@@ -124,6 +124,7 @@ export default {
       dragOver: false,
       progressTriggerStopped: false,
       openPlayListTimeId: NaN,
+      playListState: false,
     };
   },
   computed: {
@@ -134,7 +135,7 @@ export default {
       mousemoveClientPosition: state => state.Input.mousemoveClientPosition,
       wheelTime: state => state.Input.wheelTimestamp,
     }),
-    ...mapGetters(['paused', 'duration', 'isFullScreen', 'leftMousedown', 'ratio', 'playingList', 'originSrc', 'isFocused', 'isMinimized', 'isFullScreen', 'intrinsicWidth', 'intrinsicHeight']),
+    ...mapGetters(['paused', 'duration', 'isFullScreen', 'leftMousedown', 'ratio', 'playingList', 'originSrc', 'isFocused', 'isMinimized', 'isFolderList', 'isFullScreen', 'intrinsicWidth', 'intrinsicHeight']),
     ...inputMapGetters({
       inputWheelDirection: iGT.GET_WHEEL_DIRECTION,
     }),
@@ -250,13 +251,22 @@ export default {
         hovering: false,
       };
     });
-    this.$bus.$on('open-playlist', () => {
-      this.widgetsStatus['playlist-control'].showAttached = true;
+    if (!this.isFolderList) {
+      this.playListState = true;
+      clearTimeout(this.openPlayListTimeId);
       this.openPlayListTimeId = setTimeout(() => {
-        this.widgetsStatus['playlist-control'].showAttached = false;
+        this.playListState = false;
+      }, 4000);
+    }
+    this.$bus.$on('open-playlist', () => {
+      this.playListState = true;
+      clearTimeout(this.openPlayListTimeId);
+      this.openPlayListTimeId = setTimeout(() => {
+        this.playListState = false;
       }, 4000);
     });
     this.$bus.$on('drag-over', () => {
+      this.clock.clearTimeout(this.openPlayListTimeId);
       this.dragOver = true;
     });
     this.$bus.$on('drag-leave', () => {
@@ -351,7 +361,8 @@ export default {
       clearTimeout(this.openPlayListTimeId);
     },
     updatePlaylistShowAttached(event) {
-      this.widgetsStatus['playlist-control'].showAttached = event;
+      clearTimeout(this.openPlayListTimeId);
+      this.widgetsStatus['playlist-control'].showAttached = this.playListState = event;
     },
     updatePlayButtonState(mousedownState) {
       this.mousedownOnPlayButton = mousedownState;
@@ -416,7 +427,7 @@ export default {
       Object.keys(this.displayState).forEach((index) => {
         tempObject[index] = !this.widgetsStatus['playlist-control'].showAttached;
       });
-      tempObject['recent-playlist'] = this.widgetsStatus['playlist-control'].showAttached && !this.dragOver;
+      tempObject['recent-playlist'] = (this.playListState || this.widgetsStatus['playlist-control'].showAttached) && !this.dragOver;
       this.displayState = tempObject;
       this.tempRecentPlaylistDisplayState = this.widgetsStatus['playlist-control'].showAttached;
     },

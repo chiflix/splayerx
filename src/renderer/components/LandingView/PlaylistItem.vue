@@ -47,6 +47,8 @@
 
 <script>
 import path from 'path';
+import { filePathToUrl } from '@/helpers/path';
+import { generateCoverPathByMediaHash } from '@/helpers/cacheFileStorage';
 import Icon from '../BaseIconContainer.vue';
 
 export default {
@@ -56,6 +58,7 @@ export default {
     return {
       displayInfo: [],
       coverVideo: null,
+      coverSrc: '',
       isDragging: false,
       moving: false,
       aboutToDelete: false,
@@ -102,12 +105,23 @@ export default {
     },
   },
   created() {
-    this.infoDB.get('media-item', this.playlist.items[this.playlist.playedIndex]).then((data) => {
+    let index = this.playlist.playedIndex;
+    if (index > this.playlist.items.length - 1 || index < 0) {
+      index = 0;
+      this.$infoDB.update('recent-played', {
+        ...this.playlist,
+        playedIndex: index,
+      });
+    }
+    this.infoDB.get('media-item', this.playlist.items[index]).then((data) => {
       this.coverVideo = data;
-      this.$refs.item.style.setProperty(
-        'background-image',
-        this.itemShortcut(data.smallShortCut, data.cover, data.lastPlayedTime, data.duration),
-      );
+      generateCoverPathByMediaHash(data.quickHash).then((path) => {
+        this.coverSrc = filePathToUrl(path);
+        this.$refs.item.style.setProperty(
+          'background-image',
+          this.itemShortcut(data.smallShortCut, data.lastPlayedTime, data.duration),
+        );
+      });
     });
   },
   destroyed() {
@@ -115,8 +129,8 @@ export default {
     document.removeEventListener('mouseup', this.onRecentItemMouseup);
   },
   methods: {
-    itemShortcut(shortCut, cover, lastPlayedTime, duration) {
-      return duration - lastPlayedTime < 5 ? `url("${cover}")` : `url("${shortCut}")`;
+    itemShortcut(shortCut, lastPlayedTime, duration) {
+      return duration - lastPlayedTime < 5 ? `url("${this.coverSrc}")` : `url("${shortCut}")`;
     },
     itemInfo() {
       return {
@@ -144,7 +158,6 @@ export default {
           ...this.itemInfo(),
           backgroundUrl: this.itemShortcut(
             this.coverVideo.shortCut,
-            this.coverVideo.cover,
             this.coverVideo.lastPlayedTime,
             this.coverVideo.duration,
           ),
