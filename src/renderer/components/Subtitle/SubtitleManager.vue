@@ -177,16 +177,16 @@ export default {
 
       const storedLanguagePreference = await retrieveLanguagePreference(videoSrc);
       const storedSubtitles = await retrieveSubtitleList(videoSrc);
-      const Ids = await retrieveSelectedSubtitleId(videoSrc);
+      const ids = await retrieveSelectedSubtitleId(videoSrc);
 
       if (requestedTypes.includes('local')) {
         const storedLocalSubtitles = storedSubtitles.filter(({ type }) => type === 'local');
-        subtitleRequests.push(getLocalSubtitlesList(videoSrc, storedLocalSubtitles, Ids));
+        subtitleRequests.push(getLocalSubtitlesList(videoSrc, storedLocalSubtitles, ids));
       }
       if (requestedTypes.includes('embedded')) {
         const storedEmbeddedSubtitles = storedSubtitles
           .filter(({ type }) => type === 'embedded');
-        subtitleRequests.push(getEmbeddedSubtitlesList(videoSrc, storedEmbeddedSubtitles, Ids));
+        subtitleRequests.push(getEmbeddedSubtitlesList(videoSrc, storedEmbeddedSubtitles, ids));
       }
       if (requestedTypes.includes('online')) {
         const storedOnlineSubtitleIds = storedSubtitles
@@ -203,13 +203,13 @@ export default {
           isFetching,
           storedOnlineSubtitleIds,
           preferredLanguages,
-          Ids,
+          ids,
         ));
       }
       if (!this.isInitial) {
         this.selectionComplete = false;
         this.selectionSecondaryComplete = false;
-        this.checkCurrentSubtitleList(Ids);
+        this.checkCurrentSubtitleList(ids);
       }
 
       return Promise.all(subtitleRequests)
@@ -219,13 +219,13 @@ export default {
             const switchLanguage = storedLanguagePreference[0] === preferredLanguages[1] &&
               storedLanguagePreference[1] === preferredLanguages[0];
             const selectedSubtitles = storedSubtitles
-              .filter(({ id }) => [Ids.firstId, Ids.secondaryId].includes(id));
+              .filter(({ id }) => [ids.firstId, ids.secondaryId].includes(id));
             const shiftFirstId = selectedSubtitles
               .find(({ language }) => language === preferredLanguages[0])?.id;
             const shiftSecondaryId = selectedSubtitles
               .find(({ language }) => language === preferredLanguages[1])?.id;
-            const firstId = switchLanguage ? shiftFirstId : Ids.firstId;
-            const secondaryId = switchLanguage ? shiftSecondaryId : Ids.secondaryId;
+            const firstId = switchLanguage ? shiftFirstId : ids.firstId;
+            const secondaryId = switchLanguage ? shiftSecondaryId : ids.secondaryId;
             if (firstId) {
               this.changeCurrentFirstSubtitle(firstId);
               this.selectionComplete = true;
@@ -236,7 +236,7 @@ export default {
             }
             this.isInitial = false;
           }
-          this.checkCurrentSubtitleList(Ids);
+          this.checkCurrentSubtitleList(ids);
           return storeLanguagePreference(videoSrc, preferredLanguages);
         });
     },
