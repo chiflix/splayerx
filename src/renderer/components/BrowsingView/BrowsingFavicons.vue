@@ -16,7 +16,7 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
 import { Browsing as browsingActions } from '@/store/actionTypes';
 import Icon from '../BaseIconContainer.vue';
 
@@ -34,6 +34,7 @@ export default {
     };
   },
   computed: {
+    ...mapGetters(['recordUrl']),
     favAnimClass() {
       if (this.isDarwin) {
         return this.showFavicon ? 'fav-show-animation' : 'fav-hide-animation';
@@ -70,7 +71,7 @@ export default {
       this.showFavicon = !this.showFavicon;
     },
     handleFavOpen(item) {
-      this.updateInitialUrl(item.url);
+      this.updateInitialUrl(this.recordUrl[item.type] ? this.recordUrl[item.type] : item.url);
     },
     handleFavAnimEnd(e) {
       if (e.target.classList.contains('fav-hide-animation') || e.target.classList.contains('win-fav-hide-animation')) {

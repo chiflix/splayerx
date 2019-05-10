@@ -1370,7 +1370,6 @@ new Vue({
       }
     });
     window.addEventListener('keydown', (e) => {
-      console.log(333);
       if (e.metaKey && e.shiftKey && e.key === 'u') {
         this.$bus.$emit('open-url-show', true);
       }

@@ -32,6 +32,7 @@ export default {
       isPip: false,
       pipType: '',
       bilibiliType: 'video',
+      supportedRecordHost: ['www.youtube.com', 'www.bilibili.com', 'www.youku.com', 'v.youku.com'],
     };
   },
   components: {
@@ -48,9 +49,6 @@ export default {
     },
   },
   watch: {
-    initialUrl(val) {
-      console.log(val);
-    },
     browsingWinWidth(val) {
       if (this.isPip) {
         if (this.pipType === 'youtube') {
@@ -65,6 +63,7 @@ export default {
     ...mapActions({
       updateInitialUrl: browsingActions.UPDATE_INITIAL_URL,
       updateBrowsingSize: browsingActions.UPDATE_BROWSING_SIZE,
+      updateRecordUrl: browsingActions.UPDATE_RECORD_URL,
     }),
     handleExitPip() {
       if (this.isPip) {
@@ -198,10 +197,28 @@ export default {
     });
     this.$refs.webView.addEventListener('load-commit', () => {
       this.$refs.webView.blur();
+      const loadUrl = this.$refs.webView.getURL();
+      const recordIndex = this.supportedRecordHost.indexOf(urlParseLax(loadUrl).hostname);
+      if (recordIndex !== -1) {
+        switch (recordIndex) {
+          case 0:
+            this.updateRecordUrl({ youtube: loadUrl });
+            break;
+          case 1:
+            this.updateRecordUrl({ bilibili: loadUrl });
+            break;
+          case 2:
+          case 3:
+            this.updateRecordUrl({ youku: loadUrl });
+            break;
+          default:
+            break;
+        }
+      }
       this.$refs.webView.executeJavaScript('document.querySelector("video")', (r) => {
         this.$bus.$emit('web-info', {
           hasVideo: !!r,
-          url: this.$refs.webView.getURL(),
+          url: loadUrl,
           canGoBack: this.$refs.webView.canGoBack(),
           canGoForward: this.$refs.webView.canGoForward(),
         });
