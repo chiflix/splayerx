@@ -449,6 +449,7 @@ export default {
       this.$store.dispatch('SRC_SET', { src: videoFiles[0], id: videoId, mediaHash: hash });
       this.$router.push({ name: 'playing-view' });
       this.$bus.$emit('new-file-open');
+      this.$bus.$emit('open-playlist');
     },
     // open single video
     async openVideoFile(videoFile) {
