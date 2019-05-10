@@ -37,7 +37,7 @@
         </transition>
       </div>
     </div>
-    <div class="settingItem--justify" v-if="!process.mas">
+    <div class="settingItem--justify">
       <div>
         <div class="settingItem__title">{{ $t("preferences.general.restoreSettings") }}</div>
         <div class="settingItem__description">{{ $t("preferences.general.restoreSettingsDescription") }}</div>
