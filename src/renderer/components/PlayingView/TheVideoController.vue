@@ -251,7 +251,7 @@ export default {
         hovering: false,
       };
     });
-    if (!this.isFolderList) {
+    if (this.isFolderList === false) {
       this.playListState = true;
       clearTimeout(this.openPlayListTimeId);
       this.openPlayListTimeId = setTimeout(() => {
