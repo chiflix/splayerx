@@ -141,6 +141,9 @@ function registerMainWindowEvent() {
     mainWindow.setSize(...args);
     event.sender.send('windowSizeChange-asyncReply', mainWindow.getSize());
   });
+  ipcMain.on('store-browsing-last-size', (e, size) => {
+    mainWindow?.webContents.send('mainDispatch', 'updateBrowsingSize', size);
+  });
   function thumbnail(args, cb) {
     splayerx.generateThumbnails(
       args.src, args.outPath, args.width, args.num.rows, args.num.cols,
@@ -356,13 +359,13 @@ function registerMainWindowEvent() {
       aboutWindow.show();
     });
   });
-  ipcMain.on('add-browsingView', (e, url) => {
+  ipcMain.on('add-browsingView', (e, info) => {
     const browsingWindowOptions = {
       useContentSize: true,
       frame: false,
       titleBarStyle: 'none',
-      width: 1200,
-      height: 900,
+      width: info.size[0],
+      height: info.size[1],
       transparent: true,
       show: false,
       resizable: true,
@@ -384,7 +387,7 @@ function registerMainWindowEvent() {
     browsingViewWindow.once('ready-to-show', () => {
       browsingViewWindow.show();
       registerBrowsingWindowEvent();
-      browsingViewWindow.webContents.send('initial-url', url);
+      browsingViewWindow.webContents.send('initial-url', info.url);
     });
   });
   ipcMain.on('add-preference', () => {

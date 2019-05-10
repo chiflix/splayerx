@@ -11,7 +11,7 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
 import urlParseLax from 'url-parse-lax';
 import { Browsing as browsingActions } from '@/store/actionTypes';
 import Icon from '../BaseIconContainer.vue';
@@ -22,6 +22,7 @@ export default {
     Icon,
   },
   computed: {
+    ...mapGetters(['browsingSize']),
     isDarwin() {
       return process.platform === 'darwin';
     },
@@ -41,7 +42,7 @@ export default {
         if (!['https:', 'http:'].includes(protocol) || (['https:', 'http:'].includes(protocol) && document.createElement('video').canPlayType(`video/${inputUrl.slice(inputUrl.lastIndexOf('.') + 1, inputUrl.length)}`))) {
           this.openUrlFile(inputUrl);
         } else {
-          this.$electron.ipcRenderer.send('add-browsingView', this.$refs.inputValue.value);
+          this.$electron.ipcRenderer.send('add-browsingView', { size: this.browsingSize, url: this.$refs.inputValue.value });
         }
       }
     },

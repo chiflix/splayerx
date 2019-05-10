@@ -23,7 +23,7 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
 import { Browsing as browsingActions } from '@/store/actionTypes';
 import Icon from '../BaseIconContainer.vue';
 
@@ -42,6 +42,7 @@ export default {
     };
   },
   computed: {
+    ...mapGetters(['browsingSize']),
     marksAnimClass() {
       if (this.isDarwin) {
         return this.showMarks ? 'marks-show-animation' : 'marks-hide-animation';
@@ -75,7 +76,7 @@ export default {
       this.showMarks = !this.showMarks;
     },
     handleBrowsingOpen(item) {
-      this.$electron.ipcRenderer.send('add-browsingView', item.url);
+      this.$electron.ipcRenderer.send('add-browsingView', { size: this.browsingSize, url: item.url });
     },
     handleMarksAnimEnd(e) {
       if (e.target.classList.contains('marks-hide-animation') || e.target.classList.contains('win-marks-hide-animation')) {

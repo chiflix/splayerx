@@ -1,3 +1,5 @@
+import asyncStorage from '@/helpers/asyncStorage';
+
 const state = {
   windowSize: [0, 0],
   windowMinimumSize: [0, 0],
@@ -8,6 +10,7 @@ const state = {
   isMaximized: false,
   isMinimized: false,
   sizePercent: 0,
+  browsingSize: [1200, 900],
 };
 
 const getters = {
@@ -24,6 +27,7 @@ const getters = {
   isMaximized: state => state.isMaximized,
   isMinimized: state => state.isMinimized,
   sizePercent: state => state.sizePercent,
+  browsingSize: state => state.browsingSize,
 };
 
 const mutations = {
@@ -55,6 +59,9 @@ const mutations = {
   windowAngle(state, payload) {
     state.windowAngle = payload;
   },
+  browsingSizeUpdate(state, payload) {
+    state.browsingSize = payload;
+  },
 };
 
 const actions = {
@@ -66,6 +73,10 @@ const actions = {
   },
   initWindowRotate({ commit }) {
     commit('windowAngle', 0);
+  },
+  updateBrowsingSize({ commit }, delta) {
+    commit('browsingSizeUpdate', delta);
+    return asyncStorage.set('browsing', delta);
   },
 };
 

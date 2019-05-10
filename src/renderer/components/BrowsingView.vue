@@ -182,6 +182,9 @@ export default {
     });
   },
   mounted() {
+    window.addEventListener('beforeunload', () => {
+      electron.ipcRenderer.send('store-browsing-last-size', this.browsingWinSize);
+    });
     this.$bus.$on('url-back', () => {
       if (this.$refs.webView.canGoBack()) {
         this.$refs.webView.goBack();
