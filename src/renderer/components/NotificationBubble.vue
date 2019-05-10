@@ -1,7 +1,7 @@
 <template>
   <div :class="[container, { rtl: isRtl }]">
     <transition name="nextvideo">
-      <NextVideo class="next-video" ref="nextVideo"
+      <NextVideo class="nextVideo" ref="nextVideo"
         v-if="showNextVideo"
         @close-next-video="closeNextVideo"
         @manualclose-next-video="manualClose"
@@ -49,7 +49,7 @@ export default {
   },
   data() {
     return {
-      manualClosed: false, // if next-video was manually closed then it won't appear again
+      manualClosed: false, // if nextVideo was manually closed then it won't appear again
       showNextVideo: false,
       readyToShow: false, // show after video element is loaded
       showPrivacyBubble: false,
@@ -110,9 +110,6 @@ export default {
     },
     closeMessage(id, title) {
       this.$store.dispatch('removeMessages', id);
-      if (title === this.$t('errorFile.fileNonExist.title')) {
-        this.$bus.$emit('delete-file');
-      }
     },
     checkNextVideoUI(time) {
       if (time > this.nextVideoPreviewTime && time < this.duration - 1 && this.duration > 240) {
@@ -154,6 +151,23 @@ export default {
     top: 45px;
     right: 52px;
   }
+
+  .nextVideo {
+    transition: 200ms ease-out;
+    transition-property: opacity, transform;
+    @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
+      display: none;
+    }
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+      margin-bottom: 12px;
+    }
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+      margin-bottom: 15px;
+    }
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+      margin-bottom: 18px;
+    }
+  }
 }
 .container {
   -webkit-app-region: no-drag;
@@ -164,7 +178,7 @@ export default {
   width: auto;
   height: auto;
 
-  .next-video {
+  .nextVideo {
     transition: 200ms ease-out;
     transition-property: opacity, transform;
     @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
@@ -493,16 +507,25 @@ export default {
 
   .bubbleClose {
     cursor: pointer;
+
     @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
+      width: 20px;
+      height: 20px;
       margin: 13.5px 14px auto auto;
     }
     @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+      width: 22px;
+      height: 22px;
       margin: 15px 16px auto auto;
     }
     @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+      width: 26px;
+      height: 26px;
       margin: 18px 20px auto auto;
     }
     @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+      width: 36px;
+      height: 36px;
       margin: 25.5px 28px auto auto;
     }
   }

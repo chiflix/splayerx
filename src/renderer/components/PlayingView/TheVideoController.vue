@@ -10,7 +10,7 @@
     @mousedown.left="handleMousedownLeft"
     @click.left="handleMouseupLeft">
     <titlebar key="playing-view" currentView="Playingview" :showAllWidgets="showAllWidgets" :recentPlaylist="displayState['recent-playlist']"></titlebar>
-    <notification-bubble ref="nextVideoUI"/>
+    <notification-bubble class="notification-bubble" ref="nextVideoUI"/>
     <recent-playlist class="recent-playlist" ref="recentPlaylist"
     :displayState="displayState['recent-playlist']"
     :mousemoveClientPosition="mousemoveClientPosition"
@@ -232,12 +232,13 @@ export default {
     },
   },
   mounted() {
-    this.preFullScreen = this.isFullScreen;
+    if (process.platform === 'darwin') {
+      this.preFullScreen = this.isFullScreen;
+    }
     this.createTouchBar();
     this.UIElements = this.getAllUIComponents(this.$refs.controller);
     this.UIElements.forEach((value) => {
-      this.displayState[value.name] = true;
-      if (value.name === 'recent-playlist') this.displayState[value.name] = false;
+      this.displayState[value.name] = value.name !== 'recent-playlist';
       if (value.name === 'playlist-control' && !this.playingList.length) {
         this.displayState['playlist-control'] = false;
       }
@@ -647,6 +648,9 @@ export default {
     rgba(0, 0, 0, 0.19) 62%,
     rgba(0, 0, 0, 0.29) 100%
   );
+}
+.notification-bubble {
+  z-index: 105;
 }
 .recent-playlist {
   position: absolute;

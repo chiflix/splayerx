@@ -21,6 +21,7 @@ const state = {
   videoSubtitleMap: {},
   chosenStyle: '',
   chosenSize: 1,
+  lastChosenSize: 1,
   subtitleDelay: 0,
   scaleNum: 1,
   calculatedNoSub: true,
@@ -64,6 +65,7 @@ const getters = {
   subtitleDelay: state => state.subtitleDelay,
   chosenStyle: state => state.chosenStyle,
   chosenSize: state => state.chosenSize,
+  lastChosenSize: state => state.lastChosenSize,
   scaleNum: state => state.scaleNum,
   calculatedNoSub: state => state.calculatedNoSub,
   subToTop: state => state.subToTop,
@@ -150,6 +152,9 @@ const mutations = {
   [subtitleMutations.SECONDARY_SUBTITLE_ENABLED_UPDATE](state, payload) {
     state.enabledSecondarySub = payload;
   },
+  [subtitleMutations.LAST_SUBTITLE_SIZE_UPDATE](state, payload) {
+    state.lastChosenSize = payload;
+  },
 };
 
 const actions = {
@@ -219,6 +224,7 @@ const actions = {
   },
   [subtitleActions.RESET_SUBTITLES]({ commit }) {
     commit(subtitleMutations.CURRENT_FIRST_SUBTITLE_ID_UPDATE, '');
+    commit(subtitleMutations.CURRENT_SECOND_SUBTITLE_ID_UPDATE, '');
   },
   [subtitleActions.RESET_ONLINE_SUBTITLES]({
     commit, state, getters, dispatch,
@@ -281,6 +287,9 @@ const actions = {
   },
   [subtitleActions.UPDATE_ENABLED_SECONDARY_SUBTITLE]({ commit }, delta) {
     commit(subtitleMutations.SECONDARY_SUBTITLE_ENABLED_UPDATE, delta);
+  },
+  [subtitleActions.UPDATE_LAST_SUBTITLE_SIZE]({ commit }, delta) {
+    commit(subtitleMutations.LAST_SUBTITLE_SIZE_UPDATE, delta);
   },
 };
 

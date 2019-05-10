@@ -4,7 +4,12 @@
     "audioMenu": "音頻選項",
     "changeTrack": "切換軌道",
     "chosenTrack": "默認",
-    "fontItems": ["小", "中", "大", "超大"],
+    "fontItems": [
+      "小",
+      "中",
+      "大",
+      "超大"
+    ],
     "fontSize": "字體大小",
     "fontStyle": "字體樣式",
     "rateTitle": "播放速度",
@@ -36,6 +41,14 @@
     "fileNonExist": {
       "content": "將從列表中移除此項目。",
       "title": "未找到文件"
+    },
+    "playlistNonExist": {
+      "content": "该条记录已被移除。",
+      "title": "文件未找到"
+    },
+    "fileNonExistInPlaylist": {
+      "content": "已從列表中移除。",
+      "title": "部分文件未找到"
     },
     "loadFailed": {
       "content": "暫不支持該字幕類型。",

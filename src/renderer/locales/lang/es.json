@@ -4,7 +4,12 @@
     "audioMenu": "Configuraciones de audio",
     "changeTrack": "Pista de audio",
     "chosenTrack": "Defecto",
-    "fontItems": ["S", "M", "L", "XL"],
+    "fontItems": [
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
     "fontSize": "Tamaño de fuente",
     "fontStyle": "Estilo de fuente",
     "rateTitle": "Velocidad de juego",
@@ -36,6 +41,14 @@
     "fileNonExist": {
       "content": "Será eliminado de la lista.",
       "title": "Archivo no encontrado"
+    },
+    "playlistNonExist": {
+      "content": "Este elemento se ha eliminado.",
+      "title": "Archivo no encontrado"
+    },
+    "fileNonExistInPlaylist": {
+      "content": "Los archivos serán eliminados de la lista.",
+      "title": "Archivos no encontrados"
     },
     "loadFailed": {
       "content": "Tipo de subtítulo no soportado.",

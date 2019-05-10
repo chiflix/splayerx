@@ -179,7 +179,7 @@ export default {
           return `subtitle-alignment${this.currentTags[index].alignment}`;
         }
         return '';
-      } else if (this.isVtt && this.currentTags[index].line !== '' && this.currentTags[index].position !== '') {
+      } else if (this.isVtt && this.currentTags[index].line && this.currentTags[index].position) {
         return '';
       }
       return 'subtitle-alignment2';
@@ -247,6 +247,11 @@ export default {
         });
         return currentCues;
       }
+      cues.forEach((item) => {
+        if ('line' in item.tags || 'position' in item.tags || 'vertical' in item.tags) {
+          item.tags = { pos: undefined, alignment: 2 };
+        }
+      });
       return cues;
     },
     updateVideoSegments(lastCurrentTime, currentTime) {
@@ -300,7 +305,7 @@ export default {
     vttLine(index) {
       const { currentTags: tags } = this;
       let tmp = tags[index].line;
-      if (tags[index].line.includes('%')) {
+      if (tags[index].line && tags[index].line.includes('%')) {
         tmp = -parseInt(tags[index].line, 10) / 100;
       }
       if (tmp >= -1 && tmp < -0.5) {

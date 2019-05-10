@@ -4,7 +4,12 @@
     "audioMenu": "Audio Settings",
     "changeTrack": "Audio Track",
     "chosenTrack": "Default",
-    "fontItems": ["S", "M", "L", "XL"],
+    "fontItems": [
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
     "fontSize": "Font Size",
     "fontStyle": "Font Style",
     "rateTitle": "Play Speed",
@@ -36,6 +41,14 @@
     "fileNonExist": {
       "content": "It will be removed from the list.",
       "title": "File Not Found"
+    },
+    "playlistNonExist": {
+      "content": "This item is removed.",
+      "title": "File Not Found"
+    },
+    "fileNonExistInPlaylist": {
+      "content": "Files has been removed from the list.",
+      "title": "File(s) Not Found"
     },
     "loadFailed": {
       "content": "Subtitle type unsupported.",
