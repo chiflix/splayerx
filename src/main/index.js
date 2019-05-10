@@ -7,6 +7,7 @@ import { throttle, debounce } from 'lodash';
 import os from 'os';
 import path from 'path';
 import fs from 'fs';
+import which from 'which';
 import TaskQueue from '../renderer/helpers/proceduralQueue';
 import './helpers/electronPrototypes';
 import writeLog from './helpers/writeLog';
@@ -77,17 +78,12 @@ function handleBossKey() {
 }
 
 function exitAndClear(relaunch = false) {
-  const cmd = process.env.NODE_ENV === 'development'
-    ? `${process.argv[0]} ${process.argv[1]}`
-    : `${process.argv[0]}`;
-  app.relaunch(process.platform === 'win32'
-    ? {
-      args: ['/c', `"DEL /Q /F /S "${app.getPath('userData')}"${relaunch ? ` && start "${cmd}"` : ''}"`],
-      execPath: 'C:\\WINDOWS\\system32\\cmd.EXE', // TODO: detect path
-    } : {
-      args: ['-c', `"rm -fr "${app.getPath('userData')}"${relaunch ? ` && "${cmd}"` : ''}"`],
-      execPath: 'sh',
-    });
+  const execPath = which.sync(process.platform === 'win32' ? 'cmd' : 'sh');
+  const cmd = process.argv[0];
+  const args = process.platform === 'win32'
+    ? ['/c', `DEL /Q /F /S "${app.getPath('userData')}"${relaunch ? ` && start "${cmd}"` : ''}`]
+    : ['-c', `rm -fr "${app.getPath('userData')}"${relaunch ? ` && "${cmd}"` : ''}`];
+  app.relaunch({ args, execPath });
   app.exit();
 }
 
