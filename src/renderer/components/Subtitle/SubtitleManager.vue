@@ -711,7 +711,7 @@ export default {
 
     // when set immediate on watcher, it may run before the created hook
     this.resetSubtitles();
-    this.$bus.$emit('subtitle-refresh-from-src-change');
+    // this.$bus.$emit('subtitle-refresh-from-src-change'); // TODO streaming video
     this.updateNoSubtitle(true);
   },
 };

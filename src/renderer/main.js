@@ -222,6 +222,7 @@ new Vue({
         label: this.$t('msg.window.enterFullScreen'),
         accelerator: 'F',
         click: () => {
+          console.log(123);
           this.$bus.$emit('to-fullscreen');
           this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [true]);
         },
@@ -1369,6 +1370,7 @@ new Vue({
       }
     });
     window.addEventListener('keydown', (e) => {
+      console.log(333);
       if (e.metaKey && e.shiftKey && e.key === 'u') {
         this.$bus.$emit('open-url-show', true);
       }

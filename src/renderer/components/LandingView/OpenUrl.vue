@@ -1,9 +1,9 @@
 <template>
-  <div class="open-url" :style="{
+  <div class="open-url no-drag" :style="{
     left: isDarwin ? '' : '15px',
     right: isDarwin ? '15px' : '',
   }">
-    <input class="url-input" ref="inputValue" :style="{ order: isDarwin ? '1' : '2' }" placeholder="请输入URL..." @keypress="handleEnterKey" onfocus="select()">
+    <input class="url-input no-drag" ref="inputValue" :style="{ order: isDarwin ? '1' : '2' }" placeholder="请输入URL..." @keypress.self="handleEnterKey" onfocus="select()">
     <Icon type="closeSearch" :style="{
       order: isDarwin ? '2' : '1',
       margin: isDarwin ? 'auto 0 auto 10px' : 'auto 10px auto 0' }" class="close-icon" @mouseup.native="handleCloseUrlInput"></Icon>
@@ -12,6 +12,7 @@
 
 <script>
 import { mapActions } from 'vuex';
+import urlParseLax from 'url-parse-lax';
 import { Browsing as browsingActions } from '@/store/actionTypes';
 import Icon from '../BaseIconContainer.vue';
 
@@ -33,8 +34,15 @@ export default {
       this.$bus.$emit('open-url-show', false);
     },
     handleEnterKey(e) {
+      console.log(123);
       if (e.key === 'Enter') {
-        this.$electron.ipcRenderer.send('add-browsingView', this.$refs.inputValue.value);
+        const inputUrl = this.$refs.inputValue.value;
+        const protocol = urlParseLax(inputUrl).protocol;
+        if (!['https:', 'http:'].includes(protocol) || (['https:', 'http:'].includes(protocol) && document.createElement('video').canPlayType(`video/${inputUrl.slice(inputUrl.lastIndexOf('.') + 1, inputUrl.length)}`))) {
+          this.openUrlFile(inputUrl);
+        } else {
+          this.$electron.ipcRenderer.send('add-browsingView', this.$refs.inputValue.value);
+        }
       }
     },
   },
@@ -63,7 +71,8 @@ export default {
     border-radius: 13px;
     border: none;
     z-index: 6;
-    text-indent: 15px;
+    padding-left: 15px;
+    padding-right: 15px;
     font-size: 13px;
     color: rgba(255, 255, 255, 0.8);
   }

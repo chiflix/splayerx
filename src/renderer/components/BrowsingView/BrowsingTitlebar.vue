@@ -96,9 +96,6 @@ export default {
     });
   },
   watch: {
-    middleButtonStatus(val) {
-      console.log(val);
-    },
     keyAlt(val) {
       if (!val || !this.keyOver) {
         this.itemType = this.itemTypeEnum.FULLSCREEN;

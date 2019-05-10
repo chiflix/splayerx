@@ -37,5 +37,10 @@ new Vue({
   template: '<BrowsingView/>',
   mounted() {
     this.$store.commit('getLocalPreference');
+    window.addEventListener('keydown', (e) => {
+      if (e.metaKey && e.shiftKey && e.key === 'u') {
+        this.$bus.$emit('open-url-show', true);
+      }
+    });
   },
 }).$mount('#app');

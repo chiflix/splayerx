@@ -1,5 +1,5 @@
 <template>
-  <div class="short-marks" :style="{ right: isDarwin ? '15px' : '', left: isDarwin ? '' : '15px' }">
+  <div class="short-marks no-drag" :style="{ right: isDarwin ? '15px' : '', left: isDarwin ? '' : '15px' }">
     <div class="marks-details" ref="marksDetail" :class="marksAnimClass" @animationend="handleMarksAnimEnd" :style="{ order: isDarwin ? '1' : '2' }">
       <div class="marks-container" v-for="(item, index) in marks" @mouseover="marksMouseOver(index)" @mouseleave="marksMouseLeave()"
       @mouseup="handleBrowsingOpen(item)"

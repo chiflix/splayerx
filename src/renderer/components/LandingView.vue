@@ -88,6 +88,7 @@
 <script>
 import fs from 'fs';
 import { mapState, mapGetters } from 'vuex';
+import urlParseLax from 'url-parse-lax';
 import Icon from '@/components/BaseIconContainer.vue';
 import asyncStorage from '@/helpers/asyncStorage';
 import Titlebar from './LandingTitlebar.vue';
@@ -201,15 +202,19 @@ export default {
         this.infoDB.sortedResult('recent-played', 'lastOpened', 'prev')
           .then(data => Promise.all(data.map(playlistItem => new Promise((resolve) => {
             this.infoDB.get('media-item', playlistItem.items[playlistItem.playedIndex]).then((mediaItem) => {
-              fs.access(mediaItem.path, fs.constants.F_OK, (err) => {
-                if (err) {
-                  // TODO: delete playlist inaccessible record
-                  this.infoDB.delete('media-item', mediaItem.videoId);
-                  resolve();
-                } else {
-                  resolve(playlistItem);
-                }
-              });
+              if (!urlParseLax(mediaItem.path).protocol) {
+                fs.access(mediaItem.path, fs.constants.F_OK, (err) => {
+                  if (err) {
+                    // TODO: delete playlist inaccessible record
+                    this.infoDB.delete('media-item', mediaItem.videoId);
+                    resolve();
+                  } else {
+                    resolve(playlistItem);
+                  }
+                });
+              } else {
+                resolve(playlistItem);
+              }
             });
           }))))
           .then((data) => {

@@ -3,6 +3,7 @@ import fs, { promises as fsPromises } from 'fs';
 import crypto from 'crypto';
 import lolex from 'lolex';
 import { times } from 'lodash';
+import urlParseLax from 'url-parse-lax';
 import bookmark from '@/helpers/bookmark';
 import syncStorage from '@/helpers/syncStorage';
 import infoDB from '@/helpers/infoDB';
@@ -430,6 +431,16 @@ export default {
       this.$router.push({ name: 'playing-view' });
       this.$bus.$emit('new-file-open');
     },
+    async openUrlFile(url) {
+      const id = await this.infoDB.addPlaylist([url]);
+      const playlistItem = await this.infoDB.get('recent-played', id);
+      this.playFile(url, playlistItem.items[playlistItem.playedIndex]);
+      this.$store.dispatch('FolderList', {
+        id,
+        paths: [url],
+        items: [id],
+      });
+    },
     // open single video
     async openVideoFile(videoFile) {
       const id = await this.infoDB.addPlaylist([videoFile]);
@@ -513,21 +524,25 @@ export default {
       function md5Hex(text) {
         return crypto.createHash('md5').update(text).digest('hex');
       }
-      const fileHandler = await fsPromises.open(filePath, 'r');
-      const len = (await fsPromises.stat(filePath)).size;
-      const position = [
-        4096,
-        Math.floor(len / 3),
-        Math.floor(len / 3) * 2,
-        len - 8192,
-      ];
-      const res = await Promise.all(times(4).map(async (i) => {
-        const buf = Buffer.alloc(4096);
-        const { bytesRead } = await fileHandler.read(buf, 0, 4096, position[i]);
-        return md5Hex(buf.slice(0, bytesRead));
-      }));
-      fileHandler.close();
-      return res.join('-');
+      if (!urlParseLax(filePath).protocol) {
+        const fileHandler = await fsPromises.open(filePath, 'r');
+        const len = (await fsPromises.stat(filePath)).size;
+        const position = [
+          4096,
+          Math.floor(len / 3),
+          Math.floor(len / 3) * 2,
+          len - 8192,
+        ];
+        const res = await Promise.all(times(4).map(async (i) => {
+          const buf = Buffer.alloc(4096);
+          const { bytesRead } = await fileHandler.read(buf, 0, 4096, position[i]);
+          return md5Hex(buf.slice(0, bytesRead));
+        }));
+        fileHandler.close();
+        return res.join('-');
+      } else {
+        return 'hello-world-hello';// TODO streaming quickHash
+      }
     },
     addLog(level, log) {
       switch (level) {
