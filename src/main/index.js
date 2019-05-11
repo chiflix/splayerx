@@ -478,7 +478,7 @@ function createWindow() {
 
   if (process.env.NODE_ENV === 'development') {
     setTimeout(() => { // wait some time to prevent `Object not found` error
-      mainWindow?.openDevTools();
+      mainWindow?.openDevTools({ mode: 'detach' });
     }, 1000);
   }
 }
@@ -530,10 +530,10 @@ if (process.platform === 'darwin') {
 app.on('ready', () => {
   app.setName('SPlayer');
   globalShortcut.register('CmdOrCtrl+Shift+I+O+P', () => {
-    mainWindow?.openDevTools();
+    mainWindow?.openDevTools({ mode: 'detach' });
   });
   globalShortcut.register('CmdOrCtrl+Shift+J+K+L', () => {
-    preferenceWindow?.openDevTools();
+    preferenceWindow?.openDevTools({ mode: 'detach' });
   });
 
   if (process.platform === 'win32') {
