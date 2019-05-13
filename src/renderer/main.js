@@ -491,7 +491,7 @@ new Vue({
           if (!this.menuOperationLock && e && e.label) {
             e.enabled = false;
             e.submenu && e.submenu.items.forEach((e) => {
-              if (e && e.label) {
+              if (!this.menuOperationLock && e && e.label) {
                 e.enabled = false;
               }
             });
