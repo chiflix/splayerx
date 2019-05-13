@@ -6,6 +6,7 @@
       ref="videoCanvas"
       :key="videoId"
       :needtimeupdate=true
+      :lastAudioTrackId="lastAudioTrackId"
       :events="['loadedmetadata', 'audiotrack']"
       :styles="{objectFit: 'contain', width: 'calc(100% - 0.1px)', height: '100%'}"
       @loadedmetadata="onMetaLoaded"
@@ -47,6 +48,7 @@ export default {
       videoElement: null,
       seekTime: [0],
       lastPlayedTime: 0,
+      lastAudioTrackId: 0,
       lastCoverDetectingTime: 0,
       maskBackground: 'rgba(255, 255, 255, 0)', // drag and drop related var
       asyncTasksDone: false, // window should not be closed until asyncTasks Done (only use
@@ -323,7 +325,7 @@ export default {
       this.changeWindowRotate(val);
     },
     videoId(val, oldVal) {
-      this.saveScreenshot(oldVal);
+      if (oldVal) this.saveScreenshot(oldVal);
     },
     originSrc(val, oldVal) {
       if (process.mas && oldVal) {
@@ -370,6 +372,9 @@ export default {
     });
     this.$bus.$on('send-lastplayedtime', (e) => {
       this.lastPlayedTime = e;
+    });
+    this.$bus.$on('send-audiotrackid', (id) => {
+      this.lastAudioTrackId = id;
     });
     this.$bus.$on('toggle-playback', () => {
       this[this.paused ? 'play' : 'pause']();

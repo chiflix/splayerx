@@ -528,6 +528,9 @@ export default {
         if (value.lastPlayedTime) {
           this.$bus.$emit('send-lastplayedtime', value.lastPlayedTime);
         }
+        if (value.audioTrackId) {
+          this.$bus.$emit('send-audiotrackid', value.audioTrackId);
+        }
       }
     },
     async mediaQuickHash(filePath) {
