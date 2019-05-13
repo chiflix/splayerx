@@ -65,7 +65,6 @@ export default {
       updateMetaInfo: videoActions.META_INFO,
       toggleMute: videoActions.TOGGLE_MUTED,
       addAudioTrack: videoActions.ADD_AUDIO_TRACK,
-      removeAudioTrack: videoActions.REMOVE_AUDIO_TRACK,
       switchAudioTrack: videoActions.SWITCH_AUDIO_TRACK,
       removeAllAudioTrack: videoActions.REMOVE_ALL_AUDIO_TRACK,
       updatePlayinglistRate: videoActions.UPDATE_PLAYINGLIST_RATE,
@@ -372,6 +371,7 @@ export default {
       this.$ga.event('app', 'drop');
     });
     window.onbeforeunload = (e) => {
+      this.removeAllAudioTrack();
       if (!this.asyncTasksDone && !this.needToRestore) {
         let savePromise = this.saveScreenshot(this.videoId);
         if (process.mas && this.$store.getters.source === 'drop') {

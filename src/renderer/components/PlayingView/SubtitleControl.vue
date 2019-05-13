@@ -572,7 +572,7 @@ export default {
           this.anim.loop = false;
         }
         this.refAnimation = 'refresh-animation';
-        this.$refs.scroll.scrollTop = 0;
+        if (this.$refs.scroll) this.$refs.scroll.scrollTop = 0;
       }, 1000);
     });
   },
