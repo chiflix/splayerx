@@ -86,11 +86,8 @@
 </template>
 
 <script>
-import fs from 'fs';
 import { mapState, mapGetters } from 'vuex';
-import urlParseLax from 'url-parse-lax';
 import Icon from '@/components/BaseIconContainer.vue';
-import asyncStorage from '@/helpers/asyncStorage';
 import Titlebar from './LandingTitlebar.vue';
 import VideoItem from './LandingView/VideoItem.vue';
 import PlaylistItem from './LandingView/PlaylistItem.vue';
@@ -113,7 +110,6 @@ export default {
     return {
       lastPlayedFile: [],
       sagiHealthStatus: 'UNSET',
-      showShortcutImage: false,
       mouseDown: false,
       invalidTimeRepresentation: '--',
       landingLogoAppear: true,
@@ -162,6 +158,9 @@ export default {
         }
       },
     },
+    showShortcutImage() {
+      return !this.landingLogoAppear;
+    },
     move() {
       return -(this.firstIndex * (this.thumbnailWidth + this.marginRight));
     },
@@ -196,76 +195,42 @@ export default {
     },
   },
   created() {
-    // Get all data and show
-    asyncStorage.get('preferences').then((data) => {
-      if (!data.deleteVideoHistoryOnExit) {
-        this.infoDB.sortedResult('recent-played', 'lastOpened', 'prev')
-          .then(data => Promise.all(data.map(playlistItem => new Promise((resolve) => {
-            this.infoDB.get('media-item', playlistItem.items[playlistItem.playedIndex]).then((mediaItem) => {
-              if (!urlParseLax(mediaItem.path).protocol) {
-                fs.access(mediaItem.path, fs.constants.F_OK, (err) => {
-                  if (err) {
-                    // TODO: delete playlist inaccessible record
-                    this.infoDB.delete('media-item', mediaItem.videoId);
-                    resolve();
-                  } else {
-                    resolve(playlistItem);
-                  }
-                });
-              } else {
-                resolve(playlistItem);
-              }
-            });
-          }))))
-          .then((data) => {
-            for (let i = 0; i < data.length; i += 1) {
-              if (data[i] === undefined) {
-                data.splice(i, 1);
-              }
+    if (!this.$store.getters.deleteVideoHistoryOnExit) {
+      this.infoDB.sortedResult('recent-played', 'lastOpened', 'prev')
+        .then((data) => {
+          for (let i = 0; i < data.length; i += 1) {
+            if (data[i] === undefined) {
+              data.splice(i, 1);
             }
-            this.lastPlayedFile = data.slice(0, 9);
-          });
-      } else {
-        this.infoDB.clearAll();
-      }
-    });
+          }
+          this.lastPlayedFile = data.slice(0, 9);
+        });
+    } else {
+      this.infoDB.clearAll();
+    }
     this.$bus.$on('clean-lastPlayedFile', () => {
       // just for delete thumbnail display
+      this.firstIndex = 0;
       this.lastPlayedFile = [];
       this.landingLogoAppear = true;
-      this.showShortcutImage = false;
-    });
-    // trigger by playFile function when opened file not existed
-    this.$bus.$on('file-not-existed', (filePath) => {
-      this.filePathNeedToDelete = filePath;
-      this.lastPlayedFile.forEach((file) => {
-        if (file.path === filePath) {
-          this.infoDB.delete('recent-played', file.quickHash);
-        }
-      });
     });
     // responsible for delete the thumbnail on display which had already deleted in DB
-    this.$bus.$on('delete-file', () => {
-      if (this.filePathNeedToDelete) {
-        for (let i = 0; i < this.lastPlayedFile.length; i += 1) {
-          if (this.lastPlayedFile[i].path === this.filePathNeedToDelete) {
-            this.lastPlayedFile.splice(i, 1);
-            this.landingLogoAppear = true;
-            this.showShortcutImage = false;
-            this.filePathNeedToDelete = '';
-            break;
-          }
-        }
+    this.$bus.$on('delete-file', (id) => {
+      const deleteIndex = this.lastPlayedFile
+        .findIndex(file => file.id === id);
+      if (deleteIndex >= 0) {
+        this.lastPlayedFile.splice(deleteIndex, 1);
+        this.landingLogoAppear = true;
       }
     });
     this.$bus.$on('drag-over', () => {
-      this.$refs.mask.style.setProperty('background-color', 'rgba(255, 255, 255, 0.18)');
+      if (this.$refs.mask) this.$refs.mask.style.setProperty('background-color', 'rgba(255, 255, 255, 0.18)');
     });
     this.$bus.$on('drag-leave', () => {
-      this.$refs.mask.style.setProperty('background-color', 'rgba(255, 255, 255, 0)');
+      if (this.$refs.mask) this.$refs.mask.style.setProperty('background-color', 'rgba(255, 255, 255, 0)');
     });
     this.$bus.$on('drop', () => {
-      this.$refs.mask.style.setProperty('background-color', 'rgba(255, 255, 255, 0)');
+      if (this.$refs.mask) this.$refs.mask.style.setProperty('background-color', 'rgba(255, 255, 255, 0)');
     });
   },
   mounted() {
@@ -328,7 +293,6 @@ export default {
       this.infoDB.deletePlaylist(item.id);
     },
     showShortcut(flag) {
-      this.showShortcutImage = flag;
       this.landingLogoAppear = !flag;
     },
     displayInfoUpdate(displayInfo) {

@@ -66,10 +66,12 @@ function handleBossKey() {
     }
     mainWindow.webContents.send('mainDispatch', 'PAUSE_VIDEO');
     mainWindow.hide();
+    mainWindow?.webContents.send('mainCommit', 'isHiddenByBossKey', true);
     if (process.platform === 'win32') {
       tray = new Tray(nativeImage.createFromDataURL(require('../../build/icons/1024x1024.png')));
       tray.on('click', () => {
         mainWindow.show();
+        mainWindow?.webContents.send('mainCommit', 'isHiddenByBossKey', false);
         tray.destroy();
         tray = null;
       });
@@ -114,6 +116,7 @@ function registerMainWindowEvent() {
   });
   mainWindow.on('focus', () => {
     mainWindow?.webContents.send('mainCommit', 'isFocused', true);
+    mainWindow?.webContents.send('mainCommit', 'isHiddenByBossKey', false);
   });
   mainWindow.on('blur', () => {
     mainWindow?.webContents.send('mainCommit', 'isFocused', false);

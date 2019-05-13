@@ -110,8 +110,6 @@ export default {
   props: {
     mousemoveClientPosition: {},
     displayState: Boolean,
-    mousedownOnOther: Boolean,
-    mouseupOnOther: Boolean,
     isDragging: Boolean,
     lastDragging: Boolean,
   },
@@ -132,11 +130,11 @@ export default {
       tranFlag: false,
       filePathNeedToDelete: '',
       eventTarget: {},
-      changeByRecent: false,
       pageSwitching: false,
       pageSwitchingTimeId: NaN,
       removeTimeId: NaN,
       canRemove: false,
+      mousedownIndex: NaN,
       mousedownPosition: [],
       mousemovePosition: [],
       firstIndexOnMousedown: 0,
@@ -144,12 +142,15 @@ export default {
     };
   },
   created() {
-    this.$bus.$on('file-not-existed', (path) => {
-      this.filePathNeedToDelete = path;
-    });
-    this.$bus.$on('delete-file', () => {
-      this.$store.dispatch('RemoveItemFromPlayingList', this.filePathNeedToDelete);
-      this.filePathNeedToDelete = '';
+    this.$bus.$on('delete-file', async (path, id) => {
+      this.$store.dispatch('RemoveItemFromPlayingList', path);
+      this.infoDB.delete('media-item', id);
+      const playlist = await this.infoDB.get('recent-played', this.playListId);
+      await this.infoDB.update('recent-played', {
+        ...playlist,
+        items: this.items,
+        playedIndex: this.playingIndex,
+      });
     });
     this.hoverIndex = this.playingIndex;
     this.eventTarget.onItemMousemove = this.onItemMousemove;
@@ -202,6 +203,7 @@ export default {
       this.onItemMouseup(this.addIndex);
     },
     onItemMousedown(index, pageX, pageY) {
+      this.mousedownIndex = index;
       this.mousedownPosition = [pageX, pageY];
       this.firstIndexOnMousedown = this.firstIndex;
       this.lastIndexOnMousedown = this.lastIndex;
@@ -274,6 +276,10 @@ export default {
     },
     async setPlayList() {
       const playlist = await this.infoDB.get('recent-played', this.playListId);
+      const currentVideoId = playlist.items[0];
+      const currentVideoHp = playlist.hpaths[0];
+      const items = [];
+      const hpaths = [];
       /* eslint-disable */
       for (const videoPath of this.playingList) {
         if (videoPath !== this.originSrc) {
@@ -285,10 +291,15 @@ export default {
             source: 'playlist',
           };
           const videoId = await this.infoDB.add('media-item', data);
-          playlist.items.push(videoId);
-          playlist.hpaths.push(`${quickHash}-${videoPath}`);
+          items.push(videoId);
+          hpaths.push(`${quickHash}-${videoPath}`);
+        } else {
+          items.push(currentVideoId);
+          hpaths.push(currentVideoHp);
         }
       }
+      playlist.items = items;
+      playlist.hpaths = hpaths;
       this.infoDB.update('recent-played', playlist);
       this.$store.dispatch('PlayingList', { id: playlist.id, paths: this.playingList, items: playlist.items });
     },
@@ -348,9 +359,10 @@ export default {
           this.tranFlag = false;
         }, 400);
       } else if (index !== this.playingIndex && !this.shifting
+        && this.mousedownIndex !== this.playingIndex
         && this.indexOfMovingItem === this.playingList.length
         && this.filePathNeedToDelete !== this.playingList[index]) {
-        this.changeByRecent = true;
+        this.mousedownIndex = NaN;
         if (this.isFolderList) this.openVideoFile(this.playingList[index]);
         else this.playFile(this.playingList[index], this.items[index]);
       }
@@ -373,12 +385,7 @@ export default {
   },
   watch: {
     originSrc() {
-      if (!this.changeByRecent) {
-        this.displayState = false;
-        this.$emit('update:playlistcontrol-showattached', false);
-      }
       this.updateSubToTop(this.displayState);
-      this.changeByRecent = false;
       this.hoverIndex = this.playingIndex;
       this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
     },
@@ -421,16 +428,18 @@ export default {
       }
     },
     currentMouseupComponent(val) {
-      if (this.currentMousedownComponent !== 'notification-bubble' && this.currentMousedownComponent !== 'titlebar' && val !== '') {
-        if (this.lastDragging) {
-          this.clearMousedown({ componentName: '' });
-          if (this.displayState) {
-            this.$emit('update:lastDragging', false);
+      setTimeout(() => {
+        if (this.currentMousedownComponent !== 'notification-bubble' && this.currentMousedownComponent !== 'titlebar' && val !== '') {
+          if (this.lastDragging) {
+            this.clearMousedown({ componentName: '' });
+            if (this.displayState) {
+              this.$emit('update:lastDragging', false);
+            }
+          } else if (val !== this.$options.name && this.backgroundDisplayState) {
+            this.$emit('update:playlistcontrol-showattached', false);
           }
-        } else if (val !== this.$options.name && this.backgroundDisplayState) {
-          this.$emit('update:playlistcontrol-showattached', false);
         }
-      }
+      }, 0);
     },
     displayState(val, oldval) {
       if (oldval !== undefined) {
@@ -439,7 +448,6 @@ export default {
       this.canHoverItem = false;
       this.mousePosition = this.mousemoveClientPosition;
       if (val) {
-        this.$store.dispatch('UpdatePlayingList');
         this.backgroundDisplayState = val;
         this.firstIndex = Math.floor(this.playingIndex / this.thumbnailNumber)
           * this.thumbnailNumber;
@@ -566,15 +574,10 @@ export default {
 <style lang="scss" scoped>
 .recent-playlist {
   width: 100%;
+  height: calc(100% - 36px);
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  @media screen and (max-width: 1355px) {
-    height: 282px;
-  }
-  @media screen and (min-width: 1356px) {
-    height: 20.81vw;
-  }
   .background-gradient {
     position: absolute;
     z-index: -1;
@@ -587,7 +590,7 @@ export default {
       width: 90%;
       .top {
         font-family: $font-heavy;
-        white-space:nowrap; 
+        white-space:nowrap;
         color: rgba(235,235,235,0.6);
         letter-spacing: 0.64px;
         width: fit-content;

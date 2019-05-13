@@ -22,7 +22,7 @@ const getters = {
     if (!getters.singleCycle) {
       if (index !== -1 && index + 1 < state.items.length) {
         return state.items[index + 1];
-      } else if (index + 1 >= state.items.length) {
+      } else if (state.playList.length !== 1 && index + 1 >= state.items.length) {
         return state.items[0];
       }
     }
@@ -34,7 +34,7 @@ const getters = {
     if (!getters.singleCycle) {
       if (index !== -1 && index + 1 < list.length) {
         return list[index + 1];
-      } else if (index + 1 >= list.length) {
+      } else if (list.length !== 1 && index + 1 >= list.length) {
         return list[0];
       }
     }
@@ -61,6 +61,9 @@ const mutations = {
   playList(state, t) {
     state.playList = t;
   },
+  AddIdsToPlayingList(state, t) {
+    state.items.push(...t);
+  },
   AddItemsToPlayingList(state, t) {
     state.playList.push(...t);
   },
@@ -81,8 +84,8 @@ const mutations = {
 const actions = {
   PlayingList({ commit }, payload) {
     commit('isPlayingList');
-    commit('playList', payload.paths);
-    commit('items', payload.items);
+    if (payload.paths) commit('playList', payload.paths);
+    if (payload.items) commit('items', payload.items);
     commit('id', payload.id ? payload.id : '');
   },
   FolderList({ commit }, payload) {
@@ -106,15 +109,9 @@ const actions = {
     commit('RemoveItemFromPlayingListByPos', pos);
     commit('InsertItemToPlayingList', item);
   },
-  AddItemsToPlayingList({ commit, dispatch }, items) {
-    if (items.length) {
-      items.forEach((item) => {
-        dispatch('RemoveItemFromPlayingList', item);
-      });
-    } else {
-      dispatch('RemoveItemFromPlayingList', items);
-    }
-    commit('AddItemsToPlayingList', items);
+  AddItemsToPlayingList({ commit }, items) {
+    commit('AddItemsToPlayingList', items.paths);
+    commit('AddIdsToPlayingList', items.ids);
   },
   UpdatePlayingList({ dispatch, commit, state }) {
     const dirPath = path.dirname(state.playList[0]);
