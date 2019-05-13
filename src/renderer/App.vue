@@ -46,6 +46,9 @@
       this.$electron.ipcRenderer.on('thumbnail-saved', (event, src) => {
         this.$bus.$emit('set-thumbnail-src', src);
       });
+      this.$electron.ipcRenderer.on('play-file-with-url', (event, url) => {
+        this.openUrlFile(url);
+      });
       drag(this.$el);
       this.$ga.event('app', 'mounted');
       setInterval(() => {

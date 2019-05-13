@@ -12,7 +12,6 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex';
-import urlParseLax from 'url-parse-lax';
 import { Browsing as browsingActions } from '@/store/actionTypes';
 import Icon from '../BaseIconContainer.vue';
 
@@ -35,11 +34,9 @@ export default {
       this.$bus.$emit('open-url-show', false);
     },
     handleEnterKey(e) {
-      console.log(123);
       if (e.key === 'Enter') {
         const inputUrl = this.$refs.inputValue.value;
-        const protocol = urlParseLax(inputUrl).protocol;
-        if (!['https:', 'http:'].includes(protocol) || (['https:', 'http:'].includes(protocol) && document.createElement('video').canPlayType(`video/${inputUrl.slice(inputUrl.lastIndexOf('.') + 1, inputUrl.length)}`))) {
+        if (this.openFileByPlayingView(inputUrl)) {
           this.openUrlFile(inputUrl);
         } else {
           this.$electron.ipcRenderer.send('add-browsingView', { size: this.browsingSize, url: this.$refs.inputValue.value });

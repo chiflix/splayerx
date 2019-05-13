@@ -588,5 +588,9 @@ export default {
       span.parentNode.removeChild(span);
       return result;
     },
+    openFileByPlayingView(url) {
+      const protocol = urlParseLax(url).protocol;
+      return !['https:', 'http:'].includes(protocol) || (['https:', 'http:'].includes(protocol) && document.createElement('video').canPlayType(`video/${url.slice(url.lastIndexOf('.') + 1, url.length)}`));
+    },
   },
 };

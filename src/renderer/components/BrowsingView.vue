@@ -183,7 +183,7 @@ export default {
   },
   mounted() {
     window.addEventListener('beforeunload', () => {
-      electron.ipcRenderer.send('store-browsing-last-size', this.browsingWinSize);
+      electron.ipcRenderer.send('store-browsing-last-size', this.isPip ? [1200, 900] : this.browsingWinSize);
     });
     this.$bus.$on('url-back', () => {
       if (this.$refs.webView.canGoBack()) {

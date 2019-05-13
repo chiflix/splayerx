@@ -11,6 +11,7 @@
 </template>
 
 <script>
+import electron from 'electron';
 import { mapActions } from 'vuex';
 import { Browsing as browsingActions } from '@/store/actionTypes';
 import Icon from '../BaseIconContainer.vue';
@@ -33,8 +34,13 @@ export default {
       this.$bus.$emit('open-url-show', false);
     },
     handleSearchKey(e) {
+      const inputUrl = this.$refs.searchValue.value;
       if (e.key === 'Enter') {
-        this.updateInitialUrl(this.$refs.searchValue.value);
+        if (this.openFileByPlayingView(inputUrl)) {
+          electron.ipcRenderer.send('open-file-by-playing', inputUrl);
+        } else {
+          this.updateInitialUrl(inputUrl);
+        }
       }
     },
   },

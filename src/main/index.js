@@ -144,6 +144,9 @@ function registerMainWindowEvent() {
   ipcMain.on('store-browsing-last-size', (e, size) => {
     mainWindow?.webContents.send('mainDispatch', 'updateBrowsingSize', size);
   });
+  ipcMain.on('open-file-by-playing', (e, url) => {
+    mainWindow?.webContents.send('play-file-with-url', url);
+  });
   function thumbnail(args, cb) {
     splayerx.generateThumbnails(
       args.src, args.outPath, args.width, args.num.rows, args.num.cols,

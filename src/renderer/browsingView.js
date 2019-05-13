@@ -2,6 +2,7 @@ import Vue from 'vue';
 import { hookVue } from '@/kerning';
 import BrowsingView from '@/components/BrowsingView.vue';
 import store from '@/store';
+import helpers from '@/helpers';
 import '@/css/style.scss';
 import electron from 'electron';
 import osLocale from 'os-locale';
@@ -13,6 +14,7 @@ hookVue(Vue);
 Vue.use(VueI18n);
 Vue.use(Vuex);
 Vue.prototype.$bus = new Vue(); // Global event bus
+Vue.mixin(helpers);
 
 function getSystemLocale() {
   const { app } = electron.remote;

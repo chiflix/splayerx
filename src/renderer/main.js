@@ -1370,9 +1370,6 @@ new Vue({
       }
     });
     window.addEventListener('keydown', (e) => {
-      if (e.metaKey && e.shiftKey && e.key === 'u') {
-        this.$bus.$emit('open-url-show', true);
-      }
       switch (e.keyCode) {
         case 219:
           e.preventDefault();
@@ -1385,6 +1382,12 @@ new Vue({
         case 32:
           e.preventDefault();
           this.$bus.$emit('toggle-playback');
+          break;
+        case 85:
+          e.preventDefault();
+          if (e.metaKey && e.shiftKey) {
+            this.$bus.$emit('open-url-show', true);
+          }
           break;
         default:
           break;
