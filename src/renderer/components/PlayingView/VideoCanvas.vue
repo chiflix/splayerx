@@ -403,9 +403,7 @@ export default {
       this.maskBackground = 'rgba(255, 255, 255, 0)';
       this.$ga.event('app', 'drop');
     });
-    window.addEventListener('beforeunload', (e) => {
-      this.beforeUnloadHandler(e);
-    });
+    window.addEventListener('beforeunload', this.beforeUnloadHandler);
   },
   beforeDestroy() {
     if (process.mas) this.$bus.$emit(`stop-accessing-${this.originSrc}`, this.originSrc);
