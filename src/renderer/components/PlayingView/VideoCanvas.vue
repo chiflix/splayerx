@@ -341,7 +341,7 @@ export default {
     this.$bus.$on('send-lastplayedtime', (e) => {
       this.lastPlayedTime = e;
     });
-    this.$bus.$on('send-audioTrackId', (id) => {
+    this.$bus.$on('send-audiotrackid', (id) => {
       this.lastAudioTrackId = id;
     });
     this.$bus.$on('toggle-playback', () => {

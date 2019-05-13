@@ -529,7 +529,7 @@ export default {
           this.$bus.$emit('send-lastplayedtime', value.lastPlayedTime);
         }
         if (value.audioTrackId) {
-          this.$bus.$emit('send-audioTrackId', value.audioTrackId);
+          this.$bus.$emit('send-audiotrackid', value.audioTrackId);
         }
       }
     },
