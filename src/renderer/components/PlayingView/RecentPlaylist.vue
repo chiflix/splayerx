@@ -130,7 +130,6 @@ export default {
       tranFlag: false,
       filePathNeedToDelete: '',
       eventTarget: {},
-      changeByRecent: false,
       pageSwitching: false,
       pageSwitchingTimeId: NaN,
       removeTimeId: NaN,
@@ -363,7 +362,6 @@ export default {
         && this.mousedownIndex !== this.playingIndex
         && this.indexOfMovingItem === this.playingList.length
         && this.filePathNeedToDelete !== this.playingList[index]) {
-        this.changeByRecent = true;
         this.mousedownIndex = NaN;
         if (this.isFolderList) this.openVideoFile(this.playingList[index]);
         else this.playFile(this.playingList[index], this.items[index]);
@@ -387,12 +385,7 @@ export default {
   },
   watch: {
     originSrc() {
-      if (!this.changeByRecent) {
-        this.displayState = false;
-        this.$emit('update:playlistcontrol-showattached', false);
-      }
       this.updateSubToTop(this.displayState);
-      this.changeByRecent = false;
       this.hoverIndex = this.playingIndex;
       this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
     },

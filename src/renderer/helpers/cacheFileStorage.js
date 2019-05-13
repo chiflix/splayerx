@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-02-22 11:37:18
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-05-05 18:35:13
+ * @Last Modified time: 2019-05-13 16:40:13
  */
 
 /** file dir list
@@ -378,12 +378,13 @@ export function getSubtitleContentByPath(list) {
   const jobs = [];
   list.forEach((cell) => {
     const job = new Promise((resolve, reject) => {
-      readFile(cell.src, (err, data) => {
+      readFile(cell.src, 'utf-8', (err, data) => {
         if (err) {
           reject(err);
         } else {
           try {
             cell.options = cell.options ? cell.options : {};
+            data = data.replace(/\ufeff/g, '');
             cell.options.storage = JSON.parse(data);
             const matchs = cell.src.match(/(\d+)\.?(\w+)$/i);
             cell.options.storage.metaInfo.name = matchs[1] ? matchs[1] : matchs[0];

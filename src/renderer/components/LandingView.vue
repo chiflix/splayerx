@@ -84,10 +84,8 @@
 </template>
 
 <script>
-// import fs from 'fs';
 import { mapState, mapGetters } from 'vuex';
 import Icon from '@/components/BaseIconContainer.vue';
-// import asyncStorage from '@/helpers/asyncStorage';
 import Titlebar from './Titlebar.vue';
 import VideoItem from './LandingView/VideoItem.vue';
 import PlaylistItem from './LandingView/PlaylistItem.vue';

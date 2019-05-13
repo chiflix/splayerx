@@ -37,7 +37,7 @@
         </transition>
       </div>
     </div>
-    <div class="settingItem--justify" v-if="isMac">
+    <div class="settingItem--justify" v-if="false">
       <div>
         <div class="settingItem__title">{{ $t("preferences.general.restoreSettings") }}</div>
         <div class="settingItem__description">{{ $t("preferences.general.restoreSettingsDescription") }}</div>
