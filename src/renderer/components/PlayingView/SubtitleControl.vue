@@ -285,7 +285,7 @@ export default {
       }
     },
     originSrc() {
-      this.showAttached = false;
+      this.$emit('update:showAttached', false);
       this.computedAvailableItems = [];
     },
     currentSubtitleIndex(val) {
