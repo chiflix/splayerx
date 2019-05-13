@@ -293,7 +293,7 @@ export default {
       this.changeWindowRotate(val);
     },
     videoId(val, oldVal) {
-      this.saveScreenshot(oldVal);
+      if (oldVal) this.saveScreenshot(oldVal);
     },
     originSrc(val, oldVal) {
       if (process.mas && oldVal) {
