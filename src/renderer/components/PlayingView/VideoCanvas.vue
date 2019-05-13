@@ -65,7 +65,6 @@ export default {
       updateMetaInfo: videoActions.META_INFO,
       toggleMute: videoActions.TOGGLE_MUTED,
       addAudioTrack: videoActions.ADD_AUDIO_TRACK,
-      removeAudioTrack: videoActions.REMOVE_AUDIO_TRACK,
       switchAudioTrack: videoActions.SWITCH_AUDIO_TRACK,
       removeAllAudioTrack: videoActions.REMOVE_ALL_AUDIO_TRACK,
       updatePlayinglistRate: videoActions.UPDATE_PLAYINGLIST_RATE,
@@ -272,6 +271,39 @@ export default {
     savePlaybackStates() {
       return asyncStorage.set('playback-states', { volume: this.volume, muted: this.muted });
     },
+    beforeUnloadHandler(e) {
+      this.removeAllAudioTrack();
+      if (!this.asyncTasksDone && !this.needToRestore) {
+        let savePromise = this.saveScreenshot(this.videoId);
+        if (process.mas && this.$store.getters.source === 'drop') {
+          savePromise = savePromise.then(async () => {
+            await this.infoDB.deletePlaylist(this.playListId);
+          });
+        }
+        savePromise
+          .then(this.saveSubtitleStyle)
+          .then(this.savePlaybackStates)
+          .then(this.$store.dispatch('saveWinSize', this.isFullScreen ? { size: this.winSizeBeforeFullScreen, angle: this.winAngleBeforeFullScreen } : { size: this.winSize, angle: this.winAngle }))
+          .finally(() => {
+            this.$store.dispatch('SRC_SET', { src: '', mediaHash: '', id: NaN });
+            this.asyncTasksDone = true;
+            window.close();
+          });
+        e.returnValue = false;
+      } else if (!this.quit) {
+        e.returnValue = false;
+        this.$bus.$off(); // remove all listeners before back to landing view
+        // need to init Vuex States
+        this.$router.push({
+          name: 'landing-view',
+        });
+        if (this.isFullScreen) this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [!this.isFullScreen]);
+        const x = (window.screen.width / 2) - 360;
+        const y = (window.screen.height / 2) - 200;
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [720, 405]);
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', [x, y]);
+      }
+    },
   },
   computed: {
     ...mapGetters([
@@ -371,42 +403,11 @@ export default {
       this.maskBackground = 'rgba(255, 255, 255, 0)';
       this.$ga.event('app', 'drop');
     });
-    window.onbeforeunload = (e) => {
-      if (!this.asyncTasksDone && !this.needToRestore) {
-        let savePromise = this.saveScreenshot(this.videoId);
-        if (process.mas && this.$store.getters.source === 'drop') {
-          savePromise = savePromise.then(async () => {
-            await this.infoDB.deletePlaylist(this.playListId);
-          });
-        }
-        savePromise
-          .then(this.saveSubtitleStyle)
-          .then(this.savePlaybackStates)
-          .then(this.$store.dispatch('saveWinSize', this.isFullScreen ? { size: this.winSizeBeforeFullScreen, angle: this.winAngleBeforeFullScreen } : { size: this.winSize, angle: this.winAngle }))
-          .finally(() => {
-            this.$store.dispatch('SRC_SET', { src: '', mediaHash: '', id: NaN });
-            this.asyncTasksDone = true;
-            window.close();
-          });
-        e.returnValue = false;
-      } else if (!this.quit) {
-        e.returnValue = false;
-        this.$bus.$off(); // remove all listeners before back to landing view
-        // need to init Vuex States
-        this.$router.push({
-          name: 'landing-view',
-        });
-        if (this.isFullScreen) this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [!this.isFullScreen]);
-        const x = (window.screen.width / 2) - 360;
-        const y = (window.screen.height / 2) - 200;
-        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [720, 405]);
-        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', [x, y]);
-      }
-    };
+    window.addEventListener('beforeunload', this.beforeUnloadHandler);
   },
   beforeDestroy() {
     if (process.mas) this.$bus.$emit(`stop-accessing-${this.originSrc}`, this.originSrc);
-    window.onbeforeunload = null;
+    window.removeEventListener('beforeunload', this.beforeUnloadHandler);
   },
 };
 </script>
