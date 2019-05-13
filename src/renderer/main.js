@@ -139,6 +139,7 @@ new Vue({
       menu: null,
       topOnWindow: false,
       canSendVolumeGa: true,
+      menuOperationLock: false, // 如果正在创建目录，就锁住所以操作目录的动作，防止野指针
     };
   },
   computed: {
@@ -410,7 +411,7 @@ new Vue({
       const browserWindow = this.$electron.remote.getCurrentWindow();
       if (val && browserWindow.isAlwaysOnTop()) {
         browserWindow.setAlwaysOnTop(false);
-      } else if (!val && this.menu.getMenuItemById('windowFront').checked) {
+      } else if (!val && this.menu && this.menu.getMenuItemById('windowFront').checked) {
         browserWindow.setAlwaysOnTop(true);
       }
       // 因为老板键，pause 比 isHiddenByBossKey慢，所以在paused watcher里面
@@ -450,7 +451,9 @@ new Vue({
       }
     },
     ableToPushCurrentSubtitle(val) {
-      this.menu.getMenuItemById('uploadSelectedSubtitle').enabled = val;
+      if (this.menu) {
+        this.menu.getMenuItemById('uploadSelectedSubtitle').enabled = val;
+      }
     },
     originSrc(newVal) {
       if (newVal && !this.isWheelEnd) {
@@ -481,11 +484,11 @@ new Vue({
      * @param {Menu.item} item
      */
     disableMenus(item) {
-      if (item && item.label) {
+      if (!this.menuOperationLock && item && item.label) {
         item.enabled = false;
         item.submenu && item.submenu.items.forEach((e) => {
           // this.disableMenus(e);
-          if (e && e.label) {
+          if (!this.menuOperationLock && e && e.label) {
             e.enabled = false;
             e.submenu && e.submenu.items.forEach((e) => {
               if (e && e.label) {
@@ -1058,8 +1061,10 @@ new Vue({
           this.menu.getMenuItemById(`secondSub${index}`).enabled = this.enabledSecondarySub;
         });
         this.menu.getMenuItemById('secondSub-1').enabled = this.enabledSecondarySub;
+        this.menuOperationLock = false;
       })
         .catch((err) => {
+          this.menuOperationLock = false;
           this.addLog('error', err);
         });
     },
@@ -1289,6 +1294,7 @@ new Vue({
       return menuRecentData;
     },
     async refreshMenu() {
+      this.menuOperationLock = true;
       this.$electron.remote.Menu.getApplicationMenu()?.clear();
       await this.createMenu();
     },
