@@ -6,7 +6,7 @@
      <Icon type="pipRecord" :style="{ marginRight: '12px' }"></Icon>
      <Icon type="pipBack" @mouseup.native="handleExitPip"></Icon>
    </div>
-   <webview :src="availableUrl" autosize class="web-view" ref="webView" allowpopups :style="{ webkitAppRegion: isPip ? 'drag' : 'no-drag' }"></webview>
+   <webview :src="availableUrl" autosize class="web-view" ref="webView" allowpopups :style="{ webkitAppRegion: isPip ? 'drag' : 'no-drag' }" :preload="preload"></webview>
    <browsing-control v-show="!isPip"></browsing-control>
  </div>
 </template>
@@ -29,6 +29,7 @@ export default {
       startTime: 0,
       isPip: false,
       pipType: '',
+      preload: `file:${require('path').resolve(__static, 'pip/preload.js')}`,
     };
   },
   components: {
@@ -164,6 +165,17 @@ export default {
           canGoForward: this.$refs.webView.canGoForward(),
         });
       });
+    });
+    this.$refs.webView.addEventListener('ipc-message', (evt) => {
+      const { channel, args } = evt;
+      switch (channel) {
+        case 'scroll':
+          console.log(args); // TODO: 
+          break;
+        default:
+          console.warn(`Unhandled ipc-message: ${channel}`, args);
+          break;
+      }
     });
     electron.ipcRenderer.on('quit', () => {
       this.quit = true;

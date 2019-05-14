@@ -387,6 +387,7 @@ function registerMainWindowEvent() {
       browsingViewWindow.show();
       registerBrowsingWindowEvent();
       browsingViewWindow.webContents.send('initial-url', url);
+      browsingViewWindow.openDevTools();
     });
   });
   ipcMain.on('add-preference', () => {
