@@ -26,7 +26,7 @@ class Sagi {
     const metadataUpdater = (_, cb) => {
       const metadata = new grpc.Metadata();
       metadata.set('uuid', Vue.http.headers.common['X-Application-Token']);
-      metadata.set('agent', Vue.http.headers.common['User-Agent']);
+      metadata.set('agent', navigator.userAgent);
       Vue.http.get('https://ip.xindong.com/myip').then((response) => {
         metadata.set('clientip', response.bodyText);
         cb(null, metadata);

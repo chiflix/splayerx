@@ -96,7 +96,6 @@ export class InfoDB {
    */
   async deletePlaylist(id) {
     addLog.methods.addLog('info', `deleting ${id} from recent-played`);
-    // const db = await this.getDB();
     const playlistItem = await this.get('recent-played', id);
     /* eslint-disable */
     for (const item of playlistItem.items) {

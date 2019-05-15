@@ -354,7 +354,7 @@ export default {
       }
     },
     originSrc() {
-      this.showAttached = false;
+      this.$emit('update:showAttached', false);
       this.computedAvailableItems = [];
     },
     currentSubtitleIndex(val) {
@@ -778,9 +778,7 @@ export default {
           this.anim.loop = false;
         }
         this.refAnimation = 'refresh-animation';
-        if (this.$refs.scroll) {
-          this.$refs.scroll.scrollTop = 0;
-        }
+        if (this.$refs.scroll) this.$refs.scroll.scrollTop = 0;
       }, 1000);
     });
   },
