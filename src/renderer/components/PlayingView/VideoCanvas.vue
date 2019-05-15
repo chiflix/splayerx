@@ -6,6 +6,7 @@
       ref="videoCanvas"
       :key="videoId"
       :needtimeupdate=true
+      :lastAudioTrackId="lastAudioTrackId"
       :events="['loadedmetadata', 'audiotrack']"
       :styles="{objectFit: 'contain', width: 'calc(100% - 0.1px)', height: '100%'}"
       @loadedmetadata="onMetaLoaded"
@@ -47,6 +48,7 @@ export default {
       videoElement: null,
       seekTime: [0],
       lastPlayedTime: 0,
+      lastAudioTrackId: 0,
       lastCoverDetectingTime: 0,
       maskBackground: 'rgba(255, 255, 255, 0)', // drag and drop related var
       asyncTasksDone: false, // window should not be closed until asyncTasks Done (only use
@@ -65,7 +67,6 @@ export default {
       updateMetaInfo: videoActions.META_INFO,
       toggleMute: videoActions.TOGGLE_MUTED,
       addAudioTrack: videoActions.ADD_AUDIO_TRACK,
-      removeAudioTrack: videoActions.REMOVE_AUDIO_TRACK,
       switchAudioTrack: videoActions.SWITCH_AUDIO_TRACK,
       removeAllAudioTrack: videoActions.REMOVE_ALL_AUDIO_TRACK,
       updatePlayinglistRate: videoActions.UPDATE_PLAYINGLIST_RATE,
@@ -80,9 +81,12 @@ export default {
         duration: event.target.duration,
         currentTime: 0,
       });
-      const generationInterval = Math.round(event.target.duration / (window.screen.width / 4)) || 1;
-      const maxThumbnailCount = Math.floor(event.target.duration / generationInterval);
-      this.$bus.$emit('generate-thumbnails', maxThumbnailCount);
+      if (event.target.duration && Number.isFinite(event.target.duration)) {
+        const generationInterval = Math.round(event.target.duration /
+          (window.screen.width / 4)) || 1;
+        const maxThumbnailCount = Math.floor(event.target.duration / generationInterval);
+        this.$bus.$emit('generate-thumbnails', maxThumbnailCount);
+      }
       this.updateMetaInfo({
         intrinsicWidth: event.target.videoWidth,
         intrinsicHeight: event.target.videoHeight,
@@ -146,15 +150,16 @@ export default {
         case 270:
           if (!this.isFullScreen) {
             requestAnimationFrame(() => {
-              this.$refs.videoCanvas.$el.style.setProperty('transform', `rotate(${this.winAngle}deg) scale(${this.ratio}, ${this.ratio})`);
+              // 非全屏状态下，竖状视频，需要放大
+              const scale = this.ratio < 1 ? 1 / this.ratio : this.ratio;
+              this.$refs.videoCanvas.$el.style.setProperty('transform', `rotate(${this.winAngle}deg) scale(${scale}, ${scale})`);
             });
           } else {
             requestAnimationFrame(() => {
-              const newWidth = window.screen.height;
-              const newHeight = newWidth / this.ratio;
-              const scale1 = newWidth / window.screen.width;
-              const scale2 = newHeight / window.screen.height;
-              this.$refs.videoCanvas.$el.style.setProperty('transform', `rotate(${this.winAngle}deg) scale(${scale1}, ${scale2})`);
+              // 在全屏情况下，显示器如果是竖着的话，需要根据视频的ratio反向缩放
+              const winRatio = window.screen.width / window.screen.height;
+              const scale = winRatio < 1 ? this.ratio : 1 / this.ratio;
+              this.$refs.videoCanvas.$el.style.setProperty('transform', `rotate(${this.winAngle}deg) scale(${scale}, ${scale})`);
             });
           }
           break;
@@ -172,16 +177,15 @@ export default {
       this.winAngleBeforeFullScreen = this.winAngle;
       if (this.winAngle === 90 || this.winAngle === 270) {
         requestAnimationFrame(() => {
-          const newWidth = window.screen.height;
-          const newHeight = newWidth / this.ratio;
-          const scale1 = newWidth / window.screen.width;
-          const scale2 = newHeight / window.screen.height;
-          this.$refs.videoCanvas.$el.style.setProperty('transform', `rotate(${this.winAngle}deg) scale(${scale1}, ${scale2})`);
+          // 逻辑可以参考changeWindowRotate里的
+          const winRatio = window.screen.width / window.screen.height;
+          const scale = winRatio < 1 ? this.ratio : 1 / this.ratio;
+          this.$refs.videoCanvas.$el.style.setProperty('transform', `rotate(${this.winAngle}deg) scale(${scale}, ${scale})`);
         });
       }
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [true]);
     },
-    offFullScreen() {
+    offFullScreen() { // eslint-disable-line
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
       let newSize = [];
       const windowRect = [
@@ -189,7 +193,9 @@ export default {
         window.screen.availWidth, window.screen.availHeight,
       ];
       if (this.winAngle === 90 || this.winAngle === 270) {
-        this.$refs.videoCanvas.$el.style.setProperty('transform', `rotate(${this.winAngle}deg) scale(${this.ratio}, ${this.ratio})`);
+        // 逻辑可以参考changeWindowRotate里的
+        const scale = this.ratio < 1 ? 1 / this.ratio : this.ratio;
+        this.$refs.videoCanvas.$el.style.setProperty('transform', `rotate(${this.winAngle}deg) scale(${scale}, ${scale})`);
         if (this.winAngleBeforeFullScreen === 0 || this.winAngleBeforeFullScreen === 180) {
           newSize = this.calculateWindowSize(
             [320, 180],
@@ -208,8 +214,10 @@ export default {
         }
       }
       if (newSize.length > 0) {
+        // 退出全屏，计算pos依赖旧窗口大小，现在设置旧窗口大小为新大小的反转，
+        // 这样在那里全屏，退出全屏后窗口还在那个位置。
         const newPosition = this.calculateWindowPosition(
-          this.winPos.concat(this.winSize),
+          this.winPos.concat([newSize[1], newSize[0]]),
           windowRect,
           newSize,
         );
@@ -260,15 +268,48 @@ export default {
       });
     },
     saveSubtitleStyle() {
-      return asyncStorage.set('subtitle-style', { chosenStyle: this.chosenStyle, chosenSize: this.chosenSize, enabledSecondarySub: this.enabledSecondarySub });
+      return asyncStorage.set('subtitle-style', { chosenStyle: this.chosenStyle, chosenSize: this.subToTop ? this.lastChosenSize : this.chosenSize, enabledSecondarySub: this.enabledSecondarySub });
     },
     savePlaybackStates() {
       return asyncStorage.set('playback-states', { volume: this.volume, muted: this.muted });
     },
+    beforeUnloadHandler(e) {
+      this.removeAllAudioTrack();
+      if (!this.asyncTasksDone && !this.needToRestore) {
+        let savePromise = this.saveScreenshot(this.videoId);
+        if (process.mas && this.$store.getters.source === 'drop') {
+          savePromise = savePromise.then(async () => {
+            await this.infoDB.deletePlaylist(this.playListId);
+          });
+        }
+        savePromise
+          .then(this.saveSubtitleStyle)
+          .then(this.savePlaybackStates)
+          .then(this.$store.dispatch('saveWinSize', this.isFullScreen ? { size: this.winSizeBeforeFullScreen, angle: this.winAngleBeforeFullScreen } : { size: this.winSize, angle: this.winAngle }))
+          .finally(() => {
+            this.$store.dispatch('SRC_SET', { src: '', mediaHash: '', id: NaN });
+            this.asyncTasksDone = true;
+            window.close();
+          });
+        e.returnValue = false;
+      } else if (!this.quit) {
+        e.returnValue = false;
+        this.$bus.$off(); // remove all listeners before back to landing view
+        // need to init Vuex States
+        this.$router.push({
+          name: 'landing-view',
+        });
+        if (this.isFullScreen) this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [!this.isFullScreen]);
+        const x = (window.screen.width / 2) - 360;
+        const y = (window.screen.height / 2) - 200;
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [720, 405]);
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', [x, y]);
+      }
+    },
   },
   computed: {
     ...mapGetters([
-      'videoId', 'nextVideoId', 'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId', 'enabledSecondarySub', 'lastWinSize',
+      'videoId', 'nextVideoId', 'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId', 'enabledSecondarySub', 'lastWinSize', 'lastChosenSize', 'subToTop',
       'winSize', 'winPos', 'winAngle', 'isFullScreen', 'winWidth', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo', 'loop', 'playinglistRate', 'isFolderList', 'playingList', 'playingIndex', 'playListId', 'items']),
     ...mapGetters({
       videoWidth: 'intrinsicWidth',
@@ -284,7 +325,7 @@ export default {
       this.changeWindowRotate(val);
     },
     videoId(val, oldVal) {
-      this.saveScreenshot(oldVal);
+      if (oldVal) this.saveScreenshot(oldVal);
     },
     originSrc(val, oldVal) {
       if (process.mas && oldVal) {
@@ -332,6 +373,9 @@ export default {
     this.$bus.$on('send-lastplayedtime', (e) => {
       this.lastPlayedTime = e;
     });
+    this.$bus.$on('send-audiotrackid', (id) => {
+      this.lastAudioTrackId = id;
+    });
     this.$bus.$on('toggle-playback', () => {
       this[this.paused ? 'play' : 'pause']();
       this.$ga.event('app', 'toggle-playback');
@@ -339,8 +383,11 @@ export default {
     this.$bus.$on('next-video', () => {
       videodata.paused = false;
       if (this.nextVideo) {
+        this.$store.commit('LOOP_UPDATE', false);
         if (this.isFolderList) this.openVideoFile(this.nextVideo);
         else this.playFile(this.nextVideo, this.nextVideoId);
+      } else {
+        this.$store.commit('LOOP_UPDATE', true);
       }
     });
     this.$bus.$on('seek', (e) => { this.seekTime = [e]; });
@@ -361,42 +408,11 @@ export default {
       this.maskBackground = 'rgba(255, 255, 255, 0)';
       this.$ga.event('app', 'drop');
     });
-    window.onbeforeunload = (e) => {
-      if (!this.asyncTasksDone && !this.needToRestore) {
-        this.$store.dispatch('SRC_SET', { src: '', mediaHash: '', id: NaN });
-        let savePromise = this.saveScreenshot(this.videoId);
-        if (process.mas && this.$store.getters.source === 'drop') {
-          savePromise = savePromise.then(async () => {
-            await this.infoDB.deletePlaylist(this.playListId);
-          });
-        }
-        savePromise
-          .then(this.saveSubtitleStyle)
-          .then(this.savePlaybackStates)
-          .then(this.$store.dispatch('saveWinSize', this.isFullScreen ? { size: this.winSizeBeforeFullScreen, angle: this.winAngleBeforeFullScreen } : { size: this.winSize, angle: this.winAngle }))
-          .finally(() => {
-            this.asyncTasksDone = true;
-            window.close();
-          });
-        e.returnValue = false;
-      } else if (!this.quit) {
-        e.returnValue = false;
-        this.$bus.$off(); // remove all listeners before back to landing view
-        // need to init Vuex States
-        this.$router.push({
-          name: 'landing-view',
-        });
-        if (this.isFullScreen) this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [!this.isFullScreen]);
-        const x = (window.screen.width / 2) - 360;
-        const y = (window.screen.height / 2) - 200;
-        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [720, 405]);
-        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', [x, y]);
-      }
-    };
+    window.addEventListener('beforeunload', this.beforeUnloadHandler);
   },
   beforeDestroy() {
     if (process.mas) this.$bus.$emit(`stop-accessing-${this.originSrc}`, this.originSrc);
-    window.onbeforeunload = null;
+    window.removeEventListener('beforeunload', this.beforeUnloadHandler);
   },
 };
 </script>

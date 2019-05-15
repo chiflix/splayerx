@@ -66,7 +66,7 @@ in `.travis.yml`
 - CSC_LINK and CSC_KEY_PASSWORD from https://www.electron.build/code-signing/
 - GH_TOKEN= https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/
 
-#### Maintain
+#### Maintainance Cheetsheet
 
 clear up AppVeyor Cache
 ```

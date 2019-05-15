@@ -7,6 +7,8 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex';
+import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import SubtitleManager from '@/components/Subtitle/SubtitleManager.vue';
 import VideoCanvas from './PlayingView/VideoCanvas.vue';
 import TheVideoController from './PlayingView/TheVideoController.vue';
@@ -20,6 +22,9 @@ export default {
     'subtitle-manager': SubtitleManager,
   },
   methods: {
+    ...mapActions({
+      updateSubToTop: subtitleActions.UPDATE_SUBTITLE_TOP,
+    }),
     // Compute UI states
     // When the video is playing the ontick is triggered by ontimeupdate of Video tag,
     // else it is triggered by setInterval.
@@ -34,6 +39,7 @@ export default {
     videodata.onTick = this.onUpdateTick;
   },
   beforeDestroy() {
+    this.updateSubToTop(false);
     videodata.stopCheckTick();
   },
 };

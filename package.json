@@ -2,7 +2,7 @@
   "name": "splayer",
   "productName": "splayer",
   "homepage": "https://splayer.org",
-  "version": "4.1.10",
+  "version": "4.1.13",
   "author": "tomasen <tomasen@gmail.com>",
   "description": "a media player",
   "license": "GPL-3.0-or-later",
@@ -479,6 +479,7 @@
   "dependencies": {
     "@grpc/grpc-js": "^0.2.0",
     "@sentry/electron": "^0.17.1",
+    "@sentry/integrations": "^5.1.2",
     "ass-compiler": "0.0.10",
     "axios": "^0.18.0",
     "chardet": "^0.7.0",

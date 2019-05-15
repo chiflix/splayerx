@@ -4,7 +4,6 @@ import '../shared/sentry';
 
 import Vue from 'vue';
 import VueI18n from 'vue-i18n';
-import os from 'os';
 import axios from 'axios';
 import uuidv4 from 'uuid/v4';
 import electron from 'electron';
@@ -139,11 +138,12 @@ new Vue({
       menu: null,
       topOnWindow: false,
       canSendVolumeGa: true,
+      menuOperationLock: false, // 如果正在创建目录，就锁住所以操作目录的动作，防止野指针
     };
   },
   computed: {
     ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winAngle', 'winWidth', 'winHeight', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList', 'enabledSecondarySub',
-      'currentFirstSubtitleId', 'currentSecondSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle', 'displayLanguage', 'calculatedNoSub', 'sizePercent', 'snapshotSavedPath', 'duration', 'reverseScrolling',
+      'currentFirstSubtitleId', 'currentSecondSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isHiddenByBossKey', 'isMinimized', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle', 'displayLanguage', 'calculatedNoSub', 'sizePercent', 'snapshotSavedPath', 'duration', 'reverseScrolling',
     ]),
     ...inputMapGetters({
       wheelDirection: iGT.GET_WHEEL_DIRECTION,
@@ -410,13 +410,13 @@ new Vue({
       const browserWindow = this.$electron.remote.getCurrentWindow();
       if (val && browserWindow.isAlwaysOnTop()) {
         browserWindow.setAlwaysOnTop(false);
-      } else if (!val && this.menu.getMenuItemById('windowFront').checked) {
+      } else if (!val && this.menu && this.menu.getMenuItemById('windowFront').checked) {
         browserWindow.setAlwaysOnTop(true);
       }
-      // 因为老板键，pause 比 isFocused慢，所以在paused watcher里面
+      // 因为老板键，pause 比 isHiddenByBossKey慢，所以在paused watcher里面
       // 需要判断是否需要禁用menu
       this.refreshMenu().then(() => {
-        if (!this.isFocused) {
+        if (this.isHiddenByBossKey) {
           this.menu && this.menu.items.forEach((e, i) => {
             if (i === 0) return;
             this.disableMenus(e);
@@ -425,11 +425,22 @@ new Vue({
       }).catch(() => {
       });
     },
-    isFocused(val) {
-      // 如果window失去焦点，那么就禁用menu，除了第一选项
-      // 如果window获得焦点，就重新创建menu
-      // 这里使用焦点作为条件，主要考虑老板键和最小化
-      if (val) {
+    isMinimized(val) {
+      // 如果window最小化，那么就禁用menu，除了第一选项
+      // 如果window恢复，就重新创建menu
+      if (!val) {
+        this.refreshMenu();
+      } else {
+        this.menu && this.menu.items.forEach((e, i) => {
+          if (i === 0) return;
+          this.disableMenus(e);
+        });
+      }
+    },
+    isHiddenByBossKey(val) {
+      // 如果window按了老板键，那么就禁用menu，除了第一选项
+      // 如果window获取焦点，就重新创建menu
+      if (!val) {
         this.refreshMenu();
       } else {
         this.menu && this.menu.items.forEach((e, i) => {
@@ -439,7 +450,9 @@ new Vue({
       }
     },
     ableToPushCurrentSubtitle(val) {
-      this.menu.getMenuItemById('uploadSelectedSubtitle').enabled = val;
+      if (this.menu) {
+        this.menu.getMenuItemById('uploadSelectedSubtitle').enabled = val;
+      }
     },
     originSrc(newVal) {
       if (newVal && !this.isWheelEnd) {
@@ -464,16 +477,24 @@ new Vue({
       updateSubtitleType: subtitleActions.UPDATE_SUBTITLE_TYPE,
     }),
     /**
-     * @description 递归禁用menu子项
+     * @description 找到所有menu,禁用调.目前就两层循环，如果出现孙子menu，需要再嵌套一层循环
      * @author tanghaixiang@xindong.com
      * @date 2019-02-13
      * @param {Menu.item} item
      */
     disableMenus(item) {
-      if (item && item.label) {
+      if (!this.menuOperationLock && item && item.label) {
         item.enabled = false;
         item.submenu && item.submenu.items.forEach((e) => {
-          this.disableMenus(e);
+          // this.disableMenus(e);
+          if (!this.menuOperationLock && e && e.label) {
+            e.enabled = false;
+            e.submenu && e.submenu.items.forEach((e) => {
+              if (!this.menuOperationLock && e && e.label) {
+                e.enabled = false;
+              }
+            });
+          }
         });
       }
     },
@@ -886,6 +907,7 @@ new Vue({
             {
               label: this.$t('msg.playback.windowRotate'),
               id: 'windowRotate',
+              accelerator: 'CmdOrCtrl+L',
               click: () => {
                 this.windowRotate();
               },
@@ -1038,8 +1060,10 @@ new Vue({
           this.menu.getMenuItemById(`secondSub${index}`).enabled = this.enabledSecondarySub;
         });
         this.menu.getMenuItemById('secondSub-1').enabled = this.enabledSecondarySub;
+        this.menuOperationLock = false;
       })
         .catch((err) => {
+          this.menuOperationLock = false;
           this.addLog('error', err);
         });
     },
@@ -1208,6 +1232,8 @@ new Vue({
         });
         item.enabled = flag;
       });
+      // windowRotate 菜单状态随着路由状态一起变
+      this.menu.getMenuItemById('windowRotate').enabled = flag;
     },
     processRecentPlay(recentPlayData) {
       const menuRecentData = new Map([
@@ -1267,19 +1293,22 @@ new Vue({
       return menuRecentData;
     },
     async refreshMenu() {
+      this.menuOperationLock = true;
       this.$electron.remote.Menu.getApplicationMenu()?.clear();
       await this.createMenu();
     },
     windowRotate() {
       this.$store.dispatch('windowRotate90Deg');
       if (this.isFullScreen) return;
+      const winSize = [this.winSize[0], this.winSize[1]];
       let newSize = [];
       const windowRect = [
         window.screen.availLeft, window.screen.availTop,
         window.screen.availWidth, window.screen.availHeight,
       ];
-      const videoSize = (this.winAngle === 90 || this.winAngle === 270) ?
-        [this.intrinsicHeight, this.intrinsicWidth] : [this.intrinsicWidth, this.intrinsicHeight];
+      // 旋转后，画面会恢复为原始分辨率，原始分辨率就是之前的窗口大小
+      // 这里在旋转窗口后，以之前的宽为新的高，以之前的高为新的宽,
+      const videoSize = winSize.reverse();
       newSize = this.calculateWindowSize(
         [320, 180],
         windowRect.slice(2, 4),
@@ -1361,12 +1390,8 @@ new Vue({
         userUUID = uuidv4();
         this.$storage.set('user-uuid', userUUID);
       }
-      const platform = os.platform() + os.release();
-      const { app } = this.$electron.remote;
-      const version = app.getVersion();
 
       Vue.http.headers.common['X-Application-Token'] = userUUID;
-      Vue.http.headers.common['User-Agent'] = `SPlayerX@2018 ${platform} Version ${version}`;
 
       // set userUUID to google analytics uid
       this.$ga && this.$ga.set('userId', userUUID);

@@ -30,6 +30,9 @@ export default {
       default: null,
       validator: value => [null, 'anonymous', 'user-credentials'].includes(value),
     },
+    lastAudioTrackId: {
+      default: 0,
+    },
     preload: {
       type: String,
       default: 'metadata',
@@ -106,7 +109,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['audioTrackList', 'originSrc', 'videoId']),
+    ...mapGetters(['audioTrackList']),
   },
   data() {
     return {
@@ -221,17 +224,16 @@ export default {
             this.$refs.video.addEventListener(event, listener);
             this.eventListeners.set(event, listener);
           } else {
-            const playInfo = await this.infoDB.get('media-item', this.videoId);
             const generateAudioEvent = type => (trackEvent) => {
               const {
                 id, kind, label, language,
               } = trackEvent.track;
               let enabled;
-              if (playInfo && playInfo.audioTrackId) {
-                enabled = playInfo.audioTrackId === id;
+              if (this.lastAudioTrackId) {
+                enabled = this.lastAudioTrackId === id;
                 for (let i = 0; i < this.$refs.video.audioTracks.length; i += 1) {
                   this.$refs.video.audioTracks[i].enabled =
-                    this.$refs.video.audioTracks[i].id === playInfo.audioTrackId;
+                    this.$refs.video.audioTracks[i].id === this.lastAudioTrackId;
                 }
               } else {
                 enabled = trackEvent.track.enabled;
