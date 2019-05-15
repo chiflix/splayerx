@@ -562,7 +562,6 @@ export default {
         }, 500);
       }
       setTimeout(() => {
-        this.$bus.$emit('finished-add-subtitles');
         this.isInitial = false;
         if (this.onAnimation) {
           this.anim.addEventListener('complete', () => {

@@ -14,7 +14,7 @@
           transition: 'color 300ms',
           cursor: isChosen ? 'default' : 'pointer',
         }">
-        <div class="textItem advanceNormalTitle">{{ item }}</div>
+        <div class="textItem advanceNormalTitle">{{ $t('advance.fontStyle') }}</div>
         <div class="rightItem" v-show="!isChosen"><img :src="chosenStyle"></div>
       </div>
       <transition name="detail">
@@ -82,9 +82,6 @@ export default {
         return this.isChosen ? `${74 * 1.2}px` : `${37 * 1.2}px`;
       }
       return this.isChosen ? `${74 * 1.2 * 1.4}px` : `${37 * 1.2 * 1.4}px`;
-    },
-    subStyle() {
-      return this.$store.getters.curStyle;
     },
     chosenStyle() {
       if (this.$store.getters.chosenStyle) {

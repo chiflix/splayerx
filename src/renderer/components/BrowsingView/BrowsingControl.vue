@@ -84,7 +84,6 @@ export default {
   clip-path: inset(0 round 13px);
   bottom: 35px;
   left: 50%;
-  transform: translateX(-50%);
   .back-icon {
     width: 24px;
     height: 32px;

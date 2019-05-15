@@ -7,8 +7,8 @@
      <Icon type="pipRecord" :style="{ marginRight: '12px' }"></Icon>
      <Icon type="pipBack" @mouseup.native="handleExitPip"></Icon>
    </div>
-   <webview :src="availableUrl" autosize class="web-view" ref="webView" allowpopups :style="{ webkitAppRegion: isPip ? 'drag' : 'no-drag' }"></webview>
-   <browsing-control v-show="!isPip"></browsing-control>
+   <webview :src="availableUrl" autosize class="web-view" ref="webView" allowpopups :style="{ webkitAppRegion: isPip ? 'drag' : 'no-drag' }" :preload="preload"></webview>
+   <browsing-control v-show="!isPip" :class="controlToShow ? 'control-show-animation' : 'control-hide-animation'"></browsing-control>
  </div>
 </template>
 
@@ -33,6 +33,9 @@ export default {
       pipType: '',
       bilibiliType: 'video',
       supportedRecordHost: ['www.youtube.com', 'www.bilibili.com', 'www.youku.com', 'v.youku.com'],
+      preload: `file:${require('path').resolve(__static, 'pip/preload.js')}`,
+      windowScrollY: 0,
+      controlToShow: true,
     };
   },
   components: {
@@ -57,6 +60,9 @@ export default {
           this.bilibiliWatcher(val);
         }
       }
+    },
+    windowScrollY(val, oldVal) {
+      this.controlToShow = oldVal > val;
     },
   },
   methods: {
@@ -227,6 +233,18 @@ export default {
         });
       });
     });
+    this.$refs.webView.addEventListener('ipc-message', (evt) => {
+      const { channel, args } = evt;
+      switch (channel) {
+        case 'scroll':
+          console.log(args); // TODO:
+          this.windowScrollY = args[0].windowScrollY;
+          break;
+        default:
+          console.warn(`Unhandled ipc-message: ${channel}`, args);
+          break;
+      }
+    });
     electron.ipcRenderer.on('quit', () => {
       this.quit = true;
     });
@@ -295,11 +313,27 @@ export default {
   animation: loading 3s linear 1 normal forwards;
   animation-iteration-count: infinite;
 }
+.control-show-animation {
+  animation: control-show 100ms linear 1 normal forwards;
+}
+.control-hide-animation {
+  animation: control-hide 100ms linear 1 normal forwards;
+}
 @keyframes loading {
   0% { transform: translateX(-100%) }
   25% { transform: translateX(-50%) }
   50% { transform: translateX(0%) }
   75% { transform: translateX(50%) }
   100% { transform: translateX(100%) }
+}
+@keyframes control-show {
+  0% { transform: translate(-50%, 110px) }
+  50% { transform: translate(-50%, 55px) }
+  100% { transform: translate(-50%, 0px) }
+}
+@keyframes control-hide {
+  0% { transform: translate(-50%, 0px) }
+  50% { transform: translate(-50%, 55px) }
+  100% { transform: translate(-50%, 110px) }
 }
 </style>
