@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    // "strict": true,
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "allowJs": true,
+    "noImplicitAny": false,
+    "skipLibCheck": true,
+    "newLine": "LF",
+    "baseUrl": "./src",
+    "paths": {
+      "electron": ["../node_modules/@chiflix/electron"],
+      "grpc": ["../node_modules/@grpc/grpc-js"],
+      "@/*": ["renderer/*"]
+    }
+  },
+  "include": [
+    "src/**/*",
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

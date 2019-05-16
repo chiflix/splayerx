@@ -6,13 +6,13 @@ import Vue from 'vue';
 import VueI18n from 'vue-i18n';
 import axios from 'axios';
 import uuidv4 from 'uuid/v4';
-import electron from 'electron';
+import * as electron from 'electron';
 import VueElectronJSONStorage from 'vue-electron-json-storage';
 import VueResource from 'vue-resource';
 import VueAnalytics from 'vue-analytics';
 import VueElectron from 'vue-electron';
-import Path from 'path';
-import fs from 'fs';
+import * as path from 'path';
+import * as fs from 'fs';
 import { mapGetters, mapActions, createNamespacedHelpers } from 'vuex';
 import osLocale from 'os-locale';
 import AsyncComputed from 'vue-async-computed';
@@ -500,7 +500,7 @@ new Vue({
     },
     createMenu() {
       const { Menu, app, dialog } = this.$electron.remote;
-      const template = [
+      const template: Electron.MenuItemConstructorOptions[] = [
         // menu.file
         {
           label: this.$t('msg.file.name'),
@@ -619,7 +619,7 @@ new Vue({
                     if (source.name === 'SPlayer') {
                       const date = new Date();
                       const imgName = `SPlayer-${date.getFullYear()}.${date.getMonth() + 1}.${date.getDate()}-${date.getHours()}.${date.getMinutes()}.${date.getSeconds()}.png`;
-                      const screenshotPath = Path.join(
+                      const screenshotPath = path.join(
                         this.snapshotSavedPath ? this.snapshotSavedPath : app.getPath('desktop'),
                         imgName,
                       );
@@ -700,7 +700,7 @@ new Vue({
 
                 dialog.showOpenDialog(focusWindow, {
                   title: 'Open Dialog',
-                  defaultPath: Path.dirname(this.originSrc),
+                  defaultPath: path.dirname(this.originSrc),
                   filters: [{
                     name: 'Subtitle Files',
                     extensions: VALID_EXTENSION,
@@ -950,16 +950,16 @@ new Vue({
       ];
       return this.updateRecentPlay().then((result) => {
         // menu.file add "open recent"
-        template[3].submenu.splice(3, 0, this.recentSubMenu());
-        template[3].submenu.splice(4, 0, this.recentSecondarySubMenu());
-        template[1].submenu.splice(0, 0, this.updatePlayOrPause);
-        template[4].submenu.splice(2, 0, this.updateFullScreen);
-        template[2].submenu.splice(7, 0, this.updateAudioTrack());
-        template[0].submenu.splice(1, 0, result);
+        (template[3].submenu as Electron.MenuItemConstructorOptions[]).splice(3, 0, this.recentSubMenu());
+        (template[3].submenu as Electron.MenuItemConstructorOptions[]).splice(4, 0, this.recentSecondarySubMenu());
+        (template[1].submenu as Electron.MenuItemConstructorOptions[]).splice(0, 0, this.updatePlayOrPause);
+        (template[4].submenu as Electron.MenuItemConstructorOptions[]).splice(2, 0, this.updateFullScreen);
+        (template[2].submenu as Electron.MenuItemConstructorOptions[]).splice(7, 0, this.updateAudioTrack());
+        (template[0].submenu as Electron.MenuItemConstructorOptions[]).splice(1, 0, result);
         // menu.about
         if (process.platform === 'darwin') {
-          template[2].submenu.splice(0, 0, ...this.darwinVolume);
-          template[1].submenu.splice(3, 0, ...this.darwinPlayback);
+          (template[2].submenu as Electron.MenuItemConstructorOptions[]).splice(0, 0, ...this.darwinVolume);
+          (template[1].submenu as Electron.MenuItemConstructorOptions[]).splice(3, 0, ...this.darwinPlayback);
           template.unshift({
             label: app.getName(),
             submenu: [
@@ -996,11 +996,11 @@ new Vue({
           });
         }
         if (process.platform === 'win32') {
-          template[2].submenu.splice(0, 0, ...this.winVolume);
-          template[1].submenu.splice(3, 0, ...this.winPlayback);
+          (template[2].submenu as Electron.MenuItemConstructorOptions[]).splice(0, 0, ...this.winVolume);
+          (template[1].submenu as Electron.MenuItemConstructorOptions[]).splice(3, 0, ...this.winPlayback);
           const file = template.shift();
-          const winFile = file.submenu.slice(0, 2);
-          winFile[1].submenu.unshift(file.submenu[3], file.submenu[2]);
+          const winFile = (file.submenu as Electron.MenuItemConstructorOptions[]).slice(0, 2);
+          (winFile[1].submenu as Electron.MenuItemConstructorOptions[]).unshift(file.submenu[3], file.submenu[2]);
           winFile.push(file.submenu[5], file.submenu[4]);
           winFile.reverse().forEach((menuItem) => {
             template.unshift(menuItem);
@@ -1013,7 +1013,7 @@ new Vue({
               this.$electron.ipcRenderer.send('add-preference');
             },
           });
-          template[9].submenu.unshift(
+          (template[9].submenu as Electron.MenuItemConstructorOptions[]).unshift(
             {
               label: this.$t('msg.splayerx.about'),
               role: 'about',
@@ -1080,7 +1080,7 @@ new Vue({
     },
     getSubName(item) {
       if (item.path) {
-        return Path.basename(item);
+        return path.basename(item);
       } else if (item.type === 'embedded') {
         return `${this.$t('subtitle.embedded')} ${item.name}`;
       }
@@ -1099,7 +1099,7 @@ new Vue({
       };
     },
     recentSubMenu() {
-      const tmp = {
+      const tmp: Electron.MenuItemConstructorOptions = {
         label: this.$t('msg.subtitle.mainSubtitle'),
         id: 'main-subtitle',
         submenu: [1, 2, 3, 4, 5, 6, 7, 8, 9].map(index => ({
@@ -1108,7 +1108,7 @@ new Vue({
           label: '',
         })),
       };
-      tmp.submenu.splice(0, 1, {
+      (tmp.submenu as Electron.MenuItemConstructorOptions[]).splice(0, 1, {
         id: 'sub-1',
         visible: true,
         type: 'radio',
@@ -1118,12 +1118,12 @@ new Vue({
         },
       });
       this.subtitleList.forEach((item, index) => {
-        tmp.submenu.splice(index + 1, 1, this.recentSubTmp(index, item, true));
+        (tmp.submenu as Electron.MenuItemConstructorOptions[]).splice(index + 1, 1, this.recentSubTmp(index, item, true));
       });
       return tmp;
     },
     recentSecondarySubMenu() {
-      const tmp = {
+      const tmp: Electron.MenuItemConstructorOptions = {
         label: this.$t('msg.subtitle.secondarySubtitle'),
         id: 'secondary-subtitle',
         submenu: [1, 2, 3, 4, 5, 6, 7, 8, 9].map(index => ({
@@ -1132,11 +1132,12 @@ new Vue({
           label: '',
         })),
       };
-      tmp.submenu.splice(0, 1, this.updateSecondarySub);
-      tmp.submenu.splice(1, 1, {
+      const submenu = tmp.submenu as Electron.MenuItemConstructorOptions[];
+      submenu.splice(0, 1, this.updateSecondarySub);
+      submenu.splice(1, 1, {
         type: 'separator',
       });
-      tmp.submenu.splice(2, 1, {
+      submenu.splice(2, 1, {
         id: 'secondSub-1',
         visible: true,
         type: 'radio',
@@ -1146,7 +1147,7 @@ new Vue({
         },
       });
       this.subtitleList.forEach((item, index) => {
-        tmp.submenu.splice(index + 3, 1, this.recentSubTmp(index, item, false));
+        submenu.splice(index + 3, 1, this.recentSubTmp(index, item, false));
       });
       return tmp;
     },
@@ -1227,7 +1228,7 @@ new Vue({
         item.enabled = flag;
       });
       this.menu.getMenuItemById('subtitle').submenu.items.forEach((item) => {
-        item.submenu?.items.forEach((item) => {
+        item.submenu && item.submenu.items.forEach((item) => {
           item.enabled = flag;
         });
         item.enabled = flag;
@@ -1294,7 +1295,8 @@ new Vue({
     },
     async refreshMenu() {
       this.menuOperationLock = true;
-      this.$electron.remote.Menu.getApplicationMenu()?.clear();
+      const menu = this.$electron.remote.Menu.getApplicationMenu();
+      if (menu) menu.clear();
       await this.createMenu();
     },
     windowRotate() {
@@ -1432,13 +1434,13 @@ new Vue({
         if (advance) {
           const nodeList = advance.childNodes;
           for (let i = 0; i < nodeList.length; i += 1) {
-            isAdvanceColumeItem = nodeList[i].contains(e.target);
+            isAdvanceColumeItem = nodeList[i].contains(e.target as Node);
           }
         }
         if (subtitle) {
           const subList = subtitle.childNodes;
           for (let i = 0; i < subList.length; i += 1) {
-            isSubtitleScrollItem = subList[i].contains(e.target);
+            isSubtitleScrollItem = subList[i].contains(e.target as Node);
           }
         }
         if (!isAdvanceColumeItem && !isSubtitleScrollItem) {

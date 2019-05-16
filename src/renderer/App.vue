@@ -4,7 +4,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import '@/css/style.scss';
 import drag from '@/helpers/drag';
 
