@@ -9,7 +9,7 @@ declare module 'vue/types/vue' {
   interface Vue {
     $bus: Vue;
     $ga: any;
-    $electron: Electron.MainInterface;
+    $electron: Electron.RendererInterface;
   }
   interface VueConstructor {
     http: any;

@@ -11,25 +11,25 @@ import drag from '@/helpers/drag';
 export default {
   name: 'splayer',
   methods: {
-    mainCommitProxy(commitType, commitPayload) {
+    mainCommitProxy(commitType: string, commitPayload: any) {
       this.$store.commit(commitType, commitPayload);
     },
-    mainDispatchProxy(actionType, actionPayload) {
+    mainDispatchProxy(actionType: string, actionPayload: any) {
       this.$store.dispatch(actionType, actionPayload);
     },
-    handleWindowSizeChange(windowSize) {
+    handleWindowSizeChange(windowSize: any) {
       this.$store.commit('windowSize', windowSize);
     },
   },
   mounted() {
-    this.$electron.ipcRenderer.on('mainCommit', (event, commitType, commitPayload) => {
+    this.$electron.ipcRenderer.on('mainCommit', (event: any, commitType: string, commitPayload: any) => {
       this.mainCommitProxy(commitType, commitPayload);
     });
-    this.$electron.ipcRenderer.on('mainDispatch', (event, actionType, actionPayload) => {
+    this.$electron.ipcRenderer.on('mainDispatch', (event: any, actionType: string, actionPayload: any) => {
       this.mainDispatchProxy(actionType, actionPayload);
     });
     this.$electron.ipcRenderer.send('windowInit');
-    this.$electron.ipcRenderer.on('thumbnail-saved', (event, src) => {
+    this.$electron.ipcRenderer.on('thumbnail-saved', (event: any, src: string) => {
       this.$bus.$emit('set-thumbnail-src', src);
     });
     drag(this.$el);
