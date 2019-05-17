@@ -5,9 +5,10 @@
     "moduleResolution": "node",
     "allowJs": true,
     "strict": false, // TODO
-    "noImplicitAny": false, // TODO
-    "strictNullChecks": false, // TODO
+    "noImplicitAny": true,
+    "strictNullChecks": true,
     "strictFunctionTypes": true,
+    "suppressImplicitAnyIndexErrors": true,
     "skipLibCheck": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
