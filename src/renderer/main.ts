@@ -1006,8 +1006,8 @@ new Vue({
           (template[1].submenu as Electron.MenuItemConstructorOptions[]).splice(3, 0, ...this.winPlayback);
           const file = template.shift();
           const winFile = (file!.submenu as Electron.MenuItemConstructorOptions[]).slice(0, 2);
-          (winFile[1].submenu as Electron.MenuItemConstructorOptions[]).unshift(file!.submenu as Electron.MenuItemConstructorOptions[][3], file!.submenu as Electron.MenuItemConstructorOptions[][2]);
-          winFile.push(file!.submenu as Electron.MenuItemConstructorOptions[][5], file!.submenu as Electron.MenuItemConstructorOptions[][4]);
+          (winFile[1].submenu as Electron.MenuItemConstructorOptions[]).unshift((file!.submenu as Electron.MenuItemConstructorOptions[])[3], (file!.submenu as Electron.MenuItemConstructorOptions[])[2]);
+          winFile.push((file!.submenu as Electron.MenuItemConstructorOptions[])[5], (file!.submenu as Electron.MenuItemConstructorOptions[])[4]);
           winFile.reverse().forEach((menuItem) => {
             template.unshift(menuItem);
           });
@@ -1214,8 +1214,8 @@ new Vue({
           const mediaItem = await this.infoDB.get('media-item', playlist.items[playlist.playedIndex]);
           data.push(mediaItem);
         }
-        let menuRecentData: Map<string, any> = new Map();
-        menuRecentData = this.processRecentPlay(data);
+        // let menuRecentData: Map<string, any> = new Map();
+        const menuRecentData: Map<string, any> = this.processRecentPlay(data) || new Map();
         recentMenuTemplate.submenu.forEach((element, index) => {
           const value = menuRecentData.get(element.id);
           if (value.label !== '') {
