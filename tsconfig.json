@@ -1,16 +1,17 @@
 {
   "compilerOptions": {
     "target": "ESNext",
-    // "strict": true,
-    "noImplicitAny": true,
-    "strictFunctionTypes": true,
-    "strictNullChecks": true,
-    "suppressImplicitAnyIndexErrors": true,
-    // "noImplicitThis": true,
     "module": "ESNext",
     "moduleResolution": "node",
     "allowJs": true,
+    "strict": false, // TODO
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "suppressImplicitAnyIndexErrors": true,
     "skipLibCheck": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "newLine": "LF",
     "baseUrl": "./src",
     "paths": {
