@@ -37,7 +37,7 @@
         </transition>
       </div>
     </div>
-    <div class="settingItem--justify" v-if="false">
+    <div class="settingItem--justify" v-if="!isMas">
       <div>
         <div class="settingItem__title">{{ $t("preferences.general.restoreSettings") }}</div>
         <div class="settingItem__description">{{ $t("preferences.general.restoreSettingsDescription") }}</div>
@@ -119,8 +119,8 @@ export default {
     },
   },
   computed: {
-    isMac() {
-      return process.platform === 'darwin';
+    isMas() {
+      return !!process.mas;
     },
     preferenceData() {
       return this.$store.getters.preferenceData;
@@ -202,7 +202,6 @@ export default {
       this.isSettingDefault = true;
       try {
         await setAsDefaultApp();
-        // TODO: feedback
         clearTimeout(this.defaultButtonTimeoutId);
         this.defaultState = 'success';
         this.button1Styles.pop();
@@ -212,7 +211,6 @@ export default {
           this.$refs.button1.style.setProperty('transition-delay', '');
         }, 1500);
       } catch (ex) {
-        // TODO: feedback
         clearTimeout(this.defaultButtonTimeoutId);
         this.defaultState = 'failed';
         this.button2Styles.pop();
@@ -228,7 +226,7 @@ export default {
     restoreSettings() {
       this.isRestoring = true;
       if (this.restoreContent === this.$t('preferences.general.setButton')) {
-        electron.ipcRenderer.send('apply');
+        electron.ipcRenderer.send('need-to-restore');
         this.needToRelaunch = true;
         this.restoreContent = this.$t('preferences.general.relaunch');
         this.button2Styles.pop();
@@ -296,7 +294,7 @@ export default {
     width: 240px;
     height: 28px;
     margin-top: 13px;
-    
+
     &__toggle {
       position: absolute;
       width: 100%;
@@ -305,15 +303,15 @@ export default {
       transition: all 200ms;
       border-radius: 2px;
       overflow: hidden;
-      
+
 
       &--display {
         height: 28px;
         border: 1px solid rgba(255,255,255,0);
         background-color: rgba(255, 255, 255, 0);
       }
-      
-      &--list { 
+
+      &--list {
         height: 148px;
         border: 1px solid rgba(255,255,255,0.3);
         background-color: rgba(120,120,120,1);
