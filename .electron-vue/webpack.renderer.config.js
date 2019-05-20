@@ -62,6 +62,15 @@ let rendererConfig = {
         ]
       },
       {
+        test: /\.tsx$/,
+        exclude: /node_modules/,
+        use: [
+          {
+            loader: 'ts-loader',
+          }
+        ]
+      },
+      {
         test: /\.(js|vue)$/,
         enforce: 'pre',
         exclude: /node_modules/,
@@ -203,7 +212,7 @@ let rendererConfig = {
       "electron"  : "@chiflix/electron",
       "grpc": "@grpc/grpc-js"
     },
-    extensions: ['.js', '.json', '.node']
+    extensions: ['.js', '.json', '.node', '.ts', '.tsx']
   },
   target: 'electron-renderer'
 }

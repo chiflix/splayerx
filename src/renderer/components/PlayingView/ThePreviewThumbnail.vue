@@ -23,6 +23,7 @@
 import { mapGetters } from 'vuex';
 import Icon from '../BaseIconContainer.vue';
 import ThumbnailDisplay from './ThumbnailDisplay.vue';
+// import ThumbnailDisplay from './ThumbnailDisplay';
 
 export default {
   components: {

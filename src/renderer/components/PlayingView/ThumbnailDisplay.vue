@@ -11,11 +11,15 @@
      }"></div>
   </div>
 </template>
-<script>
-import { ipcRenderer } from 'electron';
+<script lang="ts">
+// import { ipcRenderer } from 'electron';
 import { mapGetters } from 'vuex';
 import { filePathToUrl } from '@/helpers/path';
-import { getVideoInfoByMediaHash, generateThumbnailPathByMediaHash } from '@/helpers/cacheFileStorage';
+import thumbnailService from '@/services/media/thumbnailService';
+// import thumbnailService from '../../thumbnailService/services/media/thumbnailService';
+// import thumbnailService from '@/services/media/thumbnailService';
+// import { getVideoInfoByMediaHash,
+// generateThumbnailPathByMediaHash } from '@/helpers/cacheFileStorage';
 
 export default {
   name: 'thumbnail-display',
@@ -53,7 +57,7 @@ export default {
   methods: {
   },
   watch: {
-    currentTime(val) {
+    currentTime(val: number) {
       this.currentIndex = Math.abs(Math.floor(val / (this.duration / this.thumbnailCount)));
     },
     originSrc() {
@@ -63,24 +67,23 @@ export default {
     },
   },
   mounted() {
-    this.$bus.$on('set-thumbnail-src', (src) => {
+    this.$bus.$on('set-thumbnail-src', (src: string) => {
       if (src === this.originSrc) {
         this.isSaved = true;
       }
     });
-    this.$bus.$on('generate-thumbnails', async (num) => {
-      const fileContent = await getVideoInfoByMediaHash(this.mediaHash);
-      this.imgExisted = !!fileContent.thumbnail;
-      this.imgSrc = await generateThumbnailPathByMediaHash(this.mediaHash);
+    this.$bus.$on('generate-thumbnails', async (num: number) => {
       this.thumbnailCount = num;
-      if (!this.imgExisted) {
-        const info = {
-          src: this.originSrc,
-          outPath: this.imgSrc,
-          width: '272',
-          num: { rows: '10', cols: `${Math.ceil(num / 10)}` },
-        };
-        ipcRenderer.send('generateThumbnails', info);
+      try {
+        const result = await thumbnailService.getImage(this.mediaHash);
+        if (!result) {
+          this.imgExisted = false;
+          this.imgSrc = await thumbnailService.generateImage(this.mediaHash, this.originSrc, num);
+        } else {
+          this.imgExisted = true;
+          this.imgSrc = result;
+        }
+      } catch (err) { //
       }
     });
   },

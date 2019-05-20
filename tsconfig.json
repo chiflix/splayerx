@@ -9,6 +9,7 @@
     "strictNullChecks": true,
     "strictFunctionTypes": true,
     "suppressImplicitAnyIndexErrors": true,
+    "jsx": "preserve",
     "skipLibCheck": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
