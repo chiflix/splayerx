@@ -1,9 +1,20 @@
 <template>
-  <div class="cont" v-fade-in="showAllWidgets || progressTriggerStopped">
-    <div class="timing" @mousedown="switchTimeContent">
-          <span class="timeContent" ref="timeContent" :class="{ remainTime: isRemainTime }" v-if="hasDuration"></span>
+  <div
+    v-fade-in="showAllWidgets || progressTriggerStopped"
+    class="cont"
+  >
+    <div
+      class="timing"
+      @mousedown="switchTimeContent"
+    >
+      <span
+        v-if="hasDuration"
+        ref="timeContent"
+        class="timeContent"
+        :class="{ remainTime: isRemainTime }"
+      />
     </div>
-    <Labels class="rate"/>
+    <Labels class="rate" />
   </div>
 </template>
 <script>
@@ -13,7 +24,7 @@ import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import Labels from './Labels.vue';
 
 export default {
-  name: 'the-time-codes',
+  name: 'TheTimeCodes',
   type: INPUT_COMPONENT_TYPE,
   components: {
     Labels,
@@ -50,6 +61,15 @@ export default {
       }, this.progressDisappearDelay);
     },
   },
+  created() {
+    this.$bus.$on('seek', () => {
+      this.$emit('update:progressTriggerStopped', true);
+      this.clock.clearTimeout(this.progressTriggerId);
+      this.progressTriggerId = this.clock.setTimeout(() => {
+        this.$emit('update:progressTriggerStopped', false);
+      }, this.progressDisappearDelay);
+    });
+  },
   methods: {
     switchTimeContent() {
       this.isRemainTime = !this.isRemainTime;
@@ -70,15 +90,6 @@ export default {
           Math.floor(this.duration) - Math.floor(time) : Math.floor(time));
       }
     },
-  },
-  created() {
-    this.$bus.$on('seek', () => {
-      this.$emit('update:progressTriggerStopped', true);
-      this.clock.clearTimeout(this.progressTriggerId);
-      this.progressTriggerId = this.clock.setTimeout(() => {
-        this.$emit('update:progressTriggerStopped', false);
-      }, this.progressDisappearDelay);
-    });
   },
 };
 </script>

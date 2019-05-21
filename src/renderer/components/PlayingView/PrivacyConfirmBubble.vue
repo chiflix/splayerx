@@ -1,62 +1,48 @@
 <template>
-<transition name="bubble" mode="out-in">
-<div
-  class="privacy-bubble"
-  :key="state">
-  <div class="plane-background">
-    <div class="plane">
-      <div class="content">
-        <p :class="infoCSS">
-          {{ partOne }}<span class="underline"
-            @mouseup="underlineMouseup"
-          >{{ underlinedContent }}</span>{{ partTwo }}
-        </p>
-        <div class="button"
-          :class="{
-            hover: hovered,
-          }"
-          @mouseover.stop="hovered = true"
-          @mouseout.stop="hovered = false"
-          @mouseup="handleCloseMouseup">
-          <div class="button-info">{{ button }}</div>
+  <transition
+    name="bubble"
+    mode="out-in"
+  >
+    <div
+      :key="state"
+      class="privacy-bubble"
+    >
+      <div class="plane-background">
+        <div class="plane">
+          <div class="content">
+            <p :class="infoCSS">
+              {{ partOne }}<span
+                class="underline"
+                @mouseup="underlineMouseup"
+              >{{ underlinedContent }}</span>{{ partTwo }}
+            </p>
+            <div
+              class="button"
+              :class="{
+                hover: hovered,
+              }"
+              @mouseover.stop="hovered = true"
+              @mouseout.stop="hovered = false"
+              @mouseup="handleCloseMouseup"
+            >
+              <div class="button-info">
+                {{ button }}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-</div>
-</transition>
+  </transition>
 </template>
 <script>
 export default {
-  name: 'privacy-bubble',
+  name: 'PrivacyBubble',
   data() {
     return {
       state: 1,
       hovered: false,
     };
-  },
-  methods: {
-    handleCloseMouseup() {
-      if (this.state === 1) {
-        this.$store.dispatch('agreeOnPrivacyPolicy').then(() => {
-          this.$electron.ipcRenderer.send('main-to-preference', this.preferenceData);
-        });
-        this.$bus.$emit('subtitle-refresh-continue');
-        this.$emit('close-privacy-bubble');
-      } else {
-        this.state = 1;
-      }
-    },
-    underlineMouseup() {
-      if (this.state === 1) {
-        this.state = 2;
-      } else {
-        this.$store.dispatch('disagreeOnPrivacyPolicy').then(() => {
-          this.$electron.ipcRenderer.send('main-to-preference', this.preferenceData);
-        });
-        this.$emit('close-privacy-bubble');
-      }
-    },
   },
   computed: {
     preferenceData() {
@@ -97,6 +83,29 @@ export default {
         return this.$t('privacyBubble.tryToDisable.button');
       }
       return this.$t('privacyBubble.confirmDisable.button');
+    },
+  },
+  methods: {
+    handleCloseMouseup() {
+      if (this.state === 1) {
+        this.$store.dispatch('agreeOnPrivacyPolicy').then(() => {
+          this.$electron.ipcRenderer.send('main-to-preference', this.preferenceData);
+        });
+        this.$bus.$emit('subtitle-refresh-continue');
+        this.$emit('close-privacy-bubble');
+      } else {
+        this.state = 1;
+      }
+    },
+    underlineMouseup() {
+      if (this.state === 1) {
+        this.state = 2;
+      } else {
+        this.$store.dispatch('disagreeOnPrivacyPolicy').then(() => {
+          this.$electron.ipcRenderer.send('main-to-preference', this.preferenceData);
+        });
+        this.$emit('close-privacy-bubble');
+      }
     },
   },
 };

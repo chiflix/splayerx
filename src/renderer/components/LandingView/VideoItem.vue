@@ -1,33 +1,46 @@
 
 <template>
-<div class="item" ref="item"
-  :style="{
-    bottom: chosen ? '9px' : '0',
-    width: `${thumbnailWidth}px`,
-    height: `${thumbnailHeight}px`,
-  }">
-  <div class="content"
-    @click.stop="onRecentItemClick(item)"
-    @mouseout="onRecentItemMouseout"
-    @mouseover="onRecentItemMouseover"
-    @mousedown.stop="onRecentItemMousedown"
-    @mouseup="onRecentItemMouseup"
+  <div
+    ref="item"
+    class="item"
     :style="{
+      bottom: chosen ? '9px' : '0',
       width: `${thumbnailWidth}px`,
-      height: chosen ? `${thumbnailHeight + 10}px` : `${thumbnailHeight}px`,
-    }">
-    <div class="border" ref="border"
+      height: `${thumbnailHeight}px`,
+    }"
+  >
+    <div
+      class="content"
       :style="{
-        left: `-${0.7 / 2}px`,
-        top: `-${0.7 / 2}px`,
-        width: `${thumbnailWidth - 0.7}px`,
-        height: `${thumbnailHeight - 0.7}px`,
-        border: chosen ? '0.7px solid rgba(255,255,255,0.6)' : '0.7px solid rgba(255,255,255,0.15)',
-      }">
-      <div class="deleteUi" ref="deleteUi"><Icon type="delete"/></div>
+        width: `${thumbnailWidth}px`,
+        height: chosen ? `${thumbnailHeight + 10}px` : `${thumbnailHeight}px`,
+      }"
+      @click.stop="onRecentItemClick(item)"
+      @mouseout="onRecentItemMouseout"
+      @mouseover="onRecentItemMouseover"
+      @mousedown.stop="onRecentItemMousedown"
+      @mouseup="onRecentItemMouseup"
+    >
+      <div
+        ref="border"
+        class="border"
+        :style="{
+          left: `-${0.7 / 2}px`,
+          top: `-${0.7 / 2}px`,
+          width: `${thumbnailWidth - 0.7}px`,
+          height: `${thumbnailHeight - 0.7}px`,
+          border: chosen ? '0.7px solid rgba(255,255,255,0.6)' : '0.7px solid rgba(255,255,255,0.15)',
+        }"
+      >
+        <div
+          ref="deleteUi"
+          class="deleteUi"
+        >
+          <Icon type="delete" />
+        </div>
+      </div>
     </div>
   </div>
-</div>
 </template>
 
 <script>
@@ -37,21 +50,8 @@ import { generateCoverPathByMediaHash } from '@/helpers/cacheFileStorage';
 import Icon from '../BaseIconContainer.vue';
 
 export default {
-  name: 'video-item',
+  name: 'VideoItem',
   components: { Icon },
-  data() {
-    return {
-      displayInfo: [],
-      item: null,
-      coverSrc: '',
-      isDragging: false,
-      aboutToDelete: false,
-      showShadow: true,
-      chosen: false,
-      disX: NaN,
-      disY: NaN,
-    };
-  },
   props: {
     firstIndex: {
       type: Number,
@@ -88,6 +88,19 @@ export default {
     filePathNeedToDelete: {
       type: String,
     },
+  },
+  data() {
+    return {
+      displayInfo: [],
+      item: null,
+      coverSrc: '',
+      isDragging: false,
+      aboutToDelete: false,
+      showShadow: true,
+      chosen: false,
+      disX: NaN,
+      disY: NaN,
+    };
   },
   created() {
     this.infoDB.get('media-item', this.playlist.items[this.playlist.playedIndex]).then((data) => {

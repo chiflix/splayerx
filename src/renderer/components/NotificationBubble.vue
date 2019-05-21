@@ -1,29 +1,54 @@
 <template>
   <div :class="[container, { rtl: isRtl }]">
     <transition name="nextvideo">
-      <NextVideo class="nextVideo" ref="nextVideo"
+      <NextVideo
         v-if="showNextVideo"
+        ref="nextVideo"
+        class="nextVideo"
         @close-next-video="closeNextVideo"
         @manualclose-next-video="manualClose"
-        @ready-to-show="readyToShow = true"/>
+        @ready-to-show="readyToShow = true"
+      />
     </transition>
-    <PrivacyBubble class="privacy-bubble"
+    <PrivacyBubble
       v-if="showPrivacyBubble && !isMas"
-      @close-privacy-bubble="closePrivacyBubble"/>
-    <MASPrivacyBubble class="mas-privacy-bubble"
+      class="privacy-bubble"
+      @close-privacy-bubble="closePrivacyBubble"
+    />
+    <MASPrivacyBubble
       v-if="showPrivacyBubble && isMas"
-      @close-privacy-bubble="closePrivacyBubble"/>
-    <transition-group name="toast" class="transGroup">
-      <div v-for="m in messages" :key="m.id"
+      class="mas-privacy-bubble"
+      @close-privacy-bubble="closePrivacyBubble"
+    />
+    <transition-group
+      name="toast"
+      class="transGroup"
+    >
+      <div
+        v-for="m in messages"
+        :id="'item' + m.id"
+        :key="m.id"
         class="messageContainer"
-        :id="'item' + m.id">
-        <div :class="m.type === 'result' ? 'black-gradient-result' : 'black-gradient-state'"/>
+      >
+        <div :class="m.type === 'result' ? 'black-gradient-result' : 'black-gradient-state'" />
         <div :class="m.type === 'result' ? 'resultContainer' : `stateContainer`">
           <div class="bubbleContent">
-            <p class="title" v-if="m.type === 'result'">{{ m.title }}</p>
-            <p class="content">{{ m.content }}</p>
+            <p
+              v-if="m.type === 'result'"
+              class="title"
+            >
+              {{ m.title }}
+            </p>
+            <p class="content">
+              {{ m.content }}
+            </p>
           </div>
-          <Icon v-if="m.type === 'result'" type="close" class="bubbleClose" @click.native.left="closeMessage(m.id, m.title)"></Icon>
+          <Icon
+            v-if="m.type === 'result'"
+            type="close"
+            class="bubbleClose"
+            @click.native.left="closeMessage(m.id, m.title)"
+          />
         </div>
       </div>
     </transition-group>
@@ -39,7 +64,7 @@ import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import Icon from './BaseIconContainer.vue';
 
 export default {
-  name: 'notification-bubble',
+  name: 'NotificationBubble',
   type: INPUT_COMPONENT_TYPE,
   components: {
     Icon,

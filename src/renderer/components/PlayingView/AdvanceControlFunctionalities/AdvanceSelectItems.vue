@@ -1,39 +1,69 @@
 <template>
-  <div class="itemContainer"
+  <div
+    class="itemContainer"
     :style="{
       height: heightSize,
       backgroundImage: !isChosen ? '' : 'linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.07) 24%, rgba(255,255,255,0.03) 100%)',
-    }">
-    <div class="detail"
+    }"
+  >
+    <div
+      class="detail"
       :style="{
         height: heightSize,
-      }">
-    <div class="textContainer advanceNormalTitle" :style="{
-      cursor: isChosen || !isSubDelay || !isSubtitleAvaliable ? 'default' : 'pointer',
-    }">
-      <div class="textItem"
+      }"
+    >
+      <div
+        class="textContainer advanceNormalTitle"
         :style="{
-          color: isSubtitleAvaliable ? color : 'rgba(255, 255, 255, 0.2)',
-          transition: 'color 300ms',
-        }">{{ item }}</div>
-      <div class="rightItem" :style="{ color: isSubtitleAvaliable ? 'rgba(255, 255, 255, 0.6)' : 'rgba(255, 255, 255, 0.2)' }">{{ isSubDelay ? screenSubtitleDelay : audioDelay }}</div>
-    </div>
+          cursor: isChosen || !isSubDelay || !isSubtitleAvaliable ? 'default' : 'pointer',
+        }"
+      >
+        <div
+          class="textItem"
+          :style="{
+            color: isSubtitleAvaliable ? color : 'rgba(255, 255, 255, 0.2)',
+            transition: 'color 300ms',
+          }"
+        >
+          {{ item }}
+        </div>
+        <div
+          class="rightItem"
+          :style="{ color: isSubtitleAvaliable ? 'rgba(255, 255, 255, 0.6)' : 'rgba(255, 255, 255, 0.2)' }"
+        >
+          {{ isSubDelay ? screenSubtitleDelay : audioDelay }}
+        </div>
+      </div>
       <transition name="detail">
-        <div class="listContainer" v-show="isChosen">
-         <div class="rowContainer">
-           <Icon type="minus" class="decrease"
-             @mousedown.native="handleDeMousedown"
-             @mouseup.native="handleDeMouseup"
-             @mouseleave.native="handleDeMouseup"></Icon>
-           <div class="card"></div>
-           <div class="delay">{{ delayNum }}</div>
-           <Icon type="plus" class="increase"
-             @mousedown.native="handleInMousedown"
-             @mouseup.native="handleInMouseup"
-             @mouseleave.native="handleInMouseup"></Icon>
-           <Icon type="reset" class="resetPos" v-show="this.subtitleDelay !== 0"
-             @click.native="handleResetDelay">
-           </Icon>
+        <div
+          v-show="isChosen"
+          class="listContainer"
+        >
+          <div class="rowContainer">
+            <Icon
+              type="minus"
+              class="decrease"
+              @mousedown.native="handleDeMousedown"
+              @mouseup.native="handleDeMouseup"
+              @mouseleave.native="handleDeMouseup"
+            />
+            <div class="card" />
+            <div class="delay">
+              {{ delayNum }}
+            </div>
+            <Icon
+              type="plus"
+              class="increase"
+              @mousedown.native="handleInMousedown"
+              @mouseup.native="handleInMouseup"
+              @mouseleave.native="handleInMouseup"
+            />
+            <Icon
+              v-show="this.subtitleDelay !== 0"
+              type="reset"
+              class="resetPos"
+              @click.native="handleResetDelay"
+            />
           </div>
         </div>
       </transition>
@@ -48,15 +78,6 @@ import Icon from '../../BaseIconContainer.vue';
 
 export default {
   name: 'AdvanceSelectItems',
-  data() {
-    return {
-      timeDeSet: null,
-      timeDeInt: null,
-      changeSpeed: 120,
-      timeInset: null,
-      timeInInt: null,
-    };
-  },
   props: {
     item: {
       type: String,
@@ -79,6 +100,15 @@ export default {
     isSubtitleAvaliable: {
       type: Boolean,
     },
+  },
+  data() {
+    return {
+      timeDeSet: null,
+      timeDeInt: null,
+      changeSpeed: 120,
+      timeInset: null,
+      timeInInt: null,
+    };
   },
   computed: {
     ...mapGetters(['subtitleDelay', 'AudioDelay']),

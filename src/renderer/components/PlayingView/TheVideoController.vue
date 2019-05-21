@@ -1,5 +1,6 @@
 <template>
-  <div ref="controller"
+  <div
+    ref="controller"
     class="the-video-controller"
     :style="{ cursor: cursorStyle }"
     @mousemove="handleMousemove"
@@ -8,41 +9,87 @@
     @mousedown="handleMousedown"
     @mouseup="handleMouseup"
     @mousedown.left="handleMousedownLeft"
-    @click.left="handleMouseupLeft">
-    <titlebar key="playing-view" currentView="Playingview" :showAllWidgets="showAllWidgets" :recentPlaylist="displayState['recent-playlist']"></titlebar>
-    <notification-bubble class="notification-bubble" ref="nextVideoUI"/>
-    <recent-playlist class="recent-playlist" ref="recentPlaylist"
-    :displayState="displayState['recent-playlist']"
-    :mousemoveClientPosition="mousemoveClientPosition"
-    :isDragging="isDragging"
-    :lastDragging.sync="lastDragging"
-    v-bind.sync="widgetsStatus['recent-playlist']"
-    @can-hover-item="cancelPlayListTimeout"
-    @conflict-resolve="conflictResolve"
-    @update:playlistcontrol-showattached="updatePlaylistShowAttached"/>
-    <div class="masking" v-fade-in="showAllWidgets || progressTriggerStopped"/>
-    <play-button class="play-button no-drag"
+    @click.left="handleMouseupLeft"
+  >
+    <titlebar
+      key="playing-view"
+      current-view="Playingview"
+      :show-all-widgets="showAllWidgets"
+      :recent-playlist="displayState['recent-playlist']"
+    />
+    <notification-bubble
+      ref="nextVideoUI"
+      class="notification-bubble"
+    />
+    <recent-playlist
+      ref="recentPlaylist"
+      class="recent-playlist"
+      :display-state="displayState['recent-playlist']"
+      :mousemove-client-position="mousemoveClientPosition"
+      :is-dragging="isDragging"
+      :last-dragging.sync="lastDragging"
+      v-bind.sync="widgetsStatus['recent-playlist']"
+      @can-hover-item="cancelPlayListTimeout"
+      @conflict-resolve="conflictResolve"
+      @update:playlistcontrol-showattached="updatePlaylistShowAttached"
+    />
+    <div
+      v-fade-in="showAllWidgets || progressTriggerStopped"
+      class="masking"
+    />
+    <play-button
+      class="play-button no-drag"
+      :mousedown-on-volume="mousedownOnVolume"
+      :mousemove-position="mousemoveClientPosition"
+      :show-all-widgets="showAllWidgets"
+      :is-focused="isFocused"
+      :paused="paused"
+      :attached-shown="attachedShown"
       @update:playbutton-state="updatePlayButtonState"
-      :mousedownOnVolume="mousedownOnVolume"
-      :mousemovePosition="mousemoveClientPosition"
-      :showAllWidgets="showAllWidgets" :isFocused="isFocused"
-      :paused="paused" :attachedShown="attachedShown"/>
-    <volume-indicator class="no-drag"
+    />
+    <volume-indicator
+      class="no-drag"
+      :attached-shown="attachedShown"
+      :mousedown-on-play-button="mousedownOnPlayButton"
+      :show-all-widgets="showAllWidgets"
       @update:volume-state="updateVolumeState"
-      :attachedShown="attachedShown"
-      :mousedownOnPlayButton="mousedownOnPlayButton"
-      :showAllWidgets="showAllWidgets"/>
-    <div class="control-buttons" v-fade-in="showAllWidgets" :style="{ marginBottom: preFullScreen ? '10px' : '0' }">
-      <playlist-control class="button playlist" v-fade-in="displayState['playlist-control']" v-bind.sync="widgetsStatus['playlist-control']"/>
-      <subtitle-control class="button subtitle" v-fade-in="displayState['subtitle-control']"
-      v-bind.sync="widgetsStatus['subtitle-control']" :lastDragging.sync="lastDragging"
-      @conflict-resolve="conflictResolve"/>
-      <advance-control class="button advance" v-fade-in="displayState['advance-control']"
-      v-bind.sync="widgetsStatus['advance-control']" :lastDragging.sync="lastDragging"
-      @conflict-resolve="conflictResolve"/>
+    />
+    <div
+      v-fade-in="showAllWidgets"
+      class="control-buttons"
+      :style="{ marginBottom: preFullScreen ? '10px' : '0' }"
+    >
+      <playlist-control
+        v-fade-in="displayState['playlist-control']"
+        class="button playlist"
+        v-bind.sync="widgetsStatus['playlist-control']"
+      />
+      <subtitle-control
+        v-fade-in="displayState['subtitle-control']"
+        class="button subtitle"
+        v-bind.sync="widgetsStatus['subtitle-control']"
+        :last-dragging.sync="lastDragging"
+        @conflict-resolve="conflictResolve"
+      />
+      <advance-control
+        v-fade-in="displayState['advance-control']"
+        class="button advance"
+        v-bind.sync="widgetsStatus['advance-control']"
+        :last-dragging.sync="lastDragging"
+        @conflict-resolve="conflictResolve"
+      />
     </div>
-    <the-time-codes ref="theTimeCodes" :progressTriggerStopped.sync="progressTriggerStopped" :showAllWidgets="showAllWidgets" :style="{ marginBottom: preFullScreen ? '10px' : '0' }"/>
-    <the-progress-bar ref="progressbar" :showAllWidgets="showAllWidgets" :style="{ marginBottom: preFullScreen ? '10px' : '0' }"/>
+    <the-time-codes
+      ref="theTimeCodes"
+      :progress-trigger-stopped.sync="progressTriggerStopped"
+      :show-all-widgets="showAllWidgets"
+      :style="{ marginBottom: preFullScreen ? '10px' : '0' }"
+    />
+    <the-progress-bar
+      ref="progressbar"
+      :show-all-widgets="showAllWidgets"
+      :style="{ marginBottom: preFullScreen ? '10px' : '0' }"
+    />
   </div>
 </template>
 <script>
@@ -68,7 +115,7 @@ import { videodata } from '../../store/video';
 const { mapGetters: inputMapGetters } = createNamespacedHelpers('InputPlugin');
 
 export default {
-  name: 'the-video-controller',
+  name: 'TheVideoController',
   type: INPUT_COMPONENT_TYPE,
   components: {
     titlebar: Titlebar,

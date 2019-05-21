@@ -1,17 +1,19 @@
 <template>
   <div class="subtitle-loader">
-    <div class="subContainer"
-      :class="avaliableClass(index)"
+    <div
       v-for="(cue, index) in currentCues"
-      :key="index"
       :id="cueType+index"
+      :key="index"
+      class="subContainer"
+      :class="avaliableClass(index)"
       :style="{
         writingMode: isVtt ? `vertical-${cue.tags.vertical}` : '',
         left: subLeft(index),
         top: subTop(index),
         bottom: subBottom(index),
         transform: transPos(index),
-      }">
+      }"
+    >
       <cue-renderer
         :text="cue.text"
         :settings="cue.tags"
@@ -32,7 +34,8 @@ import CueRenderer from './CueRenderer.vue';
 import SubtitleInstance from './SubtitleLoader/index';
 
 export default {
-  name: 'subtitle-renderer',
+  name: 'SubtitleRenderer',
+  components: { CueRenderer },
   props: {
     subtitleInstance: SubtitleInstance,
     isFirstSub: {
@@ -54,7 +57,6 @@ export default {
       type: Object,
     },
   },
-  components: { CueRenderer },
   data() {
     return {
       subtitle: null,

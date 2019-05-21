@@ -1,26 +1,30 @@
 <template>
-  <div class="subtitle-manager"
-    :style="{ width: computedWidth + 'px', height: computedHeight + 'px' }">
+  <div
+    class="subtitle-manager"
+    :style="{ width: computedWidth + 'px', height: computedHeight + 'px' }"
+  >
     <subtitle-renderer
-      ref="subtitleRenderer"
       v-if="currentFirstSubtitleId && duration"
-      :subtitle-instance="subtitleInstances[this.currentFirstSubtitleId]"
-      :key='originSrc+currentFirstSubtitleId'
-      :isFirstSub="true"
-      :linesNum="linesNum"
-      :firstLinesNum.sync="firstLinesNum"
-      :firstTags.sync="firstTags"
-      :tags="tags"/>
-    <subtitle-renderer
       ref="subtitleRenderer"
+      :key="originSrc+currentFirstSubtitleId"
+      :subtitle-instance="subtitleInstances[this.currentFirstSubtitleId]"
+      :is-first-sub="true"
+      :lines-num="linesNum"
+      :first-lines-num.sync="firstLinesNum"
+      :first-tags.sync="firstTags"
+      :tags="tags"
+    />
+    <subtitle-renderer
       v-if="currentSecondSubtitleId && duration && enabledSecondarySub"
+      ref="subtitleRenderer"
+      :key="originSrc+currentSecondSubtitleId"
       :subtitle-instance="subtitleInstances[this.currentSecondSubtitleId]"
-      :key='originSrc+currentSecondSubtitleId'
-      :isFirstSub="false"
-      :firstLinesNum="firstLinesNum"
-      :linesNum.sync="linesNum"
+      :is-first-sub="false"
+      :first-lines-num="firstLinesNum"
+      :lines-num.sync="linesNum"
       :tags.sync="tags"
-      :firstTags="firstTags"/>
+      :first-tags="firstTags"
+    />
   </div>
 </template>
 <script>
@@ -50,7 +54,7 @@ import { localLanguageLoader } from './SubtitleLoader/utils';
 import { LOCAL_SUBTITLE_REMOVED, REQUEST_TIMEOUT, SUBTITLE_UPLOAD, UPLOAD_SUCCESS, UPLOAD_FAILED } from '../../../shared/notificationcodes';
 
 export default {
-  name: 'subtitle-manager',
+  name: 'SubtitleManager',
   components: {
     'subtitle-renderer': SubtitleRenderer,
   },

@@ -1,15 +1,31 @@
 <template>
   <div class="labels">
     <transition name="cycle-label">
-    <div class="cycle-label" v-show="showCycleLabel" key="cycle">
-      <Icon type="cycle" class="cycle-icon"/>
-    </div>
+      <div
+        v-show="showCycleLabel"
+        key="cycle"
+        class="cycle-label"
+      >
+        <Icon
+          type="cycle"
+          class="cycle-icon"
+        />
+      </div>
     </transition>
     <transition name="label">
-    <div class="speed-label" v-show="showSpeedLabel" key="speed">
-      <Icon type="speed" class="speed-icon"/>
-      <div class="rate-num">{{ Number.parseFloat(rate).toFixed(1) }}</div>
-    </div>
+      <div
+        v-show="showSpeedLabel"
+        key="speed"
+        class="speed-label"
+      >
+        <Icon
+          type="speed"
+          class="speed-icon"
+        />
+        <div class="rate-num">
+          {{ Number.parseFloat(rate).toFixed(1) }}
+        </div>
+      </div>
     </transition>
   </div>
 </template>
@@ -19,7 +35,10 @@ import { mapGetters } from 'vuex';
 import Icon from '../BaseIconContainer.vue';
 
 export default {
-  name: 'speedLabel',
+  name: 'SpeedLabel',
+  components: {
+    Icon,
+  },
   data() {
     return {
       showSpeedLabel: false,
@@ -27,9 +46,6 @@ export default {
       changeSrc: false,
       changeState: false,
     };
-  },
-  components: {
-    Icon,
   },
   computed: {
     ...mapGetters(['rate', 'singleCycle']),

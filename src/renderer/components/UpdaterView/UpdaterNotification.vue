@@ -1,89 +1,102 @@
 <template>
-    <div class="updateContainer" ref="showWindow" :style="[containerProp, hideOrNot]">
-        <div class="backGround" >
+  <div
+    ref="showWindow"
+    class="updateContainer"
+    :style="[containerProp, hideOrNot]"
+  >
+    <div class="backGround" />
+    <div
+      ref="breath"
+      class="breathe-div"
+      :style="linkProp"
+    />
+    <div class="overInner">
+      {{ content }}
+      <div class="linksInUpdater">
+        <div
+          v-for="(item) in buttons"
+          class="clickLinks"
+        >
+          <span :class="item.classC">
+            <a
+              href="#"
+              @click="item.callBack.call(item.THIS)"
+            > {{ item.text }} </a>
+          </span>
         </div>
-        <div class="breathe-div" ref="breath" :style="linkProp"></div>
-        <div class="overInner" >
-            {{content}}
-            <div class="linksInUpdater">
-                <div class="clickLinks" v-for="(item) in buttons">
-                    <span :class=item.classC>
-                        <a href='#' v-on:click=item.callBack.call(item.THIS)> {{item.text}} </a>
-                    </span>
-                </div>
-            </div>
-        </div>
+      </div>
     </div>
+  </div>
 </template>
 
 <script>
-  import GetHelper from '../../../main/update/RendererHelper';
+import GetHelper from '../../../main/update/RendererHelper';
 
-  export default {
-    name: 'UpdaterNotification',
-    components: {
+export default {
+  name: 'UpdaterNotification',
+  components: {
+  },
+  data() {
+    return {
+      helper: null,
+      content: '',
+      buttons: [],
+      containerStyle: {
+        platform: '',
+      },
+      breathType: null,
+      visibility: 'hidden',
+    };
+  },
+  computed: {
+    linkProp() {
+      return ({ 'webkit-animation-name': this.breathType });
     },
-    data() {
-      return {
-        helper: null,
-        content: '',
-        buttons: [],
-        containerStyle: {
-          platform: '',
-        },
-        breathType: null,
-        visibility: 'hidden',
-      };
+    containerProp() {
+      return (this.containerStyle);
     },
-    beforeMount() {
-      this.helper = new GetHelper(this);
+    hideOrNot() {
+      return ({ visibility: this.visibility });
     },
-    mounted() {
+  },
+  beforeMount() {
+    this.helper = new GetHelper(this);
+  },
+  mounted() {
+  },
+  updated() {
+  },
+  methods: {
+    hide() {
+      this.visibility = 'hidden';
     },
-    updated() {
+    show() {
+      this.$refs.showWindow.className = 'updateContainer';
+      this.visibility = 'visible';
     },
-    methods: {
-      hide() {
+    registerCallBackButton(buttons) {
+      this.buttons = buttons;
+    },
+    setMessage(message) {
+      this.content = message.toString();
+    },
+    startDisappear(time = 50000) {
+      setTimeout(() => {
         this.visibility = 'hidden';
-      },
-      show() {
-        this.$refs.showWindow.className = 'updateContainer';
-        this.visibility = 'visible';
-      },
-      registerCallBackButton(buttons) {
-        this.buttons = buttons;
-      },
-      setMessage(message) {
-        this.content = message.toString();
-      },
-      startDisappear(time = 50000) {
-        setTimeout(() => {
-          this.visibility = 'hidden';
-          this.$refs.showWindow.className = 'updateContainerDisappear';
-        }, time);
-      },
-      setBreathType(breath) {
-        this.breathType = breath;
-      },
-      forWin() {
-        this.containerStyle.platform = 'win32';
-      },
-      forMac() {
-        this.containerStyle.platform = 'darwin';
-      },
+        this.$refs.showWindow.className = 'updateContainerDisappear';
+      }, time);
     },
-    computed: {
-      linkProp() {
-        return ({ 'webkit-animation-name': this.breathType });
-      },
-      containerProp() {
-        return (this.containerStyle);
-      },
-      hideOrNot() {
-        return ({ visibility: this.visibility });
-      },
+    setBreathType(breath) {
+      this.breathType = breath;
     },
-  };
+    forWin() {
+      this.containerStyle.platform = 'win32';
+    },
+    forMac() {
+      this.containerStyle.platform = 'darwin';
+    },
+  },
+};
 </script>
 
 <style lang="scss">

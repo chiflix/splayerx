@@ -1,5 +1,8 @@
 <template>
-    <div :class="lot" ref="lavContainer"></div>
+  <div
+    ref="lavContainer"
+    :class="lot"
+  />
 </template>
 
 <script>

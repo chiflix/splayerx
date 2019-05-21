@@ -1,39 +1,55 @@
 <template>
   <div class="itemContainer advance-column-items">
-    <div class="textContainer advanceNormalTitle" :style="{
-      cursor: 'default',
-    }">
-      <div class="textItem">{{ item }}</div>
+    <div
+      class="textContainer advanceNormalTitle"
+      :style="{
+        cursor: 'default',
+      }"
+    >
+      <div class="textItem">
+        {{ item }}
+      </div>
     </div>
-    <div class="listContainer"
+    <div
+      class="listContainer"
       :style="{
         height: heightSize,
-      }">
-      <div class="scrollScope"
+      }"
+    >
+      <div
+        class="scrollScope"
         :style="{
           overflowY: tracks.length > 2 ? 'scroll' : '',
           height: scopeHeight,
-        }">
+        }"
+      >
         <div class="columnContainer">
-          <div v-for="(track, index) in tracks"
+          <div
+            v-for="(track, index) in tracks"
             class="columnNumDetail"
+            :style="{ cursor: track.enabled ? 'default' : 'pointer' }"
             @mouseover="handleOver(index)"
             @mouseout="handleOut(index)"
             @click="handleClick(index)"
-            :style="{ cursor: track.enabled ? 'default' : 'pointer' }">
-            <div class="text advanceNormalItem"
+          >
+            <div
+              class="text advanceNormalItem"
               :style="{
-                color: index === hoverIndex || track.enabled  ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+                color: index === hoverIndex || track.enabled ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
                 transition: 'color 300ms',
-              }">{{ track.language === 'und' || track.language === '' ? `${$t('advance.track')} ${index + 1}`
-              : tracks.length === 1 ? `${$t('advance.track')} ${index + 1} : ${track.language}` : `${$t('advance.track')} ${index + 1} : ${track.name}` }}
+              }"
+            >
+              {{ track.language === 'und' || track.language === '' ? `${$t('advance.track')} ${index + 1}`
+                : tracks.length === 1 ? `${$t('advance.track')} ${index + 1} : ${track.language}` : `${$t('advance.track')} ${index + 1} : ${track.name}` }}
             </div>
           </div>
-          <div class="card"
+          <div
+            class="card"
             :style="{
               marginTop: cardPos,
               transition: 'all 200ms cubic-bezier(0.17, 0.67, 0.17, 0.98)'
-            }"></div>
+            }"
+          />
         </div>
       </div>
     </div>
@@ -46,12 +62,6 @@ import { Video as videoActions } from '@/store/actionTypes';
 
 export default {
   name: 'AdvanceColumnItems',
-  data() {
-    return {
-      hoverIndex: -1,
-      moveLength: 0,
-    };
-  },
   props: {
     item: {
       type: String,
@@ -62,6 +72,12 @@ export default {
     isChosen: {
       type: Boolean,
     },
+  },
+  data() {
+    return {
+      hoverIndex: -1,
+      moveLength: 0,
+    };
   },
   watch: {
     audioTrackList(val) {
@@ -87,6 +103,11 @@ export default {
       return this.$store.getters.audioTrackList;
     },
   },
+  mounted() {
+    this.$bus.$on('switch-audio-track', (index) => {
+      this.handleClick(index);
+    });
+  },
   methods: {
     initialSize(size) {
       if (this.size >= 289 && this.size <= 480) {
@@ -106,11 +127,6 @@ export default {
       this.moveLength = index * 32;
       this.$store.dispatch(videoActions.SWITCH_AUDIO_TRACK, this.tracks[index]);
     },
-  },
-  mounted() {
-    this.$bus.$on('switch-audio-track', (index) => {
-      this.handleClick(index);
-    });
   },
 };
 </script>

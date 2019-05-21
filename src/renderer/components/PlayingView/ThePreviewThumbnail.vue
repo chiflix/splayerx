@@ -1,19 +1,32 @@
 <template>
-  <div class="thumbnail-wrapper"
-    :style="{width: thumbnailWidth +'px', height: thumbnailHeight +'px', transform: `translateX(${positionOfThumbnail}px)`}">
-    <div class="the-preview-thumbnail" :style="{height: thumbnailHeight + 2 +'px'}">
+  <div
+    class="thumbnail-wrapper"
+    :style="{width: thumbnailWidth +'px', height: thumbnailHeight +'px', transform: `translateX(${positionOfThumbnail}px)`}"
+  >
+    <div
+      class="the-preview-thumbnail"
+      :style="{height: thumbnailHeight + 2 +'px'}"
+    >
       <thumbnail-display
-        :quickHash="mediaHash"
-        :maxThumbnailWidth="maxThumbnailWidth"
-        :currentTime="currentTime"
-        :thumbnailWidth="thumbnailWidth"
-        :thumbnailHeight="thumbnailHeight" />
+        :quick-hash="mediaHash"
+        :max-thumbnail-width="maxThumbnailWidth"
+        :current-time="currentTime"
+        :thumbnail-width="thumbnailWidth"
+        :thumbnail-height="thumbnailHeight"
+      />
     </div>
-    <div class="thumbnail-gradient"></div>
+    <div class="thumbnail-gradient" />
     <div class="time">
-      <span class="flex-items" :style="{ color: hoveredEnd ? 'rgba(255, 255, 255, 1)' : 'rgba(255, 255, 255, 0.5)'}">{{ videoTime }}</span>
+      <span
+        class="flex-items"
+        :style="{ color: hoveredEnd ? 'rgba(255, 255, 255, 1)' : 'rgba(255, 255, 255, 0.5)'}"
+      >{{ videoTime }}</span>
       <transition name="hovered-end">
-        <base-icon class="flex-items hovered-end" type="hoveredEnd" v-if="hoveredEnd" />
+        <base-icon
+          v-if="hoveredEnd"
+          class="flex-items hovered-end"
+          type="hoveredEnd"
+        />
       </transition>
     </div>
   </div>
@@ -58,9 +71,9 @@ export default {
   },
   watch: {
   },
-  methods: {
-  },
   created() {
+  },
+  methods: {
   },
 };
 </script>

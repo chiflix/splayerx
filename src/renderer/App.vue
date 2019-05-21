@@ -1,5 +1,8 @@
 <template>
-  <div id="app" class="application">
+  <div
+    id="app"
+    class="application"
+  >
     <router-view />
   </div>
 </template>
@@ -9,18 +12,7 @@ import '@/css/style.scss';
 import drag from '@/helpers/drag';
 
 export default {
-  name: 'splayer',
-  methods: {
-    mainCommitProxy(commitType: string, commitPayload: any) {
-      this.$store.commit(commitType, commitPayload);
-    },
-    mainDispatchProxy(actionType: string, actionPayload: any) {
-      this.$store.dispatch(actionType, actionPayload);
-    },
-    handleWindowSizeChange(windowSize: any) {
-      this.$store.commit('windowSize', windowSize);
-    },
-  },
+  name: 'Splayer',
   mounted() {
     this.$electron.ipcRenderer.on('mainCommit', (event: any, commitType: string, commitPayload: any) => {
       this.mainCommitProxy(commitType, commitPayload);
@@ -37,6 +29,17 @@ export default {
     setInterval(() => {
       this.$ga.event('app', 'heartbeat');
     }, 1500000); // keep alive every 25 min.
+  },
+  methods: {
+    mainCommitProxy(commitType: string, commitPayload: any) {
+      this.$store.commit(commitType, commitPayload);
+    },
+    mainDispatchProxy(actionType: string, actionPayload: any) {
+      this.$store.dispatch(actionType, actionPayload);
+    },
+    handleWindowSizeChange(windowSize: any) {
+      this.$store.commit('windowSize', windowSize);
+    },
   },
 };
 </script>

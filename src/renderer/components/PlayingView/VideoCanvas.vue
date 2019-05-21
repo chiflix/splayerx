@@ -1,31 +1,41 @@
 <template>
   <div
-    class="video">
-    <transition name="fade" mode="out-in">
-    <base-video-player
-      ref="videoCanvas"
-      :key="videoId"
-      :needtimeupdate=true
-      :lastAudioTrackId="lastAudioTrackId"
-      :events="['loadedmetadata', 'audiotrack']"
-      :styles="{objectFit: 'contain', width: 'calc(100% - 0.1px)', height: '100%'}"
-      @loadedmetadata="onMetaLoaded"
-      @audiotrack="onAudioTrack"
-      :loop="loop"
-      :src="convertedSrc"
-      :playbackRate="rate"
-      :volume="volume"
-      :muted="muted"
-      :paused="paused"
-      :currentTime="seekTime"
-      :currentAudioTrackId="currentAudioTrackId.toString()" />
+    class="video"
+  >
+    <transition
+      name="fade"
+      mode="out-in"
+    >
+      <base-video-player
+        ref="videoCanvas"
+        :key="videoId"
+        :needtimeupdate="true"
+        :last-audio-track-id="lastAudioTrackId"
+        :events="['loadedmetadata', 'audiotrack']"
+        :styles="{objectFit: 'contain', width: 'calc(100% - 0.1px)', height: '100%'}"
+        :loop="loop"
+        :src="convertedSrc"
+        :playback-rate="rate"
+        :volume="volume"
+        :muted="muted"
+        :paused="paused"
+        :current-time="seekTime"
+        :current-audio-track-id="currentAudioTrackId.toString()"
+        @loadedmetadata="onMetaLoaded"
+        @audiotrack="onAudioTrack"
+      />
       <!-- calc(100% - 0.1px) fix for mac book pro 15 full screen after video controller fade-out video will shake -->
     </transition>
-    <div class="mask"
+    <div
+      class="mask"
       :style="{
         backgroundColor: maskBackground
-      }"/>
-    <canvas class="canvas" ref="thumbnailCanvas"></canvas>
+      }"
+    />
+    <canvas
+      ref="thumbnailCanvas"
+      class="canvas"
+    />
   </div>
 </template>;
 
@@ -38,7 +48,7 @@ import BaseVideoPlayer from './BaseVideoPlayer.vue';
 import { videodata } from '../../store/video';
 
 export default {
-  name: 'video-canvas',
+  name: 'VideoCanvas',
   components: {
     'base-video-player': BaseVideoPlayer,
   },
@@ -317,9 +327,6 @@ export default {
       videoRatio: 'ratio',
     }),
   },
-  created() {
-    this.updatePlayinglistRate({ oldDir: '', newDir: path.dirname(this.originSrc), playingList: this.playingList });
-  },
   watch: {
     winAngle(val) {
       this.changeWindowRotate(val);
@@ -346,6 +353,9 @@ export default {
         }
       });
     },
+  },
+  created() {
+    this.updatePlayinglistRate({ oldDir: '', newDir: path.dirname(this.originSrc), playingList: this.playingList });
   },
   mounted() {
     this.$electron.ipcRenderer.on('quit', (needToRestore) => {

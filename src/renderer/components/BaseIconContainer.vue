@@ -1,8 +1,17 @@
 <template>
   <svg :class="hoverState">
-    <use class='default' v-bind="{'xlink:href': `#${type}-${finalState}-${finalEffect}`}"></use>
-    <use class="hover" v-bind="{'xlink:href': `#${type}-hover-${finalEffect}`}"></use>
-    <use class="active" v-bind="{'xlink:href': `#${type}-active-${finalEffect}`}"></use>
+    <use
+      class="default"
+      v-bind="{'xlink:href': `#${type}-${finalState}-${finalEffect}`}"
+    />
+    <use
+      class="hover"
+      v-bind="{'xlink:href': `#${type}-hover-${finalEffect}`}"
+    />
+    <use
+      class="active"
+      v-bind="{'xlink:href': `#${type}-active-${finalEffect}`}"
+    />
   </svg>
 </template>
 

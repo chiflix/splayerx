@@ -1,14 +1,16 @@
 <template>
   <div
-    class="thumbnail-display">
+    class="thumbnail-display"
+  >
     <div
-     :style="{
-       width: `${thumbnailWidth}px`,
-       height: `${thumbnailHeight}px`,
-       backgroundImage: src,
-       backgroundPosition: backPos,
-       backgroundSize: backSize,
-     }"></div>
+      :style="{
+        width: `${thumbnailWidth}px`,
+        height: `${thumbnailHeight}px`,
+        backgroundImage: src,
+        backgroundPosition: backPos,
+        backgroundSize: backSize,
+      }"
+    />
   </div>
 </template>
 <script>
@@ -18,7 +20,7 @@ import { filePathToUrl } from '@/helpers/path';
 import { getVideoInfoByMediaHash, generateThumbnailPathByMediaHash } from '@/helpers/cacheFileStorage';
 
 export default {
-  name: 'thumbnail-display',
+  name: 'ThumbnailDisplay',
   components: {
   },
   props: {
@@ -49,8 +51,6 @@ export default {
       imgExisted: false,
       imgSrc: '',
     };
-  },
-  methods: {
   },
   watch: {
     currentTime(val) {
@@ -83,6 +83,8 @@ export default {
         ipcRenderer.send('generateThumbnails', info);
       }
     });
+  },
+  methods: {
   },
 };
 </script>

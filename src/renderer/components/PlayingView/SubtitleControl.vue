@@ -1,102 +1,160 @@
 <template>
-  <div data-component-name="$options.name" class="sub-control" v-fade-in="showAllWidgets">
+  <div
+    v-fade-in="showAllWidgets"
+    data-component-name="$options.name"
+    class="sub-control"
+  >
     <div class="sub-btn-control">
       <transition name="sub-trans-l">
-        <div class="sub-menu-wrapper subtitle-scroll-items"
+        <div
           v-show="showAttached"
+          class="sub-menu-wrapper subtitle-scroll-items"
           :style="{
             cursor: 'default',
             transition: showAttached ? '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' : '150ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
             height: hiddenText ? `${contHeight + hoverHeight}px` : `${contHeight}px`,
             fontWeight: '900',
-          }">
+          }"
+        >
           <div class="element bottom">
             <div class="element content">
-
               <div class="topContainer">
-                <div class="title subtitleNormal">{{ this.$t('msg.subtitle.subtitleSelect') }}</div>
-                <div class="subtitleShift" @mouseup="subTypeShift" v-show="enabledSecondarySub" @mouseover="shiftItemHover" @mouseleave="shiftItemLeave">
-                  <div class="firstSub" :style="{
-                    color: isFirstSubtitle || shiftItemHovered ? 'rgba(255, 255, 255, 0.5)' : 'rgba(255, 255, 255, 0.2)',
-                    background: isFirstSubtitle ? 'rgba(255, 255, 255, 0.13)' : '',
-                    boxShadow: isFirstSubtitle ? '1px 0 2px rgba(0, 0, 0, 0.09)' : '',
-                    borderRadius: isFirstSubtitle ? '2px' : '',
-                  }"><span>1</span></div>
-                  <div class="secondarySub" :style="{
-                    color: !isFirstSubtitle || shiftItemHovered ? 'rgba(255, 255, 255, 0.5)' : 'rgba(255, 255, 255, 0.2)',
-                    background: !isFirstSubtitle ? 'rgba(255, 255, 255, 0.13)' : '',
-                    boxShadow: !isFirstSubtitle ? '-1px 0 2px rgba(0, 0, 0, 0.09)' : '',
-                    borderRadius: !isFirstSubtitle ? '2px' : '',
-                  }"><span>2</span></div>
+                <div class="title subtitleNormal">
+                  {{ this.$t('msg.subtitle.subtitleSelect') }}
                 </div>
-                <Icon type="refresh" class="refresh" ref="refreshRotate" @mouseup.native="handleRefresh" :class="animClass ? 'icon-rotate-animation' : ''"/>
+                <div
+                  v-show="enabledSecondarySub"
+                  class="subtitleShift"
+                  @mouseup="subTypeShift"
+                  @mouseover="shiftItemHover"
+                  @mouseleave="shiftItemLeave"
+                >
+                  <div
+                    class="firstSub"
+                    :style="{
+                      color: isFirstSubtitle || shiftItemHovered ? 'rgba(255, 255, 255, 0.5)' : 'rgba(255, 255, 255, 0.2)',
+                      background: isFirstSubtitle ? 'rgba(255, 255, 255, 0.13)' : '',
+                      boxShadow: isFirstSubtitle ? '1px 0 2px rgba(0, 0, 0, 0.09)' : '',
+                      borderRadius: isFirstSubtitle ? '2px' : '',
+                    }"
+                  >
+                    <span>1</span>
+                  </div>
+                  <div
+                    class="secondarySub"
+                    :style="{
+                      color: !isFirstSubtitle || shiftItemHovered ? 'rgba(255, 255, 255, 0.5)' : 'rgba(255, 255, 255, 0.2)',
+                      background: !isFirstSubtitle ? 'rgba(255, 255, 255, 0.13)' : '',
+                      boxShadow: !isFirstSubtitle ? '-1px 0 2px rgba(0, 0, 0, 0.09)' : '',
+                      borderRadius: !isFirstSubtitle ? '2px' : '',
+                    }"
+                  >
+                    <span>2</span>
+                  </div>
+                </div>
+                <Icon
+                  ref="refreshRotate"
+                  type="refresh"
+                  class="refresh"
+                  :class="animClass ? 'icon-rotate-animation' : ''"
+                  @mouseup.native="handleRefresh"
+                />
               </div>
 
               <div class="sub-menu">
-                <div class="scrollScope" :class="refAnimation" ref="scroll"
-                  @animationend="finishAnimation"
+                <div
+                  ref="scroll"
+                  class="scrollScope"
+                  :class="refAnimation"
                   :style="{
                     transition: '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
                     height: hiddenText ? `${scopeHeight + hoverHeight}px` : `${scopeHeight}px`,
                     overflowY: isOverFlow,
-                  }">
+                  }"
+                  @animationend="finishAnimation"
+                >
                   <div class="itemContainer">
                     <div v-if="!(loadingSubsPlaceholders.length > 0)">
-                      <div class="menu-item-text-wrapper"
-                        @mouseup="$bus.$emit('off-subtitle')"
-                        @mouseover="toggleItemsMouseOver(-1)"
-                        @mouseleave="toggleItemsMouseLeave(-1)"
+                      <div
+                        class="menu-item-text-wrapper"
                         :style="{
                           color: hoverIndex === -1 || currentSubtitleIndex === -1 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
                           height: `${itemHeight}px`,
                           cursor: currentSubtitleIndex === -1 ? 'default' : 'pointer',
-                        }">
-                        <div class="text">{{ noSubtitle }}</div>
-                      </div>
-                    </div>
-
-                      <div v-for="(item, index) in computedAvailableItems" :key="item.rank">
-                        <div class="menu-item-text-wrapper"
-                          @mouseup="toggleItemClick($event, index)"
-                          @mouseover="toggleItemsMouseOver(index)"
-                          @mouseleave="toggleItemsMouseLeave(index)"
-                          :id="'item'+index"
-                          :style="{
-                            transition: isOverFlow ? '' : '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
-                            color: hoverIndex === index || currentSubtitleIndex === index ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
-                            height: hoverIndex === index && hiddenText ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
-                            cursor: currentSubtitleIndex === index ? 'default' : 'pointer',
-                          }">
-                          <div class="textContainer">
-                            <div class="text"
-                              :style="{
-                                wordBreak: hoverIndex === index && hiddenText ? 'break-all' : '',
-                                whiteSpace: hoverIndex === index && hiddenText ? '' : 'nowrap'
-                              }">{{ getSubName(item) }}</div>
-                          </div>
-                          <div class="iconContainer">
-                            <transition name="sub-delete">
-                              <Icon type="deleteSub" class="deleteIcon" @mouseup.native="handleSubDelete($event, item)" v-show="item.type === 'local' && hoverIndex === index"></Icon>
-                            </transition>
-                          </div>
+                        }"
+                        @mouseup="$bus.$emit('off-subtitle')"
+                        @mouseover="toggleItemsMouseOver(-1)"
+                        @mouseleave="toggleItemsMouseLeave(-1)"
+                      >
+                        <div class="text">
+                          {{ noSubtitle }}
                         </div>
                       </div>
+                    </div>
 
-                    <div v-if="loadingTypes.length > 0"
-                      v-for="(item, index) in loadingTypes"
-                      class="placeholders-wrapper"
-                      :key="`${item}-${index}`">
-                      <div class="placeholder-item-text-wrapper">
-                        <div class="text">{{ item }}</div>
+                    <div
+                      v-for="(item, index) in computedAvailableItems"
+                      :key="item.rank"
+                    >
+                      <div
+                        :id="'item'+index"
+                        class="menu-item-text-wrapper"
+                        :style="{
+                          transition: isOverFlow ? '' : '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
+                          color: hoverIndex === index || currentSubtitleIndex === index ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+                          height: hoverIndex === index && hiddenText ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
+                          cursor: currentSubtitleIndex === index ? 'default' : 'pointer',
+                        }"
+                        @mouseup="toggleItemClick($event, index)"
+                        @mouseover="toggleItemsMouseOver(index)"
+                        @mouseleave="toggleItemsMouseLeave(index)"
+                      >
+                        <div class="textContainer">
+                          <div
+                            class="text"
+                            :style="{
+                              wordBreak: hoverIndex === index && hiddenText ? 'break-all' : '',
+                              whiteSpace: hoverIndex === index && hiddenText ? '' : 'nowrap'
+                            }"
+                          >
+                            {{ getSubName(item) }}
+                          </div>
+                        </div>
+                        <div class="iconContainer">
+                          <transition name="sub-delete">
+                            <Icon
+                              v-show="item.type === 'local' && hoverIndex === index"
+                              type="deleteSub"
+                              class="deleteIcon"
+                              @mouseup.native="handleSubDelete($event, item)"
+                            />
+                          </transition>
+                        </div>
                       </div>
                     </div>
 
-                    <div class="card" v-if="0 <= computedAvailableItems.length"
+                    <div
+                      v-for="(item, index) in loadingTypes"
+                      v-if="loadingTypes.length > 0"
+                      :key="`${item}-${index}`"
+                      class="placeholders-wrapper"
+                    >
+                      <div class="placeholder-item-text-wrapper">
+                        <div class="text">
+                          {{ item }}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div
+                      v-if="0 <= computedAvailableItems.length"
+                      class="card"
                       :style="{
                         height: hiddenText && currentSubtitleIndex === hoverIndex ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
                         marginTop: hiddenText && currentSubtitleIndex <= hoverIndex ? `${-cardPos - hoverHeight}px` : `${-cardPos}px`,
                         transition: transFlag ? 'all 100ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' : '',
-                      }"/>
+                      }"
+                    />
                   </div>
                 </div>
               </div>
@@ -105,12 +163,22 @@
         </div>
       </transition>
     </div>
-    <div ref="sub" @mouseup.left="toggleSubMenuDisplay" @mousedown.left="handleDown" @mouseenter="handleEnter" @mouseleave="handleLeave" >
-      <lottie v-on:animCreated="handleAnimation" :options="defaultOptions" lot="subtitle"
+    <div
+      ref="sub"
+      @mouseup.left="toggleSubMenuDisplay"
+      @mousedown.left="handleDown"
+      @mouseenter="handleEnter"
+      @mouseleave="handleLeave"
+    >
+      <lottie
+        :options="defaultOptions"
+        lot="subtitle"
         :style="{
           opacity: iconOpacity,
           transition: 'opacity 150ms',
-        }"></lottie>
+        }"
+        @animCreated="handleAnimation"
+      />
     </div>
   </div>
 </template>
@@ -128,7 +196,7 @@ import Icon from '../BaseIconContainer.vue';
 import { ONLINE_LOADING, SUBTITLE_OFFLINE, REQUEST_TIMEOUT } from '../../../shared/notificationcodes';
 
 export default {
-  name: 'subtitle-control',
+  name: 'SubtitleControl',
   type: INPUT_COMPONENT_TYPE,
   components: {
     lottie,

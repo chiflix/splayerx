@@ -1,31 +1,53 @@
 <template>
-  <div class="itemContainer"
+  <div
+    class="itemContainer"
     :style="{
       height: heightSize,
       backgroundImage: !isChosen ? '' : 'linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.07) 24%, rgba(255,255,255,0.03) 100%)',
-    }">
-    <div class="detail"
+    }"
+  >
+    <div
+      class="detail"
       :style="{
         height: heightSize,
-      }">
-      <div class="textContainer"
+      }"
+    >
+      <div
+        class="textContainer"
         :style="{
           color: color,
           transition: 'color 300ms',
           cursor: isChosen ? 'default' : 'pointer',
-        }">
-        <div class="textItem advanceNormalTitle">{{ item }}</div>
-        <div class="rightItem" v-show="!isChosen"><img :src="chosenStyle"></div>
+        }"
+      >
+        <div class="textItem advanceNormalTitle">
+          {{ item }}
+        </div>
+        <div
+          v-show="!isChosen"
+          class="rightItem"
+        >
+          <img :src="chosenStyle">
+        </div>
       </div>
       <transition name="detail">
-        <div class="listContainer" v-show="isChosen">
+        <div
+          v-show="isChosen"
+          class="listContainer"
+        >
           <div class="rowContainer">
-            <div class="imgContainer" v-for="(img, index) in imgs">
-              <img :src="img === chosenStyle || index === hoverIndex ? imgsSelected[index] : img" class="imgType"
+            <div
+              v-for="(img, index) in imgs"
+              class="imgContainer"
+            >
+              <img
+                :src="img === chosenStyle || index === hoverIndex ? imgsSelected[index] : img"
+                class="imgType"
                 :style="{ cursor: img === chosenStyle ? 'default' : 'pointer'}"
                 @mouseover="handleOver(index)"
                 @mouseout="handleOut"
-                @click.left="handleClick($event, index)">
+                @click.left="handleClick($event, index)"
+              >
             </div>
           </div>
         </div>
@@ -49,14 +71,6 @@ import styleSelected4 from '../../../assets/subtitle-style5-selected.png';
 
 export default {
   name: 'AdvanceColorItems',
-  data() {
-    return {
-      hoverIndex: -1,
-      imgs: [style0, style1, style2, style3, style4],
-      imgsSelected: [styleSelected0, styleSelected1, styleSelected2,
-        styleSelected3, styleSelected4],
-    };
-  },
   props: {
     item: {
       type: String,
@@ -73,6 +87,14 @@ export default {
     size: {
       type: Number,
     },
+  },
+  data() {
+    return {
+      hoverIndex: -1,
+      imgs: [style0, style1, style2, style3, style4],
+      imgsSelected: [styleSelected0, styleSelected1, styleSelected2,
+        styleSelected3, styleSelected4],
+    };
   },
   computed: {
     heightSize() {

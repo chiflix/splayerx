@@ -1,37 +1,47 @@
 <template>
-<transition name="bubble" mode="out-in">
-<div
-  class="privacy-bubble">
-  <div class="plane-background">
-    <div class="plane">
-      <div class="content">
-        <p :class="infoCSS">
-          {{ content }}
-        </p>
-        <div :class="$i18n.locale === 'en' ? 'en-buttons' : 'buttons'">
-          <div class="agree-button"
-            :class="{
-              hover: agreeHovered,
-            }"
-            @mouseover.stop="agreeHovered = true"
-            @mouseout.stop="agreeHovered = false"
-            @mouseup.stop="handleAgreeMouseup">
-            <div class="button-info">{{ agreeButton }}</div>
-          </div>
-          <div class="disagree-button"
-            @mouseup.stop="handleDisagreeMouseup">
-            {{ disagreeButton }}
+  <transition
+    name="bubble"
+    mode="out-in"
+  >
+    <div
+      class="privacy-bubble"
+    >
+      <div class="plane-background">
+        <div class="plane">
+          <div class="content">
+            <p :class="infoCSS">
+              {{ content }}
+            </p>
+            <div :class="$i18n.locale === 'en' ? 'en-buttons' : 'buttons'">
+              <div
+                class="agree-button"
+                :class="{
+                  hover: agreeHovered,
+                }"
+                @mouseover.stop="agreeHovered = true"
+                @mouseout.stop="agreeHovered = false"
+                @mouseup.stop="handleAgreeMouseup"
+              >
+                <div class="button-info">
+                  {{ agreeButton }}
+                </div>
+              </div>
+              <div
+                class="disagree-button"
+                @mouseup.stop="handleDisagreeMouseup"
+              >
+                {{ disagreeButton }}
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-</div>
-</transition>
+  </transition>
 </template>
 <script>
 export default {
-  name: 'privacy-bubble',
+  name: 'PrivacyBubble',
   data() {
     return {
       /*
@@ -40,20 +50,6 @@ export default {
        */
       agreeHovered: false,
     };
-  },
-  methods: {
-    handleAgreeMouseup() {
-      this.$store.dispatch('agreeOnPrivacyPolicy').then(() => {
-        this.$electron.ipcRenderer.send('main-to-preference', this.preferenceData);
-      });
-      this.$emit('close-privacy-bubble');
-    },
-    handleDisagreeMouseup() {
-      this.$store.dispatch('disagreeOnPrivacyPolicy').then(() => {
-        this.$electron.ipcRenderer.send('main-to-preference', this.preferenceData);
-      });
-      this.$emit('close-privacy-bubble');
-    },
   },
   computed: {
     preferenceData() {
@@ -73,6 +69,20 @@ export default {
     },
     disagreeButton() {
       return this.$t('privacyBubble.masVersion.disagree');
+    },
+  },
+  methods: {
+    handleAgreeMouseup() {
+      this.$store.dispatch('agreeOnPrivacyPolicy').then(() => {
+        this.$electron.ipcRenderer.send('main-to-preference', this.preferenceData);
+      });
+      this.$emit('close-privacy-bubble');
+    },
+    handleDisagreeMouseup() {
+      this.$store.dispatch('disagreeOnPrivacyPolicy').then(() => {
+        this.$electron.ipcRenderer.send('main-to-preference', this.preferenceData);
+      });
+      this.$emit('close-privacy-bubble');
     },
   },
 };

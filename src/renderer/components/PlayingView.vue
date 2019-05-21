@@ -15,7 +15,7 @@ import TheVideoController from './PlayingView/TheVideoController.vue';
 import { videodata } from '../store/video';
 
 export default {
-  name: 'playing-view',
+  name: 'PlayingView',
   components: {
     'the-video-controller': TheVideoController,
     'the-video-canvas': VideoCanvas,

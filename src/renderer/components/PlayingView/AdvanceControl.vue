@@ -2,17 +2,33 @@
   <div>
     <div class="advanceControl">
       <transition name="advance-trans-l">
-      <div class="advanced" v-show="showAttached"
-        :style="{
-          transition: showAttached ? '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' : '150ms cubic-bezier(0.17, 0.67, 0.17, 0.98)'
-        }">
-        <transition name="setUp">
-          <advance-main-menu class="mainMenu" :clearState="showAttached"></advance-main-menu>
-        </transition>
-      </div>
+        <div
+          v-show="showAttached"
+          class="advanced"
+          :style="{
+            transition: showAttached ? '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' : '150ms cubic-bezier(0.17, 0.67, 0.17, 0.98)'
+          }"
+        >
+          <transition name="setUp">
+            <advance-main-menu
+              class="mainMenu"
+              :clear-state="showAttached"
+            />
+          </transition>
+        </div>
       </transition>
-      <div ref="adv" @mouseup.left="toggleAdvMenuDisplay" @mousedown.left="handleDown" @mouseenter="handleEnter" @mouseleave="handleLeave">
-        <lottie v-on:animCreated="handleAnimation" :options="defaultOptions" lot="advance"></lottie>
+      <div
+        ref="adv"
+        @mouseup.left="toggleAdvMenuDisplay"
+        @mousedown.left="handleDown"
+        @mouseenter="handleEnter"
+        @mouseleave="handleLeave"
+      >
+        <lottie
+          :options="defaultOptions"
+          lot="advance"
+          @animCreated="handleAnimation"
+        />
       </div>
     </div>
   </div>
@@ -27,7 +43,7 @@ import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import AdvanceMainMenu from './AdvanceControlFunctionalities/AdvanceMainMenu.vue';
 
 export default {
-  name: 'advance-control',
+  name: 'AdvanceControl',
   type: INPUT_COMPONENT_TYPE,
   components: {
     lottie,

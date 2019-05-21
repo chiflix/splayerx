@@ -1,11 +1,11 @@
 <script>
 export default {
-  name: 'base-image-display',
+  name: 'BaseImageDisplay',
   props: {
     imgSrc: {
       required: true,
     },
-    $_style: {
+    style: {
       type: Object,
     },
     attributes: Object,
@@ -34,6 +34,61 @@ export default {
     imageOptions() {
       return this.getImageOptions(this.imgSrc, this.imageType);
     },
+  },
+  beforeUpdate() {
+    switch (this.imageType) {
+      default: {
+        this.imageReady = true;
+        break;
+      }
+      case null: {
+        break;
+      }
+      case 'ImageBitmap': {
+        if (this.$refs.image.getContext) {
+          this.$refs.image.getContext('2d').drawImage(this.imgSrc, 0, 0, this.width, this.height);
+          this.imageReady = true;
+        }
+        break;
+      }
+      case 'ImageData': {
+        if (this.$refs.image.getContext) {
+          createImageBitmap(this.imgSrc).then((image) => {
+            this.$refs.image.getContext('2d').drawImage(image, 0, 0, this.width, this.height);
+            this.imageReady = true;
+          });
+        }
+        break;
+      }
+    }
+  },
+  mounted() {
+    switch (this.imageType) {
+      default: {
+        this.imageReady = true;
+        break;
+      }
+      case null: {
+        break;
+      }
+      case 'ImageBitmap': {
+        if (this.$refs.image.getContext) {
+          this.$refs.image.getContext('2d').drawImage(this.imgSrc, 0, 0, this.width, this.height);
+          this.imageReady = true;
+        }
+        break;
+      }
+      case 'ImageData': {
+        if (this.$refs.image.getContext) {
+          createImageBitmap(this.imgSrc).then((image) => {
+            this.$refs.image.getContext('2d').drawImage(image, 0, 0, this.width, this.height);
+            this.imageReady = true;
+          });
+        }
+        break;
+      }
+    }
+    this.$refs.image.dataset.componentName = this.$options.name;
   },
   methods: {
     getImageType(imgSrc) {
@@ -156,61 +211,6 @@ export default {
         },
       );
     return h(this.elementName, visibilityOptions);
-  },
-  beforeUpdate() {
-    switch (this.imageType) {
-      default: {
-        this.imageReady = true;
-        break;
-      }
-      case null: {
-        break;
-      }
-      case 'ImageBitmap': {
-        if (this.$refs.image.getContext) {
-          this.$refs.image.getContext('2d').drawImage(this.imgSrc, 0, 0, this.width, this.height);
-          this.imageReady = true;
-        }
-        break;
-      }
-      case 'ImageData': {
-        if (this.$refs.image.getContext) {
-          createImageBitmap(this.imgSrc).then((image) => {
-            this.$refs.image.getContext('2d').drawImage(image, 0, 0, this.width, this.height);
-            this.imageReady = true;
-          });
-        }
-        break;
-      }
-    }
-  },
-  mounted() {
-    switch (this.imageType) {
-      default: {
-        this.imageReady = true;
-        break;
-      }
-      case null: {
-        break;
-      }
-      case 'ImageBitmap': {
-        if (this.$refs.image.getContext) {
-          this.$refs.image.getContext('2d').drawImage(this.imgSrc, 0, 0, this.width, this.height);
-          this.imageReady = true;
-        }
-        break;
-      }
-      case 'ImageData': {
-        if (this.$refs.image.getContext) {
-          createImageBitmap(this.imgSrc).then((image) => {
-            this.$refs.image.getContext('2d').drawImage(image, 0, 0, this.width, this.height);
-            this.imageReady = true;
-          });
-        }
-        break;
-      }
-    }
-    this.$refs.image.dataset.componentName = this.$options.name;
   },
 };
 </script>

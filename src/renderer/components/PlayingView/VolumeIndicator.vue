@@ -1,32 +1,52 @@
 <template>
-<div class="show-area" ref="showArea"
-  @mouseenter="enterArea"
-  @mouseleave="leaveArea">
-  <div class="trigger-area"
-    :class="showVolume ? 'fade-in' : 'fade-out'"
-    :style="{cursor: showAllWidgets ? 'pointer' : 'none'}"
-    @mouseenter="actionArea"
-    @mouseleave="leaveActionArea"
-    @mousedown="mouseDownOnIndicator">
-    <div ref="indicatorContainer"
-      :class="borderClass"
-      class="indicator-container">
-      <base-info-card class="card" ref="card">
-        <div class="indicator" ref="indicator"
-          :style="{
-            height: volume * 100 + '%',
-            opacity: muted ? 0.25 : 0.8,
-          }"/>
-      </base-info-card>
-    </div>
-    <div class="volume"
-      @mouseup="mouseupOnMuteIcon">
-      <transition name="fade">
-        <base-icon v-show="showIcon" class="volume-icon" type="volume" :effect="muted || volume <= 0 ? 'mute' : 'icon'" />
-      </transition>
+  <div
+    ref="showArea"
+    class="show-area"
+    @mouseenter="enterArea"
+    @mouseleave="leaveArea"
+  >
+    <div
+      class="trigger-area"
+      :class="showVolume ? 'fade-in' : 'fade-out'"
+      :style="{cursor: showAllWidgets ? 'pointer' : 'none'}"
+      @mouseenter="actionArea"
+      @mouseleave="leaveActionArea"
+      @mousedown="mouseDownOnIndicator"
+    >
+      <div
+        ref="indicatorContainer"
+        :class="borderClass"
+        class="indicator-container"
+      >
+        <base-info-card
+          ref="card"
+          class="card"
+        >
+          <div
+            ref="indicator"
+            class="indicator"
+            :style="{
+              height: volume * 100 + '%',
+              opacity: muted ? 0.25 : 0.8,
+            }"
+          />
+        </base-info-card>
+      </div>
+      <div
+        class="volume"
+        @mouseup="mouseupOnMuteIcon"
+      >
+        <transition name="fade">
+          <base-icon
+            v-show="showIcon"
+            class="volume-icon"
+            type="volume"
+            :effect="muted || volume <= 0 ? 'mute' : 'icon'"
+          />
+        </transition>
+      </div>
     </div>
   </div>
-</div>
 </template>
 
 <script>
@@ -37,12 +57,13 @@ import BaseInfoCard from './InfoCard.vue';
 import BaseIcon from '../BaseIconContainer.vue';
 
 export default {
-  name: 'volume-indicator',
+  name: 'VolumeIndicator',
   type: INPUT_COMPONENT_TYPE,
   components: {
     'base-info-card': BaseInfoCard,
     'base-icon': BaseIcon,
   },
+  props: ['showAllWidgets', 'mousedownOnPlayButton', 'attachedShown'],
   data() {
     return {
       volumeTriggerStopped: false, // true when volume's changing
@@ -56,7 +77,6 @@ export default {
       firstAppear: true, // appear the volume indicator when switch from LandingView to PlayingView
     };
   },
-  props: ['showAllWidgets', 'mousedownOnPlayButton', 'attachedShown'],
   computed: {
     ...mapGetters(['muted', 'volumeKeydown', 'ratio', 'isFullScreen', 'wheelTriggered', 'volumeWheelTriggered']),
     ...mapState({
@@ -82,6 +102,81 @@ export default {
     showIcon() {
       return this.volumeTriggerStopped || this.mouseover || this.mousedown || this.muted;
     },
+  },
+  watch: {
+    showAllWidgets(val) {
+      if (!val) this.volumeTriggerStopped = false;
+    },
+    wheelTriggered() {
+      if (this.volumeWheelTriggered) {
+        const { clock, volumeTriggerTimerId } = this;
+        this.volumeTriggerStopped = true;
+        clock.clearTimeout(volumeTriggerTimerId);
+        this.volumeTriggerTimerId = clock.setTimeout(() => {
+          this.volumeTriggerStopped = false;
+        }, 1000);
+      }
+    },
+    showVolume(val) {
+      if (!val) document.onmouseup = null;
+    },
+    muted(val) {
+      const { clock, volumeTriggerTimerId } = this;
+      if (!this.volumeKeydown && this.volume !== 0) {
+        this.volumeTriggerStopped = true;
+        clock.clearTimeout(volumeTriggerTimerId);
+        this.volumeTriggerTimerId = clock.setTimeout(() => {
+          this.volumeTriggerStopped = false;
+        }, 1000);
+      } else if (this.volumeKeydown && val) {
+        if (!this.showAllWidgets) {
+          this.volumeTriggerStopped = true;
+          clock.clearTimeout(volumeTriggerTimerId);
+          this.volumeTriggerTimerId = clock.setTimeout(() => {
+            this.volumeTriggerStopped = false;
+          }, 1000);
+        } else {
+          this.volumeTriggerStopped = this.showAllWidgets;
+          clock.clearTimeout(volumeTriggerTimerId);
+        }
+      }
+    },
+    volume() {
+      const { clock, volumeTriggerTimerId } = this;
+      if (!this.volumeKeydown) {
+        this.volumeTriggerStopped = true;
+        clock.clearTimeout(volumeTriggerTimerId);
+        this.volumeTriggerTimerId = clock.setTimeout(() => {
+          this.volumeTriggerStopped = false;
+        }, 1000);
+      }
+    },
+    volumeKeydown(newVal, oldVal) {
+      const { clock, volumeTriggerTimerId } = this;
+      if (newVal) {
+        this.volumeTriggerStopped = true;
+        clock.clearTimeout(volumeTriggerTimerId);
+      } else if (!newVal && oldVal) {
+        clock.clearTimeout(volumeTriggerTimerId);
+        this.volumeTriggerTimerId = clock.setTimeout(() => {
+          this.volumeTriggerStopped = false;
+        }, 1000);
+      }
+    },
+  },
+  created() {
+    this.enterArea();
+    this.actionArea();
+    setTimeout(() => {
+      this.leaveArea();
+      this.firstAppear = false;
+    }, 2000);
+    if (this.muted) {
+      this.volumeTriggerStopped = this.showAllWidgets;
+    }
+    this.$bus.$on('toggle-fullscreen', this.handleFullScreen);
+    this.$bus.$on('to-fullscreen', this.handleFullScreen);
+    this.$bus.$on('off-fullscreen', this.handleFullScreen);
   },
   methods: {
     enterArea() {
@@ -163,81 +258,6 @@ export default {
           this.$refs.showArea.style.setProperty('--background-height', '');
           this.$refs.showArea.style.setProperty('--mute-top', '');
         });
-      }
-    },
-  },
-  created() {
-    this.enterArea();
-    this.actionArea();
-    setTimeout(() => {
-      this.leaveArea();
-      this.firstAppear = false;
-    }, 2000);
-    if (this.muted) {
-      this.volumeTriggerStopped = this.showAllWidgets;
-    }
-    this.$bus.$on('toggle-fullscreen', this.handleFullScreen);
-    this.$bus.$on('to-fullscreen', this.handleFullScreen);
-    this.$bus.$on('off-fullscreen', this.handleFullScreen);
-  },
-  watch: {
-    showAllWidgets(val) {
-      if (!val) this.volumeTriggerStopped = false;
-    },
-    wheelTriggered() {
-      if (this.volumeWheelTriggered) {
-        const { clock, volumeTriggerTimerId } = this;
-        this.volumeTriggerStopped = true;
-        clock.clearTimeout(volumeTriggerTimerId);
-        this.volumeTriggerTimerId = clock.setTimeout(() => {
-          this.volumeTriggerStopped = false;
-        }, 1000);
-      }
-    },
-    showVolume(val) {
-      if (!val) document.onmouseup = null;
-    },
-    muted(val) {
-      const { clock, volumeTriggerTimerId } = this;
-      if (!this.volumeKeydown && this.volume !== 0) {
-        this.volumeTriggerStopped = true;
-        clock.clearTimeout(volumeTriggerTimerId);
-        this.volumeTriggerTimerId = clock.setTimeout(() => {
-          this.volumeTriggerStopped = false;
-        }, 1000);
-      } else if (this.volumeKeydown && val) {
-        if (!this.showAllWidgets) {
-          this.volumeTriggerStopped = true;
-          clock.clearTimeout(volumeTriggerTimerId);
-          this.volumeTriggerTimerId = clock.setTimeout(() => {
-            this.volumeTriggerStopped = false;
-          }, 1000);
-        } else {
-          this.volumeTriggerStopped = this.showAllWidgets;
-          clock.clearTimeout(volumeTriggerTimerId);
-        }
-      }
-    },
-    volume() {
-      const { clock, volumeTriggerTimerId } = this;
-      if (!this.volumeKeydown) {
-        this.volumeTriggerStopped = true;
-        clock.clearTimeout(volumeTriggerTimerId);
-        this.volumeTriggerTimerId = clock.setTimeout(() => {
-          this.volumeTriggerStopped = false;
-        }, 1000);
-      }
-    },
-    volumeKeydown(newVal, oldVal) {
-      const { clock, volumeTriggerTimerId } = this;
-      if (newVal) {
-        this.volumeTriggerStopped = true;
-        clock.clearTimeout(volumeTriggerTimerId);
-      } else if (!newVal && oldVal) {
-        clock.clearTimeout(volumeTriggerTimerId);
-        this.volumeTriggerTimerId = clock.setTimeout(() => {
-          this.volumeTriggerStopped = false;
-        }, 1000);
       }
     },
   },

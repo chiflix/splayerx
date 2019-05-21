@@ -1,37 +1,47 @@
 <template>
-<div class="nextVideo">
-  <div class="nextVideo__plane">
-    <div class="nextVideo__progress" 
-      :style="{ width: progress + '%' }">
-      <div class="progressGradient"></div>
-      <div class="progressBorderLight"></div>
-    </div>
-    <div class="nextVideo__infoWrap">
-      <div class="nextVideo__info--upper">
-        <span>{{ timecode }}&nbsp;· </span>
-        <span>{{ title }}</span>
+  <div class="nextVideo">
+    <div class="nextVideo__plane">
+      <div
+        class="nextVideo__progress"
+        :style="{ width: progress + '%' }"
+      >
+        <div class="progressGradient" />
+        <div class="progressBorderLight" />
       </div>
-      <div class="nextVideo__info--mainly">{{ videoName }}</div>
+      <div class="nextVideo__infoWrap">
+        <div class="nextVideo__info--upper">
+          <span>{{ timecode }}&nbsp;· </span>
+          <span>{{ title }}</span>
+        </div>
+        <div class="nextVideo__info--mainly">
+          {{ videoName }}
+        </div>
+      </div>
+      <div
+        class="nextVideo__closeButton"
+        @mouseup.stop="handleCloseMouseup"
+      >
+        <Icon type="close" />
+      </div>
     </div>
-    <div class="nextVideo__closeButton"
-      @mouseup.stop="handleCloseMouseup">
-      <Icon type="close"/>
+    <div
+      class="nextVideo__thumbnail"
+      @mouseup="handleMouseup"
+      @mouseover="mouseoverVideo"
+      @mouseout="mouseoutVideo"
+    >
+      <video
+        ref="videoThumbnail"
+        :src="convertedSrcOfNextVideo"
+        :class="{ blur: isBlur }"
+        @loadedmetadata="onMetaLoaded"
+        @seeked="onSeeked"
+      />
+      <div class="nextVideo__playButton">
+        <Icon :type="notificationPlayIcon" />
+      </div>
     </div>
   </div>
-  <div class="nextVideo__thumbnail"
-    @mouseup="handleMouseup"
-    @mouseover="mouseoverVideo"
-    @mouseout="mouseoutVideo">
-    <video ref="videoThumbnail"
-      :src="convertedSrcOfNextVideo"
-      :class="{ blur: isBlur }"
-      @loadedmetadata="onMetaLoaded"
-      @seeked="onSeeked"></video>
-    <div class="nextVideo__playButton">
-      <Icon :type="notificationPlayIcon"/>
-    </div>
-  </div>
-</div>
 </template>
 <script>
 import { mapGetters } from 'vuex';
@@ -39,7 +49,7 @@ import path from 'path';
 import Icon from '../BaseIconContainer.vue';
 
 export default {
-  name: 'next-video',
+  name: 'NextVideo',
   components: {
     Icon,
   },
@@ -147,7 +157,7 @@ export default {
     clip-path: inset(0px round 7px);
     box-shadow: 0 0 1px rgba(0,0,0,0.1);
   }
-  
+
   &__progress {
     position: absolute;
     left: 123px;

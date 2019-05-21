@@ -1,52 +1,77 @@
 <template>
-  <div class="itemContainer"
+  <div
+    class="itemContainer"
     :style="{
       height: heightSize,
       backgroundImage: !isChosen ? '' : 'linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.07) 24%, rgba(255,255,255,0.03) 100%)',
-    }">
-    <div class="detail"
+    }"
+  >
+    <div
+      class="detail"
       :style="{
         height: heightSize,
-      }">
-      <div class="textContainer"
+      }"
+    >
+      <div
+        class="textContainer"
         :style="{
-           cursor: isChosen ? 'default' : 'pointer',
-        }">
-        <div class="textItem advanceNormalTitle"
+          cursor: isChosen ? 'default' : 'pointer',
+        }"
+      >
+        <div
+          class="textItem advanceNormalTitle"
           :style="{
             color: color,
             transition: 'color 300ms',
-          }">{{ item }}</div>
-        <div class="rightItem advanceNormalItem" v-show="!isChosen || isRateMenu">{{ showDetail }}</div>
+          }"
+        >
+          {{ item }}
+        </div>
+        <div
+          v-show="!isChosen || isRateMenu"
+          class="rightItem advanceNormalItem"
+        >
+          {{ showDetail }}
+        </div>
       </div>
       <transition name="detail">
-        <div class="listContainer" v-show="isChosen">
+        <div
+          v-show="isChosen"
+          class="listContainer"
+        >
           <div class="rowContainer">
-            <div v-for="(list, index) in lists"
+            <div
+              v-for="(list, index) in lists"
               :id="'list'+index"
               :class="rowNumDetail"
-              @mouseover="handleOver(index)"
-              @mouseout="handleOut(index)"
-              @click="handleClick(index)"
               :style="{
                 width: index === difIndex[0] || index === difIndex[1] ? `${difWidth[0]}%` : `${difWidth[1]}%`,
                 cursor: itemChosen(index) ? 'default' : 'pointer',
-              }">
-              <p class="text"
+              }"
+              @mouseover="handleOver(index)"
+              @mouseout="handleOut(index)"
+              @click="handleClick(index)"
+            >
+              <p
+                class="text"
                 :style="{
                   color: itemChosen(index) || index === hoverIndex ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
                   margin: 'auto',
                   transition: 'color 300ms',
-                }">{{ list }}
+                }"
+              >
+                {{ list }}
               </p>
             </div>
-            <div :class="cardType"
+            <div
               v-show="!this.isRateMenu || this.lists.includes(this.rate)"
+              :class="cardType"
               :style="{
                 left: `${moveLength}px`,
                 transition: 'left 200ms cubic-bezier(0.17, 0.67, 0.17, 0.98), width 200ms',
                 boxSizing: 'border-box'
-              }"></div>
+              }"
+            />
           </div>
         </div>
       </transition>
@@ -61,13 +86,6 @@ import { Video as videoActions, Subtitle as subtitleActions } from '@/store/acti
 
 export default {
   name: 'AdvanceRowItems',
-  data() {
-    return {
-      hoverIndex: -1,
-      selectedIndex: 1,
-      moveLength: '',
-    };
-  },
   props: {
     lists: {
       type: Object.Array,
@@ -89,12 +107,19 @@ export default {
     isRateMenu: {
       type: Boolean,
     },
-    ChosenSize: {
+    chosenSize: {
       type: String,
     },
     cardWidth: {
       type: Number,
     },
+  },
+  data() {
+    return {
+      hoverIndex: -1,
+      selectedIndex: 1,
+      moveLength: '',
+    };
   },
   watch: {
     subToTop(val) {
