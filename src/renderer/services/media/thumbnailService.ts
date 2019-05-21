@@ -3,6 +3,19 @@ import mediaStorageService, { MediaStorageService } from '@/services/storage/med
 import { ipcRenderer } from 'electron';
 
 export class ThumbnailService implements ThumbnailRequest {
+  constructor(private readonly mediaStorageService: MediaStorageService) {
+  }
+
+  /** 公开API 根据该视频创建缩略图对应的路径，
+   * @description ThumbnailService 对 ThumbnailRequest接口的实现
+   * @author tanghaixiang@xindong.com
+   * @date 2019-05-21
+   * @param {string} mediaHash
+   * @param {string} videoSrc
+   * @param {number} cols
+   * @returns {Promise<string>}
+   * @memberof ThumbnailService
+   */
   async generateImage(mediaHash: string, videoSrc: string, cols: number): Promise<string> {
     try {
       const gpath = await this.mediaStorageService.generate(mediaHash, 'thumbnail');
@@ -20,11 +33,18 @@ export class ThumbnailService implements ThumbnailRequest {
     }
     return '';
   }
-  constructor(private readonly mediaStorageService: MediaStorageService) {
-  }
+
+  /** 公开API 根据视频的hash获取对于的缩略图路径
+   * @description ThumbnailService 对 ThumbnailRequest接口的实现
+   * @author tanghaixiang@xindong.com
+   * @date 2019-05-21
+   * @param {string} mediaHash
+   * @returns {(Promise<string | null>)}
+   * @memberof ThumbnailService
+   */
   async getImage(mediaHash: string): Promise<string | null> {
     try {
-      const result = await this.mediaStorageService.getThumbnail(mediaHash);
+      const result = await this.mediaStorageService.getImage(mediaHash, 'thumbnail');
       return result
     } catch (err) {
       return null

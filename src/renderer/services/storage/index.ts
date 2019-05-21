@@ -1,10 +1,12 @@
-import { CacheFile, VideoInfo } from "@/libs/cacheFile";
+import { CacheFile } from "@/libs/file";
 
 export interface IFileStorable {
-  generate(mediaHash: string, tag: string): Promise<string|null>
-  read(mediaHash: string): Promise<VideoInfo|null>
-  remove(mediaHash: string): Promise<boolean>
-  clear(): Promise<boolean>
+  readFile(path: string): Promise<Buffer | null>
+  readDir(path: string): Promise<string[] | null>
+  writeFile(path: string, content: Buffer): Promise<boolean>
+  createDir(path: string): Promise<boolean>
+  removeDir(path: string): Promise<boolean>
+  removeFile(path: string): Promise<boolean>
 }
 
 export class Storage {
