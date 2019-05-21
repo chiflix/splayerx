@@ -1,8 +1,8 @@
-import { ThumbnailRequest } from '@/components/PlayingView/ThumbnailDisplay';
+import { IThumbnailRequest } from '@/containers/ThumbnailRequest';
 import mediaStorageService, { MediaStorageService } from '@/services/storage/mediaStorageService';
 import { ipcRenderer } from 'electron';
 
-export class ThumbnailService implements ThumbnailRequest {
+export class ThumbnailService implements IThumbnailRequest {
   constructor(private readonly mediaStorageService: MediaStorageService) {
   }
 

@@ -2,12 +2,7 @@
   <div class="thumbnail-wrapper"
     :style="{width: thumbnailWidth +'px', height: thumbnailHeight +'px', transform: `translateX(${positionOfThumbnail}px)`}">
     <div class="the-preview-thumbnail" :style="{height: thumbnailHeight + 2 +'px'}">
-      <thumbnail-display
-        :quickHash="mediaHash"
-        :maxThumbnailWidth="maxThumbnailWidth"
-        :currentTime="currentTime"
-        :thumbnailWidth="thumbnailWidth"
-        :thumbnailHeight="thumbnailHeight" />
+      <thumbnail-display :thumbnailWidth="thumbnailWidth" :thumbnailHeight="thumbnailHeight" :src="src" :backPos="backPos" :backSize="backSize"></thumbnail-display>
     </div>
     <div class="thumbnail-gradient"></div>
     <div class="time">
@@ -19,10 +14,13 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { mapGetters } from 'vuex';
-import Icon from '../BaseIconContainer.vue';
-import ThumbnailDisplay from './ThumbnailDisplay.vue';
+import { filePathToUrl } from '@/helpers/path';
+import thumbnailService from '@/services/media/thumbnailService';
+import ThumbnailDisplay from '@/components/PlayingView/ThumbnailDisplay.vue';
+// @ts-ignore
+import Icon from '@/components/BaseIconContainer.vue';
 
 export default {
   components: {
@@ -31,8 +29,6 @@ export default {
   },
   props: {
     currentTime: Number,
-    maxThumbnailWidth: Number,
-    videoRatio: Number,
     thumbnailWidth: Number,
     thumbnailHeight: Number,
     positionOfThumbnail: Number,
@@ -44,23 +40,58 @@ export default {
   },
   data() {
     return {
-      videoCurrentTime: 0,
-      generationInterval: 3,
-      mountVideo: false,
-      mountImage: false,
-      maxThumbnailCount: 0,
-      lastGenerationIndex: 0,
       currentIndex: 0,
+      thumbnailCount: 0,
+      isSaved: false,
+      imgExisted: false,
+      imgSrc: '',
     };
   },
   computed: {
     ...mapGetters(['originSrc', 'convertedSrc', 'mediaHash', 'duration']),
+    backPos() {
+      const index = this.currentIndex;
+      const column = index === 0 ? 0 : Math.ceil(index / 10) - 1;
+      const row = index - (10 * column);
+      return `-${row * 100}% -${column * 100}%`;
+    },
+    backSize() {
+      return `1000% ${Math.ceil(this.thumbnailCount / 10) * 100}%`;
+    },
+    src() {
+      return this.imgExisted || this.isSaved ? `url("${filePathToUrl(this.imgSrc)}")` : '';
+    },
   },
   watch: {
+    currentTime(val: number) {
+      this.currentIndex = Math.abs(Math.floor(val / (this.duration / this.thumbnailCount)));
+    },
+    originSrc() {
+      this.isSaved = false;
+      this.imgExisted = false;
+      this.imgSrc = '';
+    },
   },
-  methods: {
-  },
-  created() {
+  mounted() {
+    this.$bus.$on('set-thumbnail-src', (src: string) => {
+      if (src === this.originSrc) {
+        this.isSaved = true;
+      }
+    });
+    this.$bus.$on('generate-thumbnails', async (num: number) => {
+      this.thumbnailCount = num;
+      try {
+        const result = await thumbnailService.getImage(this.mediaHash);
+        if (!result) {
+          this.imgExisted = false;
+          this.imgSrc = await thumbnailService.generateImage(this.mediaHash, this.originSrc, num);
+        } else {
+          this.imgExisted = true;
+          this.imgSrc = result;
+        }
+      } catch (err) { //
+      }
+    });
   },
 };
 </script>

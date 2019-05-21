@@ -8,8 +8,6 @@
     @mousedown.stop="handleMousedown">
     <the-preview-thumbnail class="the-preview-thumbnail" v-show="showThumbnail"
       :currentTime="hoveredCurrentTime"
-      :maxThumbnailWidth="240"
-      :videoRatio="ratio"
       :videoTime="convertedHoveredCurrentTime"
       :thumbnailWidth="thumbnailWidth"
       :thumbnailHeight="thumbnailHeight"
@@ -56,7 +54,7 @@
 import { mapGetters } from 'vuex';
 import { videodata } from '@/store/video';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
-import ThePreviewThumbnail from './ThePreviewThumbnail.vue';
+import ThePreviewThumbnail from '@/containers/ThePreviewThumbnail.vue';
 
 export default {
   name: 'the-progress-bar',
