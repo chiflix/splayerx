@@ -182,7 +182,12 @@ export default {
       mousemoveClientPosition: state => state.Input.mousemoveClientPosition,
       wheelTime: state => state.Input.wheelTimestamp,
     }),
-    ...mapGetters(['paused', 'duration', 'isFullScreen', 'leftMousedown', 'ratio', 'playingList', 'originSrc', 'isFocused', 'isMinimized', 'isFolderList', 'isFullScreen', 'intrinsicWidth', 'intrinsicHeight']),
+    ...mapGetters([
+      'originSrc', 'paused', 'ratio', 'duration', 'intrinsicWidth', 'intrinsicHeight',
+      'playingList', 'isFolderList',
+      'isFullScreen', 'isFocused', 'isMinimized',
+      'leftMousedown',
+    ]),
     ...inputMapGetters({
       inputWheelDirection: iGT.GET_WHEEL_DIRECTION,
     }),
@@ -194,7 +199,11 @@ export default {
         (this.isMousedown && this.currentMousedownWidget === 'play-button'));
     },
     onOtherWidget() {
-      return (this.currentWidget !== this.$options.name) && (this.currentWidget !== 'play-button') && (this.currentWidget !== 'volume-indicator');
+      return (
+        (this.currentWidget !== this.$options.name) &&
+        (this.currentWidget !== 'play-button') &&
+        (this.currentWidget !== 'volume-indicator')
+      );
     },
     cursorStyle() {
       return this.showAllWidgets || !this.isFocused ||
@@ -224,7 +233,10 @@ export default {
       }, 3000);
     },
     isDragging(val, oldval) {
-      if (!val && oldval && !['subtitle-control', 'advance-control'].includes(this.currentMousedownWidget)) {
+      if (
+        !val && oldval &&
+        !['subtitle-control', 'advance-control'].includes(this.currentMousedownWidget)
+      ) {
         this.lastDragging = true;
       }
     },
@@ -474,7 +486,11 @@ export default {
       Object.keys(this.displayState).forEach((index) => {
         tempObject[index] = !this.widgetsStatus['playlist-control'].showAttached;
       });
-      tempObject['recent-playlist'] = (this.playListState || this.widgetsStatus['playlist-control'].showAttached) && !this.dragOver;
+      tempObject['recent-playlist'] = (
+        this.playListState ||
+        this.widgetsStatus['playlist-control'].showAttached
+      ) &&
+        !this.dragOver;
       this.displayState = tempObject;
       this.tempRecentPlaylistDisplayState = this.widgetsStatus['playlist-control'].showAttached;
     },
@@ -590,7 +606,10 @@ export default {
         this.clicksTimer = setTimeout(() => {
           this.clicks = 0;
           this.lastDragging = false;
-          this.lastAttachedShowing = this.widgetsStatus['subtitle-control'].showAttached || this.widgetsStatus['advance-control'].showAttached || this.widgetsStatus['playlist-control'].showAttached;
+          this.lastAttachedShowing =
+            this.widgetsStatus['subtitle-control'].showAttached ||
+            this.widgetsStatus['advance-control'].showAttached ||
+            this.widgetsStatus['playlist-control'].showAttached;
         }, this.clicksDelay);
       } else if (this.clicks === 2) {
         clearTimeout(this.clicksTimer);
@@ -718,7 +737,9 @@ export default {
 }
 
 .translate-enter-active, .translate-leave-active {
-  transition: opacity 300ms cubic-bezier(0.2, 0.3, 0.01, 1), transform 300ms cubic-bezier(0.2, 0.3, 0.01, 1);
+  transition:
+    opacity 300ms cubic-bezier(0.2, 0.3, 0.01, 1),
+    transform 300ms cubic-bezier(0.2, 0.3, 0.01, 1);
 }
 .translate-enter, .translate-leave-to {
   opacity: 0;
@@ -735,24 +756,36 @@ export default {
     position: relative;
   }
   .subtitle {
-    @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+    @media
+      screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
+      screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
       margin-right: 17.6px;
     }
-    @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+    @media
+      screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+      screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
       margin-right: 25.6px;
     }
-    @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+    @media
+      screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+      screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
       margin-right: 40px;
     }
   }
   .playlist {
-    @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+    @media
+      screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
+      screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
       margin-right: 17.6px;
     }
-    @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+    @media
+      screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+      screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
       margin-right: 25.6px;
     }
-    @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+    @media
+      screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+      screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
       margin-right: 40px;
     }
   }
@@ -761,7 +794,9 @@ export default {
     height: 100%;
   }
 }
-@media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
+@media
+  screen and (max-aspect-ratio: 1/1) and (max-width: 288px),
+  screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
   .control-buttons {
     display: none;
   }
@@ -770,7 +805,9 @@ export default {
     height: 54px;
   }
 }
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+@media
+  screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
   .control-buttons {
     width: 115px;
     height: 22px;
@@ -786,7 +823,9 @@ export default {
     height: 67px;
   }
 }
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+@media
+  screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
   .control-buttons {
     width: 167px;
     height: 32px;
@@ -802,7 +841,9 @@ export default {
     height: 93px;
   }
 }
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+@media
+  screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   .control-buttons {
     width: 260px;
     height: 50px;
