@@ -195,7 +195,12 @@ export default {
   &__tabs {
     width: 110px;
     height: 100%;
-    background-image: linear-gradient(-28deg, rgba(65,65,65,0.97) 0%, rgba(84,84,84,0.97) 47%, rgba(123,123,123,0.97) 100%);
+    background-image: linear-gradient(
+      -28deg,
+      rgba(65,65,65,0.97) 0%,
+      rgba(84,84,84,0.97) 47%,
+      rgba(123,123,123,0.97) 100%
+    );
   }
 
   &__tab {
@@ -217,7 +222,11 @@ export default {
     &--selected {
       color: rgba(255,255,255,1);
       border-left: 1px solid white;
-      background-image: linear-gradient(99deg, rgba(243,243,243,0.15) 0%, rgba(255,255,255,0.0675) 81%);
+      background-image: linear-gradient(
+        99deg,
+        rgba(243,243,243,0.15) 0%,
+        rgba(255,255,255,0.0675) 81%
+      );
       &:hover {
         background-color: rgba(255,255,255,0);
       }
@@ -226,7 +235,12 @@ export default {
 
   &__tabpanel {
     width: 430px;
-    background-image: linear-gradient(-28deg, rgba(65,65,65,0.99) 0%, rgba(84,84,84,0.99) 47%, rgba(123,123,123,0.99) 100%);
+    background-image: linear-gradient(
+      -28deg,
+      rgba(65,65,65,0.99) 0%,
+      rgba(84,84,84,0.99) 47%,
+      rgba(123,123,123,0.99) 100%
+    );
   }
 
   &__tabcontent {
