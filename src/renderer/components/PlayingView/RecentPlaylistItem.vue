@@ -19,7 +19,9 @@
         ref="blur"
         class="img blur"
         :style="{
-          backgroundImage: !isPlaying ? `linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%), ${backgroundImage}` : 'linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%)',
+          backgroundImage: !isPlaying ?
+          `linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%), ${backgroundImage}`
+          : 'linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%)',
         }"
       />
       <div
