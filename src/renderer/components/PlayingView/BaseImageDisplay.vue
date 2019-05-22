@@ -4,10 +4,9 @@ export default {
   props: {
     imgSrc: {
       required: true,
+      type: [String, Blob],
     },
-    style: {
-      type: Object,
-    },
+    imageStyle: Object,
     attributes: Object,
     width: Number,
     height: Number,
@@ -143,7 +142,7 @@ export default {
       const outerHeight = this.height ? `${this.height}px` : '100%';
 
       options = {
-        style: this.$_style,
+        style: this.imageStyle,
         ref: 'image',
         attrs: {
           width: outerWidth,
@@ -205,7 +204,7 @@ export default {
         {
           style: Object.assign(
             {},
-            this.$_style,
+            this.imageStyle,
             { visibility: false },
           ),
         },
