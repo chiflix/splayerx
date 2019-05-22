@@ -32,7 +32,11 @@
             <span class="timing-played">
               {{ timeInValidForm(timecodeFromSeconds(item.lastTime)) }}
               / {{ timeInValidForm(timecodeFromSeconds(item.duration)) }}
-              <span v-if="item.playListLength">·&nbsp;{{ $t('recentPlaylist.playlistSource') }}&nbsp;&nbsp;{{ item.index + 1 }} / {{ item.playListLength }}</span>
+              <span v-if="item.playListLength">
+                ·&nbsp;{{
+                  $t('recentPlaylist.playlistSource')
+                }}&nbsp;&nbsp;{{ item.index + 1 }} / {{ item.playListLength }}
+              </span>
             </span>
           </div>
           <div class="item-progress">
@@ -148,21 +152,6 @@ export default {
       firstIndex: 0,
     };
   },
-  watch: {
-    firstIndex() {
-      this.shifting = true;
-    },
-    lastIndex() {
-      this.shifting = true;
-    },
-    shifting(val) {
-      if (val) {
-        setTimeout(() => {
-          this.shifting = false;
-        }, 400);
-      }
-    },
-  },
   computed: {
     ...mapState({
       version: state => state.App.version,
@@ -215,6 +204,21 @@ export default {
         number = 10;
       }
       return number;
+    },
+  },
+  watch: {
+    firstIndex() {
+      this.shifting = true;
+    },
+    lastIndex() {
+      this.shifting = true;
+    },
+    shifting(val) {
+      if (val) {
+        setTimeout(() => {
+          this.shifting = false;
+        }, 400);
+      }
     },
   },
   created() {
@@ -411,7 +415,10 @@ $themeColor-Light: white;
     .background-mask {
       width: 100%;
       height: 100%;
-      background-image: radial-gradient(circle 80.5vw at 27.8vw 32.1vh, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.41) 45%, rgba(0,0,0,0.7) 100%);
+      background-image: radial-gradient(
+        circle 80.5vw at 27.8vw 32.1vh,
+        rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.41) 45%, rgba(0,0,0,0.7) 100%
+      );
     }
   }
   .item-info {

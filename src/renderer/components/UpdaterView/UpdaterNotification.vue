@@ -14,7 +14,8 @@
       {{ content }}
       <div class="linksInUpdater">
         <div
-          v-for="(item) in buttons"
+          v-for="(item, index) in buttons"
+          :key="index"
           class="clickLinks"
         >
           <span :class="item.classC">
@@ -277,24 +278,30 @@ export default {
         -webkit-animation-iteration-count: infinite;
         -webkit-animation-direction: alternate;
     }
-    @-webkit-keyframes breatheAlert {
+    @keyframes breatheAlert {
         0% {
             opacity: .4;
-            box-shadow: 1px 1px 2px rgba(183,255,111,0.5), 10px 10px 1px rgba(183,255,111,0.3) inset;;
+            box-shadow:
+              1px 1px 2px rgba(183,255,111,0.5),
+              10px 10px 1px rgba(183,255,111,0.3) inset;;
         }
         100% {
             opacity: 1;
             box-shadow: 1px 1px 15px red, 10px 10px 10px red inset;
         }
     }
-    @-webkit-keyframes breatheSuccess {
+    @keyframes breatheSuccess {
         0% {
             opacity: .4;
-            box-shadow: 0.1px 0.1px 2px rgba(183,255,111,0.5), 10px 10px 10px rgba(183,255,111,0.3) inset;;
+            box-shadow:
+              0.1px 0.1px 2px rgba(183,255,111,0.5),
+              10px 10px 10px rgba(183,255,111,0.3) inset;;
         }
         100% {
             opacity: 1;
-            box-shadow: 0.1px 0.1px 15px green, 10px 10px 1px green inset;
+            box-shadow:
+              0.1px 0.1px 15px green,
+              10px 10px 1px green inset;
         }
     }
 
