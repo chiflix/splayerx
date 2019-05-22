@@ -29,7 +29,10 @@ export default {
   components: {
     Labels,
   },
-  props: ['showAllWidgets', 'progressTriggerStopped'],
+  props: {
+    showAllWidgets: Boolean,
+    progressTriggerStopped: Boolean,
+  },
   data() {
     return {
       isRemainTime: false,
@@ -95,7 +98,8 @@ export default {
 </script>
 
 <style lang="scss">
-@media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
+@media screen and (max-aspect-ratio: 1/1) and (max-width: 288px),
+screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
   .cont {
     bottom: 23px;
     left: 20px;
@@ -114,7 +118,8 @@ export default {
     margin: 4px 1px auto 7px;
   }
 }
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
+screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
   .cont {
     bottom: 27px;
     left: 28px;
@@ -133,7 +138,8 @@ export default {
     margin: auto 2px 0 9px;
   }
 }
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
   .cont {
     bottom: 34px;
     left: 33px;
@@ -152,7 +158,8 @@ export default {
     margin: auto 3px 0 11px;
   }
 }
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   .cont {
     bottom: 44px;
     left: 51px;
