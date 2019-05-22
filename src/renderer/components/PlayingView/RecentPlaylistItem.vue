@@ -178,7 +178,7 @@ export default {
     },
     indexOfMovingTo: {
       type: Number,
-      default: this.index,
+      default: NaN,
     },
     isLastPage: {
       type: Boolean,
