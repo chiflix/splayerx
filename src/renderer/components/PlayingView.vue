@@ -21,6 +21,16 @@ export default {
     'the-video-canvas': VideoCanvas,
     'subtitle-manager': SubtitleManager,
   },
+  mounted() {
+    this.$store.dispatch('initWindowRotate');
+    this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [320, 180]);
+    videodata.checkTick();
+    videodata.onTick = this.onUpdateTick;
+  },
+  beforeDestroy() {
+    this.updateSubToTop(false);
+    videodata.stopCheckTick();
+  },
   methods: {
     ...mapActions({
       updateSubToTop: subtitleActions.UPDATE_SUBTITLE_TOP,
@@ -31,16 +41,6 @@ export default {
     onUpdateTick() {
       this.$refs.videoctrl.onTickUpdate();
     },
-  },
-  mounted() {
-    this.$store.dispatch('initWindowRotate');
-    this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [320, 180]);
-    videodata.checkTick();
-    videodata.onTick = this.onUpdateTick;
-  },
-  beforeDestroy() {
-    this.updateSubToTop(false);
-    videodata.stopCheckTick();
   },
 };
 </script>

@@ -140,7 +140,10 @@ export default {
     Add,
   },
   props: {
-    mousemoveClientPosition: {},
+    mousemoveClientPosition: {
+      type: Object,
+      default: () => {},
+    },
     displayState: Boolean,
     isDragging: Boolean,
     lastDragging: Boolean,

@@ -6,10 +6,22 @@ export default {
       required: true,
       type: [String, Blob],
     },
-    imageStyle: Object,
-    attributes: Object,
-    width: Number,
-    height: Number,
+    imageStyle: {
+      type: Object,
+      required: true,
+    },
+    attributes: {
+      type: Object,
+      required: true,
+    },
+    width: {
+      type: Number,
+      required: true,
+    },
+    height: {
+      type: Number,
+      required: true,
+    },
   },
   data() {
     return {

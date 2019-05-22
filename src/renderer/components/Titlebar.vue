@@ -66,7 +66,7 @@
         class="title-button no-drag"
         :type="itemType"
         :state="state"
-        :style="{ transform: itemType === this.itemTypeEnum.MAXSCREEN ? 'rotate(45deg)' : ''}"
+        :style="{ transform: isMaxScreen ? 'rotate(45deg)' : ''}"
         @mouseup.native="handleMacFull"
       />
       <Icon
@@ -93,7 +93,6 @@ export default {
     Icon,
   },
   props: {
-    currentView: String,
     showAllWidgets: {
       type: Boolean,
       default: true,
@@ -112,6 +111,19 @@ export default {
       keyOver: false,
       showTitleBar: true,
     };
+  },
+  computed: {
+    ...mapGetters([
+      'isMaximized',
+      'isFullScreen',
+    ]),
+    isDarwin() {
+      return process.platform === 'darwin';
+    },
+    middleButtonStatus() {
+      return this.isFullScreen ? 'exit-fullscreen' : this.isMaximized ? 'restore' : 'maximize'; // eslint-disable-line no-nested-ternary
+    },
+    isMaxScreen() { return this.itemType === this.itemTypeEnum.MAXSCREEN; },
   },
   watch: {
     recentPlaylist(val) {
@@ -190,18 +202,6 @@ export default {
       } else {
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'maximize');
       }
-    },
-  },
-  computed: {
-    ...mapGetters([
-      'isMaximized',
-      'isFullScreen',
-    ]),
-    isDarwin() {
-      return process.platform === 'darwin';
-    },
-    middleButtonStatus() {
-      return this.isFullScreen ? 'exit-fullscreen' : this.isMaximized ? 'restore' : 'maximize'; // eslint-disable-line no-nested-ternary
     },
   },
 };

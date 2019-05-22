@@ -30,7 +30,7 @@
           width: `${thumbnailWidth - 0.7}px`,
           height: `${thumbnailHeight - 0.7}px`,
           border: chosen ? '0.7px solid rgba(255,255,255,0.6)'
-          : '0.7px solid rgba(255,255,255,0.15)',
+            : '0.7px solid rgba(255,255,255,0.15)',
         }"
       >
         <div
@@ -56,9 +56,11 @@ export default {
   props: {
     firstIndex: {
       type: Number,
+      default: 0,
     },
     lastIndex: {
       type: Number,
+      default: 0,
     },
     shifting: {
       type: Boolean,
@@ -68,18 +70,22 @@ export default {
     },
     index: {
       type: Number,
+      default: NaN,
     },
     playlist: {
       type: Object,
+      default: () => {},
     },
     thumbnailHeight: {
       type: Number,
+      default: 63,
     },
     thumbnailWidth: {
       type: Number,
+      default: 112,
     },
     lastPlayedFile: {
-      type: Object.Array,
+      type: Array,
       require: true,
       default: () => [],
     },
@@ -88,6 +94,7 @@ export default {
     },
     filePathNeedToDelete: {
       type: String,
+      default: '',
     },
   },
   data() {

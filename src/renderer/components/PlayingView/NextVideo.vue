@@ -61,6 +61,27 @@ export default {
       isBlur: true,
     };
   },
+  computed: {
+    ...mapGetters(['nextVideo', 'isFolderList', 'nextVideoPreviewTime', 'duration']),
+    videoName() {
+      return path.basename(this.nextVideo, path.extname(this.nextVideo));
+    },
+    title() {
+      return this.isFolderList ? this.$t('nextVideo.nextInFolder') : this.$t('nextVideo.nextInPlaylist');
+    },
+    convertedSrcOfNextVideo() {
+      if (this.nextVideo) {
+        const originPath = this.nextVideo;
+        const convertedPath = encodeURIComponent(originPath).replace(/%3A/g, ':').replace(/(%5C)|(%2F)/g, '/');
+
+        return process.platform === 'win32' ? convertedPath : `file://${convertedPath}`;
+      }
+      return '';
+    },
+    timecode() {
+      return this.timecodeFromSeconds(this.duration);
+    },
+  },
   methods: {
     handleCloseMouseup() {
       this.$emit('manualclose-next-video');
@@ -91,27 +112,6 @@ export default {
       const fractionProgress = (time - this.nextVideoPreviewTime) /
         (this.duration - this.nextVideoPreviewTime);
       this.progress = fractionProgress * 100;
-    },
-  },
-  computed: {
-    ...mapGetters(['nextVideo', 'isFolderList', 'nextVideoPreviewTime', 'duration']),
-    videoName() {
-      return path.basename(this.nextVideo, path.extname(this.nextVideo));
-    },
-    title() {
-      return this.isFolderList ? this.$t('nextVideo.nextInFolder') : this.$t('nextVideo.nextInPlaylist');
-    },
-    convertedSrcOfNextVideo() {
-      if (this.nextVideo) {
-        const originPath = this.nextVideo;
-        const convertedPath = encodeURIComponent(originPath).replace(/%3A/g, ':').replace(/(%5C)|(%2F)/g, '/');
-
-        return process.platform === 'win32' ? convertedPath : `file://${convertedPath}`;
-      }
-      return '';
-    },
-    timecode() {
-      return this.timecodeFromSeconds(this.duration);
     },
   },
 };

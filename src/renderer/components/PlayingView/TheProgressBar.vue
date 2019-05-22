@@ -27,8 +27,8 @@
       <div
         class="fake-progress"
         :style="{
-          height: this.hovering ? '10px' : '4px',
-          backgroundColor: this.leftFakeProgressBackgroundColor,
+          height: hovering ? '10px' : '4px',
+          backgroundColor: leftFakeProgressBackgroundColor,
         }"
       >
         <div
@@ -47,7 +47,7 @@
     </div>
     <div
       class="progress"
-      :style="{ height: this.hovering ? '10px' : '4px' }"
+      :style="{ height: hovering ? '10px' : '4px' }"
     >
       <div
         ref="hoveredProgress"
@@ -72,8 +72,8 @@
         ref="fakeProgress"
         class="fake-progress"
         :style="{
-          height: this.hovering ? '10px' : '4px',
-          backgroundColor: this.rightFakeProgressBackgroundColor,
+          height: hovering ? '10px' : '4px',
+          backgroundColor: rightFakeProgressBackgroundColor,
         }"
       />
     </div>
@@ -91,7 +91,9 @@ export default {
   components: {
     'the-preview-thumbnail': ThePreviewThumbnail,
   },
-  props: ['showAllWidgets'],
+  props: {
+    showAllWidgets: Boolean,
+  },
   data() {
     return {
       hoveredPageX: 0,
