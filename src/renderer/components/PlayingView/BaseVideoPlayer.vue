@@ -34,6 +34,7 @@ export default {
       validator: value => [null, 'anonymous', 'user-credentials'].includes(value),
     },
     lastAudioTrackId: {
+      type: Number,
       default: 0,
     },
     preload: {
@@ -111,15 +112,15 @@ export default {
       default: false,
     },
   },
-  computed: {
-    ...mapGetters(['audioTrackList']),
-  },
   data() {
     return {
       eventListeners: new Map(),
       currentTimeAnimationFrameId: 0,
       duration: 0,
     };
+  },
+  computed: {
+    ...mapGetters(['audioTrackList']),
   },
   watch: {
     // network state

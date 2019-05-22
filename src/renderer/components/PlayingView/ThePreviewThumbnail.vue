@@ -47,13 +47,37 @@ export default {
     'base-icon': Icon,
   },
   props: {
-    currentTime: Number,
-    maxThumbnailWidth: Number,
-    videoRatio: Number,
-    thumbnailWidth: Number,
-    thumbnailHeight: Number,
-    positionOfThumbnail: Number,
-    videoTime: String,
+    currentTime: {
+      type: {
+        type: Number,
+        required: true,
+      },
+      required: true,
+    },
+    maxThumbnailWidth: {
+      type: Number,
+      required: true,
+    },
+    videoRatio: {
+      type: Number,
+      required: true,
+    },
+    thumbnailWidth: {
+      type: Number,
+      required: true,
+    },
+    thumbnailHeight: {
+      type: Number,
+      required: true,
+    },
+    positionOfThumbnail: {
+      type: Number,
+      required: true,
+    },
+    videoTime: {
+      type: String,
+      required: true,
+    },
     hoveredEnd: {
       type: Boolean,
       default: false,
