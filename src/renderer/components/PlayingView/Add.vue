@@ -25,11 +25,11 @@ export default {
     Icon,
   },
   props: {
-    index: {
-      type: Number,
-    },
     addMouseup: {
       type: Function,
+      default: () => {
+        console.log('mouse up on add button');
+      },
     },
     itemMoving: {
       type: Boolean,
