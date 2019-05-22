@@ -545,7 +545,7 @@ new Vue({
             { type: 'separator' },
             {
               label: this.$t('msg.file.closeWindow'),
-              role: 'Close',
+              role: 'close',
             },
           ],
         },
