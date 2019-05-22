@@ -1,17 +1,21 @@
 <template>
-  <div class="subtitle-wrapper">
+  <div
+    class="subtitle-wrapper"
+    :style="{
+      fontStyle: isItalic ? 'italic' : '',
+      fontWeight: isBold ? 'bold' : '',
+      textDecoration: lineType,
+    }">
     <span
       class="subtitle-border-content"
       :style="{ textAlign: textAlign }"
       :class="'subtitle-border-style'+ChosenIndex"
-      v-html="finalText"
-    />
+    >{{ text }}</span>
     <span
       class="subtitle-content"
       :style="{ textAlign: textAlign}"
       :class="'subtitle-style'+ChosenIndex"
-      v-html="finalText"
-    />
+    >{{ text }}</span>
   </div>
 </template>
 
@@ -30,6 +34,13 @@ export default {
       required: true,
     },
   },
+  data() {
+    return {
+      isItalic: false,
+      isBold: false,
+      lineType: '',
+    };
+  },
   computed: {
     ...mapGetters(['chosenStyle', 'scaleNum', 'winWidth']),
     ChosenIndex() {
@@ -45,23 +56,29 @@ export default {
       }
       return 'center';
     },
-    finalText() {
-      let tmp = this.text;
-      if (this.settings) {
-        if (this.settings.i) {
-          tmp = `<i>${tmp}`;
+  },
+  watch: {
+    finalText(val) {
+      console.log(val);
+    },
+    settings(val) {
+      this.isItalic = false;
+      this.isBold = false;
+      this.lineType = '';
+      if (val) {
+        if (val.i) {
+          this.isItalic = true;
         }
-        if (this.settings.b) {
-          tmp = `<b>${tmp}`;
+        if (val.b) {
+          this.isBold = true;
         }
-        if (this.settings.u) {
-          tmp = `<u>${tmp}`;
+        if (val.u) {
+          this.lineType = 'underline';
         }
-        if (this.settings.s) {
-          tmp = `<s>${tmp}`;
+        if (val.s) {
+          this.lineType = 'line-through';
         }
       }
-      return tmp;
     },
   },
 };

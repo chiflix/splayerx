@@ -127,13 +127,13 @@ export default {
       if (len > 0 && !this.isFirstSub) {
         this.$emit(
           'update:linesNum',
-          this.lastLineNum(len - 1) + val[len - 1].split('<br>').length,
+          this.lastLineNum(len - 1) + val[len - 1].split('\n').length,
         ); // 第二字幕的行数
         this.$emit('update:tags', tags[len - 1]); // 第二字幕的tags
       } else if (len > 0) {
         this.$emit(
           'update:firstLinesNum',
-          this.lastLineNum(len - 1) + val[len - 1].split('<br>').length,
+          this.lastLineNum(len - 1) + val[len - 1].split('\n').length,
         );
         this.$emit('update:firstTags', tags[len - 1]); // 第一字幕的tags
       } else if (!this.isFirstSub) {
@@ -294,7 +294,7 @@ export default {
         if (!isEqual(tags[index], tags[index - 1])) {
           break;
         }
-        tmp += texts[index - 1].replace('/<br>$/g', '').split('<br>').length;
+        tmp += texts[index - 1].replace('/\n$/g', '').split('\n').length;
         index -= 1;
       }
       return tmp;
@@ -302,7 +302,7 @@ export default {
     lineNum(index) {
       // 最新一条字幕需要换行的translate比例
       const { currentTexts: texts } = this;
-      return this.lastLineNum(index) / texts[index].split('<br>').length;
+      return this.lastLineNum(index) / texts[index].split('\n').length;
     },
     assLine(index) {
       const { currentTags: tags } = this;
@@ -367,11 +367,11 @@ export default {
         // 根据第二字幕的有效行数，计算第二字幕的比较高度
         secondSubHeight = this.linesNum * 9 * this.secondarySubScale;
         // 第一字幕的按顺序，计算当前自己的比较高度
-        firstSubHeight = texts[index].split('<br>').length * 9 * this.scaleNum;
+        firstSubHeight = texts[index].split('\n').length * 9 * this.scaleNum;
         subHeightWithDirection = [secondSubHeight, firstSubHeight];
       } else if (!this.isFirstSub && (this.subToTop || [7, 8, 9].includes(tags[index].alignment))) {
         // 第二字幕的按顺序，计算当前自己的比较高度
-        secondSubHeight = texts[index].split('<br>').length * 9 * this.secondarySubScale;
+        secondSubHeight = texts[index].split('\n').length * 9 * this.secondarySubScale;
         // 根据第一字幕的有效行数，计算第一字幕的比较高度
         firstSubHeight = this.firstLinesNum * 9 * this.scaleNum;
         subHeightWithDirection = [firstSubHeight, secondSubHeight];
