@@ -25,7 +25,8 @@
             <td>
               <div class="settingItem__input dropdown">
                 <div
-                  :class="showFirstSelection ? 'dropdown__toggle--list' : 'dropdown__toggle--display'"
+                  :class="showFirstSelection ?
+                    'dropdown__toggle--list' : 'dropdown__toggle--display'"
                   :style="{ cursor: privacyAgreement ? 'pointer' : 'default' }"
                   @mouseup.stop="openFirstDropdown"
                 >
@@ -47,7 +48,8 @@
                   </div>
                   <Icon
                     type="rightArrow"
-                    :class="showFirstSelection ? 'dropdown__icon--arrowUp' : 'dropdown__icon--arrowDown'"
+                    :class="showFirstSelection ?
+                      'dropdown__icon--arrowUp' : 'dropdown__icon--arrowDown'"
                   />
                 </div>
               </div>
@@ -60,7 +62,8 @@
             <td>
               <div class="settingItem__input dropdown">
                 <div
-                  :class="showSecondSelection ? 'dropdown__toggle--list' : 'dropdown__toggle--display'"
+                  :class="showSecondSelection ?
+                    'dropdown__toggle--list' : 'dropdown__toggle--display'"
                   :style="{ cursor: privacyAgreement ? 'pointer' : 'default' }"
                   @mouseup.stop="openSecondDropdown"
                 >
@@ -77,7 +80,8 @@
                       :key="index"
                       class="dropdownListItem"
                       :style="{
-                        color: (language === primaryLanguage && language !== noLanguage) ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,1)',
+                        color: (language === primaryLanguage && language !== noLanguage) ?
+                          'rgba(255,255,255,0.5)' : 'rgba(255,255,255,1)',
                       }"
                       @mouseup.stop="handleSecondSelection(language)"
                     >
@@ -90,7 +94,8 @@
                   </div>
                   <Icon
                     type="rightArrow"
-                    :class="showSecondSelection ? 'dropdown__icon--arrowUp' : 'dropdown__icon--arrowDown'"
+                    :class="showSecondSelection ?
+                      'dropdown__icon--arrowUp' : 'dropdown__icon--arrowDown'"
                   />
                 </div>
               </div>
@@ -114,7 +119,10 @@ export default {
     Icon,
     BaseCheckBox,
   },
-  props: ['mouseDown', 'isMoved'],
+  props: {
+    mouseDown: Boolean,
+    isMoved: Boolean,
+  },
   data() {
     return {
       showFirstSelection: false,
@@ -361,7 +369,12 @@ export default {
       line-height: 28px;
 
       &:hover {
-        background-image: linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.069) 23%, rgba(255,255,255,0.00) 100%);
+        background-image: linear-gradient(
+          90deg,
+          rgba(255,255,255,0.00) 0%,
+          rgba(255,255,255,0.069) 23%,
+          rgba(255,255,255,0.00) 100%,
+        );
       }
     }
 
