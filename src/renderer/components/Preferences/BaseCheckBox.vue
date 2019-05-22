@@ -25,7 +25,9 @@ export default {
   components: {
     Icon,
   },
-  props: ['checkboxValue'],
+  props: {
+    checkboxValue: Boolean,
+  },
 };
 </script>
 
