@@ -3,7 +3,9 @@
     class="itemContainer"
     :style="{
       height: heightSize,
-      backgroundImage: !isChosen ? '' : 'linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.07) 24%, rgba(255,255,255,0.03) 100%)',
+      backgroundImage: !isChosen ? '' :
+        'linear-gradient(90deg, rgba(255,255,255,0.03) ' +
+        '0%, rgba(255,255,255,0.07) 24%, rgba(255,255,255,0.03) 100%)',
     }"
   >
     <div
@@ -37,6 +39,7 @@
         >
           <div class="rowContainer">
             <div
+              :key="img"
               v-for="(img, index) in imgs"
               class="imgContainer"
             >
@@ -72,21 +75,11 @@ import styleSelected4 from '../../../assets/subtitle-style5-selected.png';
 export default {
   name: 'AdvanceColorItems',
   props: {
-    item: {
-      type: String,
-    },
-    height: {
-      type: Number,
-    },
-    color: {
-      type: String,
-    },
-    isChosen: {
-      type: Boolean,
-    },
-    size: {
-      type: Number,
-    },
+    item: String,
+    height: Number,
+    color: String,
+    isChosen: Boolean,
+    size: Number,
   },
   data() {
     return {
@@ -130,7 +123,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
+screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
   .itemContainer {
     width: 100%;
     .textContainer {
@@ -168,7 +162,8 @@ export default {
     animation: hideP1 100ms;
   }
 }
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
   .itemContainer {
     width: 100%;
     .textContainer {
@@ -206,7 +201,8 @@ export default {
     animation: hideP2 100ms;
   }
 }
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   .itemContainer {
     width: 100%;
     .textContainer {

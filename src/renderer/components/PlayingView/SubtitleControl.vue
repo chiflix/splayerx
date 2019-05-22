@@ -11,7 +11,8 @@
           class="sub-menu-wrapper subtitle-scroll-items"
           :style="{
             cursor: 'default',
-            transition: showAttached ? '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' : '150ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
+            transition: showAttached ? '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' :
+            '150ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
             height: hiddenText ? `${contHeight + hoverHeight}px` : `${contHeight}px`,
             fontWeight: '900',
           }"
@@ -32,7 +33,8 @@
                   <div
                     class="firstSub"
                     :style="{
-                      color: isFirstSubtitle || shiftItemHovered ? 'rgba(255, 255, 255, 0.5)' : 'rgba(255, 255, 255, 0.2)',
+                      color: isFirstSubtitle || shiftItemHovered ?
+                      'rgba(255, 255, 255, 0.5)' : 'rgba(255, 255, 255, 0.2)',
                       background: isFirstSubtitle ? 'rgba(255, 255, 255, 0.13)' : '',
                       boxShadow: isFirstSubtitle ? '1px 0 2px rgba(0, 0, 0, 0.09)' : '',
                       borderRadius: isFirstSubtitle ? '2px' : '',
@@ -43,7 +45,8 @@
                   <div
                     class="secondarySub"
                     :style="{
-                      color: !isFirstSubtitle || shiftItemHovered ? 'rgba(255, 255, 255, 0.5)' : 'rgba(255, 255, 255, 0.2)',
+                      color: !isFirstSubtitle || shiftItemHovered ?
+                      'rgba(255, 255, 255, 0.5)' : 'rgba(255, 255, 255, 0.2)',
                       background: !isFirstSubtitle ? 'rgba(255, 255, 255, 0.13)' : '',
                       boxShadow: !isFirstSubtitle ? '-1px 0 2px rgba(0, 0, 0, 0.09)' : '',
                       borderRadius: !isFirstSubtitle ? '2px' : '',
@@ -78,7 +81,8 @@
                       <div
                         class="menu-item-text-wrapper"
                         :style="{
-                          color: hoverIndex === -1 || currentSubtitleIndex === -1 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+                          color: hoverIndex === -1 || currentSubtitleIndex === -1 ?
+                          'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
                           height: `${itemHeight}px`,
                           cursor: currentSubtitleIndex === -1 ? 'default' : 'pointer',
                         }"
@@ -101,8 +105,10 @@
                         class="menu-item-text-wrapper"
                         :style="{
                           transition: isOverFlow ? '' : '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
-                          color: hoverIndex === index || currentSubtitleIndex === index ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
-                          height: hoverIndex === index && hiddenText ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
+                          color: hoverIndex === index || currentSubtitleIndex === index ?
+                          'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+                          height: hoverIndex === index && hiddenText ?
+                          `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
                           cursor: currentSubtitleIndex === index ? 'default' : 'pointer',
                         }"
                         @mouseup="toggleItemClick($event, index)"
@@ -135,7 +141,6 @@
 
                     <div
                       v-for="(item, index) in loadingTypes"
-                      v-if="loadingTypes.length > 0"
                       :key="`${item}-${index}`"
                       class="placeholders-wrapper"
                     >
@@ -146,13 +151,15 @@
                       </div>
                     </div>
 
-                    <div
-                      v-if="0 <= computedAvailableItems.length"
+                    <div v-if="0 <= computedAvailableItems.length"
                       class="card"
                       :style="{
-                        height: hiddenText && currentSubtitleIndex === hoverIndex ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
-                        marginTop: hiddenText && currentSubtitleIndex <= hoverIndex ? `${-cardPos - hoverHeight}px` : `${-cardPos}px`,
-                        transition: transFlag ? 'all 100ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' : '',
+                        height: hiddenText && currentSubtitleIndex === hoverIndex ?
+                        `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
+                        marginTop: hiddenText && currentSubtitleIndex <= hoverIndex ?
+                        `${-cardPos - hoverHeight}px` : `${-cardPos}px`,
+                        transition: transFlag ?
+                        'all 100ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' : '',
                       }"
                     />
                   </div>
@@ -193,7 +200,11 @@ import animationData from '@/assets/subtitle.json';
 import { deleteSubtitles } from '@/helpers/subtitle';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import Icon from '../BaseIconContainer.vue';
-import { ONLINE_LOADING, SUBTITLE_OFFLINE, REQUEST_TIMEOUT } from '../../../shared/notificationcodes';
+import {
+  ONLINE_LOADING,
+  SUBTITLE_OFFLINE,
+  REQUEST_TIMEOUT,
+} from '../../../shared/notificationcodes';
 
 export default {
   name: 'SubtitleControl',
@@ -241,11 +252,14 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'originSrc', 'privacyAgreement', 'currentFirstSubtitleId', 'currentSecondSubtitleId', 'subtitleList', 'calculatedNoSub', 'winHeight', 'isFirstSubtitle', 'enabledSecondarySub', 'winRatio']),
+    ...mapGetters(['winWidth', 'originSrc', 'privacyAgreement', 'currentFirstSubtitleId',
+      'currentSecondSubtitleId', 'subtitleList', 'calculatedNoSub', 'winHeight', 'isFirstSubtitle',
+      'enabledSecondarySub', 'winRatio']),
     ...mapState({
       loadingTypes: ({ Subtitle }) => {
         const { loadingStates, types } = Subtitle;
-        const loadingSubtitles = Object.keys(loadingStates).filter(id => loadingStates[id] === 'loading');
+        const loadingSubtitles = Object.keys(loadingStates)
+          .filter(id => loadingStates[id] === 'loading');
         const result = [];
         loadingSubtitles.forEach((id) => {
           if (!result.includes(types[id])) result.push(types[id]);
@@ -262,7 +276,8 @@ export default {
       if (this.animClass) {
         return this.$t('msg.subtitle.menuLoading');
       }
-      return this.calculatedNoSub ? this.$t('msg.subtitle.noSubtitle') : this.$t('msg.subtitle.notToShowSubtitle');
+      return this.calculatedNoSub ?
+        this.$t('msg.subtitle.noSubtitle') : this.$t('msg.subtitle.notToShowSubtitle');
     },
     iconOpacity() {
       return this.isShowingHovered ? 0.9 : 0.77;
@@ -288,11 +303,14 @@ export default {
     },
     isOverFlow() { // eslint-disable-line complexity
       if (this.computedSize >= 289 && this.computedSize <= 480) {
-        return this.realItemsNum > 3 || (this.scopeHeight + this.hoverHeight > 89 && this.hiddenText) ? 'scroll' : '';
+        return this.realItemsNum > 3 ||
+        (this.scopeHeight + this.hoverHeight > 89 && this.hiddenText) ? 'scroll' : '';
       } else if (this.computedSize >= 481 && this.computedSize < 1080) {
-        return this.realItemsNum > 5 || (this.scopeHeight + this.hoverHeight > 180 && this.hiddenText) ? 'scroll' : '';
+        return this.realItemsNum > 5 ||
+        (this.scopeHeight + this.hoverHeight > 180 && this.hiddenText) ? 'scroll' : '';
       }
-      return this.realItemsNum > 7 || (this.scopeHeight + this.hoverHeight > 350 && this.hiddenText) ? 'scroll' : '';
+      return this.realItemsNum > 7 ||
+      (this.scopeHeight + this.hoverHeight > 350 && this.hiddenText) ? 'scroll' : '';
     },
     scopeHeight() {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
@@ -381,7 +399,9 @@ export default {
     currentMouseupComponent(val) {
       setTimeout(() => {
         if (this.currentMousedownComponent !== 'notification-bubble' && val !== '') {
-          if (this.lastDragging || (this.currentMousedownComponent === this.$options.name && val === 'the-video-controller')) {
+          if (this.lastDragging ||
+            (this.currentMousedownComponent === this.$options.name &&
+              val === 'the-video-controller')) {
             if (this.showAttached) {
               this.anim.playSegments([79, 85]);
               this.$emit('update:lastDragging', false);
@@ -449,7 +469,10 @@ export default {
           this.$bus.$emit('off-subtitle');
         }
         deleteSubtitles([item.id], this.originSrc).then((result) => {
-          this.addLog('info', `Subtitle delete { successId:${result.success}, failureId:${result.failure} }`);
+          this.addLog(
+            'info',
+            `Subtitle delete { successId:${result.success}, failureId:${result.failure} }`,
+          );
           this.transFlag = true;
         });
       }
@@ -479,7 +502,9 @@ export default {
           const types = ['local'];
           if (this.isInitial) types.push('embedded');
           if (!hasOnlineSubtitles &&
-            (!this.isInitial || ['ts', 'avi', 'mkv', 'mp4'].includes(extname(this.originSrc).slice(1).toLowerCase()))) {
+            (!this.isInitial ||
+              ['ts', 'avi', 'mkv', 'mp4']
+                .includes(extname(this.originSrc).slice(1).toLowerCase()))) {
             types.push('online');
           }
           // three suitations for variable 'types':
@@ -775,14 +800,17 @@ export default {
     opacity: 0.4;
     border: 0.5px solid rgba(255, 255, 255, 0.20);
     box-shadow: 0px 1px 2px rgba(0, 0, 0, .2);
-    background-image: radial-gradient(60% 134%, rgba(255, 255, 255, 0.09) 44%, rgba(255, 255, 255, 0.05) 100%);
+    background-image: radial-gradient(60% 134%,
+      rgba(255, 255, 255, 0.09) 44%, rgba(255, 255, 255, 0.05) 100%);
   }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
     .sub-menu-wrapper {
       display: none;
     }
   }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
     .topContainer {
       cursor: default;
       width: 100%;
@@ -870,7 +898,8 @@ export default {
       margin-left: 9px;
     }
   }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
     .topContainer {
       cursor: default;
       width: 100%;
@@ -958,7 +987,8 @@ export default {
       margin-left: 9.5px;
     }
   }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     .topContainer {
       cursor: default;
       width: 100%;

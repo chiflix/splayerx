@@ -7,7 +7,9 @@
     :content-min-width="cardWidth > minInfoCardWidth ? cardWidth : minInfoCardWidth"
     :style="{
       cursor: 'default',
-      height: this.readyShow === 'mainMenu' ? menuCardHeight : this.readyShow === 'subMenu' ? subtitleCardHeight : audioCardHeight,
+      height: this.readyShow === 'mainMenu' ?
+      menuCardHeight : this.readyShow === 'subMenu' ?
+      subtitleCardHeight : audioCardHeight,
       transition: 'height 100ms linear, width 100ms linear',
       fontWeight: '700',
       letterSpacing: '0.2px',
@@ -47,7 +49,8 @@
             :item="$t('advance.rateTitle')"
             :size="computedSize"
             :is-chosen="speedChosen"
-            :color="hoverIndex === 1 && !speedChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"
+            :color="hoverIndex === 1 && !speedChosen ?
+            'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"
           />
         </div>
         <div
@@ -174,7 +177,8 @@
             :item="$t('advance.fontSize')"
             :size="computedSize"
             :is-chosen="subSizeChosen"
-            :color="hoverSubIndex === 1 && !subSizeChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"
+            :color="hoverSubIndex === 1 && !subSizeChosen ?
+            'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"
           />
         </div>
         <div
@@ -198,7 +202,8 @@
             :item="$t('advance.fontStyle')"
             :size="computedSize"
             :is-chosen="subColorChosen"
-            :color="hoverSubIndex === 2 && !subColorChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"
+            :color="hoverSubIndex === 2 && !subColorChosen ?
+            'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"
           />
         </div>
         <div
@@ -224,7 +229,8 @@
             :item="$t('advance.subDelay')"
             :size="computedSize"
             :is-chosen="subDelayChosen"
-            :color="hoverSubIndex === 3 && !subDelayChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"
+            :color="hoverSubIndex === 3 && !subDelayChosen ?
+            'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"
           />
         </div>
       </div>
@@ -268,14 +274,16 @@
         >
           <!--disable temporarily-->
           <transition name="arrow">
-          <!--<div class="hoverBack" v-show="!showDelay && hoverAudioIndex === 1" :style="{ height: audioDelayHeight }"></div>-->
+          <!--<div class="hoverBack" v-show="!showDelay && hoverAudioIndex === 1"
+          :style="{ height: audioDelayHeight }"></div>-->
           </transition>
           <advance-selected-items
             :is-sub-delay="false"
             :item="$t('advance.audioDelay')"
             :size="computedSize"
             :is-chosen="showDelay"
-            :color="hoverAudioIndex === 1 && !showDelay ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.2)'"
+            :color="hoverAudioIndex === 1 && !showDelay ?
+            'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.2)'"
           />
         </div>
         <div
@@ -305,7 +313,8 @@
                 <div
                   class="leftTrackTitle advanceNormalTitle"
                   :style="{
-                    color: hoverAudioIndex === 2 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+                    color: hoverAudioIndex === 2 ?
+                    'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
                     transition: 'color 300ms',
                   }"
                 >
@@ -346,6 +355,14 @@ import AdvanceColumnItems from './AdvanceColumnItems.vue';
 
 export default {
   name: 'AdvanceMainMenu',
+  components: {
+    'base-info-card': BaseInfoCard,
+    'advance-row-items': AdvanceRowItems,
+    'advance-color-items': AdvanceColorItems,
+    'advance-selected-items': AdvanceSelectedItemts,
+    'advance-column-items': AdvanceColumnItems,
+    Icon,
+  },
   props: {
     clearState: {
       type: Boolean,
@@ -357,7 +374,6 @@ export default {
       speedChosen: false,
       rightArrowSub: false,
       rightArrowMed: false,
-      preStyle: 'linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.045) 20%, rgba(255,255,255,0.00) 78%, rgba(255,255,255,0.00) 100%)',
       hoverIndex: -1,
       readyShow: 'mainMenu',
       backSubHover: false,
@@ -408,14 +424,16 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['winWidth', 'currentFirstSubtitleId', 'winHeight', 'rate', 'chosenSize', 'subtitleDelay', 'displayLanguage', 'winRatio']),
+    ...mapGetters(['winWidth', 'currentFirstSubtitleId', 'winHeight', 'rate', 'chosenSize',
+      'subtitleDelay', 'displayLanguage', 'winRatio']),
     /**
      * @return {string}
      */
     ChosenSize() {
       const compareContent = ['S', 'M', 'L', 'XL'];
       const enContent = ['Small', 'Normal', 'Large', 'Extra Large'];
-      return this.$t(`advance.fontItems[${this.chosenSize}]`) === compareContent[this.chosenSize] ? enContent[this.chosenSize] : this.$t(`advance.fontItems[${this.chosenSize}]`);
+      return this.$t(`advance.fontItems[${this.chosenSize}]`) === compareContent[this.chosenSize] ?
+        enContent[this.chosenSize] : this.$t(`advance.fontItems[${this.chosenSize}]`);
     },
     minInfoCardWidth() {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
@@ -427,35 +445,101 @@ export default {
     },
     leftTitleToShow() { // 菜单左侧显示的text
       if (this.readyShow === 'audioMenu') {
-        return [this.$t('advance.changeTrack'), this.$t('advance.audioDelay'), this.$t('advance.audioMenu')];
+        return [
+          this.$t('advance.changeTrack'),
+          this.$t('advance.audioDelay'),
+          this.$t('advance.audioMenu'),
+        ];
       } else if (this.readyShow === 'subMenu') {
-        return [this.$t('advance.subDelay'), this.$t('advance.fontSize'), this.$t('advance.fontStyle'), this.$t('advance.subMenu')];
+        return [
+          this.$t('advance.subDelay'),
+          this.$t('advance.fontSize'),
+          this.$t('advance.fontStyle'),
+          this.$t('advance.subMenu'),
+        ];
       }
-      return [this.$t('advance.rateTitle'), this.$t('advance.subMenu'), this.$t('advance.audioMenu')];
+      return [
+        this.$t('advance.rateTitle'),
+        this.$t('advance.subMenu'),
+        this.$t('advance.audioMenu'),
+      ];
     },
     maxTextLength() { // 不同菜单界面，一行文字加起来最大的长度
       if (this.readyShow === 'audioMenu') {
-        const firstLine = this.getTextWidth(`${this.textItemFontSize}px`, this.normalFont, this.leftTitleToShow[0]) +
-          this.getTextWidth(`${this.rightItemFontSize}px`, this.normalFont, '0 ms');
-        const secondLine = this.getTextWidth(`${this.textItemFontSize}px`, this.normalFont, this.leftTitleToShow[1]) +
-          this.getTextWidth(`${this.rightItemFontSize}px`, this.normalFont, this.currentAudioTrack);
-        const thirdLine = this.getTextWidth(`${this.rightItemFontSize}px`, this.normalFont, this.leftTitleToShow[2]) +
-          this.rightItemFontSize;
+        const firstLine = this.getTextWidth(
+          `${this.textItemFontSize}px`,
+          this.normalFont,
+          this.leftTitleToShow[0],
+        ) + this.getTextWidth(
+          `${this.rightItemFontSize}px`,
+          this.normalFont,
+          '0 ms',
+        );
+        const secondLine = this.getTextWidth(
+          `${this.textItemFontSize}px`,
+          this.normalFont,
+          this.leftTitleToShow[1],
+        ) + this.getTextWidth(
+          `${this.rightItemFontSize}px`,
+          this.normalFont,
+          this.currentAudioTrack,
+        );
+        const thirdLine = this.getTextWidth(
+          `${this.rightItemFontSize}px`,
+          this.normalFont,
+          this.leftTitleToShow[2],
+        ) + this.rightItemFontSize;
         return Math.max(firstLine, secondLine, thirdLine);
       } else if (this.readyShow === 'subMenu') {
-        const firstLine = this.getTextWidth(`${this.textItemFontSize}px`, this.normalFont, this.leftTitleToShow[0]) +
-          this.getTextWidth(`${this.rightItemFontSize}px`, this.normalFont, this.ChosenSize);
-        const secondLine = this.getTextWidth(`${this.textItemFontSize}px`, this.normalFont, this.leftTitleToShow[1]) + this.subStyleWidth;
-        const thirdLine = this.getTextWidth(`${this.textItemFontSize}px`, this.normalFont, this.leftTitleToShow[2]) +
-          this.getTextWidth(`${this.rightItemFontSize}px`, this.normalFont, `${this.subtitleDelay / 1000} s`);
-        const fourthLine = this.getTextWidth(`${this.rightItemFontSize}px`, this.normalFont, this.leftTitleToShow[3]) +
-          this.rightItemFontSize;
+        const firstLine = this.getTextWidth(
+          `${this.textItemFontSize}px`,
+          this.normalFont,
+          this.leftTitleToShow[0],
+        ) + this.getTextWidth(
+          `${this.rightItemFontSize}px`,
+          this.normalFont,
+          this.ChosenSize,
+        );
+        const secondLine = this.getTextWidth(
+          `${this.textItemFontSize}px`,
+          this.normalFont,
+          this.leftTitleToShow[1],
+        ) + this.subStyleWidth;
+        const thirdLine = this.getTextWidth(
+          `${this.textItemFontSize}px`,
+          this.normalFont,
+          this.leftTitleToShow[2],
+        ) + this.getTextWidth(
+          `${this.rightItemFontSize}px`,
+          this.normalFont,
+          `${this.subtitleDelay / 1000} s`,
+        );
+        const fourthLine = this.getTextWidth(
+          `${this.rightItemFontSize}px`,
+          this.normalFont,
+          this.leftTitleToShow[3],
+        ) + this.rightItemFontSize;
         return Math.max(firstLine, secondLine, thirdLine, fourthLine);
       }
-      const firstLine = this.getTextWidth(`${this.textItemFontSize}px`, this.normalFont, this.leftTitleToShow[0]) +
-        this.getTextWidth(`${this.rightItemFontSize}px`, this.normalFont, `${this.rate} x`);
-      const secondLine = this.getTextWidth(`${this.textItemFontSize}px`, this.normalFont, this.leftTitleToShow[1]) + this.textItemFontSize;
-      const thirdLine = this.getTextWidth(`${this.textItemFontSize}px`, this.normalFont, this.leftTitleToShow[2]) + this.textItemFontSize;
+      const firstLine = this.getTextWidth(
+        `${this.textItemFontSize}px`,
+        this.normalFont,
+        this.leftTitleToShow[0],
+      ) + this.getTextWidth(
+        `${this.rightItemFontSize}px`,
+        this.normalFont,
+        `${this.rate} x`,
+      );
+      const secondLine = this.getTextWidth(
+        `${this.textItemFontSize}px`,
+        this.normalFont,
+        this.leftTitleToShow[1],
+      ) + this.textItemFontSize;
+      const thirdLine = this.getTextWidth(
+        `${this.textItemFontSize}px`,
+        this.normalFont,
+        this.leftTitleToShow[2],
+      ) + this.textItemFontSize;
       return Math.max(firstLine, secondLine, thirdLine);
     },
     subStyleWidth() {
@@ -489,7 +573,9 @@ export default {
       const track = this.$store.getters.audioTrackList.filter(track => track.enabled)[0];
       if (track) {
         if (track.language === '' || track.language === 'und') {
-          return `${this.$t('advance.track')} ${this.$store.getters.audioTrackList.indexOf(track) + 1}`;
+          return `${
+            this.$t('advance.track')} ${this.$store.getters.audioTrackList.indexOf(track) + 1
+          }`;
         } else if (this.$store.getters.audioTrackList.length === 1) {
           return `${track.language}`;
         }
@@ -513,13 +599,15 @@ export default {
       return this.showDelay ? `${this.initialSize(74)}px` : `${this.initialSize(37)}px`;
     },
     changeTrackHeight() {
-      return this.showTrack ? `${this.initialSize(this.trackHeight)}px` : `${this.initialSize(37)}px`;
+      return this.showTrack ? `${this.initialSize(this.trackHeight)}px` :
+        `${this.initialSize(37)}px`;
     },
     menuCardHeight() {
       return this.speedChosen ? `${this.initialSize(164)}px` : `${this.initialSize(127)}px`;
     },
     subtitleCardHeight() {
-      return !this.subColorChosen && !this.subSizeChosen && !this.subDelayChosen ? `${this.initialSize(156)}px` : `${this.initialSize(193)}px`;
+      return !this.subColorChosen && !this.subSizeChosen && !this.subDelayChosen ?
+        `${this.initialSize(156)}px` : `${this.initialSize(193)}px`;
     },
     audioCardHeight() {
       if (this.showDelay) {
@@ -547,14 +635,6 @@ export default {
       }
       return 142;
     },
-  },
-  components: {
-    'base-info-card': BaseInfoCard,
-    'advance-row-items': AdvanceRowItems,
-    'advance-color-items': AdvanceColorItems,
-    'advance-selected-items': AdvanceSelectedItemts,
-    'advance-column-items': AdvanceColumnItems,
-    Icon,
   },
   methods: {
     initialSize(size) {
@@ -652,11 +732,13 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
+screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
   .playSpeed, .hoverBack {
     width: 100%;
   }
-  .subtitleControl, .audioItems, .topContainer, .itemSize, .subtitleStyle, .subtitleDelay, .audioDelay, .hoverSubBack, .subContainer, .hoverAudioBack, .audioContainer, .trackContainer {
+  .subtitleControl, .audioItems, .topContainer, .itemSize, .subtitleStyle, .subtitleDelay,
+  .audioDelay, .hoverSubBack, .subContainer, .hoverAudioBack, .audioContainer, .trackContainer {
     width: 100%;
     height: 37px;
   }
@@ -701,11 +783,13 @@ export default {
     animation: hideLeftP1 .2s;
   }
 }
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
   .playSpeed, .hoverBack {
     width: 100%
   }
-  .subtitleControl, .audioItems, .topContainer, .itemSize, .subtitleStyle, .subtitleDelay, .audioDelay, .hoverSubBack, .subContainer, .hoverAudioBack, .audioContainer, .trackContainer {
+  .subtitleControl, .audioItems, .topContainer, .itemSize, .subtitleStyle, .subtitleDelay,
+  .audioDelay, .hoverSubBack, .subContainer, .hoverAudioBack, .audioContainer, .trackContainer {
     width: 100%;
     height: 44.4px;
   }
@@ -749,11 +833,13 @@ export default {
     animation: hideLeftP2 .2s;
   }
 }
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   .playSpeed, .hoverBack {
     width: 100%
   }
-  .subtitleControl, .audioItems, .topContainer, .itemSize, .subtitleStyle, .subtitleDelay, .audioDelay, .hoverSubBack, .subContainer, .hoverAudioBack, .audioContainer, .trackContainer {
+  .subtitleControl, .audioItems, .topContainer, .itemSize, .subtitleStyle, .subtitleDelay,
+  .audioDelay, .hoverSubBack, .subContainer, .hoverAudioBack, .audioContainer, .trackContainer {
     height: 62.16px;
     width: 100%;
   }
@@ -803,7 +889,8 @@ export default {
   -webkit-app-region: no-drag;
 }
 .hoverBack {
-  background-image: linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.045) 20%, rgba(255,255,255,0.00) 78%, rgba(255,255,255,0.00) 100%);
+  background-image: linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.045) 20%,
+    rgba(255,255,255,0.00) 78%, rgba(255,255,255,0.00) 100%);
 }
 .mainItems {
   display: flex;
@@ -817,7 +904,8 @@ export default {
   .subtitleControl {
     display: flex;
     .hoverSubBack {
-      background-image: linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.045) 20%, rgba(255,255,255,0.00) 78%, rgba(255,255,255,0.00) 100%);
+      background-image: linear-gradient(90deg, rgba(255,255,255,0.00) 0%,
+        rgba(255,255,255,0.045) 20%, rgba(255,255,255,0.00) 78%, rgba(255,255,255,0.00) 100%);
     }
     .subContainer {
       position: absolute;
@@ -836,7 +924,8 @@ export default {
       display: flex;
     }
     .hoverAudioBack {
-      background-image: linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.045) 20%, rgba(255,255,255,0.00) 78%, rgba(255,255,255,0.00) 100%);
+      background-image: linear-gradient(90deg, rgba(255,255,255,0.00) 0%,
+        rgba(255,255,255,0.045) 20%, rgba(255,255,255,0.00) 78%, rgba(255,255,255,0.00) 100%);
     }
     .item3 {
       margin: auto;

@@ -3,7 +3,9 @@
     class="itemContainer"
     :style="{
       height: heightSize,
-      backgroundImage: !isChosen ? '' : 'linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.07) 24%, rgba(255,255,255,0.03) 100%)',
+      backgroundImage: !isChosen ? '' :
+        'linear-gradient(90deg, rgba(255,255,255,0.03) ' +
+        '0%, rgba(255,255,255,0.07) 24%, rgba(255,255,255,0.03) 100%)',
     }"
   >
     <div
@@ -41,11 +43,13 @@
         >
           <div class="rowContainer">
             <div
+              :key="list"
               v-for="(list, index) in lists"
               :id="'list'+index"
               :class="rowNumDetail"
               :style="{
-                width: index === difIndex[0] || index === difIndex[1] ? `${difWidth[0]}%` : `${difWidth[1]}%`,
+                width: index === difIndex[0] || index === difIndex[1] ?
+                `${difWidth[0]}%` : `${difWidth[1]}%`,
                 cursor: itemChosen(index) ? 'default' : 'pointer',
               }"
               @mouseover="handleOver(index)"
@@ -55,7 +59,8 @@
               <p
                 class="text"
                 :style="{
-                  color: itemChosen(index) || index === hoverIndex ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+                  color: itemChosen(index) || index === hoverIndex ?
+                  'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
                   margin: 'auto',
                   transition: 'color 300ms',
                 }"
@@ -156,7 +161,8 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['rate', 'chosenSize', 'computedHeight', 'computedWidth', 'subToTop', 'winRatio', 'lastChosenSize']),
+    ...mapGetters(['rate', 'chosenSize', 'computedHeight', 'computedWidth', 'subToTop',
+      'winRatio', 'lastChosenSize']),
     computedSize() {
       return this.winRatio >= 1 ? this.computedHeight : this.computedWidth;
     },
@@ -303,13 +309,15 @@ export default {
     updatePCVideoScaleByFactors(index) {
       const firstFactors = [21, 29, 37, 45];
       const secondFactors = [24, 26, 28, 30];
-      this.updateSubScale(`${(((firstFactors[index] / 900) * this.computedSize) + (secondFactors[index] / 5)) / 9}`);
+      this.updateSubScale(`${(((firstFactors[index] / 900) * this.computedSize) +
+        (secondFactors[index] / 5)) / 9}`);
     },
     // update video scale that height is larger than width
     updateMobileVideoScaleByFactors(index) {
       const firstFactors = [21, 29, 37, 45];
       const secondFactors = [12, -92, -196, -300];
-      this.updateSubScale(`${(((firstFactors[index] / 760) * this.computedSize) + (secondFactors[index] / 76)) / 9}`);
+      this.updateSubScale(`${(((firstFactors[index] / 760) * this.computedSize) +
+        (secondFactors[index] / 76)) / 9}`);
     },
     // update video scale when width or height is larger than 1080
     updateVideoScaleByFactors(val) {
@@ -329,7 +337,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
+screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
   .itemContainer {
     width: 100%;
     .textContainer {
@@ -378,7 +387,8 @@ export default {
     animation: hideP1 100ms;
   }
 }
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
   .itemContainer {
     width: 100%;
     .textContainer {
@@ -427,7 +437,8 @@ export default {
     animation: hideP2 100ms;
   }
 }
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   .itemContainer {
     width: 100%;
     .textContainer {
@@ -523,7 +534,8 @@ export default {
         border-radius: 7px;
         opacity: 0.4;
         border: 0.5px solid rgba(255, 255, 255, 0.20);
-        background-image: radial-gradient(60% 134%, rgba(255, 255, 255, 0.09) 44%, rgba(255, 255, 255, 0.05) 100%);
+        background-image: radial-gradient(
+          60% 134%, rgba(255, 255, 255, 0.09) 44%, rgba(255, 255, 255, 0.05) 100%);
         box-shadow: 0px 1px 2px rgba(0, 0, 0, .2);
       }
       .fontCard {
@@ -533,7 +545,8 @@ export default {
         opacity: 0.4;
         border: 0.5px solid rgba(255, 255, 255, 0.20);
         box-shadow: 0px 1px 2px rgba(0, 0, 0, .2);
-        background-image: radial-gradient(60% 134%, rgba(255, 255, 255, 0.09) 44%, rgba(255, 255, 255, 0.05) 100%);
+        background-image: radial-gradient(
+          60% 134%, rgba(255, 255, 255, 0.09) 44%, rgba(255, 255, 255, 0.05) 100%);
       }
     }
   }

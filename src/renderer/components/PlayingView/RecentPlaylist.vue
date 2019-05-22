@@ -88,11 +88,11 @@
             :is-folder-list="isFolderList"
             :hovered="hoverIndex === index"
             :win-width="winWidth"
-            @can-remove="canRemove = true"
             :thumbnail-width="thumbnailWidth"
             :thumbnail-height="thumbnailHeight"
             :size-adaption="sizeAdaption"
             :event-target="eventTarget"
+            @can-remove="canRemove = true"
           />
           <Add
             :style="{

@@ -25,6 +25,7 @@
       >
         <div class="columnContainer">
           <div
+            :key="track"
             v-for="(track, index) in tracks"
             class="columnNumDetail"
             :style="{ cursor: track.enabled ? 'default' : 'pointer' }"
@@ -35,12 +36,15 @@
             <div
               class="text advanceNormalItem"
               :style="{
-                color: index === hoverIndex || track.enabled ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+                color: index === hoverIndex || track.enabled ?
+                'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
                 transition: 'color 300ms',
               }"
             >
-              {{ track.language === 'und' || track.language === '' ? `${$t('advance.track')} ${index + 1}`
-                : tracks.length === 1 ? `${$t('advance.track')} ${index + 1} : ${track.language}` : `${$t('advance.track')} ${index + 1} : ${track.name}` }}
+              {{ track.language === 'und' || track.language === '' ?
+              `${$t('advance.track')} ${index + 1}`
+                : tracks.length === 1 ? `${$t('advance.track')} ${index + 1} : ${track.language}` :
+              `${$t('advance.track')} ${index + 1} : ${track.name}` }}
             </div>
           </div>
           <div
@@ -63,15 +67,9 @@ import { Video as videoActions } from '@/store/actionTypes';
 export default {
   name: 'AdvanceColumnItems',
   props: {
-    item: {
-      type: String,
-    },
-    size: {
-      type: Number,
-    },
-    isChosen: {
-      type: Boolean,
-    },
+    item: String,
+    size: Number,
+    isChosen: Boolean,
   },
   data() {
     return {
@@ -94,10 +92,13 @@ export default {
       return `${this.initialSize(this.moveLength - (this.tracks.length * 32))}px`;
     },
     heightSize() {
-      return this.tracks.length <= 2 ? `${this.initialSize(41 + (32 * (this.tracks.length - 1)))}px` : `${this.initialSize(105)}px`;
+      return this.tracks.length <= 2 ?
+        `${this.initialSize(41 + (32 * (this.tracks.length - 1)))}px` :
+        `${this.initialSize(105)}px`;
     },
     scopeHeight() {
-      return this.tracks.length <= 2 ? `${this.initialSize(32 * this.tracks.length)}px` : `${this.initialSize(96)}px`;
+      return this.tracks.length <= 2 ?
+        `${this.initialSize(32 * this.tracks.length)}px` : `${this.initialSize(96)}px`;
     },
     tracks() {
       return this.$store.getters.audioTrackList;
@@ -132,7 +133,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
+screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
   .itemContainer {
     width: 100%;
     .textContainer {
@@ -163,7 +165,8 @@ export default {
     }
   }
 }
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
   .itemContainer {
     width: 100%;
     .textContainer {
@@ -194,7 +197,8 @@ export default {
     }
   }
 }
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   .itemContainer {
     width: 100%;
     .textContainer {
@@ -239,7 +243,8 @@ export default {
   flex-direction: column;
   border-radius: 7px;
   z-index: 10;
-  background-image: linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.07) 24%, rgba(255,255,255,0.03) 100%);
+  background-image: linear-gradient(90deg, rgba(255,255,255,0.03) 0%,
+    rgba(255,255,255,0.07) 24%, rgba(255,255,255,0.03) 100%);
   clip-path: inset(0 round 8px);
   .textContainer {
     display: flex;
@@ -266,7 +271,8 @@ export default {
         opacity: 0.4;
         border: 0.5px solid rgba(255, 255, 255, 0.20);
         box-shadow: 0px 1px 2px rgba(0, 0, 0, .2);
-        background-image: radial-gradient(60% 134%, rgba(255, 255, 255, 0.09) 44%, rgba(255, 255, 255, 0.05) 100%);
+        background-image: radial-gradient(60% 134%,
+          rgba(255, 255, 255, 0.09) 44%, rgba(255, 255, 255, 0.05) 100%);
       }
     }
   }
