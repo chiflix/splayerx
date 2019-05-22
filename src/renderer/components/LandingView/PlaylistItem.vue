@@ -104,7 +104,7 @@ export default {
       type: Number,
     },
     lastPlayedFile: {
-      type: Object.Array,
+      type: Array,
       require: true,
       default: () => [],
     },

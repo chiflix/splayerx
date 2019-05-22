@@ -93,9 +93,9 @@ export default {
   name: 'AdvanceRowItems',
   props: {
     lists: {
-      type: Object.Array,
+      type: Array,
       require: true,
-      default: [],
+      default: () => [],
     },
     item: {
       type: String,

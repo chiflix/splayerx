@@ -48,10 +48,7 @@ export default {
   },
   props: {
     currentTime: {
-      type: {
-        type: Number,
-        required: true,
-      },
+      type: Number,
       required: true,
     },
     maxThumbnailWidth: {
