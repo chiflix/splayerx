@@ -8,7 +8,7 @@
   "license": "GPL-3.0-or-later",
   "main": "./dist/electron/main.js",
   "engines": {
-    "node": "^12"
+    "node": "^11"
   },
   "scripts": {
     "build": "node .electron-vue/build.js && electron-builder --p never",
@@ -543,7 +543,7 @@
     "@babel/preset-env": "^7.0.0",
     "@babel/register": "^7.0.0",
     "@chiflix/electron": "^5.0.1",
-    "@vue/test-utils": "^1.0.0-beta.26",
+    "@vue/test-utils": "^1.0.0-beta.29",
     "babel-eslint": "^9.0.0",
     "babel-loader": "^8.0.0",
     "babel-plugin-istanbul": "^5.1.0",
@@ -598,6 +598,8 @@
     "spectron": "^3.8.0",
     "style-loader": "^0.23.1",
     "svg-sprite-loader": "^4.1.3",
+    "ts-loader": "^6.0.0",
+    "typescript": "^3.4.5",
     "url-loader": "^1.1.2",
     "vue-html-loader": "^1.2.4",
     "vue-i18n-loader": "^1.0.0",

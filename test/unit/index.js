@@ -9,5 +9,5 @@ testsContext.keys().forEach(testsContext)
 // require all src files except main.js for coverage.
 // you can also change this to match only the subset of files that
 // you want coverage for.
-const srcContext = require.context('../../src/renderer', true, /\.(js|vue)$/)
-srcContext.keys().forEach(srcContext)
+const srcContext = require.context('../../src/renderer', true, /\.(ts|js|vue)$/)
+srcContext.keys().filter(key => !key.endsWith('.d.ts')).forEach(srcContext)

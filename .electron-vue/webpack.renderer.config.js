@@ -42,13 +42,25 @@ let rendererConfig = {
   entry: {
     preference: path.join(__dirname, '../src/renderer/preference.js'),
     about: path.join(__dirname, '../src/renderer/about.js'),
-    index: path.join(__dirname, '../src/renderer/main.js')
+    index: path.join(__dirname, '../src/renderer/main.ts')
   },
   externals: [
     ...Object.keys(Object.assign({}, dependencies, optionalDependencies)).filter(d => !whiteListedModules.includes(d))
   ],
   module: {
     rules: [
+      {
+        test: /\.ts$/,
+        exclude: /node_modules/,
+        use: [
+          {
+            loader: 'ts-loader',
+            options: {
+              appendTsSuffixTo: [ /\.vue$/ ]
+            }
+          }
+        ]
+      },
       {
         test: /\.(js|vue)$/,
         enforce: 'pre',
