@@ -14,9 +14,10 @@ export default {
       type: Object,
       required: true,
     },
-    height: Number,
-    width: Number,
-    lot: String,
+    lot: {
+      type: String,
+      required: true,
+    },
   },
   data() {
     return {

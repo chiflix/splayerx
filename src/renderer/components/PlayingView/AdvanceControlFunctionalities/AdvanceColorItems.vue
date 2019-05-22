@@ -39,8 +39,8 @@
         >
           <div class="rowContainer">
             <div
-              :key="img"
               v-for="(img, index) in imgs"
+              :key="img"
               class="imgContainer"
             >
               <img
@@ -75,11 +75,23 @@ import styleSelected4 from '../../../assets/subtitle-style5-selected.png';
 export default {
   name: 'AdvanceColorItems',
   props: {
-    item: String,
-    height: Number,
-    color: String,
+    item: {
+      type: String,
+      required: true,
+    },
+    height: {
+      type: Number,
+      required: true,
+    },
+    color: {
+      type: String,
+      required: true,
+    },
     isChosen: Boolean,
-    size: Number,
+    size: {
+      type: Number,
+      required: true,
+    },
   },
   data() {
     return {
@@ -97,9 +109,6 @@ export default {
         return this.isChosen ? `${74 * 1.2}px` : `${37 * 1.2}px`;
       }
       return this.isChosen ? `${74 * 1.2 * 1.4}px` : `${37 * 1.2 * 1.4}px`;
-    },
-    subStyle() {
-      return this.$store.getters.curStyle;
     },
     chosenStyle() {
       if (this.$store.getters.chosenStyle) {

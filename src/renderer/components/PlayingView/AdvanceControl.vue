@@ -7,7 +7,7 @@
           class="advanced"
           :style="{
             transition: showAttached ? '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' :
-            '150ms cubic-bezier(0.17, 0.67, 0.17, 0.98)'
+              '150ms cubic-bezier(0.17, 0.67, 0.17, 0.98)'
           }"
         >
           <transition name="setUp">

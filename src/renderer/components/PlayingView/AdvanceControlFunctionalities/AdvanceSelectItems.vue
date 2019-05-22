@@ -17,13 +17,13 @@
       <div
         class="textContainer advanceNormalTitle"
         :style="{
-          cursor: isChosen || !isSubDelay || !isSubtitleAvaliable ? 'default' : 'pointer',
+          cursor: isChosen || !isSubDelay || !isSubtitleAvailable ? 'default' : 'pointer',
         }"
       >
         <div
           class="textItem"
           :style="{
-            color: isSubtitleAvaliable ? color : 'rgba(255, 255, 255, 0.2)',
+            color: isSubtitleAvailable ? color : 'rgba(255, 255, 255, 0.2)',
             transition: 'color 300ms',
           }"
         >
@@ -32,7 +32,7 @@
         <div
           class="rightItem"
           :style="{
-            color: isSubtitleAvaliable ? 'rgba(255, 255, 255, 0.6)' : 'rgba(255, 255, 255, 0.2)'
+            color: isSubtitleAvailable ? 'rgba(255, 255, 255, 0.6)' : 'rgba(255, 255, 255, 0.2)'
           }"
         >
           {{ isSubDelay ? screenSubtitleDelay : audioDelay }}
@@ -63,7 +63,7 @@
               @mouseleave.native="handleInMouseup"
             />
             <Icon
-              v-show="this.subtitleDelay !== 0"
+              v-show="subtitleDelay !== 0"
               type="reset"
               class="resetPos"
               @click.native="handleResetDelay"
@@ -82,26 +82,33 @@ import Icon from '../../BaseIconContainer.vue';
 
 export default {
   name: 'AdvanceSelectItems',
+  components: {
+    Icon,
+  },
   props: {
     item: {
       type: String,
+      required: true,
     },
     height: {
       type: Number,
+      required: true,
     },
     color: {
       type: String,
+      required: true,
     },
     isChosen: {
       type: Boolean,
     },
     size: {
       type: Number,
+      required: true,
     },
     isSubDelay: {
       type: Boolean,
     },
-    isSubtitleAvaliable: {
+    isSubtitleAvailable: {
       type: Boolean,
     },
   },
@@ -142,9 +149,6 @@ export default {
       }
       return this.AudioDelay;
     },
-  },
-  components: {
-    Icon,
   },
   methods: {
     handleResetDelay() {

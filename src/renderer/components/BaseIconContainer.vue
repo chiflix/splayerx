@@ -19,10 +19,22 @@
 export default {
   name: 'Icon',
   props: {
-    type: String,
-    effect: String,
-    state: String,
-    isFullScreen: String,
+    type: {
+      type: String,
+      required: true,
+    },
+    effect: {
+      type: String,
+      default: 'icon',
+    },
+    state: {
+      type: String,
+      default: 'default',
+    },
+    isFullScreen: {
+      type: String,
+      default: '',
+    },
   },
   computed: {
     finalState() {

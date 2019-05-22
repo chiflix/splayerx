@@ -24,9 +24,27 @@ export default {
   components: {
   },
   props: {
-    currentTime: Number,
-    thumbnailWidth: Number,
-    thumbnailHeight: Number,
+    currentTime: {
+      type: Number,
+      required: true,
+    },
+    thumbnailWidth: {
+      type: Number,
+      required: true,
+    },
+    thumbnailHeight: {
+      type: Number,
+      required: true,
+    },
+  },
+  data() {
+    return {
+      currentIndex: 0,
+      thumbnailCount: 0,
+      isSaved: false,
+      imgExisted: false,
+      imgSrc: '',
+    };
   },
   computed: {
     ...mapGetters(['originSrc', 'duration', 'mediaHash']),
@@ -42,15 +60,6 @@ export default {
     src() {
       return this.imgExisted || this.isSaved ? `url("${filePathToUrl(this.imgSrc)}")` : '';
     },
-  },
-  data() {
-    return {
-      currentIndex: 0,
-      thumbnailCount: 0,
-      isSaved: false,
-      imgExisted: false,
-      imgSrc: '',
-    };
   },
   watch: {
     currentTime(val) {

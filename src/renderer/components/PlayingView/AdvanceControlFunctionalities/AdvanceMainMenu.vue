@@ -7,16 +7,16 @@
     :content-min-width="cardWidth > minInfoCardWidth ? cardWidth : minInfoCardWidth"
     :style="{
       cursor: 'default',
-      height: this.readyShow === 'mainMenu' ?
-      menuCardHeight : this.readyShow === 'subMenu' ?
-      subtitleCardHeight : audioCardHeight,
+      height: readyShow === 'mainMenu' ?
+        menuCardHeight : readyShow === 'subMenu' ?
+          subtitleCardHeight : audioCardHeight,
       transition: 'height 100ms linear, width 100ms linear',
       fontWeight: '700',
       letterSpacing: '0.2px',
       width: cardWidth > minInfoCardWidth ? `${cardWidth}px` : `${minInfoCardWidth}px`,
     }"
   >
-    <transition :name="this.readyShow === 'mainMenu' ? 'setUp' : 'setUpLeft'">
+    <transition :name="readyShow === 'mainMenu' ? 'setUp' : 'setUpLeft'">
       <div
         v-show="readyShow === 'mainMenu'"
         class="mainItems"
@@ -50,7 +50,7 @@
             :size="computedSize"
             :is-chosen="speedChosen"
             :color="hoverIndex === 1 && !speedChosen ?
-            'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"
+              'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"
           />
         </div>
         <div
@@ -126,7 +126,7 @@
       </div>
     </transition>
 
-    <transition :name="this.readyShow === 'mainMenu' ? 'setUp' : 'setUpLeft'">
+    <transition :name="readyShow === 'mainMenu' ? 'setUp' : 'setUpLeft'">
       <div
         v-show="readyShow === 'subMenu'"
         class="mainItems1"
@@ -178,7 +178,7 @@
             :size="computedSize"
             :is-chosen="subSizeChosen"
             :color="hoverSubIndex === 1 && !subSizeChosen ?
-            'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"
+              'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"
           />
         </div>
         <div
@@ -203,7 +203,7 @@
             :size="computedSize"
             :is-chosen="subColorChosen"
             :color="hoverSubIndex === 2 && !subColorChosen ?
-            'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"
+              'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"
           />
         </div>
         <div
@@ -224,19 +224,19 @@
             />
           </transition>
           <advance-selected-items
-            :is-subtitle-avaliable="isSubtitleAvailable"
+            :is-subtitle-available="isSubtitleAvailable"
             :is-sub-delay="true"
             :item="$t('advance.subDelay')"
             :size="computedSize"
             :is-chosen="subDelayChosen"
             :color="hoverSubIndex === 3 && !subDelayChosen ?
-            'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"
+              'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"
           />
         </div>
       </div>
     </transition>
 
-    <transition :name="this.readyShow === 'mainMenu' ? 'setUp' : 'setUpLeft'">
+    <transition :name="readyShow === 'mainMenu' ? 'setUp' : 'setUpLeft'">
       <div
         v-show="readyShow === 'audioMenu'"
         class="mainItems2"
@@ -283,7 +283,7 @@
             :size="computedSize"
             :is-chosen="showDelay"
             :color="hoverAudioIndex === 1 && !showDelay ?
-            'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.2)'"
+              'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.2)'"
           />
         </div>
         <div
@@ -314,7 +314,7 @@
                   class="leftTrackTitle advanceNormalTitle"
                   :style="{
                     color: hoverAudioIndex === 2 ?
-                    'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+                      'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
                     transition: 'color 300ms',
                   }"
                 >
@@ -388,40 +388,6 @@ export default {
       cardWidth: 170,
       normalFont: 'Avenir, Roboto-Regular, PingFang SC, Microsoft Yahei',
     };
-  },
-  watch: {
-    displayLanguage() {
-      this.cardWidth = this.maxTextLength + (3 * this.subStyleWidth);
-      this.$bus.$emit('card-init-left');
-    },
-    readyShow() {
-      this.cardWidth = this.maxTextLength + (3 * this.subStyleWidth);
-      this.$bus.$emit('card-init-left');
-    },
-    textItemFontSize() {
-      this.cardWidth = this.maxTextLength + (3 * this.subStyleWidth);
-      this.$bus.$emit('card-init-left');
-    },
-    clearState(val) {
-      this.cardWidth = this.maxTextLength + (3 * this.subStyleWidth);
-      this.$bus.$emit('card-init-left');
-      if (!val) {
-        setTimeout(() => {
-          this.readyShow = 'mainMenu';
-          this.speedChosen = false;
-          this.subSizeChosen = false;
-          this.subColorChosen = false;
-          this.subDelayChosen = false;
-          this.showDelay = false;
-          this.showTrack = false;
-        }, 150);
-      }
-    },
-    trackNum(val) {
-      if (val < 1) {
-        this.showTrack = false;
-      }
-    },
   },
   computed: {
     ...mapGetters(['winWidth', 'currentFirstSubtitleId', 'winHeight', 'rate', 'chosenSize',
@@ -574,8 +540,7 @@ export default {
       if (track) {
         if (track.language === '' || track.language === 'und') {
           return `${
-            this.$t('advance.track')} ${this.$store.getters.audioTrackList.indexOf(track) + 1
-          }`;
+            this.$t('advance.track')} ${this.$store.getters.audioTrackList.indexOf(track) + 1}`;
         } else if (this.$store.getters.audioTrackList.length === 1) {
           return `${track.language}`;
         }
@@ -634,6 +599,40 @@ export default {
         return (51 + (this.trackNum * 27)) + ((this.trackNum - 1) * 5);
       }
       return 142;
+    },
+  },
+  watch: {
+    displayLanguage() {
+      this.cardWidth = this.maxTextLength + (3 * this.subStyleWidth);
+      this.$bus.$emit('card-init-left');
+    },
+    readyShow() {
+      this.cardWidth = this.maxTextLength + (3 * this.subStyleWidth);
+      this.$bus.$emit('card-init-left');
+    },
+    textItemFontSize() {
+      this.cardWidth = this.maxTextLength + (3 * this.subStyleWidth);
+      this.$bus.$emit('card-init-left');
+    },
+    clearState(val) {
+      this.cardWidth = this.maxTextLength + (3 * this.subStyleWidth);
+      this.$bus.$emit('card-init-left');
+      if (!val) {
+        setTimeout(() => {
+          this.readyShow = 'mainMenu';
+          this.speedChosen = false;
+          this.subSizeChosen = false;
+          this.subColorChosen = false;
+          this.subDelayChosen = false;
+          this.showDelay = false;
+          this.showTrack = false;
+        }, 150);
+      }
+    },
+    trackNum(val) {
+      if (val < 1) {
+        this.showTrack = false;
+      }
     },
   },
   methods: {

@@ -25,8 +25,8 @@
       >
         <div class="columnContainer">
           <div
-            :key="track"
             v-for="(track, index) in tracks"
+            :key="track.id"
             class="columnNumDetail"
             :style="{ cursor: track.enabled ? 'default' : 'pointer' }"
             @mouseover="handleOver(index)"
@@ -37,14 +37,14 @@
               class="text advanceNormalItem"
               :style="{
                 color: index === hoverIndex || track.enabled ?
-                'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+                  'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
                 transition: 'color 300ms',
               }"
             >
               {{ track.language === 'und' || track.language === '' ?
-              `${$t('advance.track')} ${index + 1}`
+                `${$t('advance.track')} ${index + 1}`
                 : tracks.length === 1 ? `${$t('advance.track')} ${index + 1} : ${track.language}` :
-              `${$t('advance.track')} ${index + 1} : ${track.name}` }}
+                  `${$t('advance.track')} ${index + 1} : ${track.name}` }}
             </div>
           </div>
           <div
@@ -67,8 +67,14 @@ import { Video as videoActions } from '@/store/actionTypes';
 export default {
   name: 'AdvanceColumnItems',
   props: {
-    item: String,
-    size: Number,
+    item: {
+      type: String,
+      required: true,
+    },
+    size: {
+      type: Number,
+      required: true,
+    },
     isChosen: Boolean,
   },
   data() {
@@ -76,15 +82,6 @@ export default {
       hoverIndex: -1,
       moveLength: 0,
     };
-  },
-  watch: {
-    audioTrackList(val) {
-      val.forEach((item, index) => {
-        if (item.id === this.currentAudioTrackId) {
-          this.moveLength = index * 32;
-        }
-      });
-    },
   },
   computed: {
     ...mapGetters(['audioTrackList', 'currentAudioTrackId']),
@@ -102,6 +99,15 @@ export default {
     },
     tracks() {
       return this.$store.getters.audioTrackList;
+    },
+  },
+  watch: {
+    audioTrackList(val) {
+      val.forEach((item, index) => {
+        if (item.id === this.currentAudioTrackId) {
+          this.moveLength = index * 32;
+        }
+      });
     },
   },
   mounted() {

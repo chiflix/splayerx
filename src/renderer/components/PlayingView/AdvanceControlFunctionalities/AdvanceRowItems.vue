@@ -43,13 +43,13 @@
         >
           <div class="rowContainer">
             <div
-              :key="list"
               v-for="(list, index) in lists"
               :id="'list'+index"
+              :key="list"
               :class="rowNumDetail"
               :style="{
                 width: index === difIndex[0] || index === difIndex[1] ?
-                `${difWidth[0]}%` : `${difWidth[1]}%`,
+                  `${difWidth[0]}%` : `${difWidth[1]}%`,
                 cursor: itemChosen(index) ? 'default' : 'pointer',
               }"
               @mouseover="handleOver(index)"
@@ -60,7 +60,7 @@
                 class="text"
                 :style="{
                   color: itemChosen(index) || index === hoverIndex ?
-                  'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+                    'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
                   margin: 'auto',
                   transition: 'color 300ms',
                 }"
@@ -69,7 +69,7 @@
               </p>
             </div>
             <div
-              v-show="!this.isRateMenu || this.lists.includes(this.rate)"
+              v-show="!isRateMenu || lists.includes(rate)"
               :class="cardType"
               :style="{
                 left: `${moveLength}px`,
@@ -99,24 +99,29 @@ export default {
     },
     item: {
       type: String,
+      required: true,
     },
     color: {
       type: String,
+      required: true,
     },
     isChosen: {
       type: Boolean,
     },
     size: {
       type: Number,
+      required: true,
     },
     isRateMenu: {
       type: Boolean,
     },
     chosenSizeContent: {
       type: String,
+      required: true,
     },
     cardWidth: {
       type: Number,
+      required: true,
     },
   },
   data() {
@@ -125,40 +130,6 @@ export default {
       selectedIndex: 1,
       moveLength: '',
     };
-  },
-  watch: {
-    subToTop(val) {
-      if (!this.isRateMenu) {
-        if (val) {
-          this.updateLastSubSize(this.chosenSize);
-          this.handleClick(0);
-        } else {
-          this.handleClick(this.lastChosenSize);
-        }
-      }
-    },
-    rate(val) {
-      if (this.isRateMenu) {
-        const numList = [0.5, 1, 1.2, 1.5, 2];
-        this.selectedIndex = numList.indexOf(val);
-        this.calculateSpeedLength(numList.indexOf(val));
-      }
-    },
-    chosenSize(val) {
-      if (!this.isRateMenu) {
-        this.selectedIndex = val;
-        this.calculateFontLength(val);
-      }
-    },
-    computedSize(val) {
-      if (val >= 1080) {
-        this.updateVideoScaleByFactors(val);
-      } else if (this.winRatio >= 1) {
-        this.updatePCVideoScaleByFactors(this.chosenSize);
-      } else if (this.winRatio < 1) {
-        this.updateMobileVideoScaleByFactors(this.chosenSize);
-      }
-    },
   },
   computed: {
     ...mapGetters(['rate', 'chosenSize', 'computedHeight', 'computedWidth', 'subToTop',
@@ -208,6 +179,40 @@ export default {
       }
       return !this.isRateMenu ? [23 * 1.2 * 1.4, 27 * 1.2 * 1.4] :
         [18.5 * 1.2 * 1.4, 23 * 1.2 * 1.4];
+    },
+  },
+  watch: {
+    subToTop(val) {
+      if (!this.isRateMenu) {
+        if (val) {
+          this.updateLastSubSize(this.chosenSize);
+          this.handleClick(0);
+        } else {
+          this.handleClick(this.lastChosenSize);
+        }
+      }
+    },
+    rate(val) {
+      if (this.isRateMenu) {
+        const numList = [0.5, 1, 1.2, 1.5, 2];
+        this.selectedIndex = numList.indexOf(val);
+        this.calculateSpeedLength(numList.indexOf(val));
+      }
+    },
+    chosenSize(val) {
+      if (!this.isRateMenu) {
+        this.selectedIndex = val;
+        this.calculateFontLength(val);
+      }
+    },
+    computedSize(val) {
+      if (val >= 1080) {
+        this.updateVideoScaleByFactors(val);
+      } else if (this.winRatio >= 1) {
+        this.updatePCVideoScaleByFactors(this.chosenSize);
+      } else if (this.winRatio < 1) {
+        this.updateMobileVideoScaleByFactors(this.chosenSize);
+      }
     },
   },
   created() {

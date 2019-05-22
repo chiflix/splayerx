@@ -51,8 +51,14 @@ export default {
       type: Number,
       default: 1,
     },
-    tags: Object,
-    firstTags: Object,
+    tags: {
+      type: Object,
+      required: true,
+    },
+    firstTags: {
+      type: Object,
+      required: true,
+    },
   },
   data() {
     return {

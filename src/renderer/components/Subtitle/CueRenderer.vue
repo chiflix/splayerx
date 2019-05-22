@@ -2,13 +2,13 @@
   <div class="subtitle-wrapper">
     <span
       class="subtitle-border-content"
-      :style="{ textAlign: this.textAlign}"
+      :style="{ textAlign: textAlign }"
       :class="'subtitle-border-style'+ChosenIndex"
       v-html="finalText"
     />
     <span
       class="subtitle-content"
-      :style="{ textAlign: this.textAlign}"
+      :style="{ textAlign: textAlign}"
       :class="'subtitle-style'+ChosenIndex"
       v-html="finalText"
     />
@@ -21,8 +21,14 @@ import { mapGetters } from 'vuex';
 export default {
   name: 'CueRenderer',
   props: {
-    text: String,
-    settings: Object,
+    text: {
+      type: String,
+      required: true,
+    },
+    settings: {
+      type: Object,
+      required: true,
+    },
   },
   computed: {
     ...mapGetters(['chosenStyle', 'scaleNum', 'winWidth']),
