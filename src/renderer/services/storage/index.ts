@@ -1,17 +1,9 @@
-import { CacheFile } from "@/libs/file";
-
-export interface IFileStorable {
-  readFile(path: string): Promise<Buffer | null>
-  readDir(path: string): Promise<string[] | null>
+export interface ICacheFileStorable {
+  getPathBy(mediaHash: string): string
+  readDirBy(mediaHash: string): Promise<string[] | null>
+  createDirBy(mediaHash: string): Promise<boolean>
+  removeDirBy(mediaHash: string): Promise<boolean>
   writeFile(path: string, content: Buffer): Promise<boolean>
-  createDir(path: string): Promise<boolean>
-  removeDir(path: string): Promise<boolean>
+  readFile(path: string): Promise<Buffer | null>
   removeFile(path: string): Promise<boolean>
-}
-
-export class Storage {
-  protected file: CacheFile
-  constructor(ICacheFile: CacheFile) {
-    this.file = ICacheFile
-  }
 }
