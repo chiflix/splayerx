@@ -58,9 +58,6 @@ export default {
     },
   },
   watch: {
-    finalText(val) {
-      console.log(val);
-    },
     settings(val) {
       this.isItalic = false;
       this.isBold = false;
