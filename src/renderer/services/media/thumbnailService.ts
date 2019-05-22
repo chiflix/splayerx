@@ -50,6 +50,22 @@ export class ThumbnailService implements IThumbnailRequest {
       return null
     }
   }
+
+  /** 根据当前时间信息和缩略图总数获取缩略图的backgroundPosition
+   * @description ThumbnailService 对 ThumbnailRequest接口的实现
+   * @author TanYang
+   * @date 2019-05-22
+   * @param {number} currentTime
+   * @param {number} duration
+   * @param {number} count
+   * @returns {string} 当前hover缩略图的backgroundPosition
+   */
+  calculateThumbnailPosition(currentTime: number, duration: number, count: number): string {
+    const currentIndex = Math.abs(Math.floor(currentTime / (duration / count)));
+    const column = currentIndex === 0 ? 0 : Math.ceil(currentIndex / 10) - 1;
+    const row = currentIndex - (10 * column);
+    return `-${row * 100}% -${column * 100}%`;
+  }
 }
 
 export default new ThumbnailService(mediaStorageService)

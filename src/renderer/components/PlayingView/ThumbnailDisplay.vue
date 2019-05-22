@@ -5,8 +5,8 @@
        width: `${thumbnailWidth}px`,
        height: `${thumbnailHeight}px`,
        backgroundImage: src,
-       backgroundPosition: backPos,
-       backgroundSize: backSize,
+       backgroundPosition: backgroundPosition,
+       backgroundSize: backgroundSize,
      }"></div>
   </div>
 </template>
@@ -18,8 +18,8 @@ export default {
     thumbnailWidth: Number,
     thumbnailHeight: Number,
     src: String,
-    backPos: String,
-    backSize: String,
+    backgroundPosition: String,
+    backgroundSize: String,
   },
 };
 </script>

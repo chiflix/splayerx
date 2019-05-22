@@ -2,7 +2,7 @@
   <div class="thumbnail-wrapper"
     :style="{width: thumbnailWidth +'px', height: thumbnailHeight +'px', transform: `translateX(${positionOfThumbnail}px)`}">
     <div class="the-preview-thumbnail" :style="{height: thumbnailHeight + 2 +'px'}">
-      <thumbnail-display :thumbnailWidth="thumbnailWidth" :thumbnailHeight="thumbnailHeight" :src="src" :backPos="backPos" :backSize="backSize"></thumbnail-display>
+      <thumbnail-display :thumbnailWidth="thumbnailWidth" :thumbnailHeight="thumbnailHeight" :src="src" :backgroundPosition="backgroundPosition" :backgroundSize="backgroundSize"></thumbnail-display>
     </div>
     <div class="thumbnail-gradient"></div>
     <div class="time">
@@ -40,31 +40,24 @@ export default {
   },
   data() {
     return {
-      currentIndex: 0,
       thumbnailCount: 0,
       isSaved: false,
       imgExisted: false,
       imgSrc: '',
+      backgroundSize: '',
+      backgroundPosition: '',
     };
   },
   computed: {
-    ...mapGetters(['originSrc', 'convertedSrc', 'mediaHash', 'duration']),
-    backPos() {
-      const index = this.currentIndex;
-      const column = index === 0 ? 0 : Math.ceil(index / 10) - 1;
-      const row = index - (10 * column);
-      return `-${row * 100}% -${column * 100}%`;
-    },
-    backSize() {
-      return `1000% ${Math.ceil(this.thumbnailCount / 10) * 100}%`;
-    },
+    ...mapGetters(['originSrc', 'mediaHash', 'duration']),
     src() {
       return this.imgExisted || this.isSaved ? `url("${filePathToUrl(this.imgSrc)}")` : '';
     },
   },
   watch: {
     currentTime(val: number) {
-      this.currentIndex = Math.abs(Math.floor(val / (this.duration / this.thumbnailCount)));
+      this.backgroundPosition = thumbnailService
+        .calculateThumbnailPosition(val, this.duration, this.thumbnailCount);
     },
     originSrc() {
       this.isSaved = false;
@@ -80,6 +73,7 @@ export default {
     });
     this.$bus.$on('generate-thumbnails', async (num: number) => {
       this.thumbnailCount = num;
+      this.backgroundSize = `1000% ${Math.ceil(this.thumbnailCount / 10) * 100}%`;
       try {
         const result = await thumbnailService.getImage(this.mediaHash);
         if (!result) {
