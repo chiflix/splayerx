@@ -30,7 +30,7 @@
           width: `${thumbnailWidth - 0.7}px`,
           height: `${thumbnailHeight - 0.7}px`,
           border: chosen ? '0.7px solid rgba(255,255,255,0.6)'
-          : '0.7px solid rgba(255,255,255,0.15)',
+            : '0.7px solid rgba(255,255,255,0.15)',
         }"
       >
         <div
