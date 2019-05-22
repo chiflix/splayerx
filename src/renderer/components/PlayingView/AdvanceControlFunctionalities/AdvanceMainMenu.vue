@@ -43,7 +43,7 @@
           </transition>
           <advance-row-items
             :card-width="cardWidth > minInfoCardWidth ? cardWidth : minInfoCardWidth"
-            :chosen-size="ChosenSize"
+            :chosen-size-content="ChosenSizeContent"
             :is-rate-menu="true"
             :lists="numList"
             :item="$t('advance.rateTitle')"
@@ -171,7 +171,7 @@
           </transition>
           <advance-row-items
             :card-width="cardWidth > minInfoCardWidth ? cardWidth : minInfoCardWidth"
-            :chosen-size="ChosenSize"
+            :chosen-size-content="ChosenSizeContent"
             :is-rate-menu="false"
             :lists="$t('advance.fontItems')"
             :item="$t('advance.fontSize')"
@@ -429,7 +429,7 @@ export default {
     /**
      * @return {string}
      */
-    ChosenSize() {
+    ChosenSizeContent() {
       const compareContent = ['S', 'M', 'L', 'XL'];
       const enContent = ['Small', 'Normal', 'Large', 'Extra Large'];
       return this.$t(`advance.fontItems[${this.chosenSize}]`) === compareContent[this.chosenSize] ?
@@ -498,7 +498,7 @@ export default {
         ) + this.getTextWidth(
           `${this.rightItemFontSize}px`,
           this.normalFont,
-          this.ChosenSize,
+          this.ChosenSizeContent,
         );
         const secondLine = this.getTextWidth(
           `${this.textItemFontSize}px`,

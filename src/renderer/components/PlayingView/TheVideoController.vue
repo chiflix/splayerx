@@ -15,7 +15,7 @@
       key="playing-view"
       current-view="Playingview"
       :show-all-widgets="showAllWidgets"
-      :recent-playlist="displayState['recent-playlist']"
+      :recent-playlist="displayState.RecentPlaylist"
     />
     <notification-bubble
       ref="nextVideoUI"
@@ -24,11 +24,11 @@
     <recent-playlist
       ref="recentPlaylist"
       class="recent-playlist"
-      :display-state="displayState['recent-playlist']"
+      :display-state="displayState.RecentPlaylist"
       :mousemove-client-position="mousemoveClientPosition"
       :is-dragging="isDragging"
       :last-dragging.sync="lastDragging"
-      v-bind.sync="widgetsStatus['recent-playlist']"
+      v-bind.sync="widgetsStatus.RecentPlaylist"
       @can-hover-item="cancelPlayListTimeout"
       @conflict-resolve="conflictResolve"
       @update:playlistcontrol-showattached="updatePlaylistShowAttached"
@@ -60,21 +60,21 @@
       :style="{ marginBottom: preFullScreen ? '10px' : '0' }"
     >
       <playlist-control
-        v-fade-in="displayState['playlist-control']"
+        v-fade-in="displayState.PlaylistControl"
         class="button playlist"
-        v-bind.sync="widgetsStatus['playlist-control']"
+        v-bind.sync="widgetsStatus.PlaylistControl"
       />
       <subtitle-control
-        v-fade-in="displayState['subtitle-control']"
+        v-fade-in="displayState.SubtitleControl"
         class="button subtitle"
-        v-bind.sync="widgetsStatus['subtitle-control']"
+        v-bind.sync="widgetsStatus.SubtitleControl"
         :last-dragging.sync="lastDragging"
         @conflict-resolve="conflictResolve"
       />
       <advance-control
-        v-fade-in="displayState['advance-control']"
+        v-fade-in="displayState.AdvanceControl"
         class="button advance"
-        v-bind.sync="widgetsStatus['advance-control']"
+        v-bind.sync="widgetsStatus.AdvanceControl"
         :last-dragging.sync="lastDragging"
         @conflict-resolve="conflictResolve"
       />
@@ -147,7 +147,7 @@ export default {
       lastAttachedShowing: false,
       focusedTimestamp: 0,
       focusDelay: 500,
-      listenedWidget: 'the-video-controller',
+      listenedWidget: 'TheVideoController',
       attachedShown: false,
       needResetHoverProgressBar: false,
       isMousedown: false,
@@ -196,13 +196,13 @@ export default {
         ((!this.mouseStopped && !this.mouseLeftWindow) ||
         (!this.mouseLeftWindow && this.onOtherWidget) ||
         this.attachedShown || this.videoChanged ||
-        (this.isMousedown && this.currentMousedownWidget === 'play-button'));
+        (this.isMousedown && this.currentMousedownWidget === 'PlayButton'));
     },
     onOtherWidget() {
       return (
         (this.currentWidget !== this.$options.name) &&
-        (this.currentWidget !== 'play-button') &&
-        (this.currentWidget !== 'volume-indicator')
+        (this.currentWidget !== 'PlayButton') &&
+        (this.currentWidget !== 'VolumeIndicator')
       );
     },
     cursorStyle() {
@@ -219,7 +219,7 @@ export default {
   watch: {
     originSrc() {
       Object.keys(this.widgetsStatus).forEach((item) => {
-        if (item !== 'playlist-control') {
+        if (item !== 'PlaylistControl') {
           this.widgetsStatus[item].showAttached = false;
         }
       });
@@ -235,7 +235,7 @@ export default {
     isDragging(val, oldval) {
       if (
         !val && oldval &&
-        !['subtitle-control', 'advance-control'].includes(this.currentMousedownWidget)
+        !['SubtitleControl', 'AdvanceControl'].includes(this.currentMousedownWidget)
       ) {
         this.lastDragging = true;
       }
@@ -298,9 +298,9 @@ export default {
     this.createTouchBar();
     this.UIElements = this.getAllUIComponents(this.$refs.controller);
     this.UIElements.forEach((value) => {
-      this.displayState[value.name] = value.name !== 'recent-playlist';
-      if (value.name === 'playlist-control' && !this.playingList.length) {
-        this.displayState['playlist-control'] = false;
+      this.displayState[value.name] = value.name !== 'RecentPlaylist';
+      if (value.name === 'PlaylistControl' && !this.playingList.length) {
+        this.displayState.PlaylistControl = false;
       }
       this.widgetsStatus[value.name] = {
         selected: false,
@@ -421,7 +421,7 @@ export default {
     },
     updatePlaylistShowAttached(event) {
       clearTimeout(this.openPlayListTimeId);
-      this.widgetsStatus['playlist-control'].showAttached = this.playListState = event;
+      this.widgetsStatus.PlaylistControl.showAttached = this.playListState = event;
     },
     updatePlayButtonState(mousedownState) {
       this.mousedownOnPlayButton = mousedownState;
@@ -484,15 +484,15 @@ export default {
     UIDisplayManager() {
       const tempObject = {};
       Object.keys(this.displayState).forEach((index) => {
-        tempObject[index] = !this.widgetsStatus['playlist-control'].showAttached;
+        tempObject[index] = !this.widgetsStatus.PlaylistControl.showAttached;
       });
-      tempObject['recent-playlist'] = (
+      tempObject.RecentPlaylist = (
         this.playListState ||
-        this.widgetsStatus['playlist-control'].showAttached
+        this.widgetsStatus.PlaylistControl.showAttached
       ) &&
         !this.dragOver;
       this.displayState = tempObject;
-      this.tempRecentPlaylistDisplayState = this.widgetsStatus['playlist-control'].showAttached;
+      this.tempRecentPlaylistDisplayState = this.widgetsStatus.PlaylistControl.showAttached;
     },
     UIStateManager() {
       const {
@@ -509,21 +509,21 @@ export default {
           this.widgetsStatus[name].mousedownOnOther = currentMousedownWidget !== name;
           // 播放列表与控制它的按钮在实现并不是父子组件，然而在逻辑上是附属关系
           // 因此对于mousedown与mouseup对两者都做了判断
-          if (name === 'recent-playlist') {
+          if (name === 'RecentPlaylist') {
             this.widgetsStatus[name].mousedownOnOther = currentMousedownWidget !== name
-              && currentMousedownWidget !== 'playlist-control';
+              && currentMousedownWidget !== 'PlaylistControl';
           }
         }
         if (mouseupChanged) {
           this.widgetsStatus[name].mouseupOnOther = currentMouseupWidget !== name;
-          if (name === 'recent-playlist') {
-            this.widgetsStatus[name].mouseupOnOther = currentMouseupWidget !== 'playlist-control'
-              && currentMousedownWidget !== 'playlist-control';
+          if (name === 'RecentPlaylist') {
+            this.widgetsStatus[name].mouseupOnOther = currentMouseupWidget !== 'PlaylistControl'
+              && currentMousedownWidget !== 'PlaylistControl';
           }
         }
         if (!this.showAllWidgets) {
           // 播放列表不受showAllwidgets变量的影响而关闭
-          if (name !== 'playlist-control') {
+          if (name !== 'PlaylistControl') {
             this.widgetsStatus[name].showAttached = false;
           }
         }
@@ -572,8 +572,8 @@ export default {
     },
     handleMousedownLeft(e) {
       this.isMousedown = true;
-      this.lastMousedownPlaybutton = this.getComponentName(e.target) === 'play-button';
-      this.lastMousedownVolume = this.getComponentName(e.target) === 'volume-indicator';
+      this.lastMousedownPlaybutton = this.getComponentName(e.target) === 'PlayButton';
+      this.lastMousedownVolume = this.getComponentName(e.target) === 'VolumeIndicator';
       if (this.lastMousedownPlaybutton || this.lastMousedownVolume) {
         this.mouseStopped = false;
         if (this.mouseStoppedId) {
@@ -607,14 +607,14 @@ export default {
           this.clicks = 0;
           this.lastDragging = false;
           this.lastAttachedShowing =
-            this.widgetsStatus['subtitle-control'].showAttached ||
-            this.widgetsStatus['advance-control'].showAttached ||
-            this.widgetsStatus['playlist-control'].showAttached;
+            this.widgetsStatus.SubtitleControl.showAttached ||
+            this.widgetsStatus.AdvanceControl.showAttached ||
+            this.widgetsStatus.PlaylistControl.showAttached;
         }, this.clicksDelay);
       } else if (this.clicks === 2) {
         clearTimeout(this.clicksTimer);
         this.clicks = 0;
-        if (this.currentMouseupWidget === 'the-video-controller') {
+        if (this.currentMouseupWidget === 'TheVideoController') {
           this.toggleFullScreenState();
         }
       }
