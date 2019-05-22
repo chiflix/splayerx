@@ -13,12 +13,12 @@ export class ThumbnailService implements IThumbnailRequest {
    * @param {string} mediaHash
    * @param {string} videoSrc
    * @param {number} cols
-   * @returns {Promise<string>}
+   * @returns {Promise<string>} 返回生成的缩略图路径
    * @memberof ThumbnailService
    */
   async generateImage(mediaHash: string, videoSrc: string, cols: number): Promise<string> {
     try {
-      const gpath = await this.mediaStorageService.generate(mediaHash, 'thumbnail');
+      const gpath = await this.mediaStorageService.generatePathBy(mediaHash, 'thumbnail');
       if (gpath) {
         const info = {
           src: videoSrc,
@@ -39,12 +39,12 @@ export class ThumbnailService implements IThumbnailRequest {
    * @author tanghaixiang@xindong.com
    * @date 2019-05-21
    * @param {string} mediaHash
-   * @returns {(Promise<string | null>)}
+   * @returns {(Promise<string | null>)} 返回对应视频的缩略图路径
    * @memberof ThumbnailService
    */
   async getImage(mediaHash: string): Promise<string | null> {
     try {
-      const result = await this.mediaStorageService.getImage(mediaHash, 'thumbnail');
+      const result = await this.mediaStorageService.getImageBy(mediaHash, 'thumbnail');
       return result
     } catch (err) {
       return null
