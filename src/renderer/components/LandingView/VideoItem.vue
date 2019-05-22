@@ -56,9 +56,11 @@ export default {
   props: {
     firstIndex: {
       type: Number,
+      default: 0,
     },
     lastIndex: {
       type: Number,
+      default: 0,
     },
     shifting: {
       type: Boolean,
@@ -68,15 +70,19 @@ export default {
     },
     index: {
       type: Number,
+      default: NaN,
     },
     playlist: {
       type: Object,
+      default: () => {},
     },
     thumbnailHeight: {
       type: Number,
+      default: 63,
     },
     thumbnailWidth: {
       type: Number,
+      default: 112,
     },
     lastPlayedFile: {
       type: Array,
@@ -88,6 +94,7 @@ export default {
     },
     filePathNeedToDelete: {
       type: String,
+      default: '',
     },
   },
   data() {

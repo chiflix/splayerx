@@ -20,8 +20,8 @@
         class="img blur"
         :style="{
           backgroundImage: !isPlaying ?
-          `linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%), ${backgroundImage}`
-          : 'linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%)',
+            `linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%), ${backgroundImage}`
+            : 'linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%)',
         }"
       />
       <div
@@ -152,9 +152,11 @@ export default {
   props: {
     index: {
       type: Number,
+      default: NaN,
     },
     maxIndex: {
       type: Number,
+      default: 0,
     },
     hovered: {
       type: Boolean,
@@ -164,15 +166,19 @@ export default {
     },
     indexOfMovingItem: {
       type: Number,
+      default: NaN,
     },
     movementX: {
       type: Number,
+      default: 0,
     },
     movementY: {
       type: Number,
+      default: 0,
     },
     indexOfMovingTo: {
       type: Number,
+      default: this.index,
     },
     isLastPage: {
       type: Boolean,
@@ -196,9 +202,11 @@ export default {
     },
     thumbnailHeight: {
       type: Number,
+      default: 63,
     },
     winWidth: {
       type: Number,
+      default: 720,
     },
     // content related
     isPlaying: {
@@ -207,6 +215,7 @@ export default {
     },
     path: {
       type: String,
+      default: '',
     },
     eventTarget: {
       type: Object,
@@ -214,6 +223,7 @@ export default {
     },
     sizeAdaption: {
       type: Function,
+      default: val => val,
     },
     pageSwitching: {
       type: Boolean,
@@ -236,6 +246,53 @@ export default {
       deleteTimeId: NaN,
       selfMoving: false,
     };
+  },
+  computed: {
+    ...mapGetters(['playingList', 'items']),
+    aboutToDelete() {
+      return this.selfMoving && (-(this.movementY) > this.thumbnailHeight * 1.5);
+    },
+    baseName() {
+      const parsedName = parseNameFromPath(this.path);
+      if (parsedName.episode && parsedName.season) {
+        return `S${parsedName.season}E${parsedName.episode}`;
+      } else if (parsedName.episode && !parsedName.season) {
+        return `EP${parsedName.episode}`;
+      } else if (parsedName.season && !parsedName.episode) {
+        return `SE${parsedName.season}`;
+      }
+      return path.basename(this.path, path.extname(this.path));
+    },
+    backgroundImage() {
+      return `url(${this.imageSrc})`;
+    },
+    imageSrc() {
+      if (this.lastPlayedTime) {
+        if (this.mediaInfo.duration - this.lastPlayedTime < 10) {
+          return this.coverSrc;
+        }
+        return this.smallShortCut;
+      }
+      return this.coverSrc;
+    },
+    imageLoaded() {
+      return this.smallShortCut || this.coverSrc !== '';
+    },
+    sliderPercentage() {
+      if (this.lastPlayedTime) {
+        if (this.mediaInfo.duration &&
+            this.lastPlayedTime / this.mediaInfo.duration <= 1) {
+          return (this.lastPlayedTime / this.mediaInfo.duration) * 100;
+        }
+      }
+      return 0;
+    },
+    side() {
+      return this.winWidth > 1355 ? this.thumbnailWidth / (112 / 14) : 14;
+    },
+    bottom() {
+      return this.winWidth > 1355 ? this.thumbnailWidth / (112 / 14) : 14;
+    },
   },
   watch: {
     aboutToDelete(val) {
@@ -448,53 +505,6 @@ export default {
           this.mediaInfo = Object.assign(this.mediaInfo, val);
         });
       }
-    },
-  },
-  computed: {
-    ...mapGetters(['playingList', 'items']),
-    aboutToDelete() {
-      return this.selfMoving && (-(this.movementY) > this.thumbnailHeight * 1.5);
-    },
-    baseName() {
-      const parsedName = parseNameFromPath(this.path);
-      if (parsedName.episode && parsedName.season) {
-        return `S${parsedName.season}E${parsedName.episode}`;
-      } else if (parsedName.episode && !parsedName.season) {
-        return `EP${parsedName.episode}`;
-      } else if (parsedName.season && !parsedName.episode) {
-        return `SE${parsedName.season}`;
-      }
-      return path.basename(this.path, path.extname(this.path));
-    },
-    backgroundImage() {
-      return `url(${this.imageSrc})`;
-    },
-    imageSrc() {
-      if (this.lastPlayedTime) {
-        if (this.mediaInfo.duration - this.lastPlayedTime < 10) {
-          return this.coverSrc;
-        }
-        return this.smallShortCut;
-      }
-      return this.coverSrc;
-    },
-    imageLoaded() {
-      return this.smallShortCut || this.coverSrc !== '';
-    },
-    sliderPercentage() {
-      if (this.lastPlayedTime) {
-        if (this.mediaInfo.duration &&
-            this.lastPlayedTime / this.mediaInfo.duration <= 1) {
-          return (this.lastPlayedTime / this.mediaInfo.duration) * 100;
-        }
-      }
-      return 0;
-    },
-    side() {
-      return this.winWidth > 1355 ? this.thumbnailWidth / (112 / 14) : 14;
-    },
-    bottom() {
-      return this.winWidth > 1355 ? this.thumbnailWidth / (112 / 14) : 14;
     },
   },
 };
