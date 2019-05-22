@@ -41,7 +41,10 @@ export default {
     attachedShown: Boolean,
     showAllWidgets: Boolean,
     mousedownOnVolume: Boolean,
-    mousemovePosition: Object,
+    mousemovePosition: {
+      type: Object,
+      default: () => {},
+    },
   },
   data() {
     return {

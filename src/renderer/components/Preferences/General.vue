@@ -138,7 +138,10 @@ export default {
     BaseCheckBox,
     Icon,
   },
-  props: ['mouseDown', 'isMoved'],
+  props: {
+    mouseDown: Boolean,
+    isMoved: Boolean,
+  },
   data() {
     return {
       showSelection: false,
