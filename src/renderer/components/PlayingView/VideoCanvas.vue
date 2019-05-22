@@ -24,7 +24,8 @@
         @loadedmetadata="onMetaLoaded"
         @audiotrack="onAudioTrack"
       />
-      <!-- calc(100% - 0.1px) fix for mac book pro 15 full screen after video controller fade-out video will shake -->
+      <!-- calc(100% - 0.1px) fix for mac book pro 15 full screen after
+      video controller fade-out video will shake -->
     </transition>
     <div
       class="mask"

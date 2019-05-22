@@ -132,18 +132,22 @@ export default {
 .nextVideo {
   zoom: 1;
 
-  @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
+  @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px),
+  screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
     & {
       display: none;
     }
   }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
     zoom: 1;
   }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
     zoom: 1.2;
   }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     zoom: 1.68;
   }
 
@@ -172,7 +176,11 @@ export default {
       right: 0;
       width: 50px;
       height: 100%;
-      background-image: linear-gradient(-90deg, rgba(238,238,238,0.29) 0%, rgba(255,255,255,0.00) 100%);
+      background-image: linear-gradient(
+        -90deg,
+        rgba(238,238,238,0.29) 0%,
+        rgba(255,255,255,0.00) 100%
+      );
     }
     .progressBorderLight {
       position: absolute;
@@ -180,7 +188,13 @@ export default {
       width: 1px;
       height: 100%;
       opacity: 0.7;
-      background-image: linear-gradient(-180deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.59) 32%, rgba(255,255,255,0.17) 71%, rgba(255,255,255,0.00) 100%);
+      background-image: linear-gradient(
+        -180deg,
+        rgba(255,255,255,0.00) 0%,
+        rgba(255,255,255,0.59) 32%,
+        rgba(255,255,255,0.17) 71%,
+        rgba(255,255,255,0.00) 100%
+      );
     }
   }
   &__infoWrap {

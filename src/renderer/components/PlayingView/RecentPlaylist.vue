@@ -41,7 +41,11 @@
               }"
             >
               <span ref="lastPlayedTime" />
-              {{ timecodeFromSeconds(videoDuration) }}&nbsp&nbsp·&nbsp&nbsp{{ inWhichSource }}&nbsp&nbsp{{ indexInPlaylist }} / {{ numberOfPlaylistItem }}
+              {{
+                timecodeFromSeconds(videoDuration)
+              }}&nbsp;&nbsp;·&nbsp;&nbsp;{{
+                inWhichSource
+              }}&nbsp;&nbsp;{{ indexInPlaylist }} / {{ numberOfPlaylistItem }}
             </div>
             <div
               class="file-name"
