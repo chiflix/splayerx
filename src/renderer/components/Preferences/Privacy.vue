@@ -369,7 +369,12 @@ export default {
       line-height: 28px;
 
       &:hover {
-        background-image: linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.069) 23%, rgba(255,255,255,0.00) 100%);
+        background-image: linear-gradient(
+          90deg,
+          rgba(255,255,255,0.00) 0%,
+          rgba(255,255,255,0.069) 23%,
+          rgba(255,255,255,0.00) 100%,
+        );
       }
     }
 
