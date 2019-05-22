@@ -36,12 +36,12 @@ export default {
     Icon,
   },
   props: {
-    paused: false,
-    isFocused: true,
-    attachedShown: false,
-    showAllWidgets: false,
-    mousemovePosition: { x: 0, y: 0 },
-    mousedownOnVolume: false,
+    paused: Boolean,
+    isFocused: Boolean,
+    attachedShown: Boolean,
+    showAllWidgets: Boolean,
+    mousedownOnVolume: Boolean,
+    mousemovePosition: Object,
   },
   data() {
     return {
@@ -192,7 +192,8 @@ export default {
   height: 100%;
   transition: transform 90ms cubic-bezier(0, 1, 1, 1);
 }
-@media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
+@media screen and (max-aspect-ratio: 1/1) and (max-width: 288px),
+screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
   .icon-wrapper {
     width: 54px;
     height: 54px;
@@ -201,7 +202,8 @@ export default {
     margin-left: 2px;
   }
 }
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
+screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
   .icon-wrapper {
     width: 67px;
     height: 67px;
@@ -210,7 +212,8 @@ export default {
     margin-left: 3px;
   }
 }
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
   .icon-wrapper {
     width: 93px;
     height: 93px;
@@ -219,7 +222,8 @@ export default {
     margin-left: 3px;
   }
 }
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   .icon-wrapper {
     width: 129px;
     height: 129px;

@@ -49,8 +49,10 @@
             top: `-${0.7 / 2}px`,
             width: `${thumbnailWidth - 0.7}px`,
             height: `${thumbnailHeight - 0.7}px`,
-            border: chosen ? '0.7px solid rgba(255,255,255,0.6)' : '0.7px solid rgba(255,255,255,0.15)',
-            backgroundColor: aboutToDelete ? 'rgba(0,0,0,0.43)' : chosen ? 'rgba(255,255,255,0.2)' : '',
+            border: chosen ? '0.7px solid rgba(255,255,255,0.6)'
+            : '0.7px solid rgba(255,255,255,0.15)',
+            backgroundColor: aboutToDelete ? 'rgba(0,0,0,0.43)'
+            : chosen ? 'rgba(255,255,255,0.2)' : '',
           }"
         >
           <div
