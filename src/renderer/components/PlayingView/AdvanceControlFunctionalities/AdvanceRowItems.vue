@@ -112,7 +112,7 @@ export default {
     isRateMenu: {
       type: Boolean,
     },
-    chosenSize: {
+    chosenSizeContent: {
       type: String,
     },
     cardWidth: {
@@ -170,7 +170,7 @@ export default {
       if (this.isRateMenu) {
         return `${this.rate} x`;
       } else if (!this.isRateMenu) {
-        return `${this.ChosenSize}`;
+        return `${this.chosenSizeContent}`;
       }
       return null;
     },
