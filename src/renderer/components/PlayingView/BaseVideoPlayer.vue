@@ -283,6 +283,7 @@ export default {
   ** Adding the opacity properity to solve windows brightness when appling the backdrop-filter.
   ** (This should be fixed in libcc.)
   */
+  opacity: 0.9999;
   object-fit: cover;
 }
 </style>
