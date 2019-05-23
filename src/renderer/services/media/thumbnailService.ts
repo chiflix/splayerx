@@ -16,7 +16,7 @@ export class ThumbnailService implements IThumbnailRequest {
    * @returns {Promise<string>} 返回生成的缩略图路径
    * @memberof ThumbnailService
    */
-  async generateImage(mediaHash: string, videoSrc: string, cols: number): Promise<string> {
+  async generateThumbnailImage(mediaHash: string, videoSrc: string, cols: number): Promise<string> {
     try {
       const gpath = await this.mediaStorageService.generatePathBy(mediaHash, 'thumbnail');
       if (gpath) {
@@ -42,7 +42,7 @@ export class ThumbnailService implements IThumbnailRequest {
    * @returns {(Promise<string | null>)} 返回对应视频的缩略图路径
    * @memberof ThumbnailService
    */
-  async getImage(mediaHash: string): Promise<string | null> {
+  async getThumbnailImage(mediaHash: string): Promise<string | null> {
     try {
       const result = await this.mediaStorageService.getImageBy(mediaHash, 'thumbnail');
       return result
@@ -68,4 +68,5 @@ export class ThumbnailService implements IThumbnailRequest {
   }
 }
 
-export default new ThumbnailService(mediaStorageService)
+export default new ThumbnailService(mediaStorageService);
+

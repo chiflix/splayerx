@@ -52,7 +52,7 @@ export class CacheFile implements ICacheFileStorable {
    */
   async createDirBy(mediaHash: string): Promise<boolean> {
     try {
-      const p = join(`${getDefaultDataPath()}/${VIDEO_DIRNAME}/`, mediaHash);
+      const path = join(`${getDefaultDataPath()}/${VIDEO_DIRNAME}/`, mediaHash);
       await mkdir(path);
       return true;
     } catch (error) {
@@ -69,8 +69,9 @@ export class CacheFile implements ICacheFileStorable {
    * @memberof CacheFile
    */
   async readDirBy(mediaHash: string): Promise<string[] | null> {
+    let path = '';
     try {
-      const path = join(`${getDefaultDataPath()}/${VIDEO_DIRNAME}/`, mediaHash);
+      path = join(`${getDefaultDataPath()}/${VIDEO_DIRNAME}/`, mediaHash);
       const isExist = await checkPathExist(path);
       if (isExist) {
         return await readDir(path);
