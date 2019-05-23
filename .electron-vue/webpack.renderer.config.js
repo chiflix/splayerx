@@ -50,7 +50,7 @@ let rendererConfig = {
   module: {
     rules: [
       {
-        test: /\.ts$/,
+        test: /\.tsx?$/,
         exclude: /node_modules/,
         use: [
           {
@@ -58,15 +58,6 @@ let rendererConfig = {
             options: {
               appendTsSuffixTo: [ /\.vue$/ ]
             }
-          }
-        ]
-      },
-      {
-        test: /\.tsx$/,
-        exclude: /node_modules/,
-        use: [
-          {
-            loader: 'ts-loader',
           }
         ]
       },

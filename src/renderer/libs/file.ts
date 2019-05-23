@@ -1,4 +1,3 @@
-
 import { access, readdir } from 'fs';
 //@ts-ignore
 import mkdirp from 'mkdirp';
