@@ -1,4 +1,4 @@
-import { IMediaStorable } from '@/services/media';
+import { IMediaStorable } from '@/interfaces/services/IMediaStorable';
 import cacheFileInstance, { CacheFile } from '@/libs/cacheFile';
 //@ts-ignore
 import { join } from 'path';
