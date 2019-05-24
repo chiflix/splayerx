@@ -5,7 +5,8 @@
       fontStyle: isItalic ? 'italic' : '',
       fontWeight: isBold ? 'bold' : '',
       textDecoration: lineType,
-    }">
+    }"
+  >
     <span
       class="subtitle-border-content"
       :style="{ textAlign: textAlign }"
