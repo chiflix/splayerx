@@ -1,7 +1,6 @@
 <template>
   <div
     ref="controller"
-    class="the-video-controller"
     :style="{ cursor: cursorStyle }"
     @mousemove="handleMousemove"
     @mouseenter="handleMouseenter"
@@ -10,12 +9,13 @@
     @mouseup="handleMouseup"
     @mousedown.left="handleMousedownLeft"
     @click.left="handleMouseupLeft"
+    class="the-video-controller"
   >
     <titlebar
       key="playing-view"
-      current-view="Playingview"
       :show-all-widgets="showAllWidgets"
       :recent-playlist="displayState.RecentPlaylist"
+      current-view="Playingview"
     />
     <notification-bubble
       ref="nextVideoUI"
@@ -23,7 +23,6 @@
     />
     <recent-playlist
       ref="recentPlaylist"
-      class="recent-playlist"
       :display-state="displayState.RecentPlaylist"
       :mousemove-client-position="mousemoveClientPosition"
       :is-dragging="isDragging"
@@ -32,13 +31,13 @@
       @can-hover-item="cancelPlayListTimeout"
       @conflict-resolve="conflictResolve"
       @update:playlistcontrol-showattached="updatePlaylistShowAttached"
+      class="recent-playlist"
     />
     <div
       v-fade-in="showAllWidgets || progressTriggerStopped"
       class="masking"
     />
     <play-button
-      class="play-button no-drag"
       :mousedown-on-volume="mousedownOnVolume"
       :mousemove-position="mousemoveClientPosition"
       :show-all-widgets="showAllWidgets"
@@ -46,37 +45,38 @@
       :paused="paused"
       :attached-shown="attachedShown"
       @update:playbutton-state="updatePlayButtonState"
+      class="play-button no-drag"
     />
     <volume-indicator
-      class="no-drag"
       :attached-shown="attachedShown"
       :mousedown-on-play-button="mousedownOnPlayButton"
       :show-all-widgets="showAllWidgets"
       @update:volume-state="updateVolumeState"
+      class="no-drag"
     />
     <div
       v-fade-in="showAllWidgets"
-      class="control-buttons"
       :style="{ marginBottom: preFullScreen ? '10px' : '0' }"
+      class="control-buttons"
     >
       <playlist-control
         v-fade-in="displayState.PlaylistControl"
-        class="button playlist"
         v-bind.sync="widgetsStatus.PlaylistControl"
+        class="button playlist"
       />
       <subtitle-control
         v-fade-in="displayState.SubtitleControl"
-        class="button subtitle"
         v-bind.sync="widgetsStatus.SubtitleControl"
         :last-dragging.sync="lastDragging"
         @conflict-resolve="conflictResolve"
+        class="button subtitle"
       />
       <advance-control
         v-fade-in="displayState.AdvanceControl"
-        class="button advance"
         v-bind.sync="widgetsStatus.AdvanceControl"
         :last-dragging.sync="lastDragging"
         @conflict-resolve="conflictResolve"
+        class="button advance"
       />
     </div>
     <the-time-codes

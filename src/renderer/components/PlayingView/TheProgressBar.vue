@@ -1,15 +1,14 @@
 <template>
   <div
     v-fade-in="showAllWidgets || progressTriggerStopped"
-    class="the-progress-bar"
     @mousemove="handleMousemove"
     @mouseenter="hoveredmouseenter"
     @mouseleave="handleMouseleave"
     @mousedown.stop="handleMousedown"
+    class="the-progress-bar"
   >
     <the-preview-thumbnail
       v-show="showThumbnail"
-      class="the-preview-thumbnail"
       :current-time="hoveredCurrentTime"
       :max-thumbnail-width="240"
       :video-ratio="ratio"
@@ -18,22 +17,22 @@
       :thumbnail-height="thumbnailHeight"
       :position-of-thumbnail="thumbnailPosition"
       :hovered-end="hoveredPercent === 100 && !!nextVideo"
+      class="the-preview-thumbnail"
     />
     <div
       ref="leftInvisible"
-      class="fake-button left"
       :style="{ height: fakeButtonHeight }"
+      class="fake-button left"
     >
       <div
-        class="fake-progress"
         :style="{
           height: hovering ? '10px' : '4px',
           backgroundColor: leftFakeProgressBackgroundColor,
         }"
+        class="fake-progress"
       >
         <div
           v-if="hoveredCurrentTime === 0 && hovering"
-          class="radius"
           :style="{
             width: '20px',
             height: '10px',
@@ -42,12 +41,13 @@
             backgroundColor: 'rgba(255, 255, 255, 0.9)',
             transition: 'background-color 150ms, height 150ms',
           }"
+          class="radius"
         />
       </div>
     </div>
     <div
-      class="progress"
       :style="{ height: hovering ? '10px' : '4px' }"
+      class="progress"
     >
       <div
         ref="hoveredProgress"
@@ -59,22 +59,22 @@
       />
       <div
         ref="defaultProgress"
-        class="default"
         :style="{ order: '2' }"
+        class="default"
       />
     </div>
     <div
       ref="rightInvisible"
-      class="fake-button right"
       :style="{ height: fakeButtonHeight }"
+      class="fake-button right"
     >
       <div
         ref="fakeProgress"
-        class="fake-progress"
         :style="{
           height: hovering ? '10px' : '4px',
           backgroundColor: rightFakeProgressBackgroundColor,
         }"
+        class="fake-progress"
       />
     </div>
   </div>

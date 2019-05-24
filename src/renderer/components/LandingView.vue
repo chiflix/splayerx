@@ -15,10 +15,10 @@
         >
           <div
             :key="item.path"
-            class="background-image"
             :style="{
               backgroundImage: backgroundUrl,
             }"
+            class="background-image"
           >
             <div class="background-mask" />
           </div>
@@ -41,8 +41,8 @@
           </div>
           <div class="item-progress">
             <div
-              class="progress-played"
               :style="{ width: item.percentage + '%' }"
+              class="progress-played"
             />
           </div>
         </div>
@@ -63,25 +63,25 @@
       class="mask"
     />
     <div
-      class="controller"
       :style="{
         transform: isFullScreen ? '' : `translateX(${move}px)`,
         bottom: winWidth > 1355 ? `${40 / 1355 * winWidth}px` : '40px',
         transition: tranFlag ? 'transform 400ms cubic-bezier(0.42, 0, 0.58, 1)' : '',
       }"
+      class="controller"
     >
       <div
-        class="playlist no-drag"
         :style="{marginLeft: winWidth > 1355 ? `${50 / 1355 * winWidth}px` : '50px'}"
+        class="playlist no-drag"
       >
         <div
-          class="button"
           :style="{
             height:`${thumbnailHeight}px`,
             width:`${thumbnailWidth}px`,
             marginRight: `${marginRight}px`,
           }"
           @click="openOrMove"
+          class="button"
         >
           <div class="btnMask">
             <Icon

@@ -1,31 +1,31 @@
 <template>
   <div
-    class="itemContainer"
     :style="{
       height: heightSize,
       backgroundImage: !isChosen ? '' :
         'linear-gradient(90deg, rgba(255,255,255,0.03) ' +
         '0%, rgba(255,255,255,0.07) 24%, rgba(255,255,255,0.03) 100%)',
     }"
+    class="itemContainer"
   >
     <div
-      class="detail"
       :style="{
         height: heightSize,
       }"
+      class="detail"
     >
       <div
-        class="textContainer"
         :style="{
           cursor: isChosen ? 'default' : 'pointer',
         }"
+        class="textContainer"
       >
         <div
-          class="textItem advanceNormalTitle"
           :style="{
             color: color,
             transition: 'color 300ms',
           }"
+          class="textItem advanceNormalTitle"
         >
           {{ item }}
         </div>
@@ -57,13 +57,13 @@
               @click="handleClick(index)"
             >
               <p
-                class="text"
                 :style="{
                   color: itemChosen(index) || index === hoverIndex ?
                     'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
                   margin: 'auto',
                   transition: 'color 300ms',
                 }"
+                class="text"
               >
                 {{ list }}
               </p>

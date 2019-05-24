@@ -1,45 +1,45 @@
 <template>
   <div class="itemContainer advance-column-items">
     <div
-      class="textContainer advanceNormalTitle"
       :style="{
         cursor: 'default',
       }"
+      class="textContainer advanceNormalTitle"
     >
       <div class="textItem">
         {{ item }}
       </div>
     </div>
     <div
-      class="listContainer"
       :style="{
         height: heightSize,
       }"
+      class="listContainer"
     >
       <div
-        class="scrollScope"
         :style="{
           overflowY: tracks.length > 2 ? 'scroll' : '',
           height: scopeHeight,
         }"
+        class="scrollScope"
       >
         <div class="columnContainer">
           <div
             v-for="(track, index) in tracks"
             :key="track.id"
-            class="columnNumDetail"
             :style="{ cursor: track.enabled ? 'default' : 'pointer' }"
             @mouseover="handleOver(index)"
             @mouseout="handleOut(index)"
             @click="handleClick(index)"
+            class="columnNumDetail"
           >
             <div
-              class="text advanceNormalItem"
               :style="{
                 color: index === hoverIndex || track.enabled ?
                   'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
                 transition: 'color 300ms',
               }"
+              class="text advanceNormalItem"
             >
               {{ track.language === 'und' || track.language === '' ?
                 `${$t('advance.track')} ${index + 1}`
@@ -48,11 +48,11 @@
             </div>
           </div>
           <div
-            class="card"
             :style="{
               marginTop: cardPos,
               transition: 'all 200ms cubic-bezier(0.17, 0.67, 0.17, 0.98)'
             }"
+            class="card"
           />
         </div>
       </div>

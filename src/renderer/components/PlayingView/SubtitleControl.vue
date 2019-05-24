@@ -8,7 +8,6 @@
       <transition name="sub-trans-l">
         <div
           v-show="showAttached"
-          class="sub-menu-wrapper subtitle-scroll-items"
           :style="{
             cursor: 'default',
             transition: showAttached ? '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' :
@@ -16,6 +15,7 @@
             height: hiddenText ? `${contHeight + hoverHeight}px` : `${contHeight}px`,
             fontWeight: '900',
           }"
+          class="sub-menu-wrapper subtitle-scroll-items"
         >
           <div class="element bottom">
             <div class="element content">
@@ -25,13 +25,12 @@
                 </div>
                 <div
                   v-show="enabledSecondarySub"
-                  class="subtitleShift"
                   @mouseup="subTypeShift"
                   @mouseover="shiftItemHover"
                   @mouseleave="shiftItemLeave"
+                  class="subtitleShift"
                 >
                   <div
-                    class="firstSub"
                     :style="{
                       color: isFirstSubtitle || shiftItemHovered ?
                         'rgba(255, 255, 255, 0.5)' : 'rgba(255, 255, 255, 0.2)',
@@ -39,11 +38,11 @@
                       boxShadow: isFirstSubtitle ? '1px 0 2px rgba(0, 0, 0, 0.09)' : '',
                       borderRadius: isFirstSubtitle ? '2px' : '',
                     }"
+                    class="firstSub"
                   >
                     <span>1</span>
                   </div>
                   <div
-                    class="secondarySub"
                     :style="{
                       color: !isFirstSubtitle || shiftItemHovered ?
                         'rgba(255, 255, 255, 0.5)' : 'rgba(255, 255, 255, 0.2)',
@@ -51,23 +50,23 @@
                       boxShadow: !isFirstSubtitle ? '-1px 0 2px rgba(0, 0, 0, 0.09)' : '',
                       borderRadius: !isFirstSubtitle ? '2px' : '',
                     }"
+                    class="secondarySub"
                   >
                     <span>2</span>
                   </div>
                 </div>
                 <Icon
                   ref="refreshRotate"
-                  type="refresh"
-                  class="refresh"
                   :class="animClass ? 'icon-rotate-animation' : ''"
                   @mouseup.native="handleRefresh"
+                  type="refresh"
+                  class="refresh"
                 />
               </div>
 
               <div class="sub-menu">
                 <div
                   ref="scroll"
-                  class="scrollScope"
                   :class="refAnimation"
                   :style="{
                     transition: '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
@@ -75,11 +74,11 @@
                     overflowY: isOverFlow,
                   }"
                   @animationend="finishAnimation"
+                  class="scrollScope"
                 >
                   <div class="itemContainer">
                     <div v-if="!(loadingSubsPlaceholders.length > 0)">
                       <div
-                        class="menu-item-text-wrapper"
                         :style="{
                           color: hoverIndex === -1 || currentSubtitleIndex === -1 ?
                             'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
@@ -89,6 +88,7 @@
                         @mouseup="$bus.$emit('off-subtitle')"
                         @mouseover="toggleItemsMouseOver(-1)"
                         @mouseleave="toggleItemsMouseLeave(-1)"
+                        class="menu-item-text-wrapper"
                       >
                         <div class="text">
                           {{ noSubtitle }}
@@ -102,7 +102,6 @@
                     >
                       <div
                         :id="'item'+index"
-                        class="menu-item-text-wrapper"
                         :style="{
                           transition: isOverFlow ? '' : '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
                           color: hoverIndex === index || currentSubtitleIndex === index ?
@@ -114,14 +113,15 @@
                         @mouseup="toggleItemClick($event, index)"
                         @mouseover="toggleItemsMouseOver(index)"
                         @mouseleave="toggleItemsMouseLeave(index)"
+                        class="menu-item-text-wrapper"
                       >
                         <div class="textContainer">
                           <div
-                            class="text"
                             :style="{
                               wordBreak: hoverIndex === index && hiddenText ? 'break-all' : '',
                               whiteSpace: hoverIndex === index && hiddenText ? '' : 'nowrap'
                             }"
+                            class="text"
                           >
                             {{ getSubName(item) }}
                           </div>
@@ -130,9 +130,9 @@
                           <transition name="sub-delete">
                             <Icon
                               v-show="item.type === 'local' && hoverIndex === index"
+                              @mouseup.native="handleSubDelete($event, item)"
                               type="deleteSub"
                               class="deleteIcon"
-                              @mouseup.native="handleSubDelete($event, item)"
                             />
                           </transition>
                         </div>
@@ -153,7 +153,6 @@
 
                     <div
                       v-if="0 <= computedAvailableItems.length"
-                      class="card"
                       :style="{
                         height: hiddenText && currentSubtitleIndex === hoverIndex ?
                           `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
@@ -162,6 +161,7 @@
                         transition: transFlag ?
                           'all 100ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' : '',
                       }"
+                      class="card"
                     />
                   </div>
                 </div>
@@ -180,12 +180,12 @@
     >
       <lottie
         :options="defaultOptions"
-        lot="subtitle"
         :style="{
           opacity: iconOpacity,
           transition: 'opacity 150ms',
         }"
         @animCreated="handleAnimation"
+        lot="subtitle"
       />
     </div>
   </div>

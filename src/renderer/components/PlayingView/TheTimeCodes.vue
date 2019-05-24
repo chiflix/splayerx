@@ -4,14 +4,14 @@
     class="cont"
   >
     <div
-      class="timing"
       @mousedown="switchTimeContent"
+      class="timing"
     >
       <span
-        v-if="hasDuration"
         ref="timeContent"
-        class="timeContent"
+        v-if="hasDuration"
         :class="{ remainTime: isRemainTime }"
+        class="timeContent"
       />
     </div>
     <Labels class="rate" />

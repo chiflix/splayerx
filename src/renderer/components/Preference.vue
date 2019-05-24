@@ -3,15 +3,15 @@
     <div class="tablist__tabs">
       <div
         v-if="isDarwin"
-        class="titlebar titlebar--mac no-drag"
         @mouseover="state = 'hover'"
         @mouseout="state = 'default'"
+        class="titlebar titlebar--mac no-drag"
       >
         <Icon
-          class="titlebar__button"
-          type="titleBarClose"
           :state="state"
           @click.native="handleClose"
+          class="titlebar__button"
+          type="titleBarClose"
         />
         <Icon
           class="titlebar__button--disable"
@@ -23,16 +23,16 @@
         />
       </div>
       <div
-        class="tablist__tab"
         :class="currentPreference === 'General' ? 'tablist__tab--selected' : ''"
         @mouseup="handleMouseup('General')"
+        class="tablist__tab"
       >
         {{ $t('preferences.general.generalSetting') }}
       </div>
       <div
-        class="tablist__tab"
         :class="currentPreference === 'Privacy' ? 'tablist__tab--selected' : ''"
         @mouseup="handleMouseup('Privacy')"
+        class="tablist__tab"
       >
         {{ $t('preferences.privacy.privacySetting') }}
       </div>
@@ -40,9 +40,9 @@
     <div class="tablist__tabpanel">
       <div
         v-if="!isDarwin"
-        class="titlebar titlebar--win no-drag"
         @mouseover="state = 'hover'"
         @mouseout="state = 'default'"
+        class="titlebar titlebar--win no-drag"
       >
         <Icon
           class="titlebar__button--disable"
@@ -53,9 +53,9 @@
           type="titleBarWinFull"
         />
         <Icon
+          @click.native="handleClose"
           class="titlebar__button"
           type="titleBarWinClose"
-          @click.native="handleClose"
         />
       </div>
       <div class="tablist__tabcontent">

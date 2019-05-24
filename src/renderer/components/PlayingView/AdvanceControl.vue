@@ -4,16 +4,16 @@
       <transition name="advance-trans-l">
         <div
           v-show="showAttached"
-          class="advanced"
           :style="{
             transition: showAttached ? '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' :
               '150ms cubic-bezier(0.17, 0.67, 0.17, 0.98)'
           }"
+          class="advanced"
         >
           <transition name="setUp">
             <advance-main-menu
-              class="mainMenu"
               :clear-state="showAttached"
+              class="mainMenu"
             />
           </transition>
         </div>
@@ -27,8 +27,8 @@
       >
         <lottie
           :options="defaultOptions"
-          lot="advance"
           @animCreated="handleAnimation"
+          lot="advance"
         />
       </div>
     </div>

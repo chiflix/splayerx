@@ -1,39 +1,39 @@
 <template>
   <div
-    class="itemContainer"
     :style="{
       height: heightSize,
       backgroundImage: !isChosen ? '' :
         'linear-gradient(90deg, rgba(255,255,255,0.03) ' +
         '0%, rgba(255,255,255,0.07) 24%, rgba(255,255,255,0.03) 100%)',
     }"
+    class="itemContainer"
   >
     <div
-      class="detail"
       :style="{
         height: heightSize,
       }"
+      class="detail"
     >
       <div
-        class="textContainer advanceNormalTitle"
         :style="{
           cursor: isChosen || !isSubDelay || !isSubtitleAvailable ? 'default' : 'pointer',
         }"
+        class="textContainer advanceNormalTitle"
       >
         <div
-          class="textItem"
           :style="{
             color: isSubtitleAvailable ? color : 'rgba(255, 255, 255, 0.2)',
             transition: 'color 300ms',
           }"
+          class="textItem"
         >
           {{ item }}
         </div>
         <div
-          class="rightItem"
           :style="{
             color: isSubtitleAvailable ? 'rgba(255, 255, 255, 0.6)' : 'rgba(255, 255, 255, 0.2)'
           }"
+          class="rightItem"
         >
           {{ isSubDelay ? screenSubtitleDelay : audioDelay }}
         </div>
@@ -45,28 +45,28 @@
         >
           <div class="rowContainer">
             <Icon
-              type="minus"
-              class="decrease"
               @mousedown.native="handleDeMousedown"
               @mouseup.native="handleDeMouseup"
               @mouseleave.native="handleDeMouseup"
+              type="minus"
+              class="decrease"
             />
             <div class="card" />
             <div class="delay">
               {{ delayNum }}
             </div>
             <Icon
-              type="plus"
-              class="increase"
               @mousedown.native="handleInMousedown"
               @mouseup.native="handleInMouseup"
               @mouseleave.native="handleInMouseup"
+              type="plus"
+              class="increase"
             />
             <Icon
               v-show="subtitleDelay !== 0"
+              @click.native="handleResetDelay"
               type="reset"
               class="resetPos"
-              @click.native="handleResetDelay"
             />
           </div>
         </div>

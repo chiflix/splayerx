@@ -2,15 +2,14 @@
 <template>
   <div
     ref="item"
-    class="item"
     :style="{
       bottom: chosen ? '9px' : '0',
       width: `${thumbnailWidth}px`,
       height: `${thumbnailHeight}px`,
     }"
+    class="item"
   >
     <div
-      class="content"
       :style="{
         width: `${thumbnailWidth}px`,
         height: chosen ? `${thumbnailHeight + 10}px` : `${thumbnailHeight}px`,
@@ -20,10 +19,10 @@
       @mouseover="onRecentItemMouseover"
       @mousedown.stop="onRecentItemMousedown"
       @mouseup="onRecentItemMouseup"
+      class="content"
     >
       <div
         ref="border"
-        class="border"
         :style="{
           left: `-${0.7 / 2}px`,
           top: `-${0.7 / 2}px`,
@@ -32,6 +31,7 @@
           border: chosen ? '0.7px solid rgba(255,255,255,0.6)'
             : '0.7px solid rgba(255,255,255,0.15)',
         }"
+        class="border"
       >
         <div
           ref="deleteUi"

@@ -1,17 +1,17 @@
 <template>
   <div
     ref="showArea"
-    class="show-area"
     @mouseenter="enterArea"
     @mouseleave="leaveArea"
+    class="show-area"
   >
     <div
-      class="trigger-area"
       :class="showVolume ? 'fade-in' : 'fade-out'"
       :style="{cursor: showAllWidgets ? 'pointer' : 'none'}"
       @mouseenter="actionArea"
       @mouseleave="leaveActionArea"
       @mousedown="mouseDownOnIndicator"
+      class="trigger-area"
     >
       <div
         ref="indicatorContainer"
@@ -24,24 +24,24 @@
         >
           <div
             ref="indicator"
-            class="indicator"
             :style="{
               height: volume * 100 + '%',
               opacity: muted ? 0.25 : 0.8,
             }"
+            class="indicator"
           />
         </base-info-card>
       </div>
       <div
-        class="volume"
         @mouseup="mouseupOnMuteIcon"
+        class="volume"
       >
         <transition name="fade">
           <base-icon
             v-show="showIcon"
+            :effect="muted || volume <= 0 ? 'mute' : 'icon'"
             class="volume-icon"
             type="volume"
-            :effect="muted || volume <= 0 ? 'mute' : 'icon'"
           />
         </transition>
       </div>

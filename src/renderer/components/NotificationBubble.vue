@@ -2,23 +2,23 @@
   <div :class="[container, { rtl: isRtl }]">
     <transition name="nextvideo">
       <NextVideo
-        v-if="showNextVideo"
         ref="nextVideo"
-        class="nextVideo"
+        v-if="showNextVideo"
         @close-next-video="closeNextVideo"
         @manualclose-next-video="manualClose"
         @ready-to-show="readyToShow = true"
+        class="nextVideo"
       />
     </transition>
     <PrivacyBubble
       v-if="showPrivacyBubble && !isMas"
-      class="privacy-bubble"
       @close-privacy-bubble="closePrivacyBubble"
+      class="privacy-bubble"
     />
     <MASPrivacyBubble
       v-if="showPrivacyBubble && isMas"
-      class="mas-privacy-bubble"
       @close-privacy-bubble="closePrivacyBubble"
+      class="mas-privacy-bubble"
     />
     <transition-group
       name="toast"
@@ -45,9 +45,9 @@
           </div>
           <Icon
             v-if="m.type === 'result'"
+            @click.native.left="closeMessage(m.id, m.title)"
             type="close"
             class="bubbleClose"
-            @click.native.left="closeMessage(m.id, m.title)"
           />
         </div>
       </div>

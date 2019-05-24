@@ -1,15 +1,15 @@
 <template>
   <div
-    class="thumbnail-wrapper"
     :style="{
       width: thumbnailWidth +'px',
       height: thumbnailHeight +'px',
       transform: `translateX(${positionOfThumbnail}px)`
     }"
+    class="thumbnail-wrapper"
   >
     <div
-      class="the-preview-thumbnail"
       :style="{height: thumbnailHeight + 2 +'px'}"
+      class="the-preview-thumbnail"
     >
       <thumbnail-display
         :quick-hash="mediaHash"
@@ -22,8 +22,8 @@
     <div class="thumbnail-gradient" />
     <div class="time">
       <span
-        class="flex-items"
         :style="{ color: hoveredEnd ? 'rgba(255, 255, 255, 1)' : 'rgba(255, 255, 255, 0.5)'}"
+        class="flex-items"
       >{{ videoTime }}</span>
       <transition name="hovered-end">
         <base-icon

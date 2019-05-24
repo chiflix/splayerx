@@ -1,16 +1,16 @@
 <template>
   <svg :class="hoverState">
     <use
-      class="default"
       v-bind="{'xlink:href': `#${type}-${finalState}-${finalEffect}`}"
+      class="default"
     />
     <use
-      class="hover"
       v-bind="{'xlink:href': `#${type}-hover-${finalEffect}`}"
+      class="hover"
     />
     <use
-      class="active"
       v-bind="{'xlink:href': `#${type}-active-${finalEffect}`}"
+      class="active"
     />
   </svg>
 </template>

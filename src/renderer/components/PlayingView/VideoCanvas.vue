@@ -28,10 +28,10 @@
       video controller fade-out video will shake -->
     </transition>
     <div
-      class="mask"
       :style="{
         backgroundColor: maskBackground
       }"
+      class="mask"
     />
     <canvas
       ref="thumbnailCanvas"

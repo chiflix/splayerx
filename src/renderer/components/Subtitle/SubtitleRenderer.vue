@@ -4,7 +4,6 @@
       v-for="(cue, index) in currentCues"
       :id="cueType+index"
       :key="index"
-      class="subContainer"
       :class="avaliableClass(index)"
       :style="{
         writingMode: isVtt ? `vertical-${cue.tags.vertical}` : '',
@@ -13,6 +12,7 @@
         bottom: subBottom(index),
         transform: transPos(index),
       }"
+      class="subContainer"
     >
       <cue-renderer
         :text="cue.text"

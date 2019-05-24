@@ -1,7 +1,6 @@
 <template>
   <base-info-card
     ref="cardWidth"
-    class="card"
     :border-radius="7"
     :content-min-height="119"
     :content-min-width="cardWidth > minInfoCardWidth ? cardWidth : minInfoCardWidth"
@@ -15,17 +14,17 @@
       letterSpacing: '0.2px',
       width: cardWidth > minInfoCardWidth ? `${cardWidth}px` : `${minInfoCardWidth}px`,
     }"
+    class="card"
   >
     <transition :name="readyShow === 'mainMenu' ? 'setUp' : 'setUpLeft'">
       <div
         v-show="readyShow === 'mainMenu'"
-        class="mainItems"
         :style="{
           bottom: readyShow === 'mainMenu' ? '' : '0px',
         }"
+        class="mainItems"
       >
         <div
-          class="playSpeed"
           :style="{
             height: speedHeight,
             transition: 'height 100ms linear',
@@ -33,12 +32,13 @@
           @click.left="handleClick"
           @mouseenter="handleMouseenter(1)"
           @mouseleave="handleMouseleave()"
+          class="playSpeed"
         >
           <transition name="arrow">
             <div
               v-show="!speedChosen && hoverIndex === 1"
-              class="hoverBack"
               :style="{ height: speedHeight }"
+              class="hoverBack"
             />
           </transition>
           <advance-row-items
@@ -54,10 +54,10 @@
           />
         </div>
         <div
-          class="subtitleControl"
           @mouseenter="handleMouseenter(2)"
           @mouseleave="handleMouseleave()"
           @click.left="handleSubClick"
+          class="subtitleControl"
         >
           <transition name="arrow">
             <div
@@ -66,15 +66,15 @@
             />
           </transition>
           <div
-            class="subContainer"
             :style="{ cursor: 'pointer'}"
+            class="subContainer"
           >
             <div
-              class="item2"
               :style="{
                 color: hoverIndex === 2 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
                 transition: 'color 300ms',
               }"
+              class="item2"
             >
               <div class="subSettings">
                 {{ this.$t('advance.subMenu') }}
@@ -90,11 +90,11 @@
           </div>
         </div>
         <div
-          class="audioItems"
           :style="{ cursor: 'pointer' }"
           @mouseenter="handleMouseenter(3)"
           @mouseleave="handleMouseleave()"
           @click.left="handleAudioClick"
+          class="audioItems"
         >
           <transition name="arrow">
             <div
@@ -104,11 +104,11 @@
           </transition>
           <div class="audioContainer">
             <div
-              class="item3"
               :style="{
                 color: hoverIndex === 3 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
                 transition: 'color 300ms',
               }"
+              class="item3"
             >
               <div class="audioSettings">
                 {{ this.$t('advance.audioMenu') }}
@@ -129,31 +129,30 @@
     <transition :name="readyShow === 'mainMenu' ? 'setUp' : 'setUpLeft'">
       <div
         v-show="readyShow === 'subMenu'"
-        class="mainItems1"
         :style="{
           bottom: readyShow === 'subMenu' ? '' : '0px',
         }"
+        class="mainItems1"
       >
         <div
-          class="topContainer"
           @click.left="handleSubBackClick"
           @mouseenter="handleSubBackEnter"
           @mouseleave="handleSubBackLeave"
+          class="topContainer"
         >
           <div class="topContent">
             <Icon :type="backSubHover ? 'leftArrowHover' : 'leftArrow'" />
             <div
-              class="text"
               :style="{
                 color: backSubHover ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.2)',
               }"
+              class="text"
             >
               {{ this.$t('advance.subMenu') }}
             </div>
           </div>
         </div>
         <div
-          class="itemSize"
           :style="{
             height: subSizeHeight,
             transition: 'height 100ms linear',
@@ -161,12 +160,13 @@
           @click.left="handleSizeClick"
           @mouseenter="handleSubMouseenter(1)"
           @mouseleave="handleSubMouseleave()"
+          class="itemSize"
         >
           <transition name="arrow">
             <div
               v-show="!subSizeChosen && hoverSubIndex === 1"
-              class="hoverBack"
               :style="{ height: subSizeHeight }"
+              class="hoverBack"
             />
           </transition>
           <advance-row-items
@@ -182,7 +182,6 @@
           />
         </div>
         <div
-          class="subtitleStyle"
           :style="{
             height: subColorHeight,
             transition: 'height 100ms linear',
@@ -190,12 +189,13 @@
           @click.left="handleColorClick"
           @mouseenter="handleSubMouseenter(2)"
           @mouseleave="handleSubMouseleave()"
+          class="subtitleStyle"
         >
           <transition name="arrow">
             <div
               v-show="!subColorChosen && hoverSubIndex === 2"
-              class="hoverBack"
               :style="{ height: subColorHeight }"
+              class="hoverBack"
             />
           </transition>
           <advance-color-items
@@ -207,7 +207,6 @@
           />
         </div>
         <div
-          class="subtitleDelay"
           :style="{
             height: subDelayHeight,
             transition: 'height 100ms linear',
@@ -215,12 +214,13 @@
           @click.left="handleDelayClick"
           @mouseenter="handleSubMouseenter(3)"
           @mouseleave="handleSubMouseleave()"
+          class="subtitleDelay"
         >
           <transition name="arrow">
             <div
               v-show="!subDelayChosen && hoverSubIndex === 3 && isSubtitleAvailable"
-              class="hoverBack"
               :style="{ height: subDelayHeight }"
+              class="hoverBack"
             />
           </transition>
           <advance-selected-items
@@ -239,31 +239,30 @@
     <transition :name="readyShow === 'mainMenu' ? 'setUp' : 'setUpLeft'">
       <div
         v-show="readyShow === 'audioMenu'"
-        class="mainItems2"
         :style="{
           bottom: readyShow === 'audioMenu' ? '' : '0px',
         }"
+        class="mainItems2"
       >
         <div
-          class="topContainer"
           @click.left="handleAudioBackClick"
           @mouseenter="handleAudioBackEnter"
           @mouseleave="handleAudioBackLeave"
+          class="topContainer"
         >
           <div class="topContent">
             <Icon :type="backAudioHover ? 'leftArrowHover' : 'leftArrow'" />
             <div
-              class="text"
               :style="{
                 color: backAudioHover ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.2)',
               }"
+              class="text"
             >
               {{ this.$t('advance.audioMenu') }}
             </div>
           </div>
         </div>
         <div
-          class="audioDelay"
           :style="{
             height: audioDelayHeight,
             transition: 'height 100ms linear',
@@ -271,6 +270,7 @@
           @click.left="1"
           @mouseenter="handleAudioMouseenter(1)"
           @mouseleave="handleAudioMouseleave()"
+          class="audioDelay"
         >
           <!--disable temporarily-->
           <transition name="arrow">
@@ -287,7 +287,6 @@
           />
         </div>
         <div
-          class="changeTrack"
           :style="{
             height: changeTrackHeight,
             transition: 'height 100ms linear',
@@ -295,36 +294,37 @@
           @click.left="handleTrackClick"
           @mouseenter="handleAudioMouseenter(2)"
           @mouseleave="handleAudioMouseleave()"
+          class="changeTrack"
         >
           <transition name="arrow">
             <div
               v-show="!showTrack && hoverAudioIndex === 2"
-              class="hoverBack"
               :style="{ height: changeTrackHeight }"
+              class="hoverBack"
             />
           </transition>
           <div class="trackContainer">
             <transition name="audioTransIn">
               <div
                 v-show="!showTrack"
-                class="item2"
                 :style="{ cursor: 'pointer' }"
+                class="item2"
               >
                 <div
-                  class="leftTrackTitle advanceNormalTitle"
                   :style="{
                     color: hoverAudioIndex === 2 ?
                       'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
                     transition: 'color 300ms',
                   }"
+                  class="leftTrackTitle advanceNormalTitle"
                 >
                   {{ this.$t('advance.changeTrack') }}
                 </div>
                 <div
-                  class="rightTrackItem advanceNormalItem"
                   :style="{
                     color: 'rgba(255, 255, 255, 0.6)',
                   }"
+                  class="rightTrackItem advanceNormalItem"
                 >
                   {{ currentAudioTrack }}
                 </div>

@@ -6,22 +6,22 @@
     @mouseleave="handleMouseleave"
   >
     <div
-      class="icon-wrapper"
       :class="iconClass"
+      class="icon-wrapper"
     >
       <Icon
         v-show="showPlayIcon"
-        class="icon play"
-        type="play"
         :class="ani_mode"
         :style="{cursor: cursorAppear ? 'pointer' : 'none'}"
+        class="icon play"
+        type="play"
       />
       <Icon
         v-show="!showPlayIcon"
-        class="icon"
-        type="pause"
         :class="ani_mode"
         :style="{cursor: cursorAppear ? 'pointer' : 'none'}"
+        class="icon"
+        type="pause"
       />
     </div>
   </div>

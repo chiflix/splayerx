@@ -1,21 +1,21 @@
 <template>
   <div
-    class="subtitle-wrapper"
     :style="{
       fontStyle: isItalic ? 'italic' : '',
       fontWeight: isBold ? 'bold' : '',
       textDecoration: lineType,
     }"
+    class="subtitle-wrapper"
   >
     <span
-      class="subtitle-border-content"
       :style="{ textAlign: textAlign }"
       :class="'subtitle-border-style'+ChosenIndex"
+      class="subtitle-border-content"
     >{{ text }}</span>
     <span
-      class="subtitle-content"
       :style="{ textAlign: textAlign}"
       :class="'subtitle-style'+ChosenIndex"
+      class="subtitle-content"
     >{{ text }}</span>
   </div>
 </template>

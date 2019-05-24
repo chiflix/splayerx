@@ -1,26 +1,26 @@
 <template>
   <div
-    class="itemContainer"
     :style="{
       height: heightSize,
       backgroundImage: !isChosen ? '' :
         'linear-gradient(90deg, rgba(255,255,255,0.03) ' +
         '0%, rgba(255,255,255,0.07) 24%, rgba(255,255,255,0.03) 100%)',
     }"
+    class="itemContainer"
   >
     <div
-      class="detail"
       :style="{
         height: heightSize,
       }"
+      class="detail"
     >
       <div
-        class="textContainer"
         :style="{
           color: color,
           transition: 'color 300ms',
           cursor: isChosen ? 'default' : 'pointer',
         }"
+        class="textContainer"
       >
         <div class="textItem advanceNormalTitle">
           {{ item }}
@@ -45,11 +45,11 @@
             >
               <img
                 :src="img === chosenStyle || index === hoverIndex ? imgsSelected[index] : img"
-                class="imgType"
                 :style="{ cursor: img === chosenStyle ? 'default' : 'pointer'}"
                 @mouseover="handleOver(index)"
                 @mouseout="handleOut"
                 @click.left="handleClick($event, index)"
+                class="imgType"
               >
             </div>
           </div>
