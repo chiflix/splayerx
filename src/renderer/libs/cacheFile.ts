@@ -2,7 +2,7 @@
 import path, { join } from 'path';
 //@ts-ignore
 import electron from 'electron';
-import { ICacheFileStorable } from '@/interfaces/services/iCacheFileStorable';
+import { ICacheFileStorable } from '@/interfaces/services/ICacheFileStorable';
 import { ELECTRON_CACHE_DIRNAME, DEFAULT_DIRNAME, VIDEO_DIRNAME } from '@/constants';
 import { mkdir, checkPathExist, readDir, deleteDir } from './file';
 

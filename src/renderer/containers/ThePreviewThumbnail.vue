@@ -56,8 +56,9 @@ export default {
   },
   watch: {
     currentTime(val: number) {
-      this.backgroundPosition = thumbnailService
+      const postion = thumbnailService
         .calculateThumbnailPosition(val, this.duration, this.thumbnailCount);
+      this.backgroundPosition = `-${postion[0]}% -${postion[1]}%`;
     },
     originSrc() {
       this.isSaved = false;
@@ -79,7 +80,7 @@ export default {
         if (!result) {
           this.imgExisted = false;
           this.imgSrc =
-            await thumbnailService.generateThumbnailImage(this.mediaHash, this.originSrc, num);
+            await thumbnailService.generateThumbnailImage(this.mediaHash, this.originSrc, num, 272);
         } else {
           this.imgExisted = true;
           this.imgSrc = result;
