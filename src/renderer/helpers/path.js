@@ -22,11 +22,11 @@ export function filePathToUrl(filePath) {
  * @param {string} fileUrl To url to be converted.
  * @returns Absolute path of the file.
  */
-export function fileUrlToPath(fileUrl) {
+export function fileUrlToPath(fileUrl, { platform } = { platform: process.platform }) {
   if (!fileUrl) throw new Error('fileUrl should not be empty');
   let filePath = fileUrl.replace('file://', '').replace(/([?#].*)/g, '');
   filePath = decodeURI(filePath);
-  if (process.platform === 'win32') {
+  if (platform === 'win32') {
     filePath = filePath.substr(1).replace(/\//g, '\\');
   }
   return filePath;
