@@ -1,6 +1,9 @@
 <template>
   <div class="base-video-player">
-    <video class="video-element" ref="video"></video>
+    <video
+      ref="video"
+      class="video-element"
+    />
   </div>
 </template>
 
@@ -11,7 +14,7 @@ import { DEFAULT_VIDEO_EVENTS } from '@/constants';
 import { videodata } from '../../store/video';
 
 export default {
-  name: 'base-video-player',
+  name: 'BaseVideoPlayer',
   props: {
     // network state
     src: {
@@ -31,6 +34,7 @@ export default {
       validator: value => [null, 'anonymous', 'user-credentials'].includes(value),
     },
     lastAudioTrackId: {
+      type: Number,
       default: 0,
     },
     preload: {
@@ -108,15 +112,15 @@ export default {
       default: false,
     },
   },
-  computed: {
-    ...mapGetters(['audioTrackList']),
-  },
   data() {
     return {
       eventListeners: new Map(),
       currentTimeAnimationFrameId: 0,
       duration: 0,
     };
+  },
+  computed: {
+    ...mapGetters(['audioTrackList']),
   },
   watch: {
     // network state
@@ -185,6 +189,10 @@ export default {
       this.$refs.video.ontimeupdate = this.currentTimeUpdate;
     }
     this.duration = this.$refs.video.duration;
+  },
+  beforeDestroy() {
+    this.$refs.video.ontimeupdate = null;
+    this.removeEvents(this.events);
   },
   methods: {
     basicInfoInitialization(videoElement) {
@@ -268,10 +276,6 @@ export default {
         });
       }
     },
-  },
-  beforeDestroy() {
-    this.$refs.video.ontimeupdate = null;
-    this.removeEvents(this.events);
   },
 };
 </script>

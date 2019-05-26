@@ -1,31 +1,42 @@
 <template>
   <div
-    class="video">
-    <transition name="fade" mode="out-in">
-    <base-video-player
-      ref="videoCanvas"
-      :key="videoId"
-      :needtimeupdate=true
-      :lastAudioTrackId="lastAudioTrackId"
-      :events="['loadedmetadata', 'audiotrack']"
-      :styles="{objectFit: 'contain', width: 'calc(100% - 0.1px)', height: '100%'}"
-      @loadedmetadata="onMetaLoaded"
-      @audiotrack="onAudioTrack"
-      :loop="loop"
-      :src="convertedSrc"
-      :playbackRate="rate"
-      :volume="volume"
-      :muted="muted"
-      :paused="paused"
-      :currentTime="seekTime"
-      :currentAudioTrackId="currentAudioTrackId.toString()" />
-      <!-- calc(100% - 0.1px) fix for mac book pro 15 full screen after video controller fade-out video will shake -->
+    class="video"
+  >
+    <transition
+      name="fade"
+      mode="out-in"
+    >
+      <base-video-player
+        ref="videoCanvas"
+        :key="videoId"
+        :needtimeupdate="true"
+        :last-audio-track-id="lastAudioTrackId"
+        :events="['loadedmetadata', 'audiotrack']"
+        :styles="{objectFit: 'contain', width: 'calc(100% - 0.1px)', height: '100%'}"
+        :loop="loop"
+        :src="convertedSrc"
+        :playback-rate="rate"
+        :volume="volume"
+        :muted="muted"
+        :paused="paused"
+        :current-time="seekTime"
+        :current-audio-track-id="currentAudioTrackId.toString()"
+        @loadedmetadata="onMetaLoaded"
+        @audiotrack="onAudioTrack"
+      />
+      <!-- calc(100% - 0.1px) fix for mac book pro 15 full screen after
+      video controller fade-out video will shake -->
     </transition>
-    <div class="mask"
+    <div
+      class="mask"
       :style="{
         backgroundColor: maskBackground
-      }"/>
-    <canvas class="canvas" ref="thumbnailCanvas"></canvas>
+      }"
+    />
+    <canvas
+      ref="thumbnailCanvas"
+      class="canvas"
+    />
   </div>
 </template>;
 
@@ -38,7 +49,7 @@ import BaseVideoPlayer from './BaseVideoPlayer.vue';
 import { videodata } from '../../store/video';
 
 export default {
-  name: 'video-canvas',
+  name: 'VideoCanvas',
   components: {
     'base-video-player': BaseVideoPlayer,
   },
@@ -58,6 +69,113 @@ export default {
       winAngleBeforeFullScreen: 0, // winAngel before full screen
       winSizeBeforeFullScreen: [], // winSize before full screen
     };
+  },
+  computed: {
+    ...mapGetters([
+      'videoId', 'nextVideoId', 'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId', 'enabledSecondarySub', 'lastWinSize', 'lastChosenSize', 'subToTop',
+      'winSize', 'winPos', 'winAngle', 'isFullScreen', 'winWidth', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo', 'loop', 'playinglistRate', 'isFolderList', 'playingList', 'playingIndex', 'playListId', 'items']),
+    ...mapGetters({
+      videoWidth: 'intrinsicWidth',
+      videoHeight: 'intrinsicHeight',
+      videoRatio: 'ratio',
+    }),
+  },
+  watch: {
+    winAngle(val) {
+      this.changeWindowRotate(val);
+    },
+    videoId(val, oldVal) {
+      if (oldVal) this.saveScreenshot(oldVal);
+    },
+    originSrc(val, oldVal) {
+      if (process.mas && oldVal) {
+        this.$bus.$emit(`stop-accessing-${oldVal}`, oldVal);
+      }
+      this.$bus.$emit('show-speedlabel');
+      this.videoConfigInitialize({
+        audioTrackList: [],
+      });
+      this.play();
+      this.updatePlayinglistRate({
+        oldDir: path.dirname(oldVal), newDir: path.dirname(val), playingList: this.playingList,
+      });
+      this.playinglistRate.forEach((item) => {
+        if (item.dirPath === path.dirname(val)) {
+          this.$store.dispatch(videoActions.CHANGE_RATE, item.rate);
+          this.nowRate = item.rate;
+        }
+      });
+    },
+  },
+  created() {
+    this.updatePlayinglistRate({ oldDir: '', newDir: path.dirname(this.originSrc), playingList: this.playingList });
+  },
+  mounted() {
+    this.$electron.ipcRenderer.on('quit', (needToRestore) => {
+      if (needToRestore) this.needToRestore = needToRestore;
+      this.quit = true;
+    });
+    this.videoElement = this.$refs.videoCanvas.videoElement();
+    this.$bus.$on('toggle-fullscreen', () => {
+      if (!this.isFullScreen) {
+        this.toFullScreen();
+      } else {
+        this.offFullScreen();
+      }
+      this.$ga.event('app', 'toggle-fullscreen');
+    });
+    this.$bus.$on('to-fullscreen', () => {
+      this.toFullScreen();
+    });
+    this.$bus.$on('off-fullscreen', () => {
+      this.offFullScreen();
+    });
+    this.$bus.$on('toggle-muted', () => {
+      this.toggleMute();
+    });
+    this.$bus.$on('send-lastplayedtime', (e) => {
+      this.lastPlayedTime = e;
+    });
+    this.$bus.$on('send-audiotrackid', (id) => {
+      this.lastAudioTrackId = id;
+    });
+    this.$bus.$on('toggle-playback', () => {
+      this[this.paused ? 'play' : 'pause']();
+      this.$ga.event('app', 'toggle-playback');
+    });
+    this.$bus.$on('next-video', () => {
+      videodata.paused = false;
+      if (this.nextVideo) {
+        this.$store.commit('LOOP_UPDATE', false);
+        if (this.isFolderList) this.openVideoFile(this.nextVideo);
+        else this.playFile(this.nextVideo, this.nextVideoId);
+      } else {
+        this.$store.commit('LOOP_UPDATE', true);
+      }
+    });
+    this.$bus.$on('seek', (e) => { this.seekTime = [e]; });
+    this.$bus.$on('seek-forward', delta => this.$bus.$emit('seek', videodata.time + Math.abs(delta)));
+    this.$bus.$on('seek-backward', (delta) => {
+      const finalSeekTime = videodata.time - Math.abs(delta);
+      // find a way to stop wheel event until next begin
+      // if (finalSeekTime <= 0)
+      this.$bus.$emit('seek', finalSeekTime);
+    });
+    this.$bus.$on('drag-over', () => {
+      this.maskBackground = 'rgba(255, 255, 255, 0.18)';
+    });
+    this.$bus.$on('drag-leave', () => {
+      this.maskBackground = 'rgba(255, 255, 255, 0)';
+    });
+    this.$bus.$on('drop', () => {
+      this.maskBackground = 'rgba(255, 255, 255, 0)';
+      this.$ga.event('app', 'drop');
+    });
+    window.addEventListener('beforeunload', this.beforeUnloadHandler);
+  },
+  beforeDestroy() {
+    if (process.mas) this.$bus.$emit(`stop-accessing-${this.originSrc}`, this.originSrc);
+    window.removeEventListener('beforeunload', this.beforeUnloadHandler);
   },
   methods: {
     ...mapActions({
@@ -306,113 +424,6 @@ export default {
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', [x, y]);
       }
     },
-  },
-  computed: {
-    ...mapGetters([
-      'videoId', 'nextVideoId', 'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId', 'enabledSecondarySub', 'lastWinSize', 'lastChosenSize', 'subToTop',
-      'winSize', 'winPos', 'winAngle', 'isFullScreen', 'winWidth', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo', 'loop', 'playinglistRate', 'isFolderList', 'playingList', 'playingIndex', 'playListId', 'items']),
-    ...mapGetters({
-      videoWidth: 'intrinsicWidth',
-      videoHeight: 'intrinsicHeight',
-      videoRatio: 'ratio',
-    }),
-  },
-  created() {
-    this.updatePlayinglistRate({ oldDir: '', newDir: path.dirname(this.originSrc), playingList: this.playingList });
-  },
-  watch: {
-    winAngle(val) {
-      this.changeWindowRotate(val);
-    },
-    videoId(val, oldVal) {
-      if (oldVal) this.saveScreenshot(oldVal);
-    },
-    originSrc(val, oldVal) {
-      if (process.mas && oldVal) {
-        this.$bus.$emit(`stop-accessing-${oldVal}`, oldVal);
-      }
-      this.$bus.$emit('show-speedlabel');
-      this.videoConfigInitialize({
-        audioTrackList: [],
-      });
-      this.play();
-      this.updatePlayinglistRate({
-        oldDir: path.dirname(oldVal), newDir: path.dirname(val), playingList: this.playingList,
-      });
-      this.playinglistRate.forEach((item) => {
-        if (item.dirPath === path.dirname(val)) {
-          this.$store.dispatch(videoActions.CHANGE_RATE, item.rate);
-          this.nowRate = item.rate;
-        }
-      });
-    },
-  },
-  mounted() {
-    this.$electron.ipcRenderer.on('quit', (needToRestore) => {
-      if (needToRestore) this.needToRestore = needToRestore;
-      this.quit = true;
-    });
-    this.videoElement = this.$refs.videoCanvas.videoElement();
-    this.$bus.$on('toggle-fullscreen', () => {
-      if (!this.isFullScreen) {
-        this.toFullScreen();
-      } else {
-        this.offFullScreen();
-      }
-      this.$ga.event('app', 'toggle-fullscreen');
-    });
-    this.$bus.$on('to-fullscreen', () => {
-      this.toFullScreen();
-    });
-    this.$bus.$on('off-fullscreen', () => {
-      this.offFullScreen();
-    });
-    this.$bus.$on('toggle-muted', () => {
-      this.toggleMute();
-    });
-    this.$bus.$on('send-lastplayedtime', (e) => {
-      this.lastPlayedTime = e;
-    });
-    this.$bus.$on('send-audiotrackid', (id) => {
-      this.lastAudioTrackId = id;
-    });
-    this.$bus.$on('toggle-playback', () => {
-      this[this.paused ? 'play' : 'pause']();
-      this.$ga.event('app', 'toggle-playback');
-    });
-    this.$bus.$on('next-video', () => {
-      videodata.paused = false;
-      if (this.nextVideo) {
-        this.$store.commit('LOOP_UPDATE', false);
-        if (this.isFolderList) this.openVideoFile(this.nextVideo);
-        else this.playFile(this.nextVideo, this.nextVideoId);
-      } else {
-        this.$store.commit('LOOP_UPDATE', true);
-      }
-    });
-    this.$bus.$on('seek', (e) => { this.seekTime = [e]; });
-    this.$bus.$on('seek-forward', delta => this.$bus.$emit('seek', videodata.time + Math.abs(delta)));
-    this.$bus.$on('seek-backward', (delta) => {
-      const finalSeekTime = videodata.time - Math.abs(delta);
-      // find a way to stop wheel event until next begin
-      // if (finalSeekTime <= 0)
-      this.$bus.$emit('seek', finalSeekTime);
-    });
-    this.$bus.$on('drag-over', () => {
-      this.maskBackground = 'rgba(255, 255, 255, 0.18)';
-    });
-    this.$bus.$on('drag-leave', () => {
-      this.maskBackground = 'rgba(255, 255, 255, 0)';
-    });
-    this.$bus.$on('drop', () => {
-      this.maskBackground = 'rgba(255, 255, 255, 0)';
-      this.$ga.event('app', 'drop');
-    });
-    window.addEventListener('beforeunload', this.beforeUnloadHandler);
-  },
-  beforeDestroy() {
-    if (process.mas) this.$bus.$emit(`stop-accessing-${this.originSrc}`, this.originSrc);
-    window.removeEventListener('beforeunload', this.beforeUnloadHandler);
   },
 };
 </script>

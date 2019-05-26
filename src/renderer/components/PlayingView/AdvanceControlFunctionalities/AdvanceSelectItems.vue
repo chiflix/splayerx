@@ -1,39 +1,73 @@
 <template>
-  <div class="itemContainer"
+  <div
+    class="itemContainer"
     :style="{
       height: heightSize,
-      backgroundImage: !isChosen ? '' : 'linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.07) 24%, rgba(255,255,255,0.03) 100%)',
-    }">
-    <div class="detail"
+      backgroundImage: !isChosen ? '' :
+        'linear-gradient(90deg, rgba(255,255,255,0.03) ' +
+        '0%, rgba(255,255,255,0.07) 24%, rgba(255,255,255,0.03) 100%)',
+    }"
+  >
+    <div
+      class="detail"
       :style="{
         height: heightSize,
-      }">
-    <div class="textContainer advanceNormalTitle" :style="{
-      cursor: isChosen || !isSubDelay || !isSubtitleAvaliable ? 'default' : 'pointer',
-    }">
-      <div class="textItem"
+      }"
+    >
+      <div
+        class="textContainer advanceNormalTitle"
         :style="{
-          color: isSubtitleAvaliable ? color : 'rgba(255, 255, 255, 0.2)',
-          transition: 'color 300ms',
-        }">{{ item }}</div>
-      <div class="rightItem" :style="{ color: isSubtitleAvaliable ? 'rgba(255, 255, 255, 0.6)' : 'rgba(255, 255, 255, 0.2)' }">{{ isSubDelay ? screenSubtitleDelay : audioDelay }}</div>
-    </div>
+          cursor: isChosen || !isSubDelay || !isSubtitleAvailable ? 'default' : 'pointer',
+        }"
+      >
+        <div
+          class="textItem"
+          :style="{
+            color: isSubtitleAvailable ? color : 'rgba(255, 255, 255, 0.2)',
+            transition: 'color 300ms',
+          }"
+        >
+          {{ item }}
+        </div>
+        <div
+          class="rightItem"
+          :style="{
+            color: isSubtitleAvailable ? 'rgba(255, 255, 255, 0.6)' : 'rgba(255, 255, 255, 0.2)'
+          }"
+        >
+          {{ isSubDelay ? screenSubtitleDelay : audioDelay }}
+        </div>
+      </div>
       <transition name="detail">
-        <div class="listContainer" v-show="isChosen">
-         <div class="rowContainer">
-           <Icon type="minus" class="decrease"
-             @mousedown.native="handleDeMousedown"
-             @mouseup.native="handleDeMouseup"
-             @mouseleave.native="handleDeMouseup"></Icon>
-           <div class="card"></div>
-           <div class="delay">{{ delayNum }}</div>
-           <Icon type="plus" class="increase"
-             @mousedown.native="handleInMousedown"
-             @mouseup.native="handleInMouseup"
-             @mouseleave.native="handleInMouseup"></Icon>
-           <Icon type="reset" class="resetPos" v-show="this.subtitleDelay !== 0"
-             @click.native="handleResetDelay">
-           </Icon>
+        <div
+          v-show="isChosen"
+          class="listContainer"
+        >
+          <div class="rowContainer">
+            <Icon
+              type="minus"
+              class="decrease"
+              @mousedown.native="handleDeMousedown"
+              @mouseup.native="handleDeMouseup"
+              @mouseleave.native="handleDeMouseup"
+            />
+            <div class="card" />
+            <div class="delay">
+              {{ delayNum }}
+            </div>
+            <Icon
+              type="plus"
+              class="increase"
+              @mousedown.native="handleInMousedown"
+              @mouseup.native="handleInMouseup"
+              @mouseleave.native="handleInMouseup"
+            />
+            <Icon
+              v-show="subtitleDelay !== 0"
+              type="reset"
+              class="resetPos"
+              @click.native="handleResetDelay"
+            />
           </div>
         </div>
       </transition>
@@ -48,6 +82,36 @@ import Icon from '../../BaseIconContainer.vue';
 
 export default {
   name: 'AdvanceSelectItems',
+  components: {
+    Icon,
+  },
+  props: {
+    item: {
+      type: String,
+      required: true,
+    },
+    height: {
+      type: Number,
+      required: true,
+    },
+    color: {
+      type: String,
+      required: true,
+    },
+    isChosen: {
+      type: Boolean,
+    },
+    size: {
+      type: Number,
+      required: true,
+    },
+    isSubDelay: {
+      type: Boolean,
+    },
+    isSubtitleAvailable: {
+      type: Boolean,
+    },
+  },
   data() {
     return {
       timeDeSet: null,
@@ -56,29 +120,6 @@ export default {
       timeInset: null,
       timeInInt: null,
     };
-  },
-  props: {
-    item: {
-      type: String,
-    },
-    height: {
-      type: Number,
-    },
-    color: {
-      type: String,
-    },
-    isChosen: {
-      type: Boolean,
-    },
-    size: {
-      type: Number,
-    },
-    isSubDelay: {
-      type: Boolean,
-    },
-    isSubtitleAvaliable: {
-      type: Boolean,
-    },
   },
   computed: {
     ...mapGetters(['subtitleDelay', 'AudioDelay']),
@@ -108,9 +149,6 @@ export default {
       }
       return this.AudioDelay;
     },
-  },
-  components: {
-    Icon,
   },
   methods: {
     handleResetDelay() {
@@ -167,7 +205,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
+screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
   .itemContainer {
     width: 100%;
     .textContainer {
@@ -219,7 +258,8 @@ export default {
   .detail-leave-active {
     animation: hideP1 100ms;
   }}
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
   .itemContainer {
     width: 100%;
     .textContainer {
@@ -272,7 +312,8 @@ export default {
     animation: hideP2 100ms;
   }
 }
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   .itemContainer {
     width: 100%;
     .textContainer {
@@ -360,7 +401,8 @@ export default {
         border-radius: 7px;
         opacity: 0.4;
         border: 0.5px solid rgba(255, 255, 255, 0.20);
-        background-image: radial-gradient(60% 134%, rgba(255, 255, 255, 0.09) 44%, rgba(255, 255, 255, 0.05) 100%);
+        background-image: radial-gradient(
+            60% 134%, rgba(255, 255, 255, 0.09) 44%, rgba(255, 255, 255, 0.05) 100%);
         box-shadow: 0px 1px 2px rgba(0, 0, 0, .2);
       }
       .delay{

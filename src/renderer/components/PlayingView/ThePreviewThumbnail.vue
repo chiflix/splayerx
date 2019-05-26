@@ -1,19 +1,36 @@
 <template>
-  <div class="thumbnail-wrapper"
-    :style="{width: thumbnailWidth +'px', height: thumbnailHeight +'px', transform: `translateX(${positionOfThumbnail}px)`}">
-    <div class="the-preview-thumbnail" :style="{height: thumbnailHeight + 2 +'px'}">
+  <div
+    class="thumbnail-wrapper"
+    :style="{
+      width: thumbnailWidth +'px',
+      height: thumbnailHeight +'px',
+      transform: `translateX(${positionOfThumbnail}px)`
+    }"
+  >
+    <div
+      class="the-preview-thumbnail"
+      :style="{height: thumbnailHeight + 2 +'px'}"
+    >
       <thumbnail-display
-        :quickHash="mediaHash"
-        :maxThumbnailWidth="maxThumbnailWidth"
-        :currentTime="currentTime"
-        :thumbnailWidth="thumbnailWidth"
-        :thumbnailHeight="thumbnailHeight" />
+        :quick-hash="mediaHash"
+        :max-thumbnail-width="maxThumbnailWidth"
+        :current-time="currentTime"
+        :thumbnail-width="thumbnailWidth"
+        :thumbnail-height="thumbnailHeight"
+      />
     </div>
-    <div class="thumbnail-gradient"></div>
+    <div class="thumbnail-gradient" />
     <div class="time">
-      <span class="flex-items" :style="{ color: hoveredEnd ? 'rgba(255, 255, 255, 1)' : 'rgba(255, 255, 255, 0.5)'}">{{ videoTime }}</span>
+      <span
+        class="flex-items"
+        :style="{ color: hoveredEnd ? 'rgba(255, 255, 255, 1)' : 'rgba(255, 255, 255, 0.5)'}"
+      >{{ videoTime }}</span>
       <transition name="hovered-end">
-        <base-icon class="flex-items hovered-end" type="hoveredEnd" v-if="hoveredEnd" />
+        <base-icon
+          v-if="hoveredEnd"
+          class="flex-items hovered-end"
+          type="hoveredEnd"
+        />
       </transition>
     </div>
   </div>
@@ -30,13 +47,34 @@ export default {
     'base-icon': Icon,
   },
   props: {
-    currentTime: Number,
-    maxThumbnailWidth: Number,
-    videoRatio: Number,
-    thumbnailWidth: Number,
-    thumbnailHeight: Number,
-    positionOfThumbnail: Number,
-    videoTime: String,
+    currentTime: {
+      type: Number,
+      required: true,
+    },
+    maxThumbnailWidth: {
+      type: Number,
+      required: true,
+    },
+    videoRatio: {
+      type: Number,
+      required: true,
+    },
+    thumbnailWidth: {
+      type: Number,
+      required: true,
+    },
+    thumbnailHeight: {
+      type: Number,
+      required: true,
+    },
+    positionOfThumbnail: {
+      type: Number,
+      required: true,
+    },
+    videoTime: {
+      type: String,
+      required: true,
+    },
     hoveredEnd: {
       type: Boolean,
       default: false,
@@ -58,9 +96,9 @@ export default {
   },
   watch: {
   },
-  methods: {
-  },
   created() {
+  },
+  methods: {
   },
 };
 </script>
@@ -91,16 +129,20 @@ export default {
   height: 100%;
   position: relative;
 
-  @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
+  @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px),
+  screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
     font-size: 20px;
   }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
     font-size: 20px;
   }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
     font-size: 24px;
   }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     font-size: 40px;
   }
   span {

@@ -1,11 +1,18 @@
 <template>
-  <div class="container" ref="container">
-    <div class="element bottom"><div class="element content"><slot></slot></div></div>
+  <div
+    ref="container"
+    class="container"
+  >
+    <div class="element bottom">
+      <div class="element content">
+        <slot />
+      </div>
+    </div>
   </div>
 </template>
 <script>
 export default {
-  name: 'base-info-card',
+  name: 'BaseInfoCard',
   props: {
     borderRadius: {
       type: Number,
@@ -23,11 +30,6 @@ export default {
       validator: value => value > 0,
     },
   },
-  mounted() {
-    this.$refs.container.style.setProperty('--border-radius', `${this.borderRadius}px`);
-    this.$refs.container.style.setProperty('--content-min-width', `${this.contentMinWidth}px`);
-    this.$refs.container.style.setProperty('--content-min-height', `${this.contentMinHeight}px`);
-  },
   watch: {
     contentMinWidth(newVal) {
       this.$refs.container.style.setProperty('--content-min-width', `${newVal}px`);
@@ -35,6 +37,11 @@ export default {
     contentMinHeight(newVal) {
       this.$refs.container.style.setProperty('--content-min-height', `${newVal}px`);
     },
+  },
+  mounted() {
+    this.$refs.container.style.setProperty('--border-radius', `${this.borderRadius}px`);
+    this.$refs.container.style.setProperty('--content-min-width', `${this.contentMinWidth}px`);
+    this.$refs.container.style.setProperty('--content-min-height', `${this.contentMinHeight}px`);
   },
 };
 </script>

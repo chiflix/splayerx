@@ -1,31 +1,56 @@
 <template>
-  <div class="itemContainer"
+  <div
+    class="itemContainer"
     :style="{
       height: heightSize,
-      backgroundImage: !isChosen ? '' : 'linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.07) 24%, rgba(255,255,255,0.03) 100%)',
-    }">
-    <div class="detail"
+      backgroundImage: !isChosen ? '' :
+        'linear-gradient(90deg, rgba(255,255,255,0.03) ' +
+        '0%, rgba(255,255,255,0.07) 24%, rgba(255,255,255,0.03) 100%)',
+    }"
+  >
+    <div
+      class="detail"
       :style="{
         height: heightSize,
-      }">
-      <div class="textContainer"
+      }"
+    >
+      <div
+        class="textContainer"
         :style="{
           color: color,
           transition: 'color 300ms',
           cursor: isChosen ? 'default' : 'pointer',
-        }">
-        <div class="textItem advanceNormalTitle">{{ item }}</div>
-        <div class="rightItem" v-show="!isChosen"><img :src="chosenStyle"></div>
+        }"
+      >
+        <div class="textItem advanceNormalTitle">
+          {{ item }}
+        </div>
+        <div
+          v-show="!isChosen"
+          class="rightItem"
+        >
+          <img :src="chosenStyle">
+        </div>
       </div>
       <transition name="detail">
-        <div class="listContainer" v-show="isChosen">
+        <div
+          v-show="isChosen"
+          class="listContainer"
+        >
           <div class="rowContainer">
-            <div class="imgContainer" v-for="(img, index) in imgs">
-              <img :src="img === chosenStyle || index === hoverIndex ? imgsSelected[index] : img" class="imgType"
+            <div
+              v-for="(img, index) in imgs"
+              :key="img"
+              class="imgContainer"
+            >
+              <img
+                :src="img === chosenStyle || index === hoverIndex ? imgsSelected[index] : img"
+                class="imgType"
                 :style="{ cursor: img === chosenStyle ? 'default' : 'pointer'}"
                 @mouseover="handleOver(index)"
                 @mouseout="handleOut"
-                @click.left="handleClick($event, index)">
+                @click.left="handleClick($event, index)"
+              >
             </div>
           </div>
         </div>
@@ -49,6 +74,25 @@ import styleSelected4 from '../../../assets/subtitle-style5-selected.png';
 
 export default {
   name: 'AdvanceColorItems',
+  props: {
+    item: {
+      type: String,
+      required: true,
+    },
+    height: {
+      type: Number,
+      required: true,
+    },
+    color: {
+      type: String,
+      required: true,
+    },
+    isChosen: Boolean,
+    size: {
+      type: Number,
+      required: true,
+    },
+  },
   data() {
     return {
       hoverIndex: -1,
@@ -56,23 +100,6 @@ export default {
       imgsSelected: [styleSelected0, styleSelected1, styleSelected2,
         styleSelected3, styleSelected4],
     };
-  },
-  props: {
-    item: {
-      type: String,
-    },
-    height: {
-      type: Number,
-    },
-    color: {
-      type: String,
-    },
-    isChosen: {
-      type: Boolean,
-    },
-    size: {
-      type: Number,
-    },
   },
   computed: {
     heightSize() {
@@ -82,9 +109,6 @@ export default {
         return this.isChosen ? `${74 * 1.2}px` : `${37 * 1.2}px`;
       }
       return this.isChosen ? `${74 * 1.2 * 1.4}px` : `${37 * 1.2 * 1.4}px`;
-    },
-    subStyle() {
-      return this.$store.getters.curStyle;
     },
     chosenStyle() {
       if (this.$store.getters.chosenStyle) {
@@ -108,7 +132,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
+screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
   .itemContainer {
     width: 100%;
     .textContainer {
@@ -146,7 +171,8 @@ export default {
     animation: hideP1 100ms;
   }
 }
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
   .itemContainer {
     width: 100%;
     .textContainer {
@@ -184,7 +210,8 @@ export default {
     animation: hideP2 100ms;
   }
 }
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   .itemContainer {
     width: 100%;
     .textContainer {
