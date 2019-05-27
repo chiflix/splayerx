@@ -2,17 +2,34 @@
   <div>
     <div class="advanceControl">
       <transition name="advance-trans-l">
-      <div class="advanced" v-show="showAttached"
-        :style="{
-          transition: showAttached ? '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' : '150ms cubic-bezier(0.17, 0.67, 0.17, 0.98)'
-        }">
-        <transition name="setUp">
-          <advance-main-menu class="mainMenu" :clearState="showAttached"></advance-main-menu>
-        </transition>
-      </div>
+        <div
+          v-show="showAttached"
+          class="advanced"
+          :style="{
+            transition: showAttached ? '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' :
+              '150ms cubic-bezier(0.17, 0.67, 0.17, 0.98)'
+          }"
+        >
+          <transition name="setUp">
+            <advance-main-menu
+              class="mainMenu"
+              :clear-state="showAttached"
+            />
+          </transition>
+        </div>
       </transition>
-      <div ref="adv" @mouseup.left="toggleAdvMenuDisplay" @mousedown.left="handleDown" @mouseenter="handleEnter" @mouseleave="handleLeave">
-        <lottie v-on:animCreated="handleAnimation" :options="defaultOptions" lot="advance"></lottie>
+      <div
+        ref="adv"
+        @mouseup.left="toggleAdvMenuDisplay"
+        @mousedown.left="handleDown"
+        @mouseenter="handleEnter"
+        @mouseleave="handleLeave"
+      >
+        <lottie
+          :options="defaultOptions"
+          lot="advance"
+          @animCreated="handleAnimation"
+        />
       </div>
     </div>
   </div>
@@ -27,7 +44,7 @@ import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import AdvanceMainMenu from './AdvanceControlFunctionalities/AdvanceMainMenu.vue';
 
 export default {
-  name: 'advance-control',
+  name: 'AdvanceControl',
   type: INPUT_COMPONENT_TYPE,
   components: {
     lottie,
@@ -87,7 +104,8 @@ export default {
     currentMouseupComponent(val) {
       setTimeout(() => {
         if (this.currentMousedownComponent !== 'notification-bubble' && val !== '') {
-          if (this.lastDragging || (this.currentMousedownComponent === this.$options.name && val === 'the-video-controller')) {
+          if (this.lastDragging || (this.currentMousedownComponent === this.$options.name &&
+              val === 'the-video-controller')) {
             if (this.showAttached) {
               this.anim.playSegments([68, 73], true);
               this.$emit('update:lastDragging', false);
@@ -202,18 +220,22 @@ button:hover {
   position: absolute;
   z-index: 100;
   transition-property: opacity, transform;
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
     display: none;
   }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
     bottom: 32px;
     right: 3px;
   }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
     bottom: 44px;
     right: 3px;
   }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     bottom: 70px;
     right: 7px;
   }

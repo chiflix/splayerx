@@ -1,7 +1,7 @@
 
 import path, { join } from 'path';
 import electron from 'electron';
-import { ICacheFileStorable } from '@/interfaces/services/iCacheFileStorable';
+import { ICacheFileStorable } from '@/interfaces/services/ICacheFileStorable';
 import { ELECTRON_CACHE_DIRNAME, DEFAULT_DIRNAME, VIDEO_DIRNAME } from '@/constants';
 import { mkdir, checkPathExist, readDir, deleteDir } from './file';
 
@@ -17,7 +17,7 @@ function getDefaultDataPath() {
   return path.join(app.getPath(ELECTRON_CACHE_DIRNAME), DEFAULT_DIRNAME);
 }
 
-export class CacheFile implements ICacheFileStorable {
+export default class CacheFile implements ICacheFileStorable {
   /** 公开API 根据mediaHash得到该视频的缓存目录
    * @description CacheFile 对 IFileStorable接口的实现
    * @author tanghaixiang@xindong.com
@@ -102,4 +102,4 @@ export class CacheFile implements ICacheFileStorable {
   }
 }
 
-export default new CacheFile()
+export const cacheFile = new CacheFile()

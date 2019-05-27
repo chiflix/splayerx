@@ -1,8 +1,14 @@
-import { IThumbnailRequest } from '@/interfaces/containers/iThumbnailRequest';
-import mediaStorageService, { MediaStorageService } from '@/services/storage/mediaStorageService';
+import { IThumbnailRequest } from '@/interfaces/containers/IThumbnailRequest';
+import MediaStorageService, { mediaStorageService } from '@/services/storage/MediaStorageService';
 import { ipcRenderer } from 'electron';
 
-export class ThumbnailService implements IThumbnailRequest {
+/** 缩略图固定的列数
+ * @constant
+ * @type number
+ */
+const ROWS = 10;
+
+export default class ThumbnailService implements IThumbnailRequest {
   constructor(private readonly mediaStorageService: MediaStorageService) {
   }
 
@@ -16,15 +22,15 @@ export class ThumbnailService implements IThumbnailRequest {
    * @returns {Promise<string>} 返回生成的缩略图路径
    * @memberof ThumbnailService
    */
-  async generateThumbnailImage(mediaHash: string, videoSrc: string, cols: number): Promise<string> {
+  async generateThumbnailImage(mediaHash: string, videoSrc: string, cols: number, width: number): Promise<string> {
     try {
       const gpath = await this.mediaStorageService.generatePathBy(mediaHash, 'thumbnail');
       if (gpath) {
         const info = {
           src: videoSrc,
           outPath: gpath,
-          width: '272',
-          num: { rows: '10', cols: `${Math.ceil(cols / 10)}` },
+          width: `${width}`,
+          num: { rows: `${ROWS}`, cols: `${Math.ceil(cols / ROWS)}` },
         };
         ipcRenderer.send('generateThumbnails', info);
         return gpath;
@@ -60,13 +66,13 @@ export class ThumbnailService implements IThumbnailRequest {
    * @param {number} count
    * @returns {string} 当前hover缩略图的backgroundPosition
    */
-  calculateThumbnailPosition(currentTime: number, duration: number, count: number): string {
+  calculateThumbnailPosition(currentTime: number, duration: number, count: number): number[] {
     const currentIndex = Math.abs(Math.floor(currentTime / (duration / count)));
-    const column = currentIndex === 0 ? 0 : Math.ceil(currentIndex / 10) - 1;
-    const row = currentIndex - (10 * column);
-    return `-${row * 100}% -${column * 100}%`;
+    const column = currentIndex === 0 ? 0 : Math.ceil(currentIndex / ROWS) - 1;
+    const row = currentIndex - (ROWS * column);
+    return [row * 100, column * 100];
   }
 }
 
-export default new ThumbnailService(mediaStorageService);
+export const thumbnailService = new ThumbnailService(mediaStorageService);
 

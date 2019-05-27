@@ -1,48 +1,72 @@
 
 <template>
-<div ref="playlistItem" class="playlist-item">
-  <div class="layer1" ref="layer1"
-    :style="{
-      width: `${thumbnailWidth}px`,
-      height: `${thumbnailHeight}px`,
-    }"/>
-  <div class="layer2" ref="layer2"
-    :style="{
-      width: `${thumbnailWidth}px`,
-      height: `${thumbnailHeight}px`,
-    }"/>
-  <div class="item" ref="item"
-    :style="{
-      bottom: chosen ? '10px' : '0',
-      width: `${thumbnailWidth}px`,
-      height: `${thumbnailHeight}px`,
-    }">
-    <div class="content"
-      @click.stop="onRecentItemClick"
-      @mouseenter="onRecentItemMouseenter"
-      @mouseleave="onRecentItemMouseleave"
-      @mousedown.stop="onRecentItemMousedown"
-      @mouseup="onRecentItemMouseup"
+  <div
+    ref="playlistItem"
+    class="playlist-item"
+  >
+    <div
+      ref="layer1"
+      class="layer1"
       :style="{
         width: `${thumbnailWidth}px`,
-        height: chosen ? `${thumbnailHeight + 11}px` : `${thumbnailHeight}px`,
-      }">
-      <div class="border" ref="border"
+        height: `${thumbnailHeight}px`,
+      }"
+    />
+    <div
+      ref="layer2"
+      class="layer2"
+      :style="{
+        width: `${thumbnailWidth}px`,
+        height: `${thumbnailHeight}px`,
+      }"
+    />
+    <div
+      ref="item"
+      class="item"
+      :style="{
+        bottom: chosen ? '10px' : '0',
+        width: `${thumbnailWidth}px`,
+        height: `${thumbnailHeight}px`,
+      }"
+    >
+      <div
+        class="content"
         :style="{
-          left: `-${0.7 / 2}px`,
-          top: `-${0.7 / 2}px`,
-          width: `${thumbnailWidth - 0.7}px`,
-          height: `${thumbnailHeight - 0.7}px`,
-          border: chosen ? '0.7px solid rgba(255,255,255,0.6)' : '0.7px solid rgba(255,255,255,0.15)',
-          backgroundColor: aboutToDelete ? 'rgba(0,0,0,0.43)' : chosen ? 'rgba(255,255,255,0.2)' : '',
-        }">
-        <div class="deleteUi" :style="{
-          opacity: aboutToDelete ? '1' : '0',
-        }"><Icon type="delete"/></div>
+          width: `${thumbnailWidth}px`,
+          height: chosen ? `${thumbnailHeight + 11}px` : `${thumbnailHeight}px`,
+        }"
+        @click.stop="onRecentItemClick"
+        @mouseenter="onRecentItemMouseenter"
+        @mouseleave="onRecentItemMouseleave"
+        @mousedown.stop="onRecentItemMousedown"
+        @mouseup="onRecentItemMouseup"
+      >
+        <div
+          ref="border"
+          class="border"
+          :style="{
+            left: `-${0.7 / 2}px`,
+            top: `-${0.7 / 2}px`,
+            width: `${thumbnailWidth - 0.7}px`,
+            height: `${thumbnailHeight - 0.7}px`,
+            border: chosen ? '0.7px solid rgba(255,255,255,0.6)'
+              : '0.7px solid rgba(255,255,255,0.15)',
+            backgroundColor: aboutToDelete ? 'rgba(0,0,0,0.43)'
+              : chosen ? 'rgba(255,255,255,0.2)' : '',
+          }"
+        >
+          <div
+            class="deleteUi"
+            :style="{
+              opacity: aboutToDelete ? '1' : '0',
+            }"
+          >
+            <Icon type="delete" />
+          </div>
+        </div>
       </div>
     </div>
   </div>
-</div>
 </template>
 
 <script>
@@ -52,8 +76,52 @@ import { generateCoverPathByMediaHash } from '@/helpers/cacheFileStorage';
 import Icon from '../BaseIconContainer.vue';
 
 export default {
-  name: 'playlist-item',
+  name: 'PlaylistItem',
   components: { Icon },
+  props: {
+    firstIndex: {
+      type: Number,
+      default: 0,
+    },
+    lastIndex: {
+      type: Number,
+      default: 0,
+    },
+    shifting: {
+      type: Boolean,
+    },
+    isInRange: {
+      type: Boolean,
+    },
+    index: {
+      type: Number,
+      default: 0,
+    },
+    playlist: {
+      type: Object,
+      default: () => {},
+    },
+    thumbnailHeight: {
+      type: Number,
+      default: 63,
+    },
+    thumbnailWidth: {
+      type: Number,
+      default: 112,
+    },
+    lastPlayedFile: {
+      type: Array,
+      require: true,
+      default: () => [],
+    },
+    isFullScreen: {
+      type: Boolean,
+    },
+    filePathNeedToDelete: {
+      type: String,
+      default: '',
+    },
+  },
   data() {
     return {
       displayInfo: [],
@@ -66,43 +134,6 @@ export default {
       disX: NaN,
       disY: NaN,
     };
-  },
-  props: {
-    firstIndex: {
-      type: Number,
-    },
-    lastIndex: {
-      type: Number,
-    },
-    shifting: {
-      type: Boolean,
-    },
-    isInRange: {
-      type: Boolean,
-    },
-    index: {
-      type: Number,
-    },
-    playlist: {
-      type: Object,
-    },
-    thumbnailHeight: {
-      type: Number,
-    },
-    thumbnailWidth: {
-      type: Number,
-    },
-    lastPlayedFile: {
-      type: Object.Array,
-      require: true,
-      default: () => [],
-    },
-    isFullScreen: {
-      type: Boolean,
-    },
-    filePathNeedToDelete: {
-      type: String,
-    },
   },
   created() {
     let index = this.playlist.playedIndex;

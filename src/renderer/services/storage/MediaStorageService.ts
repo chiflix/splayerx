@@ -1,5 +1,5 @@
 import { IMediaStorable } from '@/interfaces/services/IMediaStorable';
-import cacheFileInstance, { CacheFile } from '@/libs/cacheFile';
+import CacheFile, { cacheFile as cacheFileInstance } from '@/libs/CacheFile'
 import { join } from 'path';
 
 // 视频元数据
@@ -9,7 +9,7 @@ export type VideoInfo = {
   thumbnail?: string
 }
 
-export class MediaStorageService implements IMediaStorable {
+export default class MediaStorageService implements IMediaStorable {
   constructor(private readonly cacheFile: CacheFile) {
   }
 
@@ -87,4 +87,4 @@ export class MediaStorageService implements IMediaStorable {
   }
 }
 
-export default new MediaStorageService(cacheFileInstance);
+export const mediaStorageService = new MediaStorageService(cacheFileInstance);
