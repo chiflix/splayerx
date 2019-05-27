@@ -1,95 +1,142 @@
 <template>
-<div class="recent-playlist-item no-drag" ref="recentPlaylistItem"
-  :style="{
-    transition: tranFlag ? 'transform 100ms ease-out' : '',
-    marginRight: sizeAdaption(15),
-    cursor: isPlaying && isInRange ? '' : 'pointer',
-    minWidth: `${thumbnailWidth}px`,
-    minHeight: `${thumbnailHeight}px`,
-  }">
-      <div class="child-item" style="will-change: transform;">
-        <div class="img blur" ref="blur"
-          v-if="imageLoaded"
+  <div
+    ref="recentPlaylistItem"
+    class="recent-playlist-item no-drag"
+    :style="{
+      transition: tranFlag ? 'transform 100ms ease-out' : '',
+      marginRight: sizeAdaption(15),
+      cursor: isPlaying && isInRange ? '' : 'pointer',
+      minWidth: `${thumbnailWidth}px`,
+      minHeight: `${thumbnailHeight}px`,
+    }"
+  >
+    <div
+      class="child-item"
+      style="will-change: transform;"
+    >
+      <div
+        v-if="imageLoaded"
+        ref="blur"
+        class="img blur"
+        :style="{
+          backgroundImage: !isPlaying ?
+            `linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%), ${backgroundImage}`
+            : 'linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%)',
+        }"
+      />
+      <div
+        ref="whiteHover"
+        class="white-hover"
+        :style="{
+          opacity: hovered ? '1' : '0',
+          minWidth: `${thumbnailWidth}px`,
+          minHeight: `${thumbnailHeight}px`,
+        }"
+      />
+      <div
+        ref="content"
+        class="content"
+        :style="{
+          height: '100%',
+        }"
+        @mouseenter="mouseoverVideo"
+        @mouseleave="mouseoutVideo"
+        @mousedown.left="mousedownVideo"
+        @mouseup.left="mouseupVideo"
+      >
+        <div
+          ref="info"
+          class="info"
           :style="{
-            backgroundImage: !isPlaying ? `linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%), ${backgroundImage}` : 'linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%)',
-          }"/>
-        <div class="white-hover" ref="whiteHover"
-          :style="{
-            opacity: hovered ? '1' : '0',
-            minWidth: `${thumbnailWidth}px`,
-            minHeight: `${thumbnailHeight}px`,
-          }"/>
-        <div class="content" ref="content"
-          @mouseenter="mouseoverVideo"
-          @mouseleave="mouseoutVideo"
-          @mousedown.left="mousedownVideo"
-          @mouseup.left="mouseupVideo"
-          :style="{
-            height: '100%',
-          }">
-          <div class="info" ref="info"
+            height: `${thumbnailHeight - bottom}px`,
+            width: `${thumbnailWidth - 2 * side}px`,
+            left: `${side}px`,
+          }"
+        >
+          <div
+            class="overflow-container"
             :style="{
-                height: `${thumbnailHeight - bottom}px`,
-                width: `${thumbnailWidth - 2 * side}px`,
-                left: `${side}px`,
-              }">
-            <div class="overflow-container"
-              :style="{
-                height: sizeAdaption(22),
-                bottom: sizeAdaption(14),
-              }">
+              height: sizeAdaption(22),
+              bottom: sizeAdaption(14),
+            }"
+          >
             <transition name="icon">
-            <div class="icon-container"
-              v-if="isPlaying">
-              <Icon type="playlistplay" class="playlist-play"
-                :style="{
-                  width: sizeAdaption(10),
-                  height: sizeAdaption(22),
-                  marginRight: sizeAdaption(4),
-                }"/>
-              <div class="playing"
-                :style="{
-                  paddingTop: sizeAdaption(5),
-                  fontSize: sizeAdaption(12),
-                  lineHeight: sizeAdaption(12),
-                }">{{ $t('recentPlaylist.playing') }}</div>
-            </div>
+              <div
+                v-if="isPlaying"
+                class="icon-container"
+              >
+                <Icon
+                  type="playlistplay"
+                  class="playlist-play"
+                  :style="{
+                    width: sizeAdaption(10),
+                    height: sizeAdaption(22),
+                    marginRight: sizeAdaption(4),
+                  }"
+                />
+                <div
+                  class="playing"
+                  :style="{
+                    paddingTop: sizeAdaption(5),
+                    fontSize: sizeAdaption(12),
+                    lineHeight: sizeAdaption(12),
+                  }"
+                >
+                  {{ $t('recentPlaylist.playing') }}
+                </div>
+              </div>
             </transition>
-            </div>
-            <transition name="fade">
-            <div class="progress" ref="progress"
+          </div>
+          <transition name="fade">
+            <div
+              ref="progress"
+              class="progress"
               :style="{
                 opacity: '0',
                 height: sizeAdaption(2),
                 bottom: sizeAdaption(14),
                 marginBottom: sizeAdaption(7),
-              }">
-              <div class="slider"
-              :style="{
-                width: `${sliderPercentage}%`,
-              }"></div>
+              }"
+            >
+              <div
+                class="slider"
+                :style="{
+                  width: `${sliderPercentage}%`,
+                }"
+              />
             </div>
-            </transition>
-            <div class="title" ref="title"
-              :style="{
-                color: 'rgba(255,255,255,0.40)',
-                fontSize: sizeAdaption(12),
-                lineHeight: sizeAdaption(16),
-              }">{{ baseName }}</div>
-          </div>
-          <div class="deleteUi" ref="deleteUi"
+          </transition>
+          <div
+            ref="title"
+            class="title"
             :style="{
-              height: `${thumbnailHeight}px`,
-            }">
-            <Icon type="delete"/>
+              color: 'rgba(255,255,255,0.40)',
+              fontSize: sizeAdaption(12),
+              lineHeight: sizeAdaption(16),
+            }"
+          >
+            {{ baseName }}
           </div>
         </div>
-        <div class="border" ref="border"
+        <div
+          ref="deleteUi"
+          class="deleteUi"
           :style="{
-            borderColor: 'rgba(255,255,255,0.15)',
-          }"/>
+            height: `${thumbnailHeight}px`,
+          }"
+        >
+          <Icon type="delete" />
+        </div>
       </div>
-</div>
+      <div
+        ref="border"
+        class="border"
+        :style="{
+          borderColor: 'rgba(255,255,255,0.15)',
+        }"
+      />
+    </div>
+  </div>
 </template>
 <script>
 import path from 'path';
@@ -105,9 +152,11 @@ export default {
   props: {
     index: {
       type: Number,
+      default: NaN,
     },
     maxIndex: {
       type: Number,
+      default: 0,
     },
     hovered: {
       type: Boolean,
@@ -117,15 +166,19 @@ export default {
     },
     indexOfMovingItem: {
       type: Number,
+      default: NaN,
     },
     movementX: {
       type: Number,
+      default: 0,
     },
     movementY: {
       type: Number,
+      default: 0,
     },
     indexOfMovingTo: {
       type: Number,
+      default: NaN,
     },
     isLastPage: {
       type: Boolean,
@@ -149,9 +202,11 @@ export default {
     },
     thumbnailHeight: {
       type: Number,
+      default: 63,
     },
     winWidth: {
       type: Number,
+      default: 720,
     },
     // content related
     isPlaying: {
@@ -160,6 +215,7 @@ export default {
     },
     path: {
       type: String,
+      default: '',
     },
     eventTarget: {
       type: Object,
@@ -167,6 +223,7 @@ export default {
     },
     sizeAdaption: {
       type: Function,
+      default: val => val,
     },
     pageSwitching: {
       type: Boolean,
@@ -189,6 +246,172 @@ export default {
       deleteTimeId: NaN,
       selfMoving: false,
     };
+  },
+  computed: {
+    ...mapGetters(['playingList', 'items']),
+    aboutToDelete() {
+      return this.selfMoving && (-(this.movementY) > this.thumbnailHeight * 1.5);
+    },
+    baseName() {
+      const parsedName = parseNameFromPath(this.path);
+      if (parsedName.episode && parsedName.season) {
+        return `S${parsedName.season}E${parsedName.episode}`;
+      } else if (parsedName.episode && !parsedName.season) {
+        return `EP${parsedName.episode}`;
+      } else if (parsedName.season && !parsedName.episode) {
+        return `SE${parsedName.season}`;
+      }
+      return path.basename(this.path, path.extname(this.path));
+    },
+    backgroundImage() {
+      return `url(${this.imageSrc})`;
+    },
+    imageSrc() {
+      if (this.lastPlayedTime) {
+        if (this.mediaInfo.duration - this.lastPlayedTime < 10) {
+          return this.coverSrc;
+        }
+        return this.smallShortCut;
+      }
+      return this.coverSrc;
+    },
+    imageLoaded() {
+      return this.smallShortCut || this.coverSrc !== '';
+    },
+    sliderPercentage() {
+      if (this.lastPlayedTime) {
+        if (this.mediaInfo.duration &&
+            this.lastPlayedTime / this.mediaInfo.duration <= 1) {
+          return (this.lastPlayedTime / this.mediaInfo.duration) * 100;
+        }
+      }
+      return 0;
+    },
+    side() {
+      return this.winWidth > 1355 ? this.thumbnailWidth / (112 / 14) : 14;
+    },
+    bottom() {
+      return this.winWidth > 1355 ? this.thumbnailWidth / (112 / 14) : 14;
+    },
+  },
+  watch: {
+    aboutToDelete(val) {
+      if (val) {
+        this.deleteTimeId = setTimeout(() => {
+          this.$refs.whiteHover.style.backgroundColor = 'rgba(0,0,0,0.6)';
+          this.$refs.info.style.opacity = '0';
+          this.$refs.deleteUi.style.opacity = '1';
+          this.$emit('can-remove');
+        }, 250);
+      } else {
+        clearTimeout(this.deleteTimeId);
+        requestAnimationFrame(() => {
+          this.$refs.whiteHover.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+          this.$refs.info.style.opacity = '1';
+          this.$refs.deleteUi.style.opacity = '0';
+        });
+      }
+    },
+    items() {
+      this.getLastPlayedInfo();
+    },
+    isPlaying(val) {
+      if (val) {
+        requestAnimationFrame(this.updateAnimationOut);
+      }
+    },
+    displayIndex(val) {
+      requestAnimationFrame(() => {
+        const marginRight = this.winWidth > 1355 ? (this.winWidth / 1355) * 15 : 15;
+        const distance = marginRight + this.thumbnailWidth;
+        if (val !== this.index) {
+          this.$refs.recentPlaylistItem.style.setProperty('transform', `translate(${(val - this.index) * distance}px,0)`);
+        } else {
+          this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,0)');
+        }
+      });
+    },
+    itemMoving(val) {
+      if (!val) {
+        this.tranFlag = true;
+        this.displayIndex = this.index;
+      }
+    },
+    indexOfMovingTo(val) {
+      if (this.itemMoving && Math.abs(this.movementY) < this.thumbnailHeight && !this.selfMoving) {
+        // item moving to right
+        if (this.index > this.indexOfMovingItem && this.index <= val) {
+          this.displayIndex = this.index - 1;
+        // item moving to left
+        } else if (this.index >= val && this.index < this.indexOfMovingItem) {
+          this.displayIndex = this.index + 1;
+        } else {
+          this.displayIndex = this.index;
+        }
+      }
+    },
+    pageSwitching(val, oldVal) {
+      if (!val && oldVal && this.selfMoving) {
+        requestAnimationFrame(() => {
+          this.$refs.recentPlaylistItem.style.setProperty('transform', `translate(${this.movementX}px, ${this.movementY}px)`);
+        });
+      }
+    },
+    movementY(val) { // eslint-disable-line complexity
+      if (Math.abs(val) > this.thumbnailHeight) {
+        // avoid the wrong layout after moving to left and lift up
+        if (this.index < this.indexOfMovingItem) {
+          this.displayIndex = this.isLastPage ? this.index + 1 : this.index;
+        } else if (this.index > this.indexOfMovingItem) {
+          this.displayIndex = this.isLastPage ? this.index : this.index - 1;
+        }
+      } else if (Math.abs(val) <= this.thumbnailHeight) {
+        // item moving to right
+        if (this.index > this.indexOfMovingItem && this.index <= this.indexOfMovingTo) {
+          this.displayIndex = this.index - 1;
+        // item moving to left
+        } else if (this.index >= this.indexOfMovingTo && this.index < this.indexOfMovingItem) {
+          this.displayIndex = this.index + 1;
+        } else {
+          this.displayIndex = this.index;
+        }
+      }
+    },
+    playingList() {
+      this.tranFlag = false;
+      this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,0)');
+      setTimeout(() => {
+        this.tranFlag = true;
+      }, 0);
+    },
+  },
+  mounted() {
+    this.displayIndex = this.index;
+    this.$electron.ipcRenderer.send('mediaInfo', this.path);
+    this.$electron.ipcRenderer.once(`mediaInfo-${this.path}-reply`, async (event, info) => {
+      const videoStream = JSON.parse(info).streams.find(stream => stream.codec_type === 'video');
+      this.videoHeight = videoStream.height;
+      this.videoWidth = videoStream.width;
+      this.mediaInfo = Object.assign(this.mediaInfo, JSON.parse(info).format);
+      const quickHash = await this.mediaQuickHash(this.path);
+      const imgPath = await generateCoverPathByMediaHash(quickHash);
+      this.$electron.ipcRenderer.send('snapShot', {
+        videoPath: this.path,
+        imgPath,
+        quickHash,
+        duration: this.mediaInfo.duration,
+        videoWidth: this.videoWidth,
+        videoHeight: this.videoHeight,
+      });
+    });
+    this.$electron.ipcRenderer.once(`snapShot-${this.path}-reply`, (event, imgPath) => {
+      this.coverSrc = filePathToUrl(`${imgPath}`);
+      this.imgPath = imgPath;
+    });
+    this.getLastPlayedInfo();
+    this.$bus.$on('database-saved', () => {
+      this.getLastPlayedInfo();
+    });
   },
   methods: {
     mousedownVideo(e) {
@@ -282,172 +505,6 @@ export default {
           this.mediaInfo = Object.assign(this.mediaInfo, val);
         });
       }
-    },
-  },
-  mounted() {
-    this.displayIndex = this.index;
-    this.$electron.ipcRenderer.send('mediaInfo', this.path);
-    this.$electron.ipcRenderer.once(`mediaInfo-${this.path}-reply`, async (event, info) => {
-      const videoStream = JSON.parse(info).streams.find(stream => stream.codec_type === 'video');
-      this.videoHeight = videoStream.height;
-      this.videoWidth = videoStream.width;
-      this.mediaInfo = Object.assign(this.mediaInfo, JSON.parse(info).format);
-      const quickHash = await this.mediaQuickHash(this.path);
-      const imgPath = await generateCoverPathByMediaHash(quickHash);
-      this.$electron.ipcRenderer.send('snapShot', {
-        videoPath: this.path,
-        imgPath,
-        quickHash,
-        duration: this.mediaInfo.duration,
-        videoWidth: this.videoWidth,
-        videoHeight: this.videoHeight,
-      });
-    });
-    this.$electron.ipcRenderer.once(`snapShot-${this.path}-reply`, (event, imgPath) => {
-      this.coverSrc = filePathToUrl(`${imgPath}`);
-      this.imgPath = imgPath;
-    });
-    this.getLastPlayedInfo();
-    this.$bus.$on('database-saved', () => {
-      this.getLastPlayedInfo();
-    });
-  },
-  watch: {
-    aboutToDelete(val) {
-      if (val) {
-        this.deleteTimeId = setTimeout(() => {
-          this.$refs.whiteHover.style.backgroundColor = 'rgba(0,0,0,0.6)';
-          this.$refs.info.style.opacity = '0';
-          this.$refs.deleteUi.style.opacity = '1';
-          this.$emit('can-remove');
-        }, 250);
-      } else {
-        clearTimeout(this.deleteTimeId);
-        requestAnimationFrame(() => {
-          this.$refs.whiteHover.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
-          this.$refs.info.style.opacity = '1';
-          this.$refs.deleteUi.style.opacity = '0';
-        });
-      }
-    },
-    items() {
-      this.getLastPlayedInfo();
-    },
-    isPlaying(val) {
-      if (val) {
-        requestAnimationFrame(this.updateAnimationOut);
-      }
-    },
-    displayIndex(val) {
-      requestAnimationFrame(() => {
-        const marginRight = this.winWidth > 1355 ? (this.winWidth / 1355) * 15 : 15;
-        const distance = marginRight + this.thumbnailWidth;
-        if (val !== this.index) {
-          this.$refs.recentPlaylistItem.style.setProperty('transform', `translate(${(val - this.index) * distance}px,0)`);
-        } else {
-          this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,0)');
-        }
-      });
-    },
-    itemMoving(val) {
-      if (!val) {
-        this.tranFlag = true;
-        this.displayIndex = this.index;
-      }
-    },
-    indexOfMovingTo(val) {
-      if (this.itemMoving && Math.abs(this.movementY) < this.thumbnailHeight && !this.selfMoving) {
-        // item moving to right
-        if (this.index > this.indexOfMovingItem && this.index <= val) {
-          this.displayIndex = this.index - 1;
-        // item moving to left
-        } else if (this.index >= val && this.index < this.indexOfMovingItem) {
-          this.displayIndex = this.index + 1;
-        } else {
-          this.displayIndex = this.index;
-        }
-      }
-    },
-    pageSwitching(val, oldVal) {
-      if (!val && oldVal && this.selfMoving) {
-        requestAnimationFrame(() => {
-          this.$refs.recentPlaylistItem.style.setProperty('transform', `translate(${this.movementX}px, ${this.movementY}px)`);
-        });
-      }
-    },
-    movementY(val) { // eslint-disable-line complexity
-      if (Math.abs(val) > this.thumbnailHeight) {
-        // avoid the wrong layout after moving to left and lift up
-        if (this.index < this.indexOfMovingItem) {
-          this.displayIndex = this.isLastPage ? this.index + 1 : this.index;
-        } else if (this.index > this.indexOfMovingItem) {
-          this.displayIndex = this.isLastPage ? this.index : this.index - 1;
-        }
-      } else if (Math.abs(val) <= this.thumbnailHeight) {
-        // item moving to right
-        if (this.index > this.indexOfMovingItem && this.index <= this.indexOfMovingTo) {
-          this.displayIndex = this.index - 1;
-        // item moving to left
-        } else if (this.index >= this.indexOfMovingTo && this.index < this.indexOfMovingItem) {
-          this.displayIndex = this.index + 1;
-        } else {
-          this.displayIndex = this.index;
-        }
-      }
-    },
-    playingList() {
-      this.tranFlag = false;
-      this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,0)');
-      setTimeout(() => {
-        this.tranFlag = true;
-      }, 0);
-    },
-  },
-  computed: {
-    ...mapGetters(['playingList', 'items']),
-    aboutToDelete() {
-      return this.selfMoving && (-(this.movementY) > this.thumbnailHeight * 1.5);
-    },
-    baseName() {
-      const parsedName = parseNameFromPath(this.path);
-      if (parsedName.episode && parsedName.season) {
-        return `S${parsedName.season}E${parsedName.episode}`;
-      } else if (parsedName.episode && !parsedName.season) {
-        return `EP${parsedName.episode}`;
-      } else if (parsedName.season && !parsedName.episode) {
-        return `SE${parsedName.season}`;
-      }
-      return path.basename(this.path, path.extname(this.path));
-    },
-    backgroundImage() {
-      return `url(${this.imageSrc})`;
-    },
-    imageSrc() {
-      if (this.lastPlayedTime) {
-        if (this.mediaInfo.duration - this.lastPlayedTime < 10) {
-          return this.coverSrc;
-        }
-        return this.smallShortCut;
-      }
-      return this.coverSrc;
-    },
-    imageLoaded() {
-      return this.smallShortCut || this.coverSrc !== '';
-    },
-    sliderPercentage() {
-      if (this.lastPlayedTime) {
-        if (this.mediaInfo.duration &&
-            this.lastPlayedTime / this.mediaInfo.duration <= 1) {
-          return (this.lastPlayedTime / this.mediaInfo.duration) * 100;
-        }
-      }
-      return 0;
-    },
-    side() {
-      return this.winWidth > 1355 ? this.thumbnailWidth / (112 / 14) : 14;
-    },
-    bottom() {
-      return this.winWidth > 1355 ? this.thumbnailWidth / (112 / 14) : 14;
     },
   },
 };

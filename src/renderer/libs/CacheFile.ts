@@ -18,7 +18,7 @@ function getDefaultDataPath() {
   return path.join(app.getPath(ELECTRON_CACHE_DIRNAME), DEFAULT_DIRNAME);
 }
 
-export class CacheFile implements ICacheFileStorable {
+export default class CacheFile implements ICacheFileStorable {
   /** 公开API 根据mediaHash得到该视频的缓存目录
    * @description CacheFile 对 IFileStorable接口的实现
    * @author tanghaixiang@xindong.com
@@ -103,4 +103,4 @@ export class CacheFile implements ICacheFileStorable {
   }
 }
 
-export default new CacheFile()
+export const cacheFile = new CacheFile()

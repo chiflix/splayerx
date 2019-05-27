@@ -11,7 +11,7 @@ const normalizer = (parsedSubtitle) => {
       start: toMS(subtitle.start) / 1000,
       end: toMS(subtitle.end) / 1000,
       tags: tagsGetter(subtitle.text, baseTags),
-      text: subtitle.text.replace(/\{[^{}]*\}/g, '').replace(/[\\/][Nn]|\r?\n|\r/g, '<br>'),
+      text: subtitle.text.replace(/\{[^{}]*\}/g, '').replace(/[\\/][Nn]|\r?\n|\r/g, '\n'),
     });
   });
   return {

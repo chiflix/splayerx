@@ -1,6 +1,15 @@
 <template>
-  <div @mousedown.left="handleDown" @mouseup.left="togglePlaylistDisplay" @mouseenter="handleEnter" @mouseleave="handleLeave">
-    <lottie v-on:animCreated="handleAnimation" :options="defaultOptions" lot="playlist"></lottie>
+  <div
+    @mousedown.left="handleDown"
+    @mouseup.left="togglePlaylistDisplay"
+    @mouseenter="handleEnter"
+    @mouseleave="handleLeave"
+  >
+    <lottie
+      :options="defaultOptions"
+      lot="playlist"
+      @animCreated="handleAnimation"
+    />
   </div>
 </template>
 <script>
@@ -10,7 +19,7 @@ import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import animationData from '@/assets/playlist.json';
 
 export default {
-  name: 'playlist-control',
+  name: 'PlaylistControl',
   type: INPUT_COMPONENT_TYPE,
   components: {
     lottie,

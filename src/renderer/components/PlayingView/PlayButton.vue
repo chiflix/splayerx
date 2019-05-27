@@ -1,37 +1,50 @@
 <template>
-<div
-  @mousedown="handleMousedown"
-  @mouseup="handleMouseup"
-  @mouseenter="handleMouseenter"
-  @mouseleave="handleMouseleave">
-  <div class="icon-wrapper"
-    :class="iconClass">
-    <Icon class="icon play"
-      type="play"
-      v-show="showPlayIcon"
-      :class="ani_mode"
-      :style="{cursor: cursorAppear ? 'pointer' : 'none'}"/>
-    <Icon class="icon"
-      type="pause"
-      v-show="!showPlayIcon"
-      :class="ani_mode"
-      :style="{cursor: cursorAppear ? 'pointer' : 'none'}"/>
+  <div
+    @mousedown="handleMousedown"
+    @mouseup="handleMouseup"
+    @mouseenter="handleMouseenter"
+    @mouseleave="handleMouseleave"
+  >
+    <div
+      class="icon-wrapper"
+      :class="iconClass"
+    >
+      <Icon
+        v-show="showPlayIcon"
+        class="icon play"
+        type="play"
+        :class="ani_mode"
+        :style="{cursor: cursorAppear ? 'pointer' : 'none'}"
+      />
+      <Icon
+        v-show="!showPlayIcon"
+        class="icon"
+        type="pause"
+        :class="ani_mode"
+        :style="{cursor: cursorAppear ? 'pointer' : 'none'}"
+      />
+    </div>
   </div>
-</div>
 </template>
 
 <script>
 import Icon from '../BaseIconContainer.vue';
 
 export default {
-  name: 'play-button',
+  name: 'PlayButton',
+  components: {
+    Icon,
+  },
   props: {
-    paused: false,
-    isFocused: true,
-    attachedShown: false,
-    showAllWidgets: false,
-    mousemovePosition: { x: 0, y: 0 },
-    mousedownOnVolume: false,
+    paused: Boolean,
+    isFocused: Boolean,
+    attachedShown: Boolean,
+    showAllWidgets: Boolean,
+    mousedownOnVolume: Boolean,
+    mousemovePosition: {
+      type: Object,
+      default: () => {},
+    },
   },
   data() {
     return {
@@ -47,52 +60,6 @@ export default {
       justFocused: false,
       justMousedownOnVolume: false,
     };
-  },
-  components: {
-    Icon,
-  },
-  methods: {
-    handleMouseenter() {
-      this.mouseover = true;
-      if (!this.attachedShown && this.isFocused && !this.mousedownOnVolume) {
-        this.cursorAppear = true;
-        this.iconClass = 'fade-in';
-        this.justMousedownOnVolume = false;
-      } else if (!this.isFocused) {
-        this.detectMovePosition = true;
-      }
-      if (this.iconFadingId) clearTimeout(this.iconFadingId);
-    },
-    handleMouseleave() {
-      this.cursorAppear = this.mouseover = false;
-      if (this.iconFadingId) clearTimeout(this.iconFadingId);
-      this.iconFadingId = setTimeout(() => {
-        this.iconClass = 'fade-out';
-      }, 200);
-    },
-    handleMousedown() { // eslint-disable-line complexity
-      if (this.justFocused || (this.showAllWidgets &&
-        (this.justCloseAttached || this.justMousedownOnVolume))) {
-        this.justFocused = this.justCloseAttached = this.justMousedownOnVolume = false;
-        this.cursorAppear = true;
-        this.iconClass = 'fade-in';
-      } else if (this.showAllWidgets && !this.attachedShown && this.isFocused) {
-        this.cursorAppear = true;
-        this.iconClass = 'fade-in';
-        this.mousedown = true;
-        this.ani_mode = 'icon-ani-fade-out';
-        this.$emit('update:playbutton-state', true);
-      } else if (!this.showAllWidgets && !this.attachedShown && this.isFocused) {
-        this.cursorAppear = true;
-        this.iconClass = 'fade-in';
-      }
-    },
-    handleMouseup() {
-      if (this.mousedown && !this.attachedShown) {
-        this.showPlayIcon = !this.showPlayIcon;
-        this.$bus.$emit('toggle-playback');
-      }
-    },
   },
   watch: {
     showAllWidgets(val) {
@@ -143,6 +110,49 @@ export default {
       }
     });
   },
+  methods: {
+    handleMouseenter() {
+      this.mouseover = true;
+      if (!this.attachedShown && this.isFocused && !this.mousedownOnVolume) {
+        this.cursorAppear = true;
+        this.iconClass = 'fade-in';
+        this.justMousedownOnVolume = false;
+      } else if (!this.isFocused) {
+        this.detectMovePosition = true;
+      }
+      if (this.iconFadingId) clearTimeout(this.iconFadingId);
+    },
+    handleMouseleave() {
+      this.cursorAppear = this.mouseover = false;
+      if (this.iconFadingId) clearTimeout(this.iconFadingId);
+      this.iconFadingId = setTimeout(() => {
+        this.iconClass = 'fade-out';
+      }, 200);
+    },
+    handleMousedown() { // eslint-disable-line complexity
+      if (this.justFocused || (this.showAllWidgets &&
+        (this.justCloseAttached || this.justMousedownOnVolume))) {
+        this.justFocused = this.justCloseAttached = this.justMousedownOnVolume = false;
+        this.cursorAppear = true;
+        this.iconClass = 'fade-in';
+      } else if (this.showAllWidgets && !this.attachedShown && this.isFocused) {
+        this.cursorAppear = true;
+        this.iconClass = 'fade-in';
+        this.mousedown = true;
+        this.ani_mode = 'icon-ani-fade-out';
+        this.$emit('update:playbutton-state', true);
+      } else if (!this.showAllWidgets && !this.attachedShown && this.isFocused) {
+        this.cursorAppear = true;
+        this.iconClass = 'fade-in';
+      }
+    },
+    handleMouseup() {
+      if (this.mousedown && !this.attachedShown) {
+        this.showPlayIcon = !this.showPlayIcon;
+        this.$bus.$emit('toggle-playback');
+      }
+    },
+  },
 };
 </script>
 
@@ -185,7 +195,8 @@ export default {
   height: 100%;
   transition: transform 90ms cubic-bezier(0, 1, 1, 1);
 }
-@media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
+@media screen and (max-aspect-ratio: 1/1) and (max-width: 288px),
+screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
   .icon-wrapper {
     width: 54px;
     height: 54px;
@@ -194,7 +205,8 @@ export default {
     margin-left: 2px;
   }
 }
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
+screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
   .icon-wrapper {
     width: 67px;
     height: 67px;
@@ -203,7 +215,8 @@ export default {
     margin-left: 3px;
   }
 }
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
   .icon-wrapper {
     width: 93px;
     height: 93px;
@@ -212,7 +225,8 @@ export default {
     margin-left: 3px;
   }
 }
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   .icon-wrapper {
     width: 129px;
     height: 129px;

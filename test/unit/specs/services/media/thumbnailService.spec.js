@@ -1,7 +1,7 @@
 import sinon from 'sinon';
-import { MediaStorageService } from '@/services/storage/mediaStorageService';
-import { CacheFile } from '../../../../../src/renderer/libs/cacheFile';
-import { ThumbnailService } from '../../../../../src/renderer/services/media/thumbnailService';
+import MediaStorageService from '@/services/storage/mediaStorageService';
+import CacheFile from '../../../../../src/renderer/libs/cacheFile';
+import ThumbnailService from '../../../../../src/renderer/services/media/thumbnailService';
 
 describe('thumbnaiService logic service', () => {
   let thumbnailService;

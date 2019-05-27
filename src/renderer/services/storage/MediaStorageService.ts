@@ -1,5 +1,5 @@
 import { IMediaStorable } from '@/interfaces/services/IMediaStorable';
-import cacheFileInstance, { CacheFile } from '@/libs/CacheFile';
+import CacheFile, { cacheFile as cacheFileInstance } from '@/libs/CacheFile'
 //@ts-ignore
 import { join } from 'path';
 
@@ -10,7 +10,7 @@ export type VideoInfo = {
   thumbnail?: string
 }
 
-export class MediaStorageService implements IMediaStorable {
+export default class MediaStorageService implements IMediaStorable {
   constructor(private readonly cacheFile: CacheFile) {
   }
 
@@ -68,7 +68,7 @@ export class MediaStorageService implements IMediaStorable {
       return null
     }
   }
-  
+
   /** 公开API 根据hash、tag，生成对应的图片将要存放的路径
    * @description MediaStorageService 对 IMediaStorable接口的实现
    * @author tanghaixiang@xindong.com
@@ -88,4 +88,4 @@ export class MediaStorageService implements IMediaStorable {
   }
 }
 
-export default new MediaStorageService(cacheFileInstance);
+export const mediaStorageService = new MediaStorageService(cacheFileInstance);

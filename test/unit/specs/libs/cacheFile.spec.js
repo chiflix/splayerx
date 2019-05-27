@@ -1,5 +1,5 @@
 import helpers from '@/helpers';
-import { CacheFile } from '../../../../src/renderer/libs/cacheFile';
+import CacheFile from '../../../../src/renderer/libs/cacheFile';
 
 describe('CacheFile libs', () => {
   const cacheFile = new CacheFile();

@@ -1,11 +1,22 @@
 <template>
-  <div class="subtitle-wrapper">
-    <span class="subtitle-border-content"
-       :style="{ textAlign: this.textAlign}"
-       :class="'subtitle-border-style'+ChosenIndex" v-html="finalText"></span>
-    <span class="subtitle-content"
-       :style="{ textAlign: this.textAlign}"
-       :class="'subtitle-style'+ChosenIndex" v-html="finalText"></span>
+  <div
+    class="subtitle-wrapper"
+    :style="{
+      fontStyle: isItalic ? 'italic' : '',
+      fontWeight: isBold ? 'bold' : '',
+      textDecoration: lineType,
+    }"
+  >
+    <span
+      class="subtitle-border-content"
+      :style="{ textAlign: textAlign }"
+      :class="'subtitle-border-style'+ChosenIndex"
+    >{{ text }}</span>
+    <span
+      class="subtitle-content"
+      :style="{ textAlign: textAlign}"
+      :class="'subtitle-style'+ChosenIndex"
+    >{{ text }}</span>
   </div>
 </template>
 
@@ -13,10 +24,23 @@
 import { mapGetters } from 'vuex';
 
 export default {
-  name: 'cue-renderer',
+  name: 'CueRenderer',
   props: {
-    text: String,
-    settings: Object,
+    text: {
+      type: String,
+      required: true,
+    },
+    settings: {
+      type: Object,
+      required: true,
+    },
+  },
+  data() {
+    return {
+      isItalic: false,
+      isBold: false,
+      lineType: '',
+    };
   },
   computed: {
     ...mapGetters(['chosenStyle', 'scaleNum', 'winWidth']),
@@ -33,23 +57,26 @@ export default {
       }
       return 'center';
     },
-    finalText() {
-      let tmp = this.text;
-      if (this.settings) {
-        if (this.settings.i) {
-          tmp = `<i>${tmp}`;
+  },
+  watch: {
+    settings(val) {
+      this.isItalic = false;
+      this.isBold = false;
+      this.lineType = '';
+      if (val) {
+        if (val.i) {
+          this.isItalic = true;
         }
-        if (this.settings.b) {
-          tmp = `<b>${tmp}`;
+        if (val.b) {
+          this.isBold = true;
         }
-        if (this.settings.u) {
-          tmp = `<u>${tmp}`;
+        if (val.u) {
+          this.lineType = 'underline';
         }
-        if (this.settings.s) {
-          tmp = `<s>${tmp}`;
+        if (val.s) {
+          this.lineType = 'line-through';
         }
       }
-      return tmp;
     },
   },
 };

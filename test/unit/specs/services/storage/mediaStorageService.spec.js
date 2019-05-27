@@ -1,6 +1,6 @@
 import sinon from 'sinon';
-import { MediaStorageService } from '../../../../../src/renderer/services/storage/mediaStorageService';
-import { CacheFile } from '../../../../../src/renderer/libs/cacheFile';
+import MediaStorageService from '../../../../../src/renderer/services/storage/mediaStorageService';
+import CacheFile from '../../../../../src/renderer/libs/cacheFile';
 
 describe('MediaStorageService logic service', () => {
   let mediaStorageService;

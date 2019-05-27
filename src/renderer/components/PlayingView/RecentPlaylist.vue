@@ -1,95 +1,127 @@
 <template>
-<div class="recent-playlist"
-  v-show="backgroundDisplayState"
-  @mouseup="handleMouseup">
-  <transition name="background-fade">
-  <div class="background-gradient"
-    v-show="displayState"
-    :style="{
-      height: sizeAdaption(282),
-    }"/>
-  </transition>
-  <transition name="translate"
-    @after-leave="afterLeave">
-  <div class="content"
-    v-show="displayState">
-    <transition name="fade" mode="out-in">
-    <div class="info"
-      :key="hoverIndex"
-      :style="{
-        marginTop: sizeAdaption(53),
-        paddingLeft: sizeAdaption(40),
-      }">
-      <div class="top"
+  <div
+    v-show="backgroundDisplayState"
+    class="recent-playlist"
+    @mouseup="handleMouseup"
+  >
+    <transition name="background-fade">
+      <div
+        v-show="displayState"
+        class="background-gradient"
         :style="{
-          fontSize: sizeAdaption(14),
-          lineHeight: sizeAdaption(14),
-        }">
-        <span ref="lastPlayedTime"></span>
-        {{timecodeFromSeconds(videoDuration)}}&nbsp&nbsp·&nbsp&nbsp{{inWhichSource}}&nbsp&nbsp{{indexInPlaylist}} / {{numberOfPlaylistItem}}
-      </div>
-      <div class="file-name"
-        :style="{
-          marginTop: sizeAdaption(9),
-          fontSize: sizeAdaption(18),
-          lineHeight: sizeAdaption(20),
-          fontWeight: 500,
-        }">{{ filename }}</div>
-    </div>
-    </transition>
-    <div class="playlist-items"
-      @mouseup.stop=""
-      :style="{
-        transition: tranFlag ? 'transform 400ms ease-in' : '',
-        transform: `translateX(-${distance}px)`,
-        marginTop: sizeAdaption(20),
-        marginBottom: sizeAdaption(40),
-        marginLeft: sizeAdaption(40),
-      }">
-      <RecentPlaylistItem v-for="(item, index) in playingList" class="item"
-        @can-remove="canRemove = true"
-        :key="item"
-        :index="index"
-        :path="item"
-        :maxIndex="maxIndex"
-        :isLastPage="lastIndex === maxIndex && firstIndex > 0"
-        :pageSwitching="pageSwitching"
-        :itemMoving="itemMoving"
-        :indexOfMovingTo="indexOfMovingTo"
-        :indexOfMovingItem="indexOfMovingItem"
-        :movementX="movementX"
-        :movementY="movementY"
-        :canHoverItem="canHoverItem"
-        :isInRange="index >= firstIndex && index <= lastIndex"
-        :isPlaying="index === playingIndex"
-        :isShifting="shifting"
-        :isFolderList="isFolderList"
-        :hovered="hoverIndex === index"
-        :winWidth="winWidth"
-        :thumbnailWidth="thumbnailWidth"
-        :thumbnailHeight="thumbnailHeight"
-        :sizeAdaption="sizeAdaption"
-        :eventTarget="eventTarget"/>
-      <Add :style="{
-          marginRight: sizeAdaption(15),
-          minWidth: `${thumbnailWidth}px`,
-          minHeight: `${thumbnailHeight}px`,
+          height: sizeAdaption(282),
         }"
-        :itemMoving="itemMoving"
-        :index="addIndex"
-        :addMouseup="addMouseup"/>
-      <div class="next-page"
-        v-if="thumbnailNumber < numberOfPlaylistItem"
-        @mouseup.stop=""
-        :style="{
-          marginRight: sizeAdaption(15),
-          width: `${thumbnailWidth}px`,
-          height: `${thumbnailWidth / (112 / 63)}px`,
-        }"/>
-    </div>
+      />
+    </transition>
+    <transition
+      name="translate"
+      @after-leave="afterLeave"
+    >
+      <div
+        v-show="displayState"
+        class="content"
+      >
+        <transition
+          name="fade"
+          mode="out-in"
+        >
+          <div
+            :key="hoverIndex"
+            class="info"
+            :style="{
+              marginTop: sizeAdaption(53),
+              paddingLeft: sizeAdaption(40),
+            }"
+          >
+            <div
+              class="top"
+              :style="{
+                fontSize: sizeAdaption(14),
+                lineHeight: sizeAdaption(14),
+              }"
+            >
+              <span ref="lastPlayedTime" />
+              {{
+                timecodeFromSeconds(videoDuration)
+              }}&nbsp;&nbsp;·&nbsp;&nbsp;{{
+                inWhichSource
+              }}&nbsp;&nbsp;{{ indexInPlaylist }} / {{ numberOfPlaylistItem }}
+            </div>
+            <div
+              class="file-name"
+              :style="{
+                marginTop: sizeAdaption(9),
+                fontSize: sizeAdaption(18),
+                lineHeight: sizeAdaption(20),
+                fontWeight: 500,
+              }"
+            >
+              {{ filename }}
+            </div>
+          </div>
+        </transition>
+        <div
+          class="playlist-items"
+          :style="{
+            transition: tranFlag ? 'transform 400ms ease-in' : '',
+            transform: `translateX(-${distance}px)`,
+            marginTop: sizeAdaption(20),
+            marginBottom: sizeAdaption(40),
+            marginLeft: sizeAdaption(40),
+          }"
+          @mouseup.stop=""
+        >
+          <RecentPlaylistItem
+            v-for="(item, index) in playingList"
+            :key="item"
+            class="item"
+            :index="index"
+            :path="item"
+            :max-index="maxIndex"
+            :is-last-page="lastIndex === maxIndex && firstIndex > 0"
+            :page-switching="pageSwitching"
+            :item-moving="itemMoving"
+            :index-of-moving-to="indexOfMovingTo"
+            :index-of-moving-item="indexOfMovingItem"
+            :movement-x="movementX"
+            :movement-y="movementY"
+            :can-hover-item="canHoverItem"
+            :is-in-range="index >= firstIndex && index <= lastIndex"
+            :is-playing="index === playingIndex"
+            :is-shifting="shifting"
+            :is-folder-list="isFolderList"
+            :hovered="hoverIndex === index"
+            :win-width="winWidth"
+            :thumbnail-width="thumbnailWidth"
+            :thumbnail-height="thumbnailHeight"
+            :size-adaption="sizeAdaption"
+            :event-target="eventTarget"
+            @can-remove="canRemove = true"
+          />
+          <Add
+            :style="{
+              marginRight: sizeAdaption(15),
+              minWidth: `${thumbnailWidth}px`,
+              minHeight: `${thumbnailHeight}px`,
+            }"
+            :item-moving="itemMoving"
+            :index="addIndex"
+            :add-mouseup="addMouseup"
+          />
+          <div
+            v-if="thumbnailNumber < numberOfPlaylistItem"
+            class="next-page"
+            :style="{
+              marginRight: sizeAdaption(15),
+              width: `${thumbnailWidth}px`,
+              height: `${thumbnailWidth / (112 / 63)}px`,
+            }"
+            @mouseup.stop=""
+          />
+        </div>
+      </div>
+    </transition>
   </div>
-  </transition>
-</div>
 </template>
 <script>
 import path from 'path';
@@ -101,14 +133,17 @@ import Add from '@/components/PlayingView/Add.vue';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 
 export default {
-  name: 'recent-playlist',
+  name: 'RecentPlaylist',
   type: INPUT_COMPONENT_TYPE,
   components: {
     RecentPlaylistItem,
     Add,
   },
   props: {
-    mousemoveClientPosition: {},
+    mousemoveClientPosition: {
+      type: Object,
+      default: () => {},
+    },
     displayState: Boolean,
     isDragging: Boolean,
     lastDragging: Boolean,

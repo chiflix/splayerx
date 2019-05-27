@@ -15,11 +15,21 @@ import TheVideoController from './PlayingView/TheVideoController.vue';
 import { videodata } from '../store/video';
 
 export default {
-  name: 'playing-view',
+  name: 'PlayingView',
   components: {
     'the-video-controller': TheVideoController,
     'the-video-canvas': VideoCanvas,
     'subtitle-manager': SubtitleManager,
+  },
+  mounted() {
+    this.$store.dispatch('initWindowRotate');
+    this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [320, 180]);
+    videodata.checkTick();
+    videodata.onTick = this.onUpdateTick;
+  },
+  beforeDestroy() {
+    this.updateSubToTop(false);
+    videodata.stopCheckTick();
   },
   methods: {
     ...mapActions({
@@ -31,16 +41,6 @@ export default {
     onUpdateTick() {
       this.$refs.videoctrl.onTickUpdate();
     },
-  },
-  mounted() {
-    this.$store.dispatch('initWindowRotate');
-    this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [320, 180]);
-    videodata.checkTick();
-    videodata.onTick = this.onUpdateTick;
-  },
-  beforeDestroy() {
-    this.updateSubToTop(false);
-    videodata.stopCheckTick();
   },
 };
 </script>

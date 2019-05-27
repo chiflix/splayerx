@@ -1,102 +1,168 @@
 <template>
-  <div data-component-name="$options.name" class="sub-control" v-fade-in="showAllWidgets">
+  <div
+    v-fade-in="showAllWidgets"
+    data-component-name="$options.name"
+    class="sub-control"
+  >
     <div class="sub-btn-control">
       <transition name="sub-trans-l">
-        <div class="sub-menu-wrapper subtitle-scroll-items"
+        <div
           v-show="showAttached"
+          class="sub-menu-wrapper subtitle-scroll-items"
           :style="{
             cursor: 'default',
-            transition: showAttached ? '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' : '150ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
+            transition: showAttached ? '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' :
+              '150ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
             height: hiddenText ? `${contHeight + hoverHeight}px` : `${contHeight}px`,
             fontWeight: '900',
-          }">
+          }"
+        >
           <div class="element bottom">
             <div class="element content">
-
               <div class="topContainer">
-                <div class="title subtitleNormal">{{ this.$t('msg.subtitle.subtitleSelect') }}</div>
-                <div class="subtitleShift" @mouseup="subTypeShift" v-show="enabledSecondarySub" @mouseover="shiftItemHover" @mouseleave="shiftItemLeave">
-                  <div class="firstSub" :style="{
-                    color: isFirstSubtitle || shiftItemHovered ? 'rgba(255, 255, 255, 0.5)' : 'rgba(255, 255, 255, 0.2)',
-                    background: isFirstSubtitle ? 'rgba(255, 255, 255, 0.13)' : '',
-                    boxShadow: isFirstSubtitle ? '1px 0 2px rgba(0, 0, 0, 0.09)' : '',
-                    borderRadius: isFirstSubtitle ? '2px' : '',
-                  }"><span>1</span></div>
-                  <div class="secondarySub" :style="{
-                    color: !isFirstSubtitle || shiftItemHovered ? 'rgba(255, 255, 255, 0.5)' : 'rgba(255, 255, 255, 0.2)',
-                    background: !isFirstSubtitle ? 'rgba(255, 255, 255, 0.13)' : '',
-                    boxShadow: !isFirstSubtitle ? '-1px 0 2px rgba(0, 0, 0, 0.09)' : '',
-                    borderRadius: !isFirstSubtitle ? '2px' : '',
-                  }"><span>2</span></div>
+                <div class="title subtitleNormal">
+                  {{ this.$t('msg.subtitle.subtitleSelect') }}
                 </div>
-                <Icon type="refresh" class="refresh" ref="refreshRotate" @mouseup.native="handleRefresh" :class="animClass ? 'icon-rotate-animation' : ''"/>
+                <div
+                  v-show="enabledSecondarySub"
+                  class="subtitleShift"
+                  @mouseup="subTypeShift"
+                  @mouseover="shiftItemHover"
+                  @mouseleave="shiftItemLeave"
+                >
+                  <div
+                    class="firstSub"
+                    :style="{
+                      color: isFirstSubtitle || shiftItemHovered ?
+                        'rgba(255, 255, 255, 0.5)' : 'rgba(255, 255, 255, 0.2)',
+                      background: isFirstSubtitle ? 'rgba(255, 255, 255, 0.13)' : '',
+                      boxShadow: isFirstSubtitle ? '1px 0 2px rgba(0, 0, 0, 0.09)' : '',
+                      borderRadius: isFirstSubtitle ? '2px' : '',
+                    }"
+                  >
+                    <span>1</span>
+                  </div>
+                  <div
+                    class="secondarySub"
+                    :style="{
+                      color: !isFirstSubtitle || shiftItemHovered ?
+                        'rgba(255, 255, 255, 0.5)' : 'rgba(255, 255, 255, 0.2)',
+                      background: !isFirstSubtitle ? 'rgba(255, 255, 255, 0.13)' : '',
+                      boxShadow: !isFirstSubtitle ? '-1px 0 2px rgba(0, 0, 0, 0.09)' : '',
+                      borderRadius: !isFirstSubtitle ? '2px' : '',
+                    }"
+                  >
+                    <span>2</span>
+                  </div>
+                </div>
+                <Icon
+                  ref="refreshRotate"
+                  type="refresh"
+                  class="refresh"
+                  :class="animClass ? 'icon-rotate-animation' : ''"
+                  @mouseup.native="handleRefresh"
+                />
               </div>
 
               <div class="sub-menu">
-                <div class="scrollScope" :class="refAnimation" ref="scroll"
-                  @animationend="finishAnimation"
+                <div
+                  ref="scroll"
+                  class="scrollScope"
+                  :class="refAnimation"
                   :style="{
                     transition: '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
                     height: hiddenText ? `${scopeHeight + hoverHeight}px` : `${scopeHeight}px`,
                     overflowY: isOverFlow,
-                  }">
+                  }"
+                  @animationend="finishAnimation"
+                >
                   <div class="itemContainer">
                     <div v-if="!(loadingSubsPlaceholders.length > 0)">
-                      <div class="menu-item-text-wrapper"
+                      <div
+                        class="menu-item-text-wrapper"
+                        :style="{
+                          color: hoverIndex === -1 || currentSubtitleIndex === -1 ?
+                            'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+                          height: `${itemHeight}px`,
+                          cursor: currentSubtitleIndex === -1 ? 'default' : 'pointer',
+                        }"
                         @mouseup="$bus.$emit('off-subtitle')"
                         @mouseover="toggleItemsMouseOver(-1)"
                         @mouseleave="toggleItemsMouseLeave(-1)"
-                        :style="{
-                          color: hoverIndex === -1 || currentSubtitleIndex === -1 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
-                          height: `${itemHeight}px`,
-                          cursor: currentSubtitleIndex === -1 ? 'default' : 'pointer',
-                        }">
-                        <div class="text">{{ noSubtitle }}</div>
-                      </div>
-                    </div>
-
-                      <div v-for="(item, index) in computedAvailableItems" :key="item.rank">
-                        <div class="menu-item-text-wrapper"
-                          @mouseup="toggleItemClick($event, index)"
-                          @mouseover="toggleItemsMouseOver(index)"
-                          @mouseleave="toggleItemsMouseLeave(index)"
-                          :id="'item'+index"
-                          :style="{
-                            transition: isOverFlow ? '' : '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
-                            color: hoverIndex === index || currentSubtitleIndex === index ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
-                            height: hoverIndex === index && hiddenText ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
-                            cursor: currentSubtitleIndex === index ? 'default' : 'pointer',
-                          }">
-                          <div class="textContainer">
-                            <div class="text"
-                              :style="{
-                                wordBreak: hoverIndex === index && hiddenText ? 'break-all' : '',
-                                whiteSpace: hoverIndex === index && hiddenText ? '' : 'nowrap'
-                              }">{{ getSubName(item) }}</div>
-                          </div>
-                          <div class="iconContainer">
-                            <transition name="sub-delete">
-                              <Icon type="deleteSub" class="deleteIcon" @mouseup.native="handleSubDelete($event, item)" v-show="item.type === 'local' && hoverIndex === index"></Icon>
-                            </transition>
-                          </div>
+                      >
+                        <div class="text">
+                          {{ noSubtitle }}
                         </div>
                       </div>
+                    </div>
 
-                    <div v-if="loadingTypes.length > 0"
-                      v-for="(item, index) in loadingTypes"
-                      class="placeholders-wrapper"
-                      :key="`${item}-${index}`">
-                      <div class="placeholder-item-text-wrapper">
-                        <div class="text">{{ item }}</div>
+                    <div
+                      v-for="(item, index) in computedAvailableItems"
+                      :key="item.rank"
+                    >
+                      <div
+                        :id="'item'+index"
+                        class="menu-item-text-wrapper"
+                        :style="{
+                          transition: isOverFlow ? '' : '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
+                          color: hoverIndex === index || currentSubtitleIndex === index ?
+                            'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+                          height: hoverIndex === index && hiddenText ?
+                            `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
+                          cursor: currentSubtitleIndex === index ? 'default' : 'pointer',
+                        }"
+                        @mouseup="toggleItemClick($event, index)"
+                        @mouseover="toggleItemsMouseOver(index)"
+                        @mouseleave="toggleItemsMouseLeave(index)"
+                      >
+                        <div class="textContainer">
+                          <div
+                            class="text"
+                            :style="{
+                              wordBreak: hoverIndex === index && hiddenText ? 'break-all' : '',
+                              whiteSpace: hoverIndex === index && hiddenText ? '' : 'nowrap'
+                            }"
+                          >
+                            {{ getSubName(item) }}
+                          </div>
+                        </div>
+                        <div class="iconContainer">
+                          <transition name="sub-delete">
+                            <Icon
+                              v-show="item.type === 'local' && hoverIndex === index"
+                              type="deleteSub"
+                              class="deleteIcon"
+                              @mouseup.native="handleSubDelete($event, item)"
+                            />
+                          </transition>
+                        </div>
                       </div>
                     </div>
 
-                    <div class="card" v-if="0 <= computedAvailableItems.length"
+                    <div
+                      v-for="(item, index) in loadingTypes"
+                      :key="`${item}-${index}`"
+                      class="placeholders-wrapper"
+                    >
+                      <div class="placeholder-item-text-wrapper">
+                        <div class="text">
+                          {{ item }}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div
+                      v-if="0 <= computedAvailableItems.length"
+                      class="card"
                       :style="{
-                        height: hiddenText && currentSubtitleIndex === hoverIndex ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
-                        marginTop: hiddenText && currentSubtitleIndex <= hoverIndex ? `${-cardPos - hoverHeight}px` : `${-cardPos}px`,
-                        transition: transFlag ? 'all 100ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' : '',
-                      }"/>
+                        height: hiddenText && currentSubtitleIndex === hoverIndex ?
+                          `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
+                        marginTop: hiddenText && currentSubtitleIndex <= hoverIndex ?
+                          `${-cardPos - hoverHeight}px` : `${-cardPos}px`,
+                        transition: transFlag ?
+                          'all 100ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' : '',
+                      }"
+                    />
                   </div>
                 </div>
               </div>
@@ -105,12 +171,22 @@
         </div>
       </transition>
     </div>
-    <div ref="sub" @mouseup.left="toggleSubMenuDisplay" @mousedown.left="handleDown" @mouseenter="handleEnter" @mouseleave="handleLeave" >
-      <lottie v-on:animCreated="handleAnimation" :options="defaultOptions" lot="subtitle"
+    <div
+      ref="sub"
+      @mouseup.left="toggleSubMenuDisplay"
+      @mousedown.left="handleDown"
+      @mouseenter="handleEnter"
+      @mouseleave="handleLeave"
+    >
+      <lottie
+        :options="defaultOptions"
+        lot="subtitle"
         :style="{
           opacity: iconOpacity,
           transition: 'opacity 150ms',
-        }"></lottie>
+        }"
+        @animCreated="handleAnimation"
+      />
     </div>
   </div>
 </template>
@@ -125,10 +201,14 @@ import animationData from '@/assets/subtitle.json';
 import { deleteSubtitles } from '@/helpers/subtitle';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import Icon from '../BaseIconContainer.vue';
-import { ONLINE_LOADING, SUBTITLE_OFFLINE, REQUEST_TIMEOUT } from '../../../shared/notificationcodes';
+import {
+  ONLINE_LOADING,
+  SUBTITLE_OFFLINE,
+  REQUEST_TIMEOUT,
+} from '../../../shared/notificationcodes';
 
 export default {
-  name: 'subtitle-control',
+  name: 'SubtitleControl',
   type: INPUT_COMPONENT_TYPE,
   components: {
     lottie,
@@ -173,11 +253,14 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'originSrc', 'privacyAgreement', 'currentFirstSubtitleId', 'currentSecondSubtitleId', 'subtitleList', 'calculatedNoSub', 'winHeight', 'isFirstSubtitle', 'enabledSecondarySub', 'winRatio']),
+    ...mapGetters(['winWidth', 'originSrc', 'privacyAgreement', 'currentFirstSubtitleId',
+      'currentSecondSubtitleId', 'subtitleList', 'calculatedNoSub', 'winHeight', 'isFirstSubtitle',
+      'enabledSecondarySub', 'winRatio']),
     ...mapState({
       loadingTypes: ({ Subtitle }) => {
         const { loadingStates, types } = Subtitle;
-        const loadingSubtitles = Object.keys(loadingStates).filter(id => loadingStates[id] === 'loading');
+        const loadingSubtitles = Object.keys(loadingStates)
+          .filter(id => loadingStates[id] === 'loading');
         const result = [];
         loadingSubtitles.forEach((id) => {
           if (!result.includes(types[id])) result.push(types[id]);
@@ -194,7 +277,8 @@ export default {
       if (this.animClass) {
         return this.$t('msg.subtitle.menuLoading');
       }
-      return this.calculatedNoSub ? this.$t('msg.subtitle.noSubtitle') : this.$t('msg.subtitle.notToShowSubtitle');
+      return this.calculatedNoSub ?
+        this.$t('msg.subtitle.noSubtitle') : this.$t('msg.subtitle.notToShowSubtitle');
     },
     iconOpacity() {
       return this.isShowingHovered ? 0.9 : 0.77;
@@ -220,11 +304,14 @@ export default {
     },
     isOverFlow() { // eslint-disable-line complexity
       if (this.computedSize >= 289 && this.computedSize <= 480) {
-        return this.realItemsNum > 3 || (this.scopeHeight + this.hoverHeight > 89 && this.hiddenText) ? 'scroll' : '';
+        return this.realItemsNum > 3 ||
+        (this.scopeHeight + this.hoverHeight > 89 && this.hiddenText) ? 'scroll' : '';
       } else if (this.computedSize >= 481 && this.computedSize < 1080) {
-        return this.realItemsNum > 5 || (this.scopeHeight + this.hoverHeight > 180 && this.hiddenText) ? 'scroll' : '';
+        return this.realItemsNum > 5 ||
+        (this.scopeHeight + this.hoverHeight > 180 && this.hiddenText) ? 'scroll' : '';
       }
-      return this.realItemsNum > 7 || (this.scopeHeight + this.hoverHeight > 350 && this.hiddenText) ? 'scroll' : '';
+      return this.realItemsNum > 7 ||
+      (this.scopeHeight + this.hoverHeight > 350 && this.hiddenText) ? 'scroll' : '';
     },
     scopeHeight() {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
@@ -313,7 +400,9 @@ export default {
     currentMouseupComponent(val) {
       setTimeout(() => {
         if (this.currentMousedownComponent !== 'notification-bubble' && val !== '') {
-          if (this.lastDragging || (this.currentMousedownComponent === this.$options.name && val === 'the-video-controller')) {
+          if (this.lastDragging ||
+            (this.currentMousedownComponent === this.$options.name &&
+              val === 'the-video-controller')) {
             if (this.showAttached) {
               this.anim.playSegments([79, 85]);
               this.$emit('update:lastDragging', false);
@@ -352,6 +441,81 @@ export default {
       this.updateNoSubtitle(!val.length);
     },
   },
+  created() {
+    this.$bus.$on('subtitle-refresh-from-menu', this.debouncedHandleRefresh);
+    this.$bus.$on('subtitle-refresh-from-src-change', (e, hasOnlineSubtitles) => {
+      this.isInitial = true;
+      if (this.privacyAgreement) {
+        this.debouncedHandleRefresh(hasOnlineSubtitles);
+      } else {
+        this.$bus.$emit('refresh-subtitles', { types: ['local', 'embedded'] });
+      }
+    });
+    this.$bus.$on('refresh-finished', (timeout) => {
+      if (this.showAttached) {
+        this.stopCount = this.count + 1;
+      } else {
+        this.animClass = false;
+      }
+      this.transFlag = true;
+      if (timeout) {
+        setTimeout(() => {
+          this.addLog('error', {
+            message: 'Request Timeout .',
+            errcode: REQUEST_TIMEOUT,
+          });
+          this.$addBubble(REQUEST_TIMEOUT);
+        }, 500);
+      }
+      setTimeout(() => {
+        this.$bus.$emit('finished-add-subtitles');
+        this.isInitial = false;
+        if (this.onAnimation) {
+          this.anim.addEventListener('complete', () => {
+            this.anim.setSpeed(1.5);
+          });
+          this.onAnimation = false;
+          this.anim.loop = false;
+        }
+        this.refAnimation = 'refresh-animation';
+        if (this.$refs.scroll) this.$refs.scroll.scrollTop = 0;
+      }, 1000);
+    });
+  },
+  mounted() {
+    this.$refs.refreshRotate.$el.addEventListener('animationiteration', () => {
+      this.count += 1;
+    });
+    this.$bus.$on('subtitle-refresh-continue', () => {
+      if (this.continueRefresh) {
+        this.continueRefresh = false;
+        this.debouncedHandleRefresh();
+      }
+    });
+    this.$bus.$on('online-subtitle-found', () => {
+      clearTimeout(this.breakTimer);
+    });
+
+    document.addEventListener('mouseup', (e) => {
+      if (e.button === 0) {
+        if (!this.showAttached) {
+          if (this.validEnter) {
+            this.anim.playSegments([46, 60], true);
+          } else if (this.currentMousedownComponent === this.$options.name) {
+            this.anim.playSegments([40, 44], true);
+          }
+        } else if (this.currentMousedownComponent === this.$options.name
+          && this.currentMouseupComponent !== this.$options.name) {
+          this.anim.playSegments([79, 85], true);
+        }
+      }
+    });
+  },
+  destroyed() {
+    if (this.breakTimer) {
+      clearTimeout(this.breakTimer);
+    }
+  },
   methods: {
     ...mapActions({
       addSubtitles: subtitleActions.ADD_SUBTITLES,
@@ -381,7 +545,10 @@ export default {
           this.$bus.$emit('off-subtitle');
         }
         deleteSubtitles([item.id], this.originSrc).then((result) => {
-          this.addLog('info', `Subtitle delete { successId:${result.success}, failureId:${result.failure} }`);
+          this.addLog(
+            'info',
+            `Subtitle delete { successId:${result.success}, failureId:${result.failure} }`,
+          );
           this.transFlag = true;
         });
       }
@@ -411,7 +578,9 @@ export default {
           const types = ['local'];
           if (this.isInitial) types.push('embedded');
           if (!hasOnlineSubtitles &&
-            (!this.isInitial || ['ts', 'avi', 'mkv', 'mp4'].includes(extname(this.originSrc).slice(1).toLowerCase()))) {
+            (!this.isInitial ||
+              ['ts', 'avi', 'mkv', 'mp4']
+                .includes(extname(this.originSrc).slice(1).toLowerCase()))) {
             types.push('online');
           }
           // three suitations for variable 'types':
@@ -535,81 +704,6 @@ export default {
       }
     },
   },
-  created() {
-    this.$bus.$on('subtitle-refresh-from-menu', this.debouncedHandleRefresh);
-    this.$bus.$on('subtitle-refresh-from-src-change', (e, hasOnlineSubtitles) => {
-      this.isInitial = true;
-      if (this.privacyAgreement) {
-        this.debouncedHandleRefresh(hasOnlineSubtitles);
-      } else {
-        this.$bus.$emit('refresh-subtitles', ['local', 'embedded']);
-      }
-    });
-    this.$bus.$on('refresh-finished', (timeout) => {
-      if (this.showAttached) {
-        this.stopCount = this.count + 1;
-      } else {
-        this.animClass = false;
-      }
-      this.transFlag = true;
-      if (timeout) {
-        setTimeout(() => {
-          this.addLog('error', {
-            message: 'Request Timeout .',
-            errcode: REQUEST_TIMEOUT,
-          });
-          this.$addBubble(REQUEST_TIMEOUT);
-        }, 500);
-      }
-      setTimeout(() => {
-        this.$bus.$emit('finished-add-subtitles');
-        this.isInitial = false;
-        if (this.onAnimation) {
-          this.anim.addEventListener('complete', () => {
-            this.anim.setSpeed(1.5);
-          });
-          this.onAnimation = false;
-          this.anim.loop = false;
-        }
-        this.refAnimation = 'refresh-animation';
-        if (this.$refs.scroll) this.$refs.scroll.scrollTop = 0;
-      }, 1000);
-    });
-  },
-  destroyed() {
-    if (this.breakTimer) {
-      clearTimeout(this.breakTimer);
-    }
-  },
-  mounted() {
-    this.$refs.refreshRotate.$el.addEventListener('animationiteration', () => {
-      this.count += 1;
-    });
-    this.$bus.$on('subtitle-refresh-continue', () => {
-      if (this.continueRefresh) {
-        this.continueRefresh = false;
-        this.debouncedHandleRefresh();
-      }
-    });
-    this.$bus.$on('online-subtitle-found', () => {
-      clearTimeout(this.breakTimer);
-    });
-
-    document.addEventListener('mouseup', (e) => {
-      if (e.button === 0) {
-        if (!this.showAttached) {
-          if (this.validEnter) {
-            this.anim.playSegments([46, 60], true);
-          } else if (this.currentMousedownComponent === this.$options.name) {
-            this.anim.playSegments([40, 44], true);
-          }
-        } else if (this.currentMousedownComponent === this.$options.name
-          && this.currentMouseupComponent !== this.$options.name) {
-          this.anim.playSegments([79, 85], true);
-        }
-      }
-    });
-  },
 };
 </script>
 <style lang="scss" scoped>
@@ -706,15 +800,18 @@ export default {
     border-radius: 7px;
     opacity: 0.4;
     border: 0.5px solid rgba(255, 255, 255, 0.20);
-    box-shadow: 0px 1px 2px rgba(0, 0, 0, .2);
-    background-image: radial-gradient(60% 134%, rgba(255, 255, 255, 0.09) 44%, rgba(255, 255, 255, 0.05) 100%);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .2);
+    background-image: radial-gradient(60% 134%,
+      rgba(255, 255, 255, 0.09) 44%, rgba(255, 255, 255, 0.05) 100%);
   }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
     .sub-menu-wrapper {
       display: none;
     }
   }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
     .topContainer {
       cursor: default;
       width: 100%;
@@ -802,7 +899,8 @@ export default {
       margin-left: 9px;
     }
   }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
     .topContainer {
       cursor: default;
       width: 100%;
@@ -890,7 +988,8 @@ export default {
       margin-left: 9.5px;
     }
   }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     .topContainer {
       cursor: default;
       width: 100%;

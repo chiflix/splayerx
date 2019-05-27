@@ -1,14 +1,14 @@
 import { IThumbnailRequest } from '@/interfaces/containers/IThumbnailRequest';
-import mediaStorageService, { MediaStorageService } from '@/services/storage/MediaStorageService';
+import MediaStorageService, { mediaStorageService } from '@/services/storage/MediaStorageService';
 import { ipcRenderer } from 'electron';
 
 /** 缩略图固定的列数
  * @constant
  * @type number
  */
-const ROWS = 10; 
+const ROWS = 10;
 
-export class ThumbnailService implements IThumbnailRequest {
+export default class ThumbnailService implements IThumbnailRequest {
   constructor(private readonly mediaStorageService: MediaStorageService) {
   }
 
@@ -74,5 +74,5 @@ export class ThumbnailService implements IThumbnailRequest {
   }
 }
 
-export default new ThumbnailService(mediaStorageService);
+export const thumbnailService = new ThumbnailService(mediaStorageService);
 
