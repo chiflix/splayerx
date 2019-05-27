@@ -1,4 +1,5 @@
 import sinon from 'sinon';
+import { join } from 'path';
 import MediaStorageService from '../../../../../src/renderer/services/storage/mediaStorageService';
 import CacheFile from '../../../../../src/renderer/libs/cacheFile';
 
@@ -50,25 +51,25 @@ describe('MediaStorageService logic service', () => {
 
     it('getImageBy cover return true', async () => {
       const result = await mediaStorageService.getImageBy(mediaHash, 'cover');
-      expect(result).to.be.equal(`${path}cover.jpg`);
+      expect(result).to.be.equal(join(path, 'cover.jpg'));
     });
 
     it('getImageBy thumbnail return true', async () => {
       const result = await mediaStorageService.getImageBy(mediaHash, 'thumbnail');
-      expect(result).to.be.equal(`${path}thumbnail.jpg`);
+      expect(result).to.be.equal(join(path, 'thumbnail.jpg'));
     });
 
     it('readVideoInfo return {}', async () => {
       const result = await mediaStorageService.readVideoInfo(mediaHash);
       expect(JSON.stringify(result)).to.be.equal(JSON.stringify({
-        cover: `${path}cover.jpg`,
-        thumbnail: `${path}thumbnail.jpg`,
+        cover: join(path, 'cover.jpg'),
+        thumbnail: join(path, 'thumbnail.jpg'),
       }));
     });
 
     it('generatePathBy cover return cover path', async () => {
       const result = await mediaStorageService.generatePathBy(mediaHash, 'cover');
-      expect(result).to.be.equal(`${path}cover.jpg`);
+      expect(result).to.be.equal(join(path, 'cover.jpg'));
     });
   });
 });
