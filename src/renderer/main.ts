@@ -10,19 +10,17 @@ import VueI18n from 'vue-i18n';
 import axios from 'axios';
 import { mapGetters, mapActions, createNamespacedHelpers } from 'vuex';
 import VueResource from 'vue-resource';
-//@ts-ignore
 import uuidv4 from 'uuid/v4';
-//@ts-ignore
-import VueElectronJSONStorage from 'vue-electron-json-storage';
-//@ts-ignore
-import VueAnalytics from 'vue-analytics';
-//@ts-ignore
-import VueElectron from 'vue-electron';
-//@ts-ignore
 import osLocale from 'os-locale';
-//@ts-ignore
+// @ts-ignore
+import VueElectronJSONStorage from 'vue-electron-json-storage';
+// @ts-ignore
+import VueAnalytics from 'vue-analytics';
+// @ts-ignore
+import VueElectron from 'vue-electron';
+// @ts-ignore
 import AsyncComputed from 'vue-async-computed';
-//@ts-ignore
+// @ts-ignore
 import App from '@/App.vue';
 import router from '@/router';
 import store from '@/store';
