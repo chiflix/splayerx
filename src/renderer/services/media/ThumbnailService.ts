@@ -1,5 +1,5 @@
 import { IThumbnailRequest } from '@/interfaces/containers/IThumbnailRequest';
-import mediaStorageService, { MediaStorageService } from '@/services/storage/mediaStorageService';
+import mediaStorageService, { MediaStorageService } from '@/services/storage/MediaStorageService';
 import { ipcRenderer } from 'electron';
 
 /** 缩略图固定的列数
