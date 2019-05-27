@@ -19,7 +19,6 @@ import { mapGetters } from 'vuex';
 import { filePathToUrl } from '@/helpers/path';
 import thumbnailService from '@/services/media/thumbnailService';
 import ThumbnailDisplay from '@/components/PlayingView/ThumbnailDisplay.vue';
-// @ts-ignore
 import Icon from '@/components/BaseIconContainer.vue';
 
 export default {

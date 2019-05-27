@@ -1,7 +1,5 @@
 import { access, readdir } from 'fs';
-//@ts-ignore
 import mkdirp from 'mkdirp';
-//@ts-ignore
 import rimraf from 'rimraf';
 
 /** 创建目录

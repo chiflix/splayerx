@@ -1,6 +1,5 @@
 import { IMediaStorable } from '@/interfaces/services/IMediaStorable';
 import cacheFileInstance, { CacheFile } from '@/libs/cacheFile';
-//@ts-ignore
 import { join } from 'path';
 
 // 视频元数据
@@ -68,7 +67,7 @@ export class MediaStorageService implements IMediaStorable {
       return null
     }
   }
-  
+
   /** 公开API 根据hash、tag，生成对应的图片将要存放的路径
    * @description MediaStorageService 对 IMediaStorable接口的实现
    * @author tanghaixiang@xindong.com
