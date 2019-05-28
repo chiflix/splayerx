@@ -1,58 +1,47 @@
 <template>
-  <div id="app" class="application">
-    <router-view></router-view>
-    <!--lyctest-->
-    <UpdaterProgressIndicator> </UpdaterProgressIndicator>
-    <!--lyctest-->
-      <UpdaterNotification></UpdaterNotification>
+  <div
+    id="app"
+    class="application"
+  >
+    <router-view />
   </div>
 </template>
 
-<script>
-  // import { throttle } from 'lodash';
-  import '@/css/style.scss';
-  import drag from '@/helpers/drag';
+<script lang="ts">
+import '@/css/style.scss';
+import drag from '@/helpers/drag';
 
-  import UpdaterProgressIndicator from './components/UpdaterView/UpdaterProgressIndicator.vue';
-  import UpdaterNotification from './components/UpdaterView/UpdaterNotification.vue';
-
-  export default {
-    name: 'splayer',
-    // -> for test todo need delete lyctest
-    components: {
-      UpdaterProgressIndicator,
-      UpdaterNotification,
+export default {
+  name: 'Splayer',
+  mounted() {
+    this.$electron.ipcRenderer.on('mainCommit', (event: any, commitType: string, commitPayload: any) => {
+      this.mainCommitProxy(commitType, commitPayload);
+    });
+    this.$electron.ipcRenderer.on('mainDispatch', (event: any, actionType: string, actionPayload: any) => {
+      this.mainDispatchProxy(actionType, actionPayload);
+    });
+    this.$electron.ipcRenderer.send('windowInit');
+    this.$electron.ipcRenderer.on('thumbnail-saved', (event: any, src: string) => {
+      this.$bus.$emit('set-thumbnail-src', src);
+    });
+    drag(this.$el);
+    this.$ga.event('app', 'mounted');
+    setInterval(() => {
+      this.$ga.event('app', 'heartbeat');
+    }, 1500000); // keep alive every 25 min.
+  },
+  methods: {
+    mainCommitProxy(commitType: string, commitPayload: any) {
+      this.$store.commit(commitType, commitPayload);
     },
-    // <-for test todo need delete lyctest
-    methods: {
-      mainCommitProxy(commitType, commitPayload) {
-        this.$store.commit(commitType, commitPayload);
-      },
-      mainDispatchProxy(actionType, actionPayload) {
-        this.$store.dispatch(actionType, actionPayload);
-      },
-      handleWindowSizeChange(windowSize) {
-        this.$store.commit('windowSize', windowSize);
-      },
+    mainDispatchProxy(actionType: string, actionPayload: any) {
+      this.$store.dispatch(actionType, actionPayload);
     },
-    mounted() {
-      this.$electron.ipcRenderer.on('mainCommit', (event, commitType, commitPayload) => {
-        this.mainCommitProxy(commitType, commitPayload);
-      });
-      this.$electron.ipcRenderer.on('mainDispatch', (event, actionType, actionPayload) => {
-        this.mainDispatchProxy(actionType, actionPayload);
-      });
-      this.$electron.ipcRenderer.send('windowInit');
-      this.$electron.ipcRenderer.on('thumbnail-saved', (event, src) => {
-        this.$bus.$emit('set-thumbnail-src', src);
-      });
-      drag(this.$el);
-      this.$ga.event('app', 'mounted');
-      setInterval(() => {
-        this.$ga.event('app', 'heartbeat');
-      }, 1500000); // keep alive every 25 min.
+    handleWindowSizeChange(windowSize: any) {
+      this.$store.commit('windowSize', windowSize);
     },
-  };
+  },
+};
 </script>
 
 <style lang="scss">

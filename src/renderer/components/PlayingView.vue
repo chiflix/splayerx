@@ -7,25 +7,19 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex';
+import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import SubtitleManager from '@/components/Subtitle/SubtitleManager.vue';
 import VideoCanvas from './PlayingView/VideoCanvas.vue';
 import TheVideoController from './PlayingView/TheVideoController.vue';
 import { videodata } from '../store/video';
 
 export default {
-  name: 'playing-view',
+  name: 'PlayingView',
   components: {
     'the-video-controller': TheVideoController,
     'the-video-canvas': VideoCanvas,
     'subtitle-manager': SubtitleManager,
-  },
-  methods: {
-    // Compute UI states
-    // When the video is playing the ontick is triggered by ontimeupdate of Video tag,
-    // else it is triggered by setInterval.
-    onUpdateTick() {
-      this.$refs.videoctrl.onTickUpdate();
-    },
   },
   mounted() {
     this.$store.dispatch('initWindowRotate');
@@ -34,7 +28,19 @@ export default {
     videodata.onTick = this.onUpdateTick;
   },
   beforeDestroy() {
+    this.updateSubToTop(false);
     videodata.stopCheckTick();
+  },
+  methods: {
+    ...mapActions({
+      updateSubToTop: subtitleActions.UPDATE_SUBTITLE_TOP,
+    }),
+    // Compute UI states
+    // When the video is playing the ontick is triggered by ontimeupdate of Video tag,
+    // else it is triggered by setInterval.
+    onUpdateTick() {
+      this.$refs.videoctrl.onTickUpdate();
+    },
   },
 };
 </script>

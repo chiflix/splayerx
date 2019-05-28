@@ -7,7 +7,7 @@ import bookmark from '@/helpers/bookmark';
 import syncStorage from '@/helpers/syncStorage';
 import infoDB from '@/helpers/infoDB';
 import { getValidVideoExtensions, getValidVideoRegex } from '@/../shared/utils';
-import { FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED, ADD_NO_VIDEO, SNAPSHOT_FAILED, SNAPSHOT_SUCCESS } from '@/../shared/notificationcodes';
+import { FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED, ADD_NO_VIDEO, SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, FILE_NON_EXIST_IN_PLAYLIST, PLAYLIST_NON_EXIST } from '@/../shared/notificationcodes';
 import Sentry from '@/../shared/sentry';
 import Sagi from './sagi';
 import { addBubble } from '../../shared/notificationControl';
@@ -241,42 +241,27 @@ export default {
       }
       if (videoFiles.length !== 0) {
         const addFiles = videoFiles.filter(file => !this.$store.getters.playingList.includes(file));
-        this.$store.dispatch('AddItemsToPlayingList', videoFiles);
         const playlist = await this.infoDB.get('recent-played', this.playListId);
-        if (this.$store.getters.isFolderList) {
-          /* eslint-disable */
-          for (const videoPath of this.$store.getters.playingList) {
-            if (videoPath !== this.$store.getters.originSrc) {
-              const quickHash = await this.mediaQuickHash(videoPath);
-              const data = {
-                quickHash,
-                type: 'video',
-                path: videoPath,
-                source: 'playlist',
-              };
-              const videoId = await this.infoDB.add('media-item', data);
-              playlist.items.push(videoId);
-              playlist.hpaths.push(`${quickHash}-${videoPath}`);
-            }
-          }
-          this.infoDB.update('recent-played', playlist);
-          this.$store.dispatch('PlayingList', { id: playlist.id, paths: this.$store.getters.playingList, items: playlist.items });
-        } else {
-          for (const videoPath of addFiles) {
-            const quickHash = await this.mediaQuickHash(videoPath);
-            const data = {
-              quickHash,
-              type: 'video',
-              path: videoPath,
-              source: 'playlist',
-            };
-            const videoId = await this.infoDB.add('media-item', data);
-            playlist.items.push(videoId);
-            playlist.hpaths.push(`${quickHash}-${videoPath}`);
-          }
-          this.infoDB.update('recent-played', playlist);
-          this.$store.dispatch('PlayingList', { id: playlist.id, paths: this.$store.getters.playingList, items: playlist.items });
+        const addIds = [];
+        for (const videoPath of addFiles) {
+          const quickHash = await this.mediaQuickHash(videoPath);
+          const data = {
+            quickHash,
+            type: 'video',
+            path: videoPath,
+            source: 'playlist',
+          };
+          const videoId = await this.infoDB.add('media-item', data);
+          addIds.push(videoId);
+          playlist.items.push(videoId);
+          playlist.hpaths.push(`${quickHash}-${videoPath}`);
         }
+        this.$store.dispatch('AddItemsToPlayingList', {
+          paths: addFiles,
+          ids: addIds,
+        });
+        this.infoDB.update('recent-played', playlist);
+        this.$store.dispatch('PlayingList', { id: playlist.id });
       } else {
         this.addLog('error', {
           errcode: ADD_NO_VIDEO,
@@ -373,10 +358,39 @@ export default {
     // open an existed play list
     async openPlayList(id) {
       const playlist = await this.infoDB.get('recent-played', id);
+      await this.infoDB.update('recent-played', { ...playlist, lastOpened: Date.now() });
       if (playlist.items.length > 1) {
-        const currentVideo = await this.infoDB.get('media-item', playlist.items[playlist.playedIndex]);
+        let currentVideo = await this.infoDB.get('media-item', playlist.items[playlist.playedIndex]);
+
+        const deleteItems = [];
+        for (const item of playlist.items) {
+          const video = await this.infoDB.get('media-item', item);
+          try {
+            await fsPromises.access(video.path, fs.constants.F_OK);
+          } catch (err) {
+            deleteItems.push(item);
+            this.infoDB.delete('media-item', video.videoId);
+          }
+        }
+        if (deleteItems.length > 0) {
+          deleteItems.forEach((id) => {
+            const index = playlist.items.findIndex(videoId => videoId === id);
+            playlist.items.splice(index, 1);
+          });
+          if (playlist.items.length > 0) {
+            playlist.playedIndex = 0;
+            await this.infoDB.update('recent-played', playlist);
+            currentVideo = await this.infoDB.get('media-item', playlist.items[0]);
+            addBubble(FILE_NON_EXIST_IN_PLAYLIST, this.$i18n);
+          } else {
+            this.infoDB.delete('recent-played', playlist.id);
+            addBubble(PLAYLIST_NON_EXIST, this.$i18n);
+            this.$bus.$emit('delete-file', id);
+            return;
+          }
+        }
+
         await this.playFile(currentVideo.path, currentVideo.videoId);
-        this.$bus.$emit('open-playlist');
         let paths = [];
         for (const videoId of playlist.items) {
           const mediaItem = await this.infoDB.get('media-item', videoId);
@@ -389,34 +403,40 @@ export default {
         });
       } else {
         const video = await this.infoDB.get('media-item', playlist.items[playlist.playedIndex]);
-        this.playFile(video.path, video.videoId);
-        let similarVideos;
         try {
-          similarVideos = await this.findSimilarVideoByVidPath(video.path);
-          const singleItems = await this.infoDB.getValueByKey('media-item', 'source', '');
-          const filtered = singleItems.filter((item) => similarVideos.includes(item.path));
-          const items = [];
-          filtered.forEach((media) => {
-            const mediaIndex = similarVideos.findIndex(path => path === media.path);
-            items[mediaIndex] = media.videoId;
-          });
-          this.$store.dispatch('FolderList', {
-            id,
-            paths: similarVideos,
-            items,
-          });
-        } catch (err) {
-          if (process.mas && err?.code === 'EPERM') {
-            // TODO: maybe this.openFolderByDialog(videoFiles[0]) ?
+          await fsPromises.access(video.path, fs.constants.F_OK);
+          this.playFile(video.path, video.videoId);
+          let similarVideos;
+          try {
+            similarVideos = await this.findSimilarVideoByVidPath(video.path);
+            const singleItems = await this.infoDB.getValueByKey('media-item', 'source', '');
+            const filtered = singleItems.filter((item) => similarVideos.includes(item.path));
+            const items = [];
+            filtered.forEach((media) => {
+              const mediaIndex = similarVideos.findIndex(path => path === media.path);
+              items[mediaIndex] = media.videoId;
+            });
             this.$store.dispatch('FolderList', {
               id,
-              paths: [video.path],
-              items: [video.videoId],
+              paths: similarVideos,
+              items,
             });
+          } catch (err) {
+            if (process.mas && err?.code === 'EPERM') {
+              // TODO: maybe this.openFolderByDialog(videoFiles[0]) ?
+              this.$store.dispatch('FolderList', {
+                id,
+                paths: [video.path],
+                items: [video.videoId],
+              });
+            }
           }
+        } catch (err) {
+          this.infoDB.delete('recent-played', id);
+          addBubble(PLAYLIST_NON_EXIST, this.$i18n);
+          this.$bus.$emit('delete-file', id);
         }
       }
-      this.infoDB.add('recent-played', { ...playlist, lastOpened: Date.now() });
     },
     // create new play list record in recent-played and play the video
     async createPlayList(...videoFiles) {
@@ -429,6 +449,7 @@ export default {
       this.$store.dispatch('SRC_SET', { src: videoFiles[0], id: videoId, mediaHash: hash });
       this.$router.push({ name: 'playing-view' });
       this.$bus.$emit('new-file-open');
+      this.$bus.$emit('open-playlist');
     },
     // open single video
     async openVideoFile(videoFile) {
@@ -490,8 +511,8 @@ export default {
             errcode: FILE_NON_EXIST,
             message: 'Failed to open file, it will be removed from list.'
           });
-          addBubble(FILE_NON_EXIST, this.$i18n);
-          this.$bus.$emit('file-not-existed', vidPath);
+          addBubble(FILE_NON_EXIST_IN_PLAYLIST, this.$i18n);
+          this.$bus.$emit('delete-file', vidPath, id);
         }
         if (process.mas && err?.code === 'EPERM') {
           this.openFilesByDialog({ defaultPath: vidPath });
@@ -506,6 +527,9 @@ export default {
         this.$bus.$emit('new-file-open');
         if (value.lastPlayedTime) {
           this.$bus.$emit('send-lastplayedtime', value.lastPlayedTime);
+        }
+        if (value.audioTrackId) {
+          this.$bus.$emit('send-audiotrackid', value.audioTrackId);
         }
       }
     },
@@ -533,7 +557,7 @@ export default {
       switch (level) {
         case 'error':
           console.error(log);
-          if (log && process.env.NODE_ENV !== 'development') {
+          if ((log instanceof Error || typeof log === 'string') && process.env.NODE_ENV !== 'development') {
             this.$ga && this.$ga.exception(log.message || log);
             Sentry.captureException(log);
           }
