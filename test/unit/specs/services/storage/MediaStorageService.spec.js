@@ -25,7 +25,7 @@ describe('MediaStorageService logic service', () => {
       expect(result).to.be.equal(null);
     });
 
-    it('should return no result by readVideoInfo', async () => {
+    it('should return empty object by readVideoInfo when video never cached or nothing cached', async () => {
       const result = await mediaStorageService.readVideoInfo(mediaHash);
       expect(JSON.stringify(result)).to.be.equal(JSON.stringify({}));
     });
