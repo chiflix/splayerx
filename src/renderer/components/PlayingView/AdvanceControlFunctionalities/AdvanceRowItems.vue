@@ -6,31 +6,34 @@
       backgroundImage: !isChosen ? '' :
         'linear-gradient(90deg, rgba(255,255,255,0.03) ' +
         '0%, rgba(255,255,255,0.07) 24%, rgba(255,255,255,0.03) 100%)',
+      marginTop: rowType === rowTypeEnum.RATE ? '8px' : ''
     }"
+    @mouseenter="handleMouseEnter"
+    @mouseleave="handleMouseLeave"
   >
     <div
       class="detail"
       :style="{
-        height: heightSize,
+        backgroundImage: !isChosen && hoveredText ?
+          'linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.045) 20%, ' +
+          'rgba(255,255,255,0.00) 78%, rgba(255,255,255,0.00) 100%)' : '',
+        transition: 'opacity 200ms',
       }"
     >
       <div
         class="textContainer"
         :style="{
           cursor: isChosen ? 'default' : 'pointer',
+          color: !isChosen && hoveredText ?
+            'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+          transition: 'color 300ms',
         }"
       >
-        <div
-          class="textItem advanceNormalTitle"
-          :style="{
-            color: color,
-            transition: 'color 300ms',
-          }"
-        >
-          {{ item }}
+        <div class="textItem advanceNormalTitle">
+          {{ rowType === rowTypeEnum.RATE ? $t('advance.rateTitle') : $t('advance.fontSize') }}
         </div>
         <div
-          v-show="!isChosen || isRateMenu"
+          v-show="!isChosen || rowType === rowTypeEnum.RATE"
           class="rightItem advanceNormalItem"
         >
           {{ showDetail }}
@@ -46,11 +49,11 @@
               v-for="(list, index) in lists"
               :id="'list'+index"
               :key="list"
-              :class="rowNumDetail"
+              class="rowNumDetail"
               :style="{
                 width: index === difIndex[0] || index === difIndex[1] ?
                   `${difWidth[0]}%` : `${difWidth[1]}%`,
-                cursor: itemChosen(index) ? 'default' : 'pointer',
+                cursor: selectedIndex === index ? 'default' : 'pointer',
               }"
               @mouseover="handleOver(index)"
               @mouseout="handleOut(index)"
@@ -59,7 +62,7 @@
               <p
                 class="text"
                 :style="{
-                  color: itemChosen(index) || index === hoverIndex ?
+                  color: selectedIndex === index || index === hoverIndex ?
                     'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
                   margin: 'auto',
                   transition: 'color 300ms',
@@ -69,14 +72,15 @@
               </p>
             </div>
             <div
-              v-show="!isRateMenu || lists.includes(rate)"
+              v-show="rowType !== rowTypeEnum.RATE || lists.includes(rate)"
               :class="cardType"
               :style="{
                 left: `${moveLength}px`,
                 transition: 'left 200ms cubic-bezier(0.17, 0.67, 0.17, 0.98), width 200ms',
                 boxSizing: 'border-box'
               }"
-            />
+            >
+            </div>
           </div>
         </div>
       </transition>
@@ -85,9 +89,6 @@
 </template>
 
 <script>
-import asyncStorage from '@/helpers/asyncStorage';
-import { mapGetters, mapActions } from 'vuex';
-import { Video as videoActions, Subtitle as subtitleActions } from '@/store/actionTypes';
 
 export default {
   name: 'AdvanceRowItems',
@@ -97,12 +98,16 @@ export default {
       require: true,
       default: () => [],
     },
-    item: {
-      type: String,
-      required: true,
+    rate: {
+      type: Number,
+      default: 1,
     },
-    color: {
-      type: String,
+    chosenSize: {
+      type: Number,
+      default: 1,
+    },
+    cardWidth: {
+      type: Number,
       required: true,
     },
     isChosen: {
@@ -112,47 +117,48 @@ export default {
       type: Number,
       required: true,
     },
-    isRateMenu: {
-      type: Boolean,
-    },
-    chosenSizeContent: {
+    rowType: {
       type: String,
       required: true,
     },
-    cardWidth: {
-      type: Number,
-      required: true,
+    chosenSizeContent: {
+      type: String,
+      default: 'Normal',
+    },
+    changeFontSize: {
+      type: Function,
+      default: null,
+    },
+    changeRate: {
+      type: Function,
+      default: null,
     },
   },
   data() {
     return {
       hoverIndex: -1,
-      selectedIndex: 1,
-      moveLength: '',
+      hoveredText: false,
+      rowTypeEnum: {
+        RATE: 'rate',
+        FONTSIZE: 'fontSize',
+      },
     };
   },
   computed: {
-    ...mapGetters(['rate', 'chosenSize', 'computedHeight', 'computedWidth', 'subToTop',
-      'winRatio', 'lastChosenSize']),
-    computedSize() {
-      return this.winRatio >= 1 ? this.computedHeight : this.computedWidth;
-    },
     showDetail() {
-      if (this.isRateMenu) {
+      if (this.rowType === this.rowTypeEnum.RATE) {
         return `${this.rate} x`;
-      } else if (!this.isRateMenu) {
-        return `${this.chosenSizeContent}`;
       }
-      return null;
+      return `${this.chosenSizeContent}`;
     },
     cardType() {
       if (this.selectedIndex === this.difIndex[0] || this.selectedIndex === this.difIndex[1]) {
-        if (this.isRateMenu) {
+        if (this.rowType === this.rowTypeEnum.RATE) {
           return 'speedCard smallSpeedCard';
         }
         return 'fontCard smallFontCard';
       }
-      if (this.isRateMenu) {
+      if (this.rowType === this.rowTypeEnum.RATE) {
         return 'speedCard bigSpeedCard';
       }
       return 'fontCard bigFontCard';
@@ -165,92 +171,40 @@ export default {
       }
       return this.isChosen ? `${74 * 1.2 * 1.4}px` : `${37 * 1.2 * 1.4}px`;
     },
-    rowNumDetail() {
-      return !this.isRateMenu ? 'fontRowNumDetail' : 'speedRowNumDetail';
-    },
     difIndex() {
-      return !this.isRateMenu ? [0, 2] : [1, 4];
+      return this.rowType !== this.rowTypeEnum.RATE ? [0, 2] : [1, 4];
     },
     difWidth() {
       if (this.size >= 289 && this.size <= 480) {
-        return !this.isRateMenu ? [23, 27] : [18.5, 23];
+        return this.rowType !== this.rowTypeEnum.RATE ? [23, 27] : [18.5, 23];
       } else if (this.size >= 481 && this.size < 1080) {
-        return !this.isRateMenu ? [23 * 1.2, 27 * 1.2] : [18.5 * 1.2, 23 * 1.2];
+        return this.rowType !== this.rowTypeEnum.RATE ?
+          [23 * 1.2, 27 * 1.2] : [18.5 * 1.2, 23 * 1.2];
       }
-      return !this.isRateMenu ? [23 * 1.2 * 1.4, 27 * 1.2 * 1.4] :
+      return this.rowType !== this.rowTypeEnum.RATE ? [23 * 1.2 * 1.4, 27 * 1.2 * 1.4] :
         [18.5 * 1.2 * 1.4, 23 * 1.2 * 1.4];
     },
-  },
-  watch: {
-    subToTop(val) {
-      if (!this.isRateMenu) {
-        if (val) {
-          this.updateLastSubSize(this.chosenSize);
-          this.handleClick(0);
-        } else {
-          this.handleClick(this.lastChosenSize);
-        }
+    moveLength() {
+      const rateFactors = [17, 46, 71, 100, 129];
+      const fontFactors = [17, 49, 86, 117];
+      if (this.rowType === this.rowTypeEnum.RATE) {
+        return (rateFactors[this.selectedIndex] / 170) * this.cardWidth;
       }
+      return (fontFactors[this.selectedIndex] / 170) * this.cardWidth;
     },
-    rate(val) {
-      if (this.isRateMenu) {
-        const numList = [0.5, 1, 1.2, 1.5, 2];
-        this.selectedIndex = numList.indexOf(val);
-        this.calculateSpeedLength(numList.indexOf(val));
+    selectedIndex() {
+      if (this.rowType === this.rowTypeEnum.RATE) {
+        return this.lists.indexOf(this.rate);
       }
+      return this.chosenSize;
     },
-    chosenSize(val) {
-      if (!this.isRateMenu) {
-        this.selectedIndex = val;
-        this.calculateFontLength(val);
-      }
-    },
-    computedSize(val) {
-      if (val >= 1080) {
-        this.updateVideoScaleByFactors(val);
-      } else if (this.winRatio >= 1) {
-        this.updatePCVideoScaleByFactors(this.chosenSize);
-      } else if (this.winRatio < 1) {
-        this.updateMobileVideoScaleByFactors(this.chosenSize);
-      }
-    },
-  },
-  created() {
-    asyncStorage.get('subtitle-style').then((data) => {
-      if (data.chosenSize) {
-        if (!this.isRateMenu) {
-          this.handleClick(data.chosenSize);
-        }
-      }
-    });
-  },
-  mounted() {
-    this.$bus.$on('card-init-left', () => {
-      setTimeout(() => {
-        if (this.isRateMenu) {
-          this.selectedIndex = 1;
-          this.calculateSpeedLength(1);
-        } else {
-          this.handleClick(this.chosenSize);
-        }
-      }, 0);
-    });
-    this.$bus.$on('change-size-by-menu', (index) => {
-      this.changeFontSize(index);
-    });
   },
   methods: {
-    ...mapActions({
-      changeRate: videoActions.CHANGE_RATE,
-      updateSubScale: subtitleActions.UPDATE_SUBTITLE_SCALE,
-      updateSubSize: subtitleActions.UPDATE_SUBTITLE_SIZE,
-      updateLastSubSize: subtitleActions.UPDATE_LAST_SUBTITLE_SIZE,
-    }),
-    itemChosen(index) {
-      if (this.isRateMenu) {
-        return [0.5, 1, 1.2, 1.5, 2].indexOf(this.rate) === index;
-      }
-      return this.chosenSize === index;
+    handleMouseEnter() {
+      this.hoveredText = true;
+    },
+    handleMouseLeave() {
+      this.hoveredText = false;
     },
     handleOver(index) {
       this.hoverIndex = index;
@@ -259,82 +213,10 @@ export default {
       this.hoverIndex = -1;
     },
     handleClick(index) {
-      this.selectedIndex = index;
-      if (this.isRateMenu) {
-        this.calculateSpeedLength(index);
-      } else {
-        this.calculateFontLength(index);
-      }
-      if (this.isRateMenu) {
+      if (this.rowType === this.rowTypeEnum.RATE) {
         this.changeRate(this.lists[index]);
       } else {
         this.changeFontSize(index);
-      }
-    },
-    calculateSpeedLength(index) {
-      switch (index) {
-        case 0:
-          this.moveLength = (17 / 170) * this.cardWidth;
-          break;
-        case 1:
-          this.moveLength = (46 / 170) * this.cardWidth;
-          break;
-        case 2:
-          this.moveLength = (71 / 170) * this.cardWidth;
-          break;
-        case 3:
-          this.moveLength = (100 / 170) * this.cardWidth;
-          break;
-        case 4:
-          this.moveLength = (129 / 170) * this.cardWidth;
-          break;
-        default:
-          break;
-      }
-    },
-    calculateFontLength(index) {
-      switch (index) {
-        case 0:
-          this.moveLength = (17 / 170) * this.cardWidth;
-          break;
-        case 1:
-          this.moveLength = (49 / 170) * this.cardWidth;
-          break;
-        case 2:
-          this.moveLength = (86 / 170) * this.cardWidth;
-          break;
-        case 3:
-          this.moveLength = (117 / 170) * this.cardWidth;
-          break;
-        default:
-          break;
-      }
-    },
-    // update video scale that width is larger than height
-    updatePCVideoScaleByFactors(index) {
-      const firstFactors = [21, 29, 37, 45];
-      const secondFactors = [24, 26, 28, 30];
-      this.updateSubScale(`${(((firstFactors[index] / 900) * this.computedSize) +
-        (secondFactors[index] / 5)) / 9}`);
-    },
-    // update video scale that height is larger than width
-    updateMobileVideoScaleByFactors(index) {
-      const firstFactors = [21, 29, 37, 45];
-      const secondFactors = [12, -92, -196, -300];
-      this.updateSubScale(`${(((firstFactors[index] / 760) * this.computedSize) +
-        (secondFactors[index] / 76)) / 9}`);
-    },
-    // update video scale when width or height is larger than 1080
-    updateVideoScaleByFactors(val) {
-      const factors = [30, 40, 50, 60];
-      this.updateSubScale(`${((val / 1080) * factors[this.chosenSize]) / 9}`);
-    },
-    changeFontSize(index) {
-      this.updateSubSize(index);
-      if (this.winRatio >= 1) {
-        this.updatePCVideoScaleByFactors(index);
-      } else if (this.winRatio < 1) {
-        this.updateMobileVideoScaleByFactors(index);
       }
     },
   },
@@ -493,7 +375,6 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   }
 }
 .itemContainer {
-  position: absolute;
   display: flex;
   border-radius: 7px;
   z-index: 10;
@@ -525,11 +406,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
       .text {
         text-shadow: 0px 1px 1px rgba(0, 0, 0, .1);
       }
-      .speedRowNumDetail {
-        position: relative;
-        display: flex;
-      }
-      .fontRowNumDetail {
+      .rowNumDetail {
         position: relative;
         display: flex;
       }

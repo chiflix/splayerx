@@ -41,7 +41,7 @@ import animationData from '@/assets/advance.json';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { Input as InputActions } from '@/store/actionTypes';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
-import AdvanceMainMenu from './AdvanceControlFunctionalities/AdvanceMainMenu.vue';
+import AdvanceMainMenu from '@/containers/AdvanceMainMenu.vue';
 
 export default {
   name: 'AdvanceControl',
