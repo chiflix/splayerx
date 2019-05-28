@@ -6,7 +6,7 @@ import { ipcRenderer } from 'electron';
  * @constant
  * @type number
  */
-const ROWS = 10;
+const COLS = 10;
 
 export default class ThumbnailService implements IThumbnailRequest {
   constructor(private readonly mediaStorageService: MediaStorageService) {
@@ -30,7 +30,7 @@ export default class ThumbnailService implements IThumbnailRequest {
           src: videoSrc,
           outPath: gpath,
           width: `${width}`,
-          num: { rows: `${ROWS}`, cols: `${Math.ceil(cols / ROWS)}` },
+          num: { rows: `${Math.ceil(cols / COLS)}`, cols: `${COLS}` },
         };
         ipcRenderer.send('generateThumbnails', info);
         return gpath;
@@ -68,8 +68,8 @@ export default class ThumbnailService implements IThumbnailRequest {
    */
   calculateThumbnailPosition(currentTime: number, duration: number, count: number): number[] {
     const currentIndex = Math.abs(Math.floor(currentTime / (duration / count)));
-    const column = currentIndex === 0 ? 0 : Math.ceil(currentIndex / ROWS) - 1;
-    const row = currentIndex - (ROWS * column);
+    const column = currentIndex === 0 ? 0 : Math.ceil(currentIndex / COLS) - 1;
+    const row = currentIndex - (COLS * column);
     return [row * 100, column * 100];
   }
 }

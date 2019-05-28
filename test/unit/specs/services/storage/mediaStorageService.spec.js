@@ -1,7 +1,7 @@
 import sinon from 'sinon';
 import { join } from 'path';
-import MediaStorageService from '../../../../../src/renderer/services/storage/mediaStorageService';
-import CacheFile from '../../../../../src/renderer/libs/cacheFile';
+import MediaStorageService from '../../../../../src/renderer/services/storage/MediaStorageService';
+import CacheFile from '../../../../../src/renderer/libs/CacheFile';
 
 describe('MediaStorageService logic service', () => {
   let mediaStorageService;
@@ -20,17 +20,17 @@ describe('MediaStorageService logic service', () => {
       sinon.restore();
     });
 
-    it('getImageBy return null', async () => {
+    it('should return no result by getImageBy cover', async () => {
       const result = await mediaStorageService.getImageBy(mediaHash, 'cover');
       expect(result).to.be.equal(null);
     });
 
-    it('readVideoInfo return {}', async () => {
+    it('should return no result by readVideoInfo', async () => {
       const result = await mediaStorageService.readVideoInfo(mediaHash);
       expect(JSON.stringify(result)).to.be.equal(JSON.stringify({}));
     });
 
-    it('generatePathBy cover return cover path', async () => {
+    it('should successfully generatePathBy', async () => {
       const result = await mediaStorageService.generatePathBy(mediaHash, 'cover');
       expect(result.includes('cover.jpg')).to.be.equal(true);
     });
@@ -49,17 +49,17 @@ describe('MediaStorageService logic service', () => {
       sinon.restore();
     });
 
-    it('getImageBy cover return true', async () => {
+    it('should successfully return result by getImageBy cover', async () => {
       const result = await mediaStorageService.getImageBy(mediaHash, 'cover');
       expect(result).to.be.equal(join(path, 'cover.jpg'));
     });
 
-    it('getImageBy thumbnail return true', async () => {
+    it('should successfully return result by getImageBy thumbnail', async () => {
       const result = await mediaStorageService.getImageBy(mediaHash, 'thumbnail');
       expect(result).to.be.equal(join(path, 'thumbnail.jpg'));
     });
 
-    it('readVideoInfo return {}', async () => {
+    it('should successfully return result by readVideoInfo', async () => {
       const result = await mediaStorageService.readVideoInfo(mediaHash);
       expect(JSON.stringify(result)).to.be.equal(JSON.stringify({
         cover: join(path, 'cover.jpg'),
@@ -67,7 +67,7 @@ describe('MediaStorageService logic service', () => {
       }));
     });
 
-    it('generatePathBy cover return cover path', async () => {
+    it('should successfully generatePathBy', async () => {
       const result = await mediaStorageService.generatePathBy(mediaHash, 'cover');
       expect(result).to.be.equal(join(path, 'cover.jpg'));
     });
