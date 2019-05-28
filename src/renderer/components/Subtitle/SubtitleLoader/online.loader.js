@@ -8,7 +8,7 @@ const normalizer = (parsedSubtitle) => {
       start: startTime,
       end: endTime,
       text: text
-        .replace(/[\\/][Nn]|\r?\n|\r/g, '<br>') // replace soft and hard line breaks with <br/>
+        .replace(/[\\/][Nn]|\r?\n|\r/g, '\n') // replace soft and hard line breaks with \n
         .replace(/\\h/g, ' '), // replace hard space with space
       tags: tagsGetter(text, baseTags),
     });

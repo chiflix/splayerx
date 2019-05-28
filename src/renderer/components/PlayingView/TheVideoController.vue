@@ -1,5 +1,6 @@
 <template>
-  <div ref="controller"
+  <div
+    ref="controller"
     class="the-video-controller"
     :style="{ cursor: cursorStyle }"
     @mousemove="handleMousemove"
@@ -8,41 +9,87 @@
     @mousedown="handleMousedown"
     @mouseup="handleMouseup"
     @mousedown.left="handleMousedownLeft"
-    @click.left="handleMouseupLeft">
-    <titlebar key="playing-view" currentView="Playingview" :showAllWidgets="showAllWidgets" :recentPlaylist="displayState['recent-playlist']"></titlebar>
-    <notification-bubble class="notification-bubble" ref="nextVideoUI"/>
-    <recent-playlist class="recent-playlist" ref="recentPlaylist"
-    :displayState="displayState['recent-playlist']"
-    :mousemoveClientPosition="mousemoveClientPosition"
-    :isDragging="isDragging"
-    :lastDragging.sync="lastDragging"
-    v-bind.sync="widgetsStatus['recent-playlist']"
-    @can-hover-item="cancelPlayListTimeout"
-    @conflict-resolve="conflictResolve"
-    @update:playlistcontrol-showattached="updatePlaylistShowAttached"/>
-    <div class="masking" v-fade-in="showAllWidgets || progressTriggerStopped"/>
-    <play-button class="play-button no-drag"
+    @click.left="handleMouseupLeft"
+  >
+    <titlebar
+      key="playing-view"
+      current-view="Playingview"
+      :show-all-widgets="showAllWidgets"
+      :recent-playlist="displayState.RecentPlaylist"
+    />
+    <notification-bubble
+      ref="nextVideoUI"
+      class="notification-bubble"
+    />
+    <recent-playlist
+      ref="recentPlaylist"
+      class="recent-playlist"
+      :display-state="displayState.RecentPlaylist"
+      :mousemove-client-position="mousemoveClientPosition"
+      :is-dragging="isDragging"
+      :last-dragging.sync="lastDragging"
+      v-bind.sync="widgetsStatus.RecentPlaylist"
+      @can-hover-item="cancelPlayListTimeout"
+      @conflict-resolve="conflictResolve"
+      @update:playlistcontrol-showattached="updatePlaylistShowAttached"
+    />
+    <div
+      v-fade-in="showAllWidgets || progressTriggerStopped"
+      class="masking"
+    />
+    <play-button
+      class="play-button no-drag"
+      :mousedown-on-volume="mousedownOnVolume"
+      :mousemove-position="mousemoveClientPosition"
+      :show-all-widgets="showAllWidgets"
+      :is-focused="isFocused"
+      :paused="paused"
+      :attached-shown="attachedShown"
       @update:playbutton-state="updatePlayButtonState"
-      :mousedownOnVolume="mousedownOnVolume"
-      :mousemovePosition="mousemoveClientPosition"
-      :showAllWidgets="showAllWidgets" :isFocused="isFocused"
-      :paused="paused" :attachedShown="attachedShown"/>
-    <volume-indicator class="no-drag"
+    />
+    <volume-indicator
+      class="no-drag"
+      :attached-shown="attachedShown"
+      :mousedown-on-play-button="mousedownOnPlayButton"
+      :show-all-widgets="showAllWidgets"
       @update:volume-state="updateVolumeState"
-      :attachedShown="attachedShown"
-      :mousedownOnPlayButton="mousedownOnPlayButton"
-      :showAllWidgets="showAllWidgets"/>
-    <div class="control-buttons" v-fade-in="showAllWidgets" :style="{ marginBottom: preFullScreen ? '10px' : '0' }">
-      <playlist-control class="button playlist" v-fade-in="displayState['playlist-control']" v-bind.sync="widgetsStatus['playlist-control']"/>
-      <subtitle-control class="button subtitle" v-fade-in="displayState['subtitle-control']"
-      v-bind.sync="widgetsStatus['subtitle-control']" :lastDragging.sync="lastDragging"
-      @conflict-resolve="conflictResolve"/>
-      <advance-control class="button advance" v-fade-in="displayState['advance-control']"
-      v-bind.sync="widgetsStatus['advance-control']" :lastDragging.sync="lastDragging"
-      @conflict-resolve="conflictResolve"/>
+    />
+    <div
+      v-fade-in="showAllWidgets"
+      class="control-buttons"
+      :style="{ marginBottom: preFullScreen ? '10px' : '0' }"
+    >
+      <playlist-control
+        v-fade-in="displayState.PlaylistControl"
+        class="button playlist"
+        v-bind.sync="widgetsStatus.PlaylistControl"
+      />
+      <subtitle-control
+        v-fade-in="displayState.SubtitleControl"
+        class="button subtitle"
+        v-bind.sync="widgetsStatus.SubtitleControl"
+        :last-dragging.sync="lastDragging"
+        @conflict-resolve="conflictResolve"
+      />
+      <advance-control
+        v-fade-in="displayState.AdvanceControl"
+        class="button advance"
+        v-bind.sync="widgetsStatus.AdvanceControl"
+        :last-dragging.sync="lastDragging"
+        @conflict-resolve="conflictResolve"
+      />
     </div>
-    <the-time-codes ref="theTimeCodes" :progressTriggerStopped.sync="progressTriggerStopped" :showAllWidgets="showAllWidgets" :style="{ marginBottom: preFullScreen ? '10px' : '0' }"/>
-    <the-progress-bar ref="progressbar" :showAllWidgets="showAllWidgets" :style="{ marginBottom: preFullScreen ? '10px' : '0' }"/>
+    <the-time-codes
+      ref="theTimeCodes"
+      :progress-trigger-stopped.sync="progressTriggerStopped"
+      :show-all-widgets="showAllWidgets"
+      :style="{ marginBottom: preFullScreen ? '10px' : '0' }"
+    />
+    <the-progress-bar
+      ref="progressbar"
+      :show-all-widgets="showAllWidgets"
+      :style="{ marginBottom: preFullScreen ? '10px' : '0' }"
+    />
   </div>
 </template>
 <script>
@@ -68,7 +115,7 @@ import { videodata } from '../../store/video';
 const { mapGetters: inputMapGetters } = createNamespacedHelpers('InputPlugin');
 
 export default {
-  name: 'the-video-controller',
+  name: 'TheVideoController',
   type: INPUT_COMPONENT_TYPE,
   components: {
     titlebar: Titlebar,
@@ -100,7 +147,7 @@ export default {
       lastAttachedShowing: false,
       focusedTimestamp: 0,
       focusDelay: 500,
-      listenedWidget: 'the-video-controller',
+      listenedWidget: 'TheVideoController',
       attachedShown: false,
       needResetHoverProgressBar: false,
       isMousedown: false,
@@ -135,7 +182,12 @@ export default {
       mousemoveClientPosition: state => state.Input.mousemoveClientPosition,
       wheelTime: state => state.Input.wheelTimestamp,
     }),
-    ...mapGetters(['paused', 'duration', 'isFullScreen', 'leftMousedown', 'ratio', 'playingList', 'originSrc', 'isFocused', 'isMinimized', 'isFolderList', 'isFullScreen', 'intrinsicWidth', 'intrinsicHeight']),
+    ...mapGetters([
+      'originSrc', 'paused', 'ratio', 'duration', 'intrinsicWidth', 'intrinsicHeight',
+      'playingList', 'isFolderList',
+      'isFullScreen', 'isFocused', 'isMinimized',
+      'leftMousedown',
+    ]),
     ...inputMapGetters({
       inputWheelDirection: iGT.GET_WHEEL_DIRECTION,
     }),
@@ -144,10 +196,14 @@ export default {
         ((!this.mouseStopped && !this.mouseLeftWindow) ||
         (!this.mouseLeftWindow && this.onOtherWidget) ||
         this.attachedShown || this.videoChanged ||
-        (this.isMousedown && this.currentMousedownWidget === 'play-button'));
+        (this.isMousedown && this.currentMousedownWidget === 'PlayButton'));
     },
     onOtherWidget() {
-      return (this.currentWidget !== this.$options.name) && (this.currentWidget !== 'play-button') && (this.currentWidget !== 'volume-indicator');
+      return (
+        (this.currentWidget !== this.$options.name) &&
+        (this.currentWidget !== 'PlayButton') &&
+        (this.currentWidget !== 'VolumeIndicator')
+      );
     },
     cursorStyle() {
       return this.showAllWidgets || !this.isFocused ||
@@ -163,7 +219,7 @@ export default {
   watch: {
     originSrc() {
       Object.keys(this.widgetsStatus).forEach((item) => {
-        if (item !== 'playlist-control') {
+        if (item !== 'PlaylistControl') {
           this.widgetsStatus[item].showAttached = false;
         }
       });
@@ -177,7 +233,10 @@ export default {
       }, 3000);
     },
     isDragging(val, oldval) {
-      if (!val && oldval && !['subtitle-control', 'advance-control'].includes(this.currentMousedownWidget)) {
+      if (
+        !val && oldval &&
+        !['SubtitleControl', 'AdvanceControl'].includes(this.currentMousedownWidget)
+      ) {
         this.lastDragging = true;
       }
     },
@@ -239,9 +298,9 @@ export default {
     this.createTouchBar();
     this.UIElements = this.getAllUIComponents(this.$refs.controller);
     this.UIElements.forEach((value) => {
-      this.displayState[value.name] = value.name !== 'recent-playlist';
-      if (value.name === 'playlist-control' && !this.playingList.length) {
-        this.displayState['playlist-control'] = false;
+      this.displayState[value.name] = value.name !== 'RecentPlaylist';
+      if (value.name === 'PlaylistControl' && !this.playingList.length) {
+        this.displayState.PlaylistControl = false;
       }
       this.widgetsStatus[value.name] = {
         selected: false,
@@ -362,7 +421,7 @@ export default {
     },
     updatePlaylistShowAttached(event) {
       clearTimeout(this.openPlayListTimeId);
-      this.widgetsStatus['playlist-control'].showAttached = this.playListState = event;
+      this.widgetsStatus.PlaylistControl.showAttached = this.playListState = event;
     },
     updatePlayButtonState(mousedownState) {
       this.mousedownOnPlayButton = mousedownState;
@@ -425,11 +484,15 @@ export default {
     UIDisplayManager() {
       const tempObject = {};
       Object.keys(this.displayState).forEach((index) => {
-        tempObject[index] = !this.widgetsStatus['playlist-control'].showAttached;
+        tempObject[index] = !this.widgetsStatus.PlaylistControl.showAttached;
       });
-      tempObject['recent-playlist'] = (this.playListState || this.widgetsStatus['playlist-control'].showAttached) && !this.dragOver;
+      tempObject.RecentPlaylist = (
+        this.playListState ||
+        this.widgetsStatus.PlaylistControl.showAttached
+      ) &&
+        !this.dragOver;
       this.displayState = tempObject;
-      this.tempRecentPlaylistDisplayState = this.widgetsStatus['playlist-control'].showAttached;
+      this.tempRecentPlaylistDisplayState = this.widgetsStatus.PlaylistControl.showAttached;
     },
     UIStateManager() {
       const {
@@ -446,21 +509,21 @@ export default {
           this.widgetsStatus[name].mousedownOnOther = currentMousedownWidget !== name;
           // 播放列表与控制它的按钮在实现并不是父子组件，然而在逻辑上是附属关系
           // 因此对于mousedown与mouseup对两者都做了判断
-          if (name === 'recent-playlist') {
+          if (name === 'RecentPlaylist') {
             this.widgetsStatus[name].mousedownOnOther = currentMousedownWidget !== name
-              && currentMousedownWidget !== 'playlist-control';
+              && currentMousedownWidget !== 'PlaylistControl';
           }
         }
         if (mouseupChanged) {
           this.widgetsStatus[name].mouseupOnOther = currentMouseupWidget !== name;
-          if (name === 'recent-playlist') {
-            this.widgetsStatus[name].mouseupOnOther = currentMouseupWidget !== 'playlist-control'
-              && currentMousedownWidget !== 'playlist-control';
+          if (name === 'RecentPlaylist') {
+            this.widgetsStatus[name].mouseupOnOther = currentMouseupWidget !== 'PlaylistControl'
+              && currentMousedownWidget !== 'PlaylistControl';
           }
         }
         if (!this.showAllWidgets) {
           // 播放列表不受showAllwidgets变量的影响而关闭
-          if (name !== 'playlist-control') {
+          if (name !== 'PlaylistControl') {
             this.widgetsStatus[name].showAttached = false;
           }
         }
@@ -509,8 +572,8 @@ export default {
     },
     handleMousedownLeft(e) {
       this.isMousedown = true;
-      this.lastMousedownPlaybutton = this.getComponentName(e.target) === 'play-button';
-      this.lastMousedownVolume = this.getComponentName(e.target) === 'volume-indicator';
+      this.lastMousedownPlaybutton = this.getComponentName(e.target) === 'PlayButton';
+      this.lastMousedownVolume = this.getComponentName(e.target) === 'VolumeIndicator';
       if (this.lastMousedownPlaybutton || this.lastMousedownVolume) {
         this.mouseStopped = false;
         if (this.mouseStoppedId) {
@@ -543,12 +606,15 @@ export default {
         this.clicksTimer = setTimeout(() => {
           this.clicks = 0;
           this.lastDragging = false;
-          this.lastAttachedShowing = this.widgetsStatus['subtitle-control'].showAttached || this.widgetsStatus['advance-control'].showAttached || this.widgetsStatus['playlist-control'].showAttached;
+          this.lastAttachedShowing =
+            this.widgetsStatus.SubtitleControl.showAttached ||
+            this.widgetsStatus.AdvanceControl.showAttached ||
+            this.widgetsStatus.PlaylistControl.showAttached;
         }, this.clicksDelay);
       } else if (this.clicks === 2) {
         clearTimeout(this.clicksTimer);
         this.clicks = 0;
-        if (this.currentMouseupWidget === 'the-video-controller') {
+        if (this.currentMouseupWidget === 'TheVideoController') {
           this.toggleFullScreenState();
         }
       }
@@ -671,7 +737,9 @@ export default {
 }
 
 .translate-enter-active, .translate-leave-active {
-  transition: opacity 300ms cubic-bezier(0.2, 0.3, 0.01, 1), transform 300ms cubic-bezier(0.2, 0.3, 0.01, 1);
+  transition:
+    opacity 300ms cubic-bezier(0.2, 0.3, 0.01, 1),
+    transform 300ms cubic-bezier(0.2, 0.3, 0.01, 1);
 }
 .translate-enter, .translate-leave-to {
   opacity: 0;
@@ -688,24 +756,36 @@ export default {
     position: relative;
   }
   .subtitle {
-    @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+    @media
+      screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
+      screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
       margin-right: 17.6px;
     }
-    @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+    @media
+      screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+      screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
       margin-right: 25.6px;
     }
-    @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+    @media
+      screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+      screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
       margin-right: 40px;
     }
   }
   .playlist {
-    @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+    @media
+      screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
+      screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
       margin-right: 17.6px;
     }
-    @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+    @media
+      screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+      screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
       margin-right: 25.6px;
     }
-    @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+    @media
+      screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+      screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
       margin-right: 40px;
     }
   }
@@ -714,7 +794,9 @@ export default {
     height: 100%;
   }
 }
-@media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
+@media
+  screen and (max-aspect-ratio: 1/1) and (max-width: 288px),
+  screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
   .control-buttons {
     display: none;
   }
@@ -723,7 +805,9 @@ export default {
     height: 54px;
   }
 }
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+@media
+  screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
   .control-buttons {
     width: 115px;
     height: 22px;
@@ -739,7 +823,9 @@ export default {
     height: 67px;
   }
 }
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+@media
+  screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
   .control-buttons {
     width: 167px;
     height: 32px;
@@ -755,7 +841,9 @@ export default {
     height: 93px;
   }
 }
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+@media
+  screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   .control-buttons {
     width: 260px;
     height: 50px;

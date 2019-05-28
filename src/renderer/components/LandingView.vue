@@ -1,72 +1,106 @@
 <template>
   <div class="wrapper">
-    <titlebar key="playing-view" currentView="LandingView"></titlebar>
+    <titlebar
+      key="playing-view"
+      current-view="LandingView"
+    />
     <transition name="background-container-transition">
-      <div class="background" v-if="showShortcutImage">
-        <transition name="background-transition" mode="in-out">
-          <div class="background-image"
-          :key="item.path"
-          :style="{
-            backgroundImage: backgroundUrl,
-          }">
-            <div class="background-mask"/>
+      <div
+        v-if="showShortcutImage"
+        class="background"
+      >
+        <transition
+          name="background-transition"
+          mode="in-out"
+        >
+          <div
+            :key="item.path"
+            class="background-image"
+            :style="{
+              backgroundImage: backgroundUrl,
+            }"
+          >
+            <div class="background-mask" />
           </div>
         </transition>
         <div class="item-info">
           <div class="item-name">
             {{ item.baseName }}
           </div>
-          <div class="item-description"/>
+          <div class="item-description" />
           <div class="item-timing">
             <span class="timing-played">
               {{ timeInValidForm(timecodeFromSeconds(item.lastTime)) }}
-            / {{ timeInValidForm(timecodeFromSeconds(item.duration)) }}
-            <span v-if="item.playListLength">·&nbsp;{{ $t('recentPlaylist.playlistSource') }}&nbsp;&nbsp;{{ item.index + 1 }} / {{ item.playListLength }}</span>
+              / {{ timeInValidForm(timecodeFromSeconds(item.duration)) }}
+              <span v-if="item.playListLength">
+                ·&nbsp;{{
+                  $t('recentPlaylist.playlistSource')
+                }}&nbsp;&nbsp;{{ item.index + 1 }} / {{ item.playListLength }}
+              </span>
             </span>
           </div>
           <div class="item-progress">
-            <div class="progress-played" :style="{ width: item.percentage + '%' }"/>
+            <div
+              class="progress-played"
+              :style="{ width: item.percentage + '%' }"
+            />
           </div>
         </div>
       </div>
     </transition>
     <transition name="welcome-container-transition">
-      <div class="welcome-container" v-if="landingLogoAppear">
+      <div
+        v-if="landingLogoAppear"
+        class="welcome-container"
+      >
         <div class="logo-container">
-          <Icon type="logo"/>
+          <Icon type="logo" />
         </div>
       </div>
     </transition>
-    <div class="mask" ref="mask"/>
-    <div class="controller"
+    <div
+      ref="mask"
+      class="mask"
+    />
+    <div
+      class="controller"
       :style="{
         transform: isFullScreen ? '' : `translateX(${move}px)`,
         bottom: winWidth > 1355 ? `${40 / 1355 * winWidth}px` : '40px',
         transition: tranFlag ? 'transform 400ms cubic-bezier(0.42, 0, 0.58, 1)' : '',
-      }">
-      <div class="playlist no-drag"
-        :style="{marginLeft: winWidth > 1355 ? `${50 / 1355 * winWidth}px` : '50px'}">
-        <div class="button"
+      }"
+    >
+      <div
+        class="playlist no-drag"
+        :style="{marginLeft: winWidth > 1355 ? `${50 / 1355 * winWidth}px` : '50px'}"
+      >
+        <div
+          class="button"
           :style="{
             height:`${thumbnailHeight}px`,
             width:`${thumbnailWidth}px`,
             marginRight: `${marginRight}px`,
           }"
-          @click="openOrMove">
+          @click="openOrMove"
+        >
           <div class="btnMask">
-            <Icon class="addUi" type="add"/>
+            <Icon
+              class="addUi"
+              type="add"
+            />
           </div>
         </div>
-        <component v-for="(playlist, index) in lastPlayedFile"
+        <component
           :is="playlist.items.length > 1 ? 'PlaylistItem' : 'VideoItem'"
+          v-for="(playlist, index) in lastPlayedFile"
           :key="playlist.id"
           :index="index"
-          :firstIndex="firstIndex"
-          :lastIndex="lastIndex"
-          :isInRange="index + 1 >= firstIndex && index + 1 <= lastIndex"
+          :first-index="firstIndex"
+          :last-index="lastIndex"
+          :is-in-range="index + 1 >= firstIndex && index + 1 <= lastIndex"
           :playlist="playlist"
-          :thumbnailWidth="thumbnailWidth"
-          :thumbnailHeight="thumbnailHeight"
+          :thumbnail-width="thumbnailWidth"
+          :thumbnail-height="thumbnailHeight"
           :shifting="shifting"
           :style="{
             marginRight: `${marginRight}px`,
@@ -76,10 +110,11 @@
           @previous-page="firstIndex = 0"
           @showShortcutImage="showShortcut(true)"
           @showLandingLogo="showShortcut(false)"
-          @displayInfo="displayInfoUpdate"/>
+          @displayInfo="displayInfoUpdate"
+        />
       </div>
     </div>
-    <NotificationBubble/>
+    <NotificationBubble />
   </div>
 </template>
 
@@ -92,7 +127,7 @@ import PlaylistItem from './LandingView/PlaylistItem.vue';
 import NotificationBubble from './NotificationBubble.vue';
 
 export default {
-  name: 'landing-view',
+  name: 'LandingView',
   components: {
     Icon,
     Titlebar,
@@ -116,21 +151,6 @@ export default {
       shifting: false,
       firstIndex: 0,
     };
-  },
-  watch: {
-    firstIndex() {
-      this.shifting = true;
-    },
-    lastIndex() {
-      this.shifting = true;
-    },
-    shifting(val) {
-      if (val) {
-        setTimeout(() => {
-          this.shifting = false;
-        }, 400);
-      }
-    },
   },
   computed: {
     ...mapState({
@@ -184,6 +204,21 @@ export default {
         number = 10;
       }
       return number;
+    },
+  },
+  watch: {
+    firstIndex() {
+      this.shifting = true;
+    },
+    lastIndex() {
+      this.shifting = true;
+    },
+    shifting(val) {
+      if (val) {
+        setTimeout(() => {
+          this.shifting = false;
+        }, 400);
+      }
     },
   },
   created() {
@@ -380,7 +415,10 @@ $themeColor-Light: white;
     .background-mask {
       width: 100%;
       height: 100%;
-      background-image: radial-gradient(circle 80.5vw at 27.8vw 32.1vh, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.41) 45%, rgba(0,0,0,0.7) 100%);
+      background-image: radial-gradient(
+        circle 80.5vw at 27.8vw 32.1vh,
+        rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.41) 45%, rgba(0,0,0,0.7) 100%
+      );
     }
   }
   .item-info {

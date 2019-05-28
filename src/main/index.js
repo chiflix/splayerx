@@ -159,7 +159,7 @@ function registerMainWindowEvent() {
   });
   function thumbnail(args, cb) {
     splayerx.generateThumbnails(
-      args.src, args.outPath, args.width, args.num.rows, args.num.cols,
+      args.src, args.outPath, args.width, args.num.cols, args.num.rows,
       (ret) => {
         console[ret === '0' ? 'log' : 'error'](ret, args.src);
         cb(ret, args.src);
@@ -353,6 +353,7 @@ function registerMainWindowEvent() {
       show: false,
       webPreferences: {
         webSecurity: false,
+        nodeIntegration: true,
         experimentalFeatures: true,
       },
       acceptFirstMouse: true,
@@ -383,6 +384,7 @@ function registerMainWindowEvent() {
       show: false,
       webPreferences: {
         webSecurity: false,
+        nodeIntegration: true,
         experimentalFeatures: true,
       },
       acceptFirstMouse: true,
@@ -442,10 +444,11 @@ function createWindow() {
     transparent: false, // set to false to solve the backdrop-filter bug
     webPreferences: {
       webSecurity: false,
+      nodeIntegration: true,
       experimentalFeatures: true,
     },
     // See https://github.com/electron/electron/blob/master/docs/api/browser-window.md#showing-window-gracefully
-    backgroundColor: '#802e2c29',
+    backgroundColor: '#6a6a6a',
     acceptFirstMouse: true,
     show: false,
     ...({

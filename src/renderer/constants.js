@@ -128,3 +128,21 @@ export const DATADB_SHCEMAS = [
     ],
   },
 ];
+
+/** electron 缓存用户数据路径
+ * @constant
+ * @type {String}
+ */
+export const ELECTRON_CACHE_DIRNAME = 'userData'; // 用户数据路径
+
+/** 设定的应用缓存目录
+ * @constant
+ * @type {String}
+ */
+export const DEFAULT_DIRNAME = '__cache_files__'; // 设定的应用缓存目录
+
+/** 视频缓存目录
+ * @constant
+ * @type {String}
+ */
+export const VIDEO_DIRNAME = 'videos'; // 视频缓存目录

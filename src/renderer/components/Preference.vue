@@ -1,39 +1,71 @@
 <template>
   <div class="preference tablist">
     <div class="tablist__tabs">
-      <div class="titlebar titlebar--mac no-drag"
+      <div
         v-if="isDarwin"
+        class="titlebar titlebar--mac no-drag"
         @mouseover="state = 'hover'"
-        @mouseout="state = 'default'">
-        <Icon class="titlebar__button"
-              type="titleBarClose"
-              :state="state"
-              @click.native="handleClose"/>
-        <Icon class="titlebar__button--disable" type="titleBarExitFull"/>
-        <Icon class="titlebar__button--disable" type="titleBarFull"/>
+        @mouseout="state = 'default'"
+      >
+        <Icon
+          class="titlebar__button"
+          type="titleBarClose"
+          :state="state"
+          @click.native="handleClose"
+        />
+        <Icon
+          class="titlebar__button--disable"
+          type="titleBarExitFull"
+        />
+        <Icon
+          class="titlebar__button--disable"
+          type="titleBarFull"
+        />
       </div>
-      <div class="tablist__tab"
-          :class="currentPreference === 'General' ? 'tablist__tab--selected' : ''"
-          @mouseup="handleMouseup('General')">{{ $t('preferences.general.generalSetting') }}</div>
-      <div class="tablist__tab"
-          :class="currentPreference === 'Privacy' ? 'tablist__tab--selected' : ''"
-          @mouseup="handleMouseup('Privacy')">{{ $t('preferences.privacy.privacySetting') }}</div>
+      <div
+        class="tablist__tab"
+        :class="currentPreference === 'General' ? 'tablist__tab--selected' : ''"
+        @mouseup="handleMouseup('General')"
+      >
+        {{ $t('preferences.general.generalSetting') }}
+      </div>
+      <div
+        class="tablist__tab"
+        :class="currentPreference === 'Privacy' ? 'tablist__tab--selected' : ''"
+        @mouseup="handleMouseup('Privacy')"
+      >
+        {{ $t('preferences.privacy.privacySetting') }}
+      </div>
     </div>
     <div class="tablist__tabpanel">
-      <div class="titlebar titlebar--win no-drag"
+      <div
         v-if="!isDarwin"
+        class="titlebar titlebar--win no-drag"
         @mouseover="state = 'hover'"
-        @mouseout="state = 'default'">
-        <Icon class="titlebar__button--disable"
-              type="titleBarWinExitFull"/>
-        <Icon class="titlebar__button--disable" type="titleBarWinFull"/>
-        <Icon class="titlebar__button" type="titleBarWinClose" @click.native="handleClose"/>
+        @mouseout="state = 'default'"
+      >
+        <Icon
+          class="titlebar__button--disable"
+          type="titleBarWinExitFull"
+        />
+        <Icon
+          class="titlebar__button--disable"
+          type="titleBarWinFull"
+        />
+        <Icon
+          class="titlebar__button"
+          type="titleBarWinClose"
+          @click.native="handleClose"
+        />
       </div>
       <div class="tablist__tabcontent">
         <keep-alive>
-          <component :is="currentPreference"
-          @move-stoped="isMoved = false"
-          :mouseDown="mouseDown" :isMoved="isMoved"/>
+          <component
+            :is="currentPreference"
+            :mouse-down="mouseDown"
+            :is-moved="isMoved"
+            @move-stoped="isMoved = false"
+          />
         </keep-alive>
       </div>
     </div>
@@ -66,18 +98,6 @@ export default {
       return process.platform === 'darwin';
     },
   },
-  methods: {
-    // Methods to handle window behavior
-    handleClose() {
-      electron.remote.getCurrentWindow().close();
-    },
-    mainDispatchProxy(actionType, actionPayload) {
-      this.$store.dispatch(actionType, actionPayload);
-    },
-    handleMouseup(panel) {
-      this.currentPreference = panel;
-    },
-  },
   created() {
     electron.ipcRenderer.on('preferenceDispatch', (event, actionType, actionPayload) => {
       this.mainDispatchProxy(actionType, actionPayload);
@@ -98,6 +118,18 @@ export default {
     window.onmousemove = null;
     window.onmouseup = null;
   },
+  methods: {
+    // Methods to handle window behavior
+    handleClose() {
+      electron.remote.getCurrentWindow().close();
+    },
+    mainDispatchProxy(actionType, actionPayload) {
+      this.$store.dispatch(actionType, actionPayload);
+    },
+    handleMouseup(panel) {
+      this.currentPreference = panel;
+    },
+  },
 };
 </script>
 
@@ -112,7 +144,7 @@ export default {
       margin-left: 12px;
       margin-bottom: 18px;
       width: fit-content;
-      
+
       .titlebar__button {
         margin-right: 8px;
         width: 12px;
@@ -163,7 +195,12 @@ export default {
   &__tabs {
     width: 110px;
     height: 100%;
-    background-image: linear-gradient(-28deg, rgba(65,65,65,0.97) 0%, rgba(84,84,84,0.97) 47%, rgba(123,123,123,0.97) 100%);
+    background-image: linear-gradient(
+      -28deg,
+      rgba(65,65,65,0.97) 0%,
+      rgba(84,84,84,0.97) 47%,
+      rgba(123,123,123,0.97) 100%
+    );
   }
 
   &__tab {
@@ -185,7 +222,11 @@ export default {
     &--selected {
       color: rgba(255,255,255,1);
       border-left: 1px solid white;
-      background-image: linear-gradient(99deg, rgba(243,243,243,0.15) 0%, rgba(255,255,255,0.0675) 81%);
+      background-image: linear-gradient(
+        99deg,
+        rgba(243,243,243,0.15) 0%,
+        rgba(255,255,255,0.0675) 81%
+      );
       &:hover {
         background-color: rgba(255,255,255,0);
       }
@@ -194,7 +235,12 @@ export default {
 
   &__tabpanel {
     width: 430px;
-    background-image: linear-gradient(-28deg, rgba(65,65,65,0.99) 0%, rgba(84,84,84,0.99) 47%, rgba(123,123,123,0.99) 100%);
+    background-image: linear-gradient(
+      -28deg,
+      rgba(65,65,65,0.99) 0%,
+      rgba(84,84,84,0.99) 47%,
+      rgba(123,123,123,0.99) 100%
+    );
   }
 
   &__tabcontent {

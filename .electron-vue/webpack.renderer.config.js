@@ -50,7 +50,7 @@ let rendererConfig = {
   module: {
     rules: [
       {
-        test: /\.ts$/,
+        test: /\.tsx?$/,
         exclude: /node_modules/,
         use: [
           {
@@ -203,7 +203,7 @@ let rendererConfig = {
       "electron"  : "@chiflix/electron",
       "grpc": "@grpc/grpc-js"
     },
-    extensions: ['.js', '.json', '.node']
+    extensions: ['.js', '.json', '.node', '.ts', '.tsx']
   },
   target: 'electron-renderer'
 }
@@ -214,6 +214,7 @@ let rendererConfig = {
 if (process.env.NODE_ENV !== 'production') {
   rendererConfig.plugins.push(
     new webpack.DefinePlugin({
+      'process.platform': `"${process.platform}"`,
       '__static': `"${path.join(__dirname, '../static').replace(/\\/g, '\\\\')}"`
     })
   )
@@ -235,6 +236,7 @@ if (process.env.NODE_ENV === 'production') {
       }
     ]),
     new webpack.DefinePlugin({
+      'process.platform': `"${process.platform}"`,
       'process.env.NODE_ENV': '"production"'
     }),
     new webpack.LoaderOptionsPlugin({
