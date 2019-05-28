@@ -12,11 +12,11 @@
       :style="{height: thumbnailHeight + 2 +'px'}"
     >
       <thumbnail-display
-        :quick-hash="mediaHash"
-        :max-thumbnail-width="maxThumbnailWidth"
-        :current-time="currentTime"
         :thumbnail-width="thumbnailWidth"
         :thumbnail-height="thumbnailHeight"
+        :src="src"
+        :background-position="backgroundPosition"
+        :background-size="backgroundSize"
       />
     </div>
     <div class="thumbnail-gradient" />
@@ -36,10 +36,13 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { mapGetters } from 'vuex';
-import Icon from '../BaseIconContainer.vue';
-import ThumbnailDisplay from './ThumbnailDisplay.vue';
+import { filePathToUrl } from '@/helpers/path';
+import { thumbnailService } from '@/services/media/ThumbnailService';
+import ThumbnailDisplay from '@/components/PlayingView/ThumbnailDisplay.vue';
+// @ts-ignore
+import Icon from '@/components/BaseIconContainer.vue';
 
 export default {
   components: {
@@ -47,34 +50,11 @@ export default {
     'base-icon': Icon,
   },
   props: {
-    currentTime: {
-      type: Number,
-      required: true,
-    },
-    maxThumbnailWidth: {
-      type: Number,
-      required: true,
-    },
-    videoRatio: {
-      type: Number,
-      required: true,
-    },
-    thumbnailWidth: {
-      type: Number,
-      required: true,
-    },
-    thumbnailHeight: {
-      type: Number,
-      required: true,
-    },
-    positionOfThumbnail: {
-      type: Number,
-      required: true,
-    },
-    videoTime: {
-      type: String,
-      required: true,
-    },
+    currentTime: Number,
+    thumbnailWidth: Number,
+    thumbnailHeight: Number,
+    positionOfThumbnail: Number,
+    videoTime: String,
     hoveredEnd: {
       type: Boolean,
       default: false,
@@ -82,21 +62,54 @@ export default {
   },
   data() {
     return {
-      videoCurrentTime: 0,
-      generationInterval: 3,
-      mountVideo: false,
-      mountImage: false,
-      maxThumbnailCount: 0,
-      lastGenerationIndex: 0,
-      currentIndex: 0,
+      thumbnailCount: 0,
+      isSaved: false,
+      imgExisted: false,
+      imgSrc: '',
+      backgroundSize: '',
+      backgroundPosition: '',
     };
   },
   computed: {
-    ...mapGetters(['originSrc', 'convertedSrc', 'mediaHash', 'duration']),
+    ...mapGetters(['originSrc', 'mediaHash', 'duration']),
+    src() {
+      return this.imgExisted || this.isSaved ? `url("${filePathToUrl(this.imgSrc)}")` : '';
+    },
   },
   watch: {
+    currentTime(val: number) {
+      const postion = thumbnailService
+        .calculateThumbnailPosition(val, this.duration, this.thumbnailCount);
+      this.backgroundPosition = `-${postion[0]}% -${postion[1]}%`;
+    },
+    originSrc() {
+      this.isSaved = false;
+      this.imgExisted = false;
+      this.imgSrc = '';
+    },
   },
-  created() {
+  mounted() {
+    this.$bus.$on('set-thumbnail-src', (src: string) => {
+      if (src === this.originSrc) {
+        this.isSaved = true;
+      }
+    });
+    this.$bus.$on('generate-thumbnails', async (num: number) => {
+      this.thumbnailCount = num;
+      this.backgroundSize = `1000% ${Math.ceil(this.thumbnailCount / 10) * 100}%`;
+      try {
+        const result = await thumbnailService.getThumbnailImage(this.mediaHash);
+        if (!result) {
+          this.imgExisted = false;
+          this.imgSrc =
+            await thumbnailService.generateThumbnailImage(this.mediaHash, this.originSrc, num, 272);
+        } else {
+          this.imgExisted = true;
+          this.imgSrc = result;
+        }
+      } catch (err) { //
+      }
+    });
   },
   methods: {
   },

@@ -159,7 +159,7 @@ function registerMainWindowEvent() {
   });
   function thumbnail(args, cb) {
     splayerx.generateThumbnails(
-      args.src, args.outPath, args.width, args.num.rows, args.num.cols,
+      args.src, args.outPath, args.width, args.num.cols, args.num.rows,
       (ret) => {
         console[ret === '0' ? 'log' : 'error'](ret, args.src);
         cb(ret, args.src);

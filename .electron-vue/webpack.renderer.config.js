@@ -50,7 +50,7 @@ let rendererConfig = {
   module: {
     rules: [
       {
-        test: /\.ts$/,
+        test: /\.tsx?$/,
         exclude: /node_modules/,
         use: [
           {
@@ -203,7 +203,7 @@ let rendererConfig = {
       "electron"  : "@chiflix/electron",
       "grpc": "@grpc/grpc-js"
     },
-    extensions: ['.js', '.json', '.node']
+    extensions: ['.js', '.json', '.node', '.ts', '.tsx']
   },
   target: 'electron-renderer'
 }

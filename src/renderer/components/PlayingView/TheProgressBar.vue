@@ -11,8 +11,6 @@
       v-show="showThumbnail"
       class="the-preview-thumbnail"
       :current-time="hoveredCurrentTime"
-      :max-thumbnail-width="240"
-      :video-ratio="ratio"
       :video-time="convertedHoveredCurrentTime"
       :thumbnail-width="thumbnailWidth"
       :thumbnail-height="thumbnailHeight"
@@ -83,7 +81,7 @@
 import { mapGetters } from 'vuex';
 import { videodata } from '@/store/video';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
-import ThePreviewThumbnail from './ThePreviewThumbnail.vue';
+import ThePreviewThumbnail from '@/containers/ThePreviewThumbnail.vue';
 
 export default {
   name: 'TheProgressBar',
