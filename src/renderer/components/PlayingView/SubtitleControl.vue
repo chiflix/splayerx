@@ -447,7 +447,7 @@ export default {
       if (this.privacyAgreement) {
         this.debouncedHandleRefresh(hasOnlineSubtitles);
       } else {
-        this.$bus.$emit('refresh-subtitles', ['local', 'embedded']);
+        this.$bus.$emit('refresh-subtitles', { types: ['local', 'embedded'] });
       }
     });
     this.$bus.$on('refresh-finished', (timeout) => {
