@@ -60,6 +60,7 @@
       </div>
       <div class="tablist__tabcontent">
         <keep-alive>
+          <!-- eslint-disable-next-line vue/require-component-is -->
           <component
             :is="currentPreference"
             :mouse-down="mouseDown"

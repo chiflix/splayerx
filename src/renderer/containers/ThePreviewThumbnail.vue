@@ -101,8 +101,9 @@ export default {
         const result = await thumbnailService.getThumbnailImage(this.mediaHash);
         if (!result) {
           this.imgExisted = false;
-          this.imgSrc =
-            await thumbnailService.generateThumbnailImage(this.mediaHash, this.originSrc, num, 272);
+          this.imgSrc = await thumbnailService.generateThumbnailImage(
+            this.mediaHash, this.originSrc, num, 272,
+          );
         } else {
           this.imgExisted = true;
           this.imgSrc = result;

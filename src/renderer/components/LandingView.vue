@@ -90,6 +90,7 @@
             />
           </div>
         </div>
+        <!-- eslint-disable-next-line vue/require-component-is -->
         <component
           :is="playlist.items.length > 1 ? 'PlaylistItem' : 'VideoItem'"
           v-for="(playlist, index) in lastPlayedFile"
