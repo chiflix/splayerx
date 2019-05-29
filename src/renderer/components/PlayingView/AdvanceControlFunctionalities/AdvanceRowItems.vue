@@ -80,8 +80,7 @@
                 transition: 'left 200ms cubic-bezier(0.17, 0.67, 0.17, 0.98), width 200ms',
                 boxSizing: 'border-box'
               }"
-            >
-            </div>
+            />
           </div>
         </div>
       </transition>

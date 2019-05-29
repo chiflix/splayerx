@@ -81,8 +81,7 @@
                 marginTop: cardPos,
                 transition: 'all 200ms cubic-bezier(0.17, 0.67, 0.17, 0.98)'
               }"
-            >
-            </div>
+            />
           </div>
         </div>
       </div>
