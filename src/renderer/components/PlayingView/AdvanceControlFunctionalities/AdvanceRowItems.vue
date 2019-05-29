@@ -29,12 +29,10 @@
           transition: 'color 300ms',
         }"
       >
-        <div class="textItem advanceNormalTitle">
-          {{ rowType === rowTypeEnum.RATE ? $t('advance.rateTitle') : $t('advance.fontSize') }}
-        </div>
+        <p>{{ rowType === rowTypeEnum.RATE ? $t('advance.rateTitle') : $t('advance.fontSize') }}</p>
         <div
           v-show="!isChosen || rowType === rowTypeEnum.RATE"
-          class="rightItem advanceNormalItem"
+          class="rightItem"
         >
           {{ showDetail }}
         </div>
@@ -212,6 +210,12 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480p
       width: auto;
       height: 37px;
       margin: auto 17px auto 17px;
+      p {
+        font-size: 13px;
+      }
+      .rightItem {
+        font-size: 11px;
+      }
     }
     .listContainer {
       height: 37px;
@@ -257,6 +261,12 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080
       width: auto;
       height: 44.4px;
       margin: auto 20.4px auto 20.4px;
+      p {
+        font-size: 15.6px;
+      }
+      .rightItem {
+        font-size: 13.2px;
+      }
     }
     .listContainer {
       height: 44.4px;
@@ -302,6 +312,12 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
       width: 228.48px;
       height: 62.16px;
       margin: auto auto auto 28.56px;
+      p {
+        font-size: 21.84px;
+      }
+      .rightItem {
+        font-size: 18.48px;
+      }
     }
     .listContainer {
       height: 62.16px;
@@ -352,7 +368,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     display: flex;
     flex: 1;
     color: rgba(255, 255, 255, 0.6);
-    .textItem {
+    p {
       letter-spacing: 0.2px;
       margin: auto auto auto 0;
     }

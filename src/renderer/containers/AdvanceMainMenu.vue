@@ -51,9 +51,7 @@
               transition: 'color 300ms',
             }"
           >
-            <div class="subSettings">
-              {{ this.$t('advance.subMenu') }}
-            </div>
+            <p>{{ this.$t('advance.subMenu') }}</p>
             <transition name="arrow">
               <Icon
                 v-show="hoverIndex === 1"
@@ -84,9 +82,7 @@
                 transition: 'color 300ms',
               }"
             >
-              <div class="audioSettings">
-                {{ this.$t('advance.audioMenu') }}
-              </div>
+              <p>{{ this.$t('advance.audioMenu') }}</p>
               <transition name="arrow">
                 <Icon
                   v-show="hoverIndex === 2"
@@ -113,14 +109,13 @@
         >
           <div class="topContent">
             <Icon :type="backSubHover ? 'leftArrowHover' : 'leftArrow'" />
-            <div
-              class="text"
+            <p
               :style="{
                 color: backSubHover ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.2)',
               }"
             >
               {{ this.$t('advance.subMenu') }}
-            </div>
+            </p>
           </div>
         </div>
         <advance-row-items
@@ -166,14 +161,13 @@
         >
           <div class="topContent">
             <Icon :type="backAudioHover ? 'leftArrowHover' : 'leftArrow'" />
-            <div
-              class="text"
+            <p
               :style="{
                 color: backAudioHover ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.2)',
               }"
             >
               {{ this.$t('advance.audioMenu') }}
-            </div>
+            </p>
           </div>
         </div>
         <advance-selected-items
@@ -199,7 +193,6 @@
 
 <script lang="ts">
 import { mapGetters, mapActions } from 'vuex';
-import asyncStorage from '@/helpers/asyncStorage';
 import { Subtitle as subtitleActions, Video as videoActions } from '@/store/actionTypes';
 import { getTextWidth } from '@/libs/utils';
 import AdvanceRowItems from '@/components/PlayingView/AdvanceControlFunctionalities/AdvanceRowItems.vue';
@@ -250,9 +243,6 @@ export default {
     ...mapGetters(['winWidth', 'currentFirstSubtitleId', 'winHeight', 'rate', 'chosenSize', 'subToTop',
       'subtitleDelay', 'displayLanguage', 'winRatio', 'chosenStyle', 'audioTrackList', 'currentAudioTrackId',
       'computedHeight', 'computedWidth', 'audioDelay', 'lastChosenSize']),
-    /**
-     * @return {string}
-     */
     ChosenSizeContent() {
       const compareContent = ['S', 'M', 'L', 'XL'];
       const enContent = ['Small', 'Normal', 'Large', 'Extra Large'];
@@ -626,11 +616,7 @@ export default {
 <style lang="scss" scoped>
 @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
 screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
-  .playSpeed, .hoverBack {
-    width: 100%;
-  }
-  .subtitleControl, .audioItems, .topContainer, .itemSize, .subtitleStyle, .subtitleDelay,
-  .audioDelay, .hoverSubBack, .subContainer, .hoverAudioBack, .audioContainer, .trackContainer {
+  .subtitleControl, .audioItems, .topContainer, .hoverAudioBack, .audioContainer {
     width: 100%;
     height: 37px;
   }
@@ -638,10 +624,10 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480p
     font-size: 13px;
     width: 100%;
     height: 18px;
-    .subSettings, .audioSettings, .leftTrackTitle {
+    p {
       margin: auto auto auto 17px;
     }
-    .arrowRight, .rightTrackItem {
+    .arrowRight {
       margin: auto 17px auto auto;
     }
   }
@@ -649,11 +635,11 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480p
     width: auto;
     height: 12px;
     margin: auto 9px;
-  }
-  .text {
-    font-size: 11px;
-    line-height: 13px;
-    margin-left: 3px;
+    p {
+      font-size: 11px;
+      line-height: 13px;
+      margin-left: 3px;
+    }
   }
   .setUp-enter-active {
     animation: showP1 .2s;
@@ -677,11 +663,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480p
 }
 @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
 screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
-  .playSpeed, .hoverBack {
-    width: 100%
-  }
-  .subtitleControl, .audioItems, .topContainer, .itemSize, .subtitleStyle, .subtitleDelay,
-  .audioDelay, .hoverSubBack, .subContainer, .hoverAudioBack, .audioContainer, .trackContainer {
+  .subtitleControl, .audioItems, .topContainer, .hoverAudioBack, .audioContainer {
     width: 100%;
     height: 44.4px;
   }
@@ -689,10 +671,10 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080
     font-size: 15.6px;
     width: 100%;
     height: 22px;
-    .subSettings, .audioSettings, .leftTrackTitle {
+    p {
       margin: auto auto auto 20.4px;
     }
-    .arrowRight, .rightTrackItem {
+    .arrowRight {
       margin: auto 20.4px auto auto;
     }
   }
@@ -700,11 +682,11 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080
     width: auto;
     height: 14.4px;
     margin: auto 10.8px;
-  }
-  .text {
-    font-size: 13.2px;
-    line-height: 15.6px;
-    margin-left: 3.6px;
+    p {
+      font-size: 13.2px;
+      line-height: 15.6px;
+      margin-left: 3.6px;
+    }
   }
   .setUp-enter-active {
     animation: showP2 .2s;
@@ -727,11 +709,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080
 }
 @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
 screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
-  .playSpeed, .hoverBack {
-    width: 100%
-  }
-  .subtitleControl, .audioItems, .topContainer, .itemSize, .subtitleStyle, .subtitleDelay,
-  .audioDelay, .hoverSubBack, .subContainer, .hoverAudioBack, .audioContainer, .trackContainer {
+  .subtitleControl, .audioItems, .topContainer, .hoverAudioBack, .audioContainer {
     height: 62.16px;
     width: 100%;
   }
@@ -739,10 +717,10 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     font-size: 21.84px;
     width: 100%;
     height: 30px;
-    .subSettings, .audioSettings, .leftTrackTitle {
+    p {
       margin: auto auto auto 28.48px;
     }
-    .arrowRight, .rightTrackItem {
+    .arrowRight {
       margin: auto 28.48px auto auto;
     }
   }
@@ -750,11 +728,11 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     width: auto;
     height: 20.16px;
     margin: auto 15.12px;
-  }
-  .text {
-    font-size: 18.48px;
-    line-height: 21.84px;
-    margin-left: 5.04px;
+    p {
+      font-size: 18.48px;
+      line-height: 21.84px;
+      margin-left: 5.04px;
+    }
   }
   .setUp-enter-active {
     animation: showP3 .2s;
@@ -780,28 +758,13 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
 .card {
   -webkit-app-region: no-drag;
 }
-.hoverBack {
-  background-image: linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.045) 20%,
-    rgba(255,255,255,0.00) 78%, rgba(255,255,255,0.00) 100%);
-}
 .mainItems {
   display: flex;
   flex-direction: column;
   position: absolute;
   width: 100%;
-  .playSpeed {
-    display: flex;
-  }
   .subtitleControl {
     display: flex;
-    .hoverSubBack {
-      background-image: linear-gradient(90deg, rgba(255,255,255,0.00) 0%,
-        rgba(255,255,255,0.045) 20%, rgba(255,255,255,0.00) 78%, rgba(255,255,255,0.00) 100%);
-    }
-    .subContainer {
-      position: absolute;
-      display: flex;
-    }
     .item2 {
       margin: auto;
       display: flex;
@@ -831,13 +794,6 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   flex-direction: column;
   position: absolute;
   width: 100%;
-  .leftItem {
-    margin-top: 1px;
-    font-size: 13px;
-  }
-  .rightItem {
-    font-size: 11px;
-  }
   .topContainer {
     display: flex;
     cursor: pointer;
@@ -845,15 +801,6 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
       display: flex;
       justify-content: flex-start;
     }
-  }
-  .itemSize {
-    display: flex;
-  }
-  .subtitleStyle {
-    display: flex;
-  }
-  .subtitleDelay {
-    display: flex;
   }
 }
 
@@ -868,21 +815,6 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     .topContent {
       display: flex;
       justify-content: flex-start;
-    }
-  }
-  .trackContainer {
-    display: flex;
-    position: absolute;
-  }
-  .audioDelay {
-    display: flex;
-  }
-  .changeTrack {
-    display: flex;
-    .item2 {
-      display: flex;
-      justify-content: space-between;
-      margin: auto;
     }
   }
 }

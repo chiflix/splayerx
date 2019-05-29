@@ -28,9 +28,7 @@
           cursor: isChosen ? 'default' : 'pointer',
         }"
       >
-        <div class="textItem advanceNormalTitle">
-          {{ $t('advance.fontStyle') }}
-        </div>
+        <p>{{ $t('advance.fontStyle') }}</p>
         <div
           v-show="!isChosen"
           class="rightItem"
@@ -157,8 +155,9 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480p
     .textContainer {
       width: 100%;
       height: 37px;
-      .textItem {
+      p {
         margin: auto auto auto 17px;
+        font-size: 13px;
       }
       .rightItem {
         width: 17px;
@@ -196,8 +195,9 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080
     .textContainer {
       width: 100%;
       height: 44.4px;
-      .textItem {
+      p {
         margin: auto auto auto 20.4px;
+        font-size: 15.6px;
       }
       .rightItem {
         width: 20.4px;
@@ -235,8 +235,9 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     .textContainer {
       width: 100%;
       height: 62.16px;
-      .textItem {
+      p {
         margin: auto auto auto 28.56px;
+        font-size: 21.84px;
       }
       .rightItem {
         width: 28.56px;

@@ -20,14 +20,13 @@
       }"
     >
       <div
-        class="textContainer advanceNormalTitle"
+        class="textContainer"
         :style="{
           cursor: isChosen || selectedType !== selectedTypeEnum.SUBTITLE || !isSubtitleAvailable ?
             'default' : 'pointer',
         }"
       >
-        <div
-          class="textItem"
+        <p
           :style="{
             color: !isSubtitleAvailable ? 'rgba(255, 255, 255, 0.2)' : !isChosen && hoveredText ?
               'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
@@ -36,7 +35,7 @@
         >
           {{ selectedType === selectedTypeEnum.SUBTITLE ?
             $t('advance.subDelay') : $t('advance.audioDelay') }}
-        </div>
+        </p>
         <div
           class="rightItem"
           :style="{
@@ -230,8 +229,9 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480p
     .textContainer {
       width: 100%;
       height: 37px;
-      .textItem {
+      p {
         margin: auto auto auto 17px;
+        font-size: 13px;
       }
       .rightItem {
         font-size: 11px;
@@ -283,8 +283,9 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080
     .textContainer {
       width: 100%;
       height: 44.4px;
-      .textItem {
+      p {
         margin: auto auto auto 20.4px;
+        font-size: 15.6px;
       }
       .rightItem {
         margin: auto 20.4px auto auto;
@@ -337,8 +338,9 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     .textContainer {
       width: 100%;
       height: 62.16px;
-      .textItem {
+      p {
         margin: auto auto auto 28.56px;
+        font-size: 21.84px;
       }
       .rightItem {
         margin: auto 28.56px auto auto;

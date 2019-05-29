@@ -19,7 +19,7 @@
       }"
     >
       <div
-        class="textContainer advanceNormalTitle"
+        class="textContainer"
         :style="{
           cursor: isChosen ? 'default' : 'pointer',
           color: !isChosen && hoveredText ?
@@ -27,9 +27,7 @@
           transition: 'color 300ms',
         }"
       >
-        <div class="textItem">
-          {{ $t('advance.changeTrack') }}
-        </div>
+        <p>{{ $t('advance.changeTrack') }}</p>
         <div
           v-show="!isChosen"
           class="rightTrackItem"
@@ -61,8 +59,7 @@
               @mouseout="handleOut(index)"
               @click="handleClick(index)"
             >
-              <div
-                class="text advanceNormalItem"
+              <p
                 :style="{
                   color: index === hoverIndex || track.enabled ?
                     'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
@@ -73,7 +70,7 @@
                   `${$t('advance.track')} ${index + 1}`
                   : tracks.length === 1 ? `${$t('advance.track')} ${index + 1} : ${track.language}`
                     : `${$t('advance.track')} ${index + 1} : ${track.name}` }}
-              </div>
+              </p>
             </div>
             <div
               class="card"
@@ -185,8 +182,9 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480p
     .textContainer {
       width: 100%;
       height: 37px;
-      .textItem {
+      p {
         margin: auto auto auto 17px;
+        font-size: 13px;
       }
       .rightTrackItem {
         margin: auto 17px auto auto;
@@ -201,8 +199,9 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480p
           width: 100%;
           height: 27px;
           margin: 0 auto 5px auto;
-          .text {
+          p {
             margin: auto auto auto 27px;
+            font-size: 11px;
           }
         }
         .card {
@@ -221,8 +220,9 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080
     .textContainer {
       width: 100%;
       height: 44.4px;
-      .textItem {
+      p {
         margin: auto auto auto 20.4px;
+        font-size: 15.6px;
       }
       .rightTrackItem {
         margin: auto 20.4px auto auto;
@@ -237,8 +237,9 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080
           width: 100%;
           height: 32.4px;
           margin: 0 auto 6px auto;
-          .text {
+          p {
             margin: auto auto auto 32.4px;
+            font-size: 13.2px;
           }
         }
         .card {
@@ -257,8 +258,9 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     .textContainer {
       width: 100%;
       height: 62.16px;
-      .textItem {
+      p {
         margin: auto auto auto 28.56px;
+        font-size: 21.84px;
       }
       .rightTrackItem {
         margin: auto 28.48px auto auto;
@@ -273,8 +275,9 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
           width: 100%;
           height: 45.36px;
           margin: 0 auto 8.4px auto;
-          .text {
+          p {
             margin: auto auto auto 45.36px;
+            font-size: 18.48px;
           }
         }
         .card {
@@ -303,7 +306,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   .textContainer {
     display: flex;
     color: rgba(255, 255, 255, 0.6);
-    .textItem {
+    p {
       letter-spacing: 0.2px;
     }
   }
@@ -315,8 +318,8 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
       .columnNumDetail {
         position: relative;
         display: flex;
-        .text {
-          text-shadow: 0px 1px 1px rgba(0, 0, 0, .1);
+        p {
+          text-shadow: 0 1px 1px rgba(0, 0, 0, .1);
         }
       }
       .card {
