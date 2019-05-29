@@ -502,13 +502,6 @@ export default {
       this.updateSubSize(index);
     });
   },
-  created() {
-    asyncStorage.get('subtitle-style').then((data) => {
-      if (data.chosenSize) {
-        this.updateSubSize(data.chosenSize);
-      }
-    });
-  },
   methods: {
     ...mapActions({
       updateSubScale: subtitleActions.UPDATE_SUBTITLE_SCALE,
