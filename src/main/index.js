@@ -207,23 +207,6 @@ function registerMainWindowEvent() {
     }
     return `00:${minutes}:${seconds}`;
   }
-  function snapShot(snapShot, callback) {
-    let numberString;
-    if (snapShot.type === 'cover') {
-      let randomNumber = Math.round((Math.random() * 20) + 5);
-      if (randomNumber > snapShot.duration) randomNumber = snapShot.duration;
-      numberString = timecodeFromSeconds(randomNumber);
-    } else {
-      numberString = timecodeFromSeconds(snapShot.time);
-    }
-    splayerx.snapshotVideo(
-      snapShot.videoPath, snapShot.imgPath, numberString, `${snapShot.videoWidth}`, `${snapShot.videoHeight}`,
-      (resultCode) => {
-        console[resultCode === '0' ? 'log' : 'error'](resultCode, snapShot.videoPath);
-        callback(resultCode, snapShot.imgPath);
-      },
-    );
-  }
 
   function extractSubtitle(videoPath, subtitlePath, index) {
     return new Promise((resolve, reject) => {
@@ -234,6 +217,18 @@ function registerMainWindowEvent() {
     });
   }
 
+  function snapShot(info, callback) {
+    let randomNumber = Math.round((Math.random() * 20) + 5);
+    if (randomNumber > info.duration) randomNumber = info.duration;
+    const numberString = timecodeFromSeconds(randomNumber);
+    splayerx.snapshotVideo(
+      info.src, info.imgPath, numberString, `${info.width}`, `${info.height}`,
+      (resultCode) => {
+        console[resultCode === '0' ? 'log' : 'error'](resultCode, info.src);
+        callback(resultCode, info.imgPath);
+      },
+    );
+  }
   function snapShotQueueProcess(event) {
     const maxWaitingCount = 100;
     let waitingCount = 0;
@@ -254,7 +249,7 @@ function registerMainWindowEvent() {
         if (event.sender.isDestroyed()) {
           snapShotQueue.splice(0, snapShotQueue.length);
         } else {
-          event.sender.send(`snapShot-${lastRecord.videoPath}-reply`, imgPath);
+          event.sender.send(`snapShot-${lastRecord.src}-reply`, imgPath);
           if (snapShotQueue.length > 0) {
             snapShot(snapShotQueue[0], callback);
           }
@@ -269,19 +264,18 @@ function registerMainWindowEvent() {
     snapShot(snapShotQueue[0], callback);
   }
 
-  ipcMain.on('snapShot', (event, video, type = 'cover', time = 0) => {
-    if (!video.videoWidth) video.videoWidth = 1920;
-    if (!video.videoHeight) video.videoHeight = 1080;
+  ipcMain.on('snapShot', (event, video) => {
+    if (!video.width) video.width = 1920;
+    if (!video.height) video.height = 1080;
     const imgPath = video.imgPath;
 
     if (!fs.existsSync(imgPath)) {
-      snapShotQueue.push(Object.assign({ type, time }, video));
+      snapShotQueue.push(video);
       if (snapShotQueue.length === 1) {
         snapShotQueueProcess(event);
       }
     } else {
-      console.log('pass', imgPath);
-      event.sender.send(`snapShot-${video.videoPath}-reply`, imgPath);
+      event.sender.send(`snapShot-${video.videoPath}-reply`);
     }
   });
 
