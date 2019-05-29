@@ -73,6 +73,7 @@
             </div>
             <div
               v-show="rowType !== rowTypeEnum.RATE || lists.includes(rate)"
+              class="selected-back"
               :class="cardType"
               :style="{
                 left: `${moveLength}px`,
@@ -88,7 +89,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 
 export default {
   name: 'AdvanceRowItems',
@@ -125,11 +126,7 @@ export default {
       type: String,
       default: 'Normal',
     },
-    changeFontSize: {
-      type: Function,
-      default: null,
-    },
-    changeRate: {
+    handleRowClick: {
       type: Function,
       default: null,
     },
@@ -146,22 +143,13 @@ export default {
   },
   computed: {
     showDetail() {
-      if (this.rowType === this.rowTypeEnum.RATE) {
-        return `${this.rate} x`;
-      }
-      return `${this.chosenSizeContent}`;
+      return this.rowType === this.rowTypeEnum.RATE ? `${this.rate} x` : this.chosenSizeContent;
     },
     cardType() {
       if (this.selectedIndex === this.difIndex[0] || this.selectedIndex === this.difIndex[1]) {
-        if (this.rowType === this.rowTypeEnum.RATE) {
-          return 'speedCard smallSpeedCard';
-        }
-        return 'fontCard smallFontCard';
+        return this.rowType === this.rowTypeEnum.RATE ? 'smallSpeedCard' : 'smallFontCard';
       }
-      if (this.rowType === this.rowTypeEnum.RATE) {
-        return 'speedCard bigSpeedCard';
-      }
-      return 'fontCard bigFontCard';
+      return this.rowType === this.rowTypeEnum.RATE ? 'bigSpeedCard' : 'bigFontCard';
     },
     heightSize() {
       if (this.size >= 289 && this.size <= 480) {
@@ -187,16 +175,13 @@ export default {
     moveLength() {
       const rateFactors = [17, 46, 71, 100, 129];
       const fontFactors = [17, 49, 86, 117];
-      if (this.rowType === this.rowTypeEnum.RATE) {
-        return (rateFactors[this.selectedIndex] / 170) * this.cardWidth;
-      }
-      return (fontFactors[this.selectedIndex] / 170) * this.cardWidth;
+      return this.rowType === this.rowTypeEnum.RATE ?
+        (rateFactors[this.selectedIndex] / 170) * this.cardWidth :
+        (fontFactors[this.selectedIndex] / 170) * this.cardWidth;
     },
     selectedIndex() {
-      if (this.rowType === this.rowTypeEnum.RATE) {
-        return this.lists.indexOf(this.rate);
-      }
-      return this.chosenSize;
+      return this.rowType === this.rowTypeEnum.RATE ?
+        this.lists.indexOf(this.rate) : this.chosenSize;
     },
   },
   methods: {
@@ -206,18 +191,14 @@ export default {
     handleMouseLeave() {
       this.hoveredText = false;
     },
-    handleOver(index) {
+    handleOver(index: number) {
       this.hoverIndex = index;
     },
     handleOut() {
       this.hoverIndex = -1;
     },
-    handleClick(index) {
-      if (this.rowType === this.rowTypeEnum.RATE) {
-        this.changeRate(this.lists[index]);
-      } else {
-        this.changeFontSize(index);
-      }
+    handleClick(index: number) {
+      this.handleRowClick(this.rowType === this.rowTypeEnum.RATE ? this.lists[index] : index);
     },
   },
 };
@@ -241,12 +222,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480p
         .text {
           font-size: 10px;
         }
-        .speedCard {
-          /*left: 46px;*/
-          height: 27px;
-        }
-        .fontCard {
-          /*left: 49px;*/
+        .selected-back {
           height: 27px;
         }
         .smallSpeedCard {
@@ -291,12 +267,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080
         .text {
           font-size: 12px;
         }
-        .speedCard {
-          /*left: 55.2px;*/
-          height: 32.4px;
-        }
-        .fontCard {
-          /*left: 58.8px;*/
+        .selected-back {
           height: 32.4px;
         }
         .smallSpeedCard {
@@ -341,12 +312,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
         .text {
           font-size: 16.8px;
         }
-        .speedCard {
-          /*left: 77.28px;*/
-          height: 45.36px;
-        }
-        .fontCard {
-          /*left: 82.32px;*/
+        .selected-back {
           height: 45.36px;
         }
         .smallSpeedCard {
@@ -410,7 +376,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
         position: relative;
         display: flex;
       }
-      .speedCard {
+      .selected-back {
         position: absolute;
         z-index: -1;
         border-radius: 7px;
@@ -419,16 +385,6 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
         background-image: radial-gradient(
           60% 134%, rgba(255, 255, 255, 0.09) 44%, rgba(255, 255, 255, 0.05) 100%);
         box-shadow: 0px 1px 2px rgba(0, 0, 0, .2);
-      }
-      .fontCard {
-        position: absolute;
-        z-index: -1;
-        border-radius: 7px;
-        opacity: 0.4;
-        border: 0.5px solid rgba(255, 255, 255, 0.20);
-        box-shadow: 0px 1px 2px rgba(0, 0, 0, .2);
-        background-image: radial-gradient(
-          60% 134%, rgba(255, 255, 255, 0.09) 44%, rgba(255, 255, 255, 0.05) 100%);
       }
     }
   }

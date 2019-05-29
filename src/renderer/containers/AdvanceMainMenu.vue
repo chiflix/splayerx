@@ -27,7 +27,7 @@
           :rate="rate"
           row-type="rate"
           :size="computedSize"
-          :change-rate="changeRate"
+          :handle-row-click="changeRate"
           :is-chosen="speedChosen"
           @click.left.native="handleClick"
         />
@@ -74,7 +74,7 @@
             <div
               v-show="hoverIndex === 2"
               class="hoverAudioBack"
-            ></div>
+            />
           </transition>
           <div class="audioContainer">
             <div
@@ -129,7 +129,7 @@
           row-type="fontSize"
           :lists="$t('advance.fontItems')"
           :size="computedSize"
-          :change-font-size="updateSubSize"
+          :handle-row-click="updateSubSize"
           :chosen-size="chosenSize"
           :is-chosen="subSizeChosen"
           @click.left.native="handleSizeClick"
@@ -197,12 +197,15 @@
   </base-info-card>
 </template>
 
-<script>
+<script lang="ts">
 import { mapGetters, mapActions } from 'vuex';
 import asyncStorage from '@/helpers/asyncStorage';
 import { Subtitle as subtitleActions, Video as videoActions } from '@/store/actionTypes';
+import { getTextWidth } from '@/libs/utils';
 import AdvanceRowItems from '@/components/PlayingView/AdvanceControlFunctionalities/AdvanceRowItems.vue';
+// @ts-ignore
 import BaseInfoCard from '@/components/PlayingView/InfoCard.vue';
+// @ts-ignore
 import Icon from '@/components/BaseIconContainer.vue';
 import AdvanceColorItems from '@/components/PlayingView/AdvanceControlFunctionalities/AdvanceColorItems.vue';
 import AdvanceSelectedItemts from '@/components/PlayingView/AdvanceControlFunctionalities/AdvanceSelectItems.vue';
@@ -287,76 +290,76 @@ export default {
     },
     maxTextLength() { // 不同菜单界面，一行文字加起来最大的长度
       if (this.readyShow === 'audioMenu') {
-        const firstLine = this.getTextWidth(
+        const firstLine = getTextWidth(
           `${this.textItemFontSize}px`,
           this.normalFont,
           this.leftTitleToShow[0],
-        ) + this.getTextWidth(
+        ) + getTextWidth(
           `${this.rightItemFontSize}px`,
           this.normalFont,
           '0 ms',
         );
-        const secondLine = this.getTextWidth(
+        const secondLine = getTextWidth(
           `${this.textItemFontSize}px`,
           this.normalFont,
           this.leftTitleToShow[1],
-        ) + this.getTextWidth(
+        ) + getTextWidth(
           `${this.rightItemFontSize}px`,
           this.normalFont,
           this.currentAudioTrack,
         );
-        const thirdLine = this.getTextWidth(
+        const thirdLine = getTextWidth(
           `${this.rightItemFontSize}px`,
           this.normalFont,
           this.leftTitleToShow[2],
         ) + this.rightItemFontSize;
         return Math.max(firstLine, secondLine, thirdLine);
       } else if (this.readyShow === 'subMenu') {
-        const firstLine = this.getTextWidth(
+        const firstLine = getTextWidth(
           `${this.textItemFontSize}px`,
           this.normalFont,
           this.leftTitleToShow[0],
-        ) + this.getTextWidth(
+        ) + getTextWidth(
           `${this.rightItemFontSize}px`,
           this.normalFont,
           this.ChosenSizeContent,
         );
-        const secondLine = this.getTextWidth(
+        const secondLine = getTextWidth(
           `${this.textItemFontSize}px`,
           this.normalFont,
           this.leftTitleToShow[1],
         ) + this.subStyleWidth;
-        const thirdLine = this.getTextWidth(
+        const thirdLine = getTextWidth(
           `${this.textItemFontSize}px`,
           this.normalFont,
           this.leftTitleToShow[2],
-        ) + this.getTextWidth(
+        ) + getTextWidth(
           `${this.rightItemFontSize}px`,
           this.normalFont,
           `${this.subtitleDelay / 1000} s`,
         );
-        const fourthLine = this.getTextWidth(
+        const fourthLine = getTextWidth(
           `${this.rightItemFontSize}px`,
           this.normalFont,
           this.leftTitleToShow[3],
         ) + this.rightItemFontSize;
         return Math.max(firstLine, secondLine, thirdLine, fourthLine);
       }
-      const firstLine = this.getTextWidth(
+      const firstLine = getTextWidth(
         `${this.textItemFontSize}px`,
         this.normalFont,
         this.leftTitleToShow[0],
-      ) + this.getTextWidth(
+      ) + getTextWidth(
         `${this.rightItemFontSize}px`,
         this.normalFont,
         `${this.rate} x`,
       );
-      const secondLine = this.getTextWidth(
+      const secondLine = getTextWidth(
         `${this.textItemFontSize}px`,
         this.normalFont,
         this.leftTitleToShow[1],
       ) + this.textItemFontSize;
-      const thirdLine = this.getTextWidth(
+      const thirdLine = getTextWidth(
         `${this.textItemFontSize}px`,
         this.normalFont,
         this.leftTitleToShow[2],
@@ -394,7 +397,10 @@ export default {
       return this.winRatio >= 1 ? this.computedHeight : this.computedWidth;
     },
     currentAudioTrack() {
-      const track = this.$store.getters.audioTrackList.filter(track => track.enabled)[0];
+      const track: {id: string, kind: string, label: string,
+        language: string, name: string, enabled: boolean} =
+        this.$store.getters.audioTrackList.filter((track: {id: string, kind: string, label: string,
+          language: string, name: string, enabled: boolean}) => track.enabled)[0];
       if (track) {
         if (track.language === '' || track.language === 'und') {
           return `${
@@ -435,7 +441,7 @@ export default {
     },
   },
   watch: {
-    subToTop(val) {
+    subToTop(val: boolean) {
       if (val) {
         this.updateLastSubSize(this.chosenSize);
         this.updateSubSize(0);
@@ -443,14 +449,14 @@ export default {
         this.updateSubSize(this.lastChosenSize);
       }
     },
-    chosenSize(val) {
+    chosenSize(val: number) {
       if (this.winRatio >= 1) {
         this.updatePCVideoScaleByFactors(val);
       } else if (this.winRatio < 1) {
         this.updateMobileVideoScaleByFactors(val);
       }
     },
-    computedVideoSize(val) {
+    computedVideoSize(val: number) {
       if (val >= 1080) {
         this.updateVideoScaleByFactors(val);
       } else if (this.winRatio >= 1) {
@@ -468,7 +474,7 @@ export default {
     textItemFontSize() {
       this.cardWidth = this.maxTextLength + (3 * this.subStyleWidth);
     },
-    clearState(val) {
+    clearState(val: boolean) {
       this.cardWidth = this.maxTextLength + (3 * this.subStyleWidth);
       if (!val) {
         setTimeout(() => {
@@ -482,17 +488,17 @@ export default {
         }, 150);
       }
     },
-    trackNum(val) {
+    trackNum(val: number) {
       if (val < 1) {
         this.showTrack = false;
       }
     },
   },
   mounted() {
-    this.$bus.$on('switch-audio-track', (index) => {
+    this.$bus.$on('switch-audio-track', (index: number) => {
       this.switchAudioTrack(this.audioTrackList[index]);
     });
-    this.$bus.$on('change-size-by-menu', (index) => {
+    this.$bus.$on('change-size-by-menu', (index: number) => {
       this.updateSubSize(index);
     });
   },
@@ -511,34 +517,35 @@ export default {
       changeRate: videoActions.CHANGE_RATE,
     }),
     // update video scale that width is larger than height
-    updatePCVideoScaleByFactors(index) {
+    updatePCVideoScaleByFactors(index: number) {
       const firstFactors = [21, 29, 37, 45];
       const secondFactors = [24, 26, 28, 30];
       this.updateSubScale(`${(((firstFactors[index] / 900) * this.computedVideoSize) +
         (secondFactors[index] / 5)) / 9}`);
     },
     // update video scale that height is larger than width
-    updateMobileVideoScaleByFactors(index) {
+    updateMobileVideoScaleByFactors(index: number) {
       const firstFactors = [21, 29, 37, 45];
       const secondFactors = [12, -92, -196, -300];
       this.updateSubScale(`${(((firstFactors[index] / 760) * this.computedVideoSize) +
         (secondFactors[index] / 76)) / 9}`);
     },
     // update video scale when width or height is larger than 1080
-    updateVideoScaleByFactors(val) {
+    updateVideoScaleByFactors(val: number) {
       const factors = [30, 40, 50, 60];
       this.updateSubScale(`${((val / 1080) * factors[this.chosenSize]) / 9}`);
     },
-    switchAudioTrack(track) {
+    switchAudioTrack(track: {id: string, kind: string, label: string,
+      language: string, name: string, enabled: boolean}) {
       this.$store.dispatch(videoActions.SWITCH_AUDIO_TRACK, track);
     },
-    changeSubtitleDelay(num) {
+    changeSubtitleDelay(num: number) {
       this.$store.dispatch(subtitleActions.UPDATE_SUBTITLE_DELAY, num);
     },
-    changeStyle(index) {
+    changeStyle(index: number) {
       this.$store.dispatch(subtitleActions.UPDATE_SUBTITLE_STYLE, index);
     },
-    initialSize(size) {
+    initialSize(size: number) {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
         return size;
       } else if (this.computedSize >= 481 && this.computedSize < 1080) {
@@ -557,7 +564,7 @@ export default {
       this.readyShow = 'audioMenu';
       this.speedChosen = false;
     },
-    handleMouseenter(index) {
+    handleMouseenter(index: number) {
       this.hoverIndex = index;
     },
     handleMouseleave() {
@@ -603,7 +610,7 @@ export default {
       this.showDelay = false;
       this.showTrack = false;
     },
-    handleAudioMouseenter(index) {
+    handleAudioMouseenter(index: number) {
       this.hoverAudioIndex = index;
     },
     handleAudioMouseleave() {

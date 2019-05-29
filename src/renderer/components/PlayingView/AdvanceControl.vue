@@ -10,12 +10,10 @@
               '150ms cubic-bezier(0.17, 0.67, 0.17, 0.98)'
           }"
         >
-          <transition name="setUp">
-            <advance-main-menu
-              class="mainMenu"
-              :clear-state="showAttached"
-            />
-          </transition>
+          <advance-main-menu
+            class="mainMenu"
+            :clear-state="showAttached"
+          />
         </div>
       </transition>
       <div
@@ -201,21 +199,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-button {
-  border: none;
-}
-button:focus {
-  outline: none;
-}
-button:hover {
-  cursor: pointer;
-}
-.advance-trans-l-enter, .advance-trans-l-enter-active {
-  transform: translateY(0px);
-}
-.advance-trans-l-enter, .advance-trans-l-leave-active {
-  transform: translateY(20px);
-}
 .advanced {
   position: absolute;
   z-index: 100;
@@ -244,6 +227,9 @@ button:hover {
     right: 0;
     bottom: 0;
   }
+}
+.advance-trans-l-enter, .advance-trans-l-leave-active {
+  transform: translateY(20px);
 }
 .advance-trans-l-enter-active, .advance-trans-l-leave {
   opacity: 1;
