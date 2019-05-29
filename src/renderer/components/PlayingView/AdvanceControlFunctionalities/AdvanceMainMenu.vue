@@ -398,13 +398,13 @@ export default {
     ChosenSizeContent() {
       const compareContent = ['S', 'M', 'L', 'XL'];
       const enContent = ['Small', 'Normal', 'Large', 'Extra Large'];
-      return this.$t(`advance.fontItems[${this.chosenSize}]`) === compareContent[this.chosenSize] ?
-        enContent[this.chosenSize] : this.$t(`advance.fontItems[${this.chosenSize}]`);
+      return this.$t(`advance.fontItems[${this.chosenSize}]`) === compareContent[this.chosenSize]
+        ? enContent[this.chosenSize] : this.$t(`advance.fontItems[${this.chosenSize}]`);
     },
     minInfoCardWidth() {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
         return 170;
-      } else if (this.computedSize >= 481 && this.computedSize < 1080) {
+      } if (this.computedSize >= 481 && this.computedSize < 1080) {
         return 204;
       }
       return 285.6;
@@ -416,7 +416,7 @@ export default {
           this.$t('advance.audioDelay'),
           this.$t('advance.audioMenu'),
         ];
-      } else if (this.readyShow === 'subMenu') {
+      } if (this.readyShow === 'subMenu') {
         return [
           this.$t('advance.subDelay'),
           this.$t('advance.fontSize'),
@@ -456,7 +456,7 @@ export default {
           this.leftTitleToShow[2],
         ) + this.rightItemFontSize;
         return Math.max(firstLine, secondLine, thirdLine);
-      } else if (this.readyShow === 'subMenu') {
+      } if (this.readyShow === 'subMenu') {
         const firstLine = this.getTextWidth(
           `${this.textItemFontSize}px`,
           this.normalFont,
@@ -511,7 +511,7 @@ export default {
     subStyleWidth() {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
         return 17;
-      } else if (this.computedSize >= 481 && this.computedSize < 1080) {
+      } if (this.computedSize >= 481 && this.computedSize < 1080) {
         return 20.4;
       }
       return 28.56;
@@ -519,7 +519,7 @@ export default {
     rightItemFontSize() {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
         return 11;
-      } else if (this.computedSize >= 481 && this.computedSize < 1080) {
+      } if (this.computedSize >= 481 && this.computedSize < 1080) {
         return 13.2;
       }
       return 18.48;
@@ -527,7 +527,7 @@ export default {
     textItemFontSize() {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
         return 13;
-      } else if (this.computedSize >= 481 && this.computedSize < 1080) {
+      } if (this.computedSize >= 481 && this.computedSize < 1080) {
         return 15.6;
       }
       return 21.84;
@@ -541,7 +541,7 @@ export default {
         if (track.language === '' || track.language === 'und') {
           return `${
             this.$t('advance.track')} ${this.$store.getters.audioTrackList.indexOf(track) + 1}`;
-        } else if (this.$store.getters.audioTrackList.length === 1) {
+        } if (this.$store.getters.audioTrackList.length === 1) {
           return `${track.language}`;
         }
         return `${track.name}`;
@@ -564,20 +564,20 @@ export default {
       return this.showDelay ? `${this.initialSize(74)}px` : `${this.initialSize(37)}px`;
     },
     changeTrackHeight() {
-      return this.showTrack ? `${this.initialSize(this.trackHeight)}px` :
-        `${this.initialSize(37)}px`;
+      return this.showTrack ? `${this.initialSize(this.trackHeight)}px`
+        : `${this.initialSize(37)}px`;
     },
     menuCardHeight() {
       return this.speedChosen ? `${this.initialSize(164)}px` : `${this.initialSize(127)}px`;
     },
     subtitleCardHeight() {
-      return !this.subColorChosen && !this.subSizeChosen && !this.subDelayChosen ?
-        `${this.initialSize(156)}px` : `${this.initialSize(193)}px`;
+      return !this.subColorChosen && !this.subSizeChosen && !this.subDelayChosen
+        ? `${this.initialSize(156)}px` : `${this.initialSize(193)}px`;
     },
     audioCardHeight() {
       if (this.showDelay) {
         return `${this.initialSize(156)}px`;
-      } else if (this.showTrack) {
+      } if (this.showTrack) {
         return `${this.initialSize(this.containerHeight)}px`;
       }
       return `${this.initialSize(119)}px`;
@@ -639,7 +639,7 @@ export default {
     initialSize(size) {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
         return size;
-      } else if (this.computedSize >= 481 && this.computedSize < 1080) {
+      } if (this.computedSize >= 481 && this.computedSize < 1080) {
         return size * 1.2;
       }
       return size * 1.2 * 1.4;

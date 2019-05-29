@@ -89,13 +89,13 @@ export default {
       return `${this.initialSize(this.moveLength - (this.tracks.length * 32))}px`;
     },
     heightSize() {
-      return this.tracks.length <= 2 ?
-        `${this.initialSize(41 + (32 * (this.tracks.length - 1)))}px` :
-        `${this.initialSize(105)}px`;
+      return this.tracks.length <= 2
+        ? `${this.initialSize(41 + (32 * (this.tracks.length - 1)))}px`
+        : `${this.initialSize(105)}px`;
     },
     scopeHeight() {
-      return this.tracks.length <= 2 ?
-        `${this.initialSize(32 * this.tracks.length)}px` : `${this.initialSize(96)}px`;
+      return this.tracks.length <= 2
+        ? `${this.initialSize(32 * this.tracks.length)}px` : `${this.initialSize(96)}px`;
     },
     tracks() {
       return this.$store.getters.audioTrackList;
@@ -119,7 +119,7 @@ export default {
     initialSize(size) {
       if (this.size >= 289 && this.size <= 480) {
         return size;
-      } else if (this.size >= 481 && this.size < 1080) {
+      } if (this.size >= 481 && this.size < 1080) {
         return size * 1.2;
       }
       return size * 1.2 * 1.4;

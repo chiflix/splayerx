@@ -122,8 +122,6 @@
 import { mapState, mapGetters } from 'vuex';
 import Icon from '@/components/BaseIconContainer.vue';
 import Titlebar from './Titlebar.vue';
-import VideoItem from './LandingView/VideoItem.vue';
-import PlaylistItem from './LandingView/PlaylistItem.vue';
 import NotificationBubble from './NotificationBubble.vue';
 
 export default {
@@ -131,8 +129,6 @@ export default {
   components: {
     Icon,
     Titlebar,
-    VideoItem,
-    PlaylistItem,
     NotificationBubble,
   },
   data() {

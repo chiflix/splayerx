@@ -18,13 +18,11 @@ export default function getters(options = defaultOptions) {
   }
   if (get(mouse, 'mousemove.phase')) {
     result[t.GET_MOUSEMOVE_PHASE] = ({ mousemovePhase }) => mousemovePhase;
-    result[t.GET_MOUSEMOVE_STOPPED] = ({ mousemovePhase }) =>
-      (mousemovePhase === MOUSEMOVE_STOPPED_PHASE);
+    result[t.GET_MOUSEMOVE_STOPPED] = ({ mousemovePhase: p }) => (p === MOUSEMOVE_STOPPED_PHASE);
   }
   if (get(mouse, 'mousedown.buttons')) {
     result[t.GET_MOUSEDOWN_BUTTONS] = ({ mousedownButtonNames }) => mousedownButtonNames;
-    result[t.GET_WHICH_BUTTON_PRESSED] = ({ mousedownButtonNames }) => mousedownButtonName =>
-      mousedownButtonNames.includes(mousedownButtonName);
+    result[t.GET_WHICH_BUTTON_PRESSED] = ({ mousedownButtonNames: n }) => name => n.includes(name);
   }
   if (get(mouse, 'mousedown.component')) {
     result[t.GET_MOUSEDOWN_COMPONENT] = ({ mousedownComponentName }) => mousedownComponentName;
@@ -33,8 +31,7 @@ export default function getters(options = defaultOptions) {
     result[t.GET_MOUSEUP_COMPONENT] = ({ mouseupComponentName }) => mouseupComponentName;
   }
   if (get(keyboard, 'keys')) {
-    result[t.GET_WHICH_KEY_PRESSED] = ({ pressedKeyCodes }) => keyCode =>
-      pressedKeyCodes.includes(keyCode);
+    result[t.GET_WHICH_KEY_PRESSED] = ({ pressedKeyCodes: k }) => keyCode => k.includes(keyCode);
     result[t.GET_KEYS] = ({ pressedKeyCodes }) => pressedKeyCodes;
   }
   if (get(keyboard, 'alt')) {

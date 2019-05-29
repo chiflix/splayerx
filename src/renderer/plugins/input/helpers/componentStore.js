@@ -2,7 +2,9 @@ class ComponentStore {
   // use WeakMap to store dom elements
   // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakMap#Why_WeakMap
   uiComponents = new WeakMap();
+
   uiComponentsCount = new Map();
+
   addComponent(name, element, key) {
     let result = false;
     if (name && element instanceof Element) {
@@ -20,6 +22,7 @@ class ComponentStore {
     }
     return result;
   }
+
   removeComponent(element) {
     let result = false;
     if (this.uiComponents.has(element)) {
@@ -33,11 +36,13 @@ class ComponentStore {
     }
     return result;
   }
+
   getComponentNameFromElement(element) {
     if (this.uiComponents.has(element)) return this.uiComponents.get(element);
     if (element instanceof Element) return this.getComponentNameFromElement(element.parentElement);
     return false;
   }
+
   getComponentCount(name) {
     return this.uiComponentsCount.has(name) ? this.uiComponentsCount.get(name) : 0;
   }

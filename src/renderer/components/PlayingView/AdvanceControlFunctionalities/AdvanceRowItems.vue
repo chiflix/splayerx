@@ -140,7 +140,7 @@ export default {
     showDetail() {
       if (this.isRateMenu) {
         return `${this.rate} x`;
-      } else if (!this.isRateMenu) {
+      } if (!this.isRateMenu) {
         return `${this.chosenSizeContent}`;
       }
       return null;
@@ -160,7 +160,7 @@ export default {
     heightSize() {
       if (this.size >= 289 && this.size <= 480) {
         return this.isChosen ? '74px' : '37px';
-      } else if (this.size >= 481 && this.size < 1080) {
+      } if (this.size >= 481 && this.size < 1080) {
         return this.isChosen ? `${74 * 1.2}px` : `${37 * 1.2}px`;
       }
       return this.isChosen ? `${74 * 1.2 * 1.4}px` : `${37 * 1.2 * 1.4}px`;
@@ -174,11 +174,11 @@ export default {
     difWidth() {
       if (this.size >= 289 && this.size <= 480) {
         return !this.isRateMenu ? [23, 27] : [18.5, 23];
-      } else if (this.size >= 481 && this.size < 1080) {
+      } if (this.size >= 481 && this.size < 1080) {
         return !this.isRateMenu ? [23 * 1.2, 27 * 1.2] : [18.5 * 1.2, 23 * 1.2];
       }
-      return !this.isRateMenu ? [23 * 1.2 * 1.4, 27 * 1.2 * 1.4] :
-        [18.5 * 1.2 * 1.4, 23 * 1.2 * 1.4];
+      return !this.isRateMenu ? [23 * 1.2 * 1.4, 27 * 1.2 * 1.4]
+        : [18.5 * 1.2 * 1.4, 23 * 1.2 * 1.4];
     },
   },
   watch: {
@@ -314,15 +314,15 @@ export default {
     updatePCVideoScaleByFactors(index) {
       const firstFactors = [21, 29, 37, 45];
       const secondFactors = [24, 26, 28, 30];
-      this.updateSubScale(`${(((firstFactors[index] / 900) * this.computedSize) +
-        (secondFactors[index] / 5)) / 9}`);
+      this.updateSubScale(`${(((firstFactors[index] / 900) * this.computedSize)
+        + (secondFactors[index] / 5)) / 9}`);
     },
     // update video scale that height is larger than width
     updateMobileVideoScaleByFactors(index) {
       const firstFactors = [21, 29, 37, 45];
       const secondFactors = [12, -92, -196, -300];
-      this.updateSubScale(`${(((firstFactors[index] / 760) * this.computedSize) +
-        (secondFactors[index] / 76)) / 9}`);
+      this.updateSubScale(`${(((firstFactors[index] / 760) * this.computedSize)
+        + (secondFactors[index] / 76)) / 9}`);
     },
     // update video scale when width or height is larger than 1080
     updateVideoScaleByFactors(val) {

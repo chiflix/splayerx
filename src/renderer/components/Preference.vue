@@ -75,15 +75,11 @@
 <script>
 import electron from 'electron';
 import Icon from '@/components/BaseIconContainer.vue';
-import General from './Preferences/General.vue';
-import Privacy from './Preferences/Privacy.vue';
 
 export default {
   name: 'Preference',
   components: {
     Icon,
-    General,
-    Privacy,
   },
   data() {
     return {

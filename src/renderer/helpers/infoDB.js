@@ -1,13 +1,15 @@
 import { openDb } from 'idb';
-import { INFO_DATABASE_NAME, INFO_SCHEMAS, INFODB_VERSION, RECENT_OBJECT_STORE_NAME, VIDEO_OBJECT_STORE_NAME } from '@/constants';
+import {
+  INFO_DATABASE_NAME, INFO_SCHEMAS, INFODB_VERSION,
+  RECENT_OBJECT_STORE_NAME, VIDEO_OBJECT_STORE_NAME,
+} from '@/constants';
 import Helpers from '@/helpers';
-import addLog from './index';
 
 /**
  * You can change schema info in 'constants.js'
  */
 export class InfoDB {
-  #db;
+  db;
 
   /**
    * Create InfoDB if doesn't exist
@@ -43,7 +45,7 @@ export class InfoDB {
     const tx = db.transaction(storeName, 'readwrite');
     tx.objectStore(storeName).clear();
     return tx.complete.then(() => {
-      addLog.methods.addLog('info', `DB ${storeName} records all deleted`);
+      Helpers.methods.addLog('info', `DB ${storeName} records all deleted`);
     });
   }
 
@@ -73,7 +75,7 @@ export class InfoDB {
   async update(schema, data) {
     if (!data.id && !data.videoId) throw new Error('Invalid data: Require Media ID !');
     const db = await this.getDB();
-    addLog.methods.addLog('info', `Updating ${data.path || data.videoId || data.id} to ${schema}`);
+    Helpers.methods.addLog('info', `Updating ${data.path || data.videoId || data.id} to ${schema}`);
     const tx = db.transaction(schema, 'readwrite');
     return tx.objectStore(schema).put(data);
   }
@@ -84,7 +86,7 @@ export class InfoDB {
    * Delete the record which match the given key
    */
   async delete(schema, key) {
-    addLog.methods.addLog('info', `deleting ${key} from ${schema}`);
+    Helpers.methods.addLog('info', `deleting ${key} from ${schema}`);
     const db = await this.getDB();
     const tx = db.transaction(schema, 'readwrite');
     return tx.objectStore(schema).delete(key);
@@ -95,7 +97,7 @@ export class InfoDB {
    * Delete the playlist and its contained media items which match the given id
    */
   async deletePlaylist(id) {
-    addLog.methods.addLog('info', `deleting ${id} from recent-played`);
+    Helpers.methods.addLog('info', `deleting ${id} from recent-played`);
     const playlistItem = await this.get('recent-played', id);
     /* eslint-disable */
     for (const item of playlistItem.items) {

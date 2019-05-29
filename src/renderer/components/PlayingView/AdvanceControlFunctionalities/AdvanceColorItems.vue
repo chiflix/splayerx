@@ -105,7 +105,7 @@ export default {
     heightSize() {
       if (this.size >= 289 && this.size <= 480) {
         return this.isChosen ? '74px' : '37px';
-      } else if (this.size >= 481 && this.size < 1080) {
+      } if (this.size >= 481 && this.size < 1080) {
         return this.isChosen ? `${74 * 1.2}px` : `${37 * 1.2}px`;
       }
       return this.isChosen ? `${74 * 1.2 * 1.4}px` : `${37 * 1.2 * 1.4}px`;
@@ -345,4 +345,3 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   }
 }
 </style>
-

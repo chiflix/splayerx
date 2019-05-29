@@ -192,22 +192,22 @@ export default {
       inputWheelDirection: iGT.GET_WHEEL_DIRECTION,
     }),
     showAllWidgets() {
-      return !this.tempRecentPlaylistDisplayState &&
-        ((!this.mouseStopped && !this.mouseLeftWindow) ||
-        (!this.mouseLeftWindow && this.onOtherWidget) ||
-        this.attachedShown || this.videoChanged ||
-        (this.isMousedown && this.currentMousedownWidget === 'PlayButton'));
+      return !this.tempRecentPlaylistDisplayState
+        && ((!this.mouseStopped && !this.mouseLeftWindow)
+        || (!this.mouseLeftWindow && this.onOtherWidget)
+        || this.attachedShown || this.videoChanged
+        || (this.isMousedown && this.currentMousedownWidget === 'PlayButton'));
     },
     onOtherWidget() {
       return (
-        (this.currentWidget !== this.$options.name) &&
-        (this.currentWidget !== 'PlayButton') &&
-        (this.currentWidget !== 'VolumeIndicator')
+        (this.currentWidget !== this.$options.name)
+        && (this.currentWidget !== 'PlayButton')
+        && (this.currentWidget !== 'VolumeIndicator')
       );
     },
     cursorStyle() {
-      return this.showAllWidgets || !this.isFocused ||
-        this.tempRecentPlaylistDisplayState ? 'default' : 'none';
+      return this.showAllWidgets || !this.isFocused
+        || this.tempRecentPlaylistDisplayState ? 'default' : 'none';
     },
     isDragging() {
       if (this.isMousedown) {
@@ -234,8 +234,8 @@ export default {
     },
     isDragging(val, oldval) {
       if (
-        !val && oldval &&
-        !['SubtitleControl', 'AdvanceControl'].includes(this.currentMousedownWidget)
+        !val && oldval
+        && !['SubtitleControl', 'AdvanceControl'].includes(this.currentMousedownWidget)
       ) {
         this.lastDragging = true;
       }
@@ -335,20 +335,26 @@ export default {
       this.dragOver = false;
     });
     this.$bus.$on('to-fullscreen', () => {
-      if (process.platform === 'darwin' &&
-        this.intrinsicWidth / this.intrinsicHeight > window.screen.width / window.screen.height) {
+      const { intrinsicWidth, intrinsicHeight } = this;
+      const { width, height } = window.screen;
+      if (process.platform === 'darwin'
+        && intrinsicWidth / intrinsicHeight > width / height) {
         this.preFullScreen = true;
       }
     });
     this.$bus.$on('toggle-fullscreen', () => {
-      if (process.platform === 'darwin' &&
-        this.intrinsicWidth / this.intrinsicHeight > window.screen.width / window.screen.height) {
+      const { intrinsicWidth, intrinsicHeight } = this;
+      const { width, height } = window.screen;
+      if (process.platform === 'darwin'
+        && intrinsicWidth / intrinsicHeight > width / height) {
         this.preFullScreen = !this.preFullScreen;
       }
     });
     this.$bus.$on('off-fullscreen', () => {
-      if (process.platform === 'darwin' &&
-        this.intrinsicWidth / this.intrinsicHeight > window.screen.width / window.screen.height) {
+      const { intrinsicWidth, intrinsicHeight } = this;
+      const { width, height } = window.screen;
+      if (process.platform === 'darwin'
+        && intrinsicWidth / intrinsicHeight > width / height) {
         this.preFullScreen = false;
       }
     });
@@ -487,10 +493,10 @@ export default {
         tempObject[index] = !this.widgetsStatus.PlaylistControl.showAttached;
       });
       tempObject.RecentPlaylist = (
-        this.playListState ||
-        this.widgetsStatus.PlaylistControl.showAttached
-      ) &&
-        !this.dragOver;
+        this.playListState
+        || this.widgetsStatus.PlaylistControl.showAttached
+      )
+        && !this.dragOver;
       this.displayState = tempObject;
       this.tempRecentPlaylistDisplayState = this.widgetsStatus.PlaylistControl.showAttached;
     },
@@ -606,10 +612,9 @@ export default {
         this.clicksTimer = setTimeout(() => {
           this.clicks = 0;
           this.lastDragging = false;
-          this.lastAttachedShowing =
-            this.widgetsStatus.SubtitleControl.showAttached ||
-            this.widgetsStatus.AdvanceControl.showAttached ||
-            this.widgetsStatus.PlaylistControl.showAttached;
+          this.lastAttachedShowing = this.widgetsStatus.SubtitleControl.showAttached
+            || this.widgetsStatus.AdvanceControl.showAttached
+            || this.widgetsStatus.PlaylistControl.showAttached;
         }, this.clicksDelay);
       } else if (this.clicks === 2) {
         clearTimeout(this.clicksTimer);

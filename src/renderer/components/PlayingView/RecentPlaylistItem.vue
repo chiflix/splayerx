@@ -256,9 +256,9 @@ export default {
       const parsedName = parseNameFromPath(this.path);
       if (parsedName.episode && parsedName.season) {
         return `S${parsedName.season}E${parsedName.episode}`;
-      } else if (parsedName.episode && !parsedName.season) {
+      } if (parsedName.episode && !parsedName.season) {
         return `EP${parsedName.episode}`;
-      } else if (parsedName.season && !parsedName.episode) {
+      } if (parsedName.season && !parsedName.episode) {
         return `SE${parsedName.season}`;
       }
       return path.basename(this.path, path.extname(this.path));
@@ -280,8 +280,8 @@ export default {
     },
     sliderPercentage() {
       if (this.lastPlayedTime) {
-        if (this.mediaInfo.duration &&
-            this.lastPlayedTime / this.mediaInfo.duration <= 1) {
+        if (this.mediaInfo.duration
+            && this.lastPlayedTime / this.mediaInfo.duration <= 1) {
           return (this.lastPlayedTime / this.mediaInfo.duration) * 100;
         }
       }

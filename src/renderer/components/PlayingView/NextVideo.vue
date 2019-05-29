@@ -109,8 +109,8 @@ export default {
       this.$emit('ready-to-show');
     },
     updatePlayingTime(time) {
-      const fractionProgress = (time - this.nextVideoPreviewTime) /
-        (this.duration - this.nextVideoPreviewTime);
+      const fractionProgress = (time - this.nextVideoPreviewTime)
+        / (this.duration - this.nextVideoPreviewTime);
       this.progress = fractionProgress * 100;
     },
   },

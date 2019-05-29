@@ -209,16 +209,16 @@ export default {
       this.canToggleMute = true;
       const backgroundHeight = 100 + ((window.innerHeight - 180) / 3);
       const containerTop = (window.innerHeight - (backgroundHeight + 26)) / 2;
-      const percentOfVolume = ((window.innerHeight - e.clientY) - (containerTop) - 19) /
-        this.$refs.indicatorContainer.clientHeight;
+      const percentOfVolume = ((window.innerHeight - e.clientY) - (containerTop) - 19)
+        / this.$refs.indicatorContainer.clientHeight;
       if (percentOfVolume > 0) this.volume = percentOfVolume;
       this.mousedown = true;
       this.$emit('update:volume-state', true);
       let isMoved = false;
       document.onmousemove = (e) => {
         isMoved = true;
-        const percentOfVolume = ((window.innerHeight - e.clientY) - (containerTop) - 19) /
-          this.$refs.indicatorContainer.clientHeight;
+        const percentOfVolume = ((window.innerHeight - e.clientY) - (containerTop) - 19)
+          / this.$refs.indicatorContainer.clientHeight;
         if (percentOfVolume > 0) this.volume = percentOfVolume;
       };
       document.onmouseup = () => {

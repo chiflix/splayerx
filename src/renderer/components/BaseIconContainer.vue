@@ -38,8 +38,8 @@ export default {
   },
   computed: {
     finalState() {
-      return this.state === 'hover' && this.isFullScreen !== 'exit-fullscreen' ?
-        this.state : 'default';
+      return this.state === 'hover' && this.isFullScreen !== 'exit-fullscreen'
+        ? this.state : 'default';
     },
     hoverState() {
       return this.state === 'hover' ? 'hoverState' : this.type;

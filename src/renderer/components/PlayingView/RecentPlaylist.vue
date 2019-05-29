@@ -84,7 +84,6 @@
             :index-of-moving-item="indexOfMovingItem"
             :movement-x="movementX"
             :movement-y="movementY"
-            class="item"
             :can-hover-item="canHoverItem"
             :is-in-range="index >= firstIndex && index <= lastIndex"
             :is-playing="index === playingIndex"
@@ -97,6 +96,7 @@
             :size-adaption="sizeAdaption"
             :event-target="eventTarget"
             @can-remove="canRemove = true"
+            class="item"
           />
           <Add
             :style="{
@@ -125,7 +125,9 @@
 </template>
 <script>
 import path from 'path';
-import { mapState, mapGetters, mapActions, mapMutations } from 'vuex';
+import {
+  mapState, mapGetters, mapActions, mapMutations,
+} from 'vuex';
 import { Input as inputMutations } from '@/store/mutationTypes';
 import { Input as InputActions, Subtitle as subtitleActions } from '@/store/actionTypes';
 import RecentPlaylistItem from '@/components/PlayingView/RecentPlaylistItem.vue';

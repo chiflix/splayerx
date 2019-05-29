@@ -16,6 +16,289 @@ import { ipcRenderer, remote } from 'electron'; // eslint-disable-line
 
 const clock = lolex.createClock();
 
+export function calculateWindowSize(minSize, maxSize, videoSize, videoExisted, screenSize) {
+  let result = videoSize;
+  const getRatio = size => size[0] / size[1];
+  const setWidthByHeight = size => [size[1] * getRatio(videoSize), size[1]];
+  const setHeightByWidth = size => [size[0], size[0] / getRatio(videoSize)];
+  const biggerSize = (size, diffedSize) =>
+    size.some((value, index) => value >= diffedSize[index]);
+  const biggerWidth = (size, diffedSize) => size[0] >= diffedSize[0];
+  const biggerRatio = (size1, size2) => getRatio(size1) > getRatio(size2);
+  if (videoExisted && biggerWidth(result, maxSize)) {
+    result = setHeightByWidth(maxSize);
+  }
+  const realMaxSize = videoExisted ? screenSize : maxSize;
+  if (biggerSize(result, realMaxSize)) {
+    result = biggerRatio(result, realMaxSize) ?
+      setHeightByWidth(realMaxSize) : setWidthByHeight(realMaxSize);
+  }
+  if (biggerSize(minSize, result)) {
+    result = biggerRatio(minSize, result) ?
+      setHeightByWidth(minSize) : setWidthByHeight(minSize);
+  }
+  return result.map(Math.round);
+}
+export function calculateWindowPosition(currentRect, windowRect, newSize) {
+  const tempRect = currentRect.slice(0, 2)
+    .map((value, index) => Math.floor(value + (currentRect.slice(2, 4)[index] / 2)))
+    .map((value, index) => Math.floor(value - (newSize[index] / 2))).concat(newSize);
+  return ((windowRect, tempRect) => {
+    const alterPos = (boundX, boundLength, videoX, videoLength) => {
+      if (videoX < boundX) return boundX;
+      if (videoX + videoLength > boundX + boundLength) {
+        return (boundX + boundLength) - videoLength;
+      }
+      return videoX;
+    };
+    return [
+      alterPos(windowRect[0], windowRect[2], tempRect[0], tempRect[2]),
+      alterPos(windowRect[1], windowRect[3], tempRect[1], tempRect[3]),
+    ];
+  })(windowRect, tempRect);
+}
+export function timecodeFromSeconds(s) {
+  const dt = new Date(Math.abs(s) * 1000);
+  let hours = dt.getUTCHours();
+  let minutes = dt.getUTCMinutes();
+  let seconds = dt.getUTCSeconds();
+
+  // the above dt.get...() functions return a single digit
+  // so I prepend the zero here when needed
+  if (minutes < 10) {
+    minutes = `0${minutes}`;
+  }
+  if (seconds < 10) {
+    seconds = `0${seconds}`;
+  }
+  if (hours > 0) {
+    if (hours < 10) {
+      hours = `${hours}`;
+    }
+    return `${hours}:${minutes}:${seconds}`;
+  }
+  return `${minutes}:${seconds}`;
+}
+export async function findSimilarVideoByVidPath(vidPath) {
+  vidPath = decodeURI(vidPath);
+
+  if (process.platform === 'win32') {
+    vidPath = vidPath.replace(/^file:\/\/\//, '');
+  } else {
+    vidPath = vidPath.replace(/^file:\/\//, '');
+  }
+
+  const dirPath = path.dirname(vidPath);
+
+  const videoFiles = [];
+  const files = await fsPromises.readdir(dirPath);
+  const tasks = [];
+  for (let i = 0; i < files.length; i += 1) {
+    const filename = path.join(dirPath, files[i]);
+    tasks.push(fsPromises.lstat(filename).then((stat) => {
+      const fileBaseName = path.basename(filename);
+      if (!stat.isDirectory() && !fileBaseName.startsWith('.')) {
+        if (getValidVideoRegex().test(path.extname(fileBaseName))) {
+          videoFiles.push(fileBaseName);
+        }
+      }
+    }));
+  }
+  await Promise.all(tasks);
+  videoFiles.sort();
+  for (let i = 0; i < videoFiles.length; i += 1) {
+    videoFiles[i] = path.join(dirPath, videoFiles[i]);
+  }
+
+  return videoFiles;
+}
+export function openFilesByDialog({ defaultPath } = {}) {
+  if (this.showingPopupDialog) return;
+  this.showingPopupDialog = true;
+  const opts = ['openFile', 'multiSelections'];
+  if (process.platform === 'darwin') {
+    opts.push('openDirectory');
+  }
+  process.env.NODE_ENV === 'testing' ? '' : remote.dialog.showOpenDialog({
+    title: 'Open Dialog',
+    defaultPath,
+    filters: [{
+      name: 'Video Files',
+      extensions: getValidVideoExtensions(),
+    }, {
+      name: 'All Files',
+      extensions: ['*'],
+    }],
+    properties: opts,
+    securityScopedBookmarks: process.mas,
+  }, (files, bookmarks) => {
+    this.showingPopupDialog = false;
+    if (process.mas && bookmarks?.length > 0) {
+      // TODO: put bookmarks to database
+      bookmark.resolveBookmarks(files, bookmarks);
+    }
+    if (files) {
+      this.$store.commit('source', '');
+      // if selected files contain folders only, then call openFolder()
+      const onlyFolders = files.every(file => fs.statSync(file).isDirectory());
+      files.forEach(file => remote.app.addRecentDocument(file));
+      if (onlyFolders) {
+        this.openFolder(...files);
+      } else {
+        this.openFile(...files);
+      }
+    }
+  });
+}
+export function addFilesByDialog({ defaultPath } = {}) {
+  if (this.showingPopupDialog) return;
+  this.showingPopupDialog = true;
+  const opts = ['openFile', 'multiSelections'];
+  if (process.platform === 'darwin') {
+    opts.push('openDirectory');
+  }
+  process.env.NODE_ENV === 'testing' ? '' : remote.dialog.showOpenDialog({
+    title: 'Open Dialog',
+    defaultPath,
+    filters: [{
+      name: 'Video Files',
+      extensions: getValidVideoExtensions(),
+    }, {
+      name: 'All Files',
+      extensions: ['*'],
+    }],
+    properties: opts,
+    securityScopedBookmarks: process.mas,
+  }, (files, bookmarks) => {
+    this.showingPopupDialog = false;
+    if (process.mas && bookmarks?.length > 0) {
+      // TODO: put bookmarks to database
+      bookmark.resolveBookmarks(files, bookmarks);
+    }
+    if (files) {
+      this.addFiles(...files);
+    }
+  });
+}
+export function chooseSnapshotFolder(defaultName, data) {
+  if (this.showingPopupDialog) return;
+  this.showingPopupDialog = true;
+  process.env.NODE_ENV === 'testing' ? '' : remote.dialog.showOpenDialog({
+    title: 'Snapshot Save',
+    defaultPath: data.defaultFolder ? data.defaultFolder : remote.app.getPath('desktop'),
+    filters: [{
+      name: 'Snapshot',
+    }, {
+      name: 'All Files',
+    }],
+    properties: ['openDirectory'],
+    securityScopedBookmarks: process.mas,
+  }, (files, bookmarks) => {
+    if (files) {
+      fs.writeFile(path.join(files[0], data.name), data.buffer, (error) => {
+        if (error) {
+          addBubble(SNAPSHOT_FAILED, this.$i18n);
+        } else {
+          this.$store.dispatch('UPDATE_SNAPSHOT_SAVED_PATH', files[0]);
+          addBubble(SNAPSHOT_SUCCESS, this.$i18n);
+        }
+      });
+    }
+    this.showingPopupDialog = false;
+    if (process.mas && bookmarks?.length > 0) {
+      // TODO: put bookmarks to database
+      bookmark.resolveBookmarks(files, bookmarks);
+    }
+  });
+}
+export function openFolder(...folders) {
+  const files = [];
+  let containsSubFiles = false;
+  const subtitleFiles = [];
+  const subRegex = new RegExp('^\\.(srt|ass|vtt)$', 'i');
+  const videoFiles = [];
+
+  folders.forEach((dirPath) => {
+    if (fs.statSync(dirPath).isDirectory()) {
+      const dirFiles = fs.readdirSync(dirPath).map(file => path.join(dirPath, file));
+      files.push(...dirFiles);
+    }
+  });
+
+  for (let i = 0; i < files.length; i += 1) {
+    const file = files[i];
+    if (!path.basename(file).startsWith('.')) {
+      if (subRegex.test(path.extname(file))) {
+        subtitleFiles.push({ src: file, type: 'local' });
+        containsSubFiles = true;
+      } else if (getValidVideoRegex().test(path.extname(file))) {
+        videoFiles.push(file);
+      }
+    }
+  }
+  if (videoFiles.length !== 0) {
+    this.createPlayList(...videoFiles);
+  } else {
+    // TODO: no videoFiles in folders error catch
+    this.addLog('error', {
+      errcode: EMPTY_FOLDER,
+      message: 'There is no playable file in this folder.',
+    });
+    addBubble(EMPTY_FOLDER, this.$i18n);
+  }
+  if (containsSubFiles) {
+    this.$bus.$emit('add-subtitles', subtitleFiles);
+  }
+}
+export async function addFiles(...files) { // eslint-disable-line complexity
+  const videoFiles = [];
+
+  for (let i = 0; i < files.length; i += 1) {
+    if (fs.statSync(files[i]).isDirectory()) {
+      const dirPath = files[i];
+      const dirFiles = fs.readdirSync(dirPath).map(file => path.join(dirPath, file));
+      files.push(...dirFiles);
+    }
+  }
+
+  for (let i = 0; i < files.length; i += 1) {
+    const file = files[i];
+    if (!path.basename(file).startsWith('.') && getValidVideoRegex().test(path.extname(file))) {
+      videoFiles.push(file);
+    }
+  }
+  if (videoFiles.length !== 0) {
+    const addFiles = videoFiles.filter(file => !this.$store.getters.playingList.includes(file));
+    const playlist = await this.infoDB.get('recent-played', this.playListId);
+    const addIds = [];
+    for (const videoPath of addFiles) {
+      const quickHash = await this.mediaQuickHash(videoPath);
+      const data = {
+        quickHash,
+        type: 'video',
+        path: videoPath,
+        source: 'playlist',
+      };
+      const videoId = await this.infoDB.add('media-item', data);
+      addIds.push(videoId);
+      playlist.items.push(videoId);
+      playlist.hpaths.push(`${quickHash}-${videoPath}`);
+    }
+    this.$store.dispatch('AddItemsToPlayingList', {
+      paths: addFiles,
+      ids: addIds,
+    });
+    this.infoDB.update('recent-played', playlist);
+    this.$store.dispatch('PlayingList', { id: playlist.id });
+  } else {
+    this.addLog('error', {
+      errcode: ADD_NO_VIDEO,
+      message: 'Didn\'t add any playable file in this folder.',
+    });
+    addBubble(ADD_NO_VIDEO, this.$i18n);
+  }
+}
+
 export default {
   data() {
     return {
@@ -27,290 +310,15 @@ export default {
     };
   },
   methods: {
-    calculateWindowSize(minSize, maxSize, videoSize, videoExisted, screenSize) {
-      let result = videoSize;
-      const getRatio = size => size[0] / size[1];
-      const setWidthByHeight = size => [size[1] * getRatio(videoSize), size[1]];
-      const setHeightByWidth = size => [size[0], size[0] / getRatio(videoSize)];
-      const biggerSize = (size, diffedSize) =>
-        size.some((value, index) => value >= diffedSize[index]);
-      const biggerWidth = (size, diffedSize) => size[0] >= diffedSize[0];
-      const biggerRatio = (size1, size2) => getRatio(size1) > getRatio(size2);
-      if (videoExisted && biggerWidth(result, maxSize)) {
-        result = setHeightByWidth(maxSize);
-      }
-      const realMaxSize = videoExisted ? screenSize : maxSize;
-      if (biggerSize(result, realMaxSize)) {
-        result = biggerRatio(result, realMaxSize) ?
-          setHeightByWidth(realMaxSize) : setWidthByHeight(realMaxSize);
-      }
-      if (biggerSize(minSize, result)) {
-        result = biggerRatio(minSize, result) ?
-          setHeightByWidth(minSize) : setWidthByHeight(minSize);
-      }
-      return result.map(Math.round);
-    },
-    calculateWindowPosition(currentRect, windowRect, newSize) {
-      const tempRect = currentRect.slice(0, 2)
-        .map((value, index) => Math.floor(value + (currentRect.slice(2, 4)[index] / 2)))
-        .map((value, index) => Math.floor(value - (newSize[index] / 2))).concat(newSize);
-      return ((windowRect, tempRect) => {
-        const alterPos = (boundX, boundLength, videoX, videoLength) => {
-          if (videoX < boundX) return boundX;
-          if (videoX + videoLength > boundX + boundLength) {
-            return (boundX + boundLength) - videoLength;
-          }
-          return videoX;
-        };
-        return [
-          alterPos(windowRect[0], windowRect[2], tempRect[0], tempRect[2]),
-          alterPos(windowRect[1], windowRect[3], tempRect[1], tempRect[3]),
-        ];
-      })(windowRect, tempRect);
-    },
-    timecodeFromSeconds(s) {
-      const dt = new Date(Math.abs(s) * 1000);
-      let hours = dt.getUTCHours();
-      let minutes = dt.getUTCMinutes();
-      let seconds = dt.getUTCSeconds();
-
-      // the above dt.get...() functions return a single digit
-      // so I prepend the zero here when needed
-      if (minutes < 10) {
-        minutes = `0${minutes}`;
-      }
-      if (seconds < 10) {
-        seconds = `0${seconds}`;
-      }
-      if (hours > 0) {
-        if (hours < 10) {
-          hours = `${hours}`;
-        }
-        return `${hours}:${minutes}:${seconds}`;
-      }
-      return `${minutes}:${seconds}`;
-    },
-    async findSimilarVideoByVidPath(vidPath) {
-      vidPath = decodeURI(vidPath);
-
-      if (process.platform === 'win32') {
-        vidPath = vidPath.replace(/^file:\/\/\//, '');
-      } else {
-        vidPath = vidPath.replace(/^file:\/\//, '');
-      }
-
-      const dirPath = path.dirname(vidPath);
-
-      const videoFiles = [];
-      const files = await fsPromises.readdir(dirPath);
-      const tasks = [];
-      for (let i = 0; i < files.length; i += 1) {
-        const filename = path.join(dirPath, files[i]);
-        tasks.push(fsPromises.lstat(filename).then((stat) => {
-          const fileBaseName = path.basename(filename);
-          if (!stat.isDirectory() && !fileBaseName.startsWith('.')) {
-            if (getValidVideoRegex().test(path.extname(fileBaseName))) {
-              videoFiles.push(fileBaseName);
-            }
-          }
-        }));
-      }
-      await Promise.all(tasks);
-      videoFiles.sort();
-      for (let i = 0; i < videoFiles.length; i += 1) {
-        videoFiles[i] = path.join(dirPath, videoFiles[i]);
-      }
-
-      return videoFiles;
-    },
-    openFilesByDialog({ defaultPath } = {}) {
-      if (this.showingPopupDialog) return;
-      this.showingPopupDialog = true;
-      const opts = ['openFile', 'multiSelections'];
-      if (process.platform === 'darwin') {
-        opts.push('openDirectory');
-      }
-      process.env.NODE_ENV === 'testing' ? '' : remote.dialog.showOpenDialog({
-        title: 'Open Dialog',
-        defaultPath,
-        filters: [{
-          name: 'Video Files',
-          extensions: getValidVideoExtensions(),
-        }, {
-          name: 'All Files',
-          extensions: ['*'],
-        }],
-        properties: opts,
-        securityScopedBookmarks: process.mas,
-      }, (files, bookmarks) => {
-        this.showingPopupDialog = false;
-        if (process.mas && bookmarks?.length > 0) {
-          // TODO: put bookmarks to database
-          bookmark.resolveBookmarks(files, bookmarks);
-        }
-        if (files) {
-          this.$store.commit('source', '');
-          // if selected files contain folders only, then call openFolder()
-          const onlyFolders = files.every(file => fs.statSync(file).isDirectory());
-          files.forEach(file => remote.app.addRecentDocument(file));
-          if (onlyFolders) {
-            this.openFolder(...files);
-          } else {
-            this.openFile(...files);
-          }
-        }
-      });
-    },
-    addFilesByDialog({ defaultPath } = {}) {
-      if (this.showingPopupDialog) return;
-      this.showingPopupDialog = true;
-      const opts = ['openFile', 'multiSelections'];
-      if (process.platform === 'darwin') {
-        opts.push('openDirectory');
-      }
-      process.env.NODE_ENV === 'testing' ? '' : remote.dialog.showOpenDialog({
-        title: 'Open Dialog',
-        defaultPath,
-        filters: [{
-          name: 'Video Files',
-          extensions: getValidVideoExtensions(),
-        }, {
-          name: 'All Files',
-          extensions: ['*'],
-        }],
-        properties: opts,
-        securityScopedBookmarks: process.mas,
-      }, (files, bookmarks) => {
-        this.showingPopupDialog = false;
-        if (process.mas && bookmarks?.length > 0) {
-          // TODO: put bookmarks to database
-          bookmark.resolveBookmarks(files, bookmarks);
-        }
-        if (files) {
-          this.addFiles(...files);
-        }
-      });
-    },
-    chooseSnapshotFolder(defaultName, data) {
-      if (this.showingPopupDialog) return;
-      this.showingPopupDialog = true;
-      process.env.NODE_ENV === 'testing' ? '' : remote.dialog.showOpenDialog({
-        title: 'Snapshot Save',
-        defaultPath: data.defaultFolder ? data.defaultFolder : remote.app.getPath('desktop'),
-        filters: [{
-          name: 'Snapshot',
-        }, {
-          name: 'All Files',
-        }],
-        properties: ['openDirectory'],
-        securityScopedBookmarks: process.mas,
-      }, (files, bookmarks) => {
-        if (files) {
-          fs.writeFile(path.join(files[0], data.name), data.buffer, (error) => {
-            if (error) {
-              addBubble(SNAPSHOT_FAILED, this.$i18n);
-            } else {
-              this.$store.dispatch('UPDATE_SNAPSHOT_SAVED_PATH', files[0]);
-              addBubble(SNAPSHOT_SUCCESS, this.$i18n);
-            }
-          });
-        }
-        this.showingPopupDialog = false;
-        if (process.mas && bookmarks?.length > 0) {
-          // TODO: put bookmarks to database
-          bookmark.resolveBookmarks(files, bookmarks);
-        }
-      });
-    },
-    async addFiles(...files) { // eslint-disable-line complexity
-      const videoFiles = [];
-
-      for (let i = 0; i < files.length; i += 1) {
-        if (fs.statSync(files[i]).isDirectory()) {
-          const dirPath = files[i];
-          const dirFiles = fs.readdirSync(dirPath).map(file => path.join(dirPath, file));
-          files.push(...dirFiles);
-        }
-      }
-
-      for (let i = 0; i < files.length; i += 1) {
-        const file = files[i];
-        if (!path.basename(file).startsWith('.') && getValidVideoRegex().test(path.extname(file))) {
-          videoFiles.push(file);
-        }
-      }
-      if (videoFiles.length !== 0) {
-        const addFiles = videoFiles.filter(file => !this.$store.getters.playingList.includes(file));
-        const playlist = await this.infoDB.get('recent-played', this.playListId);
-        const addIds = [];
-        for (const videoPath of addFiles) {
-          const quickHash = await this.mediaQuickHash(videoPath);
-          const data = {
-            quickHash,
-            type: 'video',
-            path: videoPath,
-            source: 'playlist',
-          };
-          const videoId = await this.infoDB.add('media-item', data);
-          addIds.push(videoId);
-          playlist.items.push(videoId);
-          playlist.hpaths.push(`${quickHash}-${videoPath}`);
-        }
-        this.$store.dispatch('AddItemsToPlayingList', {
-          paths: addFiles,
-          ids: addIds,
-        });
-        this.infoDB.update('recent-played', playlist);
-        this.$store.dispatch('PlayingList', { id: playlist.id });
-      } else {
-        this.addLog('error', {
-          errcode: ADD_NO_VIDEO,
-          message: 'Didn\'t add any playable file in this folder.',
-        });
-        addBubble(ADD_NO_VIDEO, this.$i18n);
-      }
-    },
-    // the difference between openFolder and openFile function
-    // is the way they treat the situation of empty folders and error files
-    openFolder(...folders) {
-      const files = [];
-      let containsSubFiles = false;
-      const subtitleFiles = [];
-      const subRegex = new RegExp('^\\.(srt|ass|vtt)$', 'i');
-      const videoFiles = [];
-
-      folders.forEach((dirPath) => {
-        if (fs.statSync(dirPath).isDirectory()) {
-          const dirFiles = fs.readdirSync(dirPath).map(file => path.join(dirPath, file));
-          files.push(...dirFiles);
-        }
-      });
-
-      for (let i = 0; i < files.length; i += 1) {
-        const file = files[i];
-        if (!path.basename(file).startsWith('.')) {
-          if (subRegex.test(path.extname(file))) {
-            subtitleFiles.push({ src: file, type: 'local' });
-            containsSubFiles = true;
-          } else if (getValidVideoRegex().test(path.extname(file))) {
-            videoFiles.push(file);
-          }
-        }
-      }
-      if (videoFiles.length !== 0) {
-        this.createPlayList(...videoFiles);
-      } else {
-        // TODO: no videoFiles in folders error catch
-        this.addLog('error', {
-          errcode: EMPTY_FOLDER,
-          message: 'There is no playable file in this folder.',
-        });
-        addBubble(EMPTY_FOLDER, this.$i18n);
-      }
-      if (containsSubFiles) {
-        this.$bus.$emit('add-subtitles', subtitleFiles);
-      }
-    },
+    calculateWindowSize,
+    calculateWindowPosition,
+    timecodeFromSeconds,
+    findSimilarVideoByVidPath,
+    openFilesByDialog,
+    addFilesByDialog,
+    chooseSnapshotFolder,
+    openFolder,
+    addFiles,
     /* eslint-disable */
     // filter video and sub files
     openFile(...files) {
