@@ -4,12 +4,14 @@
     "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
     "allowJs": true,
-    "strict": false, // TODO
+    "strict": false,
     "noImplicitAny": true,
     "strictNullChecks": true,
     "strictFunctionTypes": true,
     "suppressImplicitAnyIndexErrors": true,
+    "jsx": "preserve",
     "skipLibCheck": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
@@ -21,10 +23,6 @@
       "@/*": ["renderer/*"]
     }
   },
-  "include": [
-    "src/**/*",
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
 }

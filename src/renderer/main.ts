@@ -2,27 +2,25 @@
 // Be sure to call Sentry function as early as possible in the main process
 import '../shared/sentry';
 
+import path from 'path';
+import fs from 'fs';
+import electron from 'electron';
 import Vue from 'vue';
 import VueI18n from 'vue-i18n';
 import axios from 'axios';
-//@ts-ignore
-import uuidv4 from 'uuid/v4';
-import * as electron from 'electron';
-//@ts-ignore
-import VueElectronJSONStorage from 'vue-electron-json-storage';
-import VueResource from 'vue-resource';
-//@ts-ignore
-import VueAnalytics from 'vue-analytics';
-//@ts-ignore
-import VueElectron from 'vue-electron';
-import * as path from 'path';
-import * as fs from 'fs';
 import { mapGetters, mapActions, createNamespacedHelpers } from 'vuex';
-//@ts-ignore
+import VueResource from 'vue-resource';
+import uuidv4 from 'uuid/v4';
 import osLocale from 'os-locale';
-//@ts-ignore
+// @ts-ignore
+import VueElectronJSONStorage from 'vue-electron-json-storage';
+// @ts-ignore
+import VueAnalytics from 'vue-analytics';
+// @ts-ignore
+import VueElectron from 'vue-electron';
+// @ts-ignore
 import AsyncComputed from 'vue-async-computed';
-//@ts-ignore
+// @ts-ignore
 import App from '@/App.vue';
 import router from '@/router';
 import store from '@/store';
