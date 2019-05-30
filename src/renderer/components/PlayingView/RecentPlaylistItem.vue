@@ -138,11 +138,12 @@
     </div>
   </div>
 </template>
-<script>
+<script lang="ts">
 import path from 'path';
 import { mapGetters } from 'vuex';
 import { filePathToUrl, parseNameFromPath } from '@/helpers/path';
 import { generateCoverPathByMediaHash } from '@/helpers/cacheFileStorage';
+// @ts-ignore
 import Icon from '@/components/BaseIconContainer.vue';
 
 export default {
@@ -150,36 +151,39 @@ export default {
     Icon,
   },
   props: {
+    // index of current item
     index: {
       type: Number,
       default: NaN,
     },
-    maxIndex: {
-      type: Number,
-      default: 0,
-    },
     hovered: {
       type: Boolean,
     },
+    // for moving
     itemMoving: {
       type: Boolean,
     },
+    // for moving
     indexOfMovingItem: {
       type: Number,
       default: NaN,
     },
+    // for moving
     movementX: {
       type: Number,
       default: 0,
     },
+    // for moving
     movementY: {
       type: Number,
       default: 0,
     },
+    // for moving
     indexOfMovingTo: {
       type: Number,
       default: NaN,
     },
+    // for moving
     isLastPage: {
       type: Boolean,
     },
@@ -187,9 +191,6 @@ export default {
       type: Boolean,
     },
     isShifting: {
-      type: Boolean,
-    },
-    isFolderList: {
       type: Boolean,
     },
     canHoverItem: {
@@ -213,25 +214,47 @@ export default {
       type: Boolean,
       default: false,
     },
+    // for base name
     path: {
       type: String,
       default: '',
     },
-    eventTarget: {
-      type: Object,
+    onItemMousemove: {
+      type: Function,
+      required: true,
+    },
+    onItemMousedown: {
+      type: Function,
+      required: true,
+    },
+    onItemMouseup: {
+      type: Function,
+      required: true,
+    },
+    onItemMouseout: {
+      type: Function,
+      required: true,
+    },
+    onItemMouseover: {
+      type: Function,
       required: true,
     },
     sizeAdaption: {
       type: Function,
-      default: val => val,
+      default: (val: number) => val,
     },
     pageSwitching: {
       type: Boolean,
     },
+    // displayIndex: {
+    //   type: Number,
+    // },
+    // imageSrc: {
+    //   type: String,
+    // },
   },
   data() {
     return {
-      showVideo: false,
       videoId: NaN,
       coverSrc: '',
       lastPlayedTime: 0,
@@ -266,6 +289,7 @@ export default {
     backgroundImage() {
       return `url(${this.imageSrc})`;
     },
+    // change to props
     imageSrc() {
       if (this.lastPlayedTime) {
         if (this.mediaInfo.duration - this.lastPlayedTime < 10) {
@@ -276,8 +300,10 @@ export default {
       return this.coverSrc;
     },
     imageLoaded() {
+      // return !!this.imageSrc;
       return this.smallShortCut || this.coverSrc !== '';
     },
+    // change to props
     sliderPercentage() {
       if (this.lastPlayedTime) {
         if (this.mediaInfo.duration &&
@@ -287,6 +313,7 @@ export default {
       }
       return 0;
     },
+    // ui related
     side() {
       return this.winWidth > 1355 ? this.thumbnailWidth / (112 / 14) : 14;
     },
@@ -295,7 +322,7 @@ export default {
     },
   },
   watch: {
-    aboutToDelete(val) {
+    aboutToDelete(val: boolean) {
       if (val) {
         this.deleteTimeId = setTimeout(() => {
           this.$refs.whiteHover.style.backgroundColor = 'rgba(0,0,0,0.6)';
@@ -315,12 +342,12 @@ export default {
     items() {
       this.getLastPlayedInfo();
     },
-    isPlaying(val) {
+    isPlaying(val: boolean) {
       if (val) {
         requestAnimationFrame(this.updateAnimationOut);
       }
     },
-    displayIndex(val) {
+    displayIndex(val: number) {
       requestAnimationFrame(() => {
         const marginRight = this.winWidth > 1355 ? (this.winWidth / 1355) * 15 : 15;
         const distance = marginRight + this.thumbnailWidth;
@@ -331,13 +358,13 @@ export default {
         }
       });
     },
-    itemMoving(val) {
+    itemMoving(val: boolean) {
       if (!val) {
         this.tranFlag = true;
         this.displayIndex = this.index;
       }
     },
-    indexOfMovingTo(val) {
+    indexOfMovingTo(val: number) {
       if (this.itemMoving && Math.abs(this.movementY) < this.thumbnailHeight && !this.selfMoving) {
         // item moving to right
         if (this.index > this.indexOfMovingItem && this.index <= val) {
@@ -350,14 +377,14 @@ export default {
         }
       }
     },
-    pageSwitching(val, oldVal) {
+    pageSwitching(val: boolean, oldVal: boolean) {
       if (!val && oldVal && this.selfMoving) {
         requestAnimationFrame(() => {
           this.$refs.recentPlaylistItem.style.setProperty('transform', `translate(${this.movementX}px, ${this.movementY}px)`);
         });
       }
     },
-    movementY(val) { // eslint-disable-line complexity
+    movementY(val: number) { // eslint-disable-line complexity
       if (Math.abs(val) > this.thumbnailHeight) {
         // avoid the wrong layout after moving to left and lift up
         if (this.index < this.indexOfMovingItem) {
@@ -388,8 +415,8 @@ export default {
   mounted() {
     this.displayIndex = this.index;
     this.$electron.ipcRenderer.send('mediaInfo', this.path);
-    this.$electron.ipcRenderer.once(`mediaInfo-${this.path}-reply`, async (event, info) => {
-      const videoStream = JSON.parse(info).streams.find(stream => stream.codec_type === 'video');
+    this.$electron.ipcRenderer.once(`mediaInfo-${this.path}-reply`, async (event: any, info: string) => {
+      const videoStream = JSON.parse(info).streams.find((stream: any) => stream.codec_type === 'video');
       this.videoHeight = videoStream.height;
       this.videoWidth = videoStream.width;
       this.mediaInfo = Object.assign(this.mediaInfo, JSON.parse(info).format);
@@ -398,13 +425,12 @@ export default {
       this.$electron.ipcRenderer.send('snapShot', {
         videoPath: this.path,
         imgPath,
-        quickHash,
         duration: this.mediaInfo.duration,
         videoWidth: this.videoWidth,
         videoHeight: this.videoHeight,
       });
     });
-    this.$electron.ipcRenderer.once(`snapShot-${this.path}-reply`, (event, imgPath) => {
+    this.$electron.ipcRenderer.once(`snapShot-${this.path}-reply`, (event: any, imgPath: string) => {
       this.coverSrc = filePathToUrl(`${imgPath}`);
       this.imgPath = imgPath;
     });
@@ -414,8 +440,8 @@ export default {
     });
   },
   methods: {
-    mousedownVideo(e) {
-      this.eventTarget.onItemMousedown(this.index, e.pageX, e.pageY, e);
+    mousedownVideo(e: MouseEvent) {
+      this.onItemMousedown(this.index, e.pageX, e.pageY, e);
       if (this.isPlaying) return;
       document.onmousemove = (e) => {
         this.selfMoving = true;
@@ -424,7 +450,7 @@ export default {
         this.$refs.content.style.zIndex = 200;
         this.outOfWindow = e.pageX > window.innerWidth || e.pageX < 0
           || e.pageY > window.innerHeight || e.pageY < 0;
-        this.eventTarget.onItemMousemove(this.index, e.pageX, e.pageY, e);
+        this.onItemMousemove(this.index, e.pageX, e.pageY, e);
         requestAnimationFrame(() => {
           this.$refs.recentPlaylistItem.style.setProperty('transform', `translate(${this.movementX}px, ${this.movementY}px)`);
         });
@@ -440,8 +466,8 @@ export default {
           this.$refs.content.style.zIndex = 10;
           this.updateAnimationOut();
         });
-        this.eventTarget.onItemMouseout();
-        this.eventTarget.onItemMouseup(this.index);
+        this.onItemMouseout();
+        this.onItemMouseup(this.index);
       };
     },
     mouseupVideo() {
@@ -454,7 +480,7 @@ export default {
         this.$refs.recentPlaylistItem.style.zIndex = 0;
         this.$refs.content.style.zIndex = 10;
       });
-      this.eventTarget.onItemMouseup(this.index);
+      this.onItemMouseup(this.index);
     },
     updateAnimationIn() {
       if (!this.isPlaying && this.imageLoaded) {
@@ -481,20 +507,20 @@ export default {
     mouseoverVideo() {
       if (!this.isPlaying && this.isInRange && !this.isShifting
         && this.canHoverItem && !this.itemMoving) {
-        this.eventTarget.onItemMouseover(this.index, this.mediaInfo);
+        this.onItemMouseover(this.index, this.mediaInfo);
         requestAnimationFrame(this.updateAnimationIn);
       }
     },
     mouseoutVideo() {
       if (!this.itemMoving) {
-        this.eventTarget.onItemMouseout();
+        this.onItemMouseout();
         requestAnimationFrame(this.updateAnimationOut);
       }
     },
     getLastPlayedInfo() {
       this.videoId = this.items[this.index];
       if (this.videoId) {
-        this.infoDB.get('media-item', this.videoId).then((val) => {
+        this.infoDB.get('media-item', this.videoId).then((val: any) => {
           if (!val || !val.lastPlayedTime) {
             this.lastPlayedTime = 0;
             this.smallShortCut = '';

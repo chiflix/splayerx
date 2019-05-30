@@ -77,7 +77,6 @@
             class="item"
             :index="index"
             :path="item"
-            :max-index="maxIndex"
             :is-last-page="lastIndex === maxIndex && firstIndex > 0"
             :page-switching="pageSwitching"
             :item-moving="itemMoving"
@@ -89,13 +88,16 @@
             :is-in-range="index >= firstIndex && index <= lastIndex"
             :is-playing="index === playingIndex"
             :is-shifting="shifting"
-            :is-folder-list="isFolderList"
             :hovered="hoverIndex === index"
             :win-width="winWidth"
             :thumbnail-width="thumbnailWidth"
             :thumbnail-height="thumbnailHeight"
             :size-adaption="sizeAdaption"
-            :event-target="eventTarget"
+            :on-item-mousedown="onItemMousedown"
+            :on-item-mouseup="onItemMouseup"
+            :on-item-mouseout="onItemMouseout"
+            :on-item-mouseover="onItemMouseover"
+            :on-item-mousemove="onItemMousemove"
             @can-remove="canRemove = true"
           />
           <Add
@@ -131,6 +133,7 @@ import { Input as InputActions, Subtitle as subtitleActions } from '@/store/acti
 import RecentPlaylistItem from '@/components/PlayingView/RecentPlaylistItem.vue';
 import Add from '@/components/PlayingView/Add.vue';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
+import { recentPlaylistService } from '@/services/media/RecentPlayService';
 
 export default {
   name: 'RecentPlaylist',
@@ -150,6 +153,7 @@ export default {
   },
   data() {
     return {
+      mediaInfos: [],
       filename: '',
       firstIndex: 0, // first index of current page
       hoverIndex: 0, // only for display
@@ -164,7 +168,6 @@ export default {
       canHoverItem: false,
       tranFlag: false,
       filePathNeedToDelete: '',
-      eventTarget: {},
       pageSwitching: false,
       pageSwitchingTimeId: NaN,
       removeTimeId: NaN,
@@ -187,12 +190,8 @@ export default {
         playedIndex: this.playingIndex,
       });
     });
+    recentPlaylistService.generatePlaylistCovers(this.playingList);
     this.hoverIndex = this.playingIndex;
-    this.eventTarget.onItemMousemove = this.onItemMousemove;
-    this.eventTarget.onItemMousedown = this.onItemMousedown;
-    this.eventTarget.onItemMouseover = this.onItemMouseover;
-    this.eventTarget.onItemMouseout = this.onItemMouseout;
-    this.eventTarget.onItemMouseup = this.onItemMouseup;
 
     this.indexOfMovingItem = this.playingList.length;
     this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
@@ -573,7 +572,7 @@ export default {
     maxDistance() {
       return (this.maxIndex - (this.thumbnailNumber - 1)) * this.thumbnailWidth;
     },
-    // if you wanna know the meanings of wABC, please look up the product doc:
+    // please look up the product doc:
     // https://www.notion.so/splayer/Playlist-685b398ac7ce45508a4283af00f76534
     thumbnailNumber() {
       let number = 3;
