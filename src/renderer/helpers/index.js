@@ -391,7 +391,6 @@ export default {
         }
 
         await this.playFile(currentVideo.path, currentVideo.videoId);
-        this.$bus.$emit('open-playlist');
         let paths = [];
         for (const videoId of playlist.items) {
           const mediaItem = await this.infoDB.get('media-item', videoId);
@@ -450,6 +449,7 @@ export default {
       this.$store.dispatch('SRC_SET', { src: videoFiles[0], id: videoId, mediaHash: hash });
       this.$router.push({ name: 'playing-view' });
       this.$bus.$emit('new-file-open');
+      this.$bus.$emit('open-playlist');
     },
     // open single video
     async openVideoFile(videoFile) {
@@ -528,6 +528,9 @@ export default {
         if (value.lastPlayedTime) {
           this.$bus.$emit('send-lastplayedtime', value.lastPlayedTime);
         }
+        if (value.audioTrackId) {
+          this.$bus.$emit('send-audiotrackid', value.audioTrackId);
+        }
       }
     },
     async mediaQuickHash(filePath) {
@@ -554,7 +557,7 @@ export default {
       switch (level) {
         case 'error':
           console.error(log);
-          if (log && process.env.NODE_ENV !== 'development') {
+          if ((log instanceof Error || typeof log === 'string') && process.env.NODE_ENV !== 'development') {
             this.$ga && this.$ga.exception(log.message || log);
             Sentry.captureException(log);
           }

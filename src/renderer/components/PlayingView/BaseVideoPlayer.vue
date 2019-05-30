@@ -1,6 +1,9 @@
 <template>
   <div class="base-video-player">
-    <video class="video-element" ref="video"></video>
+    <video
+      ref="video"
+      class="video-element"
+    />
   </div>
 </template>
 
@@ -11,7 +14,7 @@ import { DEFAULT_VIDEO_EVENTS } from '@/constants';
 import { videodata } from '../../store/video';
 
 export default {
-  name: 'base-video-player',
+  name: 'BaseVideoPlayer',
   props: {
     // network state
     src: {
@@ -29,6 +32,10 @@ export default {
     crossOrigin: {
       default: null,
       validator: value => [null, 'anonymous', 'user-credentials'].includes(value),
+    },
+    lastAudioTrackId: {
+      type: Number,
+      default: 0,
     },
     preload: {
       type: String,
@@ -105,15 +112,15 @@ export default {
       default: false,
     },
   },
-  computed: {
-    ...mapGetters(['audioTrackList', 'originSrc', 'videoId']),
-  },
   data() {
     return {
       eventListeners: new Map(),
       currentTimeAnimationFrameId: 0,
       duration: 0,
     };
+  },
+  computed: {
+    ...mapGetters(['audioTrackList']),
   },
   watch: {
     // network state
@@ -183,6 +190,10 @@ export default {
     }
     this.duration = this.$refs.video.duration;
   },
+  beforeDestroy() {
+    this.$refs.video.ontimeupdate = null;
+    this.removeEvents(this.events);
+  },
   methods: {
     basicInfoInitialization(videoElement) {
       const basicInfo = [
@@ -221,17 +232,16 @@ export default {
             this.$refs.video.addEventListener(event, listener);
             this.eventListeners.set(event, listener);
           } else {
-            const playInfo = await this.infoDB.get('media-item', this.videoId);
             const generateAudioEvent = type => (trackEvent) => {
               const {
                 id, kind, label, language,
               } = trackEvent.track;
               let enabled;
-              if (playInfo && playInfo.audioTrackId) {
-                enabled = playInfo.audioTrackId === id;
+              if (this.lastAudioTrackId) {
+                enabled = this.lastAudioTrackId === id;
                 for (let i = 0; i < this.$refs.video.audioTracks.length; i += 1) {
                   this.$refs.video.audioTracks[i].enabled =
-                    this.$refs.video.audioTracks[i].id === playInfo.audioTrackId;
+                    this.$refs.video.audioTracks[i].id === this.lastAudioTrackId;
                 }
               } else {
                 enabled = trackEvent.track.enabled;
@@ -267,10 +277,6 @@ export default {
       }
     },
   },
-  beforeDestroy() {
-    this.$refs.video.ontimeupdate = null;
-    this.removeEvents(this.events);
-  },
 };
 </script>
 <style lang="scss" scoped>
@@ -281,6 +287,7 @@ export default {
   ** Adding the opacity properity to solve windows brightness when appling the backdrop-filter.
   ** (This should be fixed in libcc.)
   */
+  opacity: 0.9999;
   object-fit: cover;
 }
 </style>

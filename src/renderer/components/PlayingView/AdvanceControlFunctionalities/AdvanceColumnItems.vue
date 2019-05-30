@@ -1,39 +1,59 @@
 <template>
   <div class="itemContainer advance-column-items">
-    <div class="textContainer advanceNormalTitle" :style="{
-      cursor: 'default',
-    }">
-      <div class="textItem">{{ item }}</div>
+    <div
+      class="textContainer advanceNormalTitle"
+      :style="{
+        cursor: 'default',
+      }"
+    >
+      <div class="textItem">
+        {{ item }}
+      </div>
     </div>
-    <div class="listContainer"
+    <div
+      class="listContainer"
       :style="{
         height: heightSize,
-      }">
-      <div class="scrollScope"
+      }"
+    >
+      <div
+        class="scrollScope"
         :style="{
           overflowY: tracks.length > 2 ? 'scroll' : '',
           height: scopeHeight,
-        }">
+        }"
+      >
         <div class="columnContainer">
-          <div v-for="(track, index) in tracks"
+          <div
+            v-for="(track, index) in tracks"
+            :key="track.id"
             class="columnNumDetail"
+            :style="{ cursor: track.enabled ? 'default' : 'pointer' }"
             @mouseover="handleOver(index)"
             @mouseout="handleOut(index)"
             @click="handleClick(index)"
-            :style="{ cursor: track.enabled ? 'default' : 'pointer' }">
-            <div class="text advanceNormalItem"
+          >
+            <div
+              class="text advanceNormalItem"
               :style="{
-                color: index === hoverIndex || track.enabled  ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+                color: index === hoverIndex || track.enabled ?
+                  'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
                 transition: 'color 300ms',
-              }">{{ track.language === 'und' || track.language === '' ? `${$t('advance.track')} ${index + 1}`
-              : tracks.length === 1 ? `${$t('advance.track')} ${index + 1} : ${track.language}` : `${$t('advance.track')} ${index + 1} : ${track.name}` }}
+              }"
+            >
+              {{ track.language === 'und' || track.language === '' ?
+                `${$t('advance.track')} ${index + 1}`
+                : tracks.length === 1 ? `${$t('advance.track')} ${index + 1} : ${track.language}` :
+                  `${$t('advance.track')} ${index + 1} : ${track.name}` }}
             </div>
           </div>
-          <div class="card"
+          <div
+            class="card"
             :style="{
               marginTop: cardPos,
               transition: 'all 200ms cubic-bezier(0.17, 0.67, 0.17, 0.98)'
-            }"></div>
+            }"
+          />
         </div>
       </div>
     </div>
@@ -46,21 +66,39 @@ import { Video as videoActions } from '@/store/actionTypes';
 
 export default {
   name: 'AdvanceColumnItems',
+  props: {
+    item: {
+      type: String,
+      required: true,
+    },
+    size: {
+      type: Number,
+      required: true,
+    },
+    isChosen: Boolean,
+  },
   data() {
     return {
       hoverIndex: -1,
       moveLength: 0,
     };
   },
-  props: {
-    item: {
-      type: String,
+  computed: {
+    ...mapGetters(['audioTrackList', 'currentAudioTrackId']),
+    cardPos() {
+      return `${this.initialSize(this.moveLength - (this.tracks.length * 32))}px`;
     },
-    size: {
-      type: Number,
+    heightSize() {
+      return this.tracks.length <= 2 ?
+        `${this.initialSize(41 + (32 * (this.tracks.length - 1)))}px` :
+        `${this.initialSize(105)}px`;
     },
-    isChosen: {
-      type: Boolean,
+    scopeHeight() {
+      return this.tracks.length <= 2 ?
+        `${this.initialSize(32 * this.tracks.length)}px` : `${this.initialSize(96)}px`;
+    },
+    tracks() {
+      return this.$store.getters.audioTrackList;
     },
   },
   watch: {
@@ -72,20 +110,10 @@ export default {
       });
     },
   },
-  computed: {
-    ...mapGetters(['audioTrackList', 'currentAudioTrackId']),
-    cardPos() {
-      return `${this.initialSize(this.moveLength - (this.tracks.length * 32))}px`;
-    },
-    heightSize() {
-      return this.tracks.length <= 2 ? `${this.initialSize(41 + (32 * (this.tracks.length - 1)))}px` : `${this.initialSize(105)}px`;
-    },
-    scopeHeight() {
-      return this.tracks.length <= 2 ? `${this.initialSize(32 * this.tracks.length)}px` : `${this.initialSize(96)}px`;
-    },
-    tracks() {
-      return this.$store.getters.audioTrackList;
-    },
+  mounted() {
+    this.$bus.$on('switch-audio-track', (index) => {
+      this.handleClick(index);
+    });
   },
   methods: {
     initialSize(size) {
@@ -107,16 +135,12 @@ export default {
       this.$store.dispatch(videoActions.SWITCH_AUDIO_TRACK, this.tracks[index]);
     },
   },
-  mounted() {
-    this.$bus.$on('switch-audio-track', (index) => {
-      this.handleClick(index);
-    });
-  },
 };
 </script>
 
 <style lang="scss" scoped>
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
+screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
   .itemContainer {
     width: 100%;
     .textContainer {
@@ -147,7 +171,8 @@ export default {
     }
   }
 }
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
   .itemContainer {
     width: 100%;
     .textContainer {
@@ -178,7 +203,8 @@ export default {
     }
   }
 }
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   .itemContainer {
     width: 100%;
     .textContainer {
@@ -223,7 +249,8 @@ export default {
   flex-direction: column;
   border-radius: 7px;
   z-index: 10;
-  background-image: linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.07) 24%, rgba(255,255,255,0.03) 100%);
+  background-image: linear-gradient(90deg, rgba(255,255,255,0.03) 0%,
+    rgba(255,255,255,0.07) 24%, rgba(255,255,255,0.03) 100%);
   clip-path: inset(0 round 8px);
   .textContainer {
     display: flex;
@@ -250,7 +277,8 @@ export default {
         opacity: 0.4;
         border: 0.5px solid rgba(255, 255, 255, 0.20);
         box-shadow: 0px 1px 2px rgba(0, 0, 0, .2);
-        background-image: radial-gradient(60% 134%, rgba(255, 255, 255, 0.09) 44%, rgba(255, 255, 255, 0.05) 100%);
+        background-image: radial-gradient(60% 134%,
+          rgba(255, 255, 255, 0.09) 44%, rgba(255, 255, 255, 0.05) 100%);
       }
     }
   }

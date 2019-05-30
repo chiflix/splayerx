@@ -4,20 +4,51 @@ import '../shared/sentry';
 
 import { app, BrowserWindow, session, Tray, ipcMain, globalShortcut, nativeImage, splayerx } from 'electron' // eslint-disable-line
 import { throttle, debounce } from 'lodash';
+import os from 'os';
 import path from 'path';
-import fs, { promises as fsPromises } from 'fs';
+import fs from 'fs';
+import rimraf from 'rimraf';
 import TaskQueue from '../renderer/helpers/proceduralQueue';
 import './helpers/electronPrototypes';
 import writeLog from './helpers/writeLog';
 import { getOpenedFiles } from './helpers/argv';
 import { getValidVideoRegex } from '../shared/utils';
 
+// requestSingleInstanceLock is not going to work for mas
+// https://github.com/electron-userland/electron-packager/issues/923
+if (!process.mas && !app.requestSingleInstanceLock()) {
+  app.quit();
+}
+
+/**
+ * Check for restore mark and delete all user data
+ */
+const userDataPath = app.getPath('userData');
+if (fs.existsSync(path.join(userDataPath, 'NEED_TO_RESTORE_MARK'))) {
+  try {
+    const tbdPath = `${userDataPath}-TBD`;
+    if (fs.existsSync(tbdPath)) rimraf.sync(tbdPath);
+    fs.renameSync(userDataPath, tbdPath);
+    rimraf(tbdPath, (err) => {
+      if (err) console.error(err);
+    });
+  } catch (ex) {
+    console.error(ex);
+    try {
+      rimraf.sync(`${userDataPath}/**/!(lockfile)`);
+      console.log('Successfully removed all user data.');
+    } catch (ex) {
+      console.error(ex);
+    }
+  }
+}
+
 /**
  * Set `__static` path to static files in production
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
  */
 if (process.env.NODE_ENV !== 'development') {
-  global.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\') // eslint-disable-line
+  global.__static = path.join(__dirname, '/static').replace(/\\/g, '\\\\') // eslint-disable-line
 }
 
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
@@ -42,12 +73,6 @@ const aboutURL = process.env.NODE_ENV === 'development'
 const preferenceURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080/preference.html'
   : `file://${__dirname}/preference.html`;
-
-// requestSingleInstanceLock is not going to work for mas
-// https://github.com/electron-userland/electron-packager/issues/923
-if (process.mas === undefined && !app.requestSingleInstanceLock()) {
-  app.quit();
-}
 
 const tempFolderPath = path.join(app.getPath('temp'), 'splayer');
 if (!fs.existsSync(tempFolderPath)) fs.mkdirSync(tempFolderPath);
@@ -74,6 +99,11 @@ function handleBossKey() {
     }
   }
 }
+
+function markNeedToRestore() {
+  fs.closeSync(fs.openSync(path.join(app.getPath('userData'), 'NEED_TO_RESTORE_MARK'), 'w'));
+}
+
 
 function registerMainWindowEvent() {
   if (!mainWindow) return;
@@ -129,7 +159,7 @@ function registerMainWindowEvent() {
   });
   function thumbnail(args, cb) {
     splayerx.generateThumbnails(
-      args.src, args.outPath, args.width, args.num.rows, args.num.cols,
+      args.src, args.outPath, args.width, args.num.cols, args.num.rows,
       (ret) => {
         console[ret === '0' ? 'log' : 'error'](ret, args.src);
         cb(ret, args.src);
@@ -273,7 +303,6 @@ function registerMainWindowEvent() {
       callback(info);
     });
   }
-
   function mediaInfoQueueProcess(event) {
     const callback = (info) => {
       event.sender.send(`mediaInfo-${mediaInfoQueue[0]}-reply`, info);
@@ -324,6 +353,7 @@ function registerMainWindowEvent() {
       show: false,
       webPreferences: {
         webSecurity: false,
+        nodeIntegration: true,
         experimentalFeatures: true,
       },
       acceptFirstMouse: true,
@@ -354,6 +384,7 @@ function registerMainWindowEvent() {
       show: false,
       webPreferences: {
         webSecurity: false,
+        nodeIntegration: true,
         experimentalFeatures: true,
       },
       acceptFirstMouse: true,
@@ -378,11 +409,15 @@ function registerMainWindowEvent() {
   ipcMain.on('get-restore-state', () => {
     preferenceWindow?.webContents.send('restore-state', needToRestore);
   });
-  ipcMain.on('apply', () => {
+  ipcMain.on('need-to-restore', () => {
     needToRestore = true;
+    markNeedToRestore();
   });
   ipcMain.on('relaunch', () => {
-    app.relaunch();
+    const switches = process.argv.filter(a => a.startsWith('-'));
+    const argv = process.argv.filter(a => !a.startsWith('-'))
+      .slice(0, process.isPackaged ? 1 : 2).concat(switches);
+    app.relaunch({ args: argv.slice(1), execPath: argv[0] });
     app.quit();
   });
   ipcMain.on('preference-to-main', (e, args) => {
@@ -409,10 +444,11 @@ function createWindow() {
     transparent: false, // set to false to solve the backdrop-filter bug
     webPreferences: {
       webSecurity: false,
+      nodeIntegration: true,
       experimentalFeatures: true,
     },
     // See https://github.com/electron/electron/blob/master/docs/api/browser-window.md#showing-window-gracefully
-    backgroundColor: '#802e2c29',
+    backgroundColor: '#6a6a6a',
     acceptFirstMouse: true,
     show: false,
     ...({
@@ -421,6 +457,7 @@ function createWindow() {
   };
 
   mainWindow = new BrowserWindow(windowOptions);
+  mainWindow.webContents.setUserAgent(`SPlayerX@2018 ${os.platform() + os.release()} Version ${app.getVersion()}`);
 
   mainWindow.loadURL(filesToOpen.length ? `${mainURL}#/play` : mainURL);
 
@@ -444,40 +481,14 @@ function createWindow() {
 
   if (process.env.NODE_ENV === 'development') {
     setTimeout(() => { // wait some time to prevent `Object not found` error
-      mainWindow?.openDevTools();
+      mainWindow?.openDevTools({ mode: 'detach' });
     }, 1000);
   }
 }
-function removeDir(dir) {
-  const userData = app.getPath('userData');
-  return fsPromises.readdir(dir)
-    .then(files => files.reduce((result, file) => {
-      const filePath = path.join(dir, file);
-      return result.then(() => fsPromises.unlink(filePath)
-        .then(null, () => removeDir(filePath)));
-    }, Promise.resolve()).then(() => {
-      if (dir !== userData) return fsPromises.rmdir(dir);
-      return Promise.resolve();
-    }));
-}
-function removeUserData() {
-  const userData = app.getPath('userData');
-  return removeDir(path.join(userData, 'storage'))
-    .then(() => removeDir(userData));
-}
+
 app.on('before-quit', (e) => {
   if (needToRestore) {
     mainWindow?.webContents.send('quit', needToRestore);
-    e.preventDefault();
-    removeUserData()
-      .catch((err) => {
-        needToRestore = false;
-        writeLog('info', { message: `error: ${err}` });
-      })
-      .finally(() => {
-        needToRestore = false;
-        app.quit();
-      });
   } else {
     mainWindow?.webContents.send('quit');
   }
@@ -522,10 +533,10 @@ if (process.platform === 'darwin') {
 app.on('ready', () => {
   app.setName('SPlayer');
   globalShortcut.register('CmdOrCtrl+Shift+I+O+P', () => {
-    mainWindow?.openDevTools();
+    mainWindow?.openDevTools({ mode: 'detach' });
   });
   globalShortcut.register('CmdOrCtrl+Shift+J+K+L', () => {
-    preferenceWindow?.openDevTools();
+    preferenceWindow?.openDevTools({ mode: 'detach' });
   });
 
   if (process.platform === 'win32') {
@@ -539,14 +550,7 @@ app.on('ready', () => {
 
 app.on('window-all-closed', () => {
   if (process.env.NODE_ENV !== 'development' || process.platform !== 'darwin') {
-    if (needToRestore) {
-      removeUserData().then(() => {
-        needToRestore = false;
-        app.quit();
-      });
-    } else {
-      app.quit();
-    }
+    app.quit();
   }
 });
 

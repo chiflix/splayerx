@@ -1,75 +1,91 @@
 
 <template>
-<div ref="playlistItem" class="playlist-item">
-  <div class="layer1" ref="layer1"
-    :style="{
-      width: `${thumbnailWidth}px`,
-      height: `${thumbnailHeight}px`,
-    }"/>
-  <div class="layer2" ref="layer2"
-    :style="{
-      width: `${thumbnailWidth}px`,
-      height: `${thumbnailHeight}px`,
-    }"/>
-  <div class="item" ref="item"
-    :style="{
-      bottom: chosen ? '10px' : '0',
-      width: `${thumbnailWidth}px`,
-      height: `${thumbnailHeight}px`,
-    }">
-    <div class="content"
-      @click.stop="onRecentItemClick"
-      @mouseenter="onRecentItemMouseenter"
-      @mouseleave="onRecentItemMouseleave"
-      @mousedown.stop="onRecentItemMousedown"
-      @mouseup="onRecentItemMouseup"
+  <div
+    ref="playlistItem"
+    class="playlist-item"
+  >
+    <div
+      ref="layer1"
+      class="layer1"
       :style="{
         width: `${thumbnailWidth}px`,
-        height: chosen ? `${thumbnailHeight + 11}px` : `${thumbnailHeight}px`,
-      }">
-      <div class="border" ref="border"
+        height: `${thumbnailHeight}px`,
+      }"
+    />
+    <div
+      ref="layer2"
+      class="layer2"
+      :style="{
+        width: `${thumbnailWidth}px`,
+        height: `${thumbnailHeight}px`,
+      }"
+    />
+    <div
+      ref="item"
+      class="item"
+      :style="{
+        bottom: chosen ? '10px' : '0',
+        width: `${thumbnailWidth}px`,
+        height: `${thumbnailHeight}px`,
+      }"
+    >
+      <div
+        class="content"
         :style="{
-          left: `-${0.7 / 2}px`,
-          top: `-${0.7 / 2}px`,
-          width: `${thumbnailWidth - 0.7}px`,
-          height: `${thumbnailHeight - 0.7}px`,
-          border: chosen ? '0.7px solid rgba(255,255,255,0.6)' : '0.7px solid rgba(255,255,255,0.15)',
-          backgroundColor: aboutToDelete ? 'rgba(0,0,0,0.43)' : chosen ? 'rgba(255,255,255,0.2)' : '',
-        }">
-        <div class="deleteUi" :style="{
-          opacity: aboutToDelete ? '1' : '0',
-        }"><Icon type="delete"/></div>
+          width: `${thumbnailWidth}px`,
+          height: chosen ? `${thumbnailHeight + 11}px` : `${thumbnailHeight}px`,
+        }"
+        @click.stop="onRecentItemClick"
+        @mouseenter="onRecentItemMouseenter"
+        @mouseleave="onRecentItemMouseleave"
+        @mousedown.stop="onRecentItemMousedown"
+        @mouseup="onRecentItemMouseup"
+      >
+        <div
+          ref="border"
+          class="border"
+          :style="{
+            left: `-${0.7 / 2}px`,
+            top: `-${0.7 / 2}px`,
+            width: `${thumbnailWidth - 0.7}px`,
+            height: `${thumbnailHeight - 0.7}px`,
+            border: chosen ? '0.7px solid rgba(255,255,255,0.6)'
+              : '0.7px solid rgba(255,255,255,0.15)',
+            backgroundColor: aboutToDelete ? 'rgba(0,0,0,0.43)'
+              : chosen ? 'rgba(255,255,255,0.2)' : '',
+          }"
+        >
+          <div
+            class="deleteUi"
+            :style="{
+              opacity: aboutToDelete ? '1' : '0',
+            }"
+          >
+            <Icon type="delete" />
+          </div>
+        </div>
       </div>
     </div>
   </div>
-</div>
 </template>
 
 <script>
 import path from 'path';
+import { filePathToUrl } from '@/helpers/path';
+import { generateCoverPathByMediaHash } from '@/helpers/cacheFileStorage';
 import Icon from '../BaseIconContainer.vue';
 
 export default {
-  name: 'playlist-item',
+  name: 'PlaylistItem',
   components: { Icon },
-  data() {
-    return {
-      displayInfo: [],
-      coverVideo: null,
-      isDragging: false,
-      moving: false,
-      aboutToDelete: false,
-      chosen: false,
-      disX: NaN,
-      disY: NaN,
-    };
-  },
   props: {
     firstIndex: {
       type: Number,
+      default: 0,
     },
     lastIndex: {
       type: Number,
+      default: 0,
     },
     shifting: {
       type: Boolean,
@@ -79,18 +95,22 @@ export default {
     },
     index: {
       type: Number,
+      default: 0,
     },
     playlist: {
       type: Object,
+      default: () => {},
     },
     thumbnailHeight: {
       type: Number,
+      default: 63,
     },
     thumbnailWidth: {
       type: Number,
+      default: 112,
     },
     lastPlayedFile: {
-      type: Object.Array,
+      type: Array,
       require: true,
       default: () => [],
     },
@@ -99,15 +119,40 @@ export default {
     },
     filePathNeedToDelete: {
       type: String,
+      default: '',
     },
   },
+  data() {
+    return {
+      displayInfo: [],
+      coverVideo: null,
+      coverSrc: '',
+      isDragging: false,
+      moving: false,
+      aboutToDelete: false,
+      chosen: false,
+      disX: NaN,
+      disY: NaN,
+    };
+  },
   created() {
-    this.infoDB.get('media-item', this.playlist.items[this.playlist.playedIndex]).then((data) => {
+    let index = this.playlist.playedIndex;
+    if (index > this.playlist.items.length - 1 || index < 0) {
+      index = 0;
+      this.$infoDB.update('recent-played', {
+        ...this.playlist,
+        playedIndex: index,
+      });
+    }
+    this.infoDB.get('media-item', this.playlist.items[index]).then((data) => {
       this.coverVideo = data;
-      this.$refs.item.style.setProperty(
-        'background-image',
-        this.itemShortcut(data.smallShortCut, data.cover, data.lastPlayedTime, data.duration),
-      );
+      generateCoverPathByMediaHash(data.quickHash).then((path) => {
+        this.coverSrc = filePathToUrl(path);
+        this.$refs.item.style.setProperty(
+          'background-image',
+          this.itemShortcut(data.smallShortCut, data.lastPlayedTime, data.duration),
+        );
+      });
     });
   },
   destroyed() {
@@ -115,8 +160,8 @@ export default {
     document.removeEventListener('mouseup', this.onRecentItemMouseup);
   },
   methods: {
-    itemShortcut(shortCut, cover, lastPlayedTime, duration) {
-      return duration - lastPlayedTime < 5 ? `url("${cover}")` : `url("${shortCut}")`;
+    itemShortcut(shortCut, lastPlayedTime, duration) {
+      return duration - lastPlayedTime < 5 ? `url("${this.coverSrc}")` : `url("${shortCut}")`;
     },
     itemInfo() {
       return {
@@ -144,7 +189,6 @@ export default {
           ...this.itemInfo(),
           backgroundUrl: this.itemShortcut(
             this.coverVideo.shortCut,
-            this.coverVideo.cover,
             this.coverVideo.lastPlayedTime,
             this.coverVideo.duration,
           ),

@@ -1,11 +1,14 @@
 <template>
-  <div class="container"
+  <div
+    class="container"
     :style="{
       width: `${width}px`,
       height: `${height}px`,
-    }">
-    <slot></slot>
-    <div class="element"
+    }"
+  >
+    <slot />
+    <div
+      class="element"
       :style="{
         left: `-${borderWidth / 2}px`,
         top: `-${borderWidth / 2}px`,
@@ -13,18 +16,21 @@
         width: `${width + borderWidth}px`,
         height: `${height + borderWidth}px`,
         border: `${borderWidth}px solid rgba(${borderColor})`,
-      }"></div>
+      }"
+    />
   </div>
 </template>
 <script>
 export default {
-  name: 'base-info-card',
+  name: 'BaseInfoCard',
   props: {
     height: {
       type: Number,
+      required: true,
     },
     width: {
       type: Number,
+      required: true,
     },
     borderWidth: {
       type: Number,

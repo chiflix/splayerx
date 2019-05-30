@@ -36,8 +36,8 @@ new Vue({
   components: { Preference },
   data: {},
   store,
-  template: '<Preference/>',
   mounted() {
     this.$store.commit('getLocalPreference');
   },
+  template: '<Preference/>',
 }).$mount('#app');
