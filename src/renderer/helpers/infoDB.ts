@@ -224,15 +224,15 @@ export class InfoDB {
    * @param  {Any} value
    * Return the specified records that equal to value from the given schema
    */
-  async getValueByKey(schema, key, value) {
+  async getAllValueByIndex(schema, index, value) {
     const db = await this.getDB();
     const tx = db.transaction(schema);
     const res = [];
     tx.objectStore(schema)
-      .index(key)
+      .index(index)
       .iterateCursor(null, 'next', (cursor) => {
         if (!cursor) return;
-        if (cursor.value[key] === value) res.push(cursor.value);
+        if (cursor.value[index] === value) res.push(cursor.value);
         cursor.continue();
       });
     return tx.complete.then(() => Promise.resolve(res));
