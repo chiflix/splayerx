@@ -9,7 +9,6 @@ import Vue from 'vue';
 import VueI18n from 'vue-i18n';
 import axios from 'axios';
 import { mapGetters, mapActions, createNamespacedHelpers } from 'vuex';
-import VueResource from 'vue-resource';
 import uuidv4 from 'uuid/v4';
 import osLocale from 'os-locale';
 // @ts-ignore
@@ -86,7 +85,6 @@ Vue.directive('fade-in', {
 Vue.use(VueElectron);
 Vue.use(VueI18n);
 Vue.use(VueElectronJSONStorage);
-Vue.use(VueResource);
 Vue.use(AsyncComputed);
 Vue.use(VueAnalytics, {
   id: (process.env.NODE_ENV === 'production') ? 'UA-2468227-6' : 'UA-2468227-5',
