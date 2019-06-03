@@ -401,7 +401,8 @@ describe('helper - subtitle - storage', () => {
         updateSubtitle(testSubtitleStringId, testSubtitleInfo)
           .then(() => {
             expect(getStub).to.have.been.calledWithMatch(match.any, hasResultSubtitleId);
-            expect(updateStub).to.have.been.calledWithMatch(match.any, match.any, hasResultSubtitleId);
+            expect(updateStub)
+              .to.have.been.calledWithMatch(match.any, match.any, hasResultSubtitleId);
             done();
           }).catch(done);
       });
