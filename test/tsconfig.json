@@ -3,6 +3,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
+      "electron": ["../node_modules/@chiflix/electron"],
       "@/*": ["../src/renderer/*"],
       "main/*": ["../src/main/*"],
       "shared/*": ["../src/shared/*"]
