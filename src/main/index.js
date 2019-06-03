@@ -1,4 +1,3 @@
-/* eslint-disable import/first */
 // Be sure to call Sentry function as early as possible in the main process
 import '../shared/sentry';
 
@@ -429,10 +428,7 @@ function registerMainWindowEvent() {
 }
 
 function createWindow() {
-  /**
-   * Initial window options
-   */
-  const windowOptions = {
+  mainWindow = new BrowserWindow({
     useContentSize: true,
     frame: false,
     titleBarStyle: 'none',
@@ -454,9 +450,7 @@ function createWindow() {
     ...({
       win32: {},
     })[process.platform],
-  };
-
-  mainWindow = new BrowserWindow(windowOptions);
+  });
   mainWindow.webContents.setUserAgent(`SPlayerX@2018 ${os.platform() + os.release()} Version ${app.getVersion()}`);
 
   mainWindow.loadURL(filesToOpen.length ? `${mainURL}#/play` : mainURL);
@@ -477,7 +471,7 @@ function createWindow() {
     inited = true;
   });
 
-  registerMainWindowEvent();
+  registerMainWindowEvent(mainWindow);
 
   if (process.env.NODE_ENV === 'development') {
     setTimeout(() => { // wait some time to prevent `Object not found` error
