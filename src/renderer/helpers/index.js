@@ -1,7 +1,7 @@
 import path from 'path';
 import fs, { promises as fsPromises } from 'fs';
 import crypto from 'crypto';
-import lolex from 'lolex';
+import { createClock } from 'lolex';
 import { times } from 'lodash';
 import bookmark from '@/helpers/bookmark';
 import syncStorage from '@/helpers/syncStorage';
@@ -14,7 +14,7 @@ import { addBubble } from '../../shared/notificationControl';
 
 import { ipcRenderer, remote } from 'electron'; // eslint-disable-line
 
-const clock = lolex.createClock();
+const clock = createClock();
 
 export function calculateWindowSize(minSize, maxSize, videoSize, videoExisted, screenSize) {
   let result = videoSize;
