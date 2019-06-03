@@ -1,0 +1,16 @@
+{
+  "extends": "../tsconfig",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "electron": ["../node_modules/@chiflix/electron"],
+      "grpc": ["../node_modules/@grpc/grpc-js"],
+      "@/*": ["renderer/*"],
+      "main/*": ["main/*"],
+      "shared/*": ["shared/*"]
+    },
+    "composite": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
+  }
+}

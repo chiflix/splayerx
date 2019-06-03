@@ -1,8 +1,9 @@
 {
+  "compileOnSave": true,
   "compilerOptions": {
     "noEmit": true,
-    "target": "ESNext",
-    "module": "ESNext",
+    "target": "esnext",
+    "module": "esnext",
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
     "allowJs": true,
@@ -11,18 +12,12 @@
     "strictNullChecks": true,
     "strictFunctionTypes": true,
     "suppressImplicitAnyIndexErrors": true,
-    "jsx": "preserve",
-    "skipLibCheck": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
     "newLine": "LF",
-    "baseUrl": "./src",
-    "paths": {
-      "electron": ["../node_modules/@chiflix/electron"],
-      "grpc": ["../node_modules/@grpc/grpc-js"],
-      "@/*": ["renderer/*"]
-    }
+    "skipLibCheck": true
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules"]
+  "include": ["src/**/*", "test/**/*", ".electron-vue/webpack.*.config.js"],
+  "references": [
+    { "path": "src" },
+    { "path": "test" }
+  ]
 }

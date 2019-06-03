@@ -1,0 +1,12 @@
+{
+  "extends": "../tsconfig",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["../src/renderer/*"],
+      "main/*": ["../src/main/*"],
+      "shared/*": ["../src/shared/*"]
+    },
+    "composite": true
+  }
+}
