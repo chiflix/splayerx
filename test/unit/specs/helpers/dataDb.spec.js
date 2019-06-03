@@ -72,7 +72,7 @@ describe('class DataDb unit tests', () => {
           transaction: { objectStore: objectStoreStub },
         });
       };
-      dataDbRewireAPI.__Rewire__('openDb', openDbStub);
+      dataDbRewireAPI.__Rewire__('openDB', openDbStub);
     });
     describe('getDb schema unit tests', () => {
       it('should getDb create objectStore when not exist', (done) => {
