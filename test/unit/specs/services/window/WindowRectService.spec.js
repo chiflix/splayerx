@@ -6,14 +6,15 @@ describe('WindowRectService logic service', () => {
 
   describe('calculateWindowSize method', () => {
     it('should calculateWindowSize successfully', () => {
+      const MAXRECT = [window.screen.availWidth, window.screen.availHeight];
       const r1 = windowRectService
         .calculateWindowSize([320, 180], [1920, 1080], [1920, 1080], true, [2460, 1270]);
       expect(JSON.stringify(r1)).to.be.equal(JSON.stringify([1920, 1080]));
       const r2 = windowRectService
-        .calculateWindowSize([320, 180], [2535, 1417], [5000, 3000], true, [2535, 1417]);
+        .calculateWindowSize([320, 180], MAXRECT, [5000, 3000], true, MAXRECT);
       const target2 = [
-        Math.round((5000 * window.screen.availHeight) / 3000),
-        window.screen.availHeight,
+        Math.round((5000 * MAXRECT[1]) / 3000),
+        MAXRECT[1],
       ];
       expect(JSON.stringify(r2)).to.be.equal(JSON.stringify(target2));
     });
@@ -75,9 +76,9 @@ describe('WindowRectService logic service', () => {
       const r2 = windowRectService.uploadWindowBy(false, 'playing-view', 0, 90, [720, 520], [50, 100]);
       const r3 = windowRectService.uploadWindowBy(false, 'playing-view', 270, 180, [300, 520], [400, 100]);
       const r4 = windowRectService.uploadWindowBy(false, 'playing-view', 270, 0, [300, 520], [400, 100]);
-
-      expect(JSON.stringify(r1)).to.be.equal(JSON.stringify([150, 23, 520, 720]));
-      expect(JSON.stringify(r2)).to.be.equal(JSON.stringify([150, 23, 520, 720]));
+      const AVAI_LTOP = window.screen.availTop;
+      expect(JSON.stringify(r1)).to.be.equal(JSON.stringify([150, AVAI_LTOP, 520, 720]));
+      expect(JSON.stringify(r2)).to.be.equal(JSON.stringify([150, AVAI_LTOP, 520, 720]));
       expect(JSON.stringify(r3)).to.be.equal(JSON.stringify([290, 210, 520, 300]));
       expect(JSON.stringify(r4)).to.be.equal(JSON.stringify([290, 210, 520, 300]));
     });
