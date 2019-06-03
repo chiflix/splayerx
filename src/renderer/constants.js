@@ -55,7 +55,6 @@ export const DEFAULT_VIDEO_OPTIONS = [
   'src',
   'volume',
 ];
-export const THUMBNAIL_DB_NAME = 'splayerx-preview-thumbnails';
 export const INFO_DATABASE_NAME = 'Info';
 export const VIDEO_OBJECT_STORE_NAME = 'media-item';
 export const RECENT_OBJECT_STORE_NAME = 'recent-played';

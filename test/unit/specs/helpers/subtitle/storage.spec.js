@@ -379,7 +379,7 @@ describe('helper - subtitle - storage', () => {
         storeSubtitleStub = sandbox.stub().resolves();
         storageRewireAPI.__Rewire__('storeSubtitle', storeSubtitleStub);
 
-        putStub = sandbox.stub(dataDb, 'put').resolves();
+        putStub = sandbox.stub(dataDb, 'update').resolves();
       });
       afterEach(() => {
         storageRewireAPI.__ResetDependency__('storeSubtitle');
