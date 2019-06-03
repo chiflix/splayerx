@@ -1,4 +1,4 @@
-import { openDb } from 'idb';
+import { openDB } from 'idb';
 import { includes } from 'lodash';
 import {
   DATADB_VERSION as currentVersion,
@@ -24,18 +24,18 @@ export class DataDb {
    * @memberof DataDb
    */
   static async getDb(version, schema) {
-    return openDb(dBName, version, {
-      upgrade(upgradeDb) {
-        const { objectStoreNames } = upgradeDb;
+    return openDB(dBName, version, {
+      upgrade(db) {
+        const { objectStoreNames } = db;
         schema.forEach(({ name, options, indexes }) => {
           // todo: predefined database upgrade logic should go here
           if (!objectStoreNames.contains(name)) {
-            const store = upgradeDb.createObjectStore(name, options);
+            const store = db.createObjectStore(name, options);
             (indexes || []).forEach(({ name, keyPath, options }) => {
               if (name) store.createIndex(name, keyPath || name, options);
             });
           } else {
-            const store = upgradeDb.transaction.objectStore(name);
+            const store = db.transaction.objectStore(name);
             const { indexNames } = store;
 
             const indexesToDelete = Array.from(indexNames)
