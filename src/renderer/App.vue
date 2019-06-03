@@ -8,6 +8,7 @@
 </template>
 
 <script lang="ts">
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ipcRenderer, Event } from 'electron';
 import '@/css/style.scss';
 import drag from '@/helpers/drag';
