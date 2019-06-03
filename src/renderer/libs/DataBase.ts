@@ -9,7 +9,7 @@ import {
 export default class DataBase implements IDB {
   db: InfoDB | DataDb;
   currentDB: string;
-  async getDB(database: string) {
+  getDB(database: string) {
     if (database === INFO_DATABASE_NAME) {
       this.db = infoDB;
       this.currentDB = INFO_DATABASE_NAME;
