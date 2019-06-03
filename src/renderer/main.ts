@@ -25,6 +25,7 @@ import App from '@/App.vue';
 import router from '@/router';
 import store from '@/store';
 import messages from '@/locales';
+import { windowRectService } from '@/services/window/WindowRectService';
 import helpers from '@/helpers';
 import { hookVue } from '@/kerning';
 import { Video as videoActions, Subtitle as subtitleActions } from '@/store/actionTypes';
@@ -1306,61 +1307,26 @@ new Vue({
     windowRotate() {
       this.$store.dispatch('windowRotate90Deg');
       if (this.isFullScreen) return;
-      const winSize = [this.winSize[0], this.winSize[1]];
-      let newSize = [];
-      const windowRect = [
-        window.screen.availLeft, window.screen.availTop,
-        window.screen.availWidth, window.screen.availHeight,
-      ];
-      // 旋转后，画面会恢复为原始分辨率，原始分辨率就是之前的窗口大小
-      // 这里在旋转窗口后，以之前的宽为新的高，以之前的高为新的宽,
-      const videoSize = winSize.reverse();
-      newSize = this.calculateWindowSize(
-        [320, 180],
-        windowRect.slice(2, 4),
-        videoSize,
-      );
-      const newPosition = this.calculateWindowPosition(
-        this.winPos.concat(this.winSize),
-        windowRect,
-        newSize,
-      );
-      const rect = newPosition.concat(newSize);
-      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [rect.slice(2, 4)[0] / rect.slice(2, 4)[1]]);
-      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', rect.slice(2, 4));
-      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', rect.slice(0, 2));
+      const videoSize = [this.winSize[0], this.winSize[1]].reverse();
+      const oldRect = this.winPos.concat(this.winSize);
+      windowRectService.calculateWindowRect(videoSize, false, oldRect);
     },
     changeWindowSize(key: number) {
       if (!this.originSrc || key === this.sizePercent) {
         return;
       }
-      let newSize = [];
-      const windowRect = [
-        window.screen.availLeft, window.screen.availTop,
-        window.screen.availWidth, window.screen.availHeight,
-      ];
+      this.$store.dispatch('updateSizePercent', key);
+      const availWidth = window.screen.availWidth;
+      const availHeight = window.screen.availHeight;
       const videoSize = [this.intrinsicWidth * key, this.intrinsicHeight * key];
       if (key === 3) {
-        if (videoSize[0] < windowRect[2] && videoSize[1] < windowRect[3]) {
-          videoSize[1] = window.screen.availHeight;
+        if (videoSize[0] < availWidth && videoSize[1] < availHeight) {
+          videoSize[1] = availHeight;
           videoSize[0] = videoSize[1] * this.ratio;
         }
       }
-      newSize = this.calculateWindowSize(
-        [320, 180],
-        windowRect.slice(2, 4),
-        videoSize,
-      );
-      const newPosition = this.calculateWindowPosition(
-        this.winPos.concat(this.winSize),
-        windowRect,
-        newSize,
-      );
-      this.$store.dispatch('updateSizePercent', key);
-      const rect = newPosition.concat(newSize);
-      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', rect.slice(2, 4));
-      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', rect.slice(0, 2));
-      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [rect.slice(2, 4)[0] / rect.slice(2, 4)[1]]);
+      const oldRect = this.winPos.concat(this.winSize);
+      windowRectService.calculateWindowRect(videoSize, false, oldRect);
     },
     // eslint-disable-next-line complexity
     wheelEventHandler({ x }: { x: number }) {

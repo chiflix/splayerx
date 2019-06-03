@@ -478,6 +478,7 @@
     "@grpc/grpc-js": "^0.2.0",
     "@sentry/electron": "^0.17.1",
     "@sentry/integrations": "^5.1.2",
+    "@types/lodash": "^4.14.133",
     "ass-compiler": "0.0.10",
     "axios": "^0.18.0",
     "chardet": "^0.7.0",
