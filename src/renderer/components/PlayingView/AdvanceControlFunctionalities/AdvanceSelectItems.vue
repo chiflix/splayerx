@@ -114,9 +114,9 @@ export default {
       type: Number,
       default: 0,
     },
-    changeSubtitleDelay: {
+    handleSelectClick: {
       type: Function,
-      default: null,
+      required: true,
     },
   },
   data() {
@@ -169,7 +169,7 @@ export default {
       this.hoveredText = false;
     },
     handleResetDelay() {
-      this.changeSubtitleDelay(0);
+      this.handleSelectClick(0);
     },
     handleDeMousedown() {
       if (this.selectedType === this.selectedTypeEnum.SUBTITLE) {
@@ -178,10 +178,10 @@ export default {
           if (this.changeSpeed >= 20) {
             this.changeSpeed -= 2;
           }
-          this.changeSubtitleDelay(-0.1);
+          this.handleSelectClick(-0.1);
           this.timeDeInt = setInterval(decrease, this.changeSpeed);
         };
-        this.changeSubtitleDelay(-0.1);
+        this.handleSelectClick(-0.1);
         this.timeDeSet = setTimeout(() => {
           decrease();
         }, 500);
@@ -201,10 +201,10 @@ export default {
           if (this.changeSpeed >= 20) {
             this.changeSpeed -= 2;
           }
-          this.changeSubtitleDelay(0.1);
+          this.handleSelectClick(0.1);
           this.timeInInt = setInterval(increase, this.changeSpeed);
         };
-        this.changeSubtitleDelay(0.1);
+        this.handleSelectClick(0.1);
         this.timeInSet = setTimeout(() => {
           increase();
         }, 500);

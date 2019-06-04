@@ -125,7 +125,7 @@ export default {
     },
     handleRowClick: {
       type: Function,
-      default: null,
+      required: true,
     },
   },
   data() {

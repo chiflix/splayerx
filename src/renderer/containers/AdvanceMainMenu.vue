@@ -139,7 +139,7 @@
         <advance-selected-items
           :is-subtitle-available="isSubtitleAvailable"
           selected-type="subtitle"
-          :change-subtitle-delay="changeSubtitleDelay"
+          :handle-select-click="changeSubtitleDelay"
           :size="computedSize"
           :is-chosen="subDelayChosen"
           :subtitle-delay="subtitleDelay"
@@ -173,6 +173,7 @@
         <advance-selected-items
           :size="computedSize"
           selected-type="audio"
+          :handle-select-click="() => []"
           :is-chosen="showDelay"
           :audio-delay="audioDelay"
           @click.left.native="1"

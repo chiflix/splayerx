@@ -110,7 +110,7 @@ export default {
     },
     switchAudioTrack: {
       type: Function,
-      default: null,
+      required: true,
     },
   },
   data() {
