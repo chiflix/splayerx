@@ -1,5 +1,6 @@
 export type RawPlaylistItem = {
   items: IDBValidKey[],
+  hpaths: string[],
   lastOpened: number,
   playedIndex: number,
 }
@@ -9,8 +10,9 @@ export type RawMediaItem = {
   duration: number,
 }
 export type PlaylistItem = {
-  id: string,
+  id: number,
   items: IDBValidKey[],
+  hpaths: string[],
   lastOpened: number,
   playedIndex: number,
 }

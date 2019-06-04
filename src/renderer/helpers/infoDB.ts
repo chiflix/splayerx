@@ -71,10 +71,18 @@ export class InfoDB {
    * Add a record if no same quickHash in the current schema
    * Replace a record if the given quickHash existed
    */
-  async update(schema: string, data: any) {
+  async update(schema: string, data: any, keyPath: number) {
     if (!data.id && !data.videoId) throw new Error('Invalid data: Require Media ID !');
     const db = await this.getDB();
-    addLog.methods.addLog('info', `Updating ${data.path || data.videoId || data.id} to ${schema}`);
+    const tx = db.transaction(schema, 'readwrite');
+    // check if the objectStore used out-of-line key
+    const isInlineObjectStore = !!tx.objectStore(schema).keyPath;
+    if (isInlineObjectStore && keyPath) {
+      throw new Error('Providing an inline objectStore with keyPathVal is invalid.');
+    } else if (!isInlineObjectStore && !keyPath) {
+      throw new Error('Providing out-of-line objectStore without keyPathVal is invalid.');
+    }
+    addLog.methods.addLog('info', `Updating ${keyPath} to ${schema}`);
     return db.put(schema, data);
   }
 
@@ -110,6 +118,7 @@ export class InfoDB {
   async addPlaylist(videos: string[]) {
     let playlist: RawPlaylistItem = {
       items: [],
+      hpaths: [],
       playedIndex: 0,
       lastOpened: Date.now(),
     };
@@ -125,14 +134,14 @@ export class InfoDB {
         };
         const videoId = await this.add('media-item', data);
         playlist.items.push(videoId);
+        playlist.hpaths.push(`${quickHash}-${videoPath}`);
       }
     } else if (videos.length === 1) {
-      const quickHash = await Helpers.methods.mediaQuickHash(videos[0]);
-      const playlistRecord = await this.get('recent-played', 'hpaths', [`${quickHash}-${videos[0]}`]);
+      const quickHash: string = await Helpers.methods.mediaQuickHash(videos[0]);
+      const playlistRecord: PlaylistItem = await this.get('recent-played', 'hpaths', [`${quickHash}-${videos[0]}`]);
       if (playlistRecord) {
-        playlist = playlistRecord;
-        playlist.lastOpened = Date.now();
-        await this.update('recent-played', playlist);
+        playlistRecord.lastOpened = Date.now();
+        await this.update('recent-played', playlistRecord, playlistRecord.id);
         return playlistRecord.id;
       } else {
         const data = {
@@ -143,6 +152,7 @@ export class InfoDB {
         };
         const videoId = await this.add('media-item', data);
         playlist.items.push(videoId);
+        playlist.hpaths.push(`${quickHash}-${videos[0]}`);
       }
     }
     return this.add('recent-played', playlist);

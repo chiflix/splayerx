@@ -30,7 +30,7 @@ export default class DataBase implements IDB {
     if (database !== this.currentDB) {
       await this.getDB(database);
     }
-    return this.db.update(schema, data);
+    return this.db.update(schema, data, key);
   }
   async delete(database: string, schema: string, key: number): Promise<null> {
     if (database !== this.currentDB) {
