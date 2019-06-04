@@ -64,25 +64,15 @@
 </template>
 
 <script lang="ts">
-// @ts-ignore
 import style0 from '../../../assets/subtitle-style1-normal.png';
-// @ts-ignore
 import style1 from '../../../assets/subtitle-style2-normal.png';
-// @ts-ignore
 import style2 from '../../../assets/subtitle-style3-normal.png';
-// @ts-ignore
 import style3 from '../../../assets/subtitle-style4-normal.png';
-// @ts-ignore
 import style4 from '../../../assets/subtitle-style5-normal.png';
-// @ts-ignore
 import styleSelected0 from '../../../assets/subtitle-style1-selected.png';
-// @ts-ignore
 import styleSelected1 from '../../../assets/subtitle-style2-selected.png';
-// @ts-ignore
 import styleSelected2 from '../../../assets/subtitle-style3-selected.png';
-// @ts-ignore
 import styleSelected3 from '../../../assets/subtitle-style4-selected.png';
-// @ts-ignore
 import styleSelected4 from '../../../assets/subtitle-style5-selected.png';
 
 export default {
