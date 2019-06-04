@@ -7,8 +7,8 @@
         'linear-gradient(90deg, rgba(255,255,255,0.03) ' +
         '0%, rgba(255,255,255,0.07) 24%, rgba(255,255,255,0.03) 100%)',
     }"
-    @mouseenter="handleSubMouseEnter()"
-    @mouseleave="handleSubMouseLeave()"
+    @mouseenter="handleSubMouseEnter"
+    @mouseleave="handleSubMouseLeave"
   >
     <div
       class="detail"

@@ -6,8 +6,8 @@
         'linear-gradient(90deg, rgba(255,255,255,0.03) ' +
         '0%, rgba(255,255,255,0.07) 24%, rgba(255,255,255,0.03) 100%)',
     }"
-    @mouseenter="handleAudioMouseenter()"
-    @mouseleave="handleAudioMouseleave()"
+    @mouseenter="handleAudioMouseenter"
+    @mouseleave="handleAudioMouseleave"
   >
     <div
       class="detail"
@@ -135,10 +135,8 @@ export default {
     },
   },
   watch: {
-    tracks(val: Array<{id: string, kind: string, label: string,
-      language: string, name: string, enabled: boolean}>) {
-      val.forEach((item: {id: string, kind: string, label: string,
-        language: string, name: string, enabled: boolean}, index: number) => {
+    tracks(val: any) {
+      val.forEach((item: any, index: number) => {
         if (Number(item.id) === this.currentTrackId) {
           this.moveLength = index * 32;
         }

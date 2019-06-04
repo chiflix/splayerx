@@ -33,7 +33,8 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+//  @ts-ignore
 import lottie from '@/components/lottie.vue';
 import animationData from '@/assets/advance.json';
 import { mapActions, mapGetters, mapState } from 'vuex';
@@ -79,7 +80,7 @@ export default {
     originSrc() {
       this.$emit('update:showAttached', false);
     },
-    showAttached(val) {
+    showAttached(val: boolean) {
       if (!val) {
         this.animFlag = true;
         if (!this.validEnter) {
@@ -91,7 +92,7 @@ export default {
         }
       }
     },
-    currentMousedownComponent(val) {
+    currentMousedownComponent(val: string) {
       if (val !== 'notification-bubble' && val !== '') {
         if (val !== this.$options.name && this.showAttached) {
           this.anim.playSegments([37, 41], true);
@@ -99,7 +100,7 @@ export default {
         }
       }
     },
-    currentMouseupComponent(val) {
+    currentMouseupComponent(val: string) {
       setTimeout(() => {
         if (this.currentMousedownComponent !== 'notification-bubble' && val !== '') {
           if (this.lastDragging || (this.currentMousedownComponent === this.$options.name &&
@@ -121,7 +122,7 @@ export default {
       clearMousedown: InputActions.MOUSEDOWN_UPDATE,
       clearMouseup: InputActions.MOUSEUP_UPDATE,
     }),
-    handleAnimation(anim) {
+    handleAnimation(anim: any) {
       this.anim = anim;
     },
     handleDown() {

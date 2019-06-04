@@ -1,4 +1,3 @@
-
 /** 计算文本宽度
  * @description
  * @param {string} fontSize
@@ -7,8 +6,8 @@
  * @returns {number}
  */
 export function getTextWidth(fontSize: string, fontFamily: string, text: string): number {
-  const span = document.createElement('span');
-  let result = span.offsetWidth;
+  const span: HTMLElement = document.createElement('span');
+  let result: number = span.offsetWidth;
   span.style.visibility = 'hidden';
   span.style.fontSize = fontSize;
   span.style.fontFamily = fontFamily;

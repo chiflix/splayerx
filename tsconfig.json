@@ -17,6 +17,7 @@
     "emitDecoratorMetadata": true,
     "newLine": "LF",
     "baseUrl": "./src",
+    "resolveJsonModule": true,
     "paths": {
       "electron": ["../node_modules/@chiflix/electron"],
       "grpc": ["../node_modules/@grpc/grpc-js"],
