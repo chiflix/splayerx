@@ -134,6 +134,13 @@ export class DataDb {
     } catch (err) { throw err; }
   }
 
+  async clear(storeName) {
+    const db = await this.getOwnDb();
+    const tx = db.transaction(storeName, 'readwrite');
+    tx.store.clear();
+    return tx.done;
+  }
+
   async delete(objectStoreName, keyPathVal) {
     const db = await this.getOwnDb();
     const { objectStoreNames } = db;

@@ -38,7 +38,7 @@ export class InfoDB {
       );
     return this.db;
   }
-
+  // deprecated! will be deleted soon
   // clean All records in `storeName`, default to 'recent-played'
   async cleanData(storeName = 'recent-played') {
     const db = await this.getDB();
@@ -47,6 +47,13 @@ export class InfoDB {
     return tx.done.then(() => {
       addLog.methods.addLog('info', `DB ${storeName} records all deleted`);
     });
+  }
+  // formatted, equal to the previous method
+  async clear(storeName: string) {
+    const db = await this.getDB();
+    const tx = db.transaction(storeName, 'readwrite');
+    tx.store.clear();
+    return tx.done;
   }
 
   async clearAll() {
@@ -77,9 +84,7 @@ export class InfoDB {
     const tx = db.transaction(schema, 'readwrite');
     // check if the objectStore used out-of-line key
     const isInlineObjectStore = !!tx.objectStore(schema).keyPath;
-    if (isInlineObjectStore && keyPath) {
-      throw new Error('Providing an inline objectStore with keyPathVal is invalid.');
-    } else if (!isInlineObjectStore && !keyPath) {
+    if (!keyPath) {
       throw new Error('Providing out-of-line objectStore without keyPathVal is invalid.');
     }
     addLog.methods.addLog('info', `Updating ${keyPath} to ${schema}`);

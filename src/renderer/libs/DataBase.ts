@@ -26,17 +26,24 @@ export default class DataBase implements IDB {
     }
     return this.db.add(schema, data);
   }
-  async update(database: string, schema: string, key: number, data: PlaylistItem | MediaItem | SubtitleItem): Promise<null> {
+  async update(database: string, schema: string, key: number, data: PlaylistItem | MediaItem | SubtitleItem): Promise<number> {
     if (database !== this.currentDB) {
       await this.getDB(database);
     }
+    if (!key) throw new Error('KeyPath requied!');
     return this.db.update(schema, data, key);
   }
-  async delete(database: string, schema: string, key: number): Promise<null> {
+  async delete(database: string, schema: string, key: number): Promise<undefined> {
     if (database !== this.currentDB) {
       await this.getDB(database);
     }
     return this.db.delete(schema, key);
+  }
+  async clear(database: string, schema: string): Promise<undefined> {
+    if (database !== this.currentDB) {
+      await this.getDB(database);
+    } 
+    return this.db.clear(schema);
   }
   async getAll(database: string, schema: string, keyRange?: IDBKeyRange): Promise<PlaylistItem[] | MediaItem[] | SubtitleItem[]> {
     if (database !== this.currentDB) {
