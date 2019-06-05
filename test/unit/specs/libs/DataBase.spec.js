@@ -3,7 +3,7 @@ import DataBase from '@/libs/DataBase';
 import { InfoDB } from '@/helpers/infoDB';
 import { DataDb } from '@/helpers/dataDb';
 
-describe.only('DataBase', () => {
+describe('DataBase', () => {
   const database = new DataBase();
   const playlistItemData1 = {
     items: [4],
