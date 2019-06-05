@@ -133,7 +133,7 @@ import { Input as InputActions, Subtitle as subtitleActions } from '@/store/acti
 import RecentPlaylistItem from '@/components/PlayingView/RecentPlaylistItem.vue';
 import Add from '@/components/PlayingView/Add.vue';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
-import { recentPlaylistService } from '@/services/media/RecentPlayService';
+import { recentPlayService } from '@/services/media/RecentPlayService';
 
 export default {
   name: 'RecentPlaylist',
@@ -190,7 +190,7 @@ export default {
         playedIndex: this.playingIndex,
       }, playlist.id);
     });
-    recentPlaylistService.generatePlaylistCovers(this.playingList);
+    recentPlayService.generatePlaylistCovers(this.playingList);
     this.hoverIndex = this.playingIndex;
 
     this.indexOfMovingItem = this.playingList.length;
