@@ -135,7 +135,7 @@ export default {
     },
   },
   watch: {
-    tracks(val: any) {
+    tracks(val: Array<any>) {
       val.forEach((item: any, index: number) => {
         if (Number(item.id) === this.currentTrackId) {
           this.moveLength = index * 32;
