@@ -194,7 +194,7 @@ export default {
     this.hoverIndex = this.playingIndex;
 
     this.indexOfMovingItem = this.playingList.length;
-    this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
+    this.filename = this.pathBaseName(this.originSrc);
   },
   methods: {
     ...mapMutations({
@@ -210,6 +210,9 @@ export default {
     },
     sizeAdaption(size) {
       return this.winWidth > 1355 ? `${(this.winWidth / 1355) * size}px` : `${size}px`;
+    },
+    pathBaseName(src) {
+      return path.basename(src, path.extname(src));
     },
     handleMouseup() {
       if (this.isDragging) {
@@ -345,7 +348,7 @@ export default {
         this.$store.dispatch('RemoveItemFromPlayingList', this.playingList[index]);
         if (this.isFolderList) this.setPlayList();
         this.hoverIndex = this.playingIndex;
-        this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
+        this.filename = this.pathBaseName(this.originSrc);
         this.canRemove = false;
       } else if (this.movingOffset !== 0
         && Math.abs(this.movementY) < this.thumbnailHeight) {
@@ -407,21 +410,18 @@ export default {
       this.$emit('can-hover-item');
       this.hoverIndex = index;
       this.hoveredMediaInfo = media;
-      this.filename = path.basename(
-        media.path,
-        path.extname(media.path),
-      );
+      this.filename = this.pathBaseName(media.path);
     },
     onItemMouseout() {
       this.hoverIndex = this.playingIndex;
-      this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
+      this.filename = this.pathBaseName(this.originSrc);
     },
   },
   watch: {
     originSrc() {
       this.updateSubToTop(this.displayState);
       this.hoverIndex = this.playingIndex;
-      this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
+      this.filename = this.pathBaseName(this.originSrc);
     },
     playingList(val) {
       this.indexOfMovingItem = val.length;

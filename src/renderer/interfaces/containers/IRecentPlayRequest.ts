@@ -40,5 +40,6 @@ export interface IRecentPlayRequest {
    * @returns Promise 生成播放列表封面
    */
   generatePlaylistCovers(playlist: string[]): Promise<RecentPlayInfo[]>
-  setPlaylist(): void
+
+  setPlaylist(): Promise<void>
 }
