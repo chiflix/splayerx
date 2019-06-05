@@ -139,7 +139,7 @@ export default {
     let index = this.playlist.playedIndex;
     if (index > this.playlist.items.length - 1 || index < 0) {
       index = 0;
-      this.$infoDB.update('recent-played', {
+      this.infoDB.update('recent-played', {
         ...this.playlist,
         playedIndex: index,
       });
