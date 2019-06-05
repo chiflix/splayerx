@@ -18,7 +18,7 @@ async function getVideoInfoFromVideoSrc(videoSrc) {
 }
 async function setVideoInfo(infoPayload) {
   if (infoPayload.videoId) {
-    return infoDB.update('media-item', infoPayload);
+    return infoDB.update('media-item', infoPayload, infoPayload.videoId);
   }
   return infoDB.add('media-item', infoPayload);
 }

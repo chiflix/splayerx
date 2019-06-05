@@ -260,7 +260,7 @@ export default {
           paths: addFiles,
           ids: addIds,
         });
-        this.infoDB.update('recent-played', playlist);
+        this.infoDB.update('recent-played', playlist, playlist.id);
         this.$store.dispatch('PlayingList', { id: playlist.id });
       } else {
         this.addLog('error', {
@@ -358,7 +358,7 @@ export default {
     // open an existed play list
     async openPlayList(id) {
       const playlist = await this.infoDB.get('recent-played', id);
-      await this.infoDB.update('recent-played', { ...playlist, lastOpened: Date.now() });
+      await this.infoDB.update('recent-played', { ...playlist, lastOpened: Date.now() }, playlist.id);
       if (playlist.items.length > 1) {
         let currentVideo = await this.infoDB.get('media-item', playlist.items[playlist.playedIndex]);
 
@@ -379,7 +379,7 @@ export default {
           });
           if (playlist.items.length > 0) {
             playlist.playedIndex = 0;
-            await this.infoDB.update('recent-played', playlist);
+            await this.infoDB.update('recent-played', playlist, playlist.id);
             currentVideo = await this.infoDB.get('media-item', playlist.items[0]);
             addBubble(FILE_NON_EXIST_IN_PLAYLIST, this.$i18n);
           } else {

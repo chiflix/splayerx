@@ -142,7 +142,7 @@ export default {
       this.infoDB.update('recent-played', {
         ...this.playlist,
         playedIndex: index,
-      });
+      }, this.playlist.id);
     }
     this.infoDB.get('media-item', this.playlist.items[index]).then((data) => {
       this.coverVideo = data;

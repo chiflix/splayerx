@@ -188,7 +188,7 @@ export default {
         ...playlist,
         items: this.items,
         playedIndex: this.playingIndex,
-      });
+      }, playlist.id);
     });
     recentPlaylistService.generatePlaylistCovers(this.playingList);
     this.hoverIndex = this.playingIndex;
@@ -334,7 +334,7 @@ export default {
       }
       playlist.items = items;
       playlist.hpaths = hpaths;
-      this.infoDB.update('recent-played', playlist);
+      this.infoDB.update('recent-played', playlist, playlist.id);
       this.$store.dispatch('PlayingList', { id: playlist.id, paths: this.playingList, items: playlist.items });
     },
     onItemMouseup(index) { // eslint-disable-line complexity
