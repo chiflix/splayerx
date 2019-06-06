@@ -28,7 +28,7 @@ describe('DataBase', () => {
     lastPlayedTime: 5,
     duration: 10,
     source: '',
-  }; 
+  };
   const subtitleData1 = {
     format: 'a',
     language: 'b',
