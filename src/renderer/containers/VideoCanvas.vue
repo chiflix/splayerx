@@ -323,6 +323,7 @@ export default {
           .then(this.saveSubtitleStyle)
           .then(this.savePlaybackStates)
           .then(this.$store.dispatch('saveWinSize', this.isFullScreen ? { size: this.winSizeBeforeFullScreen, angle: this.winAngleBeforeFullScreen } : { size: this.winSize, angle: this.winAngle }))
+          .then(this.removeAllAudioTrack)
           .finally(() => {
             this.$store.dispatch('SRC_SET', { src: '', mediaHash: '', id: NaN });
             this.asyncTasksDone = true;

@@ -16,13 +16,26 @@
 export default {
   name: 'ThumbnailDisplay',
   props: {
-    thumbnailWidth: Number,
-    thumbnailHeight: Number,
-    src: String,
-    backgroundPosition: String,
-    backgroundSize: String,
-  },
-  methods: {
+    thumbnailWidth: {
+      type: Number,
+      required: true,
+    },
+    thumbnailHeight: {
+      type: Number,
+      required: true,
+    },
+    src: {
+      type: String,
+      required: true,
+    },
+    backgroundPosition: {
+      type: String,
+      required: true,
+    },
+    backgroundSize: {
+      type: String,
+      required: true,
+    },
   },
 };
 </script>

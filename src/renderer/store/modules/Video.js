@@ -53,7 +53,7 @@ const state = {
   intrinsicWidth: 0,
   intrinsicHeight: 0,
   ratio: 0,
-  AudioDelay: 0,
+  audioDelay: 0,
   defaultDir: '',
   snapshotSavedPath: '',
 };
@@ -85,7 +85,7 @@ const getters = {
   audioTrackList: state => state.audioTrackList,
   currentAudioTrackId: (state) => {
     const track = state.audioTrackList.filter(track => track.enabled)[0];
-    if (track && track.id) return track.id;
+    if (track && track.id) return Number(track.id);
     return -1;
   },
   // meta info
@@ -108,7 +108,7 @@ const getters = {
       getters.winWidth / (1 / getters.ratio) : getters.winHeight);
   },
   ratio: state => state.ratio,
-  AudioDelay: state => state.AudioDelay,
+  audioDelay: state => state.audioDelay,
   mediaHash: state => state.mediaHash,
   videoId: state => state.id,
   defaultDir: state => state.defaultDir,
