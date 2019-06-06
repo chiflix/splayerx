@@ -5,6 +5,7 @@ import { ipcRenderer } from 'electron';
 import store from '@/store/index';
 import { database } from '@/libs/DataBase'
 import { INFO_DATABASE_NAME } from '@/constants';
+import { PlaylistItem } from '@/interfaces/services/IDB';
 
 export type MediaInfo = {
   duration: number,
@@ -103,34 +104,36 @@ export default class RecentPlayService implements IRecentPlayRequest {
   }
 
   async setPlaylist(): Promise<void> {
-    const playlist = await database.getValueByKey(INFO_DATABASE_NAME, 'recent-played', getPlaylistId());
-    console.log(typeof playlist);
-    // const currentVideoId = playlist.items[0];
-    // const currentVideoHp = playlist.hpaths[0];
-    // const items = [];
-    // const hpaths = [];
-    // /* eslint-disable */
-    // for (const videoPath of this.playingList) {
-    //   if (videoPath !== getOriginSrc()) {
-    //     const quickHash = await this.mediaQuickHash(videoPath);
-    //     const data = {
-    //       quickHash,
-    //       type: 'video',
-    //       path: videoPath,
-    //       source: 'playlist',
-    //     };
-    //     const videoId = await this.infoDB.add('media-item', data);
-    //     items.push(videoId);
-    //     hpaths.push(`${quickHash}-${videoPath}`);
-    //   } else {
-    //     items.push(currentVideoId);
-    //     hpaths.push(currentVideoHp);
-    //   }
-    // }
-    // playlist.items = items;
-    // playlist.hpaths = hpaths;
-    // this.infoDB.update('recent-played', playlist, playlist.id);
-    // this.store.dispatch('PlayingList', { id: playlist.id, paths: this.playingList, items: playlist.items });
+    const playListId = getPlaylistId();
+    console.log(playListId);
+    const result = await database.getValueByKey(INFO_DATABASE_NAME, 'recent-played', playListId);
+    const playlist = result as PlaylistItem;
+    const currentVideoId = playlist.items[0];
+    const currentVideoHp = playlist.hpaths[0];
+    const items = [];
+    const hpaths = [];
+    /* eslint-disable */
+    for (const videoPath of this.playingList) {
+      if (videoPath !== getOriginSrc()) {
+        const quickHash = await this.mediaQuickHash(videoPath);
+        const data = {
+          quickHash,
+          type: 'video',
+          path: videoPath,
+          source: 'playlist',
+        };
+        const videoId = await this.infoDB.add('media-item', data);
+        items.push(videoId);
+        hpaths.push(`${quickHash}-${videoPath}`);
+      } else {
+        items.push(currentVideoId);
+        hpaths.push(currentVideoHp);
+      }
+    }
+    playlist.items = items;
+    playlist.hpaths = hpaths;
+    this.infoDB.update('recent-played', playlist, playlist.id);
+    this.store.dispatch('PlayingList', { id: playlist.id, paths: this.playingList, items: playlist.items });
   }
 }
 
