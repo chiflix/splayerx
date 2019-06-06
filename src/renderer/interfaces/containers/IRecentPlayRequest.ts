@@ -41,5 +41,5 @@ export interface IRecentPlayRequest {
    */
   generatePlaylistCovers(playlist: string[]): Promise<RecentPlayInfo[]>
 
-  setPlaylist(): Promise<void>
+  setPlaylist(playlsitId: number, paths: string[]): Promise<void>
 }

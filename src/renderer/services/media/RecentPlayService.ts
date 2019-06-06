@@ -103,17 +103,15 @@ export default class RecentPlayService implements IRecentPlayRequest {
     return {};
   }
 
-  async setPlaylist(): Promise<void> {
-    const playListId = getPlaylistId();
-    console.log(playListId);
-    const result = await database.getValueByKey(INFO_DATABASE_NAME, 'recent-played', playListId);
+  async setPlaylist(playlistId: number, paths: string[]): Promise<void> {
+    const result = await database.getValueByKey(INFO_DATABASE_NAME, 'recent-played', playlistId);
     const playlist = result as PlaylistItem;
     const currentVideoId = playlist.items[0];
     const currentVideoHp = playlist.hpaths[0];
     const items = [];
     const hpaths = [];
     /* eslint-disable */
-    for (const videoPath of this.playingList) {
+    for (const videoPath of paths) {
       if (videoPath !== getOriginSrc()) {
         const quickHash = await this.mediaQuickHash(videoPath);
         const data = {
