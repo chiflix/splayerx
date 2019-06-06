@@ -65,14 +65,14 @@ describe('class DataDb unit tests', () => {
         createIndex: createIndexStub,
         deleteIndex: deleteIndexStub,
       });
-      openDbStub = (dbName, version, upgradeCallback) => {
-        upgradeCallback({
+      openDbStub = (dbName, version, { upgrade }) => {
+        upgrade({
           objectStoreNames: new DOMStringListStub(['testObjectStore']),
           createObjectStore: createObjectStoreStub,
           transaction: { objectStore: objectStoreStub },
         });
       };
-      dataDbRewireAPI.__Rewire__('openDb', openDbStub);
+      dataDbRewireAPI.__Rewire__('openDB', openDbStub);
     });
     describe('getDb schema unit tests', () => {
       it('should getDb create objectStore when not exist', (done) => {
@@ -270,7 +270,7 @@ describe('class DataDb unit tests', () => {
         .then(() => done('Should reject but it resolves.'));
     });
   });
-  describe('method - put unit tests', () => {
+  describe('method - update unit tests', () => {
     const testObjectStoreName = 'testObjectStore';
     const errorCompleteParam = 'errorComplete';
     const testData = { test: testObjectStoreName };
@@ -299,8 +299,8 @@ describe('class DataDb unit tests', () => {
       });
     });
 
-    it('should invoke proper params when put', (done) => {
-      testDataDb.put(testObjectStoreName, testData, testKeyPathVal)
+    it('should invoke proper params when update', (done) => {
+      testDataDb.update(testObjectStoreName, testData, testKeyPathVal)
         .then(() => {
           sandbox.assert.calledWithExactly(putStub, testData, testKeyPathVal);
           sandbox.assert.calledWithExactly(objectStoreStub, testObjectStoreName);
@@ -309,33 +309,33 @@ describe('class DataDb unit tests', () => {
         }).catch(done);
     });
     it('should throw error when non-existent objectStoreName provided', (done) => {
-      testDataDb.put(testObjectStoreName.slice(1), testData, testKeyPathVal)
+      testDataDb.update(testObjectStoreName.slice(1), testData, testKeyPathVal)
         .catch(() => done())
         .then(done);
     });
     it('should throw error when not providing out-of-line key objectStore with keyPathVal', (done) => {
-      testDataDb.put(testObjectStoreName, testData)
+      testDataDb.update(testObjectStoreName, testData)
         .catch(() => done())
         .then(() => done('Should reject but it resolves'));
     });
     it('should throw error when providing in-line key objectStore with keyPathVal', (done) => {
       objectStoreStub.returns({ put: putStub, keyPath: randStr() });
-      testDataDb.put(testObjectStoreName, testData, testKeyPathVal)
+      testDataDb.update(testObjectStoreName, testData, testKeyPathVal)
         .catch(() => done())
         .then(() => done('Should reject but it resolves'));
     });
-    it('should resolve new key when put succeeded', (done) => {
+    it('should resolve new key when update succeeded', (done) => {
       const newKey = 233;
       putStub.resolves(newKey);
-      testDataDb.put(testObjectStoreName, testData, testKeyPathVal)
+      testDataDb.update(testObjectStoreName, testData, testKeyPathVal)
         .then((key) => {
           expect(key).to.equal(newKey);
           done();
         }).catch(done);
     });
-    it('should reject when put failed', (done) => {
+    it('should reject when update failed', (done) => {
       putStub.rejects();
-      testDataDb.put(testObjectStoreName, testData, testKeyPathVal)
+      testDataDb.update(testObjectStoreName, testData, testKeyPathVal)
         .catch(() => done())
         .then(() => done('Should reject but it resolves.'));
     });

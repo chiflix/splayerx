@@ -374,7 +374,7 @@ export default {
 
       const val = await this.infoDB.get('media-item', videoId);
       if (val) {
-        await this.infoDB.update('media-item', { ...val, ...data });
+        await this.infoDB.update('media-item', { ...val, ...data }, videoId);
         this.$bus.$emit('database-saved');
       }
       const playlist = await this.infoDB.get('recent-played', this.playListId);
@@ -383,7 +383,7 @@ export default {
         items: this.isFolderList ? [videoId] : this.items,
         playedIndex: this.isFolderList ? 0 : this.playingIndex,
         lastOpened: Date.now(),
-      });
+      }, playlist.id);
     },
     saveSubtitleStyle() {
       return asyncStorage.set('subtitle-style', { chosenStyle: this.chosenStyle, chosenSize: this.subToTop ? this.lastChosenSize : this.chosenSize, enabledSecondarySub: this.enabledSecondarySub });
