@@ -20,55 +20,55 @@ export default class DataBase implements IDB {
       throw new Error(`Wrong Database Name: ${database}`);
     }
   }
-  async add(database: string, schema: string, data: RawMediaItem | RawPlaylistItem | SubtitleItem): Promise<number> {
+  async add(database: string, objectStore: string, data: RawMediaItem | RawPlaylistItem | SubtitleItem): Promise<number> {
     if (database !== this.currentDB) {
       await this.getDB(database);
     }
-    return this.db.add(schema, data);
+    return this.db.add(objectStore, data);
   }
-  async update(database: string, schema: string, key: number, data: PlaylistItem | MediaItem | SubtitleItem): Promise<number> {
+  async update(database: string, objectStore: string, key: number, data: PlaylistItem | MediaItem | SubtitleItem): Promise<number> {
     if (database !== this.currentDB) {
       await this.getDB(database);
     }
     if (!key) throw new Error('KeyPath requied!');
-    return this.db.update(schema, data, key);
+    return this.db.update(objectStore, data, key);
   }
-  async delete(database: string, schema: string, key: number): Promise<undefined> {
+  async delete(database: string, objectStore: string, key: number): Promise<undefined> {
     if (database !== this.currentDB) {
       await this.getDB(database);
     }
-    return this.db.delete(schema, key);
+    return this.db.delete(objectStore, key);
   }
-  async clear(database: string, schema: string): Promise<undefined> {
+  async clear(database: string, objectStore: string): Promise<undefined> {
     if (database !== this.currentDB) {
       await this.getDB(database);
     } 
-    return this.db.clear(schema);
+    return this.db.clear(objectStore);
   }
-  async getAll(database: string, schema: string, keyRange?: IDBKeyRange): Promise<PlaylistItem[] | MediaItem[] | SubtitleItem[]> {
+  async getAll(database: string, objectStore: string, keyRange?: IDBKeyRange): Promise<PlaylistItem[] | MediaItem[] | SubtitleItem[]> {
     if (database !== this.currentDB) {
       await this.getDB(database);
     }
-    if (keyRange) return this.db.getAll(schema, keyRange);
-    return this.db.getAll(schema, undefined);
+    if (keyRange) return this.db.getAll(objectStore, keyRange);
+    return this.db.getAll(objectStore, undefined);
   }
-  async getValueByKey(database: string, schema: string, key: number): Promise<PlaylistItem | MediaItem | SubtitleItem | undefined> {
+  async getValueByKey(database: string, objectStore: string, key: number): Promise<PlaylistItem | MediaItem | SubtitleItem | undefined> {
     if (database !== this.currentDB) {
       await this.getDB(database);
     }
-    return this.db.get(schema, key);
+    return this.db.get(objectStore, key);
   }
-  async getValueByIndex(database: string, schema: string, index: string, value: string | number): Promise<PlaylistItem | MediaItem | SubtitleItem | undefined> {
+  async getValueByIndex(database: string, objectStore: string, index: string, value: string | number): Promise<PlaylistItem | MediaItem | SubtitleItem | undefined> {
     if (database !== this.currentDB) {
       await this.getDB(database);
     }
-    return this.db.get(schema, index, value);
+    return this.db.get(objectStore, index, value);
   }
-  async getAllValueByIndex(database: string, schema: string, index: string, value: string | number): Promise<PlaylistItem[] | MediaItem[] | SubtitleItem[]> {
+  async getAllValueByIndex(database: string, objectStore: string, index: string, value: string | number): Promise<PlaylistItem[] | MediaItem[] | SubtitleItem[]> {
     if (database !== this.currentDB) {
       await this.getDB(database);
     }
-    return this.db.getAllValueByIndex(schema, index, value);
+    return this.db.getAllValueByIndex(objectStore, index, value);
   }
 }
 
