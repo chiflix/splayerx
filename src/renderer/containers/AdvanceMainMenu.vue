@@ -20,85 +20,57 @@
       <div
         v-show="readyShow === 'mainMenu'"
         class="mainItems"
-        :style="{
-          bottom: readyShow === 'mainMenu' ? '' : '0px',
-        }"
       >
-        <div
-          class="playSpeed"
-          :style="{
-            height: speedHeight,
-            transition: 'height 100ms linear',
-          }"
-          @click.left="handleClick"
-          @mouseenter="handleMouseenter(1)"
-          @mouseleave="handleMouseleave()"
-        >
-          <transition name="arrow">
-            <div
-              v-show="!speedChosen && hoverIndex === 1"
-              class="hoverBack"
-              :style="{ height: speedHeight }"
-            />
-          </transition>
-          <advance-row-items
-            :card-width="cardWidth > minInfoCardWidth ? cardWidth : minInfoCardWidth"
-            :chosen-size-content="ChosenSizeContent"
-            :is-rate-menu="true"
-            :lists="numList"
-            :item="$t('advance.rateTitle')"
-            :size="computedSize"
-            :is-chosen="speedChosen"
-            :color="hoverIndex === 1 && !speedChosen ?
-              'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"
-          />
-        </div>
+        <advance-row-items
+          :lists="numList"
+          :card-width="cardWidth > minInfoCardWidth ? cardWidth : minInfoCardWidth"
+          :rate="rate"
+          row-type="rate"
+          :size="computedSize"
+          :handle-row-click="changeRate"
+          :is-chosen="speedChosen"
+          @click.left.native="handleClick"
+        />
         <div
           class="subtitleControl"
-          @mouseenter="handleMouseenter(2)"
+          :style="{
+            cursor: 'pointer',
+            backgroundImage: hoverIndex === 1 ?
+              'linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.045) 20%, ' +
+              'rgba(255,255,255,0.00) 78%, rgba(255,255,255,0.00) 100%)' : '',
+            transition: 'opacity 200ms',
+          }"
+          @mouseenter="handleMouseenter(1)"
           @mouseleave="handleMouseleave()"
           @click.left="handleSubClick"
         >
-          <transition name="arrow">
-            <div
-              v-show="hoverIndex === 2"
-              class="hoverSubBack"
-            />
-          </transition>
           <div
-            class="subContainer"
-            :style="{ cursor: 'pointer'}"
+            class="item2"
+            :style="{
+              color: hoverIndex === 1 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+              transition: 'color 300ms',
+            }"
           >
-            <div
-              class="item2"
-              :style="{
-                color: hoverIndex === 2 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
-                transition: 'color 300ms',
-              }"
-            >
-              <div class="subSettings">
-                {{ this.$t('advance.subMenu') }}
-              </div>
-              <transition name="arrow">
-                <Icon
-                  v-show="hoverIndex === 2"
-                  class="arrowRight"
-                  type="rightArrow"
-                />
-              </transition>
-            </div>
+            <p>{{ this.$t('advance.subMenu') }}</p>
+            <transition name="arrow">
+              <Icon
+                v-show="hoverIndex === 1"
+                class="arrowRight"
+                type="rightArrow"
+              />
+            </transition>
           </div>
         </div>
         <div
           class="audioItems"
           :style="{ cursor: 'pointer' }"
-          @mouseenter="handleMouseenter(3)"
+          @mouseenter="handleMouseenter(2)"
           @mouseleave="handleMouseleave()"
           @click.left="handleAudioClick"
         >
           <transition name="arrow">
             <div
-              v-show="hoverIndex === 3"
+              v-show="hoverIndex === 2"
               class="hoverAudioBack"
             />
           </transition>
@@ -106,16 +78,14 @@
             <div
               class="item3"
               :style="{
-                color: hoverIndex === 3 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+                color: hoverIndex === 2 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
                 transition: 'color 300ms',
               }"
             >
-              <div class="audioSettings">
-                {{ this.$t('advance.audioMenu') }}
-              </div>
+              <p>{{ this.$t('advance.audioMenu') }}</p>
               <transition name="arrow">
                 <Icon
-                  v-show="hoverIndex === 3"
+                  v-show="hoverIndex === 2"
                   class="arrowRight"
                   type="rightArrow"
                 />
@@ -130,9 +100,6 @@
       <div
         v-show="readyShow === 'subMenu'"
         class="mainItems1"
-        :style="{
-          bottom: readyShow === 'subMenu' ? '' : '0px',
-        }"
       >
         <div
           class="topContainer"
@@ -142,97 +109,42 @@
         >
           <div class="topContent">
             <Icon :type="backSubHover ? 'leftArrowHover' : 'leftArrow'" />
-            <div
-              class="text"
+            <p
               :style="{
                 color: backSubHover ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.2)',
               }"
             >
               {{ this.$t('advance.subMenu') }}
-            </div>
+            </p>
           </div>
         </div>
-        <div
-          class="itemSize"
-          :style="{
-            height: subSizeHeight,
-            transition: 'height 100ms linear',
-          }"
-          @click.left="handleSizeClick"
-          @mouseenter="handleSubMouseenter(1)"
-          @mouseleave="handleSubMouseleave()"
-        >
-          <transition name="arrow">
-            <div
-              v-show="!subSizeChosen && hoverSubIndex === 1"
-              class="hoverBack"
-              :style="{ height: subSizeHeight }"
-            />
-          </transition>
-          <advance-row-items
-            :card-width="cardWidth > minInfoCardWidth ? cardWidth : minInfoCardWidth"
-            :chosen-size-content="ChosenSizeContent"
-            :is-rate-menu="false"
-            :lists="$t('advance.fontItems')"
-            :item="$t('advance.fontSize')"
-            :size="computedSize"
-            :is-chosen="subSizeChosen"
-            :color="hoverSubIndex === 1 && !subSizeChosen ?
-              'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"
-          />
-        </div>
-        <div
-          class="subtitleStyle"
-          :style="{
-            height: subColorHeight,
-            transition: 'height 100ms linear',
-          }"
-          @click.left="handleColorClick"
-          @mouseenter="handleSubMouseenter(2)"
-          @mouseleave="handleSubMouseleave()"
-        >
-          <transition name="arrow">
-            <div
-              v-show="!subColorChosen && hoverSubIndex === 2"
-              class="hoverBack"
-              :style="{ height: subColorHeight }"
-            />
-          </transition>
-          <advance-color-items
-            :item="$t('advance.fontStyle')"
-            :size="computedSize"
-            :is-chosen="subColorChosen"
-            :color="hoverSubIndex === 2 && !subColorChosen ?
-              'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"
-          />
-        </div>
-        <div
-          class="subtitleDelay"
-          :style="{
-            height: subDelayHeight,
-            transition: 'height 100ms linear',
-          }"
-          @click.left="handleDelayClick"
-          @mouseenter="handleSubMouseenter(3)"
-          @mouseleave="handleSubMouseleave()"
-        >
-          <transition name="arrow">
-            <div
-              v-show="!subDelayChosen && hoverSubIndex === 3 && isSubtitleAvailable"
-              class="hoverBack"
-              :style="{ height: subDelayHeight }"
-            />
-          </transition>
-          <advance-selected-items
-            :is-subtitle-available="isSubtitleAvailable"
-            :is-sub-delay="true"
-            :item="$t('advance.subDelay')"
-            :size="computedSize"
-            :is-chosen="subDelayChosen"
-            :color="hoverSubIndex === 3 && !subDelayChosen ?
-              'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"
-          />
-        </div>
+        <advance-row-items
+          :card-width="cardWidth > minInfoCardWidth ? cardWidth : minInfoCardWidth"
+          :chosen-size-content="ChosenSizeContent"
+          row-type="fontSize"
+          :lists="$t('advance.fontItems')"
+          :size="computedSize"
+          :handle-row-click="updateSubSize"
+          :chosen-size="chosenSize"
+          :is-chosen="subSizeChosen"
+          @click.left.native="handleSizeClick"
+        />
+        <advance-color-items
+          :size="computedSize"
+          :is-chosen="subColorChosen"
+          :change-style="changeStyle"
+          :stored-style="chosenStyle"
+          @click.left.native="handleColorClick"
+        />
+        <advance-selected-items
+          :is-subtitle-available="isSubtitleAvailable"
+          selected-type="subtitle"
+          :handle-select-click="changeSubtitleDelay"
+          :size="computedSize"
+          :is-chosen="subDelayChosen"
+          :subtitle-delay="subtitleDelay"
+          @click.left.native="handleDelayClick"
+        />
       </div>
     </transition>
 
@@ -240,9 +152,6 @@
       <div
         v-show="readyShow === 'audioMenu'"
         class="mainItems2"
-        :style="{
-          bottom: readyShow === 'audioMenu' ? '' : '0px',
-        }"
       >
         <div
           class="topContainer"
@@ -252,106 +161,49 @@
         >
           <div class="topContent">
             <Icon :type="backAudioHover ? 'leftArrowHover' : 'leftArrow'" />
-            <div
-              class="text"
+            <p
               :style="{
                 color: backAudioHover ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.2)',
               }"
             >
               {{ this.$t('advance.audioMenu') }}
-            </div>
+            </p>
           </div>
         </div>
-        <div
-          class="audioDelay"
-          :style="{
-            height: audioDelayHeight,
-            transition: 'height 100ms linear',
-          }"
-          @click.left="1"
-          @mouseenter="handleAudioMouseenter(1)"
-          @mouseleave="handleAudioMouseleave()"
-        >
-          <!--disable temporarily-->
-          <transition name="arrow">
-          <!--<div class="hoverBack" v-show="!showDelay && hoverAudioIndex === 1"
-          :style="{ height: audioDelayHeight }"></div>-->
-          </transition>
-          <advance-selected-items
-            :is-sub-delay="false"
-            :item="$t('advance.audioDelay')"
-            :size="computedSize"
-            :is-chosen="showDelay"
-            :color="hoverAudioIndex === 1 && !showDelay ?
-              'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.2)'"
-          />
-        </div>
-        <div
-          class="changeTrack"
-          :style="{
-            height: changeTrackHeight,
-            transition: 'height 100ms linear',
-          }"
-          @click.left="handleTrackClick"
-          @mouseenter="handleAudioMouseenter(2)"
-          @mouseleave="handleAudioMouseleave()"
-        >
-          <transition name="arrow">
-            <div
-              v-show="!showTrack && hoverAudioIndex === 2"
-              class="hoverBack"
-              :style="{ height: changeTrackHeight }"
-            />
-          </transition>
-          <div class="trackContainer">
-            <transition name="audioTransIn">
-              <div
-                v-show="!showTrack"
-                class="item2"
-                :style="{ cursor: 'pointer' }"
-              >
-                <div
-                  class="leftTrackTitle advanceNormalTitle"
-                  :style="{
-                    color: hoverAudioIndex === 2 ?
-                      'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
-                    transition: 'color 300ms',
-                  }"
-                >
-                  {{ this.$t('advance.changeTrack') }}
-                </div>
-                <div
-                  class="rightTrackItem advanceNormalItem"
-                  :style="{
-                    color: 'rgba(255, 255, 255, 0.6)',
-                  }"
-                >
-                  {{ currentAudioTrack }}
-                </div>
-              </div>
-            </transition>
-          </div>
-          <transition name="audioTransOut">
-            <advance-column-items
-              v-show="showTrack"
-              :item="$t('advance.changeTrack')"
-              :size="computedSize"
-            />
-          </transition>
-        </div>
+        <advance-selected-items
+          :size="computedSize"
+          selected-type="audio"
+          :handle-select-click="() => []"
+          :is-chosen="showDelay"
+          :audio-delay="audioDelay"
+          @click.left.native="1"
+        />
+        <advance-column-items
+          :size="computedSize"
+          :is-chosen="showTrack"
+          :current-track-name="currentAudioTrack"
+          :current-track-id="currentAudioTrackId"
+          :tracks="audioTrackList"
+          :switch-audio-track="switchAudioTrack"
+          @click.left.native="handleTrackClick"
+        />
       </div>
     </transition>
   </base-info-card>
 </template>
 
-<script>
-import { mapGetters } from 'vuex';
-import AdvanceRowItems from './AdvanceRowItems.vue';
-import BaseInfoCard from '../InfoCard.vue';
-import Icon from '../../BaseIconContainer.vue';
-import AdvanceColorItems from './AdvanceColorItems.vue';
-import AdvanceSelectedItemts from './AdvanceSelectItems.vue';
-import AdvanceColumnItems from './AdvanceColumnItems.vue';
+<script lang="ts">
+import { mapGetters, mapActions } from 'vuex';
+import { Subtitle as subtitleActions, Video as videoActions } from '@/store/actionTypes';
+import { getTextWidth } from '@/libs/utils';
+import AdvanceRowItems from '@/components/PlayingView/AdvanceControlFunctionalities/AdvanceRowItems.vue';
+// @ts-ignore
+import BaseInfoCard from '@/components/PlayingView/InfoCard.vue';
+// @ts-ignore
+import Icon from '@/components/BaseIconContainer.vue';
+import AdvanceColorItems from '@/components/PlayingView/AdvanceControlFunctionalities/AdvanceColorItems.vue';
+import AdvanceSelectedItemts from '@/components/PlayingView/AdvanceControlFunctionalities/AdvanceSelectItems.vue';
+import AdvanceColumnItems from '@/components/PlayingView/AdvanceControlFunctionalities/AdvanceColumnItems.vue';
 
 export default {
   name: 'AdvanceMainMenu',
@@ -380,7 +232,6 @@ export default {
       subSizeChosen: false,
       subColorChosen: false,
       subDelayChosen: false,
-      hoverSubIndex: -1,
       showDelay: false,
       showTrack: false,
       hoverAudioIndex: -1,
@@ -390,11 +241,9 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'currentFirstSubtitleId', 'winHeight', 'rate', 'chosenSize',
-      'subtitleDelay', 'displayLanguage', 'winRatio']),
-    /**
-     * @return {string}
-     */
+    ...mapGetters(['winWidth', 'currentFirstSubtitleId', 'winHeight', 'rate', 'chosenSize', 'subToTop',
+      'subtitleDelay', 'displayLanguage', 'winRatio', 'chosenStyle', 'audioTrackList', 'currentAudioTrackId',
+      'computedHeight', 'computedWidth', 'audioDelay', 'lastChosenSize']),
     ChosenSizeContent() {
       const compareContent = ['S', 'M', 'L', 'XL'];
       const enContent = ['Small', 'Normal', 'Large', 'Extra Large'];
@@ -432,76 +281,76 @@ export default {
     },
     maxTextLength() { // 不同菜单界面，一行文字加起来最大的长度
       if (this.readyShow === 'audioMenu') {
-        const firstLine = this.getTextWidth(
+        const firstLine = getTextWidth(
           `${this.textItemFontSize}px`,
           this.normalFont,
           this.leftTitleToShow[0],
-        ) + this.getTextWidth(
+        ) + getTextWidth(
           `${this.rightItemFontSize}px`,
           this.normalFont,
           '0 ms',
         );
-        const secondLine = this.getTextWidth(
+        const secondLine = getTextWidth(
           `${this.textItemFontSize}px`,
           this.normalFont,
           this.leftTitleToShow[1],
-        ) + this.getTextWidth(
+        ) + getTextWidth(
           `${this.rightItemFontSize}px`,
           this.normalFont,
           this.currentAudioTrack,
         );
-        const thirdLine = this.getTextWidth(
+        const thirdLine = getTextWidth(
           `${this.rightItemFontSize}px`,
           this.normalFont,
           this.leftTitleToShow[2],
         ) + this.rightItemFontSize;
         return Math.max(firstLine, secondLine, thirdLine);
       } else if (this.readyShow === 'subMenu') {
-        const firstLine = this.getTextWidth(
+        const firstLine = getTextWidth(
           `${this.textItemFontSize}px`,
           this.normalFont,
           this.leftTitleToShow[0],
-        ) + this.getTextWidth(
+        ) + getTextWidth(
           `${this.rightItemFontSize}px`,
           this.normalFont,
           this.ChosenSizeContent,
         );
-        const secondLine = this.getTextWidth(
+        const secondLine = getTextWidth(
           `${this.textItemFontSize}px`,
           this.normalFont,
           this.leftTitleToShow[1],
         ) + this.subStyleWidth;
-        const thirdLine = this.getTextWidth(
+        const thirdLine = getTextWidth(
           `${this.textItemFontSize}px`,
           this.normalFont,
           this.leftTitleToShow[2],
-        ) + this.getTextWidth(
+        ) + getTextWidth(
           `${this.rightItemFontSize}px`,
           this.normalFont,
           `${this.subtitleDelay / 1000} s`,
         );
-        const fourthLine = this.getTextWidth(
+        const fourthLine = getTextWidth(
           `${this.rightItemFontSize}px`,
           this.normalFont,
           this.leftTitleToShow[3],
         ) + this.rightItemFontSize;
         return Math.max(firstLine, secondLine, thirdLine, fourthLine);
       }
-      const firstLine = this.getTextWidth(
+      const firstLine = getTextWidth(
         `${this.textItemFontSize}px`,
         this.normalFont,
         this.leftTitleToShow[0],
-      ) + this.getTextWidth(
+      ) + getTextWidth(
         `${this.rightItemFontSize}px`,
         this.normalFont,
         `${this.rate} x`,
       );
-      const secondLine = this.getTextWidth(
+      const secondLine = getTextWidth(
         `${this.textItemFontSize}px`,
         this.normalFont,
         this.leftTitleToShow[1],
       ) + this.textItemFontSize;
-      const thirdLine = this.getTextWidth(
+      const thirdLine = getTextWidth(
         `${this.textItemFontSize}px`,
         this.normalFont,
         this.leftTitleToShow[2],
@@ -535,8 +384,12 @@ export default {
     computedSize() {
       return this.winRatio >= 1 ? this.winHeight : this.winWidth;
     },
+    computedVideoSize() {
+      return this.winRatio >= 1 ? this.computedHeight : this.computedWidth;
+    },
     currentAudioTrack() {
-      const track = this.$store.getters.audioTrackList.filter(track => track.enabled)[0];
+      const track: any = this.$store.getters.audioTrackList
+        .filter((track: any) => track.enabled)[0];
       if (track) {
         if (track.language === '' || track.language === 'und') {
           return `${
@@ -547,25 +400,6 @@ export default {
         return `${track.name}`;
       }
       return this.$t('advance.chosenTrack');
-    },
-    speedHeight() {
-      return this.speedChosen ? `${this.initialSize(74)}px` : `${this.initialSize(37)}px`;
-    },
-    subSizeHeight() {
-      return this.subSizeChosen ? `${this.initialSize(74)}px` : `${this.initialSize(37)}px`;
-    },
-    subColorHeight() {
-      return this.subColorChosen ? `${this.initialSize(74)}px` : `${this.initialSize(37)}px`;
-    },
-    subDelayHeight() {
-      return this.subDelayChosen ? `${this.initialSize(74)}px` : `${this.initialSize(37)}px`;
-    },
-    audioDelayHeight() {
-      return this.showDelay ? `${this.initialSize(74)}px` : `${this.initialSize(37)}px`;
-    },
-    changeTrackHeight() {
-      return this.showTrack ? `${this.initialSize(this.trackHeight)}px` :
-        `${this.initialSize(37)}px`;
     },
     menuCardHeight() {
       return this.speedChosen ? `${this.initialSize(164)}px` : `${this.initialSize(127)}px`;
@@ -594,29 +428,43 @@ export default {
       }
       return 230;
     },
-    trackHeight() {
-      if (this.trackNum <= 2) {
-        return (51 + (this.trackNum * 27)) + ((this.trackNum - 1) * 5);
-      }
-      return 142;
-    },
   },
   watch: {
+    subToTop(val: boolean) {
+      if (val) {
+        this.updateLastSubSize(this.chosenSize);
+        this.updateSubSize(0);
+      } else {
+        this.updateSubSize(this.lastChosenSize);
+      }
+    },
+    chosenSize(val: number) {
+      if (this.winRatio >= 1) {
+        this.updatePCVideoScaleByFactors(val);
+      } else if (this.winRatio < 1) {
+        this.updateMobileVideoScaleByFactors(val);
+      }
+    },
+    computedVideoSize(val: number) {
+      if (val >= 1080) {
+        this.updateVideoScaleByFactors(val);
+      } else if (this.winRatio >= 1) {
+        this.updatePCVideoScaleByFactors(this.chosenSize);
+      } else if (this.winRatio < 1) {
+        this.updateMobileVideoScaleByFactors(this.chosenSize);
+      }
+    },
     displayLanguage() {
       this.cardWidth = this.maxTextLength + (3 * this.subStyleWidth);
-      this.$bus.$emit('card-init-left');
     },
     readyShow() {
       this.cardWidth = this.maxTextLength + (3 * this.subStyleWidth);
-      this.$bus.$emit('card-init-left');
     },
     textItemFontSize() {
       this.cardWidth = this.maxTextLength + (3 * this.subStyleWidth);
-      this.$bus.$emit('card-init-left');
     },
-    clearState(val) {
+    clearState(val: boolean) {
       this.cardWidth = this.maxTextLength + (3 * this.subStyleWidth);
-      this.$bus.$emit('card-init-left');
       if (!val) {
         setTimeout(() => {
           this.readyShow = 'mainMenu';
@@ -629,14 +477,56 @@ export default {
         }, 150);
       }
     },
-    trackNum(val) {
+    trackNum(val: number) {
       if (val < 1) {
         this.showTrack = false;
       }
     },
   },
+  mounted() {
+    this.$bus.$on('switch-audio-track', (index: number) => {
+      this.switchAudioTrack(this.audioTrackList[index]);
+    });
+    this.$bus.$on('change-size-by-menu', (index: number) => {
+      this.updateSubSize(index);
+    });
+  },
   methods: {
-    initialSize(size) {
+    ...mapActions({
+      updateSubScale: subtitleActions.UPDATE_SUBTITLE_SCALE,
+      updateLastSubSize: subtitleActions.UPDATE_LAST_SUBTITLE_SIZE,
+      updateSubSize: subtitleActions.UPDATE_SUBTITLE_SIZE,
+      changeRate: videoActions.CHANGE_RATE,
+    }),
+    // update video scale that width is larger than height
+    updatePCVideoScaleByFactors(index: number) {
+      const firstFactors = [21, 29, 37, 45];
+      const secondFactors = [24, 26, 28, 30];
+      this.updateSubScale(`${(((firstFactors[index] / 900) * this.computedVideoSize) +
+        (secondFactors[index] / 5)) / 9}`);
+    },
+    // update video scale that height is larger than width
+    updateMobileVideoScaleByFactors(index: number) {
+      const firstFactors = [21, 29, 37, 45];
+      const secondFactors = [12, -92, -196, -300];
+      this.updateSubScale(`${(((firstFactors[index] / 760) * this.computedVideoSize) +
+        (secondFactors[index] / 76)) / 9}`);
+    },
+    // update video scale when width or height is larger than 1080
+    updateVideoScaleByFactors(val: number) {
+      const factors = [30, 40, 50, 60];
+      this.updateSubScale(`${((val / 1080) * factors[this.chosenSize]) / 9}`);
+    },
+    switchAudioTrack(track: any) {
+      this.$store.dispatch(videoActions.SWITCH_AUDIO_TRACK, track);
+    },
+    changeSubtitleDelay(num: number) {
+      this.$store.dispatch(subtitleActions.UPDATE_SUBTITLE_DELAY, num);
+    },
+    changeStyle(index: number) {
+      this.$store.dispatch(subtitleActions.UPDATE_SUBTITLE_STYLE, index);
+    },
+    initialSize(size: number) {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
         return size;
       } else if (this.computedSize >= 481 && this.computedSize < 1080) {
@@ -655,7 +545,7 @@ export default {
       this.readyShow = 'audioMenu';
       this.speedChosen = false;
     },
-    handleMouseenter(index) {
+    handleMouseenter(index: number) {
       this.hoverIndex = index;
     },
     handleMouseleave() {
@@ -673,27 +563,18 @@ export default {
     handleSubBackLeave() {
       this.backSubHover = false;
     },
-    handleSubMouseenter(index) {
-      this.hoverSubIndex = index;
-    },
-    handleSubMouseleave() {
-      this.hoverSubIndex = -1;
-    },
     handleSizeClick() {
-      this.hoverSubIndex = -1;
       this.subSizeChosen = true;
       this.subDelayChosen = false;
       this.subColorChosen = false;
     },
     handleColorClick() {
-      this.hoverSubIndex = -1;
       this.subColorChosen = true;
       this.subSizeChosen = false;
       this.subDelayChosen = false;
     },
     handleDelayClick() {
       if (this.isSubtitleAvailable) {
-        this.hoverSubIndex = -1;
         this.subDelayChosen = true;
         this.subSizeChosen = false;
         this.subColorChosen = false;
@@ -710,7 +591,7 @@ export default {
       this.showDelay = false;
       this.showTrack = false;
     },
-    handleAudioMouseenter(index) {
+    handleAudioMouseenter(index: number) {
       this.hoverAudioIndex = index;
     },
     handleAudioMouseleave() {
@@ -733,11 +614,7 @@ export default {
 <style lang="scss" scoped>
 @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
 screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
-  .playSpeed, .hoverBack {
-    width: 100%;
-  }
-  .subtitleControl, .audioItems, .topContainer, .itemSize, .subtitleStyle, .subtitleDelay,
-  .audioDelay, .hoverSubBack, .subContainer, .hoverAudioBack, .audioContainer, .trackContainer {
+  .subtitleControl, .audioItems, .topContainer, .hoverAudioBack, .audioContainer {
     width: 100%;
     height: 37px;
   }
@@ -745,10 +622,10 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480p
     font-size: 13px;
     width: 100%;
     height: 18px;
-    .subSettings, .audioSettings, .leftTrackTitle {
+    p {
       margin: auto auto auto 17px;
     }
-    .arrowRight, .rightTrackItem {
+    .arrowRight {
       margin: auto 17px auto auto;
     }
   }
@@ -756,11 +633,11 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480p
     width: auto;
     height: 12px;
     margin: auto 9px;
-  }
-  .text {
-    font-size: 11px;
-    line-height: 13px;
-    margin-left: 3px;
+    p {
+      font-size: 11px;
+      line-height: 13px;
+      margin-left: 3px;
+    }
   }
   .setUp-enter-active {
     animation: showP1 .2s;
@@ -784,11 +661,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480p
 }
 @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
 screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
-  .playSpeed, .hoverBack {
-    width: 100%
-  }
-  .subtitleControl, .audioItems, .topContainer, .itemSize, .subtitleStyle, .subtitleDelay,
-  .audioDelay, .hoverSubBack, .subContainer, .hoverAudioBack, .audioContainer, .trackContainer {
+  .subtitleControl, .audioItems, .topContainer, .hoverAudioBack, .audioContainer {
     width: 100%;
     height: 44.4px;
   }
@@ -796,10 +669,10 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080
     font-size: 15.6px;
     width: 100%;
     height: 22px;
-    .subSettings, .audioSettings, .leftTrackTitle {
+    p {
       margin: auto auto auto 20.4px;
     }
-    .arrowRight, .rightTrackItem {
+    .arrowRight {
       margin: auto 20.4px auto auto;
     }
   }
@@ -807,11 +680,11 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080
     width: auto;
     height: 14.4px;
     margin: auto 10.8px;
-  }
-  .text {
-    font-size: 13.2px;
-    line-height: 15.6px;
-    margin-left: 3.6px;
+    p {
+      font-size: 13.2px;
+      line-height: 15.6px;
+      margin-left: 3.6px;
+    }
   }
   .setUp-enter-active {
     animation: showP2 .2s;
@@ -834,11 +707,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080
 }
 @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
 screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
-  .playSpeed, .hoverBack {
-    width: 100%
-  }
-  .subtitleControl, .audioItems, .topContainer, .itemSize, .subtitleStyle, .subtitleDelay,
-  .audioDelay, .hoverSubBack, .subContainer, .hoverAudioBack, .audioContainer, .trackContainer {
+  .subtitleControl, .audioItems, .topContainer, .hoverAudioBack, .audioContainer {
     height: 62.16px;
     width: 100%;
   }
@@ -846,10 +715,10 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     font-size: 21.84px;
     width: 100%;
     height: 30px;
-    .subSettings, .audioSettings, .leftTrackTitle {
+    p {
       margin: auto auto auto 28.48px;
     }
-    .arrowRight, .rightTrackItem {
+    .arrowRight {
       margin: auto 28.48px auto auto;
     }
   }
@@ -857,11 +726,11 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     width: auto;
     height: 20.16px;
     margin: auto 15.12px;
-  }
-  .text {
-    font-size: 18.48px;
-    line-height: 21.84px;
-    margin-left: 5.04px;
+    p {
+      font-size: 18.48px;
+      line-height: 21.84px;
+      margin-left: 5.04px;
+    }
   }
   .setUp-enter-active {
     animation: showP3 .2s;
@@ -887,29 +756,13 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
 .card {
   -webkit-app-region: no-drag;
 }
-.hoverBack {
-  background-image: linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.045) 20%,
-    rgba(255,255,255,0.00) 78%, rgba(255,255,255,0.00) 100%);
-}
 .mainItems {
   display: flex;
   flex-direction: column;
   position: absolute;
   width: 100%;
-  .playSpeed {
-    display: flex;
-    margin-top: 8px;
-  }
   .subtitleControl {
     display: flex;
-    .hoverSubBack {
-      background-image: linear-gradient(90deg, rgba(255,255,255,0.00) 0%,
-        rgba(255,255,255,0.045) 20%, rgba(255,255,255,0.00) 78%, rgba(255,255,255,0.00) 100%);
-    }
-    .subContainer {
-      position: absolute;
-      display: flex;
-    }
     .item2 {
       margin: auto;
       display: flex;
@@ -939,13 +792,6 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   flex-direction: column;
   position: absolute;
   width: 100%;
-  .leftItem {
-    margin-top: 1px;
-    font-size: 13px;
-  }
-  .rightItem {
-    font-size: 11px;
-  }
   .topContainer {
     display: flex;
     cursor: pointer;
@@ -953,15 +799,6 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
       display: flex;
       justify-content: flex-start;
     }
-  }
-  .itemSize {
-    display: flex;
-  }
-  .subtitleStyle {
-    display: flex;
-  }
-  .subtitleDelay {
-    display: flex;
   }
 }
 
@@ -976,21 +813,6 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     .topContent {
       display: flex;
       justify-content: flex-start;
-    }
-  }
-  .trackContainer {
-    display: flex;
-    position: absolute;
-  }
-  .audioDelay {
-    display: flex;
-  }
-  .changeTrack {
-    display: flex;
-    .item2 {
-      display: flex;
-      justify-content: space-between;
-      margin: auto;
     }
   }
 }

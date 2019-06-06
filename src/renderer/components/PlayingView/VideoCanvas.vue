@@ -392,7 +392,6 @@ export default {
       return asyncStorage.set('playback-states', { volume: this.volume, muted: this.muted });
     },
     beforeUnloadHandler(e) {
-      this.removeAllAudioTrack();
       if (!this.asyncTasksDone && !this.needToRestore) {
         let savePromise = this.saveScreenshot(this.videoId);
         if (process.mas && this.$store.getters.source === 'drop') {
@@ -404,6 +403,7 @@ export default {
           .then(this.saveSubtitleStyle)
           .then(this.savePlaybackStates)
           .then(this.$store.dispatch('saveWinSize', this.isFullScreen ? { size: this.winSizeBeforeFullScreen, angle: this.winAngleBeforeFullScreen } : { size: this.winSize, angle: this.winAngle }))
+          .then(this.removeAllAudioTrack)
           .finally(() => {
             this.$store.dispatch('SRC_SET', { src: '', mediaHash: '', id: NaN });
             this.asyncTasksDone = true;

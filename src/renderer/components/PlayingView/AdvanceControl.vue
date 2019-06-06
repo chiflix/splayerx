@@ -10,12 +10,10 @@
               '150ms cubic-bezier(0.17, 0.67, 0.17, 0.98)'
           }"
         >
-          <transition name="setUp">
-            <advance-main-menu
-              class="mainMenu"
-              :clear-state="showAttached"
-            />
-          </transition>
+          <advance-main-menu
+            class="mainMenu"
+            :clear-state="showAttached"
+          />
         </div>
       </transition>
       <div
@@ -35,13 +33,14 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+//  @ts-ignore
 import lottie from '@/components/lottie.vue';
 import animationData from '@/assets/advance.json';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { Input as InputActions } from '@/store/actionTypes';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
-import AdvanceMainMenu from './AdvanceControlFunctionalities/AdvanceMainMenu.vue';
+import AdvanceMainMenu from '@/containers/AdvanceMainMenu.vue';
 
 export default {
   name: 'AdvanceControl',
@@ -81,7 +80,7 @@ export default {
     originSrc() {
       this.$emit('update:showAttached', false);
     },
-    showAttached(val) {
+    showAttached(val: boolean) {
       if (!val) {
         this.animFlag = true;
         if (!this.validEnter) {
@@ -93,7 +92,7 @@ export default {
         }
       }
     },
-    currentMousedownComponent(val) {
+    currentMousedownComponent(val: string) {
       if (val !== 'notification-bubble' && val !== '') {
         if (val !== this.$options.name && this.showAttached) {
           this.anim.playSegments([37, 41], true);
@@ -101,7 +100,7 @@ export default {
         }
       }
     },
-    currentMouseupComponent(val) {
+    currentMouseupComponent(val: string) {
       setTimeout(() => {
         if (this.currentMousedownComponent !== 'notification-bubble' && val !== '') {
           if (this.lastDragging || (this.currentMousedownComponent === this.$options.name &&
@@ -123,7 +122,7 @@ export default {
       clearMousedown: InputActions.MOUSEDOWN_UPDATE,
       clearMouseup: InputActions.MOUSEUP_UPDATE,
     }),
-    handleAnimation(anim) {
+    handleAnimation(anim: any) {
       this.anim = anim;
     },
     handleDown() {
@@ -201,21 +200,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-button {
-  border: none;
-}
-button:focus {
-  outline: none;
-}
-button:hover {
-  cursor: pointer;
-}
-.advance-trans-l-enter, .advance-trans-l-enter-active {
-  transform: translateY(0px);
-}
-.advance-trans-l-enter, .advance-trans-l-leave-active {
-  transform: translateY(20px);
-}
 .advanced {
   position: absolute;
   z-index: 100;
@@ -244,6 +228,9 @@ button:hover {
     right: 0;
     bottom: 0;
   }
+}
+.advance-trans-l-enter, .advance-trans-l-leave-active {
+  transform: translateY(20px);
 }
 .advance-trans-l-enter-active, .advance-trans-l-leave {
   opacity: 1;

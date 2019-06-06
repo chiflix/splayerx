@@ -7,24 +7,28 @@
         'linear-gradient(90deg, rgba(255,255,255,0.03) ' +
         '0%, rgba(255,255,255,0.07) 24%, rgba(255,255,255,0.03) 100%)',
     }"
+    @mouseenter="handleSubMouseEnter"
+    @mouseleave="handleSubMouseLeave"
   >
     <div
       class="detail"
       :style="{
-        height: heightSize,
+        backgroundImage: !isChosen && hoveredText ?
+          'linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.045) 20%, ' +
+          'rgba(255,255,255,0.00) 78%, rgba(255,255,255,0.00) 100%)' : '',
+        transition: 'opacity 200ms',
       }"
     >
       <div
         class="textContainer"
         :style="{
-          color: color,
+          color: !isChosen && hoveredText ?
+            'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
           transition: 'color 300ms',
           cursor: isChosen ? 'default' : 'pointer',
         }"
       >
-        <div class="textItem advanceNormalTitle">
-          {{ item }}
-        </div>
+        <p>{{ $t('advance.fontStyle') }}</p>
         <div
           v-show="!isChosen"
           class="rightItem"
@@ -44,12 +48,12 @@
               class="imgContainer"
             >
               <img
-                :src="img === chosenStyle || index === hoverIndex ? imgsSelected[index] : img"
+                :src="img === chosenStyle || index === hoverImgIndex ? imgsSelected[index] : img"
                 class="imgType"
                 :style="{ cursor: img === chosenStyle ? 'default' : 'pointer'}"
                 @mouseover="handleOver(index)"
                 @mouseout="handleOut"
-                @click.left="handleClick($event, index)"
+                @click.left="handleClick(index)"
               >
             </div>
           </div>
@@ -59,8 +63,7 @@
   </div>
 </template>
 
-<script>
-import { Subtitle as subtitleActions } from '@/store/actionTypes';
+<script lang="ts">
 import style0 from '../../../assets/subtitle-style1-normal.png';
 import style1 from '../../../assets/subtitle-style2-normal.png';
 import style2 from '../../../assets/subtitle-style3-normal.png';
@@ -75,30 +78,27 @@ import styleSelected4 from '../../../assets/subtitle-style5-selected.png';
 export default {
   name: 'AdvanceColorItems',
   props: {
-    item: {
-      type: String,
-      required: true,
-    },
-    height: {
+    isChosen: Boolean,
+    size: {
       type: Number,
       required: true,
     },
-    color: {
-      type: String,
+    changeStyle: {
+      type: Function,
       required: true,
     },
-    isChosen: Boolean,
-    size: {
+    storedStyle: {
       type: Number,
       required: true,
     },
   },
   data() {
     return {
-      hoverIndex: -1,
+      hoverImgIndex: -1,
       imgs: [style0, style1, style2, style3, style4],
       imgsSelected: [styleSelected0, styleSelected1, styleSelected2,
         styleSelected3, styleSelected4],
+      hoveredText: false,
     };
   },
   computed: {
@@ -111,21 +111,27 @@ export default {
       return this.isChosen ? `${74 * 1.2 * 1.4}px` : `${37 * 1.2 * 1.4}px`;
     },
     chosenStyle() {
-      if (this.$store.getters.chosenStyle) {
-        return this.imgs[this.$store.getters.chosenStyle];
+      if (this.storedStyle) {
+        return this.imgs[this.storedStyle];
       }
       return style0;
     },
   },
   methods: {
-    handleOver(index) {
-      this.hoverIndex = index;
+    handleSubMouseEnter() {
+      this.hoveredText = true;
+    },
+    handleSubMouseLeave() {
+      this.hoveredText = false;
+    },
+    handleOver(index: number) {
+      this.hoverImgIndex = index;
     },
     handleOut() {
-      this.hoverIndex = -1;
+      this.hoverImgIndex = -1;
     },
-    handleClick(e, index) {
-      this.$store.dispatch(subtitleActions.UPDATE_SUBTITLE_STYLE, index);
+    handleClick(index: number) {
+      this.changeStyle(index);
     },
   },
 };
@@ -139,8 +145,9 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480p
     .textContainer {
       width: 100%;
       height: 37px;
-      .textItem {
+      p {
         margin: auto auto auto 17px;
+        font-size: 13px;
       }
       .rightItem {
         width: 17px;
@@ -178,8 +185,9 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080
     .textContainer {
       width: 100%;
       height: 44.4px;
-      .textItem {
+      p {
         margin: auto auto auto 20.4px;
+        font-size: 15.6px;
       }
       .rightItem {
         width: 20.4px;
@@ -217,8 +225,9 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     .textContainer {
       width: 100%;
       height: 62.16px;
-      .textItem {
+      p {
         margin: auto auto auto 28.56px;
+        font-size: 21.84px;
       }
       .rightItem {
         width: 28.56px;
@@ -250,7 +259,6 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   }
 }
 .itemContainer {
-  position: absolute;
   display: flex;
   border-radius: 7px;
   z-index: 10;
@@ -258,6 +266,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   transition: height 100ms linear, background-color 100ms linear;
   .detail {
     width: 100%;
+    height: 100%;
   }
   .textContainer {
     display: flex;
