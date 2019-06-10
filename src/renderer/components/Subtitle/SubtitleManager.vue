@@ -1,11 +1,11 @@
 <template>
   <div
-    class="subtitle-manager"
     :style="{ width: computedWidth + 'px', height: computedHeight + 'px' }"
+    class="subtitle-manager"
   >
     <subtitle-renderer
-      v-if="currentFirstSubtitleId && duration"
       ref="subtitleRenderer"
+      v-if="currentFirstSubtitleId && duration"
       :key="originSrc+currentFirstSubtitleId"
       :subtitle-instance="firstSubtitleInstance"
       :is-first-sub="true"
@@ -15,8 +15,8 @@
       :tags="tags"
     />
     <subtitle-renderer
-      v-if="currentSecondSubtitleId && duration && enabledSecondarySub"
       ref="subtitleRenderer"
+      v-if="currentSecondSubtitleId && duration && enabledSecondarySub"
       :key="originSrc+currentSecondSubtitleId"
       :subtitle-instance="secondSubtitleInstance"
       :is-first-sub="false"
@@ -32,7 +32,20 @@ import { mapGetters, mapActions, mapState } from 'vuex';
 import romanize from 'romanize';
 import { existsSync } from 'fs';
 import { sep } from 'path';
-import { flatten, isEqual, sortBy, differenceWith, isFunction, partial, pick, values, keyBy, merge, castArray } from 'lodash';
+import {
+  flatten,
+  isEqual,
+  sortBy,
+  differenceWith,
+  isFunction,
+  partial,
+  pick,
+  values,
+  keyBy,
+  merge,
+  castArray,
+  get,
+} from 'lodash';
 import { codeToLanguageName } from '@/helpers/language';
 import {
   searchForLocalList, fetchOnlineList, retrieveEmbeddedList,
@@ -51,7 +64,9 @@ import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import SubtitleRenderer from './SubtitleRenderer.vue';
 import SubtitleLoader from './SubtitleLoader';
 import { localLanguageLoader } from './SubtitleLoader/utils';
-import { LOCAL_SUBTITLE_REMOVED, REQUEST_TIMEOUT, SUBTITLE_UPLOAD, UPLOAD_SUCCESS, UPLOAD_FAILED } from '../../../shared/notificationcodes';
+import {
+  LOCAL_SUBTITLE_REMOVED, REQUEST_TIMEOUT, SUBTITLE_UPLOAD, UPLOAD_SUCCESS, UPLOAD_FAILED,
+} from '../../../shared/notificationcodes';
 
 export default {
   name: 'SubtitleManager',
@@ -110,14 +125,13 @@ export default {
           .forEach(id => delete this.subtitleInstances[id]);
         this.selectionComplete = false;
         this.selectionSecondaryComplete = false;
-        const hasOnlineSubtitles =
-          !!this.$store.state.Subtitle.videoSubtitleMap[this.originSrc]
-            .map((id) => {
-              const { type, language } = this.subtitleInstances[id];
-              return { type, language };
-            })
-            .filter(({ type }) => type === 'online')
-            .length;
+        const hasOnlineSubtitles = !!this.$store.state.Subtitle.videoSubtitleMap[this.originSrc]
+          .map((id) => {
+            const { type, language } = this.subtitleInstances[id];
+            return { type, language };
+          })
+          .filter(({ type }) => type === 'online')
+          .length;
         this.$bus.$emit('subtitle-refresh-from-src-change', hasOnlineSubtitles);
         this.updateNoSubtitle(true);
       }
@@ -299,14 +313,12 @@ export default {
         .then(async () => {
           this.$bus.$emit('refresh-finished');
           if (this.isInitial) {
-            const switchLanguage = storedLanguagePreference[0] === preferredLanguages[1] &&
-              storedLanguagePreference[1] === preferredLanguages[0];
+            const switchLanguage = storedLanguagePreference[0] === preferredLanguages[1]
+              && storedLanguagePreference[1] === preferredLanguages[0];
             const selectedSubtitles = storedSubtitles
               .filter(({ id }) => [ids.firstId, ids.secondaryId].includes(id));
-            const shiftFirstId = selectedSubtitles
-              .find(({ language }) => language === preferredLanguages[0])?.id;
-            const shiftSecondaryId = selectedSubtitles
-              .find(({ language }) => language === preferredLanguages[1])?.id;
+            const shiftFirstId = get(selectedSubtitles.find(({ language }) => language === preferredLanguages[0]), 'id');
+            const shiftSecondaryId = get(selectedSubtitles.find(({ language }) => language === preferredLanguages[1]), 'id');
             const firstId = switchLanguage ? shiftFirstId : ids.firstId;
             const secondaryId = switchLanguage ? shiftSecondaryId : ids.secondaryId;
             if (firstId) {
@@ -718,7 +730,7 @@ export default {
         if (index === 0) {
           result = dirOrFileName;
           return false;
-        } else if (index <= 2) {
+        } if (index <= 2) {
           result = `${dirOrFileName}${sep}${result}`;
           return false;
         }

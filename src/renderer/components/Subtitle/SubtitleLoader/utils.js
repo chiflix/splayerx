@@ -12,6 +12,7 @@ import { normalizeCode } from '@/helpers/language';
 import languageLoader from '@/helpers/subtitle/language';
 import { SubtitleError, ErrorCodes } from './errors';
 
+export { get } from 'lodash';
 export { normalizeCode, castArray };
 
 const files = require.context('.', false, /\.loader\.js$/);
