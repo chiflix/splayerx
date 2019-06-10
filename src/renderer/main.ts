@@ -14,6 +14,8 @@ import osLocale from 'os-locale';
 // @ts-ignore
 import VueElectronJSONStorage from 'vue-electron-json-storage';
 // @ts-ignore
+import VueResource from 'vue-resource';
+// @ts-ignore
 import VueAnalytics from 'vue-analytics';
 // @ts-ignore
 import VueElectron from 'vue-electron';
@@ -85,6 +87,7 @@ Vue.directive('fade-in', {
 Vue.use(VueElectron);
 Vue.use(VueI18n);
 Vue.use(VueElectronJSONStorage);
+Vue.use(VueResource);
 Vue.use(AsyncComputed);
 Vue.use(VueAnalytics, {
   id: (process.env.NODE_ENV === 'production') ? 'UA-2468227-6' : 'UA-2468227-5',
