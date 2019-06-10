@@ -12,10 +12,15 @@ describe('WindowRectService logic service', () => {
       expect(JSON.stringify(r1)).to.be.equal(JSON.stringify([1920, 1080]));
       const r2 = windowRectService
         .calculateWindowSize([320, 180], MAXRECT, [5000, 3000], true, MAXRECT);
-      const target2 = [
-        Math.round((5000 * MAXRECT[1]) / 3000),
-        MAXRECT[1],
-      ];
+      const isRatioBigger = 5000 / 3000 > window.screen.availWidth / window.screen.availHeight;
+      const target2 = isRatioBigger ? [
+        MAXRECT[0],
+        Math.round((MAXRECT[0] / (5000 / 3000))),
+      ] :
+        [
+          Math.round((5000 * MAXRECT[1]) / 3000),
+          MAXRECT[1],
+        ];
       expect(JSON.stringify(r2)).to.be.equal(JSON.stringify(target2));
     });
   });
@@ -35,12 +40,19 @@ describe('WindowRectService logic service', () => {
     it('should rect change avail size after calculateWindowRect', () => {
       const r1 = windowRectService
         .calculateWindowRect([5000, 3000], true, [100, 100, 500, 300]);
-      const target = [
+      const isRatioBigger = 5000 / 3000 > window.screen.availWidth / window.screen.availHeight;
+      const target = isRatioBigger ? [
         window.screen.availLeft,
         window.screen.availTop,
-        Math.round((5000 * window.screen.availHeight) / 3000),
-        window.screen.availHeight,
-      ];
+        window.screen.availWidth,
+        Math.round(window.screen.availWidth / (5000 / 3000)),
+      ] :
+        [
+          window.screen.availLeft,
+          window.screen.availTop,
+          Math.round((5000 * window.screen.availHeight) / 3000),
+          window.screen.availHeight,
+        ];
       expect(JSON.stringify(r1)).to.be.equal(JSON.stringify(target));
     });
   });
