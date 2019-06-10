@@ -41,6 +41,8 @@
 </template>;
 <script lang="ts">
 import { windowRectService } from '@/services/window/WindowRectService';
+import { playInfoStorageService } from '@/services/storage/PlayInfoStorageService';
+import { generateShortCutImageBy } from '@/libs/utils';
 import asyncStorage from '@/helpers/asyncStorage';
 import { mapGetters, mapActions } from 'vuex';
 import path from 'path';
@@ -264,45 +266,30 @@ export default {
     async saveScreenshot(videoId:string) {
       const { videoElement } = this;
       const canvas = this.$refs.thumbnailCanvas;
-      const canvasCTX = canvas.getContext('2d');
       // todo: use metaloaded to get videoHeight and videoWidth
       const { videoHeight, videoWidth } = this;
-      // cannot delete
-      [canvas.width, canvas.height] = [(videoWidth / videoHeight) * 1080, 1080];
-      canvasCTX.drawImage(
-        videoElement, 0, 0, videoWidth, videoHeight,
-        0, 0, (videoWidth / videoHeight) * 1080, 1080,
-      );
-      const imagePath = canvas.toDataURL('image/jpeg', 0.8);
-      // 用于测试截图的代码，以后可能还会用到
-      // const img = imagePath.replace(/^data:image\/\w+;base64,/, '');
-      // fs.writeFileSync('/Users/jinnaide/Desktop/screenshot.png', img, 'base64');
-      [canvas.width, canvas.height] = [(videoWidth / videoHeight) * 122.6, 122.6];
-      canvasCTX.drawImage(
-        videoElement, 0, 0, videoWidth, videoHeight,
-        0, 0, (videoWidth / videoHeight) * 122.6, 122.6,
-      );
-      const smallImagePath = canvas.toDataURL('image/jpeg', 0.8);
+      const shortCut = generateShortCutImageBy(videoElement, canvas, videoWidth, videoHeight);
+
       const data = {
-        shortCut: imagePath,
-        smallShortCut: smallImagePath,
+        shortCut: shortCut.shortCut,
+        smallShortCut: shortCut.smallShortCut,
         lastPlayedTime: videodata.time,
         duration: this.duration,
         audioTrackId: this.currentAudioTrackId,
       };
 
-      const val = await this.infoDB.get('media-item', videoId);
-      if (val) {
-        await this.infoDB.update('media-item', { ...val, ...data }, videoId);
+      const result = await playInfoStorageService.updateMediaItemBy(videoId, data);
+      if (result) {
         this.$bus.$emit('database-saved');
       }
-      const playlist = await this.infoDB.get('recent-played', this.playListId);
-      await this.infoDB.update('recent-played', {
-        ...playlist,
+
+      const recentPlayedData = {
         items: this.isFolderList ? [videoId] : this.items,
         playedIndex: this.isFolderList ? 0 : this.playingIndex,
         lastOpened: Date.now(),
-      }, playlist.id);
+      };
+
+      await playInfoStorageService.updateRecentPlayedBy(this.playListId, recentPlayedData);
     },
     saveSubtitleStyle() {
       return asyncStorage.set('subtitle-style', { chosenStyle: this.chosenStyle, chosenSize: this.subToTop ? this.lastChosenSize : this.chosenSize, enabledSecondarySub: this.enabledSecondarySub });
@@ -316,7 +303,7 @@ export default {
         let savePromise = this.saveScreenshot(this.videoId);
         if (process.mas && this.$store.getters.source === 'drop') {
           savePromise = savePromise.then(async () => {
-            await this.infoDB.deletePlaylist(this.playListId);
+            await playInfoStorageService.deleteRecentPlayedBy(this.playListId);
           });
         }
         savePromise

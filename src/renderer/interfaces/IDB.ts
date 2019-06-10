@@ -19,14 +19,46 @@ export type PlaylistItem = {
   lastOpened: number,
   playedIndex: number,
 }
+
+export type MediaItemSubtitleItem = {
+  id: string,
+  language: string,
+  rank: number,
+  src: string,
+  type: string,
+  videoSegments: [],
+}
+
+export type MediaItemSubtitle = {
+  language: [string],
+  list: [MediaItemSubtitleItem],
+  selected: {
+    firstId: string,
+    secondatyId: string
+  }
+}
+
+export type MediaItemPreference = {
+  subtitle: MediaItemSubtitle
+}
+
+/** MediaItem 全量结构
+ * 
+ */
 export type MediaItem = {
+  audioTrackId: number
   videoId: number,
   quickHash: string,
   path: string,
   lastPlayedTime: number,
   duration: number,
   source: string,
+  preference: MediaItemPreference,
+  shortCut: string,
+  smallShortCut: string,
+  type: string,
 }
+
 export type SubtitleItem = {
   format: string,
   language: string,
