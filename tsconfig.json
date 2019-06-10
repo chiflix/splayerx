@@ -1,22 +1,27 @@
 {
-  "compileOnSave": true,
   "compilerOptions": {
-    "noEmit": true,
     "target": "esnext",
     "module": "esnext",
     "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true,
-    "allowJs": true,
     "strict": false,
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": "./src",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "newLine": "LF",
     "noImplicitAny": true,
+    "paths": {
+      "electron": ["../node_modules/@chiflix/electron"],
+      "grpc": ["../node_modules/@grpc/grpc-js"],
+      "@/*": ["renderer/*"]
+    },
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
     "strictNullChecks": true,
     "strictFunctionTypes": true,
-    "suppressImplicitAnyIndexErrors": true,
-    "newLine": "LF",
-    "skipLibCheck": true
+    "suppressImplicitAnyIndexErrors": true
   },
-  "references": [
-    { "path": "src" },
-    { "path": "test" }
-  ]
+  "include": ["src/**/*", "test/**/*"],
+  "exclude": ["node_modules"]
 }
