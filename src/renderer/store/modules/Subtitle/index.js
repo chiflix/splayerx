@@ -19,7 +19,7 @@ const state = {
   currentFirstSubtitleId: '',
   currentSecondSubtitleId: '',
   videoSubtitleMap: {},
-  chosenStyle: '',
+  chosenStyle: 0,
   chosenSize: 1,
   lastChosenSize: 1,
   subtitleDelay: 0,

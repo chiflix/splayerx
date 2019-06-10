@@ -225,14 +225,41 @@ export function openFolder(...folders) {
     }
   });
 
-  for (let i = 0; i < files.length; i += 1) {
-    const file = files[i];
-    if (!path.basename(file).startsWith('.')) {
-      if (subRegex.test(path.extname(file))) {
-        subtitleFiles.push({ src: file, type: 'local' });
-        containsSubFiles = true;
-      } else if (getValidVideoRegex().test(path.extname(file))) {
-        videoFiles.push(file);
+      for (let i = 0; i < files.length; i += 1) {
+        const file = files[i];
+        if (!path.basename(file).startsWith('.') && getValidVideoRegex().test(path.extname(file))) {
+          videoFiles.push(file);
+        }
+      }
+      if (videoFiles.length !== 0) {
+        const addFiles = videoFiles.filter(file => !this.$store.getters.playingList.includes(file));
+        const playlist = await this.infoDB.get('recent-played', this.playListId);
+        const addIds = [];
+        for (const videoPath of addFiles) {
+          const quickHash = await this.mediaQuickHash(videoPath);
+          const data = {
+            quickHash,
+            type: 'video',
+            path: videoPath,
+            source: 'playlist',
+          };
+          const videoId = await this.infoDB.add('media-item', data);
+          addIds.push(videoId);
+          playlist.items.push(videoId);
+          playlist.hpaths.push(`${quickHash}-${videoPath}`);
+        }
+        this.$store.dispatch('AddItemsToPlayingList', {
+          paths: addFiles,
+          ids: addIds,
+        });
+        this.infoDB.update('recent-played', playlist, playlist.id);
+        this.$store.dispatch('PlayingList', { id: playlist.id });
+      } else {
+        this.addLog('error', {
+          errcode: ADD_NO_VIDEO,
+          message: 'Didn\'t add any playable file in this folder.',
+        });
+        addBubble(ADD_NO_VIDEO, this.$i18n);
       }
     }
   }
@@ -366,7 +393,7 @@ export default {
     // open an existed play list
     async openPlayList(id) {
       const playlist = await this.infoDB.get('recent-played', id);
-      await this.infoDB.update('recent-played', { ...playlist, lastOpened: Date.now() });
+      await this.infoDB.update('recent-played', { ...playlist, lastOpened: Date.now() }, playlist.id);
       if (playlist.items.length > 1) {
         let currentVideo = await this.infoDB.get('media-item', playlist.items[playlist.playedIndex]);
 
@@ -387,7 +414,7 @@ export default {
           });
           if (playlist.items.length > 0) {
             playlist.playedIndex = 0;
-            await this.infoDB.update('recent-played', playlist);
+            await this.infoDB.update('recent-played', playlist, playlist.id);
             currentVideo = await this.infoDB.get('media-item', playlist.items[0]);
             addBubble(FILE_NON_EXIST_IN_PLAYLIST, this.$i18n);
           } else {
@@ -585,25 +612,6 @@ export default {
         normalizedLog = { errcode, code, message, stack };
       }
       ipcRenderer.send('writeLog', level, normalizedLog);
-    },
-    getTextWidth(fontSize, fontFamily, text) {
-      const span = document.createElement('span');
-      let result = span.offsetWidth;
-      span.style.visibility = 'hidden';
-      span.style.fontSize = fontSize;
-      span.style.fontFamily = fontFamily;
-      span.style.display = 'inline-block';
-      span.style.fontWeight = '700';
-      span.style.letterSpacing = '0.2px';
-      document.body.appendChild(span);
-      if (typeof span.textContent !== 'undefined') {
-        span.textContent = text;
-      } else {
-        span.innerText = text;
-      }
-      result = parseFloat(window.getComputedStyle(span).width) - result;
-      span.parentNode.removeChild(span);
-      return result;
     },
   },
 };

@@ -374,7 +374,7 @@ export default {
 
       const val = await this.infoDB.get('media-item', videoId);
       if (val) {
-        await this.infoDB.update('media-item', { ...val, ...data });
+        await this.infoDB.update('media-item', { ...val, ...data }, videoId);
         this.$bus.$emit('database-saved');
       }
       const playlist = await this.infoDB.get('recent-played', this.playListId);
@@ -383,7 +383,7 @@ export default {
         items: this.isFolderList ? [videoId] : this.items,
         playedIndex: this.isFolderList ? 0 : this.playingIndex,
         lastOpened: Date.now(),
-      });
+      }, playlist.id);
     },
     saveSubtitleStyle() {
       return asyncStorage.set('subtitle-style', { chosenStyle: this.chosenStyle, chosenSize: this.subToTop ? this.lastChosenSize : this.chosenSize, enabledSecondarySub: this.enabledSecondarySub });
@@ -392,7 +392,6 @@ export default {
       return asyncStorage.set('playback-states', { volume: this.volume, muted: this.muted });
     },
     beforeUnloadHandler(e) {
-      this.removeAllAudioTrack();
       if (!this.asyncTasksDone && !this.needToRestore) {
         let savePromise = this.saveScreenshot(this.videoId);
         if (process.mas && this.$store.getters.source === 'drop') {
@@ -404,6 +403,7 @@ export default {
           .then(this.saveSubtitleStyle)
           .then(this.savePlaybackStates)
           .then(this.$store.dispatch('saveWinSize', this.isFullScreen ? { size: this.winSizeBeforeFullScreen, angle: this.winAngleBeforeFullScreen } : { size: this.winSize, angle: this.winAngle }))
+          .then(this.removeAllAudioTrack)
           .finally(() => {
             this.$store.dispatch('SRC_SET', { src: '', mediaHash: '', id: NaN });
             this.asyncTasksDone = true;

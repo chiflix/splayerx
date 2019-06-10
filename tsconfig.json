@@ -15,7 +15,6 @@
     "newLine": "LF",
     "skipLibCheck": true
   },
-  "include": ["src/**/*", "test/**/*", ".electron-vue/webpack.*.config.js"],
   "references": [
     { "path": "src" },
     { "path": "test" }

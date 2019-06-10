@@ -20,9 +20,7 @@
           <div class="element bottom">
             <div class="element content">
               <div class="topContainer">
-                <div class="title subtitleNormal">
-                  {{ this.$t('msg.subtitle.subtitleSelect') }}
-                </div>
+                <p>{{ this.$t('msg.subtitle.subtitleSelect') }}</p>
                 <div
                   v-show="enabledSecondarySub"
                   @mouseup="subTypeShift"
@@ -757,10 +755,10 @@ export default {
       left: 1px;
       background-color: transparent;
       box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
+      p {
+        color: rgba(255, 255, 255, 0.6);
+      }
     }
-  }
-  .title {
-    color: rgba(255, 255, 255, 0.6);
   }
   .firstSub, .secondarySub {
     transition: color 90ms linear;
@@ -817,10 +815,11 @@ export default {
       height: 39px;
       display: flex;
       flex-direction: row;
-      .title {
+      p {
         margin: 15px 0 auto 14px;
         letter-spacing: 0.2px;
         line-height: 15px;
+        font-size: 13px;
       }
       .refresh {
         width: 13px;
@@ -906,10 +905,11 @@ export default {
       height: 47px;
       display: flex;
       flex-direction: row;
-      .title {
+      p {
         margin: 18px 0 auto 16px;
         letter-spacing: 0.23px;
         line-height: 17px;
+        font-size: 15.6px;
       }
       .refresh {
         width: 17px;
@@ -995,10 +995,11 @@ export default {
       height: 64px;
       display: flex;
       flex-direction: row;
-      .title {
+      p {
         margin: 24px 0 auto 24px;
         letter-spacing: 0.32px;
         line-height: 23px;
+        font-size: 21.84px;
       }
       .refresh {
         width: 21px;
