@@ -239,8 +239,7 @@ export default {
               if (this.lastAudioTrackId) {
                 enabled = this.lastAudioTrackId === Number(id);
                 for (let i = 0; i < this.$refs.video.audioTracks.length; i += 1) {
-                  this.$refs.video.audioTracks[i].enabled =
-                    Number(this.$refs.video.audioTracks[i].id) === this.lastAudioTrackId;
+                  this.$refs.video.audioTracks[i].enabled = Number(this.$refs.video.audioTracks[i].id) === this.lastAudioTrackId;
                 }
               } else {
                 enabled = trackEvent.track.enabled;
