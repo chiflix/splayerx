@@ -42,8 +42,8 @@
 <script lang="ts">
 import { windowRectService } from '@/services/window/WindowRectService';
 import { playInfoStorageService } from '@/services/storage/PlayInfoStorageService';
+import { settingStorageService } from '@/services/storage/SettingStorageService';
 import { generateShortCutImageBy } from '@/libs/utils';
-import asyncStorage from '@/helpers/asyncStorage';
 import { mapGetters, mapActions } from 'vuex';
 import path from 'path';
 import { Video as videoActions } from '@/store/actionTypes';
@@ -292,10 +292,14 @@ export default {
       await playInfoStorageService.updateRecentPlayedBy(this.playListId, recentPlayedData);
     },
     saveSubtitleStyle() {
-      return asyncStorage.set('subtitle-style', { chosenStyle: this.chosenStyle, chosenSize: this.subToTop ? this.lastChosenSize : this.chosenSize, enabledSecondarySub: this.enabledSecondarySub });
+      return settingStorageService.updateSubtitleStyle({
+        chosenStyle: this.chosenStyle,
+        chosenSize: this.subToTop ? this.lastChosenSize : this.chosenSize,
+        enabledSecondarySub: this.enabledSecondarySub,
+      });
     },
     savePlaybackStates() {
-      return asyncStorage.set('playback-states', { volume: this.volume, muted: this.muted });
+      return settingStorageService.updatePlaybackStates({ volume: this.volume, muted: this.muted });
     },
     beforeUnloadHandler(e:any) {
       this.removeAllAudioTrack();
