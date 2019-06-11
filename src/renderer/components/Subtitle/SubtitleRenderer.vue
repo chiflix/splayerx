@@ -4,13 +4,13 @@
     :class="'subtitle-style'+chosenStyle"
   >
     <div
-      :class="'subtitle-alignment'+(index+1)"
-      :key="index"
       v-for="(item, index) in finalDisplayCues"
+      :key="index"
+      :class="'subtitle-alignment'+(index+1)"
     >
       <p
         v-for="(cue, ind) in item"
-        :key="ind"
+        :key="cue.text + ind"
         :style="{
           zoom: cue.category === 'first' ? `${scaleNum}` : `${secondarySubScale}`,
           opacity: cue.hide ? '0' : '1',
@@ -23,18 +23,19 @@
       >{{ cue.text }}</p>
     </div>
     <div
-      v-for="(cue, index) in positionCues"
-      :key="cue.text + index"
+      v-for="(item, index) in positionCues"
+      :key="'cues'+index"
       :style="{
         position: 'absolute',
-        left: subLeft(cue),
-        top: subTop(cue),
-        color: 'white',
-        transform: `translate(${translateNum(cue)[0]}%, ${translateNum(cue)[1]}%)`,
+        left: subLeft(item[0]),
+        top: subTop(item[0]),
+        transform: `translate(${translateNum(item[0])[0]}%, ${translateNum(item[0])[1]}%)`,
         transformOrigin: 'bottom left',
       }"
     >
       <p
+        v-for="(cue, index) in item"
+        :key="cue.text + index"
         :style="{
           whiteSpace: 'pre',
           zoom: cue.category === 'first' ? `${scaleNum}` : `${secondarySubScale}`,
@@ -45,7 +46,7 @@
 </template>
 <script>
 import { mapGetters, mapMutations } from 'vuex';
-import { isEqual, differenceWith, isEmpty } from 'lodash';
+import { isEqual, differenceWith, isEmpty, groupBy } from 'lodash';
 import { Subtitle as subtitleMutations } from '@/store/mutationTypes';
 import { videodata } from '@/store/video';
 import SubtitleInstance from './SubtitleLoader/index';
@@ -127,7 +128,25 @@ export default {
         .filter(cue => this.calculatePosition(cue.category, cue.tags)).map((cue) => { cue.category = 'first'; return cue; });
       const secondaryCues = this.secondCues
         .filter(cue => this.calculatePosition(cue.category, cue.tags)).map((cue) => { cue.category = 'secondary'; return cue; });
-      return (firstCues || []).concat(secondaryCues || []);
+      const firstClassifiedCues = [];
+      const secondaryClassifiedCues = [];
+      firstCues.forEach((item) => {
+        const index = firstClassifiedCues.findIndex(e => isEqual(e[0].tags, item.tags));
+        if (index !== -1) {
+          firstClassifiedCues[index].push(item);
+        } else {
+          firstClassifiedCues.push([item]);
+        }
+      });
+      secondaryCues.forEach((item) => {
+        const index = secondaryClassifiedCues.findIndex(e => isEqual(e[0].tags, item.tags));
+        if (index !== -1) {
+          secondaryClassifiedCues[index].push(item);
+        } else {
+          secondaryClassifiedCues.push([item]);
+        }
+      });
+      return (firstClassifiedCues || []).concat(secondaryClassifiedCues || []);
     },
   },
   watch: {
@@ -141,7 +160,6 @@ export default {
               }
               return cue;
             });
-            console.log(this.finalDisplayCues);
           } else {
             this.finalDisplayCues[i] = val[i].map((cue) => { cue.hide = false; return cue; });
           }
