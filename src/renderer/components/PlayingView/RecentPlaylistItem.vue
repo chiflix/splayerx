@@ -256,9 +256,11 @@ export default {
       const parsedName = parseNameFromPath(this.path);
       if (parsedName.episode && parsedName.season) {
         return `S${parsedName.season}E${parsedName.episode}`;
-      } if (parsedName.episode && !parsedName.season) {
+      }
+      if (parsedName.episode && !parsedName.season) {
         return `EP${parsedName.episode}`;
-      } if (parsedName.season && !parsedName.episode) {
+      }
+      if (parsedName.season && !parsedName.episode) {
         return `SE${parsedName.season}`;
       }
       return path.basename(this.path, path.extname(this.path));

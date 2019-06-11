@@ -86,7 +86,8 @@ export default {
       const messages = this.$store.getters.messageInfo;
       if (this.showNextVideo && this.showPrivacyBubble) {
         return messages.slice(0, 1);
-      } if (this.showNextVideo || this.showPrivacyBubble) {
+      }
+      if (this.showNextVideo || this.showPrivacyBubble) {
         return messages.slice(0, 2);
       }
       return messages;

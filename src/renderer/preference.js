@@ -18,7 +18,8 @@ function getSystemLocale() {
   const locale = process.platform === 'win32' ? app.getLocale() : osLocale.sync();
   if (locale === 'zh-TW') {
     return 'zhTW';
-  } if (locale.startsWith('zh')) {
+  }
+  if (locale.startsWith('zh')) {
     return 'zhCN';
   }
   return 'en';

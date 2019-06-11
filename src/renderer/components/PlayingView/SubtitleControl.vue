@@ -284,7 +284,8 @@ export default {
     textHeight() {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
         return 13;
-      } if (this.computedSize >= 481 && this.computedSize < 1080) {
+      }
+      if (this.computedSize >= 481 && this.computedSize < 1080) {
         return 14;
       }
       return 18;
@@ -292,7 +293,8 @@ export default {
     itemHeight() {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
         return 27;
-      } if (this.computedSize >= 481 && this.computedSize < 1080) {
+      }
+      if (this.computedSize >= 481 && this.computedSize < 1080) {
         return 32;
       }
       return 44;
@@ -304,7 +306,8 @@ export default {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
         return this.realItemsNum > 3
         || (this.scopeHeight + this.hoverHeight > 89 && this.hiddenText) ? 'scroll' : '';
-      } if (this.computedSize >= 481 && this.computedSize < 1080) {
+      }
+      if (this.computedSize >= 481 && this.computedSize < 1080) {
         return this.realItemsNum > 5
         || (this.scopeHeight + this.hoverHeight > 180 && this.hiddenText) ? 'scroll' : '';
       }
@@ -314,7 +317,8 @@ export default {
     scopeHeight() {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
         return (this.realItemsNum * 31) - 4;
-      } if (this.computedSize >= 481 && this.computedSize < 1080) {
+      }
+      if (this.computedSize >= 481 && this.computedSize < 1080) {
         return (this.realItemsNum * 37) - 5;
       }
       return (this.realItemsNum * 51) - 7;
@@ -322,7 +326,8 @@ export default {
     contHeight() {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
         return (this.realItemsNum * 31) + 45;
-      } if (this.computedSize >= 481 && this.computedSize < 1080) {
+      }
+      if (this.computedSize >= 481 && this.computedSize < 1080) {
         return (this.realItemsNum * 37) + 54;
       }
       return (this.realItemsNum * 51) + 76;
@@ -333,7 +338,8 @@ export default {
           ? ((this.computedAvailableItems.length + this.loadingTypes.length)
             - this.currentSubtitleIndex) * 31
           : this.scopeHeight + 4;
-      } if (this.computedSize >= 481 && this.computedSize < 1080) {
+      }
+      if (this.computedSize >= 481 && this.computedSize < 1080) {
         return this.computedAvailableItems.length > 0
           ? ((this.computedAvailableItems.length + this.loadingTypes.length)
             - this.currentSubtitleIndex) * 37
@@ -556,7 +562,8 @@ export default {
     getSubName(item) {
       if (item.path) {
         return path.basename(item);
-      } if (item.type === 'embedded') {
+      }
+      if (item.type === 'embedded') {
         return `${this.$t('subtitle.embedded')} ${item.name}`;
       }
       return item.name;

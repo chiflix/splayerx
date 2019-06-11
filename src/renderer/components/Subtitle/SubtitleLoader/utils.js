@@ -227,7 +227,8 @@ export function functionExtraction(funcOrObj, defaultParams) {
       result.func = funcOrObj.func;
       result.params = funcOrObj.params || 'src';
       return true;
-    } if (typeof funcOrObj[key] === 'function') {
+    }
+    if (typeof funcOrObj[key] === 'function') {
       result[key] = {
         func: funcOrObj[key],
         params: defaultParams || 'src',

@@ -730,7 +730,8 @@ export default {
         if (index === 0) {
           result = dirOrFileName;
           return false;
-        } if (index <= 2) {
+        }
+        if (index <= 2) {
           result = `${dirOrFileName}${sep}${result}`;
           return false;
         }

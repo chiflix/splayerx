@@ -52,7 +52,8 @@ export default {
       const alignRight = [3, 6, 9];
       if (alignLeft.includes(this.settings.alignment)) {
         return 'left';
-      } if (alignRight.includes(this.settings.alignment)) {
+      }
+      if (alignRight.includes(this.settings.alignment)) {
         return 'right';
       }
       return 'center';

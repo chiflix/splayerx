@@ -255,7 +255,8 @@ export default {
     minInfoCardWidth() {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
         return 170;
-      } if (this.computedSize >= 481 && this.computedSize < 1080) {
+      }
+      if (this.computedSize >= 481 && this.computedSize < 1080) {
         return 204;
       }
       return 285.6;
@@ -267,7 +268,8 @@ export default {
           this.$t('advance.audioDelay'),
           this.$t('advance.audioMenu'),
         ];
-      } if (this.readyShow === 'subMenu') {
+      }
+      if (this.readyShow === 'subMenu') {
         return [
           this.$t('advance.subDelay'),
           this.$t('advance.fontSize'),
@@ -307,7 +309,8 @@ export default {
           this.leftTitleToShow[2],
         ) + this.rightItemFontSize;
         return Math.max(firstLine, secondLine, thirdLine);
-      } if (this.readyShow === 'subMenu') {
+      }
+      if (this.readyShow === 'subMenu') {
         const firstLine = getTextWidth(
           `${this.textItemFontSize}px`,
           this.normalFont,
@@ -362,7 +365,8 @@ export default {
     subStyleWidth() {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
         return 17;
-      } if (this.computedSize >= 481 && this.computedSize < 1080) {
+      }
+      if (this.computedSize >= 481 && this.computedSize < 1080) {
         return 20.4;
       }
       return 28.56;
@@ -370,7 +374,8 @@ export default {
     rightItemFontSize() {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
         return 11;
-      } if (this.computedSize >= 481 && this.computedSize < 1080) {
+      }
+      if (this.computedSize >= 481 && this.computedSize < 1080) {
         return 13.2;
       }
       return 18.48;
@@ -378,7 +383,8 @@ export default {
     textItemFontSize() {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
         return 13;
-      } if (this.computedSize >= 481 && this.computedSize < 1080) {
+      }
+      if (this.computedSize >= 481 && this.computedSize < 1080) {
         return 15.6;
       }
       return 21.84;
@@ -396,7 +402,8 @@ export default {
         if (track.language === '' || track.language === 'und') {
           return `${
             this.$t('advance.track')} ${this.$store.getters.audioTrackList.indexOf(track) + 1}`;
-        } if (this.$store.getters.audioTrackList.length === 1) {
+        }
+        if (this.$store.getters.audioTrackList.length === 1) {
           return `${track.language}`;
         }
         return `${track.name}`;
@@ -413,7 +420,8 @@ export default {
     audioCardHeight() {
       if (this.showDelay) {
         return `${this.initialSize(156)}px`;
-      } if (this.showTrack) {
+      }
+      if (this.showTrack) {
         return `${this.initialSize(this.containerHeight)}px`;
       }
       return `${this.initialSize(119)}px`;
@@ -531,7 +539,8 @@ export default {
     initialSize(size: number) {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
         return size;
-      } if (this.computedSize >= 481 && this.computedSize < 1080) {
+      }
+      if (this.computedSize >= 481 && this.computedSize < 1080) {
         return size * 1.2;
       }
       return size * 1.2 * 1.4;

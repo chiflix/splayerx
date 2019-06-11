@@ -192,7 +192,8 @@ export default {
           return `subtitle-alignment${this.currentTags[index].alignment}`;
         }
         return '';
-      } if (this.isVtt && this.currentTags[index].line && this.currentTags[index].position) {
+      }
+      if (this.isVtt && this.currentTags[index].line && this.currentTags[index].position) {
         return '';
       }
       return 'subtitle-alignment2';
@@ -463,7 +464,8 @@ export default {
       const { currentTags: tags, type, isVtt } = this;
       if (!isVtt && tags[index].pos) {
         return `${(tags[index].pos.x / this.subPlayResX) * 100}vw`;
-      } if (type === 'vtt' && tags[index].line && tags[index].position) {
+      }
+      if (type === 'vtt' && tags[index].line && tags[index].position) {
         if (tags[index].vertical) {
           if (!tags[index].line.includes('%')) {
             tags[index].line = Math.abs(tags[index].line) * 100;
@@ -480,11 +482,13 @@ export default {
       if (!isVtt) {
         if (tags[index].pos) {
           return `${(tags[index].pos.y / this.subPlayResY) * 100}vh`;
-        } if ([7, 8, 9].includes(tags[index].alignment)) {
+        }
+        if ([7, 8, 9].includes(tags[index].alignment)) {
           return `${(60 / 1080) * 100}%`;
         }
         return '';
-      } if (isVtt && tags[index].line && tags[index].position) {
+      }
+      if (isVtt && tags[index].line && tags[index].position) {
         if (tags[index].vertical) {
           return tags[index].position;
         }
