@@ -7,8 +7,8 @@
   >
     <lottie
       :options="defaultOptions"
-      lot="playlist"
       @animCreated="handleAnimation"
+      lot="playlist"
     />
   </div>
 </template>

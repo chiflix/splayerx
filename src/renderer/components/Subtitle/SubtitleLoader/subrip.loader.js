@@ -1,7 +1,9 @@
 import flow from 'lodash/flow';
 import { parse, toMS } from 'subtitle';
 
-import { localLanguageLoader, localNameLoader, tagsGetter, loadLocalFile } from './utils';
+import {
+  localLanguageLoader, localNameLoader, tagsGetter, loadLocalFile,
+} from './utils';
 
 const baseTags = { alignment: 2, pos: null };
 const normalizer = (parsedSubtitle) => {

@@ -6,31 +6,30 @@
   >
     <div
       ref="layer1"
-      class="layer1"
       :style="{
         width: `${thumbnailWidth}px`,
         height: `${thumbnailHeight}px`,
       }"
+      class="layer1"
     />
     <div
       ref="layer2"
-      class="layer2"
       :style="{
         width: `${thumbnailWidth}px`,
         height: `${thumbnailHeight}px`,
       }"
+      class="layer2"
     />
     <div
       ref="item"
-      class="item"
       :style="{
         bottom: chosen ? '10px' : '0',
         width: `${thumbnailWidth}px`,
         height: `${thumbnailHeight}px`,
       }"
+      class="item"
     >
       <div
-        class="content"
         :style="{
           width: `${thumbnailWidth}px`,
           height: chosen ? `${thumbnailHeight + 11}px` : `${thumbnailHeight}px`,
@@ -40,10 +39,10 @@
         @mouseleave="onRecentItemMouseleave"
         @mousedown.stop="onRecentItemMousedown"
         @mouseup="onRecentItemMouseup"
+        class="content"
       >
         <div
           ref="border"
-          class="border"
           :style="{
             left: `-${0.7 / 2}px`,
             top: `-${0.7 / 2}px`,
@@ -54,12 +53,13 @@
             backgroundColor: aboutToDelete ? 'rgba(0,0,0,0.43)'
               : chosen ? 'rgba(255,255,255,0.2)' : '',
           }"
+          class="border"
         >
           <div
-            class="deleteUi"
             :style="{
               opacity: aboutToDelete ? '1' : '0',
             }"
+            class="deleteUi"
           >
             <Icon type="delete" />
           </div>

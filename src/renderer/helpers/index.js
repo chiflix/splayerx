@@ -2,12 +2,15 @@ import path from 'path';
 import fs, { promises as fsPromises } from 'fs';
 import crypto from 'crypto';
 import lolex from 'lolex';
-import { times } from 'lodash';
+import { times, get } from 'lodash';
 import bookmark from '@/helpers/bookmark';
 import syncStorage from '@/helpers/syncStorage';
 import infoDB from '@/helpers/infoDB';
 import { getValidVideoExtensions, getValidVideoRegex } from '@/../shared/utils';
-import { FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED, ADD_NO_VIDEO, SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, FILE_NON_EXIST_IN_PLAYLIST, PLAYLIST_NON_EXIST } from '@/../shared/notificationcodes';
+import {
+  FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED, ADD_NO_VIDEO,
+  SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, FILE_NON_EXIST_IN_PLAYLIST, PLAYLIST_NON_EXIST,
+} from '@/../shared/notificationcodes';
 import Sentry from '@/../shared/sentry';
 import Sagi from './sagi';
 import { addBubble } from '../../shared/notificationControl';
@@ -32,8 +35,8 @@ export default {
       const getRatio = size => size[0] / size[1];
       const setWidthByHeight = size => [size[1] * getRatio(videoSize), size[1]];
       const setHeightByWidth = size => [size[0], size[0] / getRatio(videoSize)];
-      const biggerSize = (size, diffedSize) =>
-        size.some((value, index) => value >= diffedSize[index]);
+      const biggerSize = (size, diffedSize) => size
+        .some((value, index) => value >= diffedSize[index]);
       const biggerWidth = (size, diffedSize) => size[0] >= diffedSize[0];
       const biggerRatio = (size1, size2) => getRatio(size1) > getRatio(size2);
       if (videoExisted && biggerWidth(result, maxSize)) {
@@ -41,12 +44,12 @@ export default {
       }
       const realMaxSize = videoExisted ? screenSize : maxSize;
       if (biggerSize(result, realMaxSize)) {
-        result = biggerRatio(result, realMaxSize) ?
-          setHeightByWidth(realMaxSize) : setWidthByHeight(realMaxSize);
+        result = biggerRatio(result, realMaxSize)
+          ? setHeightByWidth(realMaxSize) : setWidthByHeight(realMaxSize);
       }
       if (biggerSize(minSize, result)) {
-        result = biggerRatio(minSize, result) ?
-          setHeightByWidth(minSize) : setWidthByHeight(minSize);
+        result = biggerRatio(minSize, result)
+          ? setHeightByWidth(minSize) : setWidthByHeight(minSize);
       }
       return result.map(Math.round);
     },
@@ -144,7 +147,7 @@ export default {
         securityScopedBookmarks: process.mas,
       }, (files, bookmarks) => {
         this.showingPopupDialog = false;
-        if (process.mas && bookmarks?.length > 0) {
+        if (process.mas && get(bookmarks, 'length') > 0) {
           // TODO: put bookmarks to database
           bookmark.resolveBookmarks(files, bookmarks);
         }
@@ -182,7 +185,7 @@ export default {
         securityScopedBookmarks: process.mas,
       }, (files, bookmarks) => {
         this.showingPopupDialog = false;
-        if (process.mas && bookmarks?.length > 0) {
+        if (process.mas && get(bookmarks, 'length') > 0) {
           // TODO: put bookmarks to database
           bookmark.resolveBookmarks(files, bookmarks);
         }
@@ -216,7 +219,7 @@ export default {
           });
         }
         this.showingPopupDialog = false;
-        if (process.mas && bookmarks?.length > 0) {
+        if (process.mas && get(bookmarks, 'length') > 0) {
           // TODO: put bookmarks to database
           bookmark.resolveBookmarks(files, bookmarks);
         }
@@ -422,7 +425,7 @@ export default {
               items,
             });
           } catch (err) {
-            if (process.mas && err?.code === 'EPERM') {
+            if (process.mas && get(err, 'code') === 'EPERM') {
               // TODO: maybe this.openFolderByDialog(videoFiles[0]) ?
               this.$store.dispatch('FolderList', {
                 id,
@@ -472,7 +475,7 @@ export default {
           items,
         });
       } catch (err) {
-        if (process.mas && err?.code === 'EPERM') {
+        if (process.mas && get(err, 'code') === 'EPERM') {
           // TODO: maybe this.openFolderByDialog(videoFiles[0]) ?
           this.$store.dispatch('FolderList', {
             id,
@@ -493,7 +496,7 @@ export default {
           stopAccessing
         });
         this.$bus.$once(`stop-accessing-${vidPath}`, (e) => {
-          this.access.find(item => item.src === e)?.stopAccessing();
+          get(this.access.find(item => item.src === e), 'stopAccessing')();
           const index = this.access.findIndex(item => item.src === e);
           if (index >= 0) this.access.splice(index, 1);
         });
@@ -506,7 +509,7 @@ export default {
       try {
         mediaQuickHash = await this.mediaQuickHash(vidPath);
       } catch (err) {
-        if (err?.code === 'ENOENT') {
+        if (get(err, 'code') === 'ENOENT') {
           this.addLog('error', {
             errcode: FILE_NON_EXIST,
             message: 'Failed to open file, it will be removed from list.'
@@ -514,7 +517,7 @@ export default {
           addBubble(FILE_NON_EXIST_IN_PLAYLIST, this.$i18n);
           this.$bus.$emit('delete-file', vidPath, id);
         }
-        if (process.mas && err?.code === 'EPERM') {
+        if (process.mas && get(err, 'code') === 'EPERM') {
           this.openFilesByDialog({ defaultPath: vidPath });
         }
         return;
@@ -577,6 +580,25 @@ export default {
         normalizedLog = { errcode, code, message, stack };
       }
       ipcRenderer.send('writeLog', level, normalizedLog);
+    },
+    getTextWidth(fontSize, fontFamily, text) {
+      const span = document.createElement('span');
+      let result = span.offsetWidth;
+      span.style.visibility = 'hidden';
+      span.style.fontSize = fontSize;
+      span.style.fontFamily = fontFamily;
+      span.style.display = 'inline-block';
+      span.style.fontWeight = '700';
+      span.style.letterSpacing = '0.2px';
+      document.body.appendChild(span);
+      if (typeof span.textContent !== 'undefined') {
+        span.textContent = text;
+      } else {
+        span.innerText = text;
+      }
+      result = parseFloat(window.getComputedStyle(span).width) - result;
+      span.parentNode.removeChild(span);
+      return result;
     },
   },
 };

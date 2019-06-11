@@ -1,20 +1,23 @@
 import EventEmitter from 'events';
 
-class baseIpc {
+class BaseIpc {
   constructor(event) {
     this.event = event;
   }
+
   removeListener(message, callback) {
     this.event.removeListener(message, callback);
   }
+
   removeAllListener() {
     this.event.removeAllListeners();
   }
 }
-class IpcMain extends baseIpc {
+class IpcMain extends BaseIpc {
   on(message, callback) {
     return this.event.on(`${message}ipcMain`, callback);
   }
+
   send(message, args) {
     const eventP = null;
     this.event.emit(`${message}ipcRenderer`, eventP, args);
@@ -24,14 +27,16 @@ class IpcMain extends baseIpc {
     return this.event.once(`${message}ipcMain`, callback);
   }
 }
-class IpcRenderer extends baseIpc {
+class IpcRenderer extends BaseIpc {
   on(message, callback) {
     return this.event.on(`${message}ipcRenderer`, callback);
   }
+
   send(message, args) {
     const eventP = null;
     this.event.emit(`${message}ipcMain`, eventP, args);
   }
+
   once(message, callback) {
     return this.event.once(`${message}ipcRenderer`, callback);
   }

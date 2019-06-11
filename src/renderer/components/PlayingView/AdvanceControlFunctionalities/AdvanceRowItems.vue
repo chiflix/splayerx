@@ -1,6 +1,5 @@
 <template>
   <div
-    class="itemContainer"
     :style="{
       height: heightSize,
       backgroundImage: !isChosen ? '' :
@@ -12,22 +11,22 @@
     @mouseleave="handleMouseLeave"
   >
     <div
-      class="detail"
       :style="{
         backgroundImage: !isChosen && hoveredText ?
           'linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.045) 20%, ' +
           'rgba(255,255,255,0.00) 78%, rgba(255,255,255,0.00) 100%)' : '',
         transition: 'opacity 200ms',
       }"
+      class="detail"
     >
       <div
-        class="textContainer"
         :style="{
           cursor: isChosen ? 'default' : 'pointer',
           color: !isChosen && hoveredText ?
             'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
           transition: 'color 300ms',
         }"
+        class="textContainer"
       >
         <p>{{ rowType === rowTypeEnum.RATE ? $t('advance.rateTitle') : $t('advance.fontSize') }}</p>
         <div
@@ -47,7 +46,6 @@
               v-for="(list, index) in lists"
               :id="'list'+index"
               :key="list"
-              class="rowNumDetail"
               :style="{
                 width: index === difIndex[0] || index === difIndex[1] ?
                   `${difWidth[0]}%` : `${difWidth[1]}%`,
@@ -56,28 +54,29 @@
               @mouseover="handleOver(index)"
               @mouseout="handleOut(index)"
               @click="handleClick(index)"
+              class="rowNumDetail"
             >
               <p
-                class="text"
                 :style="{
                   color: selectedIndex === index || index === hoverIndex ?
                     'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
                   margin: 'auto',
                   transition: 'color 300ms',
                 }"
+                class="text"
               >
                 {{ list }}
               </p>
             </div>
             <div
               v-show="rowType !== rowTypeEnum.RATE || lists.includes(rate)"
-              class="selected-back"
               :class="cardType"
               :style="{
                 left: `${moveLength}px`,
                 transition: 'left 200ms cubic-bezier(0.17, 0.67, 0.17, 0.98), width 200ms',
                 boxSizing: 'border-box'
               }"
+              class="selected-back"
             />
           </div>
         </div>
@@ -151,7 +150,8 @@ export default {
     heightSize() {
       if (this.size >= 289 && this.size <= 480) {
         return this.isChosen ? '74px' : '37px';
-      } else if (this.size >= 481 && this.size < 1080) {
+      }
+      if (this.size >= 481 && this.size < 1080) {
         return this.isChosen ? `${74 * 1.2}px` : `${37 * 1.2}px`;
       }
       return this.isChosen ? `${74 * 1.2 * 1.4}px` : `${37 * 1.2 * 1.4}px`;
@@ -162,23 +162,24 @@ export default {
     difWidth() {
       if (this.size >= 289 && this.size <= 480) {
         return this.rowType !== this.rowTypeEnum.RATE ? [23, 27] : [18.5, 23];
-      } else if (this.size >= 481 && this.size < 1080) {
-        return this.rowType !== this.rowTypeEnum.RATE ?
-          [23 * 1.2, 27 * 1.2] : [18.5 * 1.2, 23 * 1.2];
       }
-      return this.rowType !== this.rowTypeEnum.RATE ? [23 * 1.2 * 1.4, 27 * 1.2 * 1.4] :
-        [18.5 * 1.2 * 1.4, 23 * 1.2 * 1.4];
+      if (this.size >= 481 && this.size < 1080) {
+        return this.rowType !== this.rowTypeEnum.RATE
+          ? [23 * 1.2, 27 * 1.2] : [18.5 * 1.2, 23 * 1.2];
+      }
+      return this.rowType !== this.rowTypeEnum.RATE ? [23 * 1.2 * 1.4, 27 * 1.2 * 1.4]
+        : [18.5 * 1.2 * 1.4, 23 * 1.2 * 1.4];
     },
     moveLength() {
       const rateFactors = [17, 46, 71, 100, 129];
       const fontFactors = [17, 49, 86, 117];
-      return this.rowType === this.rowTypeEnum.RATE ?
-        (rateFactors[this.selectedIndex] / 170) * this.cardWidth :
-        (fontFactors[this.selectedIndex] / 170) * this.cardWidth;
+      return this.rowType === this.rowTypeEnum.RATE
+        ? (rateFactors[this.selectedIndex] / 170) * this.cardWidth
+        : (fontFactors[this.selectedIndex] / 170) * this.cardWidth;
     },
     selectedIndex() {
-      return this.rowType === this.rowTypeEnum.RATE ?
-        this.lists.indexOf(this.rate) : this.chosenSize;
+      return this.rowType === this.rowTypeEnum.RATE
+        ? this.lists.indexOf(this.rate) : this.chosenSize;
     },
   },
   methods: {

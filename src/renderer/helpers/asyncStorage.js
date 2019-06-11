@@ -1,7 +1,7 @@
 import path from 'path';
 import storage from 'electron-json-storage';
 import { promises as fsPromises } from 'fs';
-import helpers from './index';
+import helpers from '@/helpers';
 
 /*
   使用说明：
