@@ -23,10 +23,6 @@ const getters = {
       if (index !== -1 && index + 1 < state.items.length) {
         return state.items[index + 1];
       }
-      // unnecessary 'else' after 'return'
-      // else if (state.playList.length !== 1 && index + 1 >= state.items.length) {
-      //   return state.items[0];
-      // }
       return state.items[0];
     }
     return NaN;
@@ -38,10 +34,6 @@ const getters = {
       if (index !== -1 && index + 1 < list.length) {
         return list[index + 1];
       }
-      // unnecessary 'else' after 'return'
-      // else if (list.length !== 1 && index + 1 >= list.length) {
-      //   return list[0];
-      // }
       return list[0];
     }
     return '';
