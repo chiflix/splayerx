@@ -1,10 +1,10 @@
-import JStorage from '../../../../src/renderer/libs/JStorage';
+import JsonStorage from '../../../../src/renderer/libs/JsonStorage';
 
-describe('JStorage libs', () => {
-  const jStorage = new JStorage();
+describe('JsonStorage libs', () => {
+  const jsonStorage = new JsonStorage();
 
   beforeEach(async () => {
-    await jStorage.clear();
+    await jsonStorage.clear();
   });
 
   it('should successfully set demo', async () => {
@@ -14,7 +14,7 @@ describe('JStorage libs', () => {
     };
     let r = false;
     try {
-      r = await jStorage.set('test', demo);
+      r = await jsonStorage.set('test', demo);
     } catch (error) {
       r = false;
     }
@@ -28,8 +28,8 @@ describe('JStorage libs', () => {
     };
     let r = {};
     try {
-      await jStorage.set('test', demo);
-      r = await jStorage.get('test');
+      await jsonStorage.set('test', demo);
+      r = await jsonStorage.get('test');
     } catch (error) {
       r = {};
     }
@@ -44,16 +44,16 @@ describe('JStorage libs', () => {
     };
     let r = {};
     try {
-      await jStorage.set('test', demo);
-      r = await jStorage.get('test');
+      await jsonStorage.set('test', demo);
+      r = await jsonStorage.get('test');
     } catch (error) {
       r = {};
     }
     expect(r.testNUmber).to.be.equal(1);
     expect(r.testString).to.be.equal('1');
     try {
-      await jStorage.clear();
-      r = await jStorage.get('test');
+      await jsonStorage.clear();
+      r = await jsonStorage.get('test');
     } catch (error) {
       r = null;
     }

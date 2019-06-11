@@ -40,6 +40,8 @@ describe('PlayInfoStorageService logic service', () => {
     expect(result).to.be.equal(true);
   });
 
+  // 如果 updateRecentPlayedBy方法中，如果出现取出来的数据不对，需不需要 throw error
+  // 目前验证数据库取出的数据
   // it('should fail updateRecentPlayedBy with error data', async () => {
   //   const demo = {
   //     xx: 1,

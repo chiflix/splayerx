@@ -27,14 +27,31 @@ export function getTextWidth(fontSize: string, fontFamily: string, text: string)
   return result;
 }
 
+// 最后一帧图片数据格式
 export type ShortCut = {
   shortCut: string,
   smallShortCut: string,
 }
-
+ 
+/** 最后一帧图的大尺寸
+ * @constant
+ * @type number
+ */
 const MAX_SHORT_CUT_SIZE = 1080;
-const MIN_SHORT_CUT_SIZE = 122.6;
+/** 最后一帧图的小尺寸
+ * @constant
+ * @type number
+ */
+const MIN_SHORT_CUT_SIZE = 122.6; 
+/** 最后一帧图的图片质量
+ * @constant
+ * @type number
+ */
 const SHORT_CURT_QUALITY = 0.8;
+/** 最后一帧图的图片导出格式
+ * @constant
+ * @type string
+ */
 const SHORT_CURT_TYPE = 'image/jpeg';
 
 /**

@@ -29,6 +29,7 @@ export type MediaItemSubtitleItem = {
   videoSegments: [],
 }
 
+// MediaItem下preference中的Subtitle数据结构
 export type MediaItemSubtitle = {
   language: [string],
   list: [MediaItemSubtitleItem],
@@ -38,13 +39,12 @@ export type MediaItemSubtitle = {
   }
 }
 
+// MediaItem中preference数据结构
 export type MediaItemPreference = {
   subtitle: MediaItemSubtitle
 }
 
-/** MediaItem 全量结构
- * 
- */
+// MediaItem 全量结构
 export type MediaItem = {
   audioTrackId: number
   videoId: number,

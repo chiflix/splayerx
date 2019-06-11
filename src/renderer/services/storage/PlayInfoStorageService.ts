@@ -4,6 +4,15 @@ import { MediaItem, PlaylistItem } from "@/interfaces/IDB";
 import { VIDEO_OBJECT_STORE_NAME, RECENT_OBJECT_STORE_NAME } from "@/constants";
 
 export default class PlayInfoStorageService implements IPlayInfoStorable {
+  /**
+   * @description 更新video播放的信息
+   * @author tanghaixiang@xindong.com
+   * @date 2019-06-11
+   * @param {string} videoID
+   * @param {BeforeQuitMediaItemSaveData} data
+   * @returns {Promise<boolean>} 返回布尔值, 是否成功更新
+   * @memberof PlayInfoStorageService
+   */
   async updateMediaItemBy(videoID: string, data: BeforeQuitMediaItemSaveData): Promise<boolean> {
     let value = null;
     try {
@@ -21,7 +30,15 @@ export default class PlayInfoStorageService implements IPlayInfoStorable {
     }
     return false;
   }
-
+  /**
+   * @description 更新最近播放列表
+   * @author tanghaixiang@xindong.com
+   * @date 2019-06-11
+   * @param {string} playListID
+   * @param {BeforeQuitRecentPlayedSaveData} data
+   * @returns {Promise<boolean>} 返回布尔值, 是否成功更新
+   * @memberof PlayInfoStorageService
+   */
   async updateRecentPlayedBy(playListID: string, data: BeforeQuitRecentPlayedSaveData): Promise<boolean> {
     try {
       let playList = await info.getValueByKey(RECENT_OBJECT_STORE_NAME, Number(playListID))
@@ -32,6 +49,15 @@ export default class PlayInfoStorageService implements IPlayInfoStorable {
     }
 
   }
+
+  /**
+   * @description 删除播放列表
+   * @author tanghaixiang@xindong.com
+   * @date 2019-06-11
+   * @param {string} playListID
+   * @returns {Promise<boolean>} 返回布尔值, 是否成功更新
+   * @memberof PlayInfoStorageService
+   */
   async deleteRecentPlayedBy(playListID: string): Promise<boolean> {
     try {
       await info.delete(RECENT_OBJECT_STORE_NAME, Number(playListID));
