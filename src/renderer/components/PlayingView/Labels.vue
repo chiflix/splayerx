@@ -31,7 +31,6 @@
 </template>
 
 <script lang="ts">
-import { mapGetters } from 'vuex';
 import Icon from '../BaseIconContainer.vue';
 
 export default {
@@ -39,42 +38,19 @@ export default {
   components: {
     Icon,
   },
+  props: {
+    rate: {
+      type: Number,
+      default: 1,
+    },
+    showCycleLabel: Boolean,
+    showSpeedLabel: Boolean,
+  },
   data() {
     return {
-      showSpeedLabel: false,
-      showCycleLabel: false,
-      changeSrc: false,
-      changeState: false,
     };
   },
-  computed: {
-    ...mapGetters(['rate', 'singleCycle']),
-  },
-  watch: {
-    singleCycle(val:boolean) {
-      this.showCycleLabel = val;
-    },
-    rate(val:number) {
-      if (val === 1 && !this.changeSrc) {
-        this.changeState = true;
-        setTimeout(() => {
-          if (this.changeState) {
-            this.showSpeedLabel = false;
-          }
-        }, 3000);
-      } else if (val === 1 && this.changeSrc) {
-        this.showSpeedLabel = false;
-      } else {
-        this.changeState = false;
-        this.showSpeedLabel = true;
-      }
-      this.changeSrc = false;
-    },
-  },
   mounted() {
-    this.$bus.$on('show-speedlabel', () => {
-      this.changeSrc = true;
-    });
   },
 };
 </script>

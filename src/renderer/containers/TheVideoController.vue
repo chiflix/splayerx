@@ -45,13 +45,25 @@
       :is-focused="isFocused"
       :paused="paused"
       :attached-shown="attachedShown"
+      :handle-mouse-up="togglePlay"
       @update:playbutton-state="updatePlayButtonState"
     />
     <volume-indicator
+      ref="volumeIndicator"
       class="no-drag"
       :attached-shown="attachedShown"
       :mousedown-on-play-button="mousedownOnPlayButton"
       :show-all-widgets="showAllWidgets"
+      :muted="muted"
+      :volume-keydown="volumeKeydown"
+      :volume="volume"
+      :ratio="ratio"
+      :is-full-screen="isFullScreen"
+      :wheel-triggered="wheelTriggered"
+      :volume-wheel-triggered="volumeWheelTriggered"
+      :current-widget="currentWidget"
+      :handle-update-volume="updateVolume"
+      :handle-update-muted="updateMuted"
       @update:volume-state="updateVolumeState"
     />
     <div
@@ -83,6 +95,10 @@
       ref="theTimeCodes"
       :progress-trigger-stopped.sync="progressTriggerStopped"
       :show-all-widgets="showAllWidgets"
+      :duration="duration"
+      :rate="rate"
+      :show-cycle-label="!!singleCycle"
+      :show-speed-label="showSpeedLabel"
       :style="{ marginBottom: preFullScreen ? '10px' : '0' }"
     />
     <the-progress-bar
@@ -97,7 +113,7 @@ import {
   mapState, mapGetters, mapActions,
   createNamespacedHelpers,
 } from 'vuex';
-import { Input as inputActions } from '@/store/actionTypes';
+import { Input as inputActions, Video as videoActions } from '@/store/actionTypes';
 import { INPUT_COMPONENT_TYPE, getterTypes as iGT } from '@/plugins/input';
 import path from 'path';
 import Titlebar from '@/components/Titlebar.vue';
@@ -173,6 +189,10 @@ export default {
       progressTriggerStopped: false,
       openPlayListTimeId: NaN,
       playListState: false,
+      progressDisappearDelay: 1000,
+      changeState: false, // 记录是不是要改变显示速率的状态
+      changeSrc: false, // 记录是否换过视频
+      showSpeedLabel: false, // 是否显示播放速率
     };
   },
   computed: {
@@ -184,10 +204,10 @@ export default {
       wheelTime: ({ Input }) => Input.wheelTimestamp,
     }),
     ...mapGetters([
-      'originSrc', 'paused', 'ratio', 'duration', 'intrinsicWidth', 'intrinsicHeight',
+      'originSrc', 'paused', 'ratio', 'duration', 'intrinsicWidth', 'intrinsicHeight', 'singleCycle', 'rate', 'muted', 'volume',
       'playingList', 'isFolderList',
       'isFullScreen', 'isFocused', 'isMinimized',
-      'leftMousedown',
+      'leftMousedown', 'progressKeydown', 'volumeKeydown', 'wheelTriggered', 'volumeWheelTriggered',
     ]),
     ...inputMapGetters({
       inputWheelDirection: iGT.GET_WHEEL_DIRECTION,
@@ -232,6 +252,42 @@ export default {
       this.videoChangedTimer = this.clock.setTimeout(() => {
         this.videoChanged = false;
       }, 3000);
+      this.changeSrc = true;
+    },
+    rate(val:number) {
+      // 切换rate的时候如果没有切换过视频就等3秒消失速率图标
+      // 切换rate的时候如果有切换过视频就立刻消失速率图标
+      // 切换rate的时候如果切成非1的速率就里面显示速率图标
+      if (val === 1 && !this.changeSrc) {
+        this.changeState = true;
+        setTimeout(() => {
+          if (this.changeState) {
+            this.showSpeedLabel = false;
+          }
+        }, 3000);
+      } else if (val === 1 && this.changeSrc) {
+        this.showSpeedLabel = false;
+      } else {
+        this.changeState = false;
+        this.showSpeedLabel = true;
+      }
+      this.changeSrc = false;
+      // 当触发rate 显示界面控件
+      if (!this.progressKeydown) {
+        this.progressTriggerStopped = true;
+        this.clock.clearTimeout(this.progressTriggerId);
+        this.progressTriggerId = this.clock.setTimeout(() => {
+          this.progressTriggerStopped = false;
+        }, this.progressDisappearDelay);
+      }
+    },
+    singleCycle() {
+      // 当触发循环播放 显示界面控件
+      this.progressTriggerStopped = true;
+      this.clock.clearTimeout(this.progressTriggerId);
+      this.progressTriggerId = this.clock.setTimeout(() => {
+        this.progressTriggerStopped = false;
+      }, this.progressDisappearDelay);
     },
     isDragging(val:boolean, oldval:boolean) {
       if (
@@ -293,6 +349,14 @@ export default {
     },
   },
   mounted() {
+    // 当触发seek 显示界面控件
+    this.$bus.$on('seek', () => {
+      this.progressTriggerStopped = true;
+      this.clock.clearTimeout(this.progressTriggerId);
+      this.progressTriggerId = this.clock.setTimeout(() => {
+        this.progressTriggerStopped = false;
+      }, this.progressDisappearDelay);
+    });
     if (process.platform === 'darwin') {
       this.preFullScreen = this.isFullScreen;
     }
@@ -340,18 +404,21 @@ export default {
         this.intrinsicWidth / this.intrinsicHeight > window.screen.width / window.screen.height) {
         this.preFullScreen = true;
       }
+      this.handleVolumeUIWhenFullScreenChanged();
     });
     this.$bus.$on('toggle-fullscreen', () => {
       if (process.platform === 'darwin' &&
         this.intrinsicWidth / this.intrinsicHeight > window.screen.width / window.screen.height) {
         this.preFullScreen = !this.preFullScreen;
       }
+      this.handleVolumeUIWhenFullScreenChanged();
     });
     this.$bus.$on('off-fullscreen', () => {
       if (process.platform === 'darwin' &&
         this.intrinsicWidth / this.intrinsicHeight > window.screen.width / window.screen.height) {
         this.preFullScreen = false;
       }
+      this.handleVolumeUIWhenFullScreenChanged();
     });
     document.addEventListener('keydown', this.handleKeydown);
     document.addEventListener('keyup', this.handleKeyup);
@@ -687,6 +754,38 @@ export default {
     },
     toggleFullScreenState() {
       this.$bus.$emit('toggle-fullscreen');
+    },
+    togglePlay() {
+      this.$bus.$emit('toggle-playback');
+    },
+    updateVolume(val: number) {
+      this.$store.dispatch(videoActions.VOLUME_UPDATE, val);
+    },
+    updateMuted() {
+      this.$store.dispatch(videoActions.TOGGLE_MUTED);
+    },
+    handleVolumeUIWhenFullScreenChanged() {
+      const winHeight = window.screen.height;
+      const winWidth = window.screen.width;
+      const winRatio = winWidth / winHeight;
+      // the height of video after scaling
+      const videoRealHeight = winRatio > this.ratio ? winHeight : winWidth / this.ratio;
+      const backgroundHeight = videoRealHeight <= 1080 ? ((videoRealHeight - 180) / 3) + 100
+        : winHeight * 0.37;
+      const muteTop = videoRealHeight <= 1080 ? backgroundHeight + 2 : backgroundHeight + 4;
+      const showArea = this.$refs.volumeIndicator && this.$refs.volumeIndicator.$refs
+        && this.$refs.volumeIndicator.$refs.showArea;
+      if (!this.isFullScreen && showArea) {
+        requestAnimationFrame(() => {
+          showArea.style.setProperty('--background-height', `${backgroundHeight}px`);
+          showArea.style.setProperty('--mute-top', `${muteTop}px`);
+        });
+      } else if (showArea) {
+        requestAnimationFrame(() => {
+          showArea.style.setProperty('--background-height', '');
+          showArea.style.setProperty('--mute-top', '');
+        });
+      }
     },
   },
 };

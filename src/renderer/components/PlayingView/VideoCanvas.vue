@@ -91,7 +91,7 @@ export default {
       if (process.mas && oldVal) {
         this.$bus.$emit(`stop-accessing-${oldVal}`, oldVal);
       }
-      this.$bus.$emit('show-speedlabel');
+      // this.$bus.$emit('show-speedlabel');
       this.videoConfigInitialize({
         audioTrackList: [],
       });

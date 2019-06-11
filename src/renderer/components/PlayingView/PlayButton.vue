@@ -45,6 +45,10 @@ export default {
       type: Object,
       default: () => {},
     },
+    handleMouseUp: {
+      type: Function,
+      default: () => {},
+    },
   },
   data() {
     return {
@@ -149,7 +153,7 @@ export default {
     handleMouseup() {
       if (this.mousedown && !this.attachedShown) {
         this.showPlayIcon = !this.showPlayIcon;
-        this.$bus.$emit('toggle-playback');
+        this.handleMouseUp();
       }
     },
   },

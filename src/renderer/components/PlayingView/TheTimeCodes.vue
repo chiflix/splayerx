@@ -14,11 +14,15 @@
         :class="{ remainTime: isRemainTime }"
       />
     </div>
-    <Labels class="rate" />
+    <Labels
+      class="rate"
+      :rate="rate"
+      :show-cycle-label="showCycleLabel"
+      :show-speed-label="showSpeedLabel"
+    />
   </div>
 </template>
 <script lang="ts">
-import { mapGetters } from 'vuex';
 import { videodata } from '@/store/video';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import Labels from './Labels.vue';
@@ -31,6 +35,16 @@ export default {
     Labels,
   },
   props: {
+    duration: {
+      type: Number,
+      default: 0,
+    },
+    rate: {
+      type: Number,
+      default: 1,
+    },
+    showCycleLabel: Boolean,
+    showSpeedLabel: Boolean,
     showAllWidgets: Boolean,
     progressTriggerStopped: Boolean,
   },
@@ -42,37 +56,13 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['duration', 'rate', 'singleCycle']),
     hasDuration() {
       return !Number.isNaN(this.duration);
     },
   },
   watch: {
-    rate() {
-      if (!this.progressKeydown) {
-        this.$emit('update:progressTriggerStopped', true);
-        this.clock.clearTimeout(this.progressTriggerId);
-        this.progressTriggerId = this.clock.setTimeout(() => {
-          this.$emit('update:progressTriggerStopped', false);
-        }, this.progressDisappearDelay);
-      }
-    },
-    singleCycle() {
-      this.$emit('update:progressTriggerStopped', true);
-      this.clock.clearTimeout(this.progressTriggerId);
-      this.progressTriggerId = this.clock.setTimeout(() => {
-        this.$emit('update:progressTriggerStopped', false);
-      }, this.progressDisappearDelay);
-    },
   },
   created() {
-    this.$bus.$on('seek', () => {
-      this.$emit('update:progressTriggerStopped', true);
-      this.clock.clearTimeout(this.progressTriggerId);
-      this.progressTriggerId = this.clock.setTimeout(() => {
-        this.$emit('update:progressTriggerStopped', false);
-      }, this.progressDisappearDelay);
-    });
   },
   methods: {
     switchTimeContent() {

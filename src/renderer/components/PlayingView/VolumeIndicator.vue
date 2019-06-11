@@ -50,8 +50,6 @@
 </template>
 
 <script lang="ts">
-import { mapGetters, mapState } from 'vuex';
-import { Video as videoActions } from '@/store/actionTypes';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import BaseInfoCard from './InfoCard.vue';
 import BaseIcon from '../BaseIconContainer.vue';
@@ -68,6 +66,34 @@ export default {
     showAllWidgets: Boolean,
     mousedownOnPlayButton: Boolean,
     attachedShown: Boolean,
+    muted: Boolean,
+    volume: {
+      type: Number,
+      default: 1,
+    },
+    volumeKeydown: Boolean,
+    ratio: {
+      type: Number,
+      default: 1,
+    },
+    isFullScreen: Boolean,
+    wheelTriggered: {
+      type: Number,
+      default: 0,
+    },
+    volumeWheelTriggered: Boolean,
+    currentWidget: {
+      type: String,
+      default: '',
+    },
+    handleUpdateVolume: {
+      type: Function,
+      default: () => {},
+    },
+    handleUpdateMuted: {
+      type: Function,
+      default: () => {},
+    },
   },
   data() {
     return {
@@ -83,23 +109,11 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['muted', 'volumeKeydown', 'ratio', 'isFullScreen', 'wheelTriggered', 'volumeWheelTriggered']),
-    ...mapState({
-      currentWidget: ({ Input }) => Input.mousemoveComponentName,
-    }),
     showVolume() {
       return (this.inArea && this.showAllWidgets
         && !this.mousedownOnPlayButton && !this.attachedShown)
         || this.firstAppear
         || this.mousedown || this.volumeTriggerStopped || (this.muted && this.showAllWidgets);
-    },
-    volume: {
-      get() {
-        return this.$store.getters.volume;
-      },
-      set(val:number) {
-        this.$store.dispatch(videoActions.VOLUME_UPDATE, val * 100);
-      },
     },
     borderClass() {
       return this.volumeTriggerStopped || this.mouseover || this.mousedown ? 'border-in' : 'border-out';
@@ -179,9 +193,6 @@ export default {
     if (this.muted) {
       this.volumeTriggerStopped = this.showAllWidgets;
     }
-    this.$bus.$on('toggle-fullscreen', this.handleFullScreen);
-    this.$bus.$on('to-fullscreen', this.handleFullScreen);
-    this.$bus.$on('off-fullscreen', this.handleFullScreen);
   },
   methods: {
     enterArea() {
@@ -212,7 +223,9 @@ export default {
       const containerTop = (window.innerHeight - (backgroundHeight + 26)) / 2;
       const percentOfVolume = ((window.innerHeight - e.clientY) - (containerTop) - 19) /
         this.$refs.indicatorContainer.clientHeight;
-      if (percentOfVolume > 0) this.volume = percentOfVolume;
+      if (percentOfVolume > 0) {
+        this.handleUpdateVolume(percentOfVolume * 100);
+      }
       this.mousedown = true;
       this.$emit('update:volume-state', true);
       let isMoved = false;
@@ -220,7 +233,9 @@ export default {
         isMoved = true;
         const percentOfVolume = ((window.innerHeight - e.clientY) - (containerTop) - 19) /
           this.$refs.indicatorContainer.clientHeight;
-        if (percentOfVolume > 0) this.volume = percentOfVolume;
+        if (percentOfVolume > 0) {
+          this.handleUpdateVolume(percentOfVolume * 100);
+        }
       };
       document.onmouseup = () => {
         if (isMoved) {
@@ -238,31 +253,10 @@ export default {
     mouseupOnMuteIcon() {
       if (this.canToggleMute) {
         if (this.volume <= 0) {
-          this.volume = 0.1;
+          this.handleUpdateVolume(10);
         } else {
-          this.$store.dispatch(videoActions.TOGGLE_MUTED);
+          this.handleUpdateMuted();
         }
-      }
-    },
-    handleFullScreen() {
-      const winHeight = window.screen.height;
-      const winWidth = window.screen.width;
-      const winRatio = winWidth / winHeight;
-      // the height of video after scaling
-      const videoRealHeight = winRatio > this.ratio ? winHeight : winWidth / this.ratio;
-      const backgroundHeight = videoRealHeight <= 1080 ? ((videoRealHeight - 180) / 3) + 100
-        : winHeight * 0.37;
-      const muteTop = videoRealHeight <= 1080 ? backgroundHeight + 2 : backgroundHeight + 4;
-      if (!this.isFullScreen) {
-        requestAnimationFrame(() => {
-          this.$refs.showArea.style.setProperty('--background-height', `${backgroundHeight}px`);
-          this.$refs.showArea.style.setProperty('--mute-top', `${muteTop}px`);
-        });
-      } else {
-        requestAnimationFrame(() => {
-          this.$refs.showArea.style.setProperty('--background-height', '');
-          this.$refs.showArea.style.setProperty('--mute-top', '');
-        });
       }
     },
   },
