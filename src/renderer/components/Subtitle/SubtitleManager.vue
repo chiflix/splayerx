@@ -4,26 +4,10 @@
     :style="{ width: computedWidth + 'px', height: computedHeight + 'px' }"
   >
     <subtitle-renderer
-      v-if="currentFirstSubtitleId && duration"
       ref="subtitleRenderer"
-      :key="originSrc+currentFirstSubtitleId"
+      :key="originSrc"
       :subtitle-instance="firstSubtitleInstance"
-      :is-first-sub="true"
-      :lines-num="linesNum"
-      :first-lines-num.sync="firstLinesNum"
-      :first-tags.sync="firstTags"
-      :tags="tags"
-    />
-    <subtitle-renderer
-      v-if="currentSecondSubtitleId && duration && enabledSecondarySub"
-      ref="subtitleRenderer"
-      :key="originSrc+currentSecondSubtitleId"
-      :subtitle-instance="secondSubtitleInstance"
-      :is-first-sub="false"
-      :first-lines-num="firstLinesNum"
-      :lines-num.sync="linesNum"
-      :tags.sync="tags"
-      :first-tags="firstTags"
+      :secondary-instance="secondSubtitleInstance"
     />
   </div>
 </template>

@@ -167,11 +167,11 @@ export default {
       lastMousedownVolume: false,
       mousedownOnPlayButton: false,
       mousedownOnVolume: false,
-      preFullScreen: false,
       dragOver: false,
       progressTriggerStopped: false,
       openPlayListTimeId: NaN,
       playListState: false,
+      preFullScreen: false,
     };
   },
   computed: {
@@ -273,6 +273,9 @@ export default {
       this.updateMinimumSize();
     },
     isFullScreen(val) {
+      this.preFullScreen = process.platform === 'darwin' &&
+      this.intrinsicWidth / this.intrinsicHeight > window.screen.width / window.screen.height ?
+        val : false;
       if (this.touchBar) {
         if (!val) {
           this.touchBar.escapeItem.icon = this.createIcon('touchBar/fullscreen.png');
@@ -292,9 +295,6 @@ export default {
     },
   },
   mounted() {
-    if (process.platform === 'darwin') {
-      this.preFullScreen = this.isFullScreen;
-    }
     this.createTouchBar();
     this.UIElements = this.getAllUIComponents(this.$refs.controller);
     this.UIElements.forEach((value) => {
@@ -333,24 +333,6 @@ export default {
     });
     this.$bus.$on('drop', () => {
       this.dragOver = false;
-    });
-    this.$bus.$on('to-fullscreen', () => {
-      if (process.platform === 'darwin' &&
-        this.intrinsicWidth / this.intrinsicHeight > window.screen.width / window.screen.height) {
-        this.preFullScreen = true;
-      }
-    });
-    this.$bus.$on('toggle-fullscreen', () => {
-      if (process.platform === 'darwin' &&
-        this.intrinsicWidth / this.intrinsicHeight > window.screen.width / window.screen.height) {
-        this.preFullScreen = !this.preFullScreen;
-      }
-    });
-    this.$bus.$on('off-fullscreen', () => {
-      if (process.platform === 'darwin' &&
-        this.intrinsicWidth / this.intrinsicHeight > window.screen.width / window.screen.height) {
-        this.preFullScreen = false;
-      }
     });
     document.addEventListener('keydown', this.handleKeydown);
     document.addEventListener('keyup', this.handleKeyup);
