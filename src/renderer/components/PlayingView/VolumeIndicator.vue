@@ -49,7 +49,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { mapGetters, mapState } from 'vuex';
 import { Video as videoActions } from '@/store/actionTypes';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
@@ -58,6 +58,7 @@ import BaseIcon from '../BaseIconContainer.vue';
 
 export default {
   name: 'VolumeIndicator',
+  // @ts-ignore
   type: INPUT_COMPONENT_TYPE,
   components: {
     'base-info-card': BaseInfoCard,
@@ -96,7 +97,7 @@ export default {
       get() {
         return this.$store.getters.volume;
       },
-      set(val) {
+      set(val:number) {
         this.$store.dispatch(videoActions.VOLUME_UPDATE, val * 100);
       },
     },
@@ -108,7 +109,7 @@ export default {
     },
   },
   watch: {
-    showAllWidgets(val) {
+    showAllWidgets(val:boolean) {
       if (!val) this.volumeTriggerStopped = false;
     },
     wheelTriggered() {
@@ -121,10 +122,10 @@ export default {
         }, 1000);
       }
     },
-    showVolume(val) {
+    showVolume(val:boolean) {
       if (!val) document.onmouseup = null;
     },
-    muted(val) {
+    muted(val:boolean) {
       const { clock, volumeTriggerTimerId } = this;
       if (!this.volumeKeydown && this.volume !== 0) {
         this.volumeTriggerStopped = true;
@@ -155,7 +156,7 @@ export default {
         }, 1000);
       }
     },
-    volumeKeydown(newVal, oldVal) {
+    volumeKeydown(newVal:boolean, oldVal:boolean) {
       const { clock, volumeTriggerTimerId } = this;
       if (newVal) {
         this.volumeTriggerStopped = true;
@@ -205,7 +206,7 @@ export default {
         }, 200);
       }
     },
-    mouseDownOnIndicator(e) {
+    mouseDownOnIndicator(e:MouseEvent) {
       this.canToggleMute = true;
       const backgroundHeight = 100 + ((window.innerHeight - 180) / 3);
       const containerTop = (window.innerHeight - (backgroundHeight + 26)) / 2;

@@ -92,7 +92,7 @@
     />
   </div>
 </template>
-<script>
+<script lang="ts">
 import {
   mapState, mapGetters, mapActions,
   createNamespacedHelpers,
@@ -100,22 +100,23 @@ import {
 import { Input as inputActions } from '@/store/actionTypes';
 import { INPUT_COMPONENT_TYPE, getterTypes as iGT } from '@/plugins/input';
 import path from 'path';
-import Titlebar from '../Titlebar.vue';
-import PlayButton from './PlayButton.vue';
-import VolumeIndicator from './VolumeIndicator.vue';
-import AdvanceControl from './AdvanceControl.vue';
-import SubtitleControl from './SubtitleControl.vue';
-import PlaylistControl from './PlaylistControl.vue';
-import TheTimeCodes from './TheTimeCodes.vue';
-import TheProgressBar from './TheProgressBar.vue';
-import NotificationBubble from '../NotificationBubble.vue';
-import RecentPlaylist from './RecentPlaylist.vue';
-import { videodata } from '../../store/video';
+import Titlebar from '@/components/Titlebar.vue';
+import PlayButton from '@/components/PlayingView/PlayButton.vue';
+import VolumeIndicator from '@/components/PlayingView/VolumeIndicator.vue';
+import AdvanceControl from '@/components/PlayingView/AdvanceControl.vue';
+import SubtitleControl from '@/components/PlayingView/SubtitleControl.vue';
+import PlaylistControl from '@/components/PlayingView/PlaylistControl.vue';
+import TheTimeCodes from '@/components/PlayingView/TheTimeCodes.vue';
+import TheProgressBar from '@/containers/TheProgressBar.vue';
+import NotificationBubble from '@/components/NotificationBubble.vue';
+import RecentPlaylist from '@/components/PlayingView/RecentPlaylist.vue';
+import { videodata } from '@/store/video';
 
 const { mapGetters: inputMapGetters } = createNamespacedHelpers('InputPlugin');
 
 export default {
   name: 'TheVideoController',
+  // @ts-ignore
   type: INPUT_COMPONENT_TYPE,
   components: {
     titlebar: Titlebar,
@@ -177,10 +178,10 @@ export default {
   computed: {
     ...mapState({
       currentWidget: ({ Input }) => Input.mousemoveComponentName,
-      currentMouseupWidget: state => state.Input.mouseupComponentName,
-      currentMousedownWidget: state => state.Input.mousedownComponentName,
-      mousemoveClientPosition: state => state.Input.mousemoveClientPosition,
-      wheelTime: state => state.Input.wheelTimestamp,
+      currentMouseupWidget: ({ Input }) => Input.mouseupComponentName,
+      currentMousedownWidget: ({ Input }) => Input.mousedownComponentName,
+      mousemoveClientPosition: ({ Input }) => Input.mousemoveClientPosition,
+      wheelTime: ({ Input }) => Input.wheelTimestamp,
     }),
     ...mapGetters([
       'originSrc', 'paused', 'ratio', 'duration', 'intrinsicWidth', 'intrinsicHeight',
@@ -232,7 +233,7 @@ export default {
         this.videoChanged = false;
       }, 3000);
     },
-    isDragging(val, oldval) {
+    isDragging(val:boolean, oldval:boolean) {
       if (
         !val && oldval &&
         !['SubtitleControl', 'AdvanceControl'].includes(this.currentMousedownWidget)
@@ -240,26 +241,26 @@ export default {
         this.lastDragging = true;
       }
     },
-    isFocused(newVal) {
+    isFocused(newVal:boolean) {
       if (!newVal) {
         this.isValidClick = false;
       }
     },
-    isMinimized(newVal, oldVal) {
+    isMinimized(newVal:boolean, oldVal:boolean) {
       if (!newVal && oldVal) {
         this.isValidClick = true;
       }
     },
-    currentWidget(newVal, oldVal) {
+    currentWidget(newVal:any, oldVal:any) {
       this.lastWidget = oldVal;
     },
-    currentMousedownWidget(newVal, oldVal) {
+    currentMousedownWidget(newVal:any, oldVal:any) {
       this.lastMousedownWidget = oldVal;
     },
-    currentMouseupWidget(newVal, oldVal) {
+    currentMouseupWidget(newVal:any, oldVal:any) {
       this.lastMouseupWidget = oldVal;
     },
-    tempRecentPlaylistDisplayState(val) {
+    tempRecentPlaylistDisplayState(val:boolean) {
       this.updateMinimumSize();
       if (!val) {
         clearTimeout(this.openPlayListTimeId);
@@ -272,7 +273,7 @@ export default {
     ratio() {
       this.updateMinimumSize();
     },
-    isFullScreen(val) {
+    isFullScreen(val:boolean) {
       if (this.touchBar) {
         if (!val) {
           this.touchBar.escapeItem.icon = this.createIcon('touchBar/fullscreen.png');
@@ -281,7 +282,7 @@ export default {
         }
       }
     },
-    paused(val) {
+    paused(val:boolean) {
       if (this.playButton) {
         if (val) {
           this.playButton.icon = this.createIcon('touchBar/play.png');
@@ -297,7 +298,7 @@ export default {
     }
     this.createTouchBar();
     this.UIElements = this.getAllUIComponents(this.$refs.controller);
-    this.UIElements.forEach((value) => {
+    this.UIElements.forEach((value:any) => {
       this.displayState[value.name] = value.name !== 'RecentPlaylist';
       if (value.name === 'PlaylistControl' && !this.playingList.length) {
         this.displayState.PlaylistControl = false;
@@ -365,8 +366,9 @@ export default {
       updateKeyup: inputActions.KEYUP_UPDATE,
       updateWheel: inputActions.WHEEL_UPDATE,
     }),
-    createIcon(iconPath) {
+    createIcon(iconPath:string) {
       const { nativeImage } = this.$electron.remote;
+      // @ts-ignore
       return nativeImage.createFromPath(path.join(__static, iconPath)).resize({
         width: 20,
       });
@@ -409,7 +411,7 @@ export default {
         : [320, 180];
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', minimumSize);
     },
-    conflictResolve(name) {
+    conflictResolve(name:string) {
       Object.keys(this.widgetsStatus).forEach((item) => {
         if (item !== name) {
           this.widgetsStatus[item].showAttached = false;
@@ -419,14 +421,14 @@ export default {
     cancelPlayListTimeout() {
       clearTimeout(this.openPlayListTimeId);
     },
-    updatePlaylistShowAttached(event) {
+    updatePlaylistShowAttached(event:boolean) {
       clearTimeout(this.openPlayListTimeId);
       this.widgetsStatus.PlaylistControl.showAttached = this.playListState = event;
     },
-    updatePlayButtonState(mousedownState) {
+    updatePlayButtonState(mousedownState:boolean) {
       this.mousedownOnPlayButton = mousedownState;
     },
-    updateVolumeState(mousedownState) {
+    updateVolumeState(mousedownState:boolean) {
       this.mousedownOnVolume = mousedownState;
     },
     onTickUpdate() {
@@ -482,7 +484,9 @@ export default {
       });
     },
     UIDisplayManager() {
-      const tempObject = {};
+      const tempObject = {
+        RecentPlaylist: false,
+      };
       Object.keys(this.displayState).forEach((index) => {
         tempObject[index] = !this.widgetsStatus.PlaylistControl.showAttached;
       });
@@ -532,7 +536,7 @@ export default {
         .some(key => this.widgetsStatus[key].showAttached === true);
     },
     // Event listeners
-    handleMousemove(event) {
+    handleMousemove(event:MouseEvent) {
       const { clientX, clientY, target } = event;
       this.mouseStopped = false;
       if (this.isMousedown) {
@@ -557,11 +561,11 @@ export default {
         this.clock.clearTimeout(this.mouseLeftId);
       }
     },
-    handleMousedown(event) {
+    handleMousedown(event:MouseEvent) {
       const { target, buttons } = event;
       this.updateMousedown({ componentName: this.getComponentName(target), buttons });
     },
-    handleMouseup(event) {
+    handleMouseup(event:MouseEvent) {
       const { target, buttons } = event;
       this.updateMouseup({ componentName: this.getComponentName(target), buttons });
     },
@@ -570,7 +574,7 @@ export default {
         this.mouseLeftWindow = true;
       }, this.mouseleftDelay);
     },
-    handleMousedownLeft(e) {
+    handleMousedownLeft(e:MouseEvent) {
       this.isMousedown = true;
       this.lastMousedownPlaybutton = this.getComponentName(e.target) === 'PlayButton';
       this.lastMousedownVolume = this.getComponentName(e.target) === 'VolumeIndicator';
@@ -619,13 +623,13 @@ export default {
         }
       }
     },
-    handleKeydown({ code }) {
+    handleKeydown({ code }: { code:number }) {
       this.updateKeydown({ pressedKeyboardCode: code });
     },
-    handleKeyup({ code }) {
+    handleKeyup({ code }: { code:number }) {
       this.updateKeyup({ releasedKeyboardCode: code });
     },
-    handleWheel({ target, timeStamp }) {
+    handleWheel({ target, timeStamp }: { target:any, timeStamp:number }) {
       this.updateWheel({
         componentName: this.getComponentName(target),
         timestamp: timeStamp,
@@ -633,26 +637,26 @@ export default {
       });
     },
     // Helper functions
-    getAllUIComponents(rootElement) {
+    getAllUIComponents(rootElement: any) {
       const { children } = rootElement;
-      const names = [];
+      const names:any[] = [];
       for (let i = 0; i < children.length; i += 1) {
-        this.processSingleElement(children[i]).forEach((componentName) => {
+        this.processSingleElement(children[i]).forEach((componentName:any) => {
           names.push(componentName);
         });
       }
       return names;
     },
-    isChildComponent(element) {
+    isChildComponent(element:any) {
       let componentName = null;
-      this.$children.forEach((childComponenet) => {
+      this.$children.forEach((childComponenet:any) => {
         if (childComponenet.$el === element) {
           componentName = childComponenet.$options.name;
         }
       });
       return componentName;
     },
-    processSingleElement(element) {
+    processSingleElement(element:any) {
       const names = [];
       const name = this.isChildComponent(element);
       if (name) {
@@ -668,11 +672,11 @@ export default {
       }
       return names;
     },
-    getComponentName(element) {
+    getComponentName(element:any) {
       let componentName = this.$options.name;
       if (element instanceof HTMLElement || element instanceof SVGElement) {
         /* eslint-disable consistent-return */
-        this.UIElements.forEach((UIElement) => {
+        this.UIElements.forEach((UIElement: any) => {
           if (UIElement.element.contains(element)) {
             componentName = UIElement.name;
             return componentName;

@@ -17,7 +17,7 @@
     <Labels class="rate" />
   </div>
 </template>
-<script>
+<script lang="ts">
 import { mapGetters } from 'vuex';
 import { videodata } from '@/store/video';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
@@ -25,6 +25,7 @@ import Labels from './Labels.vue';
 
 export default {
   name: 'TheTimeCodes',
+  // @ts-ignore
   type: INPUT_COMPONENT_TYPE,
   components: {
     Labels,
@@ -86,7 +87,7 @@ export default {
         }
       }
     },
-    updateTimeContent(time) {
+    updateTimeContent(time:number) {
       if (this.$refs.timeContent) {
         this.$refs.timeContent.textContent =
         this.timecodeFromSeconds(this.isRemainTime ?

@@ -12,7 +12,7 @@
     />
   </div>
 </template>
-<script>
+<script lang="ts">
 import { mapState } from 'vuex';
 import lottie from '@/components/lottie.vue';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
@@ -20,6 +20,7 @@ import animationData from '@/assets/playlist.json';
 
 export default {
   name: 'PlaylistControl',
+  // @ts-ignore
   type: INPUT_COMPONENT_TYPE,
   components: {
     lottie,
@@ -42,7 +43,7 @@ export default {
     }),
   },
   methods: {
-    handleAnimation(anim) {
+    handleAnimation(anim:any) {
       this.anim = anim;
     },
     togglePlaylistDisplay() {

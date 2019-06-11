@@ -30,7 +30,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { mapGetters } from 'vuex';
 import Icon from '../BaseIconContainer.vue';
 
@@ -51,10 +51,10 @@ export default {
     ...mapGetters(['rate', 'singleCycle']),
   },
   watch: {
-    singleCycle(val) {
+    singleCycle(val:boolean) {
       this.showCycleLabel = val;
     },
-    rate(val) {
+    rate(val:number) {
       if (val === 1 && !this.changeSrc) {
         this.changeState = true;
         setTimeout(() => {
