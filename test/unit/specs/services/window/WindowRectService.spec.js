@@ -16,8 +16,8 @@ describe('WindowRectService logic service', () => {
       const target2 = isRatioBigger ? [
         MAXRECT[0],
         Math.round((MAXRECT[0] / (5000 / 3000))),
-      ] :
-        [
+      ]
+        : [
           Math.round((5000 * MAXRECT[1]) / 3000),
           MAXRECT[1],
         ];
@@ -46,8 +46,8 @@ describe('WindowRectService logic service', () => {
         window.screen.availTop,
         window.screen.availWidth,
         Math.round(window.screen.availWidth / (5000 / 3000)),
-      ] :
-        [
+      ]
+        : [
           window.screen.availLeft,
           window.screen.availTop,
           Math.round((5000 * window.screen.availHeight) / 3000),

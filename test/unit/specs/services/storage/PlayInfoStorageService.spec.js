@@ -56,7 +56,7 @@ describe('PlayInfoStorageService logic service', () => {
     const demo = {
       id: 1,
     };
-    sinon.stub(info, 'getValueByKey').callsFake(() => throw new Error());
+    sinon.stub(info, 'getValueByKey').callsFake(() => { throw new Error(); });
     sinon.stub(info, 'update').callsFake(() => demo);
     const result = await playInfoStorageService.updateRecentPlayedBy('1', {});
     expect(result).to.be.equal(false);
@@ -67,7 +67,7 @@ describe('PlayInfoStorageService logic service', () => {
       id: 1,
     };
     sinon.stub(info, 'getValueByKey').callsFake(() => demo);
-    sinon.stub(info, 'update').callsFake(() => throw new Error());
+    sinon.stub(info, 'update').callsFake(() => { throw new Error(); });
     const result = await playInfoStorageService.updateRecentPlayedBy('1', {});
     expect(result).to.be.equal(false);
   });
@@ -82,7 +82,7 @@ describe('PlayInfoStorageService logic service', () => {
   });
 
   it('should fail deleteRecentPlayedBy when throw error', async () => {
-    sinon.stub(info, 'delete').callsFake(() => throw new Error());
+    sinon.stub(info, 'delete').callsFake(() => { throw new Error(); });
     const result = await playInfoStorageService.deleteRecentPlayedBy('1', {});
     expect(result).to.be.equal(false);
   });

@@ -61,4 +61,3 @@ describe('JsonStorage libs', () => {
     expect(r.testString).to.be.equal(undefined);
   });
 });
-

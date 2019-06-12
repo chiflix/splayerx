@@ -47,7 +47,7 @@ describe('SettingStorageService logic service', () => {
 
   it('should fail updateSubtitleStyle when throw error', async () => {
     sinon.stub(JsonStorage.prototype, 'get').callsFake(() => subStyleDemo);
-    sinon.stub(JsonStorage.prototype, 'set').callsFake(() => throw new Error());
+    sinon.stub(JsonStorage.prototype, 'set').callsFake(() => { throw new Error(); });
     const jsonStorage = new JsonStorage();
     settingStorageService = new SettingStorageService(jsonStorage);
     let r = false;
@@ -61,7 +61,7 @@ describe('SettingStorageService logic service', () => {
 
   it('should successfully updatePlaybackStates', async () => {
     sinon.stub(JsonStorage.prototype, 'get').callsFake(() => subStyleDemo);
-    sinon.stub(JsonStorage.prototype, 'set').callsFake(() => throw new Error());
+    sinon.stub(JsonStorage.prototype, 'set').callsFake(() => { throw new Error(); });
     const jsonStorage = new JsonStorage();
     settingStorageService = new SettingStorageService(jsonStorage);
     let r = false;

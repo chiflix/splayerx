@@ -95,8 +95,8 @@ export default {
       required: true,
       default: () => ['loadedmetadata'],
       validator: (value: string[]) => (
-        value.length === 0 ||
-        value.every(element => DEFAULT_VIDEO_EVENTS.includes(element))),
+        value.length === 0
+        || value.every(element => DEFAULT_VIDEO_EVENTS.includes(element))),
     },
     // video style
     styles: {
@@ -174,7 +174,7 @@ export default {
       this.removeEvents(oldVal.filter((event: string) => !newVal.includes(event)));
     },
     // styles
-    styles(newVal: Object) {
+    styles(newVal: Record<string, any>) {
       this.setStyle(newVal);
     },
   },
@@ -223,7 +223,7 @@ export default {
         this.$emit(event, value);
       }
     },
-    addEvents(events:string[]) {
+    addEvents(events: string[]) {
       events.forEach(async (event) => {
         if (!this.eventListeners.has(event)) {
           if (event !== 'audiotrack') {
@@ -267,7 +267,7 @@ export default {
         }
       });
     },
-    setStyle(styles: Object) {
+    setStyle(styles: Record<string, any>) {
       const style = Object.keys(styles);
       if (style.length > 0) {
         style.forEach((styleName) => {

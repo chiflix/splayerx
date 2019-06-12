@@ -83,13 +83,13 @@ export default {
     }),
   },
   watch: {
-    winAngle(val:number) {
+    winAngle(val: number) {
       this.changeWindowRotate(val);
     },
-    videoId(val:string, oldVal:string) {
+    videoId(val: string, oldVal: string) {
       if (oldVal) this.saveScreenshot(oldVal);
     },
-    originSrc(val:string, oldVal:string) {
+    originSrc(val: string, oldVal: string) {
       if (process.mas && oldVal) {
         this.$bus.$emit(`stop-accessing-${oldVal}`, oldVal);
       }
@@ -113,7 +113,7 @@ export default {
     this.updatePlayinglistRate({ oldDir: '', newDir: path.dirname(this.originSrc), playingList: this.playingList });
   },
   mounted() {
-    this.$electron.ipcRenderer.on('quit', (needToRestore:boolean) => {
+    this.$electron.ipcRenderer.on('quit', (needToRestore: boolean) => {
       if (needToRestore) this.needToRestore = needToRestore;
       this.quit = true;
     });
@@ -135,10 +135,10 @@ export default {
     this.$bus.$on('toggle-muted', () => {
       this.toggleMute();
     });
-    this.$bus.$on('send-lastplayedtime', (e:number) => {
+    this.$bus.$on('send-lastplayedtime', (e: number) => {
       this.lastPlayedTime = e;
     });
-    this.$bus.$on('send-audiotrackid', (id:string) => {
+    this.$bus.$on('send-audiotrackid', (id: string) => {
       this.lastAudioTrackId = id;
     });
     this.$bus.$on('toggle-playback', () => {
@@ -155,9 +155,9 @@ export default {
         this.$store.commit('LOOP_UPDATE', true);
       }
     });
-    this.$bus.$on('seek', (e:number) => { this.seekTime = [e]; });
-    this.$bus.$on('seek-forward', (delta:number) => this.$bus.$emit('seek', videodata.time + Math.abs(delta)));
-    this.$bus.$on('seek-backward', (delta:number) => {
+    this.$bus.$on('seek', (e: number) => { this.seekTime = [e]; });
+    this.$bus.$on('seek-forward', (delta: number) => this.$bus.$emit('seek', videodata.time + Math.abs(delta)));
+    this.$bus.$on('seek-backward', (delta: number) => {
       const finalSeekTime = videodata.time - Math.abs(delta);
       // find a way to stop wheel event until next begin
       // if (finalSeekTime <= 0)
@@ -191,7 +191,7 @@ export default {
       removeAllAudioTrack: videoActions.REMOVE_ALL_AUDIO_TRACK,
       updatePlayinglistRate: videoActions.UPDATE_PLAYINGLIST_RATE,
     }),
-    onMetaLoaded(event:any) {
+    onMetaLoaded(event: any) {
       this.videoElement = event.target;
       this.videoConfigInitialize({
         paused: false,
@@ -237,11 +237,11 @@ export default {
       const oldRect = this.winPos.concat(this.winSize);
       windowRectService.calculateWindowRect(videoSize, true, oldRect, maxVideoSize);
     },
-    onAudioTrack(event:any) {
+    onAudioTrack(event: any) {
       const { type, track } = event;
       this[`${type}AudioTrack`](track);
     },
-    changeWindowRotate(val:number) {
+    changeWindowRotate(val: number) {
       requestAnimationFrame(() => {
         const scale = windowRectService.calculateWindowScaleBy(this.isFullScreen, val, this.ratio);
         this.$refs.videoCanvas.$el.style.setProperty('transform', `rotate(${val}deg) scale(${scale}, ${scale})`);
@@ -263,7 +263,7 @@ export default {
       });
       windowRectService.uploadWindowBy(false, 'playing-view', this.winAngle, this.winAngleBeforeFullScreen, this.winSizeBeforeFullScreen, this.winPos);
     },
-    async saveScreenshot(videoId:string) {
+    async saveScreenshot(videoId: string) {
       const { videoElement } = this;
       const canvas = this.$refs.thumbnailCanvas;
       // todo: use metaloaded to get videoHeight and videoWidth
@@ -301,7 +301,7 @@ export default {
     savePlaybackStates() {
       return settingStorageService.updatePlaybackStates({ volume: this.volume, muted: this.muted });
     },
-    beforeUnloadHandler(e:any) {
+    beforeUnloadHandler(e: any) {
       this.removeAllAudioTrack();
       if (!this.asyncTasksDone && !this.needToRestore) {
         let savePromise = this.saveScreenshot(this.videoId);
