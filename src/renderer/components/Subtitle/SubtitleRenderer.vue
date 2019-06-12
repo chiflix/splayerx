@@ -1,6 +1,5 @@
 <template>
   <div
-    :class="'subtitle-style'+chosenStyle"
     class="subtitle-loader"
   >
     <div
@@ -18,8 +17,12 @@
             ? `vertical-${cue.tags.vertical}` : '',
           lineHeight: subtitleInstance && secondaryInstance ? '112%' : 'normal',
           marginBottom: item[ind + 1] && cue.category === 'first' &&
-            item[ind + 1].category === 'secondary' ?`${subtitleSpace / scaleNum}px` : ''
+            item[ind + 1].category === 'secondary' ?`${subtitleSpace / scaleNum}px` : '',
+          fontWeight: cue.tags.b ? 'bold' : '',
+          fontStyle: cue.tags.i ? 'italic' : '',
+          textDecoration: cue.tags.u ? 'underline' : cue.tags.s ? 'line-through' : '',
         }"
+        :class="'subtitle-style'+chosenStyle"
       >{{ cue.text }}</p>
     </div>
     <div
@@ -39,7 +42,11 @@
         :style="{
           whiteSpace: 'pre',
           zoom: cue.category === 'first' ? `${scaleNum}` : `${secondarySubScale}`,
+          fontWeight: cue.tags.b ? 'bold' : '',
+          fontStyle: cue.tags.i ? 'italic' : '',
+          textDecoration: cue.tags.u ? 'underline' : cue.tags.s ? 'line-through' : '',
         }"
+        :class="'subtitle-style'+chosenStyle"
       >{{ cue.text }}</p>
     </div>
   </div>
@@ -90,7 +97,7 @@ export default {
     firstType() {
       return this.subtitleInstance ? this.subtitleInstance.metaInfo.format : '';
     },
-    secondfirstType() {
+    secondType() {
       return this.secondaryInstance ? this.secondaryInstance.metaInfo.format : '';
     },
     secondarySubScale() { // 第二字幕的字号最小不小于9px
