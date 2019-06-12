@@ -1,17 +1,17 @@
 <template>
   <div
     ref="showArea"
-    class="show-area"
     @mouseenter="enterArea"
     @mouseleave="leaveArea"
+    class="show-area"
   >
     <div
-      class="trigger-area"
       :class="showVolume ? 'fade-in' : 'fade-out'"
       :style="{cursor: showAllWidgets ? 'pointer' : 'none'}"
       @mouseenter="actionArea"
       @mouseleave="leaveActionArea"
       @mousedown="mouseDownOnIndicator"
+      class="trigger-area"
     >
       <div
         ref="indicatorContainer"
@@ -24,24 +24,24 @@
         >
           <div
             ref="indicator"
-            class="indicator"
             :style="{
               height: volume * 100 + '%',
               opacity: muted ? 0.25 : 0.8,
             }"
+            class="indicator"
           />
         </base-info-card>
       </div>
       <div
-        class="volume"
         @mouseup="mouseupOnMuteIcon"
+        class="volume"
       >
         <transition name="fade">
           <base-icon
             v-show="showIcon"
+            :effect="muted || volume <= 0 ? 'mute' : 'icon'"
             class="volume-icon"
             type="volume"
-            :effect="muted || volume <= 0 ? 'mute' : 'icon'"
           />
         </transition>
       </div>
@@ -209,16 +209,16 @@ export default {
       this.canToggleMute = true;
       const backgroundHeight = 100 + ((window.innerHeight - 180) / 3);
       const containerTop = (window.innerHeight - (backgroundHeight + 26)) / 2;
-      const percentOfVolume = ((window.innerHeight - e.clientY) - (containerTop) - 19) /
-        this.$refs.indicatorContainer.clientHeight;
+      const percentOfVolume = ((window.innerHeight - e.clientY) - (containerTop) - 19)
+        / this.$refs.indicatorContainer.clientHeight;
       if (percentOfVolume > 0) this.volume = percentOfVolume;
       this.mousedown = true;
       this.$emit('update:volume-state', true);
       let isMoved = false;
       document.onmousemove = (e) => {
         isMoved = true;
-        const percentOfVolume = ((window.innerHeight - e.clientY) - (containerTop) - 19) /
-          this.$refs.indicatorContainer.clientHeight;
+        const percentOfVolume = ((window.innerHeight - e.clientY) - (containerTop) - 19)
+          / this.$refs.indicatorContainer.clientHeight;
         if (percentOfVolume > 0) this.volume = percentOfVolume;
       };
       document.onmouseup = () => {

@@ -4,15 +4,15 @@
       <transition name="advance-trans-l">
         <div
           v-show="showAttached"
-          class="advanced"
           :style="{
             transition: showAttached ? '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' :
               '150ms cubic-bezier(0.17, 0.67, 0.17, 0.98)'
           }"
+          class="advanced"
         >
           <advance-main-menu
-            class="mainMenu"
             :clear-state="showAttached"
+            class="mainMenu"
           />
         </div>
       </transition>
@@ -25,8 +25,8 @@
       >
         <lottie
           :options="defaultOptions"
-          lot="advance"
           @animCreated="handleAnimation"
+          lot="advance"
         />
       </div>
     </div>
@@ -103,8 +103,8 @@ export default {
     currentMouseupComponent(val: string) {
       setTimeout(() => {
         if (this.currentMousedownComponent !== 'notification-bubble' && val !== '') {
-          if (this.lastDragging || (this.currentMousedownComponent === this.$options.name &&
-              val === 'the-video-controller')) {
+          if (this.lastDragging || (this.currentMousedownComponent === this.$options.name
+              && val === 'the-video-controller')) {
             if (this.showAttached) {
               this.anim.playSegments([68, 73], true);
               this.$emit('update:lastDragging', false);

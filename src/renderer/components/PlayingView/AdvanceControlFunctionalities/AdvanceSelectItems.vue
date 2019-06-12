@@ -1,6 +1,5 @@
 <template>
   <div
-    class="itemContainer"
     :style="{
       height: heightSize,
       backgroundImage: !isChosen ? '' :
@@ -11,20 +10,20 @@
     @mouseleave="handleSubMouseLeave"
   >
     <div
-      class="detail"
       :style="{
         backgroundImage: !isChosen && hoveredText && isSubtitleAvailable ?
           'linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.045) 20%, ' +
           'rgba(255,255,255,0.00) 78%, rgba(255,255,255,0.00) 100%)' : '',
         transition: 'opacity 200ms',
       }"
+      class="detail"
     >
       <div
-        class="textContainer"
         :style="{
           cursor: isChosen || selectedType !== selectedTypeEnum.SUBTITLE || !isSubtitleAvailable ?
             'default' : 'pointer',
         }"
+        class="textContainer advanceNormalTitle"
       >
         <p
           :style="{
@@ -32,15 +31,16 @@
               'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
             transition: 'color 300ms',
           }"
+          class="textItem"
         >
           {{ selectedType === selectedTypeEnum.SUBTITLE ?
             $t('advance.subDelay') : $t('advance.audioDelay') }}
         </p>
         <div
-          class="rightItem"
           :style="{
             color: isSubtitleAvailable ? 'rgba(255, 255, 255, 0.6)' : 'rgba(255, 255, 255, 0.2)'
           }"
+          class="rightItem"
         >
           {{ selectedType === selectedTypeEnum.SUBTITLE ? screenSubtitleDelay : screenAudioDelay }}
         </div>
@@ -52,28 +52,28 @@
         >
           <div class="rowContainer">
             <Icon
-              type="minus"
-              class="decrease"
               @mousedown.native="handleDeMousedown"
               @mouseup.native="handleDeMouseup"
               @mouseleave.native="handleDeMouseup"
+              type="minus"
+              class="decrease"
             />
             <div class="card" />
             <div class="delay">
               {{ delayNum }}
             </div>
             <Icon
-              type="plus"
-              class="increase"
               @mousedown.native="handleInMousedown"
               @mouseup.native="handleInMouseup"
               @mouseleave.native="handleInMouseup"
+              type="plus"
+              class="increase"
             />
             <Icon
               v-show="subtitleDelay !== 0"
+              @click.native="handleResetDelay"
               type="reset"
               class="resetPos"
-              @click.native="handleResetDelay"
             />
           </div>
         </div>
@@ -137,7 +137,8 @@ export default {
     heightSize() {
       if (this.size >= 289 && this.size <= 480) {
         return this.isChosen ? '74px' : '37px';
-      } else if (this.size >= 481 && this.size < 1080) {
+      }
+      if (this.size >= 481 && this.size < 1080) {
         return this.isChosen ? `${74 * 1.2}px` : `${37 * 1.2}px`;
       }
       return this.isChosen ? `${74 * 1.2 * 1.4}px` : `${37 * 1.2 * 1.4}px`;

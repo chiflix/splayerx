@@ -4,7 +4,6 @@
       v-for="(cue, index) in currentCues"
       :id="cueType+index"
       :key="index"
-      class="subContainer"
       :class="avaliableClass(index)"
       :style="{
         writingMode: isVtt ? `vertical-${cue.tags.vertical}` : '',
@@ -13,6 +12,7 @@
         bottom: subBottom(index),
         transform: transPos(index),
       }"
+      class="subContainer"
     >
       <cue-renderer
         :text="cue.text"
@@ -102,8 +102,8 @@ export default {
       return (this.scaleNum * 5) / 6 < 1 ? 1 : (this.scaleNum * 5) / 6;
     },
     shouldTranslate() {
-      return !this.tags.pos && !this.firstTags.pos &&
-        this.tags.alignment === this.firstTags.alignment;
+      return !this.tags.pos && !this.firstTags.pos
+        && this.tags.alignment === this.firstTags.alignment;
     },
   },
   watch: {
@@ -162,8 +162,8 @@ export default {
       const parsedData = parsed.dialogues;
       this.videoSegments = this.getVideoSegments(parsedData, this.duration);
       this.subPlayResX = !isEmpty(parsed.info) ? Number(parsed.info.PlayResX) : this.intrinsicWidth;
-      this.subPlayResY = !isEmpty(parsed.info) ? Number(parsed.info.PlayResY) :
-        this.intrinsicHeight;
+      this.subPlayResY = !isEmpty(parsed.info) ? Number(parsed.info.PlayResY)
+        : this.intrinsicHeight;
     });
     subtitleInstance.load();
   },
@@ -192,7 +192,8 @@ export default {
           return `subtitle-alignment${this.currentTags[index].alignment}`;
         }
         return '';
-      } else if (this.isVtt && this.currentTags[index].line && this.currentTags[index].position) {
+      }
+      if (this.isVtt && this.currentTags[index].line && this.currentTags[index].position) {
         return '';
       }
       return 'subtitle-alignment2';
@@ -216,8 +217,8 @@ export default {
           const { text: text1, tags: tags1 } = cue1;
           const { text: text2, tags: tags2 } = cue2;
           return (
-            text1 === text2 &&
-            isEqual(tags1, tags2)
+            text1 === text2
+            && isEqual(tags1, tags2)
           );
         },
       ).length;
@@ -231,9 +232,9 @@ export default {
             start, end,
             text, fragments,
           }) => (
-            start <= currentTime &&
-            end >= currentTime &&
-            (!!text || !!fragments)
+            start <= currentTime
+            && end >= currentTime
+            && (!!text || !!fragments)
           )));
         if (cues.length !== this.currentCues.length || !this.isSameCues(cues, this.currentCues)) {
           this.currentCues = cues;
@@ -333,9 +334,9 @@ export default {
       return this.subToTop || [7, 8, 9].includes(alignment) ? 0 : transPercent;
     },
     secondarySubTransPercent(transPercent, alignment) { // 当播放列表打开，第二字幕对应的transPercent
-      return (this.subToTop || [7, 8, 9].includes(alignment)) &&
-      this.currentSecondSubtitleId !== '' && this.currentFirstSubtitleId !== '' &&
-      this.enabledSecondarySub ? transPercent : 0;
+      return (this.subToTop || [7, 8, 9].includes(alignment))
+      && this.currentSecondSubtitleId !== '' && this.currentFirstSubtitleId !== ''
+      && this.enabledSecondarySub ? transPercent : 0;
     },
     transPos(index) { // eslint-disable-line
       const { currentTags: tags, currentTexts: texts, isVtt } = this;
@@ -377,8 +378,9 @@ export default {
         subHeightWithDirection = [firstSubHeight, secondSubHeight];
       }
       if (subHeightWithDirection.length === 2) {
-        transPercent = -((subHeightWithDirection[0] + ((subSpaceFactorsA[this.chosenSize] *
-          this.winHeight) + subSpaceFactorsB[this.chosenSize])) / subHeightWithDirection[1]) * 100;
+        transPercent = -((subHeightWithDirection[0] + ((subSpaceFactorsA[this.chosenSize]
+          * this.winHeight) + subSpaceFactorsB[this.chosenSize]))
+            / subHeightWithDirection[1]) * 100;
       }
       if (!isVtt) {
         if (this.isFirstSub) { // 第一字幕不是VTT
@@ -388,13 +390,13 @@ export default {
             ${this.translateNum(tags[index].alignment)[0]}%,
             ${this.translateNum(tags[index].alignment)[1] + this.assLine(index)}%)`;
           }
-          if (this.currentSecondSubtitleId !== '' &&
-            this.enabledSecondarySub && this.shouldTranslate) {
+          if (this.currentSecondSubtitleId !== ''
+            && this.enabledSecondarySub && this.shouldTranslate) {
             // 没有位置信息时且同时存在第一第二字幕时第一字幕需要translate的值
             return `translate(${initialTranslate[tags[index].alignment - 1][0]}%,
             ${this.transDirection(
-    initialTranslate[tags[index].alignment - 1][1] +
-      this.firstSubTransPercent(transPercent, tags[index].alignment),
+    initialTranslate[tags[index].alignment - 1][1]
+      + this.firstSubTransPercent(transPercent, tags[index].alignment),
     tags[index].alignment,
   ) + this.assLine(index)}%)`;
           }
@@ -418,8 +420,8 @@ export default {
         return `translate(
         ${initialTranslate[tags[index].alignment - 1][0]}%,
         ${this.transDirection(
-    initialTranslate[tags[index].alignment - 1][1] +
-      this.secondarySubTransPercent(transPercent, tags[index].alignment),
+    initialTranslate[tags[index].alignment - 1][1]
+      + this.secondarySubTransPercent(transPercent, tags[index].alignment),
     tags[index].alignment,
   ) + this.assLine(index)}%)`;
       }
@@ -432,13 +434,13 @@ export default {
           if (tags[index] && tags[index].vertical) {
             return `translate(
             ${initialTranslate[1][0] + this.vttLine(index)}%,
-            ${this.transDirection(initialTranslate[1][1] +
-              this.firstSubTransPercent(transPercent))}%)`;
+            ${this.transDirection(initialTranslate[1][1]
+              + this.firstSubTransPercent(transPercent))}%)`;
           }
           return `translate(
           ${initialTranslate[1][0]}%,
-          ${this.transDirection(initialTranslate[1][1] + this.firstSubTransPercent(transPercent)) +
-          this.vttLine(index)}%)`;
+          ${this.transDirection(initialTranslate[1][1] + this.firstSubTransPercent(transPercent))
+          + this.vttLine(index)}%)`;
         }
         // 只有第一字幕时需要translate的值
         if (tags[index] && tags[index].vertical) {
@@ -453,8 +455,8 @@ export default {
       return `translate(
       ${initialTranslate[1][0]}%,
       ${this.transDirection(
-    initialTranslate[1][1] +
-      this.secondarySubTransPercent(transPercent, tags[index].alignment),
+    initialTranslate[1][1]
+      + this.secondarySubTransPercent(transPercent, tags[index].alignment),
     tags[index].alignment,
   ) + this.assLine(index)}%)`;
     },
@@ -462,7 +464,8 @@ export default {
       const { currentTags: tags, type, isVtt } = this;
       if (!isVtt && tags[index].pos) {
         return `${(tags[index].pos.x / this.subPlayResX) * 100}vw`;
-      } else if (type === 'vtt' && tags[index].line && tags[index].position) {
+      }
+      if (type === 'vtt' && tags[index].line && tags[index].position) {
         if (tags[index].vertical) {
           if (!tags[index].line.includes('%')) {
             tags[index].line = Math.abs(tags[index].line) * 100;
@@ -479,11 +482,13 @@ export default {
       if (!isVtt) {
         if (tags[index].pos) {
           return `${(tags[index].pos.y / this.subPlayResY) * 100}vh`;
-        } else if ([7, 8, 9].includes(tags[index].alignment)) {
+        }
+        if ([7, 8, 9].includes(tags[index].alignment)) {
           return `${(60 / 1080) * 100}%`;
         }
         return '';
-      } else if (isVtt && tags[index].line && tags[index].position) {
+      }
+      if (isVtt && tags[index].line && tags[index].position) {
         if (tags[index].vertical) {
           return tags[index].position;
         }
@@ -497,8 +502,8 @@ export default {
     },
     subBottom(index) {
       const { currentTags: tags, isVtt } = this;
-      if (((!isVtt && [1, 2, 3].includes(tags[index].alignment)) && !tags[index].pos) ||
-        (isVtt && (!tags[index].line || !tags[index].position))) {
+      if (((!isVtt && [1, 2, 3].includes(tags[index].alignment)) && !tags[index].pos)
+        || (isVtt && (!tags[index].line || !tags[index].position))) {
         return `${(60 / 1080) * 100}%`;
       }
       return '';

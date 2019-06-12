@@ -62,8 +62,8 @@ const getters = {
   // network state
   originSrc: state => state.src,
   convertedSrc: (state) => {
-    const converted = process.platform === 'win32' ? encodeURIComponent(state.src).replace(/%3A/g, ':').replace(/(%5C)|(%2F)/g, '/') :
-      encodeURIComponent(state.src).replace(/%3A/g, ':').replace(/%2F/g, '/');
+    const converted = process.platform === 'win32' ? encodeURIComponent(state.src).replace(/%3A/g, ':').replace(/(%5C)|(%2F)/g, '/')
+      : encodeURIComponent(state.src).replace(/%3A/g, ':').replace(/%2F/g, '/');
     return process.platform === 'win32' ? converted : `file://${converted}`;
   },
   // playback state
@@ -93,19 +93,19 @@ const getters = {
   intrinsicHeight: state => state.intrinsicHeight,
   computedWidth: (state, getters) => {
     if (getters.winAngle === 0 || getters.winAngle === 180) {
-      return Math.round(getters.winRatio > getters.ratio ?
-        getters.winHeight * getters.ratio : getters.winWidth);
+      return Math.round(getters.winRatio > getters.ratio
+        ? getters.winHeight * getters.ratio : getters.winWidth);
     }
-    return Math.round(getters.winRatio > 1 / getters.ratio ?
-      getters.winHeight * (1 / getters.ratio) : getters.winWidth);
+    return Math.round(getters.winRatio > 1 / getters.ratio
+      ? getters.winHeight * (1 / getters.ratio) : getters.winWidth);
   },
   computedHeight: (state, getters) => {
     if (getters.winAngle === 0 || getters.winAngle === 180) {
-      return Math.round(getters.winRatio < getters.ratio ?
-        getters.winWidth / getters.ratio : getters.winHeight);
+      return Math.round(getters.winRatio < getters.ratio
+        ? getters.winWidth / getters.ratio : getters.winHeight);
     }
-    return Math.round(getters.winRatio < 1 / getters.ratio ?
-      getters.winWidth / (1 / getters.ratio) : getters.winHeight);
+    return Math.round(getters.winRatio < 1 / getters.ratio
+      ? getters.winWidth / (1 / getters.ratio) : getters.winHeight);
   },
   ratio: state => state.ratio,
   audioDelay: state => state.audioDelay,

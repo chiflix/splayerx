@@ -28,10 +28,10 @@
       video controller fade-out video will shake -->
     </transition>
     <div
-      class="mask"
       :style="{
         backgroundColor: maskBackground
       }"
+      class="mask"
     />
     <canvas
       ref="thumbnailCanvas"
@@ -202,8 +202,8 @@ export default {
         currentTime: 0,
       });
       if (event.target.duration && Number.isFinite(event.target.duration)) {
-        const generationInterval = Math.round(event.target.duration /
-          (window.screen.width / 4)) || 1;
+        const generationInterval = Math.round(event.target.duration
+          / (window.screen.width / 4)) || 1;
         const maxThumbnailCount = Math.floor(event.target.duration / generationInterval);
         this.$bus.$emit('generate-thumbnails', maxThumbnailCount);
       }

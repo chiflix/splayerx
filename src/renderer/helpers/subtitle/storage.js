@@ -1,4 +1,6 @@
-import { remove, pick, values, merge, keyBy } from 'lodash';
+import {
+  remove, pick, values, merge, keyBy, get,
+} from 'lodash';
 
 import infoDB from '@/helpers/infoDB';
 import dataDb from '@/helpers/dataDb';
@@ -97,7 +99,7 @@ export async function updateSubtitleList(videoSrc, newSubtitles) {
 }
 export async function retrieveSelectedSubtitleId(videoSrc) {
   return getVideoInfoFromVideoSrc(videoSrc)
-    .then(({ preference }) => preference?.subtitle?.selected || {});
+    .then(videoInfo => get(videoInfo, 'preference.subtitle.selected') || {});
 }
 export async function updateSelectedSubtitleId(videoSrc, Ids) {
   return updateSubtitlePreference(videoSrc, { selected: Ids });

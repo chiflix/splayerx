@@ -11,6 +11,7 @@ export class MainHelper {
     this.hasNotifiedUpdateInstall = false;
     this.ipcMain = ipcMain;
   }
+
   onStart() {
     // check if installed update last round, if yes just notify renderer
     this.storage.needToNotifyUpdateInstalledOrNot().then((installedInfo) => {
@@ -20,6 +21,7 @@ export class MainHelper {
       }
     });
   }
+
   notifyRendererUpdateHasInstalled(installedInfo) {
     const message = new Message(Message.installedMessageLastRoundTitle, installedInfo);
     this.sendStatusToWindow(message.toString());
@@ -41,6 +43,7 @@ export class MainHelper {
       }, this.notifyWait);
     });
   }
+
   registerMessageReceiver() {
     this.ipcMain.on('update-message', (event, arg) => {
       if (arg) {
@@ -48,6 +51,7 @@ export class MainHelper {
       }
     });
   }
+
   handleMessage(arg) {
     const message = Message.getFromMessage(arg);
     switch (message.title) {
@@ -59,6 +63,7 @@ export class MainHelper {
     }
     return null;
   }
+
   sendStatusToWindow(text, channel = 'update-message') {
     // wait for renderer is ready
     this.waitForRenderer().then(() => {
@@ -91,6 +96,7 @@ export class MainHelperForWin extends MainHelper {
     this.updateInfo = null;
     setTimeout(() => { this.withinStartInterval = false; }, this.startInterval);
   }
+
   // info is in updater's info format
   onUpdateDownloaded(info) {
     return new Promise((resolve) => {
@@ -110,10 +116,12 @@ export class MainHelperForWin extends MainHelper {
       resolve();
     });
   }
+
   notifyRendererToInstallUpdate() {
     const message = new Message(Message.toInstallMessageNowTitle, this.updateInfo);
     this.sendStatusToWindow(message.toString());
   }
+
   getReplyAboutInstallUpdateOrNot(message) {
     if (message.body[Message.willInstallOrNotTitle]) {
       this.storage.willInstall(this.updateInfo).catch((err) => {
@@ -122,6 +130,7 @@ export class MainHelperForWin extends MainHelper {
       this.updater.quitAndInstall();
     }
   }
+
   handleMessage(arg) {
     const message = super.handleMessage(arg);
     if (!message) return;

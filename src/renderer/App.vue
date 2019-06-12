@@ -8,20 +8,23 @@
 </template>
 
 <script lang="ts">
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { ipcRenderer, Event } from 'electron';
 import '@/css/style.scss';
 import drag from '@/helpers/drag';
 
 export default {
   name: 'Splayer',
   mounted() {
-    this.$electron.ipcRenderer.on('mainCommit', (event: any, commitType: string, commitPayload: any) => {
+    // to-do: specify commitType and commitPayload with vuex typescriptened
+    ipcRenderer.on('mainCommit', (event: Event, commitType: string, commitPayload: any) => {
       this.mainCommitProxy(commitType, commitPayload);
     });
-    this.$electron.ipcRenderer.on('mainDispatch', (event: any, actionType: string, actionPayload: any) => {
+    ipcRenderer.on('mainDispatch', (event: Event, actionType: string, actionPayload: any) => {
       this.mainDispatchProxy(actionType, actionPayload);
     });
-    this.$electron.ipcRenderer.send('windowInit');
-    this.$electron.ipcRenderer.on('thumbnail-saved', (event: any, src: string) => {
+    ipcRenderer.send('windowInit');
+    ipcRenderer.on('thumbnail-saved', (event: Event, src: string) => {
       this.$bus.$emit('set-thumbnail-src', src);
     });
     drag(this.$el);

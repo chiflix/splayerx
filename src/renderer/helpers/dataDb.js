@@ -9,9 +9,11 @@ import {
 const currentSchema = schemas.find(({ version }) => version === currentVersion).schema;
 
 export class DataDb {
-  #db;
-  #version;
-  #schema;
+  db;
+
+  version;
+
+  schema;
 
   /**
    * retrieve or createDb with dbName, version and schema
@@ -77,6 +79,7 @@ export class DataDb {
       .objectStore(objectStoreName)
       .get(index);
   }
+
   async getAllValueByIndex(objectStoreName, indexName, value) {
     const db = await this.getOwnDb();
     const res = [];
@@ -91,6 +94,7 @@ export class DataDb {
     }
     return res;
   }
+
   async getAll(objectStoreName, keyRange) {
     const db = await this.getOwnDb();
     const tx = db.transaction(objectStoreName);
@@ -99,6 +103,7 @@ export class DataDb {
     }
     return tx.objectStore(objectStoreName).getAll();
   }
+
   async add(objectStoreName, data) {
     const db = await this.getOwnDb();
     const { objectStoreNames } = db;

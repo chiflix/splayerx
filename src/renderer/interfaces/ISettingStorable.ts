@@ -1,10 +1,10 @@
-// 设置中字幕样式的数据格式
+/** 设置中字幕样式的数据格式 */
 export type SubtitleStyle = {
   chosenStyle: string,
   chosenSize: string,
   enabledSecondarySub: boolean
 }
-// 设置中播放首选项的数据格式
+/** 设置中播放首选项的数据格式 */
 export type PlaybackStates = {
   volume: number,
   muted: boolean

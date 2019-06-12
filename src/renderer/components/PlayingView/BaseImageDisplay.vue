@@ -208,9 +208,9 @@ export default {
     },
   },
   render(h) {
-    const visibilityOptions = this.imageReady ?
-      this.imageOptions :
-      Object.assign(
+    const visibilityOptions = this.imageReady
+      ? this.imageOptions
+      : Object.assign(
         {},
         this.imageOptions,
         {

@@ -14,12 +14,15 @@ class FakeTimer {
       this._timeLeft = timeLeft <= 0 ? 0 : timeLeft;
     }
   }
+
   timeLeft() {
     return this._timeLeft;
   }
+
   timeout() {
     return this._timeLeft <= 0 || this._timeLeft > this.time;
   }
+
   reset() {
     this._timeLeft = this.time;
   }
@@ -48,6 +51,7 @@ class FakeTimerManager {
     }
     return false;
   }
+
   /**
    * Remove a timer with provided name.
    * @param {string} name - name of timer to be removed, return false if no such timer.
@@ -59,6 +63,7 @@ class FakeTimerManager {
     }
     return false;
   }
+
   /**
    * Update a timer with new time value.
    * @param {string} name - Name of timer to be updated, return false if no such timer.
@@ -69,9 +74,9 @@ class FakeTimerManager {
     if (this._timerQueue.has(name) && timeValidator(newTime)) {
       this._timerQueue.set(
         name,
-        keepOldTime ?
-          new FakeTimer(newTime, this._timerQueue.get(name).timeLeft()) :
-          new FakeTimer(newTime, undefined),
+        keepOldTime
+          ? new FakeTimer(newTime, this._timerQueue.get(name).timeLeft())
+          : new FakeTimer(newTime, undefined),
       );
       return {
         name,
@@ -80,6 +85,7 @@ class FakeTimerManager {
     }
     return false;
   }
+
   /**
    * Get a timer's info if existed.
    * @param {string} name Name of timer to be updated, return null if no such timer.
@@ -93,6 +99,7 @@ class FakeTimerManager {
     }
     return null;
   }
+
   /**
    * Tick a timer for provided time.
    * @param {string} name - Name of the timer to be ticked, return false if no such timer.
@@ -105,6 +112,7 @@ class FakeTimerManager {
     }
     return null;
   }
+
   /**
    * Return current manager's timers' names.
    */
@@ -115,6 +123,7 @@ class FakeTimerManager {
     });
     return timers;
   }
+
   /**
    * Return current timeout timers.
    */
@@ -127,6 +136,7 @@ class FakeTimerManager {
     });
     return timers;
   }
+
   /**
    * Reset all timeout timers.
    */

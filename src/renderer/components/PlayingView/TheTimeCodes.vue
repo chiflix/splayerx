@@ -4,14 +4,14 @@
     class="cont"
   >
     <div
-      class="timing"
       @mousedown="switchTimeContent"
+      class="timing"
     >
       <span
-        v-if="hasDuration"
         ref="timeContent"
-        class="timeContent"
+        v-if="hasDuration"
         :class="{ remainTime: isRemainTime }"
+        class="timeContent"
       />
     </div>
     <Labels class="rate" />
@@ -78,19 +78,18 @@ export default {
       this.isRemainTime = !this.isRemainTime;
       if (this.$refs.timeContent) {
         if (this.isRemainTime) {
-          this.$refs.timeContent.textContent =
-          this.timecodeFromSeconds(Math.floor(this.duration) - Math.floor(videodata.time));
+          this.$refs.timeContent.textContent = this.timecodeFromSeconds(
+            Math.floor(this.duration) - Math.floor(videodata.time),
+          );
         } else {
-          this.$refs.timeContent.textContent =
-          this.timecodeFromSeconds(Math.floor(videodata.time));
+          this.$refs.timeContent.textContent = this.timecodeFromSeconds(Math.floor(videodata.time));
         }
       }
     },
     updateTimeContent(time) {
       if (this.$refs.timeContent) {
-        this.$refs.timeContent.textContent =
-        this.timecodeFromSeconds(this.isRemainTime ?
-          Math.floor(this.duration) - Math.floor(time) : Math.floor(time));
+        this.$refs.timeContent.textContent = this.timecodeFromSeconds(this.isRemainTime
+          ? Math.floor(this.duration) - Math.floor(time) : Math.floor(time));
       }
     },
   },

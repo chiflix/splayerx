@@ -1,10 +1,10 @@
 <template>
   <div
     ref="button"
-    class="button"
     @mouseenter="addMouseenter"
     @mouseleave="addMouseleave"
     @mouseup.left="addMouseup"
+    class="button"
   >
     <div
       ref="btnMask"

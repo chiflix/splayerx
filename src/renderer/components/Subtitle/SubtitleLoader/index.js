@@ -1,30 +1,22 @@
 import { EventEmitter } from 'events';
 import { existsSync } from 'fs';
-import flatten from 'lodash/flatten';
 import { storeSubtitle } from '@/helpers/subtitle';
-import { localFormatLoader, castArray, promisify, functionExtraction, detectEncodingFromFileSync, embeddedSrcLoader } from './utils';
+import {
+  supportedFormats, supportedCodecs, codecToFormat, getLoader,
+  castArray, promisify, functionExtraction,
+  localFormatLoader, detectEncodingFromFileSync, embeddedSrcLoader,
+} from './utils';
 import { SubtitleError, ErrorCodes } from './errors';
 import { NOT_SUPPORTED_SUBTITLE } from '../../../../shared/notificationcodes';
 
-const files = require.context('.', false, /\.loader\.js$/);
-const loaders = {};
-
-files.keys().forEach((key) => {
-  loaders[key.replace(/(\.\/|\.loader|\.js)/g, '')] = files(key).default;
-});
-
-const supportedFormats = flatten(Object.keys(loaders)
-  .map(loaderType => loaders[loaderType].supportedFormats));
-
-const supportedCodecs = flatten(Object.keys(loaders)
-  .map(loaderType => [loaders[loaderType].name, loaders[loaderType].longName]));
 
 export default class SubtitleLoader extends EventEmitter {
   static supportedFormats = supportedFormats;
+
   static supportedCodecs = supportedCodecs;
-  static codecToFormat(codec) {
-    return Object.values(loaders).filter(loader => new RegExp(`${codec}`).test(loader.name))[0].supportedFormats[0];
-  }
+
+  static codecToFormat = codecToFormat;
+
   metaInfo = new Proxy({}, {
     set: (target, field, value) => {
       const oldVal = Reflect.get(target, field);
@@ -62,8 +54,7 @@ export default class SubtitleLoader extends EventEmitter {
         if (format === 'embedded' && options.codec) {
           this.metaInfo.codecFormat = SubtitleLoader.codecToFormat(options.codec);
         }
-        this.loader = Object.values(loaders)
-          .find(loader => castArray(loader.supportedFormats).includes(format));
+        this.loader = getLoader(format);
       } else {
         throw new SubtitleError(ErrorCodes.SUBTITLE_INVALID_FORMAT, `Unknown subtitle format for subtitle ${src}.`);
       }
@@ -144,8 +135,10 @@ export default class SubtitleLoader extends EventEmitter {
       const loader = functionExtraction(this.loader.loader);
       if (this.data) this.emit('data', this.data);
       else {
-        this.data =
-          await promisify(loader.func.bind(this, ...this._getParams(castArray(loader.params))));
+        this.data = await promisify(loader.func.bind(
+          this,
+          ...this._getParams(castArray(loader.params)),
+        ));
         this.emit('data', this.data);
       }
     } catch (e) {
@@ -156,8 +149,10 @@ export default class SubtitleLoader extends EventEmitter {
   async parse() {
     try {
       const parser = functionExtraction(this.loader.parser, 'data');
-      this.parsed =
-        await promisify(parser.func.bind(null, ...this._getParams(castArray(parser.params))));
+      this.parsed = await promisify(parser.func.bind(
+        null,
+        ...this._getParams(castArray(parser.params)),
+      ));
       this.emit('parse', this.parsed);
     } catch (e) {
       this.fail.bind(this)(e);

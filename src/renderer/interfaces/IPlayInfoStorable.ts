@@ -1,4 +1,4 @@
-// 退出播放前需要存储的播放进度数据格式
+/** 退出播放前需要存储的播放进度数据格式 */
 export type BeforeQuitMediaItemSaveData = {
   shortCut: string,
   smallShortCut: string,
@@ -6,7 +6,7 @@ export type BeforeQuitMediaItemSaveData = {
   duration: number,
   audioTrackId: number,
 }
-// 退出播放前需要存储的播放列表数据格式
+/** 退出播放前需要存储的播放列表数据格式 */
 export type BeforeQuitRecentPlayedSaveData = {
   items: IDBValidKey[],
   lastOpened: number,

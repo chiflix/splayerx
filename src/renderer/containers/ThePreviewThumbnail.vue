@@ -1,15 +1,15 @@
 <template>
   <div
-    class="thumbnail-wrapper"
     :style="{
       width: thumbnailWidth +'px',
       height: thumbnailHeight +'px',
       transform: `translateX(${positionOfThumbnail}px)`
     }"
+    class="thumbnail-wrapper"
   >
     <div
-      class="the-preview-thumbnail"
       :style="{height: thumbnailHeight + 2 +'px'}"
+      class="the-preview-thumbnail"
     >
       <thumbnail-display
         :thumbnail-width="thumbnailWidth"
@@ -22,8 +22,8 @@
     <div class="thumbnail-gradient" />
     <div class="time">
       <span
-        class="flex-items"
         :style="{ color: hoveredEnd ? 'rgba(255, 255, 255, 1)' : 'rgba(255, 255, 255, 0.5)'}"
+        class="flex-items"
       >{{ videoTime }}</span>
       <transition name="hovered-end">
         <base-icon
@@ -116,8 +116,9 @@ export default {
         const result = await thumbnailService.getThumbnailImage(this.mediaHash);
         if (!result) {
           this.imgExisted = false;
-          this.imgSrc =
-            await thumbnailService.generateThumbnailImage(this.mediaHash, this.originSrc, num, 272);
+          this.imgSrc = await thumbnailService.generateThumbnailImage(
+            this.mediaHash, this.originSrc, num, 272,
+          );
         } else {
           this.imgExisted = true;
           this.imgSrc = result;
