@@ -16,7 +16,7 @@
           'rgba(255,255,255,0.00) 78%, rgba(255,255,255,0.00) 100%)' : '',
         transition: 'opacity 200ms',
       }"
-      class="detail textContainer advanceNormalTitle"
+      class="detail"
     >
       <div
         :style="{
@@ -40,7 +40,7 @@
         :style="{
           height: heightSize,
         }"
-        class="listContainer scrollScope"
+        class="listContainer"
       >
         <div
           :style="{
@@ -135,8 +135,10 @@ export default {
     },
   },
   watch: {
-    tracks(val: any[]) {
-      val.forEach((item: any, index: number) => {
+    tracks(val: {id: string; kind: string; label: string;
+      language: string; name: string; enabled: boolean;}[]) {
+      val.forEach((item: { id: string; kind: string; label: string;
+        language: string; name: string; enabled: boolean; }, index: number) => {
         if (Number(item.id) === this.currentTrackId) {
           this.moveLength = index * 32;
         }
