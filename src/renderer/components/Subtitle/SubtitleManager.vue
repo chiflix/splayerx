@@ -6,7 +6,7 @@
     <subtitle-renderer
       ref="subtitleRenderer"
       :key="originSrc"
-      :subtitle-instance="firstSubtitleInstance"
+      :first-instance="firstSubtitleInstance"
       :secondary-instance="secondSubtitleInstance"
     />
   </div>

@@ -15,7 +15,7 @@
           opacity: cue.hide ? '0' : '1',
           writingMode: (cue.category === 'first' ? firstType === 'vtt' : secondType === 'vtt')
             ? `vertical-${cue.tags.vertical}` : '',
-          lineHeight: subtitleInstance && secondaryInstance ? '112%' : 'normal',
+          lineHeight: firstInstance && secondaryInstance ? '112%' : 'normal',
           marginBottom: item[ind + 1] && cue.category === 'first' &&
             item[ind + 1].category === 'secondary' ?`${subtitleSpace / scaleNum}px` : '',
           fontWeight: cue.tags.b ? 'bold' : '',
@@ -64,7 +64,7 @@ export default {
   name: 'SubtitleRenderer',
   props: {
     secondaryInstance: SubtitleInstance,
-    subtitleInstance: SubtitleInstance,
+    firstInstance: SubtitleInstance,
   },
   data() {
     return {
@@ -94,12 +94,12 @@ export default {
         + subSpaceFactorsB[this.chosenSize];
     },
     firstType() {
-      return this.subtitleInstance ? this.subtitleInstance.metaInfo.format : '';
+      return this.firstInstance ? this.firstInstance.metaInfo.format : '';
     },
     secondType() {
       return this.secondaryInstance ? this.secondaryInstance.metaInfo.format : '';
     },
-    secondarySubScale() { // 第二字幕的字号最小不小于9px
+    secondarySubScale() {
       if (this.currentFirstSubtitleId === '') {
         return this.scaleNum;
       }
@@ -161,7 +161,7 @@ export default {
   },
   watch: {
     allCues: {
-      handler(val: any, oldVal: any) {
+      handler(val: any[], oldVal: any[]) {
         for (let i = 0; i < 9; i += 1) {
           if (val[i].length < oldVal[i].length && oldVal[i].includes(...val[i])) {
             this.noPositionCues[i] = oldVal[i].map((cue: any) => {
@@ -177,52 +177,50 @@ export default {
       },
       deep: true,
     },
-    videoFirstSegments(newVal: any) {
+    videoFirstSegments(newVal: number[][]) {
       const duration = newVal
         .filter((segment: any) => segment[2])
         .map((segment: any) => segment[1] - segment[0])
         .reduce((prev: any, curr: any) => prev + curr, 0);
-      if (this.subtitleInstance) {
-        this.updateDuration({ id: this.subtitleInstance.id, duration });
+      if (this.firstInstance) {
+        this.updateDuration({ id: this.firstInstance.id, duration });
       }
     },
-    videoSecondSegments(newVal: any) {
+    videoSecondSegments(newVal: number[][]) {
       const duration = newVal
-        .filter((segment: any) => segment[2])
-        .map((segment: any) => segment[1] - segment[0])
+        .filter((segment: number[]) => segment[2])
+        .map((segment: number[]) => segment[1] - segment[0])
         .reduce((prev: any, curr: any) => prev + curr, 0);
       if (this.secondaryInstance) {
         this.updateDuration({ id: this.secondaryInstance.id, duration });
       }
     },
-    subtitleInstance(val: SubtitleInstance) {
+    firstInstance(val: SubtitleInstance) {
       if (val) {
-        const { subtitleInstance } = this;
-        subtitleInstance.once('data', subtitleInstance.parse);
-        subtitleInstance.on('parse', (parsed: any) => {
+        val.once('data', val.parse);
+        val.on('parse', (parsed: any) => {
           const parsedData = parsed.dialogues;
           this.videoFirstSegments = this.getVideoSegments(parsedData, this.duration);
           this.subPlayResX = !isEmpty(parsed.info) ? Number(parsed.info.PlayResX) : this.intrinsicWidth; // eslint-disable-line
           this.subPlayResY = !isEmpty(parsed.info) ? Number(parsed.info.PlayResY)
             : this.intrinsicHeight;
         });
-        subtitleInstance.load();
+        val.load();
       } else {
         this.currentCues = [];
       }
     },
     secondaryInstance(val: SubtitleInstance) {
       if (val) {
-        const { secondaryInstance } = this;
-        secondaryInstance.once('data', secondaryInstance.parse);
-        secondaryInstance.on('parse', (parsed: any) => {
+        val.once('data', val.parse);
+        val.on('parse', (parsed: any) => {
           const parsedData = parsed.dialogues;
           this.videoSecondSegments = this.getVideoSegments(parsedData, this.duration);
           this.secPlayResX = !isEmpty(parsed.info) ? Number(parsed.info.PlayResX) : this.intrinsicWidth; // eslint-disable-line
           this.secPlayResY = !isEmpty(parsed.info) ? Number(parsed.info.PlayResY)
             : this.intrinsicHeight;
         });
-        secondaryInstance.load();
+        val.load();
       } else {
         this.secondCues = [];
       }
@@ -259,7 +257,7 @@ export default {
         this.lastCurrentTime = currentTime;
       }
       const { lastCurrentTime } = this;
-      if (this.subtitleInstance) {
+      if (this.firstInstance) {
         this.setFirstCurrentCues(currentTime - (subtitleDelay / 1000));
         this.updateVideoFirstSegments(lastCurrentTime, currentTime);
       }
@@ -269,7 +267,7 @@ export default {
       }
       this.requestId = requestAnimationFrame(this.currentTimeUpdate);
     },
-    isSameCues(cues1: any, cues2: any) {
+    isSameCues(cues1: any[], cues2: any[]) {
       return !differenceWith(
         cues1,
         cues2,
@@ -284,8 +282,8 @@ export default {
       ).length;
     },
     setFirstCurrentCues(currentTime: number) {
-      if (!this.subtitleInstance.parsed) return;
-      const parsedData = this.subtitleInstance.parsed.dialogues;
+      if (!this.firstInstance.parsed) return;
+      const parsedData = this.firstInstance.parsed.dialogues;
       if (parsedData) {
         const cues = this.parsedFirstFragments(parsedData
           .filter(({
@@ -319,7 +317,7 @@ export default {
         }
       }
     },
-    parsedFirstFragments(cues: any) {
+    parsedFirstFragments(cues: any[]) {
       if (this.firstType === 'ass') {
         const currentCues: any[] = [];
         cues.forEach((item: any) => {
@@ -346,9 +344,9 @@ export default {
       });
       return cues;
     },
-    parsedSecondFragments(cues: any) {
+    parsedSecondFragments(cues: any[]) {
       if (this.secondType === 'ass') {
-        const currentCues: any = [];
+        const currentCues: any[] = [];
         cues.forEach((item: any) => {
           let currentText = '';
           let currentTags = {};
@@ -486,7 +484,7 @@ export default {
           return [0, 0];
       }
     },
-    getVideoSegments(parsedSubtitle: any, duration: number) {
+    getVideoSegments(parsedSubtitle: any[], duration: number) {
       const subtitleSegments = parsedSubtitle
         .filter((subtitle: any) => subtitle.text !== '')
         .map((subtitle: any) => [subtitle.start || 0, subtitle.end || duration])
