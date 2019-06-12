@@ -9,29 +9,29 @@
       </div>
       <div class="settingItem__input dropdown">
         <div
-          class="dropdown__toggle no-drag"
           :class="showSelection ? 'dropdown__toggle--list' : 'dropdown__toggle--display'"
           @mouseup.stop="showSelection = !showSelection"
+          class="dropdown__toggle no-drag"
         >
           <div class="dropdown__displayItem">
             {{ mapCode(displayLanguage) }}
           </div>
           <div
-            class="dropdown__listItems"
             @mouseup.stop=""
+            class="dropdown__listItems"
           >
             <div
               v-for="(language, index) in displayLanguages"
               :key="index"
-              class="dropdownListItem"
               @mouseup.stop="handleSelection(language)"
+              class="dropdownListItem"
             >
               {{ mapCode(language) }}
             </div>
           </div>
           <Icon
-            type="rightArrow"
             :class="showSelection ? 'dropdown__icon--arrowUp' : 'dropdown__icon--arrowDown'"
+            type="rightArrow"
           />
         </div>
       </div>
@@ -47,17 +47,17 @@
       </div>
       <div
         ref="button1"
-        class="settingItem__input button no-drag"
         :class="button1Styles"
         @mousedown="mousedownOnSetDefault"
+        class="settingItem__input button no-drag"
       >
         <transition
           name="button"
           mode="out-in"
         >
           <div
-            v-if="!defaultState"
             key=""
+            v-if="!defaultState"
             class="button__text"
           >
             {{ $t("preferences.general.setButton") }}
@@ -89,17 +89,17 @@
       </div>
       <div
         ref="button2"
-        class="settingItem__input button no-drag"
         :class="button2Styles"
         @mousedown="mousedownOnRestore"
+        class="settingItem__input button no-drag"
       >
         <transition
           name="button"
           mode="out-in"
         >
           <div
-            :key="needToRelaunch"
             ref="restoreContent"
+            :key="needToRelaunch"
             class="button__text"
           >
             {{ restoreContent }}

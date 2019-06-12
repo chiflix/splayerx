@@ -1,4 +1,3 @@
-/* eslint-disable import/first */
 // Be sure to call Sentry function as early as possible in the main process
 import '../shared/sentry';
 
@@ -87,12 +86,12 @@ function handleBossKey() {
     }
     mainWindow.webContents.send('mainDispatch', 'PAUSE_VIDEO');
     mainWindow.hide();
-    mainWindow?.webContents.send('mainCommit', 'isHiddenByBossKey', true);
+    mainWindow.webContents.send('mainCommit', 'isHiddenByBossKey', true);
     if (process.platform === 'win32') {
       tray = new Tray(nativeImage.createFromDataURL(require('../../build/icons/1024x1024.png')));
       tray.on('click', () => {
         mainWindow.show();
-        mainWindow?.webContents.send('mainCommit', 'isHiddenByBossKey', false);
+        mainWindow.webContents.send('mainCommit', 'isHiddenByBossKey', false);
         tray.destroy();
         tray = null;
       });
@@ -105,48 +104,48 @@ function markNeedToRestore() {
 }
 
 
-function registerMainWindowEvent() {
+function registerMainWindowEvent(mainWindow) {
   if (!mainWindow) return;
   // TODO: should be able to use window.outerWidth/outerHeight directly
   mainWindow.on('resize', throttle(() => {
-    mainWindow?.webContents.send('mainCommit', 'windowSize', mainWindow.getSize());
+    mainWindow.webContents.send('mainCommit', 'windowSize', mainWindow.getSize());
   }, 100));
   mainWindow.on('move', throttle(() => {
-    mainWindow?.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
+    mainWindow.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
   }, 100));
   mainWindow.on('enter-full-screen', () => {
-    mainWindow?.webContents.send('mainCommit', 'isFullScreen', true);
-    mainWindow?.webContents.send('mainCommit', 'isMaximized', mainWindow.isMaximized());
+    mainWindow.webContents.send('mainCommit', 'isFullScreen', true);
+    mainWindow.webContents.send('mainCommit', 'isMaximized', mainWindow.isMaximized());
   });
   mainWindow.on('leave-full-screen', () => {
-    mainWindow?.webContents.send('mainCommit', 'isFullScreen', false);
-    mainWindow?.webContents.send('mainCommit', 'isMaximized', mainWindow.isMaximized());
+    mainWindow.webContents.send('mainCommit', 'isFullScreen', false);
+    mainWindow.webContents.send('mainCommit', 'isMaximized', mainWindow.isMaximized());
   });
   mainWindow.on('maximize', () => {
-    mainWindow?.webContents.send('mainCommit', 'isMaximized', true);
+    mainWindow.webContents.send('mainCommit', 'isMaximized', true);
   });
   mainWindow.on('unmaximize', () => {
-    mainWindow?.webContents.send('mainCommit', 'isMaximized', false);
+    mainWindow.webContents.send('mainCommit', 'isMaximized', false);
   });
   mainWindow.on('minimize', () => {
-    mainWindow?.webContents.send('mainCommit', 'isMinimized', true);
+    mainWindow.webContents.send('mainCommit', 'isMinimized', true);
   });
   mainWindow.on('restore', () => {
-    mainWindow?.webContents.send('mainCommit', 'isMinimized', false);
+    mainWindow.webContents.send('mainCommit', 'isMinimized', false);
   });
   mainWindow.on('focus', () => {
-    mainWindow?.webContents.send('mainCommit', 'isFocused', true);
-    mainWindow?.webContents.send('mainCommit', 'isHiddenByBossKey', false);
+    mainWindow.webContents.send('mainCommit', 'isFocused', true);
+    mainWindow.webContents.send('mainCommit', 'isHiddenByBossKey', false);
   });
   mainWindow.on('blur', () => {
-    mainWindow?.webContents.send('mainCommit', 'isFocused', false);
+    mainWindow.webContents.send('mainCommit', 'isFocused', false);
   });
-  mainWindow.on('scroll-touch-begin', () => mainWindow?.webContents.send('scroll-touch-begin'));
-  mainWindow.on('scroll-touch-end', () => mainWindow?.webContents.send('scroll-touch-end'));
+  mainWindow.on('scroll-touch-begin', () => mainWindow.webContents.send('scroll-touch-begin'));
+  mainWindow.on('scroll-touch-end', () => mainWindow.webContents.send('scroll-touch-end'));
 
   ipcMain.on('callMainWindowMethod', (evt, method, args = []) => {
     try {
-      mainWindow?.[method]?.(...args);
+      mainWindow[method](...args);
     } catch (ex) {
       console.error('callMainWindowMethod', ex, method, JSON.stringify(args));
     }
@@ -173,7 +172,7 @@ function registerMainWindowEvent() {
         thumbnail(thumbnailTask[0], cb);
       }
       if (ret === '0') {
-        mainWindow?.webContents.send('thumbnail-saved', src);
+        mainWindow.webContents.send('thumbnail-saved', src);
       }
     };
     thumbnail(thumbnailTask[0], cb);
@@ -322,11 +321,11 @@ function registerMainWindowEvent() {
     event.sender.send('windowPositionChange-asyncReply', mainWindow.getPosition());
   });
   ipcMain.on('windowInit', () => {
-    mainWindow?.webContents.send('mainCommit', 'windowSize', mainWindow.getSize());
-    mainWindow?.webContents.send('mainCommit', 'windowMinimumSize', mainWindow.getMinimumSize());
-    mainWindow?.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
-    mainWindow?.webContents.send('mainCommit', 'isFullScreen', mainWindow.isFullScreen());
-    mainWindow?.webContents.send('mainCommit', 'isFocused', mainWindow.isFocused());
+    mainWindow.webContents.send('mainCommit', 'windowSize', mainWindow.getSize());
+    mainWindow.webContents.send('mainCommit', 'windowMinimumSize', mainWindow.getMinimumSize());
+    mainWindow.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
+    mainWindow.webContents.send('mainCommit', 'isFullScreen', mainWindow.isFullScreen());
+    mainWindow.webContents.send('mainCommit', 'isFocused', mainWindow.isFocused());
   });
   ipcMain.on('bossKey', () => {
     handleBossKey();
@@ -397,11 +396,11 @@ function registerMainWindowEvent() {
     }
     preferenceWindow.once('ready-to-show', () => {
       preferenceWindow.show();
-      preferenceWindow?.webContents.send('restore-state', needToRestore);
+      preferenceWindow.webContents.send('restore-state', needToRestore);
     });
   });
   ipcMain.on('get-restore-state', () => {
-    preferenceWindow?.webContents.send('restore-state', needToRestore);
+    preferenceWindow.webContents.send('restore-state', needToRestore);
   });
   ipcMain.on('need-to-restore', () => {
     needToRestore = true;
@@ -415,18 +414,15 @@ function registerMainWindowEvent() {
     app.quit();
   });
   ipcMain.on('preference-to-main', (e, args) => {
-    mainWindow?.webContents.send('mainDispatch', 'setPreference', args);
+    mainWindow.webContents.send('mainDispatch', 'setPreference', args);
   });
   ipcMain.on('main-to-preference', (e, args) => {
-    preferenceWindow?.webContents.send('preferenceDispatch', 'setPreference', args);
+    preferenceWindow.webContents.send('preferenceDispatch', 'setPreference', args);
   });
 }
 
 function createWindow() {
-  /**
-   * Initial window options
-   */
-  const windowOptions = {
+  mainWindow = new BrowserWindow({
     useContentSize: true,
     frame: false,
     titleBarStyle: 'none',
@@ -448,9 +444,7 @@ function createWindow() {
     ...({
       win32: {},
     })[process.platform],
-  };
-
-  mainWindow = new BrowserWindow(windowOptions);
+  });
   mainWindow.webContents.setUserAgent(`SPlayerX@2018 ${os.platform() + os.release()} Version ${app.getVersion()}`);
 
   mainWindow.loadURL(filesToOpen.length ? `${mainURL}#/play` : mainURL);
@@ -471,25 +465,25 @@ function createWindow() {
     inited = true;
   });
 
-  registerMainWindowEvent();
+  registerMainWindowEvent(mainWindow);
 
   if (process.env.NODE_ENV === 'development') {
     setTimeout(() => { // wait some time to prevent `Object not found` error
-      mainWindow?.openDevTools({ mode: 'detach' });
+      mainWindow.openDevTools({ mode: 'detach' });
     }, 1000);
   }
 }
 
-app.on('before-quit', (e) => {
+app.on('before-quit', () => {
   if (needToRestore) {
-    mainWindow?.webContents.send('quit', needToRestore);
+    mainWindow.webContents.send('quit', needToRestore);
   } else {
-    mainWindow?.webContents.send('quit');
+    mainWindow.webContents.send('quit');
   }
 });
 app.on('second-instance', () => {
-  if (mainWindow?.isMinimized()) mainWindow.restore();
-  mainWindow?.focus();
+  if (mainWindow.isMinimized()) mainWindow.restore();
+  mainWindow.focus();
 });
 
 
@@ -519,18 +513,19 @@ if (process.platform === 'darwin') {
   app.on('second-instance', (event, argv) => {
     const opendFiles = getOpenedFiles(argv); // TODO: multiple files
     if (opendFiles.length) {
-      mainWindow?.webContents.send('open-file', ...opendFiles);
+      mainWindow.webContents.send('open-file', ...opendFiles);
     }
   });
 }
 
 app.on('ready', () => {
+  createWindow();
   app.setName('SPlayer');
   globalShortcut.register('CmdOrCtrl+Shift+I+O+P', () => {
-    mainWindow?.openDevTools({ mode: 'detach' });
+    mainWindow.openDevTools({ mode: 'detach' });
   });
   globalShortcut.register('CmdOrCtrl+Shift+J+K+L', () => {
-    preferenceWindow?.openDevTools({ mode: 'detach' });
+    preferenceWindow.openDevTools({ mode: 'detach' });
   });
 
   if (process.platform === 'win32') {
@@ -538,8 +533,6 @@ app.on('ready', () => {
       handleBossKey();
     });
   }
-
-  createWindow();
 });
 
 app.on('window-all-closed', () => {

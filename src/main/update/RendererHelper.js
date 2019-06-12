@@ -8,6 +8,7 @@ class RendererHelper {
     this.registerListener();
     this.rendererReady();
   }
+
   learntHasInstalledUpdate() {
     this.vue.show();
     this.vue.setMessage(this.vue.$t('msg.update.updateInstalled'));
@@ -15,17 +16,20 @@ class RendererHelper {
     this.vue.startDisappear(10000);
     this.vue.setBreathType('breatheSuccess');
   }
+
   registerListener() {
     this.ipc.on('update-message', (event, arg) => {
       this.handleMessage(arg);
     });
   }
+
   // as main helper will be ready before renderer helper
   // will tell main it is ready then main can send message to renderer
   rendererReady() {
     const message = new Message(Message.rendererReadyTitle, 'void').toString();
     this.ipc.send('update-message', message);
   }
+
   // renderer now will receive two kind of messages
   // one is installed update last round for both mac and win
   // one is need to install update for only win
@@ -58,10 +62,12 @@ export class RendererHelperForWin extends RendererHelper {
     // will only listen restartOrNotToInstallUpdate selection for once
     this.alreadySentWillInstallUpdateReply = false;
   }
+
   learntHasInstalledUpdate() {
     super.learntHasInstalledUpdate();
     this.vue.forWin();
   }
+
   hasUpdateWaitingForInstall() {
     this.vue.show();
     const buttons = [{
@@ -74,6 +80,7 @@ export class RendererHelperForWin extends RendererHelper {
     this.vue.setMessage(this.vue.$t('msg.update.message'));
     this.vue.setBreathType('breatheAlert');
   }
+
   restartOrNotToInstallUpdate(yesOrNo) {
     if (this.alreadySentWillInstallUpdateReply) {
       return;
@@ -86,12 +93,15 @@ export class RendererHelperForWin extends RendererHelper {
     );
     this.ipc.send('update-message', message.toString());
   }
+
   install() {
     this.restartOrNotToInstallUpdate(true);
   }
+
   notInstall() {
     this.restartOrNotToInstallUpdate(false);
   }
+
   handleMessage(arg) {
     const message = super.handleMessage(arg);
     if (!message) return null;

@@ -1,21 +1,21 @@
 <template>
   <div
     v-show="backgroundDisplayState"
-    class="recent-playlist"
     @mouseup="handleMouseup"
+    class="recent-playlist"
   >
     <transition name="background-fade">
       <div
         v-show="displayState"
-        class="background-gradient"
         :style="{
           height: sizeAdaption(282),
         }"
+        class="background-gradient"
       />
     </transition>
     <transition
-      name="translate"
       @after-leave="afterLeave"
+      name="translate"
     >
       <div
         v-show="displayState"
@@ -27,18 +27,18 @@
         >
           <div
             :key="hoverIndex"
-            class="info"
             :style="{
               marginTop: sizeAdaption(53),
               paddingLeft: sizeAdaption(40),
             }"
+            class="info"
           >
             <div
-              class="top"
               :style="{
                 fontSize: sizeAdaption(14),
                 lineHeight: sizeAdaption(14),
               }"
+              class="top"
             >
               <span ref="lastPlayedTime" />
               {{
@@ -48,20 +48,19 @@
               }}&nbsp;&nbsp;{{ indexInPlaylist }} / {{ numberOfPlaylistItem }}
             </div>
             <div
-              class="file-name"
               :style="{
                 marginTop: sizeAdaption(9),
                 fontSize: sizeAdaption(18),
                 lineHeight: sizeAdaption(20),
                 fontWeight: 500,
               }"
+              class="file-name"
             >
               {{ filename }}
             </div>
           </div>
         </transition>
         <div
-          class="playlist-items"
           :style="{
             transition: tranFlag ? 'transform 400ms ease-in' : '',
             transform: `translateX(-${distance}px)`,
@@ -70,11 +69,11 @@
             marginLeft: sizeAdaption(40),
           }"
           @mouseup.stop=""
+          class="playlist-items"
         >
           <RecentPlaylistItem
             v-for="(item, index) in playingList"
             :key="item"
-            class="item"
             :index="index"
             :path="item"
             :is-last-page="lastIndex === maxIndex && firstIndex > 0"
@@ -99,6 +98,7 @@
             :on-item-mouseover="onItemMouseover"
             :on-item-mousemove="onItemMousemove"
             @can-remove="canRemove = true"
+            class="item"
           />
           <Add
             :style="{
@@ -112,13 +112,13 @@
           />
           <div
             v-if="thumbnailNumber < numberOfPlaylistItem"
-            class="next-page"
             :style="{
               marginRight: sizeAdaption(15),
               width: `${thumbnailWidth}px`,
               height: `${thumbnailWidth / (112 / 63)}px`,
             }"
             @mouseup.stop=""
+            class="next-page"
           />
         </div>
       </div>
@@ -127,7 +127,9 @@
 </template>
 <script lang="ts">
 import path from 'path';
-import { mapState, mapGetters, mapActions, mapMutations } from 'vuex';
+import {
+  mapState, mapGetters, mapActions, mapMutations,
+} from 'vuex';
 import { Input as inputMutations } from '@/store/mutationTypes';
 import { Input as InputActions, Subtitle as subtitleActions } from '@/store/actionTypes';
 import RecentPlaylistItem from '@/components/PlayingView/RecentPlaylistItem.vue';

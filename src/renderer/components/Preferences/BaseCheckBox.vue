@@ -3,10 +3,10 @@
     <label class="checkbox__label">
       <slot />
       <input
-        type="checkbox"
-        class="checkbox__input"
         :checked="checkboxValue"
         @input="$emit('update:checkbox-value', $event.target.checked)"
+        type="checkbox"
+        class="checkbox__input"
       >
       <span class="checkbox__checkmark" />
       <Icon

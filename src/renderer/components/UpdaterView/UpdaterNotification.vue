@@ -1,14 +1,14 @@
 <template>
   <div
     ref="showWindow"
-    class="updateContainer"
     :style="[containerProp, hideOrNot]"
+    class="updateContainer"
   >
     <div class="backGround" />
     <div
       ref="breath"
-      class="breathe-div"
       :style="linkProp"
+      class="breathe-div"
     />
     <div class="overInner">
       {{ content }}
@@ -20,8 +20,8 @@
         >
           <span :class="item.classC">
             <a
-              href="#"
               @click="item.callBack.call(item.THIS)"
+              href="#"
             > {{ item.text }} </a>
           </span>
         </div>

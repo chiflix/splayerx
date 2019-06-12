@@ -1,6 +1,6 @@
 import infoDB, { InfoDB } from '@/helpers/infoDB';
 import dataDB, { DataDb } from '@/helpers/dataDb';
-import { IDB, MediaItem, PlaylistItem, SubtitleItem, RawMediaItem, RawPlaylistItem } from '@/interfaces/services/IDB';
+import { IDB, MediaItem, PlaylistItem, SubtitleItem, RawMediaItem, RawPlaylistItem } from '@/interfaces/IDB';
 
 export default class DataBase implements IDB {
   constructor(private readonly db: InfoDB | DataDb) {

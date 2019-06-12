@@ -2,15 +2,15 @@
   <div class="content">
     <div
       v-if="isDarwin"
-      class="mac-icons no-drag"
       @mouseover="state = 'hover'"
       @mouseout="state = 'default'"
+      class="mac-icons no-drag"
     >
       <Icon
-        class="title-button"
-        type="titleBarClose"
         :state="state"
         @click.native="handleClose"
+        class="title-button"
+        type="titleBarClose"
       />
       <Icon
         class="title-button-disable"
@@ -23,9 +23,9 @@
     </div>
     <Icon
       v-if="!isDarwin"
+      @click.native="handleClose"
       class="win-title-button no-drag"
       type="titleBarWinClose"
-      @click.native="handleClose"
     />
     <img
       class="winLogo"

@@ -8,8 +8,8 @@
         {{ $t('preferences.privacy.privacyConfirm') }}
       </BaseCheckBox>
       <div
-        class="settingItem__attached"
         :style="{opacity: privacyAgreement ? 1 : 0.3}"
+        class="settingItem__attached"
       >
         <div class="settingItem__title">
           {{ $t('preferences.privacy.languagePriority') }}
@@ -34,22 +34,22 @@
                     {{ codeToLanguageName(primaryLanguage) }}
                   </div>
                   <div
-                    class="dropdown__listItems"
                     @mouseup.stop=""
+                    class="dropdown__listItems"
                   >
                     <div
                       v-for="(language, index) in primaryLanguages"
                       :key="index"
-                      class="dropdownListItem"
                       @mouseup.stop="handleFirstSelection(language)"
+                      class="dropdownListItem"
                     >
                       {{ codeToLanguageName(language) }}
                     </div>
                   </div>
                   <Icon
-                    type="rightArrow"
                     :class="showFirstSelection ?
                       'dropdown__icon--arrowUp' : 'dropdown__icon--arrowDown'"
+                    type="rightArrow"
                   />
                 </div>
               </div>
@@ -71,19 +71,19 @@
                     {{ codeToLanguageName(secondaryLanguage) }}
                   </div>
                   <div
-                    class="dropdown__listItems"
                     @mouseup.stop=""
+                    class="dropdown__listItems"
                   >
                     <div
-                      v-for="(language, index) in secondaryLanguages"
                       ref="secondarySelection"
+                      v-for="(language, index) in secondaryLanguages"
                       :key="index"
-                      class="dropdownListItem"
                       :style="{
                         color: (language === primaryLanguage && language !== noLanguage) ?
                           'rgba(255,255,255,0.5)' : 'rgba(255,255,255,1)',
                       }"
                       @mouseup.stop="handleSecondSelection(language)"
+                      class="dropdownListItem"
                     >
                       {{ codeToLanguageName(language) }}
                       <span
@@ -93,9 +93,9 @@
                     </div>
                   </div>
                   <Icon
-                    type="rightArrow"
                     :class="showSecondSelection ?
                       'dropdown__icon--arrowUp' : 'dropdown__icon--arrowDown'"
+                    type="rightArrow"
                   />
                 </div>
               </div>

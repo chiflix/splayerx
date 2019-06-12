@@ -1,7 +1,6 @@
 <template>
   <div
     ref="recentPlaylistItem"
-    class="recent-playlist-item no-drag"
     :style="{
       transition: tranFlag ? 'transform 100ms ease-out' : '',
       marginRight: sizeAdaption(15),
@@ -9,33 +8,33 @@
       minWidth: `${thumbnailWidth}px`,
       minHeight: `${thumbnailHeight}px`,
     }"
+    class="recent-playlist-item no-drag"
   >
     <div
       class="child-item"
       style="will-change: transform;"
     >
       <div
-        v-if="imageLoaded"
         ref="blur"
-        class="img blur"
+        v-if="imageLoaded"
         :style="{
           backgroundImage: !isPlaying ?
             `linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%), ${backgroundImage}`
             : 'linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%)',
         }"
+        class="img blur"
       />
       <div
         ref="whiteHover"
-        class="white-hover"
         :style="{
           opacity: hovered ? '1' : '0',
           minWidth: `${thumbnailWidth}px`,
           minHeight: `${thumbnailHeight}px`,
         }"
+        class="white-hover"
       />
       <div
         ref="content"
-        class="content"
         :style="{
           height: '100%',
         }"
@@ -43,22 +42,23 @@
         @mouseleave="mouseoutVideo"
         @mousedown.left="mousedownVideo"
         @mouseup.left="mouseupVideo"
+        class="content"
       >
         <div
           ref="info"
-          class="info"
           :style="{
             height: `${thumbnailHeight - bottom}px`,
             width: `${thumbnailWidth - 2 * side}px`,
             left: `${side}px`,
           }"
+          class="info"
         >
           <div
-            class="overflow-container"
             :style="{
               height: sizeAdaption(22),
               bottom: sizeAdaption(14),
             }"
+            class="overflow-container"
           >
             <transition name="icon">
               <div
@@ -66,21 +66,21 @@
                 class="icon-container"
               >
                 <Icon
-                  type="playlistplay"
-                  class="playlist-play"
                   :style="{
                     width: sizeAdaption(10),
                     height: sizeAdaption(22),
                     marginRight: sizeAdaption(4),
                   }"
+                  type="playlistplay"
+                  class="playlist-play"
                 />
                 <div
-                  class="playing"
                   :style="{
                     paddingTop: sizeAdaption(5),
                     fontSize: sizeAdaption(12),
                     lineHeight: sizeAdaption(12),
                   }"
+                  class="playing"
                 >
                   {{ $t('recentPlaylist.playing') }}
                 </div>
@@ -90,50 +90,50 @@
           <transition name="fade">
             <div
               ref="progress"
-              class="progress"
               :style="{
                 opacity: '0',
                 height: sizeAdaption(2),
                 bottom: sizeAdaption(14),
                 marginBottom: sizeAdaption(7),
               }"
+              class="progress"
             >
               <div
-                class="slider"
                 :style="{
                   width: `${sliderPercentage}%`,
                 }"
+                class="slider"
               />
             </div>
           </transition>
           <div
             ref="title"
-            class="title"
             :style="{
               color: 'rgba(255,255,255,0.40)',
               fontSize: sizeAdaption(12),
               lineHeight: sizeAdaption(16),
             }"
+            class="title"
           >
             {{ baseName }}
           </div>
         </div>
         <div
           ref="deleteUi"
-          class="deleteUi"
           :style="{
             height: `${thumbnailHeight}px`,
           }"
+          class="deleteUi"
         >
           <Icon type="delete" />
         </div>
       </div>
       <div
         ref="border"
-        class="border"
         :style="{
           borderColor: 'rgba(255,255,255,0.15)',
         }"
+        class="border"
       />
     </div>
   </div>
@@ -279,9 +279,11 @@ export default {
       const parsedName = parseNameFromPath(this.path);
       if (parsedName.episode && parsedName.season) {
         return `S${parsedName.season}E${parsedName.episode}`;
-      } else if (parsedName.episode && !parsedName.season) {
+      }
+      if (parsedName.episode && !parsedName.season) {
         return `EP${parsedName.episode}`;
-      } else if (parsedName.season && !parsedName.episode) {
+      }
+      if (parsedName.season && !parsedName.episode) {
         return `SE${parsedName.season}`;
       }
       return path.basename(this.path, path.extname(this.path));
@@ -306,8 +308,8 @@ export default {
     // change to props
     sliderPercentage() {
       if (this.lastPlayedTime) {
-        if (this.mediaInfo.duration &&
-            this.lastPlayedTime / this.mediaInfo.duration <= 1) {
+        if (this.mediaInfo.duration
+            && this.lastPlayedTime / this.mediaInfo.duration <= 1) {
           return (this.lastPlayedTime / this.mediaInfo.duration) * 100;
         }
       }
