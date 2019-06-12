@@ -15,7 +15,7 @@
   </svg>
 </template>
 
-<script>
+<script lang="ts">
 export default {
   name: 'Icon',
   props: {
@@ -49,7 +49,9 @@ export default {
     },
   },
   created() {
+    // @ts-ignore
     const requireAll = requireContext => requireContext.keys().map(requireContext);
+    // @ts-ignore
     const req = require.context('@/assets/icon', true, /\.svg$/);
     requireAll(req);
   },
