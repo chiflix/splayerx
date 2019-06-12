@@ -5,11 +5,12 @@ import { readdir } from 'fs';
 import { ipcRenderer } from 'electron';
 import Sagi from '@/helpers/sagi';
 import helpers from '@/helpers';
-import { VideoPath, subtitleExtensions, IRawSubtitle, SubtitleType, SubtitleFormat, SubtitlePath } from '@/interfaces/services/ISubtitle';
+import { subtitleExtensions, IRawSubtitle, SubtitleType, SubtitleFormat } from '@/interfaces/services/ISubtitle';
+import { LanguageNames } from '@/libs/language/allLanguages';
 
 const { mediaQuickHash: calculateMediaIdentity } = helpers.methods;
 
-export function searchForLocalList(videoSrc: VideoPath): Promise<IRawSubtitle[]> {
+export function searchForLocalList(videoSrc: string): Promise<IRawSubtitle[]> {
   return new Promise((resolve, reject) => {
     const videoDir = dirname(videoSrc);
     const videoBasename = basename(videoSrc, extname(videoSrc));
@@ -38,16 +39,15 @@ export function searchForLocalList(videoSrc: VideoPath): Promise<IRawSubtitle[]>
   });
 }
 
-export function fetchOnlineList(videoSrc, languageCode, hints) {
-  const subtitleInfoNormalizer = (subtitle) => {
-    const { languageCode: code, transcriptIdentity: src, ranking } = subtitle;
+export function fetchOnlineList(videoSrc: string, languageCode: LanguageNames, hints: string): Promise<IRawSubtitle[]> {
+  const subtitleInfoNormalizer = (subtitle: any): IRawSubtitle => {
+    const { languageCode: language, transcriptIdentity: origin, ranking } = subtitle;
     return ({
-      src,
-      type: 'online',
-      options: {
-        language: code,
-        ranking,
-      },
+      origin,
+      type: SubtitleType.Online,
+      format: SubtitleFormat.Online,
+      language,
+      ranking,
     });
   };
   return new Promise((resolve, reject) => {

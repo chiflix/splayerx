@@ -1,12 +1,10 @@
-export type VideoPath = string;
-export type SubtitlePath = string;
-export type SubtitleHash = string;
 export const subtitleExtensions = ['ass', 'srt', 'ssa', 'vtt'];
 export enum SubtitleFormat {
   AdvancedSubStationAplha = 'ass',
   SubRip = 'srt',
   SubStationAlpha = 'ssa',
   WebVTT = 'vtt',
+  Online = 'online',
 }
 export enum SubtitleType {
   Online,
@@ -15,8 +13,10 @@ export enum SubtitleType {
   Modified,
 }
 export interface IRawSubtitle {
+  origin: string;
   format: SubtitleFormat;
   type: SubtitleType;
-  origin: SubtitlePath | VideoPath | SubtitleHash;
+  language?: LanguageNames;
+  ranking?: number;
 }
-export interface IParsedSubtitle {}
+import { LanguageNames } from '@/libs/language/allLanguages';
