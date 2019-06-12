@@ -41,6 +41,7 @@ import { mapActions, mapGetters, mapState } from 'vuex';
 import { Input as InputActions } from '@/store/actionTypes';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import AdvanceMainMenu from '@/containers/AdvanceMainMenu.vue';
+import { AnimationItem } from 'lottie-web';
 
 export default {
   name: 'AdvanceControl',
@@ -122,7 +123,7 @@ export default {
       clearMousedown: InputActions.MOUSEDOWN_UPDATE,
       clearMouseup: InputActions.MOUSEUP_UPDATE,
     }),
-    handleAnimation(anim: any) {
+    handleAnimation(anim: AnimationItem) {
       this.anim = anim;
     },
     handleDown() {
