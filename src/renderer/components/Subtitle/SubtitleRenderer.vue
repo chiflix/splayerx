@@ -86,8 +86,7 @@ export default {
   },
   computed: {
     ...mapGetters(['duration', 'scaleNum', 'subtitleDelay', 'intrinsicHeight', 'intrinsicWidth',
-      'subToTop', 'currentFirstSubtitleId', 'currentSecondSubtitleId', 'winHeight', 'chosenStyle',
-      'enabledSecondarySub', 'chosenSize']),
+      'subToTop', 'currentFirstSubtitleId', 'winHeight', 'chosenStyle', 'chosenSize']),
     subtitleSpace() {
       const subSpaceFactorsA = [5 / 900, 9 / 900, 10 / 900, 12 / 900];
       const subSpaceFactorsB = [4, 21 / 5, 4, 23 / 5];
