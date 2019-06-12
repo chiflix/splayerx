@@ -74,8 +74,14 @@
 </template>
 
 <script>
+import Vue from 'vue';
 import electron from 'electron';
 import Icon from '@/components/BaseIconContainer.vue';
+import General from './Preferences/General.vue';
+import Privacy from './Preferences/Privacy.vue';
+
+Vue.component('General', General);
+Vue.component('Privacy', Privacy);
 
 export default {
   name: 'Preference',
