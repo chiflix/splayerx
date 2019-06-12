@@ -4,15 +4,15 @@
       <transition name="advance-trans-l">
         <div
           v-show="showAttached"
-          class="advanced"
           :style="{
             transition: showAttached ? '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' :
               '150ms cubic-bezier(0.17, 0.67, 0.17, 0.98)'
           }"
+          class="advanced"
         >
           <advance-main-menu
-            class="mainMenu"
             :clear-state="showAttached"
+            class="mainMenu"
           />
         </div>
       </transition>
@@ -25,8 +25,8 @@
       >
         <lottie
           :options="defaultOptions"
-          lot="advance"
           @animCreated="handleAnimation"
+          lot="advance"
         />
       </div>
     </div>
@@ -41,9 +41,11 @@ import { mapActions, mapGetters, mapState } from 'vuex';
 import { Input as InputActions } from '@/store/actionTypes';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import AdvanceMainMenu from '@/containers/AdvanceMainMenu.vue';
+import { AnimationItem } from 'lottie-web';
 
 export default {
   name: 'AdvanceControl',
+  //  @ts-ignore
   type: INPUT_COMPONENT_TYPE,
   components: {
     lottie,
@@ -103,8 +105,8 @@ export default {
     currentMouseupComponent(val: string) {
       setTimeout(() => {
         if (this.currentMousedownComponent !== 'notification-bubble' && val !== '') {
-          if (this.lastDragging || (this.currentMousedownComponent === this.$options.name &&
-              val === 'the-video-controller')) {
+          if (this.lastDragging || (this.currentMousedownComponent === this.$options.name
+              && val === 'the-video-controller')) {
             if (this.showAttached) {
               this.anim.playSegments([68, 73], true);
               this.$emit('update:lastDragging', false);
@@ -122,7 +124,7 @@ export default {
       clearMousedown: InputActions.MOUSEDOWN_UPDATE,
       clearMouseup: InputActions.MOUSEUP_UPDATE,
     }),
-    handleAnimation(anim: any) {
+    handleAnimation(anim: AnimationItem) {
       this.anim = anim;
     },
     handleDown() {

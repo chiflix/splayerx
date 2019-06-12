@@ -7,8 +7,8 @@
   >
     <lottie
       :options="defaultOptions"
-      lot="playlist"
       @animCreated="handleAnimation"
+      lot="playlist"
     />
   </div>
 </template>
@@ -17,6 +17,7 @@ import { mapState } from 'vuex';
 import lottie from '@/components/lottie.vue';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import animationData from '@/assets/playlist.json';
+import { AnimationItem } from 'lottie-web';
 
 export default {
   name: 'PlaylistControl',
@@ -43,7 +44,7 @@ export default {
     }),
   },
   methods: {
-    handleAnimation(anim:any) {
+    handleAnimation(anim: AnimationItem) {
       this.anim = anim;
     },
     togglePlaylistDisplay() {

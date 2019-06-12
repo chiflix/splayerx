@@ -1,37 +1,36 @@
 <template>
   <div
     v-fade-in="showAllWidgets || progressTriggerStopped"
-    class="the-progress-bar"
     @mousemove="handleMousemove"
     @mouseenter="hoveredmouseenter"
     @mouseleave="handleMouseleave"
     @mousedown.stop="handleMousedown"
+    class="the-progress-bar"
   >
     <the-preview-thumbnail
       v-show="showThumbnail"
-      class="the-preview-thumbnail"
       :current-time="hoveredCurrentTime"
       :video-time="convertedHoveredCurrentTime"
       :thumbnail-width="thumbnailWidth"
       :thumbnail-height="thumbnailHeight"
       :position-of-thumbnail="thumbnailPosition"
       :hovered-end="hoveredPercent === 100 && !!nextVideo"
+      class="the-preview-thumbnail"
     />
     <div
       ref="leftInvisible"
-      class="fake-button left"
       :style="{ height: fakeButtonHeight }"
+      class="fake-button left"
     >
       <div
-        class="fake-progress"
         :style="{
           height: hovering ? '10px' : '4px',
           backgroundColor: leftFakeProgressBackgroundColor,
         }"
+        class="fake-progress"
       >
         <div
           v-if="hoveredCurrentTime === 0 && hovering"
-          class="radius"
           :style="{
             width: '20px',
             height: '10px',
@@ -40,12 +39,13 @@
             backgroundColor: 'rgba(255, 255, 255, 0.9)',
             transition: 'background-color 150ms, height 150ms',
           }"
+          class="radius"
         />
       </div>
     </div>
     <div
-      class="progress"
       :style="{ height: hovering ? '10px' : '4px' }"
+      class="progress"
     >
       <div
         ref="hoveredProgress"
@@ -57,22 +57,22 @@
       />
       <div
         ref="defaultProgress"
-        class="default"
         :style="{ order: '2' }"
+        class="default"
       />
     </div>
     <div
       ref="rightInvisible"
-      class="fake-button right"
       :style="{ height: fakeButtonHeight }"
+      class="fake-button right"
     >
       <div
         ref="fakeProgress"
-        class="fake-progress"
         :style="{
           height: hovering ? '10px' : '4px',
           backgroundColor: rightFakeProgressBackgroundColor,
         }"
+        class="fake-progress"
       />
     </div>
   </div>
@@ -186,7 +186,7 @@ export default {
       playedProgress.style.order = this.hoveredPercent <= playedPercent ? '1' : '0';
       fakeProgress.style.backgroundColor = this.rightFakeProgressBackgroundColor(time);
     },
-    updateHoveredProgressBar(time:number, hoveredPercent:number) {
+    updateHoveredProgressBar(time: number, hoveredPercent: number) {
       const playedPercent = 100 * (time / this.duration);
       const { hoveredProgress, defaultProgress } = this.$refs;
       hoveredProgress.style.width = hoveredPercent <= playedPercent ? `${hoveredPercent}%` : `${hoveredPercent - playedPercent}%`;
@@ -216,7 +216,7 @@ export default {
         requestAnimationFrame(this.renderProgressBar);
       }
     },
-    rightFakeProgressBackgroundColor(time:number) {
+    rightFakeProgressBackgroundColor(time: number) {
       const hoveredEnd = this.hoveredPercent >= 100;
       const playedEnd = time >= this.duration;
       let opacity = 0;
@@ -235,14 +235,14 @@ export default {
       }
       return this.whiteWithOpacity(hoveredEnd && playedEnd ? 0.9 : opacity);
     },
-    handleMousemove(event:MouseEvent) {
+    handleMousemove(event: MouseEvent) {
       this.hoveredPageX = event.pageX;
       this.hovering = true;
       if (this.hoveringId) clearTimeout(this.hoveringId);
       if (event.target !== this.$refs.leftInvisible) this.showThumbnail = true;
       this.mouseleave = false;
     },
-    handleDocumentMousemove(event:MouseEvent) {
+    handleDocumentMousemove(event: MouseEvent) {
       if (this.mousedown) this.hoveredPageX = event.pageX;
     },
     handleMouseleave() {
@@ -255,7 +255,7 @@ export default {
         this.mouseleave = true;
       }
     },
-    handleMousedown(event:MouseEvent) {
+    handleMousedown(event: MouseEvent) {
       this.mousedown = true;
       if (event.target === this.$refs.leftInvisible || event.target === this.$refs.rightInvisible) {
         this.showThumbnail = false;
@@ -270,9 +270,9 @@ export default {
         this.$bus.$emit('play');
       }
     },
-    handleDocumentMouseup(event:any) {
-      const path = event.path || (event.composedPath && event.composedPath());
-      const isTargetProgressBar = path.find((e:HTMLElement) => e.tagName === 'DIV' && e.className.includes('the-progress-bar'));
+    handleDocumentMouseup(event: MouseEvent) {
+      const path = (event.composedPath && event.composedPath()) || [];
+      const isTargetProgressBar = path.find((e: EventTarget) => (e as HTMLElement).tagName === 'DIV' && (e as HTMLElement).className.includes('the-progress-bar'));
       // 如果mouseup的target是当前组件，那么不需要触发leave
       if (!isTargetProgressBar) {
         this.mouseleave = true;
@@ -287,16 +287,16 @@ export default {
         this.$bus.$emit('seek', this.hoveredCurrentTime);
       }
     },
-    pageXToProportion(pageX:number, fakeButtonWidth:number, winWidth:number) {
+    pageXToProportion(pageX: number, fakeButtonWidth: number, winWidth: number) {
       if (pageX <= fakeButtonWidth) return 0;
       if (pageX >= winWidth - fakeButtonWidth) return 1;
       return (pageX - fakeButtonWidth) / (winWidth - (fakeButtonWidth * 2));
     },
     pageXToThumbnailPosition(
-      pageX:number,
-      fakeButtonWidth:number,
-      thumbnailWidth:number,
-      winWidth:number,
+      pageX: number,
+      fakeButtonWidth: number,
+      thumbnailWidth: number,
+      winWidth: number,
     ) {
       if (pageX <= fakeButtonWidth + (thumbnailWidth / 2)) return fakeButtonWidth;
       if (pageX > winWidth - (fakeButtonWidth + (thumbnailWidth / 2))) {
@@ -304,10 +304,10 @@ export default {
       }
       return pageX - (thumbnailWidth / 2);
     },
-    whiteWithOpacity(opacity:number) {
+    whiteWithOpacity(opacity: number) {
       return `rgba(255, 255, 255, ${opacity}`;
     },
-    setHoveringToFalse(direct:boolean) {
+    setHoveringToFalse(direct: boolean) {
       if (!direct) {
         if (this.hoveringId) {
           clearTimeout(this.hoveringId);

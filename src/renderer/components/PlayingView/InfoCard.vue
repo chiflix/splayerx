@@ -17,24 +17,24 @@ export default {
     borderRadius: {
       type: Number,
       default: 1,
-      validator: (value:number) => value > 0,
+      validator: (value: number) => value > 0,
     },
     contentMinWidth: {
       type: Number,
       default: 1,
-      validator: (value:number) => value > 0,
+      validator: (value: number) => value > 0,
     },
     contentMinHeight: {
       type: Number,
       default: 1,
-      validator: (value:number) => value > 0,
+      validator: (value: number) => value > 0,
     },
   },
   watch: {
-    contentMinWidth(newVal:number) {
+    contentMinWidth(newVal: number) {
       this.$refs.container.style.setProperty('--content-min-width', `${newVal}px`);
     },
-    contentMinHeight(newVal:number) {
+    contentMinHeight(newVal: number) {
       this.$refs.container.style.setProperty('--content-min-height', `${newVal}px`);
     },
   },

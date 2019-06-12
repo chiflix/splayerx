@@ -2,8 +2,8 @@
   <div class="nextVideo">
     <div class="nextVideo__plane">
       <div
-        class="nextVideo__progress"
         :style="{ width: progress + '%' }"
+        class="nextVideo__progress"
       >
         <div class="progressGradient" />
         <div class="progressBorderLight" />
@@ -18,17 +18,17 @@
         </div>
       </div>
       <div
-        class="nextVideo__closeButton"
         @mouseup.stop="handleCloseMouseup"
+        class="nextVideo__closeButton"
       >
         <Icon type="close" />
       </div>
     </div>
     <div
-      class="nextVideo__thumbnail"
       @mouseup="handleMouseup"
       @mouseover="mouseoverVideo"
       @mouseout="mouseoutVideo"
+      class="nextVideo__thumbnail"
     >
       <video
         ref="videoThumbnail"
@@ -101,16 +101,16 @@ export default {
       this.notificationPlayIcon = 'notificationPlay';
       this.isBlur = true;
     },
-    onMetaLoaded(event:any) {
-      event.target.muted = true;
-      event.target.currentTime = 100;
+    onMetaLoaded(event: Event) {
+      (event.target as HTMLVideoElement).muted = true;
+      (event.target as HTMLVideoElement).currentTime = 100;
     },
     onSeeked() {
       this.$emit('ready-to-show');
     },
-    updatePlayingTime(time:number) {
-      const fractionProgress = (time - this.nextVideoPreviewTime) /
-        (this.duration - this.nextVideoPreviewTime);
+    updatePlayingTime(time: number) {
+      const fractionProgress = (time - this.nextVideoPreviewTime)
+        / (this.duration - this.nextVideoPreviewTime);
       this.progress = fractionProgress * 100;
     },
   },

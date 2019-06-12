@@ -9,73 +9,73 @@
       class="win-icons"
     >
       <Icon
+        @mouseup.native="handleMinimize"
         class="title-button no-drag"
         type="titleBarWinExitFull"
-        @mouseup.native="handleMinimize"
       />
       <Icon
         v-show="middleButtonStatus === 'maximize'"
+        @mouseup.native="handleWinFull"
         class="title-button no-drag"
         type="titleBarWinFull"
-        @mouseup.native="handleWinFull"
       />
       <Icon
         v-show="middleButtonStatus === 'restore'"
+        @mouseup.native="handleRestore"
         class="title-button no-drag"
         type="titleBarWinRestore"
-        @mouseup.native="handleRestore"
       />
       <Icon
         v-show="middleButtonStatus === 'exit-fullscreen'"
+        @mouseup.native="handleFullscreenExit"
         class="title-button no-drag"
         type="titleBarWinResize"
-        @mouseup.native="handleFullscreenExit"
       />
       <Icon
+        @mouseup.native="handleClose"
         class="title-button no-drag"
         type="titleBarWinClose"
-        @mouseup.native="handleClose"
       />
     </div>
     <div
       v-if="isDarwin"
       v-fade-in="showTitleBar"
-      class="mac-icons"
       @mouseover="handleMouseOver"
       @mouseout="handleMouseOut"
+      class="mac-icons"
     >
       <Icon
         id="close"
-        class="title-button no-drag"
-        type="titleBarClose"
         :state="state"
         @mouseup.native="handleClose"
+        class="title-button no-drag"
+        type="titleBarClose"
       />
       <Icon
         id="minimize"
-        class="title-button no-drag"
-        type="titleBarExitFull"
         :class="{ disabled: middleButtonStatus === 'exit-fullscreen' }"
         :state="state"
         :is-full-screen="middleButtonStatus"
         @mouseup.native="handleMinimize"
+        class="title-button no-drag"
+        type="titleBarExitFull"
       />
       <Icon
-        v-show="middleButtonStatus !== 'exit-fullscreen'"
         id="maximize"
-        class="title-button no-drag"
+        v-show="middleButtonStatus !== 'exit-fullscreen'"
         :type="itemType"
         :state="state"
         :style="{ transform: isMaxScreen ? 'rotate(45deg)' : ''}"
         @mouseup.native="handleMacFull"
+        class="title-button no-drag"
       />
       <Icon
-        v-show="middleButtonStatus === 'exit-fullscreen'"
         id="restore"
-        class="title-button no-drag"
-        type="titleBarRecover"
+        v-show="middleButtonStatus === 'exit-fullscreen'"
         :state="state"
         @mouseup.native="handleFullscreenExit"
+        class="title-button no-drag"
+        type="titleBarRecover"
       />
     </div>
   </div>
@@ -127,20 +127,20 @@ export default {
     isMaxScreen() { return this.itemType === this.itemTypeEnum.MAXSCREEN; },
   },
   watch: {
-    recentPlaylist(val:boolean) {
+    recentPlaylist(val: boolean) {
       if (!val) this.showTitleBar = this.showAllWidgets;
     },
-    showAllWidgets(val:boolean) {
+    showAllWidgets(val: boolean) {
       this.showTitleBar = this.recentPlaylist || val;
     },
-    keyAlt(val:boolean) {
+    keyAlt(val: boolean) {
       if (!val || !this.keyOver) {
         this.itemType = this.itemTypeEnum.FULLSCREEN;
       } else if (!this.isFullScreen) {
         this.itemType = this.itemTypeEnum.MAXSCREEN;
       }
     },
-    keyOver(val:boolean) {
+    keyOver(val: boolean) {
       if (!val || !this.keyAlt) {
         this.itemType = this.itemTypeEnum.FULLSCREEN;
       } else if (!this.isFullScreen) {
@@ -149,12 +149,12 @@ export default {
     },
   },
   mounted() {
-    window.addEventListener('keydown', (e:KeyboardEvent) => {
+    window.addEventListener('keydown', (e: KeyboardEvent) => {
       if (e.keyCode === 18) {
         this.keyAlt = true;
       }
     });
-    window.addEventListener('keyup', (e:KeyboardEvent) => {
+    window.addEventListener('keyup', (e: KeyboardEvent) => {
       if (e.keyCode === 18) {
         this.keyAlt = false;
       }

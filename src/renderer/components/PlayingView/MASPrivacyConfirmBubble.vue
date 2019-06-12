@@ -14,21 +14,21 @@
             </p>
             <div :class="$i18n.locale === 'en' ? 'en-buttons' : 'buttons'">
               <div
-                class="agree-button"
                 :class="{
                   hover: agreeHovered,
                 }"
                 @mouseover.stop="agreeHovered = true"
                 @mouseout.stop="agreeHovered = false"
                 @mouseup.stop="handleAgreeMouseup"
+                class="agree-button"
               >
                 <div class="button-info">
                   {{ agreeButton }}
                 </div>
               </div>
               <div
-                class="disagree-button"
                 @mouseup.stop="handleDisagreeMouseup"
+                class="disagree-button"
               >
                 {{ disagreeButton }}
               </div>

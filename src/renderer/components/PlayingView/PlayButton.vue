@@ -6,22 +6,22 @@
     @mouseleave="handleMouseleave"
   >
     <div
-      class="icon-wrapper"
       :class="iconClass"
+      class="icon-wrapper"
     >
       <Icon
         v-show="showPlayIcon"
+        :class="animationMode"
+        :style="{cursor: cursorAppear ? 'pointer' : 'none'}"
         class="icon play"
         type="play"
-        :class="ani_mode"
-        :style="{cursor: cursorAppear ? 'pointer' : 'none'}"
       />
       <Icon
         v-show="!showPlayIcon"
+        :class="animationMode"
+        :style="{cursor: cursorAppear ? 'pointer' : 'none'}"
         class="icon"
         type="pause"
-        :class="ani_mode"
-        :style="{cursor: cursorAppear ? 'pointer' : 'none'}"
       />
     </div>
   </div>
@@ -56,7 +56,7 @@ export default {
       mouseover: false,
       mousedown: false,
       showPlayIcon: false,
-      ani_mode: 'icon-ani-fade-in',
+      animationMode: 'icon-ani-fade-in',
       iconClass: 'fade-out',
       iconFadingId: NaN,
       detectMovePosition: false,
@@ -66,7 +66,7 @@ export default {
     };
   },
   watch: {
-    showAllWidgets(val:boolean) {
+    showAllWidgets(val: boolean) {
       if (!val && !this.mousedown) {
         this.cursorAppear = false;
         this.iconClass = 'fade-out';
@@ -74,24 +74,24 @@ export default {
         this.detectMovePosition = true;
       }
     },
-    attachedShown(val:boolean, oldVal:boolean) {
+    attachedShown(val: boolean, oldVal: boolean) {
       if (!val && this.mouseover) {
         if (oldVal) this.justCloseAttached = true;
         this.detectMovePosition = true;
       }
     },
-    isFocused(val:boolean, oldVal:boolean) {
+    isFocused(val: boolean, oldVal: boolean) {
       if (val && !oldVal && this.mouseover) {
         this.justFocused = true;
       }
     },
-    mousedownOnVolume(val:boolean, oldVal:boolean) {
+    mousedownOnVolume(val: boolean, oldVal: boolean) {
       if (!val && oldVal) {
         this.justMousedownOnVolume = true;
         if (this.mouseover) this.detectMovePosition = true;
       }
     },
-    mousemovePosition(newVal:any, oldVal:any) {
+    mousemovePosition(newVal: any, oldVal: any) {
       if (this.detectMovePosition && this.isFocused) {
         if (Math.abs(newVal.x - oldVal.x) > 0 || Math.abs(newVal.y - oldVal.y) > 0) {
           this.justFocused = this.justCloseAttached = this.justMousedownOnVolume = false;
@@ -101,7 +101,7 @@ export default {
         }
       }
     },
-    paused(val:boolean) {
+    paused(val: boolean) {
       this.showPlayIcon = val;
     },
   },
@@ -109,7 +109,7 @@ export default {
     document.addEventListener('mouseup', () => {
       if (this.mousedown) {
         this.mousedown = false;
-        this.ani_mode = 'icon-ani-fade-in';
+        this.animationMode = 'icon-ani-fade-in';
         this.$emit('update:playbutton-state', false);
       }
     });
@@ -134,8 +134,8 @@ export default {
       }, 200);
     },
     handleMousedown() { // eslint-disable-line complexity
-      if (this.justFocused || (this.showAllWidgets &&
-        (this.justCloseAttached || this.justMousedownOnVolume))) {
+      if (this.justFocused || (this.showAllWidgets
+        && (this.justCloseAttached || this.justMousedownOnVolume))) {
         this.justFocused = this.justCloseAttached = this.justMousedownOnVolume = false;
         this.cursorAppear = true;
         this.iconClass = 'fade-in';
@@ -143,7 +143,7 @@ export default {
         this.cursorAppear = true;
         this.iconClass = 'fade-in';
         this.mousedown = true;
-        this.ani_mode = 'icon-ani-fade-out';
+        this.animationMode = 'icon-ani-fade-out';
         this.$emit('update:playbutton-state', true);
       } else if (!this.showAllWidgets && !this.attachedShown && this.isFocused) {
         this.cursorAppear = true;

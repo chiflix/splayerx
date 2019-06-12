@@ -12,18 +12,18 @@
           <div class="content">
             <p :class="infoCSS">
               {{ partOne }}<span
-                class="underline"
                 @mouseup="underlineMouseup"
+                class="underline"
               >{{ underlinedContent }}</span>{{ partTwo }}
             </p>
             <div
-              class="button"
               :class="{
                 hover: hovered,
               }"
               @mouseover.stop="hovered = true"
               @mouseout.stop="hovered = false"
               @mouseup="handleCloseMouseup"
+              class="button"
             >
               <div class="button-info">
                 {{ button }}

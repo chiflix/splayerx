@@ -1,5 +1,7 @@
 import { join } from 'path';
-import { mkdir, readDir, checkPathExist, deleteDir } from '../../../../src/renderer/libs/file';
+import {
+  mkdir, readDir, checkPathExist, deleteDir,
+} from '../../../../src/renderer/libs/file';
 
 describe('file libs', () => {
   let path = '';

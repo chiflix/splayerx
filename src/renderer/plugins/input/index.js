@@ -32,8 +32,9 @@ export default {
     } = mouseOptions;
     const vuexOptions = { name, namespaced };
     const mousemove = generateMousemoveListener(mousemoveOptions, vuexOptions);
-    const { mousedown, mouseup } =
-      generateMousedownAndMouseupListener(mousedownOptions, vuexOptions);
+    const {
+      mousedown, mouseup,
+    } = generateMousedownAndMouseupListener(mousedownOptions, vuexOptions);
     const { keydown, keyup } = generateKeyDownAndKeyUpListener(keyboardOptions, vuexOptions);
     const wheel = generateWheelListener(wheelOptions, vuexOptions);
 

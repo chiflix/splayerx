@@ -1,7 +1,6 @@
 <template>
   <base-info-card
     ref="cardWidth"
-    class="card"
     :border-radius="7"
     :content-min-height="119"
     :content-min-width="cardWidth > minInfoCardWidth ? cardWidth : minInfoCardWidth"
@@ -15,6 +14,7 @@
       letterSpacing: '0.2px',
       width: cardWidth > minInfoCardWidth ? `${cardWidth}px` : `${minInfoCardWidth}px`,
     }"
+    class="card"
   >
     <transition :name="readyShow === 'mainMenu' ? 'setUp' : 'setUpLeft'">
       <div
@@ -25,14 +25,13 @@
           :lists="numList"
           :card-width="cardWidth > minInfoCardWidth ? cardWidth : minInfoCardWidth"
           :rate="rate"
-          row-type="rate"
           :size="computedSize"
           :handle-row-click="changeRate"
           :is-chosen="speedChosen"
           @click.left.native="handleClick"
+          row-type="rate"
         />
         <div
-          class="subtitleControl"
           :style="{
             cursor: 'pointer',
             backgroundImage: hoverIndex === 1 ?
@@ -43,13 +42,14 @@
           @mouseenter="handleMouseenter(1)"
           @mouseleave="handleMouseleave()"
           @click.left="handleSubClick"
+          class="subtitleControl"
         >
           <div
-            class="item2"
             :style="{
               color: hoverIndex === 1 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
               transition: 'color 300ms',
             }"
+            class="item2"
           >
             <p>{{ this.$t('advance.subMenu') }}</p>
             <transition name="arrow">
@@ -62,11 +62,11 @@
           </div>
         </div>
         <div
-          class="audioItems"
           :style="{ cursor: 'pointer' }"
           @mouseenter="handleMouseenter(2)"
           @mouseleave="handleMouseleave()"
           @click.left="handleAudioClick"
+          class="audioItems"
         >
           <transition name="arrow">
             <div
@@ -76,11 +76,11 @@
           </transition>
           <div class="audioContainer">
             <div
-              class="item3"
               :style="{
                 color: hoverIndex === 2 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
                 transition: 'color 300ms',
               }"
+              class="item3"
             >
               <p>{{ this.$t('advance.audioMenu') }}</p>
               <transition name="arrow">
@@ -102,10 +102,10 @@
         class="mainItems1"
       >
         <div
-          class="topContainer"
           @click.left="handleSubBackClick"
           @mouseenter="handleSubBackEnter"
           @mouseleave="handleSubBackLeave"
+          class="topContainer"
         >
           <div class="topContent">
             <Icon :type="backSubHover ? 'leftArrowHover' : 'leftArrow'" />
@@ -113,6 +113,7 @@
               :style="{
                 color: backSubHover ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.2)',
               }"
+              class="text"
             >
               {{ this.$t('advance.subMenu') }}
             </p>
@@ -121,13 +122,13 @@
         <advance-row-items
           :card-width="cardWidth > minInfoCardWidth ? cardWidth : minInfoCardWidth"
           :chosen-size-content="ChosenSizeContent"
-          row-type="fontSize"
           :lists="$t('advance.fontItems')"
           :size="computedSize"
           :handle-row-click="updateSubSize"
           :chosen-size="chosenSize"
           :is-chosen="subSizeChosen"
           @click.left.native="handleSizeClick"
+          row-type="fontSize"
         />
         <advance-color-items
           :size="computedSize"
@@ -138,12 +139,12 @@
         />
         <advance-selected-items
           :is-subtitle-available="isSubtitleAvailable"
-          selected-type="subtitle"
           :handle-select-click="changeSubtitleDelay"
           :size="computedSize"
           :is-chosen="subDelayChosen"
           :subtitle-delay="subtitleDelay"
           @click.left.native="handleDelayClick"
+          selected-type="subtitle"
         />
       </div>
     </transition>
@@ -154,10 +155,10 @@
         class="mainItems2"
       >
         <div
-          class="topContainer"
           @click.left="handleAudioBackClick"
           @mouseenter="handleAudioBackEnter"
           @mouseleave="handleAudioBackLeave"
+          class="topContainer"
         >
           <div class="topContent">
             <Icon :type="backAudioHover ? 'leftArrowHover' : 'leftArrow'" />
@@ -165,6 +166,7 @@
               :style="{
                 color: backAudioHover ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.2)',
               }"
+              class="text"
             >
               {{ this.$t('advance.audioMenu') }}
             </p>
@@ -172,11 +174,11 @@
         </div>
         <advance-selected-items
           :size="computedSize"
-          selected-type="audio"
           :handle-select-click="() => []"
           :is-chosen="showDelay"
           :audio-delay="audioDelay"
           @click.left.native="1"
+          selected-type="audio"
         />
         <advance-column-items
           :size="computedSize"
@@ -247,13 +249,14 @@ export default {
     ChosenSizeContent() {
       const compareContent = ['S', 'M', 'L', 'XL'];
       const enContent = ['Small', 'Normal', 'Large', 'Extra Large'];
-      return this.$t(`advance.fontItems[${this.chosenSize}]`) === compareContent[this.chosenSize] ?
-        enContent[this.chosenSize] : this.$t(`advance.fontItems[${this.chosenSize}]`);
+      return this.$t(`advance.fontItems[${this.chosenSize}]`) === compareContent[this.chosenSize]
+        ? enContent[this.chosenSize] : this.$t(`advance.fontItems[${this.chosenSize}]`);
     },
     minInfoCardWidth() {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
         return 170;
-      } else if (this.computedSize >= 481 && this.computedSize < 1080) {
+      }
+      if (this.computedSize >= 481 && this.computedSize < 1080) {
         return 204;
       }
       return 285.6;
@@ -265,7 +268,8 @@ export default {
           this.$t('advance.audioDelay'),
           this.$t('advance.audioMenu'),
         ];
-      } else if (this.readyShow === 'subMenu') {
+      }
+      if (this.readyShow === 'subMenu') {
         return [
           this.$t('advance.subDelay'),
           this.$t('advance.fontSize'),
@@ -305,7 +309,8 @@ export default {
           this.leftTitleToShow[2],
         ) + this.rightItemFontSize;
         return Math.max(firstLine, secondLine, thirdLine);
-      } else if (this.readyShow === 'subMenu') {
+      }
+      if (this.readyShow === 'subMenu') {
         const firstLine = getTextWidth(
           `${this.textItemFontSize}px`,
           this.normalFont,
@@ -360,7 +365,8 @@ export default {
     subStyleWidth() {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
         return 17;
-      } else if (this.computedSize >= 481 && this.computedSize < 1080) {
+      }
+      if (this.computedSize >= 481 && this.computedSize < 1080) {
         return 20.4;
       }
       return 28.56;
@@ -368,7 +374,8 @@ export default {
     rightItemFontSize() {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
         return 11;
-      } else if (this.computedSize >= 481 && this.computedSize < 1080) {
+      }
+      if (this.computedSize >= 481 && this.computedSize < 1080) {
         return 13.2;
       }
       return 18.48;
@@ -376,7 +383,8 @@ export default {
     textItemFontSize() {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
         return 13;
-      } else if (this.computedSize >= 481 && this.computedSize < 1080) {
+      }
+      if (this.computedSize >= 481 && this.computedSize < 1080) {
         return 15.6;
       }
       return 21.84;
@@ -394,7 +402,8 @@ export default {
         if (track.language === '' || track.language === 'und') {
           return `${
             this.$t('advance.track')} ${this.$store.getters.audioTrackList.indexOf(track) + 1}`;
-        } else if (this.$store.getters.audioTrackList.length === 1) {
+        }
+        if (this.$store.getters.audioTrackList.length === 1) {
           return `${track.language}`;
         }
         return `${track.name}`;
@@ -405,13 +414,14 @@ export default {
       return this.speedChosen ? `${this.initialSize(164)}px` : `${this.initialSize(127)}px`;
     },
     subtitleCardHeight() {
-      return !this.subColorChosen && !this.subSizeChosen && !this.subDelayChosen ?
-        `${this.initialSize(156)}px` : `${this.initialSize(193)}px`;
+      return !this.subColorChosen && !this.subSizeChosen && !this.subDelayChosen
+        ? `${this.initialSize(156)}px` : `${this.initialSize(193)}px`;
     },
     audioCardHeight() {
       if (this.showDelay) {
         return `${this.initialSize(156)}px`;
-      } else if (this.showTrack) {
+      }
+      if (this.showTrack) {
         return `${this.initialSize(this.containerHeight)}px`;
       }
       return `${this.initialSize(119)}px`;
@@ -502,15 +512,15 @@ export default {
     updatePCVideoScaleByFactors(index: number) {
       const firstFactors = [21, 29, 37, 45];
       const secondFactors = [24, 26, 28, 30];
-      this.updateSubScale(`${(((firstFactors[index] / 900) * this.computedVideoSize) +
-        (secondFactors[index] / 5)) / 9}`);
+      this.updateSubScale(`${(((firstFactors[index] / 900) * this.computedVideoSize)
+        + (secondFactors[index] / 5)) / 9}`);
     },
     // update video scale that height is larger than width
     updateMobileVideoScaleByFactors(index: number) {
       const firstFactors = [21, 29, 37, 45];
       const secondFactors = [12, -92, -196, -300];
-      this.updateSubScale(`${(((firstFactors[index] / 760) * this.computedVideoSize) +
-        (secondFactors[index] / 76)) / 9}`);
+      this.updateSubScale(`${(((firstFactors[index] / 760) * this.computedVideoSize)
+        + (secondFactors[index] / 76)) / 9}`);
     },
     // update video scale when width or height is larger than 1080
     updateVideoScaleByFactors(val: number) {
@@ -529,7 +539,8 @@ export default {
     initialSize(size: number) {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
         return size;
-      } else if (this.computedSize >= 481 && this.computedSize < 1080) {
+      }
+      if (this.computedSize >= 481 && this.computedSize < 1080) {
         return size * 1.2;
       }
       return size * 1.2 * 1.4;

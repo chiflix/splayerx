@@ -2,8 +2,8 @@
   <div class="labels">
     <transition name="cycle-label">
       <div
-        v-show="showCycleLabel"
         key="cycle"
+        v-show="showCycleLabel"
         class="cycle-label"
       >
         <Icon
@@ -14,8 +14,8 @@
     </transition>
     <transition name="label">
       <div
-        v-show="showSpeedLabel"
         key="speed"
+        v-show="showSpeedLabel"
         class="speed-label"
       >
         <Icon

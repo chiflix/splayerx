@@ -1,7 +1,6 @@
 <template>
   <div
     ref="recentPlaylistItem"
-    class="recent-playlist-item no-drag"
     :style="{
       transition: tranFlag ? 'transform 100ms ease-out' : '',
       marginRight: sizeAdaption(15),
@@ -9,33 +8,33 @@
       minWidth: `${thumbnailWidth}px`,
       minHeight: `${thumbnailHeight}px`,
     }"
+    class="recent-playlist-item no-drag"
   >
     <div
       class="child-item"
       style="will-change: transform;"
     >
       <div
-        v-if="imageLoaded"
         ref="blur"
-        class="img blur"
+        v-if="imageLoaded"
         :style="{
           backgroundImage: !isPlaying ?
             `linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%), ${backgroundImage}`
             : 'linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%)',
         }"
+        class="img blur"
       />
       <div
         ref="whiteHover"
-        class="white-hover"
         :style="{
           opacity: hovered ? '1' : '0',
           minWidth: `${thumbnailWidth}px`,
           minHeight: `${thumbnailHeight}px`,
         }"
+        class="white-hover"
       />
       <div
         ref="content"
-        class="content"
         :style="{
           height: '100%',
         }"
@@ -43,22 +42,23 @@
         @mouseleave="mouseoutVideo"
         @mousedown.left="mousedownVideo"
         @mouseup.left="mouseupVideo"
+        class="content"
       >
         <div
           ref="info"
-          class="info"
           :style="{
             height: `${thumbnailHeight - bottom}px`,
             width: `${thumbnailWidth - 2 * side}px`,
             left: `${side}px`,
           }"
+          class="info"
         >
           <div
-            class="overflow-container"
             :style="{
               height: sizeAdaption(22),
               bottom: sizeAdaption(14),
             }"
+            class="overflow-container"
           >
             <transition name="icon">
               <div
@@ -66,21 +66,21 @@
                 class="icon-container"
               >
                 <Icon
-                  type="playlistplay"
-                  class="playlist-play"
                   :style="{
                     width: sizeAdaption(10),
                     height: sizeAdaption(22),
                     marginRight: sizeAdaption(4),
                   }"
+                  type="playlistplay"
+                  class="playlist-play"
                 />
                 <div
-                  class="playing"
                   :style="{
                     paddingTop: sizeAdaption(5),
                     fontSize: sizeAdaption(12),
                     lineHeight: sizeAdaption(12),
                   }"
+                  class="playing"
                 >
                   {{ $t('recentPlaylist.playing') }}
                 </div>
@@ -90,50 +90,50 @@
           <transition name="fade">
             <div
               ref="progress"
-              class="progress"
               :style="{
                 opacity: '0',
                 height: sizeAdaption(2),
                 bottom: sizeAdaption(14),
                 marginBottom: sizeAdaption(7),
               }"
+              class="progress"
             >
               <div
-                class="slider"
                 :style="{
                   width: `${sliderPercentage}%`,
                 }"
+                class="slider"
               />
             </div>
           </transition>
           <div
             ref="title"
-            class="title"
             :style="{
               color: 'rgba(255,255,255,0.40)',
               fontSize: sizeAdaption(12),
               lineHeight: sizeAdaption(16),
             }"
+            class="title"
           >
             {{ baseName }}
           </div>
         </div>
         <div
           ref="deleteUi"
-          class="deleteUi"
           :style="{
             height: `${thumbnailHeight}px`,
           }"
+          class="deleteUi"
         >
           <Icon type="delete" />
         </div>
       </div>
       <div
         ref="border"
-        class="border"
         :style="{
           borderColor: 'rgba(255,255,255,0.15)',
         }"
+        class="border"
       />
     </div>
   </div>
@@ -144,6 +144,7 @@ import { mapGetters } from 'vuex';
 import { filePathToUrl, parseNameFromPath } from '@/helpers/path';
 import { generateCoverPathByMediaHash } from '@/helpers/cacheFileStorage';
 import Icon from '@/components/BaseIconContainer.vue';
+import { Event } from 'electron';
 
 export default {
   components: {
@@ -223,7 +224,7 @@ export default {
     },
     sizeAdaption: {
       type: Function,
-      default: (val:any) => val,
+      default: (val: number) => val,
     },
     pageSwitching: {
       type: Boolean,
@@ -256,9 +257,11 @@ export default {
       const parsedName = parseNameFromPath(this.path);
       if (parsedName.episode && parsedName.season) {
         return `S${parsedName.season}E${parsedName.episode}`;
-      } else if (parsedName.episode && !parsedName.season) {
+      }
+      if (parsedName.episode && !parsedName.season) {
         return `EP${parsedName.episode}`;
-      } else if (parsedName.season && !parsedName.episode) {
+      }
+      if (parsedName.season && !parsedName.episode) {
         return `SE${parsedName.season}`;
       }
       return path.basename(this.path, path.extname(this.path));
@@ -280,8 +283,8 @@ export default {
     },
     sliderPercentage() {
       if (this.lastPlayedTime) {
-        if (this.mediaInfo.duration &&
-            this.lastPlayedTime / this.mediaInfo.duration <= 1) {
+        if (this.mediaInfo.duration
+            && this.lastPlayedTime / this.mediaInfo.duration <= 1) {
           return (this.lastPlayedTime / this.mediaInfo.duration) * 100;
         }
       }
@@ -295,7 +298,7 @@ export default {
     },
   },
   watch: {
-    aboutToDelete(val:boolean) {
+    aboutToDelete(val: boolean) {
       if (val) {
         this.deleteTimeId = setTimeout(() => {
           this.$refs.whiteHover.style.backgroundColor = 'rgba(0,0,0,0.6)';
@@ -315,12 +318,12 @@ export default {
     items() {
       this.getLastPlayedInfo();
     },
-    isPlaying(val:boolean) {
+    isPlaying(val: boolean) {
       if (val) {
         requestAnimationFrame(this.updateAnimationOut);
       }
     },
-    displayIndex(val:number) {
+    displayIndex(val: number) {
       requestAnimationFrame(() => {
         const marginRight = this.winWidth > 1355 ? (this.winWidth / 1355) * 15 : 15;
         const distance = marginRight + this.thumbnailWidth;
@@ -331,13 +334,13 @@ export default {
         }
       });
     },
-    itemMoving(val:boolean) {
+    itemMoving(val: boolean) {
       if (!val) {
         this.tranFlag = true;
         this.displayIndex = this.index;
       }
     },
-    indexOfMovingTo(val:number) {
+    indexOfMovingTo(val: number) {
       if (this.itemMoving && Math.abs(this.movementY) < this.thumbnailHeight && !this.selfMoving) {
         // item moving to right
         if (this.index > this.indexOfMovingItem && this.index <= val) {
@@ -350,14 +353,14 @@ export default {
         }
       }
     },
-    pageSwitching(val:any, oldVal:any) {
+    pageSwitching(val: boolean, oldVal: boolean) {
       if (!val && oldVal && this.selfMoving) {
         requestAnimationFrame(() => {
           this.$refs.recentPlaylistItem.style.setProperty('transform', `translate(${this.movementX}px, ${this.movementY}px)`);
         });
       }
     },
-    movementY(val:number) { // eslint-disable-line complexity
+    movementY(val: number) { // eslint-disable-line complexity
       if (Math.abs(val) > this.thumbnailHeight) {
         // avoid the wrong layout after moving to left and lift up
         if (this.index < this.indexOfMovingItem) {
@@ -388,8 +391,8 @@ export default {
   mounted() {
     this.displayIndex = this.index;
     this.$electron.ipcRenderer.send('mediaInfo', this.path);
-    this.$electron.ipcRenderer.once(`mediaInfo-${this.path}-reply`, async (event:any, info:any) => {
-      const videoStream = JSON.parse(info).streams.find((stream:any) => stream.codec_type === 'video');
+    this.$electron.ipcRenderer.once(`mediaInfo-${this.path}-reply`, async (event: Event, info: any) => {
+      const videoStream = JSON.parse(info).streams.find((stream: any) => stream.codec_type === 'video');
       this.videoHeight = videoStream.height;
       this.videoWidth = videoStream.width;
       this.mediaInfo = Object.assign(this.mediaInfo, JSON.parse(info).format);
@@ -404,7 +407,7 @@ export default {
         videoHeight: this.videoHeight,
       });
     });
-    this.$electron.ipcRenderer.once(`snapShot-${this.path}-reply`, (event:any, imgPath:string) => {
+    this.$electron.ipcRenderer.once(`snapShot-${this.path}-reply`, (event: Event, imgPath: string) => {
       this.coverSrc = filePathToUrl(`${imgPath}`);
       this.imgPath = imgPath;
     });
@@ -414,7 +417,7 @@ export default {
     });
   },
   methods: {
-    mousedownVideo(e:MouseEvent) {
+    mousedownVideo(e: MouseEvent) {
       this.eventTarget.onItemMousedown(this.index, e.pageX, e.pageY, e);
       if (this.isPlaying) return;
       document.onmousemove = (e) => {
@@ -494,7 +497,7 @@ export default {
     getLastPlayedInfo() {
       this.videoId = this.items[this.index];
       if (this.videoId) {
-        this.infoDB.get('media-item', this.videoId).then((val:any) => {
+        this.infoDB.get('media-item', this.videoId).then((val: any) => {
           if (!val || !val.lastPlayedTime) {
             this.lastPlayedTime = 0;
             this.smallShortCut = '';
