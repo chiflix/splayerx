@@ -120,10 +120,16 @@
 </template>
 
 <script>
+import Vue from 'vue';
 import { mapState, mapGetters } from 'vuex';
 import Icon from '@/components/BaseIconContainer.vue';
 import Titlebar from './Titlebar.vue';
 import NotificationBubble from './NotificationBubble.vue';
+import PlaylistItem from './LandingView/PlaylistItem.vue';
+import VideoItem from './LandingView/VideoItem.vue';
+
+Vue.component('PlaylistItem', PlaylistItem);
+Vue.component('VideoItem', VideoItem);
 
 export default {
   name: 'LandingView',
