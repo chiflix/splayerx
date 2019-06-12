@@ -1,4 +1,4 @@
-import { IPlayInfoStorable, BeforeQuitMediaItemSaveData, BeforeQuitRecentPlayedSaveData } from "@/interfaces/IPlayInfoStorable";
+import { IPlayInfoStorable } from "@/interfaces/IPlayInfoStorable";
 import { info, data } from "@/libs/DataBase";
 import { MediaItem, PlaylistItem } from "@/interfaces/IDB";
 import { VIDEO_OBJECT_STORE_NAME, RECENT_OBJECT_STORE_NAME } from "@/constants";
@@ -9,11 +9,11 @@ export default class PlayInfoStorageService implements IPlayInfoStorable {
    * @author tanghaixiang@xindong.com
    * @date 2019-06-11
    * @param {string} videoID
-   * @param {BeforeQuitMediaItemSaveData} data
+   * @param {MediaItem} data
    * @returns {Promise<boolean>} 返回布尔值, 是否成功更新
    * @memberof PlayInfoStorageService
    */
-  async updateMediaItemBy(videoID: string, data: BeforeQuitMediaItemSaveData): Promise<boolean> {
+  async updateMediaItemBy(videoID: string, data: MediaItem): Promise<boolean> {
     let value = null;
     try {
       value = await info.getValueByKey(VIDEO_OBJECT_STORE_NAME, Number(videoID))
@@ -35,11 +35,11 @@ export default class PlayInfoStorageService implements IPlayInfoStorable {
    * @author tanghaixiang@xindong.com
    * @date 2019-06-11
    * @param {string} playListID
-   * @param {BeforeQuitRecentPlayedSaveData} data
+   * @param {PlaylistItem} data
    * @returns {Promise<boolean>} 返回布尔值, 是否成功更新
    * @memberof PlayInfoStorageService
    */
-  async updateRecentPlayedBy(playListID: string, data: BeforeQuitRecentPlayedSaveData): Promise<boolean> {
+  async updateRecentPlayedBy(playListID: string, data: PlaylistItem): Promise<boolean> {
     try {
       let playList = await info.getValueByKey(RECENT_OBJECT_STORE_NAME, Number(playListID))
       await info.update(RECENT_OBJECT_STORE_NAME, Number(playList.id), { ...playList, ...data } as PlaylistItem);

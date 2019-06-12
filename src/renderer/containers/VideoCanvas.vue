@@ -49,6 +49,7 @@ import path from 'path';
 import { Video as videoActions } from '@/store/actionTypes';
 import { videodata } from '@/store/video';
 import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer.vue';
+import { MediaItem, PlaylistItem } from '../interfaces/IDB';
 
 export default {
   name: 'VideoCanvas',
@@ -279,7 +280,7 @@ export default {
         audioTrackId: this.currentAudioTrackId,
       };
 
-      const result = await playInfoStorageService.updateMediaItemBy(videoId, data);
+      const result = await playInfoStorageService.updateMediaItemBy(videoId, data as MediaItem);
       if (result) {
         this.$bus.$emit('database-saved');
       }
@@ -290,7 +291,8 @@ export default {
         lastOpened: Date.now(),
       };
 
-      await playInfoStorageService.updateRecentPlayedBy(this.playListId, recentPlayedData);
+      await playInfoStorageService
+        .updateRecentPlayedBy(this.playListId, recentPlayedData as PlaylistItem);
     },
     saveSubtitleStyle() {
       return settingStorageService.updateSubtitleStyle({
