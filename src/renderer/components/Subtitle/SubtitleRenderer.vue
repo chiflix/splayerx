@@ -37,8 +37,8 @@
       }"
     >
       <p
-        v-for="(cue, index) in item"
-        :key="cue.text + index"
+        v-for="(cue, ind) in item"
+        :key="cue.text + ind"
         :style="{
           whiteSpace: 'pre',
           zoom: cue.category === 'first' ? `${scaleNum}` : `${secondarySubScale}`,
@@ -51,7 +51,7 @@
     </div>
   </div>
 </template>
-<script>
+<script lang="ts">
 import { mapGetters, mapMutations } from 'vuex';
 import {
   isEqual, differenceWith, isEmpty,
@@ -88,8 +88,8 @@ export default {
     ...mapGetters(['duration', 'scaleNum', 'subtitleDelay', 'intrinsicHeight', 'intrinsicWidth',
       'subToTop', 'currentFirstSubtitleId', 'winHeight', 'chosenStyle', 'chosenSize']),
     subtitleSpace() {
-      const subSpaceFactorsA = [5 / 900, 9 / 900, 10 / 900, 12 / 900];
-      const subSpaceFactorsB = [4, 21 / 5, 4, 23 / 5];
+      const subSpaceFactorsA: number[] = [5 / 900, 9 / 900, 10 / 900, 12 / 900];
+      const subSpaceFactorsB: number[] = [4, 21 / 5, 4, 23 / 5];
       return (subSpaceFactorsA[this.chosenSize] * this.winHeight)
         + subSpaceFactorsB[this.chosenSize];
     },
@@ -108,23 +108,23 @@ export default {
     allCues() {
       const allCues = [];
       for (let i = 1; i < 10; i += 1) {
-        const firstCues = this.currentCues
-          .filter(cue => (this.subToTop && [1, 2, 3]
+        const firstCues: any = this.currentCues
+          .filter((cue: any) => (this.subToTop && [1, 2, 3]
             .includes(this.calculateAlignment(cue.category, cue.tags))
             ? this.calculateAlignment(cue.category, cue.tags) + 6
             : this.calculateAlignment(cue.category, cue.tags)) === i
             && !this.calculatePosition(cue.category, cue.tags));
-        const secondaryCues = this.secondCues
-          .filter(cue => (this.subToTop && [1, 2, 3]
+        const secondaryCues: any = this.secondCues
+          .filter((cue: any) => (this.subToTop && [1, 2, 3]
             .includes(this.calculateAlignment(cue.category, cue.tags))
             ? this.calculateAlignment(cue.category, cue.tags) + 6
             : this.calculateAlignment(cue.category, cue.tags)) === i
             && !this.calculatePosition(cue.category, cue.tags));
-        allCues.push((firstCues.length ? firstCues.map((cue) => {
+        allCues.push((firstCues.length ? firstCues.map((cue: any) => {
           cue.category = 'first';
           return cue;
         }) : [])
-          .concat(secondaryCues.length ? secondaryCues.map((cue) => {
+          .concat(secondaryCues.length ? secondaryCues.map((cue: any) => {
             cue.category = 'secondary';
             return cue;
           }) : []));
@@ -132,22 +132,24 @@ export default {
       return allCues;
     },
     positionCues() {
-      const firstCues = this.currentCues
-        .filter(cue => this.calculatePosition(cue.category, cue.tags)).map((cue) => { cue.category = 'first'; return cue; });
-      const secondaryCues = this.secondCues
-        .filter(cue => this.calculatePosition(cue.category, cue.tags)).map((cue) => { cue.category = 'secondary'; return cue; });
-      const firstClassifiedCues = [];
-      const secondaryClassifiedCues = [];
-      firstCues.forEach((item) => {
-        const index = firstClassifiedCues.findIndex(e => isEqual(e[0].tags, item.tags));
+      const firstCues: any = this.currentCues
+        .filter((cue: any) => this.calculatePosition(cue.category, cue.tags)).map((cue: any) => { cue.category = 'first'; return cue; });
+      const secondaryCues: any = this.secondCues
+        .filter((cue: any) => this.calculatePosition(cue.category, cue.tags)).map((cue: any) => { cue.category = 'secondary'; return cue; });
+      const firstClassifiedCues: any = [];
+      const secondaryClassifiedCues: any = [];
+      firstCues.forEach((item: any) => {
+        const index: number = firstClassifiedCues
+          .findIndex((e: any) => isEqual(e[0].tags, item.tags));
         if (index !== -1) {
           firstClassifiedCues[index].push(item);
         } else {
           firstClassifiedCues.push([item]);
         }
       });
-      secondaryCues.forEach((item) => {
-        const index = secondaryClassifiedCues.findIndex(e => isEqual(e[0].tags, item.tags));
+      secondaryCues.forEach((item: any) => {
+        const index: number = secondaryClassifiedCues
+          .findIndex((e: any) => isEqual(e[0].tags, item.tags));
         if (index !== -1) {
           secondaryClassifiedCues[index].push(item);
         } else {
@@ -159,45 +161,45 @@ export default {
   },
   watch: {
     allCues: {
-      handler(val, oldVal) {
+      handler(val: any, oldVal: any) {
         for (let i = 0; i < 9; i += 1) {
           if (val[i].length < oldVal[i].length && oldVal[i].includes(...val[i])) {
-            this.noPositionCues[i] = oldVal[i].map((cue) => {
+            this.noPositionCues[i] = oldVal[i].map((cue: any) => {
               if (!val[i].includes(cue)) {
                 cue.hide = true;
               }
               return cue;
             });
           } else {
-            this.noPositionCues[i] = val[i].map((cue) => { cue.hide = false; return cue; });
+            this.noPositionCues[i] = val[i].map((cue: any) => { cue.hide = false; return cue; });
           }
         }
       },
       deep: true,
     },
-    videoFirstSegments(newVal) {
+    videoFirstSegments(newVal: any) {
       const duration = newVal
-        .filter(segment => segment[2])
-        .map(segment => segment[1] - segment[0])
-        .reduce((prev, curr) => prev + curr, 0);
+        .filter((segment: any) => segment[2])
+        .map((segment: any) => segment[1] - segment[0])
+        .reduce((prev: any, curr: any) => prev + curr, 0);
       if (this.subtitleInstance) {
         this.updateDuration({ id: this.subtitleInstance.id, duration });
       }
     },
-    videoSecondSegments(newVal) {
+    videoSecondSegments(newVal: any) {
       const duration = newVal
-        .filter(segment => segment[2])
-        .map(segment => segment[1] - segment[0])
-        .reduce((prev, curr) => prev + curr, 0);
+        .filter((segment: any) => segment[2])
+        .map((segment: any) => segment[1] - segment[0])
+        .reduce((prev: any, curr: any) => prev + curr, 0);
       if (this.secondaryInstance) {
         this.updateDuration({ id: this.secondaryInstance.id, duration });
       }
     },
-    subtitleInstance(val) {
+    subtitleInstance(val: SubtitleInstance) {
       if (val) {
         const { subtitleInstance } = this;
         subtitleInstance.once('data', subtitleInstance.parse);
-        subtitleInstance.on('parse', (parsed) => {
+        subtitleInstance.on('parse', (parsed: any) => {
           const parsedData = parsed.dialogues;
           this.videoFirstSegments = this.getVideoSegments(parsedData, this.duration);
           this.subPlayResX = !isEmpty(parsed.info) ? Number(parsed.info.PlayResX) : this.intrinsicWidth; // eslint-disable-line
@@ -209,11 +211,11 @@ export default {
         this.currentCues = [];
       }
     },
-    secondaryInstance(val) {
+    secondaryInstance(val: SubtitleInstance) {
       if (val) {
         const { secondaryInstance } = this;
         secondaryInstance.once('data', secondaryInstance.parse);
-        secondaryInstance.on('parse', (parsed) => {
+        secondaryInstance.on('parse', (parsed: any) => {
           const parsedData = parsed.dialogues;
           this.videoSecondSegments = this.getVideoSegments(parsedData, this.duration);
           this.secPlayResX = !isEmpty(parsed.info) ? Number(parsed.info.PlayResX) : this.intrinsicWidth; // eslint-disable-line
@@ -236,14 +238,14 @@ export default {
     ...mapMutations({
       updateDuration: subtitleMutations.DURATIONS_UPDATE,
     }),
-    calculatePosition(category, tags) {
+    calculatePosition(category: string, tags: any) {
       const type = category === 'first' ? this.firstType : this.secondType;
       if (type !== 'vtt') {
         return !!tags.pos;
       }
       return tags.line && tags.position;
     },
-    calculateAlignment(category, tags) {
+    calculateAlignment(category: string, tags: any) {
       const type = category === 'first' ? this.firstType : this.secondType;
       if (type !== 'vtt') {
         return !tags || !tags.alignment ? 2 : tags.alignment;
@@ -267,11 +269,11 @@ export default {
       }
       this.requestId = requestAnimationFrame(this.currentTimeUpdate);
     },
-    isSameCues(cues1, cues2) {
+    isSameCues(cues1: any, cues2: any) {
       return !differenceWith(
         cues1,
         cues2,
-        (cue1, cue2) => {
+        (cue1: any, cue2: any) => {
           const { text: text1, tags: tags1 } = cue1;
           const { text: text2, tags: tags2 } = cue2;
           return (
@@ -281,7 +283,7 @@ export default {
         },
       ).length;
     },
-    setFirstCurrentCues(currentTime) {
+    setFirstCurrentCues(currentTime: number) {
       if (!this.subtitleInstance.parsed) return;
       const parsedData = this.subtitleInstance.parsed.dialogues;
       if (parsedData) {
@@ -289,7 +291,7 @@ export default {
           .filter(({
             start, end,
             text, fragments,
-          }) => (
+          }: any) => (
             start <= currentTime
             && end >= currentTime
             && (!!text || !!fragments)
@@ -299,7 +301,7 @@ export default {
         }
       }
     },
-    setSecondCurrentCues(currentTime) {
+    setSecondCurrentCues(currentTime: number) {
       if (!this.secondaryInstance.parsed) return;
       const parsedData = this.secondaryInstance.parsed.dialogues;
       if (parsedData) {
@@ -307,7 +309,7 @@ export default {
           .filter(({
             start, end,
             text, fragments,
-          }) => (
+          }: any) => (
             start <= currentTime
             && end >= currentTime
             && (!!text || !!fragments)
@@ -317,14 +319,14 @@ export default {
         }
       }
     },
-    parsedFirstFragments(cues) {
+    parsedFirstFragments(cues: any) {
       if (this.firstType === 'ass') {
-        const currentCues = [];
-        cues.forEach((item) => {
+        const currentCues: any[] = [];
+        cues.forEach((item: any) => {
           let currentText = '';
           let currentTags = {};
           if (item.fragments.length) {
-            item.fragments.forEach((cue) => {
+            item.fragments.forEach((cue: any) => {
               currentText += cue.text;
               if (cue.tags) {
                 currentTags = cue.tags;
@@ -337,21 +339,21 @@ export default {
         });
         return currentCues;
       }
-      cues.forEach((item) => {
+      cues.forEach((item: any) => {
         if ('line' in item.tags || 'position' in item.tags || 'vertical' in item.tags) {
           item.tags = { pos: undefined, alignment: 2 };
         }
       });
       return cues;
     },
-    parsedSecondFragments(cues) {
+    parsedSecondFragments(cues: any) {
       if (this.secondType === 'ass') {
-        const currentCues = [];
-        cues.forEach((item) => {
+        const currentCues: any = [];
+        cues.forEach((item: any) => {
           let currentText = '';
           let currentTags = {};
           if (item.fragments.length) {
-            item.fragments.forEach((cue) => {
+            item.fragments.forEach((cue: any) => {
               currentText += cue.text;
               if (cue.tags) {
                 currentTags = cue.tags;
@@ -364,24 +366,25 @@ export default {
         });
         return currentCues;
       }
-      cues.forEach((item) => {
+      cues.forEach((item: any) => {
         if ('line' in item.tags || 'position' in item.tags || 'vertical' in item.tags) {
           item.tags = { pos: undefined, alignment: 2 };
         }
       });
       return cues;
     },
-    updateVideoFirstSegments(lastCurrentTime, currentTime) {
+    updateVideoFirstSegments(lastCurrentTime: number, currentTime: number) {
       const { videoFirstSegments, currentSegment, elapsedSegmentTime } = this;
       const segment = videoFirstSegments
-        .filter(segment => segment[0] <= currentTime && segment[1] > currentTime)[0];
+        .filter((segment: any) => segment[0] <= currentTime && segment[1] > currentTime)[0];
       if (segment && !segment[2]) {
         if (isEqual(segment, currentSegment)) {
           this.elapsedSegmentTime += currentTime - lastCurrentTime;
         } else {
           const segmentTime = currentSegment[1] - currentSegment[0];
           if (elapsedSegmentTime / segmentTime >= 0.9) {
-            const index = videoFirstSegments.findIndex(segment => segment[0] === currentSegment[0]);
+            const index = videoFirstSegments
+              .findIndex((segment: any) => segment[0] === currentSegment[0]);
             if (index !== -1) {
               this.$set(
                 videoFirstSegments,
@@ -394,10 +397,10 @@ export default {
         }
       }
     },
-    updateVideoSecondSegments(lastCurrentTime, currentTime) {
+    updateVideoSecondSegments(lastCurrentTime: number, currentTime: number) {
       const { videoSecondSegments, secondSegment, elapsedSecondTime } = this;
       const segment = videoSecondSegments
-        .filter(segment => segment[0] <= currentTime && segment[1] > currentTime)[0];
+        .filter((segment: any) => segment[0] <= currentTime && segment[1] > currentTime)[0];
       if (segment && !segment[2]) {
         if (isEqual(segment, secondSegment)) {
           this.elapsedSecondTime += currentTime - lastCurrentTime;
@@ -405,7 +408,7 @@ export default {
           const segmentTime = secondSegment[1] - secondSegment[0];
           if (elapsedSecondTime / segmentTime >= 0.9) {
             const index = videoSecondSegments
-              .findIndex(segment => segment[0] === secondSegment[0]);
+              .findIndex((segment: any) => segment[0] === secondSegment[0]);
             if (index !== -1) {
               this.$set(
                 videoSecondSegments,
@@ -417,8 +420,8 @@ export default {
         }
       }
     },
-    subLeft(cue) {
-      const subPlayResX = cue.category === 'first' ? this.subPlayResX : this.secPlayResX;
+    subLeft(cue: any) {
+      const subPlayResX: number = cue.category === 'first' ? this.subPlayResX : this.secPlayResX;
       const { tags, type } = cue;
       if (type !== 'vtt' && tags.pos) {
         return `${(tags.pos.x / subPlayResX) * 100}vw`;
@@ -434,8 +437,8 @@ export default {
       }
       return '';
     },
-    subTop(cue) {
-      const subPlayResY = cue.category === 'first' ? this.subPlayResY : this.secPlayResY;
+    subTop(cue: any) {
+      const subPlayResY: number = cue.category === 'first' ? this.subPlayResY : this.secPlayResY;
       const { tags, type } = cue;
       const isVtt = type === 'vtt';
       if (!isVtt) {
@@ -457,7 +460,7 @@ export default {
       }
       return '';
     },
-    translateNum(cue) { // eslint-disable-line
+    translateNum(cue: any) { // eslint-disable-line
       const index = this.calculateAlignment(cue.category, cue.tags)
         ? this.calculateAlignment(cue.category, cue.tags) : 2;
       switch (index) {
@@ -483,11 +486,11 @@ export default {
           return [0, 0];
       }
     },
-    getVideoSegments(parsedSubtitle, duration) {
+    getVideoSegments(parsedSubtitle: any, duration: number) {
       const subtitleSegments = parsedSubtitle
-        .filter(subtitle => subtitle.text !== '')
-        .map(subtitle => [subtitle.start || 0, subtitle.end || duration])
-        .sort((a, b) => a[0] - b[0]);
+        .filter((subtitle: any) => subtitle.text !== '')
+        .map((subtitle: any) => [subtitle.start || 0, subtitle.end || duration])
+        .sort((a: any, b: any) => a[0] - b[0]);
       const result = [[0, 0]];
       let currentIndex = 0;
       while (duration && result[result.length - 1][1] !== duration) {
@@ -504,7 +507,7 @@ export default {
           lastElement[1] = duration;
         }
       }
-      return result.map(segment => [...segment, false]);
+      return result.map((segment: any) => [...segment, false]);
     },
   },
 };
