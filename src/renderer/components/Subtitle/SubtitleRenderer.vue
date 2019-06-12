@@ -4,8 +4,8 @@
     :class="'subtitle-style'+chosenStyle"
   >
     <div
-      v-for="(item, index) in finalDisplayCues"
-      :key="index"
+      v-for="(item, index) in noPositionCues"
+      :key="'noPosition' + index"
       :class="'subtitle-alignment'+(index+1)"
     >
       <p
@@ -24,7 +24,7 @@
     </div>
     <div
       v-for="(item, index) in positionCues"
-      :key="'cues'+index"
+      :key="'position'+index"
       :style="{
         position: 'absolute',
         left: subLeft(item[0]),
@@ -72,7 +72,7 @@ export default {
       secPlayResX: 0,
       secPlayResY: 0,
       requestId: 0,
-      finalDisplayCues: [],
+      noPositionCues: [],
     };
   },
   computed: {
@@ -154,14 +154,14 @@ export default {
       handler(val, oldVal) {
         for (let i = 0; i < 9; i += 1) {
           if (val[i].length < oldVal[i].length && oldVal[i].includes(...val[i])) {
-            this.finalDisplayCues[i] = oldVal[i].map((cue) => {
+            this.noPositionCues[i] = oldVal[i].map((cue) => {
               if (!val[i].includes(cue)) {
                 cue.hide = true;
               }
               return cue;
             });
           } else {
-            this.finalDisplayCues[i] = val[i].map((cue) => { cue.hide = false; return cue; });
+            this.noPositionCues[i] = val[i].map((cue) => { cue.hide = false; return cue; });
           }
         }
       },
