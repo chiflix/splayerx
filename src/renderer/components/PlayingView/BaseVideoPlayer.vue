@@ -95,8 +95,8 @@ export default {
       required: true,
       default: () => ['loadedmetadata'],
       validator: value => (
-        value.length === 0 ||
-        value.every(element => DEFAULT_VIDEO_EVENTS.includes(element))),
+        value.length === 0
+        || value.every(element => DEFAULT_VIDEO_EVENTS.includes(element))),
     },
     // video style
     styles: {
@@ -147,8 +147,7 @@ export default {
     currentAudioTrackId(newVal, oldVal) {
       if (parseInt(oldVal, 10) !== -1) {
         for (let i = 0; i < this.$refs.video.audioTracks.length; i += 1) {
-          this.$refs.video.audioTracks[i].enabled =
-            this.$refs.video.audioTracks[i].id === newVal;
+          this.$refs.video.audioTracks[i].enabled = this.$refs.video.audioTracks[i].id === newVal;
         }
         this.$bus.$emit('seek', videodata.time);
       }
@@ -240,8 +239,8 @@ export default {
               if (this.lastAudioTrackId) {
                 enabled = this.lastAudioTrackId === Number(id);
                 for (let i = 0; i < this.$refs.video.audioTracks.length; i += 1) {
-                  this.$refs.video.audioTracks[i].enabled =
-                    Number(this.$refs.video.audioTracks[i].id) === this.lastAudioTrackId;
+                  const currentTrack = this.$refs.video.audioTracks[i];
+                  currentTrack.enabled = Number(currentTrack.id) === this.lastAudioTrackId;
                 }
               } else {
                 enabled = trackEvent.track.enabled;

@@ -1,4 +1,6 @@
-import { dirname, extname, basename, join } from 'path';
+import {
+  dirname, extname, basename, join,
+} from 'path';
 import { readdir } from 'fs';
 import { ipcRenderer } from 'electron';
 import Sagi from '@/helpers/sagi';
@@ -19,9 +21,9 @@ export function searchForLocalList(videoSrc, supportedExtensions) {
         .filter((subtitleFilename) => {
           const lowerCasedName = subtitleFilename.toLowerCase();
           return (
-            extensionRegex.test(lowerCasedName) &&
-            lowerCasedName.slice(0, lowerCasedName.lastIndexOf('.')) === videoBasename &&
-            lowerCasedName !== videoFilename
+            extensionRegex.test(lowerCasedName)
+            && lowerCasedName.slice(0, lowerCasedName.lastIndexOf('.')) === videoBasename
+            && lowerCasedName !== videoFilename
           );
         })
         .map(subtitleFilename => ({

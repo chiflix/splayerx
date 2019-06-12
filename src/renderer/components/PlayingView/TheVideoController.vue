@@ -1,7 +1,6 @@
 <template>
   <div
     ref="controller"
-    class="the-video-controller"
     :style="{ cursor: cursorStyle }"
     @mousemove="handleMousemove"
     @mouseenter="handleMouseenter"
@@ -10,12 +9,13 @@
     @mouseup="handleMouseup"
     @mousedown.left="handleMousedownLeft"
     @click.left="handleMouseupLeft"
+    class="the-video-controller"
   >
     <titlebar
       key="playing-view"
-      current-view="Playingview"
       :show-all-widgets="showAllWidgets"
       :recent-playlist="displayState.RecentPlaylist"
+      current-view="Playingview"
     />
     <notification-bubble
       ref="nextVideoUI"
@@ -23,7 +23,6 @@
     />
     <recent-playlist
       ref="recentPlaylist"
-      class="recent-playlist"
       :display-state="displayState.RecentPlaylist"
       :mousemove-client-position="mousemoveClientPosition"
       :is-dragging="isDragging"
@@ -32,13 +31,13 @@
       @can-hover-item="cancelPlayListTimeout"
       @conflict-resolve="conflictResolve"
       @update:playlistcontrol-showattached="updatePlaylistShowAttached"
+      class="recent-playlist"
     />
     <div
       v-fade-in="showAllWidgets || progressTriggerStopped"
       class="masking"
     />
     <play-button
-      class="play-button no-drag"
       :mousedown-on-volume="mousedownOnVolume"
       :mousemove-position="mousemoveClientPosition"
       :show-all-widgets="showAllWidgets"
@@ -46,37 +45,38 @@
       :paused="paused"
       :attached-shown="attachedShown"
       @update:playbutton-state="updatePlayButtonState"
+      class="play-button no-drag"
     />
     <volume-indicator
-      class="no-drag"
       :attached-shown="attachedShown"
       :mousedown-on-play-button="mousedownOnPlayButton"
       :show-all-widgets="showAllWidgets"
       @update:volume-state="updateVolumeState"
+      class="no-drag"
     />
     <div
       v-fade-in="showAllWidgets"
-      class="control-buttons"
       :style="{ marginBottom: preFullScreen ? '10px' : '0' }"
+      class="control-buttons"
     >
       <playlist-control
         v-fade-in="displayState.PlaylistControl"
-        class="button playlist"
         v-bind.sync="widgetsStatus.PlaylistControl"
+        class="button playlist"
       />
       <subtitle-control
         v-fade-in="displayState.SubtitleControl"
-        class="button subtitle"
         v-bind.sync="widgetsStatus.SubtitleControl"
         :last-dragging.sync="lastDragging"
         @conflict-resolve="conflictResolve"
+        class="button subtitle"
       />
       <advance-control
         v-fade-in="displayState.AdvanceControl"
-        class="button advance"
         v-bind.sync="widgetsStatus.AdvanceControl"
         :last-dragging.sync="lastDragging"
         @conflict-resolve="conflictResolve"
+        class="button advance"
       />
     </div>
     <the-time-codes
@@ -192,22 +192,22 @@ export default {
       inputWheelDirection: iGT.GET_WHEEL_DIRECTION,
     }),
     showAllWidgets() {
-      return !this.tempRecentPlaylistDisplayState &&
-        ((!this.mouseStopped && !this.mouseLeftWindow) ||
-        (!this.mouseLeftWindow && this.onOtherWidget) ||
-        this.attachedShown || this.videoChanged ||
-        (this.isMousedown && this.currentMousedownWidget === 'PlayButton'));
+      return !this.tempRecentPlaylistDisplayState
+        && ((!this.mouseStopped && !this.mouseLeftWindow)
+        || (!this.mouseLeftWindow && this.onOtherWidget)
+        || this.attachedShown || this.videoChanged
+        || (this.isMousedown && this.currentMousedownWidget === 'PlayButton'));
     },
     onOtherWidget() {
       return (
-        (this.currentWidget !== this.$options.name) &&
-        (this.currentWidget !== 'PlayButton') &&
-        (this.currentWidget !== 'VolumeIndicator')
+        (this.currentWidget !== this.$options.name)
+        && (this.currentWidget !== 'PlayButton')
+        && (this.currentWidget !== 'VolumeIndicator')
       );
     },
     cursorStyle() {
-      return this.showAllWidgets || !this.isFocused ||
-        this.tempRecentPlaylistDisplayState ? 'default' : 'none';
+      return this.showAllWidgets || !this.isFocused
+        || this.tempRecentPlaylistDisplayState ? 'default' : 'none';
     },
     isDragging() {
       if (this.isMousedown) {
@@ -234,8 +234,8 @@ export default {
     },
     isDragging(val, oldval) {
       if (
-        !val && oldval &&
-        !['SubtitleControl', 'AdvanceControl'].includes(this.currentMousedownWidget)
+        !val && oldval
+        && !['SubtitleControl', 'AdvanceControl'].includes(this.currentMousedownWidget)
       ) {
         this.lastDragging = true;
       }
@@ -273,9 +273,9 @@ export default {
       this.updateMinimumSize();
     },
     isFullScreen(val) {
-      this.preFullScreen = process.platform === 'darwin' &&
-      this.intrinsicWidth / this.intrinsicHeight > window.screen.width / window.screen.height ?
-        val : false;
+      this.preFullScreen = process.platform === 'darwin'
+      && this.intrinsicWidth / this.intrinsicHeight > window.screen.width / window.screen.height
+        ? val : false;
       if (this.touchBar) {
         if (!val) {
           this.touchBar.escapeItem.icon = this.createIcon('touchBar/fullscreen.png');
@@ -469,10 +469,10 @@ export default {
         tempObject[index] = !this.widgetsStatus.PlaylistControl.showAttached;
       });
       tempObject.RecentPlaylist = (
-        this.playListState ||
-        this.widgetsStatus.PlaylistControl.showAttached
-      ) &&
-        !this.dragOver;
+        this.playListState
+        || this.widgetsStatus.PlaylistControl.showAttached
+      )
+        && !this.dragOver;
       this.displayState = tempObject;
       this.tempRecentPlaylistDisplayState = this.widgetsStatus.PlaylistControl.showAttached;
     },
@@ -588,10 +588,9 @@ export default {
         this.clicksTimer = setTimeout(() => {
           this.clicks = 0;
           this.lastDragging = false;
-          this.lastAttachedShowing =
-            this.widgetsStatus.SubtitleControl.showAttached ||
-            this.widgetsStatus.AdvanceControl.showAttached ||
-            this.widgetsStatus.PlaylistControl.showAttached;
+          this.lastAttachedShowing = this.widgetsStatus.SubtitleControl.showAttached
+            || this.widgetsStatus.AdvanceControl.showAttached
+            || this.widgetsStatus.PlaylistControl.showAttached;
         }, this.clicksDelay);
       } else if (this.clicks === 2) {
         clearTimeout(this.clicksTimer);

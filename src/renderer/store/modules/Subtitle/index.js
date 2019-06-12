@@ -47,21 +47,21 @@ const getters = {
         type: types[id],
       }))
   ),
-  subtitleList: ({ videoSubtitleMap }, { originSrc, allSubtitleList }) =>
-    (videoSubtitleMap[originSrc] || [])
-      .map(subtitleId => allSubtitleList.find(({ id }) => id === subtitleId))
-      .sort((a, b) => b.rank - a.rank),
+  subtitleList: ({ videoSubtitleMap }, { originSrc, allSubtitleList }) => (
+    videoSubtitleMap[originSrc] || [])
+    .map(subtitleId => allSubtitleList.find(({ id }) => id === subtitleId))
+    .sort((a, b) => b.rank - a.rank),
   ableToPushCurrentSubtitle: (
     { currentFirstSubtitleId, currentSecondSubtitleId, enabledSecondarySub },
     { subtitleList },
   ) => {
     const currentSubtitles = subtitleList
-      .filter(({ id }) => id === currentFirstSubtitleId ||
-        (id === currentSecondSubtitleId && enabledSecondarySub));
+      .filter(({ id }) => id === currentFirstSubtitleId
+        || (id === currentSecondSubtitleId && enabledSecondarySub));
     return !!currentSubtitles.map(i => i.loading === 'loaded' || i.loading === 'ready').length;
   },
-  getVideoSrcById: ({ videoSubtitleMap }) => id =>
-    (Object.keys(videoSubtitleMap).find(videoSrc => videoSubtitleMap[videoSrc].includes(id))),
+  getVideoSrcById: ({ videoSubtitleMap }) => id => (Object.keys(videoSubtitleMap)
+    .find(videoSrc => videoSubtitleMap[videoSrc].includes(id))),
   subtitleDelay: state => state.subtitleDelay,
   chosenStyle: state => state.chosenStyle,
   chosenSize: state => state.chosenSize,

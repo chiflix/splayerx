@@ -1,14 +1,13 @@
 <template>
   <div
-    class="container"
     :style="{
       width: `${width}px`,
       height: `${height}px`,
     }"
+    class="container"
   >
     <slot />
     <div
-      class="element"
       :style="{
         left: `-${borderWidth / 2}px`,
         top: `-${borderWidth / 2}px`,
@@ -17,6 +16,7 @@
         height: `${height + borderWidth}px`,
         border: `${borderWidth}px solid rgba(${borderColor})`,
       }"
+      class="element"
     />
   </div>
 </template>

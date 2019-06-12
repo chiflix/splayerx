@@ -6,22 +6,22 @@
     @mouseleave="handleMouseleave"
   >
     <div
-      class="icon-wrapper"
       :class="iconClass"
+      class="icon-wrapper"
     >
       <Icon
         v-show="showPlayIcon"
+        :class="animationMode"
+        :style="{cursor: cursorAppear ? 'pointer' : 'none'}"
         class="icon play"
         type="play"
-        :class="ani_mode"
-        :style="{cursor: cursorAppear ? 'pointer' : 'none'}"
       />
       <Icon
         v-show="!showPlayIcon"
+        :class="animationMode"
+        :style="{cursor: cursorAppear ? 'pointer' : 'none'}"
         class="icon"
         type="pause"
-        :class="ani_mode"
-        :style="{cursor: cursorAppear ? 'pointer' : 'none'}"
       />
     </div>
   </div>
@@ -52,7 +52,7 @@ export default {
       mouseover: false,
       mousedown: false,
       showPlayIcon: false,
-      ani_mode: 'icon-ani-fade-in',
+      animationMode: 'icon-ani-fade-in',
       iconClass: 'fade-out',
       iconFadingId: NaN,
       detectMovePosition: false,
@@ -105,7 +105,7 @@ export default {
     document.addEventListener('mouseup', () => {
       if (this.mousedown) {
         this.mousedown = false;
-        this.ani_mode = 'icon-ani-fade-in';
+        this.animationMode = 'icon-ani-fade-in';
         this.$emit('update:playbutton-state', false);
       }
     });
@@ -130,8 +130,8 @@ export default {
       }, 200);
     },
     handleMousedown() { // eslint-disable-line complexity
-      if (this.justFocused || (this.showAllWidgets &&
-        (this.justCloseAttached || this.justMousedownOnVolume))) {
+      if (this.justFocused || (this.showAllWidgets
+        && (this.justCloseAttached || this.justMousedownOnVolume))) {
         this.justFocused = this.justCloseAttached = this.justMousedownOnVolume = false;
         this.cursorAppear = true;
         this.iconClass = 'fade-in';
@@ -139,7 +139,7 @@ export default {
         this.cursorAppear = true;
         this.iconClass = 'fade-in';
         this.mousedown = true;
-        this.ani_mode = 'icon-ani-fade-out';
+        this.animationMode = 'icon-ani-fade-out';
         this.$emit('update:playbutton-state', true);
       } else if (!this.showAllWidgets && !this.attachedShown && this.isFocused) {
         this.cursorAppear = true;

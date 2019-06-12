@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs';
 import _ from 'lodash';
-import helpers from './index';
+import * as helpers from './index';
 
 /* eslint-disable */
 const electron = require('electron');

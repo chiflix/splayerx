@@ -1,7 +1,7 @@
 <template>
   <div
-    class="subtitle-loader"
     :class="'subtitle-style'+chosenStyle"
+    class="subtitle-loader"
   >
     <div
       v-for="(item, index) in noPositionCues"
@@ -46,7 +46,9 @@
 </template>
 <script>
 import { mapGetters, mapMutations } from 'vuex';
-import { isEqual, differenceWith, isEmpty, groupBy } from 'lodash';
+import {
+  isEqual, differenceWith, isEmpty,
+} from 'lodash';
 import { Subtitle as subtitleMutations } from '@/store/mutationTypes';
 import { videodata } from '@/store/video';
 import SubtitleInstance from './SubtitleLoader/index';
@@ -82,8 +84,8 @@ export default {
     subtitleSpace() {
       const subSpaceFactorsA = [5 / 900, 9 / 900, 10 / 900, 12 / 900];
       const subSpaceFactorsB = [4, 21 / 5, 4, 23 / 5];
-      return (subSpaceFactorsA[this.chosenSize] * this.winHeight) +
-        subSpaceFactorsB[this.chosenSize];
+      return (subSpaceFactorsA[this.chosenSize] * this.winHeight)
+        + subSpaceFactorsB[this.chosenSize];
     },
     type() {
       return this.subtitleInstance ? this.subtitleInstance.metaInfo.format : '';
@@ -101,17 +103,17 @@ export default {
       const allCues = [];
       for (let i = 1; i < 10; i += 1) {
         const firstCues = this.currentCues
-          .filter(cue =>
-            (this.subToTop && [1, 2, 3].includes(this.calculateAlignment(cue.category, cue.tags)) ?
-              this.calculateAlignment(cue.category, cue.tags) + 6 :
-              this.calculateAlignment(cue.category, cue.tags)) === i &&
-            !this.calculatePosition(cue.category, cue.tags));
+          .filter(cue => (this.subToTop && [1, 2, 3]
+            .includes(this.calculateAlignment(cue.category, cue.tags))
+            ? this.calculateAlignment(cue.category, cue.tags) + 6
+            : this.calculateAlignment(cue.category, cue.tags)) === i
+            && !this.calculatePosition(cue.category, cue.tags));
         const secondaryCues = this.secondCues
-          .filter(cue =>
-            (this.subToTop && [1, 2, 3].includes(this.calculateAlignment(cue.category, cue.tags))
-              ? this.calculateAlignment(cue.category, cue.tags) + 6 :
-              this.calculateAlignment(cue.category, cue.tags)) === i &&
-            !this.calculatePosition(cue.category, cue.tags));
+          .filter(cue => (this.subToTop && [1, 2, 3]
+            .includes(this.calculateAlignment(cue.category, cue.tags))
+            ? this.calculateAlignment(cue.category, cue.tags) + 6
+            : this.calculateAlignment(cue.category, cue.tags)) === i
+            && !this.calculatePosition(cue.category, cue.tags));
         allCues.push((firstCues.length ? firstCues.map((cue) => {
           cue.category = 'first';
           return cue;
@@ -193,8 +195,8 @@ export default {
           const parsedData = parsed.dialogues;
           this.videoSegments = this.getVideoSegments(parsedData, this.duration);
           this.subPlayResX = !isEmpty(parsed.info) ? Number(parsed.info.PlayResX) : this.intrinsicWidth; // eslint-disable-line
-          this.subPlayResY = !isEmpty(parsed.info) ? Number(parsed.info.PlayResY) :
-            this.intrinsicHeight;
+          this.subPlayResY = !isEmpty(parsed.info) ? Number(parsed.info.PlayResY)
+            : this.intrinsicHeight;
         });
         subtitleInstance.load();
       } else {
@@ -209,8 +211,8 @@ export default {
           const parsedData = parsed.dialogues;
           this.videoSecondSegments = this.getVideoSegments(parsedData, this.duration);
           this.secPlayResX = !isEmpty(parsed.info) ? Number(parsed.info.PlayResX) : this.intrinsicWidth; // eslint-disable-line
-          this.secPlayResY = !isEmpty(parsed.info) ? Number(parsed.info.PlayResY) :
-            this.intrinsicHeight;
+          this.secPlayResY = !isEmpty(parsed.info) ? Number(parsed.info.PlayResY)
+            : this.intrinsicHeight;
         });
         secondaryInstance.load();
       } else {
@@ -267,8 +269,8 @@ export default {
           const { text: text1, tags: tags1 } = cue1;
           const { text: text2, tags: tags2 } = cue2;
           return (
-            text1 === text2 &&
-            isEqual(tags1, tags2)
+            text1 === text2
+            && isEqual(tags1, tags2)
           );
         },
       ).length;
@@ -282,9 +284,9 @@ export default {
             start, end,
             text, fragments,
           }) => (
-            start <= currentTime &&
-            end >= currentTime &&
-            (!!text || !!fragments)
+            start <= currentTime
+            && end >= currentTime
+            && (!!text || !!fragments)
           )));
         if (cues.length !== this.currentCues.length || !this.isSameCues(cues, this.currentCues)) {
           this.currentCues = cues;
@@ -300,9 +302,9 @@ export default {
             start, end,
             text, fragments,
           }) => (
-            start <= currentTime &&
-            end >= currentTime &&
-            (!!text || !!fragments)
+            start <= currentTime
+            && end >= currentTime
+            && (!!text || !!fragments)
           )));
         if (cues.length !== this.secondCues.length || !this.isSameCues(cues, this.secondCues)) {
           this.secondCues = cues;
@@ -410,7 +412,7 @@ export default {
       const { tags, type } = cue;
       if (type !== 'vtt' && tags.pos) {
         return `${(tags.pos.x / subPlayResX) * 100}vw`;
-      } else if (type === 'vtt' && tags.line && tags.position) {
+      } if (type === 'vtt' && tags.line && tags.position) {
         if (tags.vertical) {
           if (!tags.line.includes('%')) {
             tags.line = Math.abs(tags.line) * 100;
@@ -429,11 +431,11 @@ export default {
       if (!isVtt) {
         if (tags.pos) {
           return `${(tags.pos.y / subPlayResY) * 100}vh`;
-        } else if ([7, 8, 9].includes(tags.alignment)) {
+        } if ([7, 8, 9].includes(tags.alignment)) {
           return `${(60 / 1080) * 100}%`;
         }
         return '';
-      } else if (isVtt && tags.line && tags.position) {
+      } if (isVtt && tags.line && tags.position) {
         if (tags.vertical) {
           return tags.position;
         }
@@ -446,8 +448,8 @@ export default {
       return '';
     },
     translateNum(cue) { // eslint-disable-line
-      const index = this.calculateAlignment(cue.category, cue.tags) ?
-        this.calculateAlignment(cue.category, cue.tags) : 2;
+      const index = this.calculateAlignment(cue.category, cue.tags)
+        ? this.calculateAlignment(cue.category, cue.tags) : 2;
       switch (index) {
         case 1:
           return [0, -100];
@@ -502,12 +504,5 @@ export default {
   position: absolute;
   width: 100%;
   height: 100%;
-}
-.subContainer {
-  position: absolute;
-  display: flex;
-  flex-direction: column-reverse;
-  transform-origin: bottom left;
-  z-index: 5;
 }
 </style>

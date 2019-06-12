@@ -1,21 +1,21 @@
 <template>
   <div
-    class="subtitle-wrapper"
     :style="{
       fontStyle: isItalic ? 'italic' : '',
       fontWeight: isBold ? 'bold' : '',
       textDecoration: lineType,
     }"
+    class="subtitle-wrapper"
   >
     <span
-      class="subtitle-border-content"
       :style="{ textAlign: textAlign }"
       :class="'subtitle-border-style'+ChosenIndex"
+      class="subtitle-border-content"
     >{{ text }}</span>
     <span
-      class="subtitle-content"
       :style="{ textAlign: textAlign}"
       :class="'subtitle-style'+ChosenIndex"
+      class="subtitle-content"
     >{{ text }}</span>
   </div>
 </template>
@@ -52,7 +52,8 @@ export default {
       const alignRight = [3, 6, 9];
       if (alignLeft.includes(this.settings.alignment)) {
         return 'left';
-      } else if (alignRight.includes(this.settings.alignment)) {
+      }
+      if (alignRight.includes(this.settings.alignment)) {
         return 'right';
       }
       return 'center';

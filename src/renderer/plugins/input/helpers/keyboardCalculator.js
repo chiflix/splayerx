@@ -1,9 +1,9 @@
 export function keydownCalculator(existedCodes, currentCode, ignoredKeys = []) {
   existedCodes = [...existedCodes];
   const isIgnoredKey = (
-    Array.isArray(ignoredKeys) &&
-    ignoredKeys.length &&
-    ignoredKeys.some(code => currentCode.startsWith(code))
+    Array.isArray(ignoredKeys)
+    && ignoredKeys.length
+    && ignoredKeys.some(code => currentCode.startsWith(code))
   );
   if (!isIgnoredKey && !existedCodes.includes(currentCode)) existedCodes.push(currentCode);
   return existedCodes;
@@ -15,9 +15,9 @@ export function specialKeydownCalculator(existedCodes, currentCode) {
 export function keyupCalculator(existedCodes, currentCode, ignoredKeys = []) {
   existedCodes = [...existedCodes];
   const isIgnoredKey = (
-    Array.isArray(ignoredKeys) &&
-    ignoredKeys.length &&
-    ignoredKeys.some(code => currentCode.startsWith(code))
+    Array.isArray(ignoredKeys)
+    && ignoredKeys.length
+    && ignoredKeys.some(code => currentCode.startsWith(code))
   );
   // console.log('Keyboard:', currentCode, ignoredKeys.some(code => currentCode.startsWith(code)));
   if (!isIgnoredKey && existedCodes.includes(currentCode)) {

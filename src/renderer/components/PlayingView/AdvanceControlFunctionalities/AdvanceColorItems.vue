@@ -1,6 +1,5 @@
 <template>
   <div
-    class="itemContainer"
     :style="{
       height: heightSize,
       backgroundImage: !isChosen ? '' :
@@ -11,22 +10,22 @@
     @mouseleave="handleSubMouseLeave"
   >
     <div
-      class="detail"
       :style="{
         backgroundImage: !isChosen && hoveredText ?
           'linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.045) 20%, ' +
           'rgba(255,255,255,0.00) 78%, rgba(255,255,255,0.00) 100%)' : '',
         transition: 'opacity 200ms',
       }"
+      class="detail"
     >
       <div
-        class="textContainer"
         :style="{
           color: !isChosen && hoveredText ?
             'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
           transition: 'color 300ms',
           cursor: isChosen ? 'default' : 'pointer',
         }"
+        class="textContainer"
       >
         <p>{{ $t('advance.fontStyle') }}</p>
         <div
@@ -49,11 +48,11 @@
             >
               <img
                 :src="img === chosenStyle || index === hoverImgIndex ? imgsSelected[index] : img"
-                class="imgType"
                 :style="{ cursor: img === chosenStyle ? 'default' : 'pointer'}"
                 @mouseover="handleOver(index)"
                 @mouseout="handleOut"
                 @click.left="handleClick(index)"
+                class="imgType"
               >
             </div>
           </div>
@@ -105,7 +104,8 @@ export default {
     heightSize() {
       if (this.size >= 289 && this.size <= 480) {
         return this.isChosen ? '74px' : '37px';
-      } else if (this.size >= 481 && this.size < 1080) {
+      }
+      if (this.size >= 481 && this.size < 1080) {
         return this.isChosen ? `${74 * 1.2}px` : `${37 * 1.2}px`;
       }
       return this.isChosen ? `${74 * 1.2 * 1.4}px` : `${37 * 1.2 * 1.4}px`;
@@ -354,4 +354,3 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   }
 }
 </style>
-
