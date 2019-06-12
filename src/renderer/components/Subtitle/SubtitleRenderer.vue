@@ -14,7 +14,7 @@
         :style="{
           zoom: cue.category === 'first' ? `${scaleNum}` : `${secondarySubScale}`,
           opacity: cue.hide ? '0' : '1',
-          writingMode: (cue.category === 'first' ? type === 'vtt' : secondType === 'vtt')
+          writingMode: (cue.category === 'first' ? firstType === 'vtt' : secondType === 'vtt')
             ? `vertical-${cue.tags.vertical}` : '',
           lineHeight: subtitleInstance && secondaryInstance ? '112%' : 'normal',
           marginBottom: item[ind + 1] && cue.category === 'first' &&
@@ -63,7 +63,7 @@ export default {
     return {
       currentCues: [],
       secondCues: [],
-      videoSegments: [],
+      videoFirstSegments: [],
       videoSecondSegments: [],
       secondSegment: [0, 0, false],
       currentSegment: [0, 0, false],
@@ -87,10 +87,10 @@ export default {
       return (subSpaceFactorsA[this.chosenSize] * this.winHeight)
         + subSpaceFactorsB[this.chosenSize];
     },
-    type() {
+    firstType() {
       return this.subtitleInstance ? this.subtitleInstance.metaInfo.format : '';
     },
-    secondType() {
+    secondfirstType() {
       return this.secondaryInstance ? this.secondaryInstance.metaInfo.format : '';
     },
     secondarySubScale() { // 第二字幕的字号最小不小于9px
@@ -169,7 +169,7 @@ export default {
       },
       deep: true,
     },
-    videoSegments(newVal) {
+    videoFirstSegments(newVal) {
       const duration = newVal
         .filter(segment => segment[2])
         .map(segment => segment[1] - segment[0])
@@ -193,7 +193,7 @@ export default {
         subtitleInstance.once('data', subtitleInstance.parse);
         subtitleInstance.on('parse', (parsed) => {
           const parsedData = parsed.dialogues;
-          this.videoSegments = this.getVideoSegments(parsedData, this.duration);
+          this.videoFirstSegments = this.getVideoSegments(parsedData, this.duration);
           this.subPlayResX = !isEmpty(parsed.info) ? Number(parsed.info.PlayResX) : this.intrinsicWidth; // eslint-disable-line
           this.subPlayResY = !isEmpty(parsed.info) ? Number(parsed.info.PlayResY)
             : this.intrinsicHeight;
@@ -231,14 +231,14 @@ export default {
       updateDuration: subtitleMutations.DURATIONS_UPDATE,
     }),
     calculatePosition(category, tags) {
-      const type = category === 'first' ? this.type : this.secondType;
+      const type = category === 'first' ? this.firstType : this.secondType;
       if (type !== 'vtt') {
         return !!tags.pos;
       }
       return tags.line && tags.position;
     },
     calculateAlignment(category, tags) {
-      const type = category === 'first' ? this.type : this.secondType;
+      const type = category === 'first' ? this.firstType : this.secondType;
       if (type !== 'vtt') {
         return !tags || !tags.alignment ? 2 : tags.alignment;
       }
@@ -252,11 +252,11 @@ export default {
       }
       const { lastCurrentTime } = this;
       if (this.subtitleInstance) {
-        this.setCurrentCues(currentTime - (subtitleDelay / 1000));
-        this.updateVideoSegments(lastCurrentTime, currentTime);
+        this.setFirstCurrentCues(currentTime - (subtitleDelay / 1000));
+        this.updateVideoFirstSegments(lastCurrentTime, currentTime);
       }
       if (this.secondaryInstance) {
-        this.setSecondCues(currentTime - (subtitleDelay / 1000));
+        this.setSecondCurrentCues(currentTime - (subtitleDelay / 1000));
         this.updateVideoSecondSegments(lastCurrentTime, currentTime);
       }
       this.requestId = requestAnimationFrame(this.currentTimeUpdate);
@@ -275,11 +275,11 @@ export default {
         },
       ).length;
     },
-    setCurrentCues(currentTime) {
+    setFirstCurrentCues(currentTime) {
       if (!this.subtitleInstance.parsed) return;
       const parsedData = this.subtitleInstance.parsed.dialogues;
       if (parsedData) {
-        const cues = this.parsedFragments(parsedData
+        const cues = this.parsedFirstFragments(parsedData
           .filter(({
             start, end,
             text, fragments,
@@ -293,11 +293,11 @@ export default {
         }
       }
     },
-    setSecondCues(currentTime) {
+    setSecondCurrentCues(currentTime) {
       if (!this.secondaryInstance.parsed) return;
       const parsedData = this.secondaryInstance.parsed.dialogues;
       if (parsedData) {
-        const cues = this.parsedSecond(parsedData
+        const cues = this.parsedSecondFragments(parsedData
           .filter(({
             start, end,
             text, fragments,
@@ -311,8 +311,8 @@ export default {
         }
       }
     },
-    parsedFragments(cues) {
-      if (this.type === 'ass') {
+    parsedFirstFragments(cues) {
+      if (this.firstType === 'ass') {
         const currentCues = [];
         cues.forEach((item) => {
           let currentText = '';
@@ -338,7 +338,7 @@ export default {
       });
       return cues;
     },
-    parsedSecond(cues) {
+    parsedSecondFragments(cues) {
       if (this.secondType === 'ass') {
         const currentCues = [];
         cues.forEach((item) => {
@@ -365,9 +365,9 @@ export default {
       });
       return cues;
     },
-    updateVideoSegments(lastCurrentTime, currentTime) {
-      const { videoSegments, currentSegment, elapsedSegmentTime } = this;
-      const segment = videoSegments
+    updateVideoFirstSegments(lastCurrentTime, currentTime) {
+      const { videoFirstSegments, currentSegment, elapsedSegmentTime } = this;
+      const segment = videoFirstSegments
         .filter(segment => segment[0] <= currentTime && segment[1] > currentTime)[0];
       if (segment && !segment[2]) {
         if (isEqual(segment, currentSegment)) {
@@ -375,9 +375,13 @@ export default {
         } else {
           const segmentTime = currentSegment[1] - currentSegment[0];
           if (elapsedSegmentTime / segmentTime >= 0.9) {
-            const index = videoSegments.findIndex(segment => segment[0] === currentSegment[0]);
+            const index = videoFirstSegments.findIndex(segment => segment[0] === currentSegment[0]);
             if (index !== -1) {
-              this.$set(videoSegments, index, [...videoSegments[index].slice(0, 2), true]);
+              this.$set(
+                videoFirstSegments,
+                index,
+                [...videoFirstSegments[index].slice(0, 2), true],
+              );
             }
           }
           this.currentSegment = segment;
