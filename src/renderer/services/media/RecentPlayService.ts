@@ -1,25 +1,81 @@
 import { IRecentPlayRequest, RecentPlayInfo } from '@/interfaces/containers/IRecentPlayRequest';
 import MediaStorageService, { mediaStorageService } from '@/services/storage/MediaStorageService';
-import Helpers from '@/helpers';
 import { ipcRenderer } from 'electron';
 import store from '@/store/index';
-import { database } from '@/libs/DataBase'
-import { INFO_DATABASE_NAME } from '@/constants';
+import { basename, join, dirname, extname } from 'path';
+import { getValidVideoRegex } from '@/../shared/utils';
+import { promises as fsPromises } from 'fs';
+import { mediaQuickHash } from "@/helpers/utils";
+import { info } from '@/libs/DataBase'
 import { PlaylistItem } from '@/interfaces/services/IDB';
+import infoDB from '@/helpers/infoDB';
 
-export type MediaInfo = {
+type RecentPlayItem = {
+  name: string,
+  image: string,
+  progress: number,
+}
+type MediaInfo = {
+  path: string,
   duration: number,
-}
-
-function getOriginSrc() {
-  return store.getters.originSrc;
-}
-function getPlaylistId() {
-  return store.getters.playListId;
+  cover: string, // path
+  shortcut: string, // base64 string
+  lastPlayedTime: number,
 }
 
 export default class RecentPlayService implements IRecentPlayRequest {
+  public playlist: MediaInfo [];
+  public currentVideo: string;
+
   constructor(private readonly mediaStorageService: MediaStorageService) {
+  }
+
+  async init(playlistId: number, detectFolder: boolean, currentVideo: string) {
+    currentVideo = this.currentVideo;
+    const playlist = await info.getValueByKey('recent-played', playlistId);
+    if (playlist.item.length > 1) {
+      for (const mediaItemId of playlist.items) {
+        const mediaItem = await info.getValueByKey('media-item', mediaItemId);
+        playlist.push(mediaItem);
+      }
+    } else {
+      const mediaItem = await info.getValueByKey('media-item', playlist.items[0]);
+      const results = await this.findSimilarVideoByVidPath(mediaItem.path);
+    }
+    // get media info
+    // get covers
+    // get video records - folder branch & playlist branch
+  }
+  async findSimilarVideoByVidPath(vidPath: string) {
+    vidPath = decodeURI(vidPath);
+
+    if (process.platform === 'win32') {
+      vidPath = vidPath.replace(/^file:\/\/\//, '');
+    } else {
+      vidPath = vidPath.replace(/^file:\/\//, '');
+    }
+
+    const dirPath = dirname(vidPath);
+
+    const videoFiles: string[] = [];
+    const files = await fsPromises.readdir(dirPath);
+    const tasks = [];
+    for (let i = 0; i < files.length; i += 1) {
+      const filename = join(dirPath, files[i]);
+      tasks.push(fsPromises.lstat(filename).then((stat) => {
+        const fileBaseName = basename(filename);
+        if (!stat.isDirectory() && !fileBaseName.startsWith('.')) {
+          if (getValidVideoRegex().test(extname(fileBaseName))) {
+            videoFiles.push(fileBaseName);
+          }
+        }
+      }));
+    }
+    await Promise.all(tasks);
+    videoFiles.sort();
+    videoFiles.map(src => join(dirPath, src));
+
+    return videoFiles;
   }
    /**
    * @param  {string} mediaHash
@@ -33,12 +89,12 @@ export default class RecentPlayService implements IRecentPlayRequest {
       return null; 
     }
   }
-  async getMediaInfo(videoSrc: string): Promise<MediaInfo> {
+  async getMediaInfo(videoPath: string): Promise<MediaInfo> {
     return new Promise((resolve, j) => {
-      ipcRenderer.send('mediaInfo', videoSrc);
-      ipcRenderer.once(`mediaInfo-${videoSrc}-reply`, async (event: any, info: string) => {
+      ipcRenderer.send('mediaInfo', videoPath);
+      ipcRenderer.once(`mediaInfo-${videoPath}-reply`, async (event: any, info: string) => {
         const format: MediaInfo = JSON.parse(info).format;
-        resolve(format);
+        this.playlist.find(video => video.path === videoPath);
       });
     });
   }
@@ -75,7 +131,7 @@ export default class RecentPlayService implements IRecentPlayRequest {
       // getMediaInfo
       // getCover
       // generateCover if no result
-      const mediaHash: string = await Helpers.methods.mediaQuickHash(src);
+      const mediaHash: string = await mediaQuickHash(src);
       const mediaInfo = await this.getMediaInfo(src);
       const duration = mediaInfo.duration;
       const result: string | null = await this.getCover(mediaHash);
@@ -104,7 +160,7 @@ export default class RecentPlayService implements IRecentPlayRequest {
   }
 
   async setPlaylist(playlistId: number, paths: string[]): Promise<void> {
-    const result = await database.getValueByKey(INFO_DATABASE_NAME, 'recent-played', playlistId);
+    const result = await info.getValueByKey('recent-played', playlistId);
     const playlist = result as PlaylistItem;
     const currentVideoId = playlist.items[0];
     const currentVideoHp = playlist.hpaths[0];
@@ -112,15 +168,15 @@ export default class RecentPlayService implements IRecentPlayRequest {
     const hpaths = [];
     /* eslint-disable */
     for (const videoPath of paths) {
-      if (videoPath !== getOriginSrc()) {
-        const quickHash = await this.mediaQuickHash(videoPath);
+      if (videoPath !== this.currentVideo) {
+        const quickHash = await mediaQuickHash(videoPath);
         const data = {
           quickHash,
           type: 'video',
           path: videoPath,
           source: 'playlist',
         };
-        const videoId = await this.infoDB.add('media-item', data);
+        const videoId = await info.add('media-item', data);
         items.push(videoId);
         hpaths.push(`${quickHash}-${videoPath}`);
       } else {
@@ -130,8 +186,7 @@ export default class RecentPlayService implements IRecentPlayRequest {
     }
     playlist.items = items;
     playlist.hpaths = hpaths;
-    this.infoDB.update('recent-played', playlist, playlist.id);
-    this.store.dispatch('PlayingList', { id: playlist.id, paths: this.playingList, items: playlist.items });
+    info.update('recent-played', playlist.id, playlist);
   }
 }
 

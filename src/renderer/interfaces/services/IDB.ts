@@ -8,9 +8,10 @@ export type RawPlaylistItem = {
 export type RawMediaItem = {
   quickHash: string,
   path: string,
-  lastPlayedTime: number,
-  duration: number,
+  type: string,
   source: string,
+  lastPlayedTime?: number,
+  duration?: number,
 }
 export type PlaylistItem = {
   id: number,
@@ -23,9 +24,10 @@ export type MediaItem = {
   videoId: number,
   quickHash: string,
   path: string,
-  lastPlayedTime: number,
-  duration: number,
+  type: string,
   source: string,
+  lastPlayedTime?: number,
+  duration?: number,
 }
 export type SubtitleItem = {
   format: string,

@@ -182,6 +182,7 @@ export default {
     };
   },
   created() {
+    recentPlayService.init(this.playListId, this.isFolderList, this.originSrc);
     this.$bus.$on('delete-file', async (path: string, id: number) => {
       this.$store.dispatch('RemoveItemFromPlayingList', path);
       this.infoDB.delete('media-item', id);
@@ -192,10 +193,9 @@ export default {
         playedIndex: this.playingIndex,
       }, playlist.id);
     });
-    recentPlayService.generatePlaylistCovers(this.playingList);
-    this.hoverIndex = this.playingIndex;
 
-    this.indexOfMovingItem = this.playingList.length;
+    this.hoverIndex = this.playingIndex;
+    this.indexOfMovingItem = recentPlayService.playlist.length;
     this.filename = this.pathBaseName(this.originSrc);
   },
   methods: {
