@@ -5,31 +5,35 @@ import { readdir } from 'fs';
 import { ipcRenderer } from 'electron';
 import Sagi from '@/helpers/sagi';
 import helpers from '@/helpers';
+import { VideoPath, subtitleExtensions, IRawSubtitle, SubtitleType, SubtitleFormat, SubtitlePath } from '@/interfaces/services/ISubtitle';
 
 const { mediaQuickHash: calculateMediaIdentity } = helpers.methods;
 
-export function searchForLocalList(videoSrc, supportedExtensions) {
+export function searchForLocalList(videoSrc: VideoPath): Promise<IRawSubtitle[]> {
   return new Promise((resolve, reject) => {
     const videoDir = dirname(videoSrc);
-    const videoBasename = basename(videoSrc, extname(videoSrc)).toLowerCase();
-    const videoFilename = basename(videoSrc).toLowerCase();
-    const validExtensions = supportedExtensions || ['srt', 'ass', 'vtt'];
-    const extensionRegex = new RegExp(`\\.(${validExtensions.join('|')})$`);
+    const videoBasename = basename(videoSrc, extname(videoSrc));
+    const isValidSubtitle = (filename: string) => {
+      const subtitleExtname = extname(filename).slice(1);
+      const subtitleBasename = basename(filename, subtitleExtname);
+      return (
+        subtitleExtensions.includes(subtitleExtname) &&
+        subtitleBasename.toLowerCase() === videoBasename.toLowerCase()
+      )
+    };
+
     readdir(videoDir, (err, files) => {
       if (err) reject(err);
-      resolve(files
-        .filter((subtitleFilename) => {
-          const lowerCasedName = subtitleFilename.toLowerCase();
-          return (
-            extensionRegex.test(lowerCasedName)
-            && lowerCasedName.slice(0, lowerCasedName.lastIndexOf('.')) === videoBasename
-            && lowerCasedName !== videoFilename
-          );
-        })
-        .map(subtitleFilename => ({
-          src: join(videoDir, subtitleFilename),
-          type: 'local',
-        })));
+      else {
+        resolve(files
+          .filter(isValidSubtitle)
+          .map(filename => ({
+            origin: join(videoDir, filename),
+            type: SubtitleType.Local,
+            format: SubtitleFormat[extname(filename.slice(1))],
+          }))
+        );
+      }
     });
   });
 }
