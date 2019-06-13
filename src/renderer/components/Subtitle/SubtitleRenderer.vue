@@ -22,9 +22,9 @@
           fontStyle: cue.tags.i ? 'italic' : '',
           textDecoration: cue.tags.u ? 'underline' : cue.tags.s ? 'line-through' : '',
         }"
-        :class="'subtitle-style'+chosenStyle"
-      >{{ cue.text }}</p>
-    </div>
+      :class="'subtitle-style'+chosenStyle"
+      ><!--eslint-disable-line-->{{ cue.text }}</p>
+  </div>
     <div
       v-for="(item, index) in positionCues"
       :key="'position'+index"
@@ -47,7 +47,7 @@
           textDecoration: cue.tags.u ? 'underline' : cue.tags.s ? 'line-through' : '',
         }"
         :class="'subtitle-style'+chosenStyle"
-      >{{ cue.text }}</p>
+      ><!--eslint-disable-line-->{{ cue.text }}</p>
     </div>
   </div>
 </template>
