@@ -141,10 +141,11 @@
 <script lang="ts">
 import path from 'path';
 import { mapGetters } from 'vuex';
-import { filePathToUrl, parseNameFromPath } from '@/helpers/path';
-import { generateCoverPathByMediaHash } from '@/helpers/cacheFileStorage';
+import { parseNameFromPath } from '@/helpers/path';
 // @ts-ignore
 import Icon from '@/components/BaseIconContainer.vue';
+import RecentPlayService from '@/services/media/RecentPlayService';
+import { mediaStorageService } from '@/services/storage/MediaStorageService';
 
 export default {
   components: {
@@ -246,23 +247,12 @@ export default {
     pageSwitching: {
       type: Boolean,
     },
-    // displayIndex: {
-    //   type: Number,
-    // },
-    // imageSrc: {
-    //   type: String,
-    // },
   },
   data() {
     return {
-      videoId: NaN,
-      coverSrc: '',
-      lastPlayedTime: 0,
-      mediaInfo: { path: this.path },
-      smallShortCut: '',
-      imgPath: '',
-      videoHeight: 0,
-      videoWidth: 0,
+      recentPlayService: null,
+      imageSrc: '',
+      sliderPercentage: 0,
       displayIndex: NaN,
       tranFlag: true,
       outOfWindow: false,
@@ -291,29 +281,8 @@ export default {
     backgroundImage() {
       return `url(${this.imageSrc})`;
     },
-    // change to props
-    imageSrc() {
-      if (this.lastPlayedTime) {
-        if (this.mediaInfo.duration - this.lastPlayedTime < 10) {
-          return this.coverSrc;
-        }
-        return this.smallShortCut;
-      }
-      return this.coverSrc;
-    },
     imageLoaded() {
-      // return !!this.imageSrc;
-      return this.smallShortCut || this.coverSrc !== '';
-    },
-    // change to props
-    sliderPercentage() {
-      if (this.lastPlayedTime) {
-        if (this.mediaInfo.duration
-            && this.lastPlayedTime / this.mediaInfo.duration <= 1) {
-          return (this.lastPlayedTime / this.mediaInfo.duration) * 100;
-        }
-      }
-      return 0;
+      return this.recentPlayService.imageLoaded;
     },
     // ui related
     side() {
@@ -341,8 +310,8 @@ export default {
         });
       }
     },
-    items() {
-      this.getLastPlayedInfo();
+    items(val: number[]) {
+      this.updateUI();
     },
     isPlaying(val: boolean) {
       if (val) {
@@ -414,34 +383,22 @@ export default {
       }, 0);
     },
   },
-  mounted() {
+  created() {
     this.displayIndex = this.index;
-    this.$electron.ipcRenderer.send('mediaInfo', this.path);
-    this.$electron.ipcRenderer.once(`mediaInfo-${this.path}-reply`, async (event: any, info: string) => {
-      const videoStream = JSON.parse(info).streams.find((stream: any) => stream.codec_type === 'video');
-      this.videoHeight = videoStream.height;
-      this.videoWidth = videoStream.width;
-      this.mediaInfo = Object.assign(this.mediaInfo, JSON.parse(info).format);
-      const quickHash = await this.mediaQuickHash(this.path);
-      const imgPath = await generateCoverPathByMediaHash(quickHash);
-      this.$electron.ipcRenderer.send('snapShot', {
-        videoPath: this.path,
-        imgPath,
-        duration: this.mediaInfo.duration,
-        videoWidth: this.videoWidth,
-        videoHeight: this.videoHeight,
-      });
-    });
-    this.$electron.ipcRenderer.once(`snapShot-${this.path}-reply`, (event: any, imgPath: string) => {
-      this.coverSrc = filePathToUrl(`${imgPath}`);
-      this.imgPath = imgPath;
-    });
-    this.getLastPlayedInfo();
-    this.$bus.$on('database-saved', () => {
-      this.getLastPlayedInfo();
-    });
+    this.recentPlayService = new RecentPlayService(
+      mediaStorageService,
+      this.path,
+      this.items[this.index],
+    );
+    this.updateUI();
+    this.$bus.$on('database-saved', this.updateUI);
   },
   methods: {
+    async updateUI() {
+      await this.recentPlayService.getRecord(this.items[this.index]);
+      this.imageSrc = this.recentPlayService.imageSrc;
+      this.sliderPercentage = this.recentPlayService.percentage;
+    },
     mousedownVideo(e: MouseEvent) {
       this.onItemMousedown(this.index, e.pageX, e.pageY, e);
       if (this.isPlaying) return;
@@ -485,7 +442,7 @@ export default {
       this.onItemMouseup(this.index);
     },
     updateAnimationIn() {
-      if (!this.isPlaying && this.imageLoaded) {
+      if (!this.isPlaying) {
         this.$refs.blur.classList.remove('blur');
       }
       if (!this.itemMoving) this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,-9px)');
@@ -497,7 +454,7 @@ export default {
       }
     },
     updateAnimationOut() {
-      if (!this.isPlaying && this.imageLoaded) {
+      if (!this.isPlaying) {
         this.$refs.blur.classList.add('blur');
       }
       if (!this.itemMoving) this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,0)');
@@ -509,7 +466,10 @@ export default {
     mouseoverVideo() {
       if (!this.isPlaying && this.isInRange && !this.isShifting
         && this.canHoverItem && !this.itemMoving) {
-        this.onItemMouseover(this.index, this.mediaInfo);
+        this.onItemMouseover(
+          this.index,
+          this.recentPlayService,
+        );
         requestAnimationFrame(this.updateAnimationIn);
       }
     },
@@ -517,21 +477,6 @@ export default {
       if (!this.itemMoving) {
         this.onItemMouseout();
         requestAnimationFrame(this.updateAnimationOut);
-      }
-    },
-    getLastPlayedInfo() {
-      this.videoId = this.items[this.index];
-      if (this.videoId) {
-        this.infoDB.get('media-item', this.videoId).then((val: any) => {
-          if (!val || !val.lastPlayedTime) {
-            this.lastPlayedTime = 0;
-            this.smallShortCut = '';
-          } else if (val && val.lastPlayedTime) {
-            this.lastPlayedTime = val.lastPlayedTime;
-            this.smallShortCut = val.smallShortCut;
-          }
-          this.mediaInfo = Object.assign(this.mediaInfo, val);
-        });
       }
     },
   },

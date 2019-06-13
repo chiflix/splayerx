@@ -135,7 +135,7 @@ import { Input as InputActions, Subtitle as subtitleActions } from '@/store/acti
 import RecentPlaylistItem from '@/components/PlayingView/RecentPlaylistItem.vue';
 import Add from '@/components/PlayingView/Add.vue';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
-import { recentPlayService } from '@/services/media/RecentPlayService';
+import RecentPlayService from '../services/media/RecentPlayService';
 
 export default {
   name: 'RecentPlaylist',
@@ -165,8 +165,8 @@ export default {
       movementX: 0, // movementX of move item
       movementY: 0, // movementY of move item
       shifting: false,
-      snapShoted: false,
-      hoveredMediaInfo: {}, // the hovered video's media info
+      hoveredDuration: NaN,
+      hoveredLastPlayedTime: NaN,
       mousePosition: {},
       backgroundDisplayState: this.displayState, // it's weird but DON'T DELETE IT!!
       canHoverItem: false,
@@ -184,7 +184,6 @@ export default {
     };
   },
   created() {
-    recentPlayService.init(this.playListId, this.isFolderList, this.originSrc);
     this.$bus.$on('delete-file', async (path: string, id: number) => {
       this.$store.dispatch('RemoveItemFromPlayingList', path);
       this.infoDB.delete('media-item', id);
@@ -197,7 +196,6 @@ export default {
     });
 
     this.hoverIndex = this.playingIndex;
-    this.indexOfMovingItem = recentPlayService.playlist.length;
     this.filename = this.pathBaseName(this.originSrc);
   },
   methods: {
@@ -230,8 +228,8 @@ export default {
       if (this.$refs.lastPlayedTime) {
         if (this.hoverIndex === this.playingIndex) {
           this.$refs.lastPlayedTime.textContent = `${this.timecodeFromSeconds(time)} /`;
-        } else if (this.hoveredMediaInfo.lastPlayedTime) {
-          this.$refs.lastPlayedTime.textContent = `${this.timecodeFromSeconds(this.hoveredMediaInfo.lastPlayedTime)} /`;
+        } else if (this.hoveredLastPlayedTime) {
+          this.$refs.lastPlayedTime.textContent = `${this.timecodeFromSeconds(this.hoveredLastPlayedTime)} /`;
         }
       }
     },
@@ -410,11 +408,15 @@ export default {
       this.indexOfMovingItem = this.playingList.length;
       this.movementX = this.movementY = 0;
     },
-    onItemMouseover(index: number) {
+    onItemMouseover(index: number, recentPlayService: RecentPlayService) {
       this.$emit('can-hover-item');
       this.hoverIndex = index;
-      // this.hoveredMediaInfo = media;
-      // this.filename = this.pathBaseName(media.path);
+      this.hoveredDuration = recentPlayService.duration;
+      this.filename = this.pathBaseName(recentPlayService.path);
+      if (recentPlayService.lastPlayedTime) {
+        this.hoveredLastPlayedTime = recentPlayService.lastPlayedTime;
+      }
+      console.log(this.hoveredLastPlayedTime, this.hoveredDuration, recentPlayService.percentage);
     },
     onItemMouseout() {
       this.hoverIndex = this.playingIndex;
@@ -541,7 +543,7 @@ export default {
     },
     videoDuration() {
       if (this.hoverIndex !== this.playingIndex) {
-        return this.hoveredMediaInfo.duration;
+        return this.hoveredDuration;
       }
       return this.duration;
     },

@@ -221,34 +221,23 @@ function registerMainWindowEvent(mainWindow) {
     if (randomNumber > info.duration) randomNumber = info.duration;
     const numberString = timecodeFromSeconds(randomNumber);
     splayerx.snapshotVideo(
-      info.src, info.imgPath, numberString, `${info.width}`, `${info.height}`,
+      info.path, info.imgPath, numberString, `${info.width}`, `${info.height}`,
       (resultCode) => {
-        console[resultCode === '0' ? 'log' : 'error'](resultCode, info.src);
+        console[resultCode === '0' ? 'log' : 'error'](resultCode, info.path);
         callback(resultCode, info.imgPath);
       },
     );
   }
   function snapShotQueueProcess(event) {
-    const maxWaitingCount = 100;
-    let waitingCount = 0;
     const callback = (resultCode, imgPath) => {
       if (resultCode === 'Waiting for the task completion.') {
-        waitingCount += 1;
-        if (waitingCount <= maxWaitingCount) {
-          snapShot(snapShotQueue[0], callback);
-        } else {
-          waitingCount = 0;
-          snapShotQueue.shift();
-          if (snapShotQueue.length > 0) {
-            snapShot(snapShotQueue[0], callback);
-          }
-        }
+        snapShot(snapShotQueue[0], callback);
       } else if (resultCode === '0') {
         const lastRecord = snapShotQueue.shift();
         if (event.sender.isDestroyed()) {
           snapShotQueue.splice(0, snapShotQueue.length);
         } else {
-          event.sender.send(`snapShot-${lastRecord.src}-reply`, imgPath);
+          event.sender.send(`snapShot-${lastRecord.path}-reply`, imgPath);
           if (snapShotQueue.length > 0) {
             snapShot(snapShotQueue[0], callback);
           }
@@ -264,8 +253,6 @@ function registerMainWindowEvent(mainWindow) {
   }
 
   ipcMain.on('snapShot', (event, video) => {
-    if (!video.width) video.width = 1920;
-    if (!video.height) video.height = 1080;
     const imgPath = video.imgPath;
 
     if (!fs.existsSync(imgPath)) {
@@ -274,7 +261,7 @@ function registerMainWindowEvent(mainWindow) {
         snapShotQueueProcess(event);
       }
     } else {
-      event.sender.send(`snapShot-${video.videoPath}-reply`);
+      event.sender.send(`snapShot-${video.path}-reply`);
     }
   });
 
