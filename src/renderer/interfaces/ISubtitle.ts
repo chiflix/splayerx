@@ -7,7 +7,6 @@ export type cue = {
   tags: tagsPartial
 }
 type Partial<T> = { [P in keyof T]?: T[P] };
-// example convert type to optional type
 export type tagsPartial = Partial<tags>;
 type tags = {
   alignment: number,
