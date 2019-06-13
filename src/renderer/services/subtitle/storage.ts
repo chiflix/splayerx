@@ -1,30 +1,32 @@
 import {
   remove, pick, values, merge, keyBy, get,
 } from 'lodash';
+import { info } from '@/libs/DataBase';
 
 import infoDB from '@/helpers/infoDB';
 import dataDb from '@/helpers/dataDb';
 import TaskQueue from '@/helpers/proceduralQueue';
 import { SUBTITLE_OBJECTSTORE_NAME, DATADB_SHCEMAS, DATADB_VERSION } from '@/constants';
+import { MediaItem, MediaItemPreference } from '@/interfaces/IDB';
 
 const taskQueues = {};
 
-async function getVideoInfoFromVideoSrc(videoSrc) {
+async function getVideoInfoFromVideoSrc(videoSrc: string): Promise<MediaItem | undefined> {
   let result;
   try {
-    result = await infoDB.get('recent-played', 'path', videoSrc);
+    result = await info.getValueByIndex('recent-played', 'path', videoSrc);
   } catch (e) {
-    result = await infoDB.get('media-item', 'path', videoSrc);
+    result = await info.getValueByIndex('media-item', 'path', videoSrc);
   }
   return result;
 }
-async function setVideoInfo(infoPayload) {
+async function setVideoInfo(infoPayload: MediaItem) {
   if (infoPayload.videoId) {
-    return infoDB.update('media-item', infoPayload, infoPayload.videoId);
+    return info.update('media-item', infoPayload.videoId, infoPayload);
   }
-  return infoDB.add('media-item', infoPayload);
+  return info.add('media-item', infoPayload);
 }
-function updateSubtitlePreferenceRaw(videoSrc, preference, isDelete) {
+function updateSubtitlePreferenceRaw(videoSrc: string, preference: MediaItemPreference, isDelete: boolean) {
   return getVideoInfoFromVideoSrc(videoSrc).then((videoInfo) => {
     if (!videoInfo) videoInfo = { path: videoSrc };
     if (!videoInfo.preference) videoInfo.preference = {};
