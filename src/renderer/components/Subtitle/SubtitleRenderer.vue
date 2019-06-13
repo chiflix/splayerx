@@ -22,7 +22,7 @@
           fontStyle: cue.tags.i ? 'italic' : '',
           textDecoration: cue.tags.u ? 'underline' : cue.tags.s ? 'line-through' : '',
         }"
-      :class="'subtitle-style'+chosenStyle"
+        :class="'subtitle-style'+chosenStyle"
       ><!--eslint-disable-line-->{{ cue.text }}</p>
   </div>
     <div
@@ -58,6 +58,7 @@ import {
 } from 'lodash';
 import { Subtitle as subtitleMutations } from '@/store/mutationTypes';
 import { videodata } from '@/store/video';
+import { cue, tagsPartial } from '@/interfaces/ISubtitle';
 import SubtitleInstance from './SubtitleLoader/index';
 
 export default {
@@ -108,23 +109,23 @@ export default {
     allCues() {
       const allCues = [];
       for (let i = 1; i < 10; i += 1) {
-        const firstCues: any = this.currentCues
-          .filter((cue: any) => (this.subToTop && [1, 2, 3]
+        const firstCues: cue[] = this.currentCues
+          .filter((cue: cue) => (this.subToTop && [1, 2, 3]
             .includes(this.calculateAlignment(cue.category, cue.tags))
             ? this.calculateAlignment(cue.category, cue.tags) + 6
             : this.calculateAlignment(cue.category, cue.tags)) === i
             && !this.calculatePosition(cue.category, cue.tags));
-        const secondaryCues: any = this.secondCues
-          .filter((cue: any) => (this.subToTop && [1, 2, 3]
+        const secondaryCues: cue[] = this.secondCues
+          .filter((cue: cue) => (this.subToTop && [1, 2, 3]
             .includes(this.calculateAlignment(cue.category, cue.tags))
             ? this.calculateAlignment(cue.category, cue.tags) + 6
             : this.calculateAlignment(cue.category, cue.tags)) === i
             && !this.calculatePosition(cue.category, cue.tags));
-        allCues.push((firstCues.length ? firstCues.map((cue: any) => {
+        allCues.push((firstCues.length ? firstCues.map((cue: cue) => {
           cue.category = 'first';
           return cue;
         }) : [])
-          .concat(secondaryCues.length ? secondaryCues.map((cue: any) => {
+          .concat(secondaryCues.length ? secondaryCues.map((cue: cue) => {
             cue.category = 'secondary';
             return cue;
           }) : []));
@@ -132,24 +133,24 @@ export default {
       return allCues;
     },
     positionCues() {
-      const firstCues: any = this.currentCues
-        .filter((cue: any) => this.calculatePosition(cue.category, cue.tags)).map((cue: any) => { cue.category = 'first'; return cue; });
-      const secondaryCues: any = this.secondCues
-        .filter((cue: any) => this.calculatePosition(cue.category, cue.tags)).map((cue: any) => { cue.category = 'secondary'; return cue; });
-      const firstClassifiedCues: any = [];
-      const secondaryClassifiedCues: any = [];
-      firstCues.forEach((item: any) => {
+      const firstCues: cue[] = this.currentCues
+        .filter((cue: cue) => this.calculatePosition(cue.category, cue.tags)).map((cue: cue) => { cue.category = 'first'; return cue; });
+      const secondaryCues: cue[] = this.secondCues
+        .filter((cue: cue) => this.calculatePosition(cue.category, cue.tags)).map((cue: cue) => { cue.category = 'secondary'; return cue; });
+      const firstClassifiedCues: cue[][] = [];
+      const secondaryClassifiedCues: cue[][] = [];
+      firstCues.forEach((item: cue) => {
         const index: number = firstClassifiedCues
-          .findIndex((e: any) => isEqual(e[0].tags, item.tags));
+          .findIndex((e: cue[]) => isEqual(e[0].tags, item.tags));
         if (index !== -1) {
           firstClassifiedCues[index].push(item);
         } else {
           firstClassifiedCues.push([item]);
         }
       });
-      secondaryCues.forEach((item: any) => {
+      secondaryCues.forEach((item: cue) => {
         const index: number = secondaryClassifiedCues
-          .findIndex((e: any) => isEqual(e[0].tags, item.tags));
+          .findIndex((e: cue[]) => isEqual(e[0].tags, item.tags));
         if (index !== -1) {
           secondaryClassifiedCues[index].push(item);
         } else {
@@ -161,17 +162,17 @@ export default {
   },
   watch: {
     allCues: {
-      handler(val: any[], oldVal: any[]) {
+      handler(val: cue[][], oldVal: cue[][]) {
         for (let i = 0; i < 9; i += 1) {
-          if (val[i].length < oldVal[i].length && oldVal[i].includes(...val[i])) {
-            this.noPositionCues[i] = oldVal[i].map((cue: any) => {
+          if (val[i].length < oldVal[i].length && val[i].every((e: cue) => oldVal[i].includes(e))) {
+            this.noPositionCues[i] = oldVal[i].map((cue: cue) => {
               if (!val[i].includes(cue)) {
                 cue.hide = true;
               }
               return cue;
             });
           } else {
-            this.noPositionCues[i] = val[i].map((cue: any) => { cue.hide = false; return cue; });
+            this.noPositionCues[i] = val[i].map((cue: cue) => { cue.hide = false; return cue; });
           }
         }
       },
@@ -181,7 +182,10 @@ export default {
       const duration = newVal
         .filter((segment: any) => segment[2])
         .map((segment: any) => segment[1] - segment[0])
-        .reduce((prev: any, curr: any) => prev + curr, 0);
+        .reduce((prev: any, curr: any) => {
+          console.log(prev, curr);
+          return prev;
+        });
       if (this.firstInstance) {
         this.updateDuration({ id: this.firstInstance.id, duration });
       }
@@ -236,14 +240,14 @@ export default {
     ...mapMutations({
       updateDuration: subtitleMutations.DURATIONS_UPDATE,
     }),
-    calculatePosition(category: string, tags: any) {
+    calculatePosition(category: string, tags: tagsPartial) {
       const type = category === 'first' ? this.firstType : this.secondType;
       if (type !== 'vtt') {
         return !!tags.pos;
       }
       return tags.line && tags.position;
     },
-    calculateAlignment(category: string, tags: any) {
+    calculateAlignment(category: string, tags: tagsPartial) {
       const type = category === 'first' ? this.firstType : this.secondType;
       if (type !== 'vtt') {
         return !tags || !tags.alignment ? 2 : tags.alignment;
@@ -267,11 +271,11 @@ export default {
       }
       this.requestId = requestAnimationFrame(this.currentTimeUpdate);
     },
-    isSameCues(cues1: any[], cues2: any[]) {
+    isSameCues(cues1: cue[], cues2: cue[]) {
       return !differenceWith(
         cues1,
         cues2,
-        (cue1: any, cue2: any) => {
+        (cue1: cue, cue2: cue) => {
           const { text: text1, tags: tags1 } = cue1;
           const { text: text2, tags: tags2 } = cue2;
           return (
@@ -418,16 +422,16 @@ export default {
         }
       }
     },
-    subLeft(cue: any) {
+    subLeft(cue: cue) {
       const subPlayResX: number = cue.category === 'first' ? this.subPlayResX : this.secPlayResX;
-      const { tags, type } = cue;
+      const type = cue.category === 'first' ? this.firstType : this.secondType;
+      const { tags } = cue;
       if (type !== 'vtt' && tags.pos) {
         return `${(tags.pos.x / subPlayResX) * 100}vw`;
       } if (type === 'vtt' && tags.line && tags.position) {
         if (tags.vertical) {
           if (!tags.line.includes('%')) {
-            tags.line = Math.abs(tags.line) * 100;
-            tags.line += '%';
+            tags.line = `${Math.abs(Number(tags.line)) * 100}%`;
           }
           return tags.line;
         }
@@ -435,14 +439,15 @@ export default {
       }
       return '';
     },
-    subTop(cue: any) {
+    subTop(cue: cue) {// eslint-disable-line
       const subPlayResY: number = cue.category === 'first' ? this.subPlayResY : this.secPlayResY;
-      const { tags, type } = cue;
+      const type = cue.category === 'first' ? this.firstType : this.secondType;
+      const { tags } = cue;
       const isVtt = type === 'vtt';
       if (!isVtt) {
         if (tags.pos) {
           return `${(tags.pos.y / subPlayResY) * 100}vh`;
-        } if ([7, 8, 9].includes(tags.alignment)) {
+        } if (tags.alignment && [7, 8, 9].includes(tags.alignment)) {
           return `${(60 / 1080) * 100}%`;
         }
         return '';
@@ -451,14 +456,13 @@ export default {
           return tags.position;
         }
         if (!tags.line.includes('%')) {
-          tags.line = Math.abs(tags.line) * 100;
-          tags.line += '%';
+          tags.line = `${Math.abs(Number(tags.line)) * 100}%`;
         }
         return tags.line;
       }
       return '';
     },
-    translateNum(cue: any) { // eslint-disable-line
+    translateNum(cue: cue) { // eslint-disable-line
       const index = this.calculateAlignment(cue.category, cue.tags)
         ? this.calculateAlignment(cue.category, cue.tags) : 2;
       switch (index) {
