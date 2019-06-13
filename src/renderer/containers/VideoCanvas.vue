@@ -305,7 +305,6 @@ export default {
       return settingStorageService.updatePlaybackStates({ volume: this.volume, muted: this.muted });
     },
     beforeUnloadHandler(e: Event) {
-      this.removeAllAudioTrack();
       if (!this.asyncTasksDone && !this.needToRestore) {
         let savePromise = this.saveScreenshot(this.videoId);
         if (process.mas && this.$store.getters.source === 'drop') {

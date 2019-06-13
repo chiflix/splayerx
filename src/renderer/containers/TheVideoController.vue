@@ -46,7 +46,7 @@
       :attached-shown="attachedShown"
       :handle-mouse-up="togglePlay"
       @update:playbutton-state="updatePlayButtonState"
-      class="play-button no-drag"
+      :class="`${showAllWidgets ? 'play-button no-drag' : 'play-button'}`"
     />
     <volume-indicator
       ref="volumeIndicator"
@@ -429,6 +429,11 @@ export default {
     document.addEventListener('keydown', this.handleKeydown);
     document.addEventListener('keyup', this.handleKeyup);
     document.addEventListener('wheel', this.handleWheel);
+  },
+  destroyed() {
+    document.removeEventListener('keydown', this.handleKeydown);
+    document.removeEventListener('keyup', this.handleKeyup);
+    document.removeEventListener('wheel', this.handleWheel);
   },
   methods: {
     ...mapActions({
