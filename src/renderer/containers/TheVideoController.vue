@@ -46,7 +46,7 @@
       :attached-shown="attachedShown"
       :handle-mouse-up="togglePlay"
       @update:playbutton-state="updatePlayButtonState"
-      :class="'play-button '+`${showAllWidgets ? 'no-drag' : ''}`"
+      :class="`${showAllWidgets ? 'play-button no-drag' : 'play-button'}`"
     />
     <volume-indicator
       ref="volumeIndicator"
