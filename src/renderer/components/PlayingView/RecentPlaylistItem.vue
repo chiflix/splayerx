@@ -138,12 +138,13 @@
     </div>
   </div>
 </template>
-<script>
+<script lang="ts">
 import path from 'path';
 import { mapGetters } from 'vuex';
 import { filePathToUrl, parseNameFromPath } from '@/helpers/path';
 import { generateCoverPathByMediaHash } from '@/helpers/cacheFileStorage';
 import Icon from '@/components/BaseIconContainer.vue';
+import { Event } from 'electron';
 
 export default {
   components: {
@@ -223,7 +224,7 @@ export default {
     },
     sizeAdaption: {
       type: Function,
-      default: val => val,
+      default: (val: number) => val,
     },
     pageSwitching: {
       type: Boolean,
@@ -297,7 +298,7 @@ export default {
     },
   },
   watch: {
-    aboutToDelete(val) {
+    aboutToDelete(val: boolean) {
       if (val) {
         this.deleteTimeId = setTimeout(() => {
           this.$refs.whiteHover.style.backgroundColor = 'rgba(0,0,0,0.6)';
@@ -317,12 +318,12 @@ export default {
     items() {
       this.getLastPlayedInfo();
     },
-    isPlaying(val) {
+    isPlaying(val: boolean) {
       if (val) {
         requestAnimationFrame(this.updateAnimationOut);
       }
     },
-    displayIndex(val) {
+    displayIndex(val: number) {
       requestAnimationFrame(() => {
         const marginRight = this.winWidth > 1355 ? (this.winWidth / 1355) * 15 : 15;
         const distance = marginRight + this.thumbnailWidth;
@@ -333,13 +334,13 @@ export default {
         }
       });
     },
-    itemMoving(val) {
+    itemMoving(val: boolean) {
       if (!val) {
         this.tranFlag = true;
         this.displayIndex = this.index;
       }
     },
-    indexOfMovingTo(val) {
+    indexOfMovingTo(val: number) {
       if (this.itemMoving && Math.abs(this.movementY) < this.thumbnailHeight && !this.selfMoving) {
         // item moving to right
         if (this.index > this.indexOfMovingItem && this.index <= val) {
@@ -352,14 +353,14 @@ export default {
         }
       }
     },
-    pageSwitching(val, oldVal) {
+    pageSwitching(val: boolean, oldVal: boolean) {
       if (!val && oldVal && this.selfMoving) {
         requestAnimationFrame(() => {
           this.$refs.recentPlaylistItem.style.setProperty('transform', `translate(${this.movementX}px, ${this.movementY}px)`);
         });
       }
     },
-    movementY(val) { // eslint-disable-line complexity
+    movementY(val: number) { // eslint-disable-line complexity
       if (Math.abs(val) > this.thumbnailHeight) {
         // avoid the wrong layout after moving to left and lift up
         if (this.index < this.indexOfMovingItem) {
@@ -390,8 +391,8 @@ export default {
   mounted() {
     this.displayIndex = this.index;
     this.$electron.ipcRenderer.send('mediaInfo', this.path);
-    this.$electron.ipcRenderer.once(`mediaInfo-${this.path}-reply`, async (event, info) => {
-      const videoStream = JSON.parse(info).streams.find(stream => stream.codec_type === 'video');
+    this.$electron.ipcRenderer.once(`mediaInfo-${this.path}-reply`, async (event: Event, info: any) => {
+      const videoStream = JSON.parse(info).streams.find((stream: any) => stream.codec_type === 'video');
       this.videoHeight = videoStream.height;
       this.videoWidth = videoStream.width;
       this.mediaInfo = Object.assign(this.mediaInfo, JSON.parse(info).format);
@@ -406,7 +407,7 @@ export default {
         videoHeight: this.videoHeight,
       });
     });
-    this.$electron.ipcRenderer.once(`snapShot-${this.path}-reply`, (event, imgPath) => {
+    this.$electron.ipcRenderer.once(`snapShot-${this.path}-reply`, (event: Event, imgPath: string) => {
       this.coverSrc = filePathToUrl(`${imgPath}`);
       this.imgPath = imgPath;
     });
@@ -416,7 +417,7 @@ export default {
     });
   },
   methods: {
-    mousedownVideo(e) {
+    mousedownVideo(e: MouseEvent) {
       this.eventTarget.onItemMousedown(this.index, e.pageX, e.pageY, e);
       if (this.isPlaying) return;
       document.onmousemove = (e) => {
@@ -496,7 +497,7 @@ export default {
     getLastPlayedInfo() {
       this.videoId = this.items[this.index];
       if (this.videoId) {
-        this.infoDB.get('media-item', this.videoId).then((val) => {
+        this.infoDB.get('media-item', this.videoId).then((val: any) => {
           if (!val || !val.lastPlayedTime) {
             this.lastPlayedTime = 0;
             this.smallShortCut = '';

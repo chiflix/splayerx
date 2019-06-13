@@ -43,7 +43,7 @@
     </div>
   </div>
 </template>
-<script>
+<script lang="ts">
 import { mapGetters } from 'vuex';
 import path from 'path';
 import Icon from '../BaseIconContainer.vue';
@@ -101,14 +101,14 @@ export default {
       this.notificationPlayIcon = 'notificationPlay';
       this.isBlur = true;
     },
-    onMetaLoaded(event) {
-      event.target.muted = true;
-      event.target.currentTime = 100;
+    onMetaLoaded(event: Event) {
+      (event.target as HTMLVideoElement).muted = true;
+      (event.target as HTMLVideoElement).currentTime = 100;
     },
     onSeeked() {
       this.$emit('ready-to-show');
     },
-    updatePlayingTime(time) {
+    updatePlayingTime(time: number) {
       const fractionProgress = (time - this.nextVideoPreviewTime)
         / (this.duration - this.nextVideoPreviewTime);
       this.progress = fractionProgress * 100;

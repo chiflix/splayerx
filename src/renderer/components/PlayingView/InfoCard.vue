@@ -10,31 +10,31 @@
     </div>
   </div>
 </template>
-<script>
+<script lang="ts">
 export default {
   name: 'BaseInfoCard',
   props: {
     borderRadius: {
       type: Number,
       default: 1,
-      validator: value => value > 0,
+      validator: (value: number) => value > 0,
     },
     contentMinWidth: {
       type: Number,
       default: 1,
-      validator: value => value > 0,
+      validator: (value: number) => value > 0,
     },
     contentMinHeight: {
       type: Number,
       default: 1,
-      validator: value => value > 0,
+      validator: (value: number) => value > 0,
     },
   },
   watch: {
-    contentMinWidth(newVal) {
+    contentMinWidth(newVal: number) {
       this.$refs.container.style.setProperty('--content-min-width', `${newVal}px`);
     },
-    contentMinHeight(newVal) {
+    contentMinHeight(newVal: number) {
       this.$refs.container.style.setProperty('--content-min-height', `${newVal}px`);
     },
   },
