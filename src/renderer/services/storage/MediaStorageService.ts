@@ -1,8 +1,8 @@
-import { IMediaStorable } from '@/interfaces/services/IMediaStorable';
+import { IMediaStorable } from '@/interfaces/IMediaStorable';
 import CacheFile, { cacheFile as cacheFileInstance } from '@/libs/CacheFile'
 import { join } from 'path';
 
-// 视频元数据
+/** 视频元数据 */
 export type VideoInfo = {
   cover?: string,
   shortCut?: string,

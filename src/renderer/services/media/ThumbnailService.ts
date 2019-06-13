@@ -1,4 +1,4 @@
-import { IThumbnailRequest } from '@/interfaces/containers/IThumbnailRequest';
+import { IThumbnailRequest } from '@/interfaces/IThumbnailRequest';
 import MediaStorageService, { mediaStorageService } from '@/services/storage/MediaStorageService';
 import { ipcRenderer } from 'electron';
 

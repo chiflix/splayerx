@@ -27,7 +27,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import Icon from '../BaseIconContainer.vue';
 
 export default {
@@ -43,6 +43,10 @@ export default {
     mousedownOnVolume: Boolean,
     mousemovePosition: {
       type: Object,
+      default: () => {},
+    },
+    handleMouseUp: {
+      type: Function,
       default: () => {},
     },
   },
@@ -62,7 +66,7 @@ export default {
     };
   },
   watch: {
-    showAllWidgets(val) {
+    showAllWidgets(val: boolean) {
       if (!val && !this.mousedown) {
         this.cursorAppear = false;
         this.iconClass = 'fade-out';
@@ -70,24 +74,24 @@ export default {
         this.detectMovePosition = true;
       }
     },
-    attachedShown(val, oldVal) {
+    attachedShown(val: boolean, oldVal: boolean) {
       if (!val && this.mouseover) {
         if (oldVal) this.justCloseAttached = true;
         this.detectMovePosition = true;
       }
     },
-    isFocused(val, oldVal) {
+    isFocused(val: boolean, oldVal: boolean) {
       if (val && !oldVal && this.mouseover) {
         this.justFocused = true;
       }
     },
-    mousedownOnVolume(val, oldVal) {
+    mousedownOnVolume(val: boolean, oldVal: boolean) {
       if (!val && oldVal) {
         this.justMousedownOnVolume = true;
         if (this.mouseover) this.detectMovePosition = true;
       }
     },
-    mousemovePosition(newVal, oldVal) {
+    mousemovePosition(newVal: {x: number; y: number}, oldVal: {x: number; y: number}) {
       if (this.detectMovePosition && this.isFocused) {
         if (Math.abs(newVal.x - oldVal.x) > 0 || Math.abs(newVal.y - oldVal.y) > 0) {
           this.justFocused = this.justCloseAttached = this.justMousedownOnVolume = false;
@@ -97,7 +101,7 @@ export default {
         }
       }
     },
-    paused(val) {
+    paused(val: boolean) {
       this.showPlayIcon = val;
     },
   },
@@ -149,7 +153,7 @@ export default {
     handleMouseup() {
       if (this.mousedown && !this.attachedShown) {
         this.showPlayIcon = !this.showPlayIcon;
-        this.$bus.$emit('toggle-playback');
+        this.handleMouseUp();
       }
     },
   },

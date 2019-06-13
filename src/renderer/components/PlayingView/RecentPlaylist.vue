@@ -123,7 +123,7 @@
     </transition>
   </div>
 </template>
-<script>
+<script lang="ts">
 import path from 'path';
 import {
   mapState, mapGetters, mapActions, mapMutations,
@@ -136,6 +136,7 @@ import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 
 export default {
   name: 'RecentPlaylist',
+  // @ts-ignore
   type: INPUT_COMPONENT_TYPE,
   components: {
     RecentPlaylistItem,
@@ -179,7 +180,7 @@ export default {
     };
   },
   created() {
-    this.$bus.$on('delete-file', async (path, id) => {
+    this.$bus.$on('delete-file', async (path: string, id: string) => {
       this.$store.dispatch('RemoveItemFromPlayingList', path);
       this.infoDB.delete('media-item', id);
       const playlist = await this.infoDB.get('recent-played', this.playListId);
@@ -211,7 +212,7 @@ export default {
     afterLeave() {
       this.backgroundDisplayState = false;
     },
-    sizeAdaption(size) {
+    sizeAdaption(size: number) {
       return this.winWidth > 1355 ? `${(this.winWidth / 1355) * size}px` : `${size}px`;
     },
     handleMouseup() {
@@ -222,7 +223,7 @@ export default {
         this.updateMousemoveTarget('the-video-controller');
       }
     },
-    updatelastPlayedTime(time) {
+    updatelastPlayedTime(time: number) {
       if (this.$refs.lastPlayedTime) {
         if (this.hoverIndex === this.playingIndex) {
           this.$refs.lastPlayedTime.textContent = `${this.timecodeFromSeconds(time)} /`;
@@ -239,13 +240,13 @@ export default {
       }
       this.onItemMouseup(this.addIndex);
     },
-    onItemMousedown(index, pageX, pageY) {
+    onItemMousedown(index: number, pageX: number, pageY: number) {
       this.mousedownIndex = index;
       this.mousedownPosition = [pageX, pageY];
       this.firstIndexOnMousedown = this.firstIndex;
       this.lastIndexOnMousedown = this.lastIndex;
     },
-    onItemMousemove(index, pageX, pageY) { // eslint-disable-line complexity
+    onItemMousemove(index: number, pageX: number, pageY: number) { // eslint-disable-line complexity
       this.mousemovePosition = [pageX, pageY];
       const offsetX = pageX - this.mousedownPosition[0];
       const offsetY = pageY - this.mousedownPosition[1];
@@ -340,7 +341,7 @@ export default {
       this.infoDB.update('recent-played', playlist, playlist.id);
       this.$store.dispatch('PlayingList', { id: playlist.id, paths: this.playingList, items: playlist.items });
     },
-    onItemMouseup(index) { // eslint-disable-line complexity
+    onItemMouseup(index:number) { // eslint-disable-line complexity
       if (this.pageSwitching) clearTimeout(this.pageSwitchingTimeId);
       document.onmouseup = null;
       if (-(this.movementY) > this.thumbnailHeight * 1.5
@@ -406,7 +407,7 @@ export default {
       this.indexOfMovingItem = this.playingList.length;
       this.movementX = this.movementY = 0;
     },
-    onItemMouseover(index, media) {
+    onItemMouseover(index:number, media:any) {
       this.$emit('can-hover-item');
       this.hoverIndex = index;
       this.hoveredMediaInfo = media;
@@ -426,7 +427,7 @@ export default {
       this.hoverIndex = this.playingIndex;
       this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
     },
-    playingList(val) {
+    playingList(val:any) {
       this.indexOfMovingItem = val.length;
     },
     firstIndex() {
@@ -440,7 +441,7 @@ export default {
         this.lastIndex = this.maxIndex;
       }
     },
-    lastIndex(val) {
+    lastIndex(val:number) {
       const marginRight = this.winWidth > 1355 ? (this.winWidth / 1355) * 15 : 15;
       const distance = marginRight + this.thumbnailWidth;
       if (this.itemMoving && this.firstIndex < this.firstIndexOnMousedown) {
@@ -452,19 +453,19 @@ export default {
         this.firstIndex = (this.maxIndex - this.thumbnailNumber) + 1;
       }
     },
-    maxIndex(val, oldVal) {
+    maxIndex(val:number, oldVal:number) {
       if (this.lastIndex === oldVal) {
         this.lastIndex = val;
       }
     },
-    currentMousedownComponent(val) {
+    currentMousedownComponent(val:string) {
       if (val !== 'notification-bubble' && val !== 'titlebar' && val !== '') {
         if (val !== this.$options.name && this.backgroundDisplayState) {
           this.clearMouseup({ componentName: '' });
         }
       }
     },
-    currentMouseupComponent(val) {
+    currentMouseupComponent(val:string) {
       setTimeout(() => {
         if (this.currentMousedownComponent !== 'notification-bubble' && this.currentMousedownComponent !== 'titlebar' && val !== '') {
           if (this.lastDragging) {
@@ -478,7 +479,7 @@ export default {
         }
       }, 0);
     },
-    displayState(val, oldval) {
+    displayState(val:any, oldval:any) {
       if (oldval !== undefined) {
         this.updateSubToTop(val);
       }
@@ -492,7 +493,7 @@ export default {
         document.onmouseup = null;
       }
     },
-    mousemoveClientPosition(val) {
+    mousemoveClientPosition(val:any) {
       const distance = this.winWidth > 1355 ? 20 : 10;
       if (!this.canHoverItem && this.displayState) {
         if (Math.abs(this.mousePosition.x - val.x) > distance ||
@@ -555,7 +556,7 @@ export default {
       get() {
         return (this.firstIndex + this.thumbnailNumber) - 1;
       },
-      set(val) {
+      set(val:number) {
         if ((val - this.thumbnailNumber) + 1 < 0) {
           this.firstIndex = 0;
         } else {

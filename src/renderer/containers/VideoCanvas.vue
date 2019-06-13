@@ -39,14 +39,17 @@
     />
   </div>
 </template>;
-
-<script>
-import asyncStorage from '@/helpers/asyncStorage';
+<script lang="ts">
+import { windowRectService } from '@/services/window/WindowRectService';
+import { playInfoStorageService } from '@/services/storage/PlayInfoStorageService';
+import { settingStorageService } from '@/services/storage/SettingStorageService';
+import { generateShortCutImageBy } from '@/libs/utils';
 import { mapGetters, mapActions } from 'vuex';
 import path from 'path';
 import { Video as videoActions } from '@/store/actionTypes';
-import BaseVideoPlayer from './BaseVideoPlayer.vue';
-import { videodata } from '../../store/video';
+import { videodata } from '@/store/video';
+import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer.vue';
+import { MediaItem, PlaylistItem } from '../interfaces/IDB';
 
 export default {
   name: 'VideoCanvas',
@@ -81,17 +84,17 @@ export default {
     }),
   },
   watch: {
-    winAngle(val) {
+    winAngle(val: number) {
       this.changeWindowRotate(val);
     },
-    videoId(val, oldVal) {
+    videoId(val: string, oldVal: string) {
       if (oldVal) this.saveScreenshot(oldVal);
     },
-    originSrc(val, oldVal) {
+    originSrc(val: string, oldVal: string) {
       if (process.mas && oldVal) {
         this.$bus.$emit(`stop-accessing-${oldVal}`, oldVal);
       }
-      this.$bus.$emit('show-speedlabel');
+      // this.$bus.$emit('show-speedlabel');
       this.videoConfigInitialize({
         audioTrackList: [],
       });
@@ -99,7 +102,7 @@ export default {
       this.updatePlayinglistRate({
         oldDir: path.dirname(oldVal), newDir: path.dirname(val), playingList: this.playingList,
       });
-      this.playinglistRate.forEach((item) => {
+      this.playinglistRate.forEach((item: any) => {
         if (item.dirPath === path.dirname(val)) {
           this.$store.dispatch(videoActions.CHANGE_RATE, item.rate);
           this.nowRate = item.rate;
@@ -111,7 +114,7 @@ export default {
     this.updatePlayinglistRate({ oldDir: '', newDir: path.dirname(this.originSrc), playingList: this.playingList });
   },
   mounted() {
-    this.$electron.ipcRenderer.on('quit', (needToRestore) => {
+    this.$electron.ipcRenderer.on('quit', (needToRestore: boolean) => {
       if (needToRestore) this.needToRestore = needToRestore;
       this.quit = true;
     });
@@ -133,10 +136,10 @@ export default {
     this.$bus.$on('toggle-muted', () => {
       this.toggleMute();
     });
-    this.$bus.$on('send-lastplayedtime', (e) => {
+    this.$bus.$on('send-lastplayedtime', (e: number) => {
       this.lastPlayedTime = e;
     });
-    this.$bus.$on('send-audiotrackid', (id) => {
+    this.$bus.$on('send-audiotrackid', (id: string) => {
       this.lastAudioTrackId = id;
     });
     this.$bus.$on('toggle-playback', () => {
@@ -153,9 +156,9 @@ export default {
         this.$store.commit('LOOP_UPDATE', true);
       }
     });
-    this.$bus.$on('seek', (e) => { this.seekTime = [e]; });
-    this.$bus.$on('seek-forward', delta => this.$bus.$emit('seek', videodata.time + Math.abs(delta)));
-    this.$bus.$on('seek-backward', (delta) => {
+    this.$bus.$on('seek', (e: number) => { this.seekTime = [e]; });
+    this.$bus.$on('seek-forward', (delta: number) => this.$bus.$emit('seek', videodata.time + Math.abs(delta)));
+    this.$bus.$on('seek-backward', (delta: number) => {
       const finalSeekTime = videodata.time - Math.abs(delta);
       // find a way to stop wheel event until next begin
       // if (finalSeekTime <= 0)
@@ -189,28 +192,29 @@ export default {
       removeAllAudioTrack: videoActions.REMOVE_ALL_AUDIO_TRACK,
       updatePlayinglistRate: videoActions.UPDATE_PLAYINGLIST_RATE,
     }),
-    onMetaLoaded(event) {
-      this.videoElement = event.target;
+    onMetaLoaded(event: Event) {
+      const target = event.target as HTMLVideoElement;
+      this.videoElement = target;
       this.videoConfigInitialize({
         paused: false,
         volume: this.volume * 100,
         muted: this.muted,
         rate: this.nowRate,
-        duration: event.target.duration,
+        duration: target.duration,
         currentTime: 0,
       });
-      if (event.target.duration && Number.isFinite(event.target.duration)) {
-        const generationInterval = Math.round(event.target.duration
+      if (target.duration && Number.isFinite(target.duration)) {
+        const generationInterval = Math.round(target.duration
           / (window.screen.width / 4)) || 1;
-        const maxThumbnailCount = Math.floor(event.target.duration / generationInterval);
+        const maxThumbnailCount = Math.floor(target.duration / generationInterval);
         this.$bus.$emit('generate-thumbnails', maxThumbnailCount);
       }
       this.updateMetaInfo({
-        intrinsicWidth: event.target.videoWidth,
-        intrinsicHeight: event.target.videoHeight,
-        ratio: event.target.videoWidth / event.target.videoHeight,
+        intrinsicWidth: target.videoWidth,
+        intrinsicHeight: target.videoHeight,
+        ratio: target.videoWidth / target.videoHeight,
       });
-      if (event.target.duration - this.lastPlayedTime > 10) {
+      if (target.duration - this.lastPlayedTime > 10) {
         this.$bus.$emit('seek', this.lastPlayedTime);
       } else {
         this.$bus.$emit('seek', 0);
@@ -218,185 +222,95 @@ export default {
       this.lastPlayedTime = 0;
       this.$bus.$emit('video-loaded');
       this.changeWindowRotate(this.winAngle);
-      this.changeWindowSize();
+
+      let maxVideoSize = [];
+      let videoSize = [];
+      if (this.videoExisted && (this.winAngle === 0 || this.winAngle === 180)) {
+        maxVideoSize = this.winSize;
+        videoSize = [this.videoWidth, this.videoHeight];
+      } else if (this.videoExisted) {
+        maxVideoSize = this.winSize;
+        videoSize = [this.videoHeight, this.videoWidth];
+      } else {
+        maxVideoSize = this.lastWinSize;
+        videoSize = [this.videoWidth, this.videoHeight];
+        this.videoExisted = true;
+      }
+      const oldRect = this.winPos.concat(this.winSize);
+      windowRectService.calculateWindowRect(videoSize, true, oldRect, maxVideoSize);
     },
-    onAudioTrack(event) {
+    onAudioTrack(event: TrackEvent) {
       const { type, track } = event;
       this[`${type}AudioTrack`](track);
     },
-    changeWindowSize() {
-      let newSize = [];
-      const getWindowRect = () => [
-        window.screen.availLeft, window.screen.availTop,
-        window.screen.availWidth, window.screen.availHeight,
-      ];
-      if (this.videoExisted) {
-        const videoSize = this.winAngle === 0 || this.winAngle === 180
-          ? [this.videoWidth, this.videoHeight] : [this.videoHeight, this.videoWidth];
-        newSize = this.calculateWindowSize(
-          [320, 180],
-          this.winSize,
-          videoSize,
-          true,
-          getWindowRect().slice(2, 4),
-        );
-      } else {
-        newSize = this.calculateWindowSize(
-          [320, 180],
-          this.lastWinSize,
-          [this.videoWidth, this.videoHeight],
-          true,
-          getWindowRect().slice(2, 4),
-        );
-        this.videoExisted = true;
-      }
-      const newPosition = this.calculateWindowPosition(
-        this.winPos.concat(this.winSize),
-        getWindowRect(),
-        newSize,
-      );
-      this.controlWindowRect(newPosition.concat(newSize));
-    },
-    controlWindowRect(rect) {
-      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', rect.slice(2, 4));
-      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', rect.slice(0, 2));
-      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [rect.slice(2, 4)[0] / rect.slice(2, 4)[1]]);
-    },
-    changeWindowRotate(val) {
-      switch (val) {
-        case 90:
-        case 270:
-          if (!this.isFullScreen) {
-            requestAnimationFrame(() => {
-              // 非全屏状态下，竖状视频，需要放大
-              const scale = this.ratio < 1 ? 1 / this.ratio : this.ratio;
-              this.$refs.videoCanvas.$el.style.setProperty('transform', `rotate(${this.winAngle}deg) scale(${scale}, ${scale})`);
-            });
-          } else {
-            requestAnimationFrame(() => {
-              // 在全屏情况下，显示器如果是竖着的话，需要根据视频的ratio反向缩放
-              const winRatio = window.screen.width / window.screen.height;
-              const scale = winRatio < 1 ? this.ratio : 1 / this.ratio;
-              this.$refs.videoCanvas.$el.style.setProperty('transform', `rotate(${this.winAngle}deg) scale(${scale}, ${scale})`);
-            });
-          }
-          break;
-        case 0:
-        case 180:
-          requestAnimationFrame(() => {
-            this.$refs.videoCanvas.$el.style.setProperty('transform', `rotate(${this.winAngle}deg)`);
-          });
-          break;
-        default: break;
-      }
+    changeWindowRotate(val: number) {
+      requestAnimationFrame(() => {
+        const scale = windowRectService.calculateWindowScaleBy(this.isFullScreen, val, this.ratio);
+        this.$refs.videoCanvas.$el.style.setProperty('transform', `rotate(${val}deg) scale(${scale}, ${scale})`);
+      });
     },
     toFullScreen() {
       this.winSizeBeforeFullScreen = this.winSize;
       this.winAngleBeforeFullScreen = this.winAngle;
-      if (this.winAngle === 90 || this.winAngle === 270) {
-        requestAnimationFrame(() => {
-          // 逻辑可以参考changeWindowRotate里的
-          const winRatio = window.screen.width / window.screen.height;
-          const scale = winRatio < 1 ? this.ratio : 1 / this.ratio;
-          this.$refs.videoCanvas.$el.style.setProperty('transform', `rotate(${this.winAngle}deg) scale(${scale}, ${scale})`);
-        });
-      }
-      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [true]);
-    },
-    offFullScreen() { // eslint-disable-line
-      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
-      let newSize = [];
-      const windowRect = [
-        window.screen.availLeft, window.screen.availTop,
-        window.screen.availWidth, window.screen.availHeight,
-      ];
-      if (this.winAngle === 90 || this.winAngle === 270) {
-        // 逻辑可以参考changeWindowRotate里的
-        const scale = this.ratio < 1 ? 1 / this.ratio : this.ratio;
+      requestAnimationFrame(() => {
+        const scale = windowRectService.calculateWindowScaleBy(true, this.winAngle, this.ratio);
         this.$refs.videoCanvas.$el.style.setProperty('transform', `rotate(${this.winAngle}deg) scale(${scale}, ${scale})`);
-        if (this.winAngleBeforeFullScreen === 0 || this.winAngleBeforeFullScreen === 180) {
-          newSize = this.calculateWindowSize(
-            [320, 180],
-            windowRect.slice(2, 4),
-            [this.winSizeBeforeFullScreen[1], this.winSizeBeforeFullScreen[0]],
-          );
-        }
-      } else {
-        this.$refs.videoCanvas.$el.style.setProperty('transform', `rotate(${this.winAngle}deg)`);
-        if (this.winAngleBeforeFullScreen === 90 || this.winAngleBeforeFullScreen === 270) {
-          newSize = this.calculateWindowSize(
-            [320, 180],
-            windowRect.slice(2, 4),
-            [this.winSizeBeforeFullScreen[1], this.winSizeBeforeFullScreen[0]],
-          );
-        }
-      }
-      if (newSize.length > 0) {
-        // 退出全屏，计算pos依赖旧窗口大小，现在设置旧窗口大小为新大小的反转，
-        // 这样在那里全屏，退出全屏后窗口还在那个位置。
-        const newPosition = this.calculateWindowPosition(
-          this.winPos.concat([newSize[1], newSize[0]]),
-          windowRect,
-          newSize,
-        );
-        this.controlWindowRect(newPosition.concat(newSize));
-      }
+      });
+      windowRectService.uploadWindowBy(true);
     },
-    async saveScreenshot(videoId) {
+    offFullScreen() {
+      requestAnimationFrame(() => {
+        const scale = windowRectService.calculateWindowScaleBy(false, this.winAngle, this.ratio);
+        this.$refs.videoCanvas.$el.style.setProperty('transform', `rotate(${this.winAngle}deg) scale(${scale}, ${scale})`);
+      });
+      windowRectService.uploadWindowBy(false, 'playing-view', this.winAngle, this.winAngleBeforeFullScreen, this.winSizeBeforeFullScreen, this.winPos);
+    },
+    async saveScreenshot(videoId: string) {
       const { videoElement } = this;
       const canvas = this.$refs.thumbnailCanvas;
-      const canvasCTX = canvas.getContext('2d');
       // todo: use metaloaded to get videoHeight and videoWidth
       const { videoHeight, videoWidth } = this;
-      // cannot delete
-      [canvas.width, canvas.height] = [(videoWidth / videoHeight) * 1080, 1080];
-      canvasCTX.drawImage(
-        videoElement, 0, 0, videoWidth, videoHeight,
-        0, 0, (videoWidth / videoHeight) * 1080, 1080,
-      );
-      const imagePath = canvas.toDataURL('image/jpeg', 0.8);
-      // 用于测试截图的代码，以后可能还会用到
-      // const img = imagePath.replace(/^data:image\/\w+;base64,/, '');
-      // fs.writeFileSync('/Users/jinnaide/Desktop/screenshot.png', img, 'base64');
-      [canvas.width, canvas.height] = [(videoWidth / videoHeight) * 122.6, 122.6];
-      canvasCTX.drawImage(
-        videoElement, 0, 0, videoWidth, videoHeight,
-        0, 0, (videoWidth / videoHeight) * 122.6, 122.6,
-      );
-      const smallImagePath = canvas.toDataURL('image/jpeg', 0.8);
+      const shortCut = generateShortCutImageBy(videoElement, canvas, videoWidth, videoHeight);
+
       const data = {
-        shortCut: imagePath,
-        smallShortCut: smallImagePath,
+        shortCut: shortCut.shortCut,
+        smallShortCut: shortCut.smallShortCut,
         lastPlayedTime: videodata.time,
         duration: this.duration,
         audioTrackId: this.currentAudioTrackId,
       };
 
-      const val = await this.infoDB.get('media-item', videoId);
-      if (val) {
-        await this.infoDB.update('media-item', { ...val, ...data }, videoId);
+      const result = await playInfoStorageService.updateMediaItemBy(videoId, data as MediaItem);
+      if (result) {
         this.$bus.$emit('database-saved');
       }
-      const playlist = await this.infoDB.get('recent-played', this.playListId);
-      await this.infoDB.update('recent-played', {
-        ...playlist,
+
+      const recentPlayedData = {
         items: this.isFolderList ? [videoId] : this.items,
         playedIndex: this.isFolderList ? 0 : this.playingIndex,
         lastOpened: Date.now(),
-      }, playlist.id);
+      };
+
+      await playInfoStorageService
+        .updateRecentPlayedBy(this.playListId, recentPlayedData as PlaylistItem);
     },
     saveSubtitleStyle() {
-      return asyncStorage.set('subtitle-style', { chosenStyle: this.chosenStyle, chosenSize: this.subToTop ? this.lastChosenSize : this.chosenSize, enabledSecondarySub: this.enabledSecondarySub });
+      return settingStorageService.updateSubtitleStyle({
+        chosenStyle: this.chosenStyle,
+        chosenSize: this.subToTop ? this.lastChosenSize : this.chosenSize,
+        enabledSecondarySub: this.enabledSecondarySub,
+      });
     },
     savePlaybackStates() {
-      return asyncStorage.set('playback-states', { volume: this.volume, muted: this.muted });
+      return settingStorageService.updatePlaybackStates({ volume: this.volume, muted: this.muted });
     },
-    beforeUnloadHandler(e) {
+    beforeUnloadHandler(e: Event) {
+      this.removeAllAudioTrack();
       if (!this.asyncTasksDone && !this.needToRestore) {
         let savePromise = this.saveScreenshot(this.videoId);
         if (process.mas && this.$store.getters.source === 'drop') {
           savePromise = savePromise.then(async () => {
-            await this.infoDB.deletePlaylist(this.playListId);
+            await playInfoStorageService.deleteRecentPlayedBy(this.playListId);
           });
         }
         savePromise
@@ -417,11 +331,7 @@ export default {
         this.$router.push({
           name: 'landing-view',
         });
-        if (this.isFullScreen) this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [!this.isFullScreen]);
-        const x = (window.screen.width / 2) - 360;
-        const y = (window.screen.height / 2) - 200;
-        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [720, 405]);
-        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', [x, y]);
+        windowRectService.uploadWindowBy(false, 'landing-view');
       }
     },
   },

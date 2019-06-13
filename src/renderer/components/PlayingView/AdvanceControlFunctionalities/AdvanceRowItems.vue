@@ -9,6 +9,7 @@
     }"
     @mouseenter="handleMouseEnter"
     @mouseleave="handleMouseLeave"
+    class="itemContainer"
   >
     <div
       :style="{

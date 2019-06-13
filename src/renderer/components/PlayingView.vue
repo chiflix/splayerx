@@ -10,8 +10,8 @@
 import { mapActions } from 'vuex';
 import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import SubtitleManager from '@/components/Subtitle/SubtitleManager.vue';
-import VideoCanvas from './PlayingView/VideoCanvas.vue';
-import TheVideoController from './PlayingView/TheVideoController.vue';
+import VideoCanvas from '@/containers/VideoCanvas.vue';
+import TheVideoController from '@/containers/TheVideoController.vue';
 import { videodata } from '../store/video';
 
 export default {

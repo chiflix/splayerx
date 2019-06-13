@@ -55,7 +55,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { mapGetters } from 'vuex';
 import NextVideo from '@/components/PlayingView/NextVideo.vue';
 import PrivacyBubble from '@/components/PlayingView/PrivacyConfirmBubble.vue';
@@ -65,6 +65,7 @@ import Icon from './BaseIconContainer.vue';
 
 export default {
   name: 'NotificationBubble',
+  // @ts-ignore
   type: INPUT_COMPONENT_TYPE,
   components: {
     Icon,
@@ -106,10 +107,10 @@ export default {
     },
   },
   watch: {
-    singleCycle(val) {
+    singleCycle(val: boolean) {
       this.showNextVideo = !val;
     },
-    privacyAgreement(val) {
+    privacyAgreement(val: boolean) {
       if (val) {
         this.showPrivacyBubble = false;
       }
@@ -132,10 +133,10 @@ export default {
       this.manualClosed = false;
       this.showNextVideo = false;
     },
-    closeMessage(id) {
+    closeMessage(id: string) {
       this.$store.dispatch('removeMessages', id);
     },
-    checkNextVideoUI(time) {
+    checkNextVideoUI(time: number) {
       if (time > this.nextVideoPreviewTime && time < this.duration - 1 && this.duration > 240) {
         if (this.nextVideo && !this.manualClosed) {
           this.$store.dispatch('UpdatePlayingList');

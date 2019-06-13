@@ -81,13 +81,14 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { mapGetters } from 'vuex';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import Icon from './BaseIconContainer.vue';
 
 export default {
   name: 'Titlebar',
+  // @ts-ignore
   type: INPUT_COMPONENT_TYPE,
   components: {
     Icon,
@@ -126,20 +127,20 @@ export default {
     isMaxScreen() { return this.itemType === this.itemTypeEnum.MAXSCREEN; },
   },
   watch: {
-    recentPlaylist(val) {
+    recentPlaylist(val: boolean) {
       if (!val) this.showTitleBar = this.showAllWidgets;
     },
-    showAllWidgets(val) {
+    showAllWidgets(val: boolean) {
       this.showTitleBar = this.recentPlaylist || val;
     },
-    keyAlt(val) {
+    keyAlt(val: boolean) {
       if (!val || !this.keyOver) {
         this.itemType = this.itemTypeEnum.FULLSCREEN;
       } else if (!this.isFullScreen) {
         this.itemType = this.itemTypeEnum.MAXSCREEN;
       }
     },
-    keyOver(val) {
+    keyOver(val: boolean) {
       if (!val || !this.keyAlt) {
         this.itemType = this.itemTypeEnum.FULLSCREEN;
       } else if (!this.isFullScreen) {
@@ -148,12 +149,12 @@ export default {
     },
   },
   mounted() {
-    window.addEventListener('keydown', (e) => {
+    window.addEventListener('keydown', (e: KeyboardEvent) => {
       if (e.keyCode === 18) {
         this.keyAlt = true;
       }
     });
-    window.addEventListener('keyup', (e) => {
+    window.addEventListener('keyup', (e: KeyboardEvent) => {
       if (e.keyCode === 18) {
         this.keyAlt = false;
       }

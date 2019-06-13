@@ -188,13 +188,14 @@
     </div>
   </div>
 </template>
-<script>
+<script lang="ts">
 import { mapActions, mapGetters, mapState } from 'vuex';
 import difference from 'lodash/difference';
 import debounce from 'lodash/debounce';
 import path, { extname } from 'path';
 import { Subtitle as subtitleActions, Input as InputActions } from '@/store/actionTypes';
 import lottie from '@/components/lottie.vue';
+import { AnimationItem } from 'lottie-web';
 import animationData from '@/assets/subtitle.json';
 import { deleteSubtitles } from '@/helpers/subtitle';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
@@ -207,6 +208,7 @@ import {
 
 export default {
   name: 'SubtitleControl',
+  // @ts-ignore
   type: INPUT_COMPONENT_TYPE,
   components: {
     lottie,
@@ -244,6 +246,7 @@ export default {
       onAnimation: false,
       refAnimation: '',
       refRotate: '',
+      // @ts-ignore
       debouncedHandler: debounce(this.handleRefresh, 1000),
       transFlag: true,
       subTypeHoverIndex: 1,
@@ -259,13 +262,15 @@ export default {
         const { loadingStates, types } = Subtitle;
         const loadingSubtitles = Object.keys(loadingStates)
           .filter(id => loadingStates[id] === 'loading');
-        const result = [];
+        const result: any[] = [];
         loadingSubtitles.forEach((id) => {
           if (!result.includes(types[id])) result.push(types[id]);
         });
         return result;
       },
+      // @ts-ignore
       currentMousedownComponent: ({ Input }) => Input.mousedownComponentName,
+      // @ts-ignore
       currentMouseupComponent: ({ Input }) => Input.mouseupComponentName,
     }),
     computedSize() {
@@ -353,8 +358,10 @@ export default {
     currentSubtitleIndex() {
       const { computedAvailableItems } = this;
       return !this.isFirstSubtitle && this.enabledSecondarySub
-        ? computedAvailableItems.findIndex(subtitle => subtitle.id === this.currentSecondSubtitleId)
-        : computedAvailableItems.findIndex(subtitle => subtitle.id === this.currentFirstSubtitleId);
+        ? computedAvailableItems
+          .findIndex((subtitle: any) => subtitle.id === this.currentSecondSubtitleId)
+        : computedAvailableItems
+          .findIndex((subtitle: any) => subtitle.id === this.currentFirstSubtitleId);
     },
     currentScrollTop() {
       const marginFactors = [4, 5, 7];
@@ -363,12 +370,12 @@ export default {
     },
   },
   watch: {
-    count(val) {
+    count(val: number) {
       if (val === this.stopCount) {
         this.animClass = false;
       }
     },
-    animClass(val) {
+    animClass(val: boolean) {
       if (!val) {
         this.count = 1;
         this.stopCount = 10;
@@ -378,12 +385,12 @@ export default {
       this.$emit('update:showAttached', false);
       this.computedAvailableItems = [];
     },
-    currentSubtitleIndex(val) {
+    currentSubtitleIndex(val: number) {
       if (val === 0) {
         this.$refs.scroll.scrollTop = 0;
       }
     },
-    showAttached(val) {
+    showAttached(val: boolean) {
       this.$refs.scroll.scrollTop = this.currentScrollTop;
       if (!val) {
         this.anim.playSegments([79, 92], true);
@@ -392,7 +399,7 @@ export default {
         }
       }
     },
-    currentMousedownComponent(val) {
+    currentMousedownComponent(val: string) {
       if (val !== 'notification-bubble' && val !== '') {
         if (val !== this.$options.name && this.showAttached) {
           this.anim.playSegments([62, 64], true);
@@ -400,7 +407,7 @@ export default {
         }
       }
     },
-    currentMouseupComponent(val) {
+    currentMouseupComponent(val: string) {
       setTimeout(() => {
         if (this.currentMousedownComponent !== 'notification-bubble' && val !== '') {
           if (this.lastDragging
@@ -417,14 +424,15 @@ export default {
         }
       }, 0);
     },
-    subtitleList(val, oldval) {
+    subtitleList(val: any, oldval: any) {
       if (val.length > oldval.length) {
+        // @ts-ignore
         this.loadingType = difference(val, oldval)[0].type;
       }
       this.computedAvailableItems = val
-        .filter(({ name, loading }) => name && loading !== 'failed');
+        .filter(({ name, loading }: { name: string; loading: string}) => name && loading !== 'failed');
     },
-    loadingType(val) {
+    loadingType(val: string) {
       if (val === 'local') {
         this.loadingSubsPlaceholders.local = 'loading';
       } else if (val === 'online') {
@@ -433,20 +441,20 @@ export default {
         this.loadingSubsPlaceholders.embedded = 'loading';
       }
     },
-    enabledSecondarySub(val) {
+    enabledSecondarySub(val: boolean) {
       if (!val) this.updateSubtitleType(true);
       this.$refs.scroll.scrollTop = val ? 0 : this.currentScrollTop;
     },
     isFirstSubtitle() {
       this.$refs.scroll.scrollTop = this.currentScrollTop;
     },
-    computedAvailableItems(val) {
+    computedAvailableItems(val: any) {
       this.updateNoSubtitle(!val.length);
     },
   },
   created() {
     this.$bus.$on('subtitle-refresh-from-menu', this.debouncedHandleRefresh);
-    this.$bus.$on('subtitle-refresh-from-src-change', (e, hasOnlineSubtitles) => {
+    this.$bus.$on('subtitle-refresh-from-src-change', (e: Event, hasOnlineSubtitles: boolean) => {
       this.isInitial = true;
       if (this.privacyAgreement) {
         this.debouncedHandleRefresh(hasOnlineSubtitles);
@@ -454,7 +462,7 @@ export default {
         this.$bus.$emit('refresh-subtitles', { types: ['local', 'embedded'] });
       }
     });
-    this.$bus.$on('refresh-finished', (timeout) => {
+    this.$bus.$on('refresh-finished', (timeout: boolean) => {
       if (this.showAttached) {
         this.stopCount = this.count + 1;
       } else {
@@ -521,6 +529,7 @@ export default {
   },
   methods: {
     ...mapActions({
+      // @ts-ignore
       addSubtitles: subtitleActions.ADD_SUBTITLES,
       resetSubtitles: subtitleActions.RESET_SUBTITLES,
       offCurrentSubtitle: subtitleActions.OFF_SUBTITLES,
@@ -539,8 +548,8 @@ export default {
     subTypeShift() {
       this.updateSubtitleType(!this.isFirstSubtitle);
     },
-    handleSubDelete(e, item) {
-      if (e.target.nodeName !== 'DIV') {
+    handleSubDelete(e: MouseEvent, item: any) {
+      if ((e.target as HTMLElement).nodeName !== 'DIV') {
         this.transFlag = false;
         this.removeLocalSub(item.id);
         this.hoverHeight = 0;
@@ -559,7 +568,7 @@ export default {
     finishAnimation() {
       this.refAnimation = '';
     },
-    getSubName(item) {
+    getSubName(item: any) {
       if (item.path) {
         return path.basename(item);
       }
@@ -568,10 +577,10 @@ export default {
       }
       return item.name;
     },
-    debouncedHandleRefresh(e, hasOnlineSubtitles = false) {
+    debouncedHandleRefresh(e: MouseEvent, hasOnlineSubtitles = false) {
       this.debouncedHandler(e, hasOnlineSubtitles);
     },
-    handleRefresh(e, hasOnlineSubtitles = false) {
+    handleRefresh(e: MouseEvent, hasOnlineSubtitles = false) {
       if (navigator.onLine) {
         if (!this.privacyAgreement) {
           this.$bus.$emit('privacy-confirm');
@@ -624,7 +633,7 @@ export default {
         this.$addBubble(SUBTITLE_OFFLINE);
       }
     },
-    handleAnimation(anim) {
+    handleAnimation(anim: AnimationItem) {
       this.anim = anim;
     },
     handleDown() {
@@ -675,15 +684,15 @@ export default {
           break;
       }
     },
-    toggleItemsMouseOver(index) {
+    toggleItemsMouseOver(index: number) {
       this.showSubtitleDetails(index);
       this.hoverIndex = index;
     },
-    showSubtitleDetails(index) {
+    showSubtitleDetails(index: number) {
       if (index >= 0) {
         clearTimeout(this.detailTimer);
-        const hoverItem = document.querySelector(`#item${index} .text`);
-        if (hoverItem.clientWidth < hoverItem.scrollWidth) {
+        const hoverItem: HTMLElement|null = document.querySelector(`#item${index} .text`);
+        if (hoverItem && hoverItem.clientWidth < hoverItem.scrollWidth) {
           this.hoverHeight = this.textHeight
             * (Math.ceil(hoverItem.scrollWidth / hoverItem.clientWidth) - 1);
           this.detailTimer = setTimeout(() => {
@@ -698,8 +707,8 @@ export default {
       this.hiddenText = false;
       this.hoverIndex = -5;
     },
-    toggleItemClick(event, index) {
-      if (event.target.nodeName === 'DIV') {
+    toggleItemClick(event: MouseEvent, index: number) {
+      if ((event.target as HTMLElement).nodeName === 'DIV') {
         const { computedAvailableItems } = this;
         this.$bus.$emit('change-subtitle', computedAvailableItems[index].id);
         setTimeout(() => {
