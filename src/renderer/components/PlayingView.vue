@@ -3,6 +3,7 @@
     <the-video-canvas ref="videoCanvas" />
     <the-video-controller ref="videoctrl" />
     <subtitle-renderer
+      :key="originSrc"
       :currentCues="concatCurrentCues"
       :subPlayRes="subPlayRes"
       :scaleNum="scaleNum"
@@ -32,7 +33,7 @@ export default {
     'subtitle-renderer': SubtitleRenderer,
   },
   computed: {
-    ...mapGetters(['currentCues', 'scaleNum', 'subToTop', 'currentFirstSubtitleId', 'winHeight', 'chosenStyle', 'chosenSize']),
+    ...mapGetters(['currentCues', 'scaleNum', 'subToTop', 'currentFirstSubtitleId', 'winHeight', 'chosenStyle', 'chosenSize', 'originSrc']),
     concatCurrentCues() {
       return [this.currentCues[0].cues, this.currentCues[1].cues];
     },
