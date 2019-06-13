@@ -103,10 +103,10 @@ export default {
         + subSpaceFactorsB[this.chosenSize];
     },
     isFirstSubVtt() {
-      return !this.currentCues[0][0].tags.alignment;
+      return this.currentCues[0][0].format === 'vtt';
     },
     isSecondSubVtt() {
-      return !this.currentCues[1][0].tags.alignment;
+      return this.currentCues[1][0].format === 'vtt';
     },
     secondarySubScale() {
       if (this.currentFirstSubtitleId === '') {

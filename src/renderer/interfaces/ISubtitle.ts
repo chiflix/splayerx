@@ -4,7 +4,8 @@ export type cue = {
   end: number,
   text: string,
   hide?: boolean,
-  tags: tagsPartial
+  format: string,
+  tags: tagsPartial,
 }
 type Partial<T> = { [P in keyof T]?: T[P] };
 export type tagsPartial = Partial<tags>;
