@@ -174,7 +174,7 @@ export default {
       this.removeEvents(oldVal.filter((event: string) => !newVal.includes(event)));
     },
     // styles
-    styles(newVal: Record<string, any>) {
+    styles(newVal: Record<string, string>) {
       this.setStyle(newVal);
     },
   },
@@ -216,7 +216,7 @@ export default {
       videodata.time = this.$refs.video.currentTime;
     },
     // helper functions
-    emitEvents(event: string, value: any) {
+    emitEvents(event: string, value: Event) {
       if (event && !value) {
         this.$emit(event);
       } else if (value) {
@@ -231,10 +231,11 @@ export default {
             this.$refs.video.addEventListener(event, listener);
             this.eventListeners.set(event, listener);
           } else {
-            const generateAudioEvent = (type: string) => (trackEvent: any) => {
+            const generateAudioEvent = (type: string) => (trackEvent: TrackEvent) => {
+              const track = trackEvent.track as AudioTrack;
               const {
                 id, kind, label, language,
-              } = trackEvent.track;
+              } = track;
               let enabled;
               if (this.lastAudioTrackId) {
                 enabled = this.lastAudioTrackId === Number(id);
@@ -243,7 +244,7 @@ export default {
                   currentTrack.enabled = Number(currentTrack.id) === this.lastAudioTrackId;
                 }
               } else {
-                enabled = trackEvent.track.enabled;
+                enabled = track.enabled;
               }
               this.$emit('audiotrack', {
                 type,
@@ -267,7 +268,7 @@ export default {
         }
       });
     },
-    setStyle(styles: Record<string, any>) {
+    setStyle(styles: Record<string, string>) {
       const style = Object.keys(styles);
       if (style.length > 0) {
         style.forEach((styleName) => {

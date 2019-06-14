@@ -60,6 +60,10 @@ export type MediaItem = {
   smallShortCut?: string,
 }
 
+type Partial<T> = { [P in keyof T]?: T[P] };
+// example convert type to optional type
+type MediaItemPartial = Partial<MediaItem>;
+
 export type SubtitleItem = {
   format: string,
   language: string,

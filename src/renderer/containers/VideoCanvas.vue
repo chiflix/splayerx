@@ -49,6 +49,7 @@ import path from 'path';
 import { Video as videoActions } from '@/store/actionTypes';
 import { videodata } from '@/store/video';
 import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer.vue';
+import { MediaItem, PlaylistItem } from '../interfaces/IDB';
 
 export default {
   name: 'VideoCanvas',
@@ -93,7 +94,7 @@ export default {
       if (process.mas && oldVal) {
         this.$bus.$emit(`stop-accessing-${oldVal}`, oldVal);
       }
-      this.$bus.$emit('show-speedlabel');
+      // this.$bus.$emit('show-speedlabel');
       this.videoConfigInitialize({
         audioTrackList: [],
       });
@@ -191,28 +192,29 @@ export default {
       removeAllAudioTrack: videoActions.REMOVE_ALL_AUDIO_TRACK,
       updatePlayinglistRate: videoActions.UPDATE_PLAYINGLIST_RATE,
     }),
-    onMetaLoaded(event: any) {
-      this.videoElement = event.target;
+    onMetaLoaded(event: Event) {
+      const target = event.target as HTMLVideoElement;
+      this.videoElement = target;
       this.videoConfigInitialize({
         paused: false,
         volume: this.volume * 100,
         muted: this.muted,
         rate: this.nowRate,
-        duration: event.target.duration,
+        duration: target.duration,
         currentTime: 0,
       });
-      if (event.target.duration && Number.isFinite(event.target.duration)) {
-        const generationInterval = Math.round(event.target.duration
+      if (target.duration && Number.isFinite(target.duration)) {
+        const generationInterval = Math.round(target.duration
           / (window.screen.width / 4)) || 1;
-        const maxThumbnailCount = Math.floor(event.target.duration / generationInterval);
+        const maxThumbnailCount = Math.floor(target.duration / generationInterval);
         this.$bus.$emit('generate-thumbnails', maxThumbnailCount);
       }
       this.updateMetaInfo({
-        intrinsicWidth: event.target.videoWidth,
-        intrinsicHeight: event.target.videoHeight,
-        ratio: event.target.videoWidth / event.target.videoHeight,
+        intrinsicWidth: target.videoWidth,
+        intrinsicHeight: target.videoHeight,
+        ratio: target.videoWidth / target.videoHeight,
       });
-      if (event.target.duration - this.lastPlayedTime > 10) {
+      if (target.duration - this.lastPlayedTime > 10) {
         this.$bus.$emit('seek', this.lastPlayedTime);
       } else {
         this.$bus.$emit('seek', 0);
@@ -237,7 +239,7 @@ export default {
       const oldRect = this.winPos.concat(this.winSize);
       windowRectService.calculateWindowRect(videoSize, true, oldRect, maxVideoSize);
     },
-    onAudioTrack(event: any) {
+    onAudioTrack(event: TrackEvent) {
       const { type, track } = event;
       this[`${type}AudioTrack`](track);
     },
@@ -278,7 +280,7 @@ export default {
         audioTrackId: this.currentAudioTrackId,
       };
 
-      const result = await playInfoStorageService.updateMediaItemBy(videoId, data);
+      const result = await playInfoStorageService.updateMediaItemBy(videoId, data as MediaItem);
       if (result) {
         this.$bus.$emit('database-saved');
       }
@@ -289,7 +291,8 @@ export default {
         lastOpened: Date.now(),
       };
 
-      await playInfoStorageService.updateRecentPlayedBy(this.playListId, recentPlayedData);
+      await playInfoStorageService
+        .updateRecentPlayedBy(this.playListId, recentPlayedData as PlaylistItem);
     },
     saveSubtitleStyle() {
       return settingStorageService.updateSubtitleStyle({
@@ -301,8 +304,7 @@ export default {
     savePlaybackStates() {
       return settingStorageService.updatePlaybackStates({ volume: this.volume, muted: this.muted });
     },
-    beforeUnloadHandler(e: any) {
-      this.removeAllAudioTrack();
+    beforeUnloadHandler(e: Event) {
       if (!this.asyncTasksDone && !this.needToRestore) {
         let savePromise = this.saveScreenshot(this.videoId);
         if (process.mas && this.$store.getters.source === 'drop') {

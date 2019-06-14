@@ -45,6 +45,7 @@ import { AnimationItem } from 'lottie-web';
 
 export default {
   name: 'AdvanceControl',
+  //  @ts-ignore
   type: INPUT_COMPONENT_TYPE,
   components: {
     lottie,

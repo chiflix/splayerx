@@ -417,7 +417,6 @@ export default {
       if (recentPlayService.lastPlayedTime) {
         this.hoveredLastPlayedTime = recentPlayService.lastPlayedTime;
       }
-      console.log(this.hoveredLastPlayedTime, this.hoveredDuration, recentPlayService.percentage);
     },
     onItemMouseout() {
       this.hoverIndex = this.playingIndex;
