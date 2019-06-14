@@ -12,7 +12,7 @@ export default class RecentPlayService implements IRecentPlayRequest {
   record: MediaItem;
   smallShortCut: string;
   lastPlayedTime: number;
-  imageSrc: string;
+  imageSrc: string | undefined;
   imageLoaded = false;
 
   get percentage(): number {
@@ -64,16 +64,20 @@ export default class RecentPlayService implements IRecentPlayRequest {
    * @returns Promise 获取播放记录
    */
   async getRecord(videoId?: number): Promise<void> {
+    let record;
     if (videoId) {
-      this.record = await info.getValueByKey('media-item', videoId);
+      record = await info.getValueByKey('media-item', videoId);
     } else {
       const records = await info.getAllValueByIndex('media-item', 'source', '');
-      this.record = records.find(record => record.path === this.path);
+      record = records.find(record => record.path === this.path);
     }
-    if (this.record.lastPlayedTime) this.lastPlayedTime = this.record.lastPlayedTime;
-    if (this.record.smallShortCut) {
-      this.imageSrc = this.record.smallShortCut;
-      this.imageLoaded = true;
+    if (record) {
+      this.record = record;
+      if (this.record.lastPlayedTime) {
+        this.lastPlayedTime = this.record.lastPlayedTime;
+        this.imageSrc = this.record.smallShortCut;
+        this.imageLoaded = true;
+      }
     }
   }
 }

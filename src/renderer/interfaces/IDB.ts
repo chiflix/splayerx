@@ -47,17 +47,17 @@ export type MediaItemPreference = {
  
 /** MediaItem 全量结构 */
 export type MediaItem = {
-  audioTrackId: number
   videoId: number,
   quickHash: string,
   path: string,
   type: string,
   source: string,
+  audioTrackId?: number
   lastPlayedTime?: number,
   duration?: number,
-  preference: MediaItemPreference,
-  shortCut: string,
-  smallShortCut: string,
+  preference?: MediaItemPreference,
+  shortCut?: string,
+  smallShortCut?: string,
 }
 
 export type SubtitleItem = {

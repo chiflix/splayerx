@@ -132,7 +132,7 @@ import {
 } from 'vuex';
 import { Input as inputMutations } from '@/store/mutationTypes';
 import { Input as InputActions, Subtitle as subtitleActions } from '@/store/actionTypes';
-import RecentPlaylistItem from '@/components/PlayingView/RecentPlaylistItem.vue';
+import RecentPlaylistItem from '@/containers/RecentPlaylistItem.vue';
 import Add from '@/components/PlayingView/Add.vue';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import RecentPlayService from '../services/media/RecentPlayService';
@@ -195,6 +195,7 @@ export default {
       }, playlist.id);
     });
 
+    this.indexOfMovingItem = this.playingList.length;
     this.hoverIndex = this.playingIndex;
     this.filename = this.pathBaseName(this.originSrc);
   },

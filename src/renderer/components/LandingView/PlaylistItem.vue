@@ -74,6 +74,7 @@ import path from 'path';
 import { filePathToUrl } from '@/helpers/path';
 import { generateCoverPathByMediaHash } from '@/helpers/cacheFileStorage';
 import Icon from '../BaseIconContainer.vue';
+import { info } from '@/libs/DataBase';
 
 export default {
   name: 'PlaylistItem',
@@ -139,12 +140,12 @@ export default {
     let index = this.playlist.playedIndex;
     if (index > this.playlist.items.length - 1 || index < 0) {
       index = 0;
-      this.infoDB.update('recent-played', {
+      info.update('recent-played', {
         ...this.playlist,
         playedIndex: index,
       }, this.playlist.id);
     }
-    this.infoDB.get('media-item', this.playlist.items[index]).then((data) => {
+    info.getValueByKey('media-item', this.playlist.items[index]).then((data) => {
       this.coverVideo = data;
       generateCoverPathByMediaHash(data.quickHash).then((path) => {
         this.coverSrc = filePathToUrl(path);

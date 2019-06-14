@@ -310,7 +310,7 @@ export default {
         });
       }
     },
-    items(val: number[]) {
+    items() {
       this.updateUI();
     },
     isPlaying(val: boolean) {

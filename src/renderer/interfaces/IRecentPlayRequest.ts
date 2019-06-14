@@ -1,10 +1,12 @@
+import { MediaItem } from '@/interfaces/IDB';
+
 export interface IRecentPlayRequest {
   coverSrc: string;
   duration: any;
   record: MediaItem;
   smallShortCut: string;
   lastPlayedTime: number;
-  imageSrc: string;
+  imageSrc: string | undefined;
   imageLoaded: boolean;
   
   /**
