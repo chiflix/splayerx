@@ -558,7 +558,7 @@ app.on('activate', () => {
 /**
  * 闪退报告
  */
-if (process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV !== 'development') {
   app.setPath('temp', userDataPath);
   crashReporter.start({
     companyName: 'Sagittarius Tech LLC.',
