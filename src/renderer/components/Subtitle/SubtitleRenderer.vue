@@ -15,7 +15,7 @@
           opacity: cue.hide ? '0' : '1',
           writingMode: (cue.category === 'first' ? firstType === 'vtt' : secondType === 'vtt')
             ? `vertical-${cue.tags.vertical}` : '',
-          lineHeight: firstInstance && secondaryInstance ? '112%' : 'normal',
+          lineHeight: currentCues[0].length && currentCues[1].length ? '112%' : 'normal',
           marginBottom: item[ind + 1] && cue.category === 'first' &&
             item[ind + 1].category === 'secondary' ?`${subtitleSpace / scaleNum}px` : '',
           fontWeight: cue.tags.b ? 'bold' : '',
@@ -102,11 +102,11 @@ export default {
       return (subSpaceFactorsA[this.chosenSize] * this.winHeight)
         + subSpaceFactorsB[this.chosenSize];
     },
-    isFirstSubVtt() {
-      return this.currentCues[0][0].format === 'vtt';
+    firstType() {
+      return this.currentCues[0][0].format || '';
     },
-    isSecondSubVtt() {
-      return this.currentCues[1][0].format === 'vtt';
+    secondType() {
+      return this.currentCues[1][0].format || '';
     },
     secondarySubScale() {
       if (this.currentFirstSubtitleId === '') {
