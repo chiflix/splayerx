@@ -1,20 +1,23 @@
+
 export interface ILog {
   /**
    * @description 记录程序状态日志
    * @author tanghaixiang@xindong.com
-   * @date 2019-06-11
-   * @param {string} tag
-   * @param {Error} content
+   * @date 2019-06-14
+   * @param {string} label
+   * @param {string} message
+   * @param {string} stack
    * @memberof ILog
    */
-  info(tag: string, content: Error): void
+  info(label: string, message: string): void
   /**
    * @description 记录逻辑和程序出错日志
    * @author tanghaixiang@xindong.com
-   * @date 2019-06-11
-   * @param {string} tag
-   * @param {Error} content
+   * @date 2019-06-14
+   * @param {string} label
+   * @param {string} message
+   * @param {string} stack
    * @memberof ILog
    */
-  error(tag: string, content: Error): void
+  error(label: string, message: string | Error): void
 }
