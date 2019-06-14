@@ -544,6 +544,7 @@
     "@babel/register": "^7.0.0",
     "@chiflix/electron": "^5.0.1",
     "@types/chai": "^4.1.7",
+    "@types/lodash": "^4.14.134",
     "@types/mkdirp": "^0.5.2",
     "@types/mocha": "^5.2.7",
     "@types/os-locale": "^2.1.0",
