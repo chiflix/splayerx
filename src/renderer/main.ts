@@ -1382,6 +1382,10 @@ new Vue({
           e.preventDefault();
           this.$store.dispatch(videoActions.DECREASE_RATE);
           break;
+        case 220:
+          e.preventDefault();
+          this.$store.dispatch(videoActions.CHANGE_RATE, 1);
+          break;
         case 221:
           e.preventDefault();
           this.$store.dispatch(videoActions.INCREASE_RATE);
