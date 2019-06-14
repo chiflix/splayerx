@@ -53,7 +53,7 @@
 </template>
 <script lang="ts">
 import { isEqual } from 'lodash';
-import { cue, tagsPartial } from '@/interfaces/ISubtitle';
+import { Cue, TagsPartial } from '@/interfaces/ISubtitle';
 
 export default {
   name: 'SubtitleRenderer',
@@ -117,42 +117,42 @@ export default {
     allCues() {
       const allCues = [];
       for (let i = 1; i < 10; i += 1) {
-        const firstCues: cue[] = this.currentCues[0]
-          .filter((cue: cue) => (this.subToTop && [1, 2, 3]
+        const firstCues: Cue[] = this.currentCues[0]
+          .filter((cue: Cue) => (this.subToTop && [1, 2, 3]
             .includes(this.calculateAlignment(cue.category, cue.tags))
             ? this.calculateAlignment(cue.category, cue.tags) + 6
             : this.calculateAlignment(cue.category, cue.tags)) === i
             && !this.calculatePosition(cue.category, cue.tags));
-        const secondaryCues: cue[] = this.currentCues[1]
-          .filter((cue: cue) => (this.subToTop && [1, 2, 3]
+        const secondaryCues: Cue[] = this.currentCues[1]
+          .filter((cue: Cue) => (this.subToTop && [1, 2, 3]
             .includes(this.calculateAlignment(cue.category, cue.tags))
             ? this.calculateAlignment(cue.category, cue.tags) + 6
             : this.calculateAlignment(cue.category, cue.tags)) === i
             && !this.calculatePosition(cue.category, cue.tags));
-        allCues.push((firstCues.length ? firstCues.map((cue: cue) => { cue.category = 'first'; return cue; }) : [])
-          .concat(secondaryCues.length ? secondaryCues.map((cue: cue) => { cue.category = 'secondary'; return cue; }) : []));
+        allCues.push((firstCues.length ? firstCues.map((cue: Cue) => { cue.category = 'first'; return cue; }) : [])
+          .concat(secondaryCues.length ? secondaryCues.map((cue: Cue) => { cue.category = 'secondary'; return cue; }) : []));
       }
       return allCues;
     },
     positionCues() {
-      const firstCues: cue[] = this.currentCues[0]
-        .filter((cue: cue) => this.calculatePosition(cue.category, cue.tags)).map((cue: cue) => { cue.category = 'first'; return cue; });
-      const secondaryCues: cue[] = this.currentCues[1]
-        .filter((cue: cue) => this.calculatePosition(cue.category, cue.tags)).map((cue: cue) => { cue.category = 'secondary'; return cue; });
-      const firstClassifiedCues: cue[][] = [];
-      const secondaryClassifiedCues: cue[][] = [];
-      firstCues.forEach((item: cue) => {
+      const firstCues: Cue[] = this.currentCues[0]
+        .filter((cue: Cue) => this.calculatePosition(cue.category, cue.tags)).map((cue: Cue) => { cue.category = 'first'; return cue; });
+      const secondaryCues: Cue[] = this.currentCues[1]
+        .filter((cue: Cue) => this.calculatePosition(cue.category, cue.tags)).map((cue: Cue) => { cue.category = 'secondary'; return cue; });
+      const firstClassifiedCues: Cue[][] = [];
+      const secondaryClassifiedCues: Cue[][] = [];
+      firstCues.forEach((item: Cue) => {
         const index: number = firstClassifiedCues
-          .findIndex((e: cue[]) => isEqual(e[0].tags, item.tags));
+          .findIndex((e: Cue[]) => isEqual(e[0].tags, item.tags));
         if (index !== -1) {
           firstClassifiedCues[index].push(item);
         } else {
           firstClassifiedCues.push([item]);
         }
       });
-      secondaryCues.forEach((item: cue) => {
+      secondaryCues.forEach((item: Cue) => {
         const index: number = secondaryClassifiedCues
-          .findIndex((e: cue[]) => isEqual(e[0].tags, item.tags));
+          .findIndex((e: Cue[]) => isEqual(e[0].tags, item.tags));
         if (index !== -1) {
           secondaryClassifiedCues[index].push(item);
         } else {
@@ -164,15 +164,15 @@ export default {
   },
   watch: {
     allCues: {
-      handler(val: cue[][], oldVal: cue[][]) {
+      handler(val: Cue[][], oldVal: Cue[][]) {
         for (let i = 0; i < 9; i += 1) {
-          if (val[i].length < oldVal[i].length && val[i].every((e: cue) => oldVal[i].includes(e))) {
-            this.noPositionCues[i] = oldVal[i].map((cue: cue) => {
+          if (val[i].length < oldVal[i].length && val[i].every((e: Cue) => oldVal[i].includes(e))) {
+            this.noPositionCues[i] = oldVal[i].map((cue: Cue) => {
               cue.hide = !val[i].includes(cue);
               return cue;
             });
           } else {
-            this.noPositionCues[i] = val[i].map((cue: cue) => { cue.hide = false; return cue; });
+            this.noPositionCues[i] = val[i].map((cue: Cue) => { cue.hide = false; return cue; });
           }
         }
       },
@@ -180,21 +180,21 @@ export default {
     },
   },
   methods: {
-    calculatePosition(category: string, tags: tagsPartial) {
+    calculatePosition(category: string, tags: TagsPartial) {
       const type = category === 'first' ? this.firstType : this.secondType;
       if (type !== 'vtt') {
         return !!tags.pos;
       }
       return tags.line && tags.position;
     },
-    calculateAlignment(category: string, tags: tagsPartial) {
+    calculateAlignment(category: string, tags: TagsPartial) {
       const type = category === 'first' ? this.firstType : this.secondType;
       if (type !== 'vtt') {
         return !tags || !tags.alignment ? 2 : tags.alignment;
       }
       return !tags.line && !tags.position ? 2 : '';
     },
-    subLeft(cue: cue) {
+    subLeft(cue: Cue) {
       const subPlayResX: number = cue.category === 'first' ? this.subPlayRes[0].x : this.subPlayRes[1].x;
       const type = cue.category === 'first' ? this.firstType : this.secondType;
       const { tags } = cue;
@@ -212,7 +212,7 @@ export default {
       }
       return '';
     },
-    subTop(cue: cue) {// eslint-disable-line
+    subTop(cue: Cue) {// eslint-disable-line
       const subPlayResY: number = cue.category === 'first' ? this.subPlayRes[0].y : this.subPlayRes[1].y;
       const type = cue.category === 'first' ? this.firstType : this.secondType;
       const { tags } = cue;
@@ -237,7 +237,7 @@ export default {
       }
       return '';
     },
-    translateNum(cue: cue) { // eslint-disable-line
+    translateNum(cue: Cue) { // eslint-disable-line
       const index = this.calculateAlignment(cue.category, cue.tags)
         ? this.calculateAlignment(cue.category, cue.tags) : 2;
       switch (index) {
