@@ -1,4 +1,9 @@
-import { getTextWidth, generateShortCutImageBy, mediaQuickHash, timecodeFromSeconds } from '@/libs/utils';
+import {
+  getTextWidth,
+  generateShortCutImageBy,
+  mediaQuickHash,
+  timecodeFromSeconds,
+} from '@/libs/utils';
 
 describe('libs utils', () => {
   let fontSize = '';
