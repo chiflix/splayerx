@@ -1,6 +1,6 @@
 import { openDB, IDBPDatabase } from 'idb';
 import { INFO_DATABASE_NAME, INFO_SCHEMAS, INFODB_VERSION, RECENT_OBJECT_STORE_NAME, VIDEO_OBJECT_STORE_NAME } from '@/constants';
-import { mediaQuickHash } from '@/helpers/utils';
+import { mediaQuickHash } from '@/libs/utils';
 import addLog from './index';
 import { RawPlaylistItem, PlaylistItem, MediaItem } from '@/interfaces/IDB';
 

@@ -2,7 +2,7 @@ import { IRecentPlayRequest } from '@/interfaces/IRecentPlayRequest';
 import MediaStorageService from '@/services/storage/MediaStorageService';
 import { ipcRenderer } from 'electron';
 import { filePathToUrl } from '@/helpers/path';
-import { mediaQuickHash } from "@/helpers/utils";
+import { mediaQuickHash } from "@/libs/utils";
 import { info } from '@/libs/DataBase';
 import { MediaItem } from '@/interfaces/IDB';
 
