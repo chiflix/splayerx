@@ -11,11 +11,11 @@ export interface IRecentPlayRequest {
   
   /**
    * @param  {string} mediaHash
-   * @returns Promise 返回视频封面图片
+   * @returns Promise 返回视频封面地址
    */
   getCover(mediaHash: string): Promise<string | null>
   /**
-   * @param  {number} videoId
+   * @param  {number} videoId optional
    * @returns Promise 获取播放记录
    */
   getRecord(videoId?: number): Promise<void>
