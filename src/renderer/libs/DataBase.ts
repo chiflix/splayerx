@@ -1,14 +1,14 @@
 import infoDB, { InfoDB } from '@/helpers/infoDB';
 import dataDB, { DataDb } from '@/helpers/dataDb';
-import { IDB, MediaItem, PlaylistItem, SubtitleItem, RawMediaItem, RawPlaylistItem } from '@/interfaces/IDB';
+import { IDB, MediaItem, PlaylistItem, SubtitleDataItem, RawMediaItem, RawPlaylistItem } from '@/interfaces/IDB';
 
 export default class DataBase implements IDB {
   constructor(private readonly db: InfoDB | DataDb) {
   }
-  async add(objectStore: string, data: RawMediaItem | RawPlaylistItem | SubtitleItem): Promise<number> {
+  async add(objectStore: string, data: RawMediaItem | RawPlaylistItem | SubtitleDataItem): Promise<number> {
     return this.db.add(objectStore, data);
   }
-  async update(objectStore: string, key: number, data: PlaylistItem | MediaItem | SubtitleItem): Promise<number> {
+  async update(objectStore: string, key: number, data: PlaylistItem | MediaItem | SubtitleDataItem): Promise<number> {
     if (!key) throw new Error('KeyPath requied!');
     return this.db.update(objectStore, data, key);
   }
