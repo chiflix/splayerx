@@ -30,6 +30,7 @@ export class TranscriptQueue {
       case 'successful':
         return false;
     }
+    return this.addManually(subtitle);
   }
 
   async addManually(subtitle: SubtitleUploadParameter) {
