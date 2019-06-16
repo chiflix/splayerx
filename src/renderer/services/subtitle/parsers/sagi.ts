@@ -1,34 +1,35 @@
-import { tagsGetter, loadOnlineTranscript, normalizeCode } from './utils';
+import { IRawSubtitle, IDialogue } from './index';
+import { parse, toMS } from 'subtitle';
+import { tagsGetter } from '../utils';
 
-const baseTags = { alignment: 2, pos: null };
-const normalizer = (parsedSubtitle) => {
-  const finalDialogues = [];
-  parsedSubtitle.forEach(({ startTime, endTime, text }) => {
-    finalDialogues.push({
-      start: startTime,
-      end: endTime,
-      text: text
-        .replace(/[\\/][Nn]|\r?\n|\r/g, '\n') // replace soft and hard line breaks with \n
-        .replace(/\\h/g, ' '), // replace hard space with space
-      tags: tagsGetter(text, baseTags),
+type ParsedSubtitle = {
+  start: string;
+  end: string;
+  text: string;
+}[];
+
+export class SrtSubtitle implements IRawSubtitle {
+  payload = '';
+  constructor(srtPayload: string) {
+    this.payload = srtPayload;
+  }
+  private baseTags = { alignment: 2, pos: undefined };
+  private normalizer(parsedSubtitle: ParsedSubtitle) {
+    const finalDialogues: IDialogue[] = [];
+    parsedSubtitle.forEach((subtitle) => {
+      finalDialogues.push({
+        start: toMS(subtitle.start) / 1000,
+        end: toMS(subtitle.end) / 1000,
+        tags: tagsGetter(subtitle.text, this.baseTags),
+        text: subtitle.text.replace(/\{[^{}]*\}/g, '').replace(/[\\/][Nn]|\r?\n|\r/g, '\n'),
+      });
     });
-  });
-  return {
-    info: {},
-    dialogues: finalDialogues,
-  };
-};
-
-export default {
-  longName: 'Online Transcript',
-  name: 'online',
-  supportedFormats: ['online'],
-  infoLoaders: {
-    language: {
-      func: normalizeCode,
-      params: 'language',
-    },
-  },
-  loader: loadOnlineTranscript,
-  parser: normalizer,
-};
+    return {
+      info: {},
+      dialogues: finalDialogues,
+    };
+  }
+  async parse() {
+    return this.normalizer(parse(this.payload));
+  }
+}
