@@ -1,17 +1,10 @@
-import {
-  remove, pick, values, merge, keyBy, get,
-} from 'lodash';
-import { info } from '@/libs/DataBase';
-
-import infoDB from '@/helpers/infoDB';
-import dataDb from '@/helpers/dataDb';
+import { get, merge, union, remove } from 'lodash';
+import { MediaItem, SubtitleDataItem, SubtitlePreference, SubtitlePreferenceListItem, SubtitlePreferenceLanguage } from '@/interfaces/IDB';
+import { info, data } from '@/libs/DataBase';
+import { SUBTITLE_OBJECTSTORE_NAME } from '@/constants';
 import TaskQueue from '@/helpers/proceduralQueue';
-import { SUBTITLE_OBJECTSTORE_NAME, DATADB_SHCEMAS, DATADB_VERSION } from '@/constants';
-import { MediaItem, MediaItemPreference } from '@/interfaces/IDB';
 
-const taskQueues = {};
-
-async function getVideoInfoFromVideoSrc(videoSrc: string): Promise<MediaItem | undefined> {
+async function getVideoInfoByVideoSrc(videoSrc: string): Promise<MediaItem | undefined> {
   let result;
   try {
     result = await info.getValueByIndex('recent-played', 'path', videoSrc);
@@ -20,138 +13,142 @@ async function getVideoInfoFromVideoSrc(videoSrc: string): Promise<MediaItem | u
   }
   return result;
 }
-async function setVideoInfo(infoPayload: MediaItem) {
-  if (infoPayload.videoId) {
-    return info.update('media-item', infoPayload.videoId, infoPayload);
+async function setVideoInfo(videoInfo: MediaItem) {
+  if (videoInfo.videoId) {
+    return info.update('media-item', videoInfo.videoId, videoInfo);
   }
-  return info.add('media-item', infoPayload);
-}
-function updateSubtitlePreferenceRaw(videoSrc: string, preference: MediaItemPreference, isDelete: boolean) {
-  return getVideoInfoFromVideoSrc(videoSrc).then((videoInfo) => {
-    if (!videoInfo) videoInfo = { path: videoSrc };
-    if (!videoInfo.preference) videoInfo.preference = {};
-    if (!videoInfo.preference.subtitle) videoInfo.preference.subtitle = {};
-    const oldPreference = videoInfo.preference.subtitle;
-    const newPreference = { ...videoInfo.preference.subtitle };
-    Object.keys(preference).forEach((field) => {
-      switch (field) {
-        case 'list': {
-          const oldList = oldPreference.list || [];
-          const newList = preference.list;
-          if (isDelete) {
-            const newListIds = newList.map(({ id }) => id);
-            remove(oldList, ({ id }) => newListIds.includes(id));
-            newPreference.list = oldList;
-          } else {
-            newPreference.list = values(merge(
-              keyBy(oldList, 'id'),
-              keyBy(newList, 'id'),
-            ));
-          }
-          break;
-        }
-        default:
-          newPreference[field] = preference[field];
-          break;
-      }
-    });
-    videoInfo.preference.subtitle = newPreference;
-    return setVideoInfo(videoInfo);
-  });
-}
-function updateSubtitlePreference(videoSrc, preference, isDelete) {
-  if (!taskQueues[videoSrc]) taskQueues[videoSrc] = new TaskQueue();
-  return taskQueues[videoSrc]
-    .add(() => updateSubtitlePreferenceRaw(videoSrc, preference, isDelete));
+  return info.add('media-item', videoInfo);
 }
 
-export function storeLanguagePreference(videoSrc, languagePreference, isDelete) {
-  return updateSubtitlePreference(videoSrc, { language: languagePreference }, isDelete);
-}
-export function retrieveLanguagePreference(videoSrc) {
-  return getVideoInfoFromVideoSrc(videoSrc)
-    .then(({ preference }) => (preference ? preference.subtitle.language : []));
-}
-export function storeSubtitleList(videoSrc, subtitleList, isDelete) {
-  return updateSubtitlePreference(videoSrc, { list: subtitleList }, isDelete);
-}
-export async function retrieveSubtitleList(videoSrc) {
-  const videoInfo = await getVideoInfoFromVideoSrc(videoSrc);
-  const { preference } = videoInfo;
-  const isValidArray = val => Array.isArray(val);
-  if (!preference) return [];
-  if (!preference.subtitle) return [];
-  if (!isValidArray(preference.subtitle.list)) return [];
-  return preference.subtitle.list;
-}
-export async function updateSubtitleList(videoSrc, newSubtitles) {
-  if (!(newSubtitles instanceof Array) || !newSubtitles.length) return false;
-  const subtitleList = [...newSubtitles];
-  newSubtitles.forEach((subtitleInfo) => {
-    const { id } = subtitleInfo;
-    const existingSubtitleIndex = subtitleList.findIndex(({ id: subtitleId }) => subtitleId === id);
-    if (existingSubtitleIndex !== -1) {
-      const existingSubtitle = subtitleList[existingSubtitleIndex];
-      subtitleList[existingSubtitleIndex] = { ...existingSubtitle, ...subtitleInfo };
-    } else {
-      subtitleList.push(subtitleInfo);
+class SubtitleStorageService {
+  public addSubtitle(subtitle: SubtitleDataItem) {
+    return data.add(SUBTITLE_OBJECTSTORE_NAME, subtitle);
+  }
+  public updateSubtitle(id: number, subtitle: SubtitleDataItem) {
+    return data.update(SUBTITLE_OBJECTSTORE_NAME, id, subtitle);
+  }
+  public deleteSubtitle(id: number) {
+    return data.delete(SUBTITLE_OBJECTSTORE_NAME, id);
+  }
+  public retrieveSubtitle(id: number): Promise<SubtitleDataItem | undefined> {
+    return data.getValueByKey(SUBTITLE_OBJECTSTORE_NAME, id);
+  }
+
+  private lastPreferenceOperationId = 0;
+  private lastPreference = {
+    operationId: -1,
+    preference: {} as SubtitlePreference,
+    videoInfo: {} as MediaItem,
+  };
+  private async retrievePreference(videoSrc: string) {
+    if (this.lastPreferenceOperationId === this.lastPreference.operationId) {
+      return this.lastPreference.preference;
     }
-  });
-  return storeSubtitleList(videoSrc, subtitleList);
-}
-export async function retrieveSelectedSubtitleId(videoSrc) {
-  return getVideoInfoFromVideoSrc(videoSrc)
-    .then(videoInfo => get(videoInfo, 'preference.subtitle.selected') || {});
-}
-export async function updateSelectedSubtitleId(videoSrc, Ids) {
-  return updateSubtitlePreference(videoSrc, { selected: Ids });
-}
-
-export async function storeSubtitle(subtitle) {
-  const supportedProperties = DATADB_SHCEMAS
-    .find(({ version }) => version === DATADB_VERSION)
-    .schema // find the correct version
-    .find(({ name }) => name === SUBTITLE_OBJECTSTORE_NAME) // find the correct objectStore
-    .properties;
-  const subtitleToStore = pick(subtitle, supportedProperties);
-  return dataDb.add(SUBTITLE_OBJECTSTORE_NAME, subtitleToStore);
-}
-export async function updateSubtitle(subtitleId, subtitleInfo) {
-  const realSubtitleId = parseInt(subtitleId, 10);
-  const existingSubtitle = await dataDb.get(SUBTITLE_OBJECTSTORE_NAME, realSubtitleId);
-  if (!existingSubtitle) return storeSubtitle(subtitleInfo);
-  const subtitleToPut = { ...existingSubtitle, ...subtitleInfo };
-  return dataDb.update(
-    SUBTITLE_OBJECTSTORE_NAME,
-    subtitleToPut,
-    realSubtitleId,
-  );
-}
-export async function retrieveSubtitle(subtitleId) {
-  return dataDb.get(SUBTITLE_OBJECTSTORE_NAME, parseInt(subtitleId, 10));
-}
-export async function deleteSubtitles(subtitleIds, videoSrc) {
-  if (!(subtitleIds instanceof Array) || !subtitleIds.length) return ({ success: [], failure: [] });
-  subtitleIds = subtitleIds.map(id => parseInt(id, 10));
-  const success = [];
-  const failure = [...subtitleIds];
-  subtitleIds = subtitleIds.map(id => parseInt(id, 10));
-  const deleteSubtitle = subtitleId => (
-    dataDb.delete(SUBTITLE_OBJECTSTORE_NAME, subtitleId)
-      .then(() => {
-        success.push(subtitleId);
-        remove(failure, id => id === subtitleId);
-      })
-      .catch(console.log)
-  );
-
-  await Promise.all(subtitleIds.map(deleteSubtitle));
-  if (videoSrc) {
-    const existingSubtitles = await retrieveSubtitleList(videoSrc);
-    subtitleIds = subtitleIds.map(id => id.toString());
-    remove(existingSubtitles, ({ id }) => !subtitleIds.includes(id));
-    await storeSubtitleList(videoSrc, existingSubtitles, true);
+    const videoInfo = await getVideoInfoByVideoSrc(videoSrc);
+    const preference = get(videoInfo, ['preference', 'subtitle']) as (SubtitlePreference | undefined);
+    if (videoInfo && preference) this.lastPreference = {
+      operationId: this.lastPreferenceOperationId,
+      preference,
+      videoInfo,
+    };
+    return preference;
+  }
+  private async storePreferenceRaw(videoSrc: string, preference: SubtitlePreference) {
+    const oldPreference = await this.retrievePreference(videoSrc);
+    if (!oldPreference) {
+      this.lastPreferenceOperationId += 1;
+      const { videoInfo, preference } = this.lastPreference;
+      const newVideoInfo = merge(
+        videoInfo,
+        {
+          preference: {
+            subtitle: preference,
+          },
+        },
+      );
+      return setVideoInfo(newVideoInfo);
+    }
+  }
+  private preferenceQueues: { [videoSrc: string]: TaskQueue };
+  private async storePreference(videoSrc: string, preference: SubtitlePreference) {
+    const queue = this.preferenceQueues[videoSrc] ?
+      this.preferenceQueues[videoSrc] :
+      this.preferenceQueues[videoSrc] = new TaskQueue();
+    return queue.add(() => this.storePreferenceRaw(videoSrc, preference));
   }
 
-  return ({ success, failure });
+  public async retrieveLanguagePreference(videoSrc: string) {
+    const preference = await this.retrievePreference(videoSrc);
+    if (preference && preference.language) return preference.language;
+  }
+  public async storeLanguagePreference(videoSrc: string, languagePreference: SubtitlePreferenceLanguage) {
+    const preference = await this.retrievePreference(videoSrc);
+    const newPreference = merge(
+      preference,
+      {
+        language: languagePreference,
+      },
+    );
+    return this.storePreference(videoSrc, newPreference);
+  }
+
+  public async retrieveSubtitleList(videoSrc: string) {
+    const preference = await this.retrievePreference(videoSrc);
+    if (preference && preference.list) return preference.list;
+  }
+  private async storeSubtitleList(videoSrc: string, subtitleList: SubtitlePreferenceListItem[]) {
+    const preference = await this.retrievePreference(videoSrc);
+    const newPreference = merge(
+      preference,
+      {
+        list: subtitleList,
+      },
+    );
+    return this.storePreference(videoSrc, newPreference);
+  }
+  public async addSubtitlesToList(videoSrc: string, subtitleList: SubtitlePreferenceListItem[]) {
+    const oldSubtitleList = await this.retrieveSubtitleList(videoSrc) || [];
+    const newSubtitleList = union(oldSubtitleList, subtitleList);
+    return this.storeSubtitleList(videoSrc, newSubtitleList);
+  }
+  public async deleteSubtitlesFromList(videoSrc: string, subtitlesToDelete: SubtitlePreferenceListItem[]) {
+    const subtitleList = await this.retrieveSubtitleList(videoSrc) || [];
+    remove(subtitleList, subtitle => subtitlesToDelete.includes(subtitle));
+    return this.storeSubtitleList(videoSrc, subtitleList);
+  }
+
+  public async retrieveFirstSelectedSubtitleId(videoSrc: string) {
+    const preference = await this.retrievePreference(videoSrc);
+    if (preference && preference.selected) return preference.selected.firstId;
+  }
+  public async storeFirstSelectedSubtitleId(videoSrc: string, id: number) {
+    const preference = await this.retrievePreference(videoSrc);
+    const newPreference = merge(
+      preference,
+      {
+        selected: {
+          firstId: id,
+        },
+      },
+    );
+    return this.storePreference(videoSrc, newPreference);
+  }
+  public async retrieveSecondSelectedSubtitleId(videoSrc: string) {
+    const preference = await this.retrievePreference(videoSrc);
+    if (preference && preference.selected) return preference.selected.secondaryId;
+  }
+  public async storeSecondSelectedSubtitleId(videoSrc: string, id: number) {
+    const preference = await this.retrievePreference(videoSrc);
+    const newPreference = merge(
+      preference,
+      {
+        selected: {
+          secondaryId: id,
+        },
+      },
+    );
+    return this.storePreference(videoSrc, newPreference);
+  }
 }
+
+export default new SubtitleStorageService();
