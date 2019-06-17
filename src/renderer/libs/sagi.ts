@@ -40,7 +40,7 @@ class Sagi {
     this.creds = combinedCreds;
   }
 
-  mediaTranslate(options: MediaTranslationRequest.AsObject): Promise<MediaTranslationResponse.TranscriptInfo[]> {
+  mediaTranslate(options: MediaTranslationRequest.AsObject): Promise<MediaTranslationResponse.TranscriptInfo.AsObject[]> {
     const { mediaIdentity, languageCode, hints } = options;
     const client = new TranslationClient(this.endpoint, this.creds);
     const req = new MediaTranslationRequest();
@@ -50,7 +50,7 @@ class Sagi {
     return new Promise((resolve, reject) => {
       client.translateMedia(req, (err, res) => {
         if (err) reject(err)
-        else resolve(res.getResultsList());
+        else resolve(res.toObject().resultsList);
       });
     });
   }
