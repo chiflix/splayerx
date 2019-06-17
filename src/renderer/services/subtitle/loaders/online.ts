@@ -3,7 +3,7 @@ import { LanguageCode, normalizeCode, LanguageName } from '@/libs/language';
 import { MediaTranslationResponse } from 'sagi-api/translation/v1/translation_pb';
 import { SubtitleFormat, SagiSubtitle } from '../parsers';
 import romanize from 'romanize';
-import Sagi from '@/helpers/sagi';
+import Sagi from '@/libs/sagi';
 
 export class OnlineSubtitle implements IOriginSubtitle {
   origin: string;
@@ -36,7 +36,7 @@ export class OnlineSubtitle implements IOriginSubtitle {
   }
 
   async load() {
-    const payload = await Sagi.getTranscript({ transcriptIdentity: this.origin });
+    const payload = await Sagi.getTranscript({ transcriptIdentity: this.origin, startTime: 0 });
     return new SagiSubtitle(payload);
   }
 }
