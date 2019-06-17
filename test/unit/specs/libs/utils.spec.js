@@ -34,7 +34,7 @@ describe('libs utils', () => {
     const functionResult = await mediaQuickHash('./test/assets/test.avi');
     expect(functionResult).to.be.equal(expectedResult);
   });
-  describe.only('method - timecodeFromSeconds', () => {
+  describe('method - timecodeFromSeconds', () => {
     it('time < 60s', () => {
       const result = timecodeFromSeconds(59);
       expect(result).to.equal('00:59');
