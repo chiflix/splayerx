@@ -1,4 +1,4 @@
-import { IDialogueTag } from './parsers';
+import { IDialogueTag } from '../parsers';
 import { detect } from 'chardet';
 import { encodingExists, decode } from 'iconv-lite';
 import { open, read, close, readFile } from 'fs-extra';
@@ -95,3 +95,5 @@ export async function loadLocalFile(path: string, encoding?: string) {
   const fileEncoding = await detectEncoding(encodingBuffer);
   return decode(fileBuffer, fileEncoding);
 }
+
+export * from './languageLoader';
