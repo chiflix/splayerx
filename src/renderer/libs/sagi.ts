@@ -1,5 +1,6 @@
 import path from 'path';
 import fs from 'fs';
+import grpc from 'grpc';
 import Vue from 'vue';
 
 import healthMsg from 'sagi-api/health/v1/health_pb';
@@ -9,12 +10,12 @@ import translationRpc from 'sagi-api/translation/v1/translation_grpc_pb';
 import { TrainingData } from 'sagi-api/training/v1/training_pb';
 import { TrainngClient } from 'sagi-api/training/v1/training_grpc_pb';
 
-/* eslint-disable */
-const grpc = require('grpc');
-/* eslint-enable */
-
-
 class Sagi {
+  creds: any;
+  endpoint = process.env.NODE_ENV === 'production' ?
+    'apis.sagittarius.ai:8443' :
+    'apis.stage.sagittarius.ai:8443';
+    // '127.0.0.1:8443'; // uncomment this when debuging
   constructor() {
     const sslCreds = grpc.credentials.createSsl(
       // How to access resources with fs see:
@@ -23,11 +24,11 @@ class Sagi {
       fs.readFileSync(path.join(__static, '/certs/key.pem')),
       fs.readFileSync(path.join(__static, '/certs/cert.pem')),
     );
-    const metadataUpdater = (_, cb) => {
+    const metadataUpdater = (_: any, cb: Function) => {
       const metadata = new grpc.Metadata();
-      metadata.set('uuid', Vue.http.headers.common['X-Application-Token']);
+      metadata.set('uuid', Vue.axios.defaults.headers.common['X-Application-Token']);
       metadata.set('agent', navigator.userAgent);
-      Vue.http.get('https://ip.xindong.com/myip').then((response) => {
+      Vue.axios.get('https://ip.xindong.com/myip', { responseType: 'text' }).then((response: any) => {
         metadata.set('clientip', response.bodyText);
         cb(null, metadata);
       }, () => {
@@ -37,14 +38,6 @@ class Sagi {
     const metadataCreds = grpc.credentials.createFromMetadataGenerator(metadataUpdater);
     const combinedCreds = grpc.credentials.combineChannelCredentials(sslCreds, metadataCreds);
     this.creds = combinedCreds;
-
-    if (process.env.NODE_ENV === 'production') {
-      this.endpoint = 'apis.sagittarius.ai:8443';
-    } else {
-      this.endpoint = 'apis.stage.sagittarius.ai:8443';
-      // this.endpoint = '127.0.0.1:8443'; // uncomment this when debuging
-    }
-    this.transcripts = [];
   }
 
   mediaTranslateRaw(mediaIdentity, languageCode, hints) {
