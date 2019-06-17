@@ -14,7 +14,7 @@ export interface IEmbeddedSubtitleOrigin {
   videoSrc: string;
 }
 
-export { ISubtitleStream, subtitleCodecs } from './embedded';
+export { ISubtitleStream } from './embedded';
 
 export interface IOriginSubtitle {
   origin: string | IEmbeddedSubtitleOrigin;

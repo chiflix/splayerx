@@ -6,18 +6,7 @@ import helpers from '@/helpers';
 import { localLanguageCodeLoader, loadLocalFile } from '../utils';
 import romanize from 'romanize';
 import { i18n } from '@/main';
-import { extname } from 'path';
 
-export enum SubtitleCodec {
-  'ASS (Advanced SSA) subtitle' = SubtitleFormat.AdvancedSubStationAplha,
-  'SubRip subtitle' = SubtitleFormat.SubRip,
-  'WebVTT subtitle' = SubtitleFormat.WebVTT,
-};
-export const subtitleCodecs = [
-  'ASS (Advanced SSA) subtitle', 'ass',
-  'SubRip subtitle', 'srt',
-  'WebVTT subtitle', 'vtt',
-];
 
 interface IExtractSubtitleRequest {
   videoSrc: string;
@@ -81,7 +70,7 @@ export class EmbeddedSubtitle implements IOriginSubtitle {
       videoSrc,
       streamIndex: stream.index,
     };
-    this.format = SubtitleCodec[stream.codec_name];
+    this.format = stream.codec_name as SubtitleFormat;
     this.language = LanguageCode[stream.tags.language || LanguageName.No];
     this.isDefault = !!stream.disposition.default;
     this.name = stream.tags.title || '';
@@ -113,7 +102,7 @@ export class EmbeddedSubtitle implements IOriginSubtitle {
   async load() {
     if (!this.extractedSrc) this.extractedSrc = await embeddedSrcLoader(this.origin.videoSrc, this.origin.streamIndex, this.format);
     const fileContent = await loadLocalFile(this.extractedSrc);
-    switch (extname(this.extractedSrc).slice(1)) {
+    switch (this.format) {
       case SubtitleFormat.AdvancedSubStationAplha:
       case SubtitleFormat.SubStationAlpha:
         return new AssSubtitle(fileContent);
