@@ -3,10 +3,10 @@ import fs from 'fs';
 import grpc from 'grpc';
 import Vue from 'vue';
 
-import healthMsg from 'sagi-api/health/v1/health_pb';
-import healthRpc from 'sagi-api/health/v1/health_grpc_pb';
-import translationMsg from 'sagi-api/translation/v1/translation_pb';
-import translationRpc from 'sagi-api/translation/v1/translation_grpc_pb';
+import { HealthCheckRequest, HealthCheckResponse } from 'sagi-api/health/v1/health_pb';
+import { HealthClient } from 'sagi-api/health/v1/health_grpc_pb';
+import { MediaTranslationRequest, MediaTranslationResponse, TranscriptRequest, TranscriptResponse } from 'sagi-api/translation/v1/translation_pb';
+import { TranslationClient } from 'sagi-api/translation/v1/translation_grpc_pb';
 import { TrainingData } from 'sagi-api/training/v1/training_pb';
 import { TrainngClient } from 'sagi-api/training/v1/training_grpc_pb';
 
@@ -40,175 +40,85 @@ class Sagi {
     this.creds = combinedCreds;
   }
 
-  mediaTranslateRaw(mediaIdentity, languageCode, hints) {
+  mediaTranslate(options: MediaTranslationRequest.AsObject): Promise<MediaTranslationResponse.TranscriptInfo[]> {
+    const { mediaIdentity, languageCode, hints } = options;
+    const client = new TranslationClient(this.endpoint, this.creds);
+    const req = new MediaTranslationRequest();
+    req.setMediaIdentity(mediaIdentity);
+    req.setLanguageCode(languageCode);
+    req.setHints(hints);
     return new Promise((resolve, reject) => {
-      const client = new translationRpc.TranslationClient(this.endpoint, this.creds);
-      const req = new translationMsg.MediaTranslationRequest();
-      req.setMediaIdentity(mediaIdentity);
-      req.setLanguageCode(languageCode);
-      req.setHints(hints);
       client.translateMedia(req, (err, res) => {
-        if (err) {
-          reject(err);
-        }
-        resolve(res);
+        if (err) reject(err)
+        else resolve(res.getResultsList());
       });
     });
   }
 
-  mediaTranslate({ mediaIdentity, languageCode, hints }) {
-    if (!languageCode) {
-      languageCode = 'zh';
-      console.warn('No languageCode provided, falling back to zh.');
-    }
+  getTranscript(options: TranscriptRequest.AsObject): Promise<TranscriptResponse.Cue.AsObject[]> {
+    const { transcriptIdentity } = options;
+    const client = new TranslationClient(this.endpoint, this.creds);
+    const req = new TranscriptRequest();
+    req.setTranscriptIdentity(transcriptIdentity);
     return new Promise((resolve, reject) => {
-      this.mediaTranslateRaw(mediaIdentity, languageCode, hints).then((response) => {
-        const { error, resultsList } = response.toObject();
-        if (error && error.code) reject(error);
-        resolve(resultsList);
-      }, reject);
-    });
-  }
-
-  getTranscriptRaw(transcriptIdentity) {
-    return new Promise((resolve, reject) => {
-      const client = new translationRpc.TranslationClient(this.endpoint, this.creds);
-      const req = new translationMsg.TranscriptRequest();
-      req.setTranscriptIdentity(transcriptIdentity);
       client.transcript(req, (err, res) => {
-        if (err) {
-          reject(err);
-        }
-        resolve(res);
+        if (err) reject(err);
+        else resolve(res.toObject().transcriptsList);
       });
     });
   }
 
-  getTranscript({ transcriptIdentity }) {
+  pushTranscriptWithPayload(options: TrainingData.AsObject) {
+    const { mediaIdentity, languageCode, format, playedTime, totalTime, delay, hints, payload } = options;
+    const client = new TrainngClient(this.endpoint, this.creds);
+    const req = new TrainingData();
+    req.setMediaIdentity(mediaIdentity);
+    req.setLanguageCode(languageCode);
+    req.setFormat(format);
+    req.setPlayedTime(playedTime);
+    req.setTotalTime(totalTime);
+    req.setDelay(delay);
+    req.setHints(hints);
+    req.setPayload(payload);
     return new Promise((resolve, reject) => {
-      this.getTranscriptRaw(transcriptIdentity).then((response) => {
-        const { error, transcriptsList } = response.toObject();
-        if (error && error.code) reject(error);
-        resolve(transcriptsList);
-      }, reject);
-    });
-  }
-
-  pushTranscriptRawWithPayload(
-    mediaIdentity,
-    languageCode,
-    format,
-    playedTime,
-    totalTime,
-    delay,
-    hints,
-    payload,
-  ) {
-    return new Promise((resolve, reject) => {
-      const client = new TrainngClient(this.endpoint, this.creds);
-      const req = new TrainingData();
-      req.setMediaIdentity(mediaIdentity);
-      req.setLanguageCode(languageCode);
-      req.setFormat(format);
-      req.setPlayedTime(playedTime);
-      req.setTotalTime(totalTime);
-      req.setDelay(delay);
-      req.setHints(hints);
-      req.setPayload(payload);
       client.pushData(req, (err, res) => {
         if (err) reject(err);
-        resolve(res);
+        else resolve(res);
       });
     });
   }
 
-  pushTranscriptRawWithTranscriptIdentity(
-    mediaIdentity,
-    languageCode,
-    format,
-    playedTime,
-    totalTime,
-    delay,
-    hints,
-    transcriptIdentity,
-  ) {
+  pushTranscriptWithTranscriptIdentity(options: TrainingData.AsObject) {
+    const { mediaIdentity, languageCode, format, playedTime, totalTime, delay, hints, transcriptIdentity } = options;
+    const client = new TrainngClient(this.endpoint, this.creds);
+    const req = new TrainingData();
+    req.setMediaIdentity(mediaIdentity);
+    req.setLanguageCode(languageCode);
+    req.setFormat(format);
+    req.setPlayedTime(playedTime);
+    req.setTotalTime(totalTime);
+    req.setDelay(delay);
+    req.setHints(hints);
+    req.setTranscriptIdentity(transcriptIdentity);
     return new Promise((resolve, reject) => {
-      const client = new TrainngClient(this.endpoint, this.creds);
-      const req = new TrainingData();
-      req.setMediaIdentity(mediaIdentity);
-      req.setLanguageCode(languageCode);
-      req.setFormat(format);
-      req.setPlayedTime(playedTime);
-      req.setTotalTime(totalTime);
-      req.setDelay(delay);
-      req.setHints(hints);
-      req.setTranscriptIdentity(transcriptIdentity);
       client.pushData(req, (err, res) => {
         if (err) reject(err);
-        resolve(res);
+        else resolve(res);
       });
-    });
-  }
-
-  pushTranscript(transcriptInfo) {
-    const {
-      mediaIdentity,
-      languageCode,
-      format,
-      playedTime,
-      totalTime,
-      delay,
-      hints,
-      transcriptIdentity,
-      payload,
-    } = transcriptInfo;
-    return new Promise((resolve, reject) => {
-      if (!mediaIdentity) reject(new Error('Missing mediaIdentity.'));
-      if (!transcriptIdentity && !payload) reject(new Error('Missing transcriptIdentity or payload.'));
-      if (payload) {
-        this.pushTranscriptRawWithPayload(
-          mediaIdentity,
-          languageCode,
-          format,
-          playedTime,
-          totalTime,
-          delay,
-          hints,
-          payload,
-        ).then((res) => {
-          const resAsObject = res.toObject();
-          if (resAsObject.code) reject(resAsObject);
-          resolve(resAsObject);
-        });
-      } else {
-        this.pushTranscriptRawWithTranscriptIdentity(
-          mediaIdentity,
-          languageCode,
-          format,
-          playedTime,
-          totalTime,
-          delay,
-          hints,
-          transcriptIdentity,
-        ).then((res) => {
-          const resAsObject = res.toObject();
-          if (resAsObject.code) reject(resAsObject);
-          resolve(resAsObject);
-        });
-      }
     });
   }
 
   // check sagi-api health, return UNKNOWN(0), SERVING(1) or XXXXX
   healthCheck() {
+    const client = new HealthClient(this.endpoint, this.creds);
     return new Promise((resolve, reject) => {
-      const client = new healthRpc.HealthClient(this.endpoint, this.creds);
-      client.check(new healthMsg.HealthCheckRequest(), (err, response) => {
-        if (err) {
-          reject(err);
-        } else {
-          console.log(`sagi version ${response.getVersion()}`);
-          resolve(response.getStatus());
+      client.check(new HealthCheckRequest(), (err, response) => {
+        if (err) reject(err);
+        else {
+          const status = response.getStatus();
+          console.log(`[Sagi]Version: ${response.getVersion()}, Status: ${status}.`);
+          if (status !== HealthCheckResponse.ServingStatus.SERVING) reject(HealthCheckResponse.ServingStatus[status]);
+          else resolve({ status, version: response.getVersion() });
         }
       });
     });
