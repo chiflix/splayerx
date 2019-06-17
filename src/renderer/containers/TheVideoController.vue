@@ -124,8 +124,8 @@ import SubtitleControl from '@/components/PlayingView/SubtitleControl.vue';
 import PlaylistControl from '@/components/PlayingView/PlaylistControl.vue';
 import TheTimeCodes from '@/components/PlayingView/TheTimeCodes.vue';
 import TheProgressBar from '@/containers/TheProgressBar.vue';
+import RecentPlaylist from '@/containers/RecentPlaylist.vue';
 import NotificationBubble from '@/components/NotificationBubble.vue';
-import RecentPlaylist from '@/components/PlayingView/RecentPlaylist.vue';
 import { videodata } from '@/store/video';
 
 const { mapGetters: inputMapGetters } = createNamespacedHelpers('InputPlugin');

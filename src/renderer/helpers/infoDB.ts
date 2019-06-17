@@ -1,6 +1,6 @@
 import { openDB, IDBPDatabase } from 'idb';
 import { INFO_DATABASE_NAME, INFO_SCHEMAS, INFODB_VERSION, RECENT_OBJECT_STORE_NAME, VIDEO_OBJECT_STORE_NAME } from '@/constants';
-import Helpers from '@/helpers';
+import { mediaQuickHash } from '@/libs/utils';
 import addLog from './index';
 import { RawPlaylistItem, PlaylistItem, MediaItem } from '@/interfaces/IDB';
 
@@ -111,7 +111,10 @@ export class InfoDB {
     const playlistItem = await this.get('recent-played', id);
     /* eslint-disable */
     for (const item of playlistItem.items) {
-      await this.delete('media-item', item);
+      try {
+        // skip if item not exist
+        await this.delete('media-item', item);
+      } catch(err) {}
     }
     return this.delete('recent-played', id);
   }
@@ -130,7 +133,7 @@ export class InfoDB {
     const db = await this.getDB();
     if (videos.length > 1) {
       for (const videoPath of videos) {
-        const quickHash = await Helpers.methods.mediaQuickHash(videoPath);
+        const quickHash = await mediaQuickHash(videoPath);
         const data = {
           quickHash,
           type: 'video',
@@ -142,7 +145,7 @@ export class InfoDB {
         playlist.hpaths.push(`${quickHash}-${videoPath}`);
       }
     } else if (videos.length === 1) {
-      const quickHash: string = await Helpers.methods.mediaQuickHash(videos[0]);
+      const quickHash: string = await mediaQuickHash(videos[0]);
       const playlistRecord: PlaylistItem = await this.get('recent-played', 'hpaths', [`${quickHash}-${videos[0]}`]);
       if (playlistRecord) {
         playlistRecord.lastOpened = Date.now();
