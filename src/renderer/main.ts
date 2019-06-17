@@ -30,7 +30,7 @@ import { windowRectService } from '@/services/window/WindowRectService';
 import helpers from '@/helpers';
 import { hookVue } from '@/kerning';
 import { Video as videoActions, Subtitle as subtitleActions } from '@/store/actionTypes';
-import addLog from '@/helpers/index';
+import { log } from '@/libs/Log';
 import asyncStorage from '@/helpers/asyncStorage';
 import { videodata } from '@/store/video';
 import NotificationBubble, { addBubble } from '../shared/notificationControl';
@@ -55,10 +55,10 @@ function getSystemLocale() {
 Vue.http = Vue.prototype.$http = axios;
 Vue.config.productionTip = false;
 Vue.config.warnHandler = (warn) => {
-  addLog.methods.addLog('warn', warn);
+  log.info('render/main', warn);
 };
 Vue.config.errorHandler = (err) => {
-  addLog.methods.addLog('error', err);
+  log.error('render/main', err);
 };
 Vue.directive('fade-in', {
   bind(el: HTMLElement, binding: any) {
@@ -615,10 +615,7 @@ new Vue({
                 const options = { types: ['window'], thumbnailSize: { width: this.winWidth, height: this.winHeight } };
                 electron.desktopCapturer.getSources(options, (error, sources) => {
                   if (error) {
-                    this.addLog('info', {
-                      message: 'Snapshot failed .',
-                      code: SNAPSHOT_FAILED,
-                    });
+                    log.info('render/main', 'Snapshot failed .');
                     addBubble(SNAPSHOT_FAILED, this.$i18n);
                   }
                   sources.forEach((source) => {
@@ -641,17 +638,11 @@ new Vue({
                               },
                             );
                           } else {
-                            this.addLog('info', {
-                              message: 'Snapshot failed .',
-                              code: SNAPSHOT_FAILED,
-                            });
+                            log.info('render/main', 'Snapshot failed .');
                             addBubble(SNAPSHOT_FAILED, this.$i18n);
                           }
                         } else {
-                          this.addLog('info', {
-                            message: 'Snapshot success .',
-                            code: SNAPSHOT_SUCCESS,
-                          });
+                          log.info('render/main', 'Snapshot success .');
                           addBubble(SNAPSHOT_SUCCESS, this.$i18n);
                         }
                       });
@@ -1070,7 +1061,7 @@ new Vue({
       })
         .catch((err: Error) => {
           this.menuOperationLock = false;
-          this.addLog('error', err);
+          log.error('render/main', err);
         });
     },
     updateRecentItem(key: any, value: any) {
@@ -1359,7 +1350,7 @@ new Vue({
     // TODO: Setup user identity
     this.$storage.get('user-uuid', (err: Error, userUUID: string) => {
       if (err || Object.keys(userUUID).length === 0) {
-        err && this.addLog('error', err);
+        err && log.error('render/main', err);
         userUUID = uuidv4();
         this.$storage.set('user-uuid', userUUID);
       }

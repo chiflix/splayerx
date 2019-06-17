@@ -2,7 +2,7 @@
   <div class="nextVideo">
     <div class="nextVideo__plane">
       <div
-        :style="{ width: progress + '%' }"
+        :style="{ width: `${(progress/100)*217}px` }"
         class="nextVideo__progress"
       >
         <div class="progressGradient" />

@@ -37,30 +37,35 @@ if (checkPathExistSync(defaultPath) || mkdirSync(defaultPath)) {
   logger = getLogger(time)
 }
 export default class Log implements ILog {
-  info(label: string, message: string): void
-  info(label: string, message: string, stack: string | undefined): void
-  info(label: string, message: string, stack?: string | undefined): void {
+  private log(level: string, message: string, stack?: string | undefined) {
     try {
       logger.log({
         time: new Date().toISOString(),
-        level: 'INFO',
+        level,
         message: message,
         stack: stack
       });
     } catch (error) {
       const date = new Date();
       const time = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
-      logger = getLogger(time)
+      logger = getLogger(time);
     }
+  }
+  info(label: string, message: string): void
+  info(label: string, message: string, stack: string | undefined): void
+  info(label: string, message: string, stack?: string | undefined): void {
+    this.log('info', message, stack);
   }
   error(label: string, message: string | Error): void {
     if (message instanceof Error) {
-      this.info(label, message.message, message.stack)
+      this.log('error', message.message, message.stack);
     } else {
-      this.info(label, message)
+      this.log('error', message);
     }
     if (process.env.NODE_ENV !== 'development') {
       Sentry.captureException(message);
     }
   }
 }
+
+export const log = new Log();
