@@ -56,7 +56,7 @@ async function embeddedSrcLoader(videoSrc: string, streamIndex: number, format: 
   });
 }
 
-interface ISubtitleStream {
+export interface ISubtitleStream {
   codec_type: string;
   codec_name: string;
   index: number;

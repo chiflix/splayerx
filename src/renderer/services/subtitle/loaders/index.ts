@@ -14,6 +14,8 @@ export interface IEmbeddedSubtitleOrigin {
   videoSrc: string;
 }
 
+export { ISubtitleStream, subtitleCodecs } from './embedded';
+
 export interface IOriginSubtitle {
   origin: string | IEmbeddedSubtitleOrigin;
   format: SubtitleFormat;
@@ -22,3 +24,7 @@ export interface IOriginSubtitle {
   computeName(subtitleList?: (OnlineSubtitle | EmbeddedSubtitle)[], locale?: LanguageCode): Promise<string>;
   load(): Promise<IRawSubtitle | undefined>
 }
+
+export { EmbeddedSubtitle } from './embedded';
+export { LocalSubtitle } from './local';
+export { OnlineSubtitle } from './online';
