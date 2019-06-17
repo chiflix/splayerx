@@ -113,7 +113,7 @@ Vue.use(InputPlugin, {
 });
 // Vue.use(InputPlugin);
 // i18n and its plugin
-const i18n = new VueI18n({
+export const i18n = new VueI18n({
   locale: getSystemLocale(), // set locale
   messages, // set locale messages
 });
