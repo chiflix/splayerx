@@ -8,7 +8,7 @@ import { ipcRenderer } from 'electron';
 import { castArray, flatten } from 'lodash';
 import helpers from '@/helpers';
 import Sagi from '@/helpers/sagi';
-import { normalizeCode } from '@/helpers/language';
+import { normalizeCode } from '@/libs/language';
 import languageLoader from '@/helpers/subtitle/language';
 import { SubtitleError, ErrorCodes } from './errors';
 

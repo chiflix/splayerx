@@ -129,7 +129,7 @@
 import electron from 'electron';
 import { setAsDefaultApp } from '@/../shared/system';
 import Icon from '@/components/BaseIconContainer.vue';
-import { codeToLanguageName } from '@/helpers/language';
+import { codeToLanguageName } from '@/libs/language';
 import BaseCheckBox from './BaseCheckBox.vue';
 
 export default {

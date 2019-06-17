@@ -46,7 +46,7 @@ import {
   castArray,
   get,
 } from 'lodash';
-import { codeToLanguageName } from '@/helpers/language';
+import { codeToLanguageName } from '@/libs/language';
 import {
   searchForLocalList, fetchOnlineList, retrieveEmbeddedList,
   storeLanguagePreference,

@@ -1,4 +1,4 @@
-import { LanguageNames } from "@/libs/language/allLanguages";
+import { LanguageCode } from "@/libs/language";
 import { SubtitleType } from "./ISubtitle";
 
 export type RawPlaylistItem = {
@@ -22,10 +22,10 @@ export type PlaylistItem = {
   playedIndex: number,
 }
 
-export type SubtitlePreferenceLanguage = [LanguageNames, LanguageNames];
+export type SubtitlePreferenceLanguage = [LanguageCode, LanguageCode];
 export type SubtitlePreferenceListItem = {
   id: number,
-  language: LanguageNames,
+  language: LanguageCode,
   rank: number,
   src: string,
   type: SubtitleType,
