@@ -1,13 +1,11 @@
-import {
-  dirname, extname, basename, join,
-} from 'path';
-import { readdir } from 'fs';
-import { ipcRenderer, Event } from 'electron';
-import Sagi from '@/helpers/sagi';
-import helpers from '@/helpers';
 import { LocalSubtitle, OnlineSubtitle, EmbeddedSubtitle, ISubtitleStream, subtitleCodecs } from './loaders';
+import { dirname, basename, extname, join } from 'path';
+import { readdir } from 'fs';
+import { LanguageCode } from '@/libs/language';
+import { ipcRenderer, Event } from 'electron';
+import helpers from '@/helpers';
+import Sagi from '@/libs/sagi';
 import { subtitleExtensions } from './parsers';
-import { LanguageName } from '@/libs/language';
 
 const { mediaQuickHash: calculateMediaIdentity } = helpers.methods;
 
@@ -36,14 +34,14 @@ export function searchForLocalList(videoSrc: string): Promise<LocalSubtitle[]> {
   });
 }
 
-export function fetchOnlineList(videoSrc: string, languageCode: LanguageName, hints: string): Promise<OnlineSubtitle[]> {
+export function fetchOnlineList(videoSrc: string, languageCode: LanguageCode, hints: string): Promise<OnlineSubtitle[]> {
   return new Promise((resolve, reject) => {
     calculateMediaIdentity(videoSrc)
-      .then(mediaIdentity => Promise.race([
-        Sagi.mediaTranslate({ mediaIdentity, languageCode, hints }),
-        new Promise((resolve, reject) => setTimeout(() => reject(), 10000)),
-      ]))
-      .then(response => )
+      .then(mediaIdentity => Sagi.mediaTranslate({
+        mediaIdentity, languageCode, hints,
+        format: '', startTime: 0, // tempoary useless params according to server-side
+      }))
+      .then(response => response.map(transcriptInfo => new OnlineSubtitle(transcriptInfo)))
       .catch(err => reject(err));
   });
 }
