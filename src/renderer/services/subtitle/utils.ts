@@ -1,9 +1,7 @@
-import { IDialogueTag, SubtitleFormat } from './parsers';
+import { IDialogueTag } from './parsers';
 import { detect } from 'chardet';
 import { encodingExists, decode } from 'iconv-lite';
 import { open, read, close, readFile } from 'fs-extra';
-import languageLoader from './language';
-import { LanguageCode } from '@/libs/language';
 
 /**
  * Cue tags getter for SubRip, SubStation Alpha and Online Transcript subtitles.
@@ -62,28 +60,24 @@ export async function detectEncoding(buffer: Buffer) {
   throw new Error(`Unsupported encoding: ${encoding}.`);
 }
 
-/**
- * detect language of a local subtitle file
- * @param {string} path - path of the local subtitle file
- * @param {string} format - format of the subtitle, srt ass vtt etc.
- */
-export async function localLanguageCodeLoader(path: string, format: SubtitleFormat, encoding?: string): Promise<LanguageCode> {
+export async function extractTextFragment(path: string, encoding?: string) {
   try {
     const fd = await open(path, 'r');
-    let fileEncoding = encoding || '';
-    if (!encodingExists(fileEncoding)) {
+    if (!encoding) {
       const encodingBufferSize = 4096;
       const encodingBuffer = Buffer.alloc(4096);
       await read(fd, encodingBuffer, 0, encodingBufferSize, 0);
-      fileEncoding = await detectEncoding(encodingBuffer);
+      encoding = await detectEncoding(encodingBuffer);
     }
+    if (!encodingExists(encoding)) throw new Error(`Unsupported encoding ${encoding}.`);
+
     const languageBufferSize = 4096 * 20;
     const languageBuffer = Buffer.alloc(languageBufferSize);
     await read(fd, languageBuffer, 0, languageBufferSize, 0);
     await close(fd);
-    return languageLoader(decode(languageBuffer, fileEncoding), format)[0];
+    return decode(languageBuffer, encoding).replace(/\r?\n|\r/g, '\n');
   } catch (e) {
-    return LanguageCode.No;
+    return '';
   }
 }
 
