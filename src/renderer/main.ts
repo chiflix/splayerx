@@ -1419,13 +1419,18 @@ new Vue({
               }, 1000);
             }
             if (this.wheelDirection === 'vertical') {
+              let step = Math.abs(e.deltaY) * 0.06;
+              // in windows if wheel setting more lines per step, make it limited.
+              if (process.platform !== 'darwin' && step > 6) {
+                step = 6;
+              }
               if (
                 (process.platform !== 'darwin' && !this.reverseScrolling) ||
                 (process.platform === 'darwin' && this.reverseScrolling)
               ) {
                 this.$store.dispatch(
                   e.deltaY < 0 ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
-                  Math.abs(e.deltaY) * 0.06,
+                  step,
                 );
               } else if (
                 (process.platform === 'darwin' && !this.reverseScrolling) ||
@@ -1433,7 +1438,7 @@ new Vue({
               ) {
                 this.$store.dispatch(
                   e.deltaY > 0 ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
-                  Math.abs(e.deltaY) * 0.06,
+                  step,
                 );
               }
             }

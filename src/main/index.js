@@ -393,6 +393,10 @@ function registerMainWindowEvent(mainWindow) {
     };
     if (!preferenceWindow) {
       preferenceWindow = new BrowserWindow(preferenceWindowOptions);
+      // 如果播放窗口顶置，打开首选项也顶置
+      if (mainWindow.isAlwaysOnTop()) {
+        preferenceWindow.setAlwaysOnTop(true);
+      }
       preferenceWindow.loadURL(`${preferenceURL}`);
       preferenceWindow.on('closed', () => {
         preferenceWindow = null;
