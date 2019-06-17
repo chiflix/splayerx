@@ -1,26 +1,27 @@
 import franc from 'franc';
 import { isSimplified } from 'traditional-or-simplified';
-import { normalizeCode } from '../language';
+import { normalizeCode, LanguageCode } from '@/libs/language';
+import { SubtitleFormat } from './parsers';
 
-export default function fragmentToLanguage(fragment, type) {
+export default function fragmentToLanguageCode(fragment: string, format: SubtitleFormat): LanguageCode[] {
   fragment = fragment.replace(/\r?\n|\r/g, '\n');
-  const dialogueNomalizer = (fragment, textRegex) => {
+  const dialogueNomalizer = (fragment: string, textRegex: RegExp) => {
     const texts = fragment.replace(textRegex, '');
     let textsWithIdentifier;
     const identifier = '\ns\n';
-    if (type === 'ass') textsWithIdentifier = texts.replace(/\n/g, identifier);
+    if (format === SubtitleFormat.AdvancedSubStationAplha) textsWithIdentifier = texts.replace(/\n/g, identifier);
     else textsWithIdentifier = texts.replace(/(?<=\S)\n{2,}(?=\S)/g, identifier);
     const dialogues = textsWithIdentifier.split(identifier);
     return dialogues.slice(2, dialogues.length - 2);
   };
-  const dialoguesSplitter = (dialogues, splitterRegex) => {
-    dialogues = dialogues.map(dialogue => dialogue.split(splitterRegex));
+  const dialoguesSplitter = (dialogues: string[], splitterRegex:RegExp) => {
+    const splittedDialogues = dialogues.map(dialogue => dialogue.split(splitterRegex));
 
-    const languageCount = dialogues
+    const languageCount = splittedDialogues
       .map(({ length }) => length)
       .some(length => length > 1) ? 2 : 1;
 
-    const result = [];
+    const result: string[] = [];
     for (let i = 0; i < languageCount; i += 1) {
       const resultStr = dialogues.reduce((resultStr, currentDialogue) => {
         if (currentDialogue.length < languageCount) return resultStr;
@@ -28,26 +29,24 @@ export default function fragmentToLanguage(fragment, type) {
       }, '');
       result.push(resultStr);
     }
-    return result.map(franc).map((iso6393code, index) => {
+    return result.map(str => franc(str)).map((iso6393code, index) => {
       if (iso6393code === 'cmn') {
         try {
-          return isSimplified(result[index]) ? 'zh-CN' : 'zh-TW';
+          return isSimplified(result[index]) ? LanguageCode.简体中文 : LanguageCode.繁體中文;
         } catch (e) {
-          return 'zh-CN';
+          return LanguageCode.简体中文;
         }
       }
       return normalizeCode(iso6393code);
     });
   };
-  let dialogues;
+  let dialogues: string[] = [];
   let splitterRegex = /\n/g;
-  switch (type.toLowerCase()) {
+  switch (format.toLowerCase()) {
     default:
       break;
-    case 'ass':
-    case 'advanced substation alpha':
-    case 'ssa':
-    case 'substation alpha': {
+    case SubtitleFormat.AdvancedSubStationAplha:
+    case SubtitleFormat.SubStationAlpha: {
       const dialogueMatchRegex = /^Dialogue.*/gm;
       let matched = dialogueMatchRegex.exec(fragment);
       let resultFragment = '';
@@ -60,14 +59,12 @@ export default function fragmentToLanguage(fragment, type) {
       splitterRegex = /\\+n\s?/gi;
       break;
     }
-    case 'srt':
-    case 'subrip': {
+    case SubtitleFormat.SubRip: {
       const textRegex = /\d+\n.*\n|<\/?\w>|{.*}/g;
       dialogues = dialogueNomalizer(fragment, textRegex);
       break;
     }
-    case 'vtt':
-    case 'webvtt': {
+    case SubtitleFormat.WebVTT: {
       const textRegex = /(\d+|[\d\s:.\->]{29})\n/g;
       dialogues = dialogueNomalizer(fragment, textRegex);
       break;
