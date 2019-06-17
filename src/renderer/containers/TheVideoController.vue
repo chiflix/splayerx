@@ -46,7 +46,7 @@
       :attached-shown="attachedShown"
       :handle-mouse-up="togglePlay"
       @update:playbutton-state="updatePlayButtonState"
-      class="play-button no-drag"
+      :class="`${showAllWidgets ? 'play-button no-drag' : 'play-button'}`"
     />
     <volume-indicator
       ref="volumeIndicator"
@@ -330,6 +330,9 @@ export default {
       this.updateMinimumSize();
     },
     isFullScreen(val: boolean) {
+      this.preFullScreen = process.platform === 'darwin'
+      && this.intrinsicWidth / this.intrinsicHeight > window.screen.width / window.screen.height
+        ? val : false;
       if (this.touchBar) {
         if (!val) {
           this.touchBar.escapeItem.icon = this.createIcon('touchBar/fullscreen.png');
@@ -357,9 +360,6 @@ export default {
         this.progressTriggerStopped = false;
       }, this.progressDisappearDelay);
     });
-    if (process.platform === 'darwin') {
-      this.preFullScreen = this.isFullScreen;
-    }
     this.createTouchBar();
     this.UIElements = this.getAllUIComponents(this.$refs.controller);
     this.UIElements.forEach((value: any) => {
@@ -400,35 +400,22 @@ export default {
       this.dragOver = false;
     });
     this.$bus.$on('to-fullscreen', () => {
-      const { intrinsicWidth, intrinsicHeight } = this;
-      const { width, height } = window.screen;
-      if (process.platform === 'darwin'
-        && intrinsicWidth / intrinsicHeight > width / height) {
-        this.preFullScreen = true;
-      }
       this.handleVolumeUIWhenFullScreenChanged();
     });
     this.$bus.$on('toggle-fullscreen', () => {
-      const { intrinsicWidth, intrinsicHeight } = this;
-      const { width, height } = window.screen;
-      if (process.platform === 'darwin'
-        && intrinsicWidth / intrinsicHeight > width / height) {
-        this.preFullScreen = !this.preFullScreen;
-      }
       this.handleVolumeUIWhenFullScreenChanged();
     });
     this.$bus.$on('off-fullscreen', () => {
-      const { intrinsicWidth, intrinsicHeight } = this;
-      const { width, height } = window.screen;
-      if (process.platform === 'darwin'
-        && intrinsicWidth / intrinsicHeight > width / height) {
-        this.preFullScreen = false;
-      }
       this.handleVolumeUIWhenFullScreenChanged();
     });
     document.addEventListener('keydown', this.handleKeydown);
     document.addEventListener('keyup', this.handleKeyup);
     document.addEventListener('wheel', this.handleWheel);
+  },
+  destroyed() {
+    document.removeEventListener('keydown', this.handleKeydown);
+    document.removeEventListener('keyup', this.handleKeyup);
+    document.removeEventListener('wheel', this.handleWheel);
   },
   methods: {
     ...mapActions({

@@ -1,145 +1,173 @@
-.subtitle-style0 {
+.subtitle-alignment1 {
+  left: 20px;
+  position: absolute;
+  bottom: 5.55556%;
+  white-space: pre;
+  text-align: left;
+}
+.subtitle-alignment2 {
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: pre;
+  text-align: center;
+  bottom: 5.55556%;
+  position: absolute;
+}
+.subtitle-alignment3 {
+  right: 20px;
+  position: absolute;
+  bottom: 5.55556%;
+  white-space: pre;
+  text-align: right;
+}
+.subtitle-alignment4 {
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  white-space: pre;
+  text-align: left;
+  position: absolute;
+}
+.subtitle-alignment5 {
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  white-space: pre;
+  text-align: center;
+  position: absolute;
+}
+.subtitle-alignment6 {
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  white-space: pre;
+  text-align: right;
+  position: absolute;
+}
+.subtitle-alignment7 {
+  left: 20px;
+  white-space: pre;
+  text-align: left;
+  position: absolute;
+  top: 5.55556%;
+}
+.subtitle-alignment8 {
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: pre;
+  text-align: center;
+  position: absolute;
+  top: 5.55556%;
+}
+.subtitle-alignment9 {
+  right: 20px;
+  white-space: pre;
+  text-align: right;
+  position: absolute;
+  top: 5.55556%;
+}
+
+.subtitle-style, .subtitle-style0, .subtitle-style1, .subtitle-style2, .subtitle-style3, .subtitle-style4 {
+  // width: 100%;
+  display: block;
+  min-width: 100%;
+  width: max-content;
+  outline: none;
+  border: none;
+}
+
+
+.subtitle-style {
   font-family: $font-normal;
   font-size: 9px;
   letter-spacing: 0.3px;
   opacity: 1;
   color: white;
   font-weight: 400;
+  background-color: transparent;
   -webkit-font-smoothing: antialiased;
 }
-.subtitle-border-style0 {
+
+.subtitle-style0 {
+  // padding: 0px;
   font-family: $font-normal;
   font-size: 9px;
   letter-spacing: 0.3px;
-  padding: 0px;
-  -webkit-text-fill-color: transparent;
-  -webkit-text-stroke: 0.5px #777;
+  // white-space: pre-line;
+  // word-break: break-all;
   font-weight: 400;
-  background-color: transparent;
+  opacity: 1;
+  color: white;
+  background-color: #777;
   text-shadow: 0px 0.7px 0.5px rgba(0,0,0,.5);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: white;
+  -webkit-text-stroke: 0.5px transparent;
   -webkit-font-smoothing: antialiased;
 }
 
 .subtitle-style1 {
+  // padding: 0px;
   font-family: $font-normal;
   font-size: 9px;
   letter-spacing: 0.3px;
+  // white-space: pre-line;
+  // word-break: break-all;
+  font-weight: 400;
   opacity: 1;
   color: white;
-  font-weight: 400;
-  -webkit-font-smoothing: antialiased;
-}
-.subtitle-border-style1 {
-  font-family: $font-normal;
-  font-size: 9px;
-  letter-spacing: 0.3px;
-  padding: 0px;
-  -webkit-text-fill-color: transparent;
-  -webkit-text-stroke: 1.3px #444;
-  font-weight: 400;
-  background-color: transparent;
+  background-color: #444;
   text-shadow: 0px 1px 1px #333;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: white;
+  -webkit-text-stroke: 1.3px transparent;
   -webkit-font-smoothing: antialiased;
 }
 
 
 .subtitle-style2 {
+  // padding: 0px;
   font-family: $font-normal;
   font-size: 9px;
   letter-spacing: 0.3px;
+  // white-space: pre-line;
+  // word-break: break-all;
+  font-weight: 400;
   opacity: 1;
   color: #fffc00;
-  font-weight: 400;
-  -webkit-font-smoothing: antialiased;
-}
-.subtitle-border-style2 {
-  font-family: $font-normal;
-  font-size: 9px;
-  letter-spacing: 0.3px;
-  padding: 0px;
-  -webkit-text-fill-color: transparent;
-  font-weight: 400;
   background-color: transparent;
   text-shadow: 0px 0.5px 0.5px #555;
   -webkit-font-smoothing: antialiased;
 }
 
 .subtitle-style3 {
+  // padding: 0px;
   font-family: $font-yuanti;
   font-size: 9px;
   letter-spacing: 1px;
+  // white-space: pre-line;
+  // word-break: break-all;
+  font-weight: 800;
   opacity: 1;
   color: #fff;
-  font-weight: 800;
-  -webkit-font-smoothing: antialiased;
-}
-.subtitle-border-style3 {
-  font-family: $font-yuanti;
-  font-size: 9px;
-  letter-spacing: 1px;
-  padding: 0px;
-  -webkit-text-fill-color: transparent;
-  -webkit-text-stroke: 1.6px #009be6;
-  font-weight: 800;
-  background-color: transparent;
+  background-color: #009be6;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: white;
+  -webkit-text-stroke: 1.6px transparent;
   -webkit-font-smoothing: antialiased;
 }
 
 .subtitle-style4 {
+  // padding: 0px;
   font-family: $font-normal;
   font-size: 9px;
   letter-spacing: 0.3px;
+  // white-space: pre-line;
+  // word-break: break-all;
   opacity: 1;
   color: #fff;
   font-weight: 400;
-  -webkit-font-smoothing: antialiased;
-  padding: 0 5px;
-}
-.subtitle-border-style4 {
-  font-family: $font-normal;
-  font-size: 9px;
-  letter-spacing: 0.3px;
-  -webkit-text-fill-color: transparent;
-  font-weight: 400;
-  -webkit-font-smoothing: antialiased;
   background-color: rgba(0, 0, 0, .5);
+  -webkit-font-smoothing: antialiased;
   padding: 0 5px;
 }
-
-.subtitle-alignment1 {
-  left: 20px;
-}
-.subtitle-alignment2 {
-  left: 50%;
-  transform: translateX(-50%);
-}
-.subtitle-alignment3 {
-  right: 20px;
-}
-.subtitle-alignment4 {
-  left: 20px;
-  top: 50%;
-  transform: translateY(-50%);
-}
-.subtitle-alignment5 {
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-}
-.subtitle-alignment6 {
-  right: 20px;
-  top: 50%;
-  transform: translateY(-50%);
-}
-.subtitle-alignment7 {
-  left: 20px;
-}
-.subtitle-alignment8 {
-  left: 50%;
-  transform: translateX(-50%);
-}
-.subtitle-alignment9 {
-  right: 20px;
-}
-
-

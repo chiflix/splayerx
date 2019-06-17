@@ -5,25 +5,9 @@
   >
     <subtitle-renderer
       ref="subtitleRenderer"
-      v-if="currentFirstSubtitleId && duration"
-      :key="originSrc+currentFirstSubtitleId"
-      :subtitle-instance="firstSubtitleInstance"
-      :is-first-sub="true"
-      :lines-num="linesNum"
-      :first-lines-num.sync="firstLinesNum"
-      :first-tags.sync="firstTags"
-      :tags="tags"
-    />
-    <subtitle-renderer
-      ref="subtitleRenderer"
-      v-if="currentSecondSubtitleId && duration && enabledSecondarySub"
-      :key="originSrc+currentSecondSubtitleId"
-      :subtitle-instance="secondSubtitleInstance"
-      :is-first-sub="false"
-      :first-lines-num="firstLinesNum"
-      :lines-num.sync="linesNum"
-      :tags.sync="tags"
-      :first-tags="firstTags"
+      :key="originSrc"
+      :first-instance="firstSubtitleInstance"
+      :secondary-instance="secondSubtitleInstance"
     />
   </div>
 </template>

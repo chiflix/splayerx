@@ -28,6 +28,10 @@ const state = {
   subToTop: false,
   isFirstSubtitle: true,
   enabledSecondarySub: false,
+  currentCues: [
+    { subPlayResX: 720, subPlayResY: 405, cues: [] },
+    { subPlayResX: 720, subPlayResY: 405, cues: [] },
+  ],
 };
 
 const getters = {
@@ -71,6 +75,7 @@ const getters = {
   subToTop: state => state.subToTop,
   isFirstSubtitle: state => state.isFirstSubtitle,
   enabledSecondarySub: state => state.enabledSecondarySub,
+  currentCues: state => state.currentCues,
 };
 
 const mutations = {
