@@ -42,6 +42,7 @@ export interface IParsedSubtitle {
   dialogues: IDialogue[];
 }
 
+export const subtitleExtensions = ['ass', 'srt', 'ssa', 'vtt'];
 export enum SubtitleFormat {
   AdvancedSubStationAplha = 'ass',
   SubRip = 'srt',
