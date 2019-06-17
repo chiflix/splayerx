@@ -1,27 +1,22 @@
-import { IRawSubtitle, IDialogue } from './index';
-import { parse, toMS } from 'subtitle';
+import { IRawSubtitle, IDialogue, SagiSubtitlePayload } from './index';
 import { tagsGetter } from '../utils';
 
-type ParsedSubtitle = {
-  start: string;
-  end: string;
-  text: string;
-}[];
-
-export class SrtSubtitle implements IRawSubtitle {
-  payload = '';
-  constructor(srtPayload: string) {
-    this.payload = srtPayload;
+export class SagiSubtitle implements IRawSubtitle {
+  payload: SagiSubtitlePayload;
+  constructor(sagiPayload: SagiSubtitlePayload) {
+    this.payload = sagiPayload;
   }
   private baseTags = { alignment: 2, pos: undefined };
-  private normalizer(parsedSubtitle: ParsedSubtitle) {
+  private normalizer(parsedSubtitle: SagiSubtitlePayload) {
     const finalDialogues: IDialogue[] = [];
-    parsedSubtitle.forEach((subtitle) => {
+    parsedSubtitle.forEach(({ startTime, endTime, text }) => {
       finalDialogues.push({
-        start: toMS(subtitle.start) / 1000,
-        end: toMS(subtitle.end) / 1000,
-        tags: tagsGetter(subtitle.text, this.baseTags),
-        text: subtitle.text.replace(/\{[^{}]*\}/g, '').replace(/[\\/][Nn]|\r?\n|\r/g, '\n'),
+        start: startTime,
+        end: endTime,
+        text: text
+          .replace(/[\\/][Nn]|\r?\n|\r/g, '\n') // replace soft and hard line breaks with \n
+          .replace(/\\h/g, ' '), // replace hard space with space
+        tags: tagsGetter(text, this.baseTags),
       });
     });
     return {
@@ -30,6 +25,6 @@ export class SrtSubtitle implements IRawSubtitle {
     };
   }
   async parse() {
-    return this.normalizer(parse(this.payload));
+    return this.normalizer(this.payload);
   }
 }
