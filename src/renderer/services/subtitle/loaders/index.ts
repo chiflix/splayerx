@@ -1,11 +1,12 @@
 import { SubtitleFormat, IRawSubtitle } from '../parsers';
-import { LanguageNames } from '@/libs/language/allLanguages';
+import { LanguageCode } from '@/libs/language';
+import { OnlineSubtitle } from './online';
+import { EmbeddedSubtitle } from './embedded';
 
 export enum SubtitleType {
   Online,
   Embedded,
   Local,
-  Modified,
 }
 
 export interface IEmbeddedSubtitleOrigin {
@@ -17,6 +18,7 @@ export interface IOriginSubtitle {
   origin: string | IEmbeddedSubtitleOrigin;
   format: SubtitleFormat;
   type: SubtitleType;
-  language?: LanguageNames;
-  payload: IRawSubtitle;
+  computeLang(): Promise<LanguageCode>;
+  computeName(subtitleList?: (OnlineSubtitle | EmbeddedSubtitle)[], locale?: LanguageCode): Promise<string>;
+  load(): Promise<IRawSubtitle | undefined>
 }
