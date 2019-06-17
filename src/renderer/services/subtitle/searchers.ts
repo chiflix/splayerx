@@ -1,11 +1,12 @@
-import { LocalSubtitle, OnlineSubtitle, EmbeddedSubtitle, ISubtitleStream, subtitleCodecs } from './loaders';
-import { dirname, basename, extname, join } from 'path';
+import { LocalSubtitle, OnlineSubtitle, EmbeddedSubtitle, ISubtitleStream } from './loaders';
+import { dirname, extname, basename, join } from 'path';
+import { pathToFormat } from './utils';
 import { readdir } from 'fs';
 import { LanguageCode } from '@/libs/language';
 import { ipcRenderer, Event } from 'electron';
 import helpers from '@/helpers';
 import Sagi from '@/libs/sagi';
-import { subtitleExtensions } from './parsers';
+import { SubtitleFormat } from './parsers';
 
 const { mediaQuickHash: calculateMediaIdentity } = helpers.methods;
 
@@ -14,10 +15,9 @@ export function searchForLocalList(videoSrc: string): Promise<LocalSubtitle[]> {
     const videoDir = dirname(videoSrc);
     const videoBasename = basename(videoSrc, extname(videoSrc));
     const isValidSubtitle = (filename: string) => {
-      const subtitleExtname = extname(filename).slice(1);
-      const subtitleBasename = basename(filename, subtitleExtname);
+      const subtitleBasename = basename(filename, extname(filename).slice(1));
       return (
-        subtitleExtensions.includes(subtitleExtname) &&
+        pathToFormat(filename) &&
         subtitleBasename.toLowerCase() === videoBasename.toLowerCase()
       )
     };
@@ -41,7 +41,7 @@ export function fetchOnlineList(videoSrc: string, languageCode: LanguageCode, hi
         mediaIdentity, languageCode, hints,
         format: '', startTime: 0, // tempoary useless params according to server-side
       }))
-      .then(response => response.map(transcriptInfo => new OnlineSubtitle(transcriptInfo)))
+      .then(response => resolve(response.map(transcriptInfo => new OnlineSubtitle(transcriptInfo))))
       .catch(err => reject(err));
   });
 }
@@ -55,7 +55,7 @@ export function retrieveEmbeddedList(videoSrc: string): Promise<EmbeddedSubtitle
         const subtitleStreams: ISubtitleStream[] = JSON.parse(info).streams
           .filter((stream: ISubtitleStream) => (
             stream.codec_type === 'subtitle' &&
-            subtitleCodecs.includes(stream.codec_name)
+            SubtitleFormat[stream.codec_name]
           ));
         resolve(subtitleStreams.map(stream => new EmbeddedSubtitle(videoSrc, stream)));
       } catch (error) {
