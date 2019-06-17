@@ -1,7 +1,8 @@
-import { IDialogueTag } from '../parsers';
+import { IDialogueTag, SubtitleFormat } from '../parsers';
 import { detect } from 'chardet';
 import { encodingExists, decode } from 'iconv-lite';
 import { open, read, close, readFile } from 'fs-extra';
+import { extname } from 'path';
 
 /**
  * Cue tags getter for SubRip, SubStation Alpha and Online Transcript subtitles.
@@ -97,3 +98,17 @@ export async function loadLocalFile(path: string, encoding?: string) {
 }
 
 export * from './languageLoader';
+
+export function pathToFormat(path: string): SubtitleFormat | undefined {
+  const extension = extname(path).slice(1);
+  switch (extension) {
+    case 'ass':
+      return SubtitleFormat.AdvancedSubStationAplha;
+    case 'srt':
+      return SubtitleFormat.SubRip;
+    case 'sub':
+      return SubtitleFormat.SubStationAlpha;
+    case 'vtt':
+      return SubtitleFormat.WebVTT;
+  }
+}

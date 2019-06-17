@@ -2,22 +2,8 @@ import { IOriginSubtitle, SubtitleType } from './index';
 import { SubtitleFormat, AssSubtitle, SrtSubtitle, VttSubtitle } from '../parsers';
 import { extname, basename } from 'path';
 import { LanguageCode } from '@/libs/language';
-import { extractTextFragment, loadLocalFile } from '../utils';
-import { assFragmentLanguageLoader, srtFragmentLanguageLoader, vttFragmentLanguageLoader } from '../language';
-
-function pathToFormat(path: string): SubtitleFormat | undefined {
-  const extension = extname(path).slice(1);
-  switch (extension) {
-    case 'ass':
-      return SubtitleFormat.AdvancedSubStationAplha;
-    case 'srt':
-      return SubtitleFormat.SubRip;
-    case 'sub':
-      return SubtitleFormat.SubStationAlpha;
-    case 'vtt':
-      return SubtitleFormat.WebVTT;
-  }
-}
+import { pathToFormat, extractTextFragment, loadLocalFile } from '../utils';
+import { assFragmentLanguageLoader, srtFragmentLanguageLoader, vttFragmentLanguageLoader } from '../utils';
 
 export class LocalSubtitle implements IOriginSubtitle {
   origin: string;
@@ -33,7 +19,18 @@ export class LocalSubtitle implements IOriginSubtitle {
 
   language?: LanguageCode;
   async computeLang() {
-    return localLanguageCodeLoader(this.origin, this.format);
+    const textFragment = await extractTextFragment(this.origin);
+    switch (this.format) {
+      case SubtitleFormat.AdvancedSubStationAplha:
+      case SubtitleFormat.SubStationAlpha:
+        return assFragmentLanguageLoader(textFragment)[0];
+      case SubtitleFormat.SubRip:
+        return srtFragmentLanguageLoader(textFragment)[0];
+      case SubtitleFormat.WebVTT:
+        return vttFragmentLanguageLoader(textFragment)[0];
+      default:
+        throw new Error(`Unsupported format ${this.format}.`);
+    }
   }
 
   private name: string;
