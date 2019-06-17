@@ -121,7 +121,8 @@
       "hideOthers": "隐藏其他",
       "homepage": "网站",
       "preferences": "偏好设置",
-      "quit": "退出射手影音"
+      "quit": "退出射手影音",
+      "showAll": "全部显示"
     },
     "subtitle": {
       "AITranslation": "重新加载翻译结果",

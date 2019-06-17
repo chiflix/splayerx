@@ -121,7 +121,8 @@
       "hideOthers": "Esconder otros",
       "homepage": "Sitio web",
       "preferences": "Preferencias",
-      "quit": "Salir de SPlayer"
+      "quit": "Salir de SPlayer",
+      "showAll": "Mostrar todo"
     },
     "subtitle": {
       "AITranslation": "Recargar la traducción Smart",

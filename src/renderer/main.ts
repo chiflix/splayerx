@@ -993,6 +993,10 @@ new Vue({
                 label: this.$t('msg.splayerx.hideOthers'),
                 role: 'hideothers',
               },
+              {
+                label: this.$t('msg.splayerx.showAll'),
+                role: 'unhide'
+              },
               { type: 'separator' },
               {
                 label: this.$t('msg.splayerx.quit'),
