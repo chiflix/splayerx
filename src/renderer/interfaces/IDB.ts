@@ -8,9 +8,10 @@ export type RawPlaylistItem = {
 export type RawMediaItem = {
   quickHash: string,
   path: string,
-  lastPlayedTime: number,
-  duration: number,
+  type: string,
   source: string,
+  lastPlayedTime?: number,
+  duration?: number,
 }
 export type PlaylistItem = {
   id: number,
@@ -46,17 +47,17 @@ export type MediaItemPreference = {
  
 /** MediaItem 全量结构 */
 export type MediaItem = {
-  audioTrackId: number
   videoId: number,
   quickHash: string,
   path: string,
-  lastPlayedTime: number,
-  duration: number,
-  source: string,
-  preference: MediaItemPreference,
-  shortCut: string,
-  smallShortCut: string,
   type: string,
+  source: string,
+  audioTrackId?: number
+  lastPlayedTime?: number,
+  duration?: number,
+  preference?: MediaItemPreference,
+  shortCut?: string,
+  smallShortCut?: string,
 }
 
 type Partial<T> = { [P in keyof T]?: T[P] };

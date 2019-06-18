@@ -6,12 +6,10 @@ import { VIDEO_OBJECT_STORE_NAME, RECENT_OBJECT_STORE_NAME } from "@/constants";
 export default class PlayInfoStorageService implements IPlayInfoStorable {
   /**
    * @description 更新video播放的信息
-   * @author tanghaixiang@xindong.com
-   * @date 2019-06-11
+   * @author tanghaixiang
    * @param {string} videoID
    * @param {MediaItem} data
    * @returns {Promise<boolean>} 返回布尔值, 是否成功更新
-   * @memberof PlayInfoStorageService
    */
   async updateMediaItemBy(videoID: string, data: MediaItem): Promise<boolean> {
     let value = null;
@@ -32,12 +30,10 @@ export default class PlayInfoStorageService implements IPlayInfoStorable {
   }
   /**
    * @description 更新最近播放列表
-   * @author tanghaixiang@xindong.com
-   * @date 2019-06-11
+   * @author tanghaixiang
    * @param {string} playListID
    * @param {PlaylistItem} data
    * @returns {Promise<boolean>} 返回布尔值, 是否成功更新
-   * @memberof PlayInfoStorageService
    */
   async updateRecentPlayedBy(playListID: string, data: PlaylistItem): Promise<boolean> {
     try {
@@ -52,11 +48,9 @@ export default class PlayInfoStorageService implements IPlayInfoStorable {
 
   /**
    * @description 删除播放列表
-   * @author tanghaixiang@xindong.com
-   * @date 2019-06-11
+   * @author tanghaixiang
    * @param {string} playListID
    * @returns {Promise<boolean>} 返回布尔值, 是否成功更新
-   * @memberof PlayInfoStorageService
    */
   async deleteRecentPlayedBy(playListID: string): Promise<boolean> {
     try {

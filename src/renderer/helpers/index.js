@@ -362,17 +362,9 @@ export default {
           let similarVideos;
           try {
             similarVideos = await this.findSimilarVideoByVidPath(video.path);
-            const singleItems = await this.infoDB.getValueByKey('media-item', 'source', '');
-            const filtered = singleItems.filter((item) => similarVideos.includes(item.path));
-            const items = [];
-            filtered.forEach((media) => {
-              const mediaIndex = similarVideos.findIndex(path => path === media.path);
-              items[mediaIndex] = media.videoId;
-            });
             this.$store.dispatch('FolderList', {
               id,
               paths: similarVideos,
-              items,
             });
           } catch (err) {
             if (process.mas && get(err, 'code') === 'EPERM') {
@@ -380,7 +372,7 @@ export default {
               this.$store.dispatch('FolderList', {
                 id,
                 paths: [video.path],
-                items: [video.videoId],
+                items: [playlist.items[0]],
               });
             }
           }
@@ -412,17 +404,9 @@ export default {
       let similarVideos;
       try {
         similarVideos = await this.findSimilarVideoByVidPath(videoFile);
-        const singleItems = await this.infoDB.getValueByKey('media-item', 'source', '');
-        const filtered = singleItems.filter((item) => similarVideos.includes(item.path));
-        const items = [];
-        filtered.forEach((media) => {
-          const mediaIndex = similarVideos.findIndex(path => path === media.path);
-          items[mediaIndex] = media.videoId;
-        });
         this.$store.dispatch('FolderList', {
           id,
           paths: similarVideos,
-          items,
         });
       } catch (err) {
         if (process.mas && get(err, 'code') === 'EPERM') {
@@ -430,7 +414,7 @@ export default {
           this.$store.dispatch('FolderList', {
             id,
             paths: [videoFile],
-            items: [playlistItem.items[playlistItem.playedIndex]],
+            items: [playlistItem.items[0]],
           });
         }
       }

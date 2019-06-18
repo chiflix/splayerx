@@ -10,8 +10,15 @@ const app = electron.app || electron.remote.app;
 const defaultPath = join(app.getPath(ELECTRON_CACHE_DIRNAME), DEFAULT_LOG_DIRNAME);
 
 const loggers = {};
+/** 写日志对象 */
 let logger: winston.Logger
 
+/**
+ * @description 创建日志记录对象
+ * @author tanghaixiang
+ * @param {string} filename 日志保存的文件名
+ * @returns 
+ */
 function getLogger(filename: string) {
   if (!loggers[filename]) {
     loggers[filename] = winston.createLogger({
@@ -51,11 +58,21 @@ export default class Log implements ILog {
       logger = getLogger(time);
     }
   }
-  info(label: string, message: string): void
-  info(label: string, message: string, stack: string | undefined): void
+  /**
+   * @description 记录程序状态日志
+   * @author tanghaixiang
+   * @param {string} label 类名或者文件名
+   * @param {string} message 打印信息
+   */
   info(label: string, message: string, stack?: string | undefined): void {
     this.log('info', message, stack);
   }
+  /**
+   * @description 记录逻辑和程序出错日志
+   * @author tanghaixiang
+   * @param {string} label 类名或者文件名
+   * @param {(string | Error)} message 错误信息
+   */
   error(label: string, message: string | Error): void {
     if (message instanceof Error) {
       this.log('error', message.message, message.stack);
