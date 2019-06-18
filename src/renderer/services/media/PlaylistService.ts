@@ -1,4 +1,4 @@
-import { IRecentPlayRequest } from '@/interfaces/IRecentPlayRequest';
+import { IRecentPlayRequest } from '@/interfaces/IPlaylistRequest';
 import MediaStorageService from '@/services/storage/MediaStorageService';
 import { ipcRenderer } from 'electron';
 import { filePathToUrl } from '@/helpers/path';
