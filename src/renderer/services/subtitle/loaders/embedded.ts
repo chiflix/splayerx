@@ -3,7 +3,7 @@ import { SubtitleFormat, AssSubtitle, SrtSubtitle, VttSubtitle } from '../parser
 import { LanguageName, LanguageCode } from '@/libs/language';
 import { ipcRenderer, Event } from 'electron';
 import helpers from '@/helpers';
-import { localLanguageCodeLoader, loadLocalFile } from '../utils';
+import { inferLanguageFromPath, loadLocalFile } from '../utils';
 
 
 interface IExtractSubtitleRequest {
@@ -80,7 +80,7 @@ export class EmbeddedSubtitle implements IOriginSubtitle {
   async computeLang() {
     if (this.language && this.language !== LanguageCode.No) return this.language;
     this.extractedSrc = await embeddedSrcLoader(this.origin.videoSrc, this.origin.streamIndex, this.format);
-    return localLanguageCodeLoader(this.extractedSrc, this.format);
+    return inferLanguageFromPath(this.extractedSrc);
   }
 
   async load() {
