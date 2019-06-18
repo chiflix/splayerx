@@ -30,6 +30,7 @@ import {
   castArray,
   get,
 } from 'lodash';
+import { log } from '@/libs/Log';
 import { codeToLanguageName } from '@/helpers/language';
 import {
   searchForLocalList, fetchOnlineList, retrieveEmbeddedList,
@@ -175,10 +176,7 @@ export default {
     });
     this.$bus.$on('off-subtitle', this.offCurrentSubtitle);
     this.$bus.$on('upload-current-subtitle', () => {
-      this.addLog('info', {
-        message: 'Upload current subtitle .',
-        code: SUBTITLE_UPLOAD,
-      });
+      log.info('SubtitleManager.vue', 'Upload current subtitle .');
       this.$addBubble(SUBTITLE_UPLOAD);
       const qualifiedSubtitles = [];
       if (this.currentFirstSubtitleId) {
@@ -198,19 +196,13 @@ export default {
         transcriptQueue.addAllManual(parameters)
           .then((res) => {
             if (res.failure.length) {
-              this.addLog('error', {
-                message: 'Upload failed !',
-                errcode: UPLOAD_FAILED,
-              });
+              log.error('SubtitleManager', 'Upload failed !');
               this.$addBubble(UPLOAD_FAILED);
               res.failure.forEach((i) => {
                 console.log(`Uploading subtitle No.${i.src} failed!`);
               });
             } else {
-              this.addLog('info', {
-                message: 'Upload successfully !',
-                code: UPLOAD_SUCCESS,
-              });
+              log.info('SubtitleManager', 'Upload successfully !');
               this.$addBubble(UPLOAD_SUCCESS);
             }
             if (res.success.length) {
@@ -344,10 +336,7 @@ export default {
         const storedSubs = await Promise.all(storedSubIds.map(retrieveSub))
           .then(subtitleResults => subtitleResults.filter((result) => {
             if (result instanceof Error) {
-              this.addLog('error', {
-                message: 'Request Timeout .',
-                errcode: REQUEST_TIMEOUT,
-              });
+              log.error('SubtitleManager.vue', 'Request Timeout .');
               this.$addBubble(REQUEST_TIMEOUT);
               return [];
             }
@@ -530,7 +519,7 @@ export default {
       return updateSubtitle(id, result);
     },
     failedCallback({ id, videoSrc }, { error, bubble } = {}) {
-      if (bubble) this.addLog('error', { errcode: bubble, message: error.message });
+      if (bubble) log.error('SubtitleManager.vue', error.message);
       if (this.currentFirstSubtitleId === id) {
         this.changeCurrentFirstSubtitle(this.lastFirstSubtitleId);
       }

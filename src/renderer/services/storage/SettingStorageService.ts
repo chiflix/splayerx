@@ -17,11 +17,9 @@ export default class SettingStorageService implements ISettingStorable {
   }
   /**
    * @description 更新字幕样式设置
-   * @author tanghaixiang@xindong.com
-   * @date 2019-06-11
+   * @author tanghaixiang
    * @param {SubtitleStyle} data
    * @returns {Promise<boolean>} 返回布尔值，是否成功更新
-   * @memberof SettingStorageService
    */
   async updateSubtitleStyle(data: SubtitleStyle): Promise<boolean> {
     try {
@@ -33,11 +31,9 @@ export default class SettingStorageService implements ISettingStorable {
   }
   /**
    * @description 更新播放设置
-   * @author tanghaixiang@xindong.com
-   * @date 2019-06-11
+   * @author tanghaixiang
    * @param {PlaybackStates} data
    * @returns {Promise<boolean>} 返回布尔值，是否成功更新
-   * @memberof SettingStorageService
    */
   async updatePlaybackStates(data: PlaybackStates): Promise<boolean> {
     try {

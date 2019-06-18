@@ -66,6 +66,8 @@ describe('helper.path', () => {
     });
     [
       'Apple Special Event. October 22, 2013..mp4',
+      'cls-kungfuhubs1080dub.mp4',
+      'ewdp-girlgifts720p.mp4',
       'Event.测试测绘试p6~p7.mkv',
       'Event.四季花园.mkv',
     ].forEach((e) => {
@@ -75,7 +77,6 @@ describe('helper.path', () => {
       }));
     });
     [
-      '越狱SE01.h456.1080P.01.mp4',
       '越狱.SE01.h456.1080P.01.mp4',
       '越狱.s01.h456.1080P.01.mp4',
       '越狱_sE01.h456.1080P.01.mp4',

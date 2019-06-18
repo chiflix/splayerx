@@ -1,7 +1,7 @@
 // Be sure to call Sentry function as early as possible in the main process
 import '../shared/sentry';
 
-import { app, BrowserWindow, session, Tray, ipcMain, globalShortcut, nativeImage, splayerx } from 'electron' // eslint-disable-line
+import { app, BrowserWindow, session, Tray, ipcMain, globalShortcut, nativeImage, splayerx, crashReporter } from 'electron' // eslint-disable-line
 import { throttle, debounce } from 'lodash';
 import os from 'os';
 import path from 'path';
@@ -343,6 +343,10 @@ function registerMainWindowEvent(mainWindow) {
     };
     if (!aboutWindow) {
       aboutWindow = new BrowserWindow(aboutWindowOptions);
+      // 如果播放窗口顶置，打开关于也顶置
+      if (mainWindow.isAlwaysOnTop()) {
+        aboutWindow.setAlwaysOnTop(true);
+      }
       aboutWindow.loadURL(`${aboutURL}`);
       aboutWindow.on('closed', () => {
         aboutWindow = null;
@@ -374,6 +378,10 @@ function registerMainWindowEvent(mainWindow) {
     };
     if (!preferenceWindow) {
       preferenceWindow = new BrowserWindow(preferenceWindowOptions);
+      // 如果播放窗口顶置，打开首选项也顶置
+      if (mainWindow.isAlwaysOnTop()) {
+        preferenceWindow.setAlwaysOnTop(true);
+      }
       preferenceWindow.loadURL(`${preferenceURL}`);
       preferenceWindow.on('closed', () => {
         preferenceWindow = null;
@@ -401,10 +409,14 @@ function registerMainWindowEvent(mainWindow) {
     app.quit();
   });
   ipcMain.on('preference-to-main', (e, args) => {
-    mainWindow.webContents.send('mainDispatch', 'setPreference', args);
+    if (mainWindow) {
+      mainWindow.webContents.send('mainDispatch', 'setPreference', args);
+    }
   });
   ipcMain.on('main-to-preference', (e, args) => {
-    preferenceWindow.webContents.send('preferenceDispatch', 'setPreference', args);
+    if (preferenceWindow) {
+      preferenceWindow.webContents.send('preferenceDispatch', 'setPreference', args);
+    }
   });
 }
 
@@ -535,3 +547,16 @@ app.on('activate', () => {
     mainWindow.show();
   }
 });
+
+/**
+ * 闪退报告
+ */
+if (process.env.NODE_ENV !== 'development') {
+  app.setPath('temp', userDataPath);
+  crashReporter.start({
+    companyName: 'Sagittarius Tech LLC.',
+    productName: 'SPlayer',
+    ignoreSystemCrashHandler: true,
+    submitURL: 'https://sentry.io/api/1449341/minidump/?sentry_key=6a94feb674b54686a6d88d7278727b7c',
+  });
+}

@@ -1,8 +1,8 @@
 import { openDB, IDBPDatabase } from 'idb';
 import { INFO_DATABASE_NAME, INFO_SCHEMAS, INFODB_VERSION, RECENT_OBJECT_STORE_NAME, VIDEO_OBJECT_STORE_NAME } from '@/constants';
 import { mediaQuickHash } from '@/libs/utils';
-import addLog from './index';
 import { RawPlaylistItem, PlaylistItem, MediaItem } from '@/interfaces/IDB';
+import { log } from '@/libs/Log';
 
 /**
  * You can change schema info in 'constants.js'
@@ -45,7 +45,7 @@ export class InfoDB {
     const tx = db.transaction(storeName, 'readwrite');
     tx.store.clear();
     return tx.done.then(() => {
-      addLog.methods.addLog('info', `DB ${storeName} records all deleted`);
+      log.info('infoDB', `DB ${storeName} records all deleted`);
     });
   }
   // formatted, equal to the previous method
@@ -87,7 +87,7 @@ export class InfoDB {
     if (!keyPath) {
       throw new Error('Providing out-of-line objectStore without keyPathVal is invalid.');
     }
-    addLog.methods.addLog('info', `Updating ${keyPath} to ${schema}`);
+    log.info('infoDB', `Updating ${keyPath} to ${schema}`);
     return db.put(schema, data);
   }
 
@@ -97,7 +97,7 @@ export class InfoDB {
    * Delete the record which match the given key
    */
   async delete(schema: string, key: number) {
-    addLog.methods.addLog('info', `deleting ${key} from ${schema}`);
+    log.info('infoDB', `deleting ${key} from ${schema}`);
     const db = await this.getDB();
     return db.delete(schema, key);
   }
@@ -107,7 +107,7 @@ export class InfoDB {
    * Delete the playlist and its contained media items which match the given id
    */
   async deletePlaylist(id: number) {
-    addLog.methods.addLog('info', `deleting ${id} from recent-played`);
+    log.info('infoDB', `deleting ${id} from recent-played`);
     const playlistItem = await this.get('recent-played', id);
     /* eslint-disable */
     for (const item of playlistItem.items) {

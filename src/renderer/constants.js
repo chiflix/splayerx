@@ -122,6 +122,11 @@ export const ELECTRON_CACHE_DIRNAME = 'userData'; // 用户数据路径
  */
 export const DEFAULT_DIRNAME = '__cache_files__'; // 设定的应用缓存目录
 
+/** 日志存储目录
+ * @constant
+ */
+export const DEFAULT_LOG_DIRNAME = 'logs';
+
 /** 视频缓存目录
  * @constant
  * @type {String}
