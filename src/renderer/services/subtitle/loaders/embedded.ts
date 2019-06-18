@@ -4,8 +4,6 @@ import { LanguageName, LanguageCode } from '@/libs/language';
 import { ipcRenderer, Event } from 'electron';
 import helpers from '@/helpers';
 import { localLanguageCodeLoader, loadLocalFile } from '../utils';
-import romanize from 'romanize';
-import { i18n } from '@/main';
 
 
 interface IExtractSubtitleRequest {
@@ -83,20 +81,6 @@ export class EmbeddedSubtitle implements IOriginSubtitle {
     if (this.language && this.language !== LanguageCode.No) return this.language;
     this.extractedSrc = await embeddedSrcLoader(this.origin.videoSrc, this.origin.streamIndex, this.format);
     return localLanguageCodeLoader(this.extractedSrc, this.format);
-  }
-
-  private computeSubtitleIndex(subtitleList: EmbeddedSubtitle[]) {
-    if (!subtitleList.includes(this)) return subtitleList.length;
-    return subtitleList
-      .sort(({ origin: origin1 }, { origin: origin2 }) => origin1.streamIndex - origin2.streamIndex)
-      .findIndex(subtitle => subtitle === this)
-      + 1;
-  }
-  async computeName(subtitleList: EmbeddedSubtitle[], locale: LanguageCode) {
-    const localeEmbeddedPrefix = i18n.t('subtitle.embedded');
-    const subtitleIndex = this.computeSubtitleIndex(subtitleList);
-    const localeLanguageSuffix = LanguageName[locale];
-    return `${localeEmbeddedPrefix} ${romanize(subtitleIndex)} - ${localeLanguageSuffix}`;
   }
 
   async load() {

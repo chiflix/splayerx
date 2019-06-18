@@ -1,8 +1,7 @@
 import { IOriginSubtitle, SubtitleType } from './index';
-import { LanguageCode, normalizeCode, LanguageName } from '@/libs/language';
+import { LanguageCode, normalizeCode } from '@/libs/language';
 import { MediaTranslationResponse } from 'sagi-api/translation/v1/translation_pb';
 import { SubtitleFormat, SagiSubtitle } from '../parsers';
-import romanize from 'romanize';
 import Sagi from '@/libs/sagi';
 
 export class OnlineSubtitle implements IOriginSubtitle {
@@ -20,19 +19,6 @@ export class OnlineSubtitle implements IOriginSubtitle {
 
   async computeLang() {
     return this.language;
-  }
-
-  private computeSubtitleIndex(subtitleList: OnlineSubtitle[]) {
-    if (!subtitleList.includes(this)) return subtitleList.length;
-    return subtitleList
-      .filter(({ language }) => language === this.language)
-      .findIndex(subtitle => subtitle === this)
-      + 1;
-  }
-  async computeName(subtitleList: OnlineSubtitle[], locale: LanguageCode) {
-    const localeLanguagePrefix = LanguageName[locale];
-    const subtitleIndex = this.computeSubtitleIndex(subtitleList);
-    return `${localeLanguagePrefix} ${romanize(subtitleIndex)}`;
   }
 
   async load() {

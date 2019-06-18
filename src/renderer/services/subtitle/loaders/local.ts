@@ -1,6 +1,5 @@
 import { IOriginSubtitle, SubtitleType } from './index';
 import { SubtitleFormat, AssSubtitle, SrtSubtitle, VttSubtitle } from '../parsers';
-import { extname, basename } from 'path';
 import { LanguageCode } from '@/libs/language';
 import { pathToFormat, extractTextFragment, loadLocalFile } from '../utils';
 import { assFragmentLanguageLoader, srtFragmentLanguageLoader, vttFragmentLanguageLoader } from '../utils';
@@ -31,12 +30,6 @@ export class LocalSubtitle implements IOriginSubtitle {
       default:
         throw new Error(`Unsupported format ${this.format}.`);
     }
-  }
-
-  private name: string;
-  async computeName() {
-    if (!this.name) return this.name = basename(this.origin, extname(this.origin).slice(1));
-    return this.name;
   }
 
   async load() {
