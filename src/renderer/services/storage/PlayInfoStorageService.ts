@@ -66,6 +66,10 @@ export default class PlayInfoStorageService implements IPlayInfoStorable {
       return false;
     }
   }
+  async getAllRecentPlayed(): Promise<PlaylistItem[]> {
+    const results = await info.getAll('recent-played');
+    return results.sort((a: PlaylistItem, b: PlaylistItem) => b.lastOpened - a.lastOpened);
+  }
 }
 
 

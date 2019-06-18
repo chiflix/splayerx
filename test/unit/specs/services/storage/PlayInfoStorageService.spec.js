@@ -86,4 +86,23 @@ describe('PlayInfoStorageService logic service', () => {
     const result = await playInfoStorageService.deleteRecentPlayedBy('1', {});
     expect(result).to.be.equal(false);
   });
+  describe('method - getAllRecentPlayed', () => {
+    it('should get sorted result from recent-played', async () => {
+      const getAllResults = [
+        { lastOpened: 1 },
+        { lastOpened: 3 },
+        { lastOpened: 2 },
+        { lastOpened: 4 },
+      ];
+      sinon.stub(info, 'getAll').returns(getAllResults);
+      const results = await playInfoStorageService.getAllRecentPlayed();
+      const expectResults = [
+        { lastOpened: 4 },
+        { lastOpened: 3 },
+        { lastOpened: 2 },
+        { lastOpened: 1 },
+      ];
+      expect(results).to.deep.equal(expectResults);
+    });
+  });
 });

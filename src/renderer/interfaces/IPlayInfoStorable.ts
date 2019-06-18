@@ -30,4 +30,9 @@ export interface IPlayInfoStorable {
    * @memberof IPlayInfoStorable
    */
   deleteRecentPlayedBy(playListID: string): Promise<boolean>
+  /**
+   * @returns {Promise<PlaylistItem>}
+   * 返回所有播放记录，按上次打开时间排序
+   */
+  getAllRecentPlayed(): Promise<PlaylistItem[]>
 }
