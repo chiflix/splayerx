@@ -3,6 +3,7 @@ import electron from 'electron';
 import winston from 'winston';
 import { join } from "path";
 import Sentry from '../../shared/sentry';
+import mkdirp from 'mkdirp';
 import { checkPathExistSync, mkdirSync } from './file';
 import { ELECTRON_CACHE_DIRNAME, DEFAULT_LOG_DIRNAME } from '@/constants';
 
@@ -40,7 +41,7 @@ function getLogger(filename: string) {
 
 const date = new Date();
 const time = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
-if (checkPathExistSync(defaultPath) || mkdirSync(defaultPath)) {
+if (checkPathExistSync(defaultPath) || mkdirp.sync(defaultPath)) {
   logger = getLogger(time)
 }
 export default class Log implements ILog {

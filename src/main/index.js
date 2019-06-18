@@ -343,6 +343,10 @@ function registerMainWindowEvent(mainWindow) {
     };
     if (!aboutWindow) {
       aboutWindow = new BrowserWindow(aboutWindowOptions);
+      // 如果播放窗口顶置，打开关于也顶置
+      if (mainWindow.isAlwaysOnTop()) {
+        aboutWindow.setAlwaysOnTop(true);
+      }
       aboutWindow.loadURL(`${aboutURL}`);
       aboutWindow.on('closed', () => {
         aboutWindow = null;
@@ -405,10 +409,14 @@ function registerMainWindowEvent(mainWindow) {
     app.quit();
   });
   ipcMain.on('preference-to-main', (e, args) => {
-    mainWindow.webContents.send('mainDispatch', 'setPreference', args);
+    if (mainWindow) {
+      mainWindow.webContents.send('mainDispatch', 'setPreference', args);
+    }
   });
   ipcMain.on('main-to-preference', (e, args) => {
-    preferenceWindow.webContents.send('preferenceDispatch', 'setPreference', args);
+    if (preferenceWindow) {
+      preferenceWindow.webContents.send('preferenceDispatch', 'setPreference', args);
+    }
   });
 }
 
