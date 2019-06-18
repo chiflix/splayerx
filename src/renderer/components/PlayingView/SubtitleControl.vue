@@ -71,7 +71,9 @@
                 :hover-height.sync="hoverHeight"
                 :trans-flag.sync="transFlag"
                 :is-first-subtitle="isFirstSubtitle"
+                :show-attached="showAttached"
                 :ref-animation.sync="refAnimation"
+                :enabled-secondary-sub="enabledSecondarySub"
                 @off-subtitle="offCurrentSubtitle"
                 @remove-subtitle="2"
                 @change-first-subtitle="changeFirstSubtitle"
@@ -203,8 +205,11 @@ export default {
     },
   },
   watch: {
+    enabledSecondarySub(val: boolean) {
+      if (!val) this.updateSubtitleType(true);
+    },
     computedAvailableItems(val: Subtitle[]) {
-      this.$emit('update-no-subtitle', !val.length);
+      this.updateNoSubtitle(!val.length);
     },
     subtitleList(val: Subtitle[], oldval: Subtitle[]) {
       if (val.length > oldval.length) {
@@ -324,6 +329,8 @@ export default {
       offCurrentSubtitle: subtitleActions.OFF_SUBTITLES,
       changeFirstSubtitle: subtitleActions.CHANGE_CURRENT_FIRST_SUBTITLE,
       changeSecondarySubtitle: subtitleActions.CHANGE_CURRENT_SECOND_SUBTITLE,
+      updateNoSubtitle: subtitleActions.UPDATE_NO_SUBTITLE,
+      updateSubtitleType: subtitleActions.UPDATE_SUBTITLE_TYPE,
     }),
     shiftItemHover() {
       this.shiftItemHovered = true;
@@ -332,11 +339,11 @@ export default {
       this.shiftItemHovered = false;
     },
     subTypeShift() {
-      this.$emit('update-subtitle-type', !this.isFirstSubtitle);
+      this.updateSubtitleType(!this.isFirstSubtitle);
     },
     handleRefresh() {
       if (!this.isRefreshing) {
-        this.$emit('handle-refresh');
+        // this.$emit('handle-refresh');
       }
     },
     handleAnimation(anim: AnimationItem) {

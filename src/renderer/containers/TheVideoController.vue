@@ -80,9 +80,6 @@
         v-fade-in="displayState.SubtitleControl"
         v-bind.sync="widgetsStatus.SubtitleControl"
         :last-dragging.sync="lastDragging"
-        @handle-refresh="1"
-        @update-subtitle-type="updateSubtitleType"
-        @update-no-subtitle="updateNoSubtitle"
         @conflict-resolve="conflictResolve"
         class="button subtitle"
       />
@@ -428,8 +425,6 @@ export default {
       updateKeydown: inputActions.KEYDOWN_UPDATE,
       updateKeyup: inputActions.KEYUP_UPDATE,
       updateWheel: inputActions.WHEEL_UPDATE,
-      updateNoSubtitle: subtitleActions.UPDATE_NO_SUBTITLE,
-      updateSubtitleType: subtitleActions.UPDATE_SUBTITLE_TYPE,
     }),
     createIcon(iconPath: string) {
       const { nativeImage } = this.$electron.remote;

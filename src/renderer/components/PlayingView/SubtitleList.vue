@@ -5,7 +5,7 @@
       :class="refAnimation"
       :style="{
         transition: '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
-        height: showAllName ? `${scopeHeight + hoverHeight}px` : `${scopeHeight}px`,
+        height: `${scopeHeight + hoverHeight}px`,
         overflowY: isOverFlow,
       }"
       @animationend="finishAnimation"
@@ -39,7 +39,7 @@
               transition: isOverFlow ? '' : '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
               color: hoverIndex === index || currentSubtitleIndex === index ?
                 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
-              height: hoverIndex === index && showAllName ?
+              height: hoverIndex === index ?
                 `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
               cursor: currentSubtitleIndex === index ? 'default' : 'pointer',
             }"
@@ -87,9 +87,9 @@
         <div
           v-if="0 <= computedAvailableItems.length"
           :style="{
-            height: showAllName && currentSubtitleIndex === hoverIndex ?
+            height: currentSubtitleIndex === hoverIndex ?
               `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
-            marginTop: showAllName && currentSubtitleIndex <= hoverIndex ?
+            marginTop: currentSubtitleIndex <= hoverIndex ?
               `${-cardPos - hoverHeight}px` : `${-cardPos}px`,
             transition: transFlag ?
               'all 100ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' : '',
@@ -147,6 +147,14 @@ export default {
       type: String,
       required: true,
     },
+    showAttached: {
+      type: Boolean,
+      required: true,
+    },
+    enabledSecondarySub: {
+      type: Boolean,
+      required: true,
+    },
   },
   data() {
     return {
@@ -200,14 +208,14 @@ export default {
     isOverFlow() { // eslint-disable-line complexity
       if (this.computedSize >= 289 && this.computedSize <= 480) {
         return this.realItemsNum > 3
-        || (this.scopeHeight + this.hoverHeight > 89 && this.showAllName) ? 'scroll' : '';
+        || (this.scopeHeight + this.hoverHeight > 89) ? 'scroll' : '';
       }
       if (this.computedSize >= 481 && this.computedSize < 1080) {
         return this.realItemsNum > 5
-        || (this.scopeHeight + this.hoverHeight > 180 && this.showAllName) ? 'scroll' : '';
+        || (this.scopeHeight + this.hoverHeight > 180) ? 'scroll' : '';
       }
       return this.realItemsNum > 7
-      || (this.scopeHeight + this.hoverHeight > 350 && this.showAllName) ? 'scroll' : '';
+      || (this.scopeHeight + this.hoverHeight > 350) ? 'scroll' : '';
     },
     scopeHeight() {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
@@ -232,7 +240,6 @@ export default {
       this.$refs.scroll.scrollTop = this.currentScrollTop;
     },
     enabledSecondarySub(val: boolean) {
-      if (!val) this.$emit('update-subtitle-type', true);
       this.$refs.scroll.scrollTop = val ? 0 : this.currentScrollTop;
     },
   },
@@ -245,9 +252,9 @@ export default {
         clearTimeout(this.detailTimer);
         const hoverItem: HTMLElement|null = document.querySelector(`#item${index} .text`);
         if (hoverItem && hoverItem.clientWidth < hoverItem.scrollWidth) {
-          this.$emit('update:hoverHeight', this.textHeight
-            * (Math.ceil(hoverItem.scrollWidth / hoverItem.clientWidth) - 1));
           this.detailTimer = setTimeout(() => {
+            this.$emit('update:hoverHeight', this.textHeight
+              * (Math.ceil(hoverItem.scrollWidth / hoverItem.clientWidth) - 1));
             this.showAllName = true;
           }, 1500);
         }
