@@ -113,7 +113,7 @@ import {
   mapState, mapGetters, mapActions,
   createNamespacedHelpers,
 } from 'vuex';
-import { Input as inputActions, Video as videoActions, Subtitle as subtitleActions } from '@/store/actionTypes';
+import { Input as inputActions, Video as videoActions } from '@/store/actionTypes';
 import { INPUT_COMPONENT_TYPE, getterTypes as iGT } from '@/plugins/input';
 import path from 'path';
 import Titlebar from '@/components/Titlebar.vue';

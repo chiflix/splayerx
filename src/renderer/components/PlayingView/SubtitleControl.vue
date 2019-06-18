@@ -74,10 +74,9 @@
                 :show-attached="showAttached"
                 :ref-animation.sync="refAnimation"
                 :enabled-secondary-sub="enabledSecondarySub"
+                :change-subtitle="isFirstSubtitle ? changeFirstSubtitle : changeSecondarySubtitle"
                 @off-subtitle="offCurrentSubtitle"
                 @remove-subtitle="2"
-                @change-first-subtitle="changeFirstSubtitle"
-                @change-secondary-subtitle="changeSecondarySubtitle"
               />
             </div>
           </div>
@@ -106,7 +105,6 @@
 <script lang="ts">
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { Input as InputActions, Subtitle as subtitleActions } from '@/store/actionTypes';
-import difference from 'lodash/difference';
 import { Subtitle } from '@/interfaces/ISubtitle';
 import lottie from '@/components/lottie.vue';
 import { AnimationItem } from 'lottie-web';
@@ -139,13 +137,11 @@ export default {
       count: 1,
       stopCount: 10,
       animClass: false,
-      loadingType: '',
       computedAvailableItems: [],
       isShowingHovered: false,
       isInitial: true,
       onAnimation: false,
       refAnimation: '',
-      // @ts-ignore
       transFlag: true,
       shiftItemHovered: false,
     };
@@ -211,10 +207,7 @@ export default {
     computedAvailableItems(val: Subtitle[]) {
       this.updateNoSubtitle(!val.length);
     },
-    subtitleList(val: Subtitle[], oldval: Subtitle[]) {
-      if (val.length > oldval.length) {
-        this.loadingType = difference(val, oldval)[0].type;
-      }
+    subtitleList(val: Subtitle[]) {
       this.computedAvailableItems = val
         .filter(({ name, loading }: { name: string; loading: string}) => name && loading !== 'failed');
     },
