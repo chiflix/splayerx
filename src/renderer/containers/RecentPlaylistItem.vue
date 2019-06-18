@@ -144,7 +144,7 @@ import { mapGetters } from 'vuex';
 import { parseNameFromPath } from '@/helpers/path';
 // @ts-ignore
 import Icon from '@/components/BaseIconContainer.vue';
-import RecentPlayService from '@/services/media/RecentPlayService';
+import RecentPlayService from '@/services/media/PlaylistService';
 import { mediaStorageService } from '@/services/storage/MediaStorageService';
 
 export default {

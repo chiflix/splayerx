@@ -1,5 +1,5 @@
 import sinon from 'sinon';
-import RecentPlayService from '@/services/media/RecentPlayService';
+import RecentPlayService from '@/services/media/PlaylistService';
 import { mediaStorageService } from '@/services/storage/MediaStorageService';
 import { info } from '@/libs/DataBase';
 
