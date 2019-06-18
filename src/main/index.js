@@ -547,7 +547,7 @@ if (process.env.NODE_ENV !== 'development') {
   app.setPath('temp', userDataPath);
   crashReporter.start({
     companyName: 'Sagittarius Tech LLC.',
-    productName: 'splayerx',
+    productName: 'SPlayer',
     ignoreSystemCrashHandler: true,
     submitURL: 'https://sentry.io/api/1449341/minidump/?sentry_key=6a94feb674b54686a6d88d7278727b7c',
   });
