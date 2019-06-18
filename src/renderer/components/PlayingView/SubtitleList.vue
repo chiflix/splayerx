@@ -209,17 +209,14 @@ export default {
         - this.currentSubtitleIndex) * 51
         : this.scopeHeight + 7;
     },
-    isOverFlow() { // eslint-disable-line complexity
+    isOverFlow() {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
-        return this.realItemsNum > 3
-        || (this.scopeHeight + this.hoverHeight > 89) ? 'scroll' : '';
+        return this.scopeHeight + this.hoverHeight > 89 ? 'scroll' : '';
       }
       if (this.computedSize >= 481 && this.computedSize < 1080) {
-        return this.realItemsNum > 5
-        || (this.scopeHeight + this.hoverHeight > 180) ? 'scroll' : '';
+        return this.scopeHeight + this.hoverHeight > 180 ? 'scroll' : '';
       }
-      return this.realItemsNum > 7
-      || (this.scopeHeight + this.hoverHeight > 350) ? 'scroll' : '';
+      return this.scopeHeight + this.hoverHeight > 350 ? 'scroll' : '';
     },
     scopeHeight() {
       if (this.computedSize >= 289 && this.computedSize <= 480) {

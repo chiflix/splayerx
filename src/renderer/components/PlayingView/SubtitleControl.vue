@@ -115,7 +115,6 @@ import Icon from '../BaseIconContainer.vue';
 
 export default {
   name: 'SubtitleControl',
-  // @ts-ignore
   type: INPUT_COMPONENT_TYPE,
   components: {
     lottie,
