@@ -80,6 +80,9 @@
         v-fade-in="displayState.SubtitleControl"
         v-bind.sync="widgetsStatus.SubtitleControl"
         :last-dragging.sync="lastDragging"
+        @handle-refresh="1"
+        @update-subtitle-type="updateSubtitleType"
+        @update-no-subtitle="updateNoSubtitle"
         @conflict-resolve="conflictResolve"
         class="button subtitle"
       />
@@ -113,7 +116,7 @@ import {
   mapState, mapGetters, mapActions,
   createNamespacedHelpers,
 } from 'vuex';
-import { Input as inputActions, Video as videoActions } from '@/store/actionTypes';
+import { Input as inputActions, Video as videoActions, Subtitle as subtitleActions } from '@/store/actionTypes';
 import { INPUT_COMPONENT_TYPE, getterTypes as iGT } from '@/plugins/input';
 import path from 'path';
 import Titlebar from '@/components/Titlebar.vue';
@@ -425,6 +428,8 @@ export default {
       updateKeydown: inputActions.KEYDOWN_UPDATE,
       updateKeyup: inputActions.KEYUP_UPDATE,
       updateWheel: inputActions.WHEEL_UPDATE,
+      updateNoSubtitle: subtitleActions.UPDATE_NO_SUBTITLE,
+      updateSubtitleType: subtitleActions.UPDATE_SUBTITLE_TYPE,
     }),
     createIcon(iconPath: string) {
       const { nativeImage } = this.$electron.remote;

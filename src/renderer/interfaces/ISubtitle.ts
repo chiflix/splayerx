@@ -20,3 +20,13 @@ type Tags = {
   u: number,
   s: number,
 }
+
+export type Subtitle = {
+  id: string
+  name: string,
+  language: string,
+  format?: string,
+  rank: number,
+  loading: string,
+  type: string,
+}
