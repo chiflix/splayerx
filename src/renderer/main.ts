@@ -538,7 +538,7 @@ new Vue({
               click: () => {
                 this.infoDB.clearAll();
                 app.clearRecentDocuments();
-                this.$bus.$emit('clean-lastPlayedFile');
+                this.$bus.$emit('clean-landingViewItems');
                 this.refreshMenu();
               },
             },
