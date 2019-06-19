@@ -109,7 +109,7 @@ class Sagi {
   }
 
   // check sagi-api health, return UNKNOWN(0), SERVING(1) or XXXXX
-  healthCheck() {
+  healthCheck(): Promise<HealthCheckResponse.AsObject> {
     const client = new HealthClient(this.endpoint, this.creds);
     return new Promise((resolve, reject) => {
       client.check(new HealthCheckRequest(), (err, response) => {
