@@ -87,7 +87,7 @@ export default {
     winAngle(val: number) {
       this.changeWindowRotate(val);
     },
-    videoId(val: string, oldVal: string) {
+    videoId(val: number, oldVal: number) {
       if (oldVal) this.saveScreenshot(oldVal);
     },
     originSrc(val: string, oldVal: string) {
@@ -265,7 +265,7 @@ export default {
       });
       windowRectService.uploadWindowBy(false, 'playing-view', this.winAngle, this.winAngleBeforeFullScreen, this.winSizeBeforeFullScreen, this.winPos);
     },
-    async saveScreenshot(videoId: string) {
+    async saveScreenshot(videoId: number) {
       const { videoElement } = this;
       const canvas = this.$refs.thumbnailCanvas;
       // todo: use metaloaded to get videoHeight and videoWidth
