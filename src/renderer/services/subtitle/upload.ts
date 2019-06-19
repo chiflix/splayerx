@@ -1,5 +1,5 @@
 import PQueue from 'p-queue';
-import Sagi from '@/helpers/sagi';
+import Sagi from '@/libs/sagi';
 import { TrainingData } from 'sagi-api/training/v1/training_pb';
 
 export type SubtitleUploadParameter = TrainingData.AsObject;
@@ -36,7 +36,10 @@ export class TranscriptQueue {
   async addManually(subtitle: SubtitleUploadParameter) {
     const id = `${subtitle.hints}-${subtitle.mediaIdentity}`;
     const options = { priority: 0 };
-    return this.queue.add(() => Sagi.pushTranscript(subtitle), options)
+    const task = subtitle.transcriptIdentity ?
+      () => Sagi.pushTranscriptWithTranscriptIdentity(subtitle) :
+      () => Sagi.pushTranscriptWithPayload(subtitle);
+    return this.queue.add(task, options)
         .then(() => {
           this.subtitleState[id] = 'successful';
           return true;
