@@ -123,6 +123,7 @@
 import Vue from 'vue';
 import { mapState, mapGetters } from 'vuex';
 import Icon from '@/components/BaseIconContainer.vue';
+import { log } from '@/libs/Log';
 import Titlebar from './Titlebar.vue';
 import NotificationBubble from './NotificationBubble.vue';
 import PlaylistItem from './LandingView/PlaylistItem.vue';
@@ -276,8 +277,8 @@ export default {
     this.sagi.healthCheck().then(({ status }) => {
       if (process.env.NODE_ENV !== 'production') {
         this.sagiHealthStatus = status;
-        this.addLog('info', `launching: ${app.getName()} ${app.getVersion()}`);
-        this.addLog('info', `sagi API Status: ${this.sagiHealthStatus}`);
+        log.info('LandingView.vue', `launching: ${app.getName()} ${app.getVersion()}`);
+        log.info('LandingView.vue', `sagi API Status: ${this.sagiHealthStatus}`);
       }
     });
     window.onkeyup = (e) => {

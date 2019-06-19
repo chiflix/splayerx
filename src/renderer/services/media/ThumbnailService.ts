@@ -14,13 +14,11 @@ export default class ThumbnailService implements IThumbnailRequest {
 
   /** 公开API 根据该视频创建缩略图对应的路径，
    * @description ThumbnailService 对 ThumbnailRequest接口的实现
-   * @author tanghaixiang@xindong.com
-   * @date 2019-05-21
+   * @author tanghaixiang
    * @param {string} mediaHash
    * @param {string} videoSrc
    * @param {number} cols
    * @returns {Promise<string>} 返回生成的缩略图路径
-   * @memberof ThumbnailService
    */
   async generateThumbnailImage(mediaHash: string, videoSrc: string, cols: number, width: number): Promise<string> {
     try {
@@ -42,11 +40,9 @@ export default class ThumbnailService implements IThumbnailRequest {
 
   /** 公开API 根据视频的hash获取对于的缩略图路径
    * @description ThumbnailService 对 ThumbnailRequest接口的实现
-   * @author tanghaixiang@xindong.com
-   * @date 2019-05-21
+   * @author tanghaixiang
    * @param {string} mediaHash
    * @returns {(Promise<string | null>)} 返回对应视频的缩略图路径
-   * @memberof ThumbnailService
    */
   async getThumbnailImage(mediaHash: string): Promise<string | null> {
     try {

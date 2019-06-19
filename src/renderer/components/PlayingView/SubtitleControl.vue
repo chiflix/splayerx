@@ -194,6 +194,7 @@ import difference from 'lodash/difference';
 import debounce from 'lodash/debounce';
 import path, { extname } from 'path';
 import { Subtitle as subtitleActions, Input as InputActions } from '@/store/actionTypes';
+import { log } from '@/libs/Log';
 import lottie from '@/components/lottie.vue';
 import { AnimationItem } from 'lottie-web';
 import animationData from '@/assets/subtitle.json';
@@ -471,10 +472,7 @@ export default {
       this.transFlag = true;
       if (timeout) {
         setTimeout(() => {
-          this.addLog('error', {
-            message: 'Request Timeout .',
-            errcode: REQUEST_TIMEOUT,
-          });
+          log.error('SubtitleControll.vue', 'Request Timeout .');
           this.$addBubble(REQUEST_TIMEOUT);
         }, 500);
       }
@@ -557,10 +555,7 @@ export default {
           this.$bus.$emit('off-subtitle');
         }
         deleteSubtitles([item.id], this.originSrc).then((result) => {
-          this.addLog(
-            'info',
-            `Subtitle delete { successId:${result.success}, failureId:${result.failure} }`,
-          );
+          log.info('SubtitleControl.vuew', `Subtitle delete { successId:${result.success}, failureId:${result.failure} }`);
           this.transFlag = true;
         });
       }
@@ -603,10 +598,7 @@ export default {
           this.updateSubtitleType(true);
           this.$bus.$emit('refresh-subtitles', { types, isInitial: this.isInitial });
           if (!this.isInitial) {
-            this.addLog('info', {
-              message: 'Online subtitles loading .',
-              code: ONLINE_LOADING,
-            });
+            log.info('SubtitleControl.vue', 'Online subtitles loading .');
             this.$addBubble(ONLINE_LOADING);
           } else {
             setTimeout(() => {
@@ -626,10 +618,7 @@ export default {
           }, 10000);
         }
       } else {
-        this.addLog('error', {
-          message: 'Offline error .',
-          errcode: SUBTITLE_OFFLINE,
-        });
+        log.error('SubtitleConyrol.vue', 'Offline error .');
         this.$addBubble(SUBTITLE_OFFLINE);
       }
     },

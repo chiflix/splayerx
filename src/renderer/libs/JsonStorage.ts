@@ -7,11 +7,9 @@ import { readDir } from "./file";
 export default class JsonStorage implements IStorage {
   /**
    * @description 通过key获取存储的JSON数据
-   * @author tanghaixiang@xindong.com
-   * @date 2019-06-11
-   * @param {string} key
+   * @author tanghaixiang
+   * @param {string} key 数据对应的key
    * @returns {Promise<any>} 放回存储的JSON数据
-   * @memberof JsonStorage
    */
   get(key: string): Promise<any> {
     return new Promise((resolve, reject) => {
@@ -24,15 +22,12 @@ export default class JsonStorage implements IStorage {
       });
     });
   }
-
   /**
    * @description 通过key设置对应的JSON数据
-   * @author tanghaixiang@xindong.com
-   * @date 2019-06-11
-   * @param {string} key
-   * @param {*} json
+   * @author tanghaixiang
+   * @param {string} key 保存数据对应的key
+   * @param {*} json 保存的数据
    * @returns {Promise<boolean>} 返回布尔值，是否存储成果
-   * @memberof JsonStorage
    */
   set(key: string, json: any): Promise<boolean> {
     return new Promise((resolve, reject) => {
@@ -45,13 +40,10 @@ export default class JsonStorage implements IStorage {
       });
     });
   }
-
   /**
    * @description 清楚JSON存储目录下的所有数据
-   * @author tanghaixiang@xindong.com
-   * @date 2019-06-11
+   * @author tanghaixiang
    * @returns {Promise<any>}
-   * @memberof JsonStorage
    */
   async clear(): Promise<any> {
     const dirPath = storage.getDataPath();

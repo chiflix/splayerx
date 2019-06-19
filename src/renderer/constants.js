@@ -1,21 +1,3 @@
-export const PLAYBACKSTATE = Object.freeze({
-  PLAYING: Symbol('playing'),
-  PAUSED: Symbol('paused'),
-  UNKNOWN: Symbol('unknown'),
-});
-
-export const bar = 'bar';
-
-export const WIDTH_OF_SCREENSHOT = 170;
-export const HALF_WIDTH_OF_SCREENSHOT = 85;
-export const SCREENSHOT_SIDE_MARGIN_WIDTH = 16;
-
-export const PROGRESS_BAR_HEIGHT = '10px';
-export const PROGRESS_BAR_SLIDER_HIDE_HEIGHT = '4px';
-export const PROGRESS_BAR_HIDE_HEIGHT = '0px';
-
-export const FOOL_PROOFING_BAR_WIDTH = 20;
-
 export const DEFAULT_VIDEO_EVENTS = [
   'abort',
   'canplay',
@@ -139,6 +121,11 @@ export const ELECTRON_CACHE_DIRNAME = 'userData'; // 用户数据路径
  * @type {String}
  */
 export const DEFAULT_DIRNAME = '__cache_files__'; // 设定的应用缓存目录
+
+/** 日志存储目录
+ * @constant
+ */
+export const DEFAULT_LOG_DIRNAME = 'logs';
 
 /** 视频缓存目录
  * @constant

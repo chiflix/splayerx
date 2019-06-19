@@ -89,7 +89,7 @@ const actions = {
   FolderList({ commit }, payload) {
     commit('isFolderList');
     commit('playList', payload.paths);
-    commit('items', payload.items);
+    if (payload.items) commit('items', payload.items);
     commit('id', payload.id);
   },
   RemoveItemFromPlayingList({ state, commit }, item) {
