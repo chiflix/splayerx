@@ -9,7 +9,7 @@ export type LandingViewDisplayInfo = {
   playedIndex?: number, // playedIndex playlist only
   playlistLength?: number, // playlist only
 };
-export default interface ILandingView {
+export default interface IRecentPlay {
   /**
    * @returns Promise
    * 获取LandingView所需数据
