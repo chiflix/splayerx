@@ -124,6 +124,7 @@ import Titlebar from '@/components/Titlebar.vue';
 import NotificationBubble from '@/components/NotificationBubble.vue';
 import PlaylistItem from '@/components/LandingView/PlaylistItem.vue';
 import VideoItem from '@/components/LandingView/VideoItem.vue';
+import { log } from '@/libs/Log';
 
 Vue.component('PlaylistItem', PlaylistItem);
 Vue.component('VideoItem', VideoItem);
@@ -257,8 +258,8 @@ export default {
     this.sagi.healthCheck().then((status: any) => {
       if (process.env.NODE_ENV !== 'production') {
         this.sagiHealthStatus = status;
-        this.addLog('info', `launching: ${app.getName()} ${app.getVersion()}`);
-        this.addLog('info', `sagi API Status: ${this.sagiHealthStatus}`);
+        log.info('LandingView.vue', `launching: ${app.getName()} ${app.getVersion()}`);
+        log.info('LandingView.vue', `sagi API Status: ${this.sagiHealthStatus}`);
       }
     });
     window.onkeyup = (e) => {

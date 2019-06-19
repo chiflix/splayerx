@@ -1,6 +1,6 @@
 import { join } from 'path';
 import {
-  mkdir, readDir, checkPathExist, deleteDir,
+  mkdir, readDir, checkPathExist, deleteDir, checkPathExistSync, mkdirSync,
 } from '../../../../src/renderer/libs/file';
 
 describe('file libs', () => {
@@ -16,6 +16,16 @@ describe('file libs', () => {
 
   it('checkPathExist return true', async () => {
     const result = await checkPathExist(path);
+    expect(result).to.be.equal(true);
+  });
+
+  it('mkdirSync return path with true', async () => {
+    const result = mkdirSync(path);
+    expect(result).to.be.equal(true);
+  });
+
+  it('checkPathExistSync return true', () => {
+    const result = checkPathExistSync(path);
     expect(result).to.be.equal(true);
   });
 

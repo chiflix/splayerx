@@ -60,13 +60,11 @@ const SHORT_CURT_TYPE = 'image/jpeg';
 
 /**
  * @description canvas 生成观看视频的最后一帧图片
- * @author tanghaixiang@xindong.com
- * @date 2019-06-10
- * @export
- * @param {HTMLVideoElement} video
- * @param {HTMLCanvasElement} canvas
- * @param {number} videoWidth
- * @param {number} videoHeight
+ * @author tanghaixiang
+ * @param {HTMLVideoElement} video 需要截取的视频元素
+ * @param {HTMLCanvasElement} canvas 截图操作的canvas元素 
+ * @param {number} videoWidth 视频宽
+ * @param {number} videoHeight 视频高
  * @returns {ShortCut} 最后一帧图，有常规尺寸和小尺寸
  */
 export function generateShortCutImageBy(video: HTMLVideoElement, canvas: HTMLCanvasElement, videoWidth: number, videoHeight: number): ShortCut {
