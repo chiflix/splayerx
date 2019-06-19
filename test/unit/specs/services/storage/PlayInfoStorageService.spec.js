@@ -76,8 +76,14 @@ describe('PlayInfoStorageService logic service', () => {
       id: 1,
       items: [1, 2, 3],
     };
-    sinon.stub(info, 'getValueByKey').resolves(playlist);
-    const deleteStub = sinon.stub(info, 'delete');
+    let deleteStub;
+    beforeEach(() => {
+      deleteStub = sinon.stub(info, 'delete');
+      sinon.stub(info, 'getValueByKey').resolves(playlist);
+    });
+    afterEach(() => {
+      sinon.restore();
+    });
 
 
     it('should successfully deleteRecentPlayedBy', async () => {
