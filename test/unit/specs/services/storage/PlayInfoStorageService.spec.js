@@ -18,7 +18,7 @@ describe('PlayInfoStorageService logic service', () => {
     };
     sinon.stub(info, 'getValueByKey').callsFake(() => demo);
     sinon.stub(info, 'update').callsFake(() => demo);
-    const result = await playInfoStorageService.updateMediaItemBy('1', {});
+    const result = await playInfoStorageService.updateMediaItemBy(1, {});
     expect(result).to.be.equal(true);
   });
 
@@ -26,7 +26,7 @@ describe('PlayInfoStorageService logic service', () => {
     const demo = null;
     sinon.stub(info, 'getValueByKey').callsFake(() => demo);
     sinon.stub(info, 'update').callsFake(() => demo);
-    const result = await playInfoStorageService.updateMediaItemBy('1', {});
+    const result = await playInfoStorageService.updateMediaItemBy(1, {});
     expect(result).to.be.equal(false);
   });
 
@@ -36,7 +36,7 @@ describe('PlayInfoStorageService logic service', () => {
     };
     sinon.stub(info, 'getValueByKey').callsFake(() => demo);
     sinon.stub(info, 'update').callsFake(() => demo);
-    const result = await playInfoStorageService.updateRecentPlayedBy('1', {});
+    const result = await playInfoStorageService.updateRecentPlayedBy(1, {});
     expect(result).to.be.equal(true);
   });
 
@@ -58,7 +58,7 @@ describe('PlayInfoStorageService logic service', () => {
     };
     sinon.stub(info, 'getValueByKey').callsFake(() => { throw new Error(); });
     sinon.stub(info, 'update').callsFake(() => demo);
-    const result = await playInfoStorageService.updateRecentPlayedBy('1', {});
+    const result = await playInfoStorageService.updateRecentPlayedBy(1, {});
     expect(result).to.be.equal(false);
   });
 
@@ -68,25 +68,44 @@ describe('PlayInfoStorageService logic service', () => {
     };
     sinon.stub(info, 'getValueByKey').callsFake(() => demo);
     sinon.stub(info, 'update').callsFake(() => { throw new Error(); });
-    const result = await playInfoStorageService.updateRecentPlayedBy('1', {});
+    const result = await playInfoStorageService.updateRecentPlayedBy(1, {});
     expect(result).to.be.equal(false);
   });
-
-  it('should successfully deleteRecentPlayedBy', async () => {
-    const demo = {
+  describe('PlayInfoService - deleteRecentPlayedBy', () => {
+    const playlist = {
       id: 1,
+      items: [1, 2, 3],
     };
-    sinon.stub(info, 'delete').callsFake(() => demo);
-    const result = await playInfoStorageService.deleteRecentPlayedBy('1', {});
-    expect(result).to.be.equal(true);
-  });
+    sinon.stub(info, 'getValueByKey').resolves(playlist);
+    const deleteStub = sinon.stub(info, 'delete');
 
-  it('should fail deleteRecentPlayedBy when throw error', async () => {
-    sinon.stub(info, 'delete').callsFake(() => { throw new Error(); });
-    const result = await playInfoStorageService.deleteRecentPlayedBy('1', {});
-    expect(result).to.be.equal(false);
+
+    it('should successfully deleteRecentPlayedBy', async () => {
+      const result = await playInfoStorageService.deleteRecentPlayedBy(1);
+      expect(deleteStub.calledWith('media-item', 1)).to.be.true;
+      expect(deleteStub.calledWith('media-item', 2)).to.be.true;
+      expect(deleteStub.calledWith('media-item', 3)).to.be.true;
+      expect(deleteStub.calledWith('recent-played', 1)).to.be.true;
+      expect(result).to.be.true;
+    });
+    it('should skip the non-existed media-item', async () => {
+      deleteStub.withArgs('media-item', 1).resolves();
+      deleteStub.withArgs('media-item', 2).rejects();
+      deleteStub.withArgs('media-item', 3).resolves();
+      const result = await playInfoStorageService.deleteRecentPlayedBy(1);
+      expect(deleteStub.calledWith('media-item', 1)).to.be.true;
+      expect(deleteStub.calledWith('media-item', 2)).to.be.true;
+      expect(deleteStub.calledWith('media-item', 3)).to.be.true;
+      expect(deleteStub.calledWith('recent-played', 1)).to.be.true;
+      expect(result).to.be.true;
+    });
+    it('should fail deleteRecentPlayedBy when cannot delete playlist', async () => {
+      deleteStub.withArgs('recent-played', 1).rejects();
+      const result = await playInfoStorageService.deleteRecentPlayedBy(1);
+      expect(result).to.be.false;
+    });
   });
-  describe('method - getAllRecentPlayed', () => {
+  describe('PLayInfoService - getAllRecentPlayed', () => {
     it('should get sorted result from recent-played', async () => {
       const getAllResults = [
         { lastOpened: 1 },

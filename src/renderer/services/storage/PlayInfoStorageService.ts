@@ -55,11 +55,11 @@ export default class PlayInfoStorageService implements IPlayInfoStorable {
   async deleteRecentPlayedBy(playListID: number): Promise<boolean> {
     try {
       const { items } = await info.getValueByKey(RECENT_OBJECT_STORE_NAME, playListID);
-      for (const item of items) {
+      await Promise.all(items.map(async (item: number) => {
         try {
           await info.delete(VIDEO_OBJECT_STORE_NAME, item);
-        } catch(err) {}
-      }
+        } catch (err) {}
+      }));
       await info.delete(RECENT_OBJECT_STORE_NAME, playListID);
       return true;
     } catch (error) {
