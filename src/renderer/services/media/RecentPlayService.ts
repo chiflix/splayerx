@@ -25,7 +25,7 @@ export default class RecentPlayService implements IRecentPlay {
       }));
     const getBasename = (path: string) => basename(path, extname(path));
     const results: LandingViewDisplayInfo[] = await Promise.all(
-      coverVideos.map(async (item): Promise<LandingViewDisplayInfo> => {
+      coverVideos.map(async (item: any): Promise<LandingViewDisplayInfo> => {
         const { lastPlayedTime, duration, path, playedIndex, playlistLength, shortCut, id } = item;
         const percentage = (lastPlayedTime / duration) * 100;
         let backgroundURL;
@@ -35,7 +35,7 @@ export default class RecentPlayService implements IRecentPlay {
           const coverSrc = await mediaStorageService.getImageBy(mediaHash, 'cover');
           backgroundURL = `url("${filePathToUrl(coverSrc as string)}")`;
         } else {
-          backgroundURL = `url("${shortCut}")`          
+          backgroundURL = `url("${shortCut}")`
         }
 
         const basename = getBasename(item.path);

@@ -4,7 +4,7 @@ import helpers from '@/helpers/index';
 
 const state = {
   source: '', // 'drop' or '', used on mas version
-  id: '',
+  id: NaN,
   items: [],
   playList: [],
   isFolderList: undefined,
