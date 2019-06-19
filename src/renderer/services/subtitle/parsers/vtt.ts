@@ -1,4 +1,5 @@
 import { IRawSubtitle, IDialogue } from './index';
+// @ts-ignore
 import { parse, toMS } from 'subtitle';
 
 type ParsedSubtitle = {

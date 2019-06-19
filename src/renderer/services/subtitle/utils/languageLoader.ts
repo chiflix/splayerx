@@ -1,5 +1,6 @@
 import { normalizeCode, LanguageCode } from '@/libs/language';
 import franc from 'franc';
+// @ts-ignore
 import { isSimplified } from 'traditional-or-simplified';
 
 function dialogueTextToDialogues(dialogueText: string, textRegex: RegExp, identifierLocation: RegExp = /(?<=\S)\n{2,}(?=\S)/g) {
