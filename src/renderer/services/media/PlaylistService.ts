@@ -1,4 +1,4 @@
-import { IRecentPlayRequest } from '@/interfaces/IPlaylistRequest';
+import { IPlaylistRequest } from '@/interfaces/IPlaylistRequest';
 import MediaStorageService from '@/services/storage/MediaStorageService';
 import { ipcRenderer } from 'electron';
 import { filePathToUrl } from '@/helpers/path';
@@ -6,7 +6,7 @@ import { mediaQuickHash } from "@/libs/utils";
 import { info } from '@/libs/DataBase';
 import { MediaItem } from '@/interfaces/IDB';
 
-export default class RecentPlayService implements IRecentPlayRequest {
+export default class PlaylistService implements IPlaylistRequest {
   coverSrc: string;
   duration: any;
   record: MediaItem;

@@ -1,6 +1,6 @@
 import { MediaItem } from '@/interfaces/IDB';
 
-export interface IRecentPlayRequest {
+export interface IPlaylistRequest {
   coverSrc: string;
   duration: any;
   record: MediaItem;
