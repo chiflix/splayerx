@@ -1,6 +1,5 @@
 import path from 'path';
 import fs from 'fs';
-import grpc from 'grpc';
 import Vue from 'vue';
 
 import { HealthCheckRequest, HealthCheckResponse } from 'sagi-api/health/v1/health_pb';
@@ -9,6 +8,8 @@ import { MediaTranslationRequest, MediaTranslationResponse, TranscriptRequest, T
 import { TranslationClient } from 'sagi-api/translation/v1/translation_grpc_pb';
 import { TrainingData } from 'sagi-api/training/v1/training_pb';
 import { TrainngClient } from 'sagi-api/training/v1/training_grpc_pb';
+
+const grpc = require('grpc');
 
 class Sagi {
   creds: any;
