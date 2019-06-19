@@ -46,9 +46,6 @@
 </template>
 
 <script lang="ts">
-import path from 'path';
-import { filePathToUrl } from '@/helpers/path';
-import { generateCoverPathByMediaHash } from '@/helpers/cacheFileStorage';
 import Icon from '../BaseIconContainer.vue';
 
 export default {
@@ -68,10 +65,6 @@ export default {
       type: Number,
       default: NaN,
     },
-    playlist: {
-      type: Object,
-      default: () => {},
-    },
     thumbnailHeight: {
       type: Number,
       default: 63,
@@ -80,17 +73,8 @@ export default {
       type: Number,
       default: 112,
     },
-    lastPlayedFile: {
-      type: Array,
-      require: true,
-      default: () => [],
-    },
     isFullScreen: {
       type: Boolean,
-    },
-    filePathNeedToDelete: {
-      type: String,
-      default: '',
     },
     onItemMouseover: {
       type: Function,
