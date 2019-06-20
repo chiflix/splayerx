@@ -222,6 +222,7 @@ export default {
     this.$bus.$on('clean-landingViewItems', () => {
       // just for delete thumbnail display
       this.firstIndex = 0;
+      this.item = {};
       this.landingViewItems = [];
     });
     // responsible for delete the thumbnail on display which had already deleted in DB
@@ -229,6 +230,7 @@ export default {
       const deleteIndex = this.landingViewItems
         .findIndex((file: { id: number }) => file.id === id);
       if (deleteIndex >= 0) {
+        this.item = {};
         this.landingViewItems.splice(deleteIndex, 1);
       }
     });
