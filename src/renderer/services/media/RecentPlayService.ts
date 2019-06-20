@@ -28,14 +28,14 @@ export default class RecentPlayService implements IRecentPlay {
       coverVideos.map(async (item: any): Promise<LandingViewDisplayInfo> => {
         const { lastPlayedTime, duration, path, playedIndex, playlistLength, shortCut, id } = item;
         const percentage = (lastPlayedTime / duration) * 100;
-        let backgroundURL;
+        let backgroundUrl;
 
         if (duration - lastPlayedTime < 5) {
           const mediaHash = await mediaQuickHash(path);
           const coverSrc = await mediaStorageService.getImageBy(mediaHash, 'cover');
-          backgroundURL = `url("${filePathToUrl(coverSrc as string)}")`;
+          backgroundUrl = `url("${filePathToUrl(coverSrc as string)}")`;
         } else {
-          backgroundURL = `url("${shortCut}")`
+          backgroundUrl = `url("${shortCut}")`
         }
 
         const basename = getBasename(item.path);
@@ -46,7 +46,7 @@ export default class RecentPlayService implements IRecentPlay {
           duration,
           percentage,
           path,
-          backgroundURL,
+          backgroundUrl,
           playedIndex,
           playlistLength,
         };

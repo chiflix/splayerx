@@ -26,7 +26,7 @@
         bottom: chosen ? '10px' : '0',
         width: `${thumbnailWidth}px`,
         height: `${thumbnailHeight}px`,
-        backgroundImage: backgroundURL,
+        backgroundImage: backgroundUrl,
       }"
       class="item"
     >
@@ -77,7 +77,7 @@ export default {
   name: 'PlaylistItem',
   components: { Icon },
   props: {
-    backgroundURL: {
+    backgroundUrl: {
       type: String,
     },
     shifting: {

@@ -16,7 +16,7 @@
           <div
             :key="item.path"
             :style="{
-              backgroundImage: item.backgroundURL,
+              backgroundImage: item.backgroundUrl,
             }"
             class="background-image"
           >
@@ -93,9 +93,9 @@
         <!-- eslint-disable-next-line vue/require-component-is -->
         <component
           :is="playlistLength > 1 ? 'PlaylistItem' : 'VideoItem'"
-          v-for="({ backgroundURL, path, playlistLength }, index) in landingViewItems"
+          v-for="({ backgroundUrl, path, playlistLength }, index) in landingViewItems"
           :key="path"
-          :backgroundURL="backgroundURL"
+          :backgroundUrl="backgroundUrl"
           :index="index"
           :is-in-range="index + 1 >= firstIndex && index + 1 <= lastIndex"
           :thumbnail-width="thumbnailWidth"
@@ -302,7 +302,7 @@ export default {
     },
     onItemMouseover(index: number) {
       this.item = this.landingViewItems[index];
-      if (this.item.backgroundURL !== '') {
+      if (this.item.backgroundUrl !== '') {
         this.landingLogoAppear = false;
       } else {
         this.landingLogoAppear = true;

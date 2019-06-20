@@ -5,7 +5,7 @@ export type LandingViewDisplayInfo = {
   duration: number,
   percentage: number,
   path: string,
-  backgroundURL: string,
+  backgroundUrl: string,
   playedIndex?: number, // playedIndex playlist only
   playlistLength?: number, // playlist only
 };

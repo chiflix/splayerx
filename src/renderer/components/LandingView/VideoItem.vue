@@ -6,7 +6,7 @@
       bottom: chosen ? '9px' : '0',
       width: `${thumbnailWidth}px`,
       height: `${thumbnailHeight}px`,
-      backgroundImage: backgroundURL,
+      backgroundImage: backgroundUrl,
     }"
     class="item"
   >
@@ -52,7 +52,7 @@ export default {
   name: 'VideoItem',
   components: { Icon },
   props: {
-    backgroundURL: {
+    backgroundUrl: {
       type: String,
     },
     shifting: {
