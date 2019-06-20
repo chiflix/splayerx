@@ -117,6 +117,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import { mapGetters } from 'vuex';
+import { HealthCheckResponse } from 'sagi-api/health/v1/health_pb';
 import { playInfoStorageService } from '@/services/storage/PlayInfoStorageService';
 import { recentPlayService } from '@/services/media/RecentPlayService';
 import Icon from '@/components/BaseIconContainer.vue';
@@ -256,7 +257,7 @@ export default {
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [720 / 405]);
 
     // TODO: error handling
-    this.sagi.healthCheck().then(({ status }) => {
+    this.sagi.healthCheck().then(({ status }: HealthCheckResponse.AsObject) => {
       if (process.env.NODE_ENV !== 'production') {
         this.sagiHealthStatus = status;
         log.info('LandingView.vue', `launching: ${app.getName()} ${app.getVersion()}`);

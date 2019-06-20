@@ -9,16 +9,14 @@ describe('RecentPlayService', () => {
   const videoId = 5;
   const mediaHash = 'fa#$%ke-qu%#%ick-Ha#$$sh4l';
   let recentPlayService;
-  const factoryMediaItem = (path, lastPlayedTime, smallShortCut) => {
-    return {
-      quickHash: mediaHash,
-      path,
-      type: 'video',
-      source: '',
-      lastPlayedTime,
-      smallShortCut,
-    };
-  };
+  const factoryMediaItem = (path, lastPlayedTime, smallShortCut) => ({
+    quickHash: mediaHash,
+    path,
+    type: 'video',
+    source: '',
+    lastPlayedTime,
+    smallShortCut,
+  });
   beforeEach(() => {
     recentPlayService = new RecentPlayService(mediaStorageService, path, videoId);
   });
