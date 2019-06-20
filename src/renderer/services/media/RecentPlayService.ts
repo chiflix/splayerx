@@ -1,83 +1,58 @@
-import { IRecentPlayRequest } from '@/interfaces/IRecentPlayRequest';
-import MediaStorageService from '@/services/storage/MediaStorageService';
-import { ipcRenderer } from 'electron';
-import { filePathToUrl } from '@/helpers/path';
-import { mediaQuickHash } from "@/libs/utils";
+import IRecentPlay, { LandingViewDisplayInfo } from '@/interfaces/IRecentPlay';
+import { mediaStorageService } from '@/services/storage/MediaStorageService';
+import { basename, extname } from 'path';
+import { playInfoStorageService } from '@/services/storage/PlayInfoStorageService';
 import { info } from '@/libs/DataBase';
-import { MediaItem } from '@/interfaces/IDB';
-
-export default class RecentPlayService implements IRecentPlayRequest {
-  coverSrc: string;
-  duration: any;
-  record: MediaItem;
-  smallShortCut: string;
-  lastPlayedTime: number;
-  imageSrc: string | undefined;
-  imageLoaded = false;
-
-  get percentage(): number {
-    if (this.lastPlayedTime
-        && this.lastPlayedTime / this.duration <= 1) {
-      return (this.lastPlayedTime / this.duration) * 100;
-    }
-    return 0;
+import { mediaQuickHash } from '@/libs/utils';
+import { filePathToUrl } from '@/helpers/path';
+export default class RecentPlayService implements IRecentPlay {
+  constructor() {
   }
+  async getRecords(): Promise<LandingViewDisplayInfo[]> {
+    const recentPlayedResults = await playInfoStorageService.getAllRecentPlayed();
+    const coverVideos = await Promise.all(
+      recentPlayedResults.map(async (value) => {
+        const { items, playedIndex, id } = value;  
+        const coverVideoId = items[playedIndex] as number;
+        const mediaItem = await info.getValueByKey('media-item', coverVideoId);
 
-  constructor(private readonly mediaStorageService: MediaStorageService, readonly path: string, readonly videoId?: number) {
-    ipcRenderer.send('mediaInfo', path);
-    ipcRenderer.once(`mediaInfo-${path}-reply`, async (event: any, info: string) => {
-      const { width, height } = JSON.parse(info).streams.find((stream: any) => stream.codec_type === 'video');
+        return {
+          ...mediaItem,
+          id,
+          playedIndex,
+          playlistLength: items.length,
+        };
+      }));
+    const getBasename = (path: string) => basename(path, extname(path));
+    const results: LandingViewDisplayInfo[] = await Promise.all(
+      coverVideos.map(async (item: any): Promise<LandingViewDisplayInfo> => {
+        const { lastPlayedTime, duration, path, playedIndex, playlistLength, shortCut, id } = item;
+        const percentage = (lastPlayedTime / duration) * 100;
+        let backgroundUrl;
 
-      const { duration } = JSON.parse(info).format;
-      this.duration = parseFloat(duration);
-      const mediaHash = await mediaQuickHash(path);
-      const imgPath = await this.getCover(mediaHash);
-      
-      if (!imgPath) {
-        const imgPath = await this.mediaStorageService.generatePathBy(mediaHash, 'cover');
-        ipcRenderer.send('snapShot', { path, imgPath, duration, width, height });
-        ipcRenderer.once(`snapShot-${path}-reply`, (event: any, imgPath: string) => {
-          this.imageSrc = filePathToUrl(`${imgPath}`);
-          this.imageLoaded = true;
-        });
-      } else {
-        this.imageSrc = filePathToUrl(`${imgPath}`);
-        this.imageLoaded = true;
-      }
-    });
-    this.getRecord(videoId);
-  }
-   /**
-   * @param  {string} mediaHash
-   * @returns Promise 返回视频封面图片
-   */
-  async getCover(mediaHash: string): Promise<string | null> {
-    try {
-      const result = await this.mediaStorageService.getImageBy(mediaHash, 'cover');
-      return result;
-    } catch(err) {
-      return null; 
-    }
-  }
-  /**
-   * @param  {number} videoId
-   * @returns Promise 获取播放记录
-   */
-  async getRecord(videoId?: number): Promise<void> {
-    let record;
-    if (videoId) {
-      record = await info.getValueByKey('media-item', videoId);
-    } else {
-      const records = await info.getAllValueByIndex('media-item', 'source', '');
-      record = records.find(record => record.path === this.path);
-    }
-    if (record) {
-      this.record = record;
-      if (this.record.lastPlayedTime) {
-        this.lastPlayedTime = this.record.lastPlayedTime;
-        this.imageSrc = this.record.smallShortCut;
-        this.imageLoaded = true;
-      }
-    }
+        if (duration - lastPlayedTime < 5) {
+          const mediaHash = await mediaQuickHash(path);
+          const coverSrc = await mediaStorageService.getImageBy(mediaHash, 'cover');
+          backgroundUrl = `url("${filePathToUrl(coverSrc as string)}")`;
+        } else {
+          backgroundUrl = `url("${shortCut}")`
+        }
+
+        const basename = getBasename(item.path);
+        return {
+          id,
+          basename,
+          lastPlayedTime,
+          duration,
+          percentage,
+          path,
+          backgroundUrl,
+          playedIndex,
+          playlistLength,
+        };
+      }));
+    return results.splice(0, 9);
   }
 }
+
+export const recentPlayService = new RecentPlayService();

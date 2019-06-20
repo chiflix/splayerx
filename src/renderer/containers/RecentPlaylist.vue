@@ -135,7 +135,7 @@ import { Input as InputActions, Subtitle as subtitleActions } from '@/store/acti
 import RecentPlaylistItem from '@/containers/RecentPlaylistItem.vue';
 import Add from '@/components/PlayingView/Add.vue';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
-import RecentPlayService from '../services/media/RecentPlayService';
+import RecentPlayService from '@/services/media/PlaylistService';
 
 export default {
   name: 'RecentPlaylist',
