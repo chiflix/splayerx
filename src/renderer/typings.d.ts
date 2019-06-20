@@ -1,4 +1,5 @@
 import Vue, { VNode } from 'vue';
+import { AxiosInstance } from 'axios';
 
 declare module '*.vue' {
   export default Vue;
@@ -10,13 +11,17 @@ declare module 'vue/types/vue' {
     $bus: Vue;
     $ga: any;
     $electron: Electron.RendererInterface;
+    axios: AxiosInstance;
+    $http: AxiosInstance;
   }
-  interface VueConstructor {
-    http: any;
+
+  namespace Vue {
+    const axios: AxiosInstance;
   }
 }
 
 declare global {
+  declare const __static: string;
   interface Screen {
     availLeft: number;
     availTop: number;

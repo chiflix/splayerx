@@ -11,10 +11,9 @@ import axios from 'axios';
 import { mapGetters, mapActions, createNamespacedHelpers } from 'vuex';
 import uuidv4 from 'uuid/v4';
 import osLocale from 'os-locale';
+import VueAxios from 'vue-axios';
 // @ts-ignore
 import VueElectronJSONStorage from 'vue-electron-json-storage';
-// @ts-ignore
-import VueResource from 'vue-resource';
 // @ts-ignore
 import VueAnalytics from 'vue-analytics';
 // @ts-ignore
@@ -52,7 +51,6 @@ function getSystemLocale() {
   return 'en';
 }
 
-Vue.http = Vue.prototype.$http = axios;
 Vue.config.productionTip = false;
 Vue.config.warnHandler = (warn) => {
   log.info('render/main', warn);
@@ -88,7 +86,7 @@ Vue.directive('fade-in', {
 Vue.use(VueElectron);
 Vue.use(VueI18n);
 Vue.use(VueElectronJSONStorage);
-Vue.use(VueResource);
+Vue.use(VueAxios, axios);
 Vue.use(AsyncComputed);
 Vue.use(VueAnalytics, {
   id: (process.env.NODE_ENV === 'production') ? 'UA-2468227-6' : 'UA-2468227-5',
@@ -1355,7 +1353,7 @@ new Vue({
         this.$storage.set('user-uuid', userUUID);
       }
 
-      Vue.http.headers.common['X-Application-Token'] = userUUID;
+      Vue.axios.defaults.headers.common['X-Application-Token'] = userUUID;
 
       // set userUUID to google analytics uid
       this.$ga && this.$ga.set('userId', userUUID);

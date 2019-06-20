@@ -146,6 +146,7 @@ export default {
       }, this.playlist.id);
     }
     info.getValueByKey('media-item', this.playlist.items[index]).then((data) => {
+      if (!data) return;
       this.coverVideo = data;
       generateCoverPathByMediaHash(data.quickHash).then((path) => {
         this.coverSrc = filePathToUrl(path);

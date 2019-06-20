@@ -120,6 +120,7 @@ export default {
       }, this.playlist.id);
     }
     this.infoDB.get('media-item', this.playlist.items[this.playlist.playedIndex]).then((data) => {
+      if (!data) return;
       this.item = data;
       generateCoverPathByMediaHash(data.quickHash).then((path) => {
         this.coverSrc = filePathToUrl(path);
