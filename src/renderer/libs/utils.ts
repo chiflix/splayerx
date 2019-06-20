@@ -1,5 +1,6 @@
 import { createHash } from 'crypto';
 import { times, padStart } from 'lodash';
+// @ts-ignore
 import { promises as fsPromises } from 'fs';
 
 /** 计算文本宽度
@@ -36,7 +37,7 @@ export type ShortCut = {
   shortCut: string,
   smallShortCut: string,
 }
- 
+
 /** 最后一帧图的大尺寸
  * @constant
  * @type number
@@ -46,7 +47,7 @@ const MAX_SHORT_CUT_SIZE = 1080;
  * @constant
  * @type number
  */
-const MIN_SHORT_CUT_SIZE = 122.6; 
+const MIN_SHORT_CUT_SIZE = 122.6;
 /** 最后一帧图的图片质量
  * @constant
  * @type number
@@ -62,7 +63,7 @@ const SHORT_CURT_TYPE = 'image/jpeg';
  * @description canvas 生成观看视频的最后一帧图片
  * @author tanghaixiang
  * @param {HTMLVideoElement} video 需要截取的视频元素
- * @param {HTMLCanvasElement} canvas 截图操作的canvas元素 
+ * @param {HTMLCanvasElement} canvas 截图操作的canvas元素
  * @param {number} videoWidth 视频宽
  * @param {number} videoHeight 视频高
  * @returns {ShortCut} 最后一帧图，有常规尺寸和小尺寸

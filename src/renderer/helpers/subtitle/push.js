@@ -1,5 +1,5 @@
 import PQueue from 'p-queue';
-import Sagi from '@/helpers/sagi';
+import Sagi from '@/libs/sagi';
 
 const validProperties = [
   'mediaIdentity',
