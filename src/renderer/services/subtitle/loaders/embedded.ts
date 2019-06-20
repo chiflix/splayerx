@@ -1,6 +1,6 @@
 import { IOriginSubtitle, IEmbeddedSubtitleOrigin, SubtitleType } from './index';
 import { SubtitleFormat, AssSubtitle, SrtSubtitle, VttSubtitle } from '../parsers';
-import { LanguageName, LanguageCode } from '@/libs/language';
+import { LanguageCode, normalizeCode } from '@/libs/language';
 import { ipcRenderer, Event } from 'electron';
 import helpers from '@/helpers';
 import { inferLanguageFromPath, loadLocalFile } from '../utils';
@@ -69,7 +69,7 @@ export class EmbeddedSubtitle implements IOriginSubtitle {
       streamIndex: stream.index,
     };
     this.format = stream.codec_name as SubtitleFormat;
-    this.language = LanguageCode[stream.tags.language || LanguageName.No];
+    this.language = normalizeCode(stream.tags.language || '');
     this.isDefault = !!stream.disposition.default;
     this.name = stream.tags.title || '';
   }

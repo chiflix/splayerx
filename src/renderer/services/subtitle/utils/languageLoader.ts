@@ -29,9 +29,9 @@ function dialoguesToLanguageCodes(dialogues: string[], splitterRegex: RegExp = /
   return result.map(str => franc(str)).map((iso6393code, index) => {
     if (iso6393code === 'cmn') {
       try {
-        return isSimplified(result[index]) ? LanguageCode.简体中文 : LanguageCode.繁體中文;
+        return isSimplified(result[index]) ? LanguageCode["zh-CN"] : LanguageCode["zh-TW"];
       } catch (e) {
-        return LanguageCode.简体中文;
+        return LanguageCode["zh-CN"];
       }
     }
     return normalizeCode(iso6393code);
