@@ -30,8 +30,8 @@
           <div class="item-description" />
           <div class="item-timing">
             <span class="timing-played">
-              {{ timeInValidForm(timecodeFromSeconds(item.lastPlayedTime)) }}
-              / {{ timeInValidForm(timecodeFromSeconds(item.duration)) }}
+              {{ timeInvalidForm(timecodeFromSeconds(item.lastPlayedTime)) }}
+              / {{ timeInvalidForm(timecodeFromSeconds(item.duration)) }}
               <span v-if="item.playlistLength > 1">
                 ·&nbsp;{{
                   $t('recentPlaylist.playlistSource')
@@ -297,7 +297,7 @@ export default {
         this.open();
       }
     },
-    timeInValidForm(time: number) {
+    timeInvalidForm(time: number) {
       return (Number.isNaN(time) ? this.invalidTimeRepresentation : time);
     },
     onItemMouseover(index: number) {
