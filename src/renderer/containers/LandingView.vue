@@ -6,7 +6,7 @@
     />
     <transition name="background-container-transition">
       <div
-        v-if="showShortcutImage"
+        v-if="item.backgroundUrl"
         class="background"
       >
         <transition
@@ -50,7 +50,7 @@
     </transition>
     <transition name="welcome-container-transition">
       <div
-        v-if="landingLogoAppear"
+        v-if="!item.backgroundUrl"
         class="welcome-container"
       >
         <div class="logo-container">
@@ -142,8 +142,7 @@ export default {
       landingViewItems: [],
       sagiHealthStatus: 'UNSET',
       invalidTimeRepresentation: '--',
-      landingLogoAppear: true,
-      item: [],
+      item: {},
       tranFlag: true,
       shifting: false,
       firstIndex: 0,
@@ -162,9 +161,6 @@ export default {
           this.firstIndex = (val - this.showItemNum) + 1;
         }
       },
-    },
-    showShortcutImage() {
-      return !this.landingLogoAppear;
     },
     move() {
       return -(this.firstIndex * (this.thumbnailWidth + this.marginRight));
@@ -227,7 +223,6 @@ export default {
       // just for delete thumbnail display
       this.firstIndex = 0;
       this.landingViewItems = [];
-      this.landingLogoAppear = true;
     });
     // responsible for delete the thumbnail on display which had already deleted in DB
     this.$bus.$on('delete-file', (id: number) => {
@@ -235,7 +230,6 @@ export default {
         .findIndex((file: { id: number }) => file.id === id);
       if (deleteIndex >= 0) {
         this.landingViewItems.splice(deleteIndex, 1);
-        this.landingLogoAppear = true;
       }
     });
     this.$bus.$on('drag-over', () => {
@@ -302,11 +296,6 @@ export default {
     },
     onItemMouseover(index: number) {
       this.item = this.landingViewItems[index];
-      if (this.item.backgroundUrl !== '') {
-        this.landingLogoAppear = false;
-      } else {
-        this.landingLogoAppear = true;
-      }
     },
     onItemClick(index: number) {
       if (index === this.lastIndex && !this.isFullScreen) {
@@ -319,7 +308,7 @@ export default {
     },
     onItemDelete(index: number) {
       playInfoStorageService.deleteRecentPlayedBy(this.landingViewItems[index].id);
-      this.landingLogoAppear = true;
+      this.item = {};
       this.landingViewItems.splice(index, 1);
       if (this.firstIndex !== 0) this.lastIndex = this.landingViewItems.length;
     },
