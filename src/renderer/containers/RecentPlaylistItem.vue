@@ -16,7 +16,6 @@
     >
       <div
         ref="blur"
-        v-if="imageLoaded"
         :style="{
           backgroundImage: !isPlaying ?
             `linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%), ${backgroundImage}`
@@ -280,9 +279,6 @@ export default {
     },
     backgroundImage() {
       return `url(${this.imageSrc})`;
-    },
-    imageLoaded() {
-      return this.recentPlayService.imageLoaded;
     },
     // ui related
     side() {
