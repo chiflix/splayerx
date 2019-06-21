@@ -315,7 +315,6 @@ export default {
   },
   methods: {
     ...mapActions({
-      // @ts-ignore
       clearMousedown: InputActions.MOUSEDOWN_UPDATE,
       clearMouseup: InputActions.MOUSEUP_UPDATE,
       offCurrentSubtitle: subtitleActions.OFF_SUBTITLES,

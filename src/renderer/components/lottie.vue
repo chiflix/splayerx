@@ -6,7 +6,6 @@
 </template>
 
 <script lang="ts">
-// @ts-ignore
 import lottie from 'lottie-web';
 
 export default {
@@ -22,6 +21,7 @@ export default {
   },
   data() {
     return {
+      anim: {},
     };
   },
   mounted() {

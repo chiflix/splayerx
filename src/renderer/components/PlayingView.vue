@@ -16,7 +16,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { mapActions, mapGetters } from 'vuex';
 import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import SubtitleRenderer from '@/components/Subtitle/SubtitleRenderer.vue';

@@ -34,7 +34,6 @@
 </template>
 
 <script lang="ts">
-//  @ts-ignore
 import lottie from '@/components/lottie.vue';
 import animationData from '@/assets/advance.json';
 import { mapActions, mapGetters, mapState } from 'vuex';
@@ -45,7 +44,6 @@ import { AnimationItem } from 'lottie-web';
 
 export default {
   name: 'AdvanceControl',
-  //  @ts-ignore
   type: INPUT_COMPONENT_TYPE,
   components: {
     lottie,
