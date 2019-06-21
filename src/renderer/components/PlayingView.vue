@@ -18,6 +18,7 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex';
+import { audioGrabService } from '@/services/media/AudioGrabService';
 import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import SubtitleRenderer from '@/components/Subtitle/SubtitleRenderer.vue';
 import VideoCanvas from '@/containers/VideoCanvas.vue';
@@ -32,8 +33,18 @@ export default {
     'the-video-canvas': VideoCanvas,
     'subtitle-renderer': SubtitleRenderer,
   },
+  watch: {
+    originSrc(v) {
+      setTimeout(() => {
+        audioGrabService.send({
+          videoSrc: v,
+          mediaHash: this.mediaHash,
+        });
+      }, 100);
+    },
+  },
   computed: {
-    ...mapGetters(['currentCues', 'scaleNum', 'subToTop', 'currentFirstSubtitleId', 'winHeight', 'chosenStyle', 'chosenSize', 'originSrc']),
+    ...mapGetters(['currentCues', 'scaleNum', 'subToTop', 'currentFirstSubtitleId', 'winHeight', 'chosenStyle', 'chosenSize', 'originSrc', 'mediaHash']),
     concatCurrentCues() {
       return [this.currentCues[0].cues, this.currentCues[1].cues];
     },
@@ -49,6 +60,12 @@ export default {
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [320, 180]);
     videodata.checkTick();
     videodata.onTick = this.onUpdateTick;
+    setTimeout(() => {
+      audioGrabService.send({
+        videoSrc: this.originSrc,
+        mediaHash: this.mediaHash,
+      });
+    }, 1000);
   },
   beforeDestroy() {
     this.updateSubToTop(false);

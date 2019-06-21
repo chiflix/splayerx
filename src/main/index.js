@@ -7,6 +7,7 @@ import os from 'os';
 import path from 'path';
 import fs from 'fs';
 import rimraf from 'rimraf';
+import { audioHandler } from './helpers/audioHandler';
 import TaskQueue from '../renderer/helpers/proceduralQueue';
 import './helpers/electronPrototypes';
 import writeLog from './helpers/writeLog';
@@ -417,6 +418,10 @@ function registerMainWindowEvent(mainWindow) {
     if (preferenceWindow) {
       preferenceWindow.webContents.send('preferenceDispatch', 'setPreference', args);
     }
+  });
+  // handle audio grab on main process
+  ipcMain.on('grab-audio', (events, args) => {
+    audioHandler.push(args);
   });
 }
 
