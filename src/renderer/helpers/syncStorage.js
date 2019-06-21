@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs';
 import _ from 'lodash';
-import helpers from './index';
+import { log } from '@/libs/Log';
 
 /* eslint-disable */
 const electron = require('electron');
@@ -46,7 +46,7 @@ function getSync(key) {
       if (err.code === 'ENOENT') {
         data = JSON.stringify({});
       } else {
-        helpers.methods.addLog('error', err);
+        log.error('syncStorage', err);
         throw err;
       }
     }
@@ -68,7 +68,7 @@ function setSync(key, json) {
   } catch (err) {
     if (err instanceof Error) {
       if (err.code !== 'EEXIST') {
-        helpers.methods.addLog('error', err);
+        log.error('syncStorage', err);
       }
     }
   } finally {

@@ -46,7 +46,7 @@
       :attached-shown="attachedShown"
       :handle-mouse-up="togglePlay"
       @update:playbutton-state="updatePlayButtonState"
-      class="play-button no-drag"
+      :class="`${showAllWidgets ? 'play-button no-drag' : 'play-button'}`"
     />
     <volume-indicator
       ref="volumeIndicator"
@@ -124,8 +124,8 @@ import SubtitleControl from '@/components/PlayingView/SubtitleControl.vue';
 import PlaylistControl from '@/components/PlayingView/PlaylistControl.vue';
 import TheTimeCodes from '@/components/PlayingView/TheTimeCodes.vue';
 import TheProgressBar from '@/containers/TheProgressBar.vue';
+import RecentPlaylist from '@/containers/RecentPlaylist.vue';
 import NotificationBubble from '@/components/NotificationBubble.vue';
-import RecentPlaylist from '@/components/PlayingView/RecentPlaylist.vue';
 import { videodata } from '@/store/video';
 
 const { mapGetters: inputMapGetters } = createNamespacedHelpers('InputPlugin');
@@ -411,6 +411,11 @@ export default {
     document.addEventListener('keydown', this.handleKeydown);
     document.addEventListener('keyup', this.handleKeyup);
     document.addEventListener('wheel', this.handleWheel);
+  },
+  destroyed() {
+    document.removeEventListener('keydown', this.handleKeydown);
+    document.removeEventListener('keyup', this.handleKeyup);
+    document.removeEventListener('wheel', this.handleWheel);
   },
   methods: {
     ...mapActions({

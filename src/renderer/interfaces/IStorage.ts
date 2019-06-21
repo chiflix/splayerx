@@ -1,30 +1,23 @@
 export interface IStorage {
   /**
    * @description 通过key获取存储的JSON数据
-   * @author tanghaixiang@xindong.com
-   * @date 2019-06-11
-   * @param {String} key
-   * @param {*} json
-   * @returns {Promise<boolean>} 放回存储的JSON数据
-   * @memberof IStorage
+   * @author tanghaixiang
+   * @param {String} key 保存数据对应的key
+   * @returns {Promise<any>} 返回存储的JSON数据
    */
-  get(key: String, json: any): Promise<boolean>
+  get(key: String): Promise<any>
   /**
    * @description 通过key设置对应的JSON数据
-   * @author tanghaixiang@xindong.com
-   * @date 2019-06-11
-   * @param {String} key
-   * @param {*} json
+   * @author tanghaixiang
+   * @param {String} key 保存数据对应的key
+   * @param {*} json 保存数据
    * @returns {Promise<boolean>} 返回是否成功设置
-   * @memberof IStorage
    */
   set(key: String, json: any): Promise<boolean>
   /**
    * @description 清楚JSON存储目录下的所有数据
-   * @author tanghaixiang@xindong.com
-   * @date 2019-06-11
-   * @returns {Promise<boolean>}
-   * @memberof IStorage
+   * @author tanghaixiang
+   * @returns {Promise<any>}
    */
-  clear():Promise<boolean>
+  clear():Promise<any>
 }

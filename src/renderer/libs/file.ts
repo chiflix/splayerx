@@ -1,11 +1,10 @@
-import { access, readdir } from 'fs';
+import { access, readdir, accessSync, constants } from 'fs';
 import mkdirp from 'mkdirp';
 import rimraf from 'rimraf';
 
 /** 创建目录
  * @description
- * @author tanghaixiang@xindong.com
- * @date 2019-05-21
+ * @author tanghaixiang
  * @param {string} path
  * @returns {Promise<string>}
  */
@@ -21,11 +20,24 @@ export function mkdir(path: string): Promise<string> {
   });
 }
 
+/**
+ * @description 同步式创建目录
+ * @author tanghaixiang
+ * @param {string} path
+ * @returns {boolean}
+ */
+export function mkdirSync(path: string): boolean {
+  try {
+    mkdirp.sync(path)
+    return true
+  } catch (error) {
+  }
+  return false;
+}
+
 /** 检查path是否可以访问
  * @description
- * @author tanghaixiang@xindong.com
- * @date 2019-05-22
- * @export
+ * @author tanghaixiang
  * @param {string} path
  * @returns {Promise<boolean>}
  */
@@ -41,10 +53,24 @@ export function checkPathExist(path: string): Promise<boolean> {
   });
 }
 
+/**
+ * @description 同步检查path是否可以访问
+ * @author tanghaixiang
+ * @param {string} path
+ * @returns {boolean}
+ */
+export function checkPathExistSync(path: string): boolean {
+  try {
+    accessSync(path,  constants.R_OK |  constants.W_OK);
+    return true;
+  } catch (err) {
+  }
+  return false;
+}
+
 /** 读取目录
  * @description
- * @author tanghaixiang@xindong.com
- * @date 2019-05-21
+ * @author tanghaixiang
  * @param {string} p
  * @returns {Promise<string[]>}
  */
@@ -62,8 +88,7 @@ export function readDir(p: string): Promise<string[]> {
 
 /** 删除目录
  * @description
- * @author tanghaixiang@xindong.com
- * @date 2019-05-21
+ * @author tanghaixiang
  * @param {string} path
  * @returns {Promise<boolean>}
  */

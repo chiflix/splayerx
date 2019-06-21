@@ -3,7 +3,7 @@ import {
 } from 'path';
 import { readdir } from 'fs';
 import { ipcRenderer } from 'electron';
-import Sagi from '@/helpers/sagi';
+import Sagi from '@/libs/sagi';
 import helpers from '@/helpers';
 
 const { mediaQuickHash: calculateMediaIdentity } = helpers.methods;

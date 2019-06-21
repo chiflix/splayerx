@@ -13,20 +13,16 @@ export type PlaybackStates = {
 export interface ISettingStorable {
   /**
    * @description 更新字幕样式设置
-   * @author tanghaixiang@xindong.com
-   * @date 2019-06-11
-   * @param {SubtitleStyle} data
+   * @author tanghaixiang
+   * @param {SubtitleStyle} data 字幕设置数据
    * @returns {Promise<boolean>} 返回是否成果更新
-   * @memberof ISettingStorable
    */
   updateSubtitleStyle(data: SubtitleStyle): Promise<boolean>
   /**
    * @description 更新播放设置
-   * @author tanghaixiang@xindong.com
-   * @date 2019-06-11
-   * @param {PlaybackStates} data
+   * @author tanghaixiang
+   * @param {PlaybackStates} data 播放设置数据
    * @returns {Promise<boolean>} 返回是否成果更新
-   * @memberof ISettingStorable
    */
   updatePlaybackStates(data: PlaybackStates): Promise<boolean>
 }

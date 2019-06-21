@@ -26,6 +26,7 @@
         bottom: chosen ? '10px' : '0',
         width: `${thumbnailWidth}px`,
         height: `${thumbnailHeight}px`,
+        backgroundImage: backgroundUrl,
       }"
       class="item"
     >
@@ -69,23 +70,15 @@
   </div>
 </template>
 
-<script>
-import path from 'path';
-import { filePathToUrl } from '@/helpers/path';
-import { generateCoverPathByMediaHash } from '@/helpers/cacheFileStorage';
+<script lang="ts">
 import Icon from '../BaseIconContainer.vue';
 
 export default {
   name: 'PlaylistItem',
   components: { Icon },
   props: {
-    firstIndex: {
-      type: Number,
-      default: 0,
-    },
-    lastIndex: {
-      type: Number,
-      default: 0,
+    backgroundUrl: {
+      type: String,
     },
     shifting: {
       type: Boolean,
@@ -97,10 +90,6 @@ export default {
       type: Number,
       default: 0,
     },
-    playlist: {
-      type: Object,
-      default: () => {},
-    },
     thumbnailHeight: {
       type: Number,
       default: 63,
@@ -109,17 +98,20 @@ export default {
       type: Number,
       default: 112,
     },
-    lastPlayedFile: {
-      type: Array,
-      require: true,
-      default: () => [],
-    },
     isFullScreen: {
       type: Boolean,
     },
-    filePathNeedToDelete: {
-      type: String,
-      default: '',
+    onItemMouseover: {
+      type: Function,
+      required: true,
+    },
+    onItemClick: {
+      type: Function,
+      required: true,
+    },
+    onItemDelete: {
+      type: Function,
+      required: true,
     },
   },
   data() {
@@ -135,65 +127,16 @@ export default {
       disY: NaN,
     };
   },
-  created() {
-    let index = this.playlist.playedIndex;
-    if (index > this.playlist.items.length - 1 || index < 0) {
-      index = 0;
-      this.infoDB.update('recent-played', {
-        ...this.playlist,
-        playedIndex: index,
-      }, this.playlist.id);
-    }
-    this.infoDB.get('media-item', this.playlist.items[index]).then((data) => {
-      this.coverVideo = data;
-      generateCoverPathByMediaHash(data.quickHash).then((path) => {
-        this.coverSrc = filePathToUrl(path);
-        this.$refs.item.style.setProperty(
-          'background-image',
-          this.itemShortcut(data.smallShortCut, data.lastPlayedTime, data.duration),
-        );
-      });
-    });
-  },
   destroyed() {
     document.removeEventListener('mousemove', this.onRecentItemMousemove);
     document.removeEventListener('mouseup', this.onRecentItemMouseup);
   },
   methods: {
-    itemShortcut(shortCut, lastPlayedTime, duration) {
-      return duration - lastPlayedTime < 5 ? `url("${this.coverSrc}")` : `url("${shortCut}")`;
-    },
-    itemInfo() {
-      return {
-        baseName: path.basename(this.coverVideo.path, path.extname(this.coverVideo.path)),
-        lastTime: this.coverVideo.lastPlayedTime,
-        duration: this.coverVideo.duration,
-        percentage: (this.coverVideo.lastPlayedTime / this.coverVideo.duration) * 100,
-        path: this.coverVideo.path,
-        cover: this.coverVideo.cover,
-        index: this.playlist.playedIndex,
-        playListLength: this.playlist.items.length,
-      };
-    },
     onRecentItemMouseenter() {
       if ((this.isInRange || this.isFullScreen) && !this.shifting) {
+        this.onItemMouseover(this.index);
         this.chosen = true;
         this.$refs.layer2.style.setProperty('transform', 'translateY(-4px) scale(0.9, 0.9)');
-        if (this.coverVideo.shortCut !== '') {
-          this.isChanging = true;
-          this.$emit('showShortcutImage');
-        } else {
-          this.$emit('showLandingLogo');
-        }
-        this.displayInfo = {
-          ...this.itemInfo(),
-          backgroundUrl: this.itemShortcut(
-            this.coverVideo.shortCut,
-            this.coverVideo.lastPlayedTime,
-            this.coverVideo.duration,
-          ),
-        };
-        this.$emit('displayInfo', this.displayInfo);
       }
     },
     onRecentItemMouseleave() {
@@ -202,7 +145,7 @@ export default {
         this.$refs.layer2.style.setProperty('transform', 'scale(0.9, 0.9)');
       }
     },
-    onRecentItemMousedown(e) {
+    onRecentItemMousedown(e: MouseEvent) {
       this.disX = e.pageX;
       this.disY = e.pageY;
       this.isDragging = false;
@@ -212,7 +155,7 @@ export default {
         document.addEventListener('mouseup', this.onRecentItemMouseup);
       }
     },
-    onRecentItemMousemove(e) {
+    onRecentItemMousemove(e: MouseEvent) {
       this.isDragging = true;
       this.moving = true;
       const movementX = e.pageX - this.disX;
@@ -253,24 +196,12 @@ export default {
       this.$refs.playlistItem.style.setProperty('transform', 'translate(0,0)');
       this.$refs.playlistItem.style.setProperty('z-index', '');
       if (this.aboutToDelete) {
-        this.$emit('showLandingLogo');
-        this.$emit('delete-item', this.playlist);
+        this.onItemDelete(this.index);
         this.aboutToDelete = false;
-      }
-      if (this.firstIndex !== 0) {
-        this.$emit('next-page');
       }
     },
     onRecentItemClick() {
-      if (!this.isDragging && !this.shifting) {
-        if (this.index === this.lastIndex && !this.isFullScreen) {
-          this.$emit('next-page');
-        } else if (this.index + 1 < this.firstIndex && !this.isFullScreen) {
-          this.$emit('previous-page');
-        } else if (!this.filePathNeedToDelete) {
-          this.openPlayList(this.playlist.id);
-        }
-      }
+      this.onItemClick(this.index);
     },
   },
 };

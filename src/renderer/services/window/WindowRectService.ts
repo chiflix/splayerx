@@ -30,16 +30,13 @@ export default class WindowRectService implements IWindowRectRequest {
   private calculateWindowSize(minSize: number[], maxSize: number[], videoSize: number[], videoExisted: boolean, screenSize: number[]): number[];
   /**
    * @description 计算新的窗口大小
-   * @author tanghaixiang@xindong.com
-   * @date 2019-06-11
-   * @private
+   * @author tanghaixiang
    * @param {number[]} minSize 
    * @param {number[]} maxSize
    * @param {number[]} videoSize
    * @param {boolean} [videoExisted]
    * @param {number[]} [screenSize]
    * @returns {number[]} 返回最新的窗口宽和高
-   * @memberof WindowRectService
    */
   private calculateWindowSize(minSize: number[], maxSize: number[], videoSize: number[], videoExisted?: boolean, screenSize?: number[]): number[] {
     let result = videoSize;
@@ -67,14 +64,11 @@ export default class WindowRectService implements IWindowRectRequest {
   
   /**
    * @description 计算最新的窗口位置
-   * @author tanghaixiang@xindong.com
-   * @date 2019-06-11
-   * @private
+   * @author tanghaixiang
    * @param {number[]} currentRect
    * @param {number[]} windowRect
    * @param {number[]} newSize
    * @returns {number[]} 返回最新的窗口位置
-   * @memberof WindowRectService
    */
   private calculateWindowPosition(currentRect: number[], windowRect: number[], newSize: number[]): number[] {
     const tempRect = currentRect.slice(0, 2)
@@ -97,8 +91,7 @@ export default class WindowRectService implements IWindowRectRequest {
 
   /**
    * @description 根据是否全屏和旋转角度来计算窗口新的大小和位置
-   * @author tanghaixiang@xindong.com
-   * @date 2019-06-11
+   * @author tanghaixiang
    * @param {boolean} fullScreen
    * @param {string} [whichView]
    * @param {number} [windowAngle]
@@ -106,7 +99,6 @@ export default class WindowRectService implements IWindowRectRequest {
    * @param {number[]} [lastWindowSize]
    * @param {number[]} [windowPosition]
    * @returns {number[]} 返回新的窗口大小和位置
-   * @memberof WindowRectService
    */
   public uploadWindowBy(fullScreen: boolean, whichView?: string, windowAngle?: number, lastWindowAngle?: number, lastWindowSize?: number[], windowPosition?: number[]): number[] {
     let newRect: number[] = [];
@@ -136,14 +128,12 @@ export default class WindowRectService implements IWindowRectRequest {
   }
   /**
    * @description 正常模式下计算新的窗口大小和位置
-   * @author tanghaixiang@xindong.com
-   * @date 2019-06-11
+   * @author tanghaixiang
    * @param {number[]} videoSize
    * @param {boolean} videoExisted
    * @param {number[]} oldRect
    * @param {number[]} [maxSize]
    * @returns {number[]} 返回新的窗口大小和位置
-   * @memberof WindowRectService
    */
   public calculateWindowRect(videoSize: number[], videoExisted: boolean, oldRect: number[], maxSize?: number[]): number[] {
     if (!maxSize) {
@@ -161,14 +151,12 @@ export default class WindowRectService implements IWindowRectRequest {
 
   /**
    * @description 计算视频缩放大小
-   * @author tanghaixiang@xindong.com
-   * @date 2019-06-11
+   * @author tanghaixiang
    * @param {boolean} fullScreen
    * @param {number} windowAngle
    * @param {number} videoRatio
    * @param {number} [windowRatio]
    * @returns {number} 返回视频缩放大小
-   * @memberof WindowRectService
    */
   public calculateWindowScaleBy(fullScreen: boolean, windowAngle: number, videoRatio: number, windowRatio?: number): number {
     let result = 0;

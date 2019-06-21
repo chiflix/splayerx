@@ -6,13 +6,13 @@ import { times, get } from 'lodash';
 import bookmark from '@/helpers/bookmark';
 import syncStorage from '@/helpers/syncStorage';
 import infoDB from '@/helpers/infoDB';
+import { log } from '@/libs/Log';
 import { getValidVideoExtensions, getValidVideoRegex } from '@/../shared/utils';
 import {
-  FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED, ADD_NO_VIDEO,
+  EMPTY_FOLDER, OPEN_FAILED, ADD_NO_VIDEO,
   SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, FILE_NON_EXIST_IN_PLAYLIST, PLAYLIST_NON_EXIST,
 } from '@/../shared/notificationcodes';
-import Sentry from '@/../shared/sentry';
-import Sagi from './sagi';
+import Sagi from '@/libs/sagi';
 import { addBubble } from '../../shared/notificationControl';
 
 import { ipcRenderer, remote } from 'electron'; // eslint-disable-line
@@ -225,10 +225,7 @@ export default {
         this.infoDB.update('recent-played', playlist, playlist.id);
         this.$store.dispatch('PlayingList', { id: playlist.id });
       } else {
-        this.addLog('error', {
-          errcode: ADD_NO_VIDEO,
-          message: 'Didn\'t add any playable file in this folder.',
-        });
+        log.error('helpers/index.js', 'Didn\'t add any playable file in this folder.');
         addBubble(ADD_NO_VIDEO, this.$i18n);
       }
     },
@@ -263,10 +260,7 @@ export default {
         this.createPlayList(...videoFiles);
       } else {
         // TODO: no videoFiles in folders error catch
-        this.addLog('error', {
-          errcode: EMPTY_FOLDER,
-          message: 'There is no playable file in this folder.',
-        });
+        log.error('helpers/index.js', 'There is no playable file in this folder.');
         addBubble(EMPTY_FOLDER, this.$i18n);
       }
       if (containsSubFiles) {
@@ -301,10 +295,7 @@ export default {
         } else if (getValidVideoRegex().test(path.extname(tempFilePath))) {
           videoFiles.push(tempFilePath);
         } else {
-          this.addLog('error', {
-            errcode: OPEN_FAILED,
-            message: `Failed to open file : ${tempFilePath}`,
-          });
+          log.error('helpers/index.js', `Failed to open file : ${tempFilePath}`);
           addBubble(OPEN_FAILED, this.$i18n);
         }
       }
@@ -371,17 +362,9 @@ export default {
           let similarVideos;
           try {
             similarVideos = await this.findSimilarVideoByVidPath(video.path);
-            const singleItems = await this.infoDB.getValueByKey('media-item', 'source', '');
-            const filtered = singleItems.filter((item) => similarVideos.includes(item.path));
-            const items = [];
-            filtered.forEach((media) => {
-              const mediaIndex = similarVideos.findIndex(path => path === media.path);
-              items[mediaIndex] = media.videoId;
-            });
             this.$store.dispatch('FolderList', {
               id,
               paths: similarVideos,
-              items,
             });
           } catch (err) {
             if (process.mas && get(err, 'code') === 'EPERM') {
@@ -389,7 +372,7 @@ export default {
               this.$store.dispatch('FolderList', {
                 id,
                 paths: [video.path],
-                items: [video.videoId],
+                items: [playlist.items[0]],
               });
             }
           }
@@ -421,17 +404,9 @@ export default {
       let similarVideos;
       try {
         similarVideos = await this.findSimilarVideoByVidPath(videoFile);
-        const singleItems = await this.infoDB.getValueByKey('media-item', 'source', '');
-        const filtered = singleItems.filter((item) => similarVideos.includes(item.path));
-        const items = [];
-        filtered.forEach((media) => {
-          const mediaIndex = similarVideos.findIndex(path => path === media.path);
-          items[mediaIndex] = media.videoId;
-        });
         this.$store.dispatch('FolderList', {
           id,
           paths: similarVideos,
-          items,
         });
       } catch (err) {
         if (process.mas && get(err, 'code') === 'EPERM') {
@@ -439,7 +414,7 @@ export default {
           this.$store.dispatch('FolderList', {
             id,
             paths: [videoFile],
-            items: [playlistItem.items[playlistItem.playedIndex]],
+            items: [playlistItem.items[0]],
           });
         }
       }
@@ -469,10 +444,7 @@ export default {
         mediaQuickHash = await this.mediaQuickHash(vidPath);
       } catch (err) {
         if (get(err, 'code') === 'ENOENT') {
-          this.addLog('error', {
-            errcode: FILE_NON_EXIST,
-            message: 'Failed to open file, it will be removed from list.'
-          });
+          log.error('helpers/index.js', 'Failed to open file, it will be removed from list.');
           addBubble(FILE_NON_EXIST_IN_PLAYLIST, this.$i18n);
           this.$bus.$emit('delete-file', vidPath, id);
         }
@@ -514,31 +486,6 @@ export default {
       }));
       fileHandler.close();
       return res.join('-');
-    },
-    addLog(level, log) {
-      switch (level) {
-        case 'error':
-          console.error(log);
-          if ((log instanceof Error || typeof log === 'string') && process.env.NODE_ENV !== 'development') {
-            this.$ga && this.$ga.exception(log.message || log);
-            Sentry.captureException(log);
-          }
-          break;
-        case 'warn':
-          console.warn(log);
-          break;
-        default:
-          console.log(log);
-      }
-
-      let normalizedLog;
-      if (!log || typeof log === 'string') {
-        normalizedLog = { message: log };
-      } else {
-        const { errcode, code, message, stack } = log;
-        normalizedLog = { errcode, code, message, stack };
-      }
-      ipcRenderer.send('writeLog', level, normalizedLog);
     },
     getTextWidth(fontSize, fontFamily, text) {
       const span = document.createElement('span');

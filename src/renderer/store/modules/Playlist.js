@@ -4,7 +4,7 @@ import helpers from '@/helpers/index';
 
 const state = {
   source: '', // 'drop' or '', used on mas version
-  id: '',
+  id: NaN,
   items: [],
   playList: [],
   isFolderList: undefined,
@@ -89,7 +89,7 @@ const actions = {
   FolderList({ commit }, payload) {
     commit('isFolderList');
     commit('playList', payload.paths);
-    commit('items', payload.items);
+    if (payload.items) commit('items', payload.items);
     commit('id', payload.id);
   },
   RemoveItemFromPlayingList({ state, commit }, item) {

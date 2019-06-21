@@ -11,10 +11,9 @@ import axios from 'axios';
 import { mapGetters, mapActions, createNamespacedHelpers } from 'vuex';
 import uuidv4 from 'uuid/v4';
 import osLocale from 'os-locale';
+import VueAxios from 'vue-axios';
 // @ts-ignore
 import VueElectronJSONStorage from 'vue-electron-json-storage';
-// @ts-ignore
-import VueResource from 'vue-resource';
 // @ts-ignore
 import VueAnalytics from 'vue-analytics';
 // @ts-ignore
@@ -30,7 +29,7 @@ import { windowRectService } from '@/services/window/WindowRectService';
 import helpers from '@/helpers';
 import { hookVue } from '@/kerning';
 import { Video as videoActions, Subtitle as subtitleActions } from '@/store/actionTypes';
-import addLog from '@/helpers/index';
+import { log } from '@/libs/Log';
 import asyncStorage from '@/helpers/asyncStorage';
 import { videodata } from '@/store/video';
 import NotificationBubble, { addBubble } from '../shared/notificationControl';
@@ -52,13 +51,12 @@ function getSystemLocale() {
   return 'en';
 }
 
-Vue.http = Vue.prototype.$http = axios;
 Vue.config.productionTip = false;
 Vue.config.warnHandler = (warn) => {
-  addLog.methods.addLog('warn', warn);
+  log.info('render/main', warn);
 };
 Vue.config.errorHandler = (err) => {
-  addLog.methods.addLog('error', err);
+  log.error('render/main', err);
 };
 Vue.directive('fade-in', {
   bind(el: HTMLElement, binding: any) {
@@ -88,7 +86,7 @@ Vue.directive('fade-in', {
 Vue.use(VueElectron);
 Vue.use(VueI18n);
 Vue.use(VueElectronJSONStorage);
-Vue.use(VueResource);
+Vue.use(VueAxios, axios);
 Vue.use(AsyncComputed);
 Vue.use(VueAnalytics, {
   id: (process.env.NODE_ENV === 'production') ? 'UA-2468227-6' : 'UA-2468227-5',
@@ -538,7 +536,7 @@ new Vue({
               click: () => {
                 this.infoDB.clearAll();
                 app.clearRecentDocuments();
-                this.$bus.$emit('clean-lastPlayedFile');
+                this.$bus.$emit('clean-landingViewItems');
                 this.refreshMenu();
               },
             },
@@ -615,10 +613,7 @@ new Vue({
                 const options = { types: ['window'], thumbnailSize: { width: this.winWidth, height: this.winHeight } };
                 electron.desktopCapturer.getSources(options, (error, sources) => {
                   if (error) {
-                    this.addLog('info', {
-                      message: 'Snapshot failed .',
-                      code: SNAPSHOT_FAILED,
-                    });
+                    log.info('render/main', 'Snapshot failed .');
                     addBubble(SNAPSHOT_FAILED, this.$i18n);
                   }
                   sources.forEach((source) => {
@@ -641,17 +636,11 @@ new Vue({
                               },
                             );
                           } else {
-                            this.addLog('info', {
-                              message: 'Snapshot failed .',
-                              code: SNAPSHOT_FAILED,
-                            });
+                            log.info('render/main', 'Snapshot failed .');
                             addBubble(SNAPSHOT_FAILED, this.$i18n);
                           }
                         } else {
-                          this.addLog('info', {
-                            message: 'Snapshot success .',
-                            code: SNAPSHOT_SUCCESS,
-                          });
+                          log.info('render/main', 'Snapshot success .');
                           addBubble(SNAPSHOT_SUCCESS, this.$i18n);
                         }
                       });
@@ -1074,7 +1063,7 @@ new Vue({
       })
         .catch((err: Error) => {
           this.menuOperationLock = false;
-          this.addLog('error', err);
+          log.error('render/main', err);
         });
     },
     updateRecentItem(key: any, value: any) {
@@ -1363,12 +1352,12 @@ new Vue({
     // TODO: Setup user identity
     this.$storage.get('user-uuid', (err: Error, userUUID: string) => {
       if (err || Object.keys(userUUID).length === 0) {
-        err && this.addLog('error', err);
+        err && log.error('render/main', err);
         userUUID = uuidv4();
         this.$storage.set('user-uuid', userUUID);
       }
 
-      Vue.http.headers.common['X-Application-Token'] = userUUID;
+      Vue.axios.defaults.headers.common['X-Application-Token'] = userUUID;
 
       // set userUUID to google analytics uid
       this.$ga && this.$ga.set('userId', userUUID);
@@ -1432,13 +1421,18 @@ new Vue({
               }, 1000);
             }
             if (this.wheelDirection === 'vertical') {
+              let step = Math.abs(e.deltaY) * 0.06;
+              // in windows if wheel setting more lines per step, make it limited.
+              if (process.platform !== 'darwin' && step > 6) {
+                step = 6;
+              }
               if (
                 (process.platform !== 'darwin' && !this.reverseScrolling) ||
                 (process.platform === 'darwin' && this.reverseScrolling)
               ) {
                 this.$store.dispatch(
                   e.deltaY < 0 ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
-                  Math.abs(e.deltaY) * 0.06,
+                  step,
                 );
               } else if (
                 (process.platform === 'darwin' && !this.reverseScrolling) ||
@@ -1446,7 +1440,7 @@ new Vue({
               ) {
                 this.$store.dispatch(
                   e.deltaY > 0 ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
-                  Math.abs(e.deltaY) * 0.06,
+                  step,
                 );
               }
             }
