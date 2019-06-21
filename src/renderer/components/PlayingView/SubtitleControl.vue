@@ -335,7 +335,7 @@ export default {
     },
     handleRefresh() {
       if (!this.isRefreshing) {
-        // this.$emit('handle-refresh');
+        this.$store.dispatch('handle-refresh');
       }
     },
     handleAnimation(anim: AnimationItem) {

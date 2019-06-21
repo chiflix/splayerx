@@ -266,18 +266,6 @@ export default {
         this.$emit('update:transFlag', false);
         this.$emit('update:hoverHeight', 0);
         this.$emit('remove-subtitle', item.id);
-        // this.removeLocalSub(item.id);
-        // if (item.id === this.currentFirstSubtitleId ||
-        // item.id === this.currentSecondSubtitleId) {
-        //   this.$emit('off-subtitle');
-        // }
-        // deleteSubtitles([item.id], this.originSrc).then((result) => {
-        //   this.addLog(
-        //     'info',
-        //     `Subtitle delete { successId:${result.success}, failureId:${result.failure} }`,
-        //   );
-        //   this.transFlag = true;
-        // });
       }
     },
     toggleItemsMouseOver(index: number) {

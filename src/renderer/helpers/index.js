@@ -487,24 +487,5 @@ export default {
       fileHandler.close();
       return res.join('-');
     },
-    getTextWidth(fontSize, fontFamily, text) {
-      const span = document.createElement('span');
-      let result = span.offsetWidth;
-      span.style.visibility = 'hidden';
-      span.style.fontSize = fontSize;
-      span.style.fontFamily = fontFamily;
-      span.style.display = 'inline-block';
-      span.style.fontWeight = '700';
-      span.style.letterSpacing = '0.2px';
-      document.body.appendChild(span);
-      if (typeof span.textContent !== 'undefined') {
-        span.textContent = text;
-      } else {
-        span.innerText = text;
-      }
-      result = parseFloat(window.getComputedStyle(span).width) - result;
-      span.parentNode.removeChild(span);
-      return result;
-    },
   },
 };
