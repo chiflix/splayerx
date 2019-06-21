@@ -4,6 +4,7 @@ class Updater {
   constructor(ipcMain) {
     this.win = { webContents: ipcMain };
   }
+
   quitAndInstall() {
     return this; // nothing here just a mock
   }

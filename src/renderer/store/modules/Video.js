@@ -54,7 +54,7 @@ const state = {
   intrinsicWidth: 0,
   intrinsicHeight: 0,
   ratio: 0,
-  AudioDelay: 0,
+  audioDelay: 0,
   defaultDir: '',
   snapshotSavedPath: '',
 };
@@ -66,8 +66,8 @@ const getters = {
     if (urlParseLax(state.src).protocol) {
       return state.src;
     }
-    const converted = process.platform === 'win32' ? encodeURIComponent(state.src).replace(/%3A/g, ':').replace(/(%5C)|(%2F)/g, '/') :
-      encodeURIComponent(state.src).replace(/%3A/g, ':').replace(/%2F/g, '/');
+    const converted = process.platform === 'win32' ? encodeURIComponent(state.src).replace(/%3A/g, ':').replace(/(%5C)|(%2F)/g, '/')
+      : encodeURIComponent(state.src).replace(/%3A/g, ':').replace(/%2F/g, '/');
     return process.platform === 'win32' ? converted : `file://${converted}`;
   },
   // playback state
@@ -89,7 +89,7 @@ const getters = {
   audioTrackList: state => state.audioTrackList,
   currentAudioTrackId: (state) => {
     const track = state.audioTrackList.filter(track => track.enabled)[0];
-    if (track && track.id) return track.id;
+    if (track && track.id) return Number(track.id);
     return -1;
   },
   // meta info
@@ -97,22 +97,22 @@ const getters = {
   intrinsicHeight: state => state.intrinsicHeight,
   computedWidth: (state, getters) => {
     if (getters.winAngle === 0 || getters.winAngle === 180) {
-      return Math.round(getters.winRatio > getters.ratio ?
-        getters.winHeight * getters.ratio : getters.winWidth);
+      return Math.round(getters.winRatio > getters.ratio
+        ? getters.winHeight * getters.ratio : getters.winWidth);
     }
-    return Math.round(getters.winRatio > 1 / getters.ratio ?
-      getters.winHeight * (1 / getters.ratio) : getters.winWidth);
+    return Math.round(getters.winRatio > 1 / getters.ratio
+      ? getters.winHeight * (1 / getters.ratio) : getters.winWidth);
   },
   computedHeight: (state, getters) => {
     if (getters.winAngle === 0 || getters.winAngle === 180) {
-      return Math.round(getters.winRatio < getters.ratio ?
-        getters.winWidth / getters.ratio : getters.winHeight);
+      return Math.round(getters.winRatio < getters.ratio
+        ? getters.winWidth / getters.ratio : getters.winHeight);
     }
-    return Math.round(getters.winRatio < 1 / getters.ratio ?
-      getters.winWidth / (1 / getters.ratio) : getters.winHeight);
+    return Math.round(getters.winRatio < 1 / getters.ratio
+      ? getters.winWidth / (1 / getters.ratio) : getters.winHeight);
   },
   ratio: state => state.ratio,
-  AudioDelay: state => state.AudioDelay,
+  audioDelay: state => state.audioDelay,
   mediaHash: state => state.mediaHash,
   videoId: state => state.id,
   defaultDir: state => state.defaultDir,

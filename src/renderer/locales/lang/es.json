@@ -31,7 +31,7 @@
       "title": "Agregar archivo fallido"
     },
     "default": {
-      "content": "Tipo de video no soportado.",
+      "content": "Este tipo video no es compatible en este momento.",
       "title": "Error de apertura"
     },
     "emptyFolder": {
@@ -47,24 +47,24 @@
       "title": "Archivo no encontrado"
     },
     "fileNonExistInPlaylist": {
-      "content": "Los archivos serán eliminados de la lista.",
-      "title": "Archivos no encontrados"
+      "content": "Los archivos se han eliminados de la lista.",
+      "title": "Algunos archivos no fueron encontrados"
     },
     "loadFailed": {
-      "content": "Tipo de subtítulo no soportado.",
+      "content": "Este tipo de subtítulo no es compatible en este momento.",
       "title": "Subtitulo de carga fallado"
     },
     "offLine": {
       "content": "Por favor, compruebe la red y vuelva a intentarlo.",
-      "title": "Sin acceso a internet"
+      "title": "Error al conectarse a la red"
     },
     "timeout": {
       "content": "Retraso en la red o error del servidor.",
       "title": "Pide tiempo fuera"
     },
     "localSubtitleRemoved": {
-      "title": "Fallo en el subtítulo de carga",
-      "content": "El subtítulo local se elimina o cambia de nombre."
+      "title": "Subtítulo no se pudo cargar",
+      "content": "El subtítulo local se ha eliminado o se ha cambiado de nombre."
     }
   },
   "loading": {
@@ -104,13 +104,13 @@
       "captureScreen": "Captura de pantalla",
       "captureVideoClip": "Captura de video clip",
       "decreasePlaybackSpeed": "Disminuir la velocidad de reproducción",
-      "forwardL": "Step Forward 60s",
+      "forwardL": "Paso adelante 60s",
       "forwardS": "Paso adelante 5s",
       "fullScreen": "Pantalla Completa",
       "increasePlaybackSpeed": "Aumentar la velocidad de reproducción",
       "keepPlayingWindowFront": "Flotar al jugar",
       "name": "Reproducción",
-      "pause": "pausa",
+      "pause": "Pausa",
       "play": "Jugar",
       "resetSpeed": "Restablecer velocidad de reproducción",
       "singleCycle": "Repetir una",
@@ -121,20 +121,20 @@
       "feedback": "Realimentación",
       "hide": "Esconder",
       "hideOthers": "Esconder otros",
-      "homepage": "sitio web",
+      "homepage": "Sitio web",
       "preferences": "Preferencias",
       "quit": "Salir de SPlayer"
     },
     "subtitle": {
-      "AITranslation": "Reload Smart Translation",
+      "AITranslation": "Recargar la traducción Smart",
       "decreaseSubtitleDelayL": "",
-      "decreaseSubtitleDelayS": "Subtitle Delay -0.1s",
+      "decreaseSubtitleDelayS": "retraso de subtítulos -0.1s",
       "disabledSecondarySub": "Desactivar Subtitulo Secundario",
       "enabledSecondarySub": "Habilitar subtítulos secundarios",
       "increaseSubtitleDelayL": "",
-      "increaseSubtitleDelayS": "Subtitle Delay 0.1s",
+      "increaseSubtitleDelayS": "retraso de subtítulos +0.1s",
       "langEn": "Inglés",
-      "langZhCN": "chino",
+      "langZhCN": "Chino",
       "loadSubtitleFile": "Cargar archivo de subtítulos ...",
       "mainSubtitle": "Subtitulo primario",
       "menuLoading": "Cargando ...",
@@ -142,7 +142,7 @@
       "noSubtitle": "Extraviado",
       "notToShowSubtitle": "Ninguna",
       "secondarySubtitle": "Subtitulo secundario",
-      "size1": "Pequeña",
+      "size1": "Pequeño",
       "size2": "Estándar",
       "size3": "Grande",
       "size4": "Extra grande",
@@ -160,8 +160,8 @@
     "update": {
       "message": "¿Reiniciar la aplicación ahora para instalar la actualización?",
       "no": "No",
-      "title": "diálogo de actualización",
-      "updateInstalled": "ha instalado correctamente la actualización!",
+      "title": "Actualización lista",
+      "updateInstalled": "Ha sido actualización a la última versión!",
       "yes": "Sí"
     },
     "window": {
@@ -184,12 +184,12 @@
     "general": {
       "clearHistory": "Borrar siempre el historial de reproducción al salir",
       "reverseScrolling": "Desplazamiento inverso del ratón",
-      "setDefault": "Establecer como el jugador por defecto",
+      "setDefault": "Establecer como el jugador predeterminado",
       "setDefaultDescription": "Todos los formatos de video se abren automáticamente usando SPlayer.",
       "restoreSettings": "Borrar contenidos y ajustes",
       "restoreSettingsDescription": "Reinicie con todos los datos y cachés borrados.",
       "setButton": "Aplicar",
-      "relaunch": "reiniciar",
+      "relaunch": "Reiniciar",
       "displayLanguage": "Idioma de la pantalla",
       "generalSetting": "General",
       "others": "Otros",
@@ -212,18 +212,18 @@
       "button": "Cancelar",
       "partOne": "Confirmar a",
       "partTwo": "Datos anónimos y traducción inteligente.",
-      "underlinedContent": "Inhabilitar"
+      "underlinedContent": "Prohibir"
     },
     "masVersion": {
       "agree": "Habilitar",
       "content": "La función de traducción inteligente necesita su consentimiento para cargar información multimedia anónima en el lado del servidor, y no recibirá los resultados de la traducción si no está de acuerdo. No hay información de privacidad será recopilada.",
-      "disagree": "Inhabilitar"
+      "disagree": "Prohibir"
     },
     "tryToDisable": {
       "button": "De acuerdo",
       "partOne": "SPlayer utiliza datos anónimos para mejorar la experiencia del usuario. La traducción inteligente se desactivará si",
       "partTwo": ".",
-      "underlinedContent": "discrepar"
+      "underlinedContent": "Prohibir"
     }
   },
   "recentPlaylist": {
@@ -234,20 +234,20 @@
   "subtitle": {
     "embedded": "Empotrar",
     "language": {
-      "ar": "Arábica",
-      "de": "alemán",
+      "ar": "Árabe",
+      "de": "Alemán",
       "en": "Inglés",
-      "es": "español",
-      "fr": "francés",
-      "hi": "hindi",
-      "it": "italiano",
-      "ja": "japonés",
-      "ko": "coreano",
+      "es": "Español",
+      "fr": "Francés",
+      "hi": "Hindi",
+      "it": "Italiano",
+      "ja": "Japonés",
+      "ko": "Coreano",
       "pt": "Portugués (Portugal, Brasil)",
-      "ru": "ruso",
-      "zh": "Chino simplificado)",
-      "zh-CN": "Chino simplificado)",
-      "zh-TW": "Chino tradicional)"
+      "ru": "Ruso",
+      "zh": "Chino (Simplificado)",
+      "zh-CN": "Chino (Simplificado)",
+      "zh-TW": "Chino (Tradicional)"
     }
   },
   "uploading": {
@@ -267,7 +267,7 @@
     "title": ""
   },
   "snapshotFailed": {
-    "content": "por favor intente más tarde.",
+    "content": "Por favor intente más tarde.",
     "title": "Instantánea fallada"
   }
 }

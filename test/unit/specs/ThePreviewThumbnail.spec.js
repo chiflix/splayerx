@@ -1,4 +1,4 @@
-import ThePreviewThumbnail from '@/components/PlayingView/ThePreviewThumbnail.vue';
+import ThePreviewThumbnail from '@/containers/ThePreviewThumbnail.vue';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import Video from '@/store/modules/Video';
 import Vuex from 'vuex';

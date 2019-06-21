@@ -1,38 +1,33 @@
 <template>
-  <div id="app" class="application">
+  <div
+    id="app"
+    class="application"
+  >
     <router-view />
   </div>
 </template>
 
-<script>
+<script lang="ts">
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { ipcRenderer, Event } from 'electron';
 import '@/css/style.scss';
 import drag from '@/helpers/drag';
 
 export default {
-  name: 'splayer',
-  methods: {
-    mainCommitProxy(commitType, commitPayload) {
-      this.$store.commit(commitType, commitPayload);
-    },
-    mainDispatchProxy(actionType, actionPayload) {
-      this.$store.dispatch(actionType, actionPayload);
-    },
-    handleWindowSizeChange(windowSize) {
-      this.$store.commit('windowSize', windowSize);
-    },
-  },
+  name: 'Splayer',
   mounted() {
-    this.$electron.ipcRenderer.on('mainCommit', (event, commitType, commitPayload) => {
+    // to-do: specify commitType and commitPayload with vuex typescriptened
+    ipcRenderer.on('mainCommit', (event: Event, commitType: string, commitPayload: any) => {
       this.mainCommitProxy(commitType, commitPayload);
     });
-    this.$electron.ipcRenderer.on('mainDispatch', (event, actionType, actionPayload) => {
+    ipcRenderer.on('mainDispatch', (event: Event, actionType: string, actionPayload: any) => {
       this.mainDispatchProxy(actionType, actionPayload);
     });
-    this.$electron.ipcRenderer.send('windowInit');
-    this.$electron.ipcRenderer.on('thumbnail-saved', (event, src) => {
+    ipcRenderer.send('windowInit');
+    ipcRenderer.on('thumbnail-saved', (event: Event, src: string) => {
       this.$bus.$emit('set-thumbnail-src', src);
     });
-    this.$electron.ipcRenderer.on('play-file-with-url', (event, url) => {
+    this.$electron.ipcRenderer.on('play-file-with-url', (event: Event, url: string) => {
       this.openUrlFile(url);
     });
     drag(this.$el);
@@ -40,6 +35,17 @@ export default {
     setInterval(() => {
       this.$ga.event('app', 'heartbeat');
     }, 1500000); // keep alive every 25 min.
+  },
+  methods: {
+    mainCommitProxy(commitType: string, commitPayload: any) {
+      this.$store.commit(commitType, commitPayload);
+    },
+    mainDispatchProxy(actionType: string, actionPayload: any) {
+      this.$store.dispatch(actionType, actionPayload);
+    },
+    handleWindowSizeChange(windowSize: any) {
+      this.$store.commit('windowSize', windowSize);
+    },
   },
 };
 </script>

@@ -2,15 +2,18 @@ import path from 'path';
 import fs, { promises as fsPromises } from 'fs';
 import crypto from 'crypto';
 import lolex from 'lolex';
-import { times } from 'lodash';
 import urlParseLax from 'url-parse-lax';
+import { times, get } from 'lodash';
 import bookmark from '@/helpers/bookmark';
 import syncStorage from '@/helpers/syncStorage';
 import infoDB from '@/helpers/infoDB';
+import { log } from '@/libs/Log';
 import { getValidVideoExtensions, getValidVideoRegex } from '@/../shared/utils';
-import { FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED, ADD_NO_VIDEO, SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, FILE_NON_EXIST_IN_PLAYLIST, PLAYLIST_NON_EXIST } from '@/../shared/notificationcodes';
-import Sentry from '@/../shared/sentry';
-import Sagi from './sagi';
+import {
+  EMPTY_FOLDER, OPEN_FAILED, ADD_NO_VIDEO,
+  SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, FILE_NON_EXIST_IN_PLAYLIST, PLAYLIST_NON_EXIST,
+} from '@/../shared/notificationcodes';
+import Sagi from '@/libs/sagi';
 import { addBubble } from '../../shared/notificationControl';
 
 import { ipcRenderer, remote } from 'electron'; // eslint-disable-line
@@ -28,47 +31,6 @@ export default {
     };
   },
   methods: {
-    calculateWindowSize(minSize, maxSize, videoSize, videoExisted, screenSize) {
-      let result = videoSize;
-      const getRatio = size => size[0] / size[1];
-      const setWidthByHeight = size => [size[1] * getRatio(videoSize), size[1]];
-      const setHeightByWidth = size => [size[0], size[0] / getRatio(videoSize)];
-      const biggerSize = (size, diffedSize) =>
-        size.some((value, index) => value >= diffedSize[index]);
-      const biggerWidth = (size, diffedSize) => size[0] >= diffedSize[0];
-      const biggerRatio = (size1, size2) => getRatio(size1) > getRatio(size2);
-      if (videoExisted && biggerWidth(result, maxSize)) {
-        result = setHeightByWidth(maxSize);
-      }
-      const realMaxSize = videoExisted ? screenSize : maxSize;
-      if (biggerSize(result, realMaxSize)) {
-        result = biggerRatio(result, realMaxSize) ?
-          setHeightByWidth(realMaxSize) : setWidthByHeight(realMaxSize);
-      }
-      if (biggerSize(minSize, result)) {
-        result = biggerRatio(minSize, result) ?
-          setHeightByWidth(minSize) : setWidthByHeight(minSize);
-      }
-      return result.map(Math.round);
-    },
-    calculateWindowPosition(currentRect, windowRect, newSize) {
-      const tempRect = currentRect.slice(0, 2)
-        .map((value, index) => Math.floor(value + (currentRect.slice(2, 4)[index] / 2)))
-        .map((value, index) => Math.floor(value - (newSize[index] / 2))).concat(newSize);
-      return ((windowRect, tempRect) => {
-        const alterPos = (boundX, boundLength, videoX, videoLength) => {
-          if (videoX < boundX) return boundX;
-          if (videoX + videoLength > boundX + boundLength) {
-            return (boundX + boundLength) - videoLength;
-          }
-          return videoX;
-        };
-        return [
-          alterPos(windowRect[0], windowRect[2], tempRect[0], tempRect[2]),
-          alterPos(windowRect[1], windowRect[3], tempRect[1], tempRect[3]),
-        ];
-      })(windowRect, tempRect);
-    },
     timecodeFromSeconds(s) {
       const dt = new Date(Math.abs(s) * 1000);
       let hours = dt.getUTCHours();
@@ -145,7 +107,7 @@ export default {
         securityScopedBookmarks: process.mas,
       }, (files, bookmarks) => {
         this.showingPopupDialog = false;
-        if (process.mas && bookmarks?.length > 0) {
+        if (process.mas && get(bookmarks, 'length') > 0) {
           // TODO: put bookmarks to database
           bookmark.resolveBookmarks(files, bookmarks);
         }
@@ -183,7 +145,7 @@ export default {
         securityScopedBookmarks: process.mas,
       }, (files, bookmarks) => {
         this.showingPopupDialog = false;
-        if (process.mas && bookmarks?.length > 0) {
+        if (process.mas && get(bookmarks, 'length') > 0) {
           // TODO: put bookmarks to database
           bookmark.resolveBookmarks(files, bookmarks);
         }
@@ -217,7 +179,7 @@ export default {
           });
         }
         this.showingPopupDialog = false;
-        if (process.mas && bookmarks?.length > 0) {
+        if (process.mas && get(bookmarks, 'length') > 0) {
           // TODO: put bookmarks to database
           bookmark.resolveBookmarks(files, bookmarks);
         }
@@ -261,13 +223,10 @@ export default {
           paths: addFiles,
           ids: addIds,
         });
-        this.infoDB.update('recent-played', playlist);
+        this.infoDB.update('recent-played', playlist, playlist.id);
         this.$store.dispatch('PlayingList', { id: playlist.id });
       } else {
-        this.addLog('error', {
-          errcode: ADD_NO_VIDEO,
-          message: 'Didn\'t add any playable file in this folder.',
-        });
+        log.error('helpers/index.js', 'Didn\'t add any playable file in this folder.');
         addBubble(ADD_NO_VIDEO, this.$i18n);
       }
     },
@@ -302,10 +261,7 @@ export default {
         this.createPlayList(...videoFiles);
       } else {
         // TODO: no videoFiles in folders error catch
-        this.addLog('error', {
-          errcode: EMPTY_FOLDER,
-          message: 'There is no playable file in this folder.',
-        });
+        log.error('helpers/index.js', 'There is no playable file in this folder.');
         addBubble(EMPTY_FOLDER, this.$i18n);
       }
       if (containsSubFiles) {
@@ -340,10 +296,7 @@ export default {
         } else if (getValidVideoRegex().test(path.extname(tempFilePath))) {
           videoFiles.push(tempFilePath);
         } else {
-          this.addLog('error', {
-            errcode: OPEN_FAILED,
-            message: `Failed to open file : ${tempFilePath}`,
-          });
+          log.error('helpers/index.js', `Failed to open file : ${tempFilePath}`);
           addBubble(OPEN_FAILED, this.$i18n);
         }
       }
@@ -359,7 +312,7 @@ export default {
     // open an existed play list
     async openPlayList(id) {
       const playlist = await this.infoDB.get('recent-played', id);
-      await this.infoDB.update('recent-played', { ...playlist, lastOpened: Date.now() });
+      await this.infoDB.update('recent-played', { ...playlist, lastOpened: Date.now() }, playlist.id);
       if (playlist.items.length > 1) {
         let currentVideo = await this.infoDB.get('media-item', playlist.items[playlist.playedIndex]);
 
@@ -380,7 +333,7 @@ export default {
           });
           if (playlist.items.length > 0) {
             playlist.playedIndex = 0;
-            await this.infoDB.update('recent-played', playlist);
+            await this.infoDB.update('recent-played', playlist, playlist.id);
             currentVideo = await this.infoDB.get('media-item', playlist.items[0]);
             addBubble(FILE_NON_EXIST_IN_PLAYLIST, this.$i18n);
           } else {
@@ -410,25 +363,17 @@ export default {
           let similarVideos;
           try {
             similarVideos = await this.findSimilarVideoByVidPath(video.path);
-            const singleItems = await this.infoDB.getValueByKey('media-item', 'source', '');
-            const filtered = singleItems.filter((item) => similarVideos.includes(item.path));
-            const items = [];
-            filtered.forEach((media) => {
-              const mediaIndex = similarVideos.findIndex(path => path === media.path);
-              items[mediaIndex] = media.videoId;
-            });
             this.$store.dispatch('FolderList', {
               id,
               paths: similarVideos,
-              items,
             });
           } catch (err) {
-            if (process.mas && err?.code === 'EPERM') {
+            if (process.mas && get(err, 'code') === 'EPERM') {
               // TODO: maybe this.openFolderByDialog(videoFiles[0]) ?
               this.$store.dispatch('FolderList', {
                 id,
                 paths: [video.path],
-                items: [video.videoId],
+                items: [playlist.items[0]],
               });
             }
           }
@@ -470,25 +415,17 @@ export default {
       let similarVideos;
       try {
         similarVideos = await this.findSimilarVideoByVidPath(videoFile);
-        const singleItems = await this.infoDB.getValueByKey('media-item', 'source', '');
-        const filtered = singleItems.filter((item) => similarVideos.includes(item.path));
-        const items = [];
-        filtered.forEach((media) => {
-          const mediaIndex = similarVideos.findIndex(path => path === media.path);
-          items[mediaIndex] = media.videoId;
-        });
         this.$store.dispatch('FolderList', {
           id,
           paths: similarVideos,
-          items,
         });
       } catch (err) {
-        if (process.mas && err?.code === 'EPERM') {
+        if (process.mas && get(err, 'code') === 'EPERM') {
           // TODO: maybe this.openFolderByDialog(videoFiles[0]) ?
           this.$store.dispatch('FolderList', {
             id,
             paths: [videoFile],
-            items: [playlistItem.items[playlistItem.playedIndex]],
+            items: [playlistItem.items[0]],
           });
         }
       }
@@ -504,7 +441,7 @@ export default {
           stopAccessing
         });
         this.$bus.$once(`stop-accessing-${vidPath}`, (e) => {
-          this.access.find(item => item.src === e)?.stopAccessing();
+          get(this.access.find(item => item.src === e), 'stopAccessing')();
           const index = this.access.findIndex(item => item.src === e);
           if (index >= 0) this.access.splice(index, 1);
         });
@@ -517,15 +454,12 @@ export default {
       try {
         mediaQuickHash = await this.mediaQuickHash(vidPath);
       } catch (err) {
-        if (err?.code === 'ENOENT') {
-          this.addLog('error', {
-            errcode: FILE_NON_EXIST,
-            message: 'Failed to open file, it will be removed from list.'
-          });
+        if (get(err, 'code') === 'ENOENT') {
+          log.error('helpers/index.js', 'Failed to open file, it will be removed from list.');
           addBubble(FILE_NON_EXIST_IN_PLAYLIST, this.$i18n);
           this.$bus.$emit('delete-file', vidPath, id);
         }
-        if (process.mas && err?.code === 'EPERM') {
+        if (process.mas && get(err, 'code') === 'EPERM') {
           this.openFilesByDialog({ defaultPath: vidPath });
         }
         return;
@@ -538,6 +472,9 @@ export default {
         this.$bus.$emit('new-file-open');
         if (value.lastPlayedTime) {
           this.$bus.$emit('send-lastplayedtime', value.lastPlayedTime);
+        }
+        if (value.audioTrackId) {
+          this.$bus.$emit('send-audiotrackid', value.audioTrackId);
         }
       }
     },
@@ -564,31 +501,6 @@ export default {
       } else {
         return 'hello-world-hello';// TODO streaming quickHash
       }
-    },
-    addLog(level, log) {
-      switch (level) {
-        case 'error':
-          console.error(log);
-          if (log && process.env.NODE_ENV !== 'development') {
-            this.$ga && this.$ga.exception(log.message || log);
-            Sentry.captureException(log);
-          }
-          break;
-        case 'warn':
-          console.warn(log);
-          break;
-        default:
-          console.log(log);
-      }
-
-      let normalizedLog;
-      if (!log || typeof log === 'string') {
-        normalizedLog = { message: log };
-      } else {
-        const { errcode, code, message, stack } = log;
-        normalizedLog = { errcode, code, message, stack };
-      }
-      ipcRenderer.send('writeLog', level, normalizedLog);
     },
     getTextWidth(fontSize, fontFamily, text) {
       const span = document.createElement('span');

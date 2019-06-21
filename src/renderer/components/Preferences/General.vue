@@ -1,65 +1,125 @@
 <template>
   <div class="general tabcontent">
     <div class="settingItem">
-      <div class="settingItem__title">{{ $t("preferences.general.displayLanguage") }}</div>
-      <div class="settingItem__description">{{ $t("preferences.general.switchDisplayLanguages")}}</div>
+      <div class="settingItem__title">
+        {{ $t("preferences.general.displayLanguage") }}
+      </div>
+      <div class="settingItem__description">
+        {{ $t("preferences.general.switchDisplayLanguages") }}
+      </div>
       <div class="settingItem__input dropdown">
-        <div class="dropdown__toggle no-drag" :class="showSelection ? 'dropdown__toggle--list' : 'dropdown__toggle--display'"
-          @mouseup.stop="showSelection = !showSelection">
-          <div class="dropdown__displayItem">{{ mapCode(displayLanguage) }}</div>
-          <div class="dropdown__listItems"
-            @mouseup.stop="">
-            <div class="dropdownListItem"
+        <div
+          :class="showSelection ? 'dropdown__toggle--list' : 'dropdown__toggle--display'"
+          @mouseup.stop="showSelection = !showSelection"
+          class="dropdown__toggle no-drag"
+        >
+          <div class="dropdown__displayItem">
+            {{ mapCode(displayLanguage) }}
+          </div>
+          <div
+            @mouseup.stop=""
+            class="dropdown__listItems"
+          >
+            <div
               v-for="(language, index) in displayLanguages"
               :key="index"
-              @mouseup.stop="handleSelection(language)">
+              @mouseup.stop="handleSelection(language)"
+              class="dropdownListItem"
+            >
               {{ mapCode(language) }}
             </div>
           </div>
-          <Icon type="rightArrow" :class="showSelection ? 'dropdown__icon--arrowUp' : 'dropdown__icon--arrowDown'"/>
+          <Icon
+            :class="showSelection ? 'dropdown__icon--arrowUp' : 'dropdown__icon--arrowDown'"
+            type="rightArrow"
+          />
         </div>
       </div>
     </div>
     <div class="settingItem--justify">
       <div>
-        <div class="settingItem__title">{{ $t("preferences.general.setDefault") }}</div>
-        <div class="settingItem__description">{{ $t("preferences.general.setDefaultDescription") }}</div>
+        <div class="settingItem__title">
+          {{ $t("preferences.general.setDefault") }}
+        </div>
+        <div class="settingItem__description">
+          {{ $t("preferences.general.setDefaultDescription") }}
+        </div>
       </div>
-      <div class="settingItem__input button no-drag"
-        :class="button1Styles"
+      <div
         ref="button1"
-        @mousedown="mousedownOnSetDefault">
-        <transition name="button" mode="out-in">
-          <div key="" v-if="!defaultState" class="button__text">{{ $t("preferences.general.setButton") }}</div>
-          <div :key="defaultState" v-else class="button__result">
-            <Icon :type="defaultState" :class="defaultState"/>
+        :class="button1Styles"
+        @mousedown="mousedownOnSetDefault"
+        class="settingItem__input button no-drag"
+      >
+        <transition
+          name="button"
+          mode="out-in"
+        >
+          <div
+            key=""
+            v-if="!defaultState"
+            class="button__text"
+          >
+            {{ $t("preferences.general.setButton") }}
+          </div>
+          <div
+            v-else
+            :key="defaultState"
+            class="button__result"
+          >
+            <Icon
+              :type="defaultState"
+              :class="defaultState"
+            />
           </div>
         </transition>
       </div>
     </div>
-    <div class="settingItem--justify" v-if="false">
+    <div
+      v-if="!isMas"
+      class="settingItem--justify"
+    >
       <div>
-        <div class="settingItem__title">{{ $t("preferences.general.restoreSettings") }}</div>
-        <div class="settingItem__description">{{ $t("preferences.general.restoreSettingsDescription") }}</div>
+        <div class="settingItem__title">
+          {{ $t("preferences.general.restoreSettings") }}
+        </div>
+        <div class="settingItem__description">
+          {{ $t("preferences.general.restoreSettingsDescription") }}
+        </div>
       </div>
-      <div class="settingItem__input button no-drag"
-        :class="button2Styles"
+      <div
         ref="button2"
-        @mousedown="mousedownOnRestore">
-        <transition name="button" mode="out-in">
-          <div :key="needToRelaunch" class="button__text" ref="restoreContent">{{ restoreContent }}</div>
+        :class="button2Styles"
+        @mousedown="mousedownOnRestore"
+        class="settingItem__input button no-drag"
+      >
+        <transition
+          name="button"
+          mode="out-in"
+        >
+          <div
+            ref="restoreContent"
+            :key="needToRelaunch"
+            class="button__text"
+          >
+            {{ restoreContent }}
+          </div>
         </transition>
       </div>
     </div>
-    <div class="settingItem__title">{{ $t("preferences.general.others") }}</div>
+    <div class="settingItem__title">
+      {{ $t("preferences.general.others") }}
+    </div>
     <BaseCheckBox
-      :checkboxValue="reverseScrolling"
-      @update:checkbox-value="reverseScrolling = $event">
+      :checkbox-value="reverseScrolling"
+      @update:checkbox-value="reverseScrolling = $event"
+    >
       {{ $t('preferences.general.reverseScrolling') }}
     </BaseCheckBox>
     <BaseCheckBox
-      :checkboxValue="deleteVideoHistoryOnExit"
-      @update:checkbox-value="deleteVideoHistoryOnExit = $event">
+      :checkbox-value="deleteVideoHistoryOnExit"
+      @update:checkbox-value="deleteVideoHistoryOnExit = $event"
+    >
       {{ $t('preferences.general.clearHistory') }}
     </BaseCheckBox>
   </div>
@@ -78,7 +138,10 @@ export default {
     BaseCheckBox,
     Icon,
   },
-  props: ['mouseDown', 'isMoved'],
+  props: {
+    mouseDown: Boolean,
+    isMoved: Boolean,
+  },
   data() {
     return {
       showSelection: false,
@@ -95,32 +158,9 @@ export default {
       button2Styles: [''],
     };
   },
-  created() {
-    electron.ipcRenderer.once('restore-state', (event, state) => {
-      this.restoreContent = state ? this.$t('preferences.general.relaunch')
-        : this.$t('preferences.general.setButton');
-    });
-  },
-  watch: {
-    displayLanguage(val) {
-      if (val) this.$i18n.locale = val;
-      electron.ipcRenderer.send('get-restore-state');
-      electron.ipcRenderer.once('restore-state', (event, state) => {
-        this.restoreContent = state ? this.$t('preferences.general.relaunch')
-          : this.$t('preferences.general.setButton');
-      });
-    },
-    mouseDown(val, oldVal) {
-      if (!val && oldVal && !this.isMoved) {
-        this.showSelection = false;
-      } else if (!val && oldVal && this.isMoved) {
-        this.$emit('move-stoped');
-      }
-    },
-  },
   computed: {
-    isMac() {
-      return process.platform === 'darwin';
+    isMas() {
+      return !!process.mas;
     },
     preferenceData() {
       return this.$store.getters.preferenceData;
@@ -171,6 +211,29 @@ export default {
       return this.languages.filter(language => language !== this.displayLanguage);
     },
   },
+  watch: {
+    displayLanguage(val) {
+      if (val) this.$i18n.locale = val;
+      electron.ipcRenderer.send('get-restore-state');
+      electron.ipcRenderer.once('restore-state', (event, state) => {
+        this.restoreContent = state ? this.$t('preferences.general.relaunch')
+          : this.$t('preferences.general.setButton');
+      });
+    },
+    mouseDown(val, oldVal) {
+      if (!val && oldVal && !this.isMoved) {
+        this.showSelection = false;
+      } else if (!val && oldVal && this.isMoved) {
+        this.$emit('move-stoped');
+      }
+    },
+  },
+  created() {
+    electron.ipcRenderer.once('restore-state', (event, state) => {
+      this.restoreContent = state ? this.$t('preferences.general.relaunch')
+        : this.$t('preferences.general.setButton');
+    });
+  },
   methods: {
     mouseupOnOther() {
       if (!this.isSettingDefault) {
@@ -202,7 +265,6 @@ export default {
       this.isSettingDefault = true;
       try {
         await setAsDefaultApp();
-        // TODO: feedback
         clearTimeout(this.defaultButtonTimeoutId);
         this.defaultState = 'success';
         this.button1Styles.pop();
@@ -212,7 +274,6 @@ export default {
           this.$refs.button1.style.setProperty('transition-delay', '');
         }, 1500);
       } catch (ex) {
-        // TODO: feedback
         clearTimeout(this.defaultButtonTimeoutId);
         this.defaultState = 'failed';
         this.button2Styles.pop();
@@ -228,7 +289,7 @@ export default {
     restoreSettings() {
       this.isRestoring = true;
       if (this.restoreContent === this.$t('preferences.general.setButton')) {
-        electron.ipcRenderer.send('apply');
+        electron.ipcRenderer.send('need-to-restore');
         this.needToRelaunch = true;
         this.restoreContent = this.$t('preferences.general.relaunch');
         this.button2Styles.pop();
@@ -296,7 +357,7 @@ export default {
     width: 240px;
     height: 28px;
     margin-top: 13px;
-    
+
     &__toggle {
       position: absolute;
       width: 100%;
@@ -305,15 +366,15 @@ export default {
       transition: all 200ms;
       border-radius: 2px;
       overflow: hidden;
-      
+
 
       &--display {
         height: 28px;
         border: 1px solid rgba(255,255,255,0);
         background-color: rgba(255, 255, 255, 0);
       }
-      
-      &--list { 
+
+      &--list {
         height: 148px;
         border: 1px solid rgba(255,255,255,0.3);
         background-color: rgba(120,120,120,1);
@@ -342,7 +403,12 @@ export default {
       line-height: 28px;
 
       &:hover {
-        background-image: linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.069) 23%, rgba(255,255,255,0.00) 100%);
+        background-image: linear-gradient(
+          90deg,
+          rgba(255,255,255,0.00) 0%,
+          rgba(255,255,255,0.069) 23%,
+          rgba(255,255,255,0.00) 100%
+        );
       }
     }
 

@@ -1,165 +1,176 @@
 <template>
   <div class="wrapper">
-    <titlebar key="playing-view" currentView="LandingView"></titlebar>
-    <short-marks v-show="!openUrlShow"></short-marks>
-    <open-url v-show="openUrlShow"></open-url>
+    <titlebar
+      key="playing-view"
+      current-view="LandingView"
+    />
+    <short-marks v-show="!openUrlShow" />
+    <open-url v-show="openUrlShow" />
     <transition name="background-container-transition">
-      <div class="background" v-if="showShortcutImage">
-        <transition name="background-transition" mode="in-out">
-          <div class="background-image"
-          :key="item.path"
-          :style="{
-            backgroundImage: backgroundUrl,
-          }">
-            <div class="background-mask"/>
+      <div
+        v-if="item.backgroundUrl"
+        class="background"
+      >
+        <transition
+          name="background-transition"
+          mode="in-out"
+        >
+          <div
+            :key="item.path"
+            :style="{
+              backgroundImage: item.backgroundUrl,
+            }"
+            class="background-image"
+          >
+            <div class="background-mask" />
           </div>
         </transition>
         <div class="item-info">
           <div class="item-name">
-            {{ item.baseName }}
+            {{ item.basename }}
           </div>
-          <div class="item-description"/>
+          <div class="item-description" />
           <div class="item-timing">
             <span class="timing-played">
-              {{ timeInValidForm(timecodeFromSeconds(item.lastTime)) }}
-            / {{ timeInValidForm(timecodeFromSeconds(item.duration)) }}
-            <span v-if="item.playListLength">·&nbsp{{ $t('recentPlaylist.playlistSource') }}&nbsp&nbsp{{ item.index + 1 }} / {{ item.playListLength }}</span>
+              {{ timeInvalidForm(timecodeFromSeconds(item.lastPlayedTime)) }}
+              / {{ timeInvalidForm(timecodeFromSeconds(item.duration)) }}
+              <span v-if="item.playlistLength > 1">
+                ·&nbsp;{{
+                  $t('recentPlaylist.playlistSource')
+                }}&nbsp;&nbsp;{{ item.playedIndex + 1 }} / {{ item.playlistLength }}
+              </span>
             </span>
           </div>
           <div class="item-progress">
-            <div class="progress-played" :style="{ width: item.percentage + '%' }"/>
+            <div
+              :style="{ width: item.percentage + '%' }"
+              class="progress-played"
+            />
           </div>
         </div>
       </div>
     </transition>
     <transition name="welcome-container-transition">
-      <div class="welcome-container" v-if="landingLogoAppear">
+      <div
+        v-if="!item.backgroundUrl"
+        class="welcome-container"
+      >
         <div class="logo-container">
-          <Icon type="logo"/>
+          <Icon type="logo" />
         </div>
       </div>
     </transition>
-    <div class="mask" ref="mask"/>
-    <div class="controller"
+    <div
+      ref="mask"
+      class="mask"
+    />
+    <div
       :style="{
         transform: isFullScreen ? '' : `translateX(${move}px)`,
         bottom: winWidth > 1355 ? `${40 / 1355 * winWidth}px` : '40px',
         transition: tranFlag ? 'transform 400ms cubic-bezier(0.42, 0, 0.58, 1)' : '',
-      }">
-      <div class="playlist no-drag"
-        :style="{marginLeft: winWidth > 1355 ? `${50 / 1355 * winWidth}px` : '50px'}">
-        <div class="button"
+      }"
+      class="controller"
+    >
+      <div
+        :style="{marginLeft: winWidth > 1355 ? `${50 / 1355 * winWidth}px` : '50px'}"
+        class="playlist no-drag"
+      >
+        <div
           :style="{
             height:`${thumbnailHeight}px`,
             width:`${thumbnailWidth}px`,
             marginRight: `${marginRight}px`,
           }"
-          @click="openOrMove">
+          @click="openOrMove"
+          class="button"
+        >
           <div class="btnMask">
-            <Icon class="addUi" type="add"/>
+            <Icon
+              class="addUi"
+              type="add"
+            />
           </div>
         </div>
-        <component v-for="(playlist, index) in lastPlayedFile"
-          :is="playlist.items.length > 1 ? 'PlaylistItem' : 'VideoItem'"
-          :key="playlist.id"
+        <!-- eslint-disable-next-line vue/require-component-is -->
+        <component
+          :is="playlistLength > 1 ? 'PlaylistItem' : 'VideoItem'"
+          v-for="({ backgroundUrl, path, playlistLength }, index) in landingViewItems"
+          :key="path"
+          :backgroundUrl="backgroundUrl"
           :index="index"
-          :firstIndex="firstIndex"
-          :lastIndex="lastIndex"
-          :isInRange="index + 1 >= firstIndex && index + 1 <= lastIndex"
-          :playlist="playlist"
-          :thumbnailWidth="thumbnailWidth"
-          :thumbnailHeight="thumbnailHeight"
+          :is-in-range="index + 1 >= firstIndex && index + 1 <= lastIndex"
+          :thumbnail-width="thumbnailWidth"
+          :thumbnail-height="thumbnailHeight"
           :shifting="shifting"
           :style="{
             marginRight: `${marginRight}px`,
           }"
-          @delete-item="deleteItem"
-          @next-page="lastIndex = lastPlayedFile.length"
-          @previous-page="firstIndex = 0"
-          @showShortcutImage="showShortcut(true)"
-          @showLandingLogo="showShortcut(false)"
-          @displayInfo="displayInfoUpdate"/>
+          :on-item-mouseover="onItemMouseover"
+          :on-item-click="onItemClick"
+          :on-item-delete="onItemDelete"
+        />
       </div>
     </div>
-    <NotificationBubble/>
+    <NotificationBubble />
   </div>
 </template>
 
-<script>
-import { mapState, mapGetters } from 'vuex';
+<script lang="ts">
+import Vue from 'vue';
+import { mapGetters } from 'vuex';
+import { HealthCheckResponse } from 'sagi-api/health/v1/health_pb';
+import { playInfoStorageService } from '@/services/storage/PlayInfoStorageService';
+import { recentPlayService } from '@/services/media/RecentPlayService';
 import Icon from '@/components/BaseIconContainer.vue';
-import Titlebar from './LandingTitlebar.vue';
-import VideoItem from './LandingView/VideoItem.vue';
-import PlaylistItem from './LandingView/PlaylistItem.vue';
-import NotificationBubble from './NotificationBubble.vue';
-import ShortMarks from './LandingView/ShortMarks.vue';
-import OpenUrl from './LandingView/OpenUrl.vue';
+// @ts-ignore
+import Titlebar from '@/components/LandingTitlebar.vue';
+// @ts-ignore
+import ShortMarks from '@/components/LandingView/ShortMarks.vue';
+// @ts-ignore
+import OpenUrl from '@/components/LandingView/OpenUrl.vue';
+import NotificationBubble from '@/components/NotificationBubble.vue';
+import PlaylistItem from '@/components/LandingView/PlaylistItem.vue';
+import VideoItem from '@/components/LandingView/VideoItem.vue';
+import { log } from '@/libs/Log';
+
+Vue.component('PlaylistItem', PlaylistItem);
+Vue.component('VideoItem', VideoItem);
 
 export default {
-  name: 'landing-view',
+  name: 'LandingView',
   components: {
     Icon,
     Titlebar,
-    VideoItem,
-    PlaylistItem,
     NotificationBubble,
     'short-marks': ShortMarks,
     'open-url': OpenUrl,
   },
   data() {
     return {
-      lastPlayedFile: [],
+      landingViewItems: [],
       sagiHealthStatus: 'UNSET',
-      mouseDown: false,
       invalidTimeRepresentation: '--',
-      landingLogoAppear: true,
-      backgroundUrl: '',
-      cover: '',
-      item: [],
-      isDragging: false,
-      filePathNeedToDelete: '',
       openUrlShow: false,
-      displayInfo: [],
+      item: {},
       tranFlag: true,
       shifting: false,
       firstIndex: 0,
     };
   },
-  watch: {
-    firstIndex() {
-      this.shifting = true;
-    },
-    lastIndex() {
-      this.shifting = true;
-    },
-    shifting(val) {
-      if (val) {
-        setTimeout(() => {
-          this.shifting = false;
-        }, 400);
-      }
-    },
-  },
   computed: {
-    ...mapState({
-      version: state => state.App.version,
-      isFullScreen: state => state.Window.isFullScreen,
-    }),
-    ...mapGetters(['winWidth', 'defaultDir']),
+    ...mapGetters(['winWidth', 'defaultDir', 'isFullScreen']),
     lastIndex: {
       get() {
         return (this.firstIndex + this.showItemNum) - 1;
       },
-      set(val) {
+      set(val: number) {
         if (val < this.showItemNum - 1) {
           this.firstIndex = 0;
         } else {
           this.firstIndex = (val - this.showItemNum) + 1;
         }
       },
-    },
-    showShortcutImage() {
-      return !this.landingLogoAppear;
     },
     move() {
       return -(this.firstIndex * (this.thumbnailWidth + this.marginRight));
@@ -194,33 +205,42 @@ export default {
       return number;
     },
   },
+  watch: {
+    firstIndex() {
+      this.shifting = true;
+    },
+    lastIndex() {
+      this.shifting = true;
+    },
+    shifting(val: boolean) {
+      if (val) {
+        setTimeout(() => {
+          this.shifting = false;
+        }, 400);
+      }
+    },
+  },
   created() {
     if (!this.$store.getters.deleteVideoHistoryOnExit) {
-      this.infoDB.sortedResult('recent-played', 'lastOpened', 'prev')
-        .then((data) => {
-          for (let i = 0; i < data.length; i += 1) {
-            if (data[i] === undefined) {
-              data.splice(i, 1);
-            }
-          }
-          this.lastPlayedFile = data.slice(0, 9);
-        });
+      recentPlayService.getRecords().then((results) => {
+        this.landingViewItems = results;
+      });
     } else {
       this.infoDB.clearAll();
     }
-    this.$bus.$on('clean-lastPlayedFile', () => {
+    this.$bus.$on('clean-landingViewItems', () => {
       // just for delete thumbnail display
       this.firstIndex = 0;
-      this.lastPlayedFile = [];
-      this.landingLogoAppear = true;
+      this.item = {};
+      this.landingViewItems = [];
     });
     // responsible for delete the thumbnail on display which had already deleted in DB
-    this.$bus.$on('delete-file', (id) => {
-      const deleteIndex = this.lastPlayedFile
-        .findIndex(file => file.id === id);
+    this.$bus.$on('delete-file', (id: number) => {
+      const deleteIndex = this.landingViewItems
+        .findIndex((file: { id: number }) => file.id === id);
       if (deleteIndex >= 0) {
-        this.lastPlayedFile.splice(deleteIndex, 1);
-        this.landingLogoAppear = true;
+        this.item = {};
+        this.landingViewItems.splice(deleteIndex, 1);
       }
     });
     this.$bus.$on('drag-over', () => {
@@ -241,14 +261,15 @@ export default {
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [720, 405]);
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [720 / 405]);
 
-    this.sagi.healthCheck().then((status) => {
+    // TODO: error handling
+    this.sagi.healthCheck().then(({ status }: HealthCheckResponse.AsObject) => {
       if (process.env.NODE_ENV !== 'production') {
         this.sagiHealthStatus = status;
-        this.addLog('info', `launching: ${app.getName()} ${app.getVersion()}`);
-        this.addLog('info', `sagi API Status: ${this.sagiHealthStatus}`);
+        log.info('LandingView.vue', `launching: ${app.getName()} ${app.getVersion()}`);
+        log.info('LandingView.vue', `sagi API Status: ${this.sagiHealthStatus}`);
       }
     });
-    this.$bus.$on('open-url-show', (val) => {
+    this.$bus.$on('open-url-show', (val: boolean) => {
       this.openUrlShow = val;
     });
     this.$bus.$on('clean-lastPlayedFile', () => {
@@ -258,7 +279,7 @@ export default {
       if (e.keyCode === 39) {
         this.shifting = true;
         this.tranFlag = true;
-        this.lastIndex = this.lastPlayedFile.length;
+        this.lastIndex = this.landingViewItems.length;
       } else if (e.keyCode === 37) {
         this.shifting = true;
         this.tranFlag = true;
@@ -287,21 +308,26 @@ export default {
         this.open();
       }
     },
-    deleteItem(item) {
-      const dataIndex = this.lastPlayedFile.findIndex(file => file.id === item.id);
-      this.lastPlayedFile.splice(dataIndex, 1);
-      this.infoDB.deletePlaylist(item.id);
-    },
-    showShortcut(flag) {
-      this.landingLogoAppear = !flag;
-    },
-    displayInfoUpdate(displayInfo) {
-      this.backgroundUrl = displayInfo.backgroundUrl;
-      this.cover = displayInfo.cover;
-      this.item = displayInfo;
-    },
-    timeInValidForm(time) {
+    timeInvalidForm(time: number) {
       return (Number.isNaN(time) ? this.invalidTimeRepresentation : time);
+    },
+    onItemMouseover(index: number) {
+      this.item = this.landingViewItems[index];
+    },
+    onItemClick(index: number) {
+      if (index === this.lastIndex && !this.isFullScreen) {
+        this.lastIndex = this.landingViewItems.length;
+      } else if (index + 1 < this.firstIndex && !this.isFullScreen) {
+        this.firstIndex = 0;
+      } else if (!this.filePathNeedToDelete) {
+        this.openPlayList(this.landingViewItems[index].id);
+      }
+    },
+    onItemDelete(index: number) {
+      playInfoStorageService.deleteRecentPlayedBy(this.landingViewItems[index].id);
+      this.item = {};
+      this.landingViewItems.splice(index, 1);
+      if (this.firstIndex !== 0) this.lastIndex = this.landingViewItems.length;
     },
   },
 };
@@ -393,7 +419,10 @@ $themeColor-Light: white;
     .background-mask {
       width: 100%;
       height: 100%;
-      background-image: radial-gradient(circle 80.5vw at 27.8vw 32.1vh, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.41) 45%, rgba(0,0,0,0.7) 100%);
+      background-image: radial-gradient(
+        circle 80.5vw at 27.8vw 32.1vh,
+        rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.41) 45%, rgba(0,0,0,0.7) 100%
+      );
     }
   }
   .item-info {

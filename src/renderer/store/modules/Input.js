@@ -19,8 +19,8 @@ const getters = {
   leftMousedown: state => state.pressedMouseButtonNames.includes('left'),
   wheelTriggered: state => state.wheelTimestamp,
   volumeWheelTriggered: ({ wheelDirection, wheelComponentName }) => (
-    wheelDirection === 'vertical' &&
-    wheelComponentName !== 'subtitle-control' && wheelComponentName !== 'advance-control'
+    wheelDirection === 'vertical'
+    && wheelComponentName !== 'SubtitleControl' && wheelComponentName !== 'AdvanceControl'
   ),
 };
 

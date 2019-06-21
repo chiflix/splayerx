@@ -3,7 +3,7 @@ import sinon from 'sinon';
 import mock from 'mock-fs';
 import { resolve } from 'path';
 import SubtitleLoader from '@/components/Subtitle/SubtitleLoader';
-import Sagi from '@/helpers/sagi';
+import Sagi from '@/libs/sagi';
 
 describe('Subtitle Searchers Unit Tests', () => {
   let sandbox;

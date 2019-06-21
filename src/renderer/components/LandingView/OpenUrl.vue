@@ -1,12 +1,27 @@
 <template>
-  <div class="open-url no-drag" :style="{
-    left: isDarwin ? '' : '15px',
-    right: isDarwin ? '15px' : '',
-  }">
-    <input class="url-input no-drag" ref="inputValue" :style="{ order: isDarwin ? '1' : '2' }" placeholder="请输入URL..." @keypress.self="handleEnterKey" onfocus="select()">
-    <Icon type="closeSearch" :style="{
-      order: isDarwin ? '2' : '1',
-      margin: isDarwin ? 'auto 0 auto 10px' : 'auto 10px auto 0' }" class="close-icon" @mouseup.native="handleCloseUrlInput"></Icon>
+  <div
+    :style="{
+      left: isDarwin ? '' : '15px',
+      right: isDarwin ? '15px' : '',
+    }"
+    class="open-url no-drag"
+  >
+    <input
+      ref="inputValue"
+      :style="{ order: isDarwin ? '1' : '2' }"
+      @keypress.self="handleEnterKey"
+      class="url-input no-drag"
+      placeholder="请输入URL..."
+      onfocus="select()"
+    >
+    <Icon
+      :style="{
+        order: isDarwin ? '2' : '1',
+        margin: isDarwin ? 'auto 0 auto 10px' : 'auto 10px auto 0' }"
+      @mouseup.native="handleCloseUrlInput"
+      type="closeSearch"
+      class="close-icon"
+    />
   </div>
 </template>
 

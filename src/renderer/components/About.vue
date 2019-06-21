@@ -1,25 +1,46 @@
 <template>
   <div class="content">
-    <div class="mac-icons no-drag"
+    <div
       v-if="isDarwin"
       @mouseover="state = 'hover'"
-      @mouseout="state = 'default'">
-      <Icon class="title-button"
-            type="titleBarClose"
-            :state="state"
-            @click.native="handleClose"/>
-      <Icon class="title-button-disable" type="titleBarExitFull"/>
-      <Icon class="title-button-disable" type="titleBarFull"/>
+      @mouseout="state = 'default'"
+      class="mac-icons no-drag"
+    >
+      <Icon
+        :state="state"
+        @click.native="handleClose"
+        class="title-button"
+        type="titleBarClose"
+      />
+      <Icon
+        class="title-button-disable"
+        type="titleBarExitFull"
+      />
+      <Icon
+        class="title-button-disable"
+        type="titleBarFull"
+      />
     </div>
-    <Icon class="win-title-button no-drag"
+    <Icon
       v-if="!isDarwin"
       @click.native="handleClose"
-      type="titleBarWinClose">
-    </Icon>
-    <img class="winLogo" src="../assets/win-about-logo.png" draggable="false">
-    <div class="name">{{ name }}</div>
-    <div class="version">{{ `Version ${version}` }}</div>
-    <div class="copyright"><p>© 2009-2019</p><p>Sagittarius Technology Co.,Ltd</p></div>
+      class="win-title-button no-drag"
+      type="titleBarWinClose"
+    />
+    <img
+      class="winLogo"
+      src="../assets/win-about-logo.png"
+      draggable="false"
+    >
+    <div class="name">
+      {{ name }}
+    </div>
+    <div class="version">
+      {{ `Version ${version}` }}
+    </div>
+    <div class="copyright">
+      <p>© 2009-2019</p><p>Sagittarius Technology Co.,Ltd</p>
+    </div>
   </div>
 </template>
 
@@ -60,7 +81,12 @@ export default {
   .content {
     width: 100%;
     height: 100%;
-    background-image: linear-gradient(-28deg, rgba(65,65,65,0.97) 0%, rgba(84,84,84,0.97) 47%, rgba(123,123,123,0.97) 100%);
+    background-image: linear-gradient(
+      -28deg,
+      rgba(65,65,65,0.97) 0%,
+      rgba(84,84,84,0.97) 47%,
+      rgba(123,123,123,0.97) 100%
+    );
     border-radius: 4px;
     display: flex;
     flex-direction: column;

@@ -1,5 +1,5 @@
 import PQueue from 'p-queue';
-import Sagi from '@/helpers/sagi';
+import Sagi from '@/libs/sagi';
 
 const validProperties = [
   'mediaIdentity',
@@ -16,7 +16,8 @@ function checkProperty(object) {
 }
 
 export class TranscriptQueue {
-  #queue = new PQueue();
+  queue = new PQueue();
+
   constructor(pqueueInstance) {
     if ((pqueueInstance instanceof PQueue)) {
       this.queue = pqueueInstance;
@@ -24,6 +25,7 @@ export class TranscriptQueue {
   }
 
   subtitleState = {};
+
   async add(subtitle, isManual) {
     if (checkProperty(subtitle)) {
       const id = `${subtitle.src}-${subtitle.mediaIdentity}`;
@@ -54,6 +56,7 @@ export class TranscriptQueue {
     }
     return false;
   }
+
   async addAll(subtitles) {
     const success = [];
     const failure = [];
@@ -67,6 +70,7 @@ export class TranscriptQueue {
 
     return { success, failure };
   }
+
   async addAllManual(subtitles) {
     const success = [];
     const failure = [];

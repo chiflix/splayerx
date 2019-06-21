@@ -19,7 +19,7 @@ const state = {
   currentFirstSubtitleId: '',
   currentSecondSubtitleId: '',
   videoSubtitleMap: {},
-  chosenStyle: '',
+  chosenStyle: 0,
   chosenSize: 1,
   lastChosenSize: 1,
   subtitleDelay: 0,
@@ -28,6 +28,10 @@ const state = {
   subToTop: false,
   isFirstSubtitle: true,
   enabledSecondarySub: false,
+  currentCues: [
+    { subPlayResX: 720, subPlayResY: 405, cues: [] },
+    { subPlayResX: 720, subPlayResY: 405, cues: [] },
+  ],
 };
 
 const getters = {
@@ -47,21 +51,21 @@ const getters = {
         type: types[id],
       }))
   ),
-  subtitleList: ({ videoSubtitleMap }, { originSrc, allSubtitleList }) =>
-    (videoSubtitleMap[originSrc] || [])
-      .map(subtitleId => allSubtitleList.find(({ id }) => id === subtitleId))
-      .sort((a, b) => b.rank - a.rank),
+  subtitleList: ({ videoSubtitleMap }, { originSrc, allSubtitleList }) => (
+    videoSubtitleMap[originSrc] || [])
+    .map(subtitleId => allSubtitleList.find(({ id }) => id === subtitleId))
+    .sort((a, b) => b.rank - a.rank),
   ableToPushCurrentSubtitle: (
     { currentFirstSubtitleId, currentSecondSubtitleId, enabledSecondarySub },
     { subtitleList },
   ) => {
     const currentSubtitles = subtitleList
-      .filter(({ id }) => id === currentFirstSubtitleId ||
-        (id === currentSecondSubtitleId && enabledSecondarySub));
+      .filter(({ id }) => id === currentFirstSubtitleId
+        || (id === currentSecondSubtitleId && enabledSecondarySub));
     return !!currentSubtitles.map(i => i.loading === 'loaded' || i.loading === 'ready').length;
   },
-  getVideoSrcById: ({ videoSubtitleMap }) => id =>
-    (Object.keys(videoSubtitleMap).find(videoSrc => videoSubtitleMap[videoSrc].includes(id))),
+  getVideoSrcById: ({ videoSubtitleMap }) => id => (Object.keys(videoSubtitleMap)
+    .find(videoSrc => videoSubtitleMap[videoSrc].includes(id))),
   subtitleDelay: state => state.subtitleDelay,
   chosenStyle: state => state.chosenStyle,
   chosenSize: state => state.chosenSize,
@@ -71,6 +75,7 @@ const getters = {
   subToTop: state => state.subToTop,
   isFirstSubtitle: state => state.isFirstSubtitle,
   enabledSecondarySub: state => state.enabledSecondarySub,
+  currentCues: state => state.currentCues,
 };
 
 const mutations = {

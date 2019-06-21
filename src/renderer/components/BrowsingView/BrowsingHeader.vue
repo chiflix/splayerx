@@ -1,26 +1,24 @@
 <template>
   <div class="header">
-    <browsing-favicons v-show="!showOpenUrl"></browsing-favicons>
-    <browsing-input v-show="showOpenUrl"></browsing-input>
+    <browsing-favicons v-show="!showOpenUrl" />
+    <browsing-input v-show="showOpenUrl" />
   </div>
 </template>
 
 <script>
-import BrowsingTitlebar from './BrowsingTitlebar.vue';
 import BrowsingFavicons from './BrowsingFavicons.vue';
 import BrowsingInput from './BrowsingInput.vue';
 
 export default {
   name: 'BrowsingHeader',
+  components: {
+    'browsing-favicons': BrowsingFavicons,
+    'browsing-input': BrowsingInput,
+  },
   data() {
     return {
       showOpenUrl: false,
     };
-  },
-  components: {
-    'browsing-titlebar': BrowsingTitlebar,
-    'browsing-favicons': BrowsingFavicons,
-    'browsing-input': BrowsingInput,
   },
   mounted() {
     this.$bus.$on('open-url-show', (val) => {

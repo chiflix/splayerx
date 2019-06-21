@@ -1,17 +1,40 @@
 <template>
-  <div class="fav-icons" :style="{ left: isDarwin ? '' : '15px', right: isDarwin ? '10px' : '' }">
-    <div class="fav-icons-details" ref="favDetail" :class="favAnimClass" @animationend="handleFavAnimEnd" :style="{ order: isDarwin ? '1' : '2' }">
-      <div class="fav-icon-container" v-for="(item, index) in favicon" @mouseover="favIconMouseOver(index)" @mouseleave="favIconMouseLeave"
-      @mouseup="handleFavOpen(item)" :style="{
-        margin: isDarwin ? 'auto 0 auto 15px' : 'auto 15px auto 0'
-      }">
-        <Icon :type="item.type" :style="{ opacity: index === faviconIndex ? '1' : 'calc(4 / 9)'}"></Icon>
+  <div
+    :style="{ left: isDarwin ? '' : '15px', right: isDarwin ? '10px' : '' }"
+    class="fav-icons"
+  >
+    <div
+      ref="favDetail"
+      :class="favAnimClass"
+      @animationend="handleFavAnimEnd"
+      :style="{ order: isDarwin ? '1' : '2' }"
+      class="fav-icons-details"
+    >
+      <div
+        v-for="(item, index) in favicon"
+        @mouseover="favIconMouseOver(index)"
+        @mouseleave="favIconMouseLeave"
+        @mouseup="handleFavOpen(item)"
+        :style="{
+          margin: isDarwin ? 'auto 0 auto 15px' : 'auto 15px auto 0'
+        }"
+        class="fav-icon-container"
+      >
+        <Icon
+          :type="item.type"
+          :style="{ opacity: index === faviconIndex ? '1' : 'calc(4 / 9)'}"
+        />
       </div>
     </div>
-    <Icon type="showFavicon" class="fav-display" @mouseup.native="handleShowFavicon" :style="{
-      order: isDarwin ? '2' : '1', margin: isDarwin ? 'auto 0 auto 10px' : 'auto 10px auto 0',
-      transform: `rotate(${rotateNum}deg)`,
-      transition: 'transform 100ms linear' }"></Icon>
+    <Icon
+      @mouseup.native="handleShowFavicon"
+      :style="{
+        order: isDarwin ? '2' : '1', margin: isDarwin ? 'auto 0 auto 10px' : 'auto 10px auto 0',
+        transform: `rotate(${rotateNum}deg)`,
+        transition: 'transform 100ms linear' }"
+      type="showFavicon"
+      class="fav-display"
+    />
   </div>
 </template>
 

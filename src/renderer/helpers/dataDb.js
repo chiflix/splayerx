@@ -1,4 +1,4 @@
-import { openDb } from 'idb';
+import { openDB } from 'idb';
 import { includes } from 'lodash';
 import {
   DATADB_VERSION as currentVersion,
@@ -9,9 +9,11 @@ import {
 const currentSchema = schemas.find(({ version }) => version === currentVersion).schema;
 
 export class DataDb {
-  #db;
-  #version;
-  #schema;
+  db;
+
+  version;
+
+  schema;
 
   /**
    * retrieve or createDb with dbName, version and schema
@@ -24,29 +26,31 @@ export class DataDb {
    * @memberof DataDb
    */
   static async getDb(version, schema) {
-    return openDb(dBName, version, (upgradeDb) => {
-      const { objectStoreNames } = upgradeDb;
-      schema.forEach(({ name, options, indexes }) => {
-        // todo: predefined database upgrade logic should go here
-        if (!objectStoreNames.contains(name)) {
-          const store = upgradeDb.createObjectStore(name, options);
-          (indexes || []).forEach(({ name, keyPath, options }) => {
-            if (name) store.createIndex(name, keyPath || name, options);
-          });
-        } else {
-          const store = upgradeDb.transaction.objectStore(name);
-          const { indexNames } = store;
+    return openDB(dBName, version, {
+      upgrade(db) {
+        const { objectStoreNames } = db;
+        schema.forEach(({ name, options, indexes }) => {
+          // todo: predefined database upgrade logic should go here
+          if (!objectStoreNames.contains(name)) {
+            const store = db.createObjectStore(name, options);
+            (indexes || []).forEach(({ name, keyPath, options }) => {
+              if (name) store.createIndex(name, keyPath || name, options);
+            });
+          } else {
+            const store = db.transaction.objectStore(name);
+            const { indexNames } = store;
 
-          const indexesToDelete = Array.from(indexNames)
-            .filter(name => !includes(indexes, name));
-          indexesToDelete.forEach(store.deleteIndex);
+            const indexesToDelete = Array.from(indexNames)
+              .filter(name => !includes(indexes, name));
+            indexesToDelete.forEach(store.deleteIndex);
 
-          const indexesToCreate = indexes
-            .filter(({ name }) => !indexNames.contains(name));
-          indexesToCreate
-            .forEach(({ name, keyPath, options }) => store.createIndex(name, keyPath, options));
-        }
-      });
+            const indexesToCreate = indexes
+              .filter(({ name }) => !indexNames.contains(name));
+            indexesToCreate
+              .forEach(({ name, keyPath, options }) => store.createIndex(name, keyPath, options));
+          }
+        });
+      },
     });
   }
 
@@ -75,6 +79,22 @@ export class DataDb {
       .objectStore(objectStoreName)
       .get(index);
   }
+
+  async getAllValueByIndex(objectStoreName, indexName, value) {
+    const db = await this.getOwnDb();
+    const res = [];
+    let cursor = await db
+      .transaction(objectStoreName)
+      .store
+      .index(indexName)
+      .openCursor(undefined, 'next');
+    while (cursor) {
+      if (cursor.value[indexName] === value) res.push(cursor.value);
+      cursor = await cursor.continue();
+    }
+    return res;
+  }
+
   async getAll(objectStoreName, keyRange) {
     const db = await this.getOwnDb();
     const tx = db.transaction(objectStoreName);
@@ -93,12 +113,12 @@ export class DataDb {
     const tx = db.transaction(objectStoreName, 'readwrite');
     try {
       const newKey = await tx.objectStore(objectStoreName).add(data);
-      await tx.complete;
+      await tx.done;
       return newKey;
     } catch (err) { throw err; }
   }
 
-  async put(objectStoreName, data, keyPathVal) {
+  async update(objectStoreName, data, keyPathVal) {
     const db = await this.getOwnDb();
     const { objectStoreNames } = db;
     if (!objectStoreNames.contains(objectStoreName)) {
@@ -114,9 +134,16 @@ export class DataDb {
     }
     try {
       const newKey = await tx.objectStore(objectStoreName).put(data, keyPathVal);
-      await tx.complete;
+      await tx.done;
       return newKey;
     } catch (err) { throw err; }
+  }
+
+  async clear(storeName) {
+    const db = await this.getOwnDb();
+    const tx = db.transaction(storeName, 'readwrite');
+    tx.store.clear();
+    return tx.done;
   }
 
   async delete(objectStoreName, keyPathVal) {
@@ -127,7 +154,7 @@ export class DataDb {
     }
     const tx = db.transaction(objectStoreName, 'readwrite');
     tx.objectStore(objectStoreName).delete(keyPathVal);
-    return tx.complete;
+    return tx.done;
   }
 }
 

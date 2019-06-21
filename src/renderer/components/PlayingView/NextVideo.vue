@@ -1,45 +1,55 @@
 <template>
-<div class="nextVideo">
-  <div class="nextVideo__plane">
-    <div class="nextVideo__progress" 
-      :style="{ width: progress + '%' }">
-      <div class="progressGradient"></div>
-      <div class="progressBorderLight"></div>
-    </div>
-    <div class="nextVideo__infoWrap">
-      <div class="nextVideo__info--upper">
-        <span>{{ timecode }}&nbsp;· </span>
-        <span>{{ title }}</span>
+  <div class="nextVideo">
+    <div class="nextVideo__plane">
+      <div
+        :style="{ width: `${(progress/100)*217}px` }"
+        class="nextVideo__progress"
+      >
+        <div class="progressGradient" />
+        <div class="progressBorderLight" />
       </div>
-      <div class="nextVideo__info--mainly">{{ videoName }}</div>
+      <div class="nextVideo__infoWrap">
+        <div class="nextVideo__info--upper">
+          <span>{{ timecode }}&nbsp;· </span>
+          <span>{{ title }}</span>
+        </div>
+        <div class="nextVideo__info--mainly">
+          {{ videoName }}
+        </div>
+      </div>
+      <div
+        @mouseup.stop="handleCloseMouseup"
+        class="nextVideo__closeButton"
+      >
+        <Icon type="close" />
+      </div>
     </div>
-    <div class="nextVideo__closeButton"
-      @mouseup.stop="handleCloseMouseup">
-      <Icon type="close"/>
+    <div
+      @mouseup="handleMouseup"
+      @mouseover="mouseoverVideo"
+      @mouseout="mouseoutVideo"
+      class="nextVideo__thumbnail"
+    >
+      <video
+        ref="videoThumbnail"
+        :src="convertedSrcOfNextVideo"
+        :class="{ blur: isBlur }"
+        @loadedmetadata="onMetaLoaded"
+        @seeked="onSeeked"
+      />
+      <div class="nextVideo__playButton">
+        <Icon :type="notificationPlayIcon" />
+      </div>
     </div>
   </div>
-  <div class="nextVideo__thumbnail"
-    @mouseup="handleMouseup"
-    @mouseover="mouseoverVideo"
-    @mouseout="mouseoutVideo">
-    <video ref="videoThumbnail"
-      :src="convertedSrcOfNextVideo"
-      :class="{ blur: isBlur }"
-      @loadedmetadata="onMetaLoaded"
-      @seeked="onSeeked"></video>
-    <div class="nextVideo__playButton">
-      <Icon :type="notificationPlayIcon"/>
-    </div>
-  </div>
-</div>
 </template>
-<script>
+<script lang="ts">
 import { mapGetters } from 'vuex';
 import path from 'path';
 import Icon from '../BaseIconContainer.vue';
 
 export default {
-  name: 'next-video',
+  name: 'NextVideo',
   components: {
     Icon,
   },
@@ -50,38 +60,6 @@ export default {
       notificationPlayIcon: 'notificationPlay',
       isBlur: true,
     };
-  },
-  methods: {
-    handleCloseMouseup() {
-      this.$emit('manualclose-next-video');
-    },
-    handleMouseup() {
-      if (this.nextVideo) {
-        this.$bus.$emit('seek', this.duration);
-      }
-    },
-    mouseoverVideo() {
-      this.$refs.videoThumbnail.play();
-      this.notificationPlayIcon = 'notificationPlayHover';
-      this.isBlur = false;
-    },
-    mouseoutVideo() {
-      this.$refs.videoThumbnail.pause();
-      this.notificationPlayIcon = 'notificationPlay';
-      this.isBlur = true;
-    },
-    onMetaLoaded(event) {
-      event.target.muted = true;
-      event.target.currentTime = 100;
-    },
-    onSeeked() {
-      this.$emit('ready-to-show');
-    },
-    updatePlayingTime(time) {
-      const fractionProgress = (time - this.nextVideoPreviewTime) /
-        (this.duration - this.nextVideoPreviewTime);
-      this.progress = fractionProgress * 100;
-    },
   },
   computed: {
     ...mapGetters(['nextVideo', 'isFolderList', 'nextVideoPreviewTime', 'duration']),
@@ -104,6 +82,38 @@ export default {
       return this.timecodeFromSeconds(this.duration);
     },
   },
+  methods: {
+    handleCloseMouseup() {
+      this.$emit('manualclose-next-video');
+    },
+    handleMouseup() {
+      if (this.nextVideo) {
+        this.$bus.$emit('seek', this.duration);
+      }
+    },
+    mouseoverVideo() {
+      this.$refs.videoThumbnail.play();
+      this.notificationPlayIcon = 'notificationPlayHover';
+      this.isBlur = false;
+    },
+    mouseoutVideo() {
+      this.$refs.videoThumbnail.pause();
+      this.notificationPlayIcon = 'notificationPlay';
+      this.isBlur = true;
+    },
+    onMetaLoaded(event: Event) {
+      (event.target as HTMLVideoElement).muted = true;
+      (event.target as HTMLVideoElement).currentTime = 100;
+    },
+    onSeeked() {
+      this.$emit('ready-to-show');
+    },
+    updatePlayingTime(time: number) {
+      const fractionProgress = (time - this.nextVideoPreviewTime)
+        / (this.duration - this.nextVideoPreviewTime);
+      this.progress = fractionProgress * 100;
+    },
+  },
 };
 </script>
 <style scoped lang="scss">
@@ -122,18 +132,22 @@ export default {
 .nextVideo {
   zoom: 1;
 
-  @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
+  @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px),
+  screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
     & {
       display: none;
     }
   }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
     zoom: 1;
   }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
     zoom: 1.2;
   }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     zoom: 1.68;
   }
 
@@ -147,7 +161,7 @@ export default {
     clip-path: inset(0px round 7px);
     box-shadow: 0 0 1px rgba(0,0,0,0.1);
   }
-  
+
   &__progress {
     position: absolute;
     left: 123px;
@@ -162,7 +176,11 @@ export default {
       right: 0;
       width: 50px;
       height: 100%;
-      background-image: linear-gradient(-90deg, rgba(238,238,238,0.29) 0%, rgba(255,255,255,0.00) 100%);
+      background-image: linear-gradient(
+        -90deg,
+        rgba(238,238,238,0.29) 0%,
+        rgba(255,255,255,0.00) 100%
+      );
     }
     .progressBorderLight {
       position: absolute;
@@ -170,7 +188,13 @@ export default {
       width: 1px;
       height: 100%;
       opacity: 0.7;
-      background-image: linear-gradient(-180deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.59) 32%, rgba(255,255,255,0.17) 71%, rgba(255,255,255,0.00) 100%);
+      background-image: linear-gradient(
+        -180deg,
+        rgba(255,255,255,0.00) 0%,
+        rgba(255,255,255,0.59) 32%,
+        rgba(255,255,255,0.17) 71%,
+        rgba(255,255,255,0.00) 100%
+      );
     }
   }
   &__infoWrap {

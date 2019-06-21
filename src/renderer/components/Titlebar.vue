@@ -1,74 +1,105 @@
 <template>
   <div
     :class="isDarwin ? 'darwin-titlebar' : 'titlebar'"
-    @dblclick.stop="handleDbClick">
-    <div class="win-icons" v-if="!isDarwin" v-fade-in="showTitleBar">
-      <Icon class="title-button no-drag"
+    @dblclick.stop="handleDbClick"
+  >
+    <div
+      v-if="!isDarwin"
+      v-fade-in="showTitleBar"
+      class="win-icons"
+    >
+      <Icon
         @mouseup.native="handleMinimize"
-        type="titleBarWinExitFull">
-      </Icon>
-      <Icon class="title-button no-drag"
-        @mouseup.native="handleWinFull"
+        class="title-button no-drag"
+        type="titleBarWinExitFull"
+      />
+      <Icon
         v-show="middleButtonStatus === 'maximize'"
-        type="titleBarWinFull">
-      </Icon>
-      <Icon class="title-button no-drag"
+        @mouseup.native="handleWinFull"
+        class="title-button no-drag"
+        type="titleBarWinFull"
+      />
+      <Icon
+        v-show="middleButtonStatus === 'restore'"
         @mouseup.native="handleRestore"
+        class="title-button no-drag"
         type="titleBarWinRestore"
-        v-show="middleButtonStatus === 'restore'">
-      </Icon>
-      <Icon class="title-button no-drag"
-        @mouseup.native="handleFullscreenExit"
+      />
+      <Icon
         v-show="middleButtonStatus === 'exit-fullscreen'"
-        type="titleBarWinResize">
-      </Icon>
-      <Icon class="title-button no-drag"
+        @mouseup.native="handleFullscreenExit"
+        class="title-button no-drag"
+        type="titleBarWinResize"
+      />
+      <Icon
         @mouseup.native="handleClose"
-        type="titleBarWinClose">
-      </Icon>
+        class="title-button no-drag"
+        type="titleBarWinClose"
+      />
     </div>
-    <div class="mac-icons"
+    <div
       v-if="isDarwin"
       v-fade-in="showTitleBar"
       @mouseover="handleMouseOver"
-      @mouseout="handleMouseOut">
-      <Icon id="close" class="title-button no-drag"
-            type="titleBarClose"
-            :state="state"
-            @mouseup.native="handleClose">
-      </Icon>
-      <Icon id="minimize" class="title-button no-drag"
-            type="titleBarExitFull"
-            @mouseup.native="handleMinimize"
-            :class="{ disabled: middleButtonStatus === 'exit-fullscreen' }"
-            :state="state"
-            :isFullScreen="middleButtonStatus">
-      </Icon>
-      <Icon id="maximize" class="title-button no-drag"
-            :type="itemType"
-            @mouseup.native="handleMacFull"
-            v-show="middleButtonStatus !== 'exit-fullscreen'"
-            :state="state"
-            :style="{ transform: itemType === this.itemTypeEnum.MAXSCREEN ? 'rotate(45deg)' : ''}">
-      </Icon>
-      <Icon id="restore" class="title-button no-drag"
-            @mouseup.native="handleFullscreenExit"
-            v-show="middleButtonStatus === 'exit-fullscreen'"
-            type="titleBarRecover"
-            :state="state">
-      </Icon>
+      @mouseout="handleMouseOut"
+      class="mac-icons"
+    >
+      <Icon
+        id="close"
+        :state="state"
+        @mouseup.native="handleClose"
+        class="title-button no-drag"
+        type="titleBarClose"
+      />
+      <Icon
+        id="minimize"
+        :class="{ disabled: middleButtonStatus === 'exit-fullscreen' }"
+        :state="state"
+        :is-full-screen="middleButtonStatus"
+        @mouseup.native="handleMinimize"
+        class="title-button no-drag"
+        type="titleBarExitFull"
+      />
+      <Icon
+        id="maximize"
+        v-show="middleButtonStatus !== 'exit-fullscreen'"
+        :type="itemType"
+        :state="state"
+        :style="{ transform: isMaxScreen ? 'rotate(45deg)' : ''}"
+        @mouseup.native="handleMacFull"
+        class="title-button no-drag"
+      />
+      <Icon
+        id="restore"
+        v-show="middleButtonStatus === 'exit-fullscreen'"
+        :state="state"
+        @mouseup.native="handleFullscreenExit"
+        class="title-button no-drag"
+        type="titleBarRecover"
+      />
     </div>
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { mapGetters } from 'vuex';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import Icon from './BaseIconContainer.vue';
 
 export default {
-  name: 'titlebar',
+  name: 'Titlebar',
+  // @ts-ignore
   type: INPUT_COMPONENT_TYPE,
+  components: {
+    Icon,
+  },
+  props: {
+    showAllWidgets: {
+      type: Boolean,
+      default: true,
+    },
+    recentPlaylist: Boolean,
+  },
   data() {
     return {
       state: 'default',
@@ -82,50 +113,52 @@ export default {
       showTitleBar: true,
     };
   },
-  props: {
-    currentView: String,
-    showAllWidgets: {
-      type: Boolean,
-      default: true,
+  computed: {
+    ...mapGetters([
+      'isMaximized',
+      'isFullScreen',
+    ]),
+    isDarwin() {
+      return process.platform === 'darwin';
     },
-    recentPlaylist: Boolean,
-  },
-  components: {
-    Icon,
-  },
-  mounted() {
-    window.addEventListener('keydown', (e) => {
-      if (e.keyCode === 18) {
-        this.keyAlt = true;
-      }
-    });
-    window.addEventListener('keyup', (e) => {
-      if (e.keyCode === 18) {
-        this.keyAlt = false;
-      }
-    });
+    middleButtonStatus() {
+      return this.isFullScreen ? 'exit-fullscreen' : this.isMaximized ? 'restore' : 'maximize'; // eslint-disable-line no-nested-ternary
+    },
+    isMaxScreen() { return this.itemType === this.itemTypeEnum.MAXSCREEN; },
   },
   watch: {
-    recentPlaylist(val) {
+    recentPlaylist(val: boolean) {
       if (!val) this.showTitleBar = this.showAllWidgets;
     },
-    showAllWidgets(val) {
+    showAllWidgets(val: boolean) {
       this.showTitleBar = this.recentPlaylist || val;
     },
-    keyAlt(val) {
+    keyAlt(val: boolean) {
       if (!val || !this.keyOver) {
         this.itemType = this.itemTypeEnum.FULLSCREEN;
       } else if (!this.isFullScreen) {
         this.itemType = this.itemTypeEnum.MAXSCREEN;
       }
     },
-    keyOver(val) {
+    keyOver(val: boolean) {
       if (!val || !this.keyAlt) {
         this.itemType = this.itemTypeEnum.FULLSCREEN;
       } else if (!this.isFullScreen) {
         this.itemType = this.itemTypeEnum.MAXSCREEN;
       }
     },
+  },
+  mounted() {
+    window.addEventListener('keydown', (e: KeyboardEvent) => {
+      if (e.keyCode === 18) {
+        this.keyAlt = true;
+      }
+    });
+    window.addEventListener('keyup', (e: KeyboardEvent) => {
+      if (e.keyCode === 18) {
+        this.keyAlt = false;
+      }
+    });
   },
   methods: {
     handleDbClick() {
@@ -170,18 +203,6 @@ export default {
       } else {
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'maximize');
       }
-    },
-  },
-  computed: {
-    ...mapGetters([
-      'isMaximized',
-      'isFullScreen',
-    ]),
-    isDarwin() {
-      return process.platform === 'darwin';
-    },
-    middleButtonStatus() {
-      return this.isFullScreen ? 'exit-fullscreen' : this.isMaximized ? 'restore' : 'maximize'; // eslint-disable-line no-nested-ternary
     },
   },
 };

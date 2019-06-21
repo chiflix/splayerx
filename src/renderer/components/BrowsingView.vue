@@ -1,15 +1,38 @@
 <template>
- <div class="browsing">
-   <browsing-titlebar></browsing-titlebar>
-   <browsing-header v-show="!isPip"></browsing-header>
-   <div class="loading-state loading-animation" v-show="loadingState && !isPip"></div>
-   <div class="pip-buttons" v-show="isPip">
-     <Icon type="pipRecord" :style="{ marginRight: '12px' }"></Icon>
-     <Icon type="pipBack" @mouseup.native="handleExitPip"></Icon>
-   </div>
-   <webview :src="availableUrl" autosize class="web-view" ref="webView" allowpopups :style="{ webkitAppRegion: isPip ? 'drag' : 'no-drag' }" :preload="preload"></webview>
-   <browsing-control v-show="!isPip" :class="controlToShow ? 'control-show-animation' : 'control-hide-animation'"></browsing-control>
- </div>
+  <div class="browsing">
+    <browsing-titlebar />
+    <browsing-header v-show="!isPip" />
+    <div
+      v-show="loadingState && !isPip"
+      class="loading-state loading-animation"
+    />
+    <div
+      v-show="isPip"
+      class="pip-buttons"
+    >
+      <Icon
+        :style="{ marginRight: '12px' }"
+        type="pipRecord"
+      />
+      <Icon
+        @mouseup.native="handleExitPip"
+        type="pipBack"
+      />
+    </div>
+    <webview
+      ref="webView"
+      :src="availableUrl"
+      :style="{ webkitAppRegion: isPip ? 'drag' : 'no-drag' }"
+      :preload="preload"
+      autosize
+      class="web-view"
+      allowpopups
+    />
+    <browsing-control
+      v-show="!isPip"
+      :class="controlToShow ? 'control-show-animation' : 'control-hide-animation'"
+    />
+  </div>
 </template>
 
 <script>
@@ -24,6 +47,12 @@ import BrowsingTitleBar from './BrowsingView/BrowsingTitlebar.vue';
 
 export default {
   name: 'BrowsingView',
+  components: {
+    'browsing-header': BrowsingHeader,
+    'browsing-control': BrowsingControl,
+    'browsing-titlebar': BrowsingTitleBar,
+    Icon,
+  },
   data() {
     return {
       quit: false,
@@ -37,12 +66,6 @@ export default {
       windowScrollY: 0,
       controlToShow: true,
     };
-  },
-  components: {
-    'browsing-header': BrowsingHeader,
-    'browsing-control': BrowsingControl,
-    'browsing-titlebar': BrowsingTitleBar,
-    Icon,
   },
   computed: {
     ...mapGetters(['browsingWinSize', 'winPos', 'isFullScreen', 'initialUrl', 'browsingWinWidth']),
@@ -98,14 +121,14 @@ export default {
       this.$refs.webView.executeJavaScript(`document.querySelector(".html5-video-player").style.position = "absolute";document.querySelector(".html5-video-player").style.width = "${val}px";document.querySelector(".html5-video-player").style.height = "${this.browsingWinSize[1]}px";`);
     },
     youtubeRecover() {
-      this.$refs.webView.executeJavaScript('document.getElementsByTagName("ytd-app")[0].style.display = "";' +
-        'document.querySelector(".html5-video-player").style.left = "";' +
-        'document.querySelector(".html5-video-player").style.transform = "";' +
-        'document.querySelector(".html5-video-player").style.position = "relative";' +
-        'document.querySelector(".html5-video-player").style.width = "100%";' +
-        'document.querySelector(".html5-video-player").style.height = "100%";' +
-        'window.removeEventListener("resize", setZoom);' +
-        'document.querySelector("video").style.zoom = 1');
+      this.$refs.webView.executeJavaScript('document.getElementsByTagName("ytd-app")[0].style.display = "";'
+        + 'document.querySelector(".html5-video-player").style.left = "";'
+        + 'document.querySelector(".html5-video-player").style.transform = "";'
+        + 'document.querySelector(".html5-video-player").style.position = "relative";'
+        + 'document.querySelector(".html5-video-player").style.width = "100%";'
+        + 'document.querySelector(".html5-video-player").style.height = "100%";'
+        + 'window.removeEventListener("resize", setZoom);'
+        + 'document.querySelector("video").style.zoom = 1');
       this.$refs.webView.executeJavaScript('document.querySelector(".html5-video-player").style.background = "rgba(255, 255, 255, 1)"');
       this.$refs.webView.executeJavaScript('if (document.querySelector(".video-ads")) document.querySelector(".video-ads").style.display = ""'); // remove youtube ads
       this.$refs.webView.executeJavaScript('var isPaused = document.querySelector("video").paused;document.querySelector(".ytd-player").appendChild(document.querySelector(".html5-video-player")); if (!isPaused) {document.querySelector("video").play()}');
@@ -140,13 +163,13 @@ export default {
           electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setMinimumSize', [320, 180]);
           electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setSize', [320, 180]);
           this.$refs.webView.executeJavaScript('document.body.prepend(document.querySelector("iframe"));document.querySelector("#app").style.display = "none"');
-          this.$refs.webView.executeJavaScript('var timer = setInterval(() => {' +
-            'if (document.querySelector("iframe") && document.querySelector("iframe").contentDocument.querySelector(".live-player-ctnr")) {' +
-            'console.log(document.querySelector("iframe").contentDocument.body);document.querySelector("iframe").contentDocument.body.prepend(document.querySelector("iframe").contentDocument.querySelector(".live-player-ctnr"));' +
-            'document.querySelector("iframe").contentDocument.querySelector(".live-room-app").style.display = "none";' +
-            'clearInterval(timer)' +
-            '}' +
-            '}, 100)');
+          this.$refs.webView.executeJavaScript('var timer = setInterval(() => {'
+            + 'if (document.querySelector("iframe") && document.querySelector("iframe").contentDocument.querySelector(".live-player-ctnr")) {'
+            + 'console.log(document.querySelector("iframe").contentDocument.body);document.querySelector("iframe").contentDocument.body.prepend(document.querySelector("iframe").contentDocument.querySelector(".live-player-ctnr"));'
+            + 'document.querySelector("iframe").contentDocument.querySelector(".live-room-app").style.display = "none";'
+            + 'clearInterval(timer)'
+            + '}'
+            + '}, 100)');
         }
       });
     },
@@ -297,7 +320,8 @@ export default {
     width: 100%;
     height: 36px;
     position: absolute;
-    background-image: linear-gradient(-90deg, #414141 18%, #555555 34%, #626262 51%, #626262 56%, #555555 69%, #414141 86%);
+    background-image: linear-gradient(-90deg, #414141 18%, #555555 34%,
+      #626262 51%, #626262 56%, #555555 69%, #414141 86%);
   }
   .pip-buttons {
     width: auto;

@@ -1,18 +1,41 @@
 import { extname, basename } from 'path';
-import { open, read, readFile, close } from 'fs-extra';
+import {
+  open, read, readFile, close,
+} from 'fs-extra';
 import chardet from 'chardet';
 import iconv from 'iconv-lite';
 import { ipcRenderer } from 'electron';
+import { castArray, flatten } from 'lodash';
 import helpers from '@/helpers';
-import Sagi from '@/helpers/sagi';
+import Sagi from '@/libs/sagi';
 import { normalizeCode } from '@/helpers/language';
 import languageLoader from '@/helpers/subtitle/language';
-import SubtitleLoader from './index';
 import { SubtitleError, ErrorCodes } from './errors';
 
-export { castArray } from 'lodash';
+export { get } from 'lodash';
+export { normalizeCode, castArray };
 
-export { normalizeCode };
+const files = require.context('.', false, /\.loader\.js$/);
+const loaders = {};
+
+files.keys().forEach((key) => {
+  loaders[key.replace(/(\.\/|\.loader|\.js)/g, '')] = files(key).default;
+});
+
+export const supportedFormats = flatten(Object.keys(loaders)
+  .map(loaderType => loaders[loaderType].supportedFormats));
+
+export const supportedCodecs = flatten(Object.keys(loaders)
+  .map(loaderType => [loaders[loaderType].name, loaders[loaderType].longName]));
+
+export function codecToFormat(codec) {
+  return Object.values(loaders).filter(loader => new RegExp(`${codec}`).test(loader.name))[0].supportedFormats[0];
+}
+
+export function getLoader(format) {
+  return Object.values(loaders)
+    .find(loader => castArray(loader.supportedFormats).includes(format));
+}
 
 export const mediaHash = helpers.methods.mediaQuickHash;
 
@@ -143,7 +166,7 @@ export async function loadLocalFile(path, encoding) {
  * @returns {Promise<string|SubtitleError>} the subtitle path string or SubtitleError
  */
 export async function embeddedSrcLoader(videoSrc, subtitleStreamIndex, subtitleCodec) {
-  ipcRenderer.send('extract-subtitle-request', videoSrc, subtitleStreamIndex, SubtitleLoader.codecToFormat(subtitleCodec), await helpers.methods.mediaQuickHash(videoSrc));
+  ipcRenderer.send('extract-subtitle-request', videoSrc, subtitleStreamIndex, codecToFormat(subtitleCodec), await helpers.methods.mediaQuickHash(videoSrc));
   return new Promise((resolve, reject) => {
     ipcRenderer.once('extract-subtitle-response', (event, { error, index, path }) => {
       if (error) reject(new SubtitleError(ErrorCodes.SUBTITLE_RETRIEVE_FAILED, `${videoSrc}'s No.${index} extraction failed with ${error}.`));
@@ -204,7 +227,8 @@ export function functionExtraction(funcOrObj, defaultParams) {
       result.func = funcOrObj.func;
       result.params = funcOrObj.params || 'src';
       return true;
-    } else if (typeof funcOrObj[key] === 'function') {
+    }
+    if (typeof funcOrObj[key] === 'function') {
       result[key] = {
         func: funcOrObj[key],
         params: defaultParams || 'src',

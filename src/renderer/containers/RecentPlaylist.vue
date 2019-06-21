@@ -1,120 +1,163 @@
 <template>
-<div class="recent-playlist"
-  v-show="backgroundDisplayState"
-  @mouseup="handleMouseup">
-  <transition name="background-fade">
-  <div class="background-gradient"
-    v-show="displayState"
-    :style="{
-      height: sizeAdaption(282),
-    }"/>
-  </transition>
-  <transition name="translate"
-    @after-leave="afterLeave">
-  <div class="content"
-    v-show="displayState">
-    <transition name="fade" mode="out-in">
-    <div class="info"
-      :key="hoverIndex"
-      :style="{
-        marginTop: sizeAdaption(53),
-        paddingLeft: sizeAdaption(40),
-      }">
-      <div class="top"
+  <div
+    v-show="backgroundDisplayState"
+    @mouseup="handleMouseup"
+    class="recent-playlist"
+  >
+    <transition name="background-fade">
+      <div
+        v-show="displayState"
         :style="{
-          fontSize: sizeAdaption(14),
-          lineHeight: sizeAdaption(14),
-        }">
-        <span ref="lastPlayedTime"></span>
-        {{timecodeFromSeconds(videoDuration)}}&nbsp&nbsp·&nbsp&nbsp{{inWhichSource}}&nbsp&nbsp{{indexInPlaylist}} / {{numberOfPlaylistItem}}
-      </div>
-      <div class="file-name"
-        :style="{
-          marginTop: sizeAdaption(9),
-          fontSize: sizeAdaption(18),
-          lineHeight: sizeAdaption(20),
-          fontWeight: 500,
-        }">{{ filename }}</div>
-    </div>
-    </transition>
-    <div class="playlist-items"
-      @mouseup.stop=""
-      :style="{
-        transition: tranFlag ? 'transform 400ms ease-in' : '',
-        transform: `translateX(-${distance}px)`,
-        marginTop: sizeAdaption(20),
-        marginBottom: sizeAdaption(40),
-        marginLeft: sizeAdaption(40),
-      }">
-      <RecentPlaylistItem v-for="(item, index) in playingList" class="item"
-        @can-remove="canRemove = true"
-        :key="item"
-        :index="index"
-        :path="item"
-        :maxIndex="maxIndex"
-        :isLastPage="lastIndex === maxIndex && firstIndex > 0"
-        :pageSwitching="pageSwitching"
-        :itemMoving="itemMoving"
-        :indexOfMovingTo="indexOfMovingTo"
-        :indexOfMovingItem="indexOfMovingItem"
-        :movementX="movementX"
-        :movementY="movementY"
-        :canHoverItem="canHoverItem"
-        :isInRange="index >= firstIndex && index <= lastIndex"
-        :isPlaying="index === playingIndex"
-        :isShifting="shifting"
-        :isFolderList="isFolderList"
-        :hovered="hoverIndex === index"
-        :winWidth="winWidth"
-        :thumbnailWidth="thumbnailWidth"
-        :thumbnailHeight="thumbnailHeight"
-        :sizeAdaption="sizeAdaption"
-        :eventTarget="eventTarget"/>
-      <Add :style="{
-          marginRight: sizeAdaption(15),
-          minWidth: `${thumbnailWidth}px`,
-          minHeight: `${thumbnailHeight}px`,
+          height: sizeAdaption(282),
         }"
-        :itemMoving="itemMoving"
-        :index="addIndex"
-        :addMouseup="addMouseup"/>
-      <div class="next-page"
-        v-if="thumbnailNumber < numberOfPlaylistItem"
-        @mouseup.stop=""
-        :style="{
-          marginRight: sizeAdaption(15),
-          width: `${thumbnailWidth}px`,
-          height: `${thumbnailWidth / (112 / 63)}px`,
-        }"/>
-    </div>
+        class="background-gradient"
+      />
+    </transition>
+    <transition
+      @after-leave="afterLeave"
+      name="translate"
+    >
+      <div
+        v-show="displayState"
+        class="content"
+      >
+        <transition
+          name="fade"
+          mode="out-in"
+        >
+          <div
+            :key="hoverIndex"
+            :style="{
+              marginTop: sizeAdaption(53),
+              paddingLeft: sizeAdaption(40),
+            }"
+            class="info"
+          >
+            <div
+              :style="{
+                fontSize: sizeAdaption(14),
+                lineHeight: sizeAdaption(14),
+              }"
+              class="top"
+            >
+              <span ref="lastPlayedTime" />
+              {{
+                timecodeFromSeconds(videoDuration)
+              }}&nbsp;&nbsp;·&nbsp;&nbsp;{{
+                inWhichSource
+              }}&nbsp;&nbsp;{{ indexInPlaylist }} / {{ numberOfPlaylistItem }}
+            </div>
+            <div
+              :style="{
+                marginTop: sizeAdaption(9),
+                fontSize: sizeAdaption(18),
+                lineHeight: sizeAdaption(20),
+                fontWeight: 500,
+              }"
+              class="file-name"
+            >
+              {{ filename }}
+            </div>
+          </div>
+        </transition>
+        <div
+          :style="{
+            transition: tranFlag ? 'transform 400ms ease-in' : '',
+            transform: `translateX(-${distance}px)`,
+            marginTop: sizeAdaption(20),
+            marginBottom: sizeAdaption(40),
+            marginLeft: sizeAdaption(40),
+          }"
+          @mouseup.stop=""
+          class="playlist-items"
+        >
+          <RecentPlaylistItem
+            v-for="(item, index) in playingList"
+            :key="item"
+            :index="index"
+            :path="item"
+            :is-last-page="lastIndex === maxIndex && firstIndex > 0"
+            :page-switching="pageSwitching"
+            :item-moving="itemMoving"
+            :index-of-moving-to="indexOfMovingTo"
+            :index-of-moving-item="indexOfMovingItem"
+            :movement-x="movementX"
+            :movement-y="movementY"
+            :can-hover-item="canHoverItem"
+            :is-in-range="index >= firstIndex && index <= lastIndex"
+            :is-playing="index === playingIndex"
+            :is-shifting="shifting"
+            :hovered="hoverIndex === index"
+            :win-width="winWidth"
+            :thumbnail-width="thumbnailWidth"
+            :thumbnail-height="thumbnailHeight"
+            :size-adaption="sizeAdaption"
+            :on-item-mousedown="onItemMousedown"
+            :on-item-mouseup="onItemMouseup"
+            :on-item-mouseout="onItemMouseout"
+            :on-item-mouseover="onItemMouseover"
+            :on-item-mousemove="onItemMousemove"
+            @can-remove="canRemove = true"
+            class="item"
+          />
+          <Add
+            :style="{
+              marginRight: sizeAdaption(15),
+              minWidth: `${thumbnailWidth}px`,
+              minHeight: `${thumbnailHeight}px`,
+            }"
+            :item-moving="itemMoving"
+            :index="addIndex"
+            :add-mouseup="addMouseup"
+          />
+          <div
+            v-if="thumbnailNumber < numberOfPlaylistItem"
+            :style="{
+              marginRight: sizeAdaption(15),
+              width: `${thumbnailWidth}px`,
+              height: `${thumbnailWidth / (112 / 63)}px`,
+            }"
+            @mouseup.stop=""
+            class="next-page"
+          />
+        </div>
+      </div>
+    </transition>
   </div>
-  </transition>
-</div>
 </template>
-<script>
+<script lang="ts">
 import path from 'path';
-import { mapState, mapGetters, mapActions, mapMutations } from 'vuex';
+import {
+  mapState, mapGetters, mapActions, mapMutations,
+} from 'vuex';
 import { Input as inputMutations } from '@/store/mutationTypes';
 import { Input as InputActions, Subtitle as subtitleActions } from '@/store/actionTypes';
-import RecentPlaylistItem from '@/components/PlayingView/RecentPlaylistItem.vue';
+import RecentPlaylistItem from '@/containers/RecentPlaylistItem.vue';
 import Add from '@/components/PlayingView/Add.vue';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
+import RecentPlayService from '@/services/media/PlaylistService';
 
 export default {
-  name: 'recent-playlist',
+  name: 'RecentPlaylist',
+  // @ts-ignore
   type: INPUT_COMPONENT_TYPE,
   components: {
     RecentPlaylistItem,
     Add,
   },
   props: {
-    mousemoveClientPosition: {},
+    mousemoveClientPosition: {
+      type: Object,
+      default: () => {},
+    },
     displayState: Boolean,
     isDragging: Boolean,
     lastDragging: Boolean,
   },
   data() {
     return {
+      playlist: [],
+      mediaInfos: [],
       filename: '',
       firstIndex: 0, // first index of current page
       hoverIndex: 0, // only for display
@@ -122,14 +165,13 @@ export default {
       movementX: 0, // movementX of move item
       movementY: 0, // movementY of move item
       shifting: false,
-      snapShoted: false,
-      hoveredMediaInfo: {}, // the hovered video's media info
+      hoveredDuration: NaN,
+      hoveredLastPlayedTime: NaN,
       mousePosition: {},
       backgroundDisplayState: this.displayState, // it's weird but DON'T DELETE IT!!
       canHoverItem: false,
       tranFlag: false,
       filePathNeedToDelete: '',
-      eventTarget: {},
       pageSwitching: false,
       pageSwitchingTimeId: NaN,
       removeTimeId: NaN,
@@ -142,7 +184,7 @@ export default {
     };
   },
   created() {
-    this.$bus.$on('delete-file', async (path, id) => {
+    this.$bus.$on('delete-file', async (path: string, id: number) => {
       this.$store.dispatch('RemoveItemFromPlayingList', path);
       this.infoDB.delete('media-item', id);
       const playlist = await this.infoDB.get('recent-played', this.playListId);
@@ -150,17 +192,12 @@ export default {
         ...playlist,
         items: this.items,
         playedIndex: this.playingIndex,
-      });
+      }, playlist.id);
     });
-    this.hoverIndex = this.playingIndex;
-    this.eventTarget.onItemMousemove = this.onItemMousemove;
-    this.eventTarget.onItemMousedown = this.onItemMousedown;
-    this.eventTarget.onItemMouseover = this.onItemMouseover;
-    this.eventTarget.onItemMouseout = this.onItemMouseout;
-    this.eventTarget.onItemMouseup = this.onItemMouseup;
 
     this.indexOfMovingItem = this.playingList.length;
-    this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
+    this.hoverIndex = this.playingIndex;
+    this.filename = this.pathBaseName(this.originSrc);
   },
   methods: {
     ...mapMutations({
@@ -174,8 +211,11 @@ export default {
     afterLeave() {
       this.backgroundDisplayState = false;
     },
-    sizeAdaption(size) {
+    sizeAdaption(size: number) {
       return this.winWidth > 1355 ? `${(this.winWidth / 1355) * size}px` : `${size}px`;
+    },
+    pathBaseName(src: string) {
+      return path.basename(src, path.extname(src));
     },
     handleMouseup() {
       if (this.isDragging) {
@@ -185,12 +225,12 @@ export default {
         this.updateMousemoveTarget('the-video-controller');
       }
     },
-    updatelastPlayedTime(time) {
+    updatelastPlayedTime(time: number) {
       if (this.$refs.lastPlayedTime) {
         if (this.hoverIndex === this.playingIndex) {
           this.$refs.lastPlayedTime.textContent = `${this.timecodeFromSeconds(time)} /`;
-        } else if (this.hoveredMediaInfo.lastPlayedTime) {
-          this.$refs.lastPlayedTime.textContent = `${this.timecodeFromSeconds(this.hoveredMediaInfo.lastPlayedTime)} /`;
+        } else if (this.hoveredLastPlayedTime) {
+          this.$refs.lastPlayedTime.textContent = `${this.timecodeFromSeconds(this.hoveredLastPlayedTime)} /`;
         }
       }
     },
@@ -202,13 +242,13 @@ export default {
       }
       this.onItemMouseup(this.addIndex);
     },
-    onItemMousedown(index, pageX, pageY) {
+    onItemMousedown(index: number, pageX: number, pageY: number) {
       this.mousedownIndex = index;
       this.mousedownPosition = [pageX, pageY];
       this.firstIndexOnMousedown = this.firstIndex;
       this.lastIndexOnMousedown = this.lastIndex;
     },
-    onItemMousemove(index, pageX, pageY) { // eslint-disable-line complexity
+    onItemMousemove(index: number, pageX: number, pageY: number) { // eslint-disable-line complexity
       this.mousemovePosition = [pageX, pageY];
       const offsetX = pageX - this.mousedownPosition[0];
       const offsetY = pageY - this.mousedownPosition[1];
@@ -300,10 +340,10 @@ export default {
       }
       playlist.items = items;
       playlist.hpaths = hpaths;
-      this.infoDB.update('recent-played', playlist);
+      this.infoDB.update('recent-played', playlist, playlist.id);
       this.$store.dispatch('PlayingList', { id: playlist.id, paths: this.playingList, items: playlist.items });
     },
-    onItemMouseup(index) { // eslint-disable-line complexity
+    onItemMouseup(index: number) { // eslint-disable-line complexity
       if (this.pageSwitching) clearTimeout(this.pageSwitchingTimeId);
       document.onmouseup = null;
       if (-(this.movementY) > this.thumbnailHeight * 1.5
@@ -311,7 +351,7 @@ export default {
         this.$store.dispatch('RemoveItemFromPlayingList', this.playingList[index]);
         if (this.isFolderList) this.setPlayList();
         this.hoverIndex = this.playingIndex;
-        this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
+        this.filename = this.pathBaseName(this.originSrc);
         this.canRemove = false;
       } else if (this.movingOffset !== 0
         && Math.abs(this.movementY) < this.thumbnailHeight) {
@@ -369,27 +409,27 @@ export default {
       this.indexOfMovingItem = this.playingList.length;
       this.movementX = this.movementY = 0;
     },
-    onItemMouseover(index, media) {
+    onItemMouseover(index: number, recentPlayService: RecentPlayService) {
       this.$emit('can-hover-item');
       this.hoverIndex = index;
-      this.hoveredMediaInfo = media;
-      this.filename = path.basename(
-        media.path,
-        path.extname(media.path),
-      );
+      this.hoveredDuration = recentPlayService.duration;
+      this.filename = this.pathBaseName(recentPlayService.path);
+      if (recentPlayService.lastPlayedTime) {
+        this.hoveredLastPlayedTime = recentPlayService.lastPlayedTime;
+      }
     },
     onItemMouseout() {
       this.hoverIndex = this.playingIndex;
-      this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
+      this.filename = this.pathBaseName(this.originSrc);
     },
   },
   watch: {
     originSrc() {
       this.updateSubToTop(this.displayState);
       this.hoverIndex = this.playingIndex;
-      this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
+      this.filename = this.pathBaseName(this.originSrc);
     },
-    playingList(val) {
+    playingList(val: string[]) {
       this.indexOfMovingItem = val.length;
     },
     firstIndex() {
@@ -403,7 +443,7 @@ export default {
         this.lastIndex = this.maxIndex;
       }
     },
-    lastIndex(val) {
+    lastIndex(val: number) {
       const marginRight = this.winWidth > 1355 ? (this.winWidth / 1355) * 15 : 15;
       const distance = marginRight + this.thumbnailWidth;
       if (this.itemMoving && this.firstIndex < this.firstIndexOnMousedown) {
@@ -415,19 +455,19 @@ export default {
         this.firstIndex = (this.maxIndex - this.thumbnailNumber) + 1;
       }
     },
-    maxIndex(val, oldVal) {
+    maxIndex(val: number, oldVal: number) {
       if (this.lastIndex === oldVal) {
         this.lastIndex = val;
       }
     },
-    currentMousedownComponent(val) {
+    currentMousedownComponent(val: string) {
       if (val !== 'notification-bubble' && val !== 'titlebar' && val !== '') {
         if (val !== this.$options.name && this.backgroundDisplayState) {
           this.clearMouseup({ componentName: '' });
         }
       }
     },
-    currentMouseupComponent(val) {
+    currentMouseupComponent(val: string) {
       setTimeout(() => {
         if (this.currentMousedownComponent !== 'notification-bubble' && this.currentMousedownComponent !== 'titlebar' && val !== '') {
           if (this.lastDragging) {
@@ -441,7 +481,7 @@ export default {
         }
       }, 0);
     },
-    displayState(val, oldval) {
+    displayState(val: boolean, oldval: boolean) {
       if (oldval !== undefined) {
         this.updateSubToTop(val);
       }
@@ -455,7 +495,7 @@ export default {
         document.onmouseup = null;
       }
     },
-    mousemoveClientPosition(val) {
+    mousemoveClientPosition(val: { x: number, y: number }) {
       const distance = this.winWidth > 1355 ? 20 : 10;
       if (!this.canHoverItem && this.displayState) {
         if (Math.abs(this.mousePosition.x - val.x) > distance ||
@@ -503,7 +543,7 @@ export default {
     },
     videoDuration() {
       if (this.hoverIndex !== this.playingIndex) {
-        return this.hoveredMediaInfo.duration;
+        return this.hoveredDuration;
       }
       return this.duration;
     },
@@ -518,7 +558,7 @@ export default {
       get() {
         return (this.firstIndex + this.thumbnailNumber) - 1;
       },
-      set(val) {
+      set(val: number) {
         if ((val - this.thumbnailNumber) + 1 < 0) {
           this.firstIndex = 0;
         } else {
@@ -538,7 +578,7 @@ export default {
     maxDistance() {
       return (this.maxIndex - (this.thumbnailNumber - 1)) * this.thumbnailWidth;
     },
-    // if you wanna know the meanings of wABC, please look up the product doc:
+    // please look up the product doc:
     // https://www.notion.so/splayer/Playlist-685b398ac7ce45508a4283af00f76534
     thumbnailNumber() {
       let number = 3;

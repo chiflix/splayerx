@@ -1,44 +1,94 @@
 
 <template>
-<div class="item" ref="item"
-  :style="{
-    bottom: chosen ? '9px' : '0',
-    width: `${thumbnailWidth}px`,
-    height: `${thumbnailHeight}px`,
-  }">
-  <div class="content"
-    @click.stop="onRecentItemClick(item)"
-    @mouseout="onRecentItemMouseout"
-    @mouseover="onRecentItemMouseover"
-    @mousedown.stop="onRecentItemMousedown"
-    @mouseup="onRecentItemMouseup"
+  <div
+    ref="item"
     :style="{
+      bottom: chosen ? '9px' : '0',
       width: `${thumbnailWidth}px`,
-      height: chosen ? `${thumbnailHeight + 10}px` : `${thumbnailHeight}px`,
-    }">
-    <div class="border" ref="border"
+      height: `${thumbnailHeight}px`,
+      backgroundImage: backgroundUrl,
+    }"
+    class="item"
+  >
+    <div
       :style="{
-        left: `-${0.7 / 2}px`,
-        top: `-${0.7 / 2}px`,
-        width: `${thumbnailWidth - 0.7}px`,
-        height: `${thumbnailHeight - 0.7}px`,
-        border: chosen ? '0.7px solid rgba(255,255,255,0.6)' : '0.7px solid rgba(255,255,255,0.15)',
-      }">
-      <div class="deleteUi" ref="deleteUi"><Icon type="delete"/></div>
+        width: `${thumbnailWidth}px`,
+        height: chosen ? `${thumbnailHeight + 10}px` : `${thumbnailHeight}px`,
+      }"
+      @click.stop="onRecentItemClick(item)"
+      @mouseout="onRecentItemMouseout"
+      @mouseover="onRecentItemMouseover"
+      @mousedown.stop="onRecentItemMousedown"
+      @mouseup="onRecentItemMouseup"
+      class="content"
+    >
+      <div
+        ref="border"
+        :style="{
+          left: `-${0.7 / 2}px`,
+          top: `-${0.7 / 2}px`,
+          width: `${thumbnailWidth - 0.7}px`,
+          height: `${thumbnailHeight - 0.7}px`,
+          border: chosen ? '0.7px solid rgba(255,255,255,0.6)'
+            : '0.7px solid rgba(255,255,255,0.15)',
+        }"
+        class="border"
+      >
+        <div
+          ref="deleteUi"
+          class="deleteUi"
+        >
+          <Icon type="delete" />
+        </div>
+      </div>
     </div>
   </div>
-</div>
 </template>
 
-<script>
-import path from 'path';
-import { filePathToUrl } from '@/helpers/path';
-import { generateCoverPathByMediaHash } from '@/helpers/cacheFileStorage';
+<script lang="ts">
 import Icon from '../BaseIconContainer.vue';
 
 export default {
-  name: 'video-item',
+  name: 'VideoItem',
   components: { Icon },
+  props: {
+    backgroundUrl: {
+      type: String,
+    },
+    shifting: {
+      type: Boolean,
+    },
+    isInRange: {
+      type: Boolean,
+    },
+    index: {
+      type: Number,
+      default: NaN,
+    },
+    thumbnailHeight: {
+      type: Number,
+      default: 63,
+    },
+    thumbnailWidth: {
+      type: Number,
+      default: 112,
+    },
+    isFullScreen: {
+      type: Boolean,
+    },
+    onItemMouseover: {
+      type: Function,
+      required: true,
+    },
+    onItemClick: {
+      type: Function,
+      required: true,
+    },
+    onItemDelete: {
+      type: Function,
+      required: true,
+    },
+  },
   data() {
     return {
       displayInfo: [],
@@ -52,99 +102,23 @@ export default {
       disY: NaN,
     };
   },
-  props: {
-    firstIndex: {
-      type: Number,
-    },
-    lastIndex: {
-      type: Number,
-    },
-    shifting: {
-      type: Boolean,
-    },
-    isInRange: {
-      type: Boolean,
-    },
-    index: {
-      type: Number,
-    },
-    playlist: {
-      type: Object,
-    },
-    thumbnailHeight: {
-      type: Number,
-    },
-    thumbnailWidth: {
-      type: Number,
-    },
-    lastPlayedFile: {
-      type: Object.Array,
-      require: true,
-      default: () => [],
-    },
-    isFullScreen: {
-      type: Boolean,
-    },
-    filePathNeedToDelete: {
-      type: String,
-    },
-  },
-  created() {
-    this.infoDB.get('media-item', this.playlist.items[this.playlist.playedIndex]).then((data) => {
-      this.item = data;
-      generateCoverPathByMediaHash(data.quickHash).then((path) => {
-        this.coverSrc = filePathToUrl(path);
-        this.$refs.item.style.setProperty(
-          'background-image',
-          this.itemShortcut(data.smallShortCut, data.lastPlayedTime, data.duration),
-        );
-      });
-    });
-  },
   destroyed() {
     document.removeEventListener('mousemove', this.onRecentItemMousemove);
     document.removeEventListener('mouseup', this.onRecentItemMouseup);
   },
   methods: {
-    itemShortcut(shortCut, lastPlayedTime, duration) {
-      return duration - lastPlayedTime < 5 ? `url("${this.coverSrc}")` : `url("${shortCut}")`;
-    },
-    itemInfo() {
-      return {
-        baseName: path.basename(this.item.path, path.extname(this.item.path)),
-        lastTime: this.item.lastPlayedTime,
-        duration: this.item.duration,
-        percentage: (this.item.lastPlayedTime / this.item.duration) * 100,
-        path: this.item.path,
-        cover: this.item.cover,
-      };
-    },
     onRecentItemMouseover() {
       if ((this.isInRange || this.isFullScreen) && !this.shifting) {
+        this.onItemMouseover(this.index);
         this.chosen = true;
         this.$refs.border.style.setProperty('background-color', 'rgba(255,255,255,0.2)');
-        if (this.item.shortCut !== '') {
-          this.isChanging = true;
-          this.$emit('showShortcutImage');
-        } else {
-          this.$emit('showLandingLogo');
-        }
-        this.displayInfo = {
-          ...this.itemInfo(),
-          backgroundUrl: this.itemShortcut(
-            this.item.shortCut,
-            this.item.lastPlayedTime,
-            this.item.duration,
-          ),
-        };
-        this.$emit('displayInfo', this.displayInfo);
       }
     },
     onRecentItemMouseout() {
       this.chosen = false;
       this.$refs.border.style.setProperty('background-color', '');
     },
-    onRecentItemMousedown(e) {
+    onRecentItemMousedown(e: MouseEvent) {
       this.disX = e.pageX;
       this.disY = e.pageY;
       this.isDragging = false;
@@ -156,7 +130,7 @@ export default {
         this.$refs.item.style.setProperty('z-index', '5');
       }
     },
-    onRecentItemMousemove(e) {
+    onRecentItemMousemove(e: MouseEvent) {
       this.isDragging = true;
       const movementX = e.pageX - this.disX;
       const movementY = e.pageY - this.disY;
@@ -178,23 +152,13 @@ export default {
       this.$refs.item.style.setProperty('transform', 'translate(0,0)');
       this.$refs.item.style.setProperty('z-index', '');
       if (this.aboutToDelete) {
-        this.$emit('showLandingLogo');
-        this.$emit('delete-item', this.playlist);
+        this.onItemDelete(this.index);
         this.aboutToDelete = false;
-      }
-      if (this.firstIndex !== 0) {
-        this.$emit('next-page');
       }
     },
     onRecentItemClick() {
       if (!this.isDragging && !this.shifting) {
-        if (this.index === this.lastIndex && !this.isFullScreen) {
-          this.$emit('next-page');
-        } else if (this.index + 1 < this.firstIndex && !this.isFullScreen) {
-          this.$emit('previous-page');
-        } else if (!this.filePathNeedToDelete) {
-          this.openPlayList(this.playlist.id);
-        }
+        this.onItemClick(this.index);
       }
     },
   },

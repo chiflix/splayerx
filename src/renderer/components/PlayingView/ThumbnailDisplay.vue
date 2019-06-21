@@ -1,88 +1,41 @@
 <template>
-  <div
-    class="thumbnail-display">
+  <div class="thumbnail-display">
     <div
-     :style="{
-       width: `${thumbnailWidth}px`,
-       height: `${thumbnailHeight}px`,
-       backgroundImage: src,
-       backgroundPosition: backPos,
-       backgroundSize: backSize,
-     }"></div>
+      :style="{
+        width: `${thumbnailWidth}px`,
+        height: `${thumbnailHeight}px`,
+        backgroundImage: src,
+        backgroundPosition: backgroundPosition,
+        backgroundSize: backgroundSize,
+      }"
+    />
   </div>
 </template>
-<script>
-import { ipcRenderer } from 'electron';
-import { mapGetters } from 'vuex';
-import { filePathToUrl } from '@/helpers/path';
-import { getVideoInfoByMediaHash, generateThumbnailPathByMediaHash } from '@/helpers/cacheFileStorage';
+<script lang="ts">
 
 export default {
-  name: 'thumbnail-display',
-  components: {
-  },
+  name: 'ThumbnailDisplay',
   props: {
-    currentTime: Number,
-    thumbnailWidth: Number,
-    thumbnailHeight: Number,
-  },
-  computed: {
-    ...mapGetters(['originSrc', 'duration', 'mediaHash']),
-    backPos() {
-      const index = this.currentIndex;
-      const column = index === 0 ? 0 : Math.ceil(index / 10) - 1;
-      const row = index - (10 * column);
-      return `-${row * 100}% -${column * 100}%`;
+    thumbnailWidth: {
+      type: Number,
+      required: true,
     },
-    backSize() {
-      return `1000% ${Math.ceil(this.thumbnailCount / 10) * 100}%`;
+    thumbnailHeight: {
+      type: Number,
+      required: true,
     },
-    src() {
-      return this.imgExisted || this.isSaved ? `url("${filePathToUrl(this.imgSrc)}")` : '';
+    src: {
+      type: String,
+      required: true,
     },
-  },
-  data() {
-    return {
-      currentIndex: 0,
-      thumbnailCount: 0,
-      isSaved: false,
-      imgExisted: false,
-      imgSrc: '',
-    };
-  },
-  methods: {
-  },
-  watch: {
-    currentTime(val) {
-      this.currentIndex = Math.abs(Math.floor(val / (this.duration / this.thumbnailCount)));
+    backgroundPosition: {
+      type: String,
+      required: true,
     },
-    originSrc() {
-      this.isSaved = false;
-      this.imgExisted = false;
-      this.imgSrc = '';
+    backgroundSize: {
+      type: String,
+      required: true,
     },
-  },
-  mounted() {
-    this.$bus.$on('set-thumbnail-src', (src) => {
-      if (src === this.originSrc) {
-        this.isSaved = true;
-      }
-    });
-    this.$bus.$on('generate-thumbnails', async (num) => {
-      const fileContent = await getVideoInfoByMediaHash(this.mediaHash);
-      this.imgExisted = !!fileContent.thumbnail;
-      this.imgSrc = await generateThumbnailPathByMediaHash(this.mediaHash);
-      this.thumbnailCount = num;
-      if (!this.imgExisted) {
-        const info = {
-          src: this.originSrc,
-          outPath: this.imgSrc,
-          width: '272',
-          num: { rows: '10', cols: `${Math.ceil(num / 10)}` },
-        };
-        ipcRenderer.send('generateThumbnails', info);
-      }
-    });
   },
 };
 </script>

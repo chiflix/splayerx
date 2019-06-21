@@ -4,7 +4,7 @@ import helpers from '@/helpers/index';
 
 const state = {
   source: '', // 'drop' or '', used on mas version
-  id: '',
+  id: NaN,
   items: [],
   playList: [],
   isFolderList: undefined,
@@ -22,9 +22,8 @@ const getters = {
     if (!getters.singleCycle) {
       if (index !== -1 && index + 1 < state.items.length) {
         return state.items[index + 1];
-      } else if (state.playList.length !== 1 && index + 1 >= state.items.length) {
-        return state.items[0];
       }
+      return state.items[0];
     }
     return NaN;
   },
@@ -34,9 +33,8 @@ const getters = {
     if (!getters.singleCycle) {
       if (index !== -1 && index + 1 < list.length) {
         return list[index + 1];
-      } else if (list.length !== 1 && index + 1 >= list.length) {
-        return list[0];
       }
+      return list[0];
     }
     return '';
   },
@@ -91,7 +89,7 @@ const actions = {
   FolderList({ commit }, payload) {
     commit('isFolderList');
     commit('playList', payload.paths);
-    commit('items', payload.items);
+    if (payload.items) commit('items', payload.items);
     commit('id', payload.id);
   },
   RemoveItemFromPlayingList({ state, commit }, item) {
@@ -126,7 +124,7 @@ const actions = {
       helpers.methods.findSimilarVideoByVidPath(state.playList[0]).then((videoFiles) => {
         commit('playList', videoFiles);
       }, (err) => {
-        if (process.mas && err?.code === 'EPERM') {
+        if (process.mas && (err && err.code === 'EPERM')) {
           dispatch('FolderList', {
             id: state.id,
             paths: state.playList,
@@ -137,7 +135,7 @@ const actions = {
     } else {
       for (let i = 0; i < state.playList.length; i += 1) {
         fs.access(state.playList[i], fs.constants.F_OK, (err) => {
-          if (err?.code === 'ENOENT') dispatch('RemoveItemFromPlayingList', state.playList[i]);
+          if (err && err.code === 'ENOENT') dispatch('RemoveItemFromPlayingList', state.playList[i]);
         });
       }
     }

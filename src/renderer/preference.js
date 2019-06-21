@@ -17,7 +17,8 @@ function getSystemLocale() {
   const locale = process.platform === 'win32' ? app.getLocale() : osLocale.sync();
   if (locale === 'zh-TW') {
     return 'zhTW';
-  } else if (locale.startsWith('zh')) {
+  }
+  if (locale.startsWith('zh')) {
     return 'zhCN';
   }
   return 'en';
@@ -35,8 +36,8 @@ new Vue({
   components: { Preference },
   data: {},
   store,
-  template: '<Preference/>',
   mounted() {
     this.$store.commit('getLocalPreference');
   },
+  template: '<Preference/>',
 }).$mount('#app');

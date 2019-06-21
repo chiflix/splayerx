@@ -1,16 +1,27 @@
 <template>
-  <div @mousedown.left="handleDown" @mouseup.left="togglePlaylistDisplay" @mouseenter="handleEnter" @mouseleave="handleLeave">
-    <lottie v-on:animCreated="handleAnimation" :options="defaultOptions" lot="playlist"></lottie>
+  <div
+    @mousedown.left="handleDown"
+    @mouseup.left="togglePlaylistDisplay"
+    @mouseenter="handleEnter"
+    @mouseleave="handleLeave"
+  >
+    <lottie
+      :options="defaultOptions"
+      @animCreated="handleAnimation"
+      lot="playlist"
+    />
   </div>
 </template>
-<script>
+<script lang="ts">
 import { mapState } from 'vuex';
 import lottie from '@/components/lottie.vue';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import animationData from '@/assets/playlist.json';
+import { AnimationItem } from 'lottie-web';
 
 export default {
-  name: 'playlist-control',
+  name: 'PlaylistControl',
+  // @ts-ignore
   type: INPUT_COMPONENT_TYPE,
   components: {
     lottie,
@@ -33,7 +44,7 @@ export default {
     }),
   },
   methods: {
-    handleAnimation(anim) {
+    handleAnimation(anim: AnimationItem) {
       this.anim = anim;
     },
     togglePlaylistDisplay() {

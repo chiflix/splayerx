@@ -1,26 +1,14 @@
 <template>
-  <div class="subtitle-manager"
-    :style="{ width: computedWidth + 'px', height: computedHeight + 'px' }">
+  <div
+    :style="{ width: computedWidth + 'px', height: computedHeight + 'px' }"
+    class="subtitle-manager"
+  >
     <subtitle-renderer
       ref="subtitleRenderer"
-      v-if="currentFirstSubtitleId && duration"
-      :subtitle-instance="subtitleInstances[this.currentFirstSubtitleId]"
-      :key='originSrc+currentFirstSubtitleId'
-      :isFirstSub="true"
-      :linesNum="linesNum"
-      :firstLinesNum.sync="firstLinesNum"
-      :firstTags.sync="firstTags"
-      :tags="tags"/>
-    <subtitle-renderer
-      ref="subtitleRenderer"
-      v-if="currentSecondSubtitleId && duration && enabledSecondarySub"
-      :subtitle-instance="subtitleInstances[this.currentSecondSubtitleId]"
-      :key='originSrc+currentSecondSubtitleId'
-      :isFirstSub="false"
-      :firstLinesNum="firstLinesNum"
-      :linesNum.sync="linesNum"
-      :tags.sync="tags"
-      :firstTags="firstTags"/>
+      :key="originSrc"
+      :first-instance="firstSubtitleInstance"
+      :secondary-instance="secondSubtitleInstance"
+    />
   </div>
 </template>
 <script>
@@ -28,7 +16,21 @@ import { mapGetters, mapActions, mapState } from 'vuex';
 import romanize from 'romanize';
 import { existsSync } from 'fs';
 import { sep } from 'path';
-import { flatten, isEqual, sortBy, differenceWith, isFunction, partial, pick, values, keyBy, merge, castArray } from 'lodash';
+import {
+  flatten,
+  isEqual,
+  sortBy,
+  differenceWith,
+  isFunction,
+  partial,
+  pick,
+  values,
+  keyBy,
+  merge,
+  castArray,
+  get,
+} from 'lodash';
+import { log } from '@/libs/Log';
 import { codeToLanguageName } from '@/helpers/language';
 import {
   searchForLocalList, fetchOnlineList, retrieveEmbeddedList,
@@ -47,10 +49,12 @@ import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import SubtitleRenderer from './SubtitleRenderer.vue';
 import SubtitleLoader from './SubtitleLoader';
 import { localLanguageLoader } from './SubtitleLoader/utils';
-import { LOCAL_SUBTITLE_REMOVED, REQUEST_TIMEOUT, SUBTITLE_UPLOAD, UPLOAD_SUCCESS, UPLOAD_FAILED } from '../../../shared/notificationcodes';
+import {
+  LOCAL_SUBTITLE_REMOVED, REQUEST_TIMEOUT, SUBTITLE_UPLOAD, UPLOAD_SUCCESS, UPLOAD_FAILED,
+} from '../../../shared/notificationcodes';
 
 export default {
-  name: 'subtitle-manager',
+  name: 'SubtitleManager',
   components: {
     'subtitle-renderer': SubtitleRenderer,
   },
@@ -92,6 +96,8 @@ export default {
           .map(id => ({ id, type: types[id], duration: durations[id] }));
       },
     }),
+    firstSubtitleInstance() { return this.subtitleInstances[this.currentFirstSubtitleId]; },
+    secondSubtitleInstance() { return this.subtitleInstances[this.currentSecondSubtitleId]; },
   },
   watch: {
     originSrc(newVal) {
@@ -104,14 +110,13 @@ export default {
           .forEach(id => delete this.subtitleInstances[id]);
         this.selectionComplete = false;
         this.selectionSecondaryComplete = false;
-        const hasOnlineSubtitles =
-          !!this.$store.state.Subtitle.videoSubtitleMap[this.originSrc]
-            .map((id) => {
-              const { type, language } = this.subtitleInstances[id];
-              return { type, language };
-            })
-            .filter(({ type }) => type === 'online')
-            .length;
+        const hasOnlineSubtitles = !!this.$store.state.Subtitle.videoSubtitleMap[this.originSrc]
+          .map((id) => {
+            const { type, language } = this.subtitleInstances[id];
+            return { type, language };
+          })
+          .filter(({ type }) => type === 'online')
+          .length;
         this.$bus.$emit('subtitle-refresh-from-src-change', hasOnlineSubtitles);
         this.updateNoSubtitle(true);
       }
@@ -145,6 +150,74 @@ export default {
         this.linesNum = 0;
       }
     },
+  },
+  created() {
+    this.$bus.$on('add-subtitles', (subs) => {
+      Promise.all(subs
+        .map(this.normalizeSubtitle)
+        .filter(sub => !!sub)
+        .map(sub => this.addSubtitle(sub, this.originSrc)))
+        .then((subtitleInstances) => {
+          this.changeCurrentFirstSubtitle(subtitleInstances[subtitleInstances.length - 1].id);
+          this.selectionComplete = true;
+          this.selectionSecondaryComplete = true;
+        });
+    });
+    this.$bus.$on('refresh-subtitles', ({ types, isInitial }) => {
+      this.refreshSubtitles(types, this.originSrc, isInitial);
+      this.isInitial = isInitial;
+    });
+    this.$bus.$on('change-subtitle', (id) => {
+      if (this.isFirstSubtitle) {
+        this.changeCurrentFirstSubtitle(id);
+      } else {
+        this.changeCurrentSecondSubtitle(id);
+      }
+    });
+    this.$bus.$on('off-subtitle', this.offCurrentSubtitle);
+    this.$bus.$on('upload-current-subtitle', () => {
+      log.info('SubtitleManager.vue', 'Upload current subtitle .');
+      this.$addBubble(SUBTITLE_UPLOAD);
+      const qualifiedSubtitles = [];
+      if (this.currentFirstSubtitleId) {
+        qualifiedSubtitles.push({
+          id: this.currentFirstSubtitleId,
+          duration: this.$store.state.Subtitle.durations[this.currentFirstSubtitleId],
+        });
+      }
+      if (this.currentSecondSubtitleId && this.enabledSecondarySub) {
+        qualifiedSubtitles.push({
+          id: this.currentSecondSubtitleId,
+          duration: this.$store.state.Subtitle.durations[this.currentSecondSubtitleId],
+        });
+      }
+      if (qualifiedSubtitles.length) {
+        const parameters = qualifiedSubtitles.map(this.makeSubtitleUploadParameter);
+        transcriptQueue.addAllManual(parameters)
+          .then((res) => {
+            if (res.failure.length) {
+              log.error('SubtitleManager', 'Upload failed !');
+              this.$addBubble(UPLOAD_FAILED);
+              res.failure.forEach((i) => {
+                console.log(`Uploading subtitle No.${i.src} failed!`);
+              });
+            } else {
+              log.info('SubtitleManager', 'Upload successfully !');
+              this.$addBubble(UPLOAD_SUCCESS);
+            }
+            if (res.success.length) {
+              res.success.forEach((i) => {
+                console.log(`Uploading subtitle No.${i.src} succeeded!`);
+              });
+            }
+          });
+      }
+    });
+
+    // when set immediate on watcher, it may run before the created hook
+    this.resetSubtitles();
+    this.$bus.$emit('subtitle-refresh-from-src-change');
+    this.updateNoSubtitle(true);
   },
   methods: {
     ...mapActions({
@@ -216,14 +289,12 @@ export default {
         .then(async () => {
           this.$bus.$emit('refresh-finished');
           if (this.isInitial) {
-            const switchLanguage = storedLanguagePreference[0] === preferredLanguages[1] &&
-              storedLanguagePreference[1] === preferredLanguages[0];
+            const switchLanguage = storedLanguagePreference[0] === preferredLanguages[1]
+              && storedLanguagePreference[1] === preferredLanguages[0];
             const selectedSubtitles = storedSubtitles
               .filter(({ id }) => [ids.firstId, ids.secondaryId].includes(id));
-            const shiftFirstId = selectedSubtitles
-              .find(({ language }) => language === preferredLanguages[0])?.id;
-            const shiftSecondaryId = selectedSubtitles
-              .find(({ language }) => language === preferredLanguages[1])?.id;
+            const shiftFirstId = get(selectedSubtitles.find(({ language }) => language === preferredLanguages[0]), 'id');
+            const shiftSecondaryId = get(selectedSubtitles.find(({ language }) => language === preferredLanguages[1]), 'id');
             const firstId = switchLanguage ? shiftFirstId : ids.firstId;
             const secondaryId = switchLanguage ? shiftSecondaryId : ids.secondaryId;
             if (firstId) {
@@ -265,10 +336,7 @@ export default {
         const storedSubs = await Promise.all(storedSubIds.map(retrieveSub))
           .then(subtitleResults => subtitleResults.filter((result) => {
             if (result instanceof Error) {
-              this.addLog('error', {
-                message: 'Request Timeout .',
-                errcode: REQUEST_TIMEOUT,
-              });
+              log.error('SubtitleManager.vue', 'Request Timeout .');
               this.$addBubble(REQUEST_TIMEOUT);
               return [];
             }
@@ -451,7 +519,7 @@ export default {
       return updateSubtitle(id, result);
     },
     failedCallback({ id, videoSrc }, { error, bubble } = {}) {
-      if (bubble) this.addLog('error', { errcode: bubble, message: error.message });
+      if (bubble) log.error('SubtitleManager.vue', error.message);
       if (this.currentFirstSubtitleId === id) {
         this.changeCurrentFirstSubtitle(this.lastFirstSubtitleId);
       }
@@ -635,7 +703,8 @@ export default {
         if (index === 0) {
           result = dirOrFileName;
           return false;
-        } else if (index <= 2) {
+        }
+        if (index <= 2) {
           result = `${dirOrFileName}${sep}${result}`;
           return false;
         }
@@ -644,83 +713,6 @@ export default {
       });
       return result;
     },
-  },
-  created() {
-    this.$bus.$on('add-subtitles', (subs) => {
-      Promise.all(subs
-        .map(this.normalizeSubtitle)
-        .filter(sub => !!sub)
-        .map(sub => this.addSubtitle(sub, this.originSrc)))
-        .then((subtitleInstances) => {
-          this.changeCurrentFirstSubtitle(subtitleInstances[subtitleInstances.length - 1].id);
-          this.selectionComplete = true;
-          this.selectionSecondaryComplete = true;
-        });
-    });
-    this.$bus.$on('refresh-subtitles', ({ types, isInitial }) => {
-      this.refreshSubtitles(types, this.originSrc, isInitial);
-      this.isInitial = isInitial;
-    });
-    this.$bus.$on('change-subtitle', (id) => {
-      if (this.isFirstSubtitle) {
-        this.changeCurrentFirstSubtitle(id);
-      } else {
-        this.changeCurrentSecondSubtitle(id);
-      }
-    });
-    this.$bus.$on('off-subtitle', this.offCurrentSubtitle);
-    this.$bus.$on('upload-current-subtitle', () => {
-      this.addLog('info', {
-        message: 'Upload current subtitle .',
-        code: SUBTITLE_UPLOAD,
-      });
-      this.$addBubble(SUBTITLE_UPLOAD);
-      const qualifiedSubtitles = [];
-      if (this.currentFirstSubtitleId) {
-        qualifiedSubtitles.push({
-          id: this.currentFirstSubtitleId,
-          duration: this.$store.state.Subtitle.durations[this.currentFirstSubtitleId],
-        });
-      }
-      if (this.currentSecondSubtitleId && this.enabledSecondarySub) {
-        qualifiedSubtitles.push({
-          id: this.currentSecondSubtitleId,
-          duration: this.$store.state.Subtitle.durations[this.currentSecondSubtitleId],
-        });
-      }
-      if (qualifiedSubtitles.length) {
-        const parameters = qualifiedSubtitles.map(this.makeSubtitleUploadParameter);
-        transcriptQueue.addAllManual(parameters)
-          .then((res) => {
-            if (res.failure.length) {
-              this.addLog('error', {
-                message: 'Upload failed !',
-                errcode: UPLOAD_FAILED,
-              });
-              this.$addBubble(UPLOAD_FAILED);
-              res.failure.forEach((i) => {
-                console.log(`Uploading subtitle No.${i.src} failed!`);
-              });
-            } else {
-              this.addLog('info', {
-                message: 'Upload successfully !',
-                code: UPLOAD_SUCCESS,
-              });
-              this.$addBubble(UPLOAD_SUCCESS);
-            }
-            if (res.success.length) {
-              res.success.forEach((i) => {
-                console.log(`Uploading subtitle No.${i.src} succeeded!`);
-              });
-            }
-          });
-      }
-    });
-
-    // when set immediate on watcher, it may run before the created hook
-    this.resetSubtitles();
-    // this.$bus.$emit('subtitle-refresh-from-src-change'); // TODO streaming video
-    this.updateNoSubtitle(true);
   },
 };
 </script>

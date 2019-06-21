@@ -1,61 +1,80 @@
 <template>
   <div
     :data-component-name="$options.name"
-    :class="isDarwin ? 'darwin-titlebar' : 'titlebar'">
-    <div class="win-icons" v-if="!isDarwin">
-      <Icon class="title-button no-drag"
-            @mouseup.native="handleMinimize"
-            type="titleBarWinExitFull">
-      </Icon>
-      <Icon class="title-button no-drag"
-            @mouseup.native="handleWinFull"
-            v-show="middleButtonStatus === 'maximize'"
-            type="titleBarWinFull">
-      </Icon>
-      <Icon class="title-button no-drag"
-            @mouseup.native="handleRestore"
-            type="titleBarWinRestore"
-            v-show="middleButtonStatus === 'restore'">
-      </Icon>
-      <Icon class="title-button no-drag"
-            @mouseup.native="handleFullscreenExit"
-            v-show="middleButtonStatus === 'exit-fullscreen'"
-            type="titleBarWinResize">
-      </Icon>
-      <Icon class="title-button no-drag"
-            @mouseup.native="handleClose"
-            type="titleBarWinClose">
-      </Icon>
+    :class="isDarwin ? 'darwin-titlebar' : 'titlebar'"
+  >
+    <div
+      v-if="!isDarwin"
+      class="win-icons"
+    >
+      <Icon
+        @mouseup.native="handleMinimize"
+        class="title-button no-drag"
+        type="titleBarWinExitFull"
+      />
+      <Icon
+        @mouseup.native="handleWinFull"
+        v-show="middleButtonStatus === 'maximize'"
+        class="title-button no-drag"
+        type="titleBarWinFull"
+      />
+      <Icon
+        @mouseup.native="handleRestore"
+        v-show="middleButtonStatus === 'restore'"
+        class="title-button no-drag"
+        type="titleBarWinRestore"
+      />
+      <Icon
+        @mouseup.native="handleFullscreenExit"
+        v-show="middleButtonStatus === 'exit-fullscreen'"
+        class="title-button no-drag"
+        type="titleBarWinResize"
+      />
+      <Icon
+        @mouseup.native="handleClose"
+        class="title-button no-drag"
+        type="titleBarWinClose"
+      />
     </div>
-    <div class="mac-icons"
-         v-if="isDarwin"
-         @mouseover="handleMouseOver"
-         @mouseout="handleMouseOut">
-      <Icon id="close" class="title-button no-drag"
-            type="titleBarClose"
-            :state="state"
-            @mouseup.native="handleClose">
-      </Icon>
-      <Icon id="minimize" class="title-button no-drag"
-            type="titleBarExitFull"
-            @mouseup.native="handleMinimize"
-            :class="{ disabled: middleButtonStatus === 'exit-fullscreen' }"
-            :state="state"
-            :isFullScreen="middleButtonStatus">
-      </Icon>
-      <Icon id="maximize" class="title-button no-drag"
-            :type="itemType"
-            @mouseup.native="handleMacFull"
-            v-show="middleButtonStatus !== 'exit-fullscreen'"
-            :state="state"
-            :style="{ transform: itemType === this.itemTypeEnum.MAXSCREEN ? 'rotate(45deg)' : ''}">
-      </Icon>
-      <Icon id="restore" class="title-button no-drag"
-            @mouseup.native="handleFullscreenExit"
-            v-show="middleButtonStatus === 'exit-fullscreen'"
-            type="titleBarRecover"
-            :state="state">
-      </Icon>
+    <div
+      v-if="isDarwin"
+      @mouseover="handleMouseOver"
+      @mouseout="handleMouseOut"
+      class="mac-icons"
+    >
+      <Icon
+        id="close"
+        :state="state"
+        @mouseup.native="handleClose"
+        class="title-button no-drag"
+        type="titleBarClose"
+      />
+      <Icon
+        id="minimize"
+        @mouseup.native="handleMinimize"
+        :class="{ disabled: middleButtonStatus === 'exit-fullscreen' }"
+        :state="state"
+        :isFullScreen="middleButtonStatus"
+        class="title-button no-drag"
+        type="titleBarExitFull"
+      />
+      <Icon
+        id="maximize"
+        :type="itemType"
+        @mouseup.native="handleMacFull"
+        v-show="middleButtonStatus !== 'exit-fullscreen'"
+        :state="state"
+        :style="{ transform: itemType === this.itemTypeEnum.MAXSCREEN ? 'rotate(45deg)' : ''}"
+        class="title-button no-drag"
+      />
+      <Icon
+        id="restore"
+        @mouseup.native="handleFullscreenExit"
+        v-show="middleButtonStatus === 'exit-fullscreen'"
+        :state="state"
+        class="title-button no-drag"
+        type="titleBarRecover"
+      />
     </div>
   </div>
 </template>
@@ -66,6 +85,9 @@ import Icon from '../BaseIconContainer.vue';
 
 export default {
   name: 'BrowsingTitlebar',
+  components: {
+    Icon,
+  },
   data() {
     return {
       state: 'default',
@@ -80,20 +102,13 @@ export default {
       isFullScreen: false,
     };
   },
-  components: {
-    Icon,
-  },
-  mounted() {
-    window.addEventListener('keydown', (e) => {
-      if (e.keyCode === 18) {
-        this.keyAlt = true;
-      }
-    });
-    window.addEventListener('keyup', (e) => {
-      if (e.keyCode === 18) {
-        this.keyAlt = false;
-      }
-    });
+  computed: {
+    isDarwin() {
+      return process.platform === 'darwin';
+    },
+    middleButtonStatus() {
+      return this.isFullScreen ? 'exit-fullscreen' : this.isMaximized ? 'restore' : 'maximize'; // eslint-disable-line no-nested-ternary
+    },
   },
   watch: {
     keyAlt(val) {
@@ -110,6 +125,18 @@ export default {
         this.itemType = this.itemTypeEnum.MAXSCREEN;
       }
     },
+  },
+  mounted() {
+    window.addEventListener('keydown', (e) => {
+      if (e.keyCode === 18) {
+        this.keyAlt = true;
+      }
+    });
+    window.addEventListener('keyup', (e) => {
+      if (e.keyCode === 18) {
+        this.keyAlt = false;
+      }
+    });
   },
   methods: {
     handleMouseOver() {
@@ -152,14 +179,6 @@ export default {
         electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'maximize');
         this.isMaximized = true;
       }
-    },
-  },
-  computed: {
-    isDarwin() {
-      return process.platform === 'darwin';
-    },
-    middleButtonStatus() {
-      return this.isFullScreen ? 'exit-fullscreen' : this.isMaximized ? 'restore' : 'maximize'; // eslint-disable-line no-nested-ternary
     },
   },
 };

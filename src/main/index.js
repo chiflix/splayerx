@@ -1,23 +1,53 @@
-/* eslint-disable import/first */
 // Be sure to call Sentry function as early as possible in the main process
 import '../shared/sentry';
 
-import { app, BrowserWindow, session, Tray, ipcMain, globalShortcut, nativeImage, splayerx } from 'electron' // eslint-disable-line
+import { app, BrowserWindow, session, Tray, ipcMain, globalShortcut, nativeImage, splayerx, crashReporter } from 'electron' // eslint-disable-line
 import { throttle, debounce } from 'lodash';
+import os from 'os';
 import path from 'path';
-import fs, { promises as fsPromises } from 'fs';
+import fs from 'fs';
+import rimraf from 'rimraf';
 import TaskQueue from '../renderer/helpers/proceduralQueue';
 import './helpers/electronPrototypes';
 import writeLog from './helpers/writeLog';
 import { getOpenedFiles } from './helpers/argv';
 import { getValidVideoRegex } from '../shared/utils';
 
+// requestSingleInstanceLock is not going to work for mas
+// https://github.com/electron-userland/electron-packager/issues/923
+if (!process.mas && !app.requestSingleInstanceLock()) {
+  app.quit();
+}
+
+/**
+ * Check for restore mark and delete all user data
+ */
+const userDataPath = app.getPath('userData');
+if (fs.existsSync(path.join(userDataPath, 'NEED_TO_RESTORE_MARK'))) {
+  try {
+    const tbdPath = `${userDataPath}-TBD`;
+    if (fs.existsSync(tbdPath)) rimraf.sync(tbdPath);
+    fs.renameSync(userDataPath, tbdPath);
+    rimraf(tbdPath, (err) => {
+      if (err) console.error(err);
+    });
+  } catch (ex) {
+    console.error(ex);
+    try {
+      rimraf.sync(`${userDataPath}/**/!(lockfile)`);
+      console.log('Successfully removed all user data.');
+    } catch (ex) {
+      console.error(ex);
+    }
+  }
+}
+
 /**
  * Set `__static` path to static files in production
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
  */
 if (process.env.NODE_ENV !== 'development') {
-  global.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\') // eslint-disable-line
+  global.__static = path.join(__dirname, '/static').replace(/\\/g, '\\\\') // eslint-disable-line
 }
 
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
@@ -47,12 +77,6 @@ const browsingViewURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080/browsingView.html'
   : `file://${__dirname}/browsingView.html`;
 
-// requestSingleInstanceLock is not going to work for mas
-// https://github.com/electron-userland/electron-packager/issues/923
-if (process.mas === undefined && !app.requestSingleInstanceLock()) {
-  app.quit();
-}
-
 const tempFolderPath = path.join(app.getPath('temp'), 'splayer');
 if (!fs.existsSync(tempFolderPath)) fs.mkdirSync(tempFolderPath);
 
@@ -66,12 +90,12 @@ function handleBossKey() {
     }
     mainWindow.webContents.send('mainDispatch', 'PAUSE_VIDEO');
     mainWindow.hide();
-    mainWindow?.webContents.send('mainCommit', 'isHiddenByBossKey', true);
+    mainWindow.webContents.send('mainCommit', 'isHiddenByBossKey', true);
     if (process.platform === 'win32') {
       tray = new Tray(nativeImage.createFromDataURL(require('../../build/icons/1024x1024.png')));
       tray.on('click', () => {
         mainWindow.show();
-        mainWindow?.webContents.send('mainCommit', 'isHiddenByBossKey', false);
+        mainWindow.webContents.send('mainCommit', 'isHiddenByBossKey', false);
         tray.destroy();
         tray = null;
       });
@@ -82,58 +106,63 @@ function handleBossKey() {
 function registerBrowsingWindowEvent() {
   if (!browsingViewWindow) return;
   browsingViewWindow.on('resize', throttle(() => {
-    browsingViewWindow?.webContents.send('browsingViewSize', browsingViewWindow.getSize());
+    browsingViewWindow.webContents.send('browsingViewSize', browsingViewWindow.getSize());
   }, 100));
 }
-function registerMainWindowEvent() {
+
+function markNeedToRestore() {
+  fs.closeSync(fs.openSync(path.join(app.getPath('userData'), 'NEED_TO_RESTORE_MARK'), 'w'));
+}
+
+function registerMainWindowEvent(mainWindow) {
   if (!mainWindow) return;
   // TODO: should be able to use window.outerWidth/outerHeight directly
   mainWindow.on('resize', throttle(() => {
-    mainWindow?.webContents.send('mainCommit', 'windowSize', mainWindow.getSize());
+    mainWindow.webContents.send('mainCommit', 'windowSize', mainWindow.getSize());
   }, 100));
   mainWindow.on('move', throttle(() => {
-    mainWindow?.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
+    mainWindow.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
   }, 100));
   mainWindow.on('enter-full-screen', () => {
-    mainWindow?.webContents.send('mainCommit', 'isFullScreen', true);
-    mainWindow?.webContents.send('mainCommit', 'isMaximized', mainWindow.isMaximized());
+    mainWindow.webContents.send('mainCommit', 'isFullScreen', true);
+    mainWindow.webContents.send('mainCommit', 'isMaximized', mainWindow.isMaximized());
   });
   mainWindow.on('leave-full-screen', () => {
-    mainWindow?.webContents.send('mainCommit', 'isFullScreen', false);
-    mainWindow?.webContents.send('mainCommit', 'isMaximized', mainWindow.isMaximized());
+    mainWindow.webContents.send('mainCommit', 'isFullScreen', false);
+    mainWindow.webContents.send('mainCommit', 'isMaximized', mainWindow.isMaximized());
   });
   mainWindow.on('maximize', () => {
-    mainWindow?.webContents.send('mainCommit', 'isMaximized', true);
+    mainWindow.webContents.send('mainCommit', 'isMaximized', true);
   });
   mainWindow.on('unmaximize', () => {
-    mainWindow?.webContents.send('mainCommit', 'isMaximized', false);
+    mainWindow.webContents.send('mainCommit', 'isMaximized', false);
   });
   mainWindow.on('minimize', () => {
-    mainWindow?.webContents.send('mainCommit', 'isMinimized', true);
+    mainWindow.webContents.send('mainCommit', 'isMinimized', true);
   });
   mainWindow.on('restore', () => {
-    mainWindow?.webContents.send('mainCommit', 'isMinimized', false);
+    mainWindow.webContents.send('mainCommit', 'isMinimized', false);
   });
   mainWindow.on('focus', () => {
-    mainWindow?.webContents.send('mainCommit', 'isFocused', true);
-    mainWindow?.webContents.send('mainCommit', 'isHiddenByBossKey', false);
+    mainWindow.webContents.send('mainCommit', 'isFocused', true);
+    mainWindow.webContents.send('mainCommit', 'isHiddenByBossKey', false);
   });
   mainWindow.on('blur', () => {
-    mainWindow?.webContents.send('mainCommit', 'isFocused', false);
+    mainWindow.webContents.send('mainCommit', 'isFocused', false);
   });
-  mainWindow.on('scroll-touch-begin', () => mainWindow?.webContents.send('scroll-touch-begin'));
-  mainWindow.on('scroll-touch-end', () => mainWindow?.webContents.send('scroll-touch-end'));
+  mainWindow.on('scroll-touch-begin', () => mainWindow.webContents.send('scroll-touch-begin'));
+  mainWindow.on('scroll-touch-end', () => mainWindow.webContents.send('scroll-touch-end'));
 
   ipcMain.on('callMainWindowMethod', (evt, method, args = []) => {
     try {
-      mainWindow?.[method]?.(...args);
+      mainWindow[method](...args);
     } catch (ex) {
       console.error('callMainWindowMethod', ex, method, JSON.stringify(args));
     }
   });
   ipcMain.on('callBrowsingViewWindowMethod', (evt, method, args = []) => {
     try {
-      browsingViewWindow?.[method]?.(...args);
+      browsingViewWindow[method](...args);
     } catch (ex) {
       console.error('callBrowsingViewWindowMethod', ex, method, JSON.stringify(args));
     }
@@ -145,14 +174,14 @@ function registerMainWindowEvent() {
     event.sender.send('windowSizeChange-asyncReply', mainWindow.getSize());
   });
   ipcMain.on('store-browsing-last-size', (e, size) => {
-    mainWindow?.webContents.send('mainDispatch', 'updateBrowsingSize', size);
+    mainWindow.webContents.send('mainDispatch', 'updateBrowsingSize', size);
   });
   ipcMain.on('open-file-by-playing', (e, url) => {
-    mainWindow?.webContents.send('play-file-with-url', url);
+    mainWindow.webContents.send('play-file-with-url', url);
   });
   function thumbnail(args, cb) {
     splayerx.generateThumbnails(
-      args.src, args.outPath, args.width, args.num.rows, args.num.cols,
+      args.src, args.outPath, args.width, args.num.cols, args.num.rows,
       (ret) => {
         console[ret === '0' ? 'log' : 'error'](ret, args.src);
         cb(ret, args.src);
@@ -166,7 +195,7 @@ function registerMainWindowEvent() {
         thumbnail(thumbnailTask[0], cb);
       }
       if (ret === '0') {
-        mainWindow?.webContents.send('thumbnail-saved', src);
+        mainWindow.webContents.send('thumbnail-saved', src);
       }
     };
     thumbnail(thumbnailTask[0], cb);
@@ -200,23 +229,6 @@ function registerMainWindowEvent() {
     }
     return `00:${minutes}:${seconds}`;
   }
-  function snapShot(snapShot, callback) {
-    let numberString;
-    if (snapShot.type === 'cover') {
-      let randomNumber = Math.round((Math.random() * 20) + 5);
-      if (randomNumber > snapShot.duration) randomNumber = snapShot.duration;
-      numberString = timecodeFromSeconds(randomNumber);
-    } else {
-      numberString = timecodeFromSeconds(snapShot.time);
-    }
-    splayerx.snapshotVideo(
-      snapShot.videoPath, snapShot.imgPath, numberString, `${snapShot.videoWidth}`, `${snapShot.videoHeight}`,
-      (resultCode) => {
-        console[resultCode === '0' ? 'log' : 'error'](resultCode, snapShot.videoPath);
-        callback(resultCode, snapShot.imgPath);
-      },
-    );
-  }
 
   function extractSubtitle(videoPath, subtitlePath, index) {
     return new Promise((resolve, reject) => {
@@ -227,27 +239,28 @@ function registerMainWindowEvent() {
     });
   }
 
+  function snapShot(info, callback) {
+    let randomNumber = Math.round((Math.random() * 20) + 5);
+    if (randomNumber > info.duration) randomNumber = info.duration;
+    const numberString = timecodeFromSeconds(randomNumber);
+    splayerx.snapshotVideo(
+      info.path, info.imgPath, numberString, `${info.width}`, `${info.height}`,
+      (resultCode) => {
+        console[resultCode === '0' ? 'log' : 'error'](resultCode, info.path);
+        callback(resultCode, info.imgPath);
+      },
+    );
+  }
   function snapShotQueueProcess(event) {
-    const maxWaitingCount = 100;
-    let waitingCount = 0;
     const callback = (resultCode, imgPath) => {
       if (resultCode === 'Waiting for the task completion.') {
-        waitingCount += 1;
-        if (waitingCount <= maxWaitingCount) {
-          snapShot(snapShotQueue[0], callback);
-        } else {
-          waitingCount = 0;
-          snapShotQueue.shift();
-          if (snapShotQueue.length > 0) {
-            snapShot(snapShotQueue[0], callback);
-          }
-        }
+        snapShot(snapShotQueue[0], callback);
       } else if (resultCode === '0') {
         const lastRecord = snapShotQueue.shift();
         if (event.sender.isDestroyed()) {
           snapShotQueue.splice(0, snapShotQueue.length);
         } else {
-          event.sender.send(`snapShot-${lastRecord.videoPath}-reply`, imgPath);
+          event.sender.send(`snapShot-${lastRecord.path}-reply`, imgPath);
           if (snapShotQueue.length > 0) {
             snapShot(snapShotQueue[0], callback);
           }
@@ -262,19 +275,16 @@ function registerMainWindowEvent() {
     snapShot(snapShotQueue[0], callback);
   }
 
-  ipcMain.on('snapShot', (event, video, type = 'cover', time = 0) => {
-    if (!video.videoWidth) video.videoWidth = 1920;
-    if (!video.videoHeight) video.videoHeight = 1080;
+  ipcMain.on('snapShot', (event, video) => {
     const imgPath = video.imgPath;
 
     if (!fs.existsSync(imgPath)) {
-      snapShotQueue.push(Object.assign({ type, time }, video));
+      snapShotQueue.push(video);
       if (snapShotQueue.length === 1) {
         snapShotQueueProcess(event);
       }
     } else {
-      console.log('pass', imgPath);
-      event.sender.send(`snapShot-${video.videoPath}-reply`, imgPath);
+      event.sender.send(`snapShot-${video.path}-reply`);
     }
   });
 
@@ -296,7 +306,6 @@ function registerMainWindowEvent() {
       callback(info);
     });
   }
-
   function mediaInfoQueueProcess(event) {
     const callback = (info) => {
       event.sender.send(`mediaInfo-${mediaInfoQueue[0]}-reply`, info);
@@ -322,11 +331,11 @@ function registerMainWindowEvent() {
     event.sender.send('windowPositionChange-asyncReply', mainWindow.getPosition());
   });
   ipcMain.on('windowInit', () => {
-    mainWindow?.webContents.send('mainCommit', 'windowSize', mainWindow.getSize());
-    mainWindow?.webContents.send('mainCommit', 'windowMinimumSize', mainWindow.getMinimumSize());
-    mainWindow?.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
-    mainWindow?.webContents.send('mainCommit', 'isFullScreen', mainWindow.isFullScreen());
-    mainWindow?.webContents.send('mainCommit', 'isFocused', mainWindow.isFocused());
+    mainWindow.webContents.send('mainCommit', 'windowSize', mainWindow.getSize());
+    mainWindow.webContents.send('mainCommit', 'windowMinimumSize', mainWindow.getMinimumSize());
+    mainWindow.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
+    mainWindow.webContents.send('mainCommit', 'isFullScreen', mainWindow.isFullScreen());
+    mainWindow.webContents.send('mainCommit', 'isFocused', mainWindow.isFocused());
   });
   ipcMain.on('bossKey', () => {
     handleBossKey();
@@ -347,6 +356,7 @@ function registerMainWindowEvent() {
       show: false,
       webPreferences: {
         webSecurity: false,
+        nodeIntegration: true,
         experimentalFeatures: true,
       },
       acceptFirstMouse: true,
@@ -356,6 +366,10 @@ function registerMainWindowEvent() {
     };
     if (!aboutWindow) {
       aboutWindow = new BrowserWindow(aboutWindowOptions);
+      // 如果播放窗口顶置，打开关于也顶置
+      if (mainWindow.isAlwaysOnTop()) {
+        aboutWindow.setAlwaysOnTop(true);
+      }
       aboutWindow.loadURL(`${aboutURL}`);
       aboutWindow.on('closed', () => {
         aboutWindow = null;
@@ -380,6 +394,8 @@ function registerMainWindowEvent() {
       webPreferences: {
         webSecurity: false,
         experimentalFeatures: true,
+        nodeIntegration: true,
+        webviewTag: true,
       },
       acceptFirstMouse: true,
     };
@@ -409,6 +425,7 @@ function registerMainWindowEvent() {
       show: false,
       webPreferences: {
         webSecurity: false,
+        nodeIntegration: true,
         experimentalFeatures: true,
       },
       acceptFirstMouse: true,
@@ -418,6 +435,10 @@ function registerMainWindowEvent() {
     };
     if (!preferenceWindow) {
       preferenceWindow = new BrowserWindow(preferenceWindowOptions);
+      // 如果播放窗口顶置，打开首选项也顶置
+      if (mainWindow.isAlwaysOnTop()) {
+        preferenceWindow.setAlwaysOnTop(true);
+      }
       preferenceWindow.loadURL(`${preferenceURL}`);
       preferenceWindow.on('closed', () => {
         preferenceWindow = null;
@@ -427,32 +448,37 @@ function registerMainWindowEvent() {
     }
     preferenceWindow.once('ready-to-show', () => {
       preferenceWindow.show();
-      preferenceWindow?.webContents.send('restore-state', needToRestore);
+      preferenceWindow.webContents.send('restore-state', needToRestore);
     });
   });
   ipcMain.on('get-restore-state', () => {
-    preferenceWindow?.webContents.send('restore-state', needToRestore);
+    preferenceWindow.webContents.send('restore-state', needToRestore);
   });
-  ipcMain.on('apply', () => {
+  ipcMain.on('need-to-restore', () => {
     needToRestore = true;
+    markNeedToRestore();
   });
   ipcMain.on('relaunch', () => {
-    app.relaunch();
+    const switches = process.argv.filter(a => a.startsWith('-'));
+    const argv = process.argv.filter(a => !a.startsWith('-'))
+      .slice(0, process.isPackaged ? 1 : 2).concat(switches);
+    app.relaunch({ args: argv.slice(1), execPath: argv[0] });
     app.quit();
   });
   ipcMain.on('preference-to-main', (e, args) => {
-    mainWindow?.webContents.send('mainDispatch', 'setPreference', args);
+    if (mainWindow) {
+      mainWindow.webContents.send('mainDispatch', 'setPreference', args);
+    }
   });
   ipcMain.on('main-to-preference', (e, args) => {
-    preferenceWindow?.webContents.send('preferenceDispatch', 'setPreference', args);
+    if (preferenceWindow) {
+      preferenceWindow.webContents.send('preferenceDispatch', 'setPreference', args);
+    }
   });
 }
 
 function createWindow() {
-  /**
-   * Initial window options
-   */
-  const windowOptions = {
+  mainWindow = new BrowserWindow({
     useContentSize: true,
     frame: false,
     titleBarStyle: 'none',
@@ -464,18 +490,18 @@ function createWindow() {
     transparent: false, // set to false to solve the backdrop-filter bug
     webPreferences: {
       webSecurity: false,
+      nodeIntegration: true,
       experimentalFeatures: true,
     },
     // See https://github.com/electron/electron/blob/master/docs/api/browser-window.md#showing-window-gracefully
-    backgroundColor: '#802e2c29',
+    backgroundColor: '#6a6a6a',
     acceptFirstMouse: true,
     show: false,
     ...({
       win32: {},
     })[process.platform],
-  };
-
-  mainWindow = new BrowserWindow(windowOptions);
+  });
+  mainWindow.webContents.setUserAgent(`SPlayerX@2018 ${os.platform() + os.release()} Version ${app.getVersion()}`);
 
   mainWindow.loadURL(filesToOpen.length ? `${mainURL}#/play` : mainURL);
 
@@ -495,51 +521,25 @@ function createWindow() {
     inited = true;
   });
 
-  registerMainWindowEvent();
+  registerMainWindowEvent(mainWindow);
 
   if (process.env.NODE_ENV === 'development') {
     setTimeout(() => { // wait some time to prevent `Object not found` error
-      mainWindow?.openDevTools();
+      mainWindow.openDevTools({ mode: 'detach' });
     }, 1000);
   }
 }
-function removeDir(dir) {
-  const userData = app.getPath('userData');
-  return fsPromises.readdir(dir)
-    .then(files => files.reduce((result, file) => {
-      const filePath = path.join(dir, file);
-      return result.then(() => fsPromises.unlink(filePath)
-        .then(null, () => removeDir(filePath)));
-    }, Promise.resolve()).then(() => {
-      if (dir !== userData) return fsPromises.rmdir(dir);
-      return Promise.resolve();
-    }));
-}
-function removeUserData() {
-  const userData = app.getPath('userData');
-  return removeDir(path.join(userData, 'storage'))
-    .then(() => removeDir(userData));
-}
-app.on('before-quit', (e) => {
+
+app.on('before-quit', () => {
   if (needToRestore) {
-    mainWindow?.webContents.send('quit', needToRestore);
-    e.preventDefault();
-    removeUserData()
-      .catch((err) => {
-        needToRestore = false;
-        writeLog('info', { message: `error: ${err}` });
-      })
-      .finally(() => {
-        needToRestore = false;
-        app.quit();
-      });
+    mainWindow.webContents.send('quit', needToRestore);
   } else {
-    mainWindow?.webContents.send('quit');
+    mainWindow.webContents.send('quit');
   }
 });
 app.on('second-instance', () => {
-  if (mainWindow?.isMinimized()) mainWindow.restore();
-  mainWindow?.focus();
+  if (mainWindow.isMinimized()) mainWindow.restore();
+  mainWindow.focus();
 });
 
 
@@ -569,18 +569,19 @@ if (process.platform === 'darwin') {
   app.on('second-instance', (event, argv) => {
     const opendFiles = getOpenedFiles(argv); // TODO: multiple files
     if (opendFiles.length) {
-      mainWindow?.webContents.send('open-file', ...opendFiles);
+      mainWindow.webContents.send('open-file', ...opendFiles);
     }
   });
 }
 
 app.on('ready', () => {
+  createWindow();
   app.setName('SPlayer');
   globalShortcut.register('CmdOrCtrl+Shift+I+O+P', () => {
-    mainWindow?.openDevTools();
+    mainWindow.openDevTools({ mode: 'detach' });
   });
   globalShortcut.register('CmdOrCtrl+Shift+J+K+L', () => {
-    preferenceWindow?.openDevTools();
+    preferenceWindow.openDevTools({ mode: 'detach' });
   });
 
   if (process.platform === 'win32') {
@@ -588,20 +589,11 @@ app.on('ready', () => {
       handleBossKey();
     });
   }
-
-  createWindow();
 });
 
 app.on('window-all-closed', () => {
   if (process.env.NODE_ENV !== 'development' || process.platform !== 'darwin') {
-    if (needToRestore) {
-      removeUserData().then(() => {
-        needToRestore = false;
-        app.quit();
-      });
-    } else {
-      app.quit();
-    }
+    app.quit();
   }
 });
 
@@ -612,3 +604,16 @@ app.on('activate', () => {
     mainWindow.show();
   }
 });
+
+/**
+ * 闪退报告
+ */
+if (process.env.NODE_ENV !== 'development') {
+  app.setPath('temp', userDataPath);
+  crashReporter.start({
+    companyName: 'Sagittarius Tech LLC.',
+    productName: 'SPlayer',
+    ignoreSystemCrashHandler: true,
+    submitURL: 'https://sentry.io/api/1449341/minidump/?sentry_key=6a94feb674b54686a6d88d7278727b7c',
+  });
+}

@@ -1,10 +1,31 @@
 <template>
   <div class="browsing-control">
-    <Icon :type="backType" ref="back" class="back-icon" @mouseup.native="handleUrlBack"></Icon>
-    <Icon :type="forwardType" ref="forward" class="forward-icon" @mouseup.native="handleUrlForward"></Icon>
-    <Icon type="pageRefresh" class="page-refresh-icon" @mouseup.native="handleUrlReload"></Icon>
-    <Icon type="videoRecordDisabled" class="video-record-icon"></Icon>
-    <Icon :type="picInPicType" class="pic-in-pic" @mouseup.native="handlePicInPic"></Icon>
+    <Icon
+      ref="back"
+      :type="backType"
+      @mouseup.native="handleUrlBack"
+      class="back-icon"
+    />
+    <Icon
+      ref="forward"
+      :type="forwardType"
+      @mouseup.native="handleUrlForward"
+      class="forward-icon"
+    />
+    <Icon
+      @mouseup.native="handleUrlReload"
+      type="pageRefresh"
+      class="page-refresh-icon"
+    />
+    <Icon
+      type="videoRecordDisabled"
+      class="video-record-icon"
+    />
+    <Icon
+      :type="picInPicType"
+      @mouseup.native="handlePicInPic"
+      class="pic-in-pic"
+    />
   </div>
 </template>
 

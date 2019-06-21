@@ -169,8 +169,10 @@ describe('helper - subtitle - storage', () => {
       it('should storeSubtitleList invoke infoDb.add', (done) => {
         storeSubtitleList(videoSrc, testSubtitleList)
           .then(() => {
-            const veryDeepArrayMatcher = match(arr =>
-              !differenceWith(arr, testSubtitleList, isEqual).length);
+            const veryDeepArrayMatcher = match(arr => !differenceWith(
+              arr, testSubtitleList,
+              isEqual,
+            ).length);
             expect(infoDBAddStub).to.have.been.calledWithMatch(
               mediaItemSchemaName,
               match.hasNested('preference.subtitle.list', veryDeepArrayMatcher),
@@ -364,7 +366,7 @@ describe('helper - subtitle - storage', () => {
 
       let getStub;
       let storeSubtitleStub;
-      let putStub;
+      let updateStub;
       beforeEach(() => {
         testSubtitleId = randNum();
         getStub = sandbox.stub(dataDb, 'get').resolves();
@@ -379,7 +381,7 @@ describe('helper - subtitle - storage', () => {
         storeSubtitleStub = sandbox.stub().resolves();
         storageRewireAPI.__Rewire__('storeSubtitle', storeSubtitleStub);
 
-        putStub = sandbox.stub(dataDb, 'put').resolves();
+        updateStub = sandbox.stub(dataDb, 'update').resolves();
       });
       afterEach(() => {
         storageRewireAPI.__ResetDependency__('storeSubtitle');
@@ -401,15 +403,16 @@ describe('helper - subtitle - storage', () => {
         updateSubtitle(testSubtitleStringId, testSubtitleInfo)
           .then(() => {
             expect(getStub).to.have.been.calledWithMatch(match.any, hasResultSubtitleId);
-            expect(putStub).to.have.been.calledWithMatch(match.any, match.any, hasResultSubtitleId);
+            expect(updateStub)
+              .to.have.been.calledWithMatch(match.any, match.any, hasResultSubtitleId);
             done();
           }).catch(done);
       });
-      it('should invoke dataDb.put when result found', (done) => {
+      it('should invoke dataDb.update when result found', (done) => {
         testSubtitleId = hasResultSubtitleId;
         updateSubtitle(testSubtitleId, testSubtitleInfo)
           .then(() => {
-            expect(putStub).to.have.been.calledWithExactly(
+            expect(updateStub).to.have.been.calledWithExactly(
               SUBTITLE_OBJECTSTORE_NAME,
               { ...result, ...testSubtitleInfo },
               testSubtitleId,
@@ -425,9 +428,9 @@ describe('helper - subtitle - storage', () => {
             done();
           }).catch(done);
       });
-      it('should resolve what dataDb.put resolves', (done) => {
+      it('should resolve what dataDb.update resolves', (done) => {
         const newKey = 233;
-        putStub.resolves(newKey);
+        updateStub.resolves(newKey);
 
         updateSubtitle(hasResultSubtitleId, testSubtitleInfo)
           .then((result) => {
@@ -435,9 +438,9 @@ describe('helper - subtitle - storage', () => {
             done();
           }).catch(done);
       });
-      it('should reject what dataDb.put rejects', (done) => {
+      it('should reject what dataDb.update rejects', (done) => {
         const newError = new Error();
-        putStub.rejects(newError);
+        updateStub.rejects(newError);
 
         updateSubtitle(hasResultSubtitleId, testSubtitleInfo)
           .catch((err) => {

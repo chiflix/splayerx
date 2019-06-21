@@ -112,9 +112,9 @@ export default function kern(createElement, text) { // eslint-disable-line compl
     }
 
     if (
-      !result.length ||
-      typeof result[result.length - 1] !== 'string' ||
-      typeof char2 !== 'string'
+      !result.length
+      || typeof result[result.length - 1] !== 'string'
+      || typeof char2 !== 'string'
     ) {
       result.push(char2);
     } else {

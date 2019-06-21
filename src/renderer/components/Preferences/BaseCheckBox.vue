@@ -1,13 +1,18 @@
 <template>
   <div class="checkbox">
     <label class="checkbox__label">
-      <slot></slot>
-      <input type="checkbox"
-        class="checkbox__input"
+      <slot />
+      <input
         :checked="checkboxValue"
-        @input="$emit('update:checkbox-value', $event.target.checked)">
-      <span class="checkbox__checkmark"></span>
-      <Icon type="nike" class="checkbox__icon"/>
+        @input="$emit('update:checkbox-value', $event.target.checked)"
+        type="checkbox"
+        class="checkbox__input"
+      >
+      <span class="checkbox__checkmark" />
+      <Icon
+        type="nike"
+        class="checkbox__icon"
+      />
     </label>
   </div>
 </template>
@@ -20,7 +25,9 @@ export default {
   components: {
     Icon,
   },
-  props: ['checkboxValue'],
+  props: {
+    checkboxValue: Boolean,
+  },
 };
 </script>
 
@@ -59,12 +66,12 @@ export default {
     border: 1px solid rgba(255,255,255,0.2);
     background-color: rgba(255,255,255,0.1);
   }
-      
+
   &__input {
     position: absolute;
     display: none;
     cursor: pointer;
-    
+
     &:checked ~ .checkbox__icon {
       display: block;
     }

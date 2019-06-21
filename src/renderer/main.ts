@@ -2,30 +2,34 @@
 // Be sure to call Sentry function as early as possible in the main process
 import '../shared/sentry';
 
+import path from 'path';
+import fs from 'fs';
+import electron from 'electron';
 import Vue from 'vue';
 import VueI18n from 'vue-i18n';
-import os from 'os';
 import axios from 'axios';
-import uuidv4 from 'uuid/v4';
-import electron from 'electron';
-import VueElectronJSONStorage from 'vue-electron-json-storage';
-import VueResource from 'vue-resource';
-import VueAnalytics from 'vue-analytics';
-import VueElectron from 'vue-electron';
-import Path from 'path';
-import fs from 'fs';
 import { mapGetters, mapActions, createNamespacedHelpers } from 'vuex';
+import uuidv4 from 'uuid/v4';
 import osLocale from 'os-locale';
+import VueAxios from 'vue-axios';
+// @ts-ignore
+import VueElectronJSONStorage from 'vue-electron-json-storage';
+// @ts-ignore
+import VueAnalytics from 'vue-analytics';
+// @ts-ignore
+import VueElectron from 'vue-electron';
+// @ts-ignore
 import AsyncComputed from 'vue-async-computed';
-
+// @ts-ignore
 import App from '@/App.vue';
 import router from '@/router';
 import store from '@/store';
 import messages from '@/locales';
+import { windowRectService } from '@/services/window/WindowRectService';
 import helpers from '@/helpers';
 import { hookVue } from '@/kerning';
 import { Video as videoActions, Subtitle as subtitleActions } from '@/store/actionTypes';
-import addLog from '@/helpers/index';
+import { log } from '@/libs/Log';
 import asyncStorage from '@/helpers/asyncStorage';
 import { videodata } from '@/store/video';
 import NotificationBubble, { addBubble } from '../shared/notificationControl';
@@ -47,16 +51,15 @@ function getSystemLocale() {
   return 'en';
 }
 
-Vue.http = Vue.prototype.$http = axios;
 Vue.config.productionTip = false;
 Vue.config.warnHandler = (warn) => {
-  addLog.methods.addLog('warn', warn);
+  log.info('render/main', warn);
 };
 Vue.config.errorHandler = (err) => {
-  addLog.methods.addLog('error', err);
+  log.error('render/main', err);
 };
 Vue.directive('fade-in', {
-  bind(el, binding) {
+  bind(el: HTMLElement, binding: any) {
     const { value } = binding;
     if (value) {
       el.classList.add('fade-in');
@@ -66,7 +69,7 @@ Vue.directive('fade-in', {
       el.classList.remove('fade-in');
     }
   },
-  update(el, binding) {
+  update(el: HTMLElement, binding: any) {
     const { oldValue, value } = binding;
     if (oldValue !== value) {
       if (value) {
@@ -83,7 +86,7 @@ Vue.directive('fade-in', {
 Vue.use(VueElectron);
 Vue.use(VueI18n);
 Vue.use(VueElectronJSONStorage);
-Vue.use(VueResource);
+Vue.use(VueAxios, axios);
 Vue.use(AsyncComputed);
 Vue.use(VueAnalytics, {
   id: (process.env.NODE_ENV === 'production') ? 'UA-2468227-6' : 'UA-2468227-5',
@@ -139,6 +142,7 @@ new Vue({
       menu: null,
       topOnWindow: false,
       canSendVolumeGa: true,
+      menuOperationLock: false, // 如果正在创建目录，就锁住所以操作目录的动作，防止野指针
     };
   },
   computed: {
@@ -353,7 +357,7 @@ new Vue({
     },
     enabledSecondarySub(val) {
       if (this.menu) {
-        this.subtitleList.forEach((item, index) => {
+        this.subtitleList.forEach((item: any, index: number) => {
           this.menu.getMenuItemById(`secondSub${index}`).enabled = val;
         });
         this.menu.getMenuItemById('secondSub-1').enabled = val;
@@ -397,7 +401,7 @@ new Vue({
         this.refreshMenu();
       }
       if (this.menu) {
-        this.audioTrackList.forEach((item, index) => {
+        this.audioTrackList.forEach((item: Electron.MenuItem, index: number) => {
           if (item.enabled === true && this.menu.getMenuItemById(`track${index}`)) {
             this.menu.getMenuItemById(`track${index}`).checked = true;
           }
@@ -411,14 +415,14 @@ new Vue({
       const browserWindow = this.$electron.remote.getCurrentWindow();
       if (val && browserWindow.isAlwaysOnTop()) {
         browserWindow.setAlwaysOnTop(false);
-      } else if (!val && this.menu.getMenuItemById('windowFront').checked) {
+      } else if (!val && this.menu && this.menu.getMenuItemById('windowFront').checked) {
         browserWindow.setAlwaysOnTop(true);
       }
       // 因为老板键，pause 比 isHiddenByBossKey慢，所以在paused watcher里面
       // 需要判断是否需要禁用menu
       this.refreshMenu().then(() => {
         if (this.isHiddenByBossKey) {
-          this.menu && this.menu.items.forEach((e, i) => {
+          this.menu && this.menu.items.forEach((e: Electron.MenuItem, i: number) => {
             if (i === 0) return;
             this.disableMenus(e);
           });
@@ -432,7 +436,7 @@ new Vue({
       if (!val) {
         this.refreshMenu();
       } else {
-        this.menu && this.menu.items.forEach((e, i) => {
+        this.menu && this.menu.items.forEach((e: Electron.MenuItem, i: number) => {
           if (i === 0) return;
           this.disableMenus(e);
         });
@@ -444,19 +448,21 @@ new Vue({
       if (!val) {
         this.refreshMenu();
       } else {
-        this.menu && this.menu.items.forEach((e, i) => {
+        this.menu && this.menu.items.forEach((e: Electron.MenuItem, i: number) => {
           if (i === 0) return;
           this.disableMenus(e);
         });
       }
     },
     ableToPushCurrentSubtitle(val) {
-      this.menu.getMenuItemById('uploadSelectedSubtitle').enabled = val;
+      if (this.menu) {
+        this.menu.getMenuItemById('uploadSelectedSubtitle').enabled = val;
+      }
     },
     originSrc(newVal) {
       if (newVal && !this.isWheelEnd) {
         this.$off('wheel-event', this.wheelEventHandler);
-        this.isWheelEndWatcher = this.$watch('isWheelEnd', (newVal) => {
+        this.isWheelEndWatcher = this.$watch('isWheelEnd', (newVal: Boolean) => {
           if (newVal) {
             this.isWheelEndWatcher(); // cancel the isWheelEnd watcher
             this.$on('wheel-event', this.wheelEventHandler); // reset the wheel-event handler
@@ -479,17 +485,17 @@ new Vue({
      * @description 找到所有menu,禁用调.目前就两层循环，如果出现孙子menu，需要再嵌套一层循环
      * @author tanghaixiang@xindong.com
      * @date 2019-02-13
-     * @param {Menu.item} item
+     * @param {Electron.MenuItemConstructorOptions} item
      */
-    disableMenus(item) {
-      if (item && item.label) {
+    disableMenus(item: Electron.MenuItemConstructorOptions) {
+      if (!this.menuOperationLock && item && item.label) {
         item.enabled = false;
-        item.submenu && item.submenu.items.forEach((e) => {
+        item.submenu && (item.submenu as Electron.Menu).items.forEach((e: any) => {
           // this.disableMenus(e);
-          if (e && e.label) {
+          if (!this.menuOperationLock && e && e.label) {
             e.enabled = false;
-            e.submenu && e.submenu.items.forEach((e) => {
-              if (e && e.label) {
+            e.submenu && e.submenu.items.forEach((e: any) => {
+              if (!this.menuOperationLock && e && e.label) {
                 e.enabled = false;
               }
             });
@@ -499,7 +505,7 @@ new Vue({
     },
     createMenu() {
       const { Menu, app, dialog } = this.$electron.remote;
-      const template = [
+      const template: Electron.MenuItemConstructorOptions[] = [
         // menu.file
         {
           label: this.$t('msg.file.name'),
@@ -531,6 +537,7 @@ new Vue({
             {
               label: this.$t('msg.file.copy'),
               accelerator: 'CmdOrCtrl+C',
+              // @ts-ignore
               selector: 'copy:',
             },
             {
@@ -544,14 +551,14 @@ new Vue({
               click: () => {
                 this.infoDB.clearAll();
                 app.clearRecentDocuments();
-                this.$bus.$emit('clean-lastPlayedFile');
+                this.$bus.$emit('clean-landingViewItems');
                 this.refreshMenu();
               },
             },
             { type: 'separator' },
             {
               label: this.$t('msg.file.closeWindow'),
-              role: 'Close',
+              role: 'close',
             },
           ],
         },
@@ -621,17 +628,14 @@ new Vue({
                 const options = { types: ['window'], thumbnailSize: { width: this.winWidth, height: this.winHeight } };
                 electron.desktopCapturer.getSources(options, (error, sources) => {
                   if (error) {
-                    this.addLog('info', {
-                      message: 'Snapshot failed .',
-                      code: SNAPSHOT_FAILED,
-                    });
+                    log.info('render/main', 'Snapshot failed .');
                     addBubble(SNAPSHOT_FAILED, this.$i18n);
                   }
                   sources.forEach((source) => {
                     if (source.name === 'SPlayer') {
                       const date = new Date();
                       const imgName = `SPlayer-${date.getFullYear()}.${date.getMonth() + 1}.${date.getDate()}-${date.getHours()}.${date.getMinutes()}.${date.getSeconds()}.png`;
-                      const screenshotPath = Path.join(
+                      const screenshotPath = path.join(
                         this.snapshotSavedPath ? this.snapshotSavedPath : app.getPath('desktop'),
                         imgName,
                       );
@@ -647,17 +651,11 @@ new Vue({
                               },
                             );
                           } else {
-                            this.addLog('info', {
-                              message: 'Snapshot failed .',
-                              code: SNAPSHOT_FAILED,
-                            });
+                            log.info('render/main', 'Snapshot failed .');
                             addBubble(SNAPSHOT_FAILED, this.$i18n);
                           }
                         } else {
-                          this.addLog('info', {
-                            message: 'Snapshot success .',
-                            code: SNAPSHOT_SUCCESS,
-                          });
+                          log.info('render/main', 'Snapshot success .');
                           addBubble(SNAPSHOT_SUCCESS, this.$i18n);
                         }
                       });
@@ -712,13 +710,13 @@ new Vue({
 
                 dialog.showOpenDialog(focusWindow, {
                   title: 'Open Dialog',
-                  defaultPath: Path.dirname(this.originSrc),
+                  defaultPath: path.dirname(this.originSrc),
                   filters: [{
                     name: 'Subtitle Files',
                     extensions: VALID_EXTENSION,
                   }],
                   properties: ['openFile'],
-                }, (item) => {
+                }, (item: Array<string>) => {
                   if (item) {
                     this.$bus.$emit('add-subtitles', [{ src: item[0], type: 'local' }]);
                   }
@@ -960,18 +958,18 @@ new Vue({
           ],
         },
       ];
-      return this.updateRecentPlay().then((result) => {
+      return this.updateRecentPlay().then((result: any) => {
         // menu.file add "open recent"
-        template[3].submenu.splice(3, 0, this.recentSubMenu());
-        template[3].submenu.splice(4, 0, this.recentSecondarySubMenu());
-        template[1].submenu.splice(0, 0, this.updatePlayOrPause);
-        template[4].submenu.splice(2, 0, this.updateFullScreen);
-        template[2].submenu.splice(7, 0, this.updateAudioTrack());
-        template[0].submenu.splice(1, 0, result);
+        (template[3].submenu as Electron.MenuItemConstructorOptions[]).splice(3, 0, this.recentSubMenu());
+        (template[3].submenu as Electron.MenuItemConstructorOptions[]).splice(4, 0, this.recentSecondarySubMenu());
+        (template[1].submenu as Electron.MenuItemConstructorOptions[]).splice(0, 0, this.updatePlayOrPause);
+        (template[4].submenu as Electron.MenuItemConstructorOptions[]).splice(2, 0, this.updateFullScreen);
+        (template[2].submenu as Electron.MenuItemConstructorOptions[]).splice(7, 0, this.updateAudioTrack());
+        (template[0].submenu as Electron.MenuItemConstructorOptions[]).splice(1, 0, result);
         // menu.about
         if (process.platform === 'darwin') {
-          template[2].submenu.splice(0, 0, ...this.darwinVolume);
-          template[1].submenu.splice(3, 0, ...this.darwinPlayback);
+          (template[2].submenu as Electron.MenuItemConstructorOptions[]).splice(0, 0, ...this.darwinVolume);
+          (template[1].submenu as Electron.MenuItemConstructorOptions[]).splice(3, 0, ...this.darwinPlayback);
           template.unshift({
             label: app.getName(),
             submenu: [
@@ -1008,12 +1006,12 @@ new Vue({
           });
         }
         if (process.platform === 'win32') {
-          template[2].submenu.splice(0, 0, ...this.winVolume);
-          template[1].submenu.splice(3, 0, ...this.winPlayback);
+          (template[2].submenu as Electron.MenuItemConstructorOptions[]).splice(0, 0, ...this.winVolume);
+          (template[1].submenu as Electron.MenuItemConstructorOptions[]).splice(3, 0, ...this.winPlayback);
           const file = template.shift();
-          const winFile = file.submenu.slice(0, 3);
-          winFile[1].submenu.unshift(file.submenu[3], file.submenu[2]);
-          winFile.push(file.submenu[5], file.submenu[4]);
+          const winFile = (file!.submenu as Electron.MenuItemConstructorOptions[]).slice(0, 3);
+          (winFile[1].submenu as Electron.MenuItemConstructorOptions[]).unshift((file!.submenu as Electron.MenuItemConstructorOptions[])[3], (file!.submenu as Electron.MenuItemConstructorOptions[])[2]);
+          winFile.push((file!.submenu as Electron.MenuItemConstructorOptions[])[5], (file!.submenu as Electron.MenuItemConstructorOptions[])[4]);
           winFile.reverse().forEach((menuItem) => {
             template.unshift(menuItem);
           });
@@ -1025,7 +1023,7 @@ new Vue({
               this.$electron.ipcRenderer.send('add-preference');
             },
           });
-          template[9].submenu.unshift(
+          (template[9].submenu as Electron.MenuItemConstructorOptions[]).unshift(
             {
               label: this.$t('msg.splayerx.about'),
               role: 'about',
@@ -1037,7 +1035,7 @@ new Vue({
           );
         }
         return template;
-      }).then((result) => {
+      }).then((result: any) => {
         this.menu = Menu.buildFromTemplate(result);
         Menu.setApplicationMenu(this.menu);
       }).then(() => {
@@ -1056,13 +1054,13 @@ new Vue({
           this.menu.getMenuItemById('uploadSelectedSubtitle').enabled = this.ableToPushCurrentSubtitle;
           this.menu.getMenuItemById('sub-1').checked = true;
         }
-        this.audioTrackList.forEach((item, index) => {
+        this.audioTrackList.forEach((item: any, index: number) => {
           if (item.enabled === true) {
             this.menu.getMenuItemById(`track${index}`).checked = true;
           }
         });
         this.menu.getMenuItemById('windowFront').checked = this.topOnWindow;
-        this.subtitleList.forEach((item, index) => {
+        this.subtitleList.forEach((item: any, index: number) => {
           if (item.id === this.currentFirstSubtitleId && this.menu.getMenuItemById(`sub${index}`)) {
             this.menu.getMenuItemById(`sub${index}`).checked = true;
           }
@@ -1072,12 +1070,14 @@ new Vue({
           this.menu.getMenuItemById(`secondSub${index}`).enabled = this.enabledSecondarySub;
         });
         this.menu.getMenuItemById('secondSub-1').enabled = this.enabledSecondarySub;
+        this.menuOperationLock = false;
       })
-        .catch((err) => {
-          this.addLog('error', err);
+        .catch((err: Error) => {
+          this.menuOperationLock = false;
+          log.error('render/main', err);
         });
     },
-    updateRecentItem(key, value) {
+    updateRecentItem(key: any, value: any) {
       return {
         id: key,
         visible: true,
@@ -1088,15 +1088,15 @@ new Vue({
         },
       };
     },
-    getSubName(item) {
+    getSubName(item: any) {
       if (item.path) {
-        return Path.basename(item);
+        return path.basename(item);
       } else if (item.type === 'embedded') {
         return `${this.$t('subtitle.embedded')} ${item.name}`;
       }
       return item.name;
     },
-    recentSubTmp(key, value, type) {
+    recentSubTmp(key: any, value: any, type: any) {
       return {
         id: type ? `sub${key}` : `secondSub${key}`,
         visible: true,
@@ -1109,7 +1109,7 @@ new Vue({
       };
     },
     recentSubMenu() {
-      const tmp = {
+      const tmp: Electron.MenuItemConstructorOptions = {
         label: this.$t('msg.subtitle.mainSubtitle'),
         id: 'main-subtitle',
         submenu: [1, 2, 3, 4, 5, 6, 7, 8, 9].map(index => ({
@@ -1118,7 +1118,7 @@ new Vue({
           label: '',
         })),
       };
-      tmp.submenu.splice(0, 1, {
+      (tmp.submenu as Electron.MenuItemConstructorOptions[]).splice(0, 1, {
         id: 'sub-1',
         visible: true,
         type: 'radio',
@@ -1127,13 +1127,13 @@ new Vue({
           this.changeFirstSubtitle('');
         },
       });
-      this.subtitleList.forEach((item, index) => {
-        tmp.submenu.splice(index + 1, 1, this.recentSubTmp(index, item, true));
+      this.subtitleList.forEach((item: any, index: number) => {
+        (tmp.submenu as Electron.MenuItemConstructorOptions[]).splice(index + 1, 1, this.recentSubTmp(index, item, true));
       });
       return tmp;
     },
     recentSecondarySubMenu() {
-      const tmp = {
+      const tmp: Electron.MenuItemConstructorOptions = {
         label: this.$t('msg.subtitle.secondarySubtitle'),
         id: 'secondary-subtitle',
         submenu: [1, 2, 3, 4, 5, 6, 7, 8, 9].map(index => ({
@@ -1142,11 +1142,12 @@ new Vue({
           label: '',
         })),
       };
-      tmp.submenu.splice(0, 1, this.updateSecondarySub);
-      tmp.submenu.splice(1, 1, {
+      const submenu = tmp.submenu as Electron.MenuItemConstructorOptions[];
+      submenu.splice(0, 1, this.updateSecondarySub);
+      submenu.splice(1, 1, {
         type: 'separator',
       });
-      tmp.submenu.splice(2, 1, {
+      submenu.splice(2, 1, {
         id: 'secondSub-1',
         visible: true,
         type: 'radio',
@@ -1155,12 +1156,12 @@ new Vue({
           this.changeSecondarySubtitle('');
         },
       });
-      this.subtitleList.forEach((item, index) => {
-        tmp.submenu.splice(index + 3, 1, this.recentSubTmp(index, item, false));
+      this.subtitleList.forEach((item: any, index: number) => {
+        submenu.splice(index + 3, 1, this.recentSubTmp(index, item, false));
       });
       return tmp;
     },
-    updateAudioTrackItem(key, value) {
+    updateAudioTrackItem(key: number, value: string) {
       return {
         id: `track${key}`,
         visible: true,
@@ -1175,12 +1176,12 @@ new Vue({
       const tmp = {
         label: this.$t('msg.audio.switchAudioTrack'),
         id: 'audio-track',
-        submenu: [],
+        submenu: [] as Electron.MenuItemConstructorOptions[],
       };
       if (this.audioTrackList.length === 1 && this.audioTrackList[0].language === 'und') {
         tmp.submenu.splice(0, 1, this.updateAudioTrackItem(0, this.$t('advance.chosenTrack')));
       } else {
-        this.audioTrackList.forEach((item, index) => {
+        this.audioTrackList.forEach((item: any, index: number) => {
           let detail;
           if (item.language === 'und' || item.language === '') {
             detail = `${this.$t('advance.track')} ${index + 1}`;
@@ -1194,7 +1195,7 @@ new Vue({
       }
       return tmp;
     },
-    pathProcess(path) {
+    pathProcess(path: string) {
       if (process.platform === 'win32') {
         return path.toString().replace(/^file:\/\/\//, '');
       }
@@ -1210,15 +1211,15 @@ new Vue({
           label: '',
         })),
       };
-      return this.infoDB.sortedResult('recent-played', 'lastOpened', 'prev').then(async (playlists) => {
+      return this.infoDB.sortedResult('recent-played', 'lastOpened', 'prev').then(async (playlists: any) => {
         const data = [];
         /* eslint-disable */
         for (const playlist of playlists) {
           const mediaItem = await this.infoDB.get('media-item', playlist.items[playlist.playedIndex]);
           data.push(mediaItem);
         }
-        let menuRecentData = null;
-        menuRecentData = this.processRecentPlay(data);
+        // let menuRecentData: Map<string, any> = new Map();
+        const menuRecentData: Map<string, any> = this.processRecentPlay(data) || new Map();
         recentMenuTemplate.submenu.forEach((element, index) => {
           const value = menuRecentData.get(element.id);
           if (value.label !== '') {
@@ -1229,15 +1230,15 @@ new Vue({
         return recentMenuTemplate;
       }).catch(() => recentMenuTemplate);
     },
-    menuStateControl(flag) {
-      this.menu.getMenuItemById('playback').submenu.items.forEach((item) => {
+    menuStateControl(flag: Boolean) {
+      this.menu.getMenuItemById('playback').submenu.items.forEach((item: any) => {
         item.enabled = flag;
       });
-      this.menu.getMenuItemById('audio').submenu.items.forEach((item) => {
+      this.menu.getMenuItemById('audio').submenu.items.forEach((item: any) => {
         item.enabled = flag;
       });
-      this.menu.getMenuItemById('subtitle').submenu.items.forEach((item) => {
-        item.submenu?.items.forEach((item) => {
+      this.menu.getMenuItemById('subtitle').submenu.items.forEach((item: any) => {
+        item.submenu && item.submenu.items.forEach((item: any) => {
           item.enabled = flag;
         });
         item.enabled = flag;
@@ -1245,7 +1246,7 @@ new Vue({
       // windowRotate 菜单状态随着路由状态一起变
       this.menu.getMenuItemById('windowRotate').enabled = flag;
     },
-    processRecentPlay(recentPlayData) {
+    processRecentPlay(recentPlayData: Array<any>) {
       const menuRecentData = new Map([
         ['recent-1', {
           label: '',
@@ -1303,70 +1304,37 @@ new Vue({
       return menuRecentData;
     },
     async refreshMenu() {
-      this.$electron.remote.Menu.getApplicationMenu()?.clear();
+      this.menuOperationLock = true;
+      const menu = this.$electron.remote.Menu.getApplicationMenu();
+      if (menu) menu.clear();
       await this.createMenu();
     },
     windowRotate() {
       this.$store.dispatch('windowRotate90Deg');
       if (this.isFullScreen) return;
-      const winSize = [this.winSize[0], this.winSize[1]];
-      let newSize = [];
-      const windowRect = [
-        window.screen.availLeft, window.screen.availTop,
-        window.screen.availWidth, window.screen.availHeight,
-      ];
-      // 旋转后，画面会恢复为原始分辨率，原始分辨率就是之前的窗口大小
-      // 这里在旋转窗口后，以之前的宽为新的高，以之前的高为新的宽,
-      const videoSize = winSize.reverse();
-      newSize = this.calculateWindowSize(
-        [320, 180],
-        windowRect.slice(2, 4),
-        videoSize,
-      );
-      const newPosition = this.calculateWindowPosition(
-        this.winPos.concat(this.winSize),
-        windowRect,
-        newSize,
-      );
-      const rect = newPosition.concat(newSize);
-      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [rect.slice(2, 4)[0] / rect.slice(2, 4)[1]]);
-      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', rect.slice(2, 4));
-      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', rect.slice(0, 2));
+      const videoSize = [this.winSize[0], this.winSize[1]].reverse();
+      const oldRect = this.winPos.concat(this.winSize);
+      windowRectService.calculateWindowRect(videoSize, false, oldRect);
     },
-    changeWindowSize(key) {
+    changeWindowSize(key: number) {
       if (!this.originSrc || key === this.sizePercent) {
         return;
       }
-      let newSize = [];
-      const windowRect = [
-        window.screen.availLeft, window.screen.availTop,
-        window.screen.availWidth, window.screen.availHeight,
-      ];
+      this.$store.dispatch('updateSizePercent', key);
+      const availWidth = window.screen.availWidth;
+      const availHeight = window.screen.availHeight;
       const videoSize = [this.intrinsicWidth * key, this.intrinsicHeight * key];
       if (key === 3) {
-        if (videoSize[0] < windowRect[2] && videoSize[1] < windowRect[3]) {
-          videoSize[1] = window.screen.availHeight;
+        if (videoSize[0] < availWidth && videoSize[1] < availHeight) {
+          videoSize[1] = availHeight;
           videoSize[0] = videoSize[1] * this.ratio;
         }
       }
-      newSize = this.calculateWindowSize(
-        [320, 180],
-        windowRect.slice(2, 4),
-        videoSize,
-      );
-      const newPosition = this.calculateWindowPosition(
-        this.winPos.concat(this.winSize),
-        windowRect,
-        newSize,
-      );
-      this.$store.dispatch('updateSizePercent', key);
-      const rect = newPosition.concat(newSize);
-      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', rect.slice(2, 4));
-      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', rect.slice(0, 2));
-      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [rect.slice(2, 4)[0] / rect.slice(2, 4)[1]]);
+      const oldRect = this.winPos.concat(this.winSize);
+      windowRectService.calculateWindowRect(videoSize, false, oldRect);
     },
     // eslint-disable-next-line complexity
-    wheelEventHandler({ x }) {
+    wheelEventHandler({ x }: { x: number }) {
       if (this.duration && this.wheelDirection === 'horizontal') {
         const eventName = x < 0 ? 'seek-forward' : 'seek-backward';
         const absX = Math.abs(x);
@@ -1393,18 +1361,14 @@ new Vue({
     this.createMenu();
     this.$bus.$on('new-file-open', this.refreshMenu);
     // TODO: Setup user identity
-    this.$storage.get('user-uuid', (err, userUUID) => {
+    this.$storage.get('user-uuid', (err: Error, userUUID: string) => {
       if (err || Object.keys(userUUID).length === 0) {
-        err && this.addLog('error', err);
+        err && log.error('render/main', err);
         userUUID = uuidv4();
         this.$storage.set('user-uuid', userUUID);
       }
-      const platform = os.platform() + os.release();
-      const { app } = this.$electron.remote;
-      const version = app.getVersion();
 
-      Vue.http.headers.common['X-Application-Token'] = userUUID;
-      Vue.http.headers.common['User-Agent'] = `SPlayerX@2018 ${platform} Version ${version}`;
+      Vue.axios.defaults.headers.common['X-Application-Token'] = userUUID;
 
       // set userUUID to google analytics uid
       this.$ga && this.$ga.set('userId', userUUID);
@@ -1421,6 +1385,10 @@ new Vue({
         case 219:
           e.preventDefault();
           this.$store.dispatch(videoActions.DECREASE_RATE);
+          break;
+        case 220:
+          e.preventDefault();
+          this.$store.dispatch(videoActions.CHANGE_RATE, 1);
           break;
         case 221:
           e.preventDefault();
@@ -1451,13 +1419,13 @@ new Vue({
         if (advance) {
           const nodeList = advance.childNodes;
           for (let i = 0; i < nodeList.length; i += 1) {
-            isAdvanceColumeItem = nodeList[i].contains(e.target);
+            isAdvanceColumeItem = nodeList[i].contains(e.target as Node);
           }
         }
         if (subtitle) {
           const subList = subtitle.childNodes;
           for (let i = 0; i < subList.length; i += 1) {
-            isSubtitleScrollItem = subList[i].contains(e.target);
+            isSubtitleScrollItem = subList[i].contains(e.target as Node);
           }
         }
         if (!isAdvanceColumeItem && !isSubtitleScrollItem) {
@@ -1470,13 +1438,18 @@ new Vue({
               }, 1000);
             }
             if (this.wheelDirection === 'vertical') {
+              let step = Math.abs(e.deltaY) * 0.06;
+              // in windows if wheel setting more lines per step, make it limited.
+              if (process.platform !== 'darwin' && step > 6) {
+                step = 6;
+              }
               if (
                 (process.platform !== 'darwin' && !this.reverseScrolling) ||
                 (process.platform === 'darwin' && this.reverseScrolling)
               ) {
                 this.$store.dispatch(
                   e.deltaY < 0 ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
-                  Math.abs(e.deltaY) * 0.06,
+                  step,
                 );
               } else if (
                 (process.platform === 'darwin' && !this.reverseScrolling) ||
@@ -1484,7 +1457,7 @@ new Vue({
               ) {
                 this.$store.dispatch(
                   e.deltaY > 0 ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
-                  Math.abs(e.deltaY) * 0.06,
+                  step,
                 );
               }
             }
@@ -1502,9 +1475,9 @@ new Vue({
       e.preventDefault();
       this.$bus.$emit('drop');
       this.$store.commit('source', 'drop');
-      const files = Array.prototype.map.call(e.dataTransfer.files, f => f.path)
-      const onlyFolders = files.every(file => fs.statSync(file).isDirectory());
-      files.forEach(file => this.$electron.remote.app.addRecentDocument(file));
+      const files = Array.prototype.map.call(e.dataTransfer!.files, (f: File) => f.path)
+      const onlyFolders = files.every((file: fs.PathLike) => fs.statSync(file).isDirectory());
+      files.forEach((file: fs.PathLike) => this.$electron.remote.app.addRecentDocument(file));
       if (onlyFolders) {
         this.openFolder(...files);
       } else {
@@ -1513,7 +1486,7 @@ new Vue({
     });
     window.addEventListener('dragover', (e) => {
       e.preventDefault();
-      e.dataTransfer.dropEffect = process.platform === 'darwin' ? 'copy' : '';
+      e.dataTransfer!.dropEffect = process.platform === 'darwin' ? 'copy' : '';
       this.$bus.$emit('drag-over');
     });
     window.addEventListener('dragleave', (e) => {
@@ -1521,7 +1494,7 @@ new Vue({
       this.$bus.$emit('drag-leave');
     });
 
-    this.$electron.ipcRenderer.on('open-file', (event, ...files) => {
+    this.$electron.ipcRenderer.on('open-file', (event: any, ...files: Array<fs.PathLike>) => {
       const onlyFolders = files.every(file => fs.statSync(file).isDirectory());
       if (onlyFolders) {
         this.openFolder(...files);

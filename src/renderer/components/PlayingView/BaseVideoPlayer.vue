@@ -1,23 +1,26 @@
 <template>
   <div class="base-video-player">
-    <video class="video-element" ref="video"></video>
+    <video
+      ref="video"
+      class="video-element"
+    />
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { mapGetters } from 'vuex';
 import _ from 'lodash';
 import { DEFAULT_VIDEO_EVENTS } from '@/constants';
 import { videodata } from '../../store/video';
 
 export default {
-  name: 'base-video-player',
+  name: 'BaseVideoPlayer',
   props: {
     // network state
     src: {
       type: String,
       required: true,
-      validator(value) {
+      validator(value: string) {
         const fileSrcRegexes = [
           RegExp('^(http|https)://'),
           RegExp('^file:///?'),
@@ -28,23 +31,27 @@ export default {
     },
     crossOrigin: {
       default: null,
-      validator: value => [null, 'anonymous', 'user-credentials'].includes(value),
+      validator: (value: string) => [null, 'anonymous', 'user-credentials'].includes(value),
+    },
+    lastAudioTrackId: {
+      type: Number,
+      default: 0,
     },
     preload: {
       type: String,
       default: 'metadata',
-      validator: value => ['none', 'metadata', 'auto', ''].includes(value),
+      validator: (value: string) => ['none', 'metadata', 'auto', ''].includes(value),
     },
     // playback state
     currentTime: {
       type: Array,
       default: () => [0],
-      validator: value => Number.isFinite(value[0]),
+      validator: (value: number[]) => Number.isFinite(value[0]),
     },
     playbackRate: {
       type: Number,
       default: 1,
-      validator: value => value > 0 && value <= 16,
+      validator: (value: number) => value > 0 && value <= 16,
     },
     autoplay: {
       type: Boolean,
@@ -67,7 +74,7 @@ export default {
     volume: {
       type: Number,
       default: 0.7,
-      validator: value => typeof value === 'number' && value >= 0 && value <= 1,
+      validator: (value: number) => typeof value === 'number' && value >= 0 && value <= 1,
     },
     muted: {
       type: Boolean,
@@ -87,9 +94,9 @@ export default {
       type: Array,
       required: true,
       default: () => ['loadedmetadata'],
-      validator: value => (
-        value.length === 0 ||
-        value.every(element => DEFAULT_VIDEO_EVENTS.includes(element))),
+      validator: (value: string[]) => (
+        value.length === 0
+        || value.every(element => DEFAULT_VIDEO_EVENTS.includes(element))),
     },
     // video style
     styles: {
@@ -105,9 +112,6 @@ export default {
       default: false,
     },
   },
-  computed: {
-    ...mapGetters(['audioTrackList', 'originSrc', 'videoId']),
-  },
   data() {
     return {
       eventListeners: new Map(),
@@ -115,13 +119,16 @@ export default {
       duration: 0,
     };
   },
+  computed: {
+    ...mapGetters(['audioTrackList']),
+  },
   watch: {
     // network state
     // playback state
-    currentTime(newVal) {
+    currentTime(newVal: number[]) {
       // calculate the seek time
       let [finalSeekTime] = newVal;
-      if (newVal < 0 || !newVal) finalSeekTime = 0;
+      if (finalSeekTime < 0 || !newVal || !finalSeekTime) finalSeekTime = 0;
       else if (newVal > this.duration) finalSeekTime = this.duration;
       // seek the video
       this.$refs.video.currentTime = finalSeekTime;
@@ -130,45 +137,44 @@ export default {
         videodata.time = this.$refs.video.currentTime;
       }
     },
-    playbackRate(newVal) {
+    playbackRate(newVal: number) {
       this.$refs.video.playbackRate = newVal;
     },
-    loop(newVal) {
+    loop(newVal: boolean) {
       this.$refs.video.loop = newVal;
     },
     // tracks
-    currentAudioTrackId(newVal, oldVal) {
+    currentAudioTrackId(newVal: string, oldVal: string) {
       if (parseInt(oldVal, 10) !== -1) {
         for (let i = 0; i < this.$refs.video.audioTracks.length; i += 1) {
-          this.$refs.video.audioTracks[i].enabled =
-            this.$refs.video.audioTracks[i].id === newVal;
+          this.$refs.video.audioTracks[i].enabled = this.$refs.video.audioTracks[i].id === newVal;
         }
         this.$bus.$emit('seek', videodata.time);
       }
     },
     // controls
-    controls(newVal) {
+    controls(newVal: boolean) {
       this.$refs.video.controls = newVal;
     },
-    volume(newVal) {
+    volume(newVal: number) {
       this.$refs.video.volume = newVal;
     },
-    muted(newVal) {
+    muted(newVal: boolean) {
       this.$refs.video.muted = newVal;
     },
     // custom
-    paused(newVal) {
+    paused(newVal: boolean) {
       // update the play state
       videodata.paused = newVal;
       this.$refs.video[newVal ? 'pause' : 'play']();
     },
     // events
-    events(newVal, oldVal) {
-      this.addEvents(newVal.filter(event => !oldVal.includes(event)));
-      this.removeEvents(oldVal.filter(event => !newVal.includes(event)));
+    events(newVal: string[], oldVal: string[]) {
+      this.addEvents(newVal.filter((event: string) => !oldVal.includes(event)));
+      this.removeEvents(oldVal.filter((event: string) => !newVal.includes(event)));
     },
     // styles
-    styles(newVal) {
+    styles(newVal: Record<string, string>) {
       this.setStyle(newVal);
     },
   },
@@ -183,8 +189,12 @@ export default {
     }
     this.duration = this.$refs.video.duration;
   },
+  beforeDestroy() {
+    this.$refs.video.ontimeupdate = null;
+    this.removeEvents(this.events);
+  },
   methods: {
-    basicInfoInitialization(videoElement) {
+    basicInfoInitialization(videoElement: HTMLVideoElement) {
       const basicInfo = [
         'src', 'crossOrigin', 'preload',
         'playbackRate', 'autoplay',
@@ -206,14 +216,14 @@ export default {
       videodata.time = this.$refs.video.currentTime;
     },
     // helper functions
-    emitEvents(event, value) {
+    emitEvents(event: string, value: Event) {
       if (event && !value) {
         this.$emit(event);
       } else if (value) {
         this.$emit(event, value);
       }
     },
-    addEvents(events) {
+    addEvents(events: string[]) {
       events.forEach(async (event) => {
         if (!this.eventListeners.has(event)) {
           if (event !== 'audiotrack') {
@@ -221,20 +231,20 @@ export default {
             this.$refs.video.addEventListener(event, listener);
             this.eventListeners.set(event, listener);
           } else {
-            const playInfo = await this.infoDB.get('media-item', this.videoId);
-            const generateAudioEvent = type => (trackEvent) => {
+            const generateAudioEvent = (type: string) => (trackEvent: TrackEvent) => {
+              const track = trackEvent.track as AudioTrack;
               const {
                 id, kind, label, language,
-              } = trackEvent.track;
+              } = track;
               let enabled;
-              if (playInfo && playInfo.audioTrackId) {
-                enabled = playInfo.audioTrackId === id;
+              if (this.lastAudioTrackId) {
+                enabled = this.lastAudioTrackId === Number(id);
                 for (let i = 0; i < this.$refs.video.audioTracks.length; i += 1) {
-                  this.$refs.video.audioTracks[i].enabled =
-                    this.$refs.video.audioTracks[i].id === playInfo.audioTrackId;
+                  const currentTrack = this.$refs.video.audioTracks[i];
+                  currentTrack.enabled = Number(currentTrack.id) === this.lastAudioTrackId;
                 }
               } else {
-                enabled = trackEvent.track.enabled;
+                enabled = track.enabled;
               }
               this.$emit('audiotrack', {
                 type,
@@ -249,7 +259,7 @@ export default {
         }
       });
     },
-    removeEvents(events) {
+    removeEvents(events: string[]) {
       events.forEach((event) => {
         if (this.eventListeners.has(event)) {
           const listener = this.eventListeners.get(event);
@@ -258,7 +268,7 @@ export default {
         }
       });
     },
-    setStyle(styles) {
+    setStyle(styles: Record<string, string>) {
       const style = Object.keys(styles);
       if (style.length > 0) {
         style.forEach((styleName) => {
@@ -266,10 +276,6 @@ export default {
         });
       }
     },
-  },
-  beforeDestroy() {
-    this.$refs.video.ontimeupdate = null;
-    this.removeEvents(this.events);
   },
 };
 </script>
@@ -281,6 +287,7 @@ export default {
   ** Adding the opacity properity to solve windows brightness when appling the backdrop-filter.
   ** (This should be fixed in libcc.)
   */
+  opacity: 0.9999;
   object-fit: cover;
 }
 </style>

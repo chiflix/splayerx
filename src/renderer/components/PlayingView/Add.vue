@@ -1,14 +1,23 @@
 <template>
-  <div class="button" ref="button"
+  <div
+    ref="button"
     @mouseenter="addMouseenter"
     @mouseleave="addMouseleave"
-    @mouseup.left="addMouseup">
-    <div class="btnMask" ref="btnMask">
-      <Icon class="addUi" type="add"></Icon>
+    @mouseup.left="addMouseup"
+    class="button"
+  >
+    <div
+      ref="btnMask"
+      class="btnMask"
+    >
+      <Icon
+        class="addUi"
+        type="add"
+      />
     </div>
   </div>
 </template>
-<script>
+<script lang="ts">
 import Icon from '@/components/BaseIconContainer.vue';
 
 export default {
@@ -16,11 +25,11 @@ export default {
     Icon,
   },
   props: {
-    index: {
-      type: Number,
-    },
     addMouseup: {
       type: Function,
+      default: () => {
+        console.log('mouse up on add button');
+      },
     },
     itemMoving: {
       type: Boolean,

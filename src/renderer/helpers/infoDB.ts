@@ -1,50 +1,59 @@
-import { openDb } from 'idb';
+import { openDB, IDBPDatabase } from 'idb';
 import { INFO_DATABASE_NAME, INFO_SCHEMAS, INFODB_VERSION, RECENT_OBJECT_STORE_NAME, VIDEO_OBJECT_STORE_NAME } from '@/constants';
-import Helpers from '@/helpers';
-import addLog from './index';
+import { mediaQuickHash } from '@/libs/utils';
+import { RawPlaylistItem, PlaylistItem, MediaItem } from '@/interfaces/IDB';
+import { log } from '@/libs/Log';
 
 /**
  * You can change schema info in 'constants.js'
  */
 export class InfoDB {
-  #db;
+  db: IDBPDatabase;
 
   /**
    * Create InfoDB if doesn't exist
    * Update InfoDB if new schema or new index has added
    */
-  async getDB() {
+  async getDB():Promise<IDBPDatabase> {
     if (this.db) return this.db;
-    this.db = await openDb(
-      INFO_DATABASE_NAME, INFODB_VERSION,
-      async (upgradeDB) => {
-        if (upgradeDB.oldVersion === 1) {
-          await upgradeDB.deleteObjectStore(RECENT_OBJECT_STORE_NAME);
-        } else if (upgradeDB.oldVersion === 2) {
-          await upgradeDB.deleteObjectStore(RECENT_OBJECT_STORE_NAME);
-          await upgradeDB.deleteObjectStore(VIDEO_OBJECT_STORE_NAME);
-        }
-        INFO_SCHEMAS.forEach(({ name, options, indexes }) => {
-          const store = upgradeDB.createObjectStore(name, options);
-          if (indexes) {
-            indexes.forEach((val) => {
-              if (!store.indexNames.contains(val)) store.createIndex(val, val);
-            });
+    this.db = await openDB(
+      INFO_DATABASE_NAME, INFODB_VERSION, {
+        upgrade(db: IDBPDatabase, oldVersion: number, newVersion: number) {
+          if (oldVersion === 1) {
+            db.deleteObjectStore(RECENT_OBJECT_STORE_NAME);
+          } else if (oldVersion === 2) {
+            db.deleteObjectStore(RECENT_OBJECT_STORE_NAME);
+            db.deleteObjectStore(VIDEO_OBJECT_STORE_NAME);
           }
-        });
+          INFO_SCHEMAS.forEach(({ name, options, indexes }) => {
+            const store = db.createObjectStore(name, options);
+            if (indexes) {
+              indexes.forEach((val) => {
+                store.createIndex(val, val);
+              });
+            }
+          });
+        },
       },
-    );
+      );
     return this.db;
   }
-
+  // deprecated! will be deleted soon
   // clean All records in `storeName`, default to 'recent-played'
   async cleanData(storeName = 'recent-played') {
     const db = await this.getDB();
     const tx = db.transaction(storeName, 'readwrite');
-    tx.objectStore(storeName).clear();
-    return tx.complete.then(() => {
-      addLog.methods.addLog('info', `DB ${storeName} records all deleted`);
+    tx.store.clear();
+    return tx.done.then(() => {
+      log.info('infoDB', `DB ${storeName} records all deleted`);
     });
+  }
+  // formatted, equal to the previous method
+  async clear(storeName: string) {
+    const db = await this.getDB();
+    const tx = db.transaction(storeName, 'readwrite');
+    tx.store.clear();
+    return tx.done;
   }
 
   async clearAll() {
@@ -57,11 +66,10 @@ export class InfoDB {
    * @param  {Object} data
    * Add a new record
    */
-  async add(schema, data) {
+  async add(schema: string, data: any) {
     if (!data) throw new Error(`Invalid data: ${JSON.stringify(data)}`);
     const db = await this.getDB();
-    const tx = db.transaction(schema, 'readwrite');
-    return tx.objectStore(schema).add(data);
+    return db.add(schema, data);
   }
 
   /**
@@ -70,12 +78,17 @@ export class InfoDB {
    * Add a record if no same quickHash in the current schema
    * Replace a record if the given quickHash existed
    */
-  async update(schema, data) {
+  async update(schema: string, data: any, keyPath: number) {
     if (!data.id && !data.videoId) throw new Error('Invalid data: Require Media ID !');
     const db = await this.getDB();
-    addLog.methods.addLog('info', `Updating ${data.path || data.videoId || data.id} to ${schema}`);
     const tx = db.transaction(schema, 'readwrite');
-    return tx.objectStore(schema).put(data);
+    // check if the objectStore used out-of-line key
+    const isInlineObjectStore = !!tx.objectStore(schema).keyPath;
+    if (!keyPath) {
+      throw new Error('Providing out-of-line objectStore without keyPathVal is invalid.');
+    }
+    log.info('infoDB', `Updating ${keyPath} to ${schema}`);
+    return db.put(schema, data);
   }
 
   /**
@@ -83,24 +96,25 @@ export class InfoDB {
    * @param  {String} key
    * Delete the record which match the given key
    */
-  async delete(schema, key) {
-    addLog.methods.addLog('info', `deleting ${key} from ${schema}`);
+  async delete(schema: string, key: number) {
+    log.info('infoDB', `deleting ${key} from ${schema}`);
     const db = await this.getDB();
-    const tx = db.transaction(schema, 'readwrite');
-    return tx.objectStore(schema).delete(key);
+    return db.delete(schema, key);
   }
 
   /**
    * @param  {String} id
    * Delete the playlist and its contained media items which match the given id
    */
-  async deletePlaylist(id) {
-    addLog.methods.addLog('info', `deleting ${id} from recent-played`);
-    const db = await this.getDB();
+  async deletePlaylist(id: number) {
+    log.info('infoDB', `deleting ${id} from recent-played`);
     const playlistItem = await this.get('recent-played', id);
     /* eslint-disable */
     for (const item of playlistItem.items) {
-      await this.delete('media-item', item);
+      try {
+        // skip if item not exist
+        await this.delete('media-item', item);
+      } catch(err) {}
     }
     return this.delete('recent-played', id);
   }
@@ -109,8 +123,8 @@ export class InfoDB {
    * @param  {Array} videos
    * Add a new playlist to recent-played and add the corresponding media-items
    */
-  async addPlaylist(videos) {
-    let playlist = {
+  async addPlaylist(videos: string[]) {
+    let playlist: RawPlaylistItem = {
       items: [],
       hpaths: [],
       playedIndex: 0,
@@ -119,7 +133,7 @@ export class InfoDB {
     const db = await this.getDB();
     if (videos.length > 1) {
       for (const videoPath of videos) {
-        const quickHash = await Helpers.methods.mediaQuickHash(videoPath);
+        const quickHash = await mediaQuickHash(videoPath);
         const data = {
           quickHash,
           type: 'video',
@@ -131,12 +145,11 @@ export class InfoDB {
         playlist.hpaths.push(`${quickHash}-${videoPath}`);
       }
     } else if (videos.length === 1) {
-      const quickHash = await Helpers.methods.mediaQuickHash(videos[0]);
-      const playlistRecord = await this.get('recent-played', 'hpaths', [`${quickHash}-${videos[0]}`]);
+      const quickHash: string = await mediaQuickHash(videos[0]);
+      const playlistRecord: PlaylistItem = await this.get('recent-played', 'hpaths', [`${quickHash}-${videos[0]}`]);
       if (playlistRecord) {
-        playlist = playlistRecord;
-        playlist.lastOpened = Date.now();
-        await this.update('recent-played', playlist);
+        playlistRecord.lastOpened = Date.now();
+        await this.update('recent-played', playlistRecord, playlistRecord.id);
         return playlistRecord.id;
       } else {
         const data = {
@@ -158,15 +171,14 @@ export class InfoDB {
    */
   async lastPlayed() {
     const db = await this.getDB();
-    const tx = db.transaction('recent-played');
-    let val;
-    tx.objectStore('recent-played')
+    let val: PlaylistItem | undefined;
+    const cursor = await db
+      .transaction('recent-played')
+      .store
       .index('lastOpened')
-      .iterateCursor(null, 'prev', (cursor) => {
-        if (!cursor) return;
-        val = cursor.value;
-      });
-    return tx.complete.then(() => Promise.resolve(val));
+      .openCursor(undefined, 'prev');
+    if (cursor) val = cursor.value;
+    return val;
   }
 
   /**
@@ -179,43 +191,36 @@ export class InfoDB {
    * 'prevunique' Same as above, except: For duplicate values, only the first record is yielded.
    *  Return a sorted result with the given key and schema
    */
-  async sortedResult(schema, key, direction) {
+  async sortedResult(schema: string, indexName: string, direction: IDBCursorDirection) {
     const db = await this.getDB();
-    const tx = db.transaction(schema);
-    const res = [];
-    tx.objectStore(schema)
-      .index(key)
-      .iterateCursor(null, direction, (cursor) => {
-        if (!cursor) return;
-        res.push(cursor.value);
-        cursor.continue();
-      });
-    return tx.complete.then(() => Promise.resolve(res));
+    const res: PlaylistItem[] | MediaItem[] = [];
+    let cursor = await db
+      .transaction(schema)
+      .store
+      .index(indexName)
+      .openCursor(undefined, direction);
+    while (cursor) {
+      res.push(cursor.value);
+      cursor = await cursor.continue();
+    }
+    return res;
   }
 
   /**
    * @param  {String} schema
-   * @param  {String} key Optional
-   * @param  {String} val
+   * @param  {String} key
+   * @param  {String} val Optional
    * Retrieve a record which Primary key equal to the given val if there's no specified key
    * Otherwise retrieve the record which specified key equal to the given val.
    */
-  async get(schema, key, val) {
+  async get(schema: string, key: string | any, val?: any) {
     if (!key) throw new Error(`Invalid get method: ${key} to ${schema}`);
     const db = await this.getDB();
     if (val) {
-      const value = await db
-        .transaction(schema)
-        .objectStore(schema)
-        .index(key)
-        .get(val);
+      const value = await db.getFromIndex(schema, key, val);
       return value;
     }
-    val = key;
-    const value = await db
-      .transaction(schema)
-      .objectStore(schema)
-      .get(val);
+    const value = await db.get(schema, key);
     return value;
   }
 
@@ -225,18 +230,19 @@ export class InfoDB {
    * @param  {Any} value
    * Return the specified records that equal to value from the given schema
    */
-  async getValueByKey(schema, key, value) {
+  async getAllValueByIndex(schema: string, indexName: string, value: any) {
     const db = await this.getDB();
-    const tx = db.transaction(schema);
-    const res = [];
-    tx.objectStore(schema)
-      .index(key)
-      .iterateCursor(null, 'next', (cursor) => {
-        if (!cursor) return;
-        if (cursor.value[key] === value) res.push(cursor.value);
-        cursor.continue();
-      });
-    return tx.complete.then(() => Promise.resolve(res));
+    const res: PlaylistItem[] | MediaItem[] = [];
+    let cursor = await db
+      .transaction(schema)
+      .store
+      .index(indexName)
+      .openCursor(undefined, 'next');
+    while (cursor) {
+      if (cursor.value[indexName] === value) res.push(cursor.value);
+      cursor = await cursor.continue();
+    }
+    return res;
   }
 
   /**
@@ -245,15 +251,9 @@ export class InfoDB {
    * https://developer.mozilla.org/en-US/docs/Web/API/IDBKeyRange KeyRange Doc
    * Return all records from the given schema if no range specified
    */
-  async getAll(schema, keyRange) {
+  async getAll(schema: string, keyRange?: IDBKeyRange) {
     const db = await this.getDB();
-    const tx = db.transaction(schema);
-    let val;
-    if (keyRange) {
-      val = await tx.objectStore(schema).getAll(keyRange);
-    } else {
-      val = await tx.objectStore(schema).getAll();
-    }
+    const val = await db.getAll(schema, keyRange);
     return val;
   }
 }

@@ -1,7 +1,7 @@
 import path from 'path';
 import storage from 'electron-json-storage';
 import { promises as fsPromises } from 'fs';
-import helpers from './index';
+import { log } from '@/libs/Log';
 
 /*
   使用说明：
@@ -26,7 +26,7 @@ function get(key) {
   return new Promise((resolve, reject) => {
     storage.get(key, (err, data) => {
       if (err) {
-        helpers.methods.addLog('error', err);
+        log.error('asyncStorage', err);
         reject(err);
       } else {
         resolve(data);
@@ -38,7 +38,7 @@ function set(key, json) {
   return new Promise((resolve, reject) => {
     storage.set(key, json, (err) => {
       if (err) {
-        helpers.methods.addLog('error', err);
+        log.error('asyncStorage', err);
         reject(err);
       }
       resolve();

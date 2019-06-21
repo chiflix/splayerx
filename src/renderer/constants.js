@@ -1,21 +1,3 @@
-export const PLAYBACKSTATE = Object.freeze({
-  PLAYING: Symbol('playing'),
-  PAUSED: Symbol('paused'),
-  UNKNOWN: Symbol('unknown'),
-});
-
-export const bar = 'bar';
-
-export const WIDTH_OF_SCREENSHOT = 170;
-export const HALF_WIDTH_OF_SCREENSHOT = 85;
-export const SCREENSHOT_SIDE_MARGIN_WIDTH = 16;
-
-export const PROGRESS_BAR_HEIGHT = '10px';
-export const PROGRESS_BAR_SLIDER_HIDE_HEIGHT = '4px';
-export const PROGRESS_BAR_HIDE_HEIGHT = '0px';
-
-export const FOOL_PROOFING_BAR_WIDTH = 20;
-
 export const DEFAULT_VIDEO_EVENTS = [
   'abort',
   'canplay',
@@ -55,7 +37,6 @@ export const DEFAULT_VIDEO_OPTIONS = [
   'src',
   'volume',
 ];
-export const THUMBNAIL_DB_NAME = 'splayerx-preview-thumbnails';
 export const INFO_DATABASE_NAME = 'Info';
 export const VIDEO_OBJECT_STORE_NAME = 'media-item';
 export const RECENT_OBJECT_STORE_NAME = 'recent-played';
@@ -128,3 +109,26 @@ export const DATADB_SHCEMAS = [
     ],
   },
 ];
+
+/** electron 缓存用户数据路径
+ * @constant
+ * @type {String}
+ */
+export const ELECTRON_CACHE_DIRNAME = 'userData'; // 用户数据路径
+
+/** 设定的应用缓存目录
+ * @constant
+ * @type {String}
+ */
+export const DEFAULT_DIRNAME = '__cache_files__'; // 设定的应用缓存目录
+
+/** 日志存储目录
+ * @constant
+ */
+export const DEFAULT_LOG_DIRNAME = 'logs';
+
+/** 视频缓存目录
+ * @constant
+ * @type {String}
+ */
+export const VIDEO_DIRNAME = 'videos'; // 视频缓存目录

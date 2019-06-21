@@ -1,24 +1,48 @@
 <template>
-  <div class="short-marks no-drag" :style="{ right: isDarwin ? '15px' : '', left: isDarwin ? '' : '15px' }">
-    <div class="marks-details" ref="marksDetail" :class="marksAnimClass" @animationend="handleMarksAnimEnd" :style="{ order: isDarwin ? '1' : '2' }">
-      <div class="marks-container" v-for="(item, index) in marks" @mouseover="marksMouseOver(index)" @mouseleave="marksMouseLeave()"
-      @mouseup="handleBrowsingOpen(item)"
-      :style="{
-        background: markHoverIndex === index ? 'rgba(255, 255, 255, 0.35)' : 'rgba(255, 255, 255, 0.08)',
-        color: markHoverIndex === index ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.5)',
-      }">
-        <Icon :type="item.type" class="marks-icon" :style="{
-          opacity: markHoverIndex === index ? '1' : 'calc(4 / 9)'
-        }"/>
+  <div
+    :style="{ right: isDarwin ? '15px' : '', left: isDarwin ? '' : '15px' }"
+    class="short-marks no-drag"
+  >
+    <div
+      ref="marksDetail"
+      :class="marksAnimClass"
+      @animationend="handleMarksAnimEnd"
+      :style="{ order: isDarwin ? '1' : '2' }"
+      class="marks-details"
+    >
+      <div
+        v-for="(item, index) in marks"
+        @mouseover="marksMouseOver(index)"
+        @mouseleave="marksMouseLeave()"
+        @mouseup="handleBrowsingOpen(item)"
+        :style="{
+          background: markHoverIndex === index ?
+            'rgba(255, 255, 255, 0.35)' : 'rgba(255, 255, 255, 0.08)',
+          color: markHoverIndex === index ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.5)',
+        }"
+        class="marks-container"
+      >
+        <Icon
+          :type="item.type"
+          :style="{
+            opacity: markHoverIndex === index ? '1' : 'calc(4 / 9)'
+          }"
+          class="marks-icon"
+        />
         <p>{{ item.name }}</p>
       </div>
     </div>
-    <Icon type="showMarks" class="display-marks" @mouseup.native="handleMarksDisplay" :style="{
-      order: isDarwin ? '2' : '1',
-      margin: isDarwin ? 'auto 0 auto 10px' : 'auto 0 auto 0',
-      transform: `rotate(${rotateNum}deg)`,
-      transition: 'transform 100ms linear'
-    }"></Icon>
+    <Icon
+      @mouseup.native="handleMarksDisplay"
+      :style="{
+        order: isDarwin ? '2' : '1',
+        margin: isDarwin ? 'auto 0 auto 10px' : 'auto 0 auto 0',
+        transform: `rotate(${rotateNum}deg)`,
+        transition: 'transform 100ms linear'
+      }"
+      type="showMarks"
+      class="display-marks"
+    />
   </div>
 </template>
 

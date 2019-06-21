@@ -2,32 +2,50 @@
   <div>
     <div class="advanceControl">
       <transition name="advance-trans-l">
-      <div class="advanced" v-show="showAttached"
-        :style="{
-          transition: showAttached ? '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' : '150ms cubic-bezier(0.17, 0.67, 0.17, 0.98)'
-        }">
-        <transition name="setUp">
-          <advance-main-menu class="mainMenu" :clearState="showAttached"></advance-main-menu>
-        </transition>
-      </div>
+        <div
+          v-show="showAttached"
+          :style="{
+            transition: showAttached ? '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' :
+              '150ms cubic-bezier(0.17, 0.67, 0.17, 0.98)'
+          }"
+          class="advanced"
+        >
+          <advance-main-menu
+            :clear-state="showAttached"
+            class="mainMenu"
+          />
+        </div>
       </transition>
-      <div ref="adv" @mouseup.left="toggleAdvMenuDisplay" @mousedown.left="handleDown" @mouseenter="handleEnter" @mouseleave="handleLeave">
-        <lottie v-on:animCreated="handleAnimation" :options="defaultOptions" lot="advance"></lottie>
+      <div
+        ref="adv"
+        @mouseup.left="toggleAdvMenuDisplay"
+        @mousedown.left="handleDown"
+        @mouseenter="handleEnter"
+        @mouseleave="handleLeave"
+      >
+        <lottie
+          :options="defaultOptions"
+          @animCreated="handleAnimation"
+          lot="advance"
+        />
       </div>
     </div>
   </div>
 </template>
 
-<script>
+<script lang="ts">
+//  @ts-ignore
 import lottie from '@/components/lottie.vue';
 import animationData from '@/assets/advance.json';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { Input as InputActions } from '@/store/actionTypes';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
-import AdvanceMainMenu from './AdvanceControlFunctionalities/AdvanceMainMenu.vue';
+import AdvanceMainMenu from '@/containers/AdvanceMainMenu.vue';
+import { AnimationItem } from 'lottie-web';
 
 export default {
-  name: 'advance-control',
+  name: 'AdvanceControl',
+  //  @ts-ignore
   type: INPUT_COMPONENT_TYPE,
   components: {
     lottie,
@@ -64,7 +82,7 @@ export default {
     originSrc() {
       this.$emit('update:showAttached', false);
     },
-    showAttached(val) {
+    showAttached(val: boolean) {
       if (!val) {
         this.animFlag = true;
         if (!this.validEnter) {
@@ -76,7 +94,7 @@ export default {
         }
       }
     },
-    currentMousedownComponent(val) {
+    currentMousedownComponent(val: string) {
       if (val !== 'notification-bubble' && val !== '') {
         if (val !== this.$options.name && this.showAttached) {
           this.anim.playSegments([37, 41], true);
@@ -84,10 +102,11 @@ export default {
         }
       }
     },
-    currentMouseupComponent(val) {
+    currentMouseupComponent(val: string) {
       setTimeout(() => {
         if (this.currentMousedownComponent !== 'notification-bubble' && val !== '') {
-          if (this.lastDragging || (this.currentMousedownComponent === this.$options.name && val === 'the-video-controller')) {
+          if (this.lastDragging || (this.currentMousedownComponent === this.$options.name
+              && val === 'the-video-controller')) {
             if (this.showAttached) {
               this.anim.playSegments([68, 73], true);
               this.$emit('update:lastDragging', false);
@@ -105,7 +124,7 @@ export default {
       clearMousedown: InputActions.MOUSEDOWN_UPDATE,
       clearMouseup: InputActions.MOUSEUP_UPDATE,
     }),
-    handleAnimation(anim) {
+    handleAnimation(anim: AnimationItem) {
       this.anim = anim;
     },
     handleDown() {
@@ -183,37 +202,26 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-button {
-  border: none;
-}
-button:focus {
-  outline: none;
-}
-button:hover {
-  cursor: pointer;
-}
-.advance-trans-l-enter, .advance-trans-l-enter-active {
-  transform: translateY(0px);
-}
-.advance-trans-l-enter, .advance-trans-l-leave-active {
-  transform: translateY(20px);
-}
 .advanced {
   position: absolute;
   z-index: 100;
   transition-property: opacity, transform;
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
     display: none;
   }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
     bottom: 32px;
     right: 3px;
   }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
     bottom: 44px;
     right: 3px;
   }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     bottom: 70px;
     right: 7px;
   }
@@ -222,6 +230,9 @@ button:hover {
     right: 0;
     bottom: 0;
   }
+}
+.advance-trans-l-enter, .advance-trans-l-leave-active {
+  transform: translateY(20px);
 }
 .advance-trans-l-enter-active, .advance-trans-l-leave {
   opacity: 1;

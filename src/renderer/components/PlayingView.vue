@@ -2,34 +2,46 @@
   <div class="player">
     <the-video-canvas ref="videoCanvas" />
     <the-video-controller ref="videoctrl" />
-    <subtitle-manager />
+    <subtitle-renderer
+      :key="originSrc"
+      :currentCues="concatCurrentCues"
+      :subPlayRes="subPlayRes"
+      :scaleNum="scaleNum"
+      :subToTop="subToTop"
+      :currentFirstSubtitleId="currentFirstSubtitleId"
+      :winHeight="winHeight"
+      :chosenStyle="chosenStyle"
+      :chosenSize="chosenSize"
+    />
   </div>
 </template>
 
 <script>
-import { mapActions } from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
 import { Subtitle as subtitleActions } from '@/store/actionTypes';
-import SubtitleManager from '@/components/Subtitle/SubtitleManager.vue';
-import VideoCanvas from './PlayingView/VideoCanvas.vue';
-import TheVideoController from './PlayingView/TheVideoController.vue';
+import SubtitleRenderer from '@/components/Subtitle/SubtitleRenderer.vue';
+import VideoCanvas from '@/containers/VideoCanvas.vue';
+import TheVideoController from '@/containers/TheVideoController.vue';
 import { videodata } from '../store/video';
 
 export default {
-  name: 'playing-view',
+  name: 'PlayingView',
   components: {
+    SubtitleRenderer,
     'the-video-controller': TheVideoController,
     'the-video-canvas': VideoCanvas,
-    'subtitle-manager': SubtitleManager,
+    'subtitle-renderer': SubtitleRenderer,
   },
-  methods: {
-    ...mapActions({
-      updateSubToTop: subtitleActions.UPDATE_SUBTITLE_TOP,
-    }),
-    // Compute UI states
-    // When the video is playing the ontick is triggered by ontimeupdate of Video tag,
-    // else it is triggered by setInterval.
-    onUpdateTick() {
-      this.$refs.videoctrl.onTickUpdate();
+  computed: {
+    ...mapGetters(['currentCues', 'scaleNum', 'subToTop', 'currentFirstSubtitleId', 'winHeight', 'chosenStyle', 'chosenSize', 'originSrc']),
+    concatCurrentCues() {
+      return [this.currentCues[0].cues, this.currentCues[1].cues];
+    },
+    subPlayRes() {
+      return [
+        { x: this.currentCues[0].subPlayResX, y: this.currentCues[0].subPlayResY },
+        { x: this.currentCues[1].subPlayResX, y: this.currentCues[1].subPlayResY },
+      ];
     },
   },
   mounted() {
@@ -41,6 +53,17 @@ export default {
   beforeDestroy() {
     this.updateSubToTop(false);
     videodata.stopCheckTick();
+  },
+  methods: {
+    ...mapActions({
+      updateSubToTop: subtitleActions.UPDATE_SUBTITLE_TOP,
+    }),
+    // Compute UI states
+    // When the video is playing the ontick is triggered by ontimeupdate of Video tag,
+    // else it is triggered by setInterval.
+    onUpdateTick() {
+      this.$refs.videoctrl.onTickUpdate();
+    },
   },
 };
 </script>

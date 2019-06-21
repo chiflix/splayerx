@@ -1,19 +1,23 @@
 module.exports = {
   root: true,
-  parser: 'babel-eslint',
+  parser: 'vue-eslint-parser',
   parserOptions: {
-    sourceType: 'module'
+    parser: '@typescript-eslint/parser'
   },
   env: {
     browser: true,
     node: true
   },
-  extends: 'airbnb-base',
+  extends: [
+    'plugin:vue/recommended',
+    'plugin:@typescript-eslint/recommended',
+    'airbnb-base'
+  ],
   globals: {
     __static: true
   },
   plugins: [
-    'html'
+    'vue'
   ],
   'rules': {
     'no-console': 0,
@@ -39,5 +43,22 @@ module.exports = {
     // allow for-of and await in for-of loop
     'no-restricted-syntax': 0,
     'no-await-in-loop': 0,
+    'indent': 'off',
+    '@typescript-eslint/indent': ['error', 2],
+    'vue/attributes-order': ['error', {
+      'order': [
+        'DEFINITION',
+        'LIST_RENDERING',
+        'CONDITIONALS',
+        'RENDER_MODIFIERS',
+        'GLOBAL',
+        'UNIQUE',
+        'TWO_WAY_BINDING',
+        'OTHER_DIRECTIVES',
+        'OTHER_ATTR',
+        'EVENTS',
+        'CONTENT'
+      ]
+    }]
   }
 }

@@ -1,37 +1,54 @@
 <template>
-<div
-  @mousedown="handleMousedown"
-  @mouseup="handleMouseup"
-  @mouseenter="handleMouseenter"
-  @mouseleave="handleMouseleave">
-  <div class="icon-wrapper"
-    :class="iconClass">
-    <Icon class="icon play"
-      type="play"
-      v-show="showPlayIcon"
-      :class="ani_mode"
-      :style="{cursor: cursorAppear ? 'pointer' : 'none'}"/>
-    <Icon class="icon"
-      type="pause"
-      v-show="!showPlayIcon"
-      :class="ani_mode"
-      :style="{cursor: cursorAppear ? 'pointer' : 'none'}"/>
+  <div
+    @mousedown="handleMousedown"
+    @mouseup="handleMouseup"
+    @mouseenter="handleMouseenter"
+    @mouseleave="handleMouseleave"
+  >
+    <div
+      :class="iconClass"
+      class="icon-wrapper"
+    >
+      <Icon
+        v-show="showPlayIcon"
+        :class="animationMode"
+        :style="{cursor: cursorAppear ? 'pointer' : 'none'}"
+        class="icon play"
+        type="play"
+      />
+      <Icon
+        v-show="!showPlayIcon"
+        :class="animationMode"
+        :style="{cursor: cursorAppear ? 'pointer' : 'none'}"
+        class="icon"
+        type="pause"
+      />
+    </div>
   </div>
-</div>
 </template>
 
-<script>
+<script lang="ts">
 import Icon from '../BaseIconContainer.vue';
 
 export default {
-  name: 'play-button',
+  name: 'PlayButton',
+  components: {
+    Icon,
+  },
   props: {
-    paused: false,
-    isFocused: true,
-    attachedShown: false,
-    showAllWidgets: false,
-    mousemovePosition: { x: 0, y: 0 },
-    mousedownOnVolume: false,
+    paused: Boolean,
+    isFocused: Boolean,
+    attachedShown: Boolean,
+    showAllWidgets: Boolean,
+    mousedownOnVolume: Boolean,
+    mousemovePosition: {
+      type: Object,
+      default: () => {},
+    },
+    handleMouseUp: {
+      type: Function,
+      default: () => {},
+    },
   },
   data() {
     return {
@@ -39,7 +56,7 @@ export default {
       mouseover: false,
       mousedown: false,
       showPlayIcon: false,
-      ani_mode: 'icon-ani-fade-in',
+      animationMode: 'icon-ani-fade-in',
       iconClass: 'fade-out',
       iconFadingId: NaN,
       detectMovePosition: false,
@@ -48,8 +65,54 @@ export default {
       justMousedownOnVolume: false,
     };
   },
-  components: {
-    Icon,
+  watch: {
+    showAllWidgets(val: boolean) {
+      if (!val && !this.mousedown) {
+        this.cursorAppear = false;
+        this.iconClass = 'fade-out';
+      } else if (val && this.mouseover) {
+        this.detectMovePosition = true;
+      }
+    },
+    attachedShown(val: boolean, oldVal: boolean) {
+      if (!val && this.mouseover) {
+        if (oldVal) this.justCloseAttached = true;
+        this.detectMovePosition = true;
+      }
+    },
+    isFocused(val: boolean, oldVal: boolean) {
+      if (val && !oldVal && this.mouseover) {
+        this.justFocused = true;
+      }
+    },
+    mousedownOnVolume(val: boolean, oldVal: boolean) {
+      if (!val && oldVal) {
+        this.justMousedownOnVolume = true;
+        if (this.mouseover) this.detectMovePosition = true;
+      }
+    },
+    mousemovePosition(newVal: {x: number; y: number}, oldVal: {x: number; y: number}) {
+      if (this.detectMovePosition && this.isFocused) {
+        if (Math.abs(newVal.x - oldVal.x) > 0 || Math.abs(newVal.y - oldVal.y) > 0) {
+          this.justFocused = this.justCloseAttached = this.justMousedownOnVolume = false;
+          this.cursorAppear = true;
+          this.iconClass = 'fade-in';
+          this.detectMovePosition = false;
+        }
+      }
+    },
+    paused(val: boolean) {
+      this.showPlayIcon = val;
+    },
+  },
+  created() {
+    document.addEventListener('mouseup', () => {
+      if (this.mousedown) {
+        this.mousedown = false;
+        this.animationMode = 'icon-ani-fade-in';
+        this.$emit('update:playbutton-state', false);
+      }
+    });
   },
   methods: {
     handleMouseenter() {
@@ -71,8 +134,8 @@ export default {
       }, 200);
     },
     handleMousedown() { // eslint-disable-line complexity
-      if (this.justFocused || (this.showAllWidgets &&
-        (this.justCloseAttached || this.justMousedownOnVolume))) {
+      if (this.justFocused || (this.showAllWidgets
+        && (this.justCloseAttached || this.justMousedownOnVolume))) {
         this.justFocused = this.justCloseAttached = this.justMousedownOnVolume = false;
         this.cursorAppear = true;
         this.iconClass = 'fade-in';
@@ -80,7 +143,7 @@ export default {
         this.cursorAppear = true;
         this.iconClass = 'fade-in';
         this.mousedown = true;
-        this.ani_mode = 'icon-ani-fade-out';
+        this.animationMode = 'icon-ani-fade-out';
         this.$emit('update:playbutton-state', true);
       } else if (!this.showAllWidgets && !this.attachedShown && this.isFocused) {
         this.cursorAppear = true;
@@ -90,58 +153,9 @@ export default {
     handleMouseup() {
       if (this.mousedown && !this.attachedShown) {
         this.showPlayIcon = !this.showPlayIcon;
-        this.$bus.$emit('toggle-playback');
+        this.handleMouseUp();
       }
     },
-  },
-  watch: {
-    showAllWidgets(val) {
-      if (!val && !this.mousedown) {
-        this.cursorAppear = false;
-        this.iconClass = 'fade-out';
-      } else if (val && this.mouseover) {
-        this.detectMovePosition = true;
-      }
-    },
-    attachedShown(val, oldVal) {
-      if (!val && this.mouseover) {
-        if (oldVal) this.justCloseAttached = true;
-        this.detectMovePosition = true;
-      }
-    },
-    isFocused(val, oldVal) {
-      if (val && !oldVal && this.mouseover) {
-        this.justFocused = true;
-      }
-    },
-    mousedownOnVolume(val, oldVal) {
-      if (!val && oldVal) {
-        this.justMousedownOnVolume = true;
-        if (this.mouseover) this.detectMovePosition = true;
-      }
-    },
-    mousemovePosition(newVal, oldVal) {
-      if (this.detectMovePosition && this.isFocused) {
-        if (Math.abs(newVal.x - oldVal.x) > 0 || Math.abs(newVal.y - oldVal.y) > 0) {
-          this.justFocused = this.justCloseAttached = this.justMousedownOnVolume = false;
-          this.cursorAppear = true;
-          this.iconClass = 'fade-in';
-          this.detectMovePosition = false;
-        }
-      }
-    },
-    paused(val) {
-      this.showPlayIcon = val;
-    },
-  },
-  created() {
-    document.addEventListener('mouseup', () => {
-      if (this.mousedown) {
-        this.mousedown = false;
-        this.ani_mode = 'icon-ani-fade-in';
-        this.$emit('update:playbutton-state', false);
-      }
-    });
   },
 };
 </script>
@@ -185,7 +199,8 @@ export default {
   height: 100%;
   transition: transform 90ms cubic-bezier(0, 1, 1, 1);
 }
-@media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
+@media screen and (max-aspect-ratio: 1/1) and (max-width: 288px),
+screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
   .icon-wrapper {
     width: 54px;
     height: 54px;
@@ -194,7 +209,8 @@ export default {
     margin-left: 2px;
   }
 }
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
+screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
   .icon-wrapper {
     width: 67px;
     height: 67px;
@@ -203,7 +219,8 @@ export default {
     margin-left: 3px;
   }
 }
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
   .icon-wrapper {
     width: 93px;
     height: 93px;
@@ -212,7 +229,8 @@ export default {
     margin-left: 3px;
   }
 }
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   .icon-wrapper {
     width: 129px;
     height: 129px;

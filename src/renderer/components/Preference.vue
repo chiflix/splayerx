@@ -1,39 +1,72 @@
 <template>
   <div class="preference tablist">
     <div class="tablist__tabs">
-      <div class="titlebar titlebar--mac no-drag"
+      <div
         v-if="isDarwin"
         @mouseover="state = 'hover'"
-        @mouseout="state = 'default'">
-        <Icon class="titlebar__button"
-              type="titleBarClose"
-              :state="state"
-              @click.native="handleClose"/>
-        <Icon class="titlebar__button--disable" type="titleBarExitFull"/>
-        <Icon class="titlebar__button--disable" type="titleBarFull"/>
+        @mouseout="state = 'default'"
+        class="titlebar titlebar--mac no-drag"
+      >
+        <Icon
+          :state="state"
+          @click.native="handleClose"
+          class="titlebar__button"
+          type="titleBarClose"
+        />
+        <Icon
+          class="titlebar__button--disable"
+          type="titleBarExitFull"
+        />
+        <Icon
+          class="titlebar__button--disable"
+          type="titleBarFull"
+        />
       </div>
-      <div class="tablist__tab"
-          :class="currentPreference === 'General' ? 'tablist__tab--selected' : ''"
-          @mouseup="handleMouseup('General')">{{ $t('preferences.general.generalSetting') }}</div>
-      <div class="tablist__tab"
-          :class="currentPreference === 'Privacy' ? 'tablist__tab--selected' : ''"
-          @mouseup="handleMouseup('Privacy')">{{ $t('preferences.privacy.privacySetting') }}</div>
+      <div
+        :class="currentPreference === 'General' ? 'tablist__tab--selected' : ''"
+        @mouseup="handleMouseup('General')"
+        class="tablist__tab"
+      >
+        {{ $t('preferences.general.generalSetting') }}
+      </div>
+      <div
+        :class="currentPreference === 'Privacy' ? 'tablist__tab--selected' : ''"
+        @mouseup="handleMouseup('Privacy')"
+        class="tablist__tab"
+      >
+        {{ $t('preferences.privacy.privacySetting') }}
+      </div>
     </div>
     <div class="tablist__tabpanel">
-      <div class="titlebar titlebar--win no-drag"
+      <div
         v-if="!isDarwin"
         @mouseover="state = 'hover'"
-        @mouseout="state = 'default'">
-        <Icon class="titlebar__button--disable"
-              type="titleBarWinExitFull"/>
-        <Icon class="titlebar__button--disable" type="titleBarWinFull"/>
-        <Icon class="titlebar__button" type="titleBarWinClose" @click.native="handleClose"/>
+        @mouseout="state = 'default'"
+        class="titlebar titlebar--win no-drag"
+      >
+        <Icon
+          class="titlebar__button--disable"
+          type="titleBarWinExitFull"
+        />
+        <Icon
+          class="titlebar__button--disable"
+          type="titleBarWinFull"
+        />
+        <Icon
+          @click.native="handleClose"
+          class="titlebar__button"
+          type="titleBarWinClose"
+        />
       </div>
       <div class="tablist__tabcontent">
         <keep-alive>
-          <component :is="currentPreference"
-          @move-stoped="isMoved = false"
-          :mouseDown="mouseDown" :isMoved="isMoved"/>
+          <!-- eslint-disable-next-line vue/require-component-is -->
+          <component
+            :is="currentPreference"
+            :mouse-down="mouseDown"
+            :is-moved="isMoved"
+            @move-stoped="isMoved = false"
+          />
         </keep-alive>
       </div>
     </div>
@@ -41,17 +74,19 @@
 </template>
 
 <script>
+import Vue from 'vue';
 import electron from 'electron';
 import Icon from '@/components/BaseIconContainer.vue';
 import General from './Preferences/General.vue';
 import Privacy from './Preferences/Privacy.vue';
 
+Vue.component('General', General);
+Vue.component('Privacy', Privacy);
+
 export default {
   name: 'Preference',
   components: {
     Icon,
-    General,
-    Privacy,
   },
   data() {
     return {
@@ -64,18 +99,6 @@ export default {
   computed: {
     isDarwin() {
       return process.platform === 'darwin';
-    },
-  },
-  methods: {
-    // Methods to handle window behavior
-    handleClose() {
-      electron.remote.getCurrentWindow().close();
-    },
-    mainDispatchProxy(actionType, actionPayload) {
-      this.$store.dispatch(actionType, actionPayload);
-    },
-    handleMouseup(panel) {
-      this.currentPreference = panel;
     },
   },
   created() {
@@ -98,6 +121,18 @@ export default {
     window.onmousemove = null;
     window.onmouseup = null;
   },
+  methods: {
+    // Methods to handle window behavior
+    handleClose() {
+      electron.remote.getCurrentWindow().close();
+    },
+    mainDispatchProxy(actionType, actionPayload) {
+      this.$store.dispatch(actionType, actionPayload);
+    },
+    handleMouseup(panel) {
+      this.currentPreference = panel;
+    },
+  },
 };
 </script>
 
@@ -112,7 +147,7 @@ export default {
       margin-left: 12px;
       margin-bottom: 18px;
       width: fit-content;
-      
+
       .titlebar__button {
         margin-right: 8px;
         width: 12px;
@@ -163,7 +198,12 @@ export default {
   &__tabs {
     width: 110px;
     height: 100%;
-    background-image: linear-gradient(-28deg, rgba(65,65,65,0.97) 0%, rgba(84,84,84,0.97) 47%, rgba(123,123,123,0.97) 100%);
+    background-image: linear-gradient(
+      -28deg,
+      rgba(65,65,65,0.97) 0%,
+      rgba(84,84,84,0.97) 47%,
+      rgba(123,123,123,0.97) 100%
+    );
   }
 
   &__tab {
@@ -185,7 +225,11 @@ export default {
     &--selected {
       color: rgba(255,255,255,1);
       border-left: 1px solid white;
-      background-image: linear-gradient(99deg, rgba(243,243,243,0.15) 0%, rgba(255,255,255,0.0675) 81%);
+      background-image: linear-gradient(
+        99deg,
+        rgba(243,243,243,0.15) 0%,
+        rgba(255,255,255,0.0675) 81%
+      );
       &:hover {
         background-color: rgba(255,255,255,0);
       }
@@ -194,7 +238,12 @@ export default {
 
   &__tabpanel {
     width: 430px;
-    background-image: linear-gradient(-28deg, rgba(65,65,65,0.99) 0%, rgba(84,84,84,0.99) 47%, rgba(123,123,123,0.99) 100%);
+    background-image: linear-gradient(
+      -28deg,
+      rgba(65,65,65,0.99) 0%,
+      rgba(84,84,84,0.99) 47%,
+      rgba(123,123,123,0.99) 100%
+    );
   }
 
   &__tabcontent {

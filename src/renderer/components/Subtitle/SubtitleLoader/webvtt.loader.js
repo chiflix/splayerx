@@ -17,7 +17,7 @@ const normalizer = (parsedSubtitle) => {
     finalDialogues.push({
       start: toMS(subtitle.start) / 1000,
       end: toMS(subtitle.end) / 1000,
-      text: subtitle.text.replace(/\{[^{}]*\}/g, '').replace(/[\\/][Nn]|\r?\n|\r/g, '<br>'),
+      text: subtitle.text.replace(/\{[^{}]*\}/g, '').replace(/[\\/][Nn]|\r?\n|\r/g, '\n'),
       tags: !subtitle.settings ? baseTags : {
         ...baseTags,
         ...subtitle.split(' ').reduce((accu, curr) => ({ ...accu, [curr.split(':')[0]]: curr.split(':')[1] }), {}),

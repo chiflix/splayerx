@@ -42,7 +42,7 @@ let rendererConfig = {
   entry: {
     preference: path.join(__dirname, '../src/renderer/preference.js'),
     about: path.join(__dirname, '../src/renderer/about.js'),
-    index: path.join(__dirname, '../src/renderer/main.js'),
+    index: path.join(__dirname, '../src/renderer/main.ts'),
     browsingView: path.join(__dirname, '../src/renderer/browsingView.js')
   },
   externals: [
@@ -50,6 +50,18 @@ let rendererConfig = {
   ],
   module: {
     rules: [
+      {
+        test: /\.tsx?$/,
+        exclude: /node_modules/,
+        use: [
+          {
+            loader: 'ts-loader',
+            options: {
+              appendTsSuffixTo: [ /\.vue$/ ]
+            }
+          }
+        ]
+      },
       {
         test: /\.(js|vue)$/,
         enforce: 'pre',
@@ -193,7 +205,7 @@ let rendererConfig = {
       "electron"  : "@chiflix/electron",
       "grpc": "@grpc/grpc-js"
     },
-    extensions: ['.js', '.json', '.node']
+    extensions: ['.js', '.json', '.node', '.ts', '.tsx']
   },
   target: 'electron-renderer'
 }
@@ -204,6 +216,7 @@ let rendererConfig = {
 if (process.env.NODE_ENV !== 'production') {
   rendererConfig.plugins.push(
     new webpack.DefinePlugin({
+      'process.platform': `"${process.platform}"`,
       '__static': `"${path.join(__dirname, '../static').replace(/\\/g, '\\\\')}"`
     })
   )
@@ -225,6 +238,7 @@ if (process.env.NODE_ENV === 'production') {
       }
     ]),
     new webpack.DefinePlugin({
+      'process.platform': `"${process.platform}"`,
       'process.env.NODE_ENV': '"production"'
     }),
     new webpack.LoaderOptionsPlugin({

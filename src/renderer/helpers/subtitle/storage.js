@@ -1,4 +1,6 @@
-import { remove, pick, values, merge, keyBy } from 'lodash';
+import {
+  remove, pick, values, merge, keyBy, get,
+} from 'lodash';
 
 import infoDB from '@/helpers/infoDB';
 import dataDb from '@/helpers/dataDb';
@@ -18,7 +20,7 @@ async function getVideoInfoFromVideoSrc(videoSrc) {
 }
 async function setVideoInfo(infoPayload) {
   if (infoPayload.videoId) {
-    return infoDB.update('media-item', infoPayload);
+    return infoDB.update('media-item', infoPayload, infoPayload.videoId);
   }
   return infoDB.add('media-item', infoPayload);
 }
@@ -97,7 +99,7 @@ export async function updateSubtitleList(videoSrc, newSubtitles) {
 }
 export async function retrieveSelectedSubtitleId(videoSrc) {
   return getVideoInfoFromVideoSrc(videoSrc)
-    .then(({ preference }) => preference?.subtitle?.selected || {});
+    .then(videoInfo => get(videoInfo, 'preference.subtitle.selected') || {});
 }
 export async function updateSelectedSubtitleId(videoSrc, Ids) {
   return updateSubtitlePreference(videoSrc, { selected: Ids });
@@ -117,7 +119,7 @@ export async function updateSubtitle(subtitleId, subtitleInfo) {
   const existingSubtitle = await dataDb.get(SUBTITLE_OBJECTSTORE_NAME, realSubtitleId);
   if (!existingSubtitle) return storeSubtitle(subtitleInfo);
   const subtitleToPut = { ...existingSubtitle, ...subtitleInfo };
-  return dataDb.put(
+  return dataDb.update(
     SUBTITLE_OBJECTSTORE_NAME,
     subtitleToPut,
     realSubtitleId,
