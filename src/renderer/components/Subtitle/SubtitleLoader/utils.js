@@ -7,7 +7,7 @@ import iconv from 'iconv-lite';
 import { ipcRenderer } from 'electron';
 import { castArray, flatten } from 'lodash';
 import helpers from '@/helpers';
-import Sagi from '@/helpers/sagi';
+import Sagi from '@/libs/sagi';
 import { normalizeCode } from '@/helpers/language';
 import languageLoader from '@/helpers/subtitle/language';
 import { SubtitleError, ErrorCodes } from './errors';
