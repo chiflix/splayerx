@@ -308,13 +308,13 @@ export default {
         this.openPlayList(this.landingViewItems[index].id);
       }
     },
-    async onItemDelete(index: number) {
-      try {
-        await playInfoStorageService.deleteRecentPlayedBy(this.landingViewItems[index].id);
-        this.item = {};
-        this.landingViewItems.splice(index, 1);
-        if (this.firstIndex !== 0) this.lastIndex = this.landingViewItems.length;
-      } catch (err) { console.log(err); }
+    onItemDelete(index: number) {
+      playInfoStorageService.deleteRecentPlayedBy(this.landingViewItems[index].id)
+        .then(() => {
+          this.item = {};
+          this.landingViewItems.splice(index, 1);
+          if (this.firstIndex !== 0) this.lastIndex = this.landingViewItems.length;
+        }).catch();
     },
   },
 };
