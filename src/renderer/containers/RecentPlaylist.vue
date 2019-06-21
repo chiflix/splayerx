@@ -496,7 +496,7 @@ export default {
       }
     },
     mousemoveClientPosition(val: { x: number, y: number }) {
-      const distance = this.winWidth > 1355 ? 20 : 10;
+      const distance = 10;
       if (!this.canHoverItem && this.displayState) {
         if (Math.abs(this.mousePosition.x - val.x) > distance ||
         Math.abs(this.mousePosition.y - val.y) > distance) {

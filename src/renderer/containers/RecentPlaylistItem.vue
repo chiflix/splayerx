@@ -250,6 +250,7 @@ export default {
   data() {
     return {
       recentPlayService: null,
+      mouseover: false,
       imageSrc: '',
       sliderPercentage: 0,
       displayIndex: NaN,
@@ -304,6 +305,11 @@ export default {
           this.$refs.info.style.opacity = '1';
           this.$refs.deleteUi.style.opacity = '0';
         });
+      }
+    },
+    canHoverItem(val: boolean, oldVal: boolean) {
+      if (!oldVal && val && this.mouseover) {
+        this.mouseoverVideo();
       }
     },
     items() {
@@ -460,6 +466,7 @@ export default {
       this.$refs.progress.style.setProperty('opacity', '0');
     },
     mouseoverVideo() {
+      this.mouseover = true;
       if (!this.isPlaying && this.isInRange && !this.isShifting
         && this.canHoverItem && !this.itemMoving) {
         this.onItemMouseover(
@@ -470,6 +477,7 @@ export default {
       }
     },
     mouseoutVideo() {
+      this.mouseover = false;
       if (!this.itemMoving) {
         this.onItemMouseout();
         requestAnimationFrame(this.updateAnimationOut);
