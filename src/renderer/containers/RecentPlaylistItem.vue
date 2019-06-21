@@ -446,6 +446,8 @@ export default {
     updateAnimationIn() {
       if (!this.isPlaying) {
         this.$refs.blur.classList.remove('blur');
+      } else {
+        return;
       }
       if (!this.itemMoving) this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,-9px)');
       this.$refs.content.style.setProperty('height', `${this.thumbnailHeight + 10}px`);
@@ -467,7 +469,7 @@ export default {
     },
     mouseoverVideo() {
       this.mouseover = true;
-      if (!this.isPlaying && this.isInRange && !this.isShifting
+      if (this.isInRange && !this.isShifting
         && this.canHoverItem && !this.itemMoving) {
         this.onItemMouseover(
           this.index,

@@ -549,10 +549,7 @@ export default {
       return this.currentTime;
     },
     videoDuration() {
-      if (this.hoverIndex !== this.playingIndex) {
-        return this.hoveredDuration;
-      }
-      return this.duration;
+      return this.hoveredDuration;
     },
     indexInPlaylist() {
       return this.hoverIndex + 1;
