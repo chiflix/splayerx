@@ -40,7 +40,11 @@
               }"
               class="top"
             >
-              <span ref="lastPlayedTime" />
+              <span v-show="lastPlayedTimeDisplay > 0">
+              {{
+                timecodeFromSeconds(lastPlayedTimeDisplay)
+              }} /
+              </span>
               {{
                 timecodeFromSeconds(videoDuration)
               }}&nbsp;&nbsp;·&nbsp;&nbsp;{{
@@ -181,6 +185,7 @@ export default {
       mousemovePosition: [],
       firstIndexOnMousedown: 0,
       lastIndexOnMousedown: 0,
+      currentTime: NaN,
     };
   },
   created() {
@@ -226,13 +231,7 @@ export default {
       }
     },
     updatelastPlayedTime(time: number) {
-      if (this.$refs.lastPlayedTime) {
-        if (this.hoverIndex === this.playingIndex) {
-          this.$refs.lastPlayedTime.textContent = `${this.timecodeFromSeconds(time)} /`;
-        } else if (this.hoveredLastPlayedTime) {
-          this.$refs.lastPlayedTime.textContent = `${this.timecodeFromSeconds(this.hoveredLastPlayedTime)} /`;
-        }
-      }
+      this.currentTime = time;
     },
     addMouseup() {
       if (this.addIndex !== this.lastIndex + 1) {
@@ -416,6 +415,8 @@ export default {
       this.filename = this.pathBaseName(recentPlayService.path);
       if (recentPlayService.lastPlayedTime) {
         this.hoveredLastPlayedTime = recentPlayService.lastPlayedTime;
+      } else {
+        this.hoveredLastPlayedTime = 0;
       }
     },
     onItemMouseout() {
@@ -540,6 +541,12 @@ export default {
         return this.$t('recentPlaylist.folderSource');
       }
       return this.$t('recentPlaylist.playlistSource');
+    },
+    lastPlayedTimeDisplay() {
+      if (this.hoverIndex !== this.playingIndex) {
+        return this.hoveredLastPlayedTime;
+      }
+      return this.currentTime;
     },
     videoDuration() {
       if (this.hoverIndex !== this.playingIndex) {
