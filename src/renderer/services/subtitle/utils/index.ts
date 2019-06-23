@@ -1,9 +1,10 @@
-import { IDialogueTag, SubtitleFormat } from '../parsers';
+import { IDialogueTag } from '../parsers';
 import { detect } from 'chardet';
 import { encodingExists, decode } from 'iconv-lite';
 import { open, read, close, readFile } from 'fs-extra';
 import { extname } from 'path';
 import { LanguageCode } from '@/libs/language';
+import { Format } from '@/interfaces/ISubtitle';
 
 /**
  * Cue tags getter for SubRip, SubStation Alpha and Online Transcript subtitles.
@@ -100,17 +101,17 @@ export async function loadLocalFile(path: string, encoding?: string) {
 
 import { assFragmentLanguageLoader, srtFragmentLanguageLoader, vttFragmentLanguageLoader } from './languageLoader';
 
-export function pathToFormat(path: string): SubtitleFormat | undefined {
+export function pathToFormat(path: string): Format | undefined {
   const extension = extname(path).slice(1);
   switch (extension) {
     case 'ass':
-      return SubtitleFormat.AdvancedSubStationAplha;
+      return Format.AdvancedSubStationAplha;
     case 'srt':
-      return SubtitleFormat.SubRip;
+      return Format.SubRip;
     case 'sub':
-      return SubtitleFormat.SubStationAlpha;
+      return Format.SubStationAlpha;
     case 'vtt':
-      return SubtitleFormat.WebVTT;
+      return Format.WebVTT;
   }
 }
 
@@ -118,12 +119,12 @@ export async function inferLanguageFromPath(path: string): Promise<LanguageCode>
   const format = await pathToFormat(path);
   const textFragment = await extractTextFragment(path);
   switch (format) {
-    case SubtitleFormat.AdvancedSubStationAplha:
-    case SubtitleFormat.SubStationAlpha:
+    case Format.AdvancedSubStationAplha:
+    case Format.SubStationAlpha:
       return assFragmentLanguageLoader(textFragment)[0];
-    case SubtitleFormat.SubRip:
+    case Format.SubRip:
       return srtFragmentLanguageLoader(textFragment)[0];
-    case SubtitleFormat.WebVTT:
+    case Format.WebVTT:
       return vttFragmentLanguageLoader(textFragment)[0];
     default:
       throw new Error(`Unsupported format ${format}.`);
