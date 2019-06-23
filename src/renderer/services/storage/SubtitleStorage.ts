@@ -8,7 +8,26 @@ import { uniqBy, unionBy, includes, remove, isEqual, flatMap } from 'lodash';
 import Sagi from '@/libs/sagi';
 import { loadLocalFile } from '../subtitle/utils';
 import { embeddedSrcLoader } from '../subtitle/loaders/embedded';
+import helpers from '@/helpers';
 
+interface DataDBV1 extends DBSchema {
+  'subtitles': {
+    key: number;
+    value: {
+      type: string;
+      src: number | string;
+      format: string;
+      language: string;
+    };
+    indexes: {
+      type: string;
+      format: string;
+      src: number | string;
+      language: string;
+      lastOpened: Date;
+    };
+  };
+}
 interface DataDBV2 extends DBSchema {
   'subtitles': {
     key: string;
@@ -21,6 +40,25 @@ interface DataDBV2 extends DBSchema {
       language: [LanguageCode, LanguageCode];
       list: StoredSubtitleItem[];
       selected: string[];
+    };
+  };
+}
+interface InfoDBV3 extends DBSchema {
+  [RECENT_OBJECT_STORE_NAME]: {
+    key: string;
+    value: PlaylistItem;
+    indexes: {
+      lastOpened: number;
+      hpaths: string[];
+    };
+  };
+  [VIDEO_OBJECT_STORE_NAME]: {
+    key: string;
+    value: MediaItem;
+    indexes: {
+      path: string;
+      lastPlayedTime: number;
+      source: string;
     };
   };
 }
@@ -37,10 +75,66 @@ interface RemoveSubtitleOptions {
 
 class SubtitleDataBase {
   private db: IDBPDatabase<DataDBV2>;
+  private async v1SubtitleTransformer(v1Subtitle: any) {
+    const v2Subtitle: StoredSubtitle = {
+      language: normalizeCode(v1Subtitle.language),
+    } as StoredSubtitle;
+
+    // set format
+    if (v1Subtitle.type === 'online') {
+      v2Subtitle.format = Format.Sagi;
+      v2Subtitle.source = [{
+        type: Type.Online,
+        source: v1Subtitle.src,
+      }];
+      v2Subtitle.hash = v1Subtitle.src;
+    }
+    else {
+      v2Subtitle.source = [{
+        type: Type.Local,
+        source: v1Subtitle.src,
+      }];
+      v2Subtitle.hash = await helpers.methods.mediaQuickHash(v1Subtitle.src);
+      switch (v1Subtitle.format) {
+        case 'srt':
+          v2Subtitle.format = Format.SubRip;
+          break;
+        case 'ass':
+          v2Subtitle.format = Format.AdvancedSubStationAplha;
+          break;
+        case 'ssa':
+          v2Subtitle.format = Format.SubStationAlpha;
+          break;
+        case 'vtt':
+          v2Subtitle.format = Format.WebVTT;
+          break;
+      }
+    }
+    return v2Subtitle;
+  }
   private async getDb() {
     return this.db ? this.db : this.db = await openDB<DataDBV2>(
       DATADB_NAME,
       2,
+      { async upgrade(db, oldVersion, newVersion, transaction) {
+        const v1Db = db as unknown as IDBPDatabase<DataDBV1>;
+        if (oldVersion < 1)  v1Db.createObjectStore('subtitles');
+        if (oldVersion < 2) {
+          const infoDb = await openDB<InfoDBV3>(INFO_DATABASE_NAME, INFODB_VERSION);
+          const mediaItems = (await infoDb.getAll('media-item'))
+            .filter(({ preference }) => preference && preference.subtitle);
+          const allSubtitleIds = flatMap(mediaItems.map(({ preference }) => Object.values(preference.subtitle.selected)));
+          let cursor = await v1Db.transaction('subtitles', 'readonly').objectStore('subtitles').openCursor();
+          const allSubtitles = [];
+          while(cursor) {
+            if (allSubtitleIds.includes(cursor.key) && cursor.value.type !== 'embedded') allSubtitles.push(cursor.value);
+            cursor.continue();
+          }
+          // turn all the subtitles into v2 subtitle
+          // create the new subtitles object store
+          // add all v2 subtitles to the new object store
+        }
+      }},
     );
   }
 
@@ -102,7 +196,7 @@ class SubtitleDataBase {
   }
   async retrieveSubtitleList(hash: string) {
     const preference =  await this.retrieveSubtitlePreference(hash);
-    return preference ? preference.list : undefined;
+    return preference ? preference.list : [];
   }
   async addSubtitleItemsToList(hash: string, subtitles: StoredSubtitleItem[]) {
     subtitles = uniqBy(subtitles, 'hash');
