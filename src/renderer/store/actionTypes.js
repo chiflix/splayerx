@@ -48,6 +48,32 @@ export const Subtitle = {
   UPDATE_ENABLED_SECONDARY_SUBTITLE: 'UPDATE_ENABLED_SECONDARY_SUBTITLE',
 };
 
+export const newSubtitle = {
+  add: 'ADD',
+  load: 'LOAD',
+  parse: 'PARSE',
+  store: 'STORE',
+  upload: 'UPLOAD',
+  getDialogues: 'GET_DIALOGUES_BY_TIME',
+  updatePlayedTime: 'UPDATE_PLAYED_TIME',
+  startWatchPlayedTime: 'START_WATCH_PLAYED_TIME',
+  pauseWatchPlayedTime: 'PAUSE_WATCH_PLAYED_TIME',
+  stopWatchPlayedTime: 'STOP_WATCH_PLAYED_TIME',
+};
+export const SubtitleManager = {
+  refreshSubtitlesInitially: 'REFRESH_SUBTITLES_INITIALLY',
+  refreshSubtitles: 'REFRESH_SUBTITLES',
+  changeCurrentSubtitle: 'CHANGE_CURRENT_SUBTITLE',
+  storeCurrentSubtitle: 'STORE_CURRENT_SUBTITLE',
+  uploadCurrentSubtitle: 'UPLOAD_CURRENT_SUBTITLE',
+  addLocalSubtitles: 'ADD_LOCAL_SUBTITLES',
+  addEmbeddedSubtitles: 'ADD_EMBEDDED_SUBTITLES',
+  addOnlineSubtitles: 'ADD_ONLINE_SUBTITLES',
+  startAISelection: 'START_AI_SELECTION',
+  stopAISelection: 'STOP_AI_SELECTION',
+  getCurrentCues: 'GET_CURRENT_CUES',
+};
+
 export const Input = {
   MOUSEMOVE_UPDATE: 'MOUSEMOVE_UPDATE',
   MOUSEDOWN_UPDATE: 'MOUSEDOWN_UPDATE',

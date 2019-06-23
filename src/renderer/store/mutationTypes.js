@@ -71,6 +71,16 @@ export const Subtitle = {
   SECONDARY_SUBTITLE_ENABLED_UPDATE: 'SECONDARY_SUBTITLE_ENABLED_UPDATE',
 };
 
+export const newSubtitle = {
+  setSource: 'SET_SOURCE',
+  setType: 'SET_TYPE',
+  setFormat: 'SET_FORMAT',
+  setLanguage: 'SET_LANGUAGE',
+  setDelay: 'SET_DELAY',
+  setPlayedTime: 'SET_PLAYED_TIME',
+};
+export const SubtitleManager = {};
+
 export const Input = {
   MOUSEMOVE_CLIENT_POSITION_UPDATE: 'MOUSEMOVE_CLIENT_POSITION_UPDATE',
   MOUSEMOVE_COMPONENT_NAME_UPDATE: 'MOUSEMOVE_COMPONENT_NAME_UPDATE',
