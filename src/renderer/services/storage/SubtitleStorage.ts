@@ -233,6 +233,48 @@ class SubtitleDataBase {
       });
     }
   }
+  async retrieveSubtitleLanguage(hash: string) {
+    const preference = await this.retrieveSubtitlePreference(hash);
+    return preference ? preference.language : [LanguageCode.Default, LanguageCode.Default];
+  }
+  async storeSubtitleLanguage(hash: string, languageCodes: LanguageCode[]) {
+    const objectStore = (await this.getDb())
+      .transaction('preferences', 'readwrite')
+      .objectStore('preferences');
+    const preference = await objectStore.get(hash);
+    if (!preference) {
+      return objectStore.add({
+        ...this.generateDefaultPreference(hash),
+        language: [languageCodes[0], languageCodes[1]],
+      });
+    } else {
+      return objectStore.put({
+        ...preference,
+        language: [languageCodes[0], languageCodes[1]],
+      });
+    }
+  }
+  async retrieveSelectedSubtitleIds(hash: string) {
+    const preference = await this.retrieveSubtitlePreference(hash);
+    return preference ? preference.selected : [];
+  }
+  async storeSelectedSubtitleIds(hash: string, subtitleIds: string[]) {
+    const objectStore = (await this.getDb())
+      .transaction('preferences', 'readwrite')
+      .objectStore('preferences');
+    const preference = await objectStore.get(hash);
+    if (!preference) {
+      return objectStore.add({
+        ...this.generateDefaultPreference(hash),
+        selected: subtitleIds,
+      });
+    } else {
+      return objectStore.put({
+        ...preference,
+        selected: subtitleIds,
+      });
+    }
+  }
 }
 
 const db = new SubtitleDataBase();
