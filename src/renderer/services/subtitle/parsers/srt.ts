@@ -1,4 +1,5 @@
-import { IRawSubtitle, IDialogue } from './index';
+import { Dialogue } from '@/interfaces/ISubtitle';
+import { BaseParser } from './index';
 // @ts-ignore
 import { parse, toMS } from 'subtitle';
 import { tagsGetter } from '../utils';
@@ -9,14 +10,16 @@ type ParsedSubtitle = {
   text: string;
 }[];
 
-export class SrtSubtitle implements IRawSubtitle {
+export class SrtParser extends BaseParser {
   payload = '';
   constructor(srtPayload: string) {
+    super();
     this.payload = srtPayload;
   }
+  dialogues: Dialogue[];
   private baseTags = { alignment: 2, pos: undefined };
   private normalizer(parsedSubtitle: ParsedSubtitle) {
-    const finalDialogues: IDialogue[] = [];
+    const finalDialogues: Dialogue[] = [];
     parsedSubtitle.forEach((subtitle) => {
       finalDialogues.push({
         start: toMS(subtitle.start) / 1000,
@@ -25,12 +28,9 @@ export class SrtSubtitle implements IRawSubtitle {
         text: subtitle.text.replace(/\{[^{}]*\}/g, '').replace(/[\\/][Nn]|\r?\n|\r/g, '\n'),
       });
     });
-    return {
-      info: {},
-      dialogues: finalDialogues,
-    };
+    this.dialogues = finalDialogues;
   }
   async parse() {
-    return this.normalizer(parse(this.payload));
+    this.normalizer(parse(this.payload));
   }
 }

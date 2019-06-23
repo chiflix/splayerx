@@ -1,14 +1,17 @@
-import { IRawSubtitle, IDialogue, SagiSubtitlePayload } from './index';
+import { Dialogue } from '@/interfaces/ISubtitle';
+import { BaseParser, SagiSubtitlePayload } from './index';
 import { tagsGetter } from '../utils';
 
-export class SagiSubtitle implements IRawSubtitle {
+export class SagiParser extends BaseParser {
   payload: SagiSubtitlePayload;
   constructor(sagiPayload: SagiSubtitlePayload) {
+    super();
     this.payload = sagiPayload;
   }
+  dialogues: Dialogue[];
   private baseTags = { alignment: 2, pos: undefined };
   private normalizer(parsedSubtitle: SagiSubtitlePayload) {
-    const finalDialogues: IDialogue[] = [];
+    const finalDialogues: Dialogue[] = [];
     parsedSubtitle.forEach(({ startTime, endTime, text }) => {
       finalDialogues.push({
         start: startTime,
@@ -19,12 +22,9 @@ export class SagiSubtitle implements IRawSubtitle {
         tags: tagsGetter(text, this.baseTags),
       });
     });
-    return {
-      info: {},
-      dialogues: finalDialogues,
-    };
+    this.dialogues = finalDialogues;
   }
   async parse() {
-    return this.normalizer(this.payload);
+    this.normalizer(this.payload);
   }
 }

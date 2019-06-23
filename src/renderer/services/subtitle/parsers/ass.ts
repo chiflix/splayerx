@@ -1,5 +1,7 @@
-import { IRawSubtitle, IParsedSubtitle, IDialogue } from './index';
+import { Dialogue } from '@/interfaces/ISubtitle';
+import { BaseParser } from './index';
 import { pick } from 'lodash';
+// @ts-ignore
 import { compile } from 'ass-compiler';
 
 interface IAssTags {
@@ -32,9 +34,10 @@ type CompiledSubtitle = {
   }[];
 }
 
-export class AssSubtitle implements IRawSubtitle {
-  payload = '';
+export class AssParser extends BaseParser {
+  readonly payload: string = '';
   constructor(assPayload: string) {
+    super();
     this.payload = assPayload;
   }
 
@@ -78,10 +81,10 @@ export class AssSubtitle implements IRawSubtitle {
     alignment: 2,
     pos: null,
   };
-  private normalize(compiledSubtitle: CompiledSubtitle): IParsedSubtitle {
-    const finalDialogues: IDialogue[] = [];
+  private normalize(compiledSubtitle: CompiledSubtitle) {
+    const finalDialogues: Dialogue[] = [];
     const { info, dialogues } = compiledSubtitle;
-    const validInfo = pick(info, Object.keys(this.baseInfo));
+    this.info = pick(info, Object.keys(this.baseInfo));
     dialogues.forEach((dialogue) => {
       const {
         start, end, alignment, slices, pos,
@@ -116,12 +119,9 @@ export class AssSubtitle implements IRawSubtitle {
         }
       });
     });
-    return {
-      info: validInfo,
-      dialogues: finalDialogues,
-    };
+    this.dialogues = finalDialogues;
   }
   async parse() {
-    return this.normalize(compile(this.payload) as CompiledSubtitle);
+    this.normalize(compile(this.payload) as CompiledSubtitle);
   }
 }

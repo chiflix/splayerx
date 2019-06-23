@@ -1,4 +1,5 @@
-import { IRawSubtitle, IDialogue } from './index';
+import { Dialogue } from '@/interfaces/ISubtitle';
+import { BaseParser } from './index';
 // @ts-ignore
 import { parse, toMS } from 'subtitle';
 
@@ -9,11 +10,13 @@ type ParsedSubtitle = {
   settings: string;
 }[];
 
-export class VttSubtitle implements IRawSubtitle {
-  payload = '';
+export class VttParser extends BaseParser {
+  readonly payload: string = '';
   constructor(vttString: string) {
+    super();
     this.payload = vttString;
   }
+  dialogues: Dialogue[];
   private baseTags = {
     // https://developer.mozilla.org/en-US/docs/Web/API/WebVTT_API#Cue_settings
     vertical: '',
@@ -23,7 +26,7 @@ export class VttSubtitle implements IRawSubtitle {
     // align: '',
   };
   private normalizer(parsedSubtitle: ParsedSubtitle) {
-    const finalDialogues: IDialogue[] = [];
+    const finalDialogues: Dialogue[] = [];
     parsedSubtitle.forEach((subtitle) => {
       finalDialogues.push({
         start: toMS(subtitle.start) / 1000,
@@ -43,12 +46,9 @@ export class VttSubtitle implements IRawSubtitle {
         },
       });
     });
-    return {
-      info: {},
-      dialogues: finalDialogues,
-    };
+    this.dialogues = finalDialogues;
   }
   async parse() {
-    return this.normalizer(parse(this.payload));
+    this.normalizer(parse(this.payload));
   }
 }
