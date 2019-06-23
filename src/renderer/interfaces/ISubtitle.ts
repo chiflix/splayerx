@@ -1,24 +1,36 @@
-export { SubtitleFormat } from '@/services/subtitle/parsers'
-export { SubtitleType } from '@/services/subtitle/loaders';
-export type Cue = {
-  category?: string,
-  start: number,
-  end: number,
-  text: string,
-  hide?: boolean,
-  format: string,
-  tags: TagsPartial,
+import { LanguageCode } from '@/libs/language';
+
+export enum Type {
+  Online = 'online',
+  Embedded = 'embedded',
+  Local ='local',
 }
-type Partial<T> = { [P in keyof T]?: T[P] };
-export type TagsPartial = Partial<Tags>;
-type Tags = {
-  alignment: number,
-  pos: { x: number, y: number },
-  vertical: string,
-  line: string,
-  position: string,
-  b: number,
-  i: number,
-  u: number,
-  s: number,
+export enum Format {
+  AdvancedSubStationAplha = 'ass',
+  Sagi = 'sagi',
+  SubRip = 'srt',
+  SubStationAlpha = 'ssa',
+  WebVTT = 'webvtt',
+}
+
+export interface Origin {
+  type: Type;
+  source: any;
+}
+export interface Entity {
+  source: Origin;
+  type: Type;
+  format: Format;
+  language: LanguageCode;
+  payload: any;
+  hash: string;
+}
+
+export interface EntityGenerator {
+  getSource(): Promise<Origin>
+  getType(): Promise<Type>
+  getFormat(): Promise<Format>
+  getLanguage(): Promise<LanguageCode>
+  getPayload(): Promise<any>
+  getHash(): Promise<string>
 }

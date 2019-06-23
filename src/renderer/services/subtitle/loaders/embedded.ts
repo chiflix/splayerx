@@ -1,15 +1,13 @@
-import { IOriginSubtitle, IEmbeddedSubtitleOrigin, SubtitleType } from './index';
-import { SubtitleFormat, AssSubtitle, SrtSubtitle, VttSubtitle } from '../parsers';
+import { Origin, Type, EntityGenerator, Format } from '@/interfaces/ISubtitle';
 import { LanguageCode, normalizeCode } from '@/libs/language';
 import { ipcRenderer, Event } from 'electron';
 import helpers from '@/helpers';
 import { inferLanguageFromPath, loadLocalFile } from '../utils';
 
-
 interface IExtractSubtitleRequest {
   videoSrc: string;
   streamIndex: number;
-  format: SubtitleFormat;
+  format: Format;
   mediaHash: string;
 }
 interface IExtractSubtitleResponse {
@@ -26,7 +24,7 @@ interface IExtractSubtitleResponse {
  * @param {string} subtitleCodec - the codec of the embedded subtitle
  * @returns the subtitle path string
  */
-async function embeddedSrcLoader(videoSrc: string, streamIndex: number, format: SubtitleFormat): Promise<string> {
+export async function embeddedSrcLoader(videoSrc: string, streamIndex: number, format: Format): Promise<string> {
   const mediaHash = await helpers.methods.mediaQuickHash(videoSrc);
   ipcRenderer.send('extract-subtitle-request', {
     videoSrc,
@@ -43,6 +41,14 @@ async function embeddedSrcLoader(videoSrc: string, streamIndex: number, format: 
   });
 }
 
+interface EmbeddedOrigin extends Origin {
+  type: Type.Embedded,
+  source: {
+    streamIndex: number;
+    videoSrc: string;
+    extractedSrc: string;
+  };
+}
 export interface ISubtitleStream {
   codec_type: string;
   codec_name: string;
@@ -57,43 +63,42 @@ export interface ISubtitleStream {
   [propName: string]: any;
 }
 
-export class EmbeddedSubtitle implements IOriginSubtitle {
-  origin: IEmbeddedSubtitleOrigin;
-  format: SubtitleFormat;
-  language?: LanguageCode;
-  isDefault: boolean;
-  name: string;
+export class EmbeddedGenerator implements EntityGenerator {
+  private origin: EmbeddedOrigin;
+  private format: Format;
+  private language: LanguageCode = LanguageCode.Default;
+  readonly isDefault: boolean;
   constructor(videoSrc: string, stream: ISubtitleStream) {
-    this.origin = {
+    this.origin.source = {
       videoSrc,
       streamIndex: stream.index,
+      extractedSrc: '',
     };
-    this.format = stream.codec_name as SubtitleFormat;
+    this.format = stream.codec_name as Format;
     this.language = normalizeCode(stream.tags.language || '');
     this.isDefault = !!stream.disposition.default;
-    this.name = stream.tags.title || '';
   }
 
-  type: SubtitleType.Embedded;
-
-  private extractedSrc = '';
-  async computeLang() {
-    if (this.language && this.language !== LanguageCode.No) return this.language;
-    this.extractedSrc = await embeddedSrcLoader(this.origin.videoSrc, this.origin.streamIndex, this.format);
-    return inferLanguageFromPath(this.extractedSrc);
+  async getSource() { return this.origin; }
+  async getType() { return Type.Embedded; }
+  async getFormat() { return this.format; }
+  private async getExtractedSrc() {
+    const { videoSrc, streamIndex, extractedSrc } = this.origin.source;
+    if (!extractedSrc) return this.origin.source.extractedSrc = await embeddedSrcLoader(videoSrc, streamIndex, this.format);
+    return extractedSrc;
+  }
+  async getHash() {
+    return helpers.methods.mediaQuickHash(await this.getExtractedSrc());
   }
 
-  async load() {
-    if (!this.extractedSrc) this.extractedSrc = await embeddedSrcLoader(this.origin.videoSrc, this.origin.streamIndex, this.format);
-    const fileContent = await loadLocalFile(this.extractedSrc);
-    switch (this.format) {
-      case SubtitleFormat.AdvancedSubStationAplha:
-      case SubtitleFormat.SubStationAlpha:
-        return new AssSubtitle(fileContent);
-      case SubtitleFormat.SubRip:
-        return new SrtSubtitle(fileContent);
-      case SubtitleFormat.WebVTT:
-        return new VttSubtitle(fileContent);
-    }
+  async getLanguage() {
+    if (this.language !== LanguageCode.Default) return this.language;
+    const { videoSrc, streamIndex, extractedSrc } = this.origin.source;
+    if (!extractedSrc) this.origin.source.extractedSrc = await embeddedSrcLoader(videoSrc, streamIndex, this.format);
+    return this.language = await inferLanguageFromPath(this.origin.source.extractedSrc);
+  }
+
+  async getPayload() {
+    return await loadLocalFile(await this.getExtractedSrc());
   }
 }

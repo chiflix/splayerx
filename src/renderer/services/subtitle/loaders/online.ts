@@ -1,28 +1,32 @@
-import { IOriginSubtitle, SubtitleType } from './index';
 import { LanguageCode, normalizeCode } from '@/libs/language';
 import { MediaTranslationResponse } from 'sagi-api/translation/v1/translation_pb';
-import { SubtitleFormat, SagiSubtitle } from '../parsers';
 import Sagi from '@/libs/sagi';
+import { Origin, EntityGenerator, Type, Format } from '@/interfaces/ISubtitle';
 
-export class OnlineSubtitle implements IOriginSubtitle {
-  origin: string;
+interface OnlineOrigin extends Origin {
+  type: Type.Online;
+  source: string;
+}
+export class OnlineGenerator implements EntityGenerator {
+  private origin: OnlineOrigin;
   private language: LanguageCode;
-  ranking: number;
+  readonly ranking: number;
   constructor(transcriptInfo: MediaTranslationResponse.TranscriptInfo.AsObject) {
-    this.origin = transcriptInfo.transcriptIdentity;
+    this.origin.source = transcriptInfo.transcriptIdentity;
     this.language = normalizeCode(transcriptInfo.languageCode);
     this.ranking = transcriptInfo.ranking;
   }
 
-  format: SubtitleFormat.Sagi;
-  type: SubtitleType.Online;
+  async getType() { return Type.Online; }
 
-  async computeLang() {
+  async getSource() { return this.origin; }
+  async getLanguage() {
     return this.language;
   }
+  async getFormat() { return Format.Sagi; }
+  async getHash() { return this.origin.source; }
 
-  async load() {
-    const payload = await Sagi.getTranscript({ transcriptIdentity: this.origin, startTime: 0 });
-    return new SagiSubtitle(payload);
+  async getPayload() {
+    return Sagi.getTranscript({ transcriptIdentity: this.origin.source, startTime: 0 });
   }
 }

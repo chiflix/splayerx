@@ -1,36 +1,37 @@
-import { IOriginSubtitle, SubtitleType } from './index';
-import { SubtitleFormat, AssSubtitle, SrtSubtitle, VttSubtitle } from '../parsers';
-import { LanguageCode } from '@/libs/language';
-import { pathToFormat, extractTextFragment, loadLocalFile } from '../utils';
+import { pathToFormat, loadLocalFile } from '../utils';
 import { inferLanguageFromPath } from '../utils';
+import { Origin, Type, EntityGenerator, Format } from '@/interfaces/ISubtitle';
+import helpers from '@/helpers';
 
-export class LocalSubtitle implements IOriginSubtitle {
-  origin: string;
-  format: SubtitleFormat;
+interface LocalOrigin extends Origin {
+  type: Type.Local,
+  source: string;
+}
+export class LocalGenerator implements EntityGenerator {
+  private origin: LocalOrigin;
+  private format: Format;
   constructor(subtitlePath: string) {
-    this.origin = subtitlePath;
+    this.origin = { type: Type.Local, source: subtitlePath };
     const format = pathToFormat(subtitlePath);
     if (!format) throw new Error(`Unrecongnized subtitle format ${subtitlePath}.`);
     this.format = format;
   }
 
-  type: SubtitleType.Local;
-
-  language?: LanguageCode;
-  async computeLang() {
-    return inferLanguageFromPath(this.origin);
+  async getSource() { return this.origin; }
+  async getType() { return Type.Local; }
+  async getFormat() {
+    if (this.format) return this.format;
+    const format = pathToFormat(this.origin.source);
+    if (!format) throw new Error(`Unrecongnized subtitle format ${this.origin.source}.`);
+    return this.format = format;
   }
-
-  async load() {
-    const subtitlePayload = await loadLocalFile(this.origin);
-    switch (this.format) {
-      case SubtitleFormat.AdvancedSubStationAplha:
-      case SubtitleFormat.SubStationAlpha:
-        return new AssSubtitle(subtitlePayload);
-      case SubtitleFormat.SubRip:
-        return new SrtSubtitle(subtitlePayload);
-      case SubtitleFormat.WebVTT:
-        return new VttSubtitle(subtitlePayload);
-    }
+  async getLanguage() {
+    return inferLanguageFromPath(this.origin.source);
+  }
+  async getPayload() {
+    return loadLocalFile(this.origin.source);
+  }
+  async getHash() {
+    return helpers.methods.mediaQuickHash(this.origin.source);
   }
 }
