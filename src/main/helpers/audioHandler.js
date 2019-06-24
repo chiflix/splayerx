@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-06-20 18:03:14
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-06-24 11:53:02
+ * @Last Modified time: 2019-06-24 12:34:29
  */
 
 import { splayerx } from 'electron';

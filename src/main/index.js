@@ -422,6 +422,8 @@ function registerMainWindowEvent(mainWindow) {
   // handle audio grab on main process
   ipcMain.on('grab-audio', (events, args) => {
     audioHandler.push(args, () => {
+      const coustTime = (Date.now() - args.time) / 1000;
+      console.warn(`提取音频花费 ${coustTime}s`);
       mainWindow.webContents.send('grab-audio-complete', args);
     });
   });
