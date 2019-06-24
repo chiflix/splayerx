@@ -45,6 +45,9 @@ import Icon from '../BaseIconContainer.vue';
 
 export default {
   name: 'BrowsingFavicons',
+  components: {
+    Icon,
+  },
   data() {
     return {
       showFavicon: true,
@@ -73,9 +76,6 @@ export default {
       }
       return this.showFavicon ? '0' : '180';
     },
-  },
-  components: {
-    Icon,
   },
   methods: {
     ...mapActions({

@@ -35,6 +35,9 @@ import Icon from '../BaseIconContainer.vue';
 
 export default {
   name: 'BrowsingControl',
+  components: {
+    Icon,
+  },
   data() {
     return {
       backType: 'backDisabled',
@@ -72,9 +75,6 @@ export default {
       this.backType = info.canGoBack ? 'back' : 'backDisabled';
       this.forwardType = info.canGoForward ? 'forward' : 'forwardDisabled';
     });
-  },
-  components: {
-    Icon,
   },
   methods: {
     handlePicInPic() {

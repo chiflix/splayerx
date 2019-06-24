@@ -64,7 +64,7 @@
         @mouseup.native="handleMacFull"
         v-show="middleButtonStatus !== 'exit-fullscreen'"
         :state="state"
-        :style="{ transform: itemType === this.itemTypeEnum.MAXSCREEN ? 'rotate(45deg)' : ''}"
+        :style="{ transform: itemType === itemTypeEnum.MAXSCREEN ? 'rotate(45deg)' : ''}"
         class="title-button no-drag"
       />
       <Icon

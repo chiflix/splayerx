@@ -66,7 +66,7 @@
         @mouseup.native="handleMacFull"
         v-show="middleButtonStatus !== 'exit-fullscreen'"
         :state="state"
-        :style="{ transform: itemType === this.itemTypeEnum.MAXSCREEN ? 'rotate(45deg)' : ''}"
+        :style="{ transform: itemType === itemTypeEnum.MAXSCREEN ? 'rotate(45deg)' : ''}"
         class="title-button no-drag"
       />
       <Icon
@@ -91,7 +91,6 @@ export default {
     Icon,
   },
   props: {
-    currentView: String,
     showAllWidgets: {
       type: Boolean,
       default: true,
@@ -110,6 +109,18 @@ export default {
       keyOver: false,
       showTitleBar: true,
     };
+  },
+  computed: {
+    ...mapGetters([
+      'isMaximized',
+      'isFullScreen',
+    ]),
+    isDarwin() {
+      return process.platform === 'darwin';
+    },
+    middleButtonStatus() {
+      return this.isFullScreen ? 'exit-fullscreen' : this.isMaximized ? 'restore' : 'maximize'; // eslint-disable-line no-nested-ternary
+    },
   },
   watch: {
     recentPlaylist(val) {
@@ -181,18 +192,6 @@ export default {
       } else {
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'maximize');
       }
-    },
-  },
-  computed: {
-    ...mapGetters([
-      'isMaximized',
-      'isFullScreen',
-    ]),
-    isDarwin() {
-      return process.platform === 'darwin';
-    },
-    middleButtonStatus() {
-      return this.isFullScreen ? 'exit-fullscreen' : this.isMaximized ? 'restore' : 'maximize'; // eslint-disable-line no-nested-ternary
     },
   },
 };

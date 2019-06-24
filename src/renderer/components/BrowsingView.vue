@@ -88,6 +88,107 @@ export default {
       this.controlToShow = oldVal > val;
     },
   },
+  created() {
+    electron.ipcRenderer.on('initial-url', (e, url) => {
+      this.updateInitialUrl(url);
+    });
+    electron.ipcRenderer.on('browsingViewSize', (e, size) => {
+      this.updateBrowsingSize(size);
+    });
+  },
+  mounted() {
+    window.addEventListener('beforeunload', () => {
+      electron.ipcRenderer.send('store-browsing-last-size', this.isPip ? [1200, 900] : this.browsingWinSize);
+    });
+    this.$bus.$on('url-back', () => {
+      if (this.$refs.webView.canGoBack()) {
+        this.$refs.webView.goBack();
+      }
+    });
+    this.$bus.$on('url-forward', () => {
+      if (this.$refs.webView.canGoForward()) {
+        this.$refs.webView.goForward();
+      }
+    });
+    this.$bus.$on('url-reload', () => {
+      this.$refs.webView.reload();
+    });
+    this.$refs.webView.addEventListener('load-commit', () => {
+      this.$refs.webView.blur();
+      const loadUrl = this.$refs.webView.getURL();
+      const recordIndex = this.supportedRecordHost.indexOf(urlParseLax(loadUrl).hostname);
+      if (recordIndex !== -1) {
+        switch (recordIndex) {
+          case 0:
+            this.updateRecordUrl({ youtube: loadUrl });
+            break;
+          case 1:
+            this.updateRecordUrl({ bilibili: loadUrl });
+            break;
+          case 2:
+          case 3:
+            this.updateRecordUrl({ youku: loadUrl });
+            break;
+          default:
+            break;
+        }
+      }
+      this.$refs.webView.executeJavaScript('document.querySelector("video")', (r) => {
+        this.$bus.$emit('web-info', {
+          hasVideo: !!r,
+          url: loadUrl,
+          canGoBack: this.$refs.webView.canGoBack(),
+          canGoForward: this.$refs.webView.canGoForward(),
+        });
+      });
+    });
+    this.$refs.webView.addEventListener('ipc-message', (evt) => {
+      const { channel, args } = evt;
+      switch (channel) {
+        case 'scroll':
+          console.log(args); // TODO:
+          this.windowScrollY = args[0].windowScrollY;
+          break;
+        default:
+          console.warn(`Unhandled ipc-message: ${channel}`, args);
+          break;
+      }
+    });
+    electron.ipcRenderer.on('quit', () => {
+      this.quit = true;
+    });
+    this.$refs.webView.addEventListener('dom-ready', () => { // for webview test
+      this.$refs.webView.openDevTools();
+    });
+    this.$refs.webView.addEventListener('new-window', (e) => { // new tabs
+      this.updateInitialUrl(e.url);
+    });
+    this.$refs.webView.addEventListener('did-start-loading', () => {
+      this.startTime = new Date();
+      this.loadingState = true;
+    });
+    this.$refs.webView.addEventListener('did-stop-loading', () => {
+      const loadingTime = new Date() - this.startTime;
+      if (loadingTime % 3000 === 0) {
+        this.loadingState = false;
+      } else {
+        setTimeout(() => {
+          this.loadingState = false;
+        }, 3000 - (loadingTime % 3000));
+      }
+    });
+    this.$bus.$on('enter-pip', () => {
+      const parseUrl = urlParseLax(this.initialUrl);
+      if (parseUrl.host.includes('youtube')) {
+        this.pipType = 'youtube';
+        this.youtubeAdapter();
+      } else if (parseUrl.host.includes('bilibili')) {
+        this.pipType = 'bilibili';
+        this.bilibiliAdapter();
+      }
+      this.isPip = true;
+    });
+  },
   methods: {
     ...mapActions({
       updateInitialUrl: browsingActions.UPDATE_INITIAL_URL,
@@ -201,107 +302,6 @@ export default {
         this.$refs.webView.executeJavaScript('document.querySelector(".live-root").childNodes[0].prepend(document.querySelector("iframe"));;document.querySelector("#app").style.display = ""');
       }
     },
-  },
-  created() {
-    electron.ipcRenderer.on('initial-url', (e, url) => {
-      this.updateInitialUrl(url);
-    });
-    electron.ipcRenderer.on('browsingViewSize', (e, size) => {
-      this.updateBrowsingSize(size);
-    });
-  },
-  mounted() {
-    window.addEventListener('beforeunload', () => {
-      electron.ipcRenderer.send('store-browsing-last-size', this.isPip ? [1200, 900] : this.browsingWinSize);
-    });
-    this.$bus.$on('url-back', () => {
-      if (this.$refs.webView.canGoBack()) {
-        this.$refs.webView.goBack();
-      }
-    });
-    this.$bus.$on('url-forward', () => {
-      if (this.$refs.webView.canGoForward()) {
-        this.$refs.webView.goForward();
-      }
-    });
-    this.$bus.$on('url-reload', () => {
-      this.$refs.webView.reload();
-    });
-    this.$refs.webView.addEventListener('load-commit', () => {
-      this.$refs.webView.blur();
-      const loadUrl = this.$refs.webView.getURL();
-      const recordIndex = this.supportedRecordHost.indexOf(urlParseLax(loadUrl).hostname);
-      if (recordIndex !== -1) {
-        switch (recordIndex) {
-          case 0:
-            this.updateRecordUrl({ youtube: loadUrl });
-            break;
-          case 1:
-            this.updateRecordUrl({ bilibili: loadUrl });
-            break;
-          case 2:
-          case 3:
-            this.updateRecordUrl({ youku: loadUrl });
-            break;
-          default:
-            break;
-        }
-      }
-      this.$refs.webView.executeJavaScript('document.querySelector("video")', (r) => {
-        this.$bus.$emit('web-info', {
-          hasVideo: !!r,
-          url: loadUrl,
-          canGoBack: this.$refs.webView.canGoBack(),
-          canGoForward: this.$refs.webView.canGoForward(),
-        });
-      });
-    });
-    this.$refs.webView.addEventListener('ipc-message', (evt) => {
-      const { channel, args } = evt;
-      switch (channel) {
-        case 'scroll':
-          console.log(args); // TODO:
-          this.windowScrollY = args[0].windowScrollY;
-          break;
-        default:
-          console.warn(`Unhandled ipc-message: ${channel}`, args);
-          break;
-      }
-    });
-    electron.ipcRenderer.on('quit', () => {
-      this.quit = true;
-    });
-    this.$refs.webView.addEventListener('dom-ready', () => { // for webview test
-      this.$refs.webView.openDevTools();
-    });
-    this.$refs.webView.addEventListener('new-window', (e) => { // new tabs
-      this.updateInitialUrl(e.url);
-    });
-    this.$refs.webView.addEventListener('did-start-loading', () => {
-      this.startTime = new Date();
-      this.loadingState = true;
-    });
-    this.$refs.webView.addEventListener('did-stop-loading', () => {
-      const loadingTime = new Date() - this.startTime;
-      if (loadingTime % 3000 === 0) {
-        this.loadingState = false;
-      } else {
-        setTimeout(() => {
-          this.loadingState = false;
-        }, 3000 - (loadingTime % 3000));
-      }
-    });
-    this.$bus.$on('enter-pip', () => {
-      const parseUrl = urlParseLax(this.initialUrl);
-      if (parseUrl.host.includes('youtube')) {
-        this.pipType = 'youtube';
-        this.youtubeAdapter();
-      } else if (parseUrl.host.includes('bilibili')) {
-        this.pipType = 'bilibili';
-        this.bilibiliAdapter();
-      }
-      this.isPip = true;
-    });
   },
 };
 </script>
