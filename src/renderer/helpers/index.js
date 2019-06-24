@@ -358,7 +358,6 @@ export default {
         const video = await this.infoDB.get('media-item', playlist.items[playlist.playedIndex]);
         try {
           await fsPromises.access(video.path, fs.constants.F_OK);
-          this.playFile(video.path, video.videoId);
           let similarVideos;
           try {
             similarVideos = await this.findSimilarVideoByVidPath(video.path);
@@ -376,6 +375,7 @@ export default {
               });
             }
           }
+          this.playFile(video.path, video.videoId);
         } catch (err) {
           this.infoDB.delete('recent-played', id);
           addBubble(PLAYLIST_NON_EXIST, this.$i18n);
@@ -400,7 +400,6 @@ export default {
     async openVideoFile(videoFile) {
       const id = await this.infoDB.addPlaylist([videoFile]);
       const playlistItem = await this.infoDB.get('recent-played', id);
-      this.playFile(videoFile, playlistItem.items[playlistItem.playedIndex]);
       let similarVideos;
       try {
         similarVideos = await this.findSimilarVideoByVidPath(videoFile);
@@ -418,6 +417,7 @@ export default {
           });
         }
       }
+      this.playFile(videoFile, playlistItem.items[playlistItem.playedIndex]);      
     },
     bookmarkAccessing(vidPath) {
       const bookmarkObj = syncStorage.getSync('bookmark');

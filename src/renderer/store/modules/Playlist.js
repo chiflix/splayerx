@@ -72,10 +72,9 @@ const mutations = {
     }
   },
   InsertItemToPlayingList(state, item) {
-    if (item.newPosition >= 0) {
-      state.playList.splice(item.newPosition, 0, item.src);
-      state.items.splice(item.newPosition, 0, item.id);
-    }
+    if (item.newPosition < 0) item.newPosition = 0;
+    state.playList.splice(item.newPosition, 0, item.src);
+    state.items.splice(item.newPosition, 0, item.id);
   },
 };
 
