@@ -87,8 +87,8 @@ export default {
     winAngle(val: number) {
       this.changeWindowRotate(val);
     },
-    videoId(val: number, oldVal: number) {
-      if (oldVal) this.saveScreenshot(oldVal);
+    playListId(val: number, oldVal: number) {
+      if (oldVal) this.saveScreenshot(oldVal, this.videoId);
     },
     originSrc(val: string, oldVal: string) {
       if (process.mas && oldVal) {
@@ -265,7 +265,7 @@ export default {
       });
       windowRectService.uploadWindowBy(false, 'playing-view', this.winAngle, this.winAngleBeforeFullScreen, this.winSizeBeforeFullScreen, this.winPos);
     },
-    async saveScreenshot(videoId: number) {
+    async saveScreenshot(playlistId: number, videoId: number) {
       const { videoElement } = this;
       const canvas = this.$refs.thumbnailCanvas;
       // todo: use metaloaded to get videoHeight and videoWidth
@@ -292,7 +292,7 @@ export default {
       };
 
       await playInfoStorageService
-        .updateRecentPlayedBy(this.playListId, recentPlayedData as PlaylistItem);
+        .updateRecentPlayedBy(playlistId, recentPlayedData as PlaylistItem);
     },
     saveSubtitleStyle() {
       return settingStorageService.updateSubtitleStyle({
@@ -306,7 +306,7 @@ export default {
     },
     beforeUnloadHandler(e: Event) {
       if (!this.asyncTasksDone && !this.needToRestore) {
-        let savePromise = this.saveScreenshot(this.videoId);
+        let savePromise = this.saveScreenshot(this.playlistId, this.videoId);
         if (process.mas && this.$store.getters.source === 'drop') {
           savePromise = savePromise.then(async () => {
             await playInfoStorageService.deleteRecentPlayedBy(this.playListId);

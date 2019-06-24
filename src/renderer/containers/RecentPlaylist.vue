@@ -40,7 +40,11 @@
               }"
               class="top"
             >
-              <span ref="lastPlayedTime" />
+              <span v-show="lastPlayedTimeDisplay > 0">
+              {{
+                timecodeFromSeconds(lastPlayedTimeDisplay)
+              }} /
+              </span>
               {{
                 timecodeFromSeconds(videoDuration)
               }}&nbsp;&nbsp;·&nbsp;&nbsp;{{
@@ -181,6 +185,7 @@ export default {
       mousemovePosition: [],
       firstIndexOnMousedown: 0,
       lastIndexOnMousedown: 0,
+      currentTime: NaN,
     };
   },
   created() {
@@ -226,13 +231,7 @@ export default {
       }
     },
     updatelastPlayedTime(time: number) {
-      if (this.$refs.lastPlayedTime) {
-        if (this.hoverIndex === this.playingIndex) {
-          this.$refs.lastPlayedTime.textContent = `${this.timecodeFromSeconds(time)} /`;
-        } else if (this.hoveredLastPlayedTime) {
-          this.$refs.lastPlayedTime.textContent = `${this.timecodeFromSeconds(this.hoveredLastPlayedTime)} /`;
-        }
-      }
+      this.currentTime = time;
     },
     addMouseup() {
       if (this.addIndex !== this.lastIndex + 1) {
@@ -416,6 +415,8 @@ export default {
       this.filename = this.pathBaseName(recentPlayService.path);
       if (recentPlayService.lastPlayedTime) {
         this.hoveredLastPlayedTime = recentPlayService.lastPlayedTime;
+      } else {
+        this.hoveredLastPlayedTime = 0;
       }
     },
     onItemMouseout() {
@@ -496,7 +497,7 @@ export default {
       }
     },
     mousemoveClientPosition(val: { x: number, y: number }) {
-      const distance = this.winWidth > 1355 ? 20 : 10;
+      const distance = 10;
       if (!this.canHoverItem && this.displayState) {
         if (Math.abs(this.mousePosition.x - val.x) > distance ||
         Math.abs(this.mousePosition.y - val.y) > distance) {
@@ -541,11 +542,14 @@ export default {
       }
       return this.$t('recentPlaylist.playlistSource');
     },
-    videoDuration() {
+    lastPlayedTimeDisplay() {
       if (this.hoverIndex !== this.playingIndex) {
-        return this.hoveredDuration;
+        return this.hoveredLastPlayedTime;
       }
-      return this.duration;
+      return this.currentTime;
+    },
+    videoDuration() {
+      return this.hoveredDuration;
     },
     indexInPlaylist() {
       return this.hoverIndex + 1;
