@@ -121,7 +121,8 @@
       "hideOthers": "다른 사람 숨기기",
       "homepage": "웹 사이트",
       "preferences": "환경 설정",
-      "quit": "SPlayer 종료"
+      "quit": "SPlayer 종료",
+      "showAll": "모두 표시"
     },
     "subtitle": {
       "AITranslation": "스마트 번역 새로 고침",

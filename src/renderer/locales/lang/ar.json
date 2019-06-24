@@ -121,7 +121,8 @@
       "hideOthers": "إخفاء الآخرين",
       "homepage": "موقع الكتروني",
       "preferences": "تفضيلات",
-      "quit": "قم بإنهاء برنامج SPlayer"
+      "quit": "قم بإنهاء برنامج SPlayer",
+      "showAll": "عرض الكل"
     },
     "subtitle": {
       "AITranslation": "تحديث الترجمة الذكية",

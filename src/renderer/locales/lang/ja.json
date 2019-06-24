@@ -121,7 +121,8 @@
       "hideOthers": "その他を隠す",
       "homepage": "ホームページ",
       "preferences": "環境設定",
-      "quit": "SPlayerを終了"
+      "quit": "SPlayerを終了",
+      "showAll": "すべて表示"
     },
     "subtitle": {
       "AITranslation": "トランスレーション結果を再読込",
