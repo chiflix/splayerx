@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-06-20 18:03:14
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-06-21 10:17:52
+ * @Last Modified time: 2019-06-24 11:53:02
  */
 
 import { splayerx } from 'electron';
@@ -32,6 +32,7 @@ export default class AudioHandler {
     this.streamClint = null;
     this.request = null;
     this.queue = [];
+    this.callback = null;
   }
 
   grabAudio() {
@@ -57,7 +58,7 @@ export default class AudioHandler {
       this.request.clearStreamingConfig();
       this.request.clearAudioContent();
       this.request.setAudioContent(framebuf);
-      this.streamClint.write(this.request);
+      // this.streamClint.write(this.request);
       // setImmediate(() => {
       //   this.grabAudio();
       // });
@@ -67,20 +68,23 @@ export default class AudioHandler {
     } else if (err === 'EOF') {
       this.request.clearAudioContent();
       this.request.setAudioContent(framebuf);
-      this.streamClint.write(this.request);
-      this.streamClint.end();
+      // this.streamClint.write(this.request);
+      // this.streamClint.end();
       this.streamClint = null;
       this.request = null;
+      console.warn('EOF');
+      this.callback();
     } else {
       console.error(err);
       // 如果不延迟处理，就会卡住
-      // setTimeout(() => {
-      //   this.grabAudio();
-      // }, 50);
+      setTimeout(() => {
+        this.grabAudio();
+      }, 20);
     }
   }
 
-  push(data) {
+  push(data, callback) {
+    data.callback = callback;
     if (this.queue) {
       this.queue.push(data);
     } else {
@@ -98,6 +102,7 @@ export default class AudioHandler {
     this.mediaHash = data.mediaHash;
     this.videoSrc = data.videoSrc;
     this.languageCode = data.languageCode;
+    this.callback = data.callback;
     // create stream client
     this.streamClint = this.openClient();
 
@@ -107,7 +112,7 @@ export default class AudioHandler {
     const c = new global.proto.google.cloud.speech.v1
       .RecognitionConfig([1, this.rate, this.languageCode]);
     this.request.setStreamingConfig(c);
-    this.streamClint.write(this.request);
+    // this.streamClint.write(this.request);
 
     // start grab data
     this.pts = '0';
@@ -127,7 +132,7 @@ export default class AudioHandler {
     const metadataCreds = grpc.credentials.createFromMetadataGenerator(metadataUpdater);
     const combinedCreds = grpc.credentials.combineChannelCredentials(sslCreds, metadataCreds);
     const client = new TrainngClient(endpoint, combinedCreds);
-    const stream = client.streamingTraining(this.rpcCallBack);
+    const stream = client.streamingTraining(this.rpcCallBack.bind(this));
     return stream;
   }
 

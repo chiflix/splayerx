@@ -37,6 +37,7 @@ export default {
     originSrc(v) {
       setTimeout(() => {
         audioGrabService.send({
+          time: Date.now(),
           videoSrc: v,
           mediaHash: this.mediaHash,
         });
@@ -62,10 +63,21 @@ export default {
     videodata.onTick = this.onUpdateTick;
     setTimeout(() => {
       audioGrabService.send({
+        time: Date.now(),
         videoSrc: this.originSrc,
         mediaHash: this.mediaHash,
       });
     }, 1000);
+    this.$electron.ipcRenderer.on('grab-audio-complete', (event, args) => {
+      // temp code
+      const coustTime = (Date.now() - args.time) / 1000;
+      this.$store.dispatch('addMessages', {
+        type: 'result',
+        title: '提取音频结束',
+        content: `花费时间 ${coustTime}s`,
+        dismissAfter: 10000,
+      });
+    });
   },
   beforeDestroy() {
     this.updateSubToTop(false);
