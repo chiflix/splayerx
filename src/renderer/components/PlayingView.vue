@@ -75,7 +75,7 @@ export default {
         type: 'result',
         title: '提取音频结束',
         content: `花费时间 ${coustTime}s`,
-        dismissAfter: 10000,
+        dismissAfter: 1000000,
       });
     });
   },
