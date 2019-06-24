@@ -201,7 +201,9 @@ export default {
       }
     },
     onRecentItemClick() {
-      this.onItemClick(this.index);
+      if (!this.isDragging && !this.shifting) {
+        this.onItemClick(this.index);
+      }
     },
   },
 };

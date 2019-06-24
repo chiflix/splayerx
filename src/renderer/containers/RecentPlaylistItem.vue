@@ -16,7 +16,6 @@
     >
       <div
         ref="blur"
-        v-if="imageLoaded"
         :style="{
           backgroundImage: !isPlaying ?
             `linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%), ${backgroundImage}`
@@ -251,6 +250,7 @@ export default {
   data() {
     return {
       recentPlayService: null,
+      mouseover: false,
       imageSrc: '',
       sliderPercentage: 0,
       displayIndex: NaN,
@@ -281,9 +281,6 @@ export default {
     backgroundImage() {
       return `url(${this.imageSrc})`;
     },
-    imageLoaded() {
-      return this.recentPlayService.imageLoaded;
-    },
     // ui related
     side() {
       return this.winWidth > 1355 ? this.thumbnailWidth / (112 / 14) : 14;
@@ -308,6 +305,11 @@ export default {
           this.$refs.info.style.opacity = '1';
           this.$refs.deleteUi.style.opacity = '0';
         });
+      }
+    },
+    canHoverItem(val: boolean, oldVal: boolean) {
+      if (!oldVal && val && this.mouseover) {
+        this.mouseoverVideo();
       }
     },
     items() {
@@ -444,6 +446,8 @@ export default {
     updateAnimationIn() {
       if (!this.isPlaying) {
         this.$refs.blur.classList.remove('blur');
+      } else {
+        return;
       }
       if (!this.itemMoving) this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,-9px)');
       this.$refs.content.style.setProperty('height', `${this.thumbnailHeight + 10}px`);
@@ -464,7 +468,8 @@ export default {
       this.$refs.progress.style.setProperty('opacity', '0');
     },
     mouseoverVideo() {
-      if (!this.isPlaying && this.isInRange && !this.isShifting
+      this.mouseover = true;
+      if (this.isInRange && !this.isShifting
         && this.canHoverItem && !this.itemMoving) {
         this.onItemMouseover(
           this.index,
@@ -474,6 +479,7 @@ export default {
       }
     },
     mouseoutVideo() {
+      this.mouseover = false;
       if (!this.itemMoving) {
         this.onItemMouseout();
         requestAnimationFrame(this.updateAnimationOut);
