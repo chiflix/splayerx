@@ -111,6 +111,8 @@
       "pause": "وقفة",
       "play": "لعب",
       "resetSpeed": "إعادة ضبط سرعة التشغيل",
+      "nextVideo": "الفيديو التالي",
+      "previousVideo": "الفيديو السابق",
       "singleCycle": "كرر مرة واحدة",
       "snapShot": "لمحة"
     },

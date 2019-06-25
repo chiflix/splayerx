@@ -590,6 +590,21 @@ new Vue({
             },
             { type: 'separator' },
             {
+              label: this.$t('msg.playback.nextVideo'),
+              accelerator: 'CmdOrCtrl+Right',
+              click: () => {
+                this.$bus.$emit('next-video');
+              },
+            },
+            {
+              label: this.$t('msg.playback.previousVideo'),
+              accelerator: 'CmdOrCtrl+Left',
+              click: () => {
+                this.$bus.$emit('previous-video');
+              },
+            },
+            { type: 'separator' },
+            {
               label: this.$t('msg.playback.singleCycle'),
               type: 'checkbox',
               id: 'singleCycle',
