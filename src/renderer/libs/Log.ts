@@ -1,7 +1,7 @@
 import { ILog } from '@/interfaces/ILog';
 import electron from 'electron';
 import winston from 'winston';
-import { join } from "path";
+import { join } from 'path';
 import Sentry from '../../shared/sentry';
 import mkdirp from 'mkdirp';
 import { checkPathExistSync, mkdirSync } from './file';
@@ -46,6 +46,9 @@ if (checkPathExistSync(defaultPath) || mkdirp.sync(defaultPath)) {
 }
 export default class Log implements ILog {
   private log(level: string, message: string, stack?: string | undefined) {
+    if (level in console) console[level](message);
+    else console.log(message);
+
     try {
       logger.log({
         time: new Date().toISOString(),
