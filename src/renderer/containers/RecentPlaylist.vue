@@ -80,6 +80,7 @@
             :key="item"
             :index="index"
             :path="item"
+            :paused="paused"
             :is-last-page="lastIndex === maxIndex && firstIndex > 0"
             :page-switching="pageSwitching"
             :item-moving="itemMoving"
@@ -154,6 +155,7 @@ export default {
       type: Object,
       default: () => {},
     },
+    paused: Boolean,
     displayState: Boolean,
     isDragging: Boolean,
     lastDragging: Boolean,

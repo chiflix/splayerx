@@ -70,8 +70,7 @@
                     height: sizeAdaption(22),
                     marginRight: sizeAdaption(4),
                   }"
-                  type="playlistplay"
-                  class="playlist-play"
+                  :type="paused ? 'playlistpause' : 'playlistplay'"
                 />
                 <div
                   :style="{
@@ -81,7 +80,7 @@
                   }"
                   class="playing"
                 >
-                  {{ $t('recentPlaylist.playing') }}
+                  {{ paused ? $t('recentPlaylist.paused') : $t('recentPlaylist.playing') }}
                 </div>
               </div>
             </transition>
@@ -213,6 +212,10 @@ export default {
     isPlaying: {
       type: Boolean,
       default: false,
+    },
+    paused: {
+      type: Boolean,
+      default: true,
     },
     // for base name
     path: {

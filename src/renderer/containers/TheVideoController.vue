@@ -26,6 +26,7 @@
       :display-state="displayState.RecentPlaylist"
       :mousemove-client-position="mousemoveClientPosition"
       :is-dragging="isDragging"
+      :paused="paused"
       :last-dragging.sync="lastDragging"
       v-bind.sync="widgetsStatus.RecentPlaylist"
       @can-hover-item="cancelPlayListTimeout"
