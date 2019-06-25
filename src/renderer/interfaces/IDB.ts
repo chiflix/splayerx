@@ -1,8 +1,8 @@
-import { LanguageCode } from "@/libs/language";
-import { Type } from "./ISubtitle";
+import { LanguageCode } from '@/libs/language';
+import { Type } from './ISubtitle';
 
 export type RawPlaylistItem = {
-  items: IDBValidKey[],
+  items: number[],
   hpaths: string[],
   lastOpened: number,
   playedIndex: number,
@@ -17,7 +17,7 @@ export type RawMediaItem = {
 }
 export type PlaylistItem = {
   id: number,
-  items: IDBValidKey[],
+  items: number[],
   hpaths: string[],
   lastOpened: number,
   playedIndex: number,
@@ -79,7 +79,6 @@ export interface IDB {
    * @param  {string} database
    * @param  {string} objectStore
    * @param  {RawMediaItem|RawPlaylistItem} data
-   * @returns {Promise<IDBValidKey>}
    * 向 database -> objectStore 中添加data，返回key值
    */
   add(objectStore: string, data: RawMediaItem | RawPlaylistItem): Promise<number>
@@ -88,7 +87,6 @@ export interface IDB {
    * @param  {string} objectStore
    * @param  {number} key
    * @param  {PlaylistItem|MediaItem} data
-   * @returns {Promise<IDBValidKey>}
    * 向 database -> objectStore 中更新主键为key的数据，返回key值
    */
   update(objectStore: string, key: number, data: PlaylistItem | MediaItem): Promise<number>
