@@ -231,7 +231,7 @@ export default {
     },
     // the difference between openFolder and openFile function
     // is the way they treat the situation of empty folders and error files
-    openFolder(...folders) {
+    async openFolder(...folders) {
       const files = [];
       let containsSubFiles = false;
       const subtitleFiles = [];
@@ -257,7 +257,7 @@ export default {
         }
       }
       if (videoFiles.length !== 0) {
-        this.createPlayList(...videoFiles);
+        await this.createPlayList(...videoFiles);
       } else {
         // TODO: no videoFiles in folders error catch
         log.error('helpers/index.js', 'There is no playable file in this folder.');
@@ -268,7 +268,7 @@ export default {
       }
     },
     // filter video and sub files
-    openFile(...files) {
+    async openFile(...files) {
       try {
         let containsSubFiles = false;
         const subtitleFiles = [];
@@ -298,15 +298,16 @@ export default {
         });
 
         if (videoFiles.length > 1) {
-          this.createPlayList(...videoFiles);
+          await this.createPlayList(...videoFiles);
         } else if (videoFiles.length === 1) {
-          this.openVideoFile(...videoFiles);
+          await this.openVideoFile(...videoFiles);
         }
         if (containsSubFiles) {
           this.$bus.$emit('add-subtitles', subtitleFiles);
         }
       } catch (ex) {
-        console.error(ex);
+        log.info('openFile', ex);
+        addBubble(OPEN_FAILED, this.$i18n);
       }
     },
     // open an existed play list
