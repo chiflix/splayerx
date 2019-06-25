@@ -41,9 +41,9 @@
               class="top"
             >
               <span v-show="lastPlayedTimeDisplay > 0">
-              {{
-                timecodeFromSeconds(lastPlayedTimeDisplay)
-              }} /
+                {{
+                  timecodeFromSeconds(lastPlayedTimeDisplay)
+                }} /
               </span>
               {{
                 timecodeFromSeconds(videoDuration)
