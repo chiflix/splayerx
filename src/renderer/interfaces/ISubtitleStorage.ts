@@ -10,5 +10,16 @@ export interface StoredSubtitle {
 export interface StoredSubtitleItem {
   hash: string;
   type: Type;
-  videoSegments: VideoSegment[];
+  videoSegments?: VideoSegment[];
+}
+interface PrimarySecondary<T> {
+  primary: T;
+  secondary: T;
+}
+export interface SubtitlePreference {
+  playlistId: number;
+  mediaId: string;
+  list: StoredSubtitleItem[];
+  language: PrimarySecondary<LanguageCode>;
+  selected: PrimarySecondary<string>;
 }
