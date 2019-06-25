@@ -102,7 +102,11 @@ export default {
       this.updatePlayinglistRate({
         oldDir: path.dirname(oldVal), newDir: path.dirname(val), playingList: this.playingList,
       });
-      this.playinglistRate.forEach((item: any) => {
+      this.playinglistRate.forEach((item: {
+        dirPath: string,
+        rate: number,
+        playingList: string[],
+      }) => {
         if (item.dirPath === path.dirname(val)) {
           this.$store.dispatch(videoActions.CHANGE_RATE, item.rate);
           this.nowRate = item.rate;

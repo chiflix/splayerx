@@ -129,6 +129,11 @@ import NotificationBubble from '@/components/NotificationBubble.vue';
 import { videodata } from '@/store/video';
 
 const { mapGetters: inputMapGetters } = createNamespacedHelpers('InputPlugin');
+/** dom wrapper */
+type NamedComponent = {
+  name: string,
+  element: Element,
+};
 
 export default {
   name: 'TheVideoController',
@@ -362,7 +367,7 @@ export default {
     });
     this.createTouchBar();
     this.UIElements = this.getAllUIComponents(this.$refs.controller);
-    this.UIElements.forEach((value: any) => {
+    this.UIElements.forEach((value: NamedComponent) => {
       this.displayState[value.name] = value.name !== 'RecentPlaylist';
       if (value.name === 'PlaylistControl' && !this.playingList.length) {
         this.displayState.PlaylistControl = false;
@@ -688,7 +693,7 @@ export default {
     handleKeyup({ code }: { code: number }) {
       this.updateKeyup({ releasedKeyboardCode: code });
     },
-    handleWheel({ target, timeStamp }: { target: any; timeStamp: number }) {
+    handleWheel({ target, timeStamp }: { target: Element; timeStamp: number }) {
       this.updateWheel({
         componentName: this.getComponentName(target),
         timestamp: timeStamp,
@@ -696,17 +701,17 @@ export default {
       });
     },
     // Helper functions
-    getAllUIComponents(rootElement: any) {
+    getAllUIComponents(rootElement: Element) {
       const { children } = rootElement;
-      const names: any[] = [];
+      const names: NamedComponent[] = [];
       for (let i = 0; i < children.length; i += 1) {
-        this.processSingleElement(children[i]).forEach((componentName: any) => {
+        this.processSingleElement(children[i]).forEach((componentName: NamedComponent) => {
           names.push(componentName);
         });
       }
       return names;
     },
-    isChildComponent(element: any) {
+    isChildComponent(element: Element) {
       let componentName = null;
       this.$children.forEach((childComponenet: any) => {
         if (childComponenet.$el === element) {
@@ -715,7 +720,7 @@ export default {
       });
       return componentName;
     },
-    processSingleElement(element: any) {
+    processSingleElement(element: Element) {
       const names = [];
       const name = this.isChildComponent(element);
       if (name) {
@@ -731,11 +736,11 @@ export default {
       }
       return names;
     },
-    getComponentName(element: any) {
+    getComponentName(element: Element) {
       let componentName = this.$options.name;
       if (element instanceof HTMLElement || element instanceof SVGElement) {
         /* eslint-disable consistent-return */
-        this.UIElements.forEach((UIElement: any) => {
+        this.UIElements.forEach((UIElement: NamedComponent) => {
           if (UIElement.element.contains(element)) {
             componentName = UIElement.name;
             return componentName;

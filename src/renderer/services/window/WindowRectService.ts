@@ -72,7 +72,7 @@ export default class WindowRectService implements IWindowRectRequest {
    */
   private calculateWindowPosition(currentRect: number[], windowRect: number[], newSize: number[]): number[] {
     const tempRect = currentRect.slice(0, 2)
-      .map((value, index) => Math.floor(value + (currentRect.slice(2, 4)[index] / 2)))
+      .map((value, index) => value + (currentRect.slice(2, 4)[index] / 2))
       .map((value, index) => Math.floor(value - (newSize[index] / 2))).concat(newSize);
     return ((windowRect, tempRect) => {
       const alterPos = (boundX: number, boundLength: number, videoX: number, videoLength: number) => {
