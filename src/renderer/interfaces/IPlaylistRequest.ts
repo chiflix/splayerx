@@ -7,7 +7,6 @@ export interface IPlaylistRequest {
   smallShortCut: string;
   lastPlayedTime: number;
   imageSrc: string | undefined;
-  imageLoaded: boolean;
   
   /**
    * @param  {string} mediaHash
