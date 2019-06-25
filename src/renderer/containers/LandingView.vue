@@ -310,9 +310,9 @@ export default {
     },
     onItemDelete(index: number) {
       this.item = {};
-      const deletedItem = this.landingViewItems.splice(index, 1);
+      const [deletedItem] = this.landingViewItems.splice(index, 1);
       if (this.firstIndex !== 0) this.lastIndex = this.landingViewItems.length;
-      playInfoStorageService.deleteRecentPlayedBy(deletedItem[0].id);
+      playInfoStorageService.deleteRecentPlayedBy(deletedItem.id);
     },
   },
 };
