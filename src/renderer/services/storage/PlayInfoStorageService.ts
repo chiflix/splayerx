@@ -52,15 +52,15 @@ export default class PlayInfoStorageService implements IPlayInfoStorable {
    * @param {number} playListID
    * @returns {Promise<boolean>} 返回布尔值, 是否成功更新
    */
-  async deleteRecentPlayedBy(playListID: number): Promise<boolean> {
+  async deleteRecentPlayedBy(playlistID: number): Promise<boolean> {
     try {
-      const { items } = await info.getValueByKey(RECENT_OBJECT_STORE_NAME, playListID);
+      const { items } = await info.getValueByKey(RECENT_OBJECT_STORE_NAME, playlistID);
       await Promise.all(items.map(async (item: number) => {
         try {
           await info.delete(VIDEO_OBJECT_STORE_NAME, item);
         } catch (err) {}
       }));
-      await info.delete(RECENT_OBJECT_STORE_NAME, playListID);
+      await info.delete(RECENT_OBJECT_STORE_NAME, playlistID);
       return true;
     } catch (error) {
       return false;

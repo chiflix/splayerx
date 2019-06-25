@@ -312,7 +312,7 @@ export default {
       this.item = {};
       const deletedItem = this.landingViewItems.splice(index, 1);
       if (this.firstIndex !== 0) this.lastIndex = this.landingViewItems.length;
-      playInfoStorageService.deleteRecentPlayedBy(deletedItem.id);
+      playInfoStorageService.deleteRecentPlayedBy(deletedItem[0].id);
     },
   },
 };
