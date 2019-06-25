@@ -193,10 +193,10 @@ import { mapActions, mapGetters, mapState } from 'vuex';
 import difference from 'lodash/difference';
 import debounce from 'lodash/debounce';
 import path, { extname } from 'path';
+import { AnimationItem } from 'lottie-web';
 import { Subtitle as subtitleActions, Input as InputActions } from '@/store/actionTypes';
 import { log } from '@/libs/Log';
 import lottie from '@/components/lottie.vue';
-import { AnimationItem } from 'lottie-web';
 import animationData from '@/assets/subtitle.json';
 import { deleteSubtitles } from '@/helpers/subtitle';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
@@ -745,7 +745,6 @@ export default {
       top: 0;
       background: rgba(0, 0, 0, 0.1);
       backdrop-filter: blur(10px);
-      clip-path: inset(0 round 7px);
     }
     .middle {
       width: 100%;
@@ -802,6 +801,7 @@ export default {
     border-radius: 7px;
     opacity: 0.4;
     border: 0.5px solid rgba(255, 255, 255, 0.20);
+    box-sizing: border-box;
     box-shadow: 0 1px 2px rgba(0, 0, 0, .2);
     background-image: radial-gradient(60% 134%,
       rgba(255, 255, 255, 0.09) 44%, rgba(255, 255, 255, 0.05) 100%);

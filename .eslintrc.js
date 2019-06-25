@@ -59,6 +59,19 @@ module.exports = {
         'EVENTS',
         'CONTENT'
       ]
-    }]
+    }],
+    // can use types to define Obejct
+    '@typescript-eslint/prefer-interface': 0,
+    // JSON style for interfaces && types
+    '@typescript-eslint/member-delimiter-style': {
+      'multiline': {
+        'delimiter': 'comma',
+        'requireLast': true
+      },
+      'singleline': {
+        "delimiter": 'comma',
+        'requireLast': false
+      }
+    },
   }
 }

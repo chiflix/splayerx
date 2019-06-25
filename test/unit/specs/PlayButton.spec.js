@@ -1,5 +1,5 @@
-import PlayButton from '@/components/PlayingView/PlayButton.vue';
 import { mount } from '@vue/test-utils';
+import PlayButton from '@/components/PlayingView/PlayButton.vue';
 
 describe('PlayButton.vue', () => {
   const propsData = {

@@ -40,12 +40,12 @@
   </div>
 </template>;
 <script lang="ts">
+import { mapGetters, mapActions } from 'vuex';
+import path from 'path';
 import { windowRectService } from '@/services/window/WindowRectService';
 import { playInfoStorageService } from '@/services/storage/PlayInfoStorageService';
 import { settingStorageService } from '@/services/storage/SettingStorageService';
 import { generateShortCutImageBy } from '@/libs/utils';
-import { mapGetters, mapActions } from 'vuex';
-import path from 'path';
 import { Video as videoActions } from '@/store/actionTypes';
 import { videodata } from '@/store/video';
 import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer.vue';
@@ -102,7 +102,11 @@ export default {
       this.updatePlayinglistRate({
         oldDir: path.dirname(oldVal), newDir: path.dirname(val), playingList: this.playingList,
       });
-      this.playinglistRate.forEach((item: any) => {
+      this.playinglistRate.forEach((item: {
+        dirPath: string,
+        rate: number,
+        playingList: string[],
+      }) => {
         if (item.dirPath === path.dirname(val)) {
           this.$store.dispatch(videoActions.CHANGE_RATE, item.rate);
           this.nowRate = item.rate;
