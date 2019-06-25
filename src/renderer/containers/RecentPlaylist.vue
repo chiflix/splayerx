@@ -46,7 +46,7 @@
                 }} /
               </span>
               {{
-                timecodeFromSeconds(videoDuration)
+                timecodeFromSeconds(hoveredDuration)
               }}&nbsp;&nbsp;·&nbsp;&nbsp;{{
                 inWhichSource
               }}&nbsp;&nbsp;{{ indexInPlaylist }} / {{ numberOfPlaylistItem }}
@@ -191,6 +191,7 @@ export default {
     };
   },
   created() {
+    window.addEventListener('keyup', this.keyBoardHandler);
     this.$bus.$on('delete-file', async (path: string, id: number) => {
       this.$store.dispatch('RemoveItemFromPlayingList', path);
       this.infoDB.delete('media-item', id);
@@ -206,6 +207,9 @@ export default {
     this.hoverIndex = this.playingIndex;
     this.filename = this.pathBaseName(this.originSrc);
   },
+  destroyed() {
+    window.removeEventListener('keyup', this.keyBoardHandler);
+  },
   methods: {
     ...mapMutations({
       updateMousemoveTarget: inputMutations.MOUSEMOVE_COMPONENT_NAME_UPDATE,
@@ -215,6 +219,21 @@ export default {
       clearMouseup: InputActions.MOUSEUP_UPDATE,
       updateSubToTop: subtitleActions.UPDATE_SUBTITLE_TOP,
     }),
+    keyBoardHandler(e: KeyboardEvent) {
+      if (this.displayState) {
+        if (e.keyCode === 39) {
+          this.shifting = true;
+          this.tranFlag = true;
+          this.firstIndex += this.thumbnailNumber;
+        } else if (e.keyCode === 37) {
+          this.shifting = true;
+          this.tranFlag = true;
+          this.lastIndex -= this.thumbnailNumber;
+        } else if (e.keyCode === 27) {
+          this.$emit('update:playlistcontrol-showattached', false);
+        }
+      }
+    },
     afterLeave() {
       this.backgroundDisplayState = false;
     },
@@ -432,6 +451,9 @@ export default {
       this.hoverIndex = this.playingIndex;
       this.filename = this.pathBaseName(this.originSrc);
     },
+    duration(val: number) {
+      if (val) this.hoveredDuration = val;
+    },
     playingList(val: string[]) {
       this.indexOfMovingItem = val.length;
     },
@@ -549,9 +571,6 @@ export default {
         return this.hoveredLastPlayedTime;
       }
       return this.currentTime;
-    },
-    videoDuration() {
-      return this.hoveredDuration;
     },
     indexInPlaylist() {
       return this.hoverIndex + 1;

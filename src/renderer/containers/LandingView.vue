@@ -260,7 +260,13 @@ export default {
         log.info('LandingView.vue', `sagi API Status: ${this.sagiHealthStatus}`);
       }
     });
-    window.onkeyup = (e) => {
+    window.addEventListener('keyup', this.keyBoardHandler);
+  },
+  destroyed() {
+    window.removeEventListener('keyup', this.keyBoardHandler);
+  },
+  methods: {
+    keyBoardHandler(e: KeyboardEvent) {
       if (e.keyCode === 39) {
         this.shifting = true;
         this.tranFlag = true;
@@ -270,9 +276,7 @@ export default {
         this.tranFlag = true;
         this.firstIndex = 0;
       }
-    };
-  },
-  methods: {
+    },
     open() {
       const { app } = this.$electron.remote;
       if (this.defaultDir) {

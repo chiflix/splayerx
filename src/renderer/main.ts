@@ -140,6 +140,7 @@ new Vue({
   data() {
     return {
       menu: null,
+      playlistDisplayState: false,
       topOnWindow: false,
       canSendVolumeGa: true,
       menuOperationLock: false, // 如果正在创建目录，就锁住所以操作目录的动作，防止野指针
@@ -236,8 +237,10 @@ new Vue({
     updateFullScreen() {
       if (this.isFullScreen) {
         return {
+          id: 'KeyboardEsc',
           label: this.$t('msg.window.exitFullScreen'),
           accelerator: 'Esc',
+          enabled: !this.playlistDisplayState,
           click: () => {
             this.$bus.$emit('off-fullscreen');
             this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
@@ -337,8 +340,20 @@ new Vue({
     this.$bus.$on('delete-file', () => {
       this.refreshMenu();
     });
+    this.$bus.$on('playlist-display-state', (e: boolean) => {
+      this.playlistDisplayState = e;
+    });
   },
   watch: {
+    playlistDisplayState(val: boolean) {
+      if (this.menu) {
+        if (this.menu.getMenuItemById('KeyboardEsc')) {
+          this.menu.getMenuItemById('KeyboardEsc').enabled = !val;
+        }
+        this.menu.getMenuItemById('KeyboardLeft').enabled = !val;
+        this.menu.getMenuItemById('KeyboardRight').enabled = !val;
+      }
+    },
     isSubtitleAvailable(val) {
       if (this.menu) {
         this.menu.getMenuItemById('increaseSubDelay').enabled = val;
@@ -553,15 +568,19 @@ new Vue({
           id: 'playback',
           submenu: [
             {
+              id: 'KeyboardRight',
               label: this.$t('msg.playback.forwardS'),
               accelerator: 'Right',
+              enabled: !this.playlistDisplayState,
               click: () => {
                 this.$bus.$emit('seek', videodata.time + 5);
               },
             },
             {
+              id: 'KeyboardLeft',
               label: this.$t('msg.playback.backwardS'),
               accelerator: 'Left',
+              enabled: !this.playlistDisplayState,
               click: () => {
                 this.$bus.$emit('seek', videodata.time - 5);
               },
