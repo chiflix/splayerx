@@ -11,6 +11,7 @@ export enum Format {
   SubRip = 'srt',
   SubStationAlpha = 'ssa',
   WebVTT = 'webvtt',
+  Unknown = 'unknown',
 }
 
 export interface Origin {
