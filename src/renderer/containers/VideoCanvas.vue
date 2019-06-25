@@ -90,6 +90,9 @@ export default {
     playListId(val: number, oldVal: number) {
       if (oldVal) this.saveScreenshot(oldVal, this.videoId);
     },
+    videoId(val: number, oldVal: number) {
+      if (!this.isFolderList) this.saveScreenshot(this.playListId, oldVal);
+    },
     originSrc(val: string, oldVal: string) {
       if (process.mas && oldVal) {
         this.$bus.$emit(`stop-accessing-${oldVal}`, oldVal);
