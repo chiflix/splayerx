@@ -398,6 +398,7 @@ export default {
   methods: {
     async updateUI() {
       await this.recentPlayService.getRecord(this.items[this.index]);
+      console.log(this.recentPlayService);
       this.imageSrc = this.recentPlayService.imageSrc;
       this.sliderPercentage = this.recentPlayService.percentage;
     },
