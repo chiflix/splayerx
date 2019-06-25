@@ -31,13 +31,13 @@ export default class PlayInfoStorageService implements IPlayInfoStorable {
   /**
    * @description 更新最近播放列表
    * @author tanghaixiang
-   * @param {number} playListID
+   * @param {number} playlistId
    * @param {PlaylistItem} data
    * @returns {Promise<boolean>} 返回布尔值, 是否成功更新
    */
-  async updateRecentPlayedBy(playListID: number, data: PlaylistItem): Promise<boolean> {
+  async updateRecentPlayedBy(playlistId: number, data: PlaylistItem): Promise<boolean> {
     try {
-      let playList = await info.getValueByKey(RECENT_OBJECT_STORE_NAME, playListID)
+      let playList = await info.getValueByKey(RECENT_OBJECT_STORE_NAME, playlistId)
       await info.update(RECENT_OBJECT_STORE_NAME, playList.id, { ...playList, ...data } as PlaylistItem);
       return true;
     } catch (error) {
@@ -49,18 +49,18 @@ export default class PlayInfoStorageService implements IPlayInfoStorable {
   /**
    * @description 删除播放列表
    * @author tanghaixiang
-   * @param {number} playListID
+   * @param {number} playlistId
    * @returns {Promise<boolean>} 返回布尔值, 是否成功更新
    */
-  async deleteRecentPlayedBy(playlistID: number): Promise<boolean> {
+  async deleteRecentPlayedBy(playlistId: number): Promise<boolean> {
     try {
-      const { items } = await info.getValueByKey(RECENT_OBJECT_STORE_NAME, playlistID);
+      const { items } = await info.getValueByKey(RECENT_OBJECT_STORE_NAME, playlistId);
       await Promise.all(items.map(async (item: number) => {
         try {
           await info.delete(VIDEO_OBJECT_STORE_NAME, item);
         } catch (err) {}
       }));
-      await info.delete(RECENT_OBJECT_STORE_NAME, playlistID);
+      await info.delete(RECENT_OBJECT_STORE_NAME, playlistId);
       return true;
     } catch (error) {
       return false;
