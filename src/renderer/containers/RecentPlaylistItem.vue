@@ -392,6 +392,9 @@ export default {
       this.path,
       this.items[this.index],
     );
+    this.recentPlayService.on('image-loaded', () => {
+      this.updateUI();
+    });
     this.updateUI();
     this.$bus.$on('database-saved', this.updateUI);
   },
