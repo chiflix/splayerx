@@ -6,12 +6,12 @@ import { times, get } from 'lodash';
 import bookmark from '@/helpers/bookmark';
 import syncStorage from '@/helpers/syncStorage';
 import infoDB from '@/helpers/infoDB';
+import { log } from '@/libs/Log';
 import { getValidVideoExtensions, getValidVideoRegex } from '@/../shared/utils';
 import {
-  FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED, ADD_NO_VIDEO,
+  EMPTY_FOLDER, OPEN_FAILED, ADD_NO_VIDEO,
   SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, FILE_NON_EXIST_IN_PLAYLIST, PLAYLIST_NON_EXIST,
 } from '@/../shared/notificationcodes';
-import Sentry from '@/../shared/sentry';
 import { addBubble } from '../../shared/notificationControl';
 
 import { ipcRenderer, remote } from 'electron'; // eslint-disable-line
@@ -223,16 +223,13 @@ export default {
         this.infoDB.update('recent-played', playlist, playlist.id);
         this.$store.dispatch('PlayingList', { id: playlist.id });
       } else {
-        this.addLog('error', {
-          errcode: ADD_NO_VIDEO,
-          message: 'Didn\'t add any playable file in this folder.',
-        });
+        log.error('helpers/index.js', 'Didn\'t add any playable file in this folder.');
         addBubble(ADD_NO_VIDEO, this.$i18n);
       }
     },
     // the difference between openFolder and openFile function
     // is the way they treat the situation of empty folders and error files
-    openFolder(...folders) {
+    async openFolder(...folders) {
       const files = [];
       let containsSubFiles = false;
       const subtitleFiles = [];
@@ -258,61 +255,57 @@ export default {
         }
       }
       if (videoFiles.length !== 0) {
-        this.createPlayList(...videoFiles);
+        await this.createPlayList(...videoFiles);
       } else {
         // TODO: no videoFiles in folders error catch
-        this.addLog('error', {
-          errcode: EMPTY_FOLDER,
-          message: 'There is no playable file in this folder.',
-        });
+        log.error('helpers/index.js', 'There is no playable file in this folder.');
         addBubble(EMPTY_FOLDER, this.$i18n);
       }
       if (containsSubFiles) {
         this.$bus.$emit('add-subtitles', subtitleFiles);
       }
     },
-    /* eslint-disable */
     // filter video and sub files
-    openFile(...files) {
-      let containsSubFiles = false;
-      const subtitleFiles = [];
-      const subRegex = new RegExp('\\.(srt|ass|vtt)$', 'i');
-      const videoFiles = [];
+    async openFile(...files) {
+      try {
+        let containsSubFiles = false;
+        const subtitleFiles = [];
+        const subRegex = new RegExp('\\.(srt|ass|vtt)$', 'i');
+        const videoFiles = [];
 
-      for (let i = 0; i < files.length; i += 1) {
-        if (fs.statSync(files[i]).isDirectory()) {
-          const dirPath = files[i];
-          const dirFiles = fs.readdirSync(dirPath).map(file => path.join(dirPath, file));
-          files.push(...dirFiles);
+        for (let i = 0; i < files.length; i += 1) {
+          if (fs.statSync(files[i]).isDirectory()) {
+            const dirPath = files[i];
+            const dirFiles = fs.readdirSync(dirPath).map(file => path.join(dirPath, file));
+            files.push(...dirFiles);
+          }
         }
-      }
 
-      for (let i = 0; i < files.length; i += 1) {
-        let tempFilePath = files[i];
-        let baseName = path.basename(tempFilePath);
-        if (baseName.startsWith('.') || fs.statSync(tempFilePath).isDirectory()) {
-          continue;
+        files.forEach((tempFilePath) => {
+          const baseName = path.basename(tempFilePath);
+          if (baseName.startsWith('.') || fs.statSync(tempFilePath).isDirectory()) return;
+          if (subRegex.test(path.extname(tempFilePath))) {
+            subtitleFiles.push({ src: tempFilePath, type: 'local' });
+            containsSubFiles = true;
+          } else if (getValidVideoRegex().test(path.extname(tempFilePath))) {
+            videoFiles.push(tempFilePath);
+          } else {
+            log.error('helpers/index.js', `Failed to open file : ${tempFilePath}`);
+            addBubble(OPEN_FAILED, this.$i18n);
+          }
+        });
+
+        if (videoFiles.length > 1) {
+          await this.createPlayList(...videoFiles);
+        } else if (videoFiles.length === 1) {
+          await this.openVideoFile(...videoFiles);
         }
-        if (subRegex.test(path.extname(tempFilePath))) {
-          subtitleFiles.push({ src: tempFilePath, type: 'local' });
-          containsSubFiles = true;
-        } else if (getValidVideoRegex().test(path.extname(tempFilePath))) {
-          videoFiles.push(tempFilePath);
-        } else {
-          this.addLog('error', {
-            errcode: OPEN_FAILED,
-            message: `Failed to open file : ${tempFilePath}`,
-          });
-          addBubble(OPEN_FAILED, this.$i18n);
+        if (containsSubFiles) {
+          this.$bus.$emit('add-subtitles', subtitleFiles);
         }
-      }
-      if (videoFiles.length > 1) {
-        this.createPlayList(...videoFiles);
-      } else if (videoFiles.length === 1) {
-        this.openVideoFile(...videoFiles);
-      }
-      if (containsSubFiles) {
-        this.$bus.$emit('add-subtitles', subtitleFiles);
+      } catch (ex) {
+        log.info('openFile', ex);
+        addBubble(OPEN_FAILED, this.$i18n);
       }
     },
     // open an existed play list
@@ -323,7 +316,7 @@ export default {
         let currentVideo = await this.infoDB.get('media-item', playlist.items[playlist.playedIndex]);
 
         const deleteItems = [];
-        for (const item of playlist.items) {
+        await Promise.all(playlist.items.map(async (item) => {
           const video = await this.infoDB.get('media-item', item);
           try {
             await fsPromises.access(video.path, fs.constants.F_OK);
@@ -331,7 +324,7 @@ export default {
             deleteItems.push(item);
             this.infoDB.delete('media-item', video.videoId);
           }
-        }
+        }));
         if (deleteItems.length > 0) {
           deleteItems.forEach((id) => {
             const index = playlist.items.findIndex(videoId => videoId === id);
@@ -351,7 +344,7 @@ export default {
         }
 
         await this.playFile(currentVideo.path, currentVideo.videoId);
-        let paths = [];
+        const paths = [];
         for (const videoId of playlist.items) {
           const mediaItem = await this.infoDB.get('media-item', videoId);
           paths.push(mediaItem.path);
@@ -365,21 +358,12 @@ export default {
         const video = await this.infoDB.get('media-item', playlist.items[playlist.playedIndex]);
         try {
           await fsPromises.access(video.path, fs.constants.F_OK);
-          this.playFile(video.path, video.videoId);
           let similarVideos;
           try {
             similarVideos = await this.findSimilarVideoByVidPath(video.path);
-            const singleItems = await this.infoDB.getValueByKey('media-item', 'source', '');
-            const filtered = singleItems.filter((item) => similarVideos.includes(item.path));
-            const items = [];
-            filtered.forEach((media) => {
-              const mediaIndex = similarVideos.findIndex(path => path === media.path);
-              items[mediaIndex] = media.videoId;
-            });
             this.$store.dispatch('FolderList', {
               id,
               paths: similarVideos,
-              items,
             });
           } catch (err) {
             if (process.mas && get(err, 'code') === 'EPERM') {
@@ -387,10 +371,11 @@ export default {
               this.$store.dispatch('FolderList', {
                 id,
                 paths: [video.path],
-                items: [video.videoId],
+                items: [playlist.items[0]],
               });
             }
           }
+          this.playFile(video.path, video.videoId);
         } catch (err) {
           this.infoDB.delete('recent-played', id);
           addBubble(PLAYLIST_NON_EXIST, this.$i18n);
@@ -415,21 +400,12 @@ export default {
     async openVideoFile(videoFile) {
       const id = await this.infoDB.addPlaylist([videoFile]);
       const playlistItem = await this.infoDB.get('recent-played', id);
-      this.playFile(videoFile, playlistItem.items[playlistItem.playedIndex]);
       let similarVideos;
       try {
         similarVideos = await this.findSimilarVideoByVidPath(videoFile);
-        const singleItems = await this.infoDB.getValueByKey('media-item', 'source', '');
-        const filtered = singleItems.filter((item) => similarVideos.includes(item.path));
-        const items = [];
-        filtered.forEach((media) => {
-          const mediaIndex = similarVideos.findIndex(path => path === media.path);
-          items[mediaIndex] = media.videoId;
-        });
         this.$store.dispatch('FolderList', {
           id,
           paths: similarVideos,
-          items,
         });
       } catch (err) {
         if (process.mas && get(err, 'code') === 'EPERM') {
@@ -437,20 +413,21 @@ export default {
           this.$store.dispatch('FolderList', {
             id,
             paths: [videoFile],
-            items: [playlistItem.items[playlistItem.playedIndex]],
+            items: [playlistItem.items[0]],
           });
         }
       }
+      this.playFile(videoFile, playlistItem.items[playlistItem.playedIndex]);
     },
     bookmarkAccessing(vidPath) {
       const bookmarkObj = syncStorage.getSync('bookmark');
-      if (bookmarkObj.hasOwnProperty(vidPath)) {
+      if (Object.prototype.hasOwnProperty.call(bookmarkObj, vidPath)) {
         const { app } = remote;
         const bookmark = bookmarkObj[vidPath];
         const stopAccessing = app.startAccessingSecurityScopedResource(bookmark);
         this.access.push({
           src: vidPath,
-          stopAccessing
+          stopAccessing,
         });
         this.$bus.$once(`stop-accessing-${vidPath}`, (e) => {
           get(this.access.find(item => item.src === e), 'stopAccessing')();
@@ -467,10 +444,7 @@ export default {
         mediaQuickHash = await this.mediaQuickHash(vidPath);
       } catch (err) {
         if (get(err, 'code') === 'ENOENT') {
-          this.addLog('error', {
-            errcode: FILE_NON_EXIST,
-            message: 'Failed to open file, it will be removed from list.'
-          });
+          log.error('helpers/index.js', 'Failed to open file, it will be removed from list.');
           addBubble(FILE_NON_EXIST_IN_PLAYLIST, this.$i18n);
           this.$bus.$emit('delete-file', vidPath, id);
         }
@@ -512,31 +486,6 @@ export default {
       }));
       fileHandler.close();
       return res.join('-');
-    },
-    addLog(level, log) {
-      switch (level) {
-        case 'error':
-          console.error(log);
-          if ((log instanceof Error || typeof log === 'string') && process.env.NODE_ENV !== 'development') {
-            this.$ga && this.$ga.exception(log.message || log);
-            Sentry.captureException(log);
-          }
-          break;
-        case 'warn':
-          console.warn(log);
-          break;
-        default:
-          console.log(log);
-      }
-
-      let normalizedLog;
-      if (!log || typeof log === 'string') {
-        normalizedLog = { message: log };
-      } else {
-        const { errcode, code, message, stack } = log;
-        normalizedLog = { errcode, code, message, stack };
-      }
-      ipcRenderer.send('writeLog', level, normalizedLog);
     },
     getTextWidth(fontSize, fontFamily, text) {
       const span = document.createElement('span');

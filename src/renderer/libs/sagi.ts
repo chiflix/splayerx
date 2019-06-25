@@ -1,5 +1,6 @@
 import path from 'path';
 import fs from 'fs';
+import { credentials, Metadata } from 'grpc';
 import Vue from 'vue';
 
 import { HealthCheckRequest, HealthCheckResponse } from 'sagi-api/health/v1/health_pb';
@@ -18,7 +19,7 @@ class Sagi {
     'apis.stage.sagittarius.ai:8443';
     // '127.0.0.1:8443'; // uncomment this when debuging
   constructor() {
-    const sslCreds = grpc.credentials.createSsl(
+    const sslCreds = credentials.createSsl(
       // How to access resources with fs see:
       // https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
       fs.readFileSync(path.join(__static, '/certs/ca.pem')),
@@ -26,7 +27,7 @@ class Sagi {
       fs.readFileSync(path.join(__static, '/certs/cert.pem')),
     );
     const metadataUpdater = (_: any, cb: Function) => {
-      const metadata = new grpc.Metadata();
+      const metadata = new Metadata();
       metadata.set('uuid', Vue.axios.defaults.headers.common['X-Application-Token']);
       metadata.set('agent', navigator.userAgent);
       Vue.axios.get('https://ip.xindong.com/myip', { responseType: 'text' }).then((response: any) => {
@@ -36,8 +37,8 @@ class Sagi {
         cb(null, metadata);
       });
     };
-    const metadataCreds = grpc.credentials.createFromMetadataGenerator(metadataUpdater);
-    const combinedCreds = grpc.credentials.combineChannelCredentials(sslCreds, metadataCreds);
+    const metadataCreds = credentials.createFromMetadataGenerator(metadataUpdater);
+    const combinedCreds = credentials.combineChannelCredentials(sslCreds, metadataCreds);
     this.creds = combinedCreds;
   }
 
@@ -110,7 +111,7 @@ class Sagi {
   }
 
   // check sagi-api health, return UNKNOWN(0), SERVING(1) or XXXXX
-  healthCheck() {
+  healthCheck(): Promise<HealthCheckResponse.AsObject> {
     const client = new HealthClient(this.endpoint, this.creds);
     return new Promise((resolve, reject) => {
       client.check(new HealthCheckRequest(), (err, response) => {

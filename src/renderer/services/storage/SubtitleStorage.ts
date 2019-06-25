@@ -113,29 +113,7 @@ class SubtitleDataBase {
     return v2Subtitle;
   }
   private async getDb() {
-    return this.db ? this.db : this.db = await openDB<DataDBV2>(
-      DATADB_NAME,
-      2,
-      { async upgrade(db, oldVersion, newVersion, transaction) {
-        const v1Db = db as unknown as IDBPDatabase<DataDBV1>;
-        if (oldVersion < 1)  v1Db.createObjectStore('subtitles');
-        if (oldVersion < 2) {
-          const infoDb = await openDB<InfoDBV3>(INFO_DATABASE_NAME, INFODB_VERSION);
-          const mediaItems = (await infoDb.getAll('media-item'))
-            .filter(({ preference }) => preference && preference.subtitle);
-          const allSubtitleIds = flatMap(mediaItems.map(({ preference }) => Object.values(preference.subtitle.selected)));
-          let cursor = await v1Db.transaction('subtitles', 'readonly').objectStore('subtitles').openCursor();
-          const allSubtitles = [];
-          while(cursor) {
-            if (allSubtitleIds.includes(cursor.key) && cursor.value.type !== 'embedded') allSubtitles.push(cursor.value);
-            cursor.continue();
-          }
-          // turn all the subtitles into v2 subtitle
-          // create the new subtitles object store
-          // add all v2 subtitles to the new object store
-        }
-      }},
-    );
+    return this.db ? this.db : this.db = await openDB<DataDBV2>(DATADB_NAME, 2);
   }
 
   async retrieveSubtitle(hash: string) {

@@ -40,12 +40,12 @@
   </div>
 </template>;
 <script lang="ts">
+import { mapGetters, mapActions } from 'vuex';
+import path from 'path';
 import { windowRectService } from '@/services/window/WindowRectService';
 import { playInfoStorageService } from '@/services/storage/PlayInfoStorageService';
 import { settingStorageService } from '@/services/storage/SettingStorageService';
 import { generateShortCutImageBy } from '@/libs/utils';
-import { mapGetters, mapActions } from 'vuex';
-import path from 'path';
 import { Video as videoActions } from '@/store/actionTypes';
 import { videodata } from '@/store/video';
 import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer.vue';
@@ -76,7 +76,9 @@ export default {
   computed: {
     ...mapGetters([
       'videoId', 'nextVideoId', 'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId', 'enabledSecondarySub', 'lastWinSize', 'lastChosenSize', 'subToTop',
-      'winSize', 'winPos', 'winAngle', 'isFullScreen', 'winWidth', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo', 'loop', 'playinglistRate', 'isFolderList', 'playingList', 'playingIndex', 'playListId', 'items']),
+      'winSize', 'winPos', 'winAngle', 'isFullScreen', 'winWidth', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo', 'loop', 'playinglistRate', 'isFolderList', 'playingList', 'playingIndex', 'playListId', 'items',
+      'previousVideo', 'previousVideoId',
+    ]),
     ...mapGetters({
       videoWidth: 'intrinsicWidth',
       videoHeight: 'intrinsicHeight',
@@ -87,8 +89,11 @@ export default {
     winAngle(val: number) {
       this.changeWindowRotate(val);
     },
-    videoId(val: string, oldVal: string) {
-      if (oldVal) this.saveScreenshot(oldVal);
+    playListId(val: number, oldVal: number) {
+      if (oldVal) this.saveScreenshot(oldVal, this.videoId);
+    },
+    videoId(val: number, oldVal: number) {
+      if (!this.isFolderList) this.saveScreenshot(this.playListId, oldVal);
     },
     originSrc(val: string, oldVal: string) {
       if (process.mas && oldVal) {
@@ -102,7 +107,11 @@ export default {
       this.updatePlayinglistRate({
         oldDir: path.dirname(oldVal), newDir: path.dirname(val), playingList: this.playingList,
       });
-      this.playinglistRate.forEach((item: any) => {
+      this.playinglistRate.forEach((item: {
+        dirPath: string,
+        rate: number,
+        playingList: string[],
+      }) => {
         if (item.dirPath === path.dirname(val)) {
           this.$store.dispatch(videoActions.CHANGE_RATE, item.rate);
           this.nowRate = item.rate;
@@ -152,6 +161,16 @@ export default {
         this.$store.commit('LOOP_UPDATE', false);
         if (this.isFolderList) this.openVideoFile(this.nextVideo);
         else this.playFile(this.nextVideo, this.nextVideoId);
+      } else {
+        this.$store.commit('LOOP_UPDATE', true);
+      }
+    });
+    this.$bus.$on('previous-video', () => {
+      videodata.paused = false;
+      if (this.previousVideo) {
+        this.$store.commit('LOOP_UPDATE', false);
+        if (this.isFolderList) this.openVideoFile(this.previousVideo);
+        else this.playFile(this.previousVideo, this.previousVideoId);
       } else {
         this.$store.commit('LOOP_UPDATE', true);
       }
@@ -265,7 +284,7 @@ export default {
       });
       windowRectService.uploadWindowBy(false, 'playing-view', this.winAngle, this.winAngleBeforeFullScreen, this.winSizeBeforeFullScreen, this.winPos);
     },
-    async saveScreenshot(videoId: string) {
+    async saveScreenshot(playlistId: number, videoId: number) {
       const { videoElement } = this;
       const canvas = this.$refs.thumbnailCanvas;
       // todo: use metaloaded to get videoHeight and videoWidth
@@ -292,7 +311,7 @@ export default {
       };
 
       await playInfoStorageService
-        .updateRecentPlayedBy(this.playListId, recentPlayedData as PlaylistItem);
+        .updateRecentPlayedBy(playlistId, recentPlayedData as PlaylistItem);
     },
     saveSubtitleStyle() {
       return settingStorageService.updateSubtitleStyle({
@@ -306,7 +325,7 @@ export default {
     },
     beforeUnloadHandler(e: Event) {
       if (!this.asyncTasksDone && !this.needToRestore) {
-        let savePromise = this.saveScreenshot(this.videoId);
+        let savePromise = this.saveScreenshot(this.playlistId, this.videoId);
         if (process.mas && this.$store.getters.source === 'drop') {
           savePromise = savePromise.then(async () => {
             await playInfoStorageService.deleteRecentPlayedBy(this.playListId);

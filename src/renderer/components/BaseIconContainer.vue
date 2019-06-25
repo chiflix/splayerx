@@ -156,6 +156,10 @@ export default {
   width: 100%;
   height: 100%;
 }
+.playlistpause {
+  width: 100%;
+  height: 100%;
+}
 
 .folder {
   width: 100%;

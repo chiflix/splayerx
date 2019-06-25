@@ -70,7 +70,6 @@ export default {
     top: 0;
     background: rgba(0, 0, 0, 0.1);
     backdrop-filter: blur(10px);
-    clip-path: inset(0 round var(--border-radius));
   }
   .middle {
     min-width: calc(var(--content-min-width) + 2px);
@@ -90,6 +89,7 @@ export default {
     background-color: transparent;
     box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
     display: flex;
+    overflow: hidden;
   }
 
 }

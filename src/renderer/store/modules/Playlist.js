@@ -4,7 +4,7 @@ import helpers from '@/helpers/index';
 
 const state = {
   source: '', // 'drop' or '', used on mas version
-  id: '',
+  id: NaN,
   items: [],
   playList: [],
   isFolderList: undefined,
@@ -37,6 +37,27 @@ const getters = {
       return list[0];
     }
     return '';
+  },
+  previousVideo: (state, getters) => {
+    const list = state.playList;
+    const index = list.findIndex(value => value === getters.originSrc);
+    if (!getters.singleCycle) {
+      if (index - 1 >= 0 && index - 1 < list.length) {
+        return list[index - 1];
+      }
+      return list[list.length - 1];
+    }
+    return '';
+  },
+  previousVideoId: (state, getters) => {
+    const index = state.items.findIndex(value => value === getters.videoId);
+    if (!getters.singleCycle) {
+      if (index - 1 >= 0 && index - 1 < state.items.length) {
+        return state.items[index - 1];
+      }
+      return state.items[state.items.length - 1];
+    }
+    return NaN;
   },
 };
 
@@ -72,10 +93,9 @@ const mutations = {
     }
   },
   InsertItemToPlayingList(state, item) {
-    if (item.newPosition >= 0) {
-      state.playList.splice(item.newPosition, 0, item.src);
-      state.items.splice(item.newPosition, 0, item.id);
-    }
+    if (item.newPosition < 0) item.newPosition = 0;
+    state.playList.splice(item.newPosition, 0, item.src);
+    state.items.splice(item.newPosition, 0, item.id);
   },
 };
 
@@ -89,7 +109,7 @@ const actions = {
   FolderList({ commit }, payload) {
     commit('isFolderList');
     commit('playList', payload.paths);
-    commit('items', payload.items);
+    if (payload.items) commit('items', payload.items);
     commit('id', payload.id);
   },
   RemoveItemFromPlayingList({ state, commit }, item) {

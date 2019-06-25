@@ -2,7 +2,7 @@
   <div class="nextVideo">
     <div class="nextVideo__plane">
       <div
-        :style="{ width: progress + '%' }"
+        :style="{ width: `${(progress/100)*217}px` }"
         class="nextVideo__progress"
       >
         <div class="progressGradient" />
@@ -158,7 +158,6 @@ export default {
     border-radius: 7px;
     background-color: rgba(0,0,0,0.2);
     backdrop-filter: blur(10px);
-    clip-path: inset(0px round 7px);
     box-shadow: 0 0 1px rgba(0,0,0,0.1);
   }
 

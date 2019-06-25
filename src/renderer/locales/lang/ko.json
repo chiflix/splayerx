@@ -111,6 +111,8 @@
       "pause": "중지",
       "play": "놀이",
       "resetSpeed": "재생 속도 재설정",
+      "nextVideo": "다음 동영상",
+      "previousVideo": "이전 비디오",
       "singleCycle": "하나 반복",
       "snapShot": "스냅 샷"
     },
@@ -121,7 +123,8 @@
       "hideOthers": "다른 사람 숨기기",
       "homepage": "웹 사이트",
       "preferences": "환경 설정",
-      "quit": "SPlayer 종료"
+      "quit": "SPlayer 종료",
+      "showAll": "모두 표시"
     },
     "subtitle": {
       "AITranslation": "스마트 번역 새로 고침",

@@ -15,12 +15,9 @@ export default class MediaStorageService implements IMediaStorable {
 
   /** 私有方法 获取路径下的视频元数据
    * @description MediaStorageService 内部方法
-   * @author tanghaixiang@xindong.com
-   * @date 2019-05-21
-   * @private
+   * @author tanghaixiang
    * @param {string} mediaHash
    * @returns {(Promise<VideoInfo | null>)}
-   * @memberof MediaStorageService
    */
   private readVideoInfo(mediaHash: string): Promise<VideoInfo | null> {
     return new Promise(async (resolve, reject) => {
@@ -52,12 +49,10 @@ export default class MediaStorageService implements IMediaStorable {
 
   /** 公开API 根据hash、tag，取得对应的图片路径
    * @description MediaStorageService 对 IMediaStorable接口的实现
-   * @author tanghaixiang@xindong.com
-   * @date 2019-05-21
+   * @author tanghaixiang
    * @param {string} mediaHash
    * @param {string} tag
    * @returns {(Promise<string | null>)} 返回文件路径，如果没有就是null
-   * @memberof MediaStorageService
    */
   async getImageBy(mediaHash: string, tag: string): Promise<string | null> {
     try {
@@ -70,12 +65,10 @@ export default class MediaStorageService implements IMediaStorable {
 
   /** 公开API 根据hash、tag，生成对应的图片将要存放的路径
    * @description MediaStorageService 对 IMediaStorable接口的实现
-   * @author tanghaixiang@xindong.com
-   * @date 2019-05-21
+   * @author tanghaixiang
    * @param {string} mediaHash
    * @param {string} tag
    * @returns {(Promise<string | null>)} 返回生成对应的路径
-   * @memberof MediaStorageService
    */
   async generatePathBy(mediaHash: string, tag: string): Promise<string | null> {
     try {

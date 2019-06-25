@@ -514,20 +514,20 @@ export default {
     updatePCVideoScaleByFactors(index: number) {
       const firstFactors = [21, 29, 37, 45];
       const secondFactors = [24, 26, 28, 30];
-      this.updateSubScale(`${(((firstFactors[index] / 900) * this.computedVideoSize)
-        + (secondFactors[index] / 5)) / 9}`);
+      this.updateSubScale((((firstFactors[index] / 900) * this.computedVideoSize)
+        + (secondFactors[index] / 5)) / 9);
     },
     // update video scale that height is larger than width
     updateMobileVideoScaleByFactors(index: number) {
       const firstFactors = [21, 29, 37, 45];
       const secondFactors = [12, -92, -196, -300];
-      this.updateSubScale(`${(((firstFactors[index] / 760) * this.computedVideoSize)
-        + (secondFactors[index] / 76)) / 9}`);
+      this.updateSubScale((((firstFactors[index] / 760) * this.computedVideoSize)
+        + (secondFactors[index] / 76)) / 9);
     },
     // update video scale when width or height is larger than 1080
     updateVideoScaleByFactors(val: number) {
       const factors = [30, 40, 50, 60];
-      this.updateSubScale(`${((val / 1080) * factors[this.chosenSize]) / 9}`);
+      this.updateSubScale(((val / 1080) * factors[this.chosenSize]) / 9);
     },
     switchAudioTrack(track: {id: string; kind: string; label: string;
       language: string; name: string; enabled: boolean;}) {

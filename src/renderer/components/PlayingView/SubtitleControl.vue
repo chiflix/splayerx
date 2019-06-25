@@ -193,9 +193,10 @@ import { mapActions, mapGetters, mapState } from 'vuex';
 import difference from 'lodash/difference';
 import debounce from 'lodash/debounce';
 import path, { extname } from 'path';
-import { Subtitle as subtitleActions, Input as InputActions } from '@/store/actionTypes';
-import lottie from '@/components/lottie.vue';
 import { AnimationItem } from 'lottie-web';
+import { Subtitle as subtitleActions, Input as InputActions } from '@/store/actionTypes';
+import { log } from '@/libs/Log';
+import lottie from '@/components/lottie.vue';
 import animationData from '@/assets/subtitle.json';
 // import SubtitleStorage from '@/services/storage/SubtitleStorage';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
@@ -476,10 +477,7 @@ export default {
       this.transFlag = true;
       if (timeout) {
         setTimeout(() => {
-          this.addLog('error', {
-            message: 'Request Timeout .',
-            errcode: REQUEST_TIMEOUT,
-          });
+          log.error('SubtitleControll.vue', 'Request Timeout .');
           this.$addBubble(REQUEST_TIMEOUT);
         }, 500);
       }
@@ -562,10 +560,7 @@ export default {
           this.$bus.$emit('off-subtitle');
         }
         deleteSubtitles([item.id], this.originSrc).then((result: any) => {
-          this.addLog(
-            'info',
-            `Subtitle delete { successId:${result.success}, failureId:${result.failure} }`,
-          );
+          log.info('SubtitleControl.vue', `Subtitle delete { successId:${result.success}, failureId:${result.failure} }`);
           this.transFlag = true;
         });
       }
@@ -608,10 +603,7 @@ export default {
           this.updateSubtitleType(true);
           this.$bus.$emit('refresh-subtitles', { types, isInitial: this.isInitial });
           if (!this.isInitial) {
-            this.addLog('info', {
-              message: 'Online subtitles loading .',
-              code: ONLINE_LOADING,
-            });
+            log.info('SubtitleControl.vue', 'Online subtitles loading .');
             this.$addBubble(ONLINE_LOADING);
           } else {
             setTimeout(() => {
@@ -631,10 +623,7 @@ export default {
           }, 10000);
         }
       } else {
-        this.addLog('error', {
-          message: 'Offline error .',
-          errcode: SUBTITLE_OFFLINE,
-        });
+        log.error('SubtitleConyrol.vue', 'Offline error .');
         this.$addBubble(SUBTITLE_OFFLINE);
       }
     },
@@ -761,7 +750,6 @@ export default {
       top: 0;
       background: rgba(0, 0, 0, 0.1);
       backdrop-filter: blur(10px);
-      clip-path: inset(0 round 7px);
     }
     .middle {
       width: 100%;
@@ -818,6 +806,7 @@ export default {
     border-radius: 7px;
     opacity: 0.4;
     border: 0.5px solid rgba(255, 255, 255, 0.20);
+    box-sizing: border-box;
     box-shadow: 0 1px 2px rgba(0, 0, 0, .2);
     background-image: radial-gradient(60% 134%,
       rgba(255, 255, 255, 0.09) 44%, rgba(255, 255, 255, 0.05) 100%);

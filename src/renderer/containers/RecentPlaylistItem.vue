@@ -16,7 +16,6 @@
     >
       <div
         ref="blur"
-        v-if="imageLoaded"
         :style="{
           backgroundImage: !isPlaying ?
             `linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%), ${backgroundImage}`
@@ -141,46 +140,50 @@
 <script lang="ts">
 import path from 'path';
 import { mapGetters } from 'vuex';
-import { filePathToUrl, parseNameFromPath } from '@/helpers/path';
-import { generateCoverPathByMediaHash } from '@/helpers/cacheFileStorage';
+import { parseNameFromPath } from '@/helpers/path';
+// @ts-ignore
 import Icon from '@/components/BaseIconContainer.vue';
-import { Event } from 'electron';
+import RecentPlayService from '@/services/media/PlaylistService';
+import { mediaStorageService } from '@/services/storage/MediaStorageService';
 
 export default {
   components: {
     Icon,
   },
   props: {
+    // index of current item
     index: {
       type: Number,
       default: NaN,
     },
-    maxIndex: {
-      type: Number,
-      default: 0,
-    },
     hovered: {
       type: Boolean,
     },
+    // for moving
     itemMoving: {
       type: Boolean,
     },
+    // for moving
     indexOfMovingItem: {
       type: Number,
       default: NaN,
     },
+    // for moving
     movementX: {
       type: Number,
       default: 0,
     },
+    // for moving
     movementY: {
       type: Number,
       default: 0,
     },
+    // for moving
     indexOfMovingTo: {
       type: Number,
       default: NaN,
     },
+    // for moving
     isLastPage: {
       type: Boolean,
     },
@@ -188,9 +191,6 @@ export default {
       type: Boolean,
     },
     isShifting: {
-      type: Boolean,
-    },
-    isFolderList: {
       type: Boolean,
     },
     canHoverItem: {
@@ -214,12 +214,29 @@ export default {
       type: Boolean,
       default: false,
     },
+    // for base name
     path: {
       type: String,
       default: '',
     },
-    eventTarget: {
-      type: Object,
+    onItemMousemove: {
+      type: Function,
+      required: true,
+    },
+    onItemMousedown: {
+      type: Function,
+      required: true,
+    },
+    onItemMouseup: {
+      type: Function,
+      required: true,
+    },
+    onItemMouseout: {
+      type: Function,
+      required: true,
+    },
+    onItemMouseover: {
+      type: Function,
       required: true,
     },
     sizeAdaption: {
@@ -232,15 +249,10 @@ export default {
   },
   data() {
     return {
-      showVideo: false,
-      videoId: NaN,
-      coverSrc: '',
-      lastPlayedTime: 0,
-      mediaInfo: { path: this.path },
-      smallShortCut: '',
-      imgPath: '',
-      videoHeight: 0,
-      videoWidth: 0,
+      recentPlayService: null,
+      mouseover: false,
+      imageSrc: '',
+      sliderPercentage: 0,
       displayIndex: NaN,
       tranFlag: true,
       outOfWindow: false,
@@ -269,27 +281,7 @@ export default {
     backgroundImage() {
       return `url(${this.imageSrc})`;
     },
-    imageSrc() {
-      if (this.lastPlayedTime) {
-        if (this.mediaInfo.duration - this.lastPlayedTime < 10) {
-          return this.coverSrc;
-        }
-        return this.smallShortCut;
-      }
-      return this.coverSrc;
-    },
-    imageLoaded() {
-      return this.smallShortCut || this.coverSrc !== '';
-    },
-    sliderPercentage() {
-      if (this.lastPlayedTime) {
-        if (this.mediaInfo.duration
-            && this.lastPlayedTime / this.mediaInfo.duration <= 1) {
-          return (this.lastPlayedTime / this.mediaInfo.duration) * 100;
-        }
-      }
-      return 0;
-    },
+    // ui related
     side() {
       return this.winWidth > 1355 ? this.thumbnailWidth / (112 / 14) : 14;
     },
@@ -315,8 +307,13 @@ export default {
         });
       }
     },
+    canHoverItem(val: boolean, oldVal: boolean) {
+      if (!oldVal && val && this.mouseover) {
+        this.mouseoverVideo();
+      }
+    },
     items() {
-      this.getLastPlayedInfo();
+      this.updateUI();
     },
     isPlaying(val: boolean) {
       if (val) {
@@ -388,37 +385,27 @@ export default {
       }, 0);
     },
   },
-  mounted() {
+  created() {
     this.displayIndex = this.index;
-    this.$electron.ipcRenderer.send('mediaInfo', this.path);
-    this.$electron.ipcRenderer.once(`mediaInfo-${this.path}-reply`, async (event: Event, info: any) => {
-      const videoStream = JSON.parse(info).streams.find((stream: any) => stream.codec_type === 'video');
-      this.videoHeight = videoStream.height;
-      this.videoWidth = videoStream.width;
-      this.mediaInfo = Object.assign(this.mediaInfo, JSON.parse(info).format);
-      const quickHash = await this.mediaQuickHash(this.path);
-      const imgPath = await generateCoverPathByMediaHash(quickHash);
-      this.$electron.ipcRenderer.send('snapShot', {
-        videoPath: this.path,
-        imgPath,
-        quickHash,
-        duration: this.mediaInfo.duration,
-        videoWidth: this.videoWidth,
-        videoHeight: this.videoHeight,
-      });
+    this.recentPlayService = new RecentPlayService(
+      mediaStorageService,
+      this.path,
+      this.items[this.index],
+    );
+    this.recentPlayService.on('image-loaded', () => {
+      this.updateUI();
     });
-    this.$electron.ipcRenderer.once(`snapShot-${this.path}-reply`, (event: Event, imgPath: string) => {
-      this.coverSrc = filePathToUrl(`${imgPath}`);
-      this.imgPath = imgPath;
-    });
-    this.getLastPlayedInfo();
-    this.$bus.$on('database-saved', () => {
-      this.getLastPlayedInfo();
-    });
+    this.updateUI();
+    this.$bus.$on('database-saved', this.updateUI);
   },
   methods: {
+    async updateUI() {
+      await this.recentPlayService.getRecord(this.items[this.index]);
+      this.imageSrc = this.recentPlayService.imageSrc;
+      this.sliderPercentage = this.recentPlayService.percentage;
+    },
     mousedownVideo(e: MouseEvent) {
-      this.eventTarget.onItemMousedown(this.index, e.pageX, e.pageY, e);
+      this.onItemMousedown(this.index, e.pageX, e.pageY, e);
       if (this.isPlaying) return;
       document.onmousemove = (e) => {
         this.selfMoving = true;
@@ -427,7 +414,7 @@ export default {
         this.$refs.content.style.zIndex = 200;
         this.outOfWindow = e.pageX > window.innerWidth || e.pageX < 0
           || e.pageY > window.innerHeight || e.pageY < 0;
-        this.eventTarget.onItemMousemove(this.index, e.pageX, e.pageY, e);
+        this.onItemMousemove(this.index, e.pageX, e.pageY, e);
         requestAnimationFrame(() => {
           this.$refs.recentPlaylistItem.style.setProperty('transform', `translate(${this.movementX}px, ${this.movementY}px)`);
         });
@@ -443,8 +430,8 @@ export default {
           this.$refs.content.style.zIndex = 10;
           this.updateAnimationOut();
         });
-        this.eventTarget.onItemMouseout();
-        this.eventTarget.onItemMouseup(this.index);
+        this.onItemMouseout();
+        this.onItemMouseup(this.index);
       };
     },
     mouseupVideo() {
@@ -457,11 +444,13 @@ export default {
         this.$refs.recentPlaylistItem.style.zIndex = 0;
         this.$refs.content.style.zIndex = 10;
       });
-      this.eventTarget.onItemMouseup(this.index);
+      this.onItemMouseup(this.index);
     },
     updateAnimationIn() {
-      if (!this.isPlaying && this.imageLoaded) {
+      if (!this.isPlaying) {
         this.$refs.blur.classList.remove('blur');
+      } else {
+        return;
       }
       if (!this.itemMoving) this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,-9px)');
       this.$refs.content.style.setProperty('height', `${this.thumbnailHeight + 10}px`);
@@ -472,7 +461,7 @@ export default {
       }
     },
     updateAnimationOut() {
-      if (!this.isPlaying && this.imageLoaded) {
+      if (!this.isPlaying) {
         this.$refs.blur.classList.add('blur');
       }
       if (!this.itemMoving) this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,0)');
@@ -482,31 +471,21 @@ export default {
       this.$refs.progress.style.setProperty('opacity', '0');
     },
     mouseoverVideo() {
-      if (!this.isPlaying && this.isInRange && !this.isShifting
+      this.mouseover = true;
+      if (this.isInRange && !this.isShifting
         && this.canHoverItem && !this.itemMoving) {
-        this.eventTarget.onItemMouseover(this.index, this.mediaInfo);
+        this.onItemMouseover(
+          this.index,
+          this.recentPlayService,
+        );
         requestAnimationFrame(this.updateAnimationIn);
       }
     },
     mouseoutVideo() {
+      this.mouseover = false;
       if (!this.itemMoving) {
-        this.eventTarget.onItemMouseout();
+        this.onItemMouseout();
         requestAnimationFrame(this.updateAnimationOut);
-      }
-    },
-    getLastPlayedInfo() {
-      this.videoId = this.items[this.index];
-      if (this.videoId) {
-        this.infoDB.get('media-item', this.videoId).then((val: any) => {
-          if (!val || !val.lastPlayedTime) {
-            this.lastPlayedTime = 0;
-            this.smallShortCut = '';
-          } else if (val && val.lastPlayedTime) {
-            this.lastPlayedTime = val.lastPlayedTime;
-            this.smallShortCut = val.smallShortCut;
-          }
-          this.mediaInfo = Object.assign(this.mediaInfo, val);
-        });
       }
     },
   },
@@ -522,7 +501,6 @@ $border-radius: 3px;
     background-color: rgba(111,111,111,0.30);
     .blur {
       filter: blur(1.5px);
-      clip-path: inset(0 round $border-radius);
     }
     .img {
       position: absolute;

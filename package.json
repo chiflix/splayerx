@@ -2,7 +2,7 @@
   "name": "splayer",
   "productName": "splayer",
   "homepage": "https://splayer.org",
-  "version": "4.1.13",
+  "version": "4.1.14",
   "author": "tomasen <tomasen@gmail.com>",
   "description": "a media player",
   "license": "GPL-3.0-or-later",
@@ -520,7 +520,8 @@
     "vue-i18n": "^7.7.0",
     "vue-router": "^3.0.2",
     "vuex": "^3.0.1",
-    "winston": "^3.1.0"
+    "winston": "^3.1.0",
+    "winston-daily-rotate-file": "^3.9.0"
   },
   "optionalDependencies": {
     "win-mouse": "github:ipy/win-mouse"
@@ -545,7 +546,7 @@
     "@babel/plugin-syntax-import-meta": "^7.0.0",
     "@babel/preset-env": "^7.0.0",
     "@babel/register": "^7.0.0",
-    "@chiflix/electron": "^5.0.1",
+    "@chiflix/electron": "^5.0.4",
     "@types/chai": "^4.1.7",
     "@types/lodash": "^4.14.134",
     "@types/mkdirp": "^0.5.2",

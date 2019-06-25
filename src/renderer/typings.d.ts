@@ -1,5 +1,4 @@
 import Vue, { VNode } from 'vue';
-import VueResource from 'vue-resource';
 import { AxiosInstance } from 'axios';
 
 declare module '*.vue' {
