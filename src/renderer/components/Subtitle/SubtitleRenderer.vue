@@ -53,7 +53,7 @@
 </template>
 <script lang="ts">
 import { isEqual } from 'lodash';
-import { Cue, TagsPartial } from '@/interfaces/ISubtitle';
+import { Cue, Tags } from '@/interfaces/ISubtitle';
 
 export default {
   name: 'SubtitleRenderer',
@@ -180,14 +180,14 @@ export default {
     },
   },
   methods: {
-    calculatePosition(category: string, tags: TagsPartial) {
+    calculatePosition(category: string, tags: Tags) {
       const type = category === 'first' ? this.firstType : this.secondType;
       if (type !== 'vtt') {
         return !!tags.pos;
       }
       return tags.line && tags.position;
     },
-    calculateAlignment(category: string, tags: TagsPartial) {
+    calculateAlignment(category: string, tags: Tags) {
       const type = category === 'first' ? this.firstType : this.secondType;
       if (type !== 'vtt') {
         return !tags || !tags.alignment ? 2 : tags.alignment;

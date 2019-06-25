@@ -56,6 +56,15 @@ export interface Tags {
   // size: string;
   // align: string';
 }
+export type Cue = {
+  category?: string,
+  start: number,
+  end: number,
+  text: string,
+  hide?: boolean,
+  format: string,
+  tags: Tags,
+}
 export interface Dialogue {
   start: number;
   end: number;

@@ -1,4 +1,4 @@
-import { IDialogueTag } from '../parsers';
+import { Tags } from '@/interfaces/ISubtitle';
 import { detect } from 'chardet';
 import { encodingExists, decode } from 'iconv-lite';
 import { open, read, close, readFile } from 'fs-extra';
@@ -14,7 +14,7 @@ import { Format } from '@/interfaces/ISubtitle';
  * @param {object} baseTags - default tags for the cue.
  * @returns {object} tags object for the cue
  */
-export function tagsGetter(text: string, baseTags: IDialogueTag) {
+export function tagsGetter(text: string, baseTags: Tags) {
   const tagRegex = /\{[^{}]*\}/g;
   const matchTags = text.match(tagRegex);
   const finalTags = { ...baseTags };

@@ -1,3 +1,4 @@
+// @ts-ignore
 import PQueue from 'p-queue';
 import Sagi from '@/libs/sagi';
 import { TrainingData } from 'sagi-api/training/v1/training_pb';

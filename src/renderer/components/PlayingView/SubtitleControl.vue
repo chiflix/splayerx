@@ -197,7 +197,7 @@ import { Subtitle as subtitleActions, Input as InputActions } from '@/store/acti
 import lottie from '@/components/lottie.vue';
 import { AnimationItem } from 'lottie-web';
 import animationData from '@/assets/subtitle.json';
-import { deleteSubtitles } from '@/helpers/subtitle';
+// import SubtitleStorage from '@/services/storage/SubtitleStorage';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import Icon from '../BaseIconContainer.vue';
 import {
@@ -205,6 +205,11 @@ import {
   SUBTITLE_OFFLINE,
   REQUEST_TIMEOUT,
 } from '../../../shared/notificationcodes';
+
+const deleteSubtitles = (subtitles: any[], videoSrc: string) => Promise.resolve([
+  subtitles,
+  videoSrc,
+]);
 
 export default {
   name: 'SubtitleControl',
@@ -556,7 +561,7 @@ export default {
         if (item.id === this.currentFirstSubtitleId) {
           this.$bus.$emit('off-subtitle');
         }
-        deleteSubtitles([item.id], this.originSrc).then((result) => {
+        deleteSubtitles([item.id], this.originSrc).then((result: any) => {
           this.addLog(
             'info',
             `Subtitle delete { successId:${result.success}, failureId:${result.failure} }`,

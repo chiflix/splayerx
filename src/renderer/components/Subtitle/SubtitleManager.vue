@@ -46,12 +46,16 @@ import {
 import transcriptQueue from '@/helpers/subtitle/push';
 import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import SubtitleRenderer from './SubtitleRenderer.vue';
-import SubtitleLoader from './SubtitleLoader';
-import { localLanguageLoader } from './SubtitleLoader/utils';
 import {
   LOCAL_SUBTITLE_REMOVED, REQUEST_TIMEOUT, SUBTITLE_UPLOAD, UPLOAD_SUCCESS, UPLOAD_FAILED,
 } from '../../../shared/notificationcodes';
 
+class SubtitleLoader {
+  static supportedFormats = [];
+
+  static supportedCodecs = [];
+}
+const localLanguageLoader = () => {};
 export default {
   name: 'SubtitleManager',
   components: {

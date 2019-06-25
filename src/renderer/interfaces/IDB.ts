@@ -1,5 +1,5 @@
 import { LanguageCode } from "@/libs/language";
-import { SubtitleType } from "./ISubtitle";
+import { Type } from "./ISubtitle";
 
 export type RawPlaylistItem = {
   items: IDBValidKey[],
@@ -28,7 +28,7 @@ export type SubtitlePreferenceListItem = {
   language: LanguageCode,
   rank: number,
   src: string,
-  type: SubtitleType,
+  type: Type,
   // todo: type videoSegments
   videoSegments: [],
 }
@@ -47,7 +47,7 @@ export type SubtitlePreference = {
 export type MediaItemPreference = {
   subtitle: SubtitlePreference
 }
- 
+
 /** MediaItem 全量结构 */
 export type MediaItem = {
   audioTrackId: number

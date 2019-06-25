@@ -12,7 +12,6 @@ import {
   SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, FILE_NON_EXIST_IN_PLAYLIST, PLAYLIST_NON_EXIST,
 } from '@/../shared/notificationcodes';
 import Sentry from '@/../shared/sentry';
-import Sagi from './sagi';
 import { addBubble } from '../../shared/notificationControl';
 
 import { ipcRenderer, remote } from 'electron'; // eslint-disable-line
@@ -24,7 +23,6 @@ export default {
     return {
       clock,
       infoDB,
-      sagi: Sagi,
       showingPopupDialog: false,
       access: [],
     };

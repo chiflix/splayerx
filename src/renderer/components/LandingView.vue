@@ -127,6 +127,7 @@ import Titlebar from './Titlebar.vue';
 import NotificationBubble from './NotificationBubble.vue';
 import PlaylistItem from './LandingView/PlaylistItem.vue';
 import VideoItem from './LandingView/VideoItem.vue';
+import Sagi from '@/libs/sagi';
 
 Vue.component('PlaylistItem', PlaylistItem);
 Vue.component('VideoItem', VideoItem);
@@ -272,7 +273,7 @@ export default {
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [720, 405]);
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [720 / 405]);
 
-    this.sagi.healthCheck().then((status) => {
+    Sagi.healthCheck().then((status) => {
       if (process.env.NODE_ENV !== 'production') {
         this.sagiHealthStatus = status;
         this.addLog('info', `launching: ${app.getName()} ${app.getVersion()}`);
