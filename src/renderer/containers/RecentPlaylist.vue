@@ -442,6 +442,7 @@ export default {
     },
     onItemMouseout() {
       this.hoverIndex = this.playingIndex;
+      this.hoveredDuration = this.duration;
       this.filename = this.pathBaseName(this.originSrc);
     },
   },
