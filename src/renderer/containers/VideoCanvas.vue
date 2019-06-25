@@ -76,7 +76,9 @@ export default {
   computed: {
     ...mapGetters([
       'videoId', 'nextVideoId', 'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId', 'enabledSecondarySub', 'lastWinSize', 'lastChosenSize', 'subToTop',
-      'winSize', 'winPos', 'winAngle', 'isFullScreen', 'winWidth', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo', 'loop', 'playinglistRate', 'isFolderList', 'playingList', 'playingIndex', 'playListId', 'items']),
+      'winSize', 'winPos', 'winAngle', 'isFullScreen', 'winWidth', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo', 'loop', 'playinglistRate', 'isFolderList', 'playingList', 'playingIndex', 'playListId', 'items',
+      'previousVideo', 'previousVideoId',
+    ]),
     ...mapGetters({
       videoWidth: 'intrinsicWidth',
       videoHeight: 'intrinsicHeight',
@@ -156,6 +158,16 @@ export default {
         this.$store.commit('LOOP_UPDATE', false);
         if (this.isFolderList) this.openVideoFile(this.nextVideo);
         else this.playFile(this.nextVideo, this.nextVideoId);
+      } else {
+        this.$store.commit('LOOP_UPDATE', true);
+      }
+    });
+    this.$bus.$on('previous-video', () => {
+      videodata.paused = false;
+      if (this.previousVideo) {
+        this.$store.commit('LOOP_UPDATE', false);
+        if (this.isFolderList) this.openVideoFile(this.previousVideo);
+        else this.playFile(this.previousVideo, this.previousVideoId);
       } else {
         this.$store.commit('LOOP_UPDATE', true);
       }

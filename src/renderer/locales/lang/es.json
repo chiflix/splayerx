@@ -111,6 +111,8 @@
       "pause": "Pausa",
       "play": "Jugar",
       "resetSpeed": "Restablecer velocidad de reproducción",
+      "nextVideo": "Siguiente Video",
+      "previousVideo": "Video Anterior",
       "singleCycle": "Repetir una",
       "snapShot": "Instantánea"
     },

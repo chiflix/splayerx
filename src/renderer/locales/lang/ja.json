@@ -111,6 +111,8 @@
       "pause": "停止",
       "play": "プレイ",
       "resetSpeed": "重置播放速度",
+      "nextVideo": "次のビデオ",
+      "previousVideo": "前のビデオ",
       "singleCycle": "リピート",
       "snapShot": "スナップショット"
     },
