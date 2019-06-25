@@ -7,6 +7,9 @@ import { info } from '@/libs/DataBase';
 import { MediaItem } from '@/interfaces/IDB';
 import { EventEmitter } from 'events';
 
+interface PlaylistEvent {
+  "image-loaded": Event
+}
 export default class PlaylistService extends EventEmitter implements IPlaylistRequest {
   coverSrc: string;
   duration: any;
@@ -47,6 +50,9 @@ export default class PlaylistService extends EventEmitter implements IPlaylistRe
       }
     });
     this.getRecord(videoId);
+  }
+  on<K extends keyof PlaylistEvent>(type: K, listener: (...args: any[]) => void): this {
+    return super.on(type, listener);
   }
    /**
    * @param  {string} mediaHash
