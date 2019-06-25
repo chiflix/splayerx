@@ -5,8 +5,8 @@
  * @Last Modified time: 2019-03-01 13:35:13
  */
 
-import helpers from '@/helpers';
 import { writeFileSync } from 'fs';
+import helpers from '@/helpers';
 import {
   getVideoInfoByMediaHash,
   generateThumbnailPathByMediaHash,
