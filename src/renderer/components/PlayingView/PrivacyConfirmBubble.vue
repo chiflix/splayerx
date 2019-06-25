@@ -139,17 +139,14 @@ export default {
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
   screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
     border-radius: 7px;
-    clip-path: inset(0px round 7px);
   }
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
   screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
     border-radius: 8.4px;
-    clip-path: inset(0px round 8.4px);
   }
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
   screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     border-radius: 11.76px;
-    clip-path: inset(0px round 11.76px);
   }
 }
 .plane {
@@ -160,17 +157,14 @@ export default {
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
   screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
     border-radius: 7px;
-    clip-path: inset(0px round 7px);
   }
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
   screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
     border-radius: 8.4px;
-    clip-path: inset(0px round 8.4px);
   }
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
   screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     border-radius: 11.76px;
-    clip-path: inset(0px round 11.76px);
   }
   .content {
     display: flex;
@@ -372,7 +366,6 @@ export default {
           radial-gradient(60% 134%, rgba(255,255,255,0.09) 44%, rgba(255,255,255,0.05) 100%);
 
         backdrop-filter: blur(3px);
-        clip-path: inset(0px round 11px);
       }
       @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
       screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
@@ -383,7 +376,6 @@ export default {
           radial-gradient(60% 134%, rgba(255,255,255,0.09) 44%, rgba(255,255,255,0.05) 100%);
 
         backdrop-filter: blur(3px);
-        clip-path: inset(0px round 13.2px);
       }
       @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
       screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
@@ -394,7 +386,6 @@ export default {
           radial-gradient(60% 134%, rgba(255,255,255,0.09) 44%, rgba(255,255,255,0.05) 100%);
 
         backdrop-filter: blur(5px);
-        clip-path: inset(0px round 18.5px);
       }
       &:active {
         background-image: none;

@@ -498,7 +498,6 @@ $border-radius: 3px;
     background-color: rgba(111,111,111,0.30);
     .blur {
       filter: blur(1.5px);
-      clip-path: inset(0 round $border-radius);
     }
     .img {
       position: absolute;
