@@ -276,6 +276,38 @@
           ],
           "role": "Viewer",
           "icon": "build/icons/wmv.icns"
+        },
+        {
+          "name": "SRT",
+          "ext": [
+            "srt"
+          ],
+          "role": "Viewer",
+          "icon": "build/icons/srt.icns"
+        },
+        {
+          "name": "ASS",
+          "ext": [
+            "ass"
+          ],
+          "role": "Viewer",
+          "icon": "build/icons/ass.icns"
+        },
+        {
+          "name": "VTT",
+          "ext": [
+            "vtt"
+          ],
+          "role": "Viewer",
+          "icon": "build/icons/vtt.icns"
+        },
+        {
+          "name": "SSA",
+          "ext": [
+            "ssa"
+          ],
+          "role": "Viewer",
+          "icon": "build/icons/ssa.icns"
         }
       ]
     },
@@ -464,6 +496,38 @@
           ],
           "role": "Viewer",
           "icon": "build/icons/wmv.ico"
+        },
+        {
+          "name": "SRT",
+          "ext": [
+            "srt"
+          ],
+          "role": "Viewer",
+          "icon": "build/icons/srt.ico"
+        },
+        {
+          "name": "ASS",
+          "ext": [
+            "ass"
+          ],
+          "role": "Viewer",
+          "icon": "build/icons/ass.ico"
+        },
+        {
+          "name": "VTT",
+          "ext": [
+            "vtt"
+          ],
+          "role": "Viewer",
+          "icon": "build/icons/vtt.ico"
+        },
+        {
+          "name": "SSA",
+          "ext": [
+            "ssa"
+          ],
+          "role": "Viewer",
+          "icon": "build/icons/ssa.ico"
         }
       ]
     },
