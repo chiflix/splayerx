@@ -101,7 +101,7 @@ export async function loadLocalFile(path: string, encoding?: string) {
 
 import { assFragmentLanguageLoader, srtFragmentLanguageLoader, vttFragmentLanguageLoader } from './languageLoader';
 
-export function pathToFormat(path: string): Format | undefined {
+export function pathToFormat(path: string): Format {
   const extension = extname(path).slice(1);
   switch (extension) {
     case 'ass':
@@ -112,6 +112,8 @@ export function pathToFormat(path: string): Format | undefined {
       return Format.SubStationAlpha;
     case 'vtt':
       return Format.WebVTT;
+    default:
+      return Format.Unknown;
   }
 }
 
