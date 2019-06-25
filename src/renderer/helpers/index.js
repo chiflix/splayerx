@@ -267,45 +267,46 @@ export default {
         this.$bus.$emit('add-subtitles', subtitleFiles);
       }
     },
-    /* eslint-disable */
     // filter video and sub files
     openFile(...files) {
-      let containsSubFiles = false;
-      const subtitleFiles = [];
-      const subRegex = new RegExp('\\.(srt|ass|vtt)$', 'i');
-      const videoFiles = [];
+      try {
+        let containsSubFiles = false;
+        const subtitleFiles = [];
+        const subRegex = new RegExp('\\.(srt|ass|vtt)$', 'i');
+        const videoFiles = [];
 
-      for (let i = 0; i < files.length; i += 1) {
-        if (fs.statSync(files[i]).isDirectory()) {
-          const dirPath = files[i];
-          const dirFiles = fs.readdirSync(dirPath).map(file => path.join(dirPath, file));
-          files.push(...dirFiles);
+        for (let i = 0; i < files.length; i += 1) {
+          if (fs.statSync(files[i]).isDirectory()) {
+            const dirPath = files[i];
+            const dirFiles = fs.readdirSync(dirPath).map(file => path.join(dirPath, file));
+            files.push(...dirFiles);
+          }
         }
-      }
 
-      for (let i = 0; i < files.length; i += 1) {
-        let tempFilePath = files[i];
-        let baseName = path.basename(tempFilePath);
-        if (baseName.startsWith('.') || fs.statSync(tempFilePath).isDirectory()) {
-          continue;
+        files.forEach((tempFilePath) => {
+          const baseName = path.basename(tempFilePath);
+          if (baseName.startsWith('.') || fs.statSync(tempFilePath).isDirectory()) return;
+          if (subRegex.test(path.extname(tempFilePath))) {
+            subtitleFiles.push({ src: tempFilePath, type: 'local' });
+            containsSubFiles = true;
+          } else if (getValidVideoRegex().test(path.extname(tempFilePath))) {
+            videoFiles.push(tempFilePath);
+          } else {
+            log.error('helpers/index.js', `Failed to open file : ${tempFilePath}`);
+            addBubble(OPEN_FAILED, this.$i18n);
+          }
+        });
+
+        if (videoFiles.length > 1) {
+          this.createPlayList(...videoFiles);
+        } else if (videoFiles.length === 1) {
+          this.openVideoFile(...videoFiles);
         }
-        if (subRegex.test(path.extname(tempFilePath))) {
-          subtitleFiles.push({ src: tempFilePath, type: 'local' });
-          containsSubFiles = true;
-        } else if (getValidVideoRegex().test(path.extname(tempFilePath))) {
-          videoFiles.push(tempFilePath);
-        } else {
-          log.error('helpers/index.js', `Failed to open file : ${tempFilePath}`);
-          addBubble(OPEN_FAILED, this.$i18n);
+        if (containsSubFiles) {
+          this.$bus.$emit('add-subtitles', subtitleFiles);
         }
-      }
-      if (videoFiles.length > 1) {
-        this.createPlayList(...videoFiles);
-      } else if (videoFiles.length === 1) {
-        this.openVideoFile(...videoFiles);
-      }
-      if (containsSubFiles) {
-        this.$bus.$emit('add-subtitles', subtitleFiles);
+      } catch (ex) {
+        console.error(ex);
       }
     },
     // open an existed play list
@@ -316,7 +317,7 @@ export default {
         let currentVideo = await this.infoDB.get('media-item', playlist.items[playlist.playedIndex]);
 
         const deleteItems = [];
-        for (const item of playlist.items) {
+        await Promise.all(playlist.items.map(async (item) => {
           const video = await this.infoDB.get('media-item', item);
           try {
             await fsPromises.access(video.path, fs.constants.F_OK);
@@ -324,7 +325,7 @@ export default {
             deleteItems.push(item);
             this.infoDB.delete('media-item', video.videoId);
           }
-        }
+        }));
         if (deleteItems.length > 0) {
           deleteItems.forEach((id) => {
             const index = playlist.items.findIndex(videoId => videoId === id);
@@ -344,7 +345,7 @@ export default {
         }
 
         await this.playFile(currentVideo.path, currentVideo.videoId);
-        let paths = [];
+        const paths = [];
         for (const videoId of playlist.items) {
           const mediaItem = await this.infoDB.get('media-item', videoId);
           paths.push(mediaItem.path);
@@ -417,17 +418,17 @@ export default {
           });
         }
       }
-      this.playFile(videoFile, playlistItem.items[playlistItem.playedIndex]);      
+      this.playFile(videoFile, playlistItem.items[playlistItem.playedIndex]);
     },
     bookmarkAccessing(vidPath) {
       const bookmarkObj = syncStorage.getSync('bookmark');
-      if (bookmarkObj.hasOwnProperty(vidPath)) {
+      if (Object.prototype.hasOwnProperty.call(bookmarkObj, vidPath)) {
         const { app } = remote;
         const bookmark = bookmarkObj[vidPath];
         const stopAccessing = app.startAccessingSecurityScopedResource(bookmark);
         this.access.push({
           src: vidPath,
-          stopAccessing
+          stopAccessing,
         });
         this.$bus.$once(`stop-accessing-${vidPath}`, (e) => {
           get(this.access.find(item => item.src === e), 'stopAccessing')();

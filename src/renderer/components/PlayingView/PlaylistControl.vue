@@ -14,10 +14,10 @@
 </template>
 <script lang="ts">
 import { mapState } from 'vuex';
+import { AnimationItem } from 'lottie-web';
 import lottie from '@/components/lottie.vue';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import animationData from '@/assets/playlist.json';
-import { AnimationItem } from 'lottie-web';
 
 export default {
   name: 'PlaylistControl',

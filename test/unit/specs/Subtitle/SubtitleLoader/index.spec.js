@@ -1,6 +1,6 @@
-import SubtitleLoader, { __RewireAPI__ as subtitleLoaderRewireAPI } from '@/components/Subtitle/SubtitleLoader';
 import sinon from 'sinon';
 import EventEmitter from 'events';
+import SubtitleLoader, { __RewireAPI__ as subtitleLoaderRewireAPI } from '@/components/Subtitle/SubtitleLoader';
 import { randStr } from '../../../helpers';
 
 describe('SubtitleLoader unit tests', () => {

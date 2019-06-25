@@ -79,6 +79,7 @@ export default {
   props: {
     backgroundUrl: {
       type: String,
+      default: '',
     },
     shifting: {
       type: Boolean,
