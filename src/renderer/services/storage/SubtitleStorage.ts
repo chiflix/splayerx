@@ -242,33 +242,42 @@ class SubtitleDataBase {
     }
   }
 
-  async retrieveSubtitlePreference(hash: string) {
-    return (await this.getDb())
+  async retrieveSubtitlePreference(playlistId: number, mediaItemId: string) {
+    const preferences = await (await this.getDb())
       .transaction('preferences', 'readonly')
       .objectStore('preferences')
-      .get(hash);
+      .index('byPlaylist')
+      .getAll(playlistId);
+    return preferences.find(({ mediaId }) => mediaId === mediaItemId);
   }
-  private generateDefaultPreference(hash: string) {
+  private generateDefaultPreference(playlistId: number, mediaItemId: string): SubtitlePreference {
     return {
-      hash,
-      language: [LanguageCode.Default, LanguageCode.Default] as [LanguageCode, LanguageCode],
+      playlistId, mediaId: mediaItemId,
+      language: {
+        primary: LanguageCode.Default,
+        secondary: LanguageCode.Default,
+      },
       list: [],
-      selected: ['', ''],
+      selected: {
+        primary: '',
+        secondary: '',
+      },
     };
   }
-  async retrieveSubtitleList(hash: string) {
-    const preference =  await this.retrieveSubtitlePreference(hash);
+  async retrieveSubtitleList(playlistId: number, mediaItemId: string) {
+    const preference =  await this.retrieveSubtitlePreference(playlistId, mediaItemId);
     return preference ? preference.list : [];
   }
-  async addSubtitleItemsToList(hash: string, subtitles: StoredSubtitleItem[]) {
+  async addSubtitleItemsToList(playlistId: number, mediaItemId: string, subtitles: StoredSubtitleItem[]) {
     subtitles = uniqBy(subtitles, 'hash');
     const objectStore = (await this.getDb())
       .transaction('preferences', 'readwrite')
       .objectStore('preferences');
-    const preference = await objectStore.get(hash);
+    const preference = (await objectStore.index('byPlaylist').getAll(playlistId))
+      .find(({ mediaId }) => mediaId === mediaItemId);
     if (!preference) {
       return objectStore.add({
-        ...this.generateDefaultPreference(hash),
+        ...this.generateDefaultPreference(playlistId, mediaItemId),
         list: subtitles,
       });
     } else {
@@ -278,14 +287,15 @@ class SubtitleDataBase {
       });
     }
   }
-  async removeSubtitleItemsFromList(hash: string, subtitles: StoredSubtitleItem[]) {
+  async removeSubtitleItemsFromList(playlistId: number, mediaItemId: string, subtitles: StoredSubtitleItem[]) {
     subtitles = uniqBy(subtitles, 'hash');
     const objectStore = (await this.getDb())
       .transaction('preferences', 'readwrite')
       .objectStore('preferences');
-    const preference = await objectStore.get(hash);
+    const preference = (await objectStore.index('byPlaylist').getAll(playlistId))
+      .find(({ mediaId }) => mediaId === mediaItemId);
     if (!preference) {
-      return objectStore.add(this.generateDefaultPreference(hash));
+      return objectStore.add(this.generateDefaultPreference(playlistId, mediaItemId));
     } else {
       const { list: existedList } = preference;
       remove(existedList, (sub: StoredSubtitleItem) => subtitles.includes(sub));
@@ -295,45 +305,62 @@ class SubtitleDataBase {
       });
     }
   }
-  async retrieveSubtitleLanguage(hash: string) {
-    const preference = await this.retrieveSubtitlePreference(hash);
-    return preference ? preference.language : [LanguageCode.Default, LanguageCode.Default];
+  async retrieveSubtitleLanguage(playlistId: number, mediaItemId: string) {
+    const preference = await this.retrieveSubtitlePreference(playlistId, mediaItemId);
+    return preference ? preference.language : {
+      primary: LanguageCode.Default,
+      secondary: LanguageCode.Default,
+    };
   }
-  async storeSubtitleLanguage(hash: string, languageCodes: LanguageCode[]) {
+  async storeSubtitleLanguage(playlistId: number, mediaItemId: string, languageCodes: LanguageCode[]) {
     const objectStore = (await this.getDb())
       .transaction('preferences', 'readwrite')
       .objectStore('preferences');
-    const preference = await objectStore.get(hash);
+    const preference = (await objectStore.index('byPlaylist').getAll(playlistId))
+      .find(({ mediaId }) => mediaId === mediaItemId);
     if (!preference) {
       return objectStore.add({
-        ...this.generateDefaultPreference(hash),
-        language: [languageCodes[0], languageCodes[1]],
+        ...this.generateDefaultPreference(playlistId, mediaItemId),
+        language: {
+          primary: languageCodes[0],
+          secondary: languageCodes[1],
+        },
       });
     } else {
       return objectStore.put({
         ...preference,
-        language: [languageCodes[0], languageCodes[1]],
+        language: {
+          primary: languageCodes[0],
+          secondary: languageCodes[1],
+        },
       });
     }
   }
-  async retrieveSelectedSubtitleIds(hash: string) {
-    const preference = await this.retrieveSubtitlePreference(hash);
+  async retrieveSelectedSubtitleIds(playlistId: number, mediaItemId: string) {
+    const preference = await this.retrieveSubtitlePreference(playlistId, mediaItemId);
     return preference ? preference.selected : [];
   }
-  async storeSelectedSubtitleIds(hash: string, subtitleIds: string[]) {
+  async storeSelectedSubtitleIds(playlistId: number, mediaItemId: string, subtitleIds: string[]) {
     const objectStore = (await this.getDb())
       .transaction('preferences', 'readwrite')
       .objectStore('preferences');
-    const preference = await objectStore.get(hash);
+    const preference = (await objectStore.index('byPlaylist').getAll(playlistId))
+      .find(({ mediaId }) => mediaId === mediaItemId);
     if (!preference) {
       return objectStore.add({
-        ...this.generateDefaultPreference(hash),
-        selected: subtitleIds,
+        ...this.generateDefaultPreference(playlistId, mediaItemId),
+        selected: {
+          primary: subtitleIds[0],
+          secondary: subtitleIds[1],
+        },
       });
     } else {
       return objectStore.put({
         ...preference,
-        selected: subtitleIds,
+        selected: {
+          primary: subtitleIds[0],
+          secondary: subtitleIds[1],
+        },
       });
     }
   }
