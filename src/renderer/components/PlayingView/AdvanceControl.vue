@@ -35,13 +35,13 @@
 
 <script lang="ts">
 //  @ts-ignore
+import { mapActions, mapGetters, mapState } from 'vuex';
+import { AnimationItem } from 'lottie-web';
 import lottie from '@/components/lottie.vue';
 import animationData from '@/assets/advance.json';
-import { mapActions, mapGetters, mapState } from 'vuex';
 import { Input as InputActions } from '@/store/actionTypes';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import AdvanceMainMenu from '@/containers/AdvanceMainMenu.vue';
-import { AnimationItem } from 'lottie-web';
 
 export default {
   name: 'AdvanceControl',

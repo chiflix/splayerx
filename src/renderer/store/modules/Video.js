@@ -1,8 +1,8 @@
 import Vue from 'vue';
 
-import Helpers from '@/helpers';
 import romanize from 'romanize';
 import isEqual from 'lodash/isEqual';
+import Helpers from '@/helpers';
 import { Video as videoMutations } from '../mutationTypes';
 import { Video as videoActions, Subtitle as subtitleActions } from '../actionTypes';
 

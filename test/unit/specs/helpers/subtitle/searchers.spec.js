@@ -1,7 +1,7 @@
-import { searchForLocalList, fetchOnlineList, __RewireAPI__ as SearchersRewireAPI } from '@/helpers/subtitle/searchers';
 import sinon from 'sinon';
 import mock from 'mock-fs';
 import { resolve } from 'path';
+import { searchForLocalList, fetchOnlineList, __RewireAPI__ as SearchersRewireAPI } from '@/helpers/subtitle/searchers';
 import SubtitleLoader from '@/components/Subtitle/SubtitleLoader';
 import Sagi from '@/libs/sagi';
 
