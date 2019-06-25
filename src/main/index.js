@@ -219,6 +219,8 @@ function registerMainWindowEvent(mainWindow) {
   function snapShot(info, callback) {
     let randomNumber = Math.round((Math.random() * 20) + 5);
     if (randomNumber > info.duration) randomNumber = info.duration;
+    if (!info.width) info.width = 1920;
+    if (!info.height) info.height = 1080;
     const numberString = timecodeFromSeconds(randomNumber);
     splayerx.snapshotVideo(
       info.path, info.imgPath, numberString, `${info.width}`, `${info.height}`,
