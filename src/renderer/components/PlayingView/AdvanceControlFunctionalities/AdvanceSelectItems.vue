@@ -392,7 +392,6 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   display: flex;
   border-radius: 7px;
   z-index: 10;
-  clip-path: inset(0 round 7px);
   transition: background-color 100ms linear;
   cursor: default;
   .detail {
