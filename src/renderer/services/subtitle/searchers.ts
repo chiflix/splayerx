@@ -1,4 +1,4 @@
-import { OnlineGenerator, EmbeddedGenerator, ISubtitleStream } from './loaders';
+import { EmbeddedGenerator, ISubtitleStream } from './loaders';
 import { dirname, extname, basename, join } from 'path';
 import { pathToFormat } from './utils';
 import { readdir } from 'fs';
@@ -34,15 +34,14 @@ export function searchForLocalList(videoSrc: string): Promise<string[]> {
   });
 }
 
-export function fetchOnlineList(videoSrc: string, languageCode: LanguageCode, hints: string): Promise<OnlineGenerator[]> {
-  return new Promise((resolve, reject) => {
-    calculateMediaIdentity(videoSrc)
-      .then(mediaIdentity => Sagi.mediaTranslate({
-        mediaIdentity, languageCode, hints,
-        format: '', startTime: 0, // tempoary useless params according to server-side
-      }))
-      .then(response => resolve(response.map(transcriptInfo => new OnlineGenerator(transcriptInfo))))
-      .catch(err => reject(err));
+export async function fetchOnlineList(
+  videoSrc: string,
+  languageCode: LanguageCode = LanguageCode["zh-CN"],
+  hints?: string) {
+  const mediaIdentity = await calculateMediaIdentity(videoSrc);
+  return Sagi.mediaTranslate({
+    mediaIdentity, languageCode, hints: hints || basename(videoSrc, extname(videoSrc)),
+    format: '', startTime: 0, // tempoary useless params according to server-side
   });
 }
 
