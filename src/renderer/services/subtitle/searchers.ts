@@ -1,4 +1,4 @@
-import { LocalGenerator, OnlineGenerator, EmbeddedGenerator, ISubtitleStream } from './loaders';
+import { OnlineGenerator, EmbeddedGenerator, ISubtitleStream } from './loaders';
 import { dirname, extname, basename, join } from 'path';
 import { pathToFormat } from './utils';
 import { readdir } from 'fs';
@@ -10,12 +10,12 @@ import { Format } from '@/interfaces/ISubtitle';
 
 const { mediaQuickHash: calculateMediaIdentity } = helpers.methods;
 
-export function searchForLocalList(videoSrc: string): Promise<LocalGenerator[]> {
+export function searchForLocalList(videoSrc: string): Promise<string[]> {
   return new Promise((resolve, reject) => {
     const videoDir = dirname(videoSrc);
     const videoBasename = basename(videoSrc, extname(videoSrc));
     const isValidSubtitle = (filename: string) => {
-      const subtitleBasename = basename(filename, extname(filename).slice(1));
+      const subtitleBasename = basename(filename, extname(filename));
       return (
         pathToFormat(filename) &&
         subtitleBasename.toLowerCase() === videoBasename.toLowerCase()
@@ -27,7 +27,7 @@ export function searchForLocalList(videoSrc: string): Promise<LocalGenerator[]> 
       else {
         resolve(files
           .filter(isValidSubtitle)
-          .map(filename => new LocalGenerator(join(videoDir, filename)))
+          .map(filename => join(videoDir, filename))
         );
       }
     });
