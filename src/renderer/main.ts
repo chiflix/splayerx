@@ -36,6 +36,7 @@ import NotificationBubble, { addBubble } from '../shared/notificationControl';
 import { SNAPSHOT_FAILED, SNAPSHOT_SUCCESS } from '../shared/notificationcodes';
 import InputPlugin, { getterTypes as iGT } from '@/plugins/input';
 import { VueDevtools } from './plugins/vueDevtools.dev';
+import { EventEmitter } from 'events';
 
 // causing callbacks-registry.js 404 error. disable temporarily
 // require('source-map-support').install();
@@ -127,6 +128,7 @@ Vue.mixin(helpers);
 hookVue(Vue);
 
 Vue.prototype.$bus = new Vue(); // Global event bus
+Vue.prototype.$event = new EventEmitter();
 
 
 const { mapGetters: inputMapGetters } = createNamespacedHelpers('InputPlugin');
@@ -340,7 +342,7 @@ new Vue({
     this.$bus.$on('delete-file', () => {
       this.refreshMenu();
     });
-    this.$bus.$on('playlist-display-state', (e: boolean) => {
+    this.$event.on('playlist-display-state', (e: boolean) => {
       this.playlistDisplayState = e;
     });
   },

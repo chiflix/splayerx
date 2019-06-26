@@ -323,7 +323,7 @@ export default {
       this.lastMouseupWidget = oldVal;
     },
     tempRecentPlaylistDisplayState(val: boolean) {
-      this.$bus.$emit('playlist-display-state', val);
+      this.$event.emit('playlist-display-state', val);
       this.updateMinimumSize();
       if (!val) {
         clearTimeout(this.openPlayListTimeId);
