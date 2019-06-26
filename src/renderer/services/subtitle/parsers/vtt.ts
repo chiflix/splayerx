@@ -1,5 +1,5 @@
 import { Dialogue } from '@/interfaces/ISubtitle';
-import { BaseParser } from './index';
+import { BaseParser } from './base';
 // @ts-ignore
 import { parse, toMS } from 'subtitle';
 

@@ -1,5 +1,6 @@
 import { Dialogue } from '@/interfaces/ISubtitle';
-import { BaseParser, SagiSubtitlePayload } from './index';
+import { SagiSubtitlePayload } from './index';
+import { BaseParser } from './base';
 import { tagsGetter } from '../utils';
 
 export class SagiParser extends BaseParser {

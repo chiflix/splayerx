@@ -1,10 +1,11 @@
-import { Tags } from '@/interfaces/ISubtitle';
+import { Tags, Entity } from '@/interfaces/ISubtitle';
 import { detect } from 'chardet';
 import { encodingExists, decode } from 'iconv-lite';
 import { open, read, close, readFile } from 'fs-extra';
 import { extname } from 'path';
 import { LanguageCode } from '@/libs/language';
-import { Format } from '@/interfaces/ISubtitle';
+import { Format, Parser } from '@/interfaces/ISubtitle';
+import { AssParser, SrtParser, SagiParser, VttParser } from '@/services/subtitle';
 
 /**
  * Cue tags getter for SubRip, SubStation Alpha and Online Transcript subtitles.
@@ -131,4 +132,19 @@ export async function inferLanguageFromPath(path: string): Promise<LanguageCode>
     default:
       throw new Error(`Unsupported format ${format}.`);
   }
+}
+
+export function getParser(subtitle: Entity): Parser {
+  switch(subtitle.format) {
+    case Format.AdvancedSubStationAplha:
+    case Format.SubStationAlpha:
+      return new AssParser(subtitle.payload);
+    case Format.SubRip:
+      return new SrtParser(subtitle.payload);
+    case Format.Sagi:
+      return new SagiParser(subtitle.payload);
+    case Format.WebVTT:
+      return new VttParser(subtitle.payload);
+  }
+  throw new Error();
 }
