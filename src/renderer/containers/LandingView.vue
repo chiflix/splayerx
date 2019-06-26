@@ -260,13 +260,13 @@ export default {
         log.info('LandingView.vue', `sagi API Status: ${this.sagiHealthStatus}`);
       }
     });
-    window.addEventListener('keyup', this.keyBoardHandler);
+    window.addEventListener('keyup', this.keyboardHandler);
   },
   destroyed() {
-    window.removeEventListener('keyup', this.keyBoardHandler);
+    window.removeEventListener('keyup', this.keyboardHandler);
   },
   methods: {
-    keyBoardHandler(e: KeyboardEvent) {
+    keyboardHandler(e: KeyboardEvent) {
       if (e.keyCode === 39) {
         this.shifting = true;
         this.tranFlag = true;
