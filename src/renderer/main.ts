@@ -1062,6 +1062,13 @@ new Vue({
             },
             { type: 'separator' },
           );
+          template.push({
+            label: this.$t('msg.splayerx.quit'),
+            accelerator: 'Ctrl+q',
+            click: () => {
+              this.$electron.remote.app.quit();
+            },
+          });
         }
         return template;
       }).then((result: any) => {
