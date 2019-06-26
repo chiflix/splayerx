@@ -188,6 +188,7 @@ export default {
       firstIndexOnMousedown: 0,
       lastIndexOnMousedown: 0,
       currentTime: NaN,
+      shiftingTimeout: NaN,
     };
   },
   created() {
@@ -225,10 +226,20 @@ export default {
           this.shifting = true;
           this.tranFlag = true;
           this.firstIndex += this.thumbnailNumber;
+          if (this.shiftingTimeout) clearTimeout(this.shiftingTimeout);
+          this.shiftingTimeout = setTimeout(() => {
+            this.shifting = false;
+            this.tranFlag = false;
+          }, 400);
         } else if (e.keyCode === 37) {
           this.shifting = true;
           this.tranFlag = true;
           this.lastIndex -= this.thumbnailNumber;
+          if (this.shiftingTimeout) clearTimeout(this.shiftingTimeout);
+          this.shiftingTimeout = setTimeout(() => {
+            this.shifting = false;
+            this.tranFlag = false;
+          }, 400);
         } else if (e.keyCode === 27) {
           this.$emit('update:playlistcontrol-showattached', false);
         }
