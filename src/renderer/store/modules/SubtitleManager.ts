@@ -2,7 +2,7 @@ import uuidv4 from 'uuid/v4';
 import store from '@/store';
 import { SubtitleManager as m } from '@/store/mutationTypes';
 import { SubtitleManager as a, newSubtitle as subActions } from '@/store/actionTypes';
-import { SubtitleControlListItem } from '@/interfaces/ISubtitle';
+import { SubtitleControlListItem, Type } from '@/interfaces/ISubtitle';
 import { ISubtitleStream, TranscriptInfo, searchForLocalList, retrieveEmbeddedList, fetchOnlineList, OnlineGenerator } from '@/services/subtitle';
 import { generateHints } from '@/libs/utils';
 import { LanguageCode } from '@/libs/language';
