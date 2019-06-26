@@ -26,6 +26,7 @@
       :display-state="displayState.RecentPlaylist"
       :mousemove-client-position="mousemoveClientPosition"
       :is-dragging="isDragging"
+      :paused="paused"
       :last-dragging.sync="lastDragging"
       v-bind.sync="widgetsStatus.RecentPlaylist"
       @can-hover-item="cancelPlayListTimeout"
@@ -322,6 +323,7 @@ export default {
       this.lastMouseupWidget = oldVal;
     },
     tempRecentPlaylistDisplayState(val: boolean) {
+      this.$bus.$emit('playlist-display-state', val);
       this.updateMinimumSize();
       if (!val) {
         clearTimeout(this.openPlayListTimeId);

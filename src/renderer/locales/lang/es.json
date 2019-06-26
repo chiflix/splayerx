@@ -230,6 +230,7 @@
   "recentPlaylist": {
     "folderSource": "Carpeta",
     "playing": "Jugando",
+    "paused": "En pausa",
     "playlistSource": "Playlist"
   },
   "subtitle": {

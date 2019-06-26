@@ -46,7 +46,7 @@
                 }} /
               </span>
               {{
-                timecodeFromSeconds(videoDuration)
+                timecodeFromSeconds(hoveredDuration)
               }}&nbsp;&nbsp;·&nbsp;&nbsp;{{
                 inWhichSource
               }}&nbsp;&nbsp;{{ indexInPlaylist }} / {{ numberOfPlaylistItem }}
@@ -80,6 +80,7 @@
             :key="item"
             :index="index"
             :path="item"
+            :paused="paused"
             :is-last-page="lastIndex === maxIndex && firstIndex > 0"
             :page-switching="pageSwitching"
             :item-moving="itemMoving"
@@ -154,6 +155,7 @@ export default {
       type: Object,
       default: () => {},
     },
+    paused: Boolean,
     displayState: Boolean,
     isDragging: Boolean,
     lastDragging: Boolean,
@@ -186,9 +188,11 @@ export default {
       firstIndexOnMousedown: 0,
       lastIndexOnMousedown: 0,
       currentTime: NaN,
+      shiftingTimeout: NaN,
     };
   },
   created() {
+    window.addEventListener('keyup', this.keyboardHandler);
     this.$bus.$on('delete-file', async (path: string, id: number) => {
       this.$store.dispatch('RemoveItemFromPlayingList', path);
       this.infoDB.delete('media-item', id);
@@ -204,6 +208,9 @@ export default {
     this.hoverIndex = this.playingIndex;
     this.filename = this.pathBaseName(this.originSrc);
   },
+  destroyed() {
+    window.removeEventListener('keyup', this.keyboardHandler);
+  },
   methods: {
     ...mapMutations({
       updateMousemoveTarget: inputMutations.MOUSEMOVE_COMPONENT_NAME_UPDATE,
@@ -213,6 +220,31 @@ export default {
       clearMouseup: InputActions.MOUSEUP_UPDATE,
       updateSubToTop: subtitleActions.UPDATE_SUBTITLE_TOP,
     }),
+    keyboardHandler(e: KeyboardEvent) {
+      if (this.displayState) {
+        if (e.key === 'ArrowRight') {
+          this.shifting = true;
+          this.tranFlag = true;
+          this.firstIndex += this.thumbnailNumber;
+          if (this.shiftingTimeout) clearTimeout(this.shiftingTimeout);
+          this.shiftingTimeout = setTimeout(() => {
+            this.shifting = false;
+            this.tranFlag = false;
+          }, 400);
+        } else if (e.key === 'ArrowLeft') {
+          this.shifting = true;
+          this.tranFlag = true;
+          this.lastIndex -= this.thumbnailNumber;
+          if (this.shiftingTimeout) clearTimeout(this.shiftingTimeout);
+          this.shiftingTimeout = setTimeout(() => {
+            this.shifting = false;
+            this.tranFlag = false;
+          }, 400);
+        } else if (e.key === 'Escape') {
+          this.$emit('update:playlistcontrol-showattached', false);
+        }
+      }
+    },
     afterLeave() {
       this.backgroundDisplayState = false;
     },
@@ -421,6 +453,7 @@ export default {
     },
     onItemMouseout() {
       this.hoverIndex = this.playingIndex;
+      this.hoveredDuration = this.duration;
       this.filename = this.pathBaseName(this.originSrc);
     },
   },
@@ -429,6 +462,9 @@ export default {
       this.updateSubToTop(this.displayState);
       this.hoverIndex = this.playingIndex;
       this.filename = this.pathBaseName(this.originSrc);
+    },
+    duration(val: number) {
+      if (val) this.hoveredDuration = val;
     },
     playingList(val: string[]) {
       this.indexOfMovingItem = val.length;
@@ -547,9 +583,6 @@ export default {
         return this.hoveredLastPlayedTime;
       }
       return this.currentTime;
-    },
-    videoDuration() {
-      return this.hoveredDuration;
     },
     indexInPlaylist() {
       return this.hoverIndex + 1;
