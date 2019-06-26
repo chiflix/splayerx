@@ -84,6 +84,7 @@ const actions = {
         commit(m.setHash, hash);
       }),
     ]);
+    return entity;
   },
   async [a.load]() {
     if (loader) {

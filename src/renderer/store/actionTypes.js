@@ -65,6 +65,8 @@ export const newSubtitle = {
 export const SubtitleManager = {
   initializeManager: 'INITIALIZE_MANAGER',
   destoryManager: 'DESTROY_MANAGER',
+  addSubtitle: 'ADD_SUBTITLE',
+  removeSubtitle: 'REMOVE_SUBTITLE',
   refreshSubtitlesInitially: 'REFRESH_SUBTITLES_INITIALLY',
   refreshSubtitles: 'REFRESH_SUBTITLES',
   addLocalSubtitles: 'ADD_LOCAL_SUBTITLES',

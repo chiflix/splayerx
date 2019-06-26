@@ -2,14 +2,15 @@ import uuidv4 from 'uuid/v4';
 import store from '@/store';
 import { SubtitleManager as m } from '@/store/mutationTypes';
 import { SubtitleManager as a, newSubtitle as subActions } from '@/store/actionTypes';
-import { SubtitleControlListItem, Type } from '@/interfaces/ISubtitle';
+import { SubtitleControlListItem, Type, EntityGenerator, Entity } from '@/interfaces/ISubtitle';
 import { ISubtitleStream, TranscriptInfo, searchForLocalList, retrieveEmbeddedList, fetchOnlineList, OnlineGenerator, LocalGenerator, EmbeddedGenerator } from '@/services/subtitle';
 import { generateHints } from '@/libs/utils';
 import { log } from '@/libs/Log';
-import subtitle from './Subtitle';
+import SubtitleModule from './Subtitle';
 import { StoredSubtitleItem } from '@/interfaces/ISubtitleStorage';
 import { retrieveSubtitlePreference } from '@/services/storage/SubtitleStorage';
 import { isEqual } from 'lodash';
+import Vue from 'vue';
 
 let unwatch: Function;
 
@@ -19,6 +20,7 @@ type SubtitleManagerState = {
   primarySubtitleId: string,
   secondarySubtitleId: string,
   isRefreshing: boolean,
+  allSubtitles: { [id: string]: SubtitleControlListItem },
 }
 const state = {
   playlistId: 0,
@@ -26,19 +28,11 @@ const state = {
   primarySubtitleId: '',
   secondarySubtitleId: '',
   isRefreshing: false,
+  allSubtitles: {},
 };
 const getters = {
-  list(state: any): SubtitleControlListItem[] {
-    return Object.keys(state)
-      .filter(stateName => /-/.test(stateName))
-      .map(stateName => {
-        const value = store.state.SubtitleManager[stateName];
-        return {
-          id: value.moduleId,
-          type: value.type,
-          language: value.language,
-        };
-      }) || [];
+  list(state: SubtitleManagerState) {
+    return Object.values(state.allSubtitles);
   },
   primarySubtitleId(state: SubtitleManagerState): string { return state.primarySubtitleId },
   secondarySubtitleId(state: SubtitleManagerState): string { return state.secondarySubtitleId },
@@ -60,11 +54,18 @@ const mutations = {
   [m.setIsRefreshing](state: SubtitleManagerState, isRefreshing: boolean) {
     state.isRefreshing = isRefreshing;
   },
+  [m.addSubtitleId](state: SubtitleManagerState, controlItem: SubtitleControlListItem) {
+    const { id } = controlItem;
+    Vue.set(state.allSubtitles, id, controlItem);
+  },
+  [m.deleteSubtitleId](state: SubtitleManagerState, id: string) {
+    Vue.set(state.allSubtitles, id, undefined);
+  },
 };
 const actions = {
-  async [a.initializeManager]({ getters, commit, dispatch }: any) {
-    const { playListId, originSrc, mediaHash, list } = getters;
-    list.forEach(({ id }: SubtitleControlListItem) => store.unregisterModule(['SubtitleManager', id]));
+  async [a.initializeManager]({ getters, state, commit, dispatch }: any) {
+    const { playListId, originSrc, mediaHash } = getters;
+    state.subtitleIds.forEach((id: string) => dispatch(a.removeSubtitle, id));
     commit(m.setPlaylistId, playListId);
     commit(m.setMediaItemId, `${mediaHash}-${originSrc}`);
     dispatch(a.refreshSubtitlesInitially);
@@ -128,51 +129,38 @@ const actions = {
       dispatch(a.addOnlineSubtitles, await fetchOnlineList(originSrc, secondaryLanguage, hints)).then(secondaryDeletePromise),
     ]);
   },
-  async [a.addLocalSubtitles]({ commit, dispatch }: any, paths: string[]) {
-    paths.forEach(async (p: string) => {
-      const id = uuidv4();
-      const transcript = new LocalGenerator(p);
-      const language = await transcript.getLanguage();
-      const type = await transcript.getType();
-      const item: SubtitleControlListItem = {
-        id,
-        language,
-        type,
-      }
-      store.registerModule([id], { ...subtitle, name: `${id}` });
-      // commit(m.addSubtitle, item);
-      dispatch(`${id}/${subActions.add}`, transcript);
-    });
+  async [a.addLocalSubtitles]({ dispatch }: any, paths: string[]) {
+    return Promise.all(
+      paths.map(path => dispatch(a.addSubtitle, new LocalGenerator(path)))
+    );
   },
-  async [a.addEmbeddedSubtitles]({ commit, dispatch, getters }: any, subtitleStreams: ISubtitleStream[]) {
-    subtitleStreams.forEach(async (stream: ISubtitleStream) => {
-      const id = uuidv4();
-      const transcript = new EmbeddedGenerator(getters.originSrc, stream);
-      const language = await transcript.getLanguage();
-      const type = await transcript.getType();
-      const item: SubtitleControlListItem = {
-        id,
-        language,
-        type,
-      }
-      store.registerModule([id], { ...subtitle, name: `${id}` });
-      // commit(m.addSubtitle, item);
-      dispatch(`${id}/${subActions.add}`, transcript);
-    });
-  },
+  async [a.addEmbeddedSubtitles]({ dispatch, getters }: any, subtitleStreams: ISubtitleStream[]) {
+    return Promise.all(
+      subtitleStreams.map(stream => dispatch(a.addSubtitle, new EmbeddedGenerator(getters.videoSrc, stream)))
+    );
+   },
   async [a.addOnlineSubtitles]({ commit, dispatch }: any, transcriptInfoList: TranscriptInfo[]) {
     // remove all type online item from list
-    transcriptInfoList.forEach(async (transcriptInfo: TranscriptInfo) => {
-      const id = uuidv4();
-      const transcript = new OnlineGenerator(transcriptInfo);
-      const language = await transcript.getLanguage();
-      const type = await transcript.getType();
-      store.registerModule(['SubtitleManager', id], { ...subtitle, name: `${id}` });
-      dispatch(`${id}/${subActions.initialize}`, id);
-      dispatch(`${id}/${subActions.add}`, transcript);
-    });
+    return Promise.all(
+      transcriptInfoList.map(transcriptInfo => dispatch(a.addSubtitle, new OnlineGenerator(transcriptInfo)))
+    );
   },
   async [a.addDatabaseSubtitles](context: any, storedSubtitleItems: StoredSubtitleItem[]) {},
+  async [a.addSubtitle]({ commit, dispatch }: any, subtitleGenerator: EntityGenerator) {
+    const id = uuidv4();
+    store.registerModule(['SubtitleManager', id], { ...SubtitleModule, name: `${id}` });
+    dispatch(`${id}/${subActions.initialize}`, id);
+    const subtitle: Entity = await dispatch(`${id}/${subActions.add}`, subtitleGenerator);
+    commit(m.addSubtitleId, {
+      id,
+      type: subtitle.type,
+      language: subtitle.language,
+    });
+  },
+  [a.removeSubtitle]({ commit }: any, id: string) {
+    store.unregisterModule(`SubtitleManager/${id}`);
+    commit(m.deleteSubtitleId, id);
+  },
   async [a.deleteSubtitlesByHash](context: any, storedSubtitleItems: StoredSubtitleItem[]) {},
   async [a.deleteSubtitlesByUuid]({ dispatch }: any, storedSubtitleItems: SubtitleControlListItem[]) {
     return Promise.all(storedSubtitleItems.map(({ id }) => dispatch(`${id}/${subActions.delete}`)));

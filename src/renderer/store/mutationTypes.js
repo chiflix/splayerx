@@ -88,6 +88,8 @@ export const SubtitleManager = {
   setPlaylistId: 'SET_PLAYLIST_ID',
   setMediaItemId: 'SET_MEDIA_ITEM_ID',
   setIsRefreshing: 'SET_IS_REFRESHING',
+  addSubtitleId: 'ADD_SUBTITLE_ID',
+  deleteSubtitleId: 'DELETE_SUBTITLE_ID',
 };
 
 export const Input = {
