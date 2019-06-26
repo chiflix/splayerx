@@ -50,6 +50,13 @@ export default {
       return [];
     },
   },
+  watch: {
+    originSrc(newVal) {
+      if (newVal) {
+        this.refreshSubtitlesInitially();
+      }
+    },
+  },
   created() {
     this.refreshSubtitlesInitially();
   },
@@ -79,7 +86,7 @@ export default {
     },
     async loopCues() {
       const cues = await this.getCues(videodata.time);
-      console.log(cues);
+      // console.log(cues);
     },
   },
 };

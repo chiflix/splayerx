@@ -80,15 +80,13 @@ const actions = {
   async [a.load]() {
     if (loader) {
       entity.payload = await loader();
-      Object.freeze(entity);
+      // Object.freeze(entity);
     }
   },
   async [a.getDialogues](context: any, time: number) {
     parser = getParser(entity);
     await parser.parse(entity);
-    const dis = await parser.getDialogues(time);
-    console.log(dis);
-    return dis;
+    return await parser.getDialogues(time);
   },
   async [a.store]() {
     await storeSubtitle(entity);
