@@ -8,6 +8,9 @@ import { generateHints } from '@/libs/utils';
 import { LanguageCode } from '@/libs/language';
 import { log } from '@/libs/Log';
 import subtitle from './Subtitle';
+import { StoredSubtitleItem } from '@/interfaces/ISubtitleStorage';
+import { retrieveSubtitlePreference } from '@/services/storage/SubtitleStorage';
+import { isEqual } from 'lodash';
 
 let unwatch: Function;
 
@@ -20,6 +23,7 @@ const state = {
   list: [],
   primarySubtitleId: '',
   secondarySubtitleId: '',
+  isRefreshing: false,
 };
 const getters = {
   subtitleNewList(state: SubtitleManagerState): SubtitleControlListItem[] { return state.list },
@@ -32,20 +36,51 @@ const mutations = {
     state.primarySubtitleId = id;
   }
 };
+type RefreshSubtitlesOptions = {
+  videoSrc: string;
+  mediaItem: {
+    playlistId: number;
+    mediaItemId: string;
+  };
+  language: {
+    primary: LanguageCode;
+    secondary: LanguageCode;
+  };
+};
 const actions = {
-  async [a.refreshSubtitlesInitially]({ dispatch, getters }: any) {
-    try {
-      const hints = generateHints(getters.originSrc);
-      let localList = await searchForLocalList(getters.originSrc);
-      dispatch(a.addLocalSubtitles, localList);
-      let embeddedList = await retrieveEmbeddedList(getters.originSrc);
-      dispatch(a.addEmbeddedSubtitles, embeddedList)
-      let onlineList = await fetchOnlineList(getters.originSrc, LanguageCode["zh-CN"], hints);
-      dispatch(a.addOnlineSubtitles, onlineList);
-      dispatch(a.startAISelection);
-    } catch (error) {
-      log.error('SubtitleManager', error);
+  async [a.refreshSubtitlesInitially]({ dispatch }: any, options: RefreshSubtitlesOptions) {
+    const { mediaItem, videoSrc } = options;
+    const preference = await retrieveSubtitlePreference(mediaItem.playlistId, mediaItem.mediaItemId);
+    const databaseItemsToAdd: StoredSubtitleItem[] = [];
+    const databaseItemsToDelete: StoredSubtitleItem[] = [];
+    /** whether or not to fetch new online list */
+    let online = true;
+    /** whether or not to extract new embedded list */
+    let embedded = true;
+    if (preference) {
+      const { language, list } = preference;
+
+      const embeddedStoredSubtitles = list.filter(({ type }) => type === Type.Embedded);;
+      databaseItemsToAdd
+        .concat(list.filter(({ type }) => type === Type.Local))
+        .concat(embeddedStoredSubtitles);
+      embedded = !embeddedStoredSubtitles.length;
+      online = !isEqual(language, options.language);
+
+      const onlineStoredSubtitles = list.filter(({ type }) => type === Type.Online);
+      if (online) databaseItemsToDelete.concat(onlineStoredSubtitles);
+      else databaseItemsToAdd.concat(onlineStoredSubtitles);
     }
+
+    const hints = generateHints(videoSrc);
+    await dispatch(a.deleteDatabaseSubtitles, databaseItemsToDelete);
+    return Promise.all([
+      dispatch(a.addLocalSubtitles, await searchForLocalList(videoSrc)),
+      dispatch(a.addEmbeddedSubtitles, embedded ? await retrieveEmbeddedList(videoSrc) : []),
+      dispatch(a.addOnlineSubtitles, online ? await fetchOnlineList(videoSrc, options.language.primary, hints) : []),
+      dispatch(a.addOnlineSubtitles, online ? await fetchOnlineList(videoSrc, options.language.secondary, hints) : []),
+      dispatch(a.addDatabaseSubtitles, databaseItemsToAdd),
+    ]);
   },
   async [a.refreshSubtitles]() { },
   async [a.addLocalSubtitles](context: any, paths: string[]) { },
@@ -67,6 +102,8 @@ const actions = {
       dispatch(`${id}/${subActions.add}`, transcript);
     })
   },
+  async [a.addDatabaseSubtitles](context: any, storedSubtitleItems: StoredSubtitleItem[]) {},
+  async [a.deleteDatabaseSubtitles](context: any, storedSubtitleItems: StoredSubtitleItem[]) {},
   async [a.changePrimarySubtitle]({ dispatch, commit }: any, id: string) {
     commit(m.setPrimarySubtitleId, id);
     await dispatch(`${id}/${subActions.load}`);
