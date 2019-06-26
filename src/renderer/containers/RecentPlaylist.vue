@@ -222,7 +222,7 @@ export default {
     }),
     keyboardHandler(e: KeyboardEvent) {
       if (this.displayState) {
-        if (e.keyCode === 39) {
+        if (e.key === 'ArrowRight') {
           this.shifting = true;
           this.tranFlag = true;
           this.firstIndex += this.thumbnailNumber;
@@ -231,7 +231,7 @@ export default {
             this.shifting = false;
             this.tranFlag = false;
           }, 400);
-        } else if (e.keyCode === 37) {
+        } else if (e.key === 'ArrowLeft') {
           this.shifting = true;
           this.tranFlag = true;
           this.lastIndex -= this.thumbnailNumber;
@@ -240,7 +240,7 @@ export default {
             this.shifting = false;
             this.tranFlag = false;
           }, 400);
-        } else if (e.keyCode === 27) {
+        } else if (e.key === 'Escape') {
           this.$emit('update:playlistcontrol-showattached', false);
         }
       }

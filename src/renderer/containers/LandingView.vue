@@ -267,11 +267,11 @@ export default {
   },
   methods: {
     keyboardHandler(e: KeyboardEvent) {
-      if (e.keyCode === 39) {
+      if (e.key === 'ArrowRight') {
         this.shifting = true;
         this.tranFlag = true;
         this.lastIndex = this.landingViewItems.length;
-      } else if (e.keyCode === 37) {
+      } else if (e.key === 'ArrowLeft') {
         this.shifting = true;
         this.tranFlag = true;
         this.firstIndex = 0;
