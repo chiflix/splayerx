@@ -102,7 +102,6 @@ export default {
     },
     async loopCues() {
       const cues = await this.getCues(videodata.time);
-      console.log(cues);
       this.currentCues = cues;
     },
   },
