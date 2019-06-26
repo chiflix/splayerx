@@ -37,7 +37,8 @@ export function searchForLocalList(videoSrc: string): Promise<string[]> {
 export async function fetchOnlineList(
   videoSrc: string,
   languageCode: LanguageCode = LanguageCode["zh-CN"],
-  hints?: string) {
+  hints?: string,
+) {
   const mediaIdentity = await calculateMediaIdentity(videoSrc);
   return Sagi.mediaTranslate({
     mediaIdentity, languageCode, hints: hints || basename(videoSrc, extname(videoSrc)),
@@ -45,7 +46,7 @@ export async function fetchOnlineList(
   });
 }
 
-export function retrieveEmbeddedList(videoSrc: string): Promise<EmbeddedGenerator[]> {
+export function retrieveEmbeddedList(videoSrc: string): Promise<[string, ISubtitleStream][]> {
   ipcRenderer.send('mediaInfo', videoSrc);
   return new Promise((resolve, reject) => {
     setTimeout(() => { reject(new Error('Embedded Subtitles Retrieve Timeout!')); }, 20000);
@@ -54,9 +55,9 @@ export function retrieveEmbeddedList(videoSrc: string): Promise<EmbeddedGenerato
         const subtitleStreams: ISubtitleStream[] = JSON.parse(info).streams
           .filter((stream: ISubtitleStream) => (
             stream.codec_type === 'subtitle' &&
-            Format[stream.codec_name]
+            Object.values(Format).includes(stream.codec_name)
           ));
-        resolve(subtitleStreams.map(stream => new EmbeddedGenerator(videoSrc, stream)));
+        resolve(subtitleStreams.map(stream => [videoSrc, stream]));
       } catch (error) {
         reject(error);
       }
