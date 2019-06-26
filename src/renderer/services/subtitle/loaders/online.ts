@@ -3,6 +3,8 @@ import { MediaTranslationResponse } from 'sagi-api/translation/v1/translation_pb
 import Sagi from '@/libs/sagi';
 import { Origin, EntityGenerator, Type, Format } from '@/interfaces/ISubtitle';
 
+export type TranscriptInfo = MediaTranslationResponse.TranscriptInfo.AsObject;
+
 interface OnlineOrigin extends Origin {
   type: Type.Online;
   source: string;
@@ -11,7 +13,7 @@ export class OnlineGenerator implements EntityGenerator {
   private origin: OnlineOrigin;
   private language: LanguageCode;
   readonly ranking: number;
-  constructor(transcriptInfo: MediaTranslationResponse.TranscriptInfo.AsObject) {
+  constructor(transcriptInfo: TranscriptInfo) {
     this.origin.source = transcriptInfo.transcriptIdentity;
     this.language = normalizeCode(transcriptInfo.languageCode);
     this.ranking = transcriptInfo.ranking;

@@ -1,7 +1,7 @@
 import { SubtitleManager as m } from '@/store/mutationTypes';
 import { SubtitleManager as a } from '@/store/actionTypes';
 import { SubtitleControlListItem } from '@/interfaces/ISubtitle';
-import { SagiSubtitlePayload, ISubtitleStream } from '@/services/subtitle';
+import { ISubtitleStream, TranscriptInfo } from '@/services/subtitle';
 
 const state = {
   primarySubtitleId: '',
@@ -16,7 +16,7 @@ const actions = {
   async [a.refreshSubtitles]() {},
   async [a.addLocalSubtitles](context: any, paths: string[]) {},
   async [a.addEmbeddedSubtitles](context: any, subtitleStreams: ISubtitleStream[]) {},
-  async [a.addOnlineSubtitles](context: any, transcriptInfoList: SagiSubtitlePayload[]) {},
+  async [a.addOnlineSubtitles](context: any, transcriptInfoList: TranscriptInfo[]) {},
   async [a.changePrimarySubtitle](context: any, id: string) {},
   async [a.changeSecondarySubtitle](context: any, id: string) {},
   async [a.storeSubtitle](context: any, id: string) {},
