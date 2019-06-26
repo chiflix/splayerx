@@ -64,24 +64,30 @@
                 v-if="isPlaying"
                 class="icon-container"
               >
-                <Icon
-                  :style="{
-                    width: sizeAdaption(10),
-                    height: sizeAdaption(22),
-                    marginRight: sizeAdaption(4),
-                  }"
-                  :type="paused ? 'playlistpause' : 'playlistplay'"
-                />
-                <div
-                  :style="{
-                    paddingTop: sizeAdaption(5),
-                    fontSize: sizeAdaption(12),
-                    lineHeight: sizeAdaption(12),
-                  }"
-                  class="playing"
-                >
-                  {{ paused ? $t('recentPlaylist.paused') : $t('recentPlaylist.playing') }}
-                </div>
+                <transition name="fade" mode="out-in">
+                  <Icon
+                    :key="paused"
+                    :style="{
+                      width: sizeAdaption(10),
+                      height: sizeAdaption(22),
+                      marginRight: sizeAdaption(4),
+                    }"
+                    :type="paused ? 'playlistpause' : 'playlistplay'"
+                  />
+                </transition>
+                <transition name="fade" mode="out-in">
+                  <div
+                    :key="paused"
+                    :style="{
+                      paddingTop: sizeAdaption(5),
+                      fontSize: sizeAdaption(12),
+                      lineHeight: sizeAdaption(12),
+                    }"
+                    class="playing"
+                  >
+                    {{ paused ? $t('recentPlaylist.paused') : $t('recentPlaylist.playing') }}
+                  </div>
+                </transition>
               </div>
             </transition>
           </div>
@@ -557,9 +563,8 @@ $border-radius: 3px;
         height: fit-content;
 
         .playing {
-          opacity: 0.7;
           font-family: $font-semibold;
-          color: #FFFFFF;
+          color: rgba(255,255,255,0.7);
           letter-spacing: 0.5px;
         }
       }
