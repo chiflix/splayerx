@@ -285,30 +285,49 @@ export default {
         })
         .map(subtitleFilename => (join(videoDir, subtitleFilename)));
     },
-    async openSubtitle(...files) {
+    async openSubtitle(onlySubtitle, ...files) {
       try {
         let videoFiles = [];
         const subRegex = new RegExp('^\\.(srt|ass|vtt)$', 'i');
-        files.forEach(async (tempFilePath) => {
-          const baseName = path.basename(tempFilePath);
-          if (baseName.startsWith('.') || fs.statSync(tempFilePath).isDirectory()) return;
-          if (subRegex.test(path.extname(tempFilePath))) {
-            const tempVideo = this.searchForLocalVideo(tempFilePath);
-            videoFiles.push(...tempVideo);
-          } else if (!subRegex.test(path.extname(tempFilePath))
-            && getValidVideoRegex().test(tempFilePath)) {
-            videoFiles.push(tempFilePath);
+
+        for (let i = 0; i < files.length; i += 1) {
+          if (fs.statSync(files[i]).isDirectory()) {
+            const dirPath = files[i];
+            const dirFiles = fs.readdirSync(dirPath).map(file => path.join(dirPath, file));
+            files.push(...dirFiles);
           }
-        });
-        console.log(videoFiles, 'final', videoFiles.length);
+        }
+        if (!process.mas) {
+          files.forEach((tempFilePath) => {
+            const baseName = path.basename(tempFilePath);
+            if (baseName.startsWith('.') || fs.statSync(tempFilePath).isDirectory()) return;
+            if (subRegex.test(path.extname(tempFilePath))) {
+              const tempVideo = this.searchForLocalVideo(tempFilePath);
+              videoFiles.push(...tempVideo);
+            } else if (!subRegex.test(path.extname(tempFilePath))
+              && getValidVideoRegex().test(tempFilePath)) {
+              videoFiles.push(tempFilePath);
+            }
+          });
+        } else if (onlySubtitle) {
+          this.openFilesByDialog({ defaultPath: files[0] });
+        } else {
+          files.forEach((tempFilePath) => {
+            const baseName = path.basename(tempFilePath);
+            if (baseName.startsWith('.') || fs.statSync(tempFilePath).isDirectory()) return;
+            if (!subRegex.test(path.extname(tempFilePath))
+                && getValidVideoRegex().test(tempFilePath)) {
+              videoFiles.push(tempFilePath);
+            }
+          });
+        }
         videoFiles = uniq(videoFiles);
-        console.log(videoFiles, 'final', videoFiles.length);
         if (videoFiles.length > 1) {
           await this.createPlayList(...videoFiles);
         } else if (videoFiles.length === 1) {
           await this.openVideoFile(...videoFiles);
-        } else {
-          log.error('helpers/index.js', `Cannot find any related video in the folder: ${files}`);
+        } else if (!process.mas) {
+          log.info('helpers/index.js', `Cannot find any related video in the folder: ${files}`);
           addBubble(LOAD_SUBVIDEO_FAILED, this.$i18n);
         }
       } catch (ex) {
@@ -442,7 +461,6 @@ export default {
       this.$store.dispatch('PlayingList', { id, paths: videoFiles, items: playlistItem.items });
 
       const videoId = playlistItem.items[playlistItem.playedIndex];
-      console.log(videoId, videoFiles[0]);
       this.$store.dispatch('SRC_SET', { src: videoFiles[0], id: videoId, mediaHash: hash });
       this.$router.push({ name: 'playing-view' });
       this.$bus.$emit('new-file-open');
@@ -469,7 +487,6 @@ export default {
           });
         }
       }
-      console.log(videoFile);
       this.playFile(videoFile, playlistItem.items[playlistItem.playedIndex]);
     },
     bookmarkAccessing(vidPath) {

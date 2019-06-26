@@ -457,14 +457,12 @@ function createWindow() {
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
     // Open file by file association. Currently support 1 file only.
-    if (filesToOpen.length && !subsToOpen.length) {
-      mainWindow.webContents.send('open-file', ...filesToOpen);
-      filesToOpen.splice(0, filesToOpen.length);
-    } else if (!filesToOpen.length && subsToOpen.length) {
-      mainWindow.webContents.send('open-subs', ...subsToOpen);
-      subsToOpen.splice(0, subsToOpen.length);
-    } else if (filesToOpen.length && subsToOpen.length) {
-      mainWindow.webContents.send('open-video-subs', filesToOpen.concat(subsToOpen));
+    if (filesToOpen.length + subsToOpen.length > 0) {
+      if (!subsToOpen.length) {
+        mainWindow.webContents.send('open-file', ...filesToOpen);
+      } else {
+        mainWindow.webContents.send('open-video-by-subtitle', { files: filesToOpen.concat(subsToOpen), onlySubtitle: !filesToOpen.length });
+      }
       filesToOpen.splice(0, filesToOpen.length);
       subsToOpen.splice(0, subsToOpen.length);
     }
@@ -493,7 +491,7 @@ app.on('second-instance', () => {
 });
 
 
-function darwinOpenFilesToStart() { // eslint-disable-line
+function darwinOpenFilesToStart() {
   if (mainWindow) { // sencond instance
     if (!inited) return;
     if (!mainWindow.isVisible()) mainWindow.show();
@@ -501,15 +499,11 @@ function darwinOpenFilesToStart() { // eslint-disable-line
     mainWindow.focus();
     if (filesToOpen.length && !subsToOpen.length) {
       mainWindow.webContents.send('open-file', ...filesToOpen);
-      filesToOpen.splice(0, filesToOpen.length);
-    } else if (!filesToOpen && subsToOpen.length) {
-      mainWindow.webContents.send('open-subs', ...subsToOpen);
-      subsToOpen.splice(0, subsToOpen.length);
-    } else if (filesToOpen.length && subsToOpen.length) {
-      mainWindow.webContents.send('open-video-subs', filesToOpen.concat(subsToOpen));
-      filesToOpen.splice(0, filesToOpen.length);
-      subsToOpen.splice(0, subsToOpen.length);
+    } else if (filesToOpen.length + subsToOpen.length > 0) {
+      mainWindow.webContents.send('open-video-by-subtitle', { files: filesToOpen.concat(subsToOpen), onlySubtitle: !filesToOpen.length });
     }
+    filesToOpen.splice(0, filesToOpen.length);
+    subsToOpen.splice(0, subsToOpen.length);
   } else {
     createWindow();
   }
@@ -519,14 +513,13 @@ if (process.platform === 'darwin') {
   app.on('will-finish-launching', () => {
     app.on('open-file', (event, file) => {
       const subRegex = new RegExp('^\\.(srt|ass|vtt)$', 'i');
-      if (subRegex.test(path.extname(file))) {
+      if (subRegex.test(path.extname(file)) || fs.statSync(file).isDirectory()) {
         subsToOpen.push(file);
-        darwinOpenFilesToStartDebounced();
       } else if (!subRegex.test(path.extname(file))
-        && getValidVideoRegex().test(path.extname(file))) {
+        && getValidVideoRegex().test(file)) {
         filesToOpen.push(file);
-        darwinOpenFilesToStartDebounced();
       }
+      darwinOpenFilesToStartDebounced();
     });
   });
 } else {
