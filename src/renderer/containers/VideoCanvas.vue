@@ -123,6 +123,11 @@ export default {
     this.updatePlayinglistRate({ oldDir: '', newDir: path.dirname(this.originSrc), playingList: this.playingList });
   },
   mounted() {
+    console.log(`
+      [Subtitle|PreferenceId]:
+        playlistId: ${this.$store.getters.playListId},
+        mediaItemId: ${this.$store.getters.mediaHash}-${this.$store.getters.originSrc},
+    `);
     this.$electron.ipcRenderer.on('quit', (needToRestore: boolean) => {
       if (needToRestore) this.needToRestore = needToRestore;
       this.quit = true;

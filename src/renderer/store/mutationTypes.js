@@ -81,8 +81,11 @@ export const newSubtitle = {
   setHash: 'SET_HASH',
 };
 export const SubtitleManager = {
-  addSubtitle: 'ADD_SUBTITLE',
   setPrimarySubtitleId: 'SET_PRIMARY_SUBTITLE_ID',
+  setSecondarySubtitleId: 'SET_PSECONDARY_SUBTITLE_ID',
+  setPlaylistId: 'SET_PLAYLIST_ID',
+  setMediaItemId: 'SET_MEDIA_ITEM_ID',
+  setIsRefreshing: 'SET_IS_REFRESHING',
 };
 
 export const Input = {

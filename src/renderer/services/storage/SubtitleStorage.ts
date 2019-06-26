@@ -83,7 +83,7 @@ async function v1PlaylistToV2Preference(): Promise<{
   const mediaStore = await infoDb.transaction('media-item', 'readonly').objectStore('media-item');
   while (cursor) {
     const playlistId = cursor.key;
-    const { hpaths, items, playedIndex } = cursor.value;
+    const { hpaths, items } = cursor.value;
     const mediaItems = zip(hpaths, items)
       .filter(mediaItem => !mediaItem[0] || !mediaItem[1]) as [string, number][]
     const oldPreferenceList = (await Promise.all(
@@ -169,7 +169,12 @@ class SubtitleDataBase {
       2,
       {
         async upgrade(db, version) {
-          if (version < 2) {
+          if (version < 1) {
+            db.createObjectStore('subtitles', { keyPath: 'hash' });
+            const preferenceStore = db.createObjectStore('preferences', { autoIncrement: true });
+            preferenceStore.createIndex('byPlaylist', 'playlistId');
+            preferenceStore.createIndex('byMediaItem', 'mediaId');
+          } else if (version < 2) {
             // retrieve all needed info
             const { preference, subtitle: v1Ids } = await v1PlaylistToV2Preference();
             const { subtitle, map } = await v1SubtitlesToV2Subtitles(v1Ids);

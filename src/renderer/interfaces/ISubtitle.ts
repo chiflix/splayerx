@@ -1,9 +1,11 @@
 import { LanguageCode } from '@/libs/language';
 
+type Partial<T> = { [P in keyof T]?: T[P] };
+
 export enum Type {
   Online = 'online',
   Embedded = 'embedded',
-  Local ='local',
+  Local = 'local',
 }
 export enum Format {
   AdvancedSubStationAplha = 'ass',
@@ -45,6 +47,7 @@ export interface Info {
   PlayResX?: string | undefined;
   PlayResY?: string | undefined;
 }
+
 export interface Tags {
   b?: number;
   i?: number;
@@ -62,13 +65,15 @@ export interface Tags {
   // size: string;
   // align: string';
 }
+export type TagsPartial = Partial<Tags>;
+
 export type Cue = {
   category?: string,
   start: number,
   end: number,
   text: string,
   hide?: boolean,
-  format: string,
+  format?: string,
   tags: Tags,
 }
 export interface Dialogue {
@@ -91,6 +96,6 @@ export interface Parser {
   parse(subtitle: Entity): void;
   readonly payload: any;
   getInfo(): Promise<Info>;
-  getDialogues(time?: number): Promise<Dialogue[]>;
+  getDialogues(time?: number): Promise<Cue[]>;
   getVideoSegments(duration: number): Promise<VideoSegment[]>;
 }
