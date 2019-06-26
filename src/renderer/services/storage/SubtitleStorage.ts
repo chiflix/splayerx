@@ -417,6 +417,7 @@ export async function storeSubtitle(subtitle: Entity) {
   const { source, hash, format, language } = subtitle;
   await db.addSubtitle({ source, format, language, hash });
 }
+export async function removeSubtitle(subtitle: Entity) {}
 export function retrieveSubtitlePreference(playlistId: number, mediaItemId: string) {
   return db.retrieveSubtitlePreference(playlistId, mediaItemId);
 }

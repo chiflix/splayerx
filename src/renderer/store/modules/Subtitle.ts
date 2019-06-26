@@ -1,6 +1,6 @@
 import { EntityGenerator, Entity, Parser, Type, Format } from '@/interfaces/ISubtitle';
 import { LanguageCode } from '@/libs/language';
-import { storeSubtitle } from '@/services/storage/SubtitleStorage';
+import { storeSubtitle, removeSubtitle } from '@/services/storage/SubtitleStorage';
 import { newSubtitle as m } from '@/store/mutationTypes';
 import { newSubtitle as a } from '@/store/actionTypes';
 import { getParser } from '@/services/subtitle/utils';
@@ -92,6 +92,9 @@ const actions = {
   },
   async [a.store]() {
     await storeSubtitle(entity);
+  },
+  async [a.delete]() {
+    await removeSubtitle(entity);
   },
   [a.upload]() {
     // directly invoke from @/services/subtitle/upload

@@ -127,7 +127,9 @@ const actions = {
   },
   async [a.addDatabaseSubtitles](context: any, storedSubtitleItems: StoredSubtitleItem[]) {},
   async [a.deleteSubtitlesByHash](context: any, storedSubtitleItems: StoredSubtitleItem[]) {},
-  async [a.deleteSubtitlesByUuid](context: any, storedSubtitleItems: SubtitleControlListItem[]) {},
+  async [a.deleteSubtitlesByUuid]({ dispatch }: any, storedSubtitleItems: SubtitleControlListItem[]) {
+    return Promise.all(storedSubtitleItems.map(({ id }) => dispatch(`${id}/${subActions.delete}`)));
+  },
   async [a.changePrimarySubtitle]({ dispatch, commit }: any, id: string) {
     commit(m.setPrimarySubtitleId, id);
     await dispatch(`${id}/${subActions.load}`);

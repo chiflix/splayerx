@@ -53,6 +53,7 @@ export const newSubtitle = {
   load: 'LOAD',
   parse: 'PARSE',
   store: 'STORE',
+  delete: 'DELETE',
   upload: 'UPLOAD',
   getDialogues: 'GET_DIALOGUES_BY_TIME',
   updatePlayedTime: 'UPDATE_PLAYED_TIME',
@@ -61,6 +62,8 @@ export const newSubtitle = {
   stopWatchPlayedTime: 'STOP_WATCH_PLAYED_TIME',
 };
 export const SubtitleManager = {
+  initializeManager: 'INITIALIZE_MANAGER',
+  destoryManager: 'DESTROY_MANAGER',
   refreshSubtitlesInitially: 'REFRESH_SUBTITLES_INITIALLY',
   refreshSubtitles: 'REFRESH_SUBTITLES',
   addLocalSubtitles: 'ADD_LOCAL_SUBTITLES',
