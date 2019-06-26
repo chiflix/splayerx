@@ -3,7 +3,7 @@ import store from '@/store';
 import { SubtitleManager as m } from '@/store/mutationTypes';
 import { SubtitleManager as a, newSubtitle as subActions } from '@/store/actionTypes';
 import { SubtitleControlListItem, Type } from '@/interfaces/ISubtitle';
-import { ISubtitleStream, TranscriptInfo, searchForLocalList, retrieveEmbeddedList, fetchOnlineList, OnlineGenerator } from '@/services/subtitle';
+import { ISubtitleStream, TranscriptInfo, searchForLocalList, retrieveEmbeddedList, fetchOnlineList, OnlineGenerator, LocalGenerator, EmbeddedGenerator } from '@/services/subtitle';
 import { generateHints } from '@/libs/utils';
 import { log } from '@/libs/Log';
 import subtitle from './Subtitle';
@@ -128,8 +128,38 @@ const actions = {
       dispatch(a.addOnlineSubtitles, await fetchOnlineList(originSrc, secondaryLanguage, hints)).then(secondaryDeletePromise),
     ]);
   },
-  async [a.addLocalSubtitles](context: any, paths: string[]) { },
-  async [a.addEmbeddedSubtitles](context: any, subtitleStreams: ISubtitleStream[]) { },
+  async [a.addLocalSubtitles]({ commit, dispatch }: any, paths: string[]) {
+    paths.forEach(async (p: string) => {
+      const id = uuidv4();
+      const transcript = new LocalGenerator(p);
+      const language = await transcript.getLanguage();
+      const type = await transcript.getType();
+      const item: SubtitleControlListItem = {
+        id,
+        language,
+        type,
+      }
+      store.registerModule([id], { ...subtitle, name: `${id}` });
+      // commit(m.addSubtitle, item);
+      dispatch(`${id}/${subActions.add}`, transcript);
+    });
+  },
+  async [a.addEmbeddedSubtitles]({ commit, dispatch, getters }: any, subtitleStreams: ISubtitleStream[]) {
+    subtitleStreams.forEach(async (stream: ISubtitleStream) => {
+      const id = uuidv4();
+      const transcript = new EmbeddedGenerator(getters.originSrc, stream);
+      const language = await transcript.getLanguage();
+      const type = await transcript.getType();
+      const item: SubtitleControlListItem = {
+        id,
+        language,
+        type,
+      }
+      store.registerModule([id], { ...subtitle, name: `${id}` });
+      // commit(m.addSubtitle, item);
+      dispatch(`${id}/${subActions.add}`, transcript);
+    });
+  },
   async [a.addOnlineSubtitles]({ commit, dispatch }: any, transcriptInfoList: TranscriptInfo[]) {
     // remove all type online item from list
     transcriptInfoList.forEach(async (transcriptInfo: TranscriptInfo) => {

@@ -1,4 +1,4 @@
-import { Dialogue, Format } from '@/interfaces/ISubtitle';
+import { Dialogue, Format, Cue } from '@/interfaces/ISubtitle';
 import { BaseParser } from './base';
 // @ts-ignore
 import { parse, toMS } from 'subtitle';
@@ -17,7 +17,7 @@ export class VttParser extends BaseParser {
     super();
     this.payload = vttString;
   }
-  dialogues: Dialogue[];
+  dialogues: Cue[];
   private baseTags = {
     // https://developer.mozilla.org/en-US/docs/Web/API/WebVTT_API#Cue_settings
     vertical: '',
@@ -27,7 +27,7 @@ export class VttParser extends BaseParser {
     // align: '',
   };
   private normalizer(parsedSubtitle: ParsedSubtitle) {
-    const finalDialogues: Dialogue[] = [];
+    const finalDialogues: Cue[] = [];
     parsedSubtitle.forEach((subtitle) => {
       finalDialogues.push({
         start: toMS(subtitle.start) / 1000,
@@ -45,6 +45,7 @@ export class VttParser extends BaseParser {
               {},
             ),
         },
+        format: this.format,
       });
     });
     this.dialogues = finalDialogues;

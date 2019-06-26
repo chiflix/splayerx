@@ -73,7 +73,7 @@ export type Cue = {
   end: number,
   text: string,
   hide?: boolean,
-  format?: string,
+  format: string,
   tags: Tags,
 }
 export interface Dialogue {

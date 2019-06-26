@@ -81,6 +81,7 @@ export const newSubtitle = {
   setPlayedTime: 'SET_PLAYED_TIME',
   setHash: 'SET_HASH',
 };
+
 export const SubtitleManager = {
   setPrimarySubtitleId: 'SET_PRIMARY_SUBTITLE_ID',
   setSecondarySubtitleId: 'SET_PSECONDARY_SUBTITLE_ID',

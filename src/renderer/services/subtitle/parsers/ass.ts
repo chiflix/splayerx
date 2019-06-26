@@ -1,4 +1,4 @@
-import { Dialogue, Format } from '@/interfaces/ISubtitle';
+import { Dialogue, Format, Cue, Tags } from '@/interfaces/ISubtitle';
 import { BaseParser } from './base';
 import { pick } from 'lodash';
 // @ts-ignore
@@ -83,7 +83,7 @@ export class AssParser extends BaseParser {
     pos: null,
   };
   private normalize(compiledSubtitle: CompiledSubtitle) {
-    const finalDialogues: Dialogue[] = [];
+    const finalDialogues: Cue[] = [];
     const { info, dialogues } = compiledSubtitle;
     this.info = pick(info, Object.keys(this.baseInfo));
     dialogues.forEach((dialogue) => {
@@ -112,9 +112,19 @@ export class AssParser extends BaseParser {
               tags: finalTags,
             };
           });
+          let txt = '';
+          let tags: Tags = {} as Tags;
+          processedFragments.forEach((f: { text: string, tags: Tags }, i: number) => {
+            if (i === 0) {
+              tags = f.tags;
+            }
+            txt += f.text;
+          })
           const finalDialogue = {
             ...baseDiagolue,
-            fragments: processedFragments,
+            text: txt,
+            tags,
+            format: this.format,
           };
           finalDialogues.push(finalDialogue);
         }

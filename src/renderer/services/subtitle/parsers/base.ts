@@ -4,7 +4,7 @@ import { Dialogue } from '@/interfaces/ISubtitle';
 export class BaseParser implements Parser {
   readonly payload: any;
   info = {};
-  dialogues: Dialogue[];
+  dialogues: Cue[];
   format: Format = Format.Unknown;
 
   async getInfo() { return this.info; }
@@ -17,46 +17,11 @@ export class BaseParser implements Parser {
   async parse() { }
 }
 
-/**
- * @description dialogue转cue
- * @param {Dialogue} dialogue
- * @returns {Cue}
- */
-function dialogues2Cues(dialogue: Dialogue): Cue {
-  if (dialogue && !dialogue.text && dialogue.fragments) {
-    let txt = '';
-    let tags: Tags = {} as Tags;
-    dialogue.fragments.forEach((e: { text: string, tags: Tags }, i: number) => {
-      if (i === 0) {
-        tags = e.tags;
-      }
-      txt += e.text
-    });
-    return {
-      start: dialogue.start,
-      end: dialogue.end,
-      text: txt,
-      tags,
-    }
-  } else if (dialogue && dialogue.text && dialogue.tags) {
-    const tags = dialogue.tags ? dialogue.tags : {} as Tags;
-    return {
-      start: dialogue.start,
-      end: dialogue.end,
-      text: dialogue.text,
-      tags,
-    }
-  } else {
-    return {} as Cue;
-  }
-}
-
-function getDialogues(dialogues: Dialogue[], time?: number) {
-  return typeof time === 'undefined' ? dialogues.map(dialogues2Cues) :
-    dialogues.filter(({ start, end, text, fragments }) => (
-      (start <= time && end >= time) &&
-      (!!text || !!fragments)
-    )).map(dialogues2Cues);
+function getDialogues(dialogues: Cue[], time?: number) {
+  return typeof time === 'undefined' ? dialogues :
+    dialogues.filter(({ start, end, text }) => (
+      (start <= time && end >= time) && !!text
+    ));
 }
 
 function calculateVideoSegments(dialogues: Dialogue[], duration: number) {

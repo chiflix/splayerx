@@ -1,4 +1,4 @@
-import { Dialogue, Format } from '@/interfaces/ISubtitle';
+import { Dialogue, Format, Cue } from '@/interfaces/ISubtitle';
 import { BaseParser } from './base';
 // @ts-ignore
 import { parse, toMS } from 'subtitle';
@@ -17,16 +17,17 @@ export class SrtParser extends BaseParser {
     super();
     this.payload = srtPayload;
   }
-  dialogues: Dialogue[];
+  dialogues: Cue[];
   private baseTags = { alignment: 2, pos: undefined };
   private normalizer(parsedSubtitle: ParsedSubtitle) {
-    const finalDialogues: Dialogue[] = [];
+    const finalDialogues: Cue[] = [];
     parsedSubtitle.forEach((subtitle) => {
       finalDialogues.push({
         start: toMS(subtitle.start) / 1000,
         end: toMS(subtitle.end) / 1000,
         tags: tagsGetter(subtitle.text, this.baseTags),
         text: subtitle.text.replace(/\{[^{}]*\}/g, '').replace(/[\\/][Nn]|\r?\n|\r/g, '\n'),
+        format: this.format,
       });
     });
     this.dialogues = finalDialogues;

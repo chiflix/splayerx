@@ -32,8 +32,24 @@ export default {
     'the-video-canvas': VideoCanvas,
     'subtitle-renderer': SubtitleRenderer,
   },
+  data() {
+    return {
+      currentCues: [
+        {
+          cues: [],
+          subPlayResX: 720,
+          subPlayResY: 405,
+        },
+        {
+          cues: [],
+          subPlayResX: 720,
+          subPlayResY: 405,
+        },
+      ],
+    };
+  },
   computed: {
-    ...mapGetters(['currentCues', 'scaleNum', 'subToTop', 'currentFirstSubtitleId', 'winHeight', 'chosenStyle', 'chosenSize', 'originSrc']),
+    ...mapGetters(['scaleNum', 'subToTop', 'currentFirstSubtitleId', 'winHeight', 'chosenStyle', 'chosenSize', 'originSrc']),
     concatCurrentCues() {
       if (this.currentCues.length === 2) {
         return [this.currentCues[0].cues, this.currentCues[1].cues];
@@ -86,7 +102,8 @@ export default {
     },
     async loopCues() {
       const cues = await this.getCues(videodata.time);
-      // console.log(cues);
+      console.log(cues);
+      this.currentCues = cues;
     },
   },
 };

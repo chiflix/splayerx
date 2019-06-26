@@ -1,5 +1,5 @@
 import { TranscriptResponse } from 'sagi-api/translation/v1/translation_pb';
-import { Dialogue, Format } from '@/interfaces/ISubtitle';
+import { Dialogue, Format, Cue } from '@/interfaces/ISubtitle';
 import { BaseParser } from './base';
 import { tagsGetter } from '../utils';
 
@@ -12,10 +12,10 @@ export class SagiParser extends BaseParser {
     super();
     this.payload = sagiPayload;
   }
-  dialogues: Dialogue[] = [];
+  dialogues: Cue[] = [];
   private baseTags = { alignment: 2, pos: undefined };
   private normalizer(parsedSubtitle: SagiSubtitlePayload) {
-    const finalDialogues: Dialogue[] = [];
+    const finalDialogues: Cue[] = [];
     parsedSubtitle.forEach(({ startTime, endTime, text }) => {
       finalDialogues.push({
         start: startTime,
@@ -24,6 +24,7 @@ export class SagiParser extends BaseParser {
           .replace(/[\\/][Nn]|\r?\n|\r/g, '\n') // replace soft and hard line breaks with \n
           .replace(/\\h/g, ' '), // replace hard space with space
         tags: tagsGetter(text, this.baseTags),
+        format: this.format,
       });
     });
     this.dialogues = finalDialogues;
