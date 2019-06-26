@@ -59,6 +59,7 @@ let tray = null;
 let needToRestore = false;
 let inited = false;
 const filesToOpen = [];
+const subsToOpen = [];
 const snapShotQueue = [];
 const thumbnailTask = [];
 const mediaInfoQueue = [];
@@ -455,11 +456,17 @@ function createWindow() {
 
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
-
     // Open file by file association. Currently support 1 file only.
-    if (filesToOpen.length) {
+    if (filesToOpen.length && !subsToOpen.length) {
       mainWindow.webContents.send('open-file', ...filesToOpen);
       filesToOpen.splice(0, filesToOpen.length);
+    } else if (!filesToOpen.length && subsToOpen.length) {
+      mainWindow.webContents.send('open-subs', ...subsToOpen);
+      subsToOpen.splice(0, subsToOpen.length);
+    } else if (filesToOpen.length && subsToOpen.length) {
+      mainWindow.webContents.send('open-video-subs', filesToOpen.concat(subsToOpen));
+      filesToOpen.splice(0, filesToOpen.length);
+      subsToOpen.splice(0, subsToOpen.length);
     }
     inited = true;
   });
@@ -486,14 +493,23 @@ app.on('second-instance', () => {
 });
 
 
-function darwinOpenFilesToStart() {
+function darwinOpenFilesToStart() { // eslint-disable-line
   if (mainWindow) { // sencond instance
     if (!inited) return;
     if (!mainWindow.isVisible()) mainWindow.show();
     if (mainWindow.isMinimized()) mainWindow.restore();
     mainWindow.focus();
-    mainWindow.webContents.send('open-file', ...filesToOpen);
-    filesToOpen.splice(0, filesToOpen.length);
+    if (filesToOpen.length && !subsToOpen.length) {
+      mainWindow.webContents.send('open-file', ...filesToOpen);
+      filesToOpen.splice(0, filesToOpen.length);
+    } else if (!filesToOpen && subsToOpen.length) {
+      mainWindow.webContents.send('open-subs', ...subsToOpen);
+      subsToOpen.splice(0, subsToOpen.length);
+    } else if (filesToOpen.length && subsToOpen.length) {
+      mainWindow.webContents.send('open-video-subs', filesToOpen.concat(subsToOpen));
+      filesToOpen.splice(0, filesToOpen.length);
+      subsToOpen.splice(0, subsToOpen.length);
+    }
   } else {
     createWindow();
   }
@@ -502,9 +518,15 @@ const darwinOpenFilesToStartDebounced = debounce(darwinOpenFilesToStart, 100);
 if (process.platform === 'darwin') {
   app.on('will-finish-launching', () => {
     app.on('open-file', (event, file) => {
-      if (!getValidVideoRegex().test(file)) return;
-      filesToOpen.push(file);
-      darwinOpenFilesToStartDebounced();
+      const subRegex = new RegExp('^\\.(srt|ass|vtt)$', 'i');
+      if (subRegex.test(path.extname(file))) {
+        subsToOpen.push(file);
+        darwinOpenFilesToStartDebounced();
+      } else if (!subRegex.test(path.extname(file))
+        && getValidVideoRegex().test(path.extname(file))) {
+        filesToOpen.push(file);
+        darwinOpenFilesToStartDebounced();
+      }
     });
   });
 } else {

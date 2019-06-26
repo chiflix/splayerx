@@ -270,5 +270,9 @@
   "snapshotFailed": {
     "content": "Por favor intente más tarde.",
     "title": "Instantánea fallada"
+  },
+  "loadVideoBySubtitleFailed": {
+    "content": "No se puede encontrar ningún video relacionado en la carpeta",
+    "title": ""
   }
 }

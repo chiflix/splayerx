@@ -270,5 +270,9 @@
   "snapshotFailed": {
     "content": "يرجى المحاولة لاحقا.",
     "title": " فشل لقطة"
+  },
+  "loadVideoBySubtitleFailed": {
+    "content": "لا يمكن العثور على أي فيديو ذي صلة في المجلد",
+    "title": ""
   }
 }

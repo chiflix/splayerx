@@ -1365,6 +1365,9 @@ new Vue({
   mounted() {
     // https://github.com/electron/electron/issues/3609
     // Disable Zooming
+    setTimeout(() => {
+      console.log('test5.0');
+    }, 3000);
     this.$electron.webFrame.setVisualZoomLevelLimits(1, 1);
     this.createMenu();
     this.$bus.$on('new-file-open', this.refreshMenu);
@@ -1503,6 +1506,14 @@ new Vue({
       } else {
         this.openFile(...files);
       }
+    });
+    this.$electron.ipcRenderer.on('open-subs', (event: any, ...files: Array<fs.PathLike>) => {
+       console.log(files, 'subs');
+       this.openSubtitle(...files);
+    });
+    this.$electron.ipcRenderer.on('open-video-subs', (event: any, files: Array<any>) => {
+      console.log(files, 'video-subs');
+      this.openSubtitle(...files);
     });
   },
 }).$mount('#app');

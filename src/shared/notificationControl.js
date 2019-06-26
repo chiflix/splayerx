@@ -16,6 +16,7 @@ import {
   LOCAL_SUBTITLE_REMOVED,
   SNAPSHOT_SUCCESS,
   SNAPSHOT_FAILED,
+  LOAD_SUBVIDEO_FAILED,
 } from './notificationcodes';
 
 export function addBubble(code, i18n) { // eslint-disable-line complexity
@@ -145,6 +146,14 @@ export function addBubble(code, i18n) { // eslint-disable-line complexity
         type: 'result',
         title: i18n.t('snapshotFailed.title', i18n.locale, i18n.messages),
         content: i18n.t('snapshotFailed.content', i18n.locale, i18n.messages),
+        dismissAfter: 2000,
+      });
+      break;
+    case LOAD_SUBVIDEO_FAILED:
+      store.dispatch('addMessages', {
+        type: 'state',
+        title: i18n.t('loadVideoBySubtitleFailed.title', i18n.locale, i18n.messages),
+        content: i18n.t('loadVideoBySubtitleFailed.content', i18n.locale, i18n.messages),
         dismissAfter: 2000,
       });
       break;

@@ -1,15 +1,17 @@
-import path from 'path';
+import path, {
+  basename, dirname, extname, join,
+} from 'path';
 import fs, { promises as fsPromises } from 'fs';
 import crypto from 'crypto';
 import lolex from 'lolex';
-import { times, get } from 'lodash';
+import { times, get, uniq } from 'lodash';
 import bookmark from '@/helpers/bookmark';
 import syncStorage from '@/helpers/syncStorage';
 import infoDB from '@/helpers/infoDB';
 import { log } from '@/libs/Log';
 import { getValidVideoExtensions, getValidVideoRegex } from '@/../shared/utils';
 import {
-  EMPTY_FOLDER, OPEN_FAILED, ADD_NO_VIDEO,
+  EMPTY_FOLDER, OPEN_FAILED, ADD_NO_VIDEO, LOAD_SUBVIDEO_FAILED,
   SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, FILE_NON_EXIST_IN_PLAYLIST, PLAYLIST_NON_EXIST,
 } from '@/../shared/notificationcodes';
 import Sagi from '@/libs/sagi';
@@ -267,6 +269,53 @@ export default {
         this.$bus.$emit('add-subtitles', subtitleFiles);
       }
     },
+    searchForLocalVideo(subSrc) {
+      const videoDir = dirname(subSrc);
+      const videoBasename = basename(subSrc, extname(subSrc)).toLowerCase();
+      const videoFilename = basename(subSrc).toLowerCase();
+      const dirFiles = fs.readdirSync(videoDir);
+      return dirFiles
+        .filter((subtitleFilename) => {
+          const lowerCasedName = subtitleFilename.toLowerCase();
+          return (
+            getValidVideoRegex().test(lowerCasedName)
+            && lowerCasedName.slice(0, lowerCasedName.lastIndexOf('.')) === videoBasename
+            && lowerCasedName !== videoFilename
+          );
+        })
+        .map(subtitleFilename => (join(videoDir, subtitleFilename)));
+    },
+    async openSubtitle(...files) {
+      try {
+        let videoFiles = [];
+        const subRegex = new RegExp('^\\.(srt|ass|vtt)$', 'i');
+        files.forEach(async (tempFilePath) => {
+          const baseName = path.basename(tempFilePath);
+          if (baseName.startsWith('.') || fs.statSync(tempFilePath).isDirectory()) return;
+          if (subRegex.test(path.extname(tempFilePath))) {
+            const tempVideo = this.searchForLocalVideo(tempFilePath);
+            videoFiles.push(...tempVideo);
+          } else if (!subRegex.test(path.extname(tempFilePath))
+            && getValidVideoRegex().test(tempFilePath)) {
+            videoFiles.push(tempFilePath);
+          }
+        });
+        console.log(videoFiles, 'final', videoFiles.length);
+        videoFiles = uniq(videoFiles);
+        console.log(videoFiles, 'final', videoFiles.length);
+        if (videoFiles.length > 1) {
+          await this.createPlayList(...videoFiles);
+        } else if (videoFiles.length === 1) {
+          await this.openVideoFile(...videoFiles);
+        } else {
+          log.error('helpers/index.js', `Cannot find any related video in the folder: ${files}`);
+          addBubble(LOAD_SUBVIDEO_FAILED, this.$i18n);
+        }
+      } catch (ex) {
+        log.info('openFile', ex);
+        addBubble(OPEN_FAILED, this.$i18n);
+      }
+    },
     // filter video and sub files
     async openFile(...files) {
       try {
@@ -393,6 +442,7 @@ export default {
       this.$store.dispatch('PlayingList', { id, paths: videoFiles, items: playlistItem.items });
 
       const videoId = playlistItem.items[playlistItem.playedIndex];
+      console.log(videoId, videoFiles[0]);
       this.$store.dispatch('SRC_SET', { src: videoFiles[0], id: videoId, mediaHash: hash });
       this.$router.push({ name: 'playing-view' });
       this.$bus.$emit('new-file-open');
@@ -419,6 +469,7 @@ export default {
           });
         }
       }
+      console.log(videoFile);
       this.playFile(videoFile, playlistItem.items[playlistItem.playedIndex]);
     },
     bookmarkAccessing(vidPath) {

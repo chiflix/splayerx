@@ -270,5 +270,9 @@
   "snapshotFailed": {
     "content": "Please try again later.",
     "title": "Snapshot Failed"
+  },
+  "loadVideoBySubtitleFailed": {
+    "content": "Cannot find any related video in the folder",
+    "title": ""
   }
 }
