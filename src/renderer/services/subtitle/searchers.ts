@@ -1,4 +1,4 @@
-import { EmbeddedGenerator, ISubtitleStream } from './loaders';
+import { ISubtitleStream } from './loaders';
 import { dirname, extname, basename, join } from 'path';
 import { pathToFormat } from './utils';
 import { readdir } from 'fs';
@@ -17,7 +17,7 @@ export function searchForLocalList(videoSrc: string): Promise<string[]> {
     const isValidSubtitle = (filename: string) => {
       const subtitleBasename = basename(filename, extname(filename));
       return (
-        pathToFormat(filename) &&
+        pathToFormat(filename) !== Format.Unknown &&
         subtitleBasename.toLowerCase() === videoBasename.toLowerCase()
       )
     };

@@ -109,7 +109,7 @@ export function pathToFormat(path: string): Format {
       return Format.AdvancedSubStationAplha;
     case 'srt':
       return Format.SubRip;
-    case 'sub':
+    case 'ssa':
       return Format.SubStationAlpha;
     case 'vtt':
       return Format.WebVTT;
