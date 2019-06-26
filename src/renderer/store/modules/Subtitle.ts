@@ -1,10 +1,9 @@
 import { EntityGenerator, Entity, Parser, Type, Format } from '@/interfaces/ISubtitle';
-import { BaseParser } from '@/services/subtitle/parsers';
 import { LanguageCode } from '@/libs/language';
 import { storeSubtitle } from '@/services/storage/SubtitleStorage';
-import helpers from '@/helpers';
 import { newSubtitle as m } from '@/store/mutationTypes';
 import { newSubtitle as a } from '@/store/actionTypes';
+import { getParser } from '@/services/subtitle/utils';
 
 type SubtitleState = {
   source: any;
@@ -13,6 +12,7 @@ type SubtitleState = {
   language: LanguageCode;
   delay: number;
   playedTime: number;
+  hash: string;
 };
 
 let entity: Entity;
@@ -22,13 +22,12 @@ let parser: Parser;
 const state = {
   source: '',
   type: undefined,
-  format: undefined,
+  format: Format.Unknown,
   language: LanguageCode.Default,
   delay: 0,
+  hash: '',
 } as SubtitleState;
-const getters = {
-  hints: '',
-};
+const getters = {};
 const mutations = {
   [m.setSource](state: SubtitleState, source: any) {
     state.source = source;
@@ -48,38 +47,44 @@ const mutations = {
   [m.setPlayedTime](state: SubtitleState, playedTime: number) {
     state.playedTime = playedTime;
   },
+  [m.setHash](state: SubtitleState, hash: string) {
+    state.hash = hash;
+  },
 };
 const actions = {
   async [a.add]({ commit }: any, generator: EntityGenerator) {
     loader = generator.getPayload.bind(generator);
     await Promise.all([
       generator.getSource().then(src => {
-        commit(m.setSource, src);
         entity.source = src;
+        commit(m.setSource, src);
       }),
       generator.getFormat().then(format => {
-        commit(m.setFormat, format);
         entity.format = format;
+        commit(m.setFormat, format);
       }),
       generator.getLanguage().then(language => {
-        commit(m.setLanguage, language);
         entity.language = language;
+        commit(m.setLanguage, language);
       }),
       generator.getType().then(type => {
-        commit(m.setType, type);
         entity.type = type;
+        commit(m.setType, type);
+      }),
+      generator.getHash().then(hash => {
+        entity.hash = hash;
+        commit(m.setHash, hash);
       }),
     ]);
   },
   async [a.load]() {
     if (loader) {
       entity.payload = await loader();
-      entity.hash = await helpers.methods.mediaQuickHash(entity.payload);
       Object.freeze(entity);
     }
   },
   async [a.getDialogues](context: any, time: number) {
-    parser = BaseParser.from(entity);
+    parser = getParser(entity);
     return parser.getDialogues(time);
   },
   async [a.store]() {
@@ -107,6 +112,7 @@ const actions = {
 };
 
 export default {
+  namespaced: true,
   state,
   getters,
   mutations,

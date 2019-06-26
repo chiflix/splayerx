@@ -78,6 +78,7 @@ export const newSubtitle = {
   setLanguage: 'SET_LANGUAGE',
   setDelay: 'SET_DELAY',
   setPlayedTime: 'SET_PLAYED_TIME',
+  setHash: 'SET_HASH',
 };
 export const SubtitleManager = {};
 

@@ -63,15 +63,16 @@ export const newSubtitle = {
 export const SubtitleManager = {
   refreshSubtitlesInitially: 'REFRESH_SUBTITLES_INITIALLY',
   refreshSubtitles: 'REFRESH_SUBTITLES',
-  changeCurrentSubtitle: 'CHANGE_CURRENT_SUBTITLE',
-  storeCurrentSubtitle: 'STORE_CURRENT_SUBTITLE',
-  uploadCurrentSubtitle: 'UPLOAD_CURRENT_SUBTITLE',
   addLocalSubtitles: 'ADD_LOCAL_SUBTITLES',
   addEmbeddedSubtitles: 'ADD_EMBEDDED_SUBTITLES',
   addOnlineSubtitles: 'ADD_ONLINE_SUBTITLES',
+  changePrimarySubtitle: 'CHANGE_PRIMARY_SUBTITLE',
+  changeSecondarySubtitle: 'CHANGE_SECONDARY_SUBTITLE',
+  storeSubtitle: 'STORE_SUBTITLE',
+  uploadSubtitle: 'UPLOAD_SUBTITLE',
   startAISelection: 'START_AI_SELECTION',
   stopAISelection: 'STOP_AI_SELECTION',
-  getCurrentCues: 'GET_CURRENT_CUES',
+  getCues: 'GET_CUES',
 };
 
 export const Input = {

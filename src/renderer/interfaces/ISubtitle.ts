@@ -18,7 +18,7 @@ export interface Origin {
   type: Type;
   source: any;
 }
-export interface Entity {
+export type Entity = {
   source: Origin;
   type: Type;
   format: Format;
@@ -26,6 +26,11 @@ export interface Entity {
   payload: any;
   hash: string;
 }
+export type SubtitleControlListItem = {
+  id: string;
+  type: Type;
+  language: LanguageCode;
+};
 
 export interface EntityGenerator {
   getSource(): Promise<Origin>
