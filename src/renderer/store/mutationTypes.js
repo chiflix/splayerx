@@ -80,7 +80,10 @@ export const newSubtitle = {
   setPlayedTime: 'SET_PLAYED_TIME',
   setHash: 'SET_HASH',
 };
-export const SubtitleManager = {};
+export const SubtitleManager = {
+  addSubtitle: 'ADD_SUBTITLE',
+  setPrimarySubtitleId: 'SET_PRIMARY_SUBTITLE_ID',
+};
 
 export const Input = {
   MOUSEMOVE_CLIENT_POSITION_UPDATE: 'MOUSEMOVE_CLIENT_POSITION_UPDATE',

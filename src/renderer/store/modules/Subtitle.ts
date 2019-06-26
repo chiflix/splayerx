@@ -15,7 +15,7 @@ type SubtitleState = {
   hash: string;
 };
 
-let entity: Entity;
+let entity: Entity = {} as Entity;
 let loader: () => Promise<any>;
 let parser: Parser;
 
@@ -85,7 +85,10 @@ const actions = {
   },
   async [a.getDialogues](context: any, time: number) {
     parser = getParser(entity);
-    return parser.getDialogues(time);
+    await parser.parse(entity);
+    const dis = await parser.getDialogues(time);
+    console.log(dis);
+    return dis;
   },
   async [a.store]() {
     await storeSubtitle(entity);

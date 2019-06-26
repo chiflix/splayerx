@@ -8,7 +8,9 @@ export class BaseParser implements Parser {
 
   async getInfo() { return this.info; }
   async getDialogues(time?: number) {
-    return getDialogues(this.dialogues, time);
+    const d = getDialogues(this.dialogues, time);
+    console.warn(d);
+    return d;
   }
   async getVideoSegments(duration: number) {
     return calculateVideoSegments(this.dialogues, duration);

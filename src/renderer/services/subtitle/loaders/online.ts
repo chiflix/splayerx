@@ -14,7 +14,10 @@ export class OnlineGenerator implements EntityGenerator {
   private language: LanguageCode;
   readonly ranking: number;
   constructor(transcriptInfo: TranscriptInfo) {
-    this.origin.source = transcriptInfo.transcriptIdentity;
+    this.origin = {
+      type: Type.Online,
+      source: transcriptInfo.transcriptIdentity
+    };
     this.language = normalizeCode(transcriptInfo.languageCode);
     this.ranking = transcriptInfo.ranking;
   }

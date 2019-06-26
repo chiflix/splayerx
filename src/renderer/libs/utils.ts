@@ -1,5 +1,6 @@
 import { createHash } from 'crypto';
 import { times, padStart } from 'lodash';
+import { sep } from 'path';
 // @ts-ignore
 import { promises as fsPromises } from 'fs';
 
@@ -127,4 +128,26 @@ export function timecodeFromSeconds(s: number) {
     return `${hours}:${minutes}:${seconds}`;
   }
   return `${minutes}:${seconds}`;
+}
+
+/**
+ * @description 
+ * @param {string} videoSrc 视频路径
+ * @returns {string} hints
+ */
+export function generateHints(videoSrc: string): string {
+  let result = '';
+  videoSrc.split(sep).reverse().some((dirOrFileName, index) => {
+    if (index === 0) {
+      result = dirOrFileName;
+      return false;
+    }
+    if (index <= 2) {
+      result = `${dirOrFileName}${sep}${result}`;
+      return false;
+    }
+    result = `${sep}${result}`;
+    return true;
+  });
+  return result;
 }

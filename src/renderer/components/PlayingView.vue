@@ -18,7 +18,7 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex';
-import { Subtitle as subtitleActions } from '@/store/actionTypes';
+import { Subtitle as subtitleActions, SubtitleManager as smActions } from '@/store/actionTypes';
 import SubtitleRenderer from '@/components/Subtitle/SubtitleRenderer.vue';
 import VideoCanvas from '@/containers/VideoCanvas.vue';
 import TheVideoController from '@/containers/TheVideoController.vue';
@@ -35,20 +35,30 @@ export default {
   computed: {
     ...mapGetters(['currentCues', 'scaleNum', 'subToTop', 'currentFirstSubtitleId', 'winHeight', 'chosenStyle', 'chosenSize', 'originSrc']),
     concatCurrentCues() {
-      return [this.currentCues[0].cues, this.currentCues[1].cues];
+      if (this.currentCues.length === 2) {
+        return [this.currentCues[0].cues, this.currentCues[1].cues];
+      }
+      return [];
     },
     subPlayRes() {
-      return [
-        { x: this.currentCues[0].subPlayResX, y: this.currentCues[0].subPlayResY },
-        { x: this.currentCues[1].subPlayResX, y: this.currentCues[1].subPlayResY },
-      ];
+      if (this.currentCues.length === 2) {
+        return [
+          { x: this.currentCues[0].subPlayResX, y: this.currentCues[0].subPlayResY },
+          { x: this.currentCues[1].subPlayResX, y: this.currentCues[1].subPlayResY },
+        ];
+      }
+      return [];
     },
+  },
+  created() {
+    this.refreshSubtitlesInitially();
   },
   mounted() {
     this.$store.dispatch('initWindowRotate');
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [320, 180]);
     videodata.checkTick();
     videodata.onTick = this.onUpdateTick;
+    requestAnimationFrame(this.loopCues);
   },
   beforeDestroy() {
     this.updateSubToTop(false);
@@ -57,12 +67,19 @@ export default {
   methods: {
     ...mapActions({
       updateSubToTop: subtitleActions.UPDATE_SUBTITLE_TOP,
+      refreshSubtitlesInitially: smActions.refreshSubtitlesInitially,
+      getCues: smActions.getCues,
     }),
     // Compute UI states
     // When the video is playing the ontick is triggered by ontimeupdate of Video tag,
     // else it is triggered by setInterval.
     onUpdateTick() {
+      requestAnimationFrame(this.loopCues);
       this.$refs.videoctrl.onTickUpdate();
+    },
+    async loopCues() {
+      const cues = await this.getCues(videodata.time);
+      console.log(cues);
     },
   },
 };

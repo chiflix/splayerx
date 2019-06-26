@@ -11,7 +11,7 @@ export class SagiParser extends BaseParser {
     super();
     this.payload = sagiPayload;
   }
-  dialogues: Dialogue[];
+  dialogues: Dialogue[] = [];
   private baseTags = { alignment: 2, pos: undefined };
   private normalizer(parsedSubtitle: SagiSubtitlePayload) {
     const finalDialogues: Dialogue[] = [];
