@@ -151,7 +151,7 @@ async function v1SubtitlesToV2Subtitles(v1Ids: number[]): Promise<{
       return [id.toString(), undefined];
     })
   )).filter(subtitle => !!subtitle) as [string, StoredSubtitle][];
-  
+
   return {
     subtitle: resultEntries.map(entry => entry[1]),
     map: Object.fromEntries([
@@ -416,4 +416,7 @@ export class DatabaseGenerator implements EntityGenerator {
 export async function storeSubtitle(subtitle: Entity) {
   const { source, hash, format, language } = subtitle;
   await db.addSubtitle({ source, format, language, hash });
+}
+export function retrieveSubtitlePreference(playlistId: number, mediaItemId: string) {
+  return db.retrieveSubtitlePreference(playlistId, mediaItemId);
 }

@@ -73,7 +73,7 @@ const actions = {
     }
 
     const hints = generateHints(videoSrc);
-    await dispatch(a.deleteDatabaseSubtitles, databaseItemsToDelete);
+    await dispatch(a.deleteSubtitlesByHash, databaseItemsToDelete);
     return Promise.all([
       dispatch(a.addLocalSubtitles, await searchForLocalList(videoSrc)),
       dispatch(a.addEmbeddedSubtitles, embedded ? await retrieveEmbeddedList(videoSrc) : []),
@@ -82,7 +82,30 @@ const actions = {
       dispatch(a.addDatabaseSubtitles, databaseItemsToAdd),
     ]);
   },
-  async [a.refreshSubtitles]() { },
+  /** only refresh local and online subtitles, delete old online subtitles */
+  async [a.refreshSubtitles]({ getters, dispatch }: any, options: RefreshSubtitlesOptions) {
+    const { subtitleNewList } = getters as { subtitleNewList: SubtitleControlListItem[] };
+    const [primary, secondary] = subtitleNewList.reduce((subtitleList, currentSubtitle) => {
+      if (!subtitleList[0][0]) {
+        subtitleList[0].push(currentSubtitle);
+      } else if (subtitleList[0][0].language === currentSubtitle.language) {
+        subtitleList[0].push(currentSubtitle);
+      } else {
+        subtitleList[1].push(currentSubtitle);
+      }
+      return subtitleList;
+    }, [[], []] as [SubtitleControlListItem[], SubtitleControlListItem[]]);
+
+    const { videoSrc, language } = options;
+    const hints = generateHints(videoSrc);
+    const primaryDeletePromise = () => dispatch(a.deleteSubtitlesByUuid, primary);
+    const secondaryDeletePromise = () => dispatch(a.deleteSubtitlesByUuid, secondary);
+    return Promise.all([
+      dispatch(a.addLocalSubtitles, await searchForLocalList(videoSrc)),
+      dispatch(a.addOnlineSubtitles, await fetchOnlineList(videoSrc, language.primary, hints)).then(primaryDeletePromise),
+      dispatch(a.addOnlineSubtitles, await fetchOnlineList(videoSrc, language.secondary, hints)).then(secondaryDeletePromise),
+    ]);
+  },
   async [a.addLocalSubtitles](context: any, paths: string[]) { },
   async [a.addEmbeddedSubtitles](context: any, subtitleStreams: ISubtitleStream[]) { },
   async [a.addOnlineSubtitles]({ commit, dispatch }: any, transcriptInfoList: TranscriptInfo[]) {
@@ -103,7 +126,8 @@ const actions = {
     })
   },
   async [a.addDatabaseSubtitles](context: any, storedSubtitleItems: StoredSubtitleItem[]) {},
-  async [a.deleteDatabaseSubtitles](context: any, storedSubtitleItems: StoredSubtitleItem[]) {},
+  async [a.deleteSubtitlesByHash](context: any, storedSubtitleItems: StoredSubtitleItem[]) {},
+  async [a.deleteSubtitlesByUuid](context: any, storedSubtitleItems: SubtitleControlListItem[]) {},
   async [a.changePrimarySubtitle]({ dispatch, commit }: any, id: string) {
     commit(m.setPrimarySubtitleId, id);
     await dispatch(`${id}/${subActions.load}`);
