@@ -1,4 +1,4 @@
-import { Dialogue } from '@/interfaces/ISubtitle';
+import { Dialogue, Format } from '@/interfaces/ISubtitle';
 import { BaseParser } from './base';
 import { pick } from 'lodash';
 // @ts-ignore
@@ -36,6 +36,7 @@ type CompiledSubtitle = {
 
 export class AssParser extends BaseParser {
   readonly payload: string = '';
+  format: Format.AdvancedSubStationAplha;
   constructor(assPayload: string) {
     super();
     this.payload = assPayload;

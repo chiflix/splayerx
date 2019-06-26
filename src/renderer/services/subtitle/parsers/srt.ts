@@ -1,4 +1,4 @@
-import { Dialogue } from '@/interfaces/ISubtitle';
+import { Dialogue, Format } from '@/interfaces/ISubtitle';
 import { BaseParser } from './base';
 // @ts-ignore
 import { parse, toMS } from 'subtitle';
@@ -12,6 +12,7 @@ type ParsedSubtitle = {
 
 export class SrtParser extends BaseParser {
   payload = '';
+  format = Format.SubRip;
   constructor(srtPayload: string) {
     super();
     this.payload = srtPayload;

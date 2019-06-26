@@ -1,10 +1,11 @@
-import { Parser, Entity, Format, Cue, Tags } from '@/interfaces/ISubtitle';
+import { Parser, Format, Cue, Tags } from '@/interfaces/ISubtitle';
 import { Dialogue } from '@/interfaces/ISubtitle';
 
 export class BaseParser implements Parser {
   readonly payload: any;
   info = {};
   dialogues: Dialogue[];
+  format: Format = Format.Unknown;
 
   async getInfo() { return this.info; }
   async getDialogues(time?: number) {

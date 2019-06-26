@@ -1,5 +1,5 @@
 import { TranscriptResponse } from 'sagi-api/translation/v1/translation_pb';
-import { Dialogue } from '@/interfaces/ISubtitle';
+import { Dialogue, Format } from '@/interfaces/ISubtitle';
 import { BaseParser } from './base';
 import { tagsGetter } from '../utils';
 
@@ -7,6 +7,7 @@ export type SagiSubtitlePayload = TranscriptResponse.Cue.AsObject[];
 
 export class SagiParser extends BaseParser {
   payload: SagiSubtitlePayload;
+  format = Format.Sagi;
   constructor(sagiPayload: SagiSubtitlePayload) {
     super();
     this.payload = sagiPayload;
