@@ -192,7 +192,7 @@ export default {
     };
   },
   created() {
-    window.addEventListener('keyup', this.keyBoardHandler);
+    window.addEventListener('keyup', this.keyboardHandler);
     this.$bus.$on('delete-file', async (path: string, id: number) => {
       this.$store.dispatch('RemoveItemFromPlayingList', path);
       this.infoDB.delete('media-item', id);
@@ -209,7 +209,7 @@ export default {
     this.filename = this.pathBaseName(this.originSrc);
   },
   destroyed() {
-    window.removeEventListener('keyup', this.keyBoardHandler);
+    window.removeEventListener('keyup', this.keyboardHandler);
   },
   methods: {
     ...mapMutations({
@@ -220,7 +220,7 @@ export default {
       clearMouseup: InputActions.MOUSEUP_UPDATE,
       updateSubToTop: subtitleActions.UPDATE_SUBTITLE_TOP,
     }),
-    keyBoardHandler(e: KeyboardEvent) {
+    keyboardHandler(e: KeyboardEvent) {
       if (this.displayState) {
         if (e.keyCode === 39) {
           this.shifting = true;
