@@ -49,6 +49,7 @@ export const Subtitle = {
 };
 
 export const newSubtitle = {
+  initialize: 'INITIALIZE',
   add: 'ADD',
   load: 'LOAD',
   parse: 'PARSE',
@@ -79,6 +80,7 @@ export const SubtitleManager = {
   startAISelection: 'START_AI_SELECTION',
   stopAISelection: 'STOP_AI_SELECTION',
   getCues: 'GET_CUES',
+  clearSubtitles: 'CLEAR_SUBTITLES',
 };
 
 export const Input = {

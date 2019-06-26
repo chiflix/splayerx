@@ -261,7 +261,7 @@ export default {
   },
   computed: {
     ...mapGetters(['winWidth', 'originSrc', 'privacyAgreement', 'currentFirstSubtitleId',
-      'currentSecondSubtitleId', 'subtitleNewList', 'calculatedNoSub', 'winHeight', 'isFirstSubtitle',
+      'currentSecondSubtitleId', 'list', 'calculatedNoSub', 'winHeight', 'isFirstSubtitle',
       'enabledSecondarySub', 'winRatio']),
     ...mapState({
       loadingTypes: ({ Subtitle }) => {
@@ -430,7 +430,7 @@ export default {
         }
       }, 0);
     },
-    subtitleNewList(val: any, oldval: any) {
+    list(val: any, oldval: any) {
       if (val.length > oldval.length) {
         // @ts-ignore
         this.loadingType = difference(val, oldval)[0].type;

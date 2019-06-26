@@ -6,6 +6,7 @@ import { newSubtitle as a } from '@/store/actionTypes';
 import { getParser } from '@/services/subtitle/utils';
 
 type SubtitleState = {
+  moduleId: string;
   source: any;
   type: Type | undefined;
   format: Format | undefined;
@@ -20,6 +21,7 @@ let loader: () => Promise<any>;
 let parser: Parser;
 
 const state = {
+  moduleId: '',
   source: '',
   type: undefined,
   format: Format.Unknown,
@@ -29,6 +31,9 @@ const state = {
 } as SubtitleState;
 const getters = {};
 const mutations = {
+  [m.setModuleId](state: SubtitleState, id: string) {
+    state.moduleId = id;
+  },
   [m.setSource](state: SubtitleState, source: any) {
     state.source = source;
   },
@@ -52,6 +57,9 @@ const mutations = {
   },
 };
 const actions = {
+  [a.initialize]({ commit }: any, moduleId: string) {
+    commit(m.setModuleId, moduleId);
+  },
   async [a.add]({ commit }: any, generator: EntityGenerator) {
     loader = generator.getPayload.bind(generator);
     await Promise.all([
