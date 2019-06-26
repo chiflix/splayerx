@@ -8,7 +8,7 @@ import { generateHints } from '@/libs/utils';
 import { log } from '@/libs/Log';
 import SubtitleModule from './Subtitle';
 import { StoredSubtitleItem } from '@/interfaces/ISubtitleStorage';
-import { retrieveSubtitlePreference } from '@/services/storage/SubtitleStorage';
+import { retrieveSubtitlePreference, DatabaseGenerator } from '@/services/storage/SubtitleStorage';
 import { isEqual } from 'lodash';
 import Vue from 'vue';
 
@@ -138,19 +138,24 @@ const actions = {
     return Promise.all(
       subtitleStreams.map(stream => dispatch(a.addSubtitle, new EmbeddedGenerator(getters.videoSrc, stream)))
     );
-   },
-  async [a.addOnlineSubtitles]({ commit, dispatch }: any, transcriptInfoList: TranscriptInfo[]) {
+  },
+  async [a.addOnlineSubtitles]({ dispatch }: any, transcriptInfoList: TranscriptInfo[]) {
     // remove all type online item from list
     return Promise.all(
       transcriptInfoList.map(transcriptInfo => dispatch(a.addSubtitle, new OnlineGenerator(transcriptInfo)))
     );
   },
-  async [a.addDatabaseSubtitles](context: any, storedSubtitleItems: StoredSubtitleItem[]) {},
+  async [a.addDatabaseSubtitles]({ dispatch }: any, storedList: StoredSubtitleItem[]) {
+    return Promise.all(
+      storedList.map(stored => dispatch(a.addSubtitle, DatabaseGenerator.from(stored)))
+    );
+  },
   async [a.addSubtitle]({ commit, dispatch }: any, subtitleGenerator: EntityGenerator) {
     const id = uuidv4();
     store.registerModule(['SubtitleManager', id], { ...SubtitleModule, name: `${id}` });
     dispatch(`${id}/${subActions.initialize}`, id);
     const subtitle: Entity = await dispatch(`${id}/${subActions.add}`, subtitleGenerator);
+    await dispatch(`${id}/${subActions.store}`);
     commit(m.addSubtitleId, {
       id,
       type: subtitle.type,
@@ -176,7 +181,10 @@ const actions = {
   async [a.storeSubtitle](context: any, id: string) { },
   async [a.uploadSubtitle](context: any, id: string) { },
   async [a.startAISelection]({ dispatch }: any) {
-    unwatch = store.watch((state: any, getters: any) => getters.list, (value: SubtitleControlListItem[], oldValue: SubtitleControlListItem[]) => {
+    unwatch = store.watch(
+      (state: any, getters: any) => getters.list,
+      (value: SubtitleControlListItem[], oldValue: SubtitleControlListItem[]) => {
+      console.log(value);
       // AI select
       if (value.length > 0) {
         dispatch(a.changePrimarySubtitle, value[0].id);
