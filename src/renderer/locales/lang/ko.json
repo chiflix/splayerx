@@ -228,6 +228,7 @@
   "recentPlaylist": {
     "folderSource": "폴더",
     "playing": "연주 중",
+    "paused": "일시 중지 된",
     "playlistSource": "재생 목록"
   },
   "subtitle": {

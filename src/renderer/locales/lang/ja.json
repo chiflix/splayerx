@@ -228,6 +228,7 @@
   "recentPlaylist": {
     "folderSource": "ホルダー",
     "playing": "再生中",
+    "paused": "一時停止",
     "playlistSource": "プレイリスト"
   },
   "subtitle": {

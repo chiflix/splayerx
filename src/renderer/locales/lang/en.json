@@ -228,6 +228,7 @@
   "recentPlaylist": {
     "folderSource": "Folder",
     "playing": "Playing",
+    "paused": "Paused",
     "playlistSource": "Playlist"
   },
   "subtitle": {
