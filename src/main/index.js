@@ -12,7 +12,6 @@ import rimraf from 'rimraf';
 import TaskQueue from '../renderer/helpers/proceduralQueue';
 import './helpers/electronPrototypes';
 import writeLog from './helpers/writeLog';
-import { getOpenedFiles } from './helpers/argv';
 import { getValidVideoRegex } from '../shared/utils';
 
 // requestSingleInstanceLock is not going to work for mas
@@ -67,6 +66,7 @@ const snapShotQueue = [];
 const thumbnailTask = [];
 const mediaInfoQueue = [];
 const embeeddSubtitlesQueue = new TaskQueue();
+const subRegex = new RegExp('^\\.(srt|ass|vtt|ssa)$', 'i');
 const mainURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080'
   : `file://${__dirname}/index.html`;
@@ -434,7 +434,7 @@ function searchForLocalVideo(subSrc) {
       return (
         getValidVideoRegex().test(lowerCasedName)
         && lowerCasedName.slice(0, lowerCasedName.lastIndexOf('.')) === videoBasename
-        && lowerCasedName !== videoFilename
+        && lowerCasedName !== videoFilename && !subRegex.test(path.extname(lowerCasedName))
       );
     })
     .map(subtitleFilename => (join(videoDir, subtitleFilename)));
@@ -442,7 +442,6 @@ function searchForLocalVideo(subSrc) {
 function openSubtitle(onlySubtitle, files) {
   try {
     const videoFiles = [];
-    const subRegex = new RegExp('^\\.(srt|ass|vtt|ssa)$', 'i');
 
     for (let i = 0; i < files.length; i += 1) {
       if (fs.statSync(files[i]).isDirectory()) {
@@ -518,7 +517,7 @@ function createWindow() {
     finalVideoToOpen = openSubtitle(!tmpVideoToOpen.length, tmpVideoToOpen.concat(tmpSubsToOpen));
     if (process.mas && !tmpVideoToOpen.length && tmpSubsToOpen.length) {
       mainWindow.webContents.send('open-subtitle-in-mas', tmpSubsToOpen[0]);
-    } else if (finalVideoToOpen.length) {
+    } else if (tmpVideoToOpen.length + tmpSubsToOpen.length > 0) {
       mainWindow.webContents.send('open-file', { onlySubtitle: !tmpVideoToOpen.length, files: finalVideoToOpen });
     }
     finalVideoToOpen.splice(0, finalVideoToOpen.length);
@@ -558,7 +557,7 @@ async function darwinOpenFilesToStart() {
     finalVideoToOpen = openSubtitle(!tmpVideoToOpen.length, tmpVideoToOpen.concat(tmpSubsToOpen));
     if (process.mas && !tmpVideoToOpen.length && tmpSubsToOpen.length) {
       mainWindow.webContents.send('open-subtitle-in-mas', tmpSubsToOpen[0]);
-    } else if (finalVideoToOpen.length) {
+    } else if (tmpVideoToOpen.length + tmpSubsToOpen.length > 0) {
       mainWindow.webContents.send('open-file', { onlySubtitle: !tmpVideoToOpen.length, files: finalVideoToOpen });
     }
     finalVideoToOpen.splice(0, finalVideoToOpen.length);
@@ -572,7 +571,6 @@ const darwinOpenFilesToStartDebounced = debounce(darwinOpenFilesToStart, 100);
 if (process.platform === 'darwin') {
   app.on('will-finish-launching', () => {
     app.on('open-file', (event, file) => {
-      const subRegex = new RegExp('^\\.(srt|ass|vtt|ssa)$', 'i');
       if (subRegex.test(path.extname(file)) || fs.statSync(file).isDirectory()) {
         tmpSubsToOpen.push(file);
       } else if (!subRegex.test(path.extname(file))
@@ -583,12 +581,32 @@ if (process.platform === 'darwin') {
     });
   });
 } else {
-  tmpVideoToOpen.push(...getOpenedFiles(process.argv));
-  app.on('second-instance', (event, argv) => {
-    const opendFiles = getOpenedFiles(argv); // TODO: multiple files
-    if (opendFiles.length) {
-      mainWindow.webContents.send('open-file', ...opendFiles);
+  const tmpFile = process.argv.slice(app.isPackaged ? 1 : 2);
+  tmpFile.forEach((file) => {
+    if (subRegex.test(path.extname(file)) || fs.statSync(file).isDirectory()) {
+      tmpSubsToOpen.push(file);
+    } else if (!subRegex.test(path.extname(file))
+      && getValidVideoRegex().test(file)) {
+      tmpVideoToOpen.push(file);
     }
+  });
+  app.on('second-instance', (event, argv) => {
+    const opendFiles = argv.slice(app.isPackaged ? 1 : 2); // TODO: multiple files
+    opendFiles.forEach((file) => {
+      if (subRegex.test(path.extname(file)) || fs.statSync(file).isDirectory()) {
+        tmpSubsToOpen.push(file);
+      } else if (!subRegex.test(path.extname(file))
+        && getValidVideoRegex().test(file)) {
+        tmpVideoToOpen.push(file);
+      }
+    });
+    finalVideoToOpen = openSubtitle(!tmpVideoToOpen.length, tmpVideoToOpen.concat(tmpSubsToOpen));
+    if (tmpVideoToOpen.length + tmpSubsToOpen.length > 0) {
+      mainWindow.webContents.send('open-file', { onlySubtitle: !tmpVideoToOpen.length, files: finalVideoToOpen });
+    }
+    finalVideoToOpen.splice(0, finalVideoToOpen.length);
+    tmpSubsToOpen.splice(0, tmpSubsToOpen.length);
+    tmpVideoToOpen.splice(0, tmpVideoToOpen.length);
   });
 }
 

@@ -1366,9 +1366,6 @@ new Vue({
   mounted() {
     // https://github.com/electron/electron/issues/3609
     // Disable Zooming
-    setTimeout(() => {
-      console.log('test7.2');
-    }, 3000);
     this.$electron.webFrame.setVisualZoomLevelLimits(1, 1);
     this.createMenu();
     this.$bus.$on('new-file-open', this.refreshMenu);
@@ -1501,7 +1498,6 @@ new Vue({
     });
 
     this.$electron.ipcRenderer.on('open-file', (event: Event, args: { onlySubtitle: boolean, files: Array<string> }) => {
-      console.log(args);
       if (!args.files.length && args.onlySubtitle) {
         log.info('helpers/index.js', `Cannot find any related video in the folder: ${args.files}`);
         addBubble(LOAD_SUBVIDEO_FAILED, this.$i18n);
