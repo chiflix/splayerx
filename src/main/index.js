@@ -557,8 +557,8 @@ async function darwinOpenFilesToStart() {
     mainWindow.focus();
     finalVideoToOpen = getAllValidVideo(!tmpVideoToOpen.length,
       tmpVideoToOpen.concat(tmpSubsToOpen));
-    if (process.mas && !tmpVideoToOpen.length && tmpSubsToOpen.length) {
-      mainWindow.webContents.send('open-subtitle-in-mas', tmpSubsToOpen[0]);
+    if (!tmpVideoToOpen.length && tmpSubsToOpen.length) {
+      mainWindow.webContents.send('add-local-subtitle', tmpSubsToOpen);
     } else if (tmpVideoToOpen.length + tmpSubsToOpen.length > 0) {
       mainWindow.webContents.send('open-file', { onlySubtitle: !tmpVideoToOpen.length, files: finalVideoToOpen });
     }
@@ -604,7 +604,9 @@ if (process.platform === 'darwin') {
     });
     finalVideoToOpen = getAllValidVideo(!tmpVideoToOpen.length,
       tmpVideoToOpen.concat(tmpSubsToOpen));
-    if (tmpVideoToOpen.length + tmpSubsToOpen.length > 0) {
+    if (!tmpVideoToOpen.length && tmpSubsToOpen.length) {
+      mainWindow.webContents.send('add-local-subtitle', tmpSubsToOpen);
+    } else if (tmpVideoToOpen.length + tmpSubsToOpen.length > 0) {
       mainWindow.webContents.send('open-file', { onlySubtitle: !tmpVideoToOpen.length, files: finalVideoToOpen });
     }
     finalVideoToOpen.splice(0, finalVideoToOpen.length);
