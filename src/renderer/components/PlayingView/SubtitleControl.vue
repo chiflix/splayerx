@@ -148,7 +148,7 @@ export default {
   },
   computed: {
     ...mapGetters(['winWidth', 'originSrc', 'primarySubtitleId', 'secondarySubtitleId', 'list',
-      'subtitleList', 'calculatedNoSub', 'winHeight', 'isFirstSubtitle', 'enabledSecondarySub', 'isRefreshing',
+      'calculatedNoSub', 'winHeight', 'isFirstSubtitle', 'enabledSecondarySub', 'isRefreshing',
       'winRatio', 'isRefreshing']),
     ...mapState({
       loadingTypes: ({ Subtitle }) => {
@@ -315,11 +315,13 @@ export default {
         }
       }
     });
+    this.initializeManager();
   },
   methods: {
     ...mapActions({
       clearMousedown: InputActions.MOUSEDOWN_UPDATE,
       clearMouseup: InputActions.MOUSEUP_UPDATE,
+      initializeManager: smActions.initializeManager,
       changeFirstSubtitle: smActions.changePrimarySubtitle,
       changeSecondarySubtitle: smActions.changeSecondarySubtitle,
       refreshSubtitles: smActions.refreshSubtitles,
@@ -637,20 +639,9 @@ export default {
 .sub-delete-enter, .sub-delete-leave-to {
   opacity: 0;
 }
-
-.refresh-animation {
-  animation: menu-refresh 300ms linear 1 normal forwards;
-}
 .icon-rotate-animation {
   animation: icon-rotate 1s linear 1 normal forwards;
   animation-iteration-count: 10;
-}
-@keyframes menu-refresh {
-  0% { opacity: 1 }
-  25% { opacity: 0.5 }
-  50% { opacity: 0 }
-  75% { opacity: 0.5 }
-  100% { opacity: 1 }
 }
 @keyframes icon-rotate {
   0% { transform: rotate(0deg) }

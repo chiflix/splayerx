@@ -102,11 +102,14 @@
 </template>
 
 <script lang="ts">
+import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import { SubtitleControlListItem } from '@/interfaces/ISubtitle';
 import Icon from '../BaseIconContainer.vue';
 
 export default {
   name: 'SubtitleList',
+  // @ts-ignore
+  type: INPUT_COMPONENT_TYPE,
   components: {
     Icon,
   },
@@ -267,9 +270,11 @@ export default {
     },
     handleSubDelete(e: MouseEvent, item: SubtitleControlListItem) {
       if ((e.target as HTMLElement).nodeName !== 'DIV') {
-        this.$emit('update:transFlag', false);
-        this.$emit('update:hoverHeight', 0);
-        this.$emit('remove-subtitle', [item]);
+        setTimeout(() => {
+          this.$emit('update:transFlag', false);
+          this.$emit('update:hoverHeight', 0);
+          this.$emit('remove-subtitle', [item]);
+        }, 0);
       }
     },
     toggleItemsMouseOver(index: number) {
@@ -303,6 +308,16 @@ export default {
   border-radius: 1.2px;
   border: 0.5px solid rgba(255, 255, 255, 0.2);
   background: rgba(255, 255, 255, 0.15);
+}
+.refresh-animation {
+  animation: menu-refresh 300ms linear 1 normal forwards;
+}
+@keyframes menu-refresh {
+  0% { opacity: 1 }
+  25% { opacity: 0.5 }
+  50% { opacity: 0 }
+  75% { opacity: 0.5 }
+  100% { opacity: 1 }
 }
 .menu-item-text-wrapper {
   .iconContainer {
