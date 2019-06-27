@@ -1413,6 +1413,13 @@ new Vue({
     });
     window.addEventListener('keydown', (e) => {
       switch (e.keyCode) {
+        case 27:
+          if (this.isFullScreen && !this.playlistDisplayState) {
+            e.preventDefault();
+            this.$bus.$emit('off-fullscreen');
+            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
+          }
+          break;
         case 219:
           e.preventDefault();
           this.$store.dispatch(videoActions.DECREASE_RATE);
