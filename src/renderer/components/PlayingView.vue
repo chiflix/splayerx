@@ -69,12 +69,12 @@ export default {
   watch: {
     originSrc(newVal) {
       if (newVal) {
-        this.refreshSubtitlesInitially();
+        this.initializeManager();
       }
     },
   },
   created() {
-    this.refreshSubtitlesInitially();
+    this.initializeManager();
   },
   mounted() {
     this.$store.dispatch('initWindowRotate');
@@ -90,7 +90,7 @@ export default {
   methods: {
     ...mapActions({
       updateSubToTop: subtitleActions.UPDATE_SUBTITLE_TOP,
-      refreshSubtitlesInitially: smActions.refreshSubtitlesInitially,
+      initializeManager: smActions.initializeManager,
       getCues: smActions.getCues,
     }),
     // Compute UI states

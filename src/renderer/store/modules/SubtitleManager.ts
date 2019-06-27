@@ -32,7 +32,7 @@ const state = {
 };
 const getters = {
   list(state: SubtitleManagerState) {
-    return Object.values(state.allSubtitles);
+    return Object.values(state.allSubtitles).filter((v: any) => !!v);
   },
   primarySubtitleId(state: SubtitleManagerState): string { return state.primarySubtitleId },
   secondarySubtitleId(state: SubtitleManagerState): string { return state.secondarySubtitleId },
@@ -65,9 +65,12 @@ const mutations = {
 const actions = {
   async [a.initializeManager]({ getters, state, commit, dispatch }: any) {
     const { playListId, originSrc, mediaHash } = getters;
-    state.subtitleIds.forEach((id: string) => dispatch(a.removeSubtitle, id));
+    getters.list.forEach((s: SubtitleControlListItem) => dispatch(a.removeSubtitle, s.id));
     commit(m.setPlaylistId, playListId);
     commit(m.setMediaItemId, `${mediaHash}-${originSrc}`);
+    commit(m.setPrimarySubtitleId, '');
+    commit(m.setSecondarySubtitleId, '');
+    commit(m.setIsRefreshing, true);
     dispatch(a.refreshSubtitlesInitially);
   },
   async [a.refreshSubtitlesInitially]({ getters, dispatch }: any) {
@@ -96,13 +99,16 @@ const actions = {
     const hints = generateHints(originSrc);
     await dispatch(a.deleteSubtitlesByHash, databaseItemsToDelete);
     dispatch(a.startAISelection);
-    return Promise.all([
+    let dispatchs = [
       dispatch(a.addLocalSubtitles, await searchForLocalList(originSrc)),
       dispatch(a.addEmbeddedSubtitles, embedded ? await retrieveEmbeddedList(originSrc) : []),
       dispatch(a.addOnlineSubtitles, online ? await fetchOnlineList(originSrc, primaryLanguage, hints) : []),
-      dispatch(a.addOnlineSubtitles, online ? await fetchOnlineList(originSrc, secondaryLanguage, hints) : []),
-      dispatch(a.addDatabaseSubtitles, databaseItemsToAdd),
-    ]);
+    ];
+    if (secondaryLanguage) {
+      dispatchs.push(dispatch(a.addOnlineSubtitles, online ? await fetchOnlineList(originSrc, secondaryLanguage, hints) : []));
+    }
+    dispatchs.push(dispatch(a.addDatabaseSubtitles, databaseItemsToAdd))
+    return Promise.all(dispatchs);
   },
   /** only refresh local and online subtitles, delete old online subtitles */
   async [a.refreshSubtitles]({ getters, dispatch }: any) {
@@ -152,7 +158,7 @@ const actions = {
   },
   async [a.addSubtitle]({ commit, dispatch }: any, subtitleGenerator: EntityGenerator) {
     const id = uuidv4();
-    store.registerModule(['SubtitleManager', id], { ...SubtitleModule, name: `${id}` });
+    store.registerModule([id], { ...SubtitleModule, name: `${id}` });
     dispatch(`${id}/${subActions.initialize}`, id);
     const subtitle: Entity = await dispatch(`${id}/${subActions.add}`, subtitleGenerator);
     await dispatch(`${id}/${subActions.store}`);
@@ -160,13 +166,14 @@ const actions = {
       id,
       type: subtitle.type,
       language: subtitle.language,
+      source: subtitle.source.source,
     });
   },
   [a.removeSubtitle]({ commit }: any, id: string) {
-    store.unregisterModule(`SubtitleManager/${id}`);
+    store.unregisterModule(id);
     commit(m.deleteSubtitleId, id);
   },
-  async [a.deleteSubtitlesByHash](context: any, storedSubtitleItems: StoredSubtitleItem[]) {},
+  async [a.deleteSubtitlesByHash](context: any, storedSubtitleItems: StoredSubtitleItem[]) { },
   async [a.deleteSubtitlesByUuid]({ dispatch }: any, storedSubtitleItems: SubtitleControlListItem[]) {
     return Promise.all(storedSubtitleItems.map(({ id }) => dispatch(`${id}/${subActions.delete}`)));
   },
@@ -184,13 +191,13 @@ const actions = {
     unwatch = store.watch(
       (state: any, getters: any) => getters.list,
       (value: SubtitleControlListItem[], oldValue: SubtitleControlListItem[]) => {
-      console.log(value);
-      // AI select
-      if (value.length > 0) {
-        dispatch(a.changePrimarySubtitle, value[0].id);
-        dispatch(a.stopAISelection);
-      }
-    });
+        console.log(value);
+        // AI select
+        if (value.length > 0) {
+          dispatch(a.changePrimarySubtitle, value[0].id);
+          dispatch(a.stopAISelection);
+        }
+      });
   },
   async [a.stopAISelection]() {
     unwatch();

@@ -206,8 +206,12 @@ import {
   SUBTITLE_OFFLINE,
   REQUEST_TIMEOUT,
 } from '../../../shared/notificationcodes';
+import { SubtitleControlListItem } from '../../interfaces/ISubtitle';
 
-const deleteSubtitles = (subtitles: any[], videoSrc: string) => Promise.resolve([
+const deleteSubtitles = (
+  subtitles: SubtitleControlListItem[],
+  videoSrc: string,
+) => Promise.resolve([
   subtitles,
   videoSrc,
 ]);
@@ -365,9 +369,13 @@ export default {
       const { computedAvailableItems } = this;
       return !this.isFirstSubtitle && this.enabledSecondarySub
         ? computedAvailableItems
-          .findIndex((subtitle: any) => subtitle.id === this.currentSecondSubtitleId)
+          .findIndex((
+            subtitle: SubtitleControlListItem,
+          ) => subtitle.id === this.currentSecondSubtitleId)
         : computedAvailableItems
-          .findIndex((subtitle: any) => subtitle.id === this.currentFirstSubtitleId);
+          .findIndex((
+            subtitle: SubtitleControlListItem,
+          ) => subtitle.id === this.currentFirstSubtitleId);
     },
     currentScrollTop() {
       const marginFactors = [4, 5, 7];
@@ -430,12 +438,15 @@ export default {
         }
       }, 0);
     },
-    list(val: any, oldval: any) {
+    list(val: SubtitleControlListItem[], oldval: SubtitleControlListItem[]) {
       if (val.length > oldval.length) {
         // @ts-ignore
         this.loadingType = difference(val, oldval)[0].type;
       }
-      this.computedAvailableItems = val;
+      this.computedAvailableItems = val.map((sub: SubtitleControlListItem) => ({
+        name: sub.id,
+        ...sub,
+      }));
     },
     loadingType(val: string) {
       if (val === 'local') {
@@ -453,7 +464,7 @@ export default {
     isFirstSubtitle() {
       this.$refs.scroll.scrollTop = this.currentScrollTop;
     },
-    computedAvailableItems(val: any) {
+    computedAvailableItems(val: SubtitleControlListItem[]) {
       this.updateNoSubtitle(!val.length);
     },
   },
@@ -550,7 +561,7 @@ export default {
     subTypeShift() {
       this.updateSubtitleType(!this.isFirstSubtitle);
     },
-    handleSubDelete(e: MouseEvent, item: any) {
+    handleSubDelete(e: MouseEvent, item: SubtitleControlListItem) {
       if ((e.target as HTMLElement).nodeName !== 'DIV') {
         this.transFlag = false;
         this.removeLocalSub(item.id);
@@ -558,7 +569,7 @@ export default {
         if (item.id === this.currentFirstSubtitleId) {
           this.$bus.$emit('off-subtitle');
         }
-        deleteSubtitles([item.id], this.originSrc).then((result: any) => {
+        deleteSubtitles([item], this.originSrc).then((result: any) => {
           log.info('SubtitleControl.vue', `Subtitle delete { successId:${result.success}, failureId:${result.failure} }`);
           this.transFlag = true;
         });
@@ -567,14 +578,14 @@ export default {
     finishAnimation() {
       this.refAnimation = '';
     },
-    getSubName(item: any) {
-      if (item.path) {
-        return path.basename(item);
+    getSubName(item: SubtitleControlListItem) {
+      if (item.source) {
+        return path.basename(item.source);
       }
       if (item.type === 'embedded') {
-        return `${this.$t('subtitle.embedded')} ${item.name}`;
+        return `${this.$t('subtitle.embedded')}`;
       }
-      return item.name;
+      return item.id;
     },
     debouncedHandleRefresh(e: MouseEvent, hasOnlineSubtitles = false) {
       this.debouncedHandler(e, hasOnlineSubtitles);

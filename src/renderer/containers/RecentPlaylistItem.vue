@@ -279,7 +279,8 @@ export default {
       return path.basename(this.path, path.extname(this.path));
     },
     backgroundImage() {
-      return `url(${this.imageSrc})`;
+      const { imageSrc } = this;
+      return imageSrc ? `url(${imageSrc})` : '';
     },
     // ui related
     side() {

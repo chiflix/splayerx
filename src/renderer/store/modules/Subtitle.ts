@@ -94,8 +94,12 @@ const actions = {
   },
   async [a.getDialogues](context: any, time: number) {
     parser = getParser(entity);
-    await parser.parse(entity);
-    return await parser.getDialogues(time);
+    if (parser.payload) {
+      await parser.parse(entity);
+      return await parser.getDialogues(time);
+    } else {
+      return [];
+    }
   },
   async [a.store]() {
     await storeSubtitle(entity);

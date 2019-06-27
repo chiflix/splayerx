@@ -10,6 +10,7 @@ import { TranslationClient } from 'sagi-api/translation/v1/translation_grpc_pb';
 import { TrainingData } from 'sagi-api/training/v1/training_pb';
 import { TrainngClient } from 'sagi-api/training/v1/training_grpc_pb';
 import { SagiSubtitlePayload } from '@/services/subtitle';
+import { log } from './Log';
 
 const grpc = require('grpc');
 
@@ -50,6 +51,7 @@ class Sagi {
     req.setMediaIdentity(mediaIdentity);
     req.setLanguageCode(languageCode);
     req.setHints(hints);
+    log.info('Sagi.mediaTranslate', `hash-${mediaIdentity}***language-${languageCode}***hints-${hints}`);
     return new Promise((resolve, reject) => {
       client.translateMedia(req, (err, res) => {
         if (err) reject(err)
