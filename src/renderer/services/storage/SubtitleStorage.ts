@@ -2,9 +2,9 @@ import { DBSchema, IDBPDatabase, openDB } from 'idb';
 import { LanguageCode, normalizeCode } from '@/libs/language';
 import { RECENT_OBJECT_STORE_NAME, VIDEO_OBJECT_STORE_NAME, DATADB_NAME, INFO_DATABASE_NAME, INFODB_VERSION } from '@/constants';
 import { MediaItem, PlaylistItem, SubtitlePreference as oldPreference } from '@/interfaces/IDB';
-import { Entity, EntityGenerator, Type, Format, Origin } from '@/interfaces/ISubtitle';
+import { Entity, EntityGenerator, Type, Format, Origin, SubtitleControlListItem } from '@/interfaces/ISubtitle';
 import { StoredSubtitle, StoredSubtitleItem, SubtitlePreference } from '@/interfaces/ISubtitleStorage';
-import { uniqBy, unionBy, uniqWith, remove, isEqual, get, zip, union, flatMap } from 'lodash';
+import { uniqBy, unionBy, uniqWith, remove, isEqual, get, zip, union, flatMap, some } from 'lodash';
 import Sagi from '@/libs/sagi';
 import { loadLocalFile, pathToFormat } from '../subtitle/utils';
 import { embeddedSrcLoader } from '../subtitle/loaders/embedded';
@@ -232,8 +232,8 @@ class SubtitleDataBase {
       .transaction('subtitles', 'readwrite')
       .objectStore('subtitles');
     const storedSubtitle = await objectStore.get(subtitle.hash);
-    if (storedSubtitle && storedSubtitle.source.includes(subtitle.source)) {
-      remove(storedSubtitle.source, storedSub => isEqual(storedSub.source, subtitle.source));
+    if (storedSubtitle) {
+      remove(storedSubtitle.source, storedSource => isEqual(storedSource, subtitle.source));
       if (!storedSubtitle.source.length) {
         return objectStore.delete(subtitle.hash);
       } else {
@@ -316,7 +316,7 @@ class SubtitleDataBase {
       return objectStore.add(this.generateDefaultPreference(playlistId, mediaItemId));
     } else {
       const { list: existedList } = preference;
-      remove(existedList, (sub: StoredSubtitleItem) => subtitles.includes(sub));
+      remove(existedList, sub => some(subtitles, sub));
       return objectStore.put({
         ...preference,
         list: existedList,
@@ -462,12 +462,12 @@ export function retrieveSubtitlePreference(playlistId: number, mediaItemId: stri
 export function retrieveStoredSubtitleList(playlistId: number, mediaItemId: string) {
   return db.retrieveSubtitleList(playlistId, mediaItemId);
 }
-export function addSubtitleItemsToList(subtitles: Entity[], playlistId: number, mediaItemId: string) {
-  const storedSubtitles = subtitles.map(({ hash, type }) => ({ hash, type }));
+export function addSubtitleItemsToList(subtitles: SubtitleControlListItem[], playlistId: number, mediaItemId: string) {
+  const storedSubtitles = subtitles.map(({ hash, type, source }) => ({ hash, type, source }));
   return db.addSubtitleItemsToList(playlistId, mediaItemId, storedSubtitles);
 }
-export function removeSubtitleItemsFromList(subtitles: Entity[], playlistId: number, mediaItemId: string) {
-  const storedSubtitles = subtitles.map(({ hash, type }) => ({ hash, type }));
+export function removeSubtitleItemsFromList(subtitles: SubtitleControlListItem[], playlistId: number, mediaItemId: string) {
+  const storedSubtitles = subtitles.map(({ hash, type, source }) => ({ hash, type, source }));
   return db.removeSubtitleItemsFromList(playlistId, mediaItemId, storedSubtitles);
 }
 export function storeSubtitleLanguage(languageCodes: LanguageCode[], playlistId: number, mediaItemId: string) {

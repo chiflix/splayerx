@@ -30,6 +30,7 @@ export type Entity = {
 }
 export type SubtitleControlListItem = {
   id: string;
+  hash: string;
   type: Type;
   language: LanguageCode;
   source: any,

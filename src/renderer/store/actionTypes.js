@@ -73,7 +73,6 @@ export const SubtitleManager = {
   addEmbeddedSubtitles: 'ADD_EMBEDDED_SUBTITLES',
   addOnlineSubtitles: 'ADD_ONLINE_SUBTITLES',
   addDatabaseSubtitles: 'ADD_DATABASE_SUBTITLES',
-  deleteSubtitlesByHash: 'DELETE_DATABASE_SUBTITLES',
   deleteSubtitlesByUuid: 'DELETE_SUBTITLES_BY_UUID',
   changePrimarySubtitle: 'CHANGE_PRIMARY_SUBTITLE',
   changeSecondarySubtitle: 'CHANGE_SECONDARY_SUBTITLE',
