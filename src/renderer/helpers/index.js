@@ -456,10 +456,13 @@ export default {
         return;
       }
       this.$store.dispatch('SRC_SET', { src: vidPath, mediaHash: mediaQuickHash, id });
-      this.$router.push({ name: 'playing-view' });
+      if (this.$router.currentRoute.name !== 'playing-view') {
+        this.$router.push({ name: 'playing-view' });
+      }
 
       if (id) {
         const value = await this.infoDB.get('media-item', id);
+        if (!value) return;
         this.$bus.$emit('new-file-open');
         if (value.lastPlayedTime) {
           this.$bus.$emit('send-lastplayedtime', value.lastPlayedTime);
