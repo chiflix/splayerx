@@ -221,7 +221,7 @@ export default {
       updateSubToTop: subtitleActions.UPDATE_SUBTITLE_TOP,
     }),
     keyboardHandler(e: KeyboardEvent) {
-      if (this.displayState) {
+      if (this.displayState && !e.metaKey && !e.ctrlKey) {
         if (e.key === 'ArrowRight') {
           this.shifting = true;
           this.tranFlag = true;
