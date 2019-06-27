@@ -30,8 +30,6 @@ export default class PlaylistService extends EventEmitter implements IPlaylistRe
     super();
     ipcRenderer.send('mediaInfo', path);
     ipcRenderer.once(`mediaInfo-${path}-reply`, async (event: any, info: string) => {
-      const { width, height } = JSON.parse(info).streams.find((stream: any) => stream.codec_type === 'video');
-
       const { duration } = JSON.parse(info).format;
       this.duration = parseFloat(duration);
       const mediaHash = await mediaQuickHash(path);
@@ -39,7 +37,7 @@ export default class PlaylistService extends EventEmitter implements IPlaylistRe
       
       if (!imgPath) {
         const imgPath = await this.mediaStorageService.generatePathBy(mediaHash, 'cover');
-        ipcRenderer.send('snapShot', { path, imgPath, duration, width, height });
+        ipcRenderer.send('snapShot', { path, imgPath, duration });
         ipcRenderer.once(`snapShot-${path}-reply`, (event: any, imgPath: string) => {
           this.imageSrc = filePathToUrl(`${imgPath}`);
           this.emit('image-loaded');

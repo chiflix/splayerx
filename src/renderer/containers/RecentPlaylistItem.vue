@@ -64,7 +64,10 @@
                 v-if="isPlaying"
                 class="icon-container"
               >
-                <transition name="fade" mode="out-in">
+                <transition
+                  name="fade"
+                  mode="out-in"
+                >
                   <Icon
                     :key="paused"
                     :style="{
@@ -75,7 +78,10 @@
                     :type="paused ? 'playlistpause' : 'playlistplay'"
                   />
                 </transition>
-                <transition name="fade" mode="out-in">
+                <transition
+                  name="fade"
+                  mode="out-in"
+                >
                   <div
                     :key="paused"
                     :style="{

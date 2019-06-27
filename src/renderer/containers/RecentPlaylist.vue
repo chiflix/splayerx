@@ -221,7 +221,7 @@ export default {
       updateSubToTop: subtitleActions.UPDATE_SUBTITLE_TOP,
     }),
     keyboardHandler(e: KeyboardEvent) {
-      if (this.displayState) {
+      if (this.displayState && !e.metaKey && !e.ctrlKey) {
         if (e.key === 'ArrowRight') {
           this.shifting = true;
           this.tranFlag = true;
@@ -461,6 +461,18 @@ export default {
     originSrc() {
       this.updateSubToTop(this.displayState);
       this.hoverIndex = this.playingIndex;
+      if (
+        this.playingIndex > this.lastIndex
+        || this.playingIndex < this.firstIndex
+      ) {
+        this.firstIndex = this.playingIndex;
+        this.shifting = true;
+        this.tranFlag = true;
+        setTimeout(() => {
+          this.shifting = false;
+          this.tranFlag = false;
+        }, 400);
+      }
       this.filename = this.pathBaseName(this.originSrc);
     },
     duration(val: number) {
@@ -490,6 +502,25 @@ export default {
       if (this.firstIndex > 0 && this.maxIndex > this.firstIndex
        && this.maxIndex <= val && !this.itemMoving) {
         this.firstIndex = (this.maxIndex - this.thumbnailNumber) + 1;
+      }
+    },
+    thumbnailNumber() {
+      if (this.playingIndex > this.lastIndex) {
+        this.lastIndex = this.playingIndex;
+        this.shifting = true;
+        this.tranFlag = true;
+        setTimeout(() => {
+          this.shifting = false;
+          this.tranFlag = false;
+        }, 400);
+      } else if (this.playingIndex < this.firstIndex) {
+        this.firstIndex = this.playingIndex;
+        this.shifting = true;
+        this.tranFlag = true;
+        setTimeout(() => {
+          this.shifting = false;
+          this.tranFlag = false;
+        }, 400);
       }
     },
     maxIndex(val: number, oldVal: number) {

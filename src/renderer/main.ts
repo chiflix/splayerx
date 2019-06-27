@@ -243,10 +243,8 @@ new Vue({
     updateFullScreen() {
       if (this.isFullScreen) {
         return {
-          id: 'KeyboardEsc',
           label: this.$t('msg.window.exitFullScreen'),
-          accelerator: 'Esc',
-          enabled: !this.playlistDisplayState,
+          accelerator: 'F',
           click: () => {
             this.$bus.$emit('off-fullscreen');
             this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
@@ -353,9 +351,6 @@ new Vue({
   watch: {
     playlistDisplayState(val: boolean) {
       if (this.menu) {
-        if (this.menu.getMenuItemById('KeyboardEsc')) {
-          this.menu.getMenuItemById('KeyboardEsc').enabled = !val;
-        }
         this.menu.getMenuItemById('KeyboardLeft').enabled = !val;
         this.menu.getMenuItemById('KeyboardRight').enabled = !val;
       }
@@ -1371,7 +1366,7 @@ new Vue({
     },
     // eslint-disable-next-line complexity
     wheelEventHandler({ x }: { x: number }) {
-      if (this.duration && this.wheelDirection === 'horizontal') {
+      if (this.duration && this.wheelDirection === 'horizontal' && !this.playlistDisplayState) {
         const eventName = x < 0 ? 'seek-forward' : 'seek-backward';
         const absX = Math.abs(x);
 
@@ -1418,6 +1413,13 @@ new Vue({
     });
     window.addEventListener('keydown', (e) => {
       switch (e.keyCode) {
+        case 27:
+          if (this.isFullScreen && !this.playlistDisplayState) {
+            e.preventDefault();
+            this.$bus.$emit('off-fullscreen');
+            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
+          }
+          break;
         case 219:
           e.preventDefault();
           this.$store.dispatch(videoActions.DECREASE_RATE);
@@ -1467,7 +1469,7 @@ new Vue({
                 this.canSendVolumeGa = true;
               }, 1000);
             }
-            if (this.wheelDirection === 'vertical') {
+            if (this.wheelDirection === 'vertical' || this.playlistDisplayState) {
               let step = Math.abs(e.deltaY) * 0.06;
               // in windows if wheel setting more lines per step, make it limited.
               if (process.platform !== 'darwin' && step > 6) {

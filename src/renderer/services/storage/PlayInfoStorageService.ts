@@ -70,6 +70,9 @@ export default class PlayInfoStorageService implements IPlayInfoStorable {
     const results = await info.getAll('recent-played');
     return results.sort((a: PlaylistItem, b: PlaylistItem) => b.lastOpened - a.lastOpened);
   }
+  async getPlaylistRecord(playlistId: number): Promise<PlaylistItem> {
+    return info.getValueByKey(RECENT_OBJECT_STORE_NAME, playlistId);
+  }
 }
 
 
