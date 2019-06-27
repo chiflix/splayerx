@@ -14,13 +14,14 @@ export interface StoredSubtitleItem {
   videoSegments?: VideoSegment[];
 }
 interface PrimarySecondary<T> {
-  primary: T;
-  secondary: T;
+  primary?: T;
+  secondary?: T;
 }
+export type SelectedSubtitle = { hash: string, source?: Origin };
 export interface SubtitlePreference {
   playlistId: number;
   mediaId: string;
   list: StoredSubtitleItem[];
   language: PrimarySecondary<LanguageCode>;
-  selected: PrimarySecondary<string>;
+  selected: PrimarySecondary<SelectedSubtitle>;
 }

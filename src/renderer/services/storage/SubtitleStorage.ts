@@ -3,7 +3,7 @@ import { LanguageCode, normalizeCode } from '@/libs/language';
 import { RECENT_OBJECT_STORE_NAME, VIDEO_OBJECT_STORE_NAME, DATADB_NAME, INFO_DATABASE_NAME, INFODB_VERSION } from '@/constants';
 import { MediaItem, PlaylistItem, SubtitlePreference as oldPreference } from '@/interfaces/IDB';
 import { Entity, EntityGenerator, Type, Format, Origin, SubtitleControlListItem } from '@/interfaces/ISubtitle';
-import { StoredSubtitle, StoredSubtitleItem, SubtitlePreference } from '@/interfaces/ISubtitleStorage';
+import { StoredSubtitle, StoredSubtitleItem, SubtitlePreference, SelectedSubtitle } from '@/interfaces/ISubtitleStorage';
 import { uniqBy, unionBy, uniqWith, remove, isEqual, get, zip, union, flatMap, some } from 'lodash';
 import Sagi from '@/libs/sagi';
 import { loadLocalFile, pathToFormat } from '../subtitle/utils';
@@ -105,8 +105,8 @@ async function v1PlaylistToV2Preference(): Promise<{
         secondary: normalizeCode(p[1].language[1]),
       },
       selected: {
-        primary: p[1].selected.firstId.toString(),
-        secondary: p[1].selected.secondaryId.toString(),
+        primary: p[1].selected.firstId.toString() as unknown as SelectedSubtitle,
+        secondary: p[1].selected.secondaryId.toString() as unknown as SelectedSubtitle,
       },
     })) as SubtitlePreference[]
     const validSubtitleIdList = flatMap(oldPreferenceList
@@ -182,8 +182,8 @@ class SubtitleDataBase {
               ...p,
               list: p.list.map(s => ({ ...s, hash: map[s.hash] })),
               selected: {
-                primary: map[p.selected.primary],
-                secondary: map[p.selected.secondary],
+                primary: { hash: map[p.selected.primary as unknown as string] },
+                secondary: { hash: map[p.selected.secondary as unknown as string] },
               },
             }));
             // arrange the object stores
@@ -261,8 +261,8 @@ class SubtitleDataBase {
       },
       list: [],
       selected: {
-        primary: '',
-        secondary: '',
+        primary: { hash: '' },
+        secondary: { hash: '' },
       },
     };
   }
@@ -363,11 +363,11 @@ class SubtitleDataBase {
       }, key);
     }
   }
-  async retrieveSelectedSubtitleIds(playlistId: number, mediaItemId: string) {
+  async retrieveSelectedSubtitles(playlistId: number, mediaItemId: string) {
     const preference = await this.retrieveSubtitlePreference(playlistId, mediaItemId);
     return preference ? preference.selected : [];
   }
-  async storeSelectedSubtitleIds(playlistId: number, mediaItemId: string, subtitleIds: string[]) {
+  async storeSelectedSubtitles(playlistId: number, mediaItemId: string, subtitles: SelectedSubtitle[]) {
     const objectStore = (await this.getDb())
       .transaction('preferences', 'readwrite')
       .objectStore('preferences');
@@ -385,16 +385,16 @@ class SubtitleDataBase {
       return objectStore.add({
         ...this.generateDefaultPreference(playlistId, mediaItemId),
         selected: {
-          primary: subtitleIds[0],
-          secondary: subtitleIds[1],
+          primary: subtitles[0],
+          secondary: subtitles[1],
         },
       });
     } else {
       return objectStore.put({
         ...preference,
         selected: {
-          primary: subtitleIds[0],
-          secondary: subtitleIds[1],
+          primary: subtitles[0],
+          secondary: subtitles[1],
         },
       }, key);
     }
@@ -474,6 +474,9 @@ export function removeSubtitleItemsFromList(subtitles: SubtitleControlListItem[]
 export function storeSubtitleLanguage(languageCodes: LanguageCode[], playlistId: number, mediaItemId: string) {
   return db.storeSubtitleLanguage(playlistId, mediaItemId, languageCodes);
 }
-export function storeSelectedSubtitleIds(ids: string[], playlistId: number, mediaItemId: string) {
-  return db.storeSelectedSubtitleIds(playlistId, mediaItemId, ids);
+export function storeSelectedSubtitles(subs: SelectedSubtitle[], playlistId: number, mediaItemId: string) {
+  return db.storeSelectedSubtitles(playlistId, mediaItemId, subs);
+}
+export function retrieveSelectedSubtitles(playlistId: number, mediaItemId: string) {
+  return db.retrieveSelectedSubtitles(playlistId, mediaItemId);
 }
