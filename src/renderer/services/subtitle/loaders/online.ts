@@ -2,6 +2,7 @@ import { LanguageCode, normalizeCode } from '@/libs/language';
 import { MediaTranslationResponse } from 'sagi-api/translation/v1/translation_pb';
 import Sagi from '@/libs/sagi';
 import { Origin, EntityGenerator, Type, Format } from '@/interfaces/ISubtitle';
+import { cloneDeep } from 'lodash';
 
 export type TranscriptInfo = MediaTranslationResponse.TranscriptInfo.AsObject;
 
@@ -24,7 +25,7 @@ export class OnlineGenerator implements EntityGenerator {
 
   async getType() { return Type.Online; }
 
-  async getSource() { return this.origin; }
+  async getSource() { return cloneDeep(this.origin); }
   async getLanguage() {
     return this.language;
   }

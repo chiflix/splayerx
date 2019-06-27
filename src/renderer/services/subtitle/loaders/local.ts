@@ -2,6 +2,7 @@ import { pathToFormat, loadLocalFile } from '../utils';
 import { inferLanguageFromPath } from '../utils';
 import { Origin, Type, EntityGenerator, Format } from '@/interfaces/ISubtitle';
 import helpers from '@/helpers';
+import { cloneDeep } from 'lodash';
 
 interface LocalOrigin extends Origin {
   type: Type.Local,
@@ -17,7 +18,7 @@ export class LocalGenerator implements EntityGenerator {
     this.format = format;
   }
 
-  async getSource() { return this.origin; }
+  async getSource() { return cloneDeep(this.origin); }
   async getType() { return Type.Local; }
   async getFormat() {
     if (this.format) return this.format;

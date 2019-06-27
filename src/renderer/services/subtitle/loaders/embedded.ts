@@ -3,6 +3,7 @@ import { LanguageCode, normalizeCode } from '@/libs/language';
 import { ipcRenderer, Event } from 'electron';
 import helpers from '@/helpers';
 import { inferLanguageFromPath, loadLocalFile } from '../utils';
+import { cloneDeep } from 'lodash';
 
 interface IExtractSubtitleRequest {
   videoSrc: string;
@@ -82,7 +83,7 @@ export class EmbeddedGenerator implements EntityGenerator {
     this.isDefault = !!stream.disposition.default;
   }
 
-  async getSource() { return this.origin; }
+  async getSource() { return cloneDeep(this.origin); }
   async getType() { return Type.Embedded; }
   async getFormat() { return this.format; }
   private async getExtractedSrc() {
