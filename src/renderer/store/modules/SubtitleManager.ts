@@ -9,8 +9,14 @@ import { log } from '@/libs/Log';
 import SubtitleModule from './Subtitle';
 import { StoredSubtitleItem, SelectedSubtitle } from '@/interfaces/ISubtitleStorage';
 import { retrieveSubtitlePreference, DatabaseGenerator, storeSubtitleLanguage, addSubtitleItemsToList, removeSubtitleItemsFromList, storeSelectedSubtitles } from '@/services/storage/SubtitleStorage';
-import { isEqual, get } from 'lodash';
+import { isEqual, get, sortBy } from 'lodash';
 import Vue from 'vue';
+
+const sortOfTypes = {
+  local: 0,
+  embedded: 1,
+  online: 2,
+};
 
 let unwatch: Function;
 
@@ -32,7 +38,13 @@ const state = {
 };
 const getters = {
   list(state: SubtitleManagerState) {
-    return Object.values(state.allSubtitles).filter((v: any) => !!v);
+    const list = Object.values(state.allSubtitles).filter((v: any) => !!v);
+    return sortBy(list, (sub: SubtitleControlListItem) => {
+      return sortOfTypes[sub.type];
+    }).map((sub: SubtitleControlListItem) => ({
+      ...sub,
+      name: calculatedName(sub, list),
+    }));
   },
   primarySubtitleId(state: SubtitleManagerState): string { return state.primarySubtitleId },
   secondarySubtitleId(state: SubtitleManagerState): string { return state.secondarySubtitleId },
@@ -126,6 +138,8 @@ const actions = {
   },
   /** only refresh local and online subtitles, delete old online subtitles */
   async [a.refreshSubtitles]({ state, getters, dispatch, commit }: any) {
+    commit(m.setPrimarySubtitleId, '');
+    commit(m.setSecondarySubtitleId, '');
     commit(m.setIsRefreshing, true);
     const { list } = getters as { list: SubtitleControlListItem[] };
     const { originSrc, primaryLanguage, secondaryLanguage } = getters;
@@ -202,9 +216,7 @@ const actions = {
       type: subtitle.type,
       language: subtitle.language,
       source: subtitle.source.source,
-      name: '',
     };
-    subtitleControlListItem.name = calculatedName(subtitleControlListItem, getters.list);
     commit(m.addSubtitleId, subtitleControlListItem);
     return subtitleControlListItem;
   },
@@ -260,7 +272,7 @@ const actions = {
       (value: SubtitleControlListItem[], oldValue: SubtitleControlListItem[]) => {
         // AI select
         if (value.length > 0) {
-          dispatch(a.changePrimarySubtitle, value[0].id);
+          // dispatch(a.changePrimarySubtitle, value[0].id);
           dispatch(a.stopAISelection);
         }
       });
