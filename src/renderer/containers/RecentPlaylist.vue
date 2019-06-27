@@ -504,6 +504,25 @@ export default {
         this.firstIndex = (this.maxIndex - this.thumbnailNumber) + 1;
       }
     },
+    thumbnailNumber() {
+      if (this.playingIndex > this.lastIndex) {
+        this.lastIndex = this.playingIndex;
+        this.shifting = true;
+        this.tranFlag = true;
+        setTimeout(() => {
+          this.shifting = false;
+          this.tranFlag = false;
+        }, 400);
+      } else if (this.playingIndex < this.firstIndex) {
+        this.firstIndex = this.playingIndex;
+        this.shifting = true;
+        this.tranFlag = true;
+        setTimeout(() => {
+          this.shifting = false;
+          this.tranFlag = false;
+        }, 400);
+      }
+    },
     maxIndex(val: number, oldVal: number) {
       if (this.lastIndex === oldVal) {
         this.lastIndex = val;
