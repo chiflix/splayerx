@@ -271,7 +271,7 @@ class SubtitleDataBase {
     return preference ? preference.list : [];
   }
   async addSubtitleItemsToList(playlistId: number, mediaItemId: string, subtitles: StoredSubtitleItem[]) {
-    subtitles = uniqBy(subtitles, 'hash');
+    subtitles = uniqBy(subtitles, 'source');
     const objectStore = (await this.getDb())
       .transaction('preferences', 'readwrite')
       .objectStore('preferences');
@@ -293,12 +293,12 @@ class SubtitleDataBase {
     } else {
       return objectStore.put({
         ...preference,
-        list: unionBy(subtitles, preference.list, 'hash'),
+        list: unionBy(subtitles, preference.list, 'source'),
       }, key);
     }
   }
   async removeSubtitleItemsFromList(playlistId: number, mediaItemId: string, subtitles: StoredSubtitleItem[]) {
-    subtitles = uniqBy(subtitles, 'hash');
+    subtitles = uniqBy(subtitles, 'source');
     const objectStore = (await this.getDb())
       .transaction('preferences', 'readwrite')
       .objectStore('preferences');
