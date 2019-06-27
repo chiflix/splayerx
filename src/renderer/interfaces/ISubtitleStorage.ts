@@ -10,7 +10,7 @@ export interface StoredSubtitle {
 export interface StoredSubtitleItem {
   hash: string;
   type: Type;
-  source: Origin;
+  source: any;
   videoSegments?: VideoSegment[];
 }
 interface PrimarySecondary<T> {

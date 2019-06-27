@@ -4,7 +4,7 @@ import { RECENT_OBJECT_STORE_NAME, VIDEO_OBJECT_STORE_NAME, DATADB_NAME, INFO_DA
 import { MediaItem, PlaylistItem, SubtitlePreference as oldPreference } from '@/interfaces/IDB';
 import { Entity, EntityGenerator, Type, Format, Origin, SubtitleControlListItem } from '@/interfaces/ISubtitle';
 import { StoredSubtitle, StoredSubtitleItem, SubtitlePreference, SelectedSubtitle } from '@/interfaces/ISubtitleStorage';
-import { uniqBy, unionBy, uniqWith, remove, isEqual, get, zip, union, flatMap, some } from 'lodash';
+import { uniqBy, unionWith, uniqWith, remove, isEqual, get, zip, union, flatMap, some } from 'lodash';
 import Sagi from '@/libs/sagi';
 import { loadLocalFile, pathToFormat } from '../subtitle/utils';
 import { embeddedSrcLoader } from '../subtitle/loaders/embedded';
@@ -293,7 +293,7 @@ class SubtitleDataBase {
     } else {
       return objectStore.put({
         ...preference,
-        list: unionBy(subtitles, preference.list, 'source'),
+        list: unionWith(subtitles, preference.list, isEqual),
       }, key);
     }
   }
@@ -440,7 +440,10 @@ export class DatabaseGenerator implements EntityGenerator {
     const storedSubtitle = await db.retrieveSubtitle(hash);
     if (storedSubtitle) {
       const newGenerator = new DatabaseGenerator();
-      newGenerator.storedSource = storedSubtitleItem.source;
+      newGenerator.storedSource = {
+        type,
+        source: storedSubtitleItem.source,
+      };
       const { source, format, language } = storedSubtitle;
       newGenerator.type = type;
       newGenerator.format = format;
@@ -467,7 +470,7 @@ export function retrieveStoredSubtitleList(playlistId: number, mediaItemId: stri
   return db.retrieveSubtitleList(playlistId, mediaItemId);
 }
 export function addSubtitleItemsToList(subtitles: SubtitleControlListItem[], playlistId: number, mediaItemId: string) {
-  const storedSubtitles = subtitles.map(({ hash, type, source }) => ({ hash, type, source: { type, source } }));
+  const storedSubtitles = subtitles.map(({ hash, type, source }) => ({ hash, type, source }));
   return db.addSubtitleItemsToList(playlistId, mediaItemId, storedSubtitles);
 }
 export function removeSubtitleItemsFromList(subtitles: SubtitleControlListItem[], playlistId: number, mediaItemId: string) {
