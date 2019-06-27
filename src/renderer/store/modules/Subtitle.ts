@@ -1,4 +1,4 @@
-import { EntityGenerator, Entity, Parser, Type, Format } from '@/interfaces/ISubtitle';
+import { EntityGenerator, Entity, Parser, Type, Format, Origin } from '@/interfaces/ISubtitle';
 import { LanguageCode } from '@/libs/language';
 import { storeSubtitle, removeSubtitle } from '@/services/storage/SubtitleStorage';
 import { newSubtitle as m } from '@/store/mutationTypes';
@@ -73,10 +73,9 @@ const actions = {
       subtitle.loader = generator.getPayload.bind(generator);
       const { entity } = subtitle;
       await Promise.all([
-        generator.getSource().then(src => {
-          entity.source = src;
-          commit(m.setSource, src);
-        }),
+        generator.getStoredSource
+          ? generator.getStoredSource().then((src: Origin) => entity.source = src)
+          : generator.getSource().then((src: Origin) => entity.source = src),
         generator.getFormat().then(format => {
           entity.format = format;
           commit(m.setFormat, format);
@@ -119,7 +118,7 @@ const actions = {
     }
     return [];
   },
-  async [a.store]({ state, rootState }: any) {
+  async [a.store]({ state }: any) {
     const subtitle = subtitleMap.get(state.moduleId);
     if (subtitle) await storeSubtitle(subtitle.entity);
   },
