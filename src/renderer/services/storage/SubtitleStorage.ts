@@ -243,12 +243,14 @@ class SubtitleDataBase {
   }
 
   async retrieveSubtitlePreference(playlistId: number, mediaItemId: string) {
-    const preferences = await (await this.getDb())
+    let cursor = await ((await this.getDb())
       .transaction('preferences', 'readonly')
       .objectStore('preferences')
-      .index('byPlaylist')
-      .getAll(playlistId);
-    return preferences.find(({ mediaId }) => mediaId === mediaItemId);
+      .openCursor());
+    while (cursor) {
+      if (cursor.value.playlistId === playlistId && cursor.value.mediaId === mediaItemId) return cursor.value;
+      cursor = await cursor.continue();
+    }
   }
   private generateDefaultPreference(playlistId: number, mediaItemId: string): SubtitlePreference {
     return {
@@ -273,8 +275,16 @@ class SubtitleDataBase {
     const objectStore = (await this.getDb())
       .transaction('preferences', 'readwrite')
       .objectStore('preferences');
-    const preference = (await objectStore.index('byPlaylist').getAll(playlistId))
-      .find(({ mediaId }) => mediaId === mediaItemId);
+    let preference;
+    let key;
+    let cursor = await objectStore.openCursor();
+    while (cursor && !preference && !key) {
+      if (cursor.value.playlistId === playlistId && cursor.value.mediaId === mediaItemId) {
+        preference = cursor.value;
+        key = cursor.key;
+      }
+      cursor = await cursor.continue();
+    }
     if (!preference) {
       return objectStore.add({
         ...this.generateDefaultPreference(playlistId, mediaItemId),
@@ -284,7 +294,7 @@ class SubtitleDataBase {
       return objectStore.put({
         ...preference,
         list: unionBy(subtitles, preference.list, 'hash'),
-      });
+      }, key);
     }
   }
   async removeSubtitleItemsFromList(playlistId: number, mediaItemId: string, subtitles: StoredSubtitleItem[]) {
@@ -292,8 +302,16 @@ class SubtitleDataBase {
     const objectStore = (await this.getDb())
       .transaction('preferences', 'readwrite')
       .objectStore('preferences');
-    const preference = (await objectStore.index('byPlaylist').getAll(playlistId))
-      .find(({ mediaId }) => mediaId === mediaItemId);
+    let preference;
+    let key;
+    let cursor = await objectStore.openCursor();
+    while (cursor && !preference && !key) {
+      if (cursor.value.playlistId === playlistId && cursor.value.mediaId === mediaItemId) {
+        preference = cursor.value;
+        key = cursor.key;
+      }
+      cursor = await cursor.continue();
+    }
     if (!preference) {
       return objectStore.add(this.generateDefaultPreference(playlistId, mediaItemId));
     } else {
@@ -302,7 +320,7 @@ class SubtitleDataBase {
       return objectStore.put({
         ...preference,
         list: existedList,
-      });
+      }, key);
     }
   }
   async retrieveSubtitleLanguage(playlistId: number, mediaItemId: string) {
@@ -316,8 +334,17 @@ class SubtitleDataBase {
     const objectStore = (await this.getDb())
       .transaction('preferences', 'readwrite')
       .objectStore('preferences');
-    const preference = (await objectStore.index('byPlaylist').getAll(playlistId))
-      .find(({ mediaId }) => mediaId === mediaItemId);
+    let preference;
+    let key;
+    let cursor = await objectStore.openCursor();
+    while (cursor && !preference && !key) {
+      if (cursor.value.playlistId === playlistId && cursor.value.mediaId === mediaItemId) {
+        preference = cursor.value;
+        key = cursor.key;
+      }
+      cursor = await cursor.continue();
+    }
+
     if (!preference) {
       return objectStore.add({
         ...this.generateDefaultPreference(playlistId, mediaItemId),
@@ -333,7 +360,7 @@ class SubtitleDataBase {
           primary: languageCodes[0],
           secondary: languageCodes[1],
         },
-      });
+      }, key);
     }
   }
   async retrieveSelectedSubtitleIds(playlistId: number, mediaItemId: string) {
@@ -344,8 +371,16 @@ class SubtitleDataBase {
     const objectStore = (await this.getDb())
       .transaction('preferences', 'readwrite')
       .objectStore('preferences');
-    const preference = (await objectStore.index('byPlaylist').getAll(playlistId))
-      .find(({ mediaId }) => mediaId === mediaItemId);
+    let preference;
+    let key;
+    let cursor = await objectStore.openCursor();
+    while (cursor && !preference && !key) {
+      if (cursor.value.playlistId === playlistId && cursor.value.mediaId === mediaItemId) {
+        preference = cursor.value;
+        key = cursor.key;
+      }
+      cursor = await cursor.continue();
+    }
     if (!preference) {
       return objectStore.add({
         ...this.generateDefaultPreference(playlistId, mediaItemId),
@@ -361,7 +396,7 @@ class SubtitleDataBase {
           primary: subtitleIds[0],
           secondary: subtitleIds[1],
         },
-      });
+      }, key);
     }
   }
 }
