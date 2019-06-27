@@ -126,7 +126,6 @@ import NotificationBubble from '@/components/NotificationBubble.vue';
 import PlaylistItem from '@/components/LandingView/PlaylistItem.vue';
 import VideoItem from '@/components/LandingView/VideoItem.vue';
 import { log } from '@/libs/Log';
-import { getValidVideoRegex } from '../../shared/utils';
 
 Vue.component('PlaylistItem', PlaylistItem);
 Vue.component('VideoItem', VideoItem);
@@ -246,7 +245,6 @@ export default {
     });
   },
   mounted() {
-    console.log(getValidVideoRegex().test('/Users/tanyang/Desktop/movies'));
     this.$store.dispatch('refreshVersion');
 
     const { app } = this.$electron.remote;
