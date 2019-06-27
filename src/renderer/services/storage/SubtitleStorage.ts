@@ -444,6 +444,7 @@ export class DatabaseGenerator implements EntityGenerator {
       newGenerator.language = language;
       newGenerator.sources = source;
       newGenerator.hash = hash;
+      return newGenerator;
     }
   }
 }
