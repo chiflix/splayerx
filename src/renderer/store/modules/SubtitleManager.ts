@@ -108,7 +108,7 @@ const actions = {
       dispatchs.push(dispatch(a.addOnlineSubtitles, online ? await fetchOnlineList(originSrc, secondaryLanguage, hints) : []));
     }
     dispatchs.push(dispatch(a.addDatabaseSubtitles, databaseItemsToAdd))
-    return Promise.all(dispatchs);
+    return Promise.all(dispatchs).then(console.log);
   },
   /** only refresh local and online subtitles, delete old online subtitles */
   async [a.refreshSubtitles]({ getters, dispatch }: any) {
@@ -140,9 +140,9 @@ const actions = {
       paths.map(path => dispatch(a.addSubtitle, new LocalGenerator(path)))
     );
   },
-  async [a.addEmbeddedSubtitles]({ dispatch, getters }: any, subtitleStreams: ISubtitleStream[]) {
+  async [a.addEmbeddedSubtitles]({ dispatch }: any, streams: [string, ISubtitleStream][]) {
     return Promise.all(
-      subtitleStreams.map(stream => dispatch(a.addSubtitle, new EmbeddedGenerator(getters.videoSrc, stream)))
+      streams.map(stream => dispatch(a.addSubtitle, new EmbeddedGenerator(stream[0], stream[1])))
     );
   },
   async [a.addOnlineSubtitles]({ dispatch }: any, transcriptInfoList: TranscriptInfo[]) {
@@ -159,15 +159,17 @@ const actions = {
   async [a.addSubtitle]({ commit, dispatch }: any, subtitleGenerator: EntityGenerator) {
     const id = uuidv4();
     store.registerModule([id], { ...SubtitleModule, name: `${id}` });
-    dispatch(`${id}/${subActions.initialize}`, id);
-    const subtitle: Entity = await dispatch(`${id}/${subActions.add}`, subtitleGenerator);
-    await dispatch(`${id}/${subActions.store}`);
-    commit(m.addSubtitleId, {
+    const subtitleControlListItem: SubtitleControlListItem = {
       id,
-      type: subtitle.type,
-      language: subtitle.language,
-      source: subtitle.source.source,
-    });
+      type: await subtitleGenerator.getType(),
+      language: await subtitleGenerator.getLanguage(),
+      source: (await subtitleGenerator.getSource()).source,
+    };
+    commit(m.addSubtitleId, subtitleControlListItem);
+    dispatch(`${id}/${subActions.initialize}`, id);
+    await dispatch(`${id}/${subActions.add}`, subtitleGenerator);
+    await dispatch(`${id}/${subActions.store}`);
+    return subtitleControlListItem;
   },
   [a.removeSubtitle]({ commit }: any, id: string) {
     store.unregisterModule(id);
