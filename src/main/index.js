@@ -476,6 +476,7 @@ function createWindow() {
 }
 
 app.on('before-quit', () => {
+  if (!mainWindow) return;
   if (needToRestore) {
     mainWindow.webContents.send('quit', needToRestore);
   } else {
