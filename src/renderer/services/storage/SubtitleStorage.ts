@@ -431,7 +431,7 @@ export function addSubtitleItemsToList(subtitles: Entity[], playlistId: number, 
   const storedSubtitles = subtitles.map(({ hash, type }) => ({ hash, type }));
   return db.addSubtitleItemsToList(playlistId, mediaItemId, storedSubtitles);
 }
-export function removeSubtitleItemsToList(subtitles: Entity[], playlistId: number, mediaItemId: string) {
+export function removeSubtitleItemsFromList(subtitles: Entity[], playlistId: number, mediaItemId: string) {
   const storedSubtitles = subtitles.map(({ hash, type }) => ({ hash, type }));
   return db.removeSubtitleItemsFromList(playlistId, mediaItemId, storedSubtitles);
 }
