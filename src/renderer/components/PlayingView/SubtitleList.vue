@@ -102,7 +102,7 @@
 </template>
 
 <script lang="ts">
-import { Subtitle } from '@/interfaces/ISubtitle';
+import { Subtitle, SubtitleControlListItem } from '@/interfaces/ISubtitle';
 import Icon from '../BaseIconContainer.vue';
 
 export default {
@@ -265,11 +265,11 @@ export default {
         }
       }
     },
-    handleSubDelete(e: MouseEvent, item: Subtitle) {
+    handleSubDelete(e: MouseEvent, item: SubtitleControlListItem) {
       if ((e.target as HTMLElement).nodeName !== 'DIV') {
         this.$emit('update:transFlag', false);
         this.$emit('update:hoverHeight', 0);
-        this.$emit('remove-subtitle', item.id);
+        this.$emit('remove-subtitle', [item]);
       }
     },
     toggleItemsMouseOver(index: number) {

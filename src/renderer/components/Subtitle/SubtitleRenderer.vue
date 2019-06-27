@@ -104,14 +104,10 @@ export default {
         + subSpaceFactorsB[this.chosenSize];
     },
     firstType() {
-      // TODO
-      return 'sagi';
-      // return this.currentCues[0] ? this.currentCues[0][0].format : '';
+      return this.currentCues[0].cue && this.currentCues[0].cue.length > 0 ? this.currentCues[0].cue[0].format : '';
     },
     secondType() {
-      // TODO
-      return 'sagi';
-      // return this.currentCues[1] ? this.currentCues[1][0].format : '';
+      return this.currentCues[1].cue && this.currentCues[1].cue.length > 0 ? this.currentCues[1].cue[0].format : '';
     },
     secondarySubScale() {
       if (this.currentFirstSubtitleId === '') {

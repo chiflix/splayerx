@@ -161,9 +161,8 @@ export function calculatedName(item: SubtitleControlListItem, list: SubtitleCont
   if (item.type === Type.Local) {
     name = basename(item.source);
   } else if (item.type === Type.Embedded) {
-    name = item.source;
+    name = item.source.streamIndex;
   } else if (item.type === Type.Online) {
-    console.log(list);
     const sort = list
       .filter((s: SubtitleControlListItem) => s.type === Type.Online && s.language === item.language).length + 1;
     name = `${codeToLanguageName(item.language)} ${romanize(sort)}`;

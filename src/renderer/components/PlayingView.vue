@@ -8,7 +8,7 @@
       :subPlayRes="subPlayRes"
       :scaleNum="scaleNum"
       :subToTop="subToTop"
-      :currentFirstSubtitleId="currentFirstSubtitleId"
+      :currentFirstSubtitleId="primarySubtitleId"
       :winHeight="winHeight"
       :chosenStyle="chosenStyle"
       :chosenSize="chosenSize"
@@ -49,7 +49,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['scaleNum', 'subToTop', 'currentFirstSubtitleId', 'winHeight', 'chosenStyle', 'chosenSize', 'originSrc']),
+    ...mapGetters(['scaleNum', 'subToTop', 'primarySubtitleId', 'winHeight', 'chosenStyle', 'chosenSize', 'originSrc']),
     concatCurrentCues() {
       if (this.currentCues.length === 2) {
         return [this.currentCues[0].cues, this.currentCues[1].cues];
@@ -82,6 +82,10 @@ export default {
     videodata.checkTick();
     videodata.onTick = this.onUpdateTick;
     requestAnimationFrame(this.loopCues);
+    this.$bus.$on('add-subtitles', (subs: { src: string, type: string }[]) => {
+      const paths = subs.map((sub: { src: string, type: string }) => (sub.src));
+      this.addLocalSubtitles(paths);
+    });
   },
   beforeDestroy() {
     this.updateSubToTop(false);
@@ -91,6 +95,7 @@ export default {
     ...mapActions({
       updateSubToTop: subtitleActions.UPDATE_SUBTITLE_TOP,
       initializeManager: smActions.initializeManager,
+      addLocalSubtitles: smActions.addLocalSubtitles,
       getCues: smActions.getCues,
     }),
     // Compute UI states
