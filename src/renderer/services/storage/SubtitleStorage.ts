@@ -413,6 +413,8 @@ export class DatabaseGenerator implements EntityGenerator {
   async getLanguage() { return this.language; }
   private sources: Origin[];
   async getSource() { return this.sources[0]; }
+  private storedSource: Origin;
+  async getStoredSource() { return this.storedSource; }
   async getPayload() {
     const { type, source } = await this.getSource();
     switch (type) {
@@ -438,6 +440,7 @@ export class DatabaseGenerator implements EntityGenerator {
     const storedSubtitle = await db.retrieveSubtitle(hash);
     if (storedSubtitle) {
       const newGenerator = new DatabaseGenerator();
+      newGenerator.storedSource = storedSubtitleItem.source;
       const { source, format, language } = storedSubtitle;
       newGenerator.type = type;
       newGenerator.format = format;

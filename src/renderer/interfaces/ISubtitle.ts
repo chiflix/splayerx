@@ -39,6 +39,7 @@ export type SubtitleControlListItem = {
 
 export interface EntityGenerator {
   getSource(): Promise<Origin>
+  getStoredSource?: any
   getType(): Promise<Type>
   getFormat(): Promise<Format>
   getLanguage(): Promise<LanguageCode>
