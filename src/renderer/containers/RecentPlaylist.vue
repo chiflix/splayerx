@@ -461,6 +461,18 @@ export default {
     originSrc() {
       this.updateSubToTop(this.displayState);
       this.hoverIndex = this.playingIndex;
+      if (
+        this.playingIndex > this.lastIndex
+        || this.playingIndex < this.firstIndex
+      ) {
+        this.firstIndex = this.playingIndex;
+        this.shifting = true;
+        this.tranFlag = true;
+        setTimeout(() => {
+          this.shifting = false;
+          this.tranFlag = false;
+        }, 400);
+      }
       this.filename = this.pathBaseName(this.originSrc);
     },
     duration(val: number) {
