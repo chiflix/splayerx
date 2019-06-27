@@ -164,7 +164,8 @@ export function calculatedName(item: SubtitleControlListItem, list: SubtitleCont
     name = item.source.streamIndex;
   } else if (item.type === Type.Online) {
     const sort = list
-      .filter((s: SubtitleControlListItem) => s.type === Type.Online && s.language === item.language).length + 1;
+      .filter((s: SubtitleControlListItem) => s.type === Type.Online && s.language === item.language)
+      .findIndex((s: SubtitleControlListItem) => s.id === item.id) + 1;
     name = `${codeToLanguageName(item.language)} ${romanize(sort)}`;
   }
   return name;

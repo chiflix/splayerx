@@ -9,8 +9,14 @@ import { log } from '@/libs/Log';
 import SubtitleModule from './Subtitle';
 import { StoredSubtitleItem } from '@/interfaces/ISubtitleStorage';
 import { retrieveSubtitlePreference, DatabaseGenerator } from '@/services/storage/SubtitleStorage';
-import { isEqual } from 'lodash';
+import { isEqual, sortBy } from 'lodash';
 import Vue from 'vue';
+
+const sortOfTypes = {
+  local: 0,
+  embedded: 1,
+  online: 2,
+};
 
 let unwatch: Function;
 
@@ -32,7 +38,13 @@ const state = {
 };
 const getters = {
   list(state: SubtitleManagerState) {
-    return Object.values(state.allSubtitles).filter((v: any) => !!v);
+    const list = Object.values(state.allSubtitles).filter((v: any) => !!v);
+    return sortBy(list, (sub: SubtitleControlListItem) => {
+      return sortOfTypes[sub.type];
+    }).map((sub: SubtitleControlListItem) => ({
+      ...sub,
+      name: calculatedName(sub, list),
+    }));
   },
   primarySubtitleId(state: SubtitleManagerState): string { return state.primarySubtitleId },
   secondarySubtitleId(state: SubtitleManagerState): string { return state.secondarySubtitleId },
@@ -115,6 +127,8 @@ const actions = {
   },
   /** only refresh local and online subtitles, delete old online subtitles */
   async [a.refreshSubtitles]({ getters, dispatch, commit }: any) {
+    commit(m.setPrimarySubtitleId, '');
+    commit(m.setSecondarySubtitleId, '');
     commit(m.setIsRefreshing, true);
     const { list } = getters as { list: SubtitleControlListItem[] };
     const { originSrc, primaryLanguage, secondaryLanguage } = getters;
@@ -174,9 +188,7 @@ const actions = {
       type: subtitle.type,
       language: subtitle.language,
       source: subtitle.source.source,
-      name: '',
     };
-    subtitleControlListItem.name = calculatedName(subtitleControlListItem, getters.list);
     commit(m.addSubtitleId, subtitleControlListItem);
     return subtitleControlListItem;
   },
@@ -206,13 +218,13 @@ const actions = {
     }
   },
   async [a.changeSecondarySubtitle]({ dispatch, commit, getters }: any, id: string) {
-    if (id) {
-      await dispatch(`${id}/${subActions.load}`);
-    }
     if (id && id === getters.primarySubtitleId) {
       commit(m.setPrimarySubtitleId, '');
     }
     commit(m.setSecondarySubtitleId, id);
+    if (id) {
+      await dispatch(`${id}/${subActions.load}`);
+    }
   },
   async [a.storeSubtitle](context: any, id: string) { },
   async [a.uploadSubtitle](context: any, id: string) { },
@@ -222,7 +234,7 @@ const actions = {
       (value: SubtitleControlListItem[], oldValue: SubtitleControlListItem[]) => {
         // AI select
         if (value.length > 0) {
-          dispatch(a.changePrimarySubtitle, value[0].id);
+          // dispatch(a.changePrimarySubtitle, value[0].id);
           dispatch(a.stopAISelection);
         }
       });

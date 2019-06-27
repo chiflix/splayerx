@@ -102,7 +102,7 @@
 </template>
 
 <script lang="ts">
-import { Subtitle, SubtitleControlListItem } from '@/interfaces/ISubtitle';
+import { SubtitleControlListItem } from '@/interfaces/ISubtitle';
 import Icon from '../BaseIconContainer.vue';
 
 export default {

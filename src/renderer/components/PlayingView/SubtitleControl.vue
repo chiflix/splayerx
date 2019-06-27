@@ -105,7 +105,7 @@
 <script lang="ts">
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { Input as InputActions, Subtitle as subtitleActions, SubtitleManager as smActions } from '@/store/actionTypes';
-import { SubtitleControlListItem } from '@/interfaces/ISubtitle';
+import { SubtitleControlListItem, Type } from '@/interfaces/ISubtitle';
 import lottie from '@/components/lottie.vue';
 import { AnimationItem } from 'lottie-web';
 import animationData from '@/assets/subtitle.json';
@@ -210,7 +210,7 @@ export default {
     list(val: SubtitleControlListItem[]) {
       this.computedAvailableItems = val.map((sub: SubtitleControlListItem) => ({
         ...sub,
-        name: this.getSubName(sub),
+        name: this.getSubName(sub, val),
       }));
     },
     isRefreshing(val: boolean) {
@@ -400,7 +400,7 @@ export default {
       }
     },
     getSubName(item: SubtitleControlListItem) {
-      if (item.type === 'embedded') {
+      if (item.type === Type.Embedded) {
         return `${this.$t('subtitle.embedded')} ${item.name}`;
       }
       return item.name;
