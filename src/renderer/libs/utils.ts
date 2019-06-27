@@ -1,8 +1,12 @@
 import { createHash } from 'crypto';
+// @ts-ignore
+import romanize from 'romanize';
 import { times, padStart } from 'lodash';
-import { sep } from 'path';
+import { sep, basename } from 'path';
 // @ts-ignore
 import { promises as fsPromises } from 'fs';
+import { SubtitleControlListItem, Type } from '@/interfaces/ISubtitle';
+import { codeToLanguageName } from './language';
 
 /** 计算文本宽度
  * @description
@@ -150,4 +154,19 @@ export function generateHints(videoSrc: string): string {
     return true;
   });
   return result;
+}
+
+export function calculatedName(item: SubtitleControlListItem, list: SubtitleControlListItem[]): string {
+  let name = '';
+  if (item.type === Type.Local) {
+    name = basename(item.source);
+  } else if (item.type === Type.Embedded) {
+    name = item.source;
+  } else if (item.type === Type.Online) {
+    console.log(list);
+    const sort = list
+      .filter((s: SubtitleControlListItem) => s.type === Type.Online && s.language === item.language).length + 1;
+    name = `${codeToLanguageName(item.language)} ${romanize(sort)}`;
+  }
+  return name;
 }

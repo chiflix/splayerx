@@ -33,6 +33,7 @@ export type SubtitleControlListItem = {
   type: Type;
   language: LanguageCode;
   source: string,
+  name: string,
 };
 
 export interface EntityGenerator {

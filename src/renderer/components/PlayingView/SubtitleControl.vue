@@ -104,8 +104,8 @@
 </template>
 <script lang="ts">
 import { mapActions, mapGetters, mapState } from 'vuex';
-import { Input as InputActions, Subtitle as subtitleActions } from '@/store/actionTypes';
-import { Subtitle } from '@/interfaces/ISubtitle';
+import { Input as InputActions, Subtitle as subtitleActions, SubtitleManager as smActions } from '@/store/actionTypes';
+import { SubtitleControlListItem } from '@/interfaces/ISubtitle';
 import lottie from '@/components/lottie.vue';
 import { AnimationItem } from 'lottie-web';
 import animationData from '@/assets/subtitle.json';
@@ -115,6 +115,7 @@ import Icon from '../BaseIconContainer.vue';
 
 export default {
   name: 'SubtitleControl',
+  // @ts-ignore
   type: INPUT_COMPONENT_TYPE,
   components: {
     lottie,
@@ -146,8 +147,8 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'originSrc', 'currentFirstSubtitleId', 'currentSecondSubtitleId',
-      'subtitleList', 'calculatedNoSub', 'winHeight', 'isFirstSubtitle', 'enabledSecondarySub',
+    ...mapGetters(['winWidth', 'originSrc', 'primarySubtitleId', 'secondarySubtitleId', 'list',
+      'subtitleList', 'calculatedNoSub', 'winHeight', 'isFirstSubtitle', 'enabledSecondarySub', 'isRefreshing',
       'winRatio', 'isRefreshing']),
     ...mapState({
       loadingTypes: ({ Subtitle }) => {
@@ -187,9 +188,9 @@ export default {
       const { computedAvailableItems } = this;
       return !this.isFirstSubtitle && this.enabledSecondarySub
         ? computedAvailableItems
-          .findIndex((sub: Subtitle) => sub.id === this.currentSecondSubtitleId)
+          .findIndex((sub: SubtitleControlListItem) => sub.id === this.secondarySubtitleId)
         : computedAvailableItems
-          .findIndex((sub: Subtitle) => sub.id === this.currentFirstSubtitleId);
+          .findIndex((sub: SubtitleControlListItem) => sub.id === this.primarySubtitleId);
     },
     noSubtitle() {
       if (this.animClass) {
@@ -203,12 +204,14 @@ export default {
     enabledSecondarySub(val: boolean) {
       if (!val) this.updateSubtitleType(true);
     },
-    computedAvailableItems(val: Subtitle[]) {
+    computedAvailableItems(val: SubtitleControlListItem[]) {
       this.updateNoSubtitle(!val.length);
     },
-    subtitleList(val: Subtitle[]) {
-      this.computedAvailableItems = val
-        .filter(({ name, loading }: { name: string; loading: string}) => name && loading !== 'failed');
+    list(val: SubtitleControlListItem[]) {
+      this.computedAvailableItems = val.map((sub: SubtitleControlListItem) => ({
+        ...sub,
+        name: this.getSubName(sub),
+      }));
     },
     isRefreshing(val: boolean) {
       if (!val) {
@@ -317,12 +320,19 @@ export default {
     ...mapActions({
       clearMousedown: InputActions.MOUSEDOWN_UPDATE,
       clearMouseup: InputActions.MOUSEUP_UPDATE,
-      offCurrentSubtitle: subtitleActions.OFF_SUBTITLES,
-      changeFirstSubtitle: subtitleActions.CHANGE_CURRENT_FIRST_SUBTITLE,
-      changeSecondarySubtitle: subtitleActions.CHANGE_CURRENT_SECOND_SUBTITLE,
+      changeFirstSubtitle: smActions.changePrimarySubtitle,
+      changeSecondarySubtitle: smActions.changeSecondarySubtitle,
+      refreshSubtitles: smActions.refreshSubtitles,
       updateNoSubtitle: subtitleActions.UPDATE_NO_SUBTITLE,
       updateSubtitleType: subtitleActions.UPDATE_SUBTITLE_TYPE,
     }),
+    offCurrentSubtitle() {
+      if (this.isFirstSubtitle) {
+        this.changeFirstSubtitle('');
+      } else {
+        this.changeSecondarySubtitle('');
+      }
+    },
     shiftItemHover() {
       this.shiftItemHovered = true;
     },
@@ -334,7 +344,8 @@ export default {
     },
     handleRefresh() {
       if (!this.isRefreshing) {
-        this.$store.dispatch('handle-refresh');
+        console.log('aa');
+        this.refreshSubtitles();
       }
     },
     handleAnimation(anim: AnimationItem) {
@@ -387,6 +398,12 @@ export default {
           this.clicks = 0;
           break;
       }
+    },
+    getSubName(item: SubtitleControlListItem) {
+      if (item.type === 'embedded') {
+        return `${this.$t('subtitle.embedded')} ${item.name}`;
+      }
+      return item.name;
     },
   },
 };

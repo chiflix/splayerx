@@ -103,9 +103,13 @@
 
 <script lang="ts">
 import { Subtitle } from '@/interfaces/ISubtitle';
+import Icon from '../BaseIconContainer.vue';
 
 export default {
   name: 'SubtitleList',
+  components: {
+    Icon,
+  },
   props: {
     computedSize: {
       type: Number,

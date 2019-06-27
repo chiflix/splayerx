@@ -77,7 +77,7 @@ const getters = {
   isFirstSubtitle: state => state.isFirstSubtitle,
   enabledSecondarySub: state => state.enabledSecondarySub,
   currentCues: state => state.currentCues,
-  isRefreshing: state => state.isRefreshing,
+  // isRefreshing: state => state.isRefreshing,
 };
 
 const mutations = {

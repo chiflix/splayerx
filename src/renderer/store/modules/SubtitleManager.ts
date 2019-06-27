@@ -4,7 +4,7 @@ import { SubtitleManager as m } from '@/store/mutationTypes';
 import { SubtitleManager as a, newSubtitle as subActions } from '@/store/actionTypes';
 import { SubtitleControlListItem, Type, EntityGenerator, Entity } from '@/interfaces/ISubtitle';
 import { ISubtitleStream, TranscriptInfo, searchForLocalList, retrieveEmbeddedList, fetchOnlineList, OnlineGenerator, LocalGenerator, EmbeddedGenerator } from '@/services/subtitle';
-import { generateHints } from '@/libs/utils';
+import { generateHints, calculatedName } from '@/libs/utils';
 import { log } from '@/libs/Log';
 import SubtitleModule from './Subtitle';
 import { StoredSubtitleItem } from '@/interfaces/ISubtitleStorage';
@@ -73,7 +73,7 @@ const actions = {
     commit(m.setIsRefreshing, true);
     dispatch(a.refreshSubtitlesInitially);
   },
-  async [a.refreshSubtitlesInitially]({ getters, dispatch }: any) {
+  async [a.refreshSubtitlesInitially]({ getters, dispatch, commit }: any) {
     const { playlistId, mediaItemId, originSrc, primaryLanguage, secondaryLanguage } = getters;
     const preference = await retrieveSubtitlePreference(playlistId, mediaItemId);
     const databaseItemsToAdd: StoredSubtitleItem[] = [];
@@ -108,10 +108,13 @@ const actions = {
       dispatchs.push(dispatch(a.addOnlineSubtitles, online ? await fetchOnlineList(originSrc, secondaryLanguage, hints) : []));
     }
     dispatchs.push(dispatch(a.addDatabaseSubtitles, databaseItemsToAdd))
-    return Promise.all(dispatchs).then(console.log);
+    return Promise.all(dispatchs).then(() => {
+      commit(m.setIsRefreshing, false);
+    });
   },
   /** only refresh local and online subtitles, delete old online subtitles */
-  async [a.refreshSubtitles]({ getters, dispatch }: any) {
+  async [a.refreshSubtitles]({ getters, dispatch, commit }: any) {
+    commit(m.setIsRefreshing, true);
     const { list } = getters as { list: SubtitleControlListItem[] };
     const { originSrc, primaryLanguage, secondaryLanguage } = getters;
     const [primary, secondary] = list.reduce((subtitleList, currentSubtitle) => {
@@ -133,7 +136,9 @@ const actions = {
       dispatch(a.addLocalSubtitles, await searchForLocalList(originSrc)),
       dispatch(a.addOnlineSubtitles, await fetchOnlineList(originSrc, primaryLanguage, hints)).then(primaryDeletePromise),
       dispatch(a.addOnlineSubtitles, await fetchOnlineList(originSrc, secondaryLanguage, hints)).then(secondaryDeletePromise),
-    ]);
+    ]).then(() => {
+      commit(m.setIsRefreshing, false);
+    });
   },
   async [a.addLocalSubtitles]({ dispatch }: any, paths: string[]) {
     return Promise.all(
@@ -146,6 +151,7 @@ const actions = {
     );
   },
   async [a.addOnlineSubtitles]({ dispatch }: any, transcriptInfoList: TranscriptInfo[]) {
+    console.log(transcriptInfoList);
     // remove all type online item from list
     return Promise.all(
       transcriptInfoList.map(transcriptInfo => dispatch(a.addSubtitle, new OnlineGenerator(transcriptInfo)))
@@ -156,18 +162,21 @@ const actions = {
       storedList.map(stored => dispatch(a.addSubtitle, DatabaseGenerator.from(stored)))
     );
   },
-  async [a.addSubtitle]({ commit, dispatch }: any, subtitleGenerator: EntityGenerator) {
+  async [a.addSubtitle]({ commit, dispatch, getters }: any, subtitleGenerator: EntityGenerator) {
     const id = uuidv4();
     store.registerModule([id], { ...SubtitleModule, name: `${id}` });
     dispatch(`${id}/${subActions.initialize}`, id);
     const subtitle: Entity = await dispatch(`${id}/${subActions.add}`, subtitleGenerator);
     await dispatch(`${id}/${subActions.store}`);
-    const subtitleControlListItem: SubtitleControlListItem = {
+    let subtitleControlListItem: SubtitleControlListItem = {
       id,
       type: subtitle.type,
       language: subtitle.language,
       source: subtitle.source.source,
+      name: '',
     };
+    subtitleControlListItem.name = calculatedName(subtitleControlListItem, getters.list);
+    console.log(subtitleControlListItem);
     commit(m.addSubtitleId, subtitleControlListItem);
     return subtitleControlListItem;
   },
@@ -181,11 +190,14 @@ const actions = {
   },
   async [a.changePrimarySubtitle]({ dispatch, commit }: any, id: string) {
     commit(m.setPrimarySubtitleId, id);
-    await dispatch(`${id}/${subActions.load}`);
+    if (id) {
+      await dispatch(`${id}/${subActions.load}`);
+    }
   },
   async [a.changeSecondarySubtitle]({ dispatch, commit }: any, id: string) {
-    commit(m.setSecondarySubtitleId, id);
-    await dispatch(`${id}/${subActions.load}`);
+    commit(m.setSecondarySubtitleId, id); if (id) {
+      await dispatch(`${id}/${subActions.load}`);
+    }
   },
   async [a.storeSubtitle](context: any, id: string) { },
   async [a.uploadSubtitle](context: any, id: string) { },

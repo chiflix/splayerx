@@ -67,7 +67,7 @@ export default {
     },
   },
   watch: {
-    originSrc(newVal) {
+    originSrc(newVal: string) {
       if (newVal) {
         this.initializeManager();
       }
