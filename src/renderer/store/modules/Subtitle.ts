@@ -16,11 +16,13 @@ type SubtitleState = {
   hash: string;
 };
 
-let entity: Entity = {} as Entity;
-let loader: () => Promise<any>;
-let parser: Parser;
+const subtitleMap: Map<string, {
+  entity: Entity;
+  loader: () => Promise<any>;
+  parser: Parser;
+}> = new Map();
 
-const state = {
+const state = () => ({
   moduleId: '',
   source: '',
   type: undefined,
@@ -28,7 +30,7 @@ const state = {
   language: LanguageCode.Default,
   delay: 0,
   hash: '',
-} as SubtitleState;
+}) as SubtitleState;
 const getters = {};
 const mutations = {
   [m.setModuleId](state: SubtitleState, id: string) {
@@ -58,54 +60,70 @@ const mutations = {
 };
 const actions = {
   [a.initialize]({ commit }: any, moduleId: string) {
+    subtitleMap.set(moduleId, {
+      entity: {} as Entity,
+      loader: () => Promise.resolve(),
+      parser: {} as Parser,
+    });
     commit(m.setModuleId, moduleId);
   },
-  async [a.add]({ commit }: any, generator: EntityGenerator) {
-    loader = generator.getPayload.bind(generator);
-    await Promise.all([
-      generator.getSource().then(src => {
-        entity.source = src;
-        commit(m.setSource, src);
-      }),
-      generator.getFormat().then(format => {
-        entity.format = format;
-        commit(m.setFormat, format);
-      }),
-      generator.getLanguage().then(language => {
-        entity.language = language;
-        commit(m.setLanguage, language);
-      }),
-      generator.getType().then(type => {
-        entity.type = type;
-        commit(m.setType, type);
-      }),
-      generator.getHash().then(hash => {
-        entity.hash = hash;
-        commit(m.setHash, hash);
-      }),
-    ]);
-    return entity;
+  async [a.add]({ commit, state }: any, generator: EntityGenerator) {
+    const subtitle = subtitleMap.get(state.moduleId);
+    if (subtitle) {
+      subtitle.loader = generator.getPayload.bind(generator);
+      const { entity } = subtitle;
+      await Promise.all([
+        generator.getSource().then(src => {
+          entity.source = src;
+          commit(m.setSource, src);
+        }),
+        generator.getFormat().then(format => {
+          entity.format = format;
+          commit(m.setFormat, format);
+        }),
+        generator.getLanguage().then(language => {
+          entity.language = language;
+          commit(m.setLanguage, language);
+        }),
+        generator.getType().then(type => {
+          entity.type = type;
+          commit(m.setType, type);
+        }),
+        generator.getHash().then(hash => {
+          entity.hash = hash;
+          commit(m.setHash, hash);
+        }),
+      ]);
+      return entity;
+    }
   },
-  async [a.load]() {
-    if (loader) {
+  async [a.load]({ state }: any) {
+    const subtitle = subtitleMap.get(state.moduleId);
+    if (subtitle) {
+      const { entity, loader } = subtitle;
       entity.payload = await loader();
-      // Object.freeze(entity);
+      Object.freeze(entity);
     }
   },
-  async [a.getDialogues](context: any, time: number) {
-    parser = getParser(entity);
-    if (parser.payload) {
-      await parser.parse(entity);
-      return await parser.getDialogues(time);
-    } else {
-      return [];
+  async [a.getDialogues]({ state }: any, time: number) {
+    const subtitle = subtitleMap.get(state.moduleId);
+    if (subtitle) {
+      if (!Object.keys(subtitle.parser)) subtitle.parser = getParser(subtitle.entity);
+      const { parser, entity } = subtitle;
+      if (parser.payload) {
+        await parser.parse(entity);
+        return await parser.getDialogues(time);
+      } else return [];
     }
   },
-  async [a.store]() {
-    await storeSubtitle(entity);
+  async [a.store]({ state, rootState }: any) {
+    const subtitle = subtitleMap.get(state.moduleId);
+    console.log(rootState);
+    if (subtitle) await storeSubtitle(subtitle.entity);
   },
-  async [a.delete]() {
-    await removeSubtitle(entity);
+  async [a.delete]({ state }: any) {
+    const subtitle = subtitleMap.get(state.moduleId);
+    if (subtitle) await removeSubtitle(subtitle.entity);
   },
   [a.upload]() {
     // directly invoke from @/services/subtitle/upload

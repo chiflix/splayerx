@@ -159,16 +159,16 @@ const actions = {
   async [a.addSubtitle]({ commit, dispatch }: any, subtitleGenerator: EntityGenerator) {
     const id = uuidv4();
     store.registerModule([id], { ...SubtitleModule, name: `${id}` });
+    dispatch(`${id}/${subActions.initialize}`, id);
+    const subtitle: Entity = await dispatch(`${id}/${subActions.add}`, subtitleGenerator);
+    await dispatch(`${id}/${subActions.store}`);
     const subtitleControlListItem: SubtitleControlListItem = {
       id,
-      type: await subtitleGenerator.getType(),
-      language: await subtitleGenerator.getLanguage(),
-      source: (await subtitleGenerator.getSource()).source,
+      type: subtitle.type,
+      language: subtitle.language,
+      source: subtitle.source.source,
     };
     commit(m.addSubtitleId, subtitleControlListItem);
-    dispatch(`${id}/${subActions.initialize}`, id);
-    await dispatch(`${id}/${subActions.add}`, subtitleGenerator);
-    await dispatch(`${id}/${subActions.store}`);
     return subtitleControlListItem;
   },
   [a.removeSubtitle]({ commit }: any, id: string) {
