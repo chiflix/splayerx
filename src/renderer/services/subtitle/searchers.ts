@@ -39,7 +39,11 @@ export async function fetchOnlineList(
   languageCode: LanguageCode = LanguageCode["zh-CN"],
   hints?: string,
 ) {
-  if (languageCode === LanguageCode.Default || languageCode === LanguageCode.No) return [];
+  if (
+    !languageCode ||
+    languageCode === LanguageCode.Default ||
+    languageCode === LanguageCode.No
+  ) return [];
   const mediaIdentity = await calculateMediaIdentity(videoSrc);
   return Sagi.mediaTranslate({
     mediaIdentity, languageCode, hints: hints || basename(videoSrc, extname(videoSrc)),
