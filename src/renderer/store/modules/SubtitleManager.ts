@@ -102,15 +102,14 @@ const actions = {
     let online = true;
     /** whether or not to extract new embedded list */
     let embedded = true;
-    let selected;
+    let selected: any;
     if (preference) {
       const { language, list } = preference;
       selected = preference.selected;
 
       const embeddedStoredSubtitles = list.filter(({ type }) => type === Type.Embedded);;
-      databaseItemsToAdd
-        .concat(list.filter(({ type }) => type === Type.Local))
-        .concat(embeddedStoredSubtitles);
+      databaseItemsToAdd.push(...list.filter(({ type }) => type === Type.Local));
+      databaseItemsToAdd.push(...embeddedStoredSubtitles);
       embedded = !embeddedStoredSubtitles.length;
       online = !isEqual(language, { primary: primaryLanguage, secondary: secondaryLanguage });
 
@@ -128,9 +127,9 @@ const actions = {
     if (secondaryLanguage) {
       actions.push(dispatch(a.addOnlineSubtitles, online ? await fetchOnlineList(originSrc, secondaryLanguage, hints) : []));
     }
-    actions.push(dispatch(a.addDatabaseSubtitles, { storedList: databaseItemsToAdd, selected }))
     return Promise.all(actions)
-      .then(() => {
+      .then(async () => {
+        await dispatch(a.addDatabaseSubtitles, { storedList: databaseItemsToAdd, selected })
         storeSubtitleLanguage([primaryLanguage, secondaryLanguage], playlistId, mediaItemId);
         addSubtitleItemsToList(getters.list, playlistId, mediaItemId);
         commit(m.setIsRefreshing, false);
@@ -143,7 +142,9 @@ const actions = {
     commit(m.setIsRefreshing, true);
     const { list } = getters as { list: SubtitleControlListItem[] };
     const { originSrc, primaryLanguage, secondaryLanguage } = getters;
-    const [primary, secondary] = list.reduce((subtitleList, currentSubtitle) => {
+    const [primary, secondary] = list
+      .filter(({ type }) => type === Type.Online)
+      .reduce((subtitleList, currentSubtitle) => {
       if (!subtitleList[0][0]) {
         subtitleList[0].push(currentSubtitle);
       } else if (subtitleList[0][0].language === currentSubtitle.language) {
@@ -205,20 +206,27 @@ const actions = {
       });
   },
   async [a.addSubtitle]({ commit, dispatch, getters }: any, subtitleGenerator: EntityGenerator) {
-    const id = uuidv4();
-    store.registerModule([id], { ...SubtitleModule, name: `${id}` });
-    dispatch(`${id}/${subActions.initialize}`, id);
-    const subtitle: Entity = await dispatch(`${id}/${subActions.add}`, subtitleGenerator);
-    await dispatch(`${id}/${subActions.store}`);
-    let subtitleControlListItem: SubtitleControlListItem = {
-      id,
-      hash: subtitle.hash,
-      type: subtitle.type,
-      language: subtitle.language,
-      source: subtitle.source.source,
-    };
-    commit(m.addSubtitleId, subtitleControlListItem);
-    return subtitleControlListItem;
+    const hash = await subtitleGenerator.getHash();
+    const type = await subtitleGenerator.getType();
+    const existedHash = getters.list.find((subtitle: SubtitleControlListItem) => subtitle.hash === hash && subtitle.type === type);
+    const source = await subtitleGenerator.getSource();
+    const existedOrigin = getters.list.find((subtitle: SubtitleControlListItem) => isEqual(subtitle.source, source.source));
+    if (!existedHash || !existedOrigin) {
+      const id = uuidv4();
+      store.registerModule([id], { ...SubtitleModule, name: `${id}` });
+      dispatch(`${id}/${subActions.initialize}`, id);
+      const subtitle: Entity = await dispatch(`${id}/${subActions.add}`, subtitleGenerator);
+      await dispatch(`${id}/${subActions.store}`);
+      let subtitleControlListItem: SubtitleControlListItem = {
+        id,
+        hash: subtitle.hash,
+        type: subtitle.type,
+        language: subtitle.language,
+        source: subtitle.source.source,
+      };
+      commit(m.addSubtitleId, subtitleControlListItem);
+      return subtitleControlListItem;
+    }
   },
   [a.removeSubtitle]({ commit, getters }: any, id: string) {
     store.unregisterModule(id);
