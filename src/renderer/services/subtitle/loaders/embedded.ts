@@ -26,12 +26,12 @@ interface IExtractSubtitleResponse {
  */
 export async function embeddedSrcLoader(videoSrc: string, streamIndex: number, format: Format): Promise<string> {
   const mediaHash = await helpers.methods.mediaQuickHash(videoSrc);
-  ipcRenderer.send('extract-subtitle-request', {
+  ipcRenderer.send('extract-subtitle-request',
     videoSrc,
     streamIndex,
     format,
     mediaHash,
-  } as IExtractSubtitleRequest);
+  );
   return new Promise((resolve, reject) => {
     ipcRenderer.once('extract-subtitle-response', (event: Event, response: IExtractSubtitleResponse) => {
       const { error, index, path } = response;
@@ -69,10 +69,13 @@ export class EmbeddedGenerator implements EntityGenerator {
   private language: LanguageCode = LanguageCode.Default;
   readonly isDefault: boolean;
   constructor(videoSrc: string, stream: ISubtitleStream) {
-    this.origin.source = {
-      videoSrc,
-      streamIndex: stream.index,
-      extractedSrc: '',
+    this.origin = {
+      type: Type.Embedded,
+      source: {
+        videoSrc,
+        streamIndex: stream.index,
+        extractedSrc: '',
+      },
     };
     this.format = stream.codec_name as Format;
     this.language = normalizeCode(stream.tags.language || '');
