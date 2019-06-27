@@ -415,9 +415,29 @@ export class DatabaseGenerator implements EntityGenerator {
 
 export async function storeSubtitle(subtitle: Entity) {
   const { source, hash, format, language } = subtitle;
-  await db.addSubtitle({ source, format, language, hash });
+  return db.addSubtitle({ source, format, language, hash });
 }
-export async function removeSubtitle(subtitle: Entity) {}
+export async function removeSubtitle(subtitle: Entity) {
+  const { hash, source } = subtitle;
+  return db.removeSubtitle({ hash, source });
+}
 export function retrieveSubtitlePreference(playlistId: number, mediaItemId: string) {
   return db.retrieveSubtitlePreference(playlistId, mediaItemId);
+}
+export function retrieveStoredSubtitleList(playlistId: number, mediaItemId: string) {
+  return db.retrieveSubtitleList(playlistId, mediaItemId);
+}
+export function addSubtitleItemsToList(subtitles: Entity[], playlistId: number, mediaItemId: string) {
+  const storedSubtitles = subtitles.map(({ hash, type }) => ({ hash, type }));
+  return db.addSubtitleItemsToList(playlistId, mediaItemId, storedSubtitles);
+}
+export function removeSubtitleItemsToList(subtitles: Entity[], playlistId: number, mediaItemId: string) {
+  const storedSubtitles = subtitles.map(({ hash, type }) => ({ hash, type }));
+  return db.removeSubtitleItemsFromList(playlistId, mediaItemId, storedSubtitles);
+}
+export function storeSubtitleLanguage(languageCodes: LanguageCode[], playlistId: number, mediaItemId: string) {
+  return db.storeSubtitleLanguage(playlistId, mediaItemId, languageCodes);
+}
+export function storeSelectedSubtitleIds(ids: string[], playlistId: number, mediaItemId: string) {
+  return db.storeSelectedSubtitleIds(playlistId, mediaItemId, ids);
 }
