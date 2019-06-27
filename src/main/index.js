@@ -423,6 +423,14 @@ function registerMainWindowEvent(mainWindow) {
     }
   });
 }
+
+function searchSubsInDir(dir) {
+  const subRegex = new RegExp('^\\.(srt|ass|vtt|ssa)$', 'i');
+  const dirFiles = fs.readdirSync(dir);
+  return dirFiles
+    .filter(subtitleFilename => subRegex.test(path.extname(subtitleFilename)))
+    .map(subtitleFilename => (join(dir, subtitleFilename)));
+}
 function searchForLocalVideo(subSrc) {
   const videoDir = dirname(subSrc);
   const videoBasename = basename(subSrc, extname(subSrc)).toLowerCase();
@@ -558,7 +566,15 @@ async function darwinOpenFilesToStart() {
     finalVideoToOpen = getAllValidVideo(!tmpVideoToOpen.length,
       tmpVideoToOpen.concat(tmpSubsToOpen));
     if (!tmpVideoToOpen.length && tmpSubsToOpen.length) {
-      mainWindow.webContents.send('add-local-subtitle', tmpSubsToOpen);
+      const allSubFiles = [];
+      tmpSubsToOpen.forEach((file) => {
+        if (subRegex.test(path.extname(file))) {
+          allSubFiles.push(file);
+        } else {
+          allSubFiles.push(...searchSubsInDir(file));
+        }
+      });
+      mainWindow.webContents.send('add-local-subtitles', allSubFiles);
     } else if (tmpVideoToOpen.length + tmpSubsToOpen.length > 0) {
       mainWindow.webContents.send('open-file', { onlySubtitle: !tmpVideoToOpen.length, files: finalVideoToOpen });
     }
@@ -605,7 +621,15 @@ if (process.platform === 'darwin') {
     finalVideoToOpen = getAllValidVideo(!tmpVideoToOpen.length,
       tmpVideoToOpen.concat(tmpSubsToOpen));
     if (!tmpVideoToOpen.length && tmpSubsToOpen.length) {
-      mainWindow.webContents.send('add-local-subtitle', tmpSubsToOpen);
+      const allSubFiles = [];
+      tmpSubsToOpen.forEach((file) => {
+        if (subRegex.test(path.extname(file))) {
+          allSubFiles.push(file);
+        } else {
+          allSubFiles.push(...searchSubsInDir(file));
+        }
+      });
+      mainWindow.webContents.send('add-local-subtitles', allSubFiles);
     } else if (tmpVideoToOpen.length + tmpSubsToOpen.length > 0) {
       mainWindow.webContents.send('open-file', { onlySubtitle: !tmpVideoToOpen.length, files: finalVideoToOpen });
     }
