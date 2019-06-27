@@ -102,19 +102,22 @@ const actions = {
     if (subtitle) {
       const { entity, loader } = subtitle;
       entity.payload = await loader();
-      Object.freeze(entity);
     }
   },
   async [a.getDialogues]({ state }: any, time: number) {
     const subtitle = subtitleMap.get(state.moduleId);
     if (subtitle) {
-      if (!Object.keys(subtitle.parser).length) subtitle.parser = getParser(subtitle.entity);
-      const { parser, entity } = subtitle;
-      if (parser.payload) {
-        await parser.parse(entity);
-        return await parser.getDialogues(time);
-      } else return [];
+      const { entity, parser } = subtitle;
+      if (!entity.payload) return [];
+      else if (entity.payload && !parser.getDialogues) {
+        subtitle.parser = getParser(entity);
+        await subtitle.parser.parse();
+      }
+      if (entity.payload && parser.getDialogues && parser.payload) {
+        return subtitle.parser.getDialogues(time);
+      }
     }
+    return [];
   },
   async [a.store]({ state, rootState }: any) {
     const subtitle = subtitleMap.get(state.moduleId);
