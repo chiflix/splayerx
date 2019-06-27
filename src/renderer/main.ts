@@ -1462,7 +1462,7 @@ new Vue({
                 this.canSendVolumeGa = true;
               }, 1000);
             }
-            if (this.wheelDirection === 'vertical') {
+            if (this.wheelDirection === 'vertical' || this.playlistDisplayState) {
               let step = Math.abs(e.deltaY) * 0.06;
               // in windows if wheel setting more lines per step, make it limited.
               if (process.platform !== 'darwin' && step > 6) {
