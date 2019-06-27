@@ -76,6 +76,7 @@ export const SubtitleManager = {
   deleteSubtitlesByUuid: 'DELETE_SUBTITLES_BY_UUID',
   changePrimarySubtitle: 'CHANGE_PRIMARY_SUBTITLE',
   changeSecondarySubtitle: 'CHANGE_SECONDARY_SUBTITLE',
+  storeSelectedSubtitle: 'STORE_SELECTED_SUBTITLE',
   storeSubtitle: 'STORE_SUBTITLE',
   uploadSubtitle: 'UPLOAD_SUBTITLE',
   startAISelection: 'START_AI_SELECTION',
