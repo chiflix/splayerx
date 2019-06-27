@@ -874,7 +874,10 @@ new Vue({
             {
               label: this.$t('msg.subtitle.uploadSelectedSubtitle'),
               id: 'uploadSelectedSubtitle',
-              click: () => this.$bus.$emit('upload-current-subtitle'),
+              click: () => {
+                // TODO
+                this.$bus.$emit('upload-current-subtitle');
+              },
             },
           ],
         },

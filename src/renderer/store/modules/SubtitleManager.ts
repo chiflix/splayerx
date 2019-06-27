@@ -49,6 +49,14 @@ const getters = {
   primarySubtitleId(state: SubtitleManagerState): string { return state.primarySubtitleId },
   secondarySubtitleId(state: SubtitleManagerState): string { return state.secondarySubtitleId },
   isRefreshing(state: SubtitleManagerState): boolean { return state.isRefreshing },
+  ableToPushCurrentSubtitle(state: SubtitleManagerState): boolean {
+    let enable = false;
+    // TODO
+    if (state.primarySubtitleId) {   
+      enable = true;
+    }
+    return enable;
+  }
 };
 const mutations = {
   [m.setPlaylistId](state: SubtitleManagerState, id: number) {

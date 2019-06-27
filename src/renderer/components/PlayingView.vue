@@ -74,7 +74,6 @@ export default {
     },
   },
   created() {
-    this.initializeManager();
   },
   mounted() {
     this.$store.dispatch('initWindowRotate');
