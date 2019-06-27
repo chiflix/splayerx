@@ -95,7 +95,7 @@ export interface VideoSegment {
 }
 
 export interface Parser {
-  parse(subtitle: Entity): void;
+  parse(): void;
   readonly payload: any;
   getInfo(): Promise<Info>;
   getDialogues(time?: number): Promise<Cue[]>;
