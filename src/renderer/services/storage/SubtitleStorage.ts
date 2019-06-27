@@ -4,7 +4,7 @@ import { RECENT_OBJECT_STORE_NAME, VIDEO_OBJECT_STORE_NAME, DATADB_NAME, INFO_DA
 import { MediaItem, PlaylistItem, SubtitlePreference as oldPreference } from '@/interfaces/IDB';
 import { Entity, EntityGenerator, Type, Format, Origin } from '@/interfaces/ISubtitle';
 import { StoredSubtitle, StoredSubtitleItem, SubtitlePreference } from '@/interfaces/ISubtitleStorage';
-import { uniqBy, unionBy, includes, remove, isEqual, get, zip, union, flatMap } from 'lodash';
+import { uniqBy, unionBy, uniqWith, remove, isEqual, get, zip, union, flatMap } from 'lodash';
 import Sagi from '@/libs/sagi';
 import { loadLocalFile, pathToFormat } from '../subtitle/utils';
 import { embeddedSrcLoader } from '../subtitle/loaders/embedded';
@@ -221,15 +221,10 @@ class SubtitleDataBase {
         ...subtitle,
         source: [subtitle.source],
       });
-    } else if (!includes(storedSubtitle.source, subtitle.source)) {
-      return objectStore.put({
-        ...subtitle,
-        source: storedSubtitle.source.concat([subtitle.source]),
-      });
     }
     return objectStore.put({
       ...subtitle,
-      ...storedSubtitle,
+      source: uniqWith(storedSubtitle.source.concat(subtitle.source), isEqual),
     });
   }
   async removeSubtitle(subtitle: RemoveSubtitleOptions) {
