@@ -63,7 +63,7 @@ const mutations = {
   },
 };
 const actions = {
-  async [a.initializeManager]({ getters, state, commit, dispatch }: any) {
+  async [a.initializeManager]({ getters, commit, dispatch }: any) {
     const { playListId, originSrc, mediaHash } = getters;
     getters.list.forEach((s: SubtitleControlListItem) => dispatch(a.removeSubtitle, s.id));
     commit(m.setPlaylistId, playListId);
@@ -108,9 +108,10 @@ const actions = {
       dispatchs.push(dispatch(a.addOnlineSubtitles, online ? await fetchOnlineList(originSrc, secondaryLanguage, hints) : []));
     }
     dispatchs.push(dispatch(a.addDatabaseSubtitles, databaseItemsToAdd))
-    return Promise.all(dispatchs).then(() => {
-      commit(m.setIsRefreshing, false);
-    });
+    return Promise.all(dispatchs)
+      .then(() => {
+        commit(m.setIsRefreshing, false);
+      });
   },
   /** only refresh local and online subtitles, delete old online subtitles */
   async [a.refreshSubtitles]({ getters, dispatch, commit }: any) {
@@ -136,9 +137,10 @@ const actions = {
       dispatch(a.addLocalSubtitles, await searchForLocalList(originSrc)),
       dispatch(a.addOnlineSubtitles, await fetchOnlineList(originSrc, primaryLanguage, hints)).then(primaryDeletePromise),
       dispatch(a.addOnlineSubtitles, await fetchOnlineList(originSrc, secondaryLanguage, hints)).then(secondaryDeletePromise),
-    ]).then(() => {
-      commit(m.setIsRefreshing, false);
-    });
+    ])
+      .then(() => {
+        commit(m.setIsRefreshing, false);
+      });
   },
   async [a.addLocalSubtitles]({ dispatch }: any, paths: string[]) {
     return Promise.all(
@@ -151,7 +153,6 @@ const actions = {
     );
   },
   async [a.addOnlineSubtitles]({ dispatch }: any, transcriptInfoList: TranscriptInfo[]) {
-    console.log(transcriptInfoList);
     // remove all type online item from list
     return Promise.all(
       transcriptInfoList.map(transcriptInfo => dispatch(a.addSubtitle, new OnlineGenerator(transcriptInfo)))
@@ -176,7 +177,6 @@ const actions = {
       name: '',
     };
     subtitleControlListItem.name = calculatedName(subtitleControlListItem, getters.list);
-    console.log(subtitleControlListItem);
     commit(m.addSubtitleId, subtitleControlListItem);
     return subtitleControlListItem;
   },
@@ -205,7 +205,6 @@ const actions = {
     unwatch = store.watch(
       (state: any, getters: any) => getters.list,
       (value: SubtitleControlListItem[], oldValue: SubtitleControlListItem[]) => {
-        console.log(value);
         // AI select
         if (value.length > 0) {
           dispatch(a.changePrimarySubtitle, value[0].id);
