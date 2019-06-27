@@ -100,3 +100,13 @@ export interface Parser {
   getDialogues(time?: number): Promise<Cue[]>;
   getVideoSegments(duration: number): Promise<VideoSegment[]>;
 }
+
+export type Subtitle = {
+  id: string
+  name: string,
+  language: string,
+  format?: string,
+  rank: number,
+  loading: string,
+  type: string,
+}
