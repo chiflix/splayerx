@@ -243,10 +243,8 @@ new Vue({
     updateFullScreen() {
       if (this.isFullScreen) {
         return {
-          id: 'KeyboardEsc',
           label: this.$t('msg.window.exitFullScreen'),
-          accelerator: 'Esc',
-          enabled: !this.playlistDisplayState,
+          accelerator: 'F',
           click: () => {
             this.$bus.$emit('off-fullscreen');
             this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
@@ -353,9 +351,6 @@ new Vue({
   watch: {
     playlistDisplayState(val: boolean) {
       if (this.menu) {
-        if (this.menu.getMenuItemById('KeyboardEsc')) {
-          this.menu.getMenuItemById('KeyboardEsc').enabled = !val;
-        }
         this.menu.getMenuItemById('KeyboardLeft').enabled = !val;
         this.menu.getMenuItemById('KeyboardRight').enabled = !val;
       }
