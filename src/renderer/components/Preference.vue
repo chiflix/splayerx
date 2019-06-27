@@ -75,16 +75,10 @@
 
 <script>
 import Vue from 'vue';
-import path, {
-  basename, dirname, extname, join,
-} from 'path';
-import fs from 'fs';
-import { uniq } from 'lodash';
 import electron from 'electron';
 import Icon from '@/components/BaseIconContainer.vue';
 import General from './Preferences/General.vue';
 import Privacy from './Preferences/Privacy.vue';
-import { getValidVideoRegex } from '../../shared/utils';
 
 Vue.component('General', General);
 Vue.component('Privacy', Privacy);
@@ -101,9 +95,6 @@ export default {
       mouseDown: false,
       isMoved: false,
     };
-  },
-  mounted() {
-    console.log(this.openSubtitle(true, '/Users/tanyang/Desktop/Bon Jovi - Walls-_SWSdUPMLMI.vtt'));
   },
   computed: {
     isDarwin() {
@@ -140,62 +131,6 @@ export default {
     },
     handleMouseup(panel) {
       this.currentPreference = panel;
-    },
-    searchForLocalVideo(subSrc) {
-      const videoDir = dirname(subSrc);
-      const videoBasename = basename(subSrc, extname(subSrc)).toLowerCase();
-      const videoFilename = basename(subSrc).toLowerCase();
-      const dirFiles = fs.readdirSync(videoDir);
-      return dirFiles
-        .filter((subtitleFilename) => {
-          const lowerCasedName = subtitleFilename.toLowerCase();
-          return (
-            getValidVideoRegex().test(lowerCasedName)
-            && lowerCasedName.slice(0, lowerCasedName.lastIndexOf('.')) === videoBasename
-            && lowerCasedName !== videoFilename
-          );
-        })
-        .map(subtitleFilename => (join(videoDir, subtitleFilename)));
-    },
-    openSubtitle(onlySubtitle, ...files) {
-      try {
-        const videoFiles = [];
-        const subRegex = new RegExp('^\\.(srt|ass|vtt)$', 'i');
-        for (let i = 0; i < files.length; i += 1) {
-          if (fs.statSync(files[i]).isDirectory()) {
-            const dirPath = files[i];
-            const dirFiles = fs.readdirSync(dirPath).map(file => path.join(dirPath, file));
-            files.push(...dirFiles);
-          }
-        }
-        if (!process.mas) {
-          files.forEach((tempFilePath) => {
-            const baseName = path.basename(tempFilePath);
-            if (baseName.startsWith('.') || fs.statSync(tempFilePath).isDirectory()) return;
-            if (subRegex.test(path.extname(tempFilePath))) {
-              const tempVideo = this.searchForLocalVideo(tempFilePath);
-              videoFiles.push(...tempVideo);
-            } else if (!subRegex.test(path.extname(tempFilePath))
-              && getValidVideoRegex().test(tempFilePath)) {
-              videoFiles.push(tempFilePath);
-            }
-          });
-        } else if (!onlySubtitle) {
-          files.forEach((tempFilePath) => {
-            const baseName = path.basename(tempFilePath);
-            if (baseName.startsWith('.') || fs.statSync(tempFilePath).isDirectory()) return;
-            if (!subRegex.test(path.extname(tempFilePath))
-              && getValidVideoRegex().test(tempFilePath)) {
-              videoFiles.push(tempFilePath);
-            }
-          });
-        }
-        return uniq(videoFiles);
-      } catch (ex) {
-        return [];
-        // log.info('openFile', ex);
-        // addBubble(OPEN_FAILED, this.$i18n);
-      }
     },
   },
 };
