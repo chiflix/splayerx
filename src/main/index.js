@@ -442,7 +442,7 @@ function searchForLocalVideo(subSrc) {
 function openSubtitle(onlySubtitle, files) {
   try {
     const videoFiles = [];
-    const subRegex = new RegExp('^\\.(srt|ass|vtt)$', 'i');
+    const subRegex = new RegExp('^\\.(srt|ass|vtt|ssa)$', 'i');
 
     for (let i = 0; i < files.length; i += 1) {
       if (fs.statSync(files[i]).isDirectory()) {
@@ -476,8 +476,6 @@ function openSubtitle(onlySubtitle, files) {
     return uniq(videoFiles);
   } catch (ex) {
     return [];
-    // log.info('openFile', ex);
-    // addBubble(OPEN_FAILED, this.$i18n);
   }
 }
 
@@ -574,7 +572,7 @@ const darwinOpenFilesToStartDebounced = debounce(darwinOpenFilesToStart, 100);
 if (process.platform === 'darwin') {
   app.on('will-finish-launching', () => {
     app.on('open-file', (event, file) => {
-      const subRegex = new RegExp('^\\.(srt|ass|vtt)$', 'i');
+      const subRegex = new RegExp('^\\.(srt|ass|vtt|ssa)$', 'i');
       if (subRegex.test(path.extname(file)) || fs.statSync(file).isDirectory()) {
         tmpSubsToOpen.push(file);
       } else if (!subRegex.test(path.extname(file))

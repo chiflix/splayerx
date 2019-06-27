@@ -1517,8 +1517,5 @@ new Vue({
     this.$electron.ipcRenderer.on('open-subtitle-in-mas', (event: Event, file: string) => {
       this.openFilesByDialog({ defaultPath: file });
     });
-    this.$electron.ipcRenderer.on('test-file', (event: any, args: any) => {
-      console.log(args);
-    });
   },
 }).$mount('#app');
