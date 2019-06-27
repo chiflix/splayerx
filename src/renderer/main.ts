@@ -51,6 +51,10 @@ function getSystemLocale() {
   return 'en';
 }
 
+window.addEventListener('error', (ev: ErrorEvent) => {
+  log.error('window', ev.error);
+});
+
 Vue.config.productionTip = false;
 Vue.config.warnHandler = (warn) => {
   log.info('render/main', warn);
@@ -111,7 +115,7 @@ Vue.use(InputPlugin, {
 });
 // Vue.use(InputPlugin);
 // i18n and its plugin
-const i18n = new VueI18n({
+export const i18n = new VueI18n({
   locale: getSystemLocale(), // set locale
   messages, // set locale messages
 });
@@ -590,6 +594,21 @@ new Vue({
             },
             { type: 'separator' },
             {
+              label: this.$t('msg.playback.previousVideo'),
+              accelerator: 'CmdOrCtrl+Left',
+              click: () => {
+                this.$bus.$emit('previous-video');
+              },
+            },
+            {
+              label: this.$t('msg.playback.nextVideo'),
+              accelerator: 'CmdOrCtrl+Right',
+              click: () => {
+                this.$bus.$emit('next-video');
+              },
+            },
+            { type: 'separator' },
+            {
               label: this.$t('msg.playback.singleCycle'),
               type: 'checkbox',
               id: 'singleCycle',
@@ -981,6 +1000,10 @@ new Vue({
               {
                 label: this.$t('msg.splayerx.hideOthers'),
                 role: 'hideothers',
+              },
+              {
+                label: this.$t('msg.splayerx.showAll'),
+                role: 'unhide'
               },
               { type: 'separator' },
               {

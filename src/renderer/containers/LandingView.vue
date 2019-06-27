@@ -117,7 +117,6 @@
 <script lang="ts">
 import Vue from 'vue';
 import { mapGetters } from 'vuex';
-import { HealthCheckResponse } from 'sagi-api/health/v1/health_pb';
 import { playInfoStorageService } from '@/services/storage/PlayInfoStorageService';
 import { recentPlayService } from '@/services/media/RecentPlayService';
 import Icon from '@/components/BaseIconContainer.vue';
@@ -126,6 +125,7 @@ import NotificationBubble from '@/components/NotificationBubble.vue';
 import PlaylistItem from '@/components/LandingView/PlaylistItem.vue';
 import VideoItem from '@/components/LandingView/VideoItem.vue';
 import { log } from '@/libs/Log';
+import Sagi from '@/libs/sagi';
 
 Vue.component('PlaylistItem', PlaylistItem);
 Vue.component('VideoItem', VideoItem);
@@ -252,8 +252,7 @@ export default {
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [720, 405]);
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [720 / 405]);
 
-    // TODO: error handling
-    this.sagi.healthCheck().then(({ status }: HealthCheckResponse.AsObject) => {
+    Sagi.healthCheck().then((status) => {
       if (process.env.NODE_ENV !== 'production') {
         this.sagiHealthStatus = status;
         log.info('LandingView.vue', `launching: ${app.getName()} ${app.getVersion()}`);
@@ -310,9 +309,9 @@ export default {
     },
     onItemDelete(index: number) {
       this.item = {};
-      this.landingViewItems.splice(index, 1);
+      const [deletedItem] = this.landingViewItems.splice(index, 1);
       if (this.firstIndex !== 0) this.lastIndex = this.landingViewItems.length;
-      playInfoStorageService.deleteRecentPlayedBy(this.landingViewItems[index].id);
+      playInfoStorageService.deleteRecentPlayedBy(deletedItem.id);
     },
   },
 };

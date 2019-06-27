@@ -111,6 +111,8 @@
       "pause": "暂停",
       "play": "播放",
       "resetSpeed": "重置播放速度",
+      "nextVideo": "下一集",
+      "previousVideo": "上一集",
       "singleCycle": "循环单个文件",
       "snapShot": "截图"
     },
@@ -121,7 +123,8 @@
       "hideOthers": "隐藏其他",
       "homepage": "网站",
       "preferences": "偏好设置",
-      "quit": "退出射手影音"
+      "quit": "退出射手影音",
+      "showAll": "全部显示"
     },
     "subtitle": {
       "AITranslation": "重新加载翻译结果",

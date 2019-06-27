@@ -111,6 +111,8 @@
       "pause": "Pausa",
       "play": "Jugar",
       "resetSpeed": "Restablecer velocidad de reproducción",
+      "nextVideo": "Siguiente Video",
+      "previousVideo": "Video Anterior",
       "singleCycle": "Repetir una",
       "snapShot": "Instantánea"
     },
@@ -121,7 +123,8 @@
       "hideOthers": "Esconder otros",
       "homepage": "Sitio web",
       "preferences": "Preferencias",
-      "quit": "Salir de SPlayer"
+      "quit": "Salir de SPlayer",
+      "showAll": "Mostrar todo"
     },
     "subtitle": {
       "AITranslation": "Recargar la traducción Smart",

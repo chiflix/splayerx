@@ -53,7 +53,7 @@
 </template>
 <script lang="ts">
 import { isEqual } from 'lodash';
-import { Cue, TagsPartial } from '@/interfaces/ISubtitle';
+import { Cue, Tags } from '@/interfaces/ISubtitle';
 
 export default {
   name: 'SubtitleRenderer',
@@ -92,6 +92,7 @@ export default {
   },
   data() {
     return {
+      allCues: [[], [], [], [], [], [], [], [], []],
       noPositionCues: [],
     };
   },
@@ -103,36 +104,20 @@ export default {
         + subSpaceFactorsB[this.chosenSize];
     },
     firstType() {
-      return this.currentCues[0][0].format || '';
+      // TODO
+      return 'sagi';
+      // return this.currentCues[0] ? this.currentCues[0][0].format : '';
     },
     secondType() {
-      return this.currentCues[1][0].format || '';
+      // TODO
+      return 'sagi';
+      // return this.currentCues[1] ? this.currentCues[1][0].format : '';
     },
     secondarySubScale() {
       if (this.currentFirstSubtitleId === '') {
         return this.scaleNum;
       }
       return (this.scaleNum * 5) / 6 < 1 ? 1 : (this.scaleNum * 5) / 6;
-    },
-    allCues() {
-      const allCues = [];
-      for (let i = 1; i < 10; i += 1) {
-        const firstCues: Cue[] = this.currentCues[0]
-          .filter((cue: Cue) => (this.subToTop && [1, 2, 3]
-            .includes(this.calculateAlignment(cue.category, cue.tags))
-            ? this.calculateAlignment(cue.category, cue.tags) + 6
-            : this.calculateAlignment(cue.category, cue.tags)) === i
-            && !this.calculatePosition(cue.category, cue.tags));
-        const secondaryCues: Cue[] = this.currentCues[1]
-          .filter((cue: Cue) => (this.subToTop && [1, 2, 3]
-            .includes(this.calculateAlignment(cue.category, cue.tags))
-            ? this.calculateAlignment(cue.category, cue.tags) + 6
-            : this.calculateAlignment(cue.category, cue.tags)) === i
-            && !this.calculatePosition(cue.category, cue.tags));
-        allCues.push((firstCues.length ? firstCues.map((cue: Cue) => { cue.category = 'first'; return cue; }) : [])
-          .concat(secondaryCues.length ? secondaryCues.map((cue: Cue) => { cue.category = 'secondary'; return cue; }) : []));
-      }
-      return allCues;
     },
     positionCues() {
       const firstCues: Cue[] = this.currentCues[0]
@@ -163,6 +148,26 @@ export default {
     },
   },
   watch: {
+    currentCues(newValue: any) {
+      const allCues = [];
+      for (let i = 1; i < 10; i += 1) {
+        const firstCues: Cue[] = newValue[0]
+          .filter((cue: Cue) => (this.subToTop && [1, 2, 3]
+            .includes(this.calculateAlignment(cue.category, cue.tags))
+            ? this.calculateAlignment(cue.category, cue.tags) + 6
+            : this.calculateAlignment(cue.category, cue.tags)) === i
+            && !this.calculatePosition(cue.category, cue.tags));
+        const secondaryCues: Cue[] = newValue[1]
+          .filter((cue: Cue) => (this.subToTop && [1, 2, 3]
+            .includes(this.calculateAlignment(cue.category, cue.tags))
+            ? this.calculateAlignment(cue.category, cue.tags) + 6
+            : this.calculateAlignment(cue.category, cue.tags)) === i
+            && !this.calculatePosition(cue.category, cue.tags));
+        allCues.push((firstCues.length ? firstCues.map((cue: Cue) => { cue.category = 'first'; return cue; }) : [])
+          .concat(secondaryCues.length ? secondaryCues.map((cue: Cue) => { cue.category = 'secondary'; return cue; }) : []));
+      }
+      this.allCues = allCues;
+    },
     allCues: {
       handler(val: Cue[][], oldVal: Cue[][]) {
         for (let i = 0; i < 9; i += 1) {
@@ -180,14 +185,14 @@ export default {
     },
   },
   methods: {
-    calculatePosition(category: string, tags: TagsPartial) {
+    calculatePosition(category: string, tags: Tags) {
       const type = category === 'first' ? this.firstType : this.secondType;
       if (type !== 'vtt') {
         return !!tags.pos;
       }
       return tags.line && tags.position;
     },
-    calculateAlignment(category: string, tags: TagsPartial) {
+    calculateAlignment(category: string, tags: Tags) {
       const type = category === 'first' ? this.firstType : this.secondType;
       if (type !== 'vtt') {
         return !tags || !tags.alignment ? 2 : tags.alignment;
@@ -271,5 +276,7 @@ export default {
   position: absolute;
   width: 100%;
   height: 100%;
+  left: 0;
+  top: 0;
 }
 </style>

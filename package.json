@@ -478,6 +478,9 @@
     "@grpc/grpc-js": "^0.2.0",
     "@sentry/electron": "^0.17.1",
     "@sentry/integrations": "^5.1.2",
+    "@types/chardet": "^0.5.0",
+    "@types/franc": "^4.0.0",
+    "@types/fs-extra": "^7.0.0",
     "@types/lodash": "^4.14.134",
     "@types/lolex": "^3.1.1",
     "ass-compiler": "0.0.10",
@@ -499,7 +502,7 @@
     "mkdirp": "^0.5.1",
     "nzh": "^1.0.4",
     "os-locale": "^3.0.1",
-    "p-queue": "^3.1.0",
+    "p-queue": "^6.0.0",
     "rimraf": "^2.6.3",
     "romanize": "^1.1.1",
     "sagi-api": "^0.0.10",
@@ -517,7 +520,8 @@
     "vue-i18n": "^7.7.0",
     "vue-router": "^3.0.2",
     "vuex": "^3.0.1",
-    "winston": "^3.1.0"
+    "winston": "^3.1.0",
+    "winston-daily-rotate-file": "^3.9.0"
   },
   "optionalDependencies": {
     "win-mouse": "github:ipy/win-mouse"

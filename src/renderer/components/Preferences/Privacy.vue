@@ -109,7 +109,7 @@
 
 <script>
 import electron from 'electron';
-import { codeToLanguageName } from '@/helpers/language';
+import { codeToLanguageName } from '@/libs/language';
 import Icon from '@/components/BaseIconContainer.vue';
 import BaseCheckBox from './BaseCheckBox.vue';
 

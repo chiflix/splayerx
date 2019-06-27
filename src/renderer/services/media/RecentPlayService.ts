@@ -12,7 +12,7 @@ export default class RecentPlayService implements IRecentPlay {
     const recentPlayedResults = await playInfoStorageService.getAllRecentPlayed();
     const coverVideos = await Promise.all(
       recentPlayedResults.map(async (value) => {
-        const { items, playedIndex, id } = value;  
+        const { items, playedIndex, id } = value;
         const coverVideoId = items[playedIndex] as number;
         const mediaItem = await info.getValueByKey('media-item', coverVideoId);
 
