@@ -1,10 +1,8 @@
-import path, {
-  basename, dirname, extname, join,
-} from 'path';
+import path from 'path';
 import fs, { promises as fsPromises } from 'fs';
 import crypto from 'crypto';
 import lolex from 'lolex';
-import { times, get, uniq } from 'lodash';
+import { times, get } from 'lodash';
 import bookmark from '@/helpers/bookmark';
 import syncStorage from '@/helpers/syncStorage';
 import infoDB from '@/helpers/infoDB';
@@ -267,72 +265,6 @@ export default {
       }
       if (containsSubFiles) {
         this.$bus.$emit('add-subtitles', subtitleFiles);
-      }
-    },
-    searchForLocalVideo(subSrc) {
-      const videoDir = dirname(subSrc);
-      const videoBasename = basename(subSrc, extname(subSrc)).toLowerCase();
-      const videoFilename = basename(subSrc).toLowerCase();
-      const dirFiles = fs.readdirSync(videoDir);
-      return dirFiles
-        .filter((subtitleFilename) => {
-          const lowerCasedName = subtitleFilename.toLowerCase();
-          return (
-            getValidVideoRegex().test(lowerCasedName)
-            && lowerCasedName.slice(0, lowerCasedName.lastIndexOf('.')) === videoBasename
-            && lowerCasedName !== videoFilename
-          );
-        })
-        .map(subtitleFilename => (join(videoDir, subtitleFilename)));
-    },
-    async openSubtitle(onlySubtitle, ...files) {
-      try {
-        let videoFiles = [];
-        const subRegex = new RegExp('^\\.(srt|ass|vtt)$', 'i');
-
-        for (let i = 0; i < files.length; i += 1) {
-          if (fs.statSync(files[i]).isDirectory()) {
-            const dirPath = files[i];
-            const dirFiles = fs.readdirSync(dirPath).map(file => path.join(dirPath, file));
-            files.push(...dirFiles);
-          }
-        }
-        if (!process.mas) {
-          files.forEach((tempFilePath) => {
-            const baseName = path.basename(tempFilePath);
-            if (baseName.startsWith('.') || fs.statSync(tempFilePath).isDirectory()) return;
-            if (subRegex.test(path.extname(tempFilePath))) {
-              const tempVideo = this.searchForLocalVideo(tempFilePath);
-              videoFiles.push(...tempVideo);
-            } else if (!subRegex.test(path.extname(tempFilePath))
-              && getValidVideoRegex().test(tempFilePath)) {
-              videoFiles.push(tempFilePath);
-            }
-          });
-        } else if (onlySubtitle) {
-          this.openFilesByDialog({ defaultPath: files[0] });
-        } else {
-          files.forEach((tempFilePath) => {
-            const baseName = path.basename(tempFilePath);
-            if (baseName.startsWith('.') || fs.statSync(tempFilePath).isDirectory()) return;
-            if (!subRegex.test(path.extname(tempFilePath))
-                && getValidVideoRegex().test(tempFilePath)) {
-              videoFiles.push(tempFilePath);
-            }
-          });
-        }
-        videoFiles = uniq(videoFiles);
-        if (videoFiles.length > 1) {
-          await this.createPlayList(...videoFiles);
-        } else if (videoFiles.length === 1) {
-          await this.openVideoFile(...videoFiles);
-        } else if (!process.mas) {
-          log.info('helpers/index.js', `Cannot find any related video in the folder: ${files}`);
-          addBubble(LOAD_SUBVIDEO_FAILED, this.$i18n);
-        }
-      } catch (ex) {
-        log.info('openFile', ex);
-        addBubble(OPEN_FAILED, this.$i18n);
       }
     },
     // filter video and sub files

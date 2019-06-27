@@ -2,9 +2,11 @@
 import '../shared/sentry';
 
 import { app, BrowserWindow, session, Tray, ipcMain, globalShortcut, nativeImage, splayerx, crashReporter } from 'electron' // eslint-disable-line
-import { throttle, debounce } from 'lodash';
+import { throttle, debounce, uniq } from 'lodash';
 import os from 'os';
-import path from 'path';
+import path, {
+  basename, dirname, extname, join,
+} from 'path';
 import fs from 'fs';
 import rimraf from 'rimraf';
 import TaskQueue from '../renderer/helpers/proceduralQueue';
@@ -58,8 +60,9 @@ let preferenceWindow = null;
 let tray = null;
 let needToRestore = false;
 let inited = false;
-const filesToOpen = [];
-const subsToOpen = [];
+let finalVideoToOpen = [];
+const tmpVideoToOpen = [];
+const tmpSubsToOpen = [];
 const snapShotQueue = [];
 const thumbnailTask = [];
 const mediaInfoQueue = [];
@@ -420,6 +423,63 @@ function registerMainWindowEvent(mainWindow) {
     }
   });
 }
+function searchForLocalVideo(subSrc) {
+  const videoDir = dirname(subSrc);
+  const videoBasename = basename(subSrc, extname(subSrc)).toLowerCase();
+  const videoFilename = basename(subSrc).toLowerCase();
+  const dirFiles = fs.readdirSync(videoDir);
+  return dirFiles
+    .filter((subtitleFilename) => {
+      const lowerCasedName = subtitleFilename.toLowerCase();
+      return (
+        getValidVideoRegex().test(lowerCasedName)
+        && lowerCasedName.slice(0, lowerCasedName.lastIndexOf('.')) === videoBasename
+        && lowerCasedName !== videoFilename
+      );
+    })
+    .map(subtitleFilename => (join(videoDir, subtitleFilename)));
+}
+function openSubtitle(onlySubtitle, files) {
+  try {
+    const videoFiles = [];
+    const subRegex = new RegExp('^\\.(srt|ass|vtt)$', 'i');
+
+    for (let i = 0; i < files.length; i += 1) {
+      if (fs.statSync(files[i]).isDirectory()) {
+        const dirPath = files[i];
+        const dirFiles = fs.readdirSync(dirPath).map(file => path.join(dirPath, file));
+        files.push(...dirFiles);
+      }
+    }
+    if (!process.mas) {
+      files.forEach((tempFilePath) => {
+        const baseName = path.basename(tempFilePath);
+        if (baseName.startsWith('.') || fs.statSync(tempFilePath).isDirectory()) return;
+        if (subRegex.test(path.extname(tempFilePath))) {
+          const tempVideo = searchForLocalVideo(tempFilePath);
+          videoFiles.push(...tempVideo);
+        } else if (!subRegex.test(path.extname(tempFilePath))
+          && getValidVideoRegex().test(tempFilePath)) {
+          videoFiles.push(tempFilePath);
+        }
+      });
+    } else if (!onlySubtitle) {
+      files.forEach((tempFilePath) => {
+        const baseName = path.basename(tempFilePath);
+        if (baseName.startsWith('.') || fs.statSync(tempFilePath).isDirectory()) return;
+        if (!subRegex.test(path.extname(tempFilePath))
+          && getValidVideoRegex().test(tempFilePath)) {
+          videoFiles.push(tempFilePath);
+        }
+      });
+    }
+    return uniq(videoFiles);
+  } catch (ex) {
+    return [];
+    // log.info('openFile', ex);
+    // addBubble(OPEN_FAILED, this.$i18n);
+  }
+}
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -447,7 +507,7 @@ function createWindow() {
   });
   mainWindow.webContents.setUserAgent(`SPlayerX@2018 ${os.platform() + os.release()} Version ${app.getVersion()}`);
 
-  mainWindow.loadURL(filesToOpen.length ? `${mainURL}#/play` : mainURL);
+  mainWindow.loadURL(finalVideoToOpen.length ? `${mainURL}#/play` : mainURL);
 
   mainWindow.on('closed', () => {
     ipcMain.removeAllListeners();
@@ -457,15 +517,15 @@ function createWindow() {
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
     // Open file by file association. Currently support 1 file only.
-    if (filesToOpen.length + subsToOpen.length > 0) {
-      if (!subsToOpen.length) {
-        mainWindow.webContents.send('open-file', ...filesToOpen);
-      } else {
-        mainWindow.webContents.send('open-video-by-subtitle', { files: filesToOpen.concat(subsToOpen), onlySubtitle: !filesToOpen.length });
-      }
-      filesToOpen.splice(0, filesToOpen.length);
-      subsToOpen.splice(0, subsToOpen.length);
+    finalVideoToOpen = openSubtitle(!tmpVideoToOpen.length, tmpVideoToOpen.concat(tmpSubsToOpen));
+    if (process.mas && !tmpVideoToOpen.length && tmpSubsToOpen.length) {
+      mainWindow.webContents.send('open-subtitle-in-mas', tmpSubsToOpen[0]);
+    } else if (finalVideoToOpen.length) {
+      mainWindow.webContents.send('open-file', { onlySubtitle: !tmpVideoToOpen.length, files: finalVideoToOpen });
     }
+    finalVideoToOpen.splice(0, finalVideoToOpen.length);
+    tmpSubsToOpen.splice(0, tmpSubsToOpen.length);
+    tmpVideoToOpen.splice(0, tmpVideoToOpen.length);
     inited = true;
   });
 
@@ -491,19 +551,21 @@ app.on('second-instance', () => {
 });
 
 
-function darwinOpenFilesToStart() {
+async function darwinOpenFilesToStart() {
   if (mainWindow) { // sencond instance
     if (!inited) return;
     if (!mainWindow.isVisible()) mainWindow.show();
     if (mainWindow.isMinimized()) mainWindow.restore();
     mainWindow.focus();
-    if (filesToOpen.length && !subsToOpen.length) {
-      mainWindow.webContents.send('open-file', ...filesToOpen);
-    } else if (filesToOpen.length + subsToOpen.length > 0) {
-      mainWindow.webContents.send('open-video-by-subtitle', { files: filesToOpen.concat(subsToOpen), onlySubtitle: !filesToOpen.length });
+    finalVideoToOpen = openSubtitle(!tmpVideoToOpen.length, tmpVideoToOpen.concat(tmpSubsToOpen));
+    if (process.mas && !tmpVideoToOpen.length && tmpSubsToOpen.length) {
+      mainWindow.webContents.send('open-subtitle-in-mas', tmpSubsToOpen[0]);
+    } else if (finalVideoToOpen.length) {
+      mainWindow.webContents.send('open-file', { onlySubtitle: !tmpVideoToOpen.length, files: finalVideoToOpen });
     }
-    filesToOpen.splice(0, filesToOpen.length);
-    subsToOpen.splice(0, subsToOpen.length);
+    finalVideoToOpen.splice(0, finalVideoToOpen.length);
+    tmpSubsToOpen.splice(0, tmpSubsToOpen.length);
+    tmpVideoToOpen.splice(0, tmpVideoToOpen.length);
   } else {
     createWindow();
   }
@@ -514,16 +576,16 @@ if (process.platform === 'darwin') {
     app.on('open-file', (event, file) => {
       const subRegex = new RegExp('^\\.(srt|ass|vtt)$', 'i');
       if (subRegex.test(path.extname(file)) || fs.statSync(file).isDirectory()) {
-        subsToOpen.push(file);
+        tmpSubsToOpen.push(file);
       } else if (!subRegex.test(path.extname(file))
         && getValidVideoRegex().test(file)) {
-        filesToOpen.push(file);
+        tmpVideoToOpen.push(file);
       }
       darwinOpenFilesToStartDebounced();
     });
   });
 } else {
-  filesToOpen.push(...getOpenedFiles(process.argv));
+  tmpVideoToOpen.push(...getOpenedFiles(process.argv));
   app.on('second-instance', (event, argv) => {
     const opendFiles = getOpenedFiles(argv); // TODO: multiple files
     if (opendFiles.length) {

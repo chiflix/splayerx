@@ -33,9 +33,10 @@ import { log } from '@/libs/Log';
 import asyncStorage from '@/helpers/asyncStorage';
 import { videodata } from '@/store/video';
 import NotificationBubble, { addBubble } from '../shared/notificationControl';
-import { SNAPSHOT_FAILED, SNAPSHOT_SUCCESS } from '../shared/notificationcodes';
+import { SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, LOAD_SUBVIDEO_FAILED } from '../shared/notificationcodes';
 import InputPlugin, { getterTypes as iGT } from '@/plugins/input';
 import { VueDevtools } from './plugins/vueDevtools.dev';
+
 
 // causing callbacks-registry.js 404 error. disable temporarily
 // require('source-map-support').install();
@@ -1366,7 +1367,7 @@ new Vue({
     // https://github.com/electron/electron/issues/3609
     // Disable Zooming
     setTimeout(() => {
-      console.log('test6.3');
+      console.log('test7.2');
     }, 3000);
     this.$electron.webFrame.setVisualZoomLevelLimits(1, 1);
     this.createMenu();
@@ -1499,16 +1500,25 @@ new Vue({
       this.$bus.$emit('drag-leave');
     });
 
-    this.$electron.ipcRenderer.on('open-file', (event: any, ...files: Array<fs.PathLike>) => {
-      const onlyFolders = files.every(file => fs.statSync(file).isDirectory());
-      if (onlyFolders) {
-        this.openFolder(...files);
+    this.$electron.ipcRenderer.on('open-file', (event: Event, args: { onlySubtitle: boolean, files: Array<string> }) => {
+      console.log(args);
+      if (!args.files.length && args.onlySubtitle) {
+        log.info('helpers/index.js', `Cannot find any related video in the folder: ${args.files}`);
+        addBubble(LOAD_SUBVIDEO_FAILED, this.$i18n);
       } else {
-        this.openFile(...files);
+        const onlyFolders = args.files.every((file: any) => fs.statSync(file).isDirectory());
+        if (onlyFolders) {
+          this.openFolder(...args.files);
+        } else {
+          this.openFile(...args.files);
+        }
       }
     });
-    this.$electron.ipcRenderer.on('open-video-by-subtitle', (event: any, args: any) => {
-      this.openSubtitle(args.onlySubtitle, ...args.files);
+    this.$electron.ipcRenderer.on('open-subtitle-in-mas', (event: Event, file: string) => {
+      this.openFilesByDialog({ defaultPath: file });
+    });
+    this.$electron.ipcRenderer.on('test-file', (event: any, args: any) => {
+      console.log(args);
     });
   },
 }).$mount('#app');
