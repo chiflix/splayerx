@@ -36,7 +36,7 @@ type CompiledSubtitle = {
 
 export class AssParser extends BaseParser {
   readonly payload: string = '';
-  format: Format.AdvancedSubStationAplha;
+  format = Format.AdvancedSubStationAplha;
   constructor(assPayload: string) {
     super();
     this.payload = assPayload;

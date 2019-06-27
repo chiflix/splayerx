@@ -102,7 +102,7 @@ const actions = {
     if (subtitle) {
       const { entity, loader } = subtitle;
       entity.payload = await loader();
-      Object.freeze(entity);
+      // Object.freeze(entity);
     }
   },
   async [a.getDialogues]({ state }: any, time: number) {
@@ -118,7 +118,6 @@ const actions = {
   },
   async [a.store]({ state, rootState }: any) {
     const subtitle = subtitleMap.get(state.moduleId);
-    console.log(rootState);
     if (subtitle) await storeSubtitle(subtitle.entity);
   },
   async [a.delete]({ state }: any) {

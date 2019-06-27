@@ -76,7 +76,7 @@
                 :enabled-secondary-sub="enabledSecondarySub"
                 :change-subtitle="isFirstSubtitle ? changeFirstSubtitle : changeSecondarySubtitle"
                 @off-subtitle="offCurrentSubtitle"
-                @remove-subtitle="2"
+                @remove-subtitle="deleteCurrentSubtitle"
               />
             </div>
           </div>
@@ -208,6 +208,7 @@ export default {
       this.updateNoSubtitle(!val.length);
     },
     list(val: SubtitleControlListItem[]) {
+      console.log(val);
       this.computedAvailableItems = val.map((sub: SubtitleControlListItem) => ({
         ...sub,
         name: this.getSubName(sub),
@@ -323,6 +324,7 @@ export default {
       changeFirstSubtitle: smActions.changePrimarySubtitle,
       changeSecondarySubtitle: smActions.changeSecondarySubtitle,
       refreshSubtitles: smActions.refreshSubtitles,
+      deleteCurrentSubtitle: smActions.deleteSubtitlesByUuid,
       updateNoSubtitle: subtitleActions.UPDATE_NO_SUBTITLE,
       updateSubtitleType: subtitleActions.UPDATE_SUBTITLE_TYPE,
     }),
@@ -344,7 +346,6 @@ export default {
     },
     handleRefresh() {
       if (!this.isRefreshing) {
-        console.log('aa');
         this.refreshSubtitles();
       }
     },

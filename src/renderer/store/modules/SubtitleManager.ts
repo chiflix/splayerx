@@ -180,24 +180,39 @@ const actions = {
     commit(m.addSubtitleId, subtitleControlListItem);
     return subtitleControlListItem;
   },
-  [a.removeSubtitle]({ commit }: any, id: string) {
+  [a.removeSubtitle]({ commit, getters }: any, id: string) {
     store.unregisterModule(id);
     commit(m.deleteSubtitleId, id);
+    if (getters.isFirstSubtitle && getters.primarySubtitleId === id) {
+      commit(m.setPrimarySubtitleId, '');
+    } else if (!getters.isFirstSubtitle && getters.secondarySubtitleId === id) {
+      commit(m.setSecondarySubtitleId, '');
+    }
   },
   async [a.deleteSubtitlesByHash](context: any, storedSubtitleItems: StoredSubtitleItem[]) { },
   async [a.deleteSubtitlesByUuid]({ dispatch }: any, storedSubtitleItems: SubtitleControlListItem[]) {
-    return Promise.all(storedSubtitleItems.map(({ id }) => dispatch(`${id}/${subActions.delete}`)));
+    return Promise.all(storedSubtitleItems.map(({ id }) => {
+      dispatch(`${id}/${subActions.delete}`);
+      dispatch(a.removeSubtitle, id);
+    }));
   },
-  async [a.changePrimarySubtitle]({ dispatch, commit }: any, id: string) {
+  async [a.changePrimarySubtitle]({ dispatch, commit, getters }: any, id: string) {
+    if (id === getters.secondarySubtitleId) {
+      commit(m.setSecondarySubtitleId, '');
+    }
     commit(m.setPrimarySubtitleId, id);
     if (id) {
       await dispatch(`${id}/${subActions.load}`);
     }
   },
-  async [a.changeSecondarySubtitle]({ dispatch, commit }: any, id: string) {
-    commit(m.setSecondarySubtitleId, id); if (id) {
+  async [a.changeSecondarySubtitle]({ dispatch, commit, getters }: any, id: string) {
+    if (id) {
       await dispatch(`${id}/${subActions.load}`);
     }
+    if (id && id === getters.primarySubtitleId) {
+      commit(m.setPrimarySubtitleId, '');
+    }
+    commit(m.setSecondarySubtitleId, id);
   },
   async [a.storeSubtitle](context: any, id: string) { },
   async [a.uploadSubtitle](context: any, id: string) { },
