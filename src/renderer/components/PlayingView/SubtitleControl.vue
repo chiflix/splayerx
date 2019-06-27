@@ -208,7 +208,6 @@ export default {
       this.updateNoSubtitle(!val.length);
     },
     list(val: SubtitleControlListItem[]) {
-      console.log(val);
       this.computedAvailableItems = val.map((sub: SubtitleControlListItem) => ({
         ...sub,
         name: this.getSubName(sub),
