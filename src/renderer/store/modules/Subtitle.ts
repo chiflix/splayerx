@@ -108,7 +108,7 @@ const actions = {
   async [a.getDialogues]({ state }: any, time: number) {
     const subtitle = subtitleMap.get(state.moduleId);
     if (subtitle) {
-      if (!Object.keys(subtitle.parser)) subtitle.parser = getParser(subtitle.entity);
+      if (!Object.keys(subtitle.parser).length) subtitle.parser = getParser(subtitle.entity);
       const { parser, entity } = subtitle;
       if (parser.payload) {
         await parser.parse(entity);
@@ -123,7 +123,10 @@ const actions = {
   },
   async [a.delete]({ state }: any) {
     const subtitle = subtitleMap.get(state.moduleId);
-    if (subtitle) await removeSubtitle(subtitle.entity);
+    if (subtitle) {
+      subtitleMap.delete(state.moduleId);
+      await removeSubtitle(subtitle.entity);
+    }
   },
   [a.upload]() {
     // directly invoke from @/services/subtitle/upload
