@@ -609,7 +609,7 @@ if (process.platform === 'darwin') {
     }
   });
   app.on('second-instance', (event, argv) => {
-    const opendFiles = argv.slice(app.isPackaged ? 1 : 2); // TODO: multiple files
+    const opendFiles = argv.slice(app.isPackaged ? 3 : 2); // TODO: multiple files
     opendFiles.forEach((file) => {
       if (subRegex.test(path.extname(file)) || fs.statSync(file).isDirectory()) {
         tmpSubsToOpen.push(file);
