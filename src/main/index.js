@@ -12,7 +12,7 @@ import rimraf from 'rimraf';
 import TaskQueue from '../renderer/helpers/proceduralQueue';
 import './helpers/electronPrototypes';
 import writeLog from './helpers/writeLog';
-import { getValidVideoRegex } from '../shared/utils';
+import { getValidVideoRegex, getValidSubtitleRegex } from '../shared/utils';
 
 // requestSingleInstanceLock is not going to work for mas
 // https://github.com/electron-userland/electron-packager/issues/923
@@ -66,7 +66,7 @@ const snapShotQueue = [];
 const thumbnailTask = [];
 const mediaInfoQueue = [];
 const embeeddSubtitlesQueue = new TaskQueue();
-const subRegex = new RegExp('^\\.(srt|ass|vtt|ssa)$', 'i');
+const subRegex = getValidSubtitleRegex();
 const mainURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080'
   : `file://${__dirname}/index.html`;
@@ -425,7 +425,7 @@ function registerMainWindowEvent(mainWindow) {
 }
 
 function searchSubsInDir(dir) {
-  const subRegex = new RegExp('^\\.(srt|ass|vtt|ssa)$', 'i');
+  const subRegex = getValidSubtitleRegex();
   const dirFiles = fs.readdirSync(dir);
   return dirFiles
     .filter(subtitleFilename => subRegex.test(path.extname(subtitleFilename)))
