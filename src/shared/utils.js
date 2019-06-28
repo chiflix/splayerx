@@ -32,3 +32,17 @@ export function getValidVideoRegex() {
   validVideoRegex = new RegExp(`\\.(${getValidVideoExtensions().join('|')})$`, 'i');
   return validVideoRegex;
 }
+
+let allValidExtensions;
+export function getAllValidExtensions() {
+  if (allValidExtensions) return allValidExtensions;
+  allValidExtensions = manifest.build[process.platform === 'darwin' ? 'mac' : 'win']
+    .fileAssociations.reduce((exts, fa) => {
+      if (!fa || !fa.ext || !fa.ext.length) return exts;
+      return exts.concat(
+        fa.ext.map(x => x.toLowerCase()),
+      );
+    }, []);
+  allValidExtensions = Object.freeze(allValidExtensions);
+  return allValidExtensions;
+}
