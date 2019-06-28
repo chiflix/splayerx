@@ -113,6 +113,9 @@ function privacyConfirm() {
 }
 let onlineTimeoutId: any;
 let onlineTimeout = false;
+
+let primarySelectionComplete = false;
+let secondarySelectionComplete = false;
 function fetchOnlineListWithBubble(
   videoSrc: string,
   languageCode: LanguageCode,
@@ -140,6 +143,8 @@ const actions = {
     commit(m.setMediaItemId, `${mediaHash}-${originSrc}`);
     commit(m.setPrimarySubtitleId, '');
     commit(m.setSecondarySubtitleId, '');
+    primarySelectionComplete = false;;
+    secondarySelectionComplete = false;
     commit(m.setIsRefreshing, true);
     commit(m.setGlobalDelay, 0);
     dispatch(a.refreshSubtitlesInitially);
@@ -183,8 +188,10 @@ const actions = {
     if (secondaryLanguage) {
       actions.push(dispatch(a.addOnlineSubtitles, online ? await fetchOnlineListWithBubble(originSrc, secondaryLanguage, hints) : []));
     }
+    dispatch(a.startAISelection);
     return Promise.all(actions)
       .then(async () => {
+        if (!primarySelectionComplete || !secondarySelectionComplete) dispatch(a.stopAISelection);
         if (onlineTimeout) addBubble(REQUEST_TIMEOUT, i18n);
         await dispatch(a.addDatabaseSubtitles, { storedList: databaseItemsToAdd, selected })
         storeSubtitleLanguage([primaryLanguage, secondaryLanguage], playlistId, mediaItemId);
@@ -196,6 +203,8 @@ const actions = {
   async [a.refreshSubtitles]({ state, getters, dispatch, commit }: any) {
     commit(m.setPrimarySubtitleId, '');
     commit(m.setSecondarySubtitleId, '');
+    primarySelectionComplete = false;;
+    secondarySelectionComplete = false;
     commit(m.setIsRefreshing, true);
     addBubble(ONLINE_LOADING, i18n);
     const { list } = getters as { list: SubtitleControlListItem[] };
@@ -227,6 +236,7 @@ const actions = {
     );
     return Promise.all(actions)
       .then(() => {
+        if (!primarySelectionComplete || !secondarySelectionComplete) dispatch(a.stopAISelection);
         if (onlineTimeout) addBubble(REQUEST_TIMEOUT, i18n);
         const { playlistId, mediaItemId } = state;
         storeSubtitleLanguage([primaryLanguage, secondaryLanguage], playlistId, mediaItemId);
@@ -337,14 +347,38 @@ const actions = {
   },
   async [a.storeSubtitle](context: any, id: string) { },
   async [a.uploadSubtitle](context: any, id: string) { },
-  async [a.startAISelection]({ dispatch }: any) {
+  async [a.startAISelection]({ state, getters, dispatch }: any) {
     unwatch = store.watch(
-      (state: any, getters: any) => getters.list,
+      (state: any, getters: any) => getters.list.map(({ id, type, source, language }: any) => ({ id, type, source, language })),
       (value: SubtitleControlListItem[], oldValue: SubtitleControlListItem[]) => {
-        // AI select
-        if (value.length > 0) {
-          // dispatch(a.changePrimarySubtitle, value[0].id);
-          dispatch(a.stopAISelection);
+        const { primaryLanguage, secondaryLanguage } = getters;
+        if (!primarySelectionComplete || !secondarySelectionComplete) {
+          const hasPrimaryLanguage = value
+            .find(({ language }) => language === primaryLanguage);
+          const hasSecondaryLanguage = value
+            .find(({ language }) => language === secondaryLanguage);
+          if (hasPrimaryLanguage) {
+            dispatch(a.changePrimarySubtitle, hasPrimaryLanguage.id);
+            primarySelectionComplete = true;
+            if (hasSecondaryLanguage) {
+              dispatch(a.changeSecondarySubtitle, hasSecondaryLanguage.id);
+              secondarySelectionComplete = true;
+            }
+          } else if (hasSecondaryLanguage) {
+            if (primarySelectionComplete) {
+              dispatch(a.changeSecondarySubtitle, hasSecondaryLanguage.id);
+              secondarySelectionComplete = true;
+            } else {
+              dispatch(a.changePrimarySubtitle, hasSecondaryLanguage.id);
+              dispatch(a.changeSecondarySubtitle, '');
+              primarySelectionComplete = true;
+              secondarySelectionComplete = true;
+            }
+          } else {
+            dispatch(a.changePrimarySubtitle, '');
+            dispatch(a.changeSecondarySubtitle, '');
+          }
+          if (primarySelectionComplete && secondarySelectionComplete) dispatch(a.stopAISelection);
         }
       });
   },
