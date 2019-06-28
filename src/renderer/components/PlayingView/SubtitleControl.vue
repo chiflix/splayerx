@@ -153,8 +153,7 @@ export default {
   },
   computed: {
     ...mapGetters(['winWidth', 'originSrc', 'primarySubtitleId', 'secondarySubtitleId', 'list', 'privacyAgreement',
-      'calculatedNoSub', 'winHeight', 'isFirstSubtitle', 'enabledSecondarySub', 'isRefreshing',
-      'winRatio', 'isRefreshing']),
+      'calculatedNoSub', 'winHeight', 'isFirstSubtitle', 'enabledSecondarySub', 'isRefreshing', 'winRatio']),
     ...mapState({
       loadingTypes: ({ Subtitle }) => {
         const { loadingStates, types } = Subtitle;

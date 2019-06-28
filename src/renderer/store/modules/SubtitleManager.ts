@@ -194,16 +194,21 @@ const actions = {
       dispatch(a.addOnlineSubtitles, online ? await fetchOnlineListWithBubble(originSrc, primaryLanguage, hints) : []),
     ];
     dispatch(a.startAISelection);
-    return Promise.all(actions)
-      .then(async () => {
-        if (!primarySelectionComplete || !secondarySelectionComplete) dispatch(a.stopAISelection);
-        if (onlineTimeout) addBubble(REQUEST_TIMEOUT, store.$i18n);
-        await dispatch(a.addDatabaseSubtitles, { storedList: databaseItemsToAdd, selected })
-        storeSubtitleLanguage([primaryLanguage, secondaryLanguage], playlistId, mediaItemId);
-        addSubtitleItemsToList(getters.list, playlistId, mediaItemId);
-        commit(m.setIsRefreshing, false);
-        dispatch(a.checkLocalSubtitles);
-      });
+    try {
+      await Promise.all(actions)
+        .then(async () => {
+          if (!primarySelectionComplete || !secondarySelectionComplete) dispatch(a.stopAISelection);
+          if (onlineTimeout) addBubble(REQUEST_TIMEOUT, store.$i18n);
+          await dispatch(a.addDatabaseSubtitles, { storedList: databaseItemsToAdd, selected })
+          storeSubtitleLanguage([primaryLanguage, secondaryLanguage], playlistId, mediaItemId);
+          addSubtitleItemsToList(getters.list, playlistId, mediaItemId);
+          dispatch(a.checkLocalSubtitles);
+        });
+    } catch(ex) {
+      console.error(ex);
+    } finally {
+      commit(m.setIsRefreshing, false);
+    }
   },
   /** only refresh local and online subtitles, delete old online subtitles */
   async [a.refreshSubtitles]({ state, getters, dispatch, commit }: any) {
@@ -243,18 +248,24 @@ const actions = {
         actions.push(dispatch(a.addOnlineSubtitles, primaryResults));
         actions.push(dispatch(a.addOnlineSubtitles, secondaryResults));
       } catch (error) {
+        console.error(error);
       }
     }
-    return Promise.all(actions)
-      .then(() => {
-        if (!primarySelectionComplete || !secondarySelectionComplete) dispatch(a.stopAISelection);
-        if (onlineTimeout) addBubble(REQUEST_TIMEOUT, store.$i18n);
-        const { playlistId, mediaItemId } = state;
-        storeSubtitleLanguage([primaryLanguage, secondaryLanguage], playlistId, mediaItemId);
-        addSubtitleItemsToList(getters.list, playlistId, mediaItemId);
-        commit(m.setIsRefreshing, false);
-        dispatch(a.checkLocalSubtitles);
-      });
+    try {
+      await Promise.all(actions)
+        .then(() => {
+          if (!primarySelectionComplete || !secondarySelectionComplete) dispatch(a.stopAISelection);
+          if (onlineTimeout) addBubble(REQUEST_TIMEOUT, store.$i18n);
+          const { playlistId, mediaItemId } = state;
+          storeSubtitleLanguage([primaryLanguage, secondaryLanguage], playlistId, mediaItemId);
+          addSubtitleItemsToList(getters.list, playlistId, mediaItemId);
+          dispatch(a.checkLocalSubtitles);
+        });
+    } catch(ex) {
+      console.error(ex);
+    } finally {
+      commit(m.setIsRefreshing, false);
+    }
   },
   async [a.checkLocalSubtitles]({ dispatch, getters }: any) {
     const localInvalidSubtitles = getters.list.filter(({ type, source }: any) => type === Type.Local && !existsSync(source));
