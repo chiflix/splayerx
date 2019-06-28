@@ -13,8 +13,9 @@ import { isEqual, get, sortBy, remove } from 'lodash';
 import Vue from 'vue';
 import { extname } from 'path';
 import { addBubble } from '../../../shared/notificationControl';
-import { ONLINE_LOADING, REQUEST_TIMEOUT, SUBTITLE_UPLOAD, UPLOAD_SUCCESS, UPLOAD_FAILED } from '../../../shared/notificationcodes';
+import { ONLINE_LOADING, REQUEST_TIMEOUT, SUBTITLE_UPLOAD, UPLOAD_SUCCESS, UPLOAD_FAILED, LOCAL_SUBTITLE_REMOVED } from '../../../shared/notificationcodes';
 import { LanguageCode } from '@/libs/language';
+import { existsSync } from 'fs';
 
 const sortOfTypes = {
   local: 0,
@@ -201,6 +202,7 @@ const actions = {
         storeSubtitleLanguage([primaryLanguage, secondaryLanguage], playlistId, mediaItemId);
         addSubtitleItemsToList(getters.list, playlistId, mediaItemId);
         commit(m.setIsRefreshing, false);
+        dispatch(a.checkLocalSubtitles);
       });
   },
   /** only refresh local and online subtitles, delete old online subtitles */
@@ -244,7 +246,12 @@ const actions = {
         storeSubtitleLanguage([primaryLanguage, secondaryLanguage], playlistId, mediaItemId);
         addSubtitleItemsToList(getters.list, playlistId, mediaItemId);
         commit(m.setIsRefreshing, false);
+        dispatch(a.checkLocalSubtitles);
       });
+  },
+  async [a.checkLocalSubtitles]({ dispatch, getters }: any) {
+    const localInvalidSubtitles = getters.list.filter(({ type, source }: any) => type === Type.Local && !existsSync(source));
+    if (localInvalidSubtitles.length) return dispatch(a.deleteSubtitlesByUuid, localInvalidSubtitles).then(() => addBubble(LOCAL_SUBTITLE_REMOVED, store.$i18n));
   },
   async [a.addLocalSubtitles]({ dispatch }: any, paths: string[]) {
     return Promise.all(
