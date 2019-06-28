@@ -19,6 +19,13 @@ function getPosition(bounds, mousePosition, newWidth, newHeight) {
   return position;
 }
 
+/**
+ * Check if a and b is almost the same
+ */
+function almostSame(a, b) {
+  return Math.abs(a - b) < 2;
+}
+
 function keepAspectRatio(evt, newBounds) {
   evt.preventDefault();
   if (!this._aspectRatio || this.isMaximized() || this.isFullScreen()) return;
@@ -28,23 +35,28 @@ function keepAspectRatio(evt, newBounds) {
   const { width: oldWidth, height: oldHeight } = bounds;
   const [minimumWidth, minimumHeight] = this.getMinimumSize();
   let { width: newWidth, height: newHeight } = newBounds;
+  newWidth /= scaleFactor;
+  newHeight /= scaleFactor;
   if (newWidth < minimumWidth) newWidth = minimumWidth;
   if (newHeight < minimumHeight) newHeight = minimumHeight;
 
-  if ((newWidth !== oldWidth && newHeight !== oldHeight
+  if ((!almostSame(newWidth, oldWidth) && !almostSame(newHeight, oldHeight)
       && newWidth - oldWidth < newHeight - oldHeight)
-    || newHeight === oldHeight
+    || almostSame(newHeight, oldHeight)
   ) {
-    newHeight = parseInt(newWidth / this._aspectRatio, 10);
+
+    newHeight = Math.round(newWidth / this._aspectRatio);
   } else {
-    newWidth = parseInt(newHeight * this._aspectRatio, 10);
+
+    newWidth = Math.round(newHeight * this._aspectRatio);
   }
+
   const position = getPosition(bounds, mousePosition, newWidth, newHeight);
   const finalBounds = {
-    width: Math.round(newWidth / scaleFactor),
-    height: Math.round(newHeight / scaleFactor),
-    x: Math.round(position.x / scaleFactor),
-    y: Math.round(position.y / scaleFactor),
+    width: Math.round(newWidth),
+    height: Math.round(newHeight),
+    x: Math.round(position.x),
+    y: Math.round(position.y),
   };
   this.setBounds(finalBounds);
 }
