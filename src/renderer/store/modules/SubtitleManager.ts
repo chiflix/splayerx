@@ -84,10 +84,16 @@ const mutations = {
   [m.addSubtitleId](state: SubtitleManagerState, controlItem: SubtitleControlListItem) {
     const { id } = controlItem;
     Vue.set(state.allSubtitles, id, controlItem);
+    const { primarySubtitleId, secondarySubtitleId } = state;
+    if (primarySubtitleId && !state.allSubtitles[primarySubtitleId]) state.primarySubtitleId = '';
+    if (secondarySubtitleId && !state.allSubtitles[secondarySubtitleId]) state.secondarySubtitleId = '';
   },
   [m.addSubtitleIds](state: SubtitleManagerState, controlItems: SubtitleControlListItem[]) {
     const newControlItems = Object.fromEntries(controlItems.map((item) => [item.id, item]));
     state.allSubtitles = { ...state.allSubtitles, ...newControlItems };
+    const { primarySubtitleId, secondarySubtitleId } = state;
+    if (primarySubtitleId && !state.allSubtitles[primarySubtitleId]) state.primarySubtitleId = '';
+    if (secondarySubtitleId && !state.allSubtitles[secondarySubtitleId]) state.secondarySubtitleId = '';
   },
   [m.deleteSubtitleId](state: SubtitleManagerState, id: string) {
     Vue.set(state.allSubtitles, id, undefined);

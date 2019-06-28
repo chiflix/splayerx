@@ -106,9 +106,11 @@ export default {
     },
     async loopCues() {
       if (!this.time) this.time = videodata.time;
-      const cues = await this.getCues(videodata.time);
-      await this.updatePlayTime({ start: this.time, end: videodata.time });
-      this.currentCues = cues;
+      if (this.time !== videodata.time) {
+        const cues = await this.getCues(videodata.time);
+        this.updatePlayTime({ start: this.time, end: videodata.time });
+        this.currentCues = cues;
+      }
       this.time = videodata.time;
     },
   },
