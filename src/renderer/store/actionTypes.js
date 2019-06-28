@@ -83,6 +83,7 @@ export const SubtitleManager = {
   stopAISelection: 'STOP_AI_SELECTION',
   getCues: 'GET_CUES',
   clearSubtitles: 'CLEAR_SUBTITLES',
+  setGlobalDelay: 'UPDATE_SUBTITLE_DELAY',
 };
 
 export const Input = {

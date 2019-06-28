@@ -90,6 +90,7 @@ export const SubtitleManager = {
   setIsRefreshing: 'SET_IS_REFRESHING',
   addSubtitleId: 'ADD_SUBTITLE_ID',
   deleteSubtitleId: 'DELETE_SUBTITLE_ID',
+  setGlobalDelay: 'SET_GLOBAL_DELAY',
 };
 
 export const Input = {

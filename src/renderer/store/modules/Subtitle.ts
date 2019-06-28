@@ -103,7 +103,7 @@ const actions = {
       entity.payload = await loader();
     }
   },
-  async [a.getDialogues]({ state }: any, time: number) {
+  async [a.getDialogues]({ state, rootGetters }: any, time: number) {
     const subtitle = subtitleMap.get(state.moduleId);
     if (subtitle) {
       const { entity, parser } = subtitle;
@@ -113,7 +113,7 @@ const actions = {
         await subtitle.parser.parse();
       }
       if (entity.payload && parser.getDialogues && parser.payload) {
-        return subtitle.parser.getDialogues(time);
+        return subtitle.parser.getDialogues(time - rootGetters.globalDelay);
       }
     }
     return [];

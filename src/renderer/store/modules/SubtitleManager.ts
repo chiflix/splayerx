@@ -27,6 +27,7 @@ type SubtitleManagerState = {
   secondarySubtitleId: string,
   isRefreshing: boolean,
   allSubtitles: { [id: string]: SubtitleControlListItem },
+  globalDelay: number,
 }
 const state = {
   playlistId: 0,
@@ -35,6 +36,7 @@ const state = {
   secondarySubtitleId: '',
   isRefreshing: false,
   allSubtitles: {},
+  globalDelay: 0,
 };
 const getters = {
   list(state: SubtitleManagerState) {
@@ -56,7 +58,8 @@ const getters = {
       enable = true;
     }
     return enable;
-  }
+  },
+  globalDelay(state: SubtitleManagerState) { return state.globalDelay; },
 };
 const mutations = {
   [m.setPlaylistId](state: SubtitleManagerState, id: number) {
@@ -81,6 +84,13 @@ const mutations = {
   [m.deleteSubtitleId](state: SubtitleManagerState, id: string) {
     Vue.set(state.allSubtitles, id, undefined);
   },
+  [m.setGlobalDelay](state: SubtitleManagerState, delay: number) {
+    if (delay === 0) {
+      state.globalDelay = delay;
+    } else if (Math.abs((state.globalDelay / 1000) + delay) <= 10000) {
+      state.globalDelay += delay * 1000;
+    }
+  },
 };
 type AddDatabaseSubtitlesOptions = {
   storedList: StoredSubtitleItem[];
@@ -98,6 +108,7 @@ const actions = {
     commit(m.setPrimarySubtitleId, '');
     commit(m.setSecondarySubtitleId, '');
     commit(m.setIsRefreshing, true);
+    commit(m.setGlobalDelay, 0);
     dispatch(a.refreshSubtitlesInitially);
   },
   async [a.refreshSubtitlesInitially]({ state, getters, dispatch, commit }: any) {
@@ -332,6 +343,9 @@ const actions = {
       }
     }
     return [firstSub, secondSub];
+  },
+  [a.setGlobalDelay]({ commit }: any, delta: any) {
+    commit(m.setGlobalDelay, delta);
   },
 };
 
