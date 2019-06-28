@@ -88,10 +88,8 @@ const mutations = {
     if (primarySubtitleId && !state.allSubtitles[primarySubtitleId]) state.primarySubtitleId = '';
     if (secondarySubtitleId && !state.allSubtitles[secondarySubtitleId]) state.secondarySubtitleId = '';
   },
-  [m.deleteSubtitleIds](state: SubtitleManagerState, ids: string[]) {
-    const allSubtitleEntries = Object.entries(state.allSubtitles);
-    remove(allSubtitleEntries, ({ 0: id }) => ids.includes(id));
-    state.allSubtitles = Object.fromEntries(allSubtitleEntries);
+  [m.deleteSubtitleId](state: SubtitleManagerState, id: string) {
+    Vue.set(state.allSubtitles, id, undefined);
   },
   [m.setGlobalDelay](state: SubtitleManagerState, delay: number) {
     if (delay === 0) {
