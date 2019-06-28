@@ -107,6 +107,67 @@ function markNeedToRestore() {
   fs.closeSync(fs.openSync(path.join(app.getPath('userData'), 'NEED_TO_RESTORE_MARK'), 'w'));
 }
 
+function searchSubsInDir(dir) {
+  const subRegex = getValidSubtitleRegex();
+  const dirFiles = fs.readdirSync(dir);
+  return dirFiles
+    .filter(subtitleFilename => subRegex.test(path.extname(subtitleFilename)))
+    .map(subtitleFilename => (join(dir, subtitleFilename)));
+}
+function searchForLocalVideo(subSrc) {
+  const videoDir = dirname(subSrc);
+  const videoBasename = basename(subSrc, extname(subSrc)).toLowerCase();
+  const videoFilename = basename(subSrc).toLowerCase();
+  const dirFiles = fs.readdirSync(videoDir);
+  return dirFiles
+    .filter((subtitleFilename) => {
+      const lowerCasedName = subtitleFilename.toLowerCase();
+      return (
+        getValidVideoRegex().test(lowerCasedName)
+        && lowerCasedName.slice(0, lowerCasedName.lastIndexOf('.')) === videoBasename
+        && lowerCasedName !== videoFilename && !subRegex.test(path.extname(lowerCasedName))
+      );
+    })
+    .map(subtitleFilename => (join(videoDir, subtitleFilename)));
+}
+function getAllValidVideo(onlySubtitle, files) {
+  try {
+    const videoFiles = [];
+
+    for (let i = 0; i < files.length; i += 1) {
+      if (fs.statSync(files[i]).isDirectory()) {
+        const dirPath = files[i];
+        const dirFiles = fs.readdirSync(dirPath).map(file => path.join(dirPath, file));
+        files.push(...dirFiles);
+      }
+    }
+    if (!process.mas) {
+      files.forEach((tempFilePath) => {
+        const baseName = path.basename(tempFilePath);
+        if (baseName.startsWith('.') || fs.statSync(tempFilePath).isDirectory()) return;
+        if (subRegex.test(path.extname(tempFilePath))) {
+          const tempVideo = searchForLocalVideo(tempFilePath);
+          videoFiles.push(...tempVideo);
+        } else if (!subRegex.test(path.extname(tempFilePath))
+          && getValidVideoRegex().test(tempFilePath)) {
+          videoFiles.push(tempFilePath);
+        }
+      });
+    } else if (!onlySubtitle) {
+      files.forEach((tempFilePath) => {
+        const baseName = path.basename(tempFilePath);
+        if (baseName.startsWith('.') || fs.statSync(tempFilePath).isDirectory()) return;
+        if (!subRegex.test(path.extname(tempFilePath))
+          && getValidVideoRegex().test(tempFilePath)) {
+          videoFiles.push(tempFilePath);
+        }
+      });
+    }
+    return uniq(videoFiles);
+  } catch (ex) {
+    return [];
+  }
+}
 
 function registerMainWindowEvent(mainWindow) {
   if (!mainWindow) return;
@@ -444,68 +505,6 @@ function registerMainWindowEvent(mainWindow) {
       preferenceWindow.webContents.send('preferenceDispatch', 'setPreference', args);
     }
   });
-}
-
-function searchSubsInDir(dir) {
-  const subRegex = getValidSubtitleRegex();
-  const dirFiles = fs.readdirSync(dir);
-  return dirFiles
-    .filter(subtitleFilename => subRegex.test(path.extname(subtitleFilename)))
-    .map(subtitleFilename => (join(dir, subtitleFilename)));
-}
-function searchForLocalVideo(subSrc) {
-  const videoDir = dirname(subSrc);
-  const videoBasename = basename(subSrc, extname(subSrc)).toLowerCase();
-  const videoFilename = basename(subSrc).toLowerCase();
-  const dirFiles = fs.readdirSync(videoDir);
-  return dirFiles
-    .filter((subtitleFilename) => {
-      const lowerCasedName = subtitleFilename.toLowerCase();
-      return (
-        getValidVideoRegex().test(lowerCasedName)
-        && lowerCasedName.slice(0, lowerCasedName.lastIndexOf('.')) === videoBasename
-        && lowerCasedName !== videoFilename && !subRegex.test(path.extname(lowerCasedName))
-      );
-    })
-    .map(subtitleFilename => (join(videoDir, subtitleFilename)));
-}
-function getAllValidVideo(onlySubtitle, files) {
-  try {
-    const videoFiles = [];
-
-    for (let i = 0; i < files.length; i += 1) {
-      if (fs.statSync(files[i]).isDirectory()) {
-        const dirPath = files[i];
-        const dirFiles = fs.readdirSync(dirPath).map(file => path.join(dirPath, file));
-        files.push(...dirFiles);
-      }
-    }
-    if (!process.mas) {
-      files.forEach((tempFilePath) => {
-        const baseName = path.basename(tempFilePath);
-        if (baseName.startsWith('.') || fs.statSync(tempFilePath).isDirectory()) return;
-        if (subRegex.test(path.extname(tempFilePath))) {
-          const tempVideo = searchForLocalVideo(tempFilePath);
-          videoFiles.push(...tempVideo);
-        } else if (!subRegex.test(path.extname(tempFilePath))
-          && getValidVideoRegex().test(tempFilePath)) {
-          videoFiles.push(tempFilePath);
-        }
-      });
-    } else if (!onlySubtitle) {
-      files.forEach((tempFilePath) => {
-        const baseName = path.basename(tempFilePath);
-        if (baseName.startsWith('.') || fs.statSync(tempFilePath).isDirectory()) return;
-        if (!subRegex.test(path.extname(tempFilePath))
-          && getValidVideoRegex().test(tempFilePath)) {
-          videoFiles.push(tempFilePath);
-        }
-      });
-    }
-    return uniq(videoFiles);
-  } catch (ex) {
-    return [];
-  }
 }
 
 function createWindow() {

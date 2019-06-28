@@ -9,7 +9,7 @@ import infoDB from '@/helpers/infoDB';
 import { log } from '@/libs/Log';
 import { getValidSubtitleRegex, getValidVideoExtensions, getValidVideoRegex } from '@/../shared/utils';
 import {
-  EMPTY_FOLDER, OPEN_FAILED, ADD_NO_VIDEO, LOAD_SUBVIDEO_FAILED,
+  EMPTY_FOLDER, OPEN_FAILED, ADD_NO_VIDEO,
   SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, FILE_NON_EXIST_IN_PLAYLIST, PLAYLIST_NON_EXIST,
 } from '@/../shared/notificationcodes';
 import Sagi from '@/libs/sagi';
