@@ -439,7 +439,7 @@ export default {
       }
     },
     // openFile and db operation
-    async playFile(vidPath, id) {
+    async playFile(vidPath, id) { // eslint-disable-line complexity
       let mediaQuickHash;
       if (process.mas && this.$store.getters.source !== 'drop') this.bookmarkAccessing(vidPath);
       try {
