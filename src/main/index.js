@@ -160,6 +160,26 @@ function registerMainWindowEvent(mainWindow) {
     mainWindow.setSize(...args);
     event.sender.send('windowSizeChange-asyncReply', mainWindow.getSize());
   });
+  ipcMain.on('drop-subtitle', (event, args) => {
+    args.forEach((file) => {
+      if (subRegex.test(path.extname(file)) || fs.statSync(file).isDirectory()) {
+        tmpSubsToOpen.push(file);
+      } else if (!subRegex.test(path.extname(file))
+        && getValidVideoRegex().test(file)) {
+        tmpVideoToOpen.push(file);
+      }
+    });
+    finalVideoToOpen = getAllValidVideo(!tmpVideoToOpen.length,
+      tmpVideoToOpen.concat(tmpSubsToOpen));
+    if (process.mas && !tmpVideoToOpen.length && tmpSubsToOpen.length) {
+      mainWindow.webContents.send('open-subtitle-in-mas', tmpSubsToOpen[0]);
+    } else if (tmpVideoToOpen.length + tmpSubsToOpen.length > 0) {
+      mainWindow.webContents.send('open-file', { onlySubtitle: !tmpVideoToOpen.length, files: finalVideoToOpen });
+    }
+    finalVideoToOpen.splice(0, finalVideoToOpen.length);
+    tmpSubsToOpen.splice(0, tmpSubsToOpen.length);
+    tmpVideoToOpen.splice(0, tmpVideoToOpen.length);
+  });
   function thumbnail(args, cb) {
     splayerx.generateThumbnails(
       args.src, args.outPath, args.width, args.num.cols, args.num.rows,

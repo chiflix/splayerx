@@ -36,6 +36,7 @@ import NotificationBubble, { addBubble } from '../shared/notificationControl';
 import { SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, LOAD_SUBVIDEO_FAILED } from '../shared/notificationcodes';
 import InputPlugin, { getterTypes as iGT } from '@/plugins/input';
 import { VueDevtools } from './plugins/vueDevtools.dev';
+import { getValidVideoRegex, getValidSubtitleRegex } from '../shared/utils';
 
 
 // causing callbacks-registry.js 404 error. disable temporarily
@@ -1478,13 +1479,18 @@ new Vue({
       e.preventDefault();
       this.$bus.$emit('drop');
       this.$store.commit('source', 'drop');
-      const files = Array.prototype.map.call(e.dataTransfer!.files, (f: File) => f.path)
-      const onlyFolders = files.every((file: fs.PathLike) => fs.statSync(file).isDirectory());
-      files.forEach((file: fs.PathLike) => this.$electron.remote.app.addRecentDocument(file));
-      if (onlyFolders) {
-        this.openFolder(...files);
+      const files = Array.prototype.map.call(e.dataTransfer!.files, (f: File) => f.path);
+      if (files.every((file: fs.PathLike) => getValidVideoRegex().test(file) && !getValidSubtitleRegex().test(file))
+        || this.currentRouteName === 'playing-view') {
+        const onlyFolders = files.every((file: fs.PathLike) => fs.statSync(file).isDirectory());
+        files.forEach((file: fs.PathLike) => this.$electron.remote.app.addRecentDocument(file));
+        if (onlyFolders) {
+          this.openFolder(...files);
+        } else {
+          this.openFile(...files);
+        }
       } else {
-        this.openFile(...files);
+        this.$electron.ipcRenderer.send('drop-subtitle', files);
       }
     });
     window.addEventListener('dragover', (e) => {
