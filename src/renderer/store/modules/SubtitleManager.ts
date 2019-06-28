@@ -162,7 +162,6 @@ const actions = {
     commit(m.setSecondarySubtitleId, '');
     primarySelectionComplete = false;;
     secondarySelectionComplete = false;
-    commit(m.setIsRefreshing, true);
     commit(m.setGlobalDelay, 0);
     dispatch(a.refreshSubtitlesInitially);
   },
@@ -194,6 +193,8 @@ const actions = {
       if (online) databaseItemsToDelete.push(...onlineStoredSubtitles);
       else databaseItemsToAdd.push(...onlineStoredSubtitles);
     }
+    
+    if (online) commit(m.setIsRefreshing, true);
     const hints = generateHints(originSrc);
     await dispatch(a.deleteSubtitlesByUuid, databaseItemsToDelete);
     // TODO getters.privacyAgreement
@@ -218,8 +219,6 @@ const actions = {
   },
   /** only refresh local and online subtitles, delete old online subtitles */
   async [a.refreshSubtitles]({ state, getters, dispatch, commit }: any) {
-    commit(m.setPrimarySubtitleId, '');
-    commit(m.setSecondarySubtitleId, '');
     primarySelectionComplete = false;;
     secondarySelectionComplete = false;
     commit(m.setIsRefreshing, true);
