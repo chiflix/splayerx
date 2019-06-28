@@ -115,6 +115,7 @@ Vue.use(InputPlugin, {
 // i18n and its plugin
 const i18n = new VueI18n({
   locale: getSystemLocale(), // set locale
+  fallbackLocale: 'en',
   messages, // set locale messages
 });
 
