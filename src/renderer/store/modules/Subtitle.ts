@@ -2,11 +2,14 @@ import { EntityGenerator, Entity, Parser, Type, Format, Origin } from '@/interfa
 import { LanguageCode } from '@/libs/language';
 import { storeSubtitle, removeSubtitle } from '@/services/storage/SubtitleStorage';
 import { newSubtitle as m } from '@/store/mutationTypes';
-import { newSubtitle as a } from '@/store/actionTypes';
+import { newSubtitle as a, SubtitleManager as parentActions } from '@/store/actionTypes';
 import { getParser } from '@/services/subtitle/utils';
 import { SubtitleUploadParameter } from '@/services/subtitle';
 import { generateHints } from '@/libs/utils';
 import upload from '@/services/subtitle/upload';
+import { addBubble } from '../../../shared/notificationControl';
+import { NOT_SUPPORTED_SUBTITLE } from '../../../shared/notificationcodes';
+import store from '..';
 
 type SubtitleState = {
   moduleId: string;
@@ -114,8 +117,13 @@ const actions = {
       if (!entity.payload) return [];
       else if (entity.payload && !parser.getDialogues) {
         subtitle.parser = getParser(entity);
-        await subtitle.parser.parse();
-        await dispatch(a.startWatchPlayedTime);
+        try {
+          await subtitle.parser.parse();
+          await dispatch(a.startWatchPlayedTime);
+        } catch(err) {
+          addBubble(NOT_SUPPORTED_SUBTITLE, store.$i18n);
+          store.dispatch(parentActions.removeSubtitle, state.moduleId);
+        }
       }
       if (entity.payload && parser.getDialogues && parser.payload) {
         return subtitle.parser.getDialogues(time - rootGetters.globalDelay);

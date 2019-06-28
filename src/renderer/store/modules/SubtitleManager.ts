@@ -263,7 +263,7 @@ const actions = {
       paths.map(path => dispatch(a.addSubtitle, new LocalGenerator(path)))
     );
   },
-  async [a.addLocalSubtitlesWithSelect]({ state, dispatch, getters, commit }: any, paths: string[]) {
+  async [a.addLocalSubtitlesWithSelect]({ state, dispatch, getters }: any, paths: string[]) {
     let selectedHash = paths[0];
     const { playlistId, mediaItemId } = state;
     return Promise.all(
@@ -278,9 +278,9 @@ const actions = {
       addSubtitleItemsToList(localEntities, playlistId, mediaItemId);
       const sub: SubtitleControlListItem = getters.list.find((sub: SubtitleControlListItem) => sub.hash === selectedHash);
       if (sub && getters.isFirstSubtitle) {
-        commit(m.setPrimarySubtitleId, sub.id);
+        dispatch(a.changePrimarySubtitle, sub.id);
       } else if (sub && !getters.isFirstSubtitle) {
-        commit(m.setSecondarySubtitleId, sub.id);
+        dispatch(a.changeSecondarySubtitle, sub.id);
       }
     });
   },
