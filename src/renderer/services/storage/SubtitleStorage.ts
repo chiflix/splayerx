@@ -4,7 +4,7 @@ import { RECENT_OBJECT_STORE_NAME, VIDEO_OBJECT_STORE_NAME, DATADB_NAME, INFO_DA
 import { MediaItem, PlaylistItem, SubtitlePreference as oldPreference } from '@/interfaces/IDB';
 import { Entity, EntityGenerator, Type, Format, Origin, SubtitleControlListItem } from '@/interfaces/ISubtitle';
 import { StoredSubtitle, StoredSubtitleItem, SubtitlePreference, SelectedSubtitle } from '@/interfaces/ISubtitleStorage';
-import { uniqBy, unionWith, uniqWith, remove, isEqual, get, zip, union, flatMap, some } from 'lodash';
+import { unionWith, uniqWith, remove, isEqual, get, zip, union, flatMap, some } from 'lodash';
 import Sagi from '@/libs/sagi';
 import { loadLocalFile, pathToFormat } from '../subtitle/utils';
 import { embeddedSrcLoader } from '../subtitle/loaders/embedded';
@@ -271,7 +271,7 @@ class SubtitleDataBase {
     return preference ? preference.list : [];
   }
   async addSubtitleItemsToList(playlistId: number, mediaItemId: string, subtitles: StoredSubtitleItem[]) {
-    subtitles = uniqBy(subtitles, 'source');
+    subtitles = uniqWith(subtitles, ({ hash: hash1, source: source1 }, { hash: hash2, source: source2 }) => hash1 === hash2 && isEqual(source1, source2));
     const objectStore = (await this.getDb())
       .transaction('preferences', 'readwrite')
       .objectStore('preferences');
@@ -298,7 +298,7 @@ class SubtitleDataBase {
     }
   }
   async removeSubtitleItemsFromList(playlistId: number, mediaItemId: string, subtitles: StoredSubtitleItem[]) {
-    subtitles = uniqBy(subtitles, 'source');
+    subtitles = uniqWith(subtitles, ({ hash: hash1, source: source1 }, { hash: hash2, source: source2 }) => hash1 === hash2 && isEqual(source1, source2));
     const objectStore = (await this.getDb())
       .transaction('preferences', 'readwrite')
       .objectStore('preferences');
