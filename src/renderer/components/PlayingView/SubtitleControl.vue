@@ -305,7 +305,7 @@ export default {
     document.addEventListener('mouseup', (e: MouseEvent) => {
       if (e.button === 0) {
         if (!this.showAttached) {
-          if (this.validEnter) {
+          if (this.validEnter || this.currentMousedownComponent === this.$options.name) {
             this.anim.playSegments([46, 60], true);
           } else if (this.currentMousedownComponent === this.$options.name) {
             this.anim.playSegments([40, 44], true);
@@ -314,6 +314,7 @@ export default {
           && this.currentMouseupComponent !== this.$options.name) {
           this.anim.playSegments([79, 85], true);
         }
+        this.mouseDown = false;
       }
     });
     if (navigator.onLine) {
@@ -350,6 +351,7 @@ export default {
       this.updateSubtitleType(!this.isFirstSubtitle);
     },
     handleRefresh() {
+      console.log(this.isRefreshing);
       if (navigator.onLine && !this.isRefreshing) this.refreshSubtitles();
       else if (!navigator.onLine) this.$addBubble(SUBTITLE_OFFLINE);
     },
@@ -357,6 +359,7 @@ export default {
       this.anim = anim;
     },
     handleDown() {
+      this.mouseDown = true;
       if (!this.showAttached) {
         this.anim.playSegments([28, 32], true);
       } else {
@@ -374,7 +377,7 @@ export default {
       if (!this.showAttached) {
         this.isShowingHovered = true;
       }
-      this.validEnter = true;
+      this.validEnter = this.currentMousedownComponent === this.$options.name;
     },
     handleLeave() {
       if (!this.showAttached) {
@@ -388,20 +391,22 @@ export default {
       this.validEnter = false;
     },
     toggleSubMenuDisplay() {
-      this.clicks = this.showAttached ? 1 : 0;
-      this.clicks += 1;
-      switch (this.clicks) {
-        case 1:
-          this.$emit('update:showAttached', true);
-          this.$emit('conflict-resolve', this.$options.name);
-          break;
-        case 2:
-          this.$emit('update:showAttached', false);
-          this.clicks = 0;
-          break;
-        default:
-          this.clicks = 0;
-          break;
+      if (this.mouseDown) {
+        this.clicks = this.showAttached ? 1 : 0;
+        this.clicks += 1;
+        switch (this.clicks) {
+          case 1:
+            this.$emit('update:showAttached', true);
+            this.$emit('conflict-resolve', this.$options.name);
+            break;
+          case 2:
+            this.$emit('update:showAttached', false);
+            this.clicks = 0;
+            break;
+          default:
+            this.clicks = 0;
+            break;
+        }
       }
     },
     getSubName(item: SubtitleControlListItem) {

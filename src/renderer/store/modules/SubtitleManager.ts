@@ -136,7 +136,7 @@ function fetchOnlineListWithBubble(
     try {
       results = await fetchOnlineList(videoSrc, languageCode, hints);
       clearTimeout(onlineTimeoutId);
-    } catch(err) {
+    } catch (err) {
       results = [];
     } finally {
       resolve(results);
@@ -256,6 +256,25 @@ const actions = {
     return Promise.all(
       paths.map(path => dispatch(a.addSubtitle, new LocalGenerator(path)))
     );
+  },
+  async [a.addLocalSubtitlesWithSelect]({ dispatch, getters, commit }: any, paths: string[]) {
+    let selectedHash = paths[0];
+    return Promise.all(
+      paths.map(async (path: string, i: number) => {
+        const g = new LocalGenerator(path);
+        if (i === 0) {
+          selectedHash = await g.getHash();
+        }
+        return dispatch(a.addSubtitle, g);
+      })
+    ).then(() => {
+      const sub: SubtitleControlListItem = getters.list.find((sub: SubtitleControlListItem) => sub.hash === selectedHash);
+      if (sub && getters.isFirstSubtitle) {
+        commit(m.setPrimarySubtitleId, sub.id);
+      } else if (sub && !getters.isFirstSubtitle) {
+        commit(m.setSecondarySubtitleId, sub.id);
+      }
+    });
   },
   async [a.addEmbeddedSubtitles]({ dispatch }: any, streams: [string, ISubtitleStream][]) {
     return Promise.all(
