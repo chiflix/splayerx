@@ -132,7 +132,10 @@ function fetchOnlineListWithBubble(
   let results: TranscriptInfo[] = [];
   onlineTimeout = false;
   return new Promise(async (resolve) => {
-    onlineTimeoutId = setTimeout(() => onlineTimeout = true, 10000);
+    onlineTimeoutId = setTimeout(() => {
+      onlineTimeout = true;
+      resolve(results);
+    }, 10000);
     try {
       results = await fetchOnlineList(videoSrc, languageCode, hints);
       clearTimeout(onlineTimeoutId);
