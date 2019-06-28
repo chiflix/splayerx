@@ -80,6 +80,7 @@
             width:`${thumbnailWidth}px`,
             marginRight: `${marginRight}px`,
           }"
+          :class="{ 'backdrop': useBlur }"
           @click="openOrMove"
           class="button"
         >
@@ -147,6 +148,7 @@ export default {
       tranFlag: true,
       shifting: false,
       firstIndex: 0,
+      useBlur: false,
     };
   },
   computed: {
@@ -210,8 +212,15 @@ export default {
         }, 400);
       }
     },
+    showItemNum() {
+      if (this.firstIndex !== 0) {
+        this.tranFlag = false;
+        this.lastIndex = this.landingViewItems.length;
+      }
+    },
   },
   created() {
+    this.useBlur = window.devicePixelRatio === 1;
     // Get all data and show
     if (!this.$store.getters.deleteVideoHistoryOnExit) {
       recentPlayService.getRecords().then((results) => {
@@ -305,8 +314,12 @@ export default {
     },
     onItemClick(index: number) {
       if (index === this.lastIndex && !this.isFullScreen) {
+        this.shifting = true;
+        this.tranFlag = true;
         this.lastIndex = this.landingViewItems.length;
       } else if (index + 1 < this.firstIndex && !this.isFullScreen) {
+        this.shifting = true;
+        this.tranFlag = true;
         this.firstIndex = 0;
       } else if (!this.filePathNeedToDelete) {
         this.openPlayList(this.landingViewItems[index].id);
@@ -315,7 +328,11 @@ export default {
     onItemDelete(index: number) {
       this.item = {};
       const [deletedItem] = this.landingViewItems.splice(index, 1);
-      if (this.firstIndex !== 0) this.lastIndex = this.landingViewItems.length;
+      if (this.firstIndex !== 0) {
+        this.shifting = true;
+        this.tranFlag = true;
+        this.lastIndex = this.landingViewItems.length;
+      }
       playInfoStorageService.deleteRecentPlayedBy(deletedItem.id);
       deleteSubtitlesByPlaylistId(deletedItem.id);
     },
@@ -364,8 +381,10 @@ $themeColor-Light: white;
     .button {
       background-color: rgba(0, 0, 0, 0.12);
       transition: background-color 150ms ease-out;
-      backdrop-filter: blur(9.8px);
       cursor: pointer;
+    }
+    .backdrop {
+      backdrop-filter: blur(9.8px);
     }
 
     .button:hover {

@@ -17,7 +17,10 @@
           }"
           class="sub-menu-wrapper subtitle-scroll-items"
         >
-          <div class="element bottom">
+          <div
+            :class="{ 'backdrop': useBlur }"
+            class="element bottom"
+          >
             <div class="element content">
               <div class="topContainer">
                 <p>{{ this.$t('msg.subtitle.subtitleSelect') }}</p>
@@ -130,6 +133,7 @@ export default {
   },
   data() {
     return {
+      useBlur: false,
       clicks: 0,
       defaultOptions: { animationData },
       anim: {},
@@ -298,6 +302,7 @@ export default {
       }, 0);
     },
   },
+  created() { this.useBlur = window.devicePixelRatio === 1; },
   mounted() {
     this.$refs.refreshRotate.$el.addEventListener('animationiteration', () => {
       this.count += 1;
@@ -445,7 +450,10 @@ export default {
       width: 100%;
       height: 100%;
       top: 0;
-      background: rgba(0, 0, 0, 0.1);
+      background-color: rgba(85, 85, 85, 0.88);
+    }
+    .backdrop {
+      background-color: rgba(0, 0, 0, 0.1);
       backdrop-filter: blur(10px);
     }
     .middle {

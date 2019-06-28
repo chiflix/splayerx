@@ -31,7 +31,11 @@
         class="messageContainer"
       >
         <div :class="m.type === 'result' ? 'black-gradient-result' : 'black-gradient-state'" />
-        <div :class="m.type === 'result' ? 'resultContainer' : `stateContainer`">
+        <div :class="[
+          m.type === 'result' ? 'resultContainer' : 'stateContainer',
+          { 'backdrop': useBlur },
+        ]"
+        >
           <div class="bubbleContent">
             <p
               v-if="m.type === 'result'"
@@ -79,6 +83,7 @@ export default {
       showNextVideo: false,
       readyToShow: false, // show after video element is loaded
       showPrivacyBubble: false,
+      useBlur: false,
     };
   },
   computed: {
@@ -117,6 +122,7 @@ export default {
     },
   },
   mounted() {
+    this.useBlur = window.devicePixelRatio === 1;
     this.$bus.$on('privacy-confirm', () => {
       this.showPrivacyBubble = true;
     });
@@ -310,7 +316,7 @@ export default {
 .stateContainer {
   display: flex;
   justify-content: flex-start;
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: rgba(85, 85, 85, 0.88);
   backdrop-filter: blur(8px);
   z-index: 8;
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -467,7 +473,7 @@ export default {
 
 .resultContainer {
   display: flex;
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: rgba(85, 85, 85, 0.88);
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px),
@@ -605,7 +611,10 @@ export default {
     }
   }
 }
-
+.backdrop {
+  background-color: rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(8px);
+}
 
 .toast-leave-active {
   position: absolute;

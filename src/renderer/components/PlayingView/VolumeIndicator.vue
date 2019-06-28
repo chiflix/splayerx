@@ -20,6 +20,7 @@
       >
         <base-info-card
           ref="card"
+          :use-blur="true"
           class="card"
         >
           <div
