@@ -1,6 +1,6 @@
 import { EntityGenerator, Entity, Parser, Type, Format, Origin } from '@/interfaces/ISubtitle';
 import { LanguageCode } from '@/libs/language';
-import { storeSubtitle, removeSubtitle } from '@/services/storage/SubtitleStorage';
+import { storeSubtitle, removeSubtitle, removeSubtitleItemsFromList } from '@/services/storage/SubtitleStorage';
 import { newSubtitle as m } from '@/store/mutationTypes';
 import { newSubtitle as a, SubtitleManager as parentActions } from '@/store/actionTypes';
 import { getParser } from '@/services/subtitle/utils';
@@ -122,7 +122,8 @@ const actions = {
           await dispatch(a.startWatchPlayedTime);
         } catch(err) {
           addBubble(NOT_SUPPORTED_SUBTITLE, store.$i18n);
-          store.dispatch(parentActions.removeSubtitle, state.moduleId);
+          const subtitleToRemoveFromList = rootGetters.list.find((sub: any) => sub.id === state.moduleId);
+          store.dispatch(parentActions.deleteSubtitlesByUuid, [subtitleToRemoveFromList]);
         }
       }
       if (entity.payload && parser.getDialogues && parser.payload) {
@@ -135,12 +136,15 @@ const actions = {
     const subtitle = subtitleMap.get(state.moduleId);
     if (subtitle) await storeSubtitle(subtitle.entity);
   },
-  async [a.delete]({ state }: any) {
+  async [a.delete]({ state, rootGetters }: any) {
+    const subtitleToRemoveFromList = rootGetters.list.find((sub: any) => sub.id === state.moduleId);
+    const { playlistId, mediaItemId } = store.state.SubtitleManager;
     const subtitle = subtitleMap.get(state.moduleId);
     if (subtitle) {
       subtitleMap.delete(state.moduleId);
       await removeSubtitle(subtitle.entity);
     }
+    removeSubtitleItemsFromList([subtitleToRemoveFromList], playlistId, mediaItemId);
   },
   async [a.upload]({ state, dispatch, rootGetters }: any) {
     const subtitle = subtitleMap.get(state.moduleId);

@@ -338,7 +338,7 @@ const actions = {
       return subtitleControlListItem;
     }
   },
-  [a.removeSubtitle]({ commit, getters }: any, id: string) {
+  [a.removeSubtitle]({ commit, getters, state }: any, id: string) {
     store.unregisterModule(id);
     commit(m.deleteSubtitleId, id);
     if (getters.isFirstSubtitle && getters.primarySubtitleId === id) {
@@ -352,9 +352,7 @@ const actions = {
       dispatch(`${id}/${subActions.delete}`);
       dispatch(a.removeSubtitle, id);
     });
-    return Promise.all(storedSubtitleItems.map(({ id }) => {
-      removeSubtitleItemsFromList(storedSubtitleItems, state.playlistId, state.mediaItemId);
-    }));
+    return removeSubtitleItemsFromList(storedSubtitleItems, state.playlistId, state.mediaItemId);
   },
   async [a.changePrimarySubtitle]({ dispatch, commit, getters }: any, id: string) {
     let primary = id;
@@ -386,7 +384,7 @@ const actions = {
   },
   async [a.storeSubtitle](context: any, id: string) { },
   async [a.uploadSubtitle](context: any, id: string) { },
-  async [a.startAISelection]({ state, getters, dispatch }: any) {
+  async [a.startAISelection]({ getters, dispatch }: any) {
     unwatch = store.watch(
       (state: any, getters: any) => getters.list.map(({ id, type, source, language }: any) => ({ id, type, source, language })),
       (value: SubtitleControlListItem[], oldValue: SubtitleControlListItem[]) => {
@@ -444,7 +442,7 @@ const actions = {
       }
     }
 
-    if (getters.secondarySubtitleId) {
+    if (getters.enabledSecondarySub && getters.secondarySubtitleId) {
       try {
         const dialogues = await dispatch(`${getters.secondarySubtitleId}/${subActions.getDialogues}`, time);
         secondSub.cues = dialogues;
