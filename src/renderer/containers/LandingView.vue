@@ -80,6 +80,7 @@
             width:`${thumbnailWidth}px`,
             marginRight: `${marginRight}px`,
           }"
+          :class="{ 'backdrop': useBlur }"
           @click="openOrMove"
           class="button"
         >
@@ -146,6 +147,7 @@ export default {
       tranFlag: true,
       shifting: false,
       firstIndex: 0,
+      useBlur: false,
     };
   },
   computed: {
@@ -211,6 +213,7 @@ export default {
     },
   },
   created() {
+    this.useBlur = window.devicePixelRatio === 1;
     // Get all data and show
     if (!this.$store.getters.deleteVideoHistoryOnExit) {
       recentPlayService.getRecords().then((results) => {
@@ -363,8 +366,10 @@ $themeColor-Light: white;
     .button {
       background-color: rgba(0, 0, 0, 0.12);
       transition: background-color 150ms ease-out;
-      backdrop-filter: blur(9.8px);
       cursor: pointer;
+    }
+    .backdrop {
+      backdrop-filter: blur(9.8px);
     }
 
     .button:hover {

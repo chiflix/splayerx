@@ -1,6 +1,9 @@
 <template>
   <div class="nextVideo">
-    <div class="nextVideo__plane">
+    <div
+      :class="{ 'backdrop': useBlur }"
+      class="nextVideo__plane"
+    >
       <div
         :style="{ width: `${(progress/100)*217}px` }"
         class="nextVideo__progress"
@@ -59,6 +62,7 @@ export default {
       animation: '',
       notificationPlayIcon: 'notificationPlay',
       isBlur: true,
+      useBlur: false,
     };
   },
   computed: {
@@ -81,6 +85,9 @@ export default {
     timecode() {
       return this.timecodeFromSeconds(this.duration);
     },
+  },
+  created() {
+    this.useBlur = window.devicePixelRatio === 1;
   },
   methods: {
     handleCloseMouseup() {
@@ -156,9 +163,12 @@ export default {
     height: 70px;
     border: 1px solid rgba(255,255,255,0.1);
     border-radius: 7px;
+    background-color: rgba(85,85,85,0.94);
+    box-shadow: 0 0 1px rgba(0,0,0,0.1);
+  }
+  .backdrop {
     background-color: rgba(0,0,0,0.2);
     backdrop-filter: blur(10px);
-    box-shadow: 0 0 1px rgba(0,0,0,0.1);
   }
 
   &__progress {
