@@ -47,6 +47,9 @@ const getters = {
   list(state: SubtitleManagerState) {
     const list = Object.values(state.allSubtitles).filter((v: any) => !!v);
     return sortBy(list, (sub: SubtitleControlListItem) => {
+      if (sub.type === Type.Online && sub.language !== store.getters.primaryLanguage) {
+        return sortOfTypes[sub.type] + 1;
+      }
       return sortOfTypes[sub.type];
     }).map((sub: SubtitleControlListItem) => ({
       ...sub,
@@ -155,6 +158,7 @@ const actions = {
     dispatch(a.refreshSubtitlesInitially);
   },
   async [a.refreshSubtitlesInitially]({ state, getters, dispatch, commit }: any) {
+    onlineTimeout = false;
     const { playlistId, mediaItemId } = state;
     const { originSrc, primaryLanguage, secondaryLanguage } = getters;
     const preference = await retrieveSubtitlePreference(playlistId, mediaItemId);
@@ -186,7 +190,6 @@ const actions = {
     if (online) commit(m.setIsRefreshing, true);
     const hints = generateHints(originSrc);
     await dispatch(a.deleteSubtitlesByUuid, databaseItemsToDelete);
-    // TODO getters.privacyAgreement
     const actions = [
       dispatch(a.addLocalSubtitles, await searchForLocalList(originSrc)),
       dispatch(a.addEmbeddedSubtitles, embedded ? await retrieveEmbeddedList(originSrc) : []),
@@ -399,6 +402,7 @@ const actions = {
     unwatch = store.watch(
       (state: any, getters: any) => getters.list.map(({ id, type, source, language }: any) => ({ id, type, source, language })),
       (value: SubtitleControlListItem[], oldValue: SubtitleControlListItem[]) => {
+        console.log(value);
         const { primaryLanguage, secondaryLanguage } = getters;
         if (!primarySelectionComplete || !secondarySelectionComplete) {
           const hasPrimaryLanguage = value
