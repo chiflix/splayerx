@@ -56,10 +56,10 @@ export const newSubtitle = {
   store: 'STORE',
   delete: 'DELETE',
   upload: 'UPLOAD',
+  manualUpload: 'MANUAL_UPLOAD',
   getDialogues: 'GET_DIALOGUES_BY_TIME',
   updatePlayedTime: 'UPDATE_PLAYED_TIME',
   startWatchPlayedTime: 'START_WATCH_PLAYED_TIME',
-  pauseWatchPlayedTime: 'PAUSE_WATCH_PLAYED_TIME',
   stopWatchPlayedTime: 'STOP_WATCH_PLAYED_TIME',
 };
 export const SubtitleManager = {
@@ -82,6 +82,7 @@ export const SubtitleManager = {
   startAISelection: 'START_AI_SELECTION',
   stopAISelection: 'STOP_AI_SELECTION',
   getCues: 'GET_CUES',
+  updatePlayedTime: 'UPDATE_PLAYED_TIME',
   clearSubtitles: 'CLEAR_SUBTITLES',
   setGlobalDelay: 'UPDATE_SUBTITLE_DELAY',
 };

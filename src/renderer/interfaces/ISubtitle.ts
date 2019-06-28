@@ -102,6 +102,7 @@ export interface Parser {
   getInfo(): Promise<Info>;
   getDialogues(time?: number): Promise<Cue[]>;
   getVideoSegments(duration: number): Promise<VideoSegment[]>;
+  updateVideoSegments(lastTime: number, currentTime: number): number;
 }
 
 export type Subtitle = {

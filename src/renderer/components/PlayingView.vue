@@ -95,6 +95,7 @@ export default {
       initializeManager: smActions.initializeManager,
       addLocalSubtitles: smActions.addLocalSubtitles,
       getCues: smActions.getCues,
+      updatePlayTime: smActions.updatePlayedTime,
     }),
     // Compute UI states
     // When the video is playing the ontick is triggered by ontimeupdate of Video tag,
@@ -104,8 +105,11 @@ export default {
       this.$refs.videoctrl.onTickUpdate();
     },
     async loopCues() {
+      if (!this.time) this.time = videodata.time;
       const cues = await this.getCues(videodata.time);
+      await this.updatePlayTime({ start: this.time, end: videodata.time });
       this.currentCues = cues;
+      this.time = videodata.time;
     },
   },
 };

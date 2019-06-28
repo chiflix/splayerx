@@ -4,6 +4,9 @@ import { storeSubtitle, removeSubtitle } from '@/services/storage/SubtitleStorag
 import { newSubtitle as m } from '@/store/mutationTypes';
 import { newSubtitle as a } from '@/store/actionTypes';
 import { getParser } from '@/services/subtitle/utils';
+import { SubtitleUploadParameter } from '@/services/subtitle';
+import { generateHints } from '@/libs/utils';
+import upload from '@/services/subtitle/upload';
 
 type SubtitleState = {
   moduleId: string;
@@ -22,6 +25,7 @@ const subtitleMap: Map<string, {
   parser: Parser;
 }> = new Map();
 
+let autoUpload = false;
 const state = () => ({
   moduleId: '',
   source: '',
@@ -103,7 +107,7 @@ const actions = {
       entity.payload = await loader();
     }
   },
-  async [a.getDialogues]({ state, rootGetters }: any, time: number) {
+  async [a.getDialogues]({ state, rootGetters, dispatch }: any, time: number) {
     const subtitle = subtitleMap.get(state.moduleId);
     if (subtitle) {
       const { entity, parser } = subtitle;
@@ -111,6 +115,7 @@ const actions = {
       else if (entity.payload && !parser.getDialogues) {
         subtitle.parser = getParser(entity);
         await subtitle.parser.parse();
+        await dispatch(a.startWatchPlayedTime);
       }
       if (entity.payload && parser.getDialogues && parser.payload) {
         return subtitle.parser.getDialogues(time - rootGetters.globalDelay);
@@ -129,24 +134,65 @@ const actions = {
       await removeSubtitle(subtitle.entity);
     }
   },
-  [a.upload]() {
-    // directly invoke from @/services/subtitle/upload
-    // resolve when succeeded, and reject if not
+  async [a.upload]({ state, dispatch, rootGetters }: any) {
+    const subtitle = subtitleMap.get(state.moduleId);
+    if (subtitle && !autoUpload) {
+      const uploadParam: SubtitleUploadParameter = {
+        mediaIdentity: rootGetters.mediaHash,
+        languageCode: state.language,
+        format: state.format,
+        playedTime: state.playedTime,
+        totalTime: rootGetters.duration,
+        delay: state.delay,
+        hints: await generateHints(rootGetters.originSrc),
+        transcriptIdentity: state.format === Format.Sagi ? state.hash : '',
+        payload: state.format === Format.Sagi ? '' : subtitle.entity.payload,
+      };
+      await upload.add(uploadParam);
+      dispatch(a.stopWatchPlayedTime);
+    }
+  },
+  async [a.manualUpload]({ state, rootGetters }: any) {
+    const subtitle = subtitleMap.get(state.moduleId);
+    if (subtitle) {
+      const uploadParam: SubtitleUploadParameter = {
+        mediaIdentity: rootGetters.mediaHash,
+        languageCode: state.language,
+        format: state.format,
+        playedTime: state.playedTime,
+        totalTime: rootGetters.duration,
+        delay: state.delay,
+        hints: await generateHints(rootGetters.originSrc),
+        transcriptIdentity: state.format === Format.Sagi ? state.hash : '',
+        payload: state.format === Format.Sagi ? '' : subtitle.entity.payload,
+      };
+      await upload.addManually(uploadParam);
+    }
   },
   // played time actions
-  [a.updatePlayedTime](context: any, time: number) {
-    // use generatePlayedTime in @/services/subtitle/utils
-    // commit the played time
+  async [a.updatePlayedTime]({ state, commit }: any, times: { last: number, current: number }) {
+    const subtitle = subtitleMap.get(state.moduleId);
+    if (subtitle) {
+      const { entity, parser } = subtitle;
+      if (entity.payload && parser.updateVideoSegments && parser.payload) {
+        // @ts-ignore
+        const playedTime = await subtitle.parser.updateVideoSegments(...Object.values(times));
+        if (playedTime !== state.playedTime) commit(m.setPlayedTime, playedTime);
+      }
+    }
   },
-  [a.startWatchPlayedTime]() {
-    // set the video segments if not have
-    // register the played time watcher
-  },
-  [a.pauseWatchPlayedTime]() {
-    // unsubscribe the watcher if have one
+  [a.startWatchPlayedTime]({ state, rootGetters, commit }: any) {
+    const subtitle = subtitleMap.get(state.moduleId);
+    if (subtitle && !autoUpload) {
+      const { entity, parser } = subtitle;
+      if (entity.payload && parser.getVideoSegments && parser.payload) {
+        parser.getVideoSegments(rootGetters.duration);
+        commit(m.setPlayedTime, 0);
+      }
+    }
   },
   [a.stopWatchPlayedTime]() {
-    // set mannual flag to true, and cannot be uploaded again
+    autoUpload = true;
   },
 };
 

@@ -415,6 +415,23 @@ const actions = {
     }
     return [firstSub, secondSub];
   },
+  async [a.updatePlayedTime]({ state, dispatch, duration }: any, times: { start: number, end: number }) {
+    const actions: Promise<any>[] = [];
+    const { primarySubtitleId, secondarySubtitleId } = state;
+    if (primarySubtitleId) actions.push(
+      dispatch(`${primarySubtitleId}/${subActions.updatePlayedTime}`, times)
+        .then((playedTime: number) => {
+          if (playedTime >= duration * 0.6) dispatch(`${primarySubtitleId}/${subActions.upload}`)
+        })
+    );
+    if (secondarySubtitleId) actions.push(
+      dispatch(`${secondarySubtitleId}/${subActions.updatePlayedTime}`, times)
+        .then((playedTime: number) => {
+          if (playedTime >= duration * 0.6) dispatch(`${secondarySubtitleId}/${subActions.upload}`)
+        })
+    );
+    return Promise.all(actions);
+  },
   [a.setGlobalDelay]({ commit }: any, delta: any) {
     commit(m.setGlobalDelay, delta);
   },

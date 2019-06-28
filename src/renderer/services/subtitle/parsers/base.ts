@@ -1,6 +1,6 @@
-import { Parser, Format, Cue, Tags } from '@/interfaces/ISubtitle';
+import { Parser, Format, Cue, VideoSegment } from '@/interfaces/ISubtitle';
 import { Dialogue } from '@/interfaces/ISubtitle';
-
+import { isEqual } from 'lodash';
 export class BaseParser implements Parser {
   readonly payload: any;
   info = {};
@@ -11,8 +11,32 @@ export class BaseParser implements Parser {
   async getDialogues(time?: number) {
     return getDialogues(this.dialogues, time);
   }
+  private videoSegments: VideoSegment[];
   async getVideoSegments(duration: number) {
-    return calculateVideoSegments(this.dialogues, duration);
+    if (this.videoSegments) return this.videoSegments;
+    return this.videoSegments = calculateVideoSegments(this.dialogues, duration);
+  }
+  private lastSegment: VideoSegment;
+  private lastSegmentPlayedTime: number = 0;
+  updateVideoSegments(lastTime: number, currentTime: number) {
+    const { videoSegments, lastSegment } = this;
+    const currentSegment = videoSegments.find((segment) => segment.start <= currentTime && segment.end > currentTime);
+    if (currentSegment && !currentSegment.played) {
+      if (isEqual(currentSegment, lastSegment)) {
+        this.lastSegmentPlayedTime += currentTime - lastTime;
+      } else {
+        const segmentTime = currentSegment.end - currentSegment.start;
+        if (this.lastSegmentPlayedTime / segmentTime >= 0.9) {
+          const index = videoSegments.findIndex(segment => isEqual(segment, currentSegment));
+          if (index) videoSegments[index] = { ...currentSegment, played: true };
+        }
+      }
+      this.lastSegment = currentSegment;
+    }
+    return videoSegments
+      .filter(({ played }) => played)
+      .map(({ end, start }) => end - start)
+      .reduce((playedTime, currentSegmentTime) => playedTime += currentSegmentTime, 0);
   }
   async parse() { }
 }
