@@ -45,7 +45,7 @@
       :is-focused="isFocused"
       :paused="paused"
       :attached-shown="attachedShown"
-      :handle-mouse-up="togglePlay"
+      :on-play-button-mouseup="togglePlay"
       @update:playbutton-state="updatePlayButtonState"
       :class="`${showAllWidgets ? 'play-button no-drag' : 'play-button'}`"
     />

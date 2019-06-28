@@ -153,7 +153,7 @@ export default {
       restoreButtonTimeoutId: NaN,
       needToRelaunch: false,
       restoreContent: '',
-      languages: ['zhCN', 'zhTW', 'ja', 'ko', 'en', 'es', 'ar'],
+      languages: ['zh-Hans', 'zh-Hant', 'ja', 'ko', 'en', 'es', 'ar'],
       button1Styles: [''],
       button2Styles: [''],
     };

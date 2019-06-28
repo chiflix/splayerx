@@ -5,6 +5,7 @@ export const codes = {
     'cmn',
     'zh-CN',
     'zhCN',
+    'zh-Hans',
   ],
   'zh-TW': [
     'zh',
@@ -12,6 +13,7 @@ export const codes = {
     'cmn',
     'zh-TW',
     'zhTW',
+    'zh-Hant',
   ],
   ja: [
     'ja',

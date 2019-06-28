@@ -1,21 +1,21 @@
 {
   "advance": {
-    "audioDelay": "Audio Delay",
-    "audioMenu": "Audio Settings",
-    "changeTrack": "Audio Track",
-    "chosenTrack": "Default",
+    "audioDelay": "音频延迟",
+    "audioMenu": "音频选项",
+    "changeTrack": "切换轨道",
+    "chosenTrack": "默认",
     "fontItems": [
-      "S",
-      "M",
-      "L",
-      "XL"
+      "小",
+      "中",
+      "大",
+      "超大"
     ],
-    "fontSize": "Font Size",
-    "fontStyle": "Font Style",
-    "rateTitle": "Play Speed",
-    "subDelay": "Subtitle Delay",
-    "subMenu": "Subtitle Settings",
-    "track": "Track"
+    "fontSize": "字体大小",
+    "fontStyle": "字体样式",
+    "rateTitle": "播放速度",
+    "subDelay": "字幕延迟",
+    "subMenu": "字幕设置",
+    "track": "音轨"
   },
   "css": {
     "titleFontSize": {
@@ -27,249 +27,249 @@
   },
   "errorFile": {
     "addNoVideo": {
-      "content": "Cannot find playable file.",
-      "title": "Add File Failed"
+      "content": "未找到可播放文件。",
+      "title": "添加错误"
     },
     "default": {
-      "content": "Video type unsupported.",
-      "title": "Open Failed"
+      "content": "暂不支持该文件类型。",
+      "title": "打开错误"
     },
     "emptyFolder": {
-      "content": "Cannot find playable file.",
-      "title": "Open Failed"
+      "content": "未找到可播放文件。",
+      "title": "打开错误"
     },
     "fileNonExist": {
-      "content": "It will be removed from the list.",
-      "title": "File Not Found"
+      "content": "将从列表中移除此项目。",
+      "title": "未找到文件"
     },
     "playlistNonExist": {
-      "content": "This item is removed.",
-      "title": "File Not Found"
+      "content": "该条记录已被移除。",
+      "title": "文件未找到"
     },
     "fileNonExistInPlaylist": {
-      "content": "Files has been removed from the list.",
-      "title": "File(s) Not Found"
+      "content": "已从列表中移除。",
+      "title": "部分文件未找到"
     },
     "loadFailed": {
-      "content": "Subtitle type unsupported.",
-      "title": "Load Subtitle Failed"
+      "content": "暂不支持该字幕类型。",
+      "title": "未能加载字幕"
     },
     "offLine": {
-      "content": "Please check network and try again.",
-      "title": "No Network Access"
+      "content": "建议您检查网络状况后重试。",
+      "title": "未能连接网络"
     },
     "timeout": {
-      "content": "Network delay or server error.",
-      "title": "Request Timeout"
+      "content": "网络延迟或云端异常。",
+      "title": "网络请求超时"
     },
     "localSubtitleRemoved": {
-      "title": "Load Subtitle Failed",
-      "content": "Local subtitle removed or renamed."
+      "title": "字幕加载失败",
+      "content": "本地字幕文件被删除或已改名。"
     }
   },
   "loading": {
-    "content": "Loading Translations ...",
+    "content": "正在匹配智能翻译结果 ...",
     "title": ""
   },
   "msg": {
     "audio": {
-      "decreaseAudioDelay": "Audio Delay",
-      "decreaseVolume": "Decrease Volume",
-      "defaultAudioTrack": "Default",
-      "increaseAudioDelay": "Audio Delay",
-      "increaseVolume": "Increase Volume",
-      "mute": "Mute",
-      "name": "Audio",
-      "switchAudioTrack": "Switch Audio Track"
+      "decreaseAudioDelay": "音频延迟",
+      "decreaseVolume": "降低音量",
+      "defaultAudioTrack": "默认",
+      "increaseAudioDelay": "音频延迟",
+      "increaseVolume": "提高音量",
+      "mute": "静音",
+      "name": "音频",
+      "switchAudioTrack": "切换音轨"
     },
     "file": {
-      "clearHistory": "Clear Playback History",
-      "closeWindow": "Close Window",
-      "name": "File",
-      "open": "Open…",
-      "openRecent": "Open Recent",
-      "openURL": "Open URL…"
+      "clearHistory": "清空播放记录",
+      "closeWindow": "关闭",
+      "name": "文件",
+      "open": "打开文件…",
+      "openRecent": "打开最近播放",
+      "openURL": "打开 URL…"
     },
     "help": {
-      "name": "Help",
-      "splayerxHelp": "Help",
-      "shortCuts": "Shortcuts List"
+      "name": "帮助",
+      "splayerxHelp": "帮助",
+      "shortCuts": "快捷键列表"
     },
     "playback": {
-      "backwardL": "Step Backward -60s",
-      "backwardS": "Step Backward -5s",
-      "windowRotate": "Rotate 90° Clockwise",
-      "captureScreen": "Capture Screen",
-      "captureVideoClip": "Capture Video Clip",
-      "decreasePlaybackSpeed": "Decrease Playback Speed",
-      "forwardL": "Step Forward +60s",
-      "forwardS": "Step Forward +5s",
-      "fullScreen": "Full Screen",
-      "increasePlaybackSpeed": "Increase Playback Speed",
-      "keepPlayingWindowFront": "Float When Playing",
-      "name": "Playback",
-      "pause": "Pause",
-      "play": "Play",
-      "resetSpeed": "Reset Playback Speed",
-      "nextVideo": "Next Video",
-      "previousVideo": "Previous Video",
-      "singleCycle": "Repeat One",
-      "snapShot": "Snapshot"
+      "backwardL": "后退 -60s",
+      "backwardS": "后退 -5s",
+      "windowRotate": "正时针旋转 90°",
+      "captureScreen": "截图",
+      "captureVideoClip": "截取视频片段",
+      "decreasePlaybackSpeed": "减缓播放速度",
+      "forwardL": "前进 +60s",
+      "forwardS": "前进 +5s",
+      "fullScreen": "全屏/退出全屏",
+      "increasePlaybackSpeed": "加快播放速度",
+      "keepPlayingWindowFront": "播放时保持在前",
+      "name": "播放",
+      "pause": "暂停",
+      "play": "播放",
+      "resetSpeed": "重置播放速度",
+      "nextVideo": "下一集",
+      "previousVideo": "上一集",
+      "singleCycle": "循环单个文件",
+      "snapShot": "截图"
     },
     "splayerx": {
-      "about": "About SPlayer",
-      "feedback": "Feedback",
-      "hide": "Hide",
-      "hideOthers": "Hide Others",
-      "homepage": "Website",
-      "preferences": "Preferences",
-      "quit": "Quit SPlayer",
-      "showAll": "Show All"
+      "about": "关于射手影音",
+      "feedback": "反馈",
+      "hide": "隐藏射手影音",
+      "hideOthers": "隐藏其他",
+      "homepage": "网站",
+      "preferences": "偏好设置",
+      "quit": "退出射手影音",
+      "showAll": "全部显示"
     },
     "subtitle": {
-      "AITranslation": "Reload Smart Translation",
+      "AITranslation": "重新加载翻译结果",
       "decreaseSubtitleDelayL": "",
-      "decreaseSubtitleDelayS": "Subtitle Delay -0.1s",
-      "disabledSecondarySub": "Disable Secondary Subtitle",
-      "enabledSecondarySub": "Enable Secondary Subtitle",
+      "decreaseSubtitleDelayS": "字幕延时 -0.1s",
+      "disabledSecondarySub": "关闭第二字幕",
+      "enabledSecondarySub": "启用第二字幕",
       "increaseSubtitleDelayL": "",
-      "increaseSubtitleDelayS": "Subtitle Delay +0.1s",
-      "langEn": "English",
-      "langZhCN": "Chinese",
-      "loadSubtitleFile": "Load Subtitle File…",
-      "mainSubtitle": "Primary Subtitle",
-      "menuLoading": "Loading ...",
-      "name": "Subtitles",
-      "noSubtitle": "Not Found",
-      "notToShowSubtitle": "None",
-      "secondarySubtitle": "Secondary Subtitle",
-      "size1": "Small",
-      "size2": "Standard",
-      "size3": "Large",
-      "size4": "Extra Large",
-      "style1": "Movie Style",
-      "style2": "Anime Style",
-      "style3": "Retro Style",
-      "style4": "Japanese Style",
-      "style5": "Modern Classic",
-      "subtitleSelect": "Translation",
-      "subtitleSize": "Font Size",
-      "subtitleStyle": "Font Style",
-      "uploadSelectedSubtitle": "Upload Selected Subtitle"
+      "increaseSubtitleDelayS": "字幕延时 +0.1s",
+      "langEn": "英文",
+      "langZhCN": "中文",
+      "loadSubtitleFile": "加载字幕文件…",
+      "mainSubtitle": "第一字幕",
+      "menuLoading": "正在匹配翻译结果 ...",
+      "name": "字幕",
+      "noSubtitle": "暂未找到翻译结果",
+      "notToShowSubtitle": "无",
+      "secondarySubtitle": "第二字幕",
+      "size1": "小",
+      "size2": "标准",
+      "size3": "大",
+      "size4": "超大",
+      "style1": "电影风格",
+      "style2": "动漫风格",
+      "style3": "复古风格",
+      "style4": "日系风格",
+      "style5": "现代经典",
+      "subtitleSelect": "翻译",
+      "subtitleSize": "字幕尺寸",
+      "subtitleStyle": "字幕样式",
+      "uploadSelectedSubtitle": "上传所选字幕"
     },
     "titleName": "SPlayer",
     "update": {
-      "message": "Restart the app now to install update?",
-      "no": "no",
-      "title": "update dialog",
-      "updateInstalled": "has successfully installed update!",
-      "yes": "yes"
+      "message": "更新已就绪，是否现在重启?",
+      "no": "暂不更新",
+      "title": "更新就绪",
+      "updateInstalled": "播放器已更新至最新版本!",
+      "yes": "更新"
     },
     "window": {
-      "bossKey": "Boss Key",
+      "bossKey": "老板键",
       "doubleSize": "200%",
-      "enterFullScreen": "Enter Full Screen",
-      "exitFullScreen": "Exit Full Screen",
+      "enterFullScreen": "进入全屏",
+      "exitFullScreen": "退出全屏",
       "halfSize": "50%",
-      "maxmize": "Zoom",
-      "minimize": "Minimize",
-      "name": "Window",
+      "maxmize": "最大化",
+      "minimize": "最小化",
+      "name": "窗口",
       "originSize": "100%"
     }
   },
   "nextVideo": {
-    "nextInFolder": "Next in Folder",
-    "nextInPlaylist": "Next in Playlist"
+    "nextInFolder": "文件夹中下一视频",
+    "nextInPlaylist": "播放列表中下一视频"
   },
   "preferences": {
     "general": {
-      "clearHistory": "Always clear playback history on exit",
-      "reverseScrolling": "Reverse mouse scrolling",
-      "setDefault": "Set as the Default Video Player",
-      "setDefaultDescription": "Open all video files with SPlayer.",
-      "restoreSettings": "Reset All Content and Settings",
-      "restoreSettingsDescription": "Restart application with all data and caches erased.",
-      "setButton": "Apply",
-      "relaunch": "Restart",
-      "displayLanguage": "Display Language",
-      "generalSetting": "General",
-      "others": "Others",
-      "switchDisplayLanguages": "Display Language controls the language you see in SPlayer."
+      "clearHistory": "退出时自动清空播放记录",
+      "reverseScrolling": "鼠标滚轮反向",
+      "setDefault": "设为默认播放器",
+      "setDefaultDescription": "所有视频文件都自动使用SPlayer打开。",
+      "restoreSettings": "抹掉所有内容和设置",
+      "restoreSettingsDescription": "删除所有本地数据和缓存文件并重启应用。",
+      "setButton": "应用",
+      "relaunch": "重启",
+      "displayLanguage": "显示语言",
+      "generalSetting": "通用设置",
+      "others": "其他",
+      "switchDisplayLanguages": "您可以在此修改射手影音播放器菜单、对话框中的显示语言。"
     },
     "privacy": {
-      "languageDescription": "Upload anonymous data to fetch translation results in the following language,  no privacy information will be included.",
-      "languagePriority": "Language Preference",
-      "none": "None",
-      "primary": "Primary",
-      "privacyConfirm": "Enable Smart Translation",
-      "privacySetting": "Translation",
-      "secondary": "Secondary",
-      "setAsDefault": "Set SPlayer as the Default Application",
-      "settings": "Settings"
+      "languageDescription": "按以下语言提供翻译结果，翻译需上传匿名信息但不会包含任何隐私数据。",
+      "languagePriority": "选择翻译语言",
+      "none": "无",
+      "primary": "首要语言",
+      "privacyConfirm": "启用智能翻译",
+      "privacySetting": "智能翻译",
+      "secondary": "次要语言",
+      "setAsDefault": "将SPlayer设为默认播放器",
+      "settings": "设置"
     }
   },
   "privacyBubble": {
     "confirmDisable": {
-      "button": "CANCEL",
-      "partOne": "Confirm to ",
-      "partTwo": " anonymous data and Smart Translation.",
-      "underlinedContent": "disable"
+      "button": "取消",
+      "partOne": "确认",
+      "partTwo": "匿名信息和智能翻译。",
+      "underlinedContent": "禁用"
     },
     "masVersion": {
-      "agree": "Enable",
-      "content": "Smart Translation function needs your consent for uploading anonymous media info to the server  side, and you will not receive translation results if you disagree. There is no privacy information will be collected.",
-      "disagree": "Disable"
+      "agree": "启用",
+      "content": "智能翻译功能需要您同意通过匿名方式上传媒体信息至服务端，否则将无法使用该功能获取翻译结果，我们不会收集关于您个人的隐私信息。",
+      "disagree": "禁用"
     },
     "tryToDisable": {
-      "button": "OK",
-      "partOne": "SPlayer uses anonymous data to enhance user experience. Smart Translation will be disabled if you ",
-      "partTwo": ".",
-      "underlinedContent": "disagree"
+      "button": "确定",
+      "partOne": "射手影音使用匿名信息以提供更好服务，",
+      "partTwo": "匿名信息会导致智能翻译无法使用。",
+      "underlinedContent": "禁用"
     }
   },
   "recentPlaylist": {
-    "folderSource": "Folder",
-    "playing": "Playing",
-    "paused": "Paused",
-    "playlistSource": "Playlist"
+    "folderSource": "文件夹",
+    "playing": "正在播放",
+    "paused": "已暂停",
+    "playlistSource": "播放列表"
   },
   "subtitle": {
-    "embedded": "Embed",
+    "embedded": "内嵌",
     "language": {
-      "ar": "Arabic",
-      "de": "German",
-      "en": "English",
-      "es": "Spanish",
-      "fr": "French",
-      "hi": "Hindi",
-      "it": "Italian",
-      "ja": "Japanese",
-      "ko": "Korean",
-      "pt": "Portuguese (Portugal, Brazil)",
-      "ru": "Russian",
-      "zh": "Chinese (Simplified)",
-      "zh-CN": "Chinese (Simplified)",
-      "zh-TW": "Chinese (Traditional)"
+      "ar": "阿拉伯语",
+      "de": "德语",
+      "en": "英语",
+      "es": "西班牙语",
+      "fr": "法语",
+      "hi": "印地语",
+      "it": "意大利语",
+      "ja": "日语",
+      "ko": "韩语",
+      "pt": "葡萄牙语（葡萄牙、巴西）",
+      "ru": "俄语",
+      "zh": "中文（简体）",
+      "zh-CN": "中文（简体）",
+      "zh-TW": "中文（繁体）"
     }
   },
   "uploading": {
-    "content": "Subtitle Uploading ...",
+    "content": "字幕正在上传中 ...",
     "title": ""
   },
   "uploadingFailed": {
-    "content": "Please try later.",
-    "title": "Upload Failed"
+    "content": "请稍后重试。",
+    "title": "上传失败"
   },
   "uploadingSuccess": {
-    "content": "Subtitle has been uploaded.",
-    "title": "Upload Successfully"
+    "content": "字幕已成功上传。",
+    "title": "上传成功"
   },
   "snapshotSuccess": {
-    "content": "Snapshot Successfully",
+    "content": "截图成功",
     "title": ""
   },
   "snapshotFailed": {
-    "content": "Please try again later.",
-    "title": "Snapshot Failed"
+    "content": "请稍后重试。",
+    "title": "截图失败"
   }
 }
