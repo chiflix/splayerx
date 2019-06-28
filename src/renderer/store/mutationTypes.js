@@ -89,7 +89,9 @@ export const SubtitleManager = {
   setMediaItemId: 'SET_MEDIA_ITEM_ID',
   setIsRefreshing: 'SET_IS_REFRESHING',
   addSubtitleId: 'ADD_SUBTITLE_ID',
+  addSubtitleIds: 'ADD_SUBTITLE_IDS',
   deleteSubtitleId: 'DELETE_SUBTITLE_ID',
+  deleteSubtitleIds: 'DELETE_SUBTITLE_IDS',
   setGlobalDelay: 'SET_GLOBAL_DELAY',
 };
 
