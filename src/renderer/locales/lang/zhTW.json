@@ -230,6 +230,7 @@
   "recentPlaylist": {
     "folderSource": "文件夾",
     "playing": "正在播放",
+    "paused": "已暫停",
     "playlistSource": "播放列表"
   },
   "subtitle": {

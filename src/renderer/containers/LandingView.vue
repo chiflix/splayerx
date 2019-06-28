@@ -260,19 +260,23 @@ export default {
         log.info('LandingView.vue', `sagi API Status: ${this.sagiHealthStatus}`);
       }
     });
-    window.onkeyup = (e) => {
-      if (e.keyCode === 39) {
+    window.addEventListener('keyup', this.keyboardHandler);
+  },
+  destroyed() {
+    window.removeEventListener('keyup', this.keyboardHandler);
+  },
+  methods: {
+    keyboardHandler(e: KeyboardEvent) {
+      if (e.key === 'ArrowRight') {
         this.shifting = true;
         this.tranFlag = true;
         this.lastIndex = this.landingViewItems.length;
-      } else if (e.keyCode === 37) {
+      } else if (e.key === 'ArrowLeft') {
         this.shifting = true;
         this.tranFlag = true;
         this.firstIndex = 0;
       }
-    };
-  },
-  methods: {
+    },
     open() {
       const { app } = this.$electron.remote;
       if (this.defaultDir) {
@@ -310,9 +314,9 @@ export default {
     },
     onItemDelete(index: number) {
       this.item = {};
-      this.landingViewItems.splice(index, 1);
+      const [deletedItem] = this.landingViewItems.splice(index, 1);
       if (this.firstIndex !== 0) this.lastIndex = this.landingViewItems.length;
-      playInfoStorageService.deleteRecentPlayedBy(this.landingViewItems[index].id);
+      playInfoStorageService.deleteRecentPlayedBy(deletedItem.id);
     },
   },
 };

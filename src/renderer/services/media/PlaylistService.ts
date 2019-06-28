@@ -5,15 +5,18 @@ import { filePathToUrl } from '@/helpers/path';
 import { mediaQuickHash } from "@/libs/utils";
 import { info } from '@/libs/DataBase';
 import { MediaItem } from '@/interfaces/IDB';
+import { EventEmitter } from 'events';
 
-export default class PlaylistService implements IPlaylistRequest {
+interface PlaylistEvent {
+  "image-loaded": Event
+}
+export default class PlaylistService extends EventEmitter implements IPlaylistRequest {
   coverSrc: string;
   duration: any;
   record: MediaItem;
   smallShortCut: string;
   lastPlayedTime: number;
   imageSrc: string | undefined;
-  imageLoaded = false;
 
   get percentage(): number {
     if (this.lastPlayedTime
@@ -24,10 +27,9 @@ export default class PlaylistService implements IPlaylistRequest {
   }
 
   constructor(private readonly mediaStorageService: MediaStorageService, readonly path: string, readonly videoId?: number) {
+    super();
     ipcRenderer.send('mediaInfo', path);
     ipcRenderer.once(`mediaInfo-${path}-reply`, async (event: any, info: string) => {
-      const { width, height } = JSON.parse(info).streams.find((stream: any) => stream.codec_type === 'video');
-
       const { duration } = JSON.parse(info).format;
       this.duration = parseFloat(duration);
       const mediaHash = await mediaQuickHash(path);
@@ -35,17 +37,20 @@ export default class PlaylistService implements IPlaylistRequest {
       
       if (!imgPath) {
         const imgPath = await this.mediaStorageService.generatePathBy(mediaHash, 'cover');
-        ipcRenderer.send('snapShot', { path, imgPath, duration, width, height });
+        ipcRenderer.send('snapShot', { path, imgPath, duration });
         ipcRenderer.once(`snapShot-${path}-reply`, (event: any, imgPath: string) => {
           this.imageSrc = filePathToUrl(`${imgPath}`);
-          this.imageLoaded = true;
+          this.emit('image-loaded');
         });
       } else {
         this.imageSrc = filePathToUrl(`${imgPath}`);
-        this.imageLoaded = true;
+        this.emit('image-loaded');
       }
     });
     this.getRecord(videoId);
+  }
+  on<K extends keyof PlaylistEvent>(type: K, listener: (...args: any[]) => void): this {
+    return super.on(type, listener);
   }
    /**
    * @param  {string} mediaHash
@@ -76,7 +81,6 @@ export default class PlaylistService implements IPlaylistRequest {
       if (this.record.lastPlayedTime) {
         this.lastPlayedTime = this.record.lastPlayedTime;
         this.imageSrc = this.record.smallShortCut;
-        this.imageLoaded = true;
       }
     }
   }

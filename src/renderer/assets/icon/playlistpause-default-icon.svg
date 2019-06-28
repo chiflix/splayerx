@@ -1,0 +1,18 @@
+
+<svg width="8px" height="8px" viewBox="0 0 8 8" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <defs>
+        <radialGradient cx="50%" cy="50%" fx="50%" fy="50%" r="153.899639%" gradientTransform="translate(0.500000,0.500000),scale(0.324887,1.000000),scale(1.000000,0.913257),translate(-0.500000,-0.500000)" id="radialGradient-1">
+            <stop stop-color="#FFFFFF" stop-opacity="0.109884511" offset="0%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.227553216" offset="53.8768967%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.540194746" offset="100%"></stop>
+        </radialGradient>
+    </defs>
+    <g id="页面1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" opacity="0.9" stroke-opacity="0.5">
+        <g id="Thumbnail-On-Playing/Hover备份" transform="translate(-10.000000, -27.000000)" fill="url(#radialGradient-1)" stroke="#FFFFFF" stroke-width="0.576">
+            <g id="pause" transform="translate(10.000000, 27.000000)">
+                <path d="M-0.484000933,5.15585927 L-0.929500231,5.15585927 C-1.1755427,5.15585927 -1.37499953,4.95640244 -1.37499953,4.71035997 L-1.37499953,3.3154993 C-1.37499953,3.06945683 -1.1755427,2.87 -0.929500231,2.87 L5.36085881,2.87152093 C5.52651372,2.87164211 5.66078072,3.00594406 5.6608588,3.171599 L5.6608588,4.860549 C5.6608588,5.02364436 5.52864389,5.15585927 5.36554853,5.15585927 Z" id="Icon" transform="translate(2.142930, 4.012930) rotate(90.000000) translate(-2.142930, -4.012930) "></path>
+                <path d="M3.51599907,5.15585927 L3.07049977,5.15585927 C2.8244573,5.15585927 2.62500047,4.95640244 2.62500047,4.71035997 L2.62500047,3.3154993 C2.62500047,3.06945683 2.8244573,2.87 3.07049977,2.87 L9.36085881,2.87152093 C9.52651372,2.87164211 9.66078072,3.00594406 9.6608588,3.171599 L9.6608588,4.860549 C9.6608588,5.02364436 9.52864389,5.15585927 9.36554853,5.15585927 Z" id="Icon备份" transform="translate(6.142930, 4.012930) rotate(90.000000) translate(-6.142930, -4.012930) "></path>
+            </g>
+        </g>
+    </g>
+</svg>

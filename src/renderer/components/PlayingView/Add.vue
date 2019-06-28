@@ -60,6 +60,7 @@ export default {
 }
 
 .btnMask {
+  box-sizing: border-box;
   border-radius: 2.5px;
   width: 100%;
   height: 100%;

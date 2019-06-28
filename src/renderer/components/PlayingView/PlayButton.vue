@@ -45,7 +45,7 @@ export default {
       type: Object,
       default: () => {},
     },
-    handleMouseUp: {
+    onPlayButtonMouseup: {
       type: Function,
       default: () => {},
     },
@@ -106,15 +106,19 @@ export default {
     },
   },
   created() {
-    document.addEventListener('mouseup', () => {
+    document.addEventListener('mouseup', this.globalMouseup);
+  },
+  destroyed() {
+    document.removeEventListener('mouseup', this.globalMouseup);
+  },
+  methods: {
+    globalMouseup() {
       if (this.mousedown) {
         this.mousedown = false;
         this.animationMode = 'icon-ani-fade-in';
         this.$emit('update:playbutton-state', false);
       }
-    });
-  },
-  methods: {
+    },
     handleMouseenter() {
       this.mouseover = true;
       if (!this.attachedShown && this.isFocused && !this.mousedownOnVolume) {
@@ -153,7 +157,7 @@ export default {
     handleMouseup() {
       if (this.mousedown && !this.attachedShown) {
         this.showPlayIcon = !this.showPlayIcon;
-        this.handleMouseUp();
+        this.onPlayButtonMouseup();
       }
     },
   },

@@ -243,6 +243,8 @@ function registerMainWindowEvent(mainWindow) {
   function snapShot(info, callback) {
     let randomNumber = Math.round((Math.random() * 20) + 5);
     if (randomNumber > info.duration) randomNumber = info.duration;
+    if (!info.width) info.width = 1920;
+    if (!info.height) info.height = 1080;
     const numberString = timecodeFromSeconds(randomNumber);
     splayerx.snapshotVideo(
       info.path, info.imgPath, numberString, `${info.width}`, `${info.height}`,
@@ -565,6 +567,7 @@ function createWindow() {
 }
 
 app.on('before-quit', () => {
+  if (!mainWindow) return;
   if (needToRestore) {
     mainWindow.webContents.send('quit', needToRestore);
   } else {
@@ -689,16 +692,3 @@ app.on('activate', () => {
     mainWindow.show();
   }
 });
-
-/**
- * 闪退报告
- */
-if (process.env.NODE_ENV !== 'development') {
-  app.setPath('temp', userDataPath);
-  crashReporter.start({
-    companyName: 'Sagittarius Tech LLC.',
-    productName: 'SPlayer',
-    ignoreSystemCrashHandler: true,
-    submitURL: 'https://sentry.io/api/1449341/minidump/?sentry_key=6a94feb674b54686a6d88d7278727b7c',
-  });
-}

@@ -92,6 +92,9 @@ export default {
     playListId(val: number, oldVal: number) {
       if (oldVal) this.saveScreenshot(oldVal, this.videoId);
     },
+    videoId(val: number, oldVal: number) {
+      if (!this.isFolderList) this.saveScreenshot(this.playListId, oldVal);
+    },
     originSrc(val: string, oldVal: string) {
       if (process.mas && oldVal) {
         this.$bus.$emit(`stop-accessing-${oldVal}`, oldVal);
@@ -300,13 +303,12 @@ export default {
       if (result) {
         this.$bus.$emit('database-saved');
       }
-
+      const playlistRecord = await playInfoStorageService.getPlaylistRecord(playlistId);
       const recentPlayedData = {
+        ...playlistRecord,
         items: this.isFolderList ? [videoId] : this.items,
         playedIndex: this.isFolderList ? 0 : this.playingIndex,
-        lastOpened: Date.now(),
       };
-
       await playInfoStorageService
         .updateRecentPlayedBy(playlistId, recentPlayedData as PlaylistItem);
     },
@@ -322,7 +324,7 @@ export default {
     },
     beforeUnloadHandler(e: Event) {
       if (!this.asyncTasksDone && !this.needToRestore) {
-        let savePromise = this.saveScreenshot(this.playlistId, this.videoId);
+        let savePromise = this.saveScreenshot(this.playListId, this.videoId);
         if (process.mas && this.$store.getters.source === 'drop') {
           savePromise = savePromise.then(async () => {
             await playInfoStorageService.deleteRecentPlayedBy(this.playListId);

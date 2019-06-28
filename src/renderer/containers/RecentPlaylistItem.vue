@@ -4,7 +4,7 @@
     :style="{
       transition: tranFlag ? 'transform 100ms ease-out' : '',
       marginRight: sizeAdaption(15),
-      cursor: isPlaying && isInRange ? '' : 'pointer',
+      cursor: isInRange ? 'pointer' : '',
       minWidth: `${thumbnailWidth}px`,
       minHeight: `${thumbnailHeight}px`,
     }"
@@ -64,25 +64,36 @@
                 v-if="isPlaying"
                 class="icon-container"
               >
-                <Icon
-                  :style="{
-                    width: sizeAdaption(10),
-                    height: sizeAdaption(22),
-                    marginRight: sizeAdaption(4),
-                  }"
-                  type="playlistplay"
-                  class="playlist-play"
-                />
-                <div
-                  :style="{
-                    paddingTop: sizeAdaption(5),
-                    fontSize: sizeAdaption(12),
-                    lineHeight: sizeAdaption(12),
-                  }"
-                  class="playing"
+                <transition
+                  name="fade"
+                  mode="out-in"
                 >
-                  {{ $t('recentPlaylist.playing') }}
-                </div>
+                  <Icon
+                    :key="paused"
+                    :style="{
+                      width: sizeAdaption(10),
+                      height: sizeAdaption(22),
+                      marginRight: sizeAdaption(4),
+                    }"
+                    :type="paused ? 'playlistpause' : 'playlistplay'"
+                  />
+                </transition>
+                <transition
+                  name="fade"
+                  mode="out-in"
+                >
+                  <div
+                    :key="paused"
+                    :style="{
+                      paddingTop: sizeAdaption(5),
+                      fontSize: sizeAdaption(12),
+                      lineHeight: sizeAdaption(12),
+                    }"
+                    class="playing"
+                  >
+                    {{ paused ? $t('recentPlaylist.paused') : $t('recentPlaylist.playing') }}
+                  </div>
+                </transition>
               </div>
             </transition>
           </div>
@@ -140,7 +151,7 @@
 <script lang="ts">
 import path from 'path';
 import { mapGetters } from 'vuex';
-import { parseNameFromPath } from '@/helpers/path';
+import { parseNameFromPath } from '@/libs/utils';
 // @ts-ignore
 import Icon from '@/components/BaseIconContainer.vue';
 import RecentPlayService from '@/services/media/PlaylistService';
@@ -213,6 +224,10 @@ export default {
     isPlaying: {
       type: Boolean,
       default: false,
+    },
+    paused: {
+      type: Boolean,
+      default: true,
     },
     // for base name
     path: {
@@ -392,6 +407,9 @@ export default {
       this.path,
       this.items[this.index],
     );
+    this.recentPlayService.on('image-loaded', () => {
+      this.updateUI();
+    });
     this.updateUI();
     this.$bus.$on('database-saved', this.updateUI);
   },
@@ -444,6 +462,7 @@ export default {
       this.onItemMouseup(this.index);
     },
     updateAnimationIn() {
+      this.$refs.border.style.setProperty('border-color', 'rgba(255,255,255,0.6)');
       if (!this.isPlaying) {
         this.$refs.blur.classList.remove('blur');
       } else {
@@ -451,7 +470,6 @@ export default {
       }
       if (!this.itemMoving) this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,-9px)');
       this.$refs.content.style.setProperty('height', `${this.thumbnailHeight + 10}px`);
-      this.$refs.border.style.setProperty('border-color', 'rgba(255,255,255,0.6)');
       this.$refs.title.style.setProperty('color', 'rgba(255,255,255,0.8)');
       if (!this.isPlaying && this.sliderPercentage > 0) {
         this.$refs.progress.style.setProperty('opacity', '1');
@@ -551,9 +569,8 @@ $border-radius: 3px;
         height: fit-content;
 
         .playing {
-          opacity: 0.7;
           font-family: $font-semibold;
-          color: #FFFFFF;
+          color: rgba(255,255,255,0.7);
           letter-spacing: 0.5px;
         }
       }
@@ -586,7 +603,7 @@ $border-radius: 3px;
   .border {
     position: absolute;
     box-sizing: border-box;
-    transition: border-color 20ms ease-out;
+    transition: border-color 150ms ease-out;
 
     width: 100%;
     height: 100%;
