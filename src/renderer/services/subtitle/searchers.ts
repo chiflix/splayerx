@@ -60,8 +60,9 @@ export function retrieveEmbeddedList(
 ): Promise<[string, ISubtitleStream][]> {
   ipcRenderer.send('mediaInfo', videoSrc);
   return new Promise((resolve) => {
-    // setTimeout(() => { reject(new Error('Embedded Subtitles Retrieve Timeout!')); }, 20000);
+    const timeout = setTimeout(() => { resolve([]); }, 20000);
     ipcRenderer.once(`mediaInfo-${videoSrc}-reply`, (event: Event, info: string) => {
+      clearTimeout(timeout);
       try {
         const subtitleStreams: ISubtitleStream[] = JSON.parse(info).streams
           .filter((stream: ISubtitleStream) => (
