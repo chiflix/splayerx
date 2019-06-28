@@ -50,6 +50,7 @@ import { Video as videoActions } from '@/store/actionTypes';
 import { videodata } from '@/store/video';
 import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer.vue';
 import { MediaItem, PlaylistItem } from '../interfaces/IDB';
+import { deleteSubtitlesByPlaylistId } from '../services/storage/SubtitleStorage';
 
 export default {
   name: 'VideoCanvas',
@@ -328,6 +329,7 @@ export default {
         if (process.mas && this.$store.getters.source === 'drop') {
           savePromise = savePromise.then(async () => {
             await playInfoStorageService.deleteRecentPlayedBy(this.playListId);
+            await deleteSubtitlesByPlaylistId(this.playListId);
           });
         }
         savePromise

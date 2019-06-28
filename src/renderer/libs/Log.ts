@@ -64,6 +64,8 @@ export default class Log implements ILog {
     }
     if (process.env.NODE_ENV !== 'development') {
       Sentry.captureException(message);
+    } else {
+      console.error(message);
     }
   }
 }

@@ -5,8 +5,9 @@ import uniq from 'lodash/uniq';
 import difference from 'lodash/difference';
 import remove from 'lodash/remove';
 import { Subtitle as subtitleMutations } from '@/store/mutationTypes';
-import { Subtitle as subtitleActions } from '@/store/actionTypes';
+import { Subtitle as subtitleActions, SubtitleManager as realSubtitleActions } from '@/store/actionTypes';
 import { metaInfoUpdate } from './rank';
+import store from '@/store';
 
 const state = {
   loadingStates: {},
@@ -32,38 +33,39 @@ const state = {
     { subPlayResX: 720, subPlayResY: 405, cues: [] },
     { subPlayResX: 720, subPlayResY: 405, cues: [] },
   ],
+  isRefreshing: false,
 };
 
 const getters = {
-  currentFirstSubtitleId: state => state.currentFirstSubtitleId,
-  currentSecondSubtitleId: state => state.currentSecondSubtitleId,
-  allSubtitleList: ({
-    loadingStates, names, languages, formats, ranks, types,
-  }) => (
-    Object.keys(loadingStates)
-      .map(id => ({
-        id,
-        name: names[id],
-        language: languages[id],
-        format: formats[id],
-        rank: ranks[id],
-        loading: loadingStates[id],
-        type: types[id],
-      }))
-  ),
-  subtitleList: ({ videoSubtitleMap }, { originSrc, allSubtitleList }) => (
-    videoSubtitleMap[originSrc] || [])
-    .map(subtitleId => allSubtitleList.find(({ id }) => id === subtitleId))
-    .sort((a, b) => b.rank - a.rank),
-  ableToPushCurrentSubtitle: (
-    { currentFirstSubtitleId, currentSecondSubtitleId, enabledSecondarySub },
-    { subtitleList },
-  ) => {
-    const currentSubtitles = subtitleList
-      .filter(({ id }) => id === currentFirstSubtitleId
-        || (id === currentSecondSubtitleId && enabledSecondarySub));
-    return !!currentSubtitles.map(i => i.loading === 'loaded' || i.loading === 'ready').length;
-  },
+  // currentFirstSubtitleId: state => state.currentFirstSubtitleId,
+  // currentSecondSubtitleId: state => state.currentSecondSubtitleId,
+  // allSubtitleList: ({
+  //   loadingStates, names, languages, formats, ranks, types,
+  // }) => (
+  //   Object.keys(loadingStates)
+  //     .map(id => ({
+  //       id,
+  //       name: names[id],
+  //       language: languages[id],
+  //       format: formats[id],
+  //       rank: ranks[id],
+  //       loading: loadingStates[id],
+  //       type: types[id],
+  //     }))
+  // ),
+  // subtitleList: ({ videoSubtitleMap }, { originSrc, allSubtitleList }) => (
+  //   videoSubtitleMap[originSrc] || [])
+  //   .map(subtitleId => allSubtitleList.find(({ id }) => id === subtitleId))
+  //   .sort((a, b) => b.rank - a.rank),
+  // ableToPushCurrentSubtitle: (
+  //   { currentFirstSubtitleId, currentSecondSubtitleId, enabledSecondarySub },
+  //   { subtitleList },
+  // ) => {
+  //   const currentSubtitles = subtitleList
+  //     .filter(({ id }) => id === currentFirstSubtitleId
+  //       || (id === currentSecondSubtitleId && enabledSecondarySub));
+  //   return !!currentSubtitles.map(i => i.loading === 'loaded' || i.loading === 'ready').length;
+  // },
   getVideoSrcById: ({ videoSubtitleMap }) => id => (Object.keys(videoSubtitleMap)
     .find(videoSrc => videoSubtitleMap[videoSrc].includes(id))),
   subtitleDelay: state => state.subtitleDelay,
@@ -75,7 +77,8 @@ const getters = {
   subToTop: state => state.subToTop,
   isFirstSubtitle: state => state.isFirstSubtitle,
   enabledSecondarySub: state => state.enabledSecondarySub,
-  currentCues: state => state.currentCues,
+  // currentCues: state => state.currentCues,
+  // isRefreshing: state => state.isRefreshing,
 };
 
 const mutations = {
@@ -292,6 +295,7 @@ const actions = {
   },
   [subtitleActions.UPDATE_ENABLED_SECONDARY_SUBTITLE]({ commit }, delta) {
     commit(subtitleMutations.SECONDARY_SUBTITLE_ENABLED_UPDATE, delta);
+    store.dispatch(realSubtitleActions.changeSecondarySubtitle, '');
   },
   [subtitleActions.UPDATE_LAST_SUBTITLE_SIZE]({ commit }, delta) {
     commit(subtitleMutations.LAST_SUBTITLE_SIZE_UPDATE, delta);

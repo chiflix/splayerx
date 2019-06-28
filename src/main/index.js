@@ -210,6 +210,7 @@ function registerMainWindowEvent(mainWindow) {
   function extractSubtitle(videoPath, subtitlePath, index) {
     return new Promise((resolve, reject) => {
       splayerx.extractSubtitles(videoPath, subtitlePath, `0:${index}:0`, (err) => {
+        console.log('Subtitle:', subtitlePath);
         if (err === 0) reject(index);
         resolve(index);
       });
@@ -272,11 +273,12 @@ function registerMainWindowEvent(mainWindow) {
     if (!fs.existsSync(subtitleFolderPath)) fs.mkdirSync(subtitleFolderPath);
     console.log(subtitleFolderPath);
     const subtitlePath = path.join(subtitleFolderPath, `embedded-${index}.${format}`);
-    if (fs.existsSync(subtitlePath)) event.sender.send('extract-subtitle-response', { error: null, index, path: subtitlePath });
+    console.log(subtitlePath);
+    if (fs.existsSync(subtitlePath)) event.sender.send(`extract-subtitle-response-${index}`, { error: null, index, path: subtitlePath });
     else {
       embeeddSubtitlesQueue.add(() => extractSubtitle(videoPath, subtitlePath, index)
-        .then(index => event.sender.send('extract-subtitle-response', { error: null, index, path: subtitlePath }))
-        .catch(index => event.sender.send('extract-subtitle-response', { error: 'error', index })));
+        .then(index => event.sender.send(`extract-subtitle-response-${index}`, { error: null, index, path: subtitlePath }))
+        .catch(index => event.sender.send(`extract-subtitle-response-${index}`, { error: 'error', index })));
     }
   });
 

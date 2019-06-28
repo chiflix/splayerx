@@ -12,7 +12,6 @@ import {
   EMPTY_FOLDER, OPEN_FAILED, ADD_NO_VIDEO,
   SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, FILE_NON_EXIST_IN_PLAYLIST, PLAYLIST_NON_EXIST,
 } from '@/../shared/notificationcodes';
-import Sagi from '@/libs/sagi';
 import { addBubble } from '../../shared/notificationControl';
 
 import { ipcRenderer, remote } from 'electron'; // eslint-disable-line
@@ -24,7 +23,6 @@ export default {
     return {
       clock,
       infoDB,
-      sagi: Sagi,
       showingPopupDialog: false,
       access: [],
     };
@@ -491,25 +489,6 @@ export default {
       }));
       fileHandler.close();
       return res.join('-');
-    },
-    getTextWidth(fontSize, fontFamily, text) {
-      const span = document.createElement('span');
-      let result = span.offsetWidth;
-      span.style.visibility = 'hidden';
-      span.style.fontSize = fontSize;
-      span.style.fontFamily = fontFamily;
-      span.style.display = 'inline-block';
-      span.style.fontWeight = '700';
-      span.style.letterSpacing = '0.2px';
-      document.body.appendChild(span);
-      if (typeof span.textContent !== 'undefined') {
-        span.textContent = text;
-      } else {
-        span.innerText = text;
-      }
-      result = parseFloat(window.getComputedStyle(span).width) - result;
-      span.parentNode.removeChild(span);
-      return result;
     },
   },
 };

@@ -1,4 +1,4 @@
-import helpers from '@/helpers';
+import { mediaQuickHash } from '@/libs/utils';
 import CacheFile from '../../../../src/renderer/libs/CacheFile';
 
 describe('CacheFile libs', () => {
@@ -6,7 +6,7 @@ describe('CacheFile libs', () => {
   let mediaHash = '';
 
   beforeEach(async () => {
-    mediaHash = await helpers.methods.mediaQuickHash('./test/assets/test.avi');
+    mediaHash = await mediaQuickHash('./test/assets/test.avi');
   });
 
   it('should successfully getPathBy return path with mediaHash', async () => {

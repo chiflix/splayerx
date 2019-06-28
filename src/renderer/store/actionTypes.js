@@ -48,6 +48,48 @@ export const Subtitle = {
   UPDATE_ENABLED_SECONDARY_SUBTITLE: 'UPDATE_ENABLED_SECONDARY_SUBTITLE',
 };
 
+export const newSubtitle = {
+  initialize: 'INITIALIZE',
+  add: 'ADD',
+  load: 'LOAD',
+  parse: 'PARSE',
+  store: 'STORE',
+  delete: 'DELETE',
+  upload: 'UPLOAD',
+  manualUpload: 'MANUAL_UPLOAD',
+  getDialogues: 'GET_DIALOGUES_BY_TIME',
+  updatePlayedTime: 'UPDATE_PLAYED_TIME',
+  startWatchPlayedTime: 'START_WATCH_PLAYED_TIME',
+  stopWatchPlayedTime: 'STOP_WATCH_PLAYED_TIME',
+};
+export const SubtitleManager = {
+  initializeManager: 'INITIALIZE_MANAGER',
+  destoryManager: 'DESTROY_MANAGER',
+  addSubtitle: 'ADD_SUBTITLE',
+  removeSubtitle: 'REMOVE_SUBTITLE',
+  refreshSubtitlesInitially: 'REFRESH_SUBTITLES_INITIALLY',
+  refreshSubtitles: 'REFRESH_SUBTITLES',
+  addLocalSubtitles: 'ADD_LOCAL_SUBTITLES',
+  addLocalSubtitlesWithSelect: 'ADD_LOCAL_SUBTITLES_WITH_SELECT',
+  addEmbeddedSubtitles: 'ADD_EMBEDDED_SUBTITLES',
+  addOnlineSubtitles: 'ADD_ONLINE_SUBTITLES',
+  addDatabaseSubtitles: 'ADD_DATABASE_SUBTITLES',
+  checkLocalSubtitles: 'CHECK_LOCAL_SUBTITLES',
+  deleteSubtitlesByUuid: 'DELETE_SUBTITLES_BY_UUID',
+  changePrimarySubtitle: 'CHANGE_PRIMARY_SUBTITLE',
+  changeSecondarySubtitle: 'CHANGE_SECONDARY_SUBTITLE',
+  storeSelectedSubtitle: 'STORE_SELECTED_SUBTITLE',
+  storeSubtitle: 'STORE_SUBTITLE',
+  uploadSubtitle: 'UPLOAD_SUBTITLE',
+  startAISelection: 'START_AI_SELECTION',
+  stopAISelection: 'STOP_AI_SELECTION',
+  getCues: 'GET_CUES',
+  updatePlayedTime: 'UPDATE_PLAYED_TIME',
+  manualUploadAllSubtitles: 'MANUAL_UPLOAD_ALL_SUBTITLES',
+  clearSubtitles: 'CLEAR_SUBTITLES',
+  setGlobalDelay: 'UPDATE_SUBTITLE_DELAY',
+};
+
 export const Input = {
   MOUSEMOVE_UPDATE: 'MOUSEMOVE_UPDATE',
   MOUSEDOWN_UPDATE: 'MOUSEDOWN_UPDATE',

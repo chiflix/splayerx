@@ -1,6 +1,8 @@
+import { LanguageCode } from '@/libs/language';
+import { Type } from './ISubtitle';
 
 export type RawPlaylistItem = {
-  items: IDBValidKey[],
+  items: number[],
   hpaths: string[],
   lastOpened: number,
   playedIndex: number,
@@ -15,36 +17,38 @@ export type RawMediaItem = {
 }
 export type PlaylistItem = {
   id: number,
-  items: IDBValidKey[],
+  items: number[],
   hpaths: string[],
   lastOpened: number,
   playedIndex: number,
 }
 
-export type MediaItemSubtitleItem = {
-  id: string,
-  language: string,
+export type SubtitlePreferenceLanguage = [LanguageCode, LanguageCode];
+export type SubtitlePreferenceListItem = {
+  id: number,
+  language: LanguageCode,
   rank: number,
   src: string,
-  type: string,
+  type: Type,
+  // todo: type videoSegments
   videoSegments: [],
 }
 
 /** MediaItem下preference中的Subtitle数据结构 */
-export type MediaItemSubtitle = {
-  language: [string],
-  list: [MediaItemSubtitleItem],
+export type SubtitlePreference = {
+  language: SubtitlePreferenceLanguage,
+  list: SubtitlePreferenceListItem[],
   selected: {
-    firstId: string,
-    secondatyId: string
+    firstId: number,
+    secondaryId: number,
   }
 }
 
 /** MediaItem中preference数据结构 */
 export type MediaItemPreference = {
-  subtitle: MediaItemSubtitle
+  subtitle: SubtitlePreference
 }
- 
+
 /** MediaItem 全量结构 */
 export type MediaItem = {
   videoId: number,
@@ -64,7 +68,7 @@ type Partial<T> = { [P in keyof T]?: T[P] };
 // example convert type to optional type
 type MediaItemPartial = Partial<MediaItem>;
 
-export type SubtitleItem = {
+export type SubtitleDataItem = {
   format: string,
   language: string,
   src: string,
@@ -75,7 +79,6 @@ export interface IDB {
    * @param  {string} database
    * @param  {string} objectStore
    * @param  {RawMediaItem|RawPlaylistItem} data
-   * @returns {Promise<IDBValidKey>}
    * 向 database -> objectStore 中添加data，返回key值
    */
   add(objectStore: string, data: RawMediaItem | RawPlaylistItem): Promise<number>
@@ -84,7 +87,6 @@ export interface IDB {
    * @param  {string} objectStore
    * @param  {number} key
    * @param  {PlaylistItem|MediaItem} data
-   * @returns {Promise<IDBValidKey>}
    * 向 database -> objectStore 中更新主键为key的数据，返回key值
    */
   update(objectStore: string, key: number, data: PlaylistItem | MediaItem): Promise<number>
@@ -107,34 +109,34 @@ export interface IDB {
    * @param  {string} database
    * @param  {string} objectStore
    * @param  {IDBKeyRange} keyRange
-   * @returns {Promise<PlaylistItem[] | MediaItem[] | SubtitleItem[]>}
+   * @returns {Promise<PlaylistItem[] | MediaItem[] | SubtitleDataItem[]>}
    * 返回 database -> objectStore 中所有记录
    */
-  getAll(objectStore: string, keyRange: IDBKeyRange): Promise<PlaylistItem[] | MediaItem[] | SubtitleItem[]>
+  getAll(objectStore: string, keyRange: IDBKeyRange): Promise<PlaylistItem[] | MediaItem[] | SubtitleDataItem[]>
   /**
    * @param  {string} database
    * @param  {string} objectStore
    * @param  {number} key
-   * @returns {Promise<PlaylistItem | MediaItem | SubtitleItem>}
+   * @returns {Promise<PlaylistItem | MediaItem | SubtitleDataItem>}
    * 返回 database -> objectStore 中主键为key的记录
    */
-  getValueByKey(objectStore: string, key: number): Promise<PlaylistItem | MediaItem | SubtitleItem | undefined>
+  getValueByKey(objectStore: string, key: number): Promise<PlaylistItem | MediaItem | SubtitleDataItem | undefined>
   /**
    * @param  {string} database
    * @param  {string} objectStore
    * @param  {string} index
    * @param  {string|number} value
-   * @returns {Promise<PlaylistItem | MediaItem | SubtitleItem>}
+   * @returns {Promise<PlaylistItem | MediaItem | SubtitleDataItem>}
    * 返回 database -> objectStore 中属性index的值为value的第一条记录
    */
-  getValueByIndex(objectStore: string, index: string, value: string | number): Promise<PlaylistItem | MediaItem | SubtitleItem | undefined>
+  getValueByIndex(objectStore: string, index: string, value: string | number): Promise<PlaylistItem | MediaItem | SubtitleDataItem | undefined>
   /**
    * @param  {string} database
    * @param  {string} objectStore
    * @param  {string} index
    * @param  {string|number} value
-   * @returns {Promise<PlaylistItem[] | MediaItem[] | SubtitleItem[]>}
+   * @returns {Promise<PlaylistItem[] | MediaItem[] | SubtitleDataItem[]>}
    * 返回 database -> objectStore 中属性index为value的所有记录
    */
-  getAllValueByIndex(objectStore: string, index: string, value: string | number): Promise<PlaylistItem[] | MediaItem[] | SubtitleItem[]>
+  getAllValueByIndex(objectStore: string, index: string, value: string | number): Promise<PlaylistItem[] | MediaItem[] | SubtitleDataItem[]>
 }
