@@ -169,7 +169,8 @@ export default {
         for (let i = 0; i < 9; i += 1) {
           if (val[i].length < oldVal[i].length && val[i].every((e: Cue) => oldVal[i].includes(e))) {
             this.noPositionCues[i] = oldVal[i].map((cue: Cue) => {
-              cue.hide = !val[i].includes(cue);
+              // cue.hide = !val[i].includes(cue);
+              cue.hide = false;
               return cue;
             });
           } else {
