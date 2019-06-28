@@ -11,7 +11,7 @@ import { Format } from '@/interfaces/ISubtitle';
 const { mediaQuickHash: calculateMediaIdentity } = helpers.methods;
 
 export function searchForLocalList(videoSrc: string): Promise<string[]> {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const videoDir = dirname(videoSrc);
     const videoBasename = basename(videoSrc, extname(videoSrc));
     const isValidSubtitle = (filename: string) => {
@@ -23,7 +23,10 @@ export function searchForLocalList(videoSrc: string): Promise<string[]> {
     };
 
     readdir(videoDir, (err, files) => {
-      if (err) reject(err);
+      if (err) {
+        // reject(err);
+        resolve([]);
+      }
       else {
         resolve(files
           .filter(isValidSubtitle)
@@ -56,8 +59,8 @@ export function retrieveEmbeddedList(
   excludedStreamIndexes: number[] = [],
 ): Promise<[string, ISubtitleStream][]> {
   ipcRenderer.send('mediaInfo', videoSrc);
-  return new Promise((resolve, reject) => {
-    setTimeout(() => { reject(new Error('Embedded Subtitles Retrieve Timeout!')); }, 20000);
+  return new Promise((resolve) => {
+    // setTimeout(() => { reject(new Error('Embedded Subtitles Retrieve Timeout!')); }, 20000);
     ipcRenderer.once(`mediaInfo-${videoSrc}-reply`, (event: Event, info: string) => {
       try {
         const subtitleStreams: ISubtitleStream[] = JSON.parse(info).streams
@@ -68,7 +71,8 @@ export function retrieveEmbeddedList(
           ));
         resolve(subtitleStreams.map(stream => [videoSrc, stream]));
       } catch (error) {
-        reject(error);
+        // reject(error);
+        resolve([]);
       }
     });
   });
