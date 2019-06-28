@@ -4,7 +4,7 @@
     :style="{
       transition: tranFlag ? 'transform 100ms ease-out' : '',
       marginRight: sizeAdaption(15),
-      cursor: isPlaying && isInRange ? '' : 'pointer',
+      cursor: isInRange ? 'pointer' : '',
       minWidth: `${thumbnailWidth}px`,
       minHeight: `${thumbnailHeight}px`,
     }"
