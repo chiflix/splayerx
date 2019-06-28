@@ -47,6 +47,9 @@ const getters = {
   list(state: SubtitleManagerState) {
     const list = Object.values(state.allSubtitles).filter((v: any) => !!v);
     return sortBy(list, (sub: SubtitleControlListItem) => {
+      if (sub.type === Type.Online && sub.language !== store.getters.primaryLanguage) {
+        return sortOfTypes[sub.type] + 1;
+      }
       return sortOfTypes[sub.type];
     }).map((sub: SubtitleControlListItem) => ({
       ...sub,
