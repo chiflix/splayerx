@@ -48,7 +48,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['scaleNum', 'subToTop', 'primarySubtitleId', 'winHeight', 'chosenStyle', 'chosenSize', 'originSrc']),
+    ...mapGetters(['scaleNum', 'subToTop', 'primarySubtitleId', 'secondarySubtitleId', 'winHeight', 'chosenStyle', 'chosenSize', 'originSrc']),
     concatCurrentCues() {
       if (this.currentCues.length === 2) {
         return [this.currentCues[0].cues, this.currentCues[1].cues];
@@ -70,6 +70,12 @@ export default {
       if (newVal) {
         this.initializeManager();
       }
+    },
+    async primarySubtitleId() {
+      this.currentCues = await this.getCues(videodata.time);
+    },
+    async secondarySubtitleId() {
+      this.currentCues = await this.getCues(videodata.time);
     },
   },
   created() {
