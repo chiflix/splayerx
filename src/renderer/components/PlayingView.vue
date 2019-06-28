@@ -82,7 +82,7 @@ export default {
     requestAnimationFrame(this.loopCues);
     this.$bus.$on('add-subtitles', (subs: { src: string, type: string }[]) => {
       const paths = subs.map((sub: { src: string, type: string }) => (sub.src));
-      this.addLocalSubtitles(paths);
+      this.addLocalSubtitlesWithSelect(paths);
     });
   },
   beforeDestroy() {
@@ -93,7 +93,7 @@ export default {
     ...mapActions({
       updateSubToTop: subtitleActions.UPDATE_SUBTITLE_TOP,
       initializeManager: smActions.initializeManager,
-      addLocalSubtitles: smActions.addLocalSubtitles,
+      addLocalSubtitlesWithSelect: smActions.addLocalSubtitlesWithSelect,
       getCues: smActions.getCues,
       updatePlayTime: smActions.updatePlayedTime,
     }),

@@ -70,6 +70,7 @@ export const SubtitleManager = {
   refreshSubtitlesInitially: 'REFRESH_SUBTITLES_INITIALLY',
   refreshSubtitles: 'REFRESH_SUBTITLES',
   addLocalSubtitles: 'ADD_LOCAL_SUBTITLES',
+  addLocalSubtitlesWithSelect: 'ADD_LOCAL_SUBTITLES_WITH_SELECT',
   addEmbeddedSubtitles: 'ADD_EMBEDDED_SUBTITLES',
   addOnlineSubtitles: 'ADD_ONLINE_SUBTITLES',
   addDatabaseSubtitles: 'ADD_DATABASE_SUBTITLES',
