@@ -603,7 +603,7 @@ $border-radius: 3px;
   .border {
     position: absolute;
     box-sizing: border-box;
-    transition: border-color 20ms ease-out;
+    transition: border-color 150ms ease-out;
 
     width: 100%;
     height: 100%;
