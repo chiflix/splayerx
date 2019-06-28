@@ -11,6 +11,7 @@ import { StoredSubtitleItem, SelectedSubtitle } from '@/interfaces/ISubtitleStor
 import { retrieveSubtitlePreference, DatabaseGenerator, storeSubtitleLanguage, addSubtitleItemsToList, removeSubtitleItemsFromList, storeSelectedSubtitles } from '@/services/storage/SubtitleStorage';
 import { isEqual, get, sortBy } from 'lodash';
 import Vue from 'vue';
+import { extname } from 'path';
 
 const sortOfTypes = {
   local: 0,
@@ -119,6 +120,8 @@ const actions = {
     const databaseItemsToDelete: StoredSubtitleItem[] = [];
     /** whether or not to fetch new online list */
     let online = true;
+    /** do not serach online subtitles if extension is not one of mkv, ts, avi and mp4 */
+    online = ['mkv', 'avi', 'ts', 'mp4'].includes(extname(originSrc).slice(1));
     /** whether or not to extract new embedded list */
     let embedded = true;
     let selected: any;
@@ -130,7 +133,7 @@ const actions = {
       databaseItemsToAdd.push(...list.filter(({ type }) => type === Type.Local));
       databaseItemsToAdd.push(...embeddedStoredSubtitles);
       embedded = !embeddedStoredSubtitles.length;
-      online = !isEqual(language, { primary: primaryLanguage, secondary: secondaryLanguage });
+      if (online) online = !isEqual(language, { primary: primaryLanguage, secondary: secondaryLanguage });
 
       const onlineStoredSubtitles = list.filter(({ type }) => type === Type.Online);
       if (online) databaseItemsToDelete.push(...onlineStoredSubtitles);
