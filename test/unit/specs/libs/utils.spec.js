@@ -7,7 +7,7 @@ import {
   parseNameFromPath,
 } from '@/libs/utils';
 
-describe.only('libs utils', () => {
+describe('libs utils', () => {
   let fontSize = '';
   let fontFamily = '';
   let text = '';
