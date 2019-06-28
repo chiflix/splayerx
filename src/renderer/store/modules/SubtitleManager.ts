@@ -15,6 +15,7 @@ import { extname } from 'path';
 import { addBubble } from '../../../shared/notificationControl';
 import { ONLINE_LOADING, REQUEST_TIMEOUT } from '../../../shared/notificationcodes';
 import { i18n } from '@/main';
+import { LanguageCode } from '@/libs/language';
 
 const sortOfTypes = {
   local: 0,
@@ -110,6 +111,27 @@ function privacyConfirm() {
     $bus.$once('subtitle-refresh-continue', resolve);
   })
 }
+let onlineTimeoutId: any;
+let onlineTimeout = false;
+function fetchOnlineListWithBubble(
+  videoSrc: string,
+  languageCode: LanguageCode,
+  hints?: string,
+): Promise<TranscriptInfo[]> {
+  let results: TranscriptInfo[] = [];
+  onlineTimeout = false;
+  return new Promise(async (resolve) => {
+    onlineTimeoutId = setTimeout(() => onlineTimeout = true, 10000);
+    try {
+      results = await fetchOnlineList(videoSrc, languageCode, hints);
+      clearTimeout(onlineTimeoutId);
+    } catch(err) {
+      results = [];
+    } finally {
+      resolve(results);
+    }
+  });
+}
 const actions = {
   async [a.initializeManager]({ getters, commit, dispatch }: any) {
     const { playListId, originSrc, mediaHash } = getters;
@@ -156,13 +178,14 @@ const actions = {
     const actions = [
       dispatch(a.addLocalSubtitles, await searchForLocalList(originSrc)),
       dispatch(a.addEmbeddedSubtitles, embedded ? await retrieveEmbeddedList(originSrc) : []),
-      dispatch(a.addOnlineSubtitles, online ? await fetchOnlineList(originSrc, primaryLanguage, hints) : []),
+      dispatch(a.addOnlineSubtitles, online ? await fetchOnlineListWithBubble(originSrc, primaryLanguage, hints) : []),
     ];
     if (secondaryLanguage) {
-      actions.push(dispatch(a.addOnlineSubtitles, online ? await fetchOnlineList(originSrc, secondaryLanguage, hints) : []));
+      actions.push(dispatch(a.addOnlineSubtitles, online ? await fetchOnlineListWithBubble(originSrc, secondaryLanguage, hints) : []));
     }
     return Promise.all(actions)
       .then(async () => {
+        if (onlineTimeout) addBubble(REQUEST_TIMEOUT, i18n);
         await dispatch(a.addDatabaseSubtitles, { storedList: databaseItemsToAdd, selected })
         storeSubtitleLanguage([primaryLanguage, secondaryLanguage], playlistId, mediaItemId);
         addSubtitleItemsToList(getters.list, playlistId, mediaItemId);
@@ -199,11 +222,12 @@ const actions = {
     dispatch(a.startAISelection);
     const actions = [dispatch(a.addLocalSubtitles, await searchForLocalList(originSrc))];
     if (online) actions.push(
-      dispatch(a.addOnlineSubtitles, await fetchOnlineList(originSrc, primaryLanguage, hints)).then(primaryDeletePromise),
-      dispatch(a.addOnlineSubtitles, await fetchOnlineList(originSrc, secondaryLanguage, hints)).then(secondaryDeletePromise),
+      dispatch(a.addOnlineSubtitles, await fetchOnlineListWithBubble(originSrc, primaryLanguage, hints)).then(primaryDeletePromise),
+      dispatch(a.addOnlineSubtitles, await fetchOnlineListWithBubble(originSrc, secondaryLanguage, hints)).then(secondaryDeletePromise),
     );
     return Promise.all(actions)
       .then(() => {
+        if (onlineTimeout) addBubble(REQUEST_TIMEOUT, i18n);
         const { playlistId, mediaItemId } = state;
         storeSubtitleLanguage([primaryLanguage, secondaryLanguage], playlistId, mediaItemId);
         addSubtitleItemsToList(getters.list, playlistId, mediaItemId);
