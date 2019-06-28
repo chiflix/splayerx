@@ -447,7 +447,6 @@ export default {
       top: 0;
       background: rgba(0, 0, 0, 0.1);
       backdrop-filter: blur(10px);
-      clip-path: inset(0 round 7px);
     }
     .middle {
       width: 100%;
