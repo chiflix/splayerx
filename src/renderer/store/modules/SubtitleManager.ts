@@ -12,6 +12,9 @@ import { retrieveSubtitlePreference, DatabaseGenerator, storeSubtitleLanguage, a
 import { isEqual, get, sortBy } from 'lodash';
 import Vue from 'vue';
 import { extname } from 'path';
+import { addBubble } from '../../../shared/notificationControl';
+import { ONLINE_LOADING, REQUEST_TIMEOUT } from '../../../shared/notificationcodes';
+import { i18n } from '@/main';
 
 const sortOfTypes = {
   local: 0,
@@ -171,12 +174,7 @@ const actions = {
     commit(m.setPrimarySubtitleId, '');
     commit(m.setSecondarySubtitleId, '');
     commit(m.setIsRefreshing, true);
-    dispatch('addMessages', {
-      type: 'state',
-      title: '',
-      content: store.$i18n.t('loading.content', store.$i18n.locale, store.$i18n.messages),
-      dismissAfter: 2000,
-    });
+    addBubble(ONLINE_LOADING, i18n);
     const { list } = getters as { list: SubtitleControlListItem[] };
     const { originSrc, primaryLanguage, secondaryLanguage } = getters;
     /** do not serach online subtitles if extension is not one of mkv, ts, avi and mp4 */

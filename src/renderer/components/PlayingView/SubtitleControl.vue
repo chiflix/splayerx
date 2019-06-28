@@ -112,6 +112,7 @@ import animationData from '@/assets/subtitle.json';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import SubtitleList from '@/components/PlayingView/SubtitleList.vue';
 import Icon from '../BaseIconContainer.vue';
+import { SUBTITLE_OFFLINE } from '../../../shared/notificationcodes';
 
 export default {
   name: 'SubtitleControl',
@@ -349,17 +350,8 @@ export default {
       this.updateSubtitleType(!this.isFirstSubtitle);
     },
     handleRefresh() {
-      if (navigator.onLine) {
-        if (!this.isRefreshing) this.refreshSubtitles();
-      } else if (!navigator.onLine) {
-        // TODO
-        this.addMessages({
-          type: 'result',
-          title: this.$i18n.t('errorFile.offLine.title'),
-          content: this.$i18n.t('errorFile.offLine.content'),
-          dismissAfter: 5000,
-        });
-      }
+      if (navigator.onLine && !this.isRefreshing) this.refreshSubtitles();
+      else if (!navigator.onLine) this.$addBubble(SUBTITLE_OFFLINE);
     },
     handleAnimation(anim: AnimationItem) {
       this.anim = anim;
