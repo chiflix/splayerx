@@ -151,7 +151,7 @@
 <script lang="ts">
 import path from 'path';
 import { mapGetters } from 'vuex';
-import { parseNameFromPath } from '@/helpers/path';
+import { parseNameFromPath } from '@/libs/utils';
 // @ts-ignore
 import Icon from '@/components/BaseIconContainer.vue';
 import RecentPlayService from '@/services/media/PlaylistService';
