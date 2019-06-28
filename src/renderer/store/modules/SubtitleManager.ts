@@ -497,14 +497,19 @@ const actions = {
     return Promise.all(actions);
   },
   async [a.manualUploadAllSubtitles]({ state, dispatch }: any) {
-    const actions: Promise<any>[] = [];
-    const { primarySubtitleId, secondarySubtitleId } = state;
-    if (primarySubtitleId) actions.push(dispatch(`${primarySubtitleId}/${subActions.manualUpload}`));
-    if (secondarySubtitleId) actions.push(dispatch(`${secondarySubtitleId}/${subActions.manualUpload}`));
-    return Promise.all(actions)
-      .then((result: boolean[]) => {
-        addBubble(result.every(res => res) ? UPLOAD_SUCCESS : UPLOAD_FAILED, store.$i18n);
-      });
+    if (navigator.onLine) {
+      addBubble(SUBTITLE_UPLOAD, store.$i18n);
+      const actions: Promise<any>[] = [];
+      const { primarySubtitleId, secondarySubtitleId } = state;
+      if (primarySubtitleId) actions.push(dispatch(`${primarySubtitleId}/${subActions.manualUpload}`));
+      if (secondarySubtitleId) actions.push(dispatch(`${secondarySubtitleId}/${subActions.manualUpload}`));
+      return Promise.all(actions)
+        .then((result: boolean[]) => {
+          addBubble(result.every(res => res) ? UPLOAD_SUCCESS : UPLOAD_FAILED, store.$i18n);
+        });
+    } else {
+      addBubble(UPLOAD_FAILED, store.$i18n);
+    }
   },
   [a.setGlobalDelay]({ commit }: any, delta: any) {
     commit(m.setGlobalDelay, delta);
