@@ -462,6 +462,7 @@ export default {
       this.onItemMouseup(this.index);
     },
     updateAnimationIn() {
+      this.$refs.border.style.setProperty('border-color', 'rgba(255,255,255,0.6)');
       if (!this.isPlaying) {
         this.$refs.blur.classList.remove('blur');
       } else {
@@ -469,7 +470,6 @@ export default {
       }
       if (!this.itemMoving) this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,-9px)');
       this.$refs.content.style.setProperty('height', `${this.thumbnailHeight + 10}px`);
-      this.$refs.border.style.setProperty('border-color', 'rgba(255,255,255,0.6)');
       this.$refs.title.style.setProperty('color', 'rgba(255,255,255,0.8)');
       if (!this.isPlaying && this.sliderPercentage > 0) {
         this.$refs.progress.style.setProperty('opacity', '1');
