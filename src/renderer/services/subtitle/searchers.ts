@@ -4,11 +4,9 @@ import { pathToFormat } from './utils';
 import { readdir } from 'fs';
 import { LanguageCode } from '@/libs/language';
 import { ipcRenderer, Event } from 'electron';
-import helpers from '@/helpers';
+import { mediaQuickHash as calculateMediaIdentity } from '@/libs/utils';
 import Sagi from '@/libs/sagi';
 import { Format } from '@/interfaces/ISubtitle';
-
-const { mediaQuickHash: calculateMediaIdentity } = helpers.methods;
 
 export function searchForLocalList(videoSrc: string): Promise<string[]> {
   return new Promise((resolve) => {

@@ -8,7 +8,7 @@ import { unionWith, uniqWith, remove, isEqual, get, zip, union, flatMap, some } 
 import Sagi from '@/libs/sagi';
 import { loadLocalFile, pathToFormat } from '../subtitle/utils';
 import { embeddedSrcLoader } from '../subtitle/loaders/embedded';
-import helpers from '@/helpers';
+import { mediaQuickHash } from '@/libs/utils';
 
 interface DataDBV1 extends DBSchema {
   'subtitles': {
@@ -144,7 +144,7 @@ async function v1SubtitlesToV2Subtitles(v1Ids: number[]): Promise<{
           source: [{ type, source: src }],
           format: pathToFormat(src),
           language: normalizeCode(language),
-          hash: await helpers.methods.mediaQuickHash(src),
+          hash: await mediaQuickHash(src),
         };
         return [id.toString(), v2Subtitle];
       }

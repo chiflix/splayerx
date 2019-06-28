@@ -1,7 +1,7 @@
 import { pathToFormat, loadLocalFile } from '../utils';
 import { inferLanguageFromPath } from '../utils';
 import { Origin, Type, EntityGenerator, Format } from '@/interfaces/ISubtitle';
-import helpers from '@/helpers';
+import { mediaQuickHash } from '@/libs/utils';
 import { cloneDeep } from 'lodash';
 
 interface LocalOrigin extends Origin {
@@ -33,6 +33,6 @@ export class LocalGenerator implements EntityGenerator {
     return loadLocalFile(this.origin.source);
   }
   async getHash() {
-    return helpers.methods.mediaQuickHash(this.origin.source);
+    return mediaQuickHash(this.origin.source);
   }
 }

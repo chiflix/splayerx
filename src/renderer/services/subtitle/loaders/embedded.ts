@@ -1,7 +1,7 @@
 import { Origin, Type, EntityGenerator, Format } from '@/interfaces/ISubtitle';
 import { LanguageCode, normalizeCode } from '@/libs/language';
 import { ipcRenderer, Event } from 'electron';
-import helpers from '@/helpers';
+import { mediaQuickHash } from '@/libs/utils';
 import { inferLanguageFromPath, loadLocalFile } from '../utils';
 import { cloneDeep } from 'lodash';
 
@@ -26,7 +26,7 @@ interface IExtractSubtitleResponse {
  * @returns the subtitle path string
  */
 export async function embeddedSrcLoader(videoSrc: string, streamIndex: number, format: Format): Promise<string> {
-  const mediaHash = await helpers.methods.mediaQuickHash(videoSrc);
+  const mediaHash = await mediaQuickHash(videoSrc);
   ipcRenderer.send('extract-subtitle-request',
     videoSrc,
     streamIndex,
@@ -92,7 +92,7 @@ export class EmbeddedGenerator implements EntityGenerator {
     return extractedSrc;
   }
   async getHash() {
-    return helpers.methods.mediaQuickHash(await this.getExtractedSrc());
+    return mediaQuickHash(await this.getExtractedSrc());
   }
 
   async getLanguage() {
