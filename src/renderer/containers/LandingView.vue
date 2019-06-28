@@ -126,6 +126,7 @@ import PlaylistItem from '@/components/LandingView/PlaylistItem.vue';
 import VideoItem from '@/components/LandingView/VideoItem.vue';
 import { log } from '@/libs/Log';
 import Sagi from '@/libs/sagi';
+import { deleteSubtitlesByPlaylistId } from '../services/storage/SubtitleStorage';
 
 Vue.component('PlaylistItem', PlaylistItem);
 Vue.component('VideoItem', VideoItem);
@@ -316,6 +317,7 @@ export default {
       const [deletedItem] = this.landingViewItems.splice(index, 1);
       if (this.firstIndex !== 0) this.lastIndex = this.landingViewItems.length;
       playInfoStorageService.deleteRecentPlayedBy(deletedItem.id);
+      deleteSubtitlesByPlaylistId(deletedItem.id);
     },
   },
 };

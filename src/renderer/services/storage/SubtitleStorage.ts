@@ -399,6 +399,16 @@ class SubtitleDataBase {
       }, key);
     }
   }
+  async deleteSubtitlesByPlaylistId(playlistId: number) {
+    const playlistStore = await (await this.getDb())
+      .transaction('preferences', 'readwrite')
+      .objectStore('preferences');
+    let cursor = await playlistStore.openCursor();
+    while (cursor) {
+      if (cursor.value.playlistId === playlistId) await playlistStore.delete(cursor.key);
+      cursor = await cursor.continue();
+    }
+  }
 }
 
 const db = new SubtitleDataBase();
@@ -485,4 +495,7 @@ export function storeSelectedSubtitles(subs: SelectedSubtitle[], playlistId: num
 }
 export function retrieveSelectedSubtitles(playlistId: number, mediaItemId: string) {
   return db.retrieveSelectedSubtitles(playlistId, mediaItemId);
+}
+export function deleteSubtitlesByPlaylistId(playlistId: number) {
+  return db.deleteSubtitlesByPlaylistId(playlistId);
 }
