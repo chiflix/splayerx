@@ -43,11 +43,12 @@ import { EventEmitter } from 'events';
 
 function getSystemLocale() {
   const { app } = electron.remote;
-  const locale = process.platform === 'win32' ? app.getLocale() : osLocale.sync();
-  if (locale === 'zh-TW') {
-    return 'zhTW';
+  let locale = process.platform === 'win32' ? app.getLocale() : osLocale.sync();
+  locale = locale.replace('_', '-');
+  if (locale === 'zh-TW' || locale === 'zh-HK' || locale === 'zh-Hant') {
+    return 'zh-Hant';
   } else if (locale.startsWith('zh')) {
-    return 'zhCN';
+    return 'zh-Hans';
   }
   return 'en';
 }
@@ -111,11 +112,12 @@ Vue.use(InputPlugin, {
   },
 });
 // Vue.use(InputPlugin);
-// i18n and its plugin
+// i18n and its plugin
 const i18n = new VueI18n({
   locale: getSystemLocale(), // set locale
   messages, // set locale messages
 });
+
 Vue.use(NotificationBubble, i18n);
 // Development-only devtools area
 // VueDevtools plugin
@@ -301,7 +303,7 @@ new Vue({
   },
   created() {
     this.$store.commit('getLocalPreference');
-    if (this.displayLanguage) this.$i18n.locale = this.displayLanguage;
+    if (this.displayLanguage && messages[this.displayLanguage]) this.$i18n.locale = this.displayLanguage;
     asyncStorage.get('preferences').then((data) => {
       if (data.privacyAgreement === undefined) this.$bus.$emit('privacy-confirm');
       if (!data.primaryLanguage) {
@@ -358,7 +360,11 @@ new Vue({
       }
     },
     displayLanguage(val) {
-      this.$i18n.locale = val;
+      if (messages[val]) {
+        this.$i18n.locale = val;
+      } else {
+        console.warn('Invalid displayLanguage', val);
+      }
       this.refreshMenu();
     },
     singleCycle(val) {
