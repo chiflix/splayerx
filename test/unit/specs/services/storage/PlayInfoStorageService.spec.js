@@ -130,4 +130,12 @@ describe('PlayInfoStorageService logic service', () => {
       expect(results).to.deep.equal(expectResults);
     });
   });
+  it('should successfully getPlaylistRecord', async () => {
+    const demo = {
+      id: 1,
+    };
+    sinon.stub(info, 'getValueByKey').resolves(demo);
+    const result = await playInfoStorageService.getPlaylistRecord(1);
+    expect(result).to.be.deep.equal(demo);
+  });
 });

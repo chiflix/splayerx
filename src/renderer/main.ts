@@ -37,7 +37,7 @@ import { SNAPSHOT_FAILED, SNAPSHOT_SUCCESS } from '../shared/notificationcodes';
 import InputPlugin, { getterTypes as iGT } from '@/plugins/input';
 import { VueDevtools } from './plugins/vueDevtools.dev';
 import { SubtitleControlListItem, Type } from './interfaces/ISubtitle';
-import { calculatedName } from './libs/utils';
+import { EventEmitter } from 'events';
 
 // causing callbacks-registry.js 404 error. disable temporarily
 // require('source-map-support').install();
@@ -133,6 +133,7 @@ Vue.mixin(helpers);
 hookVue(Vue);
 
 Vue.prototype.$bus = new Vue(); // Global event bus
+Vue.prototype.$event = new EventEmitter();
 
 
 const { mapGetters: inputMapGetters } = createNamespacedHelpers('InputPlugin');
@@ -146,6 +147,7 @@ new Vue({
   data() {
     return {
       menu: null,
+      playlistDisplayState: false,
       topOnWindow: false,
       canSendVolumeGa: true,
       menuOperationLock: false, // 如果正在创建目录，就锁住所以操作目录的动作，防止野指针
@@ -243,7 +245,7 @@ new Vue({
       if (this.isFullScreen) {
         return {
           label: this.$t('msg.window.exitFullScreen'),
-          accelerator: 'Esc',
+          accelerator: 'F',
           click: () => {
             this.$bus.$emit('off-fullscreen');
             this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
@@ -343,8 +345,17 @@ new Vue({
     this.$bus.$on('delete-file', () => {
       this.refreshMenu();
     });
+    this.$event.on('playlist-display-state', (e: boolean) => {
+      this.playlistDisplayState = e;
+    });
   },
   watch: {
+    playlistDisplayState(val: boolean) {
+      if (this.menu) {
+        this.menu.getMenuItemById('KeyboardLeft').enabled = !val;
+        this.menu.getMenuItemById('KeyboardRight').enabled = !val;
+      }
+    },
     isSubtitleAvailable(val) {
       if (this.menu) {
         this.menu.getMenuItemById('increaseSubDelay').enabled = val;
@@ -574,15 +585,19 @@ new Vue({
           id: 'playback',
           submenu: [
             {
+              id: 'KeyboardRight',
               label: this.$t('msg.playback.forwardS'),
               accelerator: 'Right',
+              enabled: !this.playlistDisplayState,
               click: () => {
                 this.$bus.$emit('seek', videodata.time + 5);
               },
             },
             {
+              id: 'KeyboardLeft',
               label: this.$t('msg.playback.backwardS'),
               accelerator: 'Left',
+              enabled: !this.playlistDisplayState,
               click: () => {
                 this.$bus.$emit('seek', videodata.time - 5);
               },
@@ -1063,6 +1078,13 @@ new Vue({
             },
             { type: 'separator' },
           );
+          template.push({
+            label: this.$t('msg.splayerx.quit'),
+            accelerator: 'Ctrl+q',
+            click: () => {
+              this.$electron.remote.app.quit();
+            },
+          });
         }
         return template;
       }).then((result: any) => {
@@ -1375,7 +1397,7 @@ new Vue({
     },
     // eslint-disable-next-line complexity
     wheelEventHandler({ x }: { x: number }) {
-      if (this.duration && this.wheelDirection === 'horizontal') {
+      if (this.duration && this.wheelDirection === 'horizontal' && !this.playlistDisplayState) {
         const eventName = x < 0 ? 'seek-forward' : 'seek-backward';
         const absX = Math.abs(x);
 
@@ -1422,6 +1444,13 @@ new Vue({
     });
     window.addEventListener('keydown', (e) => {
       switch (e.keyCode) {
+        case 27:
+          if (this.isFullScreen && !this.playlistDisplayState) {
+            e.preventDefault();
+            this.$bus.$emit('off-fullscreen');
+            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
+          }
+          break;
         case 219:
           e.preventDefault();
           this.$store.dispatch(videoActions.DECREASE_RATE);
@@ -1471,7 +1500,7 @@ new Vue({
                 this.canSendVolumeGa = true;
               }, 1000);
             }
-            if (this.wheelDirection === 'vertical') {
+            if (this.wheelDirection === 'vertical' || this.playlistDisplayState) {
               let step = Math.abs(e.deltaY) * 0.06;
               // in windows if wheel setting more lines per step, make it limited.
               if (process.platform !== 'darwin' && step > 6) {

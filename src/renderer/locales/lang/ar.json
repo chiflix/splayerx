@@ -230,6 +230,7 @@
   "recentPlaylist": {
     "folderSource": "مجلد",
     "playing": "تلعب",
+    "paused": "توقف",
     "playlistSource": "قائمة التشغيل"
   },
   "subtitle": {
