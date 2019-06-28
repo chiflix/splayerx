@@ -9,7 +9,7 @@ import { log } from '@/libs/Log';
 import SubtitleModule from './Subtitle';
 import { StoredSubtitleItem, SelectedSubtitle } from '@/interfaces/ISubtitleStorage';
 import { retrieveSubtitlePreference, DatabaseGenerator, storeSubtitleLanguage, addSubtitleItemsToList, removeSubtitleItemsFromList, storeSelectedSubtitles } from '@/services/storage/SubtitleStorage';
-import { isEqual, get, sortBy } from 'lodash';
+import { isEqual, get, sortBy, remove } from 'lodash';
 import Vue from 'vue';
 import { extname } from 'path';
 import { addBubble } from '../../../shared/notificationControl';
@@ -85,8 +85,17 @@ const mutations = {
     const { id } = controlItem;
     Vue.set(state.allSubtitles, id, controlItem);
   },
+  [m.addSubtitleIds](state: SubtitleManagerState, controlItems: SubtitleControlListItem[]) {
+    const newControlItems = Object.fromEntries(controlItems.map((item) => [item.id, item]));
+    state.allSubtitles = { ...state.allSubtitles, ...newControlItems };
+  },
   [m.deleteSubtitleId](state: SubtitleManagerState, id: string) {
     Vue.set(state.allSubtitles, id, undefined);
+  },
+  [m.deleteSubtitleIds](state: SubtitleManagerState, ids: string[]) {
+    const allSubtitleEntries = Object.entries(state.allSubtitles);
+    remove(allSubtitleEntries, ({ 0: id }) => ids.includes(id));
+    state.allSubtitles = Object.fromEntries(allSubtitleEntries);
   },
   [m.setGlobalDelay](state: SubtitleManagerState, delay: number) {
     if (delay === 0) {
@@ -273,9 +282,7 @@ const actions = {
     );
   },
   async [a.addOnlineSubtitles]({ dispatch }: any, transcriptInfoList: TranscriptInfo[]) {
-    return Promise.all(
-      transcriptInfoList.map(transcriptInfo => dispatch(a.addSubtitle, new OnlineGenerator(transcriptInfo)))
-    );
+    return dispatch(a.addSubtitles, transcriptInfoList.map(info => new OnlineGenerator(info)));
   },
   async [a.addDatabaseSubtitles]({ getters, dispatch }: any, options: AddDatabaseSubtitlesOptions) {
     return Promise.all(
@@ -318,6 +325,36 @@ const actions = {
       commit(m.addSubtitleId, subtitleControlListItem);
       return subtitleControlListItem;
     }
+  },
+  async [a.addSubtitles]({ commit, dispatch, getters }: any, generators: EntityGenerator[]) {
+    Promise.all(
+      generators.map(async (generator) => {
+        const hash = await generator.getHash();
+        const type = await generator.getType();
+        const existedHash = getters.list.find((subtitle: SubtitleControlListItem) => subtitle.hash === hash && subtitle.type === type);
+        const source = await generator.getSource();
+        const existedOrigin = getters.list.find((subtitle: SubtitleControlListItem) => isEqual(subtitle.source, source.source));
+        if (!existedHash || !existedOrigin) {
+          const id = uuidv4();
+          store.registerModule([id], { ...SubtitleModule, name: `${id}` });
+          dispatch(`${id}/${subActions.initialize}`, id);
+          const subtitle: Entity = await dispatch(`${id}/${subActions.add}`, generator);
+          await dispatch(`${id}/${subActions.store}`);
+          return {
+            id,
+            hash: subtitle.hash,
+            type: subtitle.type,
+            language: subtitle.language,
+            source: subtitle.source.source,
+          } as SubtitleControlListItem;
+        }
+      })
+    )
+      .then((results) => {
+        results = results.filter(result => !(result instanceof Error));
+        console.log(results);
+        commit(m.addSubtitleIds, results);
+      });
   },
   [a.removeSubtitle]({ commit, getters }: any, id: string) {
     store.unregisterModule(id);
