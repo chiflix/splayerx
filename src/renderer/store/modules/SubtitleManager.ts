@@ -234,8 +234,10 @@ const actions = {
     const actions = [dispatch(a.addLocalSubtitles, await searchForLocalList(originSrc))];
     if (online) {
       try {
-        const primaryResults = await fetchOnlineListWithBubble(originSrc, primaryLanguage, hints);
-        const secondaryResults = await fetchOnlineListWithBubble(originSrc, secondaryLanguage, hints);
+        const [ primaryResults, secondaryResults ] = await Promise.all([
+          fetchOnlineListWithBubble(originSrc, primaryLanguage, hints),
+          fetchOnlineListWithBubble(originSrc, secondaryLanguage, hints),
+        ]);
         dispatch(a.deleteSubtitlesByUuid, primary)
         dispatch(a.deleteSubtitlesByUuid, secondary)
         actions.push(dispatch(a.addOnlineSubtitles, primaryResults));
