@@ -228,14 +228,19 @@ const actions = {
       }, [[], []] as [SubtitleControlListItem[], SubtitleControlListItem[]]);
 
     const hints = generateHints(originSrc);
-    const primaryDeletePromise = () => dispatch(a.deleteSubtitlesByUuid, primary);
-    const secondaryDeletePromise = () => dispatch(a.deleteSubtitlesByUuid, secondary);
     dispatch(a.startAISelection);
     const actions = [dispatch(a.addLocalSubtitles, await searchForLocalList(originSrc))];
-    if (online) actions.push(
-      dispatch(a.addOnlineSubtitles, await fetchOnlineListWithBubble(originSrc, primaryLanguage, hints)).then(primaryDeletePromise),
-      dispatch(a.addOnlineSubtitles, await fetchOnlineListWithBubble(originSrc, secondaryLanguage, hints)).then(secondaryDeletePromise),
-    );
+    if (online) {
+      try {
+        const primaryResults = await fetchOnlineListWithBubble(originSrc, primaryLanguage, hints);
+        const secondaryResults = await fetchOnlineListWithBubble(originSrc, secondaryLanguage, hints);
+        dispatch(a.deleteSubtitlesByUuid, primary)
+        dispatch(a.deleteSubtitlesByUuid, secondary)
+        actions.push(dispatch(a.addOnlineSubtitles, primaryResults));
+        actions.push(dispatch(a.addOnlineSubtitles, secondaryResults));
+      } catch (error) {
+      }
+    }
     return Promise.all(actions)
       .then(() => {
         if (!primarySelectionComplete || !secondarySelectionComplete) dispatch(a.stopAISelection);
@@ -332,10 +337,12 @@ const actions = {
     }
   },
   async [a.deleteSubtitlesByUuid]({ state, dispatch }: any, storedSubtitleItems: SubtitleControlListItem[]) {
-    return Promise.all(storedSubtitleItems.map(({ id }) => {
-      removeSubtitleItemsFromList(storedSubtitleItems, state.playlistId, state.mediaItemId);
+    storedSubtitleItems.map(({ id }) => {
       dispatch(`${id}/${subActions.delete}`);
       dispatch(a.removeSubtitle, id);
+    });
+    return Promise.all(storedSubtitleItems.map(({ id }) => {
+      removeSubtitleItemsFromList(storedSubtitleItems, state.playlistId, state.mediaItemId);
     }));
   },
   async [a.changePrimarySubtitle]({ dispatch, commit, getters }: any, id: string) {
