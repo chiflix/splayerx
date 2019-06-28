@@ -100,6 +100,13 @@ type AddDatabaseSubtitlesOptions = {
     secondary?: SelectedSubtitle;
   };
 };
+function privacyConfirm() {
+  const { $bus } = Vue.prototype;
+  $bus.$emit('privacy-confirm');
+  return new Promise((resolve) => {
+    $bus.$once('subtitle-refresh-continue', resolve);
+  })
+}
 const actions = {
   async [a.initializeManager]({ getters, commit, dispatch }: any) {
     const { playListId, originSrc, mediaHash } = getters;
@@ -122,6 +129,7 @@ const actions = {
     let online = true;
     /** do not serach online subtitles if extension is not one of mkv, ts, avi and mp4 */
     online = ['mkv', 'avi', 'ts', 'mp4'].includes(extname(originSrc).slice(1));
+    if (online && !getters.privacyAgreement) online = !!(await privacyConfirm());
     /** whether or not to extract new embedded list */
     let embedded = true;
     let selected: any;
@@ -171,6 +179,9 @@ const actions = {
     });
     const { list } = getters as { list: SubtitleControlListItem[] };
     const { originSrc, primaryLanguage, secondaryLanguage } = getters;
+    /** do not serach online subtitles if extension is not one of mkv, ts, avi and mp4 */
+    let online = ['mkv', 'avi', 'ts', 'mp4'].includes(extname(originSrc).slice(1));
+    if (online && !getters.privacyAgreement) online = !!(await privacyConfirm());
     const [primary, secondary] = list
       .filter(({ type }) => type === Type.Online)
       .reduce((subtitleList, currentSubtitle) => {
@@ -188,11 +199,12 @@ const actions = {
     const primaryDeletePromise = () => dispatch(a.deleteSubtitlesByUuid, primary);
     const secondaryDeletePromise = () => dispatch(a.deleteSubtitlesByUuid, secondary);
     dispatch(a.startAISelection);
-    return Promise.all([
-      dispatch(a.addLocalSubtitles, await searchForLocalList(originSrc)),
+    const actions = [dispatch(a.addLocalSubtitles, await searchForLocalList(originSrc))];
+    if (online) actions.push(
       dispatch(a.addOnlineSubtitles, await fetchOnlineList(originSrc, primaryLanguage, hints)).then(primaryDeletePromise),
       dispatch(a.addOnlineSubtitles, await fetchOnlineList(originSrc, secondaryLanguage, hints)).then(secondaryDeletePromise),
-    ])
+    );
+    return Promise.all(actions)
       .then(() => {
         const { playlistId, mediaItemId } = state;
         storeSubtitleLanguage([primaryLanguage, secondaryLanguage], playlistId, mediaItemId);

@@ -144,7 +144,6 @@ export default {
       refAnimation: '',
       transFlag: true,
       shiftItemHovered: false,
-      continueRefresh: false,
     };
   },
   computed: {
@@ -302,12 +301,6 @@ export default {
     this.$refs.refreshRotate.$el.addEventListener('animationiteration', () => {
       this.count += 1;
     });
-    this.$bus.$on('subtitle-refresh-continue', () => {
-      if (this.continueRefresh) {
-        this.continueRefresh = false;
-        this.handleRefresh();
-      }
-    });
     document.addEventListener('mouseup', (e: MouseEvent) => {
       if (e.button === 0) {
         if (!this.showAttached) {
@@ -357,12 +350,7 @@ export default {
     },
     handleRefresh() {
       if (navigator.onLine) {
-        if (!this.privacyAgreement) {
-          this.$bus.$emit('privacy-confirm');
-          this.continueRefresh = true;
-        } else if (this.privacyAgreement && !this.isRefreshing) {
-          this.refreshSubtitles();
-        }
+        if (!this.isRefreshing) this.refreshSubtitles();
       } else if (!navigator.onLine) {
         // TODO
         this.addMessages({
