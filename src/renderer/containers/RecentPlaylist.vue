@@ -436,6 +436,9 @@ export default {
         this.mousedownIndex = NaN;
         if (this.isFolderList) this.openVideoFile(this.playingList[index]);
         else this.playFile(this.playingList[index], this.items[index]);
+      } else if (index === this.playingIndex
+        && this.indexOfMovingItem === this.playingList.length) {
+        this.$bus.$emit('toggle-playback');
       }
       this.indexOfMovingItem = this.playingList.length;
       this.movementX = this.movementY = 0;

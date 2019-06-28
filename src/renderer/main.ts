@@ -53,10 +53,6 @@ function getSystemLocale() {
   return 'en';
 }
 
-window.addEventListener('error', (ev: ErrorEvent) => {
-  log.error('window', ev.error);
-});
-
 Vue.config.productionTip = false;
 Vue.config.warnHandler = (warn) => {
   log.info('render/main', warn);
