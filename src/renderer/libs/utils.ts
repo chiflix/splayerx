@@ -1,7 +1,7 @@
 import { createHash } from 'crypto';
 // @ts-ignore
 import romanize from 'romanize';
-import { times, padStart } from 'lodash';
+import { times, padStart, sortBy } from 'lodash';
 import { sep, basename } from 'path';
 // @ts-ignore
 import { promises as fsPromises } from 'fs';
@@ -161,7 +161,11 @@ export function calculatedName(item: SubtitleControlListItem, list: SubtitleCont
   if (item.type === Type.Local) {
     name = basename(item.source);
   } else if (item.type === Type.Embedded) {
-    name = item.source.streamIndex;
+    let embeddedList = list
+      .filter((s: SubtitleControlListItem) => s.type === Type.Embedded);
+    embeddedList = sortBy(embeddedList, (s: SubtitleControlListItem) => s.source.streamIndex);
+    const sort = embeddedList.findIndex((s: SubtitleControlListItem) => s.id === item.id) + 1;
+    name = `${romanize(sort)} - ${codeToLanguageName(item.language)}`;
   } else if (item.type === Type.Online) {
     const sort = list
       .filter((s: SubtitleControlListItem) => s.type === Type.Online && s.language === item.language)
