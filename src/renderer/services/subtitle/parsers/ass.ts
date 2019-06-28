@@ -83,6 +83,7 @@ export class AssParser extends BaseParser {
     pos: null,
   };
   private normalize(compiledSubtitle: CompiledSubtitle) {
+    if (!compiledSubtitle.dialogues.length) throw new Error('Unsupported Subtitle');
     const finalDialogues: Cue[] = [];
     const { info, dialogues } = compiledSubtitle;
     this.info = pick(info, Object.keys(this.baseInfo));

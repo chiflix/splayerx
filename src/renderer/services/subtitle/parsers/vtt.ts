@@ -27,6 +27,7 @@ export class VttParser extends BaseParser {
     // align: '',
   };
   private normalizer(parsedSubtitle: ParsedSubtitle) {
+    if (!parsedSubtitle.length) throw new Error('Unsupported Subtitle');
     const finalDialogues: Cue[] = [];
     parsedSubtitle.forEach((subtitle) => {
       finalDialogues.push({

@@ -20,6 +20,7 @@ export class SrtParser extends BaseParser {
   dialogues: Cue[];
   private baseTags = { alignment: 2, pos: undefined };
   private normalizer(parsedSubtitle: ParsedSubtitle) {
+    if (!parsedSubtitle.length) throw new Error('Unsupported Subtitle');
     const finalDialogues: Cue[] = [];
     parsedSubtitle.forEach((subtitle) => {
       finalDialogues.push({
