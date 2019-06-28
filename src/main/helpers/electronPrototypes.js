@@ -44,10 +44,8 @@ function keepAspectRatio(evt, newBounds) {
       && newWidth - oldWidth < newHeight - oldHeight)
     || almostSame(newHeight, oldHeight)
   ) {
-
     newHeight = Math.round(newWidth / this._aspectRatio);
   } else {
-
     newWidth = Math.round(newHeight * this._aspectRatio);
   }
 
