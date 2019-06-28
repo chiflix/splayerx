@@ -34,7 +34,7 @@ export async function embeddedSrcLoader(videoSrc: string, streamIndex: number, f
     mediaHash,
   );
   return new Promise((resolve, reject) => {
-    ipcRenderer.once('extract-subtitle-response', (event: Event, response: IExtractSubtitleResponse) => {
+    ipcRenderer.once(`extract-subtitle-response-${streamIndex}`, (event: Event, response: IExtractSubtitleResponse) => {
       const { error, index, path } = response;
       if (error) reject(new Error(`${videoSrc}'s No.${index} extraction failed with ${error}.`));
       resolve(path);
