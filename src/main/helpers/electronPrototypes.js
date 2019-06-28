@@ -23,6 +23,7 @@ function keepAspectRatio(evt, newBounds) {
   evt.preventDefault();
   if (!this._aspectRatio || this.isMaximized() || this.isFullScreen()) return;
   const mousePosition = screen.getCursorScreenPoint();
+  const scaleFactor = screen.getDisplayNearestPoint(mousePosition).scaleFactor;
   const bounds = this.getBounds();
   const { width: oldWidth, height: oldHeight } = bounds;
   const [minimumWidth, minimumHeight] = this.getMinimumSize();
@@ -39,7 +40,12 @@ function keepAspectRatio(evt, newBounds) {
     newWidth = parseInt(newHeight * this._aspectRatio, 10);
   }
   const position = getPosition(bounds, mousePosition, newWidth, newHeight);
-  const finalBounds = { width: newWidth, height: newHeight, ...position };
+  const finalBounds = {
+    width: newWidth / scaleFactor,
+    height: newHeight / scaleFactor,
+    x: position.x / scaleFactor,
+    y: position.y / scaleFactor,
+  };
   this.setBounds(finalBounds);
 }
 
