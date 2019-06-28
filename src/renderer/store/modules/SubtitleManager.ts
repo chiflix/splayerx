@@ -156,6 +156,7 @@ const actions = {
   },
   async [a.refreshSubtitlesInitially]({ state, getters, dispatch, commit }: any) {
     onlineTimeout = false;
+    clearTimeout(onlineTimeoutId);
     const { playlistId, mediaItemId } = state;
     const { originSrc, primaryLanguage, secondaryLanguage } = getters;
     const preference = await retrieveSubtitlePreference(playlistId, mediaItemId);
@@ -207,7 +208,9 @@ const actions = {
   },
   /** only refresh local and online subtitles, delete old online subtitles */
   async [a.refreshSubtitles]({ state, getters, dispatch, commit }: any) {
-    primarySelectionComplete = false;;
+    onlineTimeout = false;
+    clearTimeout(onlineTimeoutId);
+    primarySelectionComplete = false;
     secondarySelectionComplete = false;
     commit(m.setIsRefreshing, true);
     addBubble(ONLINE_LOADING, store.$i18n);
