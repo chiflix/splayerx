@@ -41,10 +41,10 @@ function keepAspectRatio(evt, newBounds) {
   }
   const position = getPosition(bounds, mousePosition, newWidth, newHeight);
   const finalBounds = {
-    width: newWidth / scaleFactor,
-    height: newHeight / scaleFactor,
-    x: position.x / scaleFactor,
-    y: position.y / scaleFactor,
+    width: Math.round(newWidth / scaleFactor),
+    height: Math.round(newHeight / scaleFactor),
+    x: Math.round(position.x / scaleFactor),
+    y: Math.round(position.y / scaleFactor),
   };
   this.setBounds(finalBounds);
 }
