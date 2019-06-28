@@ -232,12 +232,13 @@ export default {
             this.eventListeners.set(event, listener);
           } else {
             const generateAudioEvent = (type: string) => (trackEvent: TrackEvent) => {
+              if (!this.$refs.video) return;
               const track = trackEvent.track as AudioTrack;
               const {
                 id, kind, label, language,
               } = track;
               let enabled;
-              if (this.lastAudioTrackId) {
+              if (this.lastAudioTrackId > 0) {
                 enabled = this.lastAudioTrackId === Number(id);
                 for (let i = 0; i < this.$refs.video.audioTracks.length; i += 1) {
                   const currentTrack = this.$refs.video.audioTracks[i];
