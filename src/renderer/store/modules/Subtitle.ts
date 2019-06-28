@@ -146,10 +146,11 @@ const actions = {
         delay: state.delay,
         hints: await generateHints(rootGetters.originSrc),
         transcriptIdentity: state.format === Format.Sagi ? state.hash : '',
-        payload: state.format === Format.Sagi ? '' : subtitle.entity.payload,
+        payload: state.format === Format.Sagi ? '' : Buffer.from(subtitle.entity.payload),
       };
-      await upload.add(uploadParam);
+      const result = await upload.add(uploadParam);
       dispatch(a.stopWatchPlayedTime);
+      return result;
     }
   },
   async [a.manualUpload]({ state, rootGetters }: any) {
@@ -164,9 +165,9 @@ const actions = {
         delay: state.delay,
         hints: await generateHints(rootGetters.originSrc),
         transcriptIdentity: state.format === Format.Sagi ? state.hash : '',
-        payload: state.format === Format.Sagi ? '' : subtitle.entity.payload,
+        payload: state.format === Format.Sagi ? '' : Buffer.from(subtitle.entity.payload),
       };
-      await upload.addManually(uploadParam);
+      return upload.addManually(uploadParam);
     }
   },
   // played time actions

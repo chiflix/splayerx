@@ -28,7 +28,7 @@ import messages from '@/locales';
 import { windowRectService } from '@/services/window/WindowRectService';
 import helpers from '@/helpers';
 import { hookVue } from '@/kerning';
-import { Video as videoActions, Subtitle as subtitleActions, SubtitleManager as smActions } from '@/store/actionTypes';
+import { Video as videoActions, Subtitle as subtitleActions, SubtitleManager as smActions, SubtitleManager } from '@/store/actionTypes';
 import { log } from '@/libs/Log';
 import asyncStorage from '@/helpers/asyncStorage';
 import { videodata } from '@/store/video';
@@ -890,10 +890,7 @@ new Vue({
             {
               label: this.$t('msg.subtitle.uploadSelectedSubtitle'),
               id: 'uploadSelectedSubtitle',
-              click: () => {
-                // TODO
-                this.$bus.$emit('upload-current-subtitle');
-              },
+              click: () => this.$store.dispatch(SubtitleManager.manualUploadAllSubtitles),
             },
           ],
         },

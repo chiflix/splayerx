@@ -83,6 +83,7 @@ export const SubtitleManager = {
   stopAISelection: 'STOP_AI_SELECTION',
   getCues: 'GET_CUES',
   updatePlayedTime: 'UPDATE_PLAYED_TIME',
+  manualUploadAllSubtitles: 'MANUAL_UPLOAD_ALL_SUBTITLES',
   clearSubtitles: 'CLEAR_SUBTITLES',
   setGlobalDelay: 'UPDATE_SUBTITLE_DELAY',
 };

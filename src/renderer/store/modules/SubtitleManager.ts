@@ -13,7 +13,7 @@ import { isEqual, get, sortBy } from 'lodash';
 import Vue from 'vue';
 import { extname } from 'path';
 import { addBubble } from '../../../shared/notificationControl';
-import { ONLINE_LOADING, REQUEST_TIMEOUT } from '../../../shared/notificationcodes';
+import { ONLINE_LOADING, REQUEST_TIMEOUT, SUBTITLE_UPLOAD, UPLOAD_SUCCESS, UPLOAD_FAILED } from '../../../shared/notificationcodes';
 import { i18n } from '@/main';
 import { LanguageCode } from '@/libs/language';
 
@@ -415,22 +415,38 @@ const actions = {
     }
     return [firstSub, secondSub];
   },
-  async [a.updatePlayedTime]({ state, dispatch, duration }: any, times: { start: number, end: number }) {
+  async [a.updatePlayedTime]({ state, dispatch, getters }: any, times: { start: number, end: number }) {
     const actions: Promise<any>[] = [];
     const { primarySubtitleId, secondarySubtitleId } = state;
     if (primarySubtitleId) actions.push(
       dispatch(`${primarySubtitleId}/${subActions.updatePlayedTime}`, times)
         .then((playedTime: number) => {
-          if (playedTime >= duration * 0.6) dispatch(`${primarySubtitleId}/${subActions.upload}`)
+          if (playedTime >= getters.duration * 0.6) {
+            addBubble(SUBTITLE_UPLOAD, i18n);
+            dispatch(`${primarySubtitleId}/${subActions.upload}`).then((result: boolean) => addBubble(result ? UPLOAD_SUCCESS : UPLOAD_FAILED, i18n));
+          }
         })
     );
     if (secondarySubtitleId) actions.push(
       dispatch(`${secondarySubtitleId}/${subActions.updatePlayedTime}`, times)
         .then((playedTime: number) => {
-          if (playedTime >= duration * 0.6) dispatch(`${secondarySubtitleId}/${subActions.upload}`)
+          if (playedTime >= getters.duration * 0.6) {
+            addBubble(SUBTITLE_UPLOAD, i18n);
+            dispatch(`${secondarySubtitleId}/${subActions.upload}`).then((result: boolean) => addBubble(result ? UPLOAD_SUCCESS : UPLOAD_FAILED, i18n));
+          }
         })
     );
     return Promise.all(actions);
+  },
+  async [a.manualUploadAllSubtitles]({ state, dispatch }: any) {
+    const actions: Promise<any>[] = [];
+    const { primarySubtitleId, secondarySubtitleId } = state;
+    if (primarySubtitleId) actions.push(dispatch(`${primarySubtitleId}/${subActions.manualUpload}`));
+    if (secondarySubtitleId) actions.push(dispatch(`${secondarySubtitleId}/${subActions.manualUpload}`));
+    return Promise.all(actions)
+      .then((result: boolean[]) => {
+        addBubble(result.every(res => res) ? UPLOAD_SUCCESS : UPLOAD_FAILED, i18n);
+      });
   },
   [a.setGlobalDelay]({ commit }: any, delta: any) {
     commit(m.setGlobalDelay, delta);
