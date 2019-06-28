@@ -175,6 +175,7 @@ export function calculatedName(item: SubtitleControlListItem, list: SubtitleCont
     name = `${codeToLanguageName(item.language)} ${romanize(sort)}`;
   }
   return name;
+}
 // season math reg
 const SEREG = /([\u005b.-\s_]s[e]?(\d+)|season(\d+)|第(\d+)季|第([零一二三四五六七八九十百千]+)季)/i;
 // episode match reg
