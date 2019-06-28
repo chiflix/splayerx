@@ -78,7 +78,7 @@ export default {
     width: 100%;
     height: 100%;
     top: 0;
-    background-color: rgba(85, 85, 85, 0.94);
+    background-color: rgba(85, 85, 85, 0.88);
   }
   .backdrop {
     background-color: rgba(0, 0, 0, 0.1);

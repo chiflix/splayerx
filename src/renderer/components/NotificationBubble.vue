@@ -316,7 +316,7 @@ export default {
 .stateContainer {
   display: flex;
   justify-content: flex-start;
-  background-color: rgba(85, 85, 85, 0.94);
+  background-color: rgba(85, 85, 85, 0.88);
   backdrop-filter: blur(8px);
   z-index: 8;
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -473,7 +473,7 @@ export default {
 
 .resultContainer {
   display: flex;
-  background-color: rgba(85, 85, 85, 0.94);
+  background-color: rgba(85, 85, 85, 0.88);
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px),
