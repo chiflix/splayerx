@@ -211,6 +211,12 @@ export default {
         }, 400);
       }
     },
+    showItemNum() {
+      if (this.firstIndex !== 0) {
+        this.tranFlag = false;
+        this.lastIndex = this.landingViewItems.length;
+      }
+    },
   },
   created() {
     this.useBlur = window.devicePixelRatio === 1;
@@ -308,8 +314,12 @@ export default {
     },
     onItemClick(index: number) {
       if (index === this.lastIndex && !this.isFullScreen) {
+        this.shifting = true;
+        this.tranFlag = true;
         this.lastIndex = this.landingViewItems.length;
       } else if (index + 1 < this.firstIndex && !this.isFullScreen) {
+        this.shifting = true;
+        this.tranFlag = true;
         this.firstIndex = 0;
       } else if (!this.filePathNeedToDelete) {
         this.openPlayList(this.landingViewItems[index].id);
@@ -318,7 +328,11 @@ export default {
     onItemDelete(index: number) {
       this.item = {};
       const [deletedItem] = this.landingViewItems.splice(index, 1);
-      if (this.firstIndex !== 0) this.lastIndex = this.landingViewItems.length;
+      if (this.firstIndex !== 0) {
+        this.shifting = true;
+        this.tranFlag = true;
+        this.lastIndex = this.landingViewItems.length;
+      }
       playInfoStorageService.deleteRecentPlayedBy(deletedItem.id);
     },
   },
