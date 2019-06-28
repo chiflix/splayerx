@@ -135,6 +135,7 @@ hookVue(Vue);
 Vue.prototype.$bus = new Vue(); // Global event bus
 Vue.prototype.$event = new EventEmitter();
 
+store.$i18n = i18n;
 
 const { mapGetters: inputMapGetters } = createNamespacedHelpers('InputPlugin');
 /* eslint-disable no-new */

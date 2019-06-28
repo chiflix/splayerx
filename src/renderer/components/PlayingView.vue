@@ -27,7 +27,6 @@ import { videodata } from '../store/video';
 export default {
   name: 'PlayingView',
   components: {
-    SubtitleRenderer,
     'the-video-controller': TheVideoController,
     'the-video-canvas': VideoCanvas,
     'subtitle-renderer': SubtitleRenderer,

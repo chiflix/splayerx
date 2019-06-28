@@ -144,10 +144,11 @@ export default {
       refAnimation: '',
       transFlag: true,
       shiftItemHovered: false,
+      continueRefresh: false,
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'originSrc', 'primarySubtitleId', 'secondarySubtitleId', 'list',
+    ...mapGetters(['winWidth', 'originSrc', 'primarySubtitleId', 'secondarySubtitleId', 'list', 'privacyAgreement',
       'calculatedNoSub', 'winHeight', 'isFirstSubtitle', 'enabledSecondarySub', 'isRefreshing',
       'winRatio', 'isRefreshing']),
     ...mapState({
@@ -301,6 +302,12 @@ export default {
     this.$refs.refreshRotate.$el.addEventListener('animationiteration', () => {
       this.count += 1;
     });
+    this.$bus.$on('subtitle-refresh-continue', () => {
+      if (this.continueRefresh) {
+        this.continueRefresh = false;
+        this.handleRefresh();
+      }
+    });
     document.addEventListener('mouseup', (e: MouseEvent) => {
       if (e.button === 0) {
         if (!this.showAttached) {
@@ -315,7 +322,9 @@ export default {
         }
       }
     });
-    this.initializeManager();
+    if (navigator.onLine) {
+      this.initializeManager();
+    }
   },
   methods: {
     ...mapActions({
@@ -328,6 +337,7 @@ export default {
       deleteCurrentSubtitle: smActions.deleteSubtitlesByUuid,
       updateNoSubtitle: subtitleActions.UPDATE_NO_SUBTITLE,
       updateSubtitleType: subtitleActions.UPDATE_SUBTITLE_TYPE,
+      addMessages: 'addMessages',
     }),
     offCurrentSubtitle() {
       if (this.isFirstSubtitle) {
@@ -346,8 +356,21 @@ export default {
       this.updateSubtitleType(!this.isFirstSubtitle);
     },
     handleRefresh() {
-      if (!this.isRefreshing) {
-        this.refreshSubtitles();
+      if (navigator.onLine) {
+        if (!this.privacyAgreement) {
+          this.$bus.$emit('privacy-confirm');
+          this.continueRefresh = true;
+        } else if (this.privacyAgreement && !this.isRefreshing) {
+          this.refreshSubtitles();
+        }
+      } else if (!navigator.onLine) {
+        // TODO
+        this.addMessages({
+          type: 'result',
+          title: this.$i18n.t('errorFile.offLine.title'),
+          content: this.$i18n.t('errorFile.offLine.content'),
+          dismissAfter: 5000,
+        });
       }
     },
     handleAnimation(anim: AnimationItem) {

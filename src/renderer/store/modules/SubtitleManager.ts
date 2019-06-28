@@ -52,7 +52,7 @@ const getters = {
   ableToPushCurrentSubtitle(state: SubtitleManagerState): boolean {
     let enable = false;
     // TODO
-    if (state.primarySubtitleId) {   
+    if (state.primarySubtitleId) {
       enable = true;
     }
     return enable;
@@ -127,6 +127,7 @@ const actions = {
     }
     const hints = generateHints(originSrc);
     await dispatch(a.deleteSubtitlesByUuid, databaseItemsToDelete);
+    // TODO getters.privacyAgreement
     const actions = [
       dispatch(a.addLocalSubtitles, await searchForLocalList(originSrc)),
       dispatch(a.addEmbeddedSubtitles, embedded ? await retrieveEmbeddedList(originSrc) : []),
@@ -148,20 +149,26 @@ const actions = {
     commit(m.setPrimarySubtitleId, '');
     commit(m.setSecondarySubtitleId, '');
     commit(m.setIsRefreshing, true);
+    dispatch('addMessages', {
+      type: 'state',
+      title: '',
+      content: store.$i18n.t('loading.content', store.$i18n.locale, store.$i18n.messages),
+      dismissAfter: 2000,
+    });
     const { list } = getters as { list: SubtitleControlListItem[] };
     const { originSrc, primaryLanguage, secondaryLanguage } = getters;
     const [primary, secondary] = list
       .filter(({ type }) => type === Type.Online)
       .reduce((subtitleList, currentSubtitle) => {
-      if (!subtitleList[0][0]) {
-        subtitleList[0].push(currentSubtitle);
-      } else if (subtitleList[0][0].language === currentSubtitle.language) {
-        subtitleList[0].push(currentSubtitle);
-      } else {
-        subtitleList[1].push(currentSubtitle);
-      }
-      return subtitleList;
-    }, [[], []] as [SubtitleControlListItem[], SubtitleControlListItem[]]);
+        if (!subtitleList[0][0]) {
+          subtitleList[0].push(currentSubtitle);
+        } else if (subtitleList[0][0].language === currentSubtitle.language) {
+          subtitleList[0].push(currentSubtitle);
+        } else {
+          subtitleList[1].push(currentSubtitle);
+        }
+        return subtitleList;
+      }, [[], []] as [SubtitleControlListItem[], SubtitleControlListItem[]]);
 
     const hints = generateHints(originSrc);
     const primaryDeletePromise = () => dispatch(a.deleteSubtitlesByUuid, primary);
