@@ -104,10 +104,10 @@
 </template>
 <script lang="ts">
 import { mapActions, mapGetters, mapState } from 'vuex';
+import { AnimationItem } from 'lottie-web';
 import { Input as InputActions, Subtitle as subtitleActions, SubtitleManager as smActions } from '@/store/actionTypes';
 import { SubtitleControlListItem, Type } from '@/interfaces/ISubtitle';
 import lottie from '@/components/lottie.vue';
-import { AnimationItem } from 'lottie-web';
 import animationData from '@/assets/subtitle.json';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import SubtitleList from '@/components/PlayingView/SubtitleList.vue';
