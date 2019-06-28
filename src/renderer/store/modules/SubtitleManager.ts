@@ -199,11 +199,12 @@ const actions = {
     ];
     dispatch(a.startAISelection);
     try {
-      await Promise.all(actions)
+      await dispatch(a.addDatabaseSubtitles, { storedList: databaseItemsToAdd, selected })
+        .then(() => Promise.all(actions))
         .then(async () => {
           if (!primarySelectionComplete || !secondarySelectionComplete) dispatch(a.stopAISelection);
           if (onlineTimeout) addBubble(REQUEST_TIMEOUT, store.$i18n);
-          await dispatch(a.addDatabaseSubtitles, { storedList: databaseItemsToAdd, selected })
+          await dispatch(a.addDatabaseSubtitles, { storedList: databaseItemsToAdd, selected });
           storeSubtitleLanguage([primaryLanguage, secondaryLanguage], playlistId, mediaItemId);
           addSubtitleItemsToList(getters.list, playlistId, mediaItemId);
           dispatch(a.checkLocalSubtitles);
