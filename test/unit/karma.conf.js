@@ -77,7 +77,7 @@ module.exports = config => {
       './index.js': ['webpack', 'sourcemap']
     },
     reporters: ['spec', 'coverage'],
-    singleRun: false,
+    singleRun: true,
     webpack: webpackConfig,
     webpackMiddleware: {
       noInfo: true
