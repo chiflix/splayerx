@@ -140,7 +140,7 @@ export class InfoDB {
           path: videoPath,
           source: 'playlist',
         };
-        const videoId = await this.add('media-item', data);
+        const videoId = await this.add('media-item', data) as number;
         playlist.items.push(videoId);
         playlist.hpaths.push(`${quickHash}-${videoPath}`);
       }
@@ -158,7 +158,7 @@ export class InfoDB {
           path: videos[0],
           source: '',
         };
-        const videoId = await this.add('media-item', data);
+        const videoId = await this.add('media-item', data) as number;
         playlist.items.push(videoId);
         playlist.hpaths.push(`${quickHash}-${videos[0]}`);
       }

@@ -91,7 +91,7 @@ export default {
         this.$store.dispatch('agreeOnPrivacyPolicy').then(() => {
           this.$electron.ipcRenderer.send('main-to-preference', this.preferenceData);
         });
-        this.$bus.$emit('subtitle-refresh-continue');
+        this.$bus.$emit('subtitle-refresh-continue', true);
         this.$emit('close-privacy-bubble');
       } else {
         this.state = 1;
@@ -104,6 +104,7 @@ export default {
         this.$store.dispatch('disagreeOnPrivacyPolicy').then(() => {
           this.$electron.ipcRenderer.send('main-to-preference', this.preferenceData);
         });
+        this.$bus.$emit('subtitle-refresh-continue', false);
         this.$emit('close-privacy-bubble');
       }
     },

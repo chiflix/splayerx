@@ -1,6 +1,7 @@
 <template>
   <base-info-card
     ref="cardWidth"
+    :use-blur="useBlur"
     :border-radius="7"
     :content-min-height="119"
     :content-min-width="cardWidth > minInfoCardWidth ? cardWidth : minInfoCardWidth"
@@ -240,12 +241,16 @@ export default {
       backAudioHover: false,
       cardWidth: 170,
       normalFont: 'Avenir, Roboto-Regular, PingFang SC, Microsoft Yahei',
+      useBlur: false,
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'currentFirstSubtitleId', 'winHeight', 'rate', 'chosenSize', 'subToTop',
-      'subtitleDelay', 'displayLanguage', 'winRatio', 'chosenStyle', 'audioTrackList', 'currentAudioTrackId',
+    ...mapGetters(['winWidth', 'primarySubtitleId', 'secondarySubtitleId', 'enabledSecondarySub', 'winHeight', 'rate', 'chosenSize', 'subToTop',
+      'displayLanguage', 'winRatio', 'chosenStyle', 'audioTrackList', 'currentAudioTrackId',
       'computedHeight', 'computedWidth', 'audioDelay', 'lastChosenSize']),
+    ...mapGetters({
+      subtitleDelay: 'globalDelay',
+    }),
     ChosenSizeContent() {
       const compareContent = ['S', 'M', 'L', 'XL'];
       const enContent = ['Small', 'Normal', 'Large', 'Extra Large'];
@@ -429,7 +434,7 @@ export default {
       return `${this.initialSize(119)}px`;
     },
     isSubtitleAvailable() {
-      return this.currentFirstSubtitleId !== '';
+      return this.primarySubtitleId !== '' || (this.secondarySubtitleId !== '' && this.enabledSecondarySub);
     },
     trackNum() {
       return this.$store.getters.audioTrackList.length;
@@ -496,6 +501,7 @@ export default {
     },
   },
   mounted() {
+    this.useBlur = window.devicePixelRatio === 1;
     this.$bus.$on('switch-audio-track', (index: number) => {
       this.switchAudioTrack(this.audioTrackList[index]);
     });

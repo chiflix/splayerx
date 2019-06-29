@@ -110,6 +110,7 @@
   </div>
 </template>
 <script lang="ts">
+import Vue from 'vue';
 import {
   mapState, mapGetters, mapActions,
   createNamespacedHelpers,
@@ -715,7 +716,7 @@ export default {
     },
     isChildComponent(element: Element) {
       let componentName = null;
-      this.$children.forEach((childComponenet: any) => {
+      this.$children.forEach((childComponenet: Vue) => {
         if (childComponenet.$el === element) {
           componentName = childComponenet.$options.name;
         }
@@ -799,7 +800,7 @@ export default {
   border-radius: 4px;
   opacity: 1;
   transition: opacity 400ms;
-  z-index: auto;
+  z-index: 1;
 }
 .play-button {
   position: absolute;
