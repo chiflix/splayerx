@@ -90,7 +90,6 @@ export default {
       const paths = subs.map((sub: { src: string, type: string }) => (sub.src));
       this.addLocalSubtitlesWithSelect(paths);
     });
-    throw new Error('sentry test');
   },
   beforeDestroy() {
     this.updateSubToTop(false);
