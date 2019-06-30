@@ -545,6 +545,7 @@
     "@babel/preset-env": "^7.0.0",
     "@babel/register": "^7.0.0",
     "@chiflix/electron": "^5.0.4",
+    "@sentry/webpack-plugin": "^1.6.2",
     "@types/chai": "^4.1.7",
     "@types/lodash": "^4.14.134",
     "@types/mkdirp": "^0.5.2",
