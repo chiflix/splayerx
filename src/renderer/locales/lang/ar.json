@@ -5,10 +5,10 @@
     "changeTrack": "مقطع صوتي",
     "chosenTrack": "افتراضي",
     "fontItems": [
-      "S",
-      "M",
-      "L",
-      "XL"
+      "",
+      "",
+      "",
+      ""
     ],
     "fontSize": "حجم الخط",
     "fontStyle": "نوع الخط",
@@ -19,10 +19,10 @@
   },
   "css": {
     "titleFontSize": {
-      "fontSize": "21px"
+      "fontSize": ""
     },
     "versionFontSize": {
-      "fontSize": "14px"
+      "fontSize": ""
     }
   },
   "errorFile": {
@@ -156,7 +156,7 @@
       "subtitleStyle": "نوع الخط",
       "uploadSelectedSubtitle": "تحميل العنوان الفرعي المحدد"
     },
-    "titleName": "SPlayer",
+    "titleName": "",
     "update": {
       "message": "أعد تشغيل التطبيق الآن لتثبيت التحديث؟",
       "no": "لا",
@@ -222,7 +222,7 @@
     "tryToDisable": {
       "button": "حسنا",
       "partOne": "يستخدم SPlayer بيانات مجهولة لتعزيز تجربة المستخدم. سيتم تعطيل الترجمة الذكية إذا كنت",
-      "partTwo": ".",
+      "partTwo": "",
       "underlinedContent": "تعارض"
     }
   },
