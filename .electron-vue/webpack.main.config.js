@@ -3,7 +3,7 @@
 process.env.BABEL_ENV = 'main'
 
 const path = require('path')
-const { dependencies, _moduleAliases } = require('../package.json')
+const { dependencies, optionalDependencies, _moduleAliases } = require('../package.json')
 const webpack = require('webpack')
 
 let mainConfig = {
@@ -13,7 +13,7 @@ let mainConfig = {
     main: path.join(__dirname, '../src/main/index.js')
   },
   externals: [
-    ...Object.keys(dependencies || {})
+    ...Object.keys(Object.assign({}, dependencies, optionalDependencies))
   ],
   module: {
     rules: [
@@ -27,6 +27,11 @@ let mainConfig = {
             formatter: require('eslint-friendly-formatter')
           }
         }
+      },
+      {
+        test: /\.ts$/,
+        exclude: /node_modules/,
+        use: 'ts-loader'
       },
       {
         test: /\.js$/,
@@ -59,7 +64,7 @@ let mainConfig = {
   },
   plugins: [],
   resolve: {
-    extensions: ['.js', '.json', '.node'],
+    extensions: ['.ts', '.js', '.json', '.node'],
     alias: _moduleAliases || {},
   },
   target: 'electron-main'
