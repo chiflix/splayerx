@@ -3,8 +3,21 @@
 process.env.BABEL_ENV = 'main'
 
 const path = require('path')
-const { dependencies, optionalDependencies, _moduleAliases } = require('../package.json')
+const childProcess = require('child_process')
 const webpack = require('webpack')
+const SentryWebpackPlugin = require('@sentry/webpack-plugin')
+const { dependencies, optionalDependencies, _moduleAliases } = require('../package.json')
+
+let release = '';
+try {
+  const result = childProcess.spawnSync('git', ['describe', '--tag', '--exact-match', '--abbrev=0']);
+  if (result.status === 0) {
+    const tag = result.stdout.toString('utf8').replace(/^\s+|\s+$/g, '');
+    if (tag) release = `SPlayer${tag}`;
+  }
+} catch(ex) {
+  console.error(ex);
+}
 
 let mainConfig = {
   mode: 'development',
@@ -88,9 +101,28 @@ if (process.env.NODE_ENV === 'production') {
   mainConfig.mode = 'production';
   mainConfig.plugins.push(
     new webpack.DefinePlugin({
+      'process.env.SENTRY_RELEASE': `"${release}"`,
       'process.env.NODE_ENV': '"production"'
     })
   )
+  if (release && process.env.SENTRY_AUTH_TOKEN) {
+    mainConfig.plugins.push(
+      new SentryWebpackPlugin({
+        release,
+        include: './dist',
+        urlPrefix: 'app:///dist/',
+        ext: ['js', 'map'],
+        ignore: ['node_modules']
+      }),
+      new SentryWebpackPlugin({
+        release,
+        include: './src',
+        urlPrefix: 'webpack:///./src/',
+        ext: ['js', 'ts', 'vue'],
+        ignore: ['node_modules']
+      })
+    );
+  }
 }
 
 module.exports = mainConfig

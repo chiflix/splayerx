@@ -128,7 +128,6 @@
     },
     "subtitle": {
       "AITranslation": "重新加载翻译结果",
-      "decreaseSubtitleDelayL": "",
       "decreaseSubtitleDelayS": "字幕延时 -0.1s",
       "disabledSecondarySub": "关闭第二字幕",
       "enabledSecondarySub": "启用第二字幕",

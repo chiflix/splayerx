@@ -144,23 +144,23 @@ export default {
     },
   },
   watch: {
-    currentCues(newValue: any) {
+    currentCues(newValue: Cue[][]) {
       const allCues = [];
       for (let i = 1; i < 10; i += 1) {
-        const firstCues: Cue[] = newValue[0]
-          .filter((cue: Cue) => (this.subToTop && [1, 2, 3]
+        const firstCues = newValue[0]
+          .filter(cue => (this.subToTop && [1, 2, 3]
             .includes(this.calculateAlignment(cue.category, cue.tags))
             ? this.calculateAlignment(cue.category, cue.tags) + 6
             : this.calculateAlignment(cue.category, cue.tags)) === i
             && !this.calculatePosition(cue.category, cue.tags));
-        const secondaryCues: Cue[] = newValue[1]
-          .filter((cue: Cue) => (this.subToTop && [1, 2, 3]
+        const secondaryCues = newValue[1]
+          .filter(cue => (this.subToTop && [1, 2, 3]
             .includes(this.calculateAlignment(cue.category, cue.tags))
             ? this.calculateAlignment(cue.category, cue.tags) + 6
             : this.calculateAlignment(cue.category, cue.tags)) === i
             && !this.calculatePosition(cue.category, cue.tags));
-        allCues.push((firstCues.length ? firstCues.map((cue: Cue) => { cue.category = 'first'; return cue; }) : [])
-          .concat(secondaryCues.length ? secondaryCues.map((cue: Cue) => { cue.category = 'secondary'; return cue; }) : []));
+        allCues.push((firstCues.length ? firstCues.map((cue) => { cue.category = 'first'; return cue; }) : [])
+          .concat(secondaryCues.length ? secondaryCues.map((cue) => { cue.category = 'secondary'; return cue; }) : []));
       }
       this.allCues = allCues;
     },

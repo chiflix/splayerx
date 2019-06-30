@@ -31,10 +31,11 @@
         class="messageContainer"
       >
         <div :class="m.type === 'result' ? 'black-gradient-result' : 'black-gradient-state'" />
-        <div :class="[
-          m.type === 'result' ? 'resultContainer' : 'stateContainer',
-          { 'backdrop': useBlur },
-        ]"
+        <div
+          :class="[
+            m.type === 'result' ? 'resultContainer' : 'stateContainer',
+            { 'backdrop': useBlur },
+          ]"
         >
           <div class="bubbleContent">
             <p

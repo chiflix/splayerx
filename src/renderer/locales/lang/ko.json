@@ -128,7 +128,6 @@
     },
     "subtitle": {
       "AITranslation": "스마트 번역 새로 고침",
-      "decreaseSubtitleDelayL": "",
       "decreaseSubtitleDelayS": "자막 지연 -0.1s",
       "disabledSecondarySub": "보조 부제목 사용 중지",
       "enabledSecondarySub": "보조 부제목 사용",
