@@ -5,10 +5,10 @@
     "changeTrack": "Pista de audio",
     "chosenTrack": "Defecto",
     "fontItems": [
-      "S",
-      "M",
-      "L",
-      "XL"
+      "",
+      "",
+      "",
+      ""
     ],
     "fontSize": "Tamaño de fuente",
     "fontStyle": "Estilo de fuente",
@@ -19,10 +19,10 @@
   },
   "css": {
     "titleFontSize": {
-      "fontSize": "21px"
+      "fontSize": ""
     },
     "versionFontSize": {
-      "fontSize": "14px"
+      "fontSize": ""
     }
   },
   "errorFile": {
@@ -79,7 +79,7 @@
       "increaseAudioDelay": "Retraso auditivo",
       "increaseVolume": "Aumenta el volumen",
       "mute": "Mudo",
-      "name": "Audio",
+      "name": "",
       "switchAudioTrack": "Cambiar la pista de audio"
     },
     "file": {
@@ -156,7 +156,7 @@
       "subtitleStyle": "Estilo de fuente",
       "uploadSelectedSubtitle": "Subir Subtítulo seleccionado"
     },
-    "titleName": "SPlayer",
+    "titleName": "",
     "update": {
       "message": "¿Reiniciar la aplicación ahora para instalar la actualización?",
       "no": "No",
@@ -166,14 +166,14 @@
     },
     "window": {
       "bossKey": "Clave de jefe",
-      "doubleSize": "200%",
+      "doubleSize": "",
       "enterFullScreen": "Ingrese a pantalla completa",
       "exitFullScreen": "Salir de pantalla completa",
-      "halfSize": "50%",
+      "halfSize": "",
       "maxmize": "Enfocar",
       "minimize": "Minimizar",
       "name": "Ventana",
-      "originSize": "100%"
+      "originSize": ""
     }
   },
   "nextVideo": {
@@ -191,7 +191,7 @@
       "setButton": "Aplicar",
       "relaunch": "Reiniciar",
       "displayLanguage": "Idioma de la pantalla",
-      "generalSetting": "General",
+      "generalSetting": "",
       "others": "Otros",
       "switchDisplayLanguages": "Mostrar idioma controla el idioma que ves en SPlayer."
     },
@@ -222,7 +222,7 @@
     "tryToDisable": {
       "button": "De acuerdo",
       "partOne": "SPlayer utiliza datos anónimos para mejorar la experiencia del usuario. La traducción inteligente se desactivará si",
-      "partTwo": ".",
+      "partTwo": "",
       "underlinedContent": "Prohibir"
     }
   },
@@ -230,7 +230,7 @@
     "folderSource": "Carpeta",
     "playing": "Jugando",
     "paused": "En pausa",
-    "playlistSource": "Playlist"
+    "playlistSource": ""
   },
   "subtitle": {
     "embedded": "Empotrar",
@@ -240,7 +240,7 @@
       "en": "Inglés",
       "es": "Español",
       "fr": "Francés",
-      "hi": "Hindi",
+      "hi": "",
       "it": "Italiano",
       "ja": "Japonés",
       "ko": "Coreano",
