@@ -1,21 +1,5 @@
 import { ipcRenderer, remote } from 'electron'; //eslint-disable-line
 
-let mouseConstructor = null;
-const isWin32 = process.platform === 'win32'; // judge which system
-
-function getMouseConstructor() {
-  if (mouseConstructor) return mouseConstructor;
-  try {
-    if (isWin32) {
-      mouseConstructor = require('win-mouse'); //eslint-disable-line
-    }
-    return mouseConstructor;
-  } catch (ex) {
-    console.error(ex);
-    return null;
-  }
-}
-
 function getRatio() {
   return window.devicePixelRatio || 1;
 }
@@ -27,9 +11,7 @@ function parentsHasClass(element, className) {
 }
 
 export default function drag(element) {
-  const mouseConstructor = getMouseConstructor();
-  if (!mouseConstructor) return () => { };
-  const mouse = mouseConstructor();
+  if (process.platform !== 'win32') return () => {};
   let offset = null;
   let windowSize = null;
   const onmousedown = (e) => {
@@ -52,14 +34,14 @@ export default function drag(element) {
 
   // 在windows系统下，正常情况win-mouse模块的left-up事件会正常触发，但是虚拟机下面
   // 有时会失效，导致拖动窗口，松开鼠标，应用窗口吸附的bug，通过mouseup，来释放拖拽
-  if (isWin32) {
-    element.addEventListener('mouseup', () => {
-      offset = null;
-      windowSize = null;
-    }, true);
-  }
+  const onmouseup = () => {
+    offset = null;
+    windowSize = null;
+  };
+  element.addEventListener('mouseup', onmouseup, true);
 
-  mouse.on('left-drag', (x, y) => {
+  ipcRenderer.on('mouse-left-drag', (evt, x, y) => {
+    console.log(x, y);
     if (!offset) return;
     x = Math.round((x / getRatio()) - offset[0]);
     y = Math.round((y / getRatio()) - offset[1]);
@@ -72,13 +54,13 @@ export default function drag(element) {
     }
   });
 
-  mouse.on('left-up', () => {
+  ipcRenderer.on('mouse-left-up', () => {
     offset = null;
     windowSize = null;
   });
 
   return () => {
     element.removeEventListener('mousedown', onmousedown);
-    mouse.destroy();
+    element.removeEventListener('mouseup', onmouseup);
   };
 }

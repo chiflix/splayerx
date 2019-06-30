@@ -478,6 +478,13 @@ function createWindow() {
   }
 }
 
+['left-drag', 'left-up'].forEach((channel) => {
+  mouse.on(channel, (...args) => {
+    if (!mainWindow || !mainWindow.webContents) return;
+    mainWindow.webContents.send(`mouse-${channel}`, ...args);
+  });
+});
+
 app.on('before-quit', () => {
   mouse.dispose();
   if (!mainWindow) return;
