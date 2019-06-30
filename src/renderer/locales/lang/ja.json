@@ -128,7 +128,6 @@
     },
     "subtitle": {
       "AITranslation": "トランスレーション結果を再読込",
-      "decreaseSubtitleDelayL": "",
       "decreaseSubtitleDelayS": "字幕ディレイ -0.1s",
       "disabledSecondarySub": "第二字幕を閉じる",
       "enabledSecondarySub": "第二字幕を開く",
