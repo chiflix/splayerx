@@ -41,7 +41,6 @@ export default function drag(element) {
   element.addEventListener('mouseup', onmouseup, true);
 
   ipcRenderer.on('mouse-left-drag', (evt, x, y) => {
-    console.log(x, y);
     if (!offset) return;
     x = Math.round((x / getRatio()) - offset[0]);
     y = Math.round((y / getRatio()) - offset[1]);
