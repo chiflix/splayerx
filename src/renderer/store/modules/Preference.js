@@ -16,7 +16,12 @@ const getters = {
   deleteVideoHistoryOnExit: state => state.deleteVideoHistoryOnExit,
   reverseScrolling: state => state.reverseScrolling,
   privacyAgreement: state => state.privacyAgreement,
-  displayLanguage: state => state.displayLanguage,
+  displayLanguage: (state) => {
+    // for backward compability
+    if (state.displayLanguage === 'zhCN') state.displayLanguage = 'zh-Hans';
+    if (state.displayLanguage === 'zhTW') state.displayLanguage = 'zh-Hant';
+    return state.displayLanguage;
+  },
   primaryLanguage: state => state.primaryLanguage,
   secondaryLanguage: state => state.secondaryLanguage,
   singleCycle: state => state.singleCycle,

@@ -24,6 +24,7 @@ const allCodes = {
     'cmn',
     'zh-CN',
     'zhCN',
+    'zh-Hans',
   ],
   'zh-TW': [
     'zh',
@@ -31,6 +32,7 @@ const allCodes = {
     'cmn',
     'zh-TW',
     'zhTW',
+    'zh-Hant',
   ],
   ja: [
     'ja',
