@@ -99,11 +99,13 @@ export default {
       }
     },
     mouseoverVideo() {
+      if (!this.$refs.videoThumbnail) return;
       this.$refs.videoThumbnail.play();
       this.notificationPlayIcon = 'notificationPlayHover';
       this.isBlur = false;
     },
     mouseoutVideo() {
+      if (!this.$refs.videoThumbnail) return;
       this.$refs.videoThumbnail.pause();
       this.notificationPlayIcon = 'notificationPlay';
       this.isBlur = true;
