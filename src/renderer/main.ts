@@ -32,8 +32,8 @@ import { Video as videoActions, Subtitle as subtitleActions, SubtitleManager as 
 import { log } from '@/libs/Log';
 import asyncStorage from '@/helpers/asyncStorage';
 import { videodata } from '@/store/video';
-import NotificationBubble, { addBubble } from '../shared/notificationControl';
-import { SNAPSHOT_FAILED, SNAPSHOT_SUCCESS } from '../shared/notificationcodes';
+import { addBubble } from './helpers/notificationControl';
+import { SNAPSHOT_FAILED, SNAPSHOT_SUCCESS } from './helpers/notificationcodes';
 import InputPlugin, { getterTypes as iGT } from '@/plugins/input';
 import { VueDevtools } from './plugins/vueDevtools.dev';
 import { SubtitleControlListItem, Type } from './interfaces/ISubtitle';
@@ -121,7 +121,6 @@ const i18n = new VueI18n({
   messages, // set locale messages
 });
 
-Vue.use(NotificationBubble, i18n);
 // Development-only devtools area
 // VueDevtools plugin
 if (process.env.NODE_ENV === 'development') {
@@ -670,7 +669,7 @@ new Vue({
                 electron.desktopCapturer.getSources(options, (error, sources) => {
                   if (error) {
                     log.info('render/main', 'Snapshot failed .');
-                    addBubble(SNAPSHOT_FAILED, this.$i18n);
+                    addBubble(SNAPSHOT_FAILED);
                   }
                   sources.forEach((source) => {
                     if (source.name === 'SPlayer') {
@@ -693,11 +692,11 @@ new Vue({
                             );
                           } else {
                             log.info('render/main', 'Snapshot failed .');
-                            addBubble(SNAPSHOT_FAILED, this.$i18n);
+                            addBubble(SNAPSHOT_FAILED);
                           }
                         } else {
                           log.info('render/main', 'Snapshot success .');
-                          addBubble(SNAPSHOT_SUCCESS, this.$i18n);
+                          addBubble(SNAPSHOT_SUCCESS);
                         }
                       });
                     }

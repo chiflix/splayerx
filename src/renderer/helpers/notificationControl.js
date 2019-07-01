@@ -18,7 +18,9 @@ import {
   SNAPSHOT_FAILED,
 } from './notificationcodes';
 
-export function addBubble(code, i18n) { // eslint-disable-line complexity
+export function addBubble(code) { // eslint-disable-line complexity
+  const i18n = store.$i18n;
+  if (!i18n) return;
   switch (code) {
     case FILE_NON_EXIST_IN_PLAYLIST:
       store.dispatch('addMessages', {
@@ -152,10 +154,5 @@ export function addBubble(code, i18n) { // eslint-disable-line complexity
       break;
   }
 }
-const NotificationBubble = {};
-NotificationBubble.install = (Vue, i18n) => {
-  Vue.prototype.$addBubble = (code) => {
-    addBubble(code, i18n);
-  };
-};
-export default NotificationBubble;
+
+window.addBubble = addBubble;

@@ -115,7 +115,8 @@ import animationData from '@/assets/subtitle.json';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import SubtitleList from '@/components/PlayingView/SubtitleList.vue';
 import Icon from '../BaseIconContainer.vue';
-import { SUBTITLE_OFFLINE } from '../../../shared/notificationcodes';
+import { addBubble } from '@/helpers/notificationControl';
+import { SUBTITLE_OFFLINE } from '@/helpers/notificationcodes';
 
 export default {
   name: 'SubtitleControl',
@@ -357,7 +358,7 @@ export default {
     handleRefresh() {
       console.log(this.isRefreshing);
       if (navigator.onLine && !this.isRefreshing) this.refreshSubtitles();
-      else if (!navigator.onLine) this.$addBubble(SUBTITLE_OFFLINE);
+      else if (!navigator.onLine) addBubble(SUBTITLE_OFFLINE);
     },
     handleAnimation(anim: AnimationItem) {
       this.anim = anim;
