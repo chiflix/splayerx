@@ -63,6 +63,7 @@ Vue.config.errorHandler = (err) => {
 };
 Vue.directive('fade-in', {
   bind(el: HTMLElement, binding: any) {
+    if (!el) return;
     const { value } = binding;
     if (value) {
       el.classList.add('fade-in');
