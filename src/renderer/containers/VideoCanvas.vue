@@ -343,14 +343,8 @@ export default {
             this.asyncTasksDone = true;
             window.close();
           });
-      } else if (!this.quit) {
-        e.returnValue = false;
-        this.$bus.$off(); // remove all listeners before back to landing view
-        // need to init Vuex States
-        this.$router.push({
-          name: 'landing-view',
-        });
-        windowRectService.uploadWindowBy(false, 'landing-view');
+      } else if (this.quit) {
+        this.$electron.remote.app.quit();
       }
     },
   },
