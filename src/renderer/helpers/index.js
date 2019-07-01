@@ -289,7 +289,7 @@ export default {
           } else if (getValidVideoRegex().test(path.extname(tempFilePath))) {
             videoFiles.push(tempFilePath);
           } else {
-            log.error('helpers/index.js', `Failed to open file : ${tempFilePath}`);
+            log.warn('helpers/index.js', `Failed to open file : ${tempFilePath}`);
             addBubble(OPEN_FAILED, this.$i18n);
           }
         });
@@ -442,12 +442,13 @@ export default {
       try {
         mediaQuickHash = await this.mediaQuickHash(vidPath);
       } catch (err) {
-        if (get(err, 'code') === 'ENOENT') {
-          log.error('helpers/index.js', 'Failed to open file, it will be removed from list.');
+        const errorCode = get(err, 'code');
+        if (errorCode === 'ENOENT') {
+          log.warn('helpers/index.js', 'Failed to open file, it will be removed from list.');
           addBubble(FILE_NON_EXIST_IN_PLAYLIST, this.$i18n);
           this.$bus.$emit('delete-file', vidPath, id);
         }
-        if (process.mas && get(err, 'code') === 'EPERM') {
+        if (process.mas && errorCode === 'EPERM') {
           this.openFilesByDialog({ defaultPath: vidPath });
         }
         return;
