@@ -16,6 +16,10 @@ import {
   LOCAL_SUBTITLE_REMOVED,
   SNAPSHOT_SUCCESS,
   SNAPSHOT_FAILED,
+  ENOSPC,
+  EACCES,
+  EPERM,
+  ENOENT,
 } from './notificationcodes';
 
 export function addBubble(code) { // eslint-disable-line complexity
@@ -148,6 +152,31 @@ export function addBubble(code) { // eslint-disable-line complexity
         title: i18n.t('snapshotFailed.title', i18n.locale, i18n.messages),
         content: i18n.t('snapshotFailed.content', i18n.locale, i18n.messages),
         dismissAfter: 2000,
+      });
+      break;
+    case ENOSPC:
+      store.dispatch('addMessages', {
+        type: 'result',
+        title: i18n.t('errorFile.ENOSPC.title', i18n.locale, i18n.messages),
+        content: i18n.t('errorFile.ENOSPC.content', i18n.locale, i18n.messages),
+        dismissAfter: 5000,
+      });
+      break;
+    case EACCES:
+    case EPERM:
+      store.dispatch('addMessages', {
+        type: 'result',
+        title: i18n.t('errorFile.EACCES.title', i18n.locale, i18n.messages),
+        content: i18n.t('errorFile.EACCES.content', i18n.locale, i18n.messages),
+        dismissAfter: 5000,
+      });
+      break;
+    case ENOENT:
+      store.dispatch('addMessages', {
+        type: 'result',
+        title: i18n.t('errorFile.ENOENT.title', i18n.locale, i18n.messages),
+        content: i18n.t('errorFile.ENOENT.content', i18n.locale, i18n.messages),
+        dismissAfter: 5000,
       });
       break;
     default:

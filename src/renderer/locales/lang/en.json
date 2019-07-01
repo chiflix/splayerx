@@ -26,6 +26,19 @@
     }
   },
   "errorFile": {
+    "ENOSPC": {
+      "content": "No enough disk space available.",
+      "title": "Open Failed"
+    },
+    "EACCES": {
+      "content": "You don't have sufficient permission.",
+      "title": "Open Failed"
+    },
+    "ENOENT": {
+      "content": "File not found.",
+      "title": "Open Failed"
+    },
+
     "addNoVideo": {
       "content": "Cannot find playable file.",
       "title": "Add File Failed"
