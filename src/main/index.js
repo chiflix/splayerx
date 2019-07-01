@@ -104,7 +104,6 @@ function markNeedToRestore() {
   fs.closeSync(fs.openSync(path.join(app.getPath('userData'), 'NEED_TO_RESTORE_MARK'), 'w'));
 }
 
-
 function registerMainWindowEvent(mainWindow) {
   if (!mainWindow) return;
   // TODO: should be able to use window.outerWidth/outerHeight directly
@@ -409,7 +408,7 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('relaunch', () => {
     const switches = process.argv.filter(a => a.startsWith('-'));
     const argv = process.argv.filter(a => !a.startsWith('-'))
-      .slice(0, process.isPackaged ? 1 : 2).concat(switches);
+      .slice(0, app.isPackaged ? 1 : 2).concat(switches);
     app.relaunch({ args: argv.slice(1), execPath: argv[0] });
     app.quit();
   });
@@ -508,7 +507,7 @@ function darwinOpenFilesToStart() {
     mainWindow.focus();
     mainWindow.webContents.send('open-file', ...filesToOpen);
     filesToOpen.splice(0, filesToOpen.length);
-  } else {
+  } else if (app.isReady()) {
     createWindow();
   }
 }
