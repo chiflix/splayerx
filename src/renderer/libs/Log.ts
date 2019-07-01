@@ -76,6 +76,7 @@ export default class Log implements ILog {
   error(label: string, message: string | Error): void {
     this.log(label, 'error', message);
     if (process.env.NODE_ENV !== 'development') {
+      Sentry.addBreadcrumb({ message: `Error label: ${label}` });
       Sentry.captureException(message);
     }
   }
