@@ -28,9 +28,15 @@ const logger = winston.createLogger({
 });
 
 export default class Log implements ILog {
-  private log(level: string, message: string, stack?: string | undefined) {
-    if (level in console) console[level](message);
-    else console.log(message);
+  private log(label: string, level: string, message: string | Error) {
+    if (level in console) console[level](label, message);
+    else console.log(label, message);
+
+    let stack;
+    if (message instanceof Error) {
+      stack = message.stack;
+      message = message.message;
+    }
 
     try {
       logger.log({
@@ -47,9 +53,20 @@ export default class Log implements ILog {
    * @param {string} label 类名或者文件名
    * @param {string} message 打印信息
    */
-  info(label: string, message: string, stack?: string | undefined): void {
-    this.log('info', message, stack);
+  info(label: string, message: string | Error): void {
+    this.log(label, 'info', message);
   }
+
+  /**
+   * @description 记录程序状态日志
+   * @author tanghaixiang
+   * @param {string} label 类名或者文件名
+   * @param {string} message 打印信息
+   */
+  warn(label: string, message: string | Error): void {
+    this.log(label, 'warn', message);
+  }
+
   /**
    * @description 记录逻辑和程序出错日志
    * @author tanghaixiang
@@ -57,15 +74,9 @@ export default class Log implements ILog {
    * @param {(string | Error)} message 错误信息
    */
   error(label: string, message: string | Error): void {
-    if (message instanceof Error) {
-      this.log('error', message.message, message.stack);
-    } else {
-      this.log('error', message);
-    }
+    this.log(label, 'error', message);
     if (process.env.NODE_ENV !== 'development') {
       Sentry.captureException(message);
-    } else {
-      console.error(message);
     }
   }
 }

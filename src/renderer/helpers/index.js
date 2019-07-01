@@ -257,8 +257,7 @@ export default {
       if (videoFiles.length !== 0) {
         await this.createPlayList(...videoFiles);
       } else {
-        // TODO: no videoFiles in folders error catch
-        log.error('helpers/index.js', 'There is no playable file in this folder.');
+        log.warn('helpers/index.js', 'There is no playable file in this folder.');
         addBubble(EMPTY_FOLDER, this.$i18n);
       }
       if (containsSubFiles) {
