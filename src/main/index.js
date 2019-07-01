@@ -11,6 +11,7 @@ import TaskQueue from '../renderer/helpers/proceduralQueue';
 import './helpers/electronPrototypes';
 import writeLog from './helpers/writeLog';
 import { getOpenedFiles } from './helpers/argv';
+import { mouse } from './helpers/mouse';
 import { getValidVideoRegex } from '../shared/utils';
 
 // requestSingleInstanceLock is not going to work for mas
@@ -477,7 +478,15 @@ function createWindow() {
   }
 }
 
+['left-drag', 'left-up'].forEach((channel) => {
+  mouse.on(channel, (...args) => {
+    if (!mainWindow || !mainWindow.webContents) return;
+    mainWindow.webContents.send(`mouse-${channel}`, ...args);
+  });
+});
+
 app.on('before-quit', () => {
+  mouse.dispose();
   if (!mainWindow) return;
   if (needToRestore) {
     mainWindow.webContents.send('quit', needToRestore);

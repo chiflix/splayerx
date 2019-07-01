@@ -4,13 +4,13 @@ process.env.BABEL_ENV = 'renderer'
 
 const path = require('path')
 const childProcess = require('child_process')
-const { dependencies, optionalDependencies } = require('../package.json')
 const webpack = require('webpack')
 const { VueLoaderPlugin } = require('vue-loader')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const SentryWebpackPlugin = require('@sentry/webpack-plugin')
+const { dependencies, optionalDependencies } = require('../package.json')
 
 let release = '';
 try {
@@ -62,18 +62,6 @@ let rendererConfig = {
   module: {
     rules: [
       {
-        test: /\.tsx?$/,
-        exclude: /node_modules/,
-        use: [
-          {
-            loader: 'ts-loader',
-            options: {
-              appendTsSuffixTo: [ /\.vue$/ ]
-            }
-          }
-        ]
-      },
-      {
         test: /\.(js|vue)$/,
         enforce: 'pre',
         exclude: /node_modules/,
@@ -94,6 +82,18 @@ let rendererConfig = {
       {
         test: /\.html$/,
         use: 'vue-html-loader'
+      },
+      {
+        test: /\.tsx?$/,
+        exclude: /node_modules/,
+        use: [
+          {
+            loader: 'ts-loader',
+            options: {
+              appendTsSuffixTo: [ /\.vue$/ ]
+            }
+          }
+        ]
       },
       {
         test: /\.js$/,
