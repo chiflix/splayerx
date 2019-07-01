@@ -94,8 +94,8 @@
         <!-- eslint-disable-next-line vue/require-component-is -->
         <component
           :is="playlistLength > 1 ? 'PlaylistItem' : 'VideoItem'"
-          v-for="({ backgroundUrl, path, playlistLength }, index) in landingViewItems"
-          :key="path"
+          v-for="({ backgroundUrl, id, playlistLength }, index) in landingViewItems"
+          :key="id"
           :backgroundUrl="backgroundUrl"
           :index="index"
           :is-in-range="index + 1 >= firstIndex && index + 1 <= lastIndex"
