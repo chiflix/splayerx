@@ -38,6 +38,27 @@ const getters = {
     }
     return '';
   },
+  previousVideo: (state, getters) => {
+    const list = state.playList;
+    const index = list.findIndex(value => value === getters.originSrc);
+    if (!getters.singleCycle) {
+      if (index - 1 >= 0 && index - 1 < list.length) {
+        return list[index - 1];
+      }
+      return list[list.length - 1];
+    }
+    return '';
+  },
+  previousVideoId: (state, getters) => {
+    const index = state.items.findIndex(value => value === getters.videoId);
+    if (!getters.singleCycle) {
+      if (index - 1 >= 0 && index - 1 < state.items.length) {
+        return state.items[index - 1];
+      }
+      return state.items[state.items.length - 1];
+    }
+    return NaN;
+  },
 };
 
 const mutations = {

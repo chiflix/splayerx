@@ -5,10 +5,14 @@ import Vue from 'vue';
 
 import { HealthCheckRequest, HealthCheckResponse } from 'sagi-api/health/v1/health_pb';
 import { HealthClient } from 'sagi-api/health/v1/health_grpc_pb';
-import { MediaTranslationRequest, MediaTranslationResponse, TranscriptRequest, TranscriptResponse } from 'sagi-api/translation/v1/translation_pb';
+import { MediaTranslationRequest, TranscriptRequest, TranscriptResponse, TranscriptInfo } from 'sagi-api/translation/v1/translation_pb';
 import { TranslationClient } from 'sagi-api/translation/v1/translation_grpc_pb';
 import { TrainingData } from 'sagi-api/training/v1/training_pb';
 import { TrainngClient } from 'sagi-api/training/v1/training_grpc_pb';
+import { SagiSubtitlePayload } from '@/services/subtitle';
+import { log } from './Log';
+
+const grpc = require('grpc');
 
 class Sagi {
   creds: any;
@@ -40,13 +44,14 @@ class Sagi {
     this.creds = combinedCreds;
   }
 
-  mediaTranslate(options: MediaTranslationRequest.AsObject): Promise<MediaTranslationResponse.TranscriptInfo.AsObject[]> {
+  mediaTranslate(options: MediaTranslationRequest.AsObject): Promise<TranscriptInfo.AsObject[]> {
     const { mediaIdentity, languageCode, hints } = options;
     const client = new TranslationClient(this.endpoint, this.creds);
     const req = new MediaTranslationRequest();
     req.setMediaIdentity(mediaIdentity);
     req.setLanguageCode(languageCode);
     req.setHints(hints);
+    log.info('Sagi.mediaTranslate', `hash-${mediaIdentity}***language-${languageCode}***hints-${hints}`);
     return new Promise((resolve, reject) => {
       client.translateMedia(req, (err, res) => {
         if (err) reject(err)
@@ -55,7 +60,7 @@ class Sagi {
     });
   }
 
-  getTranscript(options: TranscriptRequest.AsObject): Promise<TranscriptResponse.Cue.AsObject[]> {
+  getTranscript(options: TranscriptRequest.AsObject): Promise<SagiSubtitlePayload> {
     const { transcriptIdentity } = options;
     const client = new TranslationClient(this.endpoint, this.creds);
     const req = new TranscriptRequest();

@@ -2,14 +2,14 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-06-20 18:03:14
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-06-24 12:34:29
+ * @Last Modified time: 2019-06-28 17:29:08
  */
 
 import { splayerx } from 'electron';
 import path from 'path';
 import fs from 'fs';
-import { StreamingTrainingRequest } from 'sagi-api/training/v1/training_pb';
-import { TrainngClient } from 'sagi-api/training/v1/training_grpc_pb';
+import { StreamingTranslationRequest, StreamingTranslationRequestConfig } from 'sagi-api/translation/v1/translation_pb';
+import { TranslationClient } from 'sagi-api/translation/v1/translation_grpc_pb';
 
 /* eslint-disable */
 const grpc = require('grpc');
@@ -29,7 +29,7 @@ export default class AudioHandler {
     this.audioChannel = 1;
     this.rate = 16000;
     this.languageCode = '';
-    this.streamClint = null;
+    this.streamClient = null;
     this.request = null;
     this.queue = [];
     this.callback = null;
@@ -42,10 +42,12 @@ export default class AudioHandler {
     splayerx.grabAudioFrame(
       videoSrc, // 需要提取音频的视频文件路径
       `${pts}`, // seek位置
+      -1, // 音轨
       0, // 需要提取的声道, [1,8] 0代表提取所有声道
       audioChannel, // 重采样的声道[1,8] 1代表单声道
       rate, // 采样频率
       1, // 采样存储格式 0 代表 AV_SAMPLE_FMT_U8
+      200, // 一次性待提取的帧数
       handleCallBack.bind(this),
     );
   }
@@ -53,12 +55,14 @@ export default class AudioHandler {
   handleCallBack(err, framebuf, framedata) {
     if (err !== 'EOF' && framedata && framebuf) {
       const s = framedata.split(',');
-      console.log(framedata);
+      // console.log(`${this.pts},-1,0,${this.audioChannel},${this.rate},1,200 --send
+      // ${framedata} -- back
+      // ${err} -- error`);
       this.pts = s[0];
       this.request.clearStreamingConfig();
       this.request.clearAudioContent();
       this.request.setAudioContent(framebuf);
-      // this.streamClint.write(this.request);
+      this.streamClient.write(this.request);
       // setImmediate(() => {
       //   this.grabAudio();
       // });
@@ -68,10 +72,10 @@ export default class AudioHandler {
     } else if (err === 'EOF') {
       this.request.clearAudioContent();
       this.request.setAudioContent(framebuf);
-      // this.streamClint.write(this.request);
-      // this.streamClint.end();
-      this.streamClint = null;
-      this.request = null;
+      this.streamClient.write(this.request);
+      this.streamClient.end();
+      // this.streamClient = null;
+      // this.request = null;
       console.warn('EOF');
       this.callback();
     } else {
@@ -104,16 +108,19 @@ export default class AudioHandler {
     this.languageCode = data.languageCode;
     this.callback = data.callback;
     // create stream client
-    this.streamClint = this.openClient();
+    this.streamClient = this.openClient();
 
     // send config
-    this.request = new StreamingTrainingRequest();
-    this.request.setMediaIdentity(data.mediaHash);
+    this.request = new StreamingTranslationRequest();
+    const cc = new StreamingTranslationRequestConfig();
     const c = new global.proto.google.cloud.speech.v1
       .RecognitionConfig([1, this.rate, this.languageCode]);
-    this.request.setStreamingConfig(c);
-    // this.streamClint.write(this.request);
-
+    cc.setStreamingConfig(c);
+    cc.setAudioLanguageCode(this.languageCode);
+    cc.setTargetLanguageCode(this.languageCode);
+    cc.setMediaIdentity(data.mediaHash);
+    this.request.setStreamingConfig(cc);
+    this.streamClient.write(this.request);
     // start grab data
     this.pts = '0';
     this.grabAudio();
@@ -131,19 +138,34 @@ export default class AudioHandler {
     };
     const metadataCreds = grpc.credentials.createFromMetadataGenerator(metadataUpdater);
     const combinedCreds = grpc.credentials.combineChannelCredentials(sslCreds, metadataCreds);
-    const client = new TrainngClient(endpoint, combinedCreds);
-    const stream = client.streamingTraining(this.rpcCallBack.bind(this));
+    const client = new TranslationClient(endpoint, combinedCreds);
+    const stream = client.streamingTranslation();
+    stream.on('data', this.rpcDataCallBack.bind(this));
+    stream.on('end', this.rpcCallBack.bind(this));
+    // stream.write()
     return stream;
   }
 
+  rpcDataCallBack(res, err) {
+    const s = this.videoSrc;
+    console.log('data', res, err);
+    // if (res && this.queue.length > 0) {
+    //   const job = this.queue.shift();
+    //   if (job) {
+    //     this.startJob(job);
+    //   }
+    // }
+  }
+
   rpcCallBack(res, err) {
-    console.log(res, err);
-    if (res && this.queue.length > 0) {
-      const job = this.queue.shift();
-      if (job) {
-        this.startJob(job);
-      }
-    }
+    const s = this.videoSrc;
+    console.log('end', res, err);
+    // if (res && this.queue.length > 0) {
+    //   const job = this.queue.shift();
+    //   if (job) {
+    //     this.startJob(job);
+    //   }
+    // }
   }
 }
 

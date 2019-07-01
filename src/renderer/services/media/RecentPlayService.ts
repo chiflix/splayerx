@@ -10,11 +10,12 @@ export default class RecentPlayService implements IRecentPlay {
   }
   async getRecords(): Promise<LandingViewDisplayInfo[]> {
     const recentPlayedResults = await playInfoStorageService.getAllRecentPlayed();
-    const coverVideos = await Promise.all(
+    const coverVideos = (await Promise.all(
       recentPlayedResults.map(async (value) => {
-        const { items, playedIndex, id } = value;  
+        const { items, playedIndex, id } = value;
         const coverVideoId = items[playedIndex] as number;
         const mediaItem = await info.getValueByKey('media-item', coverVideoId);
+        if (!mediaItem) return null; // TODO: figure out why it wasn't saved to media-item
 
         return {
           ...mediaItem,
@@ -22,7 +23,8 @@ export default class RecentPlayService implements IRecentPlay {
           playedIndex,
           playlistLength: items.length,
         };
-      }));
+      })
+    )).filter((item) => !!item);
     const getBasename = (path: string) => basename(path, extname(path));
     const results: LandingViewDisplayInfo[] = await Promise.all(
       coverVideos.map(async (item: any): Promise<LandingViewDisplayInfo> => {

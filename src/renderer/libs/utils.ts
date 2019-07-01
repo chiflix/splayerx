@@ -1,7 +1,14 @@
 import { createHash } from 'crypto';
-import { times, padStart } from 'lodash';
+// @ts-ignore
+import romanize from 'romanize';
+import { times, padStart, sortBy } from 'lodash';
+import { sep, basename } from 'path';
 // @ts-ignore
 import { promises as fsPromises } from 'fs';
+import { SubtitleControlListItem, Type } from '@/interfaces/ISubtitle';
+import { codeToLanguageName } from './language';
+// @ts-ignore
+import nzh from 'nzh';
 
 /** 计算文本宽度
  * @description
@@ -127,4 +134,97 @@ export function timecodeFromSeconds(s: number) {
     return `${hours}:${minutes}:${seconds}`;
   }
   return `${minutes}:${seconds}`;
+}
+
+/**
+ * @description
+ * @param {string} videoSrc 视频路径
+ * @returns {string} hints
+ */
+export function generateHints(videoSrc: string): string {
+  let result = '';
+  videoSrc.split(sep).reverse().some((dirOrFileName, index) => {
+    if (index === 0) {
+      result = dirOrFileName;
+      return false;
+    }
+    if (index <= 2) {
+      result = `${dirOrFileName}${sep}${result}`;
+      return false;
+    }
+    result = `${sep}${result}`;
+    return true;
+  });
+  return result;
+}
+
+export function calculatedName(item: SubtitleControlListItem, list: SubtitleControlListItem[]): string {
+  let name = '';
+  if (item.type === Type.Local) {
+    name = basename(item.source);
+  } else if (item.type === Type.Embedded) {
+    let embeddedList = list
+      .filter((s: SubtitleControlListItem) => s.type === Type.Embedded);
+    embeddedList = sortBy(embeddedList, (s: SubtitleControlListItem) => s.source.streamIndex);
+    const sort = embeddedList.findIndex((s: SubtitleControlListItem) => s.id === item.id) + 1;
+    name = `${romanize(sort)} - ${codeToLanguageName(item.language)}`;
+  } else if (item.type === Type.Online) {
+    const sort = list
+      .filter((s: SubtitleControlListItem) => s.type === Type.Online && s.language === item.language)
+      .findIndex((s: SubtitleControlListItem) => s.id === item.id) + 1;
+    name = `${codeToLanguageName(item.language)} ${romanize(sort)}`;
+  }
+  return name;
+}
+// season math reg
+const SEREG = /([\u005b.-\s_]s[e]?(\d+)|season(\d+)|第(\d+)季|第([零一二三四五六七八九十百千]+)季)/i;
+// episode match reg
+const EPREG = /(e[p]?(\d+)[\u005d.-\s_]?|episode(\d+)|第(\d+)集|第([零一二三四五六七八九十百千]+)集)/i;
+
+/**
+ *
+ * @description 匹配路径中视频文件名称里面的season和episode
+ * @param {String} path 视频名称
+ * @returns {Object} example: {season: null, episode: "02"}
+ */
+export function parseNameFromPath(path: string) {
+  path = basename(path.trim()).replace(/\.(\w+)$/i, '.');
+  const result = {
+    season: null,
+    episode: null,
+  };
+  [
+    {
+      section: 'season',
+      pattern: SEREG,
+    },
+    {
+      section: 'episode',
+      pattern: EPREG,
+    },
+  ].forEach((item) => {
+    path = path.trim().replace(item.pattern, (match, $0, $1, $2, $3, $4) => {
+      // $0 -> matched content
+      // $1 -> first offset (\d+)
+      // $2 -> second offset (\d+)
+      // $3 -> third offset (\d+)
+      // $4 -> third offset ([零一二三四五六七八九十百千]+)
+      let p = null;
+      if ($1 !== undefined) p = parseInt($1, 10);
+      if ($2 !== undefined) p = parseInt($2, 10);
+      if ($3 !== undefined) p = parseInt($3, 10);
+      if (p !== null) {
+        result[item.section] = p < 10 ? `0${p}` : `${p}`;
+        return '';
+      }
+      if ($4) {
+        const p = nzh.cn.decodeS($4);
+        if (p > 0) result[item.section] = p < 10 ? `0${p}` : `${p}`;
+        return '';
+      }
+      if (match) return match;
+      return '';
+    });
+  });
+  return result;
 }

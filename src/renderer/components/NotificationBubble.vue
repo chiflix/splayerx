@@ -31,7 +31,12 @@
         class="messageContainer"
       >
         <div :class="m.type === 'result' ? 'black-gradient-result' : 'black-gradient-state'" />
-        <div :class="m.type === 'result' ? 'resultContainer' : `stateContainer`">
+        <div
+          :class="[
+            m.type === 'result' ? 'resultContainer' : 'stateContainer',
+            { 'backdrop': useBlur },
+          ]"
+        >
           <div class="bubbleContent">
             <p
               v-if="m.type === 'result'"
@@ -79,6 +84,7 @@ export default {
       showNextVideo: false,
       readyToShow: false, // show after video element is loaded
       showPrivacyBubble: false,
+      useBlur: false,
     };
   },
   computed: {
@@ -117,6 +123,7 @@ export default {
     },
   },
   mounted() {
+    this.useBlur = window.devicePixelRatio === 1;
     this.$bus.$on('privacy-confirm', () => {
       this.showPrivacyBubble = true;
     });
@@ -310,7 +317,7 @@ export default {
 .stateContainer {
   display: flex;
   justify-content: flex-start;
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: rgba(85, 85, 85, 0.88);
   backdrop-filter: blur(8px);
   z-index: 8;
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -318,25 +325,21 @@ export default {
   screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
     height: 32px;
     border-radius: 6px;
-    clip-path: inset(0 round 6px);
   }
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
   screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
     height: 36px;
     border-radius: 7px;
-    clip-path: inset(0 round 7px);
   }
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
   screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
     height: 43px;
     border-radius: 8px;
-    clip-path: inset(0 round 8px);
   }
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
   screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     height: 60px;
     border-radius: 11px;
-    clip-path: inset(0 round 11px);
   }
 
   .bubbleContent {
@@ -426,25 +429,21 @@ export default {
   screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
     height: 47px;
     border-radius: 6px;
-    clip-path: inset(0 round 6px);
   }
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
   screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
     height: 52px;
     border-radius: 7px;
-    clip-path: inset(0 round 7px);
   }
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
   screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
     height: 62px;
     border-radius: 8px;
-    clip-path: inset(0 round 8px);
   }
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
   screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     height: 87px;
     border-radius: 11px;
-    clip-path: inset(0 round 11px);
   }
 }
 .black-gradient-state {
@@ -455,56 +454,48 @@ export default {
   screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
     height: 32px;
     border-radius: 6px;
-    clip-path: inset(0 round 6px);
   }
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
   screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
     height: 36px;
     border-radius: 7px;
-    clip-path: inset(0 round 7px);
   }
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
   screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
     height: 43px;
     border-radius: 8px;
-    clip-path: inset(0 round 8px);
   }
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
   screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     height: 60px;
     border-radius: 11px;
-    clip-path: inset(0 round 11px);
   }
 }
 
 .resultContainer {
   display: flex;
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: rgba(85, 85, 85, 0.88);
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px),
   screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
     height: 47px;
     border-radius: 6px;
-    clip-path: inset(0 round 6px);
   }
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
   screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
     height: 52px;
     border-radius: 7px;
-    clip-path: inset(0 round 7px);
   }
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
   screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
     height: 62px;
     border-radius: 8px;
-    clip-path: inset(0 round 8px);
   }
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
   screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     height: 87px;
     border-radius: 11px;
-    clip-path: inset(0 round 11px);
   }
 
   .bubbleContent {
@@ -621,7 +612,10 @@ export default {
     }
   }
 }
-
+.backdrop {
+  background-color: rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(8px);
+}
 
 .toast-leave-active {
   position: absolute;

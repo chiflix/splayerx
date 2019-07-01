@@ -1,7 +1,7 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
-import TheProgressBar from '@/containers/TheProgressBar.vue';
 import sinon from 'sinon';
+import TheProgressBar from '@/containers/TheProgressBar.vue';
 
 describe('Component - TheProgressBar', () => {
   let sandbox;

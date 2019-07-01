@@ -1,51 +1,37 @@
 import { ILog } from '@/interfaces/ILog';
 import electron from 'electron';
 import winston from 'winston';
-import { join } from "path";
+import DailyRotateFile from 'winston-daily-rotate-file';
+import { join } from 'path';
 import Sentry from '../../shared/sentry';
-import mkdirp from 'mkdirp';
-import { checkPathExistSync, mkdirSync } from './file';
 import { ELECTRON_CACHE_DIRNAME, DEFAULT_LOG_DIRNAME } from '@/constants';
 
 const app = electron.app || electron.remote.app;
 const defaultPath = join(app.getPath(ELECTRON_CACHE_DIRNAME), DEFAULT_LOG_DIRNAME);
 
-const loggers = {};
-/** 写日志对象 */
-let logger: winston.Logger
+const transport = new DailyRotateFile({
+  filename: `${defaultPath}/%DATE%.log`,
+  datePattern: 'YYYY-MM-DD',
+  zippedArchive: true,
+  maxSize: '20m',
+  maxFiles: '14d'
+});
 
-/**
- * @description 创建日志记录对象
- * @author tanghaixiang
- * @param {string} filename 日志保存的文件名
- * @returns 
- */
-function getLogger(filename: string) {
-  if (!loggers[filename]) {
-    loggers[filename] = winston.createLogger({
-      format: winston.format.combine(winston.format.printf((info) => {
-        if (info.stack) {
-          return `${info.time} - ${info.level}: ${info.message}-${info.stack}`;
-        }
-        return `${info.time} - ${info.level}: ${info.message}`;
-      })),
-      transports: [
-        new winston.transports.File({
-          filename: `${defaultPath}/${filename}.log`,
-        }),
-      ],
-    });
-  }
-  return loggers[filename];
-}
+const logger = winston.createLogger({
+  format: winston.format.combine(winston.format.printf((info) => {
+    if (info.stack) {
+      return `${info.time} - ${info.level}: ${info.message}-${info.stack}`;
+    }
+    return `${info.time} - ${info.level}: ${info.message}`;
+  })),
+  transports: [ transport ],
+});
 
-const date = new Date();
-const time = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
-if (checkPathExistSync(defaultPath) || mkdirp.sync(defaultPath)) {
-  logger = getLogger(time)
-}
 export default class Log implements ILog {
   private log(level: string, message: string, stack?: string | undefined) {
+    if (level in console) console[level](message);
+    else console.log(message);
+
     try {
       logger.log({
         time: new Date().toISOString(),
@@ -53,11 +39,7 @@ export default class Log implements ILog {
         message: message,
         stack: stack
       });
-    } catch (error) {
-      const date = new Date();
-      const time = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
-      logger = getLogger(time);
-    }
+    } catch (error) {}
   }
   /**
    * @description 记录程序状态日志
@@ -82,6 +64,8 @@ export default class Log implements ILog {
     }
     if (process.env.NODE_ENV !== 'development') {
       Sentry.captureException(message);
+    } else {
+      console.error(message);
     }
   }
 }

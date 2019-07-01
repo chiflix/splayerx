@@ -1,0 +1,274 @@
+{
+  "advance": {
+    "audioDelay": "音頻延遲",
+    "audioMenu": "音頻選項",
+    "changeTrack": "切換軌道",
+    "chosenTrack": "默認",
+    "fontItems": [
+      "小",
+      "中",
+      "大",
+      "超大"
+    ],
+    "fontSize": "字體大小",
+    "fontStyle": "字體樣式",
+    "rateTitle": "播放速度",
+    "subDelay": "字幕延遲",
+    "subMenu": "字幕設置",
+    "track": "音軌"
+  },
+  "css": {
+    "titleFontSize": {
+      "fontSize": "21px"
+    },
+    "versionFontSize": {
+      "fontSize": "14px"
+    }
+  },
+  "errorFile": {
+    "addNoVideo": {
+      "content": "未找到可播放文件。",
+      "title": "添加錯誤"
+    },
+    "default": {
+      "content": "暫不支持該文件類型。",
+      "title": "打開錯誤"
+    },
+    "emptyFolder": {
+      "content": "未找到可播放文件。",
+      "title": "打開錯誤"
+    },
+    "fileNonExist": {
+      "content": "將從列表中移除此項目。",
+      "title": "未找到文件"
+    },
+    "playlistNonExist": {
+      "content": "该条记录已被移除。",
+      "title": "文件未找到"
+    },
+    "fileNonExistInPlaylist": {
+      "content": "已從列表中移除。",
+      "title": "部分文件未找到"
+    },
+    "loadFailed": {
+      "content": "暫不支持該字幕類型。",
+      "title": "未能加載字幕"
+    },
+    "offLine": {
+      "content": "建議您檢查網絡狀況後重試。",
+      "title": "未能連接網絡"
+    },
+    "timeout": {
+      "content": "網絡延遲或雲端異常。",
+      "title": "網絡請求超時"
+    },
+    "localSubtitleRemoved": {
+      "title": "字幕加載失敗",
+      "content": "本地字幕文件被刪除或已改名。"
+    }
+  },
+  "loading": {
+    "content": "正在智能匹配翻譯結果 ...",
+    "title": ""
+  },
+  "msg": {
+    "audio": {
+      "decreaseAudioDelay": "音頻延遲",
+      "decreaseVolume": "降低音量",
+      "defaultAudioTrack": "默認",
+      "increaseAudioDelay": "音頻延遲",
+      "increaseVolume": "提高音量",
+      "mute": "靜音",
+      "name": "音頻",
+      "switchAudioTrack": "切換音軌"
+    },
+    "file": {
+      "clearHistory": "清空播放記錄",
+      "closeWindow": "關閉",
+      "name": "文件",
+      "open": "打開文件…",
+      "openRecent": "打開最近播放",
+      "openURL": "打開 URL…"
+    },
+    "help": {
+      "name": "幫助",
+      "splayerxHelp": "幫助",
+      "shortCuts": "快捷鍵列表"
+    },
+    "playback": {
+      "backwardL": "後退 -60s",
+      "backwardS": "後退 -5s",
+      "windowRotate": "正時針旋轉 90°",
+      "captureScreen": "截圖",
+      "captureVideoClip": "截取視頻片段",
+      "decreasePlaybackSpeed": "減緩播放速度",
+      "forwardL": "前進 +60s",
+      "forwardS": "前進 +5s",
+      "fullScreen": "全屏\/退出全屏",
+      "increasePlaybackSpeed": "加快播放速度",
+      "keepPlayingWindowFront": "播放時保持在前",
+      "name": "播放",
+      "pause": "暫停",
+      "play": "播放",
+      "resetSpeed": "重置播放速度",
+      "nextVideo": "下一集",
+      "previousVideo": "上一集",
+      "singleCycle": "循環單個文件",
+      "snapShot": "截圖"
+    },
+    "splayerx": {
+      "about": "關於射手影音",
+      "feedback": "反饋",
+      "hide": "隱藏射手影音",
+      "hideOthers": "隱藏其他",
+      "homepage": "網站",
+      "preferences": "偏好設置",
+      "quit": "退出射手影音",
+      "showAll": "全部顯示"
+    },
+    "subtitle": {
+      "AITranslation": "重新加載翻譯結果",
+      "decreaseSubtitleDelayS": "字幕延時 -0.1s",
+      "disabledSecondarySub": "關閉第二字幕",
+      "enabledSecondarySub": "啟用第二字幕",
+      "increaseSubtitleDelayL": "",
+      "increaseSubtitleDelayS": "字幕延時 +0.1s",
+      "langEn": "英文",
+      "langZhCN": "中文",
+      "loadSubtitleFile": "加載字幕文件…",
+      "mainSubtitle": "第一字幕",
+      "menuLoading": "正在匹配翻譯結果 ...",
+      "name": "字幕",
+      "noSubtitle": "暫未找到翻譯結果",
+      "notToShowSubtitle": "無",
+      "secondarySubtitle": "第二字幕",
+      "size1": "小",
+      "size2": "標準",
+      "size3": "大",
+      "size4": "超大",
+      "style1": "電影風格",
+      "style2": "動漫風格",
+      "style3": "復古風格",
+      "style4": "日系風格",
+      "style5": "現代經典",
+      "subtitleSelect": "翻譯",
+      "subtitleSize": "字幕尺寸",
+      "subtitleStyle": "字幕樣式",
+      "uploadSelectedSubtitle": "上傳所選字幕"
+    },
+    "titleName": "SPlayer",
+    "update": {
+      "message": "更新已就緒，是否現在重啟?",
+      "no": "暫不更新",
+      "title": "更新就緒",
+      "updateInstalled": "播放器已更新至最新版本!",
+      "yes": "更新"
+    },
+    "window": {
+      "bossKey": "老板鍵",
+      "doubleSize": "200%",
+      "enterFullScreen": "進入全屏",
+      "exitFullScreen": "退出全屏",
+      "halfSize": "50%",
+      "maxmize": "最大化",
+      "minimize": "最小化",
+      "name": "窗口",
+      "originSize": "100%"
+    }
+  },
+  "nextVideo": {
+    "nextInFolder": "文件夾中下一視頻",
+    "nextInPlaylist": "播放列表中下一視頻"
+  },
+  "preferences": {
+    "general": {
+      "clearHistory": "退出時自動清空播放記錄",
+      "reverseScrolling": "鼠标滚轮反向",
+      "setDefault": "設為默認播放器",
+      "setDefaultDescription": "所有視頻文件都自動使用 SPlayer 打開。",
+      "restoreSettings": "抹掉所有內容和設置",
+      "restoreSettingsDescription": "刪除所有本地數據和緩存文件并重啟應用。",
+      "setButton": "應用",
+      "relaunch": "重啟",
+      "displayLanguage": "顯示語言",
+      "generalSetting": "通用設置",
+      "others": "其他",
+      "switchDisplayLanguages": "您可以在此修改射手影音播放器菜單、對話框中的顯示語言。"
+    },
+    "privacy": {
+      "languageDescription": "按以下語言提供翻譯結果，翻譯需上傳匿名信息但不會包含任何隱私數據。",
+      "languagePriority": "選擇翻譯語言",
+      "none": "無",
+      "primary": "首要語言",
+      "privacyConfirm": "啟用智能翻譯",
+      "privacySetting": "智能翻譯",
+      "secondary": "次要語言",
+      "setAsDefault": "將SPlayer設為默認播放器",
+      "settings": "設置"
+    }
+  },
+  "privacyBubble": {
+    "confirmDisable": {
+      "button": "取消",
+      "partOne": "確認",
+      "partTwo": "匿名信息和智能翻譯。",
+      "underlinedContent": "禁用"
+    },
+    "masVersion": {
+      "agree": "啟用",
+      "content": "智能翻譯功能需要您同意通過匿名方式上傳媒體信息至服務端，否則將無法使用該功能獲取翻譯結果，我們不會收集關於您個人的隱私信息。",
+      "disagree": "禁用"
+    },
+    "tryToDisable": {
+      "button": "確定",
+      "partOne": "射手影音使用匿名信息以提供更好服務，",
+      "partTwo": "匿名信息會導致智能翻譯無法使用。",
+      "underlinedContent": "禁用"
+    }
+  },
+  "recentPlaylist": {
+    "folderSource": "文件夾",
+    "playing": "正在播放",
+    "paused": "已暫停",
+    "playlistSource": "播放列表"
+  },
+  "subtitle": {
+    "embedded": "內嵌",
+    "language": {
+      "ar": "阿拉伯語",
+      "de": "德語",
+      "en": "英語",
+      "es": "西班牙語",
+      "fr": "法語",
+      "hi": "印地語",
+      "it": "義大利語",
+      "ja": "日語",
+      "ko": "韓語",
+      "pt": "葡萄牙語 (葡萄牙、巴西)",
+      "ru": "俄語",
+      "zh": "中文 (簡體)",
+      "zh-CN": "中文 (簡體)",
+      "zh-TW": "中文 (繁體)"
+    }
+  },
+  "uploading": {
+    "content": "字幕正在上傳中 ...",
+    "title": ""
+  },
+  "uploadingFailed": {
+    "content": "請稍後重試。",
+    "title": "上傳失敗"
+  },
+  "uploadingSuccess": {
+    "content": "字幕已成功上傳。",
+    "title": "上傳成功"
+  },
+  "snapshotSuccess": {
+    "content": "截圖成功",
+    "title": ""
+  },
+  "snapshotFailed": {
+    "content": "請稍後重試。",
+    "title": "截圖失敗"
+  }
+}

@@ -5,10 +5,10 @@
     "changeTrack": "مقطع صوتي",
     "chosenTrack": "افتراضي",
     "fontItems": [
-      "S",
-      "M",
-      "L",
-      "XL"
+      "",
+      "",
+      "",
+      ""
     ],
     "fontSize": "حجم الخط",
     "fontStyle": "نوع الخط",
@@ -19,10 +19,10 @@
   },
   "css": {
     "titleFontSize": {
-      "fontSize": "21px"
+      "fontSize": ""
     },
     "versionFontSize": {
-      "fontSize": "14px"
+      "fontSize": ""
     }
   },
   "errorFile": {
@@ -111,6 +111,8 @@
       "pause": "وقفة",
       "play": "لعب",
       "resetSpeed": "إعادة ضبط سرعة التشغيل",
+      "nextVideo": "الفيديو التالي",
+      "previousVideo": "الفيديو السابق",
       "singleCycle": "كرر مرة واحدة",
       "snapShot": "لمحة"
     },
@@ -121,11 +123,11 @@
       "hideOthers": "إخفاء الآخرين",
       "homepage": "موقع الكتروني",
       "preferences": "تفضيلات",
-      "quit": "قم بإنهاء برنامج SPlayer"
+      "quit": "قم بإنهاء برنامج SPlayer",
+      "showAll": "عرض الكل"
     },
     "subtitle": {
       "AITranslation": "تحديث الترجمة الذكية",
-      "decreaseSubtitleDelayL": "",
       "decreaseSubtitleDelayS": "العنوان الفرعي تأخير -0.1s",
       "disabledSecondarySub": "تعطيل الترجمة الثانوية",
       "enabledSecondarySub": "تمكين الترجمة الثانوية",
@@ -154,7 +156,7 @@
       "subtitleStyle": "نوع الخط",
       "uploadSelectedSubtitle": "تحميل العنوان الفرعي المحدد"
     },
-    "titleName": "SPlayer",
+    "titleName": "",
     "update": {
       "message": "أعد تشغيل التطبيق الآن لتثبيت التحديث؟",
       "no": "لا",
@@ -220,13 +222,14 @@
     "tryToDisable": {
       "button": "حسنا",
       "partOne": "يستخدم SPlayer بيانات مجهولة لتعزيز تجربة المستخدم. سيتم تعطيل الترجمة الذكية إذا كنت",
-      "partTwo": ".",
+      "partTwo": "",
       "underlinedContent": "تعارض"
     }
   },
   "recentPlaylist": {
     "folderSource": "مجلد",
     "playing": "تلعب",
+    "paused": "توقف",
     "playlistSource": "قائمة التشغيل"
   },
   "subtitle": {

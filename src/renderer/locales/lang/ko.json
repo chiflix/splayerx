@@ -19,10 +19,10 @@
   },
   "css": {
     "titleFontSize": {
-      "fontSize": "21px"
+      "fontSize": ""
     },
     "versionFontSize": {
-      "fontSize": "14px"
+      "fontSize": ""
     }
   },
   "errorFile": {
@@ -111,6 +111,8 @@
       "pause": "중지",
       "play": "놀이",
       "resetSpeed": "재생 속도 재설정",
+      "nextVideo": "다음 동영상",
+      "previousVideo": "이전 비디오",
       "singleCycle": "하나 반복",
       "snapShot": "스냅 샷"
     },
@@ -121,11 +123,11 @@
       "hideOthers": "다른 사람 숨기기",
       "homepage": "웹 사이트",
       "preferences": "환경 설정",
-      "quit": "SPlayer 종료"
+      "quit": "SPlayer 종료",
+      "showAll": "모두 표시"
     },
     "subtitle": {
       "AITranslation": "스마트 번역 새로 고침",
-      "decreaseSubtitleDelayL": "",
       "decreaseSubtitleDelayS": "자막 지연 -0.1s",
       "disabledSecondarySub": "보조 부제목 사용 중지",
       "enabledSecondarySub": "보조 부제목 사용",
@@ -154,7 +156,7 @@
       "subtitleStyle": "글꼴 스타일",
       "uploadSelectedSubtitle": "선택한 부제목 업로드"
     },
-    "titleName": "SPlayer",
+    "titleName": "",
     "update": {
       "message": "업데이트를 설치하려면 지금 앱을 다시 시작 하시겠습니까?",
       "no": "아니",
@@ -220,13 +222,14 @@
     "tryToDisable": {
       "button": "승인",
       "partOne": "SPlayer는 익명 데이터를 사용하여 사용자 경험을 향상시킵니다. 스마트 번역은 귀하가",
-      "partTwo": ".",
+      "partTwo": "",
       "underlinedContent": "동의하지 않는다"
     }
   },
   "recentPlaylist": {
     "folderSource": "폴더",
     "playing": "연주 중",
+    "paused": "일시 중지 된",
     "playlistSource": "재생 목록"
   },
   "subtitle": {

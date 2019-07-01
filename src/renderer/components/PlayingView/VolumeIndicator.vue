@@ -20,6 +20,7 @@
       >
         <base-info-card
           ref="card"
+          :use-blur="true"
           class="card"
         >
           <div
@@ -104,6 +105,7 @@ export default {
       inArea: false,
       mouseover: false,
       mousedown: false,
+      isMoved: false,
       canToggleMute: false,
       firstAppear: true, // appear the volume indicator when switch from LandingView to PlayingView
     };
@@ -223,35 +225,38 @@ export default {
       const containerTop = (window.innerHeight - (backgroundHeight + 26)) / 2;
       const percentOfVolume = ((window.innerHeight - e.clientY) - (containerTop) - 19)
         / this.$refs.indicatorContainer.clientHeight;
-      if (percentOfVolume > 0) {
+      if (percentOfVolume >= 0) {
         this.handleUpdateVolume(percentOfVolume * 100);
       }
       this.mousedown = true;
       this.$emit('update:volume-state', true);
-      let isMoved = false;
-      document.onmousemove = (e) => {
-        isMoved = true;
-        const percentOfVolume = ((window.innerHeight - e.clientY) - (containerTop) - 19)
-          / this.$refs.indicatorContainer.clientHeight;
-        if (percentOfVolume > 0) {
-          this.handleUpdateVolume(percentOfVolume * 100);
-        }
-      };
-      document.onmouseup = () => {
-        if (isMoved) {
-          this.$ga.event('app', 'volume', 'drag');
-        } else {
-          this.$ga.event('app', 'volume', 'mousedown');
-        }
-        document.onmousemove = null;
-        this.mousedown = false;
-        this.$emit('update:volume-state', false);
-        if (!this.inArea) this.mouseover = false;
-        this.canToggleMute = false;
-      };
+      this.isMoved = false;
+      document.addEventListener('mousemove', this.globalMousemoveHandler);
+      document.addEventListener('mouseup', this.globalMouseupHandler);
+    },
+    globalMousemoveHandler(e: MouseEvent) {
+      this.isMoved = true;
+      const backgroundHeight = 100 + ((window.innerHeight - 180) / 3);
+      const containerTop = (window.innerHeight - (backgroundHeight + 26)) / 2;
+      const percentOfVolume = ((window.innerHeight - e.clientY) - (containerTop) - 19)
+        / this.$refs.indicatorContainer.clientHeight;
+      this.handleUpdateVolume(percentOfVolume * 100);
+    },
+    globalMouseupHandler() {
+      if (this.isMoved) {
+        this.$ga.event('app', 'volume', 'drag');
+      } else {
+        this.$ga.event('app', 'volume', 'mousedown');
+      }
+      document.removeEventListener('mousemove', this.globalMousemoveHandler);
+      document.removeEventListener('mouseup', this.globalMouseupHandler);
+      this.mousedown = false;
+      this.$emit('update:volume-state', false);
+      if (!this.inArea) this.mouseover = false;
+      this.canToggleMute = false;
     },
     mouseupOnMuteIcon() {
-      if (this.canToggleMute) {
+      if (this.canToggleMute && !this.isMoved) {
         if (this.volume <= 0) {
           this.handleUpdateVolume(10);
         } else {

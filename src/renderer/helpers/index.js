@@ -12,7 +12,6 @@ import {
   EMPTY_FOLDER, OPEN_FAILED, ADD_NO_VIDEO,
   SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, FILE_NON_EXIST_IN_PLAYLIST, PLAYLIST_NON_EXIST,
 } from '@/../shared/notificationcodes';
-import Sagi from '@/libs/sagi';
 import { addBubble } from '../../shared/notificationControl';
 
 import { ipcRenderer, remote } from 'electron'; // eslint-disable-line
@@ -24,7 +23,6 @@ export default {
     return {
       clock,
       infoDB,
-      sagi: Sagi,
       showingPopupDialog: false,
       access: [],
     };
@@ -231,7 +229,7 @@ export default {
     },
     // the difference between openFolder and openFile function
     // is the way they treat the situation of empty folders and error files
-    openFolder(...folders) {
+    async openFolder(...folders) {
       const files = [];
       let containsSubFiles = false;
       const subtitleFiles = [];
@@ -257,7 +255,7 @@ export default {
         }
       }
       if (videoFiles.length !== 0) {
-        this.createPlayList(...videoFiles);
+        await this.createPlayList(...videoFiles);
       } else {
         // TODO: no videoFiles in folders error catch
         log.error('helpers/index.js', 'There is no playable file in this folder.');
@@ -267,45 +265,47 @@ export default {
         this.$bus.$emit('add-subtitles', subtitleFiles);
       }
     },
-    /* eslint-disable */
     // filter video and sub files
-    openFile(...files) {
-      let containsSubFiles = false;
-      const subtitleFiles = [];
-      const subRegex = new RegExp('\\.(srt|ass|vtt)$', 'i');
-      const videoFiles = [];
+    async openFile(...files) {
+      try {
+        let containsSubFiles = false;
+        const subtitleFiles = [];
+        const subRegex = new RegExp('\\.(srt|ass|vtt)$', 'i');
+        const videoFiles = [];
 
-      for (let i = 0; i < files.length; i += 1) {
-        if (fs.statSync(files[i]).isDirectory()) {
-          const dirPath = files[i];
-          const dirFiles = fs.readdirSync(dirPath).map(file => path.join(dirPath, file));
-          files.push(...dirFiles);
+        for (let i = 0; i < files.length; i += 1) {
+          if (fs.statSync(files[i]).isDirectory()) {
+            const dirPath = files[i];
+            const dirFiles = fs.readdirSync(dirPath).map(file => path.join(dirPath, file));
+            files.push(...dirFiles);
+          }
         }
-      }
 
-      for (let i = 0; i < files.length; i += 1) {
-        let tempFilePath = files[i];
-        let baseName = path.basename(tempFilePath);
-        if (baseName.startsWith('.') || fs.statSync(tempFilePath).isDirectory()) {
-          continue;
+        files.forEach((tempFilePath) => {
+          const baseName = path.basename(tempFilePath);
+          if (baseName.startsWith('.') || fs.statSync(tempFilePath).isDirectory()) return;
+          if (subRegex.test(path.extname(tempFilePath))) {
+            subtitleFiles.push({ src: tempFilePath, type: 'local' });
+            containsSubFiles = true;
+          } else if (getValidVideoRegex().test(path.extname(tempFilePath))) {
+            videoFiles.push(tempFilePath);
+          } else {
+            log.error('helpers/index.js', `Failed to open file : ${tempFilePath}`);
+            addBubble(OPEN_FAILED, this.$i18n);
+          }
+        });
+
+        if (videoFiles.length > 1) {
+          await this.createPlayList(...videoFiles);
+        } else if (videoFiles.length === 1) {
+          await this.openVideoFile(...videoFiles);
         }
-        if (subRegex.test(path.extname(tempFilePath))) {
-          subtitleFiles.push({ src: tempFilePath, type: 'local' });
-          containsSubFiles = true;
-        } else if (getValidVideoRegex().test(path.extname(tempFilePath))) {
-          videoFiles.push(tempFilePath);
-        } else {
-          log.error('helpers/index.js', `Failed to open file : ${tempFilePath}`);
-          addBubble(OPEN_FAILED, this.$i18n);
+        if (containsSubFiles) {
+          this.$bus.$emit('add-subtitles', subtitleFiles);
         }
-      }
-      if (videoFiles.length > 1) {
-        this.createPlayList(...videoFiles);
-      } else if (videoFiles.length === 1) {
-        this.openVideoFile(...videoFiles);
-      }
-      if (containsSubFiles) {
-        this.$bus.$emit('add-subtitles', subtitleFiles);
+      } catch (ex) {
+        log.info('openFile', ex);
+        addBubble(OPEN_FAILED, this.$i18n);
       }
     },
     // open an existed play list
@@ -316,7 +316,7 @@ export default {
         let currentVideo = await this.infoDB.get('media-item', playlist.items[playlist.playedIndex]);
 
         const deleteItems = [];
-        for (const item of playlist.items) {
+        await Promise.all(playlist.items.map(async (item) => {
           const video = await this.infoDB.get('media-item', item);
           try {
             await fsPromises.access(video.path, fs.constants.F_OK);
@@ -324,7 +324,7 @@ export default {
             deleteItems.push(item);
             this.infoDB.delete('media-item', video.videoId);
           }
-        }
+        }));
         if (deleteItems.length > 0) {
           deleteItems.forEach((id) => {
             const index = playlist.items.findIndex(videoId => videoId === id);
@@ -344,7 +344,7 @@ export default {
         }
 
         await this.playFile(currentVideo.path, currentVideo.videoId);
-        let paths = [];
+        const paths = [];
         for (const videoId of playlist.items) {
           const mediaItem = await this.infoDB.get('media-item', videoId);
           paths.push(mediaItem.path);
@@ -417,17 +417,17 @@ export default {
           });
         }
       }
-      this.playFile(videoFile, playlistItem.items[playlistItem.playedIndex]);      
+      this.playFile(videoFile, playlistItem.items[playlistItem.playedIndex]);
     },
     bookmarkAccessing(vidPath) {
       const bookmarkObj = syncStorage.getSync('bookmark');
-      if (bookmarkObj.hasOwnProperty(vidPath)) {
+      if (Object.prototype.hasOwnProperty.call(bookmarkObj, vidPath)) {
         const { app } = remote;
         const bookmark = bookmarkObj[vidPath];
         const stopAccessing = app.startAccessingSecurityScopedResource(bookmark);
         this.access.push({
           src: vidPath,
-          stopAccessing
+          stopAccessing,
         });
         this.$bus.$once(`stop-accessing-${vidPath}`, (e) => {
           get(this.access.find(item => item.src === e), 'stopAccessing')();
@@ -437,7 +437,7 @@ export default {
       }
     },
     // openFile and db operation
-    async playFile(vidPath, id) {
+    async playFile(vidPath, id) { // eslint-disable-line complexity
       let mediaQuickHash;
       if (process.mas && this.$store.getters.source !== 'drop') this.bookmarkAccessing(vidPath);
       try {
@@ -454,10 +454,13 @@ export default {
         return;
       }
       this.$store.dispatch('SRC_SET', { src: vidPath, mediaHash: mediaQuickHash, id });
-      this.$router.push({ name: 'playing-view' });
+      if (this.$router.currentRoute.name !== 'playing-view') {
+        this.$router.push({ name: 'playing-view' });
+      }
 
       if (id) {
         const value = await this.infoDB.get('media-item', id);
+        if (!value) return;
         this.$bus.$emit('new-file-open');
         if (value.lastPlayedTime) {
           this.$bus.$emit('send-lastplayedtime', value.lastPlayedTime);
@@ -486,25 +489,6 @@ export default {
       }));
       fileHandler.close();
       return res.join('-');
-    },
-    getTextWidth(fontSize, fontFamily, text) {
-      const span = document.createElement('span');
-      let result = span.offsetWidth;
-      span.style.visibility = 'hidden';
-      span.style.fontSize = fontSize;
-      span.style.fontFamily = fontFamily;
-      span.style.display = 'inline-block';
-      span.style.fontWeight = '700';
-      span.style.letterSpacing = '0.2px';
-      document.body.appendChild(span);
-      if (typeof span.textContent !== 'undefined') {
-        span.textContent = text;
-      } else {
-        span.innerText = text;
-      }
-      result = parseFloat(window.getComputedStyle(span).width) - result;
-      span.parentNode.removeChild(span);
-      return result;
     },
   },
 };

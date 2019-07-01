@@ -19,10 +19,10 @@
   },
   "css": {
     "titleFontSize": {
-      "fontSize": "21px"
+      "fontSize": ""
     },
     "versionFontSize": {
-      "fontSize": "14px"
+      "fontSize": ""
     }
   },
   "errorFile": {
@@ -104,13 +104,15 @@
       "decreasePlaybackSpeed": "再生速度の低下",
       "forwardL": "進む +60s",
       "forwardS": "進む +5s",
-      "fullScreen": "ズーム/フルスクリーンを解除",
+      "fullScreen": "ズーム\/フルスクリーンを解除",
       "increasePlaybackSpeed": "再生速度の増加",
       "keepPlayingWindowFront": "再生時に最前面に表示",
       "name": "プレイ",
       "pause": "停止",
       "play": "プレイ",
       "resetSpeed": "重置播放速度",
+      "nextVideo": "次のビデオ",
+      "previousVideo": "前のビデオ",
       "singleCycle": "リピート",
       "snapShot": "スナップショット"
     },
@@ -121,15 +123,15 @@
       "hideOthers": "その他を隠す",
       "homepage": "ホームページ",
       "preferences": "環境設定",
-      "quit": "SPlayerを終了"
+      "quit": "SPlayerを終了",
+      "showAll": "すべて表示"
     },
     "subtitle": {
       "AITranslation": "トランスレーション結果を再読込",
-      "decreaseSubtitleDelayL": "字幕ディレイ -0.5s",
       "decreaseSubtitleDelayS": "字幕ディレイ -0.1s",
       "disabledSecondarySub": "第二字幕を閉じる",
       "enabledSecondarySub": "第二字幕を開く",
-      "increaseSubtitleDelayL": "字幕ディレイ +0.5s",
+      "increaseSubtitleDelayL": "",
       "increaseSubtitleDelayS": "字幕ディレイ +0.1s",
       "langEn": "英文",
       "langZhCN": "中文",
@@ -154,7 +156,7 @@
       "subtitleStyle": "字幕スタイル",
       "uploadSelectedSubtitle": "字幕をアップロード"
     },
-    "titleName": "SPlayer",
+    "titleName": "",
     "update": {
       "message": "更新已就绪，是否现在重启?",
       "no": "暂不更新",
@@ -164,14 +166,14 @@
     },
     "window": {
       "bossKey": "ボスキー",
-      "doubleSize": "200%",
+      "doubleSize": "",
       "enterFullScreen": "フルスクリーン",
       "exitFullScreen": "フルスクリーンを解除",
-      "halfSize": "50%",
+      "halfSize": "",
       "maxmize": "最大化",
       "minimize": "最小化",
       "name": "ウィンドウ",
-      "originSize": "100%"
+      "originSize": ""
     }
   },
   "nextVideo": {
@@ -227,6 +229,7 @@
   "recentPlaylist": {
     "folderSource": "ホルダー",
     "playing": "再生中",
+    "paused": "一時停止",
     "playlistSource": "プレイリスト"
   },
   "subtitle": {

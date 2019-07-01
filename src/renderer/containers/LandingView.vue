@@ -80,6 +80,7 @@
             width:`${thumbnailWidth}px`,
             marginRight: `${marginRight}px`,
           }"
+          :class="{ 'backdrop': useBlur }"
           @click="openOrMove"
           class="button"
         >
@@ -117,7 +118,6 @@
 <script lang="ts">
 import Vue from 'vue';
 import { mapGetters } from 'vuex';
-import { HealthCheckResponse } from 'sagi-api/health/v1/health_pb';
 import { playInfoStorageService } from '@/services/storage/PlayInfoStorageService';
 import { recentPlayService } from '@/services/media/RecentPlayService';
 import Icon from '@/components/BaseIconContainer.vue';
@@ -126,6 +126,8 @@ import NotificationBubble from '@/components/NotificationBubble.vue';
 import PlaylistItem from '@/components/LandingView/PlaylistItem.vue';
 import VideoItem from '@/components/LandingView/VideoItem.vue';
 import { log } from '@/libs/Log';
+import Sagi from '@/libs/sagi';
+import { deleteSubtitlesByPlaylistId } from '../services/storage/SubtitleStorage';
 
 Vue.component('PlaylistItem', PlaylistItem);
 Vue.component('VideoItem', VideoItem);
@@ -146,6 +148,7 @@ export default {
       tranFlag: true,
       shifting: false,
       firstIndex: 0,
+      useBlur: false,
     };
   },
   computed: {
@@ -209,8 +212,15 @@ export default {
         }, 400);
       }
     },
+    showItemNum() {
+      if (this.firstIndex !== 0) {
+        this.tranFlag = false;
+        this.lastIndex = this.landingViewItems.length;
+      }
+    },
   },
   created() {
+    this.useBlur = window.devicePixelRatio === 1;
     // Get all data and show
     if (!this.$store.getters.deleteVideoHistoryOnExit) {
       recentPlayService.getRecords().then((results) => {
@@ -252,27 +262,30 @@ export default {
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [720, 405]);
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [720 / 405]);
 
-    // TODO: error handling
-    this.sagi.healthCheck().then(({ status }: HealthCheckResponse.AsObject) => {
+    Sagi.healthCheck().then((status) => {
       if (process.env.NODE_ENV !== 'production') {
         this.sagiHealthStatus = status;
         log.info('LandingView.vue', `launching: ${app.getName()} ${app.getVersion()}`);
         log.info('LandingView.vue', `sagi API Status: ${this.sagiHealthStatus}`);
       }
     });
-    window.onkeyup = (e) => {
-      if (e.keyCode === 39) {
+    window.addEventListener('keyup', this.keyboardHandler);
+  },
+  destroyed() {
+    window.removeEventListener('keyup', this.keyboardHandler);
+  },
+  methods: {
+    keyboardHandler(e: KeyboardEvent) {
+      if (e.key === 'ArrowRight') {
         this.shifting = true;
         this.tranFlag = true;
         this.lastIndex = this.landingViewItems.length;
-      } else if (e.keyCode === 37) {
+      } else if (e.key === 'ArrowLeft') {
         this.shifting = true;
         this.tranFlag = true;
         this.firstIndex = 0;
       }
-    };
-  },
-  methods: {
+    },
     open() {
       const { app } = this.$electron.remote;
       if (this.defaultDir) {
@@ -301,8 +314,12 @@ export default {
     },
     onItemClick(index: number) {
       if (index === this.lastIndex && !this.isFullScreen) {
+        this.shifting = true;
+        this.tranFlag = true;
         this.lastIndex = this.landingViewItems.length;
       } else if (index + 1 < this.firstIndex && !this.isFullScreen) {
+        this.shifting = true;
+        this.tranFlag = true;
         this.firstIndex = 0;
       } else if (!this.filePathNeedToDelete) {
         this.openPlayList(this.landingViewItems[index].id);
@@ -310,9 +327,14 @@ export default {
     },
     onItemDelete(index: number) {
       this.item = {};
-      this.landingViewItems.splice(index, 1);
-      if (this.firstIndex !== 0) this.lastIndex = this.landingViewItems.length;
-      playInfoStorageService.deleteRecentPlayedBy(this.landingViewItems[index].id);
+      const [deletedItem] = this.landingViewItems.splice(index, 1);
+      if (this.firstIndex !== 0) {
+        this.shifting = true;
+        this.tranFlag = true;
+        this.lastIndex = this.landingViewItems.length;
+      }
+      playInfoStorageService.deleteRecentPlayedBy(deletedItem.id);
+      deleteSubtitlesByPlaylistId(deletedItem.id);
     },
   },
 };
@@ -359,8 +381,10 @@ $themeColor-Light: white;
     .button {
       background-color: rgba(0, 0, 0, 0.12);
       transition: background-color 150ms ease-out;
-      backdrop-filter: blur(9.8px);
       cursor: pointer;
+    }
+    .backdrop {
+      backdrop-filter: blur(9.8px);
     }
 
     .button:hover {

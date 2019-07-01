@@ -12,6 +12,7 @@ import TaskQueue from '../renderer/helpers/proceduralQueue';
 import './helpers/electronPrototypes';
 import writeLog from './helpers/writeLog';
 import { getOpenedFiles } from './helpers/argv';
+import { mouse } from './helpers/mouse';
 import { getValidVideoRegex } from '../shared/utils';
 
 // requestSingleInstanceLock is not going to work for mas
@@ -211,6 +212,7 @@ function registerMainWindowEvent(mainWindow) {
   function extractSubtitle(videoPath, subtitlePath, index) {
     return new Promise((resolve, reject) => {
       splayerx.extractSubtitles(videoPath, subtitlePath, `0:${index}:0`, (err) => {
+        console.log('Subtitle:', subtitlePath);
         if (err === 0) reject(index);
         resolve(index);
       });
@@ -220,6 +222,8 @@ function registerMainWindowEvent(mainWindow) {
   function snapShot(info, callback) {
     let randomNumber = Math.round((Math.random() * 20) + 5);
     if (randomNumber > info.duration) randomNumber = info.duration;
+    if (!info.width) info.width = 1920;
+    if (!info.height) info.height = 1080;
     const numberString = timecodeFromSeconds(randomNumber);
     splayerx.snapshotVideo(
       info.path, info.imgPath, numberString, `${info.width}`, `${info.height}`,
@@ -271,11 +275,12 @@ function registerMainWindowEvent(mainWindow) {
     if (!fs.existsSync(subtitleFolderPath)) fs.mkdirSync(subtitleFolderPath);
     console.log(subtitleFolderPath);
     const subtitlePath = path.join(subtitleFolderPath, `embedded-${index}.${format}`);
-    if (fs.existsSync(subtitlePath)) event.sender.send('extract-subtitle-response', { error: null, index, path: subtitlePath });
+    console.log(subtitlePath);
+    if (fs.existsSync(subtitlePath)) event.sender.send(`extract-subtitle-response-${index}`, { error: null, index, path: subtitlePath });
     else {
       embeeddSubtitlesQueue.add(() => extractSubtitle(videoPath, subtitlePath, index)
-        .then(index => event.sender.send('extract-subtitle-response', { error: null, index, path: subtitlePath }))
-        .catch(index => event.sender.send('extract-subtitle-response', { error: 'error', index })));
+        .then(index => event.sender.send(`extract-subtitle-response-${index}`, { error: null, index, path: subtitlePath }))
+        .catch(index => event.sender.send(`extract-subtitle-response-${index}`, { error: 'error', index })));
     }
   });
 
@@ -423,10 +428,10 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('grab-audio', (events, args) => {
     audioHandler.push(args, () => {
       splayerx.getMediaInfo(args.videoSrc, (info) => {
-        const streams = JSON.parse(info).streams.find(e => e.codec_type === 'audio');
-        const coustTime = (Date.now() - args.time) / 1000;
-        console.warn(streams);
-        console.warn(`提取音频花费 ${coustTime}s`);
+        // const streams = JSON.parse(info).streams.find(e => e.codec_type === 'audio');
+        // const coustTime = (Date.now() - args.time) / 1000;
+        // console.warn(streams);
+        // console.warn(`提取音频花费 ${coustTime}s`);
         mainWindow.webContents.send('grab-audio-complete', args);
       });
     });
@@ -486,7 +491,16 @@ function createWindow() {
   }
 }
 
+['left-drag', 'left-up'].forEach((channel) => {
+  mouse.on(channel, (...args) => {
+    if (!mainWindow || !mainWindow.webContents) return;
+    mainWindow.webContents.send(`mouse-${channel}`, ...args);
+  });
+});
+
 app.on('before-quit', () => {
+  mouse.dispose();
+  if (!mainWindow) return;
   if (needToRestore) {
     mainWindow.webContents.send('quit', needToRestore);
   } else {
@@ -560,16 +574,3 @@ app.on('activate', () => {
     mainWindow.show();
   }
 });
-
-/**
- * 闪退报告
- */
-if (process.env.NODE_ENV !== 'development') {
-  app.setPath('temp', userDataPath);
-  crashReporter.start({
-    companyName: 'Sagittarius Tech LLC.',
-    productName: 'SPlayer',
-    ignoreSystemCrashHandler: true,
-    submitURL: 'https://sentry.io/api/1449341/minidump/?sentry_key=6a94feb674b54686a6d88d7278727b7c',
-  });
-}

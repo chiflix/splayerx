@@ -36,8 +36,8 @@ module.exports = {
     'no-debugger': process.env.NODE_ENV === 'production' ? 2 : 0,
     // force the use of unix linebreak-syle
     'linebreak-style': ['error', 'unix'],
-    // limit the cyclomatic complexity to 10
-    'complexity': ['error', { max: 10 }],
+    // limit the cyclomatic complexity to 15
+    'complexity': ['error', { max: 15 }],
     // allow dangling after this and super
     'no-underscore-dangle': ['error', { allowAfterThis: true, allowAfterSuper: true }],
     // allow for-of and await in for-of loop
@@ -59,6 +59,19 @@ module.exports = {
         'EVENTS',
         'CONTENT'
       ]
-    }]
+    }],
+    // can use types to define Obejct
+    '@typescript-eslint/prefer-interface': 0,
+    // JSON style for interfaces && types
+    '@typescript-eslint/member-delimiter-style': {
+      'multiline': {
+        'delimiter': 'comma',
+        'requireLast': true
+      },
+      'singleline': {
+        "delimiter": 'comma',
+        'requireLast': false
+      }
+    },
   }
 }

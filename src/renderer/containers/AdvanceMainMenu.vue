@@ -1,6 +1,7 @@
 <template>
   <base-info-card
     ref="cardWidth"
+    :use-blur="useBlur"
     :border-radius="7"
     :content-min-height="119"
     :content-min-width="cardWidth > minInfoCardWidth ? cardWidth : minInfoCardWidth"
@@ -240,12 +241,16 @@ export default {
       backAudioHover: false,
       cardWidth: 170,
       normalFont: 'Avenir, Roboto-Regular, PingFang SC, Microsoft Yahei',
+      useBlur: false,
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'currentFirstSubtitleId', 'winHeight', 'rate', 'chosenSize', 'subToTop',
-      'subtitleDelay', 'displayLanguage', 'winRatio', 'chosenStyle', 'audioTrackList', 'currentAudioTrackId',
+    ...mapGetters(['winWidth', 'primarySubtitleId', 'secondarySubtitleId', 'enabledSecondarySub', 'winHeight', 'rate', 'chosenSize', 'subToTop',
+      'displayLanguage', 'winRatio', 'chosenStyle', 'audioTrackList', 'currentAudioTrackId',
       'computedHeight', 'computedWidth', 'audioDelay', 'lastChosenSize']),
+    ...mapGetters({
+      subtitleDelay: 'globalDelay',
+    }),
     ChosenSizeContent() {
       const compareContent = ['S', 'M', 'L', 'XL'];
       const enContent = ['Small', 'Normal', 'Large', 'Extra Large'];
@@ -429,7 +434,7 @@ export default {
       return `${this.initialSize(119)}px`;
     },
     isSubtitleAvailable() {
-      return this.currentFirstSubtitleId !== '';
+      return this.primarySubtitleId !== '' || (this.secondarySubtitleId !== '' && this.enabledSecondarySub);
     },
     trackNum() {
       return this.$store.getters.audioTrackList.length;
@@ -496,6 +501,7 @@ export default {
     },
   },
   mounted() {
+    this.useBlur = window.devicePixelRatio === 1;
     this.$bus.$on('switch-audio-track', (index: number) => {
       this.switchAudioTrack(this.audioTrackList[index]);
     });
@@ -514,20 +520,20 @@ export default {
     updatePCVideoScaleByFactors(index: number) {
       const firstFactors = [21, 29, 37, 45];
       const secondFactors = [24, 26, 28, 30];
-      this.updateSubScale(`${(((firstFactors[index] / 900) * this.computedVideoSize)
-        + (secondFactors[index] / 5)) / 9}`);
+      this.updateSubScale((((firstFactors[index] / 900) * this.computedVideoSize)
+        + (secondFactors[index] / 5)) / 9);
     },
     // update video scale that height is larger than width
     updateMobileVideoScaleByFactors(index: number) {
       const firstFactors = [21, 29, 37, 45];
       const secondFactors = [12, -92, -196, -300];
-      this.updateSubScale(`${(((firstFactors[index] / 760) * this.computedVideoSize)
-        + (secondFactors[index] / 76)) / 9}`);
+      this.updateSubScale((((firstFactors[index] / 760) * this.computedVideoSize)
+        + (secondFactors[index] / 76)) / 9);
     },
     // update video scale when width or height is larger than 1080
     updateVideoScaleByFactors(val: number) {
       const factors = [30, 40, 50, 60];
-      this.updateSubScale(`${((val / 1080) * factors[this.chosenSize]) / 9}`);
+      this.updateSubScale(((val / 1080) * factors[this.chosenSize]) / 9);
     },
     switchAudioTrack(track: {id: string; kind: string; label: string;
       language: string; name: string; enabled: boolean;}) {

@@ -111,6 +111,8 @@
       "pause": "Pause",
       "play": "Play",
       "resetSpeed": "Reset Playback Speed",
+      "nextVideo": "Next Video",
+      "previousVideo": "Previous Video",
       "singleCycle": "Repeat One",
       "snapShot": "Snapshot"
     },
@@ -121,11 +123,11 @@
       "hideOthers": "Hide Others",
       "homepage": "Website",
       "preferences": "Preferences",
-      "quit": "Quit SPlayer"
+      "quit": "Quit SPlayer",
+      "showAll": "Show All"
     },
     "subtitle": {
       "AITranslation": "Reload Smart Translation",
-      "decreaseSubtitleDelayL": "",
       "decreaseSubtitleDelayS": "Subtitle Delay -0.1s",
       "disabledSecondarySub": "Disable Secondary Subtitle",
       "enabledSecondarySub": "Enable Secondary Subtitle",
@@ -227,6 +229,7 @@
   "recentPlaylist": {
     "folderSource": "Folder",
     "playing": "Playing",
+    "paused": "Paused",
     "playlistSource": "Playlist"
   },
   "subtitle": {

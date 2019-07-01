@@ -26,6 +26,7 @@
       :display-state="displayState.RecentPlaylist"
       :mousemove-client-position="mousemoveClientPosition"
       :is-dragging="isDragging"
+      :paused="paused"
       :last-dragging.sync="lastDragging"
       v-bind.sync="widgetsStatus.RecentPlaylist"
       @can-hover-item="cancelPlayListTimeout"
@@ -44,7 +45,7 @@
       :is-focused="isFocused"
       :paused="paused"
       :attached-shown="attachedShown"
-      :handle-mouse-up="togglePlay"
+      :on-play-button-mouseup="togglePlay"
       @update:playbutton-state="updatePlayButtonState"
       :class="`${showAllWidgets ? 'play-button no-drag' : 'play-button'}`"
     />
@@ -109,13 +110,14 @@
   </div>
 </template>
 <script lang="ts">
+import Vue from 'vue';
 import {
   mapState, mapGetters, mapActions,
   createNamespacedHelpers,
 } from 'vuex';
+import path from 'path';
 import { Input as inputActions, Video as videoActions } from '@/store/actionTypes';
 import { INPUT_COMPONENT_TYPE, getterTypes as iGT } from '@/plugins/input';
-import path from 'path';
 import Titlebar from '@/components/Titlebar.vue';
 import PlayButton from '@/components/PlayingView/PlayButton.vue';
 import VolumeIndicator from '@/components/PlayingView/VolumeIndicator.vue';
@@ -129,6 +131,11 @@ import NotificationBubble from '@/components/NotificationBubble.vue';
 import { videodata } from '@/store/video';
 
 const { mapGetters: inputMapGetters } = createNamespacedHelpers('InputPlugin');
+/** dom wrapper */
+type NamedComponent = {
+  name: string,
+  element: Element,
+};
 
 export default {
   name: 'TheVideoController',
@@ -317,6 +324,7 @@ export default {
       this.lastMouseupWidget = oldVal;
     },
     tempRecentPlaylistDisplayState(val: boolean) {
+      this.$event.emit('playlist-display-state', val);
       this.updateMinimumSize();
       if (!val) {
         clearTimeout(this.openPlayListTimeId);
@@ -362,7 +370,7 @@ export default {
     });
     this.createTouchBar();
     this.UIElements = this.getAllUIComponents(this.$refs.controller);
-    this.UIElements.forEach((value: any) => {
+    this.UIElements.forEach((value: NamedComponent) => {
       this.displayState[value.name] = value.name !== 'RecentPlaylist';
       if (value.name === 'PlaylistControl' && !this.playingList.length) {
         this.displayState.PlaylistControl = false;
@@ -688,7 +696,7 @@ export default {
     handleKeyup({ code }: { code: number }) {
       this.updateKeyup({ releasedKeyboardCode: code });
     },
-    handleWheel({ target, timeStamp }: { target: any; timeStamp: number }) {
+    handleWheel({ target, timeStamp }: { target: Element; timeStamp: number }) {
       this.updateWheel({
         componentName: this.getComponentName(target),
         timestamp: timeStamp,
@@ -696,26 +704,26 @@ export default {
       });
     },
     // Helper functions
-    getAllUIComponents(rootElement: any) {
+    getAllUIComponents(rootElement: Element) {
       const { children } = rootElement;
-      const names: any[] = [];
+      const names: NamedComponent[] = [];
       for (let i = 0; i < children.length; i += 1) {
-        this.processSingleElement(children[i]).forEach((componentName: any) => {
+        this.processSingleElement(children[i]).forEach((componentName: NamedComponent) => {
           names.push(componentName);
         });
       }
       return names;
     },
-    isChildComponent(element: any) {
+    isChildComponent(element: Element) {
       let componentName = null;
-      this.$children.forEach((childComponenet: any) => {
+      this.$children.forEach((childComponenet: Vue) => {
         if (childComponenet.$el === element) {
           componentName = childComponenet.$options.name;
         }
       });
       return componentName;
     },
-    processSingleElement(element: any) {
+    processSingleElement(element: Element) {
       const names = [];
       const name = this.isChildComponent(element);
       if (name) {
@@ -731,11 +739,11 @@ export default {
       }
       return names;
     },
-    getComponentName(element: any) {
+    getComponentName(element: Element) {
       let componentName = this.$options.name;
       if (element instanceof HTMLElement || element instanceof SVGElement) {
         /* eslint-disable consistent-return */
-        this.UIElements.forEach((UIElement: any) => {
+        this.UIElements.forEach((UIElement: NamedComponent) => {
           if (UIElement.element.contains(element)) {
             componentName = UIElement.name;
             return componentName;
@@ -792,7 +800,7 @@ export default {
   border-radius: 4px;
   opacity: 1;
   transition: opacity 400ms;
-  z-index: auto;
+  z-index: 1;
 }
 .play-button {
   position: absolute;

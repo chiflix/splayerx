@@ -1,8 +1,8 @@
 import Vue from 'vue';
 
-import Helpers from '@/helpers';
 import romanize from 'romanize';
 import isEqual from 'lodash/isEqual';
+import { mediaQuickHash } from '@/libs/utils';
 import { Video as videoMutations } from '../mutationTypes';
 import { Video as videoActions, Subtitle as subtitleActions } from '../actionTypes';
 
@@ -205,7 +205,7 @@ const actions = {
         commit(videoMutations.SRC_UPDATE, src);
         commit(
           videoMutations.MEDIA_HASH_UPDATE,
-          mediaHash || await Helpers.methods.mediaQuickHash(src),
+          mediaHash || await mediaQuickHash(src),
         );
         commit(videoMutations.ID_UPDATE, id);
         dispatch(subtitleActions.INITIALIZE_VIDEO_SUBTITLE_MAP, { videoSrc: src });

@@ -14,10 +14,10 @@
 </template>
 <script lang="ts">
 import { mapState } from 'vuex';
+import { AnimationItem } from 'lottie-web';
 import lottie from '@/components/lottie.vue';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import animationData from '@/assets/playlist.json';
-import { AnimationItem } from 'lottie-web';
 
 export default {
   name: 'PlaylistControl',
@@ -48,19 +48,21 @@ export default {
       this.anim = anim;
     },
     togglePlaylistDisplay() {
-      this.clicks = this.showAttached ? 1 : 0;
-      this.clicks += 1;
-      switch (this.clicks) {
-        case 1:
-          this.$emit('update:showAttached', true);
-          break;
-        case 2:
-          this.$emit('update:showAttached', false);
-          this.clicks = 0;
-          break;
-        default:
-          this.clicks = 0;
-          break;
+      if (this.mouseDown) {
+        this.clicks = this.showAttached ? 1 : 0;
+        this.clicks += 1;
+        switch (this.clicks) {
+          case 1:
+            this.$emit('update:showAttached', true);
+            break;
+          case 2:
+            this.$emit('update:showAttached', false);
+            this.clicks = 0;
+            break;
+          default:
+            this.clicks = 0;
+            break;
+        }
       }
     },
     handleDown() {
