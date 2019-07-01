@@ -166,13 +166,13 @@ function registerMainWindowEvent(mainWindow) {
       },
     );
   }
-  function thumbnailTaskCallback() {
+  function thumbnailTaskCallback(event) {
     const cb = (ret, src) => {
       thumbnailTask.shift();
       if (thumbnailTask.length > 0) {
         thumbnail(thumbnailTask[0], cb);
       }
-      if (ret === '0') {
+      if (ret === '0' && !event.sender.isDestroyed()) {
         mainWindow.webContents.send('thumbnail-saved', src);
       }
     };
@@ -181,7 +181,7 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('generateThumbnails', (event, args) => {
     if (thumbnailTask.length === 0) {
       thumbnailTask.push(args);
-      thumbnailTaskCallback();
+      thumbnailTaskCallback(event);
     } else {
       thumbnailTask.splice(1, 1, args);
     }
