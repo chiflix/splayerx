@@ -123,7 +123,7 @@ export default {
     this.updatePlayinglistRate({ oldDir: '', newDir: path.dirname(this.originSrc), playingList: this.playingList });
   },
   mounted() {
-    this.$electron.ipcRenderer.on('quit', (needToRestore: boolean) => {
+    this.$electron.ipcRenderer.on('quit', (e: Event, needToRestore: boolean) => {
       if (needToRestore) this.needToRestore = needToRestore;
       this.quit = true;
     });
@@ -324,6 +324,7 @@ export default {
     },
     beforeUnloadHandler(e: Event) {
       if (!this.asyncTasksDone && !this.needToRestore) {
+        e.returnValue = false;
         let savePromise = this.saveScreenshot(this.playListId, this.videoId);
         if (process.mas && this.$store.getters.source === 'drop') {
           savePromise = savePromise.then(async () => {
@@ -340,7 +341,6 @@ export default {
             this.asyncTasksDone = true;
             window.close();
           });
-        e.returnValue = false;
       } else if (!this.quit) {
         e.returnValue = false;
         this.$bus.$off(); // remove all listeners before back to landing view
