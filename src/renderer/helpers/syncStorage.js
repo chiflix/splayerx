@@ -2,6 +2,7 @@ import path from 'path';
 import fs from 'fs';
 import _ from 'lodash';
 import { log } from '@/libs/Log';
+import { addBubble } from '@/helpers/notificationControl';
 
 /* eslint-disable */
 const electron = require('electron');
@@ -46,7 +47,8 @@ function getSync(key) {
       if (err.code === 'ENOENT') {
         data = JSON.stringify({});
       } else {
-        log.error('syncStorage', err);
+        log.warn('syncStorage', err);
+        addBubble(err.code);
         throw err;
       }
     }
@@ -68,7 +70,8 @@ function setSync(key, json) {
   } catch (err) {
     if (err instanceof Error) {
       if (err.code !== 'EEXIST') {
-        log.error('syncStorage', err);
+        log.warn('syncStorage', err);
+        addBubble(err.code);
       }
     }
   } finally {

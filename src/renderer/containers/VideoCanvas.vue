@@ -301,17 +301,18 @@ export default {
       };
 
       const result = await playInfoStorageService.updateMediaItemBy(videoId, data as MediaItem);
-      if (result) {
-        this.$bus.$emit('database-saved');
+      if (result) this.$bus.$emit('database-saved');
+
+      if (!Number.isNaN(playlistId)) {
+        const playlistRecord = await playInfoStorageService.getPlaylistRecord(playlistId);
+        const recentPlayedData = {
+          ...playlistRecord,
+          items: this.isFolderList ? [videoId] : this.items,
+          playedIndex: this.isFolderList ? 0 : this.playingIndex,
+        };
+        await playInfoStorageService
+          .updateRecentPlayedBy(playlistId, recentPlayedData as PlaylistItem);
       }
-      const playlistRecord = await playInfoStorageService.getPlaylistRecord(playlistId);
-      const recentPlayedData = {
-        ...playlistRecord,
-        items: this.isFolderList ? [videoId] : this.items,
-        playedIndex: this.isFolderList ? 0 : this.playingIndex,
-      };
-      await playInfoStorageService
-        .updateRecentPlayedBy(playlistId, recentPlayedData as PlaylistItem);
     },
     saveSubtitleStyle() {
       return settingStorageService.updateSubtitleStyle({

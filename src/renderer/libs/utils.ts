@@ -103,10 +103,11 @@ export function generateShortCutImageBy(video: HTMLVideoElement, canvas: HTMLCan
   return result;
 }
 
+function md5Hex(text: Buffer) {
+  return createHash('md5').update(text).digest('hex');
+}
+
 export async function mediaQuickHash(filePath: string) {
-  function md5Hex(text: Buffer) {
-    return createHash('md5').update(text).digest('hex');
-  }
   const fileHandler = await fsPromises.open(filePath, 'r');
   const len = (await fsPromises.stat(filePath)).size;
   const position = [

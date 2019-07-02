@@ -104,7 +104,6 @@ function markNeedToRestore() {
   fs.closeSync(fs.openSync(path.join(app.getPath('userData'), 'NEED_TO_RESTORE_MARK'), 'w'));
 }
 
-
 function registerMainWindowEvent(mainWindow) {
   if (!mainWindow) return;
   // TODO: should be able to use window.outerWidth/outerHeight directly
@@ -172,7 +171,7 @@ function registerMainWindowEvent(mainWindow) {
       if (thumbnailTask.length > 0) {
         thumbnail(thumbnailTask[0], cb);
       }
-      if (ret === '0') {
+      if (mainWindow && !mainWindow.webContents.isDestroyed() && ret === '0') {
         mainWindow.webContents.send('thumbnail-saved', src);
       }
     };
@@ -312,7 +311,8 @@ function registerMainWindowEvent(mainWindow) {
     mainWindow.setPosition(...args);
     event.sender.send('windowPositionChange-asyncReply', mainWindow.getPosition());
   });
-  ipcMain.on('windowInit', () => {
+  ipcMain.on('windowInit', (event) => {
+    if (!mainWindow || event.sender.isDestroyed()) return;
     mainWindow.webContents.send('mainCommit', 'windowSize', mainWindow.getSize());
     mainWindow.webContents.send('mainCommit', 'windowMinimumSize', mainWindow.getMinimumSize());
     mainWindow.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
@@ -409,17 +409,17 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('relaunch', () => {
     const switches = process.argv.filter(a => a.startsWith('-'));
     const argv = process.argv.filter(a => !a.startsWith('-'))
-      .slice(0, process.isPackaged ? 1 : 2).concat(switches);
+      .slice(0, app.isPackaged ? 1 : 2).concat(switches);
     app.relaunch({ args: argv.slice(1), execPath: argv[0] });
     app.quit();
   });
   ipcMain.on('preference-to-main', (e, args) => {
-    if (mainWindow) {
+    if (mainWindow && !mainWindow.webContents.isDestroyed()) {
       mainWindow.webContents.send('mainDispatch', 'setPreference', args);
     }
   });
   ipcMain.on('main-to-preference', (e, args) => {
-    if (preferenceWindow) {
+    if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
       preferenceWindow.webContents.send('preferenceDispatch', 'setPreference', args);
     }
   });
@@ -480,14 +480,14 @@ function createWindow() {
 
 ['left-drag', 'left-up'].forEach((channel) => {
   mouse.on(channel, (...args) => {
-    if (!mainWindow || !mainWindow.webContents) return;
+    if (!mainWindow || !mainWindow.webContents.isDestroyed()) return;
     mainWindow.webContents.send(`mouse-${channel}`, ...args);
   });
 });
 
 app.on('before-quit', () => {
   mouse.dispose();
-  if (!mainWindow) return;
+  if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
   if (needToRestore) {
     mainWindow.webContents.send('quit', needToRestore);
   } else {
@@ -508,7 +508,7 @@ function darwinOpenFilesToStart() {
     mainWindow.focus();
     mainWindow.webContents.send('open-file', ...filesToOpen);
     filesToOpen.splice(0, filesToOpen.length);
-  } else {
+  } else if (app.isReady()) {
     createWindow();
   }
 }

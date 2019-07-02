@@ -7,8 +7,8 @@ import { getParser } from '@/services/subtitle/utils';
 import { SubtitleUploadParameter } from '@/services/subtitle';
 import { generateHints } from '@/libs/utils';
 import upload from '@/services/subtitle/upload';
-import { addBubble } from '../../../shared/notificationControl';
-import { NOT_SUPPORTED_SUBTITLE } from '../../../shared/notificationcodes';
+import { addBubble } from '../../helpers/notificationControl';
+import { NOT_SUPPORTED_SUBTITLE } from '../../helpers/notificationcodes';
 import store from '..';
 
 type SubtitleState = {
@@ -121,7 +121,7 @@ const actions = {
           await subtitle.parser.parse();
           await dispatch(a.startWatchPlayedTime);
         } catch(err) {
-          addBubble(NOT_SUPPORTED_SUBTITLE, store.$i18n);
+          addBubble(NOT_SUPPORTED_SUBTITLE);
           const subtitleToRemoveFromList = rootGetters.list.find((sub: any) => sub.id === state.moduleId);
           store.dispatch(parentActions.deleteSubtitlesByUuid, [subtitleToRemoveFromList]);
         }
