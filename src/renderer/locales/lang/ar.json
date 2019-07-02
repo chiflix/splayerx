@@ -26,6 +26,18 @@
     }
   },
   "errorFile": {
+    "ENOSPC": {
+      "content": "",
+      "title": ""
+    },
+    "EACCES": {
+      "content": "",
+      "title": ""
+    },
+    "ENOENT": {
+      "content": "",
+      "title": ""
+    },
     "addNoVideo": {
       "content": "لا يمكن العثور على الملف القابل للتشغيل.",
       "title": "إضافة ملف فشل"
