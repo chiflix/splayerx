@@ -270,11 +270,21 @@ export default {
       }
     });
     window.addEventListener('keyup', this.keyboardHandler);
+    window.addEventListener('beforeunload', this.beforeUnloadHandler);
+    this.$electron.ipcRenderer.on('quit', () => {
+      this.quit = true;
+    });
   },
   destroyed() {
     window.removeEventListener('keyup', this.keyboardHandler);
   },
   methods: {
+    beforeUnloadHandler(e: BeforeUnloadEvent) {
+      if (!this.quit) {
+        e.returnValue = false;
+        this.$electron.remote.app.hide();
+      }
+    },
     keyboardHandler(e: KeyboardEvent) {
       if (e.key === 'ArrowRight') {
         this.shifting = true;

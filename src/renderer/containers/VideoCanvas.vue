@@ -323,7 +323,7 @@ export default {
     savePlaybackStates() {
       return settingStorageService.updatePlaybackStates({ volume: this.volume, muted: this.muted });
     },
-    beforeUnloadHandler(e: Event) {
+    beforeUnloadHandler(e: BeforeUnloadEvent) {
       if (!this.asyncTasksDone && !this.needToRestore) {
         e.returnValue = false;
         let savePromise = this.saveScreenshot(this.playListId, this.videoId);
@@ -343,8 +343,15 @@ export default {
             this.asyncTasksDone = true;
             window.close();
           });
-      } else if (this.quit) {
-        this.$electron.remote.app.quit();
+      } else if (!this.quit) {
+        e.returnValue = false;
+        this.$electron.remote.app.hide();
+        this.$bus.$off(); // remove all listeners before back to landing view
+        // need to init Vuex States
+        this.$router.push({
+          name: 'landing-view',
+        });
+        windowRectService.uploadWindowBy(false, 'landing-view');
       }
     },
   },
