@@ -185,6 +185,7 @@ export default {
       isValidClick: true,
       lastMousedownPlaybutton: false,
       playButton: null, // Play Button on Touch Bar
+      fullScreenBar: null, // Full Screen on Touch Bar
       timeLabel: null, // Time Label which indicates the current time
       scrubber: null,
       touchBar: null,
@@ -341,11 +342,11 @@ export default {
       this.preFullScreen = process.platform === 'darwin'
       && this.intrinsicWidth / this.intrinsicHeight > window.screen.width / window.screen.height
         ? val : false;
-      if (this.touchBar) {
+      if (this.fullScreenBar) {
         if (!val) {
-          this.touchBar.escapeItem.icon = this.createIcon('touchBar/fullscreen.png');
+          this.fullScreenBar.icon = this.createIcon('touchBar/fullscreen.png');
         } else {
-          this.touchBar.escapeItem.icon = this.createIcon('touchBar/resize.png');
+          this.fullScreenBar.icon = this.createIcon('touchBar/resize.png');
         }
       }
     },
@@ -456,7 +457,7 @@ export default {
           this.$bus.$emit('toggle-playback');
         },
       });
-      const fullScreenBar = new TouchBarButton({
+      this.fullScreenBar = new TouchBarButton({
         icon: this.createIcon('touchBar/fullscreen.png'),
         click: () => {
           this.$bus.$emit('toggle-fullscreen');
@@ -464,12 +465,12 @@ export default {
       });
       this.touchBar = new TouchBar({
         items: [
+          this.fullScreenBar,
           this.playButton,
           new TouchBarSpacer({ size: 'large' }),
           this.timeLabel,
           new TouchBarSpacer({ size: 'large' }),
         ],
-        escapeItem: fullScreenBar,
       });
       this.$electron.remote.getCurrentWindow().setTouchBar(this.touchBar);
     },

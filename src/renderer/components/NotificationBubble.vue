@@ -317,10 +317,17 @@ export default {
 .stateContainer {
   display: flex;
   justify-content: flex-start;
-  background-color: rgba(85, 85, 85, 0.88);
+  border: 1px solid rgba(160,160,160,0.7);
+  background-image: radial-gradient(
+    80% 130%,
+    rgba(85,85,85,0.88) 20%,
+    rgba(85,85,85,0.78) 50%,
+    rgba(85,85,85,0.72) 60%,
+    rgba(85,85,85,0.46) 80%,
+    rgba(85,85,85,0.00) 100%
+  );
   backdrop-filter: blur(8px);
   z-index: 8;
-  border: 1px solid rgba(255, 255, 255, 0.1);
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px),
   screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
     height: 32px;
@@ -475,8 +482,16 @@ export default {
 .resultContainer {
   display: flex;
   background-color: rgba(85, 85, 85, 0.88);
+  border: 1px solid rgba(160,160,160,0.7);
+  background-image: radial-gradient(
+    80% 130%,
+    rgba(85,85,85,0.88) 20%,
+    rgba(85,85,85,0.78) 50%,
+    rgba(85,85,85,0.72) 60%,
+    rgba(85,85,85,0.46) 80%,
+    rgba(85,85,85,0.00) 100%
+  );
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px),
   screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
     height: 47px;
@@ -613,6 +628,8 @@ export default {
   }
 }
 .backdrop {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-image: none;
   background-color: rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(8px);
 }
