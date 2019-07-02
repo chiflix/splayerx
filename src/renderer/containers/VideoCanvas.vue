@@ -343,7 +343,7 @@ export default {
             this.asyncTasksDone = true;
             window.close();
           });
-      } else if (!this.quit) {
+      } else if (process.platform === 'darwin' && !this.quit) {
         e.returnValue = false;
         this.$electron.remote.app.hide();
         this.$bus.$off(); // remove all listeners before back to landing view
@@ -352,6 +352,8 @@ export default {
           name: 'landing-view',
         });
         windowRectService.uploadWindowBy(false, 'landing-view');
+      } else {
+        this.$electron.remote.app.quit();
       }
     },
   },
