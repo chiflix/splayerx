@@ -12,8 +12,8 @@ import { retrieveSubtitlePreference, DatabaseGenerator, storeSubtitleLanguage, a
 import { isEqual, get, sortBy, remove } from 'lodash';
 import Vue from 'vue';
 import { extname } from 'path';
-import { addBubble } from '../../../shared/notificationControl';
-import { ONLINE_LOADING, REQUEST_TIMEOUT, SUBTITLE_UPLOAD, UPLOAD_SUCCESS, UPLOAD_FAILED, LOCAL_SUBTITLE_REMOVED } from '../../../shared/notificationcodes';
+import { addBubble } from '../../helpers/notificationControl';
+import { ONLINE_LOADING, REQUEST_TIMEOUT, SUBTITLE_UPLOAD, UPLOAD_SUCCESS, UPLOAD_FAILED, LOCAL_SUBTITLE_REMOVED } from '../../helpers/notificationcodes';
 import { LanguageCode } from '@/libs/language';
 import { existsSync } from 'fs';
 
@@ -203,7 +203,7 @@ const actions = {
         .then(() => Promise.all(actions))
         .then(async () => {
           if (!primarySelectionComplete || !secondarySelectionComplete) dispatch(a.stopAISelection);
-          if (onlineTimeout) addBubble(REQUEST_TIMEOUT, store.$i18n);
+          if (onlineTimeout) addBubble(REQUEST_TIMEOUT);
           await dispatch(a.addDatabaseSubtitles, { storedList: databaseItemsToAdd, selected });
           storeSubtitleLanguage([primaryLanguage, secondaryLanguage], playlistId, mediaItemId);
           addSubtitleItemsToList(getters.list, playlistId, mediaItemId);
@@ -222,7 +222,7 @@ const actions = {
     primarySelectionComplete = false;
     secondarySelectionComplete = false;
     commit(m.setIsRefreshing, true);
-    addBubble(ONLINE_LOADING, store.$i18n);
+    addBubble(ONLINE_LOADING);
     const { list } = getters as { list: SubtitleControlListItem[] };
     const { originSrc, primaryLanguage, secondaryLanguage } = getters;
     /** do not serach online subtitles if extension is not one of mkv, ts, avi and mp4 */
@@ -262,7 +262,7 @@ const actions = {
       await Promise.all(actions)
         .then(() => {
           if (!primarySelectionComplete || !secondarySelectionComplete) dispatch(a.stopAISelection);
-          if (onlineTimeout) addBubble(REQUEST_TIMEOUT, store.$i18n);
+          if (onlineTimeout) addBubble(REQUEST_TIMEOUT);
           const { playlistId, mediaItemId } = state;
           storeSubtitleLanguage([primaryLanguage, secondaryLanguage], playlistId, mediaItemId);
           addSubtitleItemsToList(getters.list, playlistId, mediaItemId);
@@ -276,7 +276,7 @@ const actions = {
   },
   async [a.checkLocalSubtitles]({ dispatch, getters }: any) {
     const localInvalidSubtitles = getters.list.filter(({ type, source }: any) => type === Type.Local && !existsSync(source));
-    if (localInvalidSubtitles.length) return dispatch(a.deleteSubtitlesByUuid, localInvalidSubtitles).then(() => addBubble(LOCAL_SUBTITLE_REMOVED, store.$i18n));
+    if (localInvalidSubtitles.length) return dispatch(a.deleteSubtitlesByUuid, localInvalidSubtitles).then(() => addBubble(LOCAL_SUBTITLE_REMOVED));
   },
   async [a.addLocalSubtitles]({ dispatch }: any, paths: string[]) {
     return Promise.all(
@@ -478,8 +478,8 @@ const actions = {
       dispatch(`${primarySubtitleId}/${subActions.updatePlayedTime}`, times)
         .then((playedTime: number) => {
           if (playedTime >= getters.duration * 0.6) {
-            addBubble(SUBTITLE_UPLOAD, store.$i18n);
-            dispatch(`${primarySubtitleId}/${subActions.upload}`).then((result: boolean) => addBubble(result ? UPLOAD_SUCCESS : UPLOAD_FAILED, store.$i18n));
+            addBubble(SUBTITLE_UPLOAD);
+            dispatch(`${primarySubtitleId}/${subActions.upload}`).then((result: boolean) => addBubble(result ? UPLOAD_SUCCESS : UPLOAD_FAILED));
           }
         })
     );
@@ -487,8 +487,8 @@ const actions = {
       dispatch(`${secondarySubtitleId}/${subActions.updatePlayedTime}`, times)
         .then((playedTime: number) => {
           if (playedTime >= getters.duration * 0.6) {
-            addBubble(SUBTITLE_UPLOAD, store.$i18n);
-            dispatch(`${secondarySubtitleId}/${subActions.upload}`).then((result: boolean) => addBubble(result ? UPLOAD_SUCCESS : UPLOAD_FAILED, store.$i18n));
+            addBubble(SUBTITLE_UPLOAD);
+            dispatch(`${secondarySubtitleId}/${subActions.upload}`).then((result: boolean) => addBubble(result ? UPLOAD_SUCCESS : UPLOAD_FAILED));
           }
         })
     );
@@ -496,17 +496,17 @@ const actions = {
   },
   async [a.manualUploadAllSubtitles]({ state, dispatch }: any) {
     if (navigator.onLine) {
-      addBubble(SUBTITLE_UPLOAD, store.$i18n);
+      addBubble(SUBTITLE_UPLOAD);
       const actions: Promise<any>[] = [];
       const { primarySubtitleId, secondarySubtitleId } = state;
       if (primarySubtitleId) actions.push(dispatch(`${primarySubtitleId}/${subActions.manualUpload}`));
       if (secondarySubtitleId) actions.push(dispatch(`${secondarySubtitleId}/${subActions.manualUpload}`));
       return Promise.all(actions)
         .then((result: boolean[]) => {
-          addBubble(result.every(res => res) ? UPLOAD_SUCCESS : UPLOAD_FAILED, store.$i18n);
+          addBubble(result.every(res => res) ? UPLOAD_SUCCESS : UPLOAD_FAILED);
         });
     } else {
-      addBubble(UPLOAD_FAILED, store.$i18n);
+      addBubble(UPLOAD_FAILED);
     }
   },
   [a.setGlobalDelay]({ commit }: any, delta: any) {

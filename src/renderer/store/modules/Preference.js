@@ -17,10 +17,11 @@ const getters = {
   reverseScrolling: state => state.reverseScrolling,
   privacyAgreement: state => state.privacyAgreement,
   displayLanguage: (state) => {
-    // for backward compability
-    if (state.displayLanguage === 'zhCN') state.displayLanguage = 'zh-Hans';
-    if (state.displayLanguage === 'zhTW') state.displayLanguage = 'zh-Hant';
-    return state.displayLanguage;
+    let { displayLanguage } = state;
+    // COMPATIBILITY: 4.1.14
+    if (displayLanguage === 'zhCN') displayLanguage = 'zh-Hans';
+    if (displayLanguage === 'zhTW') displayLanguage = 'zh-Hant';
+    return displayLanguage;
   },
   primaryLanguage: state => state.primaryLanguage,
   secondaryLanguage: state => state.secondaryLanguage,

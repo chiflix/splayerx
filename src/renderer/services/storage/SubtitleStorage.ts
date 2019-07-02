@@ -8,26 +8,7 @@ import { unionWith, uniqWith, remove, isEqual, get, zip, union, flatMap, some } 
 import Sagi from '@/libs/sagi';
 import { loadLocalFile, pathToFormat } from '../subtitle/utils';
 import { embeddedSrcLoader } from '../subtitle/loaders/embedded';
-import { mediaQuickHash } from '@/libs/utils';
 
-interface DataDBV1 extends DBSchema {
-  'subtitles': {
-    key: number;
-    value: {
-      type: Type;
-      src: string;
-      format: string;
-      language: string;
-    };
-    indexes: {
-      type: string;
-      format: string;
-      src: number | string;
-      language: string;
-      lastOpened: Date;
-    };
-  };
-}
 interface DataDBV2 extends DBSchema {
   'subtitles': {
     key: string;
@@ -42,25 +23,7 @@ interface DataDBV2 extends DBSchema {
     },
   };
 }
-interface InfoDBV3 extends DBSchema {
-  [RECENT_OBJECT_STORE_NAME]: {
-    key: number;
-    value: PlaylistItem;
-    indexes: {
-      lastOpened: number;
-      hpaths: string[];
-    };
-  };
-  [VIDEO_OBJECT_STORE_NAME]: {
-    key: number;
-    value: MediaItem;
-    indexes: {
-      path: string;
-      lastPlayedTime: number;
-      source: string;
-    };
-  };
-}
+
 interface AddSubtitleOptions {
   source: Origin;
   hash: string;
@@ -72,134 +35,21 @@ interface RemoveSubtitleOptions {
   hash: string;
 }
 
-async function v1PlaylistToV2Preference(): Promise<{
-  preference: SubtitlePreference[],
-  subtitle: number[],
-}> {
-  const infoDb = await openDB<InfoDBV3>(INFO_DATABASE_NAME, INFODB_VERSION);
-  const preferenceList: SubtitlePreference[] = [];
-  let subtitleIdList: number[] = [];
-  let cursor = await infoDb.transaction('recent-played', 'readonly').objectStore('recent-played').openCursor();
-  const mediaStore = await infoDb.transaction('media-item', 'readonly').objectStore('media-item');
-  while (cursor) {
-    const playlistId = cursor.key;
-    const { hpaths, items } = cursor.value;
-    const mediaItems = zip(hpaths, items)
-      .filter(mediaItem => !mediaItem[0] || !mediaItem[1]) as [string, number][]
-    const oldPreferenceList = (await Promise.all(
-      mediaItems.map(async (mediaItem) => [
-        mediaItem[0],
-        await mediaStore.get(mediaItem[1]).catch(err => new Error()),
-      ])
-    ))
-      .filter(mediaItem => get(mediaItem[1], 'preference.subtitle'))
-      .map(mediaItem => [mediaItem[0], get(mediaItem[1], 'preference.subtitle')]) as [string, oldPreference][];
-    const validPreferenceList = oldPreferenceList.map((p) => ({
-      playlistId,
-      mediaId: p[0],
-      list: p[1].list
-        .map(({ id, type }) => ({ hash: id.toString(), type }))
-        .filter(({ type }) => type !== 'embedded'),
-      language: {
-        primary: normalizeCode(p[1].language[0]),
-        secondary: normalizeCode(p[1].language[1]),
-      },
-      selected: {
-        primary: p[1].selected.firstId.toString() as unknown as SelectedSubtitle,
-        secondary: p[1].selected.secondaryId.toString() as unknown as SelectedSubtitle,
-      },
-    })) as SubtitlePreference[]
-    const validSubtitleIdList = flatMap(oldPreferenceList
-      .map((p) => p[1].list
-        .map(({ id }) => id)
-        .concat([p[1].selected.firstId, p[1].selected.secondaryId])));
-    preferenceList.concat(validPreferenceList);
-    subtitleIdList = union(subtitleIdList, validSubtitleIdList);
-
-    cursor.continue();
-  }
-  return {
-    preference: preferenceList,
-    subtitle: subtitleIdList,
-  };
-}
-
-async function v1SubtitlesToV2Subtitles(v1Ids: number[]): Promise<{
-  subtitle: StoredSubtitle[],
-  map: { [v1Id: string]: string },
-}> {
-  const store = (await openDB<DataDBV1>(DATADB_NAME, 1)).transaction('subtitles').objectStore('subtitles');
-  const resultEntries: [string, StoredSubtitle][] = (await Promise.all(
-    v1Ids.map(async (id): Promise<[string, StoredSubtitle] | [string, undefined]> => {
-      const v1Subtitle = await store.get(id);
-      let v2Subtitle: StoredSubtitle;
-      if (v1Subtitle && v1Subtitle.type !== Type.Embedded) {
-        const { type, src, language } = v1Subtitle;
-        const v2Subtitle =  type === Type.Online ? {
-          source: [{ type, source: src }],
-          format: Format.Sagi,
-          language: normalizeCode(language),
-          hash: src,
-        } : {
-          source: [{ type, source: src }],
-          format: pathToFormat(src),
-          language: normalizeCode(language),
-          hash: await mediaQuickHash(src),
-        };
-        return [id.toString(), v2Subtitle];
-      }
-      return [id.toString(), undefined];
-    })
-  )).filter(subtitle => !!subtitle) as [string, StoredSubtitle][];
-
-  return {
-    subtitle: resultEntries.map(entry => entry[1]),
-    map: Object.fromEntries([
-      resultEntries.map(entry => entry[0]),
-      resultEntries.map(entry => entry[1].hash),
-    ]),
-  };
-}
-
 class SubtitleDataBase {
   private db: IDBPDatabase<DataDBV2>;
   private async getDb() {
     return this.db ? this.db : this.db = await openDB<DataDBV2>(
       DATADB_NAME,
-      2,
+      3,
       {
         async upgrade(db, version) {
-          if (version < 1) {
-            db.createObjectStore('subtitles', { keyPath: 'hash' });
-            const preferenceStore = db.createObjectStore('preferences', { autoIncrement: true });
-            preferenceStore.createIndex('byPlaylist', 'playlistId');
-            preferenceStore.createIndex('byMediaItem', 'mediaId');
-          } else if (version < 2) {
-            // retrieve all needed info
-            const { preference, subtitle: v1Ids } = await v1PlaylistToV2Preference();
-            const { subtitle, map } = await v1SubtitlesToV2Subtitles(v1Ids);
-            const preferencesWithV2Id = preference.map(p => ({
-              ...p,
-              list: p.list.map(s => ({ ...s, hash: map[s.hash] })),
-              selected: {
-                primary: { hash: map[p.selected.primary as unknown as string] },
-                secondary: { hash: map[p.selected.secondary as unknown as string] },
-              },
-            }));
-            // arrange the object stores
+          if (version > 0 && version < 3) {
             db.deleteObjectStore('subtitles');
-            db.createObjectStore('subtitles', { keyPath: 'hash' });
-            const preferenceStore = db.createObjectStore('preferences', { autoIncrement: true });
-            preferenceStore.createIndex('byPlaylist', 'playlistId');
-            preferenceStore.createIndex('byMediaItem', 'mediaId');
-            // add the info into new stores
-            const subtitleTransaction = db.transaction('subtitles', 'readwrite').objectStore('subtitles');
-            const preferenceTransaction = db.transaction('preferences', 'readwrite').objectStore('preferences');
-            Promise.all([
-              Promise.all(subtitle.map(sub => subtitleTransaction.put(sub))),
-              Promise.all(preferencesWithV2Id.map(preference => preferenceTransaction.put(preference))),
-            ]);
           }
+          db.createObjectStore('subtitles', { keyPath: 'hash' });
+          const preferenceStore = db.createObjectStore('preferences', { autoIncrement: true });
+          preferenceStore.createIndex('byPlaylist', 'playlistId');
+          preferenceStore.createIndex('byMediaItem', 'mediaId');
         }
       },
     );

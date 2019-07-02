@@ -11,8 +11,8 @@ import { getValidVideoExtensions, getValidVideoRegex } from '@/../shared/utils';
 import {
   EMPTY_FOLDER, OPEN_FAILED, ADD_NO_VIDEO,
   SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, FILE_NON_EXIST_IN_PLAYLIST, PLAYLIST_NON_EXIST,
-} from '@/../shared/notificationcodes';
-import { addBubble } from '../../shared/notificationControl';
+} from '@/helpers/notificationcodes';
+import { addBubble } from './notificationControl';
 
 import { ipcRenderer, remote } from 'electron'; // eslint-disable-line
 
@@ -73,6 +73,8 @@ export default {
               videoFiles.push(fileBaseName);
             }
           }
+        }, (ex) => {
+          log.warn('findSimilarVideoByVidPath', ex);
         }));
       }
       await Promise.all(tasks);
@@ -168,10 +170,10 @@ export default {
         if (files) {
           fs.writeFile(path.join(files[0], data.name), data.buffer, (error) => {
             if (error) {
-              addBubble(SNAPSHOT_FAILED, this.$i18n);
+              addBubble(SNAPSHOT_FAILED);
             } else {
               this.$store.dispatch('UPDATE_SNAPSHOT_SAVED_PATH', files[0]);
-              addBubble(SNAPSHOT_SUCCESS, this.$i18n);
+              addBubble(SNAPSHOT_SUCCESS);
             }
           });
         }
@@ -224,7 +226,7 @@ export default {
         this.$store.dispatch('PlayingList', { id: playlist.id });
       } else {
         log.error('helpers/index.js', 'Didn\'t add any playable file in this folder.');
-        addBubble(ADD_NO_VIDEO, this.$i18n);
+        addBubble(ADD_NO_VIDEO);
       }
     },
     // the difference between openFolder and openFile function
@@ -257,9 +259,8 @@ export default {
       if (videoFiles.length !== 0) {
         await this.createPlayList(...videoFiles);
       } else {
-        // TODO: no videoFiles in folders error catch
-        log.error('helpers/index.js', 'There is no playable file in this folder.');
-        addBubble(EMPTY_FOLDER, this.$i18n);
+        log.warn('helpers/index.js', 'There is no playable file in this folder.');
+        addBubble(EMPTY_FOLDER);
       }
       if (containsSubFiles) {
         this.$bus.$emit('add-subtitles', subtitleFiles);
@@ -290,8 +291,8 @@ export default {
           } else if (getValidVideoRegex().test(path.extname(tempFilePath))) {
             videoFiles.push(tempFilePath);
           } else {
-            log.error('helpers/index.js', `Failed to open file : ${tempFilePath}`);
-            addBubble(OPEN_FAILED, this.$i18n);
+            log.warn('helpers/index.js', `Failed to open file : ${tempFilePath}`);
+            addBubble(OPEN_FAILED);
           }
         });
 
@@ -305,7 +306,7 @@ export default {
         }
       } catch (ex) {
         log.info('openFile', ex);
-        addBubble(OPEN_FAILED, this.$i18n);
+        addBubble(OPEN_FAILED);
       }
     },
     // open an existed play list
@@ -334,10 +335,10 @@ export default {
             playlist.playedIndex = 0;
             await this.infoDB.update('recent-played', playlist, playlist.id);
             currentVideo = await this.infoDB.get('media-item', playlist.items[0]);
-            addBubble(FILE_NON_EXIST_IN_PLAYLIST, this.$i18n);
+            addBubble(FILE_NON_EXIST_IN_PLAYLIST);
           } else {
             this.infoDB.delete('recent-played', playlist.id);
-            addBubble(PLAYLIST_NON_EXIST, this.$i18n);
+            addBubble(PLAYLIST_NON_EXIST);
             this.$bus.$emit('delete-file', id);
             return;
           }
@@ -378,7 +379,7 @@ export default {
           this.playFile(video.path, video.videoId);
         } catch (err) {
           this.infoDB.delete('recent-played', id);
-          addBubble(PLAYLIST_NON_EXIST, this.$i18n);
+          addBubble(PLAYLIST_NON_EXIST);
           this.$bus.$emit('delete-file', id);
         }
       }
@@ -443,12 +444,13 @@ export default {
       try {
         mediaQuickHash = await this.mediaQuickHash(vidPath);
       } catch (err) {
-        if (get(err, 'code') === 'ENOENT') {
-          log.error('helpers/index.js', 'Failed to open file, it will be removed from list.');
-          addBubble(FILE_NON_EXIST_IN_PLAYLIST, this.$i18n);
+        const errorCode = get(err, 'code');
+        if (errorCode === 'ENOENT') {
+          log.warn('helpers/index.js', 'Failed to open file, it will be removed from list.');
+          addBubble(FILE_NON_EXIST_IN_PLAYLIST);
           this.$bus.$emit('delete-file', vidPath, id);
         }
-        if (process.mas && get(err, 'code') === 'EPERM') {
+        if (process.mas && errorCode === 'EPERM') {
           this.openFilesByDialog({ defaultPath: vidPath });
         }
         return;
