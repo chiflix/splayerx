@@ -73,6 +73,8 @@ export default {
               videoFiles.push(fileBaseName);
             }
           }
+        }, (ex) => {
+          log.warn('findSimilarVideoByVidPath', ex);
         }));
       }
       await Promise.all(tasks);
