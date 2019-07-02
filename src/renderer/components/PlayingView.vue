@@ -18,7 +18,6 @@
 
 <script lang="ts">
 import { mapActions, mapGetters } from 'vuex';
-import { audioGrabService } from '@/services/media/AudioGrabService';
 import { Subtitle as subtitleActions, SubtitleManager as smActions } from '@/store/actionTypes';
 import SubtitleRenderer from '@/components/Subtitle/SubtitleRenderer.vue';
 import VideoCanvas from '@/containers/VideoCanvas.vue';
@@ -70,13 +69,6 @@ export default {
     originSrc(newVal: string) {
       if (newVal) {
         this.initializeManager();
-        setTimeout(() => {
-          audioGrabService.send({
-            time: Date.now(),
-            videoSrc: v,
-            mediaHash: this.mediaHash,
-          });
-        }, 100);
       }
     },
     async primarySubtitleId() {
@@ -98,23 +90,6 @@ export default {
       const paths = subs.map((sub: { src: string, type: string }) => (sub.src));
       this.addLocalSubtitlesWithSelect(paths);
     });
-    setTimeout(() => {
-      audioGrabService.send({
-        time: Date.now(),
-        videoSrc: this.originSrc,
-        mediaHash: this.mediaHash,
-      });
-    }, 1000);
-    this.$electron.ipcRenderer.on('grab-audio-complete', (event: any, args: any) => {
-      // temp code
-      const coustTime = (Date.now() - args.time) / 1000;
-      this.$store.dispatch('addMessages', {
-        type: 'result',
-        title: '提取音频结束',
-        content: `花费时间 ${coustTime}s`,
-        dismissAfter: 1000000,
-      });
-    });
   },
   beforeDestroy() {
     this.updateSubToTop(false);
@@ -133,6 +108,9 @@ export default {
     // else it is triggered by setInterval.
     onUpdateTick() {
       requestAnimationFrame(this.loopCues);
+      const video = document.getElementById('play-video') as HTMLVideoElement;
+      const buffered = video.buffered;
+      // console.log(`Start: ${buffered.start(0)} End:  ${buffered.end(0)}`);
       this.$refs.videoctrl.onTickUpdate();
     },
     async loopCues() {

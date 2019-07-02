@@ -81,6 +81,67 @@
                 @off-subtitle="offCurrentSubtitle"
                 @remove-subtitle="deleteCurrentSubtitle"
               />
+              <!-- grab btn -->
+              <div
+                v-if="computedAvailableItems.length === 0"
+                :style="{
+                  color: '#fff',
+                  lineHeight: '32px',
+                  fontSize: '13.2px',
+                  width: '176px',
+                  margin: '0 auto',
+                  cursor: 'pointer',
+                  position: 'relative',
+                  top: '-5px',
+                }"
+              >
+                <div v-if="!isTranslated">
+                  <div
+                    v-if="aiSelectClicked"
+                    :style="{
+                      display: 'flex',
+                    }"
+                  >
+                    <span
+                      :style="{
+                        marginLeft: '5px',
+                        marginRight: '5px',
+                      }"
+                    >音频语言: </span>
+                    <div
+                      :style="{
+                        paddingTop: '2px',
+                        width: '42%',
+                      }"
+                    >
+                      <Select
+                        :selected="audioLanguage.label"
+                        :list="lanugages"
+                        :change="changeLanguage"
+                      />
+                    </div>
+                    <div
+                      @click="translate"
+                      :style="{
+                        marginLeft: '5px',
+                      }"
+                    >
+                      确定
+                    </div>
+                  </div>
+                  <span
+                    v-if="!aiSelectClicked"
+                    @click="aiSelectClicked = true"
+                    :style="{
+                      marginLeft: '12.73px',
+                    }"
+                  >自能翻译</span>
+                </div>
+                <div v-if="isTranslated">
+                  正在自能翻译 {{ grabProgress }}%
+                </div>
+              </div>
+              <!-- grab btn -->
             </div>
           </div>
         </div>
@@ -110,6 +171,13 @@ import { mapActions, mapGetters, mapState } from 'vuex';
 import { AnimationItem } from 'lottie-web';
 import { Input as InputActions, Subtitle as subtitleActions, SubtitleManager as smActions } from '@/store/actionTypes';
 import { SubtitleControlListItem, Type } from '@/interfaces/ISubtitle';
+// grab libs
+import { audioGrabService } from '@/services/media/AudioGrabService';
+import { codeToLanguageName } from '@/libs/language';
+import { AITaskInfo } from '@/interfaces/IMediaStorable';
+import { TranscriptInfo } from '@/services/subtitle';
+import Select from '@/components/PlayingView/Select.vue';
+// grab libs
 import lottie from '@/components/lottie.vue';
 import animationData from '@/assets/subtitle.json';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
@@ -124,6 +192,7 @@ export default {
   components: {
     lottie,
     Icon,
+    Select,
     'subtitle-list': SubtitleList,
   },
   props: {
@@ -149,10 +218,17 @@ export default {
       refAnimation: '',
       transFlag: true,
       shiftItemHovered: false,
+      // grab btn datas
+      audioLanguage: { label: codeToLanguageName('en'), value: 'en' },
+      lanugages: ['zh-Hans', 'zh-Hant', 'ja', 'ko', 'en', 'es', 'ar']
+        .map((e: string) => ({ label: codeToLanguageName(e), value: e })),
+      aiSelectClicked: false,
+      isTranslated: false,
+      grabProgress: 0,
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'originSrc', 'primarySubtitleId', 'secondarySubtitleId', 'list', 'privacyAgreement',
+    ...mapGetters(['winWidth', 'originSrc', 'primarySubtitleId', 'secondarySubtitleId', 'list', 'privacyAgreement', 'meidaHash', 'primaryLanguage', 'duration',
       'calculatedNoSub', 'winHeight', 'isFirstSubtitle', 'enabledSecondarySub', 'isRefreshing', 'winRatio']),
     ...mapState({
       loadingTypes: ({ Subtitle }) => {
@@ -177,13 +253,19 @@ export default {
       return this.isShowingHovered ? 0.9 : 0.77;
     },
     contHeight() {
+      // grab btn logic
+      let nums = this.realItemsNum;
+      if (this.computedAvailableItems.length === 0) {
+        nums += 1;
+      }
+      // grab btn logic
       if (this.computedSize >= 289 && this.computedSize <= 480) {
-        return (this.realItemsNum * 31) + 45;
+        return (nums * 31) + 45;
       }
       if (this.computedSize >= 481 && this.computedSize < 1080) {
-        return (this.realItemsNum * 37) + 54;
+        return (nums * 37) + 54;
       }
-      return (this.realItemsNum * 51) + 76;
+      return (nums * 51) + 76;
     },
     realItemsNum() {
       return this.computedAvailableItems.length + 1 + this.loadingTypes.length;
@@ -355,7 +437,6 @@ export default {
       this.updateSubtitleType(!this.isFirstSubtitle);
     },
     handleRefresh() {
-      console.log(this.isRefreshing);
       if (navigator.onLine && !this.isRefreshing) this.refreshSubtitles();
       else if (!navigator.onLine) this.$addBubble(SUBTITLE_OFFLINE);
     },
@@ -418,6 +499,32 @@ export default {
         return `${this.$t('subtitle.embedded')} ${item.name}`;
       }
       return item.name;
+    },
+    changeLanguage(item: any) {
+      this.audioLanguage = item;
+    },
+    translate() {
+      this.isTranslated = true;
+      const grab = audioGrabService.send({
+        mediaHash: this.mediaHash,
+        videoSrc: this.originSrc,
+        audioLanguageCode: this.audioLanguage.value,
+        targetLanguageCode: this.primaryLanguage,
+      });
+      if (grab) {
+        grab.on('grab', (time: number) => {
+          this.grabProgress = Math.ceil((time / this.duration) * 100);
+        });
+        grab.on('error', (error: Error) => {
+          console.log(error);
+        });
+        grab.on('task', (taskInfo: AITaskInfo) => {
+          console.log(taskInfo);
+        });
+        grab.on('transcriptInfo', (transcriptInfo: TranscriptInfo) => {
+          console.log(transcriptInfo);
+        });
+      }
     },
   },
 };

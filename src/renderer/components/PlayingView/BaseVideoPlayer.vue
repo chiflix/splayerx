@@ -1,6 +1,7 @@
 <template>
   <div class="base-video-player">
     <video
+      id="play-video"
       ref="video"
       class="video-element"
     />
