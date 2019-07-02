@@ -450,7 +450,15 @@ export default {
       width: 100%;
       height: 100%;
       top: 0;
-      background-color: rgba(85, 85, 85, 0.88);
+      border: 1px solid rgba(160,160,160,0.9);
+      background-image: radial-gradient(
+        80% 130%,
+        rgba(85,85,85,0.88) 20%,
+        rgba(85,85,85,0.78) 50%,
+        rgba(85,85,85,0.72) 60%,
+        rgba(85,85,85,0.46) 80%,
+        rgba(85,85,85,0.00) 100%
+      );
     }
     .backdrop {
       background-color: rgba(0, 0, 0, 0.1);
