@@ -27,16 +27,16 @@
   },
   "errorFile": {
     "ENOSPC": {
-      "content": "",
-      "title": ""
+      "content": "沒有足夠的磁盤空間。",
+      "title": "開啟失敗"
     },
     "EACCES": {
-      "content": "",
-      "title": ""
+      "content": "您沒有足夠權限來執行此操作.",
+      "title": "開啟失敗"
     },
     "ENOENT": {
-      "content": "",
-      "title": ""
+      "content": "未找到檔案。",
+      "title": "開啟失敗"
     },
     "addNoVideo": {
       "content": "未找到可播放文件。",
