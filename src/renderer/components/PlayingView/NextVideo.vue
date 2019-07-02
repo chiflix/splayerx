@@ -86,9 +86,7 @@ export default {
       return this.timecodeFromSeconds(this.duration);
     },
   },
-  created() {
-    this.useBlur = window.devicePixelRatio === 1;
-  },
+  created() { this.useBlur = window.devicePixelRatio === 1; },
   methods: {
     handleCloseMouseup() {
       this.$emit('manualclose-next-video');
@@ -174,10 +172,11 @@ export default {
       rgba(85,85,85,0.46) 80%,
       rgba(85,85,85,0.00) 100%
     );
-    // background-color: rgba(85,85,85,0.88);
     box-shadow: 0 0 1px rgba(0,0,0,0.1);
   }
   .backdrop {
+    background-image: none;
+    border-width: 0px;
     background-color: rgba(0,0,0,0.2);
     backdrop-filter: blur(10px);
   }

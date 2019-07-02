@@ -461,6 +461,8 @@ export default {
       );
     }
     .backdrop {
+      border-width: 0px;
+      background-image: none;
       background-color: rgba(0, 0, 0, 0.1);
       backdrop-filter: blur(10px);
     }
