@@ -26,6 +26,18 @@
     }
   },
   "errorFile": {
+    "ENOSPC": {
+      "content": "",
+      "title": ""
+    },
+    "EACCES": {
+      "content": "",
+      "title": ""
+    },
+    "ENOENT": {
+      "content": "",
+      "title": ""
+    },
     "addNoVideo": {
       "content": "未找到可播放文件。",
       "title": "添加错误"
