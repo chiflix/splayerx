@@ -165,7 +165,7 @@ function registerMainWindowEvent(mainWindow) {
       },
     );
   }
-  function thumbnailTaskCallback() {
+  function thumbnailTaskCallback(event) {
     const cb = (ret, src) => {
       thumbnailTask.shift();
       if (thumbnailTask.length > 0) {
@@ -180,7 +180,7 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('generateThumbnails', (event, args) => {
     if (thumbnailTask.length === 0) {
       thumbnailTask.push(args);
-      thumbnailTaskCallback();
+      thumbnailTaskCallback(event);
     } else {
       thumbnailTask.splice(1, 1, args);
     }
@@ -486,7 +486,6 @@ function createWindow() {
 });
 
 app.on('before-quit', () => {
-  mouse.dispose();
   if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
   if (needToRestore) {
     mainWindow.webContents.send('quit', needToRestore);
@@ -494,6 +493,11 @@ app.on('before-quit', () => {
     mainWindow.webContents.send('quit');
   }
 });
+
+app.on('quit', () => {
+  mouse.dispose();
+});
+
 app.on('second-instance', () => {
   if (mainWindow.isMinimized()) mainWindow.restore();
   mainWindow.focus();
@@ -549,7 +553,7 @@ app.on('ready', () => {
 });
 
 app.on('window-all-closed', () => {
-  if (process.env.NODE_ENV !== 'development' || process.platform !== 'darwin') {
+  if (process.platform !== 'darwin') {
     app.quit();
   }
 });
