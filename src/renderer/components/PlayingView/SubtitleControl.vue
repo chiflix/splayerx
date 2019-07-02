@@ -303,7 +303,7 @@ export default {
       }, 0);
     },
   },
-  created() { this.useBlur = true; },
+  created() { this.useBlur = window.devicePixelRatio === 1; },
   mounted() {
     this.$refs.refreshRotate.$el.addEventListener('animationiteration', () => {
       this.count += 1;
