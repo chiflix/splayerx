@@ -15,3 +15,7 @@ export const ADD_NO_VIDEO = 'ADD_NO_VIDEO';
 export const LOCAL_SUBTITLE_REMOVED = 'LOCAL_SUBTITLE_REMOVED';
 export const SNAPSHOT_FAILED = 'SNAPSHOT_FAILED';
 export const SNAPSHOT_SUCCESS = 'SNAPSHOT_SUCCESS';
+export const ENOSPC = 'ENOSPC';
+export const EACCES = 'EACCES';
+export const EPERM = 'EPERM';
+export const ENOENT = 'ENOENT';

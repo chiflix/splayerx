@@ -2,6 +2,7 @@ import path from 'path';
 import storage from 'electron-json-storage';
 import { promises as fsPromises } from 'fs';
 import { log } from '@/libs/Log';
+import { addBubble } from '@/helpers/notificationControl';
 
 /*
   使用说明：
@@ -26,7 +27,8 @@ function get(key) {
   return new Promise((resolve, reject) => {
     storage.get(key, (err, data) => {
       if (err) {
-        log.error('asyncStorage', err);
+        log.warn('asyncStorage', err);
+        addBubble(err.code);
         reject(err);
       } else {
         resolve(data);
@@ -38,7 +40,8 @@ function set(key, json) {
   return new Promise((resolve, reject) => {
     storage.set(key, json, (err) => {
       if (err) {
-        log.error('asyncStorage', err);
+        log.warn('asyncStorage', err);
+        addBubble(err.code);
         reject(err);
       }
       resolve();

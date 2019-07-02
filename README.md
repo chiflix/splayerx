@@ -4,6 +4,7 @@
 [![Build Status](https://travis-ci.org/chiflix/splayerx.svg?branch=develop)](https://travis-ci.org/chiflix/splayerx?branch=develop)
 [![appveyor](https://ci.appveyor.com/api/projects/status/github/chiflix/splayerx?branch=develop&svg=true)](https://ci.appveyor.com/project/tomasen/splayerx/branch/develop)
 [![codecov](https://codecov.io/gh/chiflix/splayerx/branch/develop/graph/badge.svg)](https://codecov.io/gh/chiflix/splayerx/branch/develop)
+[![Crowdin](https://d322cqt584bo4o.cloudfront.net/splayerx/localized.svg)](https://crowdin.com/project/splayerx)
 
 ### 开发指南
 
