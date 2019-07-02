@@ -12,7 +12,7 @@ const langKeys = mapValues(langs, objectDeepKeys);
 
 describe('locales - langs', () => {
   it('should have several mainstream locales', () => {
-    expect(Object.keys(langs)).to.include.all.keys(['en', 'zh-Hans', 'zh-Hant', 'ja']);
+    expect(langs).to.include.all.keys('en', 'zh-Hans', 'zh-Hant', 'ja');
   });
   it('should have same or more keys in en than in other locales', () => {
     const enKeys = langKeys.en;
