@@ -65,6 +65,7 @@
                 />
               </div>
               <subtitle-list
+                :use-blur="useBlur"
                 :computed-size="computedSize"
                 :current-subtitle-index="currentSubtitleIndex"
                 :no-subtitle="noSubtitle"
@@ -302,7 +303,7 @@ export default {
       }, 0);
     },
   },
-  created() { this.useBlur = window.devicePixelRatio === 1; },
+  created() { this.useBlur = true; },
   mounted() {
     this.$refs.refreshRotate.$el.addEventListener('animationiteration', () => {
       this.count += 1;
