@@ -78,7 +78,7 @@ export default {
     width: 100%;
     height: 100%;
     top: 0;
-    border: 1px solid rgba(160,160,160,0.9);
+    border: 1px solid rgba(160,160,160,0.7);
     // box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.5);
     background-image: radial-gradient(
       80% 130%,
