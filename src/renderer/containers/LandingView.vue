@@ -277,6 +277,7 @@ export default {
   },
   destroyed() {
     window.removeEventListener('keyup', this.keyboardHandler);
+    window.removeEventListener('beforeunload', this.beforeUnloadHandler);
   },
   methods: {
     beforeUnloadHandler(e: BeforeUnloadEvent) {
