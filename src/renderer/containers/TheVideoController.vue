@@ -75,21 +75,21 @@
       <playlist-control
         v-fade-in="displayState.PlaylistControl"
         v-bind.sync="widgetsStatus.PlaylistControl"
-        class="button playlist"
+        class="button no-drag playlist"
       />
       <subtitle-control
         v-fade-in="displayState.SubtitleControl"
         v-bind.sync="widgetsStatus.SubtitleControl"
         :last-dragging.sync="lastDragging"
         @conflict-resolve="conflictResolve"
-        class="button subtitle"
+        class="button no-drag subtitle"
       />
       <advance-control
         v-fade-in="displayState.AdvanceControl"
         v-bind.sync="widgetsStatus.AdvanceControl"
         :last-dragging.sync="lastDragging"
         @conflict-resolve="conflictResolve"
-        class="button advance"
+        class="button no-drag advance"
       />
     </div>
     <the-time-codes
@@ -855,7 +855,6 @@ export default {
   position: fixed;
   z-index: 10;
   .button {
-    -webkit-app-region: no-drag;
     cursor: pointer;
     position: relative;
   }
