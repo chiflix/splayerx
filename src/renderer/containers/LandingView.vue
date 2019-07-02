@@ -281,7 +281,7 @@ export default {
   },
   methods: {
     beforeUnloadHandler(e: BeforeUnloadEvent) {
-      if (!this.quit) {
+      if (process.platform === 'darwin' && !this.quit) {
         e.returnValue = false;
         this.$electron.remote.app.hide();
       }
