@@ -486,7 +486,6 @@ function createWindow() {
 });
 
 app.on('before-quit', () => {
-  mouse.dispose();
   if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
   if (needToRestore) {
     mainWindow.webContents.send('quit', needToRestore);
@@ -494,6 +493,11 @@ app.on('before-quit', () => {
     mainWindow.webContents.send('quit');
   }
 });
+
+app.on('quit', () => {
+  mouse.dispose();
+});
+
 app.on('second-instance', () => {
   if (mainWindow.isMinimized()) mainWindow.restore();
   mainWindow.focus();
