@@ -108,6 +108,13 @@ type AddDatabaseSubtitlesOptions = {
     primary?: SelectedSubtitle;
     secondary?: SelectedSubtitle;
   };
+  playlistId: number;
+  mediaItemId: string;
+};
+type AddSubtitleOptions = {
+  generator: EntityGenerator;
+  playlistId: number;
+  mediaItemId: string;
 };
 function privacyConfirm() {
   const { $bus } = Vue.prototype;
@@ -142,7 +149,6 @@ function fetchOnlineListWithErrorHandling(
 }
 function initializeManager({ getters, commit, dispatch }: any) {
   const { playListId, originSrc, mediaHash } = getters;
-  console.log(`[Subtitle|Manager]: Initializing with playlist: ${playListId} and mediaitem: ${mediaHash}-${originSrc}.`);
   getters.list.forEach((s: SubtitleControlListItem) => dispatch(a.removeSubtitle, s.id));
   commit(m.setPlaylistId, playListId);
   commit(m.setMediaItemId, `${mediaHash}-${originSrc}`);
@@ -163,7 +169,8 @@ const actions = {
     secondarySelectionComplete = false;
     commit(m.setIsRefreshing, true);
     dispatch(a.startAISelection);
-    const preference = await retrieveSubtitlePreference(state.playlistId, state.mediaItemId);
+    const { playlistId, mediaItemId } = state;
+    const preference = await retrieveSubtitlePreference(playlistId, mediaItemId);
     const { primaryLanguage, secondaryLanguage } = getters;
     const needRefreshing = (
       !preference ||
@@ -179,6 +186,7 @@ const actions = {
           dispatch(a.addDatabaseSubtitles, {
             storedList: preference.list,
             selected: preference.selected,
+            playlistId, mediaItemId,
           }),
           new Promise((resolve, reject) => setTimeout(() => reject('timeout'), 10000)),
         ]);
@@ -189,16 +197,17 @@ const actions = {
         dispatch(a.stopAISelection);
       }
     } else if (!preference && needRefreshing) {
-      return dispatch(a.refreshSubtitles);
+      return dispatch(a.refreshSubtitles, { playlistId, mediaItemId });
     } else if (preference && needRefreshing) {
       return dispatch(a.addDatabaseSubtitles, {
         storedList: preference.list,
         selected: preference.selected,
+        playlistId, mediaItemId,
       })
-      .then(() => dispatch(a.refreshSubtitles));
+      .then(() => dispatch(a.refreshSubtitles, { playlistId, mediaItemId }));
     }
   },
-  async [a.refreshSubtitles]({ state, getters, dispatch, commit }: any) {
+  async [a.refreshSubtitles]({ state, getters, dispatch, commit }: any, { playlistId, mediaItemId }: any) {
     primarySelectionComplete = false;
     secondarySelectionComplete = false;
     commit(m.setIsRefreshing, true);
@@ -224,20 +233,19 @@ const actions = {
         oldSubtitlesToDel.push(...remove(oldSubtitles, ({ type, hash }) => type === Type.Online && !results.find(({ transcriptIdentity }) => transcriptIdentity === hash)));
         newSubtitlesToAdd.push(...results.filter(({ transcriptIdentity }) => !oldSubtitles.find(({ id }) => id === transcriptIdentity)));
         return { delete: oldSubtitlesToDel, add: newSubtitlesToAdd };
-      }).then((result) => dispatch(a.addOnlineSubtitles, result.add)
+      }).then((result) => dispatch(a.addOnlineSubtitles, { transcriptInfoList: result.add, playlistId, mediaItemId })
         .then(() => dispatch(a.deleteSubtitlesByUuid, result.delete)));
     }
     /** whether to search embedded subtitles */
     const embedded = list.some(({ type }) => type === Type.Embedded);
-    if (embedded) retrieveEmbeddedList(originSrc).then((streams) => dispatch(a.addEmbeddedSubtitles, streams));
+    if (embedded) retrieveEmbeddedList(originSrc).then((streams) => dispatch(a.addEmbeddedSubtitles, { streams, playlistId, mediaItemId }));
     try {
       await Promise.race([
         onlinePromise,
-        dispatch(a.addLocalSubtitles, await searchForLocalList(originSrc)),
+        dispatch(a.addLocalSubtitles, { paths: await searchForLocalList(originSrc), playlistId, mediaItemId }),
         new Promise((resolve) => setTimeout(() => resolve(new Error('timeout')), 10000)),
       ]);
       dispatch(a.stopAISelection);
-      const { playlistId, mediaItemId } = state;
       storeSubtitleLanguage([primaryLanguage, secondaryLanguage], playlistId, mediaItemId);
       addSubtitleItemsToList(getters.list, playlistId, mediaItemId);
       dispatch(a.checkLocalSubtitles);
@@ -251,9 +259,9 @@ const actions = {
     const localInvalidSubtitles = getters.list.filter(({ type, source }: any) => type === Type.Local && !existsSync(source));
     if (localInvalidSubtitles.length) return dispatch(a.deleteSubtitlesByUuid, localInvalidSubtitles).then(() => addBubble(LOCAL_SUBTITLE_REMOVED));
   },
-  async [a.addLocalSubtitles]({ dispatch }: any, paths: string[]) {
+  async [a.addLocalSubtitles]({ dispatch }: any, { paths, playlistId, mediaItemId }: any) {
     return Promise.all(
-      paths.map(path => dispatch(a.addSubtitle, new LocalGenerator(path)))
+      paths.map((path: string) => dispatch(a.addSubtitle, { generator: new LocalGenerator(path), playlistId, mediaItemId }))
     );
   },
   async [a.addLocalSubtitlesWithSelect]({ state, dispatch, getters }: any, paths: string[]) {
@@ -277,19 +285,23 @@ const actions = {
       }
     });
   },
-  async [a.addEmbeddedSubtitles]({ dispatch }: any, streams: [string, ISubtitleStream][]) {
+  async [a.addEmbeddedSubtitles]({ dispatch }: any, { streams, playlistId, mediaItemId }: any) {
     return Promise.all(
-      streams.map(stream => dispatch(a.addSubtitle, new EmbeddedGenerator(stream[0], stream[1])))
+      streams.map((stream: [string, ISubtitleStream]) => dispatch(a.addSubtitle, { generator: new EmbeddedGenerator(stream[0], stream[1]), playlistId, mediaItemId }))
     );
   },
-  async [a.addOnlineSubtitles]({ dispatch }: any, transcriptInfoList: TranscriptInfo[]) {
+  async [a.addOnlineSubtitles]({ dispatch }: any, { transcriptInfoList, playlistId, mediaItemId }: any) {
     return Promise.all(
-      transcriptInfoList.map(info => dispatch(a.addSubtitle, new OnlineGenerator(info)))
+      transcriptInfoList.map((info: TranscriptInfo) => dispatch(a.addSubtitle, { generator: new OnlineGenerator(info), playlistId, mediaItemId }))
     );
   },
   async [a.addDatabaseSubtitles]({ getters, dispatch }: any, options: AddDatabaseSubtitlesOptions) {
     return Promise.all(
-      options.storedList.map(async stored => dispatch(a.addSubtitle, await DatabaseGenerator.from(stored)))
+      options.storedList.map(async stored => dispatch(a.addSubtitle, {
+        generator: await DatabaseGenerator.from(stored),
+        playlistId: options.playlistId,
+        mediaItemId: options.mediaItemId,
+      }))
     )
       .then(() => {
         const { list } = getters;
@@ -311,27 +323,30 @@ const actions = {
         ]);
       });
   },
-  async [a.addSubtitle]({ commit, dispatch, getters }: any, subtitleGenerator: EntityGenerator) {
-    const hash = await subtitleGenerator.getHash();
-    const type = await subtitleGenerator.getType();
-    const existedHash = getters.list.find((subtitle: SubtitleControlListItem) => subtitle.hash === hash && subtitle.type === type);
-    const source = await subtitleGenerator.getSource();
-    const existedOrigin = getters.list.find((subtitle: SubtitleControlListItem) => isEqual(subtitle.source, source.source));
-    if (!existedHash || !existedOrigin) {
-      const id = uuidv4();
-      store.registerModule([id], { ...SubtitleModule, name: `${id}` });
-      dispatch(`${id}/${subActions.initialize}`, id);
-      const subtitle: Entity = await dispatch(`${id}/${subActions.add}`, subtitleGenerator);
-      await dispatch(`${id}/${subActions.store}`);
-      let subtitleControlListItem: SubtitleControlListItem = {
-        id,
-        hash: subtitle.hash,
-        type: subtitle.type,
-        language: subtitle.language,
-        source: subtitle.source.source,
-      };
-      commit(m.addSubtitleId, subtitleControlListItem);
-      return subtitleControlListItem;
+  async [a.addSubtitle]({ commit, dispatch, getters }: any, options: AddSubtitleOptions) {
+    if (options.playlistId === state.playlistId && options.mediaItemId === state.mediaItemId) {
+      const subtitleGenerator = options.generator;
+      const hash = await subtitleGenerator.getHash();
+      const type = await subtitleGenerator.getType();
+      const existedHash = getters.list.find((subtitle: SubtitleControlListItem) => subtitle.hash === hash && subtitle.type === type);
+      const source = await subtitleGenerator.getSource();
+      const existedOrigin = getters.list.find((subtitle: SubtitleControlListItem) => isEqual(subtitle.source, source.source));
+      if (!existedHash || !existedOrigin) {
+        const id = uuidv4();
+        store.registerModule([id], { ...SubtitleModule, name: `${id}` });
+        dispatch(`${id}/${subActions.initialize}`, id);
+        const subtitle: Entity = await dispatch(`${id}/${subActions.add}`, subtitleGenerator);
+        await dispatch(`${id}/${subActions.store}`);
+        let subtitleControlListItem: SubtitleControlListItem = {
+          id,
+          hash: subtitle.hash,
+          type: subtitle.type,
+          language: subtitle.language,
+          source: subtitle.source.source,
+        };
+        commit(m.addSubtitleId, subtitleControlListItem);
+        return subtitleControlListItem;
+      }
     }
   },
   [a.removeSubtitle]({ commit, getters, state }: any, id: string) {
