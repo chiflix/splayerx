@@ -9,20 +9,20 @@
     >
       <p
         v-for="(cue, ind) in item"
+        :v-if="!cue.hide"
         :key="cue.text + ind"
         :style="{
           zoom: cue.category === 'first' ? `${scaleNum}` : `${secondarySubScale}`,
-          opacity: cue.hide ? '0' : '1',
           writingMode: (cue.category === 'first' ? firstType === 'vtt' : secondType === 'vtt')
             ? `vertical-${cue.tags.vertical}` : '',
           lineHeight: currentCues[0].length && currentCues[1].length ? '112%' : 'normal',
           marginBottom: item[ind + 1] && cue.category === 'first' &&
-            item[ind + 1].category === 'secondary' ?`${subtitleSpace / scaleNum}px` : '',
+            item[ind + 1].category === 'secondary' ? `${subtitleSpace / scaleNum}px` : '',
           fontWeight: cue.tags.b ? 'bold' : '',
           fontStyle: cue.tags.i ? 'italic' : '',
           textDecoration: cue.tags.u ? 'underline' : cue.tags.s ? 'line-through' : '',
         }"
-        :class="'subtitle-style'+chosenStyle"
+        :class="[`subtitle-style${chosenStyle}`]"
       ><!--eslint-disable-line-->{{ cue.text }}</p>
     </div>
     <div

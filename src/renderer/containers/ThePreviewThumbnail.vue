@@ -5,7 +5,7 @@
       height: thumbnailHeight +'px',
       transform: `translateX(${positionOfThumbnail}px)`
     }"
-    class="thumbnail-wrapper"
+    class="thumbnail-wrapper no-drag"
   >
     <div
       :style="{height: thumbnailHeight + 2 +'px'}"
@@ -135,7 +135,6 @@ export default {
 .thumbnail-wrapper {
   position: absolute;
   bottom: 15px;
-  -webkit-app-region: no-drag;
   box-sizing: content-box;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, .2);

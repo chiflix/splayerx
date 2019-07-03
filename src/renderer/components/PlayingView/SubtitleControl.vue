@@ -15,7 +15,7 @@
             height: `${contHeight + hoverHeight}px`,
             fontWeight: '900',
           }"
-          class="sub-menu-wrapper subtitle-scroll-items"
+          class="no-drag sub-menu-wrapper subtitle-scroll-items"
         >
           <div
             :class="{ 'backdrop': useBlur }"
@@ -441,7 +441,6 @@ export default {
     border-radius: 7px;
     box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
     box-sizing: content-box;
-    -webkit-app-region: no-drag;
     .element {
       border-radius: 7px;
       position: absolute;

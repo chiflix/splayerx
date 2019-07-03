@@ -42,6 +42,7 @@
 <script lang="ts">
 import { mapGetters, mapActions } from 'vuex';
 import path from 'path';
+import { debounce } from 'lodash';
 import { windowRectService } from '@/services/window/WindowRectService';
 import { playInfoStorageService } from '@/services/storage/PlayInfoStorageService';
 import { settingStorageService } from '@/services/storage/SettingStorageService';
@@ -152,10 +153,10 @@ export default {
     this.$bus.$on('send-audiotrackid', (id: string) => {
       this.lastAudioTrackId = id;
     });
-    this.$bus.$on('toggle-playback', () => {
+    this.$bus.$on('toggle-playback', debounce(() => {
       this[this.paused ? 'play' : 'pause']();
       this.$ga.event('app', 'toggle-playback');
-    });
+    }, 50, { leading: true }));
     this.$bus.$on('next-video', () => {
       videodata.paused = false;
       if (this.nextVideo) {

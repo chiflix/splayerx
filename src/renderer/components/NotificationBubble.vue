@@ -1,5 +1,5 @@
 <template>
-  <div :class="[container, { rtl: isRtl }]">
+  <div :class="[container, 'no-drag', { rtl: isRtl }]">
     <transition name="nextvideo">
       <NextVideo
         ref="nextVideo"
@@ -163,7 +163,6 @@ export default {
 
 <style lang="scss" scoped>
 .winContainer {
-  -webkit-app-region: no-drag;
   position: absolute;
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px),
   screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
@@ -208,7 +207,6 @@ export default {
   }
 }
 .container {
-  -webkit-app-region: no-drag;
   position: absolute;
   display: flex;
   flex-direction: column;

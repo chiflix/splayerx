@@ -15,7 +15,7 @@
       letterSpacing: '0.2px',
       width: cardWidth > minInfoCardWidth ? `${cardWidth}px` : `${minInfoCardWidth}px`,
     }"
-    class="card"
+    class="no-drag"
   >
     <transition :name="readyShow === 'mainMenu' ? 'setUp' : 'setUpLeft'">
       <div
@@ -773,9 +773,6 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
 
 }
 
-.card {
-  -webkit-app-region: no-drag;
-}
 .mainItems {
   display: flex;
   flex-direction: column;
