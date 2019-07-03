@@ -61,8 +61,7 @@ const getters = {
   isRefreshing(state: SubtitleManagerState): boolean { return state.isRefreshing },
   ableToPushCurrentSubtitle(state: SubtitleManagerState): boolean {
     let enable = false;
-    // TODO
-    if (state.primarySubtitleId) {
+    if (state.primarySubtitleId || state.secondarySubtitleId) {
       enable = true;
     }
     return enable;
@@ -181,9 +180,10 @@ const actions = {
       databaseItemsToAdd.push(...list.filter(({ type }) => type === Type.Local));
       databaseItemsToAdd.push(...embeddedStoredSubtitles);
       embedded = !embeddedStoredSubtitles.length;
-      if (online) online = !isEqual(language, { primary: primaryLanguage, secondary: secondaryLanguage });
-
       const onlineStoredSubtitles = list.filter(({ type }) => type === Type.Online);
+      // No online subtitles available, try reloading and tick
+      // Language change (ignoring order), you need to try to reload and tick
+      if (online) online = !(onlineStoredSubtitles.length > 0 && isEqual(language, { primary: primaryLanguage, secondary: secondaryLanguage }));
       if (online) databaseItemsToDelete.push(...onlineStoredSubtitles);
       else databaseItemsToAdd.push(...onlineStoredSubtitles);
     }

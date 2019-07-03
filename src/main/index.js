@@ -480,7 +480,7 @@ function createWindow() {
 
 ['left-drag', 'left-up'].forEach((channel) => {
   mouse.on(channel, (...args) => {
-    if (!mainWindow || !mainWindow.webContents.isDestroyed()) return;
+    if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
     mainWindow.webContents.send(`mouse-${channel}`, ...args);
   });
 });

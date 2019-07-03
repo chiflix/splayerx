@@ -73,7 +73,7 @@
             marginLeft: sizeAdaption(40),
           }"
           @mouseup.stop=""
-          class="playlist-items"
+          class="playlist-items no-drag"
         >
           <RecentPlaylistItem
             v-for="(item, index) in playingList"
@@ -735,7 +735,6 @@ export default {
       }
     }
     .playlist-items {
-      -webkit-app-region: no-drag;
       display: flex;
       width: fit-content;
       .item {

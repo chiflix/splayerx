@@ -5,7 +5,7 @@
     @mouseenter="hoveredmouseenter"
     @mouseleave="handleMouseleave"
     @mousedown.stop="handleMousedown"
-    class="the-progress-bar"
+    class="the-progress-bar no-drag"
   >
     <the-preview-thumbnail
       v-show="showThumbnail"
@@ -329,7 +329,6 @@ export default {
   position: absolute;
   width: 100%;
   bottom: 0;
-  -webkit-app-region: no-drag;
   height: 15px;
   z-index: 12;
   & > div {
