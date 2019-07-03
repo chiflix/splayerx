@@ -201,6 +201,7 @@ export default {
   position: absolute;
   width: 100%;
   height: 100%;
+  will-change: transform, opacity;
   transition: transform 90ms cubic-bezier(0, 1, 1, 1);
 }
 @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px),
