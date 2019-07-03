@@ -50,7 +50,7 @@ let whiteListedModules = ['vue']
 
 let rendererConfig = {
   mode: 'development',
-  devtool: '#cheap-module-eval-source-map',
+  devtool: '#module-eval-source-map',
   entry: {
     preference: path.join(__dirname, '../src/renderer/preference.js'),
     about: path.join(__dirname, '../src/renderer/about.js'),
@@ -237,7 +237,6 @@ if (process.env.NODE_ENV !== 'production') {
  */
 if (process.env.NODE_ENV === 'production') {
   rendererConfig.mode = 'production';
-  rendererConfig.devtool = '#source-map'
 
   rendererConfig.plugins.push(
     new CopyWebpackPlugin([
