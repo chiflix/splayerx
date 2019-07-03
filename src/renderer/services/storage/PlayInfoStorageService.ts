@@ -38,7 +38,7 @@ export default class PlayInfoStorageService implements IPlayInfoStorable {
   async updateRecentPlayedBy(playlistId: number, data: PlaylistItem): Promise<boolean> {
     try {
       let playList = await info.getValueByKey(RECENT_OBJECT_STORE_NAME, playlistId)
-      await info.update(RECENT_OBJECT_STORE_NAME, playList.id, { ...playList, ...data } as PlaylistItem);
+      await info.update(RECENT_OBJECT_STORE_NAME, playlistId, { ...playList, ...data } as PlaylistItem);
       return true;
     } catch (error) {
       return false;
