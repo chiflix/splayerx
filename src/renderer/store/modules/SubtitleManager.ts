@@ -116,8 +116,6 @@ function privacyConfirm() {
     $bus.$once('subtitle-refresh-continue', resolve);
   })
 }
-let onlineTimeoutId: any;
-let onlineTimeout = false;
 
 let primarySelectionComplete = false;
 let secondarySelectionComplete = false;
@@ -127,19 +125,18 @@ function fetchOnlineListWithBubble(
   hints?: string,
 ): Promise<TranscriptInfo[]> {
   let results: TranscriptInfo[] = [];
-  onlineTimeout = false;
   return new Promise(async (resolve) => {
-    onlineTimeoutId = setTimeout(() => {
-      onlineTimeout = true;
+    const onlineTimeoutId = setTimeout(() => {
       resolve(results);
+      addBubble(REQUEST_TIMEOUT);
     }, 10000);
     try {
       results = await fetchOnlineList(videoSrc, languageCode, hints);
-      clearTimeout(onlineTimeoutId);
     } catch (err) {
       results = [];
     } finally {
       resolve(results);
+      clearTimeout(onlineTimeoutId);
     }
   });
 }
@@ -157,8 +154,6 @@ const actions = {
     dispatch(a.refreshSubtitlesInitially);
   },
   async [a.refreshSubtitlesInitially]({ state, getters, dispatch, commit }: any) {
-    onlineTimeout = false;
-    clearTimeout(onlineTimeoutId);
     const { playlistId, mediaItemId } = state;
     const { originSrc, primaryLanguage, secondaryLanguage } = getters;
     const preference = await retrieveSubtitlePreference(playlistId, mediaItemId);
@@ -203,7 +198,6 @@ const actions = {
         .then(() => Promise.all(actions))
         .then(async () => {
           if (!primarySelectionComplete || !secondarySelectionComplete) dispatch(a.stopAISelection);
-          if (onlineTimeout) addBubble(REQUEST_TIMEOUT);
           await dispatch(a.addDatabaseSubtitles, { storedList: databaseItemsToAdd, selected });
           storeSubtitleLanguage([primaryLanguage, secondaryLanguage], playlistId, mediaItemId);
           addSubtitleItemsToList(getters.list, playlistId, mediaItemId);
@@ -217,8 +211,6 @@ const actions = {
   },
   /** only refresh local and online subtitles, delete old online subtitles */
   async [a.refreshSubtitles]({ state, getters, dispatch, commit }: any) {
-    onlineTimeout = false;
-    clearTimeout(onlineTimeoutId);
     primarySelectionComplete = false;
     secondarySelectionComplete = false;
     commit(m.setIsRefreshing, true);
@@ -262,7 +254,6 @@ const actions = {
       await Promise.all(actions)
         .then(() => {
           if (!primarySelectionComplete || !secondarySelectionComplete) dispatch(a.stopAISelection);
-          if (onlineTimeout) addBubble(REQUEST_TIMEOUT);
           const { playlistId, mediaItemId } = state;
           storeSubtitleLanguage([primaryLanguage, secondaryLanguage], playlistId, mediaItemId);
           addSubtitleItemsToList(getters.list, playlistId, mediaItemId);
