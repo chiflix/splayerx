@@ -515,6 +515,7 @@ new Vue({
       changeFirstSubtitle: smActions.changePrimarySubtitle,
       changeSecondarySubtitle: smActions.changeSecondarySubtitle,
       refreshSubtitles: smActions.refreshSubtitles,
+      addLocalSubtitlesWithSelect: smActions.addLocalSubtitlesWithSelect,
       updateSubtitleType: subtitleActions.UPDATE_SUBTITLE_TYPE,
     }),
     /**
@@ -1563,8 +1564,8 @@ new Vue({
     this.$electron.ipcRenderer.on('open-subtitle-in-mas', (event: Event, file: string) => {
       this.openFilesByDialog({ defaultPath: file });
     });
-    this.$electron.ipcRenderer.on('add-local-subtitles', (event: Event, file: Array<string>) => {
-      console.log(file); // TODO add local subtitle
+    this.$electron.ipcRenderer.on('add-local-subtitles', (event: Event, file: string[]) => {
+      this.addLocalSubtitlesWithSelect(file);
     });
   },
 }).$mount('#app');

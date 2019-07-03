@@ -13,7 +13,6 @@ import TaskQueue from '../renderer/helpers/proceduralQueue';
 import './helpers/electronPrototypes';
 import writeLog from './helpers/writeLog';
 import { getValidVideoRegex, getValidSubtitleRegex } from '../shared/utils';
-import { getOpenedFiles } from './helpers/argv';
 import { mouse } from './helpers/mouse';
 
 // requestSingleInstanceLock is not going to work for mas
