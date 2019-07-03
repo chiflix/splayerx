@@ -308,7 +308,7 @@ function registerMainWindowEvent(mainWindow) {
       mediaInfoQueue.push(path);
     }
   });
-  ipcMain.on('back-to-landingview', () => {
+  ipcMain.on('simulate-closing-window', () => {
     mediaInfoQueue.splice(0);
     snapShotQueue.splice(0);
     thumbnailTask.splice(0);
