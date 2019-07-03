@@ -9,7 +9,7 @@ import { log } from '@/libs/Log';
 import SubtitleModule from './Subtitle';
 import { StoredSubtitleItem, SelectedSubtitle } from '@/interfaces/ISubtitleStorage';
 import { retrieveSubtitlePreference, DatabaseGenerator, storeSubtitleLanguage, addSubtitleItemsToList, removeSubtitleItemsFromList, storeSelectedSubtitles } from '@/services/storage/SubtitleStorage';
-import { isEqual, get, sortBy, differenceWith, flatten, remove } from 'lodash';
+import { isEqual, get, sortBy, differenceWith, flatten, remove, debounce } from 'lodash';
 import Vue from 'vue';
 import { extname } from 'path';
 import { addBubble } from '../../helpers/notificationControl';
@@ -140,18 +140,23 @@ function fetchOnlineListWithErrorHandling(
     }
   });
 }
+function initializeManager({ getters, commit, dispatch }: any) {
+  const { playListId, originSrc, mediaHash } = getters;
+  console.log(`[Subtitle|Manager]: Initializing with playlist: ${playListId} and mediaitem: ${mediaHash}-${originSrc}.`);
+  getters.list.forEach((s: SubtitleControlListItem) => dispatch(a.removeSubtitle, s.id));
+  commit(m.setPlaylistId, playListId);
+  commit(m.setMediaItemId, `${mediaHash}-${originSrc}`);
+  commit(m.setPrimarySubtitleId, '');
+  commit(m.setSecondarySubtitleId, '');
+  primarySelectionComplete = false;;
+  secondarySelectionComplete = false;
+  commit(m.setGlobalDelay, 0);
+  dispatch(a.refreshSubtitlesInitially);
+}
+const debouncedInitializeManager = debounce(initializeManager, 1000);
 const actions = {
-  async [a.initializeManager]({ getters, commit, dispatch }: any) {
-    const { playListId, originSrc, mediaHash } = getters;
-    getters.list.forEach((s: SubtitleControlListItem) => dispatch(a.removeSubtitle, s.id));
-    commit(m.setPlaylistId, playListId);
-    commit(m.setMediaItemId, `${mediaHash}-${originSrc}`);
-    commit(m.setPrimarySubtitleId, '');
-    commit(m.setSecondarySubtitleId, '');
-    primarySelectionComplete = false;;
-    secondarySelectionComplete = false;
-    commit(m.setGlobalDelay, 0);
-    dispatch(a.refreshSubtitlesInitially);
+  async [a.initializeManager](context: any) {
+    debouncedInitializeManager(context);
   },
   async [a.refreshSubtitlesInitially]({ state, getters, dispatch, commit }: any) {
     primarySelectionComplete = false;
