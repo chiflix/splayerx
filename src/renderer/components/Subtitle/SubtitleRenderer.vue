@@ -9,20 +9,20 @@
     >
       <p
         v-for="(cue, ind) in item"
+        :v-if="!cue.hide"
         :key="cue.text + ind"
         :style="{
           zoom: cue.category === 'first' ? `${scaleNum}` : `${secondarySubScale}`,
-          opacity: cue.hide ? '0' : '1',
           writingMode: (cue.category === 'first' ? firstType === 'vtt' : secondType === 'vtt')
             ? `vertical-${cue.tags.vertical}` : '',
           lineHeight: currentCues[0].length && currentCues[1].length ? '112%' : 'normal',
           marginBottom: item[ind + 1] && cue.category === 'first' &&
-            item[ind + 1].category === 'secondary' ?`${subtitleSpace / scaleNum}px` : '',
+            item[ind + 1].category === 'secondary' ? `${subtitleSpace / scaleNum}px` : '',
           fontWeight: cue.tags.b ? 'bold' : '',
           fontStyle: cue.tags.i ? 'italic' : '',
           textDecoration: cue.tags.u ? 'underline' : cue.tags.s ? 'line-through' : '',
         }"
-        :class="'subtitle-style'+chosenStyle"
+        :class="[`subtitle-style${chosenStyle}`]"
       ><!--eslint-disable-line-->{{ cue.text }}</p>
     </div>
     <div
@@ -92,7 +92,6 @@ export default {
   },
   data() {
     return {
-      allCues: [[], [], [], [], [], [], [], [], []],
       noPositionCues: [],
     };
   },
@@ -142,28 +141,28 @@ export default {
       });
       return (firstClassifiedCues || []).concat(secondaryClassifiedCues || []);
     },
-  },
-  watch: {
-    currentCues(newValue: Cue[][]) {
+    allCues() {
       const allCues = [];
       for (let i = 1; i < 10; i += 1) {
-        const firstCues = newValue[0]
-          .filter(cue => (this.subToTop && [1, 2, 3]
+        const firstCues = this.currentCues[0]
+          .filter((cue: Cue) => (this.subToTop && [1, 2, 3]
             .includes(this.calculateAlignment(cue.category, cue.tags))
             ? this.calculateAlignment(cue.category, cue.tags) + 6
             : this.calculateAlignment(cue.category, cue.tags)) === i
             && !this.calculatePosition(cue.category, cue.tags));
-        const secondaryCues = newValue[1]
-          .filter(cue => (this.subToTop && [1, 2, 3]
+        const secondaryCues = this.currentCues[1]
+          .filter((cue: Cue) => (this.subToTop && [1, 2, 3]
             .includes(this.calculateAlignment(cue.category, cue.tags))
             ? this.calculateAlignment(cue.category, cue.tags) + 6
             : this.calculateAlignment(cue.category, cue.tags)) === i
             && !this.calculatePosition(cue.category, cue.tags));
-        allCues.push((firstCues.length ? firstCues.map((cue) => { cue.category = 'first'; return cue; }) : [])
-          .concat(secondaryCues.length ? secondaryCues.map((cue) => { cue.category = 'secondary'; return cue; }) : []));
+        allCues.push((firstCues.length ? firstCues.map((cue: Cue) => { cue.category = 'first'; return cue; }) : [])
+          .concat(secondaryCues.length ? secondaryCues.map((cue: Cue) => { cue.category = 'secondary'; return cue; }) : []));
       }
-      this.allCues = allCues;
+      return allCues;
     },
+  },
+  watch: {
     allCues: {
       handler(val: Cue[][], oldVal: Cue[][]) {
         for (let i = 0; i < 9; i += 1) {

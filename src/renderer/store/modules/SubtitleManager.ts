@@ -1,7 +1,7 @@
 import uuidv4 from 'uuid/v4';
 import store from '@/store';
 import { SubtitleManager as m } from '@/store/mutationTypes';
-import { SubtitleManager as a, newSubtitle as subActions, newSubtitle } from '@/store/actionTypes';
+import { SubtitleManager as a, newSubtitle as subActions } from '@/store/actionTypes';
 import { SubtitleControlListItem, Type, EntityGenerator, Entity } from '@/interfaces/ISubtitle';
 import { ISubtitleStream, TranscriptInfo, searchForLocalList, retrieveEmbeddedList, fetchOnlineList, OnlineGenerator, LocalGenerator, EmbeddedGenerator } from '@/services/subtitle';
 import { generateHints, calculatedName } from '@/libs/utils';
@@ -61,8 +61,7 @@ const getters = {
   isRefreshing(state: SubtitleManagerState): boolean { return state.isRefreshing },
   ableToPushCurrentSubtitle(state: SubtitleManagerState): boolean {
     let enable = false;
-    // TODO
-    if (state.primarySubtitleId) {
+    if (state.primarySubtitleId || state.secondarySubtitleId) {
       enable = true;
     }
     return enable;
@@ -117,8 +116,6 @@ function privacyConfirm() {
     $bus.$once('subtitle-refresh-continue', resolve);
   })
 }
-let onlineTimeoutId: any;
-let onlineTimeout = false;
 
 let primarySelectionComplete = false;
 let secondarySelectionComplete = false;
@@ -128,19 +125,18 @@ function fetchOnlineListWithErrorHandling(
   hints?: string,
 ): Promise<TranscriptInfo[]> {
   let results: TranscriptInfo[] = [];
-  onlineTimeout = false;
   return new Promise(async (resolve) => {
-    onlineTimeoutId = setTimeout(() => {
-      onlineTimeout = true;
+    const onlineTimeoutId = setTimeout(() => {
       resolve(results);
+      addBubble(REQUEST_TIMEOUT, { id: `fetchOnlineListWithBubble-${videoSrc}` });
     }, 10000);
     try {
       results = await fetchOnlineList(videoSrc, languageCode, hints);
-      clearTimeout(onlineTimeoutId);
     } catch (err) {
       results = [];
     } finally {
       resolve(results);
+      clearTimeout(onlineTimeoutId);
     }
   });
 }
@@ -200,8 +196,6 @@ const actions = {
   async [a.refreshSubtitles]({ state, getters, dispatch, commit }: any) {
     primarySelectionComplete = false;
     secondarySelectionComplete = false;
-    onlineTimeout = false;
-    clearTimeout(onlineTimeoutId);
     commit(m.setIsRefreshing, true);
     dispatch(a.startAISelection);
     const { list } = getters as { list: SubtitleControlListItem[] };
@@ -231,26 +225,20 @@ const actions = {
     /** whether to search embedded subtitles */
     const embedded = list.some(({ type }) => type === Type.Embedded);
     if (embedded) retrieveEmbeddedList(originSrc).then((streams) => dispatch(a.addEmbeddedSubtitles, streams));
-
-    await Promise.race([
-      onlinePromise,
-      dispatch(a.addLocalSubtitles, await searchForLocalList(originSrc)),
-      new Promise((resolve) => setTimeout(() => resolve(new Error('timeout')), 10000)),
-    ]).then(() => {})
-      .catch(() => {});
-    dispatch(a.stopAISelection);
     try {
-      await dispatch(a.checkLocalSubtitles);
+      await Promise.race([
+        onlinePromise,
+        dispatch(a.addLocalSubtitles, await searchForLocalList(originSrc)),
+        new Promise((resolve) => setTimeout(() => resolve(new Error('timeout')), 10000)),
+      ]);
+      dispatch(a.stopAISelection);
       const { playlistId, mediaItemId } = state;
-      await storeSubtitleLanguage([primaryLanguage, secondaryLanguage], playlistId, mediaItemId);
-      await addSubtitleItemsToList(getters.list, playlistId, mediaItemId);
-    } catch (error) { console.error(error); }
-    finally {
-      if (onlineTimeout) {
-        addBubble(REQUEST_TIMEOUT);
-        clearTimeout(onlineTimeoutId);
-        onlineTimeout = false;
-      }
+      storeSubtitleLanguage([primaryLanguage, secondaryLanguage], playlistId, mediaItemId);
+      addSubtitleItemsToList(getters.list, playlistId, mediaItemId);
+      dispatch(a.checkLocalSubtitles);
+    } catch(ex) {
+      console.error(ex);
+    } finally {
       commit(m.setIsRefreshing, false);
     }
   },
@@ -460,12 +448,16 @@ const actions = {
   async [a.updatePlayedTime]({ state, dispatch, getters }: any, times: { start: number, end: number }) {
     const actions: Promise<any>[] = [];
     const { primarySubtitleId, secondarySubtitleId } = state;
+    const bubbleId = `${Date.now()}-${Math.random()}`;
     if (primarySubtitleId) actions.push(
       dispatch(`${primarySubtitleId}/${subActions.updatePlayedTime}`, times)
         .then((playedTime: number) => {
           if (playedTime >= getters.duration * 0.6) {
-            addBubble(SUBTITLE_UPLOAD);
-            dispatch(`${primarySubtitleId}/${subActions.upload}`).then((result: boolean) => addBubble(result ? UPLOAD_SUCCESS : UPLOAD_FAILED));
+            addBubble(SUBTITLE_UPLOAD, { id: `${SUBTITLE_UPLOAD}-${bubbleId}`});
+            dispatch(`${primarySubtitleId}/${subActions.upload}`).then((result: boolean) => {
+              const bubbleType = result ? UPLOAD_SUCCESS : UPLOAD_FAILED;
+              addBubble(bubbleType, { id: `${bubbleType}-${bubbleId}` });
+            });
           }
         })
     );
@@ -473,8 +465,11 @@ const actions = {
       dispatch(`${secondarySubtitleId}/${subActions.updatePlayedTime}`, times)
         .then((playedTime: number) => {
           if (playedTime >= getters.duration * 0.6) {
-            addBubble(SUBTITLE_UPLOAD);
-            dispatch(`${secondarySubtitleId}/${subActions.upload}`).then((result: boolean) => addBubble(result ? UPLOAD_SUCCESS : UPLOAD_FAILED));
+            addBubble(SUBTITLE_UPLOAD, { id: `${SUBTITLE_UPLOAD}-${bubbleId}`});
+            dispatch(`${secondarySubtitleId}/${subActions.upload}`).then((result: boolean) => {
+              const bubbleType = result ? UPLOAD_SUCCESS : UPLOAD_FAILED;
+              addBubble(bubbleType, { id: `${bubbleType}-${bubbleId}` });
+            });
           }
         })
     );

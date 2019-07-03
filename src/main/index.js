@@ -1,7 +1,7 @@
 // Be sure to call Sentry function as early as possible in the main process
 import '../shared/sentry';
 
-import { app, BrowserWindow, session, Tray, ipcMain, globalShortcut, nativeImage, splayerx, crashReporter } from 'electron' // eslint-disable-line
+import { app, BrowserWindow, session, Tray, ipcMain, globalShortcut, nativeImage, splayerx } from 'electron' // eslint-disable-line
 import { throttle, debounce } from 'lodash';
 import os from 'os';
 import path from 'path';
@@ -165,7 +165,7 @@ function registerMainWindowEvent(mainWindow) {
       },
     );
   }
-  function thumbnailTaskCallback() {
+  function thumbnailTaskCallback(event) {
     const cb = (ret, src) => {
       thumbnailTask.shift();
       if (thumbnailTask.length > 0) {
@@ -180,7 +180,7 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('generateThumbnails', (event, args) => {
     if (thumbnailTask.length === 0) {
       thumbnailTask.push(args);
-      thumbnailTaskCallback();
+      thumbnailTaskCallback(event);
     } else {
       thumbnailTask.splice(1, 1, args);
     }
@@ -477,13 +477,12 @@ function createWindow() {
 
 ['left-drag', 'left-up'].forEach((channel) => {
   mouse.on(channel, (...args) => {
-    if (!mainWindow || !mainWindow.webContents.isDestroyed()) return;
+    if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
     mainWindow.webContents.send(`mouse-${channel}`, ...args);
   });
 });
 
 app.on('before-quit', () => {
-  mouse.dispose();
   if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
   if (needToRestore) {
     mainWindow.webContents.send('quit', needToRestore);
@@ -491,6 +490,11 @@ app.on('before-quit', () => {
     mainWindow.webContents.send('quit');
   }
 });
+
+app.on('quit', () => {
+  mouse.dispose();
+});
+
 app.on('second-instance', () => {
   if (mainWindow.isMinimized()) mainWindow.restore();
   mainWindow.focus();
@@ -546,7 +550,7 @@ app.on('ready', () => {
 });
 
 app.on('window-all-closed', () => {
-  if (process.env.NODE_ENV !== 'development' || process.platform !== 'darwin') {
+  if (process.platform !== 'darwin') {
     app.quit();
   }
 });
