@@ -12,7 +12,7 @@
         :key="cue.text + ind"
         :style="{
           zoom: cue.category === 'first' ? `${scaleNum}` : `${secondarySubScale}`,
-          opacity: cue.hide ? '0' : '1',
+          display: cue.hide ? 'none' : 'block',
           writingMode: (cue.category === 'first' ? firstType === 'vtt' : secondType === 'vtt')
             ? `vertical-${cue.tags.vertical}` : '',
           lineHeight: currentCues[0].length && currentCues[1].length ? '112%' : 'normal',
@@ -145,6 +145,7 @@ export default {
   },
   watch: {
     currentCues(newValue: Cue[][]) {
+      console.log('currentCues', newValue);
       const allCues = [];
       for (let i = 1; i < 10; i += 1) {
         const firstCues = newValue[0]
