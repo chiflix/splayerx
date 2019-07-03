@@ -534,7 +534,7 @@ export default {
       // There should be a better way to handle timeline.
         try {
           this.$refs.nextVideoUI.checkNextVideoUI(videodata.time);
-          if (this.tempRecentPlaylistDisplayState) {
+          if (this.tempRecentPlaylistDisplayState || this.playListState) {
             this.$refs.recentPlaylist.updatelastPlayedTime(videodata.time);
           } else {
             this.$refs.theTimeCodes.updateTimeContent(videodata.time);
