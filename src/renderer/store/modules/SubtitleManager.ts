@@ -1,7 +1,7 @@
 import uuidv4 from 'uuid/v4';
 import store from '@/store';
 import { SubtitleManager as m } from '@/store/mutationTypes';
-import { SubtitleManager as a, newSubtitle as subActions } from '@/store/actionTypes';
+import { SubtitleManager as a, newSubtitle as subActions, Subtitle as subtitleActions } from '@/store/actionTypes';
 import { SubtitleControlListItem, Type, EntityGenerator, Entity } from '@/interfaces/ISubtitle';
 import { ISubtitleStream, TranscriptInfo, searchForLocalList, retrieveEmbeddedList, fetchOnlineList, OnlineGenerator, LocalGenerator, EmbeddedGenerator } from '@/services/subtitle';
 import { generateHints, calculatedName } from '@/libs/utils';
@@ -235,6 +235,7 @@ const actions = {
 
     const hints = generateHints(originSrc);
     dispatch(a.startAISelection);
+    dispatch(subtitleActions.UPDATE_SUBTITLE_TYPE, true);
     const actions = [dispatch(a.addLocalSubtitles, await searchForLocalList(originSrc))];
     if (online) {
       try {
