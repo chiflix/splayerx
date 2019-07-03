@@ -92,10 +92,10 @@ export default {
       this.changeWindowRotate(val);
     },
     playListId(val: number, oldVal: number) {
-      if (oldVal) this.saveScreenshot(oldVal, this.videoId);
+      if (oldVal) this.updatePlaylist(oldVal);
     },
     videoId(val: number, oldVal: number) {
-      if (!this.isFolderList) this.saveScreenshot(this.playListId, oldVal);
+      this.saveScreenshot(oldVal);
     },
     originSrc(val: string, oldVal: string) {
       if (process.mas && oldVal) {
@@ -286,7 +286,18 @@ export default {
       });
       windowRectService.uploadWindowBy(false, 'playing-view', this.winAngle, this.winAngleBeforeFullScreen, this.winSizeBeforeFullScreen, this.winPos);
     },
-    async saveScreenshot(playlistId: number, videoId: number) {
+    async updatePlaylist(playlistId: number) {
+      if (!Number.isNaN(playlistId)) {
+        const playlistRecord = await playInfoStorageService.getPlaylistRecord(playlistId);
+        const recentPlayedData = {
+          ...playlistRecord,
+          playedIndex: this.isFolderList ? 0 : this.playingIndex,
+        };
+        await playInfoStorageService
+          .updateRecentPlayedBy(playlistId, recentPlayedData as PlaylistItem);
+      }
+    },
+    async saveScreenshot(videoId: number) {
       const { videoElement } = this;
       const canvas = this.$refs.thumbnailCanvas;
       // todo: use metaloaded to get videoHeight and videoWidth
@@ -303,17 +314,6 @@ export default {
 
       const result = await playInfoStorageService.updateMediaItemBy(videoId, data as MediaItem);
       if (result) this.$bus.$emit('database-saved');
-
-      if (!Number.isNaN(playlistId)) {
-        const playlistRecord = await playInfoStorageService.getPlaylistRecord(playlistId);
-        const recentPlayedData = {
-          ...playlistRecord,
-          items: this.isFolderList ? [videoId] : this.items,
-          playedIndex: this.isFolderList ? 0 : this.playingIndex,
-        };
-        await playInfoStorageService
-          .updateRecentPlayedBy(playlistId, recentPlayedData as PlaylistItem);
-      }
     },
     saveSubtitleStyle() {
       return settingStorageService.updateSubtitleStyle({
@@ -328,7 +328,8 @@ export default {
     beforeUnloadHandler(e: BeforeUnloadEvent) {
       if (!this.asyncTasksDone && !this.needToRestore) {
         e.returnValue = false;
-        let savePromise = this.saveScreenshot(this.playListId, this.videoId);
+        let savePromise = this.saveScreenshot(this.videoId)
+          .then(() => this.updatePlaylist(this.playListId));
         if (process.mas && this.$store.getters.source === 'drop') {
           savePromise = savePromise.then(async () => {
             await playInfoStorageService.deleteRecentPlayedBy(this.playListId);
@@ -345,6 +346,7 @@ export default {
             this.asyncTasksDone = true;
             window.close();
           });
+      } else if (process.env.NODE_ENV === 'development') { // app.hide() will disable app refresh and not good for dev
       } else if (process.platform === 'darwin' && !this.quit) {
         e.returnValue = false;
         this.$electron.remote.app.hide();
