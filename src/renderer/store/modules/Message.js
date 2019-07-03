@@ -16,6 +16,9 @@ const mutations = {
     state.messages = state.messages.filter(m => m.id !== id);
   },
 };
+
+const timeouts = {};
+
 const actions = {
   removeMessages({ commit }, id) {
     commit('removeMessages', id);
@@ -25,6 +28,8 @@ const actions = {
   }) {
     if (id) {
       commit('removeMessages', id);
+      clearTimeout(timeouts[id]);
+      delete timeouts[id];
     } else {
       id = `${Date.now()}-${Math.random()}`;
     }
@@ -33,11 +38,10 @@ const actions = {
       id, type, title, content, dismissAfter,
     });
     if (dismissAfter) {
-      setTimeout(() => {
+      timeouts[id] = setTimeout(() => {
         commit('removeMessages', id);
-        if (cb) {
-          cb();
-        }
+        delete timeouts[id];
+        if (cb) cb();
       }, dismissAfter);
     }
   },
