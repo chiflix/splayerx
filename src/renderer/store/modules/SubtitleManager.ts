@@ -128,7 +128,7 @@ function fetchOnlineListWithBubble(
   return new Promise(async (resolve) => {
     const onlineTimeoutId = setTimeout(() => {
       resolve(results);
-      addBubble(REQUEST_TIMEOUT);
+      addBubble(REQUEST_TIMEOUT, { id: `fetchOnlineListWithBubble-${videoSrc}` });
     }, 10000);
     try {
       results = await fetchOnlineList(videoSrc, languageCode, hints);
@@ -465,12 +465,16 @@ const actions = {
   async [a.updatePlayedTime]({ state, dispatch, getters }: any, times: { start: number, end: number }) {
     const actions: Promise<any>[] = [];
     const { primarySubtitleId, secondarySubtitleId } = state;
+    const bubbleId = `${Date.now()}-${Math.random()}`;
     if (primarySubtitleId) actions.push(
       dispatch(`${primarySubtitleId}/${subActions.updatePlayedTime}`, times)
         .then((playedTime: number) => {
           if (playedTime >= getters.duration * 0.6) {
-            addBubble(SUBTITLE_UPLOAD);
-            dispatch(`${primarySubtitleId}/${subActions.upload}`).then((result: boolean) => addBubble(result ? UPLOAD_SUCCESS : UPLOAD_FAILED));
+            addBubble(SUBTITLE_UPLOAD, { id: `${SUBTITLE_UPLOAD}-${bubbleId}`});
+            dispatch(`${primarySubtitleId}/${subActions.upload}`).then((result: boolean) => {
+              const bubbleType = result ? UPLOAD_SUCCESS : UPLOAD_FAILED;
+              addBubble(bubbleType, { id: `${bubbleType}-${bubbleId}` });
+            });
           }
         })
     );
@@ -478,8 +482,11 @@ const actions = {
       dispatch(`${secondarySubtitleId}/${subActions.updatePlayedTime}`, times)
         .then((playedTime: number) => {
           if (playedTime >= getters.duration * 0.6) {
-            addBubble(SUBTITLE_UPLOAD);
-            dispatch(`${secondarySubtitleId}/${subActions.upload}`).then((result: boolean) => addBubble(result ? UPLOAD_SUCCESS : UPLOAD_FAILED));
+            addBubble(SUBTITLE_UPLOAD, { id: `${SUBTITLE_UPLOAD}-${bubbleId}`});
+            dispatch(`${secondarySubtitleId}/${subActions.upload}`).then((result: boolean) => {
+              const bubbleType = result ? UPLOAD_SUCCESS : UPLOAD_FAILED;
+              addBubble(bubbleType, { id: `${bubbleType}-${bubbleId}` });
+            });
           }
         })
     );
