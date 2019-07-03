@@ -15,7 +15,7 @@
       letterSpacing: '0.2px',
       width: cardWidth > minInfoCardWidth ? `${cardWidth}px` : `${minInfoCardWidth}px`,
     }"
-    class="card"
+    class="no-drag"
   >
     <transition :name="readyShow === 'mainMenu' ? 'setUp' : 'setUpLeft'">
       <div
@@ -245,9 +245,12 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'currentFirstSubtitleId', 'winHeight', 'rate', 'chosenSize', 'subToTop',
-      'subtitleDelay', 'displayLanguage', 'winRatio', 'chosenStyle', 'audioTrackList', 'currentAudioTrackId',
+    ...mapGetters(['winWidth', 'primarySubtitleId', 'secondarySubtitleId', 'enabledSecondarySub', 'winHeight', 'rate', 'chosenSize', 'subToTop',
+      'displayLanguage', 'winRatio', 'chosenStyle', 'audioTrackList', 'currentAudioTrackId',
       'computedHeight', 'computedWidth', 'audioDelay', 'lastChosenSize']),
+    ...mapGetters({
+      subtitleDelay: 'globalDelay',
+    }),
     ChosenSizeContent() {
       const compareContent = ['S', 'M', 'L', 'XL'];
       const enContent = ['Small', 'Normal', 'Large', 'Extra Large'];
@@ -431,7 +434,7 @@ export default {
       return `${this.initialSize(119)}px`;
     },
     isSubtitleAvailable() {
-      return this.currentFirstSubtitleId !== '';
+      return this.primarySubtitleId !== '' || (this.secondarySubtitleId !== '' && this.enabledSecondarySub);
     },
     trackNum() {
       return this.$store.getters.audioTrackList.length;
@@ -770,9 +773,6 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
 
 }
 
-.card {
-  -webkit-app-region: no-drag;
-}
 .mainItems {
   display: flex;
   flex-direction: column;

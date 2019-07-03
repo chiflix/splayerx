@@ -19,13 +19,25 @@
   },
   "css": {
     "titleFontSize": {
-      "fontSize": "21px"
+      "fontSize": ""
     },
     "versionFontSize": {
-      "fontSize": "14px"
+      "fontSize": ""
     }
   },
   "errorFile": {
+    "ENOSPC": {
+      "content": "",
+      "title": ""
+    },
+    "EACCES": {
+      "content": "",
+      "title": ""
+    },
+    "ENOENT": {
+      "content": "",
+      "title": ""
+    },
     "addNoVideo": {
       "content": "再生できるファイルが見つかりませんでした。",
       "title": "追加錯誤"
@@ -104,7 +116,7 @@
       "decreasePlaybackSpeed": "再生速度の低下",
       "forwardL": "進む +60s",
       "forwardS": "進む +5s",
-      "fullScreen": "ズーム/フルスクリーンを解除",
+      "fullScreen": "ズーム\/フルスクリーンを解除",
       "increasePlaybackSpeed": "再生速度の増加",
       "keepPlayingWindowFront": "再生時に最前面に表示",
       "name": "プレイ",
@@ -128,11 +140,10 @@
     },
     "subtitle": {
       "AITranslation": "トランスレーション結果を再読込",
-      "decreaseSubtitleDelayL": "字幕ディレイ -0.5s",
       "decreaseSubtitleDelayS": "字幕ディレイ -0.1s",
       "disabledSecondarySub": "第二字幕を閉じる",
       "enabledSecondarySub": "第二字幕を開く",
-      "increaseSubtitleDelayL": "字幕ディレイ +0.5s",
+      "increaseSubtitleDelayL": "",
       "increaseSubtitleDelayS": "字幕ディレイ +0.1s",
       "langEn": "英文",
       "langZhCN": "中文",
@@ -157,7 +168,7 @@
       "subtitleStyle": "字幕スタイル",
       "uploadSelectedSubtitle": "字幕をアップロード"
     },
-    "titleName": "SPlayer",
+    "titleName": "",
     "update": {
       "message": "更新已就绪，是否现在重启?",
       "no": "暂不更新",
@@ -167,14 +178,14 @@
     },
     "window": {
       "bossKey": "ボスキー",
-      "doubleSize": "200%",
+      "doubleSize": "",
       "enterFullScreen": "フルスクリーン",
       "exitFullScreen": "フルスクリーンを解除",
-      "halfSize": "50%",
+      "halfSize": "",
       "maxmize": "最大化",
       "minimize": "最小化",
       "name": "ウィンドウ",
-      "originSize": "100%"
+      "originSize": ""
     }
   },
   "nextVideo": {

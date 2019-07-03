@@ -18,20 +18,20 @@
         :class="borderClass"
         class="indicator-container"
       >
-        <base-info-card
-          ref="card"
-          :use-blur="true"
-          class="card"
-        >
-          <div
-            ref="indicator"
-            :style="{
-              height: volume * 100 + '%',
-              opacity: muted ? 0.25 : 0.8,
-            }"
-            class="indicator"
-          />
-        </base-info-card>
+        <div class="container card">
+          <div class="element bottom">
+            <div class="element content">
+              <div
+                ref="indicator"
+                :style="{
+                  height: volume * 100 + '%',
+                  opacity: muted ? 0.25 : 0.8,
+                }"
+                class="indicator"
+              />
+            </div>
+          </div>
+        </div>
       </div>
       <div
         @mouseup="mouseupOnMuteIcon"
@@ -52,7 +52,6 @@
 
 <script lang="ts">
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
-import BaseInfoCard from './InfoCard.vue';
 import BaseIcon from '../BaseIconContainer.vue';
 
 export default {
@@ -60,7 +59,6 @@ export default {
   // @ts-ignore
   type: INPUT_COMPONENT_TYPE,
   components: {
-    'base-info-card': BaseInfoCard,
     'base-icon': BaseIcon,
   },
   props: {
@@ -358,6 +356,48 @@ export default {
       width: var(--indicator-container-width);
       height: calc(var(--background-height) + 4px);
       top: 0;
+      .container {
+        min-width: 3px;
+        min-height: 3px;;
+        border-radius: 1px;
+        box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+        position: absolute;
+        box-sizing: content-box;
+        .element {
+          border-radius: 1px;
+          position: absolute;
+          box-sizing: inherit;
+        }
+        .bottom {
+          min-width: 3px;
+          min-height: 3px;;
+          width: 100%;
+          height: 100%;
+          top: 0;
+          background-image: rgba(0, 0, 0, 0.1);
+          backdrop-filter: blur(10px);
+        }
+        .middle {
+          min-width: 3px;
+          min-height: 3px;;
+          width: 100%;
+          height: 100%;
+          top: 0;
+          background: rgba(255, 255, 255, 0.2);
+        }
+        .content {
+          min-width: var(--content-min-width);
+          min-height: var(--content-min-height);
+          width: calc(100% - 2px);
+          height: calc(100% - 2px);
+          top: 1px;
+          left: 1px;
+          background-color: transparent;
+          box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
+          display: flex;
+          overflow: hidden;
+        }
+      }
       .card {
         width: calc(var(--indicator-container-width) / 2);
         height: var(--background-height);

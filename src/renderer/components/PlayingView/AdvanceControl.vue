@@ -138,7 +138,7 @@ export default {
       document.addEventListener('mouseup', (e) => {
         if (e.button === 0) {
           if (!this.showAttached) {
-            if (this.validEnter) {
+            if (this.validEnter || this.currentMousedownComponent === this.$options.name) {
               this.anim.playSegments([23, 36], true);
             } else if (this.currentMousedownComponent === this.$options.name) {
               this.anim.playSegments([105, 109], true);
@@ -160,7 +160,7 @@ export default {
         }
       }
       this.showFlag = false;
-      this.validEnter = true;
+      this.validEnter = this.currentMousedownComponent === this.$options.name;
       this.animFlag = false;
     },
     handleLeave() {
@@ -181,20 +181,22 @@ export default {
       this.validEnter = false;
     },
     toggleAdvMenuDisplay() {
-      this.clicks = this.showAttached ? 1 : 0;
-      this.clicks += 1;
-      switch (this.clicks) {
-        case 1:
-          this.$emit('update:showAttached', true);
-          this.$emit('conflict-resolve', this.$options.name);
-          break;
-        case 2:
-          this.$emit('update:showAttached', false);
-          this.clicks = 0;
-          break;
-        default:
-          this.clicks = 0;
-          break;
+      if (this.mouseDown) {
+        this.clicks = this.showAttached ? 1 : 0;
+        this.clicks += 1;
+        switch (this.clicks) {
+          case 1:
+            this.$emit('update:showAttached', true);
+            this.$emit('conflict-resolve', this.$options.name);
+            break;
+          case 2:
+            this.$emit('update:showAttached', false);
+            this.clicks = 0;
+            break;
+          default:
+            this.clicks = 0;
+            break;
+        }
       }
     },
   },

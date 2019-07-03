@@ -1,7 +1,7 @@
 // Be sure to call Sentry function as early as possible in the main process
 import '../shared/sentry';
 
-import { app, BrowserWindow, session, Tray, ipcMain, globalShortcut, nativeImage, splayerx, crashReporter } from 'electron' // eslint-disable-line
+import { app, BrowserWindow, session, Tray, ipcMain, globalShortcut, nativeImage, splayerx } from 'electron' // eslint-disable-line
 import { throttle, debounce, uniq } from 'lodash';
 import os from 'os';
 import path, {
@@ -13,6 +13,8 @@ import TaskQueue from '../renderer/helpers/proceduralQueue';
 import './helpers/electronPrototypes';
 import writeLog from './helpers/writeLog';
 import { getValidVideoRegex, getValidSubtitleRegex } from '../shared/utils';
+import { getOpenedFiles } from './helpers/argv';
+import { mouse } from './helpers/mouse';
 
 // requestSingleInstanceLock is not going to work for mas
 // https://github.com/electron-userland/electron-packager/issues/923
@@ -250,13 +252,13 @@ function registerMainWindowEvent(mainWindow) {
       },
     );
   }
-  function thumbnailTaskCallback() {
+  function thumbnailTaskCallback(event) {
     const cb = (ret, src) => {
       thumbnailTask.shift();
       if (thumbnailTask.length > 0) {
         thumbnail(thumbnailTask[0], cb);
       }
-      if (ret === '0') {
+      if (mainWindow && !mainWindow.webContents.isDestroyed() && ret === '0') {
         mainWindow.webContents.send('thumbnail-saved', src);
       }
     };
@@ -265,7 +267,7 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('generateThumbnails', (event, args) => {
     if (thumbnailTask.length === 0) {
       thumbnailTask.push(args);
-      thumbnailTaskCallback();
+      thumbnailTaskCallback(event);
     } else {
       thumbnailTask.splice(1, 1, args);
     }
@@ -295,6 +297,7 @@ function registerMainWindowEvent(mainWindow) {
   function extractSubtitle(videoPath, subtitlePath, index) {
     return new Promise((resolve, reject) => {
       splayerx.extractSubtitles(videoPath, subtitlePath, `0:${index}:0`, (err) => {
+        console.log('Subtitle:', subtitlePath);
         if (err === 0) reject(index);
         resolve(index);
       });
@@ -357,11 +360,12 @@ function registerMainWindowEvent(mainWindow) {
     if (!fs.existsSync(subtitleFolderPath)) fs.mkdirSync(subtitleFolderPath);
     console.log(subtitleFolderPath);
     const subtitlePath = path.join(subtitleFolderPath, `embedded-${index}.${format}`);
-    if (fs.existsSync(subtitlePath)) event.sender.send('extract-subtitle-response', { error: null, index, path: subtitlePath });
+    console.log(subtitlePath);
+    if (fs.existsSync(subtitlePath)) event.sender.send(`extract-subtitle-response-${index}`, { error: null, index, path: subtitlePath });
     else {
       embeeddSubtitlesQueue.add(() => extractSubtitle(videoPath, subtitlePath, index)
-        .then(index => event.sender.send('extract-subtitle-response', { error: null, index, path: subtitlePath }))
-        .catch(index => event.sender.send('extract-subtitle-response', { error: 'error', index })));
+        .then(index => event.sender.send(`extract-subtitle-response-${index}`, { error: null, index, path: subtitlePath }))
+        .catch(index => event.sender.send(`extract-subtitle-response-${index}`, { error: 'error', index })));
     }
   });
 
@@ -394,7 +398,8 @@ function registerMainWindowEvent(mainWindow) {
     mainWindow.setPosition(...args);
     event.sender.send('windowPositionChange-asyncReply', mainWindow.getPosition());
   });
-  ipcMain.on('windowInit', () => {
+  ipcMain.on('windowInit', (event) => {
+    if (!mainWindow || event.sender.isDestroyed()) return;
     mainWindow.webContents.send('mainCommit', 'windowSize', mainWindow.getSize());
     mainWindow.webContents.send('mainCommit', 'windowMinimumSize', mainWindow.getMinimumSize());
     mainWindow.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
@@ -491,17 +496,17 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('relaunch', () => {
     const switches = process.argv.filter(a => a.startsWith('-'));
     const argv = process.argv.filter(a => !a.startsWith('-'))
-      .slice(0, process.isPackaged ? 1 : 2).concat(switches);
+      .slice(0, app.isPackaged ? 1 : 2).concat(switches);
     app.relaunch({ args: argv.slice(1), execPath: argv[0] });
     app.quit();
   });
   ipcMain.on('preference-to-main', (e, args) => {
-    if (mainWindow) {
+    if (mainWindow && !mainWindow.webContents.isDestroyed()) {
       mainWindow.webContents.send('mainDispatch', 'setPreference', args);
     }
   });
   ipcMain.on('main-to-preference', (e, args) => {
-    if (preferenceWindow) {
+    if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
       preferenceWindow.webContents.send('preferenceDispatch', 'setPreference', args);
     }
   });
@@ -565,14 +570,26 @@ function createWindow() {
   }
 }
 
+['left-drag', 'left-up'].forEach((channel) => {
+  mouse.on(channel, (...args) => {
+    if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
+    mainWindow.webContents.send(`mouse-${channel}`, ...args);
+  });
+});
+
 app.on('before-quit', () => {
-  if (!mainWindow) return;
+  if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
   if (needToRestore) {
     mainWindow.webContents.send('quit', needToRestore);
   } else {
     mainWindow.webContents.send('quit');
   }
 });
+
+app.on('quit', () => {
+  mouse.dispose();
+});
+
 app.on('second-instance', () => {
   if (mainWindow.isMinimized()) mainWindow.restore();
   mainWindow.focus();
@@ -603,7 +620,7 @@ async function darwinOpenFilesToStart() {
     finalVideoToOpen.splice(0, finalVideoToOpen.length);
     tmpSubsToOpen.splice(0, tmpSubsToOpen.length);
     tmpVideoToOpen.splice(0, tmpVideoToOpen.length);
-  } else {
+  } else if (app.isReady()) {
     createWindow();
   }
 }
@@ -631,7 +648,7 @@ if (process.platform === 'darwin') {
     }
   });
   app.on('second-instance', (event, argv) => {
-    const opendFiles = argv.slice(app.isPackaged ? 3 : 2); // TODO: multiple files
+    const opendFiles = argv.slice(app.isPackaged ? 3 : 2);
     opendFiles.forEach((file) => {
       if (subRegex.test(path.extname(file)) || fs.statSync(file).isDirectory()) {
         tmpSubsToOpen.push(file);
@@ -679,7 +696,7 @@ app.on('ready', () => {
 });
 
 app.on('window-all-closed', () => {
-  if (process.env.NODE_ENV !== 'development' || process.platform !== 'darwin') {
+  if (process.platform !== 'darwin') {
     app.quit();
   }
 });

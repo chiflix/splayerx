@@ -48,19 +48,21 @@ export default {
       this.anim = anim;
     },
     togglePlaylistDisplay() {
-      this.clicks = this.showAttached ? 1 : 0;
-      this.clicks += 1;
-      switch (this.clicks) {
-        case 1:
-          this.$emit('update:showAttached', true);
-          break;
-        case 2:
-          this.$emit('update:showAttached', false);
-          this.clicks = 0;
-          break;
-        default:
-          this.clicks = 0;
-          break;
+      if (this.mouseDown) {
+        this.clicks = this.showAttached ? 1 : 0;
+        this.clicks += 1;
+        switch (this.clicks) {
+          case 1:
+            this.$emit('update:showAttached', true);
+            break;
+          case 2:
+            this.$emit('update:showAttached', false);
+            this.clicks = 0;
+            break;
+          default:
+            this.clicks = 0;
+            break;
+        }
       }
     },
     handleDown() {

@@ -3,13 +3,25 @@
 process.env.BABEL_ENV = 'renderer'
 
 const path = require('path')
-const { dependencies, optionalDependencies } = require('../package.json')
+const childProcess = require('child_process')
 const webpack = require('webpack')
 const { VueLoaderPlugin } = require('vue-loader')
-
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const SentryWebpackPlugin = require('@sentry/webpack-plugin')
+const { dependencies, optionalDependencies } = require('../package.json')
+
+let release = '';
+try {
+  const result = childProcess.spawnSync('git', ['describe', '--tag', '--exact-match', '--abbrev=0']);
+  if (result.status === 0) {
+    const tag = result.stdout.toString('utf8').replace(/^\s+|\s+$/g, '');
+    if (tag) release = `SPlayer${tag}`;
+  }
+} catch(ex) {
+  console.error(ex);
+}
 
 function generateHtmlWebpackPluginConfig(name) {
   return {
@@ -50,18 +62,6 @@ let rendererConfig = {
   module: {
     rules: [
       {
-        test: /\.tsx?$/,
-        exclude: /node_modules/,
-        use: [
-          {
-            loader: 'ts-loader',
-            options: {
-              appendTsSuffixTo: [ /\.vue$/ ]
-            }
-          }
-        ]
-      },
-      {
         test: /\.(js|vue)$/,
         enforce: 'pre',
         exclude: /node_modules/,
@@ -82,6 +82,18 @@ let rendererConfig = {
       {
         test: /\.html$/,
         use: 'vue-html-loader'
+      },
+      {
+        test: /\.tsx?$/,
+        exclude: /node_modules/,
+        use: [
+          {
+            loader: 'ts-loader',
+            options: {
+              appendTsSuffixTo: [ /\.vue$/ ]
+            }
+          }
+        ]
       },
       {
         test: /\.js$/,
@@ -188,7 +200,7 @@ let rendererConfig = {
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('index')),
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('about')),
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('preference')),
-    new webpack.HotModuleReplacementPlugin()
+    new webpack.HotModuleReplacementPlugin(),
   ],
   output: {
     filename: '[name].js',
@@ -237,12 +249,32 @@ if (process.env.NODE_ENV === 'production') {
     ]),
     new webpack.DefinePlugin({
       'process.platform': `"${process.platform}"`,
+      'process.env.SENTRY_RELEASE': `"${release}"`,
       'process.env.NODE_ENV': '"production"'
     }),
     new webpack.LoaderOptionsPlugin({
       minimize: true
     })
   )
+
+  if (release && process.env.SENTRY_AUTH_TOKEN) {
+    rendererConfig.plugins.push(
+      new SentryWebpackPlugin({
+        release,
+        include: './dist',
+        urlPrefix: 'app:///dist/',
+        ext: ['js', 'map'],
+        ignore: ['node_modules']
+      }),
+      new SentryWebpackPlugin({
+        release,
+        include: './src',
+        urlPrefix: 'webpack:///./src/',
+        ext: ['js', 'ts', 'vue'],
+        ignore: ['node_modules']
+      })
+    );
+  }
 }
 
 module.exports = rendererConfig

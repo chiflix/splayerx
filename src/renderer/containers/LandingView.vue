@@ -94,8 +94,8 @@
         <!-- eslint-disable-next-line vue/require-component-is -->
         <component
           :is="playlistLength > 1 ? 'PlaylistItem' : 'VideoItem'"
-          v-for="({ backgroundUrl, path, playlistLength }, index) in landingViewItems"
-          :key="path"
+          v-for="({ backgroundUrl, id, playlistLength }, index) in landingViewItems"
+          :key="id"
           :backgroundUrl="backgroundUrl"
           :index="index"
           :is-in-range="index + 1 >= firstIndex && index + 1 <= lastIndex"
@@ -118,7 +118,6 @@
 <script lang="ts">
 import Vue from 'vue';
 import { mapGetters } from 'vuex';
-import { HealthCheckResponse } from 'sagi-api/health/v1/health_pb';
 import { playInfoStorageService } from '@/services/storage/PlayInfoStorageService';
 import { recentPlayService } from '@/services/media/RecentPlayService';
 import Icon from '@/components/BaseIconContainer.vue';
@@ -127,6 +126,8 @@ import NotificationBubble from '@/components/NotificationBubble.vue';
 import PlaylistItem from '@/components/LandingView/PlaylistItem.vue';
 import VideoItem from '@/components/LandingView/VideoItem.vue';
 import { log } from '@/libs/Log';
+import Sagi from '@/libs/sagi';
+import { deleteSubtitlesByPlaylistId } from '../services/storage/SubtitleStorage';
 
 Vue.component('PlaylistItem', PlaylistItem);
 Vue.component('VideoItem', VideoItem);
@@ -211,6 +212,12 @@ export default {
         }, 400);
       }
     },
+    showItemNum() {
+      if (this.firstIndex !== 0) {
+        this.tranFlag = false;
+        this.lastIndex = this.landingViewItems.length;
+      }
+    },
   },
   created() {
     this.useBlur = window.devicePixelRatio === 1;
@@ -255,8 +262,7 @@ export default {
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [720, 405]);
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [720 / 405]);
 
-    // TODO: error handling
-    this.sagi.healthCheck().then(({ status }: HealthCheckResponse.AsObject) => {
+    Sagi.healthCheck().then((status) => {
       if (process.env.NODE_ENV !== 'production') {
         this.sagiHealthStatus = status;
         log.info('LandingView.vue', `launching: ${app.getName()} ${app.getVersion()}`);
@@ -264,11 +270,22 @@ export default {
       }
     });
     window.addEventListener('keyup', this.keyboardHandler);
+    window.addEventListener('beforeunload', this.beforeUnloadHandler);
+    this.$electron.ipcRenderer.on('quit', () => {
+      this.quit = true;
+    });
   },
   destroyed() {
     window.removeEventListener('keyup', this.keyboardHandler);
+    window.removeEventListener('beforeunload', this.beforeUnloadHandler);
   },
   methods: {
+    beforeUnloadHandler(e: BeforeUnloadEvent) {
+      if (process.platform === 'darwin' && !this.quit) {
+        e.returnValue = false;
+        this.$electron.remote.app.hide();
+      }
+    },
     keyboardHandler(e: KeyboardEvent) {
       if (e.key === 'ArrowRight') {
         this.shifting = true;
@@ -308,8 +325,12 @@ export default {
     },
     onItemClick(index: number) {
       if (index === this.lastIndex && !this.isFullScreen) {
+        this.shifting = true;
+        this.tranFlag = true;
         this.lastIndex = this.landingViewItems.length;
       } else if (index + 1 < this.firstIndex && !this.isFullScreen) {
+        this.shifting = true;
+        this.tranFlag = true;
         this.firstIndex = 0;
       } else if (!this.filePathNeedToDelete) {
         this.openPlayList(this.landingViewItems[index].id);
@@ -318,8 +339,13 @@ export default {
     onItemDelete(index: number) {
       this.item = {};
       const [deletedItem] = this.landingViewItems.splice(index, 1);
-      if (this.firstIndex !== 0) this.lastIndex = this.landingViewItems.length;
+      if (this.firstIndex !== 0) {
+        this.shifting = true;
+        this.tranFlag = true;
+        this.lastIndex = this.landingViewItems.length;
+      }
       playInfoStorageService.deleteRecentPlayedBy(deletedItem.id);
+      deleteSubtitlesByPlaylistId(deletedItem.id);
     },
   },
 };

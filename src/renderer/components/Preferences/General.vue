@@ -129,7 +129,7 @@
 import electron from 'electron';
 import { setAsDefaultApp } from '@/../shared/system';
 import Icon from '@/components/BaseIconContainer.vue';
-import { codeToLanguageName } from '@/helpers/language';
+import { codeToLanguageName } from '@/libs/language';
 import BaseCheckBox from './BaseCheckBox.vue';
 
 export default {
@@ -153,7 +153,7 @@ export default {
       restoreButtonTimeoutId: NaN,
       needToRelaunch: false,
       restoreContent: '',
-      languages: ['zhCN', 'zhTW', 'ja', 'ko', 'en', 'es', 'ar'],
+      languages: ['zh-Hans', 'zh-Hant', 'ja', 'ko', 'en', 'es', 'ar'],
       button1Styles: [''],
       button2Styles: [''],
     };

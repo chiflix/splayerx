@@ -254,7 +254,6 @@ export default {
     height: 12px;
     margin-right: 8px;
     background-repeat: no-repeat;
-    -webkit-app-region: no-drag;
     border-radius: 100%;
   }
   #minimize {

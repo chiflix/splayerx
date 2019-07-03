@@ -19,13 +19,25 @@
   },
   "css": {
     "titleFontSize": {
-      "fontSize": "21px"
+      "fontSize": ""
     },
     "versionFontSize": {
-      "fontSize": "14px"
+      "fontSize": ""
     }
   },
   "errorFile": {
+    "ENOSPC": {
+      "content": "",
+      "title": ""
+    },
+    "EACCES": {
+      "content": "",
+      "title": ""
+    },
+    "ENOENT": {
+      "content": "",
+      "title": ""
+    },
     "addNoVideo": {
       "content": "재생할 수있는 파일을 찾을 수 없습니다.",
       "title": "파일 추가 실패"
@@ -128,7 +140,6 @@
     },
     "subtitle": {
       "AITranslation": "스마트 번역 새로 고침",
-      "decreaseSubtitleDelayL": "",
       "decreaseSubtitleDelayS": "자막 지연 -0.1s",
       "disabledSecondarySub": "보조 부제목 사용 중지",
       "enabledSecondarySub": "보조 부제목 사용",
@@ -157,7 +168,7 @@
       "subtitleStyle": "글꼴 스타일",
       "uploadSelectedSubtitle": "선택한 부제목 업로드"
     },
-    "titleName": "SPlayer",
+    "titleName": "",
     "update": {
       "message": "업데이트를 설치하려면 지금 앱을 다시 시작 하시겠습니까?",
       "no": "아니",
@@ -223,7 +234,7 @@
     "tryToDisable": {
       "button": "승인",
       "partOne": "SPlayer는 익명 데이터를 사용하여 사용자 경험을 향상시킵니다. 스마트 번역은 귀하가",
-      "partTwo": ".",
+      "partTwo": "",
       "underlinedContent": "동의하지 않는다"
     }
   },

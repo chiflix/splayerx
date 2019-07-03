@@ -42,6 +42,7 @@
 <script lang="ts">
 import { mapGetters, mapActions } from 'vuex';
 import path from 'path';
+import { debounce } from 'lodash';
 import { windowRectService } from '@/services/window/WindowRectService';
 import { playInfoStorageService } from '@/services/storage/PlayInfoStorageService';
 import { settingStorageService } from '@/services/storage/SettingStorageService';
@@ -50,6 +51,7 @@ import { Video as videoActions } from '@/store/actionTypes';
 import { videodata } from '@/store/video';
 import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer.vue';
 import { MediaItem, PlaylistItem } from '../interfaces/IDB';
+import { deleteSubtitlesByPlaylistId } from '../services/storage/SubtitleStorage';
 
 export default {
   name: 'VideoCanvas',
@@ -90,10 +92,10 @@ export default {
       this.changeWindowRotate(val);
     },
     playListId(val: number, oldVal: number) {
-      if (oldVal) this.saveScreenshot(oldVal, this.videoId);
+      if (oldVal) this.updatePlaylist(oldVal);
     },
     videoId(val: number, oldVal: number) {
-      if (!this.isFolderList) this.saveScreenshot(this.playListId, oldVal);
+      this.saveScreenshot(oldVal);
     },
     originSrc(val: string, oldVal: string) {
       if (process.mas && oldVal) {
@@ -123,7 +125,7 @@ export default {
     this.updatePlayinglistRate({ oldDir: '', newDir: path.dirname(this.originSrc), playingList: this.playingList });
   },
   mounted() {
-    this.$electron.ipcRenderer.on('quit', (needToRestore: boolean) => {
+    this.$electron.ipcRenderer.on('quit', (e: Event, needToRestore: boolean) => {
       if (needToRestore) this.needToRestore = needToRestore;
       this.quit = true;
     });
@@ -151,10 +153,10 @@ export default {
     this.$bus.$on('send-audiotrackid', (id: string) => {
       this.lastAudioTrackId = id;
     });
-    this.$bus.$on('toggle-playback', () => {
+    this.$bus.$on('toggle-playback', debounce(() => {
       this[this.paused ? 'play' : 'pause']();
       this.$ga.event('app', 'toggle-playback');
-    });
+    }, 50, { leading: true }));
     this.$bus.$on('next-video', () => {
       videodata.paused = false;
       if (this.nextVideo) {
@@ -284,7 +286,18 @@ export default {
       });
       windowRectService.uploadWindowBy(false, 'playing-view', this.winAngle, this.winAngleBeforeFullScreen, this.winSizeBeforeFullScreen, this.winPos);
     },
-    async saveScreenshot(playlistId: number, videoId: number) {
+    async updatePlaylist(playlistId: number) {
+      if (!Number.isNaN(playlistId)) {
+        const playlistRecord = await playInfoStorageService.getPlaylistRecord(playlistId);
+        const recentPlayedData = {
+          ...playlistRecord,
+          playedIndex: this.isFolderList ? 0 : this.playingIndex,
+        };
+        await playInfoStorageService
+          .updateRecentPlayedBy(playlistId, recentPlayedData as PlaylistItem);
+      }
+    },
+    async saveScreenshot(videoId: number) {
       const { videoElement } = this;
       const canvas = this.$refs.thumbnailCanvas;
       // todo: use metaloaded to get videoHeight and videoWidth
@@ -300,17 +313,7 @@ export default {
       };
 
       const result = await playInfoStorageService.updateMediaItemBy(videoId, data as MediaItem);
-      if (result) {
-        this.$bus.$emit('database-saved');
-      }
-      const playlistRecord = await playInfoStorageService.getPlaylistRecord(playlistId);
-      const recentPlayedData = {
-        ...playlistRecord,
-        items: this.isFolderList ? [videoId] : this.items,
-        playedIndex: this.isFolderList ? 0 : this.playingIndex,
-      };
-      await playInfoStorageService
-        .updateRecentPlayedBy(playlistId, recentPlayedData as PlaylistItem);
+      if (result) this.$bus.$emit('database-saved');
     },
     saveSubtitleStyle() {
       return settingStorageService.updateSubtitleStyle({
@@ -322,12 +325,15 @@ export default {
     savePlaybackStates() {
       return settingStorageService.updatePlaybackStates({ volume: this.volume, muted: this.muted });
     },
-    beforeUnloadHandler(e: Event) {
+    beforeUnloadHandler(e: BeforeUnloadEvent) {
       if (!this.asyncTasksDone && !this.needToRestore) {
-        let savePromise = this.saveScreenshot(this.playListId, this.videoId);
+        e.returnValue = false;
+        let savePromise = this.saveScreenshot(this.videoId)
+          .then(() => this.updatePlaylist(this.playListId));
         if (process.mas && this.$store.getters.source === 'drop') {
           savePromise = savePromise.then(async () => {
             await playInfoStorageService.deleteRecentPlayedBy(this.playListId);
+            await deleteSubtitlesByPlaylistId(this.playListId);
           });
         }
         savePromise
@@ -340,15 +346,18 @@ export default {
             this.asyncTasksDone = true;
             window.close();
           });
+      } else if (process.env.NODE_ENV === 'development') { // app.hide() will disable app refresh and not good for dev
+      } else if (process.platform === 'darwin' && !this.quit) {
         e.returnValue = false;
-      } else if (!this.quit) {
-        e.returnValue = false;
+        this.$electron.remote.app.hide();
         this.$bus.$off(); // remove all listeners before back to landing view
         // need to init Vuex States
         this.$router.push({
           name: 'landing-view',
         });
         windowRectService.uploadWindowBy(false, 'landing-view');
+      } else {
+        this.$electron.remote.app.quit();
       }
     },
   },

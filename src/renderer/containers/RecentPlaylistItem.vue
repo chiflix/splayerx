@@ -15,13 +15,12 @@
       style="will-change: transform;"
     >
       <div
-        ref="blur"
         :style="{
           backgroundImage: !isPlaying ?
             `linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%), ${backgroundImage}`
             : 'linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%)',
         }"
-        class="img blur"
+        :class="['img', { blur: !mouseover && !isPlaying }]"
       />
       <div
         ref="whiteHover"
@@ -294,7 +293,8 @@ export default {
       return path.basename(this.path, path.extname(this.path));
     },
     backgroundImage() {
-      return `url(${this.imageSrc})`;
+      const { imageSrc } = this;
+      return imageSrc ? `url(${imageSrc})` : '';
     },
     // ui related
     side() {
@@ -463,9 +463,7 @@ export default {
     },
     updateAnimationIn() {
       this.$refs.border.style.setProperty('border-color', 'rgba(255,255,255,0.6)');
-      if (!this.isPlaying) {
-        this.$refs.blur.classList.remove('blur');
-      } else {
+      if (this.isPlaying) {
         return;
       }
       if (!this.itemMoving) this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,-9px)');
@@ -476,9 +474,6 @@ export default {
       }
     },
     updateAnimationOut() {
-      if (!this.isPlaying) {
-        this.$refs.blur.classList.add('blur');
-      }
       if (!this.itemMoving) this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,0)');
       this.$refs.content.style.setProperty('height', '100%');
       this.$refs.border.style.setProperty('border-color', 'rgba(255,255,255,0.15)');
