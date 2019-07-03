@@ -165,7 +165,7 @@ function registerMainWindowEvent(mainWindow) {
       },
     );
   }
-  function thumbnailTaskCallback(event) {
+  function thumbnailTaskCallback() {
     const cb = (ret, src) => {
       thumbnailTask.shift();
       if (thumbnailTask.length > 0) {
@@ -180,7 +180,7 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('generateThumbnails', (event, args) => {
     if (thumbnailTask.length === 0) {
       thumbnailTask.push(args);
-      thumbnailTaskCallback(event);
+      thumbnailTaskCallback();
     } else {
       thumbnailTask.splice(1, 1, args);
     }
@@ -287,9 +287,11 @@ function registerMainWindowEvent(mainWindow) {
       callback(info);
     });
   }
-  function mediaInfoQueueProcess(event) {
+  function mediaInfoQueueProcess() {
     const callback = (info) => {
-      event.sender.send(`mediaInfo-${mediaInfoQueue[0]}-reply`, info);
+      if (mainWindow && !mainWindow.webContents.isDestroyed()) {
+        mainWindow.webContents.send(`mediaInfo-${mediaInfoQueue[0]}-reply`, info);
+      }
       mediaInfoQueue.shift();
       if (mediaInfoQueue.length > 0) {
         mediaInfo(mediaInfoQueue[0], callback);
@@ -301,10 +303,15 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('mediaInfo', (event, path) => {
     if (mediaInfoQueue.length === 0) {
       mediaInfoQueue.push(path);
-      mediaInfoQueueProcess(event);
+      mediaInfoQueueProcess();
     } else {
       mediaInfoQueue.push(path);
     }
+  });
+  ipcMain.on('simulate-closing-window', () => {
+    mediaInfoQueue.splice(0);
+    snapShotQueue.splice(0);
+    thumbnailTask.splice(0);
   });
   ipcMain.on('windowPositionChange', (event, args) => {
     if (!mainWindow || event.sender.isDestroyed()) return;

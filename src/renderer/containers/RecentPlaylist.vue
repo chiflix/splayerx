@@ -480,7 +480,6 @@ export default {
   watch: {
     originSrc() {
       this.updateSubToTop(this.displayState);
-      this.hoverIndex = this.playingIndex;
       if (
         this.playingIndex > this.lastIndex
         || this.playingIndex < this.firstIndex
@@ -500,6 +499,9 @@ export default {
     },
     playingList(val: string[]) {
       this.indexOfMovingItem = val.length;
+    },
+    playingIndex(val: number) {
+      this.hoverIndex = val;
     },
     firstIndex() {
       const marginRight = this.winWidth > 1355 ? (this.winWidth / 1355) * 15 : 15;
