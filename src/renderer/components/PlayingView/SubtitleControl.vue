@@ -357,7 +357,6 @@ export default {
       this.updateSubtitleType(!this.isFirstSubtitle);
     },
     handleRefresh() {
-      console.log(this.isRefreshing);
       if (navigator.onLine && !this.isRefreshing) this.refreshSubtitles();
       else if (!navigator.onLine) addBubble(SUBTITLE_OFFLINE);
     },
