@@ -26,6 +26,18 @@
     }
   },
   "errorFile": {
+    "ENOSPC": {
+      "content": "",
+      "title": ""
+    },
+    "EACCES": {
+      "content": "",
+      "title": ""
+    },
+    "ENOENT": {
+      "content": "",
+      "title": ""
+    },
     "addNoVideo": {
       "content": "No se puede encontrar el archivo reproducible.",
       "title": "Agregar archivo fallido"

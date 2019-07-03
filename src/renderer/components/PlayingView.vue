@@ -115,11 +115,13 @@ export default {
     },
     async loopCues() {
       if (!this.time) this.time = videodata.time;
-      if (this.time !== videodata.time) {
-        const cues = await this.getCues(videodata.time);
-        this.updatePlayTime({ start: this.time, end: videodata.time });
-        this.currentCues = cues;
-      }
+      // TODO @Yvon Yan confirm the impact on subtitle play time
+      // onUpdateTick Always get the latest subtitles
+      // if (this.time !== videodata.time) {
+      const cues = await this.getCues(videodata.time);
+      this.updatePlayTime({ start: this.time, end: videodata.time });
+      this.currentCues = cues;
+      // }
       this.time = videodata.time;
     },
   },

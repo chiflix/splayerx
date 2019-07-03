@@ -26,6 +26,18 @@
     }
   },
   "errorFile": {
+    "ENOSPC": {
+      "content": "",
+      "title": ""
+    },
+    "EACCES": {
+      "content": "",
+      "title": ""
+    },
+    "ENOENT": {
+      "content": "",
+      "title": ""
+    },
     "addNoVideo": {
       "content": "재생할 수있는 파일을 찾을 수 없습니다.",
       "title": "파일 추가 실패"

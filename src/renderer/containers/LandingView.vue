@@ -94,8 +94,8 @@
         <!-- eslint-disable-next-line vue/require-component-is -->
         <component
           :is="playlistLength > 1 ? 'PlaylistItem' : 'VideoItem'"
-          v-for="({ backgroundUrl, path, playlistLength }, index) in landingViewItems"
-          :key="path"
+          v-for="({ backgroundUrl, id, playlistLength }, index) in landingViewItems"
+          :key="id"
           :backgroundUrl="backgroundUrl"
           :index="index"
           :is-in-range="index + 1 >= firstIndex && index + 1 <= lastIndex"
@@ -270,11 +270,22 @@ export default {
       }
     });
     window.addEventListener('keyup', this.keyboardHandler);
+    window.addEventListener('beforeunload', this.beforeUnloadHandler);
+    this.$electron.ipcRenderer.on('quit', () => {
+      this.quit = true;
+    });
   },
   destroyed() {
     window.removeEventListener('keyup', this.keyboardHandler);
+    window.removeEventListener('beforeunload', this.beforeUnloadHandler);
   },
   methods: {
+    beforeUnloadHandler(e: BeforeUnloadEvent) {
+      if (process.platform === 'darwin' && !this.quit) {
+        e.returnValue = false;
+        this.$electron.remote.app.hide();
+      }
+    },
     keyboardHandler(e: KeyboardEvent) {
       if (e.key === 'ArrowRight') {
         this.shifting = true;

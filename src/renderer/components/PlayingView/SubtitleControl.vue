@@ -15,7 +15,7 @@
             height: `${contHeight + hoverHeight}px`,
             fontWeight: '900',
           }"
-          class="sub-menu-wrapper subtitle-scroll-items"
+          class="no-drag sub-menu-wrapper subtitle-scroll-items"
         >
           <div
             :class="{ 'backdrop': useBlur }"
@@ -65,6 +65,7 @@
                 />
               </div>
               <subtitle-list
+                :use-blur="useBlur"
                 :computed-size="computedSize"
                 :current-subtitle-index="currentSubtitleIndex"
                 :no-subtitle="noSubtitle"
@@ -183,7 +184,8 @@ import animationData from '@/assets/subtitle.json';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import SubtitleList from '@/components/PlayingView/SubtitleList.vue';
 import Icon from '../BaseIconContainer.vue';
-import { SUBTITLE_OFFLINE } from '../../../shared/notificationcodes';
+import { addBubble } from '@/helpers/notificationControl';
+import { SUBTITLE_OFFLINE } from '@/helpers/notificationcodes';
 
 export default {
   name: 'SubtitleControl',
@@ -438,7 +440,7 @@ export default {
     },
     handleRefresh() {
       if (navigator.onLine && !this.isRefreshing) this.refreshSubtitles();
-      else if (!navigator.onLine) this.$addBubble(SUBTITLE_OFFLINE);
+      else if (!navigator.onLine) addBubble(SUBTITLE_OFFLINE);
     },
     handleAnimation(anim: AnimationItem) {
       this.anim = anim;
@@ -546,7 +548,6 @@ export default {
     border-radius: 7px;
     box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
     box-sizing: content-box;
-    -webkit-app-region: no-drag;
     .element {
       border-radius: 7px;
       position: absolute;
@@ -556,9 +557,19 @@ export default {
       width: 100%;
       height: 100%;
       top: 0;
-      background-color: rgba(85, 85, 85, 0.88);
+      border: 1px solid rgba(160,160,160,0.7);
+      background-image: radial-gradient(
+        80% 130%,
+        rgba(85,85,85,0.88) 20%,
+        rgba(85,85,85,0.78) 50%,
+        rgba(85,85,85,0.72) 60%,
+        rgba(85,85,85,0.46) 80%,
+        rgba(85,85,85,0.00) 100%
+      );
     }
     .backdrop {
+      border-width: 0px;
+      background-image: none;
       background-color: rgba(0, 0, 0, 0.1);
       backdrop-filter: blur(10px);
     }
