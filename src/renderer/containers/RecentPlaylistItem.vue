@@ -20,7 +20,7 @@
             `linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%), ${backgroundImage}`
             : 'linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%)',
         }"
-        :class="['img', { blur: !isPlaying }]"
+        :class="['img', { blur: !mouseover && !isPlaying }]"
       />
       <div
         ref="whiteHover"
