@@ -1,7 +1,7 @@
 // Be sure to call Sentry function as early as possible in the main process
 import '../shared/sentry';
 
-import { app, BrowserWindow, session, Tray, ipcMain, globalShortcut, nativeImage, splayerx, crashReporter } from 'electron' // eslint-disable-line
+import { app, BrowserWindow, session, Tray, ipcMain, globalShortcut, nativeImage, splayerx } from 'electron' // eslint-disable-line
 import { throttle, debounce } from 'lodash';
 import os from 'os';
 import path from 'path';
