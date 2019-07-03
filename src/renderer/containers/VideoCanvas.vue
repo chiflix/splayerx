@@ -350,6 +350,7 @@ export default {
       } else if (process.platform === 'darwin' && !this.quit) {
         e.returnValue = false;
         this.$electron.remote.app.hide();
+        this.$electron.ipcRenderer.send('back-to-landingview');
         this.$bus.$off(); // remove all listeners before back to landing view
         // need to init Vuex States
         this.$router.push({
