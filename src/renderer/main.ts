@@ -955,6 +955,19 @@ new Vue({
                 this.$electron.ipcRenderer.send('bossKey');
               },
             },
+            { type: 'separator' },
+            {
+              label: this.$t('msg.window.backToLandingView'),
+              id: 'backToLandingView',
+              accelerator: 'CmdOrCtrl+Esc',
+              click: () => {
+                this.$bus.$off();
+                this.$router.push({
+                  name: 'landing-view',
+                });
+                windowRectService.uploadWindowBy(false, 'landing-view');
+              },
+            },
           ],
         },
         // menu.help
@@ -1289,6 +1302,7 @@ new Vue({
         });
         item.enabled = flag;
       });
+      this.menu.getMenuItemById('backToLandingView').enabled = flag;
       // windowRotate 菜单状态随着路由状态一起变
       this.menu.getMenuItemById('windowRotate').enabled = flag;
     },

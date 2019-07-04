@@ -280,7 +280,8 @@ export default {
   },
   methods: {
     beforeUnloadHandler(e: BeforeUnloadEvent) {
-      if (process.platform === 'darwin' && !this.quit) {
+      if (process.env.NODE_ENV === 'development') { // app.hide() will disable app refresh and not good for dev
+      } else if (process.platform === 'darwin' && !this.quit) {
         e.returnValue = false;
         this.$electron.remote.app.hide();
       }
