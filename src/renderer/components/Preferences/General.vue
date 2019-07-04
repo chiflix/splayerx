@@ -40,7 +40,7 @@
       v-if="!isMas"
       class="settingItem--justify"
     >
-      <div>
+      <div class="flex">
         <div class="settingItem__title">
           {{ $t("preferences.general.setDefault") }}
         </div>
@@ -79,7 +79,7 @@
       </div>
     </div>
     <div class="settingItem--justify">
-      <div>
+      <div class="flex">
         <div class="settingItem__title">
           {{ $t("preferences.general.restoreSettings") }}
           {{ needToRelaunch ? $t("preferences.general.restoreSettingsAfterRelaunch") : '' }}
