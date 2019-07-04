@@ -207,7 +207,12 @@ const actions = {
       .then(() => dispatch(a.refreshSubtitles, { playlistId, mediaItemId }));
     }
   },
-  async [a.refreshSubtitles]({ state, getters, dispatch, commit }: any, { playlistId, mediaItemId }: any) {
+  async [a.refreshSubtitles](
+    { state, getters, dispatch, commit }: any,
+    args: { playlistId: number, mediaItemId: string },
+  ) {
+    const { playlistId, mediaItemId } = args || state;
+
     primarySelectionComplete = false;
     secondarySelectionComplete = false;
     commit(m.setIsRefreshing, true);
