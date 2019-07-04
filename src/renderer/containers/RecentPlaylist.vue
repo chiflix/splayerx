@@ -142,6 +142,8 @@ import RecentPlaylistItem from '@/containers/RecentPlaylistItem.vue';
 import Add from '@/components/PlayingView/Add.vue';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import RecentPlayService from '@/services/media/PlaylistService';
+import { playInfoStorageService } from '@/services/storage/PlayInfoStorageService';
+import { PlaylistItem } from '@/interfaces/IDB';
 
 export default {
   name: 'RecentPlaylist',
@@ -376,6 +378,17 @@ export default {
       this.infoDB.update('recent-played', playlist, playlist.id);
       this.$store.dispatch('PlayingList', { id: playlist.id, paths: this.playingList, items: playlist.items });
     },
+    async updatePlaylist(playlistId: number) {
+      if (!Number.isNaN(playlistId)) {
+        const playlistRecord = await playInfoStorageService.getPlaylistRecord(playlistId);
+        const recentPlayedData = {
+          ...playlistRecord,
+          items: this.items,
+        };
+        await playInfoStorageService
+          .updateRecentPlayedBy(playlistId, recentPlayedData as PlaylistItem);
+      }
+    },
     onItemMouseup(index: number) { // eslint-disable-line complexity
       if (this.pageSwitching) clearTimeout(this.pageSwitchingTimeId);
       document.onmouseup = null;
@@ -383,6 +396,7 @@ export default {
        && this.itemMoving && this.canRemove) {
         this.$store.dispatch('RemoveItemFromPlayingList', this.playingList[index]);
         if (this.isFolderList) this.setPlayList();
+        else this.updatePlaylist(this.playListId);
         this.hoverIndex = this.playingIndex;
         this.filename = this.pathBaseName(this.originSrc);
         this.canRemove = false;
@@ -394,6 +408,7 @@ export default {
           newPosition: this.indexOfMovingTo,
         });
         if (this.isFolderList) this.setPlayList();
+        else this.updatePlaylist(this.playListId);
         if (this.indexOfMovingTo > this.lastIndex
           && this.lastIndex + 1 !== this.playingList.length) {
           this.lastIndex += 1;
@@ -465,7 +480,6 @@ export default {
   watch: {
     originSrc() {
       this.updateSubToTop(this.displayState);
-      this.hoverIndex = this.playingIndex;
       if (
         this.playingIndex > this.lastIndex
         || this.playingIndex < this.firstIndex
@@ -485,6 +499,9 @@ export default {
     },
     playingList(val: string[]) {
       this.indexOfMovingItem = val.length;
+    },
+    playingIndex(val: number) {
+      this.hoverIndex = val;
     },
     firstIndex() {
       const marginRight = this.winWidth > 1355 ? (this.winWidth / 1355) * 15 : 15;

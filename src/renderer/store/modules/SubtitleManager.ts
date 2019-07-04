@@ -9,7 +9,7 @@ import { log } from '@/libs/Log';
 import SubtitleModule from './Subtitle';
 import { StoredSubtitleItem, SelectedSubtitle } from '@/interfaces/ISubtitleStorage';
 import { retrieveSubtitlePreference, DatabaseGenerator, storeSubtitleLanguage, addSubtitleItemsToList, removeSubtitleItemsFromList, storeSelectedSubtitles } from '@/services/storage/SubtitleStorage';
-import { isEqual, get, sortBy, remove } from 'lodash';
+import { isEqual, get, sortBy, differenceWith, flatten, remove, debounce } from 'lodash';
 import Vue from 'vue';
 import { extname } from 'path';
 import { addBubble } from '../../helpers/notificationControl';
@@ -108,6 +108,13 @@ type AddDatabaseSubtitlesOptions = {
     primary?: SelectedSubtitle;
     secondary?: SelectedSubtitle;
   };
+  playlistId: number;
+  mediaItemId: string;
+};
+type AddSubtitleOptions = {
+  generator: EntityGenerator;
+  playlistId: number;
+  mediaItemId: string;
 };
 function privacyConfirm() {
   const { $bus } = Vue.prototype;
@@ -116,171 +123,150 @@ function privacyConfirm() {
     $bus.$once('subtitle-refresh-continue', resolve);
   })
 }
-let onlineTimeoutId: any;
-let onlineTimeout = false;
 
 let primarySelectionComplete = false;
 let secondarySelectionComplete = false;
-function fetchOnlineListWithBubble(
+function fetchOnlineListWithErrorHandling(
   videoSrc: string,
   languageCode: LanguageCode,
   hints?: string,
 ): Promise<TranscriptInfo[]> {
   let results: TranscriptInfo[] = [];
-  onlineTimeout = false;
   return new Promise(async (resolve) => {
-    onlineTimeoutId = setTimeout(() => {
-      onlineTimeout = true;
+    const onlineTimeoutId = setTimeout(() => {
       resolve(results);
+      addBubble(REQUEST_TIMEOUT, { id: `fetchOnlineListWithBubble-${videoSrc}` });
     }, 10000);
     try {
       results = await fetchOnlineList(videoSrc, languageCode, hints);
-      clearTimeout(onlineTimeoutId);
     } catch (err) {
       results = [];
     } finally {
       resolve(results);
+      clearTimeout(onlineTimeoutId);
     }
   });
 }
+function initializeManager({ getters, commit, dispatch }: any) {
+  const { playListId, originSrc, mediaHash } = getters;
+  getters.list.forEach((s: SubtitleControlListItem) => dispatch(a.removeSubtitle, s.id));
+  commit(m.setPlaylistId, playListId);
+  commit(m.setMediaItemId, `${mediaHash}-${originSrc}`);
+  commit(m.setPrimarySubtitleId, '');
+  commit(m.setSecondarySubtitleId, '');
+  primarySelectionComplete = false;;
+  secondarySelectionComplete = false;
+  commit(m.setGlobalDelay, 0);
+  dispatch(a.refreshSubtitlesInitially);
+}
+const debouncedInitializeManager = debounce(initializeManager, 1000);
 const actions = {
-  async [a.initializeManager]({ getters, commit, dispatch }: any) {
-    const { playListId, originSrc, mediaHash } = getters;
-    getters.list.forEach((s: SubtitleControlListItem) => dispatch(a.removeSubtitle, s.id));
-    commit(m.setPlaylistId, playListId);
-    commit(m.setMediaItemId, `${mediaHash}-${originSrc}`);
-    commit(m.setPrimarySubtitleId, '');
-    commit(m.setSecondarySubtitleId, '');
-    primarySelectionComplete = false;;
-    secondarySelectionComplete = false;
-    commit(m.setGlobalDelay, 0);
-    dispatch(a.refreshSubtitlesInitially);
+  async [a.initializeManager](context: any) {
+    debouncedInitializeManager(context);
   },
   async [a.refreshSubtitlesInitially]({ state, getters, dispatch, commit }: any) {
-    onlineTimeout = false;
-    clearTimeout(onlineTimeoutId);
-    const { playlistId, mediaItemId } = state;
-    const { originSrc, primaryLanguage, secondaryLanguage } = getters;
-    const preference = await retrieveSubtitlePreference(playlistId, mediaItemId);
-    const databaseItemsToAdd: StoredSubtitleItem[] = [];
-    const databaseItemsToDelete: StoredSubtitleItem[] = [];
-    /** whether or not to fetch new online list */
-    let online = true;
-    /** do not serach online subtitles if extension is not one of mkv, ts, avi and mp4 */
-    online = ['mkv', 'avi', 'ts', 'mp4'].includes(extname(originSrc).slice(1));
-    if (online && !getters.privacyAgreement) online = !!(await privacyConfirm());
-    /** whether or not to extract new embedded list */
-    let embedded = true;
-    let selected: any;
-    if (preference) {
-      const { language, list } = preference;
-      selected = preference.selected;
-
-      const embeddedStoredSubtitles = list.filter(({ type }) => type === Type.Embedded);;
-      databaseItemsToAdd.push(...list.filter(({ type }) => type === Type.Local));
-      databaseItemsToAdd.push(...embeddedStoredSubtitles);
-      embedded = !embeddedStoredSubtitles.length;
-      const onlineStoredSubtitles = list.filter(({ type }) => type === Type.Online);
-      // No online subtitles available, try reloading and tick
-      // Language change (ignoring order), you need to try to reload and tick
-      if (online) online = !(onlineStoredSubtitles.length > 0 && isEqual(language, { primary: primaryLanguage, secondary: secondaryLanguage }));
-      if (online) databaseItemsToDelete.push(...onlineStoredSubtitles);
-      else databaseItemsToAdd.push(...onlineStoredSubtitles);
-    }
-
-    if (online) commit(m.setIsRefreshing, true);
-    const hints = generateHints(originSrc);
-    await dispatch(a.deleteSubtitlesByUuid, databaseItemsToDelete);
-    const actions = [
-      dispatch(a.addLocalSubtitles, await searchForLocalList(originSrc)),
-      dispatch(a.addEmbeddedSubtitles, embedded ? await retrieveEmbeddedList(originSrc) : []),
-      dispatch(a.addOnlineSubtitles, online ? await fetchOnlineListWithBubble(originSrc, secondaryLanguage, hints) : []),
-      dispatch(a.addOnlineSubtitles, online ? await fetchOnlineListWithBubble(originSrc, primaryLanguage, hints) : []),
-    ];
-    dispatch(a.startAISelection);
-    try {
-      await dispatch(a.addDatabaseSubtitles, { storedList: databaseItemsToAdd, selected })
-        .then(() => Promise.all(actions))
-        .then(async () => {
-          if (!primarySelectionComplete || !secondarySelectionComplete) dispatch(a.stopAISelection);
-          if (onlineTimeout) addBubble(REQUEST_TIMEOUT);
-          await dispatch(a.addDatabaseSubtitles, { storedList: databaseItemsToAdd, selected });
-          storeSubtitleLanguage([primaryLanguage, secondaryLanguage], playlistId, mediaItemId);
-          addSubtitleItemsToList(getters.list, playlistId, mediaItemId);
-          dispatch(a.checkLocalSubtitles);
-        });
-    } catch(ex) {
-      console.error(ex);
-    } finally {
-      commit(m.setIsRefreshing, false);
-    }
-  },
-  /** only refresh local and online subtitles, delete old online subtitles */
-  async [a.refreshSubtitles]({ state, getters, dispatch, commit }: any) {
-    onlineTimeout = false;
-    clearTimeout(onlineTimeoutId);
     primarySelectionComplete = false;
     secondarySelectionComplete = false;
     commit(m.setIsRefreshing, true);
-    addBubble(ONLINE_LOADING);
+    dispatch(a.startAISelection);
+    const { playlistId, mediaItemId } = state;
+    const preference = await retrieveSubtitlePreference(playlistId, mediaItemId);
+    const { primaryLanguage, secondaryLanguage } = getters;
+    const needRefreshing = (
+      !preference ||
+      !preference.list.length ||
+      !!differenceWith(
+        Object.values(preference.language),
+        [primaryLanguage, secondaryLanguage],
+      ).length
+    );
+    if (preference && !needRefreshing) {
+      try {
+        await Promise.race([
+          dispatch(a.addDatabaseSubtitles, {
+            storedList: preference.list,
+            selected: preference.selected,
+            playlistId, mediaItemId,
+          }),
+          new Promise((resolve, reject) => setTimeout(() => reject('timeout'), 10000)),
+        ]);
+      } catch(error) {
+        console.error(error);
+      } finally {
+        commit(m.setIsRefreshing, false);
+        dispatch(a.stopAISelection);
+      }
+    } else if (!preference && needRefreshing) {
+      return dispatch(a.refreshSubtitles, { playlistId, mediaItemId });
+    } else if (preference && needRefreshing) {
+      return dispatch(a.addDatabaseSubtitles, {
+        storedList: preference.list,
+        selected: preference.selected,
+        playlistId, mediaItemId,
+      })
+      .then(() => dispatch(a.refreshSubtitles, { playlistId, mediaItemId }));
+    }
+  },
+  async [a.refreshSubtitles](
+    { state, getters, dispatch, commit }: any,
+    args: { playlistId: number, mediaItemId: string },
+  ) {
+    const { playlistId, mediaItemId } = args || state;
+
+    primarySelectionComplete = false;
+    secondarySelectionComplete = false;
+    commit(m.setIsRefreshing, true);
+    dispatch(a.startAISelection);
     const { list } = getters as { list: SubtitleControlListItem[] };
     const { originSrc, primaryLanguage, secondaryLanguage } = getters;
+    let onlinePromise = new Promise((resolve) => resolve());
     /** do not serach online subtitles if extension is not one of mkv, ts, avi and mp4 */
     let online = ['mkv', 'avi', 'ts', 'mp4'].includes(extname(originSrc).slice(1));
     if (online && !getters.privacyAgreement) online = !!(await privacyConfirm());
-    const [primary, secondary] = list
-      .filter(({ type }) => type === Type.Online)
-      .reduce((subtitleList, currentSubtitle) => {
-        if (!subtitleList[0][0]) {
-          subtitleList[0].push(currentSubtitle);
-        } else if (subtitleList[0][0].language === currentSubtitle.language) {
-          subtitleList[0].push(currentSubtitle);
-        } else {
-          subtitleList[1].push(currentSubtitle);
-        }
-        return subtitleList;
-      }, [[], []] as [SubtitleControlListItem[], SubtitleControlListItem[]]);
-
-    const hints = generateHints(originSrc);
-    dispatch(a.startAISelection);
-    const actions = [dispatch(a.addLocalSubtitles, await searchForLocalList(originSrc))];
     if (online) {
-      try {
-        const [ primaryResults, secondaryResults ] = await Promise.all([
-          fetchOnlineListWithBubble(originSrc, primaryLanguage, hints),
-          fetchOnlineListWithBubble(originSrc, secondaryLanguage, hints),
-        ]);
-        dispatch(a.deleteSubtitlesByUuid, primary)
-        dispatch(a.deleteSubtitlesByUuid, secondary)
-        actions.push(dispatch(a.addOnlineSubtitles, primaryResults));
-        actions.push(dispatch(a.addOnlineSubtitles, secondaryResults));
-      } catch (error) {
-        console.error(error);
-      }
+      addBubble(ONLINE_LOADING);
+      const hints = generateHints(originSrc);
+      onlinePromise = Promise.all([
+        fetchOnlineListWithErrorHandling(originSrc, primaryLanguage, hints),
+        fetchOnlineListWithErrorHandling(originSrc, secondaryLanguage, hints),
+      ]).then((resultsList) => {
+        const results = flatten(resultsList);
+        const newSubtitlesToAdd: TranscriptInfo[] = [];
+        const oldSubtitlesToDel: SubtitleControlListItem[] = [];
+        const oldSubtitles = [...(getters as { list: SubtitleControlListItem[] }).list];
+        oldSubtitlesToDel.push(...remove(oldSubtitles, ({ type, language }) => type === Type.Online && language !== primaryLanguage && language !== secondaryLanguage));
+        oldSubtitlesToDel.push(...remove(oldSubtitles, ({ type, hash }) => type === Type.Online && !results.find(({ transcriptIdentity }) => transcriptIdentity === hash)));
+        newSubtitlesToAdd.push(...results.filter(({ transcriptIdentity }) => !oldSubtitles.find(({ id }) => id === transcriptIdentity)));
+        return { delete: oldSubtitlesToDel, add: newSubtitlesToAdd };
+      }).then((result) => dispatch(a.addOnlineSubtitles, { transcriptInfoList: result.add, playlistId, mediaItemId })
+        .then(() => dispatch(a.deleteSubtitlesByUuid, result.delete)));
     }
+    /** whether to search embedded subtitles */
+    const embedded = list.some(({ type }) => type === Type.Embedded);
+    if (embedded) retrieveEmbeddedList(originSrc).then((streams) => dispatch(a.addEmbeddedSubtitles, { streams, playlistId, mediaItemId }));
     try {
-      await Promise.all(actions)
-        .then(() => {
-          if (!primarySelectionComplete || !secondarySelectionComplete) dispatch(a.stopAISelection);
-          if (onlineTimeout) addBubble(REQUEST_TIMEOUT);
-          const { playlistId, mediaItemId } = state;
-          storeSubtitleLanguage([primaryLanguage, secondaryLanguage], playlistId, mediaItemId);
-          addSubtitleItemsToList(getters.list, playlistId, mediaItemId);
-          dispatch(a.checkLocalSubtitles);
-        });
+      await Promise.race([
+        onlinePromise,
+        dispatch(a.addLocalSubtitles, { paths: await searchForLocalList(originSrc), playlistId, mediaItemId }),
+        new Promise((resolve) => setTimeout(() => resolve(new Error('timeout')), 10000)),
+      ]);
+      dispatch(a.stopAISelection);
+      storeSubtitleLanguage([primaryLanguage, secondaryLanguage], playlistId, mediaItemId);
+      addSubtitleItemsToList(getters.list, playlistId, mediaItemId);
+      dispatch(a.checkLocalSubtitles);
     } catch(ex) {
       console.error(ex);
     } finally {
       commit(m.setIsRefreshing, false);
     }
   },
-  async [a.checkLocalSubtitles]({ dispatch, getters }: any) {
+  [a.checkLocalSubtitles]({ dispatch, getters }: any) {
     const localInvalidSubtitles = getters.list.filter(({ type, source }: any) => type === Type.Local && !existsSync(source));
     if (localInvalidSubtitles.length) return dispatch(a.deleteSubtitlesByUuid, localInvalidSubtitles).then(() => addBubble(LOCAL_SUBTITLE_REMOVED));
   },
-  async [a.addLocalSubtitles]({ dispatch }: any, paths: string[]) {
+  async [a.addLocalSubtitles]({ dispatch }: any, { paths, playlistId, mediaItemId }: any) {
     return Promise.all(
-      paths.map(path => dispatch(a.addSubtitle, new LocalGenerator(path)))
+      paths.map((path: string) => dispatch(a.addSubtitle, { generator: new LocalGenerator(path), playlistId, mediaItemId }))
     );
   },
   async [a.addLocalSubtitlesWithSelect]({ state, dispatch, getters }: any, paths: string[]) {
@@ -304,56 +290,68 @@ const actions = {
       }
     });
   },
-  async [a.addEmbeddedSubtitles]({ dispatch }: any, streams: [string, ISubtitleStream][]) {
+  async [a.addEmbeddedSubtitles]({ dispatch }: any, { streams, playlistId, mediaItemId }: any) {
     return Promise.all(
-      streams.map(stream => dispatch(a.addSubtitle, new EmbeddedGenerator(stream[0], stream[1])))
+      streams.map((stream: [string, ISubtitleStream]) => dispatch(a.addSubtitle, { generator: new EmbeddedGenerator(stream[0], stream[1]), playlistId, mediaItemId }))
     );
   },
-  async [a.addOnlineSubtitles]({ dispatch }: any, transcriptInfoList: TranscriptInfo[]) {
+  async [a.addOnlineSubtitles]({ dispatch }: any, { transcriptInfoList, playlistId, mediaItemId }: any) {
     return Promise.all(
-      transcriptInfoList.map(info => dispatch(a.addSubtitle, new OnlineGenerator(info)))
+      transcriptInfoList.map((info: TranscriptInfo) => dispatch(a.addSubtitle, { generator: new OnlineGenerator(info), playlistId, mediaItemId }))
     );
   },
   async [a.addDatabaseSubtitles]({ getters, dispatch }: any, options: AddDatabaseSubtitlesOptions) {
     return Promise.all(
-      options.storedList.map(async stored => dispatch(a.addSubtitle, await DatabaseGenerator.from(stored)))
+      options.storedList.map(async stored => dispatch(a.addSubtitle, {
+        generator: await DatabaseGenerator.from(stored),
+        playlistId: options.playlistId,
+        mediaItemId: options.mediaItemId,
+      }))
     )
       .then(() => {
         const { list } = getters;
         let primary: SelectedSubtitle, secondary: SelectedSubtitle;
+        let primaryId: string = '', secondaryId: string = '';
         if (primary = get(options, 'selected.primary')) {
           let subtitles = list.filter((sub: SubtitleControlListItem) => sub.hash === primary.hash) as SubtitleControlListItem[];
           if (subtitles.length > 1) subtitles = subtitles.filter(sub => isEqual(sub.source, primary.source));
-          if (subtitles.length) dispatch(a.changePrimarySubtitle, subtitles[0].id);
+          if (subtitles.length) primaryId = subtitles[0].id;
         }
         if (secondary = get(options, 'selected.secondary')) {
           let subtitles = list.filter((sub: SubtitleControlListItem) => sub.hash === secondary.hash) as SubtitleControlListItem[];
           if (subtitles.length > 1) subtitles = subtitles.filter(sub => isEqual(sub.source, secondary.source));
-          if (subtitles.length) dispatch(a.changeSecondarySubtitle, subtitles[0].id);
+          if (subtitles.length) secondaryId = subtitles[0].id;
         }
+        return Promise.all([
+          dispatch(a.changePrimarySubtitle, primaryId),
+          dispatch(a.changeSecondarySubtitle, secondaryId),
+        ]);
       });
   },
-  async [a.addSubtitle]({ commit, dispatch, getters }: any, subtitleGenerator: EntityGenerator) {
-    const hash = await subtitleGenerator.getHash();
-    const type = await subtitleGenerator.getType();
-    const existedHash = getters.list.find((subtitle: SubtitleControlListItem) => subtitle.hash === hash && subtitle.type === type);
-    const source = await subtitleGenerator.getSource();
-    const existedOrigin = getters.list.find((subtitle: SubtitleControlListItem) => isEqual(subtitle.source, source.source));
-    if (!existedHash || !existedOrigin) {
-      const id = uuidv4();
-      store.registerModule([id], { ...SubtitleModule, name: `${id}` });
-      dispatch(`${id}/${subActions.initialize}`, id);
-      const subtitle: Entity = await dispatch(`${id}/${subActions.add}`, subtitleGenerator);
-      await dispatch(`${id}/${subActions.store}`);
-      let subtitleControlListItem: SubtitleControlListItem = {
-        id,
-        hash: subtitle.hash,
-        type: subtitle.type,
-        language: subtitle.language,
-        source: subtitle.source.source,
-      };
-      commit(m.addSubtitleId, subtitleControlListItem);
-      return subtitleControlListItem;
+  async [a.addSubtitle]({ commit, dispatch, getters }: any, options: AddSubtitleOptions) {
+    if (options.playlistId === state.playlistId && options.mediaItemId === state.mediaItemId) {
+      const subtitleGenerator = options.generator;
+      const hash = await subtitleGenerator.getHash();
+      const type = await subtitleGenerator.getType();
+      const existedHash = getters.list.find((subtitle: SubtitleControlListItem) => subtitle.hash === hash && subtitle.type === type);
+      const source = await subtitleGenerator.getSource();
+      const existedOrigin = getters.list.find((subtitle: SubtitleControlListItem) => isEqual(subtitle.source, source.source));
+      if (!existedHash || !existedOrigin) {
+        const id = uuidv4();
+        store.registerModule([id], { ...SubtitleModule, name: `${id}` });
+        dispatch(`${id}/${subActions.initialize}`, id);
+        const subtitle: Entity = await dispatch(`${id}/${subActions.add}`, subtitleGenerator);
+        await dispatch(`${id}/${subActions.store}`);
+        let subtitleControlListItem: SubtitleControlListItem = {
+          id,
+          hash: subtitle.hash,
+          type: subtitle.type,
+          language: subtitle.language,
+          source: subtitle.source.source,
+        };
+        commit(m.addSubtitleId, subtitleControlListItem);
+        return subtitleControlListItem;
+      }
     }
   },
   [a.removeSubtitle]({ commit, getters, state }: any, id: string) {
@@ -406,40 +404,41 @@ const actions = {
     unwatch = store.watch(
       (state: any, getters: any) => getters.list.map(({ id, type, source, language }: any) => ({ id, type, source, language })),
       (value: SubtitleControlListItem[], oldValue: SubtitleControlListItem[]) => {
-        console.log(value);
-        const { primaryLanguage, secondaryLanguage } = getters;
-        if (!primarySelectionComplete || !secondarySelectionComplete) {
-          const hasPrimaryLanguage = value
-            .find(({ language }) => language === primaryLanguage);
-          const hasSecondaryLanguage = value
-            .find(({ language }) => language === secondaryLanguage);
-          if (hasPrimaryLanguage) {
-            dispatch(a.changePrimarySubtitle, hasPrimaryLanguage.id);
-            primarySelectionComplete = true;
-            if (hasSecondaryLanguage) {
-              dispatch(a.changeSecondarySubtitle, hasSecondaryLanguage.id);
-              secondarySelectionComplete = true;
-            }
-          } else if (hasSecondaryLanguage) {
-            if (primarySelectionComplete) {
-              dispatch(a.changeSecondarySubtitle, hasSecondaryLanguage.id);
-              secondarySelectionComplete = true;
-            } else {
-              dispatch(a.changePrimarySubtitle, hasSecondaryLanguage.id);
-              dispatch(a.changeSecondarySubtitle, '');
+        if (value.length) {
+          const { primaryLanguage, secondaryLanguage } = getters;
+          if (!primarySelectionComplete || !secondarySelectionComplete) {
+            const hasPrimaryLanguage = value
+              .find(({ language }) => language === primaryLanguage);
+            const hasSecondaryLanguage = value
+              .find(({ language }) => language === secondaryLanguage);
+            if (hasPrimaryLanguage) {
+              dispatch(a.changePrimarySubtitle, hasPrimaryLanguage.id);
               primarySelectionComplete = true;
-              secondarySelectionComplete = true;
+              if (hasSecondaryLanguage) {
+                dispatch(a.changeSecondarySubtitle, hasSecondaryLanguage.id);
+                secondarySelectionComplete = true;
+              }
+            } else if (hasSecondaryLanguage) {
+              if (primarySelectionComplete) {
+                dispatch(a.changeSecondarySubtitle, hasSecondaryLanguage.id);
+                secondarySelectionComplete = true;
+              } else {
+                dispatch(a.changePrimarySubtitle, hasSecondaryLanguage.id);
+                dispatch(a.changeSecondarySubtitle, '');
+                primarySelectionComplete = true;
+                secondarySelectionComplete = true;
+              }
+            } else {
+              dispatch(a.changePrimarySubtitle, '');
+              dispatch(a.changeSecondarySubtitle, '');
             }
-          } else {
-            dispatch(a.changePrimarySubtitle, '');
-            dispatch(a.changeSecondarySubtitle, '');
+            if (primarySelectionComplete && secondarySelectionComplete) dispatch(a.stopAISelection);
           }
-          if (primarySelectionComplete && secondarySelectionComplete) dispatch(a.stopAISelection);
         }
       });
   },
   async [a.stopAISelection]() {
-    unwatch();
+    if (typeof unwatch === 'function') unwatch();
   },
   async [a.getCues]({ dispatch, getters }: any, time?: number) {
     const firstSub = {
@@ -474,12 +473,16 @@ const actions = {
   async [a.updatePlayedTime]({ state, dispatch, getters }: any, times: { start: number, end: number }) {
     const actions: Promise<any>[] = [];
     const { primarySubtitleId, secondarySubtitleId } = state;
+    const bubbleId = `${Date.now()}-${Math.random()}`;
     if (primarySubtitleId) actions.push(
       dispatch(`${primarySubtitleId}/${subActions.updatePlayedTime}`, times)
         .then((playedTime: number) => {
           if (playedTime >= getters.duration * 0.6) {
-            addBubble(SUBTITLE_UPLOAD);
-            dispatch(`${primarySubtitleId}/${subActions.upload}`).then((result: boolean) => addBubble(result ? UPLOAD_SUCCESS : UPLOAD_FAILED));
+            addBubble(SUBTITLE_UPLOAD, { id: `${SUBTITLE_UPLOAD}-${bubbleId}`});
+            dispatch(`${primarySubtitleId}/${subActions.upload}`).then((result: boolean) => {
+              const bubbleType = result ? UPLOAD_SUCCESS : UPLOAD_FAILED;
+              addBubble(bubbleType, { id: `${bubbleType}-${bubbleId}` });
+            });
           }
         })
     );
@@ -487,8 +490,11 @@ const actions = {
       dispatch(`${secondarySubtitleId}/${subActions.updatePlayedTime}`, times)
         .then((playedTime: number) => {
           if (playedTime >= getters.duration * 0.6) {
-            addBubble(SUBTITLE_UPLOAD);
-            dispatch(`${secondarySubtitleId}/${subActions.upload}`).then((result: boolean) => addBubble(result ? UPLOAD_SUCCESS : UPLOAD_FAILED));
+            addBubble(SUBTITLE_UPLOAD, { id: `${SUBTITLE_UPLOAD}-${bubbleId}`});
+            dispatch(`${secondarySubtitleId}/${subActions.upload}`).then((result: boolean) => {
+              const bubbleType = result ? UPLOAD_SUCCESS : UPLOAD_FAILED;
+              addBubble(bubbleType, { id: `${bubbleType}-${bubbleId}` });
+            });
           }
         })
     );

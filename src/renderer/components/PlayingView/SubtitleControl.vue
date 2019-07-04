@@ -348,6 +348,8 @@ export default {
       }
     },
     originSrc() {
+      // Switch video, reset isInitial
+      this.isInitial = true;
       this.$emit('update:showAttached', false);
       this.computedAvailableItems = [];
     },
@@ -420,7 +422,6 @@ export default {
       deleteCurrentSubtitle: smActions.deleteSubtitlesByUuid,
       updateNoSubtitle: subtitleActions.UPDATE_NO_SUBTITLE,
       updateSubtitleType: subtitleActions.UPDATE_SUBTITLE_TYPE,
-      addMessages: 'addMessages',
     }),
     offCurrentSubtitle() {
       if (this.isFirstSubtitle) {
@@ -544,6 +545,7 @@ export default {
   }
 
   .sub-menu-wrapper {
+    overflow: hidden;
     transition-property: opacity, transform;
     border-radius: 7px;
     box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);

@@ -266,7 +266,6 @@ export default {
       if (process.env.NODE_ENV !== 'production') {
         this.sagiHealthStatus = status;
         log.info('LandingView.vue', `launching: ${app.getName()} ${app.getVersion()}`);
-        log.info('LandingView.vue', `sagi API Status: ${this.sagiHealthStatus}`);
       }
     });
     window.addEventListener('keyup', this.keyboardHandler);
