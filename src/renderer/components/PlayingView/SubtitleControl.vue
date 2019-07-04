@@ -461,6 +461,7 @@ export default {
       );
     }
     .backdrop {
+      overflow: hidden;
       border-width: 0px;
       background-image: none;
       background-color: rgba(0, 0, 0, 0.1);
