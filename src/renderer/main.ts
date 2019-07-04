@@ -1461,7 +1461,7 @@ new Vue({
       if (!e.ctrlKey) {
         let isAdvanceColumeItem;
         let isSubtitleScrollItem;
-        const advance = document.querySelector('.advance-column-items');
+        const advance = document.querySelector('.mainMenu');
         const subtitle = document.querySelector('.subtitle-scroll-items');
         if (advance) {
           const nodeList = advance.childNodes;
@@ -1513,8 +1513,26 @@ new Vue({
       }
     });
     window.addEventListener('wheel', (event) => {
-      const { deltaX: x, ctrlKey } = event;
-      if (!ctrlKey) this.$emit('wheel-event', { x });
+      const { deltaX: x, ctrlKey, target } = event;
+      let isAdvanceColumeItem;
+      let isSubtitleScrollItem;
+      const advance = document.querySelector('.mainMenu');
+      const subtitle = document.querySelector('.subtitle-scroll-items');
+      if (advance) {
+        const nodeList = advance.childNodes;
+        for (let i = 0; i < nodeList.length; i += 1) {
+          isAdvanceColumeItem = nodeList[i].contains(target as Node);
+        }
+      }
+      if (subtitle) {
+        const subList = subtitle.childNodes;
+        for (let i = 0; i < subList.length; i += 1) {
+          isSubtitleScrollItem = subList[i].contains(target as Node);
+        }
+      }
+      if (!ctrlKey && !isAdvanceColumeItem && !isSubtitleScrollItem) {
+        this.$emit('wheel-event', { x });
+      }
     });
     /* eslint-disable */
 

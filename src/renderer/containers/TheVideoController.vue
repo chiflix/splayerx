@@ -78,7 +78,6 @@
         class="button no-drag playlist"
       />
       <subtitle-control
-        :key="originSrc"
         v-fade-in="displayState.SubtitleControl"
         v-bind.sync="widgetsStatus.SubtitleControl"
         :last-dragging.sync="lastDragging"
