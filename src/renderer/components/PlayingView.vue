@@ -66,6 +66,11 @@ export default {
     },
   },
   watch: {
+    originSrc(newVal: string) {
+      if (newVal) {
+        this.initializeManager();
+      }
+    },
     async primarySubtitleId() {
       this.currentCues = await this.getCues(videodata.time);
     },
@@ -93,6 +98,7 @@ export default {
   methods: {
     ...mapActions({
       updateSubToTop: subtitleActions.UPDATE_SUBTITLE_TOP,
+      initializeManager: smActions.initializeManager,
       addLocalSubtitlesWithSelect: smActions.addLocalSubtitlesWithSelect,
       getCues: smActions.getCues,
       updatePlayTime: smActions.updatePlayedTime,
