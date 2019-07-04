@@ -116,7 +116,7 @@ import {
   createNamespacedHelpers,
 } from 'vuex';
 import path from 'path';
-import { Input as inputActions, Video as videoActions } from '@/store/actionTypes';
+import { Input as inputActions, Video as videoActions, Subtitle as legacySubtitleActions } from '@/store/actionTypes';
 import { INPUT_COMPONENT_TYPE, getterTypes as iGT } from '@/plugins/input';
 import Titlebar from '@/components/Titlebar.vue';
 import PlayButton from '@/components/PlayingView/PlayButton.vue';
@@ -216,6 +216,7 @@ export default {
       'playingList', 'isFolderList',
       'isFullScreen', 'isFocused', 'isMinimized',
       'leftMousedown', 'progressKeydown', 'volumeKeydown', 'wheelTriggered', 'volumeWheelTriggered',
+      'enabledSecondarySub',
     ]),
     ...inputMapGetters({
       inputWheelDirection: iGT.GET_WHEEL_DIRECTION,
@@ -359,6 +360,12 @@ export default {
         }
       }
     },
+    enabledSecondarySub(val: boolean) {
+      if (val && !this.widgetsStatus.SubtitleControl.showAttached) {
+        this.updateSubtitleType(false);
+        this.widgetsStatus.SubtitleControl.showAttached = true;
+      }
+    },
   },
   mounted() {
     // 当触发seek 显示界面控件
@@ -434,6 +441,7 @@ export default {
       updateKeydown: inputActions.KEYDOWN_UPDATE,
       updateKeyup: inputActions.KEYUP_UPDATE,
       updateWheel: inputActions.WHEEL_UPDATE,
+      updateSubtitleType: legacySubtitleActions.UPDATE_SUBTITLE_TYPE,
     }),
     createIcon(iconPath: string) {
       const { nativeImage } = this.$electron.remote;
