@@ -306,6 +306,9 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.sub-menu {
+  overflow: hidden;
+}
 ::-webkit-scrollbar {
   width: 2px;
 }
