@@ -1,7 +1,7 @@
 import uuidv4 from 'uuid/v4';
 import store from '@/store';
 import { SubtitleManager as m } from '@/store/mutationTypes';
-import { SubtitleManager as a, newSubtitle as subActions } from '@/store/actionTypes';
+import { SubtitleManager as a, newSubtitle as subActions, Subtitle as legacyActions } from '@/store/actionTypes';
 import { SubtitleControlListItem, Type, EntityGenerator, Entity } from '@/interfaces/ISubtitle';
 import { ISubtitleStream, TranscriptInfo, searchForLocalList, retrieveEmbeddedList, fetchOnlineList, OnlineGenerator, LocalGenerator, EmbeddedGenerator } from '@/services/subtitle';
 import { generateHints, calculatedName } from '@/libs/utils';
@@ -194,6 +194,7 @@ const actions = {
         console.error(error);
       } finally {
         commit(m.setIsRefreshing, false);
+        dispatch(legacyActions.UPDATE_SUBTITLE_TYPE, true);
         dispatch(a.stopAISelection);
       }
     } else if (!preference && needRefreshing) {
@@ -257,7 +258,9 @@ const actions = {
     } catch(ex) {
       console.error(ex);
     } finally {
+      dispatch(a.checkSubtitleList);
       commit(m.setIsRefreshing, false);
+      dispatch(legacyActions.UPDATE_SUBTITLE_TYPE, true);
     }
   },
   [a.checkLocalSubtitles]({ dispatch, getters }: any) {
@@ -278,7 +281,10 @@ const actions = {
         if (i === 0) {
           selectedHash = await g.getHash();
         }
-        return dispatch(a.addSubtitle, g);
+        return dispatch(a.addSubtitle, {
+          generator: g,
+          playlistId, mediaItemId,
+        });
       })
     ).then((localEntities: SubtitleControlListItem[]) => {
       addSubtitleItemsToList(localEntities, playlistId, mediaItemId);
@@ -403,39 +409,42 @@ const actions = {
   async [a.startAISelection]({ getters, dispatch }: any) {
     unwatch = store.watch(
       (state: any, getters: any) => getters.list.map(({ id, type, source, language }: any) => ({ id, type, source, language })),
-      (value: SubtitleControlListItem[], oldValue: SubtitleControlListItem[]) => {
-        if (value.length) {
-          const { primaryLanguage, secondaryLanguage } = getters;
-          if (!primarySelectionComplete || !secondarySelectionComplete) {
-            const hasPrimaryLanguage = value
-              .find(({ language }) => language === primaryLanguage);
-            const hasSecondaryLanguage = value
-              .find(({ language }) => language === secondaryLanguage);
-            if (hasPrimaryLanguage) {
-              dispatch(a.changePrimarySubtitle, hasPrimaryLanguage.id);
-              primarySelectionComplete = true;
-              if (hasSecondaryLanguage) {
-                dispatch(a.changeSecondarySubtitle, hasSecondaryLanguage.id);
-                secondarySelectionComplete = true;
-              }
-            } else if (hasSecondaryLanguage) {
-              if (primarySelectionComplete) {
-                dispatch(a.changeSecondarySubtitle, hasSecondaryLanguage.id);
-                secondarySelectionComplete = true;
-              } else {
-                dispatch(a.changePrimarySubtitle, hasSecondaryLanguage.id);
-                dispatch(a.changeSecondarySubtitle, '');
-                primarySelectionComplete = true;
-                secondarySelectionComplete = true;
-              }
-            } else {
-              dispatch(a.changePrimarySubtitle, '');
-              dispatch(a.changeSecondarySubtitle, '');
-            }
-            if (primarySelectionComplete && secondarySelectionComplete) dispatch(a.stopAISelection);
+      () => dispatch(a.checkSubtitleList),
+    );
+  },
+  [a.checkSubtitleList]({ getters, dispatch }: any) {
+    const { list } = getters as { list: SubtitleControlListItem[] };
+    if (list.length) {
+      const { primaryLanguage, secondaryLanguage } = getters;
+      if (!primarySelectionComplete || !secondarySelectionComplete) {
+        const hasPrimaryLanguage = list
+          .find(({ language }) => language === primaryLanguage);
+        const hasSecondaryLanguage = list
+          .find(({ language }) => language === secondaryLanguage);
+        if (hasPrimaryLanguage) {
+          dispatch(a.changePrimarySubtitle, hasPrimaryLanguage.id);
+          primarySelectionComplete = true;
+          if (hasSecondaryLanguage) {
+            dispatch(a.changeSecondarySubtitle, hasSecondaryLanguage.id);
+            secondarySelectionComplete = true;
           }
+        } else if (hasSecondaryLanguage) {
+          if (primarySelectionComplete) {
+            dispatch(a.changeSecondarySubtitle, hasSecondaryLanguage.id);
+            secondarySelectionComplete = true;
+          } else {
+            dispatch(a.changePrimarySubtitle, hasSecondaryLanguage.id);
+            dispatch(a.changeSecondarySubtitle, '');
+            primarySelectionComplete = true;
+            secondarySelectionComplete = true;
+          }
+        } else {
+          dispatch(a.changePrimarySubtitle, '');
+          dispatch(a.changeSecondarySubtitle, '');
         }
-      });
+        if (primarySelectionComplete && secondarySelectionComplete) dispatch(a.stopAISelection);
+      }
+    }
   },
   async [a.stopAISelection]() {
     if (typeof unwatch === 'function') unwatch();
