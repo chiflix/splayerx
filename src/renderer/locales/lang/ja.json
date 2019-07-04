@@ -177,6 +177,7 @@
       "yes": "更新"
     },
     "window": {
+      "backToLandingView": "起動ページに戻る",
       "bossKey": "ボスキー",
       "doubleSize": "",
       "enterFullScreen": "フルスクリーン",

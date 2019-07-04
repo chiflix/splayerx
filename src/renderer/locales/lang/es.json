@@ -177,6 +177,7 @@
       "yes": "Sí"
     },
     "window": {
+      "backToLandingView": "Volver a la página de inicio",
       "bossKey": "Clave de jefe",
       "doubleSize": "",
       "enterFullScreen": "Ingrese a pantalla completa",

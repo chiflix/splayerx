@@ -177,6 +177,7 @@
       "yes": "نعم فعلا"
     },
     "window": {
+      "backToLandingView": "العودة إلى صفحة الإطل",
       "bossKey": "مدرب مفتاح",
       "doubleSize": "200٪",
       "enterFullScreen": "أدخل ملء الشاشة",

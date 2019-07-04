@@ -177,6 +177,7 @@
       "yes": "更新"
     },
     "window": {
+      "backToLandingView": "回到著陸頁",      
       "bossKey": "老板鍵",
       "doubleSize": "200%",
       "enterFullScreen": "進入全屏",
