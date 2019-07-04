@@ -152,7 +152,7 @@
       "menuLoading": "正在匹配翻譯結果 ...",
       "name": "字幕",
       "noSubtitle": "暫未找到翻譯結果",
-      "notToShowSubtitle": "",
+      "notToShowSubtitle": "無",
       "secondarySubtitle": "第二字幕",
       "size1": "小",
       "size2": "標準",
