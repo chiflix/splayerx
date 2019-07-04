@@ -1,7 +1,7 @@
 import uuidv4 from 'uuid/v4';
 import store from '@/store';
 import { SubtitleManager as m } from '@/store/mutationTypes';
-import { SubtitleManager as a, newSubtitle as subActions } from '@/store/actionTypes';
+import { SubtitleManager as a, newSubtitle as subActions, Subtitle as legacyActions } from '@/store/actionTypes';
 import { SubtitleControlListItem, Type, EntityGenerator, Entity } from '@/interfaces/ISubtitle';
 import { ISubtitleStream, TranscriptInfo, searchForLocalList, retrieveEmbeddedList, fetchOnlineList, OnlineGenerator, LocalGenerator, EmbeddedGenerator } from '@/services/subtitle';
 import { generateHints, calculatedName } from '@/libs/utils';
@@ -194,6 +194,7 @@ const actions = {
         console.error(error);
       } finally {
         commit(m.setIsRefreshing, false);
+        dispatch(legacyActions.UPDATE_SUBTITLE_TYPE, true);
         dispatch(a.stopAISelection);
       }
     } else if (!preference && needRefreshing) {
@@ -258,6 +259,7 @@ const actions = {
       console.error(ex);
     } finally {
       commit(m.setIsRefreshing, false);
+      dispatch(legacyActions.UPDATE_SUBTITLE_TYPE, true);
     }
   },
   [a.checkLocalSubtitles]({ dispatch, getters }: any) {
