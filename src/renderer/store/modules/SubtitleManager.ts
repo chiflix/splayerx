@@ -258,6 +258,7 @@ const actions = {
     } catch(ex) {
       console.error(ex);
     } finally {
+      dispatch(a.checkSubtitleList);
       commit(m.setIsRefreshing, false);
       dispatch(legacyActions.UPDATE_SUBTITLE_TYPE, true);
     }
@@ -408,39 +409,42 @@ const actions = {
   async [a.startAISelection]({ getters, dispatch }: any) {
     unwatch = store.watch(
       (state: any, getters: any) => getters.list.map(({ id, type, source, language }: any) => ({ id, type, source, language })),
-      (value: SubtitleControlListItem[], oldValue: SubtitleControlListItem[]) => {
-        if (value.length) {
-          const { primaryLanguage, secondaryLanguage } = getters;
-          if (!primarySelectionComplete || !secondarySelectionComplete) {
-            const hasPrimaryLanguage = value
-              .find(({ language }) => language === primaryLanguage);
-            const hasSecondaryLanguage = value
-              .find(({ language }) => language === secondaryLanguage);
-            if (hasPrimaryLanguage) {
-              dispatch(a.changePrimarySubtitle, hasPrimaryLanguage.id);
-              primarySelectionComplete = true;
-              if (hasSecondaryLanguage) {
-                dispatch(a.changeSecondarySubtitle, hasSecondaryLanguage.id);
-                secondarySelectionComplete = true;
-              }
-            } else if (hasSecondaryLanguage) {
-              if (primarySelectionComplete) {
-                dispatch(a.changeSecondarySubtitle, hasSecondaryLanguage.id);
-                secondarySelectionComplete = true;
-              } else {
-                dispatch(a.changePrimarySubtitle, hasSecondaryLanguage.id);
-                dispatch(a.changeSecondarySubtitle, '');
-                primarySelectionComplete = true;
-                secondarySelectionComplete = true;
-              }
-            } else {
-              dispatch(a.changePrimarySubtitle, '');
-              dispatch(a.changeSecondarySubtitle, '');
-            }
-            if (primarySelectionComplete && secondarySelectionComplete) dispatch(a.stopAISelection);
+      () => dispatch(a.checkSubtitleList),
+    );
+  },
+  [a.checkSubtitleList]({ getters, dispatch }: any) {
+    const { list } = getters as { list: SubtitleControlListItem[] };
+    if (list.length) {
+      const { primaryLanguage, secondaryLanguage } = getters;
+      if (!primarySelectionComplete || !secondarySelectionComplete) {
+        const hasPrimaryLanguage = list
+          .find(({ language }) => language === primaryLanguage);
+        const hasSecondaryLanguage = list
+          .find(({ language }) => language === secondaryLanguage);
+        if (hasPrimaryLanguage) {
+          dispatch(a.changePrimarySubtitle, hasPrimaryLanguage.id);
+          primarySelectionComplete = true;
+          if (hasSecondaryLanguage) {
+            dispatch(a.changeSecondarySubtitle, hasSecondaryLanguage.id);
+            secondarySelectionComplete = true;
           }
+        } else if (hasSecondaryLanguage) {
+          if (primarySelectionComplete) {
+            dispatch(a.changeSecondarySubtitle, hasSecondaryLanguage.id);
+            secondarySelectionComplete = true;
+          } else {
+            dispatch(a.changePrimarySubtitle, hasSecondaryLanguage.id);
+            dispatch(a.changeSecondarySubtitle, '');
+            primarySelectionComplete = true;
+            secondarySelectionComplete = true;
+          }
+        } else {
+          dispatch(a.changePrimarySubtitle, '');
+          dispatch(a.changeSecondarySubtitle, '');
         }
-      });
+        if (primarySelectionComplete && secondarySelectionComplete) dispatch(a.stopAISelection);
+      }
+    }
   },
   async [a.stopAISelection]() {
     if (typeof unwatch === 'function') unwatch();
