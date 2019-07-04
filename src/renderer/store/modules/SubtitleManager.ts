@@ -280,7 +280,10 @@ const actions = {
         if (i === 0) {
           selectedHash = await g.getHash();
         }
-        return dispatch(a.addSubtitle, g);
+        return dispatch(a.addSubtitle, {
+          generator: g,
+          playlistId, mediaItemId,
+        });
       })
     ).then((localEntities: SubtitleControlListItem[]) => {
       addSubtitleItemsToList(localEntities, playlistId, mediaItemId);
