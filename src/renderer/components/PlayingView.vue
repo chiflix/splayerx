@@ -101,7 +101,6 @@ export default {
       initializeManager: smActions.initializeManager,
       addLocalSubtitlesWithSelect: smActions.addLocalSubtitlesWithSelect,
       getCues: smActions.getCues,
-      initializeManager: smActions.initializeManager,
       updatePlayTime: smActions.updatePlayedTime,
     }),
     // Compute UI states
