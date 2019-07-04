@@ -437,7 +437,6 @@ export default {
   }
 
   .sub-menu-wrapper {
-    overflow: hidden;
     transition-property: opacity, transform;
     border-radius: 7px;
     box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
