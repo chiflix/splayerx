@@ -152,7 +152,7 @@
       "menuLoading": "Cargando ...",
       "name": "Subtítulos",
       "noSubtitle": "Extraviado",
-      "notToShowSubtitle": "",
+      "notToShowSubtitle": "Cerrar",
       "secondarySubtitle": "Subtitulo secundario",
       "size1": "Pequeño",
       "size2": "Estándar",
