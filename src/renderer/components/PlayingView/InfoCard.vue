@@ -89,12 +89,6 @@ export default {
       rgba(85,85,85,0.00) 100%
     );
   }
-  .backdrop {
-    border-width: 0px;
-    background-image: none;
-    background-color: rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(10px);
-  }
   .middle {
     min-width: calc(var(--content-min-width) + 2px);
     min-height: calc(var(--content-min-height) + 2px);

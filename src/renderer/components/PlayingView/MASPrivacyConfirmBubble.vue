@@ -142,12 +142,6 @@ export default {
     border-radius: 11.76px;
   }
 }
-.backdrop {
-  border-width: 0;
-  background-image: none;
-  background-color: rgba(0,0,0,0.1);
-  backdrop-filter: blur(9.6px);
-}
 .plane {
   border-style: solid;
   border-width: 0.5px;

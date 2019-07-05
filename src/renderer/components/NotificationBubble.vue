@@ -4,6 +4,7 @@
       <NextVideo
         ref="nextVideo"
         v-if="showNextVideo"
+        :use-blur="useBlur"
         @close-next-video="closeNextVideo"
         @manualclose-next-video="manualClose"
         @ready-to-show="readyToShow = true"
