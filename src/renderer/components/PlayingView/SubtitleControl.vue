@@ -313,7 +313,16 @@ export default {
     document.addEventListener('mouseup', (e: MouseEvent) => {
       if (e.button === 0) {
         if (!this.showAttached) {
-          if (this.validEnter || this.currentMousedownComponent === this.$options.name) {
+          let isUpOnSubtitleControl;
+          const advance = document.querySelector('.sub-control');
+          if (advance) {
+            const nodeList = advance.childNodes;
+            for (let i = 0; i < nodeList.length; i += 1) {
+              isUpOnSubtitleControl = nodeList[i].contains(e.target as Node);
+            }
+          }
+          if (this.validEnter
+            || (this.currentMousedownComponent === this.$options.name && isUpOnSubtitleControl)) {
             this.anim.playSegments([46, 60], true);
           } else if (this.currentMousedownComponent === this.$options.name) {
             this.anim.playSegments([40, 44], true);
