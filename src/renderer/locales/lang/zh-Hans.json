@@ -177,6 +177,7 @@
       "yes": "更新"
     },
     "window": {
+      "backToLandingView": "",
       "bossKey": "老板键",
       "doubleSize": "200%",
       "enterFullScreen": "进入全屏",
@@ -282,5 +283,9 @@
   "snapshotFailed": {
     "content": "请稍后重试。",
     "title": "截图失败"
+  },
+  "loadVideoBySubtitleFailed": {
+    "content": "",
+    "title": ""
   }
 }
