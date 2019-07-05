@@ -177,6 +177,7 @@
       "yes": "Sí"
     },
     "window": {
+      "backToLandingView": "",
       "bossKey": "Clave de jefe",
       "doubleSize": "",
       "enterFullScreen": "Ingrese a pantalla completa",
@@ -282,5 +283,9 @@
   "snapshotFailed": {
     "content": "Por favor intente más tarde.",
     "title": "Instantánea fallada"
+  },
+  "loadVideoBySubtitleFailed": {
+    "content": "",
+    "title": ""
   }
 }
