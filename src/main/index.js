@@ -154,7 +154,7 @@ function getAllValidVideo(onlySubtitle, files) {
           videoFiles.push(tempFilePath);
         }
       });
-    } else if (!onlySubtitle) {
+    } else {
       files.forEach((tempFilePath) => {
         const baseName = path.basename(tempFilePath);
         if (baseName.startsWith('.') || fs.statSync(tempFilePath).isDirectory()) return;
@@ -233,7 +233,7 @@ function registerMainWindowEvent(mainWindow) {
     });
     finalVideoToOpen = getAllValidVideo(!tmpVideoToOpen.length,
       tmpVideoToOpen.concat(tmpSubsToOpen));
-    if (process.mas && !tmpVideoToOpen.length && tmpSubsToOpen.length) {
+    if (process.mas && !tmpVideoToOpen.length && tmpSubsToOpen.length && !finalVideoToOpen) {
       mainWindow.webContents.send('open-subtitle-in-mas', tmpSubsToOpen[0]);
     } else if (tmpVideoToOpen.length + tmpSubsToOpen.length > 0) {
       mainWindow.webContents.send('open-file', { onlySubtitle: !tmpVideoToOpen.length, files: finalVideoToOpen });
@@ -549,7 +549,7 @@ function createWindow() {
     // Open file by file association. Currently support 1 file only.
     finalVideoToOpen = getAllValidVideo(!tmpVideoToOpen.length,
       tmpVideoToOpen.concat(tmpSubsToOpen));
-    if (process.mas && !tmpVideoToOpen.length && tmpSubsToOpen.length) {
+    if (process.mas && !tmpVideoToOpen.length && tmpSubsToOpen.length && !finalVideoToOpen) {
       mainWindow.webContents.send('open-subtitle-in-mas', tmpSubsToOpen[0]);
     } else if (tmpVideoToOpen.length + tmpSubsToOpen.length > 0) {
       mainWindow.webContents.send('open-file', { onlySubtitle: !tmpVideoToOpen.length, files: finalVideoToOpen });

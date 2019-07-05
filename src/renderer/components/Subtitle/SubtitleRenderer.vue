@@ -165,16 +165,20 @@ export default {
   watch: {
     allCues: {
       handler(val: Cue[][], oldVal: Cue[][]) {
-        for (let i = 0; i < 9; i += 1) {
-          if (val[i].length < oldVal[i].length && val[i].every((e: Cue) => oldVal[i].includes(e))) {
-            this.noPositionCues[i] = oldVal[i].map((cue: Cue) => {
-              cue.hide = !val[i].includes(cue);
-              return cue;
-            });
-          } else {
-            this.noPositionCues[i] = val[i].map((cue: Cue) => { cue.hide = false; return cue; });
+        this.noPositionCues = val;
+        this.$nextTick(() => {
+          for (let i = 0; i < 9; i += 1) {
+            if (val[i].length < oldVal[i].length
+              && val[i].every((e: Cue) => oldVal[i].includes(e))) {
+              this.noPositionCues[i] = oldVal[i].map((cue: Cue) => {
+                cue.hide = !val[i].includes(cue);
+                return cue;
+              });
+            } else {
+              this.noPositionCues[i] = val[i].map((cue: Cue) => { cue.hide = false; return cue; });
+            }
           }
-        }
+        });
       },
       deep: true,
     },
