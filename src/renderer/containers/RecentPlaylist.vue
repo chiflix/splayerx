@@ -174,7 +174,7 @@ export default {
       movementX: 0, // movementX of move item
       movementY: 0, // movementY of move item
       shifting: false,
-      hoveredDuration: NaN,
+      hoveredDuration: this.duration,
       hoveredLastPlayedTime: NaN,
       mousePosition: {},
       backgroundDisplayState: this.displayState, // it's weird but DON'T DELETE IT!!
