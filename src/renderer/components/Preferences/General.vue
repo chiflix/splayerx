@@ -82,12 +82,12 @@
       <div class="flex">
         <div class="settingItem__title">
           {{ $t("preferences.general.restoreSettings") }}
-          <div v-if="needToRelaunch">
-            {{ $t("preferences.general.restoreSettingsAfterRelaunch") }}
-          </div>
         </div>
         <div class="settingItem__description">
-          {{ $t("preferences.general.restoreSettingsDescription") }}
+          {{ needToRelaunch
+            ? $t("preferences.general.restoreSettingsAfterRelaunch")
+            : $t("preferences.general.restoreSettingsDescription")
+          }}
         </div>
       </div>
       <div

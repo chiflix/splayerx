@@ -201,7 +201,7 @@
       "setDefaultDescription": "Open all video files with SPlayer.",
       "restoreSettings": "Reset All Content and Settings",
       "restoreSettingsDescription": "Restart application with all data and caches erased.",
-      "restoreSettingsAfterRelaunch": "(Restart to apply)",
+      "restoreSettingsAfterRelaunch": "Restart to apply.",
       "setButton": "Apply",
       "relaunch": "Restart",
       "displayLanguage": "Display Language",
