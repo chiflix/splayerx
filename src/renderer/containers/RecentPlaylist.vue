@@ -174,7 +174,7 @@ export default {
       movementX: 0, // movementX of move item
       movementY: 0, // movementY of move item
       shifting: false,
-      hoveredDuration: NaN,
+      hoveredDuration: this.duration,
       hoveredLastPlayedTime: NaN,
       mousePosition: {},
       backgroundDisplayState: this.displayState, // it's weird but DON'T DELETE IT!!
@@ -495,7 +495,7 @@ export default {
       this.filename = this.pathBaseName(this.originSrc);
     },
     duration(val: number) {
-      if (val) this.hoveredDuration = val;
+      this.hoveredDuration = val;
     },
     playingList(val: string[]) {
       this.indexOfMovingItem = val.length;
