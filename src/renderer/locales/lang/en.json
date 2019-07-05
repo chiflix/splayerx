@@ -178,6 +178,7 @@
       "yes": "yes"
     },
     "window": {
+      "backToLandingView": "Back to Launching Page",
       "bossKey": "Boss Key",
       "doubleSize": "200%",
       "enterFullScreen": "Enter Full Screen",
@@ -201,6 +202,7 @@
       "setDefaultDescription": "Open all video files with SPlayer.",
       "restoreSettings": "Reset All Content and Settings",
       "restoreSettingsDescription": "Restart application with all data and caches erased.",
+      "restoreSettingsAfterRelaunch": "Restart to apply.",
       "setButton": "Apply",
       "relaunch": "Restart",
       "displayLanguage": "Display Language",
@@ -283,5 +285,9 @@
   "snapshotFailed": {
     "content": "Please try again later.",
     "title": "Snapshot Failed"
+  },
+  "loadVideoBySubtitleFailed": {
+    "content": "Cannot find any related video in the folder",
+    "title": ""
   }
 }

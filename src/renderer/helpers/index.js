@@ -7,7 +7,7 @@ import bookmark from '@/helpers/bookmark';
 import syncStorage from '@/helpers/syncStorage';
 import infoDB from '@/helpers/infoDB';
 import { log } from '@/libs/Log';
-import { getValidVideoExtensions, getValidVideoRegex } from '@/../shared/utils';
+import { getValidSubtitleRegex, getValidVideoExtensions, getValidVideoRegex } from '@/../shared/utils';
 import {
   EMPTY_FOLDER, OPEN_FAILED, ADD_NO_VIDEO,
   SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, FILE_NON_EXIST_IN_PLAYLIST, PLAYLIST_NON_EXIST,
@@ -235,7 +235,7 @@ export default {
       const files = [];
       let containsSubFiles = false;
       const subtitleFiles = [];
-      const subRegex = new RegExp('^\\.(srt|ass|vtt)$', 'i');
+      const subRegex = getValidSubtitleRegex();
       const videoFiles = [];
 
       folders.forEach((dirPath) => {
@@ -271,7 +271,7 @@ export default {
       try {
         let containsSubFiles = false;
         const subtitleFiles = [];
-        const subRegex = new RegExp('\\.(srt|ass|vtt)$', 'i');
+        const subRegex = getValidSubtitleRegex();
         const videoFiles = [];
 
         for (let i = 0; i < files.length; i += 1) {
