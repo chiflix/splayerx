@@ -201,6 +201,7 @@
       "setDefaultDescription": "SPlayer ですべてのビデオファイルを開く。",
       "restoreSettings": "すべての設定をリセット",
       "restoreSettingsDescription": "すべてのデータとキャッシュを消去して再起動します。",
+      "restoreSettingsAfterRelaunch": "",
       "setButton": "アプライ",
       "relaunch": "再起動",
       "displayLanguage": "言語表示",
