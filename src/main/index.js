@@ -486,11 +486,7 @@ function registerMainWindowEvent(mainWindow) {
     }
     preferenceWindow.once('ready-to-show', () => {
       preferenceWindow.show();
-      preferenceWindow.webContents.send('restore-state', needToRestore);
     });
-  });
-  ipcMain.on('get-restore-state', () => {
-    preferenceWindow.webContents.send('restore-state', needToRestore);
   });
   ipcMain.on('need-to-restore', () => {
     needToRestore = true;

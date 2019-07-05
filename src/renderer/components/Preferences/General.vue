@@ -36,8 +36,11 @@
         </div>
       </div>
     </div>
-    <div class="settingItem--justify">
-      <div>
+    <div
+      v-if="!isMas"
+      class="settingItem--justify"
+    >
+      <div class="flex">
         <div class="settingItem__title">
           {{ $t("preferences.general.setDefault") }}
         </div>
@@ -47,7 +50,7 @@
       </div>
       <div
         ref="button1"
-        :class="button1Styles"
+        :class="{ 'button--mouseDown': buttonDown === 2 }"
         @mousedown="mousedownOnSetDefault"
         class="settingItem__input button no-drag"
       >
@@ -75,13 +78,13 @@
         </transition>
       </div>
     </div>
-    <div
-      v-if="!isMas"
-      class="settingItem--justify"
-    >
-      <div>
+    <div class="settingItem--justify">
+      <div class="flex">
         <div class="settingItem__title">
           {{ $t("preferences.general.restoreSettings") }}
+          <div v-if="needToRelaunch">
+            {{ $t("preferences.general.restoreSettingsAfterRelaunch") }}
+          </div>
         </div>
         <div class="settingItem__description">
           {{ $t("preferences.general.restoreSettingsDescription") }}
@@ -89,8 +92,11 @@
       </div>
       <div
         ref="button2"
-        :class="button2Styles"
         @mousedown="mousedownOnRestore"
+        :class="{
+          'button--mouseDown': buttonDown === 2 || (needToRelaunch && isMas),
+          'disabled': needToRelaunch && isMas,
+        }"
         class="settingItem__input button no-drag"
       >
         <transition
@@ -151,11 +157,9 @@ export default {
       restoreState: '',
       defaultButtonTimeoutId: NaN,
       restoreButtonTimeoutId: NaN,
-      needToRelaunch: false,
-      restoreContent: '',
+      needToRelaunch: !!window.localStorage.needToRelaunch,
       languages: ['zh-Hans', 'zh-Hant', 'ja', 'ko', 'en', 'es', 'ar'],
-      button1Styles: [''],
-      button2Styles: [''],
+      buttonDown: 0,
     };
   },
   computed: {
@@ -210,15 +214,15 @@ export default {
     displayLanguages() {
       return this.languages.filter(language => language !== this.displayLanguage);
     },
+    restoreContent() {
+      return (this.needToRelaunch && !this.isMas)
+        ? this.$t('preferences.general.relaunch')
+        : this.$t('preferences.general.setButton');
+    },
   },
   watch: {
     displayLanguage(val) {
       if (val) this.$i18n.locale = val;
-      electron.ipcRenderer.send('get-restore-state');
-      electron.ipcRenderer.once('restore-state', (event, state) => {
-        this.restoreContent = state ? this.$t('preferences.general.relaunch')
-          : this.$t('preferences.general.setButton');
-      });
     },
     mouseDown(val, oldVal) {
       if (!val && oldVal && !this.isMoved) {
@@ -228,19 +232,12 @@ export default {
       }
     },
   },
-  created() {
-    electron.ipcRenderer.once('restore-state', (event, state) => {
-      this.restoreContent = state ? this.$t('preferences.general.relaunch')
-        : this.$t('preferences.general.setButton');
-    });
-  },
   methods: {
     mouseupOnOther() {
       if (!this.isSettingDefault) {
-        this.button1Styles.pop();
-      }
-      if (!this.isRestoring) {
-        this.button2Styles.pop();
+        this.buttonDown = 1;
+      } else if (!this.isRestoring) {
+        this.buttonDown = 2;
       }
       document.removeEventListener('mouseup', this.mouseupOnOther);
       this.$refs.button1.removeEventListener('mouseup', this.setDefault);
@@ -248,14 +245,14 @@ export default {
     },
     mousedownOnSetDefault() {
       if (!this.isSettingDefault) {
-        this.button1Styles.push('button--mouseDown');
+        this.buttonDown = 1;
         this.$refs.button1.addEventListener('mouseup', this.setDefault);
         document.addEventListener('mouseup', this.mouseupOnOther);
       }
     },
     mousedownOnRestore() {
       if (!this.isSettingDefault) {
-        this.button2Styles.push('button--mouseDown');
+        this.buttonDown = 2;
         this.$refs.button2.addEventListener('mouseup', this.restoreSettings);
         document.addEventListener('mouseup', this.mouseupOnOther);
       }
@@ -267,7 +264,6 @@ export default {
         await setAsDefaultApp();
         clearTimeout(this.defaultButtonTimeoutId);
         this.defaultState = 'success';
-        this.button1Styles.pop();
         this.defaultButtonTimeoutId = setTimeout(() => {
           this.defaultState = '';
           this.isSettingDefault = false;
@@ -276,29 +272,31 @@ export default {
       } catch (ex) {
         clearTimeout(this.defaultButtonTimeoutId);
         this.defaultState = 'failed';
-        this.button2Styles.pop();
         this.defaultButtonTimeoutId = setTimeout(() => {
           this.defaultState = '';
           this.isSettingDefault = false;
           this.$refs.button1.style.setProperty('transition-delay', '');
         }, 1500);
       } finally {
+        this.buttonDown = 0;
         this.$refs.button1.removeEventListener('mouseup', this.setDefault);
       }
     },
     restoreSettings() {
       this.isRestoring = true;
-      if (this.restoreContent === this.$t('preferences.general.setButton')) {
+      if (!this.needToRelaunch) {
         electron.ipcRenderer.send('need-to-restore');
+        window.localStorage.needToRelaunch = true;
         this.needToRelaunch = true;
-        this.restoreContent = this.$t('preferences.general.relaunch');
-        this.button2Styles.pop();
         this.isRestoring = false;
+        this.buttonDown = 0;
         return;
       }
-      electron.ipcRenderer.send('relaunch');
-      this.isRestoring = false;
-      this.$refs.button2.removeEventListener('mouseup', this.restoreSettings);
+      if (!this.isMas) {
+        electron.ipcRenderer.send('relaunch');
+        this.isRestoring = false;
+        this.$refs.button2.removeEventListener('mouseup', this.restoreSettings);
+      }
     },
     mapCode(code) {
       return codeToLanguageName(code);
@@ -340,9 +338,12 @@ export default {
       background-color: rgba(255,255,255,0.03);
       transition: all 200ms;
 
-      &:hover {
+      &:not(.disabled):hover {
         border: 1px solid rgba(255,255,255,0.2);
         background-color: rgba(255,255,255,0.08);
+      }
+      &.disabled {
+        cursor: default;
       }
     }
 
