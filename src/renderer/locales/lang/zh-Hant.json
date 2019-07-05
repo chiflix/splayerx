@@ -31,7 +31,7 @@
       "title": "開啟失敗"
     },
     "EACCES": {
-      "content": "您沒有足夠權限來執行此操作.",
+      "content": "您沒有足夠權限來執行此操作。",
       "title": "開啟失敗"
     },
     "ENOENT": {
@@ -286,7 +286,7 @@
     "title": "截圖失敗"
   },
   "loadVideoBySubtitleFailed": {
-    "content": "",
+    "content": "未找到目錄下與字幕同名的視頻文件",
     "title": ""
   }
 }
