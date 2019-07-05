@@ -12,11 +12,13 @@
     </transition>
     <PrivacyBubble
       v-if="showPrivacyBubble && !isMas"
+      :use-blur="useBlur"
       @close-privacy-bubble="closePrivacyBubble"
       class="privacy-bubble"
     />
     <MASPrivacyBubble
       v-if="showPrivacyBubble && isMas"
+      :use-blur="useBlur"
       @close-privacy-bubble="closePrivacyBubble"
       class="mas-privacy-bubble"
     />

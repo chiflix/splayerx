@@ -7,7 +7,10 @@
       :key="state"
       class="privacy-bubble"
     >
-      <div class="plane-background">
+      <div
+        :class="{ 'backdrop': useBlur }"
+        class="plane-background"
+      >
         <div class="plane">
           <div class="content">
             <p :class="infoCSS">
@@ -38,6 +41,12 @@
 <script lang="ts">
 export default {
   name: 'PrivacyBubble',
+  props: {
+    useBlur: {
+      type: Boolean,
+      default: false,
+    },
+  },
   data() {
     return {
       state: 1,
@@ -130,8 +139,15 @@ export default {
   }
 }
 .plane-background {
-  background-color: rgba(0,0,0,0.1);
-  backdrop-filter: blur(9.6px);
+  border: 1px solid rgba(160,160,160,0.7);
+  background-image: radial-gradient(
+    80% 130%,
+    rgba(85,85,85,0.88) 20%,
+    rgba(85,85,85,0.78) 50%,
+    rgba(85,85,85,0.72) 60%,
+    rgba(85,85,85,0.46) 80%,
+    rgba(85,85,85,0.00) 100%
+  );
   box-shadow: 0 0 2px 0 rgba(0,0,0,0.30);
   @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px),
   screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
@@ -149,6 +165,12 @@ export default {
   screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     border-radius: 11.76px;
   }
+}
+.backdrop {
+  border-width: 0;
+  background-image: none;
+  background-color: rgba(0,0,0,0.1);
+  backdrop-filter: blur(9.6px);
 }
 .plane {
   border-style: solid;
