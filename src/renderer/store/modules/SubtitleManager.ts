@@ -356,6 +356,7 @@ const actions = {
           type: subtitle.type,
           language: subtitle.language,
           source: subtitle.source.source,
+          delay: subtitle.delay,
         };
         commit(m.addSubtitleId, subtitleControlListItem);
         return subtitleControlListItem;

@@ -34,8 +34,9 @@ export type SubtitleControlListItem = {
   hash: string;
   type: Type;
   language: LanguageCode;
-  source: any,
-  name?: string,
+  source: any;
+  name?: string;
+  delay: number;
 };
 
 export interface EntityGenerator {

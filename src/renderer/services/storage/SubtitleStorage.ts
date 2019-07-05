@@ -1,12 +1,11 @@
 import { DBSchema, IDBPDatabase, openDB } from 'idb';
-import { LanguageCode, normalizeCode } from '@/libs/language';
-import { RECENT_OBJECT_STORE_NAME, VIDEO_OBJECT_STORE_NAME, DATADB_NAME, INFO_DATABASE_NAME, INFODB_VERSION } from '@/constants';
-import { MediaItem, PlaylistItem, SubtitlePreference as oldPreference } from '@/interfaces/IDB';
+import { LanguageCode } from '@/libs/language';
+import { DATADB_NAME } from '@/constants';
 import { Entity, EntityGenerator, Type, Format, Origin, SubtitleControlListItem } from '@/interfaces/ISubtitle';
 import { StoredSubtitle, StoredSubtitleItem, SubtitlePreference, SelectedSubtitle } from '@/interfaces/ISubtitleStorage';
-import { unionWith, uniqWith, remove, isEqual, get, zip, union, flatMap, some } from 'lodash';
+import { unionWith, uniqWith, remove, isEqual, some } from 'lodash';
 import Sagi from '@/libs/sagi';
-import { loadLocalFile, pathToFormat } from '../subtitle/utils';
+import { loadLocalFile } from '../subtitle/utils';
 import { embeddedSrcLoader } from '../subtitle/loaders/embedded';
 
 interface DataDBV2 extends DBSchema {
@@ -330,11 +329,11 @@ export function retrieveStoredSubtitleList(playlistId: number, mediaItemId: stri
   return db.retrieveSubtitleList(playlistId, mediaItemId);
 }
 export function addSubtitleItemsToList(subtitles: SubtitleControlListItem[], playlistId: number, mediaItemId: string) {
-  const storedSubtitles = subtitles.map(({ hash, type, source }) => ({ hash, type, source }));
+  const storedSubtitles = subtitles.map(({ hash, type, source, delay }) => ({ hash, type, source, delay }));
   return db.addSubtitleItemsToList(playlistId, mediaItemId, storedSubtitles);
 }
 export function removeSubtitleItemsFromList(subtitles: SubtitleControlListItem[], playlistId: number, mediaItemId: string) {
-  const storedSubtitles = subtitles.map(({ hash, type, source }) => ({ hash, type, source }));
+  const storedSubtitles = subtitles.map(({ hash, type, source, delay }) => ({ hash, type, source, delay }));
   return db.removeSubtitleItemsFromList(playlistId, mediaItemId, storedSubtitles);
 }
 export function storeSubtitleLanguage(languageCodes: LanguageCode[], playlistId: number, mediaItemId: string) {

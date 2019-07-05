@@ -12,6 +12,7 @@ export interface StoredSubtitleItem {
   type: Type;
   source: any;
   videoSegments?: VideoSegment[];
+  delay: number;
 }
 interface PrimarySecondary<T> {
   primary?: T;
