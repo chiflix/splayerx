@@ -174,7 +174,7 @@ export default {
       movementX: 0, // movementX of move item
       movementY: 0, // movementY of move item
       shifting: false,
-      hoveredDuration: this.duration,
+      hoveredDuration: NaN,
       hoveredLastPlayedTime: NaN,
       mousePosition: {},
       backgroundDisplayState: this.displayState, // it's weird but DON'T DELETE IT!!
@@ -210,6 +210,7 @@ export default {
 
     this.indexOfMovingItem = this.playingList.length;
     this.hoverIndex = this.playingIndex;
+    if (this.duration) this.hoveredDuration = this.duration;
     this.filename = this.pathBaseName(this.originSrc);
   },
   destroyed() {
@@ -526,7 +527,7 @@ export default {
         this.firstIndex = (this.maxIndex - this.thumbnailNumber) + 1;
       }
     },
-    thumbnailNumber() {
+    thumbnailNumber(val: number) {
       if (this.playingIndex > this.lastIndex) {
         this.lastIndex = this.playingIndex;
         this.shifting = true;
@@ -543,6 +544,8 @@ export default {
           this.shifting = false;
           this.tranFlag = false;
         }, 400);
+      } else {
+        this.firstIndex = Math.floor(this.playingIndex / val) * val;
       }
     },
     maxIndex(val: number, oldVal: number) {
