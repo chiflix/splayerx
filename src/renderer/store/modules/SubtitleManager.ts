@@ -331,7 +331,10 @@ const actions = {
         return Promise.all([
           dispatch(a.changePrimarySubtitle, primaryId),
           dispatch(a.changeSecondarySubtitle, secondaryId),
-        ]);
+        ]).then(() => {
+          primarySelectionComplete = true;
+          secondarySelectionComplete = true;
+        });
       });
   },
   async [a.addSubtitle]({ commit, dispatch, getters }: any, options: AddSubtitleOptions) {
