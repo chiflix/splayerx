@@ -961,11 +961,7 @@ new Vue({
               id: 'backToLandingView',
               accelerator: 'CmdOrCtrl+Esc',
               click: () => {
-                this.$bus.$off();
-                this.$router.push({
-                  name: 'landing-view',
-                });
-                windowRectService.uploadWindowBy(false, 'landing-view');
+                this.$event.emit('back-to-landingview');
               },
             },
           ],
