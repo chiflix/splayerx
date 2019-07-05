@@ -28,7 +28,7 @@ import messages from '@/locales';
 import { windowRectService } from '@/services/window/WindowRectService';
 import helpers from '@/helpers';
 import { hookVue } from '@/kerning';
-import { Video as videoActions, Subtitle as subtitleActions, SubtitleManager as smActions, SubtitleManager, Input as InputActions } from '@/store/actionTypes';
+import { Video as videoActions, Subtitle as subtitleActions, SubtitleManager as smActions, SubtitleManager } from '@/store/actionTypes';
 import { log } from '@/libs/Log';
 import asyncStorage from '@/helpers/asyncStorage';
 import { videodata } from '@/store/video';
@@ -206,7 +206,7 @@ new Vue({
           click: () => {
             this.$ga.event('app', 'volume', 'keyboard');
             this.$store.dispatch(videoActions.INCREASE_VOLUME);
-            this.$store.dispatch(InputActions.KEYDOWN_UPDATE, ({ pressedKeyboardCode: 'Equal' }));
+            this.$bus.$emit('change-volume-menu');
           },
         },
         {
@@ -216,7 +216,7 @@ new Vue({
           click: () => {
             this.$ga.event('app', 'volume', 'keyboard');
             this.$store.dispatch(videoActions.DECREASE_VOLUME);
-            this.$store.dispatch(InputActions.KEYDOWN_UPDATE, ({ pressedKeyboardCode: 'Minus' }));
+            this.$bus.$emit('change-volume-menu');
           },
         },
       ];
@@ -230,6 +230,7 @@ new Vue({
           click: () => {
             this.$ga.event('app', 'volume', 'keyboard');
             this.$store.dispatch(videoActions.INCREASE_VOLUME);
+            this.$bus.$emit('change-volume-menu');
           },
         },
         {
@@ -239,6 +240,7 @@ new Vue({
           click: () => {
             this.$ga.event('app', 'volume', 'keyboard');
             this.$store.dispatch(videoActions.DECREASE_VOLUME);
+            this.$bus.$emit('change-volume-menu');
           },
         },
       ];
