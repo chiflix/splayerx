@@ -177,7 +177,7 @@
       "yes": "更新"
     },
     "window": {
-      "backToLandingView": "",
+      "backToLandingView": "回到著陸頁",
       "bossKey": "老板鍵",
       "doubleSize": "200%",
       "enterFullScreen": "進入全屏",
@@ -201,7 +201,7 @@
       "setDefaultDescription": "所有視頻文件都自動使用 SPlayer 打開。",
       "restoreSettings": "抹掉所有內容和設置",
       "restoreSettingsDescription": "刪除所有本地數據和緩存文件并重啟應用。",
-      "restoreSettingsAfterRelaunch": "",
+      "restoreSettingsAfterRelaunch": "重啟后生效",
       "setButton": "應用",
       "relaunch": "重啟",
       "displayLanguage": "顯示語言",
