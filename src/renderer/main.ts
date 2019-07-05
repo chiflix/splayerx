@@ -1524,10 +1524,10 @@ new Vue({
       e.preventDefault();
       this.$bus.$emit('drop');
       this.$store.commit('source', 'drop');
-      const files = Array.prototype.map.call(e.dataTransfer!.files, (f: File) => f.path);
-      if (files.every((file: fs.PathLike) => getValidVideoRegex().test(file) && !getValidSubtitleRegex().test(file))
-        || this.currentRouteName === 'playing-view') {
-        const onlyFolders = files.every((file: fs.PathLike) => fs.statSync(file).isDirectory());
+      const files = Array.prototype.map.call(e.dataTransfer!.files, (f: File) => f.path)
+      const onlyFolders = files.every((file: fs.PathLike) => fs.statSync(file).isDirectory());
+      if (this.currentRouteName === 'playing-view' || onlyFolders
+        || files.every((file: fs.PathLike) => getValidVideoRegex().test(file) && !getValidSubtitleRegex().test(file))) {
         files.forEach((file: fs.PathLike) => this.$electron.remote.app.addRecentDocument(file));
         if (onlyFolders) {
           this.openFolder(...files);
