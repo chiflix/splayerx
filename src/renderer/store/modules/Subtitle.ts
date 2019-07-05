@@ -55,8 +55,8 @@ const mutations = {
   [m.setLanguage](state: SubtitleState, languageCode: LanguageCode) {
     state.language = languageCode;
   },
-  [m.setDelay](state: SubtitleState, delay: number) {
-    state.delay = delay;
+  [m.setDelay](state: SubtitleState, delayInSeconds: number) {
+    state.delay = delayInSeconds;
   },
   [m.setPlayedTime](state: SubtitleState, playedTime: number) {
     state.playedTime = playedTime;
@@ -99,6 +99,10 @@ const actions = {
           entity.hash = hash;
           commit(m.setHash, hash);
         }),
+        generator.getDelay ? generator.getDelay().then((delay) => {
+          entity.delay = delay;
+          commit(m.setDelay, delay);
+        }) : () => {},
       ]);
       return entity;
     }
@@ -127,7 +131,7 @@ const actions = {
         }
       }
       if (entity.payload && parser.getDialogues && parser.payload) {
-        return subtitle.parser.getDialogues(time - rootGetters.globalDelay);
+        return subtitle.parser.getDialogues(time - state.delay);
       }
     }
     return [];
@@ -206,6 +210,16 @@ const actions = {
   },
   [a.stopWatchPlayedTime]() {
     autoUpload = true;
+  },
+  [a.alterDelay]({ state, commit }: any, deltaInSeconds: number) {
+    const subtitle = subtitleMap.get(state.moduleId);
+    if (subtitle) {
+      const alfterAltered = state.delay + deltaInSeconds;
+      if (Math.abs(alfterAltered) < 10000) {
+        commit(m.setDelay, alfterAltered);
+        subtitle.entity.delay = alfterAltered;
+      }
+    }
   },
 };
 

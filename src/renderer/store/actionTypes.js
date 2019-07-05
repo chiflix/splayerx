@@ -61,6 +61,7 @@ export const newSubtitle = {
   updatePlayedTime: 'UPDATE_PLAYED_TIME',
   startWatchPlayedTime: 'START_WATCH_PLAYED_TIME',
   stopWatchPlayedTime: 'STOP_WATCH_PLAYED_TIME',
+  alterDelay: 'ALTER_DELAY',
 };
 export const SubtitleManager = {
   initializeManager: 'INITIALIZE_MANAGER',
@@ -89,6 +90,8 @@ export const SubtitleManager = {
   manualUploadAllSubtitles: 'MANUAL_UPLOAD_ALL_SUBTITLES',
   clearSubtitles: 'CLEAR_SUBTITLES',
   setGlobalDelay: 'UPDATE_SUBTITLE_DELAY',
+  alterPrimaryDelay: 'ALTER_PRIMARY_DELAY',
+  alterSecondaryDelay: 'ALTER_SECONDARY_DELAY',
 };
 
 export const Input = {

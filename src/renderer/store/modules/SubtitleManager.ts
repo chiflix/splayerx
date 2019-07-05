@@ -67,6 +67,8 @@ const getters = {
     return enable;
   },
   globalDelay(state: SubtitleManagerState) { return state.globalDelay; },
+  primaryDelay({ primarySubtitleId }: SubtitleManagerState, getters: any, rootState: any) { return rootState[`${primarySubtitleId}/delay`]},
+  secondaryDelay({ secondarySubtitleId }: SubtitleManagerState, getters: any, rootState: any) { return rootState[`${secondarySubtitleId}/delay`]},
 };
 const mutations = {
   [m.setPlaylistId](state: SubtitleManagerState, id: number) {
@@ -526,6 +528,14 @@ const actions = {
   },
   [a.setGlobalDelay]({ commit }: any, delta: any) {
     commit(m.setGlobalDelay, delta);
+  },
+  [a.alterPrimaryDelay]({ commit, state }: any, deltaInSeconds: number) {
+    const { primarySubtitleId } = state;
+    commit(`${primarySubtitleId}/${subActions.alterDelay}`, deltaInSeconds);
+  },
+  [a.alterSecondaryDelay]({ commit, state }: any, deltaInSeconds: number) {
+    const { secondarySubtitleId } = state;
+    commit(`${secondarySubtitleId}/${subActions.alterDelay}`, deltaInSeconds);
   },
 };
 
