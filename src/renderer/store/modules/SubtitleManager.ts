@@ -251,7 +251,7 @@ const actions = {
           onlinePromise,
           dispatch(a.addLocalSubtitles, { paths: await searchForLocalList(originSrc), playlistId, mediaItemId }),
         ]),
-        new Promise((resolve, reject) => reject(new Error('timeout'))),
+        new Promise((resolve, reject) => setTimeout(() => reject(new Error('timeout')), 10000)),
       ]);
       dispatch(a.stopAISelection);
       storeSubtitleLanguage([primaryLanguage, secondaryLanguage], playlistId, mediaItemId);
