@@ -177,6 +177,7 @@
       "yes": "نعم فعلا"
     },
     "window": {
+      "backToLandingView": "",
       "bossKey": "مدرب مفتاح",
       "doubleSize": "200٪",
       "enterFullScreen": "أدخل ملء الشاشة",
@@ -282,5 +283,9 @@
   "snapshotFailed": {
     "content": "يرجى المحاولة لاحقا.",
     "title": " فشل لقطة"
+  },
+  "loadVideoBySubtitleFailed": {
+    "content": "",
+    "title": ""
   }
 }
