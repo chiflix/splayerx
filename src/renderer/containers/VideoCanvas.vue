@@ -125,7 +125,7 @@ export default {
     this.updatePlayinglistRate({ oldDir: '', newDir: path.dirname(this.originSrc), playingList: this.playingList });
   },
   mounted() {
-    this.$event.on('back-to-landingview', () => {
+    this.$bus.$on('back-to-landingview', () => {
       let savePromise = this.saveScreenshot(this.videoId)
         .then(() => this.updatePlaylist(this.playListId));
       if (process.mas && this.$store.getters.source === 'drop') {

@@ -961,7 +961,7 @@ new Vue({
               id: 'backToLandingView',
               accelerator: 'CmdOrCtrl+Esc',
               click: () => {
-                this.$event.emit('back-to-landingview');
+                this.$bus.$emit('back-to-landingview');
               },
             },
           ],
