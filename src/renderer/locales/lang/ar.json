@@ -201,6 +201,7 @@
       "setDefaultDescription": ".افتح جميع ملفات الفيديو باستخدام SPlayer",
       "restoreSettings": "إعادة ضبط جميع المحتويات والإعدادات",
       "restoreSettingsDescription": ".أعد التشغيل مع مسح جميع البيانات وذاكرة التخزين المؤقت",
+      "restoreSettingsAfterRelaunch": "",
       "setButton": "تطبيق",
       "relaunch": "إعادة بدء",
       "displayLanguage": "عرض اللغة",
