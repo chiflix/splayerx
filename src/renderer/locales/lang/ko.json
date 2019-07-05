@@ -201,6 +201,7 @@
       "setDefaultDescription": "SPlayer 로 모든 비디오 파일 열기.",
       "restoreSettings": "모든 콘텐츠 및 설정 지우기",
       "restoreSettingsDescription": "모든 로컬 데이터 및 캐시 파일을 삭제하고 다시 시작하십시오.",
+      "restoreSettingsAfterRelaunch": "",
       "setButton": "대다",
       "relaunch": "재시작",
       "displayLanguage": "표시 언어",
