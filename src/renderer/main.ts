@@ -385,11 +385,7 @@ new Vue({
       this.refreshMenu();
     },
     currentRouteName(val) {
-      if (val === 'landing-view') {
-        this.menuStateControl(false);
-      } else {
-        this.menuStateControl(true);
-      }
+      this.menuStateControl(val !== 'landing-view');
     },
     chosenStyle(val) {
       if (this.menu) {
@@ -908,6 +904,7 @@ new Vue({
             { type: 'separator' },
             {
               label: this.$t('msg.window.halfSize'),
+              id: 'windowResize1',
               checked: false,
               accelerator: 'CmdOrCtrl+0',
               click: () => {
@@ -916,6 +913,7 @@ new Vue({
             },
             {
               label: this.$t('msg.window.originSize'),
+              id: 'windowResize2',
               checked: true,
               accelerator: 'CmdOrCtrl+1',
               click: () => {
@@ -924,6 +922,7 @@ new Vue({
             },
             {
               label: this.$t('msg.window.doubleSize'),
+              id: 'windowResize3',
               checked: false,
               accelerator: 'CmdOrCtrl+2',
               click: () => {
@@ -932,6 +931,7 @@ new Vue({
             },
             {
               label: this.$t('msg.window.maxmize'),
+              id: 'windowResize4',
               checked: false,
               accelerator: 'CmdOrCtrl+3',
               click: () => {
@@ -1289,22 +1289,26 @@ new Vue({
         return recentMenuTemplate;
       }).catch(() => recentMenuTemplate);
     },
-    menuStateControl(flag: Boolean) {
+    menuStateControl(inPlayingView: Boolean) {
       this.menu.getMenuItemById('playback').submenu.items.forEach((item: any) => {
-        item.enabled = flag;
+        item.enabled = inPlayingView;
       });
       this.menu.getMenuItemById('audio').submenu.items.forEach((item: any) => {
-        item.enabled = flag;
+        item.enabled = inPlayingView;
       });
       this.menu.getMenuItemById('subtitle').submenu.items.forEach((item: any) => {
         item.submenu && item.submenu.items.forEach((item: any) => {
-          item.enabled = flag;
+          item.enabled = inPlayingView;
         });
-        item.enabled = flag;
+        item.enabled = inPlayingView;
       });
-      this.menu.getMenuItemById('backToLandingView').enabled = flag;
+      this.menu.getMenuItemById('windowResize1').enabled = inPlayingView;
+      this.menu.getMenuItemById('windowResize2').enabled = inPlayingView;
+      this.menu.getMenuItemById('windowResize3').enabled = inPlayingView;
+      this.menu.getMenuItemById('windowResize4').enabled = inPlayingView;
+      this.menu.getMenuItemById('backToLandingView').enabled = inPlayingView;
       // windowRotate 菜单状态随着路由状态一起变
-      this.menu.getMenuItemById('windowRotate').enabled = flag;
+      this.menu.getMenuItemById('windowRotate').enabled = inPlayingView;
     },
     processRecentPlay(recentPlayData: Array<any>) {
       const menuRecentData = new Map([
