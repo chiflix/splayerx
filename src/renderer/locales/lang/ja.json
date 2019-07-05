@@ -177,6 +177,7 @@
       "yes": "更新"
     },
     "window": {
+      "backToLandingView": "",
       "bossKey": "ボスキー",
       "doubleSize": "",
       "enterFullScreen": "フルスクリーン",
@@ -282,5 +283,9 @@
   "snapshotFailed": {
     "content": "後でお試しください。",
     "title": "スナップショット失敗"
+  },
+  "loadVideoBySubtitleFailed": {
+    "content": "",
+    "title": ""
   }
 }
