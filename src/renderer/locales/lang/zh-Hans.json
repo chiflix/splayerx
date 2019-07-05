@@ -201,7 +201,7 @@
       "setDefaultDescription": "所有视频文件都自动使用SPlayer打开。",
       "restoreSettings": "抹掉所有内容和设置",
       "restoreSettingsDescription": "删除所有本地数据和缓存文件并重启应用。",
-      "restoreSettingsAfterRelaunch": "",
+      "restoreSettingsAfterRelaunch": "重启后生效",
       "setButton": "应用",
       "relaunch": "重启",
       "displayLanguage": "显示语言",
