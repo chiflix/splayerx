@@ -140,6 +140,7 @@ export default {
         .then(this.$store.dispatch('saveWinSize', this.isFullScreen ? { size: this.winSizeBeforeFullScreen, angle: this.winAngleBeforeFullScreen } : { size: this.winSize, angle: this.winAngle }))
         .then(this.removeAllAudioTrack)
         .finally(() => {
+          this.$store.dispatch('Init');
           this.$bus.$off();
           this.$router.push({
             name: 'landing-view',

@@ -62,6 +62,12 @@ const getters = {
 };
 
 const mutations = {
+  Init(state) {
+    state.id = NaN;
+    state.items = [];
+    state.playList = [];
+    state.isFolderList = undefined;
+  },
   source(state, type) {
     state.source = type;
   },
@@ -100,6 +106,9 @@ const mutations = {
 };
 
 const actions = {
+  Init({ commit }) {
+    commit('Init');
+  },
   PlayingList({ commit }, payload) {
     commit('isPlayingList');
     if (payload.paths) commit('playList', payload.paths);
