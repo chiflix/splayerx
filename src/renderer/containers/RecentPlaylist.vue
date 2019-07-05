@@ -495,7 +495,7 @@ export default {
       this.filename = this.pathBaseName(this.originSrc);
     },
     duration(val: number) {
-      if (val) this.hoveredDuration = val;
+      this.hoveredDuration = val;
     },
     playingList(val: string[]) {
       this.indexOfMovingItem = val.length;
