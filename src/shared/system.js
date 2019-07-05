@@ -1,5 +1,5 @@
 import { shell } from 'electron';
-import { getValidVideoExtensions } from './utils';
+import { getAllValidExtensions } from './utils';
 
 async function spawn(...args) {
   return new Promise((resolve, reject) => {
@@ -11,7 +11,7 @@ async function spawn(...args) {
 }
 
 export async function setAsDefaultApp() {
-  const exts = getValidVideoExtensions();
+  const exts = getAllValidExtensions();
   if (process.platform === 'darwin') {
     let { default: code } = await import('raw-loader!./python/setAsDefaultAppForMac.py');
     code = code.replace('$EXTS', exts.map(ext => `'${ext}'`).join(', '));
