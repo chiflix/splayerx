@@ -56,13 +56,18 @@ export default {
   components: {
     Icon,
   },
+  props: {
+    useBlur: {
+      type: Boolean,
+      default: false,
+    },
+  },
   data() {
     return {
       progress: 0,
       animation: '',
       notificationPlayIcon: 'notificationPlay',
       isBlur: true,
-      useBlur: false,
     };
   },
   computed: {
@@ -86,7 +91,6 @@ export default {
       return this.timecodeFromSeconds(this.duration);
     },
   },
-  created() { this.useBlur = window.devicePixelRatio === 1; },
   methods: {
     handleCloseMouseup() {
       this.$emit('manualclose-next-video');

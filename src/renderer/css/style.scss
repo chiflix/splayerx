@@ -43,6 +43,23 @@ body {
 .no-drag {
   -webkit-app-region: no-drag;
 }
+.backdrop {
+  border-width: 0px;
+  background-image: none;
+  background-color: rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(9px);
+}
+.backdrop-fallback {
+  border: 1px solid rgba(160,160,160,0.7);
+  background-image: radial-gradient(
+    80% 130%,
+    rgba(85,85,85,0.88) 20%,
+    rgba(85,85,85,0.78) 50%,
+    rgba(85,85,85,0.72) 60%,
+    rgba(85,85,85,0.46) 80%,
+    rgba(85,85,85,0.00) 100%
+  );
+}
 
 .rtl p {
   direction: rtl;

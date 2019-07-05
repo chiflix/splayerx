@@ -6,7 +6,10 @@
     <div
       class="privacy-bubble"
     >
-      <div class="plane-background">
+      <div
+        :class="useBlur ? 'backdrop' : 'backdrop-fallback'"
+        class="plane-background"
+      >
         <div class="plane">
           <div class="content">
             <p :class="infoCSS">
@@ -42,6 +45,12 @@
 <script lang="ts">
 export default {
   name: 'PrivacyBubble',
+  props: {
+    useBlur: {
+      type: Boolean,
+      default: false,
+    },
+  },
   data() {
     return {
       /*
@@ -106,8 +115,6 @@ export default {
   }
 }
 .plane-background {
-  background-color: rgba(0,0,0,0.1);
-  backdrop-filter: blur(9.6px);
   box-shadow: 0 0 2px 0 rgba(0,0,0,0.30);
   @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px),
   screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {

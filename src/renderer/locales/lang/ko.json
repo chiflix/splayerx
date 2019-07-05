@@ -177,6 +177,7 @@
       "yes": "예"
     },
     "window": {
+      "backToLandingView": "시작 페이지로 돌아 가기",
       "bossKey": "보스 키",
       "doubleSize": "200 %",
       "enterFullScreen": "전체 화면으로 들어가기",

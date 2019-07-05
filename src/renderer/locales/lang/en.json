@@ -178,6 +178,7 @@
       "yes": "yes"
     },
     "window": {
+      "backToLandingView": "Back to Launching Page",
       "bossKey": "Boss Key",
       "doubleSize": "200%",
       "enterFullScreen": "Enter Full Screen",
