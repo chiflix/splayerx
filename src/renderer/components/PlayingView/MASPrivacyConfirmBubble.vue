@@ -7,7 +7,7 @@
       class="privacy-bubble"
     >
       <div
-        :class="{ 'backdrop': useBlur }"
+        :class="useBlur ? 'backdrop' : 'fallback'"
         class="plane-background"
       >
         <div class="plane">
@@ -115,15 +115,6 @@ export default {
   }
 }
 .plane-background {
-  border: 1px solid rgba(160,160,160,0.7);
-  background-image: radial-gradient(
-    80% 130%,
-    rgba(85,85,85,0.88) 20%,
-    rgba(85,85,85,0.78) 50%,
-    rgba(85,85,85,0.72) 60%,
-    rgba(85,85,85,0.46) 80%,
-    rgba(85,85,85,0.00) 100%
-  );
   box-shadow: 0 0 2px 0 rgba(0,0,0,0.30);
   @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px),
   screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
