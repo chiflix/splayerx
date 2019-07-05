@@ -177,7 +177,7 @@
       "yes": "نعم فعلا"
     },
     "window": {
-      "backToLandingView": "العودة إلى صفحة الإطل",
+      "backToLandingView": "العودة إلى صفحة الإطلاق",
       "bossKey": "مدرب مفتاح",
       "doubleSize": "200٪",
       "enterFullScreen": "أدخل ملء الشاشة",
@@ -201,6 +201,7 @@
       "setDefaultDescription": ".افتح جميع ملفات الفيديو باستخدام SPlayer",
       "restoreSettings": "إعادة ضبط جميع المحتويات والإعدادات",
       "restoreSettingsDescription": ".أعد التشغيل مع مسح جميع البيانات وذاكرة التخزين المؤقت",
+      "restoreSettingsAfterRelaunch": "العثور على أي فيديو ذات صلة في المجلد.",
       "setButton": "تطبيق",
       "relaunch": "إعادة بدء",
       "displayLanguage": "عرض اللغة",
@@ -285,7 +286,7 @@
     "title": " فشل لقطة"
   },
   "loadVideoBySubtitleFailed": {
-    "content": "لا يمكن العثور على أي فيديو ذي صلة في المجلد",
+    "content": "العثور على أي فيديو ذات صلة في المجلد",
     "title": ""
   }
 }

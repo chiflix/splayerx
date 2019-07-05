@@ -201,6 +201,7 @@
       "setDefaultDescription": "Todos los formatos de video se abren automáticamente usando SPlayer.",
       "restoreSettings": "Borrar contenidos y ajustes",
       "restoreSettingsDescription": "Reinicie con todos los datos y cachés borrados.",
+      "restoreSettingsAfterRelaunch": "Reiniciar para aplicar.",
       "setButton": "Aplicar",
       "relaunch": "Reiniciar",
       "displayLanguage": "Idioma de la pantalla",
@@ -285,7 +286,7 @@
     "title": "Instantánea fallada"
   },
   "loadVideoBySubtitleFailed": {
-    "content": "No se puede encontrar ningún video relacionado en la carpeta",
+    "content": "No hay videos relacionados en la carpeta",
     "title": ""
   }
 }

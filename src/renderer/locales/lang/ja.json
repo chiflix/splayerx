@@ -201,6 +201,7 @@
       "setDefaultDescription": "SPlayer ですべてのビデオファイルを開く。",
       "restoreSettings": "すべての設定をリセット",
       "restoreSettingsDescription": "すべてのデータとキャッシュを消去して再起動します。",
+      "restoreSettingsAfterRelaunch": "適用を再開。",
       "setButton": "アプライ",
       "relaunch": "再起動",
       "displayLanguage": "言語表示",
@@ -285,7 +286,7 @@
     "title": "スナップショット失敗"
   },
   "loadVideoBySubtitleFailed": {
-    "content": "フォルダ内に関連ビデオが見つかりません",
+    "content": "フォルダ内に関連するビデオが見つかりません",
     "title": ""
   }
 }
