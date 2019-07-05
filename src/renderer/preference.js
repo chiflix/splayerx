@@ -27,6 +27,7 @@ function getSystemLocale() {
 
 const i18n = new VueI18n({
   locale: getSystemLocale(), // set locale
+  fallbackLocale: 'en',
   messages, // set locale messages
 });
 

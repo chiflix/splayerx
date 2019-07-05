@@ -82,7 +82,9 @@
       <div class="flex">
         <div class="settingItem__title">
           {{ $t("preferences.general.restoreSettings") }}
-          {{ needToRelaunch ? $t("preferences.general.restoreSettingsAfterRelaunch") : '' }}
+          <div v-if="needToRelaunch">
+            {{ $t("preferences.general.restoreSettingsAfterRelaunch") }}
+          </div>
         </div>
         <div class="settingItem__description">
           {{ $t("preferences.general.restoreSettingsDescription") }}
@@ -91,7 +93,10 @@
       <div
         ref="button2"
         @mousedown="mousedownOnRestore"
-        :class="{ 'button--mouseDown': buttonDown === 2 || (needToRelaunch && isMas) }"
+        :class="{
+          'button--mouseDown': buttonDown === 2 || (needToRelaunch && isMas),
+          'disabled': needToRelaunch && isMas,
+        }"
         class="settingItem__input button no-drag"
       >
         <transition
@@ -333,9 +338,12 @@ export default {
       background-color: rgba(255,255,255,0.03);
       transition: all 200ms;
 
-      &:hover {
+      &:not(.disabled):hover {
         border: 1px solid rgba(255,255,255,0.2);
         background-color: rgba(255,255,255,0.08);
+      }
+      &.disabled {
+        cursor: default;
       }
     }
 
