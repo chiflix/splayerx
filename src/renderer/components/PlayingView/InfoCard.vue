@@ -4,7 +4,7 @@
     class="container"
   >
     <div
-      :class="useBlur ? 'backdrop' : 'fallback'"
+      :class="useBlur ? 'backdrop' : 'backdrop-fallback'"
       class="element bottom"
     >
       <div class="element content">

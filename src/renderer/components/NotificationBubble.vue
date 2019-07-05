@@ -37,7 +37,7 @@
         <div
           :class="[
             m.type === 'result' ? 'resultContainer' : 'stateContainer',
-            useBlur ? 'backdrop' : 'fallback',
+            useBlur ? 'backdrop' : 'backdrop-fallback',
           ]"
         >
           <div class="bubbleContent">

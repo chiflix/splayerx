@@ -18,7 +18,7 @@
           class="no-drag sub-menu-wrapper subtitle-scroll-items"
         >
           <div
-            :class="useBlur ? 'backdrop' : 'fallback'"
+            :class="useBlur ? 'backdrop' : 'backdrop-fallback'"
             class="element bottom"
           >
             <div class="element content">
