@@ -196,7 +196,6 @@ export default {
       dragOver: false,
       progressTriggerStopped: false,
       openPlayListTimeId: NaN,
-      playListState: false,
       progressDisappearDelay: 1000,
       changeState: false, // 记录是不是要改变显示速率的状态
       changeSrc: false, // 记录是否换过视频
@@ -335,9 +334,6 @@ export default {
         }, this.mousestopDelay);
       }
     },
-    playListState(val: boolean) {
-      if (val) this.updateMinimumSize();
-    },
     ratio() {
       this.updateMinimumSize();
     },
@@ -388,17 +384,17 @@ export default {
       };
     });
     if (this.isFolderList === false) {
-      this.playListState = true;
+      this.widgetsStatus.PlaylistControl.showAttached = true;
       clearTimeout(this.openPlayListTimeId);
       this.openPlayListTimeId = setTimeout(() => {
-        this.playListState = false;
+        this.widgetsStatus.PlaylistControl.showAttached = false;
       }, 4000);
     }
     this.$bus.$on('open-playlist', () => {
-      this.playListState = true;
+      this.widgetsStatus.PlaylistControl.showAttached = true;
       clearTimeout(this.openPlayListTimeId);
       this.openPlayListTimeId = setTimeout(() => {
-        this.playListState = false;
+        this.widgetsStatus.PlaylistControl.showAttached = true;
       }, 4000);
     });
     this.$bus.$on('drag-over', () => {
@@ -478,7 +474,7 @@ export default {
       this.$electron.remote.getCurrentWindow().setTouchBar(this.touchBar);
     },
     updateMinimumSize() {
-      const minimumSize = this.tempRecentPlaylistDisplayState || this.playListState
+      const minimumSize = this.tempRecentPlaylistDisplayState
         ? [512, Math.round(512 / this.ratio)]
         : [320, 180];
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', minimumSize);
@@ -495,7 +491,7 @@ export default {
     },
     updatePlaylistShowAttached(event: boolean) {
       clearTimeout(this.openPlayListTimeId);
-      this.widgetsStatus.PlaylistControl.showAttached = this.playListState = event;
+      this.widgetsStatus.PlaylistControl.showAttached = event;
     },
     updatePlayButtonState(mousedownState: boolean) {
       this.mousedownOnPlayButton = mousedownState;
@@ -537,7 +533,7 @@ export default {
       // There should be a better way to handle timeline.
         try {
           this.$refs.nextVideoUI.checkNextVideoUI(videodata.time);
-          if (this.tempRecentPlaylistDisplayState || this.playListState) {
+          if (this.tempRecentPlaylistDisplayState) {
             this.$refs.recentPlaylist.updatelastPlayedTime(videodata.time);
           } else {
             this.$refs.theTimeCodes.updateTimeContent(videodata.time);
@@ -562,10 +558,7 @@ export default {
       Object.keys(this.displayState).forEach((index) => {
         tempObject[index] = !this.widgetsStatus.PlaylistControl.showAttached;
       });
-      tempObject.RecentPlaylist = (
-        this.playListState
-        || this.widgetsStatus.PlaylistControl.showAttached
-      )
+      tempObject.RecentPlaylist = this.widgetsStatus.PlaylistControl.showAttached
         && !this.dragOver;
       this.displayState = tempObject;
       this.tempRecentPlaylistDisplayState = this.widgetsStatus.PlaylistControl.showAttached;
