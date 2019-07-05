@@ -275,7 +275,8 @@ export default {
         maxVideoSize = this.winSize;
         videoSize = [this.videoHeight, this.videoWidth];
       } else {
-        maxVideoSize = this.lastWinSize[0] > 512 ? this.lastWinSize : [512, Math.round(512 / this.ratio)];
+        maxVideoSize = this.lastWinSize[0] > 512
+          ? this.lastWinSize : [512, Math.round(512 / this.ratio)];
         videoSize = [this.videoWidth, this.videoHeight];
         this.videoExisted = true;
       }
