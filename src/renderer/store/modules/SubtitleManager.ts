@@ -245,11 +245,12 @@ const actions = {
     /** whether to search embedded subtitles */
     const embedded = list.some(({ type }) => type === Type.Embedded);
     if (embedded) retrieveEmbeddedList(originSrc).then((streams) => dispatch(a.addEmbeddedSubtitles, { streams, playlistId, mediaItemId }));
+    let timeout: any;
     try {
-      await Promise.race([
+      timeout = setTimeout(() => { throw new Error('timeout'); }, 10000);
+      await Promise.all([
         onlinePromise,
         dispatch(a.addLocalSubtitles, { paths: await searchForLocalList(originSrc), playlistId, mediaItemId }),
-        new Promise((resolve) => setTimeout(() => resolve(new Error('timeout')), 10000)),
       ]);
       dispatch(a.stopAISelection);
       storeSubtitleLanguage([primaryLanguage, secondaryLanguage], playlistId, mediaItemId);
@@ -258,6 +259,7 @@ const actions = {
     } catch(ex) {
       console.error(ex);
     } finally {
+      clearTimeout(timeout);
       dispatch(a.checkSubtitleList);
       commit(m.setIsRefreshing, false);
       dispatch(legacyActions.UPDATE_SUBTITLE_TYPE, true);
