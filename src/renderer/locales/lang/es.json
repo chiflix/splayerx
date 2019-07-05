@@ -201,6 +201,7 @@
       "setDefaultDescription": "Todos los formatos de video se abren automáticamente usando SPlayer.",
       "restoreSettings": "Borrar contenidos y ajustes",
       "restoreSettingsDescription": "Reinicie con todos los datos y cachés borrados.",
+      "restoreSettingsAfterRelaunch": "",
       "setButton": "Aplicar",
       "relaunch": "Reiniciar",
       "displayLanguage": "Idioma de la pantalla",
