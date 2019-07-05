@@ -27,6 +27,7 @@ export type Entity = {
   language: LanguageCode;
   payload: any;
   hash: string;
+  delay: number;
 }
 export type SubtitleControlListItem = {
   id: string;
@@ -40,6 +41,7 @@ export type SubtitleControlListItem = {
 export interface EntityGenerator {
   getSource(): Promise<Origin>
   getStoredSource?: any
+  getDelay?: () => Promise<number>
   getType(): Promise<Type>
   getFormat(): Promise<Format>
   getLanguage(): Promise<LanguageCode>

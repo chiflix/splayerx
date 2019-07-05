@@ -14,6 +14,7 @@ export class OnlineGenerator implements EntityGenerator {
   private origin: OnlineOrigin;
   private language: LanguageCode;
   readonly ranking: number;
+  private delayInSeconds: number;
   constructor(transcriptInfo: TranscriptInfo) {
     this.origin = {
       type: Type.Online,
@@ -21,6 +22,7 @@ export class OnlineGenerator implements EntityGenerator {
     };
     this.language = normalizeCode(transcriptInfo.languageCode);
     this.ranking = transcriptInfo.ranking;
+    this.delayInSeconds = transcriptInfo.delay / 1000;
   }
 
   async getType() { return Type.Online; }
@@ -29,6 +31,7 @@ export class OnlineGenerator implements EntityGenerator {
   async getLanguage() {
     return this.language;
   }
+  async getDelay() { return this.delayInSeconds; }
   async getFormat() { return Format.Sagi; }
   async getHash() { return this.origin.source; }
 
