@@ -144,6 +144,9 @@ export default {
               const nodeList = advance.childNodes;
               for (let i = 0; i < nodeList.length; i += 1) {
                 isUpOnAdvanceControl = nodeList[i].contains(e.target as Node);
+                if (isUpOnAdvanceControl) {
+                  break;
+                }
               }
             }
             if (this.validEnter

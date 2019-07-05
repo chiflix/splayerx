@@ -319,6 +319,9 @@ export default {
             const nodeList = advance.childNodes;
             for (let i = 0; i < nodeList.length; i += 1) {
               isUpOnSubtitleControl = nodeList[i].contains(e.target as Node);
+              if (isUpOnSubtitleControl) {
+                break;
+              }
             }
           }
           if (this.validEnter
