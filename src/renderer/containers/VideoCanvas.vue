@@ -310,11 +310,11 @@ export default {
       windowRectService.uploadWindowBy(false, 'playing-view', this.winAngle, this.winAngleBeforeFullScreen, this.winSizeBeforeFullScreen, this.winPos);
     },
     async updatePlaylist(playlistId: number) {
-      if (!Number.isNaN(playlistId)) {
+      if (!Number.isNaN(playlistId) && !this.isFolderList) {
         const playlistRecord = await playInfoStorageService.getPlaylistRecord(playlistId);
         const recentPlayedData = {
           ...playlistRecord,
-          playedIndex: this.isFolderList ? 0 : this.playingIndex,
+          playedIndex: this.playingIndex,
         };
         await playInfoStorageService
           .updateRecentPlayedBy(playlistId, recentPlayedData as PlaylistItem);
