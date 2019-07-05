@@ -392,7 +392,8 @@ $themeColor-Light: white;
     align-items: flex-end;
 
     .button {
-      transition: background-color 150ms ease-out;
+      transition: background-color 300ms ease-in;
+      transition-delay: 200ms;
       cursor: pointer;
     }
     .backdrop {
@@ -401,7 +402,7 @@ $themeColor-Light: white;
 
     .button:hover {
       background-color: rgba(123, 123, 123, 0.12);
-      transition: background-color 150ms ease-out;
+      transition: background-color 300ms ease-in;
     }
 
     .btnMask {
