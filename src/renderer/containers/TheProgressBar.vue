@@ -4,7 +4,7 @@
     @mousemove="handleMousemove"
     @mouseenter="hoveredmouseenter"
     @mouseleave="handleMouseleave"
-    @mousedown.stop="handleMousedown"
+    @mousedown="handleMousedown"
     class="the-progress-bar no-drag"
   >
     <the-preview-thumbnail

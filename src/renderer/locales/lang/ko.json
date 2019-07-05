@@ -152,7 +152,7 @@
       "menuLoading": "로드 중 ...",
       "name": "자막",
       "noSubtitle": "찾을 수 없음",
-      "notToShowSubtitle": "없음",
+      "notToShowSubtitle": "닫기",
       "secondarySubtitle": "보조 부제목",
       "size1": "작은",
       "size2": "표준",
@@ -177,6 +177,7 @@
       "yes": "예"
     },
     "window": {
+      "backToLandingView": "시작 페이지로 돌아 가기",
       "bossKey": "보스 키",
       "doubleSize": "200 %",
       "enterFullScreen": "전체 화면으로 들어가기",
@@ -200,6 +201,7 @@
       "setDefaultDescription": "SPlayer 로 모든 비디오 파일 열기.",
       "restoreSettings": "모든 콘텐츠 및 설정 지우기",
       "restoreSettingsDescription": "모든 로컬 데이터 및 캐시 파일을 삭제하고 다시 시작하십시오.",
+      "restoreSettingsAfterRelaunch": "적용을 위해 재시작.",
       "setButton": "대다",
       "relaunch": "재시작",
       "displayLanguage": "표시 언어",
@@ -284,7 +286,7 @@
     "title": "스냅 샷 실패"
   },
   "loadVideoBySubtitleFailed": {
-    "content": "폴더에서 관련 동영상을 찾을 수 없습니다",
+    "content": "폴더에서 관련 비디오를 찾지 않습니다",
     "title": ""
   }
 }

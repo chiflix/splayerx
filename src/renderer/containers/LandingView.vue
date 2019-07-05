@@ -79,6 +79,8 @@
             height:`${thumbnailHeight}px`,
             width:`${thumbnailWidth}px`,
             marginRight: `${marginRight}px`,
+            backgroundColor:
+              item.backgroundUrl ? 'rgba(255,255,255,0.12) ': 'rgba(255,255,255,0.05)',
           }"
           :class="{ 'backdrop': useBlur }"
           @click="openOrMove"
@@ -266,7 +268,6 @@ export default {
       if (process.env.NODE_ENV !== 'production') {
         this.sagiHealthStatus = status;
         log.info('LandingView.vue', `launching: ${app.getName()} ${app.getVersion()}`);
-        log.info('LandingView.vue', `sagi API Status: ${this.sagiHealthStatus}`);
       }
     });
     window.addEventListener('keyup', this.keyboardHandler);
@@ -281,7 +282,8 @@ export default {
   },
   methods: {
     beforeUnloadHandler(e: BeforeUnloadEvent) {
-      if (process.platform === 'darwin' && !this.quit) {
+      if (process.env.NODE_ENV === 'development') { // app.hide() will disable app refresh and not good for dev
+      } else if (process.platform === 'darwin' && !this.quit) {
         e.returnValue = false;
         this.$electron.remote.app.hide();
       }
@@ -390,8 +392,8 @@ $themeColor-Light: white;
     align-items: flex-end;
 
     .button {
-      background-color: rgba(0, 0, 0, 0.12);
-      transition: background-color 150ms ease-out;
+      transition: background-color 300ms ease-in;
+      transition-delay: 200ms;
       cursor: pointer;
     }
     .backdrop {
@@ -400,7 +402,7 @@ $themeColor-Light: white;
 
     .button:hover {
       background-color: rgba(123, 123, 123, 0.12);
-      transition: background-color 150ms ease-out;
+      transition: background-color 300ms ease-in;
     }
 
     .btnMask {

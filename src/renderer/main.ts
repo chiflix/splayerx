@@ -28,7 +28,7 @@ import messages from '@/locales';
 import { windowRectService } from '@/services/window/WindowRectService';
 import helpers from '@/helpers';
 import { hookVue } from '@/kerning';
-import { Video as videoActions, Subtitle as subtitleActions, SubtitleManager as smActions, SubtitleManager } from '@/store/actionTypes';
+import { Video as videoActions, Subtitle as subtitleActions, SubtitleManager as smActions, SubtitleManager, Input as InputActions } from '@/store/actionTypes';
 import { log } from '@/libs/Log';
 import asyncStorage from '@/helpers/asyncStorage';
 import { videodata } from '@/store/video';
@@ -207,6 +207,7 @@ new Vue({
           click: () => {
             this.$ga.event('app', 'volume', 'keyboard');
             this.$store.dispatch(videoActions.INCREASE_VOLUME);
+            this.$store.dispatch(InputActions.KEYDOWN_UPDATE, ({ pressedKeyboardCode: 'Equal' }));
           },
         },
         {
@@ -216,6 +217,7 @@ new Vue({
           click: () => {
             this.$ga.event('app', 'volume', 'keyboard');
             this.$store.dispatch(videoActions.DECREASE_VOLUME);
+            this.$store.dispatch(InputActions.KEYDOWN_UPDATE, ({ pressedKeyboardCode: 'Minus' }));
           },
         },
       ];
@@ -386,11 +388,7 @@ new Vue({
       this.refreshMenu();
     },
     currentRouteName(val) {
-      if (val === 'landing-view') {
-        this.menuStateControl(false);
-      } else {
-        this.menuStateControl(true);
-      }
+      this.menuStateControl(val !== 'landing-view');
     },
     chosenStyle(val) {
       if (this.menu) {
@@ -910,6 +908,7 @@ new Vue({
             { type: 'separator' },
             {
               label: this.$t('msg.window.halfSize'),
+              id: 'windowResize1',
               checked: false,
               accelerator: 'CmdOrCtrl+0',
               click: () => {
@@ -918,6 +917,7 @@ new Vue({
             },
             {
               label: this.$t('msg.window.originSize'),
+              id: 'windowResize2',
               checked: true,
               accelerator: 'CmdOrCtrl+1',
               click: () => {
@@ -926,6 +926,7 @@ new Vue({
             },
             {
               label: this.$t('msg.window.doubleSize'),
+              id: 'windowResize3',
               checked: false,
               accelerator: 'CmdOrCtrl+2',
               click: () => {
@@ -934,6 +935,7 @@ new Vue({
             },
             {
               label: this.$t('msg.window.maxmize'),
+              id: 'windowResize4',
               checked: false,
               accelerator: 'CmdOrCtrl+3',
               click: () => {
@@ -955,6 +957,15 @@ new Vue({
               accelerator: 'CmdOrCtrl+`',
               click: () => {
                 this.$electron.ipcRenderer.send('bossKey');
+              },
+            },
+            { type: 'separator' },
+            {
+              label: this.$t('msg.window.backToLandingView'),
+              id: 'backToLandingView',
+              accelerator: 'CmdOrCtrl+Esc',
+              click: () => {
+                this.$bus.$emit('back-to-landingview');
               },
             },
           ],
@@ -1278,21 +1289,26 @@ new Vue({
         return recentMenuTemplate;
       }).catch(() => recentMenuTemplate);
     },
-    menuStateControl(flag: Boolean) {
+    menuStateControl(inPlayingView: Boolean) {
       this.menu.getMenuItemById('playback').submenu.items.forEach((item: any) => {
-        item.enabled = flag;
+        item.enabled = inPlayingView;
       });
       this.menu.getMenuItemById('audio').submenu.items.forEach((item: any) => {
-        item.enabled = flag;
+        item.enabled = inPlayingView;
       });
       this.menu.getMenuItemById('subtitle').submenu.items.forEach((item: any) => {
         item.submenu && item.submenu.items.forEach((item: any) => {
-          item.enabled = flag;
+          item.enabled = inPlayingView;
         });
-        item.enabled = flag;
+        item.enabled = inPlayingView;
       });
+      this.menu.getMenuItemById('windowResize1').enabled = inPlayingView;
+      this.menu.getMenuItemById('windowResize2').enabled = inPlayingView;
+      this.menu.getMenuItemById('windowResize3').enabled = inPlayingView;
+      this.menu.getMenuItemById('windowResize4').enabled = inPlayingView;
+      this.menu.getMenuItemById('backToLandingView').enabled = inPlayingView;
       // windowRotate 菜单状态随着路由状态一起变
-      this.menu.getMenuItemById('windowRotate').enabled = flag;
+      this.menu.getMenuItemById('windowRotate').enabled = inPlayingView;
     },
     processRecentPlay(recentPlayData: Array<any>) {
       const menuRecentData = new Map([
@@ -1463,7 +1479,7 @@ new Vue({
       if (!e.ctrlKey) {
         let isAdvanceColumeItem;
         let isSubtitleScrollItem;
-        const advance = document.querySelector('.advance-column-items');
+        const advance = document.querySelector('.mainMenu');
         const subtitle = document.querySelector('.subtitle-scroll-items');
         if (advance) {
           const nodeList = advance.childNodes;
@@ -1515,8 +1531,26 @@ new Vue({
       }
     });
     window.addEventListener('wheel', (event) => {
-      const { deltaX: x, ctrlKey } = event;
-      if (!ctrlKey) this.$emit('wheel-event', { x });
+      const { deltaX: x, ctrlKey, target } = event;
+      let isAdvanceColumeItem;
+      let isSubtitleScrollItem;
+      const advance = document.querySelector('.mainMenu');
+      const subtitle = document.querySelector('.subtitle-scroll-items');
+      if (advance) {
+        const nodeList = advance.childNodes;
+        for (let i = 0; i < nodeList.length; i += 1) {
+          isAdvanceColumeItem = nodeList[i].contains(target as Node);
+        }
+      }
+      if (subtitle) {
+        const subList = subtitle.childNodes;
+        for (let i = 0; i < subList.length; i += 1) {
+          isSubtitleScrollItem = subList[i].contains(target as Node);
+        }
+      }
+      if (!ctrlKey && !isAdvanceColumeItem && !isSubtitleScrollItem) {
+        this.$emit('wheel-event', { x });
+      }
     });
     /* eslint-disable */
 

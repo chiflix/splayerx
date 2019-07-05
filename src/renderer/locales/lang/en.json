@@ -153,7 +153,7 @@
       "menuLoading": "Loading ...",
       "name": "Subtitles",
       "noSubtitle": "Not Found",
-      "notToShowSubtitle": "None",
+      "notToShowSubtitle": "Off",
       "secondarySubtitle": "Secondary Subtitle",
       "size1": "Small",
       "size2": "Standard",
@@ -178,6 +178,7 @@
       "yes": "yes"
     },
     "window": {
+      "backToLandingView": "Back to Launching Page",
       "bossKey": "Boss Key",
       "doubleSize": "200%",
       "enterFullScreen": "Enter Full Screen",
@@ -201,6 +202,7 @@
       "setDefaultDescription": "Open all video files with SPlayer.",
       "restoreSettings": "Reset All Content and Settings",
       "restoreSettingsDescription": "Restart application with all data and caches erased.",
+      "restoreSettingsAfterRelaunch": "Restart to apply.",
       "setButton": "Apply",
       "relaunch": "Restart",
       "displayLanguage": "Display Language",

@@ -152,7 +152,7 @@
       "menuLoading": "ローディング ...",
       "name": "字幕",
       "noSubtitle": "見つかりませんでした",
-      "notToShowSubtitle": "なし",
+      "notToShowSubtitle": "閉じる",
       "secondarySubtitle": "第二字幕",
       "size1": "小",
       "size2": "通常",
@@ -177,6 +177,7 @@
       "yes": "更新"
     },
     "window": {
+      "backToLandingView": "起動ページに戻る",
       "bossKey": "ボスキー",
       "doubleSize": "",
       "enterFullScreen": "フルスクリーン",
@@ -200,6 +201,7 @@
       "setDefaultDescription": "SPlayer ですべてのビデオファイルを開く。",
       "restoreSettings": "すべての設定をリセット",
       "restoreSettingsDescription": "すべてのデータとキャッシュを消去して再起動します。",
+      "restoreSettingsAfterRelaunch": "適用を再開。",
       "setButton": "アプライ",
       "relaunch": "再起動",
       "displayLanguage": "言語表示",
@@ -284,7 +286,7 @@
     "title": "スナップショット失敗"
   },
   "loadVideoBySubtitleFailed": {
-    "content": "フォルダ内に関連ビデオが見つかりません",
+    "content": "フォルダ内に関連するビデオが見つかりません",
     "title": ""
   }
 }

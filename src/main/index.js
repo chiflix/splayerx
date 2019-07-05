@@ -251,7 +251,7 @@ function registerMainWindowEvent(mainWindow) {
       },
     );
   }
-  function thumbnailTaskCallback(event) {
+  function thumbnailTaskCallback() {
     const cb = (ret, src) => {
       thumbnailTask.shift();
       if (thumbnailTask.length > 0) {
@@ -266,7 +266,7 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('generateThumbnails', (event, args) => {
     if (thumbnailTask.length === 0) {
       thumbnailTask.push(args);
-      thumbnailTaskCallback(event);
+      thumbnailTaskCallback();
     } else {
       thumbnailTask.splice(1, 1, args);
     }
@@ -296,9 +296,8 @@ function registerMainWindowEvent(mainWindow) {
   function extractSubtitle(videoPath, subtitlePath, index) {
     return new Promise((resolve, reject) => {
       splayerx.extractSubtitles(videoPath, subtitlePath, `0:${index}:0`, (err) => {
-        console.log('Subtitle:', subtitlePath);
-        if (err === 0) reject(index);
-        resolve(index);
+        if (!err) resolve(subtitlePath);
+        else reject(err);
       });
     });
   }
@@ -357,9 +356,7 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('extract-subtitle-request', (event, videoPath, index, format, hash) => {
     const subtitleFolderPath = path.join(tempFolderPath, hash);
     if (!fs.existsSync(subtitleFolderPath)) fs.mkdirSync(subtitleFolderPath);
-    console.log(subtitleFolderPath);
     const subtitlePath = path.join(subtitleFolderPath, `embedded-${index}.${format}`);
-    console.log(subtitlePath);
     if (fs.existsSync(subtitlePath)) event.sender.send(`extract-subtitle-response-${index}`, { error: null, index, path: subtitlePath });
     else {
       embeeddSubtitlesQueue.add(() => extractSubtitle(videoPath, subtitlePath, index)
@@ -373,9 +370,11 @@ function registerMainWindowEvent(mainWindow) {
       callback(info);
     });
   }
-  function mediaInfoQueueProcess(event) {
+  function mediaInfoQueueProcess() {
     const callback = (info) => {
-      event.sender.send(`mediaInfo-${mediaInfoQueue[0]}-reply`, info);
+      if (mainWindow && !mainWindow.webContents.isDestroyed()) {
+        mainWindow.webContents.send(`mediaInfo-${mediaInfoQueue[0]}-reply`, info);
+      }
       mediaInfoQueue.shift();
       if (mediaInfoQueue.length > 0) {
         mediaInfo(mediaInfoQueue[0], callback);
@@ -387,10 +386,15 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('mediaInfo', (event, path) => {
     if (mediaInfoQueue.length === 0) {
       mediaInfoQueue.push(path);
-      mediaInfoQueueProcess(event);
+      mediaInfoQueueProcess();
     } else {
       mediaInfoQueue.push(path);
     }
+  });
+  ipcMain.on('simulate-closing-window', () => {
+    mediaInfoQueue.splice(0);
+    snapShotQueue.splice(0);
+    thumbnailTask.splice(0);
   });
   ipcMain.on('windowPositionChange', (event, args) => {
     if (!mainWindow || event.sender.isDestroyed()) return;
@@ -482,11 +486,7 @@ function registerMainWindowEvent(mainWindow) {
     }
     preferenceWindow.once('ready-to-show', () => {
       preferenceWindow.show();
-      preferenceWindow.webContents.send('restore-state', needToRestore);
     });
-  });
-  ipcMain.on('get-restore-state', () => {
-    preferenceWindow.webContents.send('restore-state', needToRestore);
   });
   ipcMain.on('need-to-restore', () => {
     needToRestore = true;

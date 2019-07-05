@@ -355,6 +355,7 @@ export default {
           paths,
           items: playlist.items,
         });
+        this.$bus.$emit('open-playlist');
       } else {
         const video = await this.infoDB.get('media-item', playlist.items[playlist.playedIndex]);
         try {

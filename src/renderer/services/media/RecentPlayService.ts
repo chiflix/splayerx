@@ -14,6 +14,7 @@ export default class RecentPlayService implements IRecentPlay {
       recentPlayedResults.map(async (value) => {
         const { items, playedIndex, id } = value;
         const coverVideoId = items[playedIndex] as number;
+        if (!coverVideoId) return null;
         const mediaItem = await info.getValueByKey('media-item', coverVideoId);
         if (!mediaItem) return null; // TODO: figure out why it wasn't saved to media-item
 
