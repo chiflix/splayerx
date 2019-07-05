@@ -335,6 +335,9 @@ export default {
         }, this.mousestopDelay);
       }
     },
+    playListState(val: boolean) {
+      if (val) this.updateMinimumSize();
+    },
     ratio() {
       this.updateMinimumSize();
     },
@@ -475,7 +478,7 @@ export default {
       this.$electron.remote.getCurrentWindow().setTouchBar(this.touchBar);
     },
     updateMinimumSize() {
-      const minimumSize = this.tempRecentPlaylistDisplayState
+      const minimumSize = this.tempRecentPlaylistDisplayState || this.playListState
         ? [512, Math.round(512 / this.ratio)]
         : [320, 180];
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', minimumSize);
