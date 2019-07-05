@@ -55,7 +55,7 @@
       :mousedown-on-play-button="mousedownOnPlayButton"
       :show-all-widgets="showAllWidgets"
       :muted="muted"
-      :volume-keydown="volumeKeydown"
+      :volume-keydown="volumeKeydown || changeVolumeByMenu"
       :volume="volume"
       :ratio="ratio"
       :is-full-screen="isFullScreen"
@@ -200,6 +200,7 @@ export default {
       changeState: false, // 记录是不是要改变显示速率的状态
       changeSrc: false, // 记录是否换过视频
       showSpeedLabel: false, // 是否显示播放速率
+      changeVolumeByMenu: false,
     };
   },
   computed: {
@@ -422,6 +423,12 @@ export default {
     });
     this.$bus.$on('off-fullscreen', () => {
       this.handleVolumeUIWhenFullScreenChanged();
+    });
+    this.$bus.$on('change-volume-menu', () => {
+      this.changeVolumeByMenu = true;
+      setTimeout(() => {
+        this.changeVolumeByMenu = false;
+      });
     });
     document.addEventListener('keydown', this.handleKeydown);
     document.addEventListener('keyup', this.handleKeyup);
@@ -695,10 +702,10 @@ export default {
         }
       }
     },
-    handleKeydown({ code }: { code: number }) {
+    handleKeydown({ code }: { code: string }) {
       this.updateKeydown({ pressedKeyboardCode: code });
     },
-    handleKeyup({ code }: { code: number }) {
+    handleKeyup({ code }: { code: string }) {
       this.updateKeyup({ releasedKeyboardCode: code });
     },
     handleWheel({ target, timeStamp }: { target: Element; timeStamp: number }) {
