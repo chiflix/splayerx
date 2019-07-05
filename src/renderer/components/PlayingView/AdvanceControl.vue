@@ -138,7 +138,19 @@ export default {
       document.addEventListener('mouseup', (e) => {
         if (e.button === 0) {
           if (!this.showAttached) {
-            if (this.validEnter || this.currentMousedownComponent === this.$options.name) {
+            let isUpOnAdvanceControl;
+            const advance = document.querySelector('.advanceControl');
+            if (advance) {
+              const nodeList = advance.childNodes;
+              for (let i = 0; i < nodeList.length; i += 1) {
+                isUpOnAdvanceControl = nodeList[i].contains(e.target as Node);
+                if (isUpOnAdvanceControl) {
+                  break;
+                }
+              }
+            }
+            if (this.validEnter
+              || (this.currentMousedownComponent === this.$options.name && isUpOnAdvanceControl)) {
               this.anim.playSegments([23, 36], true);
             } else if (this.currentMousedownComponent === this.$options.name) {
               this.anim.playSegments([105, 109], true);
