@@ -2,17 +2,18 @@
 import '../shared/sentry';
 
 import { app, BrowserWindow, session, Tray, ipcMain, globalShortcut, nativeImage, splayerx } from 'electron' // eslint-disable-line
-import { throttle, debounce } from 'lodash';
+import { throttle, debounce, uniq } from 'lodash';
 import os from 'os';
-import path from 'path';
+import path, {
+  basename, dirname, extname, join,
+} from 'path';
 import fs from 'fs';
 import rimraf from 'rimraf';
 import TaskQueue from '../renderer/helpers/proceduralQueue';
 import './helpers/electronPrototypes';
 import writeLog from './helpers/writeLog';
-import { getOpenedFiles } from './helpers/argv';
+import { getValidVideoRegex, getValidSubtitleRegex } from '../shared/utils';
 import { mouse } from './helpers/mouse';
-import { getValidVideoRegex } from '../shared/utils';
 
 // requestSingleInstanceLock is not going to work for mas
 // https://github.com/electron-userland/electron-packager/issues/923
@@ -59,11 +60,14 @@ let preferenceWindow = null;
 let tray = null;
 let needToRestore = false;
 let inited = false;
-const filesToOpen = [];
+let finalVideoToOpen = [];
+const tmpVideoToOpen = [];
+const tmpSubsToOpen = [];
 const snapShotQueue = [];
 const thumbnailTask = [];
 const mediaInfoQueue = [];
 const embeeddSubtitlesQueue = new TaskQueue();
+const subRegex = getValidSubtitleRegex();
 const mainURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080'
   : `file://${__dirname}/index.html`;
@@ -102,6 +106,68 @@ function handleBossKey() {
 
 function markNeedToRestore() {
   fs.closeSync(fs.openSync(path.join(app.getPath('userData'), 'NEED_TO_RESTORE_MARK'), 'w'));
+}
+
+function searchSubsInDir(dir) {
+  const subRegex = getValidSubtitleRegex();
+  const dirFiles = fs.readdirSync(dir);
+  return dirFiles
+    .filter(subtitleFilename => subRegex.test(path.extname(subtitleFilename)))
+    .map(subtitleFilename => (join(dir, subtitleFilename)));
+}
+function searchForLocalVideo(subSrc) {
+  const videoDir = dirname(subSrc);
+  const videoBasename = basename(subSrc, extname(subSrc)).toLowerCase();
+  const videoFilename = basename(subSrc).toLowerCase();
+  const dirFiles = fs.readdirSync(videoDir);
+  return dirFiles
+    .filter((subtitleFilename) => {
+      const lowerCasedName = subtitleFilename.toLowerCase();
+      return (
+        getValidVideoRegex().test(lowerCasedName)
+        && lowerCasedName.slice(0, lowerCasedName.lastIndexOf('.')) === videoBasename
+        && lowerCasedName !== videoFilename && !subRegex.test(path.extname(lowerCasedName))
+      );
+    })
+    .map(subtitleFilename => (join(videoDir, subtitleFilename)));
+}
+function getAllValidVideo(onlySubtitle, files) {
+  try {
+    const videoFiles = [];
+
+    for (let i = 0; i < files.length; i += 1) {
+      if (fs.statSync(files[i]).isDirectory()) {
+        const dirPath = files[i];
+        const dirFiles = fs.readdirSync(dirPath).map(file => path.join(dirPath, file));
+        files.push(...dirFiles);
+      }
+    }
+    if (!process.mas) {
+      files.forEach((tempFilePath) => {
+        const baseName = path.basename(tempFilePath);
+        if (baseName.startsWith('.') || fs.statSync(tempFilePath).isDirectory()) return;
+        if (subRegex.test(path.extname(tempFilePath))) {
+          const tempVideo = searchForLocalVideo(tempFilePath);
+          videoFiles.push(...tempVideo);
+        } else if (!subRegex.test(path.extname(tempFilePath))
+          && getValidVideoRegex().test(tempFilePath)) {
+          videoFiles.push(tempFilePath);
+        }
+      });
+    } else if (!onlySubtitle) {
+      files.forEach((tempFilePath) => {
+        const baseName = path.basename(tempFilePath);
+        if (baseName.startsWith('.') || fs.statSync(tempFilePath).isDirectory()) return;
+        if (!subRegex.test(path.extname(tempFilePath))
+          && getValidVideoRegex().test(tempFilePath)) {
+          videoFiles.push(tempFilePath);
+        }
+      });
+    }
+    return uniq(videoFiles);
+  } catch (ex) {
+    return [];
+  }
 }
 
 function registerMainWindowEvent(mainWindow) {
@@ -155,6 +221,26 @@ function registerMainWindowEvent(mainWindow) {
     if (!mainWindow || event.sender.isDestroyed()) return;
     mainWindow.setSize(...args);
     event.sender.send('windowSizeChange-asyncReply', mainWindow.getSize());
+  });
+  ipcMain.on('drop-subtitle', (event, args) => {
+    args.forEach((file) => {
+      if (subRegex.test(path.extname(file)) || fs.statSync(file).isDirectory()) {
+        tmpSubsToOpen.push(file);
+      } else if (!subRegex.test(path.extname(file))
+        && getValidVideoRegex().test(file)) {
+        tmpVideoToOpen.push(file);
+      }
+    });
+    finalVideoToOpen = getAllValidVideo(!tmpVideoToOpen.length,
+      tmpVideoToOpen.concat(tmpSubsToOpen));
+    if (process.mas && !tmpVideoToOpen.length && tmpSubsToOpen.length) {
+      mainWindow.webContents.send('open-subtitle-in-mas', tmpSubsToOpen[0]);
+    } else if (tmpVideoToOpen.length + tmpSubsToOpen.length > 0) {
+      mainWindow.webContents.send('open-file', { onlySubtitle: !tmpVideoToOpen.length, files: finalVideoToOpen });
+    }
+    finalVideoToOpen.splice(0, finalVideoToOpen.length);
+    tmpSubsToOpen.splice(0, tmpSubsToOpen.length);
+    tmpVideoToOpen.splice(0, tmpVideoToOpen.length);
   });
   function thumbnail(args, cb) {
     splayerx.generateThumbnails(
@@ -455,7 +541,7 @@ function createWindow() {
   });
   mainWindow.webContents.setUserAgent(`SPlayerX@2018 ${os.platform() + os.release()} Version ${app.getVersion()}`);
 
-  mainWindow.loadURL(filesToOpen.length ? `${mainURL}#/play` : mainURL);
+  mainWindow.loadURL(finalVideoToOpen.length ? `${mainURL}#/play` : mainURL);
 
   mainWindow.on('closed', () => {
     ipcMain.removeAllListeners();
@@ -464,12 +550,17 @@ function createWindow() {
 
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
-
     // Open file by file association. Currently support 1 file only.
-    if (filesToOpen.length) {
-      mainWindow.webContents.send('open-file', ...filesToOpen);
-      filesToOpen.splice(0, filesToOpen.length);
+    finalVideoToOpen = getAllValidVideo(!tmpVideoToOpen.length,
+      tmpVideoToOpen.concat(tmpSubsToOpen));
+    if (process.mas && !tmpVideoToOpen.length && tmpSubsToOpen.length) {
+      mainWindow.webContents.send('open-subtitle-in-mas', tmpSubsToOpen[0]);
+    } else if (tmpVideoToOpen.length + tmpSubsToOpen.length > 0) {
+      mainWindow.webContents.send('open-file', { onlySubtitle: !tmpVideoToOpen.length, files: finalVideoToOpen });
     }
+    finalVideoToOpen.splice(0, finalVideoToOpen.length);
+    tmpSubsToOpen.splice(0, tmpSubsToOpen.length);
+    tmpVideoToOpen.splice(0, tmpVideoToOpen.length);
     inited = true;
   });
 
@@ -508,14 +599,30 @@ app.on('second-instance', () => {
 });
 
 
-function darwinOpenFilesToStart() {
+async function darwinOpenFilesToStart() {
   if (mainWindow) { // sencond instance
     if (!inited) return;
     if (!mainWindow.isVisible()) mainWindow.show();
     if (mainWindow.isMinimized()) mainWindow.restore();
     mainWindow.focus();
-    mainWindow.webContents.send('open-file', ...filesToOpen);
-    filesToOpen.splice(0, filesToOpen.length);
+    finalVideoToOpen = getAllValidVideo(!tmpVideoToOpen.length,
+      tmpVideoToOpen.concat(tmpSubsToOpen));
+    if (!tmpVideoToOpen.length && tmpSubsToOpen.length) {
+      const allSubFiles = [];
+      tmpSubsToOpen.forEach((file) => {
+        if (subRegex.test(path.extname(file))) {
+          allSubFiles.push(file);
+        } else {
+          allSubFiles.push(...searchSubsInDir(file));
+        }
+      });
+      mainWindow.webContents.send('add-local-subtitles', allSubFiles);
+    } else if (tmpVideoToOpen.length + tmpSubsToOpen.length > 0) {
+      mainWindow.webContents.send('open-file', { onlySubtitle: !tmpVideoToOpen.length, files: finalVideoToOpen });
+    }
+    finalVideoToOpen.splice(0, finalVideoToOpen.length);
+    tmpSubsToOpen.splice(0, tmpSubsToOpen.length);
+    tmpVideoToOpen.splice(0, tmpVideoToOpen.length);
   } else if (app.isReady()) {
     createWindow();
   }
@@ -524,18 +631,53 @@ const darwinOpenFilesToStartDebounced = debounce(darwinOpenFilesToStart, 100);
 if (process.platform === 'darwin') {
   app.on('will-finish-launching', () => {
     app.on('open-file', (event, file) => {
-      if (!getValidVideoRegex().test(file)) return;
-      filesToOpen.push(file);
+      if (subRegex.test(path.extname(file)) || fs.statSync(file).isDirectory()) {
+        tmpSubsToOpen.push(file);
+      } else if (!subRegex.test(path.extname(file))
+        && getValidVideoRegex().test(file)) {
+        tmpVideoToOpen.push(file);
+      }
       darwinOpenFilesToStartDebounced();
     });
   });
 } else {
-  filesToOpen.push(...getOpenedFiles(process.argv));
-  app.on('second-instance', (event, argv) => {
-    const opendFiles = getOpenedFiles(argv); // TODO: multiple files
-    if (opendFiles.length) {
-      mainWindow.webContents.send('open-file', ...opendFiles);
+  const tmpFile = process.argv.slice(app.isPackaged ? 1 : 2);
+  tmpFile.forEach((file) => {
+    if (subRegex.test(path.extname(file)) || fs.statSync(file).isDirectory()) {
+      tmpSubsToOpen.push(file);
+    } else if (!subRegex.test(path.extname(file))
+      && getValidVideoRegex().test(file)) {
+      tmpVideoToOpen.push(file);
     }
+  });
+  app.on('second-instance', (event, argv) => {
+    const opendFiles = argv.slice(app.isPackaged ? 3 : 2);
+    opendFiles.forEach((file) => {
+      if (subRegex.test(path.extname(file)) || fs.statSync(file).isDirectory()) {
+        tmpSubsToOpen.push(file);
+      } else if (!subRegex.test(path.extname(file))
+        && getValidVideoRegex().test(file)) {
+        tmpVideoToOpen.push(file);
+      }
+    });
+    finalVideoToOpen = getAllValidVideo(!tmpVideoToOpen.length,
+      tmpVideoToOpen.concat(tmpSubsToOpen));
+    if (!tmpVideoToOpen.length && tmpSubsToOpen.length) {
+      const allSubFiles = [];
+      tmpSubsToOpen.forEach((file) => {
+        if (subRegex.test(path.extname(file))) {
+          allSubFiles.push(file);
+        } else {
+          allSubFiles.push(...searchSubsInDir(file));
+        }
+      });
+      mainWindow.webContents.send('add-local-subtitles', allSubFiles);
+    } else if (tmpVideoToOpen.length + tmpSubsToOpen.length > 0) {
+      mainWindow.webContents.send('open-file', { onlySubtitle: !tmpVideoToOpen.length, files: finalVideoToOpen });
+    }
+    finalVideoToOpen.splice(0, finalVideoToOpen.length);
+    tmpSubsToOpen.splice(0, tmpSubsToOpen.length);
+    tmpVideoToOpen.splice(0, tmpVideoToOpen.length);
   });
 }
 

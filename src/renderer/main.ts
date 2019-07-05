@@ -33,10 +33,11 @@ import { log } from '@/libs/Log';
 import asyncStorage from '@/helpers/asyncStorage';
 import { videodata } from '@/store/video';
 import { addBubble } from './helpers/notificationControl';
-import { SNAPSHOT_FAILED, SNAPSHOT_SUCCESS } from './helpers/notificationcodes';
+import { SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, LOAD_SUBVIDEO_FAILED } from './helpers/notificationcodes';
 import InputPlugin, { getterTypes as iGT } from '@/plugins/input';
 import { VueDevtools } from './plugins/vueDevtools.dev';
 import { SubtitleControlListItem, Type } from './interfaces/ISubtitle';
+import { getValidVideoRegex, getValidSubtitleRegex } from '../shared/utils';
 import { EventEmitter } from 'events';
 
 // causing callbacks-registry.js 404 error. disable temporarily
@@ -514,6 +515,7 @@ new Vue({
       changeFirstSubtitle: smActions.changePrimarySubtitle,
       changeSecondarySubtitle: smActions.changeSecondarySubtitle,
       refreshSubtitles: smActions.refreshSubtitles,
+      addLocalSubtitlesWithSelect: smActions.addLocalSubtitlesWithSelect,
       updateSubtitleType: subtitleActions.UPDATE_SUBTITLE_TYPE,
     }),
     /**
@@ -1540,13 +1542,18 @@ new Vue({
       e.preventDefault();
       this.$bus.$emit('drop');
       this.$store.commit('source', 'drop');
-      const files = Array.prototype.map.call(e.dataTransfer!.files, (f: File) => f.path)
-      const onlyFolders = files.every((file: fs.PathLike) => fs.statSync(file).isDirectory());
-      files.forEach((file: fs.PathLike) => this.$electron.remote.app.addRecentDocument(file));
-      if (onlyFolders) {
-        this.openFolder(...files);
+      const files = Array.prototype.map.call(e.dataTransfer!.files, (f: File) => f.path);
+      if (files.every((file: fs.PathLike) => getValidVideoRegex().test(file) && !getValidSubtitleRegex().test(file))
+        || this.currentRouteName === 'playing-view') {
+        const onlyFolders = files.every((file: fs.PathLike) => fs.statSync(file).isDirectory());
+        files.forEach((file: fs.PathLike) => this.$electron.remote.app.addRecentDocument(file));
+        if (onlyFolders) {
+          this.openFolder(...files);
+        } else {
+          this.openFile(...files);
+        }
       } else {
-        this.openFile(...files);
+        this.$electron.ipcRenderer.send('drop-subtitle', files);
       }
     });
     window.addEventListener('dragover', (e) => {
@@ -1559,13 +1566,24 @@ new Vue({
       this.$bus.$emit('drag-leave');
     });
 
-    this.$electron.ipcRenderer.on('open-file', (event: any, ...files: Array<fs.PathLike>) => {
-      const onlyFolders = files.every(file => fs.statSync(file).isDirectory());
-      if (onlyFolders) {
-        this.openFolder(...files);
+    this.$electron.ipcRenderer.on('open-file', (event: Event, args: { onlySubtitle: boolean, files: Array<string> }) => {
+      if (!args.files.length && args.onlySubtitle) {
+        log.info('helpers/index.js', `Cannot find any related video in the folder: ${args.files}`);
+        addBubble(LOAD_SUBVIDEO_FAILED);
       } else {
-        this.openFile(...files);
+        const onlyFolders = args.files.every((file: any) => fs.statSync(file).isDirectory());
+        if (onlyFolders) {
+          this.openFolder(...args.files);
+        } else {
+          this.openFile(...args.files);
+        }
       }
+    });
+    this.$electron.ipcRenderer.on('open-subtitle-in-mas', (event: Event, file: string) => {
+      this.openFilesByDialog({ defaultPath: file });
+    });
+    this.$electron.ipcRenderer.on('add-local-subtitles', (event: Event, file: string[]) => {
+      this.addLocalSubtitlesWithSelect(file);
     });
   },
 }).$mount('#app');

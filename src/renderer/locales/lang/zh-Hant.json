@@ -282,5 +282,9 @@
   "snapshotFailed": {
     "content": "請稍後重試。",
     "title": "截圖失敗"
+  },
+  "loadVideoBySubtitleFailed": {
+    "content": "未找到當前目錄下與字幕同名的視頻文件",
+    "title": ""
   }
 }

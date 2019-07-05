@@ -282,5 +282,9 @@
   "snapshotFailed": {
     "content": "나중에 다시 시도 해주세요.",
     "title": "스냅 샷 실패"
+  },
+  "loadVideoBySubtitleFailed": {
+    "content": "폴더에서 관련 동영상을 찾을 수 없습니다",
+    "title": ""
   }
 }

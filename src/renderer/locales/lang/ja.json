@@ -282,5 +282,9 @@
   "snapshotFailed": {
     "content": "後でお試しください。",
     "title": "スナップショット失敗"
+  },
+  "loadVideoBySubtitleFailed": {
+    "content": "フォルダ内に関連ビデオが見つかりません",
+    "title": ""
   }
 }
