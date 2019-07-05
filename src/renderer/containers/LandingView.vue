@@ -79,6 +79,8 @@
             height:`${thumbnailHeight}px`,
             width:`${thumbnailWidth}px`,
             marginRight: `${marginRight}px`,
+            backgroundColor:
+              item.backgroundUrl ? 'rgba(255,255,255,0.12) ': 'rgba(255,255,255,0.05)',
           }"
           :class="{ 'backdrop': useBlur }"
           @click="openOrMove"
@@ -390,7 +392,6 @@ $themeColor-Light: white;
     align-items: flex-end;
 
     .button {
-      background-color: rgba(0, 0, 0, 0.12);
       transition: background-color 150ms ease-out;
       cursor: pointer;
     }
