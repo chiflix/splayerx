@@ -40,17 +40,7 @@
        Square44x44Logo="${square44x44Logo}"
        Description="${description}">
         ${lockScreen}
-        <uap:DefaultTile
-          Wide310x150Logo="assets\Wide310x150Logo.png"
-          Square310x310Logo="assets\LargeTile.png"
-          Square71x71Logo="assets\SmallTile.png"
-        >
-          <uap:ShowNameOnTiles>
-            <uap:ShowOn Tile="square150x150Logo" />
-            <uap:ShowOn Tile="wide310x150Logo" />
-            <uap:ShowOn Tile="square310x310Logo" />
-          </uap:ShowNameOnTiles>
-        </uap:DefaultTile>
+        ${defaultTile}
         ${splashScreen}
       </uap:VisualElements>
       ${extensions}
