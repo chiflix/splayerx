@@ -290,6 +290,7 @@ export default {
     },
     changeWindowRotate(val: number) {
       requestAnimationFrame(() => {
+        if (!this.$refs.videoCanvas) return;
         const scale = windowRectService.calculateWindowScaleBy(this.isFullScreen, val, this.ratio);
         this.$refs.videoCanvas.$el.style.setProperty('transform', `rotate(${val}deg) scale(${scale}, ${scale})`);
       });
@@ -298,6 +299,7 @@ export default {
       this.winSizeBeforeFullScreen = this.winSize;
       this.winAngleBeforeFullScreen = this.winAngle;
       requestAnimationFrame(() => {
+        if (!this.$refs.videoCanvas) return;
         const scale = windowRectService.calculateWindowScaleBy(true, this.winAngle, this.ratio);
         this.$refs.videoCanvas.$el.style.setProperty('transform', `rotate(${this.winAngle}deg) scale(${scale}, ${scale})`);
       });
@@ -305,6 +307,7 @@ export default {
     },
     offFullScreen() {
       requestAnimationFrame(() => {
+        if (!this.$refs.videoCanvas) return;
         const scale = windowRectService.calculateWindowScaleBy(false, this.winAngle, this.ratio);
         this.$refs.videoCanvas.$el.style.setProperty('transform', `rotate(${this.winAngle}deg) scale(${scale}, ${scale})`);
       });

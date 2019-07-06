@@ -418,6 +418,7 @@ new Vue({
       }
     },
     primarySubtitleId(id: string, oldId: string) {
+      if (!this.menu) return;
       if (id && this.menu.getMenuItemById(`sub${id}`)) {
         this.menu.getMenuItemById(`sub${id}`).checked = true;
       } else if (!id) {
@@ -425,6 +426,7 @@ new Vue({
       }
     },
     secondarySubtitleId(id: string, oldId: string) {
+      if (!this.menu) return;
       if (id && this.menu.getMenuItemById(`secondSub${id}`)) {
         this.menu.getMenuItemById(`secondSub${id}`).checked = true;
       } else if (!id) {
@@ -437,7 +439,7 @@ new Vue({
       }
       if (this.menu) {
         this.audioTrackList.forEach((item: Electron.MenuItem, index: number) => {
-          if (item.enabled === true && this.menu.getMenuItemById(`track${index}`)) {
+          if (item.enabled === true && this.menu && this.menu.getMenuItemById(`track${index}`)) {
             this.menu.getMenuItemById(`track${index}`).checked = true;
           }
         });
@@ -1090,6 +1092,7 @@ new Vue({
         this.menu = Menu.buildFromTemplate(result);
         Menu.setApplicationMenu(this.menu);
       }).then(() => {
+        if (!this.menu) return;
         if (this.currentRouteName === 'landing-view') {
           this.menuStateControl(false);
         }
@@ -1155,13 +1158,13 @@ new Vue({
           this.updateSubtitleType(isFirstSubtitleType);
           if (isFirstSubtitleType) {
             this.changeFirstSubtitle(item.id);
-            if (this.menu.getMenuItemById(`secondSub${item.id}`)) {
+            if (this.menu && this.menu.getMenuItemById(`secondSub${item.id}`)) {
               this.menu.getMenuItemById(`secondSub${item.id}`).checked = false;
               this.menu.getMenuItemById('secondSub-1').checked = true;
             }
           } else {
             this.changeSecondarySubtitle(item.id);
-            if (this.menu.getMenuItemById(`sub${item.id}`)) {
+            if (this.menu && this.menu.getMenuItemById(`sub${item.id}`)) {
               this.menu.getMenuItemById(`sub${item.id}`).checked = false;
               this.menu.getMenuItemById('sub-1').checked = true;
             }
@@ -1292,6 +1295,7 @@ new Vue({
       }).catch(() => recentMenuTemplate);
     },
     menuStateControl(inPlayingView: Boolean) {
+      if (!this.menu) return;
       this.menu.getMenuItemById('playback').submenu.items.forEach((item: any) => {
         item.enabled = inPlayingView;
       });

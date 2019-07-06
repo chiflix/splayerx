@@ -400,6 +400,7 @@ export default {
     },
     // open single video
     async openVideoFile(videoFile) {
+      if (!videoFile) return;
       const id = await this.infoDB.addPlaylist([videoFile]);
       const playlistItem = await this.infoDB.get('recent-played', id);
       let similarVideos;

@@ -32,6 +32,8 @@ export default class Log implements ILog {
     if (level in console) console[level](label, message);
     else console.log(label, message);
 
+    Sentry.addBreadcrumb({ message: `Log: ${label} ${level} ${message}` });
+
     let stack;
     if (message instanceof Error) {
       stack = message.stack;
@@ -76,7 +78,6 @@ export default class Log implements ILog {
   error(label: string, message: string | Error): void {
     this.log(label, 'error', message);
     if (process.env.NODE_ENV !== 'development') {
-      Sentry.addBreadcrumb({ message: `Error label: ${label}` });
       Sentry.captureException(message);
     }
   }

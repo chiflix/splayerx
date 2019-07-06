@@ -213,7 +213,7 @@ function registerMainWindowEvent(mainWindow) {
     try {
       mainWindow[method](...args);
     } catch (ex) {
-      console.error('callMainWindowMethod', ex, method, JSON.stringify(args));
+      console.error('callMainWindowMethod', method, JSON.stringify(args), '\n', ex);
     }
   });
   /* eslint-disable no-unused-vars */

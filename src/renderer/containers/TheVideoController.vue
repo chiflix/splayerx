@@ -729,7 +729,7 @@ export default {
     isChildComponent(element: Element) {
       let componentName = null;
       this.$children.forEach((childComponenet: Vue) => {
-        if (childComponenet.$el === element) {
+        if (childComponenet && childComponenet.$el === element) {
           componentName = childComponenet.$options.name;
         }
       });
