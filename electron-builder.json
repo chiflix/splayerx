@@ -1,6 +1,6 @@
 {
   "appId": "org.splayer.splayerx",
-  "productName": "SPlayer 4",
+  "productName": "SPlayer",
   "publish": [
     {
       "provider": "github",
@@ -13,12 +13,12 @@
   "directories": {
     "output": "build"
   },
-  "electronVersion": "5.0.1",
+  "electronVersion": "5.0.6",
   "electronDist": "node_modules/@chiflix/electron/dist",
   "electronDownload": {
     "mirror": "https://github.com/chiflix/electron/releases/download/v",
     "isVerifyChecksum": false,
-    "version": "5.0.1"
+    "version": "5.0.6"
   },
   "files": [
     "dist/electron/**/*"
@@ -27,13 +27,11 @@
     "identityName": "29951SHENGSHEN.SPlayer4",
     "applicationId": "SPlayer",
     "backgroundColor": "#FF7A1C",
-    "displayName": "SPlayer",
+    "displayName": "SPlayer 4",
     "publisher": "CN=840E2570-B48E-4F56-A2DA-0D9720F91080",
     "publisherDisplayName": "SHENG SHEN",
     "languages": [
-      "en-US",
-      "zh-CN",
-      "zh-TW"
+      "en", "ar", "es", "ja", "ko", "zh-Hans", "zh-Hant"
     ]
   },
   "dmg": {
