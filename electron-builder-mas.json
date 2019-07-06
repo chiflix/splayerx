@@ -1,54 +1,54 @@
 {
-	"appId": "org.splayer.splayerx",
-	"productName": "SPlayer",
-	"publish": [
-		{
-			"provider": "github",
-			"owner": "chiflix",
-			"repo": "splayerx"
-		}
-	],
-	"afterPack": "scripts/afterPack.js",
-	"compression": "maximum",
-	"directories": {
-		"output": "build"
-	},
-	"electronVersion": "5.0.1",
-	"electronDist": "node_modules/@chiflix/electron/dist",
-	"electronDownload": {
-		"mirror": "https://github.com/chiflix/electron/releases/download/v",
-		"isVerifyChecksum": false,
-		"version": "5.0.1"
-	},
-	"files": [
-		"dist/electron/**/*"
-	],
-	"dmg": {
-		"background": "build/icons/dmg/bg.tiff",
-		"icon": "build/icons/dmg/install.icns",
-		"iconSize": 95,
-		"window": {
-			"width": 540,
-			"height": 320
-		},
-		"contents": [
-			{
-				"x": 400,
-				"y": 148,
-				"type": "link",
-				"path": "/Applications"
-			},
-			{
-				"x": 131,
-				"y": 150,
-				"type": "file"
-			}
-		]
-	},
-	"mac": {
-		"icon": "icons/icon.icns",
-		"target": [
-			"dmg"
+  "appId": "org.splayer.splayerx",
+  "productName": "SPlayer",
+  "publish": [
+    {
+      "provider": "github",
+      "owner": "chiflix",
+      "repo": "splayerx"
+    }
+  ],
+  "afterPack": "scripts/afterPack.js",
+  "compression": "maximum",
+  "directories": {
+    "output": "build"
+  },
+  "electronVersion": "5.0.1",
+  "electronDist": "node_modules/@chiflix/electron/dist",
+  "electronDownload": {
+    "mirror": "https://github.com/chiflix/electron/releases/download/v",
+    "isVerifyChecksum": false,
+    "version": "5.0.1"
+  },
+  "files": [
+    "dist/electron/**/*"
+  ],
+  "dmg": {
+    "background": "build/icons/dmg/bg.tiff",
+    "icon": "build/icons/dmg/install.icns",
+    "iconSize": 95,
+    "window": {
+      "width": 540,
+      "height": 320
+    },
+    "contents": [
+      {
+        "x": 400,
+        "y": 148,
+        "type": "link",
+        "path": "/Applications"
+      },
+      {
+        "x": 131,
+        "y": 150,
+        "type": "file"
+      }
+    ]
+  },
+  "mac": {
+    "icon": "icons/icon.icns",
+    "target": [
+      "dmg"
     ],
     "extendInfo": {
       "NSUserNotificationAlertStyle": "alert",
@@ -58,185 +58,185 @@
         }
       ]
     },
-		"fileAssociations": [
-			{
-				"name": "Video",
-				"ext": [
-					"3g2",
-					"3gp",
-					"3gp2",
-					"3gpp",
-					"amv",
-					"asf",
-					"bik",
-					"bin",
-					"crf",
-					"divx",
-					"drc",
-					"dv",
-					"dvr-ms",
-					"evo",
-					"gvi",
-					"gxf",
-					"m1v",
-					"m2v",
-					"m2t",
-					"m2ts",
-					"mp2",
-					"mp2v",
-					"mp4v",
-					"mpe",
-					"mpeg",
-					"mpeg1",
-					"mpeg2",
-					"mpeg4",
-					"mpv2",
-					"mts",
-					"mtv",
-					"mxf",
-					"mxg",
-					"nsv",
-					"nuv",
-					"ogg",
-					"ogm",
-					"ogv",
-					"ogx",
-					"ps",
-					"rec",
-					"rpl",
-					"thp",
-					"tod",
-					"tp",
-					"tts",
-					"txd",
-					"vro",
-					"wm",
-					"wtv",
-					"xesc"
-				],
-				"role": "Viewer",
-				"icon": "build/icons/others.icns"
-			},
-			{
-				"name": "DAT",
-				"ext": [
-					"dat"
-				],
-				"role": "Viewer",
-				"icon": "build/icons/dat.icns"
-			},
-			{
-				"name": "WEBM",
-				"ext": [
-					"webm"
-				],
-				"role": "Viewer",
-				"icon": "build/icons/webm.icns"
-			},
-			{
-				"name": "VOB",
-				"ext": [
-					"vob"
-				],
-				"role": "Viewer",
-				"icon": "build/icons/vob.icns"
-			},
-			{
-				"name": "TS",
-				"ext": [
-					"ts"
-				],
-				"role": "Viewer",
-				"icon": "build/icons/ts.icns"
-			},
-			{
-				"name": "RM",
-				"ext": [
-					"rm"
-				],
-				"role": "Viewer",
-				"icon": "build/icons/rm.icns"
-			},
-			{
-				"name": "MPG",
-				"ext": [
-					"mpg"
-				],
-				"role": "Viewer",
-				"icon": "build/icons/mpg.icns"
-			},
-			{
-				"name": "F4V",
-				"ext": [
-					"f4v"
-				],
-				"role": "Viewer",
-				"icon": "build/icons/f4v.icns"
-			},
-			{
-				"name": "AVI",
-				"ext": [
-					"avi"
-				],
-				"role": "Viewer",
-				"icon": "build/icons/avi.icns"
-			},
-			{
-				"name": "FLV",
-				"ext": [
-					"flv"
-				],
-				"role": "Viewer",
-				"icon": "build/icons/flv.icns"
-			},
-			{
-				"name": "M4V",
-				"ext": [
-					"m4v"
-				],
-				"role": "Viewer",
-				"icon": "build/icons/m4v.icns"
-			},
-			{
-				"name": "MKV",
-				"ext": [
-					"mkv"
-				],
-				"role": "Viewer",
-				"icon": "build/icons/mkv.icns"
-			},
-			{
-				"name": "MOV",
-				"ext": [
-					"mov"
-				],
-				"role": "Viewer",
-				"icon": "build/icons/mov.icns"
-			},
-			{
-				"name": "MP4",
-				"ext": [
-					"mp4"
-				],
-				"role": "Viewer",
-				"icon": "build/icons/mp4.icns"
-			},
-			{
-				"name": "RMVB",
-				"ext": [
-					"rmvb"
-				],
-				"role": "Viewer",
-				"icon": "build/icons/rmvb.icns"
-			},
-			{
-				"name": "WMV",
-				"ext": [
-					"wmv"
-				],
-				"role": "Viewer",
-				"icon": "build/icons/wmv.icns"
-			}
-		]
-	}
+    "fileAssociations": [
+      {
+        "name": "Video",
+        "ext": [
+          "3g2",
+          "3gp",
+          "3gp2",
+          "3gpp",
+          "amv",
+          "asf",
+          "bik",
+          "bin",
+          "crf",
+          "divx",
+          "drc",
+          "dv",
+          "dvr-ms",
+          "evo",
+          "gvi",
+          "gxf",
+          "m1v",
+          "m2v",
+          "m2t",
+          "m2ts",
+          "mp2",
+          "mp2v",
+          "mp4v",
+          "mpe",
+          "mpeg",
+          "mpeg1",
+          "mpeg2",
+          "mpeg4",
+          "mpv2",
+          "mts",
+          "mtv",
+          "mxf",
+          "mxg",
+          "nsv",
+          "nuv",
+          "ogg",
+          "ogm",
+          "ogv",
+          "ogx",
+          "ps",
+          "rec",
+          "rpl",
+          "thp",
+          "tod",
+          "tp",
+          "tts",
+          "txd",
+          "vro",
+          "wm",
+          "wtv",
+          "xesc"
+        ],
+        "role": "Viewer",
+        "icon": "build/icons/others.icns"
+      },
+      {
+        "name": "DAT",
+        "ext": [
+          "dat"
+        ],
+        "role": "Viewer",
+        "icon": "build/icons/dat.icns"
+      },
+      {
+        "name": "WEBM",
+        "ext": [
+          "webm"
+        ],
+        "role": "Viewer",
+        "icon": "build/icons/webm.icns"
+      },
+      {
+        "name": "VOB",
+        "ext": [
+          "vob"
+        ],
+        "role": "Viewer",
+        "icon": "build/icons/vob.icns"
+      },
+      {
+        "name": "TS",
+        "ext": [
+          "ts"
+        ],
+        "role": "Viewer",
+        "icon": "build/icons/ts.icns"
+      },
+      {
+        "name": "RM",
+        "ext": [
+          "rm"
+        ],
+        "role": "Viewer",
+        "icon": "build/icons/rm.icns"
+      },
+      {
+        "name": "MPG",
+        "ext": [
+          "mpg"
+        ],
+        "role": "Viewer",
+        "icon": "build/icons/mpg.icns"
+      },
+      {
+        "name": "F4V",
+        "ext": [
+          "f4v"
+        ],
+        "role": "Viewer",
+        "icon": "build/icons/f4v.icns"
+      },
+      {
+        "name": "AVI",
+        "ext": [
+          "avi"
+        ],
+        "role": "Viewer",
+        "icon": "build/icons/avi.icns"
+      },
+      {
+        "name": "FLV",
+        "ext": [
+          "flv"
+        ],
+        "role": "Viewer",
+        "icon": "build/icons/flv.icns"
+      },
+      {
+        "name": "M4V",
+        "ext": [
+          "m4v"
+        ],
+        "role": "Viewer",
+        "icon": "build/icons/m4v.icns"
+      },
+      {
+        "name": "MKV",
+        "ext": [
+          "mkv"
+        ],
+        "role": "Viewer",
+        "icon": "build/icons/mkv.icns"
+      },
+      {
+        "name": "MOV",
+        "ext": [
+          "mov"
+        ],
+        "role": "Viewer",
+        "icon": "build/icons/mov.icns"
+      },
+      {
+        "name": "MP4",
+        "ext": [
+          "mp4"
+        ],
+        "role": "Viewer",
+        "icon": "build/icons/mp4.icns"
+      },
+      {
+        "name": "RMVB",
+        "ext": [
+          "rmvb"
+        ],
+        "role": "Viewer",
+        "icon": "build/icons/rmvb.icns"
+      },
+      {
+        "name": "WMV",
+        "ext": [
+          "wmv"
+        ],
+        "role": "Viewer",
+        "icon": "build/icons/wmv.icns"
+      }
+    ]
+  }
 }
