@@ -49,7 +49,15 @@
 		"icon": "icons/icon.icns",
 		"target": [
 			"dmg"
-		],
+    ],
+    "extendInfo": {
+      "NSUserNotificationAlertStyle": "alert",
+      "CFBundleDocumentTypes": [
+        {
+          "LSHandlerRank": "default"
+        }
+      ]
+    },
 		"fileAssociations": [
 			{
 				"name": "Video",
