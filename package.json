@@ -62,7 +62,7 @@
       "identityName": "29951SHENGSHEN.SPlayer4",
       "applicationId": "SPlayer",
       "backgroundColor": "#FF7A1C",
-      "displayName": "SPlayer",
+      "displayName": "SPlayer 4",
       "publisher": "CN=840E2570-B48E-4F56-A2DA-0D9720F91080",
       "publisherDisplayName": "SHENG SHEN",
       "languages": [
@@ -98,6 +98,14 @@
       "target": [
         "dmg"
       ],
+      "extendInfo": {
+        "NSUserNotificationAlertStyle": "alert",
+        "CFBundleDocumentTypes": [
+          {
+            "LSHandlerRank": "default"
+          }
+        ]
+      },
       "fileAssociations": [
         {
           "name": "Video",
