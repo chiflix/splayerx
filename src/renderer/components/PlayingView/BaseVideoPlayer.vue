@@ -2,8 +2,8 @@
   <div class="base-video-player">
     <video
       ref="video"
-      class="video-element"
       @error="handleError"
+      class="video-element"
     />
   </div>
 </template>
