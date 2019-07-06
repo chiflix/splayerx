@@ -598,9 +598,6 @@ app.on('second-instance', () => {
 async function darwinOpenFilesToStart() {
   if (mainWindow) { // sencond instance
     if (!inited) return;
-    if (!mainWindow.isVisible()) mainWindow.show();
-    if (mainWindow.isMinimized()) mainWindow.restore();
-    mainWindow.focus();
     finalVideoToOpen = getAllValidVideo(!tmpVideoToOpen.length,
       tmpVideoToOpen.concat(tmpSubsToOpen));
     if (!tmpVideoToOpen.length && tmpSubsToOpen.length) {
@@ -619,6 +616,11 @@ async function darwinOpenFilesToStart() {
     finalVideoToOpen.splice(0, finalVideoToOpen.length);
     tmpSubsToOpen.splice(0, tmpSubsToOpen.length);
     tmpVideoToOpen.splice(0, tmpVideoToOpen.length);
+    setTimeout(() => {
+      if (!mainWindow.isVisible()) mainWindow.show();
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      mainWindow.focus();
+    }, 500);
   } else if (app.isReady()) {
     createWindow();
   }
@@ -633,6 +635,8 @@ if (process.platform === 'darwin') {
         && getValidVideoRegex().test(file)) {
         tmpVideoToOpen.push(file);
       }
+      finalVideoToOpen = getAllValidVideo(!tmpVideoToOpen.length,
+        tmpVideoToOpen.concat(tmpSubsToOpen));
       darwinOpenFilesToStartDebounced();
     });
   });
