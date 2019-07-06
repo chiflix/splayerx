@@ -169,7 +169,9 @@ export default {
       // update the play state
       videodata.paused = newVal;
       try {
-        await this.$refs.video[newVal ? 'pause' : 'play']();
+        const action = newVal ? 'pause' : 'play';
+        console.log(action, this.$refs.video.src); // TODO: debugging SPLAYER-1A
+        await this.$refs.video[action]();
       } catch (ex) {
         console.error(ex);
         addBubble(OPEN_FAILED);
