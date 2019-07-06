@@ -237,6 +237,7 @@ if (process.env.NODE_ENV !== 'production') {
  */
 if (process.env.NODE_ENV === 'production') {
   rendererConfig.mode = 'production';
+  rendererConfig.devtool = '#source-map'
 
   rendererConfig.plugins.push(
     new CopyWebpackPlugin([
