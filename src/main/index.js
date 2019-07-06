@@ -648,6 +648,8 @@ if (process.platform === 'darwin') {
       tmpVideoToOpen.push(file);
     }
   });
+  finalVideoToOpen = getAllValidVideo(!tmpVideoToOpen.length,
+    tmpVideoToOpen.concat(tmpSubsToOpen));
   app.on('second-instance', (event, argv) => {
     const opendFiles = argv.slice(app.isPackaged ? 3 : 2);
     opendFiles.forEach((file) => {
