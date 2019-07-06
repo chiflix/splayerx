@@ -616,11 +616,9 @@ async function darwinOpenFilesToStart() {
     finalVideoToOpen.splice(0, finalVideoToOpen.length);
     tmpSubsToOpen.splice(0, tmpSubsToOpen.length);
     tmpVideoToOpen.splice(0, tmpVideoToOpen.length);
-    setTimeout(() => {
-      if (!mainWindow.isVisible()) mainWindow.show();
-      if (mainWindow.isMinimized()) mainWindow.restore();
-      mainWindow.focus();
-    }, 500);
+    if (!mainWindow.isVisible()) mainWindow.show();
+    if (mainWindow.isMinimized()) mainWindow.restore();
+    mainWindow.focus();
   } else if (app.isReady()) {
     createWindow();
   }
