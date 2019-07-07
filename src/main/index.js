@@ -564,7 +564,7 @@ function createWindow() {
 
   if (process.env.NODE_ENV === 'development') {
     setTimeout(() => { // wait some time to prevent `Object not found` error
-      mainWindow.openDevTools({ mode: 'detach' });
+      if (mainWindow) mainWindow.openDevTools({ mode: 'detach' });
     }, 1000);
   }
 }
@@ -685,10 +685,10 @@ app.on('ready', () => {
   createWindow();
   app.setName('SPlayer');
   globalShortcut.register('CmdOrCtrl+Shift+I+O+P', () => {
-    mainWindow.openDevTools({ mode: 'detach' });
+    if (mainWindow) mainWindow.openDevTools({ mode: 'detach' });
   });
   globalShortcut.register('CmdOrCtrl+Shift+J+K+L', () => {
-    preferenceWindow.openDevTools({ mode: 'detach' });
+    if (preferenceWindow) preferenceWindow.openDevTools({ mode: 'detach' });
   });
 
   if (process.platform === 'win32') {
