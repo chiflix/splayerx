@@ -289,6 +289,7 @@ export default {
       }
     },
     handleError() {
+      if (!this.$refs.video || !this.$refs.video.error) return;
       const { code, message } = this.$refs.video.error;
       log.warn('video element onerror', `${code}:${message}`);
     },
