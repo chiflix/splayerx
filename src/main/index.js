@@ -564,7 +564,7 @@ function createWindow() {
 
   if (process.env.NODE_ENV === 'development') {
     setTimeout(() => { // wait some time to prevent `Object not found` error
-      mainWindow.openDevTools({ mode: 'detach' });
+      if (mainWindow) mainWindow.openDevTools({ mode: 'detach' });
     }, 1000);
   }
 }
@@ -627,9 +627,18 @@ const darwinOpenFilesToStartDebounced = debounce(darwinOpenFilesToStart, 100);
 if (process.platform === 'darwin') {
   app.on('will-finish-launching', () => {
     app.on('open-file', (event, file) => {
-      if (subRegex.test(path.extname(file)) || fs.statSync(file).isDirectory()) {
+      // TODO: clean code to remove duplicated check
+      let ext;
+      let isDirectory;
+      try {
+        ext = path.extname(file);
+        isDirectory = fs.statSync(file).isDirectory();
+      } catch (ex) {
+        return;
+      }
+      if (subRegex.test(ext) || isDirectory) {
         tmpSubsToOpen.push(file);
-      } else if (!subRegex.test(path.extname(file))
+      } else if (!subRegex.test(ext)
         && getValidVideoRegex().test(file)) {
         tmpVideoToOpen.push(file);
       }
@@ -641,9 +650,17 @@ if (process.platform === 'darwin') {
 } else {
   const tmpFile = process.argv.slice(app.isPackaged ? 1 : 2);
   tmpFile.forEach((file) => {
-    if (subRegex.test(path.extname(file)) || fs.statSync(file).isDirectory()) {
+    let ext;
+    let isDirectory;
+    try {
+      ext = path.extname(file);
+      isDirectory = fs.statSync(file).isDirectory();
+    } catch (ex) {
+      return;
+    }
+    if (subRegex.test(ext) || isDirectory) {
       tmpSubsToOpen.push(file);
-    } else if (!subRegex.test(path.extname(file))
+    } else if (!subRegex.test(ext)
       && getValidVideoRegex().test(file)) {
       tmpVideoToOpen.push(file);
     }
@@ -653,9 +670,17 @@ if (process.platform === 'darwin') {
   app.on('second-instance', (event, argv) => {
     const opendFiles = argv.slice(app.isPackaged ? 3 : 2);
     opendFiles.forEach((file) => {
-      if (subRegex.test(path.extname(file)) || fs.statSync(file).isDirectory()) {
+      let ext;
+      let isDirectory;
+      try {
+        ext = path.extname(file);
+        isDirectory = fs.statSync(file).isDirectory();
+      } catch (ex) {
+        return;
+      }
+      if (subRegex.test(ext) || isDirectory) {
         tmpSubsToOpen.push(file);
-      } else if (!subRegex.test(path.extname(file))
+      } else if (!subRegex.test(ext)
         && getValidVideoRegex().test(file)) {
         tmpVideoToOpen.push(file);
       }
@@ -685,10 +710,10 @@ app.on('ready', () => {
   createWindow();
   app.setName('SPlayer');
   globalShortcut.register('CmdOrCtrl+Shift+I+O+P', () => {
-    mainWindow.openDevTools({ mode: 'detach' });
+    if (mainWindow) mainWindow.openDevTools({ mode: 'detach' });
   });
   globalShortcut.register('CmdOrCtrl+Shift+J+K+L', () => {
-    preferenceWindow.openDevTools({ mode: 'detach' });
+    if (preferenceWindow) preferenceWindow.openDevTools({ mode: 'detach' });
   });
 
   if (process.platform === 'win32') {

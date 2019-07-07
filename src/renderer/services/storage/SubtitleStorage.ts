@@ -330,11 +330,11 @@ export function retrieveStoredSubtitleList(playlistId: number, mediaItemId: stri
   return db.retrieveSubtitleList(playlistId, mediaItemId);
 }
 export function addSubtitleItemsToList(subtitles: SubtitleControlListItem[], playlistId: number, mediaItemId: string) {
-  const storedSubtitles = subtitles.map(({ hash, type, source }) => ({ hash, type, source }));
+  const storedSubtitles = subtitles.filter(s => s).map(({ hash, type, source }) => ({ hash, type, source }));
   return db.addSubtitleItemsToList(playlistId, mediaItemId, storedSubtitles);
 }
 export function removeSubtitleItemsFromList(subtitles: SubtitleControlListItem[], playlistId: number, mediaItemId: string) {
-  const storedSubtitles = subtitles.map(({ hash, type, source }) => ({ hash, type, source }));
+  const storedSubtitles = subtitles.filter(s => s).map(({ hash, type, source }) => ({ hash, type, source }));
   return db.removeSubtitleItemsFromList(playlistId, mediaItemId, storedSubtitles);
 }
 export function storeSubtitleLanguage(languageCodes: LanguageCode[], playlistId: number, mediaItemId: string) {
