@@ -9,11 +9,11 @@
       :style="{
         zIndex: '2',
         bottom: ![1, 2, 3].includes(index + 1) ? ''
-          : currentCues[0].length && currentCues[1].length === 1
+          : currentCues[1].length === 1 && currentFirstSubtitleId
             && !currentCues[1][0].text.includes('\n')
             ? `${(60 + 9.9 * secondarySubScale * (1080 / winHeight)) / 10.8}%` : `${60 / 10.8}%`,
         top: ![7, 8, 9].includes(index + 1) ? ''
-          : currentCues[1].length && currentCues[0].length === 1
+          : currentCues[0].length === 1 && currentSecondarySubtitleId
             && !currentCues[0][0].text.includes('\n')
             ? `${(60 + 9.9 * scaleNum * (1080 / winHeight)) / 10.8}%` : `${60 / 10.8}%`
       }"
@@ -90,6 +90,10 @@ export default {
       type: Boolean,
     },
     currentFirstSubtitleId: {
+      type: String,
+      required: true,
+    },
+    currentSecondarySubtitleId: {
       type: String,
       required: true,
     },

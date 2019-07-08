@@ -8,6 +8,7 @@
       :scaleNum="scaleNum"
       :subToTop="subToTop"
       :currentFirstSubtitleId="primarySubtitleId"
+      :currentSecondarySubtitleId="secondarySubtitleId"
       :winHeight="winHeight"
       :chosenStyle="chosenStyle"
       :chosenSize="chosenSize"
