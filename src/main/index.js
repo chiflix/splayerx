@@ -577,10 +577,3 @@ app.on('activate', () => {
     mainWindow.show();
   }
 });
-
-crashReporter.start({
-  productName: 'YourName',
-  companyName: 'YourCompany',
-  submitURL: 'https://your-domain.com/url-to-submit',
-  uploadToServer: false,
-});

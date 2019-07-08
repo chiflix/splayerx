@@ -6,7 +6,7 @@
       class="dropdown__toggle no-drag"
     >
       <div class="dropdown__displayItem">
-        {{ selected }}
+        {{ selected.label }}
       </div>
       <div
         @mouseup.stop=""
@@ -30,21 +30,21 @@
 </template>
 <script lang="ts">
 import Vue from 'vue';
+import Icon from '@/components/BaseIconContainer.vue';
 
 export default Vue.extend({
-  name: 'General',
+  name: 'Select',
+  components: {
+    Icon,
+  },
   props: {
     selected: {
-      type: String,
-      default: '',
+      type: Object,
+      required: true,
     },
     list: {
-      type: [],
-      default: [],
-    },
-    change: {
-      type: Function,
-      default: () => {},
+      type: Array,
+      required: true,
     },
   },
   data() {
@@ -66,6 +66,9 @@ export default Vue.extend({
         this.showSelection = false;
       }
     },
+    change(item: any) {
+      this.$emit('update:selected', item);
+    },
   },
 });
 
@@ -75,35 +78,30 @@ export default Vue.extend({
   width: 100%;
   position: relative;
   height: 28px;
-
+  font-size: 11px;
+  color: rgba(255,255,255,0.80);
+  letter-spacing: 0;
+  text-align: center;
+  line-height: 28px;
   &__toggle {
     position: absolute;
-    width: 100%;
+    width: calc(100% - 2px);
     margin-top: -1px;
     margin-left: -1px;
     transition: all 200ms;
     border-radius: 2px;
-    // overflow: hidden;
+    overflow: hidden;
     &--display {
       height: 28px;
       border: 1px solid rgba(255,255,255,0);
       background-color: rgba(255, 255, 255, 0);
-      .dropdown__listItems {
-        height: 0px;
-        top: 0px;
-      }
     }
 
     &--list {
-      // height: 148px;
-      .dropdown__listItems {
-        height: 112px;
-        top: -112px;
-        border: 1px solid rgba(255,255,255,0.3);
-        background-color: rgba(120,120,120,1);
-      }
-      border: 1px solid rgba(255,255,255,0.3);
-      background-color: rgba(120,120,120,1);
+      height: 148px;
+      // background: #555555;
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 2px;
       .dropdown__displayItem {
         border-bottom: 1px solid rgba(255,255,255,0.1);
       }
@@ -114,16 +112,16 @@ export default Vue.extend({
     height: 28px;
     line-height: 28px;
     border-bottom: 1px solid rgba(255,255,255,0);
+    background: rgba(0,0,0,0.04);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 2px;
   }
 
   &__listItems {
     cursor: pointer;
-    width: 100%;
-    position: absolute;
+    position: relative;
     height: 112px;
-    top: -112px;
-    left: -1px;
-    // margin: 4px 4px 4px 6px;
+    margin: 4px 4px 4px 6px;
     overflow-y: scroll;
   }
 

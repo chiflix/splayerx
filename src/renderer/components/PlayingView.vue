@@ -13,13 +13,83 @@
       :chosenStyle="chosenStyle"
       :chosenSize="chosenSize"
     />
+    <div
+      v-fade-in="isTranslateModalVisiable"
+      class="select-language-modal"
+    >
+      <h1 v-if="!isTranslating">
+        选择视频源语言
+      </h1>
+      <h1 v-else>
+        大约还需5分钟
+      </h1>
+      <p v-if="!isTranslating">
+        目前尚无此语言的智能翻译结果，请准确选择您在视频中所听到的语言，翻译将持续一段时间。
+      </p>
+      <p v-else>
+        请不要关闭播放器，您可以在该视频的翻译结果列表中查看进度。
+      </p>
+      <div
+        v-if="!isTranslating"
+        class="select"
+      >
+        <Select
+          :selected.sync="audioLanguage"
+          :list="lanugages"
+        />
+      </div>
+      <div
+        v-else
+        class="progress-wraper"
+      >
+        <Progress
+          :progress="translateProgress"
+        />
+      </div>
+      <div
+        v-if="!isTranslating"
+        class="button-wraper"
+      >
+        <div
+          @click="hideTranslateModal"
+          class="button"
+        >
+          取消
+        </div>
+        <div
+          @click="translate"
+          class="button"
+        >
+          确定
+        </div>
+      </div>
+      <div
+        v-else
+        @click="hideTranslateModal"
+        class="button"
+      >
+        确定
+      </div>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import { mapActions, mapGetters } from 'vuex';
-import { Subtitle as subtitleActions, SubtitleManager as smActions } from '@/store/actionTypes';
+import {
+  Subtitle as subtitleActions,
+  SubtitleManager as smActions,
+  AudioTranslate as atActions,
+} from '@/store/actionTypes';
+// grab libs
+import { audioGrabService } from '@/services/media/AudioGrabService';
+import { codeToLanguageName } from '@/libs/language';
+import { AITaskInfo } from '@/interfaces/IMediaStorable';
+import { TranscriptInfo } from '@/services/subtitle';
+// grab libs
 import SubtitleRenderer from '@/components/Subtitle/SubtitleRenderer.vue';
+import Select from '@/components/PlayingView/Select.vue';
+import Progress from '@/components/PlayingView/Progress.vue';
 import VideoCanvas from '@/containers/VideoCanvas.vue';
 import TheVideoController from '@/containers/TheVideoController.vue';
 import { videodata } from '../store/video';
@@ -27,6 +97,8 @@ import { videodata } from '../store/video';
 export default {
   name: 'PlayingView',
   components: {
+    Select,
+    Progress,
     'the-video-controller': TheVideoController,
     'the-video-canvas': VideoCanvas,
     'subtitle-renderer': SubtitleRenderer,
@@ -45,10 +117,18 @@ export default {
           subPlayResY: 405,
         },
       ],
+      // grab btn datas
+      audioLanguage: { label: codeToLanguageName('en'), value: 'en' },
+      lanugages: ['zh-Hans', 'zh-Hant', 'ja', 'ko', 'en', 'es', 'ar']
+        .map((e: string) => ({ label: codeToLanguageName(e), value: e })),
     };
   },
   computed: {
-    ...mapGetters(['scaleNum', 'subToTop', 'primarySubtitleId', 'secondarySubtitleId', 'winHeight', 'chosenStyle', 'chosenSize', 'originSrc']),
+    ...mapGetters([
+      'scaleNum', 'subToTop', 'primarySubtitleId', 'secondarySubtitleId', 'winHeight',
+      'chosenStyle', 'chosenSize', 'originSrc', 'mediaHash', 'primaryLanguage', 'duration',
+      'isTranslateModalVisiable', 'isTranslating', 'translateProgress',
+    ]),
     concatCurrentCues() {
       if (this.currentCues.length === 2) {
         return [this.currentCues[0].cues, this.currentCues[1].cues];
@@ -90,8 +170,12 @@ export default {
       const paths = subs.map((sub: { src: string, type: string }) => (sub.src));
       this.addLocalSubtitlesWithSelect(paths);
     });
+    this.$bus.$on('show-modal', () => {
+      this.isModalShow = true;
+    });
   },
   beforeDestroy() {
+    audioGrabService.remove();
     this.updateSubToTop(false);
     videodata.stopCheckTick();
   },
@@ -102,6 +186,9 @@ export default {
       addLocalSubtitlesWithSelect: smActions.addLocalSubtitlesWithSelect,
       getCues: smActions.getCues,
       updatePlayTime: smActions.updatePlayedTime,
+      hideTranslateModal: atActions.AUDIO_TRANSLATE_HIDE_MODAL,
+      updateTranslateStatus: atActions.AUDIO_TRANSLATE_UPDATE_STATUS,
+      updateTranslateProgress: atActions.AUDIO_TRANSLATE_UPDATE_PROGRESS,
     }),
     // Compute UI states
     // When the video is playing the ontick is triggered by ontimeupdate of Video tag,
@@ -124,6 +211,36 @@ export default {
       // }
       this.time = videodata.time;
     },
+    changeLanguage() {
+    },
+    translate() {
+      this.updateTranslateStatus('grabbing');
+      const grab = audioGrabService.send({
+        mediaHash: this.mediaHash,
+        videoSrc: this.originSrc,
+        audioLanguageCode: this.audioLanguage.value,
+        targetLanguageCode: this.primaryLanguage,
+      });
+      if (grab) {
+        grab.on('grab', (time: number) => {
+          const progress = Math.ceil((time / this.duration) * 100);
+          this.updateTranslateProgress(progress);
+        });
+        grab.on('error', (error: Error) => {
+          console.log(error);
+        });
+        grab.on('task', (taskInfo: AITaskInfo) => {
+          this.updateTranslateStatus('translating');
+          this.isGrab = false;
+          this.isTasking = true;
+          this.grabProgress = taskInfo.estimateTime;
+          console.log(taskInfo);
+        });
+        grab.on('transcriptInfo', (transcriptInfo: TranscriptInfo) => {
+          console.log(transcriptInfo);
+        });
+      }
+    },
   },
 };
 </script>
@@ -133,5 +250,74 @@ export default {
   width: 100%;
   height: 100%;
   background-color: black;
+}
+.select-language-modal {
+  position: fixed;
+  width: 280px;
+  padding: 22px;
+  box-sizing: border-box;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  backdrop-filter: blur(10px);
+  z-index: 3;
+  background: rgba(0,0,0,0.10);
+  border: 1px solid rgba(255,255,255,0.10);
+  box-shadow: 0 0 1px 0 rgba(0,0,0,0.10);
+  border-radius: 7px;
+  h1 {
+    font-size: 13px;
+    color: rgba(255,255,255,0.90);
+    letter-spacing: 1px;
+    line-height: 13px;
+    margin-bottom: 7px;
+  }
+  p {
+    font-size: 11px;
+    color: rgba(255,255,255,0.50);
+    letter-spacing: 0.2px;
+    line-height: 16px;
+    margin-bottom: 10px;
+  }
+  .select {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+  .progress-wraper {
+    margin-bottom: 17px;
+  }
+  .progress {
+    height: 9px;
+    background: rgba(0,0,0,0.10);
+    border-radius: 6px;
+    position: relative;
+    overflow: hidden;
+    &::before {
+      content: "";
+      position: absolute;
+      width: var(--tooltip-width);
+      height: 100%;
+      background: #ffffff;
+      border-radius: 6px;
+    }
+  }
+  .button-wraper {
+    display: flex;
+    justify-content: space-between;
+    .button {
+      width: 45%;
+    }
+  }
+  .button {
+    font-size: 11px;
+    color: rgba(255,255,255,0.80);
+    letter-spacing: 0;
+    text-align: center;
+    line-height: 28px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 2px;
+    cursor: pointer;
+  }
 }
 </style>

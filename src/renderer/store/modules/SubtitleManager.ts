@@ -16,11 +16,13 @@ import { addBubble } from '../../helpers/notificationControl';
 import { ONLINE_LOADING, REQUEST_TIMEOUT, SUBTITLE_UPLOAD, UPLOAD_SUCCESS, UPLOAD_FAILED, LOCAL_SUBTITLE_REMOVED } from '../../helpers/notificationcodes';
 import { LanguageCode } from '@/libs/language';
 import { existsSync } from 'fs';
+import { TranslatedGenerator } from '@/services/subtitle/loaders/translated';
 
 const sortOfTypes = {
   local: 0,
   embedded: 1,
   online: 2,
+  translated: 2,
 };
 
 let unwatch: Function;
@@ -180,6 +182,8 @@ const actions = {
         [primaryLanguage, secondaryLanguage],
       ).length
     );
+    // add ai button
+    dispatch(a.addSubtitle, { generator: new TranslatedGenerator(primaryLanguage, 0), playlistId, mediaItemId });   
     if (preference && !needRefreshing) {
       try {
         await Promise.race([

@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com 
  * @Date: 2019-06-20 18:03:14 
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-07-02 18:06:24
+ * @Last Modified time: 2019-07-03 15:54:25
  */
 
 // @ts-ignore
@@ -69,6 +69,7 @@ class AudioGrabService extends EventEmitter {
 
   constructor(private readonly mediaStorageService: MediaStorageService) {
     super();
+    this.ipcCallBack = this.ipcCallBack.bind(this)
   }
 
   public send(data: JobData): AudioGrabService | null {
@@ -78,28 +79,35 @@ class AudioGrabService extends EventEmitter {
       return null;
     } else {
       ipcRenderer.send('grab-audio', data);
-      ipcRenderer.on('grab-audio-change', (event: Event, args: any) => {
-        if (args.grabInfo) {
-          switch (args.grabInfo.status) {
-            case Status.Grab:
-              this.emit('grab', args.grabInfo.progressTime);
-              break;
-            case Status.Error:
-              this.emit('error', args.grabInfo.error);
-              break;
-            case Status.Task:
-              this.emit('tasg', args.grabInfo.taskInfo);
-              break;
-            case Status.TranscriptInfo:
-              this.emit('tasg', args.grabInfo.transcriptInfo);
-              break;
-            default:
-              break;
-          }
-        }
-      });
+      ipcRenderer.on('grab-audio-change', this.ipcCallBack);
       return this;
     }
+  }
+
+  ipcCallBack(event: Event, args: any) {
+    if (args.grabInfo) {
+      switch (args.grabInfo.status) {
+        case Status.Grab:
+          this.emit('grab', args.grabInfo.progressTime);
+          break;
+        case Status.Error:
+          this.emit('error', args.grabInfo.error);
+          break;
+        case Status.Task:
+          this.emit('task', args.grabInfo.taskInfo);
+          break;
+        case Status.TranscriptInfo:
+          this.emit('transcriptInfo', args.grabInfo.transcriptInfo);
+          break;
+        default:
+          break;
+      }
+    }
+  }
+
+  public remove() {
+    ipcRenderer.removeListener('grab-audio-change', this.ipcCallBack);
+    this.removeAllListeners();
   }
 
   private grabAudio() {
@@ -174,6 +182,7 @@ class AudioGrabService extends EventEmitter {
   }
 
   private startJob(data: JobData) {
+    console.log(data);
     this.mediaHash = data.mediaHash;
     this.videoSrc = data.videoSrc;
     this.audioLanguageCode = data.audioLanguageCode;
@@ -241,6 +250,7 @@ class AudioGrabService extends EventEmitter {
         this.request = null;
       }
       // return task to render
+      console.log(this.taskInfo);
       this.callback({
         status: Status.Task,
         taskInfo: this.taskInfo,
@@ -310,11 +320,18 @@ class AudioGrabService extends EventEmitter {
         transcriptInfo: result.transcriptinfo,
       });
     } else if (res.hasTaskinfo()) {
+      this.taskInfo = {
+        ...result.taskinfo,
+        mediaHash: this.mediaHash,
+      } as AITaskInfo;
+      if (this.taskInfo) {
+        this.taskInfo.taskId = '2';
+      }
       this.callback({
         status: Status.Task,
         taskInfo: this.taskInfo,
       });
-      this.loopTask(result.taskinfo as AITaskInfo);
+      this.loopTask(this.taskInfo);
     } else if (res.hasError()) {
       this.callback({
         status: Status.Error,

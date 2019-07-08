@@ -6,6 +6,7 @@ export enum Type {
   Online = 'online',
   Embedded = 'embedded',
   Local = 'local',
+  Translated = 'translated',
 }
 export enum Format {
   AdvancedSubStationAplha = 'ass',

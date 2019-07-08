@@ -68,6 +68,19 @@
                   class="deleteIcon"
                 />
               </transition>
+              <transition
+                v-if="translateProgress <= 0"
+                name="sub-delete"
+              >
+                <span
+                  v-show="item.type === 'translated' && hoverIndex === index"
+                  @mouseup.native="handleSubDelete($event, item)"
+                  class="txt"
+                >生成</span>
+              </transition>
+              <div v-else>
+                {{ translateProgress }}
+              </div>
             </div>
           </div>
         </div>
@@ -170,6 +183,10 @@ export default {
     changeSubtitle: {
       type: Function,
       required: true,
+    },
+    translateProgress: {
+      type: Number,
+      default: 0,
     },
   },
   data() {
@@ -295,7 +312,7 @@ export default {
     toggleItemClick(event: MouseEvent, index: number) {
       if ((event.target as HTMLElement).nodeName === 'DIV') {
         const { computedAvailableItems } = this;
-        this.changeSubtitle(computedAvailableItems[index].id);
+        this.changeSubtitle(computedAvailableItems[index]);
         setTimeout(() => {
           this.showSubtitleDetails(index);
         }, 0);
@@ -327,6 +344,13 @@ export default {
 .menu-item-text-wrapper {
   .iconContainer {
     display: flex;
+    align-items: center;
+    .txt {
+      font-size: 9px;
+      color: rgba(255,255,255,0.90);
+      letter-spacing: 0.45px;
+      cursor: pointer;
+    }
   }
   .deleteIcon {
     transition-delay: 75ms;
