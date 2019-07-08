@@ -7,6 +7,7 @@
       :key="'noPosition' + index"
       :class="'subtitle-alignment'+(index+1)"
       :style="{
+        zIndex: '2',
         bottom: ![1, 2, 3].includes(index + 1) ? ''
           : currentCues[0].length && currentCues[1].length === 1
             && !currentCues[1][0].text.includes('\n')
@@ -307,6 +308,6 @@ export default {
   height: 100%;
   left: 0;
   top: 0;
-  z-index: 0;
+  z-index: auto;
 }
 </style>
