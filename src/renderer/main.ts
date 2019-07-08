@@ -1410,7 +1410,7 @@ new Vue({
         } else {
           const maximiumSpeed = this.duration / 50;
           const minimiumSpeed = 1;
-          const speed = (this.duration / 2000) * absX;
+          const speed = (this.duration / 5000) * absX;
           if (speed < minimiumSpeed) finalSeekSpeed = 0;
           else if (speed > maximiumSpeed) finalSeekSpeed = maximiumSpeed;
           else finalSeekSpeed = speed;
