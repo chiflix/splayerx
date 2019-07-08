@@ -27,7 +27,7 @@ interface AddSubtitleOptions {
   language: LanguageCode;
 }
 interface RemoveSubtitleOptions {
-  source: Origin;
+  source: any;
   hash: string;
 }
 
@@ -85,6 +85,33 @@ export class SubtitleDataBase {
       } else {
         return objectStore.put({ ...storedSubtitle });
       }
+    }
+  }
+  async removeSubtitles(subtitles: RemoveSubtitleOptions[]) {
+    const objectStore = await (await this.getDb())
+      .transaction('subtitles', 'readwrite')
+      .objectStore('subtitles');
+    // merge subtitles of hash and source info hash and sources
+    const newSubtitles = subtitles.reduce(
+      (subs, { hash, source }) => {
+        const existedSub = subs[hash];
+        if (existedSub) existedSub.push(source);
+        else subs[hash] = [source];
+        return subs;
+      },
+      {} as { [hash: string]: any[] },
+    );
+    let cursor = await objectStore.openCursor();
+    while (cursor && Object.keys(newSubtitles).length) {
+      const { hash, source } = cursor.value;
+      const currentSub = newSubtitles[hash];
+      if (currentSub) {
+        remove(source, origin => currentSub.some(sub => isEqual(sub, origin.source)));
+        if (!source.length) await objectStore.delete(hash);
+        else await objectStore.put(cursor.value);
+        delete newSubtitles[hash];
+      }
+      cursor = await cursor.continue();
     }
   }
 
@@ -250,9 +277,14 @@ export class SubtitleDataBase {
       .transaction('preferences', 'readwrite')
       .objectStore('preferences');
     let cursor = await playlistStore.openCursor();
+    const subtitlesToRemove: RemoveSubtitleOptions[] = [];
     while (cursor) {
-      if (cursor.value.playlistId === playlistId) await playlistStore.delete(cursor.key);
+      if (cursor.value.playlistId === playlistId) {
+        await playlistStore.delete(cursor.key);
+        subtitlesToRemove.push(...cursor.value.list);
+      }
       cursor = await cursor.continue();
     }
+    await this.removeSubtitles(subtitlesToRemove);
   }
 }
