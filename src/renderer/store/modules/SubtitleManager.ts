@@ -249,9 +249,11 @@ const actions = {
     if (embedded) retrieveEmbeddedList(originSrc).then((streams) => dispatch(a.addEmbeddedSubtitles, { streams, playlistId, mediaItemId }));
     try {
       await Promise.race([
-        onlinePromise,
-        dispatch(a.addLocalSubtitles, { paths: await searchForLocalList(originSrc), playlistId, mediaItemId }),
-        new Promise((resolve) => setTimeout(() => resolve(new Error('timeout')), 10000)),
+        Promise.all([
+          onlinePromise,
+          dispatch(a.addLocalSubtitles, { paths: await searchForLocalList(originSrc), playlistId, mediaItemId }),
+        ]),
+        new Promise((resolve, reject) => setTimeout(() => reject(new Error('timeout')), 10000)),
       ]);
       dispatch(a.stopAISelection);
       storeSubtitleLanguage([primaryLanguage, secondaryLanguage], playlistId, mediaItemId);
@@ -333,7 +335,10 @@ const actions = {
         return Promise.all([
           dispatch(a.changePrimarySubtitle, primaryId),
           dispatch(a.changeSecondarySubtitle, secondaryId),
-        ]);
+        ]).then(() => {
+          primarySelectionComplete = true;
+          secondarySelectionComplete = true;
+        });
       });
   },
   async [a.addSubtitle]({ commit, dispatch, getters }: any, options: AddSubtitleOptions) {

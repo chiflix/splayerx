@@ -25,18 +25,18 @@ describe('DataBase', () => {
     duration: 10,
     source: '',
   };
-  const subtitleData1 = {
-    format: 'a',
-    language: 'b',
-    src: 'c',
-    type: 'd',
-  };
-  const subtitleData2 = {
-    format: 'c',
-    language: 'b',
-    src: 'a',
-    type: 'd',
-  };
+  // const subtitleData1 = {
+  //   format: 'a',
+  //   language: 'b',
+  //   src: 'c',
+  //   type: 'd',
+  // };
+  // const subtitleData2 = {
+  //   format: 'c',
+  //   language: 'b',
+  //   src: 'a',
+  //   type: 'd',
+  // };
 
   beforeEach(async () => {
     await info.clear('recent-played');

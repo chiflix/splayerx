@@ -33,10 +33,11 @@ import { log } from '@/libs/Log';
 import asyncStorage from '@/helpers/asyncStorage';
 import { videodata } from '@/store/video';
 import { addBubble } from './helpers/notificationControl';
-import { SNAPSHOT_FAILED, SNAPSHOT_SUCCESS } from './helpers/notificationcodes';
+import { SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, LOAD_SUBVIDEO_FAILED } from './helpers/notificationcodes';
 import InputPlugin, { getterTypes as iGT } from '@/plugins/input';
 import { VueDevtools } from './plugins/vueDevtools.dev';
 import { SubtitleControlListItem, Type } from './interfaces/ISubtitle';
+import { getValidVideoRegex, getValidSubtitleRegex } from '../shared/utils';
 import { EventEmitter } from 'events';
 
 // causing callbacks-registry.js 404 error. disable temporarily
@@ -206,6 +207,7 @@ new Vue({
           click: () => {
             this.$ga.event('app', 'volume', 'keyboard');
             this.$store.dispatch(videoActions.INCREASE_VOLUME);
+            this.$bus.$emit('change-volume-menu');
           },
         },
         {
@@ -215,6 +217,7 @@ new Vue({
           click: () => {
             this.$ga.event('app', 'volume', 'keyboard');
             this.$store.dispatch(videoActions.DECREASE_VOLUME);
+            this.$bus.$emit('change-volume-menu');
           },
         },
       ];
@@ -228,6 +231,7 @@ new Vue({
           click: () => {
             this.$ga.event('app', 'volume', 'keyboard');
             this.$store.dispatch(videoActions.INCREASE_VOLUME);
+            this.$bus.$emit('change-volume-menu');
           },
         },
         {
@@ -237,6 +241,7 @@ new Vue({
           click: () => {
             this.$ga.event('app', 'volume', 'keyboard');
             this.$store.dispatch(videoActions.DECREASE_VOLUME);
+            this.$bus.$emit('change-volume-menu');
           },
         },
       ];
@@ -385,11 +390,7 @@ new Vue({
       this.refreshMenu();
     },
     currentRouteName(val) {
-      if (val === 'landing-view') {
-        this.menuStateControl(false);
-      } else {
-        this.menuStateControl(true);
-      }
+      this.menuStateControl(val !== 'landing-view');
     },
     chosenStyle(val) {
       if (this.menu) {
@@ -417,6 +418,7 @@ new Vue({
       }
     },
     primarySubtitleId(id: string, oldId: string) {
+      if (!this.menu) return;
       if (id && this.menu.getMenuItemById(`sub${id}`)) {
         this.menu.getMenuItemById(`sub${id}`).checked = true;
       } else if (!id) {
@@ -424,6 +426,7 @@ new Vue({
       }
     },
     secondarySubtitleId(id: string, oldId: string) {
+      if (!this.menu) return;
       if (id && this.menu.getMenuItemById(`secondSub${id}`)) {
         this.menu.getMenuItemById(`secondSub${id}`).checked = true;
       } else if (!id) {
@@ -436,7 +439,7 @@ new Vue({
       }
       if (this.menu) {
         this.audioTrackList.forEach((item: Electron.MenuItem, index: number) => {
-          if (item.enabled === true && this.menu.getMenuItemById(`track${index}`)) {
+          if (item.enabled === true && this.menu && this.menu.getMenuItemById(`track${index}`)) {
             this.menu.getMenuItemById(`track${index}`).checked = true;
           }
         });
@@ -514,6 +517,7 @@ new Vue({
       changeFirstSubtitle: smActions.changePrimarySubtitle,
       changeSecondarySubtitle: smActions.changeSecondarySubtitle,
       refreshSubtitles: smActions.refreshSubtitles,
+      addLocalSubtitlesWithSelect: smActions.addLocalSubtitlesWithSelect,
       updateSubtitleType: subtitleActions.UPDATE_SUBTITLE_TYPE,
     }),
     /**
@@ -908,6 +912,7 @@ new Vue({
             { type: 'separator' },
             {
               label: this.$t('msg.window.halfSize'),
+              id: 'windowResize1',
               checked: false,
               accelerator: 'CmdOrCtrl+0',
               click: () => {
@@ -916,6 +921,7 @@ new Vue({
             },
             {
               label: this.$t('msg.window.originSize'),
+              id: 'windowResize2',
               checked: true,
               accelerator: 'CmdOrCtrl+1',
               click: () => {
@@ -924,6 +930,7 @@ new Vue({
             },
             {
               label: this.$t('msg.window.doubleSize'),
+              id: 'windowResize3',
               checked: false,
               accelerator: 'CmdOrCtrl+2',
               click: () => {
@@ -932,6 +939,7 @@ new Vue({
             },
             {
               label: this.$t('msg.window.maxmize'),
+              id: 'windowResize4',
               checked: false,
               accelerator: 'CmdOrCtrl+3',
               click: () => {
@@ -953,6 +961,15 @@ new Vue({
               accelerator: 'CmdOrCtrl+`',
               click: () => {
                 this.$electron.ipcRenderer.send('bossKey');
+              },
+            },
+            { type: 'separator' },
+            {
+              label: this.$t('msg.window.backToLandingView'),
+              id: 'backToLandingView',
+              accelerator: 'CmdOrCtrl+Esc',
+              click: () => {
+                this.$bus.$emit('back-to-landingview');
               },
             },
           ],
@@ -1075,6 +1092,7 @@ new Vue({
         this.menu = Menu.buildFromTemplate(result);
         Menu.setApplicationMenu(this.menu);
       }).then(() => {
+        if (!this.menu) return;
         if (this.currentRouteName === 'landing-view') {
           this.menuStateControl(false);
         }
@@ -1140,13 +1158,13 @@ new Vue({
           this.updateSubtitleType(isFirstSubtitleType);
           if (isFirstSubtitleType) {
             this.changeFirstSubtitle(item.id);
-            if (this.menu.getMenuItemById(`secondSub${item.id}`)) {
+            if (this.menu && this.menu.getMenuItemById(`secondSub${item.id}`)) {
               this.menu.getMenuItemById(`secondSub${item.id}`).checked = false;
               this.menu.getMenuItemById('secondSub-1').checked = true;
             }
           } else {
             this.changeSecondarySubtitle(item.id);
-            if (this.menu.getMenuItemById(`sub${item.id}`)) {
+            if (this.menu && this.menu.getMenuItemById(`sub${item.id}`)) {
               this.menu.getMenuItemById(`sub${item.id}`).checked = false;
               this.menu.getMenuItemById('sub-1').checked = true;
             }
@@ -1276,21 +1294,27 @@ new Vue({
         return recentMenuTemplate;
       }).catch(() => recentMenuTemplate);
     },
-    menuStateControl(flag: Boolean) {
+    menuStateControl(inPlayingView: Boolean) {
+      if (!this.menu) return;
       this.menu.getMenuItemById('playback').submenu.items.forEach((item: any) => {
-        item.enabled = flag;
+        item.enabled = inPlayingView;
       });
       this.menu.getMenuItemById('audio').submenu.items.forEach((item: any) => {
-        item.enabled = flag;
+        item.enabled = inPlayingView;
       });
       this.menu.getMenuItemById('subtitle').submenu.items.forEach((item: any) => {
         item.submenu && item.submenu.items.forEach((item: any) => {
-          item.enabled = flag;
+          item.enabled = inPlayingView;
         });
-        item.enabled = flag;
+        item.enabled = inPlayingView;
       });
+      this.menu.getMenuItemById('windowResize1').enabled = inPlayingView;
+      this.menu.getMenuItemById('windowResize2').enabled = inPlayingView;
+      this.menu.getMenuItemById('windowResize3').enabled = inPlayingView;
+      this.menu.getMenuItemById('windowResize4').enabled = inPlayingView;
+      this.menu.getMenuItemById('backToLandingView').enabled = inPlayingView;
       // windowRotate 菜单状态随着路由状态一起变
-      this.menu.getMenuItemById('windowRotate').enabled = flag;
+      this.menu.getMenuItemById('windowRotate').enabled = inPlayingView;
     },
     processRecentPlay(recentPlayData: Array<any>) {
       const menuRecentData = new Map([
@@ -1542,11 +1566,16 @@ new Vue({
       this.$store.commit('source', 'drop');
       const files = Array.prototype.map.call(e.dataTransfer!.files, (f: File) => f.path)
       const onlyFolders = files.every((file: fs.PathLike) => fs.statSync(file).isDirectory());
-      files.forEach((file: fs.PathLike) => this.$electron.remote.app.addRecentDocument(file));
-      if (onlyFolders) {
-        this.openFolder(...files);
+      if (this.currentRouteName === 'playing-view' || onlyFolders
+        || files.every((file: fs.PathLike) => getValidVideoRegex().test(file) && !getValidSubtitleRegex().test(file))) {
+        files.forEach((file: fs.PathLike) => this.$electron.remote.app.addRecentDocument(file));
+        if (onlyFolders) {
+          this.openFolder(...files);
+        } else {
+          this.openFile(...files);
+        }
       } else {
-        this.openFile(...files);
+        this.$electron.ipcRenderer.send('drop-subtitle', files);
       }
     });
     window.addEventListener('dragover', (e) => {
@@ -1559,13 +1588,24 @@ new Vue({
       this.$bus.$emit('drag-leave');
     });
 
-    this.$electron.ipcRenderer.on('open-file', (event: any, ...files: Array<fs.PathLike>) => {
-      const onlyFolders = files.every(file => fs.statSync(file).isDirectory());
-      if (onlyFolders) {
-        this.openFolder(...files);
+    this.$electron.ipcRenderer.on('open-file', (event: Event, args: { onlySubtitle: boolean, files: Array<string> }) => {
+      if (!args.files.length && args.onlySubtitle) {
+        log.info('helpers/index.js', `Cannot find any related video in the folder: ${args.files}`);
+        addBubble(LOAD_SUBVIDEO_FAILED);
       } else {
-        this.openFile(...files);
+        const onlyFolders = args.files.every((file: any) => fs.statSync(file).isDirectory());
+        if (onlyFolders) {
+          this.openFolder(...args.files);
+        } else {
+          this.openFile(...args.files);
+        }
       }
+    });
+    this.$electron.ipcRenderer.on('open-subtitle-in-mas', (event: Event, file: string) => {
+      this.openFilesByDialog({ defaultPath: file });
+    });
+    this.$electron.ipcRenderer.on('add-local-subtitles', (event: Event, file: string[]) => {
+      this.addLocalSubtitlesWithSelect(file);
     });
   },
 }).$mount('#app');

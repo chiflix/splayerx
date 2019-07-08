@@ -4,11 +4,8 @@
     class="container"
   >
     <div
-      :class="{
-        'element': true,
-        'bottom': true,
-        'backdrop': useBlur,
-      }"
+      :class="useBlur ? 'backdrop' : 'backdrop-fallback'"
+      class="element bottom"
     >
       <div class="element content">
         <slot />
@@ -78,22 +75,6 @@ export default {
     width: 100%;
     height: 100%;
     top: 0;
-    border: 1px solid rgba(160,160,160,0.7);
-    // box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.5);
-    background-image: radial-gradient(
-      80% 130%,
-      rgba(85,85,85,0.88) 20%,
-      rgba(85,85,85,0.78) 50%,
-      rgba(85,85,85,0.72) 60%,
-      rgba(85,85,85,0.46) 80%,
-      rgba(85,85,85,0.00) 100%
-    );
-  }
-  .backdrop {
-    border-width: 0px;
-    background-image: none;
-    background-color: rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(10px);
   }
   .middle {
     min-width: calc(var(--content-min-width) + 2px);

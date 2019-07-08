@@ -152,7 +152,7 @@
       "menuLoading": "正在匹配翻译结果 ...",
       "name": "字幕",
       "noSubtitle": "暂未找到翻译结果",
-      "notToShowSubtitle": "无",
+      "notToShowSubtitle": "关闭",
       "secondarySubtitle": "第二字幕",
       "size1": "小",
       "size2": "标准",
@@ -177,6 +177,7 @@
       "yes": "更新"
     },
     "window": {
+      "backToLandingView": "回到启动页",
       "bossKey": "老板键",
       "doubleSize": "200%",
       "enterFullScreen": "进入全屏",
@@ -200,6 +201,7 @@
       "setDefaultDescription": "所有视频文件都自动使用SPlayer打开。",
       "restoreSettings": "抹掉所有内容和设置",
       "restoreSettingsDescription": "删除所有本地数据和缓存文件并重启应用。",
+      "restoreSettingsAfterRelaunch": "重启后生效。",
       "setButton": "应用",
       "relaunch": "重启",
       "displayLanguage": "显示语言",
@@ -282,5 +284,9 @@
   "snapshotFailed": {
     "content": "请稍后重试。",
     "title": "截图失败"
+  },
+  "loadVideoBySubtitleFailed": {
+    "content": "未找到目录下与字幕同名的视频文件",
+    "title": ""
   }
 }

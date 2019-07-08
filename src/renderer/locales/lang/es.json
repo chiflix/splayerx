@@ -152,7 +152,7 @@
       "menuLoading": "Cargando ...",
       "name": "Subtítulos",
       "noSubtitle": "Extraviado",
-      "notToShowSubtitle": "Ninguna",
+      "notToShowSubtitle": "Cerrar",
       "secondarySubtitle": "Subtitulo secundario",
       "size1": "Pequeño",
       "size2": "Estándar",
@@ -177,6 +177,7 @@
       "yes": "Sí"
     },
     "window": {
+      "backToLandingView": "Volver a la página de inicio",
       "bossKey": "Clave de jefe",
       "doubleSize": "",
       "enterFullScreen": "Ingrese a pantalla completa",
@@ -200,6 +201,7 @@
       "setDefaultDescription": "Todos los formatos de video se abren automáticamente usando SPlayer.",
       "restoreSettings": "Borrar contenidos y ajustes",
       "restoreSettingsDescription": "Reinicie con todos los datos y cachés borrados.",
+      "restoreSettingsAfterRelaunch": "Reiniciar para aplicar.",
       "setButton": "Aplicar",
       "relaunch": "Reiniciar",
       "displayLanguage": "Idioma de la pantalla",
@@ -282,5 +284,9 @@
   "snapshotFailed": {
     "content": "Por favor intente más tarde.",
     "title": "Instantánea fallada"
+  },
+  "loadVideoBySubtitleFailed": {
+    "content": "No hay videos relacionados en la carpeta",
+    "title": ""
   }
 }

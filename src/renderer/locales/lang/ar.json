@@ -152,7 +152,7 @@
       "menuLoading": "جار التحميل ...",
       "name": "عناوين فرعية",
       "noSubtitle": "غير معثور عليه",
-      "notToShowSubtitle": "لا شيء",
+      "notToShowSubtitle": "قريب",
       "secondarySubtitle": "الترجمة الثانوية",
       "size1": "صغير",
       "size2": "اساسي",
@@ -177,6 +177,7 @@
       "yes": "نعم فعلا"
     },
     "window": {
+      "backToLandingView": "العودة إلى صفحة الإطلاق",
       "bossKey": "مدرب مفتاح",
       "doubleSize": "200٪",
       "enterFullScreen": "أدخل ملء الشاشة",
@@ -200,6 +201,7 @@
       "setDefaultDescription": ".افتح جميع ملفات الفيديو باستخدام SPlayer",
       "restoreSettings": "إعادة ضبط جميع المحتويات والإعدادات",
       "restoreSettingsDescription": ".أعد التشغيل مع مسح جميع البيانات وذاكرة التخزين المؤقت",
+      "restoreSettingsAfterRelaunch": "العثور على أي فيديو ذات صلة في المجلد.",
       "setButton": "تطبيق",
       "relaunch": "إعادة بدء",
       "displayLanguage": "عرض اللغة",
@@ -282,5 +284,9 @@
   "snapshotFailed": {
     "content": "يرجى المحاولة لاحقا.",
     "title": " فشل لقطة"
+  },
+  "loadVideoBySubtitleFailed": {
+    "content": "العثور على أي فيديو ذات صلة في المجلد",
+    "title": ""
   }
 }
