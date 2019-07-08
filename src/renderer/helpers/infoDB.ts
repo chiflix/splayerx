@@ -130,7 +130,6 @@ export class InfoDB {
       playedIndex: 0,
       lastOpened: Date.now(),
     };
-    const db = await this.getDB();
     if (videos.length > 1) {
       for (const videoPath of videos) {
         const quickHash = await mediaQuickHash(videoPath);

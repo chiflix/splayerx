@@ -82,6 +82,7 @@ export const SubtitleManager = {
   storeSubtitle: 'STORE_SUBTITLE',
   uploadSubtitle: 'UPLOAD_SUBTITLE',
   startAISelection: 'START_AI_SELECTION',
+  checkSubtitleList: 'CHECK_SUBTITLE_LIST',
   stopAISelection: 'STOP_AI_SELECTION',
   getCues: 'GET_CUES',
   updatePlayedTime: 'UPDATE_PLAYED_TIME',

@@ -125,6 +125,29 @@ export default {
     this.updatePlayinglistRate({ oldDir: '', newDir: path.dirname(this.originSrc), playingList: this.playingList });
   },
   mounted() {
+    this.$bus.$on('back-to-landingview', () => {
+      let savePromise = this.saveScreenshot(this.videoId)
+        .then(() => this.updatePlaylist(this.playListId));
+      if (process.mas && this.$store.getters.source === 'drop') {
+        savePromise = savePromise.then(async () => {
+          await playInfoStorageService.deleteRecentPlayedBy(this.playListId);
+          await deleteSubtitlesByPlaylistId(this.playListId);
+        });
+      }
+      savePromise
+        .then(this.saveSubtitleStyle)
+        .then(this.savePlaybackStates)
+        .then(this.$store.dispatch('saveWinSize', this.isFullScreen ? { size: this.winSizeBeforeFullScreen, angle: this.winAngleBeforeFullScreen } : { size: this.winSize, angle: this.winAngle }))
+        .then(this.removeAllAudioTrack)
+        .finally(() => {
+          this.$store.dispatch('Init');
+          this.$bus.$off();
+          this.$router.push({
+            name: 'landing-view',
+          });
+          windowRectService.uploadWindowBy(false, 'landing-view');
+        });
+    });
     this.$electron.ipcRenderer.on('quit', (e: Event, needToRestore: boolean) => {
       if (needToRestore) this.needToRestore = needToRestore;
       this.quit = true;
@@ -253,7 +276,8 @@ export default {
         maxVideoSize = this.winSize;
         videoSize = [this.videoHeight, this.videoWidth];
       } else {
-        maxVideoSize = this.lastWinSize;
+        maxVideoSize = this.lastWinSize[0] > 512 || !this.lastWinSize[0]
+          ? this.lastWinSize : [512, Math.round(512 / this.ratio)];
         videoSize = [this.videoWidth, this.videoHeight];
         this.videoExisted = true;
       }
@@ -266,6 +290,7 @@ export default {
     },
     changeWindowRotate(val: number) {
       requestAnimationFrame(() => {
+        if (!this.$refs.videoCanvas) return;
         const scale = windowRectService.calculateWindowScaleBy(this.isFullScreen, val, this.ratio);
         this.$refs.videoCanvas.$el.style.setProperty('transform', `rotate(${val}deg) scale(${scale}, ${scale})`);
       });
@@ -274,6 +299,7 @@ export default {
       this.winSizeBeforeFullScreen = this.winSize;
       this.winAngleBeforeFullScreen = this.winAngle;
       requestAnimationFrame(() => {
+        if (!this.$refs.videoCanvas) return;
         const scale = windowRectService.calculateWindowScaleBy(true, this.winAngle, this.ratio);
         this.$refs.videoCanvas.$el.style.setProperty('transform', `rotate(${this.winAngle}deg) scale(${scale}, ${scale})`);
       });
@@ -281,17 +307,18 @@ export default {
     },
     offFullScreen() {
       requestAnimationFrame(() => {
+        if (!this.$refs.videoCanvas) return;
         const scale = windowRectService.calculateWindowScaleBy(false, this.winAngle, this.ratio);
         this.$refs.videoCanvas.$el.style.setProperty('transform', `rotate(${this.winAngle}deg) scale(${scale}, ${scale})`);
       });
       windowRectService.uploadWindowBy(false, 'playing-view', this.winAngle, this.winAngleBeforeFullScreen, this.winSizeBeforeFullScreen, this.winPos);
     },
     async updatePlaylist(playlistId: number) {
-      if (!Number.isNaN(playlistId)) {
+      if (!Number.isNaN(playlistId) && !this.isFolderList) {
         const playlistRecord = await playInfoStorageService.getPlaylistRecord(playlistId);
         const recentPlayedData = {
           ...playlistRecord,
-          playedIndex: this.isFolderList ? 0 : this.playingIndex,
+          playedIndex: this.playingIndex,
         };
         await playInfoStorageService
           .updateRecentPlayedBy(playlistId, recentPlayedData as PlaylistItem);

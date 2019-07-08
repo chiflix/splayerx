@@ -18,7 +18,7 @@
           class="no-drag sub-menu-wrapper subtitle-scroll-items"
         >
           <div
-            :class="{ 'backdrop': useBlur }"
+            :class="useBlur ? 'backdrop' : 'backdrop-fallback'"
             class="element bottom"
           >
             <div class="element content">
@@ -319,7 +319,19 @@ export default {
     document.addEventListener('mouseup', (e: MouseEvent) => {
       if (e.button === 0) {
         if (!this.showAttached) {
-          if (this.validEnter || this.currentMousedownComponent === this.$options.name) {
+          let isUpOnSubtitleControl;
+          const advance = document.querySelector('.sub-control');
+          if (advance) {
+            const nodeList = advance.childNodes;
+            for (let i = 0; i < nodeList.length; i += 1) {
+              isUpOnSubtitleControl = nodeList[i].contains(e.target as Node);
+              if (isUpOnSubtitleControl) {
+                break;
+              }
+            }
+          }
+          if (this.validEnter
+            || (this.currentMousedownComponent === this.$options.name && isUpOnSubtitleControl)) {
             this.anim.playSegments([46, 60], true);
           } else if (this.currentMousedownComponent === this.$options.name) {
             this.anim.playSegments([40, 44], true);
@@ -454,7 +466,6 @@ export default {
   }
 
   .sub-menu-wrapper {
-    overflow: hidden;
     transition-property: opacity, transform;
     border-radius: 7px;
     box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
@@ -465,20 +476,13 @@ export default {
       box-sizing: inherit;
     }
     .bottom {
+      overflow: hidden;
       width: 100%;
       height: 100%;
       top: 0;
-      border: 1px solid rgba(160,160,160,0.7);
-      background-image: radial-gradient(
-        80% 130%,
-        rgba(85,85,85,0.88) 20%,
-        rgba(85,85,85,0.78) 50%,
-        rgba(85,85,85,0.72) 60%,
-        rgba(85,85,85,0.46) 80%,
-        rgba(85,85,85,0.00) 100%
-      );
     }
     .backdrop {
+      overflow: hidden;
       border-width: 0px;
       background-image: none;
       background-color: rgba(0, 0, 0, 0.1);

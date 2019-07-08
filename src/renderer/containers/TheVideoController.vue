@@ -55,7 +55,7 @@
       :mousedown-on-play-button="mousedownOnPlayButton"
       :show-all-widgets="showAllWidgets"
       :muted="muted"
-      :volume-keydown="volumeKeydown"
+      :volume-keydown="volumeKeydown || changeVolumeByMenu"
       :volume="volume"
       :ratio="ratio"
       :is-full-screen="isFullScreen"
@@ -116,7 +116,7 @@ import {
   createNamespacedHelpers,
 } from 'vuex';
 import path from 'path';
-import { Input as inputActions, Video as videoActions } from '@/store/actionTypes';
+import { Input as inputActions, Video as videoActions, Subtitle as legacySubtitleActions } from '@/store/actionTypes';
 import { INPUT_COMPONENT_TYPE, getterTypes as iGT } from '@/plugins/input';
 import Titlebar from '@/components/Titlebar.vue';
 import PlayButton from '@/components/PlayingView/PlayButton.vue';
@@ -196,11 +196,11 @@ export default {
       dragOver: false,
       progressTriggerStopped: false,
       openPlayListTimeId: NaN,
-      playListState: false,
       progressDisappearDelay: 1000,
       changeState: false, // 记录是不是要改变显示速率的状态
       changeSrc: false, // 记录是否换过视频
       showSpeedLabel: false, // 是否显示播放速率
+      changeVolumeByMenu: false,
     };
   },
   computed: {
@@ -216,6 +216,7 @@ export default {
       'playingList', 'isFolderList',
       'isFullScreen', 'isFocused', 'isMinimized',
       'leftMousedown', 'progressKeydown', 'volumeKeydown', 'wheelTriggered', 'volumeWheelTriggered',
+      'enabledSecondarySub',
     ]),
     ...inputMapGetters({
       inputWheelDirection: iGT.GET_WHEEL_DIRECTION,
@@ -359,6 +360,12 @@ export default {
         }
       }
     },
+    enabledSecondarySub(val: boolean) {
+      if (val && !this.widgetsStatus.SubtitleControl.showAttached) {
+        this.updateSubtitleType(false);
+        this.widgetsStatus.SubtitleControl.showAttached = true;
+      }
+    },
   },
   mounted() {
     // 当触发seek 显示界面控件
@@ -385,17 +392,17 @@ export default {
       };
     });
     if (this.isFolderList === false) {
-      this.playListState = true;
+      this.widgetsStatus.PlaylistControl.showAttached = true;
       clearTimeout(this.openPlayListTimeId);
       this.openPlayListTimeId = setTimeout(() => {
-        this.playListState = false;
+        this.widgetsStatus.PlaylistControl.showAttached = false;
       }, 4000);
     }
     this.$bus.$on('open-playlist', () => {
-      this.playListState = true;
+      this.widgetsStatus.PlaylistControl.showAttached = true;
       clearTimeout(this.openPlayListTimeId);
       this.openPlayListTimeId = setTimeout(() => {
-        this.playListState = false;
+        this.widgetsStatus.PlaylistControl.showAttached = true;
       }, 4000);
     });
     this.$bus.$on('drag-over', () => {
@@ -417,6 +424,12 @@ export default {
     this.$bus.$on('off-fullscreen', () => {
       this.handleVolumeUIWhenFullScreenChanged();
     });
+    this.$bus.$on('change-volume-menu', () => {
+      this.changeVolumeByMenu = true;
+      setTimeout(() => {
+        this.changeVolumeByMenu = false;
+      });
+    });
     document.addEventListener('keydown', this.handleKeydown);
     document.addEventListener('keyup', this.handleKeyup);
     document.addEventListener('wheel', this.handleWheel);
@@ -434,6 +447,7 @@ export default {
       updateKeydown: inputActions.KEYDOWN_UPDATE,
       updateKeyup: inputActions.KEYUP_UPDATE,
       updateWheel: inputActions.WHEEL_UPDATE,
+      updateSubtitleType: legacySubtitleActions.UPDATE_SUBTITLE_TYPE,
     }),
     createIcon(iconPath: string) {
       const { nativeImage } = this.$electron.remote;
@@ -492,7 +506,7 @@ export default {
     },
     updatePlaylistShowAttached(event: boolean) {
       clearTimeout(this.openPlayListTimeId);
-      this.widgetsStatus.PlaylistControl.showAttached = this.playListState = event;
+      this.widgetsStatus.PlaylistControl.showAttached = event;
     },
     updatePlayButtonState(mousedownState: boolean) {
       this.mousedownOnPlayButton = mousedownState;
@@ -534,7 +548,7 @@ export default {
       // There should be a better way to handle timeline.
         try {
           this.$refs.nextVideoUI.checkNextVideoUI(videodata.time);
-          if (this.tempRecentPlaylistDisplayState || this.playListState) {
+          if (this.tempRecentPlaylistDisplayState) {
             this.$refs.recentPlaylist.updatelastPlayedTime(videodata.time);
           } else {
             this.$refs.theTimeCodes.updateTimeContent(videodata.time);
@@ -559,10 +573,7 @@ export default {
       Object.keys(this.displayState).forEach((index) => {
         tempObject[index] = !this.widgetsStatus.PlaylistControl.showAttached;
       });
-      tempObject.RecentPlaylist = (
-        this.playListState
-        || this.widgetsStatus.PlaylistControl.showAttached
-      )
+      tempObject.RecentPlaylist = this.widgetsStatus.PlaylistControl.showAttached
         && !this.dragOver;
       this.displayState = tempObject;
       this.tempRecentPlaylistDisplayState = this.widgetsStatus.PlaylistControl.showAttached;
@@ -691,10 +702,10 @@ export default {
         }
       }
     },
-    handleKeydown({ code }: { code: number }) {
+    handleKeydown({ code }: { code: string }) {
       this.updateKeydown({ pressedKeyboardCode: code });
     },
-    handleKeyup({ code }: { code: number }) {
+    handleKeyup({ code }: { code: string }) {
       this.updateKeyup({ releasedKeyboardCode: code });
     },
     handleWheel({ target, timeStamp }: { target: Element; timeStamp: number }) {
@@ -718,7 +729,7 @@ export default {
     isChildComponent(element: Element) {
       let componentName = null;
       this.$children.forEach((childComponenet: Vue) => {
-        if (childComponenet.$el === element) {
+        if (childComponenet && childComponenet.$el === element) {
           componentName = childComponenet.$options.name;
         }
       });

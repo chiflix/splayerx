@@ -3,6 +3,7 @@
     <video
       id="play-video"
       ref="video"
+      @error="handleError"
       class="video-element"
     />
   </div>
@@ -14,6 +15,7 @@ import _ from 'lodash';
 import { DEFAULT_VIDEO_EVENTS } from '@/constants';
 import { addBubble } from '@/helpers/notificationControl';
 import { OPEN_FAILED } from '@/helpers/notificationcodes';
+import { log } from '@/libs/Log';
 import { videodata } from '../../store/video';
 
 export default {
@@ -170,9 +172,11 @@ export default {
       // update the play state
       videodata.paused = newVal;
       try {
-        await this.$refs.video[newVal ? 'pause' : 'play']();
+        const action = newVal ? 'pause' : 'play';
+        log.info(action, this.$refs.video.src); // TODO: debugging SPLAYER-1A
+        await this.$refs.video[action]();
       } catch (ex) {
-        console.error(ex);
+        log.warn('play video error', ex);
         addBubble(OPEN_FAILED);
       }
     },
@@ -284,6 +288,11 @@ export default {
           this.$refs.video.style[styleName] = styles[styleName];
         });
       }
+    },
+    handleError() {
+      if (!this.$refs.video || !this.$refs.video.error) return;
+      const { code, message } = this.$refs.video.error;
+      log.warn('video element onerror', `${code}:${message}`);
     },
   },
 };

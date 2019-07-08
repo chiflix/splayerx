@@ -114,7 +114,7 @@ export async function mediaQuickHash(filePath: string) {
     4096,
     Math.floor(len / 3),
     Math.floor(len / 3) * 2,
-    len - 8192,
+    len >= 8192 ? len - 8192 : 0,
   ];
   const res = await Promise.all(times(4).map(async (i) => {
     const buf = Buffer.alloc(4096);

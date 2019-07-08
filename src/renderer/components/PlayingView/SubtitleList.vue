@@ -96,7 +96,6 @@
             </div>
           </div>
         </div>
-
         <div
           v-if="0 <= computedAvailableItems.length"
           :style="{
@@ -323,6 +322,9 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.sub-menu {
+  overflow: hidden;
+}
 ::-webkit-scrollbar {
   width: 2px;
 }
@@ -331,7 +333,7 @@ export default {
   border: 0.5px solid rgba(255, 255, 255, 0.2);
   background: rgba(255, 255, 255, 0.15);
 }
-.refresh-animation {
+.refresh-animation .text {
   animation: menu-refresh 300ms linear 1 normal forwards;
 }
 @keyframes menu-refresh {

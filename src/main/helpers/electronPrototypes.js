@@ -42,7 +42,7 @@ function keepAspectRatio(evt, newBounds) {
   if (!this._resizeAnchor) {
     this._resizeAnchor = getAnchor(currentBounds, this._mouseDownPoint || mousePosition);
   }
-  const { type, anchor, bounds } = this._resizeAnchor;
+  const { type, anchor } = this._resizeAnchor;
 
   const scaleFactor = screen.getDisplayNearestPoint(mousePosition).scaleFactor;
   let { width: newWidth, height: newHeight } = newBounds;
