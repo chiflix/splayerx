@@ -8,7 +8,7 @@ import { generateHints, calculatedName } from '@/libs/utils';
 import { log } from '@/libs/Log';
 import SubtitleModule from './Subtitle';
 import { StoredSubtitleItem, SelectedSubtitle } from '@/interfaces/ISubtitleStorage';
-import { retrieveSubtitlePreference, DatabaseGenerator, storeSubtitleLanguage, addSubtitleItemsToList, removeSubtitleItemsFromList, storeSelectedSubtitles } from '@/services/storage/SubtitleStorage';
+import { retrieveSubtitlePreference, DatabaseGenerator, storeSubtitleLanguage, addSubtitleItemsToList, removeSubtitleItemsFromList, storeSelectedSubtitles } from '@/services/storage/subtitle';
 import { isEqual, get, sortBy, differenceWith, flatten, remove, debounce } from 'lodash';
 import Vue from 'vue';
 import { extname } from 'path';

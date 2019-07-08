@@ -1,6 +1,6 @@
 import { EntityGenerator, Entity, Parser, Type, Format, Origin } from '@/interfaces/ISubtitle';
 import { LanguageCode } from '@/libs/language';
-import { storeSubtitle, removeSubtitle, removeSubtitleItemsFromList } from '@/services/storage/SubtitleStorage';
+import { storeSubtitle, removeSubtitle, removeSubtitleItemsFromList } from '@/services/storage/subtitle';
 import { newSubtitle as m } from '@/store/mutationTypes';
 import { newSubtitle as a, SubtitleManager as parentActions } from '@/store/actionTypes';
 import { getParser } from '@/services/subtitle/utils';
