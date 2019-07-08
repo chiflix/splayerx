@@ -58,6 +58,9 @@
           fontWeight: cue.tags.b ? 'bold' : '',
           fontStyle: cue.tags.i ? 'italic' : '',
           textDecoration: cue.tags.u ? 'underline' : cue.tags.s ? 'line-through' : '',
+          lineHeight: calculateLineHeight(cue.text),
+          paddingTop: calculatePaddingTop(cue, ind, item),
+          paddingBottom: calculatePaddingBottom(cue, ind, item),
         }"
         :class="'subtitle-style'+chosenStyle"
       ><!--eslint-disable-line-->{{ cue.text }}</p>
