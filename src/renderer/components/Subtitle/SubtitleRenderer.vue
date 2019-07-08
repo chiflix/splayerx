@@ -6,6 +6,16 @@
       v-for="(item, index) in noPositionCues"
       :key="'noPosition' + index"
       :class="'subtitle-alignment'+(index+1)"
+      :style="{
+        bottom: ![1, 2, 3].includes(index + 1) ? ''
+          : currentCues[0].length && currentCues[1].length === 1
+            && !currentCues[1][0].text.includes('\n')
+            ? `${(60 + 9.9 * secondarySubScale * (1080 / winHeight)) / 10.8}%` : `${60 / 10.8}%`,
+        top: ![7, 8, 9].includes(index + 1) ? ''
+          : currentCues[1].length && currentCues[0].length === 1
+            && !currentCues[0][0].text.includes('\n')
+            ? `${(60 + 9.9 * scaleNum * (1080 / winHeight)) / 10.8}%` : `${60 / 10.8}%`
+      }"
     >
       <p
         v-for="(cue, ind) in item"
@@ -15,7 +25,9 @@
           zoom: cue.category === 'first' ? `${scaleNum}` : `${secondarySubScale}`,
           writingMode: (cue.category === 'first' ? firstType === 'vtt' : secondType === 'vtt')
             ? `vertical-${cue.tags.vertical}` : '',
-          lineHeight: currentCues[0].length && currentCues[1].length ? '112%' : 'normal',
+          lineHeight: calculateLineHeight(cue.text),
+          paddingTop: calculatePaddingTop(cue, ind, item),
+          paddingBottom: calculatePaddingBottom(cue, ind, item),
           marginBottom: item[ind + 1] && cue.category === 'first' &&
             item[ind + 1].category === 'secondary' ? `${subtitleSpace / scaleNum}px` : '',
           fontWeight: cue.tags.b ? 'bold' : '',
@@ -184,6 +196,24 @@ export default {
     },
   },
   methods: {
+    calculatePaddingTop(cue: Cue, ind: number, item: Cue[]) {
+      if (this.chosenStyle === 4
+        && (ind === 0 || (item[ind - 1].category === 'first' && cue.category === 'secondary'))) {
+        return this.currentCues[1].length ? '1.44px' : '1.35px';
+      }
+      return '';
+    },
+    calculatePaddingBottom(cue: Cue, ind: number, item: Cue[]) {
+      if (this.chosenStyle === 4
+        && (ind === item.length - 1 || (cue.category === 'first' && (!item[ind + 1] || item[ind + 1].category === 'secondary')))) {
+        return this.currentCues[1].length ? '1.44px' : '1.35px';
+      }
+      return '';
+    },
+    calculateLineHeight(text: string) {
+      const line = text.split('\n').length + 1;
+      return this.currentCues[1].length ? `${0.8 * ((line - 1) * 10) + 100}%` : `${(line - 1) * 10 + 100}%`;
+    },
     calculatePosition(category: string, tags: Tags) {
       const type = category === 'first' ? this.firstType : this.secondType;
       if (type !== 'vtt') {
