@@ -1405,7 +1405,9 @@ new Vue({
 
         let finalSeekSpeed = 0;
         if (absX >= 285) finalSeekSpeed = this.duration;
-        else {
+        else if (absX <= 3) {
+          finalSeekSpeed = 0.08;
+        } else {
           const maximiumSpeed = this.duration / 50;
           const minimiumSpeed = 1;
           const speed = (this.duration / 2000) * absX;
@@ -1413,7 +1415,6 @@ new Vue({
           else if (speed > maximiumSpeed) finalSeekSpeed = maximiumSpeed;
           else finalSeekSpeed = speed;
         }
-
         this.$bus.$emit(eventName, finalSeekSpeed);
       }
     },
