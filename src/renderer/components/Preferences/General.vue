@@ -110,16 +110,10 @@
     <div class="settingItem__title">
       {{ $t("preferences.general.others") }}
     </div>
-    <BaseCheckBox
-      :checkbox-value="reverseScrolling"
-      @update:checkbox-value="reverseScrolling = $event"
-    >
+    <BaseCheckBox v-model="reverseScrolling">
       {{ $t('preferences.general.reverseScrolling') }}
     </BaseCheckBox>
-    <BaseCheckBox
-      :checkbox-value="deleteVideoHistoryOnExit"
-      @update:checkbox-value="deleteVideoHistoryOnExit = $event"
-    >
+    <BaseCheckBox v-model="deleteVideoHistoryOnExit">
       {{ $t('preferences.general.clearHistory') }}
     </BaseCheckBox>
   </div>
