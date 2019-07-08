@@ -8,14 +8,8 @@
       :class="'subtitle-alignment'+(index+1)"
       :style="{
         zIndex: '2',
-        bottom: ![1, 2, 3].includes(index + 1) ? ''
-          : currentCues[1].length === 1 && currentFirstSubtitleId
-            && !currentCues[1][0].text.includes('\n')
-            ? `${(60 + 9.9 * secondarySubScale * (1080 / winHeight)) / 10.8}%` : `${60 / 10.8}%`,
-        top: ![7, 8, 9].includes(index + 1) ? ''
-          : currentCues[0].length === 1 && currentSecondarySubtitleId
-            && !currentCues[0][0].text.includes('\n')
-            ? `${(60 + 9.9 * scaleNum * (1080 / winHeight)) / 10.8}%` : `${60 / 10.8}%`
+        bottom: calculateSubBottom(index),
+        top: calculateSubTop(index),
       }"
     >
       <p
@@ -204,6 +198,32 @@ export default {
     },
   },
   methods: {
+    calculateSubBottom(index: number) {
+      if ([1, 2, 3].includes(index + 1)) {
+        if (this.currentCues[1].length === 1 && this.currentFirstSubtitleId && !this.currentCues[1][0].text.includes('\n')) {
+          return `${(60 + 9.9 * this.secondarySubScale * (1080 / this.winHeight)) / 10.8}%`;
+        }
+        if (this.currentCues[1].length === 0 && this.currentSecondarySubtitleId
+          && this.currentFirstSubtitleId) {
+          return `${(60 + (this.subtitleSpace + 9 * 2.1 * this.secondarySubScale) * (1080 / this.winHeight)) / 10.8}%`;
+        }
+        return `${60 / 10.8}%`;
+      }
+      return '';
+    },
+    calculateSubTop(index: number) {
+      if ([7, 8, 9].includes(index + 1)) {
+        if (this.currentCues[0].length === 1 && this.currentSecondarySubtitleId && !this.currentCues[0][0].text.includes('\n')) {
+          return `${(60 + 9.9 * this.scaleNum * (1080 / this.winHeight)) / 10.8}%`;
+        }
+        if (this.currentCues[0].length === 0 && this.currentSecondarySubtitleId
+          && this.currentFirstSubtitleId) {
+          return `${(60 + (this.subtitleSpace + 9 * 2.1 * this.scaleNum) * (1080 / this.winHeight)) / 10.8}%`;
+        }
+        return `${60 / 10.8}%`;
+      }
+      return '';
+    },
     calculatePaddingTop(cue: Cue, ind: number, item: Cue[]) {
       if (this.chosenStyle === 4
         && (ind === 0 || (item[ind - 1].category === 'first' && cue.category === 'secondary'))) {
