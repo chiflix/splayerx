@@ -57,6 +57,7 @@ app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 let mainWindow = null;
 let aboutWindow = null;
 let preferenceWindow = null;
+let welcomeWindow = null;
 let tray = null;
 let needToRestore = false;
 let inited = false;
@@ -81,6 +82,173 @@ const preferenceURL = process.env.NODE_ENV === 'development'
 const tempFolderPath = path.join(app.getPath('temp'), 'splayer');
 if (!fs.existsSync(tempFolderPath)) fs.mkdirSync(tempFolderPath);
 
+
+function createWelcome() {
+  const preferenceWindowOptions = {
+    useContentSize: true,
+    frame: false,
+    titleBarStyle: 'none',
+    width: 540,
+    height: 426,
+    transparent: true,
+    resizable: false,
+    show: false,
+    webPreferences: {
+      webSecurity: false,
+      nodeIntegration: true,
+      experimentalFeatures: true,
+    },
+    acceptFirstMouse: true,
+    fullscreenable: false,
+    maximizable: false,
+    minimizable: false,
+  };
+  if (!preferenceWindow) {
+    preferenceWindow = new BrowserWindow(preferenceWindowOptions);
+    // 如果播放窗口顶置，打开首选项也顶置
+    if (mainWindow.isAlwaysOnTop()) {
+      preferenceWindow.setAlwaysOnTop(true);
+    }
+    preferenceWindow.loadURL(`${preferenceURL}`);
+    preferenceWindow.on('closed', () => {
+      preferenceWindow = null;
+    });
+  } else {
+    preferenceWindow.focus();
+  }
+  preferenceWindow.once('ready-to-show', () => {
+    preferenceWindow.show();
+  });
+}
+function createAbout() {
+  const aboutWindowOptions = {
+    useContentSize: true,
+    frame: false,
+    titleBarStyle: 'none',
+    width: 190,
+    height: 280,
+    transparent: true,
+    resizable: false,
+    show: false,
+    webPreferences: {
+      webSecurity: false,
+      nodeIntegration: true,
+      experimentalFeatures: true,
+    },
+    acceptFirstMouse: true,
+    fullscreenable: false,
+    maximizable: false,
+    minimizable: false,
+  };
+  if (!aboutWindow) {
+    aboutWindow = new BrowserWindow(aboutWindowOptions);
+    // 如果播放窗口顶置，打开关于也顶置
+    if (mainWindow.isAlwaysOnTop()) {
+      aboutWindow.setAlwaysOnTop(true);
+    }
+    aboutWindow.loadURL(`${aboutURL}`);
+    aboutWindow.on('closed', () => {
+      aboutWindow = null;
+    });
+  }
+  aboutWindow.once('ready-to-show', () => {
+    aboutWindow.show();
+  });
+}
+function createPreference() {
+  const preferenceWindowOptions = {
+    useContentSize: true,
+    frame: false,
+    titleBarStyle: 'none',
+    width: 540,
+    height: 426,
+    transparent: true,
+    resizable: false,
+    show: false,
+    webPreferences: {
+      webSecurity: false,
+      nodeIntegration: true,
+      experimentalFeatures: true,
+    },
+    acceptFirstMouse: true,
+    fullscreenable: false,
+    maximizable: false,
+    minimizable: false,
+  };
+  if (!preferenceWindow) {
+    preferenceWindow = new BrowserWindow(preferenceWindowOptions);
+    // 如果播放窗口顶置，打开首选项也顶置
+    if (mainWindow.isAlwaysOnTop()) {
+      preferenceWindow.setAlwaysOnTop(true);
+    }
+    preferenceWindow.loadURL(`${preferenceURL}`);
+    preferenceWindow.on('closed', () => {
+      preferenceWindow = null;
+    });
+  } else {
+    preferenceWindow.focus();
+  }
+  preferenceWindow.once('ready-to-show', () => {
+    preferenceWindow.show();
+  });
+}
+function createWindow() {
+  mainWindow = new BrowserWindow({
+    useContentSize: true,
+    frame: false,
+    titleBarStyle: 'none',
+    width: 720,
+    height: 405,
+    minWidth: 720,
+    minHeight: 405,
+    // it can be set true here and be changed during player starting
+    transparent: false, // set to false to solve the backdrop-filter bug
+    webPreferences: {
+      webSecurity: false,
+      nodeIntegration: true,
+      experimentalFeatures: true,
+    },
+    // See https://github.com/electron/electron/blob/master/docs/api/browser-window.md#showing-window-gracefully
+    backgroundColor: '#6a6a6a',
+    acceptFirstMouse: true,
+    show: false,
+    ...({
+      win32: {},
+    })[process.platform],
+  });
+  mainWindow.webContents.setUserAgent(`SPlayerX@2018 ${os.platform() + os.release()} Version ${app.getVersion()}`);
+
+  mainWindow.loadURL(finalVideoToOpen.length ? `${mainURL}#/play` : mainURL);
+
+  mainWindow.on('closed', () => {
+    ipcMain.removeAllListeners();
+    mainWindow = null;
+  });
+
+  mainWindow.once('ready-to-show', () => {
+    mainWindow.show();
+    // Open file by file association. Currently support 1 file only.
+    finalVideoToOpen = getAllValidVideo(!tmpVideoToOpen.length,
+      tmpVideoToOpen.concat(tmpSubsToOpen));
+    if (process.mas && !tmpVideoToOpen.length && tmpSubsToOpen.length && !finalVideoToOpen) {
+      mainWindow.webContents.send('open-subtitle-in-mas', tmpSubsToOpen[0]);
+    } else if (tmpVideoToOpen.length + tmpSubsToOpen.length > 0) {
+      mainWindow.webContents.send('open-file', { onlySubtitle: !tmpVideoToOpen.length, files: finalVideoToOpen });
+    }
+    finalVideoToOpen.splice(0, finalVideoToOpen.length);
+    tmpSubsToOpen.splice(0, tmpSubsToOpen.length);
+    tmpVideoToOpen.splice(0, tmpVideoToOpen.length);
+    inited = true;
+  });
+
+  registerMainWindowEvent(mainWindow);
+
+  if (process.env.NODE_ENV === 'development') {
+    setTimeout(() => { // wait some time to prevent `Object not found` error
+      if (mainWindow) mainWindow.openDevTools({ mode: 'detach' });
+    }, 1000);
+  }
+}
 function handleBossKey() {
   if (!mainWindow) return;
   if (mainWindow.isVisible()) {
@@ -416,78 +584,8 @@ function registerMainWindowEvent(mainWindow) {
     if (!log) return;
     writeLog(level, log);
   });
-  ipcMain.on('add-windows-about', () => {
-    const aboutWindowOptions = {
-      useContentSize: true,
-      frame: false,
-      titleBarStyle: 'none',
-      width: 190,
-      height: 280,
-      transparent: true,
-      resizable: false,
-      show: false,
-      webPreferences: {
-        webSecurity: false,
-        nodeIntegration: true,
-        experimentalFeatures: true,
-      },
-      acceptFirstMouse: true,
-      fullscreenable: false,
-      maximizable: false,
-      minimizable: false,
-    };
-    if (!aboutWindow) {
-      aboutWindow = new BrowserWindow(aboutWindowOptions);
-      // 如果播放窗口顶置，打开关于也顶置
-      if (mainWindow.isAlwaysOnTop()) {
-        aboutWindow.setAlwaysOnTop(true);
-      }
-      aboutWindow.loadURL(`${aboutURL}`);
-      aboutWindow.on('closed', () => {
-        aboutWindow = null;
-      });
-    }
-    aboutWindow.once('ready-to-show', () => {
-      aboutWindow.show();
-    });
-  });
-  ipcMain.on('add-preference', () => {
-    const preferenceWindowOptions = {
-      useContentSize: true,
-      frame: false,
-      titleBarStyle: 'none',
-      width: 540,
-      height: 426,
-      transparent: true,
-      resizable: false,
-      show: false,
-      webPreferences: {
-        webSecurity: false,
-        nodeIntegration: true,
-        experimentalFeatures: true,
-      },
-      acceptFirstMouse: true,
-      fullscreenable: false,
-      maximizable: false,
-      minimizable: false,
-    };
-    if (!preferenceWindow) {
-      preferenceWindow = new BrowserWindow(preferenceWindowOptions);
-      // 如果播放窗口顶置，打开首选项也顶置
-      if (mainWindow.isAlwaysOnTop()) {
-        preferenceWindow.setAlwaysOnTop(true);
-      }
-      preferenceWindow.loadURL(`${preferenceURL}`);
-      preferenceWindow.on('closed', () => {
-        preferenceWindow = null;
-      });
-    } else {
-      preferenceWindow.focus();
-    }
-    preferenceWindow.once('ready-to-show', () => {
-      preferenceWindow.show();
-    });
-  });
+  ipcMain.on('add-windows-about', createAbout);
+  ipcMain.on('add-preference', createPreference);
   ipcMain.on('need-to-restore', () => {
     needToRestore = true;
     markNeedToRestore();
@@ -509,64 +607,6 @@ function registerMainWindowEvent(mainWindow) {
       preferenceWindow.webContents.send('preferenceDispatch', 'setPreference', args);
     }
   });
-}
-
-function createWindow() {
-  mainWindow = new BrowserWindow({
-    useContentSize: true,
-    frame: false,
-    titleBarStyle: 'none',
-    width: 720,
-    height: 405,
-    minWidth: 720,
-    minHeight: 405,
-    // it can be set true here and be changed during player starting
-    transparent: false, // set to false to solve the backdrop-filter bug
-    webPreferences: {
-      webSecurity: false,
-      nodeIntegration: true,
-      experimentalFeatures: true,
-    },
-    // See https://github.com/electron/electron/blob/master/docs/api/browser-window.md#showing-window-gracefully
-    backgroundColor: '#6a6a6a',
-    acceptFirstMouse: true,
-    show: false,
-    ...({
-      win32: {},
-    })[process.platform],
-  });
-  mainWindow.webContents.setUserAgent(`SPlayerX@2018 ${os.platform() + os.release()} Version ${app.getVersion()}`);
-
-  mainWindow.loadURL(finalVideoToOpen.length ? `${mainURL}#/play` : mainURL);
-
-  mainWindow.on('closed', () => {
-    ipcMain.removeAllListeners();
-    mainWindow = null;
-  });
-
-  mainWindow.once('ready-to-show', () => {
-    mainWindow.show();
-    // Open file by file association. Currently support 1 file only.
-    finalVideoToOpen = getAllValidVideo(!tmpVideoToOpen.length,
-      tmpVideoToOpen.concat(tmpSubsToOpen));
-    if (process.mas && !tmpVideoToOpen.length && tmpSubsToOpen.length && !finalVideoToOpen) {
-      mainWindow.webContents.send('open-subtitle-in-mas', tmpSubsToOpen[0]);
-    } else if (tmpVideoToOpen.length + tmpSubsToOpen.length > 0) {
-      mainWindow.webContents.send('open-file', { onlySubtitle: !tmpVideoToOpen.length, files: finalVideoToOpen });
-    }
-    finalVideoToOpen.splice(0, finalVideoToOpen.length);
-    tmpSubsToOpen.splice(0, tmpSubsToOpen.length);
-    tmpVideoToOpen.splice(0, tmpVideoToOpen.length);
-    inited = true;
-  });
-
-  registerMainWindowEvent(mainWindow);
-
-  if (process.env.NODE_ENV === 'development') {
-    setTimeout(() => { // wait some time to prevent `Object not found` error
-      if (mainWindow) mainWindow.openDevTools({ mode: 'detach' });
-    }, 1000);
-  }
 }
 
 ['left-drag', 'left-up'].forEach((channel) => {
