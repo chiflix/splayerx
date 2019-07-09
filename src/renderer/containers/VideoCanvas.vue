@@ -267,8 +267,8 @@ export default {
       this.$bus.$emit('video-loaded');
       this.changeWindowRotate(this.winAngle);
 
-      let maxVideoSize = [];
-      let videoSize = [];
+      let maxVideoSize;
+      let videoSize;
       if (this.videoExisted && (this.winAngle === 0 || this.winAngle === 180)) {
         maxVideoSize = this.winSize;
         videoSize = [this.videoWidth, this.videoHeight];
@@ -276,8 +276,6 @@ export default {
         maxVideoSize = this.winSize;
         videoSize = [this.videoHeight, this.videoWidth];
       } else {
-        maxVideoSize = this.lastWinSize[0] > 512 || !this.lastWinSize[0]
-          ? this.lastWinSize : [512, Math.round(512 / this.ratio)];
         videoSize = [this.videoWidth, this.videoHeight];
         this.videoExisted = true;
       }
