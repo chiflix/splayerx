@@ -113,7 +113,7 @@ export default {
   },
   computed: {
     subtitleSpace() {
-      const subSpaceFactors: number[] = [12, 15, 18, 21];
+      const subSpaceFactors: number[] = [15, 18, 21, 24];
       return subSpaceFactors[this.chosenSize] / 1080 * this.winHeight;
     },
     firstType() {
