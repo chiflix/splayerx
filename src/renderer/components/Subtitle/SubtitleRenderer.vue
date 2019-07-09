@@ -10,6 +10,8 @@
         zIndex: '2',
         bottom: calculateSubBottom(index),
         top: calculateSubTop(index),
+        display: 'flex',
+        flexDirection: 'column'
       }"
     >
       <p
@@ -23,11 +25,10 @@
           lineHeight: '120%',
           paddingTop: calculatePaddingTop(cue, ind, item),
           paddingBottom: calculatePaddingBottom(cue, ind, item),
-          marginBottom: item[ind + 1] && cue.category === 'first' &&
-            item[ind + 1].category === 'secondary' ? `${subtitleSpace / scaleNum}px` : '',
           fontWeight: cue.tags.b ? 'bold' : '',
           fontStyle: cue.tags.i ? 'italic' : '',
           textDecoration: cue.tags.u ? 'underline' : cue.tags.s ? 'line-through' : '',
+          margin: calculateSubMarginBottom(cue, ind, item),
         }"
         :class="[`subtitle-style${chosenStyle}`]"
       ><!--eslint-disable-line-->{{ cue.text }}</p>
@@ -198,6 +199,11 @@ export default {
     },
   },
   methods: {
+    calculateSubMarginBottom(cue: Cue, ind: number, item: Cue[]) {
+      const bottom = item[ind + 1] && cue.category === 'first'
+        && item[ind + 1].category === 'secondary' ? `${this.subtitleSpace / this.scaleNum}px` : '';
+      return `0 auto ${bottom} auto`;
+    },
     calculateSubBottom(index: number) {
       if ([1, 2, 3].includes(index + 1)) {
         const textHeight = calculateTextSize('9px', this.normalFont, '120%', this.secondarySubScale.toString(), 'test').height;
@@ -206,7 +212,7 @@ export default {
           .concat(this.noPositionCues[1], this.noPositionCues[2])
           .filter((cue: Cue) => cue.category && cue.category === 'secondary');
         if (adaptedCues.length === 1 && this.currentFirstSubtitleId && !adaptedCues[0].text.includes('\n')) {
-          return `${((textHeight + padding) * this.secondarySubScale + padding * 2 + (60 / 1080) * this.winHeight) * 100 / this.winHeight}%`;
+          return `${((textHeight + padding * 2) * this.secondarySubScale + (60 / 1080) * this.winHeight) * 100 / this.winHeight}%`;
         }
         if (adaptedCues.length === 0 && this.currentSecondarySubtitleId
           && this.currentFirstSubtitleId) {
