@@ -195,7 +195,7 @@
   },
   "preferences": {
     "general": {
-      "hideHistory": "",
+      "hideHistory": "隱藏曆史記錄",
       "clearHistory": "退出時自動清空播放記錄",
       "reverseScrolling": "鼠标滚轮反向",
       "setDefault": "設為默認播放器",
