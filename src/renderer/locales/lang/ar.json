@@ -195,7 +195,7 @@
   },
   "preferences": {
     "general": {
-      "hideHistory": "",
+      "hideHistory": "إخفاء سجل التشغيل",
       "clearHistory": "قم دائمًا بمسح سجل التشغيل عند الخروج",
       "reverseScrolling": "التمرير عكس الماوس",
       "setDefault": "تعيين كمشغل الفيديو الافتراضي",
