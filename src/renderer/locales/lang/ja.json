@@ -195,7 +195,7 @@
   },
   "preferences": {
     "general": {
-      "hideHistory": "",
+      "hideHistory": "再生履歴を隠す",
       "clearHistory": "終了時にプレイ履歴を削除",
       "reverseScrolling": "マウスの逆スクロール",
       "setDefault": "デフォルトのプレーヤーとして設定",
