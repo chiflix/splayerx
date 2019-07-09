@@ -57,7 +57,6 @@ app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 let mainWindow = null;
 let aboutWindow = null;
 let preferenceWindow = null;
-let welcomeWindow = null;
 let tray = null;
 let needToRestore = false;
 let inited = false;
@@ -83,43 +82,6 @@ const tempFolderPath = path.join(app.getPath('temp'), 'splayer');
 if (!fs.existsSync(tempFolderPath)) fs.mkdirSync(tempFolderPath);
 
 
-function createWelcome() {
-  const preferenceWindowOptions = {
-    useContentSize: true,
-    frame: false,
-    titleBarStyle: 'none',
-    width: 540,
-    height: 426,
-    transparent: true,
-    resizable: false,
-    show: false,
-    webPreferences: {
-      webSecurity: false,
-      nodeIntegration: true,
-      experimentalFeatures: true,
-    },
-    acceptFirstMouse: true,
-    fullscreenable: false,
-    maximizable: false,
-    minimizable: false,
-  };
-  if (!preferenceWindow) {
-    preferenceWindow = new BrowserWindow(preferenceWindowOptions);
-    // 如果播放窗口顶置，打开首选项也顶置
-    if (mainWindow.isAlwaysOnTop()) {
-      preferenceWindow.setAlwaysOnTop(true);
-    }
-    preferenceWindow.loadURL(`${preferenceURL}`);
-    preferenceWindow.on('closed', () => {
-      preferenceWindow = null;
-    });
-  } else {
-    preferenceWindow.focus();
-  }
-  preferenceWindow.once('ready-to-show', () => {
-    preferenceWindow.show();
-  });
-}
 function createAbout() {
   const aboutWindowOptions = {
     useContentSize: true,
