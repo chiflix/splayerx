@@ -162,6 +162,7 @@ new Vue({
       wheelDirection: iGT.GET_WHEEL_DIRECTION,
       isWheelEnd: iGT.GET_WHEEL_STOPPED,
     }),
+    // menu
     darwinPlayback() {
       return [
         {

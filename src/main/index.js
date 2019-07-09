@@ -14,6 +14,7 @@ import './helpers/electronPrototypes';
 import writeLog from './helpers/writeLog';
 import { getValidVideoRegex, getValidSubtitleRegex } from '../shared/utils';
 import { mouse } from './helpers/mouse';
+import { menuService } from './services/menu/MenuService';
 
 // requestSingleInstanceLock is not going to work for mas
 // https://github.com/electron-userland/electron-packager/issues/923
@@ -707,6 +708,7 @@ if (process.platform === 'darwin') {
 }
 
 app.on('ready', () => {
+  menuService.createMenu();
   createWindow();
   app.setName('SPlayer');
   globalShortcut.register('CmdOrCtrl+Shift+I+O+P', () => {
