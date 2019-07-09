@@ -39,6 +39,7 @@ import { VueDevtools } from './plugins/vueDevtools.dev';
 import { SubtitleControlListItem, Type } from './interfaces/ISubtitle';
 import { getValidVideoRegex, getValidSubtitleRegex } from '../shared/utils';
 import { EventEmitter } from 'events';
+import MenuService, { menuService } from '../main/services/menu/MenuService';
 
 // causing callbacks-registry.js 404 error. disable temporarily
 // require('source-map-support').install();
@@ -311,6 +312,7 @@ new Vue({
     },
   },
   created() {
+    console.log(messages);
     this.$store.commit('getLocalPreference');
     if (this.displayLanguage && messages[this.displayLanguage]) this.$i18n.locale = this.displayLanguage;
     asyncStorage.get('preferences').then((data) => {
@@ -357,6 +359,7 @@ new Vue({
   },
   watch: {
     playlistDisplayState(val: boolean) {
+      menuService.playlistDisplayStateUpdate();
       if (this.menu) {
         this.menu.getMenuItemById('KeyboardLeft').enabled = !val;
         this.menu.getMenuItemById('KeyboardRight').enabled = !val;
@@ -1589,6 +1592,9 @@ new Vue({
       this.$bus.$emit('drag-leave');
     });
 
+    this.$electron.ipcRenderer.on('menu', (event: Event, arg: MenuService) => {
+      console.log(arg, menuService, arg === menuService);
+    });
     this.$electron.ipcRenderer.on('open-file', (event: Event, args: { onlySubtitle: boolean, files: Array<string> }) => {
       if (!args.files.length && args.onlySubtitle) {
         log.info('helpers/index.js', `Cannot find any related video in the folder: ${args.files}`);
