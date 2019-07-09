@@ -203,14 +203,21 @@ export default {
     calculateSubBottom(index: number) {
       if ([1, 2, 3].includes(index + 1)) {
         const textHeight = calculateTextSize('9px', this.normalFont, '108%', this.secondarySubScale.toString(), 'test').height;
-        const adaptedCues = this.currentCues[1]
-          .filter((i: Cue) => [1, 2, 3].includes(i.tags.alignment as number));
+        let padding = 0;
+        if (this.chosenStyle === 4) {
+          padding = this.currentFirstSubtitleId && this.currentSecondarySubtitleId ? 1.35 : 1.44;
+        } else {
+          padding = 0;
+        }
+        const adaptedCues = this.noPositionCues[0]
+          .concat(this.noPositionCues[1], this.noPositionCues[2])
+          .filter((cue: Cue) => cue.category && cue.category === 'secondary');
         if (adaptedCues.length === 1 && this.currentFirstSubtitleId && !adaptedCues[0].text.includes('\n')) {
-          return `${(textHeight * this.secondarySubScale + (60 / 1080) * this.winHeight) * 100 / this.winHeight}%`;
+          return `${((textHeight + padding) * this.secondarySubScale + padding * 2 + (60 / 1080) * this.winHeight) * 100 / this.winHeight}%`;
         }
         if (adaptedCues.length === 0 && this.currentSecondarySubtitleId
           && this.currentFirstSubtitleId) {
-          return `${(this.subtitleSpace + textHeight * 2 * this.secondarySubScale + (60 / 1080) * this.winHeight) * 100 / this.winHeight}%`;
+          return `${(this.subtitleSpace + (textHeight + padding) * 2 * this.secondarySubScale + (60 / 1080) * this.winHeight) * 100 / this.winHeight}%`;
         }
         return `${60 / 10.8}%`;
       }
@@ -219,15 +226,21 @@ export default {
     calculateSubTop(index: number) {
       if ([7, 8, 9].includes(index + 1)) {
         const textHeight = calculateTextSize('9px', this.normalFont, '108%', this.scaleNum.toString(), 'test').height;
+        let padding = 0;
+        if (this.chosenStyle === 4) {
+          padding = this.currentFirstSubtitleId && this.currentSecondarySubtitleId ? 1.35 : 1.44;
+        } else {
+          padding = 0;
+        }
         const adaptedCues = this.noPositionCues[6]
           .concat(this.noPositionCues[7], this.noPositionCues[8])
           .filter((cue: Cue) => cue.category && cue.category === 'first');
         if (adaptedCues.length === 1 && this.currentSecondarySubtitleId && !adaptedCues[0].text.includes('\n')) {
-          return `${(60 / 1080 * this.winHeight + textHeight * this.scaleNum) * 100 / this.winHeight}%`;
+          return `${(60 / 1080 * this.winHeight + (textHeight + padding * 2) * this.scaleNum) * 100 / this.winHeight}%`;
         }
         if (adaptedCues.length === 0 && this.currentSecondarySubtitleId
           && this.currentFirstSubtitleId) {
-          return `${(this.subtitleSpace + textHeight * 2 * this.scaleNum + 60 / 1080 * this.winHeight) * 100 / this.winHeight}%`;
+          return `${(this.subtitleSpace + (textHeight + padding) * 2 * this.scaleNum + 60 / 1080 * this.winHeight) * 100 / this.winHeight}%`;
         }
         return `${60 / 10.8}%`;
       }
@@ -236,14 +249,14 @@ export default {
     calculatePaddingTop(cue: Cue, ind: number, item: Cue[]) {
       if (this.chosenStyle === 4
         && (ind === 0 || (item[ind - 1].category === 'first' && cue.category === 'secondary'))) {
-        return this.currentCues[1].length ? '1.44px' : '1.35px';
+        return this.currentFirstSubtitleId && this.currentSecondarySubtitleId ? '1.35px' : '1.44px';
       }
       return '';
     },
     calculatePaddingBottom(cue: Cue, ind: number, item: Cue[]) {
       if (this.chosenStyle === 4
         && (ind === item.length - 1 || (cue.category === 'first' && (!item[ind + 1] || item[ind + 1].category === 'secondary')))) {
-        return this.currentCues[1].length ? '1.44px' : '1.35px';
+        return this.currentFirstSubtitleId && this.currentSecondarySubtitleId ? '1.35px' : '1.44px';
       }
       return '';
     },
