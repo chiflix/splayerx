@@ -64,6 +64,7 @@
 <script lang="ts">
 import { isEqual } from 'lodash';
 import { Cue, Tags } from '@/interfaces/ISubtitle';
+import { calculateTextSize } from '@/libs/utils';
 
 export default {
   name: 'SubtitleRenderer',
@@ -107,6 +108,7 @@ export default {
   data() {
     return {
       noPositionCues: [],
+      normalFont: 'Avenir, Roboto-Regular, PingFang SC, Microsoft Yahei',
     };
   },
   computed: {
@@ -200,14 +202,15 @@ export default {
   methods: {
     calculateSubBottom(index: number) {
       if ([1, 2, 3].includes(index + 1)) {
+        const textHeight = calculateTextSize('9px', this.normalFont, '108%', this.secondarySubScale.toString(), 'test').height;
         const adaptedCues = this.currentCues[1]
           .filter((i: Cue) => [1, 2, 3].includes(i.tags.alignment as number));
         if (adaptedCues.length === 1 && this.currentFirstSubtitleId && !adaptedCues[0].text.includes('\n')) {
-          return `${(Math.floor(9 * 1.16) * this.secondarySubScale + 60 / 1080 * this.winHeight) * 100 / this.winHeight}%`;
+          return `${(textHeight * this.secondarySubScale + (60 / 1080) * this.winHeight) * 100 / this.winHeight}%`;
         }
         if (adaptedCues.length === 0 && this.currentSecondarySubtitleId
           && this.currentFirstSubtitleId) {
-          return `${(this.subtitleSpace + Math.floor(18 * 1.16) * this.secondarySubScale + 60 / 1080 * this.winHeight) * 100 / this.winHeight}%`;
+          return `${(this.subtitleSpace + textHeight * 2 * this.secondarySubScale + (60 / 1080) * this.winHeight) * 100 / this.winHeight}%`;
         }
         return `${60 / 10.8}%`;
       }
@@ -215,15 +218,16 @@ export default {
     },
     calculateSubTop(index: number) {
       if ([7, 8, 9].includes(index + 1)) {
+        const textHeight = calculateTextSize('9px', this.normalFont, '108%', this.scaleNum.toString(), 'test').height;
         const adaptedCues = this.noPositionCues[6]
           .concat(this.noPositionCues[7], this.noPositionCues[8])
-          .filter((cue: Cue) => cue.category === 'first');
+          .filter((cue: Cue) => cue.category && cue.category === 'first');
         if (adaptedCues.length === 1 && this.currentSecondarySubtitleId && !adaptedCues[0].text.includes('\n')) {
-          return `${(60 / 1080 * this.winHeight + Math.floor(9 * 1.16) * this.scaleNum) * 100 / this.winHeight}%`;
+          return `${(60 / 1080 * this.winHeight + textHeight * this.scaleNum) * 100 / this.winHeight}%`;
         }
         if (adaptedCues.length === 0 && this.currentSecondarySubtitleId
           && this.currentFirstSubtitleId) {
-          return `${(this.subtitleSpace + Math.floor(18 * 1.16) * this.scaleNum + 60 / 1080 * this.winHeight) * 100 / this.winHeight}%`;
+          return `${(this.subtitleSpace + textHeight * 2 * this.scaleNum + 60 / 1080 * this.winHeight) * 100 / this.winHeight}%`;
         }
         return `${60 / 10.8}%`;
       }
