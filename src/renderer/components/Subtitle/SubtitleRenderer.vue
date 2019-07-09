@@ -20,7 +20,7 @@
           zoom: cue.category === 'first' ? `${scaleNum}` : `${secondarySubScale}`,
           writingMode: (cue.category === 'first' ? firstType === 'vtt' : secondType === 'vtt')
             ? `vertical-${cue.tags.vertical}` : '',
-          lineHeight: calculateLineHeight(cue.text),
+          lineHeight: '120%',
           paddingTop: calculatePaddingTop(cue, ind, item),
           paddingBottom: calculatePaddingBottom(cue, ind, item),
           marginBottom: item[ind + 1] && cue.category === 'first' &&
@@ -52,7 +52,7 @@
           fontWeight: cue.tags.b ? 'bold' : '',
           fontStyle: cue.tags.i ? 'italic' : '',
           textDecoration: cue.tags.u ? 'underline' : cue.tags.s ? 'line-through' : '',
-          lineHeight: calculateLineHeight(cue.text),
+          lineHeight: '120%',
           paddingTop: calculatePaddingTop(cue, ind, item),
           paddingBottom: calculatePaddingBottom(cue, ind, item),
         }"
@@ -200,7 +200,7 @@ export default {
   methods: {
     calculateSubBottom(index: number) {
       if ([1, 2, 3].includes(index + 1)) {
-        const textHeight = calculateTextSize('9px', this.normalFont, '108%', this.secondarySubScale.toString(), 'test').height;
+        const textHeight = calculateTextSize('9px', this.normalFont, '120%', this.secondarySubScale.toString(), 'test').height;
         const padding = this.chosenStyle === 4 ? 0.9 : 0;
         const adaptedCues = this.noPositionCues[0]
           .concat(this.noPositionCues[1], this.noPositionCues[2])
@@ -218,7 +218,7 @@ export default {
     },
     calculateSubTop(index: number) {
       if ([7, 8, 9].includes(index + 1)) {
-        const textHeight = calculateTextSize('9px', this.normalFont, '108%', this.scaleNum.toString(), 'test').height;
+        const textHeight = calculateTextSize('9px', this.normalFont, '120%', this.scaleNum.toString(), 'test').height;
         const padding = this.chosenStyle === 4 ? 0.9 : 0;
         const adaptedCues = this.noPositionCues[6]
           .concat(this.noPositionCues[7], this.noPositionCues[8])
@@ -247,10 +247,6 @@ export default {
         return '0.9px';
       }
       return '';
-    },
-    calculateLineHeight(text: string) {
-      const line = text.split('\n').length + 1;
-      return `${(line - 1) * 20 + 100}%`;
     },
     calculatePosition(category: string, tags: Tags) {
       const type = category === 'first' ? this.firstType : this.secondType;
