@@ -113,10 +113,8 @@ export default {
   },
   computed: {
     subtitleSpace() {
-      const subSpaceFactorsA: number[] = [5 / 900, 9 / 900, 10 / 900, 12 / 900];
-      const subSpaceFactorsB: number[] = [4, 21 / 5, 4, 23 / 5];
-      return (subSpaceFactorsA[this.chosenSize] * this.winHeight)
-        + subSpaceFactorsB[this.chosenSize];
+      const subSpaceFactors: number[] = [12, 15, 18, 21];
+      return subSpaceFactors[this.chosenSize] / 1080 * this.winHeight;
     },
     firstType() {
       return this.currentCues[0].cue && this.currentCues[0].cue.length > 0 ? this.currentCues[0].cue[0].format : '';
@@ -203,12 +201,7 @@ export default {
     calculateSubBottom(index: number) {
       if ([1, 2, 3].includes(index + 1)) {
         const textHeight = calculateTextSize('9px', this.normalFont, '108%', this.secondarySubScale.toString(), 'test').height;
-        let padding = 0;
-        if (this.chosenStyle === 4) {
-          padding = this.currentFirstSubtitleId && this.currentSecondarySubtitleId ? 1.35 : 1.44;
-        } else {
-          padding = 0;
-        }
+        const padding = this.chosenStyle === 4 ? 0.9 : 0;
         const adaptedCues = this.noPositionCues[0]
           .concat(this.noPositionCues[1], this.noPositionCues[2])
           .filter((cue: Cue) => cue.category && cue.category === 'secondary');
@@ -226,12 +219,7 @@ export default {
     calculateSubTop(index: number) {
       if ([7, 8, 9].includes(index + 1)) {
         const textHeight = calculateTextSize('9px', this.normalFont, '108%', this.scaleNum.toString(), 'test').height;
-        let padding = 0;
-        if (this.chosenStyle === 4) {
-          padding = this.currentFirstSubtitleId && this.currentSecondarySubtitleId ? 1.35 : 1.44;
-        } else {
-          padding = 0;
-        }
+        const padding = this.chosenStyle === 4 ? 0.9 : 0;
         const adaptedCues = this.noPositionCues[6]
           .concat(this.noPositionCues[7], this.noPositionCues[8])
           .filter((cue: Cue) => cue.category && cue.category === 'first');
@@ -249,20 +237,20 @@ export default {
     calculatePaddingTop(cue: Cue, ind: number, item: Cue[]) {
       if (this.chosenStyle === 4
         && (ind === 0 || (item[ind - 1].category === 'first' && cue.category === 'secondary'))) {
-        return this.currentFirstSubtitleId && this.currentSecondarySubtitleId ? '1.35px' : '1.44px';
+        return '0.9px';
       }
       return '';
     },
     calculatePaddingBottom(cue: Cue, ind: number, item: Cue[]) {
       if (this.chosenStyle === 4
         && (ind === item.length - 1 || (cue.category === 'first' && (!item[ind + 1] || item[ind + 1].category === 'secondary')))) {
-        return this.currentFirstSubtitleId && this.currentSecondarySubtitleId ? '1.35px' : '1.44px';
+        return '0.9px';
       }
       return '';
     },
     calculateLineHeight(text: string) {
       const line = text.split('\n').length + 1;
-      return this.currentFirstSubtitleId && this.currentSecondarySubtitleId ? `${0.8 * ((line - 1) * 10) + 100}%` : `${(line - 1) * 10 + 100}%`;
+      return `${(line - 1) * 20 + 100}%`;
     },
     calculatePosition(category: string, tags: Tags) {
       const type = category === 'first' ? this.firstType : this.secondType;
