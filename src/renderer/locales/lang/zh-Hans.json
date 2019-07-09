@@ -195,6 +195,7 @@
   },
   "preferences": {
     "general": {
+      "hideHistory": "",
       "clearHistory": "退出时自动清空播放记录",
       "reverseScrolling": "鼠标滚轮反向",
       "setDefault": "设为默认播放器",
