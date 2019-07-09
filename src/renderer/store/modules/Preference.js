@@ -2,7 +2,7 @@ import asyncStorage from '@/helpers/asyncStorage';
 import syncStorage from '@/helpers/syncStorage';
 
 const state = {
-  deleteVideoHistoryOnExit: false,
+  hideVideoHistoryOnExit: false,
   privacyAgreement: undefined,
   displayLanguage: '',
   primaryLanguage: '',
@@ -13,7 +13,7 @@ const state = {
 };
 const getters = {
   preferenceData: state => state,
-  deleteVideoHistoryOnExit: state => state.deleteVideoHistoryOnExit,
+  hideVideoHistoryOnExit: state => state.hideVideoHistoryOnExit,
   reverseScrolling: state => state.reverseScrolling,
   privacyAgreement: state => state.privacyAgreement,
   displayLanguage: (state) => {
@@ -33,8 +33,8 @@ const mutations = {
   displayLanguage(state, payload) {
     state.displayLanguage = payload;
   },
-  deleteVideoHistoryOnExit(state, payload) {
-    state.deleteVideoHistoryOnExit = payload;
+  hideVideoHistoryOnExit(state, payload) {
+    state.hideVideoHistoryOnExit = payload;
   },
   reverseScrolling(state, payload) {
     state.reverseScrolling = payload;
@@ -83,12 +83,12 @@ const actions = {
     commit('reverseScrolling', false);
     return asyncStorage.set('preferences', state);
   },
-  deleteVideoHistoryOnExit({ commit, state }) {
-    commit('deleteVideoHistoryOnExit', true);
+  hideVideoHistoryOnExit({ commit, state }) {
+    commit('hideVideoHistoryOnExit', true);
     return asyncStorage.set('preferences', state);
   },
-  notDeleteVideoHistoryOnExit({ commit, state }) {
-    commit('deleteVideoHistoryOnExit', false);
+  nothideVideoHistoryOnExit({ commit, state }) {
+    commit('hideVideoHistoryOnExit', false);
     return asyncStorage.set('preferences', state);
   },
   primaryLanguage({ commit, state }, payload) {

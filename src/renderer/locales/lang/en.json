@@ -196,6 +196,7 @@
   },
   "preferences": {
     "general": {
+      "hideHistory": "Hide playback history",
       "clearHistory": "Always clear playback history on exit",
       "reverseScrolling": "Reverse mouse scrolling",
       "setDefault": "Set as the Default Video Player",

@@ -119,8 +119,8 @@
     <BaseCheckBox v-model="reverseScrolling">
       {{ $t('preferences.general.reverseScrolling') }}
     </BaseCheckBox>
-    <BaseCheckBox v-model="deleteVideoHistoryOnExit">
-      {{ $t('preferences.general.clearHistory') }}
+    <BaseCheckBox v-model="hideVideoHistoryOnExit">
+      {{ $t('preferences.general.hideHistory') }}
     </BaseCheckBox>
   </div>
 </template>
@@ -179,17 +179,17 @@ export default {
         }
       },
     },
-    deleteVideoHistoryOnExit: {
+    hideVideoHistoryOnExit: {
       get() {
-        return this.$store.getters.deleteVideoHistoryOnExit;
+        return this.$store.getters.hideVideoHistoryOnExit;
       },
       set(val) {
         if (val) {
-          this.$store.dispatch('deleteVideoHistoryOnExit').then(() => {
+          this.$store.dispatch('hideVideoHistoryOnExit').then(() => {
             electron.ipcRenderer.send('preference-to-main', this.preferenceData);
           });
         } else {
-          this.$store.dispatch('notDeleteVideoHistoryOnExit').then(() => {
+          this.$store.dispatch('nothideVideoHistoryOnExit').then(() => {
             electron.ipcRenderer.send('preference-to-main', this.preferenceData);
           });
         }
