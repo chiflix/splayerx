@@ -967,7 +967,7 @@ new Vue({
             {
               label: this.$t('msg.window.backToLandingView'),
               id: 'backToLandingView',
-              accelerator: 'CmdOrCtrl+Esc',
+              accelerator: 'CmdOrCtrl+E',
               click: () => {
                 this.$bus.$emit('back-to-landingview');
               },
