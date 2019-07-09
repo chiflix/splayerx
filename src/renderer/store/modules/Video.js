@@ -4,7 +4,12 @@ import romanize from 'romanize';
 import isEqual from 'lodash/isEqual';
 import { mediaQuickHash } from '@/libs/utils';
 import { Video as videoMutations } from '../mutationTypes';
-import { Video as videoActions, Subtitle as subtitleActions } from '../actionTypes';
+import {
+  Video as videoActions,
+  Subtitle as subtitleActions,
+  AudioTranslate as atActions,
+} from '../actionTypes';
+import { AudioTranslateBubbleOrigin } from './AudioTranslate';
 
 const state = {
   // error state
@@ -15,9 +20,9 @@ const state = {
   src: process.env.NODE_ENV === 'testing' ? './test/assets/test.avi' : '',
   mediaHash: process.env.NODE_ENV === 'testing'
     ? '84f0e9e5e05f04b58f53e2617cc9c866-'
-      + 'f54d6eb31bef84839c3ce4fc2f57991c-'
-      + 'b1f0696aec64577228d93eabcc8eb69b-'
-      + 'f497c6684c4c6e50d0856b5328a4bedc'
+    + 'f54d6eb31bef84839c3ce4fc2f57991c-'
+    + 'b1f0696aec64577228d93eabcc8eb69b-'
+    + 'f497c6684c4c6e50d0856b5328a4bedc'
     : '',
   currentSrc: '',
   networkState: '',
@@ -195,22 +200,31 @@ function generateRate(rateInfo, nowRate, oldRateGroup) {
 const mutations = mutationsGenerator(videoMutations);
 
 const actions = {
-  [videoActions.SRC_SET]({ commit, dispatch }, { src, mediaHash, id }) {
+  [videoActions.SRC_SET]({ commit, dispatch, getters }, { src, mediaHash, id }) {
     const srcRegexes = {
       unix: RegExp(/^[^\0]+$/),
       windows: RegExp(/^[a-zA-Z]:\/(((?![<>:"//|?*]).)+((?<![ .])\/)?)*$/),
     };
-    Object.keys(srcRegexes).forEach(async (type) => {
-      if (srcRegexes[type].test(src)) {
-        commit(videoMutations.SRC_UPDATE, src);
-        commit(
-          videoMutations.MEDIA_HASH_UPDATE,
-          mediaHash || await mediaQuickHash(src),
-        );
-        commit(videoMutations.ID_UPDATE, id);
-        dispatch(subtitleActions.INITIALIZE_VIDEO_SUBTITLE_MAP, { videoSrc: src });
-      }
-    });
+    if (getters.isTranslating) {
+      // 如果正在进行智能翻译，就阻止切换视频
+      // 并且提示是否终止智能翻译
+      dispatch(atActions.AUDIO_TRANSLATE_SHOW_BUBBLE, AudioTranslateBubbleOrigin.VideoChange);
+      dispatch(atActions.AUDIO_TRANSLATE_BUBBLE_CALLBACK, () => {
+        dispatch(videoActions.SRC_SET, { src, mediaHash, id });
+      });
+    } else {
+      Object.keys(srcRegexes).forEach(async (type) => {
+        if (srcRegexes[type].test(src)) {
+          commit(videoMutations.SRC_UPDATE, src);
+          commit(
+            videoMutations.MEDIA_HASH_UPDATE,
+            mediaHash || await mediaQuickHash(src),
+          );
+          commit(videoMutations.ID_UPDATE, id);
+          dispatch(subtitleActions.INITIALIZE_VIDEO_SUBTITLE_MAP, { videoSrc: src });
+        }
+      });
+    }
   },
   [videoActions.INITIALIZE]({ commit }, config) {
     Object.keys(config).forEach((item) => {

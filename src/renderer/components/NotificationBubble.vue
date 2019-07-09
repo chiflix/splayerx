@@ -23,6 +23,14 @@
       @close-privacy-bubble="closePrivacyBubble"
       class="mas-privacy-bubble"
     />
+    <translate-bubble
+      v-if="isTranslateBubbleVisiable"
+      :message="translateBubbleMessage"
+      :type="translateBubbleType"
+      @disCardTranslate="confirmDiscardTranslate"
+      @backStageTranslate="confirmBackStageTranslate"
+      @hide="hideTranslateBubble()"
+    />
     <transition-group
       name="toast"
       class="transGroup"
@@ -64,11 +72,13 @@
 </template>
 
 <script lang="ts">
-import { mapGetters } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
 import NextVideo from '@/components/PlayingView/NextVideo.vue';
 import PrivacyBubble from '@/components/PlayingView/PrivacyConfirmBubble.vue';
+import TranslateBubble from '@/components/PlayingView/TranslateBubble.vue';
 import MASPrivacyBubble from '@/components/PlayingView/MASPrivacyConfirmBubble.vue';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
+import { AudioTranslate as atActions } from '@/store/actionTypes';
 import Icon from './BaseIconContainer.vue';
 
 export default {
@@ -80,6 +90,7 @@ export default {
     NextVideo,
     PrivacyBubble,
     MASPrivacyBubble,
+    'translate-bubble': TranslateBubble,
   },
   data() {
     return {
@@ -91,7 +102,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['nextVideo', 'nextVideoPreviewTime', 'duration', 'singleCycle', 'privacyAgreement']),
+    ...mapGetters(['nextVideo', 'nextVideoPreviewTime', 'duration', 'singleCycle', 'privacyAgreement', 'translateBubbleMessage', 'translateBubbleType', 'isTranslateBubbleVisiable']),
     messages() {
       const messages = this.$store.getters.messageInfo;
       if (this.showNextVideo && this.showPrivacyBubble) {
@@ -132,6 +143,11 @@ export default {
     });
   },
   methods: {
+    ...mapActions({
+      hideTranslateBubble: atActions.AUDIO_TRANSLATE_HIDE_BUBBLE,
+      discardTranslate: atActions.AUDIO_TRANSLATE_DISCARD,
+      backStageTranslate: atActions.AUDIO_TRANSLATE_BACKSATGE,
+    }),
     closePrivacyBubble() {
       this.showPrivacyBubble = false;
     },
@@ -159,6 +175,16 @@ export default {
       if (this.$refs.nextVideo) {
         this.$refs.nextVideo.updatePlayingTime(time);
       }
+    },
+    confirmDiscardTranslate() {
+      this.hideTranslateBubble();
+      // discard translate
+      this.discardTranslate();
+    },
+    confirmBackStageTranslate() {
+      this.hideTranslateBubble();
+      // translate back stage
+      this.backStageTranslate();
     },
   },
 };

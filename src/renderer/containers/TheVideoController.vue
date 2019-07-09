@@ -216,12 +216,15 @@ export default {
       'playingList', 'isFolderList',
       'isFullScreen', 'isFocused', 'isMinimized',
       'leftMousedown', 'progressKeydown', 'volumeKeydown', 'wheelTriggered', 'volumeWheelTriggered',
-      'enabledSecondarySub',
+      'enabledSecondarySub', 'isTranslateModalVisiable',
     ]),
     ...inputMapGetters({
       inputWheelDirection: iGT.GET_WHEEL_DIRECTION,
     }),
     showAllWidgets() {
+      if (this.isTranslateModalVisiable) {
+        return false;
+      }
       return !this.tempRecentPlaylistDisplayState
         && ((!this.mouseStopped && !this.mouseLeftWindow)
         || (!this.mouseLeftWindow && this.onOtherWidget)

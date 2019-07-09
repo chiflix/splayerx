@@ -69,7 +69,8 @@
                 />
               </transition>
               <transition
-                v-if="translateProgress <= 0"
+                v-if="item.type === 'translated'
+                  && (item.language !== translateLanguage || translateProgress <= 0)"
                 name="sub-delete"
               >
                 <span
@@ -78,8 +79,15 @@
                   class="txt"
                 >生成</span>
               </transition>
-              <div v-else>
-                {{ translateProgress }}
+              <div
+                v-else-if="translateProgress > 0 && item.type === 'translated'
+                  && item.language === translateLanguage"
+                style="width: 20px; height: 20px"
+              >
+                <Progress
+                  :progress="translateProgress"
+                  :type="'circle'"
+                />
               </div>
             </div>
           </div>
@@ -118,6 +126,7 @@
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import { SubtitleControlListItem } from '@/interfaces/ISubtitle';
 import Icon from '../BaseIconContainer.vue';
+import Progress from './Progress.vue';
 
 export default {
   name: 'SubtitleList',
@@ -125,6 +134,7 @@ export default {
   type: INPUT_COMPONENT_TYPE,
   components: {
     Icon,
+    Progress,
   },
   props: {
     useBlur: {
@@ -186,6 +196,10 @@ export default {
     translateProgress: {
       type: Number,
       default: 0,
+    },
+    translateLanguage: {
+      type: String,
+      required: true,
     },
   },
   data() {

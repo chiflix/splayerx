@@ -6,7 +6,7 @@
       class="dropdown__toggle no-drag"
     >
       <div class="dropdown__displayItem">
-        {{ selected.label }}
+        {{ selected.label }} -> {{ staticLabel }}
       </div>
       <div
         @mouseup.stop=""
@@ -46,6 +46,10 @@ export default Vue.extend({
       type: Array,
       required: true,
     },
+    staticLabel: {
+      type: String,
+      default: '',
+    },
   },
   data() {
     return {
@@ -66,7 +70,7 @@ export default Vue.extend({
         this.showSelection = false;
       }
     },
-    change(item: any) {
+    change(item: { value: string, label: string }) {
       this.$emit('update:selected', item);
     },
   },

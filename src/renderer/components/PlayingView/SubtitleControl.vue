@@ -80,6 +80,7 @@
                 :enabled-secondary-sub="enabledSecondarySub"
                 :change-subtitle="changeSubtitle"
                 :translate-progress="translateProgress"
+                :translate-language="selectedTargetLanugage"
                 @off-subtitle="offCurrentSubtitle"
                 @remove-subtitle="deleteCurrentSubtitle"
               />
@@ -161,7 +162,7 @@ export default {
   },
   computed: {
     ...mapGetters(['winWidth', 'originSrc', 'primarySubtitleId', 'secondarySubtitleId', 'list', 'privacyAgreement',
-      'calculatedNoSub', 'winHeight', 'isFirstSubtitle', 'enabledSecondarySub', 'isRefreshing', 'winRatio', 'translateProgress']),
+      'calculatedNoSub', 'winHeight', 'isFirstSubtitle', 'enabledSecondarySub', 'isRefreshing', 'winRatio', 'translateProgress', 'selectedTargetLanugage']),
     ...mapState({
       loadingTypes: ({ Subtitle }) => {
         const { loadingStates, types } = Subtitle;
@@ -442,9 +443,11 @@ export default {
     },
     changeSubtitle(item: SubtitleControlListItem) {
       if (item.type === Type.Translated) {
-        this.showAudioTranslateModal();
-      }
-      if (this.isFirstSubtitle) {
+        this.showAudioTranslateModal(item);
+        // hide subtitle control
+        this.$emit('update:showAttached', false);
+        this.clicks = 0;
+      } else if (this.isFirstSubtitle) {
         this.changeFirstSubtitle(item.id);
       } else {
         this.changeSecondarySubtitle(item.id);

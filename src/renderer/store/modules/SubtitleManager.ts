@@ -182,8 +182,6 @@ const actions = {
         [primaryLanguage, secondaryLanguage],
       ).length
     );
-    // add ai button
-    dispatch(a.addSubtitle, { generator: new TranslatedGenerator(primaryLanguage, 0), playlistId, mediaItemId });   
     if (preference && !needRefreshing) {
       try {
         await Promise.race([
@@ -194,7 +192,7 @@ const actions = {
           }),
           new Promise((resolve, reject) => setTimeout(() => reject('timeout'), 10000)),
         ]);
-      } catch(error) {
+      } catch (error) {
         console.error(error);
       } finally {
         commit(m.setIsRefreshing, false);
@@ -209,7 +207,7 @@ const actions = {
         selected: preference.selected,
         playlistId, mediaItemId,
       })
-      .then(() => dispatch(a.refreshSubtitles, { playlistId, mediaItemId }));
+        .then(() => dispatch(a.refreshSubtitles, { playlistId, mediaItemId }));
     }
   },
   async [a.refreshSubtitles](
@@ -243,8 +241,20 @@ const actions = {
         oldSubtitlesToDel.push(...remove(oldSubtitles, ({ type, hash }) => type === Type.Online && !results.find(({ transcriptIdentity }) => transcriptIdentity === hash)));
         newSubtitlesToAdd.push(...results.filter(({ transcriptIdentity }) => !oldSubtitles.find(({ id }) => id === transcriptIdentity)));
         return { delete: oldSubtitlesToDel, add: newSubtitlesToAdd };
-      }).then((result) => dispatch(a.addOnlineSubtitles, { transcriptInfoList: result.add, playlistId, mediaItemId })
-        .then(() => dispatch(a.deleteSubtitlesByUuid, result.delete)));
+      }).then((result) => {
+        const primaryResults = result.add.filter((info: TranscriptInfo) => info.languageCode === primaryLanguage);
+        const secondaryResults = result.add.filter((info: TranscriptInfo) => info.languageCode === secondaryLanguage);
+        if ( primaryResults.length < 3) {
+          // 如果首选项语言字幕不足3个，就出现首选项语言的AI按钮
+          dispatch(a.addSubtitle, { generator: new TranslatedGenerator(primaryLanguage, 0), playlistId, mediaItemId });
+        }
+        if (secondaryResults.length < 3) {
+          // 如果次选项语言字幕不足3个，就出现次选项语言的AI按钮
+          dispatch(a.addSubtitle, { generator: new TranslatedGenerator(secondaryLanguage, 0), playlistId, mediaItemId });
+        }
+        dispatch(a.addOnlineSubtitles, { transcriptInfoList: result.add, playlistId, mediaItemId })
+        .then(() => dispatch(a.deleteSubtitlesByUuid, result.delete))
+      });
     }
     /** whether to search embedded subtitles */
     const embedded = list.some(({ type }) => type === Type.Embedded);
@@ -259,9 +269,10 @@ const actions = {
       ]);
       dispatch(a.stopAISelection);
       storeSubtitleLanguage([primaryLanguage, secondaryLanguage], playlistId, mediaItemId);
-      addSubtitleItemsToList(getters.list, playlistId, mediaItemId);
+      const list = getters.list.filter((sub: SubtitleControlListItem) => sub.type !== Type.Translated);
+      addSubtitleItemsToList(list, playlistId, mediaItemId);
       dispatch(a.checkLocalSubtitles);
-    } catch(ex) {
+    } catch (ex) {
       console.error(ex);
     } finally {
       dispatch(a.checkSubtitleList);
@@ -385,22 +396,26 @@ const actions = {
     });
     return removeSubtitleItemsFromList(storedSubtitleItems, state.playlistId, state.mediaItemId);
   },
-  async [a.changePrimarySubtitle]({ dispatch, commit, getters }: any, id: string) {
+  async [a.changePrimarySubtitle]({ dispatch, commit, getters, state }: any, id: string) {
     let primary = id;
     let secondary = getters.secondarySubtitleId;
     if (id === secondary) secondary = '';
     commit(m.setPrimarySubtitleId, primary);
     commit(m.setSecondarySubtitleId, secondary);
-    dispatch(a.storeSelectedSubtitle, [primary, secondary]);
+    if (state[id] && state[id].type !== Type.Translated) {
+      dispatch(a.storeSelectedSubtitle, [primary, secondary]);
+    }
     if (id) await dispatch(`${id}/${subActions.load}`);
   },
-  async [a.changeSecondarySubtitle]({ dispatch, commit, getters }: any, id: string) {
+  async [a.changeSecondarySubtitle]({ dispatch, commit, getters, state }: any, id: string) {
     let primary = getters.primarySubtitleId;
     let secondary = id;
     if (id === primary) primary = '';
     commit(m.setPrimarySubtitleId, primary);
     commit(m.setSecondarySubtitleId, secondary);
-    dispatch(a.storeSelectedSubtitle, [primary, secondary]);
+    if (state[id] && state[id].type !== Type.Translated) {
+      dispatch(a.storeSelectedSubtitle, [primary, secondary]);
+    }
     if (id) await dispatch(`${id}/${subActions.load}`);
   },
   async [a.storeSelectedSubtitle]({ state }: any, ids: string[]) {
@@ -427,9 +442,9 @@ const actions = {
       const { primaryLanguage, secondaryLanguage } = getters;
       if (!primarySelectionComplete || !secondarySelectionComplete) {
         const hasPrimaryLanguage = list
-          .find(({ language }) => language === primaryLanguage);
+          .find(({ language, type }) => language === primaryLanguage && type !== Type.Translated);
         const hasSecondaryLanguage = list
-          .find(({ language }) => language === secondaryLanguage);
+          .find(({ language, type }) => language === secondaryLanguage && type !== Type.Translated);
         if (hasPrimaryLanguage) {
           dispatch(a.changePrimarySubtitle, hasPrimaryLanguage.id);
           primarySelectionComplete = true;
@@ -496,7 +511,7 @@ const actions = {
       dispatch(`${primarySubtitleId}/${subActions.updatePlayedTime}`, times)
         .then((playedTime: number) => {
           if (playedTime >= getters.duration * 0.6) {
-            addBubble(SUBTITLE_UPLOAD, { id: `${SUBTITLE_UPLOAD}-${bubbleId}`});
+            addBubble(SUBTITLE_UPLOAD, { id: `${SUBTITLE_UPLOAD}-${bubbleId}` });
             dispatch(`${primarySubtitleId}/${subActions.upload}`).then((result: boolean) => {
               const bubbleType = result ? UPLOAD_SUCCESS : UPLOAD_FAILED;
               addBubble(bubbleType, { id: `${bubbleType}-${bubbleId}` });
@@ -508,7 +523,7 @@ const actions = {
       dispatch(`${secondarySubtitleId}/${subActions.updatePlayedTime}`, times)
         .then((playedTime: number) => {
           if (playedTime >= getters.duration * 0.6) {
-            addBubble(SUBTITLE_UPLOAD, { id: `${SUBTITLE_UPLOAD}-${bubbleId}`});
+            addBubble(SUBTITLE_UPLOAD, { id: `${SUBTITLE_UPLOAD}-${bubbleId}` });
             dispatch(`${secondarySubtitleId}/${subActions.upload}`).then((result: boolean) => {
               const bubbleType = result ? UPLOAD_SUCCESS : UPLOAD_FAILED;
               addBubble(bubbleType, { id: `${bubbleType}-${bubbleId}` });

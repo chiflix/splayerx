@@ -517,6 +517,9 @@ function registerMainWindowEvent(mainWindow) {
       mainWindow.webContents.send('grab-audio-change', { ...args, grabInfo: grabInfoS });
     });
   });
+  ipcMain.on('grab-audio-stop', () => {
+    audioGrabService.stop();
+  });
 }
 
 function createWindow() {

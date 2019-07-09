@@ -34,6 +34,7 @@
         class="select"
       >
         <Select
+          :static-label="translateLanguageLabel"
           :selected.sync="audioLanguage"
           :list="lanugages"
         />
@@ -82,10 +83,7 @@ import {
   AudioTranslate as atActions,
 } from '@/store/actionTypes';
 // grab libs
-import { audioGrabService } from '@/services/media/AudioGrabService';
 import { codeToLanguageName } from '@/libs/language';
-import { AITaskInfo } from '@/interfaces/IMediaStorable';
-import { TranscriptInfo } from '@/services/subtitle';
 // grab libs
 import SubtitleRenderer from '@/components/Subtitle/SubtitleRenderer.vue';
 import Select from '@/components/PlayingView/Select.vue';
@@ -127,7 +125,7 @@ export default {
     ...mapGetters([
       'scaleNum', 'subToTop', 'primarySubtitleId', 'secondarySubtitleId', 'winHeight',
       'chosenStyle', 'chosenSize', 'originSrc', 'mediaHash', 'primaryLanguage', 'duration',
-      'isTranslateModalVisiable', 'isTranslating', 'translateProgress',
+      'isTranslateModalVisiable', 'translateProgress', 'isTranslating', 'selectedTargetLanugage',
     ]),
     concatCurrentCues() {
       if (this.currentCues.length === 2) {
@@ -143,6 +141,9 @@ export default {
         ];
       }
       return [];
+    },
+    translateLanguageLabel() {
+      return codeToLanguageName(this.selectedTargetLanugage);
     },
   },
   watch: {
@@ -175,7 +176,6 @@ export default {
     });
   },
   beforeDestroy() {
-    audioGrabService.remove();
     this.updateSubToTop(false);
     videodata.stopCheckTick();
   },
@@ -187,17 +187,13 @@ export default {
       getCues: smActions.getCues,
       updatePlayTime: smActions.updatePlayedTime,
       hideTranslateModal: atActions.AUDIO_TRANSLATE_HIDE_MODAL,
-      updateTranslateStatus: atActions.AUDIO_TRANSLATE_UPDATE_STATUS,
-      updateTranslateProgress: atActions.AUDIO_TRANSLATE_UPDATE_PROGRESS,
+      startTranslate: atActions.AUDIO_TRANSLATE_START,
     }),
     // Compute UI states
     // When the video is playing the ontick is triggered by ontimeupdate of Video tag,
     // else it is triggered by setInterval.
     onUpdateTick() {
       requestAnimationFrame(this.loopCues);
-      const video = document.getElementById('play-video') as HTMLVideoElement;
-      const buffered = video.buffered;
-      // console.log(`Start: ${buffered.start(0)} End:  ${buffered.end(0)}`);
       this.$refs.videoctrl.onTickUpdate();
     },
     async loopCues() {
@@ -214,32 +210,7 @@ export default {
     changeLanguage() {
     },
     translate() {
-      this.updateTranslateStatus('grabbing');
-      const grab = audioGrabService.send({
-        mediaHash: this.mediaHash,
-        videoSrc: this.originSrc,
-        audioLanguageCode: this.audioLanguage.value,
-        targetLanguageCode: this.primaryLanguage,
-      });
-      if (grab) {
-        grab.on('grab', (time: number) => {
-          const progress = Math.ceil((time / this.duration) * 100);
-          this.updateTranslateProgress(progress);
-        });
-        grab.on('error', (error: Error) => {
-          console.log(error);
-        });
-        grab.on('task', (taskInfo: AITaskInfo) => {
-          this.updateTranslateStatus('translating');
-          this.isGrab = false;
-          this.isTasking = true;
-          this.grabProgress = taskInfo.estimateTime;
-          console.log(taskInfo);
-        });
-        grab.on('transcriptInfo', (transcriptInfo: TranscriptInfo) => {
-          console.log(transcriptInfo);
-        });
-      }
+      this.startTranslate();
     },
   },
 };

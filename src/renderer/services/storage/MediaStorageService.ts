@@ -78,19 +78,19 @@ export default class MediaStorageService implements IMediaStorable {
       return null
     }
   }
-  getAsyncTaskInfo(): AITaskInfo | undefined {
-    const result = localStorage.getItem('AITaskInfo');
+  getAsyncTaskInfo(key: string): AITaskInfo | undefined {
+    const result = localStorage.getItem(key);
     const info: any = result ? JSON.parse(result) : undefined;
     if (info && info.taskId) {
       return info as AITaskInfo;
     }
     return undefined;
   }
-  setAsyncTaskInfo(taskInfo: AITaskInfo): void {
-    localStorage.setItem('AITaskInfo', JSON.stringify(taskInfo));
+  setAsyncTaskInfo(key: string, taskInfo: AITaskInfo): void {
+    localStorage.setItem(key, JSON.stringify(taskInfo));
   }
-  clearAsyncTaskInfo(): void {
-    localStorage.removeItem('AITaskInfo');
+  clearAsyncTaskInfo(key: string): void {
+    localStorage.removeItem(key);
   }
 }
 

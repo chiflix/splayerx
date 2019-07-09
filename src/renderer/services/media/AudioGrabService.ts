@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com 
  * @Date: 2019-06-20 18:03:14 
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-07-03 15:54:25
+ * @Last Modified time: 2019-07-09 18:18:33
  */
 
 // @ts-ignore
@@ -49,13 +49,13 @@ declare interface AudioGrabService {
 }
 
 class AudioGrabService extends EventEmitter {
-  mediaHash: string = '';
-  videoSrc: string = '';
+  mediaHash: string;
+  videoSrc: string;
   pts: string = '0';
   audioChannel: number = 1;
   rate: number = 16000;
-  audioLanguageCode: string = '';
-  targetLanguageCode: string = '';
+  audioLanguageCode: string;
+  targetLanguageCode: string;
   streamClient: any = null;
   request: any = null;
   queue: [JobData];
@@ -69,15 +69,19 @@ class AudioGrabService extends EventEmitter {
 
   constructor(private readonly mediaStorageService: MediaStorageService) {
     super();
-    this.ipcCallBack = this.ipcCallBack.bind(this)
+    this.ipcCallBack = this.ipcCallBack.bind(this);
   }
 
   public send(data: JobData): AudioGrabService | null {
-    this.taskInfo = this.mediaStorageService.getAsyncTaskInfo();
+    this.taskInfo = this.mediaStorageService.getAsyncTaskInfo(data.mediaHash);
     if (this.taskInfo) {
       // 当前有任务在进行
       return null;
     } else {
+      this.mediaHash = data.mediaHash;
+      this.videoSrc = data.videoSrc;
+      this.audioLanguageCode = data.audioLanguageCode;
+      this.targetLanguageCode = data.targetLanguageCode;
       ipcRenderer.send('grab-audio', data);
       ipcRenderer.on('grab-audio-change', this.ipcCallBack);
       return this;
@@ -106,8 +110,25 @@ class AudioGrabService extends EventEmitter {
   }
 
   public remove() {
+    ipcRenderer.send('grab-audio-stop');
     ipcRenderer.removeListener('grab-audio-change', this.ipcCallBack);
     this.removeAllListeners();
+  }
+
+  public stop() {
+    if (this.streamClient) {
+      setTimeout(() => {
+        // this.streamClient = null;
+        // this.request = null;
+      }, 0);
+      splayerx.stopGrabAudioFrame();
+    }
+  }
+
+  public saveTask() {
+    if (this.taskInfo) {
+      mediaStorageService.setAsyncTaskInfo(this.mediaHash, this.taskInfo);
+    }
   }
 
   private grabAudio() {
@@ -182,7 +203,6 @@ class AudioGrabService extends EventEmitter {
   }
 
   private startJob(data: JobData) {
-    console.log(data);
     this.mediaHash = data.mediaHash;
     this.videoSrc = data.videoSrc;
     this.audioLanguageCode = data.audioLanguageCode;
@@ -241,6 +261,8 @@ class AudioGrabService extends EventEmitter {
       this.grabEndTime = Date.now();
       this.taskInfo = {
         mediaHash: this.mediaHash,
+        audioLanguageCode: this.audioLanguageCode,
+        targetLanguage: this.targetLanguageCode,
         ...result.taskinfo,
       } as AITaskInfo
       // if streamClient exist end my stream
@@ -265,24 +287,19 @@ class AudioGrabService extends EventEmitter {
         transcriptInfo: result.transcriptResult,
       });
       this.clearJob();
-    } else if (res.hasError()) {
+    } else if (res.hasError() && result.error.code !== 9100) {
       // return error to render
       this.callback({
         status: Status.Error,
         error: result.error,
       });
     } else if (err) {
+      console.warn(err);
       this.callback({
         status: Status.Error,
         error: err,
       });
     }
-    // if (res && this.queue.length > 0) {
-    //   const job = this.queue.shift();
-    //   if (job) {
-    //     this.startJob(job);
-    //   }
-    // }
   }
 
   loopTask(taskInfo: AITaskInfo) {
@@ -322,6 +339,8 @@ class AudioGrabService extends EventEmitter {
     } else if (res.hasTaskinfo()) {
       this.taskInfo = {
         ...result.taskinfo,
+        audioLanguageCode: this.audioLanguageCode,
+        targetLanguage: this.targetLanguageCode,
         mediaHash: this.mediaHash,
       } as AITaskInfo;
       if (this.taskInfo) {
@@ -353,4 +372,6 @@ class AudioGrabService extends EventEmitter {
 }
 export default AudioGrabService;
 
-export const audioGrabService = new AudioGrabService(mediaStorageService);
+const audioGrabService = new AudioGrabService(mediaStorageService);
+
+export { audioGrabService };

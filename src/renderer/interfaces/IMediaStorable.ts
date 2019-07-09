@@ -2,6 +2,8 @@ export type AITaskInfo = {
   mediaHash: string,
   taskId: string,
   estimateTime: number,
+  audioLanguageCode: string,
+  targetLanguage: string,
 }
 
 export interface IMediaStorable {
@@ -21,7 +23,7 @@ export interface IMediaStorable {
    * @returns {(Promise<string | null>)} 返回文件路径，如果没有就是null
    */
   getImageBy(mediaHash: string, tag: string): Promise<string | null>
-  getAsyncTaskInfo(): AITaskInfo | undefined
-  setAsyncTaskInfo(taskInfo: AITaskInfo): void
-  clearAsyncTaskInfo(): void
+  getAsyncTaskInfo(key: string): AITaskInfo | undefined
+  setAsyncTaskInfo(key: string, taskInfo: AITaskInfo): void
+  clearAsyncTaskInfo(key: string): void
 }
