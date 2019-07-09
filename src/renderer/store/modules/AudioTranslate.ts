@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com 
  * @Date: 2019-07-05 16:03:32 
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-07-09 18:26:41
+ * @Last Modified time: 2019-07-09 18:48:01
  */
 import { AudioTranslate as m } from '@/store/mutationTypes';
 import { AudioTranslate as a, SubtitleManager as smActions } from '@/store/actionTypes';
@@ -203,6 +203,7 @@ const actions = {
       });
     } else if (taskInfo && taskInfo.targetLanguage === sub.language) {
       commit(m.AUDIO_TRANSLATE_SELECTED_UPDATE, sub);
+      // TODO 检查audioLanguage 是否已经添加到taskInfo
       dispatch(a.AUDIO_TRANSLATE_START, taskInfo.audioLanguageCode);
       commit(m.AUDIO_TRANSLATE_UPDATE_PROGRESS, 51);
       commit(m.AUDIO_TRANSLATE_SHOW_MODAL);

@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com 
  * @Date: 2019-06-20 18:03:14 
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-07-09 18:18:33
+ * @Last Modified time: 2019-07-09 18:40:37
  */
 
 // @ts-ignore
@@ -72,20 +72,14 @@ class AudioGrabService extends EventEmitter {
     this.ipcCallBack = this.ipcCallBack.bind(this);
   }
 
-  public send(data: JobData): AudioGrabService | null {
-    this.taskInfo = this.mediaStorageService.getAsyncTaskInfo(data.mediaHash);
-    if (this.taskInfo) {
-      // 当前有任务在进行
-      return null;
-    } else {
-      this.mediaHash = data.mediaHash;
-      this.videoSrc = data.videoSrc;
-      this.audioLanguageCode = data.audioLanguageCode;
-      this.targetLanguageCode = data.targetLanguageCode;
-      ipcRenderer.send('grab-audio', data);
-      ipcRenderer.on('grab-audio-change', this.ipcCallBack);
-      return this;
-    }
+  public send(data: JobData): AudioGrabService {
+    this.mediaHash = data.mediaHash;
+    this.videoSrc = data.videoSrc;
+    this.audioLanguageCode = data.audioLanguageCode;
+    this.targetLanguageCode = data.targetLanguageCode;
+    ipcRenderer.send('grab-audio', data);
+    ipcRenderer.on('grab-audio-change', this.ipcCallBack);
+    return this;
   }
 
   ipcCallBack(event: Event, args: any) {
@@ -98,6 +92,7 @@ class AudioGrabService extends EventEmitter {
           this.emit('error', args.grabInfo.error);
           break;
         case Status.Task:
+          console.log(args.grabInfo);
           this.emit('task', args.grabInfo.taskInfo);
           break;
         case Status.TranscriptInfo:
@@ -338,14 +333,12 @@ class AudioGrabService extends EventEmitter {
       });
     } else if (res.hasTaskinfo()) {
       this.taskInfo = {
-        ...result.taskinfo,
         audioLanguageCode: this.audioLanguageCode,
         targetLanguage: this.targetLanguageCode,
         mediaHash: this.mediaHash,
+        ...result.taskinfo,
       } as AITaskInfo;
-      if (this.taskInfo) {
-        this.taskInfo.taskId = '2';
-      }
+      console.log(this.taskInfo);
       this.callback({
         status: Status.Task,
         taskInfo: this.taskInfo,
