@@ -552,7 +552,11 @@ export default {
     },
   },
   mounted() {
-    this.$bus.$on('show-subtitle-settings', this.handleSubClick);
+    this.$bus.$on('show-subtitle-settings', () => {
+      setTimeout(() => {
+        this.handleSubClick();
+      }, 0);
+    });
     this.useBlur = window.devicePixelRatio === 1;
     this.$bus.$on('switch-audio-track', (index: number) => {
       this.switchAudioTrack(this.audioTrackList[index]);

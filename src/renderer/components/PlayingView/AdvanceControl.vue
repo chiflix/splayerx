@@ -11,6 +11,7 @@
           class="advanced"
         >
           <advance-main-menu
+            ref="advanceMenu"
             :clear-state="showAttached"
             class="mainMenu"
           />
@@ -130,7 +131,7 @@ export default {
       } else {
         this.anim.playSegments([68, 83], true);
       }
-      this.clicks = this.showAttached ? 1 : 0;
+      this.clicks = this.showAttached && this.$refs.advanceMenu.readyShow === 'subMenu' ? 1 : 0;
       this.clicks += 1;
       switch (this.clicks) {
         case 1:

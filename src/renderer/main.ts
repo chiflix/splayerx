@@ -383,16 +383,6 @@ new Vue({
     currentRouteName(val) {
       this.menuStateControl(val !== 'landing-view');
     },
-    chosenStyle(val) {
-      if (this.menu) {
-        this.menu.getMenuItemById(`style${val}`).checked = true;
-      }
-    },
-    chosenSize(val) {
-      if (this.menu) {
-        this.menu.getMenuItemById(`size${val}`).checked = true;
-      }
-    },
     volume(val) {
       if (this.menu) {
         this.menu.getMenuItemById('mute').checked = val <= 0;
@@ -516,6 +506,7 @@ new Vue({
       refreshSubtitles: smActions.refreshSubtitles,
       addLocalSubtitlesWithSelect: smActions.addLocalSubtitlesWithSelect,
       updateSubtitleType: subtitleActions.UPDATE_SUBTITLE_TYPE,
+      updateSubSettingsType: subtitleActions.UPDATE_SUBTITLE_SETTINGS_TYPE,
     }),
     /**
      * @description 找到所有menu,禁用调.目前就两层循环，如果出现孙子menu，需要再嵌套一层循环
@@ -773,91 +764,6 @@ new Vue({
             // },
             { type: 'separator' },
             {
-              label: this.$t('msg.subtitle.subtitleSize'),
-              submenu: [
-                {
-                  label: this.$t('msg.subtitle.size1'),
-                  type: 'radio',
-                  id: 'size0',
-                  click: () => {
-                    this.$bus.$emit('change-size-by-menu', 0);
-                  },
-                },
-                {
-                  label: this.$t('msg.subtitle.size2'),
-                  type: 'radio',
-                  id: 'size1',
-                  checked: true,
-                  click: () => {
-                    this.$bus.$emit('change-size-by-menu', 1);
-                  },
-                },
-                {
-                  label: this.$t('msg.subtitle.size3'),
-                  type: 'radio',
-                  id: 'size2',
-                  click: () => {
-                    this.$bus.$emit('change-size-by-menu', 2);
-                  },
-                },
-                {
-                  label: this.$t('msg.subtitle.size4'),
-                  type: 'radio',
-                  id: 'size3',
-                  click: () => {
-                    this.$bus.$emit('change-size-by-menu', 3);
-                  },
-                },
-              ],
-            },
-            {
-              label: this.$t('msg.subtitle.subtitleStyle'),
-              id: 'subStyle',
-              submenu: [
-                {
-                  label: this.$t('msg.subtitle.style1'),
-                  type: 'radio',
-                  id: 'style0',
-                  click: () => {
-                    this.updateChosenStyle(0);
-                  },
-                },
-                {
-                  label: this.$t('msg.subtitle.style2'),
-                  type: 'radio',
-                  id: 'style1',
-                  click: () => {
-                    this.updateChosenStyle(1);
-                  },
-                },
-                {
-                  label: this.$t('msg.subtitle.style3'),
-                  type: 'radio',
-                  id: 'style2',
-                  click: () => {
-                    this.updateChosenStyle(2);
-                  },
-                },
-                {
-                  label: this.$t('msg.subtitle.style4'),
-                  type: 'radio',
-                  id: 'style3',
-                  click: () => {
-                    this.updateChosenStyle(3);
-                  },
-                },
-                {
-                  label: this.$t('msg.subtitle.style5'),
-                  type: 'radio',
-                  id: 'style4',
-                  click: () => {
-                    this.updateChosenStyle(4);
-                  },
-                },
-              ],
-            },
-            { type: 'separator' },
-            {
               label: this.$t('advance.subMenu'),
               click: () => {
                 this.$bus.$emit('show-subtitle-settings');
@@ -871,6 +777,7 @@ new Vue({
                   id: 'increasePrimarySubDelay',
                   accelerator: 'CmdOrCtrl+\'',
                   click: () => {
+                    this.updateSubSettingsType(true);
                     // TODO primary subtitle + delay
                   },
                 },
@@ -879,6 +786,7 @@ new Vue({
                   id: 'decreasePrimarySubDelay',
                   accelerator: 'CmdOrCtrl+;',
                   click: () => {
+                    this.updateSubSettingsType(true);
                     // TODO primary subtitle - delay
                   },
                 },
@@ -887,6 +795,7 @@ new Vue({
                   label: this.$t('msg.subtitle.increaseSecondarySubtitleDelay'),
                   id: 'increaseSecondarySubDelay',
                   click: () => {
+                    this.updateSubSettingsType(false);
                     // TODO secondary subtitle + delay
                   },
                 },
@@ -894,6 +803,7 @@ new Vue({
                   label: this.$t('msg.subtitle.decreaseSecondarySubtitleDelay'),
                   id: 'decreaseSecondarySubDelay',
                   click: () => {
+                    this.updateSubSettingsType(false);
                     // TODO secondary subtitle - delay
                   },
                 },
@@ -1118,12 +1028,6 @@ new Vue({
         if (!this.menu) return;
         if (this.currentRouteName === 'landing-view') {
           this.menuStateControl(false);
-        }
-        if (this.chosenStyle !== '') {
-          this.menu.getMenuItemById(`style${this.chosenStyle}`).checked = true;
-        }
-        if (this.chosenSize !== '') {
-          this.menu.getMenuItemById(`size${this.chosenSize}`).checked = true;
         }
         this.menu.getMenuItemById('increasePrimarySubDelay').enabled = !!this.primarySubtitleId;
         this.menu.getMenuItemById('decreasePrimarySubDelay').enabled = !!this.primarySubtitleId;
