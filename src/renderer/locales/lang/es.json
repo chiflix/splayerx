@@ -105,7 +105,9 @@
     "help": {
       "name": "Ayuda",
       "splayerxHelp": "Ayuda",
-      "shortCuts": "Lista de accesos directos"
+      "shortCuts": "Lista de accesos directos",
+      "crashReportLocation": "",
+      "crashReportNotAvailable": ""
     },
     "playback": {
       "backwardL": "Paso atrás -60s",
