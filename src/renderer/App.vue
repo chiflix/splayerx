@@ -72,9 +72,9 @@ export default {
 }
 .fade-enter-active {
   transition-property: transform, opacity;
-  transition-duration: 450ms;
-  transition-delay: 100ms;
-  transition-timing-function: ease-in-out;
+  transition-duration: 500ms;
+  transition-delay: 250ms;
+  transition-timing-function: ease-out;
 }
 .fade-leave-active {
   transition-property: transform, opacity;
