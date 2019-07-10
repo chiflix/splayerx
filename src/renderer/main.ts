@@ -1000,6 +1000,26 @@ new Vue({
           ],
         },
       ];
+
+      if (!process.mas) {
+        const helpMenu = template[template.length - 1].submenu as electron.MenuItemConstructorOptions[];
+        helpMenu.push({
+          label: this.$t('msg.help.crashReportLocation'),
+          click: () => {
+            const { remote } = this.$electron;
+            let location = remote.crashReporter.getCrashesDirectory();
+            if (!location) location = path.join(remote.app.getPath('temp'), remote.app.getName() + ' Crashes');
+            if (fs.existsSync(location)) {
+              remote.shell.openItem(location);
+            } else {
+              remote.dialog.showMessageBox(remote.getCurrentWindow(), {
+                message: this.$t('msg.help.crashReportNotAvailable'),
+              });
+            }
+          }
+        });
+      }
+
       return this.updateRecentPlay().then((result: any) => {
         // menu.file add "open recent"
         (template[3].submenu as Electron.MenuItemConstructorOptions[]).splice(3, 0, this.recentSubMenu());
