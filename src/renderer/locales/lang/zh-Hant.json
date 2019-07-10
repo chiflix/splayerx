@@ -106,7 +106,7 @@
       "name": "幫助",
       "splayerxHelp": "幫助",
       "shortCuts": "快捷鍵列表",
-      "crashReportLocation": "",
+      "crashReportLocation": "查看錯誤日誌",
       "crashReportNotAvailable": ""
     },
     "playback": {
