@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
 import {
-  getTextWidth,
+  calculateTextSize,
   generateShortCutImageBy,
   mediaQuickHash,
   timecodeFromSeconds,
@@ -10,15 +10,20 @@ import {
 describe('libs utils', () => {
   let fontSize = '';
   let fontFamily = '';
+  let lineHeight = '';
+  let zoom = '';
   let text = '';
   beforeEach(() => {
     fontSize = '12px';
     fontFamily = 'PingFang SC';
+    lineHeight = '120%';
+    zoom = '1';
     text = 'test for calculate text width';
   });
 
   it('should successfully calculate text width', () => {
-    expect(getTextWidth(fontSize, fontFamily, text)).to.be.equal(164.281);
+    expect(JSON.stringify(calculateTextSize(fontSize, fontFamily, lineHeight, zoom, text)))
+      .to.be.equal(JSON.stringify({ width: 164.281, height: 14 }));
   });
 
   it('should successfully generate ShortCutImage', () => {

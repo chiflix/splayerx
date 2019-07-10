@@ -812,7 +812,7 @@ export default {
   border-radius: 4px;
   opacity: 1;
   transition: opacity 400ms;
-  z-index: 1;
+  z-index: auto;
 }
 .play-button {
   position: absolute;

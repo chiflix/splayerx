@@ -198,7 +198,7 @@
 <script lang="ts">
 import { mapGetters, mapActions } from 'vuex';
 import { Subtitle as subtitleActions, Video as videoActions } from '@/store/actionTypes';
-import { getTextWidth } from '@/libs/utils';
+import { calculateTextSize } from '@/libs/utils';
 import AdvanceRowItems from '@/components/PlayingView/AdvanceControlFunctionalities/AdvanceRowItems.vue';
 // @ts-ignore
 import BaseInfoCard from '@/components/PlayingView/InfoCard.vue';
@@ -290,81 +290,66 @@ export default {
     },
     maxTextLength() { // 不同菜单界面，一行文字加起来最大的长度
       if (this.readyShow === 'audioMenu') {
-        const firstLine = getTextWidth(
-          `${this.textItemFontSize}px`,
-          this.normalFont,
+        const firstLine = calculateTextSize(
+          `${this.textItemFontSize}px`, this.normalFont, 'normal', '1',
           this.leftTitleToShow[0],
-        ) + getTextWidth(
-          `${this.rightItemFontSize}px`,
-          this.normalFont,
+        ).width + calculateTextSize(
+          `${this.rightItemFontSize}px`, this.normalFont, 'normal', '1',
           '0 ms',
-        );
-        const secondLine = getTextWidth(
-          `${this.textItemFontSize}px`,
-          this.normalFont,
+        ).width;
+        const secondLine = calculateTextSize(
+          `${this.textItemFontSize}px`, this.normalFont, 'normal', '1',
           this.leftTitleToShow[1],
-        ) + getTextWidth(
-          `${this.rightItemFontSize}px`,
-          this.normalFont,
+        ).width + calculateTextSize(
+          `${this.rightItemFontSize}px`, this.normalFont, 'normal', '1',
           this.currentAudioTrack,
-        );
-        const thirdLine = getTextWidth(
-          `${this.rightItemFontSize}px`,
-          this.normalFont,
+        ).width;
+        const thirdLine = calculateTextSize(
+          `${this.rightItemFontSize}px`, this.normalFont, 'normal', '1',
           this.leftTitleToShow[2],
-        ) + this.rightItemFontSize;
+        ).width + this.rightItemFontSize;
         return Math.max(firstLine, secondLine, thirdLine);
       }
       if (this.readyShow === 'subMenu') {
-        const firstLine = getTextWidth(
-          `${this.textItemFontSize}px`,
-          this.normalFont,
+        const firstLine = calculateTextSize(
+          `${this.textItemFontSize}px`, this.normalFont, 'normal', '1',
           this.leftTitleToShow[0],
-        ) + getTextWidth(
-          `${this.rightItemFontSize}px`,
-          this.normalFont,
+        ).width + calculateTextSize(
+          `${this.rightItemFontSize}px`, this.normalFont, 'normal', '1',
           this.ChosenSizeContent,
-        );
-        const secondLine = getTextWidth(
-          `${this.textItemFontSize}px`,
-          this.normalFont,
+        ).width;
+        const secondLine = calculateTextSize(
+          `${this.textItemFontSize}px`, this.normalFont, 'normal', '1',
           this.leftTitleToShow[1],
-        ) + this.subStyleWidth;
-        const thirdLine = getTextWidth(
-          `${this.textItemFontSize}px`,
-          this.normalFont,
+        ).width + this.subStyleWidth;
+        const thirdLine = calculateTextSize(
+          `${this.textItemFontSize}px`, this.normalFont, 'normal', '1',
           this.leftTitleToShow[2],
-        ) + getTextWidth(
-          `${this.rightItemFontSize}px`,
-          this.normalFont,
+        ).width + calculateTextSize(
+          `${this.rightItemFontSize}px`, this.normalFont, 'normal', '1',
           `${this.subtitleDelay / 1000} s`,
-        );
-        const fourthLine = getTextWidth(
-          `${this.rightItemFontSize}px`,
-          this.normalFont,
+        ).width;
+        const fourthLine = calculateTextSize(
+          `${this.rightItemFontSize}px`, this.normalFont, 'normal', '1',
           this.leftTitleToShow[3],
-        ) + this.rightItemFontSize;
+        ).width + this.rightItemFontSize;
         return Math.max(firstLine, secondLine, thirdLine, fourthLine);
       }
-      const firstLine = getTextWidth(
-        `${this.textItemFontSize}px`,
-        this.normalFont,
+      const firstLine = calculateTextSize(
+        `${this.textItemFontSize}px`, this.normalFont, 'normal', '1',
         this.leftTitleToShow[0],
-      ) + getTextWidth(
-        `${this.rightItemFontSize}px`,
-        this.normalFont,
+      ).width + calculateTextSize(
+        `${this.rightItemFontSize}px`, this.normalFont, 'normal', '1',
         `${this.rate} x`,
-      );
-      const secondLine = getTextWidth(
-        `${this.textItemFontSize}px`,
-        this.normalFont,
+      ).width;
+      const secondLine = calculateTextSize(
+        `${this.textItemFontSize}px`, this.normalFont, 'normal', '1',
         this.leftTitleToShow[1],
-      ) + this.textItemFontSize;
-      const thirdLine = getTextWidth(
-        `${this.textItemFontSize}px`,
-        this.normalFont,
+      ).width + this.textItemFontSize;
+      const thirdLine = calculateTextSize(
+        `${this.textItemFontSize}px`, this.normalFont, 'normal', '1',
         this.leftTitleToShow[2],
-      ) + this.textItemFontSize;
+      ).width + this.textItemFontSize;
       return Math.max(firstLine, secondLine, thirdLine);
     },
     subStyleWidth() {
