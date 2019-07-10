@@ -277,26 +277,29 @@ const actions = {
   async [a.addLocalSubtitlesWithSelect]({ state, dispatch, getters }: any, paths: string[]) {
     let selectedHash = paths[0];
     const { playlistId, mediaItemId } = state;
-    return Promise.all(
-      paths.map(async (path: string, i: number) => {
-        const g = new LocalGenerator(path);
-        if (i === 0) {
-          selectedHash = await g.getHash();
+    // tempoary solution, need db validation schema to ensure data consistent
+    if (playlistId && mediaItemId) {
+      return Promise.all(
+        paths.map(async (path: string, i: number) => {
+          const g = new LocalGenerator(path);
+          if (i === 0) {
+            selectedHash = await g.getHash();
+          }
+          return dispatch(a.addSubtitle, {
+            generator: g,
+            playlistId, mediaItemId,
+          });
+        })
+      ).then((localEntities: SubtitleControlListItem[]) => {
+        addSubtitleItemsToList(localEntities, playlistId, mediaItemId);
+        const sub: SubtitleControlListItem = getters.list.find((sub: SubtitleControlListItem) => sub.hash === selectedHash);
+        if (sub && getters.isFirstSubtitle) {
+          dispatch(a.changePrimarySubtitle, sub.id);
+        } else if (sub && !getters.isFirstSubtitle) {
+          dispatch(a.changeSecondarySubtitle, sub.id);
         }
-        return dispatch(a.addSubtitle, {
-          generator: g,
-          playlistId, mediaItemId,
-        });
-      })
-    ).then((localEntities: SubtitleControlListItem[]) => {
-      addSubtitleItemsToList(localEntities, playlistId, mediaItemId);
-      const sub: SubtitleControlListItem = getters.list.find((sub: SubtitleControlListItem) => sub.hash === selectedHash);
-      if (sub && getters.isFirstSubtitle) {
-        dispatch(a.changePrimarySubtitle, sub.id);
-      } else if (sub && !getters.isFirstSubtitle) {
-        dispatch(a.changeSecondarySubtitle, sub.id);
-      }
-    });
+      });
+    }
   },
   async [a.addEmbeddedSubtitles]({ dispatch }: any, { streams, playlistId, mediaItemId }: any) {
     return Promise.all(

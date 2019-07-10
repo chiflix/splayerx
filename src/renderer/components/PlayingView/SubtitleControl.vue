@@ -337,9 +337,6 @@ export default {
         this.mouseDown = false;
       }
     });
-    if (navigator.onLine) {
-      this.initializeManager();
-    }
   },
   methods: {
     ...mapActions({
