@@ -106,8 +106,8 @@
       "name": "도움",
       "splayerxHelp": "도움",
       "shortCuts": "바로 가기 목록",
-      "crashReportLocation": "",
-      "crashReportNotAvailable": ""
+      "crashReportLocation": "오류 로그보기",
+      "crashReportNotAvailable": "오류 로그 없음"
     },
     "playback": {
       "backwardL": "단계 뒤로 -60 년대",
