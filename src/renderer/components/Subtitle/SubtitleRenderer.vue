@@ -215,7 +215,7 @@ export default {
           .concat(this.noPositionCues[1], this.noPositionCues[2])
           .filter((cue: Cue) => cue.category && cue.category === 'secondary');
         if (adaptedCues.length === 1 && this.currentFirstSubtitleId && !adaptedCues[0].text.includes('\n')) {
-          return `${((textHeight + padding * 2) * this.secondarySubScale + (60 / 1080) * this.winHeight) * 100 / this.winHeight}%`;
+          return `${(textHeight * this.secondarySubScale + (60 / 1080) * this.winHeight) * 100 / this.winHeight}%`;
         }
         if (adaptedCues.length === 0 && this.currentSecondarySubtitleId
           && this.currentFirstSubtitleId) {
@@ -233,7 +233,7 @@ export default {
           .concat(this.noPositionCues[7], this.noPositionCues[8])
           .filter((cue: Cue) => cue.category && cue.category === 'first');
         if (adaptedCues.length === 1 && this.currentSecondarySubtitleId && !adaptedCues[0].text.includes('\n')) {
-          return `${(60 / 1080 * this.winHeight + (textHeight + padding * 2) * this.scaleNum) * 100 / this.winHeight}%`;
+          return `${(60 / 1080 * this.winHeight + textHeight * this.scaleNum) * 100 / this.winHeight}%`;
         }
         if (adaptedCues.length === 0 && this.currentSecondarySubtitleId
           && this.currentFirstSubtitleId) {
