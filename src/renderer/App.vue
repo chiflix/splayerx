@@ -1,7 +1,8 @@
 <template>
   <div
     id="app"
-    class="application landing-view"
+    :class="currentRouteName !== 'playing-view' ? 'landing-view' : ''"
+    class="application"
   >
     <Titlebar key="playing-view" />
     <transition :name="currentRouteName !== 'playing-view' ? 'fade' : ''" >
