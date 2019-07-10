@@ -427,7 +427,14 @@ export default {
       if (Object.prototype.hasOwnProperty.call(bookmarkObj, vidPath)) {
         const { app } = remote;
         const bookmark = bookmarkObj[vidPath];
-        const stopAccessing = app.startAccessingSecurityScopedResource(bookmark);
+        let stopAccessing;
+        try {
+          stopAccessing = app.startAccessingSecurityScopedResource(bookmark);
+        } catch (ex) {
+          log.warn(`startAccessingSecurityScopedResource ${bookmark}`, ex);
+          addBubble(OPEN_FAILED);
+          return;
+        }
         this.access.push({
           src: vidPath,
           stopAccessing,
