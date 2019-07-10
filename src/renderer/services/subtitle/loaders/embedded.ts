@@ -102,7 +102,9 @@ export class EmbeddedGenerator implements EntityGenerator {
     return this.language = await inferLanguageFromPath(this.origin.source.extractedSrc);
   }
 
+  private payload: string;
   async getPayload() {
-    return await loadLocalFile(await this.getExtractedSrc());
+    if (!this.payload) this.payload = await loadLocalFile(await this.getExtractedSrc());
+    return this.payload;
   }
 }

@@ -3,6 +3,7 @@ import { MediaTranslationResponse } from 'sagi-api/translation/v1/translation_pb
 import Sagi from '@/libs/sagi';
 import { Origin, EntityGenerator, Type, Format } from '@/interfaces/ISubtitle';
 import { cloneDeep } from 'lodash';
+import { SagiSubtitlePayload } from '../parsers';
 
 export type TranscriptInfo = MediaTranslationResponse.TranscriptInfo.AsObject;
 
@@ -32,7 +33,9 @@ export class OnlineGenerator implements EntityGenerator {
   async getFormat() { return Format.Sagi; }
   async getHash() { return this.origin.source; }
 
+  private payload: SagiSubtitlePayload | undefined;
   async getPayload() {
-    return Sagi.getTranscript({ transcriptIdentity: this.origin.source, startTime: 0 });
+    if (!this.payload) this.payload = await Sagi.getTranscript({ transcriptIdentity: this.origin.source, startTime: 0 });
+    return this.payload;
   }
 }
