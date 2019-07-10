@@ -9,6 +9,7 @@
       :selections="primaryLanguages"
       :selected-formater="primaryLanguageFormater"
       :selection-formater="codeToLanguageName"
+      :handle-selection="handlePrimarySelection"
       class='dropdown1'
     />
     <Dropdown
@@ -16,6 +17,8 @@
       :selected="secondaryLanguage"
       :selections="secondaryLanguages"
       :selection-formater="codeToLanguageName"
+      :handle-selection="handleSecondarySelection"
+      class='dropdown2'
     />
     <div class="content">* 稍后您可以在偏好设置里更改</div>
     <div
@@ -64,6 +67,9 @@ export default {
     };
   },
   computed: {
+    preferenceData() {
+      return this.$store.getters.preferenceData;
+    },
     primaryLanguage: {
       get() {
         return this.$store.getters.primaryLanguage;
@@ -91,6 +97,17 @@ export default {
       return this.languages.filter((lan: string) => lan !== this.secondaryLanguage);
     },
   },
+  watch: {
+    showFirstDropdown(val: boolean) {
+      if (this.showSecondDropdown) this.showSecondDropdown = false;
+    },
+  },
+  created() {
+    document.addEventListener('mouseup', this.globalMouseupHandler);
+  },
+  destroyed() {
+    document.removeEventListener('mouseup', this.globalMouseupHandler);
+  },
   methods: {
     primaryLanguageFormater(code: string) {
       return `${code} - 首要语言`;
@@ -105,6 +122,21 @@ export default {
     handleIconMouseup() {
       if (this.mousedown) this.$router.push({ name: 'landing-view' });
       this.mousedown = true;
+    },
+    handlePrimarySelection(selection: string) {
+      if (selection === this.secondaryLanguage) this.secondaryLanguage = '';
+      this.primaryLanguage = selection;
+      this.showFirstDropdown = false;
+    },
+    handleSecondarySelection(selection: string) {
+      if (selection !== this.primaryLanguage) {
+        this.secondaryLanguage = selection;
+        this.showSecondDropdown = false;
+      }
+    },
+    globalMouseupHandler() {
+      this.mousedown = false;
+      this.showFirstDropdown = this.showSecondDropdown = false;
     },
   },
 };
@@ -129,10 +161,15 @@ export default {
   text-align: center;
   line-height: 40px;
 }
-.dropdown1 {
+.dropdown {
   position: relative;
-  z-index: 10;
-  margin-top: 30px;
+  &1 {
+    margin-top: 30px;
+    z-index: 10;
+  }
+  &2 {
+    z-index: 5;
+  }
 }
 .content {
   margin-top: 12px;

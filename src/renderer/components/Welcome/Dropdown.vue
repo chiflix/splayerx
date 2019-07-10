@@ -2,7 +2,8 @@
   <div class="settingItem__input dropdown no-drag">
     <div
       :class="showSelection ? 'dropdown__toggle--list' : 'dropdown__toggle--display'"
-      @mouseup.stop="$emit('toggle', !showSelection)"
+      @mousedown.stop="handleMousedown"
+      @mouseup.stop="handleMouseup"
     >
       <div class="dropdown__displayItem">
         {{ selectedFormater(selectionFormater(selected)) }}
@@ -62,6 +63,29 @@ export default {
     selectionFormater: {
       type: Function,
       default: (selection: string) => selection,
+    },
+  },
+  data() {
+    return {
+      mousedown: false,
+    };
+  },
+  created() {
+    document.addEventListener('mouseup', this.globalMouseupHandler);
+  },
+  destroyed() {
+    document.removeEventListener('mouseup', this.globalMouseupHandler);
+  },
+  methods: {
+    globalMouseupHandler() {
+      this.mousedown = false;
+    },
+    handleMousedown() {
+      this.mousedown = true;
+    },
+    handleMouseup() {
+      if (this.mousedown) this.$emit('toggle', !this.showSelection);
+      this.mousedown = false;
     },
   },
 };
