@@ -140,11 +140,11 @@
     },
     "subtitle": {
       "AITranslation": "重新加载翻译结果",
-      "decreaseSubtitleDelayS": "字幕延时 -0.1s",
+      "decreasePrimarySubtitleDelay": "字幕延时 -0.1s",
       "disabledSecondarySub": "关闭第二字幕",
       "enabledSecondarySub": "启用第二字幕",
       "increaseSubtitleDelayL": "",
-      "increaseSubtitleDelayS": "字幕延时 +0.1s",
+      "increasePrimarySubtitleDelay": "字幕延时 +0.1s",
       "langEn": "英文",
       "langZhCN": "中文",
       "loadSubtitleFile": "加载字幕文件…",

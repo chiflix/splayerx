@@ -85,6 +85,7 @@
         class="button no-drag subtitle"
       />
       <advance-control
+        ref="advance"
         v-fade-in="displayState.AdvanceControl"
         v-bind.sync="widgetsStatus.AdvanceControl"
         :last-dragging.sync="lastDragging"
@@ -201,6 +202,8 @@ export default {
       changeSrc: false, // 记录是否换过视频
       showSpeedLabel: false, // 是否显示播放速率
       changeVolumeByMenu: false,
+      subMenuShow: false,
+      subMenuTimer: 0,
     };
   },
   computed: {
@@ -225,7 +228,7 @@ export default {
       return !this.tempRecentPlaylistDisplayState
         && ((!this.mouseStopped && !this.mouseLeftWindow)
         || (!this.mouseLeftWindow && this.onOtherWidget)
-        || this.attachedShown || this.videoChanged
+        || this.attachedShown || this.videoChanged || this.subMenuShow
         || (this.isMousedown && this.currentMousedownWidget === 'PlayButton'));
     },
     onOtherWidget() {
@@ -376,6 +379,17 @@ export default {
         this.progressTriggerStopped = false;
       }, this.progressDisappearDelay);
     });
+    this.$bus.$on('show-subtitle-settings', () => {
+      this.subMenuShow = true;
+      if (this.subMenuTimer) {
+        this.clock.clearTimeout(this.subMenuTimer);
+      }
+      this.subMenuTimer = this.clock.setTimeout(() => {
+        this.subMenuShow = false;
+      }, 3000);
+      this.tempRecentPlaylistDisplayState = false;
+      this.$refs.advance.handleMenuShow();
+    });
     this.createTouchBar();
     this.UIElements = this.getAllUIComponents(this.$refs.controller);
     this.UIElements.forEach((value: NamedComponent) => {
@@ -496,9 +510,7 @@ export default {
     },
     conflictResolve(name: string) {
       Object.keys(this.widgetsStatus).forEach((item) => {
-        if (item !== name) {
-          this.widgetsStatus[item].showAttached = false;
-        }
+        this.widgetsStatus[item].showAttached = item === name;
       });
     },
     cancelPlayListTimeout() {

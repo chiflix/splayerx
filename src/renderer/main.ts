@@ -305,9 +305,6 @@ new Vue({
     currentRouteName() {
       return this.$route.name;
     },
-    isSubtitleAvailable() {
-      return this.primarySubtitleId !== '' || (this.secondarySubtitleId !== '' && this.enabledSecondarySub);
-    },
   },
   created() {
     this.$store.commit('getLocalPreference');
@@ -361,12 +358,6 @@ new Vue({
         this.menu.getMenuItemById('KeyboardRight').enabled = !val;
       }
     },
-    isSubtitleAvailable(val) {
-      if (this.menu) {
-        this.menu.getMenuItemById('increaseSubDelay').enabled = val;
-        this.menu.getMenuItemById('decreaseSubDelay').enabled = val;
-      }
-    },
     displayLanguage(val) {
       if (messages[val]) {
         this.$i18n.locale = val;
@@ -417,20 +408,26 @@ new Vue({
         this.refreshMenu();
       }
     },
-    primarySubtitleId(id: string, oldId: string) {
-      if (!this.menu) return;
-      if (id && this.menu.getMenuItemById(`sub${id}`)) {
-        this.menu.getMenuItemById(`sub${id}`).checked = true;
-      } else if (!id) {
-        this.menu.getMenuItemById('sub-1').checked = true;
+    primarySubtitleId(id: string) {
+      if (this.menu) {
+        this.menu.getMenuItemById('increasePrimarySubDelay').enabled = !!id;
+        this.menu.getMenuItemById('decreasePrimarySubDelay').enabled = !!id;
+        if (id && this.menu.getMenuItemById(`sub${id}`)) {
+          this.menu.getMenuItemById(`sub${id}`).checked = true;
+        } else if (!id) {
+          this.menu.getMenuItemById('sub-1').checked = true;
+        }
       }
     },
-    secondarySubtitleId(id: string, oldId: string) {
-      if (!this.menu) return;
-      if (id && this.menu.getMenuItemById(`secondSub${id}`)) {
-        this.menu.getMenuItemById(`secondSub${id}`).checked = true;
-      } else if (!id) {
-        this.menu.getMenuItemById('secondSub-1').checked = true;
+    secondarySubtitleId(id: string) {
+      if (this.menu) {
+        this.menu.getMenuItemById('increaseSecondarySubDelay').enabled = !!id;
+        this.menu.getMenuItemById('decreaseSecondarySubDelay').enabled = !!id;
+        if (id && this.menu.getMenuItemById(`secondSub${id}`)) {
+          this.menu.getMenuItemById(`secondSub${id}`).checked = true;
+        } else if (!id) {
+          this.menu.getMenuItemById('secondSub-1').checked = true;
+        }
       }
     },
     audioTrackList(val, oldval) {
@@ -861,20 +858,47 @@ new Vue({
             },
             { type: 'separator' },
             {
-              label: this.$t('msg.subtitle.increaseSubtitleDelayS'),
-              id: 'increaseSubDelay',
-              accelerator: 'CmdOrCtrl+\'',
+              label: this.$t('advance.subMenu'),
               click: () => {
-                this.updateSubDelay(0.1);
+                this.$bus.$emit('show-subtitle-settings');
+                // TODO open subtitle menu
               },
             },
             {
-              label: this.$t('msg.subtitle.decreaseSubtitleDelayS'),
-              id: 'decreaseSubDelay',
-              accelerator: 'CmdOrCtrl+;',
-              click: () => {
-                this.updateSubDelay(-0.1);
-              },
+              label: this.$t('advance.subDelay'),
+              submenu: [
+                {
+                  label: this.$t('msg.subtitle.increasePrimarySubtitleDelay'),
+                  id: 'increasePrimarySubDelay',
+                  accelerator: 'CmdOrCtrl+\'',
+                  click: () => {
+                    // TODO primary subtitle + delay
+                  },
+                },
+                {
+                  label: this.$t('msg.subtitle.decreasePrimarySubtitleDelay'),
+                  id: 'decreasePrimarySubDelay',
+                  accelerator: 'CmdOrCtrl+;',
+                  click: () => {
+                    // TODO primary subtitle - delay
+                  },
+                },
+                { type: 'separator' },
+                {
+                  label: this.$t('msg.subtitle.increaseSecondarySubtitleDelay'),
+                  id: 'increaseSecondarySubDelay',
+                  click: () => {
+                    // TODO secondary subtitle + delay
+                  },
+                },
+                {
+                  label: this.$t('msg.subtitle.decreaseSecondarySubtitleDelay'),
+                  id: 'decreaseSecondarySubDelay',
+                  click: () => {
+                    // TODO secondary subtitle - delay
+                  },
+                },
+              ],
             },
             { type: 'separator' },
             {
@@ -1102,12 +1126,11 @@ new Vue({
         if (this.chosenSize !== '') {
           this.menu.getMenuItemById(`size${this.chosenSize}`).checked = true;
         }
-        if (!this.isSubtitleAvailable) {
-          this.menu.getMenuItemById('increaseSubDelay').enabled = false;
-          this.menu.getMenuItemById('decreaseSubDelay').enabled = false;
-          this.menu.getMenuItemById('uploadSelectedSubtitle').enabled = this.ableToPushCurrentSubtitle;
-          this.menu.getMenuItemById('sub-1').checked = true;
-        }
+        this.menu.getMenuItemById('increasePrimarySubDelay').enabled = !!this.primarySubtitleId;
+        this.menu.getMenuItemById('decreasePrimarySubDelay').enabled = !!this.primarySubtitleId;
+        this.menu.getMenuItemById('increaseSecondarySubDelay').enabled = !!this.secondarySubtitleId;
+        this.menu.getMenuItemById('decreaseSecondarySubDelay').enabled = !!this.secondarySubtitleId;
+        this.menu.getMenuItemById('uploadSelectedSubtitle').enabled = this.ableToPushCurrentSubtitle;
         this.audioTrackList.forEach((item: any, index: number) => {
           if (item.enabled === true) {
             this.menu.getMenuItemById(`track${index}`).checked = true;
