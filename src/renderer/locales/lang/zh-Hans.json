@@ -105,7 +105,9 @@
     "help": {
       "name": "帮助",
       "splayerxHelp": "帮助",
-      "shortCuts": "快捷键列表"
+      "shortCuts": "快捷键列表",
+      "crashReportLocation": "",
+      "crashReportNotAvailable": ""
     },
     "playback": {
       "backwardL": "后退 -60s",
