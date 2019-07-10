@@ -107,7 +107,7 @@
       "name": "Help",
       "splayerxHelp": "Help",
       "shortCuts": "Shortcuts List",
-      "crashReportLocation": "Check Crash Report",
+      "crashReportLocation": "Show Crash Reports",
       "crashReportNotAvailable": "Found no crash report."
     },
     "playback": {
