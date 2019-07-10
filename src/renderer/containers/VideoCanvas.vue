@@ -77,7 +77,7 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'videoId', 'nextVideoId', 'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId', 'enabledSecondarySub', 'lastWinSize', 'lastChosenSize', 'subToTop',
+      'videoId', 'nextVideoId', 'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId', 'enabledSecondarySub', 'lastChosenSize', 'subToTop',
       'winSize', 'winPos', 'winAngle', 'isFullScreen', 'winWidth', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo', 'loop', 'playinglistRate', 'isFolderList', 'playingList', 'playingIndex', 'playListId', 'items',
       'previousVideo', 'previousVideoId',
     ]),
@@ -137,7 +137,6 @@ export default {
       savePromise
         .then(this.saveSubtitleStyle)
         .then(this.savePlaybackStates)
-        .then(this.$store.dispatch('saveWinSize', this.isFullScreen ? { size: this.winSizeBeforeFullScreen, angle: this.winAngleBeforeFullScreen } : { size: this.winSize, angle: this.winAngle }))
         .then(this.removeAllAudioTrack)
         .finally(() => {
           this.$store.dispatch('Init');
@@ -267,8 +266,8 @@ export default {
       this.$bus.$emit('video-loaded');
       this.changeWindowRotate(this.winAngle);
 
-      let maxVideoSize = [];
-      let videoSize = [];
+      let maxVideoSize;
+      let videoSize;
       if (this.videoExisted && (this.winAngle === 0 || this.winAngle === 180)) {
         maxVideoSize = this.winSize;
         videoSize = [this.videoWidth, this.videoHeight];
@@ -276,8 +275,6 @@ export default {
         maxVideoSize = this.winSize;
         videoSize = [this.videoHeight, this.videoWidth];
       } else {
-        maxVideoSize = this.lastWinSize[0] > 512 || !this.lastWinSize[0]
-          ? this.lastWinSize : [512, Math.round(512 / this.ratio)];
         videoSize = [this.videoWidth, this.videoHeight];
         this.videoExisted = true;
       }
@@ -366,7 +363,6 @@ export default {
         savePromise
           .then(this.saveSubtitleStyle)
           .then(this.savePlaybackStates)
-          .then(this.$store.dispatch('saveWinSize', this.isFullScreen ? { size: this.winSizeBeforeFullScreen, angle: this.winAngleBeforeFullScreen } : { size: this.winSize, angle: this.winAngle }))
           .then(this.removeAllAudioTrack)
           .finally(() => {
             this.$store.dispatch('SRC_SET', { src: '', mediaHash: '', id: NaN });
