@@ -17,7 +17,17 @@ export default new Router({
     },
     {
       path: '*',
-      redirect: '/',
+      redirect: '/language-setting',
+    },
+    {
+      path: '/welcome',
+      name: 'welcome-view',
+      component: require('@/components/Welcome/WelcomeView.vue').default,
+    },
+    {
+      path: '/language-setting',
+      name: 'language-setting',
+      component: require('@/components/Welcome/LanguageSetting.vue').default,
     },
   ],
 });

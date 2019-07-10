@@ -1,20 +1,37 @@
 <template>
   <div
     id="app"
-    class="application"
+    class="application landing-view"
   >
-    <router-view />
+    <Titlebar key="playing-view" />
+    <transition :name="currentRouteName !== 'playing-view' ? 'fade' : ''" >
+      <router-view />
+    </transition>
   </div>
 </template>
 
 <script lang="ts">
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ipcRenderer, Event } from 'electron';
+import Titlebar from '@/components/Titlebar.vue';
 import '@/css/style.scss';
 import drag from '@/helpers/drag';
 
 export default {
   name: 'Splayer',
+  components: {
+    Titlebar,
+  },
+  data() {
+    return {
+      transitionMode: '',
+    };
+  },
+  computed: {
+    currentRouteName() {
+      return this.$route.name;
+    },
+  },
   mounted() {
     // to-do: specify commitType and commitPayload with vuex typescriptened
     ipcRenderer.on('mainCommit', (event: Event, commitType: string, commitPayload: any) => {
@@ -50,4 +67,26 @@ export default {
 <style lang="scss">
 // global scss
 // @import "@/css/style.scss";
+.landing-view {
+  background-image: linear-gradient(-28deg, #414141 0%, #545454 47%, #7B7B7B 100%);
+}
+.fade-enter-active {
+  transition-property: transform, opacity;
+  transition-duration: 450ms;
+  transition-delay: 100ms;
+  transition-timing-function: ease-in-out;
+}
+.fade-leave-active {
+  transition-property: transform, opacity;
+  transition-duration: 450ms;
+  transition-timing-function: ease-in;
+}
+.fade-enter {
+  transform: translateX(-400px);
+  opacity: 0;
+}
+.fade-leave-to {
+  transform: translateX(200px);
+  opacity: 0;
+}
 </style>

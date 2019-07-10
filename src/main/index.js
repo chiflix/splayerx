@@ -180,7 +180,7 @@ function createWindow() {
   });
   mainWindow.webContents.setUserAgent(`SPlayerX@2018 ${os.platform() + os.release()} Version ${app.getVersion()}`);
 
-  mainWindow.loadURL(finalVideoToOpen.length ? `${mainURL}#/play` : mainURL);
+  mainWindow.loadURL(finalVideoToOpen.length ? `${mainURL}#/play` : `${mainURL}#/welcome`);
 
   mainWindow.on('closed', () => {
     ipcMain.removeAllListeners();

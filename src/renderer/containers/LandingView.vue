@@ -1,9 +1,5 @@
 <template>
   <div class="wrapper">
-    <titlebar
-      key="playing-view"
-      current-view="LandingView"
-    />
     <transition name="background-container-transition">
       <div
         v-if="item.backgroundUrl && !hideVideoHistoryOnExit"
@@ -125,7 +121,6 @@ import { mapGetters } from 'vuex';
 import { playInfoStorageService } from '@/services/storage/PlayInfoStorageService';
 import { recentPlayService } from '@/services/media/RecentPlayService';
 import Icon from '@/components/BaseIconContainer.vue';
-import Titlebar from '@/components/Titlebar.vue';
 import NotificationBubble from '@/components/NotificationBubble.vue';
 import PlaylistItem from '@/components/LandingView/PlaylistItem.vue';
 import VideoItem from '@/components/LandingView/VideoItem.vue';
@@ -140,7 +135,6 @@ export default {
   name: 'LandingView',
   components: {
     Icon,
-    Titlebar,
     NotificationBubble,
   },
   data() {
