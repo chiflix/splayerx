@@ -106,8 +106,8 @@
       "name": "帮助",
       "splayerxHelp": "帮助",
       "shortCuts": "快捷键列表",
-      "crashReportLocation": "",
-      "crashReportNotAvailable": ""
+      "crashReportLocation": "查看错误日志",
+      "crashReportNotAvailable": "暂无错误日志"
     },
     "playback": {
       "backwardL": "后退 -60s",
