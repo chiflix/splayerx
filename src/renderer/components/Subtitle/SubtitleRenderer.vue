@@ -14,23 +14,45 @@
         flexDirection: 'column'
       }"
     >
-      <p
-        v-for="(cue, ind) in item"
-        :key="cue.text + ind"
-        :style="{
-          zoom: cue.category === 'first' ? `${scaleNum}` : `${secondarySubScale}`,
-          writingMode: (cue.category === 'first' ? firstType === 'vtt' : secondType === 'vtt')
-            ? `vertical-${cue.tags.vertical}` : '',
-          lineHeight: '120%',
-          paddingTop: calculatePaddingTop(cue, ind, item),
-          paddingBottom: calculatePaddingBottom(cue, ind, item),
-          fontWeight: cue.tags.b ? 'bold' : '',
-          fontStyle: cue.tags.i ? 'italic' : '',
-          textDecoration: cue.tags.u ? 'underline' : cue.tags.s ? 'line-through' : '',
-          margin: calculateSubMarginBottom(cue, ind, item),
-        }"
-        :class="[`subtitle-style${chosenStyle}`]"
-      ><!--eslint-disable-line-->{{ cue.text }}</p>
+      <div class="primary-sub">
+        <p
+          v-for="(cue, ind) in separateSubtitle(item)[0]"
+          :key="cue.text + ind"
+          :style="{
+            zoom: cue.category === 'first' ? `${scaleNum}` : `${secondarySubScale}`,
+            writingMode: (cue.category === 'first' ? firstType === 'vtt' : secondType === 'vtt')
+              ? `vertical-${cue.tags.vertical}` : '',
+            lineHeight: '120%',
+            paddingTop: calculatePaddingTop(ind),
+            paddingBottom: calculatePaddingBottom(ind, separateSubtitle(item)[0].length),
+            fontWeight: cue.tags.b ? 'bold' : '',
+            fontStyle: cue.tags.i ? 'italic' : '',
+            textDecoration: cue.tags.u ? 'underline' : cue.tags.s ? 'line-through' : '',
+            marginBottom: separateSubtitle(item)[1].length
+              && ind === separateSubtitle(item)[0].length - 1
+              ? `${subtitleSpace / scaleNum}px` : '',
+          }"
+          :class="[`subtitle-style${chosenStyle}`]"
+        ><!--eslint-disable-line-->{{ cue.text }}</p>
+      </div>
+      <div class="secondary-sub">
+        <p
+          v-for="(cue, ind) in separateSubtitle(item)[1]"
+          :key="cue.text + ind"
+          :style="{
+            zoom: cue.category === 'first' ? `${scaleNum}` : `${secondarySubScale}`,
+            writingMode: (cue.category === 'first' ? firstType === 'vtt' : secondType === 'vtt')
+              ? `vertical-${cue.tags.vertical}` : '',
+            lineHeight: '120%',
+            paddingTop: calculatePaddingTop(ind),
+            paddingBottom: calculatePaddingBottom(ind, separateSubtitle(item)[1].length),
+            fontWeight: cue.tags.b ? 'bold' : '',
+            fontStyle: cue.tags.i ? 'italic' : '',
+            textDecoration: cue.tags.u ? 'underline' : cue.tags.s ? 'line-through' : '',
+          }"
+          :class="[`subtitle-style${chosenStyle}`]"
+        ><!--eslint-disable-line-->{{ cue.text }}</p>
+      </div>
     </div>
     <div
       v-for="(item, index) in positionCues"
@@ -53,8 +75,7 @@
           fontStyle: cue.tags.i ? 'italic' : '',
           textDecoration: cue.tags.u ? 'underline' : cue.tags.s ? 'line-through' : '',
           lineHeight: '120%',
-          paddingTop: calculatePaddingTop(cue, ind, item),
-          paddingBottom: calculatePaddingBottom(cue, ind, item),
+          padding: calculatePositionSubPad
         }"
         :class="'subtitle-style'+chosenStyle"
       ><!--eslint-disable-line-->{{ cue.text }}</p>
@@ -111,6 +132,9 @@ export default {
     };
   },
   computed: {
+    calculatePositionSubPad() {
+      return this.chosenStyle === 4 ? '0.9px 0' : '';
+    },
     subtitleSpace() {
       const subSpaceFactors: number[] = [15, 18, 21, 24];
       return subSpaceFactors[this.chosenSize] / 1080 * this.winHeight;
@@ -176,10 +200,12 @@ export default {
     },
   },
   methods: {
-    calculateSubMarginBottom(cue: Cue, ind: number, item: Cue[]) {
-      const bottom = item[ind + 1] && cue.category === 'first'
-        && item[ind + 1].category === 'secondary' ? `${this.subtitleSpace / this.scaleNum}px` : '';
-      return `0 auto ${bottom} auto`;
+    separateSubtitle(item: Cue[]) {
+      const index = item.findIndex((cue: Cue) => cue.category === 'secondary');
+      if (index !== -1) {
+        return [item.slice(0, index), item.slice(index, item.length)];
+      }
+      return [item, []];
     },
     calculateSubBottom(index: number) {
       if ([1, 2, 3].includes(index + 1)) {
@@ -217,16 +243,14 @@ export default {
       }
       return '';
     },
-    calculatePaddingTop(cue: Cue, ind: number, item: Cue[]) {
-      if (this.chosenStyle === 4
-        && (ind === 0 || (item[ind - 1].category === 'first' && cue.category === 'secondary'))) {
+    calculatePaddingTop(ind: number) {
+      if (this.chosenStyle === 4 && ind === 0) {
         return '0.9px';
       }
       return '';
     },
-    calculatePaddingBottom(cue: Cue, ind: number, item: Cue[]) {
-      if (this.chosenStyle === 4
-        && (ind === item.length - 1 || (cue.category === 'first' && (!item[ind + 1] || item[ind + 1].category === 'secondary')))) {
+    calculatePaddingBottom(ind: number, length: number) {
+      if (this.chosenStyle === 4 && ind === length - 1) {
         return '0.9px';
       }
       return '';
@@ -325,5 +349,8 @@ export default {
   left: 0;
   top: 0;
   z-index: auto;
+  .primary-sub, .secondary-sub {
+    margin: 0 auto 0 auto;
+  }
 }
 </style>
