@@ -12,7 +12,7 @@
   >
     <div
       :style="{
-        backgroundImage: !isChosen && hoveredText ?
+        backgroundImage: !isChosen && hoveredText && isPrimarySub ?
           'linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.045) 20%, ' +
           'rgba(255,255,255,0.00) 78%, rgba(255,255,255,0.00) 100%)' : '',
         transition: 'opacity 200ms',
@@ -21,10 +21,10 @@
     >
       <div
         :style="{
-          color: !isChosen && hoveredText ?
+          color: !isPrimarySub ? 'rgba(255, 255, 255, 0.2)' : !isChosen && hoveredText ?
             'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
           transition: 'color 300ms',
-          cursor: isChosen ? 'default' : 'pointer',
+          cursor: isChosen || !isPrimarySub ? 'default' : 'pointer',
         }"
         class="textContainer"
       >
@@ -90,6 +90,10 @@ export default {
     storedStyle: {
       type: Number,
       required: true,
+    },
+    isPrimarySub: {
+      type: Boolean,
+      default: true,
     },
   },
   data() {
