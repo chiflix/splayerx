@@ -107,7 +107,7 @@
       "splayerxHelp": "幫助",
       "shortCuts": "快捷鍵列表",
       "crashReportLocation": "查看錯誤日誌",
-      "crashReportNotAvailable": ""
+      "crashReportNotAvailable": "暫無錯誤日誌"
     },
     "playback": {
       "backwardL": "後退 -60s",
