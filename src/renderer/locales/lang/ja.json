@@ -106,8 +106,8 @@
       "name": "ヘルプ",
       "splayerxHelp": "ヘルプ",
       "shortCuts": "ショートカットリスト",
-      "crashReportLocation": "",
-      "crashReportNotAvailable": ""
+      "crashReportLocation": "エラーログを表示する",
+      "crashReportNotAvailable": "Found no crash report"
     },
     "playback": {
       "backwardL": "戻る -60s",
