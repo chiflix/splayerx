@@ -106,8 +106,8 @@
       "name": "مساعدة",
       "splayerxHelp": "مساعدة",
       "shortCuts": "قائمة الاختصارات",
-      "crashReportLocation": "",
-      "crashReportNotAvailable": ""
+      "crashReportLocation": "عرض سجل الأخطاء",
+      "crashReportNotAvailable": "لا يوجد سجل خطأ."
     },
     "playback": {
       "backwardL": "خطوة الى الوراء - 60s",
