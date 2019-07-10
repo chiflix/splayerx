@@ -520,7 +520,8 @@ export default {
       }
       const timestamp = Date.now();
 
-      this.clock.tick(timestamp - this.start);
+      const ticks = timestamp - this.start;
+      this.clock.tick(ticks > 0 ? ticks : 0);
       this.UIStateManager();
 
       if (videodata.time + 1 >= this.duration) {
