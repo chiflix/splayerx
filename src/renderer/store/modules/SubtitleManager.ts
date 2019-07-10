@@ -488,34 +488,36 @@ const actions = {
     return [firstSub, secondSub];
   },
   async [a.updatePlayedTime]({ state, dispatch, getters }: any, times: { start: number, end: number }) {
-    const actions: Promise<any>[] = [];
-    const { primarySubtitleId, secondarySubtitleId } = state;
-    const bubbleId = `${Date.now()}-${Math.random()}`;
-    if (primarySubtitleId) actions.push(
-      dispatch(`${primarySubtitleId}/${subActions.updatePlayedTime}`, times)
-        .then((playedTime: number) => {
-          if (playedTime >= getters.duration * 0.6) {
-            addBubble(SUBTITLE_UPLOAD, { id: `${SUBTITLE_UPLOAD}-${bubbleId}`});
-            dispatch(`${primarySubtitleId}/${subActions.upload}`).then((result: boolean) => {
-              const bubbleType = result ? UPLOAD_SUCCESS : UPLOAD_FAILED;
-              addBubble(bubbleType, { id: `${bubbleType}-${bubbleId}` });
-            });
-          }
-        })
-    );
-    if (secondarySubtitleId) actions.push(
-      dispatch(`${secondarySubtitleId}/${subActions.updatePlayedTime}`, times)
-        .then((playedTime: number) => {
-          if (playedTime >= getters.duration * 0.6) {
-            addBubble(SUBTITLE_UPLOAD, { id: `${SUBTITLE_UPLOAD}-${bubbleId}`});
-            dispatch(`${secondarySubtitleId}/${subActions.upload}`).then((result: boolean) => {
-              const bubbleType = result ? UPLOAD_SUCCESS : UPLOAD_FAILED;
-              addBubble(bubbleType, { id: `${bubbleType}-${bubbleId}` });
-            });
-          }
-        })
-    );
-    return Promise.all(actions);
+    if (times.start !== times.end) {
+      const actions: Promise<any>[] = [];
+      const { primarySubtitleId, secondarySubtitleId } = state;
+      const bubbleId = `${Date.now()}-${Math.random()}`;
+      if (primarySubtitleId) actions.push(
+        dispatch(`${primarySubtitleId}/${subActions.updatePlayedTime}`, times)
+          .then((playedTime: number) => {
+            if (playedTime >= getters.duration * 0.6) {
+              addBubble(SUBTITLE_UPLOAD, { id: `${SUBTITLE_UPLOAD}-${bubbleId}`});
+              dispatch(`${primarySubtitleId}/${subActions.upload}`).then((result: boolean) => {
+                const bubbleType = result ? UPLOAD_SUCCESS : UPLOAD_FAILED;
+                addBubble(bubbleType, { id: `${bubbleType}-${bubbleId}` });
+              });
+            }
+          })
+      );
+      if (secondarySubtitleId) actions.push(
+        dispatch(`${secondarySubtitleId}/${subActions.updatePlayedTime}`, times)
+          .then((playedTime: number) => {
+            if (playedTime >= getters.duration * 0.6) {
+              addBubble(SUBTITLE_UPLOAD, { id: `${SUBTITLE_UPLOAD}-${bubbleId}`});
+              dispatch(`${secondarySubtitleId}/${subActions.upload}`).then((result: boolean) => {
+                const bubbleType = result ? UPLOAD_SUCCESS : UPLOAD_FAILED;
+                addBubble(bubbleType, { id: `${bubbleType}-${bubbleId}` });
+              });
+            }
+          })
+      );
+      return Promise.all(actions);
+    }
   },
   async [a.manualUploadAllSubtitles]({ state, dispatch }: any) {
     if (navigator.onLine) {
