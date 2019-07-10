@@ -106,8 +106,8 @@
       "name": "Ayuda",
       "splayerxHelp": "Ayuda",
       "shortCuts": "Lista de accesos directos",
-      "crashReportLocation": "",
-      "crashReportNotAvailable": ""
+      "crashReportLocation": "Ver registro de errores",
+      "crashReportNotAvailable": "No hay registro de errores."
     },
     "playback": {
       "backwardL": "Paso atrás -60s",
