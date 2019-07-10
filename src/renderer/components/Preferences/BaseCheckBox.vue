@@ -17,7 +17,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import Icon from '@/components/BaseIconContainer.vue';
 
 export default {
