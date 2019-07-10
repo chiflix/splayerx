@@ -31,6 +31,7 @@
         <p>{{ $t('advance.fontStyle') }}</p>
         <div
           v-show="!isChosen"
+          :style="{ opacity: isPrimarySub ? '1' : '0.3333' }"
           class="rightItem"
         >
           <img :src="chosenStyle">
