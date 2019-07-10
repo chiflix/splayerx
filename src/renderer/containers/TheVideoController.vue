@@ -364,9 +364,19 @@ export default {
       }
     },
     enabledSecondarySub(val: boolean) {
-      if (val && !this.widgetsStatus.SubtitleControl.showAttached) {
+      if (val) {
         this.updateSubtitleType(false);
-        this.widgetsStatus.SubtitleControl.showAttached = true;
+        this.subMenuShow = true;
+        if (this.subMenuTimer) {
+          this.clock.clearTimeout(this.subMenuTimer);
+        }
+        this.subMenuTimer = this.clock.setTimeout(() => {
+          this.subMenuShow = false;
+        }, 3000);
+        this.tempRecentPlaylistDisplayState = false;
+        Object.keys(this.widgetsStatus).forEach((item) => {
+          this.widgetsStatus[item].showAttached = item === 'SubtitleControl';
+        });
       }
     },
   },
