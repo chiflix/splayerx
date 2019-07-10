@@ -861,7 +861,6 @@ new Vue({
               label: this.$t('advance.subMenu'),
               click: () => {
                 this.$bus.$emit('show-subtitle-settings');
-                // TODO open subtitle menu
               },
             },
             {
