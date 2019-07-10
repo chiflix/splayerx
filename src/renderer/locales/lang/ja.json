@@ -105,7 +105,9 @@
     "help": {
       "name": "ヘルプ",
       "splayerxHelp": "ヘルプ",
-      "shortCuts": "ショートカットリスト"
+      "shortCuts": "ショートカットリスト",
+      "crashReportLocation": "",
+      "crashReportNotAvailable": ""
     },
     "playback": {
       "backwardL": "戻る -60s",
