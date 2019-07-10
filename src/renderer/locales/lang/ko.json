@@ -105,7 +105,9 @@
     "help": {
       "name": "도움",
       "splayerxHelp": "도움",
-      "shortCuts": "바로 가기 목록"
+      "shortCuts": "바로 가기 목록",
+      "crashReportLocation": "",
+      "crashReportNotAvailable": ""
     },
     "playback": {
       "backwardL": "단계 뒤로 -60 년대",
