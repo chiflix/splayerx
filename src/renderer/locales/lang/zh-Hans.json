@@ -196,8 +196,8 @@
   "welcome": {
     "welcomeTitle": "欢迎使用射手影音",
     "welcomeDescription": "强劲的视频播放能力、先锋的智能翻译与全新轻量级的设计相结合，颠覆您的视频观赏体验。",
-    "agreement": "我已阅读并同意",
-    "policy": "用户隐私条款",
+    "agreement": "继续即表示同意用户",
+    "policy": "隐私条款",
     "languageTitle1": "设置常用字幕语言",
     "languageTitle2": "以获取智能翻译结果",
     "primary": "首要语言",
