@@ -140,11 +140,11 @@
     },
     "subtitle": {
       "AITranslation": "تحديث الترجمة الذكية",
-      "decreasePrimarySubtitleDelay": "العنوان الفرعي تأخير -0.1s",
+      "decreaseSubtitleDelayS": "العنوان الفرعي تأخير -0.1s",
       "disabledSecondarySub": "تعطيل الترجمة الثانوية",
       "enabledSecondarySub": "تمكين الترجمة الثانوية",
       "increaseSubtitleDelayL": "",
-      "increasePrimarySubtitleDelay": "العنوان الفرعي تأخير 0.1s",
+      "increaseSubtitleDelayS": "العنوان الفرعي تأخير 0.1s",
       "langEn": "الإنجليزية",
       "langZhCN": "صينى",
       "loadSubtitleFile": "تحميل ملف الترجمة ...",

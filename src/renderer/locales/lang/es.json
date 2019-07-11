@@ -140,11 +140,11 @@
     },
     "subtitle": {
       "AITranslation": "Recargar la traducción Smart",
-      "decreasePrimarySubtitleDelay": "retraso de subtítulos -0.1s",
+      "decreaseSubtitleDelayS": "retraso de subtítulos -0.1s",
       "disabledSecondarySub": "Desactivar Subtitulo Secundario",
       "enabledSecondarySub": "Habilitar subtítulos secundarios",
       "increaseSubtitleDelayL": "",
-      "increasePrimarySubtitleDelay": "retraso de subtítulos +0.1s",
+      "increaseSubtitleDelayS": "retraso de subtítulos +0.1s",
       "langEn": "Inglés",
       "langZhCN": "Chino",
       "loadSubtitleFile": "Cargar archivo de subtítulos ...",
