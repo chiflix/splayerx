@@ -525,6 +525,7 @@ export default {
   screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
     .sub-menu-wrapper {
       height: auto;
+      min-width: 172px;
       max-height: 138px;
     }
     .topContainer {
@@ -534,7 +535,7 @@ export default {
       display: flex;
       flex-direction: row;
       p {
-        margin: 15px 0 auto 14px;
+        margin: 15px 0 auto 17px;
         letter-spacing: 0.2px;
         line-height: 15px;
         font-size: 13px;
@@ -566,8 +567,8 @@ export default {
     .sub-menu-wrapper {
       position: absolute;
       bottom: 32px;
-      left: -102px;
-      width: 170px;
+      left: -113px;
+      width: 180px;
       max-height: 138px;
     }
   }
@@ -576,6 +577,7 @@ export default {
     .sub-menu-wrapper {
       height: auto;
       max-height: 239px;
+      min-width: 206px;
     }
     .topContainer {
       cursor: default;
@@ -584,7 +586,7 @@ export default {
       display: flex;
       flex-direction: row;
       p {
-        margin: 18px 0 auto 16px;
+        margin: 18px 0 auto 20.04px;
         letter-spacing: 0.23px;
         line-height: 17px;
         font-size: 15.6px;
@@ -616,8 +618,8 @@ export default {
     .sub-menu-wrapper {
       position: absolute;
       bottom: 44px;
-      left: -106px;
-      width: 204px;
+      left: -117px;
+      width: 216px;
       max-height: 239px;
     }
   }
@@ -626,6 +628,7 @@ export default {
     .sub-menu-wrapper {
       height: auto;
       max-height: 433px;
+      min-width: 288px;
     }
     .topContainer {
       cursor: default;
@@ -634,7 +637,7 @@ export default {
       display: flex;
       flex-direction: row;
       p {
-        margin: 24px 0 auto 24px;
+        margin: 24px 0 auto 28.48px;
         letter-spacing: 0.32px;
         line-height: 23px;
         font-size: 21.84px;
@@ -666,8 +669,8 @@ export default {
     .sub-menu-wrapper {
       position: absolute;
       bottom: 70px;
-      left: -133px;
-      width: 286px;
+      left: -148.8px;
+      width: 302.4px;
       max-height: 433px;
     }
   }
@@ -683,12 +686,6 @@ export default {
   position: absolute;
 }
 
-.sub-delete-enter-active, .sub-delete-leave-active {
-  transition: opacity 150ms;
-}
-.sub-delete-enter, .sub-delete-leave-to {
-  opacity: 0;
-}
 .icon-rotate-animation {
   animation: icon-rotate 1s linear 1 normal forwards;
   animation-iteration-count: 10;
