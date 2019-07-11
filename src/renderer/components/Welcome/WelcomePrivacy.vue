@@ -6,21 +6,14 @@
     <div class="content">
       {{ $t('welcome.welcomeDescription') }}
     </div>
-    <BaseCheckBox
-      v-model="privacyAgreement"
-      class="checkbox"
-    >
-      {{ $t('welcome.agreement') }}<a @click.stop="handleLinkClick">{{ $t('welcome.policy') }}</a>
-    </BaseCheckBox>
+    <p class="privacy-content">
+      {{ $t('welcome.agreement') }}<u @click="handleLinkClick">{{ $t('welcome.policy') }}</u>
+    </p>
   </div>
 </template>
 <script lang="ts">
-import BaseCheckBox from '@/components/Preferences/BaseCheckBox.vue';
 
 export default {
-  components: {
-    BaseCheckBox,
-  },
   computed: {
     privacyAgreement: {
       get() {
@@ -35,6 +28,13 @@ export default {
           this.iconType = 'nextStepDisable';
         }
       },
+    },
+  },
+  methods: {
+    handleLinkClick() {
+      if (this.$i18n.locale === 'zh-Hans') this.$electron.shell.openExternal('http://splayer.org/zh-Hans/terms/');
+      else if (this.$i18n.locale === 'zh-Hant') this.$electron.shell.openExternal('http://splayer.org/zh-Hant/terms/');
+      else this.$electron.shell.openExternal('http://splayer.org/en/terms/');
     },
   },
 };
@@ -60,7 +60,7 @@ export default {
     line-height: 30px;
   }
   .content {
-    padding-top: 16px;
+    padding-top: 33px;
     width: 362px;
     height: 64px;
     font-family: $font-normal;
@@ -70,8 +70,18 @@ export default {
     text-align: center;
     line-height: 24px;
   }
-  .checkbox {
-    margin-top: 25px;
+  .privacy-content {
+    margin-top: 40px;
+    font-family: $font-medium;
+    font-size: 13px;
+    color: rgba(255,255,255,0.7);
+    letter-spacing: 0.3px;
+    line-height: 19px;
+    user-select: none;
+    u {
+      display: inline;
+      cursor: pointer;
+    }
   }
 }
 </style>
