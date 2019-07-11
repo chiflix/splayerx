@@ -74,6 +74,7 @@ export const Subtitle = {
 export const newSubtitle = {
   setModuleId: 'SET_MODULE_ID',
   setSource: 'SET_SOURCE',
+  setRealSource: 'SET_REAL_SOURCE',
   setType: 'SET_TYPE',
   setFormat: 'SET_FORMAT',
   setLanguage: 'SET_LANGUAGE',

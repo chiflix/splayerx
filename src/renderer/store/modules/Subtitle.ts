@@ -3,7 +3,7 @@ import { LanguageCode } from '@/libs/language';
 import { storeSubtitle, removeSubtitle, removeSubtitleItemsFromList, cacheSubtitle } from '@/services/storage/subtitle';
 import { newSubtitle as m } from '@/store/mutationTypes';
 import { newSubtitle as a, SubtitleManager as parentActions } from '@/store/actionTypes';
-import { getParser } from '@/services/subtitle/utils';
+import { getParser, sourceToFormat } from '@/services/subtitle/utils';
 import { SubtitleUploadParameter } from '@/services/subtitle';
 import { generateHints } from '@/libs/utils';
 import upload from '@/services/subtitle/upload';
@@ -15,6 +15,7 @@ import { isCachedSubtitle } from '@/services/storage/subtitle/file';
 type SubtitleState = {
   moduleId: string;
   source: any;
+  realSource: any;
   type: Type | undefined;
   format: Format | undefined;
   language: LanguageCode;
@@ -38,6 +39,7 @@ let autoUpload = false;
 const state = () => ({
   moduleId: '',
   source: '',
+  realSource: '',
   type: undefined,
   format: Format.Unknown,
   language: LanguageCode.Default,
@@ -51,6 +53,9 @@ const mutations = {
   },
   [m.setSource](state: SubtitleState, source: any) {
     state.source = source;
+  },
+  [m.setRealSource](state: SubtitleState, source: any) {
+    state.realSource = source;
   },
   [m.setType](state: SubtitleState, type: Type) {
     state.type = type;
@@ -88,8 +93,16 @@ const actions = {
       const { entity } = subtitle;
       await Promise.all([
         generator.getStoredSource
-          ? generator.getStoredSource().then((src: Origin) => entity.source = src)
-          : generator.getSource().then((src: Origin) => entity.source = src),
+          ? generator.getStoredSource()
+              .then((src: Origin) => {
+                entity.source = src;
+                return generator.getSource();
+              })
+              .then((src: Origin) => commit(m.setRealSource, src))
+          : generator.getSource().then((src: Origin) => {
+            entity.source = src;
+            commit(m.setRealSource, src);
+          }),
         generator.getFormat().then(format => {
           entity.format = format;
           commit(m.setFormat, format);
@@ -125,7 +138,8 @@ const actions = {
       const { entity, parser } = subtitle;
       if (!entity.payload) return [];
       else if (entity.payload && !parser.getDialogues) {
-        subtitle.parser = getParser(entity);
+        const realFormat = sourceToFormat(state.realSource);
+        subtitle.parser = getParser(realFormat, entity.payload);
         try {
           await subtitle.parser.parse();
           await dispatch(a.startWatchPlayedTime);

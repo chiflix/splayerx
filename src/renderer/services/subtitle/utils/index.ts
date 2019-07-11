@@ -1,4 +1,4 @@
-import { Tags, Entity } from '@/interfaces/ISubtitle';
+import { Tags, Origin, Type } from '@/interfaces/ISubtitle';
 import { detect } from 'chardet';
 import { encodingExists, decode } from 'iconv-lite';
 import { open, read, close, readFile } from 'fs-extra';
@@ -101,6 +101,7 @@ export async function loadLocalFile(path: string, encoding?: string) {
 }
 
 import { assFragmentLanguageLoader, srtFragmentLanguageLoader, vttFragmentLanguageLoader } from './languageLoader';
+import { EmbeddedOrigin } from '../loaders';
 
 export function pathToFormat(path: string): Format {
   const extension = extname(path).slice(1);
@@ -117,6 +118,20 @@ export function pathToFormat(path: string): Format {
       return Format.Unknown;
   }
 }
+
+export function sourceToFormat(subtitleSource: Origin) {
+  switch (subtitleSource.type) {
+    case Type.Online:
+      return Format.Sagi;
+    case Type.Embedded:
+      const { extractedSrc } = (subtitleSource as EmbeddedOrigin).source;
+      if (extractedSrc) return pathToFormat(extractedSrc);
+      return Format.Unknown;
+    default:
+      return pathToFormat(subtitleSource.source);
+  }
+}
+
 export function formatToExtension(format: Format): string {
   switch (format) {
     case Format.Sagi:
@@ -143,17 +158,17 @@ export async function inferLanguageFromPath(path: string): Promise<LanguageCode>
   }
 }
 
-export function getParser(subtitle: Entity): Parser {
-  switch(subtitle.format) {
+export function getParser(format: Format, payload: any): Parser {
+  switch(format) {
     case Format.AdvancedSubStationAplha:
     case Format.SubStationAlpha:
-      return new AssParser(subtitle.payload);
+      return new AssParser(payload);
     case Format.SubRip:
-      return new SrtParser(subtitle.payload);
+      return new SrtParser(payload);
     case Format.Sagi:
-      return new SagiParser(subtitle.payload);
+      return new SagiParser(payload);
     case Format.WebVTT:
-      return new VttParser(subtitle.payload);
+      return new VttParser(payload);
   }
   throw new Error();
 }
