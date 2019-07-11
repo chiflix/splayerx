@@ -100,3 +100,18 @@ export class DatabaseGenerator implements EntityGenerator {
     }
   }
 }
+
+export async function cacheSubtitle(subtitle: Entity) {
+  switch (subtitle.type) {
+    case Type.Embedded:
+      return cacheEmbeddedSubtitle(subtitle)
+        .then(source => addNewSourceToDb(subtitle, source));
+    case Type.Local:
+      return cacheLocalSubtitle(subtitle)
+        .then(source => addNewSourceToDb(subtitle, source));
+    case Type.Online: {
+      const newOnlineSource = await cacheOnlineSubtitle(subtitle);
+      if (newOnlineSource) return addNewSourceToDb(subtitle, newOnlineSource);
+    }
+  }
+}
