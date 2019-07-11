@@ -234,8 +234,8 @@ export default {
         this.buttonDown = 2;
       }
       document.removeEventListener('mouseup', this.mouseupOnOther);
-      this.$refs.button1.removeEventListener('mouseup', this.setDefault);
-      this.$refs.button2.removeEventListener('mouseup', this.restoreSettings);
+      if (this.$refs.button1) this.$refs.button1.removeEventListener('mouseup', this.setDefault);
+      if (this.$refs.button2) this.$refs.button2.removeEventListener('mouseup', this.restoreSettings);
     },
     mousedownOnSetDefault() {
       if (!this.isSettingDefault) {
@@ -273,7 +273,7 @@ export default {
         }, 1500);
       } finally {
         this.buttonDown = 0;
-        this.$refs.button1.removeEventListener('mouseup', this.setDefault);
+        if (this.$refs.button1) this.$refs.button1.removeEventListener('mouseup', this.setDefault);
       }
     },
     restoreSettings() {
@@ -289,7 +289,7 @@ export default {
       if (!this.isMas) {
         electron.ipcRenderer.send('relaunch');
         this.isRestoring = false;
-        this.$refs.button2.removeEventListener('mouseup', this.restoreSettings);
+        if (this.$refs.button2) this.$refs.button2.removeEventListener('mouseup', this.restoreSettings);
       }
     },
     mapCode(code) {
