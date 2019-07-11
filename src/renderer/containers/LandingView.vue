@@ -148,21 +148,8 @@ export default {
       firstIndex: 0,
       useBlur: false,
       pageMounted: false,
-      logoTransition: 'welcome-container-transition',
+      logoTransition: 'scale',
     };
-  },
-  beforeRouteEnter({ name: to }: any, { name: from }: any, next: any) {
-    if (from === 'language-setting' && to === 'landing-view') {
-      next((vm: any) => {
-        vm.logoTransition = 'scale';
-        vm.pageMounted = true;
-      });
-    } else {
-      next((vm: any) => {
-        vm.logoTransition = 'welcome-container-transition';
-        vm.pageMounted = true;
-      });
-    }
   },
   computed: {
     ...mapGetters(['winWidth', 'defaultDir', 'isFullScreen', 'hideVideoHistoryOnExit']),
@@ -268,6 +255,7 @@ export default {
     });
   },
   mounted() {
+    this.pageMounted = true;
     this.$store.dispatch('refreshVersion');
 
     const { app } = this.$electron.remote;
@@ -573,7 +561,7 @@ main {
 
 .scale {
   &-enter-active {
-    transition: all 400ms ease-in;
+    transition: all 400ms ease-in 100ms;
   }
   &-enter {
     transform: scale(0.9, 0.9);

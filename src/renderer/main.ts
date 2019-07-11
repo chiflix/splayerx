@@ -1314,7 +1314,7 @@ new Vue({
       this.menu.getMenuItemById('file').submenu.items.forEach((item: any) => {
         item.enabled = !inWelcomeView;
       });
-      this.menu.getMenuItemById('preference').enabled = !inWelcomeView;
+      // this.menu.getMenuItemById('preference').enabled = !inWelcomeView;
       this.menu.getMenuItemById('windowResize1').enabled = inPlayingView;
       this.menu.getMenuItemById('windowResize2').enabled = inPlayingView;
       this.menu.getMenuItemById('windowResize3').enabled = inPlayingView;

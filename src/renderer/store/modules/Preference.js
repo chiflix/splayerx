@@ -2,6 +2,7 @@ import asyncStorage from '@/helpers/asyncStorage';
 import syncStorage from '@/helpers/syncStorage';
 
 const state = {
+  welcomeProcessDone: false,
   hideVideoHistoryOnExit: false,
   privacyAgreement: undefined,
   displayLanguage: '',
@@ -11,6 +12,7 @@ const state = {
   reverseScrolling: false,
 };
 const getters = {
+  welcomeProcessDone: state => state.welcomeProcessDone,
   preferenceData: state => state,
   hideVideoHistoryOnExit: state => state.hideVideoHistoryOnExit,
   reverseScrolling: state => state.reverseScrolling,
@@ -28,6 +30,9 @@ const getters = {
 };
 
 const mutations = {
+  welcomeProcessDone(state) {
+    state.welcomeProcessDone = true;
+  },
   displayLanguage(state, payload) {
     state.displayLanguage = payload;
   },
@@ -58,6 +63,13 @@ const mutations = {
   },
 };
 const actions = {
+  welcomeProcess({ commit, state }, payload) {
+    commit('welcomeProcessDone');
+    commit('privacyAgreement', payload.privacyAgreement);
+    commit('primaryLanguage', payload.primaryLanguage);
+    commit('secondaryLanguage', payload.secondaryLanguage);
+    return asyncStorage.set('preferences', state);
+  },
   displayLanguage({ commit, state }, payload) {
     commit('displayLanguage', payload);
     return asyncStorage.set('preferences', state);

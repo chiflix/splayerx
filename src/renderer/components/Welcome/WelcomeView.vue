@@ -1,7 +1,9 @@
 <template>
   <div class="welcome">
     <transition :name="transitionMode" mode="out-in">
-      <router-view />
+      <router-view
+        @language-setting="handleSelection"
+      />
     </transition>
     <transition name="fade" mode="out-in">
       <div
@@ -11,7 +13,7 @@
         class="icon no-drag"
       >
           <Icon
-            :type="`${iconType}${privacyAgreement ? '' : 'Disable'}`"
+            :type="iconType"
             :style="{ cursor: privacyAgreement ? 'pointer' : '' }"
           />
       </div>
@@ -29,10 +31,16 @@ export default {
   data() {
     return {
       transitionMode: 'transform',
+      welcomePayload: null,
     };
   },
   created() {
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setResizable', [false]);
+    this.welcomePayload = {
+      privacyAgreement: true,
+      primaryLanguage: this.$store.getters.primaryLanguage,
+      secondaryLanguage: this.$store.getters.secondaryLanguage,
+    };
   },
   watch: {
     $route({ name: to }: { name: string }, { name: from }: { name: string }) {
@@ -53,14 +61,28 @@ export default {
     },
   },
   methods: {
+    handleSelection(
+      { primaryLanguage, secondaryLanguage }:
+      {
+        primaryLanguage: string,
+        secondaryLanguage: string
+      },
+    ) {
+      this.welcomePayload = {
+        ...this.welcomePayload,
+        primaryLanguage,
+        secondaryLanguage,
+      };
+    },
     handleIconMousedown() {
       this.mousedown = true;
     },
     handleIconMouseup() {
       if (this.mousedown) {
-        if (this.iconType === 'nextStep' && this.privacyAgreement) {
+        if (this.iconType === 'nextStep') {
           this.$router.push({ name: 'language-setting' });
         } else if (this.iconType === 'welcomeNike') {
+          this.$store.dispatch('welcomeProcess', this.welcomePayload);
           this.$router.push({ name: 'landing-view' });
         }
       }

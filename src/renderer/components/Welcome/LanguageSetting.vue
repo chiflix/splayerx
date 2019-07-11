@@ -61,6 +61,7 @@ export default {
       ],
       noLanguage: this.$t('welcome.none'),
       iconDisplay: true,
+      payload: null,
     };
   },
   computed: {
@@ -69,22 +70,20 @@ export default {
     },
     primaryLanguage: {
       get() {
-        return this.$store.getters.primaryLanguage;
+        return this.payload.primaryLanguage;
       },
       set(val: string) {
-        this.$store.dispatch('primaryLanguage', val).then(() => {
-          this.$electron.ipcRenderer.send('main-to-preference', this.preferenceData);
-        });
+        this.payload.primaryLanguage = val;
+        this.$emit('language-setting', this.payload);
       },
     },
     secondaryLanguage: {
       get() {
-        return this.$store.getters.secondaryLanguage;
+        return this.payload.secondaryLanguage;
       },
       set(val: string) {
-        this.$store.dispatch('secondaryLanguage', val).then(() => {
-          this.$electron.ipcRenderer.send('main-to-preference', this.preferenceData);
-        });
+        this.payload.secondaryLanguage = val;
+        this.$emit('language-setting', this.payload);
       },
     },
     primaryLanguages() {
@@ -104,6 +103,10 @@ export default {
     },
   },
   created() {
+    this.payload = {
+      primaryLanguage: this.$store.getters.primaryLanguage,
+      secondaryLanguage: this.$store.getters.secondaryLanguage,
+    };
     document.addEventListener('mouseup', this.globalMouseupHandler);
   },
   beforeDestroy() {
