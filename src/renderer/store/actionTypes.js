@@ -94,6 +94,7 @@ export const SubtitleManager = {
   setGlobalDelay: 'UPDATE_SUBTITLE_DELAY',
   alterPrimaryDelay: 'ALTER_PRIMARY_DELAY',
   alterSecondaryDelay: 'ALTER_SECONDARY_DELAY',
+  storeSubtitleDelays: 'STORE_SUBTITLE_DELAYS',
 };
 
 export const Input = {

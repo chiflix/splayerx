@@ -8,7 +8,7 @@ import { generateHints, calculatedName } from '@/libs/utils';
 import { log } from '@/libs/Log';
 import SubtitleModule from './Subtitle';
 import { StoredSubtitleItem, SelectedSubtitle } from '@/interfaces/ISubtitleStorage';
-import { retrieveSubtitlePreference, DatabaseGenerator, storeSubtitleLanguage, addSubtitleItemsToList, removeSubtitleItemsFromList, storeSelectedSubtitles } from '@/services/storage/subtitle';
+import { retrieveSubtitlePreference, DatabaseGenerator, storeSubtitleLanguage, addSubtitleItemsToList, removeSubtitleItemsFromList, storeSelectedSubtitles, updateSubtitleList } from '@/services/storage/subtitle';
 import { isEqual, get, sortBy, differenceWith, flatten, remove, debounce } from 'lodash';
 import Vue from 'vue';
 import { extname } from 'path';
@@ -109,9 +109,11 @@ const mutations = {
   },
   [m.setPrimaryDelay](state: SubtitleManagerState, delayInSeconds: number) {
     state.primaryDelay = delayInSeconds;
+    state.allSubtitles[state.primarySubtitleId].delay = delayInSeconds;
   },
   [m.setSecondaryDelay](state: SubtitleManagerState, delayInSeconds: number) {
     state.secondaryDelay = delayInSeconds;
+    state.allSubtitles[state.secondarySubtitleId].delay = delayInSeconds;
   },
 };
 type AddDatabaseSubtitlesOptions = {
@@ -138,6 +140,14 @@ function privacyConfirm() {
 
 let primarySelectionComplete = false;
 let secondarySelectionComplete = false;
+let alterDelayTimeoutId: any = 0;
+function setDelayTimeout() {
+  clearTimeout(alterDelayTimeoutId);
+  alterDelayTimeoutId = setTimeout(() => {
+    console.log(`[Subtitle|Delay]: storing subtitle delay...`);
+    store.dispatch(a.storeSubtitleDelays);
+  }, 10000);
+}
 function fetchOnlineListWithErrorHandling(
   videoSrc: string,
   languageCode: LanguageCode,
@@ -561,11 +571,18 @@ const actions = {
     const { primarySubtitleId } = state;
     const delay = await dispatch(`${primarySubtitleId}/${subActions.alterDelay}`, deltaInSeconds);
     commit(m.setPrimaryDelay, delay);
+    setDelayTimeout();
   },
   async [a.alterSecondaryDelay]({ state, dispatch, commit }: any, deltaInSeconds: number) {
     const { secondarySubtitleId } = state;
     const delay = await dispatch(`${secondarySubtitleId}/${subActions.alterDelay}`, deltaInSeconds);
     commit(m.setSecondaryDelay, delay);
+    setDelayTimeout();
+  },
+  async [a.storeSubtitleDelays]({ getters, state }: any) {
+    const { list } = getters;
+    const { playlistId, mediaItemId } = state;
+    updateSubtitleList(list, playlistId, mediaItemId).then(() => console.log('[Subtitle|Delay]: subtitle delay stored!'));
   },
 };
 
