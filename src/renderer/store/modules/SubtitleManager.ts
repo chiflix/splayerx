@@ -104,6 +104,7 @@ const mutations = {
     }
   },
 };
+// TODO playlistId -> playListId @yyf
 type AddDatabaseSubtitlesOptions = {
   storedList: StoredSubtitleItem[];
   selected?: {
@@ -296,7 +297,9 @@ const actions = {
       paths.map(async (path: string, i: number) => {
         const g = new LocalGenerator(path);
         if (i === 0) {
-          selectedHash = await g.getHash();
+          try {
+            selectedHash = await g.getHash();
+          } catch (ex) {}
         }
         return dispatch(a.addSubtitle, {
           generator: g,
@@ -357,26 +360,31 @@ const actions = {
   async [a.addSubtitle]({ commit, dispatch, getters }: any, options: AddSubtitleOptions) {
     if (options.playlistId === state.playlistId && options.mediaItemId === state.mediaItemId) {
       const subtitleGenerator = options.generator;
-      const hash = await subtitleGenerator.getHash();
-      const type = await subtitleGenerator.getType();
-      const existedHash = getters.list.find((subtitle: SubtitleControlListItem) => subtitle.hash === hash && subtitle.type === type);
-      const source = await subtitleGenerator.getSource();
-      const existedOrigin = getters.list.find((subtitle: SubtitleControlListItem) => isEqual(subtitle.source, source.source));
-      if (!existedHash || !existedOrigin) {
-        const id = uuidv4();
-        store.registerModule([id], { ...SubtitleModule, name: `${id}` });
-        dispatch(`${id}/${subActions.initialize}`, id);
-        const subtitle: Entity = await dispatch(`${id}/${subActions.add}`, subtitleGenerator);
-        await dispatch(`${id}/${subActions.store}`);
-        let subtitleControlListItem: SubtitleControlListItem = {
-          id,
-          hash: subtitle.hash,
-          type: subtitle.type,
-          language: subtitle.language,
-          source: subtitle.source.source,
-        };
-        commit(m.addSubtitleId, subtitleControlListItem);
-        return subtitleControlListItem;
+      try {
+        const hash = await subtitleGenerator.getHash();
+        const type = await subtitleGenerator.getType();
+        const existedHash = getters.list.find((subtitle: SubtitleControlListItem) => subtitle.hash === hash && subtitle.type === type);
+        const source = await subtitleGenerator.getSource();
+        const existedOrigin = getters.list.find((subtitle: SubtitleControlListItem) => isEqual(subtitle.source, source.source));
+        if (!existedHash || !existedOrigin) {
+          const id = uuidv4();
+          store.registerModule([id], { ...SubtitleModule, name: `${id}` });
+          dispatch(`${id}/${subActions.initialize}`, id);
+          const subtitle: Entity = await dispatch(`${id}/${subActions.add}`, subtitleGenerator);
+          await dispatch(`${id}/${subActions.store}`);
+          let subtitleControlListItem: SubtitleControlListItem = {
+            id,
+            hash: subtitle.hash,
+            type: subtitle.type,
+            language: subtitle.language,
+            source: subtitle.source.source,
+          };
+          commit(m.addSubtitleId, subtitleControlListItem);
+          return subtitleControlListItem;
+        }
+      } catch (ex) {
+        log.warn('SubtitleManager addSubtitle action', ex);
+        return;
       }
     }
   },

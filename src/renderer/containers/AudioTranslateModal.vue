@@ -1,0 +1,260 @@
+<template>
+  <div>
+    <div
+      v-fade-in="isTranslateModalVisiable"
+      class="modal-mask"
+    />
+    <div
+      v-fade-in="isTranslateModalVisiable"
+      class="select-language-modal"
+    >
+      <h1 v-if="!isTranslating && !isConfirmCancelTranlate">
+        选择视频源语言
+      </h1>
+      <h1 v-else-if="isConfirmCancelTranlate">
+        翻译已取消
+      </h1>
+      <h1 v-else>
+        大约还需{{ translateEstimateTime }}分钟
+      </h1>
+      <p v-if="!isTranslating && !isConfirmCancelTranlate">
+        目前尚无此语言的智能翻译结果，请准确选择您在视频中所听到的语言，翻译将持续一段时间。
+      </p>
+      <p v-else-if="isConfirmCancelTranlate">
+        点击确定关闭，关闭后翻译进度将不可恢复。
+      </p>
+      <p v-else>
+        请不要关闭播放器，您可以在该视频的翻译结果列表中查看进度。
+      </p>
+      <div
+        v-if="!isTranslating && !isConfirmCancelTranlate"
+        class="select"
+      >
+        <Select
+          :static-label="translateLanguageLabel"
+          :selected.sync="audioLanguage"
+          :list="lanugages"
+        />
+      </div>
+      <div
+        v-else-if="isTranslating && !isConfirmCancelTranlate"
+        class="progress-wraper"
+      >
+        <Progress
+          :progress="translateProgress"
+        />
+        <div
+          @click="isConfirmCancelTranlate = true;"
+        >
+          <Icon
+            class="delete"
+            type="close"
+          />
+        </div>
+      </div>
+      <div
+        v-if="!isTranslating && !isConfirmCancelTranlate"
+        class="button-wraper"
+      >
+        <div
+          @click="hideTranslateModal"
+          class="button"
+        >
+          取消
+        </div>
+        <div
+          @click="translate"
+          :class="`${audioLanguage.value ? '' : 'disabled'} button`"
+        >
+          确定
+        </div>
+      </div>
+      <div
+        v-else-if="isConfirmCancelTranlate"
+        class="button-wraper"
+      >
+        <div
+          @click="isConfirmCancelTranlate = false;"
+          class="button"
+        >
+          恢复
+        </div>
+        <div
+          @click="cancelTranslate"
+          class="button"
+        >
+          确定
+        </div>
+      </div>
+      <div
+        v-else
+        @click="hideTranslateModal"
+        class="button"
+      >
+        确定
+      </div>
+    </div>
+  </div>
+</template>
+<script lang="ts">
+import Vue from 'vue';
+import { mapActions, mapGetters } from 'vuex';
+import {
+  AudioTranslate as atActions,
+} from '@/store/actionTypes';
+import { codeToLanguageName } from '@/libs/language';
+import Select from '@/components/PlayingView/Select.vue';
+import Icon from '@/components/BaseIconContainer.vue';
+import Progress from '@/components/PlayingView/Progress.vue';
+
+export default Vue.extend({
+  name: 'AudioTranslateModal',
+  components: {
+    Icon,
+    Select,
+    Progress,
+  },
+  data() {
+    return {
+      // grab btn datas
+      audioLanguage: { label: '视频源语言', value: '' },
+      lanugages: ['zh-Hans', 'zh-Hant', 'ja', 'ko', 'en', 'es', 'ar']
+        .map((e: string) => ({ label: codeToLanguageName(e), value: e })),
+      isConfirmCancelTranlate: false,
+    };
+  },
+  computed: {
+    ...mapGetters([
+      'currentAudioTrackId', 'mediaHash',
+      'isTranslateModalVisiable', 'translateProgress', 'isTranslating', 'selectedTargetLanugage', 'translateEstimateTime',
+    ]),
+    translateLanguageLabel() {
+      return codeToLanguageName(this.selectedTargetLanugage);
+    },
+  },
+  watch: {
+    mediaHash() {
+      this.audioLanguage = { label: '视频源语言', value: '' };
+    },
+    currentAudioTrackId() {
+      this.audioLanguage = { label: '视频源语言', value: '' };
+    },
+  },
+  methods: {
+    ...mapActions({
+      hideTranslateModal: atActions.AUDIO_TRANSLATE_HIDE_MODAL,
+      startTranslate: atActions.AUDIO_TRANSLATE_START,
+      discardTranslate: atActions.AUDIO_TRANSLATE_DISCARD,
+    }),
+    translate() {
+      const { audioLanguage } = this;
+      if (audioLanguage && audioLanguage.value) {
+        this.startTranslate(audioLanguage.value);
+      }
+    },
+    cancelTranslate() {
+      this.hideTranslateModal();
+      this.discardTranslate();
+      setTimeout(() => {
+        this.isConfirmCancelTranlate = false;
+      }, 500);
+    },
+  },
+});
+</script>
+<style lang="scss" scoped>
+.modal-mask {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 2;
+  opacity: 0.7;
+  background: #000000;
+}
+.select-language-modal {
+  position: fixed;
+  width: 280px;
+  padding: 22px;
+  box-sizing: border-box;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  backdrop-filter: blur(10px);
+  z-index: 3;
+  background: rgba(0,0,0,0.10);
+  border: 1px solid rgba(255,255,255,0.10);
+  box-shadow: 0 0 1px 0 rgba(0,0,0,0.10);
+  border-radius: 7px;
+  h1 {
+    font-size: 13px;
+    color: rgba(255,255,255,0.90);
+    letter-spacing: 1px;
+    line-height: 13px;
+    margin-bottom: 7px;
+  }
+  p {
+    font-size: 11px;
+    color: rgba(255,255,255,0.50);
+    letter-spacing: 0.2px;
+    line-height: 16px;
+    margin-bottom: 10px;
+  }
+  .select {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+  .progress-wraper {
+    margin-bottom: 17px;
+    display: flex;
+    align-items: center;
+    .delete {
+      width: 15px;
+      height: 15px;
+      margin-left: 6px;
+      // border-radius: 50%;
+      cursor: pointer;
+    }
+  }
+  .progress {
+    height: 9px;
+    background: rgba(0,0,0,0.10);
+    border-radius: 6px;
+    position: relative;
+    overflow: hidden;
+    &::before {
+      content: "";
+      position: absolute;
+      width: var(--tooltip-width);
+      height: 100%;
+      background: #ffffff;
+      border-radius: 6px;
+    }
+  }
+  .button-wraper {
+    display: flex;
+    justify-content: space-between;
+    .button {
+      width: 45%;
+    }
+  }
+  .button {
+    font-size: 11px;
+    color: rgba(255,255,255,0.80);
+    letter-spacing: 0;
+    text-align: center;
+    line-height: 28px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 2px;
+    cursor: pointer;
+    &.disabled {
+      // opacity: 0.3;
+      color: rgba(255,255,255,0.24);
+      background-color: rgba(255,255,255,0.009);
+      border-color: rgba(255,255,255,0.03);
+    }
+  }
+}
+</style>

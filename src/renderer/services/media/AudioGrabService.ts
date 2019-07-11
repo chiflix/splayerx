@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com 
  * @Date: 2019-06-20 18:03:14 
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-07-09 18:40:37
+ * @Last Modified time: 2019-07-11 13:52:52
  */
 
 // @ts-ignore
@@ -10,7 +10,13 @@ import { splayerx, ipcRenderer, Event } from 'electron';
 import { EventEmitter } from 'events';
 import path from 'path';
 import fs from 'fs';
-import { StreamingTranslationRequest, StreamingTranslationRequestConfig, StreamingTranslationResponse, StreamingTranslationTaskRequest, StreamingTranslationTaskResponse } from 'sagi-api/translation/v1/translation_pb';
+import {
+  StreamingTranslationRequest,
+  StreamingTranslationRequestConfig,
+  StreamingTranslationResponse,
+  StreamingTranslationTaskRequest,
+  StreamingTranslationTaskResponse,
+} from 'sagi-api/translation/v1/translation_pb';
 import { TranslationClient } from 'sagi-api/translation/v1/translation_grpc_pb';
 import { AITaskInfo } from '@/interfaces/IMediaStorable';
 import MediaStorageService, { mediaStorageService } from '../storage/MediaStorageService';
@@ -92,7 +98,6 @@ class AudioGrabService extends EventEmitter {
           this.emit('error', args.grabInfo.error);
           break;
         case Status.Task:
-          console.log(args.grabInfo);
           this.emit('task', args.grabInfo.taskInfo);
           break;
         case Status.TranscriptInfo:
@@ -111,12 +116,12 @@ class AudioGrabService extends EventEmitter {
   }
 
   public stop() {
+    this.clearJob();
+    this.pts = '0';
     if (this.streamClient) {
-      setTimeout(() => {
-        // this.streamClient = null;
-        // this.request = null;
-      }, 0);
       splayerx.stopGrabAudioFrame();
+      this.streamClient = null;
+      this.request = null;
     }
   }
 
@@ -147,8 +152,7 @@ class AudioGrabService extends EventEmitter {
     if (!this.streamClient && this.taskInfo && this.taskInfo.taskId) {
       return;
     }
-    if (err !== 'EOF' && framedata && framebuf) {
-      // console.log(framedata);
+    if (err !== 'EOF' && framedata && framebuf && this.request) {
       const s = framedata.split(',');
       this.pts = s[0];
       this.grabTime += (Number(s[3]) / this.rate);
@@ -163,22 +167,22 @@ class AudioGrabService extends EventEmitter {
       setTimeout(() => {
         this.grabAudio();
       }, 0);
-    } else if (err === 'EOF') {
+    } else if (err === 'EOF' && this.request) {
       this.request.clearAudioContent();
       this.request.setAudioContent(framebuf);
       this.streamClient.write(this.request);
       this.streamClient.end();
       this.streamClient = null;
       this.request = null;
-      console.log('EOF');
       if (this.callback) {
         this.callback();
       }
-    } else {
-      console.error(err);
+    } else if (this.request) {
       setTimeout(() => {
         this.grabAudio();
       }, 20);
+    } else {
+      return;
     }
   }
 
@@ -267,7 +271,6 @@ class AudioGrabService extends EventEmitter {
         this.request = null;
       }
       // return task to render
-      console.log(this.taskInfo);
       this.callback({
         status: Status.Task,
         taskInfo: this.taskInfo,
@@ -289,7 +292,6 @@ class AudioGrabService extends EventEmitter {
         error: result.error,
       });
     } else if (err) {
-      console.warn(err);
       this.callback({
         status: Status.Error,
         error: err,
@@ -338,7 +340,6 @@ class AudioGrabService extends EventEmitter {
         mediaHash: this.mediaHash,
         ...result.taskinfo,
       } as AITaskInfo;
-      console.log(this.taskInfo);
       this.callback({
         status: Status.Task,
         taskInfo: this.taskInfo,

@@ -34,11 +34,16 @@ export default class RecentPlayService implements IRecentPlay {
         let backgroundUrl;
 
         if (duration - lastPlayedTime < 5) {
-          const mediaHash = await mediaQuickHash(path);
-          const coverSrc = await mediaStorageService.getImageBy(mediaHash, 'cover');
-          backgroundUrl = `url("${filePathToUrl(coverSrc as string)}")`;
+          try {
+            const mediaHash = await mediaQuickHash(path);
+            const coverSrc = await mediaStorageService.getImageBy(mediaHash, 'cover');
+            if (!coverSrc) throw new Error('Cannot get coverSrc');
+            backgroundUrl = `url("${filePathToUrl(coverSrc as string)}")`;
+          } catch (ex) {
+            backgroundUrl = `url("${shortCut}")`;
+          }
         } else {
-          backgroundUrl = `url("${shortCut}")`
+          backgroundUrl = `url("${shortCut}")`;
         }
 
         const basename = getBasename(item.path);

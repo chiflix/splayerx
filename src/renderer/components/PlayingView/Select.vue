@@ -6,7 +6,13 @@
       class="dropdown__toggle no-drag"
     >
       <div class="dropdown__displayItem">
-        {{ selected.label }} -> {{ staticLabel }}
+        <span :class="`${selected.value ? '' : 'un_select'}`">
+          {{ selected.label }}
+        </span>
+        <span
+          v-show="!showSelection"
+          class="static_label"
+        >-> {{ staticLabel }}</span>
       </div>
       <div
         @mouseup.stop=""
@@ -92,22 +98,24 @@ export default Vue.extend({
     width: calc(100% - 2px);
     margin-top: -1px;
     margin-left: -1px;
-    transition: all 200ms;
     border-radius: 2px;
     overflow: hidden;
+    transition: height 200ms;
     &--display {
       height: 28px;
-      border: 1px solid rgba(255,255,255,0);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 2px;
       background-color: rgba(255, 255, 255, 0);
     }
 
     &--list {
       height: 148px;
-      // background: #555555;
+      background: #555555;
       border: 1px solid rgba(255,255,255,0.10);
       border-radius: 2px;
       .dropdown__displayItem {
-        border-bottom: 1px solid rgba(255,255,255,0.1);
+        border: none;
+        border-bottom: 0.5px solid rgba(255,255,255,0.10);
       }
     }
   }
@@ -115,10 +123,10 @@ export default Vue.extend({
   &__displayItem {
     height: 28px;
     line-height: 28px;
-    border-bottom: 1px solid rgba(255,255,255,0);
     background: rgba(0,0,0,0.04);
-    border: 1px solid rgba(255,255,255,0.10);
-    border-radius: 2px;
+    .un_select, .static_label {
+      opacity: 0.3;
+    }
   }
 
   &__listItems {

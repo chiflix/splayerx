@@ -11,7 +11,7 @@
               {{ message }}
             </p>
             <div
-              v-if="showDiscardButton"
+              v-if="showConfirmCloseButton"
               :class="{
                 hover: hovered,
               }"
@@ -46,6 +46,20 @@
               @mouseover.stop="hovered = true"
               @mouseout.stop="hovered = false"
               @mouseup.stop="$emit('backStageTranslate');"
+              class="button"
+            >
+              <div class="button-info">
+                好的
+              </div>
+            </div>
+            <div
+              v-if="showDiscardButton"
+              :class="{
+                hover: hovered,
+              }"
+              @mouseover.stop="hovered = true"
+              @mouseout.stop="hovered = false"
+              @mouseup.stop="$emit('disCardTranslate');"
               class="button"
             >
               <div class="button-info">
@@ -109,11 +123,17 @@ export default Vue.extend({
     };
   },
   computed: {
-    showDiscardButton() {
-      return this.type === AudioTranslateBubbleType.ChangeWhenGrab;
+    showConfirmCloseButton() {
+      // 当前正在提取音频
+      return this.type === AudioTranslateBubbleType.ChangeWhenGrab
+      || this.type === AudioTranslateBubbleType.CloseWhenGrab;
     },
     showCancelButton() {
-      return this.type === AudioTranslateBubbleType.ChangeWhenGrab;
+      return this.type === AudioTranslateBubbleType.ChangeWhenGrab
+      || this.type === AudioTranslateBubbleType.CloseWhenGrab;
+    },
+    showDiscardButton() {
+      return this.type === AudioTranslateBubbleType.CloseWhenTranslate;
     },
     showBackStageButton() {
       return this.type === AudioTranslateBubbleType.ChangeWhenTranslate;

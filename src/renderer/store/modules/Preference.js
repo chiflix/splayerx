@@ -8,7 +8,6 @@ const state = {
   primaryLanguage: '',
   secondaryLanguage: '',
   singleCycle: false,
-  lastWinSize: [],
   reverseScrolling: false,
 };
 const getters = {
@@ -26,7 +25,6 @@ const getters = {
   primaryLanguage: state => state.primaryLanguage,
   secondaryLanguage: state => state.secondaryLanguage,
   singleCycle: state => state.singleCycle,
-  lastWinSize: state => state.lastWinSize,
 };
 
 const mutations = {
@@ -50,9 +48,6 @@ const mutations = {
   },
   singleCycle(state, payload) {
     state.singleCycle = payload;
-  },
-  lastWinSize(state, payload) {
-    state.lastWinSize = payload;
   },
   setPreference(state, payload) {
     Object.assign(state, payload);
@@ -106,14 +101,6 @@ const actions = {
   notSingleCycle({ commit }) {
     commit('singleCycle', false);
     commit('LOOP_UPDATE', false);
-  },
-  saveWinSize({ commit }, payload) {
-    if (payload.angle === 90 || payload.angle === 270) {
-      commit('lastWinSize', [payload.size[1], payload.size[0]]);
-    } else {
-      commit('lastWinSize', payload.size);
-    }
-    return asyncStorage.set('preferences', state);
   },
   setPreference({ commit, state }, payload) {
     commit('setPreference', payload);

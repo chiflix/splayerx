@@ -77,7 +77,6 @@ export type Cue = {
   start: number,
   end: number,
   text: string,
-  hide?: boolean,
   format: string,
   tags: Tags,
 }

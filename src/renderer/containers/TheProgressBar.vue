@@ -181,6 +181,7 @@ export default {
     updatePlayProgressBar(time: number) {
       const playedPercent = 100 * (time / this.duration);
       const { playedProgress, fakeProgress } = this.$refs;
+      if (!playedProgress || !fakeProgress) return;
       playedProgress.style.width = this.hoveredPercent <= playedPercent ? `${playedPercent - this.hoveredPercent}%` : `${playedPercent}%`;
       playedProgress.style.backgroundColor = playedPercent <= this.hoveredPercent || !this.hovering ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.3)';
       playedProgress.style.order = this.hoveredPercent <= playedPercent ? '1' : '0';

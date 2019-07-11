@@ -27,9 +27,9 @@
       v-if="isTranslateBubbleVisiable"
       :message="translateBubbleMessage"
       :type="translateBubbleType"
-      @disCardTranslate="confirmDiscardTranslate"
-      @backStageTranslate="confirmBackStageTranslate"
-      @hide="hideTranslateBubble()"
+      @disCardTranslate="discardTranslate"
+      @backStageTranslate="backStageTranslate"
+      @hide="hideTranslateBubble"
     />
     <transition-group
       name="toast"
@@ -102,7 +102,10 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['nextVideo', 'nextVideoPreviewTime', 'duration', 'singleCycle', 'privacyAgreement', 'translateBubbleMessage', 'translateBubbleType', 'isTranslateBubbleVisiable']),
+    ...mapGetters([
+      'nextVideo', 'nextVideoPreviewTime', 'duration', 'singleCycle', 'privacyAgreement',
+      'translateBubbleMessage', 'translateBubbleType', 'isTranslateBubbleVisiable',
+    ]),
     messages() {
       const messages = this.$store.getters.messageInfo;
       if (this.showNextVideo && this.showPrivacyBubble) {
@@ -175,16 +178,6 @@ export default {
       if (this.$refs.nextVideo) {
         this.$refs.nextVideo.updatePlayingTime(time);
       }
-    },
-    confirmDiscardTranslate() {
-      this.hideTranslateBubble();
-      // discard translate
-      this.discardTranslate();
-    },
-    confirmBackStageTranslate() {
-      this.hideTranslateBubble();
-      // translate back stage
-      this.backStageTranslate();
     },
   },
 };
