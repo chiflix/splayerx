@@ -405,7 +405,9 @@ export default {
     async openVideoFile(videoFile) {
       if (!videoFile) return;
       const id = await this.infoDB.addPlaylist([videoFile]);
-      const playlistItem = await this.infoDB.get('recent-played', id);
+      const playlistItem = (await this.infoDB.get('recent-played', id)) || {
+        id, items: [], hpaths: [], lastOpened: Date.now(), playedIndex: 0,
+      };
       let similarVideos;
       try {
         similarVideos = await this.findSimilarVideoByVidPath(videoFile);
@@ -419,7 +421,7 @@ export default {
           this.$store.dispatch('FolderList', {
             id,
             paths: [videoFile],
-            items: [playlistItem.items[0]],
+            items: playlistItem.items.slice(0, 1),
           });
         }
       }
