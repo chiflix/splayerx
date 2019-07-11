@@ -273,6 +273,7 @@ export default {
     },
     showAttached(val: boolean) {
       if (!val) {
+        this.updateSubtitleType(true);
         this.anim.playSegments([79, 92], true);
         if (!this.validEnter) {
           this.isShowingHovered = false;
