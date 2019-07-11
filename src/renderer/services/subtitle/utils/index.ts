@@ -117,6 +117,15 @@ export function pathToFormat(path: string): Format {
       return Format.Unknown;
   }
 }
+export function formatToExtension(format: Format): string {
+  switch (format) {
+    case Format.Sagi:
+    case Format.WebVTT:
+      return 'vtt';
+    default:
+      return format;
+  }
+}
 
 export async function inferLanguageFromPath(path: string): Promise<LanguageCode> {
   const format = await pathToFormat(path);
