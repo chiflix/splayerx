@@ -84,8 +84,9 @@
 </template>
 
 <script lang="ts">
-// @ts-ignore
+import { mapActions } from 'vuex';
 import Icon from '../../BaseIconContainer.vue';
+import { SubtitleManager } from '@/store/actionTypes';
 
 export default {
   name: 'AdvanceSelectItems',
@@ -174,14 +175,10 @@ export default {
     },
   },
   methods: {
-    changePrimarySubDelay(delay: number) {
-      console.log('primary', delay);
-      // TODO change primary subtitle delay
-    },
-    changeSecondarySubDelay(delay: number) {
-      console.log('secondary', delay);
-      // TODO change secondary subtitle delay
-    },
+    ...mapActions({
+      changePrimarySubDelay: SubtitleManager.alterPrimaryDelay,
+      changeSecondarySubDelay: SubtitleManager.alterSecondaryDelay,
+    }),
     handleSubMouseEnter() {
       this.hoveredText = true;
     },
