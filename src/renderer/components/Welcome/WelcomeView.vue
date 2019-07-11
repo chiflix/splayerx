@@ -1,61 +1,55 @@
 <template>
   <div class="welcome">
-    <div class="title">
-      欢迎使用射手影音
-    </div>
-    <div class="content">
-      强劲的视频播放能力、先锋的智能翻译与全新轻量级的设计相结合，颠覆您的视频观赏体验。
-    </div>
-    <BaseCheckBox
-      v-model="privacyAgreement"
-      class="checkbox"
-    >
-      我已阅读并同意用户隐私条款
-    </BaseCheckBox>
-    <div
-      @mousedown="handleIconMousedown"
-      @mouseup="handleIconMouseup"
-      class="icon no-drag"
-    >
-      <Icon
-        :type="iconType"
-        :style="{ cursor: iconType === 'nextStepDisable' ? '' : 'pointer' }"
-      />
-    </div>
+    <transition :name="transitionMode" mode="out-in">
+      <router-view />
+    </transition>
+    <transition name="fade" mode="out-in">
+      <div
+        :key="iconType"
+        @mousedown="handleIconMousedown"
+        @mouseup="handleIconMouseup"
+        class="icon no-drag"
+      >
+          <Icon
+            :type="`${iconType}${privacyAgreement ? '' : 'Disable'}`"
+            :style="{ cursor: privacyAgreement ? 'pointer' : '' }"
+          />
+      </div>
+    </transition>
   </div>
 </template>
 <script lang="ts">
 import Icon from '@/components/BaseIconContainer.vue';
-import BaseCheckBox from '@/components/Preferences/BaseCheckBox.vue';
 import { codeToLanguageName } from '@/libs/language';
 
 export default {
   components: {
     Icon,
-    BaseCheckBox,
   },
   data() {
     return {
-      iconType: 'nextStepDisable',
+      transitionMode: 'transform',
     };
   },
   created() {
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setResizable', [false]);
   },
+  watch: {
+    $route({ name: to }: { name: string }, { name: from }: { name: string }) {
+      if (to === 'language-setting') this.transitionMode = 'transform';
+      else this.transitionMode = '';
+    },
+  },
   computed: {
-    privacyAgreement: {
-      get() {
-        return this.$store.getters.privacyAgreement;
-      },
-      set(val: boolean) {
-        if (val) {
-          this.$store.dispatch('agreeOnPrivacyPolicy');
-          this.iconType = 'nextStep';
-        } else {
-          this.$store.dispatch('disagreeOnPrivacyPolicy');
-          this.iconType = 'nextStepDisable';
-        }
-      },
+    privacyAgreement() {
+      return this.$store.getters.privacyAgreement;
+    },
+    iconType() {
+      const currentRouteName = this.$route.name;
+      if (currentRouteName === 'welcome-privacy') {
+        return 'nextStep';
+      }
+      return 'welcomeNike';
     },
   },
   methods: {
@@ -63,9 +57,17 @@ export default {
       this.mousedown = true;
     },
     handleIconMouseup() {
-      if (this.mousedown && this.iconType === 'nextStep') {
-        this.$router.push({ name: 'language-setting' });
+      if (this.mousedown) {
+        if (this.iconType === 'nextStep' && this.privacyAgreement) {
+          this.$router.push({ name: 'language-setting' });
+        } else if (this.iconType === 'welcomeNike') {
+          this.$router.push({ name: 'landing-view' });
+        }
       }
+    },
+    handleLinkClick() {
+      console.log(this.$i18n.locale);
+      // if (this.$i18n.locale === 'zh')
     },
   },
 };
@@ -79,35 +81,45 @@ export default {
   width: 100%;
   height: 100%;
 
-  .title {
-    padding-top: 89px;
-    height: 55px;
-    font-family: $font-light;
-    font-weight: lighter;
-    font-size: 30px;
-    color: rgba(255,255,255,0.90);
-    letter-spacing: 2.14px;
-    text-align: center;
-    line-height: 30px;
-  }
-  .content {
-    padding-top: 16px;
-    width: 362px;
-    height: 64px;
-    font-family: $font-normal;
-    font-size: 16px;
-    color: rgba(255,255,255,0.20);
-    letter-spacing: 1.14px;
-    text-align: center;
-    line-height: 24px;
-  }
-  .checkbox {
-    margin-top: 25px;
-  }
   .icon {
     width: 40px;
     height: 40px;
     padding-top: 42px;
+  }
+}
+.transform {
+  &-enter-active {
+    transition-property: transform, opacity;
+    transition-duration: 300ms;
+    transition-timing-function: ease-out;
+  }
+  &-leave-active {
+    transition-property: transform, opacity;
+    transition-duration: 250ms;
+    transition-timing-function: ease-in;
+  }
+  &-enter {
+    transform: translateX(100px);
+    opacity: 0;
+  }
+  &-leave-to {
+    transform: translateX(-100px);
+    opacity: 0;
+  }
+}
+
+.fade {
+  &-enter-active {
+    transition: opacity 300ms ease-in;
+  }
+  &-leave-active {
+    transition: opacity 250ms ease-in;
+  }
+  &-enter {
+    opacity: 0;
+  }
+  &-leave-to {
+    opacity: 0;
   }
 }
 </style>

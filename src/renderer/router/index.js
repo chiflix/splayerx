@@ -23,11 +23,18 @@ export default new Router({
       path: '/welcome',
       name: 'welcome-view',
       component: require('@/components/Welcome/WelcomeView.vue').default,
-    },
-    {
-      path: '/language-setting',
-      name: 'language-setting',
-      component: require('@/components/Welcome/LanguageSetting.vue').default,
+      children: [
+        {
+          path: '',
+          name: 'welcome-privacy',
+          component: require('@/components/Welcome/WelcomePrivacy.vue').default,
+        },
+        {
+          path: 'language',
+          name: 'language-setting',
+          component: require('@/components/Welcome/LanguageSetting.vue').default,
+        },
+      ],
     },
   ],
 });

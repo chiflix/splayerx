@@ -4,7 +4,7 @@
     :class="$route.name !== 'playing-view' ? 'landing-view' : ''"
     class="application"
   >
-    <Titlebar v-if="currentRoute !== 'playing-view'" />
+    <Titlebar v-if="$route.name !== 'playing-view'" />
     <transition :name="transitionMode">
       <router-view />
     </transition>
@@ -30,8 +30,7 @@ export default {
   },
   watch: {
     $route({ name: to }: { name: string }, { name: from }: { name: string }) {
-      if (to === 'language-setting') this.transitionMode = 'transform';
-      else if (from === 'language-setting' && to === 'landing-view') this.transitionMode = 'fade-transform';
+      if (from === 'language-setting' && to === 'landing-view') this.transitionMode = 'fade';
       else this.transitionMode = '';
     },
   },
@@ -73,34 +72,13 @@ export default {
 .landing-view {
   background-image: linear-gradient(-28deg, #414141 0%, #545454 47%, #7B7B7B 100%);
 }
-.transform {
-  &-enter-active {
-    transition-property: transform, opacity;
-    transition-duration: 500ms;
-    transition-delay: 250ms;
-    transition-timing-function: ease-out;
-  }
-  &-leave-active {
-    transition-property: transform, opacity;
-    transition-duration: 450ms;
-    transition-timing-function: ease-in;
-  }
-  &-enter {
-    transform: translateX(200px);
-    opacity: 0;
-  }
-  &-leave-to {
-    transform: translateX(-400px);
-    opacity: 0;
-  }
-}
 
-.fade-transform {
+.fade {
   &-enter-active {
-    transition: opacity 450ms ease-in 450ms;
+    transition: opacity 250ms ease-in 250ms;
   }
   &-leave-active {
-    transition: opacity 450ms ease-in;
+    transition: opacity 250ms ease-in;
   }
   &-enter {
     opacity: 0;

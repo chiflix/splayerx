@@ -26,26 +26,14 @@
     <div class="content">
       {{ $t('welcome.languageDescription') }}
     </div>
-    <transition name="fade">
-      <div
-        v-if="iconDisplay"
-        @mousedown="handleIconMousedown"
-        @mouseup="handleIconMouseup"
-        class="icon no-drag"
-      >
-        <Icon type="welcomeNike" />
-      </div>
-    </transition>
   </div>
 </template>
 <script lang="ts">
-import Icon from '@/components/BaseIconContainer.vue';
 import Dropdown from '@/components/Welcome/Dropdown.vue';
 import { codeToLanguageName } from '@/libs/language';
 
 export default {
   components: {
-    Icon,
     Dropdown,
   },
   data() {
@@ -111,7 +99,7 @@ export default {
     },
   },
   watch: {
-    showFirstDropdown(val: boolean) {
+    showFirstDropdown() {
       if (this.showSecondDropdown) this.showSecondDropdown = false;
     },
   },
@@ -173,7 +161,7 @@ export default {
   justify-content: flex-start;
   align-items: center;
   width: 100%;
-  height: 100%;
+  height: 270px;
 }
 .title {
   padding-top: 64px;
@@ -203,25 +191,5 @@ export default {
   color: rgba(255,255,255,0.20);
   letter-spacing: 0.86px;
   text-align: center;
-}
-.icon {
-  width: 40px;
-  height: 40px;
-  margin-top: 42px;
-}
-
-.fade {
-  &-enter-active {
-    transition: opacity 500ms ease-out;
-  }
-  &-leave-active {
-    transition: opacity 450ms ease-out;
-  }
-  &-enter, &-leave-to {
-    opacity: 0;
-  }
-  &-leave-to {
-    opacity: 0;
-  }
 }
 </style>
