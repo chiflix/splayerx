@@ -33,6 +33,8 @@ type SubtitleManagerState = {
   isRefreshing: boolean,
   allSubtitles: { [id: string]: SubtitleControlListItem },
   globalDelay: number,
+  primaryDelay: number,
+  secondaryDelay: number,
 }
 const state = {
   playlistId: 0,
@@ -42,6 +44,8 @@ const state = {
   isRefreshing: false,
   allSubtitles: {},
   globalDelay: 0,
+  primaryDelay: 0,
+  secondaryDelay: 0,
 };
 const getters = {
   list(state: SubtitleManagerState) {
@@ -67,8 +71,8 @@ const getters = {
     return enable;
   },
   globalDelay(state: SubtitleManagerState) { return state.globalDelay; },
-  primaryDelay({ primarySubtitleId }: SubtitleManagerState, getters: any, rootState: any) { return rootState[`${primarySubtitleId}/delay`]},
-  secondaryDelay({ secondarySubtitleId }: SubtitleManagerState, getters: any, rootState: any) { return rootState[`${secondarySubtitleId}/delay`]},
+  primaryDelay({ primaryDelay }: SubtitleManagerState) { return primaryDelay; },
+  secondaryDelay({ secondaryDelay }: SubtitleManagerState) { return secondaryDelay; },
 };
 const mutations = {
   [m.setPlaylistId](state: SubtitleManagerState, id: number) {
@@ -102,6 +106,12 @@ const mutations = {
     } else if (Math.abs((state.globalDelay / 1000) + delay) <= 10000) {
       state.globalDelay += delay * 1000;
     }
+  },
+  [m.setPrimaryDelay](state: SubtitleManagerState, delayInSeconds: number) {
+    state.primaryDelay = delayInSeconds;
+  },
+  [m.setSecondaryDelay](state: SubtitleManagerState, delayInSeconds: number) {
+    state.secondaryDelay = delayInSeconds;
   },
 };
 type AddDatabaseSubtitlesOptions = {
@@ -378,7 +388,7 @@ const actions = {
       }
     }
   },
-  [a.removeSubtitle]({ commit, getters, state }: any, id: string) {
+  [a.removeSubtitle]({ commit, getters }: any, id: string) {
     store.unregisterModule(id);
     commit(m.deleteSubtitleId, id);
     if (getters.isFirstSubtitle && getters.primarySubtitleId === id) {
@@ -547,13 +557,15 @@ const actions = {
   [a.setGlobalDelay]({ commit }: any, delta: any) {
     commit(m.setGlobalDelay, delta);
   },
-  [a.alterPrimaryDelay]({ state, dispatch }: any, deltaInSeconds: number) {
+  async [a.alterPrimaryDelay]({ state, dispatch, commit }: any, deltaInSeconds: number) {
     const { primarySubtitleId } = state;
-    dispatch(`${primarySubtitleId}/${subActions.alterDelay}`, deltaInSeconds);
+    const delay = await dispatch(`${primarySubtitleId}/${subActions.alterDelay}`, deltaInSeconds);
+    commit(m.setPrimaryDelay, delay);
   },
-  [a.alterSecondaryDelay]({ state, dispatch }: any, deltaInSeconds: number) {
+  async [a.alterSecondaryDelay]({ state, dispatch, commit }: any, deltaInSeconds: number) {
     const { secondarySubtitleId } = state;
-    dispatch(`${secondarySubtitleId}/${subActions.alterDelay}`, deltaInSeconds);
+    const delay = await dispatch(`${secondarySubtitleId}/${subActions.alterDelay}`, deltaInSeconds);
+    commit(m.setSecondaryDelay, delay);
   },
 };
 

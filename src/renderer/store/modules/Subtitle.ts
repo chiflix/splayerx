@@ -255,6 +255,7 @@ const actions = {
         subtitle.entity.delay = alfterAltered;
       }
     }
+    return state.delay;
   },
 };
 
