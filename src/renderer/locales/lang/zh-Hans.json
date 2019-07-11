@@ -193,6 +193,19 @@
     "nextInFolder": "文件夹中下一视频",
     "nextInPlaylist": "播放列表中下一视频"
   },
+  "welcome": {
+    "welcomeTitle": "欢迎使用射手影音",
+    "welcomeDescription": "强劲的视频播放能力、先锋的智能翻译与全新轻量级的设计相结合，颠覆您的视频观赏体验。",
+    "agreement": "我已阅读并同意",
+    "policy": "用户隐私条款",
+    "languageTitle1": "设置常用字幕语言",
+    "languageTitle2": "以获取智能翻译结果",
+    "primary": "首要语言",
+    "secondary": "次要语言",
+    "chooseSecondary": "选用次要语言",
+    "languageDescription": "* 稍后您可以在偏好设置里更改",
+    "none": "无"
+  },
   "preferences": {
     "general": {
       "clearHistory": "退出时自动清空播放记录",
