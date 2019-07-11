@@ -1,10 +1,10 @@
 <template>
   <div
     id="app"
-    :class="currentRouteName !== 'playing-view' ? 'landing-view' : ''"
+    :class="$route.name !== 'playing-view' ? 'landing-view' : ''"
     class="application"
   >
-    <Titlebar v-if="currentRouteName !== 'playing-view'" />
+    <Titlebar v-if="currentRoute !== 'playing-view'" />
     <transition :name="transitionMode">
       <router-view />
     </transition>
@@ -28,28 +28,11 @@ export default {
       transitionMode: '',
     };
   },
-  computed: {
-    currentRouteName() {
-      return this.$route.name;
-    },
-    isWelcomeView() {
-      return this.currentRouteName === 'welcome-view';
-    },
-    isLanguageSetting() {
-      return this.currentRouteName === 'language-setting';
-    },
-    isPlayingView() {
-      return this.currentRouteName === 'playing-view';
-    },
-    isLandingView() {
-      return this.currentRouteName === 'landing-view';
-    },
-  },
   watch: {
-    currentRouteName(val: string, oldVal: string) {
-      if (val === 'language-setting') this.transitionMode = 'transform';
-      if (val === 'landing-view' && oldVal !== 'playing-view') this.transitionMode = 'fade';
-      if (val === 'playing-view') this.transitionMode = '';
+    $route({ name: to }: { name: string }, { name: from }: { name: string }) {
+      if (to === 'language-setting') this.transitionMode = 'transform';
+      else if (from === 'language-setting' && to === 'landing-view') this.transitionMode = 'fade-transform';
+      else this.transitionMode = '';
     },
   },
   mounted() {
@@ -90,40 +73,40 @@ export default {
 .landing-view {
   background-image: linear-gradient(-28deg, #414141 0%, #545454 47%, #7B7B7B 100%);
 }
-.transform-enter-active {
-  transition-property: transform, opacity;
-  transition-duration: 500ms;
-  transition-delay: 250ms;
-  transition-timing-function: ease-out;
+.transform {
+  &-enter-active {
+    transition-property: transform, opacity;
+    transition-duration: 500ms;
+    transition-delay: 250ms;
+    transition-timing-function: ease-out;
+  }
+  &-leave-active {
+    transition-property: transform, opacity;
+    transition-duration: 450ms;
+    transition-timing-function: ease-in;
+  }
+  &-enter {
+    transform: translateX(200px);
+    opacity: 0;
+  }
+  &-leave-to {
+    transform: translateX(-400px);
+    opacity: 0;
+  }
 }
-.transform-leave-active {
-  transition-property: transform, opacity;
-  transition-duration: 450ms;
-  transition-timing-function: ease-in;
-}
-.transform-enter {
-  transform: translateX(200px);
-  opacity: 0;
-}
-.transform-leave-to {
-  transform: translateX(-400px);
-  opacity: 0;
-}
-.fade-enter-active {
-  transition-property: opacity;
-  transition-duration: 500ms;
-  transition-delay: 400ms;
-  transition-timing-function: ease-out;
-}
-.fade-leave-active {
-  transition-property: opacity;
-  transition-duration: 450ms;
-  transition-timing-function: ease-in;
-}
-.fade-enter {
-  opacity: 0;
-}
-.fade-leave-to {
-  opacity: 0;
+
+.fade-transform {
+  &-enter-active {
+    transition: opacity 450ms ease-in 450ms;
+  }
+  &-leave-active {
+    transition: opacity 450ms ease-in;
+  }
+  &-enter {
+    opacity: 0;
+  }
+  &-leave-to {
+    opacity: 0;
+  }
 }
 </style>
