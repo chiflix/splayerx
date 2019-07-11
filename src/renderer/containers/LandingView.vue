@@ -149,7 +149,7 @@ export default {
       firstIndex: 0,
       useBlur: false,
       pageMounted: false,
-      logoTransition: 'scale',
+      logoTransition: '',
       canHover: false,
     };
   },
@@ -221,6 +221,12 @@ export default {
       }
     },
   },
+  beforeRouteEnter({ name: to }: any, { name: from }: any, next: any) {
+    next((vm: any) => {
+      vm.logoTransition = from === 'language-setting' ? 'scale' : '';
+      vm.pageMounted = true;
+    });
+  },
   created() {
     window.addEventListener('mousemove', this.globalMoveHandler);
     this.useBlur = window.devicePixelRatio === 1;
@@ -258,7 +264,6 @@ export default {
     });
   },
   mounted() {
-    this.pageMounted = true;
     this.$store.dispatch('refreshVersion');
 
     const { app } = this.$electron.remote;

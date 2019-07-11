@@ -9,7 +9,7 @@
       :enable-full-screen-button="$route.name === 'landing-view' || $route.name === 'playing-view'"
     />
     <transition
-      name="fade"
+      :name="$route.name === 'landing-view' || $route.name === 'playing-view' ? '' : 'fade'"
       mode="out-in"
     >
       <router-view />
