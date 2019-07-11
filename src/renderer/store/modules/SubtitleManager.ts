@@ -143,10 +143,7 @@ let secondarySelectionComplete = false;
 let alterDelayTimeoutId: any = 0;
 function setDelayTimeout() {
   clearTimeout(alterDelayTimeoutId);
-  alterDelayTimeoutId = setTimeout(() => {
-    console.log(`[Subtitle|Delay]: storing subtitle delay...`);
-    store.dispatch(a.storeSubtitleDelays);
-  }, 10000);
+  alterDelayTimeoutId = setTimeout(() => store.dispatch(a.storeSubtitleDelays), 10000);
 }
 function fetchOnlineListWithErrorHandling(
   videoSrc: string,
@@ -582,7 +579,7 @@ const actions = {
   async [a.storeSubtitleDelays]({ getters, state }: any) {
     const { list } = getters;
     const { playlistId, mediaItemId } = state;
-    updateSubtitleList(list, playlistId, mediaItemId).then(() => console.log('[Subtitle|Delay]: subtitle delay stored!'));
+    updateSubtitleList(list, playlistId, mediaItemId);
   },
 };
 
