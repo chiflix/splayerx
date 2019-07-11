@@ -377,6 +377,7 @@ export default {
         Object.keys(this.widgetsStatus).forEach((item) => {
           this.widgetsStatus[item].showAttached = item === 'SubtitleControl';
         });
+        this.updateMouseup({ componentName: '' });
       }
     },
   },
@@ -399,6 +400,7 @@ export default {
       }, 3000);
       this.tempRecentPlaylistDisplayState = false;
       this.$refs.advance.handleMenuShow();
+      this.updateMouseup({ componentName: '' });
     });
     this.createTouchBar();
     this.UIElements = this.getAllUIComponents(this.$refs.controller);
