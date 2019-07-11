@@ -1,6 +1,6 @@
 import { EntityGenerator, Entity, Parser, Type, Format, Origin } from '@/interfaces/ISubtitle';
 import { LanguageCode } from '@/libs/language';
-import { storeSubtitle, removeSubtitle, removeSubtitleItemsFromList } from '@/services/storage/subtitle';
+import { storeSubtitle, removeSubtitle, removeSubtitleItemsFromList, cacheSubtitle } from '@/services/storage/subtitle';
 import { newSubtitle as m } from '@/store/mutationTypes';
 import { newSubtitle as a, SubtitleManager as parentActions } from '@/store/actionTypes';
 import { getParser } from '@/services/subtitle/utils';
@@ -10,6 +10,7 @@ import upload from '@/services/subtitle/upload';
 import { addBubble } from '../../helpers/notificationControl';
 import { NOT_SUPPORTED_SUBTITLE } from '../../helpers/notificationcodes';
 import store from '..';
+import { isCachedSubtitle } from '@/services/storage/subtitle/file';
 
 type SubtitleState = {
   moduleId: string;
@@ -21,11 +22,16 @@ type SubtitleState = {
   playedTime: number;
   hash: string;
 };
-
+enum CacheStatus {
+  NOT_CACHED,
+  CACHING,
+  CACHED,
+}
 const subtitleMap: Map<string, {
   entity: Entity;
   loader: () => Promise<any>;
   parser: Parser;
+  cached: CacheStatus;
 }> = new Map();
 
 let autoUpload = false;
@@ -71,6 +77,7 @@ const actions = {
       entity: {} as Entity,
       loader: () => Promise.resolve(),
       parser: {} as Parser,
+      cached: CacheStatus.NOT_CACHED,
     });
     commit(m.setModuleId, moduleId);
   },
@@ -100,14 +107,16 @@ const actions = {
           commit(m.setHash, hash);
         }),
       ]);
+      if (isCachedSubtitle(entity.source)) subtitle.cached = CacheStatus.CACHED;
       return entity;
     }
   },
-  async [a.load]({ state }: any) {
+  async [a.load]({ state, dispatch }: any) {
     const subtitle = subtitleMap.get(state.moduleId);
     if (subtitle) {
       const { entity, loader } = subtitle;
       entity.payload = await loader();
+      await dispatch(a.cache);
     }
   },
   async [a.getDialogues]({ state, rootGetters, dispatch }: any, time: number) {
@@ -134,7 +143,19 @@ const actions = {
   },
   async [a.store]({ state }: any) {
     const subtitle = subtitleMap.get(state.moduleId);
-    if (subtitle) await storeSubtitle(subtitle.entity);
+    if (subtitle) {
+      await storeSubtitle(subtitle.entity);
+    }
+  },
+  async [a.cache]({ state }: any) {
+    const subtitle = subtitleMap.get(state.moduleId);
+    if (subtitle) {
+      if (subtitle.cached === CacheStatus.NOT_CACHED) {
+        subtitle.cached = CacheStatus.CACHING;
+        await cacheSubtitle(subtitle.entity);
+        subtitle.cached = CacheStatus.CACHED;
+      }
+    }
   },
   async [a.delete]({ state, rootGetters }: any) {
     const subtitleToRemoveFromList = rootGetters.list.find((sub: any) => sub.id === state.moduleId);

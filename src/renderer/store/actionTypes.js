@@ -54,6 +54,7 @@ export const newSubtitle = {
   load: 'LOAD',
   parse: 'PARSE',
   store: 'STORE',
+  cache: 'CACHE',
   delete: 'DELETE',
   upload: 'UPLOAD',
   manualUpload: 'MANUAL_UPLOAD',
