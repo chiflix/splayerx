@@ -3,7 +3,7 @@ import { LanguageCode } from '@/libs/language';
 import { storeSubtitle, removeSubtitle, removeSubtitleItemsFromList, cacheSubtitle } from '@/services/storage/subtitle';
 import { newSubtitle as m } from '@/store/mutationTypes';
 import { newSubtitle as a, SubtitleManager as parentActions } from '@/store/actionTypes';
-import { getParser, sourceToFormat } from '@/services/subtitle/utils';
+import { getParser, sourceToFormat, delayCalculator } from '@/services/subtitle/utils';
 import { SubtitleUploadParameter } from '@/services/subtitle';
 import { generateHints } from '@/libs/utils';
 import upload from '@/services/subtitle/upload';
@@ -249,7 +249,7 @@ const actions = {
   [a.alterDelay]({ state, commit }: any, deltaInSeconds: number) {
     const subtitle = subtitleMap.get(state.moduleId);
     if (subtitle) {
-      const alfterAltered = state.delay + deltaInSeconds;
+      const alfterAltered = delayCalculator(state.delay, deltaInSeconds);
       if (Math.abs(alfterAltered) < 10000) {
         commit(m.setDelay, alfterAltered);
         subtitle.entity.delay = alfterAltered;
