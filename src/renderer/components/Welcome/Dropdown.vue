@@ -103,7 +103,6 @@ export default {
 <style lang="scss" scoped>
 .settingItem {
   &__input {
-    box-sizing: border-box;
     cursor: pointer;
     font-family: $font-semibold;
     font-size: 11px;
