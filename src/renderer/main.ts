@@ -390,7 +390,7 @@ new Vue({
       this.refreshMenu();
     },
     currentRouteName(val) {
-      this.menuStateControl(val !== 'landing-view');
+      this.menuStateControl(val);
     },
     chosenStyle(val) {
       if (this.menu) {
@@ -548,6 +548,7 @@ new Vue({
         // menu.file
         {
           label: this.$t('msg.file.name'),
+          id: 'file',
           submenu: [
             {
               label: this.$t('msg.file.open'),
@@ -887,6 +888,7 @@ new Vue({
         // menu.window
         {
           label: this.$t('msg.window.name'),
+          id: 'window',
           submenu: [
             {
               label: this.$t('msg.playback.keepPlayingWindowFront'),
@@ -1024,6 +1026,7 @@ new Vue({
               { type: 'separator' },
               {
                 label: this.$t('msg.splayerx.preferences'),
+                id: 'preference',
                 enabled: true,
                 accelerator: 'Cmd+,',
                 click: () => {
@@ -1093,9 +1096,7 @@ new Vue({
         Menu.setApplicationMenu(this.menu);
       }).then(() => {
         if (!this.menu) return;
-        if (this.currentRouteName === 'landing-view') {
-          this.menuStateControl(false);
-        }
+        this.menuStateControl(this.currentRouteName);
         if (this.chosenStyle !== '') {
           this.menu.getMenuItemById(`style${this.chosenStyle}`).checked = true;
         }
@@ -1294,7 +1295,9 @@ new Vue({
         return recentMenuTemplate;
       }).catch(() => recentMenuTemplate);
     },
-    menuStateControl(inPlayingView: Boolean) {
+    menuStateControl(routeName: string) {
+      const inPlayingView = routeName === 'playing-view';
+      const inWelcomeView = routeName === 'welcome-view' || routeName === 'language-setting';
       if (!this.menu) return;
       this.menu.getMenuItemById('playback').submenu.items.forEach((item: any) => {
         item.enabled = inPlayingView;
@@ -1308,6 +1311,13 @@ new Vue({
         });
         item.enabled = inPlayingView;
       });
+      this.menu.getMenuItemById('window').submenu.items.forEach((item: any) => {
+        item.enabled = !inWelcomeView;
+      });
+      this.menu.getMenuItemById('file').submenu.items.forEach((item: any) => {
+        item.enabled = !inWelcomeView;
+      });
+      this.menu.getMenuItemById('preference').enabled = !inWelcomeView;
       this.menu.getMenuItemById('windowResize1').enabled = inPlayingView;
       this.menu.getMenuItemById('windowResize2').enabled = inPlayingView;
       this.menu.getMenuItemById('windowResize3').enabled = inPlayingView;
