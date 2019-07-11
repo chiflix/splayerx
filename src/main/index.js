@@ -562,6 +562,8 @@ function createWindow() {
     if (finalVideoToOpen.length) url = `${mainURL}#/play`;
     else if (!data.welcomeProcessDone) url = `${mainURL}#/welcome`;
     mainWindow.loadURL(url);
+  }).catch(() => {
+    mainWindow.loadURL(mainURL);
   });
   mainWindow.webContents.setUserAgent(
     `${mainWindow.webContents.getUserAgent().replace(/Electron\S+/i, '')
