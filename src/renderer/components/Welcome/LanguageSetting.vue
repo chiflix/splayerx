@@ -1,7 +1,7 @@
 <template>
-  <div class="welcome">
+  <div class="language-setting">
     <div class="title">
-      设置常用字幕语言<br>以获取智能翻译结果
+      {{ $t('welcome.languageTitle1') }}<br>{{ $t('welcome.languageTitle2') }}
     </div>
     <Dropdown
       v-model="showFirstDropdown"
@@ -10,26 +10,32 @@
       :selected-formater="primaryLanguageFormater"
       :selection-formater="primarySelectionFormater"
       :handle-selection="handlePrimarySelection"
-      class='dropdown1'
+      class="dropdown1"
     />
     <Dropdown
       v-model="showSecondDropdown"
-      :select-none="secondaryLanguage === ''"
+      :use-default="secondaryLanguage === undefined"
+      :default-value="$t('welcome.chooseSecondary')"
       :selected="secondaryLanguage"
       :selections="secondaryLanguages"
       :selected-formater="secondaryLanguageFormater"
       :selection-formater="secondarySelectionFormater"
       :handle-selection="handleSecondarySelection"
-      class='dropdown2'
+      class="dropdown2"
     />
-    <div class="content">* 稍后您可以在偏好设置里更改</div>
-    <div
-      @mousedown="handleIconMousedown"
-      @mouseup="handleIconMouseup"
-      class="icon no-drag"
-    >
-      <Icon type="welcomeNike" />
+    <div class="content">
+      {{ $t('welcome.languageDescription') }}
     </div>
+    <transition name="fade">
+      <div
+        v-if="iconDisplay"
+        @mousedown="handleIconMousedown"
+        @mouseup="handleIconMouseup"
+        class="icon no-drag"
+      >
+        <Icon type="welcomeNike" />
+      </div>
+    </transition>
   </div>
 </template>
 <script lang="ts">
@@ -65,7 +71,8 @@ export default {
         'ar',
         'hi',
       ],
-      noLanguage: this.$t('preferences.privacy.none'),
+      noLanguage: this.$t('welcome.none'),
+      iconDisplay: true,
     };
   },
   computed: {
@@ -99,7 +106,7 @@ export default {
     },
     secondaryLanguages() {
       return this.languages
-        .filter((lan: string) => lan && lan !== this.secondaryLanguage)
+        .filter((lan: string) => lan !== this.secondaryLanguage)
         .map((lan: string) => ({ selection: lan, disabled: lan === this.primaryLanguage }));
     },
   },
@@ -111,16 +118,19 @@ export default {
   created() {
     document.addEventListener('mouseup', this.globalMouseupHandler);
   },
+  beforeDestroy() {
+    this.iconDisplay = false;
+  },
   destroyed() {
     document.removeEventListener('mouseup', this.globalMouseupHandler);
   },
   methods: {
     primaryLanguageFormater(code: string) {
-      return `${code} - 首要语言`;
+      return `${code} - ${this.$t('welcome.primary')}`;
     },
     secondaryLanguageFormater(code: string) {
-      if (code === '选择次要语言') return code;
-      return `${code} - 次要语言`;
+      if (code === this.$t('welcome.choseSecondary') || code === this.$t('welcome.none')) return code;
+      return `${code} - ${this.$t('welcome.secondary')}`;
     },
     primarySelectionFormater(code: string) {
       if (!code) return this.noLanguage;
@@ -128,7 +138,7 @@ export default {
     },
     secondarySelectionFormater(code: string) {
       if (!code) return this.noLanguage;
-      if (code === this.primaryLanguage) return `${codeToLanguageName(code)} - 首要语言`;
+      if (code === this.primaryLanguage) return `${codeToLanguageName(code)} - ${this.$t('welcome.primary')}`;
       return codeToLanguageName(code);
     },
     handleIconMousedown() {
@@ -157,7 +167,7 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.welcome {
+.language-setting {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -198,5 +208,20 @@ export default {
   width: 40px;
   height: 40px;
   margin-top: 42px;
+}
+
+.fade {
+  &-enter-active {
+    transition: opacity 500ms ease-out;
+  }
+  &-leave-active {
+    transition: opacity 450ms ease-out;
+  }
+  &-enter, &-leave-to {
+    opacity: 0;
+  }
+  &-leave-to {
+    opacity: 0;
+  }
 }
 </style>

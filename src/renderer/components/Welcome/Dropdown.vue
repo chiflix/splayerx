@@ -7,11 +7,11 @@
     >
       <div
         :style="{
-          color: selectNone ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.8)'
+          color: useDefault ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.8)'
         }"
         class="dropdown__displayItem"
       >
-        {{ selectedFormater(selectionFormater(selected)) }}
+        {{ useDefault ? defaultValue : selectedFormater(selectionFormater(selected)) }}
       </div>
       <div
         @mouseup.stop=""
@@ -46,9 +46,13 @@ export default {
     event: 'toggle',
   },
   props: {
-    selectNone: {
+    useDefault: {
       type: Boolean,
       default: false,
+    },
+    defaultValue: {
+      type: String,
+      default: '',
     },
     showSelection: {
       type: Boolean,

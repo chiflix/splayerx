@@ -323,9 +323,6 @@ new Vue({
           this.$store.dispatch('primaryLanguage', 'en');
         }
       }
-      if (!data.secondaryLanguage) {
-        this.$store.dispatch('secondaryLanguage', '');
-      }
       if (!data.displayLanguage) {
         this.$store.dispatch('displayLanguage', getSystemLocale());
       }

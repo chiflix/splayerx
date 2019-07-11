@@ -5,8 +5,8 @@ const state = {
   hideVideoHistoryOnExit: false,
   privacyAgreement: undefined,
   displayLanguage: '',
-  primaryLanguage: '',
-  secondaryLanguage: '',
+  primaryLanguage: undefined,
+  secondaryLanguage: undefined,
   singleCycle: false,
   reverseScrolling: false,
 };
