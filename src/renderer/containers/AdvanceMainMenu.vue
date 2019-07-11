@@ -525,7 +525,10 @@ export default {
     displayLanguage() {
       this.cardWidth = this.maxTextLength + (3 * this.subStyleWidth);
     },
-    readyShow() {
+    readyShow(val: string) {
+      if (val !== 'subMenu') {
+        this.updateSubSettingsType(true);
+      }
       this.cardWidth = this.maxTextLength + (3 * this.subStyleWidth);
     },
     textItemFontSize() {
@@ -534,6 +537,7 @@ export default {
     clearState(val: boolean) {
       this.cardWidth = this.maxTextLength + (3 * this.subStyleWidth);
       if (!val) {
+        this.updateSubSettingsType(true);
         setTimeout(() => {
           this.readyShow = 'mainMenu';
           this.speedChosen = false;
@@ -553,9 +557,7 @@ export default {
   },
   mounted() {
     this.$bus.$on('show-subtitle-settings', () => {
-      setTimeout(() => {
-        this.handleSubClick();
-      }, 0);
+      this.handleSubClick();
     });
     this.useBlur = window.devicePixelRatio === 1;
     this.$bus.$on('switch-audio-track', (index: number) => {
