@@ -51,7 +51,7 @@ export default {
   .title {
     padding-top: 89px;
     height: 55px;
-    font-family: $font-light;
+    font-family: $font-medium;
     font-weight: lighter;
     font-size: 30px;
     color: rgba(255,255,255,0.90);
@@ -61,12 +61,12 @@ export default {
   }
   .content {
     padding-top: 33px;
-    width: 362px;
+    width: 368px;
     height: 64px;
     font-family: $font-normal;
     font-size: 16px;
     color: rgba(255,255,255,0.20);
-    letter-spacing: 1.14px;
+    letter-spacing: 0;
     text-align: center;
     line-height: 24px;
   }
