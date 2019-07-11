@@ -55,6 +55,15 @@ function getSystemLocale() {
   return 'en';
 }
 
+function getEnvironmentName() {
+  if (process.platform === 'darwin') {
+    return process.mas ? 'MAS' : 'DMG';
+  } else if (process.platform === 'win32') {
+    return process.windowsStore ? 'APPX' : 'EXE';
+  }
+  return 'Unknown';
+}
+
 Vue.config.productionTip = false;
 Vue.config.warnHandler = (warn) => {
   log.info('render/main', warn);
@@ -98,6 +107,7 @@ Vue.use(VueAnalytics, {
   router,
   set: [
     { field: 'dimension1', value: electron.remote.app.getVersion() },
+    { field: 'dimension2', value: getEnvironmentName() },
     { field: 'checkProtocolTask', value: null }, // fix ga not work from file:// url
     { field: 'checkStorageTask', value: null }, // fix ga not work from file:// url
     { field: 'historyImportTask', value: null }, // fix ga not work from file:// url
