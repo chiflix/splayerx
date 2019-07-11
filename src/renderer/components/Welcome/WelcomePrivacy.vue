@@ -7,7 +7,8 @@
       {{ $t('welcome.welcomeDescription') }}
     </div>
     <p class="privacy-content">
-      {{ $t('welcome.agreement') }}<u @click="handleLinkClick">{{ $t('welcome.policy') }}</u>
+      {{ $t('welcome.agreement') }}
+      <u @click="handleLinkClick">{{ $t('welcome.policy') }}</u>
     </p>
   </div>
 </template>

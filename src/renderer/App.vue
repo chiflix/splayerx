@@ -4,8 +4,14 @@
     :class="$route.name !== 'playing-view' ? 'landing-view' : ''"
     class="application"
   >
-    <Titlebar v-if="$route.name !== 'playing-view'" />
-    <transition name="fade" mode="out-in">
+    <Titlebar
+      v-if="$route.name !== 'playing-view'"
+      :enable-full-screen-button="$route.name !== 'landing-view' || $route.name !== 'playing-view'"
+    />
+    <transition
+      name="fade"
+      mode="out-in"
+    >
       <router-view />
     </transition>
   </div>

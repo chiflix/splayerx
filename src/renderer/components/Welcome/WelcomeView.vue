@@ -1,28 +1,33 @@
 <template>
   <div class="welcome">
-    <transition :name="transitionMode" mode="out-in">
+    <transition
+      name="transform"
+      mode="out-in"
+    >
       <router-view
         @language-setting="handleSelection"
       />
     </transition>
-    <transition name="fade" mode="out-in">
+    <transition
+      name="fade"
+      mode="out-in"
+    >
       <div
         :key="iconType"
         @mousedown="handleIconMousedown"
         @mouseup="handleIconMouseup"
         class="icon no-drag"
       >
-          <Icon
-            :type="iconType"
-            :style="{ cursor: privacyAgreement ? 'pointer' : '' }"
-          />
+        <Icon
+          :type="iconType"
+          :style="{ cursor: privacyAgreement ? 'pointer' : '' }"
+        />
       </div>
     </transition>
   </div>
 </template>
 <script lang="ts">
 import Icon from '@/components/BaseIconContainer.vue';
-import { codeToLanguageName } from '@/libs/language';
 
 export default {
   components: {
@@ -30,23 +35,8 @@ export default {
   },
   data() {
     return {
-      transitionMode: 'transform',
       welcomePayload: null,
     };
-  },
-  created() {
-    this.$electron.ipcRenderer.send('callMainWindowMethod', 'setResizable', [false]);
-    this.welcomePayload = {
-      privacyAgreement: true,
-      primaryLanguage: this.$store.getters.primaryLanguage,
-      secondaryLanguage: this.$store.getters.secondaryLanguage,
-    };
-  },
-  watch: {
-    $route({ name: to }: { name: string }, { name: from }: { name: string }) {
-      if (to === 'language-setting') this.transitionMode = 'transform';
-      else this.transitionMode = '';
-    },
   },
   computed: {
     privacyAgreement() {
@@ -59,6 +49,14 @@ export default {
       }
       return 'welcomeNike';
     },
+  },
+  created() {
+    this.$electron.ipcRenderer.send('callMainWindowMethod', 'setResizable', [false]);
+    this.welcomePayload = {
+      privacyAgreement: true,
+      primaryLanguage: this.$store.getters.primaryLanguage,
+      secondaryLanguage: this.$store.getters.secondaryLanguage,
+    };
   },
   methods: {
     handleSelection(

@@ -62,7 +62,7 @@
       />
       <Icon
         id="maximize"
-        v-show="middleButtonStatus !== 'exit-fullscreen'"
+        v-show="middleButtonStatus !== 'exit-fullscreen' && enableFullScreenButton"
         :type="itemType"
         :state="state"
         :style="{ transform: isMaxScreen ? 'rotate(45deg)' : ''}"
@@ -99,6 +99,18 @@ export default {
       default: true,
     },
     recentPlaylist: Boolean,
+    enableMiddleButton: {
+      type: Boolean,
+      default: true,
+    },
+    enableLeftButton: {
+      type: Boolean,
+      default: true,
+    },
+    enableFullScreenButton: {
+      type: Boolean,
+      default: true,
+    },
   },
   data() {
     return {

@@ -21,7 +21,6 @@ export default new Router({
     },
     {
       path: '/welcome',
-      name: 'welcome-view',
       component: require('@/components/Welcome/WelcomeView.vue').default,
       children: [
         {
