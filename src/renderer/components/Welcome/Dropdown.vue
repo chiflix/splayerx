@@ -5,16 +5,22 @@
       @mousedown.stop="handleMousedown"
       @mouseup.stop="handleMouseup"
     >
-      <div class="dropdown__displayItem">
+      <div
+        :style="{
+          color: selectNone ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.8)'
+        }"
+        class="dropdown__displayItem"
+      >
         {{ selectedFormater(selectionFormater(selected)) }}
       </div>
       <div
         @mouseup.stop=""
-        class="dropdown__listItems"
+        class="dropdown__listItems no-drag"
       >
         <div
-          v-for="(selection, index) in selections"
+          v-for="({ selection, disabled }, index) in selections"
           :key="index"
+          :class="{ 'disabled': disabled }"
           @mouseup.stop="handleSelection(selection)"
           class="dropdownListItem"
         >
@@ -40,6 +46,10 @@ export default {
     event: 'toggle',
   },
   props: {
+    selectNone: {
+      type: Boolean,
+      default: false,
+    },
     showSelection: {
       type: Boolean,
       default: false,
@@ -95,7 +105,7 @@ export default {
   &__input {
     box-sizing: border-box;
     cursor: pointer;
-    font-family: $font-normal;
+    font-family: $font-semibold;
     font-size: 11px;
     color: #FFFFFF;
     text-align: center;
@@ -156,6 +166,11 @@ export default {
     height: 112px;
     margin: 4px 4px 4px 6px;
     overflow-y: scroll;
+  }
+
+  .disabled {
+    color: rgba(255,255,255,0.3);
+    cursor: default;
   }
 
   .dropdownListItem {

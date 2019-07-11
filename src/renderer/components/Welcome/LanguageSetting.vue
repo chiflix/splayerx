@@ -8,15 +8,17 @@
       :selected="primaryLanguage"
       :selections="primaryLanguages"
       :selected-formater="primaryLanguageFormater"
-      :selection-formater="codeToLanguageName"
+      :selection-formater="primarySelectionFormater"
       :handle-selection="handlePrimarySelection"
       class='dropdown1'
     />
     <Dropdown
       v-model="showSecondDropdown"
+      :select-none="secondaryLanguage === ''"
       :selected="secondaryLanguage"
       :selections="secondaryLanguages"
-      :selection-formater="codeToLanguageName"
+      :selected-formater="secondaryLanguageFormater"
+      :selection-formater="secondarySelectionFormater"
       :handle-selection="handleSecondarySelection"
       class='dropdown2'
     />
@@ -63,7 +65,7 @@ export default {
         'ar',
         'hi',
       ],
-      noLanguage: '选择次要语言',
+      noLanguage: this.$t('preferences.privacy.none'),
     };
   },
   computed: {
@@ -91,10 +93,14 @@ export default {
       },
     },
     primaryLanguages() {
-      return this.languages.filter((lan: string) => lan && lan !== this.primaryLanguage);
+      return this.languages
+        .filter((lan: string) => lan && lan !== this.primaryLanguage)
+        .map((lan: string) => ({ selection: lan, disabled: false }));
     },
     secondaryLanguages() {
-      return this.languages.filter((lan: string) => lan !== this.secondaryLanguage);
+      return this.languages
+        .filter((lan: string) => lan && lan !== this.secondaryLanguage)
+        .map((lan: string) => ({ selection: lan, disabled: lan === this.primaryLanguage }));
     },
   },
   watch: {
@@ -112,8 +118,17 @@ export default {
     primaryLanguageFormater(code: string) {
       return `${code} - 首要语言`;
     },
-    codeToLanguageName(code: string) {
+    secondaryLanguageFormater(code: string) {
+      if (code === '选择次要语言') return code;
+      return `${code} - 次要语言`;
+    },
+    primarySelectionFormater(code: string) {
       if (!code) return this.noLanguage;
+      return codeToLanguageName(code);
+    },
+    secondarySelectionFormater(code: string) {
+      if (!code) return this.noLanguage;
+      if (code === this.primaryLanguage) return `${codeToLanguageName(code)} - 首要语言`;
       return codeToLanguageName(code);
     },
     handleIconMousedown() {
