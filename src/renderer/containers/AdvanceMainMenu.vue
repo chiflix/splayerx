@@ -127,7 +127,7 @@
               </p>
             </div>
             <div
-              v-show="enabledSecondarySub"
+              v-show="enabledSecondarySub && secondarySubtitleId"
               @mouseup="subTypeShift"
               @mouseover="shiftItemHover"
               @mouseleave="shiftItemLeave"
@@ -477,6 +477,11 @@ export default {
     },
   },
   watch: {
+    secondarySubtitleId(val: string) {
+      if (val === '') {
+        this.updateSubSettingsType(true);
+      }
+    },
     isPrimarySubSettings(val: boolean) {
       if (!val) {
         this.subColorChosen = false;
