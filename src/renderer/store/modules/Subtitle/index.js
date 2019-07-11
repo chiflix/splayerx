@@ -305,9 +305,9 @@ const actions = {
   [subtitleActions.UPDATE_SUBTITLE_SETTINGS_TYPE]({ commit }, delta) {
     commit(subtitleMutations.SUBTITLE_SETTINGS_TYPE_UPDATE, delta);
   },
-  [subtitleActions.UPDATE_ENABLED_SECONDARY_SUBTITLE]({ commit }, delta) {
+  [subtitleActions.UPDATE_ENABLED_SECONDARY_SUBTITLE]({ commit, rootGetters }, delta) {
     commit(subtitleMutations.SECONDARY_SUBTITLE_ENABLED_UPDATE, delta);
-    store.dispatch(realSubtitleActions.changeSecondarySubtitle, '');
+    if (rootGetters.secondarySubtitleId) store.dispatch(realSubtitleActions.changeSecondarySubtitle, '');
   },
   [subtitleActions.UPDATE_LAST_SUBTITLE_SIZE]({ commit }, delta) {
     commit(subtitleMutations.LAST_SUBTITLE_SIZE_UPDATE, delta);
