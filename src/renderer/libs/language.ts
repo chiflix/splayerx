@@ -112,7 +112,7 @@ enum LanguageName {
   'pt'= 'Português',
   'cs'= 'čeština',
   'ru'= 'Русский',
-  'id'= 'Bahasa Indonesia',
+  'id'= 'Indonesian',
   'ar'= 'العربية',
   'hi'= 'हिन्दी',
   'No'= 'No',
