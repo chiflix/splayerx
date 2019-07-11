@@ -552,7 +552,10 @@ function createWindow() {
       win32: {},
     })[process.platform],
   });
-  mainWindow.webContents.setUserAgent(`SPlayerX@2018 ${os.platform() + os.release()} Version ${app.getVersion()}`);
+  mainWindow.webContents.setUserAgent(
+    `${mainWindow.webContents.getUserAgent().replace(/Electron\S+/i, '')
+    } SPlayerX@2018 ${os.platform()} ${os.release()} Version ${app.getVersion()}`,
+  );
 
   mainWindow.loadURL(finalVideoToOpen.length ? `${mainURL}#/play` : mainURL);
 
