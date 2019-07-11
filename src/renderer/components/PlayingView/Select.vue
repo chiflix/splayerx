@@ -96,12 +96,11 @@ export default Vue.extend({
   &__toggle {
     position: absolute;
     width: calc(100% - 2px);
-    margin-top: -1px;
-    margin-left: -1px;
     border-radius: 2px;
     overflow: hidden;
-    transition: height 200ms;
+    transition: all 200ms;
     &--display {
+      @extend .dropdown__toggle;
       height: 28px;
       border: 1px solid rgba(255,255,255,0.10);
       border-radius: 2px;
@@ -109,6 +108,7 @@ export default Vue.extend({
     }
 
     &--list {
+      @extend .dropdown__toggle;
       height: 148px;
       background: #555555;
       border: 1px solid rgba(255,255,255,0.10);
