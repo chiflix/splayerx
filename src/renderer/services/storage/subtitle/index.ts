@@ -91,8 +91,12 @@ export class DatabaseGenerator implements EntityGenerator {
   async getHash() {
     return this.hash;
   }
+  private delayInSeconds: number;
+  async getDelay() {
+    return this.delayInSeconds;
+  }
   static async from(storedSubtitleItem: StoredSubtitleItem) {
-    const { hash, type } = storedSubtitleItem;
+    const { hash, type, delay } = storedSubtitleItem;
     const storedSubtitle = await db.retrieveSubtitle(hash);
     if (storedSubtitle) {
       const newGenerator = new DatabaseGenerator();
@@ -106,6 +110,7 @@ export class DatabaseGenerator implements EntityGenerator {
       newGenerator.language = language;
       newGenerator.sources = source;
       newGenerator.hash = hash;
+      newGenerator.delayInSeconds = delay || 0;
       return newGenerator;
     }
   }
