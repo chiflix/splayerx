@@ -411,12 +411,14 @@ const actions = {
     });
     return removeSubtitleItemsFromList(storedSubtitleItems, state.playlistId, state.mediaItemId);
   },
-  async [a.changePrimarySubtitle]({ dispatch, commit, getters }: any, id: string) {
+  async [a.changePrimarySubtitle]({ dispatch, commit, getters, state }: any, id: string) {
     let primary = id;
     let secondary = getters.secondarySubtitleId;
     if (id === secondary) secondary = '';
     commit(m.setPrimarySubtitleId, primary);
+    if (state.allSubtitles[primary]) commit(m.setPrimaryDelay, state.allSubtitles[primary].delay);
     commit(m.setSecondarySubtitleId, secondary);
+    if (state.allSubtitles[secondary]) commit(m.setSecondaryDelay, state.allSubtitles[secondary].delay);
     dispatch(a.storeSelectedSubtitle, [primary, secondary]);
     if (id) await dispatch(`${id}/${subActions.load}`);
   },
@@ -425,7 +427,9 @@ const actions = {
     let secondary = id;
     if (id === primary) primary = '';
     commit(m.setPrimarySubtitleId, primary);
+    if (state.allSubtitles[primary]) commit(m.setPrimaryDelay, state.allSubtitles[primary].delay);
     commit(m.setSecondarySubtitleId, secondary);
+    if (state.allSubtitles[secondary]) commit(m.setSecondaryDelay, state.allSubtitles[secondary].delay);
     dispatch(a.storeSelectedSubtitle, [primary, secondary]);
     if (id) await dispatch(`${id}/${subActions.load}`);
   },
