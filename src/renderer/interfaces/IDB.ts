@@ -7,6 +7,11 @@ export type RawPlaylistItem = {
   lastOpened: number,
   playedIndex: number,
 }
+
+export type PlaylistItem = RawPlaylistItem & {
+  id: number,
+}
+
 export type RawMediaItem = {
   quickHash: string,
   path: string,
@@ -14,13 +19,6 @@ export type RawMediaItem = {
   source: string,
   lastPlayedTime?: number,
   duration?: number,
-}
-export type PlaylistItem = {
-  id: number,
-  items: number[],
-  hpaths: string[],
-  lastOpened: number,
-  playedIndex: number,
 }
 
 export type SubtitlePreferenceLanguage = [LanguageCode, LanguageCode];

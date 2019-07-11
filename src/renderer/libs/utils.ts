@@ -15,24 +15,29 @@ import nzh from 'nzh';
  * @param {string} fontSize
  * @param {string} fontFamily
  * @param {string} text
+ * @param {string} lineHeight
+ * @param {string} zoom
  * @returns {number}
  */
-export function getTextWidth(fontSize: string, fontFamily: string, text: string): number {
+export function calculateTextSize(fontSize: string, fontFamily: string, lineHeight: string, zoom: string, text: string): { width: number, height: number } {
   const span: HTMLElement = document.createElement('span');
-  let result: number = span.offsetWidth;
+  const result = { width: span.offsetWidth, height: span.offsetHeight };
   span.style.visibility = 'hidden';
   span.style.fontSize = fontSize;
   span.style.fontFamily = fontFamily;
   span.style.display = 'inline-block';
   span.style.fontWeight = '700';
   span.style.letterSpacing = '0.2px';
+  span.style.lineHeight = lineHeight;
+  span.style.zoom = zoom;
   document.body.appendChild(span);
   if (typeof span.textContent !== 'undefined') {
     span.textContent = text;
   } else {
     span.innerText = text;
   }
-  result = parseFloat(window.getComputedStyle(span).width || '0') - result;
+  result.width = parseFloat(window.getComputedStyle(span).width || '0') - result.width;
+  result.height = parseFloat(window.getComputedStyle(span).height || '0') - result.height;
   if (span.parentNode) {
     span.parentNode.removeChild(span);
   }
@@ -107,6 +112,7 @@ function md5Hex(text: Buffer) {
   return createHash('md5').update(text).digest('hex');
 }
 
+/** Calculate hash of file */
 export async function mediaQuickHash(filePath: string) {
   const fileHandler = await fsPromises.open(filePath, 'r');
   const len = (await fsPromises.stat(filePath)).size;
@@ -123,6 +129,16 @@ export async function mediaQuickHash(filePath: string) {
   }));
   fileHandler.close();
   return res.join('-');
+}
+
+/** Silently calculate hash of file, returns null if there was an error */
+mediaQuickHash.try = async function(filePath: string) {
+  try {
+    return await mediaQuickHash(filePath);
+  } catch (ex) {
+    console.error(ex);
+    return null;
+  }
 }
 
 export function timecodeFromSeconds(s: number) {
