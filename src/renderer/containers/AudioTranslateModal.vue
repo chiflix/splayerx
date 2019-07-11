@@ -181,32 +181,60 @@ export default Vue.extend({
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  backdrop-filter: blur(10px);
   z-index: 3;
-  background: rgba(0,0,0,0.10);
-  border: 1px solid rgba(255,255,255,0.10);
-  box-shadow: 0 0 1px 0 rgba(0,0,0,0.10);
+  border: 1px solid rgba(160,160,160,0.7);
+  background-image: radial-gradient(
+    80% 130%,
+    rgba(85,85,85,0.88) 20%,
+    rgba(85,85,85,0.78) 50%,
+    rgba(85,85,85,0.72) 60%,
+    rgba(85,85,85,0.46) 80%,
+    rgba(85,85,85,0.00) 100%
+  );
   border-radius: 7px;
+  box-shadow: 0 0 1px 0 rgba(0,0,0,0.10);
+  zoom: 1;
+
+  @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px),
+  screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
+    & {
+      display: none;
+    }
+  }
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+    zoom: 1;
+  }
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+    zoom: 1.3;
+  }
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+    zoom: 1.68;
+  }
+
   h1 {
     font-size: 13px;
     color: rgba(255,255,255,0.90);
     letter-spacing: 1px;
     line-height: 13px;
-    margin-bottom: 7px;
+    margin-bottom: 10px;
   }
   p {
     font-size: 11px;
     color: rgba(255,255,255,0.50);
-    letter-spacing: 0.2px;
     line-height: 16px;
     margin-bottom: 10px;
   }
   .select {
+    cursor: pointer;
     width: 100%;
     margin-bottom: 10px;
+    z-index: 100;
   }
   .progress-wraper {
-    margin-bottom: 17px;
+    margin-bottom: 14px;
     display: flex;
     align-items: center;
     .delete {
@@ -218,7 +246,7 @@ export default Vue.extend({
     }
   }
   .progress {
-    height: 9px;
+    height: 7px;
     background: rgba(0,0,0,0.10);
     border-radius: 6px;
     position: relative;
@@ -236,24 +264,30 @@ export default Vue.extend({
     display: flex;
     justify-content: space-between;
     .button {
-      width: 45%;
+      width: 111px;
     }
   }
   .button {
-    font-size: 11px;
-    color: rgba(255,255,255,0.80);
-    letter-spacing: 0;
-    text-align: center;
-    line-height: 28px;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.10);
-    border-radius: 2px;
     cursor: pointer;
+    font-size: 11px;
+    color: #FFFFFF;
+    text-align: center;
+    border-radius: 2px;
+    line-height: 28px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background-color: rgba(255,255,255,0.03);
+    transition: all 200ms;
+
+    &:not(.disabled):hover {
+      border: 1px solid rgba(255,255,255,0.2);
+      background-color: rgba(255,255,255,0.08);
+    }
     &.disabled {
       // opacity: 0.3;
-      color: rgba(255,255,255,0.24);
+      cursor: default;
+      color: rgba(255,255,255,0.3);
+      border: 1px solid rgba(255,255,255,0.03);
       background-color: rgba(255,255,255,0.009);
-      border-color: rgba(255,255,255,0.03);
     }
   }
 }

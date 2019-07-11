@@ -56,7 +56,7 @@ export default Vue.extend({
 <style lang="scss" scoped>
   .line {
     height: 100%;
-    min-height: 9px;
+    min-height: 7px;
     background: rgba(0,0,0,0.10);
     border-radius: 6px;
     position: relative;
