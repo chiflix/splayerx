@@ -30,7 +30,8 @@
 </template>
 <script lang="ts">
 import Dropdown from '@/components/Welcome/Dropdown.vue';
-import { codeToLanguageName } from '@/libs/language';
+import { codeToLanguageName, allCodes } from '@/libs/language';
+import { concat } from 'lodash';
 
 export default {
   components: {
@@ -41,24 +42,6 @@ export default {
       mousedown: false,
       showFirstDropdown: false,
       showSecondDropdown: false,
-      languages: [
-        '',
-        'zh-CN',
-        'zh-TW',
-        'ja',
-        'ko',
-        'en',
-        'es',
-        'fr',
-        'de',
-        'it',
-        'pt',
-        'cs',
-        'ru',
-        'id',
-        'ar',
-        'hi',
-      ],
       noLanguage: this.$t('welcome.none'),
       iconDisplay: true,
       payload: null,
@@ -67,6 +50,9 @@ export default {
   computed: {
     preferenceData() {
       return this.$store.getters.preferenceData;
+    },
+    languages() {
+      return concat('', Object.keys(allCodes));
     },
     primaryLanguage: {
       get() {
