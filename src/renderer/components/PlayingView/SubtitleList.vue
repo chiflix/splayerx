@@ -82,7 +82,7 @@
               <div
                 v-else-if="translateProgress > 0 && item.type === 'translated'
                   && item.language === translateLanguage"
-                style="width: 20px; height: 20px"
+                class="translateProgress"
               >
                 <Progress
                   :progress="translateProgress"
@@ -411,6 +411,11 @@ export default {
   rgba(255, 255, 255, 0.05) 100%
   );
 }
+.translateProgress {
+  width: 10px;
+  height: 10px;
+  margin-right: 8px;
+}
 @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
 screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
   .scrollScope {
@@ -460,6 +465,11 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480p
 }
 @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
 screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+  .translateProgress {
+    width: 14px;
+    height: 14px;
+    margin-right: 10px;
+  }
   .scrollScope {
     width: 191px;
     margin: auto auto 12px auto;
@@ -507,6 +517,11 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080
 }
 @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
 screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+  .translateProgress {
+    width: 20px;
+    height: 20px;
+    margin-right: 14px;
+  }
   .scrollScope {
     width: 266px;
     margin: auto auto 19px auto;

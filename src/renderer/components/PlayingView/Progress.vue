@@ -11,9 +11,7 @@
       class="circle"
     >
       <div
-        :style="{
-          clip: progress <= 50 ? 'rect(0, 20px, 20px, 10px)' : 'rect(auto, auto, auto, auto)'
-        }"
+        :class="progress <= 50 ? 'pie__clip' : 'pie__auto'"
         class="pie"
       >
         <div
@@ -80,13 +78,13 @@ export default Vue.extend({
       position: absolute;
       left: 0;
       top: 0;
-      clip: rect(auto, auto, auto, auto);
+      clip: auto;
       .left, .right {
         height: 100%;
         width: 100%;
-        border: 3px solid #ffffff;
+        border: 1px solid #ffffff;
         border-radius: 50%;
-        clip: rect(0, 10px, 20px, 0);
+        clip: rect(0, 5px, 10px, 0);
         left: 0;
         position: absolute;
         top: 0;
@@ -96,13 +94,49 @@ export default Vue.extend({
       }
       .right {
       }
+      &__clip {
+        clip: rect(0, 10px, 10px, 5px);
+      }
+      &__auto {
+        clip: auto;
+      }
     }
     .shadow {
       height: 100%;
       width: 100%;
-      border: 3px solid rgba(0,0,0,0.10);
+      border: 1px solid rgba(0,0,0,0.10);
       border-radius: 50%;
       box-sizing: border-box;
+    }
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+    screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+      .pie {
+        .left, .right {
+          border: 2px solid #ffffff;
+          clip: rect(0, 7px, 14px, 0);
+        }
+        &__clip {
+          clip: rect(0, 14px, 14px, 7px);
+        }
+      }
+      .shadow {
+        border: 2px solid rgba(0,0,0,0.10);
+      }
+    }
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+    screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+      .pie {
+        .left, .right {
+          border: 2px solid #ffffff;
+          clip: rect(0, 10px, 20px, 0);
+        }
+        &__clip {
+          clip: rect(0, 20px, 20px, 10px);
+        }
+      }
+      .shadow {
+        border: 3px solid rgba(0,0,0,0.10);
+      }
     }
   }
 </style>
