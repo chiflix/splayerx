@@ -1,8 +1,8 @@
 import path from 'path';
 import fs, { promises as fsPromises } from 'fs';
-import crypto from 'crypto';
 import lolex from 'lolex';
-import { times, get } from 'lodash';
+import { get } from 'lodash';
+import { mediaQuickHash } from '@/libs/utils';
 import bookmark from '@/helpers/bookmark';
 import syncStorage from '@/helpers/syncStorage';
 import infoDB from '@/helpers/infoDB';
@@ -206,17 +206,19 @@ export default {
         const playlist = await this.infoDB.get('recent-played', this.playListId);
         const addIds = [];
         for (const videoPath of addFiles) {
-          const quickHash = await this.mediaQuickHash(videoPath);
-          const data = {
-            quickHash,
-            type: 'video',
-            path: videoPath,
-            source: 'playlist',
-          };
-          const videoId = await this.infoDB.add('media-item', data);
-          addIds.push(videoId);
-          playlist.items.push(videoId);
-          playlist.hpaths.push(`${quickHash}-${videoPath}`);
+          const quickHash = await mediaQuickHash.try(videoPath);
+          if (quickHash) {
+            const data = {
+              quickHash,
+              type: 'video',
+              path: videoPath,
+              source: 'playlist',
+            };
+            const videoId = await this.infoDB.add('media-item', data);
+            addIds.push(videoId);
+            playlist.items.push(videoId);
+            playlist.hpaths.push(`${quickHash}-${videoPath}`);
+          }
         }
         this.$store.dispatch('AddItemsToPlayingList', {
           paths: addFiles,
@@ -387,7 +389,8 @@ export default {
     },
     // create new play list record in recent-played and play the video
     async createPlayList(...videoFiles) {
-      const hash = await this.mediaQuickHash(videoFiles[0]);
+      const hash = await mediaQuickHash.try(videoFiles[0]);
+      if (!hash) return;
       const id = await this.infoDB.addPlaylist(videoFiles);
       const playlistItem = await this.infoDB.get('recent-played', id);
       this.$store.dispatch('PlayingList', { id, paths: videoFiles, items: playlistItem.items });
@@ -402,7 +405,9 @@ export default {
     async openVideoFile(videoFile) {
       if (!videoFile) return;
       const id = await this.infoDB.addPlaylist([videoFile]);
-      const playlistItem = await this.infoDB.get('recent-played', id);
+      const playlistItem = (await this.infoDB.get('recent-played', id)) || {
+        id, items: [], hpaths: [], lastOpened: Date.now(), playedIndex: 0,
+      };
       let similarVideos;
       try {
         similarVideos = await this.findSimilarVideoByVidPath(videoFile);
@@ -416,7 +421,7 @@ export default {
           this.$store.dispatch('FolderList', {
             id,
             paths: [videoFile],
-            items: [playlistItem.items[0]],
+            items: playlistItem.items.slice(0, 1),
           });
         }
       }
@@ -449,12 +454,12 @@ export default {
     },
     // openFile and db operation
     async playFile(vidPath, id) { // eslint-disable-line complexity
-      let mediaQuickHash;
+      let mediaHash;
       if (process.mas && this.$store.getters.source !== 'drop') {
         if (!this.bookmarkAccessing(vidPath)) return;
       }
       try {
-        mediaQuickHash = await this.mediaQuickHash(vidPath);
+        mediaHash = await mediaQuickHash(vidPath);
       } catch (err) {
         const errorCode = get(err, 'code');
         if (errorCode === 'ENOENT') {
@@ -467,7 +472,7 @@ export default {
         }
         return;
       }
-      this.$store.dispatch('SRC_SET', { src: vidPath, mediaHash: mediaQuickHash, id });
+      this.$store.dispatch('SRC_SET', { src: vidPath, mediaHash, id });
       if (this.$router.currentRoute.name !== 'playing-view') {
         this.$router.push({ name: 'playing-view' });
       }
@@ -483,26 +488,6 @@ export default {
           this.$bus.$emit('send-audiotrackid', value.audioTrackId);
         }
       }
-    },
-    async mediaQuickHash(filePath) {
-      function md5Hex(text) {
-        return crypto.createHash('md5').update(text).digest('hex');
-      }
-      const fileHandler = await fsPromises.open(filePath, 'r');
-      const len = (await fsPromises.stat(filePath)).size;
-      const position = [
-        4096,
-        Math.floor(len / 3),
-        Math.floor(len / 3) * 2,
-        len - 8192,
-      ];
-      const res = await Promise.all(times(4).map(async (i) => {
-        const buf = Buffer.alloc(4096);
-        const { bytesRead } = await fileHandler.read(buf, 0, 4096, position[i]);
-        return md5Hex(buf.slice(0, bytesRead));
-      }));
-      fileHandler.close();
-      return res.join('-');
     },
   },
 };

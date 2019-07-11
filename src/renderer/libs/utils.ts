@@ -112,6 +112,7 @@ function md5Hex(text: Buffer) {
   return createHash('md5').update(text).digest('hex');
 }
 
+/** Calculate hash of file */
 export async function mediaQuickHash(filePath: string) {
   const fileHandler = await fsPromises.open(filePath, 'r');
   const len = (await fsPromises.stat(filePath)).size;
@@ -128,6 +129,16 @@ export async function mediaQuickHash(filePath: string) {
   }));
   fileHandler.close();
   return res.join('-');
+}
+
+/** Silently calculate hash of file, returns null if there was an error */
+mediaQuickHash.try = async function(filePath: string) {
+  try {
+    return await mediaQuickHash(filePath);
+  } catch (ex) {
+    console.error(ex);
+    return null;
+  }
 }
 
 export function timecodeFromSeconds(s: number) {
