@@ -195,6 +195,7 @@
   },
   "preferences": {
     "general": {
+      "hideHistory": "재생 기록 숨기기",
       "clearHistory": "종료시 항상 재생 기록 지우기",
       "reverseScrolling": "마우스 스크롤 역전",
       "setDefault": "기본 동영상 플레이어로 설정",

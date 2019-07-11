@@ -136,6 +136,7 @@ import path from 'path';
 import {
   mapState, mapGetters, mapActions, mapMutations,
 } from 'vuex';
+import { mediaQuickHash } from '@/libs/utils';
 import { Input as inputMutations } from '@/store/mutationTypes';
 import { Input as InputActions, Subtitle as subtitleActions } from '@/store/actionTypes';
 import RecentPlaylistItem from '@/containers/RecentPlaylistItem.vue';
@@ -359,16 +360,18 @@ export default {
       /* eslint-disable */
       for (const videoPath of this.playingList) {
         if (videoPath !== this.originSrc) {
-          const quickHash = await this.mediaQuickHash(videoPath);
-          const data = {
-            quickHash,
-            type: 'video',
-            path: videoPath,
-            source: 'playlist',
-          };
-          const videoId = await this.infoDB.add('media-item', data);
-          items.push(videoId);
-          hpaths.push(`${quickHash}-${videoPath}`);
+          const quickHash = await mediaQuickHash.try(videoPath);
+          if (quickHash) {
+            const data = {
+              quickHash,
+              type: 'video',
+              path: videoPath,
+              source: 'playlist',
+            };
+            const videoId = await this.infoDB.add('media-item', data);
+            items.push(videoId);
+            hpaths.push(`${quickHash}-${videoPath}`);
+          }
         } else {
           items.push(currentVideoId);
           hpaths.push(currentVideoHp);

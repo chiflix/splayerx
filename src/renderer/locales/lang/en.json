@@ -106,7 +106,9 @@
     "help": {
       "name": "Help",
       "splayerxHelp": "Help",
-      "shortCuts": "Shortcuts List"
+      "shortCuts": "Shortcuts List",
+      "crashReportLocation": "Show Crash Reports",
+      "crashReportNotAvailable": "Found no crash report."
     },
     "playback": {
       "backwardL": "Step Backward -60s",

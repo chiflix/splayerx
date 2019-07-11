@@ -81,7 +81,7 @@
             marginRight: `${marginRight}px`,
             backgroundColor:
               item.backgroundUrl && !hideVideoHistoryOnExit
-              ? 'rgba(255,255,255,0.12) ': 'rgba(255,255,255,0.05)',
+                ? 'rgba(255,255,255,0.12) ': 'rgba(255,255,255,0.05)',
           }"
           :class="{ 'backdrop': useBlur }"
           @click="openOrMove"

@@ -132,25 +132,27 @@ export class InfoDB {
     };
     if (videos.length > 1) {
       for (const videoPath of videos) {
-        const quickHash = await mediaQuickHash(videoPath);
-        const data = {
-          quickHash,
-          type: 'video',
-          path: videoPath,
-          source: 'playlist',
-        };
-        const videoId = await this.add('media-item', data) as number;
-        playlist.items.push(videoId);
-        playlist.hpaths.push(`${quickHash}-${videoPath}`);
+        const quickHash = await mediaQuickHash.try(videoPath);
+        if (quickHash) {
+          const data = {
+            quickHash,
+            type: 'video',
+            path: videoPath,
+            source: 'playlist',
+          };
+          const videoId = await this.add('media-item', data) as number;
+          playlist.items.push(videoId);
+          playlist.hpaths.push(`${quickHash}-${videoPath}`);
+        }
       }
     } else if (videos.length === 1) {
-      const quickHash: string = await mediaQuickHash(videos[0]);
+      const quickHash = await mediaQuickHash.try(videos[0]);
       const playlistRecord: PlaylistItem = await this.get('recent-played', 'hpaths', [`${quickHash}-${videos[0]}`]);
-      if (playlistRecord) {
+      if (quickHash && playlistRecord) {
         playlistRecord.lastOpened = Date.now();
         await this.update('recent-played', playlistRecord, playlistRecord.id);
         return playlistRecord.id;
-      } else {
+      } else if (quickHash) {
         const data = {
           quickHash,
           type: 'video',
