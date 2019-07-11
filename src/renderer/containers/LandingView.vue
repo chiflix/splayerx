@@ -44,16 +44,16 @@
         </div>
       </div>
     </transition>
-    <transition name="welcome-container-transition">
-      <div
-        v-if="!item.backgroundUrl || hideVideoHistoryOnExit"
-        class="welcome-container"
-      >
-        <div class="logo-container">
+    <div class="welcome-container">
+      <transition :name="logoTransition">
+        <div
+          v-if="pageMounted && (!item.backgroundUrl || hideVideoHistoryOnExit)"
+          class="logo-container"
+        >
           <Icon type="logo" />
         </div>
-      </div>
-    </transition>
+      </transition>
+    </div>
     <div
       ref="mask"
       class="mask"
@@ -147,7 +147,22 @@ export default {
       shifting: false,
       firstIndex: 0,
       useBlur: false,
+      pageMounted: false,
+      logoTransition: 'welcome-container-transition',
     };
+  },
+  beforeRouteEnter({ name: to }: any, { name: from }: any, next: any) {
+    if (from === 'language-setting' && to === 'landing-view') {
+      next((vm: any) => {
+        vm.logoTransition = 'scale';
+        vm.pageMounted = true;
+      });
+    } else {
+      next((vm: any) => {
+        vm.logoTransition = 'welcome-container-transition';
+        vm.pageMounted = true;
+      });
+    }
   },
   computed: {
     ...mapGetters(['winWidth', 'defaultDir', 'isFullScreen', 'hideVideoHistoryOnExit']),
@@ -516,8 +531,6 @@ $themeColor-Light: white;
   --client-height: 100vh;
   --pos-y: calc(var(--client-height) * 0.37 - 46px);
   transform: translateY(var(--pos-y));
-}
-.logo-container {
   -webkit-user-select: none;
   text-align: center;
 }
@@ -527,32 +540,45 @@ main {
 }
 
 
-.background-transition-enter-active, .background-transition-leave-active {
-  transition: opacity 300ms linear;
-}
-.background-transition-enter, .background-transition-leave-to {
-  opacity: 0;
-}
-.background-transition-enter-to, .background-transition-leave {
-  opacity: 1;
-}
-
-.welcome-container-transition-enter-active, .welcome-container-transition-leave-active{
-  transition: opacity .3s ease-in;
-  transition-delay: .2s;
+.background-transition {
+  &-enter-active, &-leave-active {
+    transition: opacity 300ms linear;
+  }
+  &-enter, &-leave-to {
+    opacity: 0;
+  }
 }
 
-.welcome-container-transition-enter, .welcome-container-transition-leave-to {
-  opacity: 0;
+.welcome-container-transition {
+  &-enter-active, &-leave-active {
+    transition: opacity .3s ease-in;
+    transition-delay: .2s;
+  }
+
+  &-enter, &-leave-to {
+    opacity: 0;
+  }
 }
 
-.background-container-transition-enter-active, .background-container-transition-leave-active{
-  transition: opacity .3s ease-in;
-  transition-delay: .2s;
+.background-container-transition {
+  &-enter-active, &-leave-active {
+    transition: opacity .3s ease-in;
+    transition-delay: .2s;
+  }
+
+  &-enter, &-leave-to{
+    opacity: 0;
+  }
 }
 
-.background-container-transition-enter, .background-container-transition-leave-to{
-  opacity: 0;
+.scale {
+  &-enter-active {
+    transition: all 400ms ease-in;
+  }
+  &-enter {
+    transform: scale(0.9, 0.9);
+    opacity: 0;
+  }
 }
 
 </style>
