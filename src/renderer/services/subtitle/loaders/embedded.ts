@@ -42,7 +42,7 @@ export async function embeddedSrcLoader(videoSrc: string, streamIndex: number, f
   });
 }
 
-interface EmbeddedOrigin extends Origin {
+export interface EmbeddedOrigin extends Origin {
   type: Type.Embedded,
   source: {
     streamIndex: number;
