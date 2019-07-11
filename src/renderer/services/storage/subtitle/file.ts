@@ -55,5 +55,5 @@ export function addNewSourceToDb(subtitle: Entity, newSource: Origin) {
 
 export function isCachedSubtitle(subtitleSource: Origin) {
   const { type, source } = subtitleSource;
-  return type === Type.Local && typeof source === 'string' && dirname(source) === subtitleCachePath;
+  return type === Type.Local && typeof source === 'string' && existsSync(source) && dirname(source) === subtitleCachePath;
 }
