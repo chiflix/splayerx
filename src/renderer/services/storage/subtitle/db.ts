@@ -1,9 +1,9 @@
 import { DBSchema, IDBPDatabase, openDB } from 'idb';
 import { LanguageCode } from '@/libs/language';
 import { DATADB_NAME } from '@/constants';
-import { Entity, EntityGenerator, Type, Format, Origin, SubtitleControlListItem } from '@/interfaces/ISubtitle';
+import { Entity, EntityGenerator, Type, Format, Origin, SubtitleControlListItem, VideoSegment } from '@/interfaces/ISubtitle';
 import { StoredSubtitle, StoredSubtitleItem, SubtitlePreference, SelectedSubtitle } from '@/interfaces/ISubtitleStorage';
-import { unionWith, uniqWith, remove, isEqual, some } from 'lodash';
+import { unionWith, uniqWith, remove, isEqual, some, keyBy, mergeWith, isFinite } from 'lodash';
 import Sagi from '@/libs/sagi';
 import { loadLocalFile } from '@/services/subtitle/utils';
 import { embeddedSrcLoader } from '@/services/subtitle/loaders/embedded';
@@ -38,6 +38,13 @@ interface UpdateSubtitleOptions {
   source?: Origin;
   format?: Format;
   language?: LanguageCode;
+}
+interface UpdateSubtitleItemOptions {
+  hash: string;
+  type?: Type;
+  source?: any;
+  videoSegments?: VideoSegment[];
+  delay?: number;
 }
 
 export class SubtitleDataBase {
@@ -193,6 +200,41 @@ export class SubtitleDataBase {
         ...preference,
         list: unionWith(subtitles, preference.list, isEqual),
       }, key);
+    }
+  }
+  async updateSubtitleList(playlistId: number, mediaItemId: string, subtitlesToUpdate: UpdateSubtitleItemOptions[]) {
+    subtitlesToUpdate = uniqWith(subtitlesToUpdate, ({ hash: hash1, source: source1 }, { hash: hash2, source: source2 }) => hash1 === hash2 && isEqual(source1, source2));
+    const objectStore = (await this.getDb())
+      .transaction('preferences', 'readwrite')
+      .objectStore('preferences');
+    let preference;
+    let list: StoredSubtitleItem[] = [];
+    let key;
+    let cursor = await objectStore.openCursor();
+    while (cursor && !preference && !key) {
+      if (cursor.value.playlistId === playlistId && cursor.value.mediaId === mediaItemId) {
+        preference = cursor.value;
+        list = Object.values(mergeWith(
+          keyBy(preference.list, ({ hash }) => hash),
+          keyBy(subtitlesToUpdate, ({ hash }) => hash),
+          (objVal: StoredSubtitleItem, srcVal: StoredSubtitleItem) => {
+            const destObj = { ...objVal };
+            const { type, source, videoSegments, delay } = srcVal;
+            if (type) destObj.type = type;
+            if (source) destObj.source = source;
+            if (videoSegments) destObj.videoSegments = videoSegments;
+            if (isFinite(delay)) destObj.delay = delay;
+            return destObj;
+          },
+        ));
+        key = cursor.key;
+      }
+      cursor = await cursor.continue();
+    }
+    if (!preference) {
+      return objectStore.add({ ...this.generateDefaultPreference(playlistId, mediaItemId), list });
+    } else {
+      return objectStore.put({ ...preference, list }, key);
     }
   }
   async removeSubtitleItemsFromList(playlistId: number, mediaItemId: string, subtitles: StoredSubtitleItem[]) {

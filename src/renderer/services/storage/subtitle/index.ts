@@ -32,6 +32,12 @@ export function addSubtitleItemsToList(subtitles: SubtitleControlListItem[], pla
   const storedSubtitles = subtitles.filter(s => s).map(({ hash, type, source, delay }) => ({ hash, type, source, delay }));
   return db.addSubtitleItemsToList(playlistId, mediaItemId, storedSubtitles);
 }
+export function updateSubtitleList(subtitles: SubtitleControlListItem[], playlistId: number, mediaItemId: string) {
+  const subtitlesToUpdate = subtitles
+    .filter(sub => !!sub)
+    .map(({ hash, type, source, delay }) => ({ hash, type, source, delay }));
+  return db.updateSubtitleList(playlistId, mediaItemId, subtitlesToUpdate);
+}
 export function removeSubtitleItemsFromList(subtitles: SubtitleControlListItem[], playlistId: number, mediaItemId: string) {
   const storedSubtitles = subtitles.filter(s => s).map(({ hash, type, source, delay }) => ({ hash, type, source, delay }));
   return db.removeSubtitleItemsFromList(playlistId, mediaItemId, storedSubtitles);
