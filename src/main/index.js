@@ -402,6 +402,79 @@ function registerMainWindowEvent(mainWindow) {
     mediaInfo(mediaInfoQueue[0], callback);
   }
 
+  function createAbout() {
+    const aboutWindowOptions = {
+      useContentSize: true,
+      frame: false,
+      titleBarStyle: 'none',
+      width: 190,
+      height: 280,
+      transparent: true,
+      resizable: false,
+      show: false,
+      webPreferences: {
+        webSecurity: false,
+        nodeIntegration: true,
+        experimentalFeatures: true,
+      },
+      acceptFirstMouse: true,
+      fullscreenable: false,
+      maximizable: false,
+      minimizable: false,
+    };
+    if (!aboutWindow) {
+      aboutWindow = new BrowserWindow(aboutWindowOptions);
+      // 如果播放窗口顶置，打开关于也顶置
+      if (mainWindow.isAlwaysOnTop()) {
+        aboutWindow.setAlwaysOnTop(true);
+      }
+      aboutWindow.loadURL(`${aboutURL}`);
+      aboutWindow.on('closed', () => {
+        aboutWindow = null;
+      });
+    }
+    aboutWindow.once('ready-to-show', () => {
+      aboutWindow.show();
+    });
+  }
+  function createPreference() {
+    const preferenceWindowOptions = {
+      useContentSize: true,
+      frame: false,
+      titleBarStyle: 'none',
+      width: 540,
+      height: 426,
+      transparent: true,
+      resizable: false,
+      show: false,
+      webPreferences: {
+        webSecurity: false,
+        nodeIntegration: true,
+        experimentalFeatures: true,
+      },
+      acceptFirstMouse: true,
+      fullscreenable: false,
+      maximizable: false,
+      minimizable: false,
+    };
+    if (!preferenceWindow) {
+      preferenceWindow = new BrowserWindow(preferenceWindowOptions);
+      // 如果播放窗口顶置，打开首选项也顶置
+      if (mainWindow.isAlwaysOnTop()) {
+        preferenceWindow.setAlwaysOnTop(true);
+      }
+      preferenceWindow.loadURL(`${preferenceURL}`);
+      preferenceWindow.on('closed', () => {
+        preferenceWindow = null;
+      });
+    } else {
+      preferenceWindow.focus();
+    }
+    preferenceWindow.once('ready-to-show', () => {
+      preferenceWindow.show();
+    });
+  }
+
   ipcMain.on('mediaInfo', (event, path) => {
     if (mediaInfoQueue.length === 0) {
       mediaInfoQueue.push(path);
@@ -460,78 +533,6 @@ function registerMainWindowEvent(mainWindow) {
   });
 }
 
-function createAbout() {
-  const aboutWindowOptions = {
-    useContentSize: true,
-    frame: false,
-    titleBarStyle: 'none',
-    width: 190,
-    height: 280,
-    transparent: true,
-    resizable: false,
-    show: false,
-    webPreferences: {
-      webSecurity: false,
-      nodeIntegration: true,
-      experimentalFeatures: true,
-    },
-    acceptFirstMouse: true,
-    fullscreenable: false,
-    maximizable: false,
-    minimizable: false,
-  };
-  if (!aboutWindow) {
-    aboutWindow = new BrowserWindow(aboutWindowOptions);
-    // 如果播放窗口顶置，打开关于也顶置
-    if (mainWindow.isAlwaysOnTop()) {
-      aboutWindow.setAlwaysOnTop(true);
-    }
-    aboutWindow.loadURL(`${aboutURL}`);
-    aboutWindow.on('closed', () => {
-      aboutWindow = null;
-    });
-  }
-  aboutWindow.once('ready-to-show', () => {
-    aboutWindow.show();
-  });
-}
-function createPreference() {
-  const preferenceWindowOptions = {
-    useContentSize: true,
-    frame: false,
-    titleBarStyle: 'none',
-    width: 540,
-    height: 426,
-    transparent: true,
-    resizable: false,
-    show: false,
-    webPreferences: {
-      webSecurity: false,
-      nodeIntegration: true,
-      experimentalFeatures: true,
-    },
-    acceptFirstMouse: true,
-    fullscreenable: false,
-    maximizable: false,
-    minimizable: false,
-  };
-  if (!preferenceWindow) {
-    preferenceWindow = new BrowserWindow(preferenceWindowOptions);
-    // 如果播放窗口顶置，打开首选项也顶置
-    if (mainWindow.isAlwaysOnTop()) {
-      preferenceWindow.setAlwaysOnTop(true);
-    }
-    preferenceWindow.loadURL(`${preferenceURL}`);
-    preferenceWindow.on('closed', () => {
-      preferenceWindow = null;
-    });
-  } else {
-    preferenceWindow.focus();
-  }
-  preferenceWindow.once('ready-to-show', () => {
-    preferenceWindow.show();
-  });
-}
 function createWindow() {
   mainWindow = new BrowserWindow({
     useContentSize: true,
