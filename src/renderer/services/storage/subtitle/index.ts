@@ -6,7 +6,7 @@ import { EntityGenerator, Type, Format, Origin } from '@/interfaces/ISubtitle';
 import Sagi from '@/libs/sagi';
 import { loadLocalFile } from '@/services/subtitle/utils';
 import { embeddedSrcLoader } from '@/services/subtitle/loaders/embedded';
-import { cacheEmbeddedSubtitle, addNewSourceToDb, cacheLocalSubtitle, cacheOnlineSubtitle } from './file';
+import { cacheEmbeddedSubtitle, addNewSourceToDb, cacheLocalSubtitle, cacheOnlineSubtitle, isCachedSubtitle } from './file';
 
 const db = new SubtitleDataBase();
 
@@ -58,7 +58,11 @@ export class DatabaseGenerator implements EntityGenerator {
   private language: LanguageCode = LanguageCode.Default;
   async getLanguage() { return this.language; }
   private sources: Origin[];
-  async getSource() { return this.sources[0]; }
+  async getSource() {
+    const cachedSubtitle = this.sources.find(isCachedSubtitle);
+    if (cachedSubtitle) return cachedSubtitle;
+    return this.sources[0];
+  }
   private storedSource: Origin;
   async getStoredSource() { return this.storedSource; }
   async getPayload() {
