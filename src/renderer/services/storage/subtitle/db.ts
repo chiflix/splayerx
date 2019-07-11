@@ -30,6 +30,12 @@ interface RemoveSubtitleOptions {
   source: any;
   hash: string;
 }
+interface UpdateSubtitleOptions {
+  hash: string;
+  source?: Origin;
+  format?: Format;
+  language?: LanguageCode;
+}
 
 export class SubtitleDataBase {
   private db: IDBPDatabase<DataDBV2>;
@@ -112,6 +118,22 @@ export class SubtitleDataBase {
         delete newSubtitles[hash];
       }
       cursor = await cursor.continue();
+    }
+  }
+  async updateSubtitle(subtitle: UpdateSubtitleOptions) {
+    const objectStore = await (await this.getDb())
+      .transaction('subtitles', 'readwrite')
+      .objectStore('subtitles');
+    const { source, format, language } = subtitle;
+    const oldSubtitle = await objectStore.get(subtitle.hash);
+    if (oldSubtitle) {
+      const newSubtitle = { ...oldSubtitle };
+      if (source) newSubtitle.source = unionWith(oldSubtitle.source.concat([source]), isEqual);
+      if (format) newSubtitle.format = format;
+      if (language) newSubtitle.language = language;
+      return objectStore.put(newSubtitle);
+    } else if (source && format && language) {
+      return this.addSubtitle(subtitle as AddSubtitleOptions);
     }
   }
 

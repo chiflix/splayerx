@@ -6,6 +6,7 @@ import { EntityGenerator, Type, Format, Origin } from '@/interfaces/ISubtitle';
 import Sagi from '@/libs/sagi';
 import { loadLocalFile } from '@/services/subtitle/utils';
 import { embeddedSrcLoader } from '@/services/subtitle/loaders/embedded';
+import { cacheEmbeddedSubtitle, addNewSourceToDb, cacheLocalSubtitle, cacheOnlineSubtitle } from './file';
 
 const db = new SubtitleDataBase();
 
@@ -16,6 +17,10 @@ export async function storeSubtitle(subtitle: Entity) {
 export async function removeSubtitle(subtitle: Entity) {
   const { hash, source } = subtitle;
   return db.removeSubtitle({ hash, source });
+}
+export async function updateSubtitle(subtitle: Entity) {
+  const { hash, source, format, language } = subtitle;
+  return db.updateSubtitle({ hash, source, format, language });
 }
 export function retrieveSubtitlePreference(playlistId: number, mediaItemId: string) {
   return db.retrieveSubtitlePreference(playlistId, mediaItemId);
