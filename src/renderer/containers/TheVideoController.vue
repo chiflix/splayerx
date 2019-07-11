@@ -542,7 +542,8 @@ export default {
       }
       const timestamp = Date.now();
 
-      this.clock.tick(timestamp - this.start);
+      const ticks = timestamp - this.start;
+      this.clock.tick(ticks > 0 ? ticks : 0);
       this.UIStateManager();
 
       if (videodata.time + 1 >= this.duration) {
@@ -834,7 +835,7 @@ export default {
   border-radius: 4px;
   opacity: 1;
   transition: opacity 400ms;
-  z-index: 1;
+  z-index: auto;
 }
 .play-button {
   position: absolute;

@@ -427,7 +427,14 @@ export default {
       if (Object.prototype.hasOwnProperty.call(bookmarkObj, vidPath)) {
         const { app } = remote;
         const bookmark = bookmarkObj[vidPath];
-        const stopAccessing = app.startAccessingSecurityScopedResource(bookmark);
+        let stopAccessing;
+        try {
+          stopAccessing = app.startAccessingSecurityScopedResource(bookmark);
+        } catch (ex) {
+          log.warn(`startAccessingSecurityScopedResource ${bookmark}`, ex);
+          addBubble(OPEN_FAILED);
+          return false;
+        }
         this.access.push({
           src: vidPath,
           stopAccessing,
@@ -438,11 +445,14 @@ export default {
           if (index >= 0) this.access.splice(index, 1);
         });
       }
+      return true;
     },
     // openFile and db operation
     async playFile(vidPath, id) { // eslint-disable-line complexity
       let mediaQuickHash;
-      if (process.mas && this.$store.getters.source !== 'drop') this.bookmarkAccessing(vidPath);
+      if (process.mas && this.$store.getters.source !== 'drop') {
+        if (!this.bookmarkAccessing(vidPath)) return;
+      }
       try {
         mediaQuickHash = await this.mediaQuickHash(vidPath);
       } catch (err) {
