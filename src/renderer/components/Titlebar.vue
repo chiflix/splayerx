@@ -14,7 +14,7 @@
         type="titleBarWinExitFull"
       />
       <Icon
-        v-show="middleButtonStatus === 'maximize'"
+        v-show="middleButtonStatus === 'maximize' && enableFullScreenButton"
         @mouseup.native="handleWinFull"
         class="title-button no-drag"
         type="titleBarWinFull"
@@ -99,14 +99,6 @@ export default {
       default: true,
     },
     recentPlaylist: Boolean,
-    enableMiddleButton: {
-      type: Boolean,
-      default: true,
-    },
-    enableLeftButton: {
-      type: Boolean,
-      default: true,
-    },
     enableFullScreenButton: {
       type: Boolean,
       default: true,
