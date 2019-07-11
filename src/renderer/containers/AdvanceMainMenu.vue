@@ -109,6 +109,7 @@
             <div
               :style="{
                 display: 'flex',
+                marginTop: 'auto'
               }"
               @click.left="handleSubBackClick"
               @mouseenter="handleSubBackEnter"
@@ -119,7 +120,6 @@
               <p
                 :style="{
                   color: backSubHover ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.2)',
-                  margin: 'auto 0 auto 0',
                 }"
                 class="text"
               >
@@ -318,9 +318,9 @@ export default {
       }
       if (this.readyShow === 'subMenu') {
         return [
-          this.$t('advance.subDelay'),
           this.$t('advance.fontSize'),
           this.$t('advance.fontStyle'),
+          this.$t('advance.subDelay'),
           this.$t('advance.subMenu'),
         ];
       }
@@ -707,7 +707,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480p
     }
   }
   .backContent {
-    height: 13px;
+    height: 12px;
   }
   .subtitleShift {
     width: 30px;
@@ -775,7 +775,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080
     }
   }
   .backContent {
-    height: 16px;
+    height: 14.4px;
   }
   .subtitleShift {
     width: 36px;
@@ -842,7 +842,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     }
   }
   .backContent {
-    height: 22px;
+    height: 20.16px;
   }
   .subtitleShift {
     width: 50.4px;

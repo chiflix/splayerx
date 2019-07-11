@@ -306,7 +306,6 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480p
     display: block;
     width: 11px;
     height: 11px;
-    margin: 0.9px 0 auto 0;
   }
   .refresh {
     display: block;
@@ -324,7 +323,6 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080
     display: block;
     width: 13.2px;
     height: 13.2px;
-    margin: 1.2px 0 auto 0;
   }
   .refresh {
     display: block;
@@ -342,7 +340,6 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     display: block;
     width: 18.48px;
     height: 18.48px;
-    margin: 1.6px 0 auto 0;
   }
   .refresh {
     display: block;
