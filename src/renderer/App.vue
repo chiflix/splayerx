@@ -5,7 +5,7 @@
     class="application"
   >
     <Titlebar v-if="$route.name !== 'playing-view'" />
-    <transition :name="transitionMode">
+    <transition name="fade" mode="out-in">
       <router-view />
     </transition>
   </div>
@@ -22,17 +22,6 @@ export default {
   name: 'Splayer',
   components: {
     Titlebar,
-  },
-  data() {
-    return {
-      transitionMode: '',
-    };
-  },
-  watch: {
-    $route({ name: to }: { name: string }, { name: from }: { name: string }) {
-      if (from === 'language-setting' && to === 'landing-view') this.transitionMode = 'fade';
-      else this.transitionMode = '';
-    },
   },
   mounted() {
     // to-do: specify commitType and commitPayload with vuex typescriptened
@@ -75,7 +64,7 @@ export default {
 
 .fade {
   &-enter-active {
-    transition: opacity 250ms ease-in 250ms;
+    transition: opacity 250ms ease-in;
   }
   &-leave-active {
     transition: opacity 250ms ease-in;

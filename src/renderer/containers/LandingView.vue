@@ -96,6 +96,7 @@
           v-for="({ backgroundUrl, id, playlistLength }, index) in landingViewItems"
           v-if="!hideVideoHistoryOnExit"
           :key="id"
+          :can-hover="canHover"
           :backgroundUrl="backgroundUrl"
           :index="index"
           :is-in-range="index + 1 >= firstIndex && index + 1 <= lastIndex"
@@ -149,6 +150,7 @@ export default {
       useBlur: false,
       pageMounted: false,
       logoTransition: 'scale',
+      canHover: false,
     };
   },
   computed: {
@@ -220,6 +222,7 @@ export default {
     },
   },
   created() {
+    window.addEventListener('mousemove', this.globalMoveHandler);
     this.useBlur = window.devicePixelRatio === 1;
     // Get all data and show
     if (!this.$store.getters.deleteVideoHistoryOnExit) {
@@ -276,10 +279,14 @@ export default {
     });
   },
   destroyed() {
+    window.removeEventListener('mousemove', this.globalMoveHandler);
     window.removeEventListener('keyup', this.keyboardHandler);
     window.removeEventListener('beforeunload', this.beforeUnloadHandler);
   },
   methods: {
+    globalMoveHandler() {
+      this.canHover = true;
+    },
     beforeUnloadHandler(e: BeforeUnloadEvent) {
       if (process.env.NODE_ENV === 'development') { // app.hide() will disable app refresh and not good for dev
       } else if (process.platform === 'darwin' && !this.quit) {
@@ -561,10 +568,10 @@ main {
 
 .scale {
   &-enter-active {
-    transition: all 400ms ease-in 100ms;
+    transition: all 500ms ease-out 50ms;
   }
   &-enter {
-    transform: scale(0.9, 0.9);
+    transform: scale(0.8, 0.8);
     opacity: 0;
   }
 }

@@ -120,7 +120,7 @@ export default {
       return `${code} - ${this.$t('welcome.primary')}`;
     },
     secondaryLanguageFormater(code: string) {
-      if (code === this.$t('welcome.choseSecondary') || code === this.$t('welcome.none')) return code;
+      if (code === this.$t('welcome.chooseSecondary')) return code;
       return `${code} - ${this.$t('welcome.secondary')}`;
     },
     primarySelectionFormater(code: string) {

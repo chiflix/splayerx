@@ -10,6 +10,7 @@ import path, {
 import fs from 'fs';
 import rimraf from 'rimraf';
 import TaskQueue from '../renderer/helpers/proceduralQueue';
+import { jsonStorage } from '../renderer/libs/JsonStorage';
 import './helpers/electronPrototypes';
 import writeLog from './helpers/writeLog';
 import { getValidVideoRegex, getValidSubtitleRegex } from '../shared/utils';
@@ -178,9 +179,13 @@ function createWindow() {
       win32: {},
     })[process.platform],
   });
+  jsonStorage.get('preferences').then((data) => {
+    let url = mainURL;
+    if (finalVideoToOpen.length) url = `${mainURL}#/play`;
+    else if (!data.welcomeProcessDone) url = `${mainURL}#/welcome`;
+    mainWindow.loadURL(url);
+  });
   mainWindow.webContents.setUserAgent(`SPlayerX@2018 ${os.platform() + os.release()} Version ${app.getVersion()}`);
-
-  mainWindow.loadURL(finalVideoToOpen.length ? `${mainURL}#/play` : `${mainURL}#/welcome`);
 
   mainWindow.on('closed', () => {
     ipcMain.removeAllListeners();
