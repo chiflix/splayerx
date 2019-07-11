@@ -2,18 +2,17 @@ import asyncStorage from '@/helpers/asyncStorage';
 import syncStorage from '@/helpers/syncStorage';
 
 const state = {
-  deleteVideoHistoryOnExit: false,
+  hideVideoHistoryOnExit: false,
   privacyAgreement: undefined,
   displayLanguage: '',
   primaryLanguage: '',
   secondaryLanguage: '',
   singleCycle: false,
-  lastWinSize: [],
   reverseScrolling: false,
 };
 const getters = {
   preferenceData: state => state,
-  deleteVideoHistoryOnExit: state => state.deleteVideoHistoryOnExit,
+  hideVideoHistoryOnExit: state => state.hideVideoHistoryOnExit,
   reverseScrolling: state => state.reverseScrolling,
   privacyAgreement: state => state.privacyAgreement,
   displayLanguage: (state) => {
@@ -26,15 +25,14 @@ const getters = {
   primaryLanguage: state => state.primaryLanguage,
   secondaryLanguage: state => state.secondaryLanguage,
   singleCycle: state => state.singleCycle,
-  lastWinSize: state => state.lastWinSize,
 };
 
 const mutations = {
   displayLanguage(state, payload) {
     state.displayLanguage = payload;
   },
-  deleteVideoHistoryOnExit(state, payload) {
-    state.deleteVideoHistoryOnExit = payload;
+  hideVideoHistoryOnExit(state, payload) {
+    state.hideVideoHistoryOnExit = payload;
   },
   reverseScrolling(state, payload) {
     state.reverseScrolling = payload;
@@ -50,9 +48,6 @@ const mutations = {
   },
   singleCycle(state, payload) {
     state.singleCycle = payload;
-  },
-  lastWinSize(state, payload) {
-    state.lastWinSize = payload;
   },
   setPreference(state, payload) {
     Object.assign(state, payload);
@@ -83,12 +78,12 @@ const actions = {
     commit('reverseScrolling', false);
     return asyncStorage.set('preferences', state);
   },
-  deleteVideoHistoryOnExit({ commit, state }) {
-    commit('deleteVideoHistoryOnExit', true);
+  hideVideoHistoryOnExit({ commit, state }) {
+    commit('hideVideoHistoryOnExit', true);
     return asyncStorage.set('preferences', state);
   },
-  notDeleteVideoHistoryOnExit({ commit, state }) {
-    commit('deleteVideoHistoryOnExit', false);
+  nothideVideoHistoryOnExit({ commit, state }) {
+    commit('hideVideoHistoryOnExit', false);
     return asyncStorage.set('preferences', state);
   },
   primaryLanguage({ commit, state }, payload) {
@@ -106,14 +101,6 @@ const actions = {
   notSingleCycle({ commit }) {
     commit('singleCycle', false);
     commit('LOOP_UPDATE', false);
-  },
-  saveWinSize({ commit }, payload) {
-    if (payload.angle === 90 || payload.angle === 270) {
-      commit('lastWinSize', [payload.size[1], payload.size[0]]);
-    } else {
-      commit('lastWinSize', payload.size);
-    }
-    return asyncStorage.set('preferences', state);
   },
   setPreference({ commit, state }, payload) {
     commit('setPreference', payload);

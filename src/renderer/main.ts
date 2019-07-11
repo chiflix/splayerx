@@ -967,7 +967,7 @@ new Vue({
             {
               label: this.$t('msg.window.backToLandingView'),
               id: 'backToLandingView',
-              accelerator: 'CmdOrCtrl+Esc',
+              accelerator: 'CmdOrCtrl+E',
               click: () => {
                 this.$bus.$emit('back-to-landingview');
               },
@@ -1000,6 +1000,26 @@ new Vue({
           ],
         },
       ];
+
+      if (!process.mas) {
+        const helpMenu = template[template.length - 1].submenu as electron.MenuItemConstructorOptions[];
+        helpMenu.push({
+          label: this.$t('msg.help.crashReportLocation'),
+          click: () => {
+            const { remote } = this.$electron;
+            let location = remote.crashReporter.getCrashesDirectory();
+            if (!location) location = path.join(remote.app.getPath('temp'), remote.app.getName() + ' Crashes');
+            if (fs.existsSync(location)) {
+              remote.shell.openItem(location);
+            } else {
+              remote.dialog.showMessageBox(remote.getCurrentWindow(), {
+                message: this.$t('msg.help.crashReportNotAvailable'),
+              });
+            }
+          }
+        });
+      }
+
       return this.updateRecentPlay().then((result: any) => {
         // menu.file add "open recent"
         (template[3].submenu as Electron.MenuItemConstructorOptions[]).splice(3, 0, this.recentSubMenu());
@@ -1411,15 +1431,16 @@ new Vue({
 
         let finalSeekSpeed = 0;
         if (absX >= 285) finalSeekSpeed = this.duration;
-        else {
+        else if (absX <= 3) {
+          finalSeekSpeed = 0.08;
+        } else {
           const maximiumSpeed = this.duration / 50;
           const minimiumSpeed = 1;
-          const speed = (this.duration / 2000) * absX;
+          const speed = (this.duration / 5000) * absX;
           if (speed < minimiumSpeed) finalSeekSpeed = 0;
           else if (speed > maximiumSpeed) finalSeekSpeed = maximiumSpeed;
           else finalSeekSpeed = speed;
         }
-
         this.$bus.$emit(eventName, finalSeekSpeed);
       }
     },

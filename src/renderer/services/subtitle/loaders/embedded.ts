@@ -26,7 +26,8 @@ interface IExtractSubtitleResponse {
  * @returns the subtitle path string
  */
 export async function embeddedSrcLoader(videoSrc: string, streamIndex: number, format: Format): Promise<string> {
-  const mediaHash = await mediaQuickHash(videoSrc);
+  const mediaHash = await mediaQuickHash.try(videoSrc);
+  if (!mediaHash) return Promise.reject(new Error('Cannot get mediaQuickHash for embeddedSrcLoader'));
   ipcRenderer.send('extract-subtitle-request',
     videoSrc,
     streamIndex,

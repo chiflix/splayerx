@@ -1,7 +1,6 @@
 <template>
   <div class="player">
     <the-video-canvas ref="videoCanvas" />
-    <the-video-controller ref="videoctrl" />
     <subtitle-renderer
       :key="originSrc"
       :currentCues="concatCurrentCues"
@@ -9,10 +8,12 @@
       :scaleNum="scaleNum"
       :subToTop="subToTop"
       :currentFirstSubtitleId="primarySubtitleId"
+      :currentSecondarySubtitleId="secondarySubtitleId"
       :winHeight="winHeight"
       :chosenStyle="chosenStyle"
       :chosenSize="chosenSize"
     />
+    <the-video-controller ref="videoctrl" />
   </div>
 </template>
 

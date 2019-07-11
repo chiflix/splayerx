@@ -106,7 +106,9 @@
     "help": {
       "name": "Help",
       "splayerxHelp": "Help",
-      "shortCuts": "Shortcuts List"
+      "shortCuts": "Shortcuts List",
+      "crashReportLocation": "Show Crash Reports",
+      "crashReportNotAvailable": "Found no crash report."
     },
     "playback": {
       "backwardL": "Step Backward -60s",
@@ -196,6 +198,7 @@
   },
   "preferences": {
     "general": {
+      "hideHistory": "Hide playback history",
       "clearHistory": "Always clear playback history on exit",
       "reverseScrolling": "Reverse mouse scrolling",
       "setDefault": "Set as the Default Video Player",

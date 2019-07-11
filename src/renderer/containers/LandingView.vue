@@ -6,7 +6,7 @@
     />
     <transition name="background-container-transition">
       <div
-        v-if="item.backgroundUrl"
+        v-if="item.backgroundUrl && !hideVideoHistoryOnExit"
         class="background"
       >
         <transition
@@ -50,7 +50,7 @@
     </transition>
     <transition name="welcome-container-transition">
       <div
-        v-if="!item.backgroundUrl"
+        v-if="!item.backgroundUrl || hideVideoHistoryOnExit"
         class="welcome-container"
       >
         <div class="logo-container">
@@ -80,7 +80,8 @@
             width:`${thumbnailWidth}px`,
             marginRight: `${marginRight}px`,
             backgroundColor:
-              item.backgroundUrl ? 'rgba(255,255,255,0.12) ': 'rgba(255,255,255,0.05)',
+              item.backgroundUrl && !hideVideoHistoryOnExit
+                ? 'rgba(255,255,255,0.12) ': 'rgba(255,255,255,0.05)',
           }"
           :class="{ 'backdrop': useBlur }"
           @click="openOrMove"
@@ -97,6 +98,7 @@
         <component
           :is="playlistLength > 1 ? 'PlaylistItem' : 'VideoItem'"
           v-for="({ backgroundUrl, id, playlistLength }, index) in landingViewItems"
+          v-if="!hideVideoHistoryOnExit"
           :key="id"
           :backgroundUrl="backgroundUrl"
           :index="index"
@@ -154,7 +156,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'defaultDir', 'isFullScreen']),
+    ...mapGetters(['winWidth', 'defaultDir', 'isFullScreen', 'hideVideoHistoryOnExit']),
     lastIndex: {
       get() {
         return (this.firstIndex + this.showItemNum) - 1;

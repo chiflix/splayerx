@@ -116,17 +116,11 @@
     <div class="settingItem__title">
       {{ $t("preferences.general.others") }}
     </div>
-    <BaseCheckBox
-      :checkbox-value="reverseScrolling"
-      @update:checkbox-value="reverseScrolling = $event"
-    >
+    <BaseCheckBox v-model="reverseScrolling">
       {{ $t('preferences.general.reverseScrolling') }}
     </BaseCheckBox>
-    <BaseCheckBox
-      :checkbox-value="deleteVideoHistoryOnExit"
-      @update:checkbox-value="deleteVideoHistoryOnExit = $event"
-    >
-      {{ $t('preferences.general.clearHistory') }}
+    <BaseCheckBox v-model="hideVideoHistoryOnExit">
+      {{ $t('preferences.general.hideHistory') }}
     </BaseCheckBox>
   </div>
 </template>
@@ -185,17 +179,17 @@ export default {
         }
       },
     },
-    deleteVideoHistoryOnExit: {
+    hideVideoHistoryOnExit: {
       get() {
-        return this.$store.getters.deleteVideoHistoryOnExit;
+        return this.$store.getters.hideVideoHistoryOnExit;
       },
       set(val) {
         if (val) {
-          this.$store.dispatch('deleteVideoHistoryOnExit').then(() => {
+          this.$store.dispatch('hideVideoHistoryOnExit').then(() => {
             electron.ipcRenderer.send('preference-to-main', this.preferenceData);
           });
         } else {
-          this.$store.dispatch('notDeleteVideoHistoryOnExit').then(() => {
+          this.$store.dispatch('nothideVideoHistoryOnExit').then(() => {
             electron.ipcRenderer.send('preference-to-main', this.preferenceData);
           });
         }
@@ -240,8 +234,8 @@ export default {
         this.buttonDown = 2;
       }
       document.removeEventListener('mouseup', this.mouseupOnOther);
-      this.$refs.button1.removeEventListener('mouseup', this.setDefault);
-      this.$refs.button2.removeEventListener('mouseup', this.restoreSettings);
+      if (this.$refs.button1) this.$refs.button1.removeEventListener('mouseup', this.setDefault);
+      if (this.$refs.button2) this.$refs.button2.removeEventListener('mouseup', this.restoreSettings);
     },
     mousedownOnSetDefault() {
       if (!this.isSettingDefault) {
@@ -279,7 +273,7 @@ export default {
         }, 1500);
       } finally {
         this.buttonDown = 0;
-        this.$refs.button1.removeEventListener('mouseup', this.setDefault);
+        if (this.$refs.button1) this.$refs.button1.removeEventListener('mouseup', this.setDefault);
       }
     },
     restoreSettings() {
@@ -295,7 +289,7 @@ export default {
       if (!this.isMas) {
         electron.ipcRenderer.send('relaunch');
         this.isRestoring = false;
-        this.$refs.button2.removeEventListener('mouseup', this.restoreSettings);
+        if (this.$refs.button2) this.$refs.button2.removeEventListener('mouseup', this.restoreSettings);
       }
     },
     mapCode(code) {

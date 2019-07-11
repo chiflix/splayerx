@@ -1,10 +1,7 @@
 <template>
   <div class="privicy tabcontent">
     <div class="settingItem">
-      <BaseCheckBox
-        :checkbox-value="privacyAgreement"
-        @update:checkbox-value="privacyAgreement = $event"
-      >
+      <BaseCheckBox v-model="privacyAgreement">
         {{ $t('preferences.privacy.privacyConfirm') }}
       </BaseCheckBox>
       <div
