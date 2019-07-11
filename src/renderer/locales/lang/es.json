@@ -140,11 +140,10 @@
     },
     "subtitle": {
       "AITranslation": "Recargar la traducción Smart",
-      "decreaseSubtitleDelayS": "retraso de subtítulos -0.1s",
+      "decreasePrimarySubtitleDelay": "retraso de subtítulos -0.1s",
       "disabledSecondarySub": "Desactivar Subtitulo Secundario",
       "enabledSecondarySub": "Habilitar subtítulos secundarios",
-      "increaseSubtitleDelayL": "",
-      "increaseSubtitleDelayS": "retraso de subtítulos +0.1s",
+      "increasePrimarySubtitleDelay": "retraso de subtítulos +0.1s",
       "langEn": "Inglés",
       "langZhCN": "Chino",
       "loadSubtitleFile": "Cargar archivo de subtítulos ...",
@@ -195,6 +194,7 @@
   },
   "preferences": {
     "general": {
+      "hideHistory": "Ocultar historial de reproducción",
       "clearHistory": "Borrar siempre el historial de reproducción al salir",
       "reverseScrolling": "Desplazamiento inverso del ratón",
       "setDefault": "Establecer como el jugador predeterminado",

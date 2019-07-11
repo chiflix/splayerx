@@ -107,17 +107,21 @@ export default {
     isSubtitleAvailable: {
       type: Boolean,
     },
-    subtitleDelay: {
-      type: Number,
-      default: 0,
-    },
     audioDelay: {
       type: Number,
       default: 0,
     },
-    handleSelectClick: {
-      type: Function,
-      required: true,
+    primarySubDelay: {
+      type: Number,
+      default: 0,
+    },
+    secondarySubDelay: {
+      type: Number,
+      default: 0,
+    },
+    isPrimarySub: {
+      type: Boolean,
+      default: true,
     },
   },
   data() {
@@ -135,6 +139,12 @@ export default {
     };
   },
   computed: {
+    subtitleDelay() {
+      return this.isPrimarySub ? this.primarySubDelay : this.secondarySubDelay;
+    },
+    handleSelectClick() {
+      return this.isPrimarySub ? this.changePrimarySubDelay : this.changeSecondarySubDelay;
+    },
     heightSize() {
       if (this.size >= 289 && this.size <= 480) {
         return this.isChosen ? '74px' : '37px';
@@ -164,6 +174,14 @@ export default {
     },
   },
   methods: {
+    changePrimarySubDelay(delay: number) {
+      console.log('primary', delay);
+      // TODO change primary subtitle delay
+    },
+    changeSecondarySubDelay(delay: number) {
+      console.log('secondary', delay);
+      // TODO change secondary subtitle delay
+    },
     handleSubMouseEnter() {
       this.hoveredText = true;
     },

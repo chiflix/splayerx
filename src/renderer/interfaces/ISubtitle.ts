@@ -40,7 +40,9 @@ export type SubtitleControlListItem = {
 };
 
 export interface EntityGenerator {
+  /** get real source to fetch subtitle from */
   getSource(): Promise<Origin>
+  /** get fake source for display use */
   getStoredSource?: any
   getDelay?: () => Promise<number>
   getType(): Promise<Type>
@@ -79,7 +81,6 @@ export type Cue = {
   start: number,
   end: number,
   text: string,
-  hide?: boolean,
   format: string,
   tags: Tags,
 }

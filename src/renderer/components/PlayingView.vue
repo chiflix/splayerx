@@ -1,7 +1,6 @@
 <template>
   <div class="player">
     <the-video-canvas ref="videoCanvas" />
-    <the-video-controller ref="videoctrl" />
     <subtitle-renderer
       :key="originSrc"
       :currentCues="concatCurrentCues"
@@ -9,10 +8,12 @@
       :scaleNum="scaleNum"
       :subToTop="subToTop"
       :currentFirstSubtitleId="primarySubtitleId"
+      :currentSecondarySubtitleId="secondarySubtitleId"
       :winHeight="winHeight"
       :chosenStyle="chosenStyle"
       :chosenSize="chosenSize"
     />
+    <the-video-controller ref="videoctrl" />
   </div>
 </template>
 
@@ -66,10 +67,10 @@ export default {
     },
   },
   watch: {
-    originSrc(newVal: string) {
-      if (newVal) {
-        this.initializeManager();
-      }
+    originSrc: {
+      immediate: true,
+      // eslint-disable-next-line
+      handler: function (newVal: string) { if (newVal) this.initializeManager(); },
     },
     async primarySubtitleId() {
       this.currentCues = await this.getCues(videodata.time);
@@ -77,8 +78,6 @@ export default {
     async secondarySubtitleId() {
       this.currentCues = await this.getCues(videodata.time);
     },
-  },
-  created() {
   },
   mounted() {
     this.$store.dispatch('initWindowRotate');

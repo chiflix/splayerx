@@ -26,7 +26,8 @@ interface IExtractSubtitleResponse {
  * @returns the subtitle path string
  */
 export async function embeddedSrcLoader(videoSrc: string, streamIndex: number, format: Format): Promise<string> {
-  const mediaHash = await mediaQuickHash(videoSrc);
+  const mediaHash = await mediaQuickHash.try(videoSrc);
+  if (!mediaHash) return Promise.reject(new Error('Cannot get mediaQuickHash for embeddedSrcLoader'));
   ipcRenderer.send('extract-subtitle-request',
     videoSrc,
     streamIndex,
@@ -42,7 +43,7 @@ export async function embeddedSrcLoader(videoSrc: string, streamIndex: number, f
   });
 }
 
-interface EmbeddedOrigin extends Origin {
+export interface EmbeddedOrigin extends Origin {
   type: Type.Embedded,
   source: {
     streamIndex: number;
@@ -102,7 +103,9 @@ export class EmbeddedGenerator implements EntityGenerator {
     return this.language = await inferLanguageFromPath(this.origin.source.extractedSrc);
   }
 
+  private payload: string;
   async getPayload() {
-    return await loadLocalFile(await this.getExtractedSrc());
+    if (!this.payload) this.payload = await loadLocalFile(await this.getExtractedSrc());
+    return this.payload;
   }
 }

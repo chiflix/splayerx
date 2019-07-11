@@ -201,15 +201,14 @@ const actions = {
       windows: RegExp(/^[a-zA-Z]:\/(((?![<>:"//|?*]).)+((?<![ .])\/)?)*$/),
     };
     Object.keys(srcRegexes).forEach(async (type) => {
-      if (srcRegexes[type].test(src)) {
-        commit(videoMutations.SRC_UPDATE, src);
-        commit(
-          videoMutations.MEDIA_HASH_UPDATE,
-          mediaHash || await mediaQuickHash(src),
-        );
-        commit(videoMutations.ID_UPDATE, id);
-        dispatch(subtitleActions.INITIALIZE_VIDEO_SUBTITLE_MAP, { videoSrc: src });
-      }
+      if (!srcRegexes[type].test(src)) return;
+      mediaHash = mediaHash || await mediaQuickHash.try(src);
+      if (!mediaHash) return;
+
+      commit(videoMutations.SRC_UPDATE, src);
+      commit(videoMutations.MEDIA_HASH_UPDATE, mediaHash);
+      commit(videoMutations.ID_UPDATE, id);
+      dispatch(subtitleActions.INITIALIZE_VIDEO_SUBTITLE_MAP, { videoSrc: src });
     });
   },
   [videoActions.INITIALIZE]({ commit }, config) {

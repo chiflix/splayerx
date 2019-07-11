@@ -140,11 +140,10 @@
     },
     "subtitle": {
       "AITranslation": "تحديث الترجمة الذكية",
-      "decreaseSubtitleDelayS": "العنوان الفرعي تأخير -0.1s",
+      "decreasePrimarySubtitleDelay": "العنوان الفرعي تأخير -0.1s",
       "disabledSecondarySub": "تعطيل الترجمة الثانوية",
       "enabledSecondarySub": "تمكين الترجمة الثانوية",
-      "increaseSubtitleDelayL": "",
-      "increaseSubtitleDelayS": "العنوان الفرعي تأخير 0.1s",
+      "increasePrimarySubtitleDelay": "العنوان الفرعي تأخير 0.1s",
       "langEn": "الإنجليزية",
       "langZhCN": "صينى",
       "loadSubtitleFile": "تحميل ملف الترجمة ...",
@@ -195,6 +194,7 @@
   },
   "preferences": {
     "general": {
+      "hideHistory": "إخفاء سجل التشغيل",
       "clearHistory": "قم دائمًا بمسح سجل التشغيل عند الخروج",
       "reverseScrolling": "التمرير عكس الماوس",
       "setDefault": "تعيين كمشغل الفيديو الافتراضي",

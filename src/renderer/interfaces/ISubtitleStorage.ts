@@ -8,8 +8,11 @@ export interface StoredSubtitle {
   language: LanguageCode;
 }
 export interface StoredSubtitleItem {
+  /** must be real hash to retrieve real subtitle from db */
   hash: string;
+  /** may be fake type for display use only */
   type: Type;
+  /** may also be fake source for display use only */
   source: any;
   videoSegments?: VideoSegment[];
   delay: number;
