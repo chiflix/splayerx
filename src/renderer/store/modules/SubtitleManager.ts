@@ -547,13 +547,13 @@ const actions = {
   [a.setGlobalDelay]({ commit }: any, delta: any) {
     commit(m.setGlobalDelay, delta);
   },
-  [a.alterPrimaryDelay]({ commit, state }: any, deltaInSeconds: number) {
+  [a.alterPrimaryDelay]({ state, dispatch }: any, deltaInSeconds: number) {
     const { primarySubtitleId } = state;
-    commit(`${primarySubtitleId}/${subActions.alterDelay}`, deltaInSeconds);
+    dispatch(`${primarySubtitleId}/${subActions.alterDelay}`, deltaInSeconds);
   },
-  [a.alterSecondaryDelay]({ commit, state }: any, deltaInSeconds: number) {
+  [a.alterSecondaryDelay]({ state, dispatch }: any, deltaInSeconds: number) {
     const { secondarySubtitleId } = state;
-    commit(`${secondarySubtitleId}/${subActions.alterDelay}`, deltaInSeconds);
+    dispatch(`${secondarySubtitleId}/${subActions.alterDelay}`, deltaInSeconds);
   },
 };
 
