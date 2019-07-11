@@ -156,20 +156,20 @@ export default {
       return this.isChosen ? `${74 * 1.2 * 1.4}px` : `${37 * 1.2 * 1.4}px`;
     },
     screenSubtitleDelay() {
-      return `${this.subtitleDelay / 1000} s`;
+      return `${this.subtitleDelay} s`;
     },
     screenAudioDelay() {
       if (Math.abs(this.audioDelay) >= 10000) {
-        return `${this.audioDelay / 1000} s`;
+        return `${this.audioDelay} s`;
       }
       return `${this.audioDelay} ms`;
     },
     delayNum() {
       if (this.selectedType === this.selectedTypeEnum.SUBTITLE) {
-        return `${this.subtitleDelay / 1000}`;
+        return `${this.subtitleDelay}`;
       }
       if (Math.abs(this.audioDelay) >= 10000) {
-        return `${this.audioDelay / 1000}`;
+        return `${this.audioDelay}`;
       }
       return this.audioDelay;
     },
