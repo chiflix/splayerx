@@ -94,6 +94,7 @@ const mutations = {
   [m.deleteSubtitleId](state: SubtitleManagerState, id: string) {
     Vue.set(state.allSubtitles, id, undefined);
   },
+  [m.deletaAllSubtitleIds](state: SubtitleManagerState) { state.allSubtitles = {}; },
   [m.setGlobalDelay](state: SubtitleManagerState, delay: number) {
     if (delay === 0) {
       state.globalDelay = delay;
@@ -152,10 +153,6 @@ function initializeManager({ getters, commit, dispatch }: any) {
   getters.list.forEach((s: SubtitleControlListItem) => dispatch(a.removeSubtitle, s.id));
   commit(m.setPlaylistId, playListId);
   commit(m.setMediaItemId, `${mediaHash}-${originSrc}`);
-  commit(m.setPrimarySubtitleId, '');
-  commit(m.setSecondarySubtitleId, '');
-  primarySelectionComplete = false;;
-  secondarySelectionComplete = false;
   commit(m.setGlobalDelay, 0);
   dispatch(a.refreshSubtitlesInitially);
 }
@@ -163,6 +160,16 @@ const debouncedInitializeManager = debounce(initializeManager, 1000);
 const actions = {
   async [a.initializeManager](context: any) {
     debouncedInitializeManager(context);
+  },
+  [a.resetManager]({ commit }: any) {
+    commit(m.setPlaylistId, 0);
+    commit(m.setMediaItemId, '');
+    commit(m.setPrimarySubtitleId, '');
+    commit(m.setSecondarySubtitleId, '');
+    commit(m.setIsRefreshing, false);
+    commit(m.deletaAllSubtitleIds);
+    primarySelectionComplete = false;;
+    secondarySelectionComplete = false;
   },
   async [a.refreshSubtitlesInitially]({ state, getters, dispatch, commit }: any) {
     primarySelectionComplete = false;
