@@ -18,25 +18,15 @@ export class TranscriptQueue {
 
   async add(subtitle: SubtitleUploadParameter) {
     const id = `${subtitle.hints}-${subtitle.mediaIdentity}`;
-    const options = { priority: 0 };
-    switch (this.subtitleState[id]) {
-      default:
-        this.subtitleState[id] = 'loading';
-        break;
-      case 'failed':
-        this.subtitleState[id] = 'loading';
-        options.priority = 1;
-        break;
-      case 'loading':
-      case 'successful':
-        return false;
-    }
-    return this.addManually(subtitle);
+    const options = { priority: 0 } as { priority: 0 | 1 };
+    if (this.subtitleState[id] === 'loading') return false;
+    if (this.subtitleState[id] === 'failed') options.priority = 1;
+    this.subtitleState[id] = 'loading';
+    return this.addManually(subtitle, options);
   }
 
-  async addManually(subtitle: SubtitleUploadParameter) {
+  async addManually(subtitle: SubtitleUploadParameter, options: { priority : 0 | 1 } = { priority: 0 }) {
     const id = `${subtitle.hints}-${subtitle.mediaIdentity}`;
-    const options = { priority: 0 };
     const task = subtitle.transcriptIdentity ?
       () => Sagi.pushTranscriptWithTranscriptIdentity(subtitle) :
       () => Sagi.pushTranscriptWithPayload(subtitle);

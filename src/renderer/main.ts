@@ -514,6 +514,8 @@ new Vue({
       addLocalSubtitlesWithSelect: smActions.addLocalSubtitlesWithSelect,
       updateSubtitleType: subtitleActions.UPDATE_SUBTITLE_TYPE,
       updateSubSettingsType: subtitleActions.UPDATE_SUBTITLE_SETTINGS_TYPE,
+      changePrimarySubDelay: SubtitleManager.alterPrimaryDelay,
+      changeSecondarySubDelay: SubtitleManager.alterSecondaryDelay,
     }),
     /**
      * @description 找到所有menu,禁用调.目前就两层循环，如果出现孙子menu，需要再嵌套一层循环
@@ -786,7 +788,7 @@ new Vue({
                   accelerator: 'CmdOrCtrl+\'',
                   click: () => {
                     this.updateSubSettingsType(true);
-                    // TODO primary subtitle + delay
+                    this.changePrimarySubDelay(0.1);
                   },
                 },
                 {
@@ -795,7 +797,7 @@ new Vue({
                   accelerator: 'CmdOrCtrl+;',
                   click: () => {
                     this.updateSubSettingsType(true);
-                    // TODO primary subtitle - delay
+                    this.changePrimarySubDelay(-0.1);
                   },
                 },
                 { type: 'separator' },
@@ -804,7 +806,7 @@ new Vue({
                   id: 'increaseSecondarySubDelay',
                   click: () => {
                     this.updateSubSettingsType(false);
-                    // TODO secondary subtitle + delay
+                    this.changeSecondarySubDelay(0.1);
                   },
                 },
                 {
@@ -812,7 +814,7 @@ new Vue({
                   id: 'decreaseSecondarySubDelay',
                   click: () => {
                     this.updateSubSettingsType(false);
-                    // TODO secondary subtitle - delay
+                    this.changeSecondarySubDelay(-0.1);
                   },
                 },
               ],

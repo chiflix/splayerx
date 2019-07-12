@@ -29,11 +29,17 @@ export function retrieveStoredSubtitleList(playlistId: number, mediaItemId: stri
   return db.retrieveSubtitleList(playlistId, mediaItemId);
 }
 export function addSubtitleItemsToList(subtitles: SubtitleControlListItem[], playlistId: number, mediaItemId: string) {
-  const storedSubtitles = subtitles.filter(s => s).map(({ hash, type, source }) => ({ hash, type, source }));
+  const storedSubtitles = subtitles.filter(s => s).map(({ hash, type, source, delay }) => ({ hash, type, source, delay }));
   return db.addSubtitleItemsToList(playlistId, mediaItemId, storedSubtitles);
 }
+export function updateSubtitleList(subtitles: SubtitleControlListItem[], playlistId: number, mediaItemId: string) {
+  const subtitlesToUpdate = subtitles
+    .filter(sub => !!sub)
+    .map(({ hash, type, source, delay }) => ({ hash, type, source, delay }));
+  return db.updateSubtitleList(playlistId, mediaItemId, subtitlesToUpdate);
+}
 export function removeSubtitleItemsFromList(subtitles: SubtitleControlListItem[], playlistId: number, mediaItemId: string) {
-  const storedSubtitles = subtitles.filter(s => s).map(({ hash, type, source }) => ({ hash, type, source }));
+  const storedSubtitles = subtitles.filter(s => s).map(({ hash, type, source, delay }) => ({ hash, type, source, delay }));
   return db.removeSubtitleItemsFromList(playlistId, mediaItemId, storedSubtitles);
 }
 export function storeSubtitleLanguage(languageCodes: LanguageCode[], playlistId: number, mediaItemId: string) {
@@ -85,8 +91,12 @@ export class DatabaseGenerator implements EntityGenerator {
   async getHash() {
     return this.hash;
   }
+  private delayInSeconds: number;
+  async getDelay() {
+    return this.delayInSeconds;
+  }
   static async from(storedSubtitleItem: StoredSubtitleItem) {
-    const { hash, type } = storedSubtitleItem;
+    const { hash, type, delay } = storedSubtitleItem;
     const storedSubtitle = await db.retrieveSubtitle(hash);
     if (storedSubtitle) {
       const newGenerator = new DatabaseGenerator();
@@ -100,6 +110,7 @@ export class DatabaseGenerator implements EntityGenerator {
       newGenerator.language = language;
       newGenerator.sources = source;
       newGenerator.hash = hash;
+      newGenerator.delayInSeconds = delay || 0;
       return newGenerator;
     }
   }

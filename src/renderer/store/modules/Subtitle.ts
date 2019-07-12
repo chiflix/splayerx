@@ -3,7 +3,7 @@ import { LanguageCode } from '@/libs/language';
 import { storeSubtitle, removeSubtitle, removeSubtitleItemsFromList, cacheSubtitle } from '@/services/storage/subtitle';
 import { newSubtitle as m } from '@/store/mutationTypes';
 import { newSubtitle as a, SubtitleManager as parentActions } from '@/store/actionTypes';
-import { getParser, sourceToFormat } from '@/services/subtitle/utils';
+import { getParser, sourceToFormat, delayCalculator } from '@/services/subtitle/utils';
 import { SubtitleUploadParameter } from '@/services/subtitle';
 import { generateHints } from '@/libs/utils';
 import upload from '@/services/subtitle/upload';
@@ -66,8 +66,8 @@ const mutations = {
   [m.setLanguage](state: SubtitleState, languageCode: LanguageCode) {
     state.language = languageCode;
   },
-  [m.setDelay](state: SubtitleState, delay: number) {
-    state.delay = delay;
+  [m.setDelay](state: SubtitleState, delayInSeconds: number) {
+    state.delay = delayInSeconds;
   },
   [m.setPlayedTime](state: SubtitleState, playedTime: number) {
     state.playedTime = playedTime;
@@ -119,6 +119,10 @@ const actions = {
           entity.hash = hash;
           commit(m.setHash, hash);
         }),
+        generator.getDelay ? generator.getDelay().then((delay) => {
+          entity.delay = delay;
+          commit(m.setDelay, delay);
+        }) : () => {},
       ]);
       if (isCachedSubtitle(entity.source)) subtitle.cached = CacheStatus.CACHED;
       return entity;
@@ -150,7 +154,7 @@ const actions = {
         }
       }
       if (entity.payload && parser.getDialogues && parser.payload) {
-        return subtitle.parser.getDialogues(time - rootGetters.globalDelay);
+        return subtitle.parser.getDialogues(time - state.delay);
       }
     }
     return [];
@@ -190,7 +194,7 @@ const actions = {
         format: state.format,
         playedTime: state.playedTime,
         totalTime: rootGetters.duration,
-        delay: state.delay,
+        delay: state.delay * 1000,
         hints: await generateHints(rootGetters.originSrc),
         transcriptIdentity: state.format === Format.Sagi ? state.hash : '',
         payload: state.format === Format.Sagi ? '' : Buffer.from(subtitle.entity.payload),
@@ -209,7 +213,7 @@ const actions = {
         format: state.format,
         playedTime: state.playedTime,
         totalTime: rootGetters.duration,
-        delay: state.delay,
+        delay: state.delay * 1000,
         hints: await generateHints(rootGetters.originSrc),
         transcriptIdentity: state.format === Format.Sagi ? state.hash : '',
         payload: state.format === Format.Sagi ? '' : Buffer.from(subtitle.entity.payload),
@@ -241,6 +245,20 @@ const actions = {
   },
   [a.stopWatchPlayedTime]() {
     autoUpload = true;
+  },
+  [a.alterDelay]({ state, commit }: any, deltaInSeconds: number) {
+    const subtitle = subtitleMap.get(state.moduleId);
+    if (subtitle) {
+      const alfterAltered = delayCalculator(state.delay, deltaInSeconds);
+      if (Math.abs(alfterAltered) < 10000) {
+        commit(m.setDelay, alfterAltered);
+        subtitle.entity.delay = alfterAltered;
+      }
+    }
+    return state.delay;
+  },
+  [a.resetDelay]({ commit }: any) {
+    commit(m.setDelay, 0);
   },
 };
 

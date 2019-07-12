@@ -8,7 +8,7 @@ import { generateHints, calculatedName } from '@/libs/utils';
 import { log } from '@/libs/Log';
 import SubtitleModule from './Subtitle';
 import { StoredSubtitleItem, SelectedSubtitle } from '@/interfaces/ISubtitleStorage';
-import { retrieveSubtitlePreference, DatabaseGenerator, storeSubtitleLanguage, addSubtitleItemsToList, removeSubtitleItemsFromList, storeSelectedSubtitles } from '@/services/storage/subtitle';
+import { retrieveSubtitlePreference, DatabaseGenerator, storeSubtitleLanguage, addSubtitleItemsToList, removeSubtitleItemsFromList, storeSelectedSubtitles, updateSubtitleList } from '@/services/storage/subtitle';
 import { isEqual, get, sortBy, differenceWith, flatten, remove, debounce } from 'lodash';
 import Vue from 'vue';
 import { extname } from 'path';
@@ -33,6 +33,8 @@ type SubtitleManagerState = {
   isRefreshing: boolean,
   allSubtitles: { [id: string]: SubtitleControlListItem },
   globalDelay: number,
+  primaryDelay: number,
+  secondaryDelay: number,
 }
 const state = {
   playlistId: 0,
@@ -42,6 +44,8 @@ const state = {
   isRefreshing: false,
   allSubtitles: {},
   globalDelay: 0,
+  primaryDelay: 0,
+  secondaryDelay: 0,
 };
 const getters = {
   list(state: SubtitleManagerState) {
@@ -67,6 +71,8 @@ const getters = {
     return enable;
   },
   globalDelay(state: SubtitleManagerState) { return state.globalDelay; },
+  primaryDelay({ primaryDelay }: SubtitleManagerState) { return primaryDelay; },
+  secondaryDelay({ secondaryDelay }: SubtitleManagerState) { return secondaryDelay; },
 };
 const mutations = {
   [m.setPlaylistId](state: SubtitleManagerState, id: number) {
@@ -101,6 +107,14 @@ const mutations = {
       state.globalDelay += delay * 1000;
     }
   },
+  [m.setPrimaryDelay](state: SubtitleManagerState, delayInSeconds: number) {
+    state.primaryDelay = delayInSeconds;
+    state.allSubtitles[state.primarySubtitleId].delay = delayInSeconds;
+  },
+  [m.setSecondaryDelay](state: SubtitleManagerState, delayInSeconds: number) {
+    state.secondaryDelay = delayInSeconds;
+    state.allSubtitles[state.secondarySubtitleId].delay = delayInSeconds;
+  },
 };
 type AddDatabaseSubtitlesOptions = {
   storedList: StoredSubtitleItem[];
@@ -126,6 +140,11 @@ function privacyConfirm() {
 
 let primarySelectionComplete = false;
 let secondarySelectionComplete = false;
+let alterDelayTimeoutId: any = 0;
+function setDelayTimeout() {
+  clearTimeout(alterDelayTimeoutId);
+  alterDelayTimeoutId = setTimeout(() => store.dispatch(a.storeSubtitleDelays), 10000);
+}
 function fetchOnlineListWithErrorHandling(
   videoSrc: string,
   languageCode: LanguageCode,
@@ -365,6 +384,7 @@ const actions = {
             type: subtitle.type,
             language: subtitle.language,
             source: subtitle.source.source,
+            delay: subtitle.delay,
           };
           commit(m.addSubtitleId, subtitleControlListItem);
           return subtitleControlListItem;
@@ -375,7 +395,7 @@ const actions = {
       }
     }
   },
-  [a.removeSubtitle]({ commit, getters, state }: any, id: string) {
+  [a.removeSubtitle]({ commit, getters }: any, id: string) {
     store.unregisterModule(id);
     commit(m.deleteSubtitleId, id);
     if (getters.isFirstSubtitle && getters.primarySubtitleId === id) {
@@ -391,21 +411,25 @@ const actions = {
     });
     return removeSubtitleItemsFromList(storedSubtitleItems, state.playlistId, state.mediaItemId);
   },
-  async [a.changePrimarySubtitle]({ dispatch, commit, getters }: any, id: string) {
+  async [a.changePrimarySubtitle]({ dispatch, commit, getters, state }: any, id: string) {
     let primary = id;
     let secondary = getters.secondarySubtitleId;
     if (id === secondary) secondary = '';
     commit(m.setPrimarySubtitleId, primary);
+    if (state.allSubtitles[primary]) commit(m.setPrimaryDelay, state.allSubtitles[primary].delay);
     commit(m.setSecondarySubtitleId, secondary);
+    if (state.allSubtitles[secondary]) commit(m.setSecondaryDelay, state.allSubtitles[secondary].delay);
     dispatch(a.storeSelectedSubtitle, [primary, secondary]);
     if (id) await dispatch(`${id}/${subActions.load}`);
   },
   async [a.changeSecondarySubtitle]({ dispatch, commit, getters }: any, id: string) {
     let primary = getters.primarySubtitleId;
     let secondary = id;
-    if (id === primary) primary = '';
+    if (id && id === primary) primary = '';
     commit(m.setPrimarySubtitleId, primary);
+    if (state.allSubtitles[primary]) commit(m.setPrimaryDelay, state.allSubtitles[primary].delay);
     commit(m.setSecondarySubtitleId, secondary);
+    if (state.allSubtitles[secondary]) commit(m.setSecondaryDelay, state.allSubtitles[secondary].delay);
     dispatch(a.storeSelectedSubtitle, [primary, secondary]);
     if (id) await dispatch(`${id}/${subActions.load}`);
   },
@@ -543,6 +567,35 @@ const actions = {
   },
   [a.setGlobalDelay]({ commit }: any, delta: any) {
     commit(m.setGlobalDelay, delta);
+  },
+  async [a.alterPrimaryDelay]({ state, dispatch, commit }: any, deltaInSeconds: number) {
+    const { primarySubtitleId } = state;
+    const delay = await dispatch(`${primarySubtitleId}/${subActions.alterDelay}`, deltaInSeconds);
+    commit(m.setPrimaryDelay, delay);
+    setDelayTimeout();
+  },
+  async [a.resetPrimaryDelay]({ state, dispatch, commit }: any) {
+    const { primarySubtitleId } = state;
+    await dispatch(`${primarySubtitleId}/${subActions.resetDelay}`);
+    commit(m.setPrimaryDelay, 0);
+    setDelayTimeout();
+  },
+  async [a.alterSecondaryDelay]({ state, dispatch, commit }: any, deltaInSeconds: number) {
+    const { secondarySubtitleId } = state;
+    const delay = await dispatch(`${secondarySubtitleId}/${subActions.alterDelay}`, deltaInSeconds);
+    commit(m.setSecondaryDelay, delay);
+    setDelayTimeout();
+  },
+  async [a.resetSecondaryDelay]({ state, dispatch, commit }: any) {
+    const { secondarySubtitleId } = state;
+    await dispatch(`${secondarySubtitleId}/${subActions.resetDelay}`);
+    commit(m.setSecondaryDelay, 0);
+    setDelayTimeout();
+  },
+  async [a.storeSubtitleDelays]({ getters, state }: any) {
+    const { list } = getters;
+    const { playlistId, mediaItemId } = state;
+    updateSubtitleList(list, playlistId, mediaItemId);
   },
 };
 

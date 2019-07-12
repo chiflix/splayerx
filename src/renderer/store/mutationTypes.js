@@ -93,6 +93,8 @@ export const SubtitleManager = {
   addSubtitleId: 'ADD_SUBTITLE_ID',
   deleteSubtitleId: 'DELETE_SUBTITLE_ID',
   setGlobalDelay: 'SET_GLOBAL_DELAY',
+  setPrimaryDelay: 'SET_PRIMARY_DELAY',
+  setSecondaryDelay: 'SET_SECONDARY_DELAY',
 };
 
 export const Input = {

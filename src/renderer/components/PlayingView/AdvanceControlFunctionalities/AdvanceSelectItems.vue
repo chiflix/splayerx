@@ -84,8 +84,9 @@
 </template>
 
 <script lang="ts">
-// @ts-ignore
+import { mapActions } from 'vuex';
 import Icon from '../../BaseIconContainer.vue';
+import { SubtitleManager } from '@/store/actionTypes';
 
 export default {
   name: 'AdvanceSelectItems',
@@ -155,33 +156,31 @@ export default {
       return this.isChosen ? `${74 * 1.2 * 1.4}px` : `${37 * 1.2 * 1.4}px`;
     },
     screenSubtitleDelay() {
-      return `${this.subtitleDelay / 1000} s`;
+      return `${this.subtitleDelay} s`;
     },
     screenAudioDelay() {
       if (Math.abs(this.audioDelay) >= 10000) {
-        return `${this.audioDelay / 1000} s`;
+        return `${this.audioDelay} s`;
       }
       return `${this.audioDelay} ms`;
     },
     delayNum() {
       if (this.selectedType === this.selectedTypeEnum.SUBTITLE) {
-        return `${this.subtitleDelay / 1000}`;
+        return `${this.subtitleDelay}`;
       }
       if (Math.abs(this.audioDelay) >= 10000) {
-        return `${this.audioDelay / 1000}`;
+        return `${this.audioDelay}`;
       }
       return this.audioDelay;
     },
   },
   methods: {
-    changePrimarySubDelay(delay: number) {
-      console.log('primary', delay);
-      // TODO change primary subtitle delay
-    },
-    changeSecondarySubDelay(delay: number) {
-      console.log('secondary', delay);
-      // TODO change secondary subtitle delay
-    },
+    ...mapActions({
+      changePrimarySubDelay: SubtitleManager.alterPrimaryDelay,
+      changeSecondarySubDelay: SubtitleManager.alterSecondaryDelay,
+      resetPrimarySubDelay: SubtitleManager.resetPrimaryDelay,
+      resetSecondarySubDelay: SubtitleManager.resetSecondaryDelay,
+    }),
     handleSubMouseEnter() {
       this.hoveredText = true;
     },
@@ -189,7 +188,7 @@ export default {
       this.hoveredText = false;
     },
     handleResetDelay() {
-      this.handleSelectClick(0);
+      this.isPrimarySub ? this.resetPrimarySubDelay() : this.resetSecondarySubDelay();
     },
     handleDeMousedown() {
       if (this.selectedType === this.selectedTypeEnum.SUBTITLE) {

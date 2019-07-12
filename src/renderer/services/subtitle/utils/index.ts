@@ -172,3 +172,7 @@ export function getParser(format: Format, payload: any): Parser {
   }
   throw new Error();
 }
+
+export function delayCalculator(srcDelay: number, deltaDelay: number) {
+  return (srcDelay * 1000 + deltaDelay * 1000) / 1000;
+}
