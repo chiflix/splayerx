@@ -12,6 +12,7 @@
       :winHeight="winHeight"
       :chosenStyle="chosenStyle"
       :chosenSize="chosenSize"
+      :enabledSecondarySub="enabledSecondarySub"
     />
     <the-video-controller ref="videoctrl" />
   </div>
@@ -49,7 +50,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['scaleNum', 'subToTop', 'primarySubtitleId', 'secondarySubtitleId', 'winHeight', 'chosenStyle', 'chosenSize', 'originSrc']),
+    ...mapGetters(['scaleNum', 'subToTop', 'primarySubtitleId', 'secondarySubtitleId', 'winHeight', 'chosenStyle', 'chosenSize', 'originSrc', 'enabledSecondarySub']),
     concatCurrentCues() {
       if (this.currentCues.length === 2) {
         return [this.currentCues[0].cues, this.currentCues[1].cues];

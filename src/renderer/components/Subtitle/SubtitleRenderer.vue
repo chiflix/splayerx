@@ -125,6 +125,10 @@ export default {
       type: Number,
       default: 1,
     },
+    enabledSecondarySub: {
+      type: Boolean,
+      required: true,
+    },
   },
   data() {
     return {
@@ -217,7 +221,7 @@ export default {
         if (adaptedCues.length === 1 && this.currentFirstSubtitleId && !adaptedCues[0].text.includes('\n')) {
           return `${(textHeight * this.secondarySubScale + (60 / 1080) * this.winHeight) * 100 / this.winHeight}%`;
         }
-        if (adaptedCues.length === 0 && this.currentSecondarySubtitleId
+        if (adaptedCues.length === 0 && this.currentSecondarySubtitleId && this.enabledSecondarySub
           && this.currentFirstSubtitleId) {
           return `${(this.subtitleSpace + (textHeight + padding) * 2 * this.secondarySubScale + (60 / 1080) * this.winHeight) * 100 / this.winHeight}%`;
         }
@@ -235,7 +239,7 @@ export default {
         if (adaptedCues.length === 1 && this.currentSecondarySubtitleId && !adaptedCues[0].text.includes('\n')) {
           return `${(60 / 1080 * this.winHeight + textHeight * this.scaleNum) * 100 / this.winHeight}%`;
         }
-        if (adaptedCues.length === 0 && this.currentSecondarySubtitleId
+        if (adaptedCues.length === 0 && this.currentSecondarySubtitleId && this.enabledSecondarySub
           && this.currentFirstSubtitleId) {
           return `${(this.subtitleSpace + (textHeight + padding) * 2 * this.scaleNum + 60 / 1080 * this.winHeight) * 100 / this.winHeight}%`;
         }

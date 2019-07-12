@@ -29,9 +29,9 @@
   </div>
 </template>
 <script lang="ts">
+import { concat } from 'lodash';
 import Dropdown from '@/components/Welcome/Dropdown.vue';
 import { codeToLanguageName, allCodes } from '@/libs/language';
-import { concat } from 'lodash';
 
 export default {
   components: {
