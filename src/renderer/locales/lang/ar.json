@@ -196,6 +196,19 @@
     "nextInFolder": "التالي في المجلد",
     "nextInPlaylist": "التالي في قائمة التشغيل"
   },
+  "welcome": {
+    "welcomeTitle": "",
+    "welcomeDescription": "",
+    "agreement": "",
+    "policy": "",
+    "languageTitle1": "",
+    "languageTitle2": "",
+    "primary": "",
+    "secondary": "",
+    "chooseSecondary": "",
+    "languageDescription": "",
+    "none": ""
+  },
   "preferences": {
     "general": {
       "hideHistory": "إخفاء سجل التشغيل",
