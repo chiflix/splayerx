@@ -1,19 +1,21 @@
 import { EntityGenerator, Entity, Parser, Type, Format, Origin } from '@/interfaces/ISubtitle';
 import { LanguageCode } from '@/libs/language';
-import { storeSubtitle, removeSubtitle, removeSubtitleItemsFromList } from '@/services/storage/SubtitleStorage';
+import { storeSubtitle, removeSubtitle, removeSubtitleItemsFromList, cacheSubtitle } from '@/services/storage/subtitle';
 import { newSubtitle as m } from '@/store/mutationTypes';
 import { newSubtitle as a, SubtitleManager as parentActions } from '@/store/actionTypes';
-import { getParser } from '@/services/subtitle/utils';
+import { getParser, sourceToFormat } from '@/services/subtitle/utils';
 import { SubtitleUploadParameter } from '@/services/subtitle';
 import { generateHints } from '@/libs/utils';
 import upload from '@/services/subtitle/upload';
 import { addBubble } from '../../helpers/notificationControl';
 import { NOT_SUPPORTED_SUBTITLE } from '../../helpers/notificationcodes';
 import store from '..';
+import { isCachedSubtitle } from '@/services/storage/subtitle/file';
 
 type SubtitleState = {
   moduleId: string;
   source: any;
+  realSource: any;
   type: Type | undefined;
   format: Format | undefined;
   language: LanguageCode;
@@ -21,17 +23,23 @@ type SubtitleState = {
   playedTime: number;
   hash: string;
 };
-
+enum CacheStatus {
+  NOT_CACHED,
+  CACHING,
+  CACHED,
+}
 const subtitleMap: Map<string, {
   entity: Entity;
   loader: () => Promise<any>;
   parser: Parser;
+  cached: CacheStatus;
 }> = new Map();
 
 let autoUpload = false;
 const state = () => ({
   moduleId: '',
   source: '',
+  realSource: '',
   type: undefined,
   format: Format.Unknown,
   language: LanguageCode.Default,
@@ -45,6 +53,9 @@ const mutations = {
   },
   [m.setSource](state: SubtitleState, source: any) {
     state.source = source;
+  },
+  [m.setRealSource](state: SubtitleState, source: any) {
+    state.realSource = source;
   },
   [m.setType](state: SubtitleState, type: Type) {
     state.type = type;
@@ -71,6 +82,7 @@ const actions = {
       entity: {} as Entity,
       loader: () => Promise.resolve(),
       parser: {} as Parser,
+      cached: CacheStatus.NOT_CACHED,
     });
     commit(m.setModuleId, moduleId);
   },
@@ -81,8 +93,16 @@ const actions = {
       const { entity } = subtitle;
       await Promise.all([
         generator.getStoredSource
-          ? generator.getStoredSource().then((src: Origin) => entity.source = src)
-          : generator.getSource().then((src: Origin) => entity.source = src),
+          ? generator.getStoredSource()
+              .then((src: Origin) => {
+                entity.source = src;
+                return generator.getSource();
+              })
+              .then((src: Origin) => commit(m.setRealSource, src))
+          : generator.getSource().then((src: Origin) => {
+            entity.source = src;
+            commit(m.setRealSource, src);
+          }),
         generator.getFormat().then(format => {
           entity.format = format;
           commit(m.setFormat, format);
@@ -100,14 +120,16 @@ const actions = {
           commit(m.setHash, hash);
         }),
       ]);
+      if (isCachedSubtitle(entity.source)) subtitle.cached = CacheStatus.CACHED;
       return entity;
     }
   },
-  async [a.load]({ state }: any) {
+  async [a.load]({ state, dispatch }: any) {
     const subtitle = subtitleMap.get(state.moduleId);
     if (subtitle) {
       const { entity, loader } = subtitle;
       entity.payload = await loader();
+      await dispatch(a.cache);
     }
   },
   async [a.getDialogues]({ state, rootGetters, dispatch }: any, time: number) {
@@ -116,7 +138,8 @@ const actions = {
       const { entity, parser } = subtitle;
       if (!entity.payload) return [];
       else if (entity.payload && !parser.getDialogues) {
-        subtitle.parser = getParser(entity);
+        const realFormat = sourceToFormat(state.realSource);
+        subtitle.parser = getParser(realFormat, entity.payload);
         try {
           await subtitle.parser.parse();
           await dispatch(a.startWatchPlayedTime);
@@ -134,7 +157,19 @@ const actions = {
   },
   async [a.store]({ state }: any) {
     const subtitle = subtitleMap.get(state.moduleId);
-    if (subtitle) await storeSubtitle(subtitle.entity);
+    if (subtitle) {
+      await storeSubtitle(subtitle.entity);
+    }
+  },
+  async [a.cache]({ state }: any) {
+    const subtitle = subtitleMap.get(state.moduleId);
+    if (subtitle) {
+      if (subtitle.cached === CacheStatus.NOT_CACHED) {
+        subtitle.cached = CacheStatus.CACHING;
+        await cacheSubtitle(subtitle.entity);
+        subtitle.cached = CacheStatus.CACHED;
+      }
+    }
   },
   async [a.delete]({ state, rootGetters }: any) {
     const subtitleToRemoveFromList = rootGetters.list.find((sub: any) => sub.id === state.moduleId);

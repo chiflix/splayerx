@@ -51,7 +51,7 @@ import { Video as videoActions, AudioTranslate as atActions } from '@/store/acti
 import { videodata } from '@/store/video';
 import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer.vue';
 import { MediaItem, PlaylistItem } from '../interfaces/IDB';
-import { deleteSubtitlesByPlaylistId } from '../services/storage/SubtitleStorage';
+import { deleteSubtitlesByPlaylistId } from '../services/storage/subtitle';
 import { AudioTranslateBubbleOrigin } from '../store/modules/AudioTranslate';
 
 export default {

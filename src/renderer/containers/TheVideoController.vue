@@ -85,6 +85,7 @@
         class="button no-drag subtitle"
       />
       <advance-control
+        ref="advance"
         v-fade-in="displayState.AdvanceControl"
         v-bind.sync="widgetsStatus.AdvanceControl"
         :last-dragging.sync="lastDragging"
@@ -201,6 +202,8 @@ export default {
       changeSrc: false, // 记录是否换过视频
       showSpeedLabel: false, // 是否显示播放速率
       changeVolumeByMenu: false,
+      subMenuShow: false,
+      subMenuTimer: 0,
     };
   },
   computed: {
@@ -228,7 +231,7 @@ export default {
       return !this.tempRecentPlaylistDisplayState
         && ((!this.mouseStopped && !this.mouseLeftWindow)
         || (!this.mouseLeftWindow && this.onOtherWidget)
-        || this.attachedShown || this.videoChanged
+        || this.attachedShown || this.videoChanged || this.subMenuShow
         || (this.isMousedown && this.currentMousedownWidget === 'PlayButton'));
     },
     onOtherWidget() {
@@ -364,9 +367,21 @@ export default {
       }
     },
     enabledSecondarySub(val: boolean) {
-      if (val && !this.widgetsStatus.SubtitleControl.showAttached) {
+      if (val) {
         this.updateSubtitleType(false);
-        this.widgetsStatus.SubtitleControl.showAttached = true;
+        this.subMenuShow = true;
+        if (this.subMenuTimer) {
+          this.clock.clearTimeout(this.subMenuTimer);
+        }
+        this.subMenuTimer = this.clock.setTimeout(() => {
+          this.subMenuShow = false;
+        }, 3000);
+        this.tempRecentPlaylistDisplayState = false;
+        Object.keys(this.widgetsStatus).forEach((item) => {
+          this.widgetsStatus[item].showAttached = item === 'SubtitleControl';
+        });
+        this.updateMouseup({ componentName: '' });
+        this.updateMousedown({ componentName: '' });
       }
     },
   },
@@ -378,6 +393,19 @@ export default {
       this.progressTriggerId = this.clock.setTimeout(() => {
         this.progressTriggerStopped = false;
       }, this.progressDisappearDelay);
+    });
+    this.$bus.$on('show-subtitle-settings', () => {
+      this.subMenuShow = true;
+      if (this.subMenuTimer) {
+        this.clock.clearTimeout(this.subMenuTimer);
+      }
+      this.subMenuTimer = this.clock.setTimeout(() => {
+        this.subMenuShow = false;
+      }, 3000);
+      this.tempRecentPlaylistDisplayState = false;
+      this.$refs.advance.handleMenuShow();
+      this.updateMouseup({ componentName: '' });
+      this.updateMousedown({ componentName: '' });
     });
     this.createTouchBar();
     this.UIElements = this.getAllUIComponents(this.$refs.controller);
@@ -499,9 +527,7 @@ export default {
     },
     conflictResolve(name: string) {
       Object.keys(this.widgetsStatus).forEach((item) => {
-        if (item !== name) {
-          this.widgetsStatus[item].showAttached = false;
-        }
+        this.widgetsStatus[item].showAttached = item === name;
       });
     },
     cancelPlayListTimeout() {

@@ -39,7 +39,9 @@ export type SubtitleControlListItem = {
 };
 
 export interface EntityGenerator {
+  /** get real source to fetch subtitle from */
   getSource(): Promise<Origin>
+  /** get fake source for display use */
   getStoredSource?: any
   getType(): Promise<Type>
   getFormat(): Promise<Format>

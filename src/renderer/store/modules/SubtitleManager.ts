@@ -8,7 +8,7 @@ import { generateHints, calculatedName } from '@/libs/utils';
 import { log } from '@/libs/Log';
 import SubtitleModule from './Subtitle';
 import { StoredSubtitleItem, SelectedSubtitle } from '@/interfaces/ISubtitleStorage';
-import { retrieveSubtitlePreference, DatabaseGenerator, storeSubtitleLanguage, addSubtitleItemsToList, removeSubtitleItemsFromList, storeSelectedSubtitles } from '@/services/storage/SubtitleStorage';
+import { retrieveSubtitlePreference, DatabaseGenerator, storeSubtitleLanguage, addSubtitleItemsToList, removeSubtitleItemsFromList, storeSelectedSubtitles } from '@/services/storage/subtitle';
 import { isEqual, get, sortBy, differenceWith, flatten, remove, debounce } from 'lodash';
 import Vue from 'vue';
 import { extname } from 'path';
@@ -202,19 +202,19 @@ const actions = {
         dispatch(a.stopAISelection);
       }
     } else if (!preference && needRefreshing) {
-      return dispatch(a.refreshSubtitles, { playlistId, mediaItemId });
+      return dispatch(a.refreshSubtitles, { playlistId, mediaItemId, noOnline: !getters.privacyAgreement });
     } else if (preference && needRefreshing) {
       return dispatch(a.addDatabaseSubtitles, {
         storedList: preference.list,
         selected: preference.selected,
         playlistId, mediaItemId,
       })
-        .then(() => dispatch(a.refreshSubtitles, { playlistId, mediaItemId }));
+      .then(() => dispatch(a.refreshSubtitles, { playlistId, mediaItemId, noOnline: !getters.privacyAgreement }));
     }
   },
   async [a.refreshSubtitles](
     { state, getters, dispatch, commit }: any,
-    args: { playlistId: number, mediaItemId: string },
+    args: { playlistId: number, mediaItemId: string, noOnline: boolean },
   ) {
     const { playlistId, mediaItemId } = args || state;
     // 如果当前有翻译任务
@@ -235,7 +235,7 @@ const actions = {
     const { originSrc, primaryLanguage, secondaryLanguage } = getters;
     let onlinePromise = new Promise((resolve) => resolve());
     /** do not serach online subtitles if extension is not one of mkv, ts, avi and mp4 */
-    let online = ['mkv', 'avi', 'ts', 'mp4'].includes(extname(originSrc).slice(1));
+    let online = args && args.noOnline ? false : ['mkv', 'avi', 'ts', 'mp4'].includes(extname(originSrc).slice(1));
     if (online && !getters.privacyAgreement) online = !!(await privacyConfirm());
     if (online) {
       addBubble(ONLINE_LOADING);
@@ -308,28 +308,31 @@ const actions = {
   async [a.addLocalSubtitlesWithSelect]({ state, dispatch, getters }: any, paths: string[]) {
     let selectedHash = paths[0];
     const { playlistId, mediaItemId } = state;
-    return Promise.all(
-      paths.map(async (path: string, i: number) => {
-        const g = new LocalGenerator(path);
-        if (i === 0) {
-          try {
-            selectedHash = await g.getHash();
-          } catch (ex) { }
+    // tempoary solution, need db validation schema to ensure data consistent
+    if (playlistId && mediaItemId) {
+      return Promise.all(
+        paths.map(async (path: string, i: number) => {
+          const g = new LocalGenerator(path);
+          if (i === 0) {
+            try {
+              selectedHash = await g.getHash();
+            } catch (ex) {}
+          }
+          return dispatch(a.addSubtitle, {
+            generator: g,
+            playlistId, mediaItemId,
+          });
+        })
+      ).then((localEntities: SubtitleControlListItem[]) => {
+        addSubtitleItemsToList(localEntities, playlistId, mediaItemId);
+        const sub: SubtitleControlListItem = getters.list.find((sub: SubtitleControlListItem) => sub.hash === selectedHash);
+        if (sub && getters.isFirstSubtitle) {
+          dispatch(a.changePrimarySubtitle, sub.id);
+        } else if (sub && !getters.isFirstSubtitle) {
+          dispatch(a.changeSecondarySubtitle, sub.id);
         }
-        return dispatch(a.addSubtitle, {
-          generator: g,
-          playlistId, mediaItemId,
-        });
-      })
-    ).then((localEntities: SubtitleControlListItem[]) => {
-      addSubtitleItemsToList(localEntities, playlistId, mediaItemId);
-      const sub: SubtitleControlListItem = getters.list.find((sub: SubtitleControlListItem) => sub.hash === selectedHash);
-      if (sub && getters.isFirstSubtitle) {
-        dispatch(a.changePrimarySubtitle, sub.id);
-      } else if (sub && !getters.isFirstSubtitle) {
-        dispatch(a.changeSecondarySubtitle, sub.id);
-      }
-    });
+      });
+    }
   },
   async [a.addEmbeddedSubtitles]({ dispatch }: any, { streams, playlistId, mediaItemId }: any) {
     return Promise.all(
@@ -534,34 +537,36 @@ const actions = {
     return [firstSub, secondSub];
   },
   async [a.updatePlayedTime]({ state, dispatch, getters }: any, times: { start: number, end: number }) {
-    const actions: Promise<any>[] = [];
-    const { primarySubtitleId, secondarySubtitleId } = state;
-    const bubbleId = `${Date.now()}-${Math.random()}`;
-    if (primarySubtitleId) actions.push(
-      dispatch(`${primarySubtitleId}/${subActions.updatePlayedTime}`, times)
-        .then((playedTime: number) => {
-          if (playedTime >= getters.duration * 0.6) {
-            addBubble(SUBTITLE_UPLOAD, { id: `${SUBTITLE_UPLOAD}-${bubbleId}` });
-            dispatch(`${primarySubtitleId}/${subActions.upload}`).then((result: boolean) => {
-              const bubbleType = result ? UPLOAD_SUCCESS : UPLOAD_FAILED;
-              addBubble(bubbleType, { id: `${bubbleType}-${bubbleId}` });
-            });
-          }
-        })
-    );
-    if (secondarySubtitleId) actions.push(
-      dispatch(`${secondarySubtitleId}/${subActions.updatePlayedTime}`, times)
-        .then((playedTime: number) => {
-          if (playedTime >= getters.duration * 0.6) {
-            addBubble(SUBTITLE_UPLOAD, { id: `${SUBTITLE_UPLOAD}-${bubbleId}` });
-            dispatch(`${secondarySubtitleId}/${subActions.upload}`).then((result: boolean) => {
-              const bubbleType = result ? UPLOAD_SUCCESS : UPLOAD_FAILED;
-              addBubble(bubbleType, { id: `${bubbleType}-${bubbleId}` });
-            });
-          }
-        })
-    );
-    return Promise.all(actions);
+    if (times.start !== times.end) {
+      const actions: Promise<any>[] = [];
+      const { primarySubtitleId, secondarySubtitleId } = state;
+      const bubbleId = `${Date.now()}-${Math.random()}`;
+      if (primarySubtitleId) actions.push(
+        dispatch(`${primarySubtitleId}/${subActions.updatePlayedTime}`, times)
+          .then((playedTime: number) => {
+            if (playedTime >= getters.duration * 0.6) {
+              addBubble(SUBTITLE_UPLOAD, { id: `${SUBTITLE_UPLOAD}-${bubbleId}`});
+              dispatch(`${primarySubtitleId}/${subActions.upload}`).then((result: boolean) => {
+                const bubbleType = result ? UPLOAD_SUCCESS : UPLOAD_FAILED;
+                addBubble(bubbleType, { id: `${bubbleType}-${bubbleId}` });
+              });
+            }
+          })
+      );
+      if (secondarySubtitleId) actions.push(
+        dispatch(`${secondarySubtitleId}/${subActions.updatePlayedTime}`, times)
+          .then((playedTime: number) => {
+            if (playedTime >= getters.duration * 0.6) {
+              addBubble(SUBTITLE_UPLOAD, { id: `${SUBTITLE_UPLOAD}-${bubbleId}`});
+              dispatch(`${secondarySubtitleId}/${subActions.upload}`).then((result: boolean) => {
+                const bubbleType = result ? UPLOAD_SUCCESS : UPLOAD_FAILED;
+                addBubble(bubbleType, { id: `${bubbleType}-${bubbleId}` });
+              });
+            }
+          })
+      );
+      return Promise.all(actions);
+    }
   },
   async [a.manualUploadAllSubtitles]({ state, dispatch }: any) {
     if (navigator.onLine) {

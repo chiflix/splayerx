@@ -76,10 +76,10 @@ export default {
     },
   },
   watch: {
-    originSrc(newVal: string) {
-      if (newVal) {
-        this.initializeManager();
-      }
+    originSrc: {
+      immediate: true,
+      // eslint-disable-next-line
+      handler: function (newVal: string) { if (newVal) this.initializeManager(); },
     },
     async primarySubtitleId() {
       this.currentCues = await this.getCues(videodata.time);
@@ -87,8 +87,6 @@ export default {
     async secondarySubtitleId() {
       this.currentCues = await this.getCues(videodata.time);
     },
-  },
-  created() {
   },
   mounted() {
     this.$store.dispatch('initWindowRotate');
