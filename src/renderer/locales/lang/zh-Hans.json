@@ -196,6 +196,19 @@
     "nextInFolder": "文件夹中下一视频",
     "nextInPlaylist": "播放列表中下一视频"
   },
+  "welcome": {
+    "welcomeTitle": "",
+    "welcomeDescription": "",
+    "agreement": "",
+    "policy": "",
+    "languageTitle1": "",
+    "languageTitle2": "",
+    "primary": "",
+    "secondary": "",
+    "chooseSecondary": "",
+    "languageDescription": "",
+    "none": ""
+  },
   "preferences": {
     "general": {
       "hideHistory": "隐藏历史记录",
