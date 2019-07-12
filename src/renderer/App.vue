@@ -1,20 +1,45 @@
 <template>
   <div
     id="app"
+    :class="$route.name !== 'playing-view' ? 'landing-view' : ''"
     class="application"
   >
-    <router-view />
+    <Titlebar
+      v-if="$route.name !== 'playing-view'"
+      :enable-full-screen-button="$route.name === 'landing-view' || $route.name === 'playing-view'"
+    />
+    <transition
+      :name="transitionMode"
+      mode="out-in"
+    >
+      <router-view />
+    </transition>
   </div>
 </template>
 
 <script lang="ts">
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ipcRenderer, Event } from 'electron';
+import Titlebar from '@/components/Titlebar.vue';
 import '@/css/style.scss';
 import drag from '@/helpers/drag';
 
 export default {
   name: 'Splayer',
+  components: {
+    Titlebar,
+  },
+  data() {
+    return {
+      transitionMode: '',
+    };
+  },
+  watch: {
+    $route(to: any, from: any) {
+      if (to.name === 'landing-view' && from.name === 'language-setting') this.transitionMode = 'fade';
+      else this.transitionMode = '';
+    },
+  },
   mounted() {
     // to-do: specify commitType and commitPayload with vuex typescriptened
     ipcRenderer.on('mainCommit', (event: Event, commitType: string, commitPayload: any) => {
@@ -50,4 +75,22 @@ export default {
 <style lang="scss">
 // global scss
 // @import "@/css/style.scss";
+.landing-view {
+  background-image: linear-gradient(-28deg, #414141 0%, #545454 47%, #7B7B7B 100%);
+}
+
+.fade {
+  &-enter-active {
+    transition: opacity 500ms ease-out;
+  }
+  &-leave-active {
+    transition: opacity 250ms ease-in;
+  }
+  &-enter {
+    opacity: 0;
+  }
+  &-leave-to {
+    opacity: 0;
+  }
+}
 </style>

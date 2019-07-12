@@ -197,6 +197,19 @@
     "nextInFolder": "Next in Folder",
     "nextInPlaylist": "Next in Playlist"
   },
+  "welcome": {
+    "welcomeTitle": "Welcome to SPlayer",
+    "welcomeDescription": "All-new lightweight design, incredible performance with smart translation to let you enjoy your videos like never before.",
+    "agreement": "By using SPlayer, you agree to our ",
+    "policy": "privacy policy",
+    "languageTitle1": "Set your preferred subtitle",
+    "languageTitle2": "languages to fetch translations",
+    "primary": "Primary",
+    "secondary": "Secondary",
+    "chooseSecondary": "Select Secondary Language",
+    "languageDescription": "* You can change your settings in preferences later",
+    "none": "None"
+  },
   "preferences": {
     "general": {
       "hideHistory": "Hide playback history",

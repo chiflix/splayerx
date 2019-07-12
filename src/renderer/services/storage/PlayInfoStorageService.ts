@@ -73,6 +73,9 @@ export default class PlayInfoStorageService implements IPlayInfoStorable {
   async getPlaylistRecord(playlistId: number): Promise<PlaylistItem> {
     return info.getValueByKey(RECENT_OBJECT_STORE_NAME, playlistId);
   }
+  async getMediaItem(mediaitemId: number): Promise<MediaItem> {
+    return info.getValueByKey(VIDEO_OBJECT_STORE_NAME, mediaitemId);
+  }
 }
 
 

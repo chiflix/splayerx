@@ -13,6 +13,8 @@ export default class RecentPlayService implements IRecentPlay {
     const coverVideos = (await Promise.all(
       recentPlayedResults.map(async (value) => {
         const { items, playedIndex, id } = value;
+        if (playedIndex > items.length) console.error('PlayedIndex incorrectly bigger than items.length');
+        if (!items[playedIndex]) console.error('Cover video non-existed');
         const coverVideoId = items[playedIndex] as number;
         if (!coverVideoId) return null;
         const mediaItem = await info.getValueByKey('media-item', coverVideoId);
