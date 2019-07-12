@@ -132,3 +132,4 @@ export const DEFAULT_LOG_DIRNAME = 'logs';
  * @type {String}
  */
 export const VIDEO_DIRNAME = 'videos'; // 视频缓存目录
+export const SUBTITLE_DIRNAME = 'subtitles'; // 视频缓存目录

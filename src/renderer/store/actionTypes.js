@@ -46,6 +46,7 @@ export const Subtitle = {
   REMOVE_LOCAL_SUBTITLE: 'REMOVE_LOCAL_SUBTITLE',
   UPDATE_SUBTITLE_TYPE: 'UPDATE_SUBTITLE_TYPE',
   UPDATE_ENABLED_SECONDARY_SUBTITLE: 'UPDATE_ENABLED_SECONDARY_SUBTITLE',
+  UPDATE_SUBTITLE_SETTINGS_TYPE: 'UPDATE_SUBTITLE_SETTINGS_TYPE',
 };
 
 export const newSubtitle = {
@@ -54,6 +55,7 @@ export const newSubtitle = {
   load: 'LOAD',
   parse: 'PARSE',
   store: 'STORE',
+  cache: 'CACHE',
   delete: 'DELETE',
   upload: 'UPLOAD',
   manualUpload: 'MANUAL_UPLOAD',
