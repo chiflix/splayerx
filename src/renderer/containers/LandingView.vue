@@ -401,7 +401,7 @@ $themeColor-Light: white;
     align-items: flex-end;
 
     .button {
-      transition: background-color 300ms ease-in;
+      transition: all 300ms ease-in;
       transition-delay: 200ms;
       cursor: pointer;
 
