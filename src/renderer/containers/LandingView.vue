@@ -128,7 +128,7 @@ import VideoItem from '@/components/LandingView/VideoItem.vue';
 import { log } from '@/libs/Log';
 import Sagi from '@/libs/sagi';
 import { Route } from 'vue-router';
-import { deleteSubtitlesByPlaylistId } from '../services/storage/SubtitleStorage';
+import { deleteSubtitlesByPlaylistId } from '../services/storage/subtitle';
 
 Vue.component('PlaylistItem', PlaylistItem);
 Vue.component('VideoItem', VideoItem);

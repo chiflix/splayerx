@@ -99,8 +99,12 @@ function handleBossKey() {
       tray.on('click', () => {
         mainWindow.show();
         mainWindow.webContents.send('mainCommit', 'isHiddenByBossKey', false);
-        tray.destroy();
-        tray = null;
+        // Destroy tray in its callback may cause app crash
+        setTimeout(() => {
+          if (!tray) return;
+          tray.destroy();
+          tray = null;
+        }, 10);
       });
     }
   }
