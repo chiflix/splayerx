@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com 
  * @Date: 2019-07-05 16:03:32 
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-07-11 14:12:42
+ * @Last Modified time: 2019-07-12 13:18:47
  */
 import { AudioTranslate as m } from '@/store/mutationTypes';
 import { AudioTranslate as a, SubtitleManager as smActions } from '@/store/actionTypes';
@@ -11,11 +11,12 @@ import { AITaskInfo } from '@/interfaces/IMediaStorable';
 import { TranscriptInfo, OnlineGenerator } from '@/services/subtitle';
 import { SubtitleControlListItem } from '@/interfaces/ISubtitle';
 import { mediaStorageService } from '@/services/storage/MediaStorageService';
+import { TranslatedGenerator } from '@/services/subtitle/loaders/translated';
 
 let taskTimer: number;
 let firstGetTaskEstimateTime: number;
 
-enum AudioTranslateStatus {
+export enum AudioTranslateStatus {
   Default = 'default',
   Selecting = 'selecting',
   Grabbing = 'grabbing',
@@ -152,7 +153,8 @@ const mutations = {
 const actions = {
   [a.AUDIO_TRANSLATE_START]({ commit, getters, state, dispatch }: any, audioLanguageCode: string) {
     // 记录当前智能翻译的信息
-    commit(m.AUDIO_TRANSLATE_SAVE_KEY, getters.mediaHash);
+    commit(m.AUDIO_TRANSLATE_SAVE_KEY, `${getters.mediaHash}-${getters.selectedTargetLanugage}`);
+    audioGrabService.remove();
     const grab = audioGrabService.send({
       mediaHash: getters.mediaHash,
       videoSrc: getters.originSrc,
@@ -175,16 +177,23 @@ const actions = {
         commit(m.AUDIO_TRANSLATE_UPDATE_PROGRESS, progress);
       });
       grab.on('error', (error: Error) => {
-        commit(m.AUDIO_TRANSLATE_HIDE_MODAL);
+        console.log(error, 'audio-log');
+        audioGrabService.remove();
         commit(m.AUDIO_TRANSLATE_UPDATE_STATUS, AudioTranslateStatus.Fail);
-        dispatch(a.AUDIO_TRANSLATE_SHOW_BUBBLE, AudioTranslateBubbleOrigin.TranslateFail);
+        if (!state.isModalVisiable) {
+          commit(m.AUDIO_TRANSLATE_UPDATE_PROGRESS, 0);
+          dispatch(a.AUDIO_TRANSLATE_SHOW_BUBBLE, AudioTranslateBubbleOrigin.TranslateFail);
+          // TODO 如果开启了第二字幕
+          dispatch(smActions.changePrimarySubtitle, '');
+        }
       });
       grab.on('task', (taskInfo: AITaskInfo) => {
+        console.log(taskInfo, 'audio-log');
         if (taskInfo.mediaHash !== getters.mediaHash) {
           return;
         }
         audioGrabService.taskInfo = taskInfo;
-        let estimateTime = taskInfo.estimateTime;
+        let estimateTime = taskInfo.estimateTime * 1;
         if (!estimateTime) {
           estimateTime = 300;
         }
@@ -202,7 +211,7 @@ const actions = {
           clearInterval(taskTimer);
         }
         taskTimer = window.setInterval(() => {
-          if (taskInfo.mediaHash !== getters.mediaHash) {
+          if (taskInfo.mediaHash !== getters.mediaHash || state.status === AudioTranslateStatus.Fail) {
             clearInterval(taskTimer);
             return;
           }
@@ -213,6 +222,7 @@ const actions = {
         }, 1000);
       });
       grab.on('transcriptInfo', async (transcriptInfo: TranscriptInfo) => {
+        console.log(transcriptInfo, 'audio-log');
         // 清除task阶段倒计时定时器
         if (taskTimer) {
           clearInterval(taskTimer);
@@ -234,7 +244,7 @@ const actions = {
           // 先删除AI按钮对应的ID
           dispatch(smActions.removeSubtitle, targetId);
           // 加入刚刚翻译好的AI字幕
-          const generator = new OnlineGenerator(transcriptInfo);
+          const generator = new TranslatedGenerator(transcriptInfo);
           const subtitle = await dispatch(smActions.addSubtitle, {
             generator,
             playlistId: getters.playListId,
@@ -256,7 +266,12 @@ const actions = {
       });
     }
   },
-  [a.AUDIO_TRANSLATE_DISCARD]({ commit, state, dispatch }: any) {
+  [a.AUDIO_TRANSLATE_DISCARD]({ commit, getters, state, dispatch }: any) {
+    // 如果时服务器已经开始任务的
+    // 丢弃之前先把本次任务记录到本地
+    if (getters.isTranslating || state.status === AudioTranslateStatus.Back) {
+      audioGrabService.saveTask();
+    }
     // 丢弃service
     audioGrabService.remove();
     // 丢弃任务，执行用户强制操作
@@ -266,7 +281,6 @@ const actions = {
     dispatch(a.AUDIO_TRANSLATE_HIDE_BUBBLE);
   },
   [a.AUDIO_TRANSLATE_BACKSATGE]({ commit, dispatch }: any) {
-    audioGrabService.saveTask();
     state.callbackAfterBubble();
     dispatch(a.AUDIO_TRANSLATE_HIDE_BUBBLE);
     commit(m.AUDIO_TRANSLATE_HIDE_MODAL);
@@ -274,8 +288,9 @@ const actions = {
     commit(m.AUDIO_TRANSLATE_UPDATE_STATUS, AudioTranslateStatus.Back);
   },
   [a.AUDIO_TRANSLATE_SHOW_MODAL]({ commit, getters, state, dispatch }: any, sub: SubtitleControlListItem) {
-    let taskInfo = mediaStorageService.getAsyncTaskInfo(getters.mediaHash);
-    if (getters.isTranslating && state.key === getters.mediaHash && sub.language === state.selectedTargetLanugage) {
+    const key = `${getters.mediaHash}-${sub.language}`;
+    let taskInfo = mediaStorageService.getAsyncTaskInfo(key);
+    if (getters.isTranslating && state.key === key) {
       commit(m.AUDIO_TRANSLATE_SHOW_MODAL);
       // TODO 如果开启了第二字幕
       dispatch(smActions.changePrimarySubtitle, sub.id);
@@ -286,7 +301,7 @@ const actions = {
         dispatch(smActions.changePrimarySubtitle, '');
         dispatch(a.AUDIO_TRANSLATE_SHOW_MODAL, sub);
       });
-    } else if (taskInfo && taskInfo.targetLanguage === sub.language) {
+    } else if (state.key === key && taskInfo && taskInfo.targetLanguage === sub.language) {
       commit(m.AUDIO_TRANSLATE_SELECTED_UPDATE, sub);
       dispatch(a.AUDIO_TRANSLATE_START, taskInfo.audioLanguageCode);
       commit(m.AUDIO_TRANSLATE_UPDATE_PROGRESS, 51);
@@ -296,8 +311,11 @@ const actions = {
       commit(m.AUDIO_TRANSLATE_SELECTED_UPDATE, sub);
     }
   },
-  [a.AUDIO_TRANSLATE_HIDE_MODAL]({ commit }: any) {
+  [a.AUDIO_TRANSLATE_HIDE_MODAL]({ commit, dispatch }: any) {
     commit(m.AUDIO_TRANSLATE_HIDE_MODAL);
+    if (state.status === AudioTranslateStatus.Fail) {
+      dispatch(a.AUDIO_TRANSLATE_DISCARD);
+    }
   },
   [a.AUDIO_TRANSLATE_UPDATE_STATUS]({ commit }: any, status: string) {
     commit(m.AUDIO_TRANSLATE_UPDATE_STATUS, status);

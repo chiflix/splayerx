@@ -80,7 +80,7 @@
                 />
               </transition>
               <transition
-                v-if="item.type === 'translated'
+                v-if="item.type === 'translated' && item.source === ''
                   && (item.language !== translateLanguage || translateProgress <= 0)"
                 name="sub-delete"
               >
@@ -91,7 +91,7 @@
                 >Generate</span>
               </transition>
               <div
-                v-else-if="translateProgress > 0 && item.type === 'translated'
+                v-else-if="translateProgress > 0 && item.type === 'translated' && item.source === ''
                   && item.language === translateLanguage"
                 class="translateProgress"
               >

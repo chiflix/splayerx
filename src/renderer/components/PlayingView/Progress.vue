@@ -2,7 +2,7 @@
   <div style="width: 100%; height: 100%;">
     <div
       v-if="type === 'line'"
-      :style="`--tooltip-width: ${progress}%;`"
+      :style="`--tooltip-width: ${progress}%; --tooltip-color: ${frontColor};`"
       class="line"
     />
     <div
@@ -46,6 +46,10 @@ export default Vue.extend({
       type: String,
       default: 'line',
     },
+    frontColor: {
+      type: String,
+      default: '#ffffff',
+    },
   },
   watch: {
   },
@@ -64,7 +68,7 @@ export default Vue.extend({
       position: absolute;
       width: var(--tooltip-width);
       height: 100%;
-      background: #ffffff;
+      background: var(--tooltip-color);
       border-radius: 6px;
     }
   }

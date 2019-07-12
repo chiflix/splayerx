@@ -67,13 +67,27 @@
               </div>
             </div>
             <div
-              v-if="showOKButton"
+              v-if="showHideButton"
               :class="{
                 hover: hovered,
               }"
               @mouseover.stop="hovered = true"
               @mouseout.stop="hovered = false"
               @mouseup.stop="$emit('hide');"
+              class="button"
+            >
+              <div class="button-info">
+                好的
+              </div>
+            </div>
+            <div
+              v-if="showOKButton"
+              :class="{
+                hover: hovered,
+              }"
+              @mouseover.stop="hovered = true"
+              @mouseout.stop="hovered = false"
+              @mouseup.stop="$emit('disCardTranslate');"
               class="button"
             >
               <div class="button-info">
@@ -124,11 +138,12 @@ export default Vue.extend({
   },
   computed: {
     showConfirmCloseButton() {
-      // 当前正在提取音频
+      // 当前正在提取音频,确认删除
       return this.type === AudioTranslateBubbleType.ChangeWhenGrab
       || this.type === AudioTranslateBubbleType.CloseWhenGrab;
     },
     showCancelButton() {
+      // 当前正在提取音频，取消
       return this.type === AudioTranslateBubbleType.ChangeWhenGrab
       || this.type === AudioTranslateBubbleType.CloseWhenGrab;
     },
@@ -138,9 +153,11 @@ export default Vue.extend({
     showBackStageButton() {
       return this.type === AudioTranslateBubbleType.ChangeWhenTranslate;
     },
+    showHideButton() {
+      return this.type === AudioTranslateBubbleType.ClickWhenTranslate;
+    },
     showOKButton() {
-      return this.type === AudioTranslateBubbleType.ClickWhenTranslate
-        || this.type === AudioTranslateBubbleType.FailAfterTranslate;
+      return this.type === AudioTranslateBubbleType.FailAfterTranslate;
     },
     showStopTranslateButton() {
       return this.type === AudioTranslateBubbleType.ClickWhenTranslate;

@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com 
  * @Date: 2019-06-20 18:03:14 
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-07-11 13:52:52
+ * @Last Modified time: 2019-07-12 13:18:25
  */
 
 // @ts-ignore
@@ -71,6 +71,7 @@ class AudioGrabService extends EventEmitter {
   grabEndTime: number;
   translationEndTime: number;
   loopTimer: any;
+  timeoutTimer: any;
   grabTime: number;
 
   constructor(private readonly mediaStorageService: MediaStorageService) {
@@ -84,6 +85,7 @@ class AudioGrabService extends EventEmitter {
     this.audioLanguageCode = data.audioLanguageCode;
     this.targetLanguageCode = data.targetLanguageCode;
     ipcRenderer.send('grab-audio', data);
+    ipcRenderer.removeListener('grab-audio-change', this.ipcCallBack);
     ipcRenderer.on('grab-audio-change', this.ipcCallBack);
     return this;
   }
@@ -126,8 +128,9 @@ class AudioGrabService extends EventEmitter {
   }
 
   public saveTask() {
+    const { mediaHash, targetLanguageCode } = this;
     if (this.taskInfo) {
-      mediaStorageService.setAsyncTaskInfo(this.mediaHash, this.taskInfo);
+      mediaStorageService.setAsyncTaskInfo(`${mediaHash}-${targetLanguageCode}`, this.taskInfo);
     }
   }
 
@@ -149,6 +152,7 @@ class AudioGrabService extends EventEmitter {
   }
 
   private handleCallBack(err: string, framebuf: Buffer, framedata: string) {
+    console.log(err, framedata, 'audio-log');
     if (!this.streamClient && this.taskInfo && this.taskInfo.taskId) {
       return;
     }
@@ -224,7 +228,20 @@ class AudioGrabService extends EventEmitter {
     requestConfig.setMediaIdentity(data.mediaHash);
     this.request.setStreamingConfig(requestConfig);
     this.streamClient.write(this.request);
-
+    // streamingTranslation 开启时，使用时间戳标记config发送
+    // 开启timeout, 如果在超时时间内收到data，就取消timeout
+    // 如果没有收到data，就放弃任务，发送超时错误
+    this.timeoutTimer = setTimeout(() => {
+      // 丢弃本次任务
+      this.stop();
+      // 发送error
+      if (this.callback) {
+        this.callback({
+          status: Status.Error,
+          error: new Error('time out'),
+        });
+      }
+    }, 1000 * 10);
     // start grab data
     this.pts = '0';
     this.grabTime = 0;
@@ -251,12 +268,31 @@ class AudioGrabService extends EventEmitter {
     const client = new TranslationClient(endpoint, combinedCreds);
     const stream = client.streamingTranslation();
     stream.on('data', this.rpcCallBack.bind(this));
+    stream.on('error', (error: Error) => {
+      // 报错，主动丢弃
+      this.stop();
+      if (this.callback) {
+        this.callback({
+          status: Status.Error,
+          error: error,
+        });
+      }
+    });
     return stream;
   }
 
   private rpcCallBack(res: StreamingTranslationResponse, err: Error) {
-    const result = res.toObject();
-    if (res.hasTaskinfo()) {
+    try {
+      console.log(err, res.toObject(), 'audio-log');
+    } catch (err) {
+      console.warn('error');
+    }
+    // 收到返回数据，清楚超时定时器
+    if (this.timeoutTimer) {
+      clearTimeout(this.timeoutTimer);
+    }
+    const result = res && res.toObject();
+    if (result && res.hasTaskinfo()) {
       this.grabEndTime = Date.now();
       this.taskInfo = {
         mediaHash: this.mediaHash,
@@ -276,7 +312,7 @@ class AudioGrabService extends EventEmitter {
         taskInfo: this.taskInfo,
       });
       this.loopTask(this.taskInfo)
-    } else if (res.hasTranscriptResult()) {
+    } else if (result && res.hasTranscriptResult()) {
       // get Transcript Info
       // return hash to render
       this.translationEndTime = Date.now();
@@ -285,13 +321,15 @@ class AudioGrabService extends EventEmitter {
         transcriptInfo: result.transcriptResult,
       });
       this.clearJob();
-    } else if (res.hasError() && result.error.code !== 9100) {
+    } else if (result && res.hasError() && result.error.code !== 9100) {
       // return error to render
+      this.stop();
       this.callback({
         status: Status.Error,
         error: result.error,
       });
     } else if (err) {
+      this.stop();
       this.callback({
         status: Status.Error,
         error: err,
@@ -326,14 +364,19 @@ class AudioGrabService extends EventEmitter {
   }
 
   private loopTaskCallBack(err: Error | null, res: StreamingTranslationTaskResponse) {
-    const result = res.toObject();
-    if (res.hasTranscriptinfo()) {
+    try {
+      console.error(res.toObject(), err, 'loop', 'audio-log');
+    } catch (err) {
+      console.warn('error');
+    }
+    const result = res && res.toObject();
+    if (result && res.hasTranscriptinfo()) {
       this.translationEndTime = Date.now();
       this.callback({
         status: Status.TranscriptInfo,
         transcriptInfo: result.transcriptinfo,
       });
-    } else if (res.hasTaskinfo()) {
+    } else if (result && res.hasTaskinfo()) {
       this.taskInfo = {
         audioLanguageCode: this.audioLanguageCode,
         targetLanguage: this.targetLanguageCode,
@@ -345,12 +388,14 @@ class AudioGrabService extends EventEmitter {
         taskInfo: this.taskInfo,
       });
       this.loopTask(this.taskInfo);
-    } else if (res.hasError()) {
+    } else if (result && res.hasError()) {
+      this.stop();
       this.callback({
         status: Status.Error,
         error: result.error,
       });
     } else if (err) {
+      this.stop();
       this.callback({
         status: Status.Error,
         error: err,

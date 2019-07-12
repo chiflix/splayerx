@@ -8,26 +8,38 @@
       v-fade-in="isTranslateModalVisiable"
       class="select-language-modal"
     >
-      <h1 v-if="!isTranslating && !isConfirmCancelTranlate">
+      <h1 v-if="!isProgress && !isConfirmCancelTranlate">
         选择视频源语言
       </h1>
       <h1 v-else-if="isConfirmCancelTranlate">
         翻译已取消
       </h1>
-      <h1 v-else>
-        大约还需{{ translateEstimateTime }}分钟
+      <h1 v-else-if="isProgress && isTranslateSuccess">
+        翻译完成
       </h1>
-      <p v-if="!isTranslating && !isConfirmCancelTranlate">
+      <h1 v-else-if="isProgress && isTranslateFail">
+        翻译失败
+      </h1>
+      <h1 v-else-if="isProgress">
+        大约还需{{ translateEstimateTime }} 秒
+      </h1>
+      <p v-if="!isProgress && !isConfirmCancelTranlate">
         目前尚无此语言的智能翻译结果，请准确选择您在视频中所听到的语言，翻译将持续一段时间。
       </p>
       <p v-else-if="isConfirmCancelTranlate">
         点击确定关闭，关闭后翻译进度将不可恢复。
       </p>
-      <p v-else>
+      <p v-else-if="isProgress && isTranslateSuccess">
+        AI翻译已完成，可在翻译结果列表中查看。
+      </p>
+      <p v-else-if="isProgress && isTranslateFail">
+        啦啦啦啦啦啦啦啦啦啦啦啦。
+      </p>
+      <p v-else-if="isProgress">
         请不要关闭播放器，您可以在该视频的翻译结果列表中查看进度。
       </p>
       <div
-        v-if="!isTranslating && !isConfirmCancelTranlate"
+        v-if="!isProgress && !isConfirmCancelTranlate"
         class="select"
       >
         <Select
@@ -37,23 +49,45 @@
         />
       </div>
       <div
-        v-else-if="isTranslating && !isConfirmCancelTranlate"
+        v-else-if="isProgress && !isConfirmCancelTranlate"
         class="progress-wraper"
       >
         <Progress
+          :front-color="isTranslateFail ? 'rgba(255,255,255,0.3)' : '#ffffff'"
           :progress="translateProgress"
         />
         <div
-          @click="isConfirmCancelTranlate = true;"
+          v-if="isTranslateFail"
+          @click="translate"
+          class="icon-wraper"
         >
           <Icon
-            class="delete"
+            class="icon"
+            type="restart"
+          />
+        </div>
+        <div
+          v-else-if="isTranslateSuccess"
+          class="icon-wraper"
+        >
+          <Icon
+            class="icon"
+            type="complete"
+          />
+        </div>
+        <div
+          v-else
+          @click="isConfirmCancelTranlate = true;"
+          class="icon-wraper"
+        >
+          <Icon
+            class="icon"
             type="close"
           />
         </div>
       </div>
       <div
-        v-if="!isTranslating && !isConfirmCancelTranlate"
+        v-if="!isProgress && !isConfirmCancelTranlate"
         class="button-wraper"
       >
         <div
@@ -106,6 +140,7 @@ import { codeToLanguageName } from '@/libs/language';
 import Select from '@/components/PlayingView/Select.vue';
 import Icon from '@/components/BaseIconContainer.vue';
 import Progress from '@/components/PlayingView/Progress.vue';
+import { AudioTranslateStatus } from '../store/modules/AudioTranslate';
 
 export default Vue.extend({
   name: 'AudioTranslateModal',
@@ -126,10 +161,20 @@ export default Vue.extend({
   computed: {
     ...mapGetters([
       'currentAudioTrackId', 'mediaHash',
-      'isTranslateModalVisiable', 'translateProgress', 'isTranslating', 'selectedTargetLanugage', 'translateEstimateTime',
+      'isTranslateModalVisiable', 'translateProgress', 'isTranslating', 'selectedTargetLanugage', 'translateEstimateTime', 'translateStatus',
     ]),
     translateLanguageLabel() {
       return codeToLanguageName(this.selectedTargetLanugage);
+    },
+    isProgress() {
+      return this.isTranslating || this.translateStatus === AudioTranslateStatus.Fail
+        || this.translateStatus === AudioTranslateStatus.Success;
+    },
+    isTranslateFail() {
+      return this.translateStatus === AudioTranslateStatus.Fail;
+    },
+    isTranslateSuccess() {
+      return this.translateStatus === AudioTranslateStatus.Success;
     },
   },
   watch: {
@@ -169,7 +214,7 @@ export default Vue.extend({
   position: fixed;
   left: 0;
   top: 0;
-  z-index: 2;
+  z-index: 100;
   opacity: 0.7;
   background: #000000;
 }
@@ -181,7 +226,7 @@ export default Vue.extend({
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  z-index: 3;
+  z-index: 101;
   border: 1px solid rgba(160,160,160,0.7);
   background-image: radial-gradient(
     80% 130%,
@@ -237,7 +282,11 @@ export default Vue.extend({
     margin-bottom: 14px;
     display: flex;
     align-items: center;
-    .delete {
+    .icon-wraper {
+      display: flex;
+      align-items: center;
+    }
+    .icon {
       width: 15px;
       height: 15px;
       margin-left: 6px;

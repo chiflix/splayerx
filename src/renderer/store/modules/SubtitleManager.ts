@@ -1,7 +1,7 @@
 import uuidv4 from 'uuid/v4';
 import store from '@/store';
 import { SubtitleManager as m } from '@/store/mutationTypes';
-import { SubtitleManager as a, newSubtitle as subActions, Subtitle as legacyActions } from '@/store/actionTypes';
+import { SubtitleManager as a, newSubtitle as subActions, Subtitle as legacyActions, AudioTranslate as atActions } from '@/store/actionTypes';
 import { SubtitleControlListItem, Type, EntityGenerator, Entity } from '@/interfaces/ISubtitle';
 import { ISubtitleStream, TranscriptInfo, searchForLocalList, retrieveEmbeddedList, fetchOnlineList, OnlineGenerator, LocalGenerator, EmbeddedGenerator } from '@/services/subtitle';
 import { generateHints, calculatedName } from '@/libs/utils';
@@ -17,6 +17,7 @@ import { ONLINE_LOADING, REQUEST_TIMEOUT, SUBTITLE_UPLOAD, UPLOAD_SUCCESS, UPLOA
 import { LanguageCode } from '@/libs/language';
 import { existsSync } from 'fs';
 import { TranslatedGenerator } from '@/services/subtitle/loaders/translated';
+import { AudioTranslateBubbleOrigin } from './AudioTranslate';
 
 const sortOfTypes = {
   local: 0,
@@ -216,7 +217,16 @@ const actions = {
     args: { playlistId: number, mediaItemId: string },
   ) {
     const { playlistId, mediaItemId } = args || state;
-
+    // 如果当前有翻译任务
+    if (getters.isTranslating) {
+      dispatch(atActions.AUDIO_TRANSLATE_SHOW_BUBBLE, AudioTranslateBubbleOrigin.OtherAIButtonClick);
+      dispatch(atActions.AUDIO_TRANSLATE_BUBBLE_CALLBACK, () => {
+        // TODO 如果开启了第二字幕
+        dispatch(a.changePrimarySubtitle, '');
+        dispatch(a.refreshSubtitles);
+      });
+      return;
+    }
     primarySelectionComplete = false;
     secondarySelectionComplete = false;
     commit(m.setIsRefreshing, true);
@@ -238,6 +248,8 @@ const actions = {
         const newSubtitlesToAdd: TranscriptInfo[] = [];
         const oldSubtitlesToDel: SubtitleControlListItem[] = [];
         const oldSubtitles = [...(getters as { list: SubtitleControlListItem[] }).list];
+        // 将Translated类型的都删除掉
+        oldSubtitlesToDel.push(...remove(oldSubtitles, ({ type }) => type === Type.Translated));
         oldSubtitlesToDel.push(...remove(oldSubtitles, ({ type, language }) => type === Type.Online && language !== primaryLanguage && language !== secondaryLanguage));
         oldSubtitlesToDel.push(...remove(oldSubtitles, ({ type, hash }) => type === Type.Online && !results.find(({ transcriptIdentity }) => transcriptIdentity === hash)));
         newSubtitlesToAdd.push(...results.filter(({ transcriptIdentity }) => !oldSubtitles.find(({ id }) => id === transcriptIdentity)));
@@ -245,16 +257,19 @@ const actions = {
       }).then((result) => {
         const primaryResults = result.add.filter((info: TranscriptInfo) => info.languageCode === primaryLanguage);
         const secondaryResults = result.add.filter((info: TranscriptInfo) => info.languageCode === secondaryLanguage);
-        if ( primaryResults.length < 3) {
-          // 如果首选项语言字幕不足3个，就出现首选项语言的AI按钮
-          dispatch(a.addSubtitle, { generator: new TranslatedGenerator(primaryLanguage, 0), playlistId, mediaItemId });
+        const isPrimaryResultsFromES = primaryResults.every((info: TranscriptInfo) => info.tagsList.length > 0 && info.tagsList.indexOf('ES'));
+        const isSecondaryResultsFromES = secondaryResults.every((info: TranscriptInfo) => info.tagsList.length > 0 && info.tagsList.indexOf('ES'));
+        // 出现AI按钮的情况
+        // 1. 在线字幕tags都是ES(模糊搜索)
+        // 2. 没有在线字幕
+        if (primaryResults.length  === 0 || isPrimaryResultsFromES) {
+          dispatch(a.addSubtitle, { generator: new TranslatedGenerator(null, primaryLanguage), playlistId, mediaItemId });
         }
-        if (secondaryResults.length < 3) {
-          // 如果次选项语言字幕不足3个，就出现次选项语言的AI按钮
-          dispatch(a.addSubtitle, { generator: new TranslatedGenerator(secondaryLanguage, 0), playlistId, mediaItemId });
+        if (secondaryLanguage && (secondaryResults.length  === 0 || isSecondaryResultsFromES)) {
+          dispatch(a.addSubtitle, { generator: new TranslatedGenerator(null, secondaryLanguage), playlistId, mediaItemId });
         }
         dispatch(a.addOnlineSubtitles, { transcriptInfoList: result.add, playlistId, mediaItemId })
-        .then(() => dispatch(a.deleteSubtitlesByUuid, result.delete))
+          .then(() => dispatch(a.deleteSubtitlesByUuid, result.delete))
       });
     }
     /** whether to search embedded subtitles */
@@ -299,7 +314,7 @@ const actions = {
         if (i === 0) {
           try {
             selectedHash = await g.getHash();
-          } catch (ex) {}
+          } catch (ex) { }
         }
         return dispatch(a.addSubtitle, {
           generator: g,
@@ -323,7 +338,14 @@ const actions = {
   },
   async [a.addOnlineSubtitles]({ dispatch }: any, { transcriptInfoList, playlistId, mediaItemId }: any) {
     return Promise.all(
-      transcriptInfoList.map((info: TranscriptInfo) => dispatch(a.addSubtitle, { generator: new OnlineGenerator(info), playlistId, mediaItemId }))
+      transcriptInfoList.map((info: TranscriptInfo) => {
+        if (info.tagsList.length > 0 && info.tagsList.indexOf('AI')) {
+          // 如果在线字幕有AI标签，就使用TranslatedGenerator
+          dispatch(a.addSubtitle, { generator: new TranslatedGenerator(info), playlistId, mediaItemId });
+        } else {
+          dispatch(a.addSubtitle, { generator: new OnlineGenerator(info), playlistId, mediaItemId });
+        }
+      })
     );
   },
   async [a.addDatabaseSubtitles]({ getters, dispatch }: any, options: AddDatabaseSubtitlesOptions) {

@@ -67,6 +67,7 @@ class Sagi {
     req.setTranscriptIdentity(transcriptIdentity);
     return new Promise((resolve, reject) => {
       client.transcript(req, (err, res) => {
+        console.log(res.toObject(), 'audio-log');
         if (err) reject(err);
         else resolve(res.toObject().transcriptsList);
       });
