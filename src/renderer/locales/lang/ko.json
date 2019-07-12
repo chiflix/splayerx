@@ -196,6 +196,19 @@
     "nextInFolder": "폴더에서 다음",
     "nextInPlaylist": "다음 재생 목록에서"
   },
+  "welcome": {
+    "welcomeTitle": "",
+    "welcomeDescription": "",
+    "agreement": "",
+    "policy": "",
+    "languageTitle1": "",
+    "languageTitle2": "",
+    "primary": "",
+    "secondary": "",
+    "chooseSecondary": "",
+    "languageDescription": "",
+    "none": ""
+  },
   "preferences": {
     "general": {
       "hideHistory": "재생 기록 숨기기",
