@@ -6,7 +6,7 @@ import { EntityGenerator, Type, Format, Origin } from '@/interfaces/ISubtitle';
 import Sagi from '@/libs/sagi';
 import { loadLocalFile } from '@/services/subtitle/utils';
 import { embeddedSrcLoader } from '@/services/subtitle/loaders/embedded';
-import { cacheEmbeddedSubtitle, addNewSourceToDb, cacheLocalSubtitle, cacheOnlineSubtitle, isCachedSubtitle } from './file';
+import { cacheEmbeddedSubtitle, addNewSourceToDb, cacheLocalSubtitle, cacheOnlineSubtitle, isCachedSubtitle, removeCachedSubtitles } from './file';
 
 const db = new SubtitleDataBase();
 
@@ -45,8 +45,10 @@ export function storeSelectedSubtitles(subs: SelectedSubtitle[], playlistId: num
 export function retrieveSelectedSubtitles(playlistId: number, mediaItemId: string) {
   return db.retrieveSelectedSubtitles(playlistId, mediaItemId);
 }
-export function deleteSubtitlesByPlaylistId(playlistId: number) {
-  return db.deleteSubtitlesByPlaylistId(playlistId);
+export async function deleteSubtitlesByPlaylistId(playlistId: number) {
+  const hashes = await db.deleteSubtitlesByPlaylistId(playlistId);
+  const cachedSubtitleSources = await removeCachedSubtitles(hashes);
+  await db.removeSubtitles(cachedSubtitleSources.map(({ hash, source }) => ({ hash, source: source.source })));
 }
 
 export class DatabaseGenerator implements EntityGenerator {
