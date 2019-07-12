@@ -17,7 +17,7 @@ export enum LanguageCode {
   'No' = 'No',
   'Default' = 'Default',
 };
-const allCodes = {
+export const allCodes = {
   'zh-CN': [
     'zh',
     'chi',

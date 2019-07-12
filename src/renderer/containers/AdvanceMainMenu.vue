@@ -186,8 +186,8 @@
           :handle-select-click="changeSubtitleDelay"
           :size="computedSize"
           :is-chosen="subDelayChosen"
-          :primary-sub-delay="primarySubDelay"
-          :secondary-sub-delay="secondarySubDelay"
+          :primary-sub-delay="primaryDelay"
+          :secondary-sub-delay="secondaryDelay"
           @click.left.native="handleDelayClick"
           selected-type="subtitle"
         />
@@ -292,7 +292,7 @@ export default {
   computed: {
     ...mapGetters(['winWidth', 'primarySubtitleId', 'secondarySubtitleId', 'enabledSecondarySub', 'winHeight', 'rate', 'chosenSize', 'subToTop',
       'displayLanguage', 'winRatio', 'chosenStyle', 'audioTrackList', 'currentAudioTrackId', 'isPrimarySubSettings',
-      'computedHeight', 'computedWidth', 'audioDelay', 'lastChosenSize', 'primarySubDelay', 'secondarySubDelay']),
+      'computedHeight', 'computedWidth', 'audioDelay', 'lastChosenSize', 'primaryDelay', 'secondaryDelay']),
     ChosenSizeContent() {
       const compareContent = ['S', 'M', 'L', 'XL'];
       const enContent = ['Small', 'Normal', 'Large', 'Extra Large'];

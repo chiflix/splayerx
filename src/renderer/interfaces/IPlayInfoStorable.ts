@@ -35,4 +35,10 @@ export interface IPlayInfoStorable {
    * 返回指定ID的播放列表记录
    */
   getPlaylistRecord(playlistId: number): Promise<PlaylistItem> 
+  /**
+   * @param  {number} mediaitemId 视频ID
+   * @returns {Promise<MediaItem>}
+   * 返回指定ID的视频记录
+   */
+  getMediaItem(mediaitemId: number): Promise<MediaItem>
 }
