@@ -198,19 +198,19 @@ const actions = {
         dispatch(a.stopAISelection);
       }
     } else if (!preference && needRefreshing) {
-      return dispatch(a.refreshSubtitles, { playlistId, mediaItemId });
+      return dispatch(a.refreshSubtitles, { playlistId, mediaItemId, noOnline: !getters.privacyAgreement });
     } else if (preference && needRefreshing) {
       return dispatch(a.addDatabaseSubtitles, {
         storedList: preference.list,
         selected: preference.selected,
         playlistId, mediaItemId,
       })
-      .then(() => dispatch(a.refreshSubtitles, { playlistId, mediaItemId }));
+      .then(() => dispatch(a.refreshSubtitles, { playlistId, mediaItemId, noOnline: !getters.privacyAgreement }));
     }
   },
   async [a.refreshSubtitles](
     { state, getters, dispatch, commit }: any,
-    args: { playlistId: number, mediaItemId: string },
+    args: { playlistId: number, mediaItemId: string, noOnline: boolean },
   ) {
     const { playlistId, mediaItemId } = args || state;
 
@@ -222,7 +222,7 @@ const actions = {
     const { originSrc, primaryLanguage, secondaryLanguage } = getters;
     let onlinePromise = new Promise((resolve) => resolve());
     /** do not serach online subtitles if extension is not one of mkv, ts, avi and mp4 */
-    let online = ['mkv', 'avi', 'ts', 'mp4'].includes(extname(originSrc).slice(1));
+    let online = args && args.noOnline ? false : ['mkv', 'avi', 'ts', 'mp4'].includes(extname(originSrc).slice(1));
     if (online && !getters.privacyAgreement) online = !!(await privacyConfirm());
     if (online) {
       addBubble(ONLINE_LOADING);
