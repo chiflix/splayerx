@@ -197,17 +197,17 @@
     "nextInPlaylist": "播放列表中下一視頻"
   },
   "welcome": {
-    "welcomeTitle": "",
-    "welcomeDescription": "",
-    "agreement": "",
-    "policy": "",
-    "languageTitle1": "",
-    "languageTitle2": "",
-    "primary": "",
-    "secondary": "",
-    "chooseSecondary": "",
-    "languageDescription": "",
-    "none": ""
+    "welcomeTitle": "歡迎使用射手影音",
+    "welcomeDescription": "強勁的視頻播放能力、先鋒的智能翻譯與全新輕量級的設計相結合，顛覆您的視頻觀賞體驗。",
+    "agreement": "繼續即表示同意 ",
+    "policy": "用戶隱私條款",
+    "languageTitle1": "設置常用字幕語言",
+    "languageTitle2": "以獲取智能翻譯結果",
+    "primary": "首要語言",
+    "secondary": "次要語言",
+    "chooseSecondary": "選擇次要語言",
+    "languageDescription": "* 稍後您可以在偏好設置裏更改",
+    "none": "無"
   },
   "preferences": {
     "general": {
