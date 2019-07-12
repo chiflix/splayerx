@@ -1,5 +1,5 @@
 import { TranscriptResponse } from 'sagi-api/translation/v1/translation_pb';
-import { Dialogue, Format, Cue } from '@/interfaces/ISubtitle';
+import { Format, Cue } from '@/interfaces/ISubtitle';
 import { BaseParser } from './base';
 import { tagsGetter } from '../utils';
 

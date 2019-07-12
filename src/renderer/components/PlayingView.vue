@@ -70,7 +70,10 @@ export default {
     originSrc: {
       immediate: true,
       // eslint-disable-next-line
-      handler: function (newVal: string) { if (newVal) this.initializeManager(); },
+      handler: function (newVal: string) {
+        this.resetManager();
+        if (newVal) this.initializeManager();
+      },
     },
     async primarySubtitleId() {
       this.currentCues = await this.getCues(videodata.time);
@@ -97,6 +100,7 @@ export default {
   methods: {
     ...mapActions({
       updateSubToTop: subtitleActions.UPDATE_SUBTITLE_TOP,
+      resetManager: smActions.resetManager,
       initializeManager: smActions.initializeManager,
       addLocalSubtitlesWithSelect: smActions.addLocalSubtitlesWithSelect,
       getCues: smActions.getCues,

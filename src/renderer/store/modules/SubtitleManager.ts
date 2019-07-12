@@ -100,6 +100,7 @@ const mutations = {
   [m.deleteSubtitleId](state: SubtitleManagerState, id: string) {
     Vue.set(state.allSubtitles, id, undefined);
   },
+  [m.deletaAllSubtitleIds](state: SubtitleManagerState) { state.allSubtitles = {}; },
   [m.setGlobalDelay](state: SubtitleManagerState, delay: number) {
     if (delay === 0) {
       state.globalDelay = delay;
@@ -171,10 +172,6 @@ function initializeManager({ getters, commit, dispatch }: any) {
   getters.list.forEach((s: SubtitleControlListItem) => dispatch(a.removeSubtitle, s.id));
   commit(m.setPlaylistId, playListId);
   commit(m.setMediaItemId, `${mediaHash}-${originSrc}`);
-  commit(m.setPrimarySubtitleId, '');
-  commit(m.setSecondarySubtitleId, '');
-  primarySelectionComplete = false;;
-  secondarySelectionComplete = false;
   commit(m.setGlobalDelay, 0);
   dispatch(a.refreshSubtitlesInitially);
 }
@@ -182,6 +179,16 @@ const debouncedInitializeManager = debounce(initializeManager, 1000);
 const actions = {
   async [a.initializeManager](context: any) {
     debouncedInitializeManager(context);
+  },
+  [a.resetManager]({ commit }: any) {
+    commit(m.setPlaylistId, 0);
+    commit(m.setMediaItemId, '');
+    commit(m.setPrimarySubtitleId, '');
+    commit(m.setSecondarySubtitleId, '');
+    commit(m.setIsRefreshing, false);
+    commit(m.deletaAllSubtitleIds);
+    primarySelectionComplete = false;;
+    secondarySelectionComplete = false;
   },
   async [a.refreshSubtitlesInitially]({ state, getters, dispatch, commit }: any) {
     primarySelectionComplete = false;
@@ -501,8 +508,12 @@ const actions = {
     }
     if (getters.primarySubtitleId) {
       try {
-        const dialogues = await dispatch(`${getters.primarySubtitleId}/${subActions.getDialogues}`, time);
+        const { metadata = {}, dialogues = [] } = await dispatch(`${getters.primarySubtitleId}/${subActions.getDialogues}`, time);
         firstSub.cues = dialogues;
+        if (metadata) {
+          if (metadata.PlayResX) firstSub.subPlayResX = parseInt(metadata.PlayResX, 10);
+          if (metadata.PlayResY) firstSub.subPlayResY = parseInt(metadata.PlayResY, 10);
+        }
       } catch (error) {
         log.error('SubtitleManager', error);
       }
@@ -510,8 +521,12 @@ const actions = {
 
     if (getters.enabledSecondarySub && getters.secondarySubtitleId) {
       try {
-        const dialogues = await dispatch(`${getters.secondarySubtitleId}/${subActions.getDialogues}`, time);
+        const { metadata = {}, dialogues = [] } = await dispatch(`${getters.secondarySubtitleId}/${subActions.getDialogues}`, time);
         secondSub.cues = dialogues;
+        if (metadata) {
+          if (metadata.PlayResX) firstSub.subPlayResX = parseInt(metadata.PlayResX, 10);
+          if (metadata.PlayResY) firstSub.subPlayResY = parseInt(metadata.PlayResY, 10);
+        }
       } catch (error) {
         log.error('SubtitleManager', error);
       }

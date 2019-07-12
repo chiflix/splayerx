@@ -146,6 +146,7 @@ const actions = {
         subtitle.parser = getParser(realFormat, entity.payload);
         try {
           await subtitle.parser.parse();
+          entity.metadata = await subtitle.parser.getMetadata();
           await dispatch(a.startWatchPlayedTime);
         } catch(err) {
           addBubble(NOT_SUPPORTED_SUBTITLE);
@@ -154,10 +155,16 @@ const actions = {
         }
       }
       if (entity.payload && parser.getDialogues && parser.payload) {
-        return subtitle.parser.getDialogues(time - state.delay);
+        return {
+          metadata: {},
+          dialogues: await subtitle.parser.getDialogues(time - rootGetters.globalDelay),
+        };
       }
     }
-    return [];
+    return {
+      metadata: {},
+      dialogues: [],
+    };
   },
   async [a.store]({ state }: any) {
     const subtitle = subtitleMap.get(state.moduleId);

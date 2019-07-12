@@ -119,6 +119,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import { mapGetters } from 'vuex';
+import { Route } from 'vue-router';
 import { playInfoStorageService } from '@/services/storage/PlayInfoStorageService';
 import { recentPlayService } from '@/services/media/RecentPlayService';
 import Icon from '@/components/BaseIconContainer.vue';
@@ -127,7 +128,6 @@ import PlaylistItem from '@/components/LandingView/PlaylistItem.vue';
 import VideoItem from '@/components/LandingView/VideoItem.vue';
 import { log } from '@/libs/Log';
 import Sagi from '@/libs/sagi';
-import { Route } from 'vue-router';
 import { deleteSubtitlesByPlaylistId } from '../services/storage/subtitle';
 
 Vue.component('PlaylistItem', PlaylistItem);
