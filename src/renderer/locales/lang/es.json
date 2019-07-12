@@ -105,7 +105,9 @@
     "help": {
       "name": "Ayuda",
       "splayerxHelp": "Ayuda",
-      "shortCuts": "Lista de accesos directos"
+      "shortCuts": "Lista de accesos directos",
+      "crashReportLocation": "Ver registro de errores",
+      "crashReportNotAvailable": "No hay registro de errores."
     },
     "playback": {
       "backwardL": "Paso atrás -60s",
@@ -140,10 +142,12 @@
     },
     "subtitle": {
       "AITranslation": "Recargar la traducción Smart",
-      "decreasePrimarySubtitleDelay": "retraso de subtítulos -0.1s",
+      "decreasePrimarySubtitleDelay": "Retraso de subtítulos -0.1s",
+      "increasePrimarySubtitleDelay": "Retraso de subtítulos +0.1s",
+      "decreaseSecondarySubtitleDelay": "Retraso de subtítulos secundarios -0.1s",
+      "increaseSecondarySubtitleDelay": "Retraso de subtítulos secundarios +0.1s",
       "disabledSecondarySub": "Desactivar Subtitulo Secundario",
       "enabledSecondarySub": "Habilitar subtítulos secundarios",
-      "increasePrimarySubtitleDelay": "retraso de subtítulos +0.1s",
       "langEn": "Inglés",
       "langZhCN": "Chino",
       "loadSubtitleFile": "Cargar archivo de subtítulos ...",
@@ -191,6 +195,19 @@
   "nextVideo": {
     "nextInFolder": "Siguiente en la carpeta",
     "nextInPlaylist": "Siguiente en Playlist"
+  },
+  "welcome": {
+    "welcomeTitle": "",
+    "welcomeDescription": "",
+    "agreement": "",
+    "policy": "",
+    "languageTitle1": "",
+    "languageTitle2": "",
+    "primary": "",
+    "secondary": "",
+    "chooseSecondary": "",
+    "languageDescription": "",
+    "none": ""
   },
   "preferences": {
     "general": {
