@@ -194,7 +194,7 @@ const actions = {
         format: state.format,
         playedTime: state.playedTime,
         totalTime: rootGetters.duration,
-        delay: state.delay,
+        delay: state.delay * 1000,
         hints: await generateHints(rootGetters.originSrc),
         transcriptIdentity: state.format === Format.Sagi ? state.hash : '',
         payload: state.format === Format.Sagi ? '' : Buffer.from(subtitle.entity.payload),
