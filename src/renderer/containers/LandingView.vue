@@ -83,10 +83,12 @@
           @click="openOrMove"
           class="button"
         >
-          <Icon
-            class="addUi"
-            type="add"
-          />
+          <div class="btnMask">
+            <Icon
+              class="addUi"
+              type="add"
+            />
+          </div>
         </div>
         <!-- eslint-disable-next-line vue/require-component-is -->
         <component
@@ -221,7 +223,7 @@ export default {
   },
   beforeRouteEnter({ name: to }: any, { name: from }: any, next: any) {
     next((vm: any) => {
-      vm.logoTransition = from === 'language-setting' ? 'scale' : 'welcome-container-transition';
+      vm.logoTransition = from === 'language-setting' ? 'scale' : '';
       vm.pageMounted = true;
     });
   },
@@ -288,6 +290,7 @@ export default {
   },
   methods: {
     globalMoveHandler() {
+      this.logoTransition = 'welcome-container-transition';
       this.canHover = true;
     },
     beforeUnloadHandler(e: BeforeUnloadEvent) {
@@ -404,15 +407,6 @@ $themeColor-Light: white;
       transition: all 300ms ease-in;
       transition-delay: 200ms;
       cursor: pointer;
-
-      border-radius: 2px;
-      width: 100%;
-      height: 100%;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      display: flex;
-      &:hover {
-        border: 1px solid rgba(255, 255, 255, 0.6);
-      }
     }
     .backdrop {
       backdrop-filter: blur(9.8px);
@@ -421,6 +415,19 @@ $themeColor-Light: white;
     .button:hover {
       background-color: rgba(123, 123, 123, 0.12);
       transition: background-color 300ms ease-in;
+    }
+
+    .btnMask {
+      border-radius: 2px;
+      width: 100%;
+      height: 100%;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      display: flex;
+      transition: border 50ms linear;
+
+      &:hover {
+        border: 1px solid rgba(255, 255, 255, 0.6);
+      }
     }
 
     .addUi {
@@ -547,7 +554,7 @@ main {
 .welcome-container-transition {
   &-enter-active, &-leave-active {
     transition: opacity .3s ease-in;
-    transition-delay: .2s;
+    transition-delay: 200ms;
   }
 
   &-enter, &-leave-to {
