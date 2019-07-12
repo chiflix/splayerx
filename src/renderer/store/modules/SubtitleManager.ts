@@ -32,7 +32,6 @@ type SubtitleManagerState = {
   secondarySubtitleId: string,
   isRefreshing: boolean,
   allSubtitles: { [id: string]: SubtitleControlListItem },
-  globalDelay: number,
   primaryDelay: number,
   secondaryDelay: number,
 }
@@ -43,7 +42,6 @@ const state = {
   secondarySubtitleId: '',
   isRefreshing: false,
   allSubtitles: {},
-  globalDelay: 0,
   primaryDelay: 0,
   secondaryDelay: 0,
 };
@@ -70,7 +68,6 @@ const getters = {
     }
     return enable;
   },
-  globalDelay(state: SubtitleManagerState) { return state.globalDelay; },
   primaryDelay({ primaryDelay }: SubtitleManagerState) { return primaryDelay; },
   secondaryDelay({ secondaryDelay }: SubtitleManagerState) { return secondaryDelay; },
 };
@@ -101,13 +98,6 @@ const mutations = {
     Vue.set(state.allSubtitles, id, undefined);
   },
   [m.deletaAllSubtitleIds](state: SubtitleManagerState) { state.allSubtitles = {}; },
-  [m.setGlobalDelay](state: SubtitleManagerState, delay: number) {
-    if (delay === 0) {
-      state.globalDelay = delay;
-    } else if (Math.abs((state.globalDelay / 1000) + delay) <= 10000) {
-      state.globalDelay += delay * 1000;
-    }
-  },
   [m.setPrimaryDelay](state: SubtitleManagerState, delayInSeconds: number) {
     state.primaryDelay = delayInSeconds;
     state.allSubtitles[state.primarySubtitleId].delay = delayInSeconds;
@@ -172,7 +162,6 @@ function initializeManager({ getters, commit, dispatch }: any) {
   getters.list.forEach((s: SubtitleControlListItem) => dispatch(a.removeSubtitle, s.id));
   commit(m.setPlaylistId, playListId);
   commit(m.setMediaItemId, `${mediaHash}-${originSrc}`);
-  commit(m.setGlobalDelay, 0);
   dispatch(a.refreshSubtitlesInitially);
 }
 const debouncedInitializeManager = debounce(initializeManager, 1000);
@@ -579,9 +568,6 @@ const actions = {
     } else {
       addBubble(UPLOAD_FAILED);
     }
-  },
-  [a.setGlobalDelay]({ commit }: any, delta: any) {
-    commit(m.setGlobalDelay, delta);
   },
   async [a.alterPrimaryDelay]({ state, dispatch, commit }: any, deltaInSeconds: number) {
     const { primarySubtitleId } = state;

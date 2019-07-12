@@ -93,7 +93,6 @@ export const SubtitleManager = {
   updatePlayedTime: 'UPDATE_PLAYED_TIME',
   manualUploadAllSubtitles: 'MANUAL_UPLOAD_ALL_SUBTITLES',
   clearSubtitles: 'CLEAR_SUBTITLES',
-  setGlobalDelay: 'UPDATE_SUBTITLE_DELAY',
   alterPrimaryDelay: 'ALTER_PRIMARY_DELAY',
   resetPrimaryDelay: 'RESET_PRIMARY_DELAY',
   alterSecondaryDelay: 'ALTER_SECONDARY_DELAY',
