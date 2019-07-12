@@ -425,7 +425,7 @@ const actions = {
   async [a.changeSecondarySubtitle]({ dispatch, commit, getters }: any, id: string) {
     let primary = getters.primarySubtitleId;
     let secondary = id;
-    if (id === primary) primary = '';
+    if (id && id === primary) primary = '';
     commit(m.setPrimarySubtitleId, primary);
     if (state.allSubtitles[primary]) commit(m.setPrimaryDelay, state.allSubtitles[primary].delay);
     commit(m.setSecondarySubtitleId, secondary);
