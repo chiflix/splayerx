@@ -484,8 +484,12 @@ const actions = {
     }
     if (getters.primarySubtitleId) {
       try {
-        const dialogues = await dispatch(`${getters.primarySubtitleId}/${subActions.getDialogues}`, time);
+        const { metadata = {}, dialogues = [] } = await dispatch(`${getters.primarySubtitleId}/${subActions.getDialogues}`, time);
         firstSub.cues = dialogues;
+        if (metadata) {
+          if (metadata.PlayResX) firstSub.subPlayResX = parseInt(metadata.PlayResX, 10);
+          if (metadata.PlayResY) firstSub.subPlayResY = parseInt(metadata.PlayResY, 10);
+        }
       } catch (error) {
         log.error('SubtitleManager', error);
       }
@@ -493,8 +497,12 @@ const actions = {
 
     if (getters.enabledSecondarySub && getters.secondarySubtitleId) {
       try {
-        const dialogues = await dispatch(`${getters.secondarySubtitleId}/${subActions.getDialogues}`, time);
+        const { metadata = {}, dialogues = [] } = await dispatch(`${getters.secondarySubtitleId}/${subActions.getDialogues}`, time);
         secondSub.cues = dialogues;
+        if (metadata) {
+          if (metadata.PlayResX) firstSub.subPlayResX = parseInt(metadata.PlayResX, 10);
+          if (metadata.PlayResY) firstSub.subPlayResY = parseInt(metadata.PlayResY, 10);
+        }
       } catch (error) {
         log.error('SubtitleManager', error);
       }
