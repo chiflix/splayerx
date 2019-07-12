@@ -11,7 +11,7 @@
       class="circle"
     >
       <div
-        :class="progress <= 50 ? 'pie__clip' : 'pie__auto'"
+        :class="progress <= 50 ? 'pie--clip' : 'pie--auto'"
         class="pie"
       >
         <div
@@ -98,10 +98,10 @@ export default Vue.extend({
       }
       .right {
       }
-      &__clip {
+      &--clip {
         clip: rect(0, 10px, 10px, 5px);
       }
-      &__auto {
+      &--auto {
         clip: auto;
       }
     }
@@ -119,7 +119,7 @@ export default Vue.extend({
           border: 2px solid #ffffff;
           clip: rect(0, 7px, 14px, 0);
         }
-        &__clip {
+        &--clip {
           clip: rect(0, 14px, 14px, 7px);
         }
       }
@@ -134,7 +134,7 @@ export default Vue.extend({
           border: 2px solid #ffffff;
           clip: rect(0, 10px, 20px, 0);
         }
-        &__clip {
+        &--clip {
           clip: rect(0, 20px, 20px, 10px);
         }
       }
