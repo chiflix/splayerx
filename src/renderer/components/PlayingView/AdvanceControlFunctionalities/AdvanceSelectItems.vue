@@ -188,7 +188,7 @@ export default {
       this.hoveredText = false;
     },
     handleResetDelay() {
-      this.isPrimarySub ? this.resetPrimarySubDelay() : this.resetPrimarySubDelay();
+      this.isPrimarySub ? this.resetPrimarySubDelay() : this.resetSecondarySubDelay();
     },
     handleDeMousedown() {
       if (this.selectedType === this.selectedTypeEnum.SUBTITLE) {
