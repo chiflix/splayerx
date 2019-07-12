@@ -127,6 +127,7 @@ import PlaylistItem from '@/components/LandingView/PlaylistItem.vue';
 import VideoItem from '@/components/LandingView/VideoItem.vue';
 import { log } from '@/libs/Log';
 import Sagi from '@/libs/sagi';
+import { Route } from 'vue-router';
 import { deleteSubtitlesByPlaylistId } from '../services/storage/SubtitleStorage';
 
 Vue.component('PlaylistItem', PlaylistItem);
@@ -221,7 +222,7 @@ export default {
       }
     },
   },
-  beforeRouteEnter({ name: to }: any, { name: from }: any, next: any) {
+  beforeRouteEnter(to: Route, { name: from }: Route, next: (vm: any) => void) {
     next((vm: any) => {
       vm.logoTransition = from === 'language-setting' ? 'scale' : '';
       vm.pageMounted = true;
@@ -552,9 +553,13 @@ main {
 }
 
 .welcome-container-transition {
-  &-enter-active, &-leave-active {
+  &-enter-active {
     transition: opacity .3s ease-in;
-    transition-delay: 200ms;
+    transition-delay: 50ms;
+  }
+  &-leave-active {
+    transition: opacity 300ms ease-in;
+    transition-delay: 100ms;
   }
 
   &-enter, &-leave-to {
