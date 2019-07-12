@@ -157,7 +157,7 @@ const actions = {
       if (entity.payload && parser.getDialogues && parser.payload) {
         return {
           metadata: {},
-          dialogues: await subtitle.parser.getDialogues(time - rootGetters.globalDelay),
+          dialogues: await subtitle.parser.getDialogues(time - state.delay),
         };
       }
     }
