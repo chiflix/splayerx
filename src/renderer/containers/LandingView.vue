@@ -83,12 +83,10 @@
           @click="openOrMove"
           class="button"
         >
-          <div class="btnMask">
-            <Icon
-              class="addUi"
-              type="add"
-            />
-          </div>
+          <Icon
+            class="addUi"
+            type="add"
+          />
         </div>
         <!-- eslint-disable-next-line vue/require-component-is -->
         <component
@@ -223,7 +221,7 @@ export default {
   },
   beforeRouteEnter({ name: to }: any, { name: from }: any, next: any) {
     next((vm: any) => {
-      vm.logoTransition = from === 'language-setting' ? 'scale' : '';
+      vm.logoTransition = from === 'language-setting' ? 'scale' : 'welcome-container-transition';
       vm.pageMounted = true;
     });
   },
@@ -406,6 +404,15 @@ $themeColor-Light: white;
       transition: background-color 300ms ease-in;
       transition-delay: 200ms;
       cursor: pointer;
+
+      border-radius: 2px;
+      width: 100%;
+      height: 100%;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      display: flex;
+      &:hover {
+        border: 1px solid rgba(255, 255, 255, 0.6);
+      }
     }
     .backdrop {
       backdrop-filter: blur(9.8px);
@@ -414,18 +421,6 @@ $themeColor-Light: white;
     .button:hover {
       background-color: rgba(123, 123, 123, 0.12);
       transition: background-color 300ms ease-in;
-    }
-
-    .btnMask {
-      border-radius: 2px;
-      width: 100%;
-      height: 100%;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      display: flex;
-    }
-
-    .btnMask:hover {
-      border: 1px solid rgba(255, 255, 255, 0.6);
     }
 
     .addUi {
@@ -573,10 +568,10 @@ main {
 
 .scale {
   &-enter-active {
-    transition: all 500ms ease-out 50ms;
+    transition: all 300ms ease-out;
   }
   &-enter {
-    transform: scale(0.8, 0.8);
+    transform: scale(0.9, 0.9);
     opacity: 0;
   }
 }

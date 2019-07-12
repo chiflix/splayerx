@@ -9,7 +9,7 @@
       :enable-full-screen-button="$route.name === 'landing-view' || $route.name === 'playing-view'"
     />
     <transition
-      :name="$route.name === 'landing-view' || $route.name === 'playing-view' ? '' : 'fade'"
+      :name="transitionMode"
       mode="out-in"
     >
       <router-view />
@@ -28,6 +28,17 @@ export default {
   name: 'Splayer',
   components: {
     Titlebar,
+  },
+  data() {
+    return {
+      transitionMode: '',
+    };
+  },
+  watch: {
+    $route(to: any, from: any) {
+      if (to.name === 'landing-view' && from.name === 'language-setting') this.transitionMode = 'fade';
+      else this.transitionMode = '';
+    },
   },
   mounted() {
     // to-do: specify commitType and commitPayload with vuex typescriptened
@@ -70,7 +81,7 @@ export default {
 
 .fade {
   &-enter-active {
-    transition: opacity 250ms ease-in;
+    transition: opacity 500ms ease-out;
   }
   &-leave-active {
     transition: opacity 250ms ease-in;
