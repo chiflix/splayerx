@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com 
  * @Date: 2019-07-05 16:03:32 
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-07-12 13:18:47
+ * @Last Modified time: 2019-07-12 15:32:57
  */
 import { AudioTranslate as m } from '@/store/mutationTypes';
 import { AudioTranslate as a, SubtitleManager as smActions } from '@/store/actionTypes';
@@ -54,6 +54,7 @@ type AudioTranslateState = {
   isBubbleVisible: boolean,
   bubbleMessage: string,
   bubbleType: string,
+  callbackAfterCancelBubble: Function,
 };
 
 const state = {
@@ -68,6 +69,7 @@ const state = {
   bubbleMessage: '',
   bubbleType: '',
   callbackAfterBubble: () => { },
+  callbackAfterCancelBubble: () => { },
 } as AudioTranslateState;
 
 const getters = {
@@ -136,6 +138,9 @@ const mutations = {
   [m.AUDIO_TRANSLATE_BUBBLE_CALLBACK](state: AudioTranslateState, callback: Function) {
     state.callbackAfterBubble = callback;
   },
+  [m.AUDIO_TRANSLATE_BUBBLE_CANCEL_CALLBACK](state: AudioTranslateState, callback: Function) {
+    state.callbackAfterCancelBubble = callback;
+  },
   [m.AUDIO_TRANSLATE_RECOVERY](state: AudioTranslateState) {
     state.translateProgress = 0;
     state.translateEstimateTime = 0;
@@ -182,9 +187,16 @@ const actions = {
         commit(m.AUDIO_TRANSLATE_UPDATE_STATUS, AudioTranslateStatus.Fail);
         if (!state.isModalVisiable) {
           commit(m.AUDIO_TRANSLATE_UPDATE_PROGRESS, 0);
-          dispatch(a.AUDIO_TRANSLATE_SHOW_BUBBLE, AudioTranslateBubbleOrigin.TranslateFail);
           // TODO 如果开启了第二字幕
           dispatch(smActions.changePrimarySubtitle, '');
+        }
+        // 如果当前有其他的bubble显示，就暂时不出失败的bubble
+        if (!state.isBubbleVisible) {
+          dispatch(a.AUDIO_TRANSLATE_SHOW_BUBBLE, AudioTranslateBubbleOrigin.TranslateFail);
+        } else {
+          commit(m.AUDIO_TRANSLATE_BUBBLE_CANCEL_CALLBACK, () => {
+            dispatch(a.AUDIO_TRANSLATE_SHOW_BUBBLE, AudioTranslateBubbleOrigin.TranslateFail);
+          });
         }
       });
       grab.on('task', (taskInfo: AITaskInfo) => {
@@ -256,13 +268,26 @@ const actions = {
             dispatch(smActions.changePrimarySubtitle, subtitle.id);
           }
         }
-        // 提示翻译成功
-        dispatch('addMessages', {
-          type: 'result',
-          title: '',
-          content: txt,
-          dismissAfter: 5000,
-        });
+        // 如果当前有其他气泡需要用户确认，就先不出成功的气泡
+        if (!state.isBubbleVisible) {
+          // 提示翻译成功
+          dispatch('addMessages', {
+            type: 'result',
+            title: '',
+            content: txt,
+            dismissAfter: 5000,
+          });
+        } else {
+          commit(m.AUDIO_TRANSLATE_BUBBLE_CANCEL_CALLBACK, () => {
+            // 提示翻译成功
+            dispatch('addMessages', {
+              type: 'result',
+              title: '',
+              content: txt,
+              dismissAfter: 5000,
+            });
+          });
+        }
       });
     }
   },
@@ -362,9 +387,13 @@ const actions = {
     }
     commit(m.AUDIO_TRANSLATE_SHOW_BUBBLE);
   },
-  [a.AUDIO_TRANSLATE_HIDE_BUBBLE]({ commit }: any) {
+  [a.AUDIO_TRANSLATE_HIDE_BUBBLE]({ commit, state }: any) {
     commit(m.AUDIO_TRANSLATE_HIDE_BUBBLE);
     commit(m.AUDIO_TRANSLATE_BUBBLE_CALLBACK, () => { });
+    if (state.callbackAfterCancelBubble) {
+      state.callbackAfterCancelBubble();
+    }
+    commit(m.AUDIO_TRANSLATE_BUBBLE_CANCEL_CALLBACK, () => { });
   },
   [a.AUDIO_TRANSLATE_BUBBLE_CALLBACK]({ commit }: any, callback: Function) {
     commit(m.AUDIO_TRANSLATE_BUBBLE_CALLBACK, callback)

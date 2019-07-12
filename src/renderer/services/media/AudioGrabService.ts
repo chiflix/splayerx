@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com 
  * @Date: 2019-06-20 18:03:14 
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-07-12 13:18:25
+ * @Last Modified time: 2019-07-12 14:59:09
  */
 
 // @ts-ignore
@@ -163,7 +163,7 @@ class AudioGrabService extends EventEmitter {
       this.request.clearStreamingConfig();
       this.request.clearAudioContent();
       this.request.setAudioContent(framebuf);
-      this.streamClient.write(this.request);
+      this.write();
       this.callback({
         status: Status.Grab,
         progressTime: this.grabTime,
@@ -174,7 +174,7 @@ class AudioGrabService extends EventEmitter {
     } else if (err === 'EOF' && this.request) {
       this.request.clearAudioContent();
       this.request.setAudioContent(framebuf);
-      this.streamClient.write(this.request);
+      this.write();
       this.streamClient.end();
       this.streamClient = null;
       this.request = null;
@@ -182,11 +182,20 @@ class AudioGrabService extends EventEmitter {
         this.callback();
       }
     } else if (this.request) {
+      // TODO 处理grabAudioFrame error ，有些视频直接不能，就返回error
       setTimeout(() => {
         this.grabAudio();
       }, 20);
     } else {
       return;
+    }
+  }
+
+  private write() {
+    try {
+      this.streamClient.write(this.request);
+    } catch (error) {
+      console.warn(error);
     }
   }
 
@@ -228,20 +237,8 @@ class AudioGrabService extends EventEmitter {
     requestConfig.setMediaIdentity(data.mediaHash);
     this.request.setStreamingConfig(requestConfig);
     this.streamClient.write(this.request);
-    // streamingTranslation 开启时，使用时间戳标记config发送
-    // 开启timeout, 如果在超时时间内收到data，就取消timeout
-    // 如果没有收到data，就放弃任务，发送超时错误
-    this.timeoutTimer = setTimeout(() => {
-      // 丢弃本次任务
-      this.stop();
-      // 发送error
-      if (this.callback) {
-        this.callback({
-          status: Status.Error,
-          error: new Error('time out'),
-        });
-      }
-    }, 1000 * 10);
+    // 开启超时处理
+    this.timeOut();
     // start grab data
     this.pts = '0';
     this.grabTime = 0;
@@ -279,6 +276,22 @@ class AudioGrabService extends EventEmitter {
       }
     });
     return stream;
+  }
+
+  private timeOut() {
+ // 开启timeout, 如果在超时时间内收到data，就取消timeout
+    // 如果没有收到data，就放弃任务，发送超时错误
+    this.timeoutTimer = setTimeout(() => {
+      // 丢弃本次任务
+      this.stop();
+      // 发送error
+      if (this.callback) {
+        this.callback({
+          status: Status.Error,
+          error: new Error('time out'),
+        });
+      }
+    }, 1000 * 10);
   }
 
   private rpcCallBack(res: StreamingTranslationResponse, err: Error) {
@@ -360,6 +373,8 @@ class AudioGrabService extends EventEmitter {
       const taskRequest = new StreamingTranslationTaskRequest();
       taskRequest.setTaskId(taskId);
       client.streamingTranslationTask(taskRequest, callback);
+      // 添加超时
+      this.timeOut();
     }, delay);
   }
 
@@ -368,6 +383,10 @@ class AudioGrabService extends EventEmitter {
       console.error(res.toObject(), err, 'loop', 'audio-log');
     } catch (err) {
       console.warn('error');
+    }
+    // 收到返回数据，清楚超时定时器
+    if (this.timeoutTimer) {
+      clearTimeout(this.timeoutTimer);
     }
     const result = res && res.toObject();
     if (result && res.hasTranscriptinfo()) {

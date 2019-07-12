@@ -6,106 +6,115 @@
     <div @mouseup.stop="">
       <div class="plane-background">
         <div class="plane">
-          <div class="content">
-            <p :class="infoCSS">
+          <div :class="`content ${showWhenGrab || showWhenStopTranslate ? 'two' : 'one'}`">
+            <p class="info">
               {{ message }}
             </p>
-            <div
-              v-if="showConfirmCloseButton"
-              :class="{
-                hover: hovered,
-              }"
-              @mouseover.stop="hovered = true"
-              @mouseout.stop="hovered = false"
-              @mouseup.stop="$emit('disCardTranslate');"
-              class="button"
-            >
-              <div class="button-info">
-                仍要关闭
+            <!-- 提取音频时，气泡 -->
+            <div v-if="showWhenGrab">
+              <div
+                :class="{
+                  hover: hovered,
+                }"
+                @mouseover.stop="hovered = true"
+                @mouseout.stop="hovered = false"
+                @mouseup.stop="$emit('disCardTranslate');"
+                class="button"
+              >
+                <div class="button-info">
+                  仍要关闭
+                </div>
+              </div>
+              <div
+                :class="{
+                  hover: seconButtonHovered,
+                }"
+                @mouseover.stop="seconButtonHovered = true"
+                @mouseout.stop="seconButtonHovered = false"
+                @mouseup.stop="$emit('hide');"
+                class="button"
+              >
+                <div class="button-info">
+                  取消
+                </div>
               </div>
             </div>
-            <div
-              v-if="showCancelButton"
-              :class="{
-                hover: seconButtonHovered,
-              }"
-              @mouseover.stop="seconButtonHovered = true"
-              @mouseout.stop="seconButtonHovered = false"
-              @mouseup.stop="$emit('hide');"
-              class="button"
-            >
-              <div class="button-info">
-                取消
+            <!-- 后台翻译，关闭窗口气泡 -->
+            <div v-else-if="showDiscardWhenTranlate">
+              <div
+                :class="{
+                  hover: hovered,
+                }"
+                @mouseover.stop="hovered = true"
+                @mouseout.stop="hovered = false"
+                @mouseup.stop="$emit('disCardTranslate');"
+                class="button"
+              >
+                <div class="button-info">
+                  好的
+                </div>
               </div>
             </div>
-            <div
-              v-if="showBackStageButton"
-              :class="{
-                hover: hovered,
-              }"
-              @mouseover.stop="hovered = true"
-              @mouseout.stop="hovered = false"
-              @mouseup.stop="$emit('backStageTranslate');"
-              class="button"
-            >
-              <div class="button-info">
-                好的
+            <!-- 后台翻译，切换视频的气泡 -->
+            <div v-else-if="showHideWhenTranslate">
+              <div
+                v-if="showBackStageButton"
+                :class="{
+                  hover: hovered,
+                }"
+                @mouseover.stop="hovered = true"
+                @mouseout.stop="hovered = false"
+                @mouseup.stop="$emit('backStageTranslate');"
+                class="button"
+              >
+                <div class="button-info">
+                  好的
+                </div>
               </div>
             </div>
-            <div
-              v-if="showDiscardButton"
-              :class="{
-                hover: hovered,
-              }"
-              @mouseover.stop="hovered = true"
-              @mouseout.stop="hovered = false"
-              @mouseup.stop="$emit('disCardTranslate');"
-              class="button"
-            >
-              <div class="button-info">
-                好的
+            <!-- 正在翻译，想使用其他翻译或者刷新字幕 -->
+            <div v-else-if="showWhenStopTranslate">
+              <div
+                :class="{
+                  hover: hovered,
+                }"
+                @mouseover.stop="hovered = true"
+                @mouseout.stop="hovered = false"
+                @mouseup.stop="$emit('disCardTranslate');"
+                class="button"
+              >
+                <div class="button-info">
+                  好的
+                </div>
+              </div>
+              <div
+                :class="{
+                  hover: seconButtonHovered,
+                }"
+                @mouseover.stop="seconButtonHovered = true"
+                @mouseout.stop="seconButtonHovered = false"
+                @mouseup.stop="$emit('disCardTranslate');"
+                class="button"
+              >
+                <div class="button-info">
+                  停止翻译
+                </div>
               </div>
             </div>
-            <div
-              v-if="showHideButton"
-              :class="{
-                hover: hovered,
-              }"
-              @mouseover.stop="hovered = true"
-              @mouseout.stop="hovered = false"
-              @mouseup.stop="$emit('hide');"
-              class="button"
-            >
-              <div class="button-info">
-                好的
-              </div>
-            </div>
-            <div
-              v-if="showOKButton"
-              :class="{
-                hover: hovered,
-              }"
-              @mouseover.stop="hovered = true"
-              @mouseout.stop="hovered = false"
-              @mouseup.stop="$emit('disCardTranslate');"
-              class="button"
-            >
-              <div class="button-info">
-                好的
-              </div>
-            </div>
-            <div
-              v-if="showStopTranslateButton"
-              :class="{
-                hover: seconButtonHovered,
-              }"
-              @mouseover.stop="seconButtonHovered = true"
-              @mouseout.stop="seconButtonHovered = false"
-              @mouseup.stop="$emit('disCardTranslate');"
-              class="button"
-            >
-              <div class="button-info">
-                停止翻译
+            <!-- 当翻译结束，失败的时候 -->
+            <div v-else-if="showWhenError">
+              <div
+                :class="{
+                  hover: hovered,
+                }"
+                @mouseover.stop="hovered = true"
+                @mouseout.stop="hovered = false"
+                @mouseup.stop="$emit('hide');"
+                class="button"
+              >
+                <div class="button-info">
+                  好的
+                </div>
               </div>
             </div>
           </div>
@@ -137,42 +146,22 @@ export default Vue.extend({
     };
   },
   computed: {
-    showConfirmCloseButton() {
+    showWhenGrab() {
       // 当前正在提取音频,确认删除
       return this.type === AudioTranslateBubbleType.ChangeWhenGrab
       || this.type === AudioTranslateBubbleType.CloseWhenGrab;
     },
-    showCancelButton() {
-      // 当前正在提取音频，取消
-      return this.type === AudioTranslateBubbleType.ChangeWhenGrab
-      || this.type === AudioTranslateBubbleType.CloseWhenGrab;
-    },
-    showDiscardButton() {
+    showDiscardWhenTranlate() {
       return this.type === AudioTranslateBubbleType.CloseWhenTranslate;
     },
-    showBackStageButton() {
+    showHideWhenTranslate() {
       return this.type === AudioTranslateBubbleType.ChangeWhenTranslate;
     },
-    showHideButton() {
+    showWhenStopTranslate() {
       return this.type === AudioTranslateBubbleType.ClickWhenTranslate;
     },
-    showOKButton() {
+    showWhenError() {
       return this.type === AudioTranslateBubbleType.FailAfterTranslate;
-    },
-    showStopTranslateButton() {
-      return this.type === AudioTranslateBubbleType.ClickWhenTranslate;
-    },
-    infoCSS() {
-      if (this.$i18n.locale === 'en') {
-        if (this.state === 1) {
-          return 'info-en-state-1';
-        }
-        return 'info-en-state-2';
-      }
-      if (this.state === 1) {
-        return 'info-state-1';
-      }
-      return 'info-state-2';
     },
   },
 });
@@ -262,7 +251,7 @@ export default Vue.extend({
         cursor: pointer;
       }
     }
-    .info-state-1 {
+    .info {
       color: rgba(255,255,255,0.7);
       height: fit-content;
       font-weight: 500;
@@ -300,123 +289,6 @@ export default Vue.extend({
 
         font-size: 17px;
         letter-spacing: 0.34px;
-        line-height: 25.2px;
-      }
-    }
-    .info-state-2 {
-      color: rgba(255,255,255,0.7);
-      height: fit-content;
-      font-weight: 500;
-      @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
-      screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
-        margin-left: 18px;
-        margin-right: 14px;
-        margin-top: 14px;
-        margin-bottom: 14px;
-        width: 161px;
-
-        font-size: 11px;
-        letter-spacing: 0.2px;
-        line-height: 15px;
-      }
-      @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
-      screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
-        margin-left: 19px;
-        margin-right: 16px;
-        margin-top: 14px;
-        margin-bottom: 14px;
-        width: 174px;
-
-        font-size: 12px;
-        letter-spacing: 0.24px;
-        line-height: 18px;
-      }
-      @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
-      screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
-        margin-left: 26px;
-        margin-right: 20px;
-        margin-top: 20px;
-        margin-bottom: 20px;
-        width: 245px;
-
-        font-size: 17px;
-        letter-spacing: 0.34px;
-        line-height: 25.2px;
-      }
-    }
-    .info-en-state-1 {
-      color: rgba(255,255,255,0.7);
-      height: min-content;
-      font-weight: 500;
-      @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
-      screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
-        margin-left: 18px;
-        margin-right: 14px;
-        margin-top: 10px;
-        margin-bottom: 12px;
-        width: 206px;
-
-        font-size: 11px;
-        line-height: 15px;
-      }
-      @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
-      screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
-        margin-left: 19px;
-        margin-right: 16px;
-        margin-top: 12px;
-        margin-bottom: 14px;
-        width: 247px;
-
-        font-size: 13.2px;
-        line-height: 18px;
-      }
-      @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
-      screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
-        margin-left: 26px;
-        margin-right: 20px;
-        margin-top: 20px;
-        margin-bottom: 20px;
-        width: 345px;
-
-        font-size: 18.48px;
-        line-height: 25.2px;
-      }
-    }
-    .info-en-state-2 {
-      color: rgba(255,255,255,0.7);
-      height: min-content;
-      font-weight: 500;
-      @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
-      screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
-        margin-left: 18px;
-        margin-right: 14px;
-        margin-top: 12px;
-        margin-bottom: 12px;
-        width: 153px;
-
-        font-size: 11px;
-        line-height: 15px;
-      }
-      @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
-      screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
-        margin-left: 19px;
-        margin-right: 16px;
-        margin-top: 13px;
-        margin-bottom: 14px;
-        width: 184px;
-
-        font-size: 13.2px;
-        line-height: 18px;
-      }
-      @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
-      screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
-        margin-left: 26px;
-        margin-right: 20px;
-        margin-top: 20px;
-        margin-bottom: 20px;
-        width: 257px;
-
-        font-size: 18.48px;
         line-height: 25.2px;
       }
     }

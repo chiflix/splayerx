@@ -21,7 +21,7 @@
         翻译失败
       </h1>
       <h1 v-else-if="isProgress">
-        大约还需{{ translateEstimateTime }} 秒
+        大约还需 {{ estimateTimeText }}
       </h1>
       <p v-if="!isProgress && !isConfirmCancelTranlate">
         目前尚无此语言的智能翻译结果，请准确选择您在视频中所听到的语言，翻译将持续一段时间。
@@ -175,6 +175,15 @@ export default Vue.extend({
     },
     isTranslateSuccess() {
       return this.translateStatus === AudioTranslateStatus.Success;
+    },
+    estimateTimeText() {
+      const time = this.translateEstimateTime;
+      if (time >= 60 * 60) {
+        return `${Math.ceil(time / (60 * 60))} 小时`;
+      } if (time >= 60) {
+        return `${Math.ceil(time / 60)} 分钟`;
+      }
+      return `${time} 秒`;
     },
   },
   watch: {

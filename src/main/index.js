@@ -531,7 +531,9 @@ function registerMainWindowEvent(mainWindow) {
   // handle audio grab on main process
   ipcMain.on('grab-audio', (events, args) => {
     audioGrabService.push(args, (grabInfoS) => {
-      mainWindow.webContents.send('grab-audio-change', { ...args, grabInfo: grabInfoS });
+      if (mainWindow && !mainWindow.webContents.isDestroyed()) {
+        mainWindow.webContents.send('grab-audio-change', { ...args, grabInfo: grabInfoS });
+      }
     });
   });
   ipcMain.on('grab-audio-stop', () => {
