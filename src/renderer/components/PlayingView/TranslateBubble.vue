@@ -4,95 +4,120 @@
     mode=""
   >
     <div @mouseup.stop="">
-      <div class="bubblePlane">
-        <p
-          class="info"
-        >
-          {{ message }}
-        </p>
-        <div
-          v-if="showConfirmCloseButton"
-          :class="{
-            hover: hovered,
-          }"
-          @mouseover.stop="hovered = true"
-          @mouseout.stop="hovered = false"
-          @mouseup.stop="$emit('disCardTranslate');"
-          class="button"
-        >
-          <div class="button-info">仍要关闭</div>
-        </div>
-        <div
-          v-if="showCancelButton"
-          :class="{
-            hover: seconButtonHovered,
-          }"
-          @mouseover.stop="seconButtonHovered = true"
-          @mouseout.stop="seconButtonHovered = false"
-          @mouseup.stop="$emit('hide');"
-          class="button"
-        >
-          <div class="button-info">取消</div>
-        </div>
-        <div
-          v-if="showBackStageButton"
-          :class="{
-            hover: hovered,
-          }"
-          @mouseover.stop="hovered = true"
-          @mouseout.stop="hovered = false"
-          @mouseup.stop="$emit('backStageTranslate');"
-          class="button"
-        >
-          <div class="button-info">好的</div>
-        </div>
-        <div
-          v-if="showDiscardButton"
-          :class="{
-            hover: hovered,
-          }"
-          @mouseover.stop="hovered = true"
-          @mouseout.stop="hovered = false"
-          @mouseup.stop="$emit('disCardTranslate');"
-          class="button"
-        >
-          <div class="button-info">好的</div>
-        </div>
-        <div
-          v-if="showHideButton"
-          :class="{
-            hover: hovered,
-          }"
-          @mouseover.stop="hovered = true"
-          @mouseout.stop="hovered = false"
-          @mouseup.stop="$emit('hide');"
-          class="button"
-        >
-          <div class="button-info">好的</div>
-        </div>
-        <div
-          v-if="showOKButton"
-          :class="{
-            hover: hovered,
-          }"
-          @mouseover.stop="hovered = true"
-          @mouseout.stop="hovered = false"
-          @mouseup.stop="$emit('disCardTranslate');"
-          class="button"
-        >
-          <div class="button-info">好的</div>
-        </div>
-        <div
-          v-if="showStopTranslateButton"
-          :class="{
-            hover: seconButtonHovered,
-          }"
-          @mouseover.stop="seconButtonHovered = true"
-          @mouseout.stop="seconButtonHovered = false"
-          @mouseup.stop="$emit('disCardTranslate');"
-          class="button"
-        >
-          <div class="button-info">停止翻译</div>
+      <div class="plane-background">
+        <div class="plane">
+          <div :class="`content ${showWhenGrab || showWhenStopTranslate ? 'two' : 'one'}`">
+            <p class="info">
+              {{ message }}
+            </p>
+            <!-- 提取音频时，气泡 -->
+            <div v-if="showWhenGrab">
+              <div
+                :class="{
+                  hover: hovered,
+                }"
+                @mouseover.stop="hovered = true"
+                @mouseout.stop="hovered = false"
+                @mouseup.stop="$emit('disCardTranslate');"
+                class="button"
+              >
+                <div class="button-info">
+                  仍要关闭
+                </div>
+              </div>
+              <div
+                :class="{
+                  hover: seconButtonHovered,
+                }"
+                @mouseover.stop="seconButtonHovered = true"
+                @mouseout.stop="seconButtonHovered = false"
+                @mouseup.stop="$emit('hide');"
+                class="button"
+              >
+                <div class="button-info">
+                  取消
+                </div>
+              </div>
+            </div>
+            <!-- 后台翻译，关闭窗口气泡 -->
+            <div v-else-if="showDiscardWhenTranlate">
+              <div
+                :class="{
+                  hover: hovered,
+                }"
+                @mouseover.stop="hovered = true"
+                @mouseout.stop="hovered = false"
+                @mouseup.stop="$emit('disCardTranslate');"
+                class="button"
+              >
+                <div class="button-info">
+                  好的
+                </div>
+              </div>
+            </div>
+            <!-- 后台翻译，切换视频的气泡 -->
+            <div v-else-if="showHideWhenTranslate">
+              <div
+                v-if="showBackStageButton"
+                :class="{
+                  hover: hovered,
+                }"
+                @mouseover.stop="hovered = true"
+                @mouseout.stop="hovered = false"
+                @mouseup.stop="$emit('backStageTranslate');"
+                class="button"
+              >
+                <div class="button-info">
+                  好的
+                </div>
+              </div>
+            </div>
+            <!-- 正在翻译，想使用其他翻译或者刷新字幕 -->
+            <div v-else-if="showWhenStopTranslate">
+              <div
+                :class="{
+                  hover: hovered,
+                }"
+                @mouseover.stop="hovered = true"
+                @mouseout.stop="hovered = false"
+                @mouseup.stop="$emit('disCardTranslate');"
+                class="button"
+              >
+                <div class="button-info">
+                  好的
+                </div>
+              </div>
+              <div
+                :class="{
+                  hover: seconButtonHovered,
+                }"
+                @mouseover.stop="seconButtonHovered = true"
+                @mouseout.stop="seconButtonHovered = false"
+                @mouseup.stop="$emit('disCardTranslate');"
+                class="button"
+              >
+                <div class="button-info">
+                  停止翻译
+                </div>
+              </div>
+            </div>
+            <!-- 当翻译结束，失败的时候 -->
+            <div v-else-if="showWhenError">
+              <div
+                :class="{
+                  hover: hovered,
+                }"
+                @mouseover.stop="hovered = true"
+                @mouseout.stop="hovered = false"
+                @mouseup.stop="$emit('hide');"
+                class="button"
+              >
+                <div class="button-info">
+                  好的
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -122,30 +147,22 @@ export default Vue.extend({
     };
   },
   computed: {
-    showConfirmCloseButton() {
+    showWhenGrab() {
       // 当前正在提取音频,确认删除
       return this.type === AudioTranslateBubbleType.ChangeWhenGrab
       || this.type === AudioTranslateBubbleType.CloseWhenGrab;
     },
-    showCancelButton() {
-      // 当前正在提取音频，取消
-      return this.type === AudioTranslateBubbleType.ChangeWhenGrab
-      || this.type === AudioTranslateBubbleType.CloseWhenGrab;
-    },
-    showDiscardButton() {
+    showDiscardWhenTranlate() {
       return this.type === AudioTranslateBubbleType.CloseWhenTranslate;
     },
-    showBackStageButton() {
+    showHideWhenTranslate() {
       return this.type === AudioTranslateBubbleType.ChangeWhenTranslate;
     },
-    showHideButton() {
+    showWhenStopTranslate() {
       return this.type === AudioTranslateBubbleType.ClickWhenTranslate;
     },
-    showOKButton() {
+    showWhenError() {
       return this.type === AudioTranslateBubbleType.FailAfterTranslate;
-    },
-    showStopTranslateButton() {
-      return this.type === AudioTranslateBubbleType.ClickWhenTranslate;
     },
   },
 });
