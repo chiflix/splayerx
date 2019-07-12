@@ -178,6 +178,8 @@ export default {
     ...mapActions({
       changePrimarySubDelay: SubtitleManager.alterPrimaryDelay,
       changeSecondarySubDelay: SubtitleManager.alterSecondaryDelay,
+      resetPrimarySubDelay: SubtitleManager.resetPrimaryDelay,
+      resetSecondarySubDelay: SubtitleManager.resetSecondaryDelay,
     }),
     handleSubMouseEnter() {
       this.hoveredText = true;
@@ -186,7 +188,7 @@ export default {
       this.hoveredText = false;
     },
     handleResetDelay() {
-      this.handleSelectClick(0);
+      this.isPrimarySub ? this.resetPrimarySubDelay() : this.resetPrimarySubDelay();
     },
     handleDeMousedown() {
       if (this.selectedType === this.selectedTypeEnum.SUBTITLE) {
