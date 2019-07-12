@@ -8,9 +8,19 @@
       v-fade-in="isTranslateModalVisiable"
       class="select-language-modal"
     >
-      <h1 v-if="!isProgress && !isConfirmCancelTranlate">
-        选择视频源语言
-      </h1>
+      <div
+        v-if="!isProgress && !isConfirmCancelTranlate"
+        class="select-title"
+      >
+        <h1>
+          选择视频源语言
+        </h1>
+        <div
+          class="beta-mark"
+        >
+          <p>Beta</p>
+        </div>
+      </div>
       <h1 v-else-if="isConfirmCancelTranlate">
         翻译已取消
       </h1>
@@ -248,6 +258,23 @@ export default Vue.extend({
   border-radius: 7px;
   box-shadow: 0 0 1px 0 rgba(0,0,0,0.10);
   zoom: 1;
+  .select-title {
+    display: flex;
+    .beta-mark {
+      width: 20px;
+      height: 11px;
+      background: rgba(103, 103, 103, 0.8);
+      display: flex;
+      border-radius: 4px;
+      margin-left: 2px;
+      p {
+        font-size: 6.5px;
+        line-height: 6.5px;
+        color: rgba(255, 255, 255, 0.6);
+        margin: auto;
+      }
+    }
+  }
 
   @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px),
   screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
