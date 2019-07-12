@@ -196,6 +196,19 @@
     "nextInFolder": "ホルダー中の次のビデオ",
     "nextInPlaylist": "プレイリスト中の次のビデオ"
   },
+  "welcome": {
+    "welcomeTitle": "",
+    "welcomeDescription": "",
+    "agreement": "",
+    "policy": "",
+    "languageTitle1": "",
+    "languageTitle2": "",
+    "primary": "",
+    "secondary": "",
+    "chooseSecondary": "",
+    "languageDescription": "",
+    "none": ""
+  },
   "preferences": {
     "general": {
       "hideHistory": "再生履歴を隠す",
