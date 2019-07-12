@@ -574,10 +574,22 @@ const actions = {
     commit(m.setPrimaryDelay, delay);
     setDelayTimeout();
   },
+  async [a.resetPrimaryDelay]({ state, dispatch, commit }: any) {
+    const { primarySubtitleId } = state;
+    await dispatch(`${primarySubtitleId}/${subActions.resetDelay}`);
+    commit(m.setPrimaryDelay, 0);
+    setDelayTimeout();
+  },
   async [a.alterSecondaryDelay]({ state, dispatch, commit }: any, deltaInSeconds: number) {
     const { secondarySubtitleId } = state;
     const delay = await dispatch(`${secondarySubtitleId}/${subActions.alterDelay}`, deltaInSeconds);
     commit(m.setSecondaryDelay, delay);
+    setDelayTimeout();
+  },
+  async [a.resetSecondaryDelay]({ state, dispatch, commit }: any) {
+    const { secondarySubtitleId } = state;
+    await dispatch(`${secondarySubtitleId}/${subActions.resetDelay}`);
+    commit(m.setSecondaryDelay, 0);
     setDelayTimeout();
   },
   async [a.storeSubtitleDelays]({ getters, state }: any) {

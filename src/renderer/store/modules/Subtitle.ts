@@ -257,6 +257,9 @@ const actions = {
     }
     return state.delay;
   },
+  [a.resetDelay]({ commit }: any) {
+    commit(m.setDelay, 0);
+  },
 };
 
 export default {
