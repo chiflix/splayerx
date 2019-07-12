@@ -107,8 +107,8 @@ export class SubtitleDataBase {
     const objectStore = await (await this.getDb())
       .transaction('subtitles', 'readwrite')
       .objectStore('subtitles');
-    // merge subtitles of hash and source info hash and sources
-    const newSubtitles = subtitles.reduce(
+    /** subtitles to delete */
+    const hashSourcesMap = subtitles.reduce(
       (subs, { hash, source }) => {
         const existedSub = subs[hash];
         if (existedSub) existedSub.push(source);
@@ -118,17 +118,20 @@ export class SubtitleDataBase {
       {} as { [hash: string]: any[] },
     );
     let cursor = await objectStore.openCursor();
-    while (cursor && Object.keys(newSubtitles).length) {
-      const { hash, source } = cursor.value;
-      const currentSub = newSubtitles[hash];
-      if (currentSub) {
-        remove(source, origin => currentSub.some(sub => isEqual(sub, origin.source)));
-        if (!source.length) await objectStore.delete(hash);
+    const deletedSubtitleHashes: string[] = [];
+    while (cursor && Object.keys(hashSourcesMap).length) {
+      const { hash, source: storedSources } = cursor.value;
+      const sourcesToDelete = hashSourcesMap[hash];
+      if (sourcesToDelete) {
+        remove(storedSources, ({ source }) => sourcesToDelete.some(sub => isEqual(sub, source)));
+        if (!storedSources.length) await objectStore.delete(hash);
         else await objectStore.put(cursor.value);
-        delete newSubtitles[hash];
+        delete hashSourcesMap[hash];
+        deletedSubtitleHashes.push(hash);
       }
       cursor = await cursor.continue();
     }
+    return deletedSubtitleHashes;
   }
   async updateSubtitle(subtitle: UpdateSubtitleOptions) {
     const objectStore = await (await this.getDb())
@@ -352,7 +355,7 @@ export class SubtitleDataBase {
       }
       cursor = await cursor.continue();
     }
-    await this.removeSubtitles(subtitlesToRemove);
+    return this.removeSubtitles(subtitlesToRemove);
   }
 }
 

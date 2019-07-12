@@ -10,7 +10,7 @@ import upload from '@/services/subtitle/upload';
 import { addBubble } from '../../helpers/notificationControl';
 import { NOT_SUPPORTED_SUBTITLE } from '../../helpers/notificationcodes';
 import store from '..';
-import { isCachedSubtitle } from '@/services/storage/subtitle/file';
+import { isCachedSubtitle, removeCachedSubtitle } from '@/services/storage/subtitle/file';
 
 type SubtitleState = {
   moduleId: string;
@@ -182,6 +182,10 @@ const actions = {
     if (subtitle) {
       subtitleMap.delete(state.moduleId);
       await removeSubtitle(subtitle.entity);
+      if (subtitle.cached) {
+        const cachedSource = await removeCachedSubtitle(subtitle.entity.hash);
+        if (cachedSource) await removeSubtitle({ ...subtitle.entity, source: cachedSource });
+      }
     }
     removeSubtitleItemsFromList([subtitleToRemoveFromList], playlistId, mediaItemId);
   },

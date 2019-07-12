@@ -1,7 +1,7 @@
 import { Entity, Origin, Type } from '@/interfaces/ISubtitle';
-import { join, extname, dirname } from 'path';
+import { join, extname, dirname, basename } from 'path';
 import { remote } from 'electron';
-import { copyFile, existsSync, outputFile, ensureDirSync } from 'fs-extra';
+import { copyFile, existsSync, outputFile, ensureDirSync, remove, readdir } from 'fs-extra';
 import { embeddedSrcLoader, EmbeddedOrigin } from '@/services/subtitle';
 import { sagiSubtitleToWebVTT } from '@/services/subtitle/utils/transcoders';
 import { updateSubtitle } from '.';
@@ -47,6 +47,35 @@ export async function cacheOnlineSubtitle(subtitle: Entity): Promise<Origin | un
     };
   }
 }
+
+export async function removeCachedSubtitle(hash: string) {
+  const cachedSubtitlePath = (await readdir(subtitleCachePath))
+    .find(path => basename(path).startsWith(hash));
+  if (cachedSubtitlePath && existsSync(cachedSubtitlePath)) {
+    await remove(cachedSubtitlePath);
+    return {
+      type: Type.Local,
+      source: cachedSubtitlePath,
+    };
+  }
+}
+
+export async function removeCachedSubtitles(hashes: string[]): Promise<{ hash: string, source: Origin }[]> {
+  const cachedSubtitlePaths = (await readdir(subtitleCachePath))
+    .filter(path => hashes.includes(basename(path, extname(path))))
+    .map(basepath => join(subtitleCachePath, basepath));
+  return Promise.all(cachedSubtitlePaths.map(async path => {
+    await remove(path);
+    return {
+      hash: basename(path, extname(path)),
+      source: {
+        type: Type.Local,
+        source: path,
+      },
+    };
+  }));
+}
+
 /** update subtitle database with new origin */
 export function addNewSourceToDb(subtitle: Entity, newSource: Origin) {
   subtitle.source = newSource;
