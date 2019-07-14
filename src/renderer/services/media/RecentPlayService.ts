@@ -10,11 +10,15 @@ export default class RecentPlayService implements IRecentPlay {
   }
   async getRecords(): Promise<LandingViewDisplayInfo[]> {
     const recentPlayedResults = await playInfoStorageService.getAllRecentPlayed();
-    const coverVideos = await Promise.all(
+    const coverVideos = (await Promise.all(
       recentPlayedResults.map(async (value) => {
-        const { items, playedIndex, id } = value;  
+        const { items, playedIndex, id } = value;
+        if (playedIndex > items.length) console.error('PlayedIndex incorrectly bigger than items.length');
+        if (!items[playedIndex]) console.error('Cover video non-existed');
         const coverVideoId = items[playedIndex] as number;
+        if (!coverVideoId) return null;
         const mediaItem = await info.getValueByKey('media-item', coverVideoId);
+        if (!mediaItem) return null; // TODO: figure out why it wasn't saved to media-item
 
         return {
           ...mediaItem,
@@ -22,7 +26,8 @@ export default class RecentPlayService implements IRecentPlay {
           playedIndex,
           playlistLength: items.length,
         };
-      }));
+      })
+    )).filter((item) => !!item);
     const getBasename = (path: string) => basename(path, extname(path));
     const results: LandingViewDisplayInfo[] = await Promise.all(
       coverVideos.map(async (item: any): Promise<LandingViewDisplayInfo> => {
@@ -31,11 +36,16 @@ export default class RecentPlayService implements IRecentPlay {
         let backgroundUrl;
 
         if (duration - lastPlayedTime < 5) {
-          const mediaHash = await mediaQuickHash(path);
-          const coverSrc = await mediaStorageService.getImageBy(mediaHash, 'cover');
-          backgroundUrl = `url("${filePathToUrl(coverSrc as string)}")`;
+          try {
+            const mediaHash = await mediaQuickHash(path);
+            const coverSrc = await mediaStorageService.getImageBy(mediaHash, 'cover');
+            if (!coverSrc) throw new Error('Cannot get coverSrc');
+            backgroundUrl = `url("${filePathToUrl(coverSrc as string)}")`;
+          } catch (ex) {
+            backgroundUrl = `url("${shortCut}")`;
+          }
         } else {
-          backgroundUrl = `url("${shortCut}")`
+          backgroundUrl = `url("${shortCut}")`;
         }
 
         const basename = getBasename(item.path);

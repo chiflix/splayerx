@@ -122,8 +122,16 @@ const allActions = {
   },
   [at.UPDATE_WHEEL_DIRECTION]: ({ commit, getters }, { deltaX, deltaY }) => {
     const { wheelDirection: d } = getters;
-    if (deltaX && (d === no || d === horizontal)) commit(mt.WHEEL_DIRECTION, horizontal);
-    else if (deltaY && (d === no || d === vertical)) commit(mt.WHEEL_DIRECTION, vertical);
+    // angle less than 45 degrees will result to horizontal
+    const direction = Math.abs(deltaX) > Math.abs(deltaY) ? horizontal : vertical;
+    if (
+      direction === horizontal
+      && (d === no || d === horizontal)
+    ) commit(mt.WHEEL_DIRECTION, horizontal);
+    else if (
+      direction === vertical
+      && (d === no || d === vertical)
+    ) commit(mt.WHEEL_DIRECTION, vertical);
   },
   [at.UPDATE_WHEEL_COMPONENT]: ({ commit }, { target }) => {
     const { name } = getComponentName(target);

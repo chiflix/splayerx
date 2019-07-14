@@ -12,7 +12,7 @@
   >
     <div
       :style="{
-        backgroundImage: !isChosen && hoveredText ?
+        backgroundImage: !isChosen && hoveredText && isPrimarySub ?
           'linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.045) 20%, ' +
           'rgba(255,255,255,0.00) 78%, rgba(255,255,255,0.00) 100%)' : '',
         transition: 'opacity 200ms',
@@ -21,16 +21,17 @@
     >
       <div
         :style="{
-          color: !isChosen && hoveredText ?
+          color: !isPrimarySub ? 'rgba(255, 255, 255, 0.2)' : !isChosen && hoveredText ?
             'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
           transition: 'color 300ms',
-          cursor: isChosen ? 'default' : 'pointer',
+          cursor: isChosen || !isPrimarySub ? 'default' : 'pointer',
         }"
         class="textContainer"
       >
         <p>{{ $t('advance.fontStyle') }}</p>
         <div
           v-show="!isChosen"
+          :style="{ opacity: isPrimarySub ? '1' : '0.3333' }"
           class="rightItem"
         >
           <img :src="chosenStyle">
@@ -90,6 +91,10 @@ export default {
     storedStyle: {
       type: Number,
       required: true,
+    },
+    isPrimarySub: {
+      type: Boolean,
+      default: true,
     },
   },
   data() {
@@ -263,7 +268,6 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   display: flex;
   border-radius: 7px;
   z-index: 10;
-  clip-path: inset(0 round 8px);
   transition: height 100ms linear, background-color 100ms linear;
   .detail {
     width: 100%;

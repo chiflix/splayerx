@@ -38,9 +38,36 @@ const getters = {
     }
     return '';
   },
+  previousVideo: (state, getters) => {
+    const list = state.playList;
+    const index = list.findIndex(value => value === getters.originSrc);
+    if (!getters.singleCycle) {
+      if (index - 1 >= 0 && index - 1 < list.length) {
+        return list[index - 1];
+      }
+      return list[list.length - 1];
+    }
+    return '';
+  },
+  previousVideoId: (state, getters) => {
+    const index = state.items.findIndex(value => value === getters.videoId);
+    if (!getters.singleCycle) {
+      if (index - 1 >= 0 && index - 1 < state.items.length) {
+        return state.items[index - 1];
+      }
+      return state.items[state.items.length - 1];
+    }
+    return NaN;
+  },
 };
 
 const mutations = {
+  Init(state) {
+    state.id = NaN;
+    state.items = [];
+    state.playList = [];
+    state.isFolderList = undefined;
+  },
   source(state, type) {
     state.source = type;
   },
@@ -72,14 +99,16 @@ const mutations = {
     }
   },
   InsertItemToPlayingList(state, item) {
-    if (item.newPosition >= 0) {
-      state.playList.splice(item.newPosition, 0, item.src);
-      state.items.splice(item.newPosition, 0, item.id);
-    }
+    if (item.newPosition < 0) item.newPosition = 0;
+    state.playList.splice(item.newPosition, 0, item.src);
+    state.items.splice(item.newPosition, 0, item.id);
   },
 };
 
 const actions = {
+  Init({ commit }) {
+    commit('Init');
+  },
   PlayingList({ commit }, payload) {
     commit('isPlayingList');
     if (payload.paths) commit('playList', payload.paths);

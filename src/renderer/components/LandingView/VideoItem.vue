@@ -54,6 +54,7 @@ export default {
   props: {
     backgroundUrl: {
       type: String,
+      default: '',
     },
     shifting: {
       type: Boolean,
@@ -72,6 +73,10 @@ export default {
     thumbnailWidth: {
       type: Number,
       default: 112,
+    },
+    canHover: {
+      type: Boolean,
+      default: false,
     },
     isFullScreen: {
       type: Boolean,
@@ -108,7 +113,7 @@ export default {
   },
   methods: {
     onRecentItemMouseover() {
-      if ((this.isInRange || this.isFullScreen) && !this.shifting) {
+      if ((this.isInRange || this.isFullScreen) && !this.shifting && this.canHover) {
         this.onItemMouseover(this.index);
         this.chosen = true;
         this.$refs.border.style.setProperty('background-color', 'rgba(255,255,255,0.2)');

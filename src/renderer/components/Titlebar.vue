@@ -14,7 +14,7 @@
         type="titleBarWinExitFull"
       />
       <Icon
-        v-show="middleButtonStatus === 'maximize'"
+        v-show="middleButtonStatus === 'maximize' && enableFullScreenButton"
         @mouseup.native="handleWinFull"
         class="title-button no-drag"
         type="titleBarWinFull"
@@ -62,7 +62,7 @@
       />
       <Icon
         id="maximize"
-        v-show="middleButtonStatus !== 'exit-fullscreen'"
+        v-show="middleButtonStatus !== 'exit-fullscreen' && enableFullScreenButton"
         :type="itemType"
         :state="state"
         :style="{ transform: isMaxScreen ? 'rotate(45deg)' : ''}"
@@ -99,6 +99,10 @@ export default {
       default: true,
     },
     recentPlaylist: Boolean,
+    enableFullScreenButton: {
+      type: Boolean,
+      default: true,
+    },
   },
   data() {
     return {
@@ -253,7 +257,6 @@ export default {
     height: 12px;
     margin-right: 8px;
     background-repeat: no-repeat;
-    -webkit-app-region: no-drag;
     border-radius: 100%;
   }
   #minimize {

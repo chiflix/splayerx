@@ -3,7 +3,10 @@
     ref="container"
     class="container"
   >
-    <div class="element bottom">
+    <div
+      :class="useBlur ? 'backdrop' : 'backdrop-fallback'"
+      class="element bottom"
+    >
       <div class="element content">
         <slot />
       </div>
@@ -28,6 +31,10 @@ export default {
       type: Number,
       default: 1,
       validator: (value: number) => value > 0,
+    },
+    useBlur: {
+      type: Boolean,
+      default: false,
     },
   },
   watch: {
@@ -68,9 +75,6 @@ export default {
     width: 100%;
     height: 100%;
     top: 0;
-    background: rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(10px);
-    clip-path: inset(0 round var(--border-radius));
   }
   .middle {
     min-width: calc(var(--content-min-width) + 2px);
@@ -90,6 +94,7 @@ export default {
     background-color: transparent;
     box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
     display: flex;
+    overflow: hidden;
   }
 
 }

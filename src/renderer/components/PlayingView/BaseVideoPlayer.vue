@@ -2,6 +2,7 @@
   <div class="base-video-player">
     <video
       ref="video"
+      @error="handleError"
       class="video-element"
     />
   </div>
@@ -11,6 +12,9 @@
 import { mapGetters } from 'vuex';
 import _ from 'lodash';
 import { DEFAULT_VIDEO_EVENTS } from '@/constants';
+import { addBubble } from '@/helpers/notificationControl';
+import { OPEN_FAILED } from '@/helpers/notificationcodes';
+import { log } from '@/libs/Log';
 import { videodata } from '../../store/video';
 
 export default {
@@ -163,10 +167,17 @@ export default {
       this.$refs.video.muted = newVal;
     },
     // custom
-    paused(newVal: boolean) {
+    async paused(newVal: boolean) {
       // update the play state
       videodata.paused = newVal;
-      this.$refs.video[newVal ? 'pause' : 'play']();
+      try {
+        const action = newVal ? 'pause' : 'play';
+        log.info(action, this.$refs.video.src); // TODO: debugging SPLAYER-1A
+        await this.$refs.video[action]();
+      } catch (ex) {
+        log.warn('play video error', ex);
+        addBubble(OPEN_FAILED);
+      }
     },
     // events
     events(newVal: string[], oldVal: string[]) {
@@ -232,12 +243,13 @@ export default {
             this.eventListeners.set(event, listener);
           } else {
             const generateAudioEvent = (type: string) => (trackEvent: TrackEvent) => {
+              if (!this.$refs.video) return;
               const track = trackEvent.track as AudioTrack;
               const {
                 id, kind, label, language,
               } = track;
               let enabled;
-              if (this.lastAudioTrackId) {
+              if (this.lastAudioTrackId > 0) {
                 enabled = this.lastAudioTrackId === Number(id);
                 for (let i = 0; i < this.$refs.video.audioTracks.length; i += 1) {
                   const currentTrack = this.$refs.video.audioTracks[i];
@@ -275,6 +287,11 @@ export default {
           this.$refs.video.style[styleName] = styles[styleName];
         });
       }
+    },
+    handleError() {
+      if (!this.$refs.video || !this.$refs.video.error) return;
+      const { code, message } = this.$refs.video.error;
+      log.warn('video element onerror', `${code}:${message}`);
     },
   },
 };

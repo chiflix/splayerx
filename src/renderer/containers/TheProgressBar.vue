@@ -4,8 +4,8 @@
     @mousemove="handleMousemove"
     @mouseenter="hoveredmouseenter"
     @mouseleave="handleMouseleave"
-    @mousedown.stop="handleMousedown"
-    class="the-progress-bar"
+    @mousedown="handleMousedown"
+    class="the-progress-bar no-drag"
   >
     <the-preview-thumbnail
       v-show="showThumbnail"
@@ -181,6 +181,7 @@ export default {
     updatePlayProgressBar(time: number) {
       const playedPercent = 100 * (time / this.duration);
       const { playedProgress, fakeProgress } = this.$refs;
+      if (!playedProgress || !fakeProgress) return;
       playedProgress.style.width = this.hoveredPercent <= playedPercent ? `${playedPercent - this.hoveredPercent}%` : `${playedPercent}%`;
       playedProgress.style.backgroundColor = playedPercent <= this.hoveredPercent || !this.hovering ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.3)';
       playedProgress.style.order = this.hoveredPercent <= playedPercent ? '1' : '0';
@@ -329,7 +330,6 @@ export default {
   position: absolute;
   width: 100%;
   bottom: 0;
-  -webkit-app-region: no-drag;
   height: 15px;
   z-index: 12;
   & > div {

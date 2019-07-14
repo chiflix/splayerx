@@ -69,6 +69,32 @@ export const Subtitle = {
   CURRENT_SUBTITLE_REMOVE: 'CURRENT_SUBTITLE_REMOVE',
   SUBTITLE_TYPE_UPDATE: 'SUBTITLE_TYPE_UPDATE',
   SECONDARY_SUBTITLE_ENABLED_UPDATE: 'SECONDARY_SUBTITLE_ENABLED_UPDATE',
+  SUBTITLE_SETTINGS_TYPE_UPDATE: 'SUBTITLE_SETTINGS_TYPE_UPDATE',
+};
+
+export const newSubtitle = {
+  setModuleId: 'SET_MODULE_ID',
+  setSource: 'SET_SOURCE',
+  setRealSource: 'SET_REAL_SOURCE',
+  setType: 'SET_TYPE',
+  setFormat: 'SET_FORMAT',
+  setLanguage: 'SET_LANGUAGE',
+  setDelay: 'SET_DELAY',
+  setPlayedTime: 'SET_PLAYED_TIME',
+  setHash: 'SET_HASH',
+};
+
+export const SubtitleManager = {
+  setPrimarySubtitleId: 'SET_PRIMARY_SUBTITLE_ID',
+  setSecondarySubtitleId: 'SET_PSECONDARY_SUBTITLE_ID',
+  setPlaylistId: 'SET_PLAYLIST_ID',
+  setMediaItemId: 'SET_MEDIA_ITEM_ID',
+  setIsRefreshing: 'SET_IS_REFRESHING',
+  addSubtitleId: 'ADD_SUBTITLE_ID',
+  deleteSubtitleId: 'DELETE_SUBTITLE_ID',
+  deletaAllSubtitleIds: 'DELETE_ALL_SUBTITLE_IDS',
+  setPrimaryDelay: 'SET_PRIMARY_DELAY',
+  setSecondaryDelay: 'SET_SECONDARY_DELAY',
 };
 
 export const Input = {

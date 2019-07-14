@@ -6,7 +6,10 @@
     <div
       class="privacy-bubble"
     >
-      <div class="plane-background">
+      <div
+        :class="useBlur ? 'backdrop' : 'backdrop-fallback'"
+        class="plane-background"
+      >
         <div class="plane">
           <div class="content">
             <p :class="infoCSS">
@@ -42,6 +45,12 @@
 <script lang="ts">
 export default {
   name: 'PrivacyBubble',
+  props: {
+    useBlur: {
+      type: Boolean,
+      default: false,
+    },
+  },
   data() {
     return {
       /*
@@ -106,8 +115,6 @@ export default {
   }
 }
 .plane-background {
-  background-color: rgba(0,0,0,0.1);
-  backdrop-filter: blur(9.6px);
   box-shadow: 0 0 2px 0 rgba(0,0,0,0.30);
   @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px),
   screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
@@ -116,17 +123,14 @@ export default {
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
   screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
     border-radius: 7px;
-    clip-path: inset(0px round 7px);
   }
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
   screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
     border-radius: 8.4px;
-    clip-path: inset(0px round 8.4px);
   }
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
   screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     border-radius: 11.76px;
-    clip-path: inset(0px round 11.76px);
   }
 }
 .plane {
@@ -137,17 +141,14 @@ export default {
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
   screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
     border-radius: 7px;
-    clip-path: inset(0px round 7px);
   }
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
   screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
     border-radius: 8.4px;
-    clip-path: inset(0px round 8.4px);
   }
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
   screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     border-radius: 11.76px;
-    clip-path: inset(0px round 11.76px);
   }
   .content {
     display: flex;
@@ -384,7 +385,6 @@ export default {
         );
 
         backdrop-filter: blur(3px);
-        clip-path: inset(0px round 11px);
       }
       @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
       screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
@@ -397,7 +397,6 @@ export default {
         );
 
         backdrop-filter: blur(3px);
-        clip-path: inset(0px round 13.2px);
       }
       @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
       screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
@@ -410,7 +409,6 @@ export default {
         );
 
         backdrop-filter: blur(5px);
-        clip-path: inset(0px round 18.5px);
       }
       &:active {
         background-image: none;

@@ -11,6 +11,7 @@
           class="advanced"
         >
           <advance-main-menu
+            ref="advanceMenu"
             :clear-state="showAttached"
             class="mainMenu"
           />
@@ -35,13 +36,13 @@
 
 <script lang="ts">
 //  @ts-ignore
+import { mapActions, mapGetters, mapState } from 'vuex';
+import { AnimationItem } from 'lottie-web';
 import lottie from '@/components/lottie.vue';
 import animationData from '@/assets/advance.json';
-import { mapActions, mapGetters, mapState } from 'vuex';
 import { Input as InputActions } from '@/store/actionTypes';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import AdvanceMainMenu from '@/containers/AdvanceMainMenu.vue';
-import { AnimationItem } from 'lottie-web';
 
 export default {
   name: 'AdvanceControl',
@@ -124,6 +125,28 @@ export default {
       clearMousedown: InputActions.MOUSEDOWN_UPDATE,
       clearMouseup: InputActions.MOUSEUP_UPDATE,
     }),
+    handleMenuShow() {
+      if (!this.showAttached) {
+        this.anim.playSegments([23, 36], true);
+      } else {
+        this.anim.playSegments([68, 83], true);
+      }
+      this.clicks = this.showAttached && this.$refs.advanceMenu.readyShow === 'subMenu' ? 1 : 0;
+      this.clicks += 1;
+      switch (this.clicks) {
+        case 1:
+          this.$emit('conflict-resolve', this.$options.name);
+          this.$emit('update:showAttached', true);
+          break;
+        case 2:
+          this.$emit('update:showAttached', false);
+          this.clicks = 0;
+          break;
+        default:
+          this.clicks = 0;
+          break;
+      }
+    },
     handleAnimation(anim: AnimationItem) {
       this.anim = anim;
     },
@@ -138,7 +161,19 @@ export default {
       document.addEventListener('mouseup', (e) => {
         if (e.button === 0) {
           if (!this.showAttached) {
-            if (this.validEnter) {
+            let isUpOnAdvanceControl;
+            const advance = document.querySelector('.advanceControl');
+            if (advance) {
+              const nodeList = advance.childNodes;
+              for (let i = 0; i < nodeList.length; i += 1) {
+                isUpOnAdvanceControl = nodeList[i].contains(e.target as Node);
+                if (isUpOnAdvanceControl) {
+                  break;
+                }
+              }
+            }
+            if (this.validEnter
+              || (this.currentMousedownComponent === this.$options.name && isUpOnAdvanceControl)) {
               this.anim.playSegments([23, 36], true);
             } else if (this.currentMousedownComponent === this.$options.name) {
               this.anim.playSegments([105, 109], true);
@@ -160,7 +195,7 @@ export default {
         }
       }
       this.showFlag = false;
-      this.validEnter = true;
+      this.validEnter = this.currentMousedownComponent === this.$options.name;
       this.animFlag = false;
     },
     handleLeave() {
@@ -181,20 +216,22 @@ export default {
       this.validEnter = false;
     },
     toggleAdvMenuDisplay() {
-      this.clicks = this.showAttached ? 1 : 0;
-      this.clicks += 1;
-      switch (this.clicks) {
-        case 1:
-          this.$emit('update:showAttached', true);
-          this.$emit('conflict-resolve', this.$options.name);
-          break;
-        case 2:
-          this.$emit('update:showAttached', false);
-          this.clicks = 0;
-          break;
-        default:
-          this.clicks = 0;
-          break;
+      if (this.mouseDown) {
+        this.clicks = this.showAttached ? 1 : 0;
+        this.clicks += 1;
+        switch (this.clicks) {
+          case 1:
+            this.$emit('update:showAttached', true);
+            this.$emit('conflict-resolve', this.$options.name);
+            break;
+          case 2:
+            this.$emit('update:showAttached', false);
+            this.clicks = 0;
+            break;
+          default:
+            this.clicks = 0;
+            break;
+        }
       }
     },
   },

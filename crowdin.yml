@@ -1,0 +1,4 @@
+files:
+  - source: /src/renderer/locales/lang/en.json
+    translation: /src/renderer/locales/lang/%osx_locale%.json
+    update_option: update_as_unapproved

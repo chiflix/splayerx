@@ -4,7 +4,7 @@
       <slot />
       <input
         :checked="checkboxValue"
-        @input="$emit('update:checkbox-value', $event.target.checked)"
+        @change="$emit('change', $event.target.checked)"
         type="checkbox"
         class="checkbox__input"
       >
@@ -17,13 +17,17 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import Icon from '@/components/BaseIconContainer.vue';
 
 export default {
   name: 'BaseCheckBox',
   components: {
     Icon,
+  },
+  model: {
+    prop: 'checkboxValue',
+    event: 'change',
   },
   props: {
     checkboxValue: Boolean,

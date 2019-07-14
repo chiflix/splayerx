@@ -19,13 +19,25 @@
   },
   "css": {
     "titleFontSize": {
-      "fontSize": "21px"
+      "fontSize": ""
     },
     "versionFontSize": {
-      "fontSize": "14px"
+      "fontSize": ""
     }
   },
   "errorFile": {
+    "ENOSPC": {
+      "content": "",
+      "title": ""
+    },
+    "EACCES": {
+      "content": "",
+      "title": ""
+    },
+    "ENOENT": {
+      "content": "",
+      "title": ""
+    },
     "addNoVideo": {
       "content": "再生できるファイルが見つかりませんでした。",
       "title": "追加錯誤"
@@ -95,7 +107,9 @@
     "help": {
       "name": "ヘルプ",
       "splayerxHelp": "ヘルプ",
-      "shortCuts": "ショートカットリスト"
+      "shortCuts": "ショートカットリスト",
+      "crashReportLocation": "エラーログを表示する",
+      "crashReportNotAvailable": "Found no crash report"
     },
     "playback": {
       "backwardL": "戻る -60s",
@@ -106,13 +120,15 @@
       "decreasePlaybackSpeed": "再生速度の低下",
       "forwardL": "進む +60s",
       "forwardS": "進む +5s",
-      "fullScreen": "ズーム/フルスクリーンを解除",
+      "fullScreen": "ズーム\/フルスクリーンを解除",
       "increasePlaybackSpeed": "再生速度の増加",
       "keepPlayingWindowFront": "再生時に最前面に表示",
       "name": "プレイ",
       "pause": "停止",
       "play": "プレイ",
       "resetSpeed": "重置播放速度",
+      "nextVideo": "次のビデオ",
+      "previousVideo": "前のビデオ",
       "singleCycle": "リピート",
       "snapShot": "スナップショット"
     },
@@ -123,16 +139,17 @@
       "hideOthers": "その他を隠す",
       "homepage": "ホームページ",
       "preferences": "環境設定",
-      "quit": "SPlayerを終了"
+      "quit": "SPlayerを終了",
+      "showAll": "すべて表示"
     },
     "subtitle": {
       "AITranslation": "トランスレーション結果を再読込",
-      "decreaseSubtitleDelayL": "字幕ディレイ -0.5s",
-      "decreaseSubtitleDelayS": "字幕ディレイ -0.1s",
+      "decreasePrimarySubtitleDelay": "第一字幕オーディオ -0.1s",
+      "increasePrimarySubtitleDelay": "第一字幕オーディオ +0.1s",
+      "decreaseSecondarySubtitleDelay": "第二字幕オーディオ -0.1s",
+      "increaseSecondarySubtitleDelay": "第二字幕オーディオ +0.1s",
       "disabledSecondarySub": "第二字幕を閉じる",
       "enabledSecondarySub": "第二字幕を開く",
-      "increaseSubtitleDelayL": "字幕ディレイ +0.5s",
-      "increaseSubtitleDelayS": "字幕ディレイ +0.1s",
       "langEn": "英文",
       "langZhCN": "中文",
       "loadSubtitleFile": "字幕ファイルを開く…",
@@ -140,7 +157,7 @@
       "menuLoading": "ローディング ...",
       "name": "字幕",
       "noSubtitle": "見つかりませんでした",
-      "notToShowSubtitle": "なし",
+      "notToShowSubtitle": "閉じる",
       "secondarySubtitle": "第二字幕",
       "size1": "小",
       "size2": "通常",
@@ -156,7 +173,7 @@
       "subtitleStyle": "字幕スタイル",
       "uploadSelectedSubtitle": "字幕をアップロード"
     },
-    "titleName": "SPlayer",
+    "titleName": "",
     "update": {
       "message": "更新已就绪，是否现在重启?",
       "no": "暂不更新",
@@ -165,29 +182,45 @@
       "yes": "更新"
     },
     "window": {
+      "backToLandingView": "起動ページに戻る",
       "bossKey": "ボスキー",
-      "doubleSize": "200%",
+      "doubleSize": "",
       "enterFullScreen": "フルスクリーン",
       "exitFullScreen": "フルスクリーンを解除",
-      "halfSize": "50%",
+      "halfSize": "",
       "maxmize": "最大化",
       "minimize": "最小化",
       "name": "ウィンドウ",
-      "originSize": "100%"
+      "originSize": ""
     }
   },
   "nextVideo": {
     "nextInFolder": "ホルダー中の次のビデオ",
     "nextInPlaylist": "プレイリスト中の次のビデオ"
   },
+  "welcome": {
+    "welcomeTitle": "",
+    "welcomeDescription": "",
+    "agreement": "",
+    "policy": "",
+    "languageTitle1": "",
+    "languageTitle2": "",
+    "primary": "",
+    "secondary": "",
+    "chooseSecondary": "",
+    "languageDescription": "",
+    "none": ""
+  },
   "preferences": {
     "general": {
+      "hideHistory": "再生履歴を隠す",
       "clearHistory": "終了時にプレイ履歴を削除",
       "reverseScrolling": "マウスの逆スクロール",
       "setDefault": "デフォルトのプレーヤーとして設定",
       "setDefaultDescription": "SPlayer ですべてのビデオファイルを開く。",
       "restoreSettings": "すべての設定をリセット",
       "restoreSettingsDescription": "すべてのデータとキャッシュを消去して再起動します。",
+      "restoreSettingsAfterRelaunch": "適用を再開。",
       "setButton": "アプライ",
       "relaunch": "再起動",
       "displayLanguage": "言語表示",
@@ -229,6 +262,7 @@
   "recentPlaylist": {
     "folderSource": "ホルダー",
     "playing": "再生中",
+    "paused": "一時停止",
     "playlistSource": "プレイリスト"
   },
   "subtitle": {
@@ -269,5 +303,9 @@
   "snapshotFailed": {
     "content": "後でお試しください。",
     "title": "スナップショット失敗"
+  },
+  "loadVideoBySubtitleFailed": {
+    "content": "フォルダ内に関連するビデオが見つかりません",
+    "title": ""
   }
 }

@@ -303,7 +303,6 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   flex-direction: column;
   border-radius: 7px;
   z-index: 10;
-  clip-path: inset(0 round 8px);
   .textContainer {
     display: flex;
     color: rgba(255, 255, 255, 0.6);

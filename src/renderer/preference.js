@@ -15,17 +15,18 @@ Vue.use(Vuex);
 function getSystemLocale() {
   const { app } = electron.remote;
   const locale = process.platform === 'win32' ? app.getLocale() : osLocale.sync();
-  if (locale === 'zh-TW') {
-    return 'zhTW';
+  if (locale === 'zh-TW' || locale === 'zh-HK' || locale === 'zh-Hant') {
+    return 'zh-Hant';
   }
   if (locale.startsWith('zh')) {
-    return 'zhCN';
+    return 'zh-Hans';
   }
   return 'en';
 }
 
 const i18n = new VueI18n({
   locale: getSystemLocale(), // set locale
+  fallbackLocale: 'en',
   messages, // set locale messages
 });
 

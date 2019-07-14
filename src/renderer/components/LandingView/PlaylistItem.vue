@@ -79,6 +79,7 @@ export default {
   props: {
     backgroundUrl: {
       type: String,
+      default: '',
     },
     shifting: {
       type: Boolean,
@@ -97,6 +98,10 @@ export default {
     thumbnailWidth: {
       type: Number,
       default: 112,
+    },
+    canHover: {
+      type: Boolean,
+      default: false,
     },
     isFullScreen: {
       type: Boolean,
@@ -133,7 +138,7 @@ export default {
   },
   methods: {
     onRecentItemMouseenter() {
-      if ((this.isInRange || this.isFullScreen) && !this.shifting) {
+      if ((this.isInRange || this.isFullScreen) && !this.shifting && this.canHover) {
         this.onItemMouseover(this.index);
         this.chosen = true;
         this.$refs.layer2.style.setProperty('transform', 'translateY(-4px) scale(0.9, 0.9)');
@@ -201,7 +206,9 @@ export default {
       }
     },
     onRecentItemClick() {
-      this.onItemClick(this.index);
+      if (!this.isDragging && !this.shifting) {
+        this.onItemClick(this.index);
+      }
     },
   },
 };

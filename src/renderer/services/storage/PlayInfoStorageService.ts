@@ -31,14 +31,14 @@ export default class PlayInfoStorageService implements IPlayInfoStorable {
   /**
    * @description 更新最近播放列表
    * @author tanghaixiang
-   * @param {number} playListID
+   * @param {number} playlistId
    * @param {PlaylistItem} data
    * @returns {Promise<boolean>} 返回布尔值, 是否成功更新
    */
-  async updateRecentPlayedBy(playListID: number, data: PlaylistItem): Promise<boolean> {
+  async updateRecentPlayedBy(playlistId: number, data: PlaylistItem): Promise<boolean> {
     try {
-      let playList = await info.getValueByKey(RECENT_OBJECT_STORE_NAME, playListID)
-      await info.update(RECENT_OBJECT_STORE_NAME, playList.id, { ...playList, ...data } as PlaylistItem);
+      let playList = await info.getValueByKey(RECENT_OBJECT_STORE_NAME, playlistId)
+      await info.update(RECENT_OBJECT_STORE_NAME, playlistId, { ...playList, ...data } as PlaylistItem);
       return true;
     } catch (error) {
       return false;
@@ -49,18 +49,18 @@ export default class PlayInfoStorageService implements IPlayInfoStorable {
   /**
    * @description 删除播放列表
    * @author tanghaixiang
-   * @param {number} playListID
+   * @param {number} playlistId
    * @returns {Promise<boolean>} 返回布尔值, 是否成功更新
    */
-  async deleteRecentPlayedBy(playListID: number): Promise<boolean> {
+  async deleteRecentPlayedBy(playlistId: number): Promise<boolean> {
     try {
-      const { items } = await info.getValueByKey(RECENT_OBJECT_STORE_NAME, playListID);
+      const { items } = await info.getValueByKey(RECENT_OBJECT_STORE_NAME, playlistId);
       await Promise.all(items.map(async (item: number) => {
         try {
           await info.delete(VIDEO_OBJECT_STORE_NAME, item);
         } catch (err) {}
       }));
-      await info.delete(RECENT_OBJECT_STORE_NAME, playListID);
+      await info.delete(RECENT_OBJECT_STORE_NAME, playlistId);
       return true;
     } catch (error) {
       return false;
@@ -69,6 +69,12 @@ export default class PlayInfoStorageService implements IPlayInfoStorable {
   async getAllRecentPlayed(): Promise<PlaylistItem[]> {
     const results = await info.getAll('recent-played');
     return results.sort((a: PlaylistItem, b: PlaylistItem) => b.lastOpened - a.lastOpened);
+  }
+  async getPlaylistRecord(playlistId: number): Promise<PlaylistItem> {
+    return info.getValueByKey(RECENT_OBJECT_STORE_NAME, playlistId);
+  }
+  async getMediaItem(mediaitemId: number): Promise<MediaItem> {
+    return info.getValueByKey(VIDEO_OBJECT_STORE_NAME, mediaitemId);
   }
 }
 

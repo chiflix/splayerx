@@ -1,6 +1,9 @@
 <template>
   <div class="nextVideo">
-    <div class="nextVideo__plane">
+    <div
+      :class="{ 'backdrop': useBlur }"
+      class="nextVideo__plane"
+    >
       <div
         :style="{ width: `${(progress/100)*217}px` }"
         class="nextVideo__progress"
@@ -53,6 +56,12 @@ export default {
   components: {
     Icon,
   },
+  props: {
+    useBlur: {
+      type: Boolean,
+      default: false,
+    },
+  },
   data() {
     return {
       progress: 0,
@@ -92,11 +101,13 @@ export default {
       }
     },
     mouseoverVideo() {
+      if (!this.$refs.videoThumbnail) return;
       this.$refs.videoThumbnail.play();
       this.notificationPlayIcon = 'notificationPlayHover';
       this.isBlur = false;
     },
     mouseoutVideo() {
+      if (!this.$refs.videoThumbnail) return;
       this.$refs.videoThumbnail.pause();
       this.notificationPlayIcon = 'notificationPlay';
       this.isBlur = true;
@@ -156,10 +167,22 @@ export default {
     height: 70px;
     border: 1px solid rgba(255,255,255,0.1);
     border-radius: 7px;
+
+    background-image: radial-gradient(
+      80% 130%,
+      rgba(85,85,85,0.88) 20%,
+      rgba(85,85,85,0.78) 50%,
+      rgba(85,85,85,0.72) 60%,
+      rgba(85,85,85,0.46) 80%,
+      rgba(85,85,85,0.00) 100%
+    );
+    box-shadow: 0 0 1px rgba(0,0,0,0.1);
+  }
+  .backdrop {
+    background-image: none;
+    border-width: 0px;
     background-color: rgba(0,0,0,0.2);
     backdrop-filter: blur(10px);
-    clip-path: inset(0px round 7px);
-    box-shadow: 0 0 1px rgba(0,0,0,0.1);
   }
 
   &__progress {

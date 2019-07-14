@@ -1,6 +1,6 @@
-import BaseImageDisplay from '@/components/PlayingView/BaseImageDisplay.vue';
 import { mount } from '@vue/test-utils';
 import sinon from 'sinon';
+import BaseImageDisplay from '@/components/PlayingView/BaseImageDisplay.vue';
 
 describe('Component - BaseImageDisplay', () => {
   let sandbox;

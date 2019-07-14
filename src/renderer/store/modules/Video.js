@@ -1,9 +1,9 @@
 import Vue from 'vue';
 
-import Helpers from '@/helpers';
 import romanize from 'romanize';
 import isEqual from 'lodash/isEqual';
 import urlParseLax from 'url-parse-lax';
+import { mediaQuickHash } from '@/libs/utils';
 import { Video as videoMutations } from '../mutationTypes';
 import { Video as videoActions, Subtitle as subtitleActions } from '../actionTypes';
 
@@ -205,15 +205,14 @@ const actions = {
       windows: RegExp(/^[a-zA-Z]:\/(((?![<>:"//|?*]).)+((?<![ .])\/)?)*$/),
     };
     Object.keys(srcRegexes).forEach(async (type) => {
-      if (srcRegexes[type].test(src)) {
-        commit(videoMutations.SRC_UPDATE, src);
-        commit(
-          videoMutations.MEDIA_HASH_UPDATE,
-          mediaHash || await Helpers.methods.mediaQuickHash(src),
-        );
-        commit(videoMutations.ID_UPDATE, id);
-        dispatch(subtitleActions.INITIALIZE_VIDEO_SUBTITLE_MAP, { videoSrc: src });
-      }
+      if (!srcRegexes[type].test(src)) return;
+      mediaHash = mediaHash || await mediaQuickHash.try(src);
+      if (!mediaHash) return;
+
+      commit(videoMutations.SRC_UPDATE, src);
+      commit(videoMutations.MEDIA_HASH_UPDATE, mediaHash);
+      commit(videoMutations.ID_UPDATE, id);
+      dispatch(subtitleActions.INITIALIZE_VIDEO_SUBTITLE_MAP, { videoSrc: src });
     });
   },
   [videoActions.INITIALIZE]({ commit }, config) {

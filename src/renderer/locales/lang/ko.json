@@ -19,13 +19,25 @@
   },
   "css": {
     "titleFontSize": {
-      "fontSize": "21px"
+      "fontSize": ""
     },
     "versionFontSize": {
-      "fontSize": "14px"
+      "fontSize": ""
     }
   },
   "errorFile": {
+    "ENOSPC": {
+      "content": "",
+      "title": ""
+    },
+    "EACCES": {
+      "content": "",
+      "title": ""
+    },
+    "ENOENT": {
+      "content": "",
+      "title": ""
+    },
     "addNoVideo": {
       "content": "재생할 수있는 파일을 찾을 수 없습니다.",
       "title": "파일 추가 실패"
@@ -95,7 +107,9 @@
     "help": {
       "name": "도움",
       "splayerxHelp": "도움",
-      "shortCuts": "바로 가기 목록"
+      "shortCuts": "바로 가기 목록",
+      "crashReportLocation": "오류 로그보기",
+      "crashReportNotAvailable": "오류 로그 없음"
     },
     "playback": {
       "backwardL": "단계 뒤로 -60 년대",
@@ -113,6 +127,8 @@
       "pause": "중지",
       "play": "놀이",
       "resetSpeed": "재생 속도 재설정",
+      "nextVideo": "다음 동영상",
+      "previousVideo": "이전 비디오",
       "singleCycle": "하나 반복",
       "snapShot": "스냅 샷"
     },
@@ -123,16 +139,17 @@
       "hideOthers": "다른 사람 숨기기",
       "homepage": "웹 사이트",
       "preferences": "환경 설정",
-      "quit": "SPlayer 종료"
+      "quit": "SPlayer 종료",
+      "showAll": "모두 표시"
     },
     "subtitle": {
       "AITranslation": "스마트 번역 새로 고침",
-      "decreaseSubtitleDelayL": "",
-      "decreaseSubtitleDelayS": "자막 지연 -0.1s",
+      "decreasePrimarySubtitleDelay": "자막 지연 -0.1s",
+      "increasePrimarySubtitleDelay": "자막 지연 +0.1s",
+      "decreaseSecondarySubtitleDelay": "자막 지연 -0.1s",
+      "increaseSecondarySubtitleDelay": "자막 지연 +0.1s",
       "disabledSecondarySub": "보조 부제목 사용 중지",
       "enabledSecondarySub": "보조 부제목 사용",
-      "increaseSubtitleDelayL": "",
-      "increaseSubtitleDelayS": "자막 지연 0.1s",
       "langEn": "영어",
       "langZhCN": "중국말",
       "loadSubtitleFile": "자막 파일로드 중 ...",
@@ -140,7 +157,7 @@
       "menuLoading": "로드 중 ...",
       "name": "자막",
       "noSubtitle": "찾을 수 없음",
-      "notToShowSubtitle": "없음",
+      "notToShowSubtitle": "닫기",
       "secondarySubtitle": "보조 부제목",
       "size1": "작은",
       "size2": "표준",
@@ -156,7 +173,7 @@
       "subtitleStyle": "글꼴 스타일",
       "uploadSelectedSubtitle": "선택한 부제목 업로드"
     },
-    "titleName": "SPlayer",
+    "titleName": "",
     "update": {
       "message": "업데이트를 설치하려면 지금 앱을 다시 시작 하시겠습니까?",
       "no": "아니",
@@ -165,6 +182,7 @@
       "yes": "예"
     },
     "window": {
+      "backToLandingView": "시작 페이지로 돌아 가기",
       "bossKey": "보스 키",
       "doubleSize": "200 %",
       "enterFullScreen": "전체 화면으로 들어가기",
@@ -180,14 +198,29 @@
     "nextInFolder": "폴더에서 다음",
     "nextInPlaylist": "다음 재생 목록에서"
   },
+  "welcome": {
+    "welcomeTitle": "",
+    "welcomeDescription": "",
+    "agreement": "",
+    "policy": "",
+    "languageTitle1": "",
+    "languageTitle2": "",
+    "primary": "",
+    "secondary": "",
+    "chooseSecondary": "",
+    "languageDescription": "",
+    "none": ""
+  },
   "preferences": {
     "general": {
+      "hideHistory": "재생 기록 숨기기",
       "clearHistory": "종료시 항상 재생 기록 지우기",
       "reverseScrolling": "마우스 스크롤 역전",
       "setDefault": "기본 동영상 플레이어로 설정",
       "setDefaultDescription": "SPlayer 로 모든 비디오 파일 열기.",
       "restoreSettings": "모든 콘텐츠 및 설정 지우기",
       "restoreSettingsDescription": "모든 로컬 데이터 및 캐시 파일을 삭제하고 다시 시작하십시오.",
+      "restoreSettingsAfterRelaunch": "적용을 위해 재시작.",
       "setButton": "대다",
       "relaunch": "재시작",
       "displayLanguage": "표시 언어",
@@ -222,13 +255,14 @@
     "tryToDisable": {
       "button": "승인",
       "partOne": "SPlayer는 익명 데이터를 사용하여 사용자 경험을 향상시킵니다. 스마트 번역은 귀하가",
-      "partTwo": ".",
+      "partTwo": "",
       "underlinedContent": "동의하지 않는다"
     }
   },
   "recentPlaylist": {
     "folderSource": "폴더",
     "playing": "연주 중",
+    "paused": "일시 중지 된",
     "playlistSource": "재생 목록"
   },
   "subtitle": {
@@ -269,5 +303,9 @@
   "snapshotFailed": {
     "content": "나중에 다시 시도 해주세요.",
     "title": "스냅 샷 실패"
+  },
+  "loadVideoBySubtitleFailed": {
+    "content": "폴더에서 관련 비디오를 찾지 않습니다",
+    "title": ""
   }
 }

@@ -40,16 +40,18 @@
   </div>
 </template>;
 <script lang="ts">
+import { mapGetters, mapActions } from 'vuex';
+import path from 'path';
+import { debounce } from 'lodash';
 import { windowRectService } from '@/services/window/WindowRectService';
 import { playInfoStorageService } from '@/services/storage/PlayInfoStorageService';
 import { settingStorageService } from '@/services/storage/SettingStorageService';
 import { generateShortCutImageBy } from '@/libs/utils';
-import { mapGetters, mapActions } from 'vuex';
-import path from 'path';
 import { Video as videoActions } from '@/store/actionTypes';
 import { videodata } from '@/store/video';
 import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer.vue';
 import { MediaItem, PlaylistItem } from '../interfaces/IDB';
+import { deleteSubtitlesByPlaylistId } from '../services/storage/subtitle';
 
 export default {
   name: 'VideoCanvas',
@@ -61,7 +63,6 @@ export default {
       videoExisted: false,
       videoElement: null,
       seekTime: [0],
-      lastPlayedTime: 0,
       lastAudioTrackId: 0,
       lastCoverDetectingTime: 0,
       maskBackground: 'rgba(255, 255, 255, 0)', // drag and drop related var
@@ -75,8 +76,10 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'videoId', 'nextVideoId', 'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId', 'enabledSecondarySub', 'lastWinSize', 'lastChosenSize', 'subToTop',
-      'winSize', 'winPos', 'winAngle', 'isFullScreen', 'winWidth', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo', 'loop', 'playinglistRate', 'isFolderList', 'playingList', 'playingIndex', 'playListId', 'items']),
+      'videoId', 'nextVideoId', 'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId', 'enabledSecondarySub', 'lastChosenSize', 'subToTop',
+      'winSize', 'winPos', 'winAngle', 'isFullScreen', 'winWidth', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo', 'loop', 'playinglistRate', 'isFolderList', 'playingList', 'playingIndex', 'playListId', 'items',
+      'previousVideo', 'previousVideoId',
+    ]),
     ...mapGetters({
       videoWidth: 'intrinsicWidth',
       videoHeight: 'intrinsicHeight',
@@ -87,8 +90,11 @@ export default {
     winAngle(val: number) {
       this.changeWindowRotate(val);
     },
+    playListId(val: number, oldVal: number) {
+      if (oldVal) this.updatePlaylist(oldVal);
+    },
     videoId(val: number, oldVal: number) {
-      if (oldVal) this.saveScreenshot(oldVal);
+      this.saveScreenshot(oldVal);
     },
     originSrc(val: string, oldVal: string) {
       if (process.mas && oldVal) {
@@ -102,7 +108,11 @@ export default {
       this.updatePlayinglistRate({
         oldDir: path.dirname(oldVal), newDir: path.dirname(val), playingList: this.playingList,
       });
-      this.playinglistRate.forEach((item: any) => {
+      this.playinglistRate.forEach((item: {
+        dirPath: string,
+        rate: number,
+        playingList: string[],
+      }) => {
         if (item.dirPath === path.dirname(val)) {
           this.$store.dispatch(videoActions.CHANGE_RATE, item.rate);
           this.nowRate = item.rate;
@@ -114,7 +124,29 @@ export default {
     this.updatePlayinglistRate({ oldDir: '', newDir: path.dirname(this.originSrc), playingList: this.playingList });
   },
   mounted() {
-    this.$electron.ipcRenderer.on('quit', (needToRestore: boolean) => {
+    this.$bus.$on('back-to-landingview', () => {
+      let savePromise = this.saveScreenshot(this.videoId)
+        .then(() => this.updatePlaylist(this.playListId));
+      if (process.mas && this.$store.getters.source === 'drop') {
+        savePromise = savePromise.then(async () => {
+          await playInfoStorageService.deleteRecentPlayedBy(this.playListId);
+          await deleteSubtitlesByPlaylistId(this.playListId);
+        });
+      }
+      savePromise
+        .then(this.saveSubtitleStyle)
+        .then(this.savePlaybackStates)
+        .then(this.removeAllAudioTrack)
+        .finally(() => {
+          this.$store.dispatch('Init');
+          this.$bus.$off();
+          this.$router.push({
+            name: 'landing-view',
+          });
+          windowRectService.uploadWindowBy(false, 'landing-view');
+        });
+    });
+    this.$electron.ipcRenderer.on('quit', (e: Event, needToRestore: boolean) => {
       if (needToRestore) this.needToRestore = needToRestore;
       this.quit = true;
     });
@@ -136,22 +168,26 @@ export default {
     this.$bus.$on('toggle-muted', () => {
       this.toggleMute();
     });
-    this.$bus.$on('send-lastplayedtime', (e: number) => {
-      this.lastPlayedTime = e;
-    });
-    this.$bus.$on('send-audiotrackid', (id: string) => {
-      this.lastAudioTrackId = id;
-    });
-    this.$bus.$on('toggle-playback', () => {
+    this.$bus.$on('toggle-playback', debounce(() => {
       this[this.paused ? 'play' : 'pause']();
       this.$ga.event('app', 'toggle-playback');
-    });
+    }, 50, { leading: true }));
     this.$bus.$on('next-video', () => {
       videodata.paused = false;
       if (this.nextVideo) {
         this.$store.commit('LOOP_UPDATE', false);
         if (this.isFolderList) this.openVideoFile(this.nextVideo);
         else this.playFile(this.nextVideo, this.nextVideoId);
+      } else {
+        this.$store.commit('LOOP_UPDATE', true);
+      }
+    });
+    this.$bus.$on('previous-video', () => {
+      videodata.paused = false;
+      if (this.previousVideo) {
+        this.$store.commit('LOOP_UPDATE', false);
+        if (this.isFolderList) this.openVideoFile(this.previousVideo);
+        else this.playFile(this.previousVideo, this.previousVideoId);
       } else {
         this.$store.commit('LOOP_UPDATE', true);
       }
@@ -192,7 +228,7 @@ export default {
       removeAllAudioTrack: videoActions.REMOVE_ALL_AUDIO_TRACK,
       updatePlayinglistRate: videoActions.UPDATE_PLAYINGLIST_RATE,
     }),
-    onMetaLoaded(event: Event) {
+    async onMetaLoaded(event: Event) {
       const target = event.target as HTMLVideoElement;
       this.videoElement = target;
       this.videoConfigInitialize({
@@ -214,17 +250,18 @@ export default {
         intrinsicHeight: target.videoHeight,
         ratio: target.videoWidth / target.videoHeight,
       });
-      if (target.duration - this.lastPlayedTime > 10) {
-        this.$bus.$emit('seek', this.lastPlayedTime);
+      const mediaInfo = await playInfoStorageService.getMediaItem(this.videoId);
+      if (mediaInfo.lastPlayedTime && target.duration - mediaInfo.lastPlayedTime > 10) {
+        this.$bus.$emit('seek', mediaInfo.lastPlayedTime);
       } else {
         this.$bus.$emit('seek', 0);
       }
-      this.lastPlayedTime = 0;
+      if (mediaInfo.audioTrackId) this.lastAudioTrackId = mediaInfo.audioTrackId;
       this.$bus.$emit('video-loaded');
       this.changeWindowRotate(this.winAngle);
 
-      let maxVideoSize = [];
-      let videoSize = [];
+      let maxVideoSize;
+      let videoSize;
       if (this.videoExisted && (this.winAngle === 0 || this.winAngle === 180)) {
         maxVideoSize = this.winSize;
         videoSize = [this.videoWidth, this.videoHeight];
@@ -232,7 +269,6 @@ export default {
         maxVideoSize = this.winSize;
         videoSize = [this.videoHeight, this.videoWidth];
       } else {
-        maxVideoSize = this.lastWinSize;
         videoSize = [this.videoWidth, this.videoHeight];
         this.videoExisted = true;
       }
@@ -245,6 +281,7 @@ export default {
     },
     changeWindowRotate(val: number) {
       requestAnimationFrame(() => {
+        if (!this.$refs.videoCanvas) return;
         const scale = windowRectService.calculateWindowScaleBy(this.isFullScreen, val, this.ratio);
         this.$refs.videoCanvas.$el.style.setProperty('transform', `rotate(${val}deg) scale(${scale}, ${scale})`);
       });
@@ -253,6 +290,7 @@ export default {
       this.winSizeBeforeFullScreen = this.winSize;
       this.winAngleBeforeFullScreen = this.winAngle;
       requestAnimationFrame(() => {
+        if (!this.$refs.videoCanvas) return;
         const scale = windowRectService.calculateWindowScaleBy(true, this.winAngle, this.ratio);
         this.$refs.videoCanvas.$el.style.setProperty('transform', `rotate(${this.winAngle}deg) scale(${scale}, ${scale})`);
       });
@@ -260,10 +298,22 @@ export default {
     },
     offFullScreen() {
       requestAnimationFrame(() => {
+        if (!this.$refs.videoCanvas) return;
         const scale = windowRectService.calculateWindowScaleBy(false, this.winAngle, this.ratio);
         this.$refs.videoCanvas.$el.style.setProperty('transform', `rotate(${this.winAngle}deg) scale(${scale}, ${scale})`);
       });
       windowRectService.uploadWindowBy(false, 'playing-view', this.winAngle, this.winAngleBeforeFullScreen, this.winSizeBeforeFullScreen, this.winPos);
+    },
+    async updatePlaylist(playlistId: number) {
+      if (!Number.isNaN(playlistId) && !this.isFolderList) {
+        const playlistRecord = await playInfoStorageService.getPlaylistRecord(playlistId);
+        const recentPlayedData = {
+          ...playlistRecord,
+          playedIndex: this.playingIndex,
+        };
+        await playInfoStorageService
+          .updateRecentPlayedBy(playlistId, recentPlayedData as PlaylistItem);
+      }
     },
     async saveScreenshot(videoId: number) {
       const { videoElement } = this;
@@ -281,18 +331,7 @@ export default {
       };
 
       const result = await playInfoStorageService.updateMediaItemBy(videoId, data as MediaItem);
-      if (result) {
-        this.$bus.$emit('database-saved');
-      }
-
-      const recentPlayedData = {
-        items: this.isFolderList ? [videoId] : this.items,
-        playedIndex: this.isFolderList ? 0 : this.playingIndex,
-        lastOpened: Date.now(),
-      };
-
-      await playInfoStorageService
-        .updateRecentPlayedBy(this.playListId, recentPlayedData as PlaylistItem);
+      if (result) this.$bus.$emit('database-saved');
     },
     saveSubtitleStyle() {
       return settingStorageService.updateSubtitleStyle({
@@ -304,33 +343,39 @@ export default {
     savePlaybackStates() {
       return settingStorageService.updatePlaybackStates({ volume: this.volume, muted: this.muted });
     },
-    beforeUnloadHandler(e: Event) {
+    beforeUnloadHandler(e: BeforeUnloadEvent) {
       if (!this.asyncTasksDone && !this.needToRestore) {
-        let savePromise = this.saveScreenshot(this.videoId);
+        e.returnValue = false;
+        let savePromise = this.saveScreenshot(this.videoId)
+          .then(() => this.updatePlaylist(this.playListId));
         if (process.mas && this.$store.getters.source === 'drop') {
           savePromise = savePromise.then(async () => {
             await playInfoStorageService.deleteRecentPlayedBy(this.playListId);
+            await deleteSubtitlesByPlaylistId(this.playListId);
           });
         }
         savePromise
           .then(this.saveSubtitleStyle)
           .then(this.savePlaybackStates)
-          .then(this.$store.dispatch('saveWinSize', this.isFullScreen ? { size: this.winSizeBeforeFullScreen, angle: this.winAngleBeforeFullScreen } : { size: this.winSize, angle: this.winAngle }))
           .then(this.removeAllAudioTrack)
           .finally(() => {
             this.$store.dispatch('SRC_SET', { src: '', mediaHash: '', id: NaN });
             this.asyncTasksDone = true;
             window.close();
           });
+      } else if (process.env.NODE_ENV === 'development') { // app.hide() will disable app refresh and not good for dev
+      } else if (process.platform === 'darwin' && !this.quit) {
         e.returnValue = false;
-      } else if (!this.quit) {
-        e.returnValue = false;
+        this.$electron.remote.app.hide();
+        this.$electron.ipcRenderer.send('simulate-closing-window');
         this.$bus.$off(); // remove all listeners before back to landing view
         // need to init Vuex States
         this.$router.push({
           name: 'landing-view',
         });
         windowRectService.uploadWindowBy(false, 'landing-view');
+      } else {
+        this.$electron.remote.app.quit();
       }
     },
   },

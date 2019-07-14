@@ -26,6 +26,19 @@
     }
   },
   "errorFile": {
+    "ENOSPC": {
+      "content": "No enough disk space available.",
+      "title": "Open Failed"
+    },
+    "EACCES": {
+      "content": "You don't have sufficient permission.",
+      "title": "Open Failed"
+    },
+    "ENOENT": {
+      "content": "File not found.",
+      "title": "Open Failed"
+    },
+
     "addNoVideo": {
       "content": "Cannot find playable file.",
       "title": "Add File Failed"
@@ -95,7 +108,9 @@
     "help": {
       "name": "Help",
       "splayerxHelp": "Help",
-      "shortCuts": "Shortcuts List"
+      "shortCuts": "Shortcuts List",
+      "crashReportLocation": "Show Crash Reports",
+      "crashReportNotAvailable": "Found no crash report."
     },
     "playback": {
       "backwardL": "Step Backward -60s",
@@ -113,6 +128,8 @@
       "pause": "Pause",
       "play": "Play",
       "resetSpeed": "Reset Playback Speed",
+      "nextVideo": "Next Video",
+      "previousVideo": "Previous Video",
       "singleCycle": "Repeat One",
       "snapShot": "Snapshot"
     },
@@ -123,16 +140,17 @@
       "hideOthers": "Hide Others",
       "homepage": "Website",
       "preferences": "Preferences",
-      "quit": "Quit SPlayer"
+      "quit": "Quit SPlayer",
+      "showAll": "Show All"
     },
     "subtitle": {
       "AITranslation": "Reload Smart Translation",
-      "decreaseSubtitleDelayL": "",
-      "decreaseSubtitleDelayS": "Subtitle Delay -0.1s",
+      "decreasePrimarySubtitleDelay": "Primary Subtitle Delay -0.1s",
+      "increasePrimarySubtitleDelay": "Primary Subtitle Delay +0.1s",
+      "decreaseSecondarySubtitleDelay": "Secondary Subtitle Delay -0.1s",
+      "increaseSecondarySubtitleDelay": "Secondary Subtitle Delay +0.1s",
       "disabledSecondarySub": "Disable Secondary Subtitle",
       "enabledSecondarySub": "Enable Secondary Subtitle",
-      "increaseSubtitleDelayL": "",
-      "increaseSubtitleDelayS": "Subtitle Delay +0.1s",
       "langEn": "English",
       "langZhCN": "Chinese",
       "loadSubtitleFile": "Load Subtitle File…",
@@ -140,7 +158,7 @@
       "menuLoading": "Loading ...",
       "name": "Subtitles",
       "noSubtitle": "Not Found",
-      "notToShowSubtitle": "None",
+      "notToShowSubtitle": "Off",
       "secondarySubtitle": "Secondary Subtitle",
       "size1": "Small",
       "size2": "Standard",
@@ -165,6 +183,7 @@
       "yes": "yes"
     },
     "window": {
+      "backToLandingView": "Back to Launching Page",
       "bossKey": "Boss Key",
       "doubleSize": "200%",
       "enterFullScreen": "Enter Full Screen",
@@ -180,14 +199,29 @@
     "nextInFolder": "Next in Folder",
     "nextInPlaylist": "Next in Playlist"
   },
+  "welcome": {
+    "welcomeTitle": "Welcome to SPlayer",
+    "welcomeDescription": "All-new lightweight design, incredible performance with smart translation to let you enjoy your videos like never before.",
+    "agreement": "By using SPlayer, you agree to our ",
+    "policy": "privacy policy",
+    "languageTitle1": "Set your preferred subtitle",
+    "languageTitle2": "languages to fetch translations",
+    "primary": "Primary",
+    "secondary": "Secondary",
+    "chooseSecondary": "Select Secondary Language",
+    "languageDescription": "* You can change your settings in preferences later",
+    "none": "None"
+  },
   "preferences": {
     "general": {
+      "hideHistory": "Hide playback history",
       "clearHistory": "Always clear playback history on exit",
       "reverseScrolling": "Reverse mouse scrolling",
       "setDefault": "Set as the Default Video Player",
       "setDefaultDescription": "Open all video files with SPlayer.",
       "restoreSettings": "Reset All Content and Settings",
       "restoreSettingsDescription": "Restart application with all data and caches erased.",
+      "restoreSettingsAfterRelaunch": "Restart to apply.",
       "setButton": "Apply",
       "relaunch": "Restart",
       "displayLanguage": "Display Language",
@@ -229,6 +263,7 @@
   "recentPlaylist": {
     "folderSource": "Folder",
     "playing": "Playing",
+    "paused": "Paused",
     "playlistSource": "Playlist"
   },
   "subtitle": {
@@ -269,5 +304,9 @@
   "snapshotFailed": {
     "content": "Please try again later.",
     "title": "Snapshot Failed"
+  },
+  "loadVideoBySubtitleFailed": {
+    "content": "Cannot find any related video in the folder",
+    "title": ""
   }
 }

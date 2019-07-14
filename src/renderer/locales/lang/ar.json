@@ -5,10 +5,10 @@
     "changeTrack": "مقطع صوتي",
     "chosenTrack": "افتراضي",
     "fontItems": [
-      "S",
-      "M",
-      "L",
-      "XL"
+      "",
+      "",
+      "",
+      ""
     ],
     "fontSize": "حجم الخط",
     "fontStyle": "نوع الخط",
@@ -19,13 +19,25 @@
   },
   "css": {
     "titleFontSize": {
-      "fontSize": "21px"
+      "fontSize": ""
     },
     "versionFontSize": {
-      "fontSize": "14px"
+      "fontSize": ""
     }
   },
   "errorFile": {
+    "ENOSPC": {
+      "content": "",
+      "title": ""
+    },
+    "EACCES": {
+      "content": "",
+      "title": ""
+    },
+    "ENOENT": {
+      "content": "",
+      "title": ""
+    },
     "addNoVideo": {
       "content": "لا يمكن العثور على الملف القابل للتشغيل.",
       "title": "إضافة ملف فشل"
@@ -95,7 +107,9 @@
     "help": {
       "name": "مساعدة",
       "splayerxHelp": "مساعدة",
-      "shortCuts": "قائمة الاختصارات"
+      "shortCuts": "قائمة الاختصارات",
+      "crashReportLocation": "عرض سجل الأخطاء",
+      "crashReportNotAvailable": "لا يوجد سجل خطأ."
     },
     "playback": {
       "backwardL": "خطوة الى الوراء - 60s",
@@ -113,6 +127,8 @@
       "pause": "وقفة",
       "play": "لعب",
       "resetSpeed": "إعادة ضبط سرعة التشغيل",
+      "nextVideo": "الفيديو التالي",
+      "previousVideo": "الفيديو السابق",
       "singleCycle": "كرر مرة واحدة",
       "snapShot": "لمحة"
     },
@@ -123,16 +139,17 @@
       "hideOthers": "إخفاء الآخرين",
       "homepage": "موقع الكتروني",
       "preferences": "تفضيلات",
-      "quit": "قم بإنهاء برنامج SPlayer"
+      "quit": "قم بإنهاء برنامج SPlayer",
+      "showAll": "عرض الكل"
     },
     "subtitle": {
       "AITranslation": "تحديث الترجمة الذكية",
-      "decreaseSubtitleDelayL": "",
-      "decreaseSubtitleDelayS": "العنوان الفرعي تأخير -0.1s",
+      "decreasePrimarySubtitleDelay": "العنوان الفرعي تأخير -0.1s",
+      "increasePrimarySubtitleDelay": "العنوان الفرعي تأخير +0.1s",
+      "decreaseSecondarySubtitleDelay": "العنوان الفرعي تأخير -0.1s",
+      "increaseSecondarySubtitleDelay": "العنوان الفرعي تأخير +0.1s",
       "disabledSecondarySub": "تعطيل الترجمة الثانوية",
       "enabledSecondarySub": "تمكين الترجمة الثانوية",
-      "increaseSubtitleDelayL": "",
-      "increaseSubtitleDelayS": "العنوان الفرعي تأخير 0.1s",
       "langEn": "الإنجليزية",
       "langZhCN": "صينى",
       "loadSubtitleFile": "تحميل ملف الترجمة ...",
@@ -140,7 +157,7 @@
       "menuLoading": "جار التحميل ...",
       "name": "عناوين فرعية",
       "noSubtitle": "غير معثور عليه",
-      "notToShowSubtitle": "لا شيء",
+      "notToShowSubtitle": "قريب",
       "secondarySubtitle": "الترجمة الثانوية",
       "size1": "صغير",
       "size2": "اساسي",
@@ -156,7 +173,7 @@
       "subtitleStyle": "نوع الخط",
       "uploadSelectedSubtitle": "تحميل العنوان الفرعي المحدد"
     },
-    "titleName": "SPlayer",
+    "titleName": "",
     "update": {
       "message": "أعد تشغيل التطبيق الآن لتثبيت التحديث؟",
       "no": "لا",
@@ -165,6 +182,7 @@
       "yes": "نعم فعلا"
     },
     "window": {
+      "backToLandingView": "العودة إلى صفحة الإطلاق",
       "bossKey": "مدرب مفتاح",
       "doubleSize": "200٪",
       "enterFullScreen": "أدخل ملء الشاشة",
@@ -180,14 +198,29 @@
     "nextInFolder": "التالي في المجلد",
     "nextInPlaylist": "التالي في قائمة التشغيل"
   },
+  "welcome": {
+    "welcomeTitle": "",
+    "welcomeDescription": "",
+    "agreement": "",
+    "policy": "",
+    "languageTitle1": "",
+    "languageTitle2": "",
+    "primary": "",
+    "secondary": "",
+    "chooseSecondary": "",
+    "languageDescription": "",
+    "none": ""
+  },
   "preferences": {
     "general": {
+      "hideHistory": "إخفاء سجل التشغيل",
       "clearHistory": "قم دائمًا بمسح سجل التشغيل عند الخروج",
       "reverseScrolling": "التمرير عكس الماوس",
       "setDefault": "تعيين كمشغل الفيديو الافتراضي",
       "setDefaultDescription": ".افتح جميع ملفات الفيديو باستخدام SPlayer",
       "restoreSettings": "إعادة ضبط جميع المحتويات والإعدادات",
       "restoreSettingsDescription": ".أعد التشغيل مع مسح جميع البيانات وذاكرة التخزين المؤقت",
+      "restoreSettingsAfterRelaunch": "العثور على أي فيديو ذات صلة في المجلد.",
       "setButton": "تطبيق",
       "relaunch": "إعادة بدء",
       "displayLanguage": "عرض اللغة",
@@ -222,13 +255,14 @@
     "tryToDisable": {
       "button": "حسنا",
       "partOne": "يستخدم SPlayer بيانات مجهولة لتعزيز تجربة المستخدم. سيتم تعطيل الترجمة الذكية إذا كنت",
-      "partTwo": ".",
+      "partTwo": "",
       "underlinedContent": "تعارض"
     }
   },
   "recentPlaylist": {
     "folderSource": "مجلد",
     "playing": "تلعب",
+    "paused": "توقف",
     "playlistSource": "قائمة التشغيل"
   },
   "subtitle": {
@@ -269,5 +303,9 @@
   "snapshotFailed": {
     "content": "يرجى المحاولة لاحقا.",
     "title": " فشل لقطة"
+  },
+  "loadVideoBySubtitleFailed": {
+    "content": "العثور على أي فيديو ذات صلة في المجلد",
+    "title": ""
   }
 }

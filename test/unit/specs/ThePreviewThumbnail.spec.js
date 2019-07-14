@@ -1,8 +1,8 @@
-import ThePreviewThumbnail from '@/containers/ThePreviewThumbnail.vue';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
-import Video from '@/store/modules/Video';
 import Vuex from 'vuex';
 import sinon from 'sinon';
+import Video from '@/store/modules/Video';
+import ThePreviewThumbnail from '@/containers/ThePreviewThumbnail.vue';
 
 describe('Component - ThePreviewThumbnail', () => {
   let wrapper;

@@ -3,12 +3,11 @@
  * in a one-shot manner. There should not be any reason to edit this file.
  */
 
-const files = require.context('.', true, /^\.\/\w+(\/index)?\.js$/);
+const files = require.context('.', true, /^\.\/\w+(\/index)?\.[j|t]s$/);
 const modules = {};
 
 files.keys().forEach((key) => {
-  if (key === './index.js') return;
-  modules[key.replace(/(\.\/|(\/\w+)?\.js)/g, '')] = files(key).default;
+  if (key === './index.js' || key === './Subtitle.ts') return;
+  modules[key.replace(/(\.\/|(\/\w+)?\.[j|t]s)/g, '')] = files(key).default;
 });
-
 export default modules;

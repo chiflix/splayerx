@@ -40,9 +40,13 @@
               }"
               class="top"
             >
-              <span ref="lastPlayedTime" />
+              <span v-show="lastPlayedTimeDisplay > 0">
+                {{
+                  timecodeFromSeconds(lastPlayedTimeDisplay)
+                }} /
+              </span>
               {{
-                timecodeFromSeconds(videoDuration)
+                timecodeFromSeconds(hoveredDuration)
               }}&nbsp;&nbsp;·&nbsp;&nbsp;{{
                 inWhichSource
               }}&nbsp;&nbsp;{{ indexInPlaylist }} / {{ numberOfPlaylistItem }}
@@ -69,13 +73,14 @@
             marginLeft: sizeAdaption(40),
           }"
           @mouseup.stop=""
-          class="playlist-items"
+          class="playlist-items no-drag"
         >
           <RecentPlaylistItem
             v-for="(item, index) in playingList"
             :key="item"
             :index="index"
             :path="item"
+            :paused="paused"
             :is-last-page="lastIndex === maxIndex && firstIndex > 0"
             :page-switching="pageSwitching"
             :item-moving="itemMoving"
@@ -106,6 +111,7 @@
               minWidth: `${thumbnailWidth}px`,
               minHeight: `${thumbnailHeight}px`,
             }"
+            :use-blur="useBlur"
             :item-moving="itemMoving"
             :index="addIndex"
             :add-mouseup="addMouseup"
@@ -130,12 +136,15 @@ import path from 'path';
 import {
   mapState, mapGetters, mapActions, mapMutations,
 } from 'vuex';
+import { mediaQuickHash } from '@/libs/utils';
 import { Input as inputMutations } from '@/store/mutationTypes';
 import { Input as InputActions, Subtitle as subtitleActions } from '@/store/actionTypes';
 import RecentPlaylistItem from '@/containers/RecentPlaylistItem.vue';
 import Add from '@/components/PlayingView/Add.vue';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import RecentPlayService from '@/services/media/PlaylistService';
+import { playInfoStorageService } from '@/services/storage/PlayInfoStorageService';
+import { PlaylistItem } from '@/interfaces/IDB';
 
 export default {
   name: 'RecentPlaylist',
@@ -150,6 +159,7 @@ export default {
       type: Object,
       default: () => {},
     },
+    paused: Boolean,
     displayState: Boolean,
     isDragging: Boolean,
     lastDragging: Boolean,
@@ -181,9 +191,13 @@ export default {
       mousemovePosition: [],
       firstIndexOnMousedown: 0,
       lastIndexOnMousedown: 0,
+      currentTime: NaN,
+      shiftingTimeout: NaN,
     };
   },
   created() {
+    this.useBlur = window.devicePixelRatio === 1;
+    window.addEventListener('keyup', this.keyboardHandler);
     this.$bus.$on('delete-file', async (path: string, id: number) => {
       this.$store.dispatch('RemoveItemFromPlayingList', path);
       this.infoDB.delete('media-item', id);
@@ -197,7 +211,11 @@ export default {
 
     this.indexOfMovingItem = this.playingList.length;
     this.hoverIndex = this.playingIndex;
+    if (this.duration) this.hoveredDuration = this.duration;
     this.filename = this.pathBaseName(this.originSrc);
+  },
+  destroyed() {
+    window.removeEventListener('keyup', this.keyboardHandler);
   },
   methods: {
     ...mapMutations({
@@ -208,6 +226,31 @@ export default {
       clearMouseup: InputActions.MOUSEUP_UPDATE,
       updateSubToTop: subtitleActions.UPDATE_SUBTITLE_TOP,
     }),
+    keyboardHandler(e: KeyboardEvent) {
+      if (this.displayState && !e.metaKey && !e.ctrlKey) {
+        if (e.key === 'ArrowRight') {
+          this.shifting = true;
+          this.tranFlag = true;
+          this.firstIndex += this.thumbnailNumber;
+          if (this.shiftingTimeout) clearTimeout(this.shiftingTimeout);
+          this.shiftingTimeout = setTimeout(() => {
+            this.shifting = false;
+            this.tranFlag = false;
+          }, 400);
+        } else if (e.key === 'ArrowLeft') {
+          this.shifting = true;
+          this.tranFlag = true;
+          this.lastIndex -= this.thumbnailNumber;
+          if (this.shiftingTimeout) clearTimeout(this.shiftingTimeout);
+          this.shiftingTimeout = setTimeout(() => {
+            this.shifting = false;
+            this.tranFlag = false;
+          }, 400);
+        } else if (e.key === 'Escape') {
+          this.$emit('update:playlistcontrol-showattached', false);
+        }
+      }
+    },
     afterLeave() {
       this.backgroundDisplayState = false;
     },
@@ -226,13 +269,7 @@ export default {
       }
     },
     updatelastPlayedTime(time: number) {
-      if (this.$refs.lastPlayedTime) {
-        if (this.hoverIndex === this.playingIndex) {
-          this.$refs.lastPlayedTime.textContent = `${this.timecodeFromSeconds(time)} /`;
-        } else if (this.hoveredLastPlayedTime) {
-          this.$refs.lastPlayedTime.textContent = `${this.timecodeFromSeconds(this.hoveredLastPlayedTime)} /`;
-        }
-      }
+      this.currentTime = time;
     },
     addMouseup() {
       if (this.addIndex !== this.lastIndex + 1) {
@@ -323,16 +360,18 @@ export default {
       /* eslint-disable */
       for (const videoPath of this.playingList) {
         if (videoPath !== this.originSrc) {
-          const quickHash = await this.mediaQuickHash(videoPath);
-          const data = {
-            quickHash,
-            type: 'video',
-            path: videoPath,
-            source: 'playlist',
-          };
-          const videoId = await this.infoDB.add('media-item', data);
-          items.push(videoId);
-          hpaths.push(`${quickHash}-${videoPath}`);
+          const quickHash = await mediaQuickHash.try(videoPath);
+          if (quickHash) {
+            const data = {
+              quickHash,
+              type: 'video',
+              path: videoPath,
+              source: 'playlist',
+            };
+            const videoId = await this.infoDB.add('media-item', data);
+            items.push(videoId);
+            hpaths.push(`${quickHash}-${videoPath}`);
+          }
         } else {
           items.push(currentVideoId);
           hpaths.push(currentVideoHp);
@@ -343,6 +382,17 @@ export default {
       this.infoDB.update('recent-played', playlist, playlist.id);
       this.$store.dispatch('PlayingList', { id: playlist.id, paths: this.playingList, items: playlist.items });
     },
+    async updatePlaylist(playlistId: number) {
+      if (!Number.isNaN(playlistId)) {
+        const playlistRecord = await playInfoStorageService.getPlaylistRecord(playlistId);
+        const recentPlayedData = {
+          ...playlistRecord,
+          items: this.items,
+        };
+        await playInfoStorageService
+          .updateRecentPlayedBy(playlistId, recentPlayedData as PlaylistItem);
+      }
+    },
     onItemMouseup(index: number) { // eslint-disable-line complexity
       if (this.pageSwitching) clearTimeout(this.pageSwitchingTimeId);
       document.onmouseup = null;
@@ -350,6 +400,7 @@ export default {
        && this.itemMoving && this.canRemove) {
         this.$store.dispatch('RemoveItemFromPlayingList', this.playingList[index]);
         if (this.isFolderList) this.setPlayList();
+        else this.updatePlaylist(this.playListId);
         this.hoverIndex = this.playingIndex;
         this.filename = this.pathBaseName(this.originSrc);
         this.canRemove = false;
@@ -361,6 +412,7 @@ export default {
           newPosition: this.indexOfMovingTo,
         });
         if (this.isFolderList) this.setPlayList();
+        else this.updatePlaylist(this.playListId);
         if (this.indexOfMovingTo > this.lastIndex
           && this.lastIndex + 1 !== this.playingList.length) {
           this.lastIndex += 1;
@@ -405,6 +457,9 @@ export default {
         this.mousedownIndex = NaN;
         if (this.isFolderList) this.openVideoFile(this.playingList[index]);
         else this.playFile(this.playingList[index], this.items[index]);
+      } else if (index === this.playingIndex
+        && this.indexOfMovingItem === this.playingList.length) {
+        this.$bus.$emit('toggle-playback');
       }
       this.indexOfMovingItem = this.playingList.length;
       this.movementX = this.movementY = 0;
@@ -416,21 +471,41 @@ export default {
       this.filename = this.pathBaseName(recentPlayService.path);
       if (recentPlayService.lastPlayedTime) {
         this.hoveredLastPlayedTime = recentPlayService.lastPlayedTime;
+      } else {
+        this.hoveredLastPlayedTime = 0;
       }
     },
     onItemMouseout() {
       this.hoverIndex = this.playingIndex;
+      this.hoveredDuration = this.duration;
       this.filename = this.pathBaseName(this.originSrc);
     },
   },
   watch: {
     originSrc() {
       this.updateSubToTop(this.displayState);
-      this.hoverIndex = this.playingIndex;
+      if (
+        this.playingIndex > this.lastIndex
+        || this.playingIndex < this.firstIndex
+      ) {
+        this.firstIndex = this.playingIndex;
+        this.shifting = true;
+        this.tranFlag = true;
+        setTimeout(() => {
+          this.shifting = false;
+          this.tranFlag = false;
+        }, 400);
+      }
       this.filename = this.pathBaseName(this.originSrc);
+    },
+    duration(val: number) {
+      this.hoveredDuration = val;
     },
     playingList(val: string[]) {
       this.indexOfMovingItem = val.length;
+    },
+    playingIndex(val: number) {
+      this.hoverIndex = val;
     },
     firstIndex() {
       const marginRight = this.winWidth > 1355 ? (this.winWidth / 1355) * 15 : 15;
@@ -453,6 +528,27 @@ export default {
       if (this.firstIndex > 0 && this.maxIndex > this.firstIndex
        && this.maxIndex <= val && !this.itemMoving) {
         this.firstIndex = (this.maxIndex - this.thumbnailNumber) + 1;
+      }
+    },
+    thumbnailNumber(val: number) {
+      if (this.playingIndex > this.lastIndex) {
+        this.lastIndex = this.playingIndex;
+        this.shifting = true;
+        this.tranFlag = true;
+        setTimeout(() => {
+          this.shifting = false;
+          this.tranFlag = false;
+        }, 400);
+      } else if (this.playingIndex < this.firstIndex) {
+        this.firstIndex = this.playingIndex;
+        this.shifting = true;
+        this.tranFlag = true;
+        setTimeout(() => {
+          this.shifting = false;
+          this.tranFlag = false;
+        }, 400);
+      } else {
+        this.firstIndex = Math.floor(this.playingIndex / val) * val;
       }
     },
     maxIndex(val: number, oldVal: number) {
@@ -496,7 +592,7 @@ export default {
       }
     },
     mousemoveClientPosition(val: { x: number, y: number }) {
-      const distance = this.winWidth > 1355 ? 20 : 10;
+      const distance = 10;
       if (!this.canHoverItem && this.displayState) {
         if (Math.abs(this.mousePosition.x - val.x) > distance ||
         Math.abs(this.mousePosition.y - val.y) > distance) {
@@ -541,11 +637,11 @@ export default {
       }
       return this.$t('recentPlaylist.playlistSource');
     },
-    videoDuration() {
+    lastPlayedTimeDisplay() {
       if (this.hoverIndex !== this.playingIndex) {
-        return this.hoveredDuration;
+        return this.hoveredLastPlayedTime;
       }
-      return this.duration;
+      return this.currentTime;
     },
     indexInPlaylist() {
       return this.hoverIndex + 1;
@@ -647,7 +743,6 @@ export default {
       }
     }
     .playlist-items {
-      -webkit-app-region: no-drag;
       display: flex;
       width: fit-content;
       .item {

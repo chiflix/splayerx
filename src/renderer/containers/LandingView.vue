@@ -8,7 +8,7 @@
     <open-url v-show="openUrlShow" />
     <transition name="background-container-transition">
       <div
-        v-if="item.backgroundUrl"
+        v-if="item.backgroundUrl && !hideVideoHistoryOnExit"
         class="background"
       >
         <transition
@@ -50,16 +50,16 @@
         </div>
       </div>
     </transition>
-    <transition name="welcome-container-transition">
-      <div
-        v-if="!item.backgroundUrl"
-        class="welcome-container"
-      >
-        <div class="logo-container">
+    <div class="welcome-container">
+      <transition :name="logoTransition">
+        <div
+          v-if="pageMounted && (!item.backgroundUrl || hideVideoHistoryOnExit)"
+          class="logo-container"
+        >
           <Icon type="logo" />
         </div>
-      </div>
-    </transition>
+      </transition>
+    </div>
     <div
       ref="mask"
       class="mask"
@@ -81,7 +81,11 @@
             height:`${thumbnailHeight}px`,
             width:`${thumbnailWidth}px`,
             marginRight: `${marginRight}px`,
+            backgroundColor:
+              item.backgroundUrl && !hideVideoHistoryOnExit
+                ? 'rgba(255,255,255,0.12) ': 'rgba(255,255,255,0.05)',
           }"
+          :class="{ 'backdrop': useBlur }"
           @click="openOrMove"
           class="button"
         >
@@ -95,8 +99,10 @@
         <!-- eslint-disable-next-line vue/require-component-is -->
         <component
           :is="playlistLength > 1 ? 'PlaylistItem' : 'VideoItem'"
-          v-for="({ backgroundUrl, path, playlistLength }, index) in landingViewItems"
-          :key="path"
+          v-for="({ backgroundUrl, id, playlistLength }, index) in landingViewItems"
+          v-if="!hideVideoHistoryOnExit"
+          :key="id"
+          :can-hover="canHover"
           :backgroundUrl="backgroundUrl"
           :index="index"
           :is-in-range="index + 1 >= firstIndex && index + 1 <= lastIndex"
@@ -119,7 +125,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import { mapGetters } from 'vuex';
-import { HealthCheckResponse } from 'sagi-api/health/v1/health_pb';
+import { Route } from 'vue-router';
 import { playInfoStorageService } from '@/services/storage/PlayInfoStorageService';
 import { recentPlayService } from '@/services/media/RecentPlayService';
 import Icon from '@/components/BaseIconContainer.vue';
@@ -133,6 +139,8 @@ import NotificationBubble from '@/components/NotificationBubble.vue';
 import PlaylistItem from '@/components/LandingView/PlaylistItem.vue';
 import VideoItem from '@/components/LandingView/VideoItem.vue';
 import { log } from '@/libs/Log';
+import Sagi from '@/libs/sagi';
+import { deleteSubtitlesByPlaylistId } from '../services/storage/subtitle';
 
 Vue.component('PlaylistItem', PlaylistItem);
 Vue.component('VideoItem', VideoItem);
@@ -141,7 +149,6 @@ export default {
   name: 'LandingView',
   components: {
     Icon,
-    Titlebar,
     NotificationBubble,
     'short-marks': ShortMarks,
     'open-url': OpenUrl,
@@ -156,10 +163,14 @@ export default {
       tranFlag: true,
       shifting: false,
       firstIndex: 0,
+      useBlur: false,
+      pageMounted: false,
+      logoTransition: '',
+      canHover: false,
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'defaultDir', 'isFullScreen']),
+    ...mapGetters(['winWidth', 'defaultDir', 'isFullScreen', 'hideVideoHistoryOnExit']),
     lastIndex: {
       get() {
         return (this.firstIndex + this.showItemNum) - 1;
@@ -219,8 +230,23 @@ export default {
         }, 400);
       }
     },
+    showItemNum() {
+      if (this.firstIndex !== 0) {
+        this.tranFlag = false;
+        this.lastIndex = this.landingViewItems.length;
+      }
+    },
+  },
+  beforeRouteEnter(to: Route, { name: from }: Route, next: (vm: any) => void) {
+    next((vm: any) => {
+      vm.logoTransition = from === 'language-setting' ? 'scale' : '';
+      vm.pageMounted = true;
+    });
   },
   created() {
+    window.addEventListener('mousemove', this.globalMoveHandler);
+    this.useBlur = window.devicePixelRatio === 1;
+    // Get all data and show
     if (!this.$store.getters.deleteVideoHistoryOnExit) {
       recentPlayService.getRecords().then((results) => {
         this.landingViewItems = results;
@@ -261,33 +287,49 @@ export default {
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [720, 405]);
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [720 / 405]);
 
-    // TODO: error handling
-    this.sagi.healthCheck().then(({ status }: HealthCheckResponse.AsObject) => {
+    Sagi.healthCheck().then((status) => {
       if (process.env.NODE_ENV !== 'production') {
         this.sagiHealthStatus = status;
         log.info('LandingView.vue', `launching: ${app.getName()} ${app.getVersion()}`);
-        log.info('LandingView.vue', `sagi API Status: ${this.sagiHealthStatus}`);
       }
     });
     this.$bus.$on('open-url-show', (val: boolean) => {
       this.openUrlShow = val;
     });
-    this.$bus.$on('clean-lastPlayedFile', () => {
-      this.firstIndex = 0;
+    window.addEventListener('keyup', this.keyboardHandler);
+    window.addEventListener('beforeunload', this.beforeUnloadHandler);
+    this.$electron.ipcRenderer.on('quit', () => {
+      this.quit = true;
     });
-    window.onkeyup = (e) => {
-      if (e.keyCode === 39) {
+  },
+  destroyed() {
+    window.removeEventListener('mousemove', this.globalMoveHandler);
+    window.removeEventListener('keyup', this.keyboardHandler);
+    window.removeEventListener('beforeunload', this.beforeUnloadHandler);
+  },
+  methods: {
+    globalMoveHandler() {
+      this.logoTransition = 'welcome-container-transition';
+      this.canHover = true;
+    },
+    beforeUnloadHandler(e: BeforeUnloadEvent) {
+      if (process.env.NODE_ENV === 'development') { // app.hide() will disable app refresh and not good for dev
+      } else if (process.platform === 'darwin' && !this.quit) {
+        e.returnValue = false;
+        this.$electron.remote.app.hide();
+      }
+    },
+    keyboardHandler(e: KeyboardEvent) {
+      if (e.key === 'ArrowRight') {
         this.shifting = true;
         this.tranFlag = true;
         this.lastIndex = this.landingViewItems.length;
-      } else if (e.keyCode === 37) {
+      } else if (e.key === 'ArrowLeft') {
         this.shifting = true;
         this.tranFlag = true;
         this.firstIndex = 0;
       }
-    };
-  },
-  methods: {
+    },
     open() {
       const { app } = this.$electron.remote;
       if (this.defaultDir) {
@@ -316,18 +358,27 @@ export default {
     },
     onItemClick(index: number) {
       if (index === this.lastIndex && !this.isFullScreen) {
+        this.shifting = true;
+        this.tranFlag = true;
         this.lastIndex = this.landingViewItems.length;
       } else if (index + 1 < this.firstIndex && !this.isFullScreen) {
+        this.shifting = true;
+        this.tranFlag = true;
         this.firstIndex = 0;
       } else if (!this.filePathNeedToDelete) {
         this.openPlayList(this.landingViewItems[index].id);
       }
     },
     onItemDelete(index: number) {
-      playInfoStorageService.deleteRecentPlayedBy(this.landingViewItems[index].id);
       this.item = {};
-      this.landingViewItems.splice(index, 1);
-      if (this.firstIndex !== 0) this.lastIndex = this.landingViewItems.length;
+      const [deletedItem] = this.landingViewItems.splice(index, 1);
+      if (this.firstIndex !== 0) {
+        this.shifting = true;
+        this.tranFlag = true;
+        this.lastIndex = this.landingViewItems.length;
+      }
+      playInfoStorageService.deleteRecentPlayedBy(deletedItem.id);
+      deleteSubtitlesByPlaylistId(deletedItem.id);
     },
   },
 };
@@ -372,15 +423,17 @@ $themeColor-Light: white;
     align-items: flex-end;
 
     .button {
-      background-color: rgba(0, 0, 0, 0.12);
-      transition: background-color 150ms ease-out;
-      backdrop-filter: blur(9.8px);
+      transition: background-color 300ms ease-in;
+      transition-delay: 200ms;
       cursor: pointer;
+    }
+    .backdrop {
+      backdrop-filter: blur(9.8px);
     }
 
     .button:hover {
       background-color: rgba(123, 123, 123, 0.12);
-      transition: background-color 150ms ease-out;
+      transition: background-color 300ms ease-in;
     }
 
     .btnMask {
@@ -389,10 +442,11 @@ $themeColor-Light: white;
       height: 100%;
       border: 1px solid rgba(255, 255, 255, 0.15);
       display: flex;
-    }
+      transition: border 50ms linear;
 
-    .btnMask:hover {
-      border: 1px solid rgba(255, 255, 255, 0.6);
+      &:hover {
+        border: 1px solid rgba(255, 255, 255, 0.6);
+      }
     }
 
     .addUi {
@@ -498,8 +552,6 @@ $themeColor-Light: white;
   --client-height: 100vh;
   --pos-y: calc(var(--client-height) * 0.37 - 46px);
   transform: translateY(var(--pos-y));
-}
-.logo-container {
   -webkit-user-select: none;
   text-align: center;
 }
@@ -509,32 +561,49 @@ main {
 }
 
 
-.background-transition-enter-active, .background-transition-leave-active {
-  transition: opacity 300ms linear;
-}
-.background-transition-enter, .background-transition-leave-to {
-  opacity: 0;
-}
-.background-transition-enter-to, .background-transition-leave {
-  opacity: 1;
-}
-
-.welcome-container-transition-enter-active, .welcome-container-transition-leave-active{
-  transition: opacity .3s ease-in;
-  transition-delay: .2s;
+.background-transition {
+  &-enter-active, &-leave-active {
+    transition: opacity 300ms linear;
+  }
+  &-enter, &-leave-to {
+    opacity: 0;
+  }
 }
 
-.welcome-container-transition-enter, .welcome-container-transition-leave-to {
-  opacity: 0;
+.welcome-container-transition {
+  &-enter-active {
+    transition: opacity .3s ease-in;
+    transition-delay: 50ms;
+  }
+  &-leave-active {
+    transition: opacity 300ms ease-in;
+    transition-delay: 100ms;
+  }
+
+  &-enter, &-leave-to {
+    opacity: 0;
+  }
 }
 
-.background-container-transition-enter-active, .background-container-transition-leave-active{
-  transition: opacity .3s ease-in;
-  transition-delay: .2s;
+.background-container-transition {
+  &-enter-active, &-leave-active {
+    transition: opacity .3s ease-in;
+    transition-delay: .2s;
+  }
+
+  &-enter, &-leave-to{
+    opacity: 0;
+  }
 }
 
-.background-container-transition-enter, .background-container-transition-leave-to{
-  opacity: 0;
+.scale {
+  &-enter-active {
+    transition: all 300ms ease-out;
+  }
+  &-enter {
+    transform: scale(0.9, 0.9);
+    opacity: 0;
+  }
 }
 
 </style>

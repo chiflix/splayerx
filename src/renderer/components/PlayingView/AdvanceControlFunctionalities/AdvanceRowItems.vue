@@ -13,7 +13,7 @@
   >
     <div
       :style="{
-        backgroundImage: !isChosen && hoveredText ?
+        backgroundImage: !isChosen && hoveredText && isPrimarySub ?
           'linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.045) 20%, ' +
           'rgba(255,255,255,0.00) 78%, rgba(255,255,255,0.00) 100%)' : '',
         transition: 'opacity 200ms',
@@ -22,8 +22,8 @@
     >
       <div
         :style="{
-          cursor: isChosen ? 'default' : 'pointer',
-          color: !isChosen && hoveredText ?
+          cursor: isChosen || !isPrimarySub ? 'default' : 'pointer',
+          color: !isPrimarySub ? 'rgba(255, 255, 255, 0.2)' : !isChosen && hoveredText ?
             'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
           transition: 'color 300ms',
         }"
@@ -32,6 +32,9 @@
         <p>{{ rowType === rowTypeEnum.RATE ? $t('advance.rateTitle') : $t('advance.fontSize') }}</p>
         <div
           v-show="!isChosen || rowType === rowTypeEnum.RATE"
+          :style="{
+            color: isPrimarySub ? 'rgba(255, 255, 255, 0.6)' : 'rgba(255, 255, 255, 0.2)'
+          }"
           class="rightItem"
         >
           {{ showDetail }}
@@ -126,6 +129,10 @@ export default {
     handleRowClick: {
       type: Function,
       required: true,
+    },
+    isPrimarySub: {
+      type: Boolean,
+      default: true,
     },
   },
   data() {
@@ -361,7 +368,6 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   display: flex;
   border-radius: 7px;
   z-index: 10;
-  clip-path: inset(0 round 8px);
   transition: height 100ms linear, background-color 100ms linear, opacity 300ms;
   .detail {
     width: 100%;

@@ -1,20 +1,58 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="84px" height="84px" viewBox="0 0 84 84" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <!-- Generator: Sketch 53.1 (72631) - https://sketchapp.com -->
+    <!-- Generator: Sketch 55 (78076) - https://sketchapp.com -->
+    <desc>Created with Sketch.</desc>
     <defs>
-        <radialGradient cx="50%" cy="65.549251%" fx="50%" fy="65.549251%" r="56.1486292%" gradientTransform="translate(0.500000,0.655493),scale(1.000000,0.848835),rotate(90.000000),translate(-0.500000,-0.655493)" id="radialGradient-1">
-            <stop stop-color="#FFFFFF" stop-opacity="0.35" offset="0%"></stop>
-            <stop stop-color="#FFFFFF" stop-opacity="0.36" offset="43.5256546%"></stop>
-            <stop stop-color="#FFFFFF" stop-opacity="0.5" offset="100%"></stop>
+        <radialGradient cx="50%" cy="50.7192251%" fx="50%" fy="50.7192251%" r="49.2807749%" id="radialGradient-1">
+            <stop stop-color="#000000" stop-opacity="0.0518192745" offset="0%"></stop>
+            <stop stop-color="#000000" stop-opacity="0.05" offset="36.9488376%"></stop>
+            <stop stop-color="#000000" stop-opacity="0" offset="100%"></stop>
         </radialGradient>
-        <radialGradient cx="50%" cy="63.3385735%" fx="50%" fy="63.3385735%" r="59.3899687%" gradientTransform="translate(0.500000,0.633386),scale(1.000000,0.848835),rotate(90.000000),translate(-0.500000,-0.633386)" id="radialGradient-2">
-            <stop stop-color="#FFFFFF" stop-opacity="0.45" offset="0%"></stop>
-            <stop stop-color="#FFFFFF" stop-opacity="0.55" offset="61.2146326%"></stop>
-            <stop stop-color="#FFFFFF" stop-opacity="0.7" offset="100%"></stop>
+        <radialGradient cx="50%" cy="65.549251%" fx="50%" fy="65.549251%" r="165.586629%" gradientTransform="translate(0.500000,0.655493),scale(1.000000,0.287831),rotate(90.000000),translate(-0.500000,-0.655493)" id="radialGradient-2">
+            <stop stop-color="#FFFFFF" stop-opacity="0.109884511" offset="0%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.227553216" offset="53.8768967%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.540194746" offset="100%"></stop>
         </radialGradient>
+        <rect id="path-3" x="0" y="0" width="20" height="69.4852941" rx="4"></rect>
+        <filter x="-47.5%" y="-12.2%" width="195.0%" height="127.3%" filterUnits="objectBoundingBox" id="filter-4">
+            <feOffset dx="0" dy="1" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="3" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.08 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+        <radialGradient cx="54.5284356%" cy="50%" fx="54.5284356%" fy="50%" r="175.145589%" gradientTransform="translate(0.545284,0.500000),scale(1.000000,0.287831),rotate(90.000000),translate(-0.545284,-0.500000)" id="radialGradient-5">
+            <stop stop-color="#FFFFFF" stop-opacity="0.46323208" offset="0%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.698535839" offset="53.8768967%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.720334353" offset="100%"></stop>
+        </radialGradient>
+        <radialGradient cx="50%" cy="50%" fx="50%" fy="50%" r="165.586629%" gradientTransform="translate(0.500000,0.500000),scale(1.000000,0.287831),rotate(90.000000),translate(-0.500000,-0.500000)" id="radialGradient-6">
+            <stop stop-color="#FFFFFF" stop-opacity="0.588532561" offset="0%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.227553216" offset="60.6471706%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.692717439" offset="100%"></stop>
+        </radialGradient>
+        <rect id="path-7" x="0" y="0" width="20" height="69.4852941" rx="4"></rect>
+        <filter x="-47.5%" y="-12.2%" width="195.0%" height="127.3%" filterUnits="objectBoundingBox" id="filter-8">
+            <feOffset dx="0" dy="1" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="3" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.08 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
     </defs>
-    <g id="pause-default-icon" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <path d="M16.5,7 L28.5,7 C30.709139,7 32.5,8.790861 32.5,11 L32.5,72.5070423 C32.5,74.7161813 30.709139,76.5070423 28.5,76.5070423 L16.5,76.5070423 C14.290861,76.5070423 12.5,74.7161813 12.5,72.5070423 L12.5,11 C12.5,8.790861 14.290861,7 16.5,7 Z M55.5,7 L67.5,7 C69.709139,7 71.5,8.790861 71.5,11 L71.5,72.4852941 C71.5,74.6944331 69.709139,76.4852941 67.5,76.4852941 L55.5,76.4852941 C53.290861,76.4852941 51.5,74.6944331 51.5,72.4852941 L51.5,11 C51.5,8.790861 53.290861,7 55.5,7 Z" id="Basis" fill="url(#radialGradient-1)"></path>
-        <path d="M16.5,7 L28.5,7 C30.709139,7 32.5,8.790861 32.5,11 L32.5,72.5070423 C32.5,74.7161813 30.709139,76.5070423 28.5,76.5070423 L16.5,76.5070423 C14.290861,76.5070423 12.5,74.7161813 12.5,72.5070423 L12.5,11 C12.5,8.790861 14.290861,7 16.5,7 Z M55.5,7 L67.5,7 C69.709139,7 71.5,8.790861 71.5,11 L71.5,72.4852941 C71.5,74.6944331 69.709139,76.4852941 67.5,76.4852941 L55.5,76.4852941 C53.290861,76.4852941 51.5,74.6944331 51.5,72.4852941 L51.5,11 C51.5,8.790861 53.290861,7 55.5,7 Z" id="Border" stroke-opacity="0.437273551" stroke="#FFFFFF" stroke-width="1.2" fill="url(#radialGradient-2)"></path>
+    <g id="Play-Button-/-Playing-View-Huge-Button-/-Pause备份" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <circle id="椭圆形" fill-opacity="0.66" fill="url(#radialGradient-1)" cx="42" cy="42" r="40"></circle>
+        <g id="编组" transform="translate(51.500000, 7.000000)">
+            <g id="Rectangle">
+                <use fill="black" fill-opacity="1" filter="url(#filter-4)" xlink:href="#path-3"></use>
+                <use fill="url(#radialGradient-2)" fill-rule="evenodd" xlink:href="#path-3"></use>
+            </g>
+            <rect id="Rectangle" stroke-opacity="0.437273551" stroke="#FFFFFF" stroke-width="1.2" fill="url(#radialGradient-5)" x="0" y="0" width="20" height="69.4852941" rx="4"></rect>
+            <rect id="Rectangle" fill="url(#radialGradient-6)" x="0" y="0" width="20" height="69.4852941" rx="4"></rect>
+        </g>
+        <g id="编组备份" transform="translate(12.500000, 7.000000)">
+            <g id="Rectangle">
+                <use fill="black" fill-opacity="1" filter="url(#filter-8)" xlink:href="#path-7"></use>
+                <use fill="url(#radialGradient-2)" fill-rule="evenodd" xlink:href="#path-7"></use>
+            </g>
+            <rect id="Rectangle" stroke-opacity="0.437273551" stroke="#FFFFFF" stroke-width="1.2" fill="url(#radialGradient-5)" x="0" y="0" width="20" height="69.4852941" rx="4"></rect>
+            <rect id="Rectangle" fill="url(#radialGradient-6)" x="0" y="0" width="20" height="69.4852941" rx="4"></rect>
+        </g>
     </g>
 </svg>

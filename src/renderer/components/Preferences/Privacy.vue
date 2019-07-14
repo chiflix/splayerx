@@ -1,10 +1,7 @@
 <template>
   <div class="privicy tabcontent">
     <div class="settingItem">
-      <BaseCheckBox
-        :checkbox-value="privacyAgreement"
-        @update:checkbox-value="privacyAgreement = $event"
-      >
+      <BaseCheckBox v-model="privacyAgreement">
         {{ $t('preferences.privacy.privacyConfirm') }}
       </BaseCheckBox>
       <div
@@ -109,7 +106,7 @@
 
 <script>
 import electron from 'electron';
-import { codeToLanguageName } from '@/helpers/language';
+import { codeToLanguageName } from '@/libs/language';
 import Icon from '@/components/BaseIconContainer.vue';
 import BaseCheckBox from './BaseCheckBox.vue';
 

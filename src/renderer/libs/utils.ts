@@ -1,31 +1,45 @@
 import { createHash } from 'crypto';
-import { times, padStart } from 'lodash';
+// @ts-ignore
+import romanize from 'romanize';
+// @ts-ignore
+import urlParseLax from 'url-parse-lax';
+import { times, padStart, sortBy } from 'lodash';
+import { sep, basename } from 'path';
 // @ts-ignore
 import { promises as fsPromises } from 'fs';
+import { SubtitleControlListItem, Type } from '@/interfaces/ISubtitle';
+import { codeToLanguageName } from './language';
+// @ts-ignore
+import nzh from 'nzh';
 
 /** 计算文本宽度
  * @description
  * @param {string} fontSize
  * @param {string} fontFamily
  * @param {string} text
+ * @param {string} lineHeight
+ * @param {string} zoom
  * @returns {number}
  */
-export function getTextWidth(fontSize: string, fontFamily: string, text: string): number {
+export function calculateTextSize(fontSize: string, fontFamily: string, lineHeight: string, zoom: string, text: string): { width: number, height: number } {
   const span: HTMLElement = document.createElement('span');
-  let result: number = span.offsetWidth;
+  const result = { width: span.offsetWidth, height: span.offsetHeight };
   span.style.visibility = 'hidden';
   span.style.fontSize = fontSize;
   span.style.fontFamily = fontFamily;
   span.style.display = 'inline-block';
   span.style.fontWeight = '700';
   span.style.letterSpacing = '0.2px';
+  span.style.lineHeight = lineHeight;
+  span.style.zoom = zoom;
   document.body.appendChild(span);
   if (typeof span.textContent !== 'undefined') {
     span.textContent = text;
   } else {
     span.innerText = text;
   }
-  result = parseFloat(window.getComputedStyle(span).width || '0') - result;
+  result.width = parseFloat(window.getComputedStyle(span).width || '0') - result.width;
+  result.height = parseFloat(window.getComputedStyle(span).height || '0') - result.height;
   if (span.parentNode) {
     span.parentNode.removeChild(span);
   }
@@ -96,25 +110,41 @@ export function generateShortCutImageBy(video: HTMLVideoElement, canvas: HTMLCan
   return result;
 }
 
+function md5Hex(text: Buffer) {
+  return createHash('md5').update(text).digest('hex');
+}
+
+/** Calculate hash of file */
 export async function mediaQuickHash(filePath: string) {
-  function md5Hex(text: Buffer) {
-    return createHash('md5').update(text).digest('hex');
+  if (!urlParseLax(filePath).protocol) {
+    const fileHandler = await fsPromises.open(filePath, 'r');
+    const len = (await fsPromises.stat(filePath)).size;
+    const position = [
+      4096,
+      Math.floor(len / 3),
+      Math.floor(len / 3) * 2,
+      len - 8192,
+    ];
+    const res = await Promise.all(times(4).map(async (i) => {
+      const buf = Buffer.alloc(4096);
+      const { bytesRead } = await fileHandler.read(buf, 0, 4096, position[i]);
+      return md5Hex(buf.slice(0, bytesRead));
+    }));
+    fileHandler.close();
+    return res.join('-');
+  } else {
+    return 'hello-world-hello';// TODO streaming quickHash
   }
-  const fileHandler = await fsPromises.open(filePath, 'r');
-  const len = (await fsPromises.stat(filePath)).size;
-  const position = [
-    4096,
-    Math.floor(len / 3),
-    Math.floor(len / 3) * 2,
-    len - 8192,
-  ];
-  const res = await Promise.all(times(4).map(async (i) => {
-    const buf = Buffer.alloc(4096);
-    const { bytesRead } = await fileHandler.read(buf, 0, 4096, position[i]);
-    return md5Hex(buf.slice(0, bytesRead));
-  }));
-  fileHandler.close();
-  return res.join('-');
+}
+
+/** Silently calculate hash of file, returns null if there was an error */
+mediaQuickHash.try = async function(filePath: string) {
+  try {
+    return await mediaQuickHash(filePath);
+  } catch (ex) {
+    console.error(ex);
+    return null;
+  }
 }
 
 export function timecodeFromSeconds(s: number) {
@@ -127,4 +157,97 @@ export function timecodeFromSeconds(s: number) {
     return `${hours}:${minutes}:${seconds}`;
   }
   return `${minutes}:${seconds}`;
+}
+
+/**
+ * @description
+ * @param {string} videoSrc 视频路径
+ * @returns {string} hints
+ */
+export function generateHints(videoSrc: string): string {
+  let result = '';
+  videoSrc.split(sep).reverse().some((dirOrFileName, index) => {
+    if (index === 0) {
+      result = dirOrFileName;
+      return false;
+    }
+    if (index <= 2) {
+      result = `${dirOrFileName}${sep}${result}`;
+      return false;
+    }
+    result = `${sep}${result}`;
+    return true;
+  });
+  return result;
+}
+
+export function calculatedName(item: SubtitleControlListItem, list: SubtitleControlListItem[]): string {
+  let name = '';
+  if (item.type === Type.Local) {
+    name = basename(item.source);
+  } else if (item.type === Type.Embedded) {
+    let embeddedList = list
+      .filter((s: SubtitleControlListItem) => s.type === Type.Embedded);
+    embeddedList = sortBy(embeddedList, (s: SubtitleControlListItem) => s.source.streamIndex);
+    const sort = embeddedList.findIndex((s: SubtitleControlListItem) => s.id === item.id) + 1;
+    name = `${romanize(sort)} - ${codeToLanguageName(item.language)}`;
+  } else if (item.type === Type.Online) {
+    const sort = list
+      .filter((s: SubtitleControlListItem) => s.type === Type.Online && s.language === item.language)
+      .findIndex((s: SubtitleControlListItem) => s.id === item.id) + 1;
+    name = `${codeToLanguageName(item.language)} ${romanize(sort)}`;
+  }
+  return name;
+}
+// season math reg
+const SEREG = /([\u005b.-\s_]s[e]?(\d+)|season(\d+)|第(\d+)季|第([零一二三四五六七八九十百千]+)季)/i;
+// episode match reg
+const EPREG = /(e[p]?(\d+)[\u005d.-\s_]?|episode(\d+)|第(\d+)集|第([零一二三四五六七八九十百千]+)集)/i;
+
+/**
+ *
+ * @description 匹配路径中视频文件名称里面的season和episode
+ * @param {String} path 视频名称
+ * @returns {Object} example: {season: null, episode: "02"}
+ */
+export function parseNameFromPath(path: string) {
+  path = basename(path.trim()).replace(/\.(\w+)$/i, '.');
+  const result = {
+    season: null,
+    episode: null,
+  };
+  [
+    {
+      section: 'season',
+      pattern: SEREG,
+    },
+    {
+      section: 'episode',
+      pattern: EPREG,
+    },
+  ].forEach((item) => {
+    path = path.trim().replace(item.pattern, (match, $0, $1, $2, $3, $4) => {
+      // $0 -> matched content
+      // $1 -> first offset (\d+)
+      // $2 -> second offset (\d+)
+      // $3 -> third offset (\d+)
+      // $4 -> third offset ([零一二三四五六七八九十百千]+)
+      let p = null;
+      if ($1 !== undefined) p = parseInt($1, 10);
+      if ($2 !== undefined) p = parseInt($2, 10);
+      if ($3 !== undefined) p = parseInt($3, 10);
+      if (p !== null) {
+        result[item.section] = p < 10 ? `0${p}` : `${p}`;
+        return '';
+      }
+      if ($4) {
+        const p = nzh.cn.decodeS($4);
+        if (p > 0) result[item.section] = p < 10 ? `0${p}` : `${p}`;
+        return '';
+      }
+      if (match) return match;
+      return '';
+    });
+  });
+  return result;
 }

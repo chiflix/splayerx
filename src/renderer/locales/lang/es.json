@@ -5,10 +5,10 @@
     "changeTrack": "Pista de audio",
     "chosenTrack": "Defecto",
     "fontItems": [
-      "S",
-      "M",
-      "L",
-      "XL"
+      "",
+      "",
+      "",
+      ""
     ],
     "fontSize": "Tamaño de fuente",
     "fontStyle": "Estilo de fuente",
@@ -19,13 +19,25 @@
   },
   "css": {
     "titleFontSize": {
-      "fontSize": "21px"
+      "fontSize": ""
     },
     "versionFontSize": {
-      "fontSize": "14px"
+      "fontSize": ""
     }
   },
   "errorFile": {
+    "ENOSPC": {
+      "content": "",
+      "title": ""
+    },
+    "EACCES": {
+      "content": "",
+      "title": ""
+    },
+    "ENOENT": {
+      "content": "",
+      "title": ""
+    },
     "addNoVideo": {
       "content": "No se puede encontrar el archivo reproducible.",
       "title": "Agregar archivo fallido"
@@ -79,7 +91,7 @@
       "increaseAudioDelay": "Retraso auditivo",
       "increaseVolume": "Aumenta el volumen",
       "mute": "Mudo",
-      "name": "Audio",
+      "name": "",
       "switchAudioTrack": "Cambiar la pista de audio"
     },
     "file": {
@@ -95,7 +107,9 @@
     "help": {
       "name": "Ayuda",
       "splayerxHelp": "Ayuda",
-      "shortCuts": "Lista de accesos directos"
+      "shortCuts": "Lista de accesos directos",
+      "crashReportLocation": "Ver registro de errores",
+      "crashReportNotAvailable": "No hay registro de errores."
     },
     "playback": {
       "backwardL": "Paso atrás -60s",
@@ -113,6 +127,8 @@
       "pause": "Pausa",
       "play": "Jugar",
       "resetSpeed": "Restablecer velocidad de reproducción",
+      "nextVideo": "Siguiente Video",
+      "previousVideo": "Video Anterior",
       "singleCycle": "Repetir una",
       "snapShot": "Instantánea"
     },
@@ -123,16 +139,17 @@
       "hideOthers": "Esconder otros",
       "homepage": "Sitio web",
       "preferences": "Preferencias",
-      "quit": "Salir de SPlayer"
+      "quit": "Salir de SPlayer",
+      "showAll": "Mostrar todo"
     },
     "subtitle": {
       "AITranslation": "Recargar la traducción Smart",
-      "decreaseSubtitleDelayL": "",
-      "decreaseSubtitleDelayS": "retraso de subtítulos -0.1s",
+      "decreasePrimarySubtitleDelay": "Retraso de subtítulos -0.1s",
+      "increasePrimarySubtitleDelay": "Retraso de subtítulos +0.1s",
+      "decreaseSecondarySubtitleDelay": "Retraso de subtítulos secundarios -0.1s",
+      "increaseSecondarySubtitleDelay": "Retraso de subtítulos secundarios +0.1s",
       "disabledSecondarySub": "Desactivar Subtitulo Secundario",
       "enabledSecondarySub": "Habilitar subtítulos secundarios",
-      "increaseSubtitleDelayL": "",
-      "increaseSubtitleDelayS": "retraso de subtítulos +0.1s",
       "langEn": "Inglés",
       "langZhCN": "Chino",
       "loadSubtitleFile": "Cargar archivo de subtítulos ...",
@@ -140,7 +157,7 @@
       "menuLoading": "Cargando ...",
       "name": "Subtítulos",
       "noSubtitle": "Extraviado",
-      "notToShowSubtitle": "Ninguna",
+      "notToShowSubtitle": "Cerrar",
       "secondarySubtitle": "Subtitulo secundario",
       "size1": "Pequeño",
       "size2": "Estándar",
@@ -156,7 +173,7 @@
       "subtitleStyle": "Estilo de fuente",
       "uploadSelectedSubtitle": "Subir Subtítulo seleccionado"
     },
-    "titleName": "SPlayer",
+    "titleName": "",
     "update": {
       "message": "¿Reiniciar la aplicación ahora para instalar la actualización?",
       "no": "No",
@@ -165,33 +182,49 @@
       "yes": "Sí"
     },
     "window": {
+      "backToLandingView": "Volver a la página de inicio",
       "bossKey": "Clave de jefe",
-      "doubleSize": "200%",
+      "doubleSize": "",
       "enterFullScreen": "Ingrese a pantalla completa",
       "exitFullScreen": "Salir de pantalla completa",
-      "halfSize": "50%",
+      "halfSize": "",
       "maxmize": "Enfocar",
       "minimize": "Minimizar",
       "name": "Ventana",
-      "originSize": "100%"
+      "originSize": ""
     }
   },
   "nextVideo": {
     "nextInFolder": "Siguiente en la carpeta",
     "nextInPlaylist": "Siguiente en Playlist"
   },
+  "welcome": {
+    "welcomeTitle": "",
+    "welcomeDescription": "",
+    "agreement": "",
+    "policy": "",
+    "languageTitle1": "",
+    "languageTitle2": "",
+    "primary": "",
+    "secondary": "",
+    "chooseSecondary": "",
+    "languageDescription": "",
+    "none": ""
+  },
   "preferences": {
     "general": {
+      "hideHistory": "Ocultar historial de reproducción",
       "clearHistory": "Borrar siempre el historial de reproducción al salir",
       "reverseScrolling": "Desplazamiento inverso del ratón",
       "setDefault": "Establecer como el jugador predeterminado",
       "setDefaultDescription": "Todos los formatos de video se abren automáticamente usando SPlayer.",
       "restoreSettings": "Borrar contenidos y ajustes",
       "restoreSettingsDescription": "Reinicie con todos los datos y cachés borrados.",
+      "restoreSettingsAfterRelaunch": "Reiniciar para aplicar.",
       "setButton": "Aplicar",
       "relaunch": "Reiniciar",
       "displayLanguage": "Idioma de la pantalla",
-      "generalSetting": "General",
+      "generalSetting": "",
       "others": "Otros",
       "switchDisplayLanguages": "Mostrar idioma controla el idioma que ves en SPlayer."
     },
@@ -222,14 +255,15 @@
     "tryToDisable": {
       "button": "De acuerdo",
       "partOne": "SPlayer utiliza datos anónimos para mejorar la experiencia del usuario. La traducción inteligente se desactivará si",
-      "partTwo": ".",
+      "partTwo": "",
       "underlinedContent": "Prohibir"
     }
   },
   "recentPlaylist": {
     "folderSource": "Carpeta",
     "playing": "Jugando",
-    "playlistSource": "Playlist"
+    "paused": "En pausa",
+    "playlistSource": ""
   },
   "subtitle": {
     "embedded": "Empotrar",
@@ -239,7 +273,7 @@
       "en": "Inglés",
       "es": "Español",
       "fr": "Francés",
-      "hi": "Hindi",
+      "hi": "",
       "it": "Italiano",
       "ja": "Japonés",
       "ko": "Coreano",
@@ -269,5 +303,9 @@
   "snapshotFailed": {
     "content": "Por favor intente más tarde.",
     "title": "Instantánea fallada"
+  },
+  "loadVideoBySubtitleFailed": {
+    "content": "No hay videos relacionados en la carpeta",
+    "title": ""
   }
 }
