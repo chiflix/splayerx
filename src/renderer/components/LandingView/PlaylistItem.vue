@@ -43,7 +43,6 @@
         class="content"
       >
         <div
-          ref="border"
           :style="{
             left: `-${0.7 / 2}px`,
             top: `-${0.7 / 2}px`,
@@ -56,14 +55,9 @@
           }"
           class="border"
         >
-          <div
-            :style="{
-              opacity: aboutToDelete ? '1' : '0',
-            }"
-            class="deleteUi"
-          >
-            <Icon type="delete" />
-          </div>
+          <transition name="fade-100">
+            <Icon v-show="aboutToDelete" type="delete" />
+          </transition>
         </div>
       </div>
     </div>
@@ -272,10 +266,6 @@ $border-radius: 3px;
     justify-content: center;
     align-items: center;
     transition: border 100ms ease-out, background-color 100ms ease-out;
-    .deleteUi {
-      opacity: 0;
-      transition: opacity 100ms ease-out;
-    }
   }
 }
 </style>

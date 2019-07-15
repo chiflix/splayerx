@@ -23,7 +23,6 @@
       class="content"
     >
       <div
-        ref="border"
         :style="{
           left: `-${0.7 / 2}px`,
           top: `-${0.7 / 2}px`,
@@ -31,15 +30,14 @@
           height: `${thumbnailHeight - 0.7}px`,
           border: chosen ? '0.7px solid rgba(255,255,255,0.6)'
             : '0.7px solid rgba(255,255,255,0.15)',
+          backgroundColor: aboutToDelete ? 'rgba(0,0,0,0.43)'
+            : chosen ? 'rgba(255,255,255,0.2)' : '',
         }"
         class="border"
       >
-        <div
-          ref="deleteUi"
-          class="deleteUi"
-        >
-          <Icon type="delete" />
-        </div>
+        <transition name="fade-100">
+          <Icon v-show="aboutToDelete" type="delete" />
+        </transition>
       </div>
     </div>
   </div>
@@ -116,12 +114,10 @@ export default {
       if ((this.isInRange || this.isFullScreen) && !this.shifting && this.canHover) {
         this.onItemMouseover(this.index);
         this.chosen = true;
-        this.$refs.border.style.setProperty('background-color', 'rgba(255,255,255,0.2)');
       }
     },
     onRecentItemMouseout() {
       this.chosen = false;
-      this.$refs.border.style.setProperty('background-color', '');
     },
     onRecentItemMousedown(e: MouseEvent) {
       this.disX = e.pageX;
@@ -142,12 +138,8 @@ export default {
       this.$refs.item.style.setProperty('transform', `translate(${movementX}px, ${movementY}px)`);
       if (Math.abs(movementX) >= this.thumbnailWidth
         || Math.abs(movementY) >= this.thumbnailHeight) {
-        this.$refs.border.style.setProperty('background-color', 'rgba(0,0,0,0.43)');
-        this.$refs.deleteUi.style.setProperty('opacity', '1');
         this.aboutToDelete = true;
       } else {
-        this.$refs.border.style.setProperty('background-color', 'rgba(255,255,255,0.2');
-        this.$refs.deleteUi.style.setProperty('opacity', '0');
         this.aboutToDelete = false;
       }
     },
@@ -212,9 +204,5 @@ $border-radius: 3px;
   justify-content: center;
   align-items: center;
   transition: border 100ms ease-out, background-color 100ms ease-out;
-  .deleteUi {
-    opacity: 0;
-    transition: opacity 100ms ease-out;
-  }
 }
 </style>
