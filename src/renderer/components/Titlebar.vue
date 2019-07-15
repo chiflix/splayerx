@@ -1,6 +1,9 @@
 <template>
   <div
     :class="isDarwin ? 'darwin-titlebar' : 'titlebar'"
+    :style="{
+      width: $route.name === 'playing-view' ? '100%' : ''
+    }"
     @dblclick.stop="handleDbClick"
   >
     <div
@@ -84,7 +87,7 @@
 <script lang="ts">
 import { mapGetters } from 'vuex';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
-import Icon from './BaseIconContainer.vue';
+import Icon from '@/components/BaseIconContainer.vue';
 
 export default {
   name: 'Titlebar',
@@ -166,10 +169,12 @@ export default {
   },
   methods: {
     handleDbClick() {
-      if (!this.isMaximized) {
-        this.$electron.ipcRenderer.send('callMainWindowMethod', 'maximize');
-      } else {
-        this.$electron.ipcRenderer.send('callMainWindowMethod', 'unmaximize');
+      if (this.$route.name === 'playing-view') {
+        if (!this.isMaximized) {
+          this.$electron.ipcRenderer.send('callMainWindowMethod', 'maximize');
+        } else {
+          this.$electron.ipcRenderer.send('callMainWindowMethod', 'unmaximize');
+        }
       }
     },
     handleMouseOver() {
@@ -214,20 +219,22 @@ export default {
 
 <style lang="scss" scoped>
 .titlebar {
-  position: absolute;
   top: 0;
+  right: 0;
   border-radius: 10px;
-  width: 100%;
+  width: 135px;
   height: 36px;
   z-index: 6;
+  display: flex;
+  position: absolute;
   .win-icons {
     display: flex;
     flex-wrap: nowrap;
-    position: absolute;
-    right: 0;
+    margin: auto;
     .title-button {
       width: 45px;
       height: 36px;
+      display: flex;
       background-color: rgba(255,255,255,0);
       transition: background-color 200ms;
     }
@@ -240,15 +247,13 @@ export default {
   }
 }
 .darwin-titlebar {
-  position: absolute;
   z-index: 6;
-  box-sizing: content-box;
   height: 36px;
-  width: 100%;
+  width: 90px;
+  display: flex;
+  position: absolute;
   .mac-icons {
-    position: absolute;
-    top: 12px;
-    left: 12px;
+    margin: auto auto auto 10px;
     display: flex;
     flex-wrap: nowrap;
   }
@@ -257,6 +262,7 @@ export default {
     height: 12px;
     margin-right: 8px;
     background-repeat: no-repeat;
+    -webkit-app-region: no-drag;
     border-radius: 100%;
   }
   #minimize {

@@ -1,9 +1,5 @@
 <template>
   <div class="wrapper">
-    <titlebar
-      key="playing-view"
-      current-view="LandingView"
-    />
     <short-marks
       v-show="!openUrlShow"
       :handle-browsing-open="handleBrowsingOpen"
@@ -136,10 +132,7 @@ import { Route } from 'vue-router';
 import { playInfoStorageService } from '@/services/storage/PlayInfoStorageService';
 import { recentPlayService } from '@/services/media/RecentPlayService';
 import Icon from '@/components/BaseIconContainer.vue';
-// @ts-ignore
-// @ts-ignore
 import ShortMarks from '@/components/LandingView/ShortMarks.vue';
-// @ts-ignore
 import OpenUrl from '@/components/LandingView/OpenUrl.vue';
 import NotificationBubble from '@/components/NotificationBubble.vue';
 import PlaylistItem from '@/components/LandingView/PlaylistItem.vue';
