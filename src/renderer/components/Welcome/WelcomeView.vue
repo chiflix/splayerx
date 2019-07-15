@@ -104,7 +104,7 @@ export default {
   .icon {
     width: 40px;
     height: 40px;
-    padding-top: 42px;
+    margin-top: 42px;
   }
 }
 .transform {
