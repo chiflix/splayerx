@@ -169,7 +169,7 @@ export default {
 <style lang="scss" scoped>
 $border-radius: 3px;
 .item {
-  transition: bottom 100ms ease-in, transform 10ms ease-in;
+  transition: bottom 100ms ease-in;
   position: relative;
   border-radius: $border-radius;
   cursor: pointer;
