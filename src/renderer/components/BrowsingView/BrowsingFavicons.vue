@@ -38,15 +38,23 @@
   </div>
 </template>
 
-<script>
-import { mapActions, mapGetters } from 'vuex';
-import { Browsing as browsingActions } from '@/store/actionTypes';
-import Icon from '../BaseIconContainer.vue';
+<script lang="ts">
+import Icon from '@/components/BaseIconContainer.vue';
 
 export default {
   name: 'BrowsingFavicons',
   components: {
     Icon,
+  },
+  props: {
+    recordUrl: {
+      type: Object,
+      required: true,
+    },
+    updateInitialUrl: {
+      type: Function,
+      required: true,
+    },
   },
   data() {
     return {
@@ -60,7 +68,6 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['recordUrl']),
     favAnimClass() {
       if (this.isDarwin) {
         return this.showFavicon ? 'fav-show-animation' : 'fav-hide-animation';
@@ -78,10 +85,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions({
-      updateInitialUrl: browsingActions.UPDATE_INITIAL_URL,
-    }),
-    favIconMouseOver(index) {
+    favIconMouseOver(index: number) {
       this.faviconIndex = index;
     },
     favIconMouseLeave() {
@@ -93,11 +97,12 @@ export default {
       }
       this.showFavicon = !this.showFavicon;
     },
-    handleFavOpen(item) {
+    handleFavOpen(item: { name: string, type: string, url: string }) {
       this.updateInitialUrl(this.recordUrl[item.type] ? this.recordUrl[item.type] : item.url);
     },
-    handleFavAnimEnd(e) {
-      if (e.target.classList.contains('fav-hide-animation') || e.target.classList.contains('win-fav-hide-animation')) {
+    handleFavAnimEnd(e: AnimationEvent) {
+      const target = e.target as HTMLElement;
+      if (target.classList.contains('fav-hide-animation') || target.classList.contains('win-fav-hide-animation')) {
         this.$refs.favDetail.style.display = 'none';
       }
     },

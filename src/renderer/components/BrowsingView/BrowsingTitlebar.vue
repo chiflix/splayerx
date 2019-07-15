@@ -79,9 +79,9 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import electron from 'electron';
-import Icon from '../BaseIconContainer.vue';
+import Icon from '@/components/BaseIconContainer.vue';
 
 export default {
   name: 'BrowsingTitlebar',
@@ -111,14 +111,14 @@ export default {
     },
   },
   watch: {
-    keyAlt(val) {
+    keyAlt(val: boolean) {
       if (!val || !this.keyOver) {
         this.itemType = this.itemTypeEnum.FULLSCREEN;
       } else if (!this.isFullScreen) {
         this.itemType = this.itemTypeEnum.MAXSCREEN;
       }
     },
-    keyOver(val) {
+    keyOver(val: boolean) {
       if (!val || !this.keyAlt) {
         this.itemType = this.itemTypeEnum.FULLSCREEN;
       } else if (!this.isFullScreen) {

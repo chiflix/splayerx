@@ -18,44 +18,41 @@
       :style="{
         order: isDarwin ? '2' : '1',
         margin: isDarwin ? 'auto 0 auto 10px' : 'auto 10px auto 0' }"
-      @mouseup.native="handleCloseUrlInput"
+      @mouseup.native="closeUrlInput"
       type="closeSearch"
       class="close-icon"
     />
   </div>
 </template>
 
-<script>
-import { mapActions, mapGetters } from 'vuex';
-import { Browsing as browsingActions } from '@/store/actionTypes';
-import Icon from '../BaseIconContainer.vue';
+<script lang="ts">
+import Icon from '@/components/BaseIconContainer.vue';
 
 export default {
   name: 'OpenUrl',
   components: {
     Icon,
   },
+  props: {
+    openInputUrl: {
+      type: Function,
+      required: true,
+    },
+    closeUrlInput: {
+      type: Function,
+      required: true,
+    },
+  },
   computed: {
-    ...mapGetters(['browsingSize']),
     isDarwin() {
       return process.platform === 'darwin';
     },
   },
   methods: {
-    ...mapActions({
-      updateInitialUrl: browsingActions.UPDATE_INITIAL_URL,
-    }),
-    handleCloseUrlInput() {
-      this.$bus.$emit('open-url-show', false);
-    },
-    handleEnterKey(e) {
+    handleEnterKey(e: KeyboardEvent) {
       if (e.key === 'Enter') {
         const inputUrl = this.$refs.inputValue.value;
-        if (this.openFileByPlayingView(inputUrl)) {
-          this.openUrlFile(inputUrl);
-        } else {
-          this.$electron.ipcRenderer.send('add-browsingView', { size: this.browsingSize, url: this.$refs.inputValue.value });
-        }
+        this.openInputUrl(inputUrl);
       }
     },
   },

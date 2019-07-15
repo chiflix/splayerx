@@ -23,20 +23,38 @@
     />
     <Icon
       :type="picInPicType"
-      @mouseup.native="handlePicInPic"
+      @mouseup.native="handleEnterPip"
       class="pic-in-pic"
     />
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { mapGetters } from 'vuex';
-import Icon from '../BaseIconContainer.vue';
+import Icon from '@/components/BaseIconContainer.vue';
 
 export default {
   name: 'BrowsingControl',
   components: {
     Icon,
+  },
+  props: {
+    handleEnterPip: {
+      type: Function,
+      required: true,
+    },
+    handleUrlReload: {
+      type: Function,
+      required: true,
+    },
+    handleUrlBack: {
+      type: Function,
+      required: true,
+    },
+    handleUrlForward: {
+      type: Function,
+      required: true,
+    },
   },
   data() {
     return {
@@ -53,14 +71,14 @@ export default {
     },
   },
   watch: {
-    backType(val) {
+    backType(val: string) {
       if (val === 'back') {
         this.$refs.back.$el.classList.add('able-opacity');
       } else {
         this.$refs.back.$el.classList.remove('able-opacity');
       }
     },
-    forwardType(val) {
+    forwardType(val: string) {
       if (val === 'forward') {
         this.$refs.forward.$el.classList.add('able-opacity');
       } else {
@@ -68,26 +86,14 @@ export default {
       }
     },
   },
-  mounted() {
-    this.$bus.$on('web-info', (info) => {
+  methods: {
+    updateWebInfo(info: {
+      hasVideo: boolean, url: string, canGoBack: boolean, canGoForward: boolean
+    }) {
       this.hasVideo = info.hasVideo;
       this.url = info.url;
       this.backType = info.canGoBack ? 'back' : 'backDisabled';
       this.forwardType = info.canGoForward ? 'forward' : 'forwardDisabled';
-    });
-  },
-  methods: {
-    handlePicInPic() {
-      this.$bus.$emit('enter-pip');
-    },
-    handleUrlReload() {
-      this.$bus.$emit('url-reload');
-    },
-    handleUrlBack() {
-      this.$bus.$emit('url-back');
-    },
-    handleUrlForward() {
-      this.$bus.$emit('url-forward');
     },
   },
 };

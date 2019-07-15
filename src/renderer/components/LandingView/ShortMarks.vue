@@ -46,14 +46,18 @@
   </div>
 </template>
 
-<script>
-import { mapActions, mapGetters } from 'vuex';
-import { Browsing as browsingActions } from '@/store/actionTypes';
-import Icon from '../BaseIconContainer.vue';
+<script lang="ts">
+import Icon from '@/components/BaseIconContainer.vue';
 
 export default {
   name: 'ShortMarks',
   components: { Icon },
+  props: {
+    handleBrowsingOpen: {
+      type: Function,
+      required: true,
+    },
+  },
   data() {
     return {
       marks: [
@@ -66,7 +70,6 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['browsingSize']),
     marksAnimClass() {
       if (this.isDarwin) {
         return this.showMarks ? 'marks-show-animation' : 'marks-hide-animation';
@@ -84,10 +87,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions({
-      updateInitialUrl: browsingActions.UPDATE_INITIAL_URL,
-    }),
-    marksMouseOver(index) {
+    marksMouseOver(index: number) {
       this.markHoverIndex = index;
     },
     marksMouseLeave() {
@@ -99,11 +99,9 @@ export default {
       }
       this.showMarks = !this.showMarks;
     },
-    handleBrowsingOpen(item) {
-      this.$electron.ipcRenderer.send('add-browsingView', { size: this.browsingSize, url: item.url });
-    },
-    handleMarksAnimEnd(e) {
-      if (e.target.classList.contains('marks-hide-animation') || e.target.classList.contains('win-marks-hide-animation')) {
+    handleMarksAnimEnd(e: AnimationEvent) {
+      const target = e.target as HTMLElement;
+      if (target.classList.contains('marks-hide-animation') || target.classList.contains('win-marks-hide-animation')) {
         this.$refs.marksDetail.style.display = 'none';
       }
     },

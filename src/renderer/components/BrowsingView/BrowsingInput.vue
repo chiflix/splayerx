@@ -25,16 +25,23 @@
   </div>
 </template>
 
-<script>
-import electron from 'electron';
-import { mapActions } from 'vuex';
-import { Browsing as browsingActions } from '@/store/actionTypes';
-import Icon from '../BaseIconContainer.vue';
+<script lang="ts">
+import Icon from '@/components/BaseIconContainer.vue';
 
 export default {
   name: 'BrowsingInput',
   components: {
     Icon,
+  },
+  props: {
+    closeUrlInput: {
+      type: Function,
+      required: true,
+    },
+    playFileWithPlayingView: {
+      type: Function,
+      required: true,
+    },
   },
   computed: {
     isDarwin() {
@@ -42,20 +49,13 @@ export default {
     },
   },
   methods: {
-    ...mapActions({
-      updateInitialUrl: browsingActions.UPDATE_INITIAL_URL,
-    }),
     handleCloseUrlInput() {
-      this.$bus.$emit('open-url-show', false);
+      this.closeUrlInput();
     },
-    handleSearchKey(e) {
+    handleSearchKey(e: KeyboardEvent) {
       const inputUrl = this.$refs.searchValue.value;
       if (e.key === 'Enter') {
-        if (this.openFileByPlayingView(inputUrl)) {
-          electron.ipcRenderer.send('open-file-by-playing', inputUrl);
-        } else {
-          this.updateInitialUrl(inputUrl);
-        }
+        this.playFileWithPlayingView(inputUrl);
       }
     },
   },

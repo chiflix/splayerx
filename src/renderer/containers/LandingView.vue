@@ -4,8 +4,15 @@
       key="playing-view"
       current-view="LandingView"
     />
-    <short-marks v-show="!openUrlShow" />
-    <open-url v-show="openUrlShow" />
+    <short-marks
+      v-show="!openUrlShow"
+      :handle-browsing-open="handleBrowsingOpen"
+    />
+    <open-url
+      v-show="openUrlShow"
+      :open-input-url="openInputUrl"
+      :close-url-input="closeUrlInput"
+    />
     <transition name="background-container-transition">
       <div
         v-if="item.backgroundUrl && !hideVideoHistoryOnExit"
@@ -124,13 +131,12 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import { mapGetters } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
 import { Route } from 'vue-router';
 import { playInfoStorageService } from '@/services/storage/PlayInfoStorageService';
 import { recentPlayService } from '@/services/media/RecentPlayService';
 import Icon from '@/components/BaseIconContainer.vue';
 // @ts-ignore
-import Titlebar from '@/components/LandingTitlebar.vue';
 // @ts-ignore
 import ShortMarks from '@/components/LandingView/ShortMarks.vue';
 // @ts-ignore
@@ -140,6 +146,7 @@ import PlaylistItem from '@/components/LandingView/PlaylistItem.vue';
 import VideoItem from '@/components/LandingView/VideoItem.vue';
 import { log } from '@/libs/Log';
 import Sagi from '@/libs/sagi';
+import { Browsing as browsingActions } from '@/store/actionTypes';
 import { deleteSubtitlesByPlaylistId } from '../services/storage/subtitle';
 
 Vue.component('PlaylistItem', PlaylistItem);
@@ -170,7 +177,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'defaultDir', 'isFullScreen', 'hideVideoHistoryOnExit']),
+    ...mapGetters(['winWidth', 'defaultDir', 'isFullScreen', 'hideVideoHistoryOnExit', 'browsingSize']),
     lastIndex: {
       get() {
         return (this.firstIndex + this.showItemNum) - 1;
@@ -308,6 +315,22 @@ export default {
     window.removeEventListener('beforeunload', this.beforeUnloadHandler);
   },
   methods: {
+    ...mapActions({
+      updateInitialUrl: browsingActions.UPDATE_INITIAL_URL,
+    }),
+    handleBrowsingOpen(item: { type: string, name: string, url: string }) {
+      this.$electron.ipcRenderer.send('add-browsingView', { size: this.browsingSize, url: item.url });
+    },
+    closeUrlInput() {
+      this.$bus.$emit('open-url-show', false);
+    },
+    openInputUrl(inputUrl: string) {
+      if (this.openFileByPlayingView(inputUrl)) {
+        this.openUrlFile(inputUrl);
+      } else {
+        this.$electron.ipcRenderer.send('add-browsingView', { size: this.browsingSize, url: inputUrl });
+      }
+    },
     globalMoveHandler() {
       this.logoTransition = 'welcome-container-transition';
       this.canHover = true;

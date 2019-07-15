@@ -29,21 +29,27 @@
       allowpopups
     />
     <browsing-control
+      ref="browsingControl"
       v-show="!isPip"
       :class="controlToShow ? 'control-show-animation' : 'control-hide-animation'"
+      :handle-enter-pip="handleEnterPip"
+      :handle-url-reload="handleUrlReload"
+      :handle-url-back="handleUrlBack"
+      :handle-url-forward="handleUrlForward"
     />
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { mapGetters, mapActions } from 'vuex';
 import electron from 'electron';
 import { Browsing as browsingActions } from '@/store/actionTypes';
+// @ts-ignore
 import urlParseLax from 'url-parse-lax';
-import BrowsingHeader from './BrowsingView/BrowsingHeader.vue';
-import BrowsingControl from './BrowsingView/BrowsingControl.vue';
-import Icon from './BaseIconContainer.vue';
-import BrowsingTitleBar from './BrowsingView/BrowsingTitlebar.vue';
+import BrowsingHeader from '@/components/BrowsingView/BrowsingHeader.vue';
+import BrowsingControl from '@/components/BrowsingView/BrowsingControl.vue';
+import Icon from '@/components/BaseIconContainer.vue';
+import BrowsingTitleBar from '@/components/BrowsingView/BrowsingTitlebar.vue';
 
 export default {
   name: 'BrowsingView',
@@ -75,7 +81,7 @@ export default {
     },
   },
   watch: {
-    browsingWinWidth(val) {
+    browsingWinWidth(val: number) {
       if (this.isPip) {
         if (this.pipType === 'youtube') {
           this.youtubeWatcher(val);
@@ -84,34 +90,24 @@ export default {
         }
       }
     },
-    windowScrollY(val, oldVal) {
+    windowScrollY(val: number, oldVal: number) {
       this.controlToShow = oldVal > val;
+    },
+    initialUrl() {
+      this.controlToShow = true;
     },
   },
   created() {
-    electron.ipcRenderer.on('initial-url', (e, url) => {
+    electron.ipcRenderer.on('initial-url', (e: Event, url: string) => {
       this.updateInitialUrl(url);
     });
-    electron.ipcRenderer.on('browsingViewSize', (e, size) => {
+    electron.ipcRenderer.on('browsingViewSize', (e: Event, size: number[]) => {
       this.updateBrowsingSize(size);
     });
   },
   mounted() {
     window.addEventListener('beforeunload', () => {
       electron.ipcRenderer.send('store-browsing-last-size', this.isPip ? [1200, 900] : this.browsingWinSize);
-    });
-    this.$bus.$on('url-back', () => {
-      if (this.$refs.webView.canGoBack()) {
-        this.$refs.webView.goBack();
-      }
-    });
-    this.$bus.$on('url-forward', () => {
-      if (this.$refs.webView.canGoForward()) {
-        this.$refs.webView.goForward();
-      }
-    });
-    this.$bus.$on('url-reload', () => {
-      this.$refs.webView.reload();
     });
     this.$refs.webView.addEventListener('load-commit', () => {
       this.$refs.webView.blur();
@@ -133,8 +129,8 @@ export default {
             break;
         }
       }
-      this.$refs.webView.executeJavaScript('document.querySelector("video")', (r) => {
-        this.$bus.$emit('web-info', {
+      this.$refs.webView.executeJavaScript('document.querySelector("video")', (r: HTMLElement | null) => {
+        this.$refs.browsingControl.updateWebInfo({
           hasVideo: !!r,
           url: loadUrl,
           canGoBack: this.$refs.webView.canGoBack(),
@@ -142,8 +138,8 @@ export default {
         });
       });
     });
-    this.$refs.webView.addEventListener('ipc-message', (evt) => {
-      const { channel, args } = evt;
+    this.$refs.webView.addEventListener('ipc-message', (evt: any) => {
+      const { channel, args }: { channel: string, args: { windowScrollY: number }[] } = evt;
       switch (channel) {
         case 'scroll':
           console.log(args); // TODO:
@@ -160,15 +156,15 @@ export default {
     this.$refs.webView.addEventListener('dom-ready', () => { // for webview test
       this.$refs.webView.openDevTools();
     });
-    this.$refs.webView.addEventListener('new-window', (e) => { // new tabs
+    this.$refs.webView.addEventListener('new-window', (e: any) => { // new tabs
       this.updateInitialUrl(e.url);
     });
     this.$refs.webView.addEventListener('did-start-loading', () => {
-      this.startTime = new Date();
+      this.startTime = new Date().getTime();
       this.loadingState = true;
     });
     this.$refs.webView.addEventListener('did-stop-loading', () => {
-      const loadingTime = new Date() - this.startTime;
+      const loadingTime: number = new Date().getTime() - this.startTime;
       if (loadingTime % 3000 === 0) {
         this.loadingState = false;
       } else {
@@ -177,7 +173,27 @@ export default {
         }, 3000 - (loadingTime % 3000));
       }
     });
-    this.$bus.$on('enter-pip', () => {
+  },
+  methods: {
+    ...mapActions({
+      updateInitialUrl: browsingActions.UPDATE_INITIAL_URL,
+      updateBrowsingSize: browsingActions.UPDATE_BROWSING_SIZE,
+      updateRecordUrl: browsingActions.UPDATE_RECORD_URL,
+    }),
+    handleUrlForward() {
+      if (this.$refs.webView.canGoForward()) {
+        this.$refs.webView.goForward();
+      }
+    },
+    handleUrlBack() {
+      if (this.$refs.webView.canGoBack()) {
+        this.$refs.webView.goBack();
+      }
+    },
+    handleUrlReload() {
+      this.$refs.webView.reload();
+    },
+    handleEnterPip() {
       const parseUrl = urlParseLax(this.initialUrl);
       if (parseUrl.host.includes('youtube')) {
         this.pipType = 'youtube';
@@ -187,14 +203,7 @@ export default {
         this.bilibiliAdapter();
       }
       this.isPip = true;
-    });
-  },
-  methods: {
-    ...mapActions({
-      updateInitialUrl: browsingActions.UPDATE_INITIAL_URL,
-      updateBrowsingSize: browsingActions.UPDATE_BROWSING_SIZE,
-      updateRecordUrl: browsingActions.UPDATE_RECORD_URL,
-    }),
+    },
     handleExitPip() {
       if (this.isPip) {
         if (this.pipType === 'youtube') {
@@ -206,10 +215,12 @@ export default {
       }
     },
     youtubeAdapter() {
-      this.$refs.webView.executeJavaScript('document.querySelector("video").style', (result) => {
-        electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setAspectRatio', [parseFloat(result.width) / parseFloat(result.height)]);
-        electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setMinimumSize', [parseInt(180 * (parseFloat(result.width) / parseFloat(result.height)), 10), 180]);
-        electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setSize', [parseInt(180 * (parseFloat(result.width) / parseFloat(result.height)), 10), 180]);
+      this.$refs.webView.executeJavaScript('document.querySelector("video").style', (result: CSSStyleDeclaration) => {
+        const aspectRatio: number[] = [parseFloat(result.width as string)
+          / parseFloat(result.height as string)];
+        electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setAspectRatio', aspectRatio);
+        electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setMinimumSize', [180 * aspectRatio[0], 180]);
+        electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setSize', [180 * aspectRatio[0], 180]);
       });
       this.$refs.webView.executeJavaScript('var isPaused = document.querySelector("video").paused;document.body.appendChild(document.querySelector(".html5-video-player")); if (!isPaused) {document.querySelector("video").play()}');
       this.$refs.webView.executeJavaScript('document.getElementsByTagName("ytd-app")[0].style.display = "none"');
@@ -218,7 +229,7 @@ export default {
       this.$refs.webView.executeJavaScript('var setZoom = function() {setTimeout(() => { document.querySelector("video").style.zoom = document.body.clientWidth / parseFloat(document.querySelector("video").style.width);document.querySelector(".ytp-chrome-bottom").style.width = "calc(100% - 24px)"; }, 250);};window.addEventListener("resize", setZoom);');
       this.$refs.webView.executeJavaScript('document.querySelector(".html5-video-player").style.background = "rgba(0, 0, 0, 1)"');
     },
-    youtubeWatcher(val) {
+    youtubeWatcher(val: number) {
       this.$refs.webView.executeJavaScript(`document.querySelector(".html5-video-player").style.position = "absolute";document.querySelector(".html5-video-player").style.width = "${val}px";document.querySelector(".html5-video-player").style.height = "${this.browsingWinSize[1]}px";`);
     },
     youtubeRecover() {
@@ -238,17 +249,18 @@ export default {
       electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setSize', [1200, 900]);
     },
     bilibiliAdapter() {
-      this.$refs.webView.executeJavaScript('[document.querySelector("iframe"), document.querySelector(".live-player-ctnr"), document.querySelector("#bofqi")]', (r) => {
-        this.bilibiliType = ['iframeStreaming', 'videoStreaming', 'video'][r.findIndex(i => i)];
+      this.$refs.webView.executeJavaScript('[document.querySelector(".live-player-ctnr"), document.querySelector("iframe"), document.querySelector("#bofqi")]', (r: (HTMLElement | null)[]) => {
+        this.bilibiliType = ['videoStreaming', 'iframeStreaming', 'video'][r.findIndex(i => i)];
       }).then(() => {
         console.log(this.bilibiliType);
         if (this.bilibiliType === 'video') {
           this.$refs.webView.executeJavaScript('var isPaused = document.querySelector("video").paused;document.body.appendChild(document.querySelector(".player")); if (!isPaused) {document.querySelector("video").play()}');
-          this.$refs.webView.executeJavaScript('document.querySelector("#bofqi").style', (result) => {
-            const videoAspectRatio = parseFloat(result.width) / (parseFloat(result.height) - 46);
+          this.$refs.webView.executeJavaScript('document.querySelector("#bofqi").style', (result: CSSStyleDeclaration) => {
+            const videoAspectRatio = parseFloat(result.width as string)
+              / (parseFloat(result.height as string) - 46);
             electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setAspectRatio', [videoAspectRatio]);
-            electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setMinimumSize', [parseInt(180 * (parseFloat(result.width) / parseFloat(result.height)), 10), 180]);
-            electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setSize', [parseInt(180 * videoAspectRatio, 10), 180]);
+            electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setMinimumSize', [180 * videoAspectRatio, 180]);
+            electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setSize', [180 * videoAspectRatio, 180]);
           });
           this.$refs.webView.executeJavaScript('document.querySelector("#app").style.display = "none"');
           this.$refs.webView.executeJavaScript('document.body.style.overflow = "hidden"');
@@ -274,7 +286,7 @@ export default {
         }
       });
     },
-    bilibiliWatcher(val) {
+    bilibiliWatcher(val: number) {
       if (this.bilibiliType === 'video') {
         if (val >= 480) {
           this.$refs.webView.executeJavaScript('document.querySelector(".player").style.width= "100%"; document.querySelector(".player").style.height= "calc(100% + 46px)"');
