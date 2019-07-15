@@ -165,7 +165,7 @@ export default {
   &__plane {
     width: 340px;
     height: 70px;
-    border: 1px solid rgba(255,255,255,0.1);
+    border: 1px solid rgba(160,160,160,0.7);
     border-radius: 7px;
 
     background-image: radial-gradient(

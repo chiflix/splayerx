@@ -93,6 +93,7 @@ export default {
       primaryLanguage: this.$store.getters.primaryLanguage,
       secondaryLanguage: this.$store.getters.secondaryLanguage,
     };
+    this.$emit('language-setting', this.payload);
     document.addEventListener('mouseup', this.globalMouseupHandler);
   },
   beforeDestroy() {
