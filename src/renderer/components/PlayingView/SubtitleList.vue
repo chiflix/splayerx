@@ -84,11 +84,12 @@
                   && (item.language !== translateLanguage || translateProgress <= 0)"
                 name="sub-delete"
               >
-                <span
+                <div
                   v-show="item.type === 'translated' && hoverIndex === index"
-                  @mouseup.native="handleSubDelete($event, item)"
                   class="txt"
-                >Generate</span>
+                >
+                  Generate
+                </div>
               </transition>
               <div
                 v-else-if="translateProgress > 0 && item.type === 'translated' && item.source === ''

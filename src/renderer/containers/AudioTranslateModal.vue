@@ -1,11 +1,12 @@
 <template>
-  <div>
+  <div
+    v-fade-in="isTranslateModalVisiable"
+    class="audio-translate"
+  >
     <div
-      v-fade-in="isTranslateModalVisiable"
       class="modal-mask"
     />
     <div
-      v-fade-in="isTranslateModalVisiable"
       class="select-language-modal"
     >
       <div
@@ -144,8 +145,10 @@
 import Vue from 'vue';
 import { mapActions, mapGetters } from 'vuex';
 import {
+  Input as inputActions,
   AudioTranslate as atActions,
 } from '@/store/actionTypes';
+import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import { codeToLanguageName } from '@/libs/language';
 import Select from '@/components/PlayingView/Select.vue';
 import Icon from '@/components/BaseIconContainer.vue';
@@ -154,6 +157,8 @@ import { AudioTranslateStatus } from '../store/modules/AudioTranslate';
 
 export default Vue.extend({
   name: 'AudioTranslateModal',
+  // @ts-ignore
+  type: INPUT_COMPONENT_TYPE,
   components: {
     Icon,
     Select,
@@ -161,10 +166,34 @@ export default Vue.extend({
   },
   data() {
     return {
-      // grab btn datas
+      // TODO 统一language code
       audioLanguage: { label: '视频源语言', value: '' },
-      lanugages: ['zh-Hans', 'zh-Hant', 'ja', 'ko', 'en', 'es', 'ar']
-        .map((e: string) => ({ label: codeToLanguageName(e), value: e })),
+      lanugages: [
+        {
+          value: 'en-US',
+          label: 'English (US)',
+        },
+        {
+          value: 'en-GB',
+          label: 'English (UK)',
+        },
+        {
+          value: 'zh',
+          label: '普通话 (中国大陆)',
+        },
+        {
+          value: 'yue-Hant-HK',
+          label: '廣東話 (香港)',
+        },
+        {
+          value: 'ja-JP',
+          label: '日本語',
+        },
+        {
+          value: 'ko-KR',
+          label: '한국어',
+        },
+      ],
       isConfirmCancelTranlate: false,
     };
   },
@@ -209,6 +238,7 @@ export default Vue.extend({
       hideTranslateModal: atActions.AUDIO_TRANSLATE_HIDE_MODAL,
       startTranslate: atActions.AUDIO_TRANSLATE_START,
       discardTranslate: atActions.AUDIO_TRANSLATE_DISCARD,
+      updateWheel: inputActions.WHEEL_UPDATE,
     }),
     translate() {
       const { audioLanguage } = this;

@@ -1,81 +1,79 @@
 <template>
-  <transition
-    name=""
-    mode=""
-  >
-    <div @mouseup.stop="">
-      <div
+  <div @mouseup.stop="">
+    <div
       :class="`${
         showWhenGrab || showWhenStopTranslate
-        ? 'bubbleLayout--column'
-        : 'bubbleLayout--row'
+          ? 'bubbleLayout--column'
+          : 'bubbleLayout--row'
       }`"
       class="bubble"
+    >
+      <p class="bubble__info">
+        {{ message }}
+      </p>
+      <!-- 提取音频时，气泡 -->
+      <div
+        v-if="showWhenGrab"
+        class="buttonGroup"
       >
-        <p class="bubble__info">
-          {{ message }}
-        </p>
-        <!-- 提取音频时，气泡 -->
-        <div v-if="showWhenGrab" class="buttonGroup">
-          <div
-            @mouseup.stop="$emit('disCardTranslate');"
-            class="bubble__button--lower"
-          >
-            仍要关闭
-          </div>
-          <div
-            @mouseup.stop="$emit('hide');"
-            class="bubble__button"
-          >
-            取消
-          </div>
+        <div
+          @mouseup.stop="$emit('disCardTranslate');"
+          class="bubble__button--lower"
+        >
+          仍要关闭
         </div>
-        <!-- 后台翻译，关闭窗口气泡 -->
-        <div v-else-if="showDiscardWhenTranlate">
-          <div
-            @mouseup.stop="$emit('disCardTranslate');"
-            class="bubble__button"
-          >
-            好的
-          </div>
+        <div
+          @mouseup.stop="$emit('hide');"
+          class="bubble__button"
+        >
+          取消
         </div>
-        <!-- 后台翻译，切换视频的气泡 -->
-        <div v-else-if="showHideWhenTranslate">
-          <div
-            v-if="showBackStageButton"
-            @mouseup.stop="$emit('backStageTranslate');"
-            class="bubble__button"
-          >
-            好的
-          </div>
+      </div>
+      <!-- 后台翻译，关闭窗口气泡 -->
+      <div v-else-if="showDiscardWhenTranlate">
+        <div
+          @mouseup.stop="$emit('disCardTranslate');"
+          class="bubble__button"
+        >
+          好的
         </div>
-        <!-- 正在翻译，想使用其他翻译或者刷新字幕 -->
-        <div v-else-if="showWhenStopTranslate">
-          <div
-            @mouseup.stop="$emit('disCardTranslate');"
-            class="bubble__button"
-          >
-            好的
-          </div>
-          <div
-            @mouseup.stop="$emit('disCardTranslate');"
-            class="bubble__button"
-          >
-            停止翻译
-          </div>
+      </div>
+      <!-- 后台翻译，切换视频的气泡 -->
+      <div v-else-if="showHideWhenTranslate">
+        <div
+          v-if="showBackStageButton"
+          @mouseup.stop="$emit('backStageTranslate');"
+          class="bubble__button"
+        >
+          好的
         </div>
-        <!-- 当翻译结束，失败的时候 -->
-        <div v-else-if="showWhenError">
-          <div
-            @mouseup.stop="$emit('hide');"
-            class="bubble__button"
-          >
-            好的
-          </div>
+      </div>
+      <!-- 正在翻译，想使用其他翻译或者刷新字幕 -->
+      <div v-else-if="showWhenStopTranslate">
+        <div
+          @mouseup.stop="$emit('disCardTranslate');"
+          class="bubble__button"
+        >
+          好的
+        </div>
+        <div
+          @mouseup.stop="$emit('disCardTranslate');"
+          class="bubble__button"
+        >
+          停止翻译
+        </div>
+      </div>
+      <!-- 当翻译结束，失败的时候 -->
+      <div v-else-if="showWhenError">
+        <div
+          @mouseup.stop="$emit('hide');"
+          class="bubble__button"
+        >
+          好的
         </div>
       </div>
     </div>
-  </transition>
+  </div>
 </template>
 <script lang="ts">
 import Vue from 'vue';
@@ -140,6 +138,7 @@ export default Vue.extend({
   zoom: 1;
   box-sizing: border-box;
   padding: 14px 18px;
+  margin-bottom: 12px;
   display: flex;
   border-radius: 7px;
   border: 1px solid rgba(160,160,160,0.7);

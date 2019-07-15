@@ -266,6 +266,7 @@ export default {
                 },
               });
             };
+            // 通过video元素的audioTracks，获取视屏的tracks
             this.$refs.video.audioTracks.onaddtrack = generateAudioEvent('add');
             this.$refs.video.audioTracks.onremovetrack = generateAudioEvent('remove');
           }

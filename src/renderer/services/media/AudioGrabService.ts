@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com 
  * @Date: 2019-06-20 18:03:14 
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-07-12 14:59:09
+ * @Last Modified time: 2019-07-15 19:05:04
  */
 
 // @ts-ignore
@@ -10,6 +10,7 @@ import { splayerx, ipcRenderer, Event } from 'electron';
 import { EventEmitter } from 'events';
 import path from 'path';
 import fs from 'fs';
+import { isNaN } from 'lodash';
 import {
   StreamingTranslationRequest,
   StreamingTranslationRequestConfig,
@@ -33,13 +34,15 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 enum Status {
-  Grab = 'Grab',
-  Task = 'Task',
-  Error = 'Error',
-  TranscriptInfo = 'TranscriptInfo',
+  Grab = 'grab',
+  GrabCompleted = 'grab-completed',
+  Task = 'task',
+  Error = 'error',
+  TranscriptInfo = 'transcriptInfo',
 }
 
 type JobData = {
+  audioId: string,
   mediaHash: string,
   videoSrc: string,
   audioLanguageCode: string,
@@ -49,6 +52,7 @@ type JobData = {
 
 declare interface AudioGrabService {
   on(event: 'grab', listener: (time: number) => void): this;
+  on(event: 'grabCompleted', listener: () => void): this;
   on(event: 'error', listener: (error: Error) => void): this;
   on(event: 'task', listener: (taskInfo: AITaskInfo) => void): this;
   on(event: 'transcriptInfo', listener: (transcriptInfo: TranscriptInfo) => void): this;
@@ -57,13 +61,13 @@ declare interface AudioGrabService {
 class AudioGrabService extends EventEmitter {
   mediaHash: string;
   videoSrc: string;
+  audioId: number;
   pts: string = '0';
   audioChannel: number = 1;
   rate: number = 16000;
   audioLanguageCode: string;
   targetLanguageCode: string;
   streamClient: any = null;
-  request: any = null;
   queue: [JobData];
   callback: Function;
   taskInfo?: AITaskInfo;
@@ -73,6 +77,8 @@ class AudioGrabService extends EventEmitter {
   loopTimer: any;
   timeoutTimer: any;
   grabTime: number;
+  _count: number;
+  _pkgSize: number;
 
   constructor(private readonly mediaStorageService: MediaStorageService) {
     super();
@@ -95,6 +101,9 @@ class AudioGrabService extends EventEmitter {
       switch (args.grabInfo.status) {
         case Status.Grab:
           this.emit('grab', args.grabInfo.progressTime);
+          break;
+        case Status.GrabCompleted:
+          this.emit('grabCompleted');
           break;
         case Status.Error:
           this.emit('error', args.grabInfo.error);
@@ -123,7 +132,6 @@ class AudioGrabService extends EventEmitter {
     if (this.streamClient) {
       splayerx.stopGrabAudioFrame();
       this.streamClient = null;
-      this.request = null;
     }
   }
 
@@ -136,12 +144,12 @@ class AudioGrabService extends EventEmitter {
 
   private grabAudio() {
     const {
-      videoSrc, pts, audioChannel, rate, handleCallBack,
+      videoSrc, pts, audioChannel, rate, handleCallBack, audioId,
     } = this;
     splayerx.grabAudioFrame(
       videoSrc, // 需要提取音频的视频文件路径
       `${pts}`, // seek位置
-      -1, // 音轨
+      audioId, // 音轨
       0, // 需要提取的声道, [1,8] 0代表提取所有声道
       audioChannel, // 重采样的声道[1,8] 1代表单声道
       rate, // 采样频率
@@ -152,18 +160,15 @@ class AudioGrabService extends EventEmitter {
   }
 
   private handleCallBack(err: string, framebuf: Buffer, framedata: string) {
-    console.log(err, framedata, 'audio-log');
     if (!this.streamClient && this.taskInfo && this.taskInfo.taskId) {
       return;
     }
-    if (err !== 'EOF' && framedata && framebuf && this.request) {
+    if (err !== 'EOF' && framedata && framebuf && this.streamClient) {
+      this._count += 1;
       const s = framedata.split(',');
       this.pts = s[0];
       this.grabTime += (Number(s[3]) / this.rate);
-      this.request.clearStreamingConfig();
-      this.request.clearAudioContent();
-      this.request.setAudioContent(framebuf);
-      this.write();
+      this.write(framebuf);
       this.callback({
         status: Status.Grab,
         progressTime: this.grabTime,
@@ -171,17 +176,18 @@ class AudioGrabService extends EventEmitter {
       setTimeout(() => {
         this.grabAudio();
       }, 0);
-    } else if (err === 'EOF' && this.request) {
-      this.request.clearAudioContent();
-      this.request.setAudioContent(framebuf);
-      this.write();
+    } else if (err === 'EOF' && this.streamClient) {
+      this.write(framebuf);
       this.streamClient.end();
       this.streamClient = null;
-      this.request = null;
+      this._count += 1;
+      console.warn('EOF', this._count);
       if (this.callback) {
-        this.callback();
+        this.callback({
+          status: Status.GrabCompleted
+        });
       }
-    } else if (this.request) {
+    } else if (this.streamClient) {
       // TODO 处理grabAudioFrame error ，有些视频直接不能，就返回error
       setTimeout(() => {
         this.grabAudio();
@@ -191,9 +197,12 @@ class AudioGrabService extends EventEmitter {
     }
   }
 
-  private write() {
+  private write(framebuf: Buffer) {
     try {
-      this.streamClient.write(this.request);
+      // fs.appendFileSync('/Users/harry/Desktop/1.pcm', framebuf);
+      const request = new StreamingTranslationRequest();
+      request.setAudioContent(framebuf);
+      this.streamClient.write(request);
     } catch (error) {
       console.warn(error);
     }
@@ -219,6 +228,8 @@ class AudioGrabService extends EventEmitter {
     this.videoSrc = data.videoSrc;
     this.audioLanguageCode = data.audioLanguageCode;
     this.targetLanguageCode = data.targetLanguageCode;
+    const audioId = Number(data.audioId) - 1;
+    this.audioId = isNaN(audioId) ? -1 : audioId;
     if (data.callback) {
       this.callback = data.callback;
     }
@@ -226,7 +237,7 @@ class AudioGrabService extends EventEmitter {
     this.streamClient = this.openClient();
 
     // send config
-    this.request = new StreamingTranslationRequest();
+    const request = new StreamingTranslationRequest();
     const requestConfig = new StreamingTranslationRequestConfig();
     // @ts-ignore
     const audioConfig = new global.proto.google.cloud.speech.v1
@@ -235,12 +246,14 @@ class AudioGrabService extends EventEmitter {
     requestConfig.setAudioLanguageCode(this.audioLanguageCode);
     requestConfig.setTargetLanguageCode(this.targetLanguageCode);
     requestConfig.setMediaIdentity(data.mediaHash);
-    this.request.setStreamingConfig(requestConfig);
-    this.streamClient.write(this.request);
+    request.setStreamingConfig(requestConfig);
+    this.streamClient.write(request);
     // 开启超时处理
-    this.timeOut();
+    // this.timeOut();
     // start grab data
     this.pts = '0';
+    this._count = 0;
+    this._pkgSize = 0;
     this.grabTime = 0;
     this.grabAudio();
 
@@ -266,6 +279,11 @@ class AudioGrabService extends EventEmitter {
     const stream = client.streamingTranslation();
     stream.on('data', this.rpcCallBack.bind(this));
     stream.on('error', (error: Error) => {
+      try {
+        console.log(error, 'audio-log');
+      } catch (err) {
+        console.warn('error');
+      }
       // 报错，主动丢弃
       this.stop();
       if (this.callback) {
@@ -279,7 +297,7 @@ class AudioGrabService extends EventEmitter {
   }
 
   private timeOut() {
- // 开启timeout, 如果在超时时间内收到data，就取消timeout
+    // 开启timeout, 如果在超时时间内收到data，就取消timeout
     // 如果没有收到data，就放弃任务，发送超时错误
     this.timeoutTimer = setTimeout(() => {
       // 丢弃本次任务
@@ -317,7 +335,6 @@ class AudioGrabService extends EventEmitter {
       if (this.streamClient) {
         this.streamClient.end();
         this.streamClient = null;
-        this.request = null;
       }
       // return task to render
       this.callback({
@@ -352,7 +369,9 @@ class AudioGrabService extends EventEmitter {
 
   loopTask(taskInfo: AITaskInfo) {
     const taskId = taskInfo.taskId;
-    const delay = (taskInfo.estimateTime / 2) * 1000;
+    let delay = Math.ceil((taskInfo.estimateTime / 2));
+    // 延迟查询task进度，如果延迟超多10秒，就10秒之后去查询
+    delay = delay > 10 ? 10 * 1000 : delay * 1000;
     const callback = this.loopTaskCallBack.bind(this);
     this.loopTimer = setTimeout(() => {
       const sslCreds = grpc.credentials.createSsl(

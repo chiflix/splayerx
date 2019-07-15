@@ -12,22 +12,18 @@
       :winHeight="winHeight"
       :chosenStyle="chosenStyle"
       :chosenSize="chosenSize"
+      :enabledSecondarySub="enabledSecondarySub"
     />
     <the-video-controller ref="videoctrl" />
-    <audio-translate-modal />
   </div>
 </template>
 
 <script lang="ts">
 import { mapActions, mapGetters } from 'vuex';
-import {
-  Subtitle as subtitleActions,
-  SubtitleManager as smActions,
-} from '@/store/actionTypes';
+import { Subtitle as subtitleActions, SubtitleManager as smActions } from '@/store/actionTypes';
 import SubtitleRenderer from '@/components/Subtitle/SubtitleRenderer.vue';
 import VideoCanvas from '@/containers/VideoCanvas.vue';
 import TheVideoController from '@/containers/TheVideoController.vue';
-import AudioTranslateModal from '@/containers/AudioTranslateModal.vue';
 import { videodata } from '../store/video';
 
 export default {
@@ -36,7 +32,6 @@ export default {
     'the-video-controller': TheVideoController,
     'the-video-canvas': VideoCanvas,
     'subtitle-renderer': SubtitleRenderer,
-    'audio-translate-modal': AudioTranslateModal,
   },
   data() {
     return {
@@ -55,10 +50,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters([
-      'scaleNum', 'subToTop', 'primarySubtitleId', 'secondarySubtitleId', 'winHeight',
-      'chosenStyle', 'chosenSize', 'originSrc', 'mediaHash', 'primaryLanguage', 'duration',
-    ]),
+    ...mapGetters(['scaleNum', 'subToTop', 'primarySubtitleId', 'secondarySubtitleId', 'winHeight', 'chosenStyle', 'chosenSize', 'originSrc', 'enabledSecondarySub']),
     concatCurrentCues() {
       if (this.currentCues.length === 2) {
         return [this.currentCues[0].cues, this.currentCues[1].cues];
@@ -79,7 +71,10 @@ export default {
     originSrc: {
       immediate: true,
       // eslint-disable-next-line
-      handler: function (newVal: string) { if (newVal) this.initializeManager(); },
+      handler: function (newVal: string) {
+        this.resetManager();
+        if (newVal) this.initializeManager();
+      },
     },
     async primarySubtitleId() {
       this.currentCues = await this.getCues(videodata.time);
@@ -106,6 +101,7 @@ export default {
   methods: {
     ...mapActions({
       updateSubToTop: subtitleActions.UPDATE_SUBTITLE_TOP,
+      resetManager: smActions.resetManager,
       initializeManager: smActions.initializeManager,
       addLocalSubtitlesWithSelect: smActions.addLocalSubtitlesWithSelect,
       getCues: smActions.getCues,

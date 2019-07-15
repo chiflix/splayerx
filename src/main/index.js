@@ -12,6 +12,7 @@ import rimraf from 'rimraf';
 // import { audioHandler } from './helpers/audioHandler';
 import { audioGrabService } from '../renderer/services/media/AudioGrabService';
 import TaskQueue from '../renderer/helpers/proceduralQueue';
+import { jsonStorage } from '../renderer/libs/JsonStorage';
 import './helpers/electronPrototypes';
 import writeLog from './helpers/writeLog';
 import { getValidVideoRegex, getValidSubtitleRegex } from '../shared/utils';
@@ -83,6 +84,7 @@ const preferenceURL = process.env.NODE_ENV === 'development'
 const tempFolderPath = path.join(app.getPath('temp'), 'splayer');
 if (!fs.existsSync(tempFolderPath)) fs.mkdirSync(tempFolderPath);
 
+
 function handleBossKey() {
   if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
   if (mainWindow.isVisible()) {
@@ -99,8 +101,12 @@ function handleBossKey() {
       tray.on('click', () => {
         mainWindow.show();
         mainWindow.webContents.send('mainCommit', 'isHiddenByBossKey', false);
-        tray.destroy();
-        tray = null;
+        // Destroy tray in its callback may cause app crash
+        setTimeout(() => {
+          if (!tray) return;
+          tray.destroy();
+          tray = null;
+        }, 10);
       });
     }
   }
@@ -402,40 +408,7 @@ function registerMainWindowEvent(mainWindow) {
     mediaInfo(mediaInfoQueue[0], callback);
   }
 
-  ipcMain.on('mediaInfo', (event, path) => {
-    if (mediaInfoQueue.length === 0) {
-      mediaInfoQueue.push(path);
-      mediaInfoQueueProcess();
-    } else {
-      mediaInfoQueue.push(path);
-    }
-  });
-  ipcMain.on('simulate-closing-window', () => {
-    mediaInfoQueue.splice(0);
-    snapShotQueue.splice(0);
-    thumbnailTask.splice(0);
-  });
-  ipcMain.on('windowPositionChange', (event, args) => {
-    if (!mainWindow || event.sender.isDestroyed()) return;
-    mainWindow.setPosition(...args);
-    event.sender.send('windowPositionChange-asyncReply', mainWindow.getPosition());
-  });
-  ipcMain.on('windowInit', (event) => {
-    if (!mainWindow || event.sender.isDestroyed()) return;
-    mainWindow.webContents.send('mainCommit', 'windowSize', mainWindow.getSize());
-    mainWindow.webContents.send('mainCommit', 'windowMinimumSize', mainWindow.getMinimumSize());
-    mainWindow.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
-    mainWindow.webContents.send('mainCommit', 'isFullScreen', mainWindow.isFullScreen());
-    mainWindow.webContents.send('mainCommit', 'isFocused', mainWindow.isFocused());
-  });
-  ipcMain.on('bossKey', () => {
-    handleBossKey();
-  });
-  ipcMain.on('writeLog', (event, level, log) => { // eslint-disable-line complexity
-    if (!log) return;
-    writeLog(level, log);
-  });
-  ipcMain.on('add-windows-about', () => {
+  function createAbout() {
     const aboutWindowOptions = {
       useContentSize: true,
       frame: false,
@@ -469,8 +442,8 @@ function registerMainWindowEvent(mainWindow) {
     aboutWindow.once('ready-to-show', () => {
       aboutWindow.show();
     });
-  });
-  ipcMain.on('add-preference', () => {
+  }
+  function createPreference() {
     const preferenceWindowOptions = {
       useContentSize: true,
       frame: false,
@@ -506,7 +479,43 @@ function registerMainWindowEvent(mainWindow) {
     preferenceWindow.once('ready-to-show', () => {
       preferenceWindow.show();
     });
+  }
+
+  ipcMain.on('mediaInfo', (event, path) => {
+    if (mediaInfoQueue.length === 0) {
+      mediaInfoQueue.push(path);
+      mediaInfoQueueProcess();
+    } else {
+      mediaInfoQueue.push(path);
+    }
   });
+  ipcMain.on('simulate-closing-window', () => {
+    mediaInfoQueue.splice(0);
+    snapShotQueue.splice(0);
+    thumbnailTask.splice(0);
+  });
+  ipcMain.on('windowPositionChange', (event, args) => {
+    if (!mainWindow || event.sender.isDestroyed()) return;
+    mainWindow.setPosition(...args);
+    event.sender.send('windowPositionChange-asyncReply', mainWindow.getPosition());
+  });
+  ipcMain.on('windowInit', (event) => {
+    if (!mainWindow || event.sender.isDestroyed()) return;
+    mainWindow.webContents.send('mainCommit', 'windowSize', mainWindow.getSize());
+    mainWindow.webContents.send('mainCommit', 'windowMinimumSize', mainWindow.getMinimumSize());
+    mainWindow.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
+    mainWindow.webContents.send('mainCommit', 'isFullScreen', mainWindow.isFullScreen());
+    mainWindow.webContents.send('mainCommit', 'isFocused', mainWindow.isFocused());
+  });
+  ipcMain.on('bossKey', () => {
+    handleBossKey();
+  });
+  ipcMain.on('writeLog', (event, level, log) => { // eslint-disable-line complexity
+    if (!log) return;
+    writeLog(level, log);
+  });
+  ipcMain.on('add-windows-about', createAbout);
+  ipcMain.on('add-preference', createPreference);
   ipcMain.on('need-to-restore', () => {
     needToRestore = true;
     markNeedToRestore();
@@ -530,10 +539,13 @@ function registerMainWindowEvent(mainWindow) {
   });
   // handle audio grab on main process
   ipcMain.on('grab-audio', (events, args) => {
-    audioGrabService.push(args, (grabInfoS) => {
-      if (mainWindow && !mainWindow.webContents.isDestroyed()) {
-        mainWindow.webContents.send('grab-audio-change', { ...args, grabInfo: grabInfoS });
-      }
+    splayerx.getMediaInfo(args.videoSrc, (info) => {
+      console.log(info);
+      audioGrabService.push(args, (grabInfoS) => {
+        if (mainWindow && !mainWindow.webContents.isDestroyed()) {
+          mainWindow.webContents.send('grab-audio-change', { ...args, grabInfo: grabInfoS });
+        }
+      });
     });
   });
   ipcMain.on('grab-audio-stop', () => {
@@ -565,12 +577,18 @@ function createWindow() {
       win32: {},
     })[process.platform],
   });
+  jsonStorage.get('preferences').then((data) => {
+    let url = mainURL;
+    if (finalVideoToOpen.length) url = `${mainURL}#/play`;
+    else if (!data.welcomeProcessDone) url = `${mainURL}#/welcome`;
+    mainWindow.loadURL(url);
+  }).catch(() => {
+    mainWindow.loadURL(mainURL);
+  });
   mainWindow.webContents.setUserAgent(
     `${mainWindow.webContents.getUserAgent().replace(/Electron\S+/i, '')
     } SPlayerX@2018 ${os.platform()} ${os.release()} Version ${app.getVersion()}`,
   );
-
-  mainWindow.loadURL(finalVideoToOpen.length ? `${mainURL}#/play` : mainURL);
 
   mainWindow.on('closed', () => {
     ipcMain.removeAllListeners();
@@ -623,13 +641,17 @@ app.on('quit', () => {
 });
 
 app.on('second-instance', () => {
-  if (mainWindow.isMinimized()) mainWindow.restore();
-  mainWindow.focus();
+  if (mainWindow) {
+    if (mainWindow.isMinimized()) mainWindow.restore();
+    mainWindow.focus();
+  } else if (app.isReady()) {
+    createWindow();
+  }
 });
 
 
 async function darwinOpenFilesToStart() {
-  if (mainWindow) { // sencond instance
+  if (mainWindow && !mainWindow.webContents.isDestroyed()) { // sencond instance
     if (!inited) return;
     finalVideoToOpen = getAllValidVideo(!tmpVideoToOpen.length,
       tmpVideoToOpen.concat(tmpSubsToOpen));
@@ -652,7 +674,7 @@ async function darwinOpenFilesToStart() {
     if (!mainWindow.isVisible()) mainWindow.show();
     if (mainWindow.isMinimized()) mainWindow.restore();
     mainWindow.focus();
-  } else if (app.isReady()) {
+  } else if (app.isReady() && !mainWindow) {
     createWindow();
   }
 }

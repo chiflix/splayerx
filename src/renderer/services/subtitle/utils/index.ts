@@ -122,6 +122,7 @@ export function pathToFormat(path: string): Format {
 export function sourceToFormat(subtitleSource: Origin) {
   switch (subtitleSource.type) {
     case Type.Online:
+    case Type.Translated:
       return Format.Sagi;
     case Type.Embedded:
       const { extractedSrc } = (subtitleSource as EmbeddedOrigin).source;

@@ -105,7 +105,9 @@
     "help": {
       "name": "مساعدة",
       "splayerxHelp": "مساعدة",
-      "shortCuts": "قائمة الاختصارات"
+      "shortCuts": "قائمة الاختصارات",
+      "crashReportLocation": "عرض سجل الأخطاء",
+      "crashReportNotAvailable": "لا يوجد سجل خطأ."
     },
     "playback": {
       "backwardL": "خطوة الى الوراء - 60s",
@@ -141,9 +143,11 @@
     "subtitle": {
       "AITranslation": "تحديث الترجمة الذكية",
       "decreasePrimarySubtitleDelay": "العنوان الفرعي تأخير -0.1s",
+      "increasePrimarySubtitleDelay": "العنوان الفرعي تأخير +0.1s",
+      "decreaseSecondarySubtitleDelay": "العنوان الفرعي تأخير -0.1s",
+      "increaseSecondarySubtitleDelay": "العنوان الفرعي تأخير +0.1s",
       "disabledSecondarySub": "تعطيل الترجمة الثانوية",
       "enabledSecondarySub": "تمكين الترجمة الثانوية",
-      "increasePrimarySubtitleDelay": "العنوان الفرعي تأخير 0.1s",
       "langEn": "الإنجليزية",
       "langZhCN": "صينى",
       "loadSubtitleFile": "تحميل ملف الترجمة ...",
@@ -191,6 +195,19 @@
   "nextVideo": {
     "nextInFolder": "التالي في المجلد",
     "nextInPlaylist": "التالي في قائمة التشغيل"
+  },
+  "welcome": {
+    "welcomeTitle": "",
+    "welcomeDescription": "",
+    "agreement": "",
+    "policy": "",
+    "languageTitle1": "",
+    "languageTitle2": "",
+    "primary": "",
+    "secondary": "",
+    "chooseSecondary": "",
+    "languageDescription": "",
+    "none": ""
   },
   "preferences": {
     "general": {

@@ -15,6 +15,7 @@ export interface StoredSubtitleItem {
   /** may also be fake source for display use only */
   source: any;
   videoSegments?: VideoSegment[];
+  delay: number;
 }
 interface PrimarySecondary<T> {
   primary?: T;

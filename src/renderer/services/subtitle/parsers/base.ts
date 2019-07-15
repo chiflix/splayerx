@@ -3,11 +3,11 @@ import { Dialogue } from '@/interfaces/ISubtitle';
 import { isEqual } from 'lodash';
 export class BaseParser implements Parser {
   readonly payload: any;
-  info = {};
+  metadata = {};
   dialogues: Cue[];
   format: Format = Format.Unknown;
 
-  async getInfo() { return this.info; }
+  async getMetadata() { return this.metadata; }
   async getDialogues(time?: number) {
     return getDialogues(this.dialogues, time);
   }

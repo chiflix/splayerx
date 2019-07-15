@@ -64,7 +64,6 @@ export default {
       videoExisted: false,
       videoElement: null,
       seekTime: [0],
-      lastPlayedTime: 0,
       lastAudioTrackId: 0,
       lastCoverDetectingTime: 0,
       maskBackground: 'rgba(255, 255, 255, 0)', // drag and drop related var
@@ -170,12 +169,6 @@ export default {
     this.$bus.$on('toggle-muted', () => {
       this.toggleMute();
     });
-    this.$bus.$on('send-lastplayedtime', (e: number) => {
-      this.lastPlayedTime = e;
-    });
-    this.$bus.$on('send-audiotrackid', (id: string) => {
-      this.lastAudioTrackId = id;
-    });
     this.$bus.$on('toggle-playback', debounce(() => {
       this[this.paused ? 'play' : 'pause']();
       this.$ga.event('app', 'toggle-playback');
@@ -239,7 +232,7 @@ export default {
       addTranslateBubbleCallBack: atActions.AUDIO_TRANSLATE_BUBBLE_CALLBACK,
       discardTranslate: atActions.AUDIO_TRANSLATE_DISCARD,
     }),
-    onMetaLoaded(event: Event) {
+    async onMetaLoaded(event: Event) {
       const target = event.target as HTMLVideoElement;
       this.videoElement = target;
       this.videoConfigInitialize({
@@ -261,12 +254,16 @@ export default {
         intrinsicHeight: target.videoHeight,
         ratio: target.videoWidth / target.videoHeight,
       });
-      if (target.duration - this.lastPlayedTime > 10) {
-        this.$bus.$emit('seek', this.lastPlayedTime);
+      const mediaInfo = this.videoId
+        ? await playInfoStorageService.getMediaItem(this.videoId)
+        : null;
+      if (mediaInfo && mediaInfo.lastPlayedTime
+        && target.duration - mediaInfo.lastPlayedTime > 10) {
+        this.$bus.$emit('seek', mediaInfo.lastPlayedTime);
       } else {
         this.$bus.$emit('seek', 0);
       }
-      this.lastPlayedTime = 0;
+      if (mediaInfo && mediaInfo.audioTrackId) this.lastAudioTrackId = mediaInfo.audioTrackId;
       this.$bus.$emit('video-loaded');
       this.changeWindowRotate(this.winAngle);
 

@@ -104,17 +104,20 @@ export default Vue.extend({
       height: 28px;
       border: 1px solid rgba(255,255,255,0.10);
       border-radius: 2px;
-      background-color: rgba(255, 255, 255, 0);
+      background-color: rgba(0, 0, 0, .04);
+      &:hover {
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background-color: rgba(255, 255, 255, 0.08);
+      }
     }
 
     &--list {
       @extend .dropdown__toggle;
       height: 148px;
-      background: #555555;
-      border: 1px solid rgba(255,255,255,0.10);
+      border: 1px solid rgba(255,255,255,0.3);
+      background-color: rgba(120, 120, 120, 1);
       border-radius: 2px;
       .dropdown__displayItem {
-        border: none;
         border-bottom: 0.5px solid rgba(255,255,255,0.10);
       }
     }
@@ -122,8 +125,11 @@ export default Vue.extend({
 
   &__displayItem {
     height: 28px;
-    line-height: 28px;
-    background: rgba(0,0,0,0.04);
+    span {
+      display: inline-block;
+      vertical-align: center;
+      line-height: 28px;
+    }
     .un_select, .static_label {
       opacity: 0.3;
     }

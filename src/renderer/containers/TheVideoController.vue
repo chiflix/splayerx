@@ -108,6 +108,7 @@
       :show-all-widgets="showAllWidgets"
       :style="{ marginBottom: preFullScreen ? '10px' : '0' }"
     />
+    <audio-translate-modal />
   </div>
 </template>
 <script lang="ts">
@@ -129,6 +130,7 @@ import TheTimeCodes from '@/components/PlayingView/TheTimeCodes.vue';
 import TheProgressBar from '@/containers/TheProgressBar.vue';
 import RecentPlaylist from '@/containers/RecentPlaylist.vue';
 import NotificationBubble from '@/components/NotificationBubble.vue';
+import AudioTranslateModal from '@/containers/AudioTranslateModal.vue';
 import { videodata } from '@/store/video';
 
 const { mapGetters: inputMapGetters } = createNamespacedHelpers('InputPlugin');
@@ -153,6 +155,7 @@ export default {
     'the-progress-bar': TheProgressBar,
     'notification-bubble': NotificationBubble,
     'recent-playlist': RecentPlaylist,
+    'audio-translate-modal': AudioTranslateModal,
   },
   data() {
     return {
@@ -242,6 +245,9 @@ export default {
       );
     },
     cursorStyle() {
+      if (this.isTranslateModalVisiable) {
+        return 'default';
+      }
       return this.showAllWidgets || !this.isFocused
         || this.tempRecentPlaylistDisplayState ? 'default' : 'none';
     },

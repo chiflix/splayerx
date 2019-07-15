@@ -10,7 +10,7 @@ import upload from '@/services/subtitle/upload';
 import { addBubble } from '../../helpers/notificationControl';
 import { NOT_SUPPORTED_SUBTITLE } from '../../helpers/notificationcodes';
 import store from '..';
-import { isCachedSubtitle } from '@/services/storage/subtitle/file';
+import { isCachedSubtitle, removeCachedSubtitle } from '@/services/storage/subtitle/file';
 
 type SubtitleState = {
   moduleId: string;
@@ -66,8 +66,8 @@ const mutations = {
   [m.setLanguage](state: SubtitleState, languageCode: LanguageCode) {
     state.language = languageCode;
   },
-  [m.setDelay](state: SubtitleState, delay: number) {
-    state.delay = delay;
+  [m.setDelay](state: SubtitleState, delayInSeconds: number) {
+    state.delay = delayInSeconds;
   },
   [m.setPlayedTime](state: SubtitleState, playedTime: number) {
     state.playedTime = playedTime;
@@ -119,6 +119,10 @@ const actions = {
           entity.hash = hash;
           commit(m.setHash, hash);
         }),
+        generator.getDelay ? generator.getDelay().then((delay) => {
+          entity.delay = delay;
+          commit(m.setDelay, delay);
+        }) : () => {},
       ]);
       if (isCachedSubtitle(entity.source)) subtitle.cached = CacheStatus.CACHED;
       return entity;
@@ -142,6 +146,7 @@ const actions = {
         subtitle.parser = getParser(realFormat, entity.payload);
         try {
           await subtitle.parser.parse();
+          entity.metadata = await subtitle.parser.getMetadata();
           await dispatch(a.startWatchPlayedTime);
         } catch(err) {
           addBubble(NOT_SUPPORTED_SUBTITLE);
@@ -150,10 +155,16 @@ const actions = {
         }
       }
       if (entity.payload && parser.getDialogues && parser.payload) {
-        return subtitle.parser.getDialogues(time - rootGetters.globalDelay);
+        return {
+          metadata: {},
+          dialogues: await subtitle.parser.getDialogues(time - state.delay),
+        };
       }
     }
-    return [];
+    return {
+      metadata: {},
+      dialogues: [],
+    };
   },
   async [a.store]({ state }: any) {
     const subtitle = subtitleMap.get(state.moduleId);
@@ -178,6 +189,10 @@ const actions = {
     if (subtitle) {
       subtitleMap.delete(state.moduleId);
       await removeSubtitle(subtitle.entity);
+      if (subtitle.cached) {
+        const cachedSource = await removeCachedSubtitle(subtitle.entity.hash);
+        if (cachedSource) await removeSubtitle({ ...subtitle.entity, source: cachedSource });
+      }
     }
     removeSubtitleItemsFromList([subtitleToRemoveFromList], playlistId, mediaItemId);
   },
@@ -190,7 +205,7 @@ const actions = {
         format: state.format,
         playedTime: state.playedTime,
         totalTime: rootGetters.duration,
-        delay: state.delay,
+        delay: state.delay * 1000,
         hints: await generateHints(rootGetters.originSrc),
         transcriptIdentity: state.format === Format.Sagi ? state.hash : '',
         payload: state.format === Format.Sagi ? '' : Buffer.from(subtitle.entity.payload),
@@ -209,7 +224,7 @@ const actions = {
         format: state.format,
         playedTime: state.playedTime,
         totalTime: rootGetters.duration,
-        delay: state.delay,
+        delay: state.delay * 1000,
         hints: await generateHints(rootGetters.originSrc),
         transcriptIdentity: state.format === Format.Sagi ? state.hash : '',
         payload: state.format === Format.Sagi ? '' : Buffer.from(subtitle.entity.payload),
@@ -241,6 +256,20 @@ const actions = {
   },
   [a.stopWatchPlayedTime]() {
     autoUpload = true;
+  },
+  [a.alterDelay]({ state, commit }: any, deltaInSeconds: number) {
+    const subtitle = subtitleMap.get(state.moduleId);
+    if (subtitle) {
+      const alfterAltered = +(state.delay + deltaInSeconds).toFixed(1);
+      if (Math.abs(alfterAltered) < 10000) {
+        commit(m.setDelay, alfterAltered);
+        subtitle.entity.delay = alfterAltered;
+      }
+    }
+    return state.delay;
+  },
+  [a.resetDelay]({ commit }: any) {
+    commit(m.setDelay, 0);
   },
 };
 

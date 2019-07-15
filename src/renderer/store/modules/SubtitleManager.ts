@@ -8,7 +8,7 @@ import { generateHints, calculatedName } from '@/libs/utils';
 import { log } from '@/libs/Log';
 import SubtitleModule from './Subtitle';
 import { StoredSubtitleItem, SelectedSubtitle } from '@/interfaces/ISubtitleStorage';
-import { retrieveSubtitlePreference, DatabaseGenerator, storeSubtitleLanguage, addSubtitleItemsToList, removeSubtitleItemsFromList, storeSelectedSubtitles } from '@/services/storage/subtitle';
+import { retrieveSubtitlePreference, DatabaseGenerator, storeSubtitleLanguage, addSubtitleItemsToList, removeSubtitleItemsFromList, storeSelectedSubtitles, updateSubtitleList } from '@/services/storage/subtitle';
 import { isEqual, get, sortBy, differenceWith, flatten, remove, debounce } from 'lodash';
 import Vue from 'vue';
 import { extname } from 'path';
@@ -35,7 +35,8 @@ type SubtitleManagerState = {
   secondarySubtitleId: string,
   isRefreshing: boolean,
   allSubtitles: { [id: string]: SubtitleControlListItem },
-  globalDelay: number,
+  primaryDelay: number,
+  secondaryDelay: number,
 }
 const state = {
   playlistId: 0,
@@ -44,7 +45,8 @@ const state = {
   secondarySubtitleId: '',
   isRefreshing: false,
   allSubtitles: {},
-  globalDelay: 0,
+  primaryDelay: 0,
+  secondaryDelay: 0,
 };
 const getters = {
   list(state: SubtitleManagerState) {
@@ -69,7 +71,8 @@ const getters = {
     }
     return enable;
   },
-  globalDelay(state: SubtitleManagerState) { return state.globalDelay; },
+  primaryDelay({ primaryDelay }: SubtitleManagerState) { return primaryDelay; },
+  secondaryDelay({ secondaryDelay }: SubtitleManagerState) { return secondaryDelay; },
 };
 const mutations = {
   [m.setPlaylistId](state: SubtitleManagerState, id: number) {
@@ -97,12 +100,16 @@ const mutations = {
   [m.deleteSubtitleId](state: SubtitleManagerState, id: string) {
     Vue.set(state.allSubtitles, id, undefined);
   },
-  [m.setGlobalDelay](state: SubtitleManagerState, delay: number) {
-    if (delay === 0) {
-      state.globalDelay = delay;
-    } else if (Math.abs((state.globalDelay / 1000) + delay) <= 10000) {
-      state.globalDelay += delay * 1000;
-    }
+  [m.deletaAllSubtitleIds](state: SubtitleManagerState) { state.allSubtitles = {}; },
+  [m.setPrimaryDelay](state: SubtitleManagerState, delayInSeconds: number) {
+    state.primaryDelay = delayInSeconds;
+    const subtitle = state.allSubtitles[state.primarySubtitleId];
+    if (subtitle) subtitle.delay = delayInSeconds;
+  },
+  [m.setSecondaryDelay](state: SubtitleManagerState, delayInSeconds: number) {
+    state.secondaryDelay = delayInSeconds;
+    const subtitle = state.allSubtitles[state.secondarySubtitleId];
+    if (subtitle) subtitle.delay = delayInSeconds;
   },
 };
 // TODO playlistId -> playListId @yyf
@@ -130,6 +137,11 @@ function privacyConfirm() {
 
 let primarySelectionComplete = false;
 let secondarySelectionComplete = false;
+let alterDelayTimeoutId: any = 0;
+function setDelayTimeout() {
+  clearTimeout(alterDelayTimeoutId);
+  alterDelayTimeoutId = setTimeout(() => store.dispatch(a.storeSubtitleDelays), 10000);
+}
 function fetchOnlineListWithErrorHandling(
   videoSrc: string,
   languageCode: LanguageCode,
@@ -156,17 +168,22 @@ function initializeManager({ getters, commit, dispatch }: any) {
   getters.list.forEach((s: SubtitleControlListItem) => dispatch(a.removeSubtitle, s.id));
   commit(m.setPlaylistId, playListId);
   commit(m.setMediaItemId, `${mediaHash}-${originSrc}`);
-  commit(m.setPrimarySubtitleId, '');
-  commit(m.setSecondarySubtitleId, '');
-  primarySelectionComplete = false;;
-  secondarySelectionComplete = false;
-  commit(m.setGlobalDelay, 0);
   dispatch(a.refreshSubtitlesInitially);
 }
 const debouncedInitializeManager = debounce(initializeManager, 1000);
 const actions = {
   async [a.initializeManager](context: any) {
     debouncedInitializeManager(context);
+  },
+  [a.resetManager]({ commit }: any) {
+    commit(m.setPlaylistId, 0);
+    commit(m.setMediaItemId, '');
+    commit(m.setPrimarySubtitleId, '');
+    commit(m.setSecondarySubtitleId, '');
+    commit(m.setIsRefreshing, false);
+    commit(m.deletaAllSubtitleIds);
+    primarySelectionComplete = false;;
+    secondarySelectionComplete = false;
   },
   async [a.refreshSubtitlesInitially]({ state, getters, dispatch, commit }: any) {
     primarySelectionComplete = false;
@@ -403,6 +420,7 @@ const actions = {
             type: subtitle.type,
             language: subtitle.language,
             source: subtitle.source.source,
+            delay: subtitle.delay,
           };
           commit(m.addSubtitleId, subtitleControlListItem);
           return subtitleControlListItem;
@@ -413,7 +431,7 @@ const actions = {
       }
     }
   },
-  [a.removeSubtitle]({ commit, getters, state }: any, id: string) {
+  [a.removeSubtitle]({ commit, getters }: any, id: string) {
     store.unregisterModule(id);
     commit(m.deleteSubtitleId, id);
     if (getters.isFirstSubtitle && getters.primarySubtitleId === id) {
@@ -434,7 +452,9 @@ const actions = {
     let secondary = getters.secondarySubtitleId;
     if (id === secondary) secondary = '';
     commit(m.setPrimarySubtitleId, primary);
+    if (state.allSubtitles[primary]) commit(m.setPrimaryDelay, state.allSubtitles[primary].delay);
     commit(m.setSecondarySubtitleId, secondary);
+    if (state.allSubtitles[secondary]) commit(m.setSecondaryDelay, state.allSubtitles[secondary].delay);
     if (state[id] && state[id].type !== Type.Translated) {
       dispatch(a.storeSelectedSubtitle, [primary, secondary]);
     }
@@ -443,9 +463,11 @@ const actions = {
   async [a.changeSecondarySubtitle]({ dispatch, commit, getters, state }: any, id: string) {
     let primary = getters.primarySubtitleId;
     let secondary = id;
-    if (id === primary) primary = '';
+    if (id && id === primary) primary = '';
     commit(m.setPrimarySubtitleId, primary);
+    if (state.allSubtitles[primary]) commit(m.setPrimaryDelay, state.allSubtitles[primary].delay);
     commit(m.setSecondarySubtitleId, secondary);
+    if (state.allSubtitles[secondary]) commit(m.setSecondaryDelay, state.allSubtitles[secondary].delay);
     if (state[id] && state[id].type !== Type.Translated) {
       dispatch(a.storeSelectedSubtitle, [primary, secondary]);
     }
@@ -519,8 +541,12 @@ const actions = {
     }
     if (getters.primarySubtitleId) {
       try {
-        const dialogues = await dispatch(`${getters.primarySubtitleId}/${subActions.getDialogues}`, time);
+        const { metadata = {}, dialogues = [] } = await dispatch(`${getters.primarySubtitleId}/${subActions.getDialogues}`, time);
         firstSub.cues = dialogues;
+        if (metadata) {
+          if (metadata.PlayResX) firstSub.subPlayResX = parseInt(metadata.PlayResX, 10);
+          if (metadata.PlayResY) firstSub.subPlayResY = parseInt(metadata.PlayResY, 10);
+        }
       } catch (error) {
         log.error('SubtitleManager', error);
       }
@@ -528,8 +554,12 @@ const actions = {
 
     if (getters.enabledSecondarySub && getters.secondarySubtitleId) {
       try {
-        const dialogues = await dispatch(`${getters.secondarySubtitleId}/${subActions.getDialogues}`, time);
+        const { metadata = {}, dialogues = [] } = await dispatch(`${getters.secondarySubtitleId}/${subActions.getDialogues}`, time);
         secondSub.cues = dialogues;
+        if (metadata) {
+          if (metadata.PlayResX) firstSub.subPlayResX = parseInt(metadata.PlayResX, 10);
+          if (metadata.PlayResY) firstSub.subPlayResY = parseInt(metadata.PlayResY, 10);
+        }
       } catch (error) {
         log.error('SubtitleManager', error);
       }
@@ -583,8 +613,34 @@ const actions = {
       addBubble(UPLOAD_FAILED);
     }
   },
-  [a.setGlobalDelay]({ commit }: any, delta: any) {
-    commit(m.setGlobalDelay, delta);
+  async [a.alterPrimaryDelay]({ state, dispatch, commit }: any, deltaInSeconds: number) {
+    const { primarySubtitleId } = state;
+    const delay = await dispatch(`${primarySubtitleId}/${subActions.alterDelay}`, deltaInSeconds);
+    commit(m.setPrimaryDelay, delay);
+    setDelayTimeout();
+  },
+  async [a.resetPrimaryDelay]({ state, dispatch, commit }: any) {
+    const { primarySubtitleId } = state;
+    await dispatch(`${primarySubtitleId}/${subActions.resetDelay}`);
+    commit(m.setPrimaryDelay, 0);
+    setDelayTimeout();
+  },
+  async [a.alterSecondaryDelay]({ state, dispatch, commit }: any, deltaInSeconds: number) {
+    const { secondarySubtitleId } = state;
+    const delay = await dispatch(`${secondarySubtitleId}/${subActions.alterDelay}`, deltaInSeconds);
+    commit(m.setSecondaryDelay, delay);
+    setDelayTimeout();
+  },
+  async [a.resetSecondaryDelay]({ state, dispatch, commit }: any) {
+    const { secondarySubtitleId } = state;
+    await dispatch(`${secondarySubtitleId}/${subActions.resetDelay}`);
+    commit(m.setSecondaryDelay, 0);
+    setDelayTimeout();
+  },
+  async [a.storeSubtitleDelays]({ getters, state }: any) {
+    const { list } = getters;
+    const { playlistId, mediaItemId } = state;
+    updateSubtitleList(list, playlistId, mediaItemId);
   },
 };
 

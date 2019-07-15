@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com 
  * @Date: 2019-07-05 16:03:32 
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-07-12 15:32:57
+ * @Last Modified time: 2019-07-15 19:04:15
  */
 import { AudioTranslate as m } from '@/store/mutationTypes';
 import { AudioTranslate as a, SubtitleManager as smActions } from '@/store/actionTypes';
@@ -14,6 +14,7 @@ import { mediaStorageService } from '@/services/storage/MediaStorageService';
 import { TranslatedGenerator } from '@/services/subtitle/loaders/translated';
 
 let taskTimer: number;
+let timerCount: number;
 let firstGetTaskEstimateTime: number;
 
 export enum AudioTranslateStatus {
@@ -161,6 +162,7 @@ const actions = {
     commit(m.AUDIO_TRANSLATE_SAVE_KEY, `${getters.mediaHash}-${getters.selectedTargetLanugage}`);
     audioGrabService.remove();
     const grab = audioGrabService.send({
+      audioId: getters.currentAudioTrackId,
       mediaHash: getters.mediaHash,
       videoSrc: getters.originSrc,
       audioLanguageCode,
@@ -177,7 +179,7 @@ const actions = {
         const progress = Math.ceil((time / getters.duration) * 50);
         // 倒计时计算公式(视频时长 - 已经提取音频时长) * 系数 + 预估预约识别的时长
         // 系数0.005 2000s的视频提取完成话费10s, 系数 = 10 / 2000
-        const estimateTime = ((getters.duration - time) * 0.005 + 300);
+        const estimateTime = ((getters.duration - time) * 0.005 + 150);
         commit(m.AUDIO_TRANSLATE_UPDATE_ESTIMATE_TIME, estimateTime);
         commit(m.AUDIO_TRANSLATE_UPDATE_PROGRESS, progress);
       });
@@ -189,15 +191,32 @@ const actions = {
           commit(m.AUDIO_TRANSLATE_UPDATE_PROGRESS, 0);
           // TODO 如果开启了第二字幕
           dispatch(smActions.changePrimarySubtitle, '');
-        }
-        // 如果当前有其他的bubble显示，就暂时不出失败的bubble
-        if (!state.isBubbleVisible) {
-          dispatch(a.AUDIO_TRANSLATE_SHOW_BUBBLE, AudioTranslateBubbleOrigin.TranslateFail);
-        } else {
-          commit(m.AUDIO_TRANSLATE_BUBBLE_CANCEL_CALLBACK, () => {
+          // 如果当前有其他的bubble显示，就暂时不出失败的bubble
+          if (!state.isBubbleVisible) {
             dispatch(a.AUDIO_TRANSLATE_SHOW_BUBBLE, AudioTranslateBubbleOrigin.TranslateFail);
-          });
+          } else {
+            commit(m.AUDIO_TRANSLATE_BUBBLE_CANCEL_CALLBACK, () => {
+              dispatch(a.AUDIO_TRANSLATE_SHOW_BUBBLE, AudioTranslateBubbleOrigin.TranslateFail);
+            });
+          }
         }
+      });
+      grab.on('grabCompleted', () => {
+        // 假进度
+        timerCount = 0;
+        firstGetTaskEstimateTime = 150;
+        taskTimer = window.setInterval(() => {
+          if (state.status !== AudioTranslateStatus.Grabbing) {
+            clearInterval(taskTimer);
+            return;
+          }
+          timerCount += 1;
+          const estimateTime = firstGetTaskEstimateTime - Math.log(timerCount);
+          const progress = 100 - ((estimateTime / firstGetTaskEstimateTime) * 50);
+          console.log(estimateTime, progress);
+          commit(m.AUDIO_TRANSLATE_UPDATE_ESTIMATE_TIME, estimateTime);
+          commit(m.AUDIO_TRANSLATE_UPDATE_PROGRESS, progress);
+        }, 1000);
       });
       grab.on('task', (taskInfo: AITaskInfo) => {
         console.log(taskInfo, 'audio-log');
@@ -207,17 +226,17 @@ const actions = {
         audioGrabService.taskInfo = taskInfo;
         let estimateTime = taskInfo.estimateTime * 1;
         if (!estimateTime) {
-          estimateTime = 300;
-        }
-        if (!firstGetTaskEstimateTime) {
+          firstGetTaskEstimateTime = state.translateEstimateTime;
+        } else if (state.translateEstimateTime > estimateTime) {
           firstGetTaskEstimateTime = estimateTime;
         }
+        timerCount = 0;
         commit(m.AUDIO_TRANSLATE_UPDATE_STATUS, AudioTranslateStatus.Translating);
         // 进入服务端语音识别阶段，倒计时完全使用服务器给的倒计时
-        commit(m.AUDIO_TRANSLATE_UPDATE_ESTIMATE_TIME, estimateTime);
+        commit(m.AUDIO_TRANSLATE_UPDATE_ESTIMATE_TIME, firstGetTaskEstimateTime);
         // 进度条计算公式((第一次给的预估时间 - 本次预估时间) / 第一次给的预估时间) + 50
-        const progress = ((firstGetTaskEstimateTime - estimateTime) / firstGetTaskEstimateTime) * 50;
-        commit(m.AUDIO_TRANSLATE_UPDATE_PROGRESS, (50 + progress));
+        const progress = 100 - ((estimateTime / firstGetTaskEstimateTime) * 50);
+        commit(m.AUDIO_TRANSLATE_UPDATE_PROGRESS, progress);
         // 开启定时器模拟倒计时和进度
         if (taskTimer) {
           clearInterval(taskTimer);
@@ -227,10 +246,12 @@ const actions = {
             clearInterval(taskTimer);
             return;
           }
-          const estimateTime = state.translateEstimateTime - 1;
-          const progress = ((firstGetTaskEstimateTime - estimateTime) / firstGetTaskEstimateTime) * 50;
+          timerCount += 1;
+          const estimateTime = firstGetTaskEstimateTime - Math.log(timerCount);
+          const progress = 100 - ((estimateTime / firstGetTaskEstimateTime) * 50);
+          console.log(estimateTime, progress);
           commit(m.AUDIO_TRANSLATE_UPDATE_ESTIMATE_TIME, estimateTime);
-          commit(m.AUDIO_TRANSLATE_UPDATE_PROGRESS, (50 + progress));
+          commit(m.AUDIO_TRANSLATE_UPDATE_PROGRESS, progress);
         }, 1000);
       });
       grab.on('transcriptInfo', async (transcriptInfo: TranscriptInfo) => {
@@ -313,6 +334,7 @@ const actions = {
     commit(m.AUDIO_TRANSLATE_UPDATE_STATUS, AudioTranslateStatus.Back);
   },
   [a.AUDIO_TRANSLATE_SHOW_MODAL]({ commit, getters, state, dispatch }: any, sub: SubtitleControlListItem) {
+    dispatch(a.AUDIO_TRANSLATE_HIDE_BUBBLE);
     const key = `${getters.mediaHash}-${sub.language}`;
     let taskInfo = mediaStorageService.getAsyncTaskInfo(key);
     if (getters.isTranslating && state.key === key) {
@@ -332,6 +354,7 @@ const actions = {
       commit(m.AUDIO_TRANSLATE_UPDATE_PROGRESS, 51);
       commit(m.AUDIO_TRANSLATE_SHOW_MODAL);
     } else {
+      commit(m.AUDIO_TRANSLATE_UPDATE_STATUS, AudioTranslateStatus.Default);
       commit(m.AUDIO_TRANSLATE_SHOW_MODAL);
       commit(m.AUDIO_TRANSLATE_SELECTED_UPDATE, sub);
     }
