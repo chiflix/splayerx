@@ -1,12 +1,13 @@
 
 <template>
   <div
-    ref="item"
     :style="{
       bottom: chosen ? '9px' : '0',
       width: `${thumbnailWidth}px`,
       height: `${thumbnailHeight}px`,
       backgroundImage: backgroundUrl,
+      transform: `translate(${movementX}px, ${movementY}px`,
+      zIndex: mousedown ? '5' : '',
     }"
     class="item"
   >
@@ -36,7 +37,10 @@
         class="border"
       >
         <transition name="fade-100">
-          <Icon v-show="aboutToDelete" type="delete" />
+          <Icon
+            v-show="aboutToDelete"
+            type="delete"
+          />
         </transition>
       </div>
     </div>
@@ -99,10 +103,12 @@ export default {
       coverSrc: '',
       isDragging: false,
       aboutToDelete: false,
-      showShadow: true,
       chosen: false,
-      disX: NaN,
-      disY: NaN,
+      mousedown: false,
+      mousedownX: NaN,
+      mousedownY: NaN,
+      movementX: NaN,
+      movementY: NaN,
     };
   },
   destroyed() {
@@ -120,24 +126,22 @@ export default {
       this.chosen = false;
     },
     onRecentItemMousedown(e: MouseEvent) {
-      this.disX = e.pageX;
-      this.disY = e.pageY;
+      this.mousedown = true;
       this.isDragging = false;
+      this.mousedownX = e.pageX;
+      this.mousedownY = e.pageY;
 
       if (this.isInRange) {
         document.addEventListener('mousemove', this.onRecentItemMousemove);
         document.addEventListener('mouseup', this.onRecentItemMouseup);
-        this.showShadow = false;
-        this.$refs.item.style.setProperty('z-index', '5');
       }
     },
     onRecentItemMousemove(e: MouseEvent) {
       this.isDragging = true;
-      const movementX = e.pageX - this.disX;
-      const movementY = e.pageY - this.disY;
-      this.$refs.item.style.setProperty('transform', `translate(${movementX}px, ${movementY}px)`);
-      if (Math.abs(movementX) >= this.thumbnailWidth
-        || Math.abs(movementY) >= this.thumbnailHeight) {
+      this.movementX = e.pageX - this.mousedownX;
+      this.movementY = e.pageY - this.mousedownY;
+      if (Math.abs(this.movementX) >= this.thumbnailWidth
+        || Math.abs(this.movementY) >= this.thumbnailHeight) {
         this.aboutToDelete = true;
       } else {
         this.aboutToDelete = false;
@@ -145,9 +149,9 @@ export default {
     },
     onRecentItemMouseup() {
       document.removeEventListener('mousemove', this.onRecentItemMousemove);
-      this.showShadow = true;
-      this.$refs.item.style.setProperty('transform', 'translate(0,0)');
-      this.$refs.item.style.setProperty('z-index', '');
+      document.removeEventListener('mouseup', this.onRecentItemMouseup);
+      this.mousedown = false;
+      this.movementX = this.movementY = 0;
       if (this.aboutToDelete) {
         this.onItemDelete(this.index);
         this.aboutToDelete = false;
