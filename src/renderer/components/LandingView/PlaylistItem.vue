@@ -1,7 +1,6 @@
 
 <template>
   <div
-    ref="playlistItem"
     :style="{
       transform: `translate(${movementX}px, ${movementY}px)`,
       zIndex: mousedown ? '5' : '',
@@ -9,7 +8,6 @@
     class="playlist-item"
   >
     <div
-      ref="layer1"
       :style="{
         width: `${thumbnailWidth}px`,
         height: `${thumbnailHeight}px`,
@@ -18,7 +16,6 @@
       class="layer1"
     />
     <div
-      ref="layer2"
       :style="{
         width: `${thumbnailWidth}px`,
         height: `${thumbnailHeight}px`,
@@ -27,7 +24,6 @@
       class="layer2"
     />
     <div
-      ref="item"
       :style="{
         bottom: chosen ? '10px' : '0',
         width: `${thumbnailWidth}px`,
