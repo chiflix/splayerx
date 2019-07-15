@@ -100,11 +100,13 @@ const mutations = {
   [m.deletaAllSubtitleIds](state: SubtitleManagerState) { state.allSubtitles = {}; },
   [m.setPrimaryDelay](state: SubtitleManagerState, delayInSeconds: number) {
     state.primaryDelay = delayInSeconds;
-    state.allSubtitles[state.primarySubtitleId].delay = delayInSeconds;
+    const subtitle = state.allSubtitles[state.primarySubtitleId];
+    if (subtitle) subtitle.delay = delayInSeconds;
   },
   [m.setSecondaryDelay](state: SubtitleManagerState, delayInSeconds: number) {
     state.secondaryDelay = delayInSeconds;
-    state.allSubtitles[state.secondarySubtitleId].delay = delayInSeconds;
+    const subtitle = state.allSubtitles[state.secondarySubtitleId];
+    if (subtitle) subtitle.delay = delayInSeconds;
   },
 };
 type AddDatabaseSubtitlesOptions = {

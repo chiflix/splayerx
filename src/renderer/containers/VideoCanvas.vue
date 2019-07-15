@@ -250,13 +250,16 @@ export default {
         intrinsicHeight: target.videoHeight,
         ratio: target.videoWidth / target.videoHeight,
       });
-      const mediaInfo = await playInfoStorageService.getMediaItem(this.videoId);
-      if (mediaInfo.lastPlayedTime && target.duration - mediaInfo.lastPlayedTime > 10) {
+      const mediaInfo = this.videoId
+        ? await playInfoStorageService.getMediaItem(this.videoId)
+        : null;
+      if (mediaInfo && mediaInfo.lastPlayedTime
+        && target.duration - mediaInfo.lastPlayedTime > 10) {
         this.$bus.$emit('seek', mediaInfo.lastPlayedTime);
       } else {
         this.$bus.$emit('seek', 0);
       }
-      if (mediaInfo.audioTrackId) this.lastAudioTrackId = mediaInfo.audioTrackId;
+      if (mediaInfo && mediaInfo.audioTrackId) this.lastAudioTrackId = mediaInfo.audioTrackId;
       this.$bus.$emit('video-loaded');
       this.changeWindowRotate(this.winAngle);
 
