@@ -1,6 +1,10 @@
-import { EntityGenerator, Entity, Parser, Type, Format, Origin } from '@/interfaces/ISubtitle';
+import {
+  EntityGenerator, Entity, Parser, Type, Format, Origin,
+} from '@/interfaces/ISubtitle';
 import { LanguageCode } from '@/libs/language';
-import { storeSubtitle, removeSubtitle, removeSubtitleItemsFromList, cacheSubtitle } from '@/services/storage/subtitle';
+import {
+  storeSubtitle, removeSubtitle, removeSubtitleItemsFromList, cacheSubtitle,
+} from '@/services/storage/subtitle';
 import { newSubtitle as m } from '@/store/mutationTypes';
 import { newSubtitle as a, SubtitleManager as parentActions } from '@/store/actionTypes';
 import { getParser, sourceToFormat } from '@/services/subtitle/utils';
@@ -94,28 +98,28 @@ const actions = {
       await Promise.all([
         generator.getStoredSource
           ? generator.getStoredSource()
-              .then((src: Origin) => {
-                entity.source = src;
-                return generator.getSource();
-              })
-              .then((src: Origin) => commit(m.setRealSource, src))
+            .then((src: Origin) => {
+              entity.source = src;
+              return generator.getSource();
+            })
+            .then((src: Origin) => commit(m.setRealSource, src))
           : generator.getSource().then((src: Origin) => {
             entity.source = src;
             commit(m.setRealSource, src);
           }),
-        generator.getFormat().then(format => {
+        generator.getFormat().then((format) => {
           entity.format = format;
           commit(m.setFormat, format);
         }),
-        generator.getLanguage().then(language => {
+        generator.getLanguage().then((language) => {
           entity.language = language;
           commit(m.setLanguage, language);
         }),
-        generator.getType().then(type => {
+        generator.getType().then((type) => {
           entity.type = type;
           commit(m.setType, type);
         }),
-        generator.getHash().then(hash => {
+        generator.getHash().then((hash) => {
           entity.hash = hash;
           commit(m.setHash, hash);
         }),
@@ -141,14 +145,14 @@ const actions = {
     if (subtitle) {
       const { entity, parser } = subtitle;
       if (!entity.payload) return [];
-      else if (entity.payload && !parser.getDialogues) {
+      if (entity.payload && !parser.getDialogues) {
         const realFormat = sourceToFormat(state.realSource);
         subtitle.parser = getParser(realFormat, entity.payload);
         try {
           await subtitle.parser.parse();
           entity.metadata = await subtitle.parser.getMetadata();
           await dispatch(a.startWatchPlayedTime);
-        } catch(err) {
+        } catch (err) {
           addBubble(NOT_SUPPORTED_SUBTITLE);
           const subtitleToRemoveFromList = rootGetters.list.find((sub: any) => sub.id === state.moduleId);
           store.dispatch(parentActions.deleteSubtitlesByUuid, [subtitleToRemoveFromList]);

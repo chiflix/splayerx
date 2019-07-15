@@ -6,11 +6,12 @@ interface IMouse {
 
 class WinMouse implements IMouse {
   private mouse: any;
+
   constructor() {
     try {
       const mouseConstructor = require('win-mouse');
       this.mouse = mouseConstructor();
-    } catch(ex) {
+    } catch (ex) {
       console.error(ex);
     }
   }
@@ -31,7 +32,9 @@ class WinMouse implements IMouse {
 
 class FakeMouse implements IMouse {
   on() {}
+
   off() {}
+
   dispose() {}
 }
 

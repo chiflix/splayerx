@@ -1,7 +1,11 @@
-import { Entity, Origin, Type } from '@/interfaces/ISubtitle';
-import { join, extname, dirname, basename } from 'path';
+import {
+  join, extname, dirname, basename,
+} from 'path';
 import { remote } from 'electron';
-import { copyFile, existsSync, outputFile, ensureDirSync, remove, readdir } from 'fs-extra';
+import {
+  copyFile, existsSync, outputFile, ensureDirSync, remove, readdir,
+} from 'fs-extra';
+import { Entity, Origin, Type } from '@/interfaces/ISubtitle';
 import { embeddedSrcLoader, EmbeddedOrigin } from '@/services/subtitle';
 import { sagiSubtitleToWebVTT } from '@/services/subtitle/utils/transcoders';
 import { updateSubtitle } from '.';
@@ -64,7 +68,7 @@ export async function removeCachedSubtitles(hashes: string[]): Promise<{ hash: s
   const cachedSubtitlePaths = (await readdir(subtitleCachePath))
     .filter(path => hashes.includes(basename(path, extname(path))))
     .map(basepath => join(subtitleCachePath, basepath));
-  return Promise.all(cachedSubtitlePaths.map(async path => {
+  return Promise.all(cachedSubtitlePaths.map(async (path) => {
     await remove(path);
     return {
       hash: basename(path, extname(path)),

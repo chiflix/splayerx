@@ -1,9 +1,11 @@
-import { Origin, Type, EntityGenerator, Format } from '@/interfaces/ISubtitle';
-import { LanguageCode, normalizeCode } from '@/libs/language';
 import { ipcRenderer, Event } from 'electron';
+import { cloneDeep } from 'lodash';
+import {
+  Origin, Type, EntityGenerator, Format,
+} from '@/interfaces/ISubtitle';
+import { LanguageCode, normalizeCode } from '@/libs/language';
 import { mediaQuickHash } from '@/libs/utils';
 import { inferLanguageFromPath, loadLocalFile } from '../utils';
-import { cloneDeep } from 'lodash';
 
 interface IExtractSubtitleRequest {
   videoSrc: string;
@@ -32,8 +34,7 @@ export async function embeddedSrcLoader(videoSrc: string, streamIndex: number, f
     videoSrc,
     streamIndex,
     format,
-    mediaHash,
-  );
+    mediaHash);
   return new Promise((resolve, reject) => {
     ipcRenderer.once(`extract-subtitle-response-${streamIndex}`, (event: Event, response: IExtractSubtitleResponse) => {
       const { error, index, path } = response;
@@ -67,9 +68,13 @@ export interface ISubtitleStream {
 
 export class EmbeddedGenerator implements EntityGenerator {
   private origin: EmbeddedOrigin;
+
   private format: Format;
+
   private language: LanguageCode = LanguageCode.Default;
+
   readonly isDefault: boolean;
+
   constructor(videoSrc: string, stream: ISubtitleStream) {
     this.origin = {
       type: Type.Embedded,
@@ -85,13 +90,17 @@ export class EmbeddedGenerator implements EntityGenerator {
   }
 
   async getSource() { return cloneDeep(this.origin); }
+
   async getType() { return Type.Embedded; }
+
   async getFormat() { return this.format; }
+
   private async getExtractedSrc() {
     const { videoSrc, streamIndex, extractedSrc } = this.origin.source;
     if (!extractedSrc) return this.origin.source.extractedSrc = await embeddedSrcLoader(videoSrc, streamIndex, this.format);
     return extractedSrc;
   }
+
   async getHash() {
     return mediaQuickHash(await this.getExtractedSrc());
   }
@@ -104,6 +113,7 @@ export class EmbeddedGenerator implements EntityGenerator {
   }
 
   private payload: string;
+
   async getPayload() {
     if (!this.payload) this.payload = await loadLocalFile(await this.getExtractedSrc());
     return this.payload;

@@ -1,7 +1,7 @@
 // @ts-ignore
 import PQueue from 'p-queue';
-import Sagi from '@/libs/sagi';
 import { TrainingData } from 'sagi-api/training/v1/training_pb';
+import Sagi from '@/libs/sagi';
 
 export type SubtitleUploadParameter = TrainingData.AsObject;
 
@@ -25,20 +25,20 @@ export class TranscriptQueue {
     return this.addManually(subtitle, options);
   }
 
-  async addManually(subtitle: SubtitleUploadParameter, options: { priority : 0 | 1 } = { priority: 0 }) {
+  async addManually(subtitle: SubtitleUploadParameter, options: { priority: 0 | 1 } = { priority: 0 }) {
     const id = `${subtitle.hints}-${subtitle.mediaIdentity}`;
-    const task = subtitle.transcriptIdentity ?
-      () => Sagi.pushTranscriptWithTranscriptIdentity(subtitle) :
-      () => Sagi.pushTranscriptWithPayload(subtitle);
+    const task = subtitle.transcriptIdentity
+      ? () => Sagi.pushTranscriptWithTranscriptIdentity(subtitle)
+      : () => Sagi.pushTranscriptWithPayload(subtitle);
     return this.queue.add(task, options)
-        .then(() => {
-          this.subtitleState[id] = 'successful';
-          return true;
-        })
-        .catch(() => {
-          this.subtitleState[id] = 'failed';
-          return false;
-        });
+      .then(() => {
+        this.subtitleState[id] = 'successful';
+        return true;
+      })
+      .catch(() => {
+        this.subtitleState[id] = 'failed';
+        return false;
+      });
   }
 
   async addAll(subtitles: SubtitleUploadParameter[]) {

@@ -15,4 +15,4 @@ export default interface IRecentPlay {
    * 获取LandingView所需数据
    */
   getRecords(): Promise<LandingViewDisplayInfo[]>
-}
+};

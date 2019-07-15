@@ -1,6 +1,6 @@
+import { ipcRenderer } from 'electron';
 import { IThumbnailRequest } from '@/interfaces/IThumbnailRequest';
 import MediaStorageService, { mediaStorageService } from '@/services/storage/MediaStorageService';
-import { ipcRenderer } from 'electron';
 
 /** 缩略图固定的列数
  * @constant
@@ -47,9 +47,9 @@ export default class ThumbnailService implements IThumbnailRequest {
   async getThumbnailImage(mediaHash: string): Promise<string | null> {
     try {
       const result = await this.mediaStorageService.getImageBy(mediaHash, 'thumbnail');
-      return result
+      return result;
     } catch (err) {
-      return null
+      return null;
     }
   }
 
@@ -71,4 +71,3 @@ export default class ThumbnailService implements IThumbnailRequest {
 }
 
 export const thumbnailService = new ThumbnailService(mediaStorageService);
-

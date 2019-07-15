@@ -1,4 +1,6 @@
-import { access, readdir, accessSync, constants } from 'fs';
+import {
+  access, readdir, accessSync, constants,
+} from 'fs';
 import mkdirp from 'mkdirp';
 import rimraf from 'rimraf';
 
@@ -28,8 +30,8 @@ export function mkdir(path: string): Promise<string> {
  */
 export function mkdirSync(path: string): boolean {
   try {
-    mkdirp.sync(path)
-    return true
+    mkdirp.sync(path);
+    return true;
   } catch (error) {
   }
   return false;
@@ -61,7 +63,7 @@ export function checkPathExist(path: string): Promise<boolean> {
  */
 export function checkPathExistSync(path: string): boolean {
   try {
-    accessSync(path,  constants.R_OK |  constants.W_OK);
+    accessSync(path, constants.R_OK | constants.W_OK);
     return true;
   } catch (err) {
   }

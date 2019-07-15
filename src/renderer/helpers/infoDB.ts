@@ -1,5 +1,7 @@
 import { openDB, IDBPDatabase } from 'idb';
-import { INFO_DATABASE_NAME, INFO_SCHEMAS, INFODB_VERSION, RECENT_OBJECT_STORE_NAME, VIDEO_OBJECT_STORE_NAME } from '@/constants';
+import {
+  INFO_DATABASE_NAME, INFO_SCHEMAS, INFODB_VERSION, RECENT_OBJECT_STORE_NAME, VIDEO_OBJECT_STORE_NAME,
+} from '@/constants';
 import { mediaQuickHash } from '@/libs/utils';
 import { RawPlaylistItem, PlaylistItem, MediaItem } from '@/interfaces/IDB';
 import { log } from '@/libs/Log';
@@ -14,7 +16,7 @@ export class InfoDB {
    * Create InfoDB if doesn't exist
    * Update InfoDB if new schema or new index has added
    */
-  async getDB():Promise<IDBPDatabase> {
+  async getDB(): Promise<IDBPDatabase> {
     if (this.db) return this.db;
     this.db = await openDB(
       INFO_DATABASE_NAME, INFODB_VERSION, {
@@ -35,9 +37,10 @@ export class InfoDB {
           });
         },
       },
-      );
+    );
     return this.db;
   }
+
   // deprecated! will be deleted soon
   // clean All records in `storeName`, default to 'recent-played'
   async cleanData(storeName = 'recent-played') {
@@ -48,6 +51,7 @@ export class InfoDB {
       log.info('infoDB', `DB ${storeName} records all deleted`);
     });
   }
+
   // formatted, equal to the previous method
   async clear(storeName: string) {
     const db = await this.getDB();

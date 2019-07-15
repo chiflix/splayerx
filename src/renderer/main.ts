@@ -21,6 +21,7 @@ import VueElectron from 'vue-electron';
 // @ts-ignore
 import AsyncComputed from 'vue-async-computed';
 // @ts-ignore
+import { EventEmitter } from 'events';
 import App from '@/App.vue';
 import router from '@/router';
 import store from '@/store';
@@ -28,7 +29,9 @@ import messages from '@/locales';
 import { windowRectService } from '@/services/window/WindowRectService';
 import helpers from '@/helpers';
 import { hookVue } from '@/kerning';
-import { Video as videoActions, Subtitle as subtitleActions, SubtitleManager as smActions, SubtitleManager } from '@/store/actionTypes';
+import {
+  Video as videoActions, Subtitle as subtitleActions, SubtitleManager as smActions, SubtitleManager,
+} from '@/store/actionTypes';
 import { log } from '@/libs/Log';
 import asyncStorage from '@/helpers/asyncStorage';
 import { videodata } from '@/store/video';
@@ -38,7 +41,6 @@ import InputPlugin, { getterTypes as iGT } from '@/plugins/input';
 import { VueDevtools } from './plugins/vueDevtools.dev';
 import { SubtitleControlListItem, Type } from './interfaces/ISubtitle';
 import { getValidVideoRegex, getValidSubtitleRegex } from '../shared/utils';
-import { EventEmitter } from 'events';
 
 // causing callbacks-registry.js 404 error. disable temporarily
 // require('source-map-support').install();
@@ -49,7 +51,7 @@ function getSystemLocale() {
   locale = locale.replace('_', '-');
   if (locale === 'zh-TW' || locale === 'zh-HK' || locale === 'zh-Hant') {
     return 'zh-Hant';
-  } else if (locale.startsWith('zh')) {
+  } if (locale.startsWith('zh')) {
     return 'zh-Hans';
   }
   return 'en';
@@ -58,7 +60,7 @@ function getSystemLocale() {
 function getEnvironmentName() {
   if (process.platform === 'darwin') {
     return process.mas ? 'MAS' : 'DMG';
-  } else if (process.platform === 'win32') {
+  } if (process.platform === 'win32') {
     return process.windowsStore ? 'APPX' : 'EXE';
   }
   return 'Unknown';
@@ -154,7 +156,6 @@ new Vue({
   components: { App },
   router,
   store,
-  template: '<App/>',
   data() {
     return {
       menu: null,
@@ -164,6 +165,7 @@ new Vue({
       menuOperationLock: false, // 如果正在创建目录，就锁住所以操作目录的动作，防止野指针
     };
   },
+  template: '<App/>',
   computed: {
     ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winAngle', 'winWidth', 'winHeight', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'list', 'enabledSecondarySub', 'isRefreshing',
       'primarySubtitleId', 'secondarySubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isHiddenByBossKey', 'isMinimized', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle', 'displayLanguage', 'calculatedNoSub', 'sizePercent', 'snapshotSavedPath', 'duration', 'reverseScrolling',
@@ -316,48 +318,6 @@ new Vue({
       return this.$route.name;
     },
   },
-  created() {
-    this.$store.commit('getLocalPreference');
-    if (this.displayLanguage && messages[this.displayLanguage]) this.$i18n.locale = this.displayLanguage;
-    asyncStorage.get('preferences').then((data) => {
-      if (data.privacyAgreement === undefined) this.$bus.$emit('privacy-confirm');
-      if (!data.primaryLanguage) {
-        const { app } = this.$electron.remote;
-        const locale = process.platform === 'win32' ? app.getLocale() : osLocale.sync();
-        if (locale === 'zh_TW' || locale === 'zh_CN') {
-          this.$store.dispatch('primaryLanguage', locale.replace('_', '-'));
-        } else {
-          this.$store.dispatch('primaryLanguage', 'en');
-        }
-      }
-      if (!data.displayLanguage) {
-        this.$store.dispatch('displayLanguage', getSystemLocale());
-      }
-    });
-    asyncStorage.get('subtitle-style').then((data) => {
-      if (data.chosenStyle) {
-        this.updateChosenStyle(data.chosenStyle);
-      }
-      if (data.chosenSize) {
-        this.updateChosenSize(data.chosenSize);
-      }
-      this.updateEnabledSecondarySub(!!data.enabledSecondarySub);
-    });
-    asyncStorage.get('playback-states').then((data) => {
-      if (data.volume) {
-        this.$store.dispatch(videoActions.VOLUME_UPDATE, data.volume * 100);
-      }
-      if (data.muted) {
-        this.$store.dispatch(videoActions.MUTED_UPDATE, data.muted);
-      }
-    });
-    this.$bus.$on('delete-file', () => {
-      this.refreshMenu();
-    });
-    this.$event.on('playlist-display-state', (e: boolean) => {
-      this.playlistDisplayState = e;
-    });
-  },
   watch: {
     playlistDisplayState(val: boolean) {
       if (this.menu) {
@@ -493,7 +453,7 @@ new Vue({
     originSrc(newVal) {
       if (newVal && !this.isWheelEnd) {
         this.$off('wheel-event', this.wheelEventHandler);
-        this.isWheelEndWatcher = this.$watch('isWheelEnd', (newVal: Boolean) => {
+        this.isWheelEndWatcher = this.$watch('isWheelEnd', (newVal: boolean) => {
           if (newVal) {
             this.isWheelEndWatcher(); // cancel the isWheelEnd watcher
             this.$on('wheel-event', this.wheelEventHandler); // reset the wheel-event handler
@@ -501,6 +461,48 @@ new Vue({
         });
       }
     },
+  },
+  created() {
+    this.$store.commit('getLocalPreference');
+    if (this.displayLanguage && messages[this.displayLanguage]) this.$i18n.locale = this.displayLanguage;
+    asyncStorage.get('preferences').then((data) => {
+      if (data.privacyAgreement === undefined) this.$bus.$emit('privacy-confirm');
+      if (!data.primaryLanguage) {
+        const { app } = this.$electron.remote;
+        const locale = process.platform === 'win32' ? app.getLocale() : osLocale.sync();
+        if (locale === 'zh_TW' || locale === 'zh_CN') {
+          this.$store.dispatch('primaryLanguage', locale.replace('_', '-'));
+        } else {
+          this.$store.dispatch('primaryLanguage', 'en');
+        }
+      }
+      if (!data.displayLanguage) {
+        this.$store.dispatch('displayLanguage', getSystemLocale());
+      }
+    });
+    asyncStorage.get('subtitle-style').then((data) => {
+      if (data.chosenStyle) {
+        this.updateChosenStyle(data.chosenStyle);
+      }
+      if (data.chosenSize) {
+        this.updateChosenSize(data.chosenSize);
+      }
+      this.updateEnabledSecondarySub(!!data.enabledSecondarySub);
+    });
+    asyncStorage.get('playback-states').then((data) => {
+      if (data.volume) {
+        this.$store.dispatch(videoActions.VOLUME_UPDATE, data.volume * 100);
+      }
+      if (data.muted) {
+        this.$store.dispatch(videoActions.MUTED_UPDATE, data.muted);
+      }
+    });
+    this.$bus.$on('delete-file', () => {
+      this.refreshMenu();
+    });
+    this.$event.on('playlist-display-state', (e: boolean) => {
+      this.playlistDisplayState = e;
+    });
   },
   methods: {
     ...mapActions({
@@ -760,7 +762,7 @@ new Vue({
                     extensions: VALID_EXTENSION,
                   }],
                   properties: ['openFile'],
-                }, (item: Array<string>) => {
+                }, (item: string[]) => {
                   if (item) {
                     this.$bus.$emit('add-subtitles', [{ src: item[0], type: 'local' }]);
                   }
@@ -952,7 +954,7 @@ new Vue({
           click: () => {
             const { remote } = this.$electron;
             let location = remote.crashReporter.getCrashesDirectory();
-            if (!location) location = path.join(remote.app.getPath('temp'), remote.app.getName() + ' Crashes');
+            if (!location) location = path.join(remote.app.getPath('temp'), `${remote.app.getName()} Crashes`);
             if (fs.existsSync(location)) {
               remote.shell.openItem(location);
             } else {
@@ -960,7 +962,7 @@ new Vue({
                 message: this.$t('msg.help.crashReportNotAvailable'),
               });
             }
-          }
+          },
         });
       }
 
@@ -1006,7 +1008,7 @@ new Vue({
               },
               {
                 label: this.$t('msg.splayerx.showAll'),
-                role: 'unhide'
+                role: 'unhide',
               },
               { type: 'separator' },
               {

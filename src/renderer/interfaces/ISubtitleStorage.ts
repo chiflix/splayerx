@@ -1,4 +1,6 @@
-import { Format, Type, VideoSegment, Origin } from './ISubtitle';
+import {
+  Format, Type, VideoSegment, Origin,
+} from './ISubtitle';
 import { LanguageCode } from '@/libs/language';
 
 export interface StoredSubtitle {

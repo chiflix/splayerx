@@ -1,26 +1,38 @@
-import { Entity, SubtitleControlListItem } from '@/interfaces/ISubtitle';
+import {
+  Entity, SubtitleControlListItem, EntityGenerator, Type, Format, Origin,
+} from '@/interfaces/ISubtitle';
 import { LanguageCode } from '@/libs/language';
 import { SelectedSubtitle, StoredSubtitleItem } from '@/interfaces/ISubtitleStorage';
 import { SubtitleDataBase } from './db';
-import { EntityGenerator, Type, Format, Origin } from '@/interfaces/ISubtitle';
+
 import Sagi from '@/libs/sagi';
 import { loadLocalFile } from '@/services/subtitle/utils';
 import { embeddedSrcLoader } from '@/services/subtitle/loaders/embedded';
-import { cacheEmbeddedSubtitle, addNewSourceToDb, cacheLocalSubtitle, cacheOnlineSubtitle, isCachedSubtitle, removeCachedSubtitles } from './file';
+import {
+  cacheEmbeddedSubtitle, addNewSourceToDb, cacheLocalSubtitle, cacheOnlineSubtitle, isCachedSubtitle, removeCachedSubtitles,
+} from './file';
 
 const db = new SubtitleDataBase();
 
 export async function storeSubtitle(subtitle: Entity) {
-  const { source, hash, format, language } = subtitle;
-  return db.addSubtitle({ source, format, language, hash });
+  const {
+    source, hash, format, language,
+  } = subtitle;
+  return db.addSubtitle({
+    source, format, language, hash,
+  });
 }
 export async function removeSubtitle(subtitle: Entity) {
   const { hash, source } = subtitle;
   return db.removeSubtitle({ hash, source });
 }
 export async function updateSubtitle(subtitle: Entity) {
-  const { hash, source, format, language } = subtitle;
-  return db.updateSubtitle({ hash, source, format, language });
+  const {
+    hash, source, format, language,
+  } = subtitle;
+  return db.updateSubtitle({
+    hash, source, format, language,
+  });
 }
 export function retrieveSubtitlePreference(playlistId: number, mediaItemId: string) {
   return db.retrieveSubtitlePreference(playlistId, mediaItemId);
@@ -29,17 +41,29 @@ export function retrieveStoredSubtitleList(playlistId: number, mediaItemId: stri
   return db.retrieveSubtitleList(playlistId, mediaItemId);
 }
 export function addSubtitleItemsToList(subtitles: SubtitleControlListItem[], playlistId: number, mediaItemId: string) {
-  const storedSubtitles = subtitles.filter(s => s).map(({ hash, type, source, delay }) => ({ hash, type, source, delay }));
+  const storedSubtitles = subtitles.filter(s => s).map(({
+    hash, type, source, delay,
+  }) => ({
+    hash, type, source, delay,
+  }));
   return db.addSubtitleItemsToList(playlistId, mediaItemId, storedSubtitles);
 }
 export function updateSubtitleList(subtitles: SubtitleControlListItem[], playlistId: number, mediaItemId: string) {
   const subtitlesToUpdate = subtitles
     .filter(sub => !!sub)
-    .map(({ hash, type, source, delay }) => ({ hash, type, source, delay }));
+    .map(({
+      hash, type, source, delay,
+    }) => ({
+      hash, type, source, delay,
+    }));
   return db.updateSubtitleList(playlistId, mediaItemId, subtitlesToUpdate);
 }
 export function removeSubtitleItemsFromList(subtitles: SubtitleControlListItem[], playlistId: number, mediaItemId: string) {
-  const storedSubtitles = subtitles.filter(s => s).map(({ hash, type, source, delay }) => ({ hash, type, source, delay }));
+  const storedSubtitles = subtitles.filter(s => s).map(({
+    hash, type, source, delay,
+  }) => ({
+    hash, type, source, delay,
+  }));
   return db.removeSubtitleItemsFromList(playlistId, mediaItemId, storedSubtitles);
 }
 export function storeSubtitleLanguage(languageCodes: LanguageCode[], playlistId: number, mediaItemId: string) {
@@ -59,20 +83,31 @@ export async function deleteSubtitlesByPlaylistId(playlistId: number) {
 
 export class DatabaseGenerator implements EntityGenerator {
   private constructor() {}
+
   private type: Type;
+
   async getType() { return this.type; }
+
   private format: Format;
+
   async getFormat() { return this.format; }
+
   private language: LanguageCode = LanguageCode.Default;
+
   async getLanguage() { return this.language; }
+
   private sources: Origin[];
+
   async getSource() {
     const cachedSubtitle = this.sources.find(isCachedSubtitle);
     if (cachedSubtitle) return cachedSubtitle;
     return this.sources[0];
   }
+
   private storedSource: Origin;
+
   async getStoredSource() { return this.storedSource; }
+
   async getPayload() {
     const { type, source } = await this.getSource();
     switch (type) {
@@ -89,14 +124,19 @@ export class DatabaseGenerator implements EntityGenerator {
         return Sagi.getTranscript({ transcriptIdentity: source, startTime: 0 });
     }
   }
+
   private hash: string;
+
   async getHash() {
     return this.hash;
   }
+
   private delayInSeconds: number;
+
   async getDelay() {
     return this.delayInSeconds;
   }
+
   static async from(storedSubtitleItem: StoredSubtitleItem) {
     const { hash, type, delay } = storedSubtitleItem;
     const storedSubtitle = await db.retrieveSubtitle(hash);

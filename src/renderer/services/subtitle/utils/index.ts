@@ -1,11 +1,20 @@
-import { Tags, Origin, Type } from '@/interfaces/ISubtitle';
 import { detect } from 'chardet';
 import { encodingExists, decode } from 'iconv-lite';
-import { open, read, close, readFile } from 'fs-extra';
+import {
+  open, read, close, readFile,
+} from 'fs-extra';
 import { extname } from 'path';
+import {
+  Tags, Origin, Type, Format, Parser,
+} from '@/interfaces/ISubtitle';
 import { LanguageCode } from '@/libs/language';
-import { Format, Parser } from '@/interfaces/ISubtitle';
-import { AssParser, SrtParser, SagiParser, VttParser } from '@/services/subtitle';
+
+import {
+  AssParser, SrtParser, SagiParser, VttParser,
+} from '@/services/subtitle';
+
+import { assFragmentLanguageLoader, srtFragmentLanguageLoader, vttFragmentLanguageLoader } from './languageLoader';
+import { EmbeddedOrigin } from '../loaders';
 
 /**
  * Cue tags getter for SubRip, SubStation Alpha and Online Transcript subtitles.
@@ -23,7 +32,7 @@ export function tagsGetter(text: string, baseTags: Tags) {
     const tagGetters = {
       an: (tag: string) => {
         const matchedAligment = tag.match(/\d/g);
-        if (matchedAligment) return Number.parseFloat(matchedAligment[0])
+        if (matchedAligment) return Number.parseFloat(matchedAligment[0]);
       },
       pos: (tag: string) => {
         const matchedCoords = tag.match(/\((.*)\)/);
@@ -100,9 +109,6 @@ export async function loadLocalFile(path: string, encoding?: string) {
   return decode(fileBuffer, fileEncoding);
 }
 
-import { assFragmentLanguageLoader, srtFragmentLanguageLoader, vttFragmentLanguageLoader } from './languageLoader';
-import { EmbeddedOrigin } from '../loaders';
-
 export function pathToFormat(path: string): Format {
   const extension = extname(path).slice(1);
   switch (extension) {
@@ -159,7 +165,7 @@ export async function inferLanguageFromPath(path: string): Promise<LanguageCode>
 }
 
 export function getParser(format: Format, payload: any): Parser {
-  switch(format) {
+  switch (format) {
     case Format.AdvancedSubStationAplha:
     case Format.SubStationAlpha:
       return new AssParser(payload);

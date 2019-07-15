@@ -1,5 +1,5 @@
-import { ISettingStorable, SubtitleStyle, PlaybackStates } from "@/interfaces/ISettingStorable";
-import JsonStorage, { jsonStorage } from "@/libs/JsonStorage";
+import { ISettingStorable, SubtitleStyle, PlaybackStates } from '@/interfaces/ISettingStorable';
+import JsonStorage, { jsonStorage } from '@/libs/JsonStorage';
 
 /** 字幕设置存储的KEY
  * @constant
@@ -15,6 +15,7 @@ const PLAYBACK_STATES_STORAGE_NAME = 'playback-states';
 export default class SettingStorageService implements ISettingStorable {
   constructor(private readonly storage: JsonStorage) {
   }
+
   /**
    * @description 更新字幕样式设置
    * @author tanghaixiang
@@ -26,9 +27,10 @@ export default class SettingStorageService implements ISettingStorable {
       await this.storage.set(SUBTITLE_STYLE_STORAGE_NAME, data);
       return true;
     } catch (error) {
-      return false
+      return false;
     }
   }
+
   /**
    * @description 更新播放设置
    * @author tanghaixiang
@@ -40,10 +42,10 @@ export default class SettingStorageService implements ISettingStorable {
       await this.storage.set(PLAYBACK_STATES_STORAGE_NAME, data);
       return true;
     } catch (error) {
-      return false
+      return false;
     }
   }
 }
 
 
-export const settingStorageService = new SettingStorageService(jsonStorage)
+export const settingStorageService = new SettingStorageService(jsonStorage);

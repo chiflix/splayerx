@@ -16,10 +16,12 @@ const grpc = require('grpc');
 
 class Sagi {
   creds: any;
-  endpoint = process.env.NODE_ENV === 'production' ?
-    'apis.sagittarius.ai:8443' :
-    'apis.stage.sagittarius.ai:8443';
-    // '127.0.0.1:8443'; // uncomment this when debuging
+
+  endpoint = process.env.NODE_ENV === 'production'
+    ? 'apis.sagittarius.ai:8443'
+    : 'apis.stage.sagittarius.ai:8443';
+
+  // '127.0.0.1:8443'; // uncomment this when debuging
   constructor() {
     const sslCreds = credentials.createSsl(
       // How to access resources with fs see:
@@ -54,7 +56,7 @@ class Sagi {
     log.info('Sagi.mediaTranslate', `hash-${mediaIdentity}***language-${languageCode}***hints-${hints}`);
     return new Promise((resolve, reject) => {
       client.translateMedia(req, (err, res) => {
-        if (err) reject(err)
+        if (err) reject(err);
         else resolve(res.toObject().resultsList);
       });
     });
@@ -74,7 +76,9 @@ class Sagi {
   }
 
   pushTranscriptWithPayload(options: TrainingData.AsObject) {
-    const { mediaIdentity, languageCode, format, playedTime, totalTime, delay, hints, payload } = options;
+    const {
+      mediaIdentity, languageCode, format, playedTime, totalTime, delay, hints, payload,
+    } = options;
     const client = new TrainngClient(this.endpoint, this.creds);
     const req = new TrainingData();
     req.setMediaIdentity(mediaIdentity);
@@ -94,7 +98,9 @@ class Sagi {
   }
 
   pushTranscriptWithTranscriptIdentity(options: TrainingData.AsObject) {
-    const { mediaIdentity, languageCode, format, playedTime, totalTime, delay, hints, transcriptIdentity } = options;
+    const {
+      mediaIdentity, languageCode, format, playedTime, totalTime, delay, hints, transcriptIdentity,
+    } = options;
     const client = new TrainngClient(this.endpoint, this.creds);
     const req = new TrainingData();
     req.setMediaIdentity(mediaIdentity);

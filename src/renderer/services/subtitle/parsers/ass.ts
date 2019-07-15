@@ -1,8 +1,10 @@
-import { Dialogue, Format, Cue, Tags } from '@/interfaces/ISubtitle';
-import { BaseParser } from './base';
 import { pick } from 'lodash';
-// @ts-ignore
 import { compile } from 'ass-compiler';
+import {
+  Dialogue, Format, Cue, Tags,
+} from '@/interfaces/ISubtitle';
+import { BaseParser } from './base';
+// @ts-ignore
 
 interface IAssTags {
   b: number;
@@ -36,7 +38,9 @@ type CompiledSubtitle = {
 
 export class AssParser extends BaseParser {
   readonly payload: string = '';
+
   format = Format.AdvancedSubStationAplha;
+
   constructor(assPayload: string) {
     super();
     this.payload = assPayload;
@@ -55,6 +59,7 @@ export class AssParser extends BaseParser {
     // 'Video Zoom': '8',
     // 'Video Position': '0',
   };
+
   private baseTags = {
     // fn: '',
     // fs: '',
@@ -82,6 +87,7 @@ export class AssParser extends BaseParser {
     alignment: 2,
     pos: null,
   };
+
   private normalize(compiledSubtitle: CompiledSubtitle) {
     if (!compiledSubtitle.dialogues.length) throw new Error('Unsupported Subtitle');
     const finalDialogues: Cue[] = [];
@@ -120,7 +126,7 @@ export class AssParser extends BaseParser {
               tags = f.tags;
             }
             txt += f.text;
-          })
+          });
           const finalDialogue = {
             ...baseDiagolue,
             text: txt,
@@ -133,6 +139,7 @@ export class AssParser extends BaseParser {
     });
     this.dialogues = finalDialogues;
   }
+
   async parse() {
     this.normalize(compile(this.payload) as CompiledSubtitle);
   }

@@ -5,10 +5,11 @@ import { times, padStart, sortBy } from 'lodash';
 import { sep, basename } from 'path';
 // @ts-ignore
 import { promises as fsPromises } from 'fs';
+// @ts-ignore
+import nzh from 'nzh';
 import { SubtitleControlListItem, Type } from '@/interfaces/ISubtitle';
 import { codeToLanguageName } from './language';
 // @ts-ignore
-import nzh from 'nzh';
 
 /** 计算文本宽度
  * @description
@@ -81,7 +82,7 @@ const SHORT_CURT_TYPE = 'image/jpeg';
  * @returns {ShortCut} 最后一帧图，有常规尺寸和小尺寸
  */
 export function generateShortCutImageBy(video: HTMLVideoElement, canvas: HTMLCanvasElement, videoWidth: number, videoHeight: number): ShortCut {
-  let result: ShortCut = {
+  const result: ShortCut = {
     shortCut: '',
     smallShortCut: '',
   };
@@ -132,14 +133,14 @@ export async function mediaQuickHash(filePath: string) {
 }
 
 /** Silently calculate hash of file, returns null if there was an error */
-mediaQuickHash.try = async function(filePath: string) {
+mediaQuickHash.try = async function (filePath: string) {
   try {
     return await mediaQuickHash(filePath);
   } catch (ex) {
     console.error(ex);
     return null;
   }
-}
+};
 
 export function timecodeFromSeconds(s: number) {
   const dt = new Date(Math.abs(s) * 1000);

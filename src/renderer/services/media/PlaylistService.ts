@@ -1,21 +1,26 @@
+import { ipcRenderer } from 'electron';
+import { EventEmitter } from 'events';
 import { IPlaylistRequest } from '@/interfaces/IPlaylistRequest';
 import MediaStorageService from '@/services/storage/MediaStorageService';
-import { ipcRenderer } from 'electron';
 import { filePathToUrl } from '@/helpers/path';
-import { mediaQuickHash } from "@/libs/utils";
+import { mediaQuickHash } from '@/libs/utils';
 import { info } from '@/libs/DataBase';
 import { MediaItem } from '@/interfaces/IDB';
-import { EventEmitter } from 'events';
 
 interface PlaylistEvent {
-  "image-loaded": Event
+  'image-loaded': Event
 }
 export default class PlaylistService extends EventEmitter implements IPlaylistRequest {
   coverSrc: string;
+
   duration: any;
+
   record: MediaItem;
+
   smallShortCut: string;
+
   lastPlayedTime: number;
+
   imageSrc: string | undefined;
 
   get percentage(): number {
@@ -50,10 +55,12 @@ export default class PlaylistService extends EventEmitter implements IPlaylistRe
     });
     this.getRecord(videoId);
   }
+
   on<K extends keyof PlaylistEvent>(type: K, listener: (...args: any[]) => void): this {
     return super.on(type, listener);
   }
-   /**
+
+  /**
    * @param  {string} mediaHash
    * @returns Promise 返回视频封面图片
    */
@@ -61,10 +68,11 @@ export default class PlaylistService extends EventEmitter implements IPlaylistRe
     try {
       const result = await this.mediaStorageService.getImageBy(mediaHash, 'cover');
       return result;
-    } catch(err) {
+    } catch (err) {
       return null;
     }
   }
+
   /**
    * @param  {number} videoId
    * @returns Promise 获取播放记录

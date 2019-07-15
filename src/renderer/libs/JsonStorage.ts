@@ -1,8 +1,8 @@
-import { IStorage } from "@/interfaces/IStorage";
 import path from 'path';
 // @ts-ignore
 import storage from 'electron-json-storage';
-import { readDir } from "./file";
+import { IStorage } from '@/interfaces/IStorage';
+import { readDir } from './file';
 
 export default class JsonStorage implements IStorage {
   /**
@@ -22,6 +22,7 @@ export default class JsonStorage implements IStorage {
       });
     });
   }
+
   /**
    * @description 通过key设置对应的JSON数据
    * @author tanghaixiang
@@ -40,6 +41,7 @@ export default class JsonStorage implements IStorage {
       });
     });
   }
+
   /**
    * @description 清楚JSON存储目录下的所有数据
    * @author tanghaixiang
@@ -63,4 +65,4 @@ export default class JsonStorage implements IStorage {
   }
 }
 
-export const jsonStorage = new JsonStorage()
+export const jsonStorage = new JsonStorage();

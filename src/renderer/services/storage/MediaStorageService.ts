@@ -1,6 +1,6 @@
-import { IMediaStorable } from '@/interfaces/IMediaStorable';
-import CacheFile, { cacheFile as cacheFileInstance } from '@/libs/CacheFile'
 import { join } from 'path';
+import { IMediaStorable } from '@/interfaces/IMediaStorable';
+import CacheFile, { cacheFile as cacheFileInstance } from '@/libs/CacheFile';
 
 /** 视频元数据 */
 export type VideoInfo = {
@@ -40,7 +40,7 @@ export default class MediaStorageService implements IMediaStorable {
           });
           resolve(result);
         }
-        resolve(result)
+        resolve(result);
       } catch (error) {
         reject(error);
       }
@@ -59,7 +59,7 @@ export default class MediaStorageService implements IMediaStorable {
       const r = await this.readVideoInfo(mediaHash);
       return r && r[tag] ? r[tag] : null;
     } catch (err) {
-      return null
+      return null;
     }
   }
 
@@ -75,7 +75,7 @@ export default class MediaStorageService implements IMediaStorable {
       const path = await this.cacheFile.getPathBy(mediaHash);
       return join(path, `${tag}.jpg`);
     } catch (err) {
-      return null
+      return null;
     }
   }
 }

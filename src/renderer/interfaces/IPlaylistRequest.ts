@@ -7,7 +7,7 @@ export interface IPlaylistRequest {
   smallShortCut: string;
   lastPlayedTime: number;
   imageSrc: string | undefined;
-  
+
   /**
    * @param  {string} mediaHash
    * @returns Promise 返回视频封面地址

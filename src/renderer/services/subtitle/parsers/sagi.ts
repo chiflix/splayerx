@@ -7,13 +7,18 @@ export type SagiSubtitlePayload = TranscriptResponse.Cue.AsObject[];
 
 export class SagiParser extends BaseParser {
   payload: SagiSubtitlePayload;
+
   format = Format.Sagi;
+
   constructor(sagiPayload: SagiSubtitlePayload) {
     super();
     this.payload = sagiPayload;
   }
+
   dialogues: Cue[] = [];
+
   private baseTags = { alignment: 2, pos: undefined };
+
   private normalizer(parsedSubtitle: SagiSubtitlePayload) {
     const finalDialogues: Cue[] = [];
     parsedSubtitle.forEach(({ startTime, endTime, text }) => {
@@ -29,6 +34,7 @@ export class SagiParser extends BaseParser {
     });
     this.dialogues = finalDialogues;
   }
+
   async parse() {
     this.normalizer(this.payload);
   }
