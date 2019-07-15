@@ -9,7 +9,7 @@ if (process.env.NODE_ENV !== 'development') {
   Sentry.init({
     release: process.env.SENTRY_RELEASE,
     dsn: 'https://6a94feb674b54686a6d88d7278727b7c@sentry.io/1449341',
-    enableNative: process.type === 'browser', // enableNative in main process only
+    enableNative: false,
     integrations: [
       new Integrations.Vue({
         Vue,
@@ -17,13 +17,13 @@ if (process.env.NODE_ENV !== 'development') {
       }),
     ],
   });
-} else {
-  crashReporter.start({
-    companyName: 'Sagittarius Tech LLC',
-    productName: 'SPlayer',
-    ignoreSystemCrashHandler: true,
-    submitURL: 'https://sentry.io/api/1449341/minidump/?sentry_key=6a94feb674b54686a6d88d7278727b7c',
-  });
 }
+
+crashReporter.start({
+  companyName: 'Sagittarius Tech LLC',
+  productName: 'SPlayer',
+  ignoreSystemCrashHandler: true,
+  submitURL: 'https://sentry.io/api/1449341/minidump/?sentry_key=6a94feb674b54686a6d88d7278727b7c',
+});
 
 export default Sentry;
