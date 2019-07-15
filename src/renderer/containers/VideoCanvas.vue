@@ -253,7 +253,8 @@ export default {
       const mediaInfo = this.videoId
         ? await playInfoStorageService.getMediaItem(this.videoId)
         : null;
-      if (mediaInfo && mediaInfo.lastPlayedTime && target.duration - mediaInfo.lastPlayedTime > 10) {
+      if (mediaInfo && mediaInfo.lastPlayedTime
+        && target.duration - mediaInfo.lastPlayedTime > 10) {
         this.$bus.$emit('seek', mediaInfo.lastPlayedTime);
       } else {
         this.$bus.$emit('seek', 0);
