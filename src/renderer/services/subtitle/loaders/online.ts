@@ -18,11 +18,11 @@ export class OnlineGenerator implements EntityGenerator {
 
   private language: LanguageCode;
 
-  readonly ranking: number;
+  public readonly ranking: number;
 
   private delayInSeconds: number;
 
-  constructor(transcriptInfo: TranscriptInfo) {
+  public constructor(transcriptInfo: TranscriptInfo) {
     this.origin = {
       type: Type.Online,
       source: transcriptInfo.transcriptIdentity,
@@ -32,24 +32,33 @@ export class OnlineGenerator implements EntityGenerator {
     this.delayInSeconds = transcriptInfo.delay / 1000;
   }
 
-  async getType() { return Type.Online; }
+  private type = Type.Online
 
-  async getSource() { return cloneDeep(this.origin); }
+  public async getType() { return this.type; }
 
-  async getLanguage() {
+  public async getSource() { return cloneDeep(this.origin); }
+
+  public async getLanguage() {
     return this.language;
   }
 
-  async getDelay() { return this.delayInSeconds; }
+  public async getDelay() { return this.delayInSeconds; }
 
-  async getFormat() { return Format.Sagi; }
+  private format = Format.Sagi;
 
-  async getHash() { return this.origin.source; }
+  public async getFormat() { return this.format; }
+
+  public async getHash() { return this.origin.source; }
 
   private payload: SagiSubtitlePayload | undefined;
 
-  async getPayload() {
-    if (!this.payload) this.payload = await Sagi.getTranscript({ transcriptIdentity: this.origin.source, startTime: 0 });
+  public async getPayload() {
+    if (!this.payload) {
+      this.payload = await Sagi.getTranscript({
+        transcriptIdentity: this.origin.source,
+        startTime: 0,
+      });
+    }
     return this.payload;
   }
 }

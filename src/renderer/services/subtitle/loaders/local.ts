@@ -15,36 +15,39 @@ export class LocalGenerator implements EntityGenerator {
 
   private format: Format;
 
-  constructor(subtitlePath: string) {
+  private type = Type.Local;
+
+  public constructor(subtitlePath: string) {
     this.origin = { type: Type.Local, source: subtitlePath };
     const format = pathToFormat(subtitlePath);
     if (!format) throw new Error(`Unrecongnized subtitle format ${subtitlePath}.`);
     this.format = format;
   }
 
-  async getSource() { return cloneDeep(this.origin); }
+  public async getSource() { return cloneDeep(this.origin); }
 
-  async getType() { return Type.Local; }
+  public async getType() { return this.type; }
 
-  async getFormat() {
+  public async getFormat() {
     if (this.format) return this.format;
     const format = pathToFormat(this.origin.source);
     if (!format) throw new Error(`Unrecongnized subtitle format ${this.origin.source}.`);
-    return this.format = format;
+    this.format = format;
+    return this.format;
   }
 
-  async getLanguage() {
+  public async getLanguage() {
     return inferLanguageFromPath(this.origin.source);
   }
 
   private payload: string;
 
-  async getPayload() {
+  public async getPayload() {
     if (!this.payload) this.payload = await loadLocalFile(this.origin.source);
     return this.payload;
   }
 
-  async getHash() {
+  public async getHash() {
     return mediaQuickHash(this.origin.source);
   }
 }

@@ -12,7 +12,7 @@ import {
   SubtitleControlListItem, Type, EntityGenerator, Entity,
 } from '@/interfaces/ISubtitle';
 import {
-  ISubtitleStream, TranscriptInfo,
+  SubtitleStream, TranscriptInfo,
   searchForLocalList, retrieveEmbeddedList, fetchOnlineList,
   OnlineGenerator, LocalGenerator, EmbeddedGenerator,
 } from '@/services/subtitle';
@@ -412,7 +412,7 @@ const actions = {
     }
     return {};
   },
-  async [a.addEmbeddedSubtitles]({ dispatch, state }: any, streams: [string, ISubtitleStream][]) {
+  async [a.addEmbeddedSubtitles]({ dispatch, state }: any, streams: [string, SubtitleStream][]) {
     return Promise.all(
       streams.map(stream => dispatch(a.addSubtitle, {
         generator: new EmbeddedGenerator(stream[0], stream[1]),

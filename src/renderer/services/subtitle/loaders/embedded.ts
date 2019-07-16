@@ -7,13 +7,13 @@ import { LanguageCode, normalizeCode } from '@/libs/language';
 import { mediaQuickHash } from '@/libs/utils';
 import { inferLanguageFromPath, loadLocalFile } from '../utils';
 
-interface IExtractSubtitleRequest {
+interface ExtractSubtitleRequest {
   videoSrc: string;
   streamIndex: number;
   format: Format;
   mediaHash: string;
 }
-interface IExtractSubtitleResponse {
+interface ExtractSubtitleResponse {
   error: number;
   index: number;
   path: string;
@@ -27,7 +27,11 @@ interface IExtractSubtitleResponse {
  * @param {string} subtitleCodec - the codec of the embedded subtitle
  * @returns the subtitle path string
  */
-export async function embeddedSrcLoader(videoSrc: string, streamIndex: number, format: Format): Promise<string> {
+export async function embeddedSrcLoader(
+  videoSrc: string,
+  streamIndex: number,
+  format: Format,
+): Promise<string> {
   const mediaHash = await mediaQuickHash.try(videoSrc);
   if (!mediaHash) return Promise.reject(new Error('Cannot get mediaQuickHash for embeddedSrcLoader'));
   ipcRenderer.send('extract-subtitle-request',
@@ -36,7 +40,7 @@ export async function embeddedSrcLoader(videoSrc: string, streamIndex: number, f
     format,
     mediaHash);
   return new Promise((resolve, reject) => {
-    ipcRenderer.once(`extract-subtitle-response-${streamIndex}`, (event: Event, response: IExtractSubtitleResponse) => {
+    ipcRenderer.once(`extract-subtitle-response-${streamIndex}`, (event: Event, response: ExtractSubtitleResponse) => {
       const { error, index, path } = response;
       if (error) reject(new Error(`${videoSrc}'s No.${index} extraction failed with ${error}.`));
       resolve(path);
@@ -52,8 +56,10 @@ export interface EmbeddedOrigin extends Origin {
     extractedSrc: string;
   };
 }
-export interface ISubtitleStream {
+export interface SubtitleStream {
+  // eslint-disable-next-line camelcase
   codec_type: string;
+  // eslint-disable-next-line camelcase
   codec_name: string;
   index: number;
   tags: {
@@ -73,9 +79,9 @@ export class EmbeddedGenerator implements EntityGenerator {
 
   private language: LanguageCode = LanguageCode.Default;
 
-  readonly isDefault: boolean;
+  public readonly isDefault: boolean;
 
-  constructor(videoSrc: string, stream: ISubtitleStream) {
+  public constructor(videoSrc: string, stream: SubtitleStream) {
     this.origin = {
       type: Type.Embedded,
       source: {
@@ -89,32 +95,40 @@ export class EmbeddedGenerator implements EntityGenerator {
     this.isDefault = !!stream.disposition.default;
   }
 
-  async getSource() { return cloneDeep(this.origin); }
+  public async getSource() { return cloneDeep(this.origin); }
 
-  async getType() { return Type.Embedded; }
+  private type = Type.Embedded;
 
-  async getFormat() { return this.format; }
+  public async getType() { return this.type; }
+
+  public async getFormat() { return this.format; }
 
   private async getExtractedSrc() {
     const { videoSrc, streamIndex, extractedSrc } = this.origin.source;
-    if (!extractedSrc) return this.origin.source.extractedSrc = await embeddedSrcLoader(videoSrc, streamIndex, this.format);
+    if (!extractedSrc) {
+      this.origin.source.extractedSrc = await embeddedSrcLoader(videoSrc, streamIndex, this.format);
+      return this.origin.source.extractedSrc;
+    }
     return extractedSrc;
   }
 
-  async getHash() {
+  public async getHash() {
     return mediaQuickHash(await this.getExtractedSrc());
   }
 
-  async getLanguage() {
+  public async getLanguage() {
     if (this.language !== LanguageCode.Default) return this.language;
     const { videoSrc, streamIndex, extractedSrc } = this.origin.source;
-    if (!extractedSrc) this.origin.source.extractedSrc = await embeddedSrcLoader(videoSrc, streamIndex, this.format);
-    return this.language = await inferLanguageFromPath(this.origin.source.extractedSrc);
+    if (!extractedSrc) {
+      this.origin.source.extractedSrc = await embeddedSrcLoader(videoSrc, streamIndex, this.format);
+    }
+    this.language = await inferLanguageFromPath(this.origin.source.extractedSrc);
+    return this.language;
   }
 
   private payload: string;
 
-  async getPayload() {
+  public async getPayload() {
     if (!this.payload) this.payload = await loadLocalFile(await this.getExtractedSrc());
     return this.payload;
   }
