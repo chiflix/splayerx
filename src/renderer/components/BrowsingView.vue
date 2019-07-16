@@ -129,7 +129,7 @@ export default {
             break;
         }
       }
-      this.$refs.webView.executeJavaScript('document.querySelector("video")', (r: HTMLElement | null) => {
+      this.$refs.webView.executeJavaScript('var el = document.querySelector("iframe");if (el) {document.getElementsByTagName("video").length + el.contentDocument.getElementsByTagName("video").length} else {document.getElementsByTagName("video").length}', (r: number) => {
         this.$refs.browsingControl.updateWebInfo({
           hasVideo: !!r,
           url: loadUrl,
@@ -275,14 +275,9 @@ export default {
           electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setAspectRatio', [320 / 180]);
           electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setMinimumSize', [320, 180]);
           electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setSize', [320, 180]);
-          this.$refs.webView.executeJavaScript('document.body.prepend(document.querySelector("iframe"));document.querySelector("#app").style.display = "none"');
-          this.$refs.webView.executeJavaScript('var timer = setInterval(() => {'
-            + 'if (document.querySelector("iframe") && document.querySelector("iframe").contentDocument.querySelector(".live-player-ctnr")) {'
-            + 'console.log(document.querySelector("iframe").contentDocument.body);document.querySelector("iframe").contentDocument.body.prepend(document.querySelector("iframe").contentDocument.querySelector(".live-player-ctnr"));'
-            + 'document.querySelector("iframe").contentDocument.querySelector(".live-room-app").style.display = "none";'
-            + 'clearInterval(timer)'
-            + '}'
-            + '}, 100)');
+          this.$refs.webView.executeJavaScript('document.body.style.cssText = "overflow: hidden";Object.defineProperty(document.body.style, "overflow", {get: function(){return "hidden"}, set: function(){}});document.querySelector("iframe").contentDocument.querySelector(".aside-area").style.display = "none";');
+          this.$refs.webView.executeJavaScript('document.querySelector(".game-header").style.display = "none";document.querySelector(".link-navbar").style.display = "none";document.querySelector("iframe").contentDocument.querySelector("#head-info-vm").style.display = "none";document.querySelector("iframe").contentDocument.querySelector(".aside-area-toggle-btn").style.display = "none";document.querySelector(".agile-sidebar").style.display = "none";document.querySelector("iframe").contentDocument.querySelector("#gift-control-vm").style.display = "none"');
+          this.$refs.webView.executeJavaScript('var el = document.querySelector("iframe");el.style.cssText = "position: fixed;left: 0;top: 0;";Object.defineProperty(el.style, "position", {get: function(){ return "fixed"},set: function(){}});Object.defineProperty(el.style, "left", {get: function(){ return "0"},set: function(){}});Object.defineProperty(el.style, "top", {get: function(){ return "0"},set: function(){}});');
         }
       });
     },
@@ -294,7 +289,7 @@ export default {
           this.$refs.webView.executeJavaScript('document.querySelector(".player").style.width= "100%"; document.querySelector(".player").style.height= "100%"');
         }
       } else if (this.bilibiliType === 'iframeStreaming') {
-        this.$refs.webView.executeJavaScript(`document.body.style.height = "${this.browsingWinSize[1]}px"`);
+        this.$refs.webView.executeJavaScript(`document.querySelector("iframe").contentDocument.querySelector(".player-ctnr").style.width = "${val}px";document.querySelector("iframe").contentDocument.querySelector(".player-ctnr").style.height = "${this.browsingWinSize[1]}px";document.querySelector("iframe").contentDocument.querySelector(".live-player-ctnr").style.width ="${val}px";document.querySelector("iframe").contentDocument.querySelector(".live-player-ctnr").style.height ="${this.browsingWinSize[1]}px"`);
       }
     },
     bilibiliRecover() {
@@ -311,7 +306,10 @@ export default {
         this.$refs.webView.executeJavaScript('document.querySelector(".player-section").prepend(document.querySelector(".live-player-ctnr"))');
         this.$refs.webView.executeJavaScript('document.querySelector(".live-room-app").style.display = ""');
       } else if (this.bilibiliType === 'iframeStreaming') {
-        this.$refs.webView.executeJavaScript('document.querySelector(".live-root").childNodes[0].prepend(document.querySelector("iframe"));;document.querySelector("#app").style.display = ""');
+        this.$refs.webView.executeJavaScript('Object.defineProperty(document.body.style, "overflow", {value: "scroll",writable: true});document.body.style.cssText = "overflow: scroll";document.querySelector("iframe").contentDocument.querySelector(".aside-area").style.display = "";');
+        this.$refs.webView.executeJavaScript('document.querySelector(".game-header").style.display = "";document.querySelector(".link-navbar").style.display = "";document.querySelector("iframe").contentDocument.querySelector("#head-info-vm").style.display = "";document.querySelector("iframe").contentDocument.querySelector(".aside-area-toggle-btn").style.display = "";document.querySelector(".agile-sidebar").style.display = "";document.querySelector("iframe").contentDocument.querySelector("#gift-control-vm").style.display = ""');
+        this.$refs.webView.executeJavaScript('var el = document.querySelector("iframe");Object.defineProperty(el.style, "position", {value: "", writable: true});Object.defineProperty(el.style, "left", {value: "", writable: true});Object.defineProperty(el.style, "top", {value: "", writable: true});el.style.cssText = `position: "";left: "";top: "";`');
+        this.$refs.webView.executeJavaScript('document.querySelector("iframe").contentDocument.querySelector(".player-ctnr").style.cssText = `width: "";height: "";`;document.querySelector("iframe").contentDocument.querySelector(".live-player-ctnr").style.cssText = `width: "";height: "";`');
       }
     },
   },
