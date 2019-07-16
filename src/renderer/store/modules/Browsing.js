@@ -3,7 +3,7 @@ import { Browsing as browsingActions } from '../actionTypes';
 
 const state = {
   initialUrl: '',
-  browsingWinSize: [0, 0],
+  browsingWinSize: [1200, 900],
   recordUrl: {},
 };
 const getters = {

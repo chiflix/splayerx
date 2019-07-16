@@ -608,7 +608,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     }
   }
 }
-.youtube, .bilibili, .youku {
+.youtube, .bilibili, .iqiyi {
   width: 20px;
   height: 20px;
   display: block;

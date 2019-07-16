@@ -26,7 +26,6 @@
       :preload="preload"
       autosize
       class="web-view"
-      allowpopups
     />
     <browsing-control
       ref="browsingControl"
@@ -67,7 +66,7 @@ export default {
       isPip: false,
       pipType: '',
       bilibiliType: 'video',
-      supportedRecordHost: ['www.youtube.com', 'www.bilibili.com', 'www.youku.com', 'v.youku.com'],
+      supportedRecordHost: ['www.youtube.com', 'www.bilibili.com', 'www.iqiyi.com'],
       preload: `file:${require('path').resolve(__static, 'pip/preload.js')}`,
       windowScrollY: 0,
       controlToShow: true,
@@ -122,8 +121,7 @@ export default {
             this.updateRecordUrl({ bilibili: loadUrl });
             break;
           case 2:
-          case 3:
-            this.updateRecordUrl({ youku: loadUrl });
+            this.updateRecordUrl({ iqiyi: loadUrl });
             break;
           default:
             break;

@@ -61,7 +61,7 @@ export default {
   data() {
     return {
       marks: [
-        { name: '优酷', type: 'youku', url: 'https://www.youku.com' },
+        { name: '爱奇艺', type: 'iqiyi', url: 'https://www.iqiyi.com' },
         { name: 'Bilibili', type: 'bilibili', url: 'https://www.bilibili.com' },
         { name: 'YouTube', type: 'youtube', url: 'https://www.youtube.com' },
       ],

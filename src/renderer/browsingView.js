@@ -1,14 +1,14 @@
 import Vue from 'vue';
+import Vuex from 'vuex';
+import electron from 'electron';
+import osLocale from 'os-locale';
+import VueI18n from 'vue-i18n';
 import { hookVue } from '@/kerning';
 import BrowsingView from '@/components/BrowsingView.vue';
 import store from '@/store';
 import helpers from '@/helpers';
 import '@/css/style.scss';
-import electron from 'electron';
-import osLocale from 'os-locale';
-import VueI18n from 'vue-i18n';
 import messages from '@/locales';
-import Vuex from 'vuex';
 
 hookVue(Vue);
 Vue.use(VueI18n);
