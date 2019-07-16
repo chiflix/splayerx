@@ -7,9 +7,7 @@ import { Video as videoMutations } from '../mutationTypes';
 import {
   Video as videoActions,
   Subtitle as subtitleActions,
-  AudioTranslate as atActions,
 } from '../actionTypes';
-import { AudioTranslateBubbleOrigin } from './AudioTranslate';
 
 const state = {
   // error state
@@ -200,29 +198,20 @@ function generateRate(rateInfo, nowRate, oldRateGroup) {
 const mutations = mutationsGenerator(videoMutations);
 
 const actions = {
-  [videoActions.SRC_SET]({ commit, dispatch, getters }, { src, mediaHash, id }) {
+  [videoActions.SRC_SET]({ commit, dispatch }, { src, mediaHash, id }) {
     const srcRegexes = {
       unix: RegExp(/^[^\0]+$/),
       windows: RegExp(/^[a-zA-Z]:\/(((?![<>:"//|?*]).)+((?<![ .])\/)?)*$/),
     };
-    if (getters.isTranslating) {
-      // 如果正在进行智能翻译，就阻止切换视频
-      // 并且提示是否终止智能翻译
-      dispatch(atActions.AUDIO_TRANSLATE_SHOW_BUBBLE, AudioTranslateBubbleOrigin.VideoChange);
-      dispatch(atActions.AUDIO_TRANSLATE_BUBBLE_CALLBACK, () => {
-        dispatch(videoActions.SRC_SET, { src, mediaHash, id });
-      });
-    } else {
-      Object.keys(srcRegexes).forEach(async (type) => {
-        if (!srcRegexes[type].test(src)) return;
-        mediaHash = mediaHash || await mediaQuickHash.try(src);
-        if (!mediaHash) return;
-        commit(videoMutations.SRC_UPDATE, src);
-        commit(videoMutations.MEDIA_HASH_UPDATE, mediaHash);
-        commit(videoMutations.ID_UPDATE, id);
-        dispatch(subtitleActions.INITIALIZE_VIDEO_SUBTITLE_MAP, { videoSrc: src });
-      });
-    }
+    Object.keys(srcRegexes).forEach(async (type) => {
+      if (!srcRegexes[type].test(src)) return;
+      mediaHash = mediaHash || await mediaQuickHash.try(src);
+      if (!mediaHash) return;
+      commit(videoMutations.SRC_UPDATE, src);
+      commit(videoMutations.MEDIA_HASH_UPDATE, mediaHash);
+      commit(videoMutations.ID_UPDATE, id);
+      dispatch(subtitleActions.INITIALIZE_VIDEO_SUBTITLE_MAP, { videoSrc: src });
+    });
   },
   [videoActions.INITIALIZE]({ commit }, config) {
     Object.keys(config).forEach((item) => {

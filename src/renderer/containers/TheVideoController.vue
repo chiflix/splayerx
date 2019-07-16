@@ -390,6 +390,17 @@ export default {
         this.updateMousedown({ componentName: '' });
       }
     },
+    isTranslateModalVisiable(visible: boolean) {
+      const { ratio } = this;
+      let minimumSize = [320, 180];
+      // 弹窗出现的时候窗口缩小到一定尺寸应该不能再缩小
+      if (visible && ratio > 1) {
+        minimumSize = [Math.round(290 * ratio), 290];
+      } else if (visible && ratio <= 1) {
+        minimumSize = [290, Math.round(290 / ratio)];
+      }
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', minimumSize);
+    },
   },
   mounted() {
     // 当触发seek 显示界面控件

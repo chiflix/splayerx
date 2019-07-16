@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com 
  * @Date: 2019-06-20 18:03:14 
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-07-16 10:19:28
+ * @Last Modified time: 2019-07-16 18:30:46
  */
 
 // @ts-ignore
@@ -63,7 +63,7 @@ class AudioGrabService extends EventEmitter {
   videoSrc: string;
   audioId: number;
   pts: string = '0';
-  audioChannel: number = 1;
+  audioChannel: number = 0;
   rate: number = 16000;
   audioLanguageCode: string;
   targetLanguageCode: string;
@@ -150,8 +150,8 @@ class AudioGrabService extends EventEmitter {
       videoSrc, // 需要提取音频的视频文件路径
       `${pts}`, // seek位置
       audioId, // 音轨
-      0, // 需要提取的声道, [1,8] 0代表提取所有声道
-      audioChannel, // 重采样的声道[1,8] 1代表单声道
+      audioChannel, // 需要提取的声道, [1,8] 0代表提取所有声道
+      1, // 重采样的声道[1,8] 1代表单声道
       rate, // 采样频率
       1, // 采样存储格式 0 代表 AV_SAMPLE_FMT_U8
       200, // 一次性待提取的帧数
@@ -199,7 +199,7 @@ class AudioGrabService extends EventEmitter {
 
   private write(framebuf: Buffer) {
     try {
-      // fs.appendFileSync('/Users/harry/Desktop/1.pcm', framebuf);
+      // fs.appendFileSync('/Users/harry/Desktop/6.pcm', framebuf);
       const request = new StreamingTranslationRequest();
       request.setAudioContent(framebuf);
       this.streamClient.write(request);

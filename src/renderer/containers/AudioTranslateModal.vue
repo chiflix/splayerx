@@ -170,20 +170,16 @@ export default Vue.extend({
       audioLanguage: { label: '视频源语言', value: '' },
       lanugages: [
         {
-          value: 'en-US',
-          label: 'English (US)',
-        },
-        {
-          value: 'en-GB',
-          label: 'English (UK)',
+          value: 'en',
+          label: 'English',
         },
         {
           value: 'zh',
-          label: '普通话 (中国大陆)',
+          label: '普通话（国语）',
         },
         {
           value: 'yue-Hant-HK',
-          label: '廣東話 (香港)',
+          label: '廣東話（粤语）',
         },
         {
           value: 'ja-JP',

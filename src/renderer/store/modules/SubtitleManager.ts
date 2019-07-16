@@ -279,13 +279,12 @@ const actions = {
         // 出现AI按钮的情况
         // 1. 在线字幕tags都是ES(模糊搜索)
         // 2. 没有在线字幕
-        // TODO reopen filter
-        // if (primaryResults.length  === 0 || isPrimaryResultsFromES) {
-        dispatch(a.addSubtitle, { generator: new TranslatedGenerator(null, primaryLanguage), playlistId, mediaItemId });
-        // }
-        // if (secondaryLanguage && (secondaryResults.length  === 0 || isSecondaryResultsFromES)) {
-        dispatch(a.addSubtitle, { generator: new TranslatedGenerator(null, secondaryLanguage), playlistId, mediaItemId });
-        // }
+        if (primaryResults.length  === 0 || isPrimaryResultsFromES) {
+          dispatch(a.addSubtitle, { generator: new TranslatedGenerator(null, primaryLanguage), playlistId, mediaItemId });
+        }
+        if (secondaryLanguage && (secondaryResults.length  === 0 || isSecondaryResultsFromES)) {
+          dispatch(a.addSubtitle, { generator: new TranslatedGenerator(null, secondaryLanguage), playlistId, mediaItemId });
+        }
         dispatch(a.addOnlineSubtitles, { transcriptInfoList: result.add, playlistId, mediaItemId })
           .then(() => dispatch(a.deleteSubtitlesByUuid, result.delete))
       });

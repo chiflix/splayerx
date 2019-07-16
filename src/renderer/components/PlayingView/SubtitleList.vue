@@ -41,7 +41,8 @@
                 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
               height: hoverIndex === index ?
                 `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
-              cursor: currentSubtitleIndex === index ? 'default' : 'pointer',
+              cursor: currentSubtitleIndex === index &&
+                !(item.type === 'translated' && item.source === '') ? 'default' : 'pointer',
               justifyContent: item.type === 'translated' ? 'space-between' : ''
             }"
             @mouseup="toggleItemClick($event, index)"

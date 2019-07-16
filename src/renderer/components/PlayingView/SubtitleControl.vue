@@ -442,9 +442,6 @@ export default {
     changeSubtitle(item: SubtitleControlListItem) {
       if (item.type === Type.Translated && item.source === '') {
         this.showAudioTranslateModal(item);
-        // hide subtitle control
-        this.$emit('update:showAttached', false);
-        this.clicks = 0;
       } else if (this.isFirstSubtitle) {
         this.changeFirstSubtitle(item.id);
       } else {

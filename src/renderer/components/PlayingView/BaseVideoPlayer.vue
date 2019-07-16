@@ -134,7 +134,7 @@ export default {
       // calculate the seek time
       let [finalSeekTime] = newVal;
       if (finalSeekTime < 0 || !newVal || !finalSeekTime) finalSeekTime = 0;
-      else if (newVal > this.duration) finalSeekTime = this.duration;
+      else if (finalSeekTime > this.duration) finalSeekTime = this.duration;
       // seek the video
       this.$refs.video.currentTime = finalSeekTime;
       // update the seek time

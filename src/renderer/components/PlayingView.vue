@@ -20,10 +20,11 @@
 
 <script lang="ts">
 import { mapActions, mapGetters } from 'vuex';
-import { Subtitle as subtitleActions, SubtitleManager as smActions } from '@/store/actionTypes';
+import { Subtitle as subtitleActions, SubtitleManager as smActions, AudioTranslate as atActions } from '@/store/actionTypes';
 import SubtitleRenderer from '@/components/Subtitle/SubtitleRenderer.vue';
 import VideoCanvas from '@/containers/VideoCanvas.vue';
 import TheVideoController from '@/containers/TheVideoController.vue';
+import { AudioTranslateBubbleType } from '@/store/modules/AudioTranslate';
 import { videodata } from '../store/video';
 
 export default {
@@ -50,7 +51,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['scaleNum', 'subToTop', 'primarySubtitleId', 'secondarySubtitleId', 'winHeight', 'chosenStyle', 'chosenSize', 'originSrc', 'enabledSecondarySub']),
+    ...mapGetters(['scaleNum', 'subToTop', 'primarySubtitleId', 'secondarySubtitleId', 'winHeight', 'chosenStyle', 'chosenSize', 'originSrc', 'enabledSecondarySub', 'duration', 'isTranslateBubbleVisiable', 'translateBubbleType']),
     concatCurrentCues() {
       if (this.currentCues.length === 2) {
         return [this.currentCues[0].cues, this.currentCues[1].cues];
@@ -106,12 +107,21 @@ export default {
       addLocalSubtitlesWithSelect: smActions.addLocalSubtitlesWithSelect,
       getCues: smActions.getCues,
       updatePlayTime: smActions.updatePlayedTime,
+      hideTranslateBubble: atActions.AUDIO_TRANSLATE_HIDE_BUBBLE,
     }),
     // Compute UI states
     // When the video is playing the ontick is triggered by ontimeupdate of Video tag,
     // else it is triggered by setInterval.
     onUpdateTick() {
       requestAnimationFrame(this.loopCues);
+      // when next video trigger translate bubble,
+      // user trigger video data, hide translate bubble
+      if (this.isTranslateBubbleVisiable
+        && (this.translateBubbleType === AudioTranslateBubbleType.NextVideoWhenGrab
+        || this.translateBubbleType === AudioTranslateBubbleType.NextVideoWhenTranslate)
+        && Math.ceil(videodata.time) < Math.ceil(this.duration)) {
+        this.hideTranslateBubble();
+      }
       this.$refs.videoctrl.onTickUpdate();
     },
     async loopCues() {

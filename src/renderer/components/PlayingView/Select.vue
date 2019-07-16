@@ -29,7 +29,7 @@
       </div>
       <div class="iconWrap">
         <svg :class="showSelection ? 'dropdown__icon--arrowUp' : 'dropdown__icon--arrowDown'">
-          <use v-bind="{'xlink:href': `#rightArrow-default-icon`}"/>
+          <use v-bind="{'xlink:href': `#rightArrow-default-icon`}" />
         </svg>
       </div>
     </div>

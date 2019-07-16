@@ -539,14 +539,14 @@ function registerMainWindowEvent(mainWindow) {
   });
   // handle audio grab on main process
   ipcMain.on('grab-audio', (events, args) => {
-    splayerx.getMediaInfo(args.videoSrc, (info) => {
-      console.log(info);
-      audioGrabService.push(args, (grabInfoS) => {
-        if (mainWindow && !mainWindow.webContents.isDestroyed()) {
-          mainWindow.webContents.send('grab-audio-change', { ...args, grabInfo: grabInfoS });
-        }
-      });
+    // splayerx.getMediaInfo(args.videoSrc, (info) => {
+    // TODO 对比metaInfo 找到对应的音频流，比较 channels
+    audioGrabService.push(args, (grabInfoS) => {
+      if (mainWindow && !mainWindow.webContents.isDestroyed()) {
+        mainWindow.webContents.send('grab-audio-change', { ...args, grabInfo: grabInfoS });
+      }
     });
+    // });
   });
   ipcMain.on('grab-audio-stop', () => {
     audioGrabService.stop();

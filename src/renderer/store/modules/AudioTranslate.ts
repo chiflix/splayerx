@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com 
  * @Date: 2019-07-05 16:03:32 
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-07-15 19:04:15
+ * @Last Modified time: 2019-07-16 17:46:30
  */
 import { AudioTranslate as m } from '@/store/mutationTypes';
 import { AudioTranslate as a, SubtitleManager as smActions } from '@/store/actionTypes';
@@ -30,14 +30,17 @@ export enum AudioTranslateStatus {
 export enum AudioTranslateBubbleOrigin {
   WindowClose = 'window-close',
   VideoChange = 'video-change',
+  NextVideoChange = 'next-video-change',
   OtherAIButtonClick = 'other-ai-button-click',
   TranslateFail = 'translate-fail',
 }
 
 export enum AudioTranslateBubbleType {
   ChangeWhenGrab = 'change-when-grab',
+  NextVideoWhenGrab = 'next-video-when-grab',
   CloseWhenGrab = 'close-when-grab',
   ChangeWhenTranslate = 'change-when-translate',
+  NextVideoWhenTranslate = 'next-video-when-translate',
   CloseWhenTranslate = 'close-when-translate',
   ClickWhenTranslate = 'click-when-translate',
   FailAfterTranslate = 'fail-when-translate',
@@ -375,6 +378,12 @@ const actions = {
         type: AudioTranslateBubbleType.ChangeWhenGrab,
         message: '正在进行AI翻译，关闭视频将无法继续',
       });
+    } else if (origin === AudioTranslateBubbleOrigin.NextVideoChange && state.status === AudioTranslateStatus.Grabbing) {
+      // 当正在提取音频，自动下一个视频
+      commit(m.AUDIO_TRANSLATE_BUBBLE_INFO_UPDATE, {
+        type: AudioTranslateBubbleType.NextVideoWhenGrab,
+        message: '正在进行AI翻译，关闭视频将无法继续',
+      });
     } else if (origin === AudioTranslateBubbleOrigin.WindowClose && state.status === AudioTranslateStatus.Grabbing) {
       // 当前正在提取音频, 关闭窗口
       commit(m.AUDIO_TRANSLATE_BUBBLE_INFO_UPDATE, {
@@ -385,6 +394,12 @@ const actions = {
       // 当正在后台翻译，切换视频
       commit(m.AUDIO_TRANSLATE_BUBBLE_INFO_UPDATE, {
         type: AudioTranslateBubbleType.ChangeWhenTranslate,
+        message: 'AI翻译会在云端继续处理，下次播放该视频时将自动获取翻译进度',
+      });
+    } else if (origin === AudioTranslateBubbleOrigin.NextVideoChange && state.status === AudioTranslateStatus.Translating) { 
+      // 当正在后台翻译，切换视频
+      commit(m.AUDIO_TRANSLATE_BUBBLE_INFO_UPDATE, {
+        type: AudioTranslateBubbleType.NextVideoWhenTranslate,
         message: 'AI翻译会在云端继续处理，下次播放该视频时将自动获取翻译进度',
       });
     } else if (origin === AudioTranslateBubbleOrigin.WindowClose && state.status === AudioTranslateStatus.Translating) {

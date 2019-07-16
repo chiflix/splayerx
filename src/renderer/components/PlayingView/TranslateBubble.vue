@@ -102,13 +102,15 @@ export default Vue.extend({
     showWhenGrab() {
       // 当前正在提取音频,确认删除
       return this.type === AudioTranslateBubbleType.ChangeWhenGrab
+      || this.type === AudioTranslateBubbleType.NextVideoWhenGrab
       || this.type === AudioTranslateBubbleType.CloseWhenGrab;
     },
     showDiscardWhenTranlate() {
       return this.type === AudioTranslateBubbleType.CloseWhenTranslate;
     },
     showHideWhenTranslate() {
-      return this.type === AudioTranslateBubbleType.ChangeWhenTranslate;
+      return this.type === AudioTranslateBubbleType.ChangeWhenTranslate
+      || this.type === AudioTranslateBubbleType.NextVideoWhenTranslate;
     },
     showWhenStopTranslate() {
       return this.type === AudioTranslateBubbleType.ClickWhenTranslate;
