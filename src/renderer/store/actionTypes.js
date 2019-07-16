@@ -74,6 +74,7 @@ export const SubtitleManager = {
   removeSubtitle: 'REMOVE_SUBTITLE',
   refreshSubtitlesInitially: 'REFRESH_SUBTITLES_INITIALLY',
   refreshSubtitles: 'REFRESH_SUBTITLES',
+  refreshOnlineSubtitles: 'REFRESH_ONLINE_SUBTITLES',
   addLocalSubtitles: 'ADD_LOCAL_SUBTITLES',
   addLocalSubtitlesWithSelect: 'ADD_LOCAL_SUBTITLES_WITH_SELECT',
   addEmbeddedSubtitles: 'ADD_EMBEDDED_SUBTITLES',
