@@ -368,15 +368,15 @@ export default {
           });
       } else if (process.env.NODE_ENV === 'development') { // app.hide() will disable app refresh and not good for dev
       } else if (process.platform === 'darwin' && !this.quit) {
-        e.returnValue = false;
-        this.$electron.remote.app.hide();
-        this.$electron.ipcRenderer.send('simulate-closing-window');
-        this.$bus.$off(); // remove all listeners before back to landing view
-        // need to init Vuex States
-        this.$router.push({
-          name: 'landing-view',
-        });
-        windowRectService.uploadWindowBy(false, 'landing-view');
+        // e.returnValue = false;
+        // this.$electron.remote.app.hide();
+        // this.$electron.ipcRenderer.send('simulate-closing-window');
+        // this.$bus.$off(); // remove all listeners before back to landing view
+        // // need to init Vuex States
+        // this.$router.push({
+        //   name: 'landing-view',
+        // });
+        // windowRectService.uploadWindowBy(false, 'landing-view');
       } else {
         this.$electron.remote.app.quit();
       }
