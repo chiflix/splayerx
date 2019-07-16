@@ -1,475 +1,272 @@
-import { Menu, MenuItem, shell } from 'electron';
-
-const fileMenu = [
-  {
-    label: this.$t('msg.file.open'),
-    accelerator: 'CmdOrCtrl+O',
-    click: () => {
-      if (this.defaultDir) {
-        this.openFilesByDialog();
-      } else {
-        const defaultPath = process.platform === 'darwin' ? app.getPath('home') : app.getPath('desktop');
-        this.$store.dispatch('UPDATE_DEFAULT_DIR', defaultPath);
-        this.openFilesByDialog({ defaultPath });
-      }
-    },
-  },
-  // {
-  //   label: this.$t('msg.file.openURL'),
-  //   accelerator: 'CmdOrCtrl+U',
-  //   click: () => {
-  //     // TODO: openURL.click
-  //   },
-  //   enabled: false,
-  // },
-  { type: 'separator' },
-  {
-    label: this.$t('msg.file.clearHistory'),
-    click: () => {
-      this.infoDB.clearAll();
-      app.clearRecentDocuments();
-      this.$bus.$emit('clean-landingViewItems');
-      this.refreshMenu();
-    },
-  },
-  { type: 'separator' },
-  {
-    label: this.$t('msg.file.closeWindow'),
-    role: 'close',
-  },
-];
-const playbackMenu = [
-  {
-    id: 'KeyboardRight',
-    label: this.$t('msg.playback.forwardS'),
-    accelerator: 'Right',
-    enabled: !this.playlistDisplayState,
-    click: () => {
-      this.$bus.$emit('seek', videodata.time + 5);
-    },
-  },
-  {
-    id: 'KeyboardLeft',
-    label: this.$t('msg.playback.backwardS'),
-    accelerator: 'Left',
-    enabled: !this.playlistDisplayState,
-    click: () => {
-      this.$bus.$emit('seek', videodata.time - 5);
-    },
-  },
-  { type: 'separator' },
-  {
-    label: this.$t('msg.playback.increasePlaybackSpeed'),
-    accelerator: ']',
-    click: () => {
-      this.$store.dispatch(videoActions.INCREASE_RATE);
-    },
-  },
-  {
-    label: this.$t('msg.playback.decreasePlaybackSpeed'),
-    accelerator: '[',
-    click: () => {
-      this.$store.dispatch(videoActions.DECREASE_RATE);
-    },
-  },
-  {
-    label: this.$t('msg.playback.resetSpeed'),
-    accelerator: '\\',
-    click: () => {
-      this.$store.dispatch(videoActions.CHANGE_RATE, 1);
-    },
-  },
-  { type: 'separator' },
-  {
-    label: this.$t('msg.playback.previousVideo'),
-    accelerator: 'CmdOrCtrl+Left',
-    click: () => {
-      this.$bus.$emit('previous-video');
-    },
-  },
-  {
-    label: this.$t('msg.playback.nextVideo'),
-    accelerator: 'CmdOrCtrl+Right',
-    click: () => {
-      this.$bus.$emit('next-video');
-    },
-  },
-  { type: 'separator' },
-  {
-    label: this.$t('msg.playback.singleCycle'),
-    type: 'checkbox',
-    id: 'singleCycle',
-    checked: this.singleCycle,
-    click: () => {
-      if (this.singleCycle) {
-        this.$store.dispatch('notSingleCycle');
-      } else {
-        this.$store.dispatch('singleCycle');
-      }
-    },
-  },
-  { type: 'separator' },
-  {
-    label: this.$t('msg.playback.snapShot'),
-    accelerator: 'CmdOrCtrl+Shift+S',
-    click: () => {
-      if (!this.paused) {
-        this.$bus.$emit('toggle-playback');
-      }
-      const options = { types: ['window'], thumbnailSize: { width: this.winWidth, height: this.winHeight } };
-      electron.desktopCapturer.getSources(options, (error, sources) => {
-        if (error) {
-          log.info('render/main', 'Snapshot failed .');
-          addBubble(SNAPSHOT_FAILED);
-        }
-        sources.forEach((source) => {
-          if (source.name === 'SPlayer') {
-            const date = new Date();
-            const imgName = `SPlayer-${date.getFullYear()}.${date.getMonth() + 1}.${date.getDate()}-${date.getHours()}.${date.getMinutes()}.${date.getSeconds()}.png`;
-            const screenshotPath = path.join(
-              this.snapshotSavedPath ? this.snapshotSavedPath : app.getPath('desktop'),
-              imgName,
-            );
-            fs.writeFile(screenshotPath, source.thumbnail.toPNG(), (error) => {
-              if (error) {
-                if (error.message.includes('operation not permitted')) {
-                  this.chooseSnapshotFolder(
-                    imgName,
-                    {
-                      name: imgName,
-                      buffer: source.thumbnail.toPNG(),
-                      defaultFolder: this.snapshotSavedPath,
-                    },
-                  );
-                } else {
-                  log.info('render/main', 'Snapshot failed .');
-                  addBubble(SNAPSHOT_FAILED);
-                }
-              } else {
-                log.info('render/main', 'Snapshot success .');
-                addBubble(SNAPSHOT_SUCCESS);
-              }
-            });
-          }
-        });
-      });
-    },
-  },
-  // { type: 'separator' },
-  // { label: this.$t('msg.playback.captureScreen'), enabled: false },
-  // { label: this.$t('msg.playback.captureVideoClip'), enabled: false },
-];
-const audioMenu = [
-  {
-    label: this.$t('msg.audio.mute'),
-    type: 'checkbox',
-    accelerator: 'M',
-    id: 'mute',
-    click: () => {
-      this.$bus.$emit('toggle-muted');
-    },
-  },
-  { type: 'separator' },
-  // { label: this.$t('msg.audio.increaseAudioDelay'), enabled: false },
-  // { label: this.$t('msg.audio.decreaseAudioDelay'), enabled: false },
-  // { type: 'separator' },
-];
-const subtitleMenu = [
-  {
-    label: this.$t('msg.subtitle.AITranslation'),
-    click: () => {
-      if (!this.isRefreshing) {
-        this.refreshSubtitles();
-      }
-    },
-  },
-  {
-    label: this.$t('msg.subtitle.loadSubtitleFile'),
-    click: () => {
-      const { remote } = this.$electron;
-      const browserWindow = remote.BrowserWindow;
-      const focusWindow = browserWindow.getFocusedWindow();
-      const VALID_EXTENSION = ['ass', 'srt', 'vtt'];
-
-      dialog.showOpenDialog(focusWindow, {
-        title: 'Open Dialog',
-        defaultPath: path.dirname(this.originSrc),
-        filters: [{
-          name: 'Subtitle Files',
-          extensions: VALID_EXTENSION,
-        }],
-        properties: ['openFile'],
-      }, (item: Array<string>) => {
-        if (item) {
-          this.$bus.$emit('add-subtitles', [{ src: item[0], type: 'local' }]);
-        }
-      });
-    },
-  },
-  { type: 'separator' },
-  // {
-  //   label: this.$t('msg.subtitle.secondarySubtitle'),
-  //   enabled: false,
-  // },
-  { type: 'separator' },
-  {
-    label: this.$t('msg.subtitle.subtitleSize'),
-    submenu: [
-      {
-        label: this.$t('msg.subtitle.size1'),
-        type: 'radio',
-        id: 'size0',
-        click: () => {
-          this.$bus.$emit('change-size-by-menu', 0);
-        },
-      },
-      {
-        label: this.$t('msg.subtitle.size2'),
-        type: 'radio',
-        id: 'size1',
-        checked: true,
-        click: () => {
-          this.$bus.$emit('change-size-by-menu', 1);
-        },
-      },
-      {
-        label: this.$t('msg.subtitle.size3'),
-        type: 'radio',
-        id: 'size2',
-        click: () => {
-          this.$bus.$emit('change-size-by-menu', 2);
-        },
-      },
-      {
-        label: this.$t('msg.subtitle.size4'),
-        type: 'radio',
-        id: 'size3',
-        click: () => {
-          this.$bus.$emit('change-size-by-menu', 3);
-        },
-      },
-    ],
-  },
-  {
-    label: this.$t('msg.subtitle.subtitleStyle'),
-    id: 'subStyle',
-    submenu: [
-      {
-        label: this.$t('msg.subtitle.style1'),
-        type: 'radio',
-        id: 'style0',
-        click: () => {
-          this.updateChosenStyle(0);
-        },
-      },
-      {
-        label: this.$t('msg.subtitle.style2'),
-        type: 'radio',
-        id: 'style1',
-        click: () => {
-          this.updateChosenStyle(1);
-        },
-      },
-      {
-        label: this.$t('msg.subtitle.style3'),
-        type: 'radio',
-        id: 'style2',
-        click: () => {
-          this.updateChosenStyle(2);
-        },
-      },
-      {
-        label: this.$t('msg.subtitle.style4'),
-        type: 'radio',
-        id: 'style3',
-        click: () => {
-          this.updateChosenStyle(3);
-        },
-      },
-      {
-        label: this.$t('msg.subtitle.style5'),
-        type: 'radio',
-        id: 'style4',
-        click: () => {
-          this.updateChosenStyle(4);
-        },
-      },
-    ],
-  },
-  { type: 'separator' },
-  {
-    label: this.$t('msg.subtitle.increaseSubtitleDelayS'),
-    id: 'increaseSubDelay',
-    accelerator: 'CmdOrCtrl+\'',
-    click: () => {
-      this.updateSubDelay(0.1);
-    },
-  },
-  {
-    label: this.$t('msg.subtitle.decreaseSubtitleDelayS'),
-    id: 'decreaseSubDelay',
-    accelerator: 'CmdOrCtrl+;',
-    click: () => {
-      this.updateSubDelay(-0.1);
-    },
-  },
-  { type: 'separator' },
-  {
-    label: this.$t('msg.subtitle.uploadSelectedSubtitle'),
-    id: 'uploadSelectedSubtitle',
-    click: () => this.$store.dispatch(SubtitleManager.manualUploadAllSubtitles),
-  },
-];
-const windowMenu = [
-  {
-    label: this.$t('msg.playback.keepPlayingWindowFront'),
-    type: 'checkbox',
-    id: 'windowFront',
-    click: (menuItem, browserWindow) => {
-      if (browserWindow.isAlwaysOnTop()) {
-        browserWindow.setAlwaysOnTop(false);
-        menuItem.checked = false;
-        this.topOnWindow = false;
-      } else {
-        browserWindow.setAlwaysOnTop(true);
-        menuItem.checked = true;
-        this.topOnWindow = true;
-      }
-    },
-  },
-  { type: 'separator' },
-  {
-    label: this.$t('msg.window.minimize'),
-    role: 'minimize',
-  },
-  { type: 'separator' },
-  {
-    label: this.$t('msg.window.halfSize'),
-    id: 'windowResize1',
-    checked: false,
-    accelerator: 'CmdOrCtrl+0',
-    click: () => {
-      this.changeWindowSize(0.5);
-    },
-  },
-  {
-    label: this.$t('msg.window.originSize'),
-    id: 'windowResize2',
-    checked: true,
-    accelerator: 'CmdOrCtrl+1',
-    click: () => {
-      this.changeWindowSize(1);
-    },
-  },
-  {
-    label: this.$t('msg.window.doubleSize'),
-    id: 'windowResize3',
-    checked: false,
-    accelerator: 'CmdOrCtrl+2',
-    click: () => {
-      this.changeWindowSize(2);
-    },
-  },
-  {
-    label: this.$t('msg.window.maxmize'),
-    id: 'windowResize4',
-    checked: false,
-    accelerator: 'CmdOrCtrl+3',
-    click: () => {
-      this.changeWindowSize(3);
-    },
-  },
-  { type: 'separator' },
-  {
-    label: this.$t('msg.playback.windowRotate'),
-    id: 'windowRotate',
-    accelerator: 'CmdOrCtrl+L',
-    click: () => {
-      this.windowRotate();
-    },
-  },
-  { type: 'separator' },
-  {
-    label: this.$t('msg.window.bossKey'),
-    accelerator: 'CmdOrCtrl+`',
-    click: () => {
-      this.$electron.ipcRenderer.send('bossKey');
-    },
-  },
-  { type: 'separator' },
-  {
-    label: this.$t('msg.window.backToLandingView'),
-    id: 'backToLandingView',
-    accelerator: 'CmdOrCtrl+Esc',
-    click: () => {
-      this.$bus.$emit('back-to-landingview');
-    },
-  },
-];
-const helpMenu = [
-  {
-    label: this.$t('msg.splayerx.feedback'),
-    click: () => {
-      shell.openExternal('https://feedback.splayer.org');
-    },
-  },
-  {
-    label: this.$t('msg.splayerx.homepage'),
-    click: () => {
-      shell.openExternal('https://beta.splayer.org');
-    },
-  },
-  {
-    label: this.$t('msg.help.shortCuts'),
-    click: () => {
-      shell.openExternal('https://github.com/chiflix/splayerx/wiki/SPlayer-Shortcuts-List');
-    },
-  },
-];
-const template: Electron.MenuItemConstructorOptions[] = [
-  // menu.file
-  {
-    label: this.$t('msg.file.name'),
-    submenu: fileMenu,
-  },
-  // menu.playback
-  {
-    label: this.$t('msg.playback.name'),
-    id: 'playback',
-    submenu: playbackMenu,
-  },
-  // menu.audio
-  {
-    label: this.$t('msg.audio.name'),
-    id: 'audio',
-    submenu: audioMenu,
-  },
-  // menu.subtitle
-  {
-    label: this.$t('msg.subtitle.name'),
-    id: 'subtitle',
-    submenu: subtitleMenu,
-  },
-  // menu.window
-  {
-    label: this.$t('msg.window.name'),
-    submenu: windowMenu,
-  },
-  // menu.help
-  {
-    label: this.$t('msg.help.name'),
-    role: 'help',
-    submenu: helpMenu,
-  },
-];
+import { Menu, MenuItem } from 'electron';
+import { isMacintosh } from 'shared/common/platform';
 
 export default class MenuService {
-  detect = 1;
-  createMenu() {
-    this.detect = 2;
-    const menu = Menu.buildFromTemplate(template);
-    Menu.setApplicationMenu(menu);
+  
+  private willShutdown: boolean;
+	private appMenuInstalled: boolean;
+  private closedLastWindow: boolean;
+  
+  private oldMenus: Menu[];
+
+  constructor() {
+		// this.menuUpdater = new RunOnceScheduler(() => this.doUpdateMenu(), 0);
+
+		// this.menuGC = new RunOnceScheduler(() => { this.oldMenus = []; }, 10000);
+
+		// this.menubarMenus = Object.create(null);
+		// this.keybindings = Object.create(null);
+
+		// if (isMacintosh || getTitleBarStyle(this.configurationService, this.environmentService) === 'native') {
+		// 	this.restoreCachedMenubarData();
+		// }
+
+		// this.addFallbackHandlers();
+
+		// this.closedLastWindow = false;
+
+		this.oldMenus = [];
+
+		this.install();
+
+		// this.registerListeners();
   }
+  private install(): void {
+		// Store old menu in our array to avoid GC to collect the menu and crash. See #55347
+		// TODO@sbatten Remove this when fixed upstream by Electron
+		const oldMenu = Menu.getApplicationMenu();
+		if (oldMenu) {
+			this.oldMenus.push(oldMenu);
+		}
+
+		// If we don't have a menu yet, set it to null to avoid the electron menu.
+		// This should only happen on the first launch ever
+		if (Object.keys(this.menubarMenus).length === 0) {
+			Menu.setApplicationMenu(isMacintosh ? new Menu() : null);
+			return;
+		}
+
+		// Menus
+		const menubar = new Menu();
+
+		// Mac: Application
+		let macApplicationMenuItem: Electron.MenuItem;
+		if (isMacintosh) {
+			const applicationMenu = new Menu();
+			macApplicationMenuItem = new MenuItem({ label: product.nameShort, submenu: applicationMenu });
+			this.setMacApplicationMenu(applicationMenu);
+			menubar.append(macApplicationMenuItem);
+		}
+
+		// Mac: Dock
+		if (isMacintosh && !this.appMenuInstalled) {
+			this.appMenuInstalled = true;
+
+			const dockMenu = new Menu();
+			dockMenu.append(new MenuItem({ label: this.mnemonicLabel(nls.localize({ key: 'miNewWindow', comment: ['&& denotes a mnemonic'] }, "New &&Window")), click: () => this.windowsMainService.openNewWindow(OpenContext.DOCK) }));
+
+			app.dock.setMenu(dockMenu);
+		}
+
+		// File
+		const fileMenu = new Menu();
+		const fileMenuItem = new MenuItem({ label: this.mnemonicLabel(nls.localize({ key: 'mFile', comment: ['&& denotes a mnemonic'] }, "&&File")), submenu: fileMenu });
+
+		this.setMenuById(fileMenu, 'File');
+		menubar.append(fileMenuItem);
+
+		// Edit
+		const editMenu = new Menu();
+		const editMenuItem = new MenuItem({ label: this.mnemonicLabel(nls.localize({ key: 'mEdit', comment: ['&& denotes a mnemonic'] }, "&&Edit")), submenu: editMenu });
+
+		this.setMenuById(editMenu, 'Edit');
+		menubar.append(editMenuItem);
+
+		// Selection
+		const selectionMenu = new Menu();
+		const selectionMenuItem = new MenuItem({ label: this.mnemonicLabel(nls.localize({ key: 'mSelection', comment: ['&& denotes a mnemonic'] }, "&&Selection")), submenu: selectionMenu });
+
+		this.setMenuById(selectionMenu, 'Selection');
+		menubar.append(selectionMenuItem);
+
+		// View
+		const viewMenu = new Menu();
+		const viewMenuItem = new MenuItem({ label: this.mnemonicLabel(nls.localize({ key: 'mView', comment: ['&& denotes a mnemonic'] }, "&&View")), submenu: viewMenu });
+
+		this.setMenuById(viewMenu, 'View');
+		menubar.append(viewMenuItem);
+
+		// Go
+		const gotoMenu = new Menu();
+		const gotoMenuItem = new MenuItem({ label: this.mnemonicLabel(nls.localize({ key: 'mGoto', comment: ['&& denotes a mnemonic'] }, "&&Go")), submenu: gotoMenu });
+
+		this.setMenuById(gotoMenu, 'Go');
+		menubar.append(gotoMenuItem);
+
+		// Debug
+		const debugMenu = new Menu();
+		const debugMenuItem = new MenuItem({ label: this.mnemonicLabel(nls.localize({ key: 'mDebug', comment: ['&& denotes a mnemonic'] }, "&&Debug")), submenu: debugMenu });
+
+		this.setMenuById(debugMenu, 'Debug');
+		menubar.append(debugMenuItem);
+
+		// Terminal
+		const terminalMenu = new Menu();
+		const terminalMenuItem = new MenuItem({ label: this.mnemonicLabel(nls.localize({ key: 'mTerminal', comment: ['&& denotes a mnemonic'] }, "&&Terminal")), submenu: terminalMenu });
+
+		this.setMenuById(terminalMenu, 'Terminal');
+		menubar.append(terminalMenuItem);
+
+		// Mac: Window
+		let macWindowMenuItem: Electron.MenuItem | undefined;
+		if (this.shouldDrawMenu('Window')) {
+			const windowMenu = new Menu();
+			macWindowMenuItem = new MenuItem({ label: this.mnemonicLabel(nls.localize('mWindow', "Window")), submenu: windowMenu, role: 'window' });
+			this.setMacWindowMenu(windowMenu);
+		}
+
+		if (macWindowMenuItem) {
+			menubar.append(macWindowMenuItem);
+		}
+
+		// Help
+		const helpMenu = new Menu();
+		const helpMenuItem = new MenuItem({ label: this.mnemonicLabel(nls.localize({ key: 'mHelp', comment: ['&& denotes a mnemonic'] }, "&&Help")), submenu: helpMenu, role: 'help' });
+
+		this.setMenuById(helpMenu, 'Help');
+		menubar.append(helpMenuItem);
+
+		if (menubar.items && menubar.items.length > 0) {
+			Menu.setApplicationMenu(menubar);
+		} else {
+			Menu.setApplicationMenu(null);
+		}
+
+		// Dispose of older menus after some time
+		this.menuGC.schedule();
+  }
+  private setMacApplicationMenu(macApplicationMenu: Electron.Menu): void {
+		const about = this.createMenuItem(nls.localize('mAbout', "About {0}", product.nameLong), 'workbench.action.showAboutDialog');
+		const checkForUpdates = this.getUpdateMenuItems();
+
+		let preferences;
+		if (this.shouldDrawMenu('Preferences')) {
+			const preferencesMenu = new Menu();
+			this.setMenuById(preferencesMenu, 'Preferences');
+			preferences = new MenuItem({ label: this.mnemonicLabel(nls.localize({ key: 'miPreferences', comment: ['&& denotes a mnemonic'] }, "&&Preferences")), submenu: preferencesMenu });
+		}
+
+		const servicesMenu = new Menu();
+		const services = new MenuItem({ label: nls.localize('mServices', "Services"), role: 'services', submenu: servicesMenu });
+		const hide = new MenuItem({ label: nls.localize('mHide', "Hide {0}", product.nameLong), role: 'hide', accelerator: 'Command+H' });
+		const hideOthers = new MenuItem({ label: nls.localize('mHideOthers', "Hide Others"), role: 'hideothers', accelerator: 'Command+Alt+H' });
+		const showAll = new MenuItem({ label: nls.localize('mShowAll', "Show All"), role: 'unhide' });
+		const quit = new MenuItem(this.likeAction('workbench.action.quit', {
+			label: nls.localize('miQuit', "Quit {0}", product.nameLong), click: () => {
+				if (
+					this.windowsMainService.getWindowCount() === 0 || 			// allow to quit when no more windows are open
+					!!this.windowsMainService.getFocusedWindow() ||				// allow to quit when window has focus (fix for https://github.com/Microsoft/vscode/issues/39191)
+					this.windowsMainService.getLastActiveWindow()!.isMinimized()	// allow to quit when window has no focus but is minimized (https://github.com/Microsoft/vscode/issues/63000)
+				) {
+					this.windowsMainService.quit();
+				}
+			}
+		}));
+
+		const actions = [about];
+		actions.push(...checkForUpdates);
+
+		if (preferences) {
+			actions.push(...[
+				__separator__(),
+				preferences
+			]);
+		}
+
+		actions.push(...[
+			__separator__(),
+			services,
+			__separator__(),
+			hide,
+			hideOthers,
+			showAll,
+			__separator__(),
+			quit
+		]);
+
+		actions.forEach(i => macApplicationMenu.append(i));
+  }
+  private createMenuItem(label: string, commandId: string | string[], enabled?: boolean, checked?: boolean): Electron.MenuItem;
+	private createMenuItem(label: string, click: () => void, enabled?: boolean, checked?: boolean): Electron.MenuItem;
+	private createMenuItem(arg1: string, arg2: any, arg3?: boolean, arg4?: boolean): Electron.MenuItem {
+		const label = this.mnemonicLabel(arg1);
+		const click: () => void = (typeof arg2 === 'function') ? arg2 :
+		(menuItem: Electron.MenuItem & IMenuItemWithKeybinding, win: Electron.BrowserWindow, event: Electron.Event) => {
+			const userSettingsLabel = menuItem ? menuItem.userSettingsLabel : null;
+			let commandId = arg2;
+			if (Array.isArray(arg2)) {
+				commandId = this.isOptionClick(event) ? arg2[1] : arg2[0]; // support alternative action if we got multiple action Ids and the option key was pressed while invoking
+			}
+
+			if (userSettingsLabel && Menubar._menuItemIsTriggeredViaKeybinding(event, userSettingsLabel)) {
+				this.runActionInRenderer({ type: 'keybinding', userSettingsLabel });
+			} else {
+				this.runActionInRenderer({ type: 'commandId', commandId });
+			}
+		};
+		const enabled = typeof arg3 === 'boolean' ? arg3 : this.windowsMainService.getWindowCount() > 0;
+		const checked = typeof arg4 === 'boolean' ? arg4 : false;
+
+		const options: Electron.MenuItemConstructorOptions = {
+			label,
+			click,
+			enabled
+		};
+
+		if (checked) {
+			options.type = 'checkbox';
+			options.checked = checked;
+		}
+
+		let commandId: string | undefined;
+		if (typeof arg2 === 'string') {
+			commandId = arg2;
+		} else if (Array.isArray(arg2)) {
+			commandId = arg2[0];
+		}
+
+		if (isMacintosh) {
+
+			// Add role for special case menu items
+			if (commandId === 'editor.action.clipboardCutAction') {
+				options.role = 'cut';
+			} else if (commandId === 'editor.action.clipboardCopyAction') {
+				options.role = 'copy';
+			} else if (commandId === 'editor.action.clipboardPasteAction') {
+				options.role = 'paste';
+			}
+
+			// Add context aware click handlers for special case menu items
+			if (commandId === 'undo') {
+				options.click = this.makeContextAwareClickHandler(click, {
+					inDevTools: devTools => devTools.undo(),
+					inNoWindow: () => Menu.sendActionToFirstResponder('undo:')
+				});
+			} else if (commandId === 'redo') {
+				options.click = this.makeContextAwareClickHandler(click, {
+					inDevTools: devTools => devTools.redo(),
+					inNoWindow: () => Menu.sendActionToFirstResponder('redo:')
+				});
+			} else if (commandId === 'editor.action.selectAll') {
+				options.click = this.makeContextAwareClickHandler(click, {
+					inDevTools: devTools => devTools.selectAll(),
+					inNoWindow: () => Menu.sendActionToFirstResponder('selectAll:')
+				});
+			}
+		}
+
+		return new MenuItem(this.withKeybinding(commandId, options));
+	}
 }
 
 export const menuService = new MenuService();
