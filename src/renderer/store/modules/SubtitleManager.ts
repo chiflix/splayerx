@@ -191,7 +191,6 @@ const actions = {
     const {
       primaryLanguage, secondaryLanguage,
       originSrc,
-      list,
       privacyAgreement,
     } = getters;
     const preference = await retrieveSubtitlePreference(playlistId, mediaItemId);
@@ -232,24 +231,22 @@ const actions = {
     let onlineNeeded = (languageHasChanged || !hasStoredSubtitles) && ['mkv', 'avi', 'ts', 'mp4'].includes(extname(originSrc).slice(1)) && privacyAgreement;
     if (onlineNeeded) onlinePromise = dispatch(a.refreshOnlineSubtitles);
     /** whether or not to refresh embedded subtitles */
-    const embeddedNeeded = list.some(({ type }: SubtitleControlListItem) => type === Type.Embedded);
-    if (embeddedNeeded) retrieveEmbeddedList(originSrc).then((streams) => dispatch(a.addEmbeddedSubtitles, { streams, playlistId, mediaItemId }));
+    const embeddedNeeded = getters.list.some(({ type }: SubtitleControlListItem) => type === Type.Embedded);
+    if (embeddedNeeded) retrieveEmbeddedList(originSrc).then((streams) => dispatch(a.addEmbeddedSubtitles, streams));
 
     return Promise.race([
       Promise.all([
         onlinePromise,
-        dispatch(a.addLocalSubtitles, { paths: await searchForLocalList(originSrc), playlistId, mediaItemId }),
+        dispatch(a.addLocalSubtitles, await searchForLocalList(originSrc)),
       ]),
       new Promise((resolve, reject) => setTimeout(() => reject(new Error('timeout')), 10000)),
     ])
-      .then(() => {
-        dispatch(a.stopAISelection);
-        storeSubtitleLanguage([primaryLanguage, secondaryLanguage], playlistId, mediaItemId);
-        addSubtitleItemsToList(list, playlistId, mediaItemId);
-        dispatch(a.checkLocalSubtitles);
-      })
       .catch(console.error)
       .finally(() => {
+        dispatch(a.stopAISelection);
+        storeSubtitleLanguage([primaryLanguage, secondaryLanguage], playlistId, mediaItemId);
+        addSubtitleItemsToList(getters.list, playlistId, mediaItemId);
+        dispatch(a.checkLocalSubtitles);
         dispatch(a.checkSubtitleList);
         commit(m.setIsRefreshing, false);
         dispatch(legacyActions.UPDATE_SUBTITLE_TYPE, true);
@@ -257,7 +254,6 @@ const actions = {
   },
   async [a.refreshSubtitles]({ state, getters, dispatch, commit }: any) {
     const { playlistId, mediaItemId } = state;
-    const { list } = getters as { list: SubtitleControlListItem[] };
     const {
       originSrc,
       primaryLanguage, secondaryLanguage,
@@ -270,21 +266,20 @@ const actions = {
     dispatch(a.startAISelection);
     const onlineNeeded = privacyAgreement ? true : await privacyConfirm();
     const onlinePromise = onlineNeeded ? dispatch(a.refreshOnlineSubtitles) : Promise.resolve();
+    if (onlineNeeded) addBubble(ONLINE_LOADING);
     return Promise.race([
       Promise.all([
         onlinePromise,
-        dispatch(a.addLocalSubtitles, { paths: await searchForLocalList(originSrc), playlistId, mediaItemId }),
+        dispatch(a.addLocalSubtitles, await searchForLocalList(originSrc)),
       ]),
       new Promise((resolve, reject) => setTimeout(() => reject(new Error('timeout')), 10000)),
     ])
-      .then(() => {
-        dispatch(a.stopAISelection);
-        storeSubtitleLanguage([primaryLanguage, secondaryLanguage], playlistId, mediaItemId);
-        addSubtitleItemsToList(list, playlistId, mediaItemId);
-        dispatch(a.checkLocalSubtitles);
-      })
       .catch(console.error)
       .finally(() => {
+        dispatch(a.stopAISelection);
+        storeSubtitleLanguage([primaryLanguage, secondaryLanguage], playlistId, mediaItemId);
+        addSubtitleItemsToList(getters.list, playlistId, mediaItemId);
+        dispatch(a.checkLocalSubtitles);
         dispatch(a.checkSubtitleList);
         commit(m.setIsRefreshing, false);
         dispatch(legacyActions.UPDATE_SUBTITLE_TYPE, true);
@@ -296,8 +291,6 @@ const actions = {
       primaryLanguage, secondaryLanguage,
       playlistId, mediaItemId,
     } = getters;
-
-    addBubble(ONLINE_LOADING);
     const hints = generateHints(originSrc);
     return Promise.all([
       fetchOnlineListWithErrorHandling(originSrc, primaryLanguage, hints),
@@ -314,14 +307,14 @@ const actions = {
       // add subtitles not existed in the old subtitles
       newSubtitlesToAdd.push(...results.filter(({ transcriptIdentity }) => !oldSubtitles.find(({ id }) => id === transcriptIdentity)));
       return { delete: oldSubtitlesToDel, add: newSubtitlesToAdd };
-    }).then((result) => dispatch(a.addOnlineSubtitles, { transcriptInfoList: result.add, playlistId, mediaItemId })
+    }).then((result) => dispatch(a.addOnlineSubtitles, result.add)
       .then(() => dispatch(a.deleteSubtitlesByUuid, result.delete)));
   },
   [a.checkLocalSubtitles]({ dispatch, getters }: any) {
     const localInvalidSubtitles = getters.list.filter(({ type, source }: any) => type === Type.Local && !existsSync(source));
     if (localInvalidSubtitles.length) return dispatch(a.deleteSubtitlesByUuid, localInvalidSubtitles).then(() => addBubble(LOCAL_SUBTITLE_REMOVED));
   },
-  async [a.addLocalSubtitles]({ dispatch, state }: any, { paths }: any) {
+  async [a.addLocalSubtitles]({ dispatch, state }: any, paths: string[]) {
     return Promise.all(
       paths.map((path: string) => dispatch(a.addSubtitle, {
         generator: new LocalGenerator(path),
@@ -359,16 +352,16 @@ const actions = {
       });
     }
   },
-  async [a.addEmbeddedSubtitles]({ dispatch, state }: any, { streams }: any) {
+  async [a.addEmbeddedSubtitles]({ dispatch, state }: any, streams: [string, ISubtitleStream][]) {
     return Promise.all(
-      streams.map((stream: [string, ISubtitleStream]) => dispatch(a.addSubtitle, {
+      streams.map((stream) => dispatch(a.addSubtitle, {
         generator: new EmbeddedGenerator(stream[0], stream[1]),
         playlistId: state.playlistId,
         mediaItemId: state.mediaItemId,
       }))
     );
   },
-  async [a.addOnlineSubtitles]({ dispatch, state }: any, { transcriptInfoList }: any) {
+  async [a.addOnlineSubtitles]({ dispatch, state }: any, transcriptInfoList: TranscriptInfo[]) {
     return Promise.all(
       transcriptInfoList.map((info: TranscriptInfo) => dispatch(a.addSubtitle, {
         generator: new OnlineGenerator(info),
