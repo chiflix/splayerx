@@ -6,26 +6,29 @@ import Sagi from '@/libs/sagi';
 export type SubtitleUploadParameter = TrainingData.AsObject;
 
 export class TranscriptQueue {
-  queue = new PQueue();
+  private queue = new PQueue();
 
-  constructor(pqueueInstance: PQueue) {
+  public constructor(pqueueInstance: PQueue) {
     if ((pqueueInstance instanceof PQueue)) {
       this.queue = pqueueInstance;
     } else throw new TypeError('Expected PQueue instance provided.');
   }
 
-  subtitleState = {};
+  private subtitleState = {};
 
-  async add(subtitle: SubtitleUploadParameter) {
+  public async add(subtitle: SubtitleUploadParameter) {
     const id = `${subtitle.hints}-${subtitle.mediaIdentity}`;
-    const options = { priority: 0 } as { priority: 0 | 1 };
+    const options = { priority: 0 };
     if (this.subtitleState[id] === 'loading') return false;
     if (this.subtitleState[id] === 'failed') options.priority = 1;
     this.subtitleState[id] = 'loading';
-    return this.addManually(subtitle, options);
+    return this.addManually(subtitle, options as { priority: 0 | 1 });
   }
 
-  async addManually(subtitle: SubtitleUploadParameter, options: { priority: 0 | 1 } = { priority: 0 }) {
+  public async addManually(
+    subtitle: SubtitleUploadParameter,
+    options: { priority: 0 | 1 } = { priority: 0 },
+  ) {
     const id = `${subtitle.hints}-${subtitle.mediaIdentity}`;
     const task = subtitle.transcriptIdentity
       ? () => Sagi.pushTranscriptWithTranscriptIdentity(subtitle)
@@ -41,7 +44,7 @@ export class TranscriptQueue {
       });
   }
 
-  async addAll(subtitles: SubtitleUploadParameter[]) {
+  public async addAll(subtitles: SubtitleUploadParameter[]) {
     const success: SubtitleUploadParameter[] = [];
     const failure: SubtitleUploadParameter[] = [];
     const addSubtitle = async (subtitle: SubtitleUploadParameter) => {
@@ -55,7 +58,7 @@ export class TranscriptQueue {
     return { success, failure };
   }
 
-  async addAllManual(subtitles: SubtitleUploadParameter[]) {
+  public async addAllManual(subtitles: SubtitleUploadParameter[]) {
     const success: SubtitleUploadParameter[] = [];
     const failure: SubtitleUploadParameter[] = [];
     const addSubtitle = async (subtitle: SubtitleUploadParameter) => {
