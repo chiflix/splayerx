@@ -12,17 +12,15 @@ import { TrainngClient } from 'sagi-api/training/v1/training_grpc_pb';
 import { SagiSubtitlePayload } from '@/services/subtitle';
 import { log } from './Log';
 
-const grpc = require('grpc');
-
 class Sagi {
-  creds: any;
+  private creds: any;
 
-  endpoint = process.env.NODE_ENV === 'production'
+  private endpoint = process.env.NODE_ENV === 'production'
     ? 'apis.sagittarius.ai:8443'
     : 'apis.stage.sagittarius.ai:8443';
 
   // '127.0.0.1:8443'; // uncomment this when debuging
-  constructor() {
+  public constructor() {
     const sslCreds = credentials.createSsl(
       // How to access resources with fs see:
       // https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
@@ -46,7 +44,9 @@ class Sagi {
     this.creds = combinedCreds;
   }
 
-  mediaTranslate(options: MediaTranslationRequest.AsObject): Promise<MediaTranslationResponse.TranscriptInfo.AsObject[]> {
+  public mediaTranslate(
+    options: MediaTranslationRequest.AsObject,
+  ): Promise<MediaTranslationResponse.TranscriptInfo.AsObject[]> {
     const { mediaIdentity, languageCode, hints } = options;
     const client = new TranslationClient(this.endpoint, this.creds);
     const req = new MediaTranslationRequest();
@@ -62,7 +62,7 @@ class Sagi {
     });
   }
 
-  getTranscript(options: TranscriptRequest.AsObject): Promise<SagiSubtitlePayload> {
+  public getTranscript(options: TranscriptRequest.AsObject): Promise<SagiSubtitlePayload> {
     const { transcriptIdentity } = options;
     const client = new TranslationClient(this.endpoint, this.creds);
     const req = new TranscriptRequest();
@@ -75,7 +75,7 @@ class Sagi {
     });
   }
 
-  pushTranscriptWithPayload(options: TrainingData.AsObject) {
+  public pushTranscriptWithPayload(options: TrainingData.AsObject) {
     const {
       mediaIdentity, languageCode, format, playedTime, totalTime, delay, hints, payload,
     } = options;
@@ -97,7 +97,7 @@ class Sagi {
     });
   }
 
-  pushTranscriptWithTranscriptIdentity(options: TrainingData.AsObject) {
+  public pushTranscriptWithTranscriptIdentity(options: TrainingData.AsObject) {
     const {
       mediaIdentity, languageCode, format, playedTime, totalTime, delay, hints, transcriptIdentity,
     } = options;
@@ -120,7 +120,7 @@ class Sagi {
   }
 
   // check sagi-api health, return UNKNOWN(0), SERVING(1) or XXXXX
-  healthCheck(): Promise<HealthCheckResponse.AsObject> {
+  public healthCheck(): Promise<HealthCheckResponse.AsObject> {
     const client = new HealthClient(this.endpoint, this.creds);
     return new Promise((resolve, reject) => {
       client.check(new HealthCheckRequest(), (err, response) => {
@@ -128,8 +128,9 @@ class Sagi {
         else {
           const status = response.getStatus();
           console.log(`[Sagi]Version: ${response.getVersion()}, Status: ${status}.`);
-          if (status !== HealthCheckResponse.ServingStatus.SERVING) reject(HealthCheckResponse.ServingStatus[status]);
-          else resolve({ status, version: response.getVersion() });
+          if (status !== HealthCheckResponse.ServingStatus.SERVING) {
+            reject(HealthCheckResponse.ServingStatus[status]);
+          } else resolve({ status, version: response.getVersion() });
         }
       });
     });
