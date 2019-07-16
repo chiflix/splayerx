@@ -94,7 +94,8 @@ export const allCodes = {
 export function normalizeCode(code: string): LanguageCode {
   if (!code) return LanguageCode.Default;
   return (
-    Object.keys(allCodes).find(standardCode => allCodes[standardCode].includes(code)) as LanguageCode
+    Object.keys(allCodes)
+      .find(standardCode => allCodes[standardCode].includes(code)) as LanguageCode
     || LanguageCode.No
   );
 }
