@@ -49,10 +49,13 @@
         </div>
       </div>
       <!-- 正在翻译，想使用其他翻译或者刷新字幕 -->
-      <div v-else-if="showWhenStopTranslate">
+      <div
+        v-else-if="showWhenStopTranslate"
+        class="buttonGroup"
+      >
         <div
           @mouseup.stop="$emit('disCardTranslate');"
-          class="bubble__button"
+          class="bubble__button--lower"
         >
           好的
         </div>
