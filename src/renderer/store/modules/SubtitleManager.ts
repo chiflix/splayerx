@@ -213,12 +213,12 @@ const actions = {
         }),
         new Promise((resolve, reject) => setTimeout(() => reject('timeout'), 10000)),
       ])
-        .then(() => {
+        .catch(console.error)
+        .finally(() => {
           commit(m.setIsRefreshing, false);
           dispatch(legacyActions.UPDATE_SUBTITLE_TYPE, true);
           dispatch(a.stopAISelection);
-        })
-        .catch(console.error);
+        });
     }
 
     if (hasStoredSubtitles && preference) await dispatch(a.addDatabaseSubtitles, {
