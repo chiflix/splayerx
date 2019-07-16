@@ -3,7 +3,7 @@
     <div
       :class="showSelection ? 'dropdown__toggle--list' : 'dropdown__toggle--display'"
       @mouseup.stop="showSelection = !showSelection"
-      class="dropdown__toggle no-drag"
+      class="no-drag"
     >
       <div class="dropdown__displayItem">
         <span :class="`${selected.value ? '' : 'un_select'}`">
@@ -27,21 +27,20 @@
           {{ item.label }}
         </div>
       </div>
-      <Icon
-        :class="showSelection ? 'dropdown__icon--arrowUp' : 'dropdown__icon--arrowDown'"
-        type="rightArrow"
-      />
+      <div class="iconWrap">
+        <svg :class="showSelection ? 'dropdown__icon--arrowUp' : 'dropdown__icon--arrowDown'">
+          <use v-bind="{'xlink:href': `#rightArrow-default-icon`}"/>
+        </svg>
+      </div>
     </div>
   </div>
 </template>
 <script lang="ts">
 import Vue from 'vue';
-import Icon from '@/components/BaseIconContainer.vue';
 
 export default Vue.extend({
   name: 'Select',
   components: {
-    Icon,
   },
   props: {
     selected: {
@@ -87,12 +86,11 @@ export default Vue.extend({
 .dropdown {
   width: 100%;
   position: relative;
-  height: 28px;
+  height: 30px;
   font-size: 11px;
   color: rgba(255,255,255,0.80);
   letter-spacing: 0;
   text-align: center;
-  line-height: 28px;
   &__toggle {
     position: absolute;
     width: calc(100% - 2px);
@@ -110,7 +108,6 @@ export default Vue.extend({
         background-color: rgba(255, 255, 255, 0.08);
       }
     }
-
     &--list {
       @extend .dropdown__toggle;
       height: 148px;
@@ -125,11 +122,9 @@ export default Vue.extend({
 
   &__displayItem {
     height: 28px;
-    span {
-      display: inline-block;
-      vertical-align: center;
-      line-height: 28px;
-    }
+    display: flex;
+    align-items: center;
+    justify-content: center;
     .un_select, .static_label {
       opacity: 0.3;
     }
@@ -156,11 +151,17 @@ export default Vue.extend({
       );
     }
   }
-
-  &__icon {
+  .iconWrap {
     position: absolute;
-    top: 7px;
+    height: 28px;
+    top: 0;
     right: 8px;
+    display: flex;
+    align-items: center;
+  }
+  &__icon {
+    width: 13px;
+    height: 13px;
     transition: transform 200ms;
     &--arrowDown {
       @extend .dropdown__icon;

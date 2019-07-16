@@ -19,7 +19,7 @@
         <div
           class="beta-mark"
         >
-          <p>Beta</p>
+          Beta
         </div>
       </div>
       <h1 v-else-if="isConfirmCancelTranlate">
@@ -292,17 +292,14 @@ export default Vue.extend({
     display: flex;
     .beta-mark {
       width: 20px;
-      height: 11px;
+      height: 12px;
       background: rgba(103, 103, 103, 0.8);
-      display: flex;
-      border-radius: 4px;
-      margin-left: 2px;
-      p {
-        font-size: 6.5px;
-        line-height: 6.5px;
-        color: rgba(255, 255, 255, 0.6);
-        margin: auto;
-      }
+      border-radius: 7px;
+      margin-left: 3px;
+      font-size: 7px;
+      line-height: 12px;
+      color: rgba(255, 255, 255, 0.6);
+      text-align: center;
     }
   }
 
