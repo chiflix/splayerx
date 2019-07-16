@@ -11,16 +11,16 @@ type ParsedSubtitle = {
 }[];
 
 export class VttParser extends BaseParser {
-  readonly payload: string = '';
+  public readonly payload: string = '';
 
-  format = Format.WebVTT;
+  public format = Format.WebVTT;
 
-  constructor(vttString: string) {
+  public constructor(vttString: string) {
     super();
     this.payload = vttString;
   }
 
-  dialogues: Cue[];
+  public dialogues: Cue[];
 
   private baseTags = {
     // https://developer.mozilla.org/en-US/docs/Web/API/WebVTT_API#Cue_settings
@@ -57,7 +57,7 @@ export class VttParser extends BaseParser {
     this.dialogues = finalDialogues;
   }
 
-  async parse() {
+  public async parse() {
     this.normalizer(parse(this.payload));
   }
 }

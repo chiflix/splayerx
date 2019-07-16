@@ -1,12 +1,10 @@
 import { pick } from 'lodash';
-import { compile } from 'ass-compiler';
-import {
-  Dialogue, Format, Cue, Tags,
-} from '@/interfaces/ISubtitle';
-import { BaseParser } from './base';
 // @ts-ignore
+import { compile } from 'ass-compiler';
+import { Format, Cue, Tags } from '@/interfaces/ISubtitle';
+import { BaseParser } from './base';
 
-interface IAssTags {
+interface AssTags {
   b: number;
   i: number;
   u: number;
@@ -26,9 +24,9 @@ type CompiledSubtitle = {
       y: number;
     };
     slices: {
-      tag: IAssTags;
+      tag: AssTags;
       fragments: {
-        tag: IAssTags;
+        tag: AssTags;
         text: string;
         drawing: null | object;
       }[];
@@ -37,11 +35,11 @@ type CompiledSubtitle = {
 }
 
 export class AssParser extends BaseParser {
-  readonly payload: string = '';
+  public readonly payload: string = '';
 
-  format = Format.AdvancedSubStationAplha;
+  public format = Format.AdvancedSubStationAplha;
 
-  constructor(assPayload: string) {
+  public constructor(assPayload: string) {
     super();
     this.payload = assPayload;
   }
@@ -120,7 +118,7 @@ export class AssParser extends BaseParser {
             };
           });
           let txt = '';
-          let tags: Tags = {} as Tags;
+          let tags: Tags = {};
           processedFragments.forEach((f: { text: string, tags: Tags }, i: number) => {
             if (i === 0) {
               tags = f.tags;
@@ -140,7 +138,7 @@ export class AssParser extends BaseParser {
     this.dialogues = finalDialogues;
   }
 
-  async parse() {
+  public async parse() {
     this.normalize(compile(this.payload) as CompiledSubtitle);
   }
 }

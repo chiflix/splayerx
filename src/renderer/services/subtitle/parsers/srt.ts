@@ -1,7 +1,7 @@
-import { parse, toMS } from 'subtitle';
-import { Dialogue, Format, Cue } from '@/interfaces/ISubtitle';
-import { BaseParser } from './base';
 // @ts-ignore
+import { parse, toMS } from 'subtitle';
+import { Format, Cue } from '@/interfaces/ISubtitle';
+import { BaseParser } from './base';
 import { tagsGetter } from '../utils';
 
 type ParsedSubtitle = {
@@ -11,16 +11,16 @@ type ParsedSubtitle = {
 }[];
 
 export class SrtParser extends BaseParser {
-  payload = '';
+  public payload = '';
 
-  format = Format.SubRip;
+  public format = Format.SubRip;
 
-  constructor(srtPayload: string) {
+  public constructor(srtPayload: string) {
     super();
     this.payload = srtPayload;
   }
 
-  dialogues: Cue[];
+  public dialogues: Cue[];
 
   private baseTags = { alignment: 2, pos: undefined };
 
@@ -39,7 +39,7 @@ export class SrtParser extends BaseParser {
     this.dialogues = finalDialogues;
   }
 
-  async parse() {
+  public async parse() {
     this.normalizer(parse(this.payload));
   }
 }

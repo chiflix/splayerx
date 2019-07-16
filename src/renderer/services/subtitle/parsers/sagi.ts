@@ -6,16 +6,16 @@ import { tagsGetter } from '../utils';
 export type SagiSubtitlePayload = TranscriptResponse.Cue.AsObject[];
 
 export class SagiParser extends BaseParser {
-  payload: SagiSubtitlePayload;
+  public payload: SagiSubtitlePayload;
 
-  format = Format.Sagi;
+  public format = Format.Sagi;
 
-  constructor(sagiPayload: SagiSubtitlePayload) {
+  public constructor(sagiPayload: SagiSubtitlePayload) {
     super();
     this.payload = sagiPayload;
   }
 
-  dialogues: Cue[] = [];
+  public dialogues: Cue[] = [];
 
   private baseTags = { alignment: 2, pos: undefined };
 
@@ -35,7 +35,7 @@ export class SagiParser extends BaseParser {
     this.dialogues = finalDialogues;
   }
 
-  async parse() {
+  public async parse() {
     this.normalizer(this.payload);
   }
 }
