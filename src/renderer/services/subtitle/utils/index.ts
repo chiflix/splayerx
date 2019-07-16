@@ -33,6 +33,7 @@ export function tagsGetter(text: string, baseTags: Tags) {
       an: (tag: string) => {
         const matchedAligment = tag.match(/\d/g);
         if (matchedAligment) return Number.parseFloat(matchedAligment[0]);
+        return undefined;
       },
       pos: (tag: string) => {
         const matchedCoords = tag.match(/\((.*)\)/);
@@ -45,6 +46,7 @@ export function tagsGetter(text: string, baseTags: Tags) {
             },
           });
         }
+        return undefined;
       },
     };
     for (let tag of matchTags) {
@@ -129,10 +131,11 @@ export function sourceToFormat(subtitleSource: Origin) {
   switch (subtitleSource.type) {
     case Type.Online:
       return Format.Sagi;
-    case Type.Embedded:
+    case Type.Embedded: {
       const { extractedSrc } = (subtitleSource as EmbeddedOrigin).source;
       if (extractedSrc) return pathToFormat(extractedSrc);
       return Format.Unknown;
+    }
     default:
       return pathToFormat(subtitleSource.source);
   }
@@ -175,6 +178,7 @@ export function getParser(format: Format, payload: any): Parser {
       return new SagiParser(payload);
     case Format.WebVTT:
       return new VttParser(payload);
+    default:
+      throw new Error();
   }
-  throw new Error();
 }
