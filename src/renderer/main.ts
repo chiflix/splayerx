@@ -1271,24 +1271,40 @@ new Vue({
       const inPlayingView = routeName === 'playing-view';
       const inWelcomeView = routeName === 'welcome-view' || routeName === 'language-setting';
       if (!this.menu) return;
-      this.menu.getMenuItemById('playback').submenu.items.forEach((item: any) => {
-        item.enabled = inPlayingView;
-      });
-      this.menu.getMenuItemById('audio').submenu.items.forEach((item: any) => {
-        item.enabled = inPlayingView;
-      });
-      this.menu.getMenuItemById('subtitle').submenu.items.forEach((item: any) => {
-        item.submenu && item.submenu.items.forEach((item: any) => {
+      let menuItem;
+      menuItem = this.menu.getMenuItemById('playback');
+      if (menuItem) {
+        menuItem.submenu.items.forEach((item: any) => {
           item.enabled = inPlayingView;
         });
-        item.enabled = inPlayingView;
-      });
-      this.menu.getMenuItemById('window').submenu.items.forEach((item: any) => {
-        item.enabled = !inWelcomeView;
-      });
-      this.menu.getMenuItemById('file').submenu.items.forEach((item: any) => {
-        item.enabled = !inWelcomeView;
-      });
+      }
+      menuItem = this.menu.getMenuItemById('audio');
+      if (menuItem) {
+        menuItem.submenu.items.forEach((item: any) => {
+          item.enabled = inPlayingView;
+        });
+      }
+      menuItem = this.menu.getMenuItemById('subtitle');
+      if (menuItem) {
+        menuItem.submenu.items.forEach((item: any) => {
+          item.submenu && item.submenu.items.forEach((item: any) => {
+            item.enabled = inPlayingView;
+          });
+          item.enabled = inPlayingView;
+        });
+      }
+      menuItem = this.menu.getMenuItemById('window');
+      if (menuItem) {
+        menuItem.submenu.items.forEach((item: any) => {
+          item.enabled = !inWelcomeView;
+        });
+      }
+      menuItem = this.menu.getMenuItemById('file');
+      if (menuItem) {
+        menuItem.submenu.items.forEach((item: any) => {
+          item.enabled = !inWelcomeView;
+        });
+      }
       this.menu.getMenuItemById('preference').enabled = !inWelcomeView;
       this.menu.getMenuItemById('windowResize1').enabled = inPlayingView;
       this.menu.getMenuItemById('windowResize2').enabled = inPlayingView;

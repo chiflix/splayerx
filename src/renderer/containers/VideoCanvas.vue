@@ -250,13 +250,16 @@ export default {
         intrinsicHeight: target.videoHeight,
         ratio: target.videoWidth / target.videoHeight,
       });
-      const mediaInfo = await playInfoStorageService.getMediaItem(this.videoId);
-      if (mediaInfo.lastPlayedTime && target.duration - mediaInfo.lastPlayedTime > 10) {
+      const mediaInfo = this.videoId
+        ? await playInfoStorageService.getMediaItem(this.videoId)
+        : null;
+      if (mediaInfo && mediaInfo.lastPlayedTime
+        && target.duration - mediaInfo.lastPlayedTime > 10) {
         this.$bus.$emit('seek', mediaInfo.lastPlayedTime);
       } else {
         this.$bus.$emit('seek', 0);
       }
-      if (mediaInfo.audioTrackId) this.lastAudioTrackId = mediaInfo.audioTrackId;
+      if (mediaInfo && mediaInfo.audioTrackId) this.lastAudioTrackId = mediaInfo.audioTrackId;
       this.$bus.$emit('video-loaded');
       this.changeWindowRotate(this.winAngle);
 
@@ -365,15 +368,15 @@ export default {
           });
       } else if (process.env.NODE_ENV === 'development') { // app.hide() will disable app refresh and not good for dev
       } else if (process.platform === 'darwin' && !this.quit) {
-        e.returnValue = false;
-        this.$electron.remote.app.hide();
-        this.$electron.ipcRenderer.send('simulate-closing-window');
-        this.$bus.$off(); // remove all listeners before back to landing view
-        // need to init Vuex States
-        this.$router.push({
-          name: 'landing-view',
-        });
-        windowRectService.uploadWindowBy(false, 'landing-view');
+        // e.returnValue = false;
+        // this.$electron.remote.app.hide();
+        // this.$electron.ipcRenderer.send('simulate-closing-window');
+        // this.$bus.$off(); // remove all listeners before back to landing view
+        // // need to init Vuex States
+        // this.$router.push({
+        //   name: 'landing-view',
+        // });
+        // windowRectService.uploadWindowBy(false, 'landing-view');
       } else {
         this.$electron.remote.app.quit();
       }

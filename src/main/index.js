@@ -688,13 +688,17 @@ app.on('quit', () => {
 });
 
 app.on('second-instance', () => {
-  if (mainWindow.isMinimized()) mainWindow.restore();
-  mainWindow.focus();
+  if (mainWindow) {
+    if (mainWindow.isMinimized()) mainWindow.restore();
+    mainWindow.focus();
+  } else if (app.isReady()) {
+    createWindow();
+  }
 });
 
 
 async function darwinOpenFilesToStart() {
-  if (mainWindow) { // sencond instance
+  if (mainWindow && !mainWindow.webContents.isDestroyed()) { // sencond instance
     if (!inited) return;
     finalVideoToOpen = getAllValidVideo(!tmpVideoToOpen.length,
       tmpVideoToOpen.concat(tmpSubsToOpen));
@@ -717,7 +721,7 @@ async function darwinOpenFilesToStart() {
     if (!mainWindow.isVisible()) mainWindow.show();
     if (mainWindow.isMinimized()) mainWindow.restore();
     mainWindow.focus();
-  } else if (app.isReady()) {
+  } else if (app.isReady() && !mainWindow) {
     createWindow();
   }
 }
@@ -825,9 +829,9 @@ app.on('ready', () => {
 });
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
+  // if (process.platform !== 'darwin') {
+  // }
+  app.quit();
 });
 
 app.on('activate', () => {

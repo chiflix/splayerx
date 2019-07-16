@@ -68,3 +68,12 @@ body {
 .flex {
   flex: 1;
 }
+
+.fade-100 {
+  &-enter, &-leave-to {
+    opacity: 0;
+  }
+  &-enter-active, &-leave-active {
+    transition: opacity 100ms ease-out;
+  }
+}

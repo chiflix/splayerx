@@ -152,7 +152,7 @@ export default {
       defaultButtonTimeoutId: NaN,
       restoreButtonTimeoutId: NaN,
       needToRelaunch: !!window.localStorage.needToRelaunch,
-      languages: ['zh-Hans', 'zh-Hant', 'ja', 'ko', 'en', 'es', 'ar'],
+      languages: ['en', 'zh-Hans', 'zh-Hant', 'ja', 'ko', 'es', 'ar'],
       buttonDown: 0,
     };
   },
