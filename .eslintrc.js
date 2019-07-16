@@ -73,5 +73,6 @@ module.exports = {
         'requireLast': false
       }
     },
-  }
+    '@typescript-eslint/explicit-function-return-type': 0
+  },
 }
