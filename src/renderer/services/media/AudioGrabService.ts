@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com 
  * @Date: 2019-06-20 18:03:14 
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-07-15 19:05:04
+ * @Last Modified time: 2019-07-16 10:19:28
  */
 
 // @ts-ignore
@@ -309,7 +309,8 @@ class AudioGrabService extends EventEmitter {
           error: new Error('time out'),
         });
       }
-    }, 1000 * 10);
+    }, 1000 * 50);
+    // TODO timeout reset 10s
   }
 
   private rpcCallBack(res: StreamingTranslationResponse, err: Error) {
