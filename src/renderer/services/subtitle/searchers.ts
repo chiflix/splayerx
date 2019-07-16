@@ -49,7 +49,7 @@ export async function fetchOnlineList(
   return Sagi.mediaTranslate({
     mediaIdentity, languageCode, hints: hints || basename(videoSrc, extname(videoSrc)),
     format: '', startTime: 0, // tempoary useless params according to server-side
-  });
+  }).catch(() => []);
 }
 
 export function retrieveEmbeddedList(
