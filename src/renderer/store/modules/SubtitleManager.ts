@@ -70,6 +70,7 @@ const getters = {
   },
   primaryDelay({ primaryDelay }: SubtitleManagerState) { return primaryDelay; },
   secondaryDelay({ secondaryDelay }: SubtitleManagerState) { return secondaryDelay; },
+  calculatedNoSub(state: any, { list }: any) { return !list.length; },
 };
 const mutations = {
   [m.setPlaylistId](state: SubtitleManagerState, id: number) {
