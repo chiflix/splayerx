@@ -25,7 +25,6 @@ const state = {
   lastChosenSize: 1,
   subtitleDelay: 0,
   scaleNum: 1,
-  calculatedNoSub: true,
   subToTop: false,
   isFirstSubtitle: true,
   isPrimarySubSettings: true,
@@ -76,7 +75,6 @@ const getters = {
   chosenSize: state => state.chosenSize,
   lastChosenSize: state => state.lastChosenSize,
   scaleNum: state => state.scaleNum,
-  calculatedNoSub: state => state.calculatedNoSub,
   subToTop: state => state.subToTop,
   isFirstSubtitle: state => state.isFirstSubtitle,
   enabledSecondarySub: state => state.enabledSecondarySub,
@@ -149,9 +147,6 @@ const mutations = {
   },
   [subtitleMutations.SUBTITLE_SIZE_UPDATE](state, payload) {
     state.chosenSize = payload;
-  },
-  [subtitleMutations.NO_SUBTITLE_UPDATE](state, payload) {
-    state.calculatedNoSub = payload;
   },
   [subtitleMutations.SUBTITLE_TOP_UPDATE](state, payload) {
     state.subToTop = payload;
@@ -289,9 +284,6 @@ const actions = {
   },
   [subtitleActions.UPDATE_SUBTITLE_SIZE]({ commit }, delta) {
     commit(subtitleMutations.SUBTITLE_SIZE_UPDATE, delta);
-  },
-  [subtitleActions.UPDATE_NO_SUBTITLE]({ commit }, delta) {
-    commit(subtitleMutations.NO_SUBTITLE_UPDATE, delta);
   },
   [subtitleActions.UPDATE_SUBTITLE_TOP]({ commit }, delta) {
     commit(subtitleMutations.SUBTITLE_TOP_UPDATE, delta);
