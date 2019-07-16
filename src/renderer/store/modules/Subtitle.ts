@@ -1,5 +1,5 @@
 import {
-  EntityGenerator, Entity, Parser, Type, Format, Origin,
+  EntityGenerator, Entity, Parser, Type, Format, Origin, defaultEntity,
 } from '@/interfaces/ISubtitle';
 import { LanguageCode } from '@/libs/language';
 import {
@@ -15,6 +15,7 @@ import { addBubble } from '../../helpers/notificationControl';
 import { NOT_SUPPORTED_SUBTITLE } from '../../helpers/notificationcodes';
 import store from '..';
 import { isCachedSubtitle, removeCachedSubtitle } from '@/services/storage/subtitle/file';
+import { BaseParser } from '@/services/subtitle/parsers/base';
 
 type SubtitleState = {
   moduleId: string;
@@ -40,7 +41,7 @@ const subtitleMap: Map<string, {
 }> = new Map();
 
 let autoUpload = false;
-const state = () => ({
+const state = (): SubtitleState => ({
   moduleId: '',
   source: '',
   realSource: '',
@@ -49,7 +50,8 @@ const state = () => ({
   language: LanguageCode.Default,
   delay: 0,
   hash: '',
-}) as SubtitleState;
+  playedTime: 0,
+});
 const getters = {};
 const mutations = {
   [m.setModuleId](state: SubtitleState, id: string) {
@@ -83,9 +85,9 @@ const mutations = {
 const actions = {
   [a.initialize]({ commit }: any, moduleId: string) {
     subtitleMap.set(moduleId, {
-      entity: {} as Entity,
+      entity: defaultEntity,
       loader: () => Promise.resolve(),
-      parser: {} as Parser,
+      parser: new BaseParser(),
       cached: CacheStatus.NOT_CACHED,
     });
     commit(m.setModuleId, moduleId);
@@ -131,6 +133,7 @@ const actions = {
       if (isCachedSubtitle(entity.source)) subtitle.cached = CacheStatus.CACHED;
       return entity;
     }
+    throw new Error(`Subtitle ${state.moduleId} not found.`);
   },
   async [a.load]({ state, dispatch }: any) {
     const subtitle = subtitleMap.get(state.moduleId);
@@ -154,7 +157,8 @@ const actions = {
           await dispatch(a.startWatchPlayedTime);
         } catch (err) {
           addBubble(NOT_SUPPORTED_SUBTITLE);
-          const subtitleToRemoveFromList = rootGetters.list.find((sub: any) => sub.id === state.moduleId);
+          const subtitleToRemoveFromList = rootGetters.list
+            .find((sub: any) => sub.id === state.moduleId);
           store.dispatch(parentActions.deleteSubtitlesByUuid, [subtitleToRemoveFromList]);
         }
       }
@@ -218,6 +222,7 @@ const actions = {
       dispatch(a.stopWatchPlayedTime);
       return result;
     }
+    throw new Error(`Subtitle ${state.moduleId} not found.`);
   },
   async [a.manualUpload]({ state, rootGetters }: any) {
     const subtitle = subtitleMap.get(state.moduleId);
@@ -235,6 +240,7 @@ const actions = {
       };
       return upload.addManually(uploadParam);
     }
+    throw new Error(`Subtitle ${state.moduleId} not found.`);
   },
   // played time actions
   async [a.updatePlayedTime]({ state, commit }: any, times: { last: number, current: number }) {

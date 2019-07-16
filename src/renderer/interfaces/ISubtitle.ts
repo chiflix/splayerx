@@ -30,6 +30,19 @@ export type Entity = {
   metadata: Metadata;
   delay: number;
 }
+export const defaultEntity: Entity = {
+  source: {
+    type: Type.Local,
+    source: '',
+  },
+  type: Type.Local,
+  format: Format.Unknown,
+  language: LanguageCode.Default,
+  payload: '',
+  hash: '',
+  metadata: {},
+  delay: 0,
+};
 export type SubtitleControlListItem = {
   id: string;
   hash: string;
