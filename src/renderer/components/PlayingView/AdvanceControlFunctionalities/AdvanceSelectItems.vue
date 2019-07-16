@@ -84,8 +84,9 @@
 </template>
 
 <script lang="ts">
-// @ts-ignore
+import { mapActions } from 'vuex';
 import Icon from '../../BaseIconContainer.vue';
+import { SubtitleManager } from '@/store/actionTypes';
 
 export default {
   name: 'AdvanceSelectItems',
@@ -107,17 +108,21 @@ export default {
     isSubtitleAvailable: {
       type: Boolean,
     },
-    subtitleDelay: {
-      type: Number,
-      default: 0,
-    },
     audioDelay: {
       type: Number,
       default: 0,
     },
-    handleSelectClick: {
-      type: Function,
-      required: true,
+    primarySubDelay: {
+      type: Number,
+      default: 0,
+    },
+    secondarySubDelay: {
+      type: Number,
+      default: 0,
+    },
+    isPrimarySub: {
+      type: Boolean,
+      default: true,
     },
   },
   data() {
@@ -135,6 +140,12 @@ export default {
     };
   },
   computed: {
+    subtitleDelay() {
+      return this.isPrimarySub ? this.primarySubDelay : this.secondarySubDelay;
+    },
+    handleSelectClick() {
+      return this.isPrimarySub ? this.changePrimarySubDelay : this.changeSecondarySubDelay;
+    },
     heightSize() {
       if (this.size >= 289 && this.size <= 480) {
         return this.isChosen ? '74px' : '37px';
@@ -145,25 +156,31 @@ export default {
       return this.isChosen ? `${74 * 1.2 * 1.4}px` : `${37 * 1.2 * 1.4}px`;
     },
     screenSubtitleDelay() {
-      return `${this.subtitleDelay / 1000} s`;
+      return `${this.subtitleDelay} s`;
     },
     screenAudioDelay() {
       if (Math.abs(this.audioDelay) >= 10000) {
-        return `${this.audioDelay / 1000} s`;
+        return `${this.audioDelay} s`;
       }
       return `${this.audioDelay} ms`;
     },
     delayNum() {
       if (this.selectedType === this.selectedTypeEnum.SUBTITLE) {
-        return `${this.subtitleDelay / 1000}`;
+        return `${this.subtitleDelay}`;
       }
       if (Math.abs(this.audioDelay) >= 10000) {
-        return `${this.audioDelay / 1000}`;
+        return `${this.audioDelay}`;
       }
       return this.audioDelay;
     },
   },
   methods: {
+    ...mapActions({
+      changePrimarySubDelay: SubtitleManager.alterPrimaryDelay,
+      changeSecondarySubDelay: SubtitleManager.alterSecondaryDelay,
+      resetPrimarySubDelay: SubtitleManager.resetPrimaryDelay,
+      resetSecondarySubDelay: SubtitleManager.resetSecondaryDelay,
+    }),
     handleSubMouseEnter() {
       this.hoveredText = true;
     },
@@ -171,7 +188,7 @@ export default {
       this.hoveredText = false;
     },
     handleResetDelay() {
-      this.handleSelectClick(0);
+      this.isPrimarySub ? this.resetPrimarySubDelay() : this.resetSecondarySubDelay();
     },
     handleDeMousedown() {
       if (this.selectedType === this.selectedTypeEnum.SUBTITLE) {

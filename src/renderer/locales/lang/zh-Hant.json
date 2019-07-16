@@ -105,7 +105,9 @@
     "help": {
       "name": "幫助",
       "splayerxHelp": "幫助",
-      "shortCuts": "快捷鍵列表"
+      "shortCuts": "快捷鍵列表",
+      "crashReportLocation": "查看錯誤日誌",
+      "crashReportNotAvailable": "暫無錯誤日誌"
     },
     "playback": {
       "backwardL": "後退 -60s",
@@ -140,11 +142,12 @@
     },
     "subtitle": {
       "AITranslation": "重新加載翻譯結果",
-      "decreaseSubtitleDelayS": "字幕延時 -0.1s",
-      "disabledSecondarySub": "關閉第二字幕",
+      "decreasePrimarySubtitleDelay": "第一字幕延遲 -0.1s",
+      "increasePrimarySubtitleDelay": "第一字幕延遲 +0.1s",
+      "decreaseSecondarySubtitleDelay": "第二字幕延遲 -0.1s",
+      "increaseSecondarySubtitleDelay": "第二字幕延遲 +0.1s",
+      "disabledSecondarySub": "禁用第二字幕",
       "enabledSecondarySub": "啟用第二字幕",
-      "increaseSubtitleDelayL": "",
-      "increaseSubtitleDelayS": "字幕延時 +0.1s",
       "langEn": "英文",
       "langZhCN": "中文",
       "loadSubtitleFile": "加載字幕文件…",
@@ -152,7 +155,7 @@
       "menuLoading": "正在匹配翻譯結果 ...",
       "name": "字幕",
       "noSubtitle": "暫未找到翻譯結果",
-      "notToShowSubtitle": "關閉",
+      "notToShowSubtitle": "無",
       "secondarySubtitle": "第二字幕",
       "size1": "小",
       "size2": "標準",
@@ -193,8 +196,22 @@
     "nextInFolder": "文件夾中下一視頻",
     "nextInPlaylist": "播放列表中下一視頻"
   },
+  "welcome": {
+    "welcomeTitle": "歡迎使用射手影音",
+    "welcomeDescription": "強勁的視頻播放能力、先鋒的智能翻譯與全新輕量級的設計相結合，顛覆您的視頻觀賞體驗。",
+    "agreement": "繼續即表示同意 ",
+    "policy": "用戶隱私條款",
+    "languageTitle1": "設置常用字幕語言",
+    "languageTitle2": "以獲取智能翻譯結果",
+    "primary": "首要語言",
+    "secondary": "次要語言",
+    "chooseSecondary": "選擇次要語言",
+    "languageDescription": "* 稍後您可以在偏好設置裏更改",
+    "none": "無"
+  },
   "preferences": {
     "general": {
+      "hideHistory": "隱藏曆史記錄",
       "clearHistory": "退出時自動清空播放記錄",
       "reverseScrolling": "鼠标滚轮反向",
       "setDefault": "設為默認播放器",

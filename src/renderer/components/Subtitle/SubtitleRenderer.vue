@@ -6,24 +6,53 @@
       v-for="(item, index) in noPositionCues"
       :key="'noPosition' + index"
       :class="'subtitle-alignment'+(index+1)"
+      :style="{
+        zIndex: '2',
+        bottom: calculateSubBottom(index),
+        top: calculateSubTop(index),
+        display: 'flex',
+        flexDirection: 'column'
+      }"
     >
-      <p
-        v-for="(cue, ind) in item"
-        :v-if="!cue.hide"
-        :key="cue.text + ind"
-        :style="{
-          zoom: cue.category === 'first' ? `${scaleNum}` : `${secondarySubScale}`,
-          writingMode: (cue.category === 'first' ? firstType === 'vtt' : secondType === 'vtt')
-            ? `vertical-${cue.tags.vertical}` : '',
-          lineHeight: currentCues[0].length && currentCues[1].length ? '112%' : 'normal',
-          marginBottom: item[ind + 1] && cue.category === 'first' &&
-            item[ind + 1].category === 'secondary' ? `${subtitleSpace / scaleNum}px` : '',
-          fontWeight: cue.tags.b ? 'bold' : '',
-          fontStyle: cue.tags.i ? 'italic' : '',
-          textDecoration: cue.tags.u ? 'underline' : cue.tags.s ? 'line-through' : '',
-        }"
-        :class="[`subtitle-style${chosenStyle}`]"
-      ><!--eslint-disable-line-->{{ cue.text }}</p>
+      <div class="primary-sub">
+        <p
+          v-for="(cue, ind) in separateSubtitle(item)[0]"
+          :key="cue.text + ind"
+          :style="{
+            zoom: cue.category === 'first' ? `${scaleNum}` : `${secondarySubScale}`,
+            writingMode: (cue.category === 'first' ? firstType === 'vtt' : secondType === 'vtt')
+              ? `vertical-${cue.tags.vertical}` : '',
+            lineHeight: '120%',
+            paddingTop: calculatePaddingTop(ind),
+            paddingBottom: calculatePaddingBottom(ind, separateSubtitle(item)[0].length),
+            fontWeight: cue.tags.b ? 'bold' : '',
+            fontStyle: cue.tags.i ? 'italic' : '',
+            textDecoration: cue.tags.u ? 'underline' : cue.tags.s ? 'line-through' : '',
+            marginBottom: separateSubtitle(item)[1].length
+              && ind === separateSubtitle(item)[0].length - 1
+              ? `${subtitleSpace / scaleNum}px` : '',
+          }"
+          :class="[`subtitle-style${chosenStyle}`]"
+        ><!--eslint-disable-line-->{{ cue.text }}</p>
+      </div>
+      <div class="secondary-sub">
+        <p
+          v-for="(cue, ind) in separateSubtitle(item)[1]"
+          :key="cue.text + ind"
+          :style="{
+            zoom: cue.category === 'first' ? `${scaleNum}` : `${secondarySubScale}`,
+            writingMode: (cue.category === 'first' ? firstType === 'vtt' : secondType === 'vtt')
+              ? `vertical-${cue.tags.vertical}` : '',
+            lineHeight: '120%',
+            paddingTop: calculatePaddingTop(ind),
+            paddingBottom: calculatePaddingBottom(ind, separateSubtitle(item)[1].length),
+            fontWeight: cue.tags.b ? 'bold' : '',
+            fontStyle: cue.tags.i ? 'italic' : '',
+            textDecoration: cue.tags.u ? 'underline' : cue.tags.s ? 'line-through' : '',
+          }"
+          :class="[`subtitle-style${chosenStyle}`]"
+        ><!--eslint-disable-line-->{{ cue.text }}</p>
+      </div>
     </div>
     <div
       v-for="(item, index) in positionCues"
@@ -45,6 +74,8 @@
           fontWeight: cue.tags.b ? 'bold' : '',
           fontStyle: cue.tags.i ? 'italic' : '',
           textDecoration: cue.tags.u ? 'underline' : cue.tags.s ? 'line-through' : '',
+          lineHeight: '120%',
+          padding: calculatePositionSubPad
         }"
         :class="'subtitle-style'+chosenStyle"
       ><!--eslint-disable-line-->{{ cue.text }}</p>
@@ -54,6 +85,7 @@
 <script lang="ts">
 import { isEqual } from 'lodash';
 import { Cue, Tags } from '@/interfaces/ISubtitle';
+import { calculateTextSize } from '@/libs/utils';
 
 export default {
   name: 'SubtitleRenderer',
@@ -77,6 +109,10 @@ export default {
       type: String,
       required: true,
     },
+    currentSecondarySubtitleId: {
+      type: String,
+      required: true,
+    },
     winHeight: {
       type: Number,
       required: true,
@@ -89,18 +125,23 @@ export default {
       type: Number,
       default: 1,
     },
+    enabledSecondarySub: {
+      type: Boolean,
+      required: true,
+    },
   },
   data() {
     return {
-      noPositionCues: [],
+      normalFont: 'Avenir, Roboto-Regular, PingFang SC, Microsoft Yahei',
     };
   },
   computed: {
+    calculatePositionSubPad() {
+      return this.chosenStyle === 4 ? '0.9px 0' : '';
+    },
     subtitleSpace() {
-      const subSpaceFactorsA: number[] = [5 / 900, 9 / 900, 10 / 900, 12 / 900];
-      const subSpaceFactorsB: number[] = [4, 21 / 5, 4, 23 / 5];
-      return (subSpaceFactorsA[this.chosenSize] * this.winHeight)
-        + subSpaceFactorsB[this.chosenSize];
+      const subSpaceFactors: number[] = [15, 18, 21, 24];
+      return subSpaceFactors[this.chosenSize] / 1080 * this.winHeight;
     },
     firstType() {
       return this.currentCues[0].cue && this.currentCues[0].cue.length > 0 ? this.currentCues[0].cue[0].format : '';
@@ -141,7 +182,7 @@ export default {
       });
       return (firstClassifiedCues || []).concat(secondaryClassifiedCues || []);
     },
-    allCues() {
+    noPositionCues() {
       const allCues = [];
       for (let i = 1; i < 10; i += 1) {
         const firstCues = this.currentCues[0]
@@ -162,28 +203,62 @@ export default {
       return allCues;
     },
   },
-  watch: {
-    allCues: {
-      handler(val: Cue[][], oldVal: Cue[][]) {
-        this.noPositionCues = val;
-        this.$nextTick(() => {
-          for (let i = 0; i < 9; i += 1) {
-            if (val[i].length < oldVal[i].length
-              && val[i].every((e: Cue) => oldVal[i].includes(e))) {
-              this.noPositionCues[i] = oldVal[i].map((cue: Cue) => {
-                cue.hide = !val[i].includes(cue);
-                return cue;
-              });
-            } else {
-              this.noPositionCues[i] = val[i].map((cue: Cue) => { cue.hide = false; return cue; });
-            }
-          }
-        });
-      },
-      deep: true,
-    },
-  },
   methods: {
+    separateSubtitle(item: Cue[]) {
+      const index = item.findIndex((cue: Cue) => cue.category === 'secondary');
+      if (index !== -1) {
+        return [item.slice(0, index), item.slice(index, item.length)];
+      }
+      return [item, []];
+    },
+    calculateSubBottom(index: number) {
+      if ([1, 2, 3].includes(index + 1)) {
+        const textHeight = calculateTextSize('9px', this.normalFont, '120%', this.secondarySubScale.toString(), 'test').height;
+        const padding = this.chosenStyle === 4 ? 0.9 : 0;
+        const adaptedCues = this.noPositionCues[0]
+          .concat(this.noPositionCues[1], this.noPositionCues[2])
+          .filter((cue: Cue) => cue.category && cue.category === 'secondary');
+        if (adaptedCues.length === 1 && this.currentFirstSubtitleId && !adaptedCues[0].text.includes('\n')) {
+          return `${(textHeight * this.secondarySubScale + (60 / 1080) * this.winHeight) * 100 / this.winHeight}%`;
+        }
+        if (adaptedCues.length === 0 && this.currentSecondarySubtitleId && this.enabledSecondarySub
+          && this.currentFirstSubtitleId) {
+          return `${(this.subtitleSpace + (textHeight + padding) * 2 * this.secondarySubScale + (60 / 1080) * this.winHeight) * 100 / this.winHeight}%`;
+        }
+        return `${60 / 10.8}%`;
+      }
+      return '';
+    },
+    calculateSubTop(index: number) {
+      if ([7, 8, 9].includes(index + 1)) {
+        const textHeight = calculateTextSize('9px', this.normalFont, '120%', this.scaleNum.toString(), 'test').height;
+        const padding = this.chosenStyle === 4 ? 0.9 : 0;
+        const adaptedCues = this.noPositionCues[6]
+          .concat(this.noPositionCues[7], this.noPositionCues[8])
+          .filter((cue: Cue) => cue.category && cue.category === 'first');
+        if (adaptedCues.length === 1 && this.currentSecondarySubtitleId && !adaptedCues[0].text.includes('\n')) {
+          return `${(60 / 1080 * this.winHeight + textHeight * this.scaleNum) * 100 / this.winHeight}%`;
+        }
+        if (adaptedCues.length === 0 && this.currentSecondarySubtitleId && this.enabledSecondarySub
+          && this.currentFirstSubtitleId) {
+          return `${(this.subtitleSpace + (textHeight + padding) * 2 * this.scaleNum + 60 / 1080 * this.winHeight) * 100 / this.winHeight}%`;
+        }
+        return `${60 / 10.8}%`;
+      }
+      return '';
+    },
+    calculatePaddingTop(ind: number) {
+      if (this.chosenStyle === 4 && ind === 0) {
+        return '0.9px';
+      }
+      return '';
+    },
+    calculatePaddingBottom(ind: number, length: number) {
+      if (this.chosenStyle === 4 && ind === length - 1) {
+        return '0.9px';
+      }
+      return '';
+    },
     calculatePosition(category: string, tags: Tags) {
       const type = category === 'first' ? this.firstType : this.secondType;
       if (type !== 'vtt') {
@@ -277,6 +352,9 @@ export default {
   height: 100%;
   left: 0;
   top: 0;
-  z-index: 0;
+  z-index: auto;
+  .primary-sub, .secondary-sub {
+    margin: 0 auto 0 auto;
+  }
 }
 </style>

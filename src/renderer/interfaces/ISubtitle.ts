@@ -27,19 +27,25 @@ export type Entity = {
   language: LanguageCode;
   payload: any;
   hash: string;
+  metadata: Metadata;
+  delay: number;
 }
 export type SubtitleControlListItem = {
   id: string;
   hash: string;
   type: Type;
   language: LanguageCode;
-  source: any,
-  name?: string,
+  source: any;
+  name?: string;
+  delay: number;
 };
 
 export interface EntityGenerator {
+  /** get real source to fetch subtitle from */
   getSource(): Promise<Origin>
+  /** get fake source for display use */
   getStoredSource?: any
+  getDelay?: () => Promise<number>
   getType(): Promise<Type>
   getFormat(): Promise<Format>
   getLanguage(): Promise<LanguageCode>
@@ -47,9 +53,9 @@ export interface EntityGenerator {
   getHash(): Promise<string>
 }
 
-export interface Info {
-  PlayResX?: string | undefined;
-  PlayResY?: string | undefined;
+export interface Metadata {
+  PlayResX?: string;
+  PlayResY?: string;
 }
 
 export interface Tags {
@@ -76,7 +82,6 @@ export type Cue = {
   start: number,
   end: number,
   text: string,
-  hide?: boolean,
   format: string,
   tags: Tags,
 }
@@ -99,7 +104,7 @@ export interface VideoSegment {
 export interface Parser {
   parse(): void;
   readonly payload: any;
-  getInfo(): Promise<Info>;
+  getMetadata(): Promise<Metadata>;
   getDialogues(time?: number): Promise<Cue[]>;
   getVideoSegments(duration: number): Promise<VideoSegment[]>;
   updateVideoSegments(lastTime: number, currentTime: number): number;

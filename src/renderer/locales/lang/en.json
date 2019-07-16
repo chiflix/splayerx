@@ -106,7 +106,9 @@
     "help": {
       "name": "Help",
       "splayerxHelp": "Help",
-      "shortCuts": "Shortcuts List"
+      "shortCuts": "Shortcuts List",
+      "crashReportLocation": "Show Crash Reports",
+      "crashReportNotAvailable": "Found no crash report."
     },
     "playback": {
       "backwardL": "Step Backward -60s",
@@ -141,11 +143,12 @@
     },
     "subtitle": {
       "AITranslation": "Reload Smart Translation",
-      "decreaseSubtitleDelayS": "Subtitle Delay -0.1s",
+      "decreasePrimarySubtitleDelay": "Primary Subtitle Delay -0.1s",
+      "increasePrimarySubtitleDelay": "Primary Subtitle Delay +0.1s",
+      "decreaseSecondarySubtitleDelay": "Secondary Subtitle Delay -0.1s",
+      "increaseSecondarySubtitleDelay": "Secondary Subtitle Delay +0.1s",
       "disabledSecondarySub": "Disable Secondary Subtitle",
       "enabledSecondarySub": "Enable Secondary Subtitle",
-      "increaseSubtitleDelayL": "",
-      "increaseSubtitleDelayS": "Subtitle Delay +0.1s",
       "langEn": "English",
       "langZhCN": "Chinese",
       "loadSubtitleFile": "Load Subtitle File…",
@@ -194,8 +197,22 @@
     "nextInFolder": "Next in Folder",
     "nextInPlaylist": "Next in Playlist"
   },
+  "welcome": {
+    "welcomeTitle": "Welcome to SPlayer",
+    "welcomeDescription": "All-new lightweight design, incredible performance with smart translation to let you enjoy your videos like never before.",
+    "agreement": "By using SPlayer, you agree to our ",
+    "policy": "privacy policy",
+    "languageTitle1": "Set your preferred subtitle",
+    "languageTitle2": "languages to fetch translations",
+    "primary": "Primary",
+    "secondary": "Secondary",
+    "chooseSecondary": "Select Secondary Language",
+    "languageDescription": "* You can change your settings in preferences later",
+    "none": "None"
+  },
   "preferences": {
     "general": {
+      "hideHistory": "Hide playback history",
       "clearHistory": "Always clear playback history on exit",
       "reverseScrolling": "Reverse mouse scrolling",
       "setDefault": "Set as the Default Video Player",

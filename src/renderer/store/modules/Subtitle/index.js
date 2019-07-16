@@ -28,12 +28,15 @@ const state = {
   calculatedNoSub: true,
   subToTop: false,
   isFirstSubtitle: true,
+  isPrimarySubSettings: true,
   enabledSecondarySub: false,
   currentCues: [
     { subPlayResX: 720, subPlayResY: 405, cues: [] },
     { subPlayResX: 720, subPlayResY: 405, cues: [] },
   ],
   isRefreshing: false,
+  primarySubDelay: 10,
+  secondarySubDelay: 20,
 };
 
 const getters = {
@@ -77,6 +80,9 @@ const getters = {
   subToTop: state => state.subToTop,
   isFirstSubtitle: state => state.isFirstSubtitle,
   enabledSecondarySub: state => state.enabledSecondarySub,
+  isPrimarySubSettings: state => state.isPrimarySubSettings,
+  primarySubDelay: state => state.primarySubDelay,
+  secondarySubDelay: state => state.secondarySubDelay,
   // currentCues: state => state.currentCues,
   // isRefreshing: state => state.isRefreshing,
 };
@@ -156,6 +162,9 @@ const mutations = {
   },
   [subtitleMutations.SUBTITLE_TYPE_UPDATE](state, payload) {
     state.isFirstSubtitle = payload;
+  },
+  [subtitleMutations.SUBTITLE_SETTINGS_TYPE_UPDATE](state, payload) {
+    state.isPrimarySubSettings = payload;
   },
   [subtitleMutations.SECONDARY_SUBTITLE_ENABLED_UPDATE](state, payload) {
     state.enabledSecondarySub = payload;
@@ -293,9 +302,12 @@ const actions = {
   [subtitleActions.UPDATE_SUBTITLE_TYPE]({ commit }, delta) {
     commit(subtitleMutations.SUBTITLE_TYPE_UPDATE, delta);
   },
-  [subtitleActions.UPDATE_ENABLED_SECONDARY_SUBTITLE]({ commit }, delta) {
+  [subtitleActions.UPDATE_SUBTITLE_SETTINGS_TYPE]({ commit }, delta) {
+    commit(subtitleMutations.SUBTITLE_SETTINGS_TYPE_UPDATE, delta);
+  },
+  [subtitleActions.UPDATE_ENABLED_SECONDARY_SUBTITLE]({ commit, rootGetters }, delta) {
     commit(subtitleMutations.SECONDARY_SUBTITLE_ENABLED_UPDATE, delta);
-    store.dispatch(realSubtitleActions.changeSecondarySubtitle, '');
+    if (rootGetters.secondarySubtitleId) store.dispatch(realSubtitleActions.changeSecondarySubtitle, '');
   },
   [subtitleActions.UPDATE_LAST_SUBTITLE_SIZE]({ commit }, delta) {
     commit(subtitleMutations.LAST_SUBTITLE_SIZE_UPDATE, delta);

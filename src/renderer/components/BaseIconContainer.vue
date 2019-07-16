@@ -173,6 +173,34 @@ export default {
   display: block;
 }
 
+.nextStep {
+  width: 100%;
+  height: 100%;
+  opacity: 0.7;
+  cursor: pointer;
+  transition: opacity 200ms;
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.nextStepDisable {
+  width: 100%;
+  height: 100%;
+  opacity: 0.1;
+}
+
+.welcomeNike {
+  width: 100%;
+  height: 100%;
+  opacity: 0.7;
+  cursor: pointer;
+  transition: opacity 200ms;
+  &:hover {
+    opacity: 1;
+  }
+}
+
 .close {
   cursor: pointer;
   width: 100%;

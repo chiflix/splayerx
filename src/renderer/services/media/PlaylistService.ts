@@ -30,11 +30,12 @@ export default class PlaylistService extends EventEmitter implements IPlaylistRe
     super();
     ipcRenderer.send('mediaInfo', path);
     ipcRenderer.once(`mediaInfo-${path}-reply`, async (event: any, info: string) => {
+      const mediaHash = await mediaQuickHash.try(path);
+      if (!mediaHash) return;
       const { duration } = JSON.parse(info).format;
       this.duration = parseFloat(duration);
-      const mediaHash = await mediaQuickHash(path);
       const imgPath = await this.getCover(mediaHash);
-      
+
       if (!imgPath) {
         const imgPath = await this.mediaStorageService.generatePathBy(mediaHash, 'cover');
         ipcRenderer.send('snapShot', { path, imgPath, duration });
@@ -61,7 +62,7 @@ export default class PlaylistService extends EventEmitter implements IPlaylistRe
       const result = await this.mediaStorageService.getImageBy(mediaHash, 'cover');
       return result;
     } catch(err) {
-      return null; 
+      return null;
     }
   }
   /**

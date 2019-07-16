@@ -69,11 +69,13 @@ export const Subtitle = {
   CURRENT_SUBTITLE_REMOVE: 'CURRENT_SUBTITLE_REMOVE',
   SUBTITLE_TYPE_UPDATE: 'SUBTITLE_TYPE_UPDATE',
   SECONDARY_SUBTITLE_ENABLED_UPDATE: 'SECONDARY_SUBTITLE_ENABLED_UPDATE',
+  SUBTITLE_SETTINGS_TYPE_UPDATE: 'SUBTITLE_SETTINGS_TYPE_UPDATE',
 };
 
 export const newSubtitle = {
   setModuleId: 'SET_MODULE_ID',
   setSource: 'SET_SOURCE',
+  setRealSource: 'SET_REAL_SOURCE',
   setType: 'SET_TYPE',
   setFormat: 'SET_FORMAT',
   setLanguage: 'SET_LANGUAGE',
@@ -90,7 +92,9 @@ export const SubtitleManager = {
   setIsRefreshing: 'SET_IS_REFRESHING',
   addSubtitleId: 'ADD_SUBTITLE_ID',
   deleteSubtitleId: 'DELETE_SUBTITLE_ID',
-  setGlobalDelay: 'SET_GLOBAL_DELAY',
+  deletaAllSubtitleIds: 'DELETE_ALL_SUBTITLE_IDS',
+  setPrimaryDelay: 'SET_PRIMARY_DELAY',
+  setSecondaryDelay: 'SET_SECONDARY_DELAY',
 };
 
 export const Input = {

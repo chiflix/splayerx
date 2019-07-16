@@ -51,7 +51,7 @@ import { Video as videoActions } from '@/store/actionTypes';
 import { videodata } from '@/store/video';
 import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer.vue';
 import { MediaItem, PlaylistItem } from '../interfaces/IDB';
-import { deleteSubtitlesByPlaylistId } from '../services/storage/SubtitleStorage';
+import { deleteSubtitlesByPlaylistId } from '../services/storage/subtitle';
 
 export default {
   name: 'VideoCanvas',
@@ -63,7 +63,6 @@ export default {
       videoExisted: false,
       videoElement: null,
       seekTime: [0],
-      lastPlayedTime: 0,
       lastAudioTrackId: 0,
       lastCoverDetectingTime: 0,
       maskBackground: 'rgba(255, 255, 255, 0)', // drag and drop related var
@@ -77,7 +76,7 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'videoId', 'nextVideoId', 'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId', 'enabledSecondarySub', 'lastWinSize', 'lastChosenSize', 'subToTop',
+      'videoId', 'nextVideoId', 'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId', 'enabledSecondarySub', 'lastChosenSize', 'subToTop',
       'winSize', 'winPos', 'winAngle', 'isFullScreen', 'winWidth', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo', 'loop', 'playinglistRate', 'isFolderList', 'playingList', 'playingIndex', 'playListId', 'items',
       'previousVideo', 'previousVideoId',
     ]),
@@ -137,7 +136,6 @@ export default {
       savePromise
         .then(this.saveSubtitleStyle)
         .then(this.savePlaybackStates)
-        .then(this.$store.dispatch('saveWinSize', this.isFullScreen ? { size: this.winSizeBeforeFullScreen, angle: this.winAngleBeforeFullScreen } : { size: this.winSize, angle: this.winAngle }))
         .then(this.removeAllAudioTrack)
         .finally(() => {
           this.$store.dispatch('Init');
@@ -169,12 +167,6 @@ export default {
     });
     this.$bus.$on('toggle-muted', () => {
       this.toggleMute();
-    });
-    this.$bus.$on('send-lastplayedtime', (e: number) => {
-      this.lastPlayedTime = e;
-    });
-    this.$bus.$on('send-audiotrackid', (id: string) => {
-      this.lastAudioTrackId = id;
     });
     this.$bus.$on('toggle-playback', debounce(() => {
       this[this.paused ? 'play' : 'pause']();
@@ -236,7 +228,7 @@ export default {
       removeAllAudioTrack: videoActions.REMOVE_ALL_AUDIO_TRACK,
       updatePlayinglistRate: videoActions.UPDATE_PLAYINGLIST_RATE,
     }),
-    onMetaLoaded(event: Event) {
+    async onMetaLoaded(event: Event) {
       const target = event.target as HTMLVideoElement;
       this.videoElement = target;
       this.videoConfigInitialize({
@@ -258,17 +250,21 @@ export default {
         intrinsicHeight: target.videoHeight,
         ratio: target.videoWidth / target.videoHeight,
       });
-      if (target.duration - this.lastPlayedTime > 10) {
-        this.$bus.$emit('seek', this.lastPlayedTime);
+      const mediaInfo = this.videoId
+        ? await playInfoStorageService.getMediaItem(this.videoId)
+        : null;
+      if (mediaInfo && mediaInfo.lastPlayedTime
+        && target.duration - mediaInfo.lastPlayedTime > 10) {
+        this.$bus.$emit('seek', mediaInfo.lastPlayedTime);
       } else {
         this.$bus.$emit('seek', 0);
       }
-      this.lastPlayedTime = 0;
+      if (mediaInfo && mediaInfo.audioTrackId) this.lastAudioTrackId = mediaInfo.audioTrackId;
       this.$bus.$emit('video-loaded');
       this.changeWindowRotate(this.winAngle);
 
-      let maxVideoSize = [];
-      let videoSize = [];
+      let maxVideoSize;
+      let videoSize;
       if (this.videoExisted && (this.winAngle === 0 || this.winAngle === 180)) {
         maxVideoSize = this.winSize;
         videoSize = [this.videoWidth, this.videoHeight];
@@ -276,8 +272,6 @@ export default {
         maxVideoSize = this.winSize;
         videoSize = [this.videoHeight, this.videoWidth];
       } else {
-        maxVideoSize = this.lastWinSize[0] > 512 || !this.lastWinSize[0]
-          ? this.lastWinSize : [512, Math.round(512 / this.ratio)];
         videoSize = [this.videoWidth, this.videoHeight];
         this.videoExisted = true;
       }
@@ -366,7 +360,6 @@ export default {
         savePromise
           .then(this.saveSubtitleStyle)
           .then(this.savePlaybackStates)
-          .then(this.$store.dispatch('saveWinSize', this.isFullScreen ? { size: this.winSizeBeforeFullScreen, angle: this.winAngleBeforeFullScreen } : { size: this.winSize, angle: this.winAngle }))
           .then(this.removeAllAudioTrack)
           .finally(() => {
             this.$store.dispatch('SRC_SET', { src: '', mediaHash: '', id: NaN });
@@ -375,15 +368,15 @@ export default {
           });
       } else if (process.env.NODE_ENV === 'development') { // app.hide() will disable app refresh and not good for dev
       } else if (process.platform === 'darwin' && !this.quit) {
-        e.returnValue = false;
-        this.$electron.remote.app.hide();
-        this.$electron.ipcRenderer.send('simulate-closing-window');
-        this.$bus.$off(); // remove all listeners before back to landing view
-        // need to init Vuex States
-        this.$router.push({
-          name: 'landing-view',
-        });
-        windowRectService.uploadWindowBy(false, 'landing-view');
+        // e.returnValue = false;
+        // this.$electron.remote.app.hide();
+        // this.$electron.ipcRenderer.send('simulate-closing-window');
+        // this.$bus.$off(); // remove all listeners before back to landing view
+        // // need to init Vuex States
+        // this.$router.push({
+        //   name: 'landing-view',
+        // });
+        // windowRectService.uploadWindowBy(false, 'landing-view');
       } else {
         this.$electron.remote.app.quit();
       }

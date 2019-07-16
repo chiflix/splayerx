@@ -56,6 +56,15 @@ function getSystemLocale() {
   return 'en';
 }
 
+function getEnvironmentName() {
+  if (process.platform === 'darwin') {
+    return process.mas ? 'MAS' : 'DMG';
+  } else if (process.platform === 'win32') {
+    return process.windowsStore ? 'APPX' : 'EXE';
+  }
+  return 'Unknown';
+}
+
 Vue.config.productionTip = false;
 Vue.config.warnHandler = (warn) => {
   log.info('render/main', warn);
@@ -99,6 +108,7 @@ Vue.use(VueAnalytics, {
   router,
   set: [
     { field: 'dimension1', value: electron.remote.app.getVersion() },
+    { field: 'dimension2', value: getEnvironmentName() },
     { field: 'checkProtocolTask', value: null }, // fix ga not work from file:// url
     { field: 'checkStorageTask', value: null }, // fix ga not work from file:// url
     { field: 'historyImportTask', value: null }, // fix ga not work from file:// url
@@ -307,9 +317,6 @@ new Vue({
     currentRouteName() {
       return this.$route.name;
     },
-    isSubtitleAvailable() {
-      return this.primarySubtitleId !== '' || (this.secondarySubtitleId !== '' && this.enabledSecondarySub);
-    },
   },
   created() {
     console.log(messages);
@@ -325,9 +332,6 @@ new Vue({
         } else {
           this.$store.dispatch('primaryLanguage', 'en');
         }
-      }
-      if (!data.secondaryLanguage) {
-        this.$store.dispatch('secondaryLanguage', '');
       }
       if (!data.displayLanguage) {
         this.$store.dispatch('displayLanguage', getSystemLocale());
@@ -365,12 +369,6 @@ new Vue({
         this.menu.getMenuItemById('KeyboardRight').enabled = !val;
       }
     },
-    isSubtitleAvailable(val) {
-      if (this.menu) {
-        this.menu.getMenuItemById('increaseSubDelay').enabled = val;
-        this.menu.getMenuItemById('decreaseSubDelay').enabled = val;
-      }
-    },
     displayLanguage(val) {
       if (messages[val]) {
         this.$i18n.locale = val;
@@ -394,17 +392,7 @@ new Vue({
       this.refreshMenu();
     },
     currentRouteName(val) {
-      this.menuStateControl(val !== 'landing-view');
-    },
-    chosenStyle(val) {
-      if (this.menu) {
-        this.menu.getMenuItemById(`style${val}`).checked = true;
-      }
-    },
-    chosenSize(val) {
-      if (this.menu) {
-        this.menu.getMenuItemById(`size${val}`).checked = true;
-      }
+      this.menuStateControl(val);
     },
     volume(val) {
       if (this.menu) {
@@ -421,20 +409,26 @@ new Vue({
         this.refreshMenu();
       }
     },
-    primarySubtitleId(id: string, oldId: string) {
-      if (!this.menu) return;
-      if (id && this.menu.getMenuItemById(`sub${id}`)) {
-        this.menu.getMenuItemById(`sub${id}`).checked = true;
-      } else if (!id) {
-        this.menu.getMenuItemById('sub-1').checked = true;
+    primarySubtitleId(id: string) {
+      if (this.menu) {
+        this.menu.getMenuItemById('increasePrimarySubDelay').enabled = !!id;
+        this.menu.getMenuItemById('decreasePrimarySubDelay').enabled = !!id;
+        if (id && this.menu.getMenuItemById(`sub${id}`)) {
+          this.menu.getMenuItemById(`sub${id}`).checked = true;
+        } else if (!id) {
+          this.menu.getMenuItemById('sub-1').checked = true;
+        }
       }
     },
-    secondarySubtitleId(id: string, oldId: string) {
-      if (!this.menu) return;
-      if (id && this.menu.getMenuItemById(`secondSub${id}`)) {
-        this.menu.getMenuItemById(`secondSub${id}`).checked = true;
-      } else if (!id) {
-        this.menu.getMenuItemById('secondSub-1').checked = true;
+    secondarySubtitleId(id: string) {
+      if (this.menu) {
+        this.menu.getMenuItemById('increaseSecondarySubDelay').enabled = !!id;
+        this.menu.getMenuItemById('decreaseSecondarySubDelay').enabled = !!id;
+        if (id && this.menu.getMenuItemById(`secondSub${id}`)) {
+          this.menu.getMenuItemById(`secondSub${id}`).checked = true;
+        } else if (!id) {
+          this.menu.getMenuItemById('secondSub-1').checked = true;
+        }
       }
     },
     audioTrackList(val, oldval) {
@@ -523,6 +517,9 @@ new Vue({
       refreshSubtitles: smActions.refreshSubtitles,
       addLocalSubtitlesWithSelect: smActions.addLocalSubtitlesWithSelect,
       updateSubtitleType: subtitleActions.UPDATE_SUBTITLE_TYPE,
+      updateSubSettingsType: subtitleActions.UPDATE_SUBTITLE_SETTINGS_TYPE,
+      changePrimarySubDelay: SubtitleManager.alterPrimaryDelay,
+      changeSecondarySubDelay: SubtitleManager.alterSecondaryDelay,
     }),
     /**
      * @description 找到所有menu,禁用调.目前就两层循环，如果出现孙子menu，需要再嵌套一层循环
@@ -552,6 +549,7 @@ new Vue({
         // menu.file
         {
           label: this.$t('msg.file.name'),
+          id: 'file',
           submenu: [
             {
               label: this.$t('msg.file.open'),
@@ -780,105 +778,50 @@ new Vue({
             // },
             { type: 'separator' },
             {
-              label: this.$t('msg.subtitle.subtitleSize'),
-              submenu: [
-                {
-                  label: this.$t('msg.subtitle.size1'),
-                  type: 'radio',
-                  id: 'size0',
-                  click: () => {
-                    this.$bus.$emit('change-size-by-menu', 0);
-                  },
-                },
-                {
-                  label: this.$t('msg.subtitle.size2'),
-                  type: 'radio',
-                  id: 'size1',
-                  checked: true,
-                  click: () => {
-                    this.$bus.$emit('change-size-by-menu', 1);
-                  },
-                },
-                {
-                  label: this.$t('msg.subtitle.size3'),
-                  type: 'radio',
-                  id: 'size2',
-                  click: () => {
-                    this.$bus.$emit('change-size-by-menu', 2);
-                  },
-                },
-                {
-                  label: this.$t('msg.subtitle.size4'),
-                  type: 'radio',
-                  id: 'size3',
-                  click: () => {
-                    this.$bus.$emit('change-size-by-menu', 3);
-                  },
-                },
-              ],
-            },
-            {
-              label: this.$t('msg.subtitle.subtitleStyle'),
-              id: 'subStyle',
-              submenu: [
-                {
-                  label: this.$t('msg.subtitle.style1'),
-                  type: 'radio',
-                  id: 'style0',
-                  click: () => {
-                    this.updateChosenStyle(0);
-                  },
-                },
-                {
-                  label: this.$t('msg.subtitle.style2'),
-                  type: 'radio',
-                  id: 'style1',
-                  click: () => {
-                    this.updateChosenStyle(1);
-                  },
-                },
-                {
-                  label: this.$t('msg.subtitle.style3'),
-                  type: 'radio',
-                  id: 'style2',
-                  click: () => {
-                    this.updateChosenStyle(2);
-                  },
-                },
-                {
-                  label: this.$t('msg.subtitle.style4'),
-                  type: 'radio',
-                  id: 'style3',
-                  click: () => {
-                    this.updateChosenStyle(3);
-                  },
-                },
-                {
-                  label: this.$t('msg.subtitle.style5'),
-                  type: 'radio',
-                  id: 'style4',
-                  click: () => {
-                    this.updateChosenStyle(4);
-                  },
-                },
-              ],
-            },
-            { type: 'separator' },
-            {
-              label: this.$t('msg.subtitle.increaseSubtitleDelayS'),
-              id: 'increaseSubDelay',
-              accelerator: 'CmdOrCtrl+\'',
+              label: this.$t('advance.subMenu'),
               click: () => {
-                this.updateSubDelay(0.1);
+                this.$bus.$emit('show-subtitle-settings');
               },
             },
             {
-              label: this.$t('msg.subtitle.decreaseSubtitleDelayS'),
-              id: 'decreaseSubDelay',
-              accelerator: 'CmdOrCtrl+;',
-              click: () => {
-                this.updateSubDelay(-0.1);
-              },
+              label: this.$t('advance.subDelay'),
+              submenu: [
+                {
+                  label: this.$t('msg.subtitle.increasePrimarySubtitleDelay'),
+                  id: 'increasePrimarySubDelay',
+                  accelerator: 'CmdOrCtrl+\'',
+                  click: () => {
+                    this.updateSubSettingsType(true);
+                    this.changePrimarySubDelay(0.1);
+                  },
+                },
+                {
+                  label: this.$t('msg.subtitle.decreasePrimarySubtitleDelay'),
+                  id: 'decreasePrimarySubDelay',
+                  accelerator: 'CmdOrCtrl+;',
+                  click: () => {
+                    this.updateSubSettingsType(true);
+                    this.changePrimarySubDelay(-0.1);
+                  },
+                },
+                { type: 'separator' },
+                {
+                  label: this.$t('msg.subtitle.increaseSecondarySubtitleDelay'),
+                  id: 'increaseSecondarySubDelay',
+                  click: () => {
+                    this.updateSubSettingsType(false);
+                    this.changeSecondarySubDelay(0.1);
+                  },
+                },
+                {
+                  label: this.$t('msg.subtitle.decreaseSecondarySubtitleDelay'),
+                  id: 'decreaseSecondarySubDelay',
+                  click: () => {
+                    this.updateSubSettingsType(false);
+                    this.changeSecondarySubDelay(-0.1);
+                  },
+                },
+              ],
             },
             { type: 'separator' },
             {
@@ -891,6 +834,7 @@ new Vue({
         // menu.window
         {
           label: this.$t('msg.window.name'),
+          id: 'window',
           submenu: [
             {
               label: this.$t('msg.playback.keepPlayingWindowFront'),
@@ -971,7 +915,7 @@ new Vue({
             {
               label: this.$t('msg.window.backToLandingView'),
               id: 'backToLandingView',
-              accelerator: 'CmdOrCtrl+Esc',
+              accelerator: 'CmdOrCtrl+E',
               click: () => {
                 this.$bus.$emit('back-to-landingview');
               },
@@ -1004,6 +948,26 @@ new Vue({
           ],
         },
       ];
+
+      if (!process.mas) {
+        const helpMenu = template[template.length - 1].submenu as electron.MenuItemConstructorOptions[];
+        helpMenu.push({
+          label: this.$t('msg.help.crashReportLocation'),
+          click: () => {
+            const { remote } = this.$electron;
+            let location = remote.crashReporter.getCrashesDirectory();
+            if (!location) location = path.join(remote.app.getPath('temp'), remote.app.getName() + ' Crashes');
+            if (fs.existsSync(location)) {
+              remote.shell.openItem(location);
+            } else {
+              remote.dialog.showMessageBox(remote.getCurrentWindow(), {
+                message: this.$t('msg.help.crashReportNotAvailable'),
+              });
+            }
+          }
+        });
+      }
+
       return this.updateRecentPlay().then((result: any) => {
         // menu.file add "open recent"
         (template[3].submenu as Electron.MenuItemConstructorOptions[]).splice(3, 0, this.recentSubMenu());
@@ -1028,6 +992,7 @@ new Vue({
               { type: 'separator' },
               {
                 label: this.$t('msg.splayerx.preferences'),
+                id: 'preference',
                 enabled: true,
                 accelerator: 'Cmd+,',
                 click: () => {
@@ -1097,21 +1062,14 @@ new Vue({
         Menu.setApplicationMenu(this.menu);
       }).then(() => {
         if (!this.menu) return;
-        if (this.currentRouteName === 'landing-view') {
-          this.menuStateControl(false);
-        }
-        if (this.chosenStyle !== '') {
-          this.menu.getMenuItemById(`style${this.chosenStyle}`).checked = true;
-        }
-        if (this.chosenSize !== '') {
-          this.menu.getMenuItemById(`size${this.chosenSize}`).checked = true;
-        }
-        if (!this.isSubtitleAvailable) {
-          this.menu.getMenuItemById('increaseSubDelay').enabled = false;
-          this.menu.getMenuItemById('decreaseSubDelay').enabled = false;
-          this.menu.getMenuItemById('uploadSelectedSubtitle').enabled = this.ableToPushCurrentSubtitle;
-          this.menu.getMenuItemById('sub-1').checked = true;
-        }
+        this.menuStateControl(this.currentRouteName);
+
+        this.menu.getMenuItemById('increasePrimarySubDelay').enabled = !!this.primarySubtitleId;
+        this.menu.getMenuItemById('decreasePrimarySubDelay').enabled = !!this.primarySubtitleId;
+        this.menu.getMenuItemById('increaseSecondarySubDelay').enabled = !!this.secondarySubtitleId;
+        this.menu.getMenuItemById('decreaseSecondarySubDelay').enabled = !!this.secondarySubtitleId;
+        this.menu.getMenuItemById('uploadSelectedSubtitle').enabled = this.ableToPushCurrentSubtitle;
+
         this.audioTrackList.forEach((item: any, index: number) => {
           if (item.enabled === true) {
             this.menu.getMenuItemById(`track${index}`).checked = true;
@@ -1298,20 +1256,45 @@ new Vue({
         return recentMenuTemplate;
       }).catch(() => recentMenuTemplate);
     },
-    menuStateControl(inPlayingView: Boolean) {
+    menuStateControl(routeName: string) {
+      const inPlayingView = routeName === 'playing-view';
+      const inWelcomeView = routeName === 'welcome-view' || routeName === 'language-setting';
       if (!this.menu) return;
-      this.menu.getMenuItemById('playback').submenu.items.forEach((item: any) => {
-        item.enabled = inPlayingView;
-      });
-      this.menu.getMenuItemById('audio').submenu.items.forEach((item: any) => {
-        item.enabled = inPlayingView;
-      });
-      this.menu.getMenuItemById('subtitle').submenu.items.forEach((item: any) => {
-        item.submenu && item.submenu.items.forEach((item: any) => {
+      let menuItem;
+      menuItem = this.menu.getMenuItemById('playback');
+      if (menuItem) {
+        menuItem.submenu.items.forEach((item: any) => {
           item.enabled = inPlayingView;
         });
-        item.enabled = inPlayingView;
-      });
+      }
+      menuItem = this.menu.getMenuItemById('audio');
+      if (menuItem) {
+        menuItem.submenu.items.forEach((item: any) => {
+          item.enabled = inPlayingView;
+        });
+      }
+      menuItem = this.menu.getMenuItemById('subtitle');
+      if (menuItem) {
+        menuItem.submenu.items.forEach((item: any) => {
+          item.submenu && item.submenu.items.forEach((item: any) => {
+            item.enabled = inPlayingView;
+          });
+          item.enabled = inPlayingView;
+        });
+      }
+      menuItem = this.menu.getMenuItemById('window');
+      if (menuItem) {
+        menuItem.submenu.items.forEach((item: any) => {
+          item.enabled = !inWelcomeView;
+        });
+      }
+      menuItem = this.menu.getMenuItemById('file');
+      if (menuItem) {
+        menuItem.submenu.items.forEach((item: any) => {
+          item.enabled = !inWelcomeView;
+        });
+      }
+      this.menu.getMenuItemById('preference').enabled = !inWelcomeView;
       this.menu.getMenuItemById('windowResize1').enabled = inPlayingView;
       this.menu.getMenuItemById('windowResize2').enabled = inPlayingView;
       this.menu.getMenuItemById('windowResize3').enabled = inPlayingView;
@@ -1415,15 +1398,16 @@ new Vue({
 
         let finalSeekSpeed = 0;
         if (absX >= 285) finalSeekSpeed = this.duration;
-        else {
+        else if (absX <= 3) {
+          finalSeekSpeed = 0.08;
+        } else {
           const maximiumSpeed = this.duration / 50;
           const minimiumSpeed = 1;
-          const speed = (this.duration / 2000) * absX;
+          const speed = (this.duration / 5000) * absX;
           if (speed < minimiumSpeed) finalSeekSpeed = 0;
           else if (speed > maximiumSpeed) finalSeekSpeed = maximiumSpeed;
           else finalSeekSpeed = speed;
         }
-
         this.$bus.$emit(eventName, finalSeekSpeed);
       }
     },

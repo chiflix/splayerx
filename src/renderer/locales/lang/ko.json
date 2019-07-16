@@ -105,7 +105,9 @@
     "help": {
       "name": "도움",
       "splayerxHelp": "도움",
-      "shortCuts": "바로 가기 목록"
+      "shortCuts": "바로 가기 목록",
+      "crashReportLocation": "오류 로그보기",
+      "crashReportNotAvailable": "오류 로그 없음"
     },
     "playback": {
       "backwardL": "단계 뒤로 -60 년대",
@@ -140,11 +142,12 @@
     },
     "subtitle": {
       "AITranslation": "스마트 번역 새로 고침",
-      "decreaseSubtitleDelayS": "자막 지연 -0.1s",
+      "decreasePrimarySubtitleDelay": "자막 지연 -0.1s",
+      "increasePrimarySubtitleDelay": "자막 지연 +0.1s",
+      "decreaseSecondarySubtitleDelay": "자막 지연 -0.1s",
+      "increaseSecondarySubtitleDelay": "자막 지연 +0.1s",
       "disabledSecondarySub": "보조 부제목 사용 중지",
       "enabledSecondarySub": "보조 부제목 사용",
-      "increaseSubtitleDelayL": "",
-      "increaseSubtitleDelayS": "자막 지연 0.1s",
       "langEn": "영어",
       "langZhCN": "중국말",
       "loadSubtitleFile": "자막 파일로드 중 ...",
@@ -193,8 +196,22 @@
     "nextInFolder": "폴더에서 다음",
     "nextInPlaylist": "다음 재생 목록에서"
   },
+  "welcome": {
+    "welcomeTitle": "",
+    "welcomeDescription": "",
+    "agreement": "",
+    "policy": "",
+    "languageTitle1": "",
+    "languageTitle2": "",
+    "primary": "",
+    "secondary": "",
+    "chooseSecondary": "",
+    "languageDescription": "",
+    "none": ""
+  },
   "preferences": {
     "general": {
+      "hideHistory": "재생 기록 숨기기",
       "clearHistory": "종료시 항상 재생 기록 지우기",
       "reverseScrolling": "마우스 스크롤 역전",
       "setDefault": "기본 동영상 플레이어로 설정",

@@ -86,7 +86,7 @@ export class AssParser extends BaseParser {
     if (!compiledSubtitle.dialogues.length) throw new Error('Unsupported Subtitle');
     const finalDialogues: Cue[] = [];
     const { info, dialogues } = compiledSubtitle;
-    this.info = pick(info, Object.keys(this.baseInfo));
+    this.metadata = pick(info, Object.keys(this.baseInfo));
     dialogues.forEach((dialogue) => {
       const {
         start, end, alignment, slices, pos,

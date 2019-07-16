@@ -105,7 +105,9 @@
     "help": {
       "name": "帮助",
       "splayerxHelp": "帮助",
-      "shortCuts": "快捷键列表"
+      "shortCuts": "快捷键列表",
+      "crashReportLocation": "查看错误日志",
+      "crashReportNotAvailable": "暂无错误日志"
     },
     "playback": {
       "backwardL": "后退 -60s",
@@ -140,11 +142,12 @@
     },
     "subtitle": {
       "AITranslation": "重新加载翻译结果",
-      "decreaseSubtitleDelayS": "字幕延时 -0.1s",
-      "disabledSecondarySub": "关闭第二字幕",
+      "decreasePrimarySubtitleDelay": "第一字幕延迟 -0.1s",
+      "increasePrimarySubtitleDelay": "第一字幕延迟 +0.1s",
+      "decreaseSecondarySubtitleDelay": "第二字幕延迟 -0.1s",
+      "increaseSecondarySubtitleDelay": "第二字幕延迟 +0.1s",
+      "disabledSecondarySub": "禁用第二字幕",
       "enabledSecondarySub": "启用第二字幕",
-      "increaseSubtitleDelayL": "",
-      "increaseSubtitleDelayS": "字幕延时 +0.1s",
       "langEn": "英文",
       "langZhCN": "中文",
       "loadSubtitleFile": "加载字幕文件…",
@@ -193,8 +196,22 @@
     "nextInFolder": "文件夹中下一视频",
     "nextInPlaylist": "播放列表中下一视频"
   },
+  "welcome": {
+    "welcomeTitle": "欢迎使用射手影音",
+    "welcomeDescription": "强劲的视频播放能力、先锋的智能翻译与全新轻量级的设计相结合，颠覆您的视频观赏体验。",
+    "agreement": "继续即表示同意 ",
+    "policy": "用户隐私条款",
+    "languageTitle1": "设置常用字幕语言",
+    "languageTitle2": "以获取智能翻译结果",
+    "primary": "首要语言",
+    "secondary": "次要语言",
+    "chooseSecondary": "选择次要语言",
+    "languageDescription": "* 稍后您可以在偏好设置里更改",
+    "none": "无"
+  },
   "preferences": {
     "general": {
+      "hideHistory": "隐藏历史记录",
       "clearHistory": "退出时自动清空播放记录",
       "reverseScrolling": "鼠标滚轮反向",
       "setDefault": "设为默认播放器",

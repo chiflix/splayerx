@@ -10,6 +10,7 @@ import path, {
 import fs from 'fs';
 import rimraf from 'rimraf';
 import TaskQueue from '../renderer/helpers/proceduralQueue';
+import { jsonStorage } from '../renderer/libs/JsonStorage';
 import './helpers/electronPrototypes';
 import writeLog from './helpers/writeLog';
 import { getValidVideoRegex, getValidSubtitleRegex } from '../shared/utils';
@@ -82,8 +83,9 @@ const preferenceURL = process.env.NODE_ENV === 'development'
 const tempFolderPath = path.join(app.getPath('temp'), 'splayer');
 if (!fs.existsSync(tempFolderPath)) fs.mkdirSync(tempFolderPath);
 
+
 function handleBossKey() {
-  if (!mainWindow) return;
+  if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
   if (mainWindow.isVisible()) {
     if (process.platform === 'darwin' && mainWindow.isFullScreen()) {
       mainWindow.once('leave-full-screen', handleBossKey);
@@ -98,8 +100,12 @@ function handleBossKey() {
       tray.on('click', () => {
         mainWindow.show();
         mainWindow.webContents.send('mainCommit', 'isHiddenByBossKey', false);
-        tray.destroy();
-        tray = null;
+        // Destroy tray in its callback may cause app crash
+        setTimeout(() => {
+          if (!tray) return;
+          tray.destroy();
+          tray = null;
+        }, 10);
       });
     }
   }
@@ -175,40 +181,56 @@ function registerMainWindowEvent(mainWindow) {
   if (!mainWindow) return;
   // TODO: should be able to use window.outerWidth/outerHeight directly
   mainWindow.on('resize', throttle(() => {
+    if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
     mainWindow.webContents.send('mainCommit', 'windowSize', mainWindow.getSize());
   }, 100));
   mainWindow.on('move', throttle(() => {
+    if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
     mainWindow.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
   }, 100));
   mainWindow.on('enter-full-screen', () => {
+    if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
     mainWindow.webContents.send('mainCommit', 'isFullScreen', true);
     mainWindow.webContents.send('mainCommit', 'isMaximized', mainWindow.isMaximized());
   });
   mainWindow.on('leave-full-screen', () => {
+    if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
     mainWindow.webContents.send('mainCommit', 'isFullScreen', false);
     mainWindow.webContents.send('mainCommit', 'isMaximized', mainWindow.isMaximized());
   });
   mainWindow.on('maximize', () => {
+    if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
     mainWindow.webContents.send('mainCommit', 'isMaximized', true);
   });
   mainWindow.on('unmaximize', () => {
+    if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
     mainWindow.webContents.send('mainCommit', 'isMaximized', false);
   });
   mainWindow.on('minimize', () => {
+    if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
     mainWindow.webContents.send('mainCommit', 'isMinimized', true);
   });
   mainWindow.on('restore', () => {
+    if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
     mainWindow.webContents.send('mainCommit', 'isMinimized', false);
   });
   mainWindow.on('focus', () => {
+    if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
     mainWindow.webContents.send('mainCommit', 'isFocused', true);
     mainWindow.webContents.send('mainCommit', 'isHiddenByBossKey', false);
   });
   mainWindow.on('blur', () => {
+    if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
     mainWindow.webContents.send('mainCommit', 'isFocused', false);
   });
-  mainWindow.on('scroll-touch-begin', () => mainWindow.webContents.send('scroll-touch-begin'));
-  mainWindow.on('scroll-touch-end', () => mainWindow.webContents.send('scroll-touch-end'));
+  mainWindow.on('scroll-touch-begin', () => {
+    if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
+    mainWindow.webContents.send('scroll-touch-begin');
+  });
+  mainWindow.on('scroll-touch-end', () => {
+    if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
+    mainWindow.webContents.send('scroll-touch-end');
+  });
 
   ipcMain.on('callMainWindowMethod', (evt, method, args = []) => {
     try {
@@ -224,6 +246,7 @@ function registerMainWindowEvent(mainWindow) {
     event.sender.send('windowSizeChange-asyncReply', mainWindow.getSize());
   });
   ipcMain.on('drop-subtitle', (event, args) => {
+    if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
     args.forEach((file) => {
       if (subRegex.test(path.extname(file)) || fs.statSync(file).isDirectory()) {
         tmpSubsToOpen.push(file);
@@ -384,40 +407,7 @@ function registerMainWindowEvent(mainWindow) {
     mediaInfo(mediaInfoQueue[0], callback);
   }
 
-  ipcMain.on('mediaInfo', (event, path) => {
-    if (mediaInfoQueue.length === 0) {
-      mediaInfoQueue.push(path);
-      mediaInfoQueueProcess();
-    } else {
-      mediaInfoQueue.push(path);
-    }
-  });
-  ipcMain.on('simulate-closing-window', () => {
-    mediaInfoQueue.splice(0);
-    snapShotQueue.splice(0);
-    thumbnailTask.splice(0);
-  });
-  ipcMain.on('windowPositionChange', (event, args) => {
-    if (!mainWindow || event.sender.isDestroyed()) return;
-    mainWindow.setPosition(...args);
-    event.sender.send('windowPositionChange-asyncReply', mainWindow.getPosition());
-  });
-  ipcMain.on('windowInit', (event) => {
-    if (!mainWindow || event.sender.isDestroyed()) return;
-    mainWindow.webContents.send('mainCommit', 'windowSize', mainWindow.getSize());
-    mainWindow.webContents.send('mainCommit', 'windowMinimumSize', mainWindow.getMinimumSize());
-    mainWindow.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
-    mainWindow.webContents.send('mainCommit', 'isFullScreen', mainWindow.isFullScreen());
-    mainWindow.webContents.send('mainCommit', 'isFocused', mainWindow.isFocused());
-  });
-  ipcMain.on('bossKey', () => {
-    handleBossKey();
-  });
-  ipcMain.on('writeLog', (event, level, log) => { // eslint-disable-line complexity
-    if (!log) return;
-    writeLog(level, log);
-  });
-  ipcMain.on('add-windows-about', () => {
+  function createAbout() {
     const aboutWindowOptions = {
       useContentSize: true,
       frame: false,
@@ -451,8 +441,8 @@ function registerMainWindowEvent(mainWindow) {
     aboutWindow.once('ready-to-show', () => {
       aboutWindow.show();
     });
-  });
-  ipcMain.on('add-preference', () => {
+  }
+  function createPreference() {
     const preferenceWindowOptions = {
       useContentSize: true,
       frame: false,
@@ -488,7 +478,43 @@ function registerMainWindowEvent(mainWindow) {
     preferenceWindow.once('ready-to-show', () => {
       preferenceWindow.show();
     });
+  }
+
+  ipcMain.on('mediaInfo', (event, path) => {
+    if (mediaInfoQueue.length === 0) {
+      mediaInfoQueue.push(path);
+      mediaInfoQueueProcess();
+    } else {
+      mediaInfoQueue.push(path);
+    }
   });
+  ipcMain.on('simulate-closing-window', () => {
+    mediaInfoQueue.splice(0);
+    snapShotQueue.splice(0);
+    thumbnailTask.splice(0);
+  });
+  ipcMain.on('windowPositionChange', (event, args) => {
+    if (!mainWindow || event.sender.isDestroyed()) return;
+    mainWindow.setPosition(...args);
+    event.sender.send('windowPositionChange-asyncReply', mainWindow.getPosition());
+  });
+  ipcMain.on('windowInit', (event) => {
+    if (!mainWindow || event.sender.isDestroyed()) return;
+    mainWindow.webContents.send('mainCommit', 'windowSize', mainWindow.getSize());
+    mainWindow.webContents.send('mainCommit', 'windowMinimumSize', mainWindow.getMinimumSize());
+    mainWindow.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
+    mainWindow.webContents.send('mainCommit', 'isFullScreen', mainWindow.isFullScreen());
+    mainWindow.webContents.send('mainCommit', 'isFocused', mainWindow.isFocused());
+  });
+  ipcMain.on('bossKey', () => {
+    handleBossKey();
+  });
+  ipcMain.on('writeLog', (event, level, log) => { // eslint-disable-line complexity
+    if (!log) return;
+    writeLog(level, log);
+  });
+  ipcMain.on('add-windows-about', createAbout);
+  ipcMain.on('add-preference', createPreference);
   ipcMain.on('need-to-restore', () => {
     needToRestore = true;
     markNeedToRestore();
@@ -536,9 +562,18 @@ function createWindow() {
       win32: {},
     })[process.platform],
   });
-  mainWindow.webContents.setUserAgent(`SPlayerX@2018 ${os.platform() + os.release()} Version ${app.getVersion()}`);
-
-  mainWindow.loadURL(finalVideoToOpen.length ? `${mainURL}#/play` : mainURL);
+  jsonStorage.get('preferences').then((data) => {
+    let url = mainURL;
+    if (finalVideoToOpen.length) url = `${mainURL}#/play`;
+    else if (!data.welcomeProcessDone) url = `${mainURL}#/welcome`;
+    mainWindow.loadURL(url);
+  }).catch(() => {
+    mainWindow.loadURL(mainURL);
+  });
+  mainWindow.webContents.setUserAgent(
+    `${mainWindow.webContents.getUserAgent().replace(/Electron\S+/i, '')
+    } SPlayerX@2018 ${os.platform()} ${os.release()} Version ${app.getVersion()}`,
+  );
 
   mainWindow.on('closed', () => {
     ipcMain.removeAllListeners();
@@ -591,13 +626,17 @@ app.on('quit', () => {
 });
 
 app.on('second-instance', () => {
-  if (mainWindow.isMinimized()) mainWindow.restore();
-  mainWindow.focus();
+  if (mainWindow) {
+    if (mainWindow.isMinimized()) mainWindow.restore();
+    mainWindow.focus();
+  } else if (app.isReady()) {
+    createWindow();
+  }
 });
 
 
 async function darwinOpenFilesToStart() {
-  if (mainWindow) { // sencond instance
+  if (mainWindow && !mainWindow.webContents.isDestroyed()) { // sencond instance
     if (!inited) return;
     finalVideoToOpen = getAllValidVideo(!tmpVideoToOpen.length,
       tmpVideoToOpen.concat(tmpSubsToOpen));
@@ -620,7 +659,7 @@ async function darwinOpenFilesToStart() {
     if (!mainWindow.isVisible()) mainWindow.show();
     if (mainWindow.isMinimized()) mainWindow.restore();
     mainWindow.focus();
-  } else if (app.isReady()) {
+  } else if (app.isReady() && !mainWindow) {
     createWindow();
   }
 }
@@ -669,6 +708,9 @@ if (process.platform === 'darwin') {
   finalVideoToOpen = getAllValidVideo(!tmpVideoToOpen.length,
     tmpVideoToOpen.concat(tmpSubsToOpen));
   app.on('second-instance', (event, argv) => {
+    if (!mainWindow || mainWindow.webContents.isDestroyed()) {
+      createWindow();
+    }
     const opendFiles = argv.slice(app.isPackaged ? 3 : 2);
     opendFiles.forEach((file) => {
       let ext;
@@ -726,9 +768,9 @@ app.on('ready', () => {
 });
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
+  // if (process.platform !== 'darwin') {
+  // }
+  app.quit();
 });
 
 app.on('activate', () => {

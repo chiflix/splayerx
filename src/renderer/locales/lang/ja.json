@@ -105,7 +105,9 @@
     "help": {
       "name": "ヘルプ",
       "splayerxHelp": "ヘルプ",
-      "shortCuts": "ショートカットリスト"
+      "shortCuts": "ショートカットリスト",
+      "crashReportLocation": "エラーログを表示する",
+      "crashReportNotAvailable": "Found no crash report"
     },
     "playback": {
       "backwardL": "戻る -60s",
@@ -140,11 +142,12 @@
     },
     "subtitle": {
       "AITranslation": "トランスレーション結果を再読込",
-      "decreaseSubtitleDelayS": "字幕ディレイ -0.1s",
+      "decreasePrimarySubtitleDelay": "第一字幕オーディオ -0.1s",
+      "increasePrimarySubtitleDelay": "第一字幕オーディオ +0.1s",
+      "decreaseSecondarySubtitleDelay": "第二字幕オーディオ -0.1s",
+      "increaseSecondarySubtitleDelay": "第二字幕オーディオ +0.1s",
       "disabledSecondarySub": "第二字幕を閉じる",
       "enabledSecondarySub": "第二字幕を開く",
-      "increaseSubtitleDelayL": "",
-      "increaseSubtitleDelayS": "字幕ディレイ +0.1s",
       "langEn": "英文",
       "langZhCN": "中文",
       "loadSubtitleFile": "字幕ファイルを開く…",
@@ -193,8 +196,22 @@
     "nextInFolder": "ホルダー中の次のビデオ",
     "nextInPlaylist": "プレイリスト中の次のビデオ"
   },
+  "welcome": {
+    "welcomeTitle": "",
+    "welcomeDescription": "",
+    "agreement": "",
+    "policy": "",
+    "languageTitle1": "",
+    "languageTitle2": "",
+    "primary": "",
+    "secondary": "",
+    "chooseSecondary": "",
+    "languageDescription": "",
+    "none": ""
+  },
   "preferences": {
     "general": {
+      "hideHistory": "再生履歴を隠す",
       "clearHistory": "終了時にプレイ履歴を削除",
       "reverseScrolling": "マウスの逆スクロール",
       "setDefault": "デフォルトのプレーヤーとして設定",

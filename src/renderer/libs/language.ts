@@ -17,7 +17,11 @@ export enum LanguageCode {
   'No' = 'No',
   'Default' = 'Default',
 };
-const allCodes = {
+export const allCodes = {
+  en: [
+    'en',
+    'eng',
+  ],
   'zh-CN': [
     'zh',
     'chi',
@@ -41,10 +45,6 @@ const allCodes = {
   ko: [
     'ko',
     'kor',
-  ],
-  en: [
-    'en',
-    'eng',
   ],
   es: [
     'es',
@@ -112,7 +112,7 @@ enum LanguageName {
   'pt'= 'Português',
   'cs'= 'čeština',
   'ru'= 'Русский',
-  'id'= 'Bahasa Indonesia',
+  'id'= 'Indonesian',
   'ar'= 'العربية',
   'hi'= 'हिन्दी',
   'No'= 'No',

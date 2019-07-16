@@ -29,8 +29,11 @@ export class LocalGenerator implements EntityGenerator {
   async getLanguage() {
     return inferLanguageFromPath(this.origin.source);
   }
+
+  private payload: string;
   async getPayload() {
-    return loadLocalFile(this.origin.source);
+    if (!this.payload) this.payload = await loadLocalFile(this.origin.source);
+    return this.payload;
   }
   async getHash() {
     return mediaQuickHash(this.origin.source);

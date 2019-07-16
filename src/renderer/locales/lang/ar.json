@@ -105,7 +105,9 @@
     "help": {
       "name": "مساعدة",
       "splayerxHelp": "مساعدة",
-      "shortCuts": "قائمة الاختصارات"
+      "shortCuts": "قائمة الاختصارات",
+      "crashReportLocation": "عرض سجل الأخطاء",
+      "crashReportNotAvailable": "لا يوجد سجل خطأ."
     },
     "playback": {
       "backwardL": "خطوة الى الوراء - 60s",
@@ -140,11 +142,12 @@
     },
     "subtitle": {
       "AITranslation": "تحديث الترجمة الذكية",
-      "decreaseSubtitleDelayS": "العنوان الفرعي تأخير -0.1s",
+      "decreasePrimarySubtitleDelay": "العنوان الفرعي تأخير -0.1s",
+      "increasePrimarySubtitleDelay": "العنوان الفرعي تأخير +0.1s",
+      "decreaseSecondarySubtitleDelay": "العنوان الفرعي تأخير -0.1s",
+      "increaseSecondarySubtitleDelay": "العنوان الفرعي تأخير +0.1s",
       "disabledSecondarySub": "تعطيل الترجمة الثانوية",
       "enabledSecondarySub": "تمكين الترجمة الثانوية",
-      "increaseSubtitleDelayL": "",
-      "increaseSubtitleDelayS": "العنوان الفرعي تأخير 0.1s",
       "langEn": "الإنجليزية",
       "langZhCN": "صينى",
       "loadSubtitleFile": "تحميل ملف الترجمة ...",
@@ -193,8 +196,22 @@
     "nextInFolder": "التالي في المجلد",
     "nextInPlaylist": "التالي في قائمة التشغيل"
   },
+  "welcome": {
+    "welcomeTitle": "",
+    "welcomeDescription": "",
+    "agreement": "",
+    "policy": "",
+    "languageTitle1": "",
+    "languageTitle2": "",
+    "primary": "",
+    "secondary": "",
+    "chooseSecondary": "",
+    "languageDescription": "",
+    "none": ""
+  },
   "preferences": {
     "general": {
+      "hideHistory": "إخفاء سجل التشغيل",
       "clearHistory": "قم دائمًا بمسح سجل التشغيل عند الخروج",
       "reverseScrolling": "التمرير عكس الماوس",
       "setDefault": "تعيين كمشغل الفيديو الافتراضي",
