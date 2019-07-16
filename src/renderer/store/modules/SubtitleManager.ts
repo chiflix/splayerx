@@ -138,7 +138,7 @@ function setDelayTimeout() {
   clearTimeout(alterDelayTimeoutId);
   alterDelayTimeoutId = setTimeout(() => store.dispatch(a.storeSubtitleDelays), 10000);
 }
-function fetchOnlineListWithErrorHandling(
+function fetchOnlineListWithBubble(
   videoSrc: string,
   languageCode: LanguageCode,
   hints?: string,
@@ -265,8 +265,7 @@ const actions = {
     commit(m.setIsRefreshing, true);
     dispatch(a.startAISelection);
     const onlineNeeded = privacyAgreement ? true : await privacyConfirm();
-    const onlinePromise = onlineNeeded ? dispatch(a.refreshOnlineSubtitles) : Promise.resolve();
-    if (onlineNeeded) addBubble(ONLINE_LOADING);
+    const onlinePromise = onlineNeeded ? dispatch(a.refreshOnlineSubtitles, true) : Promise.resolve();
     return Promise.race([
       Promise.all([
         onlinePromise,
@@ -285,16 +284,19 @@ const actions = {
         dispatch(legacyActions.UPDATE_SUBTITLE_TYPE, true);
       });
   },
-  async [a.refreshOnlineSubtitles]({ getters, dispatch }: any) {
+  async [a.refreshOnlineSubtitles]({ getters, dispatch }: any, bubble?: boolean) {
     const {
       originSrc,
       primaryLanguage, secondaryLanguage,
-      playlistId, mediaItemId,
     } = getters;
+    if (bubble) addBubble(ONLINE_LOADING);
     const hints = generateHints(originSrc);
-    return Promise.all([
-      fetchOnlineListWithErrorHandling(originSrc, primaryLanguage, hints),
-      fetchOnlineListWithErrorHandling(originSrc, secondaryLanguage, hints),
+    return Promise.all(bubble ? [
+      fetchOnlineListWithBubble(originSrc, primaryLanguage, hints),
+      fetchOnlineListWithBubble(originSrc, secondaryLanguage, hints),
+    ] : [
+      fetchOnlineList(originSrc, primaryLanguage, hints),
+      fetchOnlineList(originSrc, secondaryLanguage, hints),
     ]).then((resultsList) => {
       const results = flatten(resultsList);
       const newSubtitlesToAdd: TranscriptInfo[] = [];
