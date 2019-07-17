@@ -14,7 +14,6 @@
 </template>
 
 <script lang="ts">
-import electron from 'electron';
 import { mapActions, mapGetters } from 'vuex';
 import { Browsing as browsingActions } from '@/store/actionTypes';
 import BrowsingFavicons from '@/components/BrowsingView/BrowsingFavicons.vue';
@@ -48,7 +47,7 @@ export default {
     },
     playFileWithPlayingView(inputUrl: string) {
       if (this.openFileByPlayingView(inputUrl)) {
-        electron.ipcRenderer.send('open-file-by-playing', inputUrl);
+        this.openUrlFile(inputUrl);
       } else {
         this.updateInitialUrl(inputUrl);
       }

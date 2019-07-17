@@ -14,7 +14,7 @@
         v-for="(item, index) in marks"
         @mouseover="marksMouseOver(index)"
         @mouseleave="marksMouseLeave()"
-        @mouseup="handleBrowsingOpen(item)"
+        @mouseup="handleBrowsingOpen(item.url)"
         :style="{
           background: markHoverIndex === index ?
             'rgba(255, 255, 255, 0.35)' : 'rgba(255, 255, 255, 0.08)',

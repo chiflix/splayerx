@@ -2,7 +2,7 @@
   <div
     :class="isDarwin ? 'darwin-titlebar' : 'titlebar'"
     :style="{
-      width: $route.name === 'playing-view' ? '100%' : ''
+      width: ['playing-view', 'browsing-view'].includes($route.name) ? '100%' : ''
     }"
     @dblclick.stop="handleDbClick"
   >
@@ -169,7 +169,7 @@ export default {
   },
   methods: {
     handleDbClick() {
-      if (this.$route.name === 'playing-view') {
+      if (['playing-view', 'browsing-view'].includes(this.$route.name)) {
         if (!this.isMaximized) {
           this.$electron.ipcRenderer.send('callMainWindowMethod', 'maximize');
         } else {

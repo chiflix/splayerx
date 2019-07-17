@@ -6,7 +6,8 @@
   >
     <Titlebar
       v-if="$route.name !== 'playing-view'"
-      :enable-full-screen-button="$route.name === 'landing-view' || $route.name === 'playing-view'"
+      :enable-full-screen-button="['landing-view', 'playing-view', 'browsing-view']
+        .includes($route.name)"
     />
     <transition
       :name="transitionMode"
@@ -51,9 +52,6 @@ export default {
     ipcRenderer.send('windowInit');
     ipcRenderer.on('thumbnail-saved', (event: Event, src: string) => {
       this.$bus.$emit('set-thumbnail-src', src);
-    });
-    this.$electron.ipcRenderer.on('play-file-with-url', (event: Event, url: string) => {
-      this.openUrlFile(url);
     });
     drag(this.$el);
     this.$ga.event('app', 'mounted');

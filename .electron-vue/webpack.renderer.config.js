@@ -55,7 +55,6 @@ let rendererConfig = {
     preference: path.join(__dirname, '../src/renderer/preference.js'),
     about: path.join(__dirname, '../src/renderer/about.js'),
     index: path.join(__dirname, '../src/renderer/main.ts'),
-    browsingView: path.join(__dirname, '../src/renderer/browsingView.js')
   },
   externals: [
     ...Object.keys(Object.assign({}, dependencies, optionalDependencies)).filter(d => !whiteListedModules.includes(d))
@@ -201,7 +200,6 @@ let rendererConfig = {
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('index')),
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('about')),
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('preference')),
-    new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('browsingView')),
     new webpack.HotModuleReplacementPlugin(),
   ],
   output: {

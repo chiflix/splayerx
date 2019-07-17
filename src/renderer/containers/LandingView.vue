@@ -311,8 +311,13 @@ export default {
     ...mapActions({
       updateInitialUrl: browsingActions.UPDATE_INITIAL_URL,
     }),
-    handleBrowsingOpen(item: { type: string, name: string, url: string }) {
-      this.$electron.ipcRenderer.send('add-browsingView', { size: this.browsingSize, url: item.url });
+    handleBrowsingOpen(url: string) {
+      this.updateInitialUrl(url);
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [0]);
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', this.browsingSize);
+      this.$router.push({
+        name: 'browsing-view',
+      });
     },
     closeUrlInput() {
       this.$bus.$emit('open-url-show', false);
@@ -321,7 +326,7 @@ export default {
       if (this.openFileByPlayingView(inputUrl)) {
         this.openUrlFile(inputUrl);
       } else {
-        this.$electron.ipcRenderer.send('add-browsingView', { size: this.browsingSize, url: inputUrl });
+        this.handleBrowsingOpen(inputUrl);
       }
     },
     globalMoveHandler() {

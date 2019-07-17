@@ -1,6 +1,5 @@
 <template>
   <div class="browsing">
-    <browsing-titlebar />
     <browsing-header v-show="!isPip" />
     <div
       v-show="loadingState && !isPip"
@@ -41,21 +40,18 @@
 
 <script lang="ts">
 import { mapGetters, mapActions } from 'vuex';
-import electron from 'electron';
 // @ts-ignore
 import urlParseLax from 'url-parse-lax';
 import { Browsing as browsingActions } from '@/store/actionTypes';
 import BrowsingHeader from '@/components/BrowsingView/BrowsingHeader.vue';
 import BrowsingControl from '@/components/BrowsingView/BrowsingControl.vue';
 import Icon from '@/components/BaseIconContainer.vue';
-import BrowsingTitleBar from '@/components/BrowsingView/BrowsingTitlebar.vue';
 
 export default {
   name: 'BrowsingView',
   components: {
     'browsing-header': BrowsingHeader,
     'browsing-control': BrowsingControl,
-    'browsing-titlebar': BrowsingTitleBar,
     Icon,
   },
   data() {
@@ -73,14 +69,14 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['browsingWinSize', 'winPos', 'isFullScreen', 'initialUrl', 'browsingWinWidth']),
+    ...mapGetters(['winPos', 'isFullScreen', 'initialUrl', 'winWidth', 'winSize']),
     availableUrl() {
       const parsedUrl = urlParseLax(this.initialUrl);
       return parsedUrl.protocol ? parsedUrl.href : `http://${this.initialUrl}`;
     },
   },
   watch: {
-    browsingWinWidth(val: number) {
+    winWidth(val: number) {
       if (this.isPip) {
         if (this.pipType === 'youtube') {
           this.youtubeWatcher(val);
@@ -97,19 +93,20 @@ export default {
     initialUrl() {
       this.controlToShow = true;
     },
+    controlToShow(val: boolean) {
+      if (!val) {
+        setTimeout(() => {
+          this.$refs.browsingControl.$el.style.display = 'none';
+        }, 100);
+      } else {
+        this.$refs.browsingControl.$el.style.display = '';
+      }
+    },
   },
-  created() {
-    electron.ipcRenderer.on('initial-url', (e: Event, url: string) => {
-      this.updateInitialUrl(url);
-    });
-    electron.ipcRenderer.on('browsingViewSize', (e: Event, size: number[]) => {
-      this.updateBrowsingSize(size);
-    });
+  beforeDestroy() {
+    this.$store.dispatch('updateBrowsingSize', this.isPip ? [1200, 900] : this.winSize);
   },
   mounted() {
-    window.addEventListener('beforeunload', () => {
-      electron.ipcRenderer.send('store-browsing-last-size', this.isPip ? [1200, 900] : this.browsingWinSize);
-    });
     this.$refs.webView.addEventListener('load-commit', () => {
       const loadUrl = this.$refs.webView.getURL();
       const recordIndex = this.supportedRecordHost.indexOf(urlParseLax(loadUrl).hostname);
@@ -149,7 +146,7 @@ export default {
           break;
       }
     });
-    electron.ipcRenderer.on('quit', () => {
+    this.$electron.ipcRenderer.on('quit', () => {
       this.quit = true;
     });
     this.$refs.webView.addEventListener('dom-ready', () => { // for webview test
@@ -178,7 +175,6 @@ export default {
   methods: {
     ...mapActions({
       updateInitialUrl: browsingActions.UPDATE_INITIAL_URL,
-      updateBrowsingSize: browsingActions.UPDATE_BROWSING_SIZE,
       updateRecordUrl: browsingActions.UPDATE_RECORD_URL,
     }),
     handleUrlForward() {
@@ -221,19 +217,19 @@ export default {
       }
     },
     iqiyiAdapter() {
-      electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setAspectRatio', [320 / 180]);
-      electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setMinimumSize', [320, 180]);
-      electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setSize', [320, 180]);
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [320 / 180]);
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [320, 180]);
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [320, 180]);
       this.$refs.webView.executeJavaScript('document.body.style.overflow = "hidden";document.querySelector(".qy-flash-box").style.cssText = "position: fixed; left: 0; top: 0; z-index: 9999"');
-      this.$refs.webView.executeJavaScript(`setTimeout(() => {document.querySelector(".flash-box").style.width="${this.browsingWinSize[0]}px";document.querySelector(".flash-box").style.height="${this.browsingWinSize[1]}px"}, 0)`);
+      this.$refs.webView.executeJavaScript(`setTimeout(() => {document.querySelector(".flash-box").style.width="${this.winSize[0]}px";document.querySelector(".flash-box").style.height="${this.winSize[1]}px"}, 0)`);
     },
     iqiyiWatcher(val: number) {
-      this.$refs.webView.executeJavaScript(`setTimeout(() => {document.querySelector(".flash-box").style.width="${val}px";document.querySelector(".flash-box").style.height="${this.browsingWinSize[1]}px"}, 0)`);
+      this.$refs.webView.executeJavaScript(`setTimeout(() => {document.querySelector(".flash-box").style.width="${val}px";document.querySelector(".flash-box").style.height="${this.winSize[1]}px"}, 0)`);
     },
     iqiyiRecover() {
-      electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setAspectRatio', [0, 0]);
-      electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setMinimumSize', [720, 405]);
-      electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setSize', [1200, 900]);
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [0, 0]);
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [720, 405]);
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [1200, 900]);
       this.$refs.webView.executeJavaScript('document.body.style.overflow = "";document.querySelector(".qy-flash-box").style.cssText = `position: ""; left: ""; top: ""; z-index: ""`');
       this.$refs.webView.executeJavaScript('document.querySelector(".flash-box").style.width="100%";document.querySelector(".flash-box").style.height="100%"');
     },
@@ -241,9 +237,9 @@ export default {
       this.$refs.webView.executeJavaScript('document.querySelector("video").style', (result: CSSStyleDeclaration) => {
         const aspectRatio: number[] = [parseFloat(result.width as string)
           / parseFloat(result.height as string)];
-        electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setAspectRatio', aspectRatio);
-        electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setMinimumSize', [180 * aspectRatio[0], 180]);
-        electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setSize', [180 * aspectRatio[0], 180]);
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', aspectRatio);
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [180 * aspectRatio[0], 180]);
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [180 * aspectRatio[0], 180]);
       });
       this.$refs.webView.executeJavaScript('var isPaused = document.querySelector("video").paused;document.body.appendChild(document.querySelector(".html5-video-player")); if (!isPaused) {document.querySelector("video").play()}');
       this.$refs.webView.executeJavaScript('document.getElementsByTagName("ytd-app")[0].style.display = "none"');
@@ -253,7 +249,7 @@ export default {
       this.$refs.webView.executeJavaScript('document.querySelector(".html5-video-player").style.background = "rgba(0, 0, 0, 1)"');
     },
     youtubeWatcher(val: number) {
-      this.$refs.webView.executeJavaScript(`document.querySelector(".html5-video-player").style.position = "absolute";document.querySelector(".html5-video-player").style.width = "${val}px";document.querySelector(".html5-video-player").style.height = "${this.browsingWinSize[1]}px";`);
+      this.$refs.webView.executeJavaScript(`document.querySelector(".html5-video-player").style.position = "absolute";document.querySelector(".html5-video-player").style.width = "${val}px";document.querySelector(".html5-video-player").style.height = "${this.winSize[1]}px";`);
     },
     youtubeRecover() {
       this.$refs.webView.executeJavaScript('document.getElementsByTagName("ytd-app")[0].style.display = "";'
@@ -267,9 +263,9 @@ export default {
       this.$refs.webView.executeJavaScript('document.querySelector(".html5-video-player").style.background = "rgba(255, 255, 255, 1)"');
       this.$refs.webView.executeJavaScript('if (document.querySelector(".video-ads")) document.querySelector(".video-ads").style.display = ""'); // remove youtube ads
       this.$refs.webView.executeJavaScript('var isPaused = document.querySelector("video").paused;document.querySelector(".ytd-player").appendChild(document.querySelector(".html5-video-player")); if (!isPaused) {document.querySelector("video").play()}');
-      electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setAspectRatio', [0, 0]);
-      electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setMinimumSize', [720, 405]);
-      electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setSize', [1200, 900]);
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [0, 0]);
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [720, 405]);
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [1200, 900]);
     },
     bilibiliAdapter() {
       this.$refs.webView.executeJavaScript('[document.querySelector(".live-player-ctnr"), document.querySelector("iframe"), document.querySelector("#bofqi")]', (r: (HTMLElement | null)[]) => {
@@ -281,23 +277,23 @@ export default {
           this.$refs.webView.executeJavaScript('document.querySelector("#bofqi").style', (result: CSSStyleDeclaration) => {
             const videoAspectRatio = parseFloat(result.width as string)
               / (parseFloat(result.height as string) - 46);
-            electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setAspectRatio', [videoAspectRatio]);
-            electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setMinimumSize', [180 * videoAspectRatio, 180]);
-            electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setSize', [180 * videoAspectRatio, 180]);
+            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [videoAspectRatio]);
+            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [180 * videoAspectRatio, 180]);
+            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [180 * videoAspectRatio, 180]);
           });
           this.$refs.webView.executeJavaScript('document.querySelector("#app").style.display = "none"');
           this.$refs.webView.executeJavaScript('document.body.style.overflow = "hidden"');
           this.$refs.webView.executeJavaScript('document.querySelector(".bili-header-m").style.display = "none"');
         } else if (this.bilibiliType === 'videoStreaming') {
-          electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setAspectRatio', [320 / 180]);
-          electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setMinimumSize', [320, 180]);
-          electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setSize', [320, 180]);
+          this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [320 / 180]);
+          this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [320, 180]);
+          this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [320, 180]);
           this.$refs.webView.executeJavaScript('document.body.prepend(document.querySelector(".live-player-ctnr"))');
           this.$refs.webView.executeJavaScript('document.querySelector(".live-room-app").style.display = "none"');
         } else {
-          electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setAspectRatio', [320 / 180]);
-          electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setMinimumSize', [320, 180]);
-          electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setSize', [320, 180]);
+          this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [320 / 180]);
+          this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [320, 180]);
+          this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [320, 180]);
           this.$refs.webView.executeJavaScript('document.body.style.cssText = "overflow: hidden";Object.defineProperty(document.body.style, "overflow", {get: function(){return "hidden"}, set: function(){}});document.querySelector("iframe").contentDocument.querySelector(".aside-area").style.display = "none";');
           this.$refs.webView.executeJavaScript('document.querySelector(".game-header").style.display = "none";document.querySelector(".link-navbar").style.display = "none";document.querySelector("iframe").contentDocument.querySelector("#head-info-vm").style.display = "none";document.querySelector("iframe").contentDocument.querySelector(".aside-area-toggle-btn").style.display = "none";document.querySelector(".agile-sidebar").style.display = "none";document.querySelector("iframe").contentDocument.querySelector("#gift-control-vm").style.display = "none"');
           this.$refs.webView.executeJavaScript('var el = document.querySelector("iframe");el.style.cssText = "position: fixed;left: 0;top: 0;";Object.defineProperty(el.style, "position", {get: function(){ return "fixed"},set: function(){}});Object.defineProperty(el.style, "left", {get: function(){ return "0"},set: function(){}});Object.defineProperty(el.style, "top", {get: function(){ return "0"},set: function(){}});');
@@ -312,13 +308,13 @@ export default {
           this.$refs.webView.executeJavaScript('document.querySelector(".player").style.width= "100%"; document.querySelector(".player").style.height= "100%"');
         }
       } else if (this.bilibiliType === 'iframeStreaming') {
-        this.$refs.webView.executeJavaScript(`document.querySelector("iframe").contentDocument.querySelector(".player-ctnr").style.width = "${val}px";document.querySelector("iframe").contentDocument.querySelector(".player-ctnr").style.height = "${this.browsingWinSize[1]}px";document.querySelector("iframe").contentDocument.querySelector(".live-player-ctnr").style.width ="${val}px";document.querySelector("iframe").contentDocument.querySelector(".live-player-ctnr").style.height ="${this.browsingWinSize[1]}px"`);
+        this.$refs.webView.executeJavaScript(`document.querySelector("iframe").contentDocument.querySelector(".player-ctnr").style.width = "${val}px";document.querySelector("iframe").contentDocument.querySelector(".player-ctnr").style.height = "${this.winSize[1]}px";document.querySelector("iframe").contentDocument.querySelector(".live-player-ctnr").style.width ="${val}px";document.querySelector("iframe").contentDocument.querySelector(".live-player-ctnr").style.height ="${this.winSize[1]}px"`);
       }
     },
     bilibiliRecover() {
-      electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setAspectRatio', [0, 0]);
-      electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setMinimumSize', [720, 405]);
-      electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setSize', [1200, 900]);
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [0, 0]);
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [720, 405]);
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [1200, 900]);
       if (this.bilibiliType === 'video') {
         this.$refs.webView.executeJavaScript('var isPaused = document.querySelector("video").paused;document.querySelector("#bofqi").prepend(document.querySelector(".player")); if (!isPaused) {document.querySelector("video").play()}');
         this.$refs.webView.executeJavaScript('document.querySelector("#app").style.display = ""');

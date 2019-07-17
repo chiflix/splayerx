@@ -1475,7 +1475,6 @@ new Vue({
           this.$bus.$emit('toggle-playback');
           break;
         case 85:
-          e.preventDefault();
           if (e.metaKey && e.shiftKey) {
             this.$bus.$emit('open-url-show', true);
           }

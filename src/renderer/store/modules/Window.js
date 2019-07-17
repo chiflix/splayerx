@@ -80,6 +80,7 @@ const actions = {
     commit('windowAngle', 0);
   },
   updateBrowsingSize({ commit }, delta) {
+    console.log(delta);
     commit('browsingSizeUpdate', delta);
     return asyncStorage.set('browsing', delta);
   },

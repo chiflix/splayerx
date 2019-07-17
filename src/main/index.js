@@ -58,7 +58,6 @@ app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 let mainWindow = null;
 let aboutWindow = null;
 let preferenceWindow = null;
-let browsingViewWindow = null;
 let tray = null;
 let needToRestore = false;
 let inited = false;
@@ -79,9 +78,6 @@ const aboutURL = process.env.NODE_ENV === 'development'
 const preferenceURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080/preference.html'
   : `file://${__dirname}/preference.html`;
-const browsingViewURL = process.env.NODE_ENV === 'development'
-  ? 'http://localhost:9080/browsingView.html'
-  : `file://${__dirname}/browsingView.html`;
 
 const tempFolderPath = path.join(app.getPath('temp'), 'splayer');
 if (!fs.existsSync(tempFolderPath)) fs.mkdirSync(tempFolderPath);
@@ -112,13 +108,6 @@ function handleBossKey() {
       });
     }
   }
-}
-
-function registerBrowsingWindowEvent() {
-  if (!browsingViewWindow) return;
-  browsingViewWindow.on('resize', throttle(() => {
-    browsingViewWindow.webContents.send('browsingViewSize', browsingViewWindow.getSize());
-  }, 100));
 }
 
 function markNeedToRestore() {
@@ -248,45 +237,32 @@ function registerMainWindowEvent(mainWindow) {
       console.error('callMainWindowMethod', method, JSON.stringify(args), '\n', ex);
     }
   });
-  ipcMain.on('callBrowsingViewWindowMethod', (evt, method, args = []) => {
-    try {
-      browsingViewWindow[method](...args);
-    } catch (ex) {
-      console.error('callBrowsingViewWindowMethod', ex, method, JSON.stringify(args));
-    }
-  });
   /* eslint-disable no-unused-vars */
   ipcMain.on('windowSizeChange', (event, args) => {
     if (!mainWindow || event.sender.isDestroyed()) return;
     mainWindow.setSize(...args);
     event.sender.send('windowSizeChange-asyncReply', mainWindow.getSize());
   });
-  ipcMain.on('store-browsing-last-size', (e, size) => {
-    mainWindow.webContents.send('mainDispatch', 'updateBrowsingSize', size);
-  });
-  ipcMain.on('open-file-by-playing', (e, url) => {
-    mainWindow.webContents.send('play-file-with-url', url);
-    ipcMain.on('drop-subtitle', (event, args) => {
-      if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
-      args.forEach((file) => {
-        if (subRegex.test(path.extname(file)) || fs.statSync(file).isDirectory()) {
-          tmpSubsToOpen.push(file);
-        } else if (!subRegex.test(path.extname(file))
-          && getValidVideoRegex().test(file)) {
-          tmpVideoToOpen.push(file);
-        }
-      });
-      finalVideoToOpen = getAllValidVideo(!tmpVideoToOpen.length,
-        tmpVideoToOpen.concat(tmpSubsToOpen));
-      if (process.mas && !tmpVideoToOpen.length && tmpSubsToOpen.length && !finalVideoToOpen) {
-        mainWindow.webContents.send('open-subtitle-in-mas', tmpSubsToOpen[0]);
-      } else if (tmpVideoToOpen.length + tmpSubsToOpen.length > 0) {
-        mainWindow.webContents.send('open-file', { onlySubtitle: !tmpVideoToOpen.length, files: finalVideoToOpen });
+  ipcMain.on('drop-subtitle', (event, args) => {
+    if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
+    args.forEach((file) => {
+      if (subRegex.test(path.extname(file)) || fs.statSync(file).isDirectory()) {
+        tmpSubsToOpen.push(file);
+      } else if (!subRegex.test(path.extname(file))
+        && getValidVideoRegex().test(file)) {
+        tmpVideoToOpen.push(file);
       }
-      finalVideoToOpen.splice(0, finalVideoToOpen.length);
-      tmpSubsToOpen.splice(0, tmpSubsToOpen.length);
-      tmpVideoToOpen.splice(0, tmpVideoToOpen.length);
     });
+    finalVideoToOpen = getAllValidVideo(!tmpVideoToOpen.length,
+      tmpVideoToOpen.concat(tmpSubsToOpen));
+    if (process.mas && !tmpVideoToOpen.length && tmpSubsToOpen.length && !finalVideoToOpen) {
+      mainWindow.webContents.send('open-subtitle-in-mas', tmpSubsToOpen[0]);
+    } else if (tmpVideoToOpen.length + tmpSubsToOpen.length > 0) {
+      mainWindow.webContents.send('open-file', { onlySubtitle: !tmpVideoToOpen.length, files: finalVideoToOpen });
+    }
+    finalVideoToOpen.splice(0, finalVideoToOpen.length);
+    tmpSubsToOpen.splice(0, tmpSubsToOpen.length);
+    tmpVideoToOpen.splice(0, tmpVideoToOpen.length);
   });
   function thumbnail(args, cb) {
     splayerx.generateThumbnails(
@@ -469,41 +445,6 @@ function registerMainWindowEvent(mainWindow) {
     });
   }
 
-  ipcMain.on('add-browsingView', (e, info) => {
-    const browsingWindowOptions = {
-      useContentSize: true,
-      frame: false,
-      titleBarStyle: 'none',
-      width: info.size[0],
-      height: info.size[1],
-      transparent: true,
-      show: false,
-      resizable: true,
-      minWidth: 720,
-      minHeight: 405,
-      webPreferences: {
-        webSecurity: false,
-        experimentalFeatures: true,
-        nodeIntegration: true,
-        webviewTag: true,
-      },
-      acceptFirstMouse: true,
-    };
-    if (!browsingViewWindow) {
-      browsingViewWindow = new BrowserWindow(browsingWindowOptions);
-      browsingViewWindow.loadURL(`${browsingViewURL}`);
-      browsingViewWindow.on('closed', () => {
-        browsingViewWindow = null;
-      });
-    }
-    browsingViewWindow.once('ready-to-show', () => {
-      browsingViewWindow.show();
-      registerBrowsingWindowEvent();
-      browsingViewWindow.webContents.send('initial-url', info.url);
-      browsingViewWindow.openDevTools();
-    });
-  });
-
   function createPreference() {
     const preferenceWindowOptions = {
       useContentSize: true,
@@ -615,6 +556,7 @@ function createWindow() {
       webSecurity: false,
       nodeIntegration: true,
       experimentalFeatures: true,
+      webviewTag: true,
     },
     // See https://github.com/electron/electron/blob/master/docs/api/browser-window.md#showing-window-gracefully
     backgroundColor: '#6a6a6a',
