@@ -146,7 +146,7 @@ export async function mediaQuickHash(filePath: string) {
 }
 
 /** Silently calculate hash of file, returns null if there was an error */
-mediaQuickHash.try = async function (filePath: string) {
+mediaQuickHash.try = async (filePath: string) => {
   try {
     return await mediaQuickHash(filePath);
   } catch (ex) {

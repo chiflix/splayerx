@@ -166,7 +166,6 @@ new Vue({
       menuOperationLock: false, // 如果正在创建目录，就锁住所以操作目录的动作，防止野指针
     };
   },
-  template: '<App/>',
   computed: {
     ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winAngle', 'winWidth', 'winHeight', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'list', 'enabledSecondarySub', 'isRefreshing',
       'primarySubtitleId', 'secondarySubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isHiddenByBossKey', 'isMinimized', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle', 'displayLanguage', 'calculatedNoSub', 'sizePercent', 'snapshotSavedPath', 'duration', 'reverseScrolling',
@@ -1097,7 +1096,7 @@ new Vue({
           }
         });
         this.menu.getMenuItemById('windowFront').checked = this.topOnWindow;
-        this.list.forEach((item: SubtitleControlListItem, index: number) => {
+        this.list.forEach((item: SubtitleControlListItem) => {
           if (item.id === this.primarySubtitleId && this.menu.getMenuItemById(`sub${item.id}`)) {
             this.menu.getMenuItemById(`sub${item.id}`).checked = true;
           }
@@ -1618,4 +1617,5 @@ new Vue({
       this.addLocalSubtitlesWithSelect(file);
     });
   },
+  template: '<App/>',
 }).$mount('#app');

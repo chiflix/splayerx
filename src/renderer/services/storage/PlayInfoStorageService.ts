@@ -1,5 +1,5 @@
 import { IPlayInfoStorable } from '@/interfaces/IPlayInfoStorable';
-import { info, data } from '@/libs/DataBase';
+import { info } from '@/libs/DataBase';
 import { MediaItem, PlaylistItem } from '@/interfaces/IDB';
 import { VIDEO_OBJECT_STORE_NAME, RECENT_OBJECT_STORE_NAME } from '@/constants';
 

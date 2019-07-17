@@ -24,7 +24,7 @@ export class InfoDB {
     if (this.db) return this.db;
     this.db = await openDB(
       INFO_DATABASE_NAME, INFODB_VERSION, {
-        upgrade(db: IDBPDatabase, oldVersion: number, newVersion: number) {
+        upgrade(db: IDBPDatabase, oldVersion: number) {
           if (oldVersion === 1) {
             db.deleteObjectStore(RECENT_OBJECT_STORE_NAME);
           } else if (oldVersion === 2) {
@@ -89,9 +89,6 @@ export class InfoDB {
   public async update(schema: string, data: any, keyPath: number) {
     if (!data.id && !data.videoId) throw new Error('Invalid data: Require Media ID !');
     const db = await this.getDB();
-    const tx = db.transaction(schema, 'readwrite');
-    // check if the objectStore used out-of-line key
-    const isInlineObjectStore = !!tx.objectStore(schema).keyPath;
     if (!keyPath) {
       throw new Error('Providing out-of-line objectStore without keyPathVal is invalid.');
     }

@@ -29,15 +29,15 @@ export default class CacheFile implements ICacheFileStorable {
     return join(`${getDefaultDataPath()}/${VIDEO_DIRNAME}/`, mediaHash);
   }
 
-  public removeFile(path: string): Promise<boolean> {
+  public removeFile(): Promise<boolean> {
     throw new Error('Method not implemented.');
   }
 
-  public readFile(path: string): Promise<Buffer | null> {
+  public readFile(): Promise<Buffer | null> {
     throw new Error('Method not implemented.');
   }
 
-  public writeFile(path: string, content: Buffer): Promise<boolean> {
+  public writeFile(): Promise<boolean> {
     throw new Error('Method not implemented.');
   }
 

@@ -1,4 +1,5 @@
-import Vue, { VNode } from 'vue';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import Vue, { VNode } from 'vue'; // eslint-disable-line no-unused-vars
 import { AxiosInstance } from 'axios';
 
 declare module '*.vue' {

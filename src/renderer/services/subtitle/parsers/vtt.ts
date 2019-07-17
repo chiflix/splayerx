@@ -1,7 +1,7 @@
-import { parse, toMS } from 'subtitle';
-import { Dialogue, Format, Cue } from '@/interfaces/ISubtitle';
-import { BaseParser } from './base';
 // @ts-ignore
+import { parse, toMS } from 'subtitle';
+import { Format, Cue } from '@/interfaces/ISubtitle';
+import { BaseParser } from './base';
 
 type ParsedSubtitle = {
   start: number;
