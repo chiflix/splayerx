@@ -447,7 +447,7 @@ const actions = {
   },
   async [a.deleteSubtitlesByUuid]({ state, dispatch }: any, storedSubtitleItems: SubtitleControlListItem[]) {
     storedSubtitleItems.map(({ id }) => {
-      dispatch(`${id}/${subActions.delete}`);
+      if (store.hasModule(id)) dispatch(`${id}/${subActions.delete}`);
       dispatch(a.removeSubtitle, id);
     });
     return removeSubtitleItemsFromList(storedSubtitleItems, state.playlistId, state.mediaItemId);
@@ -461,7 +461,7 @@ const actions = {
     commit(m.setSecondarySubtitleId, secondary);
     if (state.allSubtitles[secondary]) commit(m.setSecondaryDelay, state.allSubtitles[secondary].delay);
     dispatch(a.storeSelectedSubtitle, [primary, secondary]);
-    if (id) await dispatch(`${id}/${subActions.load}`);
+    if (id && store.hasModule(id)) await dispatch(`${id}/${subActions.load}`);
   },
   async [a.changeSecondarySubtitle]({ dispatch, commit, getters }: any, id: string) {
     let primary = getters.primarySubtitleId;
@@ -472,7 +472,7 @@ const actions = {
     commit(m.setSecondarySubtitleId, secondary);
     if (state.allSubtitles[secondary]) commit(m.setSecondaryDelay, state.allSubtitles[secondary].delay);
     dispatch(a.storeSelectedSubtitle, [primary, secondary]);
-    if (id) await dispatch(`${id}/${subActions.load}`);
+    if (id && store.hasModule(id)) await dispatch(`${id}/${subActions.load}`);
   },
   async [a.storeSelectedSubtitle]({ state }: any, ids: string[]) {
     const { allSubtitles, playlistId, mediaItemId } = state;
@@ -540,7 +540,7 @@ const actions = {
       subPlayResX: 720,
       subPlayResY: 405,
     }
-    if (getters.primarySubtitleId) {
+    if (getters.primarySubtitleId && store.hasModule(getters.primarySubtitleId)) {
       try {
         const { metadata = {}, dialogues = [] } = await dispatch(`${getters.primarySubtitleId}/${subActions.getDialogues}`, time);
         firstSub.cues = dialogues;
@@ -553,7 +553,7 @@ const actions = {
       }
     }
 
-    if (getters.enabledSecondarySub && getters.secondarySubtitleId) {
+    if (getters.enabledSecondarySub && getters.secondarySubtitleId && store.hasModule(getters.secondarySubtitleId)) {
       try {
         const { metadata = {}, dialogues = [] } = await dispatch(`${getters.secondarySubtitleId}/${subActions.getDialogues}`, time);
         secondSub.cues = dialogues;
@@ -572,7 +572,7 @@ const actions = {
       const actions: Promise<any>[] = [];
       const { primarySubtitleId, secondarySubtitleId } = state;
       const bubbleId = `${Date.now()}-${Math.random()}`;
-      if (primarySubtitleId) actions.push(
+      if (primarySubtitleId && store.hasModule(primarySubtitleId)) actions.push(
         dispatch(`${primarySubtitleId}/${subActions.updatePlayedTime}`, times)
           .then((playedTime: number) => {
             if (playedTime >= getters.duration * 0.6) {
@@ -584,7 +584,7 @@ const actions = {
             }
           })
       );
-      if (secondarySubtitleId) actions.push(
+      if (secondarySubtitleId && store.hasModule(secondarySubtitleId)) actions.push(
         dispatch(`${secondarySubtitleId}/${subActions.updatePlayedTime}`, times)
           .then((playedTime: number) => {
             if (playedTime >= getters.duration * 0.6) {
@@ -604,8 +604,8 @@ const actions = {
       addBubble(SUBTITLE_UPLOAD);
       const actions: Promise<any>[] = [];
       const { primarySubtitleId, secondarySubtitleId } = state;
-      if (primarySubtitleId) actions.push(dispatch(`${primarySubtitleId}/${subActions.manualUpload}`));
-      if (secondarySubtitleId) actions.push(dispatch(`${secondarySubtitleId}/${subActions.manualUpload}`));
+      if (primarySubtitleId && store.hasModule(primarySubtitleId)) actions.push(dispatch(`${primarySubtitleId}/${subActions.manualUpload}`));
+      if (secondarySubtitleId && store.hasModule(secondarySubtitleId)) actions.push(dispatch(`${secondarySubtitleId}/${subActions.manualUpload}`));
       return Promise.all(actions)
         .then((result: boolean[]) => {
           addBubble(result.every(res => res) ? UPLOAD_SUCCESS : UPLOAD_FAILED);

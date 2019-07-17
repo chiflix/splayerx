@@ -138,9 +138,13 @@ const actions = {
   },
   async [a.getDialogues]({ state, rootGetters, dispatch }: any, time: number) {
     const subtitle = subtitleMap.get(state.moduleId);
+    const result = {
+      metadata: {},
+      dialogues: [],
+    };
     if (subtitle) {
       const { entity, parser } = subtitle;
-      if (!entity.payload) return [];
+      if (!entity.payload) return result;
       else if (entity.payload && !parser.getDialogues) {
         const realFormat = sourceToFormat(state.realSource);
         subtitle.parser = getParser(realFormat, entity.payload);
@@ -161,10 +165,7 @@ const actions = {
         };
       }
     }
-    return {
-      metadata: {},
-      dialogues: [],
-    };
+    return result;
   },
   async [a.store]({ state }: any) {
     const subtitle = subtitleMap.get(state.moduleId);
