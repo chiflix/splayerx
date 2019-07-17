@@ -1,13 +1,13 @@
 import EventEmitter from 'eventemitter3';
 
-export interface MediaTask {
+export interface MediaTask<T = unknown> {
   getId(): string;
-  execute(): Promise<any>;
+  execute(): Promise<T>;
 }
-type TaskInfo = {
+type TaskInfo<T = unknown> = {
   status: MediaTaskStatus;
-  result: any;
-  task: MediaTask;
+  result?: T;
+  task: MediaTask<T>;
   piority: number;
 }
 enum MediaTaskStatus {
@@ -21,7 +21,7 @@ export class BaseMediaTaskQueue extends EventEmitter {
 
   private startProcessTasks = false;
 
-  public addTask(task: MediaTask) {
+  public addTask<T>(task: MediaTask<T>): Promise<T> {
     const id = task.getId();
     if (!this.taskInfos.has(id)) {
       this.taskInfos.set(id, {
@@ -31,7 +31,7 @@ export class BaseMediaTaskQueue extends EventEmitter {
         piority: 0,
       });
     }
-    const { status, result } = this.taskInfos.get(id) as TaskInfo;
+    const { status, result } = this.taskInfos.get(id) as TaskInfo<T>;
     return new Promise((resolve, reject) => {
       switch (status) {
         case MediaTaskStatus.ADDED:
