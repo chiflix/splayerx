@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import { AxiosInstance } from 'axios';
+import { Event } from 'electron';
 
 declare module '*.vue' {
   export default Vue;
@@ -140,4 +141,16 @@ declare module 'electron' {
     stopGrabAudioFrame(): void;
   }
   const splayerx: SPlayerAPI;
+  interface IpcMain {
+    on(channel: 'media-info-request', listener: (event: Event, path: string) => void): this;
+  }
+  interface IpcRenderer {
+    send(channel: 'media-info-request', path: string): void;
+    on(channel: 'media-info-reply', listener: (event: Event, err: Error | undefined, info: string) => void): this;
+    once(channel: 'media-info-reply', listener: (event: Event, err: Error | undefined, info: string) => void): this;
+  }
+  interface Event {
+    reply(channel: string, ...args: any[]): void;
+    reply(channel: 'media-info-reply', err: Error | undefined, info: string): void;
+  }
 }
