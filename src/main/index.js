@@ -555,7 +555,7 @@ function createWindow() {
     },
     // See https://github.com/electron/electron/blob/master/docs/api/browser-window.md#showing-window-gracefully
     backgroundColor: '#6a6a6a',
-    acceptFirstMouse: true,
+    acceptFirstMouse: false,
     show: false,
     ...({
       win32: {},
