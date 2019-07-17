@@ -6,6 +6,16 @@ import { info } from '@/libs/DataBase';
 import { mediaQuickHash } from '@/libs/utils';
 import { filePathToUrl } from '@/helpers/path';
 
+type coverViedoItem = {
+  lastPlayedTime: number,
+  duration: number,
+  path: string,
+  playedIndex: number,
+  playlistLength: number,
+  shortCut: string,
+  id: number,
+};
+
 export default class RecentPlayService implements IRecentPlay {
   public async getRecords(): Promise<LandingViewDisplayInfo[]> {
     const recentPlayedResults = await playInfoStorageService.getAllRecentPlayed();
@@ -29,7 +39,7 @@ export default class RecentPlayService implements IRecentPlay {
     )).filter(item => !!item);
     const getBasename = (path: string) => basename(path, extname(path));
     const results: LandingViewDisplayInfo[] = await Promise.all(
-      coverVideos.map(async (item: any): Promise<LandingViewDisplayInfo> => {
+      coverVideos.map(async (item: coverViedoItem): Promise<LandingViewDisplayInfo> => {
         const {
           lastPlayedTime, duration, path, playedIndex, playlistLength, shortCut, id,
         } = item;

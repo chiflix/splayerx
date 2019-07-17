@@ -13,7 +13,7 @@ interface PlaylistEvent {
 export default class PlaylistService extends EventEmitter implements IPlaylistRequest {
   public coverSrc: string;
 
-  public duration: any;
+  public duration: number;
 
   public record: MediaItem;
 
