@@ -1,7 +1,7 @@
 // Be sure to call Sentry function as early as possible in the main process
 import '../shared/sentry';
 
-import { app, BrowserWindow, session, Tray, ipcMain, globalShortcut, nativeImage, splayerx } from 'electron' // eslint-disable-line
+import { app, BrowserWindow, session, Tray, ipcMain, globalShortcut, nativeImage, splayerx } from 'electron';
 import { throttle, debounce, uniq } from 'lodash';
 import os from 'os';
 import path, {
@@ -15,6 +15,8 @@ import './helpers/electronPrototypes';
 import writeLog from './helpers/writeLog';
 import { getValidVideoRegex, getValidSubtitleRegex } from '../shared/utils';
 import { mouse } from './helpers/mouse';
+
+import './helpers/mediaTaskPlugin';
 
 // requestSingleInstanceLock is not going to work for mas
 // https://github.com/electron-userland/electron-packager/issues/923
