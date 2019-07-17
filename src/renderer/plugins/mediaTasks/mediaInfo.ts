@@ -1,11 +1,12 @@
+/* eslint-disable camelcase */
 enum CodecType {
   Video = 'video',
   Audio = 'audio',
   Subtitle = 'subtitle',
   Attachment = 'attachment',
-};
+}
 // taken from https://github.com/FFmpeg/FFmpeg/blob/master/doc/ffprobe.xsd
-type RawStreamDisposition  = {
+type RawStreamDisposition = {
   default: number;
   dub: number;
   original: number;
@@ -44,7 +45,7 @@ interface RawBaseStream {
   codec_tag_string: string;
   extradata?: string;
   extradata_hash?: string;
-};
+}
 interface RawVideoStream extends RawBaseStream {
   codec_type: CodecType.Video;
   width?: number;
@@ -62,7 +63,7 @@ interface RawVideoStream extends RawBaseStream {
   field_order?: string;
   timecode?: string;
   refs?: number;
-};
+}
 interface RawAudioStream extends RawBaseStream {
   codec_type: CodecType.Audio;
   sample_fmt?: string;
@@ -84,10 +85,10 @@ interface RawAudioStream extends RawBaseStream {
   nb_frames?: number;
   nb_read_frames?: number;
   nb_read_packets?: number;
-};
+}
 interface RawSubtitleStream extends RawBaseStream {
   codec_type: CodecType.Subtitle;
-};
+}
 interface RawAttachmentStream extends RawBaseStream {
   codec_type: CodecType.Subtitle;
 }
@@ -149,7 +150,7 @@ interface BaseStream {
   codecTagString: string;
   extradata?: string;
   extradataHash?: string;
-};
+}
 interface VideoStream extends BaseStream {
   codecType: CodecType.Video;
   width?: number;
@@ -167,7 +168,7 @@ interface VideoStream extends BaseStream {
   fieldOrder?: string;
   timecode?: string;
   refs?: number;
-};
+}
 interface AudioStream extends BaseStream {
   codecType: CodecType.Audio;
   sampleFmt?: string;
@@ -189,10 +190,10 @@ interface AudioStream extends BaseStream {
   nbFrames: number;
   nbReadFrames: number;
   nbReadPackets: number;
-};
+}
 interface SubtitleStream extends BaseStream {
   codecType: CodecType.Subtitle;
-};
+}
 interface AttachmentStream extends BaseStream {
   codecType: CodecType.Attachment;
 }
