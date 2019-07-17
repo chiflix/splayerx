@@ -42,6 +42,7 @@ import InputPlugin, { getterTypes as iGT } from '@/plugins/input';
 import { VueDevtools } from './plugins/vueDevtools.dev';
 import { SubtitleControlListItem, Type } from './interfaces/ISubtitle';
 import { getValidVideoRegex, getValidSubtitleRegex } from '../shared/utils';
+import { PlaylistItem } from './interfaces/IDB';
 
 // causing callbacks-registry.js 404 error. disable temporarily
 // require('source-map-support').install();
@@ -969,7 +970,7 @@ new Vue({
         });
       }
 
-      return this.updateRecentPlay().then((result: any) => {
+      return this.updateRecentPlay().then((result: Electron.MenuItemConstructorOptions) => {
         // menu.file add "open recent"
         (template[3].submenu as Electron.MenuItemConstructorOptions[])
           .splice(3, 0, this.recentSubMenu());
@@ -1077,7 +1078,7 @@ new Vue({
           });
         }
         return template;
-      }).then((result: any) => {
+      }).then((result: Electron.MenuItemConstructorOptions[]) => {
         this.menu = Menu.buildFromTemplate(result);
         Menu.setApplicationMenu(this.menu);
       }).then(() => {
@@ -1090,7 +1091,7 @@ new Vue({
         this.menu.getMenuItemById('decreaseSecondarySubDelay').enabled = !!this.secondarySubtitleId;
         this.menu.getMenuItemById('uploadSelectedSubtitle').enabled = this.ableToPushCurrentSubtitle;
 
-        this.audioTrackList.forEach((item: any, index: number) => {
+        this.audioTrackList.forEach((item: Electron.MenuItem, index: number) => {
           if (item.enabled === true) {
             this.menu.getMenuItemById(`track${index}`).checked = true;
           }
@@ -1113,7 +1114,7 @@ new Vue({
           log.error('render/main', err);
         });
     },
-    updateRecentItem(key: any, value: any) {
+    updateRecentItem(key: string, value: { label: string, path: string }) {
       return {
         id: key,
         visible: true,
@@ -1228,7 +1229,7 @@ new Vue({
       if (this.audioTrackList.length === 1 && this.audioTrackList[0].language === 'und') {
         tmp.submenu.splice(0, 1, this.updateAudioTrackItem(0, this.$t('advance.chosenTrack')));
       } else {
-        this.audioTrackList.forEach((item: any, index: number) => {
+        this.audioTrackList.forEach((item: { language: string, name: string }, index: number) => {
           let detail;
           if (item.language === 'und' || item.language === '') {
             detail = `${this.$t('advance.track')} ${index + 1}`;
@@ -1258,7 +1259,7 @@ new Vue({
           label: '',
         })),
       };
-      return this.infoDB.sortedResult('recent-played', 'lastOpened', 'prev').then(async (playlists: any) => {
+      return this.infoDB.sortedResult('recent-played', 'lastOpened', 'prev').then(async (playlists: PlaylistItem[]) => {
         const data = [];
         /* eslint-disable */
         for (const playlist of playlists) {

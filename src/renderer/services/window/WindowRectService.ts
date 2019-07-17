@@ -45,7 +45,7 @@ export default class WindowRectService implements IWindowRectRequest {
   ): number[] {
     let result = videoSize;
     const getRatio = (size: number[]) => size[0] / size[1];
-    const setWidthByHeight = (size: any[] | number[]) => [size[1] * getRatio(videoSize), size[1]];
+    const setWidthByHeight = (size: number[]) => [size[1] * getRatio(videoSize), size[1]];
     const setHeightByWidth = (size: number[]) => [size[0], size[0] / getRatio(videoSize)];
     const biggerSize = (
       size: number[],
