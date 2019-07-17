@@ -138,7 +138,7 @@ export function sourceToFormat(subtitleSource: Origin) {
       return Format.Unknown;
     }
     default:
-      return pathToFormat(subtitleSource.source);
+      return pathToFormat(subtitleSource.source as string);
   }
 }
 

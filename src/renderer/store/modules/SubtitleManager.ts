@@ -366,7 +366,7 @@ const actions = {
   [a.checkLocalSubtitles]({ dispatch, getters }: any) {
     const list = getters.list as SubtitleControlListItem[];
     const localInvalidSubtitles = list
-      .filter(({ type, source }) => type === Type.Local && !existsSync(source));
+      .filter(({ type, source }) => type === Type.Local && !existsSync(source as string));
     if (localInvalidSubtitles.length) {
       dispatch(a.deleteSubtitlesByUuid, localInvalidSubtitles)
         .then(() => addBubble(LOCAL_SUBTITLE_REMOVED));

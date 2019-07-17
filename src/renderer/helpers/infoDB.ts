@@ -86,7 +86,7 @@ export class InfoDB {
    * Add a record if no same quickHash in the current schema
    * Replace a record if the given quickHash existed
    */
-  public async update(schema: string, data: unknown, keyPath: number) {
+  public async update(schema: string, data: Record<string, unknown>, keyPath: number) {
     if (!data.id && !data.videoId) throw new Error('Invalid data: Require Media ID !');
     const db = await this.getDB();
     if (!keyPath) {

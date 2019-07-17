@@ -7,7 +7,7 @@ import { SubtitleDataBase } from './db';
 
 import Sagi from '@/libs/sagi';
 import { loadLocalFile } from '@/services/subtitle/utils';
-import { embeddedSrcLoader } from '@/services/subtitle/loaders/embedded';
+import { embeddedSrcLoader, EmbeddedOrigin } from '@/services/subtitle/loaders/embedded';
 import {
   cacheEmbeddedSubtitle, cacheLocalSubtitle, cacheOnlineSubtitle,
   isCachedSubtitle, removeCachedSubtitles,
@@ -133,17 +133,18 @@ export class DatabaseGenerator implements EntityGenerator {
     const { type, source } = await this.getSource();
     switch (type) {
       case Type.Embedded: {
+        const { source } = await this.getSource() as EmbeddedOrigin;
         const embeddedSrc = await embeddedSrcLoader(
-          source.videoSrc as string,
-          source.streamIndex as number,
+          source.videoSrc,
+          source.streamIndex,
           this.format,
         );
         return loadLocalFile(embeddedSrc);
       }
       case Type.Local:
-        return loadLocalFile(source);
+        return loadLocalFile(source as string);
       case Type.Online:
-        return Sagi.getTranscript({ transcriptIdentity: source, startTime: 0 });
+        return Sagi.getTranscript({ transcriptIdentity: source as string, startTime: 0 });
       default:
         throw new Error(`Unexpected subtitle type ${type}.`);
     }

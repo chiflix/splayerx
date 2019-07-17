@@ -6,7 +6,7 @@ import {
   copyFile, existsSync, outputFile, ensureDirSync, remove, readdir,
 } from 'fs-extra';
 import { Entity, Origin, Type } from '@/interfaces/ISubtitle';
-import { embeddedSrcLoader, EmbeddedOrigin } from '@/services/subtitle';
+import { embeddedSrcLoader, EmbeddedOrigin, SagiSubtitlePayload } from '@/services/subtitle';
 import { sagiSubtitleToWebVTT } from '@/services/subtitle/utils/transcoders';
 import { updateSubtitle } from '.';
 import { ELECTRON_CACHE_DIRNAME, DEFAULT_DIRNAME, SUBTITLE_DIRNAME } from '@/constants';
@@ -22,9 +22,9 @@ const subtitleCacheDirPath = join(
 /** copy the subtitle from the src to cacheFileStorage */
 export async function cacheLocalSubtitle(subtitle: Entity): Promise<Origin> {
   const { source, hash } = subtitle;
-  const storedPath = join(subtitleCacheDirPath, `${hash}${extname(source.source)}`);
+  const storedPath = join(subtitleCacheDirPath, `${hash}${extname(source.source as string)}`);
   ensureDirSync(subtitleCacheDirPath);
-  if (!existsSync(storedPath)) await copyFile(source.source, storedPath);
+  if (!existsSync(storedPath)) await copyFile(source.source as string, storedPath);
   return {
     type: Type.Local,
     source: storedPath,
@@ -48,7 +48,9 @@ export async function cacheOnlineSubtitle(subtitle: Entity): Promise<Origin | un
   const { hash, payload } = subtitle;
   if (payload) {
     const storedPath = join(subtitleCacheDirPath, `${hash}.${formatToExtension(subtitle.format)}`);
-    if (!existsSync(storedPath)) await outputFile(storedPath, sagiSubtitleToWebVTT(payload));
+    if (!existsSync(storedPath)) {
+      await outputFile(storedPath, sagiSubtitleToWebVTT(payload as SagiSubtitlePayload));
+    }
     return {
       type: Type.Local,
       source: storedPath,

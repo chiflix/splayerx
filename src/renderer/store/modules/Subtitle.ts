@@ -101,7 +101,7 @@ const actions = {
       await Promise.all([
         generator.getStoredSource
           ? generator.getStoredSource()
-            .then((src: Origin) => {
+            .then((src) => {
               entity.source = src;
               return generator.getSource();
             })
@@ -218,7 +218,7 @@ const actions = {
         delay: state.delay * 1000,
         hints: await generateHints(rootGetters.originSrc),
         transcriptIdentity: state.format === Format.Sagi ? state.hash : '',
-        payload: state.format === Format.Sagi ? '' : Buffer.from(subtitle.entity.payload),
+        payload: state.format === Format.Sagi ? '' : Buffer.from(subtitle.entity.payload as string),
       };
       const result = await upload.add(uploadParam);
       dispatch(a.stopWatchPlayedTime);
@@ -238,7 +238,7 @@ const actions = {
         delay: state.delay * 1000,
         hints: await generateHints(rootGetters.originSrc),
         transcriptIdentity: state.format === Format.Sagi ? state.hash : '',
-        payload: state.format === Format.Sagi ? '' : Buffer.from(subtitle.entity.payload),
+        payload: state.format === Format.Sagi ? '' : Buffer.from(subtitle.entity.payload as string),
       };
       return upload.addManually(uploadParam);
     }

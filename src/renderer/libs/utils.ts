@@ -9,6 +9,7 @@ import { promises as fsPromises } from 'fs';
 import nzh from 'nzh';
 import { SubtitleControlListItem, Type } from '@/interfaces/ISubtitle';
 import { codeToLanguageName } from './language';
+import { EmbeddedOrigin } from '@/services/subtitle';
 // @ts-ignore
 
 /** 计算文本宽度
@@ -195,11 +196,14 @@ export function calculatedName(
 ): string {
   let name = '';
   if (item.type === Type.Local) {
-    name = basename(item.source);
+    name = basename(item.source as string);
   } else if (item.type === Type.Embedded) {
     let embeddedList = list
       .filter((s: SubtitleControlListItem) => s.type === Type.Embedded);
-    embeddedList = sortBy(embeddedList, (s: SubtitleControlListItem) => s.source.streamIndex);
+    embeddedList = sortBy(
+      embeddedList,
+      (s: SubtitleControlListItem) => (s as EmbeddedOrigin).source.streamIndex,
+    );
     const sort = embeddedList.findIndex((s: SubtitleControlListItem) => s.id === item.id) + 1;
     name = `${romanize(sort)} - ${codeToLanguageName(item.language)}`;
   } else if (item.type === Type.Online) {
