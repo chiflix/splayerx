@@ -1,27 +1,29 @@
 
 <template>
   <div
-    ref="playlistItem"
+    :style="{
+      transform: `translate(${movementX}px, ${movementY}px)`,
+      zIndex: mousedown ? '5' : '',
+    }"
     class="playlist-item"
   >
     <div
-      ref="layer1"
       :style="{
         width: `${thumbnailWidth}px`,
         height: `${thumbnailHeight}px`,
+        transform: `translateY(-${layer1Y}px) scale(0.8, 0.8)`,
       }"
       class="layer1"
     />
     <div
-      ref="layer2"
       :style="{
         width: `${thumbnailWidth}px`,
         height: `${thumbnailHeight}px`,
+        transform: `translateY(-${layer2Y}px) scale(0.9, 0.9)`,
       }"
       class="layer2"
     />
     <div
-      ref="item"
       :style="{
         bottom: chosen ? '10px' : '0',
         width: `${thumbnailWidth}px`,
@@ -43,7 +45,6 @@
         class="content"
       >
         <div
-          ref="border"
           :style="{
             left: `-${0.7 / 2}px`,
             top: `-${0.7 / 2}px`,
@@ -56,14 +57,12 @@
           }"
           class="border"
         >
-          <div
-            :style="{
-              opacity: aboutToDelete ? '1' : '0',
-            }"
-            class="deleteUi"
-          >
-            <Icon type="delete" />
-          </div>
+          <transition name="fade-100">
+            <Icon
+              v-show="aboutToDelete"
+              type="delete"
+            />
+          </transition>
         </div>
       </div>
     </div>
@@ -125,11 +124,15 @@ export default {
       coverVideo: null,
       coverSrc: '',
       isDragging: false,
-      moving: false,
       aboutToDelete: false,
       chosen: false,
-      disX: NaN,
-      disY: NaN,
+      mousedown: false,
+      mousedownX: NaN,
+      mousedownY: NaN,
+      movementX: NaN,
+      movementY: NaN,
+      layer1Y: NaN,
+      layer2Y: NaN,
     };
   },
   destroyed() {
@@ -141,19 +144,18 @@ export default {
       if ((this.isInRange || this.isFullScreen) && !this.shifting && this.canHover) {
         this.onItemMouseover(this.index);
         this.chosen = true;
-        this.$refs.layer2.style.setProperty('transform', 'translateY(-4px) scale(0.9, 0.9)');
+        this.layer2Y = 4;
       }
     },
     onRecentItemMouseleave() {
-      if (!this.moving) {
-        this.chosen = false;
-        this.$refs.layer2.style.setProperty('transform', 'scale(0.9, 0.9)');
-      }
+      this.chosen = false;
+      this.layer2Y = 0;
     },
     onRecentItemMousedown(e: MouseEvent) {
-      this.disX = e.pageX;
-      this.disY = e.pageY;
+      this.mousedown = true;
       this.isDragging = false;
+      this.mousedownX = e.pageX;
+      this.mousedownY = e.pageY;
 
       if (this.isInRange) {
         document.addEventListener('mousemove', this.onRecentItemMousemove);
@@ -162,44 +164,35 @@ export default {
     },
     onRecentItemMousemove(e: MouseEvent) {
       this.isDragging = true;
-      this.moving = true;
-      const movementX = e.pageX - this.disX;
-      const movementY = e.pageY - this.disY;
+      this.movementX = e.pageX - this.mousedownX;
+      this.movementY = e.pageY - this.mousedownY;
 
-      this.$refs.playlistItem.style.setProperty('z-index', '10');
-      this.$refs.playlistItem.style.setProperty('transform', `translate(${movementX}px, ${movementY}px)`);
-      if (Math.abs(movementX) >= this.thumbnailWidth - 5
-        || Math.abs(movementY) >= this.thumbnailHeight - 10) {
-        requestAnimationFrame(() => {
-          this.$refs.layer1.style.setProperty('transform', 'translateY(-8px) scale(0.8, 0.8)');
-          this.$refs.layer2.style.setProperty('transform', 'translateY(-10px) scale(0.9, 0.9)');
-          this.aboutToDelete = true;
-        });
-      } else if (Math.abs(movementX) >= this.thumbnailWidth - 30
-        || Math.abs(movementY) >= this.thumbnailHeight - 30) {
-        const percentageX = (Math.abs(movementX) - (this.thumbnailWidth - 30)) / 25;
-        const percentageY = (Math.abs(movementY) - (this.thumbnailHeight - 30)) / 24;
+      if (Math.abs(this.movementX) >= this.thumbnailWidth - 5
+        || Math.abs(this.movementY) >= this.thumbnailHeight - 10) {
+        this.layer1Y = 8;
+        this.layer2Y = 10;
+        this.aboutToDelete = true;
+      } else if (Math.abs(this.movementX) >= this.thumbnailWidth - 30
+        || Math.abs(this.movementY) >= this.thumbnailHeight - 30) {
+        const percentageX = (Math.abs(this.movementX) - (this.thumbnailWidth - 30)) / 25;
+        const percentageY = (Math.abs(this.movementY) - (this.thumbnailHeight - 30)) / 24;
         const percentage = percentageX > percentageY ? percentageX : percentageY;
-        requestAnimationFrame(() => {
-          this.$refs.layer1.style.setProperty('transform', `translateY(-${8 * percentage}px) scale(0.8, 0.8)`);
-          this.$refs.layer2.style.setProperty('transform', `translateY(-${4 + (6 * percentage)}px) scale(0.9, 0.9)`);
-          this.aboutToDelete = false;
-        });
+        this.layer1Y = 8 * percentage;
+        this.layer2Y = 4 + (6 * percentage);
+        this.aboutToDelete = false;
       } else {
-        requestAnimationFrame(() => {
-          this.$refs.layer1.style.setProperty('transform', 'scale(0.8, 0.8)');
-          this.$refs.layer2.style.setProperty('transform', 'translateY(-4px) scale(0.9, 0.9)');
-          this.aboutToDelete = false;
-        });
+        this.layer1Y = 0;
+        this.layer2Y = 4;
+        this.aboutToDelete = false;
       }
     },
     onRecentItemMouseup() {
       document.removeEventListener('mousemove', this.onRecentItemMousemove);
-      this.moving = false;
-      this.$refs.layer1.style.setProperty('transform', 'scale(0.8, 0.8)');
-      this.$refs.layer2.style.setProperty('transform', 'translateY(-4px) scale(0.9, 0.9)');
-      this.$refs.playlistItem.style.setProperty('transform', 'translate(0,0)');
-      this.$refs.playlistItem.style.setProperty('z-index', '');
+      document.removeEventListener('mouseup', this.onRecentItemMouseup);
+      this.layer1Y = 0;
+      this.layer2Y = 4;
+      this.mousedown = false;
+      this.movementX = this.movementY = 0;
       if (this.aboutToDelete) {
         this.onItemDelete(this.index);
         this.aboutToDelete = false;
@@ -272,10 +265,6 @@ $border-radius: 3px;
     justify-content: center;
     align-items: center;
     transition: border 100ms ease-out, background-color 100ms ease-out;
-    .deleteUi {
-      opacity: 0;
-      transition: opacity 100ms ease-out;
-    }
   }
 }
 </style>

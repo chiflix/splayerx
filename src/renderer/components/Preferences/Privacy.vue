@@ -105,8 +105,9 @@
 </template>
 
 <script>
+import { concat } from 'lodash';
 import electron from 'electron';
-import { codeToLanguageName } from '@/libs/language';
+import { codeToLanguageName, allCodes } from '@/libs/language';
 import Icon from '@/components/BaseIconContainer.vue';
 import BaseCheckBox from './BaseCheckBox.vue';
 
@@ -124,28 +125,13 @@ export default {
     return {
       showFirstSelection: false,
       showSecondSelection: false,
-      languages: [
-        '',
-        'zh-CN',
-        'zh-TW',
-        'ja',
-        'ko',
-        'en',
-        'es',
-        'fr',
-        'de',
-        'it',
-        'pt',
-        'cs',
-        'ru',
-        'id',
-        'ar',
-        'hi',
-      ],
       noLanguage: this.$t('preferences.privacy.none'),
     };
   },
   computed: {
+    languages() {
+      return concat('', Object.keys(allCodes));
+    },
     primaryLanguages() {
       return this.languages.filter(language => language && language !== this.primaryLanguage);
     },

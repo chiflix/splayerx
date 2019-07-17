@@ -54,8 +54,6 @@ export default {
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setResizable', [false]);
     this.welcomePayload = {
       privacyAgreement: true,
-      primaryLanguage: this.$store.getters.primaryLanguage,
-      secondaryLanguage: this.$store.getters.secondaryLanguage,
     };
   },
   methods: {
@@ -104,7 +102,7 @@ export default {
   .icon {
     width: 40px;
     height: 40px;
-    padding-top: 42px;
+    margin-top: 42px;
   }
 }
 .transform {
