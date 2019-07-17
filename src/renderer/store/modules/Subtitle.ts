@@ -16,7 +16,6 @@ import { addBubble } from '../../helpers/notificationControl';
 import { NOT_SUPPORTED_SUBTITLE } from '../../helpers/notificationcodes';
 import store from '..';
 import { isCachedSubtitle, removeCachedSubtitle } from '@/services/storage/subtitle/file';
-import { BaseParser } from '@/services/subtitle/parsers/base';
 
 type SubtitleState = {
   moduleId: string;
@@ -37,7 +36,7 @@ enum CacheStatus {
 const subtitleMap: Map<string, {
   entity: Entity;
   loader: () => Promise<any>;
-  parser: Parser;
+  parser?: Parser;
   cached: CacheStatus;
 }> = new Map();
 
@@ -88,7 +87,7 @@ const actions = {
     subtitleMap.set(moduleId, {
       entity: cloneDeep(defaultEntity),
       loader: () => Promise.resolve(),
-      parser: new BaseParser(),
+      parser: undefined,
       cached: CacheStatus.NOT_CACHED,
     });
     commit(m.setModuleId, moduleId);
@@ -149,7 +148,7 @@ const actions = {
     if (subtitle) {
       const { entity, parser } = subtitle;
       if (!entity.payload) return [];
-      if (entity.payload && !parser.getDialogues) {
+      if (!parser) {
         const realFormat = sourceToFormat(state.realSource);
         subtitle.parser = getParser(realFormat, entity.payload);
         try {
@@ -163,10 +162,10 @@ const actions = {
           store.dispatch(parentActions.deleteSubtitlesByUuid, [subtitleToRemoveFromList]);
         }
       }
-      if (entity.payload && parser.getDialogues && parser.payload) {
+      if (parser && parser.payload) {
         return {
           metadata: {},
-          dialogues: await subtitle.parser.getDialogues(time - state.delay),
+          dialogues: await parser.getDialogues(time - state.delay),
         };
       }
     }
@@ -248,7 +247,7 @@ const actions = {
     const subtitle = subtitleMap.get(state.moduleId);
     if (subtitle) {
       const { entity, parser } = subtitle;
-      if (entity.payload && parser.updateVideoSegments && parser.payload) {
+      if (entity.payload && parser && parser.payload) {
         // @ts-ignore
         const playedTime = await subtitle.parser.updateVideoSegments(...Object.values(times));
         if (playedTime !== state.playedTime) commit(m.setPlayedTime, playedTime);
@@ -259,7 +258,7 @@ const actions = {
     const subtitle = subtitleMap.get(state.moduleId);
     if (subtitle && !autoUpload) {
       const { entity, parser } = subtitle;
-      if (entity.payload && parser.getVideoSegments && parser.payload) {
+      if (entity.payload && parser && parser.payload) {
         parser.getVideoSegments(rootGetters.duration);
         commit(m.setPlayedTime, 0);
       }
