@@ -22,6 +22,7 @@ import VueElectron from 'vue-electron';
 import AsyncComputed from 'vue-async-computed';
 // @ts-ignore
 import { EventEmitter } from 'events';
+// @ts-ignore
 import App from '@/App.vue';
 import router from '@/router';
 import store from '@/store';
@@ -464,7 +465,9 @@ new Vue({
   },
   created() {
     this.$store.commit('getLocalPreference');
-    if (this.displayLanguage && messages[this.displayLanguage]) this.$i18n.locale = this.displayLanguage;
+    if (this.displayLanguage && messages[this.displayLanguage]) {
+      this.$i18n.locale = this.displayLanguage;
+    }
     asyncStorage.get('preferences').then((data) => {
       if (data.privacyAgreement === undefined) this.$bus.$emit('privacy-confirm');
       if (!data.primaryLanguage) {
@@ -948,7 +951,8 @@ new Vue({
       ];
 
       if (!process.mas) {
-        const helpMenu = template[template.length - 1].submenu as electron.MenuItemConstructorOptions[];
+        const helpMenu = template[template.length - 1]
+          .submenu as electron.MenuItemConstructorOptions[];
         helpMenu.push({
           label: this.$t('msg.help.crashReportLocation'),
           click: () => {
@@ -968,16 +972,24 @@ new Vue({
 
       return this.updateRecentPlay().then((result: any) => {
         // menu.file add "open recent"
-        (template[3].submenu as Electron.MenuItemConstructorOptions[]).splice(3, 0, this.recentSubMenu());
-        (template[3].submenu as Electron.MenuItemConstructorOptions[]).splice(4, 0, this.recentSecondarySubMenu());
-        (template[1].submenu as Electron.MenuItemConstructorOptions[]).splice(0, 0, this.updatePlayOrPause);
-        (template[4].submenu as Electron.MenuItemConstructorOptions[]).splice(2, 0, this.updateFullScreen);
-        (template[2].submenu as Electron.MenuItemConstructorOptions[]).splice(7, 0, this.updateAudioTrack());
-        (template[0].submenu as Electron.MenuItemConstructorOptions[]).splice(1, 0, result);
+        (template[3].submenu as Electron.MenuItemConstructorOptions[])
+          .splice(3, 0, this.recentSubMenu());
+        (template[3].submenu as Electron.MenuItemConstructorOptions[])
+          .splice(4, 0, this.recentSecondarySubMenu());
+        (template[1].submenu as Electron.MenuItemConstructorOptions[])
+          .splice(0, 0, this.updatePlayOrPause);
+        (template[4].submenu as Electron.MenuItemConstructorOptions[])
+          .splice(2, 0, this.updateFullScreen);
+        (template[2].submenu as Electron.MenuItemConstructorOptions[])
+          .splice(7, 0, this.updateAudioTrack());
+        (template[0].submenu as Electron.MenuItemConstructorOptions[])
+          .splice(1, 0, result);
         // menu.about
         if (process.platform === 'darwin') {
-          (template[2].submenu as Electron.MenuItemConstructorOptions[]).splice(0, 0, ...this.darwinVolume);
-          (template[1].submenu as Electron.MenuItemConstructorOptions[]).splice(3, 0, ...this.darwinPlayback);
+          (template[2].submenu as Electron.MenuItemConstructorOptions[])
+            .splice(0, 0, ...this.darwinVolume);
+          (template[1].submenu as Electron.MenuItemConstructorOptions[])
+            .splice(3, 0, ...this.darwinPlayback);
           template.unshift({
             label: app.getName(),
             submenu: [
@@ -1019,15 +1031,26 @@ new Vue({
           });
         }
         if (process.platform === 'win32') {
-          (template[2].submenu as Electron.MenuItemConstructorOptions[]).splice(0, 0, ...this.winVolume);
-          (template[1].submenu as Electron.MenuItemConstructorOptions[]).splice(3, 0, ...this.winPlayback);
+          (template[2].submenu as Electron.MenuItemConstructorOptions[])
+            .splice(0, 0, ...this.winVolume);
+          (template[1].submenu as Electron.MenuItemConstructorOptions[])
+            .splice(3, 0, ...this.winPlayback);
           const file = template.shift();
-          const winFile = (file!.submenu as Electron.MenuItemConstructorOptions[]).slice(0, 2);
-          (winFile[1].submenu as Electron.MenuItemConstructorOptions[]).unshift((file!.submenu as Electron.MenuItemConstructorOptions[])[3], (file!.submenu as Electron.MenuItemConstructorOptions[])[2]);
-          winFile.push((file!.submenu as Electron.MenuItemConstructorOptions[])[5], (file!.submenu as Electron.MenuItemConstructorOptions[])[4]);
-          winFile.reverse().forEach((menuItem) => {
-            template.unshift(menuItem);
-          });
+          if (file && file.submenu) {
+            const winFile = (file.submenu as Electron.MenuItemConstructorOptions[]).slice(0, 2);
+            (winFile[1].submenu as Electron.MenuItemConstructorOptions[])
+              .unshift(
+                (file.submenu as Electron.MenuItemConstructorOptions[])[3],
+                (file.submenu as Electron.MenuItemConstructorOptions[])[2],
+              );
+            winFile.push(
+              (file.submenu as Electron.MenuItemConstructorOptions[])[5],
+              (file.submenu as Electron.MenuItemConstructorOptions[])[4],
+            );
+            winFile.reverse().forEach((menuItem) => {
+              template.unshift(menuItem);
+            });
+          }
           template.splice(4, 0, {
             label: this.$t('msg.splayerx.preferences'),
             enabled: true,
@@ -1152,7 +1175,8 @@ new Vue({
         },
       });
       this.list.forEach((item: SubtitleControlListItem, index: number) => {
-        (tmp.submenu as Electron.MenuItemConstructorOptions[]).splice(index + 1, 1, this.recentSubTmp(item, true));
+        (tmp.submenu as Electron.MenuItemConstructorOptions[])
+          .splice(index + 1, 1, this.recentSubTmp(item, true));
       });
       return tmp;
     },

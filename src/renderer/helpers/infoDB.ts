@@ -1,6 +1,10 @@
 import { openDB, IDBPDatabase } from 'idb';
 import {
-  INFO_DATABASE_NAME, INFO_SCHEMAS, INFODB_VERSION, RECENT_OBJECT_STORE_NAME, VIDEO_OBJECT_STORE_NAME,
+  INFO_DATABASE_NAME,
+  INFO_SCHEMAS,
+  INFODB_VERSION,
+  RECENT_OBJECT_STORE_NAME,
+  VIDEO_OBJECT_STORE_NAME,
 } from '@/constants';
 import { mediaQuickHash } from '@/libs/utils';
 import { RawPlaylistItem, PlaylistItem, MediaItem } from '@/interfaces/IDB';
@@ -10,13 +14,13 @@ import { log } from '@/libs/Log';
  * You can change schema info in 'constants.js'
  */
 export class InfoDB {
-  db: IDBPDatabase;
+  public db: IDBPDatabase;
 
   /**
    * Create InfoDB if doesn't exist
    * Update InfoDB if new schema or new index has added
    */
-  async getDB(): Promise<IDBPDatabase> {
+  public async getDB(): Promise<IDBPDatabase> {
     if (this.db) return this.db;
     this.db = await openDB(
       INFO_DATABASE_NAME, INFODB_VERSION, {
@@ -43,7 +47,7 @@ export class InfoDB {
 
   // deprecated! will be deleted soon
   // clean All records in `storeName`, default to 'recent-played'
-  async cleanData(storeName = 'recent-played') {
+  public async cleanData(storeName = 'recent-played') {
     const db = await this.getDB();
     const tx = db.transaction(storeName, 'readwrite');
     tx.store.clear();
@@ -53,14 +57,14 @@ export class InfoDB {
   }
 
   // formatted, equal to the previous method
-  async clear(storeName: string) {
+  public async clear(storeName: string) {
     const db = await this.getDB();
     const tx = db.transaction(storeName, 'readwrite');
     tx.store.clear();
     return tx.done;
   }
 
-  async clearAll() {
+  public async clearAll() {
     await this.cleanData();
     await this.cleanData('media-item');
   }
@@ -70,7 +74,7 @@ export class InfoDB {
    * @param  {Object} data
    * Add a new record
    */
-  async add(schema: string, data: any) {
+  public async add(schema: string, data: any) {
     if (!data) throw new Error(`Invalid data: ${JSON.stringify(data)}`);
     const db = await this.getDB();
     return db.add(schema, data);
@@ -82,7 +86,7 @@ export class InfoDB {
    * Add a record if no same quickHash in the current schema
    * Replace a record if the given quickHash existed
    */
-  async update(schema: string, data: any, keyPath: number) {
+  public async update(schema: string, data: any, keyPath: number) {
     if (!data.id && !data.videoId) throw new Error('Invalid data: Require Media ID !');
     const db = await this.getDB();
     const tx = db.transaction(schema, 'readwrite');
@@ -100,7 +104,7 @@ export class InfoDB {
    * @param  {String} key
    * Delete the record which match the given key
    */
-  async delete(schema: string, key: number) {
+  public async delete(schema: string, key: number) {
     log.info('infoDB', `deleting ${key} from ${schema}`);
     const db = await this.getDB();
     return db.delete(schema, key);
@@ -110,7 +114,7 @@ export class InfoDB {
    * @param  {String} id
    * Delete the playlist and its contained media items which match the given id
    */
-  async deletePlaylist(id: number) {
+  public async deletePlaylist(id: number) {
     log.info('infoDB', `deleting ${id} from recent-played`);
     const playlistItem = await this.get('recent-played', id);
     /* eslint-disable */

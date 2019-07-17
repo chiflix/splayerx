@@ -25,19 +25,19 @@ export default class CacheFile implements ICacheFileStorable {
    * @param {string} mediaHash
    * @returns {string} 返回改视频对应的缓存路径
    */
-  getPathBy(mediaHash: string): string {
+  public getPathBy(mediaHash: string): string {
     return join(`${getDefaultDataPath()}/${VIDEO_DIRNAME}/`, mediaHash);
   }
 
-  removeFile(path: string): Promise<boolean> {
+  public removeFile(path: string): Promise<boolean> {
     throw new Error('Method not implemented.');
   }
 
-  readFile(path: string): Promise<Buffer | null> {
+  public readFile(path: string): Promise<Buffer | null> {
     throw new Error('Method not implemented.');
   }
 
-  writeFile(path: string, content: Buffer): Promise<boolean> {
+  public writeFile(path: string, content: Buffer): Promise<boolean> {
     throw new Error('Method not implemented.');
   }
 
@@ -47,7 +47,7 @@ export default class CacheFile implements ICacheFileStorable {
    * @param {string} mediaHash
    * @returns {Promise<boolean>} 成功是否成功
    */
-  async createDirBy(mediaHash: string): Promise<boolean> {
+  public async createDirBy(mediaHash: string): Promise<boolean> {
     try {
       const path = join(`${getDefaultDataPath()}/${VIDEO_DIRNAME}/`, mediaHash);
       await mkdir(path);
@@ -63,7 +63,7 @@ export default class CacheFile implements ICacheFileStorable {
    * @param {string} mediaHash
    * @returns {(Promise<string[] | null>)} 返回当前目录下的文件列表
    */
-  async readDirBy(mediaHash: string): Promise<string[] | null> {
+  public async readDirBy(mediaHash: string): Promise<string[] | null> {
     let path = '';
     try {
       path = join(`${getDefaultDataPath()}/${VIDEO_DIRNAME}/`, mediaHash);
@@ -85,7 +85,7 @@ export default class CacheFile implements ICacheFileStorable {
    * @param {string} mediaHash
    * @returns {Promise<boolean>} 是否删除成功
    */
-  async removeDirBy(mediaHash: string): Promise<boolean> {
+  public async removeDirBy(mediaHash: string): Promise<boolean> {
     try {
       const path = join(`${getDefaultDataPath()}/${VIDEO_DIRNAME}/`, mediaHash);
       await deleteDir(path);

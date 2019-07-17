@@ -13,7 +13,10 @@ const SUBTITLE_STYLE_STORAGE_NAME = 'subtitle-style';
 const PLAYBACK_STATES_STORAGE_NAME = 'playback-states';
 
 export default class SettingStorageService implements ISettingStorable {
-  constructor(private readonly storage: JsonStorage) {
+  private storage: JsonStorage;
+
+  public constructor(storage: JsonStorage) {
+    this.storage = storage;
   }
 
   /**
@@ -22,7 +25,7 @@ export default class SettingStorageService implements ISettingStorable {
    * @param {SubtitleStyle} data
    * @returns {Promise<boolean>} 返回布尔值，是否成功更新
    */
-  async updateSubtitleStyle(data: SubtitleStyle): Promise<boolean> {
+  public async updateSubtitleStyle(data: SubtitleStyle): Promise<boolean> {
     try {
       await this.storage.set(SUBTITLE_STYLE_STORAGE_NAME, data);
       return true;
@@ -37,7 +40,7 @@ export default class SettingStorageService implements ISettingStorable {
    * @param {PlaybackStates} data
    * @returns {Promise<boolean>} 返回布尔值，是否成功更新
    */
-  async updatePlaybackStates(data: PlaybackStates): Promise<boolean> {
+  public async updatePlaybackStates(data: PlaybackStates): Promise<boolean> {
     try {
       await this.storage.set(PLAYBACK_STATES_STORAGE_NAME, data);
       return true;

@@ -33,6 +33,7 @@ export function mkdirSync(path: string): boolean {
     mkdirp.sync(path);
     return true;
   } catch (error) {
+    // empty
   }
   return false;
 }
@@ -63,9 +64,10 @@ export function checkPathExist(path: string): Promise<boolean> {
  */
 export function checkPathExistSync(path: string): boolean {
   try {
-    accessSync(path, constants.R_OK | constants.W_OK);
+    accessSync(path, constants.R_OK | constants.W_OK); //eslint-disable-line
     return true;
   } catch (err) {
+    // empty
   }
   return false;
 }

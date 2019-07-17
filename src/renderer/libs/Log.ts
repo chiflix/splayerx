@@ -47,7 +47,9 @@ export default class Log implements ILog {
         message,
         stack,
       });
-    } catch (error) {}
+    } catch (error) {
+      // empty
+    }
   }
 
   /**
@@ -56,7 +58,7 @@ export default class Log implements ILog {
    * @param {string} label 类名或者文件名
    * @param {string} message 打印信息
    */
-  info(label: string, message: string | Error): void {
+  public info(label: string, message: string | Error): void {
     this.log(label, 'info', message);
   }
 
@@ -66,7 +68,7 @@ export default class Log implements ILog {
    * @param {string} label 类名或者文件名
    * @param {string} message 打印信息
    */
-  warn(label: string, message: string | Error): void {
+  public warn(label: string, message: string | Error): void {
     this.log(label, 'warn', message);
   }
 
@@ -76,7 +78,7 @@ export default class Log implements ILog {
    * @param {string} label 类名或者文件名
    * @param {(string | Error)} message 错误信息
    */
-  error(label: string, message: string | Error): void {
+  public error(label: string, message: string | Error): void {
     this.log(label, 'error', message);
     if (process.env.NODE_ENV !== 'development') {
       Sentry.captureException(message);

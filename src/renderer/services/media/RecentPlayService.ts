@@ -1,5 +1,5 @@
 import { basename, extname } from 'path';
-import IRecentPlay, { LandingViewDisplayInfo } from '@/interfaces/IRecentPlay';
+import { IRecentPlay, LandingViewDisplayInfo } from '@/interfaces/IRecentPlay';
 import { mediaStorageService } from '@/services/storage/MediaStorageService';
 import { playInfoStorageService } from '@/services/storage/PlayInfoStorageService';
 import { info } from '@/libs/DataBase';
@@ -7,10 +7,7 @@ import { mediaQuickHash } from '@/libs/utils';
 import { filePathToUrl } from '@/helpers/path';
 
 export default class RecentPlayService implements IRecentPlay {
-  constructor() {
-  }
-
-  async getRecords(): Promise<LandingViewDisplayInfo[]> {
+  public async getRecords(): Promise<LandingViewDisplayInfo[]> {
     const recentPlayedResults = await playInfoStorageService.getAllRecentPlayed();
     const coverVideos = (await Promise.all(
       recentPlayedResults.map(async (value) => {

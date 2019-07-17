@@ -20,7 +20,13 @@ import { codeToLanguageName } from './language';
  * @param {string} zoom
  * @returns {number}
  */
-export function calculateTextSize(fontSize: string, fontFamily: string, lineHeight: string, zoom: string, text: string): { width: number, height: number } {
+export function calculateTextSize(
+  fontSize: string,
+  fontFamily: string,
+  lineHeight: string,
+  zoom: string,
+  text: string,
+): { width: number, height: number } {
   const span: HTMLElement = document.createElement('span');
   const result = { width: span.offsetWidth, height: span.offsetHeight };
   span.style.visibility = 'hidden';
@@ -81,14 +87,20 @@ const SHORT_CURT_TYPE = 'image/jpeg';
  * @param {number} videoHeight 视频高
  * @returns {ShortCut} 最后一帧图，有常规尺寸和小尺寸
  */
-export function generateShortCutImageBy(video: HTMLVideoElement, canvas: HTMLCanvasElement, videoWidth: number, videoHeight: number): ShortCut {
+export function generateShortCutImageBy(
+  video: HTMLVideoElement,
+  canvas: HTMLCanvasElement,
+  videoWidth: number,
+  videoHeight: number,
+): ShortCut {
   const result: ShortCut = {
     shortCut: '',
     smallShortCut: '',
   };
   const canvasCTX = canvas.getContext('2d');
   if (canvasCTX) {
-    [canvas.width, canvas.height] = [(videoWidth / videoHeight) * MAX_SHORT_CUT_SIZE, MAX_SHORT_CUT_SIZE];
+    [canvas.width, canvas.height] = [(videoWidth / videoHeight)
+      * MAX_SHORT_CUT_SIZE, MAX_SHORT_CUT_SIZE];
     canvasCTX.drawImage(
       video, 0, 0, videoWidth, videoHeight,
       0, 0, (videoWidth / videoHeight) * MAX_SHORT_CUT_SIZE, MAX_SHORT_CUT_SIZE,
@@ -98,7 +110,8 @@ export function generateShortCutImageBy(video: HTMLVideoElement, canvas: HTMLCan
     // 用于测试截图的代码，以后可能还会用到
     // const img = imagePath.replace(/^data:image\/\w+;base64,/, '');
     // fs.writeFileSync('/Users/jinnaide/Desktop/screenshot.png', img, 'base64');
-    [canvas.width, canvas.height] = [(videoWidth / videoHeight) * MIN_SHORT_CUT_SIZE, MIN_SHORT_CUT_SIZE];
+    [canvas.width, canvas.height] = [(videoWidth / videoHeight)
+      * MIN_SHORT_CUT_SIZE, MIN_SHORT_CUT_SIZE];
     canvasCTX.drawImage(
       video, 0, 0, videoWidth, videoHeight,
       0, 0, (videoWidth / videoHeight) * MIN_SHORT_CUT_SIZE, MIN_SHORT_CUT_SIZE,
@@ -176,7 +189,10 @@ export function generateHints(videoSrc: string): string {
   return result;
 }
 
-export function calculatedName(item: SubtitleControlListItem, list: SubtitleControlListItem[]): string {
+export function calculatedName(
+  item: SubtitleControlListItem,
+  list: SubtitleControlListItem[],
+): string {
   let name = '';
   if (item.type === Type.Local) {
     name = basename(item.source);
@@ -188,7 +204,8 @@ export function calculatedName(item: SubtitleControlListItem, list: SubtitleCont
     name = `${romanize(sort)} - ${codeToLanguageName(item.language)}`;
   } else if (item.type === Type.Online) {
     const sort = list
-      .filter((s: SubtitleControlListItem) => s.type === Type.Online && s.language === item.language)
+      .filter((s: SubtitleControlListItem) => s.type === Type.Online
+        && s.language === item.language)
       .findIndex((s: SubtitleControlListItem) => s.id === item.id) + 1;
     name = `${codeToLanguageName(item.language)} ${romanize(sort)}`;
   }

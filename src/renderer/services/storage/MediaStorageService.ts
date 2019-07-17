@@ -10,7 +10,10 @@ export type VideoInfo = {
 }
 
 export default class MediaStorageService implements IMediaStorable {
-  constructor(private readonly cacheFile: CacheFile) {
+  private cacheFile: CacheFile;
+
+  public constructor(cacheFile: CacheFile) {
+    this.cacheFile = cacheFile;
   }
 
   /** 私有方法 获取路径下的视频元数据
@@ -54,7 +57,7 @@ export default class MediaStorageService implements IMediaStorable {
    * @param {string} tag
    * @returns {(Promise<string | null>)} 返回文件路径，如果没有就是null
    */
-  async getImageBy(mediaHash: string, tag: string): Promise<string | null> {
+  public async getImageBy(mediaHash: string, tag: string): Promise<string | null> {
     try {
       const r = await this.readVideoInfo(mediaHash);
       return r && r[tag] ? r[tag] : null;
@@ -70,7 +73,7 @@ export default class MediaStorageService implements IMediaStorable {
    * @param {string} tag
    * @returns {(Promise<string | null>)} 返回生成对应的路径
    */
-  async generatePathBy(mediaHash: string, tag: string): Promise<string | null> {
+  public async generatePathBy(mediaHash: string, tag: string): Promise<string | null> {
     try {
       const path = await this.cacheFile.getPathBy(mediaHash);
       return join(path, `${tag}.jpg`);

@@ -11,19 +11,25 @@ interface PlaylistEvent {
   'image-loaded': Event
 }
 export default class PlaylistService extends EventEmitter implements IPlaylistRequest {
-  coverSrc: string;
+  public coverSrc: string;
 
-  duration: any;
+  public duration: any;
 
-  record: MediaItem;
+  public record: MediaItem;
 
-  smallShortCut: string;
+  public smallShortCut: string;
 
-  lastPlayedTime: number;
+  public lastPlayedTime: number;
 
-  imageSrc: string | undefined;
+  public imageSrc: string | undefined;
 
-  get percentage(): number {
+  private mediaStorageService: MediaStorageService;
+
+  public path: string;
+
+  public videoId?: number;
+
+  public get percentage(): number {
     if (this.lastPlayedTime
         && this.lastPlayedTime / this.duration <= 1) {
       return (this.lastPlayedTime / this.duration) * 100;
@@ -31,8 +37,11 @@ export default class PlaylistService extends EventEmitter implements IPlaylistRe
     return 0;
   }
 
-  constructor(private readonly mediaStorageService: MediaStorageService, readonly path: string, readonly videoId?: number) {
+  public constructor(mediaStorageService: MediaStorageService, path: string, videoId?: number) {
     super();
+    this.mediaStorageService = mediaStorageService;
+    this.path = path;
+    this.videoId = videoId;
     ipcRenderer.send('mediaInfo', path);
     ipcRenderer.once(`mediaInfo-${path}-reply`, async (event: any, info: string) => {
       const mediaHash = await mediaQuickHash.try(path);
@@ -56,7 +65,7 @@ export default class PlaylistService extends EventEmitter implements IPlaylistRe
     this.getRecord(videoId);
   }
 
-  on<K extends keyof PlaylistEvent>(type: K, listener: (...args: any[]) => void): this {
+  public on<K extends keyof PlaylistEvent>(type: K, listener: (...args: any[]) => void): this {
     return super.on(type, listener);
   }
 
@@ -64,7 +73,7 @@ export default class PlaylistService extends EventEmitter implements IPlaylistRe
    * @param  {string} mediaHash
    * @returns Promise 返回视频封面图片
    */
-  async getCover(mediaHash: string): Promise<string | null> {
+  public async getCover(mediaHash: string): Promise<string | null> {
     try {
       const result = await this.mediaStorageService.getImageBy(mediaHash, 'cover');
       return result;
@@ -77,7 +86,7 @@ export default class PlaylistService extends EventEmitter implements IPlaylistRe
    * @param  {number} videoId
    * @returns Promise 获取播放记录
    */
-  async getRecord(videoId?: number): Promise<void> {
+  public async getRecord(videoId?: number): Promise<void> {
     let record;
     if (videoId) {
       record = await info.getValueByKey('media-item', videoId);

@@ -11,7 +11,7 @@ export default class JsonStorage implements IStorage {
    * @param {string} key 数据对应的key
    * @returns {Promise<any>} 放回存储的JSON数据
    */
-  get(key: string): Promise<any> {
+  public get(key: string): Promise<any> {
     return new Promise((resolve, reject) => {
       storage.get(key, (err: Error, data: any) => {
         if (err) {
@@ -30,7 +30,7 @@ export default class JsonStorage implements IStorage {
    * @param {*} json 保存的数据
    * @returns {Promise<boolean>} 返回布尔值，是否存储成果
    */
-  set(key: string, json: any): Promise<boolean> {
+  public set(key: string, json: any): Promise<boolean> {
     return new Promise((resolve, reject) => {
       storage.set(key, json, (err: Error) => {
         if (err) {
@@ -47,7 +47,7 @@ export default class JsonStorage implements IStorage {
    * @author tanghaixiang
    * @returns {Promise<any>}
    */
-  async clear(): Promise<any> {
+  public async clear(): Promise<any> {
     const dirPath = storage.getDataPath();
     const taskArray: any[] = [];
     try {
@@ -59,9 +59,10 @@ export default class JsonStorage implements IStorage {
           });
         }));
       });
-      return Promise.all(taskArray);
     } catch (error) {
+      // empty
     }
+    return Promise.all(taskArray);
   }
 }
 
