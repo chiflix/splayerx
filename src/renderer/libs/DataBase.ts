@@ -35,12 +35,12 @@ export default class DataBase implements IDB {
     return this.db.clear(objectStore);
   }
 
-  public async getAll(objectStore: string, keyRange?: IDBKeyRange): Promise< any[]> {
+  public async getAll(objectStore: string, keyRange?: IDBKeyRange) {
     if (keyRange) return this.db.getAll(objectStore, keyRange);
     return this.db.getAll(objectStore, undefined);
   }
 
-  public async getValueByKey(objectStore: string, key: number): Promise<any | undefined> {
+  public async getValueByKey(objectStore: string, key: number) {
     return this.db.get(objectStore, key);
   }
 
@@ -48,7 +48,7 @@ export default class DataBase implements IDB {
     objectStore: string,
     index: string,
     value: string | number,
-  ): Promise<any | undefined> {
+  ) {
     return this.db.get(objectStore, index, value);
   }
 
@@ -56,7 +56,7 @@ export default class DataBase implements IDB {
     objectStore: string,
     index: string,
     value: string | number,
-  ): Promise<any[]> {
+  ) {
     return this.db.getAllValueByIndex(objectStore, index, value);
   }
 }

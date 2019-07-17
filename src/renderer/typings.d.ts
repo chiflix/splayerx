@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import Vue, { VNode } from 'vue'; // eslint-disable-line no-unused-vars
 import { AxiosInstance } from 'axios';
@@ -31,7 +32,7 @@ declare global {
     interface Element extends VNode {} //eslint-disable-line
     interface ElementClass extends Vue {} //eslint-disable-line
     interface IntrinsicElements {
-      [elem: string]: any;
+      [elem: string]: unknown;
     }
   }
 }

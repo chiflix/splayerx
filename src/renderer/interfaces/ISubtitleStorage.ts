@@ -15,7 +15,7 @@ export interface StoredSubtitleItem {
   /** may be fake type for display use only */
   type: Type;
   /** may also be fake source for display use only */
-  source: any;
+  source: unknown;
   videoSegments?: VideoSegment[];
   delay: number;
 }

@@ -15,6 +15,7 @@ import {
 
 import { assFragmentLanguageLoader, srtFragmentLanguageLoader, vttFragmentLanguageLoader } from './languageLoader';
 import { EmbeddedOrigin } from '../loaders';
+import { SagiSubtitlePayload } from '../parsers';
 
 /**
  * Cue tags getter for SubRip, SubStation Alpha and Online Transcript subtitles.
@@ -167,17 +168,17 @@ export async function inferLanguageFromPath(path: string): Promise<LanguageCode>
   }
 }
 
-export function getParser(format: Format, payload: any): Parser {
+export function getParser(format: Format, payload: unknown): Parser {
   switch (format) {
     case Format.AdvancedSubStationAplha:
     case Format.SubStationAlpha:
-      return new AssParser(payload);
+      return new AssParser(payload as string);
     case Format.SubRip:
-      return new SrtParser(payload);
+      return new SrtParser(payload as string);
     case Format.Sagi:
-      return new SagiParser(payload);
+      return new SagiParser(payload as SagiSubtitlePayload);
     case Format.WebVTT:
-      return new VttParser(payload);
+      return new VttParser(payload as string);
     default:
       throw new Error();
   }

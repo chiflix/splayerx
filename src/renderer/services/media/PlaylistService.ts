@@ -1,4 +1,4 @@
-import { ipcRenderer } from 'electron';
+import { ipcRenderer, Event } from 'electron';
 import { EventEmitter } from 'events';
 import { IPlaylistRequest } from '@/interfaces/IPlaylistRequest';
 import MediaStorageService from '@/services/storage/MediaStorageService';
@@ -43,7 +43,7 @@ export default class PlaylistService extends EventEmitter implements IPlaylistRe
     this.path = path;
     this.videoId = videoId;
     ipcRenderer.send('mediaInfo', path);
-    ipcRenderer.once(`mediaInfo-${path}-reply`, async (event: any, info: string) => {
+    ipcRenderer.once(`mediaInfo-${path}-reply`, async (event: Event, info: string) => {
       const mediaHash = await mediaQuickHash.try(path);
       if (!mediaHash) return;
       const { duration } = JSON.parse(info).format;
@@ -53,7 +53,7 @@ export default class PlaylistService extends EventEmitter implements IPlaylistRe
       if (!imgPath) {
         const imgPath = await this.mediaStorageService.generatePathBy(mediaHash, 'cover');
         ipcRenderer.send('snapShot', { path, imgPath, duration });
-        ipcRenderer.once(`snapShot-${path}-reply`, (event: any, imgPath: string) => {
+        ipcRenderer.once(`snapShot-${path}-reply`, (event: Event, imgPath: string) => {
           this.imageSrc = filePathToUrl(`${imgPath}`);
           this.emit('image-loaded');
         });
@@ -65,7 +65,7 @@ export default class PlaylistService extends EventEmitter implements IPlaylistRe
     this.getRecord(videoId);
   }
 
-  public on<K extends keyof PlaylistEvent>(type: K, listener: (...args: any[]) => void): this {
+  public on<K extends keyof PlaylistEvent>(type: K, listener: (...args: unknown[]) => void): this {
     return super.on(type, listener);
   }
 

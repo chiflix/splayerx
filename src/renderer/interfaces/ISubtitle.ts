@@ -18,14 +18,14 @@ export enum Format {
 
 export interface Origin {
   type: Type;
-  source: any;
+  source: unknown;
 }
 export type Entity = {
   source: Origin;
   type: Type;
   format: Format;
   language: LanguageCode;
-  payload: any;
+  payload: unknown;
   hash: string;
   metadata: Metadata;
   delay: number;
@@ -48,7 +48,7 @@ export type SubtitleControlListItem = {
   hash: string;
   type: Type;
   language: LanguageCode;
-  source: any;
+  source: unknown;
   name?: string;
   delay: number;
 };
@@ -57,12 +57,12 @@ export interface EntityGenerator {
   /** get real source to fetch subtitle from */
   getSource(): Promise<Origin>
   /** get fake source for display use */
-  getStoredSource?: any
+  getStoredSource?: unknown
   getDelay?: () => Promise<number>
   getType(): Promise<Type>
   getFormat(): Promise<Format>
   getLanguage(): Promise<LanguageCode>
-  getPayload(): Promise<any>
+  getPayload(): Promise<unknown>
   getHash(): Promise<string>
 }
 
@@ -116,7 +116,7 @@ export interface VideoSegment {
 
 export interface Parser {
   parse(): void;
-  readonly payload: any;
+  readonly payload: unknown;
   getMetadata(): Promise<Metadata>;
   getDialogues(time?: number): Promise<Cue[]>;
   getVideoSegments(duration: number): Promise<VideoSegment[]>;

@@ -13,7 +13,7 @@ import { SagiSubtitlePayload } from '@/services/subtitle';
 import { log } from './Log';
 
 class Sagi {
-  private creds: any;
+  private creds: unknown;
 
   private endpoint = process.env.NODE_ENV === 'production'
     ? 'apis.sagittarius.ai:8443'
@@ -28,10 +28,11 @@ class Sagi {
       fs.readFileSync(path.join(__static, '/certs/key.pem')),
       fs.readFileSync(path.join(__static, '/certs/cert.pem')),
     );
-    const metadataUpdater = (_: any, cb: Function) => {
+    const metadataUpdater = (_: unknown, cb: Function) => {
       const metadata = new Metadata();
       metadata.set('uuid', Vue.axios.defaults.headers.common['X-Application-Token']);
       metadata.set('agent', navigator.userAgent);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       Vue.axios.get('https://ip.xindong.com/myip', { responseType: 'text' }).then((response: any) => {
         metadata.set('clientip', response.bodyText);
         cb(null, metadata);

@@ -75,9 +75,9 @@ Vue.config.errorHandler = (err) => {
   log.error('render/main', err);
 };
 Vue.directive('fade-in', {
-  bind(el: HTMLElement, binding: any) {
+  bind(el: HTMLElement, binding: unknown) {
     if (!el) return;
-    const { value } = binding;
+    const { value } = binding as { value: unknown };
     if (value) {
       el.classList.add('fade-in');
       el.classList.remove('fade-out');
@@ -86,7 +86,7 @@ Vue.directive('fade-in', {
       el.classList.remove('fade-in');
     }
   },
-  update(el: HTMLElement, binding: any) {
+  update(el: HTMLElement, binding) {
     const { oldValue, value } = binding;
     if (oldValue !== value) {
       if (value) {
@@ -530,11 +530,11 @@ new Vue({
     disableMenus(item: Electron.MenuItemConstructorOptions) {
       if (!this.menuOperationLock && item && item.label) {
         item.enabled = false;
-        item.submenu && (item.submenu as Electron.Menu).items.forEach((e: any) => {
+        item.submenu && (item.submenu as Electron.Menu).items.forEach((e) => {
           // this.disableMenus(e);
           if (!this.menuOperationLock && e && e.label) {
             e.enabled = false;
-            e.submenu && e.submenu.items.forEach((e: any) => {
+            e.submenu && e.submenu.items.forEach((e) => {
               if (!this.menuOperationLock && e && e.label) {
                 e.enabled = false;
               }
@@ -1130,7 +1130,7 @@ new Vue({
       }
       return item.name;
     },
-    recentSubTmp(item: SubtitleControlListItem, isFirstSubtitleType: any) {
+    recentSubTmp(item: SubtitleControlListItem, isFirstSubtitleType: boolean) {
       return {
         id: isFirstSubtitleType ? `sub${item.id}` : `secondSub${item.id}`,
         visible: true,

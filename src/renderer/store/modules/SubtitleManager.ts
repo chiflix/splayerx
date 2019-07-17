@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import uuidv4 from 'uuid/v4';
 import {
   isEqual, get, sortBy, differenceWith, flatten, remove, debounce,
@@ -63,7 +64,7 @@ const state = {
 };
 const getters = {
   list(state: SubtitleManagerState) {
-    const list = Object.values(state.allSubtitles).filter((v: any) => !!v);
+    const list = Object.values(state.allSubtitles).filter(v => !!v);
     return sortBy(list, (sub: SubtitleControlListItem) => {
       if (sub.type === Type.Online && sub.language !== store.getters.primaryLanguage) {
         return sortOfTypes[sub.type] + 1;
@@ -86,7 +87,7 @@ const getters = {
   },
   primaryDelay({ primaryDelay }: SubtitleManagerState) { return primaryDelay; },
   secondaryDelay({ secondaryDelay }: SubtitleManagerState) { return secondaryDelay; },
-  calculatedNoSub(state: any, { list }: any) { return !list.length; },
+  calculatedNoSub(state: SubtitleManagerState, { list }: any) { return !list.length; },
 };
 const mutations = {
   [m.setPlaylistId](state: SubtitleManagerState, id: number) {
@@ -150,7 +151,7 @@ function privacyConfirm(): Promise<boolean> {
 
 let primarySelectionComplete = false;
 let secondarySelectionComplete = false;
-let alterDelayTimeoutId: any = 0;
+let alterDelayTimeoutId: NodeJS.Timeout;
 function setDelayTimeout() {
   clearTimeout(alterDelayTimeoutId);
   alterDelayTimeoutId = setTimeout(() => store.dispatch(a.storeSubtitleDelays), 10000);

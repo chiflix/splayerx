@@ -9,11 +9,11 @@ export default class JsonStorage implements IStorage {
    * @description 通过key获取存储的JSON数据
    * @author tanghaixiang
    * @param {string} key 数据对应的key
-   * @returns {Promise<any>} 放回存储的JSON数据
+   * @returns {Promise<unknown>} 放回存储的JSON数据
    */
-  public get(key: string): Promise<any> {
+  public get(key: string): Promise<unknown> {
     return new Promise((resolve, reject) => {
-      storage.get(key, (err: Error, data: any) => {
+      storage.get(key, (err: Error, data: unknown) => {
         if (err) {
           reject(err);
         } else {
@@ -30,7 +30,7 @@ export default class JsonStorage implements IStorage {
    * @param {*} json 保存的数据
    * @returns {Promise<boolean>} 返回布尔值，是否存储成果
    */
-  public set(key: string, json: any): Promise<boolean> {
+  public set(key: string, json: Record<string, unknown>): Promise<boolean> {
     return new Promise((resolve, reject) => {
       storage.set(key, json, (err: Error) => {
         if (err) {
@@ -47,18 +47,13 @@ export default class JsonStorage implements IStorage {
    * @author tanghaixiang
    * @returns {Promise<any>}
    */
-  public async clear(): Promise<any> {
+  public async clear(): Promise<unknown[]> {
     const dirPath = storage.getDataPath();
-    const taskArray: any[] = [];
+    const taskArray: Promise<unknown>[] = [];
     try {
       const files = await readDir(dirPath);
-      files.forEach((file) => {
-        taskArray.push(new Promise((resolve) => {
-          storage.remove(path.basename(file), () => {
-            resolve();
-          });
-        }));
-      });
+      files.forEach(file => taskArray
+        .push(new Promise(resolve => storage.remove(path.basename(file), resolve))));
     } catch (error) {
       // empty
     }

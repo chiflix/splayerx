@@ -74,7 +74,7 @@ export class InfoDB {
    * @param  {Object} data
    * Add a new record
    */
-  public async add(schema: string, data: any) {
+  public async add(schema: string, data: unknown) {
     if (!data) throw new Error(`Invalid data: ${JSON.stringify(data)}`);
     const db = await this.getDB();
     return db.add(schema, data);
@@ -86,7 +86,7 @@ export class InfoDB {
    * Add a record if no same quickHash in the current schema
    * Replace a record if the given quickHash existed
    */
-  public async update(schema: string, data: any, keyPath: number) {
+  public async update(schema: string, data: unknown, keyPath: number) {
     if (!data.id && !data.videoId) throw new Error('Invalid data: Require Media ID !');
     const db = await this.getDB();
     if (!keyPath) {

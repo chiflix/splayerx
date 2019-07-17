@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { cloneDeep } from 'lodash';
 import {
-  EntityGenerator, Entity, Parser, Type, Format, Origin, defaultEntity,
+  EntityGenerator, Entity, Parser, Type, Format, Origin, defaultEntity, SubtitleControlListItem,
 } from '@/interfaces/ISubtitle';
 import { LanguageCode } from '@/libs/language';
 import {
@@ -19,10 +20,10 @@ import { isCachedSubtitle, removeCachedSubtitle } from '@/services/storage/subti
 
 type SubtitleState = {
   moduleId: string;
-  source: any;
-  realSource: any;
-  type: Type | undefined;
-  format: Format | undefined;
+  source: unknown;
+  realSource: unknown;
+  type?: Type;
+  format: Format;
   language: LanguageCode;
   delay: number;
   playedTime: number;
@@ -35,7 +36,7 @@ enum CacheStatus {
 }
 const subtitleMap: Map<string, {
   entity: Entity;
-  loader: () => Promise<any>;
+  loader: () => Promise<unknown>;
   parser?: Parser;
   cached: CacheStatus;
 }> = new Map();
@@ -57,10 +58,10 @@ const mutations = {
   [m.setModuleId](state: SubtitleState, id: string) {
     state.moduleId = id;
   },
-  [m.setSource](state: SubtitleState, source: any) {
+  [m.setSource](state: SubtitleState, source: unknown) {
     state.source = source;
   },
-  [m.setRealSource](state: SubtitleState, source: any) {
+  [m.setRealSource](state: SubtitleState, source: unknown) {
     state.realSource = source;
   },
   [m.setType](state: SubtitleState, type: Type) {
@@ -158,7 +159,7 @@ const actions = {
         } catch (err) {
           addBubble(NOT_SUPPORTED_SUBTITLE);
           const subtitleToRemoveFromList = rootGetters.list
-            .find((sub: any) => sub.id === state.moduleId);
+            .find((sub: SubtitleControlListItem) => sub.id === state.moduleId);
           store.dispatch(parentActions.deleteSubtitlesByUuid, [subtitleToRemoveFromList]);
         }
       }
@@ -191,7 +192,8 @@ const actions = {
     }
   },
   async [a.delete]({ state, rootGetters }: any) {
-    const subtitleToRemoveFromList = rootGetters.list.find((sub: any) => sub.id === state.moduleId);
+    const subtitleToRemoveFromList = rootGetters.list
+      .find((sub: SubtitleControlListItem) => sub.id === state.moduleId);
     const { playlistId, mediaItemId } = store.state.SubtitleManager;
     const subtitle = subtitleMap.get(state.moduleId);
     if (subtitle) {

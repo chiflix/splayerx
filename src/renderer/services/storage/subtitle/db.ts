@@ -33,7 +33,7 @@ interface AddSubtitleOptions {
   language: LanguageCode;
 }
 interface RemoveSubtitleOptions {
-  source: any;
+  source: unknown;
   hash: string;
 }
 interface UpdateSubtitleOptions {
@@ -45,7 +45,7 @@ interface UpdateSubtitleOptions {
 interface UpdateSubtitleItemOptions {
   hash: string;
   type?: Type;
-  source?: any;
+  source?: unknown;
   videoSegments?: VideoSegment[];
   delay?: number;
 }

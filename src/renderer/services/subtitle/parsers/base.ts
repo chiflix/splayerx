@@ -35,7 +35,7 @@ function calculateVideoSegments(dialogues: Dialogue[], duration: number) {
 }
 
 export class BaseParser implements Parser {
-  public readonly payload: any;
+  public readonly payload: unknown;
 
   public metadata = {};
 

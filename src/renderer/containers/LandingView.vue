@@ -222,12 +222,14 @@ export default {
       }
     },
   },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   beforeRouteEnter(to: Route, { name: from }: Route, next: (vm: any) => void) {
-    next((vm: any) => {
+    next((vm: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
       vm.logoTransition = from === 'language-setting' ? 'scale' : '';
       vm.pageMounted = true;
     });
   },
+  /* eslint-disable @typescript-eslint/no-explicit-any */
   created() {
     window.addEventListener('mousemove', this.globalMoveHandler);
     this.useBlur = window.devicePixelRatio === 1;

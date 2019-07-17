@@ -69,7 +69,6 @@ export interface SubtitleStream {
   disposition: {
     default: 0 | 1;
   };
-  [propName: string]: any;
 }
 
 export class EmbeddedGenerator implements EntityGenerator {
