@@ -86,6 +86,8 @@ export default {
           this.youtubeWatcher(val);
         } else if (this.pipType === 'bilibili') {
           this.bilibiliWatcher(val);
+        } else {
+          this.iqiyiWatcher(val);
         }
       }
     },
@@ -109,7 +111,6 @@ export default {
       electron.ipcRenderer.send('store-browsing-last-size', this.isPip ? [1200, 900] : this.browsingWinSize);
     });
     this.$refs.webView.addEventListener('load-commit', () => {
-      this.$refs.webView.blur();
       const loadUrl = this.$refs.webView.getURL();
       const recordIndex = this.supportedRecordHost.indexOf(urlParseLax(loadUrl).hostname);
       if (recordIndex !== -1) {
@@ -127,7 +128,7 @@ export default {
             break;
         }
       }
-      this.$refs.webView.executeJavaScript('var el = document.querySelector("iframe");if (el) {document.getElementsByTagName("video").length + el.contentDocument.getElementsByTagName("video").length} else {document.getElementsByTagName("video").length}', (r: number) => {
+      this.$refs.webView.executeJavaScript('var el = document.querySelector("iframe");if (el && el.contentDocument) {document.getElementsByTagName("video").length + el.contentDocument.getElementsByTagName("video").length} else {document.getElementsByTagName("video").length}', (r: number) => {
         this.$refs.browsingControl.updateWebInfo({
           hasVideo: !!r,
           url: loadUrl,
@@ -152,6 +153,8 @@ export default {
       this.quit = true;
     });
     this.$refs.webView.addEventListener('dom-ready', () => { // for webview test
+      window.focus();
+      this.$refs.webView.focus();
       this.$refs.webView.openDevTools();
     });
     this.$refs.webView.addEventListener('new-window', (e: any) => { // new tabs
@@ -199,6 +202,9 @@ export default {
       } else if (parseUrl.host.includes('bilibili')) {
         this.pipType = 'bilibili';
         this.bilibiliAdapter();
+      } else {
+        this.pipType = 'iqiyi';
+        this.iqiyiAdapter();
       }
       this.isPip = true;
     },
@@ -208,9 +214,28 @@ export default {
           this.youtubeRecover();
         } else if (this.pipType === 'bilibili') {
           this.bilibiliRecover();
+        } else {
+          this.iqiyiRecover();
         }
         this.isPip = false;
       }
+    },
+    iqiyiAdapter() {
+      electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setAspectRatio', [320 / 180]);
+      electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setMinimumSize', [320, 180]);
+      electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setSize', [320, 180]);
+      this.$refs.webView.executeJavaScript('document.body.style.overflow = "hidden";document.querySelector(".qy-flash-box").style.cssText = "position: fixed; left: 0; top: 0; z-index: 9999"');
+      this.$refs.webView.executeJavaScript(`setTimeout(() => {document.querySelector(".flash-box").style.width="${this.browsingWinSize[0]}px";document.querySelector(".flash-box").style.height="${this.browsingWinSize[1]}px"}, 0)`);
+    },
+    iqiyiWatcher(val: number) {
+      this.$refs.webView.executeJavaScript(`setTimeout(() => {document.querySelector(".flash-box").style.width="${val}px";document.querySelector(".flash-box").style.height="${this.browsingWinSize[1]}px"}, 0)`);
+    },
+    iqiyiRecover() {
+      electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setAspectRatio', [0, 0]);
+      electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setMinimumSize', [720, 405]);
+      electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setSize', [1200, 900]);
+      this.$refs.webView.executeJavaScript('document.body.style.overflow = "";document.querySelector(".qy-flash-box").style.cssText = `position: ""; left: ""; top: ""; z-index: ""`');
+      this.$refs.webView.executeJavaScript('document.querySelector(".flash-box").style.width="100%";document.querySelector(".flash-box").style.height="100%"');
     },
     youtubeAdapter() {
       this.$refs.webView.executeJavaScript('document.querySelector("video").style', (result: CSSStyleDeclaration) => {

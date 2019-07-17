@@ -3,17 +3,26 @@
     <Icon
       ref="back"
       :type="backType"
+      :style="{
+        cursor: webInfo.canGoBack ? 'pointer' : ''
+      }"
       @mouseup.native="handleUrlBack"
       class="back-icon"
     />
     <Icon
       ref="forward"
       :type="forwardType"
+      :style="{
+        cursor: webInfo.canGoForward ? 'pointer' : ''
+      }"
       @mouseup.native="handleUrlForward"
       class="forward-icon"
     />
     <Icon
       @mouseup.native="handleUrlReload"
+      :style="{
+        cursor: 'pointer',
+      }"
       type="pageRefresh"
       class="page-refresh-icon"
     />
@@ -23,6 +32,9 @@
     />
     <Icon
       :type="picInPicType"
+      :style="{
+        cursor: webInfo.hasVideo ? 'pointer' : ''
+      }"
       @mouseup.native="handleEnterPip"
       class="pic-in-pic"
     />
@@ -60,14 +72,13 @@ export default {
     return {
       backType: 'backDisabled',
       forwardType: 'forwardDisabled',
-      url: '',
-      hasVideo: false,
+      webInfo: {},
     };
   },
   computed: {
     ...mapGetters(['winWidth']),
     picInPicType() {
-      return this.hasVideo ? 'pip' : 'pipDisabled';
+      return this.webInfo.hasVideo ? 'pip' : 'pipDisabled';
     },
   },
   watch: {
@@ -90,8 +101,7 @@ export default {
     updateWebInfo(info: {
       hasVideo: boolean, url: string, canGoBack: boolean, canGoForward: boolean
     }) {
-      this.hasVideo = info.hasVideo;
-      this.url = info.url;
+      this.webInfo = info;
       this.backType = info.canGoBack ? 'back' : 'backDisabled';
       this.forwardType = info.canGoForward ? 'forward' : 'forwardDisabled';
     },
@@ -115,13 +125,11 @@ export default {
     width: 24px;
     height: 32px;
     margin: auto 0 auto 20px;
-    cursor: pointer;
   }
   .forward-icon {
     width: 24px;
     height: 32px;
     margin: auto 0 auto 15px;
-    cursor: pointer;
   }
   .able-opacity:active {
     opacity: 0.5;
@@ -133,7 +141,6 @@ export default {
     width: 32px;
     height: 32px;
     margin: auto 0 auto 15px;
-    cursor: pointer;
   }
 }
 </style>
