@@ -77,6 +77,9 @@ module.exports = {
         'requireLast': false
       }
     },
-    '@typescript-eslint/explicit-function-return-type': 0
+    '@typescript-eslint/explicit-function-return-type': 0,
+    '@typescript-eslint/no-explicit-any': ['error', {
+      ignoreRestArgs: true,
+    }]
   },
 }
