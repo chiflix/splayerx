@@ -31,7 +31,7 @@ let mainConfig = {
   module: {
     rules: [
       {
-        test: /\.(js)$/,
+        test: /\.(ts|js)$/,
         enforce: 'pre',
         exclude: /node_modules/,
         use: {
