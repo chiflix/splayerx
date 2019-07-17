@@ -5,7 +5,7 @@ interface IMouse {
 }
 
 class WinMouse implements IMouse {
-  private mouse: any;
+  private mouse: { on: () => void, off: () => void, destroy: () => void };
 
   public constructor() {
     try {
