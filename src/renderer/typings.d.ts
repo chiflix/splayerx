@@ -86,7 +86,7 @@ declare module 'electron' {
       height: string,
       callback: (
         /** if not '0', an error occurred */
-        err: string,
+        error: string,
       ) => void,
     ): void;
     extractSubtitles(
@@ -98,7 +98,7 @@ declare module 'electron' {
       streamIndex?: string,
       callback: (
         /** if not '0', an error occurred */
-        err: string,
+        error: string,
       ) => void,
     ): void;
     generateThumbnails(
@@ -107,12 +107,11 @@ declare module 'electron' {
       /** image path to save */
       imagePath: string,
       thumbnailWidth: string,
-      thumbnailHeight: string,
       rowThumbnailCount: string,
       columnThumbnailCount: string,
       callback: (
         /** if not '0', an error occurred */
-        err: string,
+        error: string,
       ) => void,
     ): void;
     grabAudioFrame(
@@ -133,7 +132,7 @@ declare module 'electron' {
       frameCount: number,
       callback: (
         /** if not '0', an error occurred */
-        err: string,
+        error: string,
         frameBuffer?: Buffer,
         frameData: string,
       ) => void,
@@ -143,14 +142,27 @@ declare module 'electron' {
   const splayerx: SPlayerAPI;
   interface IpcMain {
     on(channel: 'media-info-request', listener: (event: Event, path: string) => void): this;
+    on(channel: 'generate-thumbnail-request', listener: (event: Event, 
+      videoPath: string, imagePath: string,
+      thumbnailWidth: number,
+      rowThumbnailCount: number, columnThumbnailCount: number,
+    ) => void): this;
   }
   interface IpcRenderer {
     send(channel: 'media-info-request', path: string): void;
-    on(channel: 'media-info-reply', listener: (event: Event, err: Error | undefined, info: string) => void): this;
-    once(channel: 'media-info-reply', listener: (event: Event, err: Error | undefined, info: string) => void): this;
+    on(channel: 'media-info-reply', listener: (event: Event, error: Error | undefined, info: string) => void): this;
+    once(channel: 'media-info-reply', listener: (event: Event, error: Error | undefined, info: string) => void): this;
+    send(channel: 'generate-thumbnail-request',
+      videoPath: string, imagePath: string,
+      thumbnailWidth: number,
+      rowThumbnailCount: number, columnThumbnailCount: number,
+    ): void;
+    on(channel: 'generate-thumbnail-reply', listener: (event: Event, error: Error | undefined, path: string) => void): this;
+    once(channel: 'generate-thumbnail-reply', listener: (event: Event, error: Error | undefined, path: string) => void): this;
   }
   interface Event {
     reply(channel: string, ...args: any[]): void;
-    reply(channel: 'media-info-reply', err: Error | undefined, info: string): void;
+    reply(channel: 'media-info-reply', error: Error | undefined, info: string): void;
+    reply(channel: 'generate-thumbnail-reply', error: Error | undefined, path: string): void;
   }
 }
