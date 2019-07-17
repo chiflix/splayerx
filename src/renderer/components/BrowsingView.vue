@@ -42,9 +42,9 @@
 <script lang="ts">
 import { mapGetters, mapActions } from 'vuex';
 import electron from 'electron';
-import { Browsing as browsingActions } from '@/store/actionTypes';
 // @ts-ignore
 import urlParseLax from 'url-parse-lax';
+import { Browsing as browsingActions } from '@/store/actionTypes';
 import BrowsingHeader from '@/components/BrowsingView/BrowsingHeader.vue';
 import BrowsingControl from '@/components/BrowsingView/BrowsingControl.vue';
 import Icon from '@/components/BaseIconContainer.vue';
