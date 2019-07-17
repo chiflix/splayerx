@@ -19,9 +19,9 @@ enum MediaTaskStatus {
 export class BaseMediaTaskQueue extends EventEmitter {
   private taskInfos: Map<string, TaskInfo> = new Map();
 
-  startProcessTasks = false;
+  private startProcessTasks = false;
 
-  addTask(task: MediaTask) {
+  public addTask(task: MediaTask) {
     const id = task.getId();
     if (!this.taskInfos.has(id)) {
       this.taskInfos.set(id, {
@@ -53,19 +53,23 @@ export class BaseMediaTaskQueue extends EventEmitter {
         case MediaTaskStatus.FAILED:
           reject(reject);
           break;
+        default:
+          break;
       }
       this.processTasks();
     });
   }
 
-  private async * getNextTask() {
+  private async* getNextTask() {
     let unExecutedTasks: [string, TaskInfo][] = [];
+    // eslint-disable-next-line
     while (
       (unExecutedTasks = Array.from(this.taskInfos.entries())
-        .filter((entry) => entry[1].status === MediaTaskStatus.ADDED))
+        .filter(entry => entry[1].status === MediaTaskStatus.ADDED))
         .length
     ) {
-      const [id, taskInfo] = unExecutedTasks.sort((task1, task2) => task1[1].piority - task2[1].piority)[0];
+      const [id, taskInfo] = unExecutedTasks
+        .sort((task1, task2) => task1[1].piority - task2[1].piority)[0];
       try {
         yield {
           id,
