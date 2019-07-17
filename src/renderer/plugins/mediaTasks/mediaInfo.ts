@@ -1,3 +1,9 @@
+import { ipcRenderer } from 'electron';
+import { camelCase } from 'lodash';
+import { MediaTask, BaseMediaTaskQueue } from './mediaTaskQueue';
+import { LanguageCode, normalizeCode } from '@/libs/language';
+import { mediaQuickHash } from '@/libs/utils';
+
 /* eslint-disable camelcase */
 enum CodecType {
   Video = 'video',
@@ -6,7 +12,7 @@ enum CodecType {
   Attachment = 'attachment',
 }
 // taken from https://github.com/FFmpeg/FFmpeg/blob/master/doc/ffprobe.xsd
-type RawStreamDisposition = {
+interface RawStreamDisposition {
   default: number;
   dub: number;
   original: number;
@@ -19,22 +25,15 @@ type RawStreamDisposition = {
   clean_effects: number;
   attached_pic: number;
   timed_thumbnails: number;
-};
-type RawTag = {
+}
+interface RawTag {
   language?: string;
   filename?: string;
   mimetype?: string;
-};
-type RawPacketSideDataList = {
-  side_data: {
-    side_data_type: string;
-    side_data_size: number;
-  };
-};
+}
 interface RawBaseStream {
   disposition?: RawStreamDisposition;
   tag?: RawTag;
-  side_data_list?: RawPacketSideDataList;
   index: number;
   codec_name?: string;
   codec_long_name?: string;
@@ -90,10 +89,10 @@ interface RawSubtitleStream extends RawBaseStream {
   codec_type: CodecType.Subtitle;
 }
 interface RawAttachmentStream extends RawBaseStream {
-  codec_type: CodecType.Subtitle;
+  codec_type: CodecType.Attachment;
 }
-type RawStreams = (RawVideoStream | RawAudioStream | RawSubtitleStream | RawAttachmentStream)[];
-type RawFormat = {
+type RawStream = RawVideoStream | RawAudioStream | RawSubtitleStream | RawAttachmentStream;
+interface RawFormat {
   tag?: RawTag;
   filename: string;
   nb_streams: number;
@@ -105,13 +104,13 @@ type RawFormat = {
   size?: number;
   bit_rate?: number;
   probe_score?: number;
-};
-type RawMediaInfo = {
-  streams?: RawStreams;
+}
+interface RawMediaInfo {
+  streams?: RawStream[];
   format?: RawFormat;
-};
+}
 
-type StreamDisposition = {
+interface StreamDisposition {
   default: boolean;
   dub: boolean;
   original: boolean;
@@ -124,22 +123,15 @@ type StreamDisposition = {
   cleanEffects: boolean;
   attachedPic: boolean;
   timedThumbnails: boolean;
-};
-type Tag = {
-  language?: string;
+}
+interface Tag {
+  language?: LanguageCode;
   filename?: string;
   mimetype?: string;
-};
-type PacketSideDataList = {
-  sideData: {
-    sideDataType: string;
-    sideDataSize: number;
-  };
-};
+}
 interface BaseStream {
   disposition?: RawStreamDisposition;
   tag?: Tag;
-  sideDataList?: RawPacketSideDataList;
   index: number;
   codecName?: CodecType;
   codecLongName?: string;
@@ -197,7 +189,7 @@ interface SubtitleStream extends BaseStream {
 interface AttachmentStream extends BaseStream {
   codecType: CodecType.Attachment;
 }
-type Format = {
+interface Format {
   tag?: Tag;
   filename: string;
   nbStreams: number;
@@ -209,9 +201,137 @@ type Format = {
   size?: number;
   bitRate?: number;
   probeScore?: number;
-};
-type Streams = (VideoStream | AudioStream | SubtitleStream | AttachmentStream)[];
-type MediaInfo = {
-  streams?: Streams[];
+}
+type Stream = VideoStream | AudioStream | SubtitleStream | AttachmentStream;
+interface MediaInfo {
+  streams?: Stream[];
   format?: Format;
-};
+}
+
+class MediaInfoTask implements MediaTask<MediaInfo> {
+  private path: string = '';
+
+  private hash: string = '';
+
+  private constructor(path: string, hash: string) {
+    this.path = path;
+    this.hash = hash;
+  }
+
+  public static async from(path: string) {
+    const hash = await mediaQuickHash(path);
+    return new MediaInfoTask(path, hash);
+  }
+
+  public getId() { return this.hash; }
+
+  private static streamDispositionMapper(raw: RawStreamDisposition): StreamDisposition {
+    return Object.entries(raw)
+      .reduce((result, entry: [string, number]) => {
+        result[camelCase(entry[0])] = !!entry[1];
+        return result;
+      }, {}) as StreamDisposition;
+  }
+
+  private static tagMapper(raw: RawTag): Tag {
+    return Object.entries(raw)
+      .reduce((result, entry: [string, unknown]) => {
+        if (entry[0] === 'language') result[entry[0]] = normalizeCode(entry[1] as string);
+        else result[camelCase(entry[0])] = entry[1];
+        return result;
+      }, {}) as Tag;
+  }
+
+  private static videoStreamMapper(raw: RawVideoStream): VideoStream {
+    return Object.entries(raw)
+      .reduce((result, entry: [string, unknown]) => {
+        if (entry[0] === 'disposition') result[entry[0]] = MediaInfoTask.streamDispositionMapper(entry[1] as RawStreamDisposition);
+        else if (entry[0] === 'tags') result[entry[0]] = MediaInfoTask.tagMapper(entry[1] as RawTag);
+        else if (entry[0] === 'has_b_frames') result[camelCase(entry[0])] = !!entry[1];
+        else result[camelCase(entry[0])] = entry[1];
+        return result;
+      }, {}) as VideoStream;
+  }
+
+  private static audioStreamMapper(raw: RawAudioStream): AudioStream {
+    return Object.entries(raw)
+      .reduce((result, entry: [string, unknown]) => {
+        if (entry[0] === 'disposition') result[entry[0]] = MediaInfoTask.streamDispositionMapper(entry[1] as RawStreamDisposition);
+        else if (entry[0] === 'tags') result[entry[0]] = MediaInfoTask.tagMapper(entry[1] as RawTag);
+        else result[camelCase(entry[0])] = entry[1];
+        return result;
+      }, {}) as AudioStream;
+  }
+
+  private static subtitleStreamMapper(raw: RawSubtitleStream): SubtitleStream {
+    return Object.entries(raw)
+      .reduce((result, entry: [string, unknown]) => {
+        if (entry[0] === 'disposition') result[entry[0]] = MediaInfoTask.streamDispositionMapper(entry[1] as RawStreamDisposition);
+        else if (entry[0] === 'tags') result[entry[0]] = MediaInfoTask.tagMapper(entry[1] as RawTag);
+        else result[camelCase(entry[0])] = entry[1];
+        return result;
+      }, {}) as SubtitleStream;
+  }
+
+  private static attachmentStreamMapper(raw: RawAttachmentStream): AttachmentStream {
+    return Object.entries(raw)
+      .reduce((result, entry: [string, unknown]) => {
+        if (entry[0] === 'disposition') result[entry[0]] = MediaInfoTask.streamDispositionMapper(entry[1] as RawStreamDisposition);
+        else if (entry[0] === 'tags') result[entry[0]] = MediaInfoTask.tagMapper(entry[1] as RawTag);
+        else result[camelCase(entry[0])] = entry[1];
+        return result;
+      }, {}) as AttachmentStream;
+  }
+
+  private static streamsMapper(raw: RawStream[]): Stream[] {
+    return raw.map((stream) => {
+      switch (stream.codec_type) {
+        default:
+          return undefined;
+        case CodecType.Video:
+          return MediaInfoTask.videoStreamMapper(stream);
+        case CodecType.Audio:
+          return MediaInfoTask.audioStreamMapper(stream);
+        case CodecType.Subtitle:
+          return MediaInfoTask.subtitleStreamMapper(stream);
+        case CodecType.Attachment:
+          return MediaInfoTask.attachmentStreamMapper(stream);
+      }
+    })
+      .filter(stream => !!stream) as Stream[];
+  }
+
+  private static formatMapper(raw: RawFormat): Format {
+    return Object.entries(raw)
+      .reduce((result, entry: [string, unknown]) => {
+        if (entry[0] === 'tags') result[entry[0]] = MediaInfoTask.tagMapper(entry[1] as RawTag);
+        else result[camelCase(entry[0])] = entry[1];
+        return result;
+      }, {}) as Format;
+  }
+
+  private static mediaInfoMapper(raw: RawMediaInfo): MediaInfo {
+    const result: MediaInfo = {};
+    if (raw.streams) result.streams = MediaInfoTask.streamsMapper(raw.streams);
+    if (raw.format) result.format = MediaInfoTask.formatMapper(raw.format);
+    return result;
+  }
+
+  public execute(): Promise<MediaInfo> {
+    return new Promise((resolve, reject) => {
+      ipcRenderer.send('media-info-request', this.path);
+      ipcRenderer.once('media-info-reply', (event, error, info) => {
+        console.log(JSON.parse(info));
+        if (error) reject(error);
+        else resolve(MediaInfoTask.mediaInfoMapper(JSON.parse(info) as RawMediaInfo));
+      });
+    });
+  }
+}
+export class MediaInfoQueue extends BaseMediaTaskQueue {
+  public async getMediaInfo(path: string) {
+    const result = await super.addTask<MediaInfo>(await MediaInfoTask.from(path));
+    if (result instanceof Error) throw result;
+    return result;
+  }
+}
