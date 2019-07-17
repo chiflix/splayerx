@@ -1,3 +1,4 @@
+import { cloneDeep } from 'lodash';
 import {
   EntityGenerator, Entity, Parser, Type, Format, Origin, defaultEntity,
 } from '@/interfaces/ISubtitle';
@@ -85,7 +86,7 @@ const mutations = {
 const actions = {
   [a.initialize]({ commit }: any, moduleId: string) {
     subtitleMap.set(moduleId, {
-      entity: defaultEntity,
+      entity: cloneDeep(defaultEntity),
       loader: () => Promise.resolve(),
       parser: new BaseParser(),
       cached: CacheStatus.NOT_CACHED,
