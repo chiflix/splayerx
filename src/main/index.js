@@ -708,7 +708,7 @@ if (process.platform === 'darwin') {
     tmpVideoToOpen.concat(tmpSubsToOpen));
   app.on('second-instance', (event, argv) => {
     if (!mainWindow || mainWindow.webContents.isDestroyed()) {
-      createWindow();
+      if (app.isReady()) createWindow();
     }
     const opendFiles = argv.slice(app.isPackaged ? 3 : 2);
     opendFiles.forEach((file) => {
@@ -773,7 +773,7 @@ app.on('window-all-closed', () => {
 
 app.on('activate', () => {
   if (!mainWindow) {
-    createWindow();
+    if (app.isReady()) createWindow();
   } else if (!mainWindow.isVisible()) {
     mainWindow.show();
   }

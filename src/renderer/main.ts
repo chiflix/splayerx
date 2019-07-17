@@ -1028,6 +1028,7 @@ new Vue({
           });
           template.splice(4, 0, {
             label: this.$t('msg.splayerx.preferences'),
+            id: 'preference',
             enabled: true,
             accelerator: 'Ctrl+,',
             click: () => {
