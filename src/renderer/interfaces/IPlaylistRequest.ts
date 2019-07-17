@@ -2,7 +2,7 @@ import { MediaItem } from '@/interfaces/IDB';
 
 export interface IPlaylistRequest {
   coverSrc: string;
-  duration: any;
+  duration: number;
   record: MediaItem;
   smallShortCut: string;
   lastPlayedTime: number;
