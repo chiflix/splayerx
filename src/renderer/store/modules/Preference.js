@@ -4,6 +4,7 @@ import syncStorage from '@/helpers/syncStorage';
 const state = {
   welcomeProcessDone: false,
   hideVideoHistoryOnExit: false,
+  hideNSFW: true,
   privacyAgreement: undefined,
   displayLanguage: '',
   primaryLanguage: undefined,
@@ -15,6 +16,7 @@ const getters = {
   welcomeProcessDone: state => state.welcomeProcessDone,
   preferenceData: state => state,
   hideVideoHistoryOnExit: state => state.hideVideoHistoryOnExit,
+  hideNSFW: state => state.hideNSFW,
   reverseScrolling: state => state.reverseScrolling,
   privacyAgreement: state => state.privacyAgreement,
   displayLanguage: (state) => {
@@ -35,6 +37,9 @@ const mutations = {
   },
   displayLanguage(state, payload) {
     state.displayLanguage = payload;
+  },
+  hideNSFW(state, payload) {
+    state.hideNSFW = payload;
   },
   hideVideoHistoryOnExit(state, payload) {
     state.hideVideoHistoryOnExit = payload;
@@ -88,6 +93,10 @@ const actions = {
   },
   notReverseScrolling({ commit, state }) {
     commit('reverseScrolling', false);
+    return asyncStorage.set('preferences', state);
+  },
+  hideNSFW({ commit, state }, payload) {
+    commit('hideNSFW', !!payload);
     return asyncStorage.set('preferences', state);
   },
   hideVideoHistoryOnExit({ commit, state }) {

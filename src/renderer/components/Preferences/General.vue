@@ -119,6 +119,9 @@
     <BaseCheckBox v-model="reverseScrolling">
       {{ $t('preferences.general.reverseScrolling') }}
     </BaseCheckBox>
+    <BaseCheckBox v-model="hideNSFW">
+      {{ $t('preferences.general.hideNSFW') }}
+    </BaseCheckBox>
     <BaseCheckBox v-model="hideVideoHistoryOnExit">
       {{ $t('preferences.general.hideHistory') }}
     </BaseCheckBox>
@@ -177,6 +180,16 @@ export default {
             electron.ipcRenderer.send('preference-to-main', this.preferenceData);
           });
         }
+      },
+    },
+    hideNSFW: {
+      get() {
+        return this.$store.getters.hideNSFW;
+      },
+      set(val) {
+        this.$store.dispatch('hideNSFW', !!val).then(() => {
+          electron.ipcRenderer.send('preference-to-main', this.preferenceData);
+        });
       },
     },
     hideVideoHistoryOnExit: {
