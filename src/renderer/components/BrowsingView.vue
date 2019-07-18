@@ -12,6 +12,7 @@
         height: '100%',
         zIndex: '10',
         position: 'absolute',
+        cursor: 'pointer'
       }"
       v-show="isPip && isDragging"
     />
@@ -273,6 +274,7 @@ export default {
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [1200, 900]);
       this.$refs.webView.executeJavaScript('document.querySelector("#iframaWrapper").prepend(document.querySelector("#flashbox"));document.body.style.overflow = "";document.querySelector(".qy-player-absolute").style.display = "";document.getElementsByName("ttat")[0].style.display = "";document.getElementsByClassName("iqp-barrage")[1].style.display = ""');
       this.$refs.webView.executeJavaScript('document.querySelector("#flashbox").style.width="100%";document.querySelector("#flashbox").style.height="100%"');
+      this.$refs.webView.executeJavaScript('document.querySelector(".iqp-player").style.width="100%";document.querySelector(".iqp-player").style.height="100%"');
     },
     youtubeAdapter() {
       this.$refs.webView.executeJavaScript('getComputedStyle(document.querySelector("video"))', (result: CSSStyleDeclaration) => {
@@ -284,7 +286,6 @@ export default {
       });
       this.$refs.webView.executeJavaScript('var isPaused = document.querySelector("video").paused;document.body.appendChild(document.querySelector(".html5-video-player")); if (!isPaused) {document.querySelector("video").play()}');
       this.$refs.webView.executeJavaScript('document.querySelector(".html5-video-player").style.position = "absolute";document.getElementsByTagName("ytd-app")[0].style.display = "none"');
-      this.$refs.webView.executeJavaScript('if (document.querySelector(".video-ads")) document.querySelector(".video-ads").style.display = "none"'); // remove youtube ads
       this.$refs.webView.executeJavaScript('document.querySelector(".html5-video-container").style.width="100%";document.querySelector(".html5-video-container").style.height="100%";');
       this.$refs.webView.executeJavaScript('document.querySelector("video").style.width="100%";document.querySelector("video").style.height="100%";Object.defineProperty(document.querySelector("video").style, "width", {get: function(){return "100%"}, set: function(){}});Object.defineProperty(document.querySelector("video").style, "height", {get: function(){return "100%"}, set: function(){}})');
       this.$refs.webView.executeJavaScript('document.querySelector(".html5-video-player").style.background = "rgba(0, 0, 0, 1)"');
@@ -296,7 +297,6 @@ export default {
       this.$refs.webView.executeJavaScript('Object.defineProperty(document.querySelector("video").style, "width", {value: "100%", writable: true});Object.defineProperty(document.querySelector("video").style, "height", {value: "100%", writable: true});');
       this.$refs.webView.executeJavaScript('Object.defineProperty(document.querySelector(".ytp-chrome-bottom").style, "width", {get: function(){return this._width}, set: function(val){this._width = val;document.querySelector(".ytp-chrome-bottom").style.setProperty("width", val);}});');
       this.$refs.webView.executeJavaScript('document.querySelector(".html5-video-player").style.background = "rgba(255, 255, 255, 1)"');
-      this.$refs.webView.executeJavaScript('if (document.querySelector(".video-ads")) document.querySelector(".video-ads").style.display = ""'); // remove youtube ads
       this.$refs.webView.executeJavaScript('Object.defineProperty(document.body.style, "overflow", {value: "",writable: true});document.body.style.setProperty("overflow", "");');
       this.$refs.webView.executeJavaScript('var isPaused = document.querySelector("video").paused;document.querySelector(".ytd-player").appendChild(document.querySelector(".html5-video-player")); if (!isPaused) {document.querySelector("video").play()}');
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [0, 0]);
@@ -309,7 +309,6 @@ export default {
       }).then(() => {
         console.log(this.bilibiliType);
         if (this.bilibiliType === 'video') {
-          this.$refs.webView.executeJavaScript('var isPaused = document.querySelector("video").paused;document.body.appendChild(document.querySelector(".player")); if (!isPaused) {document.querySelector("video").play()}');
           this.$refs.webView.executeJavaScript('document.querySelector("#bofqi").style', (result: CSSStyleDeclaration) => {
             const videoAspectRatio = parseFloat(result.width as string)
               / (parseFloat(result.height as string) - 46);
@@ -317,11 +316,9 @@ export default {
             this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [420, Math.round(420 / videoAspectRatio)]);
             this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [420, Math.round(420 / videoAspectRatio)]);
           });
-          this.$refs.webView.executeJavaScript('document.querySelector(".bilibili-player-video-danmaku").style.display = "none"');
-          this.$refs.webView.executeJavaScript('document.querySelector("#app").style.display = "none"');
+          this.$refs.webView.executeJavaScript('document.querySelector(".bilibili-player-video-wrap").style.position = "fixed";document.querySelector(".bilibili-player-video-wrap").style.left="0";document.querySelector(".bilibili-player-video-wrap").style.top="0";document.querySelector(".bilibili-player-video-wrap").style.zIndex = "9999";document.querySelector(".bilibili-player-video-wrap").style.width="100%";document.querySelector(".bilibili-player-video-wrap").style.height="100%"');
+          this.$refs.webView.executeJavaScript('document.querySelector(".bilibili-player-video-danmaku").style.opacity = "0"');
           this.$refs.webView.executeJavaScript('document.body.style.overflow = "hidden"');
-          this.$refs.webView.executeJavaScript('document.querySelector(".bili-header-m").style.display = "none"');
-          this.$refs.webView.executeJavaScript('document.querySelector(".bilibili-player-video-bottom-area").style.display="none"');
         } else if (this.bilibiliType === 'videoStreaming') {
           this.$refs.webView.executeJavaScript('getComputedStyle(document.querySelector("video"))', (result: CSSStyleDeclaration) => {
             const videoAspectRatio = parseFloat(result.width as string)
@@ -359,13 +356,9 @@ export default {
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [720, 405]);
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [1200, 900]);
       if (this.bilibiliType === 'video') {
-        this.$refs.webView.executeJavaScript('var isPaused = document.querySelector("video").paused;document.querySelector("#bofqi").prepend(document.querySelector(".player")); if (!isPaused) {document.querySelector("video").play()}');
-        this.$refs.webView.executeJavaScript('document.querySelector("#app").style.display = ""');
-        this.$refs.webView.executeJavaScript('document.querySelector(".bilibili-player-video-danmaku").style.display = ""');
+        this.$refs.webView.executeJavaScript('document.querySelector(".bilibili-player-video-danmaku").style.opacity = "1"');
         this.$refs.webView.executeJavaScript('document.body.style.overflow = ""');
-        this.$refs.webView.executeJavaScript('document.querySelector(".bili-header-m").style.display = ""');
-        this.$refs.webView.executeJavaScript('document.querySelector(".player").style.height= "100%"');
-        this.$refs.webView.executeJavaScript('document.querySelector(".bilibili-player-video-bottom-area").style.display=""');
+        this.$refs.webView.executeJavaScript('document.querySelector(".bilibili-player-video-wrap").style.position = "relative";document.querySelector(".bilibili-player-video-wrap").style.left="";document.querySelector(".bilibili-player-video-wrap").style.top="";document.querySelector(".bilibili-player-video-wrap").style.zIndex = "auto";document.querySelector(".bilibili-player-video-wrap").style.width="";document.querySelector(".bilibili-player-video-wrap").style.height=""');
       } else if (this.bilibiliType === 'videoStreaming') {
         this.$refs.webView.executeJavaScript('document.querySelector(".player-section").prepend(document.querySelector(".live-player-ctnr"))');
         this.$refs.webView.executeJavaScript('document.querySelector(".bilibili-live-player-video-danmaku").style.display = ""');
