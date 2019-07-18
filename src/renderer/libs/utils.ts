@@ -8,7 +8,7 @@ import { promises as fsPromises } from 'fs';
 // @ts-ignore
 import nzh from 'nzh';
 import { SubtitleControlListItem, Type } from '@/interfaces/ISubtitle';
-import { codeToLanguageName } from './language';
+import { codeToLanguageName, LanguageCode } from './language';
 import { IEmbeddedOrigin } from '@/services/subtitle';
 // @ts-ignore
 
@@ -205,7 +205,8 @@ export function calculatedName(
       (s: SubtitleControlListItem) => (s as IEmbeddedOrigin).source.streamIndex,
     );
     const sort = embeddedList.findIndex((s: SubtitleControlListItem) => s.id === item.id) + 1;
-    name = `${romanize(sort)} - ${codeToLanguageName(item.language)}`;
+    name = item.language === LanguageCode.No || item.language === LanguageCode.Default
+      ? `${romanize(sort)}` : `${romanize(sort)} - ${codeToLanguageName(item.language)}`;
   } else if (item.type === Type.Online) {
     const sort = list
       .filter((s: SubtitleControlListItem) => s.type === Type.Online
