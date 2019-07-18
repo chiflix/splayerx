@@ -21,14 +21,14 @@ export class BaseMediaTaskQueue extends EventEmitter {
 
   private startProcessTasks = false;
 
-  public addTask<T>(task: IMediaTask<T>): Promise<T> {
+  public addTask<T>(task: IMediaTask<T>, piority: number = 0): Promise<T> {
     const id = task.getId();
     if (!this.taskInfos.has(id)) {
       this.taskInfos.set(id, {
         status: MediaTaskStatus.ADDED,
         result: undefined,
         task,
-        piority: 0,
+        piority,
       });
     }
     const { status, result } = this.taskInfos.get(id) as TaskInfo<T>;
@@ -41,7 +41,7 @@ export class BaseMediaTaskQueue extends EventEmitter {
               status: MediaTaskStatus.EXECUTED,
               result,
               task,
-              piority: 0,
+              piority,
             });
             if (status === MediaTaskStatus.EXECUTED) resolve(result);
             else reject(result);
@@ -69,7 +69,7 @@ export class BaseMediaTaskQueue extends EventEmitter {
         .length
     ) {
       const [id, taskInfo] = unExecutedTasks
-        .sort((task1, task2) => task1[1].piority - task2[1].piority)[0];
+        .sort((task1, task2) => task2[1].piority - task1[1].piority)[0];
       try {
         yield {
           id,
@@ -92,6 +92,7 @@ export class BaseMediaTaskQueue extends EventEmitter {
       for await (const taskInfo of this.getNextTask()) {
         if (taskInfo) {
           const { id, result, status } = taskInfo;
+          console.log(id, result, status);
           this.emit(id, { result, status });
         }
       }

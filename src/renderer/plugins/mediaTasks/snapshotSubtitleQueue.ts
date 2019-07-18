@@ -150,7 +150,7 @@ export class SnapshotSubtitleQueue extends BaseMediaTaskQueue {
     try {
       const result = await super.addTask<string>(await SubtitleTask.from(
         videoPath, streamIndex, format,
-      ));
+      ), 1);
       if (result as unknown instanceof Error) return '';
       return result;
     } catch (err) { return ''; }
