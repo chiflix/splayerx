@@ -9,7 +9,7 @@ import { promises as fsPromises } from 'fs';
 import nzh from 'nzh';
 import { SubtitleControlListItem, Type } from '@/interfaces/ISubtitle';
 import { codeToLanguageName } from './language';
-import { EmbeddedOrigin } from '@/services/subtitle';
+import { IEmbeddedOrigin } from '@/services/subtitle';
 // @ts-ignore
 
 /** 计算文本宽度
@@ -202,7 +202,7 @@ export function calculatedName(
       .filter((s: SubtitleControlListItem) => s.type === Type.Embedded);
     embeddedList = sortBy(
       embeddedList,
-      (s: SubtitleControlListItem) => (s as EmbeddedOrigin).source.streamIndex,
+      (s: SubtitleControlListItem) => (s as IEmbeddedOrigin).source.streamIndex,
     );
     const sort = embeddedList.findIndex((s: SubtitleControlListItem) => s.id === item.id) + 1;
     name = `${romanize(sort)} - ${codeToLanguageName(item.language)}`;

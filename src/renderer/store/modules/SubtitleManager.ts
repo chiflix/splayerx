@@ -151,7 +151,7 @@ function privacyConfirm(): Promise<boolean> {
 
 let primarySelectionComplete = false;
 let secondarySelectionComplete = false;
-let alterDelayTimeoutId: NodeJS.Timeout;
+let alterDelayTimeoutId: NodeJS.Timer;
 function setDelayTimeout() {
   clearTimeout(alterDelayTimeoutId);
   alterDelayTimeoutId = setTimeout(() => store.dispatch(a.storeSubtitleDelays), 10000);

@@ -1,6 +1,6 @@
 import { isEqual } from 'lodash';
 import {
-  IParser, Format, Cue, VideoSegment, IDialogue,
+  IParser, Format, Cue, IVideoSegment, IDialogue,
 } from '@/interfaces/ISubtitle';
 
 function getDialogues(dialogues: Cue[], time?: number) {
@@ -49,7 +49,7 @@ export class BaseParser implements IParser {
     return getDialogues(this.dialogues, time);
   }
 
-  private videoSegments: VideoSegment[];
+  private videoSegments: IVideoSegment[];
 
   public async getVideoSegments(duration: number) {
     if (this.videoSegments) return this.videoSegments;
@@ -57,7 +57,7 @@ export class BaseParser implements IParser {
     return this.videoSegments;
   }
 
-  private lastSegment: VideoSegment;
+  private lastSegment: IVideoSegment;
 
   private lastSegmentPlayedTime: number = 0;
 

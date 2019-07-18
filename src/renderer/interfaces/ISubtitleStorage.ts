@@ -1,5 +1,5 @@
 import {
-  Format, Type, VideoSegment, IOrigin,
+  Format, Type, IVideoSegment, IOrigin,
 } from './ISubtitle';
 import { LanguageCode } from '@/libs/language';
 
@@ -16,7 +16,7 @@ export interface IStoredSubtitleItem {
   type: Type;
   /** may also be fake source for display use only */
   source: unknown;
-  videoSegments?: VideoSegment[];
+  videoSegments?: IVideoSegment[];
   delay: number;
 }
 interface IPrimarySecondary<T> {

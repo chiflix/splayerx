@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { cloneDeep } from 'lodash';
 import {
-  EntityGenerator, Entity, Parser, Type, Format, Origin, defaultEntity, SubtitleControlListItem,
+  IEntityGenerator, Entity, IParser, Type, Format, IOrigin, defaultEntity, SubtitleControlListItem,
 } from '@/interfaces/ISubtitle';
 import { LanguageCode } from '@/libs/language';
 import {
@@ -37,7 +37,7 @@ enum CacheStatus {
 const subtitleMap: Map<string, {
   entity: Entity;
   loader: () => Promise<unknown>;
-  parser?: Parser;
+  parser?: IParser;
   cached: CacheStatus;
 }> = new Map();
 
@@ -93,7 +93,7 @@ const actions = {
     });
     commit(m.setModuleId, moduleId);
   },
-  async [a.add]({ commit, state }: any, generator: EntityGenerator) {
+  async [a.add]({ commit, state }: any, generator: IEntityGenerator) {
     const subtitle = subtitleMap.get(state.moduleId);
     if (subtitle) {
       subtitle.loader = generator.getPayload.bind(generator);
@@ -105,8 +105,8 @@ const actions = {
               entity.source = src;
               return generator.getSource();
             })
-            .then((src: Origin) => commit(m.setRealSource, src))
-          : generator.getSource().then((src: Origin) => {
+            .then((src: IOrigin) => commit(m.setRealSource, src))
+          : generator.getSource().then((src: IOrigin) => {
             entity.source = src;
             commit(m.setRealSource, src);
           }),
