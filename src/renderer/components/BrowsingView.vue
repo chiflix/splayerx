@@ -231,20 +231,18 @@ export default {
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [420, Math.round(420 / videoAspectRatio)]);
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [420, Math.round(420 / videoAspectRatio)]);
       });
-      this.$refs.webView.executeJavaScript('document.getElementsByClassName("iqp-barrage")[1].style.display = "none"');
-      this.$refs.webView.executeJavaScript('document.body.style.overflow = "hidden";document.querySelector(".qy-flash-box").style.cssText = "position: fixed; left: 0; top: 0; z-index: 9999"');
-      this.$refs.webView.executeJavaScript(`setTimeout(() => {document.querySelector(".flash-box").style.width="${this.winSize[0]}px";document.querySelector(".flash-box").style.height="${this.winSize[1]}px"}, 0)`);
+      this.$refs.webView.executeJavaScript('document.body.prepend(document.querySelector("#flashbox"));document.querySelector(".qy-player-absolute").style.display = "none"');
+      this.$refs.webView.executeJavaScript(`document.querySelector("#flashbox").style.width="${this.winWidth}px";document.querySelector("#flashbox").style.height="${this.winSize[1]}px"`);
     },
     iqiyiWatcher(val: number) {
-      this.$refs.webView.executeJavaScript(`setTimeout(() => {document.querySelector(".flash-box").style.width="${val}px";document.querySelector(".flash-box").style.height="${this.winSize[1]}px"}, 0)`);
+      this.$refs.webView.executeJavaScript(`document.querySelector("#flashbox").style.width="${val}px";document.querySelector("#flashbox").style.height="${this.winSize[1]}px"`);
     },
     iqiyiRecover() {
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [0, 0]);
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [720, 405]);
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [1200, 900]);
-      this.$refs.webView.executeJavaScript('document.getElementsByClassName("iqp-barrage")[1].style.display = ""');
-      this.$refs.webView.executeJavaScript('document.body.style.overflow = "";document.querySelector(".qy-flash-box").style.cssText = `position: ""; left: ""; top: ""; z-index: ""`');
-      this.$refs.webView.executeJavaScript('document.querySelector(".flash-box").style.width="100%";document.querySelector(".flash-box").style.height="100%"');
+      this.$refs.webView.executeJavaScript('document.querySelector("#iframaWrapper").prepend(document.querySelector("#flashbox"));document.querySelector(".qy-player-absolute").style.display = ""');
+      this.$refs.webView.executeJavaScript('document.querySelector("#flashbox").style.width="100%";document.querySelector("#flashbox").style.height="100%"');
     },
     youtubeAdapter() {
       this.$refs.webView.executeJavaScript('getComputedStyle(document.querySelector("video"))', (result: CSSStyleDeclaration) => {
@@ -291,6 +289,7 @@ export default {
           this.$refs.webView.executeJavaScript('document.querySelector("#app").style.display = "none"');
           this.$refs.webView.executeJavaScript('document.body.style.overflow = "hidden"');
           this.$refs.webView.executeJavaScript('document.querySelector(".bili-header-m").style.display = "none"');
+          this.$refs.webView.executeJavaScript('document.querySelector(".bilibili-player-video-bottom-area").style.display="none"');
         } else if (this.bilibiliType === 'videoStreaming') {
           this.$refs.webView.executeJavaScript('getComputedStyle(document.querySelector("video"))', (result: CSSStyleDeclaration) => {
             const videoAspectRatio = parseFloat(result.width as string)
@@ -318,13 +317,7 @@ export default {
       });
     },
     bilibiliWatcher(val: number) {
-      if (this.bilibiliType === 'video') {
-        if (val >= 480) {
-          this.$refs.webView.executeJavaScript('document.querySelector(".player").style.width= "100%"; document.querySelector(".player").style.height= "calc(100% + 46px)"');
-        } else {
-          this.$refs.webView.executeJavaScript('document.querySelector(".player").style.width= "100%"; document.querySelector(".player").style.height= "100%"');
-        }
-      } else if (this.bilibiliType === 'iframeStreaming') {
+      if (this.bilibiliType === 'iframeStreaming') {
         this.$refs.webView.executeJavaScript(`document.querySelector("iframe").contentDocument.querySelector(".player-ctnr").style.width = "${val}px";document.querySelector("iframe").contentDocument.querySelector(".player-ctnr").style.height = "${this.winSize[1]}px";document.querySelector("iframe").contentDocument.querySelector(".live-player-ctnr").style.width ="${val}px";document.querySelector("iframe").contentDocument.querySelector(".live-player-ctnr").style.height ="${this.winSize[1]}px"`);
       }
     },
@@ -339,6 +332,7 @@ export default {
         this.$refs.webView.executeJavaScript('document.body.style.overflow = ""');
         this.$refs.webView.executeJavaScript('document.querySelector(".bili-header-m").style.display = ""');
         this.$refs.webView.executeJavaScript('document.querySelector(".player").style.height= "100%"');
+        this.$refs.webView.executeJavaScript('document.querySelector(".bilibili-player-video-bottom-area").style.display=""');
       } else if (this.bilibiliType === 'videoStreaming') {
         this.$refs.webView.executeJavaScript('document.querySelector(".player-section").prepend(document.querySelector(".live-player-ctnr"))');
         this.$refs.webView.executeJavaScript('document.querySelector(".bilibili-live-player-video-danmaku").style.display = ""');
