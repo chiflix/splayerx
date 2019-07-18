@@ -300,10 +300,7 @@ const actions = {
     } = getters;
     // 如果当前有翻译任务
     if (isTranslating) {
-      dispatch(
-        atActions.AUDIO_TRANSLATE_SHOW_BUBBLE,
-        AudioTranslateBubbleOrigin.OtherAIButtonClick,
-      );
+      dispatch(atActions.AUDIO_TRANSLATE_SHOW_BUBBLE, AudioTranslateBubbleOrigin.Refresh);
       dispatch(atActions.AUDIO_TRANSLATE_BUBBLE_CALLBACK, () => {
         // TODO 如果开启了第二字幕
         dispatch(a.changePrimarySubtitle, '');
@@ -596,9 +593,7 @@ const actions = {
     if (state.allSubtitles[secondary]) {
       commit(m.setSecondaryDelay, state.allSubtitles[secondary].delay);
     }
-    if (state[id] && state[id].type !== Type.Translated) {
-      dispatch(a.storeSelectedSubtitle, [primary, secondary]);
-    }
+    dispatch(a.storeSelectedSubtitle, [primary, secondary]);
     if (id && store.hasModule(id)) await dispatch(`${id}/${subActions.load}`);
   },
   async [a.changeSecondarySubtitle]({
@@ -613,15 +608,14 @@ const actions = {
     if (state.allSubtitles[secondary]) {
       commit(m.setSecondaryDelay, state.allSubtitles[secondary].delay);
     }
-    if (state[id] && state[id].type !== Type.Translated) {
-      dispatch(a.storeSelectedSubtitle, [primary, secondary]);
-    }
+    dispatch(a.storeSelectedSubtitle, [primary, secondary]);
     if (id && store.hasModule(id)) await dispatch(`${id}/${subActions.load}`);
   },
   async [a.storeSelectedSubtitle]({ state }: any, ids: string[]) {
     const { allSubtitles, playlistId, mediaItemId } = state;
     const subtitles = ids
-      .filter(id => allSubtitles[id])
+      .filter(id => allSubtitles[id]
+        && !(allSubtitles[id].type === Type.Translated && allSubtitles[id].source === ''))
       .map((id) => {
         const { hash, source } = allSubtitles[id];
         return { hash, source };

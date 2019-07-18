@@ -266,6 +266,7 @@
   },
   "subtitle": {
     "embedded": "Embed",
+    "generate": "Generate",
     "language": {
       "ar": "Arabic",
       "de": "German",
@@ -306,5 +307,36 @@
   "loadVideoBySubtitleFailed": {
     "content": "Cannot find any related video in the folder",
     "title": ""
+  },
+  "translateModal": {
+    "title": "Select Audio Language",
+    "translateTitle": "About {time} Left",
+    "minute": "{number} min",
+    "second": "{number} second",
+    "hour": "{number} hour",
+    "successTitle": "Translation Done",
+    "failTitle": "Translation Failed",
+    "cancelTitle": "Translation Cancelled",
+    "selectDescription": "Found no translation results. To generate one, please select the language you hear in the video. The translation process might take some time.",
+    "selectLabel": "Audio Language",
+    "cancel": "Cancel",
+    "generate": "Generate",
+    "translateDescription": "Please do not skip the video or close the application. Progress can be viewed on the translation panel.",
+    "ok": "Okay",
+    "successDescriptiton": "AI Translation is ready, please check it on the translation panel.",
+    "failDescription": "Please try later, thanks.",
+    "cancelDescription": "Please confirm you cancellation, and the translation progress will not be restored.",
+    "continue": "Continue"
+  },
+  "translateBubble": {
+    "bubbleWhenGrab": "AI Translation is in progress. Do you still want to Leave anyway?",
+    "bubbleWhenTranslate": "AI Translation is being processed on the server. You will see the progress when you watch the video next time.",
+    "bubbleWhenForbidden": "Unable to use this function while AI Translation is processing.",
+    "bubbleWhenSuccess": "AI Translation is ready now, please check it on the translation list.",
+    "bubbleWhenSuccessOnOtherVideo": "AI Translation is ready now. It will be automatically loaded next time when you watch the video.",
+    "bubbleWhenFail": "Translation Failed - Please try later, thanks.",
+    "continue": "Continue Watching",
+    "leave": "Leave",
+    "ok": "Okay"
   }
 }

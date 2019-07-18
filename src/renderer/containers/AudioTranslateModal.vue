@@ -14,7 +14,7 @@
         class="select-title"
       >
         <h1>
-          选择视频源语言
+          {{ $t('translateModal.title') }}
         </h1>
         <div
           class="beta-mark"
@@ -23,31 +23,31 @@
         </div>
       </div>
       <h1 v-else-if="isConfirmCancelTranlate">
-        翻译已取消
+        {{ $t('translateModal.cancelTitle') }}
       </h1>
       <h1 v-else-if="isProgress && isTranslateSuccess">
-        翻译完成
+        {{ $t('translateModal.successTitle') }}
       </h1>
       <h1 v-else-if="isProgress && isTranslateFail">
-        翻译失败
+        {{ $t('translateModal.failTitle') }}
       </h1>
       <h1 v-else-if="isProgress">
-        大约还需 {{ estimateTimeText }}
+        {{ $t('translateModal.translateTitle', { time: estimateTimeText }) }}
       </h1>
       <p v-if="!isProgress && !isConfirmCancelTranlate">
-        目前尚无此语言的智能翻译结果，请准确选择您在视频中所听到的语言，翻译将持续一段时间。
+        {{ $t('translateModal.selectDescription') }}
       </p>
       <p v-else-if="isConfirmCancelTranlate">
-        点击确定关闭，关闭后翻译进度将不可恢复。
+        {{ $t('translateModal.cancelDescription') }}
       </p>
       <p v-else-if="isProgress && isTranslateSuccess">
-        AI翻译已完成，可在翻译结果列表中查看。
+        {{ $t('translateModal.successDescriptiton') }}
       </p>
       <p v-else-if="isProgress && isTranslateFail">
-        啦啦啦啦啦啦啦啦啦啦啦啦。
+        {{ $t('translateModal.failDescription') }}
       </p>
       <p v-else-if="isProgress">
-        请不要关闭播放器，您可以在该视频的翻译结果列表中查看进度。
+        {{ $t('translateModal.translateDescription') }}
       </p>
       <div
         v-if="!isProgress && !isConfirmCancelTranlate"
@@ -69,7 +69,7 @@
         />
         <div
           v-if="isTranslateFail"
-          @click="translate"
+          @click="retryTranslate"
           class="icon-wraper"
         >
           <Icon
@@ -105,13 +105,13 @@
           @click="hideTranslateModal"
           class="button"
         >
-          取消
+          {{ $t('translateModal.cancel') }}
         </div>
         <div
           @click="translate"
           :class="`${audioLanguage.value ? '' : 'disabled'} button`"
         >
-          确定
+          {{ $t('translateModal.generate') }}
         </div>
       </div>
       <div
@@ -122,13 +122,13 @@
           @click="isConfirmCancelTranlate = false;"
           class="button"
         >
-          恢复
+          {{ $t('translateModal.continue') }}
         </div>
         <div
           @click="cancelTranslate"
           class="button"
         >
-          确定
+          {{ $t('translateModal.cancel') }}
         </div>
       </div>
       <div
@@ -136,7 +136,7 @@
         @click="hideTranslateModal"
         class="button"
       >
-        确定
+        {{ $t('translateModal.ok') }}
       </div>
     </div>
   </div>
@@ -165,9 +165,9 @@ export default Vue.extend({
     Progress,
   },
   data() {
+    const label = this.$t('translateModal.selectLabel');
     return {
-      // TODO 统一language code
-      audioLanguage: { label: '视频源语言', value: '' },
+      audioLanguage: { label, value: '' },
       lanugages: [
         {
           value: 'en',
@@ -214,19 +214,19 @@ export default Vue.extend({
     estimateTimeText() {
       const time = this.translateEstimateTime;
       if (time >= 60 * 60) {
-        return `${Math.ceil(time / (60 * 60))} 小时`;
+        return this.$t('translateModal.hour', { number: Math.ceil(time / (60 * 60)) });
       } if (time >= 60) {
-        return `${Math.ceil(time / 60)} 分钟`;
+        return this.$t('translateModal.minute', { number: Math.ceil(time / 60) });
       }
-      return `${time} 秒`;
+      return this.$t('translateModal.minute', { number: 1 });
     },
   },
   watch: {
     mediaHash() {
-      this.audioLanguage = { label: '视频源语言', value: '' };
+      this.audioLanguage = { label: this.$t('translateModal.selectLabel'), value: '' };
     },
     currentAudioTrackId() {
-      this.audioLanguage = { label: '视频源语言', value: '' };
+      this.audioLanguage = { label: this.$t('translateModal.selectLabel'), value: '' };
     },
   },
   methods: {
@@ -240,6 +240,16 @@ export default Vue.extend({
       const { audioLanguage } = this;
       if (audioLanguage && audioLanguage.value) {
         this.startTranslate(audioLanguage.value);
+        // ga 真正开始翻译的次数 (即点击 "Confirm"的次数)
+        this.$ga.event('app', 'ai-translate-confirm-button-click');
+      }
+    },
+    retryTranslate() {
+      const { audioLanguage } = this;
+      if (audioLanguage && audioLanguage.value) {
+        this.startTranslate(audioLanguage.value);
+        // ga 重新翻译的次数
+        this.$ga.event('app', 'ai-translate-retry-button-click');
       }
     },
     cancelTranslate() {

@@ -508,6 +508,8 @@ new Vue({
     this.$event.on('playlist-display-state', (e: boolean) => {
       this.playlistDisplayState = e;
     });
+    // set $ga to vuex store
+    store.$ga = this.$ga;
   },
   methods: {
     ...mapActions({

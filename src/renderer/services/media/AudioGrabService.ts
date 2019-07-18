@@ -1,8 +1,8 @@
 /*
- * @Author: tanghaixiang@xindong.com 
- * @Date: 2019-06-20 18:03:14 
+ * @Author: tanghaixiang@xindong.com
+ * @Date: 2019-06-20 18:03:14
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-07-16 18:30:46
+ * @Last Modified time: 2019-07-18 12:50:03
  */
 
 // @ts-ignore
@@ -26,7 +26,7 @@ import { TranscriptInfo } from '../subtitle';
 /* eslint-disable */
 const grpc = require('grpc');
 /* eslint-enable */
-var endpoint: string = '';
+let endpoint = '';
 if (process.env.NODE_ENV === 'production') {
   endpoint = 'apis.sagittarius.ai:8443';
 } else {
@@ -50,7 +50,7 @@ type JobData = {
   callback?: Function,
 }
 
-declare interface AudioGrabService {
+declare interface AudioGrabService { // eslint-disable-line
   on(event: 'grab', listener: (time: number) => void): this;
   on(event: 'grabCompleted', listener: () => void): this;
   on(event: 'error', listener: (error: Error) => void): this;
@@ -59,29 +59,51 @@ declare interface AudioGrabService {
 }
 
 class AudioGrabService extends EventEmitter {
-  mediaHash: string;
-  videoSrc: string;
-  audioId: number;
-  pts: string = '0';
-  audioChannel: number = 0;
-  rate: number = 16000;
-  audioLanguageCode: string;
-  targetLanguageCode: string;
-  streamClient: any = null;
-  queue: [JobData];
-  callback: Function;
-  taskInfo?: AITaskInfo;
-  startTime: number;
-  grabEndTime: number;
-  translationEndTime: number;
-  loopTimer: any;
-  timeoutTimer: any;
-  grabTime: number;
-  _count: number;
-  _pkgSize: number;
+  public mediaHash: string;
 
-  constructor(private readonly mediaStorageService: MediaStorageService) {
+  public videoSrc: string;
+
+  public audioId: number;
+
+  public pts: string = '0';
+
+  public audioChannel: number = 0;
+
+  public rate: number = 16000;
+
+  public audioLanguageCode: string;
+
+  public targetLanguageCode: string;
+
+  public streamClient: any; // eslint-disable-line
+
+  public queue: [JobData];
+
+  public callback: Function;
+
+  public taskInfo?: AITaskInfo;
+
+  public startTime: number;
+
+  public grabEndTime: number;
+
+  public translationEndTime: number;
+
+  public loopTimer: NodeJS.Timeout;
+
+  public timeoutTimer: NodeJS.Timeout;
+
+  public grabTime: number;
+
+  public _count: number;
+
+  public _pkgSize: number;
+
+  private mediaStorageService: MediaStorageService;
+
+  public constructor(mediaStorageService: MediaStorageService) {
     super();
+    this.mediaStorageService = mediaStorageService;
     this.ipcCallBack = this.ipcCallBack.bind(this);
   }
 
@@ -96,7 +118,7 @@ class AudioGrabService extends EventEmitter {
     return this;
   }
 
-  ipcCallBack(event: Event, args: any) {
+  public ipcCallBack(event: Event, args: any) { // eslint-disable-line
     if (args.grabInfo) {
       switch (args.grabInfo.status) {
         case Status.Grab:
@@ -184,7 +206,7 @@ class AudioGrabService extends EventEmitter {
       console.warn('EOF', this._count);
       if (this.callback) {
         this.callback({
-          status: Status.GrabCompleted
+          status: Status.GrabCompleted,
         });
       }
     } else if (this.streamClient) {
@@ -193,7 +215,7 @@ class AudioGrabService extends EventEmitter {
         this.grabAudio();
       }, 20);
     } else {
-      return;
+      // empty
     }
   }
 
@@ -248,8 +270,12 @@ class AudioGrabService extends EventEmitter {
     requestConfig.setMediaIdentity(data.mediaHash);
     request.setStreamingConfig(requestConfig);
     this.streamClient.write(request);
+    this.streamClient.once('data', this.rpcCallBack.bind(this));
     // 开启超时处理
-    // this.timeOut();
+    this.timeOut();
+  }
+
+  private startGrab() {
     // start grab data
     this.pts = '0';
     this._count = 0;
@@ -258,9 +284,10 @@ class AudioGrabService extends EventEmitter {
     this.grabAudio();
 
     this.startTime = Date.now();
+    this.streamClient.once('data', this.rpcCallBack.bind(this));
   }
 
-  private openClient(): any {
+  private openClient(): any { // eslint-disable-line
     const sslCreds = grpc.credentials.createSsl(
       // @ts-ignore
       fs.readFileSync(path.join(__static, '/certs/ca.pem')),
@@ -269,7 +296,7 @@ class AudioGrabService extends EventEmitter {
       // @ts-ignore
       fs.readFileSync(path.join(__static, '/certs/cert.pem')),
     );
-    const metadataUpdater = (_: any, cb: Function) => {
+    const metadataUpdater = (_: {}, cb: Function) => {
       const metadata = new grpc.Metadata();
       cb(null, metadata);
     };
@@ -277,8 +304,7 @@ class AudioGrabService extends EventEmitter {
     const combinedCreds = grpc.credentials.combineChannelCredentials(sslCreds, metadataCreds);
     const client = new TranslationClient(endpoint, combinedCreds);
     const stream = client.streamingTranslation();
-    stream.on('data', this.rpcCallBack.bind(this));
-    stream.on('error', (error: Error) => {
+    stream.once('error', (error: Error) => {
       try {
         console.log(error, 'audio-log');
       } catch (err) {
@@ -289,7 +315,7 @@ class AudioGrabService extends EventEmitter {
       if (this.callback) {
         this.callback({
           status: Status.Error,
-          error: error,
+          error,
         });
       }
     });
@@ -313,9 +339,12 @@ class AudioGrabService extends EventEmitter {
     // TODO timeout reset 10s
   }
 
-  private rpcCallBack(res: StreamingTranslationResponse, err: Error) {
+  private rpcCallBack( // eslint-disable-line complexity
+    res: StreamingTranslationResponse,
+    err: Error,
+  ) {
     try {
-      console.log(err, res.toObject(), 'audio-log');
+      console.log(err, res.toObject(), 'rpcCallBack', 'audio-log');
     } catch (err) {
       console.warn('error');
     }
@@ -324,14 +353,14 @@ class AudioGrabService extends EventEmitter {
       clearTimeout(this.timeoutTimer);
     }
     const result = res && res.toObject();
-    if (result && res.hasTaskinfo()) {
+    if (result && res.hasTaskinfo() && result.taskinfo) {
       this.grabEndTime = Date.now();
       this.taskInfo = {
         mediaHash: this.mediaHash,
         audioLanguageCode: this.audioLanguageCode,
         targetLanguage: this.targetLanguageCode,
         ...result.taskinfo,
-      } as AITaskInfo
+      };
       // if streamClient exist end my stream
       if (this.streamClient) {
         this.streamClient.end();
@@ -342,7 +371,7 @@ class AudioGrabService extends EventEmitter {
         status: Status.Task,
         taskInfo: this.taskInfo,
       });
-      this.loopTask(this.taskInfo)
+      this.loopTask(this.taskInfo);
     } else if (result && res.hasTranscriptResult()) {
       // get Transcript Info
       // return hash to render
@@ -352,7 +381,9 @@ class AudioGrabService extends EventEmitter {
         transcriptInfo: result.transcriptResult,
       });
       this.clearJob();
-    } else if (result && res.hasError() && result.error.code !== 9100) {
+    } else if (result && result.error && result.error.code === 9100) {
+      this.startGrab();
+    } else if (result && res.hasError()) {
       // return error to render
       this.stop();
       this.callback({
@@ -368,7 +399,7 @@ class AudioGrabService extends EventEmitter {
     }
   }
 
-  loopTask(taskInfo: AITaskInfo) {
+  public loopTask(taskInfo: AITaskInfo) {
     const taskId = taskInfo.taskId;
     let delay = Math.ceil((taskInfo.estimateTime / 2));
     // 延迟查询task进度，如果延迟超多10秒，就10秒之后去查询
@@ -383,7 +414,7 @@ class AudioGrabService extends EventEmitter {
         // @ts-ignore
         fs.readFileSync(path.join(__static, '/certs/cert.pem')),
       );
-      const metadataUpdater = (_: any, cb: Function) => {
+      const metadataUpdater = (_: {}, cb: Function) => {
         const metadata = new grpc.Metadata();
         cb(null, metadata);
       };
@@ -400,7 +431,7 @@ class AudioGrabService extends EventEmitter {
 
   private loopTaskCallBack(err: Error | null, res: StreamingTranslationTaskResponse) {
     try {
-      console.error(res.toObject(), err, 'loop', 'audio-log');
+      console.error(res.toObject(), err, 'loopTaskCallBack', 'audio-log');
     } catch (err) {
       console.warn('error');
     }
@@ -415,13 +446,13 @@ class AudioGrabService extends EventEmitter {
         status: Status.TranscriptInfo,
         transcriptInfo: result.transcriptinfo,
       });
-    } else if (result && res.hasTaskinfo()) {
+    } else if (result && res.hasTaskinfo() && result.taskinfo) {
       this.taskInfo = {
         audioLanguageCode: this.audioLanguageCode,
         targetLanguage: this.targetLanguageCode,
         mediaHash: this.mediaHash,
         ...result.taskinfo,
-      } as AITaskInfo;
+      };
       this.callback({
         status: Status.Task,
         taskInfo: this.taskInfo,
@@ -442,7 +473,7 @@ class AudioGrabService extends EventEmitter {
     }
   }
 
-  clearJob() {
+  public clearJob() {
     if (this.loopTimer) {
       clearTimeout(this.loopTimer);
     }

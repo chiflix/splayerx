@@ -1,6 +1,6 @@
 import { join } from 'path';
-import { IMediaStorable } from '@/interfaces/IMediaStorable';
-import CacheFile, { cacheFile as cacheFileInstance } from '@/libs/CacheFile';
+import { IMediaStorable, AITaskInfo } from '@/interfaces/IMediaStorable';
+import CacheFile, { cacheFile as cacheFileInstance } from '../../libs/CacheFile';
 
 /** 视频元数据 */
 export type VideoInfo = {
@@ -81,18 +81,21 @@ export default class MediaStorageService implements IMediaStorable {
       return null;
     }
   }
-  getAsyncTaskInfo(key: string): AITaskInfo | undefined {
+
+  public getAsyncTaskInfo(key: string): AITaskInfo | undefined {
     const result = localStorage.getItem(key);
-    const info: any = result ? JSON.parse(result) : undefined;
+    const info: AITaskInfo | undefined = result ? JSON.parse(result) : undefined;
     if (info && info.taskId) {
       return info as AITaskInfo;
     }
     return undefined;
   }
-  setAsyncTaskInfo(key: string, taskInfo: AITaskInfo): void {
+
+  public setAsyncTaskInfo(key: string, taskInfo: AITaskInfo): void {
     localStorage.setItem(key, JSON.stringify(taskInfo));
   }
-  clearAsyncTaskInfo(key: string): void {
+
+  public clearAsyncTaskInfo(key: string): void {
     localStorage.removeItem(key);
   }
 }

@@ -89,7 +89,7 @@
                   v-show="item.type === 'translated' && hoverIndex === index"
                   class="txt"
                 >
-                  Generate
+                  {{ $t('subtitle.generate') }}
                 </div>
               </transition>
               <div

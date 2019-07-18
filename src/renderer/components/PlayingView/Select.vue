@@ -11,8 +11,12 @@
         </span>
         <span
           v-show="!showSelection"
+          class="arrow"
+        >→</span>
+        <span
+          v-show="!showSelection"
           class="static_label"
-        >-> {{ staticLabel }}</span>
+        >{{ staticLabel }}</span>
       </div>
       <div
         @mouseup.stop=""
@@ -125,8 +129,12 @@ export default Vue.extend({
     display: flex;
     align-items: center;
     justify-content: center;
-    .un_select, .static_label {
+    .un_select, .static_label, .arrow {
       opacity: 0.3;
+    }
+    .arrow {
+      margin-left: 4px;
+      margin-right: 4px;
     }
   }
 

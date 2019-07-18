@@ -2,7 +2,7 @@
   <div @mouseup.stop="">
     <div
       :class="`${
-        showWhenGrab || showWhenStopTranslate
+        showWhenGrab || showWhenStopTranslate || showDiscardWhenTranlate
           ? 'bubbleLayout--column'
           : 'bubbleLayout--row'
       }`"
@@ -20,22 +20,31 @@
           @mouseup.stop="$emit('disCardTranslate');"
           class="bubble__button--lower"
         >
-          仍要关闭
+          {{ $t('translateBubble.leave') }}
         </div>
         <div
           @mouseup.stop="$emit('hide');"
           class="bubble__button"
         >
-          取消
+          {{ $t('translateBubble.continue') }}
         </div>
       </div>
       <!-- 后台翻译，关闭窗口气泡 -->
-      <div v-else-if="showDiscardWhenTranlate">
+      <div
+        v-else-if="showDiscardWhenTranlate"
+        class="buttonGroup"
+      >
         <div
           @mouseup.stop="$emit('disCardTranslate');"
+          class="bubble__button--lower"
+        >
+          {{ $t('translateBubble.leave') }}
+        </div>
+        <div
+          @mouseup.stop="$emit('hide');"
           class="bubble__button"
         >
-          好的
+          {{ $t('translateBubble.continue') }}
         </div>
       </div>
       <!-- 后台翻译，切换视频的气泡 -->
@@ -45,7 +54,7 @@
           @mouseup.stop="$emit('backStageTranslate');"
           class="bubble__button"
         >
-          好的
+          {{ $t('translateBubble.ok') }}
         </div>
       </div>
       <!-- 正在翻译，想使用其他翻译或者刷新字幕 -->
@@ -57,13 +66,13 @@
           @mouseup.stop="$emit('disCardTranslate');"
           class="bubble__button--lower"
         >
-          好的
+          {{ $t('translateBubble.leave') }}
         </div>
         <div
-          @mouseup.stop="$emit('disCardTranslate');"
+          @mouseup.stop="$emit('hide');"
           class="bubble__button"
         >
-          停止翻译
+          {{ $t('translateBubble.continue') }}
         </div>
       </div>
       <!-- 当翻译结束，失败的时候 -->
@@ -72,7 +81,7 @@
           @mouseup.stop="$emit('hide');"
           class="bubble__button"
         >
-          好的
+          {{ $t('translateBubble.ok') }}
         </div>
       </div>
     </div>
@@ -113,7 +122,8 @@ export default Vue.extend({
       || this.type === AudioTranslateBubbleType.NextVideoWhenTranslate;
     },
     showWhenStopTranslate() {
-      return this.type === AudioTranslateBubbleType.ClickWhenTranslate;
+      return this.type === AudioTranslateBubbleType.ClickWhenTranslate
+       || this.type === AudioTranslateBubbleType.RefreshWhenTranslate;
     },
     showWhenError() {
       return this.type === AudioTranslateBubbleType.FailAfterTranslate;

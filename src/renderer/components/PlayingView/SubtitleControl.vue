@@ -438,6 +438,8 @@ export default {
     changeSubtitle(item: SubtitleControlListItem) {
       if (item.type === Type.Translated && item.source === '') {
         this.showAudioTranslateModal(item);
+        // ga 字幕面板中点击 "Generate" 的次数
+        this.$ga.event('app', 'ai-translate-generate-button-click');
       } else if (this.isFirstSubtitle) {
         this.changeFirstSubtitle(item.id);
       } else {

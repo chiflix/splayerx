@@ -141,7 +141,10 @@ const actions = {
     if (subtitle) {
       const { entity, loader } = subtitle;
       entity.payload = await loader();
-      await dispatch(a.cache);
+      // 如果是translate 按钮就skip
+      if (entity && !(entity.type === Type.Translated && entity.payload === '')) {
+        await dispatch(a.cache);
+      }
     }
   },
   async [a.getDialogues]({ state, rootGetters, dispatch }: any, time: number) {

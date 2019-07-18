@@ -192,6 +192,7 @@ export async function cacheSubtitle(subtitle: Entity) {
     case Type.Local:
       return cacheLocalSubtitle(subtitle)
         .then(source => addNewSourceToDb(subtitle, source));
+    case Type.Translated:
     case Type.Online: {
       const newOnlineSource = await cacheOnlineSubtitle(subtitle);
       if (newOnlineSource) return addNewSourceToDb(subtitle, newOnlineSource);
