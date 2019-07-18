@@ -67,7 +67,6 @@ let inited = false;
 let finalVideoToOpen = [];
 const tmpVideoToOpen = [];
 const tmpSubsToOpen = [];
-const mediaInfoQueue = [];
 const subRegex = getValidSubtitleRegex();
 const mainURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080'
@@ -266,24 +265,6 @@ function registerMainWindowEvent(mainWindow) {
     tmpVideoToOpen.splice(0, tmpVideoToOpen.length);
   });
 
-  function mediaInfo(videoPath, callback) {
-    splayerx.getMediaInfo(videoPath, (info) => {
-      callback(info);
-    });
-  }
-  function mediaInfoQueueProcess() {
-    const callback = (info) => {
-      if (mainWindow && !mainWindow.webContents.isDestroyed()) {
-        mainWindow.webContents.send(`mediaInfo-${mediaInfoQueue[0]}-reply`, info);
-      }
-      mediaInfoQueue.shift();
-      if (mediaInfoQueue.length > 0) {
-        mediaInfo(mediaInfoQueue[0], callback);
-      }
-    };
-    mediaInfo(mediaInfoQueue[0], callback);
-  }
-
   function createAbout() {
     const aboutWindowOptions = {
       useContentSize: true,
@@ -356,18 +337,6 @@ function registerMainWindowEvent(mainWindow) {
       preferenceWindow.show();
     });
   }
-
-  ipcMain.on('mediaInfo', (event, path) => {
-    if (mediaInfoQueue.length === 0) {
-      mediaInfoQueue.push(path);
-      mediaInfoQueueProcess();
-    } else {
-      mediaInfoQueue.push(path);
-    }
-  });
-  ipcMain.on('simulate-closing-window', () => {
-    mediaInfoQueue.splice(0);
-  });
   ipcMain.on('windowPositionChange', (event, args) => {
     if (!mainWindow || event.sender.isDestroyed()) return;
     mainWindow.setPosition(...args);
