@@ -84,7 +84,7 @@
 </template>
 <script lang="ts">
 import { isEqual } from 'lodash';
-import { Cue, Tags } from '@/interfaces/ISubtitle';
+import { Cue, ITags } from '@/interfaces/ISubtitle';
 import { calculateTextSize } from '@/libs/utils';
 
 export default {
@@ -259,14 +259,14 @@ export default {
       }
       return '';
     },
-    calculatePosition(category: string, tags: Tags) {
+    calculatePosition(category: string, tags: ITags) {
       const type = category === 'first' ? this.firstType : this.secondType;
       if (type !== 'vtt') {
         return !!tags.pos;
       }
       return tags.line && tags.position;
     },
-    calculateAlignment(category: string, tags: Tags) {
+    calculateAlignment(category: string, tags: ITags) {
       const type = category === 'first' ? this.firstType : this.secondType;
       if (type !== 'vtt') {
         return !tags || !tags.alignment ? 2 : tags.alignment;

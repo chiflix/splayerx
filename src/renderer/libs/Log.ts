@@ -1,8 +1,8 @@
-import { ILog } from '@/interfaces/ILog';
 import electron from 'electron';
 import winston from 'winston';
 import DailyRotateFile from 'winston-daily-rotate-file';
 import { join } from 'path';
+import { ILog } from '@/interfaces/ILog';
 import Sentry from '../../shared/sentry';
 import { ELECTRON_CACHE_DIRNAME, DEFAULT_LOG_DIRNAME } from '@/constants';
 
@@ -14,7 +14,7 @@ const transport = new DailyRotateFile({
   datePattern: 'YYYY-MM-DD',
   zippedArchive: true,
   maxSize: '20m',
-  maxFiles: '14d'
+  maxFiles: '14d',
 });
 
 const logger = winston.createLogger({
@@ -24,7 +24,7 @@ const logger = winston.createLogger({
     }
     return `${info.time} - ${info.level}: ${info.message}`;
   })),
-  transports: [ transport ],
+  transports: [transport],
 });
 
 export default class Log implements ILog {
@@ -44,18 +44,21 @@ export default class Log implements ILog {
       logger.log({
         time: new Date().toISOString(),
         level,
-        message: message,
-        stack: stack
+        message,
+        stack,
       });
-    } catch (error) {}
+    } catch (error) {
+      // empty
+    }
   }
+
   /**
    * @description 记录程序状态日志
    * @author tanghaixiang
    * @param {string} label 类名或者文件名
    * @param {string} message 打印信息
    */
-  info(label: string, message: string | Error): void {
+  public info(label: string, message: string | Error): void {
     this.log(label, 'info', message);
   }
 
@@ -65,7 +68,7 @@ export default class Log implements ILog {
    * @param {string} label 类名或者文件名
    * @param {string} message 打印信息
    */
-  warn(label: string, message: string | Error): void {
+  public warn(label: string, message: string | Error): void {
     this.log(label, 'warn', message);
   }
 
@@ -75,7 +78,7 @@ export default class Log implements ILog {
    * @param {string} label 类名或者文件名
    * @param {(string | Error)} message 错误信息
    */
-  error(label: string, message: string | Error): void {
+  public error(label: string, message: string | Error): void {
     this.log(label, 'error', message);
     if (process.env.NODE_ENV !== 'development') {
       Sentry.captureException(message);

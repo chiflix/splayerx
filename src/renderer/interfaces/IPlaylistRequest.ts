@@ -2,12 +2,12 @@ import { MediaItem } from '@/interfaces/IDB';
 
 export interface IPlaylistRequest {
   coverSrc: string;
-  duration: any;
+  duration: number;
   record: MediaItem;
   smallShortCut: string;
   lastPlayedTime: number;
   imageSrc: string | undefined;
-  
+
   /**
    * @param  {string} mediaHash
    * @returns Promise 返回视频封面地址

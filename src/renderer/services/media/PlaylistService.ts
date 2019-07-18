@@ -1,24 +1,35 @@
+import { ipcRenderer, Event } from 'electron';
+import { EventEmitter } from 'events';
 import { IPlaylistRequest } from '@/interfaces/IPlaylistRequest';
 import MediaStorageService from '@/services/storage/MediaStorageService';
-import { ipcRenderer } from 'electron';
 import { filePathToUrl } from '@/helpers/path';
-import { mediaQuickHash } from "@/libs/utils";
+import { mediaQuickHash } from '@/libs/utils';
 import { info } from '@/libs/DataBase';
 import { MediaItem } from '@/interfaces/IDB';
-import { EventEmitter } from 'events';
 
-interface PlaylistEvent {
-  "image-loaded": Event
+interface IPlaylistEvent {
+  'image-loaded': Event
 }
 export default class PlaylistService extends EventEmitter implements IPlaylistRequest {
-  coverSrc: string;
-  duration: any;
-  record: MediaItem;
-  smallShortCut: string;
-  lastPlayedTime: number;
-  imageSrc: string | undefined;
+  public coverSrc: string;
 
-  get percentage(): number {
+  public duration: number;
+
+  public record: MediaItem;
+
+  public smallShortCut: string;
+
+  public lastPlayedTime: number;
+
+  public imageSrc: string | undefined;
+
+  private mediaStorageService: MediaStorageService;
+
+  public path: string;
+
+  public videoId?: number;
+
+  public get percentage(): number {
     if (this.lastPlayedTime
         && this.lastPlayedTime / this.duration <= 1) {
       return (this.lastPlayedTime / this.duration) * 100;
@@ -26,10 +37,13 @@ export default class PlaylistService extends EventEmitter implements IPlaylistRe
     return 0;
   }
 
-  constructor(private readonly mediaStorageService: MediaStorageService, readonly path: string, readonly videoId?: number) {
+  public constructor(mediaStorageService: MediaStorageService, path: string, videoId?: number) {
     super();
+    this.mediaStorageService = mediaStorageService;
+    this.path = path;
+    this.videoId = videoId;
     ipcRenderer.send('mediaInfo', path);
-    ipcRenderer.once(`mediaInfo-${path}-reply`, async (event: any, info: string) => {
+    ipcRenderer.once(`mediaInfo-${path}-reply`, async (event: Event, info: string) => {
       const mediaHash = await mediaQuickHash.try(path);
       if (!mediaHash) return;
       const { duration } = JSON.parse(info).format;
@@ -39,7 +53,7 @@ export default class PlaylistService extends EventEmitter implements IPlaylistRe
       if (!imgPath) {
         const imgPath = await this.mediaStorageService.generatePathBy(mediaHash, 'cover');
         ipcRenderer.send('snapShot', { path, imgPath, duration });
-        ipcRenderer.once(`snapShot-${path}-reply`, (event: any, imgPath: string) => {
+        ipcRenderer.once(`snapShot-${path}-reply`, (event: Event, imgPath: string) => {
           this.imageSrc = filePathToUrl(`${imgPath}`);
           this.emit('image-loaded');
         });
@@ -50,26 +64,29 @@ export default class PlaylistService extends EventEmitter implements IPlaylistRe
     });
     this.getRecord(videoId);
   }
-  on<K extends keyof PlaylistEvent>(type: K, listener: (...args: any[]) => void): this {
+
+  public on<K extends keyof IPlaylistEvent>(type: K, listener: (...args: unknown[]) => void): this {
     return super.on(type, listener);
   }
-   /**
+
+  /**
    * @param  {string} mediaHash
    * @returns Promise 返回视频封面图片
    */
-  async getCover(mediaHash: string): Promise<string | null> {
+  public async getCover(mediaHash: string): Promise<string | null> {
     try {
       const result = await this.mediaStorageService.getImageBy(mediaHash, 'cover');
       return result;
-    } catch(err) {
+    } catch (err) {
       return null;
     }
   }
+
   /**
    * @param  {number} videoId
    * @returns Promise 获取播放记录
    */
-  async getRecord(videoId?: number): Promise<void> {
+  public async getRecord(videoId?: number): Promise<void> {
     let record;
     if (videoId) {
       record = await info.getValueByKey('media-item', videoId);

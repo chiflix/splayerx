@@ -15,7 +15,12 @@ export interface IThumbnailRequest {
    * @param {number} width
    * @returns {Promise<string>} 返回生成的缩略图路径
    */
-  generateThumbnailImage(mediaHash: string, videoSrc: string, cols: number, width: number): Promise<string>
+  generateThumbnailImage(
+    mediaHash: string,
+    videoSrc: string,
+    cols: number,
+    width: number,
+  ): Promise<string>
   /**
    * @description 根据当前时间信息和缩略图总数获取缩略图的backgroundPosition
    * @author tanghaixiang

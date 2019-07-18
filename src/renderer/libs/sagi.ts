@@ -12,15 +12,15 @@ import { TrainngClient } from 'sagi-api/training/v1/training_grpc_pb';
 import { SagiSubtitlePayload } from '@/services/subtitle';
 import { log } from './Log';
 
-const grpc = require('grpc');
-
 class Sagi {
-  creds: any;
-  endpoint = process.env.NODE_ENV === 'production' ?
-    'apis.sagittarius.ai:8443' :
-    'apis.stage.sagittarius.ai:8443';
-    // '127.0.0.1:8443'; // uncomment this when debuging
-  constructor() {
+  private creds: unknown;
+
+  private endpoint = process.env.NODE_ENV === 'production'
+    ? 'apis.sagittarius.ai:8443'
+    : 'apis.stage.sagittarius.ai:8443';
+
+  // '127.0.0.1:8443'; // uncomment this when debuging
+  public constructor() {
     const sslCreds = credentials.createSsl(
       // How to access resources with fs see:
       // https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
@@ -28,10 +28,11 @@ class Sagi {
       fs.readFileSync(path.join(__static, '/certs/key.pem')),
       fs.readFileSync(path.join(__static, '/certs/cert.pem')),
     );
-    const metadataUpdater = (_: any, cb: Function) => {
+    const metadataUpdater = (_: unknown, cb: Function) => {
       const metadata = new Metadata();
       metadata.set('uuid', Vue.axios.defaults.headers.common['X-Application-Token']);
       metadata.set('agent', navigator.userAgent);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       Vue.axios.get('https://ip.xindong.com/myip', { responseType: 'text' }).then((response: any) => {
         metadata.set('clientip', response.bodyText);
         cb(null, metadata);
@@ -44,7 +45,9 @@ class Sagi {
     this.creds = combinedCreds;
   }
 
-  mediaTranslate(options: MediaTranslationRequest.AsObject): Promise<MediaTranslationResponse.TranscriptInfo.AsObject[]> {
+  public mediaTranslate(
+    options: MediaTranslationRequest.AsObject,
+  ): Promise<MediaTranslationResponse.TranscriptInfo.AsObject[]> {
     const { mediaIdentity, languageCode, hints } = options;
     const client = new TranslationClient(this.endpoint, this.creds);
     const req = new MediaTranslationRequest();
@@ -54,13 +57,13 @@ class Sagi {
     log.info('Sagi.mediaTranslate', `hash-${mediaIdentity}***language-${languageCode}***hints-${hints}`);
     return new Promise((resolve, reject) => {
       client.translateMedia(req, (err, res) => {
-        if (err) reject(err)
+        if (err) reject(err);
         else resolve(res.toObject().resultsList);
       });
     });
   }
 
-  getTranscript(options: TranscriptRequest.AsObject): Promise<SagiSubtitlePayload> {
+  public getTranscript(options: TranscriptRequest.AsObject): Promise<SagiSubtitlePayload> {
     const { transcriptIdentity } = options;
     const client = new TranslationClient(this.endpoint, this.creds);
     const req = new TranscriptRequest();
@@ -73,8 +76,10 @@ class Sagi {
     });
   }
 
-  pushTranscriptWithPayload(options: TrainingData.AsObject) {
-    const { mediaIdentity, languageCode, format, playedTime, totalTime, delay, hints, payload } = options;
+  public pushTranscriptWithPayload(options: TrainingData.AsObject) {
+    const {
+      mediaIdentity, languageCode, format, playedTime, totalTime, delay, hints, payload,
+    } = options;
     const client = new TrainngClient(this.endpoint, this.creds);
     const req = new TrainingData();
     req.setMediaIdentity(mediaIdentity);
@@ -93,8 +98,10 @@ class Sagi {
     });
   }
 
-  pushTranscriptWithTranscriptIdentity(options: TrainingData.AsObject) {
-    const { mediaIdentity, languageCode, format, playedTime, totalTime, delay, hints, transcriptIdentity } = options;
+  public pushTranscriptWithTranscriptIdentity(options: TrainingData.AsObject) {
+    const {
+      mediaIdentity, languageCode, format, playedTime, totalTime, delay, hints, transcriptIdentity,
+    } = options;
     const client = new TrainngClient(this.endpoint, this.creds);
     const req = new TrainingData();
     req.setMediaIdentity(mediaIdentity);
@@ -114,7 +121,7 @@ class Sagi {
   }
 
   // check sagi-api health, return UNKNOWN(0), SERVING(1) or XXXXX
-  healthCheck(): Promise<HealthCheckResponse.AsObject> {
+  public healthCheck(): Promise<HealthCheckResponse.AsObject> {
     const client = new HealthClient(this.endpoint, this.creds);
     return new Promise((resolve, reject) => {
       client.check(new HealthCheckRequest(), (err, response) => {
@@ -122,8 +129,9 @@ class Sagi {
         else {
           const status = response.getStatus();
           console.log(`[Sagi]Version: ${response.getVersion()}, Status: ${status}.`);
-          if (status !== HealthCheckResponse.ServingStatus.SERVING) reject(HealthCheckResponse.ServingStatus[status]);
-          else resolve({ status, version: response.getVersion() });
+          if (status !== HealthCheckResponse.ServingStatus.SERVING) {
+            reject(HealthCheckResponse.ServingStatus[status]);
+          } else resolve({ status, version: response.getVersion() });
         }
       });
     });

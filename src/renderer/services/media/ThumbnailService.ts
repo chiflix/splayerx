@@ -1,6 +1,6 @@
+import { ipcRenderer } from 'electron';
 import { IThumbnailRequest } from '@/interfaces/IThumbnailRequest';
 import MediaStorageService, { mediaStorageService } from '@/services/storage/MediaStorageService';
-import { ipcRenderer } from 'electron';
 
 /** 缩略图固定的列数
  * @constant
@@ -9,7 +9,10 @@ import { ipcRenderer } from 'electron';
 const COLS = 10;
 
 export default class ThumbnailService implements IThumbnailRequest {
-  constructor(private readonly mediaStorageService: MediaStorageService) {
+  private mediaStorageService: MediaStorageService;
+
+  public constructor(mediaStorageService: MediaStorageService) {
+    this.mediaStorageService = mediaStorageService;
   }
 
   /** 公开API 根据该视频创建缩略图对应的路径，
@@ -20,7 +23,12 @@ export default class ThumbnailService implements IThumbnailRequest {
    * @param {number} cols
    * @returns {Promise<string>} 返回生成的缩略图路径
    */
-  async generateThumbnailImage(mediaHash: string, videoSrc: string, cols: number, width: number): Promise<string> {
+  public async generateThumbnailImage(
+    mediaHash: string,
+    videoSrc: string,
+    cols: number,
+    width: number,
+  ): Promise<string> {
     try {
       const gpath = await this.mediaStorageService.generatePathBy(mediaHash, 'thumbnail');
       if (gpath) {
@@ -34,6 +42,7 @@ export default class ThumbnailService implements IThumbnailRequest {
         return gpath;
       }
     } catch (err) {
+      // empty
     }
     return '';
   }
@@ -44,12 +53,12 @@ export default class ThumbnailService implements IThumbnailRequest {
    * @param {string} mediaHash
    * @returns {(Promise<string | null>)} 返回对应视频的缩略图路径
    */
-  async getThumbnailImage(mediaHash: string): Promise<string | null> {
+  public async getThumbnailImage(mediaHash: string): Promise<string | null> {
     try {
       const result = await this.mediaStorageService.getImageBy(mediaHash, 'thumbnail');
-      return result
+      return result;
     } catch (err) {
-      return null
+      return null;
     }
   }
 
@@ -62,7 +71,11 @@ export default class ThumbnailService implements IThumbnailRequest {
    * @param {number} count
    * @returns {string} 当前hover缩略图的backgroundPosition
    */
-  calculateThumbnailPosition(currentTime: number, duration: number, count: number): number[] {
+  public calculateThumbnailPosition(
+    currentTime: number,
+    duration: number,
+    count: number,
+  ): number[] {
     const currentIndex = Math.abs(Math.floor(currentTime / (duration / count)));
     const column = currentIndex === 0 ? 0 : Math.ceil(currentIndex / COLS) - 1;
     const row = currentIndex - (COLS * column);
@@ -71,4 +84,3 @@ export default class ThumbnailService implements IThumbnailRequest {
 }
 
 export const thumbnailService = new ThumbnailService(mediaStorageService);
-
