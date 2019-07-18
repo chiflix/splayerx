@@ -135,10 +135,10 @@ interface IBaseStream {
   disposition?: IRawStreamDisposition;
   tags?: ITag;
   index: number;
-  codecName?: CodecType;
+  codecName?: string;
   codecLongName?: string;
   profile?: string;
-  codecType?: string;
+  codecType?: CodecType;
   codecTimeBase: string;
   codecTag: string;
   codecTagString: string;
@@ -185,7 +185,7 @@ interface IAudioStream extends IBaseStream {
   nbReadFrames: number;
   nbReadPackets: number;
 }
-interface ISubtitleStream extends IBaseStream {
+export interface ISubtitleStream extends IBaseStream {
   codecType: CodecType.Subtitle;
 }
 interface IAttachmentStream extends IBaseStream {
