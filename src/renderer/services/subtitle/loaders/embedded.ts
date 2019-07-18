@@ -3,9 +3,10 @@ import { cloneDeep } from 'lodash';
 import {
   IOrigin, Type, IEntityGenerator, Format,
 } from '@/interfaces/ISubtitle';
-import { LanguageCode, normalizeCode } from '@/libs/language';
+import { LanguageCode } from '@/libs/language';
 import { mediaQuickHash } from '@/libs/utils';
 import { inferLanguageFromPath, loadLocalFile } from '../utils';
+import { ISubtitleStream } from '@/plugins/mediaTasks';
 
 interface IExtractSubtitleRequest {
   videoSrc: string;
@@ -56,20 +57,6 @@ export interface IEmbeddedOrigin extends IOrigin {
     extractedSrc: string;
   };
 }
-export interface ISubtitleStream {
-  // eslint-disable-next-line camelcase
-  codec_type: string;
-  // eslint-disable-next-line camelcase
-  codec_name: string;
-  index: number;
-  tags: {
-    language?: string;
-    title?: string;
-  };
-  disposition: {
-    default: 0 | 1;
-  };
-}
 
 export class EmbeddedGenerator implements IEntityGenerator {
   private origin: IEmbeddedOrigin;
@@ -89,9 +76,9 @@ export class EmbeddedGenerator implements IEntityGenerator {
         extractedSrc: '',
       },
     };
-    this.format = stream.codec_name as Format;
-    this.language = normalizeCode(stream.tags.language || '');
-    this.isDefault = !!stream.disposition.default;
+    this.format = stream.codecName ? stream.codecName as Format : Format.Unknown;
+    this.language = stream.tags && stream.tags.language ? stream.tags.language : LanguageCode.No;
+    this.isDefault = !!(stream.disposition && stream.disposition.default);
   }
 
   public async getSource() { return cloneDeep(this.origin); }

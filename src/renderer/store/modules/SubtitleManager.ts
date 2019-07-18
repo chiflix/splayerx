@@ -13,7 +13,7 @@ import {
   SubtitleControlListItem, Type, IEntityGenerator, Entity,
 } from '@/interfaces/ISubtitle';
 import {
-  ISubtitleStream, TranscriptInfo,
+  TranscriptInfo,
   searchForLocalList, retrieveEmbeddedList, fetchOnlineList,
   OnlineGenerator, LocalGenerator, EmbeddedGenerator,
 } from '@/services/subtitle';
@@ -33,6 +33,7 @@ import {
   LOCAL_SUBTITLE_REMOVED,
 } from '../../helpers/notificationcodes';
 import { LanguageCode } from '@/libs/language';
+import { ISubtitleStream } from '@/plugins/mediaTasks';
 
 const sortOfTypes = {
   local: 0,
