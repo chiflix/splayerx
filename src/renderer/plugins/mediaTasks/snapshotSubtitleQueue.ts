@@ -107,7 +107,7 @@ class SubtitleTask implements MediaTask<string> {
     return new Promise((resolve, reject) => {
       ipcRenderer.send('subtitle-request',
         this.videoPath, this.subtitlePath,
-        this.streamIndex);
+        `0:${this.streamIndex}:0`);
       ipcRenderer.once('subtitle-reply', (event, error, path) => {
         if (error) reject(error);
         else resolve(path);
@@ -116,4 +116,20 @@ class SubtitleTask implements MediaTask<string> {
   }
 }
 
-export class SnapshotSubtitleQueue extends BaseMediaTaskQueue {}
+export class SnapshotSubtitleQueue extends BaseMediaTaskQueue {
+  public async getSnapshotPath(
+    videoPath: string,
+    timeInSeconds: number,
+    width: number, height: number,
+  ) {
+    return super.addTask<string>(await SnapshotTask.from(
+      videoPath,
+      timeInSeconds,
+      width, height,
+    ));
+  }
+
+  public async getSubtitlePath(videoPath: string, streamIndex: number, format: Format) {
+    return super.addTask<string>(await SubtitleTask.from(videoPath, streamIndex, format));
+  }
+}
