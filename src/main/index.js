@@ -11,7 +11,6 @@ import path, {
 } from 'path';
 import fs from 'fs';
 import rimraf from 'rimraf';
-import TaskQueue from '../renderer/helpers/proceduralQueue';
 import { jsonStorage } from '../renderer/libs/JsonStorage';
 import './helpers/electronPrototypes';
 import writeLog from './helpers/writeLog';
@@ -71,7 +70,6 @@ const tmpSubsToOpen = [];
 const snapShotQueue = [];
 const thumbnailTask = [];
 const mediaInfoQueue = [];
-const embeeddSubtitlesQueue = new TaskQueue();
 const subRegex = getValidSubtitleRegex();
 const mainURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080'
@@ -320,15 +318,6 @@ function registerMainWindowEvent(mainWindow) {
     return `00:${minutes}:${seconds}`;
   }
 
-  function extractSubtitle(videoPath, subtitlePath, index) {
-    return new Promise((resolve, reject) => {
-      splayerx.extractSubtitles(videoPath, subtitlePath, `0:${index}:0`, (err) => {
-        if (!err) resolve(subtitlePath);
-        else reject(err);
-      });
-    });
-  }
-
   function snapShot(info, callback) {
     let randomNumber = Math.round((Math.random() * 20) + 5);
     if (randomNumber > info.duration) randomNumber = info.duration;
@@ -377,18 +366,6 @@ function registerMainWindowEvent(mainWindow) {
       }
     } else {
       event.sender.send(`snapShot-${video.path}-reply`);
-    }
-  });
-
-  ipcMain.on('extract-subtitle-request', (event, videoPath, index, format, hash) => {
-    const subtitleFolderPath = path.join(tempFolderPath, hash);
-    if (!fs.existsSync(subtitleFolderPath)) fs.mkdirSync(subtitleFolderPath);
-    const subtitlePath = path.join(subtitleFolderPath, `embedded-${index}.${format}`);
-    if (fs.existsSync(subtitlePath)) event.sender.send(`extract-subtitle-response-${index}`, { error: null, index, path: subtitlePath });
-    else {
-      embeeddSubtitlesQueue.add(() => extractSubtitle(videoPath, subtitlePath, index)
-        .then(index => event.sender.send(`extract-subtitle-response-${index}`, { error: null, index, path: subtitlePath }))
-        .catch(index => event.sender.send(`extract-subtitle-response-${index}`, { error: 'error', index })));
     }
   });
 

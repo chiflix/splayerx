@@ -1,4 +1,3 @@
-import { ipcRenderer, Event } from 'electron';
 import { cloneDeep } from 'lodash';
 import {
   IOrigin, Type, IEntityGenerator, Format,
@@ -6,7 +5,7 @@ import {
 import { LanguageCode } from '@/libs/language';
 import { mediaQuickHash } from '@/libs/utils';
 import { inferLanguageFromPath, loadLocalFile } from '../utils';
-import { ISubtitleStream } from '@/plugins/mediaTasks';
+import { ISubtitleStream, getSubtitlePath } from '@/plugins/mediaTasks';
 
 interface IExtractSubtitleRequest {
   videoSrc: string;
@@ -28,26 +27,7 @@ interface IExtractSubtitleResponse {
  * @param {string} subtitleCodec - the codec of the embedded subtitle
  * @returns the subtitle path string
  */
-export async function embeddedSrcLoader(
-  videoSrc: string,
-  streamIndex: number,
-  format: Format,
-): Promise<string> {
-  const mediaHash = await mediaQuickHash.try(videoSrc);
-  if (!mediaHash) return Promise.reject(new Error('Cannot get mediaQuickHash for embeddedSrcLoader'));
-  ipcRenderer.send('extract-subtitle-request',
-    videoSrc,
-    streamIndex,
-    format,
-    mediaHash);
-  return new Promise((resolve, reject) => {
-    ipcRenderer.once(`extract-subtitle-response-${streamIndex}`, (event: Event, response: IExtractSubtitleResponse) => {
-      const { error, index, path } = response;
-      if (error) reject(new Error(`${videoSrc}'s No.${index} extraction failed with ${error}.`));
-      resolve(path);
-    });
-  });
-}
+export { getSubtitlePath as embeddedSrcLoader } from '@/plugins/mediaTasks';
 
 export interface IEmbeddedOrigin extends IOrigin {
   type: Type.Embedded,
@@ -92,7 +72,7 @@ export class EmbeddedGenerator implements IEntityGenerator {
   private async getExtractedSrc() {
     const { videoSrc, streamIndex, extractedSrc } = this.origin.source;
     if (!extractedSrc) {
-      this.origin.source.extractedSrc = await embeddedSrcLoader(videoSrc, streamIndex, this.format);
+      this.origin.source.extractedSrc = await getSubtitlePath(videoSrc, streamIndex, this.format);
       return this.origin.source.extractedSrc;
     }
     return extractedSrc;
@@ -106,7 +86,7 @@ export class EmbeddedGenerator implements IEntityGenerator {
     if (this.language !== LanguageCode.Default) return this.language;
     const { videoSrc, streamIndex, extractedSrc } = this.origin.source;
     if (!extractedSrc) {
-      this.origin.source.extractedSrc = await embeddedSrcLoader(videoSrc, streamIndex, this.format);
+      this.origin.source.extractedSrc = await getSubtitlePath(videoSrc, streamIndex, this.format);
     }
     this.language = await inferLanguageFromPath(this.origin.source.extractedSrc);
     return this.language;
