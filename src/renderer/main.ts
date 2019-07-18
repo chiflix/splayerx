@@ -12,6 +12,7 @@ import { mapGetters, mapActions, createNamespacedHelpers } from 'vuex';
 import uuidv4 from 'uuid/v4';
 import osLocale from 'os-locale';
 import VueAxios from 'vue-axios';
+import { throttle } from 'lodash';
 // @ts-ignore
 import VueElectronJSONStorage from 'vue-electron-json-storage';
 // @ts-ignore
@@ -1457,6 +1458,14 @@ new Vue({
       this.$ga && this.$ga.set('userId', userUUID);
     });
     this.$on('wheel-event', this.wheelEventHandler);
+
+    window.addEventListener('resize', throttle(() => {
+      this.$store.commit('windowSize', [window.outerWidth, window.outerHeight]);
+    }, 100));
+
+    window.addEventListener('DOMContentLoaded', () => {
+      this.$store.commit('windowSize', [window.outerWidth, window.outerHeight]);
+    });
 
     window.addEventListener('mousedown', (e) => {
       if (e.button === 2 && process.platform === 'win32') {

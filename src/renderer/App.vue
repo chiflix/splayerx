@@ -65,9 +65,6 @@ export default {
     mainDispatchProxy(actionType: string, actionPayload: any) {
       this.$store.dispatch(actionType, actionPayload);
     },
-    handleWindowSizeChange(windowSize: any) {
-      this.$store.commit('windowSize', windowSize);
-    },
   },
 };
 </script>
