@@ -1,5 +1,5 @@
 export interface ICacheFileStorable {
- /** 
+  /**
    * @description 公开API 根据mediaHash得到该视频的缓存目录
    * @author tanghaixiang
    * @param {string} mediaHash 视频hash码

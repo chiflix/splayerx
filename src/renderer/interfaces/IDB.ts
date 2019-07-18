@@ -110,7 +110,10 @@ export interface IDB {
    * @returns {Promise<PlaylistItem[] | MediaItem[] | SubtitleDataItem[]>}
    * 返回 database -> objectStore 中所有记录
    */
-  getAll(objectStore: string, keyRange: IDBKeyRange): Promise<PlaylistItem[] | MediaItem[] | SubtitleDataItem[]>
+  getAll(
+    objectStore: string,
+    keyRange: IDBKeyRange,
+  ): Promise<PlaylistItem[] | MediaItem[] | SubtitleDataItem[]>
   /**
    * @param  {string} database
    * @param  {string} objectStore
@@ -118,7 +121,10 @@ export interface IDB {
    * @returns {Promise<PlaylistItem | MediaItem | SubtitleDataItem>}
    * 返回 database -> objectStore 中主键为key的记录
    */
-  getValueByKey(objectStore: string, key: number): Promise<PlaylistItem | MediaItem | SubtitleDataItem | undefined>
+  getValueByKey(
+    objectStore: string,
+    key: number,
+  ): Promise<PlaylistItem | MediaItem | SubtitleDataItem | undefined>
   /**
    * @param  {string} database
    * @param  {string} objectStore
@@ -127,7 +133,11 @@ export interface IDB {
    * @returns {Promise<PlaylistItem | MediaItem | SubtitleDataItem>}
    * 返回 database -> objectStore 中属性index的值为value的第一条记录
    */
-  getValueByIndex(objectStore: string, index: string, value: string | number): Promise<PlaylistItem | MediaItem | SubtitleDataItem | undefined>
+  getValueByIndex(
+    objectStore: string,
+    index: string,
+    value: string | number,
+  ): Promise<PlaylistItem | MediaItem | SubtitleDataItem | undefined>
   /**
    * @param  {string} database
    * @param  {string} objectStore
@@ -136,5 +146,9 @@ export interface IDB {
    * @returns {Promise<PlaylistItem[] | MediaItem[] | SubtitleDataItem[]>}
    * 返回 database -> objectStore 中属性index为value的所有记录
    */
-  getAllValueByIndex(objectStore: string, index: string, value: string | number): Promise<PlaylistItem[] | MediaItem[] | SubtitleDataItem[]>
+  getAllValueByIndex(
+    objectStore: string,
+    index: string,
+    value: string | number,
+  ): Promise<PlaylistItem[] | MediaItem[] | SubtitleDataItem[]>
 }
