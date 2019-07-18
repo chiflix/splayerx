@@ -67,7 +67,6 @@ let inited = false;
 let finalVideoToOpen = [];
 const tmpVideoToOpen = [];
 const tmpSubsToOpen = [];
-const snapShotQueue = [];
 const mediaInfoQueue = [];
 const subRegex = getValidSubtitleRegex();
 const mainURL = process.env.NODE_ENV === 'development'
@@ -267,78 +266,6 @@ function registerMainWindowEvent(mainWindow) {
     tmpVideoToOpen.splice(0, tmpVideoToOpen.length);
   });
 
-  function timecodeFromSeconds(s) {
-    const dt = new Date(Math.abs(s) * 1000);
-    let hours = dt.getUTCHours();
-    let minutes = dt.getUTCMinutes();
-    let seconds = dt.getUTCSeconds();
-
-    if (minutes < 10) {
-      minutes = `0${minutes}`;
-    }
-    if (seconds < 10) {
-      seconds = `0${seconds}`;
-    }
-    if (hours > 0) {
-      if (hours < 10) {
-        hours = `${hours}`;
-      }
-      return `${hours}:${minutes}:${seconds}`;
-    }
-    return `00:${minutes}:${seconds}`;
-  }
-
-  function snapShot(info, callback) {
-    let randomNumber = Math.round((Math.random() * 20) + 5);
-    if (randomNumber > info.duration) randomNumber = info.duration;
-    if (!info.width) info.width = 1920;
-    if (!info.height) info.height = 1080;
-    const numberString = timecodeFromSeconds(randomNumber);
-    splayerx.snapshotVideo(
-      info.path, info.imgPath, numberString, `${info.width}`, `${info.height}`,
-      (resultCode) => {
-        console[resultCode === '0' ? 'log' : 'error'](resultCode, info.path);
-        callback(resultCode, info.imgPath);
-      },
-    );
-  }
-  function snapShotQueueProcess(event) {
-    const callback = (resultCode, imgPath) => {
-      if (resultCode === 'Waiting for the task completion.') {
-        snapShot(snapShotQueue[0], callback);
-      } else if (resultCode === '0') {
-        const lastRecord = snapShotQueue.shift();
-        if (event.sender.isDestroyed()) {
-          snapShotQueue.splice(0, snapShotQueue.length);
-        } else {
-          event.sender.send(`snapShot-${lastRecord.path}-reply`, imgPath);
-          if (snapShotQueue.length > 0) {
-            snapShot(snapShotQueue[0], callback);
-          }
-        }
-      } else {
-        snapShotQueue.shift();
-        if (snapShotQueue.length > 0) {
-          snapShot(snapShotQueue[0], callback);
-        }
-      }
-    };
-    snapShot(snapShotQueue[0], callback);
-  }
-
-  ipcMain.on('snapShot', (event, video) => {
-    const imgPath = video.imgPath;
-
-    if (!fs.existsSync(imgPath)) {
-      snapShotQueue.push(video);
-      if (snapShotQueue.length === 1) {
-        snapShotQueueProcess(event);
-      }
-    } else {
-      event.sender.send(`snapShot-${video.path}-reply`);
-    }
-  });
-
   function mediaInfo(videoPath, callback) {
     splayerx.getMediaInfo(videoPath, (info) => {
       callback(info);
@@ -440,7 +367,6 @@ function registerMainWindowEvent(mainWindow) {
   });
   ipcMain.on('simulate-closing-window', () => {
     mediaInfoQueue.splice(0);
-    snapShotQueue.splice(0);
   });
   ipcMain.on('windowPositionChange', (event, args) => {
     if (!mainWindow || event.sender.isDestroyed()) return;
