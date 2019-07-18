@@ -4,6 +4,8 @@ import { IMediaTask, BaseMediaTaskQueue } from './mediaTaskQueue';
 import { LanguageCode, normalizeCode } from '@/libs/language';
 import { mediaQuickHash } from '@/libs/utils';
 
+type EntryOf<T> = [keyof T, T[keyof T]];
+
 /* eslint-disable camelcase */
 enum CodecType {
   Video = 'video',
@@ -33,7 +35,7 @@ interface IRawTag {
 }
 interface IRawBaseStream {
   disposition?: IRawStreamDisposition;
-  tag?: IRawTag;
+  tags?: IRawTag;
   index: number;
   codec_name?: string;
   codec_long_name?: string;
@@ -93,16 +95,16 @@ interface IRawAttachmentStream extends IRawBaseStream {
 }
 type RawStream = IRawVideoStream | IRawAudioStream | IRawSubtitleStream | IRawAttachmentStream;
 interface IRawFormat {
-  tag?: IRawTag;
+  tags?: IRawTag;
   filename: string;
   nb_streams: number;
   nb_programs: number;
   format_name: string;
   format_long_name?: string;
-  start_time?: number;
-  duration?: number;
-  size?: number;
-  bit_rate?: number;
+  start_time?: string;
+  duration?: string;
+  size?: string;
+  bit_rate?: string;
   probe_score?: number;
 }
 interface IRawMediaInfo {
@@ -131,7 +133,7 @@ interface ITag {
 }
 interface IBaseStream {
   disposition?: IRawStreamDisposition;
-  tag?: ITag;
+  tags?: ITag;
   index: number;
   codecName?: CodecType;
   codecLongName?: string;
@@ -190,7 +192,7 @@ interface IAttachmentStream extends IBaseStream {
   codecType: CodecType.Attachment;
 }
 interface IFormat {
-  tag?: ITag;
+  tags?: ITag;
   filename: string;
   nbStreams: number;
   nbPrograms: number;
@@ -226,61 +228,81 @@ class MediaInfoTask implements IMediaTask<IMediaInfo> {
   public getId() { return this.hash; }
 
   private static streamDispositionMapper(raw: IRawStreamDisposition): IStreamDisposition {
-    return Object.entries(raw)
-      .reduce((result, entry: [string, number]) => {
-        result[camelCase(entry[0])] = !!entry[1];
-        return result;
-      }, {}) as IStreamDisposition;
+    const entries = (Object.entries(raw) as EntryOf<IRawStreamDisposition>[])
+      .map(({ 0: key, 1: value }) => [camelCase(key), !!value]);
+    return Object.fromEntries(entries) as IStreamDisposition;
   }
 
   private static tagMapper(raw: IRawTag): ITag {
-    return Object.entries(raw)
-      .reduce((result, entry: [string, unknown]) => {
-        if (entry[0] === 'language') result[entry[0]] = normalizeCode(entry[1] as string);
-        else result[camelCase(entry[0])] = entry[1];
-        return result;
-      }, {}) as ITag;
+    const entries = (Object.entries(raw) as EntryOf<IRawTag>[])
+      .map(({ 0: key, 1: value }) => [camelCase(key), key === 'language' ? normalizeCode(value as string) : value]);
+    return Object.fromEntries(entries) as ITag;
   }
 
   private static videoStreamMapper(raw: IRawVideoStream): IVideoStream {
-    return Object.entries(raw)
-      .reduce((result, entry: [string, unknown]) => {
-        if (entry[0] === 'disposition') result[entry[0]] = MediaInfoTask.streamDispositionMapper(entry[1] as IRawStreamDisposition);
-        else if (entry[0] === 'tags') result[entry[0]] = MediaInfoTask.tagMapper(entry[1] as IRawTag);
-        else if (entry[0] === 'has_b_frames') result[camelCase(entry[0])] = !!entry[1];
-        else result[camelCase(entry[0])] = entry[1];
-        return result;
-      }, {}) as IVideoStream;
+    const entries = (Object.entries(raw) as EntryOf<IRawVideoStream>[])
+      .map(({ 0: key, 1: value }) => {
+        const newKey = camelCase(key);
+        switch (key) {
+          default:
+            return [newKey, value];
+          case 'disposition':
+            return [newKey, MediaInfoTask.streamDispositionMapper(value as IRawStreamDisposition)];
+          case 'tags':
+            return [newKey, MediaInfoTask.tagMapper(value as IRawTag)];
+          case 'has_b_frames':
+            return [newKey, !!value];
+        }
+      });
+    return Object.fromEntries(entries) as IVideoStream;
   }
 
   private static audioStreamMapper(raw: IRawAudioStream): IAudioStream {
-    return Object.entries(raw)
-      .reduce((result, entry: [string, unknown]) => {
-        if (entry[0] === 'disposition') result[entry[0]] = MediaInfoTask.streamDispositionMapper(entry[1] as IRawStreamDisposition);
-        else if (entry[0] === 'tags') result[entry[0]] = MediaInfoTask.tagMapper(entry[1] as IRawTag);
-        else result[camelCase(entry[0])] = entry[1];
-        return result;
-      }, {}) as IAudioStream;
+    const entries = (Object.entries(raw) as EntryOf<IRawAudioStream>[])
+      .map(({ 0: key, 1: value }) => {
+        const newKey = camelCase(key);
+        switch (key) {
+          default:
+            return [newKey, value];
+          case 'disposition':
+            return [newKey, MediaInfoTask.streamDispositionMapper(value as IRawStreamDisposition)];
+          case 'tags':
+            return [newKey, MediaInfoTask.tagMapper(value as IRawTag)];
+        }
+      });
+    return Object.fromEntries(entries) as IAudioStream;
   }
 
   private static subtitleStreamMapper(raw: IRawSubtitleStream): ISubtitleStream {
-    return Object.entries(raw)
-      .reduce((result, entry: [string, unknown]) => {
-        if (entry[0] === 'disposition') result[entry[0]] = MediaInfoTask.streamDispositionMapper(entry[1] as IRawStreamDisposition);
-        else if (entry[0] === 'tags') result[entry[0]] = MediaInfoTask.tagMapper(entry[1] as IRawTag);
-        else result[camelCase(entry[0])] = entry[1];
-        return result;
-      }, {}) as ISubtitleStream;
+    const entries = (Object.entries(raw) as EntryOf<IRawSubtitleStream>[])
+      .map(({ 0: key, 1: value }) => {
+        const newKey = camelCase(key);
+        switch (key) {
+          default:
+            return [newKey, value];
+          case 'disposition':
+            return [newKey, MediaInfoTask.streamDispositionMapper(value as IRawStreamDisposition)];
+          case 'tags':
+            return [newKey, MediaInfoTask.tagMapper(value as IRawTag)];
+        }
+      });
+    return Object.fromEntries(entries) as ISubtitleStream;
   }
 
   private static attachmentStreamMapper(raw: IRawAttachmentStream): IAttachmentStream {
-    return Object.entries(raw)
-      .reduce((result, entry: [string, unknown]) => {
-        if (entry[0] === 'disposition') result[entry[0]] = MediaInfoTask.streamDispositionMapper(entry[1] as IRawStreamDisposition);
-        else if (entry[0] === 'tags') result[entry[0]] = MediaInfoTask.tagMapper(entry[1] as IRawTag);
-        else result[camelCase(entry[0])] = entry[1];
-        return result;
-      }, {}) as IAttachmentStream;
+    const entries = (Object.entries(raw) as EntryOf<IRawAttachmentStream>[])
+      .map(({ 0: key, 1: value }) => {
+        const newKey = camelCase(key);
+        switch (key) {
+          default:
+            return [newKey, value];
+          case 'disposition':
+            return [newKey, MediaInfoTask.streamDispositionMapper(value as IRawStreamDisposition)];
+          case 'tags':
+            return [newKey, MediaInfoTask.tagMapper(value as IRawTag)];
+        }
+      });
+    return Object.fromEntries(entries) as IAttachmentStream;
   }
 
   private static streamsMapper(raw: RawStream[]): Stream[] {
@@ -302,12 +324,23 @@ class MediaInfoTask implements IMediaTask<IMediaInfo> {
   }
 
   private static formatMapper(raw: IRawFormat): IFormat {
-    return Object.entries(raw)
-      .reduce((result, entry: [string, unknown]) => {
-        if (entry[0] === 'tags') result[entry[0]] = MediaInfoTask.tagMapper(entry[1] as IRawTag);
-        else result[camelCase(entry[0])] = entry[1];
-        return result;
-      }, {}) as IFormat;
+    const entries = (Object.entries(raw) as EntryOf<IRawFormat>[])
+      .map(({ 0: key, 1: value }) => {
+        const newKey = camelCase(key);
+        switch (key) {
+          default:
+            return [newKey, value];
+          case 'bit_rate':
+          case 'size':
+            return [newKey, parseInt(value as string, 10)];
+          case 'duration':
+          case 'start_time':
+            return [newKey, parseFloat(value as string)];
+          case 'tags':
+            return [newKey, MediaInfoTask.tagMapper(value as IRawTag)];
+        }
+      });
+    return Object.fromEntries(entries) as unknown as IFormat;
   }
 
   private static mediaInfoMapper(raw: IRawMediaInfo): IMediaInfo {
@@ -321,7 +354,6 @@ class MediaInfoTask implements IMediaTask<IMediaInfo> {
     return new Promise((resolve, reject) => {
       ipcRenderer.send('media-info-request', this.path);
       ipcRenderer.once('media-info-reply', (event, error, info) => {
-        console.log(JSON.parse(info));
         if (error) reject(error);
         else resolve(MediaInfoTask.mediaInfoMapper(JSON.parse(info) as IRawMediaInfo));
       });
