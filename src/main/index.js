@@ -175,11 +175,6 @@ function getAllValidVideo(onlySubtitle, files) {
 
 function registerMainWindowEvent(mainWindow) {
   if (!mainWindow) return;
-  // TODO: should be able to use window.outerWidth/outerHeight directly
-  mainWindow.on('resize', throttle(() => {
-    if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
-    mainWindow.webContents.send('mainCommit', 'windowSize', mainWindow.getSize());
-  }, 100));
   mainWindow.on('move', throttle(() => {
     if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
     mainWindow.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
@@ -234,12 +229,6 @@ function registerMainWindowEvent(mainWindow) {
     } catch (ex) {
       console.error('callMainWindowMethod', method, JSON.stringify(args), '\n', ex);
     }
-  });
-  /* eslint-disable no-unused-vars */
-  ipcMain.on('windowSizeChange', (event, args) => {
-    if (!mainWindow || event.sender.isDestroyed()) return;
-    mainWindow.setSize(...args);
-    event.sender.send('windowSizeChange-asyncReply', mainWindow.getSize());
   });
   ipcMain.on('drop-subtitle', (event, args) => {
     if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
@@ -343,7 +332,6 @@ function registerMainWindowEvent(mainWindow) {
   });
   ipcMain.on('windowInit', (event) => {
     if (!mainWindow || event.sender.isDestroyed()) return;
-    mainWindow.webContents.send('mainCommit', 'windowSize', mainWindow.getSize());
     mainWindow.webContents.send('mainCommit', 'windowMinimumSize', mainWindow.getMinimumSize());
     mainWindow.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
     mainWindow.webContents.send('mainCommit', 'isFullScreen', mainWindow.isFullScreen());
