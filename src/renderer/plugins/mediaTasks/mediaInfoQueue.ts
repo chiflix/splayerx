@@ -380,4 +380,9 @@ export class MediaInfoQueue extends BaseMediaTaskQueue {
     if (result && result.streams) return result.streams;
     return [];
   }
+
+  public async getSubtitleStreams(path: string): Promise<ISubtitleStream[]> {
+    const streams = await this.getStreams(path);
+    return streams.filter(({ codecType }) => codecType === CodecType.Subtitle) as ISubtitleStream[];
+  }
 }
