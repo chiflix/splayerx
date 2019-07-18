@@ -6,6 +6,7 @@ import { filePathToUrl } from '@/helpers/path';
 import { mediaQuickHash } from '@/libs/utils';
 import { info } from '@/libs/DataBase';
 import { MediaItem } from '@/interfaces/IDB';
+import { getSnapshotPath } from '@/plugins/mediaTasks';
 
 interface IPlaylistEvent {
   'image-loaded': Event
@@ -48,19 +49,13 @@ export default class PlaylistService extends EventEmitter implements IPlaylistRe
       if (!mediaHash) return;
       const { duration } = JSON.parse(info).format;
       this.duration = parseFloat(duration);
-      const imgPath = await this.getCover(mediaHash);
-
-      if (!imgPath) {
-        const imgPath = await this.mediaStorageService.generatePathBy(mediaHash, 'cover');
-        ipcRenderer.send('snapShot', { path, imgPath, duration });
-        ipcRenderer.once(`snapShot-${path}-reply`, (event: Event, imgPath: string) => {
-          this.imageSrc = filePathToUrl(`${imgPath}`);
-          this.emit('image-loaded');
-        });
-      } else {
-        this.imageSrc = filePathToUrl(`${imgPath}`);
-        this.emit('image-loaded');
-      }
+      const randomNumber = Math.round((Math.random() * 20) + 5);
+      const imgPath = await getSnapshotPath(
+        path,
+        randomNumber > this.duration ? this.duration : randomNumber,
+      );
+      this.imageSrc = filePathToUrl(`${imgPath}`);
+      this.emit('image-loaded');
     });
     this.getRecord(videoId);
   }
