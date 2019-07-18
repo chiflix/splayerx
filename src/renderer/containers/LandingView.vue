@@ -222,12 +222,14 @@ export default {
       }
     },
   },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   beforeRouteEnter(to: Route, { name: from }: Route, next: (vm: any) => void) {
-    next((vm: any) => {
+    next((vm: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
       vm.logoTransition = from === 'language-setting' ? 'scale' : '';
       vm.pageMounted = true;
     });
   },
+  /* eslint-disable @typescript-eslint/no-explicit-any */
   created() {
     window.addEventListener('mousemove', this.globalMoveHandler);
     this.useBlur = window.devicePixelRatio === 1;
@@ -279,7 +281,7 @@ export default {
       }
     });
     window.addEventListener('keyup', this.keyboardHandler);
-    window.addEventListener('beforeunload', this.beforeUnloadHandler);
+    // window.addEventListener('beforeunload', this.beforeUnloadHandler);
     this.$electron.ipcRenderer.on('quit', () => {
       this.quit = true;
     });
@@ -287,7 +289,7 @@ export default {
   destroyed() {
     window.removeEventListener('mousemove', this.globalMoveHandler);
     window.removeEventListener('keyup', this.keyboardHandler);
-    window.removeEventListener('beforeunload', this.beforeUnloadHandler);
+    // window.removeEventListener('beforeunload', this.beforeUnloadHandler);
   },
   methods: {
     globalMoveHandler() {

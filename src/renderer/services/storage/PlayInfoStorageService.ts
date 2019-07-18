@@ -1,7 +1,7 @@
-import { IPlayInfoStorable } from "@/interfaces/IPlayInfoStorable";
-import { info, data } from "@/libs/DataBase";
-import { MediaItem, PlaylistItem } from "@/interfaces/IDB";
-import { VIDEO_OBJECT_STORE_NAME, RECENT_OBJECT_STORE_NAME } from "@/constants";
+import { IPlayInfoStorable } from '@/interfaces/IPlayInfoStorable';
+import { info } from '@/libs/DataBase';
+import { MediaItem, PlaylistItem } from '@/interfaces/IDB';
+import { VIDEO_OBJECT_STORE_NAME, RECENT_OBJECT_STORE_NAME } from '@/constants';
 
 export default class PlayInfoStorageService implements IPlayInfoStorable {
   /**
@@ -11,16 +11,20 @@ export default class PlayInfoStorageService implements IPlayInfoStorable {
    * @param {MediaItem} data
    * @returns {Promise<boolean>} 返回布尔值, 是否成功更新
    */
-  async updateMediaItemBy(videoID: number, data: MediaItem): Promise<boolean> {
+  public async updateMediaItemBy(
+    videoID: number,
+    data: MediaItem,
+  ): Promise<boolean> {
     let value = null;
     try {
-      value = await info.getValueByKey(VIDEO_OBJECT_STORE_NAME, videoID)
+      value = await info.getValueByKey(VIDEO_OBJECT_STORE_NAME, videoID);
     } catch (error) {
       return false;
     }
     if (value) {
       try {
-        await info.update(VIDEO_OBJECT_STORE_NAME, videoID, { ...value, ...data } as MediaItem);
+        const updateData: MediaItem = { ...value, ...data };
+        await info.update(VIDEO_OBJECT_STORE_NAME, videoID, updateData);
         return true;
       } catch (error) {
         return false;
@@ -28,6 +32,7 @@ export default class PlayInfoStorageService implements IPlayInfoStorable {
     }
     return false;
   }
+
   /**
    * @description 更新最近播放列表
    * @author tanghaixiang
@@ -35,15 +40,18 @@ export default class PlayInfoStorageService implements IPlayInfoStorable {
    * @param {PlaylistItem} data
    * @returns {Promise<boolean>} 返回布尔值, 是否成功更新
    */
-  async updateRecentPlayedBy(playlistId: number, data: PlaylistItem): Promise<boolean> {
+  public async updateRecentPlayedBy(
+    playlistId: number,
+    data: PlaylistItem,
+  ): Promise<boolean> {
     try {
-      let playList = await info.getValueByKey(RECENT_OBJECT_STORE_NAME, playlistId)
-      await info.update(RECENT_OBJECT_STORE_NAME, playlistId, { ...playList, ...data } as PlaylistItem);
+      const playList = await info.getValueByKey(RECENT_OBJECT_STORE_NAME, playlistId);
+      const updateData: PlaylistItem = { ...playList, ...data };
+      await info.update(RECENT_OBJECT_STORE_NAME, playlistId, updateData);
       return true;
     } catch (error) {
       return false;
     }
-
   }
 
   /**
@@ -52,13 +60,15 @@ export default class PlayInfoStorageService implements IPlayInfoStorable {
    * @param {number} playlistId
    * @returns {Promise<boolean>} 返回布尔值, 是否成功更新
    */
-  async deleteRecentPlayedBy(playlistId: number): Promise<boolean> {
+  public async deleteRecentPlayedBy(playlistId: number): Promise<boolean> {
     try {
       const { items } = await info.getValueByKey(RECENT_OBJECT_STORE_NAME, playlistId);
       await Promise.all(items.map(async (item: number) => {
         try {
           await info.delete(VIDEO_OBJECT_STORE_NAME, item);
-        } catch (err) {}
+        } catch (err) {
+          // empty
+        }
       }));
       await info.delete(RECENT_OBJECT_STORE_NAME, playlistId);
       return true;
@@ -66,17 +76,20 @@ export default class PlayInfoStorageService implements IPlayInfoStorable {
       return false;
     }
   }
-  async getAllRecentPlayed(): Promise<PlaylistItem[]> {
+
+  public async getAllRecentPlayed(): Promise<PlaylistItem[]> {
     const results = await info.getAll('recent-played');
     return results.sort((a: PlaylistItem, b: PlaylistItem) => b.lastOpened - a.lastOpened);
   }
-  async getPlaylistRecord(playlistId: number): Promise<PlaylistItem> {
+
+  public async getPlaylistRecord(playlistId: number): Promise<PlaylistItem> {
     return info.getValueByKey(RECENT_OBJECT_STORE_NAME, playlistId);
   }
-  async getMediaItem(mediaitemId: number): Promise<MediaItem> {
+
+  public async getMediaItem(mediaitemId: number): Promise<MediaItem> {
     return info.getValueByKey(VIDEO_OBJECT_STORE_NAME, mediaitemId);
   }
 }
 
 
-export const playInfoStorageService = new PlayInfoStorageService()
+export const playInfoStorageService = new PlayInfoStorageService();

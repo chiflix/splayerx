@@ -1,7 +1,7 @@
 <template>
   <div
     ref="controller"
-    :style="{ cursor: cursorStyle }"
+    :style="{ cursor: cursorStyle, pointerEvents: isFocused ? 'auto' : 'none' }"
     @mousemove="handleMousemove"
     @mouseenter="handleMouseenter"
     @mouseleave="handleMouseleave"
