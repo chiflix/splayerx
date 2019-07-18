@@ -362,8 +362,22 @@ class MediaInfoTask implements IMediaTask<IMediaInfo> {
 }
 export class MediaInfoQueue extends BaseMediaTaskQueue {
   public async getMediaInfo(path: string) {
-    const result = await super.addTask<IMediaInfo>(await MediaInfoTask.from(path));
-    if (result instanceof Error) throw result;
-    return result;
+    try {
+      const result = await super.addTask<IMediaInfo>(await MediaInfoTask.from(path));
+      if (result instanceof Error) return undefined;
+      return result;
+    } catch (err) { return undefined; }
+  }
+
+  public async getFormat(path: string): Promise<IFormat | undefined> {
+    const result = await this.getMediaInfo(path);
+    if (result && result.format) return result.format;
+    return undefined;
+  }
+
+  public async getStreams(path: string): Promise<Stream[]> {
+    const result = await this.getMediaInfo(path);
+    if (result && result.streams) return result.streams;
+    return [];
   }
 }
