@@ -170,7 +170,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'defaultDir', 'isFullScreen', 'hideVideoHistoryOnExit', 'browsingSize']),
+    ...mapGetters(['winWidth', 'defaultDir', 'isFullScreen', 'hideVideoHistoryOnExit']),
     lastIndex: {
       get() {
         return (this.firstIndex + this.showItemNum) - 1;
@@ -313,8 +313,6 @@ export default {
     }),
     handleBrowsingOpen(url: string) {
       this.updateInitialUrl(url);
-      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [0]);
-      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', this.browsingSize);
       this.$router.push({
         name: 'browsing-view',
       });

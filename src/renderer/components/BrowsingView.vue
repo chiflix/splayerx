@@ -10,7 +10,7 @@
       class="pip-buttons"
     >
       <Icon
-        :style="{ marginRight: '12px' }"
+        :style="{ marginBottom: '12px' }"
         type="pipRecord"
       />
       <Icon
@@ -42,6 +42,7 @@
 import { mapGetters, mapActions } from 'vuex';
 // @ts-ignore
 import urlParseLax from 'url-parse-lax';
+import { windowRectService } from '@/services/window/WindowRectService';
 import { Browsing as browsingActions } from '@/store/actionTypes';
 import BrowsingHeader from '@/components/BrowsingView/BrowsingHeader.vue';
 import BrowsingControl from '@/components/BrowsingView/BrowsingControl.vue';
@@ -68,8 +69,16 @@ export default {
       controlToShow: true,
     };
   },
+  created() {
+    windowRectService.calculateWindowRect(
+      this.browsingSize,
+      true,
+      this.winPos.concat(this.winSize),
+    );
+    this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [0]);
+  },
   computed: {
-    ...mapGetters(['winPos', 'isFullScreen', 'initialUrl', 'winWidth', 'winSize']),
+    ...mapGetters(['winPos', 'isFullScreen', 'initialUrl', 'winWidth', 'winSize', 'browsingSize']),
     availableUrl() {
       const parsedUrl = urlParseLax(this.initialUrl);
       return parsedUrl.protocol ? parsedUrl.href : `http://${this.initialUrl}`;
@@ -78,12 +87,10 @@ export default {
   watch: {
     winWidth(val: number) {
       if (this.isPip) {
-        if (this.pipType === 'youtube') {
-          this.youtubeWatcher(val);
+        if (this.pipType === 'iqiyi') {
+          this.iqiyiWatcher(val);
         } else if (this.pipType === 'bilibili') {
           this.bilibiliWatcher(val);
-        } else {
-          this.iqiyiWatcher(val);
         }
       }
     },
@@ -98,7 +105,7 @@ export default {
         setTimeout(() => {
           this.$refs.browsingControl.$el.style.display = 'none';
         }, 100);
-      } else {
+      } else if (!this.isPip) {
         this.$refs.browsingControl.$el.style.display = '';
       }
     },
@@ -217,9 +224,14 @@ export default {
       }
     },
     iqiyiAdapter() {
-      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [320 / 180]);
-      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [320, 180]);
-      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [320, 180]);
+      this.$refs.webView.executeJavaScript('getComputedStyle(document.querySelector("video"))', (result: CSSStyleDeclaration) => {
+        const videoAspectRatio = parseFloat(result.width as string)
+                / parseFloat(result.height as string);
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [videoAspectRatio]);
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [420, Math.round(420 / videoAspectRatio)]);
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [420, Math.round(420 / videoAspectRatio)]);
+      });
+      this.$refs.webView.executeJavaScript('document.getElementsByClassName("iqp-barrage")[1].style.display = "none"');
       this.$refs.webView.executeJavaScript('document.body.style.overflow = "hidden";document.querySelector(".qy-flash-box").style.cssText = "position: fixed; left: 0; top: 0; z-index: 9999"');
       this.$refs.webView.executeJavaScript(`setTimeout(() => {document.querySelector(".flash-box").style.width="${this.winSize[0]}px";document.querySelector(".flash-box").style.height="${this.winSize[1]}px"}, 0)`);
     },
@@ -230,36 +242,30 @@ export default {
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [0, 0]);
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [720, 405]);
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [1200, 900]);
+      this.$refs.webView.executeJavaScript('document.getElementsByClassName("iqp-barrage")[1].style.display = ""');
       this.$refs.webView.executeJavaScript('document.body.style.overflow = "";document.querySelector(".qy-flash-box").style.cssText = `position: ""; left: ""; top: ""; z-index: ""`');
       this.$refs.webView.executeJavaScript('document.querySelector(".flash-box").style.width="100%";document.querySelector(".flash-box").style.height="100%"');
     },
     youtubeAdapter() {
-      this.$refs.webView.executeJavaScript('document.querySelector("video").style', (result: CSSStyleDeclaration) => {
-        const aspectRatio: number[] = [parseFloat(result.width as string)
-          / parseFloat(result.height as string)];
-        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', aspectRatio);
-        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [180 * aspectRatio[0], 180]);
-        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [180 * aspectRatio[0], 180]);
+      this.$refs.webView.executeJavaScript('getComputedStyle(document.querySelector("video"))', (result: CSSStyleDeclaration) => {
+        const videoAspectRatio = parseFloat(result.width as string)
+                / parseFloat(result.height as string);
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [videoAspectRatio]);
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [420, Math.round(420 / videoAspectRatio)]);
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [420, Math.round(420 / videoAspectRatio)]);
       });
       this.$refs.webView.executeJavaScript('var isPaused = document.querySelector("video").paused;document.body.appendChild(document.querySelector(".html5-video-player")); if (!isPaused) {document.querySelector("video").play()}');
-      this.$refs.webView.executeJavaScript('document.getElementsByTagName("ytd-app")[0].style.display = "none"');
+      this.$refs.webView.executeJavaScript('document.querySelector(".html5-video-player").style.position = "absolute";document.getElementsByTagName("ytd-app")[0].style.display = "none"');
       this.$refs.webView.executeJavaScript('if (document.querySelector(".video-ads")) document.querySelector(".video-ads").style.display = "none"'); // remove youtube ads
-      this.$refs.webView.executeJavaScript('document.querySelector(".html5-video-player").style.left = "50%";document.querySelector(".html5-video-player").style.transform = "translateX(-50%)";');
-      this.$refs.webView.executeJavaScript('var setZoom = function() {setTimeout(() => { document.querySelector("video").style.zoom = document.body.clientWidth / parseFloat(document.querySelector("video").style.width);document.querySelector(".ytp-chrome-bottom").style.width = "calc(100% - 24px)"; }, 250);};window.addEventListener("resize", setZoom);');
+      this.$refs.webView.executeJavaScript('document.querySelector(".html5-video-container").style.width="100%";document.querySelector(".html5-video-container").style.height="100%";');
+      this.$refs.webView.executeJavaScript('document.querySelector("video").style.width="100%";document.querySelector("video").style.height="100%";Object.defineProperty(document.querySelector("video").style, "width", {get: function(){return "100%"}, set: function(){}});Object.defineProperty(document.querySelector("video").style, "height", {get: function(){return "100%"}, set: function(){}})');
       this.$refs.webView.executeJavaScript('document.querySelector(".html5-video-player").style.background = "rgba(0, 0, 0, 1)"');
-    },
-    youtubeWatcher(val: number) {
-      this.$refs.webView.executeJavaScript(`document.querySelector(".html5-video-player").style.position = "absolute";document.querySelector(".html5-video-player").style.width = "${val}px";document.querySelector(".html5-video-player").style.height = "${this.winSize[1]}px";`);
+      this.$refs.webView.executeJavaScript('document.querySelector(".ytp-chrome-bottom").style.width="calc(100vw - 24px)";Object.defineProperty(document.querySelector(".ytp-chrome-bottom").style, "width", {get: function(){return "calc(100vw - 24px)"}, set: function(){}});');
     },
     youtubeRecover() {
-      this.$refs.webView.executeJavaScript('document.getElementsByTagName("ytd-app")[0].style.display = "";'
-        + 'document.querySelector(".html5-video-player").style.left = "";'
-        + 'document.querySelector(".html5-video-player").style.transform = "";'
-        + 'document.querySelector(".html5-video-player").style.position = "relative";'
-        + 'document.querySelector(".html5-video-player").style.width = "100%";'
-        + 'document.querySelector(".html5-video-player").style.height = "100%";'
-        + 'window.removeEventListener("resize", setZoom);'
-        + 'document.querySelector("video").style.zoom = 1');
+      this.$refs.webView.executeJavaScript('document.getElementsByTagName("ytd-app")[0].style.display = "";document.querySelector(".html5-video-player").style.position = "";');
+      this.$refs.webView.executeJavaScript('Object.defineProperty(document.querySelector("video").style, "width", {value: "100%", writable: true});Object.defineProperty(document.querySelector("video").style, "height", {value: "100%", writable: true});');
+      this.$refs.webView.executeJavaScript('Object.defineProperty(document.querySelector(".ytp-chrome-bottom").style, "width", {get: function(){return this._width}, set: function(val){this._width = val;document.querySelector(".ytp-chrome-bottom").style.setProperty("width", val);}});');
       this.$refs.webView.executeJavaScript('document.querySelector(".html5-video-player").style.background = "rgba(255, 255, 255, 1)"');
       this.$refs.webView.executeJavaScript('if (document.querySelector(".video-ads")) document.querySelector(".video-ads").style.display = ""'); // remove youtube ads
       this.$refs.webView.executeJavaScript('var isPaused = document.querySelector("video").paused;document.querySelector(".ytd-player").appendChild(document.querySelector(".html5-video-player")); if (!isPaused) {document.querySelector("video").play()}');
@@ -278,22 +284,33 @@ export default {
             const videoAspectRatio = parseFloat(result.width as string)
               / (parseFloat(result.height as string) - 46);
             this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [videoAspectRatio]);
-            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [180 * videoAspectRatio, 180]);
-            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [180 * videoAspectRatio, 180]);
+            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [420, Math.round(420 / videoAspectRatio)]);
+            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [420, Math.round(420 / videoAspectRatio)]);
           });
+          this.$refs.webView.executeJavaScript('document.querySelector(".bilibili-player-video-danmaku").style.display = "none"');
           this.$refs.webView.executeJavaScript('document.querySelector("#app").style.display = "none"');
           this.$refs.webView.executeJavaScript('document.body.style.overflow = "hidden"');
           this.$refs.webView.executeJavaScript('document.querySelector(".bili-header-m").style.display = "none"');
         } else if (this.bilibiliType === 'videoStreaming') {
-          this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [320 / 180]);
-          this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [320, 180]);
-          this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [320, 180]);
+          this.$refs.webView.executeJavaScript('getComputedStyle(document.querySelector("video"))', (result: CSSStyleDeclaration) => {
+            const videoAspectRatio = parseFloat(result.width as string)
+            / parseFloat(result.height as string);
+            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [videoAspectRatio]);
+            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [420, Math.round(420 / videoAspectRatio)]);
+            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [420, Math.round(420 / videoAspectRatio)]);
+          });
+          this.$refs.webView.executeJavaScript('document.querySelector(".bilibili-live-player-video-danmaku").style.display = "none"');
           this.$refs.webView.executeJavaScript('document.body.prepend(document.querySelector(".live-player-ctnr"))');
           this.$refs.webView.executeJavaScript('document.querySelector(".live-room-app").style.display = "none"');
         } else {
-          this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [320 / 180]);
-          this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [320, 180]);
-          this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [320, 180]);
+          this.$refs.webView.executeJavaScript('getComputedStyle(document.querySelector("iframe").contentDocument.querySelector("video"))', (result: CSSStyleDeclaration) => {
+            const videoAspectRatio = parseFloat(result.width as string)
+                    / parseFloat(result.height as string);
+            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [videoAspectRatio]);
+            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [420, Math.round(420 / videoAspectRatio)]);
+            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [420, Math.round(420 / videoAspectRatio)]);
+          });
+          this.$refs.webView.executeJavaScript('document.querySelector("iframe").contentDocument.querySelector(".bilibili-live-player-video-danmaku").style.display = "none"');
           this.$refs.webView.executeJavaScript('document.body.style.cssText = "overflow: hidden";Object.defineProperty(document.body.style, "overflow", {get: function(){return "hidden"}, set: function(){}});document.querySelector("iframe").contentDocument.querySelector(".aside-area").style.display = "none";');
           this.$refs.webView.executeJavaScript('document.querySelector(".game-header").style.display = "none";document.querySelector(".link-navbar").style.display = "none";document.querySelector("iframe").contentDocument.querySelector("#head-info-vm").style.display = "none";document.querySelector("iframe").contentDocument.querySelector(".aside-area-toggle-btn").style.display = "none";document.querySelector(".agile-sidebar").style.display = "none";document.querySelector("iframe").contentDocument.querySelector("#gift-control-vm").style.display = "none"');
           this.$refs.webView.executeJavaScript('var el = document.querySelector("iframe");el.style.cssText = "position: fixed;left: 0;top: 0;";Object.defineProperty(el.style, "position", {get: function(){ return "fixed"},set: function(){}});Object.defineProperty(el.style, "left", {get: function(){ return "0"},set: function(){}});Object.defineProperty(el.style, "top", {get: function(){ return "0"},set: function(){}});');
@@ -318,15 +335,18 @@ export default {
       if (this.bilibiliType === 'video') {
         this.$refs.webView.executeJavaScript('var isPaused = document.querySelector("video").paused;document.querySelector("#bofqi").prepend(document.querySelector(".player")); if (!isPaused) {document.querySelector("video").play()}');
         this.$refs.webView.executeJavaScript('document.querySelector("#app").style.display = ""');
+        this.$refs.webView.executeJavaScript('document.querySelector(".bilibili-player-video-danmaku").style.display = ""');
         this.$refs.webView.executeJavaScript('document.body.style.overflow = ""');
         this.$refs.webView.executeJavaScript('document.querySelector(".bili-header-m").style.display = ""');
         this.$refs.webView.executeJavaScript('document.querySelector(".player").style.height= "100%"');
       } else if (this.bilibiliType === 'videoStreaming') {
         this.$refs.webView.executeJavaScript('document.querySelector(".player-section").prepend(document.querySelector(".live-player-ctnr"))');
+        this.$refs.webView.executeJavaScript('document.querySelector(".bilibili-live-player-video-danmaku").style.display = ""');
         this.$refs.webView.executeJavaScript('document.querySelector(".live-room-app").style.display = ""');
       } else if (this.bilibiliType === 'iframeStreaming') {
         this.$refs.webView.executeJavaScript('Object.defineProperty(document.body.style, "overflow", {value: "scroll",writable: true});document.body.style.cssText = "overflow: scroll";document.querySelector("iframe").contentDocument.querySelector(".aside-area").style.display = "";');
         this.$refs.webView.executeJavaScript('document.querySelector(".game-header").style.display = "";document.querySelector(".link-navbar").style.display = "";document.querySelector("iframe").contentDocument.querySelector("#head-info-vm").style.display = "";document.querySelector("iframe").contentDocument.querySelector(".aside-area-toggle-btn").style.display = "";document.querySelector(".agile-sidebar").style.display = "";document.querySelector("iframe").contentDocument.querySelector("#gift-control-vm").style.display = ""');
+        this.$refs.webView.executeJavaScript('document.querySelector("iframe").contentDocument.querySelector(".bilibili-live-player-video-danmaku").style.display = ""');
         this.$refs.webView.executeJavaScript('var el = document.querySelector("iframe");Object.defineProperty(el.style, "position", {value: "", writable: true});Object.defineProperty(el.style, "left", {value: "", writable: true});Object.defineProperty(el.style, "top", {value: "", writable: true});el.style.cssText = `position: "";left: "";top: "";`');
         this.$refs.webView.executeJavaScript('document.querySelector("iframe").contentDocument.querySelector(".player-ctnr").style.cssText = `width: "";height: "";`;document.querySelector("iframe").contentDocument.querySelector(".live-player-ctnr").style.cssText = `width: "";height: "";`');
       }
@@ -353,12 +373,18 @@ export default {
       #626262 51%, #626262 56%, #555555 69%, #414141 86%);
   }
   .pip-buttons {
-    width: auto;
-    height: 20px;
+    width: 20px;
+    height: auto;
     display: flex;
+    padding: 22px 15px 22px 15px;
+    border-radius: 40px;
+    flex-direction: column;
+    justify-content: space-between;
     position: absolute;
-    right: 10px;
-    top: 10px;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.4);
     z-index: 100;
   }
 }
