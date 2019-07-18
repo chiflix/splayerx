@@ -60,8 +60,8 @@ module.exports = {
         'CONTENT'
       ]
     }],
-    // interface name can use `I` prefix
-    '@typescript-eslint/interface-name-prefix': 0,
+    // interface name must use `I` prefix
+    '@typescript-eslint/interface-name-prefix': ['error', 'always'],
     // class methods can without use this
     'class-methods-use-this': 0,
     // can use types to define Obejct

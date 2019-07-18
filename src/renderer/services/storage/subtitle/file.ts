@@ -5,8 +5,8 @@ import { remote } from 'electron';
 import {
   copyFile, existsSync, outputFile, ensureDirSync, remove, readdir,
 } from 'fs-extra';
-import { Entity, Origin, Type } from '@/interfaces/ISubtitle';
-import { embeddedSrcLoader, EmbeddedOrigin, SagiSubtitlePayload } from '@/services/subtitle';
+import { Entity, IOrigin, Type } from '@/interfaces/ISubtitle';
+import { embeddedSrcLoader, IEmbeddedOrigin, SagiSubtitlePayload } from '@/services/subtitle';
 import { sagiSubtitleToWebVTT } from '@/services/subtitle/utils/transcoders';
 import { updateSubtitle } from '.';
 import { ELECTRON_CACHE_DIRNAME, DEFAULT_DIRNAME, SUBTITLE_DIRNAME } from '@/constants';
@@ -20,7 +20,7 @@ const subtitleCacheDirPath = join(
   SUBTITLE_DIRNAME,
 );
 /** copy the subtitle from the src to cacheFileStorage */
-export async function cacheLocalSubtitle(subtitle: Entity): Promise<Origin> {
+export async function cacheLocalSubtitle(subtitle: Entity): Promise<IOrigin> {
   const { source, hash } = subtitle;
   const storedPath = join(subtitleCacheDirPath, `${hash}${extname(source.source as string)}`);
   ensureDirSync(subtitleCacheDirPath);
@@ -31,10 +31,10 @@ export async function cacheLocalSubtitle(subtitle: Entity): Promise<Origin> {
   };
 }
 /** copy the subtitle if extracted */
-export async function cacheEmbeddedSubtitle(subtitle: Entity): Promise<Origin> {
+export async function cacheEmbeddedSubtitle(subtitle: Entity): Promise<IOrigin> {
   const { hash, format } = subtitle;
   const storedPath = join(subtitleCacheDirPath, `${hash}.${formatToExtension(subtitle.format)}`);
-  const { extractedSrc, videoSrc, streamIndex } = (subtitle.source as EmbeddedOrigin).source;
+  const { extractedSrc, videoSrc, streamIndex } = (subtitle.source as IEmbeddedOrigin).source;
   const srcPath = extractedSrc || await embeddedSrcLoader(videoSrc, streamIndex, format);
   ensureDirSync(subtitleCacheDirPath);
   if (!existsSync(srcPath)) await copyFile(srcPath, storedPath);
@@ -44,7 +44,7 @@ export async function cacheEmbeddedSubtitle(subtitle: Entity): Promise<Origin> {
   };
 }
 /** convert payload to WebVTT subtitle and cache it */
-export async function cacheOnlineSubtitle(subtitle: Entity): Promise<Origin | undefined> {
+export async function cacheOnlineSubtitle(subtitle: Entity): Promise<IOrigin | undefined> {
   const { hash, payload } = subtitle;
   if (payload) {
     const storedPath = join(subtitleCacheDirPath, `${hash}.${formatToExtension(subtitle.format)}`);
@@ -75,7 +75,7 @@ export async function removeCachedSubtitle(hash: string) {
 
 export async function removeCachedSubtitles(
   hashes: string[],
-): Promise<{ hash: string, source: Origin }[]> {
+): Promise<{ hash: string, source: IOrigin }[]> {
   const cachedSubtitlePaths = (await readdir(subtitleCacheDirPath))
     .filter(path => hashes.includes(basename(path, extname(path))))
     .map(basepath => join(subtitleCacheDirPath, basepath));
@@ -92,12 +92,12 @@ export async function removeCachedSubtitles(
 }
 
 /** update subtitle database with new origin */
-export function addNewSourceToDb(subtitle: Entity, newSource: Origin) {
+export function addNewSourceToDb(subtitle: Entity, newSource: IOrigin) {
   subtitle.source = newSource;
   return updateSubtitle(subtitle);
 }
 
-export function isCachedSubtitle(subtitleSource: Origin) {
+export function isCachedSubtitle(subtitleSource: IOrigin) {
   const { type, source } = subtitleSource;
   return type === Type.Local && typeof source === 'string' && existsSync(source) && dirname(source) === subtitleCacheDirPath;
 }

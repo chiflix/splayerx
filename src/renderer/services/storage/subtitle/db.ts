@@ -5,20 +5,20 @@ import {
 import { LanguageCode } from '@/libs/language';
 import { DATADB_NAME } from '@/constants';
 import {
-  Type, Format, Origin, VideoSegment,
+  Type, Format, IOrigin, IVideoSegment,
 } from '@/interfaces/ISubtitle';
 import {
-  StoredSubtitle, StoredSubtitleItem, SubtitlePreference, SelectedSubtitle,
+  IStoredSubtitle, IStoredSubtitleItem, ISubtitlePreference, SelectedSubtitle,
 } from '@/interfaces/ISubtitleStorage';
 
-interface DataDBV2 extends DBSchema {
+interface IDataDBV2 extends DBSchema {
   'subtitles': {
     key: string;
-    value: StoredSubtitle;
+    value: IStoredSubtitle;
   };
   'preferences': {
     key: number;
-    value: SubtitlePreference;
+    value: ISubtitlePreference;
     indexes: {
       'byPlaylist': number,
       'byMediaItem': string,
@@ -26,36 +26,36 @@ interface DataDBV2 extends DBSchema {
   };
 }
 
-interface AddSubtitleOptions {
-  source: Origin;
+interface IAddSubtitleOptions {
+  source: IOrigin;
   hash: string;
   format: Format;
   language: LanguageCode;
 }
-interface RemoveSubtitleOptions {
+interface IRemoveSubtitleOptions {
   source: unknown;
   hash: string;
 }
-interface UpdateSubtitleOptions {
+interface IUpdateSubtitleOptions {
   hash: string;
-  source?: Origin;
+  source?: IOrigin;
   format?: Format;
   language?: LanguageCode;
 }
-interface UpdateSubtitleItemOptions {
+interface IUpdateSubtitleItemOptions {
   hash: string;
   type?: Type;
   source?: unknown;
-  videoSegments?: VideoSegment[];
+  videoSegments?: IVideoSegment[];
   delay?: number;
 }
 
 export class SubtitleDataBase {
-  private db: IDBPDatabase<DataDBV2>;
+  private db: IDBPDatabase<IDataDBV2>;
 
   private async getDb() {
     if (!this.db) {
-      this.db = await openDB<DataDBV2>(
+      this.db = await openDB<IDataDBV2>(
         DATADB_NAME,
         3,
         {
@@ -81,7 +81,7 @@ export class SubtitleDataBase {
       .get(hash);
   }
 
-  public async addSubtitle(subtitle: AddSubtitleOptions) {
+  public async addSubtitle(subtitle: IAddSubtitleOptions) {
     const objectStore = (await this.getDb())
       .transaction('subtitles', 'readwrite')
       .objectStore('subtitles');
@@ -98,7 +98,7 @@ export class SubtitleDataBase {
     });
   }
 
-  public async removeSubtitle(subtitle: RemoveSubtitleOptions) {
+  public async removeSubtitle(subtitle: IRemoveSubtitleOptions) {
     const objectStore = (await this.getDb())
       .transaction('subtitles', 'readwrite')
       .objectStore('subtitles');
@@ -113,7 +113,7 @@ export class SubtitleDataBase {
     return undefined;
   }
 
-  public async removeSubtitles(subtitles: RemoveSubtitleOptions[]) {
+  public async removeSubtitles(subtitles: IRemoveSubtitleOptions[]) {
     const objectStore = await (await this.getDb())
       .transaction('subtitles', 'readwrite')
       .objectStore('subtitles');
@@ -144,7 +144,7 @@ export class SubtitleDataBase {
     return deletedSubtitleHashes;
   }
 
-  public async updateSubtitle(subtitle: UpdateSubtitleOptions) {
+  public async updateSubtitle(subtitle: IUpdateSubtitleOptions) {
     const objectStore = await (await this.getDb())
       .transaction('subtitles', 'readwrite')
       .objectStore('subtitles');
@@ -156,8 +156,9 @@ export class SubtitleDataBase {
       if (format) newSubtitle.format = format;
       if (language) newSubtitle.language = language;
       return objectStore.put(newSubtitle);
-    } if (source && format && language) {
-      return this.addSubtitle(subtitle as AddSubtitleOptions);
+    }
+    if (source && format && language) {
+      return this.addSubtitle(subtitle as IAddSubtitleOptions);
     }
     return undefined;
   }
@@ -179,7 +180,7 @@ export class SubtitleDataBase {
   private static generateDefaultPreference(
     playlistId: number,
     mediaItemId: string,
-  ): SubtitlePreference {
+  ): ISubtitlePreference {
     return {
       playlistId,
       mediaId: mediaItemId,
@@ -203,7 +204,7 @@ export class SubtitleDataBase {
   public async addSubtitleItemsToList(
     playlistId: number,
     mediaItemId: string,
-    subtitles: StoredSubtitleItem[],
+    subtitles: IStoredSubtitleItem[],
   ) {
     subtitles = uniqWith(subtitles, (
       { hash: hash1, source: source1 },
@@ -237,7 +238,7 @@ export class SubtitleDataBase {
   public async updateSubtitleList(
     playlistId: number,
     mediaItemId: string,
-    subtitlesToUpdate: UpdateSubtitleItemOptions[],
+    subtitlesToUpdate: IUpdateSubtitleItemOptions[],
   ) {
     subtitlesToUpdate = uniqWith(subtitlesToUpdate, (
       { hash: hash1, source: source1 },
@@ -247,7 +248,7 @@ export class SubtitleDataBase {
       .transaction('preferences', 'readwrite')
       .objectStore('preferences');
     let preference;
-    let list: StoredSubtitleItem[] = [];
+    let list: IStoredSubtitleItem[] = [];
     let key;
     let cursor = await objectStore.openCursor();
     while (cursor && !preference && !key) {
@@ -256,7 +257,7 @@ export class SubtitleDataBase {
         list = Object.values(mergeWith(
           keyBy(preference.list, ({ hash }) => hash),
           keyBy(subtitlesToUpdate, ({ hash }) => hash),
-          (objVal: StoredSubtitleItem, srcVal: StoredSubtitleItem) => {
+          (objVal: IStoredSubtitleItem, srcVal: IStoredSubtitleItem) => {
             const destObj = { ...objVal };
             const {
               type, source, videoSegments, delay,
@@ -283,7 +284,7 @@ export class SubtitleDataBase {
   public async removeSubtitleItemsFromList(
     playlistId: number,
     mediaItemId: string,
-    subtitles: StoredSubtitleItem[],
+    subtitles: IStoredSubtitleItem[],
   ) {
     subtitles = uniqWith(subtitles, (
       { hash: hash1, source: source1 },
@@ -404,7 +405,7 @@ export class SubtitleDataBase {
       .transaction('preferences', 'readwrite')
       .objectStore('preferences');
     let cursor = await playlistStore.openCursor();
-    const subtitlesToRemove: RemoveSubtitleOptions[] = [];
+    const subtitlesToRemove: IRemoveSubtitleOptions[] = [];
     while (cursor) {
       if (cursor.value.playlistId === playlistId) {
         await playlistStore.delete(cursor.key);

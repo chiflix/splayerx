@@ -5,7 +5,7 @@ import {
 } from 'fs-extra';
 import { extname } from 'path';
 import {
-  Tags, Origin, Type, Format, Parser,
+  ITags, IOrigin, Type, Format, IParser,
 } from '@/interfaces/ISubtitle';
 import { LanguageCode } from '@/libs/language';
 
@@ -14,7 +14,7 @@ import {
 } from '@/services/subtitle';
 
 import { assFragmentLanguageLoader, srtFragmentLanguageLoader, vttFragmentLanguageLoader } from './languageLoader';
-import { EmbeddedOrigin } from '../loaders';
+import { IEmbeddedOrigin } from '../loaders';
 import { SagiSubtitlePayload } from '../parsers';
 
 /**
@@ -25,7 +25,7 @@ import { SagiSubtitlePayload } from '../parsers';
  * @param {object} baseTags - default tags for the cue.
  * @returns {object} tags object for the cue
  */
-export function tagsGetter(text: string, baseTags: Tags) {
+export function tagsGetter(text: string, baseTags: ITags) {
   const tagRegex = /\{[^{}]*\}/g;
   const matchTags = text.match(tagRegex);
   const finalTags = { ...baseTags };
@@ -128,12 +128,12 @@ export function pathToFormat(path: string): Format {
   }
 }
 
-export function sourceToFormat(subtitleSource: Origin) {
+export function sourceToFormat(subtitleSource: IOrigin) {
   switch (subtitleSource.type) {
     case Type.Online:
       return Format.Sagi;
     case Type.Embedded: {
-      const { extractedSrc } = (subtitleSource as EmbeddedOrigin).source;
+      const { extractedSrc } = (subtitleSource as IEmbeddedOrigin).source;
       if (extractedSrc) return pathToFormat(extractedSrc);
       return Format.Unknown;
     }
@@ -168,7 +168,7 @@ export async function inferLanguageFromPath(path: string): Promise<LanguageCode>
   }
 }
 
-export function getParser(format: Format, payload: unknown): Parser {
+export function getParser(format: Format, payload: unknown): IParser {
   switch (format) {
     case Format.AdvancedSubStationAplha:
     case Format.SubStationAlpha:

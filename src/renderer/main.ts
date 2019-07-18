@@ -53,7 +53,8 @@ function getSystemLocale() {
   locale = locale.replace('_', '-');
   if (locale === 'zh-TW' || locale === 'zh-HK' || locale === 'zh-Hant') {
     return 'zh-Hant';
-  } if (locale.startsWith('zh')) {
+  }
+  if (locale.startsWith('zh')) {
     return 'zh-Hans';
   }
   return 'en';
@@ -62,7 +63,8 @@ function getSystemLocale() {
 function getEnvironmentName() {
   if (process.platform === 'darwin') {
     return process.mas ? 'MAS' : 'DMG';
-  } if (process.platform === 'win32') {
+  }
+  if (process.platform === 'win32') {
     return process.windowsStore ? 'APPX' : 'EXE';
   }
   return 'Unknown';

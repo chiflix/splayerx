@@ -3,18 +3,18 @@ import { cloneDeep } from 'lodash';
 import { LanguageCode, normalizeCode } from '@/libs/language';
 import Sagi from '@/libs/sagi';
 import {
-  Origin, EntityGenerator, Type, Format,
+  IOrigin, IEntityGenerator, Type, Format,
 } from '@/interfaces/ISubtitle';
 import { SagiSubtitlePayload } from '../parsers';
 
 export type TranscriptInfo = MediaTranslationResponse.TranscriptInfo.AsObject;
 
-interface OnlineOrigin extends Origin {
+interface IOnlineOrigin extends IOrigin {
   type: Type.Online;
   source: string;
 }
-export class OnlineGenerator implements EntityGenerator {
-  private origin: OnlineOrigin;
+export class OnlineGenerator implements IEntityGenerator {
+  private origin: IOnlineOrigin;
 
   private language: LanguageCode;
 

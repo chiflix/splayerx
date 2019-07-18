@@ -16,18 +16,18 @@ export enum Format {
   Unknown = 'unknown',
 }
 
-export interface Origin {
+export interface IOrigin {
   type: Type;
   source: unknown;
 }
 export type Entity = {
-  source: Origin;
+  source: IOrigin;
   type: Type;
   format: Format;
   language: LanguageCode;
   payload: unknown;
   hash: string;
-  metadata: Metadata;
+  metadata: IMetadata;
   delay: number;
 }
 export const defaultEntity: Entity = {
@@ -53,11 +53,11 @@ export type SubtitleControlListItem = {
   delay: number;
 };
 
-export interface EntityGenerator {
+export interface IEntityGenerator {
   /** get real source to fetch subtitle from */
-  getSource(): Promise<Origin>
+  getSource(): Promise<IOrigin>
   /** get fake source for display use */
-  getStoredSource?: () => Promise<Origin>
+  getStoredSource?: () => Promise<IOrigin>
   getDelay?: () => Promise<number>
   getType(): Promise<Type>
   getFormat(): Promise<Format>
@@ -66,12 +66,12 @@ export interface EntityGenerator {
   getHash(): Promise<string>
 }
 
-export interface Metadata {
+export interface IMetadata {
   PlayResX?: string;
   PlayResY?: string;
 }
 
-export interface Tags {
+export interface ITags {
   b?: number;
   i?: number;
   u?: number;
@@ -88,7 +88,7 @@ export interface Tags {
   // size: string;
   // align: string';
 }
-export type TagsPartial = Partial<Tags>;
+export type TagsPartial = Partial<ITags>;
 
 export type Cue = {
   category?: string,
@@ -96,30 +96,30 @@ export type Cue = {
   end: number,
   text: string,
   format: string,
-  tags: Tags,
+  tags: ITags,
 }
-export interface Dialogue {
+export interface IDialogue {
   start: number;
   end: number;
   text?: string;
-  tags?: Tags;
+  tags?: ITags;
   fragments?: {
     text: string;
-    tags: Tags;
+    tags: ITags;
   }[];
 }
-export interface VideoSegment {
+export interface IVideoSegment {
   start: number;
   end: number;
   played: boolean;
 }
 
-export interface Parser {
+export interface IParser {
   parse(): void;
   readonly payload: unknown;
-  getMetadata(): Promise<Metadata>;
+  getMetadata(): Promise<IMetadata>;
   getDialogues(time?: number): Promise<Cue[]>;
-  getVideoSegments(duration: number): Promise<VideoSegment[]>;
+  getVideoSegments(duration: number): Promise<IVideoSegment[]>;
   updateVideoSegments(lastTime: number, currentTime: number): number;
 }
 

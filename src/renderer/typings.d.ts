@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/interface-name-prefix */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import Vue, { VNode } from 'vue'; // eslint-disable-line no-unused-vars
 import { AxiosInstance } from 'axios';

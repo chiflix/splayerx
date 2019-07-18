@@ -1,19 +1,19 @@
 import { ipcRenderer, Event } from 'electron';
 import { cloneDeep } from 'lodash';
 import {
-  Origin, Type, EntityGenerator, Format,
+  IOrigin, Type, IEntityGenerator, Format,
 } from '@/interfaces/ISubtitle';
 import { LanguageCode, normalizeCode } from '@/libs/language';
 import { mediaQuickHash } from '@/libs/utils';
 import { inferLanguageFromPath, loadLocalFile } from '../utils';
 
-interface ExtractSubtitleRequest {
+interface IExtractSubtitleRequest {
   videoSrc: string;
   streamIndex: number;
   format: Format;
   mediaHash: string;
 }
-interface ExtractSubtitleResponse {
+interface IExtractSubtitleResponse {
   error: number;
   index: number;
   path: string;
@@ -40,7 +40,7 @@ export async function embeddedSrcLoader(
     format,
     mediaHash);
   return new Promise((resolve, reject) => {
-    ipcRenderer.once(`extract-subtitle-response-${streamIndex}`, (event: Event, response: ExtractSubtitleResponse) => {
+    ipcRenderer.once(`extract-subtitle-response-${streamIndex}`, (event: Event, response: IExtractSubtitleResponse) => {
       const { error, index, path } = response;
       if (error) reject(new Error(`${videoSrc}'s No.${index} extraction failed with ${error}.`));
       resolve(path);
@@ -48,7 +48,7 @@ export async function embeddedSrcLoader(
   });
 }
 
-export interface EmbeddedOrigin extends Origin {
+export interface IEmbeddedOrigin extends IOrigin {
   type: Type.Embedded,
   source: {
     streamIndex: number;
@@ -56,7 +56,7 @@ export interface EmbeddedOrigin extends Origin {
     extractedSrc: string;
   };
 }
-export interface SubtitleStream {
+export interface ISubtitleStream {
   // eslint-disable-next-line camelcase
   codec_type: string;
   // eslint-disable-next-line camelcase
@@ -71,8 +71,8 @@ export interface SubtitleStream {
   };
 }
 
-export class EmbeddedGenerator implements EntityGenerator {
-  private origin: EmbeddedOrigin;
+export class EmbeddedGenerator implements IEntityGenerator {
+  private origin: IEmbeddedOrigin;
 
   private format: Format;
 
@@ -80,7 +80,7 @@ export class EmbeddedGenerator implements EntityGenerator {
 
   public readonly isDefault: boolean;
 
-  public constructor(videoSrc: string, stream: SubtitleStream) {
+  public constructor(videoSrc: string, stream: ISubtitleStream) {
     this.origin = {
       type: Type.Embedded,
       source: {

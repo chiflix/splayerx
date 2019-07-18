@@ -2,16 +2,16 @@ import { cloneDeep } from 'lodash';
 import { pathToFormat, loadLocalFile, inferLanguageFromPath } from '../utils';
 
 import {
-  Origin, Type, EntityGenerator, Format,
+  IOrigin, Type, IEntityGenerator, Format,
 } from '@/interfaces/ISubtitle';
 import { mediaQuickHash } from '@/libs/utils';
 
-interface LocalOrigin extends Origin {
+interface ILocalOrigin extends IOrigin {
   type: Type.Local,
   source: string;
 }
-export class LocalGenerator implements EntityGenerator {
-  private origin: LocalOrigin;
+export class LocalGenerator implements IEntityGenerator {
+  private origin: ILocalOrigin;
 
   private format: Format;
 

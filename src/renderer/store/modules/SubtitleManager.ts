@@ -10,17 +10,17 @@ import store from '@/store';
 import { SubtitleManager as m } from '@/store/mutationTypes';
 import { SubtitleManager as a, newSubtitle as subActions, Subtitle as legacyActions } from '@/store/actionTypes';
 import {
-  SubtitleControlListItem, Type, EntityGenerator, Entity,
+  SubtitleControlListItem, Type, IEntityGenerator, Entity,
 } from '@/interfaces/ISubtitle';
 import {
-  SubtitleStream, TranscriptInfo,
+  ISubtitleStream, TranscriptInfo,
   searchForLocalList, retrieveEmbeddedList, fetchOnlineList,
   OnlineGenerator, LocalGenerator, EmbeddedGenerator,
 } from '@/services/subtitle';
 import { generateHints, calculatedName } from '@/libs/utils';
 import { log } from '@/libs/Log';
 import SubtitleModule from './Subtitle';
-import { StoredSubtitleItem, SelectedSubtitle } from '@/interfaces/ISubtitleStorage';
+import { IStoredSubtitleItem, SelectedSubtitle } from '@/interfaces/ISubtitleStorage';
 import {
   retrieveSubtitlePreference, DatabaseGenerator,
   storeSubtitleLanguage, addSubtitleItemsToList, removeSubtitleItemsFromList,
@@ -128,7 +128,7 @@ const mutations = {
   },
 };
 type AddDatabaseSubtitlesOptions = {
-  storedList: StoredSubtitleItem[];
+  storedList: IStoredSubtitleItem[];
   selected?: {
     primary?: SelectedSubtitle;
     secondary?: SelectedSubtitle;
@@ -137,7 +137,7 @@ type AddDatabaseSubtitlesOptions = {
   mediaItemId: string;
 };
 type AddSubtitleOptions = {
-  generator: EntityGenerator;
+  generator: IEntityGenerator;
   playlistId: number;
   mediaItemId: string;
 };
@@ -413,7 +413,7 @@ const actions = {
     }
     return {};
   },
-  async [a.addEmbeddedSubtitles]({ dispatch, state }: any, streams: [string, SubtitleStream][]) {
+  async [a.addEmbeddedSubtitles]({ dispatch, state }: any, streams: [string, ISubtitleStream][]) {
     return Promise.all(
       streams.map(stream => dispatch(a.addSubtitle, {
         generator: new EmbeddedGenerator(stream[0], stream[1]),

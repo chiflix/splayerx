@@ -1,10 +1,10 @@
 import { pick } from 'lodash';
 // @ts-ignore
 import { compile } from 'ass-compiler';
-import { Format, Cue, Tags } from '@/interfaces/ISubtitle';
+import { Format, Cue, ITags } from '@/interfaces/ISubtitle';
 import { BaseParser } from './base';
 
-interface AssTags {
+interface IAssTags {
   b: number;
   i: number;
   u: number;
@@ -24,9 +24,9 @@ type CompiledSubtitle = {
       y: number;
     };
     slices: {
-      tag: AssTags;
+      tag: IAssTags;
       fragments: {
-        tag: AssTags;
+        tag: IAssTags;
         text: string;
         drawing: null | object;
       }[];
@@ -118,8 +118,8 @@ export class AssParser extends BaseParser {
             };
           });
           let txt = '';
-          let tags: Tags = {};
-          processedFragments.forEach((f: { text: string, tags: Tags }, i: number) => {
+          let tags: ITags = {};
+          processedFragments.forEach((f: { text: string, tags: ITags }, i: number) => {
             if (i === 0) {
               tags = f.tags;
             }

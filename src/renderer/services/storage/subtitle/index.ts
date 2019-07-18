@@ -1,13 +1,13 @@
 import {
-  Entity, SubtitleControlListItem, EntityGenerator, Type, Format, Origin,
+  Entity, SubtitleControlListItem, IEntityGenerator, Type, Format, IOrigin,
 } from '@/interfaces/ISubtitle';
 import { LanguageCode } from '@/libs/language';
-import { SelectedSubtitle, StoredSubtitleItem } from '@/interfaces/ISubtitleStorage';
+import { SelectedSubtitle, IStoredSubtitleItem } from '@/interfaces/ISubtitleStorage';
 import { SubtitleDataBase } from './db';
 
 import Sagi from '@/libs/sagi';
 import { loadLocalFile } from '@/services/subtitle/utils';
-import { embeddedSrcLoader, EmbeddedOrigin } from '@/services/subtitle/loaders/embedded';
+import { embeddedSrcLoader, IEmbeddedOrigin } from '@/services/subtitle/loaders/embedded';
 import {
   cacheEmbeddedSubtitle, cacheLocalSubtitle, cacheOnlineSubtitle,
   isCachedSubtitle, removeCachedSubtitles,
@@ -104,7 +104,7 @@ export async function deleteSubtitlesByPlaylistId(playlistId: number) {
     .map(({ hash, source }) => ({ hash, source: source.source })));
 }
 
-export class DatabaseGenerator implements EntityGenerator {
+export class DatabaseGenerator implements IEntityGenerator {
   private type: Type;
 
   public async getType() { return this.type; }
@@ -117,7 +117,7 @@ export class DatabaseGenerator implements EntityGenerator {
 
   public async getLanguage() { return this.language; }
 
-  private sources: Origin[];
+  private sources: IOrigin[];
 
   public async getSource() {
     const cachedSubtitle = this.sources.find(isCachedSubtitle);
@@ -125,7 +125,7 @@ export class DatabaseGenerator implements EntityGenerator {
     return this.sources[0];
   }
 
-  private storedSource: Origin;
+  private storedSource: IOrigin;
 
   public async getStoredSource() { return this.storedSource; }
 
@@ -133,7 +133,7 @@ export class DatabaseGenerator implements EntityGenerator {
     const { type, source } = await this.getSource();
     switch (type) {
       case Type.Embedded: {
-        const { source } = await this.getSource() as EmbeddedOrigin;
+        const { source } = await this.getSource() as IEmbeddedOrigin;
         const embeddedSrc = await embeddedSrcLoader(
           source.videoSrc,
           source.streamIndex,
@@ -162,7 +162,7 @@ export class DatabaseGenerator implements EntityGenerator {
     return this.delayInSeconds;
   }
 
-  public static async from(storedSubtitleItem: StoredSubtitleItem) {
+  public static async from(storedSubtitleItem: IStoredSubtitleItem) {
     const { hash, type, delay } = storedSubtitleItem;
     const storedSubtitle = await db.retrieveSubtitle(hash);
     if (storedSubtitle) {

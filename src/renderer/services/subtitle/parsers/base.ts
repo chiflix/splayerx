@@ -1,6 +1,6 @@
 import { isEqual } from 'lodash';
 import {
-  Parser, Format, Cue, VideoSegment, Dialogue,
+  IParser, Format, Cue, VideoSegment, IDialogue,
 } from '@/interfaces/ISubtitle';
 
 function getDialogues(dialogues: Cue[], time?: number) {
@@ -10,7 +10,7 @@ function getDialogues(dialogues: Cue[], time?: number) {
     ));
 }
 
-function calculateVideoSegments(dialogues: Dialogue[], duration: number) {
+function calculateVideoSegments(dialogues: IDialogue[], duration: number) {
   const subtitleSegments = dialogues
     .filter(({ text }) => !!text)
     .map(({ start, end }) => ({ start, end }))
@@ -34,7 +34,7 @@ function calculateVideoSegments(dialogues: Dialogue[], duration: number) {
   return result.map(segment => ({ ...segment, played: false }));
 }
 
-export class BaseParser implements Parser {
+export class BaseParser implements IParser {
   public readonly payload: unknown;
 
   public metadata = {};
