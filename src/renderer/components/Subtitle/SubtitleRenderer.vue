@@ -155,6 +155,14 @@ export default {
       }
       return (this.scaleNum * 5) / 6 < 1 ? 1 : (this.scaleNum * 5) / 6;
     },
+    firstSubTextHeight() {
+      const { normalFont, scaleNum } = this;
+      return calculateTextSize('9px', normalFont, '120%', scaleNum.toString(), 'test').height;
+    },
+    secondarySubTextHeight() {
+      const { normalFont, secondarySubScale } = this;
+      return calculateTextSize('9px', normalFont, '120%', secondarySubScale.toString(), 'test').height;
+    },
     positionCues() {
       const firstCues: Cue[] = this.currentCues[0]
         .filter((cue: Cue) => this.calculatePosition(cue.category, cue.tags)).map((cue: Cue) => { cue.category = 'first'; return cue; });
@@ -213,17 +221,20 @@ export default {
     },
     calculateSubBottom(index: number) {
       if ([1, 2, 3].includes(index + 1)) {
-        const textHeight = calculateTextSize('9px', this.normalFont, '120%', this.secondarySubScale.toString(), 'test').height;
-        const padding = this.chosenStyle === 4 ? 0.9 : 0;
-        const adaptedCues = this.noPositionCues[0]
-          .concat(this.noPositionCues[1], this.noPositionCues[2])
+        const {
+          secondarySubTextHeight, secondarySubScale, chosenStyle, currentFirstSubtitleId,
+          currentSecondarySubtitleId, enabledSecondarySub, subtitleSpace, winHeight, noPositionCues,
+        } = this;
+        const padding = chosenStyle === 4 ? 0.9 : 0;
+        const adaptedCues = noPositionCues[0]
+          .concat(noPositionCues[1], noPositionCues[2])
           .filter((cue: Cue) => cue.category && cue.category === 'secondary');
-        if (adaptedCues.length === 1 && this.currentFirstSubtitleId && !adaptedCues[0].text.includes('\n')) {
-          return `${(textHeight * this.secondarySubScale + (60 / 1080) * this.winHeight) * 100 / this.winHeight}%`;
+        if (adaptedCues.length === 1 && currentFirstSubtitleId && !adaptedCues[0].text.includes('\n')) {
+          return `${(secondarySubTextHeight * secondarySubScale + (60 / 1080) * winHeight) * 100 / winHeight}%`;
         }
-        if (adaptedCues.length === 0 && this.currentSecondarySubtitleId && this.enabledSecondarySub
-          && this.currentFirstSubtitleId) {
-          return `${(this.subtitleSpace + (textHeight + padding) * 2 * this.secondarySubScale + (60 / 1080) * this.winHeight) * 100 / this.winHeight}%`;
+        if (adaptedCues.length === 0 && currentSecondarySubtitleId
+          && enabledSecondarySub && currentFirstSubtitleId) {
+          return `${(subtitleSpace + (secondarySubTextHeight + padding) * 2 * secondarySubScale + (60 / 1080) * winHeight) * 100 / winHeight}%`;
         }
         return `${60 / 10.8}%`;
       }
@@ -231,17 +242,20 @@ export default {
     },
     calculateSubTop(index: number) {
       if ([7, 8, 9].includes(index + 1)) {
-        const textHeight = calculateTextSize('9px', this.normalFont, '120%', this.scaleNum.toString(), 'test').height;
-        const padding = this.chosenStyle === 4 ? 0.9 : 0;
-        const adaptedCues = this.noPositionCues[6]
-          .concat(this.noPositionCues[7], this.noPositionCues[8])
+        const {
+          firstSubTextHeight, scaleNum, chosenStyle, currentFirstSubtitleId, noPositionCues,
+          currentSecondarySubtitleId, enabledSecondarySub, subtitleSpace, winHeight,
+        } = this;
+        const padding = chosenStyle === 4 ? 0.9 : 0;
+        const adaptedCues = noPositionCues[6]
+          .concat(noPositionCues[7], noPositionCues[8])
           .filter((cue: Cue) => cue.category && cue.category === 'first');
-        if (adaptedCues.length === 1 && this.currentSecondarySubtitleId && !adaptedCues[0].text.includes('\n')) {
-          return `${(60 / 1080 * this.winHeight + textHeight * this.scaleNum) * 100 / this.winHeight}%`;
+        if (adaptedCues.length === 1 && currentSecondarySubtitleId && !adaptedCues[0].text.includes('\n')) {
+          return `${(60 / 1080 * winHeight + firstSubTextHeight * scaleNum) * 100 / winHeight}%`;
         }
-        if (adaptedCues.length === 0 && this.currentSecondarySubtitleId && this.enabledSecondarySub
-          && this.currentFirstSubtitleId) {
-          return `${(this.subtitleSpace + (textHeight + padding) * 2 * this.scaleNum + 60 / 1080 * this.winHeight) * 100 / this.winHeight}%`;
+        if (adaptedCues.length === 0 && currentSecondarySubtitleId
+          && enabledSecondarySub && currentFirstSubtitleId) {
+          return `${(subtitleSpace + (firstSubTextHeight + padding) * 2 * scaleNum + 60 / 1080 * winHeight) * 100 / winHeight}%`;
         }
         return `${60 / 10.8}%`;
       }
