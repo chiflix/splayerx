@@ -5,7 +5,11 @@ interface IMouse {
 }
 
 class WinMouse implements IMouse {
-  private mouse: { on: () => void, off: () => void, destroy: () => void };
+  private mouse: {
+    on(channel: string, callback: (x: number, y: number) => void): void,
+    off(channel: string, callback?: (x: number, y: number) => void): void,
+    destroy(): void,
+  } | null;
 
   public constructor() {
     try {

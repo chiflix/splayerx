@@ -235,12 +235,12 @@ const actions = {
         }),
         new Promise((resolve, reject) => setTimeout(() => reject(new Error('timeout')), 10000)),
       ])
-        .then(() => {
+        .catch(console.error)
+        .finally(() => {
           commit(m.setIsRefreshing, false);
           dispatch(legacyActions.UPDATE_SUBTITLE_TYPE, true);
           dispatch(a.stopAISelection);
-        })
-        .catch(console.error);
+        });
     }
 
     if (hasStoredSubtitles && preference) {
@@ -514,6 +514,7 @@ const actions = {
   },
   async [a.deleteSubtitlesByUuid]({ state, dispatch }: any, subtitles: SubtitleControlListItem[]) {
     subtitles.forEach(({ id }) => {
+      if (store.hasModule(id)) dispatch(`${id}/${subActions.delete}`);
       dispatch(`${id}/${subActions.delete}`);
       dispatch(a.removeSubtitle, id);
     });
@@ -532,7 +533,7 @@ const actions = {
       commit(m.setSecondaryDelay, state.allSubtitles[secondary].delay);
     }
     dispatch(a.storeSelectedSubtitle, [primary, secondary]);
-    if (id) await dispatch(`${id}/${subActions.load}`);
+    if (id && store.hasModule(id)) await dispatch(`${id}/${subActions.load}`);
   },
   async [a.changeSecondarySubtitle]({ dispatch, commit, getters }: any, id: string) {
     let primary = getters.primarySubtitleId;
@@ -545,7 +546,7 @@ const actions = {
       commit(m.setSecondaryDelay, state.allSubtitles[secondary].delay);
     }
     dispatch(a.storeSelectedSubtitle, [primary, secondary]);
-    if (id) await dispatch(`${id}/${subActions.load}`);
+    if (id && store.hasModule(id)) await dispatch(`${id}/${subActions.load}`);
   },
   async [a.storeSelectedSubtitle]({ state }: any, ids: string[]) {
     const { allSubtitles, playlistId, mediaItemId } = state;
@@ -616,7 +617,7 @@ const actions = {
       subPlayResX: 720,
       subPlayResY: 405,
     };
-    if (getters.primarySubtitleId) {
+    if (getters.primarySubtitleId && store.hasModule(getters.primarySubtitleId)) {
       try {
         const { metadata = {}, dialogues = [] } = await dispatch(`${getters.primarySubtitleId}/${subActions.getDialogues}`, time);
         firstSub.cues = dialogues;
@@ -629,7 +630,9 @@ const actions = {
       }
     }
 
-    if (getters.enabledSecondarySub && getters.secondarySubtitleId) {
+    if (getters.enabledSecondarySub
+      && getters.secondarySubtitleId
+      && store.hasModule(getters.secondarySubtitleId)) {
       try {
         const { metadata = {}, dialogues = [] } = await dispatch(`${getters.secondarySubtitleId}/${subActions.getDialogues}`, time);
         secondSub.cues = dialogues;
@@ -651,7 +654,7 @@ const actions = {
     if (times.start !== times.end) {
       const { primarySubtitleId, secondarySubtitleId } = state;
       const bubbleId = `${Date.now()}-${Math.random()}`;
-      if (primarySubtitleId) {
+      if (primarySubtitleId && store.hasModule(primarySubtitleId)) {
         actions.push(
           dispatch(`${primarySubtitleId}/${subActions.updatePlayedTime}`, times)
             .then((playedTime: number) => {
@@ -665,7 +668,7 @@ const actions = {
             }),
         );
       }
-      if (secondarySubtitleId) {
+      if (secondarySubtitleId && store.hasModule(secondarySubtitleId)) {
         actions.push(
           dispatch(`${secondarySubtitleId}/${subActions.updatePlayedTime}`, times)
             .then((playedTime: number) => {
@@ -687,8 +690,8 @@ const actions = {
       addBubble(SUBTITLE_UPLOAD);
       const actions: Promise<any>[] = [];
       const { primarySubtitleId, secondarySubtitleId } = state;
-      if (primarySubtitleId) actions.push(dispatch(`${primarySubtitleId}/${subActions.manualUpload}`));
-      if (secondarySubtitleId) actions.push(dispatch(`${secondarySubtitleId}/${subActions.manualUpload}`));
+      if (primarySubtitleId && store.hasModule(primarySubtitleId)) actions.push(dispatch(`${primarySubtitleId}/${subActions.manualUpload}`));
+      if (secondarySubtitleId && store.hasModule(secondarySubtitleId)) actions.push(dispatch(`${secondarySubtitleId}/${subActions.manualUpload}`));
       return Promise.all(actions)
         .then((result: boolean[]) => {
           addBubble(result.every(res => res) ? UPLOAD_SUCCESS : UPLOAD_FAILED);

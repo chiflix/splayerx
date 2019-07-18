@@ -60,6 +60,7 @@ export async function cacheOnlineSubtitle(subtitle: Entity): Promise<Origin | un
 }
 
 export async function removeCachedSubtitle(hash: string) {
+  ensureDirSync(subtitleCacheDirPath);
   const cachedSubtitlePath = (await readdir(subtitleCacheDirPath))
     .find(path => basename(path).startsWith(hash));
   if (cachedSubtitlePath && existsSync(cachedSubtitlePath)) {

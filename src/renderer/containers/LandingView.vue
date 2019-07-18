@@ -281,7 +281,7 @@ export default {
       }
     });
     window.addEventListener('keyup', this.keyboardHandler);
-    window.addEventListener('beforeunload', this.beforeUnloadHandler);
+    // window.addEventListener('beforeunload', this.beforeUnloadHandler);
     this.$electron.ipcRenderer.on('quit', () => {
       this.quit = true;
     });
@@ -289,7 +289,7 @@ export default {
   destroyed() {
     window.removeEventListener('mousemove', this.globalMoveHandler);
     window.removeEventListener('keyup', this.keyboardHandler);
-    window.removeEventListener('beforeunload', this.beforeUnloadHandler);
+    // window.removeEventListener('beforeunload', this.beforeUnloadHandler);
   },
   methods: {
     globalMoveHandler() {
