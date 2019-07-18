@@ -75,10 +75,14 @@ export class ThumbnailQueue extends BaseMediaTaskQueue {
     width: number,
     rowCount: number, columnCount: number,
   ) {
-    return super.addTask<string>(await ThumbnailTask.from(
-      videoPath,
-      width,
-      rowCount, columnCount,
-    ));
+    try {
+      const result = super.addTask<string>(await ThumbnailTask.from(
+        videoPath,
+        width,
+        rowCount, columnCount,
+      ));
+      if (result as unknown instanceof Error) return '';
+      return result;
+    } catch (err) { return ''; }
   }
 }

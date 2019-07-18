@@ -122,14 +122,24 @@ export class SnapshotSubtitleQueue extends BaseMediaTaskQueue {
     timeInSeconds: number,
     width: number, height: number,
   ) {
-    return super.addTask<string>(await SnapshotTask.from(
-      videoPath,
-      timeInSeconds,
-      width, height,
-    ));
+    try {
+      const result = await super.addTask<string>(await SnapshotTask.from(
+        videoPath,
+        timeInSeconds,
+        width, height,
+      ));
+      if (result as unknown instanceof Error) return '';
+      return result;
+    } catch (err) { return ''; }
   }
 
   public async getSubtitlePath(videoPath: string, streamIndex: number, format: Format) {
-    return super.addTask<string>(await SubtitleTask.from(videoPath, streamIndex, format));
+    try {
+      const result = await super.addTask<string>(await SubtitleTask.from(
+        videoPath, streamIndex, format,
+      ));
+      if (result as unknown instanceof Error) return '';
+      return result;
+    } catch (err) { return ''; }
   }
 }
