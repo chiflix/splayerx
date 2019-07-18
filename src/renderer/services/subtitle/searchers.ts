@@ -58,8 +58,8 @@ export function retrieveEmbeddedList(
   videoSrc: string,
   excludedStreamIndexes: number[] = [],
 ): Promise<[string, ISubtitleStream][]> {
-  console.log('Searching for embedded subtitles');
   return getSubtitleStreams(videoSrc).then(streams => streams
     .filter(({ index }) => !excludedStreamIndexes.includes(index))
+    .filter(({ codecName }) => Object.values(Format).includes(codecName))
     .map(stream => [videoSrc, stream]));
 }
