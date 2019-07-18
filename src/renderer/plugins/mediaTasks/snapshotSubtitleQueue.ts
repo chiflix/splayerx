@@ -45,13 +45,14 @@ class SnapshotTask implements IMediaTask<string> {
       remote.app.getPath(ELECTRON_CACHE_DIRNAME),
       DEFAULT_DIRNAME,
       VIDEO_DIRNAME,
+      videoHash,
     ));
     const imagePath = join(
       remote.app.getPath(ELECTRON_CACHE_DIRNAME),
       DEFAULT_DIRNAME,
       VIDEO_DIRNAME,
       videoHash,
-      `${[timeInSeconds, width, height].join('-')}.jpg`,
+      'cover.jpg',
     );
     return new SnapshotTask(
       videoPath, videoHash, imagePath,
@@ -59,12 +60,13 @@ class SnapshotTask implements IMediaTask<string> {
     );
   }
 
-  public getId() { return [this.videoHash, this.timeString, this.width, this.height].join('-'); }
+  public getId() { return [this.videoHash, this.width, this.height].join('-'); }
 
   public async execute(): Promise<string> {
     return new Promise((resolve, reject) => {
       ipcRenderer.send('snapshot-request',
         this.videoPath, this.imagePath,
+        this.timeString,
         this.width, this.height);
       ipcRenderer.once('snapshot-reply', (event, error, path) => {
         if (error) reject(error);

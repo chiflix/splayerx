@@ -24,7 +24,7 @@ export { ISubtitleStream } from './mediaInfoQueue';
 export function getSnapshotPath(
   videoPath: string,
   timeInSeconds: number,
-  width: number, height: number,
+  width: number = 1920, height: number = 1080,
 ) {
   return snapshotSubtitleQueue.getSnapshotPath(
     videoPath,
