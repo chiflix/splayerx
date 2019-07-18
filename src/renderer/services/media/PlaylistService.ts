@@ -1,12 +1,10 @@
-import { ipcRenderer, Event } from 'electron';
 import { EventEmitter } from 'events';
 import { IPlaylistRequest } from '@/interfaces/IPlaylistRequest';
 import MediaStorageService from '@/services/storage/MediaStorageService';
 import { filePathToUrl } from '@/helpers/path';
-import { mediaQuickHash } from '@/libs/utils';
 import { info } from '@/libs/DataBase';
 import { MediaItem } from '@/interfaces/IDB';
-import { getSnapshotPath } from '@/plugins/mediaTasks';
+import { getSnapshotPath, getFormat } from '@/plugins/mediaTasks';
 
 interface IPlaylistEvent {
   'image-loaded': Event
@@ -43,20 +41,19 @@ export default class PlaylistService extends EventEmitter implements IPlaylistRe
     this.mediaStorageService = mediaStorageService;
     this.path = path;
     this.videoId = videoId;
-    ipcRenderer.send('mediaInfo', path);
-    ipcRenderer.once(`mediaInfo-${path}-reply`, async (event: Event, info: string) => {
-      const mediaHash = await mediaQuickHash.try(path);
-      if (!mediaHash) return;
-      const { duration } = JSON.parse(info).format;
-      this.duration = parseFloat(duration);
-      const randomNumber = Math.round((Math.random() * 20) + 5);
-      const imgPath = await getSnapshotPath(
-        path,
-        randomNumber > this.duration ? this.duration : randomNumber,
-      );
-      this.imageSrc = filePathToUrl(`${imgPath}`);
-      this.emit('image-loaded');
-    });
+    getFormat(path)
+      .then(async (format) => {
+        if (format && format.duration) {
+          this.duration = format.duration;
+          const randomNumber = Math.round((Math.random() * 20) + 5);
+          const imgPath = await getSnapshotPath(
+            path,
+            randomNumber > this.duration ? this.duration : randomNumber,
+          );
+          this.imageSrc = filePathToUrl(`${imgPath}`);
+          this.emit('image-loaded');
+        }
+      });
     this.getRecord(videoId);
   }
 
