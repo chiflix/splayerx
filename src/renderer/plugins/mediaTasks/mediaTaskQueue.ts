@@ -92,7 +92,6 @@ export class BaseMediaTaskQueue extends EventEmitter {
       for await (const taskInfo of this.getNextTask()) {
         if (taskInfo) {
           const { id, result, status } = taskInfo;
-          console.log(id, result, status);
           this.emit(id, { result, status });
         }
       }
