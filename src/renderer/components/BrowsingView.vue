@@ -259,17 +259,19 @@ export default {
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [420, Math.round(420 / videoAspectRatio)]);
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [420, Math.round(420 / videoAspectRatio)]);
       });
-      this.$refs.webView.executeJavaScript('document.body.prepend(document.querySelector("#flashbox"));document.querySelector(".qy-player-absolute").style.display = "none";document.getElementsByName("ttat")[0].style.display = "none";document.getElementsByClassName("iqp-barrage")[1].style.display = "none"');
+      this.$refs.webView.executeJavaScript('document.body.prepend(document.querySelector("#flashbox"));document.body.style.overflow = "hidden";document.querySelector(".qy-player-absolute").style.display = "none";document.getElementsByName("ttat")[0].style.display = "none";document.getElementsByClassName("iqp-barrage")[1].style.display = "none"');
       this.$refs.webView.executeJavaScript(`document.querySelector("#flashbox").style.width="${this.winWidth}px";document.querySelector("#flashbox").style.height="${this.winSize[1]}px"`);
+      this.$refs.webView.executeJavaScript(`document.querySelector(".iqp-player").style.width="${this.winWidth}px";document.querySelector(".iqp-player").style.height="${this.winSize[1]}px"`);
     },
     iqiyiWatcher(val: number) {
       this.$refs.webView.executeJavaScript(`document.querySelector("#flashbox").style.width="${val}px";document.querySelector("#flashbox").style.height="${this.winSize[1]}px"`);
+      this.$refs.webView.executeJavaScript(`document.querySelector(".iqp-player").style.width="${val}px";document.querySelector(".iqp-player").style.height="${this.winSize[1]}px"`);
     },
     iqiyiRecover() {
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [0, 0]);
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [720, 405]);
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [1200, 900]);
-      this.$refs.webView.executeJavaScript('document.querySelector("#iframaWrapper").prepend(document.querySelector("#flashbox"));document.querySelector(".qy-player-absolute").style.display = "";document.getElementsByName("ttat")[0].style.display = "";document.getElementsByClassName("iqp-barrage")[1].style.display = ""');
+      this.$refs.webView.executeJavaScript('document.querySelector("#iframaWrapper").prepend(document.querySelector("#flashbox"));document.body.style.overflow = "";document.querySelector(".qy-player-absolute").style.display = "";document.getElementsByName("ttat")[0].style.display = "";document.getElementsByClassName("iqp-barrage")[1].style.display = ""');
       this.$refs.webView.executeJavaScript('document.querySelector("#flashbox").style.width="100%";document.querySelector("#flashbox").style.height="100%"');
     },
     youtubeAdapter() {
@@ -286,6 +288,7 @@ export default {
       this.$refs.webView.executeJavaScript('document.querySelector(".html5-video-container").style.width="100%";document.querySelector(".html5-video-container").style.height="100%";');
       this.$refs.webView.executeJavaScript('document.querySelector("video").style.width="100%";document.querySelector("video").style.height="100%";Object.defineProperty(document.querySelector("video").style, "width", {get: function(){return "100%"}, set: function(){}});Object.defineProperty(document.querySelector("video").style, "height", {get: function(){return "100%"}, set: function(){}})');
       this.$refs.webView.executeJavaScript('document.querySelector(".html5-video-player").style.background = "rgba(0, 0, 0, 1)"');
+      this.$refs.webView.executeJavaScript('document.body.style.setProperty("overflow", "hidden");Object.defineProperty(document.body.style, "overflow", {get: function(){return "hidden"}, set: function(){}})');
       this.$refs.webView.executeJavaScript('document.querySelector(".ytp-chrome-bottom").style.width="calc(100vw - 24px)";Object.defineProperty(document.querySelector(".ytp-chrome-bottom").style, "width", {get: function(){return "calc(100vw - 24px)"}, set: function(){}});');
     },
     youtubeRecover() {
@@ -294,6 +297,7 @@ export default {
       this.$refs.webView.executeJavaScript('Object.defineProperty(document.querySelector(".ytp-chrome-bottom").style, "width", {get: function(){return this._width}, set: function(val){this._width = val;document.querySelector(".ytp-chrome-bottom").style.setProperty("width", val);}});');
       this.$refs.webView.executeJavaScript('document.querySelector(".html5-video-player").style.background = "rgba(255, 255, 255, 1)"');
       this.$refs.webView.executeJavaScript('if (document.querySelector(".video-ads")) document.querySelector(".video-ads").style.display = ""'); // remove youtube ads
+      this.$refs.webView.executeJavaScript('Object.defineProperty(document.body.style, "overflow", {value: "",writable: true});document.body.style.setProperty("overflow", "");');
       this.$refs.webView.executeJavaScript('var isPaused = document.querySelector("video").paused;document.querySelector(".ytd-player").appendChild(document.querySelector(".html5-video-player")); if (!isPaused) {document.querySelector("video").play()}');
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [0, 0]);
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [720, 405]);
