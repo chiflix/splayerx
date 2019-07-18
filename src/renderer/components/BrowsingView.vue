@@ -6,6 +6,16 @@
       class="loading-state loading-animation"
     />
     <div
+      ref="preventEventLayer"
+      :style="{
+        width: '100%',
+        height: '100%',
+        zIndex: '10',
+        position: 'absolute',
+      }"
+      v-show="isPip && isDragging"
+    />
+    <div
       v-show="isPip"
       class="pip-buttons"
     >
@@ -67,6 +77,8 @@ export default {
       preload: `file:${require('path').resolve(__static, 'pip/preload.js')}`,
       windowScrollY: 0,
       controlToShow: true,
+      isDragging: false,
+      upOnBrowsing: false,
     };
   },
   computed: {
@@ -114,6 +126,17 @@ export default {
     this.$store.dispatch('updateBrowsingSize', this.isPip ? [1200, 900] : this.winSize);
   },
   mounted() {
+    this.$refs.preventEventLayer.addEventListener('mousedown', () => {
+      if (this.isPip) {
+        this.upOnBrowsing = false;
+        this.isDragging = false;
+      }
+    });
+    this.$refs.preventEventLayer.addEventListener('mouseup', () => {
+      if (this.isPip && this.isDragging) {
+        this.upOnBrowsing = true;
+      }
+    });
     this.$refs.webView.addEventListener('load-commit', () => {
       const loadUrl = this.$refs.webView.getURL();
       const recordIndex = this.supportedRecordHost.indexOf(urlParseLax(loadUrl).hostname);
@@ -142,11 +165,16 @@ export default {
       });
     });
     this.$refs.webView.addEventListener('ipc-message', (evt: any) => {
-      const { channel, args }: { channel: string, args: { windowScrollY: number }[] } = evt;
+      const { channel, args }: { channel: string, args:
+      { windowScrollY?: number, isDragging?: boolean }[] } = evt;
       switch (channel) {
         case 'scroll':
-          console.log(args); // TODO:
           this.windowScrollY = args[0].windowScrollY;
+          break;
+        case 'mousemove':
+          if (!this.upOnBrowsing) {
+            this.isDragging = args[0].isDragging;
+          }
           break;
         default:
           console.warn(`Unhandled ipc-message: ${channel}`, args);
@@ -231,7 +259,7 @@ export default {
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [420, Math.round(420 / videoAspectRatio)]);
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [420, Math.round(420 / videoAspectRatio)]);
       });
-      this.$refs.webView.executeJavaScript('document.body.prepend(document.querySelector("#flashbox"));document.querySelector(".qy-player-absolute").style.display = "none";document.getElementsByName("ttat")[0].style.display = "none"');
+      this.$refs.webView.executeJavaScript('document.body.prepend(document.querySelector("#flashbox"));document.querySelector(".qy-player-absolute").style.display = "none";document.getElementsByName("ttat")[0].style.display = "none";document.getElementsByClassName("iqp-barrage")[1].style.display = "none"');
       this.$refs.webView.executeJavaScript(`document.querySelector("#flashbox").style.width="${this.winWidth}px";document.querySelector("#flashbox").style.height="${this.winSize[1]}px"`);
     },
     iqiyiWatcher(val: number) {
@@ -241,7 +269,7 @@ export default {
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [0, 0]);
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [720, 405]);
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [1200, 900]);
-      this.$refs.webView.executeJavaScript('document.querySelector("#iframaWrapper").prepend(document.querySelector("#flashbox"));document.querySelector(".qy-player-absolute").style.display = "";document.getElementsByName("ttat")[0].style.display = ""');
+      this.$refs.webView.executeJavaScript('document.querySelector("#iframaWrapper").prepend(document.querySelector("#flashbox"));document.querySelector(".qy-player-absolute").style.display = "";document.getElementsByName("ttat")[0].style.display = "";document.getElementsByClassName("iqp-barrage")[1].style.display = ""');
       this.$refs.webView.executeJavaScript('document.querySelector("#flashbox").style.width="100%";document.querySelector("#flashbox").style.height="100%"');
     },
     youtubeAdapter() {
