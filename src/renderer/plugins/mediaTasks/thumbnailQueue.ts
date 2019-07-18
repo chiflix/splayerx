@@ -1,8 +1,9 @@
 import { ipcRenderer, remote } from 'electron';
+import { join } from 'path';
 import { MediaTask, BaseMediaTaskQueue } from './mediaTaskQueue';
 import { mediaQuickHash } from '@/libs/utils';
-import { join } from 'path';
 import { ELECTRON_CACHE_DIRNAME, DEFAULT_DIRNAME, VIDEO_DIRNAME } from '@/constants';
+
 const mediaDirPath = join(
   remote.app.getPath(ELECTRON_CACHE_DIRNAME),
   DEFAULT_DIRNAME,
@@ -22,7 +23,7 @@ class ThumbnailTask implements MediaTask<string> {
 
   private readonly columnCount: number;
 
-  constructor(
+  public constructor(
     videoPath: string, videoHash: string, imagePath: string,
     width: number,
     rowCount: number, columnCount: number,
@@ -53,15 +54,14 @@ class ThumbnailTask implements MediaTask<string> {
     );
   }
 
-  getId() { return [this.videoHash, this.width, this.rowCount, this.columnCount].join('-'); }
+  public getId() { return [this.videoHash, this.width, this.rowCount, this.columnCount].join('-'); }
 
-  async execute(): Promise<string> {
+  public async execute(): Promise<string> {
     return new Promise((resolve, reject) => {
-      ipcRenderer.send('generate-thumbnail-request',
+      ipcRenderer.send('thumbnail-request',
         this.videoPath, this.imagePath,
         this.width,
-        this.rowCount, this.columnCount,
-      );
+        this.rowCount, this.columnCount);
       ipcRenderer.once('generate-thumbnail-reply', (event, error, path) => {
         if (error) reject(error);
         else resolve(path);
@@ -70,7 +70,7 @@ class ThumbnailTask implements MediaTask<string> {
   }
 }
 export class ThumbnailQueue extends BaseMediaTaskQueue {
-  async getThumbnailPath(
+  public async getThumbnailPath(
     videoPath: string,
     width: number,
     rowCount: number, columnCount: number,
