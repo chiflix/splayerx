@@ -354,7 +354,7 @@ const actions = {
           && !results.find(({ transcriptIdentity }) => transcriptIdentity === hash)
         ),
       );
-      oldSubtitles.push(...wrongLanguageSubs, ...notExistedOldSubs);
+      oldSubtitlesToDel.push(...wrongLanguageSubs, ...notExistedOldSubs);
       // add subtitles not existed in the old subtitles
       const notExistedNewSubs = results
         .filter(({ transcriptIdentity }) => !oldSubtitles
