@@ -1,3 +1,3 @@
-export default interface IMediaFilter {
-  checkImage(src: string): Promise<boolean>;
+export interface IMediaFilter {
+  checkImage(src: string): Promise<boolean>
 }
