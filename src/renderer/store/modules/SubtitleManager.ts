@@ -257,7 +257,7 @@ const actions = {
     const onlineNeeded = (languageHasChanged || !hasStoredSubtitles) && ['mkv', 'avi', 'ts', 'mp4'].includes(extname(originSrc).slice(1)) && privacyAgreement;
     if (onlineNeeded) onlinePromise = dispatch(a.refreshOnlineSubtitles);
     /** whether or not to refresh embedded subtitles */
-    const embeddedNeeded = list
+    const embeddedNeeded = !list
       .some(({ type }: SubtitleControlListItem) => type === Type.Embedded);
     if (embeddedNeeded) {
       retrieveEmbeddedList(originSrc).then(streams => dispatch(a.addEmbeddedSubtitles, streams));
