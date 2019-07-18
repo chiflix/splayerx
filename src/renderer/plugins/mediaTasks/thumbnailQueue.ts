@@ -1,5 +1,6 @@
 import { ipcRenderer, remote } from 'electron';
 import { join } from 'path';
+import { ensureDir } from 'fs-extra';
 import { IMediaTask, BaseMediaTaskQueue } from './mediaTaskQueue';
 import { mediaQuickHash } from '@/libs/utils';
 import { ELECTRON_CACHE_DIRNAME, DEFAULT_DIRNAME, VIDEO_DIRNAME } from '@/constants';
@@ -42,6 +43,7 @@ class ThumbnailTask implements IMediaTask<string> {
     rowCount: number, columnCount: number,
   ) {
     const videoHash = await mediaQuickHash(videoPath);
+    await ensureDir(join(mediaDirPath, videoHash));
     const imagePath = join(
       mediaDirPath,
       videoHash,

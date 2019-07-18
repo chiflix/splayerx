@@ -1,5 +1,6 @@
 import { remote, ipcRenderer } from 'electron';
 import { join } from 'path';
+import { ensureDir } from 'fs-extra';
 import { IMediaTask, BaseMediaTaskQueue } from './mediaTaskQueue';
 import { timecodeFromSeconds, mediaQuickHash } from '@/libs/utils';
 import {
@@ -40,6 +41,11 @@ class SnapshotTask implements IMediaTask<string> {
     width: number, height: number,
   ) {
     const videoHash = await mediaQuickHash(videoPath);
+    await ensureDir(join(
+      remote.app.getPath(ELECTRON_CACHE_DIRNAME),
+      DEFAULT_DIRNAME,
+      VIDEO_DIRNAME,
+    ));
     const imagePath = join(
       remote.app.getPath(ELECTRON_CACHE_DIRNAME),
       DEFAULT_DIRNAME,
@@ -89,6 +95,11 @@ class SubtitleTask implements IMediaTask<string> {
 
   public static async from(videoPath: string, streamIndex: number, format: Format) {
     const videoHash = await mediaQuickHash(videoPath);
+    await ensureDir(join(
+      remote.app.getPath(ELECTRON_CACHE_DIRNAME),
+      DEFAULT_DIRNAME,
+      SUBTITLE_DIRNAME,
+    ));
     const subtitlePath = join(
       remote.app.getPath(ELECTRON_CACHE_DIRNAME),
       DEFAULT_DIRNAME,
