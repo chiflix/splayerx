@@ -68,7 +68,6 @@ let finalVideoToOpen = [];
 const tmpVideoToOpen = [];
 const tmpSubsToOpen = [];
 const snapShotQueue = [];
-const thumbnailTask = [];
 const mediaInfoQueue = [];
 const subRegex = getValidSubtitleRegex();
 const mainURL = process.env.NODE_ENV === 'development'
@@ -267,35 +266,6 @@ function registerMainWindowEvent(mainWindow) {
     tmpSubsToOpen.splice(0, tmpSubsToOpen.length);
     tmpVideoToOpen.splice(0, tmpVideoToOpen.length);
   });
-  function thumbnail(args, cb) {
-    splayerx.generateThumbnails(
-      args.src, args.outPath, args.width, args.num.cols, args.num.rows,
-      (ret) => {
-        console[ret === '0' ? 'log' : 'error'](ret, args.src);
-        cb(ret, args.src);
-      },
-    );
-  }
-  function thumbnailTaskCallback() {
-    const cb = (ret, src) => {
-      thumbnailTask.shift();
-      if (thumbnailTask.length > 0) {
-        thumbnail(thumbnailTask[0], cb);
-      }
-      if (mainWindow && !mainWindow.webContents.isDestroyed() && ret === '0') {
-        mainWindow.webContents.send('thumbnail-saved', src);
-      }
-    };
-    thumbnail(thumbnailTask[0], cb);
-  }
-  ipcMain.on('generateThumbnails', (event, args) => {
-    if (thumbnailTask.length === 0) {
-      thumbnailTask.push(args);
-      thumbnailTaskCallback();
-    } else {
-      thumbnailTask.splice(1, 1, args);
-    }
-  });
 
   function timecodeFromSeconds(s) {
     const dt = new Date(Math.abs(s) * 1000);
@@ -471,7 +441,6 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('simulate-closing-window', () => {
     mediaInfoQueue.splice(0);
     snapShotQueue.splice(0);
-    thumbnailTask.splice(0);
   });
   ipcMain.on('windowPositionChange', (event, args) => {
     if (!mainWindow || event.sender.isDestroyed()) return;
