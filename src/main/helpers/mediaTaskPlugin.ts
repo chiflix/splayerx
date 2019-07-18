@@ -18,7 +18,7 @@ app.on('ready', () => {
         thumbnailWidth.toString(),
         rowThumbnailCount.toString(), columnThumbnailCount.toString(),
         (err) => {
-          if (!err && existsSync(imagePath)) event.reply('generate-thumbnail-reply', imagePath);
+          if (err === '0' && existsSync(imagePath)) event.reply('generate-thumbnail-reply', undefined, imagePath);
           else event.reply('generate-thumbnail-reply', new Error(err));
         },
       );
@@ -35,11 +35,11 @@ app.on('ready', () => {
         timeString,
         width.toString(), height.toString(),
         (err) => {
-          if (!err && existsSync(imagePath)) event.reply('snapshot-reply', undefined, imagePath);
+          if (err === '0' && existsSync(imagePath)) event.reply('snapshot-reply', undefined, imagePath);
           else event.reply('snapshot-reply', new Error(err));
         },
       );
-    } else event.reply('generate-thumbnail-reply', new Error('File does not exist.'));
+    } else event.reply('snapshot-reply', new Error('File does not exist.'));
   });
   ipcMain.on('subtitle-request', (event,
     videoPath: string, subtitlePath: string,
@@ -50,10 +50,10 @@ app.on('ready', () => {
         videoPath, subtitlePath,
         streamIndex,
         (err) => {
-          if (!err && existsSync(subtitlePath)) event.reply('subtitle-reply', undefined, subtitlePath);
+          if (err === '0' && existsSync(subtitlePath)) event.reply('subtitle-reply', undefined, subtitlePath);
           else event.reply('subtitle-reply', new Error(err));
         },
       );
-    } else event.reply('generate-thumbnail-reply', new Error('File does not exist.'));
+    } else event.reply('subtitle-reply', new Error('File does not exist.'));
   });
 });
