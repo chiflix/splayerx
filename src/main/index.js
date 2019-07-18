@@ -1,7 +1,9 @@
 // Be sure to call Sentry function as early as possible in the main process
 import '../shared/sentry';
 
-import { app, BrowserWindow, session, Tray, ipcMain, globalShortcut, nativeImage, splayerx } from 'electron';
+import {
+  app, BrowserWindow, Tray, ipcMain, globalShortcut, nativeImage, splayerx,
+} from 'electron';
 import { throttle, debounce, uniq } from 'lodash';
 import os from 'os';
 import path, {
@@ -557,7 +559,7 @@ function createWindow() {
     },
     // See https://github.com/electron/electron/blob/master/docs/api/browser-window.md#showing-window-gracefully
     backgroundColor: '#6a6a6a',
-    acceptFirstMouse: true,
+    acceptFirstMouse: false,
     show: false,
     ...({
       win32: {},
@@ -710,7 +712,7 @@ if (process.platform === 'darwin') {
     tmpVideoToOpen.concat(tmpSubsToOpen));
   app.on('second-instance', (event, argv) => {
     if (!mainWindow || mainWindow.webContents.isDestroyed()) {
-      createWindow();
+      if (app.isReady()) createWindow();
     }
     const opendFiles = argv.slice(app.isPackaged ? 3 : 2);
     opendFiles.forEach((file) => {
@@ -775,7 +777,7 @@ app.on('window-all-closed', () => {
 
 app.on('activate', () => {
   if (!mainWindow) {
-    createWindow();
+    if (app.isReady()) createWindow();
   } else if (!mainWindow.isVisible()) {
     mainWindow.show();
   }

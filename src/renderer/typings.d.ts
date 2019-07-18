@@ -1,4 +1,7 @@
-import Vue from 'vue';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/interface-name-prefix */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import Vue, { VNode } from 'vue'; // eslint-disable-line no-unused-vars
 import { AxiosInstance } from 'axios';
 import { Event } from 'electron';
 
@@ -22,18 +25,16 @@ declare module 'vue/types/vue' {
 }
 
 declare global {
-  declare const __static: string;
+  declare const __static: string; //eslint-disable-line
   interface Screen {
     availLeft: number;
     availTop: number;
   }
   namespace JSX {
-    // tslint:disable no-empty-interface
-    interface Element extends VNode {}
-    // tslint:disable no-empty-interface
-    interface ElementClass extends Vue {}
+    interface Element extends VNode {} //eslint-disable-line
+    interface ElementClass extends Vue {} //eslint-disable-line
     interface IntrinsicElements {
-      [elem: string]: any;
+      [elem: string]: unknown;
     }
   }
 }

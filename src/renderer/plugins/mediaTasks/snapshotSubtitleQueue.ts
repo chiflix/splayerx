@@ -1,6 +1,6 @@
 import { remote, ipcRenderer } from 'electron';
 import { join } from 'path';
-import { MediaTask, BaseMediaTaskQueue } from './mediaTaskQueue';
+import { IMediaTask, BaseMediaTaskQueue } from './mediaTaskQueue';
 import { timecodeFromSeconds, mediaQuickHash } from '@/libs/utils';
 import {
   ELECTRON_CACHE_DIRNAME, DEFAULT_DIRNAME, VIDEO_DIRNAME, SUBTITLE_DIRNAME,
@@ -8,7 +8,7 @@ import {
 import { Format } from '@/interfaces/ISubtitle';
 import { formatToExtension } from '@/services/subtitle/utils';
 
-class SnapshotTask implements MediaTask<string> {
+class SnapshotTask implements IMediaTask<string> {
   private readonly videoPath: string;
 
   private readonly videoHash: string;
@@ -68,7 +68,7 @@ class SnapshotTask implements MediaTask<string> {
   }
 }
 
-class SubtitleTask implements MediaTask<string> {
+class SubtitleTask implements IMediaTask<string> {
   private readonly videoPath: string;
 
   private readonly videoHash: string;

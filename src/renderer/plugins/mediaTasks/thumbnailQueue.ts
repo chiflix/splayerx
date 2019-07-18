@@ -1,6 +1,6 @@
 import { ipcRenderer, remote } from 'electron';
 import { join } from 'path';
-import { MediaTask, BaseMediaTaskQueue } from './mediaTaskQueue';
+import { IMediaTask, BaseMediaTaskQueue } from './mediaTaskQueue';
 import { mediaQuickHash } from '@/libs/utils';
 import { ELECTRON_CACHE_DIRNAME, DEFAULT_DIRNAME, VIDEO_DIRNAME } from '@/constants';
 
@@ -10,7 +10,7 @@ const mediaDirPath = join(
   VIDEO_DIRNAME,
 );
 
-class ThumbnailTask implements MediaTask<string> {
+class ThumbnailTask implements IMediaTask<string> {
   private readonly videoPath: string;
 
   private readonly videoHash: string;

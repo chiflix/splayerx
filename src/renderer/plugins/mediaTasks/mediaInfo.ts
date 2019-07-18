@@ -1,6 +1,6 @@
 import { ipcRenderer } from 'electron';
 import { camelCase } from 'lodash';
-import { MediaTask, BaseMediaTaskQueue } from './mediaTaskQueue';
+import { IMediaTask, BaseMediaTaskQueue } from './mediaTaskQueue';
 import { LanguageCode, normalizeCode } from '@/libs/language';
 import { mediaQuickHash } from '@/libs/utils';
 
@@ -12,7 +12,7 @@ enum CodecType {
   Attachment = 'attachment',
 }
 // taken from https://github.com/FFmpeg/FFmpeg/blob/master/doc/ffprobe.xsd
-interface RawStreamDisposition {
+interface IRawStreamDisposition {
   default: number;
   dub: number;
   original: number;
@@ -26,14 +26,14 @@ interface RawStreamDisposition {
   attached_pic: number;
   timed_thumbnails: number;
 }
-interface RawTag {
+interface IRawTag {
   language?: string;
   filename?: string;
   mimetype?: string;
 }
-interface RawBaseStream {
-  disposition?: RawStreamDisposition;
-  tag?: RawTag;
+interface IRawBaseStream {
+  disposition?: IRawStreamDisposition;
+  tag?: IRawTag;
   index: number;
   codec_name?: string;
   codec_long_name?: string;
@@ -45,7 +45,7 @@ interface RawBaseStream {
   extradata?: string;
   extradata_hash?: string;
 }
-interface RawVideoStream extends RawBaseStream {
+interface IRawVideoStream extends IRawBaseStream {
   codec_type: CodecType.Video;
   width?: number;
   height?: number;
@@ -63,7 +63,7 @@ interface RawVideoStream extends RawBaseStream {
   timecode?: string;
   refs?: number;
 }
-interface RawAudioStream extends RawBaseStream {
+interface IRawAudioStream extends IRawBaseStream {
   codec_type: CodecType.Audio;
   sample_fmt?: string;
   sample_rate?: number;
@@ -85,15 +85,15 @@ interface RawAudioStream extends RawBaseStream {
   nb_read_frames?: number;
   nb_read_packets?: number;
 }
-interface RawSubtitleStream extends RawBaseStream {
+interface IRawSubtitleStream extends IRawBaseStream {
   codec_type: CodecType.Subtitle;
 }
-interface RawAttachmentStream extends RawBaseStream {
+interface IRawAttachmentStream extends IRawBaseStream {
   codec_type: CodecType.Attachment;
 }
-type RawStream = RawVideoStream | RawAudioStream | RawSubtitleStream | RawAttachmentStream;
-interface RawFormat {
-  tag?: RawTag;
+type RawStream = IRawVideoStream | IRawAudioStream | IRawSubtitleStream | IRawAttachmentStream;
+interface IRawFormat {
+  tag?: IRawTag;
   filename: string;
   nb_streams: number;
   nb_programs: number;
@@ -105,12 +105,12 @@ interface RawFormat {
   bit_rate?: number;
   probe_score?: number;
 }
-interface RawMediaInfo {
+interface IRawMediaInfo {
   streams?: RawStream[];
-  format?: RawFormat;
+  format?: IRawFormat;
 }
 
-interface StreamDisposition {
+interface IStreamDisposition {
   default: boolean;
   dub: boolean;
   original: boolean;
@@ -124,14 +124,14 @@ interface StreamDisposition {
   attachedPic: boolean;
   timedThumbnails: boolean;
 }
-interface Tag {
+interface ITag {
   language?: LanguageCode;
   filename?: string;
   mimetype?: string;
 }
-interface BaseStream {
-  disposition?: RawStreamDisposition;
-  tag?: Tag;
+interface IBaseStream {
+  disposition?: IRawStreamDisposition;
+  tag?: ITag;
   index: number;
   codecName?: CodecType;
   codecLongName?: string;
@@ -143,7 +143,7 @@ interface BaseStream {
   extradata?: string;
   extradataHash?: string;
 }
-interface VideoStream extends BaseStream {
+interface IVideoStream extends IBaseStream {
   codecType: CodecType.Video;
   width?: number;
   height?: number;
@@ -161,7 +161,7 @@ interface VideoStream extends BaseStream {
   timecode?: string;
   refs?: number;
 }
-interface AudioStream extends BaseStream {
+interface IAudioStream extends IBaseStream {
   codecType: CodecType.Audio;
   sampleFmt?: string;
   sampleRate?: number;
@@ -183,14 +183,14 @@ interface AudioStream extends BaseStream {
   nbReadFrames: number;
   nbReadPackets: number;
 }
-interface SubtitleStream extends BaseStream {
+interface ISubtitleStream extends IBaseStream {
   codecType: CodecType.Subtitle;
 }
-interface AttachmentStream extends BaseStream {
+interface IAttachmentStream extends IBaseStream {
   codecType: CodecType.Attachment;
 }
-interface Format {
-  tag?: Tag;
+interface IFormat {
+  tag?: ITag;
   filename: string;
   nbStreams: number;
   nbPrograms: number;
@@ -202,13 +202,13 @@ interface Format {
   bitRate?: number;
   probeScore?: number;
 }
-type Stream = VideoStream | AudioStream | SubtitleStream | AttachmentStream;
-interface MediaInfo {
+type Stream = IVideoStream | IAudioStream | ISubtitleStream | IAttachmentStream;
+interface IMediaInfo {
   streams?: Stream[];
-  format?: Format;
+  format?: IFormat;
 }
 
-class MediaInfoTask implements MediaTask<MediaInfo> {
+class MediaInfoTask implements IMediaTask<IMediaInfo> {
   private path: string = '';
 
   private hash: string = '';
@@ -225,62 +225,62 @@ class MediaInfoTask implements MediaTask<MediaInfo> {
 
   public getId() { return this.hash; }
 
-  private static streamDispositionMapper(raw: RawStreamDisposition): StreamDisposition {
+  private static streamDispositionMapper(raw: IRawStreamDisposition): IStreamDisposition {
     return Object.entries(raw)
       .reduce((result, entry: [string, number]) => {
         result[camelCase(entry[0])] = !!entry[1];
         return result;
-      }, {}) as StreamDisposition;
+      }, {}) as IStreamDisposition;
   }
 
-  private static tagMapper(raw: RawTag): Tag {
+  private static tagMapper(raw: IRawTag): ITag {
     return Object.entries(raw)
       .reduce((result, entry: [string, unknown]) => {
         if (entry[0] === 'language') result[entry[0]] = normalizeCode(entry[1] as string);
         else result[camelCase(entry[0])] = entry[1];
         return result;
-      }, {}) as Tag;
+      }, {}) as ITag;
   }
 
-  private static videoStreamMapper(raw: RawVideoStream): VideoStream {
+  private static videoStreamMapper(raw: IRawVideoStream): IVideoStream {
     return Object.entries(raw)
       .reduce((result, entry: [string, unknown]) => {
-        if (entry[0] === 'disposition') result[entry[0]] = MediaInfoTask.streamDispositionMapper(entry[1] as RawStreamDisposition);
-        else if (entry[0] === 'tags') result[entry[0]] = MediaInfoTask.tagMapper(entry[1] as RawTag);
+        if (entry[0] === 'disposition') result[entry[0]] = MediaInfoTask.streamDispositionMapper(entry[1] as IRawStreamDisposition);
+        else if (entry[0] === 'tags') result[entry[0]] = MediaInfoTask.tagMapper(entry[1] as IRawTag);
         else if (entry[0] === 'has_b_frames') result[camelCase(entry[0])] = !!entry[1];
         else result[camelCase(entry[0])] = entry[1];
         return result;
-      }, {}) as VideoStream;
+      }, {}) as IVideoStream;
   }
 
-  private static audioStreamMapper(raw: RawAudioStream): AudioStream {
+  private static audioStreamMapper(raw: IRawAudioStream): IAudioStream {
     return Object.entries(raw)
       .reduce((result, entry: [string, unknown]) => {
-        if (entry[0] === 'disposition') result[entry[0]] = MediaInfoTask.streamDispositionMapper(entry[1] as RawStreamDisposition);
-        else if (entry[0] === 'tags') result[entry[0]] = MediaInfoTask.tagMapper(entry[1] as RawTag);
+        if (entry[0] === 'disposition') result[entry[0]] = MediaInfoTask.streamDispositionMapper(entry[1] as IRawStreamDisposition);
+        else if (entry[0] === 'tags') result[entry[0]] = MediaInfoTask.tagMapper(entry[1] as IRawTag);
         else result[camelCase(entry[0])] = entry[1];
         return result;
-      }, {}) as AudioStream;
+      }, {}) as IAudioStream;
   }
 
-  private static subtitleStreamMapper(raw: RawSubtitleStream): SubtitleStream {
+  private static subtitleStreamMapper(raw: IRawSubtitleStream): ISubtitleStream {
     return Object.entries(raw)
       .reduce((result, entry: [string, unknown]) => {
-        if (entry[0] === 'disposition') result[entry[0]] = MediaInfoTask.streamDispositionMapper(entry[1] as RawStreamDisposition);
-        else if (entry[0] === 'tags') result[entry[0]] = MediaInfoTask.tagMapper(entry[1] as RawTag);
+        if (entry[0] === 'disposition') result[entry[0]] = MediaInfoTask.streamDispositionMapper(entry[1] as IRawStreamDisposition);
+        else if (entry[0] === 'tags') result[entry[0]] = MediaInfoTask.tagMapper(entry[1] as IRawTag);
         else result[camelCase(entry[0])] = entry[1];
         return result;
-      }, {}) as SubtitleStream;
+      }, {}) as ISubtitleStream;
   }
 
-  private static attachmentStreamMapper(raw: RawAttachmentStream): AttachmentStream {
+  private static attachmentStreamMapper(raw: IRawAttachmentStream): IAttachmentStream {
     return Object.entries(raw)
       .reduce((result, entry: [string, unknown]) => {
-        if (entry[0] === 'disposition') result[entry[0]] = MediaInfoTask.streamDispositionMapper(entry[1] as RawStreamDisposition);
-        else if (entry[0] === 'tags') result[entry[0]] = MediaInfoTask.tagMapper(entry[1] as RawTag);
+        if (entry[0] === 'disposition') result[entry[0]] = MediaInfoTask.streamDispositionMapper(entry[1] as IRawStreamDisposition);
+        else if (entry[0] === 'tags') result[entry[0]] = MediaInfoTask.tagMapper(entry[1] as IRawTag);
         else result[camelCase(entry[0])] = entry[1];
         return result;
-      }, {}) as AttachmentStream;
+      }, {}) as IAttachmentStream;
   }
 
   private static streamsMapper(raw: RawStream[]): Stream[] {
@@ -301,36 +301,36 @@ class MediaInfoTask implements MediaTask<MediaInfo> {
       .filter(stream => !!stream) as Stream[];
   }
 
-  private static formatMapper(raw: RawFormat): Format {
+  private static formatMapper(raw: IRawFormat): IFormat {
     return Object.entries(raw)
       .reduce((result, entry: [string, unknown]) => {
-        if (entry[0] === 'tags') result[entry[0]] = MediaInfoTask.tagMapper(entry[1] as RawTag);
+        if (entry[0] === 'tags') result[entry[0]] = MediaInfoTask.tagMapper(entry[1] as IRawTag);
         else result[camelCase(entry[0])] = entry[1];
         return result;
-      }, {}) as Format;
+      }, {}) as IFormat;
   }
 
-  private static mediaInfoMapper(raw: RawMediaInfo): MediaInfo {
-    const result: MediaInfo = {};
+  private static mediaInfoMapper(raw: IRawMediaInfo): IMediaInfo {
+    const result: IMediaInfo = {};
     if (raw.streams) result.streams = MediaInfoTask.streamsMapper(raw.streams);
     if (raw.format) result.format = MediaInfoTask.formatMapper(raw.format);
     return result;
   }
 
-  public execute(): Promise<MediaInfo> {
+  public execute(): Promise<IMediaInfo> {
     return new Promise((resolve, reject) => {
       ipcRenderer.send('media-info-request', this.path);
       ipcRenderer.once('media-info-reply', (event, error, info) => {
         console.log(JSON.parse(info));
         if (error) reject(error);
-        else resolve(MediaInfoTask.mediaInfoMapper(JSON.parse(info) as RawMediaInfo));
+        else resolve(MediaInfoTask.mediaInfoMapper(JSON.parse(info) as IRawMediaInfo));
       });
     });
   }
 }
 export class MediaInfoQueue extends BaseMediaTaskQueue {
   public async getMediaInfo(path: string) {
-    const result = await super.addTask<MediaInfo>(await MediaInfoTask.from(path));
+    const result = await super.addTask<IMediaInfo>(await MediaInfoTask.from(path));
     if (result instanceof Error) throw result;
     return result;
   }
