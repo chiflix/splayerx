@@ -73,5 +73,6 @@ module.exports = {
         'requireLast': false
       }
     },
+    '@typescript-eslint/interface-name-prefix': always
   }
 }
