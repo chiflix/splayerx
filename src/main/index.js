@@ -16,6 +16,8 @@ import writeLog from './helpers/writeLog';
 import { getValidVideoRegex, getValidSubtitleRegex } from '../shared/utils';
 import { mouse } from './helpers/mouse';
 
+import './helpers/mediaTasksPlugin';
+
 // requestSingleInstanceLock is not going to work for mas
 // https://github.com/electron-userland/electron-packager/issues/923
 if (!process.mas && !app.requestSingleInstanceLock()) {
