@@ -158,18 +158,42 @@ declare module 'electron' {
 
   interface IpcMain {
     on(channel: 'media-info-request', listener: (event: Event, path: string) => void): this;
+    on(channel: 'snapshot-request', listener: (event: Event,
+      videoPath: string, imagePath: string,
+      timeString: string,
+      width: number, height: number,
+    ) => void): this;
+    on(channel: 'subtitle-request', listener: (event: Event,
+      videoPath: string, subtitlePath: string,
+      streamIndex: string,
+    ) => void): this;
   }
 
   interface IpcRenderer {
     send(channel: 'media-info-request', path: string): void;
+    send(channel: 'snapshot-request',
+      videoPath: string, imagePath: string,
+      timeString: string,
+      width: number, height: number,
+    ): void;
+    send(channel: 'subtitle-request',
+      videoPath: string, subtitlePath: string,
+      streamIndex: string,
+    ): void;
 
     on(channel: 'media-info-reply', listener: (event: Event, error?: Error, info: string) => void): this;
+    on(channel: 'snapshot-reply', listener: (event: Event, error?: Error, path: string) => void): this;
+    on(channel: 'subtitle-reply', listener: (event: Event, error: Error | undefined, path: string) => void): this;
 
     once(channel: 'media-info-reply', listener: (event: Event, error?: Error, info: string) => void): this;
+    once(channel: 'snapshot-reply', listener: (event: Event, error?: Error, path: string) => void): this;
+    once(channel: 'subtitle-reply', listener: (event: Event, error: Error | undefined, path: string) => void): this;
   }
 
   interface Event {
     reply(channel: string, ...args: any[]): void;
     reply(channel: 'media-info-reply', error?: Error, info: string): void;
+    reply(channel: 'snapshot-reply', error?: Error, path: string): this;
+    reply(channel: 'subtitle-reply', error: Error | undefined, path: string): this;
   }
 }
