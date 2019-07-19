@@ -155,4 +155,21 @@ declare module 'electron' {
     stopGrabAudioFrame(): void;
   }
   const splayerx: SPlayerAPI;
+
+  interface IpcMain {
+    on(channel: 'media-info-request', listener: (event: Event, path: string) => void): this;
+  }
+
+  interface IpcRenderer {
+    send(channel: 'media-info-request', path: string): void;
+
+    on(channel: 'media-info-reply', listener: (event: Event, error?: Error, info: string) => void): this;
+
+    once(channel: 'media-info-reply', listener: (event: Event, error?: Error, info: string) => void): this;
+  }
+
+  interface Event {
+    reply(channel: string, ...args: any[]): void;
+    reply(channel: 'media-info-reply', error?: Error, info: string): void;
+  }
 }
