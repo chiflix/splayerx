@@ -1,13 +1,13 @@
 import { ipcRenderer } from 'electron';
 import { camelCase } from 'lodash';
-import { IMediaTask } from './baseMediaTaskQueue';
+import BaseMediaTaskQueue, { IMediaTask } from './baseMediaTaskQueue';
 import { LanguageCode, normalizeCode } from '@/libs/language';
 import { mediaQuickHash } from '@/libs/utils';
 
 type EntryOf<T> = [keyof T, T[keyof T]];
 
 /* eslint-disable camelcase */
-enum CodecType {
+export enum CodecType {
   Video = 'video',
   Audio = 'audio',
   Subtitle = 'subtitle',
@@ -359,5 +359,12 @@ class MediaInfoTask implements IMediaTask<IMediaInfo> {
         else resolve(MediaInfoTask.mediaInfoMapper(JSON.parse(info) as IRawMediaInfo));
       });
     });
+  }
+}
+
+export default class MediaInfoQueue extends BaseMediaTaskQueue {
+  /** get media info by path(result will be cached) */
+  public getMediaInfo(path: string) {
+    return MediaInfoTask.from(path).then(task => super.addTask<IMediaInfo>(task, { cache: true }));
   }
 }

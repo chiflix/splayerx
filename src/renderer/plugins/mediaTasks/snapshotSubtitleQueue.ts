@@ -1,6 +1,6 @@
 import { ipcRenderer } from 'electron';
 import { join } from 'path';
-import { IMediaTask } from './baseMediaTaskQueue';
+import BaseMediaTaskQueue, { IMediaTask } from './baseMediaTaskQueue';
 import {
   timecodeFromSeconds, mediaQuickHash,
   getVideoDir, getSubtitleDir,
@@ -105,5 +105,26 @@ class SubtitleTask implements IMediaTask<string> {
         else resolve(path);
       });
     });
+  }
+}
+
+export default class SnapshotSubtitleQueue extends BaseMediaTaskQueue {
+  /** get snapshot path, generate it if not exist */
+  public getSnapshotPath(
+    videoPath: string,
+    timeInSeconds: number,
+    width: number, height: number,
+  ) {
+    return SnapshotTask.from(
+      videoPath,
+      timeInSeconds,
+      width, height,
+    ).then(task => super.addTask<string>(task));
+  }
+
+  /** get a embedded subtitle path, extract it if not exist */
+  public getSubtitlePath(videoPath: string, streamIndex: number, format: Format) {
+    return SubtitleTask.from(videoPath, streamIndex, format)
+      .then(task => super.addTask<string>(task, { piority: 1 }));
   }
 }

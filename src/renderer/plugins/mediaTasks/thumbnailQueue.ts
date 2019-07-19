@@ -1,6 +1,6 @@
 import { ipcRenderer } from 'electron';
 import { join } from 'path';
-import { IMediaTask } from './baseMediaTaskQueue';
+import BaseMediaTaskQueue, { IMediaTask } from './baseMediaTaskQueue';
 import { mediaQuickHash, getVideoDir } from '@/libs/utils';
 
 class ThumbnailTask implements IMediaTask<string> {
@@ -57,5 +57,20 @@ class ThumbnailTask implements IMediaTask<string> {
         else resolve(path);
       });
     });
+  }
+}
+
+export default class ThumbnailQueue extends BaseMediaTaskQueue {
+  /** get a thumbnail's path, generate it if not exist */
+  public getThumbnailPath(
+    videoPath: string,
+    width: number,
+    rowCount: number, columnCount: number,
+  ) {
+    return ThumbnailTask.from(
+      videoPath,
+      width,
+      rowCount, columnCount,
+    ).then(task => super.addTask<string>(task));
   }
 }
