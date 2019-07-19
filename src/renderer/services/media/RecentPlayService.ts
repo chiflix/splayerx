@@ -1,14 +1,23 @@
-import IRecentPlay, { LandingViewDisplayInfo } from '@/interfaces/IRecentPlay';
-import { mediaStorageService } from '@/services/storage/MediaStorageService';
 import { basename, extname } from 'path';
+import { IRecentPlay, LandingViewDisplayInfo } from '@/interfaces/IRecentPlay';
+import { mediaStorageService } from '@/services/storage/MediaStorageService';
 import { playInfoStorageService } from '@/services/storage/PlayInfoStorageService';
 import { info } from '@/libs/DataBase';
 import { mediaQuickHash } from '@/libs/utils';
 import { filePathToUrl } from '@/helpers/path';
+
+type coverViedoItem = {
+  lastPlayedTime: number,
+  duration: number,
+  path: string,
+  playedIndex: number,
+  playlistLength: number,
+  shortCut: string,
+  id: number,
+};
+
 export default class RecentPlayService implements IRecentPlay {
-  constructor() {
-  }
-  async getRecords(): Promise<LandingViewDisplayInfo[]> {
+  public async getRecords(): Promise<LandingViewDisplayInfo[]> {
     const recentPlayedResults = await playInfoStorageService.getAllRecentPlayed();
     const coverVideos = (await Promise.all(
       recentPlayedResults.map(async (value) => {
@@ -26,12 +35,14 @@ export default class RecentPlayService implements IRecentPlay {
           playedIndex,
           playlistLength: items.length,
         };
-      })
-    )).filter((item) => !!item);
+      }),
+    )).filter(item => !!item);
     const getBasename = (path: string) => basename(path, extname(path));
     const results: LandingViewDisplayInfo[] = await Promise.all(
-      coverVideos.map(async (item: any): Promise<LandingViewDisplayInfo> => {
-        const { lastPlayedTime, duration, path, playedIndex, playlistLength, shortCut, id } = item;
+      coverVideos.map(async (item: coverViedoItem): Promise<LandingViewDisplayInfo> => {
+        const {
+          lastPlayedTime, duration, path, playedIndex, playlistLength, shortCut, id,
+        } = item;
         const percentage = (lastPlayedTime / duration) * 100;
         let backgroundUrl;
 
@@ -60,7 +71,8 @@ export default class RecentPlayService implements IRecentPlay {
           playedIndex,
           playlistLength,
         };
-      }));
+      }),
+    );
     return results.splice(0, 9);
   }
 }

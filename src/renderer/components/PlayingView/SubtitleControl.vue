@@ -210,9 +210,6 @@ export default {
     enabledSecondarySub(val: boolean) {
       if (!val) this.updateSubtitleType(true);
     },
-    computedAvailableItems(val: SubtitleControlListItem[]) {
-      this.updateNoSubtitle(!val.length);
-    },
     list(val: SubtitleControlListItem[]) {
       this.computedAvailableItems = val.map((sub: SubtitleControlListItem) => ({
         ...sub,
@@ -348,7 +345,6 @@ export default {
       changeSecondarySubtitle: smActions.changeSecondarySubtitle,
       refreshSubtitles: smActions.refreshSubtitles,
       deleteCurrentSubtitle: smActions.deleteSubtitlesByUuid,
-      updateNoSubtitle: subtitleActions.UPDATE_NO_SUBTITLE,
       updateSubtitleType: subtitleActions.UPDATE_SUBTITLE_TYPE,
     }),
     offCurrentSubtitle() {

@@ -1,9 +1,11 @@
-import { ISubtitleStream } from './loaders';
-import { dirname, extname, basename, join } from 'path';
-import { pathToFormat } from './utils';
+import {
+  dirname, extname, basename, join,
+} from 'path';
 import { readdir } from 'fs';
-import { LanguageCode } from '@/libs/language';
 import { ipcRenderer, Event } from 'electron';
+import { ISubtitleStream } from './loaders';
+import { pathToFormat } from './utils';
+import { LanguageCode } from '@/libs/language';
 import { mediaQuickHash as calculateMediaIdentity } from '@/libs/utils';
 import Sagi from '@/libs/sagi';
 import { Format } from '@/interfaces/ISubtitle';
@@ -15,21 +17,19 @@ export function searchForLocalList(videoSrc: string): Promise<string[]> {
     const isValidSubtitle = (filename: string) => {
       const subtitleBasename = basename(filename, extname(filename));
       return (
-        pathToFormat(filename) !== Format.Unknown &&
-        subtitleBasename.toLowerCase() === videoBasename.toLowerCase()
-      )
+        pathToFormat(filename) !== Format.Unknown
+        && subtitleBasename.toLowerCase() === videoBasename.toLowerCase()
+      );
     };
 
     readdir(videoDir, (err, files) => {
       if (err) {
         // reject(err);
         resolve([]);
-      }
-      else {
+      } else {
         resolve(files
           .filter(isValidSubtitle)
-          .map(filename => join(videoDir, filename))
-        );
+          .map(filename => join(videoDir, filename)));
       }
     });
   });
@@ -37,19 +37,22 @@ export function searchForLocalList(videoSrc: string): Promise<string[]> {
 
 export async function fetchOnlineList(
   videoSrc: string,
-  languageCode: LanguageCode = LanguageCode["zh-CN"],
+  languageCode: LanguageCode = LanguageCode['zh-CN'],
   hints?: string,
 ) {
   if (
-    !languageCode ||
-    languageCode === LanguageCode.Default ||
-    languageCode === LanguageCode.No
+    !languageCode
+    || languageCode === LanguageCode.Default
+    || languageCode === LanguageCode.No
   ) return [];
   const mediaIdentity = await calculateMediaIdentity(videoSrc);
   return Sagi.mediaTranslate({
-    mediaIdentity, languageCode, hints: hints || basename(videoSrc, extname(videoSrc)),
-    format: '', startTime: 0, // tempoary useless params according to server-side
-  });
+    mediaIdentity,
+    languageCode,
+    hints: hints || basename(videoSrc, extname(videoSrc)),
+    format: '',
+    startTime: 0, // tempoary useless params according to server-side
+  }).catch(() => []);
 }
 
 export function retrieveEmbeddedList(
@@ -64,9 +67,9 @@ export function retrieveEmbeddedList(
       try {
         const subtitleStreams: ISubtitleStream[] = JSON.parse(info).streams
           .filter((stream: ISubtitleStream) => (
-            !excludedStreamIndexes.includes(stream.index) &&
-            stream.codec_type === 'subtitle' &&
-            Object.values(Format).includes(stream.codec_name)
+            !excludedStreamIndexes.includes(stream.index)
+            && stream.codec_type === 'subtitle'
+            && Object.values(Format).includes(stream.codec_name)
           ));
         resolve(subtitleStreams.map(stream => [videoSrc, stream]));
       } catch (error) {
