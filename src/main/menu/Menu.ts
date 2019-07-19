@@ -1,5 +1,6 @@
 import { Menu, MenuItem } from 'electron';
 import { isMacintosh } from 'shared/common/platform';
+import { $t } from 'shared/common/localize';
 
 export default class Menubar {
   
@@ -27,14 +28,14 @@ export default class Menubar {
 		// Menus
 		const menubar = new Menu();
 
-		// Mac: Application
-		let macApplicationMenuItem: Electron.MenuItem;
-		if (isMacintosh) {
-			const applicationMenu = new Menu();
-			macApplicationMenuItem = new MenuItem({ label: 'Splayer', submenu: applicationMenu });
-			this.setMacApplicationMenu(applicationMenu);
-			menubar.append(macApplicationMenuItem);
-		}
+		// // Mac: Application
+		// let macApplicationMenuItem: Electron.MenuItem;
+		// if (isMacintosh) {
+		// 	const applicationMenu = new Menu();
+		// 	macApplicationMenuItem = new MenuItem({ label: 'Splayer', submenu: applicationMenu });
+		// 	this.setMacApplicationMenu(applicationMenu);
+		// 	menubar.append(macApplicationMenuItem);
+		// }
 
 		// File
 		const fileMenuItem = this.createFileMenu();
@@ -54,7 +55,7 @@ export default class Menubar {
 		// Subtitle
 		const subtitleMenuItem = this.createSubtitleMenu();
 
-		menubar.append(viewMenuItem);
+		menubar.append(subtitleMenuItem);
 
 		// Mac: Window
 		let macWindowMenuItem: Electron.MenuItem | undefined;
@@ -81,25 +82,40 @@ export default class Menubar {
 
 	}
 
-	private createFileMenu() {
+	private createFileMenu(): Electron.MenuItem {
 		const fileMenu = new Menu();
-		const fileMenuItem = new MenuItem();
+		const fileMenuItem = new MenuItem({ label: $t('msg.file.name'), submenu: fileMenu });
+		return fileMenuItem;
 	}
 
 	private createPlaybackMenu() {
-
+		const playbackMenu = new Menu();
+		const playbackMenuItem = new MenuItem({ label: $t('msg.playback.name'), submenu: playbackMenu });
+		return playbackMenuItem;
 	}
 
 	private createAudioMenu() {
-
+		const audioMenu = new Menu();
+		const audioMenuItem = new MenuItem({ label: $t('msg.audio.name'), submenu: audioMenu });
+		return audioMenuItem;
 	}
 
 	private createSubtitleMenu() {
-		
+		const subtitleMenu = new Menu();
+		const subtitleMenuItem = new MenuItem({ label: $t('msg.subtitle.name'), submenu: subtitleMenu });
+		return subtitleMenuItem;
 	}
 
 	private createMacWindowMenu() {
+		const macWindowMenu = new Menu();
+		const macWindowMenuItem = new MenuItem({ label: $t('msg.window.name'), submenu: macWindowMenu });
+		return macWindowMenuItem;
+	}
 
+	private createHelpMenu() {
+		const helpMenu = new Menu();
+		const helpMenuItem = new MenuItem({ label: $t('msg.help.name'), submenu: helpMenu });
+		return helpMenuItem;
 	}
 
 	private setMacMenu() {
@@ -119,4 +135,4 @@ function __separator__(): Electron.MenuItem {
 	return new MenuItem({ type: 'separator' });
 }
 
-export const menuService = new MenuService();
+export const menuService = new Menubar();
