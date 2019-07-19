@@ -167,6 +167,11 @@ declare module 'electron' {
       videoPath: string, subtitlePath: string,
       streamIndex: string,
     ) => void): this;
+    on(channel: 'thumbnail-request', listener: (event: Event,
+      videoPath: string, imagePath: string,
+      thumbnailWidth: number,
+      columnThumbnailCount: number, rowThumbnailCount: number,
+    ) => void): this;
   }
 
   interface IpcRenderer {
@@ -180,14 +185,21 @@ declare module 'electron' {
       videoPath: string, subtitlePath: string,
       streamIndex: string,
     ): void;
+    send(channel: 'thumbnail-request',
+      videoPath: string, imagePath: string,
+      thumbnailWidth: number,
+      columnThumbnailCount: number, rowThumbnailCount: number,
+    ): void;
 
     on(channel: 'media-info-reply', listener: (event: Event, error?: Error, info: string) => void): this;
     on(channel: 'snapshot-reply', listener: (event: Event, error?: Error, path: string) => void): this;
     on(channel: 'subtitle-reply', listener: (event: Event, error: Error | undefined, path: string) => void): this;
+    on(channel: 'thumbnail-reply', listener: (event: Event, error?: Error, path: string) => void): this;
 
     once(channel: 'media-info-reply', listener: (event: Event, error?: Error, info: string) => void): this;
     once(channel: 'snapshot-reply', listener: (event: Event, error?: Error, path: string) => void): this;
     once(channel: 'subtitle-reply', listener: (event: Event, error: Error | undefined, path: string) => void): this;
+    once(channel: 'thumbnail-reply', listener: (event: Event, error?: Error, path: string) => void): this;
   }
 
   interface Event {
@@ -195,5 +207,6 @@ declare module 'electron' {
     reply(channel: 'media-info-reply', error?: Error, info: string): void;
     reply(channel: 'snapshot-reply', error?: Error, path: string): this;
     reply(channel: 'subtitle-reply', error: Error | undefined, path: string): this;
+    reply(channel: 'thumbnail-reply', error?: Error, path: string): void;
   }
 }
