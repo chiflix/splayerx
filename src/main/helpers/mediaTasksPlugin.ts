@@ -39,4 +39,21 @@ app.on('ready', () => {
       );
     } else event.reply('subtitle-reply', new Error('File does not exist.'));
   });
+  ipcMain.on('thumbnail-request', (event,
+    videoPath, imagePath,
+    thumbnailWidth,
+    rowThumbnailCount, columnThumbnailCount) => {
+    if (existsSync(imagePath)) event.reply('thumbnail-reply', undefined, imagePath);
+    else if (existsSync(videoPath)) {
+      splayerx.generateThumbnails(
+        videoPath, imagePath,
+        thumbnailWidth.toString(),
+        rowThumbnailCount.toString(), columnThumbnailCount.toString(),
+        (err) => {
+          if (err === '0' && existsSync(imagePath)) event.reply('thumbnail-reply', undefined, imagePath);
+          else event.reply('thumbnail-reply', new Error(err));
+        },
+      );
+    } else event.reply('thumbnail-reply', new Error('File does not exist.'));
+  });
 });
