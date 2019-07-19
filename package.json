@@ -30,8 +30,8 @@
     "postinstall": "node ./scripts/postinstall.js"
   },
   "_moduleAliases": {
-    "electron": "node_modules/@chiflix/electron",
-    "grpc": "node_modules/@grpc/grpc-js"
+    "electron"  : "@chiflix/electron",
+    "grpc": "@grpc/grpc-js"
   },
   "dependencies": {
     "@grpc/grpc-js": "^0.2.0",

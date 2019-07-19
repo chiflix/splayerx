@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-06-20 18:03:14
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-07-18 12:50:03
+ * @Last Modified time: 2019-07-19 17:38:41
  */
 
 // @ts-ignore
@@ -11,6 +11,7 @@ import { EventEmitter } from 'events';
 import path from 'path';
 import fs from 'fs';
 import { isNaN } from 'lodash';
+import { credentials, Metadata } from 'grpc';
 import {
   StreamingTranslationRequest,
   StreamingTranslationRequestConfig,
@@ -23,9 +24,6 @@ import { AITaskInfo } from '@/interfaces/IMediaStorable';
 import MediaStorageService, { mediaStorageService } from '../storage/MediaStorageService';
 import { TranscriptInfo } from '../subtitle';
 
-/* eslint-disable */
-const grpc = require('grpc');
-/* eslint-enable */
 let endpoint = '';
 if (process.env.NODE_ENV === 'production') {
   endpoint = 'apis.sagittarius.ai:8443';
@@ -288,7 +286,7 @@ class AudioGrabService extends EventEmitter {
   }
 
   private openClient(): any { // eslint-disable-line
-    const sslCreds = grpc.credentials.createSsl(
+    const sslCreds = credentials.createSsl(
       // @ts-ignore
       fs.readFileSync(path.join(__static, '/certs/ca.pem')),
       // @ts-ignore
@@ -297,11 +295,11 @@ class AudioGrabService extends EventEmitter {
       fs.readFileSync(path.join(__static, '/certs/cert.pem')),
     );
     const metadataUpdater = (_: {}, cb: Function) => {
-      const metadata = new grpc.Metadata();
+      const metadata = new Metadata();
       cb(null, metadata);
     };
-    const metadataCreds = grpc.credentials.createFromMetadataGenerator(metadataUpdater);
-    const combinedCreds = grpc.credentials.combineChannelCredentials(sslCreds, metadataCreds);
+    const metadataCreds = credentials.createFromMetadataGenerator(metadataUpdater);
+    const combinedCreds = credentials.combineChannelCredentials(sslCreds, metadataCreds);
     const client = new TranslationClient(endpoint, combinedCreds);
     const stream = client.streamingTranslation();
     stream.once('error', (error: Error) => {
@@ -406,7 +404,7 @@ class AudioGrabService extends EventEmitter {
     delay = delay > 10 ? 10 * 1000 : delay * 1000;
     const callback = this.loopTaskCallBack.bind(this);
     this.loopTimer = setTimeout(() => {
-      const sslCreds = grpc.credentials.createSsl(
+      const sslCreds = credentials.createSsl(
         // @ts-ignore
         fs.readFileSync(path.join(__static, '/certs/ca.pem')),
         // @ts-ignore
@@ -415,11 +413,11 @@ class AudioGrabService extends EventEmitter {
         fs.readFileSync(path.join(__static, '/certs/cert.pem')),
       );
       const metadataUpdater = (_: {}, cb: Function) => {
-        const metadata = new grpc.Metadata();
+        const metadata = new Metadata();
         cb(null, metadata);
       };
-      const metadataCreds = grpc.credentials.createFromMetadataGenerator(metadataUpdater);
-      const combinedCreds = grpc.credentials.combineChannelCredentials(sslCreds, metadataCreds);
+      const metadataCreds = credentials.createFromMetadataGenerator(metadataUpdater);
+      const combinedCreds = credentials.combineChannelCredentials(sslCreds, metadataCreds);
       const client = new TranslationClient(endpoint, combinedCreds);
       const taskRequest = new StreamingTranslationTaskRequest();
       taskRequest.setTaskId(taskId);

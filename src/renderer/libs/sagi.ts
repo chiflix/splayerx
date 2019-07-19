@@ -59,6 +59,7 @@ class Sagi {
     log.info('Sagi.mediaTranslate', `hash-${mediaIdentity}***language-${languageCode}***hints-${hints}`);
     return new Promise((resolve, reject) => {
       client.translateMedia(req, (err, res) => {
+        console.log(res.toObject());
         if (err) reject(err);
         else resolve(res.toObject().resultsList);
       });
