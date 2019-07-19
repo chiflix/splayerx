@@ -2,6 +2,16 @@
   <div class="browsing">
     <browsing-header v-show="!isPip" />
     <div
+      :style="{
+        position: 'absolute',
+        width: '100%',
+        height: '100%',
+        background: 'rgba(255, 255, 255, 0.18)',
+        zIndex: '999'
+      }"
+      v-show="maskToShow"
+    />
+    <div
       v-show="loadingState && !isPip"
       class="loading-state loading-animation"
     />
@@ -21,10 +31,11 @@
       class="pip-buttons"
     >
       <Icon
-        :style="{ marginBottom: '12px' }"
+        :style="{ marginBottom: '12px', cursor: 'pointer' }"
         type="pipRecord"
       />
       <Icon
+        :style="{ cursor: 'pointer' }"
         @mouseup.native="handleExitPip"
         type="pipBack"
       />
@@ -51,6 +62,7 @@
 
 <script lang="ts">
 import { mapGetters, mapActions } from 'vuex';
+import fs from 'fs';
 // @ts-ignore
 import urlParseLax from 'url-parse-lax';
 import { windowRectService } from '@/services/window/WindowRectService';
@@ -58,6 +70,7 @@ import { Browsing as browsingActions } from '@/store/actionTypes';
 import BrowsingHeader from '@/components/BrowsingView/BrowsingHeader.vue';
 import BrowsingControl from '@/components/BrowsingView/BrowsingControl.vue';
 import Icon from '@/components/BaseIconContainer.vue';
+import { getValidVideoRegex, getValidSubtitleRegex } from '../../shared/utils';
 
 export default {
   name: 'BrowsingView',
@@ -80,16 +93,46 @@ export default {
       controlToShow: true,
       isDragging: false,
       upOnBrowsing: false,
+      maskToShow: false,
+      dropFiles: [],
     };
   },
   computed: {
-    ...mapGetters(['winPos', 'isFullScreen', 'initialUrl', 'winWidth', 'winSize', 'browsingSize']),
+    ...mapGetters(['winPos', 'isFullScreen', 'initialUrl', 'winWidth', 'winSize', 'browsingSize', 'pipSize']),
     availableUrl() {
       const parsedUrl = urlParseLax(this.initialUrl);
       return parsedUrl.protocol ? parsedUrl.href : `http://${this.initialUrl}`;
     },
+    pipStoredWidth() {
+      return this.pipSize[0];
+    },
   },
   watch: {
+    dropFiles(val: string[]) {
+      const onlyFolders = val.every((file: fs.PathLike) => fs.statSync(file).isDirectory());
+      if (this.currentRouteName === 'playing-view' || onlyFolders
+        || val.every((file: fs.PathLike) => getValidVideoRegex()
+          .test(file) && !getValidSubtitleRegex().test(file))) {
+        val.forEach((file: fs.PathLike) => this.$electron.remote.app.addRecentDocument(file));
+        if (onlyFolders) {
+          this.openFolder(...val);
+        } else {
+          this.openFile(...val);
+        }
+      } else {
+        this.$electron.ipcRenderer.send('drop-subtitle', val);
+      }
+    },
+    isPip(val: boolean) {
+      if (!val) {
+        windowRectService.calculateWindowRect(
+          this.browsingSize,
+          true,
+          this.winPos.concat(this.winSize),
+        );
+      }
+      this.$store.dispatch(val ? 'updateBrowsingSize' : 'updatePipSize', this.winSize);
+    },
     winWidth(val: number) {
       if (this.isPip) {
         if (this.pipType === 'iqiyi') {
@@ -124,9 +167,15 @@ export default {
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [0]);
   },
   beforeDestroy() {
-    this.$store.dispatch('updateBrowsingSize', this.isPip ? [1200, 900] : this.winSize);
+    this.$store.dispatch(this.isPip ? 'updatePipSize' : 'updateBrowsingSize', this.winSize);
   },
   mounted() {
+    this.$bus.$on('back-to-landingview', () => {
+      this.$router.push({
+        name: 'landing-view',
+      });
+      windowRectService.uploadWindowBy(false, 'landing-view');
+    });
     this.$refs.preventEventLayer.addEventListener('mousedown', () => {
       if (this.isPip) {
         this.upOnBrowsing = false;
@@ -167,7 +216,8 @@ export default {
     });
     this.$refs.webView.addEventListener('ipc-message', (evt: any) => {
       const { channel, args }: { channel: string, args:
-      { windowScrollY?: number, isDragging?: boolean }[] } = evt;
+      { windowScrollY?: number, isDragging?: boolean,
+        dragover?: boolean, files: string[] }[] } = evt;
       switch (channel) {
         case 'scroll':
           this.windowScrollY = args[0].windowScrollY;
@@ -176,6 +226,14 @@ export default {
           if (!this.upOnBrowsing) {
             this.isDragging = args[0].isDragging;
           }
+          break;
+        case 'dragover':
+        case 'dragleave':
+          this.maskToShow = args[0].dragover;
+          break;
+        case 'drop':
+          this.maskToShow = false;
+          this.dropFiles = args[0].files;
           break;
         default:
           console.warn(`Unhandled ipc-message: ${channel}`, args);
@@ -258,7 +316,8 @@ export default {
                 / parseFloat(result.height as string);
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [videoAspectRatio]);
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [420, Math.round(420 / videoAspectRatio)]);
-        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [420, Math.round(420 / videoAspectRatio)]);
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', [window.screen.availLeft, window.screen.availTop + window.screen.availHeight - Math.round(this.pipStoredWidth / videoAspectRatio)]);
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [this.pipStoredWidth, Math.round(this.pipStoredWidth / videoAspectRatio)]);
       });
       this.$refs.webView.executeJavaScript('document.body.prepend(document.querySelector("#flashbox"));document.body.style.overflow = "hidden";document.querySelector(".qy-player-absolute").style.display = "none";document.getElementsByName("ttat")[0].style.display = "none";document.getElementsByClassName("iqp-barrage")[1].style.display = "none"');
       this.$refs.webView.executeJavaScript(`document.querySelector("#flashbox").style.width="${this.winWidth}px";document.querySelector("#flashbox").style.height="${this.winSize[1]}px"`);
@@ -271,7 +330,7 @@ export default {
     iqiyiRecover() {
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [0, 0]);
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [720, 405]);
-      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [1200, 900]);
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', this.browsingSize);
       this.$refs.webView.executeJavaScript('document.querySelector("#iframaWrapper").prepend(document.querySelector("#flashbox"));document.body.style.overflow = "";document.querySelector(".qy-player-absolute").style.display = "";document.getElementsByName("ttat")[0].style.display = "";document.getElementsByClassName("iqp-barrage")[1].style.display = ""');
       this.$refs.webView.executeJavaScript('document.querySelector("#flashbox").style.width="100%";document.querySelector("#flashbox").style.height="100%"');
       this.$refs.webView.executeJavaScript('document.querySelector(".iqp-player").style.width="100%";document.querySelector(".iqp-player").style.height="100%"');
@@ -282,26 +341,29 @@ export default {
                 / parseFloat(result.height as string);
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [videoAspectRatio]);
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [420, Math.round(420 / videoAspectRatio)]);
-        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [420, Math.round(420 / videoAspectRatio)]);
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [this.pipStoredWidth, Math.round(this.pipStoredWidth / videoAspectRatio)]);
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', [window.screen.availLeft, window.screen.availTop + window.screen.availHeight - Math.round(this.pipStoredWidth / videoAspectRatio)]);
       });
       this.$refs.webView.executeJavaScript('var isPaused = document.querySelector("video").paused;document.body.appendChild(document.querySelector(".html5-video-player")); if (!isPaused) {document.querySelector("video").play()}');
       this.$refs.webView.executeJavaScript('document.querySelector(".html5-video-player").style.position = "absolute";document.getElementsByTagName("ytd-app")[0].style.display = "none"');
       this.$refs.webView.executeJavaScript('document.querySelector(".html5-video-container").style.width="100%";document.querySelector(".html5-video-container").style.height="100%";');
       this.$refs.webView.executeJavaScript('document.querySelector("video").style.width="100%";document.querySelector("video").style.height="100%";Object.defineProperty(document.querySelector("video").style, "width", {get: function(){return "100%"}, set: function(){}});Object.defineProperty(document.querySelector("video").style, "height", {get: function(){return "100%"}, set: function(){}})');
       this.$refs.webView.executeJavaScript('document.querySelector(".html5-video-player").style.background = "rgba(0, 0, 0, 1)"');
+      this.$refs.webView.executeJavaScript('var theater = document.querySelector("#player-theater-container").childElementCount; if (!theater) { document.querySelector(".ytp-size-button").click() }');
       this.$refs.webView.executeJavaScript('document.body.style.setProperty("overflow", "hidden");Object.defineProperty(document.body.style, "overflow", {get: function(){return "hidden"}, set: function(){}})');
       this.$refs.webView.executeJavaScript('document.querySelector(".ytp-chrome-bottom").style.width="calc(100vw - 24px)";Object.defineProperty(document.querySelector(".ytp-chrome-bottom").style, "width", {get: function(){return "calc(100vw - 24px)"}, set: function(){}});');
     },
     youtubeRecover() {
       this.$refs.webView.executeJavaScript('document.getElementsByTagName("ytd-app")[0].style.display = "";document.querySelector(".html5-video-player").style.position = "";');
-      this.$refs.webView.executeJavaScript('Object.defineProperty(document.querySelector("video").style, "width", {value: "100%", writable: true});Object.defineProperty(document.querySelector("video").style, "height", {value: "100%", writable: true});');
+      this.$refs.webView.executeJavaScript('Object.defineProperty(document.querySelector("video").style, "width", {get: function(){return this._width}, set: function(val){this._width = val;document.querySelector("video").style.setProperty("width", val);}});Object.defineProperty(document.querySelector("video").style, "height", {get: function(){return this._height}, set: function(val){this._height = val;document.querySelector("video").style.setProperty("height", val);}});');
       this.$refs.webView.executeJavaScript('Object.defineProperty(document.querySelector(".ytp-chrome-bottom").style, "width", {get: function(){return this._width}, set: function(val){this._width = val;document.querySelector(".ytp-chrome-bottom").style.setProperty("width", val);}});');
-      this.$refs.webView.executeJavaScript('document.querySelector(".html5-video-player").style.background = "rgba(255, 255, 255, 1)"');
+      this.$refs.webView.executeJavaScript('document.querySelector(".html5-video-player").style.background = ""');
+      this.$refs.webView.executeJavaScript('if (!theater) { document.querySelector(".ytp-size-button").click() }');
       this.$refs.webView.executeJavaScript('Object.defineProperty(document.body.style, "overflow", {value: "",writable: true});document.body.style.setProperty("overflow", "");');
       this.$refs.webView.executeJavaScript('var isPaused = document.querySelector("video").paused;document.querySelector(".ytd-player").appendChild(document.querySelector(".html5-video-player")); if (!isPaused) {document.querySelector("video").play()}');
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [0, 0]);
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [720, 405]);
-      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [1200, 900]);
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', this.browsingSize);
     },
     bilibiliAdapter() {
       this.$refs.webView.executeJavaScript('[document.querySelector(".live-player-ctnr"), document.querySelector("iframe"), document.querySelector("#bofqi")]', (r: (HTMLElement | null)[]) => {
@@ -309,23 +371,26 @@ export default {
       }).then(() => {
         console.log(this.bilibiliType);
         if (this.bilibiliType === 'video') {
+          this.$refs.webView.executeJavaScript('var isTheater = document.querySelector(".player-wrap").style.height !== "auto";if (!isTheater) {document.querySelector(".bilibili-player-video-btn-widescreen").click()}');
           this.$refs.webView.executeJavaScript('document.querySelector("#bofqi").style', (result: CSSStyleDeclaration) => {
             const videoAspectRatio = parseFloat(result.width as string)
               / (parseFloat(result.height as string) - 46);
             this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [videoAspectRatio]);
             this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [420, Math.round(420 / videoAspectRatio)]);
-            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [420, Math.round(420 / videoAspectRatio)]);
+            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [this.pipStoredWidth, Math.round(this.pipStoredWidth / videoAspectRatio)]);
+            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', [window.screen.availLeft, window.screen.availTop + window.screen.availHeight - Math.round(this.pipStoredWidth / videoAspectRatio)]);
           });
           this.$refs.webView.executeJavaScript('document.querySelector(".bilibili-player-video-wrap").style.position = "fixed";document.querySelector(".bilibili-player-video-wrap").style.left="0";document.querySelector(".bilibili-player-video-wrap").style.top="0";document.querySelector(".bilibili-player-video-wrap").style.zIndex = "9999";document.querySelector(".bilibili-player-video-wrap").style.width="100%";document.querySelector(".bilibili-player-video-wrap").style.height="100%"');
           this.$refs.webView.executeJavaScript('document.querySelector(".bilibili-player-video-danmaku").style.opacity = "0"');
-          this.$refs.webView.executeJavaScript('document.body.style.overflow = "hidden"');
+          this.$refs.webView.executeJavaScript('document.body.style.overflow = "hidden";document.querySelector(".bili-header-m").style.display = "none";');
         } else if (this.bilibiliType === 'videoStreaming') {
           this.$refs.webView.executeJavaScript('getComputedStyle(document.querySelector("video"))', (result: CSSStyleDeclaration) => {
             const videoAspectRatio = parseFloat(result.width as string)
             / parseFloat(result.height as string);
             this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [videoAspectRatio]);
             this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [420, Math.round(420 / videoAspectRatio)]);
-            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [420, Math.round(420 / videoAspectRatio)]);
+            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [this.pipStoredWidth, Math.round(this.pipStoredWidth / videoAspectRatio)]);
+            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', [window.screen.availLeft, window.screen.availTop + window.screen.availHeight - Math.round(this.pipStoredWidth / videoAspectRatio)]);
           });
           this.$refs.webView.executeJavaScript('document.querySelector(".bilibili-live-player-video-danmaku").style.display = "none"');
           this.$refs.webView.executeJavaScript('document.body.prepend(document.querySelector(".live-player-ctnr"))');
@@ -336,7 +401,8 @@ export default {
                     / parseFloat(result.height as string);
             this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [videoAspectRatio]);
             this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [420, Math.round(420 / videoAspectRatio)]);
-            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [420, Math.round(420 / videoAspectRatio)]);
+            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [this.pipStoredWidth, Math.round(this.pipStoredWidth / videoAspectRatio)]);
+            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', [window.screen.availLeft, window.screen.availTop + window.screen.availHeight - Math.round(this.pipStoredWidth / videoAspectRatio)]);
           });
           this.$refs.webView.executeJavaScript('document.querySelector("iframe").contentDocument.querySelector(".bilibili-live-player-video-danmaku").style.display = "none"');
           this.$refs.webView.executeJavaScript('document.body.style.cssText = "overflow: hidden";Object.defineProperty(document.body.style, "overflow", {get: function(){return "hidden"}, set: function(){}});document.querySelector("iframe").contentDocument.querySelector(".aside-area").style.display = "none";');
@@ -354,11 +420,12 @@ export default {
     bilibiliRecover() {
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [0, 0]);
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [720, 405]);
-      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [1200, 900]);
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', this.browsingSize);
       if (this.bilibiliType === 'video') {
         this.$refs.webView.executeJavaScript('document.querySelector(".bilibili-player-video-danmaku").style.opacity = "1"');
-        this.$refs.webView.executeJavaScript('document.body.style.overflow = ""');
+        this.$refs.webView.executeJavaScript('document.body.style.overflow = "";document.querySelector(".bili-header-m").style.display = "";');
         this.$refs.webView.executeJavaScript('document.querySelector(".bilibili-player-video-wrap").style.position = "relative";document.querySelector(".bilibili-player-video-wrap").style.left="";document.querySelector(".bilibili-player-video-wrap").style.top="";document.querySelector(".bilibili-player-video-wrap").style.zIndex = "auto";document.querySelector(".bilibili-player-video-wrap").style.width="";document.querySelector(".bilibili-player-video-wrap").style.height=""');
+        this.$refs.webView.executeJavaScript('if (!isTheater) {document.querySelector(".bilibili-player-video-btn-widescreen").click()}');
       } else if (this.bilibiliType === 'videoStreaming') {
         this.$refs.webView.executeJavaScript('document.querySelector(".player-section").prepend(document.querySelector(".live-player-ctnr"))');
         this.$refs.webView.executeJavaScript('document.querySelector(".bilibili-live-player-video-danmaku").style.display = ""');

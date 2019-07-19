@@ -12,6 +12,7 @@ const state = {
   isHiddenByBossKey: false,
   sizePercent: 0,
   browsingSize: [1200, 900],
+  pipSize: [420, 236],
 };
 
 const getters = {
@@ -30,6 +31,7 @@ const getters = {
   isHiddenByBossKey: state => state.isHiddenByBossKey,
   sizePercent: state => state.sizePercent,
   browsingSize: state => state.browsingSize,
+  pipSize: state => state.pipSize,
 };
 
 const mutations = {
@@ -67,6 +69,9 @@ const mutations = {
   browsingSizeUpdate(state, payload) {
     state.browsingSize = payload;
   },
+  pipSizeUpdate(state, payload) {
+    state.pipSize = payload;
+  },
 };
 
 const actions = {
@@ -80,9 +85,12 @@ const actions = {
     commit('windowAngle', 0);
   },
   updateBrowsingSize({ commit }, delta) {
-    console.log(delta);
     commit('browsingSizeUpdate', delta);
-    return asyncStorage.set('browsing', delta);
+    asyncStorage.set('browsing', { pipSize: state.pipSize, browsingSize: delta });
+  },
+  updatePipSize({ commit }, delta) {
+    commit('pipSizeUpdate', delta);
+    asyncStorage.set('browsing', { pipSize: delta, browsingSize: state.browsingSize });
   },
 };
 

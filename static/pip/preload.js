@@ -18,4 +18,17 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('mouseup', (evt) => {
     mousedown = false;
   }, true);
+  window.addEventListener('drop', (e) => {
+    e.preventDefault();
+    const files = Array.prototype.map.call(e.dataTransfer.files, f => f.path);
+    sendToHost('drop', { files });
+  });
+  window.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    sendToHost('dragover', { dragover: true });
+  });
+  window.addEventListener('dragleave', (e) => {
+    e.preventDefault();
+    sendToHost('dragleave', { dragover: false });
+  });
 });

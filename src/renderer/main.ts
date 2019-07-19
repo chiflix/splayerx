@@ -28,7 +28,7 @@ import messages from '@/locales';
 import { windowRectService } from '@/services/window/WindowRectService';
 import helpers from '@/helpers';
 import { hookVue } from '@/kerning';
-import { Video as videoActions, Subtitle as subtitleActions, SubtitleManager as smActions, SubtitleManager } from '@/store/actionTypes';
+import { Video as videoActions, Subtitle as subtitleActions, SubtitleManager as smActions, SubtitleManager, Browsing as browsingActions } from '@/store/actionTypes';
 import { log } from '@/libs/Log';
 import asyncStorage from '@/helpers/asyncStorage';
 import { videodata } from '@/store/video';
@@ -165,7 +165,7 @@ new Vue({
     };
   },
   computed: {
-    ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winAngle', 'winWidth', 'winHeight', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'list', 'enabledSecondarySub', 'isRefreshing',
+    ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winAngle', 'winWidth', 'winHeight', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'list', 'enabledSecondarySub', 'isRefreshing', 'browsingSize', 'pipSize',
       'primarySubtitleId', 'secondarySubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isHiddenByBossKey', 'isMinimized', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle', 'displayLanguage', 'calculatedNoSub', 'sizePercent', 'snapshotSavedPath', 'duration', 'reverseScrolling',
     ]),
     ...inputMapGetters({
@@ -351,6 +351,10 @@ new Vue({
       if (data.muted) {
         this.$store.dispatch(videoActions.MUTED_UPDATE, data.muted);
       }
+    });
+    asyncStorage.get('browsing').then((data) => {
+      this.$store.dispatch('updateBrowsingSize', data.browsingSize || this.browsingSize);
+      this.$store.dispatch('updatePipSize', data.pipSize || this.pipSize);
     });
     this.$bus.$on('delete-file', () => {
       this.refreshMenu();
@@ -1269,6 +1273,7 @@ new Vue({
     },
     menuStateControl(routeName: string) {
       const inPlayingView = routeName === 'playing-view';
+      const inBrowsingView = routeName === 'browsing-view';
       const inWelcomeView = routeName === 'welcome-view' || routeName === 'language-setting';
       if (!this.menu) return;
       let menuItem;
@@ -1310,7 +1315,7 @@ new Vue({
       this.menu.getMenuItemById('windowResize2').enabled = inPlayingView;
       this.menu.getMenuItemById('windowResize3').enabled = inPlayingView;
       this.menu.getMenuItemById('windowResize4').enabled = inPlayingView;
-      this.menu.getMenuItemById('backToLandingView').enabled = inPlayingView;
+      this.menu.getMenuItemById('backToLandingView').enabled = inPlayingView || inBrowsingView;
       // windowRotate 菜单状态随着路由状态一起变
       this.menu.getMenuItemById('windowRotate').enabled = inPlayingView;
     },
