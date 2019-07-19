@@ -1,4 +1,10 @@
-import { LanguageCode } from '@/libs/language';
+import { ipcRenderer } from 'electron';
+import { camelCase } from 'lodash';
+import { IMediaTask } from './baseMediaTaskQueue';
+import { LanguageCode, normalizeCode } from '@/libs/language';
+import { mediaQuickHash } from '@/libs/utils';
+
+type EntryOf<T> = [keyof T, T[keyof T]];
 
 /* eslint-disable camelcase */
 enum CodecType {
@@ -202,4 +208,156 @@ type Stream = IVideoStream | IAudioStream | ISubtitleStream | IAttachmentStream;
 interface IMediaInfo {
   streams?: Stream[];
   format?: IFormat;
+}
+
+class MediaInfoTask implements IMediaTask<IMediaInfo> {
+  private path: string = '';
+
+  private hash: string = '';
+
+  private constructor(path: string, hash: string) {
+    this.path = path;
+    this.hash = hash;
+  }
+
+  /** generate a MediaInfoTask instance by file path */
+  public static async from(path: string) {
+    const hash = await mediaQuickHash(path);
+    return new MediaInfoTask(path, hash);
+  }
+
+  public getId() { return this.hash; }
+
+  private static streamDispositionMapper(raw: IRawStreamDisposition): IStreamDisposition {
+    const entries = (Object.entries(raw) as EntryOf<IRawStreamDisposition>[])
+      .map(({ 0: key, 1: value }) => [camelCase(key), !!value]);
+    return Object.fromEntries(entries) as IStreamDisposition;
+  }
+
+  private static tagMapper(raw: IRawTag): ITag {
+    const entries = (Object.entries(raw) as EntryOf<IRawTag>[])
+      .map(({ 0: key, 1: value }) => [camelCase(key), key === 'language' ? normalizeCode(value as string) : value]);
+    return Object.fromEntries(entries) as ITag;
+  }
+
+  private static videoStreamMapper(raw: IRawVideoStream): IVideoStream {
+    const entries = (Object.entries(raw) as EntryOf<IRawVideoStream>[])
+      .map(({ 0: key, 1: value }) => {
+        const newKey = camelCase(key);
+        switch (key) {
+          default:
+            return [newKey, value];
+          case 'disposition':
+            return [newKey, MediaInfoTask.streamDispositionMapper(value as IRawStreamDisposition)];
+          case 'tags':
+            return [newKey, MediaInfoTask.tagMapper(value as IRawTag)];
+          case 'has_b_frames':
+            return [newKey, !!value];
+        }
+      });
+    return Object.fromEntries(entries) as IVideoStream;
+  }
+
+  private static audioStreamMapper(raw: IRawAudioStream): IAudioStream {
+    const entries = (Object.entries(raw) as EntryOf<IRawAudioStream>[])
+      .map(({ 0: key, 1: value }) => {
+        const newKey = camelCase(key);
+        switch (key) {
+          default:
+            return [newKey, value];
+          case 'disposition':
+            return [newKey, MediaInfoTask.streamDispositionMapper(value as IRawStreamDisposition)];
+          case 'tags':
+            return [newKey, MediaInfoTask.tagMapper(value as IRawTag)];
+        }
+      });
+    return Object.fromEntries(entries) as IAudioStream;
+  }
+
+  private static subtitleStreamMapper(raw: IRawSubtitleStream): ISubtitleStream {
+    const entries = (Object.entries(raw) as EntryOf<IRawSubtitleStream>[])
+      .map(({ 0: key, 1: value }) => {
+        const newKey = camelCase(key);
+        switch (key) {
+          default:
+            return [newKey, value];
+          case 'disposition':
+            return [newKey, MediaInfoTask.streamDispositionMapper(value as IRawStreamDisposition)];
+          case 'tags':
+            return [newKey, MediaInfoTask.tagMapper(value as IRawTag)];
+        }
+      });
+    return Object.fromEntries(entries) as ISubtitleStream;
+  }
+
+  private static attachmentStreamMapper(raw: IRawAttachmentStream): IAttachmentStream {
+    const entries = (Object.entries(raw) as EntryOf<IRawAttachmentStream>[])
+      .map(({ 0: key, 1: value }) => {
+        const newKey = camelCase(key);
+        switch (key) {
+          default:
+            return [newKey, value];
+          case 'disposition':
+            return [newKey, MediaInfoTask.streamDispositionMapper(value as IRawStreamDisposition)];
+          case 'tags':
+            return [newKey, MediaInfoTask.tagMapper(value as IRawTag)];
+        }
+      });
+    return Object.fromEntries(entries) as IAttachmentStream;
+  }
+
+  private static streamsMapper(raw: RawStream[]): Stream[] {
+    return raw.map((stream) => {
+      switch (stream.codec_type) {
+        default:
+          return undefined;
+        case CodecType.Video:
+          return MediaInfoTask.videoStreamMapper(stream);
+        case CodecType.Audio:
+          return MediaInfoTask.audioStreamMapper(stream);
+        case CodecType.Subtitle:
+          return MediaInfoTask.subtitleStreamMapper(stream);
+        case CodecType.Attachment:
+          return MediaInfoTask.attachmentStreamMapper(stream);
+      }
+    })
+      .filter(stream => !!stream) as Stream[];
+  }
+
+  private static formatMapper(raw: IRawFormat): IFormat {
+    const entries = (Object.entries(raw) as EntryOf<IRawFormat>[])
+      .map(({ 0: key, 1: value }) => {
+        const newKey = camelCase(key);
+        switch (key) {
+          default:
+            return [newKey, value];
+          case 'bit_rate':
+          case 'size':
+            return [newKey, parseInt(value as string, 10)];
+          case 'duration':
+          case 'start_time':
+            return [newKey, parseFloat(value as string)];
+          case 'tags':
+            return [newKey, MediaInfoTask.tagMapper(value as IRawTag)];
+        }
+      });
+    return Object.fromEntries(entries) as unknown as IFormat;
+  }
+
+  private static mediaInfoMapper(raw: IRawMediaInfo): IMediaInfo {
+    const result: IMediaInfo = {};
+    if (raw.streams) result.streams = MediaInfoTask.streamsMapper(raw.streams);
+    if (raw.format) result.format = MediaInfoTask.formatMapper(raw.format);
+    return result;
+  }
+
+  public execute(): Promise<IMediaInfo> {
+    return new Promise((resolve, reject) => {
+      ipcRenderer.send('media-info-request', this.path);
+      ipcRenderer.once('media-info-reply', (event, error, info) => {
+        if (error) reject(error);
+        else resolve(MediaInfoTask.mediaInfoMapper(JSON.parse(info) as IRawMediaInfo));
+      });
+    });
+  }
 }
