@@ -77,8 +77,7 @@ module.exports = {
         'requireLast': false
       }
     },
-    '@typescript-eslint/interface-name-prefix': 'always'
-  }
+    '@typescript-eslint/interface-name-prefix': 'always',
     '@typescript-eslint/explicit-function-return-type': 0,
     '@typescript-eslint/no-explicit-any': ['error', {
       ignoreRestArgs: true,
