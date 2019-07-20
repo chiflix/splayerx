@@ -25,6 +25,7 @@ import SubtitleRenderer from '@/components/Subtitle/SubtitleRenderer.vue';
 import VideoCanvas from '@/containers/VideoCanvas.vue';
 import TheVideoController from '@/containers/TheVideoController.vue';
 import { videodata } from '../store/video';
+import { getStreams } from '../plugins/mediaTasks';
 
 export default {
   name: 'PlayingView',
@@ -73,7 +74,10 @@ export default {
       // eslint-disable-next-line
       handler: function (newVal: string) {
         this.resetManager();
-        if (newVal) this.initializeManager();
+        if (newVal) {
+          getStreams(newVal);
+          this.initializeManager();
+        }
       },
     },
     async primarySubtitleId() {
