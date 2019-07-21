@@ -2,10 +2,8 @@ import electron from 'electron';
 import osLocale from 'os-locale';
 import { join } from 'path';
 import { readFileSync } from 'fs';
-import { IsMacintosh } from './platform';
+import { IsMacintosh, IsElectronRenderer } from './platform';
 import messages from '../../renderer/locales/index';
-
-const isElectronRenderer = (typeof process !== 'undefined' && typeof process.versions !== 'undefined' && typeof process.versions.electron !== 'undefined' && process.type === 'renderer');
 
 export default class Locale {
   public displayLanguage: string;
@@ -28,7 +26,7 @@ export default class Locale {
   }
 
   private getDisplayLanguage() {
-    const { app } = isElectronRenderer ? electron.remote : electron;
+    const { app } = IsElectronRenderer ? electron.remote : electron;
     const preferencesPath = join(app.getPath('userData'), 'storage', 'preferences.json');
     const data = JSON.parse(readFileSync(preferencesPath) as unknown as string);
     if (data.displayLanguage) this.displayLanguage = data.displayLanguage;
@@ -36,7 +34,7 @@ export default class Locale {
   }
 
   private getSystemLocale(): string {
-    const { app } = isElectronRenderer ? electron.remote : electron;
+    const { app } = IsElectronRenderer ? electron.remote : electron;
     let locale = IsMacintosh ? osLocale.sync() : app.getLocale();
     locale = locale.replace('_', '-');
     if (locale === 'zh-TW' || locale === 'zh-HK' || locale === 'zh-Hant') {
