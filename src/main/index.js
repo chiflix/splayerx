@@ -15,6 +15,7 @@ import './helpers/electronPrototypes';
 import writeLog from './helpers/writeLog';
 import { getValidVideoRegex, getValidSubtitleRegex } from '../shared/utils';
 import { mouse } from './helpers/mouse';
+import Menu from './menu/Menu';
 
 // requestSingleInstanceLock is not going to work for mas
 // https://github.com/electron-userland/electron-packager/issues/923
@@ -55,6 +56,7 @@ if (process.env.NODE_ENV !== 'development') {
 
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 
+let menu = null;
 let mainWindow = null;
 let aboutWindow = null;
 let preferenceWindow = null;
@@ -577,6 +579,7 @@ function createWindow() {
   mainWindow.on('closed', () => {
     ipcMain.removeAllListeners();
     mainWindow = null;
+    menu.setMainWindow(null);
   });
 
   mainWindow.once('ready-to-show', () => {
@@ -749,6 +752,7 @@ if (process.platform === 'darwin') {
 }
 
 app.on('ready', () => {
+  menu = new Menu();
   createWindow();
   app.setName('SPlayer');
   globalShortcut.register('CmdOrCtrl+Shift+I+O+P', () => {
@@ -769,6 +773,13 @@ app.on('window-all-closed', () => {
   // if (process.platform !== 'darwin') {
   // }
   app.quit();
+});
+
+app.on('menu-create-main-window', (e, menuItem, id) => {
+  console.log(e, menuItem, id);
+  createWindow();
+  mainWindow.webContents.send(`menu-item-${id}`, menuItem);
+  menu.setMainWindow(mainWindow);
 });
 
 app.on('activate', () => {
