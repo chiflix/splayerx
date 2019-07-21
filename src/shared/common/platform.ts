@@ -3,7 +3,7 @@ let isWindows = false;
 let isMacintosh = false;
 let isLinux = false;
 
-export const IsElectronRenderer = (typeof process !== 'undefined' && typeof process.versions !== 'undefined' && typeof process.versions.electron !== 'undefined' && process.type === 'renderer');
+const isElectronRenderer = (typeof process !== 'undefined' && typeof process.versions !== 'undefined' && typeof process.versions.electron !== 'undefined' && process.type === 'renderer');
 
 // OS detection
 if (typeof navigator === 'object' && !isElectronRenderer) {
@@ -19,3 +19,4 @@ if (typeof navigator === 'object' && !isElectronRenderer) {
 export const IsWindows = isWindows;
 export const IsMacintosh = isMacintosh;
 export const IsLinux = isLinux;
+export const IsElectronRenderer = isElectronRenderer;
