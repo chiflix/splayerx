@@ -408,79 +408,6 @@ function registerMainWindowEvent(mainWindow) {
     mediaInfo(mediaInfoQueue[0], callback);
   }
 
-  function createAbout() {
-    const aboutWindowOptions = {
-      useContentSize: true,
-      frame: false,
-      titleBarStyle: 'none',
-      width: 190,
-      height: 280,
-      transparent: true,
-      resizable: false,
-      show: false,
-      webPreferences: {
-        webSecurity: false,
-        nodeIntegration: true,
-        experimentalFeatures: true,
-      },
-      acceptFirstMouse: true,
-      fullscreenable: false,
-      maximizable: false,
-      minimizable: false,
-    };
-    if (!aboutWindow) {
-      aboutWindow = new BrowserWindow(aboutWindowOptions);
-      // 如果播放窗口顶置，打开关于也顶置
-      if (mainWindow.isAlwaysOnTop()) {
-        aboutWindow.setAlwaysOnTop(true);
-      }
-      aboutWindow.loadURL(`${aboutURL}`);
-      aboutWindow.on('closed', () => {
-        aboutWindow = null;
-      });
-    }
-    aboutWindow.once('ready-to-show', () => {
-      aboutWindow.show();
-    });
-  }
-  function createPreference() {
-    const preferenceWindowOptions = {
-      useContentSize: true,
-      frame: false,
-      titleBarStyle: 'none',
-      width: 540,
-      height: 426,
-      transparent: true,
-      resizable: false,
-      show: false,
-      webPreferences: {
-        webSecurity: false,
-        nodeIntegration: true,
-        experimentalFeatures: true,
-      },
-      acceptFirstMouse: true,
-      fullscreenable: false,
-      maximizable: false,
-      minimizable: false,
-    };
-    if (!preferenceWindow) {
-      preferenceWindow = new BrowserWindow(preferenceWindowOptions);
-      // 如果播放窗口顶置，打开首选项也顶置
-      if (mainWindow.isAlwaysOnTop()) {
-        preferenceWindow.setAlwaysOnTop(true);
-      }
-      preferenceWindow.loadURL(`${preferenceURL}`);
-      preferenceWindow.on('closed', () => {
-        preferenceWindow = null;
-      });
-    } else {
-      preferenceWindow.focus();
-    }
-    preferenceWindow.once('ready-to-show', () => {
-      preferenceWindow.show();
-    });
-  }
-
   ipcMain.on('mediaInfo', (event, path) => {
     if (mediaInfoQueue.length === 0) {
       mediaInfoQueue.push(path);
@@ -514,8 +441,6 @@ function registerMainWindowEvent(mainWindow) {
     if (!log) return;
     writeLog(level, log);
   });
-  ipcMain.on('add-windows-about', createAbout);
-  ipcMain.on('add-preference', createPreference);
   ipcMain.on('need-to-restore', () => {
     needToRestore = true;
     markNeedToRestore();
@@ -575,6 +500,7 @@ function createWindow() {
     `${mainWindow.webContents.getUserAgent().replace(/Electron\S+/i, '')
     } SPlayerX@2018 ${os.platform()} ${os.release()} Version ${app.getVersion()}`,
   );
+  menu.setMainWindow(mainWindow);
 
   mainWindow.on('closed', () => {
     ipcMain.removeAllListeners();
@@ -775,11 +701,86 @@ app.on('window-all-closed', () => {
   app.quit();
 });
 
+function createAbout() {
+  const aboutWindowOptions = {
+    useContentSize: true,
+    frame: false,
+    titleBarStyle: 'none',
+    width: 190,
+    height: 280,
+    transparent: true,
+    resizable: false,
+    show: false,
+    webPreferences: {
+      webSecurity: false,
+      nodeIntegration: true,
+      experimentalFeatures: true,
+    },
+    acceptFirstMouse: true,
+    fullscreenable: false,
+    maximizable: false,
+    minimizable: false,
+  };
+  if (!aboutWindow) {
+    aboutWindow = new BrowserWindow(aboutWindowOptions);
+    // 如果播放窗口顶置，打开关于也顶置
+    if (mainWindow.isAlwaysOnTop()) {
+      aboutWindow.setAlwaysOnTop(true);
+    }
+    aboutWindow.loadURL(`${aboutURL}`);
+    aboutWindow.on('closed', () => {
+      aboutWindow = null;
+    });
+  }
+  aboutWindow.once('ready-to-show', () => {
+    aboutWindow.show();
+  });
+}
+function createPreference() {
+  const preferenceWindowOptions = {
+    useContentSize: true,
+    frame: false,
+    titleBarStyle: 'none',
+    width: 540,
+    height: 426,
+    transparent: true,
+    resizable: false,
+    show: false,
+    webPreferences: {
+      webSecurity: false,
+      nodeIntegration: true,
+      experimentalFeatures: true,
+    },
+    acceptFirstMouse: true,
+    fullscreenable: false,
+    maximizable: false,
+    minimizable: false,
+  };
+  if (!preferenceWindow) {
+    preferenceWindow = new BrowserWindow(preferenceWindowOptions);
+    // 如果播放窗口顶置，打开首选项也顶置
+    if (mainWindow.isAlwaysOnTop()) {
+      preferenceWindow.setAlwaysOnTop(true);
+    }
+    preferenceWindow.loadURL(`${preferenceURL}`);
+    preferenceWindow.on('closed', () => {
+      preferenceWindow = null;
+    });
+  } else {
+    preferenceWindow.focus();
+  }
+  preferenceWindow.once('ready-to-show', () => {
+    preferenceWindow.show();
+  });
+}
+
+app.on('add-preference', createPreference);
+app.on('add-windows-about', createAbout);
+
 app.on('menu-create-main-window', (e, menuItem, id) => {
   console.log(e, menuItem, id);
   createWindow();
   mainWindow.webContents.send(`menu-item-${id}`, menuItem);
-  menu.setMainWindow(mainWindow);
 });
 
 app.on('activate', () => {

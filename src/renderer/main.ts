@@ -43,6 +43,7 @@ import { VueDevtools } from './plugins/vueDevtools.dev';
 import { SubtitleControlListItem, Type } from './interfaces/ISubtitle';
 import { getValidVideoRegex, getValidSubtitleRegex } from '../shared/utils';
 import { PlaylistItem } from './interfaces/IDB';
+import MenuService from './services/menu/MenuService';
 
 // causing callbacks-registry.js 404 error. disable temporarily
 // require('source-map-support').install();
@@ -1387,10 +1388,10 @@ new Vue({
       return menuRecentData;
     },
     async refreshMenu() {
-      this.menuOperationLock = true;
-      const menu = this.$electron.remote.Menu.getApplicationMenu();
-      if (menu) menu.clear();
-      await this.createMenu();
+      // this.menuOperationLock = true;
+      // const menu = this.$electron.remote.Menu.getApplicationMenu();
+      // if (menu) menu.clear();
+      // await this.createMenu();
     },
     windowRotate() {
       this.$store.dispatch('windowRotate90Deg');
@@ -1442,7 +1443,11 @@ new Vue({
     // https://github.com/electron/electron/issues/3609
     // Disable Zooming
     this.$electron.webFrame.setVisualZoomLevelLimits(1, 1);
-    this.createMenu();
+    this.menu = new MenuService();
+    this.menu.on('menu-item-file.open', () => {
+      console.log('open');
+    });
+    // this.createMenu();
     this.$bus.$on('new-file-open', this.refreshMenu);
     // TODO: Setup user identity
     this.$storage.get('user-uuid', (err: Error, userUUID: string) => {
