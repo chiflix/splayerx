@@ -5,6 +5,7 @@ import { times, padStart, sortBy } from 'lodash';
 import { sep, basename, join } from 'path';
 import { ensureDir } from 'fs-extra';
 import { remote } from 'electron';
+// @ts-ignore
 import { promises as fsPromises } from 'fs';
 // @ts-ignore
 import nzh from 'nzh';
