@@ -16,7 +16,9 @@
     "build:mas": "scripts/masbuild.sh mas",
     "build:mas-dev": "scripts/masbuild.sh mas-dev",
     "build:clean": "cross-env BUILD_TARGET=clean node .electron-vue/build.js",
-    "dev": "node .electron-vue/dev-runner.js",
+    "start": "npm run stage",
+    "dev": "cross-env SAGI_API=sagi-api:8443 node .electron-vue/dev-runner.js",
+    "stage": "node .electron-vue/dev-runner.js",
     "e2e": "npm run pack && electron-mocha test/e2e",
     "install-app-deps": "electron-builder install-app-deps",
     "lint": "eslint --ext .ts,.js,.vue -f ./node_modules/eslint-friendly-formatter src test",
@@ -30,8 +32,8 @@
     "postinstall": "node ./scripts/postinstall.js"
   },
   "_moduleAliases": {
-    "electron"  : "@chiflix/electron",
-    "grpc": "@grpc/grpc-js"
+    "electron": "node_modules/@chiflix/electron",
+    "grpc": "node_modules/@grpc/grpc-js"
   },
   "dependencies": {
     "@grpc/grpc-js": "^0.2.0",
@@ -105,7 +107,7 @@
     "@babel/plugin-syntax-import-meta": "^7.0.0",
     "@babel/preset-env": "^7.0.0",
     "@babel/register": "^7.0.0",
-    "@chiflix/electron": "5.0.6",
+    "@chiflix/electron": "5.0.7",
     "@sentry/webpack-plugin": "^1.6.2",
     "@types/chai": "^4.1.7",
     "@types/lodash": "^4.14.134",

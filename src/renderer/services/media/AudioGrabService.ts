@@ -24,12 +24,7 @@ import { AITaskInfo } from '@/interfaces/IMediaStorable';
 import MediaStorageService, { mediaStorageService } from '../storage/MediaStorageService';
 import { TranscriptInfo } from '../subtitle';
 
-let endpoint = '';
-if (process.env.NODE_ENV === 'production') {
-  endpoint = 'apis.sagittarius.ai:8443';
-} else {
-  endpoint = 'apis.stage.sagittarius.ai:8443';
-}
+const endpoint = process.env.SAGI_API as string;
 
 enum Status {
   Grab = 'grab',
@@ -87,9 +82,9 @@ class AudioGrabService extends EventEmitter {
 
   public translationEndTime: number;
 
-  public loopTimer: NodeJS.Timeout;
+  public loopTimer: NodeJS.Timer;
 
-  public timeoutTimer: NodeJS.Timeout;
+  public timeoutTimer: NodeJS.Timer;
 
   public grabTime: number;
 

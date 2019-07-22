@@ -14,14 +14,13 @@ import { TrainngClient } from 'sagi-api/training/v1/training_grpc_pb';
 import { SagiSubtitlePayload } from '@/services/subtitle';
 import { log } from './Log';
 
-class Sagi {
+export class Sagi {
+  public static get endpoint() {
+    return process.env.SAGI_API as string;
+  }
+
   private creds: unknown;
 
-  private endpoint = process.env.NODE_ENV === 'production'
-    ? 'apis.sagittarius.ai:8443'
-    : 'apis.stage.sagittarius.ai:8443';
-
-  // '127.0.0.1:8443'; // uncomment this when debuging
   public constructor() {
     const sslCreds = credentials.createSsl(
       // How to access resources with fs see:
@@ -51,7 +50,7 @@ class Sagi {
     options: MediaTranslationRequest.AsObject,
   ): Promise<TranscriptInfo.AsObject[]> {
     const { mediaIdentity, languageCode, hints } = options;
-    const client = new TranslationClient(this.endpoint, this.creds);
+    const client = new TranslationClient(Sagi.endpoint, this.creds);
     const req = new MediaTranslationRequest();
     req.setMediaIdentity(mediaIdentity);
     req.setLanguageCode(languageCode);
@@ -68,7 +67,7 @@ class Sagi {
 
   public getTranscript(options: TranscriptRequest.AsObject): Promise<SagiSubtitlePayload> {
     const { transcriptIdentity } = options;
-    const client = new TranslationClient(this.endpoint, this.creds);
+    const client = new TranslationClient(Sagi.endpoint, this.creds);
     const req = new TranscriptRequest();
     req.setTranscriptIdentity(transcriptIdentity);
     return new Promise((resolve, reject) => {
@@ -84,7 +83,7 @@ class Sagi {
     const {
       mediaIdentity, languageCode, format, playedTime, totalTime, delay, hints, payload,
     } = options;
-    const client = new TrainngClient(this.endpoint, this.creds);
+    const client = new TrainngClient(Sagi.endpoint, this.creds);
     const req = new TrainingData();
     req.setMediaIdentity(mediaIdentity);
     req.setLanguageCode(languageCode);
@@ -106,7 +105,7 @@ class Sagi {
     const {
       mediaIdentity, languageCode, format, playedTime, totalTime, delay, hints, transcriptIdentity,
     } = options;
-    const client = new TrainngClient(this.endpoint, this.creds);
+    const client = new TrainngClient(Sagi.endpoint, this.creds);
     const req = new TrainingData();
     req.setMediaIdentity(mediaIdentity);
     req.setLanguageCode(languageCode);
@@ -126,7 +125,7 @@ class Sagi {
 
   // check sagi-api health, return UNKNOWN(0), SERVING(1) or XXXXX
   public healthCheck(): Promise<HealthCheckResponse.AsObject> {
-    const client = new HealthClient(this.endpoint, this.creds);
+    const client = new HealthClient(Sagi.endpoint, this.creds);
     return new Promise((resolve, reject) => {
       client.check(new HealthCheckRequest(), (err, response) => {
         if (err) reject(err);
