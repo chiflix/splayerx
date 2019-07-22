@@ -105,6 +105,8 @@
     },
     "help": {
       "name": "Help",
+      "feedback": "Feedback",
+      "homepage": "Website",
       "splayerxHelp": "Help",
       "shortCuts": "Shortcuts List",
       "crashReportLocation": "Show Crash Reports",
@@ -113,7 +115,6 @@
     "playback": {
       "backwardL": "Step Backward -60s",
       "backwardS": "Step Backward -5s",
-      "windowRotate": "Rotate 90° Clockwise",
       "captureScreen": "Capture Screen",
       "captureVideoClip": "Capture Video Clip",
       "decreasePlaybackSpeed": "Decrease Playback Speed",
@@ -121,7 +122,6 @@
       "forwardS": "Step Forward +5s",
       "fullScreen": "Full Screen",
       "increasePlaybackSpeed": "Increase Playback Speed",
-      "keepPlayingWindowFront": "Float When Playing",
       "name": "Playback",
       "pause": "Pause",
       "play": "Play",
@@ -133,10 +133,8 @@
     },
     "splayerx": {
       "about": "About SPlayer",
-      "feedback": "Feedback",
       "hide": "Hide",
       "hideOthers": "Hide Others",
-      "homepage": "Website",
       "preferences": "Preferences",
       "quit": "Quit SPlayer",
       "showAll": "Show All"
@@ -183,6 +181,8 @@
       "yes": "yes"
     },
     "window": {
+      "windowRotate": "Rotate 90° Clockwise",
+      "keepPlayingWindowFront": "Float When Playing",
       "backToLandingView": "Back to Launching Page",
       "bossKey": "Boss Key",
       "doubleSize": "200%",

@@ -44,6 +44,8 @@ import { SubtitleControlListItem, Type } from './interfaces/ISubtitle';
 import { getValidVideoRegex, getValidSubtitleRegex } from '../shared/utils';
 import { PlaylistItem } from './interfaces/IDB';
 import MenuService from './services/menu/MenuService';
+import { recentPlayService } from '@/services/media/RecentPlayService';
+
 
 // causing callbacks-registry.js 404 error. disable temporarily
 // require('source-map-support').install();
@@ -179,111 +181,6 @@ new Vue({
       wheelDirection: iGT.GET_WHEEL_DIRECTION,
       isWheelEnd: iGT.GET_WHEEL_STOPPED,
     }),
-    // menu
-    darwinPlayback() {
-      return [
-        {
-          label: this.$t('msg.playback.forwardL'),
-          accelerator: 'Up',
-          click: () => {
-            this.$bus.$emit('seek', videodata.time + 60);
-          },
-        },
-        {
-          label: this.$t('msg.playback.backwardL'),
-          accelerator: 'Down',
-          click: () => {
-            this.$bus.$emit('seek', videodata.time - 60);
-          },
-        },
-      ];
-    },
-    winPlayback() {
-      return [
-        {
-          label: this.$t('msg.playback.forwardL'),
-          accelerator: 'Alt+Right',
-          click: () => {
-            this.$bus.$emit('seek', videodata.time + 60);
-          },
-        },
-        {
-          label: this.$t('msg.playback.backwardL'),
-          accelerator: 'Alt+Left',
-          click: () => {
-            this.$bus.$emit('seek', videodata.time - 60);
-          },
-        },
-      ];
-    },
-    winVolume() {
-      return [
-        {
-          label: this.$t('msg.audio.increaseVolume'),
-          accelerator: 'Up',
-          id: 'inVolume',
-          click: () => {
-            this.$ga.event('app', 'volume', 'keyboard');
-            this.$store.dispatch(videoActions.INCREASE_VOLUME);
-            this.$bus.$emit('change-volume-menu');
-          },
-        },
-        {
-          label: this.$t('msg.audio.decreaseVolume'),
-          accelerator: 'Down',
-          id: 'deVolume',
-          click: () => {
-            this.$ga.event('app', 'volume', 'keyboard');
-            this.$store.dispatch(videoActions.DECREASE_VOLUME);
-            this.$bus.$emit('change-volume-menu');
-          },
-        },
-      ];
-    },
-    darwinVolume() {
-      return [
-        {
-          label: this.$t('msg.audio.increaseVolume'),
-          accelerator: '=',
-          id: 'inVolume',
-          click: () => {
-            this.$ga.event('app', 'volume', 'keyboard');
-            this.$store.dispatch(videoActions.INCREASE_VOLUME);
-            this.$bus.$emit('change-volume-menu');
-          },
-        },
-        {
-          label: this.$t('msg.audio.decreaseVolume'),
-          accelerator: '-',
-          id: 'deVolume',
-          click: () => {
-            this.$ga.event('app', 'volume', 'keyboard');
-            this.$store.dispatch(videoActions.DECREASE_VOLUME);
-            this.$bus.$emit('change-volume-menu');
-          },
-        },
-      ];
-    },
-    updateFullScreen() {
-      if (this.isFullScreen) {
-        return {
-          label: this.$t('msg.window.exitFullScreen'),
-          accelerator: 'F',
-          click: () => {
-            this.$bus.$emit('off-fullscreen');
-            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
-          },
-        };
-      }
-      return {
-        label: this.$t('msg.window.enterFullScreen'),
-        accelerator: 'F',
-        click: () => {
-          this.$bus.$emit('to-fullscreen');
-          this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [true]);
-        },
-      };
-    },
     updateSecondarySub() {
       if (this.enabledSecondarySub) {
         return {
@@ -302,34 +199,13 @@ new Vue({
         },
       };
     },
-    updatePlayOrPause() {
-      if (!this.paused) {
-        return {
-          label: `${this.$t('msg.playback.pause')}`,
-          accelerator: 'Space',
-          click: () => {
-            this.$bus.$emit('toggle-playback');
-          },
-        };
-      }
-      return {
-        label: `${this.$t('msg.playback.play')}`,
-        accelerator: 'Space',
-        click: () => {
-          this.$bus.$emit('toggle-playback');
-        },
-      };
-    },
     currentRouteName() {
       return this.$route.name;
     },
   },
   watch: {
     playlistDisplayState(val: boolean) {
-      if (this.menu) {
-        this.menu.getMenuItemById('KeyboardLeft').enabled = !val;
-        this.menu.getMenuItemById('KeyboardRight').enabled = !val;
-      }
+      this.menuService.resolvePlaylistDisplayState(val);
     },
     displayLanguage(val) {
       if (messages[val]) {
@@ -339,32 +215,29 @@ new Vue({
       }
       this.refreshMenu();
     },
-    singleCycle(val) {
+    singleCycle(val: boolean) {
+      this.menuService.resolveSingleCycle(val);
       if (this.menu) {
-        this.menu.getMenuItemById('singleCycle').checked = val;
+        this.menuService.getMenuItemById('singleCycle').checked = val;
       }
     },
     enabledSecondarySub(val) {
       if (this.menu) {
         this.list.forEach((item: SubtitleControlListItem) => {
-          this.menu.getMenuItemById(`secondSub${item.id}`).enabled = val;
+          this.menuService.getMenuItemById(`secondSub${item.id}`).enabled = val;
         });
-        this.menu.getMenuItemById('secondSub-1').enabled = val;
+        this.menuService.getMenuItemById('secondSub-1').enabled = val;
       }
       this.refreshMenu();
     },
     currentRouteName(val) {
       this.menuService.menuStateControl(val);
     },
-    volume(val) {
-      if (this.menu) {
-        this.menu.getMenuItemById('mute').checked = val <= 0;
-      }
+    volume(val: number) {
+      this.menuService.resolveMute(val <= 0);
     },
-    muted(val) {
-      if (this.menu && val) {
-        this.menu.getMenuItemById('mute').checked = val;
-      }
+    muted(val: boolean) {
+      this.menuService.resolveMute(val);
     },
     list(val: SubtitleControlListItem[], oldval: SubtitleControlListItem[]) {
       if (val.length !== oldval.length) {
@@ -373,23 +246,23 @@ new Vue({
     },
     primarySubtitleId(id: string) {
       if (this.menu) {
-        this.menu.getMenuItemById('increasePrimarySubDelay').enabled = !!id;
-        this.menu.getMenuItemById('decreasePrimarySubDelay').enabled = !!id;
-        if (id && this.menu.getMenuItemById(`sub${id}`)) {
-          this.menu.getMenuItemById(`sub${id}`).checked = true;
+        this.menuService.getMenuItemById('increasePrimarySubDelay').enabled = !!id;
+        this.menuService.getMenuItemById('decreasePrimarySubDelay').enabled = !!id;
+        if (id && this.menuService.getMenuItemById(`sub${id}`)) {
+          this.menuService.getMenuItemById(`sub${id}`).checked = true;
         } else if (!id) {
-          this.menu.getMenuItemById('sub-1').checked = true;
+          this.menuService.getMenuItemById('sub-1').checked = true;
         }
       }
     },
     secondarySubtitleId(id: string) {
       if (this.menu) {
-        this.menu.getMenuItemById('increaseSecondarySubDelay').enabled = !!id;
-        this.menu.getMenuItemById('decreaseSecondarySubDelay').enabled = !!id;
-        if (id && this.menu.getMenuItemById(`secondSub${id}`)) {
-          this.menu.getMenuItemById(`secondSub${id}`).checked = true;
+        this.menuService.getMenuItemById('increaseSecondarySubDelay').enabled = !!id;
+        this.menuService.getMenuItemById('decreaseSecondarySubDelay').enabled = !!id;
+        if (id && this.menuService.getMenuItemById(`secondSub${id}`)) {
+          this.menuService.getMenuItemById(`secondSub${id}`).checked = true;
         } else if (!id) {
-          this.menu.getMenuItemById('secondSub-1').checked = true;
+          this.menuService.getMenuItemById('secondSub-1').checked = true;
         }
       }
     },
@@ -399,8 +272,8 @@ new Vue({
       }
       if (this.menu) {
         this.audioTrackList.forEach((item: Electron.MenuItem, index: number) => {
-          if (item.enabled === true && this.menu && this.menu.getMenuItemById(`track${index}`)) {
-            this.menu.getMenuItemById(`track${index}`).checked = true;
+          if (item.enabled === true && this.menu && this.menuService.getMenuItemById(`track${index}`)) {
+            this.menuService.getMenuItemById(`track${index}`).checked = true;
           }
         });
       }
@@ -412,7 +285,7 @@ new Vue({
       const browserWindow = this.$electron.remote.getCurrentWindow();
       if (val && browserWindow.isAlwaysOnTop()) {
         browserWindow.setAlwaysOnTop(false);
-      } else if (!val && this.menu && this.menu.getMenuItemById('windowFront').checked) {
+      } else if (!val && this.menu && this.menuService.getMenuItemById('windowFront').checked) {
         browserWindow.setAlwaysOnTop(true);
       }
       // 因为老板键，pause 比 isHiddenByBossKey慢，所以在paused watcher里面
@@ -453,7 +326,7 @@ new Vue({
     },
     ableToPushCurrentSubtitle(val) {
       if (this.menu) {
-        this.menu.getMenuItemById('uploadSelectedSubtitle').enabled = val;
+        this.menuService.getMenuItemById('uploadSelectedSubtitle').enabled = val;
       }
     },
     originSrc(newVal) {
@@ -527,10 +400,38 @@ new Vue({
       changePrimarySubDelay: SubtitleManager.alterPrimaryDelay,
       changeSecondarySubDelay: SubtitleManager.alterSecondaryDelay,
     }),
+    async initializeMenuSettings() {
+      this.menuService.menuStateControl(this.currentRouteName);
+
+      await this.menuService.addRecentPlayItems();
+
+      this.menuService.getMenuItemById('subtitle.increasePrimarySubDelay').enabled = !!this.primarySubtitleId;
+      this.menuService.getMenuItemById('subtitle.decreasePrimarySubDelay').enabled = !!this.primarySubtitleId;
+      this.menuService.getMenuItemById('subtitle.increaseSecondarySubDelay').enabled = !!this.secondarySubtitleId;
+      this.menuService.getMenuItemById('subtitle.decreaseSecondarySubDelay').enabled = !!this.secondarySubtitleId;
+      this.menuService.getMenuItemById('subtitle.uploadSelectedSubtitle').enabled = this.ableToPushCurrentSubtitle;
+
+      this.audioTrackList.forEach((item: Electron.MenuItem, index: number) => {
+        if (item.enabled === true) {
+          this.menuService.getMenuItemById(`track${index}`).checked = true;
+        }
+      });
+      this.menuService.getMenuItemById('windowFront').checked = this.topOnWindow;
+      this.list.forEach((item: SubtitleControlListItem) => {
+        if (item.id === this.primarySubtitleId && this.menuService.getMenuItemById(`sub${item.id}`)) {
+          this.menuService.getMenuItemById(`sub${item.id}`).checked = true;
+        }
+        if (item.id === this.secondarySubtitleId && this.menuService.getMenuItemById(`secondSub${item.id}`)) {
+          this.menuService.getMenuItemById(`secondSub${item.id}`).checked = true;
+        }
+        this.menuService.getMenuItemById(`secondSub${item.id}`).enabled = this.enabledSecondarySub;
+      });
+      this.menuService.getMenuItemById('secondSub-1').enabled = this.enabledSecondarySub;
+      this.menuOperationLock = false;
+    },
     registeMenuActions() {
       const { app, dialog } = this.$electron.remote;
-      this.menuService.on('file.open', (e: Event, menuItem: Electron.MenuItem) => {
-        console.log('open1', menuItem);
+      this.menuService.on('file.open', () => {
         if (this.defaultDir) {
           this.openFilesByDialog();
         } else {
@@ -544,6 +445,9 @@ new Vue({
         app.clearRecentDocuments();
         this.$bus.$emit('clean-landingViewItems');
         this.refreshMenu();
+      });
+      this.menuService.on('playback.play', () => {
+        this.$bus.$emit('toggle-playback');
       });
       this.menuService.on('playback.forwardS', () => {
         this.$bus.$emit('seek', videodata.time + 5);
@@ -1292,28 +1196,28 @@ new Vue({
         if (!this.menu) return;
         this.menuStateControl(this.currentRouteName);
 
-        this.menu.getMenuItemById('increasePrimarySubDelay').enabled = !!this.primarySubtitleId;
-        this.menu.getMenuItemById('decreasePrimarySubDelay').enabled = !!this.primarySubtitleId;
-        this.menu.getMenuItemById('increaseSecondarySubDelay').enabled = !!this.secondarySubtitleId;
-        this.menu.getMenuItemById('decreaseSecondarySubDelay').enabled = !!this.secondarySubtitleId;
-        this.menu.getMenuItemById('uploadSelectedSubtitle').enabled = this.ableToPushCurrentSubtitle;
+        this.menuService.getMenuItemById('increasePrimarySubDelay').enabled = !!this.primarySubtitleId;
+        this.menuService.getMenuItemById('decreasePrimarySubDelay').enabled = !!this.primarySubtitleId;
+        this.menuService.getMenuItemById('increaseSecondarySubDelay').enabled = !!this.secondarySubtitleId;
+        this.menuService.getMenuItemById('decreaseSecondarySubDelay').enabled = !!this.secondarySubtitleId;
+        this.menuService.getMenuItemById('uploadSelectedSubtitle').enabled = this.ableToPushCurrentSubtitle;
 
         this.audioTrackList.forEach((item: Electron.MenuItem, index: number) => {
           if (item.enabled === true) {
-            this.menu.getMenuItemById(`track${index}`).checked = true;
+            this.menuService.getMenuItemById(`track${index}`).checked = true;
           }
         });
-        this.menu.getMenuItemById('windowFront').checked = this.topOnWindow;
+        this.menuService.getMenuItemById('windowFront').checked = this.topOnWindow;
         this.list.forEach((item: SubtitleControlListItem) => {
-          if (item.id === this.primarySubtitleId && this.menu.getMenuItemById(`sub${item.id}`)) {
-            this.menu.getMenuItemById(`sub${item.id}`).checked = true;
+          if (item.id === this.primarySubtitleId && this.menuService.getMenuItemById(`sub${item.id}`)) {
+            this.menuService.getMenuItemById(`sub${item.id}`).checked = true;
           }
-          if (item.id === this.secondarySubtitleId && this.menu.getMenuItemById(`secondSub${item.id}`)) {
-            this.menu.getMenuItemById(`secondSub${item.id}`).checked = true;
+          if (item.id === this.secondarySubtitleId && this.menuService.getMenuItemById(`secondSub${item.id}`)) {
+            this.menuService.getMenuItemById(`secondSub${item.id}`).checked = true;
           }
-          this.menu.getMenuItemById(`secondSub${item.id}`).enabled = this.enabledSecondarySub;
+          this.menuService.getMenuItemById(`secondSub${item.id}`).enabled = this.enabledSecondarySub;
         });
-        this.menu.getMenuItemById('secondSub-1').enabled = this.enabledSecondarySub;
+        this.menuService.getMenuItemById('secondSub-1').enabled = this.enabledSecondarySub;
         this.menuOperationLock = false;
       })
         .catch((err: Error) => {
@@ -1348,15 +1252,15 @@ new Vue({
           this.updateSubtitleType(isFirstSubtitleType);
           if (isFirstSubtitleType) {
             this.changeFirstSubtitle(item.id);
-            if (this.menu && this.menu.getMenuItemById(`secondSub${item.id}`)) {
-              this.menu.getMenuItemById(`secondSub${item.id}`).checked = false;
-              this.menu.getMenuItemById('secondSub-1').checked = true;
+            if (this.menu && this.menuService.getMenuItemById(`secondSub${item.id}`)) {
+              this.menuService.getMenuItemById(`secondSub${item.id}`).checked = false;
+              this.menuService.getMenuItemById('secondSub-1').checked = true;
             }
           } else {
             this.changeSecondarySubtitle(item.id);
-            if (this.menu && this.menu.getMenuItemById(`sub${item.id}`)) {
-              this.menu.getMenuItemById(`sub${item.id}`).checked = false;
-              this.menu.getMenuItemById('sub-1').checked = true;
+            if (this.menu && this.menuService.getMenuItemById(`sub${item.id}`)) {
+              this.menuService.getMenuItemById(`sub${item.id}`).checked = false;
+              this.menuService.getMenuItemById('sub-1').checked = true;
             }
           }
         },
@@ -1456,138 +1360,8 @@ new Vue({
       }
       return path.toString().replace(/^file\/\//, '');
     },
-    updateRecentPlay() {
-      const recentMenuTemplate = {
-        label: this.$t('msg.file.openRecent'),
-        id: 'recent-play',
-        submenu: [1, 2, 3, 4, 5, 6, 7, 8, 9].map(index => ({
-          id: `recent-${index}`,
-          visible: false,
-          label: '',
-        })),
-      };
-      return this.infoDB.sortedResult('recent-played', 'lastOpened', 'prev').then(async (playlists: PlaylistItem[]) => {
-        const data = [];
-        /* eslint-disable */
-        for (const playlist of playlists) {
-          const mediaItem = await this.infoDB.get('media-item', playlist.items[playlist.playedIndex]);
-          data.push(mediaItem);
-        }
-        // let menuRecentData: Map<string, any> = new Map();
-        const menuRecentData: Map<string, any> = this.processRecentPlay(data) || new Map();
-        recentMenuTemplate.submenu.forEach((element, index) => {
-          const value = menuRecentData.get(element.id);
-          if (value.label !== '') {
-            recentMenuTemplate.submenu
-              .splice(index, 1, this.updateRecentItem(element.id, value));
-          }
-        });
-        return recentMenuTemplate;
-      }).catch(() => recentMenuTemplate);
-    },
-    menuStateControl(routeName: string) {
-      const inPlayingView = routeName === 'playing-view';
-      const inWelcomeView = routeName === 'welcome-view' || routeName === 'language-setting';
-      if (!this.menu) return;
-      let menuItem;
-      menuItem = this.menu.getMenuItemById('playback');
-      if (menuItem) {
-        menuItem.submenu.items.forEach((item: any) => {
-          item.enabled = inPlayingView;
-        });
-      }
-      menuItem = this.menu.getMenuItemById('audio');
-      if (menuItem) {
-        menuItem.submenu.items.forEach((item: any) => {
-          item.enabled = inPlayingView;
-        });
-      }
-      menuItem = this.menu.getMenuItemById('subtitle');
-      if (menuItem) {
-        menuItem.submenu.items.forEach((item: any) => {
-          item.submenu && item.submenu.items.forEach((item: any) => {
-            item.enabled = inPlayingView;
-          });
-          item.enabled = inPlayingView;
-        });
-      }
-      menuItem = this.menu.getMenuItemById('window');
-      if (menuItem) {
-        menuItem.submenu.items.forEach((item: any) => {
-          item.enabled = !inWelcomeView;
-        });
-      }
-      menuItem = this.menu.getMenuItemById('file');
-      if (menuItem) {
-        menuItem.submenu.items.forEach((item: any) => {
-          item.enabled = !inWelcomeView;
-        });
-      }
-      this.menu.getMenuItemById('preference').enabled = !inWelcomeView;
-      this.menu.getMenuItemById('windowResize1').enabled = inPlayingView;
-      this.menu.getMenuItemById('windowResize2').enabled = inPlayingView;
-      this.menu.getMenuItemById('windowResize3').enabled = inPlayingView;
-      this.menu.getMenuItemById('windowResize4').enabled = inPlayingView;
-      this.menu.getMenuItemById('backToLandingView').enabled = inPlayingView;
-      // windowRotate 菜单状态随着路由状态一起变
-      this.menu.getMenuItemById('windowRotate').enabled = inPlayingView;
-    },
-    processRecentPlay(recentPlayData: Array<any>) {
-      const menuRecentData = new Map([
-        ['recent-1', {
-          label: '',
-          path: '',
-          visible: false,
-        }],
-        ['recent-2', {
-          label: '',
-          path: '',
-          visible: false,
-        }],
-        ['recent-3', {
-          label: '',
-          path: '',
-          visible: false,
-        }],
-        ['recent-4', {
-          label: '',
-          path: '',
-          visible: false,
-        }],
-        ['recent-5', {
-          label: '',
-          path: '',
-          visible: false,
-        }],
-        ['recent-6', {
-          label: '',
-          path: '',
-          visible: false,
-        }],
-        ['recent-7', {
-          label: '',
-          path: '',
-          visible: false,
-        }],
-        ['recent-8', {
-          label: '',
-          path: '',
-          visible: false,
-        }],
-        ['recent-9', {
-          label: '',
-          path: '',
-          visible: false,
-        }],
-      ]);
-      for (let i = 1; i <= recentPlayData.length; i += 1) {
-        menuRecentData.set(`recent-${i}`, {
-          label: this.pathProcess(recentPlayData[i - 1].path.split('/').reverse()[0]),
-          path: recentPlayData[i - 1].path,
-          visible: true,
-        });
-      }
-      return menuRecentData;
+    async updateRecentPlay() {
+      return '';
     },
     async refreshMenu() {
       // this.menuOperationLock = true;
@@ -1647,6 +1421,7 @@ new Vue({
     this.$electron.webFrame.setVisualZoomLevelLimits(1, 1);
     this.menuService = new MenuService();
     this.registeMenuActions();
+    this.initializeMenuSettings();
     // this.createMenu();
     this.$bus.$on('new-file-open', this.refreshMenu);
     // TODO: Setup user identity

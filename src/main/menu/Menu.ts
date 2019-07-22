@@ -8,6 +8,7 @@ import {
 import { IsMacintosh } from '../../shared/common/platform';
 import Locale from '../../shared/common/localize';
 import menuTemplate from './menu.json';
+import { IMenuDisplayInfo } from '../../renderer/interfaces/IRecentPlay';
 
 function separator(): Electron.MenuItem {
   return new MenuItem({ type: 'separator' });
@@ -36,20 +37,17 @@ export default class Menubar {
     this.mainWindow = window;
   }
 
-  public updateMenuItem(id: string, property: string, value: any) {
+  public updateRecentPlay(items: IMenuDisplayInfo[]) {
     if (!this.menubar) this.menubar = Menu.getApplicationMenu() as Electron.Menu;
-    const menuItem = this.menubar.getMenuItemById(id);
-    menuItem[property] = value;
-  }
-
-  public updateSubmenuItem(id: string, enabled: boolean) {
-    if (!this.menubar) this.menubar = Menu.getApplicationMenu() as Electron.Menu;
-    const menuItem = this.menubar.getMenuItemById(id);
-    if (menuItem) {
-      menuItem.submenu.items.forEach((item: Electron.MenuItem) => {
-        item.enabled = enabled;
+    const menuItem = this.menubar.getMenuItemById('file.openRecent');
+    items.forEach(({ id, label }) => {
+      const item = this.createMenuItem(label, () => {
+        if (!this.mainWindow.webContents.isDestroyed()) {
+          this.mainWindow.webContents.send(id.toString());
+        }
       });
-    }
+      menuItem.submenu.append(item);
+    });
   }
 
   private install(): void {
