@@ -128,7 +128,7 @@
       {
         "id": "playback.singleCycle",
         "label": "singleCycle",
-        "type": "checkbox",
+        "type": "checkbox"
       },
       {
         "id": "playback.snapShot",
