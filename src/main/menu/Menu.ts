@@ -303,7 +303,7 @@ export default class Menubar {
     label = this.$t(label);
     if (!click) {
       click = (menuItem: Electron.MenuItem) => {
-        if (!this.mainWindow.webContents.isDestroyed()) {
+        if (this.mainWindow) {
           this.mainWindow.webContents.send(id, menuItem);
         } else {
           app.emit('menu-create-main-window', id, menuItem);
