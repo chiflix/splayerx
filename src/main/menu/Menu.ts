@@ -1,7 +1,23 @@
 import { Menu, MenuItem, app } from 'electron';
+import {
+  MenubarMenuItem,
+  IMenubarMenu,
+  IMenubarMenuItemSubmenu,
+  IMenubarMenuItemSeparator,
+} from './common/Menubar';
 import { IsMacintosh } from '../../shared/common/platform';
 import Locale from '../../shared/common/localize';
-import menuTemplate from './menuId.json';
+import menuTemplate from './menu.json';
+
+function separator(): Electron.MenuItem {
+  return new MenuItem({ type: 'separator' });
+}
+function isSeparator(menuItem: MenubarMenuItem): menuItem is IMenubarMenuItemSeparator {
+  return menuItem.id === 'menubar.separator';
+}
+function isSubmenu(menuItem: MenubarMenuItem): menuItem is IMenubarMenuItemSubmenu {
+  return (menuItem as IMenubarMenuItemSubmenu).submenu !== undefined;
+}
 
 export default class Menubar {
   private oldMenus: Menu[];
@@ -26,11 +42,9 @@ export default class Menubar {
     // TODO@sbatten Remove this when fixed upstream by Electron
     const oldMenu = Menu.getApplicationMenu();
 
-    console.log('oldMenu', oldMenu);
     // If we don't have a menu yet, set it to null to avoid the electron menu.
     // This should only happen on the first launch ever
     if (!oldMenu) {
-      console.log('hey');
       Menu.setApplicationMenu(IsMacintosh ? new Menu() : null);
       return;
     }
@@ -39,13 +53,11 @@ export default class Menubar {
     const menubar = new Menu();
 
     // Mac: Application
-    // let macApplicationMenuItem: Electron.MenuItem;
-    // if (IsMacintosh) {
-    //   const applicationMenu = new Menu();
-    //   macApplicationMenuItem = new MenuItem({ label: 'Splayer', submenu: applicationMenu });
-    //   this.setMacApplicationMenu(applicationMenu);
-    //   menubar.append(macApplicationMenuItem);
-    // }
+    let macApplicationMenuItem: Electron.MenuItem;
+    if (IsMacintosh) {
+      macApplicationMenuItem = this.createMacApplicationMenu();
+      menubar.append(macApplicationMenuItem);
+    }
 
     // File
     const fileMenuItem = this.createFileMenu();
@@ -82,8 +94,6 @@ export default class Menubar {
 
     menubar.append(helpMenuItem);
 
-    console.log('menubar', menubar);
-
     if (menubar.items && menubar.items.length > 0) {
       Menu.setApplicationMenu(menubar);
     } else {
@@ -95,48 +105,105 @@ export default class Menubar {
     return this.locale.$t(msg);
   }
 
+  private createMacApplicationMenu(): Electron.MenuItem {
+    const applicationMenu = new Menu();
+    const about = this.createMenuItem('msg.splayerx.about', () => {
+      app.emit('add-windows-about');
+    }, undefined, true);
+    const preference = this.createMenuItem('msg.splayerx.preferences', () => {
+      app.emit('add-preference');
+    }, 'CmdOrCtrl+,', true);
+
+    const hide = this.createRoleMenuItem('msg.splayerx.hide', 'hide');
+    const hideOthers = this.createRoleMenuItem('msg.splayerx.hideOthers', 'hideothers');
+    const unhide = this.createRoleMenuItem('msg.splayerx.showAll', 'unhide');
+    const quit = this.createRoleMenuItem('msg.splayerx.quit', 'quit');
+
+    const actions = [about];
+    actions.push(...[
+      separator(),
+      preference,
+      separator(),
+      hide,
+      hideOthers,
+      unhide,
+      separator(),
+      quit,
+    ]);
+    actions.forEach(i => applicationMenu.append(i));
+
+    const applicationMenuItem = new MenuItem({ label: this.$t('msg.splayerx.name'), submenu: applicationMenu });
+    return applicationMenuItem;
+  }
+
   private createFileMenu(): Electron.MenuItem {
     const fileMenu = new Menu();
-    this.getMenuItemTemplate('file').forEach((menuid: string) => {
-      const menuItem = this.createMenuItem(`msg.file.${menuid}`);
-      fileMenu.append(menuItem);
-    });
-    const fileMenuItem = new MenuItem({ label: this.$t('msg.file.name'), submenu: fileMenu });
+    const open = this.createMenuItem('msg.file.open', undefined, undefined, true);
+    const openRecent = this.createSubMenuItem('msg.file.openRecent');
+    const clearHistory = this.createMenuItem('msg.file.clearHistory', undefined, undefined, true);
+    const closeWindow = this.createRoleMenuItem('msg.file.closeWindow', 'close');
+
+    const actions = [open];
+    actions.push(...[
+      openRecent,
+      separator(),
+      clearHistory,
+      separator(),
+      closeWindow,
+    ]);
+    actions.forEach(i => fileMenu.append(i));
+
+    const fileMenuItem = new MenuItem({ id: 'file', label: this.$t('msg.file.name'), submenu: fileMenu });
     return fileMenuItem;
   }
 
   private createPlaybackMenu() {
-    const playbackMenu = new Menu();
-    this.getMenuItemTemplate('playback').forEach((menuid: string) => {
-      const menuItem = this.createMenuItem(`msg.playback.${menuid}`);
-      playbackMenu.append(menuItem);
-    });
-    const playbackMenuItem = new MenuItem({ label: this.$t('msg.playback.name'), submenu: playbackMenu });
+    const playbackMenu = this.convertFromMenuItemTemplate('playback');
+    const playbackMenuItem = new MenuItem({ id: 'playback', label: this.$t('msg.playback.name'), submenu: playbackMenu });
     return playbackMenuItem;
   }
 
   private createAudioMenu() {
-    const audioMenu = new Menu();
-    this.getMenuItemTemplate('audio').forEach((menuid: string) => {
-      const menuItem = this.createMenuItem(`msg.audio.${menuid}`);
-      audioMenu.append(menuItem);
-    });
-    const audioMenuItem = new MenuItem({ label: this.$t('msg.audio.name'), submenu: audioMenu });
+    const audioMenu = this.convertFromMenuItemTemplate('audio');
+    const audioMenuItem = new MenuItem({ id: 'audio', label: this.$t('msg.audio.name'), submenu: audioMenu });
     return audioMenuItem;
   }
 
   private createSubtitleMenu() {
-    const subtitleMenu = new Menu();
-    this.getMenuItemTemplate('subtitle').forEach((menuid: string) => {
-      const menuItem = this.createMenuItem(`msg.subtitle.${menuid}`);
-      subtitleMenu.append(menuItem);
-    });
-    const subtitleMenuItem = new MenuItem({ label: this.$t('msg.subtitle.name'), submenu: subtitleMenu });
+    const subtitleMenu = this.convertFromMenuItemTemplate('subtitle');
+    const subtitleMenuItem = new MenuItem({ id: 'subtitle', label: this.$t('msg.subtitle.name'), submenu: subtitleMenu });
     return subtitleMenuItem;
   }
 
   private createMacWindowMenu() {
     const macWindowMenu = new Menu();
+
+    // const about = this.createMenuItem('msg.splayerx.about', () => {
+    //   app.emit('add-windows-about');
+    // }, true);
+    // const preference = this.createMenuItem('msg.splayerx.preference', () => {
+    //   app.emit('add-preference');
+    // }, true);
+    // this.withKeyBinding(preference, 'CmdOrCtrl+,');
+
+    // const hide = this.createRoleMenuItem('msg.splayerx.hide', 'hide');
+    // const hideOthers = this.createRoleMenuItem('msg.splayerx.hideOthers', 'hideothers');
+    // const unhide = this.createRoleMenuItem('msg.splayerx.showAll', 'unhide');
+    // const quit = this.createRoleMenuItem('msg.splayerx.quit', 'quit');
+
+    // const actions = [about];
+    // actions.push(...[
+    //   separator(),
+    //   preference,
+    //   separator(),
+    //   hide,
+    //   hideOthers,
+    //   unhide,
+    //   separator(),
+    //   quit,
+    // ]);
+    // actions.forEach(i => applicationMenu.append(i));
+
     const macWindowMenuItem = new MenuItem({ label: this.$t('msg.window.name'), submenu: macWindowMenu });
     return macWindowMenuItem;
   }
@@ -147,49 +214,97 @@ export default class Menubar {
     return helpMenuItem;
   }
 
+  private createSubMenuItem(
+    label: string,
+    submenu?: Electron.Menu,
+    enabled = true,
+  ): Electron.MenuItem {
+    const id = label.replace(/^msg./g, '');
+    label = this.$t(label);
+    return new MenuItem({
+      id, label, enabled, submenu,
+    });
+  }
+
+  private createRoleMenuItem(
+    label: string,
+    role: ('undo' | 'redo' | 'cut' | 'copy' | 'paste' | 'pasteandmatchstyle' | 'delete' | 'selectall' | 'reload' | 'forcereload' | 'toggledevtools' | 'resetzoom' | 'zoomin' | 'zoomout' | 'togglefullscreen' | 'window' | 'minimize' | 'close' | 'help' | 'about' | 'services' | 'hide' | 'hideothers' | 'unhide' | 'quit' | 'startspeaking' | 'stopspeaking' | 'close' | 'minimize' | 'zoom' | 'front' | 'appMenu' | 'fileMenu' | 'editMenu' | 'viewMenu' | 'windowMenu'),
+    enabled = true,
+  ): Electron.MenuItem {
+    const id = label.replace(/^msg./g, '');
+    label = this.$t(label);
+    return new MenuItem({
+      id, label, enabled, role,
+    });
+  }
+
   private createMenuItem(
     label: string,
     click?: (menuItem: Electron.MenuItem) => void,
-    enabled?: boolean,
+    accelerator?: string,
+    enabled = false,
     checked?: boolean,
   ): Electron.MenuItem {
     const id = label.replace(/^msg./g, '');
     label = this.$t(label);
     if (!click) {
       click = (menuItem: Electron.MenuItem) => {
-        if (this.mainWindow) this.mainWindow.webContents.send(`menu-item-${id}`, menuItem);
+        if (this.mainWindow) this.mainWindow.webContents.send(id, menuItem);
         else {
           app.emit('menu-create-main-window', id, menuItem);
         }
       };
     }
-    if (!enabled) enabled = false;
-    if (!checked) checked = false;
 
     const options: Electron.MenuItemConstructorOptions = {
       label,
       click,
       enabled,
+      accelerator,
     };
 
-    if (checked) {
+    if (checked !== undefined) {
       options.type = 'checkbox';
       options.checked = checked;
     }
     return new MenuItem(options);
   }
 
-  private setMenuById() {
-
-  }
-
-  private getMenuItemTemplate(menu: string) {
+  private getMenuItemTemplate(menu: string): IMenubarMenu {
     return menuTemplate[menu];
   }
-}
 
-function separator(): Electron.MenuItem {
-  return new MenuItem({ type: 'separator' });
+  private convertFromMenuItemTemplate(menu: string): Electron.Menu {
+    const newMenu = new Menu();
+    this.getMenuItemTemplate(menu).items.forEach((menuItem: MenubarMenuItem) => {
+      if (isSeparator(menuItem)) {
+        const item = separator();
+        newMenu.append(item);
+      } else if (isSubmenu(menuItem)) {
+        const item = this.createSubMenuItem(`msg.${menuItem.id}`);
+        newMenu.append(item);
+      } else {
+        let item;
+        if (menuItem.accelerator && menuItem.winAccelerator) {
+          item = this.createMenuItem(
+            `msg.${menuItem.id}`,
+            undefined,
+            IsMacintosh ? menuItem.accelerator : menuItem.winAccelerator,
+            menuItem.enabled,
+          );
+        } else {
+          item = this.createMenuItem(
+            `msg.${menuItem.id}`,
+            undefined,
+            undefined,
+            menuItem.enabled,
+          );
+        }
+        newMenu.append(item);
+      }
+    });
+    return newMenu;
+  }
 }
 
 export const menuService = new Menubar();

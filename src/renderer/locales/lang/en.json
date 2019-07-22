@@ -158,6 +158,8 @@
       "noSubtitle": "Not Found",
       "notToShowSubtitle": "Off",
       "secondarySubtitle": "Secondary Subtitle",
+      "subtitleSetting": "Subtitle Settings",
+      "subtitleDelay": "Subtitle Delay",
       "size1": "Small",
       "size2": "Standard",
       "size3": "Large",
