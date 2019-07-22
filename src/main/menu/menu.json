@@ -5,13 +5,13 @@
         "id": "audio.increaseVolume",
         "label": "increaseVolume",
         "accelerator": "=",
-        "winAccelerator": "Up",
+        "winAccelerator": "Up"
       },
       {
         "id": "audio.decreaseVolume",
         "label": "decreaseVolume",
         "accelerator": "-",
-        "winAccelerator": "Down",
+        "winAccelerator": "Down"
       },
       {
         "id": "audio.mute",
@@ -19,14 +19,14 @@
         "accelerator": "M"
       },
       {
-        "id": "menubar.seperator"
-      }
+        "id": "menubar.separator"
+      },
       {
         "id": "audio.switchAudioTrack",
         "label": "switchAudioTrack",
         "submenu": []
-      },
-    ],
+      }
+    ]
   },
   "file": {
     "open": {
@@ -66,7 +66,7 @@
       {
         "id": "playback.backwardS",
         "label": "backwardS",
-        "accelerator": "Left",
+        "accelerator": "Left"
       },
       {
         "id": "playback.forwardL",
@@ -81,7 +81,7 @@
         "winAccelerator": "Alt+Left"
       },
       {
-        "id": "menubar.seperator",
+        "id": "menubar.separator"
       },
       {
         "id":"playback.increasePlaybackSpeed",
@@ -99,7 +99,7 @@
         "accelerator": "\\"
       },
       {
-        "id": "menubar.seperator"
+        "id": "menubar.separator"
       },
       {
         "id":"playback.previousVideo",
@@ -112,7 +112,7 @@
         "accelerator": "CmdOrCtrl+Right"
       },
       {
-        "id": "menubar.seperator"
+        "id": "menubar.separator"
       },
       {
         "id": "playback.singleCycle",
@@ -149,7 +149,7 @@
 
     },
     "preferences": {
-      "accelerator": "CmdOrCtrl+,",
+      "accelerator": "CmdOrCtrl+,"
     },
     "quit": {
 
@@ -159,93 +159,70 @@
     }
   },
   "subtitle": {
-    "AITranslation": {
-
-    },
-    "decreasePrimarySubtitleDelay": {
-
-    },
-    "increasePrimarySubtitleDelay": {
-
-    },
-    "decreaseSecondarySubtitleDelay": {
-
-    },
-    "increaseSecondarySubtitleDelay": {
-
-    },
-    "disabledSecondarySub": {
-
-    },
-    "enabledSecondarySub": {
-
-    },
-    "langEn": {
-
-    },
-    "langZhCN": {
-
-    },
-    "loadSubtitleFile": {
-
-    },
-    "mainSubtitle": {
-
-    },
-    "menuLoading": {
-
-    },
-    "name": {
-
-    },
-    "noSubtitle": {
-
-    },
-    "notToShowSubtitle": {
-
-    },
-    "secondarySubtitle": {
-
-    },
-    "size1": {
-
-    },
-    "size2": {
-
-    },
-    "size3": {
-
-    },
-    "size4": {
-
-    },
-    "style1": {
-
-    },
-    "style2": {
-
-    },
-    "style3": {
-
-    },
-    "style4": {
-
-    },
-    "style5": {
-
-    },
-    "subtitleSelect": {
-
-    },
-    "subtitleSize": {
-
-    },
-    "subtitleStyle": {
-
-    },
-    "uploadSelectedSubtitle": {
-
-    }
+    "items": [
+      {
+        "id": "subtitle.AITranslation",
+        "label": "AITranslation"
+      },
+      {
+        "id": "subtitle.loadSubtitleFile",
+        "label": "loadSubtitleFile"
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "subtitle.mainSubtitle",
+        "label": "mainSubtitle",
+        "subtitle": []
+      },
+      {
+        "id": "subtitle.secondarySubtitle",
+        "label": "secondarySubtitle",
+        "subtitle": []
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "subtitle.subtitleSetting",
+        "label": "subtitleSetting"
+      },
+      {
+        "id": "subtitle.subtitleDelay",
+        "label": "subtitleDelay",
+        "submenu": {
+          "items": [
+            {
+              "id": "subtitle.increasePrimarySubtitleDelay",
+              "label": "increasePrimarySubtitleDelay"
+            },
+            {
+              "id": "subtitle.decreasePrimarySubtitleDelay",
+              "label": "decreasePrimarySubtitleDelay"
+            },
+            {
+              "id": "menubar.separator"
+            },
+            {
+              "id": "subtitle.increaseSecondarySubtitleDelay",
+              "label": "increasePrimarySubtitleDelay"
+            },
+            {
+              "id": "subtitle.decreaseSecondarySubtitleDelay",
+              "label": "increasePrimarySubtitleDelay"
+            }
+          ]
+        }
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "subtitle.uploadSelectedSubtitle",
+        "label": "uploadSelectedSubtitle"
+      }
+    ]
   },
   "update": {
     "message": {
