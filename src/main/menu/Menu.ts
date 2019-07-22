@@ -178,31 +178,38 @@ export default class Menubar {
   private createMacWindowMenu() {
     const macWindowMenu = new Menu();
 
-    // const about = this.createMenuItem('msg.splayerx.about', () => {
-    //   app.emit('add-windows-about');
-    // }, true);
-    // const preference = this.createMenuItem('msg.splayerx.preference', () => {
-    //   app.emit('add-preference');
-    // }, true);
-    // this.withKeyBinding(preference, 'CmdOrCtrl+,');
+    const windowFront = this.createMenuItem('msg.window.keepPlayingWindowFront', undefined, undefined, true, false);
 
-    // const hide = this.createRoleMenuItem('msg.splayerx.hide', 'hide');
-    // const hideOthers = this.createRoleMenuItem('msg.splayerx.hideOthers', 'hideothers');
-    // const unhide = this.createRoleMenuItem('msg.splayerx.showAll', 'unhide');
-    // const quit = this.createRoleMenuItem('msg.splayerx.quit', 'quit');
+    const fullscreen = this.createMenuItem('msg.window.enterFullScreen', undefined, 'F');
+    const minimize = this.createRoleMenuItem('msg.window.minimize', 'minimize');
 
-    // const actions = [about];
-    // actions.push(...[
-    //   separator(),
-    //   preference,
-    //   separator(),
-    //   hide,
-    //   hideOthers,
-    //   unhide,
-    //   separator(),
-    //   quit,
-    // ]);
-    // actions.forEach(i => applicationMenu.append(i));
+    const halfSize = this.createMenuItem('msg.window.halfSize', undefined, 'CmdOrCtrl+0');
+    const originSize = this.createMenuItem('msg.window.originSize', undefined, 'CmdOrCtrl+1');
+    const doubleSize = this.createMenuItem('msg.window.doubleSize', undefined, 'CmdOrCtrl+2');
+    const maxmize = this.createMenuItem('msg.window.maxmize', undefined, 'CmdOrCtrl+3');
+
+    const windowRotate = this.createMenuItem('msg.window.windowRotate', undefined, 'CmdOrCtrl+L');
+    const bossKey = this.createMenuItem('msg.window.bossKey', undefined, 'CmdOrCtrl+`');
+
+    const backToLandingView = this.createMenuItem('msg.window.backToLandingView', undefined, 'CmdOrCtrl+E');
+
+    const actions = [windowFront];
+    actions.push(...[
+      separator(),
+      fullscreen,
+      minimize,
+      separator(),
+      halfSize,
+      originSize,
+      doubleSize,
+      maxmize,
+      separator(),
+      windowRotate,
+      bossKey,
+      separator(),
+      backToLandingView,
+    ]);
+    actions.forEach(i => macWindowMenu.append(i));
 
     const macWindowMenuItem = new MenuItem({ label: this.$t('msg.window.name'), submenu: macWindowMenu });
     return macWindowMenuItem;
@@ -210,7 +217,14 @@ export default class Menubar {
 
   private createHelpMenu() {
     const helpMenu = new Menu();
-    const helpMenuItem = new MenuItem({ label: this.$t('msg.help.name'), submenu: helpMenu });
+
+    const feedback = this.createMenuItem('msg.help.feedback');
+    const homepage = this.createMenuItem('msg.help.homepage');
+    const shortCuts = this.createMenuItem('msg.help.shortCuts');
+
+    [feedback, homepage, shortCuts].forEach(i => helpMenu.append(i));
+
+    const helpMenuItem = new MenuItem({ label: this.$t('msg.help.name'), submenu: helpMenu, role: 'help' });
     return helpMenuItem;
   }
 
@@ -221,6 +235,7 @@ export default class Menubar {
   ): Electron.MenuItem {
     const id = label.replace(/^msg./g, '');
     label = this.$t(label);
+    if (!submenu) submenu = new Menu();
     return new MenuItem({
       id, label, enabled, submenu,
     });
@@ -285,21 +300,12 @@ export default class Menubar {
         newMenu.append(item);
       } else {
         let item;
-        if (menuItem.accelerator && menuItem.winAccelerator) {
-          item = this.createMenuItem(
-            `msg.${menuItem.id}`,
-            undefined,
-            IsMacintosh ? menuItem.accelerator : menuItem.winAccelerator,
-            menuItem.enabled,
-          );
-        } else {
-          item = this.createMenuItem(
-            `msg.${menuItem.id}`,
-            undefined,
-            undefined,
-            menuItem.enabled,
-          );
-        }
+        item = this.createMenuItem(
+          `msg.${menu}.${menuItem.label}`,
+          undefined,
+          IsMacintosh ? menuItem.accelerator : menuItem.winAccelerator,
+          menuItem.enabled,
+        );
         newMenu.append(item);
       }
     });

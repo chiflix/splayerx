@@ -59,6 +59,11 @@
   "playback": {
     "items": [
       {
+        "id": "playback.playOrPause",
+        "label": "pause",
+        "accelerator": "Space"
+      },
+      {
         "id": "playback.forwardS",
         "label": "forwardS",
         "accelerator": "Right"
@@ -124,11 +129,6 @@
         "id": "playback.snapShot",
         "label": "snapShot",
         "accelerator": "CmdOrCtrl+Shift+S"
-      },
-      {
-        "id": "playback.playOrPause",
-        "label": "pause",
-        "accelerator": "Space"
       }
     ]
   },
