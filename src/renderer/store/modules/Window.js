@@ -13,6 +13,8 @@ const state = {
   sizePercent: 0,
   browsingSize: [1200, 900],
   pipSize: [420, 236],
+  pipPos: [window.screen.availLeft + 20,
+    window.screen.availTop + window.screen.availHeight - 236 - 20],
 };
 
 const getters = {
@@ -32,6 +34,7 @@ const getters = {
   sizePercent: state => state.sizePercent,
   browsingSize: state => state.browsingSize,
   pipSize: state => state.pipSize,
+  pipPos: state => state.pipPos,
 };
 
 const mutations = {
@@ -72,6 +75,9 @@ const mutations = {
   pipSizeUpdate(state, payload) {
     state.pipSize = payload;
   },
+  pipPosUpdate(state, payload) {
+    state.pipPos = payload;
+  },
 };
 
 const actions = {
@@ -86,11 +92,15 @@ const actions = {
   },
   updateBrowsingSize({ commit }, delta) {
     commit('browsingSizeUpdate', delta);
-    asyncStorage.set('browsing', { pipSize: state.pipSize, browsingSize: delta });
+    asyncStorage.set('browsing', { pipSize: state.pipSize, browsingSize: delta, pipPos: state.pipPos });
   },
   updatePipSize({ commit }, delta) {
     commit('pipSizeUpdate', delta);
-    asyncStorage.set('browsing', { pipSize: delta, browsingSize: state.browsingSize });
+    asyncStorage.set('browsing', { pipSize: delta, browsingSize: state.browsingSize, pipPos: state.pipPos });
+  },
+  updatePipPos({ commit }, delta) {
+    commit('pipPosUpdate', delta);
+    asyncStorage.set('browsing', { pipSize: state.pipSize, browsingSize: state.browsingSize, pipPos: delta });
   },
 };
 

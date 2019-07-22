@@ -510,30 +510,6 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     height: 16.8px;
   }
 }
-.download {
-  width: 16px;
-  height: 16px;
-  .default {
-    display: block;
-  }
-  .hover {
-    display: none;
-  }
-  .active {
-    display: none;
-  }
-  &:active {
-    .default {
-      display: none;
-    }
-    .hover {
-      display: none;
-    }
-    .active {
-      display: block;
-    }
-  }
-}
 .picInpic {
   width: 20px;
   height: 16px;
@@ -573,7 +549,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   height: 32px;
   display: block;
 }
-.backDisabled, .forwardDisabled, .downloadDisabled, .star, .starActive {
+.backDisabled, .forwardDisabled, .star, .starActive {
   display: block;
   width: 24px;
   height: 32px;
@@ -672,7 +648,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     }
   }
 }
-.pipRecord, .pipBack {
+.pipRecord, .pipBack, .danmu, .noDanmu {
   width: 20px;
   height: 20px;
   .default {

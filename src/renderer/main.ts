@@ -165,7 +165,7 @@ new Vue({
     };
   },
   computed: {
-    ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winAngle', 'winWidth', 'winHeight', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'list', 'enabledSecondarySub', 'isRefreshing', 'browsingSize', 'pipSize',
+    ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winAngle', 'winWidth', 'winHeight', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'list', 'enabledSecondarySub', 'isRefreshing', 'browsingSize', 'pipSize', 'pipPos',
       'primarySubtitleId', 'secondarySubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isHiddenByBossKey', 'isMinimized', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle', 'displayLanguage', 'calculatedNoSub', 'sizePercent', 'snapshotSavedPath', 'duration', 'reverseScrolling',
     ]),
     ...inputMapGetters({
@@ -271,7 +271,6 @@ new Vue({
         label: this.$t('msg.window.enterFullScreen'),
         accelerator: 'F',
         click: () => {
-          console.log(123);
           this.$bus.$emit('to-fullscreen');
           this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [true]);
         },
@@ -355,6 +354,7 @@ new Vue({
     asyncStorage.get('browsing').then((data) => {
       this.$store.dispatch('updateBrowsingSize', data.browsingSize || this.browsingSize);
       this.$store.dispatch('updatePipSize', data.pipSize || this.pipSize);
+      this.$store.dispatch('updatePipPos', data.pipPos || this.pipPos);
     });
     this.$bus.$on('delete-file', () => {
       this.refreshMenu();
@@ -1481,7 +1481,7 @@ new Vue({
           break;
         case 85:
           if (e.metaKey && e.shiftKey) {
-            this.$bus.$emit('open-url-show', true);
+            // this.$bus.$emit('open-url-show', true); TODO Open Url
           }
           break;
         default:

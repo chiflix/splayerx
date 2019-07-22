@@ -491,7 +491,7 @@ export default {
     },
     openFileByPlayingView(url) {
       const protocol = urlParseLax(url).protocol;
-      return !['https:', 'http:'].includes(protocol) || (['https:', 'http:'].includes(protocol) && document.createElement('video').canPlayType(`video/${url.slice(url.lastIndexOf('.') + 1, url.length)}`));
+      return !['https:', 'http:'].includes(protocol) || document.createElement('video').canPlayType(`video/${url.slice(url.lastIndexOf('.') + 1, url.length)}`);
     },
   },
 };
