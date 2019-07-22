@@ -164,6 +164,7 @@ new Vue({
   data() {
     return {
       menu: null,
+      menuService: null,
       playlistDisplayState: false,
       topOnWindow: false,
       canSendVolumeGa: true,
@@ -353,7 +354,7 @@ new Vue({
       this.refreshMenu();
     },
     currentRouteName(val) {
-      this.menuStateControl(val);
+      this.menuService.menuStateControl(val);
     },
     volume(val) {
       if (this.menu) {
@@ -526,6 +527,207 @@ new Vue({
       changePrimarySubDelay: SubtitleManager.alterPrimaryDelay,
       changeSecondarySubDelay: SubtitleManager.alterSecondaryDelay,
     }),
+    registeMenuActions() {
+      const { app, dialog } = this.$electron.remote;
+      this.menuService.on('file.open', (e: Event, menuItem: Electron.MenuItem) => {
+        console.log('open1', menuItem);
+        if (this.defaultDir) {
+          this.openFilesByDialog();
+        } else {
+          const defaultPath = process.platform === 'darwin' ? app.getPath('home') : app.getPath('desktop');
+          this.$store.dispatch('UPDATE_DEFAULT_DIR', defaultPath);
+          this.openFilesByDialog({ defaultPath });
+        }
+      });
+      this.menuService.on('file.clearHistory', () => {
+        this.infoDB.clearAll();
+        app.clearRecentDocuments();
+        this.$bus.$emit('clean-landingViewItems');
+        this.refreshMenu();
+      });
+      this.menuService.on('playback.forwardS', () => {
+        this.$bus.$emit('seek', videodata.time + 5);
+      });
+      this.menuService.on('playback.backwardS', () => {
+        this.$bus.$emit('seek', videodata.time - 5);
+      });
+      this.menuService.on('playback.increasePlaybackSpeed', () => {
+        this.$store.dispatch(videoActions.INCREASE_RATE);
+      });
+      this.menuService.on('playback.decreasePlaybackSpeed', () => {
+        this.$store.dispatch(videoActions.DECREASE_RATE);
+      });
+      this.menuService.on('playback.resetSpeed', () => {
+        this.$store.dispatch(videoActions.CHANGE_RATE, 1);
+      });
+      this.menuService.on('playback.previousVideo', () => {
+        this.$bus.$emit('previous-video');
+      });
+      this.menuService.on('playback.nextVideo', () => {
+        this.$bus.$emit('next-video');
+      });
+      this.menuService.on('playback.singleCycle', () => {
+        if (this.singleCycle) {
+          this.$store.dispatch('notSingleCycle');
+        } else {
+          this.$store.dispatch('singleCycle');
+        }
+      });
+      this.menuService.on('playback.snapShot', () => {
+        if (!this.paused) {
+          this.$bus.$emit('toggle-playback');
+        }
+        const options = { types: ['window'], thumbnailSize: { width: this.winWidth, height: this.winHeight } };
+        electron.desktopCapturer.getSources(options, (error, sources) => {
+          if (error) {
+            log.info('render/main', 'Snapshot failed .');
+            addBubble(SNAPSHOT_FAILED);
+          }
+          sources.forEach((source) => {
+            if (source.name === 'SPlayer') {
+              const date = new Date();
+              const imgName = `SPlayer-${date.getFullYear()}.${date.getMonth() + 1}.${date.getDate()}-${date.getHours()}.${date.getMinutes()}.${date.getSeconds()}.png`;
+              const screenshotPath = path.join(
+                this.snapshotSavedPath ? this.snapshotSavedPath : app.getPath('desktop'),
+                imgName,
+              );
+              fs.writeFile(screenshotPath, source.thumbnail.toPNG(), (error) => {
+                if (error) {
+                  if (error.message.includes('operation not permitted')) {
+                    this.chooseSnapshotFolder(
+                      imgName,
+                      {
+                        name: imgName,
+                        buffer: source.thumbnail.toPNG(),
+                        defaultFolder: this.snapshotSavedPath,
+                      },
+                    );
+                  } else {
+                    log.info('render/main', 'Snapshot failed .');
+                    addBubble(SNAPSHOT_FAILED);
+                  }
+                } else {
+                  log.info('render/main', 'Snapshot success .');
+                  addBubble(SNAPSHOT_SUCCESS);
+                }
+              });
+            }
+          });
+        });
+      });
+      this.menuService.on('audio.increaseVolume', () => {
+        this.$ga.event('app', 'volume', 'keyboard');
+        this.$store.dispatch(videoActions.INCREASE_VOLUME);
+        this.$bus.$emit('change-volume-menu');
+      });
+      this.menuService.on('audio.decreaseVolume', () => {
+        this.$ga.event('app', 'volume', 'keyboard');
+        this.$store.dispatch(videoActions.DECREASE_VOLUME);
+        this.$bus.$emit('change-volume-menu');
+      });
+      this.menuService.on('audio.mute', (e: Event, menuItem: Electron.MenuItem) => {
+        this.menuService.updateMenuItemProperty('audio.mute', 'checked', menuItem.checked);
+        this.$bus.$emit('toggle-muted');
+      });
+      this.menuService.on('subtitle.AITranslation', () => {
+        if (!this.isRefreshing) {
+          this.refreshSubtitles();
+        }
+      });
+      this.menuService.on('subtitle.loadSubtitleFile', () => {
+        const { remote } = this.$electron;
+        const browserWindow = remote.BrowserWindow;
+        const focusWindow = browserWindow.getFocusedWindow();
+        const VALID_EXTENSION = ['ass', 'srt', 'vtt'];
+
+        dialog.showOpenDialog(focusWindow, {
+          title: 'Open Dialog',
+          defaultPath: path.dirname(this.originSrc),
+          filters: [{
+            name: 'Subtitle Files',
+            extensions: VALID_EXTENSION,
+          }],
+          properties: ['openFile'],
+        }, (item: string[]) => {
+          if (item) {
+            this.$bus.$emit('add-subtitles', [{ src: item[0], type: 'local' }]);
+          }
+        });
+      });
+      this.menuService.on('subtitle.subtitleSetting', () => {
+        this.$bus.$emit('show-subtitle-settings');
+      });
+      this.menuService.on('subtitle.increasePrimarySubtitleDelay', () => {
+        this.updateSubSettingsType(true);
+        this.changePrimarySubDelay(0.1);
+      });
+      this.menuService.on('subtitle.decreasePrimarySubtitleDelay', () => {
+        this.updateSubSettingsType(false);
+        this.changeSecondarySubDelay(-0.1);
+      });
+      this.menuService.on('subtitle.increaseSecondarySubtitleDelay', () => {
+        this.updateSubSettingsType(false);
+        this.changeSecondarySubDelay(0.1);
+      });
+      this.menuService.on('subtitle.decreaseSecondarySubtitleDelay', () => {
+        this.updateSubSettingsType(false);
+        this.changeSecondarySubDelay(-0.1);
+      });
+      this.menuService.on('subtitle.uploadSelectedSubtitle', () => {
+        this.$store.dispatch(SubtitleManager.manualUploadAllSubtitles);
+      });
+      this.menuService.on('window.keepPlayingWindowFront', (e: Event, menuItem: Electron.MenuItem) => {
+        const { remote } = this.$electron;
+        const browserWindow = remote.BrowserWindow;
+        const focusWindow = browserWindow.getFocusedWindow();
+        if (focusWindow.isAlwaysOnTop()) {
+          browserWindow.setAlwaysOnTop(false);
+          menuItem.checked = false;
+        } else {
+          focusWindow.setAlwaysOnTop(true);
+          menuItem.checked = true;
+        }
+      });
+      this.menuService.on('window.halfSize', () => {
+        this.changeWindowSize(0.5);
+      });
+      this.menuService.on('window.originSize', () => {
+        this.changeWindowSize(1);
+      });
+      this.menuService.on('window.doubleSize', () => {
+        this.changeWindowSize(2);
+      });
+      this.menuService.on('window.maxmize', () => {
+        this.changeWindowSize(3);
+      });
+      this.menuService.on('window.windowRotate', () => {
+        this.windowRotate();
+      });
+      this.menuService.on('window.backToLandingView', () => {
+        this.$bus.$emit('back-to-landingview');
+      });
+      this.menuService.on('help.feedback', () => {
+        this.$electron.shell.openExternal('https://feedback.splayer.org');
+      });
+      this.menuService.on('help.homepage', () => {
+        this.$electron.shell.openExternal('https://beta.splayer.org');
+      });
+      this.menuService.on('help.shortCuts', () => {
+        this.$electron.shell.openExternal('https://github.com/chiflix/splayerx/wiki/SPlayer-Shortcuts-List');
+      });
+      this.menuService.on('help.crashReportLocation', () => {
+        const { remote } = this.$electron;
+        let location = remote.crashReporter.getCrashesDirectory();
+        if (!location) location = path.join(remote.app.getPath('temp'), `${remote.app.getName()} Crashes`);
+        if (fs.existsSync(location)) {
+          remote.shell.openItem(location);
+        } else {
+          remote.dialog.showMessageBox(remote.getCurrentWindow(), {
+            message: this.$t('msg.help.crashReportNotAvailable'),
+          });
+        }
+      });
+    },
     /**
      * @description 找到所有menu,禁用调.目前就两层循环，如果出现孙子menu，需要再嵌套一层循环
      * @author tanghaixiang@xindong.com
@@ -842,7 +1044,7 @@ new Vue({
           id: 'window',
           submenu: [
             {
-              label: this.$t('msg.playback.keepPlayingWindowFront'),
+              label: this.$t('msg.window.keepPlayingWindowFront'),
               type: 'checkbox',
               id: 'windowFront',
               click: (menuItem, browserWindow) => {
@@ -901,7 +1103,7 @@ new Vue({
             },
             { type: 'separator' },
             {
-              label: this.$t('msg.playback.windowRotate'),
+              label: this.$t('msg.window.windowRotate'),
               id: 'windowRotate',
               accelerator: 'CmdOrCtrl+L',
               click: () => {
@@ -1443,10 +1645,8 @@ new Vue({
     // https://github.com/electron/electron/issues/3609
     // Disable Zooming
     this.$electron.webFrame.setVisualZoomLevelLimits(1, 1);
-    this.menu = new MenuService();
-    this.menu.on('menu-item-file.open', () => {
-      console.log('open');
-    });
+    this.menuService = new MenuService();
+    this.registeMenuActions();
     // this.createMenu();
     this.$bus.$on('new-file-open', this.refreshMenu);
     // TODO: Setup user identity

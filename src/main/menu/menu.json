@@ -16,7 +16,9 @@
       {
         "id": "audio.mute",
         "label": "mute",
-        "accelerator": "M"
+        "accelerator": "M",
+        "enabled": true,
+        "checked": false
       },
       {
         "id": "menubar.separator"
@@ -24,7 +26,9 @@
       {
         "id": "audio.switchAudioTrack",
         "label": "switchAudioTrack",
-        "submenu": []
+        "submenu": {
+          "items": []
+        }
       }
     ]
   },
@@ -43,23 +47,25 @@
     }
   },
   "help": {
-    "splayerxHelp": {
-
-    },
-    "shortCuts": {
-
-    },
-    "crashReportLocation": {
-
-    },
-    "crashReportNotAvailable": {
-
-    }
+    "items": [
+      {
+        "id": "help.feedback",
+        "label": "feedback"
+      },
+      {
+        "id": "help.homepage",
+        "label": "homepage"
+      },
+      {
+        "id": "help.shortCuts",
+        "label": "shortCuts"
+      }
+    ]
   },
   "playback": {
     "items": [
       {
-        "id": "playback.playOrPause",
+        "id": "playback.play",
         "label": "pause",
         "accelerator": "Space"
       },

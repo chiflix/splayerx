@@ -20,21 +20,36 @@ function isSubmenu(menuItem: MenubarMenuItem): menuItem is IMenubarMenuItemSubme
 }
 
 export default class Menubar {
-  private oldMenus: Menu[];
-
   private mainWindow: Electron.BrowserWindow;
 
   private locale: Locale;
 
+  private menubar: Electron.Menu;
+
   public constructor() {
     this.locale = new Locale();
-    this.oldMenus = [];
     this.install();
   }
 
   public setMainWindow(window: Electron.BrowserWindow) {
     // may replace this way of getting mainWindow by window service or else...
     this.mainWindow = window;
+  }
+
+  public updateMenuItem(id: string, property: string, value: any) {
+    if (!this.menubar) this.menubar = Menu.getApplicationMenu() as Electron.Menu;
+    const menuItem = this.menubar.getMenuItemById(id);
+    menuItem[property] = value;
+  }
+
+  public updateSubmenuItem(id: string, enabled: boolean) {
+    if (!this.menubar) this.menubar = Menu.getApplicationMenu() as Electron.Menu;
+    const menuItem = this.menubar.getMenuItemById(id);
+    if (menuItem) {
+      menuItem.submenu.items.forEach((item: Electron.MenuItem) => {
+        item.enabled = enabled;
+      });
+    }
   }
 
   private install(): void {
@@ -138,7 +153,7 @@ export default class Menubar {
 
   private createFileMenu(): Electron.MenuItem {
     const fileMenu = new Menu();
-    const open = this.createMenuItem('msg.file.open', undefined, undefined, true);
+    const open = this.createMenuItem('msg.file.open', undefined, 'CmdOrCtrl+O', true);
     const openRecent = this.createSubMenuItem('msg.file.openRecent');
     const clearHistory = this.createMenuItem('msg.file.clearHistory', undefined, undefined, true);
     const closeWindow = this.createRoleMenuItem('msg.file.closeWindow', 'close');
@@ -189,7 +204,9 @@ export default class Menubar {
     const maxmize = this.createMenuItem('msg.window.maxmize', undefined, 'CmdOrCtrl+3');
 
     const windowRotate = this.createMenuItem('msg.window.windowRotate', undefined, 'CmdOrCtrl+L');
-    const bossKey = this.createMenuItem('msg.window.bossKey', undefined, 'CmdOrCtrl+`');
+    const bossKey = this.createMenuItem('msg.window.bossKey', () => {
+      app.emit('bossKey');
+    }, 'CmdOrCtrl+`');
 
     const backToLandingView = this.createMenuItem('msg.window.backToLandingView', undefined, 'CmdOrCtrl+E');
 
@@ -222,6 +239,9 @@ export default class Menubar {
     const homepage = this.createMenuItem('msg.help.homepage');
     const shortCuts = this.createMenuItem('msg.help.shortCuts');
 
+    let crashReport;
+    if (!process.mas) crashReport = this.createMenuItem('msg.help.crashReportLocation');
+
     [feedback, homepage, shortCuts].forEach(i => helpMenu.append(i));
 
     const helpMenuItem = new MenuItem({ label: this.$t('msg.help.name'), submenu: helpMenu, role: 'help' });
@@ -230,14 +250,35 @@ export default class Menubar {
 
   private createSubMenuItem(
     label: string,
-    submenu?: Electron.Menu,
+    submenu?: IMenubarMenu,
     enabled = true,
   ): Electron.MenuItem {
     const id = label.replace(/^msg./g, '');
     label = this.$t(label);
-    if (!submenu) submenu = new Menu();
+    const newMenu = new Menu();
+    if (submenu) {
+      submenu.items.forEach((menuItem: MenubarMenuItem) => {
+        if (isSeparator(menuItem)) {
+          const item = separator();
+          newMenu.append(item);
+        } else if (isSubmenu(menuItem)) {
+          const item = this.createSubMenuItem(`msg.${menuItem.id}`, menuItem.submenu);
+          newMenu.append(item);
+        } else {
+          let item;
+          item = this.createMenuItem(
+            `msg.${menuItem.id}`,
+            undefined,
+            IsMacintosh ? menuItem.accelerator : menuItem.winAccelerator,
+            menuItem.enabled,
+            menuItem.checked,
+          );
+          newMenu.append(item);
+        }
+      });
+    }
     return new MenuItem({
-      id, label, enabled, submenu,
+      id, label, enabled, submenu: newMenu,
     });
   }
 
@@ -264,14 +305,16 @@ export default class Menubar {
     label = this.$t(label);
     if (!click) {
       click = (menuItem: Electron.MenuItem) => {
-        if (this.mainWindow) this.mainWindow.webContents.send(id, menuItem);
-        else {
+        if (!this.mainWindow.webContents.isDestroyed()) {
+          this.mainWindow.webContents.send(id, menuItem);
+        } else {
           app.emit('menu-create-main-window', id, menuItem);
         }
       };
     }
 
     const options: Electron.MenuItemConstructorOptions = {
+      id,
       label,
       click,
       enabled,
@@ -296,7 +339,7 @@ export default class Menubar {
         const item = separator();
         newMenu.append(item);
       } else if (isSubmenu(menuItem)) {
-        const item = this.createSubMenuItem(`msg.${menuItem.id}`);
+        const item = this.createSubMenuItem(`msg.${menuItem.id}`, menuItem.submenu);
         newMenu.append(item);
       } else {
         let item;
@@ -305,6 +348,7 @@ export default class Menubar {
           undefined,
           IsMacintosh ? menuItem.accelerator : menuItem.winAccelerator,
           menuItem.enabled,
+          menuItem.checked,
         );
         newMenu.append(item);
       }

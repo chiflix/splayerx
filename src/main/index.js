@@ -15,7 +15,7 @@ import './helpers/electronPrototypes';
 import writeLog from './helpers/writeLog';
 import { getValidVideoRegex, getValidSubtitleRegex } from '../shared/utils';
 import { mouse } from './helpers/mouse';
-import Menu from './menu/Menu';
+import MenuService from './menu/MenuService';
 
 // requestSingleInstanceLock is not going to work for mas
 // https://github.com/electron-userland/electron-packager/issues/923
@@ -56,7 +56,7 @@ if (process.env.NODE_ENV !== 'development') {
 
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 
-let menu = null;
+let menuService = null;
 let mainWindow = null;
 let aboutWindow = null;
 let preferenceWindow = null;
@@ -434,9 +434,6 @@ function registerMainWindowEvent(mainWindow) {
     mainWindow.webContents.send('mainCommit', 'isFullScreen', mainWindow.isFullScreen());
     mainWindow.webContents.send('mainCommit', 'isFocused', mainWindow.isFocused());
   });
-  ipcMain.on('bossKey', () => {
-    handleBossKey();
-  });
   ipcMain.on('writeLog', (event, level, log) => { // eslint-disable-line complexity
     if (!log) return;
     writeLog(level, log);
@@ -500,12 +497,12 @@ function createWindow() {
     `${mainWindow.webContents.getUserAgent().replace(/Electron\S+/i, '')
     } SPlayerX@2018 ${os.platform()} ${os.release()} Version ${app.getVersion()}`,
   );
-  menu.setMainWindow(mainWindow);
+  menuService.setMainWindow(mainWindow);
 
   mainWindow.on('closed', () => {
     ipcMain.removeAllListeners();
     mainWindow = null;
-    menu.setMainWindow(null);
+    menuService.setMainWindow(null);
   });
 
   mainWindow.once('ready-to-show', () => {
@@ -678,7 +675,7 @@ if (process.platform === 'darwin') {
 }
 
 app.on('ready', () => {
-  menu = new Menu();
+  menuService = new MenuService();
   createWindow();
   app.setName('SPlayer');
   globalShortcut.register('CmdOrCtrl+Shift+I+O+P', () => {
@@ -696,9 +693,9 @@ app.on('ready', () => {
 });
 
 app.on('window-all-closed', () => {
-  // if (process.platform !== 'darwin') {
-  // }
-  app.quit();
+  if (process.platform !== 'darwin') {
+    app.quit();
+  }
 });
 
 function createAbout() {
@@ -773,7 +770,7 @@ function createPreference() {
     preferenceWindow.show();
   });
 }
-
+app.on('bossKey', handleBossKey);
 app.on('add-preference', createPreference);
 app.on('add-windows-about', createAbout);
 
