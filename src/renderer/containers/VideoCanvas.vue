@@ -46,7 +46,8 @@ import { debounce } from 'lodash';
 import { windowRectService } from '@/services/window/WindowRectService';
 import { playInfoStorageService } from '@/services/storage/PlayInfoStorageService';
 import { settingStorageService } from '@/services/storage/SettingStorageService';
-import { generateShortCutImageBy } from '@/libs/utils';
+import { nsfwThumbnailFilterService } from '@/services/filter/NSFWThumbnailFilterService';
+import { generateShortCutImageBy, ShortCut } from '@/libs/utils';
 import { Video as videoActions } from '@/store/actionTypes';
 import { videodata } from '@/store/video';
 import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer.vue';
@@ -78,7 +79,7 @@ export default {
     ...mapGetters([
       'videoId', 'nextVideoId', 'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId', 'enabledSecondarySub', 'lastChosenSize', 'subToTop',
       'winSize', 'winPos', 'winAngle', 'isFullScreen', 'winWidth', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo', 'loop', 'playinglistRate', 'isFolderList', 'playingList', 'playingIndex', 'playListId', 'items',
-      'previousVideo', 'previousVideoId',
+      'previousVideo', 'previousVideoId', 'hideNSFW',
     ]),
     ...mapGetters({
       videoWidth: 'intrinsicWidth',
@@ -94,7 +95,7 @@ export default {
       if (oldVal) this.updatePlaylist(oldVal);
     },
     videoId(val: number, oldVal: number) {
-      this.saveScreenshot(oldVal);
+      this.handleLeaveVideo(oldVal);
     },
     originSrc(val: string, oldVal: string) {
       if (process.mas && oldVal) {
@@ -125,18 +126,7 @@ export default {
   },
   mounted() {
     this.$bus.$on('back-to-landingview', () => {
-      let savePromise = this.saveScreenshot(this.videoId)
-        .then(() => this.updatePlaylist(this.playListId));
-      if (process.mas && this.$store.getters.source === 'drop') {
-        savePromise = savePromise.then(async () => {
-          await playInfoStorageService.deleteRecentPlayedBy(this.playListId);
-          await deleteSubtitlesByPlaylistId(this.playListId);
-        });
-      }
-      savePromise
-        .then(this.saveSubtitleStyle)
-        .then(this.savePlaybackStates)
-        .then(this.removeAllAudioTrack)
+      this.handleLeaveVideo(this.videoId)
         .finally(() => {
           this.$store.dispatch('Init');
           this.$bus.$off();
@@ -318,16 +308,18 @@ export default {
           .updateRecentPlayedBy(playlistId, recentPlayedData as PlaylistItem);
       }
     },
-    async saveScreenshot(videoId: number) {
+    async generateScreenshot(): Promise<ShortCut> {
       const { videoElement } = this;
       const canvas = this.$refs.thumbnailCanvas;
       // todo: use metaloaded to get videoHeight and videoWidth
       const { videoHeight, videoWidth } = this;
       const shortCut = generateShortCutImageBy(videoElement, canvas, videoWidth, videoHeight);
-
+      return shortCut;
+    },
+    async saveScreenshot(videoId: number, screenshot: ShortCut) {
       const data = {
-        shortCut: shortCut.shortCut,
-        smallShortCut: shortCut.smallShortCut,
+        shortCut: screenshot.shortCut,
+        smallShortCut: screenshot.smallShortCut,
         lastPlayedTime: videodata.time,
         duration: this.duration,
         audioTrackId: this.currentAudioTrackId,
@@ -346,21 +338,39 @@ export default {
     savePlaybackStates() {
       return settingStorageService.updatePlaybackStates({ volume: this.volume, muted: this.muted });
     },
+    async handleLeaveVideo(videoId: number) {
+      const screenshot: ShortCut = await this.generateScreenshot();
+
+      if (this.hideNSFW) {
+        if (await nsfwThumbnailFilterService.checkImage(screenshot.shortCut)) {
+          this.$store.dispatch('addMessages', {
+            type: 'result',
+            title: '🙀',
+            content: '发现了奇怪的东西~',
+            dismissAfter: 5000,
+          });
+          await playInfoStorageService.deleteRecentPlayedBy(this.playListId);
+          return null;
+        }
+      }
+
+      let savePromise = this.saveScreenshot(videoId, screenshot)
+        .then(() => this.updatePlaylist(this.playListId));
+      if (process.mas && this.$store.getters.source === 'drop') {
+        savePromise = savePromise.then(async () => {
+          await playInfoStorageService.deleteRecentPlayedBy(this.playListId);
+          await deleteSubtitlesByPlaylistId(this.playListId);
+        });
+      }
+      return savePromise
+        .then(this.saveSubtitleStyle)
+        .then(this.savePlaybackStates)
+        .then(this.removeAllAudioTrack);
+    },
     beforeUnloadHandler(e: BeforeUnloadEvent) {
       if (!this.asyncTasksDone && !this.needToRestore) {
         e.returnValue = false;
-        let savePromise = this.saveScreenshot(this.videoId)
-          .then(() => this.updatePlaylist(this.playListId));
-        if (process.mas && this.$store.getters.source === 'drop') {
-          savePromise = savePromise.then(async () => {
-            await playInfoStorageService.deleteRecentPlayedBy(this.playListId);
-            await deleteSubtitlesByPlaylistId(this.playListId);
-          });
-        }
-        savePromise
-          .then(this.saveSubtitleStyle)
-          .then(this.savePlaybackStates)
-          .then(this.removeAllAudioTrack)
+        this.handleLeaveVideo(this.videoId)
           .finally(() => {
             this.$store.dispatch('SRC_SET', { src: '', mediaHash: '', id: NaN });
             this.asyncTasksDone = true;

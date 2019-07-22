@@ -212,6 +212,7 @@
   },
   "preferences": {
     "general": {
+      "hideNSFW": "Hide Sensitive Content",
       "hideHistory": "Hide playback history",
       "clearHistory": "Always clear playback history on exit",
       "reverseScrolling": "Reverse mouse scrolling",
