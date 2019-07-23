@@ -44,6 +44,12 @@ export default class Menubar {
   }
 
   public setMainWindow(window: Electron.BrowserWindow) {
+    if (!window) {
+      this.enableSubmenuItem('playback', false);
+      this.enableSubmenuItem('audio', false);
+      this.enableSubmenuItem('subtitle', false);
+      this.enableSubmenuItem('window', false);
+    }
     // may replace this way of getting mainWindow by window service or else...
     this.mainWindow = window;
   }
