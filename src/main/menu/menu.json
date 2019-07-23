@@ -33,61 +33,81 @@
     ]
   },
   "file": {
-    "open": {
-      "accelerator": "CmdOrCtrl+O"
-    },
-    "openRecent": {
-
-    },
-    "clearHistory": {
-
-    },
-    "closeWindow": {
-
-    }
+    "items": [
+      {
+        "id": "file.open",
+        "label": "msg.file.open",
+        "accelerator": "CmdOrCtrl+O"
+      },
+      {
+        "id": "file.openRecent",
+        "label": "msg.file.openRecent",
+        "submenu": {
+          "items": []
+        }
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "file.clearHistory",
+        "label": "msg.file.clearHistory"
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "file.closeWindow",
+        "label": "msg.file.closeWindow",
+        "role": "close"
+      }
+    ]
   },
   "help": {
     "items": [
       {
         "id": "help.feedback",
-        "label": "feedback"
+        "label": "feedback",
+        "enabled": true
       },
       {
         "id": "help.homepage",
-        "label": "homepage"
+        "label": "homepage",
+        "enabled": true
       },
       {
         "id": "help.shortCuts",
-        "label": "shortCuts"
+        "label": "shortCuts",
+        "enabled": true
       }
     ]
   },
   "playback": {
     "items": [
       {
-        "id": "playback.play",
-        "label": "pause",
+        "id": "playback.playOrPause",
+        "label": "msg.playback.pause",
         "accelerator": "Space"
       },
       {
         "id": "playback.forwardS",
-        "label": "forwardS",
+        "label": "msg.playback.forwardS",
         "accelerator": "Right"
       },
       {
         "id": "playback.backwardS",
-        "label": "backwardS",
+        "label": "msg.playback.backwardS",
         "accelerator": "Left"
       },
       {
         "id": "playback.forwardL",
-        "label": "forwardL",
+        "label": "msg.playback.forwardL",
         "accelerator": "Up",
         "winAccelerator": "Alt+Right"
       },
       {
         "id": "playback.backwardL",
-        "label": "backwardL",
+        "label": "msg.playback.backwardL",
         "accelerator": "Down",
         "winAccelerator": "Alt+Left"
       },
@@ -96,17 +116,17 @@
       },
       {
         "id":"playback.increasePlaybackSpeed",
-        "label": "increasePlaybackSpeed",
+        "label": "msg.playback.increasePlaybackSpeed",
         "accelerator": "]"
       },
       {
         "id":"playback.decreasePlaybackSpeed",
-        "label": "decreasePlaybackSpeed",
+        "label": "msg.playback.decreasePlaybackSpeed",
         "accelerator": "["
       },
       {
         "id":"playback.resetSpeed",
-        "label": "resetSpeed",
+        "label": "msg.playback.resetSpeed",
         "accelerator": "\\"
       },
       {
@@ -114,12 +134,12 @@
       },
       {
         "id":"playback.previousVideo",
-        "label": "previousVideo",
+        "label": "msg.playback.previousVideo",
         "accelerator": "CmdOrCtrl+Left"
       },
       {
         "id":"playback.nextVideo",
-        "label": "nextVideo",
+        "label": "msg.playback.nextVideo",
         "accelerator": "CmdOrCtrl+Right"
       },
       {
@@ -127,63 +147,40 @@
       },
       {
         "id": "playback.singleCycle",
-        "label": "singleCycle",
+        "label": "msg.playback.singleCycle",
         "type": "checkbox"
       },
       {
         "id": "playback.snapShot",
-        "label": "snapShot",
+        "label": "msg.playback.snapShot",
         "accelerator": "CmdOrCtrl+Shift+S"
       }
     ]
   },
   "splayerx": {
-    "about": {
-
-    },
-    "feedback": {
-
-    },
-    "hide": {
-
-    },
-    "hideOthers": {
-
-    },
-    "homepage": {
-
-    },
-    "preferences": {
-      "accelerator": "CmdOrCtrl+,"
-    },
-    "quit": {
-
-    },
-    "showAll": {
-
-    }
+    "items": []
   },
   "subtitle": {
     "items": [
       {
         "id": "subtitle.AITranslation",
-        "label": "AITranslation"
+        "label": "msg.subtitle.AITranslation"
       },
       {
         "id": "subtitle.loadSubtitleFile",
-        "label": "loadSubtitleFile"
+        "label": "msg.subtitle.loadSubtitleFile"
       },
       {
         "id": "menubar.separator"
       },
       {
         "id": "subtitle.mainSubtitle",
-        "label": "mainSubtitle",
+        "label": "msg.subtitle.mainSubtitle",
         "subtitle": []
       },
       {
         "id": "subtitle.secondarySubtitle",
-        "label": "secondarySubtitle",
+        "label": "msg.subtitle.secondarySubtitle",
         "subtitle": []
       },
       {
@@ -191,31 +188,31 @@
       },
       {
         "id": "subtitle.subtitleSetting",
-        "label": "subtitleSetting"
+        "label": "msg.subtitle.subtitleSetting"
       },
       {
         "id": "subtitle.subtitleDelay",
-        "label": "subtitleDelay",
+        "label": "msg.subtitle.subtitleDelay",
         "submenu": {
           "items": [
             {
               "id": "subtitle.increasePrimarySubtitleDelay",
-              "label": "increasePrimarySubtitleDelay"
+              "label": "msg.subtitle.increasePrimarySubtitleDelay"
             },
             {
               "id": "subtitle.decreasePrimarySubtitleDelay",
-              "label": "decreasePrimarySubtitleDelay"
+              "label": "msg.subtitle.decreasePrimarySubtitleDelay"
             },
             {
               "id": "menubar.separator"
             },
             {
               "id": "subtitle.increaseSecondarySubtitleDelay",
-              "label": "increasePrimarySubtitleDelay"
+              "label": "msg.subtitle.increasePrimarySubtitleDelay"
             },
             {
               "id": "subtitle.decreaseSecondarySubtitleDelay",
-              "label": "increasePrimarySubtitleDelay"
+              "label": "msg.subtitle.increasePrimarySubtitleDelay"
             }
           ]
         }
@@ -225,41 +222,80 @@
       },
       {
         "id": "subtitle.uploadSelectedSubtitle",
-        "label": "uploadSelectedSubtitle"
+        "label": "msg.subtitle.uploadSelectedSubtitle"
       }
     ]
   },
   "window": {
-    "backToLandingView": {
-
-    },
-    "bossKey": {
-      
-    },
-    "doubleSize": {
-      
-    },
-    "enterFullScreen": {
-      
-    },
-    "exitFullScreen": {
-      
-    },
-    "halfSize": {
-      
-    },
-    "maxmize": {
-      
-    },
-    "minimize": {
-      
-    },
-    "name": {
-      
-    },
-    "originSize": {
-      
-    }
+    "items": [
+      {
+        "id": "window.keepPlayingWindowFront",
+        "label": "msg.window.keepPlayingWindowFront",
+        "enabled": true,
+        "checked": false
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "window.fullscreen",
+        "label": "msg.window.enterFullScreen",
+        "accelerator": "F"
+      },
+      {
+        "id": "window.minimize",
+        "label": "msg.window.minimize",
+        "role": "minimize"
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "window.halfSize",
+        "label": "msg.window.halfSize",
+        "accelerator": "CmdOrCtrl+0"
+      },
+      {
+        "id": "window.originSize",
+        "label": "msg.window.originSize",
+        "accelerator": "CmdOrCtrl+1"
+      },
+      {
+        "id": "window.doubleSize",
+        "label": "msg.window.doubleSize",
+        "accelerator": "CmdOrCtrl+2"
+      },
+      {
+        "id": "window.maxmize",
+        "label": "msg.window.maxmize",
+        "accelerator": "CmdOrCtrl+3"
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "window.windowRotate",
+        "label": "msg.window.windowRotate",
+        "accelerator": "CmdOrCtrl+L"
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "window.bossKey",
+        "label": "msg.window.bossKey",
+        "accelerator": "CmdOrCtrl+`",
+        "enabled": true
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "window.backToLandingView",
+        "label": "msg.window.backToLandingView",
+        "accelerator": "CmdOrCtrl+E"
+      }
+    ]
   }
 }
 

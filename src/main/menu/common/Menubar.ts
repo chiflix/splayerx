@@ -4,7 +4,10 @@ export interface IMenubarMenu {
 }
 
 export type MenubarMenuItem =
-  IMenubarMenuItemAction | IMenubarMenuItemSubmenu | IMenubarMenuItemSeparator;
+  IMenubarMenuItemAction
+  | IMenubarMenuItemSubmenu
+  | IMenubarMenuItemSeparator
+  | IMenubarMenuItemRole;
 
 export interface IMenubarMenuItemAction {
   id: string;
@@ -13,6 +16,13 @@ export interface IMenubarMenuItemAction {
   winAccelerator?: string,
   checked?: boolean; // Assumed false if missing
   enabled?: boolean; // Assumed true if missing
+}
+
+export interface IMenubarMenuItemRole {
+  id: string,
+  label: string,
+  role: ('undo' | 'redo' | 'cut' | 'copy' | 'paste' | 'pasteandmatchstyle' | 'delete' | 'selectall' | 'reload' | 'forcereload' | 'toggledevtools' | 'resetzoom' | 'zoomin' | 'zoomout' | 'togglefullscreen' | 'window' | 'minimize' | 'close' | 'help' | 'about' | 'services' | 'hide' | 'hideothers' | 'unhide' | 'quit' | 'startspeaking' | 'stopspeaking' | 'close' | 'minimize' | 'zoom' | 'front' | 'appMenu' | 'fileMenu' | 'editMenu' | 'viewMenu' | 'windowMenu'),
+  enabled?: boolean;
 }
 
 export interface IMenubarMenuItemSubmenu {

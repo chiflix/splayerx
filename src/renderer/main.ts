@@ -42,9 +42,7 @@ import InputPlugin, { getterTypes as iGT } from '@/plugins/input';
 import { VueDevtools } from './plugins/vueDevtools.dev';
 import { SubtitleControlListItem, Type } from './interfaces/ISubtitle';
 import { getValidVideoRegex, getValidSubtitleRegex } from '../shared/utils';
-import { PlaylistItem } from './interfaces/IDB';
 import MenuService from './services/menu/MenuService';
-import { recentPlayService } from '@/services/media/RecentPlayService';
 
 
 // causing callbacks-registry.js 404 error. disable temporarily
@@ -268,18 +266,19 @@ new Vue({
     },
     audioTrackList(val, oldval) {
       if (val.length !== oldval.length) {
-        this.refreshMenu();
+        this.menuService.refreshMenu();
       }
-      if (this.menu) {
-        this.audioTrackList.forEach((item: Electron.MenuItem, index: number) => {
-          if (item.enabled === true && this.menu && this.menuService.getMenuItemById(`track${index}`)) {
-            this.menuService.getMenuItemById(`track${index}`).checked = true;
-          }
-        });
-      }
+      this.audioTrackList.forEach((item: Electron.MenuItem, index: number) => {
+        if (item.enabled === true && this.menu && this.menuService.getMenuItemById(`track${index}`)) {
+          this.menuService.getMenuItemById(`track${index}`).checked = true;
+        }
+      });
     },
-    isFullScreen() {
-      this.refreshMenu();
+    isFullScreen(val) {
+      this.menuService.updateMenuItemLabel(
+        'window.fullscreen',
+        val ? this.$t('msg.window.exitFullScreen') : this.$t('msg.window.enterFullScreen'),
+      );
     },
     paused(val) {
       const browserWindow = this.$electron.remote.getCurrentWindow();
@@ -288,17 +287,7 @@ new Vue({
       } else if (!val && this.menu && this.menuService.getMenuItemById('windowFront').checked) {
         browserWindow.setAlwaysOnTop(true);
       }
-      // 因为老板键，pause 比 isHiddenByBossKey慢，所以在paused watcher里面
-      // 需要判断是否需要禁用menu
-      this.refreshMenu().then(() => {
-        if (this.isHiddenByBossKey) {
-          this.menu && this.menu.items.forEach((e: Electron.MenuItem, i: number) => {
-            if (i === 0) return;
-            this.disableMenus(e);
-          });
-        }
-      }).catch(() => {
-      });
+      this.menuService.updatePaused('playback.playOrPause', val);
     },
     isMinimized(val) {
       // 如果window最小化，那么就禁用menu，除了第一选项
@@ -306,10 +295,7 @@ new Vue({
       if (!val) {
         this.refreshMenu();
       } else {
-        this.menu && this.menu.items.forEach((e: Electron.MenuItem, i: number) => {
-          if (i === 0) return;
-          this.disableMenus(e);
-        });
+        this.menuService.disableMenus();
       }
     },
     isHiddenByBossKey(val) {
@@ -318,16 +304,11 @@ new Vue({
       if (!val) {
         this.refreshMenu();
       } else {
-        this.menu && this.menu.items.forEach((e: Electron.MenuItem, i: number) => {
-          if (i === 0) return;
-          this.disableMenus(e);
-        });
+        this.menuService.disableMenus();
       }
     },
     ableToPushCurrentSubtitle(val) {
-      if (this.menu) {
-        this.menuService.getMenuItemById('uploadSelectedSubtitle').enabled = val;
-      }
+      this.menuService.updateMenuItemEnabled('subtitle.uploadSelectedSubtitle', val);
     },
     originSrc(newVal) {
       if (newVal && !this.isWheelEnd) {
@@ -446,7 +427,7 @@ new Vue({
         this.$bus.$emit('clean-landingViewItems');
         this.refreshMenu();
       });
-      this.menuService.on('playback.play', () => {
+      this.menuService.on('playback.playOrPause', () => {
         this.$bus.$emit('toggle-playback');
       });
       this.menuService.on('playback.forwardS', () => {
@@ -530,7 +511,7 @@ new Vue({
         this.$bus.$emit('change-volume-menu');
       });
       this.menuService.on('audio.mute', (e: Event, menuItem: Electron.MenuItem) => {
-        this.menuService.updateMenuItemProperty('audio.mute', 'checked', menuItem.checked);
+        this.menuService.updateMenuItemChecked('audio.mute', menuItem.checked);
         this.$bus.$emit('toggle-muted');
       });
       this.menuService.on('subtitle.AITranslation', () => {
@@ -592,6 +573,15 @@ new Vue({
           menuItem.checked = true;
         }
       });
+      this.menuService.on('window.fullscreen', () => {
+        if (this.isFullScreen) {
+          this.$bus.$emit('off-fullscreen');
+          this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
+        } else {
+          this.$bus.$emit('to-fullscreen');
+          this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [true]);
+        }
+      });
       this.menuService.on('window.halfSize', () => {
         this.changeWindowSize(0.5);
       });
@@ -610,15 +600,6 @@ new Vue({
       this.menuService.on('window.backToLandingView', () => {
         this.$bus.$emit('back-to-landingview');
       });
-      this.menuService.on('help.feedback', () => {
-        this.$electron.shell.openExternal('https://feedback.splayer.org');
-      });
-      this.menuService.on('help.homepage', () => {
-        this.$electron.shell.openExternal('https://beta.splayer.org');
-      });
-      this.menuService.on('help.shortCuts', () => {
-        this.$electron.shell.openExternal('https://github.com/chiflix/splayerx/wiki/SPlayer-Shortcuts-List');
-      });
       this.menuService.on('help.crashReportLocation', () => {
         const { remote } = this.$electron;
         let location = remote.crashReporter.getCrashesDirectory();
@@ -631,28 +612,6 @@ new Vue({
           });
         }
       });
-    },
-    /**
-     * @description 找到所有menu,禁用调.目前就两层循环，如果出现孙子menu，需要再嵌套一层循环
-     * @author tanghaixiang@xindong.com
-     * @date 2019-02-13
-     * @param {Electron.MenuItemConstructorOptions} item
-     */
-    disableMenus(item: Electron.MenuItemConstructorOptions) {
-      if (!this.menuOperationLock && item && item.label) {
-        item.enabled = false;
-        item.submenu && (item.submenu as Electron.Menu).items.forEach((e) => {
-          // this.disableMenus(e);
-          if (!this.menuOperationLock && e && e.label) {
-            e.enabled = false;
-            e.submenu && e.submenu.items.forEach((e) => {
-              if (!this.menuOperationLock && e && e.label) {
-                e.enabled = false;
-              }
-            });
-          }
-        });
-      }
     },
     createMenu() {
       const { Menu, app, dialog } = this.$electron.remote;
@@ -1464,10 +1423,6 @@ new Vue({
         case 221:
           e.preventDefault();
           this.$store.dispatch(videoActions.INCREASE_RATE);
-          break;
-        case 32:
-          e.preventDefault();
-          this.$bus.$emit('toggle-playback');
           break;
         default:
           break;

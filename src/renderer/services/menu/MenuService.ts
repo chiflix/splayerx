@@ -8,39 +8,48 @@ export default class MenuService {
     ipcRenderer.on(channel, callback);
   }
 
-  public updateMenuItemProperty(id: string, property: string, value: unknown) {
-    if (!this.menu) this.menu = remote.Menu.getApplicationMenu() as Electron.Menu;
-    const menuItem = this.menu.getMenuItemById(id);
-    menuItem[property] = value;
+  public updatePaused(id: string, paused: boolean) {
+    ipcRenderer.send('update-paused', id, paused);
   }
 
-  public updateSubmenuItem(id: string, enabled: boolean) {
-    if (!this.menu) this.menu = remote.Menu.getApplicationMenu() as Electron.Menu;
-    const menuItem = this.menu.getMenuItemById(id);
-    if (menuItem) {
-      menuItem.submenu.items.forEach((item: Electron.MenuItem) => {
-        item.enabled = enabled;
-      });
-    }
+  public updateMenuItemChecked(id: string, checked: boolean) {
+    ipcRenderer.send('update-checked', id, checked);
+  }
+
+  public updateMenuItemEnabled(id: string, enabled: boolean) {
+    ipcRenderer.send('update-enabled', id, enabled);
+  }
+
+  public enableSubmenuItem(id: string, enabled: boolean) {
+    ipcRenderer.send('enable-submenu-item', id, enabled);
+  }
+
+  public disableMenus() {
+    this.enableSubmenuItem('playback', false);
+    this.enableSubmenuItem('audio', false);
+    this.enableSubmenuItem('subtitle', false);
+    this.enableSubmenuItem('window', false);
+    this.enableSubmenuItem('file', false);
   }
 
   public menuStateControl(routeName: string) {
     const inPlayingView = routeName === 'playing-view';
     const inWelcomeView = routeName === 'welcome-view' || routeName === 'language-setting';
 
-    this.updateSubmenuItem('playback', inPlayingView);
-    this.updateSubmenuItem('audio', inPlayingView);
-    this.updateSubmenuItem('subtitle', inPlayingView);
-    this.updateSubmenuItem('window', !inWelcomeView);
-    this.updateSubmenuItem('file', !inWelcomeView);
+    this.enableSubmenuItem('playback', inPlayingView);
+    this.enableSubmenuItem('audio', inPlayingView);
+    this.enableSubmenuItem('subtitle', inPlayingView);
+    this.enableSubmenuItem('window', !inWelcomeView);
+    this.enableSubmenuItem('file', !inWelcomeView);
 
-    this.updateMenuItemProperty('splayerx.preferences', 'enabled', !inWelcomeView);
-    this.updateMenuItemProperty('window.halfSize', 'enabled', inPlayingView);
-    this.updateMenuItemProperty('window.originSize', 'enabled', inPlayingView);
-    this.updateMenuItemProperty('window.doubleSize', 'enabled', inPlayingView);
-    this.updateMenuItemProperty('window.maxmize', 'enabled', inPlayingView);
-    this.updateMenuItemProperty('window.backToLandingView', 'enabled', inPlayingView);
-    this.updateMenuItemProperty('window.windowRotate', 'enabled', inPlayingView);
+    this.updateMenuItemEnabled('splayerx.preferences', !inWelcomeView);
+    this.updateMenuItemEnabled('window.bossKey', inPlayingView);
+    this.updateMenuItemEnabled('window.halfSize', inPlayingView);
+    this.updateMenuItemEnabled('window.originSize', inPlayingView);
+    this.updateMenuItemEnabled('window.doubleSize', inPlayingView);
+    this.updateMenuItemEnabled('window.maxmize', inPlayingView);
+    this.updateMenuItemEnabled('window.backToLandingView', inPlayingView);
+    this.updateMenuItemEnabled('window.windowRotate', inPlayingView);
   }
 
   public resolvePlaylistDisplayState(state: boolean) {
@@ -62,7 +71,7 @@ export default class MenuService {
   }
 
   public refreshMenu() {
-
+    ipcRenderer.send('refresh-menu');
   }
 
   public getMenuItemById(id: string): Electron.MenuItem {

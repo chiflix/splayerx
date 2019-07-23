@@ -18,5 +18,17 @@ export default class MenuService {
     ipcMain.on('update-recent-play', (e: Event, items: IMenuDisplayInfo[]) => {
       this.menu.updateRecentPlay(items);
     });
+    ipcMain.on('update-paused', (e: Event, id: string, paused: boolean) => {
+      this.menu.updatePaused(id, paused);
+    });
+    ipcMain.on('update-checked', (e: Event, id: string, checked: boolean) => {
+      this.menu.updateMenuItemChecked(id, checked);
+    });
+    ipcMain.on('update-enabled', (e: Event, id: string, enabled: boolean) => {
+      this.menu.updateMenuItemEnabled(id, enabled);
+    });
+    ipcMain.on('enable-submenu-item', (e: Event, id: string, enabled: boolean) => {
+      this.menu.enableSubmenuItem(id, enabled);
+    });
   }
 }
