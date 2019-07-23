@@ -5,6 +5,7 @@ const { exec } = require('child_process');
 require('events').EventEmitter.prototype._maxListeners = 10000;
 
 const commands = [
+  'npx electron scripts/check-electron-version.js',
   'npm run lint:fix',
 ];
 
