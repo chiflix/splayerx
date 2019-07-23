@@ -2,11 +2,16 @@ import path from 'path';
 import fs from 'fs';
 import { credentials, Metadata } from 'grpc';
 import Vue from 'vue';
-
 import { HealthCheckRequest, HealthCheckResponse } from 'sagi-api/health/v1/health_pb';
 import { HealthClient } from 'sagi-api/health/v1/health_grpc_pb';
 import {
-  MediaTranslationRequest, TranscriptRequest, TranscriptInfo,
+  MediaTranslationRequest,
+  TranscriptRequest,
+  TranscriptInfo,
+  StreamingTranslationTaskRequest,
+  StreamingTranslationTaskResponse,
+  StreamingTranslationRequest,
+  StreamingTranslationRequestConfig,
 } from 'sagi-api/translation/v1/translation_pb';
 import { TranslationClient } from 'sagi-api/translation/v1/translation_grpc_pb';
 import { TrainingData } from 'sagi-api/training/v1/training_pb';
@@ -136,6 +141,44 @@ export class Sagi {
             reject(HealthCheckResponse.ServingStatus[status]);
           } else resolve({ status, version: response.getVersion() });
         }
+      });
+    });
+  }
+
+  public streamingTranslation(
+    mediaIdentity: string,
+    rate: number,
+    audioLanguageCode: string,
+    targetLanguageCode: string,
+  ): any { // eslint-disable-line
+
+    const request = new StreamingTranslationRequest();
+    const requestConfig = new StreamingTranslationRequestConfig();
+    // @ts-ignore
+    const audioConfig = new global.proto.google.cloud.speech.v1
+      .RecognitionConfig([1, rate, audioLanguageCode]);
+    requestConfig.setStreamingConfig(audioConfig);
+    requestConfig.setAudioLanguageCode(audioLanguageCode);
+    requestConfig.setTargetLanguageCode(targetLanguageCode);
+    requestConfig.setMediaIdentity(mediaIdentity);
+    request.setStreamingConfig(requestConfig);
+    const client = new TranslationClient(Sagi.endpoint, this.creds);
+    const stream = client.streamingTranslation();
+    stream.write(request);
+    return stream;
+  }
+
+  public streamingTranslationTask(
+    taskId: string,
+  ): Promise<StreamingTranslationTaskResponse> {
+    const client = new TranslationClient(Sagi.endpoint, this.creds);
+    const taskRequest = new StreamingTranslationTaskRequest();
+    taskRequest.setTaskId(taskId);
+    return new Promise((resolve, reject) => {
+      client.streamingTranslationTask(taskRequest, (err, res) => {
+        console.log(res);
+        if (err) reject(err);
+        else resolve(res);
       });
     });
   }
