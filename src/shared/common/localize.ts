@@ -6,21 +6,25 @@ import { IsMacintosh, IsElectronRenderer } from './platform';
 import messages from '../../renderer/locales/index';
 
 export default class Locale {
-  public displayLanguage: string;
+  private _displayLanguage: string;
+
+  public get displayLanguage(): string {
+    return this._displayLanguage;
+  }
 
   public constructor() {
     this.getDisplayLanguage();
   }
 
   public $t(msg: string): string {
-    if (!this.displayLanguage) this.getDisplayLanguage();
+    if (!this._displayLanguage) this.getDisplayLanguage();
     const msgArray = msg.split('.');
     const result = msgArray.reduce(
       (result, prop): string | object => {
         if (result[prop]) return result[prop];
         return result;
       },
-      messages[this.displayLanguage],
+      messages[this._displayLanguage],
     );
     return typeof result === 'string' ? result : msg;
   }
@@ -29,8 +33,8 @@ export default class Locale {
     const { app } = IsElectronRenderer ? electron.remote : electron;
     const preferencesPath = join(app.getPath('userData'), 'storage', 'preferences.json');
     const data = JSON.parse(readFileSync(preferencesPath) as unknown as string);
-    if (data.displayLanguage) this.displayLanguage = data.displayLanguage;
-    else this.displayLanguage = this.getSystemLocale();
+    if (data.displayLanguage) this._displayLanguage = data.displayLanguage;
+    else this._displayLanguage = this.getSystemLocale();
   }
 
   private getSystemLocale(): string {
