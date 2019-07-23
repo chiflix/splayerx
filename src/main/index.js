@@ -10,7 +10,7 @@ import path, {
 import fs from 'fs';
 import rimraf from 'rimraf';
 // import { audioHandler } from './helpers/audioHandler';
-import { audioGrabService } from '../renderer/services/media/AudioGrabService';
+import { audioGrabService } from './helpers/AudioGrabService';
 import TaskQueue from '../renderer/helpers/proceduralQueue';
 import { jsonStorage } from '../renderer/libs/JsonStorage';
 import './helpers/electronPrototypes';
@@ -537,20 +537,28 @@ function registerMainWindowEvent(mainWindow) {
       preferenceWindow.webContents.send('preferenceDispatch', 'setPreference', args);
     }
   });
-  // handle audio grab on main process
-  ipcMain.on('grab-audio', (events, args) => {
-    // splayerx.getMediaInfo(args.videoSrc, (info) => {
-    // TODO 对比metaInfo 找到对应的音频流，比较 channels
-    audioGrabService.push(args, (grabInfoS) => {
+  /** grab audio logic in main process start */
+  function audioGrabCallBack(buffer, end, time) {
+    try {
       if (mainWindow && !mainWindow.webContents.isDestroyed()) {
-        mainWindow.webContents.send('grab-audio-change', { ...args, grabInfo: grabInfoS });
+        mainWindow.webContents.send('grab-audio-update', { buffer, end, time });
       }
-    });
-    // });
+    } catch (error) {
+      // empty
+    }
+  }
+  ipcMain.on('grab-audio', (events, data) => {
+    audioGrabService.start(data);
+    audioGrabService.removeListener('data', audioGrabCallBack);
+    audioGrabService.on('data', audioGrabCallBack);
+  });
+  ipcMain.on('grab-audio-continue', () => {
+    audioGrabService.next();
   });
   ipcMain.on('grab-audio-stop', () => {
     audioGrabService.stop();
   });
+  /** grab audio logic in main process end */
 }
 
 function createWindow() {

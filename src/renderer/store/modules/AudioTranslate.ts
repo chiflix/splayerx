@@ -2,12 +2,12 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-05 16:03:32
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-07-18 13:23:20
+ * @Last Modified time: 2019-07-23 11:34:21
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { AudioTranslate as m } from '@/store/mutationTypes';
 import { AudioTranslate as a, SubtitleManager as smActions } from '@/store/actionTypes';
-import { audioGrabService } from '@/services/media/AudioGrabService';
+import { audioTranslateService } from '@/services/media/AudioTranslateService';
 import { AITaskInfo } from '@/interfaces/IMediaStorable';
 import { TranscriptInfo } from '@/services/subtitle';
 import { SubtitleControlListItem } from '@/interfaces/ISubtitle';
@@ -16,7 +16,7 @@ import { TranslatedGenerator } from '@/services/subtitle/loaders/translated';
 
 let taskTimer: number;
 let timerCount: number;
-let firstGetTaskEstimateTime: number;
+let staticEstimateTime: number;
 
 export enum AudioTranslateStatus {
   Default = 'default',
@@ -173,8 +173,8 @@ const actions = {
   }: any, audioLanguageCode: string) {
     // 记录当前智能翻译的信息
     commit(m.AUDIO_TRANSLATE_SAVE_KEY, `${getters.mediaHash}-${getters.selectedTargetLanugage}`);
-    audioGrabService.remove();
-    const grab = audioGrabService.send({
+    audioTranslateService.stop();
+    const grab = audioTranslateService.startJob({
       audioId: getters.currentAudioTrackId,
       mediaHash: getters.mediaHash,
       videoSrc: getters.originSrc,
@@ -186,9 +186,12 @@ const actions = {
       dispatch(smActions.changePrimarySubtitle, state.selectedTargetSubtitleId);
       // 设置智能翻译的状态
       commit(m.AUDIO_TRANSLATE_UPDATE_STATUS, AudioTranslateStatus.Grabbing);
-      timerCount = 0;
-      firstGetTaskEstimateTime = (getters.duration * 0.005) + 160;
-      commit(m.AUDIO_TRANSLATE_UPDATE_ESTIMATE_TIME, firstGetTaskEstimateTime);
+      timerCount = 1;
+      // 提取audio大概是暂视频总长的0.006，听写大概是视频的1/5
+      staticEstimateTime = (getters.duration * 0.206);
+      // 但是如果时间超过5分钟就按5分钟倒计时
+      staticEstimateTime = staticEstimateTime > 300 ? 300 : staticEstimateTime;
+      commit(m.AUDIO_TRANSLATE_UPDATE_ESTIMATE_TIME, staticEstimateTime);
       commit(m.AUDIO_TRANSLATE_UPDATE_PROGRESS, timerCount);
       taskTimer = window.setInterval(() => {
         if (state.status !== AudioTranslateStatus.Grabbing) {
@@ -196,8 +199,8 @@ const actions = {
           return;
         }
         timerCount += 1;
-        const estimateTime = firstGetTaskEstimateTime - (Math.log(timerCount) * 2);
-        const progress = 100 - ((estimateTime / firstGetTaskEstimateTime) * 100);
+        const estimateTime = staticEstimateTime - (Math.log(timerCount) * 2);
+        const progress = ((staticEstimateTime - estimateTime) / staticEstimateTime) * 100;
         commit(m.AUDIO_TRANSLATE_UPDATE_ESTIMATE_TIME, estimateTime);
         commit(m.AUDIO_TRANSLATE_UPDATE_PROGRESS, progress);
       }, 1000);
@@ -206,19 +209,15 @@ const actions = {
         if (taskTimer) {
           clearInterval(taskTimer);
         }
-        // 提取音频阶段的进度和倒计时规则
-        // 提取音频阶段，即使全部提取完成进度条也仅仅算一半
-        // 倒计时计算公式(视频时长 - 已经提取音频时长) * 系数 + 预估预约识别的时长
-        // 系数0.005 2000s的视频提取完成话费10s, 系数 = 10 / 2000
-        const estimateTime = firstGetTaskEstimateTime
-          - ((Math.log(timerCount) * 2) + (time * 0.005));
-        const progress = 100 - ((estimateTime / firstGetTaskEstimateTime) * 100);
+        const estimateTime = staticEstimateTime
+          - ((Math.log(timerCount) * 2) + (time * 0.019));
+        const progress = ((staticEstimateTime - estimateTime) / staticEstimateTime) * 100;
         commit(m.AUDIO_TRANSLATE_UPDATE_ESTIMATE_TIME, estimateTime);
         commit(m.AUDIO_TRANSLATE_UPDATE_PROGRESS, progress);
       });
       grab.on('error', (error: Error) => {
         console.log(error, 'audio-log');
-        audioGrabService.remove();
+        audioTranslateService.stop();
         commit(m.AUDIO_TRANSLATE_UPDATE_STATUS, AudioTranslateStatus.Fail);
         if (!state.isModalVisiable) {
           commit(m.AUDIO_TRANSLATE_UPDATE_PROGRESS, 0);
@@ -242,18 +241,21 @@ const actions = {
         }
       });
       grab.on('grabCompleted', () => {
+        console.log('grabCompleted');
         // 假进度
-        timerCount = 0;
-        firstGetTaskEstimateTime = 150;
+        timerCount = 1;
+        let startEstimateTime = state.translateEstimateTime;
+        if (startEstimateTime > staticEstimateTime * 0.6) {
+          startEstimateTime = staticEstimateTime * 0.6;
+        }
         taskTimer = window.setInterval(() => {
           if (state.status !== AudioTranslateStatus.Grabbing) {
             clearInterval(taskTimer);
             return;
           }
           timerCount += 1;
-          const estimateTime = firstGetTaskEstimateTime - Math.log(timerCount);
-          const progress = 100 - ((estimateTime / firstGetTaskEstimateTime) * 50);
-          console.log(estimateTime, progress);
+          const estimateTime = startEstimateTime - Math.log(timerCount);
+          const progress = ((staticEstimateTime - estimateTime) / staticEstimateTime) * 100;
           commit(m.AUDIO_TRANSLATE_UPDATE_ESTIMATE_TIME, estimateTime);
           commit(m.AUDIO_TRANSLATE_UPDATE_PROGRESS, progress);
         }, 1000);
@@ -269,24 +271,24 @@ const actions = {
         if (taskInfo.mediaHash !== getters.mediaHash) {
           return;
         }
-        audioGrabService.taskInfo = taskInfo;
-        let lastProgress = state.translateProgress;
+        audioTranslateService.taskInfo = taskInfo;
         const estimateTime = taskInfo.estimateTime * 1;
-        firstGetTaskEstimateTime = state.translateEstimateTime;
-        if (firstGetTaskEstimateTime > estimateTime) {
-          lastProgress += (firstGetTaskEstimateTime - estimateTime) / firstGetTaskEstimateTime;
-          firstGetTaskEstimateTime = estimateTime;
+        let startEstimateTime = state.translateEstimateTime;
+        let reduce = 1.5;
+        if (startEstimateTime > staticEstimateTime * 0.6) {
+          startEstimateTime = staticEstimateTime * 0.6;
+        } else if (startEstimateTime > estimateTime && estimateTime !== 0) {
+          startEstimateTime = estimateTime;
+        } else if (startEstimateTime < 20) {
+          reduce = startEstimateTime / 20;
         }
-        timerCount = 0;
+        timerCount = 1;
         commit(m.AUDIO_TRANSLATE_UPDATE_STATUS, AudioTranslateStatus.Translating);
-        // 进入服务端语音识别阶段，倒计时完全使用服务器给的倒计时
-        commit(m.AUDIO_TRANSLATE_UPDATE_ESTIMATE_TIME, firstGetTaskEstimateTime);
-        // 进度条计算公式((第一次给的预估时间 - 本次预估时间) / 第一次给的预估时间) + 50
-        commit(m.AUDIO_TRANSLATE_UPDATE_PROGRESS, lastProgress);
         // 开启定时器模拟倒计时和进度
         if (taskTimer) {
           clearInterval(taskTimer);
         }
+        console.log(startEstimateTime, staticEstimateTime);
         taskTimer = window.setInterval(() => {
           if (taskInfo.mediaHash !== getters.mediaHash
             || state.status === AudioTranslateStatus.Fail) {
@@ -294,8 +296,9 @@ const actions = {
             return;
           }
           timerCount += 1;
-          const estimateTime = firstGetTaskEstimateTime - Math.log(timerCount);
-          const progress = 100 - ((estimateTime / firstGetTaskEstimateTime) * (100 - lastProgress));
+          const estimateTime = startEstimateTime - (Math.log(timerCount) * reduce);
+          const progress = ((staticEstimateTime - estimateTime) / staticEstimateTime) * 100;
+          console.log(estimateTime, reduce);
           commit(m.AUDIO_TRANSLATE_UPDATE_ESTIMATE_TIME, estimateTime);
           commit(m.AUDIO_TRANSLATE_UPDATE_PROGRESS, progress);
         }, 1000);
@@ -306,18 +309,18 @@ const actions = {
         if (taskTimer) {
           clearInterval(taskTimer);
         }
-        firstGetTaskEstimateTime = 0;
+        staticEstimateTime = 0;
         const targetId = state.selectedTargetSubtitleId;
         commit(m.AUDIO_TRANSLATE_HIDE_MODAL);
         commit(m.AUDIO_TRANSLATE_UPDATE_STATUS, AudioTranslateStatus.Success);
         // 成功后清理任务缓存
         mediaStorageService.clearAsyncTaskInfo(state.key);
         // 结束任务
-        audioGrabService.remove();
+        audioTranslateService.stop();
         // 恢复vuex
         commit(m.AUDIO_TRANSLATE_RECOVERY);
         let txt = this.$i18n.t('translateBubble.bubbleWhenSuccessOnOtherVideo', this.$i18n.locale, this.$i18n.locale);
-        if (audioGrabService.mediaHash === getters.mediaHash) {
+        if (audioTranslateService.mediaHash === getters.mediaHash) {
           txt = this.$i18n.t('translateBubble.bubbleWhenSuccess', this.$i18n.locale, this.$i18n.locale);
           // 先删除AI按钮对应的ID
           dispatch(smActions.removeSubtitle, targetId);
@@ -426,10 +429,14 @@ const actions = {
     // 如果时服务器已经开始任务的
     // 丢弃之前先把本次任务记录到本地
     if (getters.isTranslating || state.status === AudioTranslateStatus.Back) {
-      audioGrabService.saveTask();
+      audioTranslateService.saveTask();
+    }
+    // 清除之前的倒计时
+    if (taskTimer) {
+      clearInterval(taskTimer);
     }
     // 丢弃service
-    audioGrabService.remove();
+    audioTranslateService.stop();
     // 丢弃任务，执行用户强制操作
     dispatch(smActions.changePrimarySubtitle, '');
     commit(m.AUDIO_TRANSLATE_RECOVERY);
