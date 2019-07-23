@@ -618,7 +618,6 @@ const actions = {
   async [a.deleteSubtitlesByUuid]({ state, dispatch }: any, subtitles: SubtitleControlListItem[]) {
     subtitles.forEach(({ id }) => {
       if (store.hasModule(id)) dispatch(`${id}/${subActions.delete}`);
-      dispatch(`${id}/${subActions.delete}`);
       dispatch(a.removeSubtitle, id);
     });
     return removeSubtitleItemsFromList(subtitles, state.playlistId, state.mediaItemId);
@@ -807,6 +806,7 @@ const actions = {
   },
   async [a.alterPrimaryDelay]({ state, dispatch, commit }: any, deltaInSeconds: number) {
     const { primarySubtitleId } = state;
+    if (!store.hasModule(primarySubtitleId)) return;
     const delay = await dispatch(`${primarySubtitleId}/${subActions.alterDelay}`, deltaInSeconds);
     commit(m.setPrimaryDelay, delay);
     setDelayTimeout();
