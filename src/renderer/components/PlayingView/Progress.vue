@@ -2,9 +2,16 @@
   <div style="width: 100%; height: 100%;">
     <div
       v-if="type === 'line'"
-      :style="`--tooltip-width: ${progress}%; --tooltip-color: ${frontColor};`"
       class="line"
-    />
+    >
+      <div
+        :style="{
+          width: `${progress}%`,
+          background: frontColor,
+        }"
+        :class="`${animate ? 'animate line-progress' : 'line-progress'}`"
+      />
+    </div>
     <div
       v-if="type === 'circle'"
       :style="`--tooltip-width: ${progress}%;`"
@@ -50,12 +57,20 @@ export default Vue.extend({
       type: String,
       default: '#ffffff',
     },
+    animate: {
+      type: Boolean,
+      default: true,
+    },
   },
   watch: {
   },
 });
 </script>
 <style lang="scss" scoped>
+  @keyframes progress {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(100%); }
+  }
   .line {
     height: 100%;
     min-height: 7px;
@@ -63,13 +78,29 @@ export default Vue.extend({
     border-radius: 6px;
     position: relative;
     overflow: hidden;
-    &::before {
-      content: "";
+    .line-progress {
       position: absolute;
-      width: var(--tooltip-width);
       height: 100%;
-      background: var(--tooltip-color);
       border-radius: 6px;
+      overflow: hidden;
+      &.animate {
+        &::before {
+          content: "";
+          position: absolute;
+          width: 200%;
+          height: 100%;
+          background-image: linear-gradient(
+            270deg,
+          rgba(255,255,255,0.00) 0%,
+          rgba(255,255,255,0.75) 34%,
+          rgba(255,255,255,0.92) 49%,
+          rgba(255,255,255,0.76) 64%,
+          rgba(255,255,255,0.00) 100%,
+          rgba(255,255,255,0.00) 100%
+          );
+          animation: progress 2s infinite;
+        }
+      }
     }
   }
   .circle {

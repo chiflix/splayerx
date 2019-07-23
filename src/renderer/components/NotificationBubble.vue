@@ -24,7 +24,7 @@
       class="mas-privacy-bubble"
     />
     <transition name="bubble">
-      <translate-bubble
+      <TranslateBubble
         v-if="isTranslateBubbleVisiable"
         :message="translateBubbleMessage"
         :type="translateBubbleType"
@@ -92,7 +92,7 @@ export default {
     NextVideo,
     PrivacyBubble,
     MASPrivacyBubble,
-    'translate-bubble': TranslateBubble,
+    TranslateBubble,
   },
   data() {
     return {

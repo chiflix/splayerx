@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-06-20 18:03:14
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-07-23 11:49:18
+ * @Last Modified time: 2019-07-23 18:22:57
  */
 
 // @ts-ignore
@@ -15,7 +15,6 @@ import {
 } from 'sagi-api/translation/v1/translation_pb';
 import { AITaskInfo } from '@/interfaces/IMediaStorable';
 import sagi from '@/libs/sagi';
-import MediaStorageService, { mediaStorageService } from '../storage/MediaStorageService';
 import { TranscriptInfo } from '../subtitle';
 
 type JobData = {
@@ -24,7 +23,6 @@ type JobData = {
   videoSrc: string,
   audioLanguageCode: string,
   targetLanguageCode: string,
-  callback?: Function,
 }
 
 declare interface AudioTranslateService { // eslint-disable-line
@@ -54,11 +52,8 @@ class AudioTranslateService extends EventEmitter {
 
   public timeoutTimer: NodeJS.Timeout;
 
-  private mediaStorageService: MediaStorageService;
-
-  public constructor(mediaStorageService: MediaStorageService) {
+  public constructor() {
     super();
-    this.mediaStorageService = mediaStorageService;
     this.ipcCallBack = this.ipcCallBack.bind(this);
   }
 
@@ -86,13 +81,6 @@ class AudioTranslateService extends EventEmitter {
       this.streamClient = null;
     }
     ipcRenderer.send('grab-audio-stop');
-  }
-
-  public saveTask() {
-    const { mediaHash, targetLanguageCode } = this;
-    if (this.taskInfo) {
-      mediaStorageService.setAsyncTaskInfo(`${mediaHash}-${targetLanguageCode}`, this.taskInfo);
-    }
   }
 
   private write(framebuf: Buffer) {
@@ -228,6 +216,6 @@ class AudioTranslateService extends EventEmitter {
 }
 export default AudioTranslateService;
 
-const audioTranslateService = new AudioTranslateService(mediaStorageService);
+const audioTranslateService = new AudioTranslateService();
 
 export { audioTranslateService };

@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-05 16:03:32
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-07-23 11:34:21
+ * @Last Modified time: 2019-07-23 18:22:46
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { AudioTranslate as m } from '@/store/mutationTypes';
@@ -280,7 +280,9 @@ const actions = {
         } else if (startEstimateTime > estimateTime && estimateTime !== 0) {
           startEstimateTime = estimateTime;
         } else if (startEstimateTime < 20) {
-          reduce = startEstimateTime / 20;
+          reduce = startEstimateTime / 30;
+        } else if (startEstimateTime < 5) {
+          reduce = 0;
         }
         timerCount = 1;
         commit(m.AUDIO_TRANSLATE_UPDATE_STATUS, AudioTranslateStatus.Translating);
@@ -369,7 +371,6 @@ const actions = {
   [a.AUDIO_TRANSLATE_DISCARD]( // eslint-disable-line complexity
     {
       commit,
-      getters,
       state,
       dispatch,
     }: any,
@@ -425,11 +426,6 @@ const actions = {
       }
     } catch (error) {
       // empty
-    }
-    // 如果时服务器已经开始任务的
-    // 丢弃之前先把本次任务记录到本地
-    if (getters.isTranslating || state.status === AudioTranslateStatus.Back) {
-      audioTranslateService.saveTask();
     }
     // 清除之前的倒计时
     if (taskTimer) {

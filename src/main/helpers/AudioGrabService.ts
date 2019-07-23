@@ -2,29 +2,38 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-22 17:18:34
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-07-23 09:44:49
+ * @Last Modified time: 2019-07-23 15:34:01
  */
 
 import { EventEmitter } from 'events';
+// @ts-ignore
 import { splayerx } from 'electron';
 
-export default class AudioGrabService extends EventEmitter {
-  constructor() {
-    super();
-    this.mediaHash = null;
-    this.videoSrc = null;
-    this.audioId = 0;
-    this.pts = '0';
-    this.audioChannel = 0;
-    this.rate = 16000;
-    this.queue = [];
-    this._count = 0;
-    this.grabTime = 0;
-    this.ipc = null;
-    this.status = 0; // 0 grab, 1 stop
-  }
+type JobData = {
+  videoSrc: string,
+  audioId: number,
+}
 
-  start(data) {
+export default class AudioGrabService extends EventEmitter {
+  private videoSrc: string;
+
+  private audioId: number;
+
+  private pts: string;
+
+  private audioChannel: number;
+
+  private rate: number = 16000;
+
+  private _count: number;
+
+  private grabTime: number;
+
+  private queue: [JobData];
+
+  private status: number; // 0 grab, 1 stop
+
+  public start(data: JobData) {
     if (this.queue) {
       this.queue.push(data);
     } else {
@@ -38,7 +47,7 @@ export default class AudioGrabService extends EventEmitter {
     }
   }
 
-  startJob(data) {
+  private startJob(data: JobData) {
     this.videoSrc = data.videoSrc;
     this.audioId = data.audioId;
     this.pts = '0';
@@ -48,7 +57,7 @@ export default class AudioGrabService extends EventEmitter {
     this.grabAudio();
   }
 
-  grabAudio() {
+  private grabAudio() {
     const {
       videoSrc, pts, audioChannel, rate, handleCallBack, audioId,
     } = this;
@@ -65,7 +74,7 @@ export default class AudioGrabService extends EventEmitter {
     );
   }
 
-  handleCallBack(err, framebuf, framedata) {
+  private handleCallBack(err: string, framebuf: Buffer, framedata: string) {
     if (this.status === 1) return;
     if (err !== 'EOF' && framedata && framebuf) {
       this._count += 1;
@@ -84,12 +93,12 @@ export default class AudioGrabService extends EventEmitter {
     }
   }
 
-  next() {
+  public next() {
     // empty
     this.grabAudio();
   }
 
-  stop() {
+  public stop() {
     this.pts = '0';
     this.status = 1;
     splayerx.stopGrabAudioFrame();

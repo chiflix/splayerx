@@ -64,7 +64,8 @@
         class="progress-wraper"
       >
         <Progress
-          :front-color="isTranslateFail ? 'rgba(255,255,255,0.3)' : '#ffffff'"
+          :front-color="isTranslateFail ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.7)'"
+          :animate="!isTranslateFail"
           :progress="translateProgress"
         />
         <div

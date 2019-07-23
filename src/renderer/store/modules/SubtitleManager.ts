@@ -165,7 +165,8 @@ function setDelayTimeout() {
   clearTimeout(alterDelayTimeoutId);
   alterDelayTimeoutId = setTimeout(() => store.dispatch(a.storeSubtitleDelays), 10000);
 }
-function fetchOnlineListWithBubble(
+function fetchOnlineListWraper(
+  bubble: boolean,
   videoSrc: string,
   languageCode: LanguageCode,
   hints?: string,
@@ -173,8 +174,10 @@ function fetchOnlineListWithBubble(
   let results: TranscriptInfo[] = [];
   return new Promise(async (resolve) => {
     const onlineTimeoutId = setTimeout(() => {
+      if (bubble) {
+        addBubble(REQUEST_TIMEOUT, { id: `fetchOnlineListWithBubble-${videoSrc}` });
+      }
       resolve(results);
-      addBubble(REQUEST_TIMEOUT, { id: `fetchOnlineListWithBubble-${videoSrc}` });
     }, 10000);
     try {
       results = await fetchOnlineList(videoSrc, languageCode, hints);
@@ -344,12 +347,9 @@ const actions = {
     } = getters;
     if (bubble) addBubble(ONLINE_LOADING);
     const hints = generateHints(originSrc);
-    return Promise.all(bubble ? [
-      fetchOnlineListWithBubble(originSrc, primaryLanguage, hints),
-      fetchOnlineListWithBubble(originSrc, secondaryLanguage, hints),
-    ] : [
-      fetchOnlineList(originSrc, primaryLanguage, hints),
-      fetchOnlineList(originSrc, secondaryLanguage, hints),
+    return Promise.all([
+      fetchOnlineListWraper(!!bubble, originSrc, primaryLanguage, hints),
+      fetchOnlineListWraper(!!bubble, originSrc, secondaryLanguage, hints),
     ]).then((resultsList) => {
       const results = flatten(resultsList);
       const newSubtitlesToAdd: TranscriptInfo[] = [];

@@ -103,10 +103,6 @@ export default Vue.extend({
       required: true,
     },
   },
-  data() {
-    return {
-    };
-  },
   computed: {
     showWhenGrab() {
       // 当前正在提取音频,确认删除
