@@ -18,8 +18,11 @@ export default class MenuService {
     ipcMain.on('update-recent-play', (e: Event, items: IMenuDisplayInfo[]) => {
       this.menu.updateRecentPlay(items);
     });
-    ipcMain.on('update-paused', (e: Event, id: string, paused: boolean) => {
-      this.menu.updatePaused(id, paused);
+    ipcMain.on('update-paused', (e: Event, paused: boolean) => {
+      this.menu.updatePaused(paused);
+    });
+    ipcMain.on('update-fullscreen', (e: Event, isFullScreen: boolean) => {
+      this.menu.updateFullScreen(isFullScreen);
     });
     ipcMain.on('update-checked', (e: Event, id: string, checked: boolean) => {
       this.menu.updateMenuItemChecked(id, checked);

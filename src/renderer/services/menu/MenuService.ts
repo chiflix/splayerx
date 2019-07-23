@@ -8,8 +8,12 @@ export default class MenuService {
     ipcRenderer.on(channel, callback);
   }
 
-  public updatePaused(id: string, paused: boolean) {
-    ipcRenderer.send('update-paused', id, paused);
+  public updatePaused(paused: boolean) {
+    ipcRenderer.send('update-paused', paused);
+  }
+
+  public updateFullScreen(isFullScreen: boolean) {
+    ipcRenderer.send('update-fullscreen', isFullScreen);
   }
 
   public updateMenuItemChecked(id: string, checked: boolean) {

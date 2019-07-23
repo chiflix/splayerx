@@ -239,7 +239,7 @@ new Vue({
     },
     list(val: SubtitleControlListItem[], oldval: SubtitleControlListItem[]) {
       if (val.length !== oldval.length) {
-        this.refreshMenu();
+        this.recentSubMenu();
       }
     },
     primarySubtitleId(id: string) {
@@ -275,10 +275,7 @@ new Vue({
       });
     },
     isFullScreen(val) {
-      this.menuService.updateMenuItemLabel(
-        'window.fullscreen',
-        val ? this.$t('msg.window.exitFullScreen') : this.$t('msg.window.enterFullScreen'),
-      );
+      this.menuService.updateFullScreen(val);
     },
     paused(val) {
       const browserWindow = this.$electron.remote.getCurrentWindow();
@@ -287,7 +284,7 @@ new Vue({
       } else if (!val && this.menu && this.menuService.getMenuItemById('windowFront').checked) {
         browserWindow.setAlwaysOnTop(true);
       }
-      this.menuService.updatePaused('playback.playOrPause', val);
+      this.menuService.updatePaused(val);
     },
     isMinimized(val) {
       // 如果window最小化，那么就禁用menu，除了第一选项
@@ -385,6 +382,7 @@ new Vue({
       this.menuService.menuStateControl(this.currentRouteName);
 
       await this.menuService.addRecentPlayItems();
+      this.recentSubMenu();
 
       this.menuService.getMenuItemById('subtitle.increasePrimarySubDelay').enabled = !!this.primarySubtitleId;
       this.menuService.getMenuItemById('subtitle.decreasePrimarySubDelay').enabled = !!this.primarySubtitleId;
@@ -420,6 +418,9 @@ new Vue({
           this.$store.dispatch('UPDATE_DEFAULT_DIR', defaultPath);
           this.openFilesByDialog({ defaultPath });
         }
+      });
+      this.menuService.on('file.openRecent', (e: Event, id: number) => {
+        this.openPlayList(id);
       });
       this.menuService.on('file.clearHistory', () => {
         this.infoDB.clearAll();
@@ -1155,7 +1156,7 @@ new Vue({
         if (!this.menu) return;
         this.menuStateControl(this.currentRouteName);
 
-        this.menuService.getMenuItemById('increasePrimarySubDelay').enabled = !!this.primarySubtitleId;
+        this.menuService.updateMenuItemEnabled('increasePrimarySubDelay', !!this.primarySubtitleId);
         this.menuService.getMenuItemById('decreasePrimarySubDelay').enabled = !!this.primarySubtitleId;
         this.menuService.getMenuItemById('increaseSecondarySubDelay').enabled = !!this.secondarySubtitleId;
         this.menuService.getMenuItemById('decreaseSecondarySubDelay').enabled = !!this.secondarySubtitleId;
@@ -1202,6 +1203,7 @@ new Vue({
       return item.name;
     },
     recentSubTmp(item: SubtitleControlListItem, isFirstSubtitleType: boolean) {
+      console.log('aa', item);
       return {
         id: isFirstSubtitleType ? `sub${item.id}` : `secondSub${item.id}`,
         visible: true,
@@ -1248,6 +1250,7 @@ new Vue({
         (tmp.submenu as Electron.MenuItemConstructorOptions[])
           .splice(index + 1, 1, this.recentSubTmp(item, true));
       });
+      console.log('ss', tmp);
       return tmp;
     },
     recentSecondarySubMenu() {

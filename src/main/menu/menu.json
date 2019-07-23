@@ -245,7 +245,8 @@
       {
         "id": "window.minimize",
         "label": "msg.window.minimize",
-        "role": "minimize"
+        "role": "minimize",
+        "enabled": true
       },
       {
         "id": "menubar.separator"

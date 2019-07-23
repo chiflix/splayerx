@@ -48,9 +48,14 @@ export default class Menubar {
     this.mainWindow = window;
   }
 
-  public updatePaused(id: string, paused: boolean) {
+  public updatePaused(paused: boolean) {
     this.paused = paused;
-    this.install();
+    this.refreshPlaybackMenu();
+  }
+
+  public updateFullScreen(isFullScreen: boolean) {
+    this.isFullScreen = isFullScreen;
+    this.refreshWindowMenu();
   }
 
   public updateMenuItemChecked(id: string, checked: boolean) {
@@ -66,22 +71,41 @@ export default class Menubar {
     if (menuItem) {
       menuItem.submenu.items.forEach((item: Electron.MenuItem) => {
         item.enabled = enabled;
+        if (item.submenu) {
+          item.submenu.items.forEach((item: Electron.MenuItem) => {
+            item.enabled = enabled;
+          });
+        }
       });
     }
   }
 
   public updateRecentPlay(items: IMenuDisplayInfo[]) {
-    if (!this.menubar) this.menubar = Menu.getApplicationMenu() as Electron.Menu;
-    const menuItem = this.menubar.getMenuItemById('file.openRecent');
+    const recentMenu = this.menubar.getMenuItemById('file.openRecent').submenu;
+    // @ts-ignore
+    recentMenu.clear();
+
     items.forEach(({ id, label }) => {
-      const item = this.createMenuItem(label, () => {
-        if (!this.mainWindow.webContents.isDestroyed()) {
-          this.mainWindow.webContents.send('file.openRecent', id);
-        }
+      const item = new MenuItem({
+        id: `file.openRecent.${id}`,
+        label,
+        click: () => {
+          if (!this.mainWindow.webContents.isDestroyed()) {
+            this.mainWindow.webContents.send('file.openRecent', id);
+          }
+        },
       });
-      menuItem.submenu.append(item);
+      recentMenu.append(item);
     });
+
+    Menu.setApplicationMenu(this.menubar);
   }
+
+  // public updatePrimarySub(items: ) {
+  //   const primarySub = this.menubar.getMenuItemById('subtitle.mainSubtitle').submenu;
+  //   // @ts-ignore
+  //   primarySub.clear();
+  // }
 
   private install(): void {
     // Store old menu in our array to avoid GC to collect the menu and crash. See #55347
@@ -102,6 +126,51 @@ export default class Menubar {
     } else {
       Menu.setApplicationMenu(null);
     }
+  }
+
+  private refreshPlaybackMenu() {
+    const playbackMenu = this.menubar.getMenuItemById('playback').submenu;
+    // @ts-ignore
+    playbackMenu.clear();
+
+    this.getMenuItemTemplate('playback').items.forEach((menuItem: MenubarMenuItem) => {
+      if (isSeparator(menuItem)) {
+        const item = separator();
+        playbackMenu.append(item);
+      } else {
+        if (menuItem.id === 'playback.playOrPause') {
+          menuItem.label = this.paused ? this.$t('msg.playback.play') : this.$t('msg.playback.pause');
+        }
+        const item = this.createMenuItemByTemplate(menuItem);
+        playbackMenu.append(item);
+      }
+    });
+
+    Menu.setApplicationMenu(this.menubar);
+  }
+
+  private refreshWindowMenu() {
+    const windowMenu = this.menubar.getMenuItemById('window').submenu;
+    // @ts-ignore
+    windowMenu.clear();
+
+    this.getMenuItemTemplate('window').items.forEach((menuItem: MenubarMenuItem) => {
+      if (isSeparator(menuItem)) {
+        const item = separator();
+        windowMenu.append(item);
+      } else if (isRole(menuItem)) {
+        const item = this.createRoleMenuItem(menuItem.label, menuItem.role, menuItem.enabled);
+        windowMenu.append(item);
+      } else {
+        if (menuItem.id === 'window.fullscreen') {
+          menuItem.label = this.isFullScreen ? this.$t('msg.window.exitFullScreen') : this.$t('msg.window.enterFullScreen');
+        }
+        const item = this.createMenuItemByTemplate(menuItem);
+        windowMenu.append(item);
+      }
+    });
+
+    Menu.setApplicationMenu(this.menubar);
   }
 
   private createMacMenu(): Electron.Menu {
@@ -248,8 +317,6 @@ export default class Menubar {
     macWindowMenu.getMenuItemById('window.bossKey').click = () => {
       app.emit('bossKey');
     };
-    macWindowMenu.getMenuItemById('window.fullscreen').label
-      = this.isFullScreen ? this.$t('msg.window.exitFullScreen') : this.$t('msg.window.enterFullScreen');
     const macWindowMenuItem = new MenuItem({ id: 'window', label: this.$t('msg.window.name'), submenu: macWindowMenu });
     return macWindowMenuItem;
   }
