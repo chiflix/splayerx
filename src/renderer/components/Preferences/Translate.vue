@@ -2,22 +2,22 @@
   <div class="privicy tabcontent">
     <div class="settingItem">
       <BaseCheckBox v-model="privacyAgreement">
-        {{ $t('preferences.privacy.privacyConfirm') }}
+        {{ $t('preferences.translate.translateConfirm') }}
       </BaseCheckBox>
       <div
         :style="{opacity: privacyAgreement ? 1 : 0.3}"
         class="settingItem__attached"
       >
         <div class="settingItem__title">
-          {{ $t('preferences.privacy.languagePriority') }}
+          {{ $t('preferences.translate.languagePriority') }}
         </div>
         <div class="settingItem__description">
-          {{ $t('preferences.privacy.languageDescription') }}
+          {{ $t('preferences.translate.languageDescription') }}
         </div>
         <table>
           <tr>
             <td class="dropdown__title">
-              {{ $t('preferences.privacy.primary') }}
+              {{ $t('preferences.translate.primary') }}
             </td>
             <td>
               <div class="settingItem__input dropdown">
@@ -54,7 +54,7 @@
           </tr>
           <tr>
             <td class="dropdown__title">
-              {{ $t('preferences.privacy.secondary') }}
+              {{ $t('preferences.translate.secondary') }}
             </td>
             <td>
               <div class="settingItem__input dropdown">
@@ -86,7 +86,7 @@
                       <span
                         v-if="language === primaryLanguage && language !== noLanguage"
                         style="color: rgba(255,255,255,0.5)"
-                      >- {{ $t('preferences.privacy.primary') }}</span>
+                      >- {{ $t('preferences.translate.primary') }}</span>
                     </div>
                   </div>
                   <Icon
@@ -125,7 +125,7 @@ export default {
     return {
       showFirstSelection: false,
       showSecondSelection: false,
-      noLanguage: this.$t('preferences.privacy.none'),
+      noLanguage: this.$t('preferences.translate.none'),
     };
   },
   computed: {

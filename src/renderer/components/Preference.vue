@@ -30,6 +30,13 @@
         {{ $t('preferences.general.generalSetting') }}
       </div>
       <div
+        :class="currentPreference === 'Translate' ? 'tablist__tab--selected' : ''"
+        @mouseup="handleMouseup('Translate')"
+        class="tablist__tab"
+      >
+        {{ $t('preferences.translate.translateSetting') }}
+      </div>
+      <div
         :class="currentPreference === 'Privacy' ? 'tablist__tab--selected' : ''"
         @mouseup="handleMouseup('Privacy')"
         class="tablist__tab"
@@ -79,9 +86,11 @@ import electron from 'electron';
 import Icon from '@/components/BaseIconContainer.vue';
 import General from './Preferences/General.vue';
 import Privacy from './Preferences/Privacy.vue';
+import Translate from './Preferences/Translate.vue';
 
 Vue.component('General', General);
 Vue.component('Privacy', Privacy);
+Vue.component('Translate', Translate);
 
 export default {
   name: 'Preference',

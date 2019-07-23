@@ -228,16 +228,19 @@
       "others": "Others",
       "switchDisplayLanguages": "Display Language controls the language you see in SPlayer."
     },
-    "privacy": {
+    "translate": {
       "languageDescription": "Upload anonymous data to fetch translation results in the following language,  no privacy information will be included.",
       "languagePriority": "Language Preference",
       "none": "None",
       "primary": "Primary",
-      "privacyConfirm": "Enable Smart Translation",
-      "privacySetting": "Translation",
+      "translateConfirm": "Enable Smart Translation",
+      "translateSetting": "Translation",
       "secondary": "Secondary",
       "setAsDefault": "Set SPlayer as the Default Application",
       "settings": "Settings"
+    },
+    "privacy": {
+      "privacySetting": "Privacy"
     }
   },
   "privacyBubble": {

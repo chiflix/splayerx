@@ -226,13 +226,13 @@
       "others": "その他",
       "switchDisplayLanguages": "SPlayerの言語表示を修正。"
     },
-    "privacy": {
+    "translate": {
       "languageDescription": "次の言語で翻訳結果を取得するために匿名データをアップロードします。プライバシー情報は含まれません。",
       "languagePriority": "言語選択",
       "none": "なし",
       "primary": "ファースト",
-      "privacyConfirm": "Smart Translationを開く",
-      "privacySetting": "翻訳設定",
+      "translateConfirm": "Smart Translationを開く",
+      "translateSetting": "翻訳設定",
       "secondary": "セカンド",
       "setAsDefault": "SPlayerをデフォルトにする",
       "settings": "設定"
