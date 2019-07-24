@@ -165,7 +165,7 @@ new Vue({
     };
   },
   computed: {
-    ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winAngle', 'winWidth', 'winHeight', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'list', 'enabledSecondarySub', 'isRefreshing', 'browsingSize', 'pipSize', 'pipPos',
+    ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winAngle', 'winWidth', 'winHeight', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'list', 'enabledSecondarySub', 'isRefreshing', 'browsingSize', 'pipSize', 'pipPos', 'barrageOpen',
       'primarySubtitleId', 'secondarySubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isHiddenByBossKey', 'isMinimized', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle', 'displayLanguage', 'calculatedNoSub', 'sizePercent', 'snapshotSavedPath', 'duration', 'reverseScrolling',
     ]),
     ...inputMapGetters({
@@ -355,6 +355,7 @@ new Vue({
       this.$store.dispatch('updateBrowsingSize', data.browsingSize || this.browsingSize);
       this.$store.dispatch('updatePipSize', data.pipSize || this.pipSize);
       this.$store.dispatch('updatePipPos', data.pipPos || this.pipPos);
+      this.updateBarrageOpen(data.barrageOpen || this.barrageOpen);
     });
     this.$bus.$on('delete-file', () => {
       this.refreshMenu();
@@ -521,6 +522,7 @@ new Vue({
       updateSubSettingsType: subtitleActions.UPDATE_SUBTITLE_SETTINGS_TYPE,
       changePrimarySubDelay: SubtitleManager.alterPrimaryDelay,
       changeSecondarySubDelay: SubtitleManager.alterSecondaryDelay,
+      updateBarrageOpen: browsingActions.UPDATE_BARRAGE_OPEN,
     }),
     /**
      * @description 找到所有menu,禁用调.目前就两层循环，如果出现孙子menu，需要再嵌套一层循环

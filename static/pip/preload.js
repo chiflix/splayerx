@@ -38,4 +38,9 @@ document.addEventListener('DOMContentLoaded', () => {
     evt.preventDefault();
     sendToHost('dragleave', { dragover: false });
   });
+  window.addEventListener('keydown', (evt) => {
+    if (document.webkitIsFullScreen && evt.keyCode === 27) {
+      document.webkitCancelFullScreen();
+    }
+  });
 });
