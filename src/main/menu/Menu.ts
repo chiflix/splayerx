@@ -28,7 +28,7 @@ function isRole(menuItem: MenubarMenuItem): menuItem is IMenubarMenuItemRole {
 }
 
 export default class Menubar {
-  private mainWindow: Electron.BrowserWindow;
+  private mainWindow: Electron.BrowserWindow | null;
 
   private locale: Locale;
 
@@ -43,32 +43,43 @@ export default class Menubar {
     this.install();
   }
 
-  public setMainWindow(window: Electron.BrowserWindow) {
-    if (!window) {
-      this.enableSubmenuItem('playback', false);
-      this.enableSubmenuItem('audio', false);
-      this.enableSubmenuItem('subtitle', false);
-      this.enableSubmenuItem('window', false);
-      this.enableSubmenuItem('file.openRecent', false);
-
-      this.updateMenuItemEnabled('file.launch', true);
-      this.updateMenuItemEnabled('file.open', false);
-      this.updateMenuItemEnabled('file.clearHistory', false);
-      this.updateMenuItemEnabled('file.closeWindow', false);
-    } else {
-      this.enableSubmenuItem('playback', true);
-      this.enableSubmenuItem('audio', true);
-      this.enableSubmenuItem('subtitle', true);
-      this.enableSubmenuItem('window', true);
-      this.enableSubmenuItem('file.openRecent', true);
-
-      this.updateMenuItemEnabled('file.launch', false);
-      this.updateMenuItemEnabled('file.open', true);
-      this.updateMenuItemEnabled('file.clearHistory', true);
-      this.updateMenuItemEnabled('file.closeWindow', true);
-    }
+  public setMainWindow(window: Electron.BrowserWindow | null) {
     // may replace this way of getting mainWindow by window service or else...
     this.mainWindow = window;
+  }
+
+  public menuStateControl(routeName: string) {
+    const inPlayingView = routeName === 'playing-view';
+    const inWelcomeView = routeName === 'welcome-view' || routeName === 'language-setting';
+
+    this.enableSubmenuItem('playback', inPlayingView);
+    this.enableSubmenuItem('audio', inPlayingView);
+    this.enableSubmenuItem('subtitle', inPlayingView);
+    this.enableSubmenuItem('window', !inWelcomeView);
+    this.enableSubmenuItem('file', !inWelcomeView);
+    this.updateMenuItemEnabled('file.launch', false);
+
+    this.updateMenuItemEnabled('splayerx.preferences', !inWelcomeView);
+    this.updateMenuItemEnabled('window.bossKey', inPlayingView);
+    this.updateMenuItemEnabled('window.halfSize', inPlayingView);
+    this.updateMenuItemEnabled('window.originSize', inPlayingView);
+    this.updateMenuItemEnabled('window.doubleSize', inPlayingView);
+    this.updateMenuItemEnabled('window.maxmize', inPlayingView);
+    this.updateMenuItemEnabled('window.backToLandingView', inPlayingView);
+    this.updateMenuItemEnabled('window.windowRotate', inPlayingView);
+  }
+
+  public disableMenu() {
+    this.enableSubmenuItem('playback', false);
+    this.enableSubmenuItem('audio', false);
+    this.enableSubmenuItem('subtitle', false);
+    this.enableSubmenuItem('window', false);
+    this.enableSubmenuItem('file.openRecent', false);
+
+    this.updateMenuItemEnabled('file.launch', true);
+    this.updateMenuItemEnabled('file.open', false);
+    this.updateMenuItemEnabled('file.clearHistory', false);
+    this.updateMenuItemEnabled('file.closeWindow', false);
   }
 
   public updatePaused(paused: boolean) {
@@ -113,7 +124,7 @@ export default class Menubar {
         id: `file.openRecent.${id}`,
         label,
         click: () => {
-          if (!this.mainWindow.webContents.isDestroyed()) {
+          if (this.mainWindow) {
             this.mainWindow.webContents.send('file.openRecent', id);
           }
         },
@@ -134,7 +145,7 @@ export default class Menubar {
         type: 'radio',
         label,
         click: () => {
-          if (!this.mainWindow.webContents.isDestroyed()) {
+          if (this.mainWindow) {
             this.mainWindow.webContents.send('subtitle.mainSubtitle', id);
           }
         },
@@ -158,7 +169,7 @@ export default class Menubar {
         type,
         label,
         click: () => {
-          if (!this.mainWindow.webContents.isDestroyed()) {
+          if (this.mainWindow) {
             this.mainWindow.webContents.send('subtitle.secondarySubtitle', id);
           }
         },
@@ -179,7 +190,7 @@ export default class Menubar {
         type: 'radio',
         label,
         click: () => {
-          if (!this.mainWindow.webContents.isDestroyed()) {
+          if (this.mainWindow) {
             this.mainWindow.webContents.send('audio.switchAudioTrack', id);
           }
         },
@@ -303,7 +314,18 @@ export default class Menubar {
     const menubar = new Menu();
 
     // File
-    // const fileMenuItem = this.createFileMenu();
+    this.getMenuItemTemplate('file').items.forEach((item: MenubarMenuItem) => {
+      if (item.id === 'file.open') {
+        const menuItem = item as IMenubarMenuItemAction;
+        menubar.append(this.createMenuItemByTemplate(menuItem));
+      } else if (item.id === 'file.openRecent') {
+        const menuItem = item as IMenubarMenuItemSubmenu;
+        menubar.append(this.createSubMenuItem(`msg.${menuItem.id}`, menuItem.submenu));
+      } else if (item.id === 'file.closeWindow') {
+        const menuItem = item as IMenubarMenuItemRole;
+        menubar.append(this.createRoleMenuItem(menuItem.label, menuItem.role, menuItem.enabled));
+      }
+    });
 
     // menubar.append(fileMenuItem);
 
@@ -331,6 +353,12 @@ export default class Menubar {
     const helpMenuItem = this.createHelpMenu();
 
     menubar.append(helpMenuItem);
+
+    const quitMenuItem = this.createMenuItem('msg.splayerx.quit', () => {
+      app.quit();
+    }, 'Ctrl+q');
+
+    menubar.append(quitMenuItem);
 
     return menubar;
   }

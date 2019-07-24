@@ -8,6 +8,10 @@ export default class MenuService {
     ipcRenderer.on(channel, callback);
   }
 
+  public updateRouteName(routeName: string) {
+    ipcRenderer.send('update-route-name', routeName);
+  }
+
   public updatePaused(paused: boolean) {
     ipcRenderer.send('update-paused', paused);
   }

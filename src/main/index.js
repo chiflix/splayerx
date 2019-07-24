@@ -96,6 +96,7 @@ function handleBossKey() {
     mainWindow.webContents.send('mainDispatch', 'PAUSE_VIDEO');
     mainWindow.hide();
     mainWindow.webContents.send('mainCommit', 'isHiddenByBossKey', true);
+    menuService.handleBossKey(true);
     if (process.platform === 'win32') {
       tray = new Tray(nativeImage.createFromDataURL(require('../../build/icons/1024x1024.png')));
       tray.on('click', () => {
@@ -208,10 +209,18 @@ function registerMainWindowEvent(mainWindow) {
     mainWindow.webContents.send('mainCommit', 'isMaximized', false);
   });
   mainWindow.on('minimize', () => {
+    menuService.minimize(true);
     if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
     mainWindow.webContents.send('mainCommit', 'isMinimized', true);
   });
   mainWindow.on('restore', () => {
+    menuService.minimize(false);
+    if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
+    mainWindow.webContents.send('mainCommit', 'isMinimized', false);
+  });
+  mainWindow.on('show', () => {
+    menuService.handleBossKey(false);
+    menuService.minimize(false);
     if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
     mainWindow.webContents.send('mainCommit', 'isMinimized', false);
   });
@@ -502,7 +511,7 @@ function createWindow() {
   mainWindow.on('closed', () => {
     ipcMain.removeAllListeners();
     mainWindow = null;
-    menuService.setMainWindow(null);
+    menuService.closed();
   });
 
   mainWindow.once('ready-to-show', () => {
@@ -774,10 +783,8 @@ app.on('bossKey', handleBossKey);
 app.on('add-preference', createPreference);
 app.on('add-windows-about', createAbout);
 
-app.on('menu-create-main-window', (e, menuItem, id) => {
-  console.log(e, menuItem, id);
+app.on('menu-create-main-window', () => {
   createWindow();
-  mainWindow.webContents.send(`menu-item-${id}`, menuItem);
 });
 
 app.on('activate', () => {

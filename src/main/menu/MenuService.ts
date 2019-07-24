@@ -5,13 +5,32 @@ import { IMenuDisplayInfo } from '../../renderer/interfaces/IRecentPlay';
 export default class MenuService {
   private menu: Menu;
 
+  private routeName: string;
+
+  private windowClosed: boolean;
+
   public constructor() {
     this.menu = new Menu();
     this.registeMenuActions();
   }
 
   public setMainWindow(window: Electron.BrowserWindow) {
+    this.windowClosed = false;
     this.menu.setMainWindow(window);
+  }
+
+  public minimize(isMinimized: boolean) {
+    isMinimized ? this.menu.disableMenu() : this.menu.menuStateControl(this.routeName);
+  }
+
+  public closed() {
+    this.windowClosed = true;
+    this.menu.disableMenu();
+    this.menu.setMainWindow(null);
+  }
+
+  public handleBossKey(hide: boolean) {
+    hide ? this.menu.disableMenu() : this.menu.menuStateControl(this.routeName);
   }
 
   private registeMenuActions() {
@@ -26,6 +45,10 @@ export default class MenuService {
     });
     ipcMain.on('update-audio-track', (e: Event, items: { id: string, label: string }[]) => {
       this.menu.updateAudioTrack(items);
+    });
+    ipcMain.on('update-route-name', (e: Event, routeName: string) => {
+      this.routeName = routeName;
+      if (!this.windowClosed) this.menu.menuStateControl(routeName);
     });
     ipcMain.on('update-paused', (e: Event, paused: boolean) => {
       this.menu.updatePaused(paused);

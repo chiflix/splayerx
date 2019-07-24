@@ -214,10 +214,7 @@ new Vue({
       this.refreshMenu();
     },
     singleCycle(val: boolean) {
-      this.menuService.resolveSingleCycle(val);
-      if (this.menu) {
-        this.menuService.getMenuItemById('singleCycle').checked = val;
-      }
+      this.menuService.getMenuItemById('singleCycle').checked = val;
     },
     enabledSecondarySub(val) {
       this.list.forEach((item: SubtitleControlListItem) => {
@@ -226,6 +223,7 @@ new Vue({
       this.menuService.updateMenuItemEnabled('subtitle.secondarySubtitle.secondSub-1', val);
     },
     currentRouteName(val) {
+      this.menuService.updateRouteName(val);
       this.menuService.menuStateControl(val);
     },
     volume(val: number) {
@@ -278,12 +276,6 @@ new Vue({
         browserWindow.setAlwaysOnTop(true);
       }
       this.menuService.updatePaused(val);
-    },
-    isMinimized() {
-      this.menuService.disableMenus();
-    },
-    isHiddenByBossKey() {
-      this.menuService.disableMenus();
     },
     ableToPushCurrentSubtitle(val) {
       this.menuService.updateMenuItemEnabled('subtitle.uploadSelectedSubtitle', val);
@@ -602,6 +594,12 @@ new Vue({
       this.menuService.on('playback.backwardS', () => {
         this.$bus.$emit('seek', videodata.time - 5);
       });
+      this.menuService.on('playback.forwardL', () => {
+        this.$bus.$emit('seek', videodata.time + 60);
+      });
+      this.menuService.on('playback.backwardL', () => {
+        this.$bus.$emit('seek', videodata.time - 60);
+      });
       this.menuService.on('playback.increasePlaybackSpeed', () => {
         this.$store.dispatch(videoActions.INCREASE_RATE);
       });
@@ -752,13 +750,12 @@ new Vue({
       });
       this.menuService.on('window.keepPlayingWindowFront', () => {
         const { remote } = this.$electron;
-        const browserWindow = remote.BrowserWindow;
-        const focusWindow = browserWindow.getFocusedWindow();
-        if (focusWindow.isAlwaysOnTop()) {
+        const browserWindow = remote.BrowserWindow.getFocusedWindow();
+        if (browserWindow.isAlwaysOnTop()) {
           browserWindow.setAlwaysOnTop(false);
           this.menuService.updateMenuItemChecked('window.keepPlayingWindowFront', false);
         } else {
-          focusWindow.setAlwaysOnTop(true);
+          browserWindow.setAlwaysOnTop(true);
           this.menuService.updateMenuItemChecked('window.keepPlayingWindowFront', true);
         }
       });
