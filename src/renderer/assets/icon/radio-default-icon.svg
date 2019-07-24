@@ -1,0 +1,23 @@
+<svg width="9px" height="9px" viewBox="0 0 9 9" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <defs>
+        <radialGradient cx="81.8460892%" cy="79.2345085%" fx="81.8460892%" fy="79.2345085%" r="111.106365%" id="radialGradient-1">
+            <stop stop-color="#FFFFFF" stop-opacity="0.775928442" offset="0%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.508378623" offset="100%"></stop>
+        </radialGradient>
+    </defs>
+    <g id="Preference" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" fill-opacity="0.7" opacity="0.95" stroke-opacity="0.168081975">
+        <g id="Privicy-Settings/" transform="translate(-175.000000, -91.000000)" fill="url(#radialGradient-1)" stroke="#FFFFFF" stroke-width="0.5">
+            <g id="Tabpanel" transform="translate(110.000000, 0.000000)">
+                <g id="Tabcontent" transform="translate(32.000000, 32.000000)">
+                    <g id="Setting-Item--attached" transform="translate(0.000000, 34.000000)">
+                        <g id="Symbols/Input/Radiobutton" transform="translate(29.000000, 20.000000)">
+                            <g id="Symbols/icons/audio-default-icon" transform="translate(2.000000, 3.000000)">
+                                <circle id="Oval" cx="6.5" cy="6.5" r="4"></circle>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
