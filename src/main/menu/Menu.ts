@@ -513,9 +513,8 @@ export default class Menubar {
       click = (menuItem: Electron.MenuItem) => {
         if (this.mainWindow) {
           this.mainWindow.webContents.send(id, menuItem);
-        } else {
-          app.emit('menu-create-main-window', id, menuItem);
         }
+        app.emit('menu-create-main-window', id, menuItem);
       };
     }
 
@@ -544,9 +543,8 @@ export default class Menubar {
     const click = (menuItem: Electron.MenuItem) => {
       if (this.mainWindow) {
         this.mainWindow.webContents.send(id, menuItem);
-      } else {
-        app.emit('menu-create-main-window', id, menuItem);
       }
+      app.emit('menu-create-main-window', id, menuItem);
     };
 
     const options: Electron.MenuItemConstructorOptions = {

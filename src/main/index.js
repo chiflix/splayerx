@@ -784,7 +784,12 @@ app.on('add-preference', createPreference);
 app.on('add-windows-about', createAbout);
 
 app.on('menu-create-main-window', () => {
-  createWindow();
+  if (!mainWindow) createWindow();
+  else if (mainWindow.isMinimized()) {
+    mainWindow.restore();
+  } else if (!mainWindow.isVisible()) {
+    mainWindow.show();
+  }
 });
 
 app.on('menu-open-dialog', () => {
