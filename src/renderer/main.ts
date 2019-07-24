@@ -1483,7 +1483,7 @@ new Vue({
           break;
         case 85:
           if (e.metaKey && e.shiftKey) {
-            // this.$bus.$emit('open-url-show', true); TODO Open Url
+            this.$bus.$emit('open-url-show', true);
           }
           break;
         default:

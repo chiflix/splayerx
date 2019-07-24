@@ -4,6 +4,8 @@ import romanize from 'romanize';
 import { times, padStart, sortBy } from 'lodash';
 import { sep, basename } from 'path';
 // @ts-ignore
+import urlParseLax from 'url-parse-lax';
+// @ts-ignore
 import { promises as fsPromises } from 'fs';
 import { SubtitleControlListItem, Type } from '@/interfaces/ISubtitle';
 import { codeToLanguageName } from './language';
@@ -114,21 +116,24 @@ function md5Hex(text: Buffer) {
 
 /** Calculate hash of file */
 export async function mediaQuickHash(filePath: string) {
-  const fileHandler = await fsPromises.open(filePath, 'r');
-  const len = (await fsPromises.stat(filePath)).size;
-  const position = [
-    4096,
-    Math.floor(len / 3),
-    Math.floor(len / 3) * 2,
-    len - 8192,
-  ];
-  const res = await Promise.all(times(4).map(async (i) => {
-    const buf = Buffer.alloc(4096);
-    const { bytesRead } = await fileHandler.read(buf, 0, 4096, position[i]);
-    return md5Hex(buf.slice(0, bytesRead));
-  }));
-  fileHandler.close();
-  return res.join('-');
+  if (!urlParseLax(filePath).protocol || urlParseLax(filePath).protocol === 'file:') {
+    const fileHandler = await fsPromises.open(filePath, 'r');
+    const len = (await fsPromises.stat(filePath)).size;
+    const position = [
+      4096,
+      Math.floor(len / 3),
+      Math.floor(len / 3) * 2,
+      len - 8192,
+    ];
+    const res = await Promise.all(times(4).map(async (i) => {
+      const buf = Buffer.alloc(4096);
+      const {bytesRead} = await fileHandler.read(buf, 0, 4096, position[i]);
+      return md5Hex(buf.slice(0, bytesRead));
+    }));
+    fileHandler.close();
+    return res.join('-');
+  }
+  return 'open-url-hash'; // TODO design openUrl hash
 }
 
 /** Silently calculate hash of file, returns null if there was an error */
