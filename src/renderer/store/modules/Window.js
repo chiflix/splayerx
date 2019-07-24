@@ -15,6 +15,7 @@ const state = {
   pipSize: [420, 236],
   pipPos: [window.screen.availLeft + 70,
     window.screen.availTop + window.screen.availHeight - 236 - 70],
+  browsingPos: [0, 0],
 };
 
 const getters = {
@@ -35,6 +36,7 @@ const getters = {
   browsingSize: state => state.browsingSize,
   pipSize: state => state.pipSize,
   pipPos: state => state.pipPos,
+  browsingPos: state => state.browsingPos,
 };
 
 const mutations = {
@@ -78,6 +80,9 @@ const mutations = {
   pipPosUpdate(state, payload) {
     state.pipPos = payload;
   },
+  browsingPosUpdate(state, payload) {
+    state.browsingPos = payload;
+  },
 };
 
 const actions = {
@@ -96,6 +101,7 @@ const actions = {
       pipSize: state.pipSize,
       browsingSize: delta,
       pipPos: state.pipPos,
+      browsingPos: state.browsingPos,
       barrageOpen: getters.barrageOpen,
     });
   },
@@ -105,6 +111,7 @@ const actions = {
       pipSize: delta,
       browsingSize: state.browsingSize,
       pipPos: state.pipPos,
+      browsingPos: state.browsingPos,
       barrageOpen: getters.barrageOpen,
     });
   },
@@ -114,6 +121,17 @@ const actions = {
       pipSize: state.pipSize,
       browsingSize: state.browsingSize,
       pipPos: delta,
+      browsingPos: state.browsingPos,
+      barrageOpen: getters.barrageOpen,
+    });
+  },
+  updateBrowsingPos({ commit }, delta) {
+    commit('browsingPosUpdate', delta);
+    asyncStorage.set('browsing', {
+      pipSize: state.pipSize,
+      browsingSize: state.browsingSize,
+      pipPos: state.pipPos,
+      browsingPos: delta,
       barrageOpen: getters.barrageOpen,
     });
   },

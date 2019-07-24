@@ -7,9 +7,6 @@ function sendToHost(channel, message) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  window.addEventListener('scroll', (evt) => {
-    sendToHost('scroll', { windowScrollY: window.scrollY });
-  }, true);
   window.addEventListener('mousedown', (evt) => {
     mousedown = true;
   }, true);

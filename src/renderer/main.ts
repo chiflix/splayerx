@@ -355,6 +355,7 @@ new Vue({
       this.$store.dispatch('updateBrowsingSize', data.browsingSize || this.browsingSize);
       this.$store.dispatch('updatePipSize', data.pipSize || this.pipSize);
       this.$store.dispatch('updatePipPos', data.pipPos || this.pipPos);
+      this.$store.dispatch('updateBrowsingPos', data.browsingPos || [0, 0]);
       this.updateBarrageOpen(data.barrageOpen || this.barrageOpen);
     });
     this.$bus.$on('delete-file', () => {

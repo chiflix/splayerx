@@ -1,6 +1,13 @@
 <template>
   <div class="browsing">
-    <browsing-header v-show="!isPip" />
+    <browsing-header
+      ref="browsingHeader"
+      :handle-enter-pip="handleEnterPip"
+      :handle-url-reload="handleUrlReload"
+      :handle-url-back="handleUrlBack"
+      :handle-url-forward="handleUrlForward"
+      v-show="!isPip"
+    />
     <div
       :style="{
         position: 'absolute',
@@ -42,15 +49,6 @@
       autosize
       class="web-view"
     />
-    <browsing-control
-      ref="browsingControl"
-      v-show="!isPip"
-      :class="controlToShow ? 'control-show-animation' : 'control-hide-animation'"
-      :handle-enter-pip="handleEnterPip"
-      :handle-url-reload="handleUrlReload"
-      :handle-url-back="handleUrlBack"
-      :handle-url-forward="handleUrlForward"
-    />
   </div>
 </template>
 
@@ -62,7 +60,6 @@ import urlParseLax from 'url-parse-lax';
 import { windowRectService } from '@/services/window/WindowRectService';
 import { Browsing as browsingActions } from '@/store/actionTypes';
 import BrowsingHeader from '@/components/BrowsingView/BrowsingHeader.vue';
-import BrowsingControl from '@/components/BrowsingView/BrowsingControl.vue';
 import Icon from '@/components/BaseIconContainer.vue';
 import asyncStorage from '@/helpers/asyncStorage';
 import { bilibili, bilibiliFindType, bilibiliBarrageAdapt } from '../../shared/pip/bilibili';
@@ -74,7 +71,6 @@ export default {
   name: 'BrowsingView',
   components: {
     'browsing-header': BrowsingHeader,
-    'browsing-control': BrowsingControl,
     Icon,
   },
   data() {
@@ -87,8 +83,6 @@ export default {
       bilibiliType: 'video',
       supportedRecordHost: ['www.youtube.com', 'www.bilibili.com', 'www.iqiyi.com'],
       preload: `file:${require('path').resolve(__static, 'pip/preload.js')}`,
-      windowScrollY: 0,
-      controlToShow: true,
       maskToShow: false,
       dropFiles: [],
       hasVideo: false,
@@ -100,7 +94,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['winPos', 'isFullScreen', 'initialUrl', 'winWidth', 'winSize', 'browsingSize', 'pipSize', 'pipPos', 'barrageOpen']),
+    ...mapGetters(['winPos', 'isFullScreen', 'initialUrl', 'winWidth', 'winSize', 'browsingSize', 'pipSize', 'pipPos', 'barrageOpen', 'browsingPos']),
     iqiyiPip() {
       return iqiyi(this.barrageOpen, this.winSize);
     },
@@ -150,6 +144,7 @@ export default {
         }
         this.$store.dispatch('updatePipPos', this.winPos);
       } else {
+        this.$store.dispatch('updateBrowsingPos', this.winPos);
         this.timeout = true;
         if (this.timer) {
           clearTimeout(this.timer);
@@ -179,18 +174,6 @@ export default {
         }
       }
     },
-    windowScrollY(val: number, oldVal: number) {
-      this.controlToShow = oldVal > val;
-    },
-    controlToShow(val: boolean) {
-      if (!val) {
-        setTimeout(() => {
-          this.$refs.browsingControl.$el.style.display = 'none';
-        }, 100);
-      } else if (!this.isPip) {
-        this.$refs.browsingControl.$el.style.display = '';
-      }
-    },
   },
   created() {
     windowRectService.calculateWindowRect(
@@ -198,14 +181,18 @@ export default {
       true,
       this.winPos.concat(this.winSize),
     );
+    this.$store.dispatch('updateBrowsingPos', this.winPos);
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [0]);
+    this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [570, 375]);
   },
   beforeDestroy() {
     this.$store.dispatch(this.isPip ? 'updatePipSize' : 'updateBrowsingSize', this.winSize);
+    this.$store.dispatch(this.isPip ? 'updatePipPos' : 'updateBrowsingPos', this.winPos);
     asyncStorage.set('browsing', {
       pipSize: this.pipSize,
-      browsingSize: this.browsingSize,
       pipPos: this.pipPos,
+      browsingSize: this.browsingSize,
+      browsingPos: this.browsingPos,
       barrageOpen: this.barrageOpen,
     });
     this.$bus.$off();
@@ -236,8 +223,16 @@ export default {
       });
       windowRectService.uploadWindowBy(false, 'landing-view');
     });
+    this.$refs.webView.addEventListener('did-start-loading', () => {
+      const loadUrl = this.$refs.webView.getURL();
+      this.$refs.browsingHeader.updateWebInfo({
+        hasVideo: false,
+        url: loadUrl,
+        canGoBack: this.$refs.webView.canGoBack(),
+        canGoForward: this.$refs.webView.canGoForward(),
+      });
+    });
     this.$refs.webView.addEventListener('load-commit', () => {
-      this.controlToShow = true;
       const loadUrl = this.$refs.webView.getURL();
       this.currentUrl = loadUrl;
       const recordIndex = this.supportedRecordHost.indexOf(urlParseLax(loadUrl).hostname);
@@ -258,7 +253,7 @@ export default {
       }
       this.$refs.webView.executeJavaScript(this.calculateVideoNum, (r: number) => {
         this.hasVideo = !!r;
-        this.$refs.browsingControl.updateWebInfo({
+        this.$refs.browsingHeader.updateWebInfo({
           hasVideo: this.hasVideo,
           url: loadUrl,
           canGoBack: this.$refs.webView.canGoBack(),
@@ -268,11 +263,8 @@ export default {
     });
     this.$refs.webView.addEventListener('ipc-message', (evt: any) => {
       const { channel, args }: { channel: string, args:
-      { windowScrollY?: number, dragover?: boolean, files?: string[] }[] } = evt;
+      { dragover?: boolean, files?: string[] }[] } = evt;
       switch (channel) {
-        case 'scroll':
-          this.windowScrollY = args[0].windowScrollY;
-          break;
         case 'dragover':
         case 'dragleave':
           this.maskToShow = args[0].dragover;
@@ -346,14 +338,11 @@ export default {
       });
     },
     handleWindowChangeExitPip() {
-      windowRectService.calculateWindowRect(
-        this.browsingSize,
-        true,
-        this.winPos.concat(this.winSize),
-      );
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [0]);
-      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [720, 405]);
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [570, 375]);
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', this.browsingSize);
+      console.log(this.browsingPos);
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', this.browsingPos);
     },
     handleDanmuDisplay() {
       if (this.pipType === 'iqiyi') {

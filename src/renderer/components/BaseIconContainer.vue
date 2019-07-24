@@ -539,26 +539,10 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   height: 16px;
   display: block;
 }
-.back, .forward {
-  width: 24px;
-  height: 32px;
+.back, .forward, .pageRefresh, .backDisabled, .forwardDisabled {
   display: block;
-}
-.pageRefresh {
-  width: 32px;
-  height: 32px;
-  display: block;
-}
-.backDisabled, .forwardDisabled, .star, .starActive {
-  display: block;
-  width: 24px;
-  height: 32px;
-}
-.pageRefreshDisabled {
-  display: block;
-  width: 16px;
-  height: 16px;
-  opacity: 0.2;
+  width: 20px;
+  height: 20px;
 }
 .showMarks, .hideMarks, .closeSearch {
   width: 18px;
@@ -584,9 +568,14 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     }
   }
 }
-.youtube, .bilibili, .iqiyi, .danmu, .noDanmu {
+.danmu, .noDanmu {
   width: 20px;
   height: 20px;
+  display: block;
+}
+.youtube, .bilibili, .iqiyi {
+  width: 18px;
+  height: 18px;
   display: block;
 }
 .showFavicon, .hideFavicon {
@@ -621,12 +610,12 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
 }
 .pipDisabled, .videoRecordDisabled {
   display: block;
-  width: 32px;
-  height: 32px;
+  width: 20px;
+  height: 20px;
 }
 .pip {
-  width: 32px;
-  height: 32px;
+  width: 20px;
+  height: 20px;
   .default {
     display: block;
   }

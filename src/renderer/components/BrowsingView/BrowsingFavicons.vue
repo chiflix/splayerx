@@ -1,13 +1,16 @@
 <template>
   <div
-    :style="{ left: isDarwin ? '' : '15px', right: isDarwin ? '10px' : '' }"
+    :style="{ width: calculateWidth }"
     class="fav-icons"
   >
     <div
       ref="favDetail"
       :class="favAnimClass"
       @animationend="handleFavAnimEnd"
-      :style="{ order: isDarwin ? '1' : '2' }"
+      :style="{
+        justifyContent: 'flex-end',
+        marginRight: '10px',
+      }"
       class="fav-icons-details"
     >
       <div
@@ -16,25 +19,23 @@
         @mouseleave="favIconMouseLeave"
         @mouseup="handleFavOpen(item)"
         :style="{
-          margin: isDarwin ? 'auto 0 auto 15px' : 'auto 15px auto 0'
+          margin: isDarwin ? index === 0
+            ? 'auto 0 auto 0' : 'auto 0 auto 10px' : 'auto 10px auto 0',
+          background: faviconIndex === index ?
+            'rgba(255, 255, 255, 0.35)' : 'rgba(255, 255, 255, 0.08)',
+          color: faviconIndex === index ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.5)',
+          webkitAppRegion: 'no-drag'
         }"
         class="fav-icon-container"
       >
         <Icon
           :type="item.type"
           :style="{ opacity: index === faviconIndex ? '1' : 'calc(4 / 9)'}"
+          class="icon-detail"
         />
+        <p>{{ item.name }}</p>
       </div>
     </div>
-    <Icon
-      @mouseup.native="handleShowFavicon"
-      :style="{
-        order: isDarwin ? '2' : '1', margin: isDarwin ? 'auto 0 auto 10px' : 'auto 10px auto 0',
-        transform: `rotate(${rotateNum}deg)`,
-        transition: 'transform 100ms linear' }"
-      type="showFavicon"
-      class="fav-display"
-    />
   </div>
 </template>
 
@@ -68,6 +69,9 @@ export default {
     };
   },
   computed: {
+    calculateWidth() {
+      return this.isDarwin ? 'calc(100% - 70px - 114px - 40px)' : 'calc(100% - 50px - 110px - 135px)';
+    },
     favAnimClass() {
       if (this.isDarwin) {
         return this.showFavicon ? 'fav-show-animation' : 'fav-hide-animation';
@@ -91,12 +95,6 @@ export default {
     favIconMouseLeave() {
       this.faviconIndex = -1;
     },
-    handleShowFavicon() {
-      if (!this.showFavicon) {
-        this.$refs.favDetail.style.display = 'flex';
-      }
-      this.showFavicon = !this.showFavicon;
-    },
     handleFavOpen(item: { name: string, type: string, url: string }) {
       this.updateInitialUrl(this.recordUrl[item.type] ? this.recordUrl[item.type] : item.url);
     },
@@ -112,20 +110,26 @@ export default {
 
 <style scoped lang="scss">
 .fav-icons {
-  width: auto;
-  display: flex;
   height: 20px;
-  position: absolute;
-  top: 8px;
+  margin: auto 0 auto 0;
   z-index: 6;
   .fav-icons-details {
     width: auto;
     height: 20px;
     display: flex;
     .fav-icon-container {
-      width: 20px;
+      width: auto;
       height: 20px;
       cursor: pointer;
+      display: flex;
+      border-radius: 13px;
+      .icon-detail {
+        margin: auto 5px auto 10px;
+      }
+      p {
+        font-size: 11px;
+        margin: auto 10px auto 0;
+      }
     }
   }
   .fav-display {

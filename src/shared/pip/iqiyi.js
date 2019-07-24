@@ -13,12 +13,12 @@ const iqiyi = (barrageState, winSize) => ({
     iqpPlayer.style.top = "0";
     iqpPlayer.style.zIndex="9999";
     iqpPlayer.style.width="${winSize[0]}px";
-    iqpPlayer.style.height="${winSize[1] - 1}px";
+    iqpPlayer.style.height="${winSize[1]}px";
     var blockA = document.querySelector(".player-mnc");
     if (blockA) {blockA.style.zIndex = "9999";};
     var blockB = document.querySelector("#block-W1");
     if (blockB) {blockB.style.display = "none"};`,
-  watcher: `document.querySelector(".iqp-player").style.width="${winSize[0]}px";document.querySelector(".iqp-player").style.height="${winSize[1] - 1}px"`,
+  watcher: `document.querySelector(".iqp-player").style.width="${winSize[0]}px";document.querySelector(".iqp-player").style.height="${winSize[1]}px"`,
   recover: 'var iqpPlayer = document.querySelector(".iqp-player");'
     + 'iqpPlayer.style.position = "relative";'
     + 'iqpPlayer.style.left = "";'

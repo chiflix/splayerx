@@ -1,5 +1,11 @@
 <template>
-  <div class="browsing-control">
+  <div
+    :style="{
+      width: isDarwin ? '114px' : '110px',
+      margin: isDarwin ? 'auto 0 auto 70px' : 'auto 0 auto 5px',
+    }"
+    class="browsing-control"
+  >
     <Icon
       ref="back"
       :type="backType"
@@ -26,23 +32,10 @@
       type="pageRefresh"
       class="page-refresh-icon"
     />
-    <Icon
-      type="videoRecordDisabled"
-      class="video-record-icon"
-    />
-    <Icon
-      :type="picInPicType"
-      :style="{
-        cursor: webInfo.hasVideo ? 'pointer' : ''
-      }"
-      @mouseup.native="handleEnterPip"
-      class="pic-in-pic"
-    />
   </div>
 </template>
 
 <script lang="ts">
-import { mapGetters } from 'vuex';
 import Icon from '@/components/BaseIconContainer.vue';
 
 export default {
@@ -51,10 +44,6 @@ export default {
     Icon,
   },
   props: {
-    handleEnterPip: {
-      type: Function,
-      required: true,
-    },
     handleUrlReload: {
       type: Function,
       required: true,
@@ -67,43 +56,22 @@ export default {
       type: Function,
       required: true,
     },
-  },
-  data() {
-    return {
-      backType: 'backDisabled',
-      forwardType: 'forwardDisabled',
-      webInfo: {},
-    };
+    backType: {
+      type: String,
+      required: true,
+    },
+    forwardType: {
+      type: String,
+      required: true,
+    },
+    webInfo: {
+      type: Object,
+      required: true,
+    },
   },
   computed: {
-    ...mapGetters(['winWidth']),
-    picInPicType() {
-      return this.webInfo.hasVideo ? 'pip' : 'pipDisabled';
-    },
-  },
-  watch: {
-    backType(val: string) {
-      if (val === 'back') {
-        this.$refs.back.$el.classList.add('able-opacity');
-      } else {
-        this.$refs.back.$el.classList.remove('able-opacity');
-      }
-    },
-    forwardType(val: string) {
-      if (val === 'forward') {
-        this.$refs.forward.$el.classList.add('able-opacity');
-      } else {
-        this.$refs.forward.$el.classList.remove('able-opacity');
-      }
-    },
-  },
-  methods: {
-    updateWebInfo(info: {
-      hasVideo: boolean, url: string, canGoBack: boolean, canGoForward: boolean
-    }) {
-      this.webInfo = info;
-      this.backType = info.canGoBack ? 'back' : 'backDisabled';
-      this.forwardType = info.canGoForward ? 'forward' : 'forwardDisabled';
+    isDarwin() {
+      return process.platform === 'darwin';
     },
   },
 };
@@ -111,36 +79,28 @@ export default {
 
 <style scoped lang="scss">
 .browsing-control {
-  position: absolute;
-  width: 245px;
-  height: 70px;
+  height: 20px;
   display: flex;
-  border-radius: 13px;
-  background: rgba(0, 0, 0, 0.73);
-  backdrop-filter: blur(10px);
-  clip-path: inset(0 round 13px);
-  bottom: 35px;
-  left: 50%;
+  z-index: 6;
   .back-icon {
-    width: 24px;
-    height: 32px;
-    margin: auto 0 auto 20px;
+    width: 20px;
+    height: 20px;
+    margin: 0 20px 0 7px;
+    -webkit-app-region: no-drag;
   }
   .forward-icon {
-    width: 24px;
-    height: 32px;
-    margin: auto 0 auto 15px;
+    width: 20px;
+    height: 20px;
+    margin-right: 20px;
+    -webkit-app-region: no-drag;
   }
-  .able-opacity:active {
+  .page-refresh-icon {
+    width: 20px;
+    height: 20px;
+    -webkit-app-region: no-drag;
+  }
+  .page-refresh-icon:active, .back-icon:active, .forward-icon:active {
     opacity: 0.5;
-  }
-  .page-refresh-icon:active {
-    opacity: 0.5;
-  }
-  .page-refresh-icon, .video-record-icon, .pic-in-pic {
-    width: 32px;
-    height: 32px;
-    margin: auto 0 auto 15px;
   }
 }
 </style>
