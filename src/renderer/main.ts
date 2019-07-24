@@ -12,6 +12,7 @@ import { mapGetters, mapActions, createNamespacedHelpers } from 'vuex';
 import uuidv4 from 'uuid/v4';
 import osLocale from 'os-locale';
 import VueAxios from 'vue-axios';
+import { throttle } from 'lodash';
 // @ts-ignore
 import VueElectronJSONStorage from 'vue-electron-json-storage';
 // @ts-ignore
@@ -358,6 +359,14 @@ new Vue({
     });
     this.$on('wheel-event', this.wheelEventHandler);
 
+    window.addEventListener('resize', throttle(() => {
+      this.$store.commit('windowSize', [window.outerWidth, window.outerHeight]);
+    }, 100));
+
+    window.addEventListener('DOMContentLoaded', () => {
+      this.$store.commit('windowSize', [window.outerWidth, window.outerHeight]);
+    });
+
     window.addEventListener('mousedown', (e) => {
       if (e.button === 2 && process.platform === 'win32') {
         this.menu.popup(this.$electron.remote.getCurrentWindow());
@@ -495,10 +504,6 @@ new Vue({
     window.addEventListener('dragleave', (e) => {
       e.preventDefault();
       this.$bus.$emit('drag-leave');
-    });
-
-    this.$electron.ipcRenderer.on('open-dialog', () => {
-      this.openFilesByDialog();
     });
 
     this.$electron.ipcRenderer.on('open-file', (event: Event, args: { onlySubtitle: boolean, files: Array<string> }) => {

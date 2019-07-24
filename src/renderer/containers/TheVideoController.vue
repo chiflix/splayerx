@@ -561,7 +561,9 @@ export default {
 
       this.start = timestamp;
 
-
+      if (this.isFocused) {
+        this.timeLabel.label = this.timecodeFromSeconds(Math.floor(videodata.time));
+      }
       /*
       /* Rendering
       /*
@@ -579,7 +581,6 @@ export default {
             this.$refs.recentPlaylist.updatelastPlayedTime(videodata.time);
           } else {
             this.$refs.theTimeCodes.updateTimeContent(videodata.time);
-            this.timeLabel.label = this.timecodeFromSeconds(Math.floor(videodata.time));
             if (this.needResetHoverProgressBar) {
               this.needResetHoverProgressBar = false;
               // reset hover-progressbar state
