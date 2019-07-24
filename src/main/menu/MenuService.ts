@@ -25,6 +25,7 @@ export default class MenuService {
 
   public closed() {
     this.windowClosed = true;
+    this.routeName = 'landing-view';
     this.menu.disableMenu();
     this.menu.setMainWindow(null);
   }

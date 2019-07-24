@@ -57,7 +57,6 @@ export default class Menubar {
     this.enableSubmenuItem('subtitle', inPlayingView);
     this.enableSubmenuItem('window', !inWelcomeView);
     this.enableSubmenuItem('file', !inWelcomeView);
-    this.updateMenuItemEnabled('file.launch', false);
 
     this.updateMenuItemEnabled('splayerx.preferences', !inWelcomeView);
     this.updateMenuItemEnabled('window.bossKey', inPlayingView);
@@ -76,7 +75,6 @@ export default class Menubar {
     this.enableSubmenuItem('window', false);
     this.enableSubmenuItem('file.openRecent', false);
 
-    this.updateMenuItemEnabled('file.launch', true);
     this.updateMenuItemEnabled('file.open', false);
     this.updateMenuItemEnabled('file.clearHistory', false);
     this.updateMenuItemEnabled('file.closeWindow', false);

@@ -220,7 +220,6 @@ function registerMainWindowEvent(mainWindow) {
   });
   mainWindow.on('show', () => {
     menuService.handleBossKey(false);
-    menuService.minimize(false);
     if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
     mainWindow.webContents.send('mainCommit', 'isMinimized', false);
   });

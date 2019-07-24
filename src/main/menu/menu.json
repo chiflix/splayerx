@@ -35,6 +35,11 @@
   "file": {
     "items": [
       {
+        "id": "file.launch",
+        "label": "msg.file.launch",
+        "enabled": false
+      },
+      {
         "id": "file.open",
         "label": "msg.file.open",
         "accelerator": "CmdOrCtrl+O"
@@ -48,11 +53,6 @@
       },
       {
         "id": "menubar.separator"
-      },
-      {
-        "id": "file.launch",
-        "label": "msg.file.launch",
-        "enabled": false
       },
       {
         "id": "file.clearHistory",
