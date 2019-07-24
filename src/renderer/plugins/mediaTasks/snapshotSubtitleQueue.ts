@@ -125,6 +125,6 @@ export default class SnapshotSubtitleQueue extends BaseMediaTaskQueue {
   /** get a embedded subtitle path, extract it if not exist */
   public getSubtitlePath(videoPath: string, streamIndex: number, format: Format) {
     return SubtitleTask.from(videoPath, streamIndex, format)
-      .then(task => super.addTask<string>(task, { piority: 1 }));
+      .then(task => super.addTask<string>(task));
   }
 }
