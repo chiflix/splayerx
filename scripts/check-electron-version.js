@@ -4,16 +4,11 @@ const { execSync } = require('child_process');
 const electronVersion = app.getVersion();
 
 function updateElectron() {
-  try {
-    execSync(`force_no_cache=true npm i @chiflix/electron@${electronVersion}`, { stdio: 'inherit' });
-    process.exit(0);
-  } catch (ex) {
-    console.error(ex);
-    process.exit(1);
-  }
+  execSync(`force_no_cache=true npm i @chiflix/electron@${electronVersion}`, { stdio: 'inherit' });
 }
 
 try {
+  console.log('Checking Electron hash...');
   const expectedHash = execSync(
     `curl -L https://github.com/chiflix/electron/releases/download/v${electronVersion}/ELECTRONSLIM_VERSION_HASH.txt`,
     { encoding: 'utf-8' },
