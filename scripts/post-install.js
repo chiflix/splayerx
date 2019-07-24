@@ -5,6 +5,7 @@ const { exec } = require('child_process');
 require('events').EventEmitter.prototype._maxListeners = 10000;
 
 const commands = [
+  'npx electron scripts/check-electron-version.js',
   'npm run lint:fix',
 ];
 
@@ -13,10 +14,9 @@ if (process.platform === 'win32') {
   commands.push('npm run rebuild:win-mouse');
 }
 
-exec(commands.join('&&'), (error) => {
-  if (error) {
-    throw error;
-  }
+exec(commands.join('&&'), (error, stdout) => {
+  if (error) throw error;
+  console.log(stdout);
 });
 
 // TODO: make a PR to electron-builder project

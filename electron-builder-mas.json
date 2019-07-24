@@ -8,7 +8,7 @@
       "repo": "splayerx"
     }
   ],
-  "afterPack": "scripts/afterPack.js",
+  "afterPack": "scripts/after-pack.js",
   "compression": "maximum",
   "directories": {
     "output": "build"

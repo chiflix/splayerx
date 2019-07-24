@@ -13,8 +13,8 @@
   "scripts": {
     "build": "node .electron-vue/build.js && electron-builder --p never",
     "build:appx": "node .electron-vue/build.js && electron-builder --p never -w appx",
-    "build:mas": "scripts/masbuild.sh mas",
-    "build:mas-dev": "scripts/masbuild.sh mas-dev",
+    "build:mas": "scripts/mas-build.sh mas",
+    "build:mas-dev": "scripts/mas-build.sh mas-dev",
     "build:clean": "cross-env BUILD_TARGET=clean node .electron-vue/build.js",
     "dev": "node .electron-vue/dev-runner.js",
     "e2e": "npm run pack && electron-mocha test/e2e",
@@ -27,7 +27,7 @@
     "rebuild:win-mouse": "electron-rebuild -f -e node_modules/@chiflix/electron -w win-mouse",
     "test": "npm run unit && npm run e2e",
     "unit": "karma start test/unit/karma.conf.js",
-    "postinstall": "node ./scripts/postinstall.js"
+    "postinstall": "node ./scripts/post-install.js"
   },
   "_moduleAliases": {
     "electron": "node_modules/@chiflix/electron",
@@ -55,7 +55,7 @@
     "iconv-lite": "^0.4.24",
     "idb": "^4.0.3",
     "lethargy": "^1.0.4",
-    "lodash": "^4.17.10",
+    "lodash": "^4.17.15",
     "lolex": "^3.0.0",
     "lottie-web": "^5.5.4",
     "mkdirp": "^0.5.1",
@@ -105,10 +105,9 @@
     "@babel/plugin-syntax-import-meta": "^7.0.0",
     "@babel/preset-env": "^7.0.0",
     "@babel/register": "^7.0.0",
-    "@chiflix/electron": "5.0.6",
+    "@chiflix/electron": "^5.0.7",
     "@sentry/webpack-plugin": "^1.6.2",
     "@types/chai": "^4.1.7",
-    "@types/lodash": "^4.14.134",
     "@types/mkdirp": "^0.5.2",
     "@types/mocha": "^5.2.7",
     "@types/os-locale": "^2.1.0",
