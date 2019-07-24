@@ -220,13 +220,10 @@ new Vue({
       }
     },
     enabledSecondarySub(val) {
-      if (this.menu) {
-        this.list.forEach((item: SubtitleControlListItem) => {
-          this.menuService.getMenuItemById(`secondSub${item.id}`).enabled = val;
-        });
-        this.menuService.getMenuItemById('secondSub-1').enabled = val;
-      }
-      this.refreshMenu();
+      this.list.forEach((item: SubtitleControlListItem) => {
+        this.menuService.updateMenuItemEnabled(`subtitle.secondarySubtitle.${item.id}`, val);
+      });
+      this.menuService.updateMenuItemEnabled('subtitle.secondarySubtitle.secondSub-1', val);
     },
     currentRouteName(val) {
       this.menuService.menuStateControl(val);
@@ -239,34 +236,30 @@ new Vue({
     },
     list(val: SubtitleControlListItem[], oldval: SubtitleControlListItem[]) {
       if (val.length !== oldval.length) {
-        this.recentSubMenu();
+        this.refreshMenu();
       }
     },
     primarySubtitleId(id: string) {
-      if (this.menu) {
-        this.menuService.getMenuItemById('increasePrimarySubDelay').enabled = !!id;
-        this.menuService.getMenuItemById('decreasePrimarySubDelay').enabled = !!id;
-        if (id && this.menuService.getMenuItemById(`sub${id}`)) {
-          this.menuService.getMenuItemById(`sub${id}`).checked = true;
-        } else if (!id) {
-          this.menuService.getMenuItemById('sub-1').checked = true;
-        }
+      this.menuService.updateMenuItemEnabled('subtitle.increasePrimarySubtitleDelay', !!id);
+      this.menuService.updateMenuItemEnabled('subtitle.decreasePrimarySubtitleDelay', !!id);
+      if (id) {
+        this.menuService.updateMenuItemChecked(`subtitle.mainSubtitle.${id}`, true);
+      } else if (!id) {
+        this.menuService.updateMenuItemChecked('subtitle.mainSubtitle.sub-1', true);
       }
     },
     secondarySubtitleId(id: string) {
-      if (this.menu) {
-        this.menuService.getMenuItemById('increaseSecondarySubDelay').enabled = !!id;
-        this.menuService.getMenuItemById('decreaseSecondarySubDelay').enabled = !!id;
-        if (id && this.menuService.getMenuItemById(`secondSub${id}`)) {
-          this.menuService.getMenuItemById(`secondSub${id}`).checked = true;
-        } else if (!id) {
-          this.menuService.getMenuItemById('secondSub-1').checked = true;
-        }
+      this.menuService.updateMenuItemEnabled('subtitle.increaseSecondarySubtitleDelay', !!id);
+      this.menuService.updateMenuItemEnabled('subtitle.decreaseSecondarySubtitleDelay', !!id);
+      if (id) {
+        this.menuService.updateMenuItemChecked(`subtitle.secondarySubtitle.${id}`, true);
+      } else if (!id) {
+        this.menuService.updateMenuItemChecked('subtitle.secondarySubtitle.secondSub-1', true);
       }
     },
     audioTrackList(val, oldval) {
       if (val.length !== oldval.length) {
-        this.menuService.refreshMenu();
+        this.refreshMenu();
       }
       this.audioTrackList.forEach((item: Electron.MenuItem, index: number) => {
         if (item.enabled === true && this.menu && this.menuService.getMenuItemById(`track${index}`)) {
@@ -286,23 +279,11 @@ new Vue({
       }
       this.menuService.updatePaused(val);
     },
-    isMinimized(val) {
-      // 如果window最小化，那么就禁用menu，除了第一选项
-      // 如果window恢复，就重新创建menu
-      if (!val) {
-        this.refreshMenu();
-      } else {
-        this.menuService.disableMenus();
-      }
+    isMinimized() {
+      this.menuService.disableMenus();
     },
-    isHiddenByBossKey(val) {
-      // 如果window按了老板键，那么就禁用menu，除了第一选项
-      // 如果window获取焦点，就重新创建menu
-      if (!val) {
-        this.refreshMenu();
-      } else {
-        this.menuService.disableMenus();
-      }
+    isHiddenByBossKey() {
+      this.menuService.disableMenus();
     },
     ableToPushCurrentSubtitle(val) {
       this.menuService.updateMenuItemEnabled('subtitle.uploadSelectedSubtitle', val);
@@ -363,6 +344,189 @@ new Vue({
       this.playlistDisplayState = e;
     });
   },
+  mounted() {
+    // https://github.com/electron/electron/issues/3609
+    // Disable Zooming
+    this.$electron.webFrame.setVisualZoomLevelLimits(1, 1);
+    this.menuService = new MenuService();
+    this.registeMenuActions();
+    this.initializeMenuSettings();
+    // this.createMenu();
+    this.$bus.$on('new-file-open', this.refreshMenu);
+    // TODO: Setup user identity
+    this.$storage.get('user-uuid', (err: Error, userUUID: string) => {
+      if (err || Object.keys(userUUID).length === 0) {
+        err && log.error('render/main', err);
+        userUUID = uuidv4();
+        this.$storage.set('user-uuid', userUUID);
+      }
+
+      Vue.axios.defaults.headers.common['X-Application-Token'] = userUUID;
+
+      // set userUUID to google analytics uid
+      this.$ga && this.$ga.set('userId', userUUID);
+    });
+    this.$on('wheel-event', this.wheelEventHandler);
+
+    window.addEventListener('mousedown', (e) => {
+      if (e.button === 2 && process.platform === 'win32') {
+        this.menu.popup(this.$electron.remote.getCurrentWindow());
+      }
+    });
+    window.addEventListener('keydown', (e) => {
+      switch (e.keyCode) {
+        case 27:
+          if (this.isFullScreen && !this.playlistDisplayState) {
+            e.preventDefault();
+            this.$bus.$emit('off-fullscreen');
+            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
+          }
+          break;
+        case 219:
+          e.preventDefault();
+          this.$store.dispatch(videoActions.DECREASE_RATE);
+          break;
+        case 220:
+          e.preventDefault();
+          this.$store.dispatch(videoActions.CHANGE_RATE, 1);
+          break;
+        case 221:
+          e.preventDefault();
+          this.$store.dispatch(videoActions.INCREASE_RATE);
+          break;
+        default:
+          break;
+      }
+    });
+    /* eslint-disable */
+    window.addEventListener('wheel', (e) => {
+      // ctrlKey is the official way of detecting pinch zoom on mac for chrome
+      if (!e.ctrlKey) {
+        let isAdvanceColumeItem;
+        let isSubtitleScrollItem;
+        const advance = document.querySelector('.mainMenu');
+        const subtitle = document.querySelector('.subtitle-scroll-items');
+        if (advance) {
+          const nodeList = advance.childNodes;
+          for (let i = 0; i < nodeList.length; i += 1) {
+            isAdvanceColumeItem = nodeList[i].contains(e.target as Node);
+          }
+        }
+        if (subtitle) {
+          const subList = subtitle.childNodes;
+          for (let i = 0; i < subList.length; i += 1) {
+            isSubtitleScrollItem = subList[i].contains(e.target as Node);
+          }
+        }
+        if (!isAdvanceColumeItem && !isSubtitleScrollItem) {
+          if (e.deltaY) {
+            if (this.canSendVolumeGa) {
+              this.$ga.event('app', 'volume', 'wheel');
+              this.canSendVolumeGa = false;
+              setTimeout(() => {
+                this.canSendVolumeGa = true;
+              }, 1000);
+            }
+            if (this.wheelDirection === 'vertical' || this.playlistDisplayState) {
+              let step = Math.abs(e.deltaY) * 0.06;
+              // in windows if wheel setting more lines per step, make it limited.
+              if (process.platform !== 'darwin' && step > 6) {
+                step = 6;
+              }
+              if (
+                (process.platform !== 'darwin' && !this.reverseScrolling) ||
+                (process.platform === 'darwin' && this.reverseScrolling)
+              ) {
+                this.$store.dispatch(
+                  e.deltaY < 0 ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
+                  step,
+                );
+              } else if (
+                (process.platform === 'darwin' && !this.reverseScrolling) ||
+                (process.platform !== 'darwin' && this.reverseScrolling)
+              ) {
+                this.$store.dispatch(
+                  e.deltaY > 0 ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
+                  step,
+                );
+              }
+            }
+          }
+        }
+      }
+    });
+    window.addEventListener('wheel', (event) => {
+      const { deltaX: x, ctrlKey, target } = event;
+      let isAdvanceColumeItem;
+      let isSubtitleScrollItem;
+      const advance = document.querySelector('.mainMenu');
+      const subtitle = document.querySelector('.subtitle-scroll-items');
+      if (advance) {
+        const nodeList = advance.childNodes;
+        for (let i = 0; i < nodeList.length; i += 1) {
+          isAdvanceColumeItem = nodeList[i].contains(target as Node);
+        }
+      }
+      if (subtitle) {
+        const subList = subtitle.childNodes;
+        for (let i = 0; i < subList.length; i += 1) {
+          isSubtitleScrollItem = subList[i].contains(target as Node);
+        }
+      }
+      if (!ctrlKey && !isAdvanceColumeItem && !isSubtitleScrollItem) {
+        this.$emit('wheel-event', { x });
+      }
+    });
+    /* eslint-disable */
+
+    window.addEventListener('drop', (e) => {
+      e.preventDefault();
+      this.$bus.$emit('drop');
+      this.$store.commit('source', 'drop');
+      const files = Array.prototype.map.call(e.dataTransfer!.files, (f: File) => f.path)
+      const onlyFolders = files.every((file: fs.PathLike) => fs.statSync(file).isDirectory());
+      if (this.currentRouteName === 'playing-view' || onlyFolders
+        || files.every((file: fs.PathLike) => getValidVideoRegex().test(file) && !getValidSubtitleRegex().test(file))) {
+        files.forEach((file: fs.PathLike) => this.$electron.remote.app.addRecentDocument(file));
+        if (onlyFolders) {
+          this.openFolder(...files);
+        } else {
+          this.openFile(...files);
+        }
+      } else {
+        this.$electron.ipcRenderer.send('drop-subtitle', files);
+      }
+    });
+    window.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.dataTransfer!.dropEffect = process.platform === 'darwin' ? 'copy' : '';
+      this.$bus.$emit('drag-over');
+    });
+    window.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      this.$bus.$emit('drag-leave');
+    });
+
+    this.$electron.ipcRenderer.on('open-file', (event: Event, args: { onlySubtitle: boolean, files: Array<string> }) => {
+      if (!args.files.length && args.onlySubtitle) {
+        log.info('helpers/index.js', `Cannot find any related video in the folder: ${args.files}`);
+        addBubble(LOAD_SUBVIDEO_FAILED);
+      } else {
+        const onlyFolders = args.files.every((file: any) => fs.statSync(file).isDirectory());
+        if (onlyFolders) {
+          this.openFolder(...args.files);
+        } else {
+          this.openFile(...args.files);
+        }
+      }
+    });
+    this.$electron.ipcRenderer.on('open-subtitle-in-mas', (event: Event, file: string) => {
+      this.openFilesByDialog({ defaultPath: file });
+    });
+    this.$electron.ipcRenderer.on('add-local-subtitles', (event: Event, file: string[]) => {
+      this.addLocalSubtitlesWithSelect(file);
+    });
+  },
   methods: {
     ...mapActions({
       updateSubDelay: subtitleActions.UPDATE_SUBTITLE_DELAY,
@@ -382,30 +546,32 @@ new Vue({
       this.menuService.menuStateControl(this.currentRouteName);
 
       await this.menuService.addRecentPlayItems();
-      this.recentSubMenu();
+      await this.menuService.addPrimarySub(this.recentSubMenu());
+      await this.menuService.addSecondarySub(this.recentSecondarySubMenu());
+      await this.menuService.addAudioTrack(this.updateAudioTrack());
 
-      this.menuService.getMenuItemById('subtitle.increasePrimarySubDelay').enabled = !!this.primarySubtitleId;
-      this.menuService.getMenuItemById('subtitle.decreasePrimarySubDelay').enabled = !!this.primarySubtitleId;
-      this.menuService.getMenuItemById('subtitle.increaseSecondarySubDelay').enabled = !!this.secondarySubtitleId;
-      this.menuService.getMenuItemById('subtitle.decreaseSecondarySubDelay').enabled = !!this.secondarySubtitleId;
-      this.menuService.getMenuItemById('subtitle.uploadSelectedSubtitle').enabled = this.ableToPushCurrentSubtitle;
+      this.menuService.updateMenuItemEnabled('subtitle.increasePrimarySubtitleDelay', !!this.primarySubtitleId);
+      this.menuService.updateMenuItemEnabled('subtitle.decreasePrimarySubtitleDelay', !!this.primarySubtitleId);
+      this.menuService.updateMenuItemEnabled('subtitle.increaseSecondarySubtitleDelay', !!this.secondarySubtitleId);
+      this.menuService.updateMenuItemEnabled('subtitle.decreaseSecondarySubtitleDelay', !!this.secondarySubtitleId);
+      this.menuService.updateMenuItemEnabled('subtitle.uploadSelectedSubtitle', !!this.ableToPushCurrentSubtitle);
 
       this.audioTrackList.forEach((item: Electron.MenuItem, index: number) => {
         if (item.enabled === true) {
-          this.menuService.getMenuItemById(`track${index}`).checked = true;
+          this.menuService.updateMenuItemChecked(`audio.switchAudioTrack.${index}`, true);
         }
       });
       this.menuService.getMenuItemById('windowFront').checked = this.topOnWindow;
       this.list.forEach((item: SubtitleControlListItem) => {
         if (item.id === this.primarySubtitleId && this.menuService.getMenuItemById(`sub${item.id}`)) {
-          this.menuService.getMenuItemById(`sub${item.id}`).checked = true;
+          this.menuService.updateMenuItemChecked(`subtitle.mainSubtitle.${item.id}`, true);
         }
         if (item.id === this.secondarySubtitleId && this.menuService.getMenuItemById(`secondSub${item.id}`)) {
-          this.menuService.getMenuItemById(`secondSub${item.id}`).checked = true;
+          this.menuService.updateMenuItemChecked(`subtitle.secondarySubtitle.${item.id}`, true);
         }
-        this.menuService.getMenuItemById(`secondSub${item.id}`).enabled = this.enabledSecondarySub;
+        this.menuService.updateMenuItemEnabled(`subtitle.secondarySubtitle.${item.id}`, this.enabledSecondarySub);
       });
-      this.menuService.getMenuItemById('secondSub-1').enabled = this.enabledSecondarySub;
+      this.menuService.updateMenuItemEnabled('subtitle.secondarySubtitle.secondSub-1', this.enabledSecondarySub);
       this.menuOperationLock = false;
     },
     registeMenuActions() {
@@ -515,6 +681,9 @@ new Vue({
         this.menuService.updateMenuItemChecked('audio.mute', menuItem.checked);
         this.$bus.$emit('toggle-muted');
       });
+      this.menuService.on('audio.switchAudioTrack', (e: Event, id: number) => {
+        this.$bus.$emit('switch-audio-track', id);
+      })
       this.menuService.on('subtitle.AITranslation', () => {
         if (!this.isRefreshing) {
           this.refreshSubtitles();
@@ -540,6 +709,26 @@ new Vue({
           }
         });
       });
+      this.menuService.on('subtitle.mainSubtitle', (e: Event, id: string) => {
+        if (id === 'sub-1') this.changeFirstSubtitle('');
+        else {
+          this.updateSubtitleType(true);
+          this.changeFirstSubtitle(id);
+          this.menuService.updateMenuItemChecked(`subtitle.secondarySubtitle.${id}`, false);
+          this.menuService.updateMenuItemChecked('subtitle.secondarySubtitle.secondSub-1', true);
+        }
+      });
+      this.menuService.on('subtitle.secondarySubtitle', (e: Event, id: string) => {
+        if (id === 'secondSub-1') this.changeSecondarySubtitle('');
+        else if (id === 'secondarySub') {
+          this.updateEnabledSecondarySub(!this.enabledSecondarySub)
+        } else {
+          this.updateSubtitleType(false);
+          this.changeSecondarySubtitle(id);
+          this.menuService.updateMenuItemChecked(`subtitle.mainSubtitle.${id}`, false);
+          this.menuService.updateMenuItemChecked('subtitle.mainSubtitle.sub-1', true);
+        }
+      });
       this.menuService.on('subtitle.subtitleSetting', () => {
         this.$bus.$emit('show-subtitle-settings');
       });
@@ -562,16 +751,16 @@ new Vue({
       this.menuService.on('subtitle.uploadSelectedSubtitle', () => {
         this.$store.dispatch(SubtitleManager.manualUploadAllSubtitles);
       });
-      this.menuService.on('window.keepPlayingWindowFront', (e: Event, menuItem: Electron.MenuItem) => {
+      this.menuService.on('window.keepPlayingWindowFront', () => {
         const { remote } = this.$electron;
         const browserWindow = remote.BrowserWindow;
         const focusWindow = browserWindow.getFocusedWindow();
         if (focusWindow.isAlwaysOnTop()) {
           browserWindow.setAlwaysOnTop(false);
-          menuItem.checked = false;
+          this.menuService.updateMenuItemChecked('window.keepPlayingWindowFront', false);
         } else {
           focusWindow.setAlwaysOnTop(true);
-          menuItem.checked = true;
+          this.menuService.updateMenuItemChecked('window.keepPlayingWindowFront', true);
         }
       });
       this.menuService.on('window.fullscreen', () => {
@@ -1203,10 +1392,8 @@ new Vue({
       return item.name;
     },
     recentSubTmp(item: SubtitleControlListItem, isFirstSubtitleType: boolean) {
-      console.log('aa', item);
       return {
-        id: isFirstSubtitleType ? `sub${item.id}` : `secondSub${item.id}`,
-        visible: true,
+        id: `${item.id}`,
         type: 'radio',
         label: this.getSubName(item, this.list),
         click: () => {
@@ -1228,16 +1415,8 @@ new Vue({
       };
     },
     recentSubMenu() {
-      const tmp: Electron.MenuItemConstructorOptions = {
-        label: this.$t('msg.subtitle.mainSubtitle'),
-        id: 'main-subtitle',
-        submenu: [1, 2, 3, 4, 5, 6, 7, 8, 9].map(index => ({
-          id: `sub${index - 2}`,
-          visible: false,
-          label: '',
-        })),
-      };
-      (tmp.submenu as Electron.MenuItemConstructorOptions[]).splice(0, 1, {
+      const submenu: Electron.MenuItemConstructorOptions[] = [];
+      submenu.splice(0, 1, {
         id: 'sub-1',
         visible: true,
         type: 'radio',
@@ -1247,26 +1426,15 @@ new Vue({
         },
       });
       this.list.forEach((item: SubtitleControlListItem, index: number) => {
-        (tmp.submenu as Electron.MenuItemConstructorOptions[])
-          .splice(index + 1, 1, this.recentSubTmp(item, true));
+        submenu.splice(index + 1, 1, this.recentSubTmp(item, true));
       });
-      console.log('ss', tmp);
-      return tmp;
+      return submenu;
     },
     recentSecondarySubMenu() {
-      const tmp: Electron.MenuItemConstructorOptions = {
-        label: this.$t('msg.subtitle.secondarySubtitle'),
-        id: 'secondary-subtitle',
-        submenu: [1, 2, 3, 4, 5, 6, 7, 8, 9].map(index => ({
-          id: `secondSub${index - 2}`,
-          visible: false,
-          label: '',
-        })),
-      };
-      const submenu = tmp.submenu as Electron.MenuItemConstructorOptions[];
+      const submenu: Electron.MenuItemConstructorOptions[] = [];
       submenu.splice(0, 1, this.updateSecondarySub);
       submenu.splice(1, 1, {
-        type: 'separator',
+        id: 'menubar.separator',
       });
       submenu.splice(2, 1, {
         id: 'secondSub-1',
@@ -1280,11 +1448,11 @@ new Vue({
       this.list.forEach((item: SubtitleControlListItem, index: number) => {
         submenu.splice(index + 3, 1, this.recentSubTmp(item, false));
       });
-      return tmp;
+      return submenu;
     },
     updateAudioTrackItem(key: number, value: string) {
       return {
-        id: `track${key}`,
+        id: `${key}`,
         visible: true,
         type: 'radio',
         label: value,
@@ -1294,13 +1462,9 @@ new Vue({
       };
     },
     updateAudioTrack() {
-      const tmp = {
-        label: this.$t('msg.audio.switchAudioTrack'),
-        id: 'audio-track',
-        submenu: [] as Electron.MenuItemConstructorOptions[],
-      };
+      const submenu: Electron.MenuItemConstructorOptions[] = [];
       if (this.audioTrackList.length === 1 && this.audioTrackList[0].language === 'und') {
-        tmp.submenu.splice(0, 1, this.updateAudioTrackItem(0, this.$t('advance.chosenTrack')));
+        submenu.splice(0, 1, this.updateAudioTrackItem(0, this.$t('advance.chosenTrack')));
       } else {
         this.audioTrackList.forEach((item: { language: string, name: string }, index: number) => {
           let detail;
@@ -1311,10 +1475,10 @@ new Vue({
           } else {
             detail = `${this.$t('advance.track')} ${index + 1}: ${item.name}`;
           }
-          tmp.submenu.splice(index, 1, this.updateAudioTrackItem(index, detail));
+          submenu.splice(index, 1, this.updateAudioTrackItem(index, detail));
         });
       }
-      return tmp;
+      return submenu;
     },
     pathProcess(path: string) {
       if (process.platform === 'win32') {
@@ -1322,14 +1486,8 @@ new Vue({
       }
       return path.toString().replace(/^file\/\//, '');
     },
-    async updateRecentPlay() {
-      return '';
-    },
-    async refreshMenu() {
-      // this.menuOperationLock = true;
-      // const menu = this.$electron.remote.Menu.getApplicationMenu();
-      // if (menu) menu.clear();
-      // await this.createMenu();
+    refreshMenu() {
+      this.initializeMenuSettings();
     },
     windowRotate() {
       this.$store.dispatch('windowRotate90Deg');
@@ -1376,189 +1534,6 @@ new Vue({
         this.$bus.$emit(eventName, finalSeekSpeed);
       }
     },
-  },
-  mounted() {
-    // https://github.com/electron/electron/issues/3609
-    // Disable Zooming
-    this.$electron.webFrame.setVisualZoomLevelLimits(1, 1);
-    this.menuService = new MenuService();
-    this.registeMenuActions();
-    this.initializeMenuSettings();
-    // this.createMenu();
-    this.$bus.$on('new-file-open', this.refreshMenu);
-    // TODO: Setup user identity
-    this.$storage.get('user-uuid', (err: Error, userUUID: string) => {
-      if (err || Object.keys(userUUID).length === 0) {
-        err && log.error('render/main', err);
-        userUUID = uuidv4();
-        this.$storage.set('user-uuid', userUUID);
-      }
-
-      Vue.axios.defaults.headers.common['X-Application-Token'] = userUUID;
-
-      // set userUUID to google analytics uid
-      this.$ga && this.$ga.set('userId', userUUID);
-    });
-    this.$on('wheel-event', this.wheelEventHandler);
-
-    window.addEventListener('mousedown', (e) => {
-      if (e.button === 2 && process.platform === 'win32') {
-        this.menu.popup(this.$electron.remote.getCurrentWindow());
-      }
-    });
-    window.addEventListener('keydown', (e) => {
-      switch (e.keyCode) {
-        case 27:
-          if (this.isFullScreen && !this.playlistDisplayState) {
-            e.preventDefault();
-            this.$bus.$emit('off-fullscreen');
-            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
-          }
-          break;
-        case 219:
-          e.preventDefault();
-          this.$store.dispatch(videoActions.DECREASE_RATE);
-          break;
-        case 220:
-          e.preventDefault();
-          this.$store.dispatch(videoActions.CHANGE_RATE, 1);
-          break;
-        case 221:
-          e.preventDefault();
-          this.$store.dispatch(videoActions.INCREASE_RATE);
-          break;
-        default:
-          break;
-      }
-    });
-    /* eslint-disable */
-    window.addEventListener('wheel', (e) => {
-      // ctrlKey is the official way of detecting pinch zoom on mac for chrome
-      if (!e.ctrlKey) {
-        let isAdvanceColumeItem;
-        let isSubtitleScrollItem;
-        const advance = document.querySelector('.mainMenu');
-        const subtitle = document.querySelector('.subtitle-scroll-items');
-        if (advance) {
-          const nodeList = advance.childNodes;
-          for (let i = 0; i < nodeList.length; i += 1) {
-            isAdvanceColumeItem = nodeList[i].contains(e.target as Node);
-          }
-        }
-        if (subtitle) {
-          const subList = subtitle.childNodes;
-          for (let i = 0; i < subList.length; i += 1) {
-            isSubtitleScrollItem = subList[i].contains(e.target as Node);
-          }
-        }
-        if (!isAdvanceColumeItem && !isSubtitleScrollItem) {
-          if (e.deltaY) {
-            if (this.canSendVolumeGa) {
-              this.$ga.event('app', 'volume', 'wheel');
-              this.canSendVolumeGa = false;
-              setTimeout(() => {
-                this.canSendVolumeGa = true;
-              }, 1000);
-            }
-            if (this.wheelDirection === 'vertical' || this.playlistDisplayState) {
-              let step = Math.abs(e.deltaY) * 0.06;
-              // in windows if wheel setting more lines per step, make it limited.
-              if (process.platform !== 'darwin' && step > 6) {
-                step = 6;
-              }
-              if (
-                (process.platform !== 'darwin' && !this.reverseScrolling) ||
-                (process.platform === 'darwin' && this.reverseScrolling)
-              ) {
-                this.$store.dispatch(
-                  e.deltaY < 0 ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
-                  step,
-                );
-              } else if (
-                (process.platform === 'darwin' && !this.reverseScrolling) ||
-                (process.platform !== 'darwin' && this.reverseScrolling)
-              ) {
-                this.$store.dispatch(
-                  e.deltaY > 0 ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
-                  step,
-                );
-              }
-            }
-          }
-        }
-      }
-    });
-    window.addEventListener('wheel', (event) => {
-      const { deltaX: x, ctrlKey, target } = event;
-      let isAdvanceColumeItem;
-      let isSubtitleScrollItem;
-      const advance = document.querySelector('.mainMenu');
-      const subtitle = document.querySelector('.subtitle-scroll-items');
-      if (advance) {
-        const nodeList = advance.childNodes;
-        for (let i = 0; i < nodeList.length; i += 1) {
-          isAdvanceColumeItem = nodeList[i].contains(target as Node);
-        }
-      }
-      if (subtitle) {
-        const subList = subtitle.childNodes;
-        for (let i = 0; i < subList.length; i += 1) {
-          isSubtitleScrollItem = subList[i].contains(target as Node);
-        }
-      }
-      if (!ctrlKey && !isAdvanceColumeItem && !isSubtitleScrollItem) {
-        this.$emit('wheel-event', { x });
-      }
-    });
-    /* eslint-disable */
-
-    window.addEventListener('drop', (e) => {
-      e.preventDefault();
-      this.$bus.$emit('drop');
-      this.$store.commit('source', 'drop');
-      const files = Array.prototype.map.call(e.dataTransfer!.files, (f: File) => f.path)
-      const onlyFolders = files.every((file: fs.PathLike) => fs.statSync(file).isDirectory());
-      if (this.currentRouteName === 'playing-view' || onlyFolders
-        || files.every((file: fs.PathLike) => getValidVideoRegex().test(file) && !getValidSubtitleRegex().test(file))) {
-        files.forEach((file: fs.PathLike) => this.$electron.remote.app.addRecentDocument(file));
-        if (onlyFolders) {
-          this.openFolder(...files);
-        } else {
-          this.openFile(...files);
-        }
-      } else {
-        this.$electron.ipcRenderer.send('drop-subtitle', files);
-      }
-    });
-    window.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      e.dataTransfer!.dropEffect = process.platform === 'darwin' ? 'copy' : '';
-      this.$bus.$emit('drag-over');
-    });
-    window.addEventListener('dragleave', (e) => {
-      e.preventDefault();
-      this.$bus.$emit('drag-leave');
-    });
-
-    this.$electron.ipcRenderer.on('open-file', (event: Event, args: { onlySubtitle: boolean, files: Array<string> }) => {
-      if (!args.files.length && args.onlySubtitle) {
-        log.info('helpers/index.js', `Cannot find any related video in the folder: ${args.files}`);
-        addBubble(LOAD_SUBVIDEO_FAILED);
-      } else {
-        const onlyFolders = args.files.every((file: any) => fs.statSync(file).isDirectory());
-        if (onlyFolders) {
-          this.openFolder(...args.files);
-        } else {
-          this.openFile(...args.files);
-        }
-      }
-    });
-    this.$electron.ipcRenderer.on('open-subtitle-in-mas', (event: Event, file: string) => {
-      this.openFilesByDialog({ defaultPath: file });
-    });
-    this.$electron.ipcRenderer.on('add-local-subtitles', (event: Event, file: string[]) => {
-      this.addLocalSubtitlesWithSelect(file);
-    });
   },
   template: '<App/>',
 }).$mount('#app');

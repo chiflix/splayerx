@@ -7,7 +7,8 @@ export type MenubarMenuItem =
   IMenubarMenuItemAction
   | IMenubarMenuItemSubmenu
   | IMenubarMenuItemSeparator
-  | IMenubarMenuItemRole;
+  | IMenubarMenuItemRole
+  | IMenubarMenuItemRadio;
 
 export interface IMenubarMenuItemAction {
   id: string;
@@ -29,6 +30,12 @@ export interface IMenubarMenuItemSubmenu {
   id: string;
   label: string;
   submenu: IMenubarMenu;
+}
+
+export interface IMenubarMenuItemRadio {
+  id: string;
+  label: string;
+  type: 'radio';
 }
 
 export interface IMenubarMenuItemSeparator {

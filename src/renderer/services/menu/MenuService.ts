@@ -46,7 +46,7 @@ export default class MenuService {
     this.enableSubmenuItem('window', !inWelcomeView);
     this.enableSubmenuItem('file', !inWelcomeView);
 
-    this.updateMenuItemEnabled('splayerx.preferences', !inWelcomeView);
+    this.getMenuItemById('splayerx.preferences').enabled = !inWelcomeView;
     this.updateMenuItemEnabled('window.bossKey', inPlayingView);
     this.updateMenuItemEnabled('window.halfSize', inPlayingView);
     this.updateMenuItemEnabled('window.originSize', inPlayingView);
@@ -74,8 +74,16 @@ export default class MenuService {
     ipcRenderer.send('update-recent-play', items);
   }
 
-  public refreshMenu() {
-    ipcRenderer.send('refresh-menu');
+  public addPrimarySub(menuItem: Electron.MenuItem) {
+    ipcRenderer.send('update-primary-sub', menuItem);
+  }
+
+  public addSecondarySub(menuItem: Electron.MenuItem) {
+    ipcRenderer.send('update-secondary-sub', menuItem);
+  }
+
+  public addAudioTrack(menuItem: Electron.MenuItem) {
+    ipcRenderer.send('update-audio-track', menuItem);
   }
 
   public getMenuItemById(id: string): Electron.MenuItem {

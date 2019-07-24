@@ -3,19 +3,19 @@
     "items": [
       {
         "id": "audio.increaseVolume",
-        "label": "increaseVolume",
+        "label": "msg.audio.increaseVolume",
         "accelerator": "=",
         "winAccelerator": "Up"
       },
       {
         "id": "audio.decreaseVolume",
-        "label": "decreaseVolume",
+        "label": "msg.audio.decreaseVolume",
         "accelerator": "-",
         "winAccelerator": "Down"
       },
       {
         "id": "audio.mute",
-        "label": "mute",
+        "label": "msg.audio.mute",
         "accelerator": "M",
         "enabled": true,
         "checked": false
@@ -25,7 +25,7 @@
       },
       {
         "id": "audio.switchAudioTrack",
-        "label": "switchAudioTrack",
+        "label": "msg.audio.switchAudioTrack",
         "submenu": {
           "items": []
         }
@@ -148,7 +148,8 @@
       {
         "id": "playback.singleCycle",
         "label": "msg.playback.singleCycle",
-        "type": "checkbox"
+        "type": "checkbox",
+        "checked": false
       },
       {
         "id": "playback.snapShot",
@@ -176,12 +177,16 @@
       {
         "id": "subtitle.mainSubtitle",
         "label": "msg.subtitle.mainSubtitle",
-        "subtitle": []
+        "submenu": {
+          "items": []
+        }
       },
       {
         "id": "subtitle.secondarySubtitle",
         "label": "msg.subtitle.secondarySubtitle",
-        "subtitle": []
+        "submenu": {
+          "items": []
+        }
       },
       {
         "id": "menubar.separator"
@@ -231,6 +236,7 @@
       {
         "id": "window.keepPlayingWindowFront",
         "label": "msg.window.keepPlayingWindowFront",
+        "accelerator": "T",
         "enabled": true,
         "checked": false
       },

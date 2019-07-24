@@ -18,6 +18,15 @@ export default class MenuService {
     ipcMain.on('update-recent-play', (e: Event, items: IMenuDisplayInfo[]) => {
       this.menu.updateRecentPlay(items);
     });
+    ipcMain.on('update-primary-sub', (e: Event, items: { id: string, label: string }[]) => {
+      this.menu.updatePrimarySub(items);
+    });
+    ipcMain.on('update-secondary-sub', (e: Event, items: { id: string, label: string }[]) => {
+      this.menu.updateSecondarySub(items);
+    });
+    ipcMain.on('update-audio-track', (e: Event, items: { id: string, label: string }[]) => {
+      this.menu.updateAudioTrack(items);
+    });
     ipcMain.on('update-paused', (e: Event, paused: boolean) => {
       this.menu.updatePaused(paused);
     });

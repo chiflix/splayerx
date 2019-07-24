@@ -49,6 +49,11 @@ export default class Menubar {
       this.enableSubmenuItem('audio', false);
       this.enableSubmenuItem('subtitle', false);
       this.enableSubmenuItem('window', false);
+    } else {
+      this.enableSubmenuItem('playback', true);
+      this.enableSubmenuItem('audio', true);
+      this.enableSubmenuItem('subtitle', true);
+      this.enableSubmenuItem('window', true);
     }
     // may replace this way of getting mainWindow by window service or else...
     this.mainWindow = window;
@@ -107,11 +112,73 @@ export default class Menubar {
     Menu.setApplicationMenu(this.menubar);
   }
 
-  // public updatePrimarySub(items: ) {
-  //   const primarySub = this.menubar.getMenuItemById('subtitle.mainSubtitle').submenu;
-  //   // @ts-ignore
-  //   primarySub.clear();
-  // }
+  public updatePrimarySub(items: { id: string, label: string }[]) {
+    console.log(items);
+    const primarySubMenu = this.menubar.getMenuItemById('subtitle.mainSubtitle').submenu;
+    // @ts-ignore
+    primarySubMenu.clear();
+    items.forEach(({ id, label }) => {
+      const item = new MenuItem({
+        id: `subtitle.mainSubtitle.${id}`,
+        type: 'radio',
+        label,
+        click: () => {
+          if (!this.mainWindow.webContents.isDestroyed()) {
+            this.mainWindow.webContents.send('subtitle.mainSubtitle', id);
+          }
+        },
+      });
+      primarySubMenu.append(item);
+    });
+
+    Menu.setApplicationMenu(this.menubar);
+  }
+
+  public updateSecondarySub(items: { id: string, label: string }[]) {
+    console.log(items);
+    const secondarySubMenu = this.menubar.getMenuItemById('subtitle.secondarySubtitle').submenu;
+    // @ts-ignore
+    secondarySubMenu.clear();
+    items.forEach(({ id, label }) => {
+      let type: ('normal' | 'separator' | 'submenu' | 'checkbox' | 'radio') = 'radio';
+      if (id === 'secondarySub') type = 'checkbox';
+      else if (id === 'menubar.separator') type = 'separator';
+      const item = new MenuItem({
+        id: `subtitle.secondarySubtitle.${id}`,
+        type,
+        label,
+        click: () => {
+          if (!this.mainWindow.webContents.isDestroyed()) {
+            this.mainWindow.webContents.send('subtitle.secondarySubtitle', id);
+          }
+        },
+      });
+      secondarySubMenu.append(item);
+    });
+
+    Menu.setApplicationMenu(this.menubar);
+  }
+
+  public updateAudioTrack(items: { id: string, label: string }[]) {
+    const audioTrackMenu = this.menubar.getMenuItemById('audio.switchAudioTrack').submenu;
+    // @ts-ignore
+    audioTrackMenu.clear();
+    items.forEach(({ id, label }) => {
+      const item = new MenuItem({
+        id: `audio.switchAudioTrack.${id}`,
+        type: 'radio',
+        label,
+        click: () => {
+          if (!this.mainWindow.webContents.isDestroyed()) {
+            this.mainWindow.webContents.send('audio.switchAudioTrack', id);
+          }
+        },
+      });
+      audioTrackMenu.append(item);
+    });
+
+    Menu.setApplicationMenu(this.menubar);
+  }
 
   private install(): void {
     // Store old menu in our array to avoid GC to collect the menu and crash. See #55347
@@ -470,8 +537,7 @@ export default class Menubar {
         const item = this.createRoleMenuItem(menuItem.label, menuItem.role, menuItem.enabled);
         newMenu.append(item);
       } else {
-        let item;
-        item = this.createMenuItemByTemplate(menuItem);
+        const item = this.createMenuItemByTemplate(menuItem);
         newMenu.append(item);
       }
     });
