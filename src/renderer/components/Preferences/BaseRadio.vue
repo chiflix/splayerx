@@ -32,9 +32,18 @@ export default {
     event: 'change',
   },
   props: {
-    radioValue: String,
-    value: String,
-    name: String,
+    radioValue: {
+      type: String,
+      default: '',
+    },
+    value: {
+      type: String,
+      default: '',
+    },
+    name: {
+      type: String,
+      default: '',
+    },
   },
 };
 </script>

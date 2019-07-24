@@ -49,15 +49,6 @@ export default {
       radioValue: 'intelligentMode',
     };
   },
-  created() {
-    if (this.protectPrivacy && this.hideNSFW) this.radioValue = 'seamlessMode';
-  },
-  watch: {
-    radioValue(val: string) {
-      if (val === 'intelligentMode') this.hideNSFW = true;
-      else if (val === 'seamlessMode') this.hideNSFW = false;
-    },
-  },
   computed: {
     preferenceData() {
       return this.$store.getters.preferenceData;
@@ -82,12 +73,21 @@ export default {
       get() {
         return this.$store.getters.hideNSFW;
       },
-      set(val) {
+      set(val: boolean) {
         this.$store.dispatch('hideNSFW', !!val).then(() => {
           electron.ipcRenderer.send('preference-to-main', this.preferenceData);
         });
       },
     },
+  },
+  watch: {
+    radioValue(val: string) {
+      if (val === 'intelligentMode') this.hideNSFW = true;
+      else if (val === 'seamlessMode') this.hideNSFW = false;
+    },
+  },
+  created() {
+    if (this.protectPrivacy && this.hideNSFW) this.radioValue = 'seamlessMode';
   },
 };
 </script>
@@ -103,7 +103,7 @@ export default {
     background-color: rgba(0,0,0,0.05);
   }
   &_radio {
-    margin-left: 29px;    
+    margin-left: 29px;
     padding-top: 20px;
     &2 {
       margin-top: 15px;
