@@ -17,11 +17,13 @@ export default class MenuService {
   }
 
   public updateMenuItemChecked(id: string, checked: boolean) {
-    ipcRenderer.send('update-checked', id, checked);
+    if (this.getMenuItemById(id)) this.getMenuItemById(id).checked = checked;
+    else console.log(id);
   }
 
   public updateMenuItemEnabled(id: string, enabled: boolean) {
-    ipcRenderer.send('update-enabled', id, enabled);
+    if (this.getMenuItemById(id)) this.getMenuItemById(id).enabled = enabled;
+    else console.log(id);
   }
 
   public enableSubmenuItem(id: string, enabled: boolean) {

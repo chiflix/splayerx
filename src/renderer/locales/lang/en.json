@@ -101,7 +101,8 @@
       "name": "File",
       "open": "Open…",
       "openRecent": "Open Recent",
-      "openURL": "Open URL…"
+      "openURL": "Open URL…",
+      "launch": "Launch"
     },
     "help": {
       "name": "Help",

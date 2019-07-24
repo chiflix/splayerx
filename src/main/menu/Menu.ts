@@ -49,11 +49,23 @@ export default class Menubar {
       this.enableSubmenuItem('audio', false);
       this.enableSubmenuItem('subtitle', false);
       this.enableSubmenuItem('window', false);
+      this.enableSubmenuItem('file.openRecent', false);
+
+      this.updateMenuItemEnabled('file.launch', true);
+      this.updateMenuItemEnabled('file.open', false);
+      this.updateMenuItemEnabled('file.clearHistory', false);
+      this.updateMenuItemEnabled('file.closeWindow', false);
     } else {
       this.enableSubmenuItem('playback', true);
       this.enableSubmenuItem('audio', true);
       this.enableSubmenuItem('subtitle', true);
       this.enableSubmenuItem('window', true);
+      this.enableSubmenuItem('file.openRecent', true);
+
+      this.updateMenuItemEnabled('file.launch', false);
+      this.updateMenuItemEnabled('file.open', true);
+      this.updateMenuItemEnabled('file.clearHistory', true);
+      this.updateMenuItemEnabled('file.closeWindow', true);
     }
     // may replace this way of getting mainWindow by window service or else...
     this.mainWindow = window;
