@@ -55,7 +55,7 @@
     "iconv-lite": "^0.4.24",
     "idb": "^4.0.3",
     "lethargy": "^1.0.4",
-    "lodash": "^4.17.10",
+    "lodash": "^4.17.15",
     "lolex": "^3.0.0",
     "lottie-web": "^5.5.4",
     "mkdirp": "^0.5.1",
