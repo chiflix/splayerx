@@ -36,7 +36,7 @@ export function searchForLocalList(videoSrc: string): Promise<string[]> {
 
 export async function fetchOnlineList(
   videoSrc: string,
-  languageCode: LanguageCode = LanguageCode['zh-CN'],
+  languageCode: LanguageCode = LanguageCode.Default,
   hints?: string,
 ) {
   if (
