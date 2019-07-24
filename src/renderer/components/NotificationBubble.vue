@@ -106,7 +106,7 @@ export default {
   computed: {
     ...mapGetters([
       'nextVideo', 'nextVideoPreviewTime', 'duration', 'singleCycle', 'privacyAgreement',
-      'translateBubbleMessage', 'translateBubbleType', 'isTranslateBubbleVisiable',
+      'translateBubbleMessage', 'translateBubbleType', 'isTranslateBubbleVisiable', 'failBubbleId',
     ]),
     messages() {
       const messages = this.$store.getters.messageInfo;
@@ -152,6 +152,7 @@ export default {
       hideTranslateBubble: atActions.AUDIO_TRANSLATE_HIDE_BUBBLE,
       discardTranslate: atActions.AUDIO_TRANSLATE_DISCARD,
       backStageTranslate: atActions.AUDIO_TRANSLATE_BACKSATGE,
+      hideBubbleCallBack: atActions.AUDIO_TRANSLATE_HIDE_BUBBLE,
     }),
     closePrivacyBubble() {
       this.showPrivacyBubble = false;
@@ -166,6 +167,10 @@ export default {
     },
     closeMessage(id: string) {
       this.$store.dispatch('removeMessages', id);
+      // 如果是x掉智能翻译失败的气泡，就执行智能翻译bubble cancal的回调
+      if (id === this.failBubbleId) {
+        this.hideBubbleCallBack();
+      }
     },
     checkNextVideoUI(time: number) {
       if (time > this.nextVideoPreviewTime && time < this.duration - 1 && this.duration > 240) {

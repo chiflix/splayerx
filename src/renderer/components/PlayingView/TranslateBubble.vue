@@ -20,7 +20,7 @@
           @mouseup.stop="$emit('disCardTranslate');"
           class="bubble__button--lower"
         >
-          {{ $t('translateBubble.leave') }}
+          {{ $t('translateBubble.cancel') }}
         </div>
         <div
           @mouseup.stop="$emit('hide');"
@@ -47,7 +47,7 @@
           @mouseup.stop="$emit('disCardTranslate');"
           class="bubble__button--lower"
         >
-          {{ $t('translateBubble.leave') }}
+          {{ $t('translateBubble.cancel') }}
         </div>
         <div
           @mouseup.stop="$emit('hide');"

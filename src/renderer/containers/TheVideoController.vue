@@ -118,7 +118,12 @@ import {
   createNamespacedHelpers,
 } from 'vuex';
 import path from 'path';
-import { Input as inputActions, Video as videoActions, Subtitle as legacySubtitleActions } from '@/store/actionTypes';
+import {
+  Input as inputActions,
+  Video as videoActions,
+  Subtitle as legacySubtitleActions,
+  AudioTranslate as atActions,
+} from '@/store/actionTypes';
 import { INPUT_COMPONENT_TYPE, getterTypes as iGT } from '@/plugins/input';
 import Titlebar from '@/components/Titlebar.vue';
 import PlayButton from '@/components/PlayingView/PlayButton.vue';
@@ -132,6 +137,7 @@ import RecentPlaylist from '@/containers/RecentPlaylist.vue';
 import NotificationBubble from '@/components/NotificationBubble.vue';
 import AudioTranslateModal from '@/containers/AudioTranslateModal.vue';
 import { videodata } from '@/store/video';
+import { AudioTranslateStatus } from '../store/modules/AudioTranslate';
 
 const { mapGetters: inputMapGetters } = createNamespacedHelpers('InputPlugin');
 /** dom wrapper */
@@ -222,7 +228,7 @@ export default {
       'playingList', 'isFolderList',
       'isFullScreen', 'isFocused', 'isMinimized',
       'leftMousedown', 'progressKeydown', 'volumeKeydown', 'wheelTriggered', 'volumeWheelTriggered',
-      'enabledSecondarySub', 'isTranslateModalVisiable',
+      'enabledSecondarySub', 'isTranslateModalVisiable', 'translateStatus', 'failBubbleId', 'messageInfo',
     ]),
     ...inputMapGetters({
       inputWheelDirection: iGT.GET_WHEEL_DIRECTION,
@@ -496,6 +502,8 @@ export default {
       updateKeyup: inputActions.KEYUP_UPDATE,
       updateWheel: inputActions.WHEEL_UPDATE,
       updateSubtitleType: legacySubtitleActions.UPDATE_SUBTITLE_TYPE,
+      updateHideModalCallback: atActions.AUDIO_TRANSLATE_MODAL_HIDE_CALLBACK,
+      updateHideBubbleCallback: atActions.AUDIO_TRANSLATE_BUBBLE_CANCEL_CALLBACK,
     }),
     createIcon(iconPath: string) {
       const { nativeImage } = this.$electron.remote;
@@ -576,7 +584,27 @@ export default {
         videodata.paused = true;
         // we need to reset the hoverProgressBar for play next video
         this.needResetHoverProgressBar = true;
-        this.$bus.$emit('next-video');
+        // 如果要自动切下个视频的时候，这个时候视频的自能翻译是失败的
+        // 但是气泡和modal显示着，就不自动切，用户手动关闭再切
+        const translateFailBubbleExist = this.messageInfo
+          && this.messageInfo.find((e: { id: string }) => e.id === this.failBubbleId);
+        console.log(translateFailBubbleExist, this.messageInfo, this.failBubbleId);
+        if (this.translateStatus === AudioTranslateStatus.Fail && this.isTranslateModalVisiable) {
+          this.$store.dispatch(videoActions.PAUSE_VIDEO);
+          this.updateHideModalCallback(() => {
+            this.$bus.$emit('next-video');
+            this.$store.dispatch(videoActions.PLAY_VIDEO);
+          });
+        } else if (this.translateStatus === AudioTranslateStatus.Fail
+          && translateFailBubbleExist) {
+          this.$store.dispatch(videoActions.PAUSE_VIDEO);
+          this.updateHideBubbleCallback(() => {
+            this.$bus.$emit('next-video');
+            this.$store.dispatch(videoActions.PLAY_VIDEO);
+          });
+        } else {
+          this.$bus.$emit('next-video');
+        }
       }
 
       this.start = timestamp;

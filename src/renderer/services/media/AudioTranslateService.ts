@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-06-20 18:03:14
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-07-24 15:07:25
+ * @Last Modified time: 2019-07-24 18:13:20
  */
 
 // @ts-ignore
@@ -55,6 +55,8 @@ class AudioTranslateService extends EventEmitter {
 
   private mediaStorageService: MediaStorageService;
 
+  private timeoutCount: number;
+
   public constructor(mediaStorageService: MediaStorageService) {
     super();
     this.mediaStorageService = mediaStorageService;
@@ -101,6 +103,7 @@ class AudioTranslateService extends EventEmitter {
   }
 
   public startJob(data: JobData): AudioTranslateService {
+    this.timeoutCount = 3;
     // 计算audioID
     const audioId = Number(data.audioId) - 1;
     this.audioId = isNaN(audioId) ? -1 : audioId;
@@ -201,7 +204,6 @@ class AudioTranslateService extends EventEmitter {
     this.loopTimer = setTimeout(async () => {
       try {
         const res = await sagi.streamingTranslationTask(taskId);
-        console.log(res);
         const result = res && res.toObject();
         if (result && res.hasTranscriptinfo()) {
           this.emit('transcriptInfo', result.transcriptinfo);
@@ -220,9 +222,15 @@ class AudioTranslateService extends EventEmitter {
           this.stop();
         }
       } catch (error) {
-        console.log(error);
-        this.emit('error', error);
-        this.stop();
+        if (error && error.message === 'time out' && this.timeoutCount > 0 && this.taskInfo) {
+          console.log('time out', 4 - this.timeoutCount);
+          this.timeoutCount -= 1;
+          this.loopTask(this.taskInfo);
+        } else {
+          console.log(error);
+          this.emit('error', error);
+          this.stop();
+        }
       }
     }, delay);
   }

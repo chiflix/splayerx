@@ -2,12 +2,14 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-05 16:03:32
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-07-24 15:24:56
+ * @Last Modified time: 2019-07-24 20:10:38
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @ts-ignore
 import { event } from 'vue-analytics';
+import uuidv4 from 'uuid/v4';
 import { AudioTranslate as m } from '@/store/mutationTypes';
+import store from '@/store';
 import { AudioTranslate as a, SubtitleManager as smActions } from '@/store/actionTypes';
 import { audioTranslateService } from '@/services/media/AudioTranslateService';
 import { AITaskInfo } from '@/interfaces/IMediaStorable';
@@ -67,7 +69,9 @@ type AudioTranslateState = {
   bubbleMessage: string,
   bubbleType: string,
   callbackAfterCancelBubble: Function,
+  callbackAfterHideModal: Function,
   lastAudioLanguage: string,
+  failBubbleId: string,
 };
 
 const state = {
@@ -83,7 +87,55 @@ const state = {
   bubbleType: '',
   callbackAfterBubble: () => { },
   callbackAfterCancelBubble: () => { },
+  callbackAfterHideModal: () => { },
   lastAudioLanguage: '',
+  failBubbleId: '',
+};
+
+const taskCallback = (taskInfo: AITaskInfo) => {
+  console.log(taskInfo, 'audio-log');
+  // @ts-ignore
+  if (taskInfo.mediaHash !== store.getters.mediaHash) {
+    return;
+  }
+  audioTranslateService.taskInfo = taskInfo;
+  const estimateTime = taskInfo.estimateTime * 1;
+  // @ts-ignore
+  let startEstimateTime = store.getters.translateEstimateTime;
+  let reduce = 1.5;
+  if (startEstimateTime > staticEstimateTime * 0.6) {
+    startEstimateTime = staticEstimateTime * 0.6;
+  } else if (startEstimateTime > estimateTime && estimateTime !== 0) {
+    startEstimateTime = estimateTime;
+  } else if (startEstimateTime < 20) {
+    reduce = startEstimateTime / 30;
+  } else if (startEstimateTime < 5) {
+    reduce = 0;
+  }
+  timerCount = 1;
+  // @ts-ignore
+  store.commit(m.AUDIO_TRANSLATE_UPDATE_STATUS, AudioTranslateStatus.Translating);
+  // 开启定时器模拟倒计时和进度
+  if (taskTimer) {
+    clearInterval(taskTimer);
+  }
+  taskTimer = window.setInterval(() => {
+    // @ts-ignore
+    if (taskInfo.mediaHash !== store.getters.mediaHash && !store.getters.isTranslating) {
+      // @ts-ignore
+      store.commit(m.AUDIO_TRANSLATE_UPDATE_PROGRESS, 0);
+      clearInterval(taskTimer);
+      return;
+    }
+    timerCount += 1;
+    const estimateTime = startEstimateTime - (Math.log(timerCount) * reduce);
+    const progress = ((staticEstimateTime - estimateTime) / staticEstimateTime) * 100;
+    console.log(estimateTime, reduce);
+    // @ts-ignore
+    store.commit(m.AUDIO_TRANSLATE_UPDATE_ESTIMATE_TIME, estimateTime);
+    // @ts-ignore
+    store.commit(m.AUDIO_TRANSLATE_UPDATE_PROGRESS, progress);
+  }, 1000);
 };
 
 const getters = {
@@ -117,6 +169,9 @@ const getters = {
   },
   lastAudioLanguage(state: AudioTranslateState) {
     return state.lastAudioLanguage;
+  },
+  failBubbleId(state: AudioTranslateState) {
+    return state.failBubbleId;
   },
 };
 
@@ -162,6 +217,9 @@ const mutations = {
   [m.AUDIO_TRANSLATE_BUBBLE_CANCEL_CALLBACK](state: AudioTranslateState, callback: Function) {
     state.callbackAfterCancelBubble = callback;
   },
+  [m.AUDIO_TRANSLATE_MODAL_HIDE_CALLBACK](state: AudioTranslateState, callback: Function) {
+    state.callbackAfterHideModal = callback;
+  },
   [m.AUDIO_TRANSLATE_RECOVERY](state: AudioTranslateState) {
     state.translateProgress = 0;
     state.translateEstimateTime = 0;
@@ -173,9 +231,16 @@ const mutations = {
     state.isBubbleVisible = false;
     state.bubbleType = '';
     state.bubbleMessage = '';
+    state.callbackAfterCancelBubble = () => { };
+    state.callbackAfterHideModal = () => { };
+    state.lastAudioLanguage = '';
+    state.failBubbleId = '';
   },
   [m.AUDIO_TRANSLATE_UPDATE_LAST_AUDIO_LANGUAGE](state: AudioTranslateState, language: string) {
     state.lastAudioLanguage = language;
+  },
+  [m.AUDIO_TRANSLATE_UPDATE_FAIL_BUBBLE_ID](state: AudioTranslateState, id: string) {
+    state.failBubbleId = id;
   },
 };
 
@@ -229,18 +294,23 @@ const actions = {
       });
       grab.on('error', (error: Error) => {
         console.log(error, 'audio-log');
+        if (taskTimer) {
+          clearInterval(taskTimer);
+        }
         audioTranslateService.stop();
         commit(m.AUDIO_TRANSLATE_UPDATE_STATUS, AudioTranslateStatus.Fail);
         if (!state.isModalVisiable) {
           commit(m.AUDIO_TRANSLATE_UPDATE_PROGRESS, 0);
           // TODO 如果开启了第二字幕
           dispatch(smActions.changePrimarySubtitle, '');
+          const failBubbleId = uuidv4();
+          commit(m.AUDIO_TRANSLATE_UPDATE_FAIL_BUBBLE_ID, failBubbleId);
           // 如果当前有其他的bubble显示，就暂时不出失败的bubble
           if (!state.isBubbleVisible) {
-            addBubble(TRANSLATE_FAIL);
+            addBubble(TRANSLATE_FAIL, { id: failBubbleId });
           } else {
             commit(m.AUDIO_TRANSLATE_BUBBLE_CANCEL_CALLBACK, () => {
-              addBubble(TRANSLATE_FAIL);
+              addBubble(TRANSLATE_FAIL, { id: failBubbleId });
             });
           }
         }
@@ -278,44 +348,7 @@ const actions = {
           // empty
         }
       });
-      grab.on('task', (taskInfo: AITaskInfo) => {
-        console.log(taskInfo, 'audio-log');
-        if (taskInfo.mediaHash !== getters.mediaHash) {
-          return;
-        }
-        audioTranslateService.taskInfo = taskInfo;
-        const estimateTime = taskInfo.estimateTime * 1;
-        let startEstimateTime = state.translateEstimateTime;
-        let reduce = 1.5;
-        if (startEstimateTime > staticEstimateTime * 0.6) {
-          startEstimateTime = staticEstimateTime * 0.6;
-        } else if (startEstimateTime > estimateTime && estimateTime !== 0) {
-          startEstimateTime = estimateTime;
-        } else if (startEstimateTime < 20) {
-          reduce = startEstimateTime / 30;
-        } else if (startEstimateTime < 5) {
-          reduce = 0;
-        }
-        timerCount = 1;
-        commit(m.AUDIO_TRANSLATE_UPDATE_STATUS, AudioTranslateStatus.Translating);
-        // 开启定时器模拟倒计时和进度
-        if (taskTimer) {
-          clearInterval(taskTimer);
-        }
-        taskTimer = window.setInterval(() => {
-          if (taskInfo.mediaHash !== getters.mediaHash
-            || state.status === AudioTranslateStatus.Fail) {
-            clearInterval(taskTimer);
-            return;
-          }
-          timerCount += 1;
-          const estimateTime = startEstimateTime - (Math.log(timerCount) * reduce);
-          const progress = ((staticEstimateTime - estimateTime) / staticEstimateTime) * 100;
-          console.log(estimateTime, reduce);
-          commit(m.AUDIO_TRANSLATE_UPDATE_ESTIMATE_TIME, estimateTime);
-          commit(m.AUDIO_TRANSLATE_UPDATE_PROGRESS, progress);
-        }, 1000);
-      });
+      grab.on('task', taskCallback);
       grab.on('transcriptInfo', async (transcriptInfo: TranscriptInfo) => {
         console.log(transcriptInfo, 'audio-log');
         // 清除task阶段倒计时定时器
@@ -458,11 +491,15 @@ const actions = {
     if (state.status === AudioTranslateStatus.Translating) {
       audioTranslateService.saveTask();
     }
+    if (taskTimer) {
+      clearInterval(taskTimer);
+    }
+    commit(m.AUDIO_TRANSLATE_UPDATE_STATUS, AudioTranslateStatus.Back);
+    commit(m.AUDIO_TRANSLATE_UPDATE_PROGRESS, 0);
+    commit(m.AUDIO_TRANSLATE_HIDE_MODAL);
     state.callbackAfterBubble();
     dispatch(a.AUDIO_TRANSLATE_HIDE_BUBBLE);
-    commit(m.AUDIO_TRANSLATE_HIDE_MODAL);
-    commit(m.AUDIO_TRANSLATE_UPDATE_PROGRESS, 0);
-    commit(m.AUDIO_TRANSLATE_UPDATE_STATUS, AudioTranslateStatus.Back);
+    audioTranslateService.removeListener('task', taskCallback);
   },
   [a.AUDIO_TRANSLATE_SHOW_MODAL]({
     commit, getters, state, dispatch,
@@ -470,7 +507,8 @@ const actions = {
     dispatch(a.AUDIO_TRANSLATE_HIDE_BUBBLE);
     const key = `${getters.mediaHash}`;
     const taskInfo = mediaStorageService.getAsyncTaskInfo(key);
-    if (getters.isTranslating && state.selectedTargetSubtitleId === sub.id) {
+    if ((getters.isTranslating || state.status === AudioTranslateStatus.Back)
+      && state.selectedTargetSubtitleId === sub.id) {
       commit(m.AUDIO_TRANSLATE_SHOW_MODAL);
       // TODO 如果开启了第二字幕
       dispatch(smActions.changePrimarySubtitle, sub.id);
@@ -578,8 +616,18 @@ const actions = {
     }
     commit(m.AUDIO_TRANSLATE_BUBBLE_CANCEL_CALLBACK, () => { });
   },
+  [a.AUDIO_TRANSLATE_BUBBLE_CANCEL_CALLBACK]({ commit }: any, callback: Function) {
+    commit(m.AUDIO_TRANSLATE_BUBBLE_CANCEL_CALLBACK, callback);
+  },
   [a.AUDIO_TRANSLATE_BUBBLE_CALLBACK]({ commit }: any, callback: Function) {
     commit(m.AUDIO_TRANSLATE_BUBBLE_CALLBACK, callback);
+  },
+  [a.AUDIO_TRANSLATE_MODAL_HIDE_CALLBACK]({ commit }: any, callback: Function) {
+    commit(m.AUDIO_TRANSLATE_MODAL_HIDE_CALLBACK, callback);
+  },
+  [a.AUDIO_TRANSLATE_INIT]({ commit, dispatch, getters }: any) {
+    dispatch('removeMessages', getters.failBubbleId);
+    commit(m.AUDIO_TRANSLATE_RECOVERY);
   },
 };
 

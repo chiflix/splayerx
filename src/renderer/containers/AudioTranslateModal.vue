@@ -129,7 +129,7 @@
           @click="cancelTranslate"
           class="button"
         >
-          {{ $t('translateModal.cancel') }}
+          {{ $t('translateModal.quit') }}
         </div>
       </div>
       <div
@@ -225,6 +225,7 @@ export default Vue.extend({
   watch: {
     mediaHash() {
       this.audioLanguage = { label: this.$t('translateModal.selectLanguageLabel'), value: '' };
+      this.audioTranslateStoreInit();
     },
     currentAudioTrackId() {
       this.audioLanguage = { label: this.$t('translateModal.selectLanguageLabel'), value: '' };
@@ -244,6 +245,7 @@ export default Vue.extend({
       startTranslate: atActions.AUDIO_TRANSLATE_START,
       discardTranslate: atActions.AUDIO_TRANSLATE_DISCARD,
       updateWheel: inputActions.WHEEL_UPDATE,
+      audioTranslateStoreInit: atActions.AUDIO_TRANSLATE_INIT,
     }),
     translate() {
       const { audioLanguage } = this;
