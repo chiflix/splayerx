@@ -79,6 +79,11 @@ export default class Menubar {
     this.updateMenuItemEnabled('file.closeWindow', false);
   }
 
+  public updateLocale() {
+    this.locale.getDisplayLanguage();
+    this.install();
+  }
+
   public updatePaused(paused: boolean) {
     this.paused = paused;
     this.refreshPlaybackMenu();
@@ -209,6 +214,8 @@ export default class Menubar {
       Menu.setApplicationMenu(IsMacintosh ? new Menu() : null);
       return;
     }
+    // @ts-ignore
+    oldMenu.clear();
 
     this.menubar = IsMacintosh ? this.createMacMenu() : this.createWinMenu();
 

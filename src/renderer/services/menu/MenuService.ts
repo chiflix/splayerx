@@ -8,6 +8,10 @@ export default class MenuService {
     ipcRenderer.on(channel, callback);
   }
 
+  public updateLocale() {
+    ipcRenderer.send('update-locale');
+  }
+
   public updateRouteName(routeName: string) {
     ipcRenderer.send('update-route-name', routeName);
   }

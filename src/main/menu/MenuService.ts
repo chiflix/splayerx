@@ -35,6 +35,9 @@ export default class MenuService {
   }
 
   private registeMenuActions() {
+    ipcMain.on('update-locale', () => {
+      this.menu.updateLocale();
+    });
     ipcMain.on('update-recent-play', (e: Event, items: IMenuDisplayInfo[]) => {
       this.menu.updateRecentPlay(items);
     });

@@ -211,7 +211,7 @@ new Vue({
       } else {
         console.warn('Invalid displayLanguage', val);
       }
-      this.refreshMenu();
+      this.menuService.updateLocale();
     },
     singleCycle(val: boolean) {
       this.menuService.getMenuItemById('singleCycle').checked = val;

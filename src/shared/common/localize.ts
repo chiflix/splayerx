@@ -29,14 +29,14 @@ export default class Locale {
     return typeof result === 'string' ? result : msg;
   }
 
-  private getDisplayLanguage() {
+  public getDisplayLanguage() {
     const { app } = IsElectronRenderer ? electron.remote : electron;
     const preferencesPath = join(app.getPath('userData'), 'storage', 'preferences.json');
     let jsonString;
     try {
-      jsonString = readFileSync(preferencesPath) as unknown as string;      
+      jsonString = readFileSync(preferencesPath) as unknown as string;
     } catch (err) {
-      jsonString = '';
+      jsonString = JSON.stringify({});
     }
     const data = JSON.parse(jsonString);
     if (data.displayLanguage) this._displayLanguage = data.displayLanguage;
