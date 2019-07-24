@@ -280,6 +280,7 @@ export default {
       this.$refs.webView.openDevTools();
     });
     this.$refs.webView.addEventListener('new-window', (e: any) => { // new tabs
+      if (!e.url || e.url === 'about:blank') return;
       if (this.isPip) {
         this.isPip = false;
       }
