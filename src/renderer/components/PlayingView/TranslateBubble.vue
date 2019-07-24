@@ -2,7 +2,7 @@
   <div @mouseup.stop="">
     <div
       :class="`${
-        showWhenGrab || showWhenStopTranslate || showDiscardWhenTranlate
+        showWhenGrab || showWhenStopTranslate
           ? 'bubbleLayout--column'
           : 'bubbleLayout--row'
       }`"
@@ -29,28 +29,9 @@
           {{ $t('translateBubble.continue') }}
         </div>
       </div>
-      <!-- 后台翻译，关闭窗口气泡 -->
-      <div
-        v-else-if="showDiscardWhenTranlate"
-        class="buttonGroup"
-      >
-        <div
-          @mouseup.stop="$emit('disCardTranslate');"
-          class="bubble__button--lower"
-        >
-          {{ $t('translateBubble.leave') }}
-        </div>
-        <div
-          @mouseup.stop="$emit('hide');"
-          class="bubble__button"
-        >
-          {{ $t('translateBubble.continue') }}
-        </div>
-      </div>
-      <!-- 后台翻译，切换视频的气泡 -->
+      <!-- 后台翻译，切换视频和关闭窗口的气泡 -->
       <div v-else-if="showHideWhenTranslate">
         <div
-          v-if="showBackStageButton"
           @mouseup.stop="$emit('backStageTranslate');"
           class="bubble__button"
         >
@@ -73,15 +54,6 @@
           class="bubble__button"
         >
           {{ $t('translateBubble.continue') }}
-        </div>
-      </div>
-      <!-- 当翻译结束，失败的时候 -->
-      <div v-else-if="showWhenError">
-        <div
-          @mouseup.stop="$emit('hide');"
-          class="bubble__button"
-        >
-          {{ $t('translateBubble.ok') }}
         </div>
       </div>
     </div>
@@ -110,19 +82,14 @@ export default Vue.extend({
       || this.type === AudioTranslateBubbleType.NextVideoWhenGrab
       || this.type === AudioTranslateBubbleType.CloseWhenGrab;
     },
-    showDiscardWhenTranlate() {
-      return this.type === AudioTranslateBubbleType.CloseWhenTranslate;
-    },
     showHideWhenTranslate() {
       return this.type === AudioTranslateBubbleType.ChangeWhenTranslate
-      || this.type === AudioTranslateBubbleType.NextVideoWhenTranslate;
+      || this.type === AudioTranslateBubbleType.NextVideoWhenTranslate
+      || this.type === AudioTranslateBubbleType.CloseWhenTranslate;
     },
     showWhenStopTranslate() {
       return this.type === AudioTranslateBubbleType.ClickWhenTranslate
        || this.type === AudioTranslateBubbleType.RefreshWhenTranslate;
-    },
-    showWhenError() {
-      return this.type === AudioTranslateBubbleType.FailAfterTranslate;
     },
   },
 });

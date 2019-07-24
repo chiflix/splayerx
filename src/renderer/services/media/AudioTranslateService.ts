@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-06-20 18:03:14
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-07-23 18:22:57
+ * @Last Modified time: 2019-07-24 15:07:25
  */
 
 // @ts-ignore
@@ -15,6 +15,7 @@ import {
 } from 'sagi-api/translation/v1/translation_pb';
 import { AITaskInfo } from '@/interfaces/IMediaStorable';
 import sagi from '@/libs/sagi';
+import MediaStorageService, { mediaStorageService } from '../storage/MediaStorageService';
 import { TranscriptInfo } from '../subtitle';
 
 type JobData = {
@@ -48,12 +49,15 @@ class AudioTranslateService extends EventEmitter {
 
   public taskInfo?: AITaskInfo;
 
-  public loopTimer: NodeJS.Timeout;
+  public loopTimer: NodeJS.Timer;
 
-  public timeoutTimer: NodeJS.Timeout;
+  public timeoutTimer: NodeJS.Timer;
 
-  public constructor() {
+  private mediaStorageService: MediaStorageService;
+
+  public constructor(mediaStorageService: MediaStorageService) {
     super();
+    this.mediaStorageService = mediaStorageService;
     this.ipcCallBack = this.ipcCallBack.bind(this);
   }
 
@@ -114,6 +118,7 @@ class AudioTranslateService extends EventEmitter {
     );
 
     this.streamClient.once('data', this.rpcCallBack.bind(this));
+    this.streamClient.on('error', this.streamError.bind(this));
     // 开启超时处理
     this.timeOut();
     return this;
@@ -122,6 +127,9 @@ class AudioTranslateService extends EventEmitter {
   private timeOut() {
     // 开启timeout, 如果在超时时间内收到data，就取消timeout
     // 如果没有收到data，就放弃任务，发送超时错误
+    if (this.timeoutTimer) {
+      clearTimeout(this.timeoutTimer);
+    }
     this.timeoutTimer = setTimeout(() => {
       // 发送error
       this.emit('error', new Error('time out'));
@@ -139,6 +147,7 @@ class AudioTranslateService extends EventEmitter {
       clearTimeout(this.timeoutTimer);
     }
     const result = res && res.toObject();
+    console.log(result, err);
     if (result && res.hasTaskinfo() && result.taskinfo) {
       this.taskInfo = {
         mediaHash: this.mediaHash,
@@ -165,6 +174,13 @@ class AudioTranslateService extends EventEmitter {
     }
   }
 
+  private streamError(error: Error) {
+    console.log(error, 'audio-log');
+    this.emit('error', error);
+    // 报错，主动丢弃
+    this.stop();
+  }
+
   private startGrab() {
     ipcRenderer.send('grab-audio', {
       videoSrc: this.videoSrc,
@@ -174,7 +190,7 @@ class AudioTranslateService extends EventEmitter {
     ipcRenderer.on('grab-audio-update', this.ipcCallBack);
   }
 
-  public loopTask(taskInfo: AITaskInfo) {
+  private loopTask(taskInfo: AITaskInfo) {
     const taskId = taskInfo.taskId;
     let delay = Math.ceil((taskInfo.estimateTime / 2));
     // 延迟查询task进度，如果延迟超多10秒，就10秒之后去查询
@@ -185,9 +201,11 @@ class AudioTranslateService extends EventEmitter {
     this.loopTimer = setTimeout(async () => {
       try {
         const res = await sagi.streamingTranslationTask(taskId);
+        console.log(res);
         const result = res && res.toObject();
         if (result && res.hasTranscriptinfo()) {
           this.emit('transcriptInfo', result.transcriptinfo);
+          this.clearJob();
         } else if (result && res.hasTaskinfo() && result.taskinfo) {
           this.taskInfo = {
             audioLanguageCode: this.audioLanguageCode,
@@ -202,6 +220,7 @@ class AudioTranslateService extends EventEmitter {
           this.stop();
         }
       } catch (error) {
+        console.log(error);
         this.emit('error', error);
         this.stop();
       }
@@ -212,10 +231,20 @@ class AudioTranslateService extends EventEmitter {
     if (this.loopTimer) {
       clearTimeout(this.loopTimer);
     }
+    if (this.timeoutTimer) {
+      clearTimeout(this.timeoutTimer);
+    }
+  }
+
+  public saveTask() {
+    const { mediaHash } = this;
+    if (this.taskInfo) {
+      this.mediaStorageService.setAsyncTaskInfo(mediaHash, this.taskInfo);
+    }
   }
 }
 export default AudioTranslateService;
 
-const audioTranslateService = new AudioTranslateService();
+const audioTranslateService = new AudioTranslateService(mediaStorageService);
 
 export { audioTranslateService };

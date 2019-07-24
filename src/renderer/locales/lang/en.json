@@ -312,31 +312,40 @@
     "title": "Select Audio Language",
     "translateTitle": "About {time} Left",
     "minute": "{number} min",
-    "second": "{number} second",
-    "hour": "{number} hour",
+    "second": "{number} sec",
+    "hour": "{number} hr",
     "successTitle": "Translation Done",
     "failTitle": "Translation Failed",
-    "cancelTitle": "Translation Cancelled",
-    "selectDescription": "Found no translation results. To generate one, please select the language you hear in the video. The translation process might take some time.",
-    "selectLabel": "Audio Language",
-    "cancel": "Cancel",
+    "cancelTitle": "AI Translation is in Progress",
+    "selectDescription": "To generate a tranlation result, please select the language you hear in the video and click the generate button. The process might take some time.",
+    "selectLanguageLabel": "Audio Language",
+    "cancel": "Quit",
     "generate": "Generate",
-    "translateDescription": "Please do not skip the video or close the application. Progress can be viewed on the translation panel.",
-    "ok": "Okay",
+    "translateDescription": "Please do not skip the video or close the application. You can check the progress on the translation panel.",
+    "ok": "OK",
     "successDescriptiton": "AI Translation is ready, please check it on the translation panel.",
     "failDescription": "Please try later, thanks.",
-    "cancelDescription": "Please confirm you cancellation, and the translation progress will not be restored.",
-    "continue": "Continue"
+    "cancelDescription": "Are you sure you want to quit? If you quit, the translation progress will not be restored.",
+    "continue": "Cancel"
   },
   "translateBubble": {
-    "bubbleWhenGrab": "AI Translation is in progress. Do you still want to Leave anyway?",
-    "bubbleWhenTranslate": "AI Translation is being processed on the server. You will see the progress when you watch the video next time.",
-    "bubbleWhenForbidden": "Unable to use this function while AI Translation is processing.",
-    "bubbleWhenSuccess": "AI Translation is ready now, please check it on the translation list.",
-    "bubbleWhenSuccessOnOtherVideo": "AI Translation is ready now. It will be automatically loaded next time when you watch the video.",
-    "bubbleWhenFail": "Translation Failed - Please try later, thanks.",
-    "continue": "Continue Watching",
-    "leave": "Leave",
-    "ok": "Okay"
+    "bubbleWhenGrab": "AI Translation is in progress. Do you want to quit or continue the AI Translation?",
+    "bubbleWhenTranslate": "AI Translation is being processed on the server. You can check the progress when you watch the video next time.",
+    "bubbleFunctionForbidden": "Unable to use this function while AI Translation is in progress.",
+    "bubbleWhenSuccess": {
+      "title": "",
+      "content": "AI Translation is ready now, please check it on the translation panel."
+    },
+    "bubbleWhenSuccessOnOtherVideo": {
+      "title": "",
+      "content": "AI Translation is ready now. It will be automatically loaded next time when you watch the video."
+    },
+    "bubbleTranslateFail": {
+      "title": "Translation Failed",
+      "content": "Please try later, thanks."
+    },
+    "continue": "Continue",
+    "leave": "Quit",
+    "ok": "OK"
   }
 }

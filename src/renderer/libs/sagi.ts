@@ -175,7 +175,11 @@ export class Sagi {
     const taskRequest = new StreamingTranslationTaskRequest();
     taskRequest.setTaskId(taskId);
     return new Promise((resolve, reject) => {
+      const onlineTimeoutId = setTimeout(() => {
+        reject(new Error('time out'));
+      }, 1000 * 10);
       client.streamingTranslationTask(taskRequest, (err, res) => {
+        clearTimeout(onlineTimeoutId);
         console.log(res);
         if (err) reject(err);
         else resolve(res);

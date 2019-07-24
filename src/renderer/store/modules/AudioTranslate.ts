@@ -2,9 +2,11 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-05 16:03:32
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-07-23 18:22:46
+ * @Last Modified time: 2019-07-24 15:24:56
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+// @ts-ignore
+import { event } from 'vue-analytics';
 import { AudioTranslate as m } from '@/store/mutationTypes';
 import { AudioTranslate as a, SubtitleManager as smActions } from '@/store/actionTypes';
 import { audioTranslateService } from '@/services/media/AudioTranslateService';
@@ -13,6 +15,10 @@ import { TranscriptInfo } from '@/services/subtitle';
 import { SubtitleControlListItem } from '@/interfaces/ISubtitle';
 import { mediaStorageService } from '@/services/storage/MediaStorageService';
 import { TranslatedGenerator } from '@/services/subtitle/loaders/translated';
+import { addBubble } from '../../helpers/notificationControl';
+import {
+  TRANSLATE_FAIL, TRANSLATE_SUCCESS, TRANSLATE_SUCCESS_WHEN_VIDEO_CHANGE,
+} from '../../helpers/notificationcodes';
 
 let taskTimer: number;
 let timerCount: number;
@@ -34,7 +40,6 @@ export enum AudioTranslateBubbleOrigin {
   NextVideoChange = 'next-video-change',
   OtherAIButtonClick = 'other-ai-button-click',
   Refresh = 'refresh',
-  TranslateFail = 'translate-fail',
 }
 
 export enum AudioTranslateBubbleType {
@@ -47,7 +52,6 @@ export enum AudioTranslateBubbleType {
   CloseWhenTranslate = 'close-when-translate',
   ClickWhenTranslate = 'click-when-translate',
   RefreshWhenTranslate = 'refresh-when-translate',
-  FailAfterTranslate = 'fail-when-translate',
 }
 
 type AudioTranslateState = {
@@ -63,6 +67,7 @@ type AudioTranslateState = {
   bubbleMessage: string,
   bubbleType: string,
   callbackAfterCancelBubble: Function,
+  lastAudioLanguage: string,
 };
 
 const state = {
@@ -78,6 +83,7 @@ const state = {
   bubbleType: '',
   callbackAfterBubble: () => { },
   callbackAfterCancelBubble: () => { },
+  lastAudioLanguage: '',
 };
 
 const getters = {
@@ -108,6 +114,9 @@ const getters = {
   },
   translateBubbleType(state: AudioTranslateState) {
     return state.bubbleType;
+  },
+  lastAudioLanguage(state: AudioTranslateState) {
+    return state.lastAudioLanguage;
   },
 };
 
@@ -165,6 +174,9 @@ const mutations = {
     state.bubbleType = '';
     state.bubbleMessage = '';
   },
+  [m.AUDIO_TRANSLATE_UPDATE_LAST_AUDIO_LANGUAGE](state: AudioTranslateState, language: string) {
+    state.lastAudioLanguage = language;
+  },
 };
 
 const actions = {
@@ -172,7 +184,7 @@ const actions = {
     commit, getters, state, dispatch,
   }: any, audioLanguageCode: string) {
     // 记录当前智能翻译的信息
-    commit(m.AUDIO_TRANSLATE_SAVE_KEY, `${getters.mediaHash}-${getters.selectedTargetLanugage}`);
+    commit(m.AUDIO_TRANSLATE_SAVE_KEY, `${getters.mediaHash}`);
     audioTranslateService.stop();
     const grab = audioTranslateService.startJob({
       audioId: getters.currentAudioTrackId,
@@ -225,17 +237,17 @@ const actions = {
           dispatch(smActions.changePrimarySubtitle, '');
           // 如果当前有其他的bubble显示，就暂时不出失败的bubble
           if (!state.isBubbleVisible) {
-            dispatch(a.AUDIO_TRANSLATE_SHOW_BUBBLE, AudioTranslateBubbleOrigin.TranslateFail);
+            addBubble(TRANSLATE_FAIL);
           } else {
             commit(m.AUDIO_TRANSLATE_BUBBLE_CANCEL_CALLBACK, () => {
-              dispatch(a.AUDIO_TRANSLATE_SHOW_BUBBLE, AudioTranslateBubbleOrigin.TranslateFail);
+              addBubble(TRANSLATE_FAIL);
             });
           }
         }
         try {
           // TODO 目前grabAudioFrame出错直接继续提取，需要确认错误类型
           // ga 翻译过程(第二步)失败的次数
-          this.$ga.event('app', 'ai-translate-server-translate-fail');
+          event('app', 'ai-translate-server-translate-fail');
         } catch (error) {
           // empty
         }
@@ -261,7 +273,7 @@ const actions = {
         }, 1000);
         // ga 提取(第一步)成功的次数
         try {
-          this.$ga.event('app', 'ai-translate-extract-audio-success');
+          event('app', 'ai-translate-extract-audio-success');
         } catch (error) {
           // empty
         }
@@ -290,7 +302,6 @@ const actions = {
         if (taskTimer) {
           clearInterval(taskTimer);
         }
-        console.log(startEstimateTime, staticEstimateTime);
         taskTimer = window.setInterval(() => {
           if (taskInfo.mediaHash !== getters.mediaHash
             || state.status === AudioTranslateStatus.Fail) {
@@ -321,9 +332,9 @@ const actions = {
         audioTranslateService.stop();
         // 恢复vuex
         commit(m.AUDIO_TRANSLATE_RECOVERY);
-        let txt = this.$i18n.t('translateBubble.bubbleWhenSuccessOnOtherVideo', this.$i18n.locale, this.$i18n.locale);
+        let result = TRANSLATE_SUCCESS_WHEN_VIDEO_CHANGE;
         if (audioTranslateService.mediaHash === getters.mediaHash) {
-          txt = this.$i18n.t('translateBubble.bubbleWhenSuccess', this.$i18n.locale, this.$i18n.locale);
+          result = TRANSLATE_SUCCESS;
           // 先删除AI按钮对应的ID
           dispatch(smActions.removeSubtitle, targetId);
           // 加入刚刚翻译好的AI字幕
@@ -342,30 +353,33 @@ const actions = {
         // 如果当前有其他气泡需要用户确认，就先不出成功的气泡
         if (!state.isBubbleVisible) {
           // 提示翻译成功
-          dispatch('addMessages', {
-            type: 'result',
-            title: '',
-            content: txt,
-            dismissAfter: 5000,
-          });
+          addBubble(result);
         } else {
           commit(m.AUDIO_TRANSLATE_BUBBLE_CANCEL_CALLBACK, () => {
             // 提示翻译成功
-            dispatch('addMessages', {
-              type: 'result',
-              title: '',
-              content: txt,
-              dismissAfter: 5000,
-            });
+            addBubble(result);
           });
         }
         // ga 翻译过程(第二步)成功次数
         try {
-          this.$ga.event('app', 'ai-translate-server-translate-success');
+          event('app', 'ai-translate-server-translate-success');
         } catch (error) {
           // empty
         }
       });
+    }
+  },
+  async [a.AUDIO_TRANSLATE_CONTINUE](
+    { getters, dispatch, commit }: any,
+    sub: SubtitleControlListItem,
+  ) {
+    const key = `${getters.mediaHash}`;
+    const taskInfo = mediaStorageService.getAsyncTaskInfo(key);
+    if (taskInfo && getters.mediaHash === taskInfo.mediaHash
+      && sub && taskInfo.targetLanguage === sub.language) {
+      commit(m.AUDIO_TRANSLATE_UPDATE_LAST_AUDIO_LANGUAGE, taskInfo.audioLanguageCode);
+      commit(m.AUDIO_TRANSLATE_SELECTED_UPDATE, sub);
+      dispatch(a.AUDIO_TRANSLATE_START, taskInfo.audioLanguageCode);
     }
   },
   [a.AUDIO_TRANSLATE_DISCARD]( // eslint-disable-line complexity
@@ -399,7 +413,7 @@ const actions = {
             discardFromWhere = 'other';
         }
         // ga 提取(第一步)中退出的次数 (切换视频、关闭播放、切换语言、取消、刷新、其他)
-        this.$ga.event('app', 'ai-translate-extract-audio-abort', discardFromWhere);
+        event('app', 'ai-translate-extract-audio-abort', discardFromWhere);
       } else if (state.status === AudioTranslateStatus.Translating) {
         switch (state.bubbleType) {
           case AudioTranslateBubbleType.Default:
@@ -422,7 +436,7 @@ const actions = {
             discardFromWhere = 'other';
         }
         // ga 翻译过程(第二步)中退出的次数 (切换视频、关闭播放、切换语言、取消、刷新、其他)
-        this.$ga.event('app', 'ai-translate-server-translate-exit', discardFromWhere);
+        event('app', 'ai-translate-server-translate-exit', discardFromWhere);
       }
     } catch (error) {
       // empty
@@ -440,6 +454,10 @@ const actions = {
     dispatch(a.AUDIO_TRANSLATE_HIDE_BUBBLE);
   },
   [a.AUDIO_TRANSLATE_BACKSATGE]({ commit, dispatch }: any) {
+    // 保存当前进度
+    if (state.status === AudioTranslateStatus.Translating) {
+      audioTranslateService.saveTask();
+    }
     state.callbackAfterBubble();
     dispatch(a.AUDIO_TRANSLATE_HIDE_BUBBLE);
     commit(m.AUDIO_TRANSLATE_HIDE_MODAL);
@@ -450,9 +468,9 @@ const actions = {
     commit, getters, state, dispatch,
   }: any, sub: SubtitleControlListItem) {
     dispatch(a.AUDIO_TRANSLATE_HIDE_BUBBLE);
-    const key = `${getters.mediaHash}-${sub.language}`;
+    const key = `${getters.mediaHash}`;
     const taskInfo = mediaStorageService.getAsyncTaskInfo(key);
-    if (getters.isTranslating && state.key === key) {
+    if (getters.isTranslating && state.selectedTargetSubtitleId === sub.id) {
       commit(m.AUDIO_TRANSLATE_SHOW_MODAL);
       // TODO 如果开启了第二字幕
       dispatch(smActions.changePrimarySubtitle, sub.id);
@@ -464,14 +482,14 @@ const actions = {
         dispatch(a.AUDIO_TRANSLATE_SHOW_MODAL, sub);
       });
     } else if (state.key === key && taskInfo && taskInfo.targetLanguage === sub.language) {
+      // TODO
       commit(m.AUDIO_TRANSLATE_SELECTED_UPDATE, sub);
       dispatch(a.AUDIO_TRANSLATE_START, taskInfo.audioLanguageCode);
-      commit(m.AUDIO_TRANSLATE_UPDATE_PROGRESS, 51);
       commit(m.AUDIO_TRANSLATE_SHOW_MODAL);
     } else {
       commit(m.AUDIO_TRANSLATE_UPDATE_STATUS, AudioTranslateStatus.Default);
-      commit(m.AUDIO_TRANSLATE_SHOW_MODAL);
       commit(m.AUDIO_TRANSLATE_SELECTED_UPDATE, sub);
+      commit(m.AUDIO_TRANSLATE_SHOW_MODAL);
     }
   },
   [a.AUDIO_TRANSLATE_HIDE_MODAL]({ commit, dispatch }: any) {
@@ -489,8 +507,7 @@ const actions = {
   ) {
     const messageWhenGrab = this.$i18n.t('translateBubble.bubbleWhenGrab', this.$i18n.locale, this.$i18n.locale);
     const messageWhenTranslate = this.$i18n.t('translateBubble.bubbleWhenTranslate', this.$i18n.locale, this.$i18n.locale);
-    const messageWhenForbidden = this.$i18n.t('translateBubble.bubbleWhenForbidden', this.$i18n.locale, this.$i18n.locale);
-    const messageWhenFail = this.$i18n.t('translateBubble.bubbleWhenFail', this.$i18n.locale, this.$i18n.locale);
+    const messageWhenForbidden = this.$i18n.t('translateBubble.bubbleFunctionForbidden', this.$i18n.locale, this.$i18n.locale);
     if (origin === AudioTranslateBubbleOrigin.VideoChange
       && state.status === AudioTranslateStatus.Grabbing) {
       // 当正在提取音频，切换视频
@@ -549,13 +566,6 @@ const actions = {
       commit(m.AUDIO_TRANSLATE_BUBBLE_INFO_UPDATE, {
         type: AudioTranslateBubbleType.RefreshWhenTranslate,
         message: messageWhenForbidden,
-      });
-    } else if (origin === AudioTranslateBubbleOrigin.TranslateFail
-      && state.status === AudioTranslateStatus.Fail) {
-      // 当AI翻译失败时
-      commit(m.AUDIO_TRANSLATE_BUBBLE_INFO_UPDATE, {
-        type: AudioTranslateBubbleType.FailAfterTranslate,
-        message: messageWhenFail,
       });
     }
     commit(m.AUDIO_TRANSLATE_SHOW_BUBBLE);

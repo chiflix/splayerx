@@ -2,12 +2,13 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-22 17:18:34
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-07-23 15:34:01
+ * @Last Modified time: 2019-07-24 12:12:36
  */
 
 import { EventEmitter } from 'events';
 // @ts-ignore
 import { splayerx } from 'electron';
+import { isNaN } from 'lodash';
 
 type JobData = {
   videoSrc: string,
@@ -49,11 +50,13 @@ export default class AudioGrabService extends EventEmitter {
 
   private startJob(data: JobData) {
     this.videoSrc = data.videoSrc;
-    this.audioId = data.audioId;
+    const audioId = Number(data.audioId);
+    this.audioId = isNaN(audioId) ? -1 : audioId;
     this.pts = '0';
     this._count = 0;
     this.grabTime = 0;
     this.status = 0;
+    this.audioChannel = 0;
     this.grabAudio();
   }
 

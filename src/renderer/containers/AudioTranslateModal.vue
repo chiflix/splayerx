@@ -166,7 +166,7 @@ export default Vue.extend({
     Progress,
   },
   data() {
-    const label = this.$t('translateModal.selectLabel');
+    const label = this.$t('translateModal.selectLanguageLabel');
     return {
       audioLanguage: { label, value: '' },
       lanugages: [
@@ -197,7 +197,7 @@ export default Vue.extend({
   computed: {
     ...mapGetters([
       'currentAudioTrackId', 'mediaHash',
-      'isTranslateModalVisiable', 'translateProgress', 'isTranslating', 'selectedTargetLanugage', 'translateEstimateTime', 'translateStatus',
+      'isTranslateModalVisiable', 'translateProgress', 'isTranslating', 'selectedTargetLanugage', 'translateEstimateTime', 'translateStatus', 'lastAudioLanguage',
     ]),
     translateLanguageLabel() {
       return codeToLanguageName(this.selectedTargetLanugage);
@@ -224,10 +224,18 @@ export default Vue.extend({
   },
   watch: {
     mediaHash() {
-      this.audioLanguage = { label: this.$t('translateModal.selectLabel'), value: '' };
+      this.audioLanguage = { label: this.$t('translateModal.selectLanguageLabel'), value: '' };
     },
     currentAudioTrackId() {
-      this.audioLanguage = { label: this.$t('translateModal.selectLabel'), value: '' };
+      this.audioLanguage = { label: this.$t('translateModal.selectLanguageLabel'), value: '' };
+    },
+    lastAudioLanguage(val: string, old: string) {
+      if (val && !old) {
+        this.audioLanguage = {
+          label: codeToLanguageName(val),
+          value: val,
+        };
+      }
     },
   },
   methods: {

@@ -15,7 +15,7 @@ import {
   AudioTranslate as atActions,
 } from '@/store/actionTypes';
 import {
-  SubtitleControlListItem, Type, IEntityGenerator, Entity,
+  SubtitleControlListItem, Type, IEntityGenerator, Entity, Format,
 } from '@/interfaces/ISubtitle';
 import {
   ISubtitleStream, TranscriptInfo,
@@ -598,6 +598,10 @@ const actions = {
             delay: subtitle.delay,
           };
           commit(m.addSubtitleId, subtitleControlListItem);
+          // 如果出现AI按钮 检查有没有上次的任务，有就继续上次任务
+          if (subtitle.type === Type.Translated && subtitle.format === Format.Unknown) {
+            dispatch(atActions.AUDIO_TRANSLATE_CONTINUE, subtitleControlListItem);
+          }
           return subtitleControlListItem;
         }
       } catch (ex) {

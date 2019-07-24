@@ -21,6 +21,7 @@
       <div
         @mouseup.stop=""
         class="dropdown__listItems"
+        tabindex="-1"
       >
         <div
           v-for="(item) in list"
@@ -144,6 +145,9 @@ export default Vue.extend({
     height: 112px;
     margin: 4px 4px 4px 6px;
     overflow-y: scroll;
+    &:focus {
+      outline: none;
+    }
   }
 
   .dropdownListItem {
