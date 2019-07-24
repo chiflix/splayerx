@@ -386,8 +386,8 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
 }
 .radio {
   display: block;
-  width: 14px;
-  height: 15px;
+  width: 8px;
+  height: 8px;
 }
 .speed {
   display: block;

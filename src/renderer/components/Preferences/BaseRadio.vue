@@ -3,9 +3,9 @@
     <label class="radio__label">
       <slot />
       <input
-        name=""
-        :checked="radioValue"
         @change="$emit('change', $event.target.checked)"
+        :checked="radioValue"
+        :name="name"
         type="radio"
         class="radio__input"
       >
@@ -32,6 +32,7 @@ export default {
   },
   props: {
     radioValue: Boolean,
+    name: String,
   },
 };
 </script>
@@ -39,8 +40,6 @@ export default {
 <style scoped lang="scss">
 .radio {
   -webkit-app-region: no-drag;
-  margin-top: 15px;
-  width: fit-content;
   position: relative;
 
   &__label {
@@ -79,13 +78,14 @@ export default {
 
     &:checked ~ .radio__icon {
       display: block;
+      transform: translate(5.5px, 5.5px);
     }
   }
   &__icon {
     position: absolute;
     display: none;
-    top: 2px;
-    left: 2px;
+    top: 0;
+    left: 0;
   }
 }
 </style>
