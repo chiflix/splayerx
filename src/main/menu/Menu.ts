@@ -400,6 +400,8 @@ export default class Menubar {
     fileMenu.getMenuItemById('file.open').click = () => {
       if (!this.mainWindow) {
         app.emit('menu-open-dialog');
+      } else {
+        this.mainWindow.webContents.send('file.open');
       }
     };
     const fileMenuItem = new MenuItem({ id: 'file', label: this.$t('msg.file.name'), submenu: fileMenu });
