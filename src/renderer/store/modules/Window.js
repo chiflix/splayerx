@@ -13,8 +13,8 @@ const state = {
   sizePercent: 0,
   browsingSize: [1200, 900],
   pipSize: [420, 236],
-  pipPos: [window.screen.availLeft + 20,
-    window.screen.availTop + window.screen.availHeight - 236 - 20],
+  pipPos: [window.screen.availLeft + 70,
+    window.screen.availTop + window.screen.availHeight - 236 - 70],
 };
 
 const getters = {
@@ -90,17 +90,32 @@ const actions = {
   initWindowRotate({ commit }) {
     commit('windowAngle', 0);
   },
-  updateBrowsingSize({ commit }, delta) {
+  updateBrowsingSize({ commit, getters }, delta) {
     commit('browsingSizeUpdate', delta);
-    asyncStorage.set('browsing', { pipSize: state.pipSize, browsingSize: delta, pipPos: state.pipPos });
+    asyncStorage.set('browsing', {
+      pipSize: state.pipSize,
+      browsingSize: delta,
+      pipPos: state.pipPos,
+      barrageOpen: getters.barrageOpen,
+    });
   },
   updatePipSize({ commit }, delta) {
     commit('pipSizeUpdate', delta);
-    asyncStorage.set('browsing', { pipSize: delta, browsingSize: state.browsingSize, pipPos: state.pipPos });
+    asyncStorage.set('browsing', {
+      pipSize: delta,
+      browsingSize: state.browsingSize,
+      pipPos: state.pipPos,
+      barrageOpen: getters.barrageOpen,
+    });
   },
   updatePipPos({ commit }, delta) {
     commit('pipPosUpdate', delta);
-    asyncStorage.set('browsing', { pipSize: state.pipSize, browsingSize: state.browsingSize, pipPos: delta });
+    asyncStorage.set('browsing', {
+      pipSize: state.pipSize,
+      browsingSize: state.browsingSize,
+      pipPos: delta,
+      barrageOpen: getters.barrageOpen,
+    });
   },
 };
 

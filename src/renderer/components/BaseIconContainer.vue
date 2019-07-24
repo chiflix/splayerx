@@ -584,7 +584,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     }
   }
 }
-.youtube, .bilibili, .iqiyi {
+.youtube, .bilibili, .iqiyi, .danmu, .noDanmu {
   width: 20px;
   height: 20px;
   display: block;
@@ -648,7 +648,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     }
   }
 }
-.pipRecord, .pipBack, .danmu, .noDanmu {
+.pipRecord, .pipBack {
   width: 20px;
   height: 20px;
   .default {
