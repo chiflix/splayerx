@@ -445,10 +445,13 @@ export default class Menubar {
       shell.openExternal('https://github.com/chiflix/splayerx/wiki/SPlayer-Shortcuts-List');
     }, undefined, true);
 
-    let crashReport;
-    if (!process.mas) crashReport = this.createMenuItem('msg.help.crashReportLocation');
-
     [feedback, homepage, shortCuts].forEach(i => helpMenu.append(i));
+
+    if (!process.mas) {
+      const crashReport = this.createMenuItem('msg.help.crashReportLocation', undefined, undefined, true);
+      helpMenu.append(crashReport);
+    }
+
 
     const helpMenuItem = new MenuItem({ label: this.$t('msg.help.name'), submenu: helpMenu, role: 'help' });
     return helpMenuItem;
