@@ -42,26 +42,6 @@ export default class MenuService {
     this.enableSubmenuItem('file', false);
   }
 
-  public menuStateControl(routeName: string) {
-    const inPlayingView = routeName === 'playing-view';
-    const inWelcomeView = routeName === 'welcome-view' || routeName === 'language-setting';
-
-    this.enableSubmenuItem('playback', inPlayingView);
-    this.enableSubmenuItem('audio', inPlayingView);
-    this.enableSubmenuItem('subtitle', inPlayingView);
-    this.enableSubmenuItem('window', !inWelcomeView);
-    this.enableSubmenuItem('file', !inWelcomeView);
-
-    this.getMenuItemById('splayerx.preferences').enabled = !inWelcomeView;
-    this.updateMenuItemEnabled('window.bossKey', inPlayingView);
-    this.updateMenuItemEnabled('window.halfSize', inPlayingView);
-    this.updateMenuItemEnabled('window.originSize', inPlayingView);
-    this.updateMenuItemEnabled('window.doubleSize', inPlayingView);
-    this.updateMenuItemEnabled('window.maxmize', inPlayingView);
-    this.updateMenuItemEnabled('window.backToLandingView', inPlayingView);
-    this.updateMenuItemEnabled('window.windowRotate', inPlayingView);
-  }
-
   public resolvePlaylistDisplayState(state: boolean) {
     this.getMenuItemById('playback.forwardS').enabled = !state;
     this.getMenuItemById('playback.backwardS').enabled = !state;

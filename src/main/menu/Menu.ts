@@ -75,7 +75,6 @@ export default class Menubar {
     this.enableSubmenuItem('window', false);
     this.enableSubmenuItem('file.openRecent', false);
 
-    this.updateMenuItemEnabled('file.open', false);
     this.updateMenuItemEnabled('file.clearHistory', false);
     this.updateMenuItemEnabled('file.closeWindow', false);
   }
@@ -398,6 +397,11 @@ export default class Menubar {
 
   private createFileMenu(): Electron.MenuItem {
     const fileMenu = this.convertFromMenuItemTemplate('file');
+    fileMenu.getMenuItemById('file.open').click = () => {
+      if (!this.mainWindow) {
+        app.emit('menu-open-dialog');
+      }
+    };
     const fileMenuItem = new MenuItem({ id: 'file', label: this.$t('msg.file.name'), submenu: fileMenu });
     return fileMenuItem;
   }

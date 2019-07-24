@@ -11,12 +11,12 @@ export default class MenuService {
 
   public constructor() {
     this.menu = new Menu();
-    this.registeMenuActions();
   }
 
   public setMainWindow(window: Electron.BrowserWindow) {
     this.windowClosed = false;
     this.menu.setMainWindow(window);
+    this.registeMenuActions();
   }
 
   public minimize(isMinimized: boolean) {

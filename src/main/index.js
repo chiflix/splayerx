@@ -469,7 +469,7 @@ function registerMainWindowEvent(mainWindow) {
   });
 }
 
-function createWindow() {
+function createWindow(openDialog) {
   mainWindow = new BrowserWindow({
     useContentSize: true,
     frame: false,
@@ -523,6 +523,7 @@ function createWindow() {
     } else if (tmpVideoToOpen.length + tmpSubsToOpen.length > 0) {
       mainWindow.webContents.send('open-file', { onlySubtitle: !tmpVideoToOpen.length, files: finalVideoToOpen });
     }
+    if (openDialog) mainWindow.webContents.send('open-dialog');
     finalVideoToOpen.splice(0, finalVideoToOpen.length);
     tmpSubsToOpen.splice(0, tmpSubsToOpen.length);
     tmpVideoToOpen.splice(0, tmpVideoToOpen.length);
@@ -784,6 +785,10 @@ app.on('add-windows-about', createAbout);
 
 app.on('menu-create-main-window', () => {
   createWindow();
+});
+
+app.on('menu-open-dialog', () => {
+  createWindow(true);
 });
 
 app.on('activate', () => {

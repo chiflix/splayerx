@@ -32,7 +32,11 @@ export default class Locale {
   private getDisplayLanguage() {
     const { app } = IsElectronRenderer ? electron.remote : electron;
     const preferencesPath = join(app.getPath('userData'), 'storage', 'preferences.json');
-    const data = JSON.parse(readFileSync(preferencesPath) as unknown as string);
+    let jsonString = '';
+    try {
+      jsonString = readFileSync(preferencesPath) as unknown as string;      
+    } catch (err) {}
+    const data = JSON.parse(jsonString);
     if (data.displayLanguage) this._displayLanguage = data.displayLanguage;
     else this._displayLanguage = this.getSystemLocale();
   }
