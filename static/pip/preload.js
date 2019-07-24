@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 console.log('preloaded~~~~~~~');
 const { ipcRenderer } = require('electron');
+
 let mousedown = false;
 let isDragging = false;
 function sendToHost(channel, message) {
@@ -41,3 +43,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
+// Some websites intercept links to open a blank window, then set its location, e.g. iqiyi.com
+const originWindowOpen = window.open.bind(window);
+window.open = function customWindowOpen(url, ...rest) {
+  if (url !== 'about:blank') return originWindowOpen(url, ...rest);
+  return {
+    set location(url) {
+      if (url && url !== 'about:blank') originWindowOpen(url);
+    },
+  };
+};
