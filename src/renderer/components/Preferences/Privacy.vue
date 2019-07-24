@@ -1,66 +1,91 @@
 <template>
   <div class="privacy">
-    <BaseCheckBox v-model="reverseScrolling">
+    <BaseCheckBox v-model="protectPrivacy">
       {{ $t('preferences.general.reverseScrolling') }}
     </BaseCheckBox>
-    <div class="privacy_radio">
-      <BaseRadioGroup :value="false" v-model="radioValue">
-        123
-      </BaseRadioGroup>
-      <BaseRadioGroup :value="true" v-model="radioValue">
-        123
-      </BaseRadioGroup>
-      {{ radioValue }}
+    <div
+      :style="{ opacity: !protectPrivacy ? 0.3: 1.0 }"
+      class="privacy_background"
+    >
+      <div class="privacy_radio">
+        <BaseRadio
+          v-model="radioValue"
+          value="intelligentMode"
+          name="mode"
+        >
+          {{ $t('preferences.privacy.intelligentMode') }}
+        </BaseRadio>
+        <div class="privacy_radio_description">
+          {{ $t('preferences.privacy.intelligentDescription') }}
+        </div>
+        <BaseRadio
+          v-model="radioValue"
+          value="seamlessMode"
+          name="mode"
+          class="privacy_radio2"
+        >
+          {{ $t('preferences.privacy.seamlessMode') }}
+        </BaseRadio>
+        <div class="privacy_radio_description">
+          {{ $t('preferences.privacy.seamlessDescription') }}
+        </div>
+      </div>
     </div>
   </div>
 </template>
 <script lang="ts">
 import electron from 'electron';
 import BaseCheckBox from './BaseCheckBox.vue';
-import BaseRadioGroup from './BaseRadioGroup.vue';
+import BaseRadio from './BaseRadio.vue';
 
 export default {
   name: 'Privacy',
   components: {
     BaseCheckBox,
-    BaseRadioGroup,
+    BaseRadio,
   },
   data() {
     return {
-      radioValue: '',
+      radioValue: 'intelligentMode',
     };
   },
+  created() {
+    if (this.protectPrivacy && this.hideNSFW) this.radioValue = 'seamlessMode';
+  },
+  watch: {
+    radioValue(val: string) {
+      if (val === 'intelligentMode') this.hideNSFW = true;
+      else if (val === 'seamlessMode') this.hideNSFW = false;
+    },
+  },
   computed: {
-    reverseScrolling: {
+    preferenceData() {
+      return this.$store.getters.preferenceData;
+    },
+    protectPrivacy: {
       get() {
-        return this.$store.getters.reverseScrolling;
+        return this.$store.getters.protectPrivacy;
       },
       set(val: boolean) {
         if (val) {
-          this.$store.dispatch('reverseScrolling').then(() => {
+          this.$store.dispatch('protectPrivacy').then(() => {
             electron.ipcRenderer.send('preference-to-main', this.preferenceData);
           });
         } else {
-          this.$store.dispatch('notReverseScrolling').then(() => {
+          this.$store.dispatch('notprotectPrivacy').then(() => {
             electron.ipcRenderer.send('preference-to-main', this.preferenceData);
           });
         }
       },
     },
-    hideVideoHistoryOnExit: {
+    hideNSFW: {
       get() {
-        return this.$store.getters.hideVideoHistoryOnExit;
+        return this.$store.getters.hideNSFW;
       },
-      set(val: boolean) {
-        if (val) {
-          this.$store.dispatch('hideVideoHistoryOnExit').then(() => {
-            electron.ipcRenderer.send('preference-to-main', this.preferenceData);
-          });
-        } else {
-          this.$store.dispatch('nothideVideoHistoryOnExit').then(() => {
-            electron.ipcRenderer.send('preference-to-main', this.preferenceData);
-          });
-        }
+      set(val) {
+        this.$store.dispatch('hideNSFW', !!val).then(() => {
+          electron.ipcRenderer.send('preference-to-main', this.preferenceData);
+        });
       },
     },
   },
@@ -70,12 +95,29 @@ export default {
 .privacy {
   .checkbox:nth-of-type(1) {
     margin-top: 0;
-    margin-bottom: 15px;
   }
-  &_radio {
+  &_background {
     width: 366px;
     height: 158px;
+    margin-top: 15px;
     background-color: rgba(0,0,0,0.05);
+  }
+  &_radio {
+    margin-left: 29px;    
+    padding-top: 20px;
+    &2 {
+      margin-top: 15px;
+    }
+    &_description {
+      width: 282px;
+      font-family: $font-medium;
+      font-size: 11px;
+      color: rgba(255,255,255,0.50);
+      letter-spacing: 0;
+      line-height: 16px;
+      margin-top: 6px;
+      margin-left: 27px;
+    }
   }
 }
 </style>

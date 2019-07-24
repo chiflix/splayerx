@@ -2,7 +2,7 @@
   <div class="wrapper">
     <transition name="background-container-transition">
       <div
-        v-if="item.backgroundUrl && !hideVideoHistoryOnExit"
+        v-if="item.backgroundUrl && !protectPrivacy"
         class="background"
       >
         <transition
@@ -47,7 +47,7 @@
     <div class="welcome-container">
       <transition :name="logoTransition">
         <div
-          v-if="pageMounted && (!item.backgroundUrl || hideVideoHistoryOnExit)"
+          v-if="pageMounted && (!item.backgroundUrl || protectPrivacy)"
           class="logo-container"
         >
           <Icon type="logo" />
@@ -76,7 +76,7 @@
             width:`${thumbnailWidth}px`,
             marginRight: `${marginRight}px`,
             backgroundColor:
-              item.backgroundUrl && !hideVideoHistoryOnExit
+              item.backgroundUrl && !protectPrivacy
                 ? 'rgba(255,255,255,0.12) ': 'rgba(255,255,255,0.05)',
           }"
           :class="{ 'backdrop': useBlur }"
@@ -94,7 +94,7 @@
         <component
           :is="playlistLength > 1 ? 'PlaylistItem' : 'VideoItem'"
           v-for="({ backgroundUrl, id, playlistLength }, index) in landingViewItems"
-          v-if="!hideVideoHistoryOnExit"
+          v-if="!protectPrivacy"
           :key="id"
           :can-hover="canHover"
           :backgroundUrl="backgroundUrl"
@@ -155,7 +155,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'defaultDir', 'isFullScreen', 'hideVideoHistoryOnExit']),
+    ...mapGetters(['winWidth', 'defaultDir', 'isFullScreen', 'protectPrivacy']),
     lastIndex: {
       get() {
         return (this.firstIndex + this.showItemNum) - 1;
