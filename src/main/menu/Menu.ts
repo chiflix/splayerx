@@ -125,7 +125,6 @@ export default class Menubar {
   }
 
   public updatePrimarySub(items: { id: string, label: string }[]) {
-    console.log(items);
     const primarySubMenu = this.menubar.getMenuItemById('subtitle.mainSubtitle').submenu;
     // @ts-ignore
     primarySubMenu.clear();
@@ -147,7 +146,6 @@ export default class Menubar {
   }
 
   public updateSecondarySub(items: { id: string, label: string }[]) {
-    console.log(items);
     const secondarySubMenu = this.menubar.getMenuItemById('subtitle.secondarySubtitle').submenu;
     // @ts-ignore
     secondarySubMenu.clear();
