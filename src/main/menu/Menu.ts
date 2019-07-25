@@ -38,6 +38,12 @@ export default class Menubar {
 
   private isFullScreen = false;
 
+  private _routeName: string;
+
+  public set routeName(val: string) {
+    this._routeName = val;
+  }
+
   public constructor() {
     this.locale = new Locale();
     this.install();
@@ -46,6 +52,12 @@ export default class Menubar {
   public setMainWindow(window: Electron.BrowserWindow | null) {
     // may replace this way of getting mainWindow by window service or else...
     this.mainWindow = window;
+  }
+
+  public popupMenu() {
+    if (this.mainWindow) {
+      this.menubar.popup();
+    }
   }
 
   public menuStateControl(routeName: string) {
@@ -59,6 +71,7 @@ export default class Menubar {
     this.enableSubmenuItem('file', !inWelcomeView);
 
     this.updateMenuItemEnabled('splayerx.preferences', !inWelcomeView);
+    this.updateMenuItemEnabled('window.keepPlayingWindowFront', inPlayingView);
     this.updateMenuItemEnabled('window.bossKey', inPlayingView);
     this.updateMenuItemEnabled('window.halfSize', inPlayingView);
     this.updateMenuItemEnabled('window.originSize', inPlayingView);
@@ -82,6 +95,7 @@ export default class Menubar {
   public updateLocale() {
     this.locale.getDisplayLanguage();
     this.install();
+    this.menuStateControl(this._routeName);
   }
 
   public updatePaused(paused: boolean) {

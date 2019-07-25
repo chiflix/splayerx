@@ -9,6 +9,10 @@ export default class MenuService {
     ipcRenderer.on(channel, callback);
   }
 
+  public popupWinMenu() {
+    ipcRenderer.send('popup-menu');
+  }
+
   public updateLocale() {
     ipcRenderer.send('update-locale');
   }

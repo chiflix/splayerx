@@ -362,8 +362,8 @@ new Vue({
     });
 
     window.addEventListener('mousedown', (e) => {
-      if (e.button === 2 && process.platform === 'win32') {
-        this.menu.popup(this.$electron.remote.getCurrentWindow());
+      if (e.button === 2) {
+        this.menuService.popupWinMenu();
       }
     });
     window.addEventListener('keydown', (e) => {
@@ -549,6 +549,7 @@ new Vue({
         this.menuService.updateMenuItemEnabled('subtitle.increaseSecondarySubtitleDelay', !!this.secondarySubtitleId);
         this.menuService.updateMenuItemEnabled('subtitle.decreaseSecondarySubtitleDelay', !!this.secondarySubtitleId);
         this.menuService.updateMenuItemEnabled('subtitle.uploadSelectedSubtitle', !!this.ableToPushCurrentSubtitle);
+        this.menuService.updateMenuItemChecked('window.keepPlayingWindowFront', this.topOnWindow);
         
         this.audioTrackList.forEach((item: Electron.MenuItem, index: number) => {
           if (item.enabled === true) {
@@ -567,8 +568,6 @@ new Vue({
         });
         this.menuService.updateMenuItemEnabled('subtitle.secondarySubtitle.secondSub-1', this.enabledSecondarySub);
       }
-
-      this.menuService.updateMenuItemChecked('window.keepPlayingWindowFront', this.topOnWindow);
     },
     registeMenuActions() {
       const { app, dialog } = this.$electron.remote;

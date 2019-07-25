@@ -35,6 +35,9 @@ export default class MenuService {
   }
 
   private registeMenuActions() {
+    ipcMain.on('popup-menu', () => {
+      this.menu.popupMenu();
+    });
     ipcMain.on('update-locale', () => {
       this.menu.updateLocale();
     });
@@ -51,7 +54,7 @@ export default class MenuService {
       this.menu.updateAudioTrack(items);
     });
     ipcMain.on('update-route-name', (e: Event, routeName: string) => {
-      this.routeName = routeName;
+      this.routeName = this.menu.routeName = routeName;
       if (!this.windowClosed) this.menu.menuStateControl(routeName);
     });
     ipcMain.on('update-paused', (e: Event, paused: boolean) => {
