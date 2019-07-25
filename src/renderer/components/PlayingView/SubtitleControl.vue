@@ -111,6 +111,7 @@
 <script lang="ts">
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { AnimationItem } from 'lottie-web';
+import { flatMap, sortBy } from 'lodash';
 import {
   Input as InputActions,
   Subtitle as subtitleActions,
@@ -218,6 +219,33 @@ export default {
       if (!val) this.updateSubtitleType(true);
     },
     list(val: SubtitleControlListItem[]) {
+      val = flatMap(val
+        .reduce((prev, currentSub) => {
+          switch (currentSub.type) {
+            default:
+              break;
+            case Type.Local:
+              prev[0].push(currentSub);
+              break;
+            case Type.Embedded:
+              prev[1].push(currentSub);
+              break;
+            case Type.Online:
+            case Type.Translated:
+              prev[2].push(currentSub);
+              break;
+          }
+          return prev;
+        }, [[], [], []] as SubtitleControlListItem[][])
+        .map((subList, index) => {
+          switch (index) {
+            default:
+              return subList;
+            case 1: // this is embedded subtitle list
+              // @ts-ignore
+              return sortBy(subList, ({ source }) => source.streamIndex);
+          }
+        }));
       this.computedAvailableItems = val.map((sub: SubtitleControlListItem) => ({
         ...sub,
         name: this.getSubName(sub, val),

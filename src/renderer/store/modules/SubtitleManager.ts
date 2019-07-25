@@ -18,7 +18,7 @@ import {
   SubtitleControlListItem, Type, IEntityGenerator, Entity, Format,
 } from '@/interfaces/ISubtitle';
 import {
-  ISubtitleStream, TranscriptInfo,
+  TranscriptInfo,
   searchForLocalList, retrieveEmbeddedList, fetchOnlineList,
   OnlineGenerator, LocalGenerator, EmbeddedGenerator, TranslatedGenerator,
 } from '@/services/subtitle';
@@ -39,6 +39,7 @@ import {
 } from '../../helpers/notificationcodes';
 import { LanguageCode } from '@/libs/language';
 import { AudioTranslateBubbleOrigin } from './AudioTranslate';
+import { ISubtitleStream } from '@/plugins/mediaTasks';
 
 const sortOfTypes = {
   local: 0,
@@ -269,7 +270,7 @@ const actions = {
     const onlineNeeded = (languageHasChanged || !hasStoredSubtitles) && ['mkv', 'avi', 'ts', 'mp4'].includes(extname(originSrc).slice(1)) && privacyAgreement;
     if (onlineNeeded) onlinePromise = dispatch(a.refreshOnlineSubtitles);
     /** whether or not to refresh embedded subtitles */
-    const embeddedNeeded = list
+    const embeddedNeeded = !list
       .some(({ type }: SubtitleControlListItem) => type === Type.Embedded);
     if (embeddedNeeded) {
       retrieveEmbeddedList(originSrc).then(streams => dispatch(a.addEmbeddedSubtitles, streams));
@@ -306,8 +307,6 @@ const actions = {
     if (isTranslating) {
       dispatch(atActions.AUDIO_TRANSLATE_SHOW_BUBBLE, AudioTranslateBubbleOrigin.Refresh);
       dispatch(atActions.AUDIO_TRANSLATE_BUBBLE_CALLBACK, () => {
-        // TODO 如果开启了第二字幕
-        dispatch(a.changePrimarySubtitle, '');
         dispatch(a.refreshSubtitles);
       });
       return false;

@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-06-20 18:03:14
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-07-24 18:13:20
+ * @Last Modified time: 2019-07-25 13:30:53
  */
 
 // @ts-ignore
@@ -71,8 +71,10 @@ class AudioTranslateService extends EventEmitter {
       this.emit('grabCompleted');
       if (this.streamClient) {
         this.streamClient.end();
+        console.log('write EOF to server', 'audio-log');
         this.streamClient.once('data', this.rpcCallBack.bind(this));
       }
+      ipcRenderer.send('grab-audio-stop');
     } else {
       this.emit('grab', time);
       ipcRenderer.send('grab-audio-continue');
@@ -216,6 +218,8 @@ class AudioTranslateService extends EventEmitter {
             ...result.taskinfo,
           };
           this.emit('task', this.taskInfo);
+          // 3次超时内得到返回，重置超时次数
+          this.timeoutCount = 3;
           this.loopTask(this.taskInfo);
         } else if (result && res.hasError()) {
           this.emit('error', result.error);
@@ -223,7 +227,7 @@ class AudioTranslateService extends EventEmitter {
         }
       } catch (error) {
         if (error && error.message === 'time out' && this.timeoutCount > 0 && this.taskInfo) {
-          console.log('time out', 4 - this.timeoutCount);
+          console.log('time out', 4 - this.timeoutCount, 'audio-log');
           this.timeoutCount -= 1;
           this.loopTask(this.taskInfo);
         } else {

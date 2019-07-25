@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-05 16:03:32
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-07-24 20:10:38
+ * @Last Modified time: 2019-07-25 13:20:21
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @ts-ignore
@@ -301,8 +301,12 @@ const actions = {
         commit(m.AUDIO_TRANSLATE_UPDATE_STATUS, AudioTranslateStatus.Fail);
         if (!state.isModalVisiable) {
           commit(m.AUDIO_TRANSLATE_UPDATE_PROGRESS, 0);
-          // TODO 如果开启了第二字幕
-          dispatch(smActions.changePrimarySubtitle, '');
+          const selectId = state.selectedTargetSubtitleId;
+          if (getters.primarySubtitleId === selectId) {
+            dispatch(smActions.changePrimarySubtitle, '');
+          } else if (getters.secondarySubtitleId === selectId) {
+            dispatch(smActions.changeSecondarySubtitle, '');
+          }
           const failBubbleId = uuidv4();
           commit(m.AUDIO_TRANSLATE_UPDATE_FAIL_BUBBLE_ID, failBubbleId);
           // 如果当前有其他的bubble显示，就暂时不出失败的bubble
@@ -363,8 +367,6 @@ const actions = {
         mediaStorageService.clearAsyncTaskInfo(state.key);
         // 结束任务
         audioTranslateService.stop();
-        // 恢复vuex
-        commit(m.AUDIO_TRANSLATE_RECOVERY);
         let result = TRANSLATE_SUCCESS_WHEN_VIDEO_CHANGE;
         if (audioTranslateService.mediaHash === getters.mediaHash) {
           result = TRANSLATE_SUCCESS;
@@ -379,8 +381,12 @@ const actions = {
           });
           if (subtitle && subtitle.id) {
             // 选中当前翻译的字幕
-            // TODO 如果开启了第二字幕
-            dispatch(smActions.changePrimarySubtitle, subtitle.id);
+            const selectId = state.selectedTargetSubtitleId;
+            if (getters.primarySubtitleId === selectId) {
+              dispatch(smActions.changePrimarySubtitle, subtitle.id);
+            } else if (getters.secondarySubtitleId === selectId) {
+              dispatch(smActions.changeSecondarySubtitle, subtitle.id);
+            }
           }
         }
         // 如果当前有其他气泡需要用户确认，就先不出成功的气泡
@@ -393,6 +399,8 @@ const actions = {
             addBubble(result);
           });
         }
+        // 恢复vuex
+        commit(m.AUDIO_TRANSLATE_RECOVERY);
         // ga 翻译过程(第二步)成功次数
         try {
           event('app', 'ai-translate-server-translate-success');
@@ -418,6 +426,7 @@ const actions = {
   [a.AUDIO_TRANSLATE_DISCARD]( // eslint-disable-line complexity
     {
       commit,
+      getters,
       state,
       dispatch,
     }: any,
@@ -481,7 +490,12 @@ const actions = {
     // 丢弃service
     audioTranslateService.stop();
     // 丢弃任务，执行用户强制操作
-    dispatch(smActions.changePrimarySubtitle, '');
+    const selectId = state.selectedTargetSubtitleId;
+    if (getters.primarySubtitleId === selectId) {
+      dispatch(smActions.changePrimarySubtitle, '');
+    } else if (getters.secondarySubtitleId === selectId) {
+      dispatch(smActions.changeSecondarySubtitle, '');
+    }
     commit(m.AUDIO_TRANSLATE_RECOVERY);
     state.callbackAfterBubble();
     dispatch(a.AUDIO_TRANSLATE_HIDE_BUBBLE);
@@ -509,18 +523,18 @@ const actions = {
     const taskInfo = mediaStorageService.getAsyncTaskInfo(key);
     if ((getters.isTranslating || state.status === AudioTranslateStatus.Back)
       && state.selectedTargetSubtitleId === sub.id) {
+      if (getters.isFirstSubtitle) {
+        dispatch(smActions.changePrimarySubtitle, sub.id);
+      } else {
+        dispatch(smActions.changeSecondarySubtitle, sub.id);
+      }
       commit(m.AUDIO_TRANSLATE_SHOW_MODAL);
-      // TODO 如果开启了第二字幕
-      dispatch(smActions.changePrimarySubtitle, sub.id);
     } else if (getters.isTranslating || state.status === AudioTranslateStatus.Back) {
       dispatch(a.AUDIO_TRANSLATE_SHOW_BUBBLE, AudioTranslateBubbleOrigin.OtherAIButtonClick);
       dispatch(a.AUDIO_TRANSLATE_BUBBLE_CALLBACK, () => {
-        // TODO 如果开启了第二字幕
-        dispatch(smActions.changePrimarySubtitle, '');
         dispatch(a.AUDIO_TRANSLATE_SHOW_MODAL, sub);
       });
     } else if (state.key === key && taskInfo && taskInfo.targetLanguage === sub.language) {
-      // TODO
       commit(m.AUDIO_TRANSLATE_SELECTED_UPDATE, sub);
       dispatch(a.AUDIO_TRANSLATE_START, taskInfo.audioLanguageCode);
       commit(m.AUDIO_TRANSLATE_SHOW_MODAL);

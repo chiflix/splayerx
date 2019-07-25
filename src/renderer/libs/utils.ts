@@ -2,15 +2,21 @@ import { createHash } from 'crypto';
 // @ts-ignore
 import romanize from 'romanize';
 import { times, padStart, sortBy } from 'lodash';
-import { sep, basename } from 'path';
+import { sep, basename, join } from 'path';
+import { ensureDir } from 'fs-extra';
+import { remote } from 'electron';
 // @ts-ignore
 import { promises as fsPromises } from 'fs';
 // @ts-ignore
 import nzh from 'nzh';
 import { SubtitleControlListItem, Type } from '@/interfaces/ISubtitle';
-import { codeToLanguageName } from './language';
+import { codeToLanguageName, LanguageCode } from './language';
 import { IEmbeddedOrigin } from '@/services/subtitle';
-// @ts-ignore
+import {
+  ELECTRON_CACHE_DIRNAME,
+  DEFAULT_DIRNAME,
+  VIDEO_DIRNAME, SUBTITLE_DIRNAME,
+} from '@/constants';
 
 /** 计算文本宽度
  * @description
@@ -205,7 +211,8 @@ export function calculatedName(
       (s: SubtitleControlListItem) => (s as IEmbeddedOrigin).source.streamIndex,
     );
     const sort = embeddedList.findIndex((s: SubtitleControlListItem) => s.id === item.id) + 1;
-    name = `${romanize(sort)} - ${codeToLanguageName(item.language)}`;
+    name = item.language === LanguageCode.No || item.language === LanguageCode.Default
+      ? `${romanize(sort)}` : `${romanize(sort)} - ${codeToLanguageName(item.language)}`;
   } else if (item.type === Type.Online) {
     const sort = list
       .filter((s: SubtitleControlListItem) => s.type === Type.Online
@@ -269,4 +276,30 @@ export function parseNameFromPath(path: string) {
     });
   });
   return result;
+}
+
+/** get video cache dir */
+export function getVideoDir(videoHash?: string) {
+  const videoDir = videoHash
+    ? join(
+      remote.app.getPath(ELECTRON_CACHE_DIRNAME),
+      DEFAULT_DIRNAME,
+      VIDEO_DIRNAME,
+      videoHash,
+    ) : join(
+      remote.app.getPath(ELECTRON_CACHE_DIRNAME),
+      DEFAULT_DIRNAME,
+      VIDEO_DIRNAME,
+    );
+  return ensureDir(videoDir).then(() => videoDir);
+}
+
+/** get subtitle cache dir */
+export function getSubtitleDir() {
+  const subtitleDir = join(
+    remote.app.getPath(ELECTRON_CACHE_DIRNAME),
+    DEFAULT_DIRNAME,
+    SUBTITLE_DIRNAME,
+  );
+  return ensureDir(subtitleDir).then(() => subtitleDir);
 }

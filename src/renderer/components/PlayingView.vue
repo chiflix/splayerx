@@ -26,6 +26,7 @@ import VideoCanvas from '@/containers/VideoCanvas.vue';
 import TheVideoController from '@/containers/TheVideoController.vue';
 import { AudioTranslateBubbleType } from '@/store/modules/AudioTranslate';
 import { videodata } from '../store/video';
+import { getStreams } from '../plugins/mediaTasks';
 
 export default {
   name: 'PlayingView',
@@ -74,7 +75,10 @@ export default {
       // eslint-disable-next-line
       handler: function (newVal: string) {
         this.resetManager();
-        if (newVal) this.initializeManager();
+        if (newVal) {
+          getStreams(newVal);
+          this.initializeManager();
+        }
       },
     },
     async primarySubtitleId() {
@@ -126,7 +130,6 @@ export default {
     },
     async loopCues() {
       if (!this.time) this.time = videodata.time;
-      // TODO @Yvon Yan confirm the impact on subtitle play time
       // onUpdateTick Always get the latest subtitles
       // if (this.time !== videodata.time) {
       const cues = await this.getCues(videodata.time);

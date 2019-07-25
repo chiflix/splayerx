@@ -126,26 +126,17 @@ export default {
   },
   mounted() {
     this.$bus.$on('back-to-landingview', () => {
-      let savePromise = this.saveScreenshot(this.videoId)
-        .then(() => this.updatePlaylist(this.playListId));
-      if (process.mas && this.$store.getters.source === 'drop') {
-        savePromise = savePromise.then(async () => {
-          await playInfoStorageService.deleteRecentPlayedBy(this.playListId);
-          await deleteSubtitlesByPlaylistId(this.playListId);
+      if (this.isTranslating) {
+        this.showTranslateBubble(AudioTranslateBubbleOrigin.WindowClose);
+        this.addTranslateBubbleCallBack(() => {
+          this.backToLandingView();
         });
+        return false;
       }
-      savePromise
-        .then(this.saveSubtitleStyle)
-        .then(this.savePlaybackStates)
-        .then(this.removeAllAudioTrack)
-        .finally(() => {
-          this.$store.dispatch('Init');
-          this.$bus.$off();
-          this.$router.push({
-            name: 'landing-view',
-          });
-          windowRectService.uploadWindowBy(false, 'landing-view');
-        });
+      // 如果有back翻译任务，直接丢弃掉
+      this.discardTranslate();
+      this.backToLandingView();
+      return false;
     });
     this.$electron.ipcRenderer.on('quit', (e: Event, needToRestore: boolean) => {
       if (needToRestore) this.needToRestore = needToRestore;
@@ -349,6 +340,28 @@ export default {
     },
     savePlaybackStates() {
       return settingStorageService.updatePlaybackStates({ volume: this.volume, muted: this.muted });
+    },
+    backToLandingView() {
+      let savePromise = this.saveScreenshot(this.videoId)
+        .then(() => this.updatePlaylist(this.playListId));
+      if (process.mas && this.$store.getters.source === 'drop') {
+        savePromise = savePromise.then(async () => {
+          await playInfoStorageService.deleteRecentPlayedBy(this.playListId);
+          await deleteSubtitlesByPlaylistId(this.playListId);
+        });
+      }
+      savePromise
+        .then(this.saveSubtitleStyle)
+        .then(this.savePlaybackStates)
+        .then(this.removeAllAudioTrack)
+        .finally(() => {
+          this.$store.dispatch('Init');
+          this.$bus.$off();
+          this.$router.push({
+            name: 'landing-view',
+          });
+          windowRectService.uploadWindowBy(false, 'landing-view');
+        });
     },
     beforeUnloadHandler(e: BeforeUnloadEvent) {
       // 如果当前有翻译任务进行，而不是再后台进行

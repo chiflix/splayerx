@@ -11,12 +11,13 @@ import fs from 'fs';
 import rimraf from 'rimraf';
 // import { audioHandler } from './helpers/audioHandler';
 import { audioGrabService } from './helpers/AudioGrabService';
-import TaskQueue from '../renderer/helpers/proceduralQueue';
 import { jsonStorage } from '../renderer/libs/JsonStorage';
 import './helpers/electronPrototypes';
 import writeLog from './helpers/writeLog';
 import { getValidVideoRegex, getValidSubtitleRegex } from '../shared/utils';
 import { mouse } from './helpers/mouse';
+
+import './helpers/mediaTasksPlugin';
 
 // requestSingleInstanceLock is not going to work for mas
 // https://github.com/electron-userland/electron-packager/issues/923
@@ -66,10 +67,6 @@ let inited = false;
 let finalVideoToOpen = [];
 const tmpVideoToOpen = [];
 const tmpSubsToOpen = [];
-const snapShotQueue = [];
-const thumbnailTask = [];
-const mediaInfoQueue = [];
-const embeeddSubtitlesQueue = new TaskQueue();
 const subRegex = getValidSubtitleRegex();
 const mainURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080'
@@ -256,146 +253,6 @@ function registerMainWindowEvent(mainWindow) {
     tmpSubsToOpen.splice(0, tmpSubsToOpen.length);
     tmpVideoToOpen.splice(0, tmpVideoToOpen.length);
   });
-  function thumbnail(args, cb) {
-    splayerx.generateThumbnails(
-      args.src, args.outPath, args.width, args.num.cols, args.num.rows,
-      (ret) => {
-        console[ret === '0' ? 'log' : 'error'](ret, args.src);
-        cb(ret, args.src);
-      },
-    );
-  }
-  function thumbnailTaskCallback() {
-    const cb = (ret, src) => {
-      thumbnailTask.shift();
-      if (thumbnailTask.length > 0) {
-        thumbnail(thumbnailTask[0], cb);
-      }
-      if (mainWindow && !mainWindow.webContents.isDestroyed() && ret === '0') {
-        mainWindow.webContents.send('thumbnail-saved', src);
-      }
-    };
-    thumbnail(thumbnailTask[0], cb);
-  }
-  ipcMain.on('generateThumbnails', (event, args) => {
-    if (thumbnailTask.length === 0) {
-      thumbnailTask.push(args);
-      thumbnailTaskCallback();
-    } else {
-      thumbnailTask.splice(1, 1, args);
-    }
-  });
-
-  function timecodeFromSeconds(s) {
-    const dt = new Date(Math.abs(s) * 1000);
-    let hours = dt.getUTCHours();
-    let minutes = dt.getUTCMinutes();
-    let seconds = dt.getUTCSeconds();
-
-    if (minutes < 10) {
-      minutes = `0${minutes}`;
-    }
-    if (seconds < 10) {
-      seconds = `0${seconds}`;
-    }
-    if (hours > 0) {
-      if (hours < 10) {
-        hours = `${hours}`;
-      }
-      return `${hours}:${minutes}:${seconds}`;
-    }
-    return `00:${minutes}:${seconds}`;
-  }
-
-  function extractSubtitle(videoPath, subtitlePath, index) {
-    return new Promise((resolve, reject) => {
-      splayerx.extractSubtitles(videoPath, subtitlePath, `0:${index}:0`, (err) => {
-        if (!err) resolve(subtitlePath);
-        else reject(err);
-      });
-    });
-  }
-
-  function snapShot(info, callback) {
-    let randomNumber = Math.round((Math.random() * 20) + 5);
-    if (randomNumber > info.duration) randomNumber = info.duration;
-    if (!info.width) info.width = 1920;
-    if (!info.height) info.height = 1080;
-    const numberString = timecodeFromSeconds(randomNumber);
-    splayerx.snapshotVideo(
-      info.path, info.imgPath, numberString, `${info.width}`, `${info.height}`,
-      (resultCode) => {
-        console[resultCode === '0' ? 'log' : 'error'](resultCode, info.path);
-        callback(resultCode, info.imgPath);
-      },
-    );
-  }
-  function snapShotQueueProcess(event) {
-    const callback = (resultCode, imgPath) => {
-      if (resultCode === 'Waiting for the task completion.') {
-        snapShot(snapShotQueue[0], callback);
-      } else if (resultCode === '0') {
-        const lastRecord = snapShotQueue.shift();
-        if (event.sender.isDestroyed()) {
-          snapShotQueue.splice(0, snapShotQueue.length);
-        } else {
-          event.sender.send(`snapShot-${lastRecord.path}-reply`, imgPath);
-          if (snapShotQueue.length > 0) {
-            snapShot(snapShotQueue[0], callback);
-          }
-        }
-      } else {
-        snapShotQueue.shift();
-        if (snapShotQueue.length > 0) {
-          snapShot(snapShotQueue[0], callback);
-        }
-      }
-    };
-    snapShot(snapShotQueue[0], callback);
-  }
-
-  ipcMain.on('snapShot', (event, video) => {
-    const imgPath = video.imgPath;
-
-    if (!fs.existsSync(imgPath)) {
-      snapShotQueue.push(video);
-      if (snapShotQueue.length === 1) {
-        snapShotQueueProcess(event);
-      }
-    } else {
-      event.sender.send(`snapShot-${video.path}-reply`);
-    }
-  });
-
-  ipcMain.on('extract-subtitle-request', (event, videoPath, index, format, hash) => {
-    const subtitleFolderPath = path.join(tempFolderPath, hash);
-    if (!fs.existsSync(subtitleFolderPath)) fs.mkdirSync(subtitleFolderPath);
-    const subtitlePath = path.join(subtitleFolderPath, `embedded-${index}.${format}`);
-    if (fs.existsSync(subtitlePath)) event.sender.send(`extract-subtitle-response-${index}`, { error: null, index, path: subtitlePath });
-    else {
-      embeeddSubtitlesQueue.add(() => extractSubtitle(videoPath, subtitlePath, index)
-        .then(index => event.sender.send(`extract-subtitle-response-${index}`, { error: null, index, path: subtitlePath }))
-        .catch(index => event.sender.send(`extract-subtitle-response-${index}`, { error: 'error', index })));
-    }
-  });
-
-  function mediaInfo(videoPath, callback) {
-    splayerx.getMediaInfo(videoPath, (info) => {
-      callback(info);
-    });
-  }
-  function mediaInfoQueueProcess() {
-    const callback = (info) => {
-      if (mainWindow && !mainWindow.webContents.isDestroyed()) {
-        mainWindow.webContents.send(`mediaInfo-${mediaInfoQueue[0]}-reply`, info);
-      }
-      mediaInfoQueue.shift();
-      if (mediaInfoQueue.length > 0) {
-        mediaInfo(mediaInfoQueue[0], callback);
-      }
-    };
-    mediaInfo(mediaInfoQueue[0], callback);
-  }
 
   function createAbout() {
     const aboutWindowOptions = {
@@ -470,19 +327,6 @@ function registerMainWindowEvent(mainWindow) {
     });
   }
 
-  ipcMain.on('mediaInfo', (event, path) => {
-    if (mediaInfoQueue.length === 0) {
-      mediaInfoQueue.push(path);
-      mediaInfoQueueProcess();
-    } else {
-      mediaInfoQueue.push(path);
-    }
-  });
-  ipcMain.on('simulate-closing-window', () => {
-    mediaInfoQueue.splice(0);
-    snapShotQueue.splice(0);
-    thumbnailTask.splice(0);
-  });
   ipcMain.on('windowPositionChange', (event, args) => {
     if (!mainWindow || event.sender.isDestroyed()) return;
     mainWindow.setPosition(...args);
