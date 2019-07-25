@@ -8,6 +8,7 @@ const iqiyi = (barrageState, winSize) => ({
     if (header) header.style.display = "none";
     ${iqiyiBarrageAdapt(barrageState)}
     var iqpPlayer = document.querySelector(".iqp-player");
+    document.scrollingElement.scrollTop = 0;
     iqpPlayer.style.position = "fixed";
     iqpPlayer.style.left = "0";
     iqpPlayer.style.top = "0";

@@ -83,21 +83,22 @@ export default {
   display: flex;
   z-index: 6;
   .back-icon {
-    width: 20px;
-    height: 20px;
-    margin: 0 20px 0 7px;
+    width: 16px;
+    height: 16px;
+    margin: auto 20px auto 7px;
     -webkit-app-region: no-drag;
   }
   .forward-icon {
-    width: 20px;
-    height: 20px;
-    margin-right: 20px;
+    width: 16px;
+    height: 16px;
+    margin: auto 20px auto 0;
     -webkit-app-region: no-drag;
   }
   .page-refresh-icon {
-    width: 20px;
-    height: 20px;
+    width: 16px;
+    height: 16px;
     -webkit-app-region: no-drag;
+    margin: auto 0 auto 0;
   }
   .page-refresh-icon:active, .back-icon:active, .forward-icon:active {
     opacity: 0.5;

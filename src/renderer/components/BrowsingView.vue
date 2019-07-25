@@ -57,6 +57,8 @@ import { mapGetters, mapActions } from 'vuex';
 import fs from 'fs';
 // @ts-ignore
 import urlParseLax from 'url-parse-lax';
+// @ts-ignore
+import getVideoId from 'get-video-id';
 import { windowRectService } from '@/services/window/WindowRectService';
 import { Browsing as browsingActions } from '@/store/actionTypes';
 import BrowsingHeader from '@/components/BrowsingView/BrowsingHeader.vue';
@@ -65,6 +67,7 @@ import asyncStorage from '@/helpers/asyncStorage';
 import { bilibili, bilibiliFindType, bilibiliBarrageAdapt } from '../../shared/pip/bilibili';
 import youtube from '../../shared/pip/youtube';
 import iqiyi, { iqiyiBarrageAdapt } from '../../shared/pip/iqiyi';
+import globalPip from '../../shared/pip/others';
 import { getValidVideoRegex, getValidSubtitleRegex } from '../../shared/utils';
 
 export default {
@@ -107,6 +110,9 @@ export default {
     bilibiliBarrage() {
       return bilibiliBarrageAdapt(this.bilibiliType, this.barrageOpen);
     },
+    othersPip() {
+      return globalPip(this.winSize);
+    },
     availableUrl() {
       const parsedUrl = urlParseLax(this.initialUrl);
       return parsedUrl.protocol ? parsedUrl.href : `http://${this.initialUrl}`;
@@ -139,8 +145,10 @@ export default {
           this.youtubeRecover();
         } else if (this.pipType === 'bilibili') {
           this.bilibiliRecover();
-        } else {
+        } else if (this.pipType === 'iqiyi') {
           this.iqiyiRecover();
+        } else {
+          this.othersRecover();
         }
         this.$store.dispatch('updatePipPos', this.winPos);
       } else {
@@ -159,18 +167,22 @@ export default {
         } else if (parseUrl.host.includes('bilibili')) {
           this.pipType = 'bilibili';
           this.bilibiliAdapter();
-        } else {
+        } else if (parseUrl.host.includes('iqiyi')) {
           this.pipType = 'iqiyi';
           this.iqiyiAdapter();
+        } else {
+          this.othersAdapter();
         }
       }
     },
     winWidth() {
-      if (this.isPip) {
+      if (this.isPip && this.pipType !== 'youtube') {
         if (this.pipType === 'iqiyi') {
           this.iqiyiWatcher();
         } else if (this.pipType === 'bilibili') {
           this.bilibiliWatcher();
+        } else {
+          this.othersWatcher();
         }
       }
     },
@@ -252,7 +264,7 @@ export default {
         }
       }
       this.$refs.webView.executeJavaScript(this.calculateVideoNum, (r: number) => {
-        this.hasVideo = !!r;
+        this.hasVideo = recordIndex === 0 && !getVideoId(loadUrl).id ? false : !!r;
         this.$refs.browsingHeader.updateWebInfo({
           hasVideo: this.hasVideo,
           url: loadUrl,
@@ -344,7 +356,6 @@ export default {
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [0]);
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [570, 375]);
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', this.browsingSize);
-      console.log(this.browsingPos);
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', this.browsingPos);
     },
     handleDanmuDisplay() {
@@ -378,6 +389,16 @@ export default {
       if (this.isPip) {
         this.isPip = false;
       }
+    },
+    othersAdapter() {
+      this.handleWindowChangeEnterPip();
+      this.$refs.webView.executeJavaScript(this.othersPip.adapter);
+    },
+    othersWatcher() {
+      this.$refs.webView.executeJavaScript(this.othersPip.watcher);
+    },
+    othersRecover() {
+      this.$refs.webView.executeJavaScript(this.othersPip.recover);
     },
     iqiyiAdapter() {
       this.handleWindowChangeEnterPip();
