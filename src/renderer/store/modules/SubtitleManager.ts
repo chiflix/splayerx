@@ -249,7 +249,9 @@ const actions = {
     const embeddedNeeded = !list
       .some(({ type }: SubtitleControlListItem) => type === Type.Embedded);
     if (embeddedNeeded) {
-      retrieveEmbeddedList(originSrc).then(streams => dispatch(a.addEmbeddedSubtitles, streams));
+      retrieveEmbeddedList(originSrc)
+        .then(streams => dispatch(a.addEmbeddedSubtitles, streams))
+        .then(() => addSubtitleItemsToList(getters.list, mediaHash));
     }
 
     return Promise.race([
@@ -263,7 +265,7 @@ const actions = {
       .finally(() => {
         dispatch(a.stopAISelection);
         storeSubtitleLanguage([primaryLanguage, secondaryLanguage], mediaHash);
-        addSubtitleItemsToList(list, mediaHash);
+        addSubtitleItemsToList(getters.list, mediaHash);
         dispatch(a.checkLocalSubtitles);
         dispatch(a.checkSubtitleList);
         commit(m.setIsRefreshing, false);
@@ -279,7 +281,6 @@ const actions = {
       primaryLanguage, secondaryLanguage,
       privacyAgreement,
     } = getters;
-    const list = getters.list as SubtitleControlListItem[];
 
     primarySelectionComplete = false;
     secondarySelectionComplete = false;
@@ -300,7 +301,7 @@ const actions = {
       .finally(() => {
         dispatch(a.stopAISelection);
         storeSubtitleLanguage([primaryLanguage, secondaryLanguage], mediaHash);
-        addSubtitleItemsToList(list, mediaHash);
+        addSubtitleItemsToList(getters.list, mediaHash);
         dispatch(a.checkLocalSubtitles);
         dispatch(a.checkSubtitleList);
         commit(m.setIsRefreshing, false);
