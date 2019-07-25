@@ -466,6 +466,16 @@ export default class Menubar {
   private createHelpMenu() {
     const helpMenu = new Menu();
 
+    if (!IsMacintosh) {
+      const about = this.createMenuItem('msg.splayerx.about', () => {
+        app.emit('add-windows-about');
+      }, undefined, true);
+
+      helpMenu.append(about);
+
+      helpMenu.append(separator());
+    }
+
     const feedback = this.createMenuItem('msg.help.feedback', () => {
       shell.openExternal('https://feedback.splayer.org');
     }, undefined, true);
