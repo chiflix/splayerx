@@ -1,5 +1,6 @@
 import { ipcRenderer, remote, MenuItem } from 'electron';
 import { recentPlayService } from '../media/RecentPlayService';
+import { log } from '@/libs/Log';
 
 export default class MenuService {
   private menu?: Electron.Menu;
@@ -26,12 +27,12 @@ export default class MenuService {
 
   public updateMenuItemChecked(id: string, checked: boolean) {
     if (this.getMenuItemById(id)) this.getMenuItemById(id).checked = checked;
-    else console.log(id);
+    else log.error('renderer/menuservice', `updateMenuItemChecked, ${id} ${checked}`);
   }
 
   public updateMenuItemEnabled(id: string, enabled: boolean) {
     if (this.getMenuItemById(id)) this.getMenuItemById(id).enabled = enabled;
-    else console.log(id);
+    else log.error('renderer/menuservice', `updateMenuItemChecked, ${id} ${enabled}`);
   }
 
   public enableSubmenuItem(id: string, enabled: boolean) {
@@ -76,7 +77,12 @@ export default class MenuService {
     ipcRenderer.send('update-audio-track', menuItem);
   }
 
-  public getMenuItemById(id: string): Electron.MenuItem {
+  public isMenuItemChecked(id: string): boolean {
+    if (this.getMenuItemById(id)) return this.getMenuItemById(id).checked;
+    return false;
+  }
+
+  private getMenuItemById(id: string): Electron.MenuItem {
     if (!this.menu) this.menu = remote.Menu.getApplicationMenu() as Electron.Menu;
     return this.menu.getMenuItemById(id);
   }

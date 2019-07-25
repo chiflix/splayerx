@@ -215,7 +215,7 @@ new Vue({
       this.menuService.updateLocale();
     },
     singleCycle(val: boolean) {
-      this.menuService.getMenuItemById('singleCycle').checked = val;
+      this.menuService.updateMenuItemChecked('singleCycle', val);
     },
     enabledSecondarySub(val) {
       this.list.forEach((item: SubtitleControlListItem) => {
@@ -260,8 +260,8 @@ new Vue({
         this.refreshMenu();
       }
       this.audioTrackList.forEach((item: Electron.MenuItem, index: number) => {
-        if (item.enabled === true && this.menu && this.menuService.getMenuItemById(`track${index}`)) {
-          this.menuService.getMenuItemById(`track${index}`).checked = true;
+        if (item.enabled === true) {
+          this.menuService.updateMenuItemChecked(`audio.switchAudioTrack.${index}`, true);
         }
       });
     },
@@ -272,7 +272,7 @@ new Vue({
       const browserWindow = this.$electron.remote.getCurrentWindow();
       if (val && browserWindow.isAlwaysOnTop()) {
         browserWindow.setAlwaysOnTop(false);
-      } else if (!val && this.menu && this.menuService.getMenuItemById('window.keepPlayingWindowFront').checked) {
+      } else if (!val && this.menuService.isMenuItemChecked('window.keepPlayingWindowFront')) {
         browserWindow.setAlwaysOnTop(true);
       }
       this.menuService.updatePaused(val);
@@ -560,12 +560,12 @@ new Vue({
           this.menuService.updateMenuItemChecked(`audio.switchAudioTrack.${index}`, true);
         }
       });
-      this.menuService.getMenuItemById('window.keepPlayingWindowFront').checked = this.topOnWindow;
+      this.menuService.updateMenuItemChecked('window.keepPlayingWindowFront', this.topOnWindow);
       this.list.forEach((item: SubtitleControlListItem) => {
-        if (item.id === this.primarySubtitleId && this.menuService.getMenuItemById(`sub${item.id}`)) {
+        if (item.id === this.primarySubtitleId) {
           this.menuService.updateMenuItemChecked(`subtitle.mainSubtitle.${item.id}`, true);
         }
-        if (item.id === this.secondarySubtitleId && this.menuService.getMenuItemById(`secondSub${item.id}`)) {
+        if (item.id === this.secondarySubtitleId) {
           this.menuService.updateMenuItemChecked(`subtitle.secondarySubtitle.${item.id}`, true);
         }
         this.menuService.updateMenuItemEnabled(`subtitle.secondarySubtitle.${item.id}`, this.enabledSecondarySub);
@@ -829,22 +829,6 @@ new Vue({
         id: `${item.id}`,
         type: 'radio',
         label: this.getSubName(item, this.list),
-        click: () => {
-          this.updateSubtitleType(isFirstSubtitleType);
-          if (isFirstSubtitleType) {
-            this.changeFirstSubtitle(item.id);
-            if (this.menu && this.menuService.getMenuItemById(`secondSub${item.id}`)) {
-              this.menuService.getMenuItemById(`secondSub${item.id}`).checked = false;
-              this.menuService.getMenuItemById('secondSub-1').checked = true;
-            }
-          } else {
-            this.changeSecondarySubtitle(item.id);
-            if (this.menu && this.menuService.getMenuItemById(`sub${item.id}`)) {
-              this.menuService.getMenuItemById(`sub${item.id}`).checked = false;
-              this.menuService.getMenuItemById('sub-1').checked = true;
-            }
-          }
-        },
       };
     },
     recentSubMenu() {
@@ -854,9 +838,6 @@ new Vue({
         visible: true,
         type: 'radio',
         label: this.calculatedNoSub ? this.$t('msg.subtitle.noSubtitle') : this.$t('msg.subtitle.notToShowSubtitle'),
-        click: () => {
-          this.changeFirstSubtitle('');
-        },
       });
       this.list.forEach((item: SubtitleControlListItem, index: number) => {
         submenu.splice(index + 1, 1, this.recentSubTmp(item, true));
