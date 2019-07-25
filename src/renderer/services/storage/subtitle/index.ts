@@ -20,9 +20,12 @@ export async function storeSubtitle(subtitle: Entity) {
   const {
     source, hash, format, language,
   } = subtitle;
-  return db.addSubtitle({
-    source, format, language, hash,
-  });
+  if (format !== Format.Unknown) {
+    return db.addSubtitle({
+      source, format, language, hash,
+    });
+  }
+  return undefined;
 }
 export async function removeSubtitle(subtitle: Entity) {
   const { hash, source } = subtitle;

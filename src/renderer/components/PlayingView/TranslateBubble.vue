@@ -20,13 +20,13 @@
           @mouseup.stop="$emit('disCardTranslate');"
           class="bubble__button--lower"
         >
-          {{ $t('translateBubble.cancel') }}
+          {{ $t('translateBubble.continue') }}
         </div>
         <div
           @mouseup.stop="$emit('hide');"
           class="bubble__button"
         >
-          {{ $t('translateBubble.continue') }}
+          {{ $t('translateBubble.cancel') }}
         </div>
       </div>
       <!-- 后台翻译，切换视频和关闭窗口的气泡 -->
@@ -47,13 +47,13 @@
           @mouseup.stop="$emit('disCardTranslate');"
           class="bubble__button--lower"
         >
-          {{ $t('translateBubble.cancel') }}
+          {{ $t('translateBubble.continue') }}
         </div>
         <div
           @mouseup.stop="$emit('hide');"
           class="bubble__button"
         >
-          {{ $t('translateBubble.continue') }}
+          {{ $t('translateBubble.cancel') }}
         </div>
       </div>
     </div>

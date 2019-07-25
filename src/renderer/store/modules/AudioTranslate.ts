@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-05 16:03:32
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-07-25 13:20:21
+ * @Last Modified time: 2019-07-25 16:14:12
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @ts-ignore
@@ -360,7 +360,6 @@ const actions = {
           clearInterval(taskTimer);
         }
         staticEstimateTime = 0;
-        const targetId = state.selectedTargetSubtitleId;
         commit(m.AUDIO_TRANSLATE_HIDE_MODAL);
         commit(m.AUDIO_TRANSLATE_UPDATE_STATUS, AudioTranslateStatus.Success);
         // 成功后清理任务缓存
@@ -369,9 +368,8 @@ const actions = {
         audioTranslateService.stop();
         let result = TRANSLATE_SUCCESS_WHEN_VIDEO_CHANGE;
         if (audioTranslateService.mediaHash === getters.mediaHash) {
+          const selectId = state.selectedTargetSubtitleId;
           result = TRANSLATE_SUCCESS;
-          // 先删除AI按钮对应的ID
-          dispatch(smActions.removeSubtitle, targetId);
           // 加入刚刚翻译好的AI字幕
           const generator = new TranslatedGenerator(transcriptInfo);
           const subtitle = await dispatch(smActions.addSubtitle, {
@@ -381,13 +379,14 @@ const actions = {
           });
           if (subtitle && subtitle.id) {
             // 选中当前翻译的字幕
-            const selectId = state.selectedTargetSubtitleId;
             if (getters.primarySubtitleId === selectId) {
               dispatch(smActions.changePrimarySubtitle, subtitle.id);
             } else if (getters.secondarySubtitleId === selectId) {
               dispatch(smActions.changeSecondarySubtitle, subtitle.id);
             }
           }
+          // 先删除AI按钮对应的ID
+          dispatch(smActions.removeSubtitle, selectId);
         }
         // 如果当前有其他气泡需要用户确认，就先不出成功的气泡
         if (!state.isBubbleVisible) {

@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-06-20 18:03:14
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-07-25 13:30:53
+ * @Last Modified time: 2019-07-25 16:42:36
  */
 
 // @ts-ignore
@@ -55,6 +55,8 @@ class AudioTranslateService extends EventEmitter {
 
   private mediaStorageService: MediaStorageService;
 
+  // loop task 3次超时 才算超时
+  // 如果3次内正常收到，就重置
   private timeoutCount: number;
 
   public constructor(mediaStorageService: MediaStorageService) {
@@ -72,6 +74,16 @@ class AudioTranslateService extends EventEmitter {
       if (this.streamClient) {
         this.streamClient.end();
         console.log('write EOF to server', 'audio-log');
+        if (this.timeoutTimer) {
+          clearTimeout(this.timeoutTimer);
+        }
+        this.timeoutTimer = setTimeout(() => {
+          // 10秒超时，再发一次EOF
+          if (this.streamClient) {
+            this.streamClient.end();
+            console.log('write EOF to server 2', 'audio-log');
+          }
+        }, 1000 * 10);
         this.streamClient.once('data', this.rpcCallBack.bind(this));
       }
       ipcRenderer.send('grab-audio-stop');

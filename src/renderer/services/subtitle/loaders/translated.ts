@@ -55,7 +55,12 @@ export class TranslatedGenerator implements IEntityGenerator {
     return this.tranlsatedType === TranslatedGeneratorType.Subtitle ? Format.Sagi : Format.Unknown;
   }
 
-  public async getHash() { return uuidv4(); }
+  public async getHash() {
+    if (this.tranlsatedType === TranslatedGeneratorType.Subtitle) {
+      return this.origin.source;
+    }
+    return uuidv4();
+  }
 
   public async getPayload() {
     return this.tranlsatedType === TranslatedGeneratorType.Subtitle
