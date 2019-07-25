@@ -169,7 +169,6 @@ new Vue({
       playlistDisplayState: false,
       topOnWindow: false,
       canSendVolumeGa: true,
-      menuOperationLock: false, // 如果正在创建目录，就锁住所以操作目录的动作，防止野指针
     };
   },
   computed: {
@@ -544,29 +543,32 @@ new Vue({
       await this.menuService.addSecondarySub(this.recentSecondarySubMenu());
       await this.menuService.addAudioTrack(this.updateAudioTrack());
 
-      this.menuService.updateMenuItemEnabled('subtitle.increasePrimarySubtitleDelay', !!this.primarySubtitleId);
-      this.menuService.updateMenuItemEnabled('subtitle.decreasePrimarySubtitleDelay', !!this.primarySubtitleId);
-      this.menuService.updateMenuItemEnabled('subtitle.increaseSecondarySubtitleDelay', !!this.secondarySubtitleId);
-      this.menuService.updateMenuItemEnabled('subtitle.decreaseSecondarySubtitleDelay', !!this.secondarySubtitleId);
-      this.menuService.updateMenuItemEnabled('subtitle.uploadSelectedSubtitle', !!this.ableToPushCurrentSubtitle);
+      if (this.currentRouteName === 'playing-view') {
+        this.menuService.updateMenuItemEnabled('subtitle.increasePrimarySubtitleDelay', !!this.primarySubtitleId);
+        this.menuService.updateMenuItemEnabled('subtitle.decreasePrimarySubtitleDelay', !!this.primarySubtitleId);
+        this.menuService.updateMenuItemEnabled('subtitle.increaseSecondarySubtitleDelay', !!this.secondarySubtitleId);
+        this.menuService.updateMenuItemEnabled('subtitle.decreaseSecondarySubtitleDelay', !!this.secondarySubtitleId);
+        this.menuService.updateMenuItemEnabled('subtitle.uploadSelectedSubtitle', !!this.ableToPushCurrentSubtitle);
+        
+        this.audioTrackList.forEach((item: Electron.MenuItem, index: number) => {
+          if (item.enabled === true) {
+            this.menuService.updateMenuItemChecked(`audio.switchAudioTrack.${index}`, true);
+          }
+        });
 
-      this.audioTrackList.forEach((item: Electron.MenuItem, index: number) => {
-        if (item.enabled === true) {
-          this.menuService.updateMenuItemChecked(`audio.switchAudioTrack.${index}`, true);
-        }
-      });
+        this.list.forEach((item: SubtitleControlListItem) => {
+          if (item.id === this.primarySubtitleId) {
+            this.menuService.updateMenuItemChecked(`subtitle.mainSubtitle.${item.id}`, true);
+          }
+          if (item.id === this.secondarySubtitleId) {
+            this.menuService.updateMenuItemChecked(`subtitle.secondarySubtitle.${item.id}`, true);
+          }
+          this.menuService.updateMenuItemEnabled(`subtitle.secondarySubtitle.${item.id}`, this.enabledSecondarySub);
+        });
+        this.menuService.updateMenuItemEnabled('subtitle.secondarySubtitle.secondSub-1', this.enabledSecondarySub);
+      }
+
       this.menuService.updateMenuItemChecked('window.keepPlayingWindowFront', this.topOnWindow);
-      this.list.forEach((item: SubtitleControlListItem) => {
-        if (item.id === this.primarySubtitleId) {
-          this.menuService.updateMenuItemChecked(`subtitle.mainSubtitle.${item.id}`, true);
-        }
-        if (item.id === this.secondarySubtitleId) {
-          this.menuService.updateMenuItemChecked(`subtitle.secondarySubtitle.${item.id}`, true);
-        }
-        this.menuService.updateMenuItemEnabled(`subtitle.secondarySubtitle.${item.id}`, this.enabledSecondarySub);
-      });
-      this.menuService.updateMenuItemEnabled('subtitle.secondarySubtitle.secondSub-1', this.enabledSecondarySub);
-      this.menuOperationLock = false;
     },
     registeMenuActions() {
       const { app, dialog } = this.$electron.remote;
