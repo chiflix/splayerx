@@ -1,23 +1,11 @@
-import { ipcRenderer, Event } from 'electron';
 import { cloneDeep } from 'lodash';
 import {
   IOrigin, Type, IEntityGenerator, Format,
 } from '@/interfaces/ISubtitle';
-import { LanguageCode, normalizeCode } from '@/libs/language';
+import { LanguageCode } from '@/libs/language';
 import { mediaQuickHash } from '@/libs/utils';
 import { inferLanguageFromPath, loadLocalFile } from '../utils';
-
-interface IExtractSubtitleRequest {
-  videoSrc: string;
-  streamIndex: number;
-  format: Format;
-  mediaHash: string;
-}
-interface IExtractSubtitleResponse {
-  error: number;
-  index: number;
-  path: string;
-}
+import { ISubtitleStream, getSubtitlePath } from '@/plugins/mediaTasks';
 
 /**
  * Get extracted embedded subtitles's local src
@@ -27,26 +15,7 @@ interface IExtractSubtitleResponse {
  * @param {string} subtitleCodec - the codec of the embedded subtitle
  * @returns the subtitle path string
  */
-export async function embeddedSrcLoader(
-  videoSrc: string,
-  streamIndex: number,
-  format: Format,
-): Promise<string> {
-  const mediaHash = await mediaQuickHash.try(videoSrc);
-  if (!mediaHash) return Promise.reject(new Error('Cannot get mediaQuickHash for embeddedSrcLoader'));
-  ipcRenderer.send('extract-subtitle-request',
-    videoSrc,
-    streamIndex,
-    format,
-    mediaHash);
-  return new Promise((resolve, reject) => {
-    ipcRenderer.once(`extract-subtitle-response-${streamIndex}`, (event: Event, response: IExtractSubtitleResponse) => {
-      const { error, index, path } = response;
-      if (error) reject(new Error(`${videoSrc}'s No.${index} extraction failed with ${error}.`));
-      resolve(path);
-    });
-  });
-}
+export { getSubtitlePath as embeddedSrcLoader } from '@/plugins/mediaTasks';
 
 export interface IEmbeddedOrigin extends IOrigin {
   type: Type.Embedded,
@@ -54,20 +23,6 @@ export interface IEmbeddedOrigin extends IOrigin {
     streamIndex: number;
     videoSrc: string;
     extractedSrc: string;
-  };
-}
-export interface ISubtitleStream {
-  // eslint-disable-next-line camelcase
-  codec_type: string;
-  // eslint-disable-next-line camelcase
-  codec_name: string;
-  index: number;
-  tags: {
-    language?: string;
-    title?: string;
-  };
-  disposition: {
-    default: 0 | 1;
   };
 }
 
@@ -89,9 +44,9 @@ export class EmbeddedGenerator implements IEntityGenerator {
         extractedSrc: '',
       },
     };
-    this.format = stream.codec_name as Format;
-    this.language = normalizeCode(stream.tags.language || '');
-    this.isDefault = !!stream.disposition.default;
+    this.format = stream.codecName ? stream.codecName as Format : Format.Unknown;
+    this.language = stream.tags && stream.tags.language ? stream.tags.language : LanguageCode.No;
+    this.isDefault = !!(stream.disposition && stream.disposition.default);
   }
 
   public async getSource() { return cloneDeep(this.origin); }
@@ -105,7 +60,7 @@ export class EmbeddedGenerator implements IEntityGenerator {
   private async getExtractedSrc() {
     const { videoSrc, streamIndex, extractedSrc } = this.origin.source;
     if (!extractedSrc) {
-      this.origin.source.extractedSrc = await embeddedSrcLoader(videoSrc, streamIndex, this.format);
+      this.origin.source.extractedSrc = await getSubtitlePath(videoSrc, streamIndex, this.format);
       return this.origin.source.extractedSrc;
     }
     return extractedSrc;
@@ -119,7 +74,7 @@ export class EmbeddedGenerator implements IEntityGenerator {
     if (this.language !== LanguageCode.Default) return this.language;
     const { videoSrc, streamIndex, extractedSrc } = this.origin.source;
     if (!extractedSrc) {
-      this.origin.source.extractedSrc = await embeddedSrcLoader(videoSrc, streamIndex, this.format);
+      this.origin.source.extractedSrc = await getSubtitlePath(videoSrc, streamIndex, this.format);
     }
     this.language = await inferLanguageFromPath(this.origin.source.extractedSrc);
     return this.language;

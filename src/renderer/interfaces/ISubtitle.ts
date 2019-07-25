@@ -10,7 +10,7 @@ export enum Type {
 export enum Format {
   AdvancedSubStationAplha = 'ass',
   Sagi = 'sagi',
-  SubRip = 'srt',
+  SubRip = 'subrip',
   SubStationAlpha = 'ssa',
   WebVTT = 'webvtt',
   Unknown = 'unknown',

@@ -147,6 +147,8 @@ export function formatToExtension(format: Format): string {
     case Format.Sagi:
     case Format.WebVTT:
       return 'vtt';
+    case Format.SubRip:
+      return 'srt';
     default:
       return format;
   }
