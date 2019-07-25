@@ -8,14 +8,14 @@
       :forward-type="forwardType"
       :web-info="webInfo"
       :style="{
-        order: isDarwin ? 1 : 3,
+        order: isDarwin ? 1 : 2,
       }"
     />
     <browsing-favicons
       :record-url="recordUrl"
       :update-initial-url="updateInitialUrl"
       :style="{
-        order: 2,
+        order: isDarwin ? 2 : 3,
       }"
     />
     <browsing-input

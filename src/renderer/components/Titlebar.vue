@@ -230,7 +230,8 @@ export default {
   .win-icons {
     display: flex;
     flex-wrap: nowrap;
-    margin: auto;
+    position: absolute;
+    right: 0;
     .title-button {
       width: 45px;
       height: 36px;

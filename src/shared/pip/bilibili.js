@@ -46,11 +46,13 @@ export function bilibili(type, barrageOpen, winSize) {
     return {
       adapter: `${bilibiliBarrageAdapt(type, barrageOpen)}
         document.body.prepend(document.querySelector(".live-player-ctnr"));
-        document.querySelector(".live-room-app").style.display = "none";`,
+        document.querySelector(".live-room-app").style.display = "none";
+        document.body.style.overflow = "hidden";`,
       watcher: '',
       recover: 'document.querySelector(".player-section").prepend(document.querySelector(".live-player-ctnr"));'
         + 'document.querySelector(".bilibili-live-player-video-danmaku").style.opacity = "1";'
-        + 'document.querySelector(".live-room-app").style.display = "";',
+        + 'document.querySelector(".live-room-app").style.display = "";'
+        + 'document.body.style.overflow = "";',
     };
   }
   if (type === 'iframeStreaming') {

@@ -539,10 +539,45 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   height: 16px;
   display: block;
 }
-.back, .forward, .pageRefresh, .backDisabled, .forwardDisabled {
+.backDisabled, .forwardDisabled {
   display: block;
   width: 20px;
   height: 20px;
+}
+.back, .forward, .pageRefresh {
+  width: 20px;
+  height: 20px;
+  .default {
+    display: block;
+  }
+  .hover {
+    display: none;
+  }
+  .active {
+    display: none;
+  }
+  &:hover {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: block;
+    }
+    .active {
+      display: none;
+    }
+  }
+  &:active {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: none;
+    }
+    .active {
+      display: block;
+    }
+  }
 }
 .showMarks, .hideMarks, .closeSearch {
   width: 18px;
@@ -624,6 +659,17 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   }
   .active {
     display: none;
+  }
+  &:hover {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: block;
+    }
+    .active {
+      display: none;
+    }
   }
   &:active {
     .default {

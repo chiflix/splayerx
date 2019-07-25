@@ -30,7 +30,7 @@
         :style="{
           marginBottom: '12px',
           cursor: pipType === 'youtube' ? 'default' : 'pointer',
-          opacity: pipType === 'youtube' ? '0.2' : '1',
+          opacity: danmuIconState,
         }"
         @mouseup.native="handleDanmuDisplay"
         :type="danmuType"
@@ -120,8 +120,20 @@ export default {
     danmuType() {
       return this.barrageOpen ? 'danmu' : 'noDanmu';
     },
+    danmuIconState() {
+      return ['youtube', 'others'].includes(this.pipType) || (this.pipType === 'bilibili' && this.bilibiliType === 'others') ? 0.2 : 1;
+    },
   },
   watch: {
+    currentUrl() {
+      const loadUrl = this.$refs.webView.getURL();
+      this.$refs.browsingHeader.updateWebInfo({
+        hasVideo: false,
+        url: loadUrl,
+        canGoBack: this.$refs.webView.canGoBack(),
+        canGoForward: this.$refs.webView.canGoForward(),
+      });
+    },
     dropFiles(val: string[]) {
       const onlyFolders = val.every((file: fs.PathLike) => fs.statSync(file).isDirectory());
       if (this.currentRouteName === 'playing-view' || onlyFolders
@@ -171,6 +183,7 @@ export default {
           this.pipType = 'iqiyi';
           this.iqiyiAdapter();
         } else {
+          this.pipType = 'others';
           this.othersAdapter();
         }
       }
@@ -211,12 +224,14 @@ export default {
   },
   mounted() {
     (document.querySelector('#app') as HTMLElement).addEventListener('mouseleave', () => {
-      if (this.isPip) {
-        this.timeout = false;
-        if (this.timer) {
-          clearTimeout(this.timer);
+      setTimeout(() => {
+        if (this.isPip) {
+          this.timeout = false;
+          if (this.timer) {
+            clearTimeout(this.timer);
+          }
         }
-      }
+      }, 50);
     });
     window.addEventListener('mousemove', () => {
       if (this.isPip) {
@@ -234,15 +249,6 @@ export default {
         name: 'landing-view',
       });
       windowRectService.uploadWindowBy(false, 'landing-view');
-    });
-    this.$refs.webView.addEventListener('did-start-loading', () => {
-      const loadUrl = this.$refs.webView.getURL();
-      this.$refs.browsingHeader.updateWebInfo({
-        hasVideo: false,
-        url: loadUrl,
-        canGoBack: this.$refs.webView.canGoBack(),
-        canGoForward: this.$refs.webView.canGoForward(),
-      });
     });
     this.$refs.webView.addEventListener('load-commit', () => {
       const loadUrl = this.$refs.webView.getURL();
@@ -419,7 +425,7 @@ export default {
     },
     bilibiliAdapter() {
       this.$refs.webView.executeJavaScript(bilibiliFindType, (r: (HTMLElement | null)[]) => {
-        this.bilibiliType = ['videoStreaming', 'iframeStreaming', 'video'][r.findIndex(i => i)];
+        this.bilibiliType = ['videoStreaming', 'iframeStreaming', 'video'][r.findIndex(i => i)] || 'others';
       }).then(() => {
         this.handleWindowChangeEnterPip();
         this.$refs.webView.executeJavaScript(this.bilibiliPip.adapter);

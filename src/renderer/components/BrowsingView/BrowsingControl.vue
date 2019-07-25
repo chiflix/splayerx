@@ -100,8 +100,5 @@ export default {
     -webkit-app-region: no-drag;
     margin: auto 0 auto 0;
   }
-  .page-refresh-icon:active, .back-icon:active, .forward-icon:active {
-    opacity: 0.5;
-  }
 }
 </style>
