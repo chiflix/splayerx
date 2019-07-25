@@ -33,11 +33,15 @@
           opacity: danmuIconState,
         }"
         @mouseup.native="handleDanmuDisplay"
+        @mouseenter.native="handleMouseenter"
+        @mouseleave.native="handleMouseleave"
         :type="danmuType"
       />
       <Icon
         :style="{ cursor: 'pointer' }"
         @mouseup.native="handleExitPip"
+        @mouseenter.native="handleMouseenter"
+        @mouseleave.native="handleMouseleave"
         type="pipBack"
       />
     </div>
@@ -94,6 +98,7 @@ export default {
       timer: 0,
       calculateVideoNum: 'var iframe = document.querySelector("iframe");if (iframe && iframe.contentDocument) {document.getElementsByTagName("video").length + iframe.contentDocument.getElementsByTagName("video").length} else {document.getElementsByTagName("video").length}',
       getVideoStyle: 'getComputedStyle(document.querySelector("video") || document.querySelector("iframe").contentDocument.querySelector("video"))',
+      pipBtnsKeepShow: false,
     };
   },
   computed: {
@@ -234,7 +239,7 @@ export default {
       }, 50);
     });
     window.addEventListener('mousemove', () => {
-      if (this.isPip) {
+      if (this.isPip && !this.pipBtnsKeepShow) {
         this.timeout = true;
         if (this.timer) {
           clearTimeout(this.timer);
@@ -345,6 +350,16 @@ export default {
       updateRecordUrl: browsingActions.UPDATE_RECORD_URL,
       updateBarrageOpen: browsingActions.UPDATE_BARRAGE_OPEN,
     }),
+    handleMouseenter() {
+      this.pipBtnsKeepShow = true;
+      this.timeout = true;
+      if (this.timer) {
+        clearTimeout(this.timer);
+      }
+    },
+    handleMouseleave() {
+      this.pipBtnsKeepShow = false;
+    },
     handleWindowChangeEnterPip() {
       this.$refs.webView.executeJavaScript(this.getVideoStyle, (result: CSSStyleDeclaration) => {
         const videoAspectRatio = parseFloat(result.width as string)

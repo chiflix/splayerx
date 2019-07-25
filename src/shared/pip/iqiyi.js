@@ -9,6 +9,7 @@ const iqiyi = (barrageState, winSize) => ({
     ${iqiyiBarrageAdapt(barrageState)}
     var iqpPlayer = document.querySelector(".iqp-player");
     document.scrollingElement.scrollTop = 0;
+    iqpPlayer.addEventListener('mouseleave', () => { document.querySelector(".iqp-bottom").parentElement.classList.add('iqp-bottom-hide'); });
     iqpPlayer.style.position = "fixed";
     iqpPlayer.style.left = "0";
     iqpPlayer.style.top = "0";
