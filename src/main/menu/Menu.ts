@@ -109,11 +109,11 @@ export default class Menubar {
   }
 
   public updateMenuItemChecked(id: string, checked: boolean) {
-    this.menubar.getMenuItemById(id).checked = checked;
+    if (this.menubar.getMenuItemById(id)) this.menubar.getMenuItemById(id).checked = checked;
   }
 
   public updateMenuItemEnabled(id: string, enabled: boolean) {
-    this.menubar.getMenuItemById(id).enabled = enabled;
+    if (this.menubar.getMenuItemById(id)) this.menubar.getMenuItemById(id).enabled = enabled;
   }
 
   public enableSubmenuItem(id: string, enabled: boolean) {
@@ -224,12 +224,12 @@ export default class Menubar {
 
     // If we don't have a menu yet, set it to null to avoid the electron menu.
     // This should only happen on the first launch ever
-    if (!oldMenu) {
-      Menu.setApplicationMenu(IsMacintosh ? new Menu() : null);
+    if (!oldMenu && IsMacintosh) {
+      Menu.setApplicationMenu(new Menu());
       return;
     }
     // @ts-ignore
-    oldMenu.clear();
+    if (oldMenu) oldMenu.clear();
 
     this.menubar = IsMacintosh ? this.createMacMenu() : this.createWinMenu();
 
@@ -345,7 +345,13 @@ export default class Menubar {
       }
     });
 
-    // menubar.append(fileMenuItem);
+    menubar.append(separator());
+
+    const preference = this.createMenuItem('msg.splayerx.preferences', () => {
+      app.emit('add-preference');
+    }, 'Ctrl+,', true);
+
+    menubar.append(preference);
 
     // PlayBack
     const playbackMenuItem = this.createPlaybackMenu();
@@ -374,7 +380,7 @@ export default class Menubar {
 
     const quitMenuItem = this.createMenuItem('msg.splayerx.quit', () => {
       app.quit();
-    }, 'Ctrl+q');
+    }, 'Ctrl+q', true);
 
     menubar.append(quitMenuItem);
 

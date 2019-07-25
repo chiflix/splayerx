@@ -362,7 +362,7 @@ new Vue({
     });
 
     window.addEventListener('mousedown', (e) => {
-      if (e.button === 2) {
+      if (e.button === 2 && process.platform === 'win32') {
         this.menuService.popupWinMenu();
       }
     });

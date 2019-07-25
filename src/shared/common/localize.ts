@@ -39,8 +39,16 @@ export default class Locale {
       jsonString = JSON.stringify({});
     }
     const data = JSON.parse(jsonString);
-    if (data.displayLanguage) this._displayLanguage = data.displayLanguage;
-    else this._displayLanguage = this.getSystemLocale();
+    if (data.displayLanguage) {
+      if (data.displayLanguage === 'zh-TW' || data.displayLanguage === 'zh-HK' || data.displayLanguage === 'zh-Hant') {
+        data.displayLanguage = 'zh-Hant';
+      } else if (data.displayLanguage.startsWith('zh')) {
+        data.displayLanguage = 'zh-Hans';
+      }
+      this._displayLanguage = data.displayLanguage;
+    } else {
+      this._displayLanguage = this.getSystemLocale();
+    }
   }
 
   private getSystemLocale(): string {
