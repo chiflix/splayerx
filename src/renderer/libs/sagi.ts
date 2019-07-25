@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs';
-import { credentials, Metadata } from 'grpc';
+import grpc, { credentials, Metadata } from 'grpc';
 import Vue from 'vue';
 import { HealthCheckRequest, HealthCheckResponse } from 'sagi-api/health/v1/health_pb';
 import { HealthClient } from 'sagi-api/health/v1/health_grpc_pb';
@@ -24,7 +24,7 @@ export class Sagi {
     return process.env.SAGI_API as string;
   }
 
-  private creds: unknown;
+  private creds: grpc.ChannelCredentials;
 
   public constructor() {
     const sslCreds = credentials.createSsl(
