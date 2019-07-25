@@ -207,11 +207,13 @@
           "items": [
             {
               "id": "subtitle.increasePrimarySubtitleDelay",
-              "label": "msg.subtitle.increasePrimarySubtitleDelay"
+              "label": "msg.subtitle.increasePrimarySubtitleDelay",
+              "accelerator": "CmdOrCtrl+'"
             },
             {
               "id": "subtitle.decreasePrimarySubtitleDelay",
-              "label": "msg.subtitle.decreasePrimarySubtitleDelay"
+              "label": "msg.subtitle.decreasePrimarySubtitleDelay",
+              "accelerator": "CmdOrCtrl+;"
             },
             {
               "id": "menubar.separator"
