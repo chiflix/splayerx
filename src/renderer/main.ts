@@ -485,6 +485,10 @@ new Vue({
       if (!data.displayLanguage) {
         this.$store.dispatch('displayLanguage', getSystemLocale());
       }
+      if (!data.protectPrivacy) {
+        this.$store.dispatch('protectPrivacy');
+        this.$store.dispatch('hideNSFW', true);
+      }
     });
     asyncStorage.get('subtitle-style').then((data) => {
       if (data.chosenStyle) {

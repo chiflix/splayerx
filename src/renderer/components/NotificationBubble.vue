@@ -24,8 +24,9 @@
       class="mas-privacy-bubble"
     />
     <NSFW
+      v-if="showNSFWBubble"
       :use-blur="useBlur"
-      @close-privacy-bubble="closePrivacyBubble"
+      @close-nsfw-bubble="closeNSFWBubble"
       class="mas-privacy-bubble"
     />
     <transition-group
@@ -94,6 +95,7 @@ export default {
       showNextVideo: false,
       readyToShow: false, // show after video element is loaded
       showPrivacyBubble: false,
+      showNSFWBubble: true,
       useBlur: false,
     };
   },
@@ -141,6 +143,9 @@ export default {
   methods: {
     closePrivacyBubble() {
       this.showPrivacyBubble = false;
+    },
+    closeNSFWBubble() {
+      this.showNSFWBubble = false;
     },
     manualClose() {
       this.manualClosed = true;

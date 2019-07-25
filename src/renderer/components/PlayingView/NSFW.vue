@@ -22,15 +22,13 @@
                 }"
                 @mouseover.stop="agreeHovered = true"
                 @mouseout.stop="agreeHovered = false"
-                @mouseup.stop="handleAgreeMouseup"
+                @mouseup.stop="handleMouseup"
                 class="agree-button"
               >
-                <div class="button-info">
-                  {{ $t('protectBubble.agree') }}
-                </div>
+                {{ $t('protectBubble.agree') }}
               </div>
               <div
-                @mouseup.stop="handleDisagreeMouseup"
+                @mouseup.stop="handleMouseup"
                 class="disagree-button"
               >
                 {{ $t('protectBubble.setting') }}
@@ -66,17 +64,8 @@ export default {
     },
   },
   methods: {
-    handleAgreeMouseup() {
-      this.$store.dispatch('agreeOnPrivacyPolicy').then(() => {
-        this.$electron.ipcRenderer.send('main-to-preference', this.preferenceData);
-      });
-      this.$emit('close-privacy-bubble');
-    },
-    handleDisagreeMouseup() {
-      this.$store.dispatch('disagreeOnPrivacyPolicy').then(() => {
-        this.$electron.ipcRenderer.send('main-to-preference', this.preferenceData);
-      });
-      this.$emit('close-privacy-bubble');
+    handleMouseup() {
+      this.$emit('close-nsfw-bubble');
     },
   },
 };
@@ -143,10 +132,10 @@ export default {
     @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
     screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
       min-height: 54px;
-      margin-top: 15px;
+      margin-top: 8px;
       margin-left: 18px;
-      margin-right: 12px;
-      margin-bottom: 15px;
+      margin-right: 15px;
+      margin-bottom: 8px;
     }
     @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
     screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
@@ -201,8 +190,6 @@ export default {
       flex-direction: column;
 
       .disagree-button {
-        display: flex;
-        justify-content: space-between;
         align-items: center;
         transition: color 80ms linear;
         color: rgba(255,255,255,0.18);
@@ -211,24 +198,28 @@ export default {
         @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
         screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
           height: 24px;
+          line-height: 24px;
           font-size: 10px;
           letter-spacing: 0.2px;
-          padding-left: 12px;
-          line-height: 10px;
+          padding-left: 6px;
+          padding-right: 6px;
         }
         @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
         screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
           height: 28px;
+          line-height: 28px;
           font-size: 12px;
-          padding-left: 14px;
+          padding-left: 7px;
+          padding-right: 7px;
           letter-spacing: 0.24px;
-          line-height: 12px;
         }
         @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
         screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
           height: 39px;
+          line-height: 39px;
           font-size: 17px;
-          padding-left: 20px;
+          padding-left: 10px;
+          padding-right: 10px;
           letter-spacing: 0.34px;
           line-height: 17px;
         }
@@ -247,13 +238,17 @@ export default {
       background-color: rgba(255,255,255,0.2);
     }
     .agree-button {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      transition: background-color 100ms linear;
+      transition: background-color 100ms linear, background-image 100ms linear;
+      background-color: rgba(255,255,255,0);
+      text-align: center;
+      vertical-align: middle;
+      color: rgba(255,255,255,0.5);
+      font-weight: 900;
+      letter-spacing: 0.2px;
       @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
       screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
         height: 24px;
+        line-height: 24px;
         border-radius: 11px;
         background-image: radial-gradient(
           60% 134%,
@@ -262,10 +257,13 @@ export default {
         );
 
         backdrop-filter: blur(3px);
+        font-size: 10px;
+        letter-spacing: 0.2px;
       }
       @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
       screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
         height: 28px;
+        line-height: 28px;
         border-radius: 13.2px;
         background-image: radial-gradient(
           60% 134%,
@@ -274,10 +272,14 @@ export default {
         );
 
         backdrop-filter: blur(3px);
+        font-size: 12px;
+        letter-spacing: 0.24px;
+        text-align: center;
       }
       @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
       screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
         height: 39px;
+        line-height: 39px;
         border-radius: 18.5px;
         background-image: radial-gradient(
           60% 134%,
@@ -286,44 +288,13 @@ export default {
         );
 
         backdrop-filter: blur(5px);
+        font-size: 17px;
+        letter-spacing: 0.34px;
+        text-align: center;
       }
       &:active {
         background-image: none;
         background-color: rgba(0,0,0,0.2);
-      }
-    }
-    .button-info {
-      color: rgba(255,255,255,0.5);
-      font-weight: 900;
-      letter-spacing: 0.2px;
-      @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
-      screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
-        padding-left: 12px;
-        padding-right: 12px;
-
-        font-size: 10px;
-        letter-spacing: 0.2px;
-        line-height: 10px;
-      }
-      @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
-      screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
-        padding-left: 14px;
-        padding-right: 14px;
-
-        font-size: 12px;
-        letter-spacing: 0.24px;
-        text-align: center;
-        line-height: 12px;
-      }
-      @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
-      screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
-        padding-left: 20px;
-        padding-right: 20px;
-
-        font-size: 17px;
-        letter-spacing: 0.34px;
-        text-align: center;
-        line-height: 17px;
       }
     }
   }
