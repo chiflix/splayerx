@@ -2,15 +2,23 @@ import { createHash } from 'crypto';
 // @ts-ignore
 import romanize from 'romanize';
 import { times, padStart, sortBy } from 'lodash';
-import { sep, basename } from 'path';
+import { sep, basename, join } from 'path';
+import { ensureDir } from 'fs-extra';
+import { remote } from 'electron';
 // @ts-ignore
 import urlParseLax from 'url-parse-lax';
 // @ts-ignore
 import { promises as fsPromises } from 'fs';
-import { SubtitleControlListItem, Type } from '@/interfaces/ISubtitle';
-import { codeToLanguageName } from './language';
 // @ts-ignore
 import nzh from 'nzh';
+import { SubtitleControlListItem, Type } from '@/interfaces/ISubtitle';
+import { codeToLanguageName, LanguageCode } from './language';
+import { IEmbeddedOrigin } from '@/services/subtitle';
+import {
+  ELECTRON_CACHE_DIRNAME,
+  DEFAULT_DIRNAME,
+  VIDEO_DIRNAME, SUBTITLE_DIRNAME,
+} from '@/constants';
 
 /** 计算文本宽度
  * @description
@@ -21,7 +29,13 @@ import nzh from 'nzh';
  * @param {string} zoom
  * @returns {number}
  */
-export function calculateTextSize(fontSize: string, fontFamily: string, lineHeight: string, zoom: string, text: string): { width: number, height: number } {
+export function calculateTextSize(
+  fontSize: string,
+  fontFamily: string,
+  lineHeight: string,
+  zoom: string,
+  text: string,
+): { width: number, height: number } {
   const span: HTMLElement = document.createElement('span');
   const result = { width: span.offsetWidth, height: span.offsetHeight };
   span.style.visibility = 'hidden';
@@ -82,14 +96,20 @@ const SHORT_CURT_TYPE = 'image/jpeg';
  * @param {number} videoHeight 视频高
  * @returns {ShortCut} 最后一帧图，有常规尺寸和小尺寸
  */
-export function generateShortCutImageBy(video: HTMLVideoElement, canvas: HTMLCanvasElement, videoWidth: number, videoHeight: number): ShortCut {
-  let result: ShortCut = {
+export function generateShortCutImageBy(
+  video: HTMLVideoElement,
+  canvas: HTMLCanvasElement,
+  videoWidth: number,
+  videoHeight: number,
+): ShortCut {
+  const result: ShortCut = {
     shortCut: '',
     smallShortCut: '',
   };
   const canvasCTX = canvas.getContext('2d');
   if (canvasCTX) {
-    [canvas.width, canvas.height] = [(videoWidth / videoHeight) * MAX_SHORT_CUT_SIZE, MAX_SHORT_CUT_SIZE];
+    [canvas.width, canvas.height] = [(videoWidth / videoHeight)
+      * MAX_SHORT_CUT_SIZE, MAX_SHORT_CUT_SIZE];
     canvasCTX.drawImage(
       video, 0, 0, videoWidth, videoHeight,
       0, 0, (videoWidth / videoHeight) * MAX_SHORT_CUT_SIZE, MAX_SHORT_CUT_SIZE,
@@ -99,7 +119,8 @@ export function generateShortCutImageBy(video: HTMLVideoElement, canvas: HTMLCan
     // 用于测试截图的代码，以后可能还会用到
     // const img = imagePath.replace(/^data:image\/\w+;base64,/, '');
     // fs.writeFileSync('/Users/jinnaide/Desktop/screenshot.png', img, 'base64');
-    [canvas.width, canvas.height] = [(videoWidth / videoHeight) * MIN_SHORT_CUT_SIZE, MIN_SHORT_CUT_SIZE];
+    [canvas.width, canvas.height] = [(videoWidth / videoHeight)
+      * MIN_SHORT_CUT_SIZE, MIN_SHORT_CUT_SIZE];
     canvasCTX.drawImage(
       video, 0, 0, videoWidth, videoHeight,
       0, 0, (videoWidth / videoHeight) * MIN_SHORT_CUT_SIZE, MIN_SHORT_CUT_SIZE,
@@ -127,7 +148,7 @@ export async function mediaQuickHash(filePath: string) {
     ];
     const res = await Promise.all(times(4).map(async (i) => {
       const buf = Buffer.alloc(4096);
-      const {bytesRead} = await fileHandler.read(buf, 0, 4096, position[i]);
+      const { bytesRead } = await fileHandler.read(buf, 0, 4096, position[i]);
       return md5Hex(buf.slice(0, bytesRead));
     }));
     fileHandler.close();
@@ -137,14 +158,14 @@ export async function mediaQuickHash(filePath: string) {
 }
 
 /** Silently calculate hash of file, returns null if there was an error */
-mediaQuickHash.try = async function(filePath: string) {
+mediaQuickHash.try = async (filePath: string) => {
   try {
     return await mediaQuickHash(filePath);
   } catch (ex) {
     console.error(ex);
     return null;
   }
-}
+};
 
 export function timecodeFromSeconds(s: number) {
   const dt = new Date(Math.abs(s) * 1000);
@@ -180,19 +201,27 @@ export function generateHints(videoSrc: string): string {
   return result;
 }
 
-export function calculatedName(item: SubtitleControlListItem, list: SubtitleControlListItem[]): string {
+export function calculatedName(
+  item: SubtitleControlListItem,
+  list: SubtitleControlListItem[],
+): string {
   let name = '';
   if (item.type === Type.Local) {
-    name = basename(item.source);
+    name = basename(item.source as string);
   } else if (item.type === Type.Embedded) {
     let embeddedList = list
       .filter((s: SubtitleControlListItem) => s.type === Type.Embedded);
-    embeddedList = sortBy(embeddedList, (s: SubtitleControlListItem) => s.source.streamIndex);
+    embeddedList = sortBy(
+      embeddedList,
+      (s: SubtitleControlListItem) => (s as IEmbeddedOrigin).source.streamIndex,
+    );
     const sort = embeddedList.findIndex((s: SubtitleControlListItem) => s.id === item.id) + 1;
-    name = `${romanize(sort)} - ${codeToLanguageName(item.language)}`;
+    name = item.language === LanguageCode.No || item.language === LanguageCode.Default
+      ? `${romanize(sort)}` : `${romanize(sort)} - ${codeToLanguageName(item.language)}`;
   } else if (item.type === Type.Online) {
     const sort = list
-      .filter((s: SubtitleControlListItem) => s.type === Type.Online && s.language === item.language)
+      .filter((s: SubtitleControlListItem) => s.type === Type.Online
+        && s.language === item.language)
       .findIndex((s: SubtitleControlListItem) => s.id === item.id) + 1;
     name = `${codeToLanguageName(item.language)} ${romanize(sort)}`;
   }
@@ -249,4 +278,30 @@ export function parseNameFromPath(path: string) {
     });
   });
   return result;
+}
+
+/** get video cache dir */
+export function getVideoDir(videoHash?: string) {
+  const videoDir = videoHash
+    ? join(
+      remote.app.getPath(ELECTRON_CACHE_DIRNAME),
+      DEFAULT_DIRNAME,
+      VIDEO_DIRNAME,
+      videoHash,
+    ) : join(
+      remote.app.getPath(ELECTRON_CACHE_DIRNAME),
+      DEFAULT_DIRNAME,
+      VIDEO_DIRNAME,
+    );
+  return ensureDir(videoDir).then(() => videoDir);
+}
+
+/** get subtitle cache dir */
+export function getSubtitleDir() {
+  const subtitleDir = join(
+    remote.app.getPath(ELECTRON_CACHE_DIRNAME),
+    DEFAULT_DIRNAME,
+    SUBTITLE_DIRNAME,
+  );
+  return ensureDir(subtitleDir).then(() => subtitleDir);
 }

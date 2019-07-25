@@ -10,55 +10,68 @@ export enum Type {
 export enum Format {
   AdvancedSubStationAplha = 'ass',
   Sagi = 'sagi',
-  SubRip = 'srt',
+  SubRip = 'subrip',
   SubStationAlpha = 'ssa',
   WebVTT = 'webvtt',
   Unknown = 'unknown',
 }
 
-export interface Origin {
+export interface IOrigin {
   type: Type;
-  source: any;
+  source: unknown;
 }
 export type Entity = {
-  source: Origin;
+  source: IOrigin;
   type: Type;
   format: Format;
   language: LanguageCode;
-  payload: any;
+  payload: unknown;
   hash: string;
-  metadata: Metadata;
+  metadata: IMetadata;
   delay: number;
 }
+export const defaultEntity: Entity = {
+  source: {
+    type: Type.Local,
+    source: '',
+  },
+  type: Type.Local,
+  format: Format.Unknown,
+  language: LanguageCode.Default,
+  payload: '',
+  hash: '',
+  metadata: {},
+  delay: 0,
+};
 export type SubtitleControlListItem = {
   id: string;
   hash: string;
   type: Type;
   language: LanguageCode;
-  source: any;
+  source: unknown;
   name?: string;
   delay: number;
 };
 
-export interface EntityGenerator {
+export interface IEntityGenerator {
   /** get real source to fetch subtitle from */
-  getSource(): Promise<Origin>
+  getSource(): Promise<IOrigin>
   /** get fake source for display use */
-  getStoredSource?: any
+  getStoredSource?: () => Promise<IOrigin>
   getDelay?: () => Promise<number>
   getType(): Promise<Type>
   getFormat(): Promise<Format>
   getLanguage(): Promise<LanguageCode>
-  getPayload(): Promise<any>
+  getPayload(): Promise<unknown>
   getHash(): Promise<string>
 }
 
-export interface Metadata {
+export interface IMetadata {
   PlayResX?: string;
   PlayResY?: string;
 }
 
-export interface Tags {
+export interface ITags {
   b?: number;
   i?: number;
   u?: number;
@@ -75,7 +88,7 @@ export interface Tags {
   // size: string;
   // align: string';
 }
-export type TagsPartial = Partial<Tags>;
+export type TagsPartial = Partial<ITags>;
 
 export type Cue = {
   category?: string,
@@ -83,30 +96,30 @@ export type Cue = {
   end: number,
   text: string,
   format: string,
-  tags: Tags,
+  tags: ITags,
 }
-export interface Dialogue {
+export interface IDialogue {
   start: number;
   end: number;
   text?: string;
-  tags?: Tags;
+  tags?: ITags;
   fragments?: {
     text: string;
-    tags: Tags;
+    tags: ITags;
   }[];
 }
-export interface VideoSegment {
+export interface IVideoSegment {
   start: number;
   end: number;
   played: boolean;
 }
 
-export interface Parser {
+export interface IParser {
   parse(): void;
-  readonly payload: any;
-  getMetadata(): Promise<Metadata>;
+  readonly payload: unknown;
+  getMetadata(): Promise<IMetadata>;
   getDialogues(time?: number): Promise<Cue[]>;
-  getVideoSegments(duration: number): Promise<VideoSegment[]>;
+  getVideoSegments(duration: number): Promise<IVideoSegment[]>;
   updateVideoSegments(lastTime: number, currentTime: number): number;
 }
 

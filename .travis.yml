@@ -44,7 +44,7 @@ deploy:
     tags: true
 after_success:
 - codecov
-- bash scripts/trigermasdev.sh
+- bash scripts/trigger-mas-dev.sh
 addons:
   apt:
     packages:

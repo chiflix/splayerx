@@ -261,7 +261,8 @@ export default {
         });
       });
     });
-    this.$refs.webView.addEventListener('ipc-message', (evt: any) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    this.$refs.webView.addEventListener('ipc-message', (evt: any) => { // https://github.com/electron/typescript-definitions/issues/27 fixed in 6.0.0
       const { channel, args }: { channel: string, args:
       { dragover?: boolean, files?: string[] }[] } = evt;
       switch (channel) {
@@ -297,7 +298,8 @@ export default {
       this.$refs.webView.focus();
       this.$refs.webView.openDevTools();
     });
-    this.$refs.webView.addEventListener('new-window', (e: any) => { // new tabs
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    this.$refs.webView.addEventListener('new-window', (e: any) => { // https://github.com/electron/typescript-definitions/issues/27 fixed in 6.0.0
       if (!e.url || e.url === 'about:blank') return;
       if (this.isPip) {
         this.isPip = false;

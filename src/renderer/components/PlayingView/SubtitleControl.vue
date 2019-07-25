@@ -109,6 +109,7 @@
 <script lang="ts">
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { AnimationItem } from 'lottie-web';
+import { flatMap, sortBy } from 'lodash';
 import { Input as InputActions, Subtitle as subtitleActions, SubtitleManager as smActions } from '@/store/actionTypes';
 import { SubtitleControlListItem, Type } from '@/interfaces/ISubtitle';
 import lottie from '@/components/lottie.vue';
@@ -118,6 +119,7 @@ import SubtitleList from '@/components/PlayingView/SubtitleList.vue';
 import Icon from '../BaseIconContainer.vue';
 import { addBubble } from '@/helpers/notificationControl';
 import { SUBTITLE_OFFLINE } from '@/helpers/notificationcodes';
+import { IEmbeddedOrigin } from '../../services/subtitle';
 
 export default {
   name: 'SubtitleControl',
@@ -210,10 +212,33 @@ export default {
     enabledSecondarySub(val: boolean) {
       if (!val) this.updateSubtitleType(true);
     },
-    computedAvailableItems(val: SubtitleControlListItem[]) {
-      this.updateNoSubtitle(!val.length);
-    },
     list(val: SubtitleControlListItem[]) {
+      val = flatMap(val
+        .reduce((prev, currentSub) => {
+          switch (currentSub.type) {
+            default:
+              break;
+            case Type.Local:
+              prev[0].push(currentSub);
+              break;
+            case Type.Embedded:
+              prev[1].push(currentSub);
+              break;
+            case Type.Online:
+              prev[2].push(currentSub);
+              break;
+          }
+          return prev;
+        }, [[], [], []] as SubtitleControlListItem[][])
+        .map((subList, index) => {
+          switch (index) {
+            default:
+              return subList;
+            case 1: // this is embedded subtitle list
+              // @ts-ignore
+              return sortBy(subList, ({ source }) => source.streamIndex);
+          }
+        }));
       this.computedAvailableItems = val.map((sub: SubtitleControlListItem) => ({
         ...sub,
         name: this.getSubName(sub, val),
@@ -348,7 +373,6 @@ export default {
       changeSecondarySubtitle: smActions.changeSecondarySubtitle,
       refreshSubtitles: smActions.refreshSubtitles,
       deleteCurrentSubtitle: smActions.deleteSubtitlesByUuid,
-      updateNoSubtitle: subtitleActions.UPDATE_NO_SUBTITLE,
       updateSubtitleType: subtitleActions.UPDATE_SUBTITLE_TYPE,
     }),
     offCurrentSubtitle() {
