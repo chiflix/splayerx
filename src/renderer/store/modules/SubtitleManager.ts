@@ -123,18 +123,20 @@ const mutations = {
     if (subtitle) subtitle.delay = delayInSeconds;
   },
 };
-type AddDatabaseSubtitlesOptions = {
-  storedList: IStoredSubtitleItem[];
+interface IAddSubtitlesOptions<SourceType> {
+  mediaHash: string,
+  source: SourceType[];
+}
+interface IAddDatabaseSubtitlesOptions extends IAddSubtitlesOptions<IStoredSubtitleItem> {
   selected?: {
     primary?: SelectedSubtitle;
     secondary?: SelectedSubtitle;
   };
-  mediaHash: string,
-};
-type AddSubtitleOptions = {
+}
+interface IAddSubtitleOptions {
   generator: IEntityGenerator;
-  mediaHash: string,
-};
+  mediaHash: string;
+}
 function privacyConfirm(): Promise<boolean> {
   const { $bus } = Vue.prototype;
   $bus.$emit('privacy-confirm');
@@ -204,6 +206,7 @@ const actions = {
       originSrc,
       privacyAgreement,
     } = getters;
+    const { mediaHash } = state;
     const list = getters.list as SubtitleControlListItem[];
     const preference = await retrieveSubtitlePreference(state.mediaHash);
     const hasStoredSubtitles = !!preference && !!preference.list.length;
@@ -218,7 +221,7 @@ const actions = {
     if (hasStoredSubtitles && !languageHasChanged && preference) {
       return Promise.race([
         dispatch(a.addDatabaseSubtitles, {
-          storedList: preference.list,
+          source: preference.list,
           selected: preference.selected,
           mediaHash: state.mediaHash,
         }),
@@ -243,20 +246,24 @@ const actions = {
     let onlinePromise = Promise.resolve();
     /** whether or not to refresh online subtitles */
     const onlineNeeded = (languageHasChanged || !hasStoredSubtitles) && ['mkv', 'avi', 'ts', 'mp4'].includes(extname(originSrc).slice(1)) && privacyAgreement;
-    if (onlineNeeded) onlinePromise = dispatch(a.refreshOnlineSubtitles);
+    if (onlineNeeded) {
+      onlinePromise = dispatch(a.refreshOnlineSubtitles, { mediaHash, bubble: false });
+    }
     /** whether or not to refresh embedded subtitles */
     const embeddedNeeded = !list
       .some(({ type }: SubtitleControlListItem) => type === Type.Embedded);
     if (embeddedNeeded) {
       retrieveEmbeddedList(originSrc)
-        .then(streams => dispatch(a.addEmbeddedSubtitles, streams))
-        .then(() => addSubtitleItemsToList(getters.list, state.mediaHash));
+        .then(streams => dispatch(a.addEmbeddedSubtitles, { mediaHash, source: streams }));
     }
 
     return Promise.race([
       Promise.all([
         onlinePromise,
-        dispatch(a.addLocalSubtitles, await searchForLocalList(originSrc)),
+        dispatch(a.addLocalSubtitles, {
+          mediaHash,
+          source: await searchForLocalList(originSrc),
+        }),
       ]),
       new Promise((resolve, reject) => setTimeout(() => reject(new Error('timeout')), 10000)),
     ])
@@ -264,7 +271,6 @@ const actions = {
       .finally(() => {
         dispatch(a.stopAISelection);
         storeSubtitleLanguage([primaryLanguage, secondaryLanguage], state.mediaHash);
-        addSubtitleItemsToList(getters.list, state.mediaHash);
         dispatch(a.checkLocalSubtitles);
         dispatch(a.checkSubtitleList);
         commit(m.setIsRefreshing, false);
@@ -279,6 +285,7 @@ const actions = {
       primaryLanguage, secondaryLanguage,
       privacyAgreement,
     } = getters;
+    const { mediaHash } = state;
 
     primarySelectionComplete = false;
     secondarySelectionComplete = false;
@@ -286,7 +293,7 @@ const actions = {
     dispatch(a.startAISelection);
     const onlineNeeded = privacyAgreement ? true : await privacyConfirm();
     const onlinePromise = onlineNeeded
-      ? dispatch(a.refreshOnlineSubtitles, true)
+      ? dispatch(a.refreshOnlineSubtitles, { mediaHash, bubble: true })
       : Promise.resolve();
     return Promise.race([
       Promise.all([
@@ -298,15 +305,17 @@ const actions = {
       .catch(console.error)
       .finally(() => {
         dispatch(a.stopAISelection);
-        storeSubtitleLanguage([primaryLanguage, secondaryLanguage], state.mediaHash);
-        addSubtitleItemsToList(getters.list, state.mediaHash);
+        storeSubtitleLanguage([primaryLanguage, secondaryLanguage], mediaHash);
         dispatch(a.checkLocalSubtitles);
         dispatch(a.checkSubtitleList);
         commit(m.setIsRefreshing, false);
         dispatch(legacyActions.UPDATE_SUBTITLE_TYPE, true);
       });
   },
-  async [a.refreshOnlineSubtitles]({ getters, dispatch }: any, bubble?: boolean) {
+  async [a.refreshOnlineSubtitles](
+    { getters, dispatch }: any,
+    { mediaHash, bubble }: { mediaHash: string, bubble: boolean },
+  ) {
     const {
       originSrc,
       primaryLanguage, secondaryLanguage,
@@ -348,7 +357,7 @@ const actions = {
           .find(({ id }) => id === transcriptIdentity));
       newSubtitlesToAdd.push(...notExistedNewSubs);
       return { delete: oldSubtitlesToDel, add: newSubtitlesToAdd };
-    }).then(result => dispatch(a.addOnlineSubtitles, result.add)
+    }).then(result => dispatch(a.addOnlineSubtitles, { mediaHash, source: result.add })
       .then(() => dispatch(a.deleteSubtitlesByUuid, result.delete)));
   },
   [a.checkLocalSubtitles]({ dispatch, getters }: any) {
@@ -360,13 +369,16 @@ const actions = {
         .then(() => addBubble(LOCAL_SUBTITLE_REMOVED));
     }
   },
-  async [a.addLocalSubtitles]({ dispatch, state }: any, paths: string[]) {
+  async [a.addLocalSubtitles](
+    { dispatch }: any,
+    { mediaHash, source }: IAddSubtitlesOptions<string>,
+  ) {
     return Promise.all(
-      paths.map((path: string) => dispatch(a.addSubtitle, {
+      source.map((path: string) => dispatch(a.addSubtitle, {
         generator: new LocalGenerator(path),
-        mediaHash: state.mediaHash,
+        mediaHash,
       })),
-    );
+    ).then(subtitles => addSubtitleItemsToList(subtitles, mediaHash));
   },
   async [a.addLocalSubtitlesWithSelect]({ state, dispatch, getters }: any, paths: string[]) {
     let selectedHash = paths[0];
@@ -399,36 +411,42 @@ const actions = {
     }
     return {};
   },
-  async [a.addEmbeddedSubtitles]({ dispatch, state }: any, streams: [string, ISubtitleStream][]) {
-    return Promise.all(
-      streams.map(stream => dispatch(a.addSubtitle, {
-        generator: new EmbeddedGenerator(stream[0], stream[1]),
-        mediaHash: state.mediaHash,
-      })),
-    );
-  },
-  async [a.addOnlineSubtitles]({ dispatch, state }: any, transcriptInfoList: TranscriptInfo[]) {
-    return Promise.all(
-      transcriptInfoList.map((info: TranscriptInfo) => dispatch(a.addSubtitle, {
-        generator: new OnlineGenerator(info),
-        mediaHash: state.mediaHash,
-      })),
-    );
-  },
-  async [a.addDatabaseSubtitles](
-    { getters, dispatch, state }: any,
-    options: AddDatabaseSubtitlesOptions,
+  async [a.addEmbeddedSubtitles](
+    { dispatch }: any,
+    { mediaHash, source }: IAddSubtitlesOptions<[string, ISubtitleStream]>,
   ) {
     return Promise.all(
-      options.storedList.map(async stored => dispatch(a.addSubtitle, {
+      source.map(stream => dispatch(a.addSubtitle, {
+        generator: new EmbeddedGenerator(stream[0], stream[1]),
+        mediaHash,
+      })),
+    ).then(subtitles => addSubtitleItemsToList(subtitles, mediaHash));
+  },
+  async [a.addOnlineSubtitles](
+    { dispatch }: any,
+    { mediaHash, source }: IAddSubtitlesOptions<TranscriptInfo>,
+  ) {
+    return Promise.all(
+      source.map((info: TranscriptInfo) => dispatch(a.addSubtitle, {
+        generator: new OnlineGenerator(info),
+        mediaHash,
+      })),
+    ).then(subtitles => addSubtitleItemsToList(subtitles, mediaHash));
+  },
+  async [a.addDatabaseSubtitles](
+    { getters, dispatch }: any,
+    { source, mediaHash, selected }: IAddDatabaseSubtitlesOptions,
+  ) {
+    return Promise.all(
+      source.map(async stored => dispatch(a.addSubtitle, {
         generator: await DatabaseGenerator.from(stored),
-        mediaHash: state.mediaHash,
+        mediaHash,
       })),
     )
       .then(() => {
         const { list } = getters as { list: SubtitleControlListItem[] };
-        const primary: SelectedSubtitle = get(options, 'selected.primary');
-        const secondary: SelectedSubtitle = get(options, 'selected.secondary');
+        const primary = get(selected, 'primary');
+        const secondary = get(selected, 'secondary');
         let primaryId = '';
         let secondaryId = '';
         if (primary) {
@@ -456,7 +474,9 @@ const actions = {
         });
       });
   },
-  async [a.addSubtitle]({ commit, dispatch, getters }: any, options: AddSubtitleOptions) {
+  async [a.addSubtitle]({
+    state, commit, dispatch, getters,
+  }: any, options: IAddSubtitleOptions) {
     if (options.mediaHash === state.mediaHash) {
       const subtitleGenerator = options.generator;
       try {
