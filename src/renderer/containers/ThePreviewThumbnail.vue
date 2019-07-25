@@ -43,6 +43,7 @@ import { thumbnailService } from '@/services/media/ThumbnailService';
 import ThumbnailDisplay from '@/components/PlayingView/ThumbnailDisplay.vue';
 // @ts-ignore
 import Icon from '@/components/BaseIconContainer.vue';
+import { getThumbnailPath } from '../plugins/mediaTasks';
 
 export default {
   components: {
@@ -112,19 +113,12 @@ export default {
     this.$bus.$on('generate-thumbnails', async (num: number) => {
       this.thumbnailCount = num;
       this.backgroundSize = `1000% ${Math.ceil(this.thumbnailCount / 10) * 100}%`;
-      try {
-        const result = await thumbnailService.getThumbnailImage(this.mediaHash);
-        if (!result) {
-          this.imgExisted = false;
-          this.imgSrc = await thumbnailService.generateThumbnailImage(
-            this.mediaHash, this.originSrc, num, 272,
-          );
-        } else {
+      getThumbnailPath(this.originSrc, 272, 10, Math.ceil(num / 10))
+        .then((path) => {
+          this.imgSrc = path;
           this.imgExisted = true;
-          this.imgSrc = result;
-        }
-      } catch (err) { //
-      }
+        })
+        .catch(console.error);
     });
   },
   methods: {
