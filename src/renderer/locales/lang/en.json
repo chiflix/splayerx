@@ -266,6 +266,11 @@
       "underlinedContent": "disagree"
     }
   },
+  "protectBubble": {
+    "agree": "OK",
+    "setting": "Setting",
+    "content": "Smart Privacy Protection is enabled. Sensitive or not-suitable-for-work playback history will be removed."
+  },
   "recentPlaylist": {
     "folderSource": "Folder",
     "playing": "Playing",

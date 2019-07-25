@@ -23,6 +23,11 @@
       @close-privacy-bubble="closePrivacyBubble"
       class="mas-privacy-bubble"
     />
+    <NSFW
+      :use-blur="useBlur"
+      @close-privacy-bubble="closePrivacyBubble"
+      class="mas-privacy-bubble"
+    />
     <transition-group
       name="toast"
       class="transGroup"
@@ -68,6 +73,7 @@ import { mapGetters } from 'vuex';
 import NextVideo from '@/components/PlayingView/NextVideo.vue';
 import PrivacyBubble from '@/components/PlayingView/PrivacyConfirmBubble.vue';
 import MASPrivacyBubble from '@/components/PlayingView/MASPrivacyConfirmBubble.vue';
+import NSFW from '@/components/PlayingView/NSFW.vue';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import Icon from './BaseIconContainer.vue';
 
@@ -80,6 +86,7 @@ export default {
     NextVideo,
     PrivacyBubble,
     MASPrivacyBubble,
+    NSFW,
   },
   data() {
     return {
