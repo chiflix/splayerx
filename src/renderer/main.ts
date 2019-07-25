@@ -185,17 +185,11 @@ new Vue({
         return {
           label: this.$t('msg.subtitle.disabledSecondarySub'),
           id: 'secondarySub',
-          click: () => {
-            this.updateEnabledSecondarySub(false);
-          },
         };
       }
       return {
         label: this.$t('msg.subtitle.enabledSecondarySub'),
         id: 'secondarySub',
-        click: () => {
-          this.updateEnabledSecondarySub(true);
-        },
       };
     },
     currentRouteName() {
@@ -204,7 +198,8 @@ new Vue({
   },
   watch: {
     playlistDisplayState(val: boolean) {
-      this.menuService.resolvePlaylistDisplayState(val);
+      this.updateMenuItemEnabled('playback.forwardS', !val);
+      this.updateMenuItemEnabled('playback.backwardS', !val);
     },
     displayLanguage(val) {
       if (messages[val]) {
@@ -215,7 +210,7 @@ new Vue({
       this.menuService.updateLocale();
     },
     singleCycle(val: boolean) {
-      this.menuService.updateMenuItemChecked('singleCycle', val);
+      this.menuService.updateMenuItemChecked('playback.singleCycle', val);
     },
     enabledSecondarySub(val) {
       this.list.forEach((item: SubtitleControlListItem) => {
@@ -807,17 +802,6 @@ new Vue({
         }
       });
     },
-    updateRecentItem(key: string, value: { label: string, path: string }) {
-      return {
-        id: key,
-        visible: true,
-        type: 'radio',
-        label: value.label,
-        click: () => {
-          this.openVideoFile(value.path);
-        },
-      };
-    },
     getSubName(item: SubtitleControlListItem) {
       if (item.type === Type.Embedded) {
         return `${this.$t('subtitle.embedded')} ${item.name}`;
@@ -855,9 +839,6 @@ new Vue({
         visible: true,
         type: 'radio',
         label: this.calculatedNoSub ? this.$t('msg.subtitle.noSubtitle') : this.$t('msg.subtitle.notToShowSubtitle'),
-        click: () => {
-          this.changeSecondarySubtitle('');
-        },
       });
       this.list.forEach((item: SubtitleControlListItem, index: number) => {
         submenu.splice(index + 3, 1, this.recentSubTmp(item, false));
@@ -870,9 +851,6 @@ new Vue({
         visible: true,
         type: 'radio',
         label: value,
-        click: () => {
-          this.$bus.$emit('switch-audio-track', key);
-        },
       };
     },
     updateAudioTrack() {

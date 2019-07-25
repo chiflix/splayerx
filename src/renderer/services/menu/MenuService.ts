@@ -35,27 +35,6 @@ export default class MenuService {
     else log.error('renderer/menuservice', `updateMenuItemChecked, ${id} ${enabled}`);
   }
 
-  public enableSubmenuItem(id: string, enabled: boolean) {
-    ipcRenderer.send('enable-submenu-item', id, enabled);
-  }
-
-  public disableMenus() {
-    this.enableSubmenuItem('playback', false);
-    this.enableSubmenuItem('audio', false);
-    this.enableSubmenuItem('subtitle', false);
-    this.enableSubmenuItem('window', false);
-    this.enableSubmenuItem('file', false);
-  }
-
-  public resolvePlaylistDisplayState(state: boolean) {
-    this.getMenuItemById('playback.forwardS').enabled = !state;
-    this.getMenuItemById('playback.backwardS').enabled = !state;
-  }
-
-  public resolveSingleCycle(state: boolean) {
-    this.getMenuItemById('playback.singleCycle').checked = state;
-  }
-
   public resolveMute(state: boolean) {
     this.getMenuItemById('audio.mute').checked = state;
   }
