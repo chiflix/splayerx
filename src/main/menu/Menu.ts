@@ -60,9 +60,9 @@ export default class Menubar {
     }
   }
 
-  public menuStateControl(routeName: string) {
-    const inPlayingView = routeName === 'playing-view';
-    const inWelcomeView = routeName === 'welcome-view' || routeName === 'language-setting';
+  public menuStateControl() {
+    const inPlayingView = this._routeName === 'playing-view';
+    const inWelcomeView = this._routeName === 'welcome-view' || this._routeName === 'language-setting';
 
     this.enableSubmenuItem('playback', inPlayingView);
     this.enableSubmenuItem('audio', inPlayingView);
@@ -71,6 +71,7 @@ export default class Menubar {
     this.enableSubmenuItem('file', !inWelcomeView);
 
     this.updateMenuItemEnabled('splayerx.preferences', !inWelcomeView);
+
     this.updateMenuItemEnabled('window.keepPlayingWindowFront', inPlayingView);
     this.updateMenuItemEnabled('window.bossKey', inPlayingView);
     this.updateMenuItemEnabled('window.halfSize', inPlayingView);
@@ -86,8 +87,8 @@ export default class Menubar {
     this.enableSubmenuItem('audio', false);
     this.enableSubmenuItem('subtitle', false);
     this.enableSubmenuItem('window', false);
-    this.enableSubmenuItem('file.openRecent', false);
 
+    this.enableSubmenuItem('file.openRecent', false);
     this.updateMenuItemEnabled('file.clearHistory', false);
     this.updateMenuItemEnabled('file.closeWindow', false);
   }
@@ -95,7 +96,7 @@ export default class Menubar {
   public updateLocale() {
     this.locale.getDisplayLanguage();
     this.install();
-    this.menuStateControl(this._routeName);
+    this.menuStateControl();
   }
 
   public updatePaused(paused: boolean) {

@@ -5,8 +5,6 @@ import { IMenuDisplayInfo } from '../../renderer/interfaces/IRecentPlay';
 export default class MenuService {
   private menu: Menu;
 
-  private routeName: string;
-
   private windowClosed: boolean;
 
   public constructor() {
@@ -20,18 +18,17 @@ export default class MenuService {
   }
 
   public minimize(isMinimized: boolean) {
-    isMinimized ? this.menu.disableMenu() : this.menu.menuStateControl(this.routeName);
+    isMinimized ? this.menu.disableMenu() : this.menu.menuStateControl();
   }
 
   public closed() {
     this.windowClosed = true;
-    this.routeName = 'landing-view';
     this.menu.disableMenu();
     this.menu.setMainWindow(null);
   }
 
   public handleBossKey(hide: boolean) {
-    hide ? this.menu.disableMenu() : this.menu.menuStateControl(this.routeName);
+    hide ? this.menu.disableMenu() : this.menu.menuStateControl();
   }
 
   private registeMenuActions() {
@@ -54,8 +51,8 @@ export default class MenuService {
       this.menu.updateAudioTrack(items);
     });
     ipcMain.on('update-route-name', (e: Event, routeName: string) => {
-      this.routeName = this.menu.routeName = routeName;
-      if (!this.windowClosed) this.menu.menuStateControl(routeName);
+      this.menu.routeName = routeName;
+      if (!this.windowClosed) this.menu.menuStateControl();
     });
     ipcMain.on('update-paused', (e: Event, paused: boolean) => {
       this.menu.updatePaused(paused);

@@ -336,6 +336,7 @@ new Vue({
     // Disable Zooming
     this.$electron.webFrame.setVisualZoomLevelLimits(1, 1);
     this.menuService = new MenuService();
+    this.menuService.updateRouteName(this.currentRouteName);
     this.registeMenuActions();
     this.initializeMenuSettings();
     this.$bus.$on('new-file-open', this.refreshMenu);
@@ -537,8 +538,6 @@ new Vue({
       changeSecondarySubDelay: SubtitleManager.alterSecondaryDelay,
     }),
     async initializeMenuSettings() {
-      this.menuService.updateRouteName(this.currentRouteName);
-
       await this.menuService.addRecentPlayItems();
       this.menuService.addPrimarySub(this.recentSubMenu());
       this.menuService.addSecondarySub(this.recentSecondarySubMenu());
