@@ -197,8 +197,8 @@ new Vue({
   },
   watch: {
     playlistDisplayState(val: boolean) {
-      this.updateMenuItemEnabled('playback.forwardS', !val);
-      this.updateMenuItemEnabled('playback.backwardS', !val);
+      this.menuService.updateMenuItemEnabled('playback.forwardS', !val);
+      this.menuService.updateMenuItemEnabled('playback.backwardS', !val);
     },
     displayLanguage(val) {
       if (messages[val]) {
@@ -228,7 +228,8 @@ new Vue({
     },
     list(val: SubtitleControlListItem[], oldval: SubtitleControlListItem[]) {
       if (val.length !== oldval.length) {
-        this.refreshMenu();
+        this.menuService.addPrimarySub(this.recentSubMenu());
+        this.menuService.addSecondarySub(this.recentSecondarySubMenu());
       }
     },
     primarySubtitleId(id: string) {
@@ -251,7 +252,7 @@ new Vue({
     },
     audioTrackList(val, oldval) {
       if (val.length !== oldval.length) {
-        this.refreshMenu();
+        this.menuService.addAudioTrack(this.updateAudioTrack());
       }
       this.audioTrackList.forEach((item: Electron.MenuItem, index: number) => {
         if (item.enabled === true) {
@@ -539,9 +540,9 @@ new Vue({
       this.menuService.updateRouteName(this.currentRouteName);
 
       await this.menuService.addRecentPlayItems();
-      await this.menuService.addPrimarySub(this.recentSubMenu());
-      await this.menuService.addSecondarySub(this.recentSecondarySubMenu());
-      await this.menuService.addAudioTrack(this.updateAudioTrack());
+      this.menuService.addPrimarySub(this.recentSubMenu());
+      this.menuService.addSecondarySub(this.recentSecondarySubMenu());
+      this.menuService.addAudioTrack(this.updateAudioTrack());
 
       if (this.currentRouteName === 'playing-view') {
         this.menuService.updateMenuItemEnabled('subtitle.increasePrimarySubtitleDelay', !!this.primarySubtitleId);
@@ -758,7 +759,7 @@ new Vue({
         if (browserWindow.isAlwaysOnTop()) {
           browserWindow.setAlwaysOnTop(false);
           this.menuService.updateMenuItemChecked('window.keepPlayingWindowFront', false);
-        } else {
+        } else if (!this.paused) {
           browserWindow.setAlwaysOnTop(true);
           this.menuService.updateMenuItemChecked('window.keepPlayingWindowFront', true);
         }

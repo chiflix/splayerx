@@ -40,7 +40,7 @@ export default class MenuService {
   }
 
   public resolveMute(state: boolean) {
-    this.getMenuItemById('audio.mute').checked = state;
+    this.updateMenuItemChecked('audio.mute', state);
   }
 
   public async addRecentPlayItems() {
