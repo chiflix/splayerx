@@ -100,7 +100,9 @@
       "name": "ファイル",
       "open": "ファイルを開く…",
       "openRecent": "最近使用した項目を開く",
-      "openURL": "URLから開く…"
+      "openURL": "URLから開く…",
+      "copy": "",
+      "paste": ""
     },
     "help": {
       "name": "ヘルプ",
