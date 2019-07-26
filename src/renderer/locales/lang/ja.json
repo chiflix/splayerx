@@ -36,7 +36,7 @@
     },
     "ENOENT": {
       "content": "ファイルが見つかりません。",
-      "title": ""
+      "title": "開く失敗"
     },
     "addNoVideo": {
       "content": "再生できるファイルが見つかりませんでした。",
@@ -209,7 +209,7 @@
     "secondary": "",
     "chooseSecondary": "",
     "languageDescription": "",
-    "none": ""
+    "none": "None"
   },
   "preferences": {
     "general": {
