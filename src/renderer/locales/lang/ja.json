@@ -106,8 +106,8 @@
     },
     "help": {
       "name": "ヘルプ",
-      "feedback": "",
-      "homepage": "",
+      "feedback": "フィードバック",
+      "homepage": "ホームページ",
       "splayerxHelp": "ヘルプ",
       "shortCuts": "ショートカットリスト",
       "crashReportLocation": "エラーログを表示する",
@@ -157,8 +157,8 @@
       "noSubtitle": "見つかりませんでした",
       "notToShowSubtitle": "閉じる",
       "secondarySubtitle": "第二字幕",
-      "subtitleSetting": "",
-      "subtitleDelay": "",
+      "subtitleSetting": "字幕の設定",
+      "subtitleDelay": "字幕ディレイ",
       "size1": "小",
       "size2": "通常",
       "size3": "大",
@@ -182,8 +182,8 @@
       "yes": "更新"
     },
     "window": {
-      "windowRotate": "",
-      "keepPlayingWindowFront": "",
+      "windowRotate": "時計回りに90°回転",
+      "keepPlayingWindowFront": "再生時に最前面に表示",
       "backToLandingView": "起動ページに戻る",
       "bossKey": "ボスキー",
       "doubleSize": "200%",
@@ -196,10 +196,10 @@
       "originSize": "100%"
     },
     "favourite": {
-      "name": "",
-      "iqiyi": "",
-      "bilibili": "",
-      "youtube": ""
+      "name": "好きな",
+      "iqiyi": "iQIYI",
+      "bilibili": "Bilibili",
+      "youtube": "Youtube"
     }
   },
   "nextVideo": {
