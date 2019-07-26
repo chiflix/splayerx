@@ -300,13 +300,11 @@ export default {
       }
       this.changeSrc = false;
       // 当触发rate 显示界面控件
-      if (!this.progressKeydown) {
-        this.progressTriggerStopped = true;
-        this.clock.clearTimeout(this.progressTriggerId);
-        this.progressTriggerId = this.clock.setTimeout(() => {
-          this.progressTriggerStopped = false;
-        }, this.progressDisappearDelay);
-      }
+      this.progressTriggerStopped = true;
+      this.clock.clearTimeout(this.progressTriggerId);
+      this.progressTriggerId = this.clock.setTimeout(() => {
+        this.progressTriggerStopped = false;
+      }, this.progressDisappearDelay);
     },
     singleCycle() {
       // 当触发循环播放 显示界面控件

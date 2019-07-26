@@ -107,6 +107,8 @@
     },
     "help": {
       "name": "Help",
+      "feedback": "Feedback",
+      "homepage": "Website",
       "splayerxHelp": "Help",
       "shortCuts": "Shortcuts List",
       "crashReportLocation": "Show Crash Reports",
@@ -115,7 +117,6 @@
     "playback": {
       "backwardL": "Step Backward -60s",
       "backwardS": "Step Backward -5s",
-      "windowRotate": "Rotate 90° Clockwise",
       "captureScreen": "Capture Screen",
       "captureVideoClip": "Capture Video Clip",
       "decreasePlaybackSpeed": "Decrease Playback Speed",
@@ -123,7 +124,6 @@
       "forwardS": "Step Forward +5s",
       "fullScreen": "Full Screen",
       "increasePlaybackSpeed": "Increase Playback Speed",
-      "keepPlayingWindowFront": "Float When Playing",
       "name": "Playback",
       "pause": "Pause",
       "play": "Play",
@@ -135,10 +135,8 @@
     },
     "splayerx": {
       "about": "About SPlayer",
-      "feedback": "Feedback",
       "hide": "Hide",
       "hideOthers": "Hide Others",
-      "homepage": "Website",
       "preferences": "Preferences",
       "quit": "Quit SPlayer",
       "showAll": "Show All"
@@ -160,6 +158,8 @@
       "noSubtitle": "Not Found",
       "notToShowSubtitle": "Off",
       "secondarySubtitle": "Secondary Subtitle",
+      "subtitleSetting": "Subtitle Settings",
+      "subtitleDelay": "Subtitle Delay",
       "size1": "Small",
       "size2": "Standard",
       "size3": "Large",
@@ -183,6 +183,8 @@
       "yes": "yes"
     },
     "window": {
+      "windowRotate": "Rotate 90° Clockwise",
+      "keepPlayingWindowFront": "Float When Playing",
       "backToLandingView": "Back to Launching Page",
       "bossKey": "Boss Key",
       "doubleSize": "200%",
@@ -193,6 +195,12 @@
       "minimize": "Minimize",
       "name": "Window",
       "originSize": "100%"
+    },
+    "favourite": {
+      "name": "Favourite",
+      "iqiyi": "Iqiyi",
+      "bilibili": "Bilibili",
+      "youtube": "Youtube"
     }
   },
   "nextVideo": {
@@ -203,7 +211,7 @@
     "welcomeTitle": "Welcome to SPlayer",
     "welcomeDescription": "All-new lightweight design, incredible performance with smart translation to let you enjoy your videos like never before.",
     "agreement": "By using SPlayer, you agree to our ",
-    "policy": "privacy policy",
+    "policy": "Privacy Policy",
     "languageTitle1": "Set your preferred subtitle",
     "languageTitle2": "languages to fetch translations",
     "primary": "Primary",
