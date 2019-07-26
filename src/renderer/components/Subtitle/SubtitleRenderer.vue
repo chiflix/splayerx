@@ -150,9 +150,6 @@ export default {
       return this.currentCues[1].cue && this.currentCues[1].cue.length > 0 ? this.currentCues[1].cue[0].format : '';
     },
     secondarySubScale() {
-      if (this.currentFirstSubtitleId === '') {
-        return this.scaleNum;
-      }
       return (this.scaleNum * 5) / 6 < 1 ? 1 : (this.scaleNum * 5) / 6;
     },
     firstSubTextHeight() {

@@ -295,10 +295,10 @@ export default {
       this.isInitial = true;
       this.$emit('update:showAttached', false);
       this.computedAvailableItems = [];
+      this.updateSubtitleType(true);
     },
     showAttached(val: boolean) {
       if (!val) {
-        this.updateSubtitleType(true);
         this.anim.playSegments([79, 92], true);
         if (!this.validEnter) {
           this.isShowingHovered = false;
