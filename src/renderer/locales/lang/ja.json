@@ -32,10 +32,10 @@
     },
     "EACCES": {
       "content": "十分な許可がありません。",
-      "title": ""
+      "title": "開けませんでした"
     },
     "ENOENT": {
-      "content": "",
+      "content": "ファイルが見つかりません。",
       "title": ""
     },
     "addNoVideo": {
@@ -318,36 +318,36 @@
     "successTitle": "翻訳完了",
     "failTitle": "翻訳失敗",
     "cancelTitle": "AI翻訳が進行中です",
-    "selectDescription": "",
-    "selectLanguageLabel": "",
-    "cancel": "",
-    "quit": "",
-    "generate": "",
-    "translateDescription": "",
-    "ok": "",
-    "successDescriptiton": "",
-    "failDescription": "",
-    "cancelDescription": "",
-    "continue": ""
+    "selectDescription": "翻訳結果を生成するには、ビデオで聞く言語を選択して[生成] ボタンをクリックしてください。",
+    "selectLanguageLabel": "音声の言語",
+    "cancel": "キャンセル",
+    "quit": "やめる",
+    "generate": "生成する",
+    "translateDescription": "動画をスキップしたり、アプリケーションを閉じたりしないでください翻訳パネルで進行状況を確認できます。",
+    "ok": "はい",
+    "successDescriptiton": "AIの翻訳は完了し、翻訳結果リストに表示されます。",
+    "failDescription": "後でもう一度やり直してください、ありがとう。",
+    "cancelDescription": "翻訳をキャンセルするには終了をクリックします終了後、翻訳の進行状況は復元されません。",
+    "continue": "キャンセル"
   },
   "translateBubble": {
-    "bubbleWhenGrab": "",
-    "bubbleWhenTranslate": "",
-    "bubbleFunctionForbidden": "",
+    "bubbleWhenGrab": "この操作は進行中の翻訳を中止させるでしょう。",
+    "bubbleWhenTranslate": "AIの翻訳は引き続きクラウドで処理され、翻訳の進行状況は次回の動画再生時に自動的に取得されます。",
+    "bubbleFunctionForbidden": "この操作は進行中の翻訳を中止させるでしょう。",
     "bubbleWhenSuccess": {
       "title": "",
-      "content": ""
+      "content": "AIの翻訳は完了し、翻訳結果リストに表示されます。"
     },
     "bubbleWhenSuccessOnOtherVideo": {
       "title": "",
-      "content": ""
+      "content": "AIの翻訳は完了し、次回ビデオを開いたときに自動的に表示されます。"
     },
     "bubbleTranslateFail": {
-      "title": "",
-      "content": ""
+      "title": "翻訳に失敗しました",
+      "content": "後でもう一度やり直してください、ありがとう。"
     },
-    "ok": "",
-    "cancel": "",
+    "ok": "はい",
+    "cancel": "キャンセル",
     "continue": "続ける"
   }
 }
