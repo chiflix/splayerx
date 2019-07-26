@@ -268,9 +268,6 @@ new Vue({
         }
       });
     },
-    isFullScreen(val) {
-      this.menuService.updateFullScreen(val);
-    },
     paused(val) {
       const browserWindow = this.$electron.remote.getCurrentWindow();
       if (val && browserWindow.isAlwaysOnTop()) {

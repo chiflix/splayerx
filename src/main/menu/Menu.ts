@@ -52,8 +52,11 @@ export default class Menubar {
 
   public set disable(val: boolean) {
     this._disable = val;
-    if (val) this.disableMenu();
-    else this.menuStateControl();
+    if (val) {
+      this.disableMenu();
+    } else {
+      this.menuStateControl();
+    }
   }
 
   public constructor() {
@@ -97,9 +100,9 @@ export default class Menubar {
         this.menubar = this.createPlayingViewMenu();
         break;
 
-      case 'welcome-view':
+      case 'welcome-privacy':
       case 'language-setting':
-        this.createWelcomeViewMenu();
+        this.menubar = this.createWelcomeViewMenu();
         break;
       default:
         break;
@@ -129,13 +132,17 @@ export default class Menubar {
   }
 
   public updatePaused(paused: boolean) {
-    this.paused = paused;
-    this.refreshPlaybackMenu();
+    if (this.paused !== paused) {
+      this.paused = paused;
+      this.refreshPlaybackMenu();
+    }
   }
 
   public updateFullScreen(isFullScreen: boolean) {
-    this.isFullScreen = isFullScreen;
-    this.refreshWindowMenu();
+    if (this.isFullScreen !== isFullScreen) {
+      this.isFullScreen = isFullScreen;
+      this.refreshWindowMenu();
+    }
   }
 
   public updateMenuItemChecked(id: string, checked: boolean) {
@@ -260,7 +267,10 @@ export default class Menubar {
         if (menuItem.id === 'playback.playOrPause') {
           menuItem.label = this.paused ? this.$t('msg.playback.play') : this.$t('msg.playback.pause');
         }
-        if (isAction(menuItem) && this._disable) menuItem.enabled = !this._disable;
+        // @ts-ignore
+        if (isAction(menuItem) && this._disable) {
+          menuItem.enabled = !this._disable;
+        }
         const item = this.createMenuItemByTemplate(menuItem);
         playbackMenu.append(item);
       }
@@ -292,108 +302,6 @@ export default class Menubar {
     });
 
     Menu.setApplicationMenu(this.menubar);
-  }
-
-  private createMacMenu(): Electron.Menu {
-    // Menus
-    const menubar = new Menu();
-
-    // Mac: Application
-    const macApplicationMenuItem = this.createMacApplicationMenu();
-
-    menubar.append(macApplicationMenuItem);
-
-    // File
-    const fileMenuItem = this.createFileMenu();
-
-    menubar.append(fileMenuItem);
-
-    // PlayBack
-    const playbackMenuItem = this.createPlaybackMenu();
-
-    menubar.append(playbackMenuItem);
-
-    // Audio
-    const audioMenuItem = this.createAudioMenu();
-
-    menubar.append(audioMenuItem);
-
-    // Subtitle
-    const subtitleMenuItem = this.createSubtitleMenu();
-
-    menubar.append(subtitleMenuItem);
-
-    // Window
-    const windowMenuItem = this.createWindowMenu();
-
-    menubar.append(windowMenuItem);
-
-    // Help
-    const helpMenuItem = this.createHelpMenu();
-
-    menubar.append(helpMenuItem);
-
-    return menubar;
-  }
-
-  private createWinMenu(): Electron.Menu {
-    // Menus
-    const menubar = new Menu();
-
-    // File
-    this.getMenuItemTemplate('file').items.forEach((item: MenubarMenuItem) => {
-      if (item.id === 'file.open') {
-        const menuItem = item as IMenubarMenuItemAction;
-        menubar.append(this.createMenuItemByTemplate(menuItem));
-      } else if (item.id === 'file.openRecent') {
-        const menuItem = item as IMenubarMenuItemSubmenu;
-        menubar.append(this.createSubMenuItem(`msg.${menuItem.id}`, menuItem.submenu));
-      } else if (item.id === 'file.closeWindow') {
-        const menuItem = item as IMenubarMenuItemRole;
-        menubar.append(this.createRoleMenuItem(menuItem.label, menuItem.role, menuItem.enabled));
-      }
-    });
-
-    menubar.append(separator());
-
-    const preference = this.createMenuItem('msg.splayerx.preferences', () => {
-      app.emit('add-preference');
-    }, 'Ctrl+,', true);
-
-    menubar.append(preference);
-
-    // PlayBack
-    const playbackMenuItem = this.createPlaybackMenu();
-
-    menubar.append(playbackMenuItem);
-
-    // Audio
-    const audioMenuItem = this.createAudioMenu();
-
-    menubar.append(audioMenuItem);
-
-    // Subtitle
-    const subtitleMenuItem = this.createSubtitleMenu();
-
-    menubar.append(subtitleMenuItem);
-
-    // Window
-    const windowMenuItem = this.createWindowMenu();
-
-    menubar.append(windowMenuItem);
-
-    // Help
-    const helpMenuItem = this.createHelpMenu();
-
-    menubar.append(helpMenuItem);
-
-    const quitMenuItem = this.createMenuItem('msg.splayerx.quit', () => {
-      app.quit();
-    }, 'Ctrl+q', true);
-
-    menubar.append(quitMenuItem);
-
-    return menubar;
   }
 
   private $t(msg: string): string {
@@ -482,15 +390,39 @@ export default class Menubar {
     // Menus
     const menubar = new Menu();
 
-    // Mac: Application
-    const macApplicationMenuItem = this.createMacApplicationMenu();
+    if (IsMacintosh) {
+      // Mac: Application
+      const macApplicationMenuItem = this.createMacApplicationMenu();
 
-    menubar.append(macApplicationMenuItem);
+      menubar.append(macApplicationMenuItem);
 
-    // File
-    const fileMenuItem = this.createFileMenu();
+      // File
+      const fileMenuItem = this.createFileMenu();
 
-    menubar.append(fileMenuItem);
+      menubar.append(fileMenuItem);
+    } else {
+      // File
+      this.getMenuItemTemplate('file').items.forEach((item: MenubarMenuItem) => {
+        if (item.id === 'file.open') {
+          const menuItem = item as IMenubarMenuItemAction;
+          menubar.append(this.createMenuItemByTemplate(menuItem));
+        } else if (item.id === 'file.openRecent') {
+          const menuItem = item as IMenubarMenuItemSubmenu;
+          menubar.append(this.createSubMenuItem(`msg.${menuItem.id}`, menuItem.submenu));
+        } else if (item.id === 'file.closeWindow') {
+          const menuItem = item as IMenubarMenuItemRole;
+          menubar.append(this.createRoleMenuItem(menuItem.label, menuItem.role, menuItem.enabled));
+        }
+      });
+
+      menubar.append(separator());
+
+      const preference = this.createMenuItem('msg.splayerx.preferences', () => {
+        app.emit('add-preference');
+      }, 'Ctrl+,', true);
+
+      menubar.append(preference);
+    }
 
     // PlayBack
     const playbackMenuItem = this.createPlaybackMenu();
@@ -517,11 +449,34 @@ export default class Menubar {
 
     menubar.append(helpMenuItem);
 
+    if (!IsMacintosh) {
+      const quitMenuItem = this.createMenuItem('msg.splayerx.quit', () => {
+        app.quit();
+      }, 'Ctrl+q', true);
+
+      menubar.append(quitMenuItem);
+    }
+
     return menubar;
   }
 
   private createWelcomeViewMenu() {
+    // Menus
+    const menubar = new Menu();
+    if (IsMacintosh) {
+      // Mac: Application
+      const macApplicationMenuItem = this.createMacApplicationMenu();
 
+      menubar.append(macApplicationMenuItem);
+    } else {
+      const quitMenuItem = this.createMenuItem('msg.splayerx.quit', () => {
+        app.quit();
+      }, 'Ctrl+q', true);
+
+      menubar.append(quitMenuItem);
+    }
+
+    return menubar;
   }
 
   private createMacApplicationMenu(): Electron.MenuItem {
@@ -531,7 +486,7 @@ export default class Menubar {
     }, undefined, true);
     const preference = this.createMenuItem('msg.splayerx.preferences', () => {
       app.emit('add-preference');
-    }, 'CmdOrCtrl+,', true);
+    }, 'CmdOrCtrl+,', this._routeName !== 'welcome-privacy' && this._routeName !== 'language-setting');
 
     const hide = this.createRoleMenuItem('msg.splayerx.hide', 'hide');
     const hideOthers = this.createRoleMenuItem('msg.splayerx.hideOthers', 'hideothers');

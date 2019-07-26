@@ -58,6 +58,7 @@ if (process.env.NODE_ENV !== 'development') {
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 
 let menuService = null;
+let routeName = null;
 let mainWindow = null;
 let aboutWindow = null;
 let preferenceWindow = null;
@@ -87,12 +88,14 @@ function handleBossKey() {
   if (mainWindow.isVisible()) {
     if (process.platform === 'darwin' && mainWindow.isFullScreen()) {
       mainWindow.once('leave-full-screen', handleBossKey);
+      menuService.updateFullScreen(false);
       mainWindow.setFullScreen(false);
       return;
     }
-    mainWindow.webContents.send('mainDispatch', 'PAUSE_VIDEO');
-    mainWindow.hide();
+    mainWindow.webContents.send('mainCommit', 'PAUSED_UPDATE', true);
     mainWindow.webContents.send('mainCommit', 'isHiddenByBossKey', true);
+    mainWindow.hide();
+    menuService.updatePaused(true);
     menuService.handleBossKey(true);
     if (process.platform === 'win32') {
       tray = new Tray(nativeImage.createFromDataURL(require('../../build/icons/1024x1024.png')));
@@ -183,11 +186,13 @@ function registerMainWindowEvent(mainWindow) {
     mainWindow.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
   }, 100));
   mainWindow.on('enter-full-screen', () => {
+    menuService.updateFullScreen(true);
     if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
     mainWindow.webContents.send('mainCommit', 'isFullScreen', true);
     mainWindow.webContents.send('mainCommit', 'isMaximized', mainWindow.isMaximized());
   });
   mainWindow.on('leave-full-screen', () => {
+    menuService.updateFullScreen(false);
     if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
     mainWindow.webContents.send('mainCommit', 'isFullScreen', false);
     mainWindow.webContents.send('mainCommit', 'isMaximized', mainWindow.isMaximized());
@@ -216,6 +221,7 @@ function registerMainWindowEvent(mainWindow) {
     mainWindow.webContents.send('mainCommit', 'isMinimized', false);
   });
   mainWindow.on('focus', () => {
+    menuService.handleBossKey(false);
     if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
     mainWindow.webContents.send('mainCommit', 'isFocused', true);
     mainWindow.webContents.send('mainCommit', 'isHiddenByBossKey', false);
@@ -239,6 +245,9 @@ function registerMainWindowEvent(mainWindow) {
     } catch (ex) {
       console.error('callMainWindowMethod', method, JSON.stringify(args), '\n', ex);
     }
+  });
+  ipcMain.on('update-route-name', (e, route) => {
+    routeName = route;
   });
   ipcMain.on('drop-subtitle', (event, args) => {
     if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
@@ -533,7 +542,10 @@ app.on('ready', () => {
 });
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
+  console.log(routeName);
+  if (
+    (routeName === 'welcome-privacy' || routeName === 'language-setting')
+    || process.platform !== 'darwin') {
     app.quit();
   }
 });

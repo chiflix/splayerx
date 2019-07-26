@@ -25,10 +25,6 @@ export default class MenuService {
     ipcRenderer.send('update-paused', paused);
   }
 
-  public updateFullScreen(isFullScreen: boolean) {
-    ipcRenderer.send('update-fullscreen', isFullScreen);
-  }
-
   public updateMenuItemChecked(id: string, checked: boolean) {
     if (this.getMenuItemById(id)) this.getMenuItemById(id).checked = checked;
     else log.error('renderer/menuservice', `updateMenuItemChecked, ${id} ${checked}`);

@@ -87,29 +87,34 @@
       {
         "id": "playback.playOrPause",
         "label": "msg.playback.pause",
-        "accelerator": "Space"
+        "accelerator": "Space",
+        "enabled": true
       },
       {
         "id": "playback.forwardS",
         "label": "msg.playback.forwardS",
-        "accelerator": "Right"
+        "accelerator": "Right",
+        "enabled": true
       },
       {
         "id": "playback.backwardS",
         "label": "msg.playback.backwardS",
-        "accelerator": "Left"
+        "accelerator": "Left",
+        "enabled": true
       },
       {
         "id": "playback.forwardL",
         "label": "msg.playback.forwardL",
         "accelerator": "Up",
-        "winAccelerator": "Alt+Right"
+        "winAccelerator": "Alt+Right",
+        "enabled": true
       },
       {
         "id": "playback.backwardL",
         "label": "msg.playback.backwardL",
         "accelerator": "Down",
-        "winAccelerator": "Alt+Left"
+        "winAccelerator": "Alt+Left",
+        "enabled": true
       },
       {
         "id": "menubar.separator"
@@ -117,17 +122,20 @@
       {
         "id":"playback.increasePlaybackSpeed",
         "label": "msg.playback.increasePlaybackSpeed",
-        "accelerator": "]"
+        "accelerator": "]",
+        "enabled": true
       },
       {
         "id":"playback.decreasePlaybackSpeed",
         "label": "msg.playback.decreasePlaybackSpeed",
-        "accelerator": "["
+        "accelerator": "[",
+        "enabled": true
       },
       {
         "id":"playback.resetSpeed",
         "label": "msg.playback.resetSpeed",
-        "accelerator": "\\"
+        "accelerator": "\\",
+        "enabled": true
       },
       {
         "id": "menubar.separator"
@@ -135,12 +143,14 @@
       {
         "id":"playback.previousVideo",
         "label": "msg.playback.previousVideo",
-        "accelerator": "CmdOrCtrl+Left"
+        "accelerator": "CmdOrCtrl+Left",
+        "enabled": true
       },
       {
         "id":"playback.nextVideo",
         "label": "msg.playback.nextVideo",
-        "accelerator": "CmdOrCtrl+Right"
+        "accelerator": "CmdOrCtrl+Right",
+        "enabled": true
       },
       {
         "id": "menubar.separator"
@@ -149,12 +159,14 @@
         "id": "playback.singleCycle",
         "label": "msg.playback.singleCycle",
         "type": "checkbox",
+        "enabled": true,
         "checked": false
       },
       {
         "id": "playback.snapShot",
         "label": "msg.playback.snapShot",
-        "accelerator": "CmdOrCtrl+Shift+S"
+        "accelerator": "CmdOrCtrl+Shift+S",
+        "enabled": true
       }
     ]
   },

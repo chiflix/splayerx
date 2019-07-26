@@ -31,6 +31,14 @@ export default class MenuService {
     this.menu.disable = hide;
   }
 
+  public updatePaused(paused: boolean) {
+    this.menu.updatePaused(paused);
+  }
+
+  public updateFullScreen(isFullScreen: boolean) {
+    this.menu.updateFullScreen(isFullScreen);
+  }
+
   private registeMenuActions() {
     ipcMain.on('popup-menu', () => {
       this.menu.popupMenu();
@@ -54,10 +62,7 @@ export default class MenuService {
       this.menu.routeName = routeName;
     });
     ipcMain.on('update-paused', (e: Event, paused: boolean) => {
-      this.menu.updatePaused(paused);
-    });
-    ipcMain.on('update-fullscreen', (e: Event, isFullScreen: boolean) => {
-      this.menu.updateFullScreen(isFullScreen);
+      this.updatePaused(paused);
     });
     ipcMain.on('update-checked', (e: Event, id: string, checked: boolean) => {
       this.menu.updateMenuItemChecked(id, checked);
