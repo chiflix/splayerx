@@ -100,7 +100,9 @@
       "name": "파일",
       "open": "열다…",
       "openRecent": "열기 최근",
-      "openURL": "URL 열기 ..."
+      "openURL": "URL 열기 ...",
+      "copy": "",
+      "paste": ""
     },
     "help": {
       "name": "도움",
