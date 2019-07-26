@@ -267,6 +267,7 @@
   },
   "subtitle": {
     "embedded": "埋め込み式",
+    "generate": "",
     "language": {
       "ar": "サウジアラビア語",
       "de": "ドイツ語",
@@ -307,5 +308,46 @@
   "loadVideoBySubtitleFailed": {
     "content": "フォルダ内に関連するビデオが見つかりません",
     "title": ""
+  },
+  "translateModal": {
+    "title": "",
+    "translateTitle": "",
+    "minute": "",
+    "second": "",
+    "hour": "",
+    "successTitle": "",
+    "failTitle": "",
+    "cancelTitle": "",
+    "selectDescription": "",
+    "selectLanguageLabel": "",
+    "cancel": "",
+    "quit": "",
+    "generate": "",
+    "translateDescription": "",
+    "ok": "",
+    "successDescriptiton": "",
+    "failDescription": "",
+    "cancelDescription": "",
+    "continue": ""
+  },
+  "translateBubble": {
+    "bubbleWhenGrab": "",
+    "bubbleWhenTranslate": "",
+    "bubbleFunctionForbidden": "",
+    "bubbleWhenSuccess": {
+      "title": "",
+      "content": ""
+    },
+    "bubbleWhenSuccessOnOtherVideo": {
+      "title": "",
+      "content": ""
+    },
+    "bubbleTranslateFail": {
+      "title": "",
+      "content": ""
+    },
+    "ok": "",
+    "cancel": "",
+    "continue": ""
   }
 }
