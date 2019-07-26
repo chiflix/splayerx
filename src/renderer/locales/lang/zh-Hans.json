@@ -100,7 +100,9 @@
       "name": "文件",
       "open": "打开文件…",
       "openRecent": "打开最近播放",
-      "openURL": "打开 URL…"
+      "openURL": "打开 URL…",
+      "copy": "",
+      "paste": ""
     },
     "help": {
       "name": "帮助",
