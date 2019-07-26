@@ -226,7 +226,7 @@ export default {
         const adaptedCues = noPositionCues[0]
           .concat(noPositionCues[1], noPositionCues[2])
           .filter((cue: Cue) => cue.category && cue.category === 'secondary');
-        if (adaptedCues.length === 1 && currentFirstSubtitleId && !adaptedCues[0].text.includes('\n')) {
+        if (adaptedCues.length === 1 && !adaptedCues[0].text.includes('\n')) {
           return `${(secondarySubTextHeight * secondarySubScale + (60 / 1080) * winHeight) * 100 / winHeight}%`;
         }
         if (adaptedCues.length === 0 && currentSecondarySubtitleId
@@ -247,7 +247,7 @@ export default {
         const adaptedCues = noPositionCues[6]
           .concat(noPositionCues[7], noPositionCues[8])
           .filter((cue: Cue) => cue.category && cue.category === 'first');
-        if (adaptedCues.length === 1 && currentSecondarySubtitleId && !adaptedCues[0].text.includes('\n')) {
+        if (adaptedCues.length === 1 && !adaptedCues[0].text.includes('\n')) {
           return `${(60 / 1080 * winHeight + firstSubTextHeight * scaleNum) * 100 / winHeight}%`;
         }
         if (adaptedCues.length === 0 && currentSecondarySubtitleId
