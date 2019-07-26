@@ -964,7 +964,7 @@ new Vue({
             {
               label: this.$t('msg.splayerx.homepage'),
               click: () => {
-                this.$electron.shell.openExternal('https://beta.splayer.org');
+                this.$electron.shell.openExternal('https://splayer.org');
               },
             },
             {
