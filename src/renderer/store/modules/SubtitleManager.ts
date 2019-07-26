@@ -40,6 +40,7 @@ import {
 import { LanguageCode } from '@/libs/language';
 import { AudioTranslateBubbleOrigin } from './AudioTranslate';
 import { ISubtitleStream } from '@/plugins/mediaTasks';
+import { Features, isFeatureEnabled } from '@/helpers/featureSwitch';
 
 const sortOfTypes = {
   local: 0,
@@ -420,6 +421,10 @@ const actions = {
         }
       } else {
         newSubtitlesToAdd.push(...secondaryNotExistedResults);
+      }
+      if (!isFeatureEnabled(Features.AI)) {
+        addPrimaryAIButton = false;
+        addSecondaryAIButton = false;
       }
       return {
         delete: oldSubtitlesToDel,

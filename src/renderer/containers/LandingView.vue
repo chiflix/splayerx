@@ -1,7 +1,7 @@
 <template>
   <div class="wrapper">
     <short-marks
-      v-show="!openUrlShow"
+      v-show="isBrowsingViewEnabled && !openUrlShow"
       :handle-browsing-open="handleBrowsingOpen"
     />
     <open-url
@@ -140,6 +140,7 @@ import VideoItem from '@/components/LandingView/VideoItem.vue';
 import { log } from '@/libs/Log';
 import Sagi from '@/libs/sagi';
 import { Browsing as browsingActions } from '@/store/actionTypes';
+import { Features, isFeatureEnabled } from '@/helpers/featureSwitch';
 
 Vue.component('PlaylistItem', PlaylistItem);
 Vue.component('VideoItem', VideoItem);
@@ -170,6 +171,9 @@ export default {
   },
   computed: {
     ...mapGetters(['winWidth', 'defaultDir', 'isFullScreen', 'hideVideoHistoryOnExit']),
+    isBrowsingViewEnabled() {
+      return isFeatureEnabled(Features.BrowsingView);
+    },
     lastIndex: {
       get() {
         return (this.firstIndex + this.showItemNum) - 1;
