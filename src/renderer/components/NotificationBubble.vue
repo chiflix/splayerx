@@ -142,7 +142,6 @@ export default {
     },
   },
   mounted() {
-    this.useBlur = window.devicePixelRatio === 1;
     this.$bus.$on('privacy-confirm', () => {
       this.showPrivacyBubble = true;
     });

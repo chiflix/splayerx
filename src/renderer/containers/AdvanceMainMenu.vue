@@ -551,7 +551,6 @@ export default {
         this.handleSubClick();
       }, 0);
     });
-    this.useBlur = window.devicePixelRatio === 1;
     this.$bus.$on('switch-audio-track', (index: number) => {
       this.switchAudioTrack(this.audioTrackList[index]);
     });

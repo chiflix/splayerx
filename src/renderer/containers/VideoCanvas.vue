@@ -51,7 +51,6 @@ import { Video as videoActions, AudioTranslate as atActions } from '@/store/acti
 import { videodata } from '@/store/video';
 import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer.vue';
 import { MediaItem, PlaylistItem } from '../interfaces/IDB';
-import { deleteSubtitlesByPlaylistId } from '../services/storage/subtitle';
 import { AudioTranslateBubbleOrigin } from '../store/modules/AudioTranslate';
 
 export default {
@@ -347,7 +346,6 @@ export default {
       if (process.mas && this.$store.getters.source === 'drop') {
         savePromise = savePromise.then(async () => {
           await playInfoStorageService.deleteRecentPlayedBy(this.playListId);
-          await deleteSubtitlesByPlaylistId(this.playListId);
         });
       }
       savePromise
@@ -382,7 +380,6 @@ export default {
         if (process.mas && this.$store.getters.source === 'drop') {
           savePromise = savePromise.then(async () => {
             await playInfoStorageService.deleteRecentPlayedBy(this.playListId);
-            await deleteSubtitlesByPlaylistId(this.playListId);
           });
         }
         savePromise

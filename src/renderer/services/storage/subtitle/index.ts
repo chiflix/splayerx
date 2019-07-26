@@ -10,7 +10,7 @@ import { loadLocalFile } from '@/services/subtitle/utils';
 import { embeddedSrcLoader, IEmbeddedOrigin } from '@/services/subtitle/loaders/embedded';
 import {
   cacheEmbeddedSubtitle, cacheLocalSubtitle, cacheOnlineSubtitle,
-  isCachedSubtitle, removeCachedSubtitles,
+  isCachedSubtitle,
   addNewSourceToDb,
 } from './file';
 
@@ -39,28 +39,26 @@ export async function updateSubtitle(subtitle: Entity) {
     hash, source, format, language,
   });
 }
-export function retrieveSubtitlePreference(playlistId: number, mediaItemId: string) {
-  return db.retrieveSubtitlePreference(playlistId, mediaItemId);
+export function retrieveSubtitlePreference(mediaHash: string) {
+  return db.retrieveSubtitlePreference(mediaHash);
 }
-export function retrieveStoredSubtitleList(playlistId: number, mediaItemId: string) {
-  return db.retrieveSubtitleList(playlistId, mediaItemId);
+export function retrieveStoredSubtitleList(mediaHash: string) {
+  return db.retrieveSubtitleList(mediaHash);
 }
 export function addSubtitleItemsToList(
   subtitles: SubtitleControlListItem[],
-  playlistId: number,
-  mediaItemId: string,
+  mediaHash: string,
 ) {
   const storedSubtitles = subtitles.filter(s => s).map(({
     hash, type, source, delay,
   }) => ({
     hash, type, source, delay,
   }));
-  return db.addSubtitleItemsToList(playlistId, mediaItemId, storedSubtitles);
+  return db.addSubtitleItemsToList(mediaHash, storedSubtitles);
 }
 export function updateSubtitleList(
   subtitles: SubtitleControlListItem[],
-  playlistId: number,
-  mediaItemId: string,
+  mediaHash: string,
 ) {
   const subtitlesToUpdate = subtitles
     .filter(sub => !!sub)
@@ -69,42 +67,33 @@ export function updateSubtitleList(
     }) => ({
       hash, type, source, delay,
     }));
-  return db.updateSubtitleList(playlistId, mediaItemId, subtitlesToUpdate);
+  return db.updateSubtitleList(mediaHash, subtitlesToUpdate);
 }
 export function removeSubtitleItemsFromList(
   subtitles: SubtitleControlListItem[],
-  playlistId: number,
-  mediaItemId: string,
+  mediaHash: string,
 ) {
   const storedSubtitles = subtitles.filter(s => s).map(({
     hash, type, source, delay,
   }) => ({
     hash, type, source, delay,
   }));
-  return db.removeSubtitleItemsFromList(playlistId, mediaItemId, storedSubtitles);
+  return db.removeSubtitleItemsFromList(mediaHash, storedSubtitles);
 }
 export function storeSubtitleLanguage(
   languageCodes: LanguageCode[],
-  playlistId: number,
-  mediaItemId: string,
+  mediaHash: string,
 ) {
-  return db.storeSubtitleLanguage(playlistId, mediaItemId, languageCodes);
+  return db.storeSubtitleLanguage(mediaHash, languageCodes);
 }
 export function storeSelectedSubtitles(
   subs: SelectedSubtitle[],
-  playlistId: number,
-  mediaItemId: string,
+  mediaHash: string,
 ) {
-  return db.storeSelectedSubtitles(playlistId, mediaItemId, subs);
+  return db.storeSelectedSubtitles(mediaHash, subs);
 }
-export function retrieveSelectedSubtitles(playlistId: number, mediaItemId: string) {
-  return db.retrieveSelectedSubtitles(playlistId, mediaItemId);
-}
-export async function deleteSubtitlesByPlaylistId(playlistId: number) {
-  const hashes = await db.deleteSubtitlesByPlaylistId(playlistId);
-  const cachedSubtitleSources = await removeCachedSubtitles(hashes);
-  await db.removeSubtitles(cachedSubtitleSources
-    .map(({ hash, source }) => ({ hash, source: source.source })));
+export function retrieveSelectedSubtitles(mediaHash: string) {
+  return db.retrieveSelectedSubtitles(mediaHash);
 }
 
 export class DatabaseGenerator implements IEntityGenerator {

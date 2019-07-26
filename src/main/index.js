@@ -370,10 +370,10 @@ function registerMainWindowEvent(mainWindow) {
     }
   });
   /** grab audio logic in main process start */
-  function audioGrabCallBack(buffer, end, time) {
+  function audioGrabCallBack(data) {
     try {
       if (mainWindow && !mainWindow.webContents.isDestroyed()) {
-        mainWindow.webContents.send('grab-audio-update', { buffer, end, time });
+        mainWindow.webContents.send('grab-audio-update', data);
       }
     } catch (error) {
       // empty

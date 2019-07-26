@@ -128,7 +128,6 @@ import PlaylistItem from '@/components/LandingView/PlaylistItem.vue';
 import VideoItem from '@/components/LandingView/VideoItem.vue';
 import { log } from '@/libs/Log';
 import Sagi from '@/libs/sagi';
-import { deleteSubtitlesByPlaylistId } from '../services/storage/subtitle';
 
 Vue.component('PlaylistItem', PlaylistItem);
 Vue.component('VideoItem', VideoItem);
@@ -232,7 +231,6 @@ export default {
   /* eslint-disable @typescript-eslint/no-explicit-any */
   created() {
     window.addEventListener('mousemove', this.globalMoveHandler);
-    this.useBlur = window.devicePixelRatio === 1;
     // Get all data and show
     if (!this.$store.getters.deleteVideoHistoryOnExit) {
       recentPlayService.getRecords().then((results) => {
@@ -362,7 +360,6 @@ export default {
         this.lastIndex = this.landingViewItems.length;
       }
       playInfoStorageService.deleteRecentPlayedBy(deletedItem.id);
-      deleteSubtitlesByPlaylistId(deletedItem.id);
     },
   },
 };

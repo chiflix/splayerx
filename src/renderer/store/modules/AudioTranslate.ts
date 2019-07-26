@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-05 16:03:32
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-07-25 16:14:12
+ * @Last Modified time: 2019-07-26 15:40:51
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @ts-ignore
@@ -352,6 +352,7 @@ const actions = {
           // empty
         }
       });
+      grab.removeListener('task', taskCallback);
       grab.on('task', taskCallback);
       grab.on('transcriptInfo', async (transcriptInfo: TranscriptInfo) => {
         console.log(transcriptInfo, 'audio-log');
@@ -373,9 +374,7 @@ const actions = {
           // 加入刚刚翻译好的AI字幕
           const generator = new TranslatedGenerator(transcriptInfo);
           const subtitle = await dispatch(smActions.addSubtitle, {
-            generator,
-            playlistId: getters.playListId,
-            mediaItemId: `${getters.mediaHash}-${getters.originSrc}`,
+            generator, mediaHash: audioTranslateService.mediaHash,
           });
           if (subtitle && subtitle.id) {
             // 选中当前翻译的字幕
@@ -420,6 +419,11 @@ const actions = {
       commit(m.AUDIO_TRANSLATE_UPDATE_LAST_AUDIO_LANGUAGE, taskInfo.audioLanguageCode);
       commit(m.AUDIO_TRANSLATE_SELECTED_UPDATE, sub);
       dispatch(a.AUDIO_TRANSLATE_START, taskInfo.audioLanguageCode);
+      if (getters.isFirstSubtitle) {
+        dispatch(smActions.changePrimarySubtitle, sub.id);
+      } else {
+        dispatch(smActions.changeSecondarySubtitle, sub.id);
+      }
     }
   },
   [a.AUDIO_TRANSLATE_DISCARD]( // eslint-disable-line complexity

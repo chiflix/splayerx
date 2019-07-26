@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-06-20 18:03:14
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-07-25 16:42:36
+ * @Last Modified time: 2019-07-26 14:52:52
  */
 
 // @ts-ignore
@@ -10,7 +10,6 @@ import { ipcRenderer, Event } from 'electron';
 import { EventEmitter } from 'events';
 import { isNaN } from 'lodash';
 import {
-  StreamingTranslationRequest,
   StreamingTranslationResponse,
 } from 'sagi-api/translation/v1/translation_pb';
 import { AITaskInfo } from '@/interfaces/IMediaStorable';
@@ -57,7 +56,7 @@ class AudioTranslateService extends EventEmitter {
 
   // loop task 3次超时 才算超时
   // 如果3次内正常收到，就重置
-  private timeoutCount: number;
+  private loopTimeoutCount: number;
 
   public constructor(mediaStorageService: MediaStorageService) {
     super();
@@ -66,58 +65,30 @@ class AudioTranslateService extends EventEmitter {
   }
 
   public ipcCallBack(event: Event, {
-    buffer, end, time,
-  }: { buffer: Buffer, end: boolean, time: number }) {
-    this.write(buffer);
-    if (end) {
-      this.emit('grabCompleted');
-      if (this.streamClient) {
-        this.streamClient.end();
-        console.log('write EOF to server', 'audio-log');
-        if (this.timeoutTimer) {
-          clearTimeout(this.timeoutTimer);
-        }
-        this.timeoutTimer = setTimeout(() => {
-          // 10秒超时，再发一次EOF
-          if (this.streamClient) {
-            this.streamClient.end();
-            console.log('write EOF to server 2', 'audio-log');
-          }
-        }, 1000 * 10);
-        this.streamClient.once('data', this.rpcCallBack.bind(this));
-      }
-      ipcRenderer.send('grab-audio-stop');
-    } else {
+    time, end, error, result,
+  }: {
+    time?: Buffer, end?: boolean, error?: number, result?: StreamingTranslationResponse.AsObject
+  }) {
+    console.log(time, end, error, result);
+    if (time) {
       this.emit('grab', time);
-      ipcRenderer.send('grab-audio-continue');
+    } else if (end) {
+      this.emit('grabCompleted');
+    } else if (result) {
+      this.handleMainCallBack(result);
+    } else if (error) {
+      this.emit('error', error);
+      this.stop();
     }
   }
 
   public stop() {
     this.removeAllListeners();
     this.clearJob();
-    if (this.streamClient) {
-      this.streamClient.removeAllListeners();
-      this.streamClient = null;
-    }
     ipcRenderer.send('grab-audio-stop');
   }
 
-  private write(framebuf: Buffer) {
-    try {
-      // fs.appendFileSync('/Users/harry/Desktop/6.pcm', framebuf);
-      if (this.streamClient) {
-        const request = new StreamingTranslationRequest();
-        request.setAudioContent(framebuf);
-        this.streamClient.write(request);
-      }
-    } catch (error) {
-      console.warn(error);
-    }
-  }
-
   public startJob(data: JobData): AudioTranslateService {
-    this.timeoutCount = 3;
     // 计算audioID
     const audioId = Number(data.audioId) - 1;
     this.audioId = isNaN(audioId) ? -1 : audioId;
@@ -126,46 +97,22 @@ class AudioTranslateService extends EventEmitter {
     this.videoSrc = data.videoSrc;
     this.audioLanguageCode = data.audioLanguageCode;
     this.targetLanguageCode = data.targetLanguageCode;
-    // create stream client
-    this.streamClient = sagi.streamingTranslation(
-      this.mediaHash,
-      16000,
-      this.audioLanguageCode,
-      this.targetLanguageCode,
-    );
-
-    this.streamClient.once('data', this.rpcCallBack.bind(this));
-    this.streamClient.on('error', this.streamError.bind(this));
-    // 开启超时处理
-    this.timeOut();
+    ipcRenderer.send('grab-audio', {
+      mediaHash: this.mediaHash,
+      videoSrc: this.videoSrc,
+      audioLanguageCode: this.audioLanguageCode,
+      targetLanguageCode: this.targetLanguageCode,
+      audioId: this.audioId,
+    });
+    ipcRenderer.removeListener('grab-audio-update', this.ipcCallBack);
+    ipcRenderer.on('grab-audio-update', this.ipcCallBack);
     return this;
   }
 
-  private timeOut() {
-    // 开启timeout, 如果在超时时间内收到data，就取消timeout
-    // 如果没有收到data，就放弃任务，发送超时错误
-    if (this.timeoutTimer) {
-      clearTimeout(this.timeoutTimer);
-    }
-    this.timeoutTimer = setTimeout(() => {
-      // 发送error
-      this.emit('error', new Error('time out'));
-      // 丢弃本次任务
-      this.stop();
-    }, 1000 * 10);
-  }
-
-  private rpcCallBack( // eslint-disable-line complexity
-    res: StreamingTranslationResponse,
-    err: Error,
+  private handleMainCallBack( // eslint-disable-line complexity
+    result: StreamingTranslationResponse.AsObject,
   ) {
-    // 收到返回数据，清楚超时定时器
-    if (this.timeoutTimer) {
-      clearTimeout(this.timeoutTimer);
-    }
-    const result = res && res.toObject();
-    console.log(result, err);
-    if (result && res.hasTaskinfo() && result.taskinfo) {
+    if (result && result.taskinfo) {
       this.taskInfo = {
         mediaHash: this.mediaHash,
         audioLanguageCode: this.audioLanguageCode,
@@ -174,37 +121,18 @@ class AudioTranslateService extends EventEmitter {
       };
       this.emit('task', this.taskInfo);
       this.loopTask(this.taskInfo);
-    } else if (result && res.hasTranscriptResult()) {
+    } else if (result && result.transcriptResult) {
       // get Transcript Info
       // return hash to render
       this.emit('transcriptInfo', result.transcriptResult);
       this.clearJob();
     } else if (result && result.error && result.error.code === 9100) {
-      this.startGrab();
-    } else if (result && res.hasError()) {
+      ipcRenderer.send('grab-audio-continue');
+    } else if (result && result.error) {
       // return error to render
       this.emit('error', result.error);
       this.stop();
-    } else if (err) {
-      this.emit('error', err);
-      this.stop();
     }
-  }
-
-  private streamError(error: Error) {
-    console.log(error, 'audio-log');
-    this.emit('error', error);
-    // 报错，主动丢弃
-    this.stop();
-  }
-
-  private startGrab() {
-    ipcRenderer.send('grab-audio', {
-      videoSrc: this.videoSrc,
-      audioId: this.audioId,
-    });
-    ipcRenderer.removeListener('grab-audio-update', this.ipcCallBack);
-    ipcRenderer.on('grab-audio-update', this.ipcCallBack);
   }
 
   private loopTask(taskInfo: AITaskInfo) {
@@ -231,16 +159,16 @@ class AudioTranslateService extends EventEmitter {
           };
           this.emit('task', this.taskInfo);
           // 3次超时内得到返回，重置超时次数
-          this.timeoutCount = 3;
+          this.loopTimeoutCount = 3;
           this.loopTask(this.taskInfo);
         } else if (result && res.hasError()) {
           this.emit('error', result.error);
           this.stop();
         }
       } catch (error) {
-        if (error && error.message === 'time out' && this.timeoutCount > 0 && this.taskInfo) {
-          console.log('time out', 4 - this.timeoutCount, 'audio-log');
-          this.timeoutCount -= 1;
+        if (error && error.message === 'time out' && this.loopTimeoutCount > 0 && this.taskInfo) {
+          console.log('time out', 4 - this.loopTimeoutCount, 'audio-log');
+          this.loopTimeoutCount -= 1;
           this.loopTask(this.taskInfo);
         } else {
           console.log(error);
@@ -254,9 +182,6 @@ class AudioTranslateService extends EventEmitter {
   public clearJob() {
     if (this.loopTimer) {
       clearTimeout(this.loopTimer);
-    }
-    if (this.timeoutTimer) {
-      clearTimeout(this.timeoutTimer);
     }
   }
 

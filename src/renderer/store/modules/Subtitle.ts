@@ -198,7 +198,7 @@ const actions = {
   async [a.delete]({ state, rootGetters }: any) {
     const subtitleToRemoveFromList = rootGetters.list
       .find((sub: SubtitleControlListItem) => sub.id === state.moduleId);
-    const { playlistId, mediaItemId } = store.state.SubtitleManager;
+    const { mediaHash } = store.state.SubtitleManager;
     const subtitle = subtitleMap.get(state.moduleId);
     if (subtitle) {
       subtitleMap.delete(state.moduleId);
@@ -208,7 +208,7 @@ const actions = {
         if (cachedSource) await removeSubtitle({ ...subtitle.entity, source: cachedSource });
       }
     }
-    removeSubtitleItemsFromList([subtitleToRemoveFromList], playlistId, mediaItemId);
+    removeSubtitleItemsFromList([subtitleToRemoveFromList], mediaHash);
   },
   async [a.upload]({ state, dispatch, rootGetters }: any) {
     const subtitle = subtitleMap.get(state.moduleId);

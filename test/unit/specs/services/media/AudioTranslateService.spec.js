@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-23 17:31:21
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-07-23 18:23:55
+ * @Last Modified time: 2019-07-26 15:15:45
  */
 
 import AudioTranslateService from '@/services/media/AudioTranslateService';
