@@ -397,36 +397,36 @@ const actions = {
         .filter((info: TranscriptInfo) => info.languageCode === primaryLanguage);
       const secondaryNotExistedResults = notExistedNewSubs
         .filter((info: TranscriptInfo) => info.languageCode === secondaryLanguage);
-      // 出现AI按钮的情况
-      // 1. 在线字幕tags都是ES(模糊搜索)
-      // 2. 没有在线字幕
-      if (primaryResults.length === 0 || isAllPrimaryResultsFromES) {
-        addPrimaryAIButton = true;
-        const oldLen = oldPrimarySubs.length;
-        // 如果出现AI按钮，在线字幕列表不能超过2个
-        if (oldLen > 2) {
-          oldSubtitlesToDel.push(...oldPrimarySubs.splice(2, oldLen));
+      if ((await isFeatureEnabled(Features.AI))) {
+        // 出现AI按钮的情况
+        // 1. 在线字幕tags都是ES(模糊搜索)
+        // 2. 没有在线字幕
+        if (primaryResults.length === 0 || isAllPrimaryResultsFromES) {
+          addPrimaryAIButton = true;
+          const oldLen = oldPrimarySubs.length;
+          // 如果出现AI按钮，在线字幕列表不能超过2个
+          if (oldLen > 2) {
+            oldSubtitlesToDel.push(...oldPrimarySubs.splice(2, oldLen));
+          } else {
+            newSubtitlesToAdd.push(...primaryNotExistedResults.splice(0, 2 - oldLen));
+          }
         } else {
-          newSubtitlesToAdd.push(...primaryNotExistedResults.splice(0, 2 - oldLen));
+          newSubtitlesToAdd.push(...primaryNotExistedResults);
+        }
+        if (secondaryLanguage && (secondaryResults.length === 0 || isAllSecondaryResultsFromES)) {
+          addSecondaryAIButton = true;
+          const oldLen = oldSecondarySubs.length;
+          // 如果出现AI按钮，在线字幕列表不能超过2个
+          if (oldLen > 2) {
+            oldSubtitlesToDel.push(...oldSecondarySubs.splice(2, oldLen));
+          } else {
+            newSubtitlesToAdd.push(...secondaryNotExistedResults.splice(0, 2 - oldLen));
+          }
+        } else {
+          newSubtitlesToAdd.push(...secondaryNotExistedResults);
         }
       } else {
-        newSubtitlesToAdd.push(...primaryNotExistedResults);
-      }
-      if (secondaryLanguage && (secondaryResults.length === 0 || isAllSecondaryResultsFromES)) {
-        addSecondaryAIButton = true;
-        const oldLen = oldSecondarySubs.length;
-        // 如果出现AI按钮，在线字幕列表不能超过2个
-        if (oldLen > 2) {
-          oldSubtitlesToDel.push(...oldSecondarySubs.splice(2, oldLen));
-        } else {
-          newSubtitlesToAdd.push(...secondaryNotExistedResults.splice(0, 2 - oldLen));
-        }
-      } else {
-        newSubtitlesToAdd.push(...secondaryNotExistedResults);
-      }
-      if (!(await isFeatureEnabled(Features.AI))) {
-        addPrimaryAIButton = false;
-        addSecondaryAIButton = false;
+        newSubtitlesToAdd.push(...notExistedNewSubs);
       }
       return {
         delete: oldSubtitlesToDel,
@@ -434,7 +434,7 @@ const actions = {
         addPrimaryAIButton,
         addSecondaryAIButton,
       };
-    }).then((result) => {
+    }).then(async (result) => {
       if (result.addPrimaryAIButton) {
         dispatch(a.addSubtitle, {
           generator: new TranslatedGenerator(null, primaryLanguage), mediaHash,
@@ -445,7 +445,7 @@ const actions = {
           generator: new TranslatedGenerator(null, secondaryLanguage), mediaHash,
         });
       }
-      dispatch(a.addOnlineSubtitles, { mediaHash, source: result.add })
+      await dispatch(a.addOnlineSubtitles, { mediaHash, source: result.add })
         .then(() => dispatch(a.deleteSubtitlesByUuid, result.delete));
     });
   },
