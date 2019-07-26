@@ -232,7 +232,6 @@ export default {
   /* eslint-disable @typescript-eslint/no-explicit-any */
   created() {
     window.addEventListener('mousemove', this.globalMoveHandler);
-    this.useBlur = window.devicePixelRatio === 1;
     // Get all data and show
     if (!this.$store.getters.deleteVideoHistoryOnExit) {
       recentPlayService.getRecords().then((results) => {
