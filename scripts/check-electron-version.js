@@ -4,7 +4,11 @@ const { execSync } = require('child_process');
 const electronVersion = app.getVersion();
 
 function updateElectron() {
-  execSync(`force_no_cache=true npm i @chiflix/electron@${electronVersion}`, { stdio: 'inherit' });
+  if (process.platform === 'win32') {
+    execSync(`set force_no_cache=true && npm i @chiflix/electron@${electronVersion}`, { stdio: 'inherit' });
+  } else {
+    execSync(`force_no_cache=true npm i @chiflix/electron@${electronVersion}`, { stdio: 'inherit' });
+  }
 }
 
 try {
