@@ -27,12 +27,10 @@ export default class MenuService {
 
   public updateMenuItemChecked(id: string, checked: boolean) {
     if (this.getMenuItemById(id)) this.getMenuItemById(id).checked = checked;
-    else log.error('renderer/menuservice', `updateMenuItemChecked, ${id} ${checked}`);
   }
 
   public updateMenuItemEnabled(id: string, enabled: boolean) {
     if (this.getMenuItemById(id)) this.getMenuItemById(id).enabled = enabled;
-    else log.error('renderer/menuservice', `updateMenuItemChecked, ${id} ${enabled}`);
   }
 
   public resolveMute(state: boolean) {
