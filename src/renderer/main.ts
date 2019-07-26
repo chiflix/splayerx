@@ -503,6 +503,10 @@ new Vue({
       this.$bus.$emit('drag-leave');
     });
 
+    this.$electron.ipcRenderer.on('open-dialog', () => {
+      this.openFilesByDialog();
+    });
+
     this.$electron.ipcRenderer.on('open-file', (event: Event, args: { onlySubtitle: boolean, files: Array<string> }) => {
       if (!args.files.length && args.onlySubtitle) {
         log.info('helpers/index.js', `Cannot find any related video in the folder: ${args.files}`);
