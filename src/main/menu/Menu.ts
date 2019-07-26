@@ -26,6 +26,9 @@ function isSubmenu(menuItem: MenubarMenuItem): menuItem is IMenubarMenuItemSubme
 function isRole(menuItem: MenubarMenuItem): menuItem is IMenubarMenuItemRole {
   return (menuItem as IMenubarMenuItemRole).role !== undefined;
 }
+function isAction(menuItem: MenubarMenuItem): menuItem is IMenubarMenuItemAction {
+  return (menuItem as IMenubarMenuItemAction).accelerator !== undefined;
+}
 
 export default class Menubar {
   private mainWindow: Electron.BrowserWindow | null;
@@ -40,9 +43,17 @@ export default class Menubar {
 
   private _routeName: string;
 
+  private _disable: boolean;
+
   public set routeName(val: string) {
     this._routeName = val;
     this.menuStateControl();
+  }
+
+  public set disable(val: boolean) {
+    this._disable = val;
+    if (val) this.disableMenu();
+    else this.menuStateControl();
   }
 
   public constructor() {
@@ -249,6 +260,7 @@ export default class Menubar {
         if (menuItem.id === 'playback.playOrPause') {
           menuItem.label = this.paused ? this.$t('msg.playback.play') : this.$t('msg.playback.pause');
         }
+        if (isAction(menuItem) && this._disable) menuItem.enabled = !this._disable;
         const item = this.createMenuItemByTemplate(menuItem);
         playbackMenu.append(item);
       }
@@ -273,6 +285,7 @@ export default class Menubar {
         if (menuItem.id === 'window.fullscreen') {
           menuItem.label = this.isFullScreen ? this.$t('msg.window.exitFullScreen') : this.$t('msg.window.enterFullScreen');
         }
+        if (isAction(menuItem) && this._disable) menuItem.enabled = !this._disable;
         const item = this.createMenuItemByTemplate(menuItem);
         windowMenu.append(item);
       }

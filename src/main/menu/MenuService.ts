@@ -18,17 +18,17 @@ export default class MenuService {
   }
 
   public minimize(isMinimized: boolean) {
-    isMinimized ? this.menu.disableMenu() : this.menu.menuStateControl();
+    this.menu.disable = isMinimized;
   }
 
   public closed() {
     this.windowClosed = true;
-    this.menu.disableMenu();
+    this.menu.disable = true;
     this.menu.setMainWindow(null);
   }
 
   public handleBossKey(hide: boolean) {
-    hide ? this.menu.disableMenu() : this.menu.menuStateControl();
+    this.menu.disable = hide;
   }
 
   private registeMenuActions() {
