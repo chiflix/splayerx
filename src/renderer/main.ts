@@ -365,11 +365,11 @@ new Vue({
     this.$on('wheel-event', this.wheelEventHandler);
 
     window.addEventListener('resize', throttle(() => {
-      this.$store.commit('windowSize', [window.outerWidth, window.outerHeight]);
+      this.$store.commit('windowSize', this.$electron.remote.getCurrentWindow().getSize());
     }, 100));
 
     window.addEventListener('DOMContentLoaded', () => {
-      this.$store.commit('windowSize', [window.outerWidth, window.outerHeight]);
+      this.$store.commit('windowSize', this.$electron.remote.getCurrentWindow().getSize());
     });
 
     window.addEventListener('mousedown', (e) => {
@@ -566,7 +566,7 @@ new Vue({
         this.menuService.updateMenuItemEnabled('subtitle.decreaseSecondarySubtitleDelay', !!this.secondarySubtitleId);
         this.menuService.updateMenuItemEnabled('subtitle.uploadSelectedSubtitle', !!this.ableToPushCurrentSubtitle);
         this.menuService.updateMenuItemChecked('window.keepPlayingWindowFront', this.topOnWindow);
-        
+
         this.audioTrackList.forEach((item: Electron.MenuItem, index: number) => {
           if (item.enabled === true) {
             this.menuService.updateMenuItemChecked(`audio.switchAudioTrack.${index}`, true);
