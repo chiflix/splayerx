@@ -157,8 +157,8 @@
       "noSubtitle": "غير معثور عليه",
       "notToShowSubtitle": "قريب",
       "secondarySubtitle": "الترجمة الثانوية",
-      "subtitleSetting": "",
-      "subtitleDelay": "",
+      "subtitleSetting": "إعدادات الترجمة",
+      "subtitleDelay": "العنوان الفرعي تأخير",
       "size1": "صغير",
       "size2": "اساسي",
       "size3": "كبير",
@@ -182,8 +182,8 @@
       "yes": "نعم فعلا"
     },
     "window": {
-      "windowRotate": "",
-      "keepPlayingWindowFront": "",
+      "windowRotate": "درجة في اتجاه عقارب الساعة",
+      "keepPlayingWindowFront": "تطفو عند اللعب",
       "backToLandingView": "العودة إلى صفحة الإطلاق",
       "bossKey": "مدرب مفتاح",
       "doubleSize": "200٪",
@@ -196,10 +196,10 @@
       "originSize": "100٪"
     },
     "favourite": {
-      "name": "",
-      "iqiyi": "",
-      "bilibili": "",
-      "youtube": ""
+      "name": "مفضل",
+      "iqiyi": "iQIYI",
+      "bilibili": "Bilibili",
+      "youtube": "Youtube"
     }
   },
   "nextVideo": {
