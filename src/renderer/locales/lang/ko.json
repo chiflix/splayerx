@@ -323,24 +323,24 @@
     "cancel": "취소",
     "quit": "떠나다",
     "generate": "일으키다",
-    "translateDescription": "",
-    "ok": "",
-    "successDescriptiton": "",
-    "failDescription": "",
-    "cancelDescription": "",
-    "continue": ""
+    "translateDescription": "비디오를 건너 뛰거나 응용 프로그램을 닫지 마십시오. 번역 패널에서 진행률을 확인할 수 있습니다.",
+    "ok": "승인",
+    "successDescriptiton": "AI 번역이 준비되었습니다. 번역 패널에서 확인하십시오.",
+    "failDescription": "고마워요. 나중에 시도해주세요.",
+    "cancelDescription": "종료 하시겠습니까? 종료하면 번역 진행 상태가 복원되지 않습니다.",
+    "continue": "취소"
   },
   "translateBubble": {
-    "bubbleWhenGrab": "",
-    "bubbleWhenTranslate": "",
-    "bubbleFunctionForbidden": "",
+    "bubbleWhenGrab": "인공 지능 번역이 중단됩니다. 계속한다면 어쨌든 계속 하시겠습니까?",
+    "bubbleWhenTranslate": "AI 번역이 서버에서 처리 중입니다. 다음에 비디오를 볼 때 진행 상태를 확인할 수 있습니다.",
+    "bubbleFunctionForbidden": "인공 지능 번역이 중단됩니다. 계속한다면 어쨌든 계속 하시겠습니까?",
     "bubbleWhenSuccess": {
       "title": "",
-      "content": ""
+      "content": "AI 번역이 준비되었습니다. 번역 패널에서 번역을 확인하십시오."
     },
     "bubbleWhenSuccessOnOtherVideo": {
       "title": "",
-      "content": ""
+      "content": "AI 번역이 준비되었습니다. 다음에 비디오를 볼 때 자동으로로드됩니다."
     },
     "bubbleTranslateFail": {
       "title": "번역 실패",
