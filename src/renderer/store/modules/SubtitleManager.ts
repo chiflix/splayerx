@@ -453,7 +453,7 @@ const actions = {
   },
   async [a.addLocalSubtitles](
     { dispatch }: any,
-    { mediaHash, source }: IAddSubtitlesOptions<string>,
+    { mediaHash, source = [] }: IAddSubtitlesOptions<string>,
   ) {
     return Promise.all(
       source.map((path: string) => dispatch(a.addSubtitle, {
@@ -495,7 +495,7 @@ const actions = {
   },
   async [a.addEmbeddedSubtitles](
     { dispatch }: any,
-    { mediaHash, source }: IAddSubtitlesOptions<[string, ISubtitleStream]>,
+    { mediaHash, source = [] }: IAddSubtitlesOptions<[string, ISubtitleStream]>,
   ) {
     return Promise.all(
       source.map(stream => dispatch(a.addSubtitle, {
@@ -506,7 +506,7 @@ const actions = {
   },
   async [a.addOnlineSubtitles](
     { dispatch }: any,
-    { mediaHash, source }: IAddSubtitlesOptions<TranscriptInfo>,
+    { mediaHash, source = [] }: IAddSubtitlesOptions<TranscriptInfo>,
   ) {
     return Promise.all(
       source.map((info: TranscriptInfo) => {
@@ -526,7 +526,7 @@ const actions = {
   },
   async [a.addDatabaseSubtitles](
     { getters, dispatch }: any,
-    { source, mediaHash, selected }: IAddDatabaseSubtitlesOptions,
+    { source = [], mediaHash, selected }: IAddDatabaseSubtitlesOptions,
   ) {
     return Promise.all(
       source.map(async stored => dispatch(a.addSubtitle, {
