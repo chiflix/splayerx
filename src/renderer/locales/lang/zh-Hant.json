@@ -106,8 +106,8 @@
     },
     "help": {
       "name": "幫助",
-      "feedback": "",
-      "homepage": "",
+      "feedback": "意見反饋",
+      "homepage": "官網",
       "splayerxHelp": "幫助",
       "shortCuts": "快捷鍵列表",
       "crashReportLocation": "查看錯誤日誌",
@@ -157,8 +157,8 @@
       "noSubtitle": "暫未找到翻譯結果",
       "notToShowSubtitle": "無",
       "secondarySubtitle": "第二字幕",
-      "subtitleSetting": "",
-      "subtitleDelay": "",
+      "subtitleSetting": "字幕設置",
+      "subtitleDelay": "字幕延遲",
       "size1": "小",
       "size2": "標準",
       "size3": "大",
@@ -182,8 +182,8 @@
       "yes": "更新"
     },
     "window": {
-      "windowRotate": "",
-      "keepPlayingWindowFront": "",
+      "windowRotate": "正時針旋轉 90°",
+      "keepPlayingWindowFront": "播放時保持在前",
       "backToLandingView": "回到著陸頁",
       "bossKey": "老板鍵",
       "doubleSize": "200%",
@@ -196,10 +196,10 @@
       "originSize": "100%"
     },
     "favourite": {
-      "name": "",
-      "iqiyi": "",
-      "bilibili": "",
-      "youtube": ""
+      "name": "收藏",
+      "iqiyi": "爱奇艺",
+      "bilibili": "哔哩哔哩",
+      "youtube": "Youtube"
     }
   },
   "nextVideo": {
