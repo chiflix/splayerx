@@ -208,7 +208,7 @@
     "primary": "首要語言",
     "secondary": "次要語言",
     "chooseSecondary": "選擇次要語言",
-    "languageDescription": "* 稍後您可以在偏好設置裏更改",
+    "languageDescription": "* 稍後您可以在偏好設置中更改",
     "none": "無"
   },
   "preferences": {
@@ -346,8 +346,8 @@
       "title": "翻譯失敗",
       "content": "請稍後重試，謝謝。"
     },
-    "ok": "",
-    "cancel": "",
+    "ok": "好的",
+    "cancel": "取消",
     "continue": "中止"
   }
 }
