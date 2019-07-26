@@ -128,6 +128,7 @@ export default class WindowRectService implements IWindowRectRequest {
     if (!fullScreen && whichView === 'landing-view') {
       ipcRenderer.send('callMainWindowMethod', 'setSize', LANDINGVIEWRECT.slice(0, 2));
       ipcRenderer.send('callMainWindowMethod', 'setPosition', LANDINGVIEWRECT.slice(2, 4));
+      setTimeout(() => window.dispatchEvent(new Event('resize')), 10);
       newRect = LANDINGVIEWRECT;
     } else if (!fullScreen && lastWindowSize && windowPosition
       && (((windowAngle === 90 || windowAngle === 270)
@@ -147,6 +148,7 @@ export default class WindowRectService implements IWindowRectRequest {
       ipcRenderer.send('callMainWindowMethod', 'setSize', newRect.slice(2, 4));
       ipcRenderer.send('callMainWindowMethod', 'setPosition', newRect.slice(0, 2));
       ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [newRect.slice(2, 4)[0] / newRect.slice(2, 4)[1]]);
+      setTimeout(() => window.dispatchEvent(new Event('resize')), 10);
     }
     return newRect;
   }
@@ -180,6 +182,7 @@ export default class WindowRectService implements IWindowRectRequest {
     ipcRenderer.send('callMainWindowMethod', 'setSize', rect.slice(2, 4));
     ipcRenderer.send('callMainWindowMethod', 'setPosition', rect.slice(0, 2));
     ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [rect.slice(2, 4)[0] / rect.slice(2, 4)[1]]);
+    setTimeout(() => window.dispatchEvent(new Event('resize')), 10);
     return rect;
   }
 

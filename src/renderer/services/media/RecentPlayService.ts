@@ -1,5 +1,5 @@
 import { basename, extname } from 'path';
-import { IRecentPlay, LandingViewDisplayInfo } from '@/interfaces/IRecentPlay';
+import { IRecentPlay, ILandingViewDisplayInfo, IMenuDisplayInfo } from '@/interfaces/IRecentPlay';
 import { mediaStorageService } from '@/services/storage/MediaStorageService';
 import { playInfoStorageService } from '@/services/storage/PlayInfoStorageService';
 import { info } from '@/libs/DataBase';
@@ -17,7 +17,7 @@ type coverViedoItem = {
 };
 
 export default class RecentPlayService implements IRecentPlay {
-  public async getRecords(): Promise<LandingViewDisplayInfo[]> {
+  public async getRecords(): Promise<ILandingViewDisplayInfo[]> {
     const recentPlayedResults = await playInfoStorageService.getAllRecentPlayed();
     const coverVideos = (await Promise.all(
       recentPlayedResults.map(async (value) => {
@@ -38,8 +38,8 @@ export default class RecentPlayService implements IRecentPlay {
       }),
     )).filter(item => !!item);
     const getBasename = (path: string) => basename(path, extname(path));
-    const results: LandingViewDisplayInfo[] = await Promise.all(
-      coverVideos.map(async (item: coverViedoItem): Promise<LandingViewDisplayInfo> => {
+    const results: ILandingViewDisplayInfo[] = await Promise.all(
+      coverVideos.map(async (item: coverViedoItem): Promise<ILandingViewDisplayInfo> => {
         const {
           lastPlayedTime, duration, path, playedIndex, playlistLength, shortCut, id,
         } = item;
@@ -74,6 +74,12 @@ export default class RecentPlayService implements IRecentPlay {
       }),
     );
     return results.splice(0, 9);
+  }
+
+  public async getMenuDisplayInfo(): Promise<IMenuDisplayInfo[]> {
+    const results = (await this.getRecords())
+      .map(({ id, path }: ILandingViewDisplayInfo) => ({ id, label: path }));
+    return results;
   }
 }
 

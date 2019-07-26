@@ -180,7 +180,6 @@ export class Sagi {
       }, 1000 * 10);
       client.streamingTranslationTask(taskRequest, (err, res) => {
         clearTimeout(onlineTimeoutId);
-        console.log(res);
         if (err) reject(err);
         else resolve(res);
       });

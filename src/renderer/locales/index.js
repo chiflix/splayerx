@@ -1,4 +1,4 @@
-const languageFiles = require.context('@/locales/lang/', false, /\.json$/);
+const languageFiles = require.context('./lang/', false, /\.json$/);
 const messages = languageFiles.keys()
   .reduce((messagesObj, currentFilename) => {
     const languageCode = currentFilename.replace(/\.(\/|json)+/g, '');

@@ -101,8 +101,8 @@
       "open": "打開文件…",
       "openRecent": "打開最近播放",
       "openURL": "打開 URL…",
-      "copy": "復制",
-      "paste": "粘貼"
+      "copy": "複製",
+      "paste": "貼上"
     },
     "help": {
       "name": "幫助",
@@ -208,7 +208,7 @@
     "primary": "首要語言",
     "secondary": "次要語言",
     "chooseSecondary": "選擇次要語言",
-    "languageDescription": "* 稍後您可以在偏好設置裏更改",
+    "languageDescription": "* 稍後您可以在偏好設置中更改",
     "none": "無"
   },
   "preferences": {
@@ -267,6 +267,7 @@
   },
   "subtitle": {
     "embedded": "內嵌",
+    "generate": "生成",
     "language": {
       "ar": "阿拉伯語",
       "de": "德語",
@@ -307,5 +308,46 @@
   "loadVideoBySubtitleFailed": {
     "content": "未找到目錄下與字幕同名的視頻文件",
     "title": ""
+  },
+  "translateModal": {
+    "title": "選擇視頻源語言",
+    "translateTitle": "大約剩餘 {time}",
+    "minute": "{number} 分鐘",
+    "second": "{number} 秒",
+    "hour": "{number} 小時",
+    "successTitle": "翻譯完成",
+    "failTitle": "翻譯失敗",
+    "cancelTitle": "AI翻譯正在進行中",
+    "selectDescription": "如要生成智能翻譯，請選擇您在視頻中所聽到的語言並點擊生成，該過程將持續一段時間。",
+    "selectLanguageLabel": "視頻源語言",
+    "cancel": "取消",
+    "quit": "退出",
+    "generate": "生成",
+    "translateDescription": "請不要切換視頻或關閉播放器，您可以在該視頻的翻譯結果列表中查看進度。",
+    "ok": "好的",
+    "successDescriptiton": "AI翻譯已完成，可在翻譯結果列表中查看。",
+    "failDescription": "請稍後重試，謝謝。",
+    "cancelDescription": "點擊退出取消翻譯，退出後翻譯進度將不可恢復。",
+    "continue": "取消"
+  },
+  "translateBubble": {
+    "bubbleWhenGrab": "該操作將會導致正在進行的翻譯中止，是否中止？",
+    "bubbleWhenTranslate": "AI翻譯會在雲端繼續處理，下次播放該視頻時將自動獲取翻譯進度。",
+    "bubbleFunctionForbidden": "該操作將會導致正在進行的翻譯中止，是否中止？",
+    "bubbleWhenSuccess": {
+      "title": "",
+      "content": "AI翻譯已完成，可在翻譯結果列表中查看。"
+    },
+    "bubbleWhenSuccessOnOtherVideo": {
+      "title": "",
+      "content": "AI 翻譯已完成，將在下次打開視頻時自動顯示。"
+    },
+    "bubbleTranslateFail": {
+      "title": "翻譯失敗",
+      "content": "請稍後重試，謝謝。"
+    },
+    "ok": "好的",
+    "cancel": "取消",
+    "continue": "中止"
   }
 }
