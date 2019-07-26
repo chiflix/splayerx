@@ -219,7 +219,11 @@ new Vue({
     },
     currentRouteName(val) {
       this.menuService.updateRouteName(val);
-      this.menuService.addRecentPlayItems();
+      if (val === 'landing-view' || val === 'playing-view') this.menuService.addRecentPlayItems();
+      if (val === 'playing-view' && this.topOnWindow) {
+        const browserWindow = this.$electron.remote.getCurrentWindow();
+        browserWindow.setAlwaysOnTop(true);
+      }
     },
     volume(val: number) {
       this.menuService.resolveMute(val <= 0);
@@ -271,8 +275,9 @@ new Vue({
       const browserWindow = this.$electron.remote.getCurrentWindow();
       if (val && browserWindow.isAlwaysOnTop()) {
         browserWindow.setAlwaysOnTop(false);
-      } else if (!val && this.menuService.isMenuItemChecked('window.keepPlayingWindowFront')) {
+      } else if (!val && this.topOnWindow) {
         browserWindow.setAlwaysOnTop(true);
+        this.topOnWindow = true;
       }
       this.menuService.updatePaused(val);
     },
@@ -546,7 +551,9 @@ new Vue({
       changeSecondarySubDelay: SubtitleManager.alterSecondaryDelay,
     }),
     async initializeMenuSettings() {
-      await this.menuService.addRecentPlayItems();
+      if (this.currentRouteName !== 'welcome-privacy' && this.currentRouteName !== 'language-setting') {
+        await this.menuService.addRecentPlayItems();
+      }
 
       if (this.currentRouteName === 'playing-view') {
         this.menuService.addPrimarySub(this.recentSubMenu());
@@ -762,13 +769,16 @@ new Vue({
         this.$store.dispatch(SubtitleManager.manualUploadAllSubtitles);
       });
       this.menuService.on('window.keepPlayingWindowFront', () => {
+        if (this.currentRouteName === 'landing-view') return;
         const { remote } = this.$electron;
         const browserWindow = remote.BrowserWindow.getFocusedWindow();
         if (browserWindow.isAlwaysOnTop()) {
           browserWindow.setAlwaysOnTop(false);
+          this.topOnWindow = false;
           this.menuService.updateMenuItemChecked('window.keepPlayingWindowFront', false);
         } else if (!this.paused) {
           browserWindow.setAlwaysOnTop(true);
+          this.topOnWindow = true;
           this.menuService.updateMenuItemChecked('window.keepPlayingWindowFront', true);
         }
       });
