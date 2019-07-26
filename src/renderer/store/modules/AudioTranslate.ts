@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-05 16:03:32
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-07-26 18:44:15
+ * @Last Modified time: 2019-07-26 19:28:39
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @ts-ignore
@@ -135,7 +135,6 @@ const taskCallback = (taskInfo: AITaskInfo) => {
     timerCount += 1;
     const estimateTime = startEstimateTime - (Math.log(timerCount) * reduce);
     const progress = ((staticEstimateTime - estimateTime) / staticEstimateTime) * 100;
-    console.log(startEstimateTime, estimateTime, reduce);
     // @ts-ignore
     store.commit(m.AUDIO_TRANSLATE_UPDATE_ESTIMATE_TIME, estimateTime);
     // @ts-ignore

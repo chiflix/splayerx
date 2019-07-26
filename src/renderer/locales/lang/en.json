@@ -319,7 +319,7 @@
     "successTitle": "Translation Done",
     "failTitle": "Translation Failed",
     "cancelTitle": "AI Translation is in Progress",
-    "selectDescription": "To generate a tranlation result, please select the language you hear in the video and click the generate button. The process might take some time.",
+    "selectDescription": "To generate a translation result, please select the language you hear in the video and click the generate button. The process might take some time.",
     "selectLanguageLabel": "Audio Language",
     "cancel": "Cancel",
     "quit": "Quit",
