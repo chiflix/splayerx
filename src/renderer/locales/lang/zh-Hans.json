@@ -323,12 +323,12 @@
     "cancel": "取消",
     "quit": "退出",
     "generate": "生成",
-    "translateDescription": "",
-    "ok": "",
-    "successDescriptiton": "",
-    "failDescription": "",
-    "cancelDescription": "",
-    "continue": ""
+    "translateDescription": "请不要切换视频或关闭播放器，您可以在该视频的翻译结果列表中查看进度。",
+    "ok": "好的",
+    "successDescriptiton": "AI翻译已完成，可在翻译结果列表中查看。",
+    "failDescription": "请稍后重试，谢谢。",
+    "cancelDescription": "点击退出取消翻译，退出后翻译进度将不可恢复。",
+    "continue": "取消"
   },
   "translateBubble": {
     "bubbleWhenGrab": "",
