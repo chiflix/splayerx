@@ -106,6 +106,8 @@
     },
     "help": {
       "name": "帮助",
+      "feedback": "反馈",
+      "homepage": "官网",
       "splayerxHelp": "帮助",
       "shortCuts": "快捷键列表",
       "crashReportLocation": "查看错误日志",
@@ -114,7 +116,6 @@
     "playback": {
       "backwardL": "后退 -60s",
       "backwardS": "后退 -5s",
-      "windowRotate": "正时针旋转 90°",
       "captureScreen": "截图",
       "captureVideoClip": "截取视频片段",
       "decreasePlaybackSpeed": "减缓播放速度",
@@ -122,7 +123,6 @@
       "forwardS": "前进 +5s",
       "fullScreen": "全屏\/退出全屏",
       "increasePlaybackSpeed": "加快播放速度",
-      "keepPlayingWindowFront": "播放时保持在前",
       "name": "播放",
       "pause": "暂停",
       "play": "播放",
@@ -134,10 +134,8 @@
     },
     "splayerx": {
       "about": "关于射手影音",
-      "feedback": "反馈",
       "hide": "隐藏射手影音",
       "hideOthers": "隐藏其他",
-      "homepage": "网站",
       "preferences": "偏好设置",
       "quit": "退出射手影音",
       "showAll": "全部显示"
@@ -159,6 +157,8 @@
       "noSubtitle": "暂未找到翻译结果",
       "notToShowSubtitle": "关闭",
       "secondarySubtitle": "第二字幕",
+      "subtitleSetting": "字幕设置",
+      "subtitleDelay": "字幕延迟",
       "size1": "小",
       "size2": "标准",
       "size3": "大",
@@ -182,6 +182,8 @@
       "yes": "更新"
     },
     "window": {
+      "windowRotate": "正时针旋转90°",
+      "keepPlayingWindowFront": "播放时置顶",
       "backToLandingView": "回到启动页",
       "bossKey": "老板键",
       "doubleSize": "200%",
@@ -192,6 +194,12 @@
       "minimize": "最小化",
       "name": "窗口",
       "originSize": "100%"
+    },
+    "favourite": {
+      "name": "收藏",
+      "iqiyi": "爱奇艺",
+      "bilibili": "哔哩哔哩",
+      "youtube": "Youtube"
     }
   },
   "nextVideo": {

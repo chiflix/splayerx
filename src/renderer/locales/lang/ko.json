@@ -101,11 +101,13 @@
       "open": "열다…",
       "openRecent": "열기 최근",
       "openURL": "URL 열기 ...",
-      "copy": "복사",
-      "paste": "붙여 넣기"
+      "copy": "부",
+      "paste": "풀"
     },
     "help": {
       "name": "도움",
+      "feedback": "피드백",
+      "homepage": "공식 사이트",
       "splayerxHelp": "도움",
       "shortCuts": "바로 가기 목록",
       "crashReportLocation": "오류 로그보기",
@@ -114,7 +116,6 @@
     "playback": {
       "backwardL": "단계 뒤로 -60 년대",
       "backwardS": "스텝 뒤로 -5s",
-      "windowRotate": "시계 방향으로 90 ° 회전",
       "captureScreen": "화면 캡처",
       "captureVideoClip": "비디오 클립 캡처",
       "decreasePlaybackSpeed": "재생 속도 감소",
@@ -122,7 +123,6 @@
       "forwardS": "1 단계 앞으로",
       "fullScreen": "전체 화면",
       "increasePlaybackSpeed": "재생 속도 향상",
-      "keepPlayingWindowFront": "재생할 때 플로트",
       "name": "재생",
       "pause": "중지",
       "play": "놀이",
@@ -134,10 +134,8 @@
     },
     "splayerx": {
       "about": "SPlayer 정보",
-      "feedback": "피드백",
       "hide": "숨는 장소",
       "hideOthers": "다른 사람 숨기기",
-      "homepage": "웹 사이트",
       "preferences": "환경 설정",
       "quit": "SPlayer 종료",
       "showAll": "모두 표시"
@@ -159,6 +157,8 @@
       "noSubtitle": "찾을 수 없음",
       "notToShowSubtitle": "닫기",
       "secondarySubtitle": "보조 부제목",
+      "subtitleSetting": "자막 설정",
+      "subtitleDelay": "자막 지연",
       "size1": "작은",
       "size2": "표준",
       "size3": "큰",
@@ -182,6 +182,8 @@
       "yes": "예"
     },
     "window": {
+      "windowRotate": "시계 방향으로 90 ° 회전",
+      "keepPlayingWindowFront": "재생할 때 플로트",
       "backToLandingView": "시작 페이지로 돌아 가기",
       "bossKey": "보스 키",
       "doubleSize": "200 %",
@@ -192,6 +194,12 @@
       "minimize": "최소화",
       "name": "창문",
       "originSize": "100 %"
+    },
+    "favourite": {
+      "name": "인기 있는 말",
+      "iqiyi": "iQIYI",
+      "bilibili": "Bilibili",
+      "youtube": "Youtube"
     }
   },
   "nextVideo": {
