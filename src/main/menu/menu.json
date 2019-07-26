@@ -35,11 +35,6 @@
   "file": {
     "items": [
       {
-        "id": "file.launch",
-        "label": "msg.file.openWindow",
-        "enabled": false
-      },
-      {
         "id": "file.open",
         "label": "msg.file.open",
         "accelerator": "CmdOrCtrl+O"
