@@ -234,6 +234,7 @@ new Vue({
       }
     },
     primarySubtitleId(id: string) {
+      if (this.currentRouteName !== 'playing-view') return;
       this.menuService.updateMenuItemEnabled('subtitle.increasePrimarySubtitleDelay', !!id);
       this.menuService.updateMenuItemEnabled('subtitle.decreasePrimarySubtitleDelay', !!id);
       if (id) {
@@ -243,6 +244,7 @@ new Vue({
       }
     },
     secondarySubtitleId(id: string) {
+      if (this.currentRouteName !== 'playing-view') return;
       this.menuService.updateMenuItemEnabled('subtitle.increaseSecondarySubtitleDelay', !!id);
       this.menuService.updateMenuItemEnabled('subtitle.decreaseSecondarySubtitleDelay', !!id);
       if (id) {
@@ -252,6 +254,7 @@ new Vue({
       }
     },
     audioTrackList(val, oldval) {
+      if (this.currentRouteName !== 'playing-view') return;
       if (val.length !== oldval.length) {
         this.menuService.addAudioTrack(this.updateAudioTrack());
       }

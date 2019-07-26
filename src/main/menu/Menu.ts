@@ -426,7 +426,26 @@ export default class Menubar {
     }
 
     // Window
-    const windowMenuItem = this.createWindowMenu();
+    const windowMenu = new Menu();
+    const items = this.getMenuItemTemplate('window').items;
+
+    const floatMenuItem = items.find((item: MenubarMenuItem) => item.id === 'window.keepPlayingWindowFront') as IMenubarMenuItemAction;
+
+    windowMenu.append(this.createMenuItemByTemplate(floatMenuItem));
+
+    const fullscreenMenuItem = items.find((item: MenubarMenuItem) => item.id === 'window.fullscreen') as IMenubarMenuItemAction;
+
+    windowMenu.append(this.createMenuItemByTemplate(fullscreenMenuItem));
+
+    const minimizeMenuItem = items.find((item: MenubarMenuItem) => item.id === 'window.minimize') as IMenubarMenuItemRole;
+
+    windowMenu.append(this.createRoleMenuItem(
+      minimizeMenuItem.label,
+      minimizeMenuItem.role,
+      minimizeMenuItem.enabled,
+    ));
+
+    const windowMenuItem = new MenuItem({ id: 'window', label: this.$t('msg.window.name'), submenu: windowMenu });
 
     menubar.append(windowMenuItem);
 
