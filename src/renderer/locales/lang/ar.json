@@ -267,6 +267,7 @@
   },
   "subtitle": {
     "embedded": "تضمين",
+    "generate": "",
     "language": {
       "ar": "عربى",
       "de": "ألمانية",
@@ -307,5 +308,46 @@
   "loadVideoBySubtitleFailed": {
     "content": "العثور على أي فيديو ذات صلة في المجلد",
     "title": ""
+  },
+  "translateModal": {
+    "title": "",
+    "translateTitle": "",
+    "minute": "",
+    "second": "",
+    "hour": "",
+    "successTitle": "",
+    "failTitle": "",
+    "cancelTitle": "",
+    "selectDescription": "",
+    "selectLanguageLabel": "",
+    "cancel": "",
+    "quit": "",
+    "generate": "",
+    "translateDescription": "",
+    "ok": "",
+    "successDescriptiton": "",
+    "failDescription": "",
+    "cancelDescription": "",
+    "continue": ""
+  },
+  "translateBubble": {
+    "bubbleWhenGrab": "",
+    "bubbleWhenTranslate": "",
+    "bubbleFunctionForbidden": "",
+    "bubbleWhenSuccess": {
+      "title": "",
+      "content": ""
+    },
+    "bubbleWhenSuccessOnOtherVideo": {
+      "title": "",
+      "content": ""
+    },
+    "bubbleTranslateFail": {
+      "title": "",
+      "content": ""
+    },
+    "ok": "",
+    "cancel": "",
+    "continue": ""
   }
 }
