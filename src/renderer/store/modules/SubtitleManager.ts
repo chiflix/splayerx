@@ -350,7 +350,9 @@ const actions = {
       const oldSubtitles = [...(getters as { list: SubtitleControlListItem[] }).list];
 
       // 将Translated类型的都删除掉
-      const translatedSubs = remove(oldSubtitles, ({ type }) => type === Type.Translated);
+      const translatedSubs = remove(oldSubtitles, ({
+        type, source,
+      }) => type === Type.Translated && !source);
       // delete subtitles not matching the current language preference
       const wrongLanguageSubs = remove(
         oldSubtitles,
