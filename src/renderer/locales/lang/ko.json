@@ -267,6 +267,7 @@
   },
   "subtitle": {
     "embedded": "깊숙이 박다",
+    "generate": "",
     "language": {
       "ar": "아라비아 말",
       "de": "독일 사람",
@@ -307,5 +308,46 @@
   "loadVideoBySubtitleFailed": {
     "content": "폴더에서 관련 비디오를 찾지 않습니다",
     "title": ""
+  },
+  "translateModal": {
+    "title": "",
+    "translateTitle": "",
+    "minute": "",
+    "second": "",
+    "hour": "",
+    "successTitle": "",
+    "failTitle": "",
+    "cancelTitle": "",
+    "selectDescription": "",
+    "selectLanguageLabel": "",
+    "cancel": "",
+    "quit": "",
+    "generate": "",
+    "translateDescription": "",
+    "ok": "",
+    "successDescriptiton": "",
+    "failDescription": "",
+    "cancelDescription": "",
+    "continue": ""
+  },
+  "translateBubble": {
+    "bubbleWhenGrab": "",
+    "bubbleWhenTranslate": "",
+    "bubbleFunctionForbidden": "",
+    "bubbleWhenSuccess": {
+      "title": "",
+      "content": ""
+    },
+    "bubbleWhenSuccessOnOtherVideo": {
+      "title": "",
+      "content": ""
+    },
+    "bubbleTranslateFail": {
+      "title": "",
+      "content": ""
+    },
+    "ok": "",
+    "cancel": "",
+    "continue": ""
   }
 }
