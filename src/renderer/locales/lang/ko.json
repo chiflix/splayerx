@@ -255,7 +255,7 @@
     "tryToDisable": {
       "button": "승인",
       "partOne": "SPlayer는 익명 데이터를 사용하여 사용자 경험을 향상시킵니다. 스마트 번역은 귀하가",
-      "partTwo": "",
+      "partTwo": ".",
       "underlinedContent": "동의하지 않는다"
     }
   },
@@ -310,19 +310,19 @@
     "title": ""
   },
   "translateModal": {
-    "title": "",
-    "translateTitle": "",
-    "minute": "",
-    "second": "",
-    "hour": "",
-    "successTitle": "",
-    "failTitle": "",
-    "cancelTitle": "",
-    "selectDescription": "",
-    "selectLanguageLabel": "",
-    "cancel": "",
-    "quit": "",
-    "generate": "",
+    "title": "오디오 언어 선택",
+    "translateTitle": "{time} 정보 남음",
+    "minute": "{number} 분",
+    "second": "{number} 초",
+    "hour": "{number} 시간",
+    "successTitle": "번역 완료",
+    "failTitle": "번역 실패",
+    "cancelTitle": "인공 지능 번역이 진행 중입니다.",
+    "selectDescription": "번역 결과를 생성하려면 동영상에서 들리는 언어를 선택하고 생성 버튼을 클릭하십시오. 과정에 약간의 시간이 걸릴 수 있습니다.",
+    "selectLanguageLabel": "오디오 언어",
+    "cancel": "취소",
+    "quit": "떠나다",
+    "generate": "일으키다",
     "translateDescription": "",
     "ok": "",
     "successDescriptiton": "",
@@ -343,11 +343,11 @@
       "content": ""
     },
     "bubbleTranslateFail": {
-      "title": "",
-      "content": ""
+      "title": "번역 실패",
+      "content": "고마워요. 나중에 시도해주세요."
     },
-    "ok": "",
-    "cancel": "",
-    "continue": ""
+    "ok": "승인",
+    "cancel": "취소",
+    "continue": "잇다"
   }
 }
