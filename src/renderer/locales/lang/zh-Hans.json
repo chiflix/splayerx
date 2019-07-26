@@ -311,7 +311,7 @@
   },
   "translateModal": {
     "title": "选择视频源语言",
-    "translateTitle": "大约还需 {time} 分钟",
+    "translateTitle": "大约还需 {time}",
     "minute": "{number} 分钟",
     "second": "{number} 秒",
     "hour": "{number} 小时",
@@ -331,23 +331,23 @@
     "continue": "取消"
   },
   "translateBubble": {
-    "bubbleWhenGrab": "",
-    "bubbleWhenTranslate": "",
-    "bubbleFunctionForbidden": "",
+    "bubbleWhenGrab": "该操作将会导致正在进行的翻译中止，是否中止？",
+    "bubbleWhenTranslate": "AI翻译会在云端继续处理，下次播放该视频时将自动获取翻译进度。",
+    "bubbleFunctionForbidden": "该操作将会导致正在进行的翻译中止，是否中止？",
     "bubbleWhenSuccess": {
       "title": "",
-      "content": ""
+      "content": "AI翻译已完成，可在翻译结果列表中查看。"
     },
     "bubbleWhenSuccessOnOtherVideo": {
       "title": "",
-      "content": ""
+      "content": "AI 翻译已完成，将在下次打开视频时自动显示。"
     },
     "bubbleTranslateFail": {
-      "title": "",
-      "content": ""
+      "title": "翻译失败",
+      "content": "请稍后重试，谢谢。"
     },
-    "ok": "",
-    "cancel": "",
-    "continue": ""
+    "ok": "好的",
+    "cancel": "取消",
+    "continue": "继续"
   }
 }
