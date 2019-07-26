@@ -106,8 +106,8 @@
     },
     "help": {
       "name": "도움",
-      "feedback": "",
-      "homepage": "",
+      "feedback": "피드백",
+      "homepage": "공식 사이트",
       "splayerxHelp": "도움",
       "shortCuts": "바로 가기 목록",
       "crashReportLocation": "오류 로그보기",
@@ -157,8 +157,8 @@
       "noSubtitle": "찾을 수 없음",
       "notToShowSubtitle": "닫기",
       "secondarySubtitle": "보조 부제목",
-      "subtitleSetting": "",
-      "subtitleDelay": "",
+      "subtitleSetting": "자막 설정",
+      "subtitleDelay": "자막 지연",
       "size1": "작은",
       "size2": "표준",
       "size3": "큰",
@@ -182,8 +182,8 @@
       "yes": "예"
     },
     "window": {
-      "windowRotate": "",
-      "keepPlayingWindowFront": "",
+      "windowRotate": "시계 방향으로 90 ° 회전",
+      "keepPlayingWindowFront": "재생할 때 플로트",
       "backToLandingView": "시작 페이지로 돌아 가기",
       "bossKey": "보스 키",
       "doubleSize": "200 %",
@@ -196,10 +196,10 @@
       "originSize": "100 %"
     },
     "favourite": {
-      "name": "",
-      "iqiyi": "",
-      "bilibili": "",
-      "youtube": ""
+      "name": "인기 있는 말",
+      "iqiyi": "iQIYI",
+      "bilibili": "Bilibili",
+      "youtube": "Youtube"
     }
   },
   "nextVideo": {
