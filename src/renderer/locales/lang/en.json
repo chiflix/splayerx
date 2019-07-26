@@ -194,6 +194,12 @@
       "minimize": "Minimize",
       "name": "Window",
       "originSize": "100%"
+    },
+    "favourite": {
+      "name": "Favourite",
+      "iqiyi": "Iqiyi",
+      "bilibili": "Bilibili",
+      "youtube": "Youtube"
     }
   },
   "nextVideo": {

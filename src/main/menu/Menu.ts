@@ -346,6 +346,11 @@ export default class Menubar {
       menubar.append(preference);
     }
 
+    // Favourite
+    const favouriteMenuItem = this.createFavouriteMenu();
+
+    menubar.append(favouriteMenuItem);
+
     // Window
     const windowMenu = new Menu();
     const items = this.getMenuItemTemplate('window').items;
@@ -540,6 +545,12 @@ export default class Menubar {
     const subtitleMenu = this.convertFromMenuItemTemplate('subtitle');
     const subtitleMenuItem = new MenuItem({ id: 'subtitle', label: this.$t('msg.subtitle.name'), submenu: subtitleMenu });
     return subtitleMenuItem;
+  }
+
+  private createFavouriteMenu() {
+    const favouriteMenu = this.convertFromMenuItemTemplate('favourite');
+    const favouriteMenuItem = new MenuItem({ id: 'favourite', label: this.$t('msg.favourite.name'), submenu: favouriteMenu });
+    return favouriteMenuItem;
   }
 
   private createWindowMenu() {
