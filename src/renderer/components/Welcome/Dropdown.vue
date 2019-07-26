@@ -16,6 +16,7 @@
       <div
         @mouseup.stop=""
         class="dropdown__listItems no-drag"
+        tabindex="-1"
       >
         <div
           v-for="({ selection, disabled }, index) in selections"
@@ -169,6 +170,9 @@ export default {
     height: 112px;
     margin: 4px 4px 4px 6px;
     overflow-y: scroll;
+      &:focus {
+        outline: none;
+      }
   }
 
   .disabled {

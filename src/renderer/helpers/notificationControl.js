@@ -21,6 +21,9 @@ import {
   EACCES,
   EPERM,
   ENOENT,
+  TRANSLATE_FAIL,
+  TRANSLATE_SUCCESS,
+  TRANSLATE_SUCCESS_WHEN_VIDEO_CHANGE,
 } from './notificationcodes';
 
 export function addBubble(code, options = {}) { // eslint-disable-line complexity
@@ -198,6 +201,32 @@ export function addBubble(code, options = {}) { // eslint-disable-line complexit
         type: 'result',
         title: i18n.t('errorFile.EACCES.title', i18n.locale, i18n.messages),
         content: i18n.t('errorFile.EACCES.content', i18n.locale, i18n.messages),
+        dismissAfter: 5000,
+      });
+      break;
+    case TRANSLATE_FAIL:
+      store.dispatch('addMessages', {
+        id,
+        type: 'result',
+        title: i18n.t('translateBubble.bubbleTranslateFail.title', i18n.locale, i18n.messages),
+        content: i18n.t('translateBubble.bubbleTranslateFail.content', i18n.locale, i18n.messages),
+      });
+      break;
+    case TRANSLATE_SUCCESS:
+      store.dispatch('addMessages', {
+        id,
+        type: 'result',
+        title: i18n.t('translateBubble.bubbleWhenSuccess.title', i18n.locale, i18n.messages),
+        content: i18n.t('translateBubble.bubbleWhenSuccess.content', i18n.locale, i18n.messages),
+        dismissAfter: 5000,
+      });
+      break;
+    case TRANSLATE_SUCCESS_WHEN_VIDEO_CHANGE:
+      store.dispatch('addMessages', {
+        id,
+        type: 'result',
+        title: i18n.t('translateBubble.bubbleWhenSuccessOnOtherVideo.title', i18n.locale, i18n.messages),
+        content: i18n.t('translateBubble.bubbleWhenSuccessOnOtherVideo.content', i18n.locale, i18n.messages),
         dismissAfter: 5000,
       });
       break;

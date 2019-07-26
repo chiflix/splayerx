@@ -1537,21 +1537,35 @@ new Vue({
       if (!e.ctrlKey) {
         let isAdvanceColumeItem;
         let isSubtitleScrollItem;
+        let isAudioTranslateItem;
         const advance = document.querySelector('.mainMenu');
+        const audioTranslate = document.querySelector('.audio-translate');
         const subtitle = document.querySelector('.subtitle-scroll-items');
         if (advance) {
           const nodeList = advance.childNodes;
           for (let i = 0; i < nodeList.length; i += 1) {
             isAdvanceColumeItem = nodeList[i].contains(e.target as Node);
+            if (isAdvanceColumeItem) break;
+          }
+        }
+        if (audioTranslate) {
+          isAudioTranslateItem = audioTranslate.contains(e.target as Node);
+          if (!isAudioTranslateItem) {
+            const nodeList = audioTranslate.childNodes;
+            for (let i = 0; i < nodeList.length; i += 1) {
+              isAudioTranslateItem = nodeList[i].contains(e.target as Node);
+              if (isAudioTranslateItem) break;
+            }
           }
         }
         if (subtitle) {
           const subList = subtitle.childNodes;
           for (let i = 0; i < subList.length; i += 1) {
             isSubtitleScrollItem = subList[i].contains(e.target as Node);
+            if (isSubtitleScrollItem) break;
           }
         }
-        if (!isAdvanceColumeItem && !isSubtitleScrollItem) {
+        if (!isAdvanceColumeItem && !isSubtitleScrollItem && !isAudioTranslateItem) {
           if (e.deltaY) {
             if (this.canSendVolumeGa) {
               this.$ga.event('app', 'volume', 'wheel');
@@ -1592,21 +1606,35 @@ new Vue({
       const { deltaX: x, ctrlKey, target } = event;
       let isAdvanceColumeItem;
       let isSubtitleScrollItem;
+      let isAudioTranslateItem;
       const advance = document.querySelector('.mainMenu');
+      const audioTranslate = document.querySelector('.audio-translate');
       const subtitle = document.querySelector('.subtitle-scroll-items');
       if (advance) {
         const nodeList = advance.childNodes;
         for (let i = 0; i < nodeList.length; i += 1) {
           isAdvanceColumeItem = nodeList[i].contains(target as Node);
+          if (isAdvanceColumeItem) break;
+        }
+      }
+      if (audioTranslate) {
+        isAudioTranslateItem = audioTranslate.contains(target as Node);
+        if (!isAudioTranslateItem) {
+          const nodeList = audioTranslate.childNodes;
+          for (let i = 0; i < nodeList.length; i += 1) {
+            isAudioTranslateItem = nodeList[i].contains(target as Node);
+            if (isAudioTranslateItem) break;
+          }
         }
       }
       if (subtitle) {
         const subList = subtitle.childNodes;
         for (let i = 0; i < subList.length; i += 1) {
           isSubtitleScrollItem = subList[i].contains(target as Node);
+          if (isSubtitleScrollItem) break;
         }
       }
-      if (!ctrlKey && !isAdvanceColumeItem && !isSubtitleScrollItem) {
+      if (!ctrlKey && !isAdvanceColumeItem && !isSubtitleScrollItem && !isAudioTranslateItem) {
         this.$emit('wheel-event', { x });
       }
     });

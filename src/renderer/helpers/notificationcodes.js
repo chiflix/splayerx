@@ -20,3 +20,7 @@ export const ENOSPC = 'ENOSPC';
 export const EACCES = 'EACCES';
 export const EPERM = 'EPERM';
 export const ENOENT = 'ENOENT';
+/** 智能翻译通用气泡 */
+export const TRANSLATE_FAIL = 'TRANSLATE_FAIL';
+export const TRANSLATE_SUCCESS = 'TRANSLATE_SUCCESS';
+export const TRANSLATE_SUCCESS_WHEN_VIDEO_CHANGE = 'TRANSLATE_SUCCESS_WHEN_VIDEO_CHANGE';

@@ -3,7 +3,7 @@ import {
 } from 'electron';
 import { existsSync } from 'fs';
 
-function reply(event: Event, channel: string, ...args: any[]) {
+function reply(event: Event, channel: string, ...args: unknown[]) {
   if (event.sender && !event.sender.isDestroyed()) event.reply(channel, ...args);
 }
 

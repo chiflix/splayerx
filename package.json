@@ -16,7 +16,9 @@
     "build:mas": "scripts/mas-build.sh mas",
     "build:mas-dev": "scripts/mas-build.sh mas-dev",
     "build:clean": "cross-env BUILD_TARGET=clean node .electron-vue/build.js",
-    "dev": "node .electron-vue/dev-runner.js",
+    "start": "npm run stage",
+    "dev": "cross-env SAGI_API=sagi-api:8443 node .electron-vue/dev-runner.js",
+    "stage": "node .electron-vue/dev-runner.js",
     "e2e": "npm run pack && electron-mocha test/e2e",
     "install-app-deps": "electron-builder install-app-deps",
     "lint": "eslint --ext .ts,.js,.vue -f ./node_modules/eslint-friendly-formatter src test",
@@ -34,7 +36,7 @@
     "grpc": "node_modules/@grpc/grpc-js"
   },
   "dependencies": {
-    "@grpc/grpc-js": "^0.2.0",
+    "@grpc/grpc-js": "^0.5.2",
     "@sentry/electron": "^0.17.1",
     "@sentry/integrations": "^5.1.2",
     "@types/chardet": "^0.5.0",
@@ -65,7 +67,7 @@
     "p-queue": "^6.0.0",
     "rimraf": "^2.6.3",
     "romanize": "^1.1.1",
-    "sagi-api": "^0.0.10",
+    "sagi-api": "^0.0.18",
     "source-map-support": "^0.5.9",
     "subtitle": "^2.0.1",
     "traditional-or-simplified": "^1.0.3",

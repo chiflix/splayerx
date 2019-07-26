@@ -21,7 +21,7 @@ export async function storeSubtitle(subtitle: Entity) {
     const {
       source, hash, format, language,
     } = subtitle;
-    if (source && hash && format && language) {
+    if (source && hash && language && format && format !== Format.Unknown) {
       db.addSubtitle({
         source, format, language, hash,
       });
@@ -195,6 +195,7 @@ export async function cacheSubtitle(subtitle: Entity) {
     case Type.Local:
       return cacheLocalSubtitle(subtitle)
         .then(source => addNewSourceToDb(subtitle, source));
+    case Type.Translated:
     case Type.Online: {
       const newOnlineSource = await cacheOnlineSubtitle(subtitle);
       if (newOnlineSource) return addNewSourceToDb(subtitle, newOnlineSource);

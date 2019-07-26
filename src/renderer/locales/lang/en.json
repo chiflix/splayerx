@@ -268,6 +268,7 @@
   },
   "subtitle": {
     "embedded": "Embed",
+    "generate": "Generate",
     "language": {
       "ar": "Arabic",
       "de": "German",
@@ -308,5 +309,46 @@
   "loadVideoBySubtitleFailed": {
     "content": "Cannot find any related video in the folder",
     "title": ""
+  },
+  "translateModal": {
+    "title": "Select Audio Language",
+    "translateTitle": "About {time} Left",
+    "minute": "{number} min",
+    "second": "{number} sec",
+    "hour": "{number} hr",
+    "successTitle": "Translation Done",
+    "failTitle": "Translation Failed",
+    "cancelTitle": "AI Translation is in Progress",
+    "selectDescription": "To generate a tranlation result, please select the language you hear in the video and click the generate button. The process might take some time.",
+    "selectLanguageLabel": "Audio Language",
+    "cancel": "Cancel",
+    "quit": "Quit",
+    "generate": "Generate",
+    "translateDescription": "Please do not skip the video or close the application. You can check the progress on the translation panel.",
+    "ok": "OK",
+    "successDescriptiton": "AI Translation is ready, please check it on the translation panel.",
+    "failDescription": "Please try later, thanks.",
+    "cancelDescription": "Are you sure you want to quit? If you quit, the translation progress will not be restored.",
+    "continue": "Cancel"
+  },
+  "translateBubble": {
+    "bubbleWhenGrab": "AI Translation will be aborted If you go on, do you want to continue anyway?",
+    "bubbleWhenTranslate": "AI Translation is being processed on the server. You can check the progress when you watch the video next time.",
+    "bubbleFunctionForbidden": "AI Translation will be aborted If you go on, do you want to continue anyway?",
+    "bubbleWhenSuccess": {
+      "title": "",
+      "content": "AI Translation is ready now, please check it on the translation panel."
+    },
+    "bubbleWhenSuccessOnOtherVideo": {
+      "title": "",
+      "content": "AI Translation is ready now. It will be automatically loaded next time when you watch the video."
+    },
+    "bubbleTranslateFail": {
+      "title": "Translation Failed",
+      "content": "Please try later, thanks."
+    },
+    "ok": "OK",
+    "cancel": "Cancel",
+    "continue": "Continue"
   }
 }
