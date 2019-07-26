@@ -100,7 +100,9 @@
       "name": "Expediente",
       "open": "Abierto…",
       "openRecent": "Recientemente abierto",
-      "openURL": "Abrir URL ..."
+      "openURL": "Abrir URL ...",
+      "copy": "",
+      "paste": ""
     },
     "help": {
       "name": "Ayuda",
