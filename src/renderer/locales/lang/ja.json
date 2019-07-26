@@ -19,10 +19,10 @@
   },
   "css": {
     "titleFontSize": {
-      "fontSize": ""
+      "fontSize": "21px"
     },
     "versionFontSize": {
-      "fontSize": ""
+      "fontSize": "14px"
     }
   },
   "errorFile": {
@@ -101,8 +101,8 @@
       "open": "ファイルを開く…",
       "openRecent": "最近使用した項目を開く",
       "openURL": "URLから開く…",
-      "copy": "",
-      "paste": ""
+      "copy": "コピー",
+      "paste": "貼り付け"
     },
     "help": {
       "name": "ヘルプ",
@@ -173,7 +173,7 @@
       "subtitleStyle": "字幕スタイル",
       "uploadSelectedSubtitle": "字幕をアップロード"
     },
-    "titleName": "",
+    "titleName": "SPlayer",
     "update": {
       "message": "更新已就绪，是否现在重启?",
       "no": "暂不更新",
@@ -184,14 +184,14 @@
     "window": {
       "backToLandingView": "起動ページに戻る",
       "bossKey": "ボスキー",
-      "doubleSize": "",
+      "doubleSize": "200%",
       "enterFullScreen": "フルスクリーン",
       "exitFullScreen": "フルスクリーンを解除",
-      "halfSize": "",
+      "halfSize": "50%",
       "maxmize": "最大化",
       "minimize": "最小化",
       "name": "ウィンドウ",
-      "originSize": ""
+      "originSize": "100%"
     }
   },
   "nextVideo": {
