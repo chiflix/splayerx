@@ -5,10 +5,10 @@
     "changeTrack": "مقطع صوتي",
     "chosenTrack": "افتراضي",
     "fontItems": [
-      "",
-      "",
-      "",
-      ""
+      "S",
+      "M",
+      "L",
+      "XL"
     ],
     "fontSize": "حجم الخط",
     "fontStyle": "نوع الخط",
@@ -19,20 +19,20 @@
   },
   "css": {
     "titleFontSize": {
-      "fontSize": ""
+      "fontSize": "21px"
     },
     "versionFontSize": {
-      "fontSize": ""
+      "fontSize": "14px"
     }
   },
   "errorFile": {
     "ENOSPC": {
-      "content": "",
-      "title": ""
+      "content": "لا توجد مساحة كافية على القرص.",
+      "title": "فتح فشل"
     },
     "EACCES": {
-      "content": "",
-      "title": ""
+      "content": "ليس لديك إذن كافي.",
+      "title": "فتح فشل"
     },
     "ENOENT": {
       "content": "",
@@ -267,7 +267,7 @@
   },
   "subtitle": {
     "embedded": "تضمين",
-    "generate": "",
+    "generate": "توفير",
     "language": {
       "ar": "عربى",
       "de": "ألمانية",
@@ -311,11 +311,11 @@
   },
   "translateModal": {
     "title": "",
-    "translateTitle": "",
-    "minute": "",
-    "second": "",
+    "translateTitle": "حوالي {time} اليسار",
+    "minute": "{number} دقيقة",
+    "second": "{number} ثانية",
     "hour": "",
-    "successTitle": "",
+    "successTitle": "تم الترجمة",
     "failTitle": "",
     "cancelTitle": "",
     "selectDescription": "",
@@ -347,7 +347,7 @@
       "content": ""
     },
     "ok": "",
-    "cancel": "",
-    "continue": ""
+    "cancel": "إلغاء",
+    "continue": "استمر"
   }
 }
