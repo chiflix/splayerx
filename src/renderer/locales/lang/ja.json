@@ -101,11 +101,13 @@
       "open": "ファイルを開く…",
       "openRecent": "最近使用した項目を開く",
       "openURL": "URLから開く…",
-      "copy": "複製",
+      "copy": "コピー",
       "paste": "貼り付け"
     },
     "help": {
       "name": "ヘルプ",
+      "feedback": "",
+      "homepage": "",
       "splayerxHelp": "ヘルプ",
       "shortCuts": "ショートカットリスト",
       "crashReportLocation": "エラーログを表示する",
@@ -114,7 +116,6 @@
     "playback": {
       "backwardL": "戻る -60s",
       "backwardS": "戻る -5s",
-      "windowRotate": "時計回りに90°回転",
       "captureScreen": "スクリンショット",
       "captureVideoClip": "トリム",
       "decreasePlaybackSpeed": "再生速度の低下",
@@ -122,7 +123,6 @@
       "forwardS": "進む +5s",
       "fullScreen": "ズーム\/フルスクリーンを解除",
       "increasePlaybackSpeed": "再生速度の増加",
-      "keepPlayingWindowFront": "再生時に最前面に表示",
       "name": "プレイ",
       "pause": "停止",
       "play": "プレイ",
@@ -134,10 +134,8 @@
     },
     "splayerx": {
       "about": "SPlayerについて",
-      "feedback": "フィードバック",
       "hide": "SPlayerを隠す",
       "hideOthers": "その他を隠す",
-      "homepage": "ホームページ",
       "preferences": "環境設定",
       "quit": "SPlayerを終了",
       "showAll": "すべて表示"
@@ -159,6 +157,8 @@
       "noSubtitle": "見つかりませんでした",
       "notToShowSubtitle": "閉じる",
       "secondarySubtitle": "第二字幕",
+      "subtitleSetting": "",
+      "subtitleDelay": "",
       "size1": "小",
       "size2": "通常",
       "size3": "大",
@@ -182,6 +182,8 @@
       "yes": "更新"
     },
     "window": {
+      "windowRotate": "",
+      "keepPlayingWindowFront": "",
       "backToLandingView": "起動ページに戻る",
       "bossKey": "ボスキー",
       "doubleSize": "200%",
@@ -192,6 +194,12 @@
       "minimize": "最小化",
       "name": "ウィンドウ",
       "originSize": "100%"
+    },
+    "favourite": {
+      "name": "",
+      "iqiyi": "",
+      "bilibili": "",
+      "youtube": ""
     }
   },
   "nextVideo": {
