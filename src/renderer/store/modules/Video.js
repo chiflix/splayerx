@@ -2,6 +2,7 @@ import Vue from 'vue';
 
 import romanize from 'romanize';
 import isEqual from 'lodash/isEqual';
+import urlParseLax from 'url-parse-lax';
 import { mediaQuickHash } from '@/libs/utils';
 import { Video as videoMutations } from '../mutationTypes';
 import {
@@ -65,6 +66,9 @@ const getters = {
   // network state
   originSrc: state => state.src,
   convertedSrc: (state) => {
+    if (urlParseLax(state.src).protocol) {
+      return state.src;
+    }
     const converted = process.platform === 'win32' ? encodeURIComponent(state.src).replace(/%3A/g, ':').replace(/(%5C)|(%2F)/g, '/')
       : encodeURIComponent(state.src).replace(/%3A/g, ':').replace(/%2F/g, '/');
     return process.platform === 'win32' ? converted : `file://${converted}`;

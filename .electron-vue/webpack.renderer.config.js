@@ -54,7 +54,7 @@ let rendererConfig = {
   entry: {
     preference: path.join(__dirname, '../src/renderer/preference.js'),
     about: path.join(__dirname, '../src/renderer/about.js'),
-    index: path.join(__dirname, '../src/renderer/main.ts')
+    index: path.join(__dirname, '../src/renderer/main.ts'),
   },
   externals: [
     ...Object.keys(Object.assign({}, dependencies, optionalDependencies)).filter(d => !whiteListedModules.includes(d))

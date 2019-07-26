@@ -1,5 +1,14 @@
 <template>
   <div class="wrapper">
+    <short-marks
+      v-show="!openUrlShow"
+      :handle-browsing-open="handleBrowsingOpen"
+    />
+    <open-url
+      v-show="openUrlShow"
+      :open-input-url="openInputUrl"
+      :close-url-input="closeUrlInput"
+    />
     <transition name="background-container-transition">
       <div
         v-if="item.backgroundUrl && !hideVideoHistoryOnExit"
@@ -118,16 +127,19 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import { mapGetters } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
 import { Route } from 'vue-router';
 import { playInfoStorageService } from '@/services/storage/PlayInfoStorageService';
 import { recentPlayService } from '@/services/media/RecentPlayService';
 import Icon from '@/components/BaseIconContainer.vue';
+import ShortMarks from '@/components/LandingView/ShortMarks.vue';
+import OpenUrl from '@/components/LandingView/OpenUrl.vue';
 import NotificationBubble from '@/components/NotificationBubble.vue';
 import PlaylistItem from '@/components/LandingView/PlaylistItem.vue';
 import VideoItem from '@/components/LandingView/VideoItem.vue';
 import { log } from '@/libs/Log';
 import Sagi from '@/libs/sagi';
+import { Browsing as browsingActions } from '@/store/actionTypes';
 
 Vue.component('PlaylistItem', PlaylistItem);
 Vue.component('VideoItem', VideoItem);
@@ -137,12 +149,15 @@ export default {
   components: {
     Icon,
     NotificationBubble,
+    'short-marks': ShortMarks,
+    'open-url': OpenUrl,
   },
   data() {
     return {
       landingViewItems: [],
       sagiHealthStatus: 'UNSET',
       invalidTimeRepresentation: '--',
+      openUrlShow: false,
       item: {},
       tranFlag: true,
       shifting: false,
@@ -278,6 +293,9 @@ export default {
         log.info('LandingView.vue', `launching: ${app.getName()} ${app.getVersion()}`);
       }
     });
+    this.$bus.$on('open-url-show', (val: boolean) => {
+      this.openUrlShow = val;
+    });
     window.addEventListener('keyup', this.keyboardHandler);
     // window.addEventListener('beforeunload', this.beforeUnloadHandler);
     this.$electron.ipcRenderer.on('quit', () => {
@@ -290,6 +308,25 @@ export default {
     // window.removeEventListener('beforeunload', this.beforeUnloadHandler);
   },
   methods: {
+    ...mapActions({
+      updateInitialUrl: browsingActions.UPDATE_INITIAL_URL,
+    }),
+    handleBrowsingOpen(url: string) {
+      this.updateInitialUrl(url);
+      this.$router.push({
+        name: 'browsing-view',
+      });
+    },
+    closeUrlInput() {
+      this.$bus.$emit('open-url-show', false);
+    },
+    openInputUrl(inputUrl: string) {
+      if (this.openFileByPlayingView(inputUrl)) {
+        this.openUrlFile(inputUrl);
+      } else {
+        this.handleBrowsingOpen(inputUrl);
+      }
+    },
     globalMoveHandler() {
       this.logoTransition = 'welcome-container-transition';
       this.canHover = true;

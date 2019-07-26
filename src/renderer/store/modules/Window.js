@@ -9,6 +9,11 @@ const state = {
   isMinimized: false,
   isHiddenByBossKey: false,
   sizePercent: 0,
+  browsingSize: [1200, 900],
+  pipSize: [420, 236],
+  pipPos: [window.screen.availLeft + 70,
+    window.screen.availTop + window.screen.availHeight - 236 - 70],
+  browsingPos: [0, 0],
 };
 
 const getters = {
@@ -26,6 +31,10 @@ const getters = {
   isMinimized: state => state.isMinimized,
   isHiddenByBossKey: state => state.isHiddenByBossKey,
   sizePercent: state => state.sizePercent,
+  browsingSize: state => state.browsingSize,
+  pipSize: state => state.pipSize,
+  pipPos: state => state.pipPos,
+  browsingPos: state => state.browsingPos,
 };
 
 const mutations = {
@@ -60,6 +69,18 @@ const mutations = {
   windowAngle(state, payload) {
     state.windowAngle = payload;
   },
+  browsingSizeUpdate(state, payload) {
+    state.browsingSize = payload;
+  },
+  pipSizeUpdate(state, payload) {
+    state.pipSize = payload;
+  },
+  pipPosUpdate(state, payload) {
+    state.pipPos = payload;
+  },
+  browsingPosUpdate(state, payload) {
+    state.browsingPos = payload;
+  },
 };
 
 const actions = {
@@ -71,6 +92,18 @@ const actions = {
   },
   initWindowRotate({ commit }) {
     commit('windowAngle', 0);
+  },
+  updateBrowsingSize({ commit }, delta) {
+    commit('browsingSizeUpdate', delta);
+  },
+  updatePipSize({ commit }, delta) {
+    commit('pipSizeUpdate', delta);
+  },
+  updatePipPos({ commit }, delta) {
+    commit('pipPosUpdate', delta);
+  },
+  updateBrowsingPos({ commit }, delta) {
+    commit('browsingPosUpdate', delta);
   },
 };
 
