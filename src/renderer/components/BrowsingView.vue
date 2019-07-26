@@ -6,7 +6,7 @@
       :handle-url-reload="handleUrlReload"
       :handle-url-back="handleUrlBack"
       :handle-url-forward="handleUrlForward"
-      v-show="!isPip"
+      v-show="!isPip && headerToShow"
     />
     <div
       :style="{
@@ -19,7 +19,7 @@
       v-show="maskToShow"
     />
     <div
-      v-show="loadingState && !isPip"
+      v-show="loadingState && !isPip && headerToShow"
       class="loading-state loading-animation"
     />
     <div
@@ -99,10 +99,12 @@ export default {
       calculateVideoNum: 'var iframe = document.querySelector("iframe");if (iframe && iframe.contentDocument) {document.getElementsByTagName("video").length + iframe.contentDocument.getElementsByTagName("video").length} else {document.getElementsByTagName("video").length}',
       getVideoStyle: 'getComputedStyle(document.querySelector("video") || document.querySelector("iframe").contentDocument.querySelector("video"))',
       pipBtnsKeepShow: false,
+      asyncTasksDone: false,
+      headerToShow: true,
     };
   },
   computed: {
-    ...mapGetters(['winPos', 'isFullScreen', 'initialUrl', 'winWidth', 'winSize', 'browsingSize', 'pipSize', 'pipPos', 'barrageOpen', 'browsingPos']),
+    ...mapGetters(['winPos', 'isFullScreen', 'initialUrl', 'winWidth', 'winSize', 'browsingSize', 'pipSize', 'pipPos', 'barrageOpen', 'browsingPos', 'isFullScreen']),
     iqiyiPip() {
       return iqiyi(this.barrageOpen, this.winSize);
     },
@@ -130,14 +132,11 @@ export default {
     },
   },
   watch: {
-    currentUrl() {
-      const loadUrl = this.$refs.webView.getURL();
-      this.$refs.browsingHeader.updateWebInfo({
-        hasVideo: false,
-        url: loadUrl,
-        canGoBack: this.$refs.webView.canGoBack(),
-        canGoForward: this.$refs.webView.canGoForward(),
-      });
+    isFullScreen(val: string) {
+      if (!val) {
+        this.headerToShow = true;
+        this.$refs.webView.executeJavaScript('document.webkitCancelFullScreen();');
+      }
     },
     dropFiles(val: string[]) {
       const onlyFolders = val.every((file: fs.PathLike) => fs.statSync(file).isDirectory());
@@ -155,8 +154,9 @@ export default {
       }
     },
     isPip(val: boolean) {
-      this.$store.dispatch(val ? 'updateBrowsingSize' : 'updatePipSize', this.winSize);
       if (!val) {
+        this.$store.dispatch('updatePipSize', this.winSize);
+        this.$store.dispatch('updatePipPos', this.winPos);
         this.handleWindowChangeExitPip();
         if (this.pipType === 'youtube') {
           this.youtubeRecover();
@@ -167,8 +167,8 @@ export default {
         } else {
           this.othersRecover();
         }
-        this.$store.dispatch('updatePipPos', this.winPos);
       } else {
+        this.$store.dispatch('updateBrowsingSize', this.winSize);
         this.$store.dispatch('updateBrowsingPos', this.winPos);
         this.timeout = true;
         if (this.timer) {
@@ -204,6 +204,28 @@ export default {
         }
       }
     },
+    loadingState(val: boolean) {
+      const loadUrl = this.$refs.webView.getURL();
+      const recordIndex = this.supportedRecordHost.indexOf(urlParseLax(loadUrl).hostname);
+      if (val) {
+        this.$refs.browsingHeader.updateWebInfo({
+          hasVideo: false,
+          url: loadUrl,
+          canGoBack: this.$refs.webView.canGoBack(),
+          canGoForward: this.$refs.webView.canGoForward(),
+        });
+      } else {
+        this.$refs.webView.executeJavaScript(this.calculateVideoNum, (r: number) => {
+          this.hasVideo = recordIndex === 0 && !getVideoId(loadUrl).id ? false : !!r;
+          this.$refs.browsingHeader.updateWebInfo({
+            hasVideo: this.hasVideo,
+            url: loadUrl,
+            canGoBack: this.$refs.webView.canGoBack(),
+            canGoForward: this.$refs.webView.canGoForward(),
+          });
+        });
+      }
+    },
   },
   created() {
     windowRectService.calculateWindowRect(
@@ -225,9 +247,25 @@ export default {
       browsingPos: this.browsingPos,
       barrageOpen: this.barrageOpen,
     });
-    this.$bus.$off();
   },
   mounted() {
+    window.addEventListener('beforeunload', (e: BeforeUnloadEvent) => {
+      if (!this.asyncTasksDone) {
+        e.returnValue = false;
+        this.$store.dispatch(this.isPip ? 'updatePipSize' : 'updateBrowsingSize', this.winSize);
+        this.$store.dispatch(this.isPip ? 'updatePipPos' : 'updateBrowsingPos', this.winPos);
+        asyncStorage.set('browsing', {
+          pipSize: this.pipSize,
+          pipPos: this.pipPos,
+          browsingSize: this.browsingSize,
+          browsingPos: this.browsingPos,
+          barrageOpen: this.barrageOpen,
+        }).finally(() => {
+          this.asyncTasksDone = true;
+          window.close();
+        });
+      }
+    });
     (document.querySelector('#app') as HTMLElement).addEventListener('mouseleave', () => {
       setTimeout(() => {
         if (this.isPip) {
@@ -274,20 +312,11 @@ export default {
             break;
         }
       }
-      this.$refs.webView.executeJavaScript(this.calculateVideoNum, (r: number) => {
-        this.hasVideo = recordIndex === 0 && !getVideoId(loadUrl).id ? false : !!r;
-        this.$refs.browsingHeader.updateWebInfo({
-          hasVideo: this.hasVideo,
-          url: loadUrl,
-          canGoBack: this.$refs.webView.canGoBack(),
-          canGoForward: this.$refs.webView.canGoForward(),
-        });
-      });
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.$refs.webView.addEventListener('ipc-message', (evt: any) => { // https://github.com/electron/typescript-definitions/issues/27 fixed in 6.0.0
       const { channel, args }: { channel: string, args:
-      { dragover?: boolean, files?: string[] }[] } = evt;
+      { dragover?: boolean, files?: string[], isFullScreen?: boolean }[] } = evt;
       switch (channel) {
         case 'dragover':
         case 'dragleave':
@@ -307,6 +336,9 @@ export default {
               this.timeout = false;
             }, 3000);
           }
+          break;
+        case 'fullscreenchange':
+          this.headerToShow = !args[0].isFullScreen;
           break;
         default:
           console.warn(`Unhandled ipc-message: ${channel}`, args);

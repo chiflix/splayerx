@@ -42,6 +42,9 @@ document.addEventListener('DOMContentLoaded', () => {
       document.webkitCancelFullScreen();
     }
   });
+  document.addEventListener('fullscreenchange', () => {
+    sendToHost('fullscreenchange', { isFullScreen: document.webkitIsFullScreen });
+  });
 });
 
 // Some websites intercept links to open a blank window, then set its location, e.g. iqiyi.com

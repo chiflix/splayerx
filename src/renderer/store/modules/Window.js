@@ -1,5 +1,3 @@
-import asyncStorage from '@/helpers/asyncStorage';
-
 const state = {
   windowSize: [0, 0],
   windowMinimumSize: [0, 0],
@@ -95,45 +93,17 @@ const actions = {
   initWindowRotate({ commit }) {
     commit('windowAngle', 0);
   },
-  updateBrowsingSize({ commit, getters }, delta) {
+  updateBrowsingSize({ commit }, delta) {
     commit('browsingSizeUpdate', delta);
-    asyncStorage.set('browsing', {
-      pipSize: state.pipSize,
-      browsingSize: delta,
-      pipPos: state.pipPos,
-      browsingPos: state.browsingPos,
-      barrageOpen: getters.barrageOpen,
-    });
   },
   updatePipSize({ commit }, delta) {
     commit('pipSizeUpdate', delta);
-    asyncStorage.set('browsing', {
-      pipSize: delta,
-      browsingSize: state.browsingSize,
-      pipPos: state.pipPos,
-      browsingPos: state.browsingPos,
-      barrageOpen: getters.barrageOpen,
-    });
   },
   updatePipPos({ commit }, delta) {
     commit('pipPosUpdate', delta);
-    asyncStorage.set('browsing', {
-      pipSize: state.pipSize,
-      browsingSize: state.browsingSize,
-      pipPos: delta,
-      browsingPos: state.browsingPos,
-      barrageOpen: getters.barrageOpen,
-    });
   },
   updateBrowsingPos({ commit }, delta) {
     commit('browsingPosUpdate', delta);
-    asyncStorage.set('browsing', {
-      pipSize: state.pipSize,
-      browsingSize: state.browsingSize,
-      pipPos: state.pipPos,
-      browsingPos: delta,
-      barrageOpen: getters.barrageOpen,
-    });
   },
 };
 
