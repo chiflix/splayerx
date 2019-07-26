@@ -9,7 +9,7 @@ if (process.env.NODE_ENV !== 'development') {
   Sentry.init({
     release: process.env.SENTRY_RELEASE,
     dsn: 'https://6a94feb674b54686a6d88d7278727b7c@sentry.io/1449341',
-    enableNative: process.type === 'browser', // enableNative in main process only
+    enableNative: false,
     integrations: [
       new Integrations.Vue({
         Vue,
@@ -17,7 +17,9 @@ if (process.env.NODE_ENV !== 'development') {
       }),
     ],
   });
-} else {
+}
+
+if (process.type === 'browser') {
   crashReporter.start({
     companyName: 'Sagittarius Tech LLC',
     productName: 'SPlayer',

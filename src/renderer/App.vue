@@ -6,7 +6,8 @@
   >
     <Titlebar
       v-if="$route.name !== 'playing-view'"
-      :enable-full-screen-button="$route.name === 'landing-view' || $route.name === 'playing-view'"
+      :enable-full-screen-button="['landing-view', 'playing-view', 'browsing-view']
+        .includes($route.name)"
     />
     <transition
       :name="transitionMode"
@@ -64,9 +65,6 @@ export default {
     },
     mainDispatchProxy(actionType: string, actionPayload: any) {
       this.$store.dispatch(actionType, actionPayload);
-    },
-    handleWindowSizeChange(windowSize: any) {
-      this.$store.commit('windowSize', windowSize);
     },
   },
 };

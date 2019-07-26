@@ -1,19 +1,24 @@
 import { TranscriptResponse } from 'sagi-api/translation/v1/translation_pb';
-import { Dialogue, Format, Cue } from '@/interfaces/ISubtitle';
+import { Format, Cue } from '@/interfaces/ISubtitle';
 import { BaseParser } from './base';
 import { tagsGetter } from '../utils';
 
 export type SagiSubtitlePayload = TranscriptResponse.Cue.AsObject[];
 
 export class SagiParser extends BaseParser {
-  payload: SagiSubtitlePayload;
-  format = Format.Sagi;
-  constructor(sagiPayload: SagiSubtitlePayload) {
+  public payload: SagiSubtitlePayload;
+
+  public format = Format.Sagi;
+
+  public constructor(sagiPayload: SagiSubtitlePayload) {
     super();
     this.payload = sagiPayload;
   }
-  dialogues: Cue[] = [];
+
+  public dialogues: Cue[] = [];
+
   private baseTags = { alignment: 2, pos: undefined };
+
   private normalizer(parsedSubtitle: SagiSubtitlePayload) {
     const finalDialogues: Cue[] = [];
     parsedSubtitle.forEach(({ startTime, endTime, text }) => {
@@ -29,7 +34,8 @@ export class SagiParser extends BaseParser {
     });
     this.dialogues = finalDialogues;
   }
-  async parse() {
+
+  public async parse() {
     this.normalizer(this.payload);
   }
 }

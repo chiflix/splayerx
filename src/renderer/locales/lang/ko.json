@@ -101,8 +101,8 @@
       "open": "열다…",
       "openRecent": "열기 최근",
       "openURL": "URL 열기 ...",
-      "copy": "부",
-      "paste": "풀"
+      "copy": "복사",
+      "paste": "붙여 넣기"
     },
     "help": {
       "name": "도움",

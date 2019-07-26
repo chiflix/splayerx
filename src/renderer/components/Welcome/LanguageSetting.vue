@@ -29,9 +29,9 @@
   </div>
 </template>
 <script lang="ts">
+import { concat } from 'lodash';
 import Dropdown from '@/components/Welcome/Dropdown.vue';
 import { codeToLanguageName, allCodes } from '@/libs/language';
-import { concat } from 'lodash';
 
 export default {
   components: {
@@ -93,6 +93,7 @@ export default {
       primaryLanguage: this.$store.getters.primaryLanguage,
       secondaryLanguage: this.$store.getters.secondaryLanguage,
     };
+    this.$emit('language-setting', this.payload);
     document.addEventListener('mouseup', this.globalMouseupHandler);
   },
   beforeDestroy() {

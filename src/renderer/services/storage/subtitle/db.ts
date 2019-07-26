@@ -1,79 +1,101 @@
 import { DBSchema, IDBPDatabase, openDB } from 'idb';
+import {
+  unionWith, uniqWith, remove, isEqual, some, pick, keyBy, mergeWith, isFinite,
+} from 'lodash';
 import { LanguageCode } from '@/libs/language';
 import { DATADB_NAME } from '@/constants';
-import { Entity, EntityGenerator, Type, Format, Origin, SubtitleControlListItem, VideoSegment } from '@/interfaces/ISubtitle';
-import { StoredSubtitle, StoredSubtitleItem, SubtitlePreference, SelectedSubtitle } from '@/interfaces/ISubtitleStorage';
-import { unionWith, uniqWith, remove, isEqual, some, keyBy, mergeWith, isFinite } from 'lodash';
-import Sagi from '@/libs/sagi';
-import { loadLocalFile } from '@/services/subtitle/utils';
-import { embeddedSrcLoader } from '@/services/subtitle/loaders/embedded';
+import {
+  Type, Format, IOrigin, IVideoSegment,
+} from '@/interfaces/ISubtitle';
+import {
+  IStoredSubtitle, IStoredSubtitleItem, ISubtitlePreference, SelectedSubtitle,
+} from '@/interfaces/ISubtitleStorage';
 
-interface DataDBV2 extends DBSchema {
+interface IDataDBV3 extends DBSchema {
   'subtitles': {
     key: string;
-    value: StoredSubtitle;
+    value: IStoredSubtitle;
   };
   'preferences': {
     key: number;
-    value: SubtitlePreference;
+    value: ISubtitlePreference;
     indexes: {
       'byPlaylist': number,
       'byMediaItem': string,
     },
   };
 }
+interface IDataDBV4 extends DBSchema {
+  'subtitles': {
+    key: string;
+    value: IStoredSubtitle;
+  };
+  'subtitle-preferences': {
+    key: string;
+    value: ISubtitlePreference;
+  };
+}
 
-interface AddSubtitleOptions {
-  source: Origin;
+interface IAddSubtitleOptions {
+  source: IOrigin;
   hash: string;
   format: Format;
   language: LanguageCode;
 }
-interface RemoveSubtitleOptions {
-  source: any;
+interface IRemoveSubtitleOptions {
+  source: unknown;
   hash: string;
 }
-interface UpdateSubtitleOptions {
+interface IUpdateSubtitleOptions {
   hash: string;
-  source?: Origin;
+  source?: IOrigin;
   format?: Format;
   language?: LanguageCode;
 }
-interface UpdateSubtitleItemOptions {
+interface IUpdateSubtitleItemOptions {
   hash: string;
   type?: Type;
-  source?: any;
-  videoSegments?: VideoSegment[];
+  source?: unknown;
+  videoSegments?: IVideoSegment[];
   delay?: number;
 }
 
 export class SubtitleDataBase {
-  private db: IDBPDatabase<DataDBV2>;
+  private db: IDBPDatabase<IDataDBV4>;
+
   private async getDb() {
-    return this.db ? this.db : this.db = await openDB<DataDBV2>(
-      DATADB_NAME,
-      3,
-      {
-        async upgrade(db, version) {
-          if (version > 0 && version < 3) {
-            db.deleteObjectStore('subtitles');
-          }
-          db.createObjectStore('subtitles', { keyPath: 'hash' });
-          const preferenceStore = db.createObjectStore('preferences', { autoIncrement: true });
-          preferenceStore.createIndex('byPlaylist', 'playlistId');
-          preferenceStore.createIndex('byMediaItem', 'mediaId');
-        }
-      },
-    );
+    if (!this.db) {
+      this.db = await openDB<IDataDBV4>(
+        DATADB_NAME,
+        4,
+        {
+          async upgrade(db, version) {
+            if (version === 0) {
+              db.createObjectStore('subtitles', { keyPath: 'hash' });
+            }
+            if (version > 0 && version < 3) {
+              db.deleteObjectStore('subtitles');
+              db.createObjectStore('subtitles', { keyPath: 'hash' });
+            } else if (version === 3) {
+              const v3Db = db as unknown as IDBPDatabase<IDataDBV3>;
+              v3Db.deleteObjectStore('preferences');
+            }
+            db.createObjectStore('subtitle-preferences', { keyPath: 'mediaHash' });
+          },
+        },
+      );
+    }
+    return this.db;
   }
 
-  async retrieveSubtitle(hash: string) {
+  public async retrieveSubtitle(hash: string) {
     return (await this.getDb())
       .transaction('subtitles', 'readonly')
       .objectStore('subtitles')
       .get(hash);
   }
-  async addSubtitle(subtitle: AddSubtitleOptions) {
+
+  public async addSubtitle(subtitle: IAddSubtitleOptions) {
     const objectStore = (await this.getDb())
       .transaction('subtitles', 'readwrite')
       .objectStore('subtitles');
@@ -89,7 +111,8 @@ export class SubtitleDataBase {
       source: uniqWith(storedSubtitle.source.concat(subtitle.source), isEqual),
     });
   }
-  async removeSubtitle(subtitle: RemoveSubtitleOptions) {
+
+  public async removeSubtitle(subtitle: IRemoveSubtitleOptions) {
     const objectStore = (await this.getDb())
       .transaction('subtitles', 'readwrite')
       .objectStore('subtitles');
@@ -98,24 +121,25 @@ export class SubtitleDataBase {
       remove(storedSubtitle.source, storedSource => isEqual(storedSource, subtitle.source));
       if (!storedSubtitle.source.length) {
         return objectStore.delete(subtitle.hash);
-      } else {
-        return objectStore.put({ ...storedSubtitle });
       }
+      return objectStore.put({ ...storedSubtitle });
     }
+    return undefined;
   }
-  async removeSubtitles(subtitles: RemoveSubtitleOptions[]) {
+
+  public async removeSubtitles(subtitles: IRemoveSubtitleOptions[]) {
     const objectStore = await (await this.getDb())
       .transaction('subtitles', 'readwrite')
       .objectStore('subtitles');
     /** subtitles to delete */
-    const hashSourcesMap = subtitles.reduce(
+    const hashSourcesMap: { [hash: string]: [] } = subtitles.reduce(
       (subs, { hash, source }) => {
         const existedSub = subs[hash];
         if (existedSub) existedSub.push(source);
         else subs[hash] = [source];
         return subs;
       },
-      {} as { [hash: string]: any[] },
+      {},
     );
     let cursor = await objectStore.openCursor();
     const deletedSubtitleHashes: string[] = [];
@@ -133,7 +157,8 @@ export class SubtitleDataBase {
     }
     return deletedSubtitleHashes;
   }
-  async updateSubtitle(subtitle: UpdateSubtitleOptions) {
+
+  public async updateSubtitle(subtitle: IUpdateSubtitleOptions) {
     const objectStore = await (await this.getDb())
       .transaction('subtitles', 'readwrite')
       .objectStore('subtitles');
@@ -145,24 +170,20 @@ export class SubtitleDataBase {
       if (format) newSubtitle.format = format;
       if (language) newSubtitle.language = language;
       return objectStore.put(newSubtitle);
-    } else if (source && format && language) {
-      return this.addSubtitle(subtitle as AddSubtitleOptions);
     }
+    if (source && format && language) {
+      return this.addSubtitle(subtitle as IAddSubtitleOptions);
+    }
+    return undefined;
   }
 
-  async retrieveSubtitlePreference(playlistId: number, mediaItemId: string) {
-    let cursor = await ((await this.getDb())
-      .transaction('preferences', 'readonly')
-      .objectStore('preferences')
-      .openCursor());
-    while (cursor) {
-      if (cursor.value.playlistId === playlistId && cursor.value.mediaId === mediaItemId) return cursor.value;
-      cursor = await cursor.continue();
-    }
+  public async retrieveSubtitlePreference(mediaHash: string) {
+    return (await this.getDb()).get('subtitle-preferences', mediaHash);
   }
-  private generateDefaultPreference(playlistId: number, mediaItemId: string): SubtitlePreference {
+
+  private static generateDefaultPreference(mediaHash: string): ISubtitlePreference {
     return {
-      playlistId, mediaId: mediaItemId,
+      mediaHash,
       language: {
         primary: LanguageCode.Default,
         secondary: LanguageCode.Default,
@@ -174,276 +195,173 @@ export class SubtitleDataBase {
       },
     };
   }
-  async retrieveSubtitleList(playlistId: number, mediaItemId: string) {
-    const preference =  await this.retrieveSubtitlePreference(playlistId, mediaItemId);
+
+  public async retrieveSubtitleList(mediaHash: string) {
+    const preference = await this.retrieveSubtitlePreference(mediaHash);
     return preference ? preference.list : [];
   }
-  async addSubtitleItemsToList(playlistId: number, mediaItemId: string, subtitles: StoredSubtitleItem[]) {
-    subtitles = uniqWith(subtitles, ({ hash: hash1, source: source1 }, { hash: hash2, source: source2 }) => hash1 === hash2 && isEqual(source1, source2));
+
+  private static unionSubtitleList(
+    subtitles: IStoredSubtitleItem[],
+    subtitlesToUnion: IStoredSubtitleItem[],
+  ) {
+    return unionWith(
+      subtitles, subtitlesToUnion,
+      (subtitle, newSubtitle) => isEqual(
+        pick(subtitle, ['hash', 'type', 'source']),
+        pick(newSubtitle, ['hash', 'type', 'source']),
+      ),
+    );
+  }
+
+  private static uniqSubtitleList(subtitles: IStoredSubtitleItem[]) {
+    return uniqWith(
+      subtitles,
+      (subtitle, newSubtitle) => isEqual(
+        pick(subtitle, ['hash', 'type', 'source']),
+        pick(newSubtitle, ['hash', 'type', 'source']),
+      ),
+    );
+  }
+
+  public async addSubtitleItemsToList(
+    mediaHash: string,
+    subtitles: IStoredSubtitleItem[],
+  ) {
+    subtitles = SubtitleDataBase.uniqSubtitleList(subtitles);
     const objectStore = (await this.getDb())
-      .transaction('preferences', 'readwrite')
-      .objectStore('preferences');
-    let preference;
-    let key;
-    let cursor = await objectStore.openCursor();
-    while (cursor && !preference && !key) {
-      if (cursor.value.playlistId === playlistId && cursor.value.mediaId === mediaItemId) {
-        preference = cursor.value;
-        key = cursor.key;
-      }
-      cursor = await cursor.continue();
-    }
+      .transaction('subtitle-preferences', 'readwrite')
+      .objectStore('subtitle-preferences');
+    const preference = await objectStore.get(mediaHash);
     if (!preference) {
       return objectStore.add({
-        ...this.generateDefaultPreference(playlistId, mediaItemId),
+        ...SubtitleDataBase.generateDefaultPreference(mediaHash),
         list: subtitles,
       });
-    } else {
-      return objectStore.put({
-        ...preference,
-        list: unionWith(subtitles, preference.list, isEqual),
-      }, key);
     }
+    return objectStore.put({
+      ...preference,
+      list: SubtitleDataBase.unionSubtitleList(preference.list, subtitles),
+    });
   }
-  async updateSubtitleList(playlistId: number, mediaItemId: string, subtitlesToUpdate: UpdateSubtitleItemOptions[]) {
-    subtitlesToUpdate = uniqWith(subtitlesToUpdate, ({ hash: hash1, source: source1 }, { hash: hash2, source: source2 }) => hash1 === hash2 && isEqual(source1, source2));
+
+  public async updateSubtitleList(
+    mediaHash: string,
+    subtitlesToUpdate: IUpdateSubtitleItemOptions[],
+  ) {
+    subtitlesToUpdate = uniqWith(subtitlesToUpdate, (
+      { hash: hash1, source: source1 },
+      { hash: hash2, source: source2 },
+    ) => hash1 === hash2 && isEqual(source1, source2));
     const objectStore = (await this.getDb())
-      .transaction('preferences', 'readwrite')
-      .objectStore('preferences');
-    let preference;
-    let list: StoredSubtitleItem[] = [];
-    let key;
-    let cursor = await objectStore.openCursor();
-    while (cursor && !preference && !key) {
-      if (cursor.value.playlistId === playlistId && cursor.value.mediaId === mediaItemId) {
-        preference = cursor.value;
-        list = Object.values(mergeWith(
-          keyBy(preference.list, ({ hash }) => hash),
-          keyBy(subtitlesToUpdate, ({ hash }) => hash),
-          (objVal: StoredSubtitleItem, srcVal: StoredSubtitleItem) => {
-            const destObj = { ...objVal };
-            const { type, source, videoSegments, delay } = srcVal;
-            if (type) destObj.type = type;
-            if (source) destObj.source = source;
-            if (videoSegments) destObj.videoSegments = videoSegments;
-            if (isFinite(delay)) destObj.delay = delay;
-            return destObj;
-          },
-        ));
-        key = cursor.key;
-      }
-      cursor = await cursor.continue();
-    }
+      .transaction('subtitle-preferences', 'readwrite')
+      .objectStore('subtitle-preferences');
+    const preference = await objectStore.get(mediaHash);
     if (!preference) {
-      return objectStore.add({ ...this.generateDefaultPreference(playlistId, mediaItemId), list });
-    } else {
-      return objectStore.put({ ...preference, list }, key);
+      return objectStore.add(SubtitleDataBase.generateDefaultPreference(mediaHash));
     }
+    return objectStore.put({
+      ...preference,
+      list: Object.values(mergeWith(
+        keyBy(preference.list, ({ hash }) => hash),
+        keyBy(subtitlesToUpdate, ({ hash }) => hash),
+        (objVal: IStoredSubtitleItem, srcVal: IStoredSubtitleItem) => {
+          const destObj = { ...objVal };
+          const {
+            type, source, videoSegments, delay,
+          } = srcVal;
+          if (type) destObj.type = type;
+          if (source) destObj.source = source;
+          if (videoSegments) destObj.videoSegments = videoSegments;
+          if (isFinite(delay)) destObj.delay = delay;
+          return destObj;
+        },
+      )),
+    });
   }
-  async removeSubtitleItemsFromList(playlistId: number, mediaItemId: string, subtitles: StoredSubtitleItem[]) {
-    subtitles = uniqWith(subtitles, ({ hash: hash1, source: source1 }, { hash: hash2, source: source2 }) => hash1 === hash2 && isEqual(source1, source2));
+
+  public async removeSubtitleItemsFromList(
+    mediaHash: string,
+    subtitles: IStoredSubtitleItem[],
+  ) {
+    subtitles = SubtitleDataBase.uniqSubtitleList(subtitles);
     const objectStore = (await this.getDb())
-      .transaction('preferences', 'readwrite')
-      .objectStore('preferences');
-    let preference;
-    let key;
-    let cursor = await objectStore.openCursor();
-    while (cursor && !preference && !key) {
-      if (cursor.value.playlistId === playlistId && cursor.value.mediaId === mediaItemId) {
-        preference = cursor.value;
-        key = cursor.key;
-      }
-      cursor = await cursor.continue();
-    }
+      .transaction('subtitle-preferences', 'readwrite')
+      .objectStore('subtitle-preferences');
+    const preference = await objectStore.get(mediaHash);
     if (!preference) {
-      return objectStore.add(this.generateDefaultPreference(playlistId, mediaItemId));
-    } else {
-      const { list: existedList } = preference;
-      remove(existedList, sub => some(subtitles, sub));
-      return objectStore.put({
-        ...preference,
-        list: existedList,
-      }, key);
+      return objectStore.add(SubtitleDataBase.generateDefaultPreference(mediaHash));
     }
+    const { list: existedList } = preference;
+    remove(existedList, sub => some(subtitles, sub));
+    return objectStore.put({
+      ...preference,
+      list: existedList,
+    });
   }
-  async retrieveSubtitleLanguage(playlistId: number, mediaItemId: string) {
-    const preference = await this.retrieveSubtitlePreference(playlistId, mediaItemId);
+
+  public async retrieveSubtitleLanguage(mediaHash: string) {
+    const preference = await this.retrieveSubtitlePreference(mediaHash);
     return preference ? preference.language : {
       primary: LanguageCode.Default,
       secondary: LanguageCode.Default,
     };
   }
-  async storeSubtitleLanguage(playlistId: number, mediaItemId: string, languageCodes: LanguageCode[]) {
-    const objectStore = (await this.getDb())
-      .transaction('preferences', 'readwrite')
-      .objectStore('preferences');
-    let preference;
-    let key;
-    let cursor = await objectStore.openCursor();
-    while (cursor && !preference && !key) {
-      if (cursor.value.playlistId === playlistId && cursor.value.mediaId === mediaItemId) {
-        preference = cursor.value;
-        key = cursor.key;
-      }
-      cursor = await cursor.continue();
-    }
 
+  public async storeSubtitleLanguage(
+    mediaHash: string,
+    languageCodes: LanguageCode[],
+  ) {
+    const objectStore = (await this.getDb())
+      .transaction('subtitle-preferences', 'readwrite')
+      .objectStore('subtitle-preferences');
+    const preference = await objectStore.get(mediaHash);
     if (!preference) {
       return objectStore.add({
-        ...this.generateDefaultPreference(playlistId, mediaItemId),
+        ...SubtitleDataBase.generateDefaultPreference(mediaHash),
         language: {
           primary: languageCodes[0],
           secondary: languageCodes[1],
         },
       });
-    } else {
-      return objectStore.put({
-        ...preference,
-        language: {
-          primary: languageCodes[0],
-          secondary: languageCodes[1],
-        },
-      }, key);
     }
+    return objectStore.put({
+      ...preference,
+      language: {
+        primary: languageCodes[0],
+        secondary: languageCodes[1],
+      },
+    });
   }
-  async retrieveSelectedSubtitles(playlistId: number, mediaItemId: string) {
-    const preference = await this.retrieveSubtitlePreference(playlistId, mediaItemId);
+
+  public async retrieveSelectedSubtitles(mediaHash: string) {
+    const preference = await this.retrieveSubtitlePreference(mediaHash);
     return preference ? preference.selected : [];
   }
-  async storeSelectedSubtitles(playlistId: number, mediaItemId: string, subtitles: SelectedSubtitle[]) {
+
+  public async storeSelectedSubtitles(
+    mediaHash: string,
+    subtitles: SelectedSubtitle[],
+  ) {
     const objectStore = (await this.getDb())
-      .transaction('preferences', 'readwrite')
-      .objectStore('preferences');
-    let preference;
-    let key;
-    let cursor = await objectStore.openCursor();
-    while (cursor && !preference && !key) {
-      if (cursor.value.playlistId === playlistId && cursor.value.mediaId === mediaItemId) {
-        preference = cursor.value;
-        key = cursor.key;
-      }
-      cursor = await cursor.continue();
-    }
+      .transaction('subtitle-preferences', 'readwrite')
+      .objectStore('subtitle-preferences');
+    const preference = await objectStore.get(mediaHash);
     if (!preference) {
       return objectStore.add({
-        ...this.generateDefaultPreference(playlistId, mediaItemId),
+        ...SubtitleDataBase.generateDefaultPreference(mediaHash),
         selected: {
           primary: subtitles[0],
           secondary: subtitles[1],
         },
       });
-    } else {
-      return objectStore.put({
-        ...preference,
-        selected: {
-          primary: subtitles[0],
-          secondary: subtitles[1],
-        },
-      }, key);
     }
+    return objectStore.put({
+      ...preference,
+      selected: {
+        primary: subtitles[0],
+        secondary: subtitles[1],
+      },
+    });
   }
-  async deleteSubtitlesByPlaylistId(playlistId: number) {
-    const playlistStore = await (await this.getDb())
-      .transaction('preferences', 'readwrite')
-      .objectStore('preferences');
-    let cursor = await playlistStore.openCursor();
-    const subtitlesToRemove: RemoveSubtitleOptions[] = [];
-    while (cursor) {
-      if (cursor.value.playlistId === playlistId) {
-        await playlistStore.delete(cursor.key);
-        subtitlesToRemove.push(...cursor.value.list);
-      }
-      cursor = await cursor.continue();
-    }
-    return this.removeSubtitles(subtitlesToRemove);
-  }
-}
-
-const db = new SubtitleDataBase();
-
-export class DatabaseGenerator implements EntityGenerator {
-  private constructor() {}
-  private type: Type;
-  async getType() { return this.type; }
-  private format: Format;
-  async getFormat() { return this.format; }
-  private language: LanguageCode = LanguageCode.Default;
-  async getLanguage() { return this.language; }
-  private sources: Origin[];
-  async getSource() { return this.sources[0]; }
-  private storedSource: Origin;
-  async getStoredSource() { return this.storedSource; }
-  async getPayload() {
-    const { type, source } = await this.getSource();
-    switch (type) {
-      case Type.Embedded:
-        const embeddedSrc = await embeddedSrcLoader(
-          source.videoSrc as string,
-          source.streamIndex as number,
-          this.format,
-        );
-        return loadLocalFile(embeddedSrc);
-      case Type.Local:
-        return loadLocalFile(source);
-      case Type.Online:
-        return Sagi.getTranscript({ transcriptIdentity: source, startTime: 0 });
-    }
-  }
-  private hash: string;
-  async getHash() {
-    return this.hash;
-  }
-  static async from(storedSubtitleItem: StoredSubtitleItem) {
-    const { hash, type } = storedSubtitleItem;
-    const storedSubtitle = await db.retrieveSubtitle(hash);
-    if (storedSubtitle) {
-      const newGenerator = new DatabaseGenerator();
-      newGenerator.storedSource = {
-        type,
-        source: storedSubtitleItem.source,
-      };
-      const { source, format, language } = storedSubtitle;
-      newGenerator.type = type;
-      newGenerator.format = format;
-      newGenerator.language = language;
-      newGenerator.sources = source;
-      newGenerator.hash = hash;
-      return newGenerator;
-    }
-  }
-}
-
-export async function storeSubtitle(subtitle: Entity) {
-  const { source, hash, format, language } = subtitle;
-  return db.addSubtitle({ source, format, language, hash });
-}
-export async function removeSubtitle(subtitle: Entity) {
-  const { hash, source } = subtitle;
-  return db.removeSubtitle({ hash, source });
-}
-export function retrieveSubtitlePreference(playlistId: number, mediaItemId: string) {
-  return db.retrieveSubtitlePreference(playlistId, mediaItemId);
-}
-export function retrieveStoredSubtitleList(playlistId: number, mediaItemId: string) {
-  return db.retrieveSubtitleList(playlistId, mediaItemId);
-}
-export function addSubtitleItemsToList(subtitles: SubtitleControlListItem[], playlistId: number, mediaItemId: string) {
-  const storedSubtitles = subtitles.map(({ hash, type, source, delay }) => ({ hash, type, source, delay }));
-  return db.addSubtitleItemsToList(playlistId, mediaItemId, storedSubtitles);
-}
-export function removeSubtitleItemsFromList(subtitles: SubtitleControlListItem[], playlistId: number, mediaItemId: string) {
-  const storedSubtitles = subtitles.map(({ hash, type, source, delay }) => ({ hash, type, source, delay }));
-  return db.removeSubtitleItemsFromList(playlistId, mediaItemId, storedSubtitles);
-}
-export function storeSubtitleLanguage(languageCodes: LanguageCode[], playlistId: number, mediaItemId: string) {
-  return db.storeSubtitleLanguage(playlistId, mediaItemId, languageCodes);
-}
-export function storeSelectedSubtitles(subs: SelectedSubtitle[], playlistId: number, mediaItemId: string) {
-  return db.storeSelectedSubtitles(playlistId, mediaItemId, subs);
-}
-export function retrieveSelectedSubtitles(playlistId: number, mediaItemId: string) {
-  return db.retrieveSelectedSubtitles(playlistId, mediaItemId);
-}
-export function deleteSubtitlesByPlaylistId(playlistId: number) {
-  return db.deleteSubtitlesByPlaylistId(playlistId);
 }

@@ -2,9 +2,13 @@ import Vue from 'vue';
 
 import romanize from 'romanize';
 import isEqual from 'lodash/isEqual';
+import urlParseLax from 'url-parse-lax';
 import { mediaQuickHash } from '@/libs/utils';
 import { Video as videoMutations } from '../mutationTypes';
-import { Video as videoActions, Subtitle as subtitleActions } from '../actionTypes';
+import {
+  Video as videoActions,
+  Subtitle as subtitleActions,
+} from '../actionTypes';
 
 const state = {
   // error state
@@ -15,9 +19,9 @@ const state = {
   src: process.env.NODE_ENV === 'testing' ? './test/assets/test.avi' : '',
   mediaHash: process.env.NODE_ENV === 'testing'
     ? '84f0e9e5e05f04b58f53e2617cc9c866-'
-      + 'f54d6eb31bef84839c3ce4fc2f57991c-'
-      + 'b1f0696aec64577228d93eabcc8eb69b-'
-      + 'f497c6684c4c6e50d0856b5328a4bedc'
+    + 'f54d6eb31bef84839c3ce4fc2f57991c-'
+    + 'b1f0696aec64577228d93eabcc8eb69b-'
+    + 'f497c6684c4c6e50d0856b5328a4bedc'
     : '',
   currentSrc: '',
   networkState: '',
@@ -62,6 +66,9 @@ const getters = {
   // network state
   originSrc: state => state.src,
   convertedSrc: (state) => {
+    if (urlParseLax(state.src).protocol) {
+      return state.src;
+    }
     const converted = process.platform === 'win32' ? encodeURIComponent(state.src).replace(/%3A/g, ':').replace(/(%5C)|(%2F)/g, '/')
       : encodeURIComponent(state.src).replace(/%3A/g, ':').replace(/%2F/g, '/');
     return process.platform === 'win32' ? converted : `file://${converted}`;
@@ -204,7 +211,6 @@ const actions = {
       if (!srcRegexes[type].test(src)) return;
       mediaHash = mediaHash || await mediaQuickHash.try(src);
       if (!mediaHash) return;
-
       commit(videoMutations.SRC_UPDATE, src);
       commit(videoMutations.MEDIA_HASH_UPDATE, mediaHash);
       commit(videoMutations.ID_UPDATE, id);

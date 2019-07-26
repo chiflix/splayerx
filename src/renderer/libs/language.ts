@@ -16,8 +16,12 @@ export enum LanguageCode {
   'hi' = 'hi',
   'No' = 'No',
   'Default' = 'Default',
-};
+}
 export const allCodes = {
+  en: [
+    'en',
+    'eng',
+  ],
   'zh-CN': [
     'zh',
     'chi',
@@ -41,10 +45,6 @@ export const allCodes = {
   ko: [
     'ko',
     'kor',
-  ],
-  en: [
-    'en',
-    'eng',
   ],
   es: [
     'es',
@@ -94,8 +94,9 @@ export const allCodes = {
 export function normalizeCode(code: string): LanguageCode {
   if (!code) return LanguageCode.Default;
   return (
-    Object.keys(allCodes).find(standardCode => allCodes[standardCode].includes(code)) as LanguageCode ||
-    LanguageCode.No
+    Object.keys(allCodes)
+      .find(standardCode => allCodes[standardCode].includes(code)) as LanguageCode
+    || LanguageCode.No
   );
 }
 
@@ -112,11 +113,11 @@ enum LanguageName {
   'pt'= 'Português',
   'cs'= 'čeština',
   'ru'= 'Русский',
-  'id'= 'Bahasa Indonesia',
+  'id'= 'Indonesian',
   'ar'= 'العربية',
   'hi'= 'हिन्दी',
   'No'= 'No',
-};
+}
 export function codeToLanguageName(code: string): LanguageName {
   const standardCode = normalizeCode(code);
   return LanguageName[standardCode];

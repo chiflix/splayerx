@@ -23,12 +23,12 @@ init:
 install:
   - ps: Install-Product node 12 x64
   - git reset --hard HEAD
-  - npm i
   - node --version
+  - npm i
 
 build_script:
   - npm run build
-  
+
 test: off
 
 after_build:

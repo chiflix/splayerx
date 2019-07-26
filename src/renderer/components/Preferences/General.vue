@@ -19,6 +19,7 @@
           <div
             @mouseup.stop=""
             class="dropdown__listItems"
+            tabindex="-1"
           >
             <div
               v-for="(language, index) in displayLanguages"
@@ -152,7 +153,7 @@ export default {
       defaultButtonTimeoutId: NaN,
       restoreButtonTimeoutId: NaN,
       needToRelaunch: !!window.localStorage.needToRelaunch,
-      languages: ['zh-Hans', 'zh-Hant', 'ja', 'ko', 'en', 'es', 'ar'],
+      languages: ['en', 'zh-Hans', 'zh-Hant', 'ja', 'ko', 'es', 'ar'],
       buttonDown: 0,
     };
   },
@@ -391,6 +392,9 @@ export default {
       height: 112px;
       margin: 4px 4px 4px 6px;
       overflow-y: scroll;
+      &:focus {
+        outline: none;
+      }
     }
 
     .dropdownListItem {

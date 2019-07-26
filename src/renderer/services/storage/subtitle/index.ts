@@ -1,103 +1,172 @@
-import { Entity, SubtitleControlListItem } from '@/interfaces/ISubtitle';
+import {
+  Entity, SubtitleControlListItem, IEntityGenerator, Type, Format, IOrigin,
+} from '@/interfaces/ISubtitle';
 import { LanguageCode } from '@/libs/language';
-import { SelectedSubtitle, StoredSubtitleItem } from '@/interfaces/ISubtitleStorage';
+import { SelectedSubtitle, IStoredSubtitleItem } from '@/interfaces/ISubtitleStorage';
 import { SubtitleDataBase } from './db';
-import { EntityGenerator, Type, Format, Origin } from '@/interfaces/ISubtitle';
+
 import Sagi from '@/libs/sagi';
 import { loadLocalFile } from '@/services/subtitle/utils';
-import { embeddedSrcLoader } from '@/services/subtitle/loaders/embedded';
-import { cacheEmbeddedSubtitle, addNewSourceToDb, cacheLocalSubtitle, cacheOnlineSubtitle, isCachedSubtitle, removeCachedSubtitles } from './file';
+import { embeddedSrcLoader, IEmbeddedOrigin } from '@/services/subtitle/loaders/embedded';
+import {
+  cacheEmbeddedSubtitle, cacheLocalSubtitle, cacheOnlineSubtitle,
+  isCachedSubtitle,
+  addNewSourceToDb,
+} from './file';
 
 const db = new SubtitleDataBase();
 
 export async function storeSubtitle(subtitle: Entity) {
-  const { source, hash, format, language } = subtitle;
-  return db.addSubtitle({ source, format, language, hash });
+  if (subtitle) {
+    const {
+      source, hash, format, language,
+    } = subtitle;
+    if (source && hash && language && format && format !== Format.Unknown) {
+      db.addSubtitle({
+        source, format, language, hash,
+      });
+    }
+  }
 }
 export async function removeSubtitle(subtitle: Entity) {
-  const { hash, source } = subtitle;
-  return db.removeSubtitle({ hash, source });
+  if (subtitle) {
+    const { hash, source } = subtitle;
+    if (hash && source) db.removeSubtitle({ hash, source });
+  }
 }
 export async function updateSubtitle(subtitle: Entity) {
-  const { hash, source, format, language } = subtitle;
-  return db.updateSubtitle({ hash, source, format, language });
+  if (subtitle) {
+    const {
+      hash, source, format, language,
+    } = subtitle;
+    if (source && hash && format && language) {
+      db.updateSubtitle({
+        hash, source, format, language,
+      });
+    }
+  }
 }
-export function retrieveSubtitlePreference(playlistId: number, mediaItemId: string) {
-  return db.retrieveSubtitlePreference(playlistId, mediaItemId);
+export function retrieveSubtitlePreference(mediaHash: string = '') {
+  return db.retrieveSubtitlePreference(mediaHash);
 }
-export function retrieveStoredSubtitleList(playlistId: number, mediaItemId: string) {
-  return db.retrieveSubtitleList(playlistId, mediaItemId);
+export function retrieveStoredSubtitleList(mediaHash: string = '') {
+  return db.retrieveSubtitleList(mediaHash);
 }
-export function addSubtitleItemsToList(subtitles: SubtitleControlListItem[], playlistId: number, mediaItemId: string) {
-  const storedSubtitles = subtitles.filter(s => s).map(({ hash, type, source, delay }) => ({ hash, type, source, delay }));
-  return db.addSubtitleItemsToList(playlistId, mediaItemId, storedSubtitles);
+export function addSubtitleItemsToList(
+  subtitles: SubtitleControlListItem[] = [],
+  mediaHash: string = '',
+) {
+  const storedSubtitles = subtitles
+    .filter(s => s && s.hash && s.source && s.type)
+    .map(({
+      hash, type, source, delay,
+    }) => ({
+      hash, type, source, delay,
+    }));
+  return db.addSubtitleItemsToList(mediaHash, storedSubtitles);
 }
-export function updateSubtitleList(subtitles: SubtitleControlListItem[], playlistId: number, mediaItemId: string) {
+export function updateSubtitleList(
+  subtitles: SubtitleControlListItem[] = [],
+  mediaHash: string = '',
+) {
   const subtitlesToUpdate = subtitles
-    .filter(sub => !!sub)
-    .map(({ hash, type, source, delay }) => ({ hash, type, source, delay }));
-  return db.updateSubtitleList(playlistId, mediaItemId, subtitlesToUpdate);
+    .filter(s => s && s.hash && s.source && s.type)
+    .map(({
+      hash, type, source, delay,
+    }) => ({
+      hash, type, source, delay,
+    }));
+  return db.updateSubtitleList(mediaHash, subtitlesToUpdate);
 }
-export function removeSubtitleItemsFromList(subtitles: SubtitleControlListItem[], playlistId: number, mediaItemId: string) {
-  const storedSubtitles = subtitles.filter(s => s).map(({ hash, type, source, delay }) => ({ hash, type, source, delay }));
-  return db.removeSubtitleItemsFromList(playlistId, mediaItemId, storedSubtitles);
+export function removeSubtitleItemsFromList(
+  subtitles: SubtitleControlListItem[] = [],
+  mediaHash: string = '',
+) {
+  const storedSubtitles = subtitles
+    .filter(s => s && s.hash && s.source && s.type)
+    .map(({
+      hash, type, source, delay,
+    }) => ({
+      hash, type, source, delay,
+    }));
+  return db.removeSubtitleItemsFromList(mediaHash, storedSubtitles);
 }
-export function storeSubtitleLanguage(languageCodes: LanguageCode[], playlistId: number, mediaItemId: string) {
-  return db.storeSubtitleLanguage(playlistId, mediaItemId, languageCodes);
+export function storeSubtitleLanguage(
+  languageCodes: LanguageCode[] = [LanguageCode.Default, LanguageCode.Default],
+  mediaHash: string = '',
+) {
+  return db.storeSubtitleLanguage(mediaHash, languageCodes);
 }
-export function storeSelectedSubtitles(subs: SelectedSubtitle[], playlistId: number, mediaItemId: string) {
-  return db.storeSelectedSubtitles(playlistId, mediaItemId, subs);
+export function storeSelectedSubtitles(
+  subs: SelectedSubtitle[] = [],
+  mediaHash: string = '',
+) {
+  return db.storeSelectedSubtitles(mediaHash, subs);
 }
-export function retrieveSelectedSubtitles(playlistId: number, mediaItemId: string) {
-  return db.retrieveSelectedSubtitles(playlistId, mediaItemId);
-}
-export async function deleteSubtitlesByPlaylistId(playlistId: number) {
-  const hashes = await db.deleteSubtitlesByPlaylistId(playlistId);
-  const cachedSubtitleSources = await removeCachedSubtitles(hashes);
-  await db.removeSubtitles(cachedSubtitleSources.map(({ hash, source }) => ({ hash, source: source.source })));
+export function retrieveSelectedSubtitles(mediaHash: string = '') {
+  return db.retrieveSelectedSubtitles(mediaHash);
 }
 
-export class DatabaseGenerator implements EntityGenerator {
-  private constructor() {}
+export class DatabaseGenerator implements IEntityGenerator {
   private type: Type;
-  async getType() { return this.type; }
+
+  public async getType() { return this.type; }
+
   private format: Format;
-  async getFormat() { return this.format; }
+
+  public async getFormat() { return this.format; }
+
   private language: LanguageCode = LanguageCode.Default;
-  async getLanguage() { return this.language; }
-  private sources: Origin[];
-  async getSource() {
+
+  public async getLanguage() { return this.language; }
+
+  private sources: IOrigin[];
+
+  public async getSource() {
     const cachedSubtitle = this.sources.find(isCachedSubtitle);
     if (cachedSubtitle) return cachedSubtitle;
     return this.sources[0];
   }
-  private storedSource: Origin;
-  async getStoredSource() { return this.storedSource; }
-  async getPayload() {
+
+  private storedSource: IOrigin;
+
+  public async getStoredSource() { return this.storedSource; }
+
+  public async getPayload() {
     const { type, source } = await this.getSource();
     switch (type) {
-      case Type.Embedded:
+      case Type.Embedded: {
+        const { source } = await this.getSource() as IEmbeddedOrigin;
         const embeddedSrc = await embeddedSrcLoader(
-          source.videoSrc as string,
-          source.streamIndex as number,
+          source.videoSrc,
+          source.streamIndex,
           this.format,
         );
         return loadLocalFile(embeddedSrc);
+      }
       case Type.Local:
-        return loadLocalFile(source);
+        return loadLocalFile(source as string);
       case Type.Online:
-        return Sagi.getTranscript({ transcriptIdentity: source, startTime: 0 });
+      case Type.Translated:
+        return Sagi.getTranscript({ transcriptIdentity: source as string, startTime: 0 });
+      default:
+        throw new Error(`Unexpected subtitle type ${type}.`);
     }
   }
+
   private hash: string;
-  async getHash() {
+
+  public async getHash() {
     return this.hash;
   }
+
   private delayInSeconds: number;
-  async getDelay() {
+
+  public async getDelay() {
     return this.delayInSeconds;
   }
-  static async from(storedSubtitleItem: StoredSubtitleItem) {
+
+  public static async from(storedSubtitleItem: IStoredSubtitleItem) {
     const { hash, type, delay } = storedSubtitleItem;
     const storedSubtitle = await db.retrieveSubtitle(hash);
     if (storedSubtitle) {
@@ -115,6 +184,7 @@ export class DatabaseGenerator implements EntityGenerator {
       newGenerator.delayInSeconds = delay || 0;
       return newGenerator;
     }
+    return undefined;
   }
 }
 
@@ -126,9 +196,14 @@ export async function cacheSubtitle(subtitle: Entity) {
     case Type.Local:
       return cacheLocalSubtitle(subtitle)
         .then(source => addNewSourceToDb(subtitle, source));
+    case Type.Translated:
     case Type.Online: {
       const newOnlineSource = await cacheOnlineSubtitle(subtitle);
       if (newOnlineSource) return addNewSourceToDb(subtitle, newOnlineSource);
+      break;
     }
+    default:
+      throw new Error(`Unexpected subtitle type ${subtitle.type}.`);
   }
+  return undefined;
 }
