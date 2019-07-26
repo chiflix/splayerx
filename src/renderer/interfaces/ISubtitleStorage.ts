@@ -25,8 +25,7 @@ interface IPrimarySecondary<T> {
 }
 export type SelectedSubtitle = { hash: string, source?: IOrigin };
 export interface ISubtitlePreference {
-  playlistId: number;
-  mediaId: string;
+  mediaHash: string;
   list: IStoredSubtitleItem[];
   language: IPrimarySecondary<LanguageCode>;
   selected: IPrimarySecondary<SelectedSubtitle>;
