@@ -101,8 +101,8 @@
       "open": "打开文件…",
       "openRecent": "打开最近播放",
       "openURL": "打开 URL…",
-      "copy": "",
-      "paste": ""
+      "copy": "复制",
+      "paste": "粘贴"
     },
     "help": {
       "name": "帮助",
@@ -267,7 +267,7 @@
   },
   "subtitle": {
     "embedded": "内嵌",
-    "generate": "",
+    "generate": "生成",
     "language": {
       "ar": "阿拉伯语",
       "de": "德语",
