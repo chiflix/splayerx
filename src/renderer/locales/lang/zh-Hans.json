@@ -267,6 +267,7 @@
   },
   "subtitle": {
     "embedded": "内嵌",
+    "generate": "生成",
     "language": {
       "ar": "阿拉伯语",
       "de": "德语",
@@ -307,5 +308,46 @@
   "loadVideoBySubtitleFailed": {
     "content": "未找到目录下与字幕同名的视频文件",
     "title": ""
+  },
+  "translateModal": {
+    "title": "选择视频源语言",
+    "translateTitle": "大约还需 {time}",
+    "minute": "{number} 分钟",
+    "second": "{number} 秒",
+    "hour": "{number} 小时",
+    "successTitle": "翻译完成",
+    "failTitle": "翻译失败",
+    "cancelTitle": "AI翻译正在进行中",
+    "selectDescription": "如要生成智能翻译，请选择您在视频中所听到的语言并点击生成，该过程将持续一段时间。",
+    "selectLanguageLabel": "视频源语言",
+    "cancel": "取消",
+    "quit": "退出",
+    "generate": "生成",
+    "translateDescription": "请不要切换视频或关闭播放器，您可以在该视频的翻译结果列表中查看进度。",
+    "ok": "好的",
+    "successDescriptiton": "AI翻译已完成，可在翻译结果列表中查看。",
+    "failDescription": "请稍后重试，谢谢。",
+    "cancelDescription": "点击退出取消翻译，退出后翻译进度将不可恢复。",
+    "continue": "取消"
+  },
+  "translateBubble": {
+    "bubbleWhenGrab": "该操作将会导致正在进行的翻译中止，是否中止？",
+    "bubbleWhenTranslate": "AI翻译会在云端继续处理，下次播放该视频时将自动获取翻译进度。",
+    "bubbleFunctionForbidden": "该操作将会导致正在进行的翻译中止，是否中止？",
+    "bubbleWhenSuccess": {
+      "title": "",
+      "content": "AI翻译已完成，可在翻译结果列表中查看。"
+    },
+    "bubbleWhenSuccessOnOtherVideo": {
+      "title": "",
+      "content": "AI 翻译已完成，将在下次打开视频时自动显示。"
+    },
+    "bubbleTranslateFail": {
+      "title": "翻译失败",
+      "content": "请稍后重试，谢谢。"
+    },
+    "ok": "好的",
+    "cancel": "取消",
+    "continue": "继续"
   }
 }
