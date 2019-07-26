@@ -317,6 +317,24 @@
       }
     ]
   },
+  "history": {
+    "items": [
+      {
+        "id": "history.reload",
+        "label": "msg.history.reload"
+      },
+      {
+        "id": "history.back",
+        "label": "msg.history.back",
+        "enabled": false
+      },
+      {
+        "id": "history.forward",
+        "label": "msg.history.forward",
+        "enabled": false
+      }
+    ]
+  },
   "favourite": {
     "items": [
       {

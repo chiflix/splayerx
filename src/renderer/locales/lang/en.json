@@ -194,13 +194,21 @@
       "maxmize": "Zoom",
       "minimize": "Minimize",
       "name": "Window",
-      "originSize": "100%"
+      "originSize": "100%",
+      "enterPip": "Enter Picture In Picture",
+      "exitPip": "Exit Picture In Picture"
     },
     "favourite": {
       "name": "Favourite",
       "iqiyi": "iQIYI",
       "bilibili": "Bilibili",
       "youtube": "Youtube"
+    },
+    "history": {
+      "name": "History",
+      "reload": "Reload Page",
+      "back": "Back",
+      "forward": "Forward"
     }
   },
   "nextVideo": {

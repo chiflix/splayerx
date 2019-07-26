@@ -1,9 +1,5 @@
 <template>
   <div class="wrapper">
-    <short-marks
-      v-show="isBrowsingViewEnabled && !openUrlShow"
-      :handle-browsing-open="handleBrowsingOpen"
-    />
     <open-url
       v-show="openUrlShow"
       :open-input-url="openInputUrl"
@@ -132,7 +128,6 @@ import { Route } from 'vue-router';
 import { playInfoStorageService } from '@/services/storage/PlayInfoStorageService';
 import { recentPlayService } from '@/services/media/RecentPlayService';
 import Icon from '@/components/BaseIconContainer.vue';
-import ShortMarks from '@/components/LandingView/ShortMarks.vue';
 import OpenUrl from '@/components/LandingView/OpenUrl.vue';
 import NotificationBubble from '@/components/NotificationBubble.vue';
 import PlaylistItem from '@/components/LandingView/PlaylistItem.vue';
@@ -150,7 +145,6 @@ export default {
   components: {
     Icon,
     NotificationBubble,
-    'short-marks': ShortMarks,
     'open-url': OpenUrl,
   },
   data() {

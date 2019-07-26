@@ -201,8 +201,8 @@ new Vue({
   },
   watch: {
     playlistDisplayState(val: boolean) {
-      this.menuService.updateMenuItemEnabled('playback.forwardS', !val);
-      this.menuService.updateMenuItemEnabled('playback.backwardS', !val);
+      this.$electron.ipcRenderer.send('update-enabled', 'playback.forwardS', !val);
+      this.$electron.ipcRenderer.send('update-enabled', 'playback.backwardS', !val);
     },
     displayLanguage(val) {
       if (messages[val]) {
@@ -217,9 +217,9 @@ new Vue({
     },
     enabledSecondarySub(val) {
       this.list.forEach((item: SubtitleControlListItem) => {
-        this.menuService.updateMenuItemEnabled(`subtitle.secondarySubtitle.${item.id}`, val);
+        this.$electron.ipcRenderer.send('update-enabled', `subtitle.secondarySubtitle.${item.id}`, val);
       });
-      this.menuService.updateMenuItemEnabled('subtitle.secondarySubtitle.secondSub-1', val);
+      this.$electron.ipcRenderer.send('update-enabled', 'subtitle.secondarySubtitle.secondSub-1', val);
     },
     currentRouteName(val) {
       this.menuService.updateRouteName(val);
@@ -241,11 +241,11 @@ new Vue({
         this.menuService.addPrimarySub(this.recentSubMenu());
         this.menuService.addSecondarySub(this.recentSecondarySubMenu());
 
-        this.menuService.updateMenuItemEnabled('subtitle.increasePrimarySubtitleDelay', !!this.primarySubtitleId);
-        this.menuService.updateMenuItemEnabled('subtitle.decreasePrimarySubtitleDelay', !!this.primarySubtitleId);
-        this.menuService.updateMenuItemEnabled('subtitle.increaseSecondarySubtitleDelay', !!this.secondarySubtitleId);
-        this.menuService.updateMenuItemEnabled('subtitle.decreaseSecondarySubtitleDelay', !!this.secondarySubtitleId);
-        this.menuService.updateMenuItemEnabled('subtitle.uploadSelectedSubtitle', !!this.ableToPushCurrentSubtitle);
+        this.$electron.ipcRenderer.send('update-enabled', 'subtitle.increasePrimarySubtitleDelay', !!this.primarySubtitleId);
+        this.$electron.ipcRenderer.send('update-enabled', 'subtitle.decreasePrimarySubtitleDelay', !!this.primarySubtitleId);
+        this.$electron.ipcRenderer.send('update-enabled', 'subtitle.increaseSecondarySubtitleDelay', !!this.secondarySubtitleId);
+        this.$electron.ipcRenderer.send('update-enabled', 'subtitle.decreaseSecondarySubtitleDelay', !!this.secondarySubtitleId);
+        this.$electron.ipcRenderer.send('update-enabled', 'subtitle.uploadSelectedSubtitle', !!this.ableToPushCurrentSubtitle);
 
         val.forEach((item: SubtitleControlListItem) => {
           if (item.id === this.primarySubtitleId) {
@@ -254,14 +254,14 @@ new Vue({
           if (item.id === this.secondarySubtitleId) {
             this.menuService.updateMenuItemChecked(`subtitle.secondarySubtitle.${item.id}`, true);
           }
-          this.menuService.updateMenuItemEnabled(`subtitle.secondarySubtitle.${item.id}`, this.enabledSecondarySub);
+          this.$electron.ipcRenderer.send('update-enabled', `subtitle.secondarySubtitle.${item.id}`, this.enabledSecondarySub);
         });
       }
     },
     primarySubtitleId(id: string) {
       if (this.currentRouteName !== 'playing-view') return;
-      this.menuService.updateMenuItemEnabled('subtitle.increasePrimarySubtitleDelay', !!id);
-      this.menuService.updateMenuItemEnabled('subtitle.decreasePrimarySubtitleDelay', !!id);
+      this.$electron.ipcRenderer.send('update-enabled', 'subtitle.increasePrimarySubtitleDelay', !!id);
+      this.$electron.ipcRenderer.send('update-enabled', 'subtitle.decreasePrimarySubtitleDelay', !!id);
       if (id) {
         this.menuService.updateMenuItemChecked(`subtitle.mainSubtitle.${id}`, true);
       } else if (!id) {
@@ -270,8 +270,8 @@ new Vue({
     },
     secondarySubtitleId(id: string) {
       if (this.currentRouteName !== 'playing-view') return;
-      this.menuService.updateMenuItemEnabled('subtitle.increaseSecondarySubtitleDelay', !!id);
-      this.menuService.updateMenuItemEnabled('subtitle.decreaseSecondarySubtitleDelay', !!id);
+      this.$electron.ipcRenderer.send('update-enabled', 'subtitle.increaseSecondarySubtitleDelay', !!id);
+      this.$electron.ipcRenderer.send('update-enabled', 'subtitle.decreaseSecondarySubtitleDelay', !!id);
       if (id) {
         this.menuService.updateMenuItemChecked(`subtitle.secondarySubtitle.${id}`, true);
       } else if (!id) {
@@ -300,7 +300,7 @@ new Vue({
       this.menuService.updatePaused(val);
     },
     ableToPushCurrentSubtitle(val) {
-      this.menuService.updateMenuItemEnabled('subtitle.uploadSelectedSubtitle', val);
+      this.$electron.ipcRenderer.send('update-enabled', 'subtitle.uploadSelectedSubtitle', val);
     },
     originSrc(newVal) {
       if (newVal && !this.isWheelEnd) {
@@ -607,6 +607,8 @@ new Vue({
       updateSubSettingsType: subtitleActions.UPDATE_SUBTITLE_SETTINGS_TYPE,
       changePrimarySubDelay: SubtitleManager.alterPrimaryDelay,
       changeSecondarySubDelay: SubtitleManager.alterSecondaryDelay,
+      updateBarrageOpen: browsingActions.UPDATE_BARRAGE_OPEN,
+      updateInitialUrl: browsingActions.UPDATE_INITIAL_URL,
     }),
     async initializeMenuSettings() {
       if (this.currentRouteName !== 'welcome-privacy' && this.currentRouteName !== 'language-setting') {
@@ -618,11 +620,11 @@ new Vue({
         this.menuService.addSecondarySub(this.recentSecondarySubMenu());
         this.menuService.addAudioTrack(this.updateAudioTrack());
 
-        this.menuService.updateMenuItemEnabled('subtitle.increasePrimarySubtitleDelay', !!this.primarySubtitleId);
-        this.menuService.updateMenuItemEnabled('subtitle.decreasePrimarySubtitleDelay', !!this.primarySubtitleId);
-        this.menuService.updateMenuItemEnabled('subtitle.increaseSecondarySubtitleDelay', !!this.secondarySubtitleId);
-        this.menuService.updateMenuItemEnabled('subtitle.decreaseSecondarySubtitleDelay', !!this.secondarySubtitleId);
-        this.menuService.updateMenuItemEnabled('subtitle.uploadSelectedSubtitle', !!this.ableToPushCurrentSubtitle);
+        this.$electron.ipcRenderer.send('update-enabled', 'subtitle.increasePrimarySubtitleDelay', !!this.primarySubtitleId);
+        this.$electron.ipcRenderer.send('update-enabled', 'subtitle.decreasePrimarySubtitleDelay', !!this.primarySubtitleId);
+        this.$electron.ipcRenderer.send('update-enabled', 'subtitle.increaseSecondarySubtitleDelay', !!this.secondarySubtitleId);
+        this.$electron.ipcRenderer.send('update-enabled', 'subtitle.decreaseSecondarySubtitleDelay', !!this.secondarySubtitleId);
+        this.$electron.ipcRenderer.send('update-enabled', 'subtitle.uploadSelectedSubtitle', !!this.ableToPushCurrentSubtitle);
 
         this.audioTrackList.forEach((item: Electron.MenuItem, index: number) => {
           if (item.enabled === true) {
@@ -637,9 +639,9 @@ new Vue({
           if (item.id === this.secondarySubtitleId) {
             this.menuService.updateMenuItemChecked(`subtitle.secondarySubtitle.${item.id}`, true);
           }
-          this.menuService.updateMenuItemEnabled(`subtitle.secondarySubtitle.${item.id}`, this.enabledSecondarySub);
+          this.$electron.ipcRenderer.send('update-enabled', `subtitle.secondarySubtitle.${item.id}`, this.enabledSecondarySub);
         });
-        this.menuService.updateMenuItemEnabled('subtitle.secondarySubtitle.secondSub-1', this.enabledSecondarySub);
+        this.$electron.ipcRenderer.send('update-enabled', 'subtitle.secondarySubtitle.secondSub-1', this.enabledSecondarySub);
       }
     },
     registeMenuActions() {
@@ -661,6 +663,33 @@ new Vue({
         app.clearRecentDocuments();
         this.$bus.$emit('clean-landingViewItems');
         this.refreshMenu();
+      });
+      this.menuService.on('favourite.iqiyi', () => {
+        this.updateInitialUrl('https://www.iqiyi.com');
+        this.$router.push({
+          name: 'browsing-view',
+        });
+      });
+      this.menuService.on('favourite.bilibili', () => {
+        this.updateInitialUrl('https://www.bilibili.com');
+        this.$router.push({
+          name: 'browsing-view',
+        });
+      });
+      this.menuService.on('favourite.youtube', () => {
+        this.updateInitialUrl('https://www.youtube.com');
+        this.$router.push({
+          name: 'browsing-view',
+        });
+      });
+      this.menuService.on('history.reload', () => {
+        this.$bus.$emit('toggle-reload');
+      });
+      this.menuService.on('history.back', () => {
+        this.$bus.$emit('toggle-back');
+      });
+      this.menuService.on('history.forward', () => {
+        this.$bus.$emit('toggle-forward');
       });
       this.menuService.on('playback.playOrPause', () => {
         this.$bus.$emit('toggle-playback');
@@ -841,6 +870,9 @@ new Vue({
           this.topOnWindow = true;
           this.menuService.updateMenuItemChecked('window.keepPlayingWindowFront', true);
         }
+      });
+      this.menuService.on('window.pip', () => {
+        this.$bus.$emit('toggle-pip');
       });
       this.menuService.on('window.fullscreen', () => {
         if (this.isFullScreen) {

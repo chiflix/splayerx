@@ -39,6 +39,10 @@ export default class MenuService {
     this.menu.updateFullScreen(isFullScreen);
   }
 
+  public updateIsPip(isPip: boolean) {
+    this.menu.updateIsPip(isPip);
+  }
+
   private registeMenuActions() {
     ipcMain.on('popup-menu', () => {
       this.menu.popupMenu();
@@ -63,6 +67,9 @@ export default class MenuService {
     });
     ipcMain.on('update-paused', (e: Event, paused: boolean) => {
       this.updatePaused(paused);
+    });
+    ipcMain.on('update-pip', (e: Event, isPip: boolean) => {
+      this.updateIsPip(isPip);
     });
     ipcMain.on('update-checked', (e: Event, id: string, checked: boolean) => {
       this.menu.updateMenuItemChecked(id, checked);

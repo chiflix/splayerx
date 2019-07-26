@@ -95,13 +95,6 @@ export default {
       return process.platform === 'darwin';
     },
   },
-  watch: {
-  },
-  mounted() {
-    this.$bus.$on('open-url-show', (val: boolean) => {
-      this.showOpenUrl = val;
-    });
-  },
   methods: {
     ...mapActions({
       updateInitialUrl: browsingActions.UPDATE_INITIAL_URL,

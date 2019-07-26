@@ -73,6 +73,7 @@ import youtube from '../../shared/pip/youtube';
 import iqiyi, { iqiyiBarrageAdapt } from '../../shared/pip/iqiyi';
 import globalPip from '../../shared/pip/others';
 import { getValidVideoRegex, getValidSubtitleRegex } from '../../shared/utils';
+import MenuService from '@/services/menu/MenuService';
 
 export default {
   name: 'BrowsingView',
@@ -101,6 +102,7 @@ export default {
       pipBtnsKeepShow: false,
       asyncTasksDone: false,
       headerToShow: true,
+      menuService: null,
     };
   },
   computed: {
@@ -154,6 +156,8 @@ export default {
       }
     },
     isPip(val: boolean) {
+      this.menuService.updatePip(val);
+      this.$electron.ipcRenderer.send('update-enabled', 'window.pip', true);
       if (!val) {
         this.$store.dispatch('updatePipSize', this.winSize);
         this.$store.dispatch('updatePipPos', this.winPos);
@@ -207,8 +211,11 @@ export default {
     loadingState(val: boolean) {
       const loadUrl = this.$refs.webView.getURL();
       const recordIndex = this.supportedRecordHost.indexOf(urlParseLax(loadUrl).hostname);
+      this.$electron.ipcRenderer.send('update-enabled', 'history.back', this.$refs.webView.canGoBack());
+      this.$electron.ipcRenderer.send('update-enabled', 'history.forward', this.$refs.webView.canGoForward());
       if (val) {
         this.hasVideo = false;
+        this.$electron.ipcRenderer.send('update-enabled', 'window.pip', false);
         this.$refs.browsingHeader.updateWebInfo({
           hasVideo: this.hasVideo,
           url: loadUrl,
@@ -218,6 +225,7 @@ export default {
       } else {
         this.$refs.webView.executeJavaScript(this.calculateVideoNum, (r: number) => {
           this.hasVideo = recordIndex === 0 && !getVideoId(loadUrl).id ? false : !!r;
+          this.$electron.ipcRenderer.send('update-enabled', 'window.pip', this.hasVideo);
           this.$refs.browsingHeader.updateWebInfo({
             hasVideo: this.hasVideo,
             url: loadUrl,
@@ -250,6 +258,15 @@ export default {
     });
   },
   mounted() {
+    this.menuService = new MenuService();
+    this.$bus.$on('toggle-reload', this.handleUrlReload);
+    this.$bus.$on('toggle-back', this.handleUrlBack);
+    this.$bus.$on('toggle-forward', this.handleUrlForward);
+    this.$bus.$on('toggle-pip', () => {
+      if (this.hasVideo) {
+        this.isPip = !this.isPip;
+      }
+    });
     window.addEventListener('beforeunload', (e: BeforeUnloadEvent) => {
       if (!this.asyncTasksDone) {
         e.returnValue = false;
