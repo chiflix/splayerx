@@ -5,10 +5,10 @@
     "changeTrack": "Pista de audio",
     "chosenTrack": "Defecto",
     "fontItems": [
-      "",
-      "",
-      "",
-      ""
+      "S",
+      "M",
+      "L",
+      "XL"
     ],
     "fontSize": "Tamaño de fuente",
     "fontStyle": "Estilo de fuente",
@@ -19,10 +19,10 @@
   },
   "css": {
     "titleFontSize": {
-      "fontSize": ""
+      "fontSize": "21px"
     },
     "versionFontSize": {
-      "fontSize": ""
+      "fontSize": "14px"
     }
   },
   "errorFile": {
@@ -173,7 +173,7 @@
       "subtitleStyle": "Estilo de fuente",
       "uploadSelectedSubtitle": "Subir Subtítulo seleccionado"
     },
-    "titleName": "",
+    "titleName": "SPlayer",
     "update": {
       "message": "¿Reiniciar la aplicación ahora para instalar la actualización?",
       "no": "No",
