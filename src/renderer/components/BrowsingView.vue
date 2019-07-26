@@ -208,8 +208,9 @@ export default {
       const loadUrl = this.$refs.webView.getURL();
       const recordIndex = this.supportedRecordHost.indexOf(urlParseLax(loadUrl).hostname);
       if (val) {
+        this.hasVideo = false;
         this.$refs.browsingHeader.updateWebInfo({
-          hasVideo: false,
+          hasVideo: this.hasVideo,
           url: loadUrl,
           canGoBack: this.$refs.webView.canGoBack(),
           canGoForward: this.$refs.webView.canGoForward(),
