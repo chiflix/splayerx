@@ -27,11 +27,11 @@
   },
   "errorFile": {
     "ENOSPC": {
-      "content": "",
-      "title": ""
+      "content": "ディスク容量が不足しています。",
+      "title": "オープン失敗"
     },
     "EACCES": {
-      "content": "",
+      "content": "十分な許可がありません。",
       "title": ""
     },
     "ENOENT": {
@@ -267,7 +267,7 @@
   },
   "subtitle": {
     "embedded": "埋め込み式",
-    "generate": "",
+    "generate": "生成する",
     "language": {
       "ar": "サウジアラビア語",
       "de": "ドイツ語",
@@ -310,14 +310,14 @@
     "title": ""
   },
   "translateModal": {
-    "title": "",
-    "translateTitle": "",
-    "minute": "",
-    "second": "",
-    "hour": "",
-    "successTitle": "",
-    "failTitle": "",
-    "cancelTitle": "",
+    "title": "ビデオソースの言語を選択",
+    "translateTitle": "{time} について",
+    "minute": "{number} 分",
+    "second": "{number} 秒",
+    "hour": "{number} 時間",
+    "successTitle": "翻訳完了",
+    "failTitle": "翻訳失敗",
+    "cancelTitle": "AI翻訳が進行中です",
     "selectDescription": "",
     "selectLanguageLabel": "",
     "cancel": "",
@@ -348,6 +348,6 @@
     },
     "ok": "",
     "cancel": "",
-    "continue": ""
+    "continue": "続ける"
   }
 }
