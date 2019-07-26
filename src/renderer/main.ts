@@ -219,6 +219,7 @@ new Vue({
     },
     currentRouteName(val) {
       this.menuService.updateRouteName(val);
+      this.menuService.addRecentPlayItems();
     },
     volume(val: number) {
       this.menuService.resolveMute(val <= 0);
@@ -539,11 +540,12 @@ new Vue({
     }),
     async initializeMenuSettings() {
       await this.menuService.addRecentPlayItems();
-      this.menuService.addPrimarySub(this.recentSubMenu());
-      this.menuService.addSecondarySub(this.recentSecondarySubMenu());
-      this.menuService.addAudioTrack(this.updateAudioTrack());
 
       if (this.currentRouteName === 'playing-view') {
+        this.menuService.addPrimarySub(this.recentSubMenu());
+        this.menuService.addSecondarySub(this.recentSecondarySubMenu());
+        this.menuService.addAudioTrack(this.updateAudioTrack());
+
         this.menuService.updateMenuItemEnabled('subtitle.increasePrimarySubtitleDelay', !!this.primarySubtitleId);
         this.menuService.updateMenuItemEnabled('subtitle.decreasePrimarySubtitleDelay', !!this.primarySubtitleId);
         this.menuService.updateMenuItemEnabled('subtitle.increaseSecondarySubtitleDelay', !!this.secondarySubtitleId);

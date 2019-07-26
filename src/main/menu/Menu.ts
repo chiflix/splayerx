@@ -42,11 +42,12 @@ export default class Menubar {
 
   public set routeName(val: string) {
     this._routeName = val;
+    this.menuStateControl();
   }
 
   public constructor() {
     this.locale = new Locale();
-    this.install();
+    this.menuStateControl();
   }
 
   public setMainWindow(window: Electron.BrowserWindow | null) {
@@ -61,25 +62,43 @@ export default class Menubar {
   }
 
   public menuStateControl() {
-    const inPlayingView = this._routeName === 'playing-view';
-    const inWelcomeView = this._routeName === 'welcome-view' || this._routeName === 'language-setting';
+    if (!this._routeName) this._routeName = 'landing-view';
 
-    this.enableSubmenuItem('playback', inPlayingView);
-    this.enableSubmenuItem('audio', inPlayingView);
-    this.enableSubmenuItem('subtitle', inPlayingView);
-    this.enableSubmenuItem('window', !inWelcomeView);
-    this.enableSubmenuItem('file', !inWelcomeView);
+    // Store old menu in our array to avoid GC to collect the menu and crash. See #55347
+    // TODO@sbatten Remove this when fixed upstream by Electron
+    const oldMenu = Menu.getApplicationMenu();
 
-    this.updateMenuItemEnabled('splayerx.preferences', !inWelcomeView);
+    // If we don't have a menu yet, set it to null to avoid the electron menu.
+    // This should only happen on the first launch ever
+    if (!oldMenu && IsMacintosh) {
+      Menu.setApplicationMenu(new Menu());
+      return;
+    }
+    // @ts-ignore
+    if (oldMenu) oldMenu.clear();
 
-    this.updateMenuItemEnabled('window.keepPlayingWindowFront', inPlayingView);
-    this.updateMenuItemEnabled('window.bossKey', inPlayingView);
-    this.updateMenuItemEnabled('window.halfSize', inPlayingView);
-    this.updateMenuItemEnabled('window.originSize', inPlayingView);
-    this.updateMenuItemEnabled('window.doubleSize', inPlayingView);
-    this.updateMenuItemEnabled('window.maxmize', inPlayingView);
-    this.updateMenuItemEnabled('window.backToLandingView', inPlayingView);
-    this.updateMenuItemEnabled('window.windowRotate', inPlayingView);
+    switch (this._routeName) {
+      case 'landing-view':
+        this.menubar = this.createLandingViewMenu();
+        break;
+
+      case 'playing-view':
+        this.menubar = this.createPlayingViewMenu();
+        break;
+
+      case 'welcome-view':
+      case 'language-setting':
+        this.createWelcomeViewMenu();
+        break;
+      default:
+        break;
+    }
+
+    if (this.menubar.items && this.menubar.items.length > 0) {
+      Menu.setApplicationMenu(this.menubar);
+    } else {
+      Menu.setApplicationMenu(null);
+    }
   }
 
   public disableMenu() {
@@ -95,7 +114,6 @@ export default class Menubar {
 
   public updateLocale() {
     this.locale.getDisplayLanguage();
-    this.install();
     this.menuStateControl();
   }
 
@@ -218,29 +236,6 @@ export default class Menubar {
     Menu.setApplicationMenu(this.menubar);
   }
 
-  private install(): void {
-    // Store old menu in our array to avoid GC to collect the menu and crash. See #55347
-    // TODO@sbatten Remove this when fixed upstream by Electron
-    const oldMenu = Menu.getApplicationMenu();
-
-    // If we don't have a menu yet, set it to null to avoid the electron menu.
-    // This should only happen on the first launch ever
-    if (!oldMenu && IsMacintosh) {
-      Menu.setApplicationMenu(new Menu());
-      return;
-    }
-    // @ts-ignore
-    if (oldMenu) oldMenu.clear();
-
-    this.menubar = IsMacintosh ? this.createMacMenu() : this.createWinMenu();
-
-    if (this.menubar.items && this.menubar.items.length > 0) {
-      Menu.setApplicationMenu(this.menubar);
-    } else {
-      Menu.setApplicationMenu(null);
-    }
-  }
-
   private refreshPlaybackMenu() {
     const playbackMenu = this.menubar.getMenuItemById('playback').submenu;
     // @ts-ignore
@@ -316,9 +311,9 @@ export default class Menubar {
     menubar.append(subtitleMenuItem);
 
     // Window
-    const macWindowMenuItem = this.createMacWindowMenu();
+    const windowMenuItem = this.createWindowMenu();
 
-    menubar.append(macWindowMenuItem);
+    menubar.append(windowMenuItem);
 
     // Help
     const helpMenuItem = this.createHelpMenu();
@@ -370,9 +365,9 @@ export default class Menubar {
     menubar.append(subtitleMenuItem);
 
     // Window
-    const macWindowMenuItem = this.createMacWindowMenu();
+    const windowMenuItem = this.createWindowMenu();
 
-    menubar.append(macWindowMenuItem);
+    menubar.append(windowMenuItem);
 
     // Help
     const helpMenuItem = this.createHelpMenu();
@@ -390,6 +385,111 @@ export default class Menubar {
 
   private $t(msg: string): string {
     return this.locale.$t(msg);
+  }
+
+  private createLandingViewMenu(): Electron.Menu {
+    // Menus
+    const menubar = new Menu();
+
+    if (IsMacintosh) {
+      // Mac: Application
+      const macApplicationMenuItem = this.createMacApplicationMenu();
+
+      menubar.append(macApplicationMenuItem);
+
+      // File
+      const fileMenuItem = this.createFileMenu();
+
+      menubar.append(fileMenuItem);
+    } else {
+      // File
+      this.getMenuItemTemplate('file').items.forEach((item: MenubarMenuItem) => {
+        if (item.id === 'file.open') {
+          const menuItem = item as IMenubarMenuItemAction;
+          menubar.append(this.createMenuItemByTemplate(menuItem));
+        } else if (item.id === 'file.openRecent') {
+          const menuItem = item as IMenubarMenuItemSubmenu;
+          menubar.append(this.createSubMenuItem(`msg.${menuItem.id}`, menuItem.submenu));
+        } else if (item.id === 'file.closeWindow') {
+          const menuItem = item as IMenubarMenuItemRole;
+          menubar.append(this.createRoleMenuItem(menuItem.label, menuItem.role, menuItem.enabled));
+        }
+      });
+
+      menubar.append(separator());
+
+      const preference = this.createMenuItem('msg.splayerx.preferences', () => {
+        app.emit('add-preference');
+      }, 'Ctrl+,', true);
+
+      menubar.append(preference);
+    }
+
+    // Window
+    const windowMenuItem = this.createWindowMenu();
+
+    menubar.append(windowMenuItem);
+
+    // Help
+    const helpMenuItem = this.createHelpMenu();
+
+    menubar.append(helpMenuItem);
+
+    if (!IsMacintosh) {
+      const quitMenuItem = this.createMenuItem('msg.splayerx.quit', () => {
+        app.quit();
+      }, 'Ctrl+q', true);
+
+      menubar.append(quitMenuItem);
+    }
+
+    return menubar;
+  }
+
+  private createPlayingViewMenu(): Electron.Menu {
+    // Menus
+    const menubar = new Menu();
+
+    // Mac: Application
+    const macApplicationMenuItem = this.createMacApplicationMenu();
+
+    menubar.append(macApplicationMenuItem);
+
+    // File
+    const fileMenuItem = this.createFileMenu();
+
+    menubar.append(fileMenuItem);
+
+    // PlayBack
+    const playbackMenuItem = this.createPlaybackMenu();
+
+    menubar.append(playbackMenuItem);
+
+    // Audio
+    const audioMenuItem = this.createAudioMenu();
+
+    menubar.append(audioMenuItem);
+
+    // Subtitle
+    const subtitleMenuItem = this.createSubtitleMenu();
+
+    menubar.append(subtitleMenuItem);
+
+    // Window
+    const windowMenuItem = this.createWindowMenu();
+
+    menubar.append(windowMenuItem);
+
+    // Help
+    const helpMenuItem = this.createHelpMenu();
+
+    menubar.append(helpMenuItem);
+
+    return menubar;
+  }
+
+  private createWelcomeViewMenu() {
+
   }
 
   private createMacApplicationMenu(): Electron.MenuItem {
@@ -455,13 +555,13 @@ export default class Menubar {
     return subtitleMenuItem;
   }
 
-  private createMacWindowMenu() {
+  private createWindowMenu() {
     const macWindowMenu = this.convertFromMenuItemTemplate('window');
     macWindowMenu.getMenuItemById('window.bossKey').click = () => {
       app.emit('bossKey');
     };
-    const macWindowMenuItem = new MenuItem({ id: 'window', label: this.$t('msg.window.name'), submenu: macWindowMenu });
-    return macWindowMenuItem;
+    const windowMenuItem = new MenuItem({ id: 'window', label: this.$t('msg.window.name'), submenu: macWindowMenu });
+    return windowMenuItem;
   }
 
   private createHelpMenu() {

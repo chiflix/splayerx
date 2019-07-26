@@ -52,7 +52,6 @@ export default class MenuService {
     });
     ipcMain.on('update-route-name', (e: Event, routeName: string) => {
       this.menu.routeName = routeName;
-      if (!this.windowClosed) this.menu.menuStateControl();
     });
     ipcMain.on('update-paused', (e: Event, paused: boolean) => {
       this.menu.updatePaused(paused);
