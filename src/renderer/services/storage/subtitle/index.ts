@@ -147,6 +147,7 @@ export class DatabaseGenerator implements IEntityGenerator {
       case Type.Local:
         return loadLocalFile(source as string);
       case Type.Online:
+      case Type.Translated:
         return Sagi.getTranscript({ transcriptIdentity: source as string, startTime: 0 });
       default:
         throw new Error(`Unexpected subtitle type ${type}.`);

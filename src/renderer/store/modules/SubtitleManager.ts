@@ -40,6 +40,7 @@ import {
 import { LanguageCode } from '@/libs/language';
 import { AudioTranslateBubbleOrigin } from './AudioTranslate';
 import { ISubtitleStream } from '@/plugins/mediaTasks';
+import { Features, isFeatureEnabled } from '@/helpers/featureSwitch';
 
 const sortOfTypes = {
   local: 0,
@@ -343,14 +344,16 @@ const actions = {
     return Promise.all([
       fetchOnlineListWraper(!!bubble, originSrc, primaryLanguage, hints),
       fetchOnlineListWraper(!!bubble, originSrc, secondaryLanguage, hints),
-    ]).then((resultsList) => {
+    ]).then(async (resultsList) => {
       const results = flatten(resultsList);
       const newSubtitlesToAdd: TranscriptInfo[] = [];
       const oldSubtitlesToDel: SubtitleControlListItem[] = [];
       const oldSubtitles = [...(getters as { list: SubtitleControlListItem[] }).list];
 
       // 将Translated类型的都删除掉
-      const translatedSubs = remove(oldSubtitles, ({ type }) => type === Type.Translated);
+      const translatedSubs = remove(oldSubtitles, ({
+        type, source,
+      }) => type === Type.Translated && !source);
       // delete subtitles not matching the current language preference
       const wrongLanguageSubs = remove(
         oldSubtitles,
@@ -420,6 +423,10 @@ const actions = {
         }
       } else {
         newSubtitlesToAdd.push(...secondaryNotExistedResults);
+      }
+      if (!(await isFeatureEnabled(Features.AI))) {
+        addPrimaryAIButton = false;
+        addSecondaryAIButton = false;
       }
       return {
         delete: oldSubtitlesToDel,

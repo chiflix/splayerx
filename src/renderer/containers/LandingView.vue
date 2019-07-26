@@ -1,7 +1,7 @@
 <template>
   <div class="wrapper">
     <short-marks
-      v-show="!openUrlShow"
+      v-show="isBrowsingViewEnabled && !openUrlShow"
       :handle-browsing-open="handleBrowsingOpen"
     />
     <open-url
@@ -140,6 +140,7 @@ import VideoItem from '@/components/LandingView/VideoItem.vue';
 import { log } from '@/libs/Log';
 import Sagi from '@/libs/sagi';
 import { Browsing as browsingActions } from '@/store/actionTypes';
+import { Features, isFeatureEnabled } from '@/helpers/featureSwitch';
 
 Vue.component('PlaylistItem', PlaylistItem);
 Vue.component('VideoItem', VideoItem);
@@ -157,6 +158,7 @@ export default {
       landingViewItems: [],
       sagiHealthStatus: 'UNSET',
       invalidTimeRepresentation: '--',
+      isBrowsingViewEnabled: false,
       openUrlShow: false,
       item: {},
       tranFlag: true,
@@ -279,7 +281,7 @@ export default {
       if (this.$refs.mask) this.$refs.mask.style.setProperty('background-color', 'rgba(255, 255, 255, 0)');
     });
   },
-  mounted() {
+  async mounted() {
     this.$store.dispatch('refreshVersion');
 
     const { app } = this.$electron.remote;
@@ -301,6 +303,8 @@ export default {
     this.$electron.ipcRenderer.on('quit', () => {
       this.quit = true;
     });
+
+    this.isBrowsingViewEnabled = await isFeatureEnabled(Features.BrowsingView);
   },
   destroyed() {
     window.removeEventListener('mousemove', this.globalMoveHandler);

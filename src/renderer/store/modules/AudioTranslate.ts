@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-05 16:03:32
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-07-26 15:40:51
+ * @Last Modified time: 2019-07-26 19:28:39
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @ts-ignore
@@ -99,20 +99,25 @@ const taskCallback = (taskInfo: AITaskInfo) => {
     return;
   }
   audioTranslateService.taskInfo = taskInfo;
-  const estimateTime = taskInfo.estimateTime * 1;
+  // const estimateTime = taskInfo.estimateTime * 1;
   // @ts-ignore
   let startEstimateTime = store.getters.translateEstimateTime;
-  let reduce = 1.5;
-  if (startEstimateTime > staticEstimateTime * 0.6) {
-    startEstimateTime = staticEstimateTime * 0.6;
-  } else if (startEstimateTime > estimateTime && estimateTime !== 0) {
-    startEstimateTime = estimateTime;
-  } else if (startEstimateTime < 20) {
-    reduce = startEstimateTime / 30;
-  } else if (startEstimateTime < 5) {
+  let reduce = 1.2;
+  let slowPoint = staticEstimateTime * 0.2;
+  slowPoint = slowPoint < 50 ? 50 : slowPoint;
+  let stopPoint = staticEstimateTime * 0.07;
+  stopPoint = stopPoint < 15 ? 15 : stopPoint;
+  if (startEstimateTime < stopPoint) {
     reduce = 0;
+    startEstimateTime = stopPoint;
+  } else if (startEstimateTime < slowPoint) {
+    reduce = 0.7;
+  } else if (startEstimateTime > staticEstimateTime * 0.6) {
+    startEstimateTime = staticEstimateTime * 0.6;
   }
-  timerCount = 1;
+  // else if (startEstimateTime > estimateTime && estimateTime !== 0) {
+  //   startEstimateTime = estimateTime;
+  // }
   // @ts-ignore
   store.commit(m.AUDIO_TRANSLATE_UPDATE_STATUS, AudioTranslateStatus.Translating);
   // 开启定时器模拟倒计时和进度
@@ -130,7 +135,6 @@ const taskCallback = (taskInfo: AITaskInfo) => {
     timerCount += 1;
     const estimateTime = startEstimateTime - (Math.log(timerCount) * reduce);
     const progress = ((staticEstimateTime - estimateTime) / staticEstimateTime) * 100;
-    console.log(estimateTime, reduce);
     // @ts-ignore
     store.commit(m.AUDIO_TRANSLATE_UPDATE_ESTIMATE_TIME, estimateTime);
     // @ts-ignore
@@ -264,10 +268,10 @@ const actions = {
       // 设置智能翻译的状态
       commit(m.AUDIO_TRANSLATE_UPDATE_STATUS, AudioTranslateStatus.Grabbing);
       timerCount = 1;
-      // 提取audio大概是暂视频总长的0.006，听写大概是视频的1/5
-      staticEstimateTime = (getters.duration * 0.206);
+      // 提取audio大概是暂视频总长的0.006，听写大概是视频的1/4
+      staticEstimateTime = (getters.duration * 0.256);
       // 但是如果时间超过5分钟就按5分钟倒计时
-      staticEstimateTime = staticEstimateTime > 300 ? 300 : staticEstimateTime;
+      // staticEstimateTime = staticEstimateTime > 300 ? 300 : staticEstimateTime;
       commit(m.AUDIO_TRANSLATE_UPDATE_ESTIMATE_TIME, staticEstimateTime);
       commit(m.AUDIO_TRANSLATE_UPDATE_PROGRESS, timerCount);
       taskTimer = window.setInterval(() => {

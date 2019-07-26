@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-06-20 18:03:14
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-07-26 14:52:52
+ * @Last Modified time: 2019-07-26 19:30:07
  */
 
 // @ts-ignore
@@ -69,7 +69,6 @@ class AudioTranslateService extends EventEmitter {
   }: {
     time?: Buffer, end?: boolean, error?: number, result?: StreamingTranslationResponse.AsObject
   }) {
-    console.log(time, end, error, result);
     if (time) {
       this.emit('grab', time);
     } else if (end) {
@@ -167,11 +166,9 @@ class AudioTranslateService extends EventEmitter {
         }
       } catch (error) {
         if (error && error.message === 'time out' && this.loopTimeoutCount > 0 && this.taskInfo) {
-          console.log('time out', 4 - this.loopTimeoutCount, 'audio-log');
           this.loopTimeoutCount -= 1;
           this.loopTask(this.taskInfo);
         } else {
-          console.log(error);
           this.emit('error', error);
           this.stop();
         }

@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-22 17:18:34
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-07-26 14:56:17
+ * @Last Modified time: 2019-07-26 19:29:13
  */
 
 import { EventEmitter } from 'events';
@@ -158,7 +158,7 @@ export default class AudioGrabService extends EventEmitter {
         this.streamClient.write(request);
       }
     } catch (error) {
-      console.warn(error);
+      // empty
     }
   }
 

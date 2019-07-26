@@ -579,7 +579,7 @@ export default class Menubar {
       shell.openExternal('https://feedback.splayer.org');
     }, undefined, true);
     const homepage = this.createMenuItem('msg.help.homepage', () => {
-      shell.openExternal('https://beta.splayer.org');
+      shell.openExternal('https://splayer.org');
     }, undefined, true);
     const shortCuts = this.createMenuItem('msg.help.shortCuts', () => {
       shell.openExternal('https://github.com/chiflix/splayerx/wiki/SPlayer-Shortcuts-List');
