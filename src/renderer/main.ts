@@ -223,6 +223,7 @@ new Vue({
       if (val === 'playing-view' && this.topOnWindow) {
         const browserWindow = this.$electron.remote.getCurrentWindow();
         browserWindow.setAlwaysOnTop(true);
+        this.menuService.updateMenuItemChecked('window.keepPlayingWindowFront', this.topOnWindow);
       }
     },
     volume(val: number) {
@@ -235,6 +236,22 @@ new Vue({
       if (val.length !== oldval.length) {
         this.menuService.addPrimarySub(this.recentSubMenu());
         this.menuService.addSecondarySub(this.recentSecondarySubMenu());
+
+        this.menuService.updateMenuItemEnabled('subtitle.increasePrimarySubtitleDelay', !!this.primarySubtitleId);
+        this.menuService.updateMenuItemEnabled('subtitle.decreasePrimarySubtitleDelay', !!this.primarySubtitleId);
+        this.menuService.updateMenuItemEnabled('subtitle.increaseSecondarySubtitleDelay', !!this.secondarySubtitleId);
+        this.menuService.updateMenuItemEnabled('subtitle.decreaseSecondarySubtitleDelay', !!this.secondarySubtitleId);
+        this.menuService.updateMenuItemEnabled('subtitle.uploadSelectedSubtitle', !!this.ableToPushCurrentSubtitle);
+
+        val.forEach((item: SubtitleControlListItem) => {
+          if (item.id === this.primarySubtitleId) {
+            this.menuService.updateMenuItemChecked(`subtitle.mainSubtitle.${item.id}`, true);
+          }
+          if (item.id === this.secondarySubtitleId) {
+            this.menuService.updateMenuItemChecked(`subtitle.secondarySubtitle.${item.id}`, true);
+          }
+          this.menuService.updateMenuItemEnabled(`subtitle.secondarySubtitle.${item.id}`, this.enabledSecondarySub);
+        });
       }
     },
     primarySubtitleId(id: string) {
@@ -562,7 +579,6 @@ new Vue({
         this.menuService.updateMenuItemEnabled('subtitle.increaseSecondarySubtitleDelay', !!this.secondarySubtitleId);
         this.menuService.updateMenuItemEnabled('subtitle.decreaseSecondarySubtitleDelay', !!this.secondarySubtitleId);
         this.menuService.updateMenuItemEnabled('subtitle.uploadSelectedSubtitle', !!this.ableToPushCurrentSubtitle);
-        this.menuService.updateMenuItemChecked('window.keepPlayingWindowFront', this.topOnWindow);
 
         this.audioTrackList.forEach((item: Electron.MenuItem, index: number) => {
           if (item.enabled === true) {
@@ -766,7 +782,10 @@ new Vue({
         this.$store.dispatch(SubtitleManager.manualUploadAllSubtitles);
       });
       this.menuService.on('window.keepPlayingWindowFront', () => {
-        if (this.currentRouteName === 'landing-view') return;
+        if (this.currentRouteName === 'landing-view') {
+          this.topOnWindow = !this.topOnWindow;
+          return;
+        }
         const { remote } = this.$electron;
         const browserWindow = remote.BrowserWindow.getFocusedWindow();
         if (browserWindow.isAlwaysOnTop()) {
