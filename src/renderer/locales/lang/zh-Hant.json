@@ -267,6 +267,7 @@
   },
   "subtitle": {
     "embedded": "內嵌",
+    "generate": "",
     "language": {
       "ar": "阿拉伯語",
       "de": "德語",
@@ -307,5 +308,46 @@
   "loadVideoBySubtitleFailed": {
     "content": "未找到目錄下與字幕同名的視頻文件",
     "title": ""
+  },
+  "translateModal": {
+    "title": "",
+    "translateTitle": "",
+    "minute": "",
+    "second": "",
+    "hour": "",
+    "successTitle": "",
+    "failTitle": "",
+    "cancelTitle": "",
+    "selectDescription": "",
+    "selectLanguageLabel": "",
+    "cancel": "",
+    "quit": "",
+    "generate": "",
+    "translateDescription": "",
+    "ok": "",
+    "successDescriptiton": "",
+    "failDescription": "",
+    "cancelDescription": "",
+    "continue": ""
+  },
+  "translateBubble": {
+    "bubbleWhenGrab": "",
+    "bubbleWhenTranslate": "",
+    "bubbleFunctionForbidden": "",
+    "bubbleWhenSuccess": {
+      "title": "",
+      "content": ""
+    },
+    "bubbleWhenSuccessOnOtherVideo": {
+      "title": "",
+      "content": ""
+    },
+    "bubbleTranslateFail": {
+      "title": "",
+      "content": ""
+    },
+    "ok": "",
+    "cancel": "",
+    "continue": ""
   }
 }
