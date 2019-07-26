@@ -542,7 +542,6 @@ app.on('ready', () => {
 });
 
 app.on('window-all-closed', () => {
-  console.log(routeName);
   if (
     (routeName === 'welcome-privacy' || routeName === 'language-setting')
     || process.platform !== 'darwin') {
