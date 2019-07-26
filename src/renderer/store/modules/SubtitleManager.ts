@@ -8,14 +8,19 @@ import { extname } from 'path';
 import { existsSync } from 'fs';
 import store from '@/store';
 import { SubtitleManager as m } from '@/store/mutationTypes';
-import { SubtitleManager as a, newSubtitle as subActions, Subtitle as legacyActions } from '@/store/actionTypes';
 import {
-  SubtitleControlListItem, Type, IEntityGenerator, Entity,
+  SubtitleManager as a,
+  newSubtitle as subActions,
+  Subtitle as legacyActions,
+  AudioTranslate as atActions,
+} from '@/store/actionTypes';
+import {
+  SubtitleControlListItem, Type, IEntityGenerator, Entity, Format,
 } from '@/interfaces/ISubtitle';
 import {
   TranscriptInfo,
   searchForLocalList, retrieveEmbeddedList, fetchOnlineList,
-  OnlineGenerator, LocalGenerator, EmbeddedGenerator,
+  OnlineGenerator, LocalGenerator, EmbeddedGenerator, TranslatedGenerator,
 } from '@/services/subtitle';
 import { generateHints, calculatedName } from '@/libs/utils';
 import { log } from '@/libs/Log';
@@ -33,12 +38,14 @@ import {
   LOCAL_SUBTITLE_REMOVED,
 } from '../../helpers/notificationcodes';
 import { LanguageCode } from '@/libs/language';
+import { AudioTranslateBubbleOrigin } from './AudioTranslate';
 import { ISubtitleStream } from '@/plugins/mediaTasks';
 
 const sortOfTypes = {
   local: 0,
   embedded: 1,
   online: 2,
+  translated: 3,
 };
 
 let unwatch: Function;
@@ -65,8 +72,9 @@ const getters = {
   list(state: SubtitleManagerState) {
     const list = Object.values(state.allSubtitles).filter(v => !!v);
     return sortBy(list, (sub: SubtitleControlListItem) => {
-      if (sub.type === Type.Online && sub.language !== store.getters.primaryLanguage) {
-        return sortOfTypes[sub.type] + 1;
+      if ((sub.type === Type.Online || sub.type === Type.Translated)
+        && sub.language !== store.getters.primaryLanguage) {
+        return sortOfTypes[sub.type] + 2;
       }
       return sortOfTypes[sub.type];
     }).map((sub: SubtitleControlListItem) => ({
@@ -152,7 +160,8 @@ function setDelayTimeout() {
   clearTimeout(alterDelayTimeoutId);
   alterDelayTimeoutId = setTimeout(() => store.dispatch(a.storeSubtitleDelays), 10000);
 }
-function fetchOnlineListWithBubble(
+function fetchOnlineListWraper(
+  bubble: boolean,
   videoSrc: string,
   languageCode: LanguageCode,
   hints?: string,
@@ -160,8 +169,10 @@ function fetchOnlineListWithBubble(
   let results: TranscriptInfo[] = [];
   return new Promise(async (resolve) => {
     const onlineTimeoutId = setTimeout(() => {
+      if (bubble) {
+        addBubble(REQUEST_TIMEOUT, { id: `fetchOnlineListWithBubble-${videoSrc}` });
+      }
       resolve(results);
-      addBubble(REQUEST_TIMEOUT, { id: `fetchOnlineListWithBubble-${videoSrc}` });
     }, 10000);
     try {
       results = await fetchOnlineList(videoSrc, languageCode, hints);
@@ -281,12 +292,19 @@ const actions = {
     state, getters, dispatch, commit,
   }: any) {
     const {
-      originSrc,
+      originSrc, isTranslating,
       primaryLanguage, secondaryLanguage,
       privacyAgreement,
     } = getters;
     const { mediaHash } = state;
-
+    // 如果当前有翻译任务
+    if (isTranslating) {
+      dispatch(atActions.AUDIO_TRANSLATE_SHOW_BUBBLE, AudioTranslateBubbleOrigin.Refresh);
+      dispatch(atActions.AUDIO_TRANSLATE_BUBBLE_CALLBACK, () => {
+        dispatch(a.refreshSubtitles);
+      });
+      return false;
+    }
     primarySelectionComplete = false;
     secondarySelectionComplete = false;
     commit(m.setIsRefreshing, true);
@@ -298,7 +316,7 @@ const actions = {
     return Promise.race([
       Promise.all([
         onlinePromise,
-        dispatch(a.addLocalSubtitles, await searchForLocalList(originSrc)),
+        dispatch(a.addLocalSubtitles, { mediaHash, source: await searchForLocalList(originSrc) }),
       ]),
       new Promise((resolve, reject) => setTimeout(() => reject(new Error('timeout')), 10000)),
     ])
@@ -322,17 +340,17 @@ const actions = {
     } = getters;
     if (bubble) addBubble(ONLINE_LOADING);
     const hints = generateHints(originSrc);
-    return Promise.all(bubble ? [
-      fetchOnlineListWithBubble(originSrc, primaryLanguage, hints),
-      fetchOnlineListWithBubble(originSrc, secondaryLanguage, hints),
-    ] : [
-      fetchOnlineList(originSrc, primaryLanguage, hints),
-      fetchOnlineList(originSrc, secondaryLanguage, hints),
+    return Promise.all([
+      fetchOnlineListWraper(!!bubble, originSrc, primaryLanguage, hints),
+      fetchOnlineListWraper(!!bubble, originSrc, secondaryLanguage, hints),
     ]).then((resultsList) => {
       const results = flatten(resultsList);
       const newSubtitlesToAdd: TranscriptInfo[] = [];
       const oldSubtitlesToDel: SubtitleControlListItem[] = [];
       const oldSubtitles = [...(getters as { list: SubtitleControlListItem[] }).list];
+
+      // 将Translated类型的都删除掉
+      const translatedSubs = remove(oldSubtitles, ({ type }) => type === Type.Translated);
       // delete subtitles not matching the current language preference
       const wrongLanguageSubs = remove(
         oldSubtitles,
@@ -350,15 +368,79 @@ const actions = {
           && !results.find(({ transcriptIdentity }) => transcriptIdentity === hash)
         ),
       );
-      oldSubtitlesToDel.push(...wrongLanguageSubs, ...notExistedOldSubs);
+      oldSubtitlesToDel.push(...translatedSubs, ...wrongLanguageSubs, ...notExistedOldSubs);
       // add subtitles not existed in the old subtitles
       const notExistedNewSubs = results
         .filter(({ transcriptIdentity }) => !oldSubtitles
-          .find(({ id }) => id === transcriptIdentity));
-      newSubtitlesToAdd.push(...notExistedNewSubs);
-      return { delete: oldSubtitlesToDel, add: newSubtitlesToAdd };
-    }).then(result => dispatch(a.addOnlineSubtitles, { mediaHash, source: result.add })
-      .then(() => dispatch(a.deleteSubtitlesByUuid, result.delete)));
+          .find(({ hash }) => hash === transcriptIdentity));
+      // 计算是不是手动添加AI按钮
+      let addPrimaryAIButton = false;
+      let addSecondaryAIButton = false;
+      const oldPrimarySubs = oldSubtitles
+        .filter((sub: SubtitleControlListItem) => sub.language === primaryLanguage);
+      const oldSecondarySubs = oldSubtitles
+        .filter((sub: SubtitleControlListItem) => sub.language === secondaryLanguage);
+      // sagi 结果
+      const primaryResults = results
+        .filter((info: TranscriptInfo) => info.languageCode === primaryLanguage);
+      const secondaryResults = results
+        .filter((info: TranscriptInfo) => info.languageCode === secondaryLanguage);
+      const isAllPrimaryResultsFromES = primaryResults
+        .every((info: TranscriptInfo) => info.tagsList.length > 0 && info.tagsList.indexOf('ES') > -1);
+      const isAllSecondaryResultsFromES = secondaryResults
+        .every((info: TranscriptInfo) => info.tagsList.length > 0 && info.tagsList.indexOf('ES') > -1);
+      // filter 结果
+      const primaryNotExistedResults = notExistedNewSubs
+        .filter((info: TranscriptInfo) => info.languageCode === primaryLanguage);
+      const secondaryNotExistedResults = notExistedNewSubs
+        .filter((info: TranscriptInfo) => info.languageCode === secondaryLanguage);
+      // 出现AI按钮的情况
+      // 1. 在线字幕tags都是ES(模糊搜索)
+      // 2. 没有在线字幕
+      if (primaryResults.length === 0 || isAllPrimaryResultsFromES) {
+        addPrimaryAIButton = true;
+        const oldLen = oldPrimarySubs.length;
+        // 如果出现AI按钮，在线字幕列表不能超过2个
+        if (oldLen > 2) {
+          oldSubtitlesToDel.push(...oldPrimarySubs.splice(2, oldLen));
+        } else {
+          newSubtitlesToAdd.push(...primaryNotExistedResults.splice(0, 2 - oldLen));
+        }
+      } else {
+        newSubtitlesToAdd.push(...primaryNotExistedResults);
+      }
+      if (secondaryLanguage && (secondaryResults.length === 0 || isAllSecondaryResultsFromES)) {
+        addSecondaryAIButton = true;
+        const oldLen = oldSecondarySubs.length;
+        // 如果出现AI按钮，在线字幕列表不能超过2个
+        if (oldLen > 2) {
+          oldSubtitlesToDel.push(...oldSecondarySubs.splice(2, oldLen));
+        } else {
+          newSubtitlesToAdd.push(...secondaryNotExistedResults.splice(0, 2 - oldLen));
+        }
+      } else {
+        newSubtitlesToAdd.push(...secondaryNotExistedResults);
+      }
+      return {
+        delete: oldSubtitlesToDel,
+        add: newSubtitlesToAdd,
+        addPrimaryAIButton,
+        addSecondaryAIButton,
+      };
+    }).then((result) => {
+      if (result.addPrimaryAIButton) {
+        dispatch(a.addSubtitle, {
+          generator: new TranslatedGenerator(null, primaryLanguage), mediaHash,
+        });
+      }
+      if (result.addSecondaryAIButton) {
+        dispatch(a.addSubtitle, {
+          generator: new TranslatedGenerator(null, secondaryLanguage), mediaHash,
+        });
+      }
+      dispatch(a.addOnlineSubtitles, { mediaHash, source: result.add })
+        .then(() => dispatch(a.deleteSubtitlesByUuid, result.delete));
+    });
   },
   [a.checkLocalSubtitles]({ dispatch, getters }: any) {
     const list = getters.list as SubtitleControlListItem[];
@@ -371,7 +453,7 @@ const actions = {
   },
   async [a.addLocalSubtitles](
     { dispatch }: any,
-    { mediaHash, source }: IAddSubtitlesOptions<string>,
+    { mediaHash, source = [] }: IAddSubtitlesOptions<string>,
   ) {
     return Promise.all(
       source.map((path: string) => dispatch(a.addSubtitle, {
@@ -413,7 +495,7 @@ const actions = {
   },
   async [a.addEmbeddedSubtitles](
     { dispatch }: any,
-    { mediaHash, source }: IAddSubtitlesOptions<[string, ISubtitleStream]>,
+    { mediaHash, source = [] }: IAddSubtitlesOptions<[string, ISubtitleStream]>,
   ) {
     return Promise.all(
       source.map(stream => dispatch(a.addSubtitle, {
@@ -424,18 +506,27 @@ const actions = {
   },
   async [a.addOnlineSubtitles](
     { dispatch }: any,
-    { mediaHash, source }: IAddSubtitlesOptions<TranscriptInfo>,
+    { mediaHash, source = [] }: IAddSubtitlesOptions<TranscriptInfo>,
   ) {
     return Promise.all(
-      source.map((info: TranscriptInfo) => dispatch(a.addSubtitle, {
-        generator: new OnlineGenerator(info),
-        mediaHash,
-      })),
+      source.map((info: TranscriptInfo) => {
+        if (info.tagsList.length > 0 && info.tagsList.indexOf('AI') > -1) {
+          // 如果在线字幕有AI标签，就使用TranslatedGenerator
+          return dispatch(a.addSubtitle, {
+            generator: new TranslatedGenerator(info),
+            mediaHash,
+          });
+        }
+        return dispatch(a.addSubtitle, {
+          generator: new OnlineGenerator(info),
+          mediaHash,
+        });
+      }),
     ).then(subtitles => addSubtitleItemsToList(subtitles, mediaHash));
   },
   async [a.addDatabaseSubtitles](
     { getters, dispatch }: any,
-    { source, mediaHash, selected }: IAddDatabaseSubtitlesOptions,
+    { source = [], mediaHash, selected }: IAddDatabaseSubtitlesOptions,
   ) {
     return Promise.all(
       source.map(async stored => dispatch(a.addSubtitle, {
@@ -501,6 +592,10 @@ const actions = {
             delay: subtitle.delay,
           };
           commit(m.addSubtitleId, subtitleControlListItem);
+          // 如果出现AI按钮 检查有没有上次的任务，有就继续上次任务
+          if (subtitle.type === Type.Translated && subtitle.format === Format.Unknown) {
+            dispatch(atActions.AUDIO_TRANSLATE_CONTINUE, subtitleControlListItem);
+          }
           return subtitleControlListItem;
         }
       } catch (ex) {
@@ -521,7 +616,6 @@ const actions = {
   async [a.deleteSubtitlesByUuid]({ state, dispatch }: any, subtitles: SubtitleControlListItem[]) {
     subtitles.forEach(({ id }) => {
       if (store.hasModule(id)) dispatch(`${id}/${subActions.delete}`);
-      dispatch(`${id}/${subActions.delete}`);
       dispatch(a.removeSubtitle, id);
     });
     return removeSubtitleItemsFromList(subtitles, state.mediaHash);
@@ -541,7 +635,9 @@ const actions = {
     dispatch(a.storeSelectedSubtitle, [primary, secondary]);
     if (id && store.hasModule(id)) await dispatch(`${id}/${subActions.load}`);
   },
-  async [a.changeSecondarySubtitle]({ dispatch, commit, getters }: any, id: string) {
+  async [a.changeSecondarySubtitle]({
+    dispatch, commit, getters, state,
+  }: any, id: string) {
     let primary = getters.primarySubtitleId;
     const secondary = id;
     if (id && id === primary) primary = '';
@@ -557,7 +653,8 @@ const actions = {
   async [a.storeSelectedSubtitle]({ state }: any, ids: string[]) {
     const { allSubtitles, mediaHash } = state;
     const subtitles = ids
-      .filter(id => allSubtitles[id])
+      .filter(id => allSubtitles[id]
+        && !(allSubtitles[id].type === Type.Translated && allSubtitles[id].source === ''))
       .map((id) => {
         const { hash, source } = allSubtitles[id];
         return { hash, source };
@@ -581,9 +678,9 @@ const actions = {
       const { primaryLanguage, secondaryLanguage } = getters;
       if (!primarySelectionComplete || !secondarySelectionComplete) {
         const hasPrimaryLanguage = list
-          .find(({ language }) => language === primaryLanguage);
+          .find(({ language, type }) => language === primaryLanguage && type !== Type.Translated);
         const hasSecondaryLanguage = list
-          .find(({ language }) => language === secondaryLanguage);
+          .find(({ language, type }) => language === secondaryLanguage && type !== Type.Translated);
         if (hasPrimaryLanguage) {
           dispatch(a.changePrimarySubtitle, hasPrimaryLanguage.id);
           primarySelectionComplete = true;
@@ -707,6 +804,7 @@ const actions = {
   },
   async [a.alterPrimaryDelay]({ state, dispatch, commit }: any, deltaInSeconds: number) {
     const { primarySubtitleId } = state;
+    if (!store.hasModule(primarySubtitleId)) return;
     const delay = await dispatch(`${primarySubtitleId}/${subActions.alterDelay}`, deltaInSeconds);
     commit(m.setPrimaryDelay, delay);
     setDelayTimeout();

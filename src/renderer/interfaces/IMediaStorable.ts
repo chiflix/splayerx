@@ -1,3 +1,11 @@
+export type AITaskInfo = {
+  mediaHash: string,
+  taskId: string,
+  estimateTime: number,
+  audioLanguageCode: string,
+  targetLanguage: string,
+}
+
 export interface IMediaStorable {
   /**
    * @description 根据hash、tag，生成对应的图片将要存放的路径
@@ -15,4 +23,7 @@ export interface IMediaStorable {
    * @returns {(Promise<string | null>)} 返回文件路径，如果没有就是null
    */
   getImageBy(mediaHash: string, tag: string): Promise<string | null>
+  getAsyncTaskInfo(key: string): AITaskInfo | undefined
+  setAsyncTaskInfo(key: string, taskInfo: AITaskInfo): void
+  clearAsyncTaskInfo(key: string): void
 }

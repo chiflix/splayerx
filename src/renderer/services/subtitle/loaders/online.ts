@@ -1,4 +1,4 @@
-import { MediaTranslationResponse } from 'sagi-api/translation/v1/translation_pb';
+import { TranscriptInfo } from 'sagi-api/translation/v1/translation_pb';
 import { cloneDeep } from 'lodash';
 import { LanguageCode, normalizeCode } from '@/libs/language';
 import Sagi from '@/libs/sagi';
@@ -7,7 +7,7 @@ import {
 } from '@/interfaces/ISubtitle';
 import { SagiSubtitlePayload } from '../parsers';
 
-export type TranscriptInfo = MediaTranslationResponse.TranscriptInfo.AsObject;
+export type TranscriptInfo = TranscriptInfo.AsObject;
 
 interface IOnlineOrigin extends IOrigin {
   type: Type.Online;
@@ -22,7 +22,7 @@ export class OnlineGenerator implements IEntityGenerator {
 
   private delayInSeconds: number;
 
-  public constructor(transcriptInfo: TranscriptInfo) {
+  public constructor(transcriptInfo: TranscriptInfo.AsObject) {
     this.origin = {
       type: Type.Online,
       source: transcriptInfo.transcriptIdentity,

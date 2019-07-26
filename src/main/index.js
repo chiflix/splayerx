@@ -9,6 +9,8 @@ import path, {
 } from 'path';
 import fs from 'fs';
 import rimraf from 'rimraf';
+// import { audioHandler } from './helpers/audioHandler';
+import { audioGrabService } from './helpers/AudioGrabService';
 import { jsonStorage } from '../renderer/libs/JsonStorage';
 import './helpers/electronPrototypes';
 import writeLog from './helpers/writeLog';
@@ -367,6 +369,28 @@ function registerMainWindowEvent(mainWindow) {
       preferenceWindow.webContents.send('preferenceDispatch', 'setPreference', args);
     }
   });
+  /** grab audio logic in main process start */
+  function audioGrabCallBack(data) {
+    try {
+      if (mainWindow && !mainWindow.webContents.isDestroyed()) {
+        mainWindow.webContents.send('grab-audio-update', data);
+      }
+    } catch (error) {
+      // empty
+    }
+  }
+  ipcMain.on('grab-audio', (events, data) => {
+    audioGrabService.start(data);
+    audioGrabService.removeListener('data', audioGrabCallBack);
+    audioGrabService.on('data', audioGrabCallBack);
+  });
+  ipcMain.on('grab-audio-continue', () => {
+    audioGrabService.next();
+  });
+  ipcMain.on('grab-audio-stop', () => {
+    audioGrabService.stop();
+  });
+  /** grab audio logic in main process end */
 }
 
 function createWindow() {

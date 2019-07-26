@@ -224,9 +224,12 @@ export function calculatedName(
         && s.language === item.language)
       .findIndex((s: SubtitleControlListItem) => s.id === item.id) + 1;
     name = `${codeToLanguageName(item.language)} ${romanize(sort)}`;
+  } else if (item.type === Type.Translated) {
+    name = `${codeToLanguageName(item.language)} AI`;
   }
   return name;
 }
+
 // season math reg
 const SEREG = /([\u005b.-\s_]s[e]?(\d+)|season(\d+)|第(\d+)季|第([零一二三四五六七八九十百千]+)季)/i;
 // episode match reg

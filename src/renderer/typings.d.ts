@@ -126,7 +126,7 @@ declare module 'electron' {
       /** only available when first sample a video */
       seekPosition: string,
       /** stream index string in the form of 0:s:0 */
-      streamIndex: string,
+      streamIndex: number,
       /** integer, usually in [1, 8], 0 for all tracks */
       trackIndex: number,
       /** integer, usually in [1, 8] */

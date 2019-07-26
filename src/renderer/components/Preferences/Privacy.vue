@@ -33,6 +33,7 @@
                   <div
                     @mouseup.stop=""
                     class="dropdown__listItems"
+                    tabindex="-1"
                   >
                     <div
                       v-for="(language, index) in primaryLanguages"
@@ -70,6 +71,7 @@
                   <div
                     @mouseup.stop=""
                     class="dropdown__listItems"
+                    tabindex="-1"
                   >
                     <div
                       ref="secondarySelection"
@@ -345,6 +347,9 @@ export default {
       height: 112px;
       margin: 4px 4px 4px 6px;
       overflow-y: scroll;
+      &:focus {
+        outline: none;
+      }
     }
 
     .dropdownListItem {
