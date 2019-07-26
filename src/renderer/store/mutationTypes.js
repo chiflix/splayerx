@@ -86,8 +86,7 @@ export const newSubtitle = {
 export const SubtitleManager = {
   setPrimarySubtitleId: 'SET_PRIMARY_SUBTITLE_ID',
   setSecondarySubtitleId: 'SET_PSECONDARY_SUBTITLE_ID',
-  setPlaylistId: 'SET_PLAYLIST_ID',
-  setMediaItemId: 'SET_MEDIA_ITEM_ID',
+  setMediaHash: 'SET_MEDIA_HASH',
   setIsRefreshing: 'SET_IS_REFRESHING',
   addSubtitleId: 'ADD_SUBTITLE_ID',
   deleteSubtitleId: 'DELETE_SUBTITLE_ID',
