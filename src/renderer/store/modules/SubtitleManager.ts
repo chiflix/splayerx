@@ -344,7 +344,7 @@ const actions = {
     return Promise.all([
       fetchOnlineListWraper(!!bubble, originSrc, primaryLanguage, hints),
       fetchOnlineListWraper(!!bubble, originSrc, secondaryLanguage, hints),
-    ]).then((resultsList) => {
+    ]).then(async (resultsList) => {
       const results = flatten(resultsList);
       const newSubtitlesToAdd: TranscriptInfo[] = [];
       const oldSubtitlesToDel: SubtitleControlListItem[] = [];
@@ -422,7 +422,7 @@ const actions = {
       } else {
         newSubtitlesToAdd.push(...secondaryNotExistedResults);
       }
-      if (!isFeatureEnabled(Features.AI)) {
+      if (!(await isFeatureEnabled(Features.AI))) {
         addPrimaryAIButton = false;
         addSecondaryAIButton = false;
       }

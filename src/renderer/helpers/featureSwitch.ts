@@ -1,7 +1,7 @@
 import Vue from 'vue';
-import { remote } from 'electron';
 import syncStorage from '@/helpers/syncStorage';
 import { crc32 } from '@/libs/utils';
+import { version } from '@/../../package.json';
 
 /**
  * 'on'/'off'/number means need to check again next time
@@ -22,7 +22,10 @@ async function getOnlineConfig(url: string) {
   const headers = new Headers();
   headers.append('pragma', 'no-cache');
   headers.append('cache-control', 'no-cache');
-  return fetch(url, { method: 'GET', headers }).then(res => res.json());
+  return Promise.race([
+    fetch(url, { method: 'GET', headers }).then(res => res.json()),
+    new Promise(resolve => setTimeout(() => resolve({}), 5000)),
+  ]);
 }
 
 let cachedConfig: {[key: string]: FeatureConfig};
@@ -31,7 +34,6 @@ async function getConfig() {
   let config: {[key: string]: FeatureConfig} = {};
   try {
     config = syncStorage.getSync('featureAlways') || config;
-    const version = remote.app.getVersion();
     const onlineConfig = await getOnlineConfig(`https://splayer.org/switch/v${version}.json`);
     config = Object.assign(config, onlineConfig);
     const featureAlways = Object.keys(config)
@@ -53,6 +55,8 @@ export enum Features {
 export async function isFeatureEnabled(feature: Features) {
   const featureName = Features[feature];
   try {
+    if (process.env.NODE_ENV === 'development'
+      && !window.localStorage.featureSwitch) return true;
     if (window.localStorage[featureName]) return true;
   } catch (ex) {
     //

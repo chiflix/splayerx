@@ -158,6 +158,7 @@ export default {
       landingViewItems: [],
       sagiHealthStatus: 'UNSET',
       invalidTimeRepresentation: '--',
+      isBrowsingViewEnabled: false,
       openUrlShow: false,
       item: {},
       tranFlag: true,
@@ -171,9 +172,6 @@ export default {
   },
   computed: {
     ...mapGetters(['winWidth', 'defaultDir', 'isFullScreen', 'hideVideoHistoryOnExit']),
-    isBrowsingViewEnabled() {
-      return isFeatureEnabled(Features.BrowsingView);
-    },
     lastIndex: {
       get() {
         return (this.firstIndex + this.showItemNum) - 1;
@@ -283,7 +281,7 @@ export default {
       if (this.$refs.mask) this.$refs.mask.style.setProperty('background-color', 'rgba(255, 255, 255, 0)');
     });
   },
-  mounted() {
+  async mounted() {
     this.$store.dispatch('refreshVersion');
 
     const { app } = this.$electron.remote;
@@ -305,6 +303,8 @@ export default {
     this.$electron.ipcRenderer.on('quit', () => {
       this.quit = true;
     });
+
+    this.isBrowsingViewEnabled = await isFeatureEnabled(Features.BrowsingView);
   },
   destroyed() {
     window.removeEventListener('mousemove', this.globalMoveHandler);
