@@ -106,8 +106,8 @@
     },
     "help": {
       "name": "Ayuda",
-      "feedback": "",
-      "homepage": "",
+      "feedback": "Realimentación",
+      "homepage": "Sitio web",
       "splayerxHelp": "Ayuda",
       "shortCuts": "Lista de accesos directos",
       "crashReportLocation": "Ver registro de errores",
@@ -157,8 +157,8 @@
       "noSubtitle": "Extraviado",
       "notToShowSubtitle": "Cerrar",
       "secondarySubtitle": "Subtitulo secundario",
-      "subtitleSetting": "",
-      "subtitleDelay": "",
+      "subtitleSetting": "Ajustes de subtítulos",
+      "subtitleDelay": "Retraso de subtítulos",
       "size1": "Pequeño",
       "size2": "Estándar",
       "size3": "Grande",
@@ -182,8 +182,8 @@
       "yes": "Sí"
     },
     "window": {
-      "windowRotate": "",
-      "keepPlayingWindowFront": "",
+      "windowRotate": "Girar 90 en sentido horario",
+      "keepPlayingWindowFront": "Flotar al jugar",
       "backToLandingView": "Volver a la página de inicio",
       "bossKey": "Clave de jefe",
       "doubleSize": "200%",
@@ -196,10 +196,10 @@
       "originSize": "100%"
     },
     "favourite": {
-      "name": "",
-      "iqiyi": "",
-      "bilibili": "",
-      "youtube": ""
+      "name": "Favoritos",
+      "iqiyi": "iQIYI",
+      "bilibili": "Bilibili",
+      "youtube": "Youtube"
     }
   },
   "nextVideo": {
