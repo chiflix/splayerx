@@ -352,7 +352,7 @@ export default {
     this.$refs.webView.addEventListener('dom-ready', () => { // for webview test
       window.focus();
       this.$refs.webView.focus();
-      this.$refs.webView.openDevTools();
+      if (process.env.NODE_ENV === 'development') this.$refs.webView.openDevTools();
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.$refs.webView.addEventListener('new-window', (e: any) => { // https://github.com/electron/typescript-definitions/issues/27 fixed in 6.0.0
