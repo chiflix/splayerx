@@ -106,8 +106,8 @@
     },
     "help": {
       "name": "مساعدة",
-      "feedback": "",
-      "homepage": "",
+      "feedback": "ردود الفعل",
+      "homepage": "موقع الكتروني",
       "splayerxHelp": "مساعدة",
       "shortCuts": "قائمة الاختصارات",
       "crashReportLocation": "عرض سجل الأخطاء",
