@@ -119,7 +119,6 @@ import SubtitleList from '@/components/PlayingView/SubtitleList.vue';
 import Icon from '../BaseIconContainer.vue';
 import { addBubble } from '@/helpers/notificationControl';
 import { SUBTITLE_OFFLINE } from '@/helpers/notificationcodes';
-import { IEmbeddedOrigin } from '../../services/subtitle';
 
 export default {
   name: 'SubtitleControl',

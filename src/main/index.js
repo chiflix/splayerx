@@ -384,6 +384,7 @@ function createWindow() {
       webSecurity: false,
       nodeIntegration: true,
       experimentalFeatures: true,
+      webviewTag: true,
     },
     // See https://github.com/electron/electron/blob/master/docs/api/browser-window.md#showing-window-gracefully
     backgroundColor: '#6a6a6a',
