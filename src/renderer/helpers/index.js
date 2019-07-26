@@ -2,12 +2,19 @@ import path from 'path';
 import fs, { promises as fsPromises } from 'fs';
 import lolex from 'lolex';
 import { get } from 'lodash';
+import urlParseLax from 'url-parse-lax';
 import { mediaQuickHash } from '@/libs/utils';
 import bookmark from '@/helpers/bookmark';
 import syncStorage from '@/helpers/syncStorage';
 import infoDB from '@/helpers/infoDB';
 import { log } from '@/libs/Log';
 import { getValidSubtitleRegex, getValidVideoExtensions, getValidVideoRegex } from '@/../shared/utils';
+import {
+  Video as videoActions,
+  AudioTranslate as atActions,
+} from '@/store/actionTypes';
+import { videodata } from '@/store/video';
+import { AudioTranslateBubbleOrigin } from '@/store/modules/AudioTranslate';
 import {
   EMPTY_FOLDER, OPEN_FAILED, ADD_NO_VIDEO,
   SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, FILE_NON_EXIST_IN_PLAYLIST, PLAYLIST_NON_EXIST,
@@ -259,6 +266,10 @@ export default {
         }
       }
       if (videoFiles.length !== 0) {
+        // 如果有翻译任务就阻止
+        if (this.translateFilter(() => { this.createPlayList(...videoFiles); })) {
+          return;
+        }
         await this.createPlayList(...videoFiles);
       } else {
         log.warn('helpers/index.js', 'There is no playable file in this folder.');
@@ -299,8 +310,16 @@ export default {
         });
 
         if (videoFiles.length > 1) {
+          // 如果有翻译任务就阻止
+          if (this.translateFilter(() => { this.createPlayList(...videoFiles); })) {
+            return;
+          }
           await this.createPlayList(...videoFiles);
         } else if (videoFiles.length === 1) {
+          // 如果有翻译任务就阻止
+          if (this.translateFilter(() => { this.openVideoFile(...videoFiles); })) {
+            return;
+          }
           await this.openVideoFile(...videoFiles);
         }
         if (containsSubFiles) {
@@ -401,9 +420,23 @@ export default {
       this.$bus.$emit('new-file-open');
       this.$bus.$emit('open-playlist');
     },
+    async openUrlFile(url) {
+      const id = await this.infoDB.addPlaylist([url]);
+      const playlistItem = await this.infoDB.get('recent-played', id);
+      this.playFile(url, playlistItem.items[playlistItem.playedIndex]);
+      this.$store.dispatch('FolderList', {
+        id,
+        paths: [url],
+        items: [id],
+      });
+    },
     // open single video
     async openVideoFile(videoFile) {
       if (!videoFile) return;
+      // 如果有翻译任务就阻止
+      if (this.translateFilter(() => {
+        this.openVideoFile(videoFile);
+      })) return;
       const id = await this.infoDB.addPlaylist([videoFile]);
       const playlistItem = (await this.infoDB.get('recent-played', id)) || {
         id, items: [], hpaths: [], lastOpened: Date.now(), playedIndex: 0,
@@ -458,6 +491,10 @@ export default {
       if (process.mas && this.$store.getters.source !== 'drop') {
         if (!this.bookmarkAccessing(vidPath)) return;
       }
+      // 如果有翻译任务就阻止
+      if (this.translateFilter(() => {
+        this.playFile(vidPath, id);
+      })) return;
       try {
         mediaHash = await mediaQuickHash(vidPath);
       } catch (err) {
@@ -477,6 +514,31 @@ export default {
         this.$router.push({ name: 'playing-view' });
       }
       this.$bus.$emit('new-file-open');
+    },
+    translateFilter(callback) {
+      if (this.$store.getters.isTranslating) {
+        // 如果正在进行智能翻译，就阻止切换视频,
+        // 并且提示是否终止智能翻译
+        if (Math.ceil(videodata.time) === Math.ceil(this.$store.getters.duration)) {
+          this.$store.dispatch(atActions.AUDIO_TRANSLATE_SHOW_BUBBLE,
+            AudioTranslateBubbleOrigin.NextVideoChange);
+          this.$store.dispatch(videoActions.PAUSE_VIDEO);
+          this.$store.dispatch(atActions.AUDIO_TRANSLATE_BUBBLE_CALLBACK, () => {
+            this.$store.dispatch(videoActions.PLAY_VIDEO);
+            callback();
+          });
+        } else {
+          this.$store.dispatch(atActions.AUDIO_TRANSLATE_SHOW_BUBBLE,
+            AudioTranslateBubbleOrigin.VideoChange);
+          this.$store.dispatch(atActions.AUDIO_TRANSLATE_BUBBLE_CALLBACK, callback);
+        }
+        return true;
+      }
+      return false;
+    },
+    openFileByPlayingView(url) {
+      const protocol = urlParseLax(url).protocol;
+      return !['https:', 'http:'].includes(protocol) || document.createElement('video').canPlayType(`video/${url.slice(url.lastIndexOf('.') + 1, url.length)}`);
     },
   },
 };

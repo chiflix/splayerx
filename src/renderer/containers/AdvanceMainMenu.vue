@@ -283,7 +283,7 @@ export default {
       showTrack: false,
       hoverAudioIndex: -1,
       backAudioHover: false,
-      cardWidth: 170,
+      cardWidth: 180,
       normalFont: 'Avenir, Roboto-Regular, PingFang SC, Microsoft Yahei',
       useBlur: false,
       shiftItemHovered: false,
@@ -301,12 +301,12 @@ export default {
     },
     minInfoCardWidth() {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
-        return 170;
+        return 180;
       }
       if (this.computedSize >= 481 && this.computedSize < 1080) {
-        return 204;
+        return 216;
       }
-      return 285.6;
+      return 302.4;
     },
     leftTitleToShow() { // 菜单左侧显示的text
       if (this.readyShow === 'audioMenu') {
@@ -551,7 +551,6 @@ export default {
         this.handleSubClick();
       }, 0);
     });
-    this.useBlur = window.devicePixelRatio === 1;
     this.$bus.$on('switch-audio-track', (index: number) => {
       this.switchAudioTrack(this.audioTrackList[index]);
     });

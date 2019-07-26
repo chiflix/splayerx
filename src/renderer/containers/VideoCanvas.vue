@@ -47,11 +47,11 @@ import { windowRectService } from '@/services/window/WindowRectService';
 import { playInfoStorageService } from '@/services/storage/PlayInfoStorageService';
 import { settingStorageService } from '@/services/storage/SettingStorageService';
 import { generateShortCutImageBy } from '@/libs/utils';
-import { Video as videoActions } from '@/store/actionTypes';
+import { Video as videoActions, AudioTranslate as atActions } from '@/store/actionTypes';
 import { videodata } from '@/store/video';
 import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer.vue';
 import { MediaItem, PlaylistItem } from '../interfaces/IDB';
-import { deleteSubtitlesByPlaylistId } from '../services/storage/subtitle';
+import { AudioTranslateBubbleOrigin } from '../store/modules/AudioTranslate';
 
 export default {
   name: 'VideoCanvas',
@@ -78,7 +78,7 @@ export default {
     ...mapGetters([
       'videoId', 'nextVideoId', 'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId', 'enabledSecondarySub', 'lastChosenSize', 'subToTop',
       'winSize', 'winPos', 'winAngle', 'isFullScreen', 'winWidth', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo', 'loop', 'playinglistRate', 'isFolderList', 'playingList', 'playingIndex', 'playListId', 'items',
-      'previousVideo', 'previousVideoId',
+      'previousVideo', 'previousVideoId', 'isTranslating',
     ]),
     ...mapGetters({
       videoWidth: 'intrinsicWidth',
@@ -125,26 +125,17 @@ export default {
   },
   mounted() {
     this.$bus.$on('back-to-landingview', () => {
-      let savePromise = this.saveScreenshot(this.videoId)
-        .then(() => this.updatePlaylist(this.playListId));
-      if (process.mas && this.$store.getters.source === 'drop') {
-        savePromise = savePromise.then(async () => {
-          await playInfoStorageService.deleteRecentPlayedBy(this.playListId);
-          await deleteSubtitlesByPlaylistId(this.playListId);
+      if (this.isTranslating) {
+        this.showTranslateBubble(AudioTranslateBubbleOrigin.WindowClose);
+        this.addTranslateBubbleCallBack(() => {
+          this.backToLandingView();
         });
+        return false;
       }
-      savePromise
-        .then(this.saveSubtitleStyle)
-        .then(this.savePlaybackStates)
-        .then(this.removeAllAudioTrack)
-        .finally(() => {
-          this.$store.dispatch('Init');
-          this.$bus.$off();
-          this.$router.push({
-            name: 'landing-view',
-          });
-          windowRectService.uploadWindowBy(false, 'landing-view');
-        });
+      // 如果有back翻译任务，直接丢弃掉
+      this.discardTranslate();
+      this.backToLandingView();
+      return false;
     });
     this.$electron.ipcRenderer.on('quit', (e: Event, needToRestore: boolean) => {
       if (needToRestore) this.needToRestore = needToRestore;
@@ -227,6 +218,9 @@ export default {
       switchAudioTrack: videoActions.SWITCH_AUDIO_TRACK,
       removeAllAudioTrack: videoActions.REMOVE_ALL_AUDIO_TRACK,
       updatePlayinglistRate: videoActions.UPDATE_PLAYINGLIST_RATE,
+      showTranslateBubble: atActions.AUDIO_TRANSLATE_SHOW_BUBBLE,
+      addTranslateBubbleCallBack: atActions.AUDIO_TRANSLATE_BUBBLE_CALLBACK,
+      discardTranslate: atActions.AUDIO_TRANSLATE_DISCARD,
     }),
     async onMetaLoaded(event: Event) {
       const target = event.target as HTMLVideoElement;
@@ -346,7 +340,39 @@ export default {
     savePlaybackStates() {
       return settingStorageService.updatePlaybackStates({ volume: this.volume, muted: this.muted });
     },
+    backToLandingView() {
+      let savePromise = this.saveScreenshot(this.videoId)
+        .then(() => this.updatePlaylist(this.playListId));
+      if (process.mas && this.$store.getters.source === 'drop') {
+        savePromise = savePromise.then(async () => {
+          await playInfoStorageService.deleteRecentPlayedBy(this.playListId);
+        });
+      }
+      savePromise
+        .then(this.saveSubtitleStyle)
+        .then(this.savePlaybackStates)
+        .then(this.removeAllAudioTrack)
+        .finally(() => {
+          this.$store.dispatch('Init');
+          this.$bus.$off();
+          this.$router.push({
+            name: 'landing-view',
+          });
+          windowRectService.uploadWindowBy(false, 'landing-view');
+        });
+    },
     beforeUnloadHandler(e: BeforeUnloadEvent) {
+      // 如果当前有翻译任务进行，而不是再后台进行
+      if (this.isTranslating) {
+        this.showTranslateBubble(AudioTranslateBubbleOrigin.WindowClose);
+        this.addTranslateBubbleCallBack(() => {
+          window.close();
+        });
+        e.returnValue = true;
+        return false;
+      }
+      // 如果有back翻译任务，直接丢弃掉
+      this.discardTranslate();
       if (!this.asyncTasksDone && !this.needToRestore) {
         e.returnValue = false;
         let savePromise = this.saveScreenshot(this.videoId)
@@ -354,7 +380,6 @@ export default {
         if (process.mas && this.$store.getters.source === 'drop') {
           savePromise = savePromise.then(async () => {
             await playInfoStorageService.deleteRecentPlayedBy(this.playListId);
-            await deleteSubtitlesByPlaylistId(this.playListId);
           });
         }
         savePromise
@@ -380,6 +405,7 @@ export default {
       } else {
         this.$electron.remote.app.quit();
       }
+      return true;
     },
   },
 };

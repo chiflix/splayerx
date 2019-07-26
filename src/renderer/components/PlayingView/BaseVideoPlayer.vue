@@ -1,6 +1,7 @@
 <template>
   <div class="base-video-player">
     <video
+      id="play-video"
       ref="video"
       @error="handleError"
       class="video-element"
@@ -133,7 +134,7 @@ export default {
       // calculate the seek time
       let [finalSeekTime] = newVal;
       if (finalSeekTime < 0 || !newVal || !finalSeekTime) finalSeekTime = 0;
-      else if (newVal > this.duration) finalSeekTime = this.duration;
+      else if (finalSeekTime > this.duration) finalSeekTime = this.duration;
       // seek the video
       this.$refs.video.currentTime = finalSeekTime;
       // update the seek time
@@ -265,6 +266,7 @@ export default {
                 },
               });
             };
+            // 通过video元素的audioTracks，获取视屏的tracks
             this.$refs.video.audioTracks.onaddtrack = generateAudioEvent('add');
             this.$refs.video.audioTracks.onremovetrack = generateAudioEvent('remove');
           }

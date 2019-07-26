@@ -32,7 +32,11 @@ import { windowRectService } from '@/services/window/WindowRectService';
 import helpers from '@/helpers';
 import { hookVue } from '@/kerning';
 import {
-  Video as videoActions, Subtitle as subtitleActions, SubtitleManager as smActions, SubtitleManager,
+  Video as videoActions,
+  Subtitle as subtitleActions,
+  SubtitleManager as smActions,
+  SubtitleManager,
+  Browsing as browsingActions,
 } from '@/store/actionTypes';
 import { log } from '@/libs/Log';
 import asyncStorage from '@/helpers/asyncStorage';
@@ -172,7 +176,7 @@ new Vue({
     };
   },
   computed: {
-    ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winAngle', 'winWidth', 'winHeight', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'list', 'enabledSecondarySub', 'isRefreshing',
+    ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winAngle', 'winWidth', 'winHeight', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'list', 'enabledSecondarySub', 'isRefreshing', 'browsingSize', 'pipSize', 'pipPos', 'barrageOpen',
       'primarySubtitleId', 'secondarySubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isHiddenByBossKey', 'isMinimized', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle', 'displayLanguage', 'calculatedNoSub', 'sizePercent', 'snapshotSavedPath', 'duration', 'reverseScrolling',
     ]),
     ...inputMapGetters({
@@ -347,6 +351,13 @@ new Vue({
         this.$store.dispatch(videoActions.MUTED_UPDATE, data.muted);
       }
     });
+    asyncStorage.get('browsing').then((data) => {
+      this.$store.dispatch('updateBrowsingSize', data.browsingSize || this.browsingSize);
+      this.$store.dispatch('updatePipSize', data.pipSize || this.pipSize);
+      this.$store.dispatch('updatePipPos', data.pipPos || this.pipPos);
+      this.$store.dispatch('updateBrowsingPos', data.browsingPos || [0, 0]);
+      this.updateBarrageOpen(data.barrageOpen || this.barrageOpen);
+    });
     this.$bus.$on('delete-file', () => {
       this.refreshMenu();
     });
@@ -412,6 +423,11 @@ new Vue({
           e.preventDefault();
           this.$store.dispatch(videoActions.INCREASE_RATE);
           break;
+        case 85:
+          if (e.metaKey && e.shiftKey) {
+            this.$bus.$emit('open-url-show', true);
+          }
+          break;
         default:
           break;
       }
@@ -422,21 +438,35 @@ new Vue({
       if (!e.ctrlKey) {
         let isAdvanceColumeItem;
         let isSubtitleScrollItem;
+        let isAudioTranslateItem;
         const advance = document.querySelector('.mainMenu');
+        const audioTranslate = document.querySelector('.audio-translate');
         const subtitle = document.querySelector('.subtitle-scroll-items');
         if (advance) {
           const nodeList = advance.childNodes;
           for (let i = 0; i < nodeList.length; i += 1) {
             isAdvanceColumeItem = nodeList[i].contains(e.target as Node);
+            if (isAdvanceColumeItem) break;
+          }
+        }
+        if (audioTranslate) {
+          isAudioTranslateItem = audioTranslate.contains(e.target as Node);
+          if (!isAudioTranslateItem) {
+            const nodeList = audioTranslate.childNodes;
+            for (let i = 0; i < nodeList.length; i += 1) {
+              isAudioTranslateItem = nodeList[i].contains(e.target as Node);
+              if (isAudioTranslateItem) break;
+            }
           }
         }
         if (subtitle) {
           const subList = subtitle.childNodes;
           for (let i = 0; i < subList.length; i += 1) {
             isSubtitleScrollItem = subList[i].contains(e.target as Node);
+            if (isSubtitleScrollItem) break;
           }
         }
-        if (!isAdvanceColumeItem && !isSubtitleScrollItem) {
+        if (!isAdvanceColumeItem && !isSubtitleScrollItem && !isAudioTranslateItem) {
           if (e.deltaY) {
             if (this.canSendVolumeGa) {
               this.$ga.event('app', 'volume', 'wheel');
@@ -477,21 +507,35 @@ new Vue({
       const { deltaX: x, ctrlKey, target } = event;
       let isAdvanceColumeItem;
       let isSubtitleScrollItem;
+      let isAudioTranslateItem;
       const advance = document.querySelector('.mainMenu');
+      const audioTranslate = document.querySelector('.audio-translate');
       const subtitle = document.querySelector('.subtitle-scroll-items');
       if (advance) {
         const nodeList = advance.childNodes;
         for (let i = 0; i < nodeList.length; i += 1) {
           isAdvanceColumeItem = nodeList[i].contains(target as Node);
+          if (isAdvanceColumeItem) break;
+        }
+      }
+      if (audioTranslate) {
+        isAudioTranslateItem = audioTranslate.contains(target as Node);
+        if (!isAudioTranslateItem) {
+          const nodeList = audioTranslate.childNodes;
+          for (let i = 0; i < nodeList.length; i += 1) {
+            isAudioTranslateItem = nodeList[i].contains(target as Node);
+            if (isAudioTranslateItem) break;
+          }
         }
       }
       if (subtitle) {
         const subList = subtitle.childNodes;
         for (let i = 0; i < subList.length; i += 1) {
           isSubtitleScrollItem = subList[i].contains(target as Node);
+          if (isSubtitleScrollItem) break;
         }
       }
-      if (!ctrlKey && !isAdvanceColumeItem && !isSubtitleScrollItem) {
+      if (!ctrlKey && !isAdvanceColumeItem && !isSubtitleScrollItem && !isAudioTranslateItem) {
         this.$emit('wheel-event', { x });
       }
     });

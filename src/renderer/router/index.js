@@ -16,6 +16,11 @@ export default new Router({
       component: require('@/components/PlayingView.vue').default,
     },
     {
+      path: '/browsing',
+      name: 'browsing-view',
+      component: require('@/components/BrowsingView.vue').default,
+    },
+    {
       path: '*',
       redirect: '/language-setting',
     },
