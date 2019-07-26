@@ -17,48 +17,60 @@ import {
 const db = new SubtitleDataBase();
 
 export async function storeSubtitle(subtitle: Entity) {
-  const {
-    source, hash, format, language,
-  } = subtitle;
-  return db.addSubtitle({
-    source, format, language, hash,
-  });
+  if (subtitle) {
+    const {
+      source, hash, format, language,
+    } = subtitle;
+    if (source && hash && format && language) {
+      db.addSubtitle({
+        source, format, language, hash,
+      });
+    }
+  }
 }
 export async function removeSubtitle(subtitle: Entity) {
-  const { hash, source } = subtitle;
-  return db.removeSubtitle({ hash, source });
+  if (subtitle) {
+    const { hash, source } = subtitle;
+    if (hash && source) db.removeSubtitle({ hash, source });
+  }
 }
 export async function updateSubtitle(subtitle: Entity) {
-  const {
-    hash, source, format, language,
-  } = subtitle;
-  return db.updateSubtitle({
-    hash, source, format, language,
-  });
+  if (subtitle) {
+    const {
+      hash, source, format, language,
+    } = subtitle;
+    if (source && hash && format && language) {
+      db.updateSubtitle({
+        hash, source, format, language,
+      });
+    }
+  }
 }
-export function retrieveSubtitlePreference(mediaHash: string) {
+export function retrieveSubtitlePreference(mediaHash: string = '') {
   return db.retrieveSubtitlePreference(mediaHash);
 }
-export function retrieveStoredSubtitleList(mediaHash: string) {
+export function retrieveStoredSubtitleList(mediaHash: string = '') {
   return db.retrieveSubtitleList(mediaHash);
 }
 export function addSubtitleItemsToList(
-  subtitles: SubtitleControlListItem[],
-  mediaHash: string,
+  subtitles: SubtitleControlListItem[] = [],
+  mediaHash: string = '',
 ) {
-  const storedSubtitles = subtitles.filter(s => s).map(({
-    hash, type, source, delay,
-  }) => ({
-    hash, type, source, delay,
-  }));
+  const storedSubtitles = subtitles
+    .filter(s => s && s.hash && s.source && s.type)
+    .map(({
+      hash, type, source, delay,
+    }) => ({
+      hash, type, source, delay,
+    }));
   return db.addSubtitleItemsToList(mediaHash, storedSubtitles);
 }
 export function updateSubtitleList(
-  subtitles: SubtitleControlListItem[],
-  mediaHash: string,
+  subtitles: SubtitleControlListItem[] = [],
+  mediaHash: string = '',
 ) {
   const subtitlesToUpdate = subtitles
-    .filter(sub => !!sub)
+    .filter(s => s && s.hash && s.source && s.type)
     .map(({
       hash, type, source, delay,
     }) => ({
@@ -67,29 +79,31 @@ export function updateSubtitleList(
   return db.updateSubtitleList(mediaHash, subtitlesToUpdate);
 }
 export function removeSubtitleItemsFromList(
-  subtitles: SubtitleControlListItem[],
-  mediaHash: string,
+  subtitles: SubtitleControlListItem[] = [],
+  mediaHash: string = '',
 ) {
-  const storedSubtitles = subtitles.filter(s => s).map(({
-    hash, type, source, delay,
-  }) => ({
-    hash, type, source, delay,
-  }));
+  const storedSubtitles = subtitles
+    .filter(s => s && s.hash && s.source && s.type)
+    .map(({
+      hash, type, source, delay,
+    }) => ({
+      hash, type, source, delay,
+    }));
   return db.removeSubtitleItemsFromList(mediaHash, storedSubtitles);
 }
 export function storeSubtitleLanguage(
-  languageCodes: LanguageCode[],
-  mediaHash: string,
+  languageCodes: LanguageCode[] = [LanguageCode.Default, LanguageCode.Default],
+  mediaHash: string = '',
 ) {
   return db.storeSubtitleLanguage(mediaHash, languageCodes);
 }
 export function storeSelectedSubtitles(
-  subs: SelectedSubtitle[],
-  mediaHash: string,
+  subs: SelectedSubtitle[] = [],
+  mediaHash: string = '',
 ) {
   return db.storeSelectedSubtitles(mediaHash, subs);
 }
-export function retrieveSelectedSubtitles(mediaHash: string) {
+export function retrieveSelectedSubtitles(mediaHash: string = '') {
   return db.retrieveSelectedSubtitles(mediaHash);
 }
 
