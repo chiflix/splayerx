@@ -193,13 +193,21 @@
       "maxmize": "Enfocar",
       "minimize": "Minimizar",
       "name": "Ventana",
-      "originSize": "100%"
+      "originSize": "100%",
+      "enterPip": "",
+      "exitPip": ""
     },
     "favourite": {
       "name": "Favoritos",
       "iqiyi": "iQIYI",
       "bilibili": "Bilibili",
       "youtube": "Youtube"
+    },
+    "history": {
+      "name": "",
+      "reload": "",
+      "back": "",
+      "forward": ""
     }
   },
   "nextVideo": {
