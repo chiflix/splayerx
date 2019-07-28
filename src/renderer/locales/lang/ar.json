@@ -193,13 +193,21 @@
       "maxmize": "تكبير",
       "minimize": "خفض",
       "name": "نافذة او شباك",
-      "originSize": "100٪"
+      "originSize": "100٪",
+      "enterPip": "",
+      "exitPip": ""
     },
     "favourite": {
       "name": "مفضل",
       "iqiyi": "iQIYI",
       "bilibili": "Bilibili",
       "youtube": "Youtube"
+    },
+    "history": {
+      "name": "",
+      "reload": "",
+      "back": "",
+      "forward": ""
     }
   },
   "nextVideo": {
