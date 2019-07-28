@@ -66,6 +66,7 @@ export default class Menubar {
 
   public setMainWindow(window: Electron.BrowserWindow | null) {
     // may replace this way of getting mainWindow by window service or else...
+    this.topOnWindow = this.isFullScreen = false;
     this.mainWindow = window;
   }
 
@@ -209,15 +210,16 @@ export default class Menubar {
     Menu.setApplicationMenu(this.menubar);
   }
 
-  public updatePrimarySub(items: { id: string, label: string }[]) {
+  public updatePrimarySub(items: { id: string, label: string, checked: boolean }[]) {
     const primarySubMenu = this.menubar.getMenuItemById('subtitle.mainSubtitle').submenu;
     // @ts-ignore
     primarySubMenu.clear();
-    items.forEach(({ id, label }) => {
+    items.forEach(({ id, label, checked }) => {
       const item = new MenuItem({
         id: `subtitle.mainSubtitle.${id}`,
         type: 'radio',
         label,
+        checked,
         click: () => {
           if (this.mainWindow) {
             this.mainWindow.webContents.send('subtitle.mainSubtitle', id);
@@ -230,11 +232,13 @@ export default class Menubar {
     Menu.setApplicationMenu(this.menubar);
   }
 
-  public updateSecondarySub(items: { id: string, label: string }[]) {
+  public updateSecondarySub(items: { id: string, label: string, checked: boolean, enabled: boolean }[]) {
     const secondarySubMenu = this.menubar.getMenuItemById('subtitle.secondarySubtitle').submenu;
     // @ts-ignore
     secondarySubMenu.clear();
-    items.forEach(({ id, label }) => {
+    items.forEach(({
+      id, label, checked, enabled,
+    }) => {
       let type: ('normal' | 'separator' | 'submenu' | 'checkbox' | 'radio') = 'radio';
       if (id === 'secondarySub') type = 'checkbox';
       else if (id === 'menubar.separator') type = 'separator';
@@ -242,6 +246,8 @@ export default class Menubar {
         id: `subtitle.secondarySubtitle.${id}`,
         type,
         label,
+        checked,
+        enabled,
         click: () => {
           if (this.mainWindow) {
             this.mainWindow.webContents.send('subtitle.secondarySubtitle', id);
