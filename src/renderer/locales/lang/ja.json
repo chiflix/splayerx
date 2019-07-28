@@ -193,13 +193,21 @@
       "maxmize": "最大化",
       "minimize": "最小化",
       "name": "ウィンドウ",
-      "originSize": "100%"
+      "originSize": "100%",
+      "enterPip": "",
+      "exitPip": ""
     },
     "favourite": {
       "name": "好きな",
       "iqiyi": "iQIYI",
       "bilibili": "Bilibili",
       "youtube": "Youtube"
+    },
+    "history": {
+      "name": "",
+      "reload": "",
+      "back": "",
+      "forward": ""
     }
   },
   "nextVideo": {
