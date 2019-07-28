@@ -25,12 +25,12 @@ export default class MenuService {
     ipcRenderer.send('update-paused', paused);
   }
 
-  public updateMenuItemChecked(id: string, checked: boolean) {
-    if (this.getMenuItemById(id)) this.getMenuItemById(id).checked = checked;
+  public updatePip(isPip: boolean) {
+    ipcRenderer.send('update-pip', isPip);
   }
 
-  public updateMenuItemEnabled(id: string, enabled: boolean) {
-    if (this.getMenuItemById(id)) this.getMenuItemById(id).enabled = enabled;
+  public updateMenuItemChecked(id: string, checked: boolean) {
+    if (this.getMenuItemById(id)) this.getMenuItemById(id).checked = checked;
   }
 
   public resolveMute(state: boolean) {
