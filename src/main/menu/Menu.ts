@@ -42,6 +42,8 @@ export default class Menubar {
   private isFullScreen = false;
 
   private isPip = false;
+  
+  private topOnWindow = false;
 
   private _routeName: string;
 
@@ -54,11 +56,7 @@ export default class Menubar {
 
   public set disable(val: boolean) {
     this._disable = val;
-    if (val) {
-      this.disableMenu();
-    } else {
-      this.menuStateControl();
-    }
+    this.enableMenu(!val);
   }
 
   public constructor() {
@@ -120,15 +118,17 @@ export default class Menubar {
     }
   }
 
-  public disableMenu() {
-    this.enableSubmenuItem('playback', false);
-    this.enableSubmenuItem('audio', false);
-    this.enableSubmenuItem('subtitle', false);
-    this.enableSubmenuItem('window', false);
+  public enableMenu(enable: boolean) {
+    if (this._routeName === 'playing-view') {
+      this.enableSubmenuItem('playback', enable);
+      this.enableSubmenuItem('audio', enable);
+      this.enableSubmenuItem('subtitle', enable);
+    }
 
-    this.enableSubmenuItem('file.openRecent', false);
-    this.updateMenuItemEnabled('file.clearHistory', false);
-    this.updateMenuItemEnabled('file.closeWindow', false);
+    this.enableSubmenuItem('window', enable);
+    this.enableSubmenuItem('file.openRecent', enable);
+    this.updateMenuItemEnabled('file.clearHistory', enable);
+    this.updateMenuItemEnabled('file.closeWindow', enable);
   }
 
   public updateLocale() {
@@ -154,6 +154,12 @@ export default class Menubar {
     if (this.isPip !== isPip) {
       this.isPip = isPip;
       this.refreshBrowsingWindowMenu();
+    }
+  }
+
+  public updateTopOnWindow(topOnWindow: boolean) {
+    if (this.topOnWindow !== topOnWindow) {
+      this.topOnWindow = topOnWindow;
     }
   }
 
@@ -337,6 +343,10 @@ export default class Menubar {
       } else {
         if (menuItem.id === 'window.fullscreen') {
           menuItem.label = this.isFullScreen ? this.$t('msg.window.exitFullScreen') : this.$t('msg.window.enterFullScreen');
+        }
+        if (menuItem.id === 'window.keepPlayingWindowFront') {
+          // @ts-ignore
+          menuItem.checked = this.topOnWindow;
         }
         if (isAction(menuItem) && this._disable) menuItem.enabled = !this._disable;
         const item = this.createMenuItemByTemplate(menuItem);

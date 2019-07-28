@@ -172,6 +172,7 @@ new Vue({
       menuService: null,
       playlistDisplayState: false,
       topOnWindow: false,
+      lastTopOnWindow: false,
       canSendVolumeGa: true,
     };
   },
@@ -200,9 +201,16 @@ new Vue({
     },
   },
   watch: {
+    topOnWindow(val: boolean) {
+      if (this.currentRouteName === 'landing-view') return;
+      const browserWindow = this.$electron.remote.getCurrentWindow();
+      browserWindow.setAlwaysOnTop(val);
+      this.menuService.updateMenuItemChecked('window.keepPlayingWindowFront', val);
+      this.menuService.updateTopOnWindow(val);
+    },
     playlistDisplayState(val: boolean) {
-      this.$electron.ipcRenderer.send('update-enabled', 'playback.forwardS', !val);
-      this.$electron.ipcRenderer.send('update-enabled', 'playback.backwardS', !val);
+      this.menuService.updateMenuItemEnabled('playback.forwardS', !val);
+      this.menuService.updateMenuItemEnabled('playback.backwardS', !val);
     },
     displayLanguage(val) {
       if (messages[val]) {
@@ -224,10 +232,8 @@ new Vue({
     currentRouteName(val) {
       this.menuService.updateRouteName(val);
       if (val === 'landing-view' || val === 'playing-view') this.menuService.addRecentPlayItems();
-      if (val === 'playing-view' && this.topOnWindow) {
-        const browserWindow = this.$electron.remote.getCurrentWindow();
-        browserWindow.setAlwaysOnTop(true);
-        this.menuService.updateMenuItemChecked('window.keepPlayingWindowFront', this.topOnWindow);
+      if (val === 'playing-view' && this.lastTopOnWindow) {
+        this.topOnWindow = true;
       }
     },
     volume(val: number) {
@@ -290,11 +296,10 @@ new Vue({
       });
     },
     paused(val) {
-      const browserWindow = this.$electron.remote.getCurrentWindow();
-      if (val && browserWindow.isAlwaysOnTop()) {
-        browserWindow.setAlwaysOnTop(false);
-      } else if (!val && this.topOnWindow) {
-        browserWindow.setAlwaysOnTop(true);
+      if (val && this.topOnWindow) {
+        this.lastTopOnWindow = true;
+        this.topOnWindow = false;
+      } else if (!val && this.lastTopOnWindow) {
         this.topOnWindow = true;
       }
       this.menuService.updatePaused(val);
@@ -856,19 +861,11 @@ new Vue({
       });
       this.menuService.on('window.keepPlayingWindowFront', () => {
         if (this.currentRouteName === 'landing-view') {
-          this.topOnWindow = !this.topOnWindow;
+          this.lastTopOnWindow = true;
           return;
         }
-        const { remote } = this.$electron;
-        const browserWindow = remote.BrowserWindow.getFocusedWindow();
-        if (browserWindow.isAlwaysOnTop()) {
-          browserWindow.setAlwaysOnTop(false);
-          this.topOnWindow = false;
-          this.menuService.updateMenuItemChecked('window.keepPlayingWindowFront', false);
-        } else if (!this.paused) {
-          browserWindow.setAlwaysOnTop(true);
-          this.topOnWindow = true;
-          this.menuService.updateMenuItemChecked('window.keepPlayingWindowFront', true);
+        if (!this.paused) {
+          this.topOnWindow = !this.topOnWindow;
         }
       });
       this.menuService.on('window.pip', () => {
