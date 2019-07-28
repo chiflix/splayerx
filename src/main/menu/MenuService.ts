@@ -53,10 +53,10 @@ export default class MenuService {
     ipcMain.on('update-recent-play', (e: Event, items: IMenuDisplayInfo[]) => {
       this.menu.updateRecentPlay(items);
     });
-    ipcMain.on('update-primary-sub', (e: Event, items: { id: string, label: string }[]) => {
+    ipcMain.on('update-primary-sub', (e: Event, items: { id: string, label: string, checked: boolean }[]) => {
       this.menu.updatePrimarySub(items);
     });
-    ipcMain.on('update-secondary-sub', (e: Event, items: { id: string, label: string }[]) => {
+    ipcMain.on('update-secondary-sub', (e: Event, items: { id: string, label: string, checked: boolean, enabled: boolean }[]) => {
       this.menu.updateSecondarySub(items);
     });
     ipcMain.on('update-audio-track', (e: Event, items: { id: string, label: string }[]) => {

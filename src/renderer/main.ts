@@ -219,9 +219,9 @@ new Vue({
     },
     enabledSecondarySub(val) {
       this.list.forEach((item: SubtitleControlListItem) => {
-        this.$electron.ipcRenderer.send('update-enabled', `subtitle.secondarySubtitle.${item.id}`, val);
+        this.menuService.updateMenuItemEnabled(`subtitle.secondarySubtitle.${item.id}`, val);
       });
-      this.$electron.ipcRenderer.send('update-enabled', 'subtitle.secondarySubtitle.off', val);
+      this.menuService.updateMenuItemEnabled('subtitle.secondarySubtitle.off', val);
     },
     currentRouteName(val) {
       this.menuService.updateRouteName(val);
@@ -241,18 +241,17 @@ new Vue({
         this.menuService.addPrimarySub(this.recentSubMenu());
         this.menuService.addSecondarySub(this.recentSecondarySubMenu());
 
-        this.$electron.ipcRenderer.send('update-enabled', 'subtitle.increasePrimarySubtitleDelay', !!this.primarySubtitleId);
-        this.$electron.ipcRenderer.send('update-enabled', 'subtitle.decreasePrimarySubtitleDelay', !!this.primarySubtitleId);
-        this.$electron.ipcRenderer.send('update-enabled', 'subtitle.increaseSecondarySubtitleDelay', !!this.secondarySubtitleId);
-        this.$electron.ipcRenderer.send('update-enabled', 'subtitle.decreaseSecondarySubtitleDelay', !!this.secondarySubtitleId);
-        this.$electron.ipcRenderer.send('update-enabled', 'subtitle.uploadSelectedSubtitle', !!this.ableToPushCurrentSubtitle);
+        this.menuService.updateMenuItemEnabled('subtitle.increasePrimarySubtitleDelay', !!this.primarySubtitleId);
+        this.menuService.updateMenuItemEnabled('subtitle.decreasePrimarySubtitleDelay', !!this.primarySubtitleId);
+        this.menuService.updateMenuItemEnabled('subtitle.increaseSecondarySubtitleDelay', !!this.secondarySubtitleId);
+        this.menuService.updateMenuItemEnabled('subtitle.decreaseSecondarySubtitleDelay', !!this.secondarySubtitleId);
+        this.menuService.updateMenuItemEnabled('subtitle.uploadSelectedSubtitle', !!this.ableToPushCurrentSubtitle);
       }
     },
     primarySubtitleId(id: string) {
-      console.log('primarySub', id);
       if (this.currentRouteName !== 'playing-view') return;
-      this.$electron.ipcRenderer.send('update-enabled', 'subtitle.increasePrimarySubtitleDelay', !!id);
-      this.$electron.ipcRenderer.send('update-enabled', 'subtitle.decreasePrimarySubtitleDelay', !!id);
+      this.menuService.updateMenuItemEnabled('subtitle.increasePrimarySubtitleDelay', !!id);
+      this.menuService.updateMenuItemEnabled('subtitle.decreasePrimarySubtitleDelay', !!id);
       if (id) {
         this.menuService.updateMenuItemChecked(`subtitle.mainSubtitle.${id}`, true);
       } else if (!id) {
@@ -260,10 +259,9 @@ new Vue({
       }
     },
     secondarySubtitleId(id: string) {
-      console.log('secondSub', id);
       if (this.currentRouteName !== 'playing-view') return;
-      this.$electron.ipcRenderer.send('update-enabled', 'subtitle.increaseSecondarySubtitleDelay', !!id);
-      this.$electron.ipcRenderer.send('update-enabled', 'subtitle.decreaseSecondarySubtitleDelay', !!id);
+      this.menuService.updateMenuItemEnabled('subtitle.increaseSecondarySubtitleDelay', !!id);
+      this.menuService.updateMenuItemEnabled('subtitle.decreaseSecondarySubtitleDelay', !!id);
       if (id) {
         this.menuService.updateMenuItemChecked(`subtitle.secondarySubtitle.${id}`, true);
       } else if (!id) {
@@ -291,7 +289,7 @@ new Vue({
       this.menuService.updatePaused(val);
     },
     ableToPushCurrentSubtitle(val) {
-      this.$electron.ipcRenderer.send('update-enabled', 'subtitle.uploadSelectedSubtitle', val);
+      this.menuService.updateMenuItemEnabled('subtitle.uploadSelectedSubtitle', val);
     },
     originSrc(newVal) {
       if (newVal && !this.isWheelEnd) {
@@ -611,11 +609,11 @@ new Vue({
         this.menuService.addSecondarySub(this.recentSecondarySubMenu());
         this.menuService.addAudioTrack(this.updateAudioTrack());
 
-        this.$electron.ipcRenderer.send('update-enabled', 'subtitle.increasePrimarySubtitleDelay', !!this.primarySubtitleId);
-        this.$electron.ipcRenderer.send('update-enabled', 'subtitle.decreasePrimarySubtitleDelay', !!this.primarySubtitleId);
-        this.$electron.ipcRenderer.send('update-enabled', 'subtitle.increaseSecondarySubtitleDelay', !!this.secondarySubtitleId);
-        this.$electron.ipcRenderer.send('update-enabled', 'subtitle.decreaseSecondarySubtitleDelay', !!this.secondarySubtitleId);
-        this.$electron.ipcRenderer.send('update-enabled', 'subtitle.uploadSelectedSubtitle', !!this.ableToPushCurrentSubtitle);
+        this.menuService.updateMenuItemEnabled('subtitle.increasePrimarySubtitleDelay', !!this.primarySubtitleId);
+        this.menuService.updateMenuItemEnabled('subtitle.decreasePrimarySubtitleDelay', !!this.primarySubtitleId);
+        this.menuService.updateMenuItemEnabled('subtitle.increaseSecondarySubtitleDelay', !!this.secondarySubtitleId);
+        this.menuService.updateMenuItemEnabled('subtitle.decreaseSecondarySubtitleDelay', !!this.secondarySubtitleId);
+        this.menuService.updateMenuItemEnabled('subtitle.uploadSelectedSubtitle', !!this.ableToPushCurrentSubtitle);
 
         this.audioTrackList.forEach((item: Electron.MenuItem, index: number) => {
           if (item.enabled === true) {
@@ -630,9 +628,9 @@ new Vue({
           if (item.id === this.secondarySubtitleId) {
             this.menuService.updateMenuItemChecked(`subtitle.secondarySubtitle.${item.id}`, true);
           }
-          this.$electron.ipcRenderer.send('update-enabled', `subtitle.secondarySubtitle.${item.id}`, this.enabledSecondarySub);
+          this.menuService.updateMenuItemEnabled(`subtitle.secondarySubtitle.${item.id}`, this.enabledSecondarySub);
         });
-        this.$electron.ipcRenderer.send('update-enabled', 'subtitle.secondarySubtitle.off', this.enabledSecondarySub);
+        this.menuService.updateMenuItemEnabled('subtitle.secondarySubtitle.off', this.enabledSecondarySub);
       }
     },
     registeMenuActions() {
