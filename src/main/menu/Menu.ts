@@ -13,7 +13,7 @@ import { IsMacintosh } from '../../shared/common/platform';
 import Locale from '../../shared/common/localize';
 import menuTemplate from './menu.json';
 import { IMenuDisplayInfo } from '../../renderer/interfaces/IRecentPlay';
-import { SubtitleControlListItem } from '../../renderer/interfaces/ISubtitle';
+import { SubtitleControlListItem, Type } from '../../renderer/interfaces/ISubtitle';
 
 function separator(): Electron.MenuItem {
   return new MenuItem({ type: 'separator' });
@@ -230,7 +230,6 @@ export default class Menubar {
         items.forEach(({
           id, label, checked, subtitleItem,
         }) => {
-          console.log(subtitleItem);
           const item = new MenuItem({
             id: `subtitle.mainSubtitle.${id}`,
             type: 'radio',
@@ -238,6 +237,7 @@ export default class Menubar {
             checked,
             click: () => {
               if (this.mainWindow) {
+                if (subtitleItem.type === Type.Translated) this.menubar.getMenuItemById('subtitle.mainSubtitle.off').checked = true;
                 this.mainWindow.webContents.send('subtitle.mainSubtitle', id, subtitleItem);
               }
             },
@@ -279,6 +279,7 @@ export default class Menubar {
             enabled,
             click: () => {
               if (this.mainWindow) {
+                if (subtitleItem.type === Type.Translated) this.menubar.getMenuItemById('subtitle.secondarySubtitle.off').checked = true;
                 this.mainWindow.webContents.send('subtitle.secondarySubtitle', id, subtitleItem);
               }
             },
