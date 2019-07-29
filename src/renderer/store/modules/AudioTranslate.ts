@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-05 16:03:32
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-07-26 15:40:51
+ * @Last Modified time: 2019-07-29 17:22:56
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @ts-ignore
@@ -14,12 +14,13 @@ import { AudioTranslate as a, SubtitleManager as smActions } from '@/store/actio
 import { audioTranslateService } from '@/services/media/AudioTranslateService';
 import { AITaskInfo } from '@/interfaces/IMediaStorable';
 import { TranscriptInfo } from '@/services/subtitle';
-import { SubtitleControlListItem } from '@/interfaces/ISubtitle';
+import { SubtitleControlListItem, Type } from '@/interfaces/ISubtitle';
 import { mediaStorageService } from '@/services/storage/MediaStorageService';
 import { TranslatedGenerator } from '@/services/subtitle/loaders/translated';
 import { addBubble } from '../../helpers/notificationControl';
 import {
-  TRANSLATE_FAIL, TRANSLATE_SUCCESS, TRANSLATE_SUCCESS_WHEN_VIDEO_CHANGE,
+  TRANSLATE_SERVER_ERROR_FAIL, TRANSLATE_SUCCESS,
+  TRANSLATE_SUCCESS_WHEN_VIDEO_CHANGE, TRANSLATE_REQUEST_TIMEOUT,
 } from '../../helpers/notificationcodes';
 
 let taskTimer: number;
@@ -34,6 +35,13 @@ export enum AudioTranslateStatus {
   Back = 'back',
   Fail = 'fail',
   Success = 'success',
+}
+
+export enum AudioTranslateFailType {
+  Default = 'default',
+  NoLine = 'noLine',
+  TimeOut = 'timeOut',
+  ServerError = 'serverError',
 }
 
 export enum AudioTranslateBubbleOrigin {
@@ -72,6 +80,7 @@ type AudioTranslateState = {
   callbackAfterHideModal: Function,
   lastAudioLanguage: string,
   failBubbleId: string,
+  failType: AudioTranslateFailType,
 };
 
 const state = {
@@ -90,7 +99,9 @@ const state = {
   callbackAfterHideModal: () => { },
   lastAudioLanguage: '',
   failBubbleId: '',
+  failType: AudioTranslateFailType.Default,
 };
+
 
 const taskCallback = (taskInfo: AITaskInfo) => {
   console.log(taskInfo, 'audio-log');
@@ -99,20 +110,25 @@ const taskCallback = (taskInfo: AITaskInfo) => {
     return;
   }
   audioTranslateService.taskInfo = taskInfo;
-  const estimateTime = taskInfo.estimateTime * 1;
+  // const estimateTime = taskInfo.estimateTime * 1;
   // @ts-ignore
   let startEstimateTime = store.getters.translateEstimateTime;
-  let reduce = 1.5;
-  if (startEstimateTime > staticEstimateTime * 0.6) {
-    startEstimateTime = staticEstimateTime * 0.6;
-  } else if (startEstimateTime > estimateTime && estimateTime !== 0) {
-    startEstimateTime = estimateTime;
-  } else if (startEstimateTime < 20) {
-    reduce = startEstimateTime / 30;
-  } else if (startEstimateTime < 5) {
+  let reduce = 1.2;
+  let slowPoint = staticEstimateTime * 0.2;
+  slowPoint = slowPoint < 50 ? 50 : slowPoint;
+  let stopPoint = staticEstimateTime * 0.07;
+  stopPoint = stopPoint < 15 ? 15 : stopPoint;
+  if (startEstimateTime < stopPoint) {
     reduce = 0;
+    startEstimateTime = stopPoint;
+  } else if (startEstimateTime < slowPoint) {
+    reduce = 0.7;
+  } else if (startEstimateTime > staticEstimateTime * 0.6) {
+    startEstimateTime = staticEstimateTime * 0.6;
   }
-  timerCount = 1;
+  // else if (startEstimateTime > estimateTime && estimateTime !== 0) {
+  //   startEstimateTime = estimateTime;
+  // }
   // @ts-ignore
   store.commit(m.AUDIO_TRANSLATE_UPDATE_STATUS, AudioTranslateStatus.Translating);
   // 开启定时器模拟倒计时和进度
@@ -130,7 +146,6 @@ const taskCallback = (taskInfo: AITaskInfo) => {
     timerCount += 1;
     const estimateTime = startEstimateTime - (Math.log(timerCount) * reduce);
     const progress = ((staticEstimateTime - estimateTime) / staticEstimateTime) * 100;
-    console.log(estimateTime, reduce);
     // @ts-ignore
     store.commit(m.AUDIO_TRANSLATE_UPDATE_ESTIMATE_TIME, estimateTime);
     // @ts-ignore
@@ -172,6 +187,9 @@ const getters = {
   },
   failBubbleId(state: AudioTranslateState) {
     return state.failBubbleId;
+  },
+  failType(state: AudioTranslateState) {
+    return state.failType;
   },
 };
 
@@ -242,6 +260,9 @@ const mutations = {
   [m.AUDIO_TRANSLATE_UPDATE_FAIL_BUBBLE_ID](state: AudioTranslateState, id: string) {
     state.failBubbleId = id;
   },
+  [m.AUDIO_TRANSLATE_UPDATE_FAIL_TYPE](state: AudioTranslateState, type: AudioTranslateFailType) {
+    state.failType = type;
+  },
 };
 
 const actions = {
@@ -249,6 +270,12 @@ const actions = {
     commit, getters, state, dispatch,
   }: any, audioLanguageCode: string) {
     // 记录当前智能翻译的信息
+    if (!navigator.onLine) {
+      // 网络断开的
+      commit(m.AUDIO_TRANSLATE_UPDATE_STATUS, AudioTranslateStatus.Fail);
+      commit(m.AUDIO_TRANSLATE_UPDATE_FAIL_TYPE, AudioTranslateFailType.NoLine);
+      return;
+    }
     commit(m.AUDIO_TRANSLATE_SAVE_KEY, `${getters.mediaHash}`);
     audioTranslateService.stop();
     const grab = audioTranslateService.startJob({
@@ -264,10 +291,10 @@ const actions = {
       // 设置智能翻译的状态
       commit(m.AUDIO_TRANSLATE_UPDATE_STATUS, AudioTranslateStatus.Grabbing);
       timerCount = 1;
-      // 提取audio大概是暂视频总长的0.006，听写大概是视频的1/5
-      staticEstimateTime = (getters.duration * 0.206);
+      // 提取audio大概是暂视频总长的0.006，听写大概是视频的1/4
+      staticEstimateTime = (getters.duration * 0.256);
       // 但是如果时间超过5分钟就按5分钟倒计时
-      staticEstimateTime = staticEstimateTime > 300 ? 300 : staticEstimateTime;
+      // staticEstimateTime = staticEstimateTime > 300 ? 300 : staticEstimateTime;
       commit(m.AUDIO_TRANSLATE_UPDATE_ESTIMATE_TIME, staticEstimateTime);
       commit(m.AUDIO_TRANSLATE_UPDATE_PROGRESS, timerCount);
       taskTimer = window.setInterval(() => {
@@ -299,6 +326,13 @@ const actions = {
         }
         audioTranslateService.stop();
         commit(m.AUDIO_TRANSLATE_UPDATE_STATUS, AudioTranslateStatus.Fail);
+        let bubbleType = TRANSLATE_SERVER_ERROR_FAIL;
+        let fileType = AudioTranslateFailType.ServerError;
+        if (error && error.message === 'time out') {
+          bubbleType = TRANSLATE_REQUEST_TIMEOUT;
+          fileType = AudioTranslateFailType.TimeOut;
+        }
+        commit(m.AUDIO_TRANSLATE_UPDATE_FAIL_TYPE, fileType);
         if (!state.isModalVisiable) {
           commit(m.AUDIO_TRANSLATE_UPDATE_PROGRESS, 0);
           const selectId = state.selectedTargetSubtitleId;
@@ -311,10 +345,10 @@ const actions = {
           commit(m.AUDIO_TRANSLATE_UPDATE_FAIL_BUBBLE_ID, failBubbleId);
           // 如果当前有其他的bubble显示，就暂时不出失败的bubble
           if (!state.isBubbleVisible) {
-            addBubble(TRANSLATE_FAIL, { id: failBubbleId });
+            addBubble(bubbleType, { id: failBubbleId });
           } else {
             commit(m.AUDIO_TRANSLATE_BUBBLE_CANCEL_CALLBACK, () => {
-              addBubble(TRANSLATE_FAIL, { id: failBubbleId });
+              addBubble(bubbleType, { id: failBubbleId });
             });
           }
         }
@@ -386,6 +420,25 @@ const actions = {
           }
           // 先删除AI按钮对应的ID
           dispatch(smActions.removeSubtitle, selectId);
+          // 智能翻译成功后，刷新另外的语言AI是否也成功
+          const {
+            primaryLanguage, secondaryLanguage, list,
+          } = getters;
+          const secondaryAIButtonExist = list
+            .find((
+              sub: SubtitleControlListItem,
+            ) => sub.language === secondaryLanguage && !sub.source && sub.type === Type.Translated);
+          const primaryAIButtonExist = list
+            .find((
+              sub: SubtitleControlListItem,
+            ) => sub.language === primaryLanguage && !sub.source && sub.type === Type.Translated);
+          if (primaryLanguage === subtitle.language
+            && !!secondaryLanguage && !!secondaryAIButtonExist) {
+            dispatch(smActions.fetchSubtitleWhenTrabslateSuccess, secondaryLanguage);
+          } else if (secondaryLanguage === subtitle.language
+            && !!primaryLanguage && !!primaryAIButtonExist) {
+            dispatch(smActions.fetchSubtitleWhenTrabslateSuccess, primaryLanguage);
+          }
         }
         // 如果当前有其他气泡需要用户确认，就先不出成功的气泡
         if (!state.isBubbleVisible) {

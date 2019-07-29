@@ -1,4 +1,4 @@
-export type LandingViewDisplayInfo = {
+export interface ILandingViewDisplayInfo {
   id: number, // playlist id
   basename: string,
   lastPlayedTime: number,
@@ -10,10 +10,15 @@ export type LandingViewDisplayInfo = {
   playlistLength?: number, // playlist only
 }
 
+export interface IMenuDisplayInfo {
+  id: number,
+  label: string,
+}
+
 export interface IRecentPlay {
   /**
    * @returns Promise
    * 获取LandingView所需数据
    */
-  getRecords(): Promise<LandingViewDisplayInfo[]>
+  getRecords(): Promise<ILandingViewDisplayInfo[]>
 }

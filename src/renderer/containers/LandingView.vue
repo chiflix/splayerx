@@ -1,9 +1,5 @@
 <template>
   <div class="wrapper">
-    <short-marks
-      v-show="!openUrlShow"
-      :handle-browsing-open="handleBrowsingOpen"
-    />
     <open-url
       v-show="openUrlShow"
       :open-input-url="openInputUrl"
@@ -88,7 +84,6 @@
               item.backgroundUrl && !hideVideoHistoryOnExit
                 ? 'rgba(255,255,255,0.12) ': 'rgba(255,255,255,0.05)',
           }"
-          :class="{ 'backdrop': useBlur }"
           @click="openOrMove"
           class="button"
         >
@@ -132,7 +127,6 @@ import { Route } from 'vue-router';
 import { playInfoStorageService } from '@/services/storage/PlayInfoStorageService';
 import { recentPlayService } from '@/services/media/RecentPlayService';
 import Icon from '@/components/BaseIconContainer.vue';
-import ShortMarks from '@/components/LandingView/ShortMarks.vue';
 import OpenUrl from '@/components/LandingView/OpenUrl.vue';
 import NotificationBubble from '@/components/NotificationBubble.vue';
 import PlaylistItem from '@/components/LandingView/PlaylistItem.vue';
@@ -140,6 +134,7 @@ import VideoItem from '@/components/LandingView/VideoItem.vue';
 import { log } from '@/libs/Log';
 import Sagi from '@/libs/sagi';
 import { Browsing as browsingActions } from '@/store/actionTypes';
+import { Features, isFeatureEnabled } from '@/helpers/featureSwitch';
 
 Vue.component('PlaylistItem', PlaylistItem);
 Vue.component('VideoItem', VideoItem);
@@ -149,7 +144,6 @@ export default {
   components: {
     Icon,
     NotificationBubble,
-    'short-marks': ShortMarks,
     'open-url': OpenUrl,
   },
   data() {
@@ -157,12 +151,12 @@ export default {
       landingViewItems: [],
       sagiHealthStatus: 'UNSET',
       invalidTimeRepresentation: '--',
+      isBrowsingViewEnabled: false,
       openUrlShow: false,
       item: {},
       tranFlag: true,
       shifting: false,
       firstIndex: 0,
-      useBlur: false,
       pageMounted: false,
       logoTransition: '',
       canHover: false,
@@ -279,7 +273,7 @@ export default {
       if (this.$refs.mask) this.$refs.mask.style.setProperty('background-color', 'rgba(255, 255, 255, 0)');
     });
   },
-  mounted() {
+  async mounted() {
     this.$store.dispatch('refreshVersion');
 
     const { app } = this.$electron.remote;
@@ -301,6 +295,8 @@ export default {
     this.$electron.ipcRenderer.on('quit', () => {
       this.quit = true;
     });
+
+    this.isBrowsingViewEnabled = await isFeatureEnabled(Features.BrowsingView);
   },
   destroyed() {
     window.removeEventListener('mousemove', this.globalMoveHandler);
@@ -444,9 +440,6 @@ $themeColor-Light: white;
       transition: background-color 300ms ease-in;
       transition-delay: 200ms;
       cursor: pointer;
-    }
-    .backdrop {
-      backdrop-filter: blur(9.8px);
     }
 
     .button:hover {

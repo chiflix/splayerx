@@ -14,7 +14,8 @@ export function bilibiliBarrageAdapt(type, barrageOpen) {
 export function bilibili(type, barrageOpen, winSize) {
   if (type === 'video') {
     return {
-      adapter: `var isTheater = document.querySelector(".player-wrap").style.height !== "auto";
+      adapter: `var theater = document.querySelector(".player-wrap");
+        var isTheater = theater ? theater.style.height !== "auto" : true;
         if (!isTheater) {document.querySelector(".bilibili-player-video-btn-widescreen").click();};
         var wrapper = document.querySelector(".bilibili-player-video-wrap");
         wrapper.style.position = "fixed";
@@ -26,7 +27,7 @@ export function bilibili(type, barrageOpen, winSize) {
         ${bilibiliBarrageAdapt(type, barrageOpen)}
         document.body.style.overflow = "hidden";
         document.querySelector(".bili-header-m").style.display = "none";
-        document.querySelector("#entryOld").style.display = "none"`,
+        if (document.querySelector("#entryOld")) {document.querySelector("#entryOld").style.display = "none";}`,
       watcher: '',
       recover: 'document.querySelector(".bilibili-player-video-danmaku").style.opacity = "1";'
         + 'var wrapper = document.querySelector(".bilibili-player-video-wrap");'
@@ -38,7 +39,7 @@ export function bilibili(type, barrageOpen, winSize) {
         + 'wrapper.style.height="";'
         + 'document.body.style.overflow = "";'
         + 'document.querySelector(".bili-header-m").style.display = "";'
-        + 'document.querySelector("#entryOld").style.display = "";'
+        + 'if (document.querySelector("#entryOld")) {document.querySelector("#entryOld").style.display = "";}'
         + 'if (!isTheater) {document.querySelector(".bilibili-player-video-btn-widescreen").click();};',
     };
   }
@@ -111,7 +112,7 @@ export function bilibili(type, barrageOpen, winSize) {
       video.style.zIndex = "9999999999";
       video.style.width = "${winSize[0]}px";
       video.style.height = "${winSize[1]}px";
-       video.style.background = "rgb(0, 0, 0)"
+      video.style.background = "rgb(0, 0, 0)";
       Object.defineProperty(document.querySelector("video").style, "width", {get: function(){return this._width}, set: function(val){this._width = val.width;if (val.flag) document.querySelector("video").style.setProperty("width", val.width);}});
       Object.defineProperty(document.querySelector("video").style, "height", {get: function(){return this._height}, set: function(val){this._height = val.height; if (val.flag) document.querySelector("video").style.setProperty("height", val.height);}});`,
     watcher: `var video = document.querySelector("video");
@@ -121,7 +122,7 @@ export function bilibili(type, barrageOpen, winSize) {
       + 'parentElement.prepend(video);'
       + 'document.body.style.overflow = "";'
       + 'video.style.zIndex = zIndex;'
-      + 'video.style.background = ""'
+      + 'video.style.background = "";'
       + 'Object.defineProperty(document.querySelector("video").style, "width", {get: function(){return this._width}, set: function(val){this._width = val;document.querySelector("video").style.setProperty("width", val);}});'
       + 'Object.defineProperty(document.querySelector("video").style, "height", {get: function(){return this._height}, set: function(val){this._height = val;document.querySelector("video").style.setProperty("height", val);}});'
       + 'video.style.width = width;'

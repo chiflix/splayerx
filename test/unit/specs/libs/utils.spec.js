@@ -5,6 +5,7 @@ import {
   mediaQuickHash,
   timecodeFromSeconds,
   parseNameFromPath,
+  crc32,
 } from '@/libs/utils';
 
 describe('libs utils', () => {
@@ -161,5 +162,9 @@ describe('libs utils', () => {
       }
     });
     expect(count / names.length > 0.93).to.be.equals(true);
+  });
+
+  it('should compute correct result for crc32', () => {
+    expect(crc32('test')).to.be.equal(-662733300);
   });
 });

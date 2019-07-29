@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-22 17:18:34
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-07-26 14:56:17
+ * @Last Modified time: 2019-07-29 14:24:43
  */
 
 import { EventEmitter } from 'events';
@@ -10,6 +10,7 @@ import { EventEmitter } from 'events';
 import { splayerx } from 'electron';
 import path from 'path';
 import fs from 'fs';
+import axios from 'axios';
 import { credentials, Metadata } from 'grpc';
 
 import { TranslationClient } from 'sagi-api/translation/v1/translation_grpc_pb';
@@ -25,10 +26,16 @@ type JobData = {
   mediaHash: string,
   audioLanguageCode: string,
   targetLanguageCode: string,
+  uuid: string,
+  agent: string,
 }
 
 const endpoint = process.env.SAGI_API as string;
 export default class AudioGrabService extends EventEmitter {
+  private uuid: string;
+
+  private agent: string;
+
   private mediaHash: string;
 
   private audioLanguageCode: string;
@@ -79,6 +86,8 @@ export default class AudioGrabService extends EventEmitter {
     this.videoSrc = data.videoSrc;
     this.audioLanguageCode = data.audioLanguageCode;
     this.targetLanguageCode = data.targetLanguageCode;
+    this.agent = data.agent;
+    this.uuid = data.uuid;
     // create stream client
     this.streamClient = this.openClient();
 
@@ -158,11 +167,12 @@ export default class AudioGrabService extends EventEmitter {
         this.streamClient.write(request);
       }
     } catch (error) {
-      console.warn(error);
+      // empty
     }
   }
 
   private openClient(): any { // eslint-disable-line
+    const { uuid, agent } = this;
     const sslCreds = credentials.createSsl(
       // @ts-ignore
       fs.readFileSync(path.join(__static, '/certs/ca.pem')),
@@ -173,7 +183,15 @@ export default class AudioGrabService extends EventEmitter {
     );
     const metadataUpdater = (_: {}, cb: Function) => {
       const metadata = new Metadata();
-      cb(null, metadata);
+      metadata.set('uuid', uuid);
+      metadata.set('agent', agent);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      axios.get('https://ip.xindong.com/myip', { responseType: 'text' }).then((response: any) => {
+        metadata.set('clientip', response.data);
+        cb(null, metadata);
+      }, () => {
+        cb(null, metadata);
+      });
     };
     const metadataCreds = credentials.createFromMetadataGenerator(metadataUpdater);
     const combinedCreds = credentials.combineChannelCredentials(sslCreds, metadataCreds);
@@ -191,7 +209,7 @@ export default class AudioGrabService extends EventEmitter {
     this.timeoutTimer = setTimeout(() => {
       // 发送error
       this.emit('data', {
-        error: new Error('time out'),
+        error: 'time out',
       });
     }, 1000 * 10);
   }

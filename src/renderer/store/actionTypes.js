@@ -74,6 +74,7 @@ export const SubtitleManager = {
   refreshSubtitlesInitially: 'REFRESH_SUBTITLES_INITIALLY',
   refreshSubtitles: 'REFRESH_SUBTITLES',
   refreshOnlineSubtitles: 'REFRESH_ONLINE_SUBTITLES',
+  fetchSubtitleWhenTrabslateSuccess: 'FETCH_SUBTITLE_WHEN_TRANSLATE_SUCCESS',
   addLocalSubtitles: 'ADD_LOCAL_SUBTITLES',
   addLocalSubtitlesWithSelect: 'ADD_LOCAL_SUBTITLES_WITH_SELECT',
   addEmbeddedSubtitles: 'ADD_EMBEDDED_SUBTITLES',
@@ -127,4 +128,6 @@ export const Browsing = {
   UPDATE_INITIAL_URL: 'UPDATE_INITIAL_URL',
   UPDATE_RECORD_URL: 'UPDATE_RECORD_URL',
   UPDATE_BARRAGE_OPEN: 'UPDATE_BARRAGE_OPEN',
+  UPDATE_IS_PIP: 'UPDATE_IS_PIP',
+  UPDATE_PIP_ALWAYS_ON_TOP: 'UPDATE_PIP_ALWAYS_ON_TOP',
 };

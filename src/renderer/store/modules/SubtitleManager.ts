@@ -40,6 +40,7 @@ import {
 import { LanguageCode } from '@/libs/language';
 import { AudioTranslateBubbleOrigin } from './AudioTranslate';
 import { ISubtitleStream } from '@/plugins/mediaTasks';
+import { Features, isFeatureEnabled } from '@/helpers/featureSwitch';
 
 const sortOfTypes = {
   local: 0,
@@ -330,6 +331,57 @@ const actions = {
         dispatch(legacyActions.UPDATE_SUBTITLE_TYPE, true);
       });
   },
+  // 这个方法仅仅给智能翻译成功后去加载另外一个AI翻译
+  async [a.fetchSubtitleWhenTrabslateSuccess](
+    { getters, dispatch, state }: any, languageCode: LanguageCode,
+  ) {
+    const {
+      mediaHash,
+    } = state;
+    const {
+      originSrc,
+    } = getters;
+    const hints = generateHints(originSrc);
+    fetchOnlineListWraper(false, originSrc, languageCode, hints)
+      .then(async (resultsList) => {
+        const results = flatten(resultsList);
+        const newSubtitlesToAdd: TranscriptInfo[] = [];
+        const oldSubtitlesToDel: SubtitleControlListItem[] = [];
+        const oldSubtitles = [...(getters as { list: SubtitleControlListItem[] }).list];
+        // 删除这个语言已经加载的字幕
+        const lastSubs = remove(
+          oldSubtitles,
+          ({ type, language }) => (
+            (type === Type.Translated || type === Type.Online)
+            && language === languageCode
+          ),
+        );
+        oldSubtitlesToDel.push(...lastSubs);
+        // add subtitles not existed in the old subtitles
+        const isAllResultsFromES = results
+          .every((info: TranscriptInfo) => info.tagsList.length > 0 && info.tagsList.indexOf('ES') > -1);
+        let addAIButton = false;
+        if (results.length === 0 || isAllResultsFromES) {
+          addAIButton = true;
+          newSubtitlesToAdd.push(...results.splice(0, 2));
+        } else {
+          newSubtitlesToAdd.push(...results);
+        }
+        return {
+          delete: oldSubtitlesToDel,
+          add: newSubtitlesToAdd,
+          addAIButton,
+        };
+      }).then(async (result) => {
+        if (result.addAIButton) {
+          dispatch(a.addSubtitle, {
+            generator: new TranslatedGenerator(null, languageCode), mediaHash,
+          });
+        }
+        await dispatch(a.addOnlineSubtitles, { mediaHash, source: result.add })
+          .then(() => dispatch(a.deleteSubtitlesByUuid, result.delete));
+      });
+  },
   async [a.refreshOnlineSubtitles](
     { getters, dispatch }: any,
     { mediaHash, bubble }: { mediaHash: string, bubble: boolean },
@@ -343,14 +395,16 @@ const actions = {
     return Promise.all([
       fetchOnlineListWraper(!!bubble, originSrc, primaryLanguage, hints),
       fetchOnlineListWraper(!!bubble, originSrc, secondaryLanguage, hints),
-    ]).then((resultsList) => {
+    ]).then(async (resultsList) => {
       const results = flatten(resultsList);
       const newSubtitlesToAdd: TranscriptInfo[] = [];
       const oldSubtitlesToDel: SubtitleControlListItem[] = [];
       const oldSubtitles = [...(getters as { list: SubtitleControlListItem[] }).list];
 
       // 将Translated类型的都删除掉
-      const translatedSubs = remove(oldSubtitles, ({ type }) => type === Type.Translated);
+      const translatedSubs = remove(oldSubtitles, ({
+        type, source,
+      }) => type === Type.Translated && !source);
       // delete subtitles not matching the current language preference
       const wrongLanguageSubs = remove(
         oldSubtitles,
@@ -394,32 +448,36 @@ const actions = {
         .filter((info: TranscriptInfo) => info.languageCode === primaryLanguage);
       const secondaryNotExistedResults = notExistedNewSubs
         .filter((info: TranscriptInfo) => info.languageCode === secondaryLanguage);
-      // 出现AI按钮的情况
-      // 1. 在线字幕tags都是ES(模糊搜索)
-      // 2. 没有在线字幕
-      if (primaryResults.length === 0 || isAllPrimaryResultsFromES) {
-        addPrimaryAIButton = true;
-        const oldLen = oldPrimarySubs.length;
-        // 如果出现AI按钮，在线字幕列表不能超过2个
-        if (oldLen > 2) {
-          oldSubtitlesToDel.push(...oldPrimarySubs.splice(2, oldLen));
+      if ((await isFeatureEnabled(Features.AI))) {
+        // 出现AI按钮的情况
+        // 1. 在线字幕tags都是ES(模糊搜索)
+        // 2. 没有在线字幕
+        if (primaryResults.length === 0 || isAllPrimaryResultsFromES) {
+          addPrimaryAIButton = true;
+          const oldLen = oldPrimarySubs.length;
+          // 如果出现AI按钮，在线字幕列表不能超过2个
+          if (oldLen > 2) {
+            oldSubtitlesToDel.push(...oldPrimarySubs.splice(2, oldLen));
+          } else {
+            newSubtitlesToAdd.push(...primaryNotExistedResults.splice(0, 2 - oldLen));
+          }
         } else {
-          newSubtitlesToAdd.push(...primaryNotExistedResults.splice(0, 2 - oldLen));
+          newSubtitlesToAdd.push(...primaryNotExistedResults);
+        }
+        if (secondaryLanguage && (secondaryResults.length === 0 || isAllSecondaryResultsFromES)) {
+          addSecondaryAIButton = true;
+          const oldLen = oldSecondarySubs.length;
+          // 如果出现AI按钮，在线字幕列表不能超过2个
+          if (oldLen > 2) {
+            oldSubtitlesToDel.push(...oldSecondarySubs.splice(2, oldLen));
+          } else {
+            newSubtitlesToAdd.push(...secondaryNotExistedResults.splice(0, 2 - oldLen));
+          }
+        } else {
+          newSubtitlesToAdd.push(...secondaryNotExistedResults);
         }
       } else {
-        newSubtitlesToAdd.push(...primaryNotExistedResults);
-      }
-      if (secondaryLanguage && (secondaryResults.length === 0 || isAllSecondaryResultsFromES)) {
-        addSecondaryAIButton = true;
-        const oldLen = oldSecondarySubs.length;
-        // 如果出现AI按钮，在线字幕列表不能超过2个
-        if (oldLen > 2) {
-          oldSubtitlesToDel.push(...oldSecondarySubs.splice(2, oldLen));
-        } else {
-          newSubtitlesToAdd.push(...secondaryNotExistedResults.splice(0, 2 - oldLen));
-        }
-      } else {
-        newSubtitlesToAdd.push(...secondaryNotExistedResults);
+        newSubtitlesToAdd.push(...notExistedNewSubs);
       }
       return {
         delete: oldSubtitlesToDel,
@@ -427,7 +485,7 @@ const actions = {
         addPrimaryAIButton,
         addSecondaryAIButton,
       };
-    }).then((result) => {
+    }).then(async (result) => {
       if (result.addPrimaryAIButton) {
         dispatch(a.addSubtitle, {
           generator: new TranslatedGenerator(null, primaryLanguage), mediaHash,
@@ -438,7 +496,7 @@ const actions = {
           generator: new TranslatedGenerator(null, secondaryLanguage), mediaHash,
         });
       }
-      dispatch(a.addOnlineSubtitles, { mediaHash, source: result.add })
+      await dispatch(a.addOnlineSubtitles, { mediaHash, source: result.add })
         .then(() => dispatch(a.deleteSubtitlesByUuid, result.delete));
     });
   },

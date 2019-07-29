@@ -18,8 +18,7 @@
           class="no-drag sub-menu-wrapper subtitle-scroll-items"
         >
           <div
-            :class="useBlur ? 'backdrop' : 'backdrop-fallback'"
-            class="element bottom"
+            class="backdrop-fallback element bottom"
           >
             <div class="element content">
               <div class="topContainer">
@@ -65,7 +64,6 @@
                 />
               </div>
               <subtitle-list
-                :use-blur="useBlur"
                 :computed-size="computedSize"
                 :current-subtitle-index="currentSubtitleIndex"
                 :no-subtitle="noSubtitle"
@@ -125,7 +123,7 @@ import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import SubtitleList from '@/components/PlayingView/SubtitleList.vue';
 import Icon from '../BaseIconContainer.vue';
 import { addBubble } from '@/helpers/notificationControl';
-import { SUBTITLE_OFFLINE } from '@/helpers/notificationcodes';
+import { SUBTITLE_OFFLINE, TRANSLATE_NO_LINE } from '@/helpers/notificationcodes';
 
 export default {
   name: 'SubtitleControl',
@@ -143,7 +141,6 @@ export default {
   },
   data() {
     return {
-      useBlur: false,
       clicks: 0,
       defaultOptions: { animationData },
       anim: {},
@@ -463,7 +460,9 @@ export default {
       return item.name;
     },
     changeSubtitle(item: SubtitleControlListItem) {
-      if (item.type === Type.Translated && item.source === '') {
+      if (!navigator.onLine && item.type === Type.Translated && item.source === '') {
+        addBubble(TRANSLATE_NO_LINE);
+      } else if (item.type === Type.Translated && item.source === '') {
         this.showAudioTranslateModal(item);
         // ga 字幕面板中点击 "Generate" 的次数
         this.$ga.event('app', 'ai-translate-generate-button-click');
@@ -503,13 +502,6 @@ export default {
       width: 100%;
       height: 100%;
       top: 0;
-    }
-    .backdrop {
-      overflow: hidden;
-      border-width: 0px;
-      background-image: none;
-      background-color: rgba(0, 0, 0, 0.1);
-      backdrop-filter: blur(10px);
     }
     .middle {
       width: 100%;

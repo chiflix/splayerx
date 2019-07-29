@@ -1,4 +1,4 @@
-import { LanguageCode } from '@/libs/language';
+import { LanguageCode } from '../libs/language';
 
 type Partial<T> = { [P in keyof T]?: T[P] };
 

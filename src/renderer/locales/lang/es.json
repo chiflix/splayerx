@@ -5,10 +5,10 @@
     "changeTrack": "Pista de audio",
     "chosenTrack": "Defecto",
     "fontItems": [
-      "",
-      "",
-      "",
-      ""
+      "S",
+      "M",
+      "L",
+      "XL"
     ],
     "fontSize": "Tamaño de fuente",
     "fontStyle": "Estilo de fuente",
@@ -19,24 +19,24 @@
   },
   "css": {
     "titleFontSize": {
-      "fontSize": ""
+      "fontSize": "21px"
     },
     "versionFontSize": {
-      "fontSize": ""
+      "fontSize": "14px"
     }
   },
   "errorFile": {
     "ENOSPC": {
-      "content": "",
-      "title": ""
+      "content": "No hay suficiente espacio en disco disponible.",
+      "title": "Error al abrir"
     },
     "EACCES": {
-      "content": "",
-      "title": ""
+      "content": "No tienes suficiente permiso.",
+      "title": "Error al abrir"
     },
     "ENOENT": {
-      "content": "",
-      "title": ""
+      "content": "Archivo no encontrado.",
+      "title": "Error al abrir"
     },
     "addNoVideo": {
       "content": "No se puede encontrar el archivo reproducible.",
@@ -91,7 +91,7 @@
       "increaseAudioDelay": "Retraso auditivo",
       "increaseVolume": "Aumenta el volumen",
       "mute": "Mudo",
-      "name": "",
+      "name": "Audio",
       "switchAudioTrack": "Cambiar la pista de audio"
     },
     "file": {
@@ -101,11 +101,13 @@
       "open": "Abierto…",
       "openRecent": "Recientemente abierto",
       "openURL": "Abrir URL ...",
-      "copy": "Copia",
+      "copy": "Copiar",
       "paste": "Pegar"
     },
     "help": {
       "name": "Ayuda",
+      "feedback": "Realimentación",
+      "homepage": "Sitio web",
       "splayerxHelp": "Ayuda",
       "shortCuts": "Lista de accesos directos",
       "crashReportLocation": "Ver registro de errores",
@@ -114,7 +116,6 @@
     "playback": {
       "backwardL": "Paso atrás -60s",
       "backwardS": "Paso hacia atrás -5s",
-      "windowRotate": "Girar 90 en sentido horario",
       "captureScreen": "Captura de pantalla",
       "captureVideoClip": "Captura de video clip",
       "decreasePlaybackSpeed": "Disminuir la velocidad de reproducción",
@@ -122,7 +123,6 @@
       "forwardS": "Paso adelante 5s",
       "fullScreen": "Pantalla Completa",
       "increasePlaybackSpeed": "Aumentar la velocidad de reproducción",
-      "keepPlayingWindowFront": "Flotar al jugar",
       "name": "Reproducción",
       "pause": "Pausa",
       "play": "Jugar",
@@ -134,10 +134,8 @@
     },
     "splayerx": {
       "about": "Acerca de SPlayer",
-      "feedback": "Realimentación",
       "hide": "Esconder",
       "hideOthers": "Esconder otros",
-      "homepage": "Sitio web",
       "preferences": "Preferencias",
       "quit": "Salir de SPlayer",
       "showAll": "Mostrar todo"
@@ -159,6 +157,8 @@
       "noSubtitle": "Extraviado",
       "notToShowSubtitle": "Cerrar",
       "secondarySubtitle": "Subtitulo secundario",
+      "subtitleSetting": "Ajustes de subtítulos",
+      "subtitleDelay": "Retraso de subtítulos",
       "size1": "Pequeño",
       "size2": "Estándar",
       "size3": "Grande",
@@ -173,7 +173,7 @@
       "subtitleStyle": "Estilo de fuente",
       "uploadSelectedSubtitle": "Subir Subtítulo seleccionado"
     },
-    "titleName": "",
+    "titleName": "SPlayer",
     "update": {
       "message": "¿Reiniciar la aplicación ahora para instalar la actualización?",
       "no": "No",
@@ -182,16 +182,32 @@
       "yes": "Sí"
     },
     "window": {
+      "windowRotate": "Girar 90 en sentido horario",
+      "keepPlayingWindowFront": "Flotar al jugar",
       "backToLandingView": "Volver a la página de inicio",
       "bossKey": "Clave de jefe",
-      "doubleSize": "",
+      "doubleSize": "200%",
       "enterFullScreen": "Ingrese a pantalla completa",
       "exitFullScreen": "Salir de pantalla completa",
-      "halfSize": "",
+      "halfSize": "50%",
       "maxmize": "Enfocar",
       "minimize": "Minimizar",
       "name": "Ventana",
-      "originSize": ""
+      "originSize": "100%",
+      "enterPip": "Habilitar Picture in Picture",
+      "exitPip": "Salir de Picture in Picture"
+    },
+    "favourite": {
+      "name": "Favoritos",
+      "iqiyi": "iQIYI",
+      "bilibili": "Bilibili",
+      "youtube": "Youtube"
+    },
+    "history": {
+      "name": "Historia",
+      "reload": "Recargar página",
+      "back": "Espalda",
+      "forward": "Avance"
     }
   },
   "nextVideo": {
@@ -224,7 +240,7 @@
       "setButton": "Aplicar",
       "relaunch": "Reiniciar",
       "displayLanguage": "Idioma de la pantalla",
-      "generalSetting": "",
+      "generalSetting": "General",
       "others": "Otros",
       "switchDisplayLanguages": "Mostrar idioma controla el idioma que ves en SPlayer."
     },
@@ -255,7 +271,7 @@
     "tryToDisable": {
       "button": "De acuerdo",
       "partOne": "SPlayer utiliza datos anónimos para mejorar la experiencia del usuario. La traducción inteligente se desactivará si",
-      "partTwo": "",
+      "partTwo": ".",
       "underlinedContent": "Prohibir"
     }
   },
@@ -263,17 +279,18 @@
     "folderSource": "Carpeta",
     "playing": "Jugando",
     "paused": "En pausa",
-    "playlistSource": ""
+    "playlistSource": "Lista"
   },
   "subtitle": {
     "embedded": "Empotrar",
+    "generate": "Generar",
     "language": {
       "ar": "Árabe",
       "de": "Alemán",
       "en": "Inglés",
       "es": "Español",
       "fr": "Francés",
-      "hi": "",
+      "hi": "Hindi",
       "it": "Italiano",
       "ja": "Japonés",
       "ko": "Coreano",
@@ -307,5 +324,46 @@
   "loadVideoBySubtitleFailed": {
     "content": "No hay videos relacionados en la carpeta",
     "title": ""
+  },
+  "translateModal": {
+    "title": "Seleccionar idioma de audio",
+    "translateTitle": "Acerca de {time} izquierda",
+    "minute": "{number} min",
+    "second": "{number} seg",
+    "hour": "{number} hr",
+    "successTitle": "Traducción realizada",
+    "failTitle": "Error al traducir",
+    "cancelTitle": "La traducción de AI está en curso",
+    "selectDescription": "Para generar un resultado de tranlación, por favor seleccione el idioma que escuche en el vídeo y haga clic en el botón generar. El proceso puede tardar algún tiempo.",
+    "selectLanguageLabel": "Idioma de audio",
+    "cancel": "Cancelar",
+    "quit": "Salir",
+    "generate": "Generar",
+    "translateDescription": "Por favor, no omita el vídeo o cierra la aplicación. Puedes comprobar el progreso en el panel de traducción.",
+    "ok": "OK",
+    "successDescriptiton": "AI Translation está lista, por favor, revisa el panel de traducción.",
+    "failDescription": "Por favor, inténtelo más tarde, gracias.",
+    "cancelDescription": "¿Estás seguro de que quieres salir? Si te sales, el progreso de la traducción no se restaurará.",
+    "continue": "Cancelar"
+  },
+  "translateBubble": {
+    "bubbleWhenGrab": "La traducción de AI se abortará si continúa, ¿quieres continuar de todos modos?",
+    "bubbleWhenTranslate": "La traducción de AI está siendo procesada en el servidor. Puedes comprobar el progreso cuando veas el vídeo la próxima vez.",
+    "bubbleFunctionForbidden": "La traducción de AI se abortará si continúa, ¿quieres continuar de todos modos?",
+    "bubbleWhenSuccess": {
+      "title": "",
+      "content": "AI Translation está lista ahora, por favor, revisa el panel de traducción."
+    },
+    "bubbleWhenSuccessOnOtherVideo": {
+      "title": "",
+      "content": "La traducción de AI está lista ahora. Será cargada automáticamente la próxima vez que veas el vídeo."
+    },
+    "bubbleTranslateFail": {
+      "title": "Error al traducir",
+      "content": "Por favor, inténtelo más tarde, gracias."
+    },
+    "ok": "OK",
+    "cancel": "Cancelar",
+    "continue": "Continuar"
   }
 }
