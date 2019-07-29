@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import uuidv4 from 'uuid/v4';
 import {
-  isEqual, get, sortBy, differenceWith, flatten, remove, debounce,
+  isEqual, sortBy, differenceWith, flatten, remove, debounce,
 } from 'lodash';
 import Vue from 'vue';
 import { extname } from 'path';
@@ -136,12 +136,6 @@ interface IAddSubtitlesOptions<SourceType> {
   mediaHash: string,
   source: SourceType[];
 }
-interface IAddDatabaseSubtitlesOptions extends IAddSubtitlesOptions<IStoredSubtitleItem> {
-  selected?: {
-    primary?: SelectedSubtitle;
-    secondary?: SelectedSubtitle;
-  };
-}
 interface IAddSubtitleOptions {
   generator: IEntityGenerator;
   mediaHash: string;
@@ -234,11 +228,11 @@ const actions = {
       return Promise.race([
         dispatch(a.addDatabaseSubtitles, {
           source: preference.list,
-          selected: preference.selected,
           mediaHash: state.mediaHash,
         }),
         new Promise((resolve, reject) => setTimeout(() => reject(new Error('timeout')), 10000)),
       ])
+        .then(() => dispatch(a.chooseSelectedSubtitles, preference.selected))
         .catch(console.error)
         .finally(() => {
           commit(m.setIsRefreshing, false);
@@ -249,10 +243,9 @@ const actions = {
 
     if (hasStoredSubtitles && preference) {
       await dispatch(a.addDatabaseSubtitles, {
-        storedList: preference.list,
-        selected: preference.selected,
+        source: preference.list,
         mediaHash: state.mediaHash,
-      });
+      }).then(() => dispatch(a.chooseSelectedSubtitles, preference.selected));
     }
 
     let onlinePromise = Promise.resolve();
@@ -492,9 +485,9 @@ const actions = {
         addSubtitleItemsToList(localEntities, state.mediaHash);
         const sub = list.find((sub: SubtitleControlListItem) => sub.hash === selectedHash);
         if (sub && getters.isFirstSubtitle) {
-          dispatch(a.changePrimarySubtitle, sub.id);
+          dispatch(a.autoChangePrimarySubtitle, sub.id);
         } else if (sub && !getters.isFirstSubtitle) {
-          dispatch(a.changeSecondarySubtitle, sub.id);
+          dispatch(a.autoChangeSecondarySubtitle, sub.id);
         }
       });
     }
@@ -532,45 +525,15 @@ const actions = {
     ).then(subtitles => addSubtitleItemsToList(subtitles, mediaHash));
   },
   async [a.addDatabaseSubtitles](
-    { getters, dispatch }: any,
-    { source = [], mediaHash, selected }: IAddDatabaseSubtitlesOptions,
+    { dispatch }: any,
+    { source = [], mediaHash }: IAddSubtitlesOptions<IStoredSubtitleItem>,
   ) {
     return Promise.all(
       source.map(async stored => dispatch(a.addSubtitle, {
         generator: await DatabaseGenerator.from(stored),
         mediaHash,
       })),
-    )
-      .then(() => {
-        const { list } = getters as { list: SubtitleControlListItem[] };
-        const primary = get(selected, 'primary');
-        const secondary = get(selected, 'secondary');
-        let primaryId = '';
-        let secondaryId = '';
-        if (primary) {
-          let subtitles = list
-            .filter((sub: SubtitleControlListItem) => sub.hash === primary.hash);
-          if (subtitles.length > 1) {
-            subtitles = subtitles.filter(sub => isEqual(sub.source, primary.source));
-          }
-          if (subtitles.length) primaryId = subtitles[0].id;
-        }
-        if (secondary) {
-          let subtitles = list
-            .filter((sub: SubtitleControlListItem) => sub.hash === secondary.hash);
-          if (subtitles.length > 1) {
-            subtitles = subtitles.filter(sub => isEqual(sub.source, secondary.source));
-          }
-          if (subtitles.length) secondaryId = subtitles[0].id;
-        }
-        return Promise.all([
-          dispatch(a.changePrimarySubtitle, primaryId),
-          dispatch(a.changeSecondarySubtitle, secondaryId),
-        ]).then(() => {
-          primarySelectionComplete = true;
-          secondarySelectionComplete = true;
-        });
-      });
+    );
   },
   async [a.addSubtitle]({
     state, commit, dispatch, getters,
@@ -627,37 +590,51 @@ const actions = {
     });
     return removeSubtitleItemsFromList(subtitles, state.mediaHash);
   },
-  async [a.changePrimarySubtitle]({
+  async [a.autoChangePrimarySubtitle]({
     dispatch, commit, getters, state,
   }: any, id: string) {
-    const primary = id;
-    let secondary = getters.secondarySubtitleId;
-    if (id === secondary) secondary = '';
-    commit(m.setPrimarySubtitleId, primary);
-    if (state.allSubtitles[primary]) commit(m.setPrimaryDelay, state.allSubtitles[primary].delay);
-    commit(m.setSecondarySubtitleId, secondary);
-    if (state.allSubtitles[secondary]) {
-      commit(m.setSecondaryDelay, state.allSubtitles[secondary].delay);
-    }
-    dispatch(a.storeSelectedSubtitle, [primary, secondary]);
-    if (id && store.hasModule(id)) await dispatch(`${id}/${subActions.load}`);
+    if (!getters.subtitleOff) {
+      const primary = id;
+      let secondary = getters.secondarySubtitleId;
+      if (id === secondary) secondary = '';
+      commit(m.setPrimarySubtitleId, primary);
+      if (state.allSubtitles[primary]) commit(m.setPrimaryDelay, state.allSubtitles[primary].delay);
+      commit(m.setSecondarySubtitleId, secondary);
+      if (state.allSubtitles[secondary]) {
+        commit(m.setSecondaryDelay, state.allSubtitles[secondary].delay);
+      }
+      dispatch(a.storeSelectedSubtitles, [primary, secondary]);
+      if (id && store.hasModule(id)) await dispatch(`${id}/${subActions.load}`);
+    } else if (getters.subtitleOff && !id) commit(m.setPrimarySubtitleId, '');
   },
-  async [a.changeSecondarySubtitle]({
+  async [a.manualChangePrimarySubtitle]({ dispatch }: any, id: string) {
+    await dispatch('setSubtitleOff', !id);
+    if (!id) dispatch(a.autoChangeSecondarySubtitle, '');
+    dispatch(a.autoChangePrimarySubtitle, id);
+  },
+  async [a.autoChangeSecondarySubtitle]({
     dispatch, commit, getters, state,
   }: any, id: string) {
-    let primary = getters.primarySubtitleId;
-    const secondary = id;
-    if (id && id === primary) primary = '';
-    commit(m.setPrimarySubtitleId, primary);
-    if (state.allSubtitles[primary]) commit(m.setPrimaryDelay, state.allSubtitles[primary].delay);
-    commit(m.setSecondarySubtitleId, secondary);
-    if (state.allSubtitles[secondary]) {
-      commit(m.setSecondaryDelay, state.allSubtitles[secondary].delay);
-    }
-    dispatch(a.storeSelectedSubtitle, [primary, secondary]);
-    if (id && store.hasModule(id)) await dispatch(`${id}/${subActions.load}`);
+    if (!getters.subtitleOff) {
+      let primary = getters.primarySubtitleId;
+      const secondary = id;
+      if (id && id === primary) primary = '';
+      commit(m.setPrimarySubtitleId, primary);
+      if (state.allSubtitles[primary]) commit(m.setPrimaryDelay, state.allSubtitles[primary].delay);
+      commit(m.setSecondarySubtitleId, secondary);
+      if (state.allSubtitles[secondary]) {
+        commit(m.setSecondaryDelay, state.allSubtitles[secondary].delay);
+      }
+      dispatch(a.storeSelectedSubtitles, [primary, secondary]);
+      if (id && store.hasModule(id)) await dispatch(`${id}/${subActions.load}`);
+    } else if (getters.subtitleOff && !id) commit(m.setSecondarySubtitleId, '');
   },
-  async [a.storeSelectedSubtitle]({ state }: any, ids: string[]) {
+  async [a.manualChangeSecondarySubtitle]({ dispatch }: any, id: string) {
+    await dispatch('setSubtitleOff', !id);
+    if (!id) dispatch(a.autoChangePrimarySubtitle, '');
+    dispatch(a.autoChangeSecondarySubtitle, id);
+  },
+  async [a.storeSelectedSubtitles]({ state }: any, ids: string[]) {
     const { allSubtitles, mediaHash } = state;
     const subtitles = ids
       .filter(id => allSubtitles[id]
@@ -667,6 +644,37 @@ const actions = {
         return { hash, source };
       });
     storeSelectedSubtitles(subtitles as SelectedSubtitle[], mediaHash);
+  },
+  async [a.chooseSelectedSubtitles](
+    { getters, dispatch }: any,
+    { primary, secondary }: { primary: SelectedSubtitle, secondary?: SelectedSubtitle },
+  ) {
+    const { list } = getters as { list: SubtitleControlListItem[] };
+    let primaryId = '';
+    let secondaryId = '';
+    if (primary) {
+      let subtitles = list
+        .filter((sub: SubtitleControlListItem) => sub.hash === primary.hash);
+      if (subtitles.length > 1) {
+        subtitles = subtitles.filter(sub => isEqual(sub.source, primary.source));
+      }
+      if (subtitles.length) primaryId = subtitles[0].id;
+    }
+    if (secondary) {
+      let subtitles = list
+        .filter((sub: SubtitleControlListItem) => sub.hash === secondary.hash);
+      if (subtitles.length > 1) {
+        subtitles = subtitles.filter(sub => isEqual(sub.source, secondary.source));
+      }
+      if (subtitles.length) secondaryId = subtitles[0].id;
+    }
+    return Promise.all([
+      dispatch(a.autoChangePrimarySubtitle, primaryId),
+      dispatch(a.autoChangeSecondarySubtitle, secondaryId),
+    ]).then(() => {
+      primarySelectionComplete = true;
+      secondarySelectionComplete = true;
+    });
   },
   async [a.startAISelection]({ dispatch }: any) {
     unwatch = store.watch(
@@ -689,25 +697,25 @@ const actions = {
         const hasSecondaryLanguage = list
           .find(({ language, type }) => language === secondaryLanguage && type !== Type.Translated);
         if (hasPrimaryLanguage) {
-          dispatch(a.changePrimarySubtitle, hasPrimaryLanguage.id);
+          dispatch(a.autoChangePrimarySubtitle, hasPrimaryLanguage.id);
           primarySelectionComplete = true;
           if (hasSecondaryLanguage) {
-            dispatch(a.changeSecondarySubtitle, hasSecondaryLanguage.id);
+            dispatch(a.autoChangeSecondarySubtitle, hasSecondaryLanguage.id);
             secondarySelectionComplete = true;
           }
         } else if (hasSecondaryLanguage) {
           if (primarySelectionComplete) {
-            dispatch(a.changeSecondarySubtitle, hasSecondaryLanguage.id);
+            dispatch(a.autoChangeSecondarySubtitle, hasSecondaryLanguage.id);
             secondarySelectionComplete = true;
           } else {
-            dispatch(a.changePrimarySubtitle, hasSecondaryLanguage.id);
-            dispatch(a.changeSecondarySubtitle, '');
+            dispatch(a.autoChangePrimarySubtitle, hasSecondaryLanguage.id);
+            dispatch(a.autoChangeSecondarySubtitle, '');
             primarySelectionComplete = true;
             secondarySelectionComplete = true;
           }
         } else {
-          dispatch(a.changePrimarySubtitle, '');
-          dispatch(a.changeSecondarySubtitle, '');
+          dispatch(a.autoChangePrimarySubtitle, '');
+          dispatch(a.autoChangeSecondarySubtitle, '');
         }
         if (primarySelectionComplete && secondarySelectionComplete) dispatch(a.stopAISelection);
       }

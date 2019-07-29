@@ -10,6 +10,7 @@ const state = {
   secondaryLanguage: undefined,
   singleCycle: false,
   reverseScrolling: false,
+  subtitleOff: false,
 };
 const getters = {
   welcomeProcessDone: state => state.welcomeProcessDone,
@@ -27,6 +28,7 @@ const getters = {
   primaryLanguage: state => state.primaryLanguage,
   secondaryLanguage: state => state.secondaryLanguage,
   singleCycle: state => state.singleCycle,
+  subtitleOff: state => state.subtitleOff,
 };
 
 const mutations = {
@@ -60,6 +62,10 @@ const mutations = {
   getLocalPreference(state) {
     const data = syncStorage.getSync('preferences');
     Object.assign(state, data);
+  },
+  subtitleOff(state, payload) {
+    state.subtitleOff = !!payload;
+    console.log(state.subtitleOff);
   },
 };
 const actions = {
@@ -116,6 +122,10 @@ const actions = {
   },
   setPreference({ commit, state }, payload) {
     commit('setPreference', payload);
+    return asyncStorage.set('preferences', state);
+  },
+  setSubtitleOff({ commit, state }, payload) {
+    commit('subtitleOff', payload);
     return asyncStorage.set('preferences', state);
   },
 };

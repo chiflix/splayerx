@@ -599,8 +599,8 @@ new Vue({
       updateChosenStyle: subtitleActions.UPDATE_SUBTITLE_STYLE,
       updateChosenSize: subtitleActions.UPDATE_SUBTITLE_SIZE,
       updateEnabledSecondarySub: subtitleActions.UPDATE_ENABLED_SECONDARY_SUBTITLE,
-      changeFirstSubtitle: smActions.changePrimarySubtitle,
-      changeSecondarySubtitle: smActions.changeSecondarySubtitle,
+      changeFirstSubtitle: smActions.manualChangePrimarySubtitle,
+      manualChangeSecondarySubtitle: smActions.manualChangeSecondarySubtitle,
       refreshSubtitles: smActions.refreshSubtitles,
       addLocalSubtitlesWithSelect: smActions.addLocalSubtitlesWithSelect,
       updateSubtitleType: subtitleActions.UPDATE_SUBTITLE_TYPE,
@@ -822,12 +822,12 @@ new Vue({
         }
       });
       this.menuService.on('subtitle.secondarySubtitle', (e: Event, id: string) => {
-        if (id === 'secondSub-1') this.changeSecondarySubtitle('');
+        if (id === 'secondSub-1') this.manualChangeSecondarySubtitle('');
         else if (id === 'secondarySub') {
           this.updateEnabledSecondarySub(!this.enabledSecondarySub)
         } else {
           this.updateSubtitleType(false);
-          this.changeSecondarySubtitle(id);
+          this.manualChangeSecondarySubtitle(id);
           this.menuService.updateMenuItemChecked(`subtitle.mainSubtitle.${id}`, false);
           this.menuService.updateMenuItemChecked('subtitle.mainSubtitle.sub-1', true);
         }
