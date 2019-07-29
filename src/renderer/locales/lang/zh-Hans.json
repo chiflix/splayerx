@@ -328,35 +328,35 @@
   "translateModal": {
     "selectLanguageLabel": "视频源语言",
     "select": {
-      "title": "",
+      "title": "选择视频源语言",
       "content": "如要生成智能翻译，请选择您在视频中所听到的语言并点击生成，该过程将持续一段时间。"
     },
     "translate": {
       "title": "大约还需 {time}",
       "content": "请不要切换视频或关闭播放器，您可以在该视频的翻译结果列表中查看进度。",
-      "minute": "",
-      "second": "",
-      "hour": ""
+      "minute": "{number} 分钟",
+      "second": "{number} 秒",
+      "hour": "{number} 小时"
     },
     "success": {
-      "title": "",
-      "content": ""
+      "title": "翻译完成",
+      "content": "AI翻译已完成，可在翻译结果列表中查看。"
     },
     "discard": {
-      "title": "",
-      "content": ""
+      "title": "AI翻译正在进行中",
+      "content": "点击退出取消翻译，退出后翻译进度将不可恢复。"
     },
     "noLineFail": {
-      "title": "",
-      "content": ""
+      "title": "网络错误",
+      "content": "请检查网络连接并重试。"
     },
     "timeOutFail": {
-      "title": "",
-      "content": ""
+      "title": "网络超时",
+      "content": "连接服务器失败，请稍后重试。"
     },
     "serverErrorFail": {
-      "title": "",
-      "content": ""
+      "title": "翻译失败",
+      "content": "云端处理错误，请稍后重试。"
     },
     "cancel": "取消",
     "quit": "退出",
@@ -377,16 +377,16 @@
       "content": "AI 翻译已完成，将在下次打开视频时自动显示。"
     },
     "bubbleTranslateNoLineFail": {
-      "title": "",
-      "content": ""
+      "title": "网络错误",
+      "content": "请检查网络连接并重试。"
     },
     "bubbleTranslateTimeOutFail": {
-      "title": "",
-      "content": ""
+      "title": "网络超时",
+      "content": "连接服务器失败，请稍后重试。"
     },
     "bubbleTranslateServerErrorFail": {
-      "title": "",
-      "content": ""
+      "title": "翻译失败",
+      "content": "云端处理错误，请稍后重试。"
     },
     "ok": "好的",
     "cancel": "取消",
