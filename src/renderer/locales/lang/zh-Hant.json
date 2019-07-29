@@ -193,13 +193,21 @@
       "maxmize": "最大化",
       "minimize": "最小化",
       "name": "窗口",
-      "originSize": "100%"
+      "originSize": "100%",
+      "enterPip": "進入畫中畫模式",
+      "exitPip": "退出畫中畫模式"
     },
     "favourite": {
       "name": "收藏",
       "iqiyi": "爱奇艺",
       "bilibili": "哔哩哔哩",
       "youtube": "Youtube"
+    },
+    "history": {
+      "name": "歷史",
+      "reload": "重新載入頁面",
+      "back": "後退",
+      "forward": "前進"
     }
   },
   "nextVideo": {
