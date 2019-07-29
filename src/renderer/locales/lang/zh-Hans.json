@@ -194,8 +194,8 @@
       "minimize": "最小化",
       "name": "窗口",
       "originSize": "100%",
-      "enterPip": "",
-      "exitPip": ""
+      "enterPip": "进入画中画模式",
+      "exitPip": "退出画中画模式"
     },
     "favourite": {
       "name": "收藏",
@@ -204,10 +204,10 @@
       "youtube": "Youtube"
     },
     "history": {
-      "name": "",
+      "name": "历史",
       "reload": "重新加载页面",
-      "back": "",
-      "forward": ""
+      "back": "后退",
+      "forward": "前进"
     }
   },
   "nextVideo": {
