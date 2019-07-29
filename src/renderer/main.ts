@@ -290,7 +290,6 @@ new Vue({
     },
     paused(val) {
       if (val && this.topOnWindow) {
-        this.playingViewTop = true;
         this.topOnWindow = false;
       } else if (!val && this.playingViewTop) {
         this.topOnWindow = true;

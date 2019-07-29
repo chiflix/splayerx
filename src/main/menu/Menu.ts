@@ -732,11 +732,12 @@ export default class Menubar {
   }
 
   private createWindowMenu() {
-    const macWindowMenu = this.convertFromMenuItemTemplate('window');
-    macWindowMenu.getMenuItemById('window.bossKey').click = () => {
+    const windowMenu = this.convertFromMenuItemTemplate('window');
+    windowMenu.getMenuItemById('window.bossKey').click = () => {
       app.emit('bossKey');
     };
-    const windowMenuItem = new MenuItem({ id: 'window', label: this.$t('msg.window.name'), submenu: macWindowMenu });
+    windowMenu.getMenuItemById('window.keepPlayingWindowFront').checked = this.playingViewTop;
+    const windowMenuItem = new MenuItem({ id: 'window', label: this.$t('msg.window.name'), submenu: windowMenu });
     return windowMenuItem;
   }
 
