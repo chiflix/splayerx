@@ -5,11 +5,13 @@ const state = {
   initialUrl: '',
   recordUrl: {},
   barrageOpen: false,
+  isPip: false,
 };
 const getters = {
   initialUrl: state => state.initialUrl,
   recordUrl: state => state.recordUrl,
   barrageOpen: state => state.barrageOpen,
+  isPip: state => state.isPip,
 };
 
 const mutations = {
@@ -22,6 +24,9 @@ const mutations = {
   [browsingMutations.BARRAGE_OPEN_UPDATE](state, payload) {
     state.barrageOpen = payload;
   },
+  [browsingMutations.IS_PIP_UPDATE](state, payload) {
+    state.isPip = payload;
+  },
 };
 const actions = {
   [browsingActions.UPDATE_INITIAL_URL]({ commit }, delta) {
@@ -32,6 +37,9 @@ const actions = {
   },
   [browsingActions.UPDATE_BARRAGE_OPEN]({ commit }, delta) {
     commit(browsingMutations.BARRAGE_OPEN_UPDATE, delta);
+  },
+  [browsingActions.UPDATE_IS_PIP]({ commit }, delta) {
+    commit(browsingMutations.IS_PIP_UPDATE, delta);
   },
 };
 export default {

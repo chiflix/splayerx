@@ -90,7 +90,6 @@ export default {
       quit: false,
       loadingState: false,
       startTime: 0,
-      isPip: false,
       pipType: '',
       bilibiliType: 'video',
       supportedRecordHost: ['www.youtube.com', 'www.bilibili.com', 'www.iqiyi.com'],
@@ -110,7 +109,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['winPos', 'isFullScreen', 'initialUrl', 'winWidth', 'winSize', 'browsingSize', 'pipSize', 'pipPos', 'barrageOpen', 'browsingPos', 'isFullScreen', 'isFocused']),
+    ...mapGetters(['winPos', 'isFullScreen', 'initialUrl', 'winWidth', 'winSize', 'browsingSize', 'pipSize', 'pipPos', 'barrageOpen', 'browsingPos', 'isFullScreen', 'isFocused', 'isPip']),
     isDarwin() {
       return process.platform === 'darwin';
     },
@@ -271,7 +270,7 @@ export default {
     this.$bus.$on('toggle-forward', this.handleUrlForward);
     this.$bus.$on('toggle-pip', () => {
       if (this.hasVideo) {
-        this.isPip = !this.isPip;
+        this.updateIsPip(!this.isPip);
       }
     });
     window.addEventListener('beforeunload', (e: BeforeUnloadEvent) => {
@@ -403,7 +402,7 @@ export default {
       if (!e.url || e.url === 'about:blank') return;
       if (e.disposition !== 'new-window') {
         if (this.isPip) {
-          this.isPip = false;
+          this.updateIsPip(false);
         }
         this.updateInitialUrl(e.url);
       }
@@ -428,6 +427,7 @@ export default {
       updateInitialUrl: browsingActions.UPDATE_INITIAL_URL,
       updateRecordUrl: browsingActions.UPDATE_RECORD_URL,
       updateBarrageOpen: browsingActions.UPDATE_BARRAGE_OPEN,
+      updateIsPip: browsingActions.UPDATE_IS_PIP,
     }),
     handleMouseenter() {
       this.pipBtnsKeepShow = true;
@@ -482,12 +482,12 @@ export default {
     },
     handleEnterPip() {
       if (this.hasVideo) {
-        this.isPip = true;
+        this.updateIsPip(true);
       }
     },
     handleExitPip() {
       if (this.isPip) {
-        this.isPip = false;
+        this.updateIsPip(false);
       }
     },
     othersAdapter() {
