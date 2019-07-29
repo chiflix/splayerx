@@ -133,3 +133,5 @@ export type Subtitle = {
   loading: string,
   type: string,
 }
+
+export const NOT_APPORIRATE_SUBTITLE = 'NOT_APPORIRATE_SUBTITLE';
