@@ -18,8 +18,7 @@
           class="no-drag sub-menu-wrapper subtitle-scroll-items"
         >
           <div
-            :class="useBlur ? 'backdrop' : 'backdrop-fallback'"
-            class="element bottom"
+            class="backdrop-fallback element bottom"
           >
             <div class="element content">
               <div class="topContainer">
@@ -65,7 +64,6 @@
                 />
               </div>
               <subtitle-list
-                :use-blur="useBlur"
                 :computed-size="computedSize"
                 :current-subtitle-index="currentSubtitleIndex"
                 :no-subtitle="noSubtitle"
@@ -143,7 +141,6 @@ export default {
   },
   data() {
     return {
-      useBlur: false,
       clicks: 0,
       defaultOptions: { animationData },
       anim: {},
@@ -503,13 +500,6 @@ export default {
       width: 100%;
       height: 100%;
       top: 0;
-    }
-    .backdrop {
-      overflow: hidden;
-      border-width: 0px;
-      background-image: none;
-      background-color: rgba(0, 0, 0, 0.1);
-      backdrop-filter: blur(10px);
     }
     .middle {
       width: 100%;
