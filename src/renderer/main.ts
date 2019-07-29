@@ -187,6 +187,7 @@ new Vue({
     }),
     updateSecondarySub() {
       return {
+        enabled: true,
         label: this.enabledSecondarySub ? this.$t('msg.subtitle.disabledSecondarySub') : this.$t('msg.subtitle.enabledSecondarySub'),
         id: 'secondarySub',
       };
@@ -222,11 +223,8 @@ new Vue({
     singleCycle(val: boolean) {
       this.menuService.updateMenuItemChecked('playback.singleCycle', val);
     },
-    enabledSecondarySub(val) {
-      this.list.forEach((item: SubtitleControlListItem) => {
-        this.menuService.updateMenuItemEnabled(`subtitle.secondarySubtitle.${item.id}`, val);
-      });
-      this.menuService.updateMenuItemEnabled('subtitle.secondarySubtitle.off', val);
+    enabledSecondarySub() {
+      this.menuService.addSecondarySub(this.recentSecondarySubMenu());
     },
     currentRouteName(val) {
       this.menuService.updateRouteName(val);
@@ -808,6 +806,7 @@ new Vue({
         });
       });
       this.menuService.on('subtitle.mainSubtitle', (e: Event, id: string) => {
+        console.log(id);
         if (id === 'off') this.changeFirstSubtitle('');
         else {
           this.updateSubtitleType(true);
@@ -908,6 +907,7 @@ new Vue({
         enabled: this.enabledSecondarySub,
         label: this.getSubName(item, this.list),
         checked: false,
+        type: item.type,
       };
     },
     recentSubMenu() {
