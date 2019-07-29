@@ -4,7 +4,6 @@
     @mouseenter="addMouseenter"
     @mouseleave="addMouseleave"
     @mouseup.left="addMouseup"
-    :class="{ 'backdrop': useBlur }"
     class="button"
   >
     <div
@@ -35,10 +34,6 @@ export default {
     itemMoving: {
       type: Boolean,
     },
-    useBlur: {
-      type: Boolean,
-      default: false,
-    },
   },
   methods: {
     addMouseenter() {
@@ -61,9 +56,6 @@ export default {
   background-color: rgba(0, 0, 0, 0.12);
   transition: background-color 150ms ease-out, transform 100ms ease-out;
   cursor: pointer;
-}
-.backdrop {
-  backdrop-filter: blur(9.8px);
 }
 
 .btnMask {

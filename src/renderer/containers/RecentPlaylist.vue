@@ -111,7 +111,6 @@
               minWidth: `${thumbnailWidth}px`,
               minHeight: `${thumbnailHeight}px`,
             }"
-            :use-blur="useBlur"
             :item-moving="itemMoving"
             :index="addIndex"
             :add-mouseup="addMouseup"

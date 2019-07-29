@@ -1,7 +1,6 @@
 <template>
   <div class="nextVideo">
     <div
-      :class="{ 'backdrop': useBlur }"
       class="nextVideo__plane"
     >
       <div
@@ -55,12 +54,6 @@ export default {
   name: 'NextVideo',
   components: {
     Icon,
-  },
-  props: {
-    useBlur: {
-      type: Boolean,
-      default: false,
-    },
   },
   data() {
     return {
@@ -177,12 +170,6 @@ export default {
       rgba(85,85,85,0.00) 100%
     );
     box-shadow: 0 0 1px rgba(0,0,0,0.1);
-  }
-  .backdrop {
-    background-image: none;
-    border-width: 0px;
-    background-color: rgba(0,0,0,0.2);
-    backdrop-filter: blur(10px);
   }
 
   &__progress {
