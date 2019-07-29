@@ -328,35 +328,35 @@
   "translateModal": {
     "selectLanguageLabel": "音声の言語",
     "select": {
-      "title": "",
-      "content": ""
+      "title": "ビデオソースの言語を選択",
+      "content": "翻訳結果を生成するには、ビデオで聞く言語を選択して[生成] ボタンをクリックしてください。"
     },
     "translate": {
-      "title": "",
-      "content": "",
-      "minute": "",
-      "second": "",
-      "hour": ""
+      "title": "{time} について",
+      "content": "動画をスキップしたり、アプリケーションを閉じたりしないでください翻訳パネルで進行状況を確認できます。",
+      "minute": "{number} 分",
+      "second": "{number} 秒",
+      "hour": "{number} 時間"
     },
     "success": {
-      "title": "",
-      "content": ""
+      "title": "翻訳完了",
+      "content": "AIの翻訳は完了し、翻訳結果リストに表示されます。"
     },
     "discard": {
-      "title": "",
-      "content": ""
+      "title": "AI翻訳が進行中です",
+      "content": "翻訳をキャンセルするには終了をクリックします終了後、翻訳の進行状況は復元されません。"
     },
     "noLineFail": {
-      "title": "",
-      "content": ""
+      "title": "ネットワークエラー",
+      "content": "ネットワーク接続を確認して、もう一度お試しください"
     },
     "timeOutFail": {
-      "title": "",
-      "content": ""
+      "title": "接続タイムアウト",
+      "content": "サーバーへの接続に失敗しました。後でもう一度やり直してください!"
     },
     "serverErrorFail": {
-      "title": "",
-      "content": ""
+      "title": "翻訳失敗",
+      "content": "サーバーエラーのため翻訳に失敗しました。 後でお試しください。"
     },
     "cancel": "キャンセル",
     "quit": "やめる",
@@ -377,16 +377,16 @@
       "content": "AIの翻訳は完了し、次回ビデオを開いたときに自動的に表示されます。"
     },
     "bubbleTranslateNoLineFail": {
-      "title": "",
-      "content": ""
+      "title": "ネットワークエラー",
+      "content": "ネットワーク接続を確認して、もう一度お試しください"
     },
     "bubbleTranslateTimeOutFail": {
-      "title": "",
-      "content": ""
+      "title": "接続タイムアウト",
+      "content": "サーバーへの接続に失敗しました。後でもう一度やり直してください!"
     },
     "bubbleTranslateServerErrorFail": {
-      "title": "",
-      "content": ""
+      "title": "翻訳失敗",
+      "content": "サーバーエラーのため翻訳に失敗しました。 後でお試しください。"
     },
     "ok": "はい",
     "cancel": "キャンセル",
