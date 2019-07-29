@@ -465,7 +465,6 @@ const actions = {
   async [a.addLocalSubtitlesWithSelect]({ state, dispatch, getters }: any, paths: string[]) {
     let selectedHash = paths[0];
     const { mediaHash } = state;
-    const list = getters.list as SubtitleControlListItem[];
     // tempoary solution, need db validation schema to ensure data consistent
     if (mediaHash) {
       return Promise.all(
@@ -481,15 +480,17 @@ const actions = {
             mediaHash,
           });
         }),
-      ).then((localEntities: SubtitleControlListItem[]) => {
-        addSubtitleItemsToList(localEntities, state.mediaHash);
-        const sub = list.find((sub: SubtitleControlListItem) => sub.hash === selectedHash);
-        if (sub && getters.isFirstSubtitle) {
-          dispatch(a.autoChangePrimarySubtitle, sub.id);
-        } else if (sub && !getters.isFirstSubtitle) {
-          dispatch(a.autoChangeSecondarySubtitle, sub.id);
-        }
-      });
+      )
+        .then((list: SubtitleControlListItem[]) => addSubtitleItemsToList(list, state.mediaHash))
+        .then(() => {
+          const sub = getters.list
+            .find((sub: SubtitleControlListItem) => sub.hash === selectedHash);
+          if (sub && getters.isFirstSubtitle) {
+            dispatch(a.manualChangePrimarySubtitle, sub.id);
+          } else if (sub && !getters.isFirstSubtitle) {
+            dispatch(a.manualChangeSecondarySubtitle, sub.id);
+          }
+        });
     }
     return {};
   },
