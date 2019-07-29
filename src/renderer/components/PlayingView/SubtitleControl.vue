@@ -125,7 +125,7 @@ import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import SubtitleList from '@/components/PlayingView/SubtitleList.vue';
 import Icon from '../BaseIconContainer.vue';
 import { addBubble } from '@/helpers/notificationControl';
-import { SUBTITLE_OFFLINE } from '@/helpers/notificationcodes';
+import { SUBTITLE_OFFLINE, TRANSLATE_NO_LINE } from '@/helpers/notificationcodes';
 
 export default {
   name: 'SubtitleControl',
@@ -463,7 +463,9 @@ export default {
       return item.name;
     },
     changeSubtitle(item: SubtitleControlListItem) {
-      if (item.type === Type.Translated && item.source === '') {
+      if (!navigator.onLine && item.type === Type.Translated && item.source === '') {
+        addBubble(TRANSLATE_NO_LINE);
+      } else if (item.type === Type.Translated && item.source === '') {
         this.showAudioTranslateModal(item);
         // ga 字幕面板中点击 "Generate" 的次数
         this.$ga.event('app', 'ai-translate-generate-button-click');

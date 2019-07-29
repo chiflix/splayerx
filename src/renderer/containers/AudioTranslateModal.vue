@@ -14,7 +14,7 @@
         class="select-title"
       >
         <h1>
-          {{ $t('translateModal.title') }}
+          {{ $t('translateModal.select.title') }}
         </h1>
         <div
           class="beta-mark"
@@ -23,31 +23,31 @@
         </div>
       </div>
       <h1 v-else-if="isConfirmCancelTranlate">
-        {{ $t('translateModal.cancelTitle') }}
+        {{ $t('translateModal.discard.title') }}
       </h1>
       <h1 v-else-if="isProgress && isTranslateSuccess">
-        {{ $t('translateModal.successTitle') }}
+        {{ $t('translateModal.success.title') }}
       </h1>
       <h1 v-else-if="isProgress && isTranslateFail">
-        {{ $t('translateModal.failTitle') }}
+        {{ failTitle }}
       </h1>
       <h1 v-else-if="isProgress">
-        {{ $t('translateModal.translateTitle', { time: estimateTimeText }) }}
+        {{ $t('translateModal.translate.title', { time: estimateTimeText }) }}
       </h1>
       <p v-if="!isProgress && !isConfirmCancelTranlate">
-        {{ $t('translateModal.selectDescription') }}
+        {{ $t('translateModal.select.content') }}
       </p>
       <p v-else-if="isConfirmCancelTranlate">
-        {{ $t('translateModal.cancelDescription') }}
+        {{ $t('translateModal.discard.content') }}
       </p>
       <p v-else-if="isProgress && isTranslateSuccess">
-        {{ $t('translateModal.successDescriptiton') }}
+        {{ $t('translateModal.success.content') }}
       </p>
       <p v-else-if="isProgress && isTranslateFail">
-        {{ $t('translateModal.failDescription') }}
+        {{ failContent }}
       </p>
       <p v-else-if="isProgress">
-        {{ $t('translateModal.translateDescription') }}
+        {{ $t('translateModal.translate.content') }}
       </p>
       <div
         v-if="!isProgress && !isConfirmCancelTranlate"
@@ -154,7 +154,7 @@ import { codeToLanguageName } from '@/libs/language';
 import Select from '@/components/PlayingView/Select.vue';
 import Icon from '@/components/BaseIconContainer.vue';
 import Progress from '@/components/PlayingView/Progress.vue';
-import { AudioTranslateStatus } from '../store/modules/AudioTranslate';
+import { AudioTranslateStatus, AudioTranslateFailType } from '../store/modules/AudioTranslate';
 
 export default Vue.extend({
   name: 'AudioTranslateModal',
@@ -197,7 +197,8 @@ export default Vue.extend({
   computed: {
     ...mapGetters([
       'currentAudioTrackId', 'mediaHash',
-      'isTranslateModalVisiable', 'translateProgress', 'isTranslating', 'selectedTargetLanugage', 'translateEstimateTime', 'translateStatus', 'lastAudioLanguage',
+      'isTranslateModalVisiable', 'translateProgress', 'isTranslating', 'selectedTargetLanugage',
+      'translateEstimateTime', 'translateStatus', 'lastAudioLanguage', 'failType',
     ]),
     translateLanguageLabel() {
       return codeToLanguageName(this.selectedTargetLanugage);
@@ -215,11 +216,29 @@ export default Vue.extend({
     estimateTimeText() {
       const time = this.translateEstimateTime;
       if (time >= 60 * 60) {
-        return this.$t('translateModal.hour', { number: Math.ceil(time / (60 * 60)) });
+        return this.$t('translateModal.translate.hour', { number: Math.ceil(time / (60 * 60)) });
       } if (time >= 60) {
-        return this.$t('translateModal.minute', { number: Math.ceil(time / 60) });
+        return this.$t('translateModal.translate.minute', { number: Math.ceil(time / 60) });
       }
-      return this.$t('translateModal.minute', { number: 1 });
+      return this.$t('translateModal.translate.minute', { number: 1 });
+    },
+    failTitle() {
+      let title = this.$t('translateModal.serverErrorFail.title');
+      if (this.failType === AudioTranslateFailType.NoLine) {
+        title = this.$t('translateModal.noLineFail.title');
+      } else if (this.failType === AudioTranslateFailType.TimeOut) {
+        title = this.$t('translateModal.timeOutFail.title');
+      }
+      return title;
+    },
+    failContent() {
+      let message = this.$t('translateModal.serverErrorFail.content');
+      if (this.failType === AudioTranslateFailType.NoLine) {
+        message = this.$t('translateModal.noLineFail.content');
+      } else if (this.failType === AudioTranslateFailType.TimeOut) {
+        message = this.$t('translateModal.timeOutFail.content');
+      }
+      return message;
     },
   },
   watch: {
