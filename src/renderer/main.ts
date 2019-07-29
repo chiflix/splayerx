@@ -807,29 +807,32 @@ new Vue({
           }
         });
       });
-      this.menuService.on('subtitle.mainSubtitle', (e: Event, item: SubtitleControlListItem) => {
-        console.log(item);
-        if (item.id === 'off') this.changeFirstSubtitle('');
+      this.menuService.on('subtitle.mainSubtitle', (e: Event, id: string, item: SubtitleControlListItem) => {
+        if (id === 'off') this.changeFirstSubtitle('');
         else if (item.type === Type.Translated && item.source === '') {
+          this.menuService.updateMenuItemChecked(`subtitle.secondarySubtitle.${item.id}`, false);
+          this.menuService.updateMenuItemChecked('subtitle.secondarySubtitle.off', true);
           this.showAudioTranslateModal(item);
         } else {
           this.updateSubtitleType(true);
           this.changeFirstSubtitle(item.id);
-          this.menuService.updateMenuItemChecked(`subtitle.secondarySubtitle.${item.id}`, false);
+          this.menuService.updateMenuItemChecked(`subtitle.secondarySubtitle.${id}`, false);
           this.menuService.updateMenuItemChecked('subtitle.secondarySubtitle.off', true);
         }
       });
-      this.menuService.on('subtitle.secondarySubtitle', (e: Event, item: SubtitleControlListItem) => {
-        if (item.id === 'off') this.changeSecondarySubtitle('');
-        else if (item.id === 'secondarySub') {
+      this.menuService.on('subtitle.secondarySubtitle', (e: Event, id: string, item: SubtitleControlListItem) => {
+        if (id === 'off') this.changeSecondarySubtitle('');
+        else if (id === 'secondarySub') {
           this.updateEnabledSecondarySub(!this.enabledSecondarySub)
         } else if (item.type === Type.Translated && item.source === '') {
+          // this.menuService.updateMenuItemChecked(`subtitle.mainSubtitle.${item.id}`, false);
+          // this.menuService.updateMenuItemChecked('subtitle.mainSubtitle.off', true);
           this.showAudioTranslateModal(item);
         } else {
           this.updateSubtitleType(false);
-          this.changeSecondarySubtitle(item.id);
-          this.menuService.updateMenuItemChecked(`subtitle.mainSubtitle.${item.id}`, false);
-          this.menuService.updateMenuItemChecked('subtitle.mainSubtitle.off', true);
+          this.changeSecondarySubtitle(id);
+          // this.menuService.updateMenuItemChecked(`subtitle.mainSubtitle.${item.id}`, false);
+          // this.menuService.updateMenuItemChecked('subtitle.mainSubtitle.off', true);
         }
       });
       this.menuService.on('subtitle.subtitleSetting', () => {
@@ -910,7 +913,7 @@ new Vue({
     recentSubTmp(item: SubtitleControlListItem, isFirstSubtitleType: boolean) {
       return {
         id: `${item.id}`,
-        enabled: this.enabledSecondarySub,
+        enabled: isFirstSubtitleType ? true: this.enabledSecondarySub,
         label: this.getSubName(item, this.list),
         checked: false,
         subtitleItem: item,

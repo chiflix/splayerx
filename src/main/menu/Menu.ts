@@ -215,7 +215,9 @@ export default class Menubar {
     Menu.setApplicationMenu(this.menubar);
   }
 
-  public updatePrimarySub(items: { id: string, label: string, checked: boolean, subtitleItem: SubtitleControlListItem }[]) {
+  public updatePrimarySub(
+    items: { id: string, label: string, checked: boolean, subtitleItem: SubtitleControlListItem }[],
+  ) {
     this.primarySubs = items;
     if (
       this.menubar.getMenuItemById('subtitle.mainSubtitle')
@@ -236,7 +238,7 @@ export default class Menubar {
             checked,
             click: () => {
               if (this.mainWindow) {
-                this.mainWindow.webContents.send('subtitle.mainSubtitle', subtitleItem);
+                this.mainWindow.webContents.send('subtitle.mainSubtitle', id, subtitleItem);
               }
             },
           });
@@ -249,7 +251,10 @@ export default class Menubar {
   }
 
   public updateSecondarySub(
-    items: { id: string, label: string, checked: boolean, enabled: boolean, subtitleItem: SubtitleControlListItem }[],
+    items: {
+      id: string, label: string, checked: boolean,
+      enabled: boolean, subtitleItem: SubtitleControlListItem,
+    }[],
   ) {
     this.secondarySubs = items;
     if (
@@ -264,7 +269,7 @@ export default class Menubar {
           id, label, checked, enabled, subtitleItem,
         }) => {
           let type: ('normal' | 'separator' | 'submenu' | 'checkbox' | 'radio') = 'radio';
-          if (id === 'secondarySub') type = 'checkbox';
+          if (id === 'secondarySub') type = 'normal';
           else if (id === 'menubar.separator') type = 'separator';
           const item = new MenuItem({
             id: `subtitle.secondarySubtitle.${id}`,
@@ -274,7 +279,7 @@ export default class Menubar {
             enabled,
             click: () => {
               if (this.mainWindow) {
-                this.mainWindow.webContents.send('subtitle.secondarySubtitle', subtitleItem);
+                this.mainWindow.webContents.send('subtitle.secondarySubtitle', id, subtitleItem);
               }
             },
           });
