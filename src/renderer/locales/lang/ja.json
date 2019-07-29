@@ -195,7 +195,7 @@
       "name": "ウィンドウ",
       "originSize": "100%",
       "enterPip": "",
-      "exitPip": ""
+      "exitPip": "画中画を閉じる"
     },
     "favourite": {
       "name": "好きな",
@@ -204,10 +204,10 @@
       "youtube": "Youtube"
     },
     "history": {
-      "name": "",
-      "reload": "",
-      "back": "",
-      "forward": ""
+      "name": "履歴",
+      "reload": "ページを再読み込み",
+      "back": "戻る",
+      "forward": "進む"
     }
   },
   "nextVideo": {
