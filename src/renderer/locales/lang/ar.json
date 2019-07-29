@@ -328,35 +328,35 @@
   "translateModal": {
     "selectLanguageLabel": "لغة الصوت",
     "select": {
-      "title": "",
-      "content": ""
+      "title": "اختر لغة الصوت",
+      "content": "لإنشاء نتيجة ترجمة ، يرجى تحديد اللغة التي تسمعها في الفيديو والنقر على زر إنشاء. قد تستغرق العملية بعض الوقت."
     },
     "translate": {
-      "title": "",
-      "content": "",
-      "minute": "",
-      "second": "",
-      "hour": ""
+      "title": "حوالي {time} اليسار",
+      "content": "يرجى عدم تخطي الفيديو أو إغلاق التطبيق. يمكنك التحقق من التقدم المحرز في لوحة الترجمة.",
+      "minute": "{number} ثواني",
+      "second": "{number} ثانية",
+      "hour": "{number} ساعة"
     },
     "success": {
-      "title": "",
-      "content": ""
+      "title": "تم الترجمة",
+      "content": "AI Translation جاهزة ، يرجى التحقق من ذلك على لوحة الترجمة."
     },
     "discard": {
-      "title": "",
-      "content": ""
+      "title": "AI Translation قيد التقدم",
+      "content": "هل أنت متأكد من أنك تريد الخروج؟ إذا قمت بالإنهاء ، فلن تتم استعادة تقدم الترجمة."
     },
     "noLineFail": {
-      "title": "",
-      "content": ""
+      "title": "خطأ بالشبكه",
+      "content": "الاتصال بالإنترنت غير متوفر.\nحاول مرة أخرى لاحقاً."
     },
     "timeOutFail": {
-      "title": "",
-      "content": ""
+      "title": "مهلة الاتصال",
+      "content": "فشل الاتصال بالخادم. يرجى المحاولة لاحقا."
     },
     "serverErrorFail": {
-      "title": "",
-      "content": ""
+      "title": "فشل الترجمة",
+      "content": "فشلت الترجمة بسبب خطأ في الخادم. يرجى المحاولة لاحقا."
     },
     "cancel": "إلغاء",
     "quit": "استقال",
@@ -377,16 +377,16 @@
       "content": "الترجمة AI جاهزة الآن. سيتم تحميله تلقائيًا في المرة القادمة عندما تشاهد الفيديو."
     },
     "bubbleTranslateNoLineFail": {
-      "title": "",
-      "content": ""
+      "title": "خطأ بالشبكه",
+      "content": "الاتصال بالإنترنت غير متوفر.\nحاول مرة أخرى لاحقاً."
     },
     "bubbleTranslateTimeOutFail": {
-      "title": "",
-      "content": ""
+      "title": "مهلة الاتصال",
+      "content": "فشل الاتصال بالخادم. يرجى المحاولة لاحقا."
     },
     "bubbleTranslateServerErrorFail": {
-      "title": "",
-      "content": ""
+      "title": "فشل الترجمة",
+      "content": "فشلت الترجمة بسبب خطأ في الخادم. يرجى المحاولة لاحقا."
     },
     "ok": "حسنا",
     "cancel": "إلغاء",
