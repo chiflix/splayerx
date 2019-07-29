@@ -329,11 +329,11 @@
     "selectLanguageLabel": "视频源语言",
     "select": {
       "title": "",
-      "content": ""
+      "content": "如要生成智能翻译，请选择您在视频中所听到的语言并点击生成，该过程将持续一段时间。"
     },
     "translate": {
-      "title": "",
-      "content": "",
+      "title": "大约还需 {time}",
+      "content": "请不要切换视频或关闭播放器，您可以在该视频的翻译结果列表中查看进度。",
       "minute": "",
       "second": "",
       "hour": ""
