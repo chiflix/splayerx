@@ -327,24 +327,42 @@
     "title": ""
   },
   "translateModal": {
-    "title": "Select Audio Language",
-    "translateTitle": "About {time} Left",
-    "minute": "{number} min",
-    "second": "{number} sec",
-    "hour": "{number} hr",
-    "successTitle": "Translation Done",
-    "failTitle": "Translation Failed",
-    "cancelTitle": "AI Translation is in Progress",
-    "selectDescription": "To generate a translation result, please select the language you hear in the video and click the generate button. The process might take some time.",
     "selectLanguageLabel": "Audio Language",
+    "select": {
+      "title": "Select Audio Language",
+      "content": "To generate a translation result, please select the language you hear in the video and click the generate button. The process might take some time."
+    },
+    "translate": {
+      "title": "About {time} Left",
+      "content": "Please do not skip the video or close the application. You can check the progress on the translation panel.",
+      "minute": "{number} min",
+      "second": "{number} sec",
+      "hour": "{number} hr"
+    },
+    "success": {
+      "title": "Translation Done",
+      "content": "AI Translation is ready, please check it on the translation panel."
+    },
+    "discard": {
+      "title": "AI Translation is in Progress",
+      "content": "Are you sure you want to quit? If you quit, the translation progress will not be restored."
+    },
+    "noLineFail": {
+      "title": "Network Error",
+      "content": "Please check your network connection and try again."
+    },
+    "timeOutFail": {
+      "title": "Connection Timeout",
+      "content": "The connection to the server failed. Please try later."
+    },
+    "serverErrorFail": {
+      "title": "Translation Failed",
+      "content": "Translation failed because of a server error. Please try later."
+    },
     "cancel": "Cancel",
     "quit": "Quit",
     "generate": "Generate",
-    "translateDescription": "Please do not skip the video or close the application. You can check the progress on the translation panel.",
     "ok": "OK",
-    "successDescriptiton": "AI Translation is ready, please check it on the translation panel.",
-    "failDescription": "Please try later, thanks.",
-    "cancelDescription": "Are you sure you want to quit? If you quit, the translation progress will not be restored.",
     "continue": "Cancel"
   },
   "translateBubble": {
@@ -359,9 +377,17 @@
       "title": "",
       "content": "AI Translation is ready now. It will be automatically loaded next time when you watch the video."
     },
-    "bubbleTranslateFail": {
+    "bubbleTranslateNoLineFail": {
+      "title": "Network Error",
+      "content": "Please check your network connection and try again."
+    },
+    "bubbleTranslateTimeOutFail": {
+      "title": "Connection Timeout",
+      "content": "The connection to the server failed. Please try later."
+    },
+    "bubbleTranslateServerErrorFail": {
       "title": "Translation Failed",
-      "content": "Please try later, thanks."
+      "content": "Translation failed because of a server error. Please try later."
     },
     "ok": "OK",
     "cancel": "Cancel",

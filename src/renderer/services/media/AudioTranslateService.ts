@@ -2,13 +2,14 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-06-20 18:03:14
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-07-26 19:30:07
+ * @Last Modified time: 2019-07-29 14:43:33
  */
 
 // @ts-ignore
 import { ipcRenderer, Event } from 'electron';
 import { EventEmitter } from 'events';
 import { isNaN } from 'lodash';
+import Vue from 'vue';
 import {
   StreamingTranslationResponse,
 } from 'sagi-api/translation/v1/translation_pb';
@@ -67,7 +68,7 @@ class AudioTranslateService extends EventEmitter {
   public ipcCallBack(event: Event, {
     time, end, error, result,
   }: {
-    time?: Buffer, end?: boolean, error?: number, result?: StreamingTranslationResponse.AsObject
+    time?: Buffer, end?: boolean, error?: string, result?: StreamingTranslationResponse.AsObject
   }) {
     if (time) {
       this.emit('grab', time);
@@ -76,7 +77,7 @@ class AudioTranslateService extends EventEmitter {
     } else if (result) {
       this.handleMainCallBack(result);
     } else if (error) {
-      this.emit('error', error);
+      this.emit('error', new Error(error));
       this.stop();
     }
   }
@@ -102,6 +103,8 @@ class AudioTranslateService extends EventEmitter {
       audioLanguageCode: this.audioLanguageCode,
       targetLanguageCode: this.targetLanguageCode,
       audioId: this.audioId,
+      uuid: Vue.axios.defaults.headers.common['X-Application-Token'],
+      agent: navigator.userAgent,
     });
     ipcRenderer.removeListener('grab-audio-update', this.ipcCallBack);
     ipcRenderer.on('grab-audio-update', this.ipcCallBack);
