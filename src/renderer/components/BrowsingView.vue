@@ -1,5 +1,8 @@
 <template>
-  <div class="browsing">
+  <div
+    :style="{ pointerEvents: isFocused ? 'auto' : 'none' }"
+    class="browsing"
+  >
     <browsing-header
       ref="browsingHeader"
       :handle-enter-pip="handleEnterPip"
@@ -48,10 +51,11 @@
     <webview
       ref="webView"
       :src="availableUrl"
-      :style="{ webkitAppRegion: isPip ? 'drag' : 'no-drag' }"
+      :style="{ webkitAppRegion: isPip && isDarwin ? 'drag' : 'no-drag' }"
       :preload="preload"
       autosize
       class="web-view"
+      allowpopups
     />
   </div>
 </template>
@@ -86,7 +90,6 @@ export default {
       quit: false,
       loadingState: false,
       startTime: 0,
-      isPip: false,
       pipType: '',
       bilibiliType: 'video',
       supportedRecordHost: ['www.youtube.com', 'www.bilibili.com', 'www.iqiyi.com'],
@@ -106,7 +109,10 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['winPos', 'isFullScreen', 'initialUrl', 'winWidth', 'winSize', 'browsingSize', 'pipSize', 'pipPos', 'barrageOpen', 'browsingPos', 'isFullScreen']),
+    ...mapGetters(['winPos', 'isFullScreen', 'initialUrl', 'winWidth', 'winSize', 'browsingSize', 'pipSize', 'pipPos', 'barrageOpen', 'browsingPos', 'isFullScreen', 'isFocused', 'isPip']),
+    isDarwin() {
+      return process.platform === 'darwin';
+    },
     iqiyiPip() {
       return iqiyi(this.barrageOpen, this.winSize);
     },
@@ -161,6 +167,7 @@ export default {
       if (!val) {
         this.$store.dispatch('updatePipSize', this.winSize);
         this.$store.dispatch('updatePipPos', this.winPos);
+        this.$electron.ipcRenderer.send('update-enabled', 'window.keepPlayingWindowFront', false);
         this.handleWindowChangeExitPip();
         if (this.pipType === 'youtube') {
           this.youtubeRecover();
@@ -174,6 +181,7 @@ export default {
       } else {
         this.$store.dispatch('updateBrowsingSize', this.winSize);
         this.$store.dispatch('updateBrowsingPos', this.winPos);
+        this.$electron.ipcRenderer.send('update-enabled', 'window.keepPlayingWindowFront', true);
         this.timeout = true;
         if (this.timer) {
           clearTimeout(this.timer);
@@ -256,6 +264,7 @@ export default {
       browsingPos: this.browsingPos,
       barrageOpen: this.barrageOpen,
     });
+    this.$bus.$off();
   },
   mounted() {
     this.menuService = new MenuService();
@@ -264,7 +273,7 @@ export default {
     this.$bus.$on('toggle-forward', this.handleUrlForward);
     this.$bus.$on('toggle-pip', () => {
       if (this.hasVideo) {
-        this.isPip = !this.isPip;
+        this.updateIsPip(!this.isPip);
       }
     });
     window.addEventListener('beforeunload', (e: BeforeUnloadEvent) => {
@@ -295,7 +304,7 @@ export default {
       }, 50);
     });
     window.addEventListener('mousemove', () => {
-      if (this.isPip && !this.pipBtnsKeepShow) {
+      if (this.isPip && !this.pipBtnsKeepShow && this.isFocused) {
         this.timeout = true;
         if (this.timer) {
           clearTimeout(this.timer);
@@ -334,7 +343,13 @@ export default {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.$refs.webView.addEventListener('ipc-message', (evt: any) => { // https://github.com/electron/typescript-definitions/issues/27 fixed in 6.0.0
       const { channel, args }: { channel: string, args:
-      { dragover?: boolean, files?: string[], isFullScreen?: boolean }[] } = evt;
+      { dragover?: boolean,
+        files?: string[],
+        isFullScreen?: boolean,
+        windowSize?: number[] | null,
+        x?: number,
+        y?: number,
+      }[] } = evt;
       switch (channel) {
         case 'dragover':
         case 'dragleave':
@@ -353,6 +368,20 @@ export default {
             this.timer = setTimeout(() => {
               this.timeout = false;
             }, 3000);
+          }
+          break;
+        case 'left-drag':
+          if (this.isPip) {
+            if (args[0].windowSize) {
+              this.$electron.ipcRenderer.send('callMainWindowMethod', 'setBounds', [{
+                x: args[0].x,
+                y: args[0].y,
+                width: args[0].windowSize[0],
+                height: args[0].windowSize[1],
+              }]);
+            } else {
+              this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', [args[0].x, args[0].y]);
+            }
           }
           break;
         case 'fullscreenchange':
@@ -374,10 +403,12 @@ export default {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.$refs.webView.addEventListener('new-window', (e: any) => { // https://github.com/electron/typescript-definitions/issues/27 fixed in 6.0.0
       if (!e.url || e.url === 'about:blank') return;
-      if (this.isPip) {
-        this.isPip = false;
+      if (e.disposition !== 'new-window') {
+        if (this.isPip) {
+          this.updateIsPip(false);
+        }
+        this.updateInitialUrl(e.url);
       }
-      this.updateInitialUrl(e.url);
     });
     this.$refs.webView.addEventListener('did-start-loading', () => {
       this.startTime = new Date().getTime();
@@ -399,6 +430,7 @@ export default {
       updateInitialUrl: browsingActions.UPDATE_INITIAL_URL,
       updateRecordUrl: browsingActions.UPDATE_RECORD_URL,
       updateBarrageOpen: browsingActions.UPDATE_BARRAGE_OPEN,
+      updateIsPip: browsingActions.UPDATE_IS_PIP,
     }),
     handleMouseenter() {
       this.pipBtnsKeepShow = true;
@@ -453,12 +485,12 @@ export default {
     },
     handleEnterPip() {
       if (this.hasVideo) {
-        this.isPip = true;
+        this.updateIsPip(true);
       }
     },
     handleExitPip() {
       if (this.isPip) {
-        this.isPip = false;
+        this.updateIsPip(false);
       }
     },
     othersAdapter() {

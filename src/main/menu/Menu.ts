@@ -354,7 +354,7 @@ export default class Menubar {
   }
 
   private refreshBrowsingWindowMenu() {
-    const windowMenu = this.menubar.getMenuItemById('window').submenu;
+    const windowMenu = this.menubar.getMenuItemById('browsing.window').submenu;
     // @ts-ignore
     windowMenu.clear();
 
@@ -367,13 +367,16 @@ export default class Menubar {
     const actions = [];
     actions.push(...[
       this.createMenuItemByTemplate(floatMenuItem),
-      this.createMenuItem(this.isPip ? 'msg.window.exitPip' : 'msg.window.enterPip', undefined, 'P', false, undefined, 'window.pip'),
+      separator(),
+      this.createMenuItem(this.isPip ? 'msg.window.exitPip' : 'msg.window.enterPip', undefined, 'P', true, undefined, 'window.pip'),
+      separator(),
       this.createRoleMenuItem(
         minimizeMenuItem.label,
         minimizeMenuItem.role,
         minimizeMenuItem.enabled,
       ),
       this.createMenuItemByTemplate(maxmizeMenuItem),
+      separator(),
       this.createMenuItemByTemplate(landingViewMenuItem),
     ]);
 
@@ -582,6 +585,7 @@ export default class Menubar {
       const fileMenu = new Menu();
 
       const items = this.getMenuItemTemplate('file').items;
+      const playbackItems = this.getMenuItemTemplate('playback').items;
 
       const openMenuItemTemplate = items.find((item: MenubarMenuItem) => item.id === 'file.open') as IMenubarMenuItemAction;
       const openMenuItem = this.createMenuItemByTemplate(openMenuItemTemplate);
@@ -593,7 +597,9 @@ export default class Menubar {
         closeWindowTemplate.enabled,
       );
 
-      [openMenuItem, closeMenuItem].forEach(i => fileMenu.append(i));
+      const snapShotTemplate = playbackItems.find((item: MenubarMenuItem) => item.id === 'playback.snapShot') as IMenubarMenuItemAction;
+      const snapShotMenuItem = this.createMenuItemByTemplate(snapShotTemplate);
+      [openMenuItem, closeMenuItem, separator(), snapShotMenuItem].forEach(i => fileMenu.append(i));
 
       const fileMenuItem = new MenuItem({ label: this.$t('msg.file.name'), submenu: fileMenu });
 
@@ -748,11 +754,12 @@ export default class Menubar {
     const minimizeMenuItem = items.find((item: MenubarMenuItem) => item.id === 'window.minimize') as IMenubarMenuItemRole;
     const maxmizeMenuItem = items.find((item: MenubarMenuItem) => item.id === 'window.maxmize') as IMenubarMenuItemAction;
     const landingViewMenuItem = items.find((item: MenubarMenuItem) => item.id === 'window.backToLandingView') as IMenubarMenuItemAction;
+    floatMenuItem.enabled = false;
 
     const actions = [];
     actions.push(...[
       this.createMenuItemByTemplate(floatMenuItem),
-      this.createMenuItem('msg.window.enterPip', undefined, 'P', true, undefined, 'window.pip'),
+      this.createMenuItem('msg.window.enterPip', undefined, 'P', false, undefined, 'window.pip'),
       this.createRoleMenuItem(
         minimizeMenuItem.label,
         minimizeMenuItem.role,
@@ -764,7 +771,7 @@ export default class Menubar {
 
     actions.forEach(i => window.append(i));
 
-    const windowMenuItem = new MenuItem({ id: 'window', label: this.$t('msg.window.name'), submenu: window });
+    const windowMenuItem = new MenuItem({ id: 'browsing.window', label: this.$t('msg.window.name'), submenu: window });
     return windowMenuItem;
   }
 
