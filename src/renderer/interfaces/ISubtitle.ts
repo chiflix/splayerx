@@ -134,4 +134,4 @@ export type Subtitle = {
   type: string,
 }
 
-export const NOT_APPORIRATE_SUBTITLE = 'NOT_APPORIRATE_SUBTITLE';
+export const NOT_SELECTED_SUBTITLE = 'NOT_SELECTED_SUBTITLE';

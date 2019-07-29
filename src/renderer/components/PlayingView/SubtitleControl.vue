@@ -116,7 +116,7 @@ import {
   SubtitleManager as smActions,
   AudioTranslate as atActions,
 } from '@/store/actionTypes';
-import { SubtitleControlListItem, Type, NOT_APPORIRATE_SUBTITLE } from '@/interfaces/ISubtitle';
+import { SubtitleControlListItem, Type, NOT_SELECTED_SUBTITLE } from '@/interfaces/ISubtitle';
 import lottie from '@/components/lottie.vue';
 import animationData from '@/assets/subtitle.json';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
@@ -198,10 +198,10 @@ export default {
     currentSubtitleIndex() {
       const { computedAvailableItems } = this;
       if (
-        (this.isFirstSubtitle && this.primarySubtitleId === NOT_APPORIRATE_SUBTITLE)
+        (this.isFirstSubtitle && this.primarySubtitleId === NOT_SELECTED_SUBTITLE)
         || (
           !this.isFirstSubtitle && this.enabledSecondarySub
-          && this.secondarySubtitleId === NOT_APPORIRATE_SUBTITLE
+          && this.secondarySubtitleId === NOT_SELECTED_SUBTITLE
         )
       ) return -2;
       return !this.isFirstSubtitle && this.enabledSecondarySub

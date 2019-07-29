@@ -15,7 +15,7 @@ import {
   AudioTranslate as atActions,
 } from '@/store/actionTypes';
 import {
-  SubtitleControlListItem, Type, IEntityGenerator, Entity, Format, NOT_APPORIRATE_SUBTITLE,
+  SubtitleControlListItem, Type, IEntityGenerator, Entity, Format, NOT_SELECTED_SUBTITLE,
 } from '@/interfaces/ISubtitle';
 import {
   TranscriptInfo,
@@ -646,17 +646,24 @@ const actions = {
     dispatch, commit, getters, state,
   }: any, id: string) {
     if (!getters.subtitleOff) {
-      const primary = id;
-      let secondary = getters.secondarySubtitleId;
-      if (id === secondary) secondary = '';
-      commit(m.setPrimarySubtitleId, primary);
-      if (state.allSubtitles[primary]) commit(m.setPrimaryDelay, state.allSubtitles[primary].delay);
-      commit(m.setSecondarySubtitleId, secondary);
-      if (state.allSubtitles[secondary]) {
-        commit(m.setSecondaryDelay, state.allSubtitles[secondary].delay);
+      if (!id) {
+        commit(m.setPrimarySubtitleId, NOT_SELECTED_SUBTITLE);
+        commit(m.setSecondarySubtitleId, NOT_SELECTED_SUBTITLE);
+      } else {
+        const primary = id;
+        let secondary = getters.secondarySubtitleId;
+        if (id === secondary) secondary = '';
+        commit(m.setPrimarySubtitleId, primary);
+        if (state.allSubtitles[primary]) {
+          commit(m.setPrimaryDelay, state.allSubtitles[primary].delay);
+        }
+        commit(m.setSecondarySubtitleId, secondary);
+        if (state.allSubtitles[secondary]) {
+          commit(m.setSecondaryDelay, state.allSubtitles[secondary].delay);
+        }
+        dispatch(a.storeSelectedSubtitles, [primary, secondary]);
+        if (id && store.hasModule(id)) await dispatch(`${id}/${subActions.load}`);
       }
-      dispatch(a.storeSelectedSubtitles, [primary, secondary]);
-      if (id && store.hasModule(id)) await dispatch(`${id}/${subActions.load}`);
     } else if (getters.subtitleOff) commit(m.setPrimarySubtitleId, '');
   },
   async [a.manualChangePrimarySubtitle]({ dispatch }: any, id: string) {
@@ -668,17 +675,24 @@ const actions = {
     dispatch, commit, getters, state,
   }: any, id: string) {
     if (!getters.subtitleOff) {
-      let primary = getters.primarySubtitleId;
-      const secondary = id;
-      if (id && id === primary) primary = '';
-      commit(m.setPrimarySubtitleId, primary);
-      if (state.allSubtitles[primary]) commit(m.setPrimaryDelay, state.allSubtitles[primary].delay);
-      commit(m.setSecondarySubtitleId, secondary);
-      if (state.allSubtitles[secondary]) {
-        commit(m.setSecondaryDelay, state.allSubtitles[secondary].delay);
+      if (!id) {
+        commit(m.setPrimarySubtitleId, NOT_SELECTED_SUBTITLE);
+        commit(m.setSecondarySubtitleId, NOT_SELECTED_SUBTITLE);
+      } else {
+        let primary = getters.primarySubtitleId;
+        const secondary = id;
+        if (id && id === primary) primary = '';
+        commit(m.setPrimarySubtitleId, primary);
+        if (state.allSubtitles[primary]) {
+          commit(m.setPrimaryDelay, state.allSubtitles[primary].delay);
+        }
+        commit(m.setSecondarySubtitleId, secondary);
+        if (state.allSubtitles[secondary]) {
+          commit(m.setSecondaryDelay, state.allSubtitles[secondary].delay);
+        }
+        dispatch(a.storeSelectedSubtitles, [primary, secondary]);
+        if (id && store.hasModule(id)) await dispatch(`${id}/${subActions.load}`);
       }
-      dispatch(a.storeSelectedSubtitles, [primary, secondary]);
-      if (id && store.hasModule(id)) await dispatch(`${id}/${subActions.load}`);
     } else if (getters.subtitleOff) commit(m.setSecondarySubtitleId, '');
   },
   async [a.manualChangeSecondarySubtitle]({ dispatch }: any, id: string) {
@@ -766,8 +780,8 @@ const actions = {
             secondarySelectionComplete = true;
           }
         } else if (!getters.subtitleOff) {
-          commit(m.setPrimarySubtitleId, NOT_APPORIRATE_SUBTITLE);
-          commit(m.setSecondarySubtitleId, NOT_APPORIRATE_SUBTITLE);
+          commit(m.setPrimarySubtitleId, NOT_SELECTED_SUBTITLE);
+          commit(m.setSecondarySubtitleId, NOT_SELECTED_SUBTITLE);
         }
         if (primarySelectionComplete && secondarySelectionComplete) dispatch(a.stopAISelection);
       }
