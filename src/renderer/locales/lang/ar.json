@@ -194,8 +194,8 @@
       "minimize": "خفض",
       "name": "نافذة او شباك",
       "originSize": "100٪",
-      "enterPip": "",
-      "exitPip": ""
+      "enterPip": "أدخل صورة في صورة",
+      "exitPip": "الخروج من الصورة في صورة"
     },
     "favourite": {
       "name": "مفضل",
@@ -204,10 +204,10 @@
       "youtube": "Youtube"
     },
     "history": {
-      "name": "",
-      "reload": "",
-      "back": "",
-      "forward": ""
+      "name": "التاريخ",
+      "reload": "إعادة تحميل الصفحة",
+      "back": "ظهر",
+      "forward": "تقدم"
     }
   },
   "nextVideo": {
