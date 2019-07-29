@@ -290,9 +290,9 @@ new Vue({
     },
     paused(val) {
       if (val && this.topOnWindow) {
-        this.lastTopOnWindow = true;
+        this.playingViewTop = true;
         this.topOnWindow = false;
-      } else if (!val && this.lastTopOnWindow) {
+      } else if (!val && this.playingViewTop) {
         this.topOnWindow = true;
       }
       this.menuService.updatePaused(val);
