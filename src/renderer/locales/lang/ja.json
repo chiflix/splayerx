@@ -194,7 +194,7 @@
       "minimize": "最小化",
       "name": "ウィンドウ",
       "originSize": "100%",
-      "enterPip": "",
+      "enterPip": "画中画を開じる",
       "exitPip": "画中画を閉じる"
     },
     "favourite": {
