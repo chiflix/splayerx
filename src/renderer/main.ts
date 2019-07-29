@@ -172,7 +172,8 @@ new Vue({
       menuService: null,
       playlistDisplayState: false,
       topOnWindow: false,
-      lastTopOnWindow: false,
+      playingViewTop: false,
+      browsingViewTop: false,
       canSendVolumeGa: true,
     };
   },
@@ -196,11 +197,15 @@ new Vue({
   },
   watch: {
     topOnWindow(val: boolean) {
-      if (this.currentRouteName === 'landing-view') return;
       const browserWindow = this.$electron.remote.getCurrentWindow();
       browserWindow.setAlwaysOnTop(val);
+    },
+    playingViewTop(val: boolean) {
+      if (this.currentRouteName === 'playing-view' && !this.paused) {
+        this.topOnWindow = true;
+      }
       this.menuService.updateMenuItemChecked('window.keepPlayingWindowFront', val);
-      this.menuService.updateTopOnWindow(val);
+      this.menuService.updatePlayingViewTop(val);
     },
     playlistDisplayState(val: boolean) {
       this.menuService.updateMenuItemEnabled('playback.forwardS', !val);
@@ -226,8 +231,12 @@ new Vue({
     currentRouteName(val) {
       this.menuService.updateRouteName(val);
       if (val === 'landing-view' || val === 'playing-view') this.menuService.addRecentPlayItems();
-      if (val === 'playing-view' && this.lastTopOnWindow) {
+      if (val === 'landing-view') this.topOnWindow = false;
+      if (val === 'playing-view' && this.playingViewTop) {
         this.topOnWindow = true;
+      }
+      if (val === 'browsing-view' && this.browsingViewTop) {
+        // this.topOnWindow = true;
       }
     },
     volume(val: number) {
@@ -844,13 +853,8 @@ new Vue({
         this.$store.dispatch(SubtitleManager.manualUploadAllSubtitles);
       });
       this.menuService.on('window.keepPlayingWindowFront', () => {
-        if (this.currentRouteName === 'landing-view') {
-          this.lastTopOnWindow = true;
-          return;
-        }
-        if (!this.paused) {
-          this.topOnWindow = !this.topOnWindow;
-        }
+        if (this.currentRouteName === 'playing-view') this.playingViewTop = !this.playingViewTop;
+        if (this.currentRouteName === 'browsing-view') this.browsingViewTop = !this.browsingViewTop;
       });
       this.menuService.on('window.pip', () => {
         this.$bus.$emit('toggle-pip');

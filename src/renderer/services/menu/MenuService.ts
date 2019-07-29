@@ -24,7 +24,7 @@ export default class MenuService {
     ipcRenderer.send('update-paused', paused);
   }
 
-  public updateTopOnWindow(topOnWindow: boolean) {
+  public updatePlayingViewTop(topOnWindow: boolean) {
     ipcRenderer.send('update-top-on-window', topOnWindow);
   }
 

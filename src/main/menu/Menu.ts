@@ -43,7 +43,7 @@ export default class Menubar {
 
   private isPip = false;
   
-  private topOnWindow = false;
+  private playingViewTop = false;
 
   private _routeName: string;
 
@@ -66,7 +66,7 @@ export default class Menubar {
 
   public setMainWindow(window: Electron.BrowserWindow | null) {
     // may replace this way of getting mainWindow by window service or else...
-    this.topOnWindow = this.isFullScreen = false;
+    this.playingViewTop = this.isFullScreen = false;
     this.mainWindow = window;
   }
 
@@ -158,9 +158,9 @@ export default class Menubar {
     }
   }
 
-  public updateTopOnWindow(topOnWindow: boolean) {
-    if (this.topOnWindow !== topOnWindow) {
-      this.topOnWindow = topOnWindow;
+  public updatePlayingViewTop(playingViewTop: boolean) {
+    if (this.playingViewTop !== playingViewTop) {
+      this.playingViewTop = playingViewTop;
     }
   }
 
@@ -212,98 +212,106 @@ export default class Menubar {
 
   public updatePrimarySub(items: { id: string, label: string, checked: boolean }[]) {
     const primarySubMenu = this.menubar.getMenuItemById('subtitle.mainSubtitle').submenu;
-    // @ts-ignore
-    primarySubMenu.clear();
-    items.forEach(({ id, label, checked }) => {
-      const item = new MenuItem({
-        id: `subtitle.mainSubtitle.${id}`,
-        type: 'radio',
-        label,
-        checked,
-        click: () => {
-          if (this.mainWindow) {
-            this.mainWindow.webContents.send('subtitle.mainSubtitle', id);
-          }
-        },
+    if (primarySubMenu) {
+      // @ts-ignore
+      primarySubMenu.clear();
+      items.forEach(({ id, label, checked }) => {
+        const item = new MenuItem({
+          id: `subtitle.mainSubtitle.${id}`,
+          type: 'radio',
+          label,
+          checked,
+          click: () => {
+            if (this.mainWindow) {
+              this.mainWindow.webContents.send('subtitle.mainSubtitle', id);
+            }
+          },
+        });
+        primarySubMenu.append(item);
       });
-      primarySubMenu.append(item);
-    });
-
-    Menu.setApplicationMenu(this.menubar);
+  
+      Menu.setApplicationMenu(this.menubar);
+    }
   }
 
-  public updateSecondarySub(items: { id: string, label: string, checked: boolean, enabled: boolean }[]) {
+  public updateSecondarySub(items: {id: string, label: string, checked: boolean, enabled: boolean }[]) {
     const secondarySubMenu = this.menubar.getMenuItemById('subtitle.secondarySubtitle').submenu;
-    // @ts-ignore
-    secondarySubMenu.clear();
-    items.forEach(({
-      id, label, checked, enabled,
-    }) => {
-      let type: ('normal' | 'separator' | 'submenu' | 'checkbox' | 'radio') = 'radio';
-      if (id === 'secondarySub') type = 'checkbox';
-      else if (id === 'menubar.separator') type = 'separator';
-      const item = new MenuItem({
-        id: `subtitle.secondarySubtitle.${id}`,
-        type,
-        label,
-        checked,
-        enabled,
-        click: () => {
-          if (this.mainWindow) {
-            this.mainWindow.webContents.send('subtitle.secondarySubtitle', id);
-          }
-        },
+    if (secondarySubMenu) {
+      // @ts-ignore
+      secondarySubMenu.clear();
+      items.forEach(({
+        id, label, checked, enabled,
+      }) => {
+        let type: ('normal' | 'separator' | 'submenu' | 'checkbox' | 'radio') = 'radio';
+        if (id === 'secondarySub') type = 'checkbox';
+        else if (id === 'menubar.separator') type = 'separator';
+        const item = new MenuItem({
+          id: `subtitle.secondarySubtitle.${id}`,
+          type,
+          label,
+          checked,
+          enabled,
+          click: () => {
+            if (this.mainWindow) {
+              this.mainWindow.webContents.send('subtitle.secondarySubtitle', id);
+            }
+          },
+        });
+        secondarySubMenu.append(item);
       });
-      secondarySubMenu.append(item);
-    });
 
-    Menu.setApplicationMenu(this.menubar);
+      Menu.setApplicationMenu(this.menubar);
+    }
   }
 
   public updateAudioTrack(items: { id: string, label: string }[]) {
     const audioTrackMenu = this.menubar.getMenuItemById('audio.switchAudioTrack').submenu;
-    // @ts-ignore
-    audioTrackMenu.clear();
-    items.forEach(({ id, label }) => {
-      const item = new MenuItem({
-        id: `audio.switchAudioTrack.${id}`,
-        type: 'radio',
-        label,
-        click: () => {
-          if (this.mainWindow) {
-            this.mainWindow.webContents.send('audio.switchAudioTrack', id);
-          }
-        },
+    if (audioTrackMenu) {
+      // @ts-ignore
+      audioTrackMenu.clear();
+      items.forEach(({ id, label }) => {
+        const item = new MenuItem({
+          id: `audio.switchAudioTrack.${id}`,
+          type: 'radio',
+          label,
+          click: () => {
+            if (this.mainWindow) {
+              this.mainWindow.webContents.send('audio.switchAudioTrack', id);
+            }
+          },
+        });
+        audioTrackMenu.append(item);
       });
-      audioTrackMenu.append(item);
-    });
-
-    Menu.setApplicationMenu(this.menubar);
+    
+      Menu.setApplicationMenu(this.menubar);
+    }
   }
 
   private refreshPlaybackMenu() {
     const playbackMenu = this.menubar.getMenuItemById('playback').submenu;
-    // @ts-ignore
-    playbackMenu.clear();
+    if (playbackMenu) {
+      // @ts-ignore
+      playbackMenu.clear();
 
-    this.getMenuItemTemplate('playback').items.forEach((menuItem: MenubarMenuItem) => {
-      if (isSeparator(menuItem)) {
-        const item = separator();
-        playbackMenu.append(item);
-      } else {
-        if (menuItem.id === 'playback.playOrPause') {
-          menuItem.label = this.paused ? this.$t('msg.playback.play') : this.$t('msg.playback.pause');
+      this.getMenuItemTemplate('playback').items.forEach((menuItem: MenubarMenuItem) => {
+        if (isSeparator(menuItem)) {
+          const item = separator();
+          playbackMenu.append(item);
+        } else {
+          if (menuItem.id === 'playback.playOrPause') {
+            menuItem.label = this.paused ? this.$t('msg.playback.play') : this.$t('msg.playback.pause');
+          }
+          // @ts-ignore
+          if (isAction(menuItem) && this._disable) {
+            menuItem.enabled = !this._disable;
+          }
+          const item = this.createMenuItemByTemplate(menuItem);
+          playbackMenu.append(item);
         }
-        // @ts-ignore
-        if (isAction(menuItem) && this._disable) {
-          menuItem.enabled = !this._disable;
-        }
-        const item = this.createMenuItemByTemplate(menuItem);
-        playbackMenu.append(item);
-      }
-    });
-
-    Menu.setApplicationMenu(this.menubar);
+      });
+  
+      Menu.setApplicationMenu(this.menubar);
+    }
   }
 
   private refreshBrowsingWindowMenu() {
@@ -352,7 +360,7 @@ export default class Menubar {
         }
         if (menuItem.id === 'window.keepPlayingWindowFront') {
           // @ts-ignore
-          menuItem.checked = this.topOnWindow;
+          menuItem.checked = this.playingViewTop;
         }
         if (isAction(menuItem) && this._disable) menuItem.enabled = !this._disable;
         const item = this.createMenuItemByTemplate(menuItem);
@@ -412,11 +420,8 @@ export default class Menubar {
 
     // Window
     const windowMenu = new Menu();
+
     const items = this.getMenuItemTemplate('window').items;
-
-    const floatMenuItem = items.find((item: MenubarMenuItem) => item.id === 'window.keepPlayingWindowFront') as IMenubarMenuItemAction;
-
-    windowMenu.append(this.createMenuItemByTemplate(floatMenuItem));
 
     const fullscreenMenuItem = items.find((item: MenubarMenuItem) => item.id === 'window.fullscreen') as IMenubarMenuItemAction;
 

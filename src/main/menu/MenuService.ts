@@ -69,7 +69,7 @@ export default class MenuService {
       this.updatePaused(paused);
     });
     ipcMain.on('update-top-on-window', (e: Event, topOnWindow: boolean) => {
-      this.menu.updateTopOnWindow(topOnWindow);
+      this.menu.updatePlayingViewTop(topOnWindow);
     });
     ipcMain.on('update-pip', (e: Event, isPip: boolean) => {
       this.updateIsPip(isPip);
