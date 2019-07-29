@@ -45,6 +45,10 @@ export default class Menubar {
 
   private playingViewTop = false;
 
+  private primarySubs: { id: string, label: string, checked: boolean }[];
+
+  private secondarySubs: { id: string, label: string, checked: boolean, enabled: boolean }[];
+
   private _routeName: string;
 
   private _disable: boolean;
@@ -211,58 +215,70 @@ export default class Menubar {
   }
 
   public updatePrimarySub(items: { id: string, label: string, checked: boolean }[]) {
-    const primarySubMenu = this.menubar.getMenuItemById('subtitle.mainSubtitle').submenu;
-    if (primarySubMenu) {
-      // @ts-ignore
-      primarySubMenu.clear();
-      items.forEach(({ id, label, checked }) => {
-        const item = new MenuItem({
-          id: `subtitle.mainSubtitle.${id}`,
-          type: 'radio',
-          label,
-          checked,
-          click: () => {
-            if (this.mainWindow) {
-              this.mainWindow.webContents.send('subtitle.mainSubtitle', id);
-            }
-          },
+    this.primarySubs = items;
+    if (
+      this.menubar.getMenuItemById('subtitle.mainSubtitle')
+      && this.menubar.getMenuItemById('subtitle.mainSubtitle').submenu
+    ) {
+      const primarySubMenu = this.menubar.getMenuItemById('subtitle.mainSubtitle').submenu;
+      if (primarySubMenu) {
+        // @ts-ignore
+        primarySubMenu.clear();
+        items.forEach(({ id, label, checked }) => {
+          const item = new MenuItem({
+            id: `subtitle.mainSubtitle.${id}`,
+            type: 'radio',
+            label,
+            checked,
+            click: () => {
+              if (this.mainWindow) {
+                this.mainWindow.webContents.send('subtitle.mainSubtitle', id);
+              }
+            },
+          });
+          primarySubMenu.append(item);
         });
-        primarySubMenu.append(item);
-      });
 
-      Menu.setApplicationMenu(this.menubar);
+        Menu.setApplicationMenu(this.menubar);
+      }
     }
   }
 
   public updateSecondarySub(
     items: { id: string, label: string, checked: boolean, enabled: boolean }[],
   ) {
-    const secondarySubMenu = this.menubar.getMenuItemById('subtitle.secondarySubtitle').submenu;
-    if (secondarySubMenu) {
-      // @ts-ignore
-      secondarySubMenu.clear();
-      items.forEach(({
-        id, label, checked, enabled,
-      }) => {
-        let type: ('normal' | 'separator' | 'submenu' | 'checkbox' | 'radio') = 'radio';
-        if (id === 'secondarySub') type = 'checkbox';
-        else if (id === 'menubar.separator') type = 'separator';
-        const item = new MenuItem({
-          id: `subtitle.secondarySubtitle.${id}`,
-          type,
-          label,
-          checked,
-          enabled,
-          click: () => {
-            if (this.mainWindow) {
-              this.mainWindow.webContents.send('subtitle.secondarySubtitle', id);
-            }
-          },
+    this.secondarySubs = items;
+    if (
+      this.menubar.getMenuItemById('subtitle.secondarySubtitle')
+      && this.menubar.getMenuItemById('subtitle.secondarySubtitle').submenu
+    ) {
+      const secondarySubMenu = this.menubar.getMenuItemById('subtitle.secondarySubtitle').submenu;
+      if (secondarySubMenu) {
+        // @ts-ignore
+        secondarySubMenu.clear();
+        items.forEach(({
+          id, label, checked, enabled,
+        }) => {
+          let type: ('normal' | 'separator' | 'submenu' | 'checkbox' | 'radio') = 'radio';
+          if (id === 'secondarySub') type = 'checkbox';
+          else if (id === 'menubar.separator') type = 'separator';
+          const item = new MenuItem({
+            id: `subtitle.secondarySubtitle.${id}`,
+            type,
+            label,
+            checked,
+            enabled,
+            click: () => {
+              if (this.mainWindow) {
+                this.mainWindow.webContents.send('subtitle.secondarySubtitle', id);
+              }
+            },
+          });
+          secondarySubMenu.append(item);
         });
-        secondarySubMenu.append(item);
-      });
 
-      Menu.setApplicationMenu(this.menubar);
+        Menu.setApplicationMenu(this.menubar);
+      }
     }
   }
 
