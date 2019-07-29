@@ -194,8 +194,8 @@
       "minimize": "최소화",
       "name": "창문",
       "originSize": "100 %",
-      "enterPip": "",
-      "exitPip": ""
+      "enterPip": "Picture In Picture 사용",
+      "exitPip": "Picture In Picture 퇴출"
     },
     "favourite": {
       "name": "인기 있는 말",
@@ -204,8 +204,8 @@
       "youtube": "Youtube"
     },
     "history": {
-      "name": "",
-      "reload": "",
+      "name": "역사",
+      "reload": "페이지 새로 고침",
       "back": "",
       "forward": ""
     }
