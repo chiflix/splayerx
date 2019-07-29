@@ -201,8 +201,9 @@ new Vue({
       browserWindow.setAlwaysOnTop(val);
     },
     playingViewTop(val: boolean) {
+      console.log(this.currentRouteName === 'playing-view', !this.paused, this.topOnWindow);
       if (this.currentRouteName === 'playing-view' && !this.paused) {
-        this.topOnWindow = true;
+        this.topOnWindow = val;
       }
       this.menuService.updateMenuItemChecked('window.keepPlayingWindowFront', val);
       this.menuService.updatePlayingViewTop(val);
