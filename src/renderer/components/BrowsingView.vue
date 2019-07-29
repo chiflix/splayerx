@@ -315,6 +315,7 @@ export default {
       }
     });
     this.$bus.$on('back-to-landingview', () => {
+      this.updateIsPip(false);
       this.$router.push({
         name: 'landing-view',
       });
