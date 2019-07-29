@@ -204,10 +204,10 @@
       "youtube": "Youtube"
     },
     "history": {
-      "name": "",
-      "reload": "",
-      "back": "",
-      "forward": ""
+      "name": "Historia",
+      "reload": "Recargar página",
+      "back": "Espalda",
+      "forward": "Avance"
     }
   },
   "nextVideo": {
