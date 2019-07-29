@@ -13,6 +13,7 @@ import { IsMacintosh } from '../../shared/common/platform';
 import Locale from '../../shared/common/localize';
 import menuTemplate from './menu.json';
 import { IMenuDisplayInfo } from '../../renderer/interfaces/IRecentPlay';
+import { SubtitleControlListItem } from '../../renderer/interfaces/ISubtitle';
 
 function separator(): Electron.MenuItem {
   return new MenuItem({ type: 'separator' });
@@ -214,7 +215,7 @@ export default class Menubar {
     Menu.setApplicationMenu(this.menubar);
   }
 
-  public updatePrimarySub(items: { id: string, label: string, checked: boolean }[]) {
+  public updatePrimarySub(items: { id: string, label: string, checked: boolean, subtitleItem: SubtitleControlListItem }[]) {
     this.primarySubs = items;
     if (
       this.menubar.getMenuItemById('subtitle.mainSubtitle')
@@ -224,7 +225,10 @@ export default class Menubar {
       if (primarySubMenu) {
         // @ts-ignore
         primarySubMenu.clear();
-        items.forEach(({ id, label, checked }) => {
+        items.forEach(({
+          id, label, checked, subtitleItem,
+        }) => {
+          console.log(subtitleItem);
           const item = new MenuItem({
             id: `subtitle.mainSubtitle.${id}`,
             type: 'radio',
@@ -232,7 +236,7 @@ export default class Menubar {
             checked,
             click: () => {
               if (this.mainWindow) {
-                this.mainWindow.webContents.send('subtitle.mainSubtitle', id);
+                this.mainWindow.webContents.send('subtitle.mainSubtitle', subtitleItem);
               }
             },
           });
@@ -245,7 +249,7 @@ export default class Menubar {
   }
 
   public updateSecondarySub(
-    items: { id: string, label: string, checked: boolean, enabled: boolean }[],
+    items: { id: string, label: string, checked: boolean, enabled: boolean, subtitleItem: SubtitleControlListItem }[],
   ) {
     this.secondarySubs = items;
     if (
@@ -257,7 +261,7 @@ export default class Menubar {
         // @ts-ignore
         secondarySubMenu.clear();
         items.forEach(({
-          id, label, checked, enabled,
+          id, label, checked, enabled, subtitleItem,
         }) => {
           let type: ('normal' | 'separator' | 'submenu' | 'checkbox' | 'radio') = 'radio';
           if (id === 'secondarySub') type = 'checkbox';
@@ -270,7 +274,7 @@ export default class Menubar {
             enabled,
             click: () => {
               if (this.mainWindow) {
-                this.mainWindow.webContents.send('subtitle.secondarySubtitle', id);
+                this.mainWindow.webContents.send('subtitle.secondarySubtitle', subtitleItem);
               }
             },
           });
