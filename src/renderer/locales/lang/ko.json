@@ -206,8 +206,8 @@
     "history": {
       "name": "역사",
       "reload": "페이지 새로 고침",
-      "back": "",
-      "forward": ""
+      "back": "뒤로",
+      "forward": "사전"
     }
   },
   "nextVideo": {
