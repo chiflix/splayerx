@@ -42,7 +42,7 @@ export default class Menubar {
   private isFullScreen = false;
 
   private isPip = false;
-  
+
   private topOnWindow = false;
 
   private _routeName: string;
@@ -232,7 +232,9 @@ export default class Menubar {
     Menu.setApplicationMenu(this.menubar);
   }
 
-  public updateSecondarySub(items: { id: string, label: string, checked: boolean, enabled: boolean }[]) {
+  public updateSecondarySub(
+    items: { id: string, label: string, checked: boolean, enabled: boolean }[],
+  ) {
     const secondarySubMenu = this.menubar.getMenuItemById('subtitle.secondarySubtitle').submenu;
     // @ts-ignore
     secondarySubMenu.clear();
