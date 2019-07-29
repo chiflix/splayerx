@@ -167,6 +167,7 @@ export default {
       if (!val) {
         this.$store.dispatch('updatePipSize', this.winSize);
         this.$store.dispatch('updatePipPos', this.winPos);
+        this.$electron.ipcRenderer.send('update-enabled', 'window.keepPlayingWindowFront', false);
         this.handleWindowChangeExitPip();
         if (this.pipType === 'youtube') {
           this.youtubeRecover();
@@ -180,6 +181,7 @@ export default {
       } else {
         this.$store.dispatch('updateBrowsingSize', this.winSize);
         this.$store.dispatch('updateBrowsingPos', this.winPos);
+        this.$electron.ipcRenderer.send('update-enabled', 'window.keepPlayingWindowFront', true);
         this.timeout = true;
         if (this.timer) {
           clearTimeout(this.timer);
@@ -262,6 +264,7 @@ export default {
       browsingPos: this.browsingPos,
       barrageOpen: this.barrageOpen,
     });
+    this.$bus.$off();
   },
   mounted() {
     this.menuService = new MenuService();

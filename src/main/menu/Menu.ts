@@ -354,7 +354,7 @@ export default class Menubar {
   }
 
   private refreshBrowsingWindowMenu() {
-    const windowMenu = this.menubar.getMenuItemById('window').submenu;
+    const windowMenu = this.menubar.getMenuItemById('browsing.window').submenu;
     // @ts-ignore
     windowMenu.clear();
 
@@ -754,6 +754,7 @@ export default class Menubar {
     const minimizeMenuItem = items.find((item: MenubarMenuItem) => item.id === 'window.minimize') as IMenubarMenuItemRole;
     const maxmizeMenuItem = items.find((item: MenubarMenuItem) => item.id === 'window.maxmize') as IMenubarMenuItemAction;
     const landingViewMenuItem = items.find((item: MenubarMenuItem) => item.id === 'window.backToLandingView') as IMenubarMenuItemAction;
+    floatMenuItem.enabled = false;
 
     const actions = [];
     actions.push(...[
@@ -770,7 +771,7 @@ export default class Menubar {
 
     actions.forEach(i => window.append(i));
 
-    const windowMenuItem = new MenuItem({ id: 'window', label: this.$t('msg.window.name'), submenu: window });
+    const windowMenuItem = new MenuItem({ id: 'browsing.window', label: this.$t('msg.window.name'), submenu: window });
     return windowMenuItem;
   }
 

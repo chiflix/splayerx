@@ -6,12 +6,14 @@ const state = {
   recordUrl: {},
   barrageOpen: false,
   isPip: false,
+  pipAlwaysOnTop: false,
 };
 const getters = {
   initialUrl: state => state.initialUrl,
   recordUrl: state => state.recordUrl,
   barrageOpen: state => state.barrageOpen,
   isPip: state => state.isPip,
+  pipAlwaysOnTop: state => state.pipAlwaysOnTop,
 };
 
 const mutations = {
@@ -27,6 +29,9 @@ const mutations = {
   [browsingMutations.IS_PIP_UPDATE](state, payload) {
     state.isPip = payload;
   },
+  [browsingMutations.PIP_ALWAYS_ON_TOP_UPDATE](state, payload) {
+    state.pipAlwaysOnTop = payload;
+  },
 };
 const actions = {
   [browsingActions.UPDATE_INITIAL_URL]({ commit }, delta) {
@@ -40,6 +45,9 @@ const actions = {
   },
   [browsingActions.UPDATE_IS_PIP]({ commit }, delta) {
     commit(browsingMutations.IS_PIP_UPDATE, delta);
+  },
+  [browsingActions.UPDATE_PIP_ALWAYS_ON_TOP]({ commit }, delta) {
+    commit(browsingMutations.PIP_ALWAYS_ON_TOP_UPDATE, delta);
   },
 };
 export default {
