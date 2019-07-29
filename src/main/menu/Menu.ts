@@ -134,8 +134,10 @@ export default class Menubar {
       this.enableSubmenuItem('playback', enable);
       this.enableSubmenuItem('audio', enable);
       this.enableSubmenuItem('subtitle', enable);
-      this.updatePrimarySub();
-      this.updateSecondarySub();
+      if (enable) {
+        this.updatePrimarySub();
+        this.updateSecondarySub();
+      }
     }
 
     this.enableSubmenuItem('window', enable);
