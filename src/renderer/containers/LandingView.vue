@@ -84,7 +84,6 @@
               item.backgroundUrl && !hideVideoHistoryOnExit
                 ? 'rgba(255,255,255,0.12) ': 'rgba(255,255,255,0.05)',
           }"
-          :class="{ 'backdrop': useBlur }"
           @click="openOrMove"
           class="button"
         >
@@ -158,7 +157,6 @@ export default {
       tranFlag: true,
       shifting: false,
       firstIndex: 0,
-      useBlur: false,
       pageMounted: false,
       logoTransition: '',
       canHover: false,
@@ -442,9 +440,6 @@ $themeColor-Light: white;
       transition: background-color 300ms ease-in;
       transition-delay: 200ms;
       cursor: pointer;
-    }
-    .backdrop {
-      backdrop-filter: blur(9.8px);
     }
 
     .button:hover {

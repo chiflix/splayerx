@@ -4,8 +4,7 @@
     class="container"
   >
     <div
-      :class="useBlur ? 'backdrop' : 'backdrop-fallback'"
-      class="element bottom"
+      class="backdrop-fallback element bottom"
     >
       <div class="element content">
         <slot />
@@ -31,10 +30,6 @@ export default {
       type: Number,
       default: 1,
       validator: (value: number) => value > 0,
-    },
-    useBlur: {
-      type: Boolean,
-      default: false,
     },
   },
   watch: {

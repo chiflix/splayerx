@@ -324,6 +324,57 @@ const actions = {
         dispatch(legacyActions.UPDATE_SUBTITLE_TYPE, true);
       });
   },
+  // 这个方法仅仅给智能翻译成功后去加载另外一个AI翻译
+  async [a.fetchSubtitleWhenTrabslateSuccess](
+    { getters, dispatch, state }: any, languageCode: LanguageCode,
+  ) {
+    const {
+      mediaHash,
+    } = state;
+    const {
+      originSrc,
+    } = getters;
+    const hints = generateHints(originSrc);
+    fetchOnlineListWraper(false, originSrc, languageCode, hints)
+      .then(async (resultsList) => {
+        const results = flatten(resultsList);
+        const newSubtitlesToAdd: TranscriptInfo[] = [];
+        const oldSubtitlesToDel: SubtitleControlListItem[] = [];
+        const oldSubtitles = [...(getters as { list: SubtitleControlListItem[] }).list];
+        // 删除这个语言已经加载的字幕
+        const lastSubs = remove(
+          oldSubtitles,
+          ({ type, language }) => (
+            (type === Type.Translated || type === Type.Online)
+            && language === languageCode
+          ),
+        );
+        oldSubtitlesToDel.push(...lastSubs);
+        // add subtitles not existed in the old subtitles
+        const isAllResultsFromES = results
+          .every((info: TranscriptInfo) => info.tagsList.length > 0 && info.tagsList.indexOf('ES') > -1);
+        let addAIButton = false;
+        if (results.length === 0 || isAllResultsFromES) {
+          addAIButton = true;
+          newSubtitlesToAdd.push(...results.splice(0, 2));
+        } else {
+          newSubtitlesToAdd.push(...results);
+        }
+        return {
+          delete: oldSubtitlesToDel,
+          add: newSubtitlesToAdd,
+          addAIButton,
+        };
+      }).then(async (result) => {
+        if (result.addAIButton) {
+          dispatch(a.addSubtitle, {
+            generator: new TranslatedGenerator(null, languageCode), mediaHash,
+          });
+        }
+        await dispatch(a.addOnlineSubtitles, { mediaHash, source: result.add })
+          .then(() => dispatch(a.deleteSubtitlesByUuid, result.delete));
+      });
+  },
   async [a.refreshOnlineSubtitles](
     { getters, dispatch }: any,
     { mediaHash, bubble }: { mediaHash: string, bubble: boolean },

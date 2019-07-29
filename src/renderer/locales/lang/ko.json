@@ -193,13 +193,21 @@
       "maxmize": "줌",
       "minimize": "최소화",
       "name": "창문",
-      "originSize": "100 %"
+      "originSize": "100 %",
+      "enterPip": "Picture In Picture 사용",
+      "exitPip": "Picture In Picture 퇴출"
     },
     "favourite": {
       "name": "인기 있는 말",
       "iqiyi": "iQIYI",
       "bilibili": "Bilibili",
       "youtube": "Youtube"
+    },
+    "history": {
+      "name": "역사",
+      "reload": "페이지 새로 고침",
+      "back": "뒤로",
+      "forward": "사전"
     }
   },
   "nextVideo": {

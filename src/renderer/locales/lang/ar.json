@@ -193,13 +193,21 @@
       "maxmize": "تكبير",
       "minimize": "خفض",
       "name": "نافذة او شباك",
-      "originSize": "100٪"
+      "originSize": "100٪",
+      "enterPip": "أدخل صورة في صورة",
+      "exitPip": "الخروج من الصورة في صورة"
     },
     "favourite": {
       "name": "مفضل",
       "iqiyi": "iQIYI",
       "bilibili": "Bilibili",
       "youtube": "Youtube"
+    },
+    "history": {
+      "name": "التاريخ",
+      "reload": "إعادة تحميل الصفحة",
+      "back": "ظهر",
+      "forward": "تقدم"
     }
   },
   "nextVideo": {

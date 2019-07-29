@@ -321,17 +321,23 @@
     "items": [
       {
         "id": "history.reload",
-        "label": "msg.history.reload"
+        "label": "msg.history.reload",
+        "accelerator": "CmdOrCtrl + R"
+      },
+      {
+        "id": "menubar.separator"
       },
       {
         "id": "history.back",
         "label": "msg.history.back",
-        "enabled": false
+        "enabled": false,
+        "accelerator": "CmdOrCtrl + ["
       },
       {
         "id": "history.forward",
         "label": "msg.history.forward",
-        "enabled": false
+        "enabled": false,
+        "accelerator": "CmdOrCtrl + ]"
       }
     ]
   },

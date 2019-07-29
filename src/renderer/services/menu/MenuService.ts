@@ -1,6 +1,5 @@
 import { ipcRenderer, remote, MenuItem } from 'electron';
 import { recentPlayService } from '../media/RecentPlayService';
-import { log } from '@/libs/Log';
 
 export default class MenuService {
   private menu?: Electron.Menu;
@@ -25,12 +24,20 @@ export default class MenuService {
     ipcRenderer.send('update-paused', paused);
   }
 
+  public updatePlayingViewTop(topOnWindow: boolean) {
+    ipcRenderer.send('update-top-on-window', topOnWindow);
+  }
+
   public updatePip(isPip: boolean) {
     ipcRenderer.send('update-pip', isPip);
   }
 
   public updateMenuItemChecked(id: string, checked: boolean) {
-    if (this.getMenuItemById(id)) this.getMenuItemById(id).checked = checked;
+    ipcRenderer.send('update-checked', id, checked);
+  }
+
+  public updateMenuItemEnabled(id: string, enabled: boolean) {
+    ipcRenderer.send('update-enabled', id, enabled);
   }
 
   public resolveMute(state: boolean) {
