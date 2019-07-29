@@ -1,6 +1,7 @@
 import { ipcMain } from 'electron';
 import Menu from './Menu';
 import { IMenuDisplayInfo } from '../../renderer/interfaces/IRecentPlay';
+import { SubtitleControlListItem } from '../../renderer/interfaces/ISubtitle';
 
 export default class MenuService {
   private menu: Menu;
@@ -53,10 +54,10 @@ export default class MenuService {
     ipcMain.on('update-recent-play', (e: Event, items: IMenuDisplayInfo[]) => {
       this.menu.updateRecentPlay(items);
     });
-    ipcMain.on('update-primary-sub', (e: Event, items: { id: string, label: string }[]) => {
+    ipcMain.on('update-primary-sub', (e: Event, items: { id: string, label: string, checked: boolean, subtitleItem: SubtitleControlListItem }[]) => {
       this.menu.updatePrimarySub(items);
     });
-    ipcMain.on('update-secondary-sub', (e: Event, items: { id: string, label: string }[]) => {
+    ipcMain.on('update-secondary-sub', (e: Event, items: { id: string, label: string, checked: boolean, enabled: boolean, subtitleItem: SubtitleControlListItem }[]) => {
       this.menu.updateSecondarySub(items);
     });
     ipcMain.on('update-audio-track', (e: Event, items: { id: string, label: string }[]) => {
@@ -67,6 +68,9 @@ export default class MenuService {
     });
     ipcMain.on('update-paused', (e: Event, paused: boolean) => {
       this.updatePaused(paused);
+    });
+    ipcMain.on('update-top-on-window', (e: Event, topOnWindow: boolean) => {
+      this.menu.updatePlayingViewTop(topOnWindow);
     });
     ipcMain.on('update-pip', (e: Event, isPip: boolean) => {
       this.updateIsPip(isPip);
