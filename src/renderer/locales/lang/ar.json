@@ -106,6 +106,8 @@
     },
     "help": {
       "name": "مساعدة",
+      "feedback": "ردود الفعل",
+      "homepage": "موقع الكتروني",
       "splayerxHelp": "مساعدة",
       "shortCuts": "قائمة الاختصارات",
       "crashReportLocation": "عرض سجل الأخطاء",
@@ -114,7 +116,6 @@
     "playback": {
       "backwardL": "خطوة الى الوراء - 60s",
       "backwardS": "خطوة الى الوراء - 5S",
-      "windowRotate": "تدوير °90 في اتجاه عقارب الساعة",
       "captureScreen": "التقاط الشاشة",
       "captureVideoClip": "التقاط الفيديو كليب",
       "decreasePlaybackSpeed": "تقليل سرعة التشغيل",
@@ -122,7 +123,6 @@
       "forwardS": "خطوة إلى الأمام 5s",
       "fullScreen": "شاشة كاملة",
       "increasePlaybackSpeed": "زيادة سرعة التشغيل",
-      "keepPlayingWindowFront": "تطفو عند اللعب",
       "name": "تشغيل",
       "pause": "وقفة",
       "play": "لعب",
@@ -134,10 +134,8 @@
     },
     "splayerx": {
       "about": "حول SPlayer",
-      "feedback": "ردود الفعل",
       "hide": "إخفاء",
       "hideOthers": "إخفاء الآخرين",
-      "homepage": "موقع الكتروني",
       "preferences": "تفضيلات",
       "quit": "قم بإنهاء برنامج SPlayer",
       "showAll": "عرض الكل"
@@ -159,6 +157,8 @@
       "noSubtitle": "غير معثور عليه",
       "notToShowSubtitle": "قريب",
       "secondarySubtitle": "الترجمة الثانوية",
+      "subtitleSetting": "إعدادات الترجمة",
+      "subtitleDelay": "العنوان الفرعي تأخير",
       "size1": "صغير",
       "size2": "اساسي",
       "size3": "كبير",
@@ -182,6 +182,8 @@
       "yes": "نعم فعلا"
     },
     "window": {
+      "windowRotate": "درجة في اتجاه عقارب الساعة",
+      "keepPlayingWindowFront": "تطفو عند اللعب",
       "backToLandingView": "العودة إلى صفحة الإطلاق",
       "bossKey": "مدرب مفتاح",
       "doubleSize": "200٪",
@@ -191,7 +193,21 @@
       "maxmize": "تكبير",
       "minimize": "خفض",
       "name": "نافذة او شباك",
-      "originSize": "100٪"
+      "originSize": "100٪",
+      "enterPip": "أدخل صورة في صورة",
+      "exitPip": "الخروج من الصورة في صورة"
+    },
+    "favourite": {
+      "name": "مفضل",
+      "iqiyi": "iQIYI",
+      "bilibili": "Bilibili",
+      "youtube": "Youtube"
+    },
+    "history": {
+      "name": "التاريخ",
+      "reload": "إعادة تحميل الصفحة",
+      "back": "ظهر",
+      "forward": "تقدم"
     }
   },
   "nextVideo": {

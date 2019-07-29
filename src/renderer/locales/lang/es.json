@@ -106,6 +106,8 @@
     },
     "help": {
       "name": "Ayuda",
+      "feedback": "Realimentación",
+      "homepage": "Sitio web",
       "splayerxHelp": "Ayuda",
       "shortCuts": "Lista de accesos directos",
       "crashReportLocation": "Ver registro de errores",
@@ -114,7 +116,6 @@
     "playback": {
       "backwardL": "Paso atrás -60s",
       "backwardS": "Paso hacia atrás -5s",
-      "windowRotate": "Girar 90 en sentido horario",
       "captureScreen": "Captura de pantalla",
       "captureVideoClip": "Captura de video clip",
       "decreasePlaybackSpeed": "Disminuir la velocidad de reproducción",
@@ -122,7 +123,6 @@
       "forwardS": "Paso adelante 5s",
       "fullScreen": "Pantalla Completa",
       "increasePlaybackSpeed": "Aumentar la velocidad de reproducción",
-      "keepPlayingWindowFront": "Flotar al jugar",
       "name": "Reproducción",
       "pause": "Pausa",
       "play": "Jugar",
@@ -134,10 +134,8 @@
     },
     "splayerx": {
       "about": "Acerca de SPlayer",
-      "feedback": "Realimentación",
       "hide": "Esconder",
       "hideOthers": "Esconder otros",
-      "homepage": "Sitio web",
       "preferences": "Preferencias",
       "quit": "Salir de SPlayer",
       "showAll": "Mostrar todo"
@@ -159,6 +157,8 @@
       "noSubtitle": "Extraviado",
       "notToShowSubtitle": "Cerrar",
       "secondarySubtitle": "Subtitulo secundario",
+      "subtitleSetting": "Ajustes de subtítulos",
+      "subtitleDelay": "Retraso de subtítulos",
       "size1": "Pequeño",
       "size2": "Estándar",
       "size3": "Grande",
@@ -182,6 +182,8 @@
       "yes": "Sí"
     },
     "window": {
+      "windowRotate": "Girar 90 en sentido horario",
+      "keepPlayingWindowFront": "Flotar al jugar",
       "backToLandingView": "Volver a la página de inicio",
       "bossKey": "Clave de jefe",
       "doubleSize": "200%",
@@ -191,7 +193,21 @@
       "maxmize": "Enfocar",
       "minimize": "Minimizar",
       "name": "Ventana",
-      "originSize": "100%"
+      "originSize": "100%",
+      "enterPip": "Habilitar Picture in Picture",
+      "exitPip": "Salir de Picture in Picture"
+    },
+    "favourite": {
+      "name": "Favoritos",
+      "iqiyi": "iQIYI",
+      "bilibili": "Bilibili",
+      "youtube": "Youtube"
+    },
+    "history": {
+      "name": "Historia",
+      "reload": "Recargar página",
+      "back": "Espalda",
+      "forward": "Avance"
     }
   },
   "nextVideo": {
