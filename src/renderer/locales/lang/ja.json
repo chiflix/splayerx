@@ -326,24 +326,42 @@
     "title": ""
   },
   "translateModal": {
-    "title": "ビデオソースの言語を選択",
-    "translateTitle": "{time} について",
-    "minute": "{number} 分",
-    "second": "{number} 秒",
-    "hour": "{number} 時間",
-    "successTitle": "翻訳完了",
-    "failTitle": "翻訳失敗",
-    "cancelTitle": "AI翻訳が進行中です",
-    "selectDescription": "翻訳結果を生成するには、ビデオで聞く言語を選択して[生成] ボタンをクリックしてください。",
     "selectLanguageLabel": "音声の言語",
+    "select": {
+      "title": "ビデオソースの言語を選択",
+      "content": "翻訳結果を生成するには、ビデオで聞く言語を選択して[生成] ボタンをクリックしてください。"
+    },
+    "translate": {
+      "title": "{time} について",
+      "content": "動画をスキップしたり、アプリケーションを閉じたりしないでください翻訳パネルで進行状況を確認できます。",
+      "minute": "{number} 分",
+      "second": "{number} 秒",
+      "hour": "{number} 時間"
+    },
+    "success": {
+      "title": "翻訳完了",
+      "content": "AIの翻訳は完了し、翻訳結果リストに表示されます。"
+    },
+    "discard": {
+      "title": "AI翻訳が進行中です",
+      "content": "翻訳をキャンセルするには終了をクリックします終了後、翻訳の進行状況は復元されません。"
+    },
+    "noLineFail": {
+      "title": "ネットワークエラー",
+      "content": "ネットワーク接続を確認して、もう一度お試しください"
+    },
+    "timeOutFail": {
+      "title": "接続タイムアウト",
+      "content": "サーバーへの接続に失敗しました。後でもう一度やり直してください!"
+    },
+    "serverErrorFail": {
+      "title": "翻訳失敗",
+      "content": "サーバーエラーのため翻訳に失敗しました。 後でお試しください。"
+    },
     "cancel": "キャンセル",
     "quit": "やめる",
     "generate": "生成する",
-    "translateDescription": "動画をスキップしたり、アプリケーションを閉じたりしないでください翻訳パネルで進行状況を確認できます。",
     "ok": "はい",
-    "successDescriptiton": "AIの翻訳は完了し、翻訳結果リストに表示されます。",
-    "failDescription": "後でもう一度やり直してください、ありがとう。",
-    "cancelDescription": "翻訳をキャンセルするには終了をクリックします終了後、翻訳の進行状況は復元されません。",
     "continue": "キャンセル"
   },
   "translateBubble": {
@@ -358,9 +376,17 @@
       "title": "",
       "content": "AIの翻訳は完了し、次回ビデオを開いたときに自動的に表示されます。"
     },
-    "bubbleTranslateFail": {
-      "title": "翻訳に失敗しました",
-      "content": "後でもう一度やり直してください、ありがとう。"
+    "bubbleTranslateNoLineFail": {
+      "title": "ネットワークエラー",
+      "content": "ネットワーク接続を確認して、もう一度お試しください"
+    },
+    "bubbleTranslateTimeOutFail": {
+      "title": "接続タイムアウト",
+      "content": "サーバーへの接続に失敗しました。後でもう一度やり直してください!"
+    },
+    "bubbleTranslateServerErrorFail": {
+      "title": "翻訳失敗",
+      "content": "サーバーエラーのため翻訳に失敗しました。 後でお試しください。"
     },
     "ok": "はい",
     "cancel": "キャンセル",

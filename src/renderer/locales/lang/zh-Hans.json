@@ -326,24 +326,42 @@
     "title": ""
   },
   "translateModal": {
-    "title": "选择视频源语言",
-    "translateTitle": "大约还需 {time}",
-    "minute": "{number} 分钟",
-    "second": "{number} 秒",
-    "hour": "{number} 小时",
-    "successTitle": "翻译完成",
-    "failTitle": "翻译失败",
-    "cancelTitle": "AI翻译正在进行中",
-    "selectDescription": "如要生成智能翻译，请选择您在视频中所听到的语言并点击生成，该过程将持续一段时间。",
     "selectLanguageLabel": "视频源语言",
+    "select": {
+      "title": "选择视频源语言",
+      "content": "如要生成智能翻译，请选择您在视频中所听到的语言并点击生成，该过程将持续一段时间。"
+    },
+    "translate": {
+      "title": "大约还需 {time}",
+      "content": "请不要切换视频或关闭播放器，您可以在该视频的翻译结果列表中查看进度。",
+      "minute": "{number} 分钟",
+      "second": "{number} 秒",
+      "hour": "{number} 小时"
+    },
+    "success": {
+      "title": "翻译完成",
+      "content": "AI翻译已完成，可在翻译结果列表中查看。"
+    },
+    "discard": {
+      "title": "AI翻译正在进行中",
+      "content": "点击退出取消翻译，退出后翻译进度将不可恢复。"
+    },
+    "noLineFail": {
+      "title": "网络错误",
+      "content": "请检查网络连接并重试。"
+    },
+    "timeOutFail": {
+      "title": "网络超时",
+      "content": "连接服务器失败，请稍后重试。"
+    },
+    "serverErrorFail": {
+      "title": "翻译失败",
+      "content": "云端处理错误，请稍后重试。"
+    },
     "cancel": "取消",
     "quit": "退出",
     "generate": "生成",
-    "translateDescription": "请不要切换视频或关闭播放器，您可以在该视频的翻译结果列表中查看进度。",
     "ok": "好的",
-    "successDescriptiton": "AI翻译已完成，可在翻译结果列表中查看。",
-    "failDescription": "请稍后重试，谢谢。",
-    "cancelDescription": "点击退出取消翻译，退出后翻译进度将不可恢复。",
     "continue": "取消"
   },
   "translateBubble": {
@@ -358,9 +376,17 @@
       "title": "",
       "content": "AI 翻译已完成，将在下次打开视频时自动显示。"
     },
-    "bubbleTranslateFail": {
+    "bubbleTranslateNoLineFail": {
+      "title": "网络错误",
+      "content": "请检查网络连接并重试。"
+    },
+    "bubbleTranslateTimeOutFail": {
+      "title": "网络超时",
+      "content": "连接服务器失败，请稍后重试。"
+    },
+    "bubbleTranslateServerErrorFail": {
       "title": "翻译失败",
-      "content": "请稍后重试，谢谢。"
+      "content": "云端处理错误，请稍后重试。"
     },
     "ok": "好的",
     "cancel": "取消",

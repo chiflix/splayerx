@@ -326,24 +326,42 @@
     "title": ""
   },
   "translateModal": {
-    "title": "Seleccionar idioma de audio",
-    "translateTitle": "Acerca de {time} izquierda",
-    "minute": "{number} min",
-    "second": "{number} seg",
-    "hour": "{number} hr",
-    "successTitle": "Traducción realizada",
-    "failTitle": "Error al traducir",
-    "cancelTitle": "La traducción de AI está en curso",
-    "selectDescription": "Para generar un resultado de tranlación, por favor seleccione el idioma que escuche en el vídeo y haga clic en el botón generar. El proceso puede tardar algún tiempo.",
     "selectLanguageLabel": "Idioma de audio",
+    "select": {
+      "title": "Seleccionar idioma de audio",
+      "content": "Para generar un resultado de tranlación, por favor seleccione el idioma que escuche en el vídeo y haga clic en el botón generar. El proceso puede tardar algún tiempo."
+    },
+    "translate": {
+      "title": "Acerca de {time} izquierda",
+      "content": "Por favor, no omita el vídeo o cierra la aplicación. Puedes comprobar el progreso en el panel de traducción.",
+      "minute": "{number} min",
+      "second": "{number} seg",
+      "hour": "{number} hr"
+    },
+    "success": {
+      "title": "Traducción realizada",
+      "content": "AI Translation está lista, por favor, revisa el panel de traducción."
+    },
+    "discard": {
+      "title": "La traducción de AI está en curso",
+      "content": "¿Estás seguro de que quieres salir? Si te sales, el progreso de la traducción no se restaurará."
+    },
+    "noLineFail": {
+      "title": "Algo ha ido mal",
+      "content": "Comprueba tu conexión de red y vuelve a intentarlo."
+    },
+    "timeOutFail": {
+      "title": "El tiempo para la conexión ha acabado",
+      "content": "서버에 대한 연결이 실패했습니다. 나중에 다시 시도 해주세요."
+    },
+    "serverErrorFail": {
+      "title": "Error al traducir",
+      "content": "La traducción ha fallado debido a un error del servidor. Por favor, inténtalo más tarde."
+    },
     "cancel": "Cancelar",
     "quit": "Salir",
     "generate": "Generar",
-    "translateDescription": "Por favor, no omita el vídeo o cierra la aplicación. Puedes comprobar el progreso en el panel de traducción.",
     "ok": "OK",
-    "successDescriptiton": "AI Translation está lista, por favor, revisa el panel de traducción.",
-    "failDescription": "Por favor, inténtelo más tarde, gracias.",
-    "cancelDescription": "¿Estás seguro de que quieres salir? Si te sales, el progreso de la traducción no se restaurará.",
     "continue": "Cancelar"
   },
   "translateBubble": {
@@ -358,9 +376,17 @@
       "title": "",
       "content": "La traducción de AI está lista ahora. Será cargada automáticamente la próxima vez que veas el vídeo."
     },
-    "bubbleTranslateFail": {
+    "bubbleTranslateNoLineFail": {
+      "title": "네트워크 오류",
+      "content": "Comprueba tu conexión de red y vuelve a intentarlo."
+    },
+    "bubbleTranslateTimeOutFail": {
+      "title": "El tiempo para la conexión ha acabado",
+      "content": "서버에 대한 연결이 실패했습니다. 나중에 다시 시도 해주세요."
+    },
+    "bubbleTranslateServerErrorFail": {
       "title": "Error al traducir",
-      "content": "Por favor, inténtelo más tarde, gracias."
+      "content": "La traducción ha fallado debido a un error del servidor. Por favor, inténtalo más tarde."
     },
     "ok": "OK",
     "cancel": "Cancelar",
