@@ -1,21 +1,46 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 console.log('preloaded~~~~~~~');
-const { ipcRenderer } = require('electron');
+const { ipcRenderer, remote } = require('electron');
+const mouse = process.platform === 'win32' ? require('win-mouse')() : null;
 
 let mousedown = false;
 let isDragging = false;
+let mousedownPos = null;
+let windowSize = null;
 function sendToHost(channel, message) {
   ipcRenderer.sendToHost(channel, message);
+}
+function getRatio() {
+  return window.devicePixelRatio || 1;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('mousedown', (evt) => {
     mousedown = true;
+    mousedownPos = [evt.clientX, evt.clientY];
+    if (getRatio() !== 1) {
+      windowSize = remote.getCurrentWindow().getSize();
+    }
   }, true);
   window.addEventListener('mouseup', (evt) => {
     mousedown = false;
+    mousedownPos = null;
+    windowSize = null;
     if (isDragging) evt.stopImmediatePropagation();
   }, true);
+  if (mouse) {
+    mouse.on('left-drag', (x, y) => {
+      sendToHost('mousemove', 'isMoving');
+      isDragging = true;
+      if (mousedownPos) {
+        sendToHost('left-drag', {
+          windowSize,
+          x: Math.round(x / getRatio() - mousedownPos[0]),
+          y: Math.round(y / getRatio() - mousedownPos[1]),
+        });
+      }
+    });
+  }
   window.addEventListener('mousemove', (evt) => {
     sendToHost('mousemove', 'isMoving');
     if (mousedown) isDragging = true;
@@ -23,6 +48,8 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('click', (evt) => {
     if (isDragging) evt.stopImmediatePropagation();
     isDragging = false;
+    mousedownPos = null;
+    windowSize = null;
   }, true);
   window.addEventListener('drop', (evt) => {
     evt.preventDefault();
