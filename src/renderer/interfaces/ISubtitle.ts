@@ -133,3 +133,5 @@ export type Subtitle = {
   loading: string,
   type: string,
 }
+
+export const NOT_SELECTED_SUBTITLE = 'NOT_SELECTED_SUBTITLE';

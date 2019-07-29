@@ -116,7 +116,7 @@ import {
   SubtitleManager as smActions,
   AudioTranslate as atActions,
 } from '@/store/actionTypes';
-import { SubtitleControlListItem, Type } from '@/interfaces/ISubtitle';
+import { SubtitleControlListItem, Type, NOT_SELECTED_SUBTITLE } from '@/interfaces/ISubtitle';
 import lottie from '@/components/lottie.vue';
 import animationData from '@/assets/subtitle.json';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
@@ -197,6 +197,13 @@ export default {
     },
     currentSubtitleIndex() {
       const { computedAvailableItems } = this;
+      if (
+        (this.isFirstSubtitle && this.primarySubtitleId === NOT_SELECTED_SUBTITLE)
+        || (
+          !this.isFirstSubtitle && this.enabledSecondarySub
+          && this.secondarySubtitleId === NOT_SELECTED_SUBTITLE
+        )
+      ) return -2;
       return !this.isFirstSubtitle && this.enabledSecondarySub
         ? computedAvailableItems
           .findIndex((sub: SubtitleControlListItem) => sub.id === this.secondarySubtitleId)
@@ -372,8 +379,8 @@ export default {
       clearMousedown: InputActions.MOUSEDOWN_UPDATE,
       clearMouseup: InputActions.MOUSEUP_UPDATE,
       initializeManager: smActions.initializeManager,
-      changeFirstSubtitle: smActions.changePrimarySubtitle,
-      changeSecondarySubtitle: smActions.changeSecondarySubtitle,
+      changeFirstSubtitle: smActions.manualChangePrimarySubtitle,
+      changeSecondarySubtitle: smActions.manualChangeSecondarySubtitle,
       refreshSubtitles: smActions.refreshSubtitles,
       deleteCurrentSubtitle: smActions.deleteSubtitlesByUuid,
       updateSubtitleType: subtitleActions.UPDATE_SUBTITLE_TYPE,

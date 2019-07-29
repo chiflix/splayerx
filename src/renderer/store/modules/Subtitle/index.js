@@ -299,7 +299,7 @@ const actions = {
   },
   [subtitleActions.UPDATE_ENABLED_SECONDARY_SUBTITLE]({ commit, rootGetters }, delta) {
     commit(subtitleMutations.SECONDARY_SUBTITLE_ENABLED_UPDATE, delta);
-    if (rootGetters.secondarySubtitleId) store.dispatch(realSubtitleActions.changeSecondarySubtitle, '');
+    if (rootGetters.secondarySubtitleId) store.dispatch(realSubtitleActions.autoChangeSecondarySubtitle, '');
   },
   [subtitleActions.UPDATE_LAST_SUBTITLE_SIZE]({ commit }, delta) {
     commit(subtitleMutations.LAST_SUBTITLE_SIZE_UPDATE, delta);
