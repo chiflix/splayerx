@@ -46,9 +46,14 @@ export default class Menubar {
 
   private playingViewTop = false;
 
-  private primarySubs: { id: string, label: string, checked: boolean }[];
+  private primarySubs: {
+    id: string, label: string, checked: boolean, subtitleItem: SubtitleControlListItem,
+  }[];
 
-  private secondarySubs: { id: string, label: string, checked: boolean, enabled: boolean }[];
+  private secondarySubs: {
+    id: string, label: string, checked: boolean,
+    enabled: boolean, subtitleItem: SubtitleControlListItem,
+  }[];
 
   private _routeName: string;
 
@@ -129,6 +134,8 @@ export default class Menubar {
       this.enableSubmenuItem('playback', enable);
       this.enableSubmenuItem('audio', enable);
       this.enableSubmenuItem('subtitle', enable);
+      this.updatePrimarySub();
+      this.updateSecondarySub();
     }
 
     this.enableSubmenuItem('window', enable);
@@ -216,9 +223,11 @@ export default class Menubar {
   }
 
   public updatePrimarySub(
-    items: { id: string, label: string, checked: boolean, subtitleItem: SubtitleControlListItem }[],
+    items?: {
+      id: string, label: string, checked: boolean, subtitleItem: SubtitleControlListItem,
+    }[],
   ) {
-    this.primarySubs = items;
+    if (items) this.primarySubs = items;
     if (
       this.menubar.getMenuItemById('subtitle.mainSubtitle')
       && this.menubar.getMenuItemById('subtitle.mainSubtitle').submenu
@@ -227,7 +236,7 @@ export default class Menubar {
       if (primarySubMenu) {
         // @ts-ignore
         primarySubMenu.clear();
-        items.forEach(({
+        this.primarySubs.forEach(({
           id, label, checked, subtitleItem,
         }) => {
           const item = new MenuItem({
@@ -237,7 +246,7 @@ export default class Menubar {
             checked,
             click: () => {
               if (this.mainWindow) {
-                if (subtitleItem.type === Type.Translated) this.menubar.getMenuItemById('subtitle.mainSubtitle.off').checked = true;
+                if (subtitleItem && subtitleItem.type === Type.Translated) this.menubar.getMenuItemById('subtitle.mainSubtitle.off').checked = true;
                 this.mainWindow.webContents.send('subtitle.mainSubtitle', id, subtitleItem);
               }
             },
@@ -251,12 +260,12 @@ export default class Menubar {
   }
 
   public updateSecondarySub(
-    items: {
+    items?: {
       id: string, label: string, checked: boolean,
       enabled: boolean, subtitleItem: SubtitleControlListItem,
     }[],
   ) {
-    this.secondarySubs = items;
+    if (items) this.secondarySubs = items;
     if (
       this.menubar.getMenuItemById('subtitle.secondarySubtitle')
       && this.menubar.getMenuItemById('subtitle.secondarySubtitle').submenu
@@ -265,7 +274,7 @@ export default class Menubar {
       if (secondarySubMenu) {
         // @ts-ignore
         secondarySubMenu.clear();
-        items.forEach(({
+        this.secondarySubs.forEach(({
           id, label, checked, enabled, subtitleItem,
         }) => {
           let type: ('normal' | 'separator' | 'submenu' | 'checkbox' | 'radio') = 'radio';
@@ -279,7 +288,7 @@ export default class Menubar {
             enabled,
             click: () => {
               if (this.mainWindow) {
-                if (subtitleItem.type === Type.Translated) this.menubar.getMenuItemById('subtitle.secondarySubtitle.off').checked = true;
+                if (subtitleItem && subtitleItem.type === Type.Translated) this.menubar.getMenuItemById('subtitle.secondarySubtitle.off').checked = true;
                 this.mainWindow.webContents.send('subtitle.secondarySubtitle', id, subtitleItem);
               }
             },
