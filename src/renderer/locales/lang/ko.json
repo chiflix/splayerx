@@ -326,24 +326,42 @@
     "title": ""
   },
   "translateModal": {
-    "title": "오디오 언어 선택",
-    "translateTitle": "{time} 정보 남음",
-    "minute": "{number} 분",
-    "second": "{number} 초",
-    "hour": "{number} 시간",
-    "successTitle": "번역 완료",
-    "failTitle": "번역 실패",
-    "cancelTitle": "인공 지능 번역이 진행 중입니다.",
-    "selectDescription": "번역 결과를 생성하려면 동영상에서 들리는 언어를 선택하고 생성 버튼을 클릭하십시오. 과정에 약간의 시간이 걸릴 수 있습니다.",
     "selectLanguageLabel": "오디오 언어",
+    "select": {
+      "title": "",
+      "content": ""
+    },
+    "translate": {
+      "title": "",
+      "content": "",
+      "minute": "",
+      "second": "",
+      "hour": ""
+    },
+    "success": {
+      "title": "",
+      "content": ""
+    },
+    "discard": {
+      "title": "",
+      "content": ""
+    },
+    "noLineFail": {
+      "title": "",
+      "content": ""
+    },
+    "timeOutFail": {
+      "title": "",
+      "content": ""
+    },
+    "serverErrorFail": {
+      "title": "",
+      "content": ""
+    },
     "cancel": "취소",
     "quit": "떠나다",
     "generate": "일으키다",
-    "translateDescription": "비디오를 건너 뛰거나 응용 프로그램을 닫지 마십시오. 번역 패널에서 진행률을 확인할 수 있습니다.",
     "ok": "승인",
-    "successDescriptiton": "AI 번역이 준비되었습니다. 번역 패널에서 확인하십시오.",
-    "failDescription": "고마워요. 나중에 시도해주세요.",
-    "cancelDescription": "종료 하시겠습니까? 종료하면 번역 진행 상태가 복원되지 않습니다.",
     "continue": "취소"
   },
   "translateBubble": {
@@ -358,9 +376,17 @@
       "title": "",
       "content": "AI 번역이 준비되었습니다. 다음에 비디오를 볼 때 자동으로로드됩니다."
     },
-    "bubbleTranslateFail": {
-      "title": "번역 실패",
-      "content": "고마워요. 나중에 시도해주세요."
+    "bubbleTranslateNoLineFail": {
+      "title": "",
+      "content": ""
+    },
+    "bubbleTranslateTimeOutFail": {
+      "title": "",
+      "content": ""
+    },
+    "bubbleTranslateServerErrorFail": {
+      "title": "",
+      "content": ""
     },
     "ok": "승인",
     "cancel": "취소",
