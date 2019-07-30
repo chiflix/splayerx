@@ -141,7 +141,10 @@ const actions = {
     if (subtitle) {
       const { entity, loader } = subtitle;
       entity.payload = await loader();
-      await dispatch(a.cache);
+      // 如果是translate 按钮就skip
+      if (entity && !(entity.type === Type.Translated && entity.payload === '')) {
+        await dispatch(a.cache);
+      }
     }
   },
   async [a.getDialogues]({ state, rootGetters, dispatch }: any, time: number) {
@@ -195,7 +198,7 @@ const actions = {
   async [a.delete]({ state, rootGetters }: any) {
     const subtitleToRemoveFromList = rootGetters.list
       .find((sub: SubtitleControlListItem) => sub.id === state.moduleId);
-    const { playlistId, mediaItemId } = store.state.SubtitleManager;
+    const { mediaHash } = store.state.SubtitleManager;
     const subtitle = subtitleMap.get(state.moduleId);
     if (subtitle) {
       subtitleMap.delete(state.moduleId);
@@ -205,7 +208,7 @@ const actions = {
         if (cachedSource) await removeSubtitle({ ...subtitle.entity, source: cachedSource });
       }
     }
-    removeSubtitleItemsFromList([subtitleToRemoveFromList], playlistId, mediaItemId);
+    removeSubtitleItemsFromList([subtitleToRemoveFromList], mediaHash);
   },
   async [a.upload]({ state, dispatch, rootGetters }: any) {
     const subtitle = subtitleMap.get(state.moduleId);

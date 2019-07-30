@@ -1,25 +1,31 @@
 import path from 'path';
 import fs from 'fs';
-import { credentials, Metadata } from 'grpc';
+import grpc, { credentials, Metadata } from 'grpc';
 import Vue from 'vue';
-
 import { HealthCheckRequest, HealthCheckResponse } from 'sagi-api/health/v1/health_pb';
 import { HealthClient } from 'sagi-api/health/v1/health_grpc_pb';
-import { MediaTranslationRequest, MediaTranslationResponse, TranscriptRequest } from 'sagi-api/translation/v1/translation_pb';
+import {
+  MediaTranslationRequest,
+  TranscriptRequest,
+  TranscriptInfo,
+  StreamingTranslationTaskRequest,
+  StreamingTranslationTaskResponse,
+  StreamingTranslationRequest,
+  StreamingTranslationRequestConfig,
+} from 'sagi-api/translation/v1/translation_pb';
 import { TranslationClient } from 'sagi-api/translation/v1/translation_grpc_pb';
 import { TrainingData } from 'sagi-api/training/v1/training_pb';
 import { TrainngClient } from 'sagi-api/training/v1/training_grpc_pb';
 import { SagiSubtitlePayload } from '@/services/subtitle';
 import { log } from './Log';
 
-class Sagi {
-  private creds: unknown;
+export class Sagi {
+  public static get endpoint() {
+    return process.env.SAGI_API as string;
+  }
 
-  private endpoint = process.env.NODE_ENV === 'production'
-    ? 'apis.sagittarius.ai:8443'
-    : 'apis.stage.sagittarius.ai:8443';
+  private creds: grpc.ChannelCredentials;
 
-  // '127.0.0.1:8443'; // uncomment this when debuging
   public constructor() {
     const sslCreds = credentials.createSsl(
       // How to access resources with fs see:
@@ -47,9 +53,9 @@ class Sagi {
 
   public mediaTranslate(
     options: MediaTranslationRequest.AsObject,
-  ): Promise<MediaTranslationResponse.TranscriptInfo.AsObject[]> {
+  ): Promise<TranscriptInfo.AsObject[]> {
     const { mediaIdentity, languageCode, hints } = options;
-    const client = new TranslationClient(this.endpoint, this.creds);
+    const client = new TranslationClient(Sagi.endpoint, this.creds);
     const req = new MediaTranslationRequest();
     req.setMediaIdentity(mediaIdentity);
     req.setLanguageCode(languageCode);
@@ -57,6 +63,7 @@ class Sagi {
     log.info('Sagi.mediaTranslate', `hash-${mediaIdentity}***language-${languageCode}***hints-${hints}`);
     return new Promise((resolve, reject) => {
       client.translateMedia(req, (err, res) => {
+        console.log(res.toObject());
         if (err) reject(err);
         else resolve(res.toObject().resultsList);
       });
@@ -65,11 +72,12 @@ class Sagi {
 
   public getTranscript(options: TranscriptRequest.AsObject): Promise<SagiSubtitlePayload> {
     const { transcriptIdentity } = options;
-    const client = new TranslationClient(this.endpoint, this.creds);
+    const client = new TranslationClient(Sagi.endpoint, this.creds);
     const req = new TranscriptRequest();
     req.setTranscriptIdentity(transcriptIdentity);
     return new Promise((resolve, reject) => {
       client.transcript(req, (err, res) => {
+        console.log(res.toObject(), 'audio-log');
         if (err) reject(err);
         else resolve(res.toObject().transcriptsList);
       });
@@ -80,7 +88,7 @@ class Sagi {
     const {
       mediaIdentity, languageCode, format, playedTime, totalTime, delay, hints, payload,
     } = options;
-    const client = new TrainngClient(this.endpoint, this.creds);
+    const client = new TrainngClient(Sagi.endpoint, this.creds);
     const req = new TrainingData();
     req.setMediaIdentity(mediaIdentity);
     req.setLanguageCode(languageCode);
@@ -102,7 +110,7 @@ class Sagi {
     const {
       mediaIdentity, languageCode, format, playedTime, totalTime, delay, hints, transcriptIdentity,
     } = options;
-    const client = new TrainngClient(this.endpoint, this.creds);
+    const client = new TrainngClient(Sagi.endpoint, this.creds);
     const req = new TrainingData();
     req.setMediaIdentity(mediaIdentity);
     req.setLanguageCode(languageCode);
@@ -122,7 +130,7 @@ class Sagi {
 
   // check sagi-api health, return UNKNOWN(0), SERVING(1) or XXXXX
   public healthCheck(): Promise<HealthCheckResponse.AsObject> {
-    const client = new HealthClient(this.endpoint, this.creds);
+    const client = new HealthClient(Sagi.endpoint, this.creds);
     return new Promise((resolve, reject) => {
       client.check(new HealthCheckRequest(), (err, response) => {
         if (err) reject(err);
@@ -133,6 +141,47 @@ class Sagi {
             reject(HealthCheckResponse.ServingStatus[status]);
           } else resolve({ status, version: response.getVersion() });
         }
+      });
+    });
+  }
+
+  public streamingTranslation(
+    mediaIdentity: string,
+    rate: number,
+    audioLanguageCode: string,
+    targetLanguageCode: string,
+  ): any { // eslint-disable-line
+
+    const request = new StreamingTranslationRequest();
+    const requestConfig = new StreamingTranslationRequestConfig();
+    // @ts-ignore
+    const audioConfig = new global.proto.google.cloud.speech.v1
+      .RecognitionConfig([1, rate, audioLanguageCode]);
+    requestConfig.setStreamingConfig(audioConfig);
+    requestConfig.setAudioLanguageCode(audioLanguageCode);
+    requestConfig.setTargetLanguageCode(targetLanguageCode);
+    requestConfig.setMediaIdentity(mediaIdentity);
+    request.setStreamingConfig(requestConfig);
+    const client = new TranslationClient(Sagi.endpoint, this.creds);
+    const stream = client.streamingTranslation();
+    stream.write(request);
+    return stream;
+  }
+
+  public streamingTranslationTask(
+    taskId: string,
+  ): Promise<StreamingTranslationTaskResponse> {
+    const client = new TranslationClient(Sagi.endpoint, this.creds);
+    const taskRequest = new StreamingTranslationTaskRequest();
+    taskRequest.setTaskId(taskId);
+    return new Promise((resolve, reject) => {
+      const onlineTimeoutId = setTimeout(() => {
+        reject(new Error('time out'));
+      }, 1000 * 10);
+      client.streamingTranslationTask(taskRequest, (err, res) => {
+        clearTimeout(onlineTimeoutId);
+        if (err) reject(err);
+        else resolve(res);
       });
     });
   }

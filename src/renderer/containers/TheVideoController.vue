@@ -108,6 +108,7 @@
       :show-all-widgets="showAllWidgets"
       :style="{ marginBottom: preFullScreen ? '10px' : '0' }"
     />
+    <audio-translate-modal />
   </div>
 </template>
 <script lang="ts">
@@ -117,7 +118,12 @@ import {
   createNamespacedHelpers,
 } from 'vuex';
 import path from 'path';
-import { Input as inputActions, Video as videoActions, Subtitle as legacySubtitleActions } from '@/store/actionTypes';
+import {
+  Input as inputActions,
+  Video as videoActions,
+  Subtitle as legacySubtitleActions,
+  AudioTranslate as atActions,
+} from '@/store/actionTypes';
 import { INPUT_COMPONENT_TYPE, getterTypes as iGT } from '@/plugins/input';
 import Titlebar from '@/components/Titlebar.vue';
 import PlayButton from '@/components/PlayingView/PlayButton.vue';
@@ -129,7 +135,9 @@ import TheTimeCodes from '@/components/PlayingView/TheTimeCodes.vue';
 import TheProgressBar from '@/containers/TheProgressBar.vue';
 import RecentPlaylist from '@/containers/RecentPlaylist.vue';
 import NotificationBubble from '@/components/NotificationBubble.vue';
+import AudioTranslateModal from '@/containers/AudioTranslateModal.vue';
 import { videodata } from '@/store/video';
+import { AudioTranslateStatus } from '../store/modules/AudioTranslate';
 
 const { mapGetters: inputMapGetters } = createNamespacedHelpers('InputPlugin');
 /** dom wrapper */
@@ -153,6 +161,7 @@ export default {
     'the-progress-bar': TheProgressBar,
     'notification-bubble': NotificationBubble,
     'recent-playlist': RecentPlaylist,
+    'audio-translate-modal': AudioTranslateModal,
   },
   data() {
     return {
@@ -219,12 +228,15 @@ export default {
       'playingList', 'isFolderList',
       'isFullScreen', 'isFocused', 'isMinimized',
       'leftMousedown', 'progressKeydown', 'volumeKeydown', 'wheelTriggered', 'volumeWheelTriggered',
-      'enabledSecondarySub',
+      'enabledSecondarySub', 'isTranslateModalVisiable', 'translateStatus', 'failBubbleId', 'messageInfo',
     ]),
     ...inputMapGetters({
       inputWheelDirection: iGT.GET_WHEEL_DIRECTION,
     }),
     showAllWidgets() {
+      if (this.isTranslateModalVisiable) {
+        return false;
+      }
       return !this.tempRecentPlaylistDisplayState
         && ((!this.mouseStopped && !this.mouseLeftWindow)
         || (!this.mouseLeftWindow && this.onOtherWidget)
@@ -239,6 +251,9 @@ export default {
       );
     },
     cursorStyle() {
+      if (this.isTranslateModalVisiable) {
+        return 'default';
+      }
       return this.showAllWidgets || !this.isFocused
         || this.tempRecentPlaylistDisplayState ? 'default' : 'none';
     },
@@ -285,13 +300,11 @@ export default {
       }
       this.changeSrc = false;
       // 当触发rate 显示界面控件
-      if (!this.progressKeydown) {
-        this.progressTriggerStopped = true;
-        this.clock.clearTimeout(this.progressTriggerId);
-        this.progressTriggerId = this.clock.setTimeout(() => {
-          this.progressTriggerStopped = false;
-        }, this.progressDisappearDelay);
-      }
+      this.progressTriggerStopped = true;
+      this.clock.clearTimeout(this.progressTriggerId);
+      this.progressTriggerId = this.clock.setTimeout(() => {
+        this.progressTriggerStopped = false;
+      }, this.progressDisappearDelay);
     },
     singleCycle() {
       // 当触发循环播放 显示界面控件
@@ -380,6 +393,17 @@ export default {
         this.updateMouseup({ componentName: '' });
         this.updateMousedown({ componentName: '' });
       }
+    },
+    isTranslateModalVisiable(visible: boolean) {
+      const { ratio } = this;
+      let minimumSize = [320, 180];
+      // 弹窗出现的时候窗口缩小到一定尺寸应该不能再缩小
+      if (visible && ratio > 1) {
+        minimumSize = [Math.round(290 * ratio), 290];
+      } else if (visible && ratio <= 1) {
+        minimumSize = [290, Math.round(290 / ratio)];
+      }
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', minimumSize);
     },
   },
   mounted() {
@@ -476,6 +500,8 @@ export default {
       updateKeyup: inputActions.KEYUP_UPDATE,
       updateWheel: inputActions.WHEEL_UPDATE,
       updateSubtitleType: legacySubtitleActions.UPDATE_SUBTITLE_TYPE,
+      updateHideModalCallback: atActions.AUDIO_TRANSLATE_MODAL_HIDE_CALLBACK,
+      updateHideBubbleCallback: atActions.AUDIO_TRANSLATE_BUBBLE_CANCEL_CALLBACK,
     }),
     createIcon(iconPath: string) {
       const { nativeImage } = this.$electron.remote;
@@ -556,7 +582,27 @@ export default {
         videodata.paused = true;
         // we need to reset the hoverProgressBar for play next video
         this.needResetHoverProgressBar = true;
-        this.$bus.$emit('next-video');
+        // 如果要自动切下个视频的时候，这个时候视频的自能翻译是失败的
+        // 但是气泡和modal显示着，就不自动切，用户手动关闭再切
+        const translateFailBubbleExist = this.messageInfo
+          && this.messageInfo.find((e: { id: string }) => e.id === this.failBubbleId);
+        console.log(translateFailBubbleExist, this.messageInfo, this.failBubbleId);
+        if (this.translateStatus === AudioTranslateStatus.Fail && this.isTranslateModalVisiable) {
+          this.$store.dispatch(videoActions.PAUSE_VIDEO);
+          this.updateHideModalCallback(() => {
+            this.$bus.$emit('next-video');
+            this.$store.dispatch(videoActions.PLAY_VIDEO);
+          });
+        } else if (this.translateStatus === AudioTranslateStatus.Fail
+          && translateFailBubbleExist) {
+          this.$store.dispatch(videoActions.PAUSE_VIDEO);
+          this.updateHideBubbleCallback(() => {
+            this.$bus.$emit('next-video');
+            this.$store.dispatch(videoActions.PLAY_VIDEO);
+          });
+        } else {
+          this.$bus.$emit('next-video');
+        }
       }
 
       this.start = timestamp;

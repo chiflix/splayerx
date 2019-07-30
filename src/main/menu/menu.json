@@ -1,0 +1,355 @@
+{
+  "audio": {
+    "items": [
+      {
+        "id": "audio.increaseVolume",
+        "label": "msg.audio.increaseVolume",
+        "accelerator": "=",
+        "winAccelerator": "Up"
+      },
+      {
+        "id": "audio.decreaseVolume",
+        "label": "msg.audio.decreaseVolume",
+        "accelerator": "-",
+        "winAccelerator": "Down"
+      },
+      {
+        "id": "audio.mute",
+        "label": "msg.audio.mute",
+        "accelerator": "M",
+        "enabled": true,
+        "checked": false
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "audio.switchAudioTrack",
+        "label": "msg.audio.switchAudioTrack",
+        "submenu": {
+          "items": []
+        }
+      }
+    ]
+  },
+  "file": {
+    "items": [
+      {
+        "id": "file.open",
+        "label": "msg.file.open",
+        "accelerator": "CmdOrCtrl+O"
+      },
+      {
+        "id": "file.openRecent",
+        "label": "msg.file.openRecent",
+        "submenu": {
+          "items": []
+        }
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "file.clearHistory",
+        "label": "msg.file.clearHistory"
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "file.closeWindow",
+        "label": "msg.file.closeWindow",
+        "role": "close"
+      }
+    ]
+  },
+  "help": {
+    "items": [
+      {
+        "id": "help.feedback",
+        "label": "feedback",
+        "enabled": true
+      },
+      {
+        "id": "help.homepage",
+        "label": "homepage",
+        "enabled": true
+      },
+      {
+        "id": "help.shortCuts",
+        "label": "shortCuts",
+        "enabled": true
+      }
+    ]
+  },
+  "playback": {
+    "items": [
+      {
+        "id": "playback.playOrPause",
+        "label": "msg.playback.pause",
+        "accelerator": "Space",
+        "enabled": true
+      },
+      {
+        "id": "playback.forwardS",
+        "label": "msg.playback.forwardS",
+        "accelerator": "Right",
+        "enabled": true
+      },
+      {
+        "id": "playback.backwardS",
+        "label": "msg.playback.backwardS",
+        "accelerator": "Left",
+        "enabled": true
+      },
+      {
+        "id": "playback.forwardL",
+        "label": "msg.playback.forwardL",
+        "accelerator": "Up",
+        "winAccelerator": "Alt+Right",
+        "enabled": true
+      },
+      {
+        "id": "playback.backwardL",
+        "label": "msg.playback.backwardL",
+        "accelerator": "Down",
+        "winAccelerator": "Alt+Left",
+        "enabled": true
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id":"playback.increasePlaybackSpeed",
+        "label": "msg.playback.increasePlaybackSpeed",
+        "accelerator": "]",
+        "enabled": true
+      },
+      {
+        "id":"playback.decreasePlaybackSpeed",
+        "label": "msg.playback.decreasePlaybackSpeed",
+        "accelerator": "[",
+        "enabled": true
+      },
+      {
+        "id":"playback.resetSpeed",
+        "label": "msg.playback.resetSpeed",
+        "accelerator": "\\",
+        "enabled": true
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id":"playback.previousVideo",
+        "label": "msg.playback.previousVideo",
+        "accelerator": "CmdOrCtrl+Left",
+        "enabled": true
+      },
+      {
+        "id":"playback.nextVideo",
+        "label": "msg.playback.nextVideo",
+        "accelerator": "CmdOrCtrl+Right",
+        "enabled": true
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "playback.singleCycle",
+        "label": "msg.playback.singleCycle",
+        "type": "checkbox",
+        "enabled": true,
+        "checked": false
+      },
+      {
+        "id": "playback.snapShot",
+        "label": "msg.playback.snapShot",
+        "accelerator": "CmdOrCtrl+Shift+S",
+        "enabled": true
+      }
+    ]
+  },
+  "splayerx": {
+    "items": []
+  },
+  "subtitle": {
+    "items": [
+      {
+        "id": "subtitle.AITranslation",
+        "label": "msg.subtitle.AITranslation"
+      },
+      {
+        "id": "subtitle.loadSubtitleFile",
+        "label": "msg.subtitle.loadSubtitleFile"
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "subtitle.mainSubtitle",
+        "label": "msg.subtitle.mainSubtitle",
+        "submenu": {
+          "items": []
+        }
+      },
+      {
+        "id": "subtitle.secondarySubtitle",
+        "label": "msg.subtitle.secondarySubtitle",
+        "submenu": {
+          "items": []
+        }
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "subtitle.subtitleSetting",
+        "label": "msg.subtitle.subtitleSetting"
+      },
+      {
+        "id": "subtitle.subtitleDelay",
+        "label": "msg.subtitle.subtitleDelay",
+        "submenu": {
+          "items": [
+            {
+              "id": "subtitle.increasePrimarySubtitleDelay",
+              "label": "msg.subtitle.increasePrimarySubtitleDelay",
+              "accelerator": "CmdOrCtrl+'"
+            },
+            {
+              "id": "subtitle.decreasePrimarySubtitleDelay",
+              "label": "msg.subtitle.decreasePrimarySubtitleDelay",
+              "accelerator": "CmdOrCtrl+;"
+            },
+            {
+              "id": "menubar.separator"
+            },
+            {
+              "id": "subtitle.increaseSecondarySubtitleDelay",
+              "label": "msg.subtitle.increaseSecondarySubtitleDelay"
+            },
+            {
+              "id": "subtitle.decreaseSecondarySubtitleDelay",
+              "label": "msg.subtitle.decreaseSecondarySubtitleDelay"
+            }
+          ]
+        }
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "subtitle.uploadSelectedSubtitle",
+        "label": "msg.subtitle.uploadSelectedSubtitle"
+      }
+    ]
+  },
+  "window": {
+    "items": [
+      {
+        "id": "window.keepPlayingWindowFront",
+        "label": "msg.window.keepPlayingWindowFront",
+        "accelerator": "T",
+        "checked": false
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "window.fullscreen",
+        "label": "msg.window.enterFullScreen",
+        "accelerator": "F"
+      },
+      {
+        "id": "window.minimize",
+        "label": "msg.window.minimize",
+        "role": "minimize",
+        "enabled": true
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "window.halfSize",
+        "label": "msg.window.halfSize",
+        "accelerator": "CmdOrCtrl+0"
+      },
+      {
+        "id": "window.originSize",
+        "label": "msg.window.originSize",
+        "accelerator": "CmdOrCtrl+1"
+      },
+      {
+        "id": "window.doubleSize",
+        "label": "msg.window.doubleSize",
+        "accelerator": "CmdOrCtrl+2"
+      },
+      {
+        "id": "window.maxmize",
+        "label": "msg.window.maxmize",
+        "accelerator": "CmdOrCtrl+3"
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "window.windowRotate",
+        "label": "msg.window.windowRotate",
+        "accelerator": "CmdOrCtrl+L"
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "window.bossKey",
+        "label": "msg.window.bossKey",
+        "accelerator": "CmdOrCtrl+`",
+        "enabled": true
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "window.backToLandingView",
+        "label": "msg.window.backToLandingView",
+        "accelerator": "CmdOrCtrl+E"
+      }
+    ]
+  },
+  "history": {
+    "items": [
+      {
+        "id": "history.reload",
+        "label": "msg.history.reload"
+      },
+      {
+        "id": "history.back",
+        "label": "msg.history.back",
+        "enabled": false
+      },
+      {
+        "id": "history.forward",
+        "label": "msg.history.forward",
+        "enabled": false
+      }
+    ]
+  },
+  "favourite": {
+    "items": [
+      {
+        "id": "favourite.iqiyi",
+        "label": "msg.favourite.iqiyi"
+      },
+      {
+        "id": "favourite.bilibili",
+        "label": "msg.favourite.bilibili"
+      },
+      {
+        "id": "favourite.youtube",
+        "label": "msg.favourite.youtube"
+      }
+    ]
+  }
+}
+

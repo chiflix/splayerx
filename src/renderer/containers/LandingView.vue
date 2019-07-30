@@ -1,5 +1,10 @@
 <template>
   <div class="wrapper">
+    <open-url
+      v-show="openUrlShow"
+      :open-input-url="openInputUrl"
+      :close-url-input="closeUrlInput"
+    />
     <transition name="background-container-transition">
       <div
         v-if="item.backgroundUrl && !protectPrivacy"
@@ -118,17 +123,19 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import { mapGetters } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
 import { Route } from 'vue-router';
 import { playInfoStorageService } from '@/services/storage/PlayInfoStorageService';
 import { recentPlayService } from '@/services/media/RecentPlayService';
 import Icon from '@/components/BaseIconContainer.vue';
+import OpenUrl from '@/components/LandingView/OpenUrl.vue';
 import NotificationBubble from '@/components/NotificationBubble.vue';
 import PlaylistItem from '@/components/LandingView/PlaylistItem.vue';
 import VideoItem from '@/components/LandingView/VideoItem.vue';
 import { log } from '@/libs/Log';
 import Sagi from '@/libs/sagi';
-import { deleteSubtitlesByPlaylistId } from '../services/storage/subtitle';
+import { Browsing as browsingActions } from '@/store/actionTypes';
+import { Features, isFeatureEnabled } from '@/helpers/featureSwitch';
 
 Vue.component('PlaylistItem', PlaylistItem);
 Vue.component('VideoItem', VideoItem);
@@ -138,12 +145,15 @@ export default {
   components: {
     Icon,
     NotificationBubble,
+    'open-url': OpenUrl,
   },
   data() {
     return {
       landingViewItems: [],
       sagiHealthStatus: 'UNSET',
       invalidTimeRepresentation: '--',
+      isBrowsingViewEnabled: false,
+      openUrlShow: false,
       item: {},
       tranFlag: true,
       shifting: false,
@@ -232,7 +242,6 @@ export default {
   /* eslint-disable @typescript-eslint/no-explicit-any */
   created() {
     window.addEventListener('mousemove', this.globalMoveHandler);
-    this.useBlur = window.devicePixelRatio === 1;
     // Get all data and show
     if (!this.$store.getters.deleteVideoHistoryOnExit) {
       recentPlayService.getRecords().then((results) => {
@@ -266,7 +275,7 @@ export default {
       if (this.$refs.mask) this.$refs.mask.style.setProperty('background-color', 'rgba(255, 255, 255, 0)');
     });
   },
-  mounted() {
+  async mounted() {
     this.$store.dispatch('refreshVersion');
 
     const { app } = this.$electron.remote;
@@ -280,11 +289,16 @@ export default {
         log.info('LandingView.vue', `launching: ${app.getName()} ${app.getVersion()}`);
       }
     });
+    this.$bus.$on('open-url-show', (val: boolean) => {
+      this.openUrlShow = val;
+    });
     window.addEventListener('keyup', this.keyboardHandler);
     // window.addEventListener('beforeunload', this.beforeUnloadHandler);
     this.$electron.ipcRenderer.on('quit', () => {
       this.quit = true;
     });
+
+    this.isBrowsingViewEnabled = await isFeatureEnabled(Features.BrowsingView);
   },
   destroyed() {
     window.removeEventListener('mousemove', this.globalMoveHandler);
@@ -292,6 +306,25 @@ export default {
     // window.removeEventListener('beforeunload', this.beforeUnloadHandler);
   },
   methods: {
+    ...mapActions({
+      updateInitialUrl: browsingActions.UPDATE_INITIAL_URL,
+    }),
+    handleBrowsingOpen(url: string) {
+      this.updateInitialUrl(url);
+      this.$router.push({
+        name: 'browsing-view',
+      });
+    },
+    closeUrlInput() {
+      this.$bus.$emit('open-url-show', false);
+    },
+    openInputUrl(inputUrl: string) {
+      if (this.openFileByPlayingView(inputUrl)) {
+        this.openUrlFile(inputUrl);
+      } else {
+        this.handleBrowsingOpen(inputUrl);
+      }
+    },
     globalMoveHandler() {
       this.logoTransition = 'welcome-container-transition';
       this.canHover = true;
@@ -362,7 +395,6 @@ export default {
         this.lastIndex = this.landingViewItems.length;
       }
       playInfoStorageService.deleteRecentPlayedBy(deletedItem.id);
-      deleteSubtitlesByPlaylistId(deletedItem.id);
     },
   },
 };

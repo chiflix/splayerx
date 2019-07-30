@@ -196,7 +196,6 @@ export default {
     };
   },
   created() {
-    this.useBlur = window.devicePixelRatio === 1;
     window.addEventListener('keyup', this.keyboardHandler);
     this.$bus.$on('delete-file', async (path: string, id: number) => {
       this.$store.dispatch('RemoveItemFromPlayingList', path);

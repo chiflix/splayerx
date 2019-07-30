@@ -100,10 +100,14 @@
       "name": "文件",
       "open": "打開文件…",
       "openRecent": "打開最近播放",
-      "openURL": "打開 URL…"
+      "openURL": "打開 URL…",
+      "copy": "複製",
+      "paste": "貼上"
     },
     "help": {
       "name": "幫助",
+      "feedback": "意見反饋",
+      "homepage": "官網",
       "splayerxHelp": "幫助",
       "shortCuts": "快捷鍵列表",
       "crashReportLocation": "查看錯誤日誌",
@@ -112,7 +116,6 @@
     "playback": {
       "backwardL": "後退 -60s",
       "backwardS": "後退 -5s",
-      "windowRotate": "正時針旋轉 90°",
       "captureScreen": "截圖",
       "captureVideoClip": "截取視頻片段",
       "decreasePlaybackSpeed": "減緩播放速度",
@@ -120,7 +123,6 @@
       "forwardS": "前進 +5s",
       "fullScreen": "全屏\/退出全屏",
       "increasePlaybackSpeed": "加快播放速度",
-      "keepPlayingWindowFront": "播放時保持在前",
       "name": "播放",
       "pause": "暫停",
       "play": "播放",
@@ -132,10 +134,8 @@
     },
     "splayerx": {
       "about": "關於射手影音",
-      "feedback": "反饋",
       "hide": "隱藏射手影音",
       "hideOthers": "隱藏其他",
-      "homepage": "網站",
       "preferences": "偏好設置",
       "quit": "退出射手影音",
       "showAll": "全部顯示"
@@ -157,6 +157,8 @@
       "noSubtitle": "暫未找到翻譯結果",
       "notToShowSubtitle": "無",
       "secondarySubtitle": "第二字幕",
+      "subtitleSetting": "字幕設置",
+      "subtitleDelay": "字幕延遲",
       "size1": "小",
       "size2": "標準",
       "size3": "大",
@@ -180,6 +182,8 @@
       "yes": "更新"
     },
     "window": {
+      "windowRotate": "正時針旋轉 90°",
+      "keepPlayingWindowFront": "播放時保持在前",
       "backToLandingView": "回到著陸頁",
       "bossKey": "老板鍵",
       "doubleSize": "200%",
@@ -189,7 +193,21 @@
       "maxmize": "最大化",
       "minimize": "最小化",
       "name": "窗口",
-      "originSize": "100%"
+      "originSize": "100%",
+      "enterPip": "進入畫中畫模式",
+      "exitPip": "退出畫中畫模式"
+    },
+    "favourite": {
+      "name": "收藏",
+      "iqiyi": "爱奇艺",
+      "bilibili": "哔哩哔哩",
+      "youtube": "Youtube"
+    },
+    "history": {
+      "name": "歷史",
+      "reload": "重新載入頁面",
+      "back": "後退",
+      "forward": "前進"
     }
   },
   "nextVideo": {
@@ -206,7 +224,7 @@
     "primary": "首要語言",
     "secondary": "次要語言",
     "chooseSecondary": "選擇次要語言",
-    "languageDescription": "* 稍後您可以在偏好設置裏更改",
+    "languageDescription": "* 稍後您可以在偏好設置中更改",
     "none": "無"
   },
   "preferences": {
@@ -265,6 +283,7 @@
   },
   "subtitle": {
     "embedded": "內嵌",
+    "generate": "生成",
     "language": {
       "ar": "阿拉伯語",
       "de": "德語",
@@ -305,5 +324,46 @@
   "loadVideoBySubtitleFailed": {
     "content": "未找到目錄下與字幕同名的視頻文件",
     "title": ""
+  },
+  "translateModal": {
+    "title": "選擇視頻源語言",
+    "translateTitle": "大約剩餘 {time}",
+    "minute": "{number} 分鐘",
+    "second": "{number} 秒",
+    "hour": "{number} 小時",
+    "successTitle": "翻譯完成",
+    "failTitle": "翻譯失敗",
+    "cancelTitle": "AI翻譯正在進行中",
+    "selectDescription": "如要生成智能翻譯，請選擇您在視頻中所聽到的語言並點擊生成，該過程將持續一段時間。",
+    "selectLanguageLabel": "視頻源語言",
+    "cancel": "取消",
+    "quit": "退出",
+    "generate": "生成",
+    "translateDescription": "請不要切換視頻或關閉播放器，您可以在該視頻的翻譯結果列表中查看進度。",
+    "ok": "好的",
+    "successDescriptiton": "AI翻譯已完成，可在翻譯結果列表中查看。",
+    "failDescription": "請稍後重試，謝謝。",
+    "cancelDescription": "點擊退出取消翻譯，退出後翻譯進度將不可恢復。",
+    "continue": "取消"
+  },
+  "translateBubble": {
+    "bubbleWhenGrab": "該操作將會導致正在進行的翻譯中止，是否中止？",
+    "bubbleWhenTranslate": "AI翻譯會在雲端繼續處理，下次播放該視頻時將自動獲取翻譯進度。",
+    "bubbleFunctionForbidden": "該操作將會導致正在進行的翻譯中止，是否中止？",
+    "bubbleWhenSuccess": {
+      "title": "",
+      "content": "AI翻譯已完成，可在翻譯結果列表中查看。"
+    },
+    "bubbleWhenSuccessOnOtherVideo": {
+      "title": "",
+      "content": "AI 翻譯已完成，將在下次打開視頻時自動顯示。"
+    },
+    "bubbleTranslateFail": {
+      "title": "翻譯失敗",
+      "content": "請稍後重試，謝謝。"
+    },
+    "ok": "好的",
+    "cancel": "取消",
+    "continue": "中止"
   }
 }

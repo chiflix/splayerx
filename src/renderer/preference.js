@@ -12,7 +12,6 @@ import '@/css/style.scss';
 Vue.use(VueI18n);
 Vue.use(Vuex);
 
-
 function getSystemLocale() {
   const { app } = electron.remote;
   const locale = process.platform === 'win32' ? app.getLocale() : osLocale.sync();
