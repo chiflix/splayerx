@@ -107,6 +107,14 @@ const mutations = {
   [m.setSecondarySubtitleId](state: SubtitleManagerState, id: string) {
     state.secondarySubtitleId = id;
   },
+  [m.setNotSelectedSubtitle](state: SubtitleManagerState, subtitle?: 'primary' | 'secondary') {
+    if (subtitle === 'primary') state.primarySubtitleId = NOT_SELECTED_SUBTITLE;
+    else if (subtitle === 'secondary') state.secondarySubtitleId = NOT_SELECTED_SUBTITLE;
+    else {
+      state.primarySubtitleId = NOT_SELECTED_SUBTITLE;
+      state.secondarySubtitleId = NOT_SELECTED_SUBTITLE;
+    }
+  },
   [m.setIsRefreshing](state: SubtitleManagerState, isRefreshing: boolean) {
     state.isRefreshing = isRefreshing;
   },
@@ -192,8 +200,7 @@ const actions = {
   },
   [a.resetManager]({ commit }: any) {
     commit(m.setMediaHash, '');
-    commit(m.setPrimarySubtitleId, '');
-    commit(m.setSecondarySubtitleId, '');
+    commit(m.setNotSelectedSubtitle);
     commit(m.setIsRefreshing, false);
     commit(m.deletaAllSubtitleIds);
     primarySelectionComplete = false;
@@ -630,9 +637,9 @@ const actions = {
     store.unregisterModule(id);
     commit(m.deleteSubtitleId, id);
     if (getters.isFirstSubtitle && getters.primarySubtitleId === id) {
-      commit(m.setPrimarySubtitleId, '');
+      commit(m.setNotSelectedSubtitle, 'primary');
     } else if (!getters.isFirstSubtitle && getters.secondarySubtitleId === id) {
-      commit(m.setSecondarySubtitleId, '');
+      commit(m.setNotSelectedSubtitle, 'secondary');
     }
   },
   async [a.deleteSubtitlesByUuid]({ state, dispatch }: any, subtitles: SubtitleControlListItem[]) {
@@ -647,8 +654,7 @@ const actions = {
   }: any, id: string) {
     if (!getters.subtitleOff) {
       if (!id) {
-        commit(m.setPrimarySubtitleId, NOT_SELECTED_SUBTITLE);
-        commit(m.setSecondarySubtitleId, NOT_SELECTED_SUBTITLE);
+        commit(m.setNotSelectedSubtitle);
       } else {
         const primary = id;
         let secondary = getters.secondarySubtitleId;
@@ -676,8 +682,7 @@ const actions = {
   }: any, id: string) {
     if (!getters.subtitleOff) {
       if (!id) {
-        commit(m.setPrimarySubtitleId, NOT_SELECTED_SUBTITLE);
-        commit(m.setSecondarySubtitleId, NOT_SELECTED_SUBTITLE);
+        commit(m.setNotSelectedSubtitle);
       } else {
         let primary = getters.primarySubtitleId;
         const secondary = id;
@@ -780,8 +785,7 @@ const actions = {
             secondarySelectionComplete = true;
           }
         } else if (!getters.subtitleOff) {
-          commit(m.setPrimarySubtitleId, NOT_SELECTED_SUBTITLE);
-          commit(m.setSecondarySubtitleId, NOT_SELECTED_SUBTITLE);
+          commit(m.setNotSelectedSubtitle);
         }
         if (primarySelectionComplete && secondarySelectionComplete) dispatch(a.stopAISelection);
       }

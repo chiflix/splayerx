@@ -65,7 +65,6 @@ const mutations = {
   },
   subtitleOff(state, payload) {
     state.subtitleOff = !!payload;
-    console.log(state.subtitleOff);
   },
 };
 const actions = {
