@@ -418,6 +418,7 @@ export default {
         if (await nsfwThumbnailFilterService.checkImage(this.imageSrc)) {
           if (!this.nsfwProcessDone) this.$bus.$emit('nsfw');
           if (!this.isPlaying) this.$store.dispatch('RemoveItemFromPlayingList', this.path);
+          this.$bus.$emit('nsfw-detected');
         }
       }
     });
@@ -492,9 +493,9 @@ export default {
       this.$refs.progress.style.setProperty('opacity', '0');
     },
     mouseoverVideo() {
-      this.mouseover = true;
       if (this.isInRange && !this.isShifting
         && this.canHoverItem && !this.itemMoving) {
+        this.mouseover = true;
         this.onItemMouseover(
           this.index,
           this.recentPlayService,

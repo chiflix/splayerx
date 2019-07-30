@@ -73,6 +73,7 @@ export default {
       needToRestore: false,
       winAngleBeforeFullScreen: 0, // winAngel before full screen
       winSizeBeforeFullScreen: [], // winSize before full screen
+      nsfwDetected: false,
     };
   },
   computed: {
@@ -95,6 +96,7 @@ export default {
       if (oldVal) this.updatePlaylist(oldVal);
     },
     videoId(val: number, oldVal: number) {
+      this.nsfwDetected = false;
       this.handleLeaveVideo(oldVal);
     },
     originSrc(val: string, oldVal: string) {
@@ -125,6 +127,9 @@ export default {
     this.updatePlayinglistRate({ oldDir: '', newDir: path.dirname(this.originSrc), playingList: this.playingList });
   },
   mounted() {
+    this.$bus.$on('nsfw-detected', () => {
+      this.nsfwDetected = true;
+    });
     this.$bus.$on('back-to-landingview', () => {
       if (this.isTranslating) {
         this.showTranslateBubble(AudioTranslateBubbleOrigin.WindowClose);
@@ -362,7 +367,7 @@ export default {
     async handleLeaveVideo(videoId: number) {
       const screenshot: ShortCut = await this.generateScreenshot();
       if (this.hideNSFW) {
-        if (await nsfwThumbnailFilterService.checkImage(screenshot.shortCut)) {
+        if (this.nsfwDetected || await nsfwThumbnailFilterService.checkImage(screenshot.shortCut)) {
           if (!this.nsfwProcessDone) this.$bus.$emit('nsfw');
           await playInfoStorageService.deleteRecentPlayedBy(this.playListId);
           return null;
