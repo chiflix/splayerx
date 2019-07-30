@@ -17,8 +17,7 @@ import writeLog from './helpers/writeLog';
 import { getValidVideoRegex, getValidSubtitleRegex } from '../shared/utils';
 import { mouse } from './helpers/mouse';
 import MenuService from './menu/MenuService';
-
-import './helpers/mediaTasksPlugin';
+import registerMediaTasks from './helpers/mediaTasksPlugin';
 
 // requestSingleInstanceLock is not going to work for mas
 // https://github.com/electron-userland/electron-packager/issues/923
@@ -280,6 +279,8 @@ function registerMainWindowEvent(mainWindow) {
     mainWindow.webContents.send('scroll-touch-end');
   });
 
+
+  registerMediaTasks();
   ipcMain.on('callMainWindowMethod', (evt, method, args = []) => {
     try {
       mainWindow[method](...args);
@@ -413,7 +414,7 @@ function createWindow(openDialog) {
   menuService.setMainWindow(mainWindow);
 
   mainWindow.on('closed', () => {
-    ipcMain.removeAllListeners();
+    ipcMain.removeAllListeners(); // FIXME: decouple mainWindow and ipcMain
     mainWindow = null;
     menuService.closed();
   });

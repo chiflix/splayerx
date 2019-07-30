@@ -1,13 +1,11 @@
-import {
-  app, ipcMain, splayerx, Event,
-} from 'electron';
+import { ipcMain, splayerx, Event } from 'electron';
 import { existsSync } from 'fs';
 
 function reply(event: Event, channel: string, ...args: unknown[]) {
   if (event.sender && !event.sender.isDestroyed()) event.reply(channel, ...args);
 }
 
-app.on('ready', () => {
+export default function registerMediaTasks() {
   ipcMain.on('media-info-request', (event, path) => {
     if (existsSync(path)) {
       splayerx.getMediaInfo(path, info => reply(event, 'media-info-reply', undefined, info));
@@ -62,4 +60,4 @@ app.on('ready', () => {
       );
     } else reply(event, 'thumbnail-reply', new Error('File does not exist.'));
   });
-});
+}
