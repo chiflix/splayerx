@@ -418,6 +418,7 @@ export default {
         if (await nsfwThumbnailFilterService.checkImage(this.imageSrc)) {
           if (!this.nsfwProcessDone) this.$bus.$emit('nsfw');
           if (!this.isPlaying) this.$store.dispatch('RemoveItemFromPlayingList', this.path);
+          this.$bus.$emit('nsfw-detected');
         }
       }
     });
