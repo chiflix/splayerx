@@ -109,7 +109,7 @@ export default {
       showNextVideo: false,
       readyToShow: false, // show after video element is loaded
       showPrivacyBubble: false,
-      showNSFWBubble: true,
+      showNSFWBubble: false,
       useBlur: false,
     };
   },

@@ -276,7 +276,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['playingList', 'items', 'hideNSFW', 'isFolderList']),
+    ...mapGetters(['playingList', 'items', 'hideNSFW', 'isFolderList', 'nsfwProcessDone']),
     aboutToDelete() {
       return this.selfMoving && (-(this.movementY) > this.thumbnailHeight * 1.5);
     },
@@ -408,10 +408,11 @@ export default {
       this.path,
       this.items[this.index],
     );
-    this.recentPlayService.on('image-loaded', () => {
+    this.recentPlayService.on('image-loaded', async () => {
       this.updateUI();
       if (this.hideNSFW && this.isFolderList) {
-        if (await nsfwThumbnailFilterService.checkImage(this.imageSrc) && ) {
+        if (await nsfwThumbnailFilterService.checkImage(this.imageSrc)) {
+          if (this.nsfwProcessDone) this.$bus.$emit('nsfw');
           this.$store.dispatch('RemoveItemFromPlayingList', this.path);
         }
       }
