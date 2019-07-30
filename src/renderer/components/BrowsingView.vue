@@ -428,7 +428,7 @@ export default {
       updateBarrageOpen: browsingActions.UPDATE_BARRAGE_OPEN,
       updateIsPip: browsingActions.UPDATE_IS_PIP,
     }),
-    handleOpenUrl({ url, disposition }: { url: string, disposition?: string }) {
+    handleOpenUrl({ url }: { url: string }) {
       if (!url || url === 'about:blank') return;
       if (this.isPip) {
         this.updateIsPip(false);
