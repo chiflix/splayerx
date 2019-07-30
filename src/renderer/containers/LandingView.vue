@@ -100,6 +100,7 @@
           :is="playlistLength > 1 ? 'PlaylistItem' : 'VideoItem'"
           v-for="({ backgroundUrl, id, playlistLength }, index) in landingViewItems"
           :key="id"
+          :cursor-url="cursorUrl"
           :can-hover="canHover"
           :backgroundUrl="backgroundUrl"
           :index="index"
@@ -123,7 +124,9 @@
 <script lang="ts">
 import Vue from 'vue';
 import { mapGetters, mapActions } from 'vuex';
+import { join } from 'path';
 import { Route } from 'vue-router';
+import { filePathToUrl } from '@/helpers/path';
 import { playInfoStorageService } from '@/services/storage/PlayInfoStorageService';
 import { recentPlayService } from '@/services/media/RecentPlayService';
 import Icon from '@/components/BaseIconContainer.vue';
@@ -176,6 +179,10 @@ export default {
           this.firstIndex = (val - this.showItemNum) + 1;
         }
       },
+    },
+    cursorUrl() {
+      if (this.firstIndex === 0) return `url("${filePathToUrl(join(__static, 'cursor/cursorRight.svg') as string)}")`;
+      return `url("${filePathToUrl(join(__static, 'cursor/cursorLeft.svg') as string)}")`;
     },
     move() {
       return -(this.firstIndex * (this.thumbnailWidth + this.marginRight));

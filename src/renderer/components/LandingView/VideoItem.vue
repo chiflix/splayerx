@@ -49,14 +49,16 @@
 </template>
 
 <script lang="ts">
-import { join } from 'path';
-import { filePathToUrl } from '@/helpers/path';
 import Icon from '../BaseIconContainer.vue';
 
 export default {
   name: 'VideoItem',
   components: { Icon },
   props: {
+    cursorUrl: {
+      type: String,
+      default: '',
+    },
     backgroundUrl: {
       type: String,
       default: '',
@@ -112,11 +114,7 @@ export default {
       mousedownY: NaN,
       movementX: NaN,
       movementY: NaN,
-      cursorUrl: '',
     };
-  },
-  created() {
-    this.cursorUrl = `url("${filePathToUrl(join(__static, 'cursor/cursor.svg') as string)}")`;
   },
   destroyed() {
     document.removeEventListener('mousemove', this.onRecentItemMousemove);
