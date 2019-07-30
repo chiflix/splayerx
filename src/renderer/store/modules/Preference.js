@@ -2,8 +2,10 @@ import asyncStorage from '@/helpers/asyncStorage';
 import syncStorage from '@/helpers/syncStorage';
 
 const state = {
+  nsfwProcessDone: false,
   welcomeProcessDone: false,
-  hideVideoHistoryOnExit: false,
+  protectPrivacy: false,
+  hideNSFW: true,
   privacyAgreement: undefined,
   displayLanguage: '',
   primaryLanguage: undefined,
@@ -13,9 +15,12 @@ const state = {
   subtitleOff: false,
 };
 const getters = {
+  nsfwProcessDone: state => state.nsfwProcessDone,
   welcomeProcessDone: state => state.welcomeProcessDone,
   preferenceData: state => state,
-  hideVideoHistoryOnExit: state => state.hideVideoHistoryOnExit,
+  protectPrivacy: state => state.protectPrivacy,
+  hideNSFW: state => state.hideNSFW,
+  incognitoMode: state => state.protectPrivacy && !state.hideNSFW,
   reverseScrolling: state => state.reverseScrolling,
   privacyAgreement: state => state.privacyAgreement,
   displayLanguage: (state) => {
@@ -32,14 +37,20 @@ const getters = {
 };
 
 const mutations = {
+  nsfwProcessDone(state) {
+    state.nsfwProcessDone = true;
+  },
   welcomeProcessDone(state) {
     state.welcomeProcessDone = true;
   },
   displayLanguage(state, payload) {
     state.displayLanguage = payload;
   },
-  hideVideoHistoryOnExit(state, payload) {
-    state.hideVideoHistoryOnExit = payload;
+  hideNSFW(state, payload) {
+    state.hideNSFW = payload;
+  },
+  protectPrivacy(state, payload) {
+    state.protectPrivacy = payload;
   },
   reverseScrolling(state, payload) {
     state.reverseScrolling = payload;
@@ -68,6 +79,10 @@ const mutations = {
   },
 };
 const actions = {
+  nsfwProcessDone({ commit, state }) {
+    commit('nsfwProcessDone');
+    return asyncStorage.set('preferences', state);
+  },
   welcomeProcess({ commit, state }, payload) {
     commit('welcomeProcessDone');
     commit('privacyAgreement', payload.privacyAgreement);
@@ -95,12 +110,16 @@ const actions = {
     commit('reverseScrolling', false);
     return asyncStorage.set('preferences', state);
   },
-  hideVideoHistoryOnExit({ commit, state }) {
-    commit('hideVideoHistoryOnExit', true);
+  hideNSFW({ commit, state }, payload) {
+    commit('hideNSFW', !!payload);
     return asyncStorage.set('preferences', state);
   },
-  nothideVideoHistoryOnExit({ commit, state }) {
-    commit('hideVideoHistoryOnExit', false);
+  protectPrivacy({ commit, state }) {
+    commit('protectPrivacy', true);
+    return asyncStorage.set('preferences', state);
+  },
+  notprotectPrivacy({ commit, state }) {
+    commit('protectPrivacy', false);
     return asyncStorage.set('preferences', state);
   },
   primaryLanguage({ commit, state }, payload) {

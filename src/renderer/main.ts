@@ -338,6 +338,10 @@ new Vue({
       if (!data.displayLanguage) {
         this.$store.dispatch('displayLanguage', getSystemLocale());
       }
+      if (!data.protectPrivacy) {
+        this.$store.dispatch('protectPrivacy');
+        this.$store.dispatch('hideNSFW', true);
+      }
     });
     asyncStorage.get('subtitle-style').then((data) => {
       if (data.chosenStyle) {
@@ -613,7 +617,7 @@ new Vue({
       updateChosenSize: subtitleActions.UPDATE_SUBTITLE_SIZE,
       updateEnabledSecondarySub: subtitleActions.UPDATE_ENABLED_SECONDARY_SUBTITLE,
       changeFirstSubtitle: smActions.manualChangePrimarySubtitle,
-      manualChangeSecondarySubtitle: smActions.manualChangeSecondarySubtitle,
+      changeSecondarySubtitle: smActions.manualChangeSecondarySubtitle,
       refreshSubtitles: smActions.refreshSubtitles,
       addLocalSubtitlesWithSelect: smActions.addLocalSubtitlesWithSelect,
       updateSubtitleType: subtitleActions.UPDATE_SUBTITLE_TYPE,

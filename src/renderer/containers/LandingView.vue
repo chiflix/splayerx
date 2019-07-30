@@ -7,7 +7,7 @@
     />
     <transition name="background-container-transition">
       <div
-        v-if="item.backgroundUrl && !hideVideoHistoryOnExit"
+        v-if="item.backgroundUrl"
         class="background"
       >
         <transition
@@ -52,7 +52,7 @@
     <div class="welcome-container">
       <transition :name="logoTransition">
         <div
-          v-if="pageMounted && (!item.backgroundUrl || hideVideoHistoryOnExit)"
+          v-if="pageMounted && (!item.backgroundUrl)"
           class="logo-container"
         >
           <Icon type="logo" />
@@ -81,7 +81,7 @@
             width:`${thumbnailWidth}px`,
             marginRight: `${marginRight}px`,
             backgroundColor:
-              item.backgroundUrl && !hideVideoHistoryOnExit
+              item.backgroundUrl
                 ? 'rgba(255,255,255,0.12) ': 'rgba(255,255,255,0.05)',
           }"
           @click="openOrMove"
@@ -98,8 +98,8 @@
         <component
           :is="playlistLength > 1 ? 'PlaylistItem' : 'VideoItem'"
           v-for="({ backgroundUrl, id, playlistLength }, index) in landingViewItems"
-          v-if="!hideVideoHistoryOnExit"
           :key="id"
+          :cursor-url="cursorUrl"
           :can-hover="canHover"
           :backgroundUrl="backgroundUrl"
           :index="index"
@@ -123,7 +123,9 @@
 <script lang="ts">
 import Vue from 'vue';
 import { mapGetters, mapActions } from 'vuex';
+import { join } from 'path';
 import { Route } from 'vue-router';
+import { filePathToUrl } from '@/helpers/path';
 import { playInfoStorageService } from '@/services/storage/PlayInfoStorageService';
 import { recentPlayService } from '@/services/media/RecentPlayService';
 import Icon from '@/components/BaseIconContainer.vue';
@@ -163,7 +165,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'defaultDir', 'isFullScreen', 'hideVideoHistoryOnExit']),
+    ...mapGetters(['winWidth', 'defaultDir', 'isFullScreen', 'incognitoMode', 'hideNSFW']),
     lastIndex: {
       get() {
         return (this.firstIndex + this.showItemNum) - 1;
@@ -175,6 +177,10 @@ export default {
           this.firstIndex = (val - this.showItemNum) + 1;
         }
       },
+    },
+    cursorUrl() {
+      if (this.firstIndex === 0) return `url("${filePathToUrl(join(__static, 'cursor/cursorRight.svg') as string)}")`;
+      return `url("${filePathToUrl(join(__static, 'cursor/cursorLeft.svg') as string)}")`;
     },
     move() {
       return -(this.firstIndex * (this.thumbnailWidth + this.marginRight));
@@ -241,7 +247,7 @@ export default {
   created() {
     window.addEventListener('mousemove', this.globalMoveHandler);
     // Get all data and show
-    if (!this.$store.getters.deleteVideoHistoryOnExit) {
+    if (!this.incognitoMode) {
       recentPlayService.getRecords().then((results) => {
         this.landingViewItems = results;
       });
@@ -291,7 +297,6 @@ export default {
       this.openUrlShow = val;
     });
     window.addEventListener('keyup', this.keyboardHandler);
-    // window.addEventListener('beforeunload', this.beforeUnloadHandler);
     this.$electron.ipcRenderer.on('quit', () => {
       this.quit = true;
     });
@@ -301,7 +306,6 @@ export default {
   destroyed() {
     window.removeEventListener('mousemove', this.globalMoveHandler);
     window.removeEventListener('keyup', this.keyboardHandler);
-    // window.removeEventListener('beforeunload', this.beforeUnloadHandler);
   },
   methods: {
     ...mapActions({
@@ -326,13 +330,6 @@ export default {
     globalMoveHandler() {
       this.logoTransition = 'welcome-container-transition';
       this.canHover = true;
-    },
-    beforeUnloadHandler(e: BeforeUnloadEvent) {
-      if (process.env.NODE_ENV === 'development') { // app.hide() will disable app refresh and not good for dev
-      } else if (process.platform === 'darwin' && !this.quit) {
-        e.returnValue = false;
-        this.$electron.remote.app.hide();
-      }
     },
     keyboardHandler(e: KeyboardEvent) {
       if (e.key === 'ArrowRight') {

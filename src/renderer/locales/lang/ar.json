@@ -251,13 +251,13 @@
       "others": "الآخرين",
       "switchDisplayLanguages": "تتحكم لغة العرض في اللغة التي تراها في SPlayer."
     },
-    "privacy": {
+    "translate": {
       "languageDescription": ".قم بتحميل بيانات مجهولة المصدر لجلب نتائج الترجمة باللغة التالية ، ولن يتم تضمين معلومات خصوصية",
       "languagePriority": "تفضيل اللغات",
       "none": "لا شيء",
       "primary": "ابتدائي",
-      "privacyConfirm": "تمكين الترجمة الذكية",
-      "privacySetting": "ترجمة",
+      "translateConfirm": "تمكين الترجمة الذكية",
+      "translateSetting": "ترجمة",
       "secondary": "ثانوي",
       "setAsDefault": "تعيين SPlayer كتطبيق افتراضي",
       "settings": "الإعدادات"

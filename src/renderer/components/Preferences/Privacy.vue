@@ -1,401 +1,124 @@
 <template>
-  <div class="privicy tabcontent">
-    <div class="settingItem">
-      <BaseCheckBox v-model="privacyAgreement">
-        {{ $t('preferences.privacy.privacyConfirm') }}
-      </BaseCheckBox>
-      <div
-        :style="{opacity: privacyAgreement ? 1 : 0.3}"
-        class="settingItem__attached"
-      >
-        <div class="settingItem__title">
-          {{ $t('preferences.privacy.languagePriority') }}
+  <div class="privacy">
+    <BaseCheckBox v-model="protectPrivacy">
+      {{ $t('preferences.privacy.enable') }}
+    </BaseCheckBox>
+    <div
+      :style="{ opacity: !protectPrivacy ? 0.3: 1.0 }"
+      class="privacy_background"
+    >
+      <div class="privacy_radio">
+        <BaseRadio
+          v-model="radioValue"
+          value="smartMode"
+          name="mode"
+        >
+          {{ $t('preferences.privacy.smartMode') }}
+        </BaseRadio>
+        <div class="privacy_radio_description">
+          {{ $t('preferences.privacy.smartDescription') }}
         </div>
-        <div class="settingItem__description">
-          {{ $t('preferences.privacy.languageDescription') }}
+        <BaseRadio
+          v-model="radioValue"
+          value="incognitoMode"
+          name="mode"
+          class="privacy_radio2"
+        >
+          {{ $t('preferences.privacy.incognitoMode') }}
+        </BaseRadio>
+        <div class="privacy_radio_description">
+          {{ $t('preferences.privacy.incognitoDescription') }}
         </div>
-        <table>
-          <tr>
-            <td class="dropdown__title">
-              {{ $t('preferences.privacy.primary') }}
-            </td>
-            <td>
-              <div class="settingItem__input dropdown">
-                <div
-                  :class="showFirstSelection ?
-                    'dropdown__toggle--list' : 'dropdown__toggle--display'"
-                  :style="{ cursor: privacyAgreement ? 'pointer' : 'default' }"
-                  @mouseup.stop="openFirstDropdown"
-                >
-                  <div class="dropdown__displayItem">
-                    {{ codeToLanguageName(primaryLanguage) }}
-                  </div>
-                  <div
-                    @mouseup.stop=""
-                    class="dropdown__listItems"
-                    tabindex="-1"
-                  >
-                    <div
-                      v-for="(language, index) in primaryLanguages"
-                      :key="index"
-                      @mouseup.stop="handleFirstSelection(language)"
-                      class="dropdownListItem"
-                    >
-                      {{ codeToLanguageName(language) }}
-                    </div>
-                  </div>
-                  <Icon
-                    :class="showFirstSelection ?
-                      'dropdown__icon--arrowUp' : 'dropdown__icon--arrowDown'"
-                    type="rightArrow"
-                  />
-                </div>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td class="dropdown__title">
-              {{ $t('preferences.privacy.secondary') }}
-            </td>
-            <td>
-              <div class="settingItem__input dropdown">
-                <div
-                  :class="showSecondSelection ?
-                    'dropdown__toggle--list' : 'dropdown__toggle--display'"
-                  :style="{ cursor: privacyAgreement ? 'pointer' : 'default' }"
-                  @mouseup.stop="openSecondDropdown"
-                >
-                  <div class="dropdown__displayItem">
-                    {{ codeToLanguageName(secondaryLanguage) }}
-                  </div>
-                  <div
-                    @mouseup.stop=""
-                    class="dropdown__listItems"
-                    tabindex="-1"
-                  >
-                    <div
-                      ref="secondarySelection"
-                      v-for="(language, index) in secondaryLanguages"
-                      :key="index"
-                      :style="{
-                        color: (language === primaryLanguage && language !== noLanguage) ?
-                          'rgba(255,255,255,0.5)' : 'rgba(255,255,255,1)',
-                      }"
-                      @mouseup.stop="handleSecondSelection(language)"
-                      class="dropdownListItem"
-                    >
-                      {{ codeToLanguageName(language) }}
-                      <span
-                        v-if="language === primaryLanguage && language !== noLanguage"
-                        style="color: rgba(255,255,255,0.5)"
-                      >- {{ $t('preferences.privacy.primary') }}</span>
-                    </div>
-                  </div>
-                  <Icon
-                    :class="showSecondSelection ?
-                      'dropdown__icon--arrowUp' : 'dropdown__icon--arrowDown'"
-                    type="rightArrow"
-                  />
-                </div>
-              </div>
-            </td>
-          </tr>
-        </table>
       </div>
     </div>
   </div>
 </template>
-
-<script>
-import { concat } from 'lodash';
+<script lang="ts">
 import electron from 'electron';
-import { codeToLanguageName, allCodes } from '@/libs/language';
-import Icon from '@/components/BaseIconContainer.vue';
 import BaseCheckBox from './BaseCheckBox.vue';
+import BaseRadio from './BaseRadio.vue';
 
 export default {
-  name: 'General',
+  name: 'Privacy',
   components: {
-    Icon,
     BaseCheckBox,
-  },
-  props: {
-    mouseDown: Boolean,
-    isMoved: Boolean,
+    BaseRadio,
   },
   data() {
     return {
-      showFirstSelection: false,
-      showSecondSelection: false,
-      noLanguage: this.$t('preferences.privacy.none'),
+      radioValue: 'smartMode',
     };
   },
   computed: {
-    languages() {
-      return concat('', Object.keys(allCodes));
-    },
-    primaryLanguages() {
-      return this.languages.filter(language => language && language !== this.primaryLanguage);
-    },
-    secondaryLanguages() {
-      return this.languages.filter(language => language !== this.secondaryLanguage);
-    },
     preferenceData() {
       return this.$store.getters.preferenceData;
     },
-    primaryLanguage: {
+    protectPrivacy: {
       get() {
-        return this.$store.getters.primaryLanguage;
+        return this.$store.getters.protectPrivacy;
       },
-      set(val) {
-        this.$store.dispatch('primaryLanguage', val).then(() => {
-          electron.ipcRenderer.send('preference-to-main', this.preferenceData);
-        });
-      },
-    },
-    secondaryLanguage: {
-      get() {
-        return this.$store.getters.secondaryLanguage;
-      },
-      set(val) {
-        this.$store.dispatch('secondaryLanguage', val).then(() => {
-          electron.ipcRenderer.send('preference-to-main', this.preferenceData);
-        });
-      },
-    },
-    privacyAgreement: {
-      get() {
-        return this.$store.getters.privacyAgreement;
-      },
-      set(val) {
+      set(val: boolean) {
         if (val) {
-          this.$store.dispatch('agreeOnPrivacyPolicy').then(() => {
+          this.$store.dispatch('protectPrivacy').then(() => {
             electron.ipcRenderer.send('preference-to-main', this.preferenceData);
           });
         } else {
-          this.$store.dispatch('disagreeOnPrivacyPolicy').then(() => {
+          this.$store.dispatch('notprotectPrivacy').then(() => {
             electron.ipcRenderer.send('preference-to-main', this.preferenceData);
           });
         }
+      },
+    },
+    hideNSFW: {
+      get() {
+        return this.$store.getters.hideNSFW;
+      },
+      set(val: boolean) {
+        this.$store.dispatch('hideNSFW', !!val).then(() => {
+          electron.ipcRenderer.send('preference-to-main', this.preferenceData);
+        });
       },
     },
   },
   watch: {
-    privacyAgreement(val) {
-      if (!val) {
-        this.showFirstSelection = this.showSecondSelection = false;
-      }
-    },
-    mouseDown(val, oldVal) {
-      if (!val && oldVal && !this.isMoved) {
-        this.showFirstSelection = this.showSecondSelection = false;
-      } else if (!val && oldVal && this.isMoved) {
-        this.$emit('move-stoped');
-      }
+    radioValue(val: string) {
+      if (val === 'smartMode') this.hideNSFW = true;
+      else if (val === 'incognitoMode') this.hideNSFW = false;
     },
   },
-  methods: {
-    codeToLanguageName(code) {
-      if (!code) return this.noLanguage;
-      return codeToLanguageName(code);
-    },
-    handleFirstSelection(selection) {
-      if (selection === this.secondaryLanguage) this.secondaryLanguage = '';
-      this.primaryLanguage = selection;
-      this.showFirstSelection = false;
-    },
-    handleSecondSelection(selection) {
-      if (selection !== this.primaryLanguage) {
-        this.secondaryLanguage = selection;
-        this.showSecondSelection = false;
-      }
-    },
-    openFirstDropdown() {
-      if (this.privacyAgreement) {
-        if (this.showFirstSelection) {
-          this.showFirstSelection = false;
-        } else {
-          this.showFirstSelection = true;
-          this.showSecondSelection = false;
-        }
-      }
-    },
-    openSecondDropdown() {
-      if (this.privacyAgreement) {
-        if (this.showSecondSelection) {
-          this.showSecondSelection = false;
-        } else {
-          this.showSecondSelection = true;
-          this.showFirstSelection = false;
-        }
-      }
-    },
+  created() {
+    if (this.protectPrivacy && !this.hideNSFW) this.radioValue = 'incognitoMode';
+    else this.radioValue = 'smartMode';
   },
 };
 </script>
-<style scoped lang="scss">
-.privicy {
+<style lang="scss" scoped>
+.privacy {
   .checkbox:nth-of-type(1) {
     margin-top: 0;
   }
-}
-.tabcontent {
-  .settingItem {
-    &__attached {
-      background-color: rgba(0,0,0,0.05);
-      margin-top: 15px;
-      padding: 20px 28px;
-
-      table {
-        width: 100%;
-        tr {
-          height: 40px;
-        }
-      }
-    }
-
-    &__title {
-      font-family: $font-medium;
-      font-size: 13px;
-      color: rgba(255,255,255,0.9);
-    }
-
-    &__description {
-      font-family: $font-medium;
-      font-size: 11px;
-      color: rgba(255,255,255,0.5);
-      margin-top: 7px;
-    }
-
-    &__input {
-      -webkit-app-region: no-drag;
-      cursor: pointer;
-      font-family: $font-semibold;
-      font-size: 11px;
-      color: #FFFFFF;
-      text-align: center;
-      border-radius: 2px;
-      border: 1px solid rgba(255,255,255,0.1);
-      background-color: rgba(255,255,255,0.03);
-      transition: all 200ms;
-
-      &:hover {
-        border: 1px solid rgba(255,255,255,0.2);
-        background-color: rgba(255,255,255,0.08);
-      }
-    }
-
-    tr:nth-of-type(1) .dropdown {
-      z-index: 1;
-    }
+  &_background {
+    width: 366px;
+    height: fit-content;
+    margin-top: 15px;
+    background-color: rgba(0,0,0,0.05);
   }
-  .dropdown {
-    position: relative;
-    width: 240px;
-    height: 28px;
-
-    &__title {
-      height: 28px;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      width: 10%;
-      padding-right: 10px;
-      line-height: 28px;
+  &_radio {
+    margin-left: 29px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    &2 {
+      margin-top: 15px;
+    }
+    &_description {
+      width: 282px;
       font-family: $font-medium;
-      font-size: 12px;
-      color: rgba(255,255,255,0.7);
-    }
-
-    &__toggle {
-      position: absolute;
-      top: 0;
-      width: 100%;
-      margin-top: -1px;
-      margin-left: -1px;
-      transition: all 200ms;
-      border-radius: 2px;
-      overflow: hidden;
-      -webkit-app-region: no-drag;
-
-      &--display {
-        @extend .dropdown__toggle;
-        height: 28px;
-        border: 1px solid rgba(255,255,255,0);
-        background-color: rgba(255, 255, 255, 0);
-      }
-
-      &--list {
-        @extend .dropdown__toggle;
-        height: 148px;
-        border: 1px solid rgba(255,255,255,0.3);
-        background-color: rgba(120,120,120,1);
-        .dropdown__displayItem {
-          border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-      }
-    }
-
-    &__displayItem {
-      height: 28px;
-      line-height: 28px;
-      border-bottom: 1px solid rgba(255,255,255,0);
-    }
-
-    &__listItems {
-      cursor: pointer;
-      position: relative;
-      height: 112px;
-      margin: 4px 4px 4px 6px;
-      overflow-y: scroll;
-      &:focus {
-        outline: none;
-      }
-    }
-
-    .dropdownListItem {
-      height: 28px;
-      line-height: 28px;
-
-      &:hover {
-        background-image: linear-gradient(
-          90deg,
-          rgba(255,255,255,0.00) 0%,
-          rgba(255,255,255,0.069) 23%,
-          rgba(255,255,255,0.00) 100%,
-        );
-      }
-    }
-
-    &__icon {
-      position: absolute;
-      top: 7px;
-      right: 8px;
-      transition: transform 200ms;
-      &--arrowDown {
-        @extend .dropdown__icon;
-        transform: rotate(90deg);
-      }
-      &--arrowUp {
-        @extend .dropdown__icon;
-        z-index: 100;
-        transform: rotate(-90deg);
-      }
-    }
-
-    ::-webkit-scrollbar {
-      width: 3px;
-      user-select: none;
-    }
-    /* Handle */
-    ::-webkit-scrollbar-thumb {
-      background: rgba(255,255,255,0.1);
-      border-radius: 1.5px;
-    }
-    ::-webkit-scrollbar-track {
-      cursor: pointer;
-      border-radius: 2px;
-      width: 10px;
-      user-select: none;
+      font-size: 11px;
+      color: rgba(255,255,255,0.50);
+      letter-spacing: 0;
+      line-height: 16px;
+      margin-top: 6px;
+      margin-left: 27px;
     }
   }
 }

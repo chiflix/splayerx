@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+import VueRouter from 'vue-router';
 import VueI18n from 'vue-i18n';
 import electron from 'electron';
 import osLocale from 'os-locale';
@@ -11,6 +12,7 @@ import '@/css/style.scss';
 
 Vue.use(VueI18n);
 Vue.use(Vuex);
+Vue.use(VueRouter);
 
 function getSystemLocale() {
   const { app } = electron.remote;
@@ -24,6 +26,32 @@ function getSystemLocale() {
   return 'en';
 }
 
+const routes = [
+  {
+    path: '*',
+    redirect: '/',
+  },
+  {
+    path: '/',
+    name: 'General',
+    component: require('@/components/Preferences/General.vue').default,
+  },
+  {
+    path: '/privacy',
+    name: 'Privacy',
+    component: require('@/components/Preferences/Privacy.vue').default,
+  },
+  {
+    path: '/translate',
+    name: 'Translate',
+    component: require('@/components/Preferences/Translate.vue').default,
+  },
+];
+
+const router = new VueRouter({
+  routes,
+});
+
 const i18n = new VueI18n({
   locale: getSystemLocale(), // set locale
   fallbackLocale: 'en',
@@ -34,6 +62,7 @@ hookVue(Vue);
 
 new Vue({
   i18n,
+  router,
   components: { Preference },
   data: {},
   store,

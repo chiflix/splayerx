@@ -6,8 +6,9 @@
       width: `${thumbnailWidth}px`,
       height: `${thumbnailHeight}px`,
       backgroundImage: backgroundUrl,
-      transform: `translate(${movementX}px, ${movementY}px`,
+      transform: `translate(${movementX}px, ${movementY}px)`,
       zIndex: mousedown ? '5' : '',
+      cursor: isInRange ? 'pointer' : `${cursorUrl}, pointer`,
     }"
     class="item"
   >
@@ -54,6 +55,10 @@ export default {
   name: 'VideoItem',
   components: { Icon },
   props: {
+    cursorUrl: {
+      type: String,
+      default: '',
+    },
     backgroundUrl: {
       type: String,
       default: '',

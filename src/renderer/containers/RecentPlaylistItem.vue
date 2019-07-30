@@ -4,7 +4,7 @@
     :style="{
       transition: tranFlag ? 'transform 100ms ease-out' : '',
       marginRight: sizeAdaption(15),
-      cursor: isInRange ? 'pointer' : '',
+      cursor: isInRange ? 'pointer' : `${cursorUrl}, pointer`,
       minWidth: `${thumbnailWidth}px`,
       minHeight: `${thumbnailHeight}px`,
     }"
@@ -155,6 +155,7 @@ import { parseNameFromPath } from '@/libs/utils';
 import Icon from '@/components/BaseIconContainer.vue';
 import RecentPlayService from '@/services/media/PlaylistService';
 import { mediaStorageService } from '@/services/storage/MediaStorageService';
+import { nsfwThumbnailFilterService } from '@/services/filter/NSFWThumbnailFilterService';
 
 export default {
   components: {
@@ -168,6 +169,10 @@ export default {
     },
     hovered: {
       type: Boolean,
+    },
+    cursorUrl: {
+      type: String,
+      default: '',
     },
     // for moving
     itemMoving: {
@@ -275,7 +280,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['playingList', 'items']),
+    ...mapGetters(['playingList', 'items', 'hideNSFW', 'isFolderList', 'nsfwProcessDone']),
     aboutToDelete() {
       return this.selfMoving && (-(this.movementY) > this.thumbnailHeight * 1.5);
     },
@@ -407,8 +412,15 @@ export default {
       this.path,
       this.items[this.index],
     );
-    this.recentPlayService.on('image-loaded', () => {
-      this.updateUI();
+    this.recentPlayService.on('image-loaded', async () => {
+      await this.updateUI();
+      if (this.hideNSFW && this.isFolderList) {
+        if (await nsfwThumbnailFilterService.checkImage(this.imageSrc)) {
+          if (!this.nsfwProcessDone) this.$bus.$emit('nsfw');
+          if (!this.isPlaying) this.$store.dispatch('RemoveItemFromPlayingList', this.path);
+          this.$bus.$emit('nsfw-detected');
+        }
+      }
     });
     this.updateUI();
     this.$bus.$on('database-saved', this.updateUI);
@@ -481,9 +493,9 @@ export default {
       this.$refs.progress.style.setProperty('opacity', '0');
     },
     mouseoverVideo() {
-      this.mouseover = true;
       if (this.isInRange && !this.isShifting
         && this.canHoverItem && !this.itemMoving) {
+        this.mouseover = true;
         this.onItemMouseover(
           this.index,
           this.recentPlayService,

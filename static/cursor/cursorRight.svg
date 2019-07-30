@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16px" height="22px" viewBox="0 0 16 22" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 56.2 (81672) - https://sketch.com -->
+    <title>形状结合</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <path d="M12.6668759,10.4698309 L4.16582491,17.8498964 C4.1241197,17.8861022 4.06096034,17.8816441 4.02475456,17.8399388 C4.0243875,17.839516 4.024024,17.8390901 4.02366409,17.8386612 L3.02339769,16.6465902 C2.98804982,16.6044642 2.99334891,16.5417016 3.03525949,16.5060986 L10.2227083,10.4003711 L3.03610308,4.36830868 C2.99381451,4.33279484 2.9883014,4.26972679 3.02378676,4.22741432 L4.02373466,3.03572282 C4.02407142,3.03532148 4.02441134,3.03492279 4.02475437,3.03452679 C4.06091509,2.9927825 4.12406959,2.98825612 4.16581389,3.02441684 L12.714424,10.4295948 L12.6668759,10.4698309 Z" id="path-1"></path>
+        <filter x="-69.8%" y="-38.9%" width="241.0%" height="190.7%" filterUnits="objectBoundingBox" id="filter-2">
+            <feMorphology radius="1.25" operator="dilate" in="SourceAlpha" result="shadowSpreadOuter1"></feMorphology>
+            <feOffset dx="0" dy="1" in="shadowSpreadOuter1" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="1.5" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feComposite in="shadowBlurOuter1" in2="SourceAlpha" operator="out" result="shadowBlurOuter1"></feComposite>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.253824301 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+    </defs>
+    <g id="Landing-View:-Open" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="画板">
+            <g id="形状结合">
+                <use fill="black" fill-opacity="1" filter="url(#filter-2)" xlink:href="#path-1"></use>
+                <path stroke="#FFFFFF" stroke-width="1.25" d="M13.0736218,10.9443816 L4.57555228,18.3218588 C4.27318944,18.5843508 3.81528415,18.5520291 3.55279218,18.2496662 C3.54881332,18.245057 3.54881332,18.245057 3.54488631,18.2404035 L2.54461992,17.0483324 C2.28834783,16.7429192 2.32676622,16.2878903 2.6306179,16.0297687 L9.25396918,10.4032413 L2.63416476,4.84692187 C2.32767129,4.58952932 2.28771691,4.13246515 2.54500899,3.82567206 L3.54495688,2.63398056 C3.54863061,2.6296256 3.54863061,2.6296256 3.55234977,2.62530938 C3.81451503,2.32266322 4.27238515,2.28984698 4.57503131,2.55201224 L13.6753988,10.4351464 L13.0736218,10.9443816 Z" fill="#000000" fill-rule="evenodd"></path>
+            </g>
+        </g>
+    </g>
+</svg>

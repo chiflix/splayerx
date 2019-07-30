@@ -237,6 +237,7 @@
   },
   "preferences": {
     "general": {
+      "hideNSFW": "Hide Sensitive Content",
       "hideHistory": "Hide playback history",
       "clearHistory": "Always clear playback history on exit",
       "reverseScrolling": "Reverse mouse scrolling",
@@ -252,16 +253,24 @@
       "others": "Others",
       "switchDisplayLanguages": "Display Language controls the language you see in SPlayer."
     },
-    "privacy": {
+    "translate": {
       "languageDescription": "Upload anonymous data to fetch translation results in the following language,  no privacy information will be included.",
       "languagePriority": "Language Preference",
       "none": "None",
       "primary": "Primary",
-      "privacyConfirm": "Enable Smart Translation",
-      "privacySetting": "Translation",
+      "translateConfirm": "Enable Smart Translation",
+      "translateSetting": "Translation",
       "secondary": "Secondary",
       "setAsDefault": "Set SPlayer as the Default Application",
       "settings": "Settings"
+    },
+    "privacy": {
+      "privacySetting": "Privacy",
+      "enable": "Enable Privacy Protection",
+      "smartMode": "Intelligent Mode",
+      "smartDescription": "Offline identify sensitive or not-suitable-for-work contents, and clear the playback history when playing in a folder playlist or when quitting.",
+      "incognitoMode": "Incognito Mode",
+      "incognitoDescription": "No playback history will be saved."
     }
   },
   "privacyBubble": {
@@ -282,6 +291,11 @@
       "partTwo": ".",
       "underlinedContent": "disagree"
     }
+  },
+  "protectBubble": {
+    "agree": "OK",
+    "setting": "Setting",
+    "content": "Smart Privacy Protection is enabled. Sensitive or not-suitable-for-work playback history will be removed."
   },
   "recentPlaylist": {
     "folderSource": "Folder",

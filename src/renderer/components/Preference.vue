@@ -23,14 +23,21 @@
         />
       </div>
       <div
-        :class="currentPreference === 'General' ? 'tablist__tab--selected' : ''"
+        :class="$route.name === 'General' ? 'tablist__tab--selected' : ''"
         @mouseup="handleMouseup('General')"
         class="tablist__tab"
       >
         {{ $t('preferences.general.generalSetting') }}
       </div>
       <div
-        :class="currentPreference === 'Privacy' ? 'tablist__tab--selected' : ''"
+        :class="$route.name === 'Translate' ? 'tablist__tab--selected' : ''"
+        @mouseup="handleMouseup('Translate')"
+        class="tablist__tab"
+      >
+        {{ $t('preferences.translate.translateSetting') }}
+      </div>
+      <div
+        :class="$route.name === 'Privacy' ? 'tablist__tab--selected' : ''"
         @mouseup="handleMouseup('Privacy')"
         class="tablist__tab"
       >
@@ -59,29 +66,15 @@
         />
       </div>
       <div class="tablist__tabcontent">
-        <keep-alive>
-          <!-- eslint-disable-next-line vue/require-component-is -->
-          <component
-            :is="currentPreference"
-            :mouse-down="mouseDown"
-            :is-moved="isMoved"
-            @move-stoped="isMoved = false"
-          />
-        </keep-alive>
+        <router-view />
       </div>
     </div>
   </div>
 </template>
 
-<script>
-import Vue from 'vue';
+<script lang="ts">
 import electron from 'electron';
 import Icon from '@/components/BaseIconContainer.vue';
-import General from './Preferences/General.vue';
-import Privacy from './Preferences/Privacy.vue';
-
-Vue.component('General', General);
-Vue.component('Privacy', Privacy);
 
 export default {
   name: 'Preference',
@@ -91,7 +84,6 @@ export default {
   data() {
     return {
       state: 'default',
-      currentPreference: 'General',
       mouseDown: false,
       isMoved: false,
     };
@@ -102,7 +94,7 @@ export default {
     },
   },
   created() {
-    electron.ipcRenderer.on('preferenceDispatch', (event, actionType, actionPayload) => {
+    electron.ipcRenderer.on('preferenceDispatch', (event: Event, actionType: string, actionPayload: string) => {
       this.mainDispatchProxy(actionType, actionPayload);
     });
     window.onmousedown = () => {
@@ -126,11 +118,11 @@ export default {
     handleClose() {
       electron.remote.getCurrentWindow().close();
     },
-    mainDispatchProxy(actionType, actionPayload) {
+    mainDispatchProxy(actionType: string, actionPayload: string) {
       this.$store.dispatch(actionType, actionPayload);
     },
-    handleMouseup(panel) {
-      this.currentPreference = panel;
+    handleMouseup(panel: string) {
+      this.$router.push({ name: panel });
     },
   },
 };

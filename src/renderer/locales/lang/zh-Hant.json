@@ -251,13 +251,13 @@
       "others": "其他",
       "switchDisplayLanguages": "您可以在此修改射手影音播放器菜單、對話框中的顯示語言。"
     },
-    "privacy": {
+    "translate": {
       "languageDescription": "按以下語言提供翻譯結果，翻譯需上傳匿名信息但不會包含任何隱私數據。",
       "languagePriority": "選擇翻譯語言",
       "none": "無",
       "primary": "首要語言",
-      "privacyConfirm": "啟用智能翻譯",
-      "privacySetting": "智能翻譯",
+      "translateConfirm": "啟用智能翻譯",
+      "translateSetting": "智能翻譯",
       "secondary": "次要語言",
       "setAsDefault": "將SPlayer設為默認播放器",
       "settings": "設置"

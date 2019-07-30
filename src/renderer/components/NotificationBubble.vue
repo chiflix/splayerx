@@ -20,6 +20,12 @@
       @close-privacy-bubble="closePrivacyBubble"
       class="mas-privacy-bubble"
     />
+    <NSFW
+      v-if="showNSFWBubble"
+      :handle-agree="handleAgree"
+      :handle-setting="handleSetting"
+      class="mas-privacy-bubble"
+    />
     <transition name="bubble">
       <TranslateBubble
         v-if="isTranslateBubbleVisiable"
@@ -76,6 +82,7 @@ import NextVideo from '@/components/PlayingView/NextVideo.vue';
 import PrivacyBubble from '@/components/PlayingView/PrivacyConfirmBubble.vue';
 import TranslateBubble from '@/components/PlayingView/TranslateBubble.vue';
 import MASPrivacyBubble from '@/components/PlayingView/MASPrivacyConfirmBubble.vue';
+import NSFW from '@/components/PlayingView/NSFW.vue';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import { AudioTranslate as atActions } from '@/store/actionTypes';
 import Icon from './BaseIconContainer.vue';
@@ -89,6 +96,7 @@ export default {
     NextVideo,
     PrivacyBubble,
     MASPrivacyBubble,
+    NSFW,
     TranslateBubble,
   },
   data() {
@@ -97,11 +105,12 @@ export default {
       showNextVideo: false,
       readyToShow: false, // show after video element is loaded
       showPrivacyBubble: false,
+      showNSFWBubble: false,
     };
   },
   computed: {
     ...mapGetters([
-      'nextVideo', 'nextVideoPreviewTime', 'duration', 'singleCycle', 'privacyAgreement',
+      'nextVideo', 'nextVideoPreviewTime', 'duration', 'singleCycle', 'privacyAgreement', 'nsfwProcessDone',
       'translateBubbleMessage', 'translateBubbleType', 'isTranslateBubbleVisiable', 'failBubbleId',
     ]),
     messages() {
@@ -138,6 +147,9 @@ export default {
     },
   },
   mounted() {
+    this.$bus.$on('nsfw', () => {
+      if (!this.nsfwProcessDone) this.showNSFWBubble = true;
+    });
     this.$bus.$on('privacy-confirm', () => {
       this.showPrivacyBubble = true;
     });
@@ -151,6 +163,17 @@ export default {
     }),
     closePrivacyBubble() {
       this.showPrivacyBubble = false;
+    },
+    handleAgree() {
+      this.closeNSFWBubble();
+    },
+    handleSetting() {
+      this.$electron.ipcRenderer.send('add-preference', 'privacy');
+      this.closeNSFWBubble();
+    },
+    closeNSFWBubble() {
+      this.showNSFWBubble = false;
+      this.$store.dispatch('nsfwProcessDone');
     },
     manualClose() {
       this.manualClosed = true;

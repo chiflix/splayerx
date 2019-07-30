@@ -46,7 +46,8 @@ import { debounce } from 'lodash';
 import { windowRectService } from '@/services/window/WindowRectService';
 import { playInfoStorageService } from '@/services/storage/PlayInfoStorageService';
 import { settingStorageService } from '@/services/storage/SettingStorageService';
-import { generateShortCutImageBy } from '@/libs/utils';
+import { nsfwThumbnailFilterService } from '@/services/filter/NSFWThumbnailFilterService';
+import { generateShortCutImageBy, ShortCut } from '@/libs/utils';
 import { Video as videoActions, AudioTranslate as atActions } from '@/store/actionTypes';
 import { videodata } from '@/store/video';
 import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer.vue';
@@ -72,13 +73,14 @@ export default {
       needToRestore: false,
       winAngleBeforeFullScreen: 0, // winAngel before full screen
       winSizeBeforeFullScreen: [], // winSize before full screen
+      nsfwDetected: false,
     };
   },
   computed: {
     ...mapGetters([
       'videoId', 'nextVideoId', 'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId', 'enabledSecondarySub', 'lastChosenSize', 'subToTop',
       'winSize', 'winPos', 'winAngle', 'isFullScreen', 'winWidth', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo', 'loop', 'playinglistRate', 'isFolderList', 'playingList', 'playingIndex', 'playListId', 'items',
-      'previousVideo', 'previousVideoId', 'isTranslating',
+      'previousVideo', 'previousVideoId', 'hideNSFW', 'isTranslating', 'nsfwProcessDone',
     ]),
     ...mapGetters({
       videoWidth: 'intrinsicWidth',
@@ -94,7 +96,8 @@ export default {
       if (oldVal) this.updatePlaylist(oldVal);
     },
     videoId(val: number, oldVal: number) {
-      this.saveScreenshot(oldVal);
+      this.nsfwDetected = false;
+      this.handleLeaveVideo(oldVal);
     },
     originSrc(val: string, oldVal: string) {
       if (process.mas && oldVal) {
@@ -124,17 +127,36 @@ export default {
     this.updatePlayinglistRate({ oldDir: '', newDir: path.dirname(this.originSrc), playingList: this.playingList });
   },
   mounted() {
+    this.$bus.$on('nsfw-detected', () => {
+      this.nsfwDetected = true;
+    });
     this.$bus.$on('back-to-landingview', () => {
       if (this.isTranslating) {
         this.showTranslateBubble(AudioTranslateBubbleOrigin.WindowClose);
         this.addTranslateBubbleCallBack(() => {
-          this.backToLandingView();
+          this.handleLeaveVideo(this.videoId)
+            .finally(() => {
+              this.$store.dispatch('Init');
+              this.$bus.$off();
+              this.$router.push({
+                name: 'landing-view',
+              });
+              windowRectService.uploadWindowBy(false, 'landing-view');
+            });
         });
         return false;
       }
       // 如果有back翻译任务，直接丢弃掉
       this.discardTranslate();
-      this.backToLandingView();
+      this.handleLeaveVideo(this.videoId)
+        .finally(() => {
+          this.$store.dispatch('Init');
+          this.$bus.$off();
+          this.$router.push({
+            name: 'landing-view',
+          });
+          windowRectService.uploadWindowBy(false, 'landing-view');
+        });
       return false;
     });
     this.$electron.ipcRenderer.on('quit', (e: Event, needToRestore: boolean) => {
@@ -312,16 +334,18 @@ export default {
           .updateRecentPlayedBy(playlistId, recentPlayedData as PlaylistItem);
       }
     },
-    async saveScreenshot(videoId: number) {
+    async generateScreenshot(): Promise<ShortCut> {
       const { videoElement } = this;
       const canvas = this.$refs.thumbnailCanvas;
       // todo: use metaloaded to get videoHeight and videoWidth
       const { videoHeight, videoWidth } = this;
       const shortCut = generateShortCutImageBy(videoElement, canvas, videoWidth, videoHeight);
-
+      return shortCut;
+    },
+    async saveScreenshot(videoId: number, screenshot: ShortCut) {
       const data = {
-        shortCut: shortCut.shortCut,
-        smallShortCut: shortCut.smallShortCut,
+        shortCut: screenshot.shortCut,
+        smallShortCut: screenshot.smallShortCut,
         lastPlayedTime: videodata.time,
         duration: this.duration,
         audioTrackId: this.currentAudioTrackId,
@@ -340,26 +364,27 @@ export default {
     savePlaybackStates() {
       return settingStorageService.updatePlaybackStates({ volume: this.volume, muted: this.muted });
     },
-    backToLandingView() {
-      let savePromise = this.saveScreenshot(this.videoId)
+    async handleLeaveVideo(videoId: number) {
+      const screenshot: ShortCut = await this.generateScreenshot();
+      if (this.hideNSFW) {
+        if (this.nsfwDetected || await nsfwThumbnailFilterService.checkImage(screenshot.shortCut)) {
+          if (!this.nsfwProcessDone) this.$bus.$emit('nsfw');
+          await playInfoStorageService.deleteRecentPlayedBy(this.playListId);
+          return null;
+        }
+      }
+
+      let savePromise = this.saveScreenshot(videoId, screenshot)
         .then(() => this.updatePlaylist(this.playListId));
       if (process.mas && this.$store.getters.source === 'drop') {
         savePromise = savePromise.then(async () => {
           await playInfoStorageService.deleteRecentPlayedBy(this.playListId);
         });
       }
-      savePromise
+      return savePromise
         .then(this.saveSubtitleStyle)
         .then(this.savePlaybackStates)
-        .then(this.removeAllAudioTrack)
-        .finally(() => {
-          this.$store.dispatch('Init');
-          this.$bus.$off();
-          this.$router.push({
-            name: 'landing-view',
-          });
-          windowRectService.uploadWindowBy(false, 'landing-view');
-        });
+        .then(this.removeAllAudioTrack);
     },
     beforeUnloadHandler(e: BeforeUnloadEvent) {
       // 如果当前有翻译任务进行，而不是再后台进行
@@ -369,43 +394,18 @@ export default {
           window.close();
         });
         e.returnValue = true;
-        return false;
       }
       // 如果有back翻译任务，直接丢弃掉
       this.discardTranslate();
       if (!this.asyncTasksDone && !this.needToRestore) {
         e.returnValue = false;
-        let savePromise = this.saveScreenshot(this.videoId)
-          .then(() => this.updatePlaylist(this.playListId));
-        if (process.mas && this.$store.getters.source === 'drop') {
-          savePromise = savePromise.then(async () => {
-            await playInfoStorageService.deleteRecentPlayedBy(this.playListId);
-          });
-        }
-        savePromise
-          .then(this.saveSubtitleStyle)
-          .then(this.savePlaybackStates)
-          .then(this.removeAllAudioTrack)
+        this.handleLeaveVideo(this.videoId)
           .finally(() => {
             this.$store.dispatch('SRC_SET', { src: '', mediaHash: '', id: NaN });
             this.asyncTasksDone = true;
             window.close();
           });
-      } else if (process.env.NODE_ENV === 'development') { // app.hide() will disable app refresh and not good for dev
-      } else if (process.platform === 'darwin' && !this.quit) {
-        // e.returnValue = false;
-        // this.$electron.remote.app.hide();
-        // this.$electron.ipcRenderer.send('simulate-closing-window');
-        // this.$bus.$off(); // remove all listeners before back to landing view
-        // // need to init Vuex States
-        // this.$router.push({
-        //   name: 'landing-view',
-        // });
-        // windowRectService.uploadWindowBy(false, 'landing-view');
-      } else {
-        this.$electron.remote.app.quit();
       }
-      return true;
     },
   },
 };
