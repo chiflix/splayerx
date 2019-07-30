@@ -236,6 +236,7 @@
   },
   "preferences": {
     "general": {
+      "hideNSFW": "",
       "hideHistory": "재생 기록 숨기기",
       "clearHistory": "종료시 항상 재생 기록 지우기",
       "reverseScrolling": "마우스 스크롤 역전",
@@ -251,16 +252,24 @@
       "others": "기타",
       "switchDisplayLanguages": "표시 언어는 SPlayer에 표시되는 언어를 제어합니다."
     },
+    "translate": {
+      "languageDescription": "",
+      "languagePriority": "",
+      "none": "",
+      "primary": "",
+      "translateConfirm": "",
+      "translateSetting": "",
+      "secondary": "",
+      "setAsDefault": "",
+      "settings": ""
+    },
     "privacy": {
-      "languageDescription": "번역 결과를 다음 언어로 가져 오기 위해 익명 데이터를 업로드하면 개인 정보가 포함되지 않습니다.",
-      "languagePriority": "언어 환경 설정",
-      "none": "없음",
-      "primary": "행성",
-      "privacyConfirm": "스마트 번역 사용",
       "privacySetting": "번역",
-      "secondary": "반성",
-      "setAsDefault": "SPlayer를 기본 응용 프로그램으로 설정",
-      "settings": "설정"
+      "enable": "",
+      "smartMode": "",
+      "smartDescription": "",
+      "incognitoMode": "",
+      "incognitoDescription": ""
     }
   },
   "privacyBubble": {
@@ -281,6 +290,11 @@
       "partTwo": ".",
       "underlinedContent": "동의하지 않는다"
     }
+  },
+  "protectBubble": {
+    "agree": "",
+    "setting": "",
+    "content": ""
   },
   "recentPlaylist": {
     "folderSource": "폴더",
