@@ -413,10 +413,6 @@ export default class Menubar {
     const windowMenu = new Menu();
     const items = this.getMenuItemTemplate('window').items;
 
-    const floatMenuItem = items.find((item: MenubarMenuItem) => item.id === 'window.keepPlayingWindowFront') as IMenubarMenuItemAction;
-
-    windowMenu.append(this.createMenuItemByTemplate(floatMenuItem));
-
     const fullscreenMenuItem = items.find((item: MenubarMenuItem) => item.id === 'window.fullscreen') as IMenubarMenuItemAction;
 
     windowMenu.append(this.createMenuItemByTemplate(fullscreenMenuItem));
