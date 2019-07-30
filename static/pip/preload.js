@@ -74,13 +74,31 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+const oauthRegex = [
+  /^https:\/\/passport.iqiyi.com\/apis\/thirdparty/i,
+  /^https:\/\/api.weibo.com\/oauth2/i,
+  /^https:\/\/graph.qq.com\//i,
+  /^https:\/\/open.weixin.qq.com\//i,
+  /^https:\/\/openapi.baidu.com\//i,
+  /^https:\/\/auth.alipay.com\/login\//i,
+  /^https:\/\/account.xiaomi.com\/pass\//i,
+];
+
 // Some websites intercept links to open a blank window, then set its location, e.g. iqiyi.com
 const originWindowOpen = window.open.bind(window);
-window.open = function customWindowOpen(url, ...rest) {
-  if (url !== 'about:blank') return originWindowOpen(url, ...rest);
-  return {
-    set location(url) {
-      if (url && url !== 'about:blank') originWindowOpen(url);
-    },
-  };
+window.open = function customWindowOpen(url, strWindowName, strWindowFeatures) {
+  if (url === 'about:blank') {
+    return {
+      set location(url) {
+        if (url && url !== 'about:blank') customWindowOpen(url, strWindowName, strWindowFeatures);
+      },
+    };
+  }
+
+  if (oauthRegex.some(re => re.test(url))) {
+    return originWindowOpen(url, strWindowName, strWindowFeatures);
+  }
+
+  sendToHost('open-url', { url });
+  return {};
 };
