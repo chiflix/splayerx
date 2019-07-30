@@ -199,10 +199,17 @@
       "exitPip": "Exit Picture In Picture"
     },
     "favourite": {
-      "name": "Favourite",
+      "name": "Channel",
       "iqiyi": "iQIYI",
       "bilibili": "Bilibili",
       "youtube": "Youtube"
+    },
+    "edit": {
+      "name": "Edit",
+      "cut": "Cut",
+      "copy": "Copy",
+      "paste": "Paste",
+      "selectAll": "Select All"
     },
     "history": {
       "name": "History",

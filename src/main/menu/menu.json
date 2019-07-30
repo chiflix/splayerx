@@ -317,6 +317,30 @@
       }
     ]
   },
+  "edit": {
+    "items": [
+      {
+        "id": "edit.cut",
+        "label": "msg.edit.cut",
+        "role": "cut"
+      },
+      {
+        "id": "edit.copy",
+        "label": "msg.edit.copy",
+        "role": "copy"
+      },
+      {
+        "id": "edit.paste",
+        "label": "msg.edit.paste",
+        "role": "paste"
+      },
+      {
+        "id": "edit.selectAll",
+        "label": "msg.edit.selectAll",
+        "role": "selectAll"
+      }
+    ]
+  },
   "history": {
     "items": [
       {
