@@ -236,6 +236,7 @@
   },
   "preferences": {
     "general": {
+      "hideNSFW": "",
       "hideHistory": "إخفاء سجل التشغيل",
       "clearHistory": "قم دائمًا بمسح سجل التشغيل عند الخروج",
       "reverseScrolling": "التمرير عكس الماوس",
@@ -251,16 +252,24 @@
       "others": "الآخرين",
       "switchDisplayLanguages": "تتحكم لغة العرض في اللغة التي تراها في SPlayer."
     },
+    "translate": {
+      "languageDescription": "",
+      "languagePriority": "",
+      "none": "",
+      "primary": "",
+      "translateConfirm": "",
+      "translateSetting": "",
+      "secondary": "",
+      "setAsDefault": "",
+      "settings": ""
+    },
     "privacy": {
-      "languageDescription": ".قم بتحميل بيانات مجهولة المصدر لجلب نتائج الترجمة باللغة التالية ، ولن يتم تضمين معلومات خصوصية",
-      "languagePriority": "تفضيل اللغات",
-      "none": "لا شيء",
-      "primary": "ابتدائي",
-      "privacyConfirm": "تمكين الترجمة الذكية",
       "privacySetting": "ترجمة",
-      "secondary": "ثانوي",
-      "setAsDefault": "تعيين SPlayer كتطبيق افتراضي",
-      "settings": "الإعدادات"
+      "enable": "",
+      "smartMode": "",
+      "smartDescription": "",
+      "incognitoMode": "",
+      "incognitoDescription": ""
     }
   },
   "privacyBubble": {
@@ -281,6 +290,11 @@
       "partTwo": ".",
       "underlinedContent": "تعارض"
     }
+  },
+  "protectBubble": {
+    "agree": "",
+    "setting": "",
+    "content": ""
   },
   "recentPlaylist": {
     "folderSource": "مجلد",
