@@ -261,7 +261,7 @@
       "privacySetting": "Privacy",
       "enable": "Enable Privacy Protection",
       "smartMode": "Intelligent Mode",
-      "smartDescription": "Offline identification of sensitive or not-suitable-for-work contents, and clear the playback history from the folder playlist or when quitting.",
+      "smartDescription": "Offline identify sensitive or not-suitable-for-work contents, and clear the playback history when playing in a folder playlist or when quitting.",
       "incognitoMode": "Incognito Mode",
       "incognitoDescription": "No playback history will be saved."
     }
