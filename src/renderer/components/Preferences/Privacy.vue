@@ -87,7 +87,7 @@ export default {
     },
   },
   created() {
-    if (this.protectPrivacy && this.hideNSFW) this.radioValue = 'seamlessMode';
+    if (this.protectPrivacy && this.hideNSFW) this.radioValue = 'intelligentMode';
   },
 };
 </script>
