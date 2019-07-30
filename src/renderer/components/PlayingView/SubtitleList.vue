@@ -127,7 +127,6 @@
             transition: transFlag ?
               'all 100ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' : '',
           }"
-          :class="{ 'backdrop': useBlur }"
           class="card"
         />
       </div>
@@ -150,10 +149,6 @@ export default {
     Progress,
   },
   props: {
-    useBlur: {
-      type: Boolean,
-      default: false,
-    },
     computedSize: {
       type: Number,
       required: true,
@@ -415,15 +410,6 @@ export default {
     rgba(255, 255, 255, 0.21) 100%
   );
   box-sizing: border-box;
-}
-.backdrop {
-  border: 0.5px solid rgba(255, 255, 255, 0.20);
-  opacity: 0.4;
-  background-image: radial-gradient(
-    60% 134%,
-  rgba(255, 255, 255, 0.09) 44%,
-  rgba(255, 255, 255, 0.05) 100%
-  );
 }
 .translateProgress {
   width: 10px;

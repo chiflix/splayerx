@@ -4,7 +4,6 @@
       <NextVideo
         ref="nextVideo"
         v-if="showNextVideo"
-        :use-blur="useBlur"
         @close-next-video="closeNextVideo"
         @manualclose-next-video="manualClose"
         @ready-to-show="readyToShow = true"
@@ -13,19 +12,16 @@
     </transition>
     <PrivacyBubble
       v-if="showPrivacyBubble && !isMas"
-      :use-blur="useBlur"
       @close-privacy-bubble="closePrivacyBubble"
       class="privacy-bubble"
     />
     <MASPrivacyBubble
       v-if="showPrivacyBubble && isMas"
-      :use-blur="useBlur"
       @close-privacy-bubble="closePrivacyBubble"
       class="mas-privacy-bubble"
     />
     <NSFW
       v-if="showNSFWBubble"
-      :use-blur="useBlur"
       :handle-agree="handleAgree"
       :handle-setting="handleSetting"
       class="mas-privacy-bubble"
@@ -54,7 +50,7 @@
         <div
           :class="[
             m.type === 'result' ? 'resultContainer' : 'stateContainer',
-            useBlur ? 'backdrop' : 'backdrop-fallback',
+            'backdrop-fallback',
           ]"
         >
           <div class="bubbleContent">
@@ -110,7 +106,6 @@ export default {
       readyToShow: false, // show after video element is loaded
       showPrivacyBubble: false,
       showNSFWBubble: false,
-      useBlur: false,
     };
   },
   computed: {
@@ -673,12 +668,6 @@ export default {
       margin: 25.5px 28px auto auto;
     }
   }
-}
-.backdrop {
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background-image: none;
-  background-color: rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(8px);
 }
 
 .toast-leave-active {

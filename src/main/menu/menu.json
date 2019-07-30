@@ -317,21 +317,51 @@
       }
     ]
   },
+  "edit": {
+    "items": [
+      {
+        "id": "edit.cut",
+        "label": "msg.edit.cut",
+        "role": "cut"
+      },
+      {
+        "id": "edit.copy",
+        "label": "msg.edit.copy",
+        "role": "copy"
+      },
+      {
+        "id": "edit.paste",
+        "label": "msg.edit.paste",
+        "role": "paste"
+      },
+      {
+        "id": "edit.selectAll",
+        "label": "msg.edit.selectAll",
+        "role": "selectAll"
+      }
+    ]
+  },
   "history": {
     "items": [
       {
         "id": "history.reload",
-        "label": "msg.history.reload"
+        "label": "msg.history.reload",
+        "accelerator": "CmdOrCtrl + R"
+      },
+      {
+        "id": "menubar.separator"
       },
       {
         "id": "history.back",
         "label": "msg.history.back",
-        "enabled": false
+        "enabled": false,
+        "accelerator": "CmdOrCtrl + ["
       },
       {
         "id": "history.forward",
         "label": "msg.history.forward",
-        "enabled": false
+        "enabled": false,
+        "accelerator": "CmdOrCtrl + ]"
       }
     ]
   },
