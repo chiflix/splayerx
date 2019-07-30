@@ -78,6 +78,13 @@ const actions = {
     commit('nsfwProcessDone');
     return asyncStorage.set('preferences', state);
   },
+  welcomeProcess({ commit, state }, payload) {
+    commit('welcomeProcessDone');
+    commit('privacyAgreement', payload.privacyAgreement);
+    commit('primaryLanguage', payload.primaryLanguage);
+    commit('secondaryLanguage', payload.secondaryLanguage);
+    return asyncStorage.set('preferences', state);
+  },
   displayLanguage({ commit, state }, payload) {
     commit('displayLanguage', payload);
     return asyncStorage.set('preferences', state);
