@@ -203,6 +203,13 @@
       "bilibili": "Bilibili",
       "youtube": "Youtube"
     },
+    "edit": {
+      "name": "",
+      "cut": "",
+      "copy": "",
+      "paste": "",
+      "selectAll": ""
+    },
     "history": {
       "name": "履歴",
       "reload": "ページを再読み込み",
