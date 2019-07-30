@@ -204,69 +204,84 @@ export default class Menubar {
   }
 
   public updatePrimarySub(items: { id: string, label: string }[]) {
-    const primarySubMenu = this.menubar.getMenuItemById('subtitle.mainSubtitle').submenu;
-    // @ts-ignore
-    primarySubMenu.clear();
-    items.forEach(({ id, label }) => {
-      const item = new MenuItem({
-        id: `subtitle.mainSubtitle.${id}`,
-        type: 'radio',
-        label,
-        click: () => {
-          if (this.mainWindow) {
-            this.mainWindow.webContents.send('subtitle.mainSubtitle', id);
-          }
-        },
+    if (
+      this.menubar.getMenuItemById('subtitle.mainSubtitle')
+      && this.menubar.getMenuItemById('subtitle.mainSubtitle').submenu
+    ) {
+      const primarySubMenu = this.menubar.getMenuItemById('subtitle.mainSubtitle').submenu;
+      // @ts-ignore
+      primarySubMenu.clear();
+      items.forEach(({ id, label }) => {
+        const item = new MenuItem({
+          id: `subtitle.mainSubtitle.${id}`,
+          type: 'radio',
+          label,
+          click: () => {
+            if (this.mainWindow) {
+              this.mainWindow.webContents.send('subtitle.mainSubtitle', id);
+            }
+          },
+        });
+        primarySubMenu.append(item);
       });
-      primarySubMenu.append(item);
-    });
 
-    Menu.setApplicationMenu(this.menubar);
+      Menu.setApplicationMenu(this.menubar);
+    }
   }
 
   public updateSecondarySub(items: { id: string, label: string }[]) {
-    const secondarySubMenu = this.menubar.getMenuItemById('subtitle.secondarySubtitle').submenu;
-    // @ts-ignore
-    secondarySubMenu.clear();
-    items.forEach(({ id, label }) => {
-      let type: ('normal' | 'separator' | 'submenu' | 'checkbox' | 'radio') = 'radio';
-      if (id === 'secondarySub') type = 'checkbox';
-      else if (id === 'menubar.separator') type = 'separator';
-      const item = new MenuItem({
-        id: `subtitle.secondarySubtitle.${id}`,
-        type,
-        label,
-        click: () => {
-          if (this.mainWindow) {
-            this.mainWindow.webContents.send('subtitle.secondarySubtitle', id);
-          }
-        },
+    if (
+      this.menubar.getMenuItemById('subtitle.secondarySubtitle')
+      && this.menubar.getMenuItemById('subtitle.secondarySubtitle').submenu
+    ) {
+      const secondarySubMenu = this.menubar.getMenuItemById('subtitle.secondarySubtitle').submenu;
+      // @ts-ignore
+      secondarySubMenu.clear();
+      items.forEach(({ id, label }) => {
+        let type: ('normal' | 'separator' | 'submenu' | 'checkbox' | 'radio') = 'radio';
+        if (id === 'secondarySub') type = 'checkbox';
+        else if (id === 'menubar.separator') type = 'separator';
+        const item = new MenuItem({
+          id: `subtitle.secondarySubtitle.${id}`,
+          type,
+          label,
+          click: () => {
+            if (this.mainWindow) {
+              this.mainWindow.webContents.send('subtitle.secondarySubtitle', id);
+            }
+          },
+        });
+        secondarySubMenu.append(item);
       });
-      secondarySubMenu.append(item);
-    });
 
-    Menu.setApplicationMenu(this.menubar);
+      Menu.setApplicationMenu(this.menubar);
+    }
   }
 
   public updateAudioTrack(items: { id: string, label: string }[]) {
-    const audioTrackMenu = this.menubar.getMenuItemById('audio.switchAudioTrack').submenu;
-    // @ts-ignore
-    audioTrackMenu.clear();
-    items.forEach(({ id, label }) => {
-      const item = new MenuItem({
-        id: `audio.switchAudioTrack.${id}`,
-        type: 'radio',
-        label,
-        click: () => {
-          if (this.mainWindow) {
-            this.mainWindow.webContents.send('audio.switchAudioTrack', id);
-          }
-        },
+    if (
+      this.menubar.getMenuItemById('audio.switchAudioTrack')
+      && this.menubar.getMenuItemById('audio.switchAudioTrack').submenu
+    ) {
+      const audioTrackMenu = this.menubar.getMenuItemById('audio.switchAudioTrack').submenu;
+      // @ts-ignore
+      audioTrackMenu.clear();
+      items.forEach(({ id, label }) => {
+        const item = new MenuItem({
+          id: `audio.switchAudioTrack.${id}`,
+          type: 'radio',
+          label,
+          click: () => {
+            if (this.mainWindow) {
+              this.mainWindow.webContents.send('audio.switchAudioTrack', id);
+            }
+          },
+        });
+        audioTrackMenu.append(item);
       });
-      audioTrackMenu.append(item);
-    });
 
-    Menu.setApplicationMenu(this.menubar);
+      Menu.setApplicationMenu(this.menubar);
+    }
   }
 
   private refreshPlaybackMenu() {
