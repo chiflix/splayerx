@@ -56,6 +56,7 @@
       autosize
       class="web-view"
       allowpopups
+      webpreferences="nativeWindowOpen=yes"
     />
   </div>
 </template>
@@ -350,8 +351,12 @@ export default {
         windowSize?: number[] | null,
         x?: number,
         y?: number,
+        url?: string,
       }[] } = evt;
       switch (channel) {
+        case 'open-url':
+          this.handleOpenUrl(args[0]);
+          break;
         case 'dragover':
         case 'dragleave':
           this.maskToShow = args[0].dragover;
@@ -401,14 +406,11 @@ export default {
       this.$refs.webView.focus();
       if (process.env.NODE_ENV === 'development') this.$refs.webView.openDevTools();
     });
+    // https://github.com/electron/typescript-definitions/issues/27 fixed in 6.0.0
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    this.$refs.webView.addEventListener('new-window', (e: any) => { // https://github.com/electron/typescript-definitions/issues/27 fixed in 6.0.0
-      if (!e.url || e.url === 'about:blank') return;
+    this.$refs.webView.addEventListener('new-window', (e: any) => {
       if (e.disposition !== 'new-window') {
-        if (this.isPip) {
-          this.updateIsPip(false);
-        }
-        this.updateInitialUrl(e.url);
+        this.handleOpenUrl(e);
       }
     });
     this.$refs.webView.addEventListener('did-start-loading', () => {
@@ -433,6 +435,13 @@ export default {
       updateBarrageOpen: browsingActions.UPDATE_BARRAGE_OPEN,
       updateIsPip: browsingActions.UPDATE_IS_PIP,
     }),
+    handleOpenUrl({ url, disposition }: { url: string, disposition?: string }) {
+      if (!url || url === 'about:blank') return;
+      if (this.isPip) {
+        this.updateIsPip(false);
+      }
+      this.updateInitialUrl(url);
+    },
     handleMouseenter() {
       this.pipBtnsKeepShow = true;
       this.timeout = true;
