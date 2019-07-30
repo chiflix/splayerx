@@ -1,4 +1,4 @@
-import { LanguageCode } from '@/libs/language';
+import { LanguageCode } from '../libs/language';
 
 type Partial<T> = { [P in keyof T]?: T[P] };
 
@@ -133,3 +133,5 @@ export type Subtitle = {
   loading: string,
   type: string,
 }
+
+export const NOT_SELECTED_SUBTITLE = 'NOT_SELECTED_SUBTITLE';

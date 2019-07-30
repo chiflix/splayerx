@@ -13,6 +13,7 @@ import { IsMacintosh } from '../../shared/common/platform';
 import Locale from '../../shared/common/localize';
 import menuTemplate from './menu.json';
 import { IMenuDisplayInfo } from '../../renderer/interfaces/IRecentPlay';
+import { SubtitleControlListItem, Type } from '../../renderer/interfaces/ISubtitle';
 
 function separator(): Electron.MenuItem {
   return new MenuItem({ type: 'separator' });
@@ -43,6 +44,17 @@ export default class Menubar {
 
   private isPip = false;
 
+  private playingViewTop = false;
+
+  private primarySubs: {
+    id: string, label: string, checked: boolean, subtitleItem: SubtitleControlListItem,
+  }[];
+
+  private secondarySubs: {
+    id: string, label: string, checked: boolean,
+    enabled: boolean, subtitleItem: SubtitleControlListItem,
+  }[];
+
   private _routeName: string;
 
   private _disable: boolean;
@@ -54,11 +66,7 @@ export default class Menubar {
 
   public set disable(val: boolean) {
     this._disable = val;
-    if (val) {
-      this.disableMenu();
-    } else {
-      this.menuStateControl();
-    }
+    this.enableMenu(!val);
   }
 
   public constructor() {
@@ -68,6 +76,7 @@ export default class Menubar {
 
   public setMainWindow(window: Electron.BrowserWindow | null) {
     // may replace this way of getting mainWindow by window service or else...
+    this.playingViewTop = this.isFullScreen = false;
     this.mainWindow = window;
   }
 
@@ -120,15 +129,21 @@ export default class Menubar {
     }
   }
 
-  public disableMenu() {
-    this.enableSubmenuItem('playback', false);
-    this.enableSubmenuItem('audio', false);
-    this.enableSubmenuItem('subtitle', false);
-    this.enableSubmenuItem('window', false);
+  public enableMenu(enable: boolean) {
+    if (this._routeName === 'playing-view') {
+      this.enableSubmenuItem('playback', enable);
+      this.enableSubmenuItem('audio', enable);
+      this.enableSubmenuItem('subtitle', enable);
+      if (enable) {
+        this.updatePrimarySub();
+        this.updateSecondarySub();
+      }
+    }
 
-    this.enableSubmenuItem('file.openRecent', false);
-    this.updateMenuItemEnabled('file.clearHistory', false);
-    this.updateMenuItemEnabled('file.closeWindow', false);
+    this.enableSubmenuItem('window', enable);
+    this.enableSubmenuItem('file.openRecent', enable);
+    this.updateMenuItemEnabled('file.clearHistory', enable);
+    this.updateMenuItemEnabled('file.closeWindow', enable);
   }
 
   public updateLocale() {
@@ -154,6 +169,12 @@ export default class Menubar {
     if (this.isPip !== isPip) {
       this.isPip = isPip;
       this.refreshBrowsingWindowMenu();
+    }
+  }
+
+  public updatePlayingViewTop(playingViewTop: boolean) {
+    if (this.playingViewTop !== playingViewTop) {
+      this.playingViewTop = playingViewTop;
     }
   }
 
@@ -203,58 +224,82 @@ export default class Menubar {
     Menu.setApplicationMenu(this.menubar);
   }
 
-  public updatePrimarySub(items: { id: string, label: string }[]) {
+  public updatePrimarySub(
+    items?: {
+      id: string, label: string, checked: boolean, subtitleItem: SubtitleControlListItem,
+    }[],
+  ) {
+    if (items) this.primarySubs = items;
     if (
       this.menubar.getMenuItemById('subtitle.mainSubtitle')
       && this.menubar.getMenuItemById('subtitle.mainSubtitle').submenu
     ) {
       const primarySubMenu = this.menubar.getMenuItemById('subtitle.mainSubtitle').submenu;
-      // @ts-ignore
-      primarySubMenu.clear();
-      items.forEach(({ id, label }) => {
-        const item = new MenuItem({
-          id: `subtitle.mainSubtitle.${id}`,
-          type: 'radio',
-          label,
-          click: () => {
-            if (this.mainWindow) {
-              this.mainWindow.webContents.send('subtitle.mainSubtitle', id);
-            }
-          },
+      if (primarySubMenu) {
+        // @ts-ignore
+        primarySubMenu.clear();
+        this.primarySubs.forEach(({
+          id, label, checked, subtitleItem,
+        }) => {
+          const item = new MenuItem({
+            id: `subtitle.mainSubtitle.${id}`,
+            type: 'radio',
+            label,
+            checked,
+            click: () => {
+              if (this.mainWindow) {
+                if (subtitleItem && subtitleItem.type === Type.Translated) this.menubar.getMenuItemById('subtitle.mainSubtitle.off').checked = true;
+                this.mainWindow.webContents.send('subtitle.mainSubtitle', id, subtitleItem);
+              }
+            },
+          });
+          primarySubMenu.append(item);
         });
-        primarySubMenu.append(item);
-      });
 
-      Menu.setApplicationMenu(this.menubar);
+        Menu.setApplicationMenu(this.menubar);
+      }
     }
   }
 
-  public updateSecondarySub(items: { id: string, label: string }[]) {
+  public updateSecondarySub(
+    items?: {
+      id: string, label: string, checked: boolean,
+      enabled: boolean, subtitleItem: SubtitleControlListItem,
+    }[],
+  ) {
+    if (items) this.secondarySubs = items;
     if (
       this.menubar.getMenuItemById('subtitle.secondarySubtitle')
       && this.menubar.getMenuItemById('subtitle.secondarySubtitle').submenu
     ) {
       const secondarySubMenu = this.menubar.getMenuItemById('subtitle.secondarySubtitle').submenu;
-      // @ts-ignore
-      secondarySubMenu.clear();
-      items.forEach(({ id, label }) => {
-        let type: ('normal' | 'separator' | 'submenu' | 'checkbox' | 'radio') = 'radio';
-        if (id === 'secondarySub') type = 'checkbox';
-        else if (id === 'menubar.separator') type = 'separator';
-        const item = new MenuItem({
-          id: `subtitle.secondarySubtitle.${id}`,
-          type,
-          label,
-          click: () => {
-            if (this.mainWindow) {
-              this.mainWindow.webContents.send('subtitle.secondarySubtitle', id);
-            }
-          },
+      if (secondarySubMenu) {
+        // @ts-ignore
+        secondarySubMenu.clear();
+        this.secondarySubs.forEach(({
+          id, label, checked, enabled, subtitleItem,
+        }) => {
+          let type: ('normal' | 'separator' | 'submenu' | 'checkbox' | 'radio') = 'radio';
+          if (id === 'secondarySub') type = 'normal';
+          else if (id === 'menubar.separator') type = 'separator';
+          const item = new MenuItem({
+            id: `subtitle.secondarySubtitle.${id}`,
+            type,
+            label,
+            checked,
+            enabled,
+            click: () => {
+              if (this.mainWindow) {
+                if (subtitleItem && subtitleItem.type === Type.Translated) this.menubar.getMenuItemById('subtitle.secondarySubtitle.off').checked = true;
+                this.mainWindow.webContents.send('subtitle.secondarySubtitle', id, subtitleItem);
+              }
+            },
+          });
+          secondarySubMenu.append(item);
         });
-        secondarySubMenu.append(item);
-      });
 
-      Menu.setApplicationMenu(this.menubar);
+        Menu.setApplicationMenu(this.menubar);
+      }
     }
   }
 
@@ -286,31 +331,33 @@ export default class Menubar {
 
   private refreshPlaybackMenu() {
     const playbackMenu = this.menubar.getMenuItemById('playback').submenu;
-    // @ts-ignore
-    playbackMenu.clear();
+    if (playbackMenu) {
+      // @ts-ignore
+      playbackMenu.clear();
 
-    this.getMenuItemTemplate('playback').items.forEach((menuItem: MenubarMenuItem) => {
-      if (isSeparator(menuItem)) {
-        const item = separator();
-        playbackMenu.append(item);
-      } else {
-        if (menuItem.id === 'playback.playOrPause') {
-          menuItem.label = this.paused ? this.$t('msg.playback.play') : this.$t('msg.playback.pause');
+      this.getMenuItemTemplate('playback').items.forEach((menuItem: MenubarMenuItem) => {
+        if (isSeparator(menuItem)) {
+          const item = separator();
+          playbackMenu.append(item);
+        } else {
+          if (menuItem.id === 'playback.playOrPause') {
+            menuItem.label = this.paused ? this.$t('msg.playback.play') : this.$t('msg.playback.pause');
+          }
+          // @ts-ignore
+          if (isAction(menuItem) && this._disable) {
+            menuItem.enabled = !this._disable;
+          }
+          const item = this.createMenuItemByTemplate(menuItem);
+          playbackMenu.append(item);
         }
-        // @ts-ignore
-        if (isAction(menuItem) && this._disable) {
-          menuItem.enabled = !this._disable;
-        }
-        const item = this.createMenuItemByTemplate(menuItem);
-        playbackMenu.append(item);
-      }
-    });
+      });
 
-    Menu.setApplicationMenu(this.menubar);
+      Menu.setApplicationMenu(this.menubar);
+    }
   }
 
   private refreshBrowsingWindowMenu() {
-    const windowMenu = this.menubar.getMenuItemById('window').submenu;
+    const windowMenu = this.menubar.getMenuItemById('browsing.window').submenu;
     // @ts-ignore
     windowMenu.clear();
 
@@ -323,13 +370,16 @@ export default class Menubar {
     const actions = [];
     actions.push(...[
       this.createMenuItemByTemplate(floatMenuItem),
-      this.createMenuItem(this.isPip ? 'msg.window.exitPip' : 'msg.window.enterPip', undefined, 'P', false, undefined, 'window.pip'),
+      separator(),
+      this.createMenuItem(this.isPip ? 'msg.window.exitPip' : 'msg.window.enterPip', undefined, 'P', true, undefined, 'window.pip'),
+      separator(),
       this.createRoleMenuItem(
         minimizeMenuItem.label,
         minimizeMenuItem.role,
         minimizeMenuItem.enabled,
       ),
       this.createMenuItemByTemplate(maxmizeMenuItem),
+      separator(),
       this.createMenuItemByTemplate(landingViewMenuItem),
     ]);
 
@@ -352,6 +402,10 @@ export default class Menubar {
       } else {
         if (menuItem.id === 'window.fullscreen') {
           menuItem.label = this.isFullScreen ? this.$t('msg.window.exitFullScreen') : this.$t('msg.window.enterFullScreen');
+        }
+        if (menuItem.id === 'window.keepPlayingWindowFront') {
+          // @ts-ignore
+          menuItem.checked = this.playingViewTop;
         }
         if (isAction(menuItem) && this._disable) menuItem.enabled = !this._disable;
         const item = this.createMenuItemByTemplate(menuItem);
@@ -411,6 +465,7 @@ export default class Menubar {
 
     // Window
     const windowMenu = new Menu();
+
     const items = this.getMenuItemTemplate('window').items;
 
     const fullscreenMenuItem = items.find((item: MenubarMenuItem) => item.id === 'window.fullscreen') as IMenubarMenuItemAction;
@@ -533,6 +588,7 @@ export default class Menubar {
       const fileMenu = new Menu();
 
       const items = this.getMenuItemTemplate('file').items;
+      const playbackItems = this.getMenuItemTemplate('playback').items;
 
       const openMenuItemTemplate = items.find((item: MenubarMenuItem) => item.id === 'file.open') as IMenubarMenuItemAction;
       const openMenuItem = this.createMenuItemByTemplate(openMenuItemTemplate);
@@ -544,7 +600,9 @@ export default class Menubar {
         closeWindowTemplate.enabled,
       );
 
-      [openMenuItem, closeMenuItem].forEach(i => fileMenu.append(i));
+      const snapShotTemplate = playbackItems.find((item: MenubarMenuItem) => item.id === 'playback.snapShot') as IMenubarMenuItemAction;
+      const snapShotMenuItem = this.createMenuItemByTemplate(snapShotTemplate);
+      [openMenuItem, closeMenuItem, separator(), snapShotMenuItem].forEach(i => fileMenu.append(i));
 
       const fileMenuItem = new MenuItem({ label: this.$t('msg.file.name'), submenu: fileMenu });
 
@@ -569,6 +627,10 @@ export default class Menubar {
 
       menubar.append(preference);
     }
+
+    // Edit
+    const editMenuItem = this.createEditMenu();
+    menubar.append(editMenuItem);
 
     // History
     const historyMenuItem = this.createHistoryMenu();
@@ -679,6 +741,12 @@ export default class Menubar {
     return subtitleMenuItem;
   }
 
+  private createEditMenu() {
+    const editMenu = this.convertFromMenuItemTemplate('edit');
+    const editMenuItem = new MenuItem({ id: 'edit', label: this.$t('msg.edit.name'), submenu: editMenu });
+    return editMenuItem;
+  }
+
   private createHistoryMenu() {
     const historyMenu = this.convertFromMenuItemTemplate('history');
     const historyMenuItem = new MenuItem({ id: 'history', label: this.$t('msg.history.name'), submenu: historyMenu });
@@ -699,32 +767,37 @@ export default class Menubar {
     const minimizeMenuItem = items.find((item: MenubarMenuItem) => item.id === 'window.minimize') as IMenubarMenuItemRole;
     const maxmizeMenuItem = items.find((item: MenubarMenuItem) => item.id === 'window.maxmize') as IMenubarMenuItemAction;
     const landingViewMenuItem = items.find((item: MenubarMenuItem) => item.id === 'window.backToLandingView') as IMenubarMenuItemAction;
+    floatMenuItem.enabled = false;
 
     const actions = [];
     actions.push(...[
       this.createMenuItemByTemplate(floatMenuItem),
-      this.createMenuItem('msg.window.enterPip', undefined, 'P', true, undefined, 'window.pip'),
+      separator(),
+      this.createMenuItem('msg.window.enterPip', undefined, 'P', false, undefined, 'window.pip'),
+      separator(),
       this.createRoleMenuItem(
         minimizeMenuItem.label,
         minimizeMenuItem.role,
         minimizeMenuItem.enabled,
       ),
       this.createMenuItemByTemplate(maxmizeMenuItem),
+      separator(),
       this.createMenuItemByTemplate(landingViewMenuItem),
     ]);
 
     actions.forEach(i => window.append(i));
 
-    const windowMenuItem = new MenuItem({ id: 'window', label: this.$t('msg.window.name'), submenu: window });
+    const windowMenuItem = new MenuItem({ id: 'browsing.window', label: this.$t('msg.window.name'), submenu: window });
     return windowMenuItem;
   }
 
   private createWindowMenu() {
-    const macWindowMenu = this.convertFromMenuItemTemplate('window');
-    macWindowMenu.getMenuItemById('window.bossKey').click = () => {
+    const windowMenu = this.convertFromMenuItemTemplate('window');
+    windowMenu.getMenuItemById('window.bossKey').click = () => {
       app.emit('bossKey');
     };
-    const windowMenuItem = new MenuItem({ id: 'window', label: this.$t('msg.window.name'), submenu: macWindowMenu });
+    windowMenu.getMenuItemById('window.keepPlayingWindowFront').checked = this.playingViewTop;
+    const windowMenuItem = new MenuItem({ id: 'window', label: this.$t('msg.window.name'), submenu: windowMenu });
     return windowMenuItem;
   }
 

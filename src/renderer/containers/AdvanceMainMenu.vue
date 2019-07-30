@@ -1,7 +1,6 @@
 <template>
   <base-info-card
     ref="cardWidth"
-    :use-blur="useBlur"
     :border-radius="7"
     :content-min-height="119"
     :content-min-width="cardWidth > minInfoCardWidth ? cardWidth : minInfoCardWidth"
@@ -285,7 +284,6 @@ export default {
       backAudioHover: false,
       cardWidth: 180,
       normalFont: 'Avenir, Roboto-Regular, PingFang SC, Microsoft Yahei',
-      useBlur: false,
       shiftItemHovered: false,
     };
   },

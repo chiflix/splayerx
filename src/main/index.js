@@ -1,7 +1,7 @@
 // Be sure to call Sentry function as early as possible in the main process
 import '../shared/sentry';
 
-import { app, BrowserWindow, session, Tray, ipcMain, globalShortcut, nativeImage, splayerx } from 'electron' // eslint-disable-line
+import { app, BrowserWindow, session, Tray, ipcMain, globalShortcut, nativeImage, splayerx, systemPreferences } from 'electron' // eslint-disable-line
 import { throttle, debounce, uniq } from 'lodash';
 import os from 'os';
 import path, {
@@ -590,6 +590,10 @@ if (process.platform === 'darwin') {
 
 app.on('ready', () => {
   menuService = new MenuService();
+  if (process.platform === 'darwin') {
+    systemPreferences.setUserDefault('NSDisabledDictationMenuItem', 'boolean', true);
+    systemPreferences.setUserDefault('NSDisabledCharacterPaletteMenuItem', 'boolean', true);
+  }
   createWindow();
   app.setName('SPlayer');
   globalShortcut.register('CmdOrCtrl+Shift+I+O+P', () => {
@@ -611,6 +615,26 @@ app.on('window-all-closed', () => {
     (routeName === 'welcome-privacy' || routeName === 'language-setting')
     || process.platform !== 'darwin') {
     app.quit();
+  }
+});
+
+const oauthRegex = [
+  /^https:\/\/cnpassport.youku.com\//i,
+  /^https:\/\/passport.iqiyi.com\/apis\/thirdparty/i,
+  /^https:\/\/api.weibo.com\/oauth2/i,
+  /^https:\/\/graph.qq.com\//i,
+  /^https:\/\/open.weixin.qq.com\//i,
+  /^https:\/\/openapi.baidu.com\//i,
+  /^https:\/\/auth.alipay.com\/login\//i,
+  /^https:\/\/account.xiaomi.com\/pass\//i,
+];
+app.on('web-contents-created', (webContentsCreatedEvent, contents) => {
+  if (contents.getType() === 'webview') {
+    contents.on('new-window', (newWindowEvent, url) => {
+      if (!oauthRegex.some(re => re.test(url))) {
+        newWindowEvent.preventDefault();
+      }
+    });
   }
 });
 

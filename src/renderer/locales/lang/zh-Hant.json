@@ -198,10 +198,17 @@
       "exitPip": "退出畫中畫模式"
     },
     "favourite": {
-      "name": "收藏",
+      "name": "頻道",
       "iqiyi": "爱奇艺",
       "bilibili": "哔哩哔哩",
       "youtube": "Youtube"
+    },
+    "edit": {
+      "name": "",
+      "cut": "",
+      "copy": "",
+      "paste": "",
+      "selectAll": ""
     },
     "history": {
       "name": "歷史",
@@ -326,24 +333,42 @@
     "title": ""
   },
   "translateModal": {
-    "title": "選擇視頻源語言",
-    "translateTitle": "大約剩餘 {time}",
-    "minute": "{number} 分鐘",
-    "second": "{number} 秒",
-    "hour": "{number} 小時",
-    "successTitle": "翻譯完成",
-    "failTitle": "翻譯失敗",
-    "cancelTitle": "AI翻譯正在進行中",
-    "selectDescription": "如要生成智能翻譯，請選擇您在視頻中所聽到的語言並點擊生成，該過程將持續一段時間。",
     "selectLanguageLabel": "視頻源語言",
+    "select": {
+      "title": "選擇視頻源語言",
+      "content": "如要生成智能翻譯，請選擇您在視頻中所聽到的語言並點擊生成，該過程將持續一段時間。"
+    },
+    "translate": {
+      "title": "大約剩餘 {time}",
+      "content": "請不要切換視頻或關閉播放器，您可以在該視頻的翻譯結果列表中查看進度。",
+      "minute": "{number} 分鐘",
+      "second": "{number} 秒",
+      "hour": "{number} 小時"
+    },
+    "success": {
+      "title": "翻譯完成",
+      "content": "AI翻譯已完成，可在翻譯結果列表中查看。"
+    },
+    "discard": {
+      "title": "AI翻譯正在進行中",
+      "content": "點擊退出取消翻譯，退出後翻譯進度將不可恢復。"
+    },
+    "noLineFail": {
+      "title": "網絡錯誤",
+      "content": "請檢查網絡連接並重試。"
+    },
+    "timeOutFail": {
+      "title": "網絡超時",
+      "content": "連接服務器失敗，請稍後重試。"
+    },
+    "serverErrorFail": {
+      "title": "翻譯失敗",
+      "content": "雲端處理錯誤，請稍後重試。"
+    },
     "cancel": "取消",
     "quit": "退出",
     "generate": "生成",
-    "translateDescription": "請不要切換視頻或關閉播放器，您可以在該視頻的翻譯結果列表中查看進度。",
     "ok": "好的",
-    "successDescriptiton": "AI翻譯已完成，可在翻譯結果列表中查看。",
-    "failDescription": "請稍後重試，謝謝。",
-    "cancelDescription": "點擊退出取消翻譯，退出後翻譯進度將不可恢復。",
     "continue": "取消"
   },
   "translateBubble": {
@@ -358,9 +383,17 @@
       "title": "",
       "content": "AI 翻譯已完成，將在下次打開視頻時自動顯示。"
     },
-    "bubbleTranslateFail": {
+    "bubbleTranslateNoLineFail": {
+      "title": "網絡錯誤",
+      "content": "請檢查網絡連接並重試。"
+    },
+    "bubbleTranslateTimeOutFail": {
+      "title": "網絡超時",
+      "content": "連接服務器失敗，請稍後重試。"
+    },
+    "bubbleTranslateServerErrorFail": {
       "title": "翻譯失敗",
-      "content": "請稍後重試，謝謝。"
+      "content": "雲端處理錯誤，請稍後重試。"
     },
     "ok": "好的",
     "cancel": "取消",

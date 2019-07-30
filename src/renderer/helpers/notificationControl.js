@@ -21,7 +21,9 @@ import {
   EACCES,
   EPERM,
   ENOENT,
-  TRANSLATE_FAIL,
+  TRANSLATE_NO_LINE,
+  TRANSLATE_SERVER_ERROR_FAIL,
+  TRANSLATE_REQUEST_TIMEOUT,
   TRANSLATE_SUCCESS,
   TRANSLATE_SUCCESS_WHEN_VIDEO_CHANGE,
 } from './notificationcodes';
@@ -204,12 +206,29 @@ export function addBubble(code, options = {}) { // eslint-disable-line complexit
         dismissAfter: 5000,
       });
       break;
-    case TRANSLATE_FAIL:
+    case TRANSLATE_NO_LINE:
       store.dispatch('addMessages', {
         id,
         type: 'result',
-        title: i18n.t('translateBubble.bubbleTranslateFail.title', i18n.locale, i18n.messages),
-        content: i18n.t('translateBubble.bubbleTranslateFail.content', i18n.locale, i18n.messages),
+        title: i18n.t('translateBubble.bubbleTranslateNoLineFail.title', i18n.locale, i18n.messages),
+        content: i18n.t('translateBubble.bubbleTranslateNoLineFail.content', i18n.locale, i18n.messages),
+        dismissAfter: 5000,
+      });
+      break;
+    case TRANSLATE_REQUEST_TIMEOUT:
+      store.dispatch('addMessages', {
+        id,
+        type: 'result',
+        title: i18n.t('translateBubble.bubbleTranslateTimeOutFail.title', i18n.locale, i18n.messages),
+        content: i18n.t('translateBubble.bubbleTranslateTimeOutFail.content', i18n.locale, i18n.messages),
+      });
+      break;
+    case TRANSLATE_SERVER_ERROR_FAIL:
+      store.dispatch('addMessages', {
+        id,
+        type: 'result',
+        title: i18n.t('translateBubble.bubbleTranslateServerErrorFail.title', i18n.locale, i18n.messages),
+        content: i18n.t('translateBubble.bubbleTranslateServerErrorFail.content', i18n.locale, i18n.messages),
       });
       break;
     case TRANSLATE_SUCCESS:
