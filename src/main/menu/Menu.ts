@@ -625,6 +625,10 @@ export default class Menubar {
       menubar.append(preference);
     }
 
+    // Edit
+    const editMenuItem = this.createEditMenu();
+    menubar.append(editMenuItem);
+
     // History
     const historyMenuItem = this.createHistoryMenu();
 
@@ -732,6 +736,12 @@ export default class Menubar {
     const subtitleMenu = this.convertFromMenuItemTemplate('subtitle');
     const subtitleMenuItem = new MenuItem({ id: 'subtitle', label: this.$t('msg.subtitle.name'), submenu: subtitleMenu });
     return subtitleMenuItem;
+  }
+
+  private createEditMenu() {
+    const editMenu = this.convertFromMenuItemTemplate('edit');
+    const editMenuItem = new MenuItem({ id: 'edit', label: this.$t('msg.edit.name'), submenu: editMenu });
+    return editMenuItem;
   }
 
   private createHistoryMenu() {
