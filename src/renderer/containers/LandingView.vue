@@ -165,7 +165,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'defaultDir', 'isFullScreen', 'protectPrivacy']),
+    ...mapGetters(['winWidth', 'defaultDir', 'isFullScreen', 'protectPrivacy', 'seamlessMode']),
     lastIndex: {
       get() {
         return (this.firstIndex + this.showItemNum) - 1;
@@ -243,7 +243,7 @@ export default {
   created() {
     window.addEventListener('mousemove', this.globalMoveHandler);
     // Get all data and show
-    if (!this.$store.getters.deleteVideoHistoryOnExit) {
+    if (!this.seamlessMode) {
       recentPlayService.getRecords().then((results) => {
         this.landingViewItems = results;
       });
@@ -293,7 +293,6 @@ export default {
       this.openUrlShow = val;
     });
     window.addEventListener('keyup', this.keyboardHandler);
-    // window.addEventListener('beforeunload', this.beforeUnloadHandler);
     this.$electron.ipcRenderer.on('quit', () => {
       this.quit = true;
     });
@@ -303,7 +302,6 @@ export default {
   destroyed() {
     window.removeEventListener('mousemove', this.globalMoveHandler);
     window.removeEventListener('keyup', this.keyboardHandler);
-    // window.removeEventListener('beforeunload', this.beforeUnloadHandler);
   },
   methods: {
     ...mapActions({
@@ -328,13 +326,6 @@ export default {
     globalMoveHandler() {
       this.logoTransition = 'welcome-container-transition';
       this.canHover = true;
-    },
-    beforeUnloadHandler(e: BeforeUnloadEvent) {
-      if (process.env.NODE_ENV === 'development') { // app.hide() will disable app refresh and not good for dev
-      } else if (process.platform === 'darwin' && !this.quit) {
-        e.returnValue = false;
-        this.$electron.remote.app.hide();
-      }
     },
     keyboardHandler(e: KeyboardEvent) {
       if (e.key === 'ArrowRight') {
