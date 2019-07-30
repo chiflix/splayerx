@@ -418,7 +418,11 @@ new Vue({
           break;
         case 219:
           e.preventDefault();
-          this.$store.dispatch(videoActions.DECREASE_RATE);
+          if (this.currentRouteName === 'browsing-view' && e.metaKey) {
+            this.$bus.$emit('toggle-back');
+          } else {
+            this.$store.dispatch(videoActions.DECREASE_RATE);
+          }
           break;
         case 220:
           e.preventDefault();
@@ -426,7 +430,11 @@ new Vue({
           break;
         case 221:
           e.preventDefault();
-          this.$store.dispatch(videoActions.INCREASE_RATE);
+          if (this.currentRouteName === 'browsing-view' && e.metaKey) {
+            this.$bus.$emit('toggle-forward');
+          } else {
+            this.$store.dispatch(videoActions.INCREASE_RATE);
+          }
           break;
         case 85:
           if (e.metaKey && e.shiftKey) {

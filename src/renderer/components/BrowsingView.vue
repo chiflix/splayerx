@@ -107,6 +107,7 @@ export default {
       asyncTasksDone: false,
       headerToShow: true,
       menuService: null,
+      pipRestore: false,
     };
   },
   computed: {
@@ -165,6 +166,8 @@ export default {
     isPip(val: boolean) {
       this.menuService.updatePip(val);
       this.$electron.ipcRenderer.send('update-enabled', 'window.pip', true);
+      this.$electron.ipcRenderer.send('update-enabled', 'history.back', !val && this.$refs.webView.canGoBack());
+      this.$electron.ipcRenderer.send('update-enabled', 'history.forward', !val && this.$refs.webView.canGoForward());
       if (!val) {
         this.$store.dispatch('updatePipSize', this.winSize);
         this.$store.dispatch('updatePipPos', this.winPos);
@@ -190,20 +193,7 @@ export default {
         this.timer = setTimeout(() => {
           this.timeout = false;
         }, 3000);
-        const parseUrl = urlParseLax(this.currentUrl);
-        if (parseUrl.host.includes('youtube')) {
-          this.pipType = 'youtube';
-          this.youtubeAdapter();
-        } else if (parseUrl.host.includes('bilibili')) {
-          this.pipType = 'bilibili';
-          this.bilibiliAdapter();
-        } else if (parseUrl.host.includes('iqiyi')) {
-          this.pipType = 'iqiyi';
-          this.iqiyiAdapter();
-        } else {
-          this.pipType = 'others';
-          this.othersAdapter();
-        }
+        this.pipAdapter();
       }
     },
     winWidth() {
@@ -232,6 +222,10 @@ export default {
           canGoForward: this.$refs.webView.canGoForward(),
         });
       } else {
+        if (this.pipRestore) {
+          this.pipAdapter();
+          this.pipRestore = false;
+        }
         this.$refs.webView.executeJavaScript(this.calculateVideoNum, (r: number) => {
           this.hasVideo = recordIndex === 0 && !getVideoId(loadUrl).id ? false : !!r;
           this.$electron.ipcRenderer.send('update-enabled', 'window.pip', this.hasVideo);
@@ -254,18 +248,6 @@ export default {
     this.$store.dispatch('updateBrowsingPos', this.winPos);
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [0]);
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [570, 375]);
-  },
-  beforeDestroy() {
-    this.$store.dispatch(this.isPip ? 'updatePipSize' : 'updateBrowsingSize', this.winSize);
-    this.$store.dispatch(this.isPip ? 'updatePipPos' : 'updateBrowsingPos', this.winPos);
-    asyncStorage.set('browsing', {
-      pipSize: this.pipSize,
-      pipPos: this.pipPos,
-      browsingSize: this.browsingSize,
-      browsingPos: this.browsingPos,
-      barrageOpen: this.barrageOpen,
-    });
-    this.$bus.$off();
   },
   mounted() {
     this.menuService = new MenuService();
@@ -316,11 +298,22 @@ export default {
       }
     });
     this.$bus.$on('back-to-landingview', () => {
-      this.updateIsPip(false);
-      this.$router.push({
-        name: 'landing-view',
+      asyncStorage.set('browsing', {
+        pipSize: this.pipSize,
+        pipPos: this.pipPos,
+        browsingSize: this.browsingSize,
+        browsingPos: this.browsingPos,
+        barrageOpen: this.barrageOpen,
+      }).finally(() => {
+        this.$store.dispatch(this.isPip ? 'updatePipSize' : 'updateBrowsingSize', this.winSize);
+        this.$store.dispatch(this.isPip ? 'updatePipPos' : 'updateBrowsingPos', this.winPos);
+        this.updateIsPip(false);
+        this.$bus.$off();
+        this.$router.push({
+          name: 'landing-view',
+        });
+        windowRectService.uploadWindowBy(false, 'landing-view');
       });
-      windowRectService.uploadWindowBy(false, 'landing-view');
     });
     this.$refs.webView.addEventListener('load-commit', () => {
       const loadUrl = this.$refs.webView.getURL();
@@ -442,6 +435,22 @@ export default {
       }
       this.updateInitialUrl(url);
     },
+    pipAdapter() {
+      const parseUrl = urlParseLax(this.currentUrl);
+      if (parseUrl.host.includes('youtube')) {
+        this.pipType = 'youtube';
+        this.youtubeAdapter();
+      } else if (parseUrl.host.includes('bilibili')) {
+        this.pipType = 'bilibili';
+        this.bilibiliAdapter();
+      } else if (parseUrl.host.includes('iqiyi')) {
+        this.pipType = 'iqiyi';
+        this.iqiyiAdapter();
+      } else {
+        this.pipType = 'others';
+        this.othersAdapter();
+      }
+    },
     handleMouseenter() {
       this.pipBtnsKeepShow = true;
       this.timeout = true;
@@ -492,6 +501,9 @@ export default {
     },
     handleUrlReload() {
       this.$refs.webView.reload();
+      if (this.isPip) {
+        this.pipRestore = true;
+      }
     },
     handleEnterPip() {
       if (this.hasVideo) {

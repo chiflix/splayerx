@@ -759,13 +759,16 @@ export default class Menubar {
     const actions = [];
     actions.push(...[
       this.createMenuItemByTemplate(floatMenuItem),
+      separator(),
       this.createMenuItem('msg.window.enterPip', undefined, 'P', false, undefined, 'window.pip'),
+      separator(),
       this.createRoleMenuItem(
         minimizeMenuItem.label,
         minimizeMenuItem.role,
         minimizeMenuItem.enabled,
       ),
       this.createMenuItemByTemplate(maxmizeMenuItem),
+      separator(),
       this.createMenuItemByTemplate(landingViewMenuItem),
     ]);
 
