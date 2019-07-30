@@ -79,7 +79,7 @@ export default {
     ...mapGetters([
       'videoId', 'nextVideoId', 'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId', 'enabledSecondarySub', 'lastChosenSize', 'subToTop',
       'winSize', 'winPos', 'winAngle', 'isFullScreen', 'winWidth', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo', 'loop', 'playinglistRate', 'isFolderList', 'playingList', 'playingIndex', 'playListId', 'items',
-      'previousVideo', 'previousVideoId', 'hideNSFW', 'isTranslating',
+      'previousVideo', 'previousVideoId', 'hideNSFW', 'isTranslating', 'nsfwProcessDone',
     ]),
     ...mapGetters({
       videoWidth: 'intrinsicWidth',
@@ -363,12 +363,7 @@ export default {
       const screenshot: ShortCut = await this.generateScreenshot();
       if (this.hideNSFW) {
         if (await nsfwThumbnailFilterService.checkImage(screenshot.shortCut)) {
-          this.$store.dispatch('addMessages', {
-            type: 'result',
-            title: '🙀',
-            content: '发现了奇怪的东西~',
-            dismissAfter: 5000,
-          });
+          if (!this.nsfwProcessDone) this.$bus.$emit('nsfw');
           await playInfoStorageService.deleteRecentPlayedBy(this.playListId);
           return null;
         }
