@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+import VueRouter from 'vue-router';
 import VueI18n from 'vue-i18n';
 import electron from 'electron';
 import osLocale from 'os-locale';
@@ -8,7 +9,6 @@ import messages from '@/locales';
 import store from '@/store';
 import Preference from '@/components/Preference.vue';
 import '@/css/style.scss';
-import VueRouter from 'vue-router';
 
 Vue.use(VueI18n);
 Vue.use(Vuex);
