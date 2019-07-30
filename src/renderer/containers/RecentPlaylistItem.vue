@@ -409,7 +409,7 @@ export default {
       this.items[this.index],
     );
     this.recentPlayService.on('image-loaded', async () => {
-      this.updateUI();
+      await this.updateUI();
       if (this.hideNSFW && this.isFolderList) {
         if (await nsfwThumbnailFilterService.checkImage(this.imageSrc)) {
           if (this.nsfwProcessDone) this.$bus.$emit('nsfw');

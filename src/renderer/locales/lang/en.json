@@ -259,10 +259,11 @@
     },
     "privacy": {
       "privacySetting": "Privacy",
-      "intelligentMode": "Intelligent Mode",
-      "intelligentDescription": "离线识别不宜在工作或公众场合浏览的敏感内容，并在自动加载同目录文件或退出时抹除相关痕迹。",
-      "seamlessMode": "Seamless mode",
-      "seamlessDescription": "不保留任何播放痕迹。"
+      "enable": "Enable Privacy Protection",
+      "smartMode": "Intelligent Mode",
+      "smartDescription": "Offline identification of sensitive or not-suitable-for-work contents, and clear the playback history from the folder playlist or when quitting.",
+      "incognitoMode": "Incognito Mode",
+      "incognitoDescription": "No playback history will be saved."
     }
   },
   "privacyBubble": {

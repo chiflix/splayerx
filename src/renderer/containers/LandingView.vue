@@ -164,7 +164,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'defaultDir', 'isFullScreen', 'seamlessMode', 'hideNSFW']),
+    ...mapGetters(['winWidth', 'defaultDir', 'isFullScreen', 'incognitoMode', 'hideNSFW']),
     lastIndex: {
       get() {
         return (this.firstIndex + this.showItemNum) - 1;
@@ -242,7 +242,7 @@ export default {
   created() {
     window.addEventListener('mousemove', this.globalMoveHandler);
     // Get all data and show
-    if (!this.seamlessMode) {
+    if (!this.incognitoMode) {
       recentPlayService.getRecords().then((results) => {
         this.landingViewItems = results;
       });

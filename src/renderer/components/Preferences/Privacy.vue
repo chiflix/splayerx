@@ -1,7 +1,7 @@
 <template>
   <div class="privacy">
     <BaseCheckBox v-model="protectPrivacy">
-      {{ $t('preferences.general.reverseScrolling') }}
+      {{ $t('preferences.privacy.enable') }}
     </BaseCheckBox>
     <div
       :style="{ opacity: !protectPrivacy ? 0.3: 1.0 }"
@@ -10,24 +10,24 @@
       <div class="privacy_radio">
         <BaseRadio
           v-model="radioValue"
-          value="intelligentMode"
+          value="smartMode"
           name="mode"
         >
-          {{ $t('preferences.privacy.intelligentMode') }}
+          {{ $t('preferences.privacy.smartMode') }}
         </BaseRadio>
         <div class="privacy_radio_description">
-          {{ $t('preferences.privacy.intelligentDescription') }}
+          {{ $t('preferences.privacy.smartDescription') }}
         </div>
         <BaseRadio
           v-model="radioValue"
-          value="seamlessMode"
+          value="incognitoMode"
           name="mode"
           class="privacy_radio2"
         >
-          {{ $t('preferences.privacy.seamlessMode') }}
+          {{ $t('preferences.privacy.incognitoMode') }}
         </BaseRadio>
         <div class="privacy_radio_description">
-          {{ $t('preferences.privacy.seamlessDescription') }}
+          {{ $t('preferences.privacy.incognitoDescription') }}
         </div>
       </div>
     </div>
@@ -46,7 +46,7 @@ export default {
   },
   data() {
     return {
-      radioValue: 'intelligentMode',
+      radioValue: 'smartMode',
     };
   },
   computed: {
@@ -82,13 +82,13 @@ export default {
   },
   watch: {
     radioValue(val: string) {
-      if (val === 'intelligentMode') this.hideNSFW = true;
-      else if (val === 'seamlessMode') this.hideNSFW = false;
+      if (val === 'smartMode') this.hideNSFW = true;
+      else if (val === 'incognitoMode') this.hideNSFW = false;
     },
   },
   created() {
-    if (this.protectPrivacy && !this.hideNSFW) this.radioValue = 'seamlessMode';
-    else this.radioValue = 'intelligentMode';
+    if (this.protectPrivacy && !this.hideNSFW) this.radioValue = 'incognitoMode';
+    else this.radioValue = 'smartMode';
   },
 };
 </script>
@@ -99,13 +99,14 @@ export default {
   }
   &_background {
     width: 366px;
-    height: 158px;
+    height: fit-content;
     margin-top: 15px;
     background-color: rgba(0,0,0,0.05);
   }
   &_radio {
     margin-left: 29px;
     padding-top: 20px;
+    padding-bottom: 20px;
     &2 {
       margin-top: 15px;
     }
