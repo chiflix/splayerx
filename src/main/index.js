@@ -550,8 +550,10 @@ if (process.platform === 'darwin') {
 
 app.on('ready', () => {
   menuService = new MenuService();
-  systemPreferences.setUserDefault('NSDisabledDictationMenuItem', 'boolean', true);
-  systemPreferences.setUserDefault('NSDisabledCharacterPaletteMenuItem', 'boolean', true);
+  if (process.platform === 'darwin') {
+    systemPreferences.setUserDefault('NSDisabledDictationMenuItem', 'boolean', true);
+    systemPreferences.setUserDefault('NSDisabledCharacterPaletteMenuItem', 'boolean', true);
+  }
   createWindow();
   app.setName('SPlayer');
   globalShortcut.register('CmdOrCtrl+Shift+I+O+P', () => {
