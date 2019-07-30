@@ -162,12 +162,12 @@ function fetchOnlineListWraper(
   hints?: string,
 ): Promise<TranscriptInfo[]> {
   let results: TranscriptInfo[] = [];
-  return new Promise(async (resolve) => {
+  return new Promise(async (resolve, reject) => {
     const onlineTimeoutId = setTimeout(() => {
       if (bubble) {
         addBubble(REQUEST_TIMEOUT, { id: `fetchOnlineListWithBubble-${videoSrc}` });
       }
-      resolve(results);
+      reject(results);
     }, 10000);
     try {
       results = await fetchOnlineList(videoSrc, languageCode, hints);
@@ -424,14 +424,26 @@ const actions = {
       let addPrimaryAIButton = false;
       let addSecondaryAIButton = false;
       const oldPrimarySubs = oldSubtitles
-        .filter((sub: SubtitleControlListItem) => sub.language === primaryLanguage);
+        .filter((
+          sub: SubtitleControlListItem,
+        ) => (sub.type === Type.Online || sub.type === Type.Translated)
+          && sub.language === primaryLanguage);
       const oldSecondarySubs = oldSubtitles
-        .filter((sub: SubtitleControlListItem) => sub.language === secondaryLanguage);
+        .filter((
+          sub: SubtitleControlListItem,
+        ) => (sub.type === Type.Online || sub.type === Type.Translated)
+          && sub.language === secondaryLanguage);
       // sagi 结果
       const primaryResults = results
         .filter((info: TranscriptInfo) => info.languageCode === primaryLanguage);
       const secondaryResults = results
         .filter((info: TranscriptInfo) => info.languageCode === secondaryLanguage);
+      const oldPrimaryAISubs = oldPrimarySubs.filter((
+        sub: SubtitleControlListItem,
+      ) => sub.type === Type.Translated);
+      const oldSecondaryAISubs = oldSecondarySubs.filter((
+        sub: SubtitleControlListItem,
+      ) => sub.type === Type.Translated);
       const isAllPrimaryResultsFromES = primaryResults
         .every((info: TranscriptInfo) => info.tagsList.length > 0 && info.tagsList.indexOf('ES') > -1);
       const isAllSecondaryResultsFromES = secondaryResults
@@ -445,7 +457,8 @@ const actions = {
         // 出现AI按钮的情况
         // 1. 在线字幕tags都是ES(模糊搜索)
         // 2. 没有在线字幕
-        if (primaryResults.length === 0 || isAllPrimaryResultsFromES) {
+        if ((primaryResults.length === 0 && oldPrimarySubs.length === 0)
+          || (isAllPrimaryResultsFromES && oldPrimaryAISubs.length === 0)) {
           addPrimaryAIButton = true;
           const oldLen = oldPrimarySubs.length;
           // 如果出现AI按钮，在线字幕列表不能超过2个
@@ -457,7 +470,9 @@ const actions = {
         } else {
           newSubtitlesToAdd.push(...primaryNotExistedResults);
         }
-        if (secondaryLanguage && (secondaryResults.length === 0 || isAllSecondaryResultsFromES)) {
+        if (secondaryLanguage
+          && ((secondaryResults.length === 0 && oldSecondarySubs.length === 0)
+            || (isAllSecondaryResultsFromES && oldSecondaryAISubs.length === 0))) {
           addSecondaryAIButton = true;
           const oldLen = oldSecondarySubs.length;
           // 如果出现AI按钮，在线字幕列表不能超过2个
