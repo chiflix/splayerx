@@ -236,6 +236,7 @@
   },
   "preferences": {
     "general": {
+      "hideNSFW": "",
       "hideHistory": "隱藏曆史記錄",
       "clearHistory": "退出時自動清空播放記錄",
       "reverseScrolling": "鼠标滚轮反向",
@@ -251,16 +252,24 @@
       "others": "其他",
       "switchDisplayLanguages": "您可以在此修改射手影音播放器菜單、對話框中的顯示語言。"
     },
+    "translate": {
+      "languageDescription": "",
+      "languagePriority": "",
+      "none": "",
+      "primary": "",
+      "translateConfirm": "",
+      "translateSetting": "",
+      "secondary": "",
+      "setAsDefault": "",
+      "settings": ""
+    },
     "privacy": {
-      "languageDescription": "按以下語言提供翻譯結果，翻譯需上傳匿名信息但不會包含任何隱私數據。",
-      "languagePriority": "選擇翻譯語言",
-      "none": "無",
-      "primary": "首要語言",
-      "privacyConfirm": "啟用智能翻譯",
       "privacySetting": "智能翻譯",
-      "secondary": "次要語言",
-      "setAsDefault": "將SPlayer設為默認播放器",
-      "settings": "設置"
+      "enable": "",
+      "smartMode": "",
+      "smartDescription": "",
+      "incognitoMode": "",
+      "incognitoDescription": ""
     }
   },
   "privacyBubble": {
@@ -281,6 +290,11 @@
       "partTwo": "匿名信息會導致智能翻譯無法使用。",
       "underlinedContent": "禁用"
     }
+  },
+  "protectBubble": {
+    "agree": "",
+    "setting": "",
+    "content": ""
   },
   "recentPlaylist": {
     "folderSource": "文件夾",
