@@ -176,10 +176,13 @@ export default class NSFWFilterService implements IMediaFilter {
     setTimeout(() => this.getNsfwNet()); // warmup
   }
 
+  private nsfwnet: NSFWJS;
+
   private async getNsfwNet() {
-    const nsfwnet = new NSFWJS({ size: IMAGE_SIZE });
-    await nsfwnet.load(); // TODO: slow, may put in a worker process
-    return nsfwnet;
+    if (this.nsfwnet) return this.nsfwnet;
+    this.nsfwnet = new NSFWJS({ size: IMAGE_SIZE });
+    await this.nsfwnet.load(); // TODO: slow, may put in a worker process
+    return this.nsfwnet;
   }
 
   /**
