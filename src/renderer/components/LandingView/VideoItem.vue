@@ -6,10 +6,9 @@
       width: `${thumbnailWidth}px`,
       height: `${thumbnailHeight}px`,
       backgroundImage: backgroundUrl,
-      transform: `translate(${movementX}px, ${movementY}px`,
+      transform: `translate(${movementX}px, ${movementY}px)`,
       zIndex: mousedown ? '5' : '',
-      cursor: isInRange ? 'pointer'
-        : cursorUrl,
+      cursor: isInRange ? 'pointer' : `${cursorUrl}, pointer`,
     }"
     class="item"
   >
