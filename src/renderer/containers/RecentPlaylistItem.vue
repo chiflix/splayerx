@@ -493,9 +493,9 @@ export default {
       this.$refs.progress.style.setProperty('opacity', '0');
     },
     mouseoverVideo() {
-      this.mouseover = true;
       if (this.isInRange && !this.isShifting
         && this.canHoverItem && !this.itemMoving) {
+        this.mouseover = true;
         this.onItemMouseover(
           this.index,
           this.recentPlayService,
