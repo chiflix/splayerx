@@ -203,6 +203,13 @@
       "bilibili": "哔哩哔哩",
       "youtube": "Youtube"
     },
+    "edit": {
+      "name": "",
+      "cut": "",
+      "copy": "",
+      "paste": "",
+      "selectAll": ""
+    },
     "history": {
       "name": "历史",
       "reload": "重新加载页面",
