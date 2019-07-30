@@ -26,7 +26,8 @@
     <NSFW
       v-if="showNSFWBubble"
       :use-blur="useBlur"
-      @close-nsfw-bubble="closeNSFWBubble"
+      :handle-agree="handleAgree"
+      :handle-setting="handleSetting"
       class="mas-privacy-bubble"
     />
     <transition name="bubble">
@@ -114,7 +115,7 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'nextVideo', 'nextVideoPreviewTime', 'duration', 'singleCycle', 'privacyAgreement',
+      'nextVideo', 'nextVideoPreviewTime', 'duration', 'singleCycle', 'privacyAgreement', 'nsfwProcessDone',
       'translateBubbleMessage', 'translateBubbleType', 'isTranslateBubbleVisiable', 'failBubbleId',
     ]),
     messages() {
@@ -152,6 +153,7 @@ export default {
   },
   mounted() {
     this.$bus.$on('nsfw', () => {
+      if (!this.nsfwProcessDone) this.showNSFWBubble = true;
     });
     this.$bus.$on('privacy-confirm', () => {
       this.showPrivacyBubble = true;
@@ -167,8 +169,16 @@ export default {
     closePrivacyBubble() {
       this.showPrivacyBubble = false;
     },
+    handleAgree() {
+      this.closeNSFWBubble();
+    },
+    handleSetting() {
+      this.$electron.ipcRenderer.send('add-preference', 'privacy');
+      this.closeNSFWBubble();
+    },
     closeNSFWBubble() {
       this.showNSFWBubble = false;
+      this.$store.dispatch('nsfwProcessDone');
     },
     manualClose() {
       this.manualClosed = true;

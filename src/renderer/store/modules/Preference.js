@@ -2,6 +2,7 @@ import asyncStorage from '@/helpers/asyncStorage';
 import syncStorage from '@/helpers/syncStorage';
 
 const state = {
+  nsfwProcessDone: false,
   welcomeProcessDone: false,
   protectPrivacy: false,
   hideNSFW: true,
@@ -13,6 +14,7 @@ const state = {
   reverseScrolling: false,
 };
 const getters = {
+  nsfwProcessDone: state => state.nsfwProcessDone,
   welcomeProcessDone: state => state.welcomeProcessDone,
   preferenceData: state => state,
   protectPrivacy: state => state.protectPrivacy,
@@ -33,6 +35,9 @@ const getters = {
 };
 
 const mutations = {
+  nsfwProcessDone(state) {
+    state.nsfwProcessDone = true;
+  },
   welcomeProcessDone(state) {
     state.welcomeProcessDone = true;
   },
@@ -69,11 +74,8 @@ const mutations = {
   },
 };
 const actions = {
-  welcomeProcess({ commit, state }, payload) {
-    commit('welcomeProcessDone');
-    commit('privacyAgreement', payload.privacyAgreement);
-    commit('primaryLanguage', payload.primaryLanguage);
-    commit('secondaryLanguage', payload.secondaryLanguage);
+  nsfwProcessDone({ commit, state }) {
+    commit('nsfwProcessDone');
     return asyncStorage.set('preferences', state);
   },
   displayLanguage({ commit, state }, payload) {

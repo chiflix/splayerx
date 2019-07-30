@@ -181,6 +181,45 @@ function getAllValidVideo(onlySubtitle, files) {
   }
 }
 
+function createPreference(e, route) {
+  const preferenceWindowOptions = {
+    useContentSize: true,
+    frame: false,
+    titleBarStyle: 'none',
+    width: 540,
+    height: 426,
+    transparent: true,
+    resizable: false,
+    show: false,
+    webPreferences: {
+      webSecurity: false,
+      nodeIntegration: true,
+      experimentalFeatures: true,
+    },
+    acceptFirstMouse: true,
+    fullscreenable: false,
+    maximizable: false,
+    minimizable: false,
+  };
+  if (!preferenceWindow) {
+    preferenceWindow = new BrowserWindow(preferenceWindowOptions);
+    // 如果播放窗口顶置，打开首选项也顶置
+    if (mainWindow.isAlwaysOnTop()) {
+      preferenceWindow.setAlwaysOnTop(true);
+    }
+    if (route) preferenceWindow.loadURL(`${preferenceURL}#/${route}`);
+    else preferenceWindow.loadURL(`${preferenceURL}`);
+    preferenceWindow.on('closed', () => {
+      preferenceWindow = null;
+    });
+  } else {
+    preferenceWindow.focus();
+  }
+  preferenceWindow.once('ready-to-show', () => {
+    preferenceWindow.show();
+  });
+}
+
 function registerMainWindowEvent(mainWindow) {
   if (!mainWindow) return;
   mainWindow.on('move', throttle(() => {
@@ -299,6 +338,7 @@ function registerMainWindowEvent(mainWindow) {
     app.relaunch({ args: argv.slice(1), execPath: argv[0] });
     app.quit();
   });
+  ipcMain.on('add-preference', createPreference);
   ipcMain.on('preference-to-main', (e, args) => {
     if (mainWindow && !mainWindow.webContents.isDestroyed()) {
       mainWindow.webContents.send('mainDispatch', 'setPreference', args);
@@ -607,43 +647,6 @@ function createAbout() {
   }
   aboutWindow.once('ready-to-show', () => {
     aboutWindow.show();
-  });
-}
-function createPreference() {
-  const preferenceWindowOptions = {
-    useContentSize: true,
-    frame: false,
-    titleBarStyle: 'none',
-    width: 540,
-    height: 426,
-    transparent: true,
-    resizable: false,
-    show: false,
-    webPreferences: {
-      webSecurity: false,
-      nodeIntegration: true,
-      experimentalFeatures: true,
-    },
-    acceptFirstMouse: true,
-    fullscreenable: false,
-    maximizable: false,
-    minimizable: false,
-  };
-  if (!preferenceWindow) {
-    preferenceWindow = new BrowserWindow(preferenceWindowOptions);
-    // 如果播放窗口顶置，打开首选项也顶置
-    if (mainWindow.isAlwaysOnTop()) {
-      preferenceWindow.setAlwaysOnTop(true);
-    }
-    preferenceWindow.loadURL(`${preferenceURL}`);
-    preferenceWindow.on('closed', () => {
-      preferenceWindow = null;
-    });
-  } else {
-    preferenceWindow.focus();
-  }
-  preferenceWindow.once('ready-to-show', () => {
-    preferenceWindow.show();
   });
 }
 app.on('bossKey', handleBossKey);

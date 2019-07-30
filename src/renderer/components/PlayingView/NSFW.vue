@@ -22,13 +22,13 @@
                 }"
                 @mouseover.stop="agreeHovered = true"
                 @mouseout.stop="agreeHovered = false"
-                @mouseup.stop="handleMouseup"
+                @mouseup.stop="handleAgree"
                 class="agree-button"
               >
                 {{ $t('protectBubble.agree') }}
               </div>
               <div
-                @mouseup.stop="handleMouseup"
+                @mouseup.stop="handleSetting"
                 class="disagree-button"
               >
                 {{ $t('protectBubble.setting') }}
@@ -48,6 +48,14 @@ export default {
       type: Boolean,
       default: false,
     },
+    handleAgree: {
+      type: Function,
+      required: true,
+    },
+    handleSetting: {
+      type: Function,
+      required: true,
+    },
   },
   data() {
     return {
@@ -57,16 +65,6 @@ export default {
        */
       agreeHovered: false,
     };
-  },
-  computed: {
-    preferenceData() {
-      return this.$store.getters.preferenceData;
-    },
-  },
-  methods: {
-    handleMouseup() {
-      this.$emit('close-nsfw-bubble');
-    },
   },
 };
 </script>
