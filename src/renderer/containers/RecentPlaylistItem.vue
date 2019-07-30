@@ -4,7 +4,7 @@
     :style="{
       transition: tranFlag ? 'transform 100ms ease-out' : '',
       marginRight: sizeAdaption(15),
-      cursor: isInRange ? 'pointer' : '',
+      cursor: isInRange ? 'pointer' : `${cursorUrl}, pointer`,
       minWidth: `${thumbnailWidth}px`,
       minHeight: `${thumbnailHeight}px`,
     }"
@@ -169,6 +169,10 @@ export default {
     },
     hovered: {
       type: Boolean,
+    },
+    cursorUrl: {
+      type: String,
+      default: '',
     },
     // for moving
     itemMoving: {
@@ -413,7 +417,7 @@ export default {
       if (this.hideNSFW && this.isFolderList) {
         if (await nsfwThumbnailFilterService.checkImage(this.imageSrc)) {
           if (!this.nsfwProcessDone) this.$bus.$emit('nsfw');
-          this.$store.dispatch('RemoveItemFromPlayingList', this.path);
+          if (!this.isPlaying) this.$store.dispatch('RemoveItemFromPlayingList', this.path);
         }
       }
     });
