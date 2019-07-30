@@ -236,6 +236,7 @@
   },
   "preferences": {
     "general": {
+      "hideNSFW": "",
       "hideHistory": "再生履歴を隠す",
       "clearHistory": "終了時にプレイ履歴を削除",
       "reverseScrolling": "マウスの逆スクロール",
@@ -251,16 +252,24 @@
       "others": "その他",
       "switchDisplayLanguages": "SPlayerの言語表示を修正。"
     },
+    "translate": {
+      "languageDescription": "",
+      "languagePriority": "",
+      "none": "",
+      "primary": "",
+      "translateConfirm": "",
+      "translateSetting": "",
+      "secondary": "",
+      "setAsDefault": "",
+      "settings": ""
+    },
     "privacy": {
-      "languageDescription": "次の言語で翻訳結果を取得するために匿名データをアップロードします。プライバシー情報は含まれません。",
-      "languagePriority": "言語選択",
-      "none": "なし",
-      "primary": "ファースト",
-      "privacyConfirm": "Smart Translationを開く",
       "privacySetting": "翻訳設定",
-      "secondary": "セカンド",
-      "setAsDefault": "SPlayerをデフォルトにする",
-      "settings": "設定"
+      "enable": "",
+      "smartMode": "",
+      "smartDescription": "",
+      "incognitoMode": "",
+      "incognitoDescription": ""
     }
   },
   "privacyBubble": {
@@ -281,6 +290,11 @@
       "partTwo": "プライバシーを解除するとSmart Translationの使用ができなくなる。",
       "underlinedContent": "禁止"
     }
+  },
+  "protectBubble": {
+    "agree": "",
+    "setting": "",
+    "content": ""
   },
   "recentPlaylist": {
     "folderSource": "ホルダー",
