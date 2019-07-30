@@ -1,6 +1,5 @@
 import { ipcRenderer, remote, MenuItem } from 'electron';
 import { recentPlayService } from '../media/RecentPlayService';
-import { log } from '@/libs/Log';
 
 export default class MenuService {
   private menu?: Electron.Menu;
