@@ -412,7 +412,7 @@ export default {
       await this.updateUI();
       if (this.hideNSFW && this.isFolderList) {
         if (await nsfwThumbnailFilterService.checkImage(this.imageSrc)) {
-          if (this.nsfwProcessDone) this.$bus.$emit('nsfw');
+          if (!this.nsfwProcessDone) this.$bus.$emit('nsfw');
           this.$store.dispatch('RemoveItemFromPlayingList', this.path);
         }
       }
