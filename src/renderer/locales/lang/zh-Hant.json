@@ -255,12 +255,12 @@
     "translate": {
       "languageDescription": "",
       "languagePriority": "",
-      "none": "",
+      "none": "關閉",
       "primary": "",
       "translateConfirm": "",
       "translateSetting": "",
       "secondary": "",
-      "setAsDefault": "",
+      "setAsDefault": "將SPlayer設為默認播放器",
       "settings": ""
     },
     "privacy": {
