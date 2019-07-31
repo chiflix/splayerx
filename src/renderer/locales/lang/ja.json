@@ -266,10 +266,10 @@
     "privacy": {
       "privacySetting": "翻訳設定",
       "enable": "Privacy Protectionを開く",
-      "smartMode": "",
-      "smartDescription": "",
-      "incognitoMode": "",
-      "incognitoDescription": ""
+      "smartMode": "Intelligent Mode",
+      "smartDescription": "機密性の高いコンテンツや作業に適さないコンテンツをオフラインで識別し、フォルダプレイリストでの再生時または終了時に再生履歴を消去します。",
+      "incognitoMode": "Incognito Mode",
+      "incognitoDescription": "再生履歴は保存されません。"
     }
   },
   "privacyBubble": {
@@ -294,7 +294,7 @@
   "protectBubble": {
     "agree": "確定",
     "setting": "設定",
-    "content": ""
+    "content": "スマートプライバシー保護が有効になります。 機密性の高い、または作業に不適切な再生履歴は削除されます。"
   },
   "recentPlaylist": {
     "folderSource": "ホルダー",
