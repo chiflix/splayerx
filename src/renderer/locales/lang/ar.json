@@ -204,11 +204,11 @@
       "youtube": "Youtube"
     },
     "edit": {
-      "name": "",
-      "cut": "",
-      "copy": "",
-      "paste": "",
-      "selectAll": ""
+      "name": "حرّر",
+      "cut": "قص",
+      "copy": "نسخ",
+      "paste": "معجون",
+      "selectAll": "تحديد الكل"
     },
     "history": {
       "name": "التاريخ",
@@ -222,17 +222,17 @@
     "nextInPlaylist": "التالي في قائمة التشغيل"
   },
   "welcome": {
-    "welcomeTitle": "",
-    "welcomeDescription": "",
-    "agreement": "",
-    "policy": "",
-    "languageTitle1": "",
-    "languageTitle2": "",
-    "primary": "",
-    "secondary": "",
-    "chooseSecondary": "",
-    "languageDescription": "",
-    "none": ""
+    "welcomeTitle": "Welcome to SPlayer",
+    "welcomeDescription": "All-new lightweight design, incredible performance with smart translation to let you enjoy your videos like never before.",
+    "agreement": "By using SPlayer, you agree to our ",
+    "policy": "Privacy Policy",
+    "languageTitle1": "Set your preferred subtitle",
+    "languageTitle2": "languages to fetch translations",
+    "primary": "Primary",
+    "secondary": "Secondary",
+    "chooseSecondary": "Select Secondary Language",
+    "languageDescription": "* You can change your settings in preferences later",
+    "none": "لا شيء"
   },
   "preferences": {
     "general": {
@@ -261,6 +261,14 @@
       "secondary": "ثانوي",
       "setAsDefault": "تعيين SPlayer كتطبيق افتراضي",
       "settings": "الإعدادات"
+    },
+    "privacy": {
+      "privacySetting": "ترجمة",
+      "enable": "تمكين حماية الخصوصية",
+      "smartMode": "Intelligent Mode",
+      "smartDescription": "قم بتعريف المحتويات الحساسة أو غير المناسبة للعمل دون اتصال ، وقم بمسح سجل التشغيل عند التشغيل في قائمة تشغيل مجلد أو عند الإقلاع عن التدخين.",
+      "incognitoMode": "وضع التخفي",
+      "incognitoDescription": "لن يتم حفظ سجل التشغيل."
     }
   },
   "privacyBubble": {
@@ -281,6 +289,11 @@
       "partTwo": ".",
       "underlinedContent": "تعارض"
     }
+  },
+  "protectBubble": {
+    "agree": "حسنا",
+    "setting": "المشهد",
+    "content": "تم تمكين حماية الخصوصية الذكية. ستتم إزالة محفوظات التشغيل الحساسة أو غير المناسبة للعمل."
   },
   "recentPlaylist": {
     "folderSource": "مجلد",
