@@ -255,21 +255,21 @@
     "translate": {
       "languageDescription": "Cargue datos anónimos para obtener resultados de traducción en el siguiente idioma, no se incluirá información de privacidad.",
       "languagePriority": "Preferencia de idioma",
-      "none": "",
-      "primary": "",
-      "translateConfirm": "",
-      "translateSetting": "",
-      "secondary": "",
-      "setAsDefault": "",
-      "settings": ""
+      "none": "Ninguna",
+      "primary": "Primario",
+      "translateConfirm": "Habilitar la traducción inteligente",
+      "translateSetting": "Traducción",
+      "secondary": "Secundario",
+      "setAsDefault": "Establecer SPlayer como la aplicación predeterminada",
+      "settings": "Ajustes"
     },
     "privacy": {
       "privacySetting": "Traducción",
-      "enable": "",
-      "smartMode": "",
-      "smartDescription": "",
-      "incognitoMode": "",
-      "incognitoDescription": ""
+      "enable": "Habilitar protección de privacidad",
+      "smartMode": "Modo inteligente",
+      "smartDescription": "No se puede identificar contenidos sensibles o no adecuados para trabajar, y borrar el historial de reproducción cuando se reproduce en una lista de carpetas o cuando se sale.",
+      "incognitoMode": "Modo incógnito",
+      "incognitoDescription": "No se guardará el historial de reproducción."
     }
   },
   "privacyBubble": {
@@ -292,9 +292,9 @@
     }
   },
   "protectBubble": {
-    "agree": "",
-    "setting": "",
-    "content": ""
+    "agree": "OK",
+    "setting": "Configurando",
+    "content": "Protección de privacidad inteligente está activada. Se eliminará el historial de reproducción sensorial o no adecuado para trabajar."
   },
   "recentPlaylist": {
     "folderSource": "Carpeta",
