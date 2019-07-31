@@ -155,7 +155,7 @@
       "menuLoading": "正在匹配翻译结果 ...",
       "name": "字幕",
       "noSubtitle": "暂未找到翻译结果",
-      "notToShowSubtitle": "无",
+      "notToShowSubtitle": "关闭",
       "secondarySubtitle": "第二字幕",
       "subtitleSetting": "字幕设置",
       "subtitleDelay": "字幕延迟",
@@ -263,7 +263,7 @@
       "settings": "设置"
     },
     "privacy": {
-      "privacySetting": "智能翻译",
+      "privacySetting": "隐私设置",
       "enable": "启用隐私保护",
       "smartMode": "智能模式",
       "smartDescription": "离线识别不宜在工作或公众场合浏览的敏感内容，并在自动加载同目录文件或退出时抹除相关痕迹。",
