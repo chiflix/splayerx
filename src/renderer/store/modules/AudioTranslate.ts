@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-05 16:03:32
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-07-29 17:22:56
+ * @Last Modified time: 2019-07-31 17:19:29
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @ts-ignore
@@ -22,6 +22,7 @@ import {
   TRANSLATE_SERVER_ERROR_FAIL, TRANSLATE_SUCCESS,
   TRANSLATE_SUCCESS_WHEN_VIDEO_CHANGE, TRANSLATE_REQUEST_TIMEOUT,
 } from '../../helpers/notificationcodes';
+import { LanguageCode } from '@/libs/language';
 
 let taskTimer: number;
 let timerCount: number;
@@ -463,20 +464,36 @@ const actions = {
   },
   async [a.AUDIO_TRANSLATE_CONTINUE](
     { getters, dispatch, commit }: any,
-    sub: SubtitleControlListItem,
   ) {
+    const {
+      primaryLanguage, secondaryLanguage, mediaHash,
+    } = getters;
     const key = `${getters.mediaHash}`;
     const taskInfo = mediaStorageService.getAsyncTaskInfo(key);
     if (taskInfo && getters.mediaHash === taskInfo.mediaHash
-      && sub && taskInfo.targetLanguage === sub.language) {
-      commit(m.AUDIO_TRANSLATE_UPDATE_LAST_AUDIO_LANGUAGE, taskInfo.audioLanguageCode);
-      commit(m.AUDIO_TRANSLATE_SELECTED_UPDATE, sub);
-      dispatch(a.AUDIO_TRANSLATE_START, taskInfo.audioLanguageCode);
-      if (getters.isFirstSubtitle) {
-        dispatch(smActions.autoChangePrimarySubtitle, sub.id);
-      } else {
-        dispatch(smActions.autoChangeSecondarySubtitle, sub.id);
+      && (taskInfo.targetLanguage === primaryLanguage
+        || taskInfo.targetLanguage === secondaryLanguage)) {
+      let sub = null;
+      try {
+        sub = await dispatch(smActions.addSubtitle, {
+          generator: new TranslatedGenerator(
+            null, taskInfo.targetLanguage as LanguageCode,
+          ),
+          mediaHash,
+        });
+      } catch (error) {
+        // empty
       }
+      commit(m.AUDIO_TRANSLATE_UPDATE_LAST_AUDIO_LANGUAGE, taskInfo.audioLanguageCode);
+      if (sub) {
+        commit(m.AUDIO_TRANSLATE_SELECTED_UPDATE, sub);
+        if (getters.isFirstSubtitle) {
+          dispatch(smActions.autoChangePrimarySubtitle, sub.id);
+        } else {
+          dispatch(smActions.autoChangeSecondarySubtitle, sub.id);
+        }
+      }
+      dispatch(a.AUDIO_TRANSLATE_START, taskInfo.audioLanguageCode);
     }
   },
   [a.AUDIO_TRANSLATE_DISCARD]( // eslint-disable-line complexity

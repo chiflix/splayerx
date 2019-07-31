@@ -15,7 +15,7 @@ import {
   AudioTranslate as atActions,
 } from '@/store/actionTypes';
 import {
-  SubtitleControlListItem, Type, IEntityGenerator, Entity, Format, NOT_SELECTED_SUBTITLE,
+  SubtitleControlListItem, Type, IEntityGenerator, Entity, NOT_SELECTED_SUBTITLE,
 } from '@/interfaces/ISubtitle';
 import {
   TranscriptInfo,
@@ -191,6 +191,7 @@ function initializeManager({ getters, commit, dispatch }: any) {
   const list = getters.list as SubtitleControlListItem[];
   list.forEach(s => dispatch(a.removeSubtitle, s.id));
   commit(m.setMediaHash, getters.mediaHash);
+  dispatch(atActions.AUDIO_TRANSLATE_CONTINUE);
   dispatch(a.refreshSubtitlesInitially);
 }
 const debouncedInitializeManager = debounce(initializeManager, 1000);
@@ -409,7 +410,7 @@ const actions = {
       const wrongLanguageSubs = remove(
         oldSubtitles,
         ({ type, language }) => (
-          type === Type.Online
+          (type === Type.Online || type === Type.Translated)
           && language !== primaryLanguage
           && language !== secondaryLanguage
         ),
@@ -418,7 +419,7 @@ const actions = {
       const notExistedOldSubs = remove(
         oldSubtitles,
         ({ type, hash }) => (
-          type === Type.Online
+          (type === Type.Online || type === Type.Translated)
           && !results.find(({ transcriptIdentity }) => transcriptIdentity === hash)
         ),
       );
@@ -636,10 +637,6 @@ const actions = {
             delay: subtitle.delay,
           };
           commit(m.addSubtitleId, subtitleControlListItem);
-          // 如果出现AI按钮 检查有没有上次的任务，有就继续上次任务
-          if (subtitle.type === Type.Translated && subtitle.format === Format.Unknown) {
-            dispatch(atActions.AUDIO_TRANSLATE_CONTINUE, subtitleControlListItem);
-          }
           return subtitleControlListItem;
         }
       } catch (ex) {
