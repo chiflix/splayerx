@@ -204,11 +204,11 @@
       "youtube": "Youtube"
     },
     "edit": {
-      "name": "",
-      "cut": "",
-      "copy": "",
-      "paste": "",
-      "selectAll": ""
+      "name": "編輯",
+      "cut": "剪切",
+      "copy": "複製",
+      "paste": "貼上",
+      "selectAll": "全選"
     },
     "history": {
       "name": "歷史",
@@ -236,7 +236,7 @@
   },
   "preferences": {
     "general": {
-      "hideNSFW": "",
+      "hideNSFW": "Hide Sensitive Content",
       "hideHistory": "隱藏曆史記錄",
       "clearHistory": "退出時自動清空播放記錄",
       "reverseScrolling": "鼠标滚轮反向",
@@ -253,21 +253,21 @@
       "switchDisplayLanguages": "您可以在此修改射手影音播放器菜單、對話框中的顯示語言。"
     },
     "translate": {
-      "languageDescription": "",
-      "languagePriority": "",
-      "none": "關閉",
-      "primary": "",
-      "translateConfirm": "",
-      "translateSetting": "",
-      "secondary": "",
+      "languageDescription": "按以下語言提供翻譯結果，翻譯需上傳匿名信息但不會包含任何隱私數據。",
+      "languagePriority": "選擇翻譯語言",
+      "none": "無",
+      "primary": "首要語言",
+      "translateConfirm": "啟用智能翻譯",
+      "translateSetting": "智能翻譯",
+      "secondary": "次要語言",
       "setAsDefault": "將SPlayer設為默認播放器",
-      "settings": ""
+      "settings": "設置"
     },
     "privacy": {
       "privacySetting": "智能翻譯",
-      "enable": "",
+      "enable": "啟用隱私保護",
       "smartMode": "",
-      "smartDescription": "",
+      "smartDescription": "離線識別不宜在工作或公眾場合瀏覽的敏感內容，並在自動加載同目錄文件或退出時抹除相關痕跡。",
       "incognitoMode": "",
       "incognitoDescription": ""
     }
@@ -292,7 +292,7 @@
     }
   },
   "protectBubble": {
-    "agree": "",
+    "agree": "好的",
     "setting": "",
     "content": ""
   },
