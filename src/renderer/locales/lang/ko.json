@@ -236,7 +236,6 @@
   },
   "preferences": {
     "general": {
-      "hideNSFW": "Hide Sensitive Content",
       "hideHistory": "재생 기록 숨기기",
       "clearHistory": "종료시 항상 재생 기록 지우기",
       "reverseScrolling": "마우스 스크롤 역전",
