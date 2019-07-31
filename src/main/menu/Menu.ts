@@ -905,6 +905,8 @@ export default class Menubar {
   }
 
   private createMenuItemByTemplate(menuItem: IMenubarMenuItemAction) {
+    if (!menuItem.enabled) menuItem.enabled = true;
+
     const {
       id, accelerator, winAccelerator, enabled, checked,
     } = menuItem;
