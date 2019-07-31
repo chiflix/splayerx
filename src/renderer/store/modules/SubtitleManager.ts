@@ -460,7 +460,7 @@ const actions = {
         .filter((info: TranscriptInfo) => info.languageCode === primaryLanguage);
       const secondaryNotExistedResults = notExistedNewSubs
         .filter((info: TranscriptInfo) => info.languageCode === secondaryLanguage);
-      if ((await isFeatureEnabled(Features.AI))) {
+      if ((await isFeatureEnabled(Features.AI, true))) {
         // 出现AI按钮的情况
         // 1. 在线字幕tags都是ES(模糊搜索)
         // 2. 没有在线字幕
