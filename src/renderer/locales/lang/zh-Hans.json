@@ -204,11 +204,11 @@
       "youtube": "Youtube"
     },
     "edit": {
-      "name": "",
-      "cut": "",
-      "copy": "",
-      "paste": "",
-      "selectAll": ""
+      "name": "编辑",
+      "cut": "剪切",
+      "copy": "复制",
+      "paste": "粘贴",
+      "selectAll": "全选"
     },
     "history": {
       "name": "历史",
@@ -255,13 +255,13 @@
     "translate": {
       "languageDescription": "",
       "languagePriority": "",
-      "none": "",
-      "primary": "",
-      "translateConfirm": "",
-      "translateSetting": "",
-      "secondary": "",
-      "setAsDefault": "",
-      "settings": ""
+      "none": "关闭",
+      "primary": "首要语言",
+      "translateConfirm": "启用智能翻译",
+      "translateSetting": "智能翻译",
+      "secondary": "次要语言",
+      "setAsDefault": "将SPlayer设为默认播放器",
+      "settings": "设置"
     },
     "privacy": {
       "privacySetting": "智能翻译",
