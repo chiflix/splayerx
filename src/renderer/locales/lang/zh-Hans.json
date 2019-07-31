@@ -265,11 +265,11 @@
     },
     "privacy": {
       "privacySetting": "智能翻译",
-      "enable": "",
-      "smartMode": "",
-      "smartDescription": "",
-      "incognitoMode": "",
-      "incognitoDescription": ""
+      "enable": "启用隐私保护",
+      "smartMode": "智能模式",
+      "smartDescription": "离线识别不宜在工作或公众场合浏览的敏感内容，并在自动加载同目录文件或退出时抹除相关痕迹。",
+      "incognitoMode": "无痕模式",
+      "incognitoDescription": "不保留任何播放记录。"
     }
   },
   "privacyBubble": {
@@ -292,9 +292,9 @@
     }
   },
   "protectBubble": {
-    "agree": "",
-    "setting": "",
-    "content": ""
+    "agree": "好的",
+    "setting": "设置",
+    "content": "保护不宜在工作或公众场合播放的内容，自动删除播放痕迹。"
   },
   "recentPlaylist": {
     "folderSource": "文件夹",
