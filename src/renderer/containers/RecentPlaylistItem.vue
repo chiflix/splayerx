@@ -155,7 +155,7 @@ import { parseNameFromPath } from '@/libs/utils';
 import Icon from '@/components/BaseIconContainer.vue';
 import RecentPlayService from '@/services/media/PlaylistService';
 import { mediaStorageService } from '@/services/storage/MediaStorageService';
-import { nsfwThumbnailFilterService } from '@/services/filter/NSFWThumbnailFilterService';
+import { nsfwThumbnailFilterService } from '@/services/filter/NSFWThumbnailFilterByLaborService';
 
 export default {
   components: {

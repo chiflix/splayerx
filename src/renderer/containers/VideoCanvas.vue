@@ -46,7 +46,7 @@ import { debounce } from 'lodash';
 import { windowRectService } from '@/services/window/WindowRectService';
 import { playInfoStorageService } from '@/services/storage/PlayInfoStorageService';
 import { settingStorageService } from '@/services/storage/SettingStorageService';
-import { nsfwThumbnailFilterService } from '@/services/filter/NSFWThumbnailFilterService';
+import { nsfwThumbnailFilterService } from '@/services/filter/NSFWThumbnailFilterByLaborService';
 import { generateShortCutImageBy, ShortCut } from '@/libs/utils';
 import { Video as videoActions, AudioTranslate as atActions } from '@/store/actionTypes';
 import { videodata } from '@/store/video';

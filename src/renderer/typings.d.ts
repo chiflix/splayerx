@@ -4,6 +4,25 @@
 import Vue, { VNode } from 'vue'; // eslint-disable-line no-unused-vars
 import { AxiosInstance } from 'axios';
 
+declare global {
+  declare const __static: string; //eslint-disable-line
+  interface Screen {
+    availLeft: number;
+    availTop: number;
+  }
+  namespace JSX {
+    interface Element extends VNode {} //eslint-disable-line
+    interface ElementClass extends Vue {} //eslint-disable-line
+    interface IntrinsicElements {
+      [elem: string]: unknown;
+    }
+  }
+
+  interface JsonMap { [member: string]: string | number | boolean | null | JsonArray | JsonMap }
+  interface JsonArray extends Array<string | number | boolean | null | JsonArray | JsonMap> {} // eslint-disable-line
+  type Json = JsonMap | JsonArray | string | number | boolean | null;
+}
+
 declare module '*.vue' {
   export default Vue;
 }
@@ -20,21 +39,6 @@ declare module 'vue/types/vue' {
 
   namespace Vue {
     const axios: AxiosInstance;
-  }
-}
-
-declare global {
-  declare const __static: string; //eslint-disable-line
-  interface Screen {
-    availLeft: number;
-    availTop: number;
-  }
-  namespace JSX {
-    interface Element extends VNode {} //eslint-disable-line
-    interface ElementClass extends Vue {} //eslint-disable-line
-    interface IntrinsicElements {
-      [elem: string]: unknown;
-    }
   }
 }
 
