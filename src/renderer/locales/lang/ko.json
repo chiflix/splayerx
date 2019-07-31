@@ -223,20 +223,20 @@
   },
   "welcome": {
     "welcomeTitle": "Welcome to SPlayer",
-    "welcomeDescription": "",
-    "agreement": "",
-    "policy": "",
-    "languageTitle1": "",
-    "languageTitle2": "",
-    "primary": "",
-    "secondary": "",
-    "chooseSecondary": "",
-    "languageDescription": "",
-    "none": ""
+    "welcomeDescription": "All-new lightweight design, incredible performance with smart translation to let you enjoy your videos like never before.",
+    "agreement": "By using SPlayer, you agree to our ",
+    "policy": "Privacy Policy",
+    "languageTitle1": "Set your preferred subtitle",
+    "languageTitle2": "languages to fetch translations",
+    "primary": "Primary",
+    "secondary": "Secondary",
+    "chooseSecondary": "Select Secondary Language",
+    "languageDescription": "* You can change your settings in preferences later",
+    "none": "None"
   },
   "preferences": {
     "general": {
-      "hideNSFW": "",
+      "hideNSFW": "Hide Sensitive Content",
       "hideHistory": "재생 기록 숨기기",
       "clearHistory": "종료시 항상 재생 기록 지우기",
       "reverseScrolling": "마우스 스크롤 역전",
@@ -253,23 +253,23 @@
       "switchDisplayLanguages": "표시 언어는 SPlayer에 표시되는 언어를 제어합니다."
     },
     "translate": {
-      "languageDescription": "",
-      "languagePriority": "",
-      "none": "",
-      "primary": "",
-      "translateConfirm": "",
-      "translateSetting": "",
-      "secondary": "",
-      "setAsDefault": "",
-      "settings": ""
+      "languageDescription": "번역 결과를 다음 언어로 가져 오기 위해 익명 데이터를 업로드하면 개인 정보가 포함되지 않습니다.",
+      "languagePriority": "언어 환경 설정",
+      "none": "없음",
+      "primary": "행성",
+      "translateConfirm": "스마트 번역 사용",
+      "translateSetting": "번역",
+      "secondary": "반성",
+      "setAsDefault": "SPlayer를 기본 응용 프로그램으로 설정",
+      "settings": "설정"
     },
     "privacy": {
       "privacySetting": "번역",
-      "enable": "",
-      "smartMode": "",
-      "smartDescription": "",
-      "incognitoMode": "",
-      "incognitoDescription": ""
+      "enable": "개인 정보 보호 사용",
+      "smartMode": "Intelligent Mode",
+      "smartDescription": "오프라인은 민감하거나 부적합한 작업 내용을 식별하고 폴더 재생 목록에서 재생할 때 또는 종료 할 때 재생 기록을 삭제합니다.",
+      "incognitoMode": "Incognito Mode",
+      "incognitoDescription": "재생 기록이 저장되지 않습니다."
     }
   },
   "privacyBubble": {
@@ -292,9 +292,9 @@
     }
   },
   "protectBubble": {
-    "agree": "",
-    "setting": "",
-    "content": ""
+    "agree": "승인",
+    "setting": "설정",
+    "content": "스마트 개인 정보 보호가 사용됩니다. 민감하거나 작동에 적합하지 않은 재생 기록은 삭제됩니다."
   },
   "recentPlaylist": {
     "folderSource": "폴더",
