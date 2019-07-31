@@ -400,6 +400,7 @@ export default {
       this.discardTranslate();
       if (!this.asyncTasksDone && !this.needToRestore) {
         e.returnValue = false;
+        if (this.quit) this.$electron.remote.app.hide();
         this.handleLeaveVideo(this.videoId)
           .finally(() => {
             this.removeAllAudioTrack();
