@@ -265,9 +265,9 @@
     },
     "privacy": {
       "privacySetting": "ترجمة",
-      "enable": "",
-      "smartMode": "",
-      "smartDescription": "",
+      "enable": "تمكين حماية الخصوصية",
+      "smartMode": "Intelligent Mode",
+      "smartDescription": "قم بتعريف المحتويات الحساسة أو غير المناسبة للعمل دون اتصال ، وقم بمسح سجل التشغيل عند التشغيل في قائمة تشغيل مجلد أو عند الإقلاع عن التدخين.",
       "incognitoMode": "وضع التخفي",
       "incognitoDescription": ""
     }
