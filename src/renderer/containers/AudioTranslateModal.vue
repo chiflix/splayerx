@@ -252,7 +252,7 @@ export default Vue.extend({
     lastAudioLanguage(val: string, old: string) {
       if (val && !old) {
         this.audioLanguage = {
-          label: codeToLanguageName(val),
+          label: this.getLanguageLabel(val),
           value: val,
         };
       }
@@ -288,6 +288,10 @@ export default Vue.extend({
       setTimeout(() => {
         this.isConfirmCancelTranlate = false;
       }, 500);
+    },
+    getLanguageLabel(code: string) {
+      const l = this.lanugages.find((l: { value: string, label: string }) => l.value === code);
+      return l ? l.label : codeToLanguageName(code);
     },
   },
 });
