@@ -40,6 +40,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       }
     });
+    mouse.on('left-up', () => {
+      isDragging = false;
+      mousedownPos = null;
+      windowSize = null;
+    });
   }
   window.addEventListener('mousemove', (evt) => {
     sendToHost('mousemove', 'isMoving');

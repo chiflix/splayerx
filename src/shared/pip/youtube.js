@@ -23,7 +23,7 @@ const youtube = {
     + 'Object.defineProperty(document.querySelector("video").style, "height", {get: function(){return this._height}, set: function(val){this._height = val;document.querySelector("video").style.setProperty("height", val);}});'
     + 'Object.defineProperty(document.querySelector(".ytp-chrome-bottom").style, "width", {get: function(){return this._width}, set: function(val){this._width = val;document.querySelector(".ytp-chrome-bottom").style.setProperty("width", val);}});'
     + 'document.querySelector(".html5-video-player").style.background = "";'
-    + 'if (!theater) { document.querySelector(".ytp-size-button").click() };'
+    + 'if (!theater) { document.body.click();document.querySelector(".ytp-size-button").click() };'
     + 'Object.defineProperty(document.body.style, "overflow", {value: "",writable: true});document.body.style.setProperty("overflow", "");'
     + 'var isPaused = document.querySelector("video").paused;'
     + 'document.querySelector(".ytd-player").appendChild(document.querySelector(".html5-video-player"));'

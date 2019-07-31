@@ -40,7 +40,7 @@ export function bilibili(type, barrageOpen, winSize) {
         + 'document.body.style.overflow = "";'
         + 'document.querySelector(".bili-header-m").style.display = "";'
         + 'if (document.querySelector("#entryOld")) {document.querySelector("#entryOld").style.display = "";}'
-        + 'if (!isTheater) {document.querySelector(".bilibili-player-video-btn-widescreen").click();};',
+        + 'if (!isTheater) {document.body.click();document.querySelector(".bilibili-player-video-btn-widescreen").click();};',
     };
   }
   if (type === 'videoStreaming') {
