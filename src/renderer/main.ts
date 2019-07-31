@@ -290,7 +290,7 @@ new Vue({
       if (val.length !== oldval.length) {
         this.menuService.addAudioTrack(this.updateAudioTrack());
       }
-      this.audioTrackList.forEach((item: Electron.MenuItem, index: number) => {
+      val.forEach((item: Electron.MenuItem, index: number) => {
         if (item.enabled === true) {
           this.menuService.updateMenuItemChecked(`audio.switchAudioTrack.${index}`, true);
         }
