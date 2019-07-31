@@ -236,7 +236,6 @@
   },
   "preferences": {
     "general": {
-      "hideNSFW": "Hide Sensitive Content",
       "hideHistory": "再生履歴を隠す",
       "clearHistory": "終了時にプレイ履歴を削除",
       "reverseScrolling": "マウスの逆スクロール",
