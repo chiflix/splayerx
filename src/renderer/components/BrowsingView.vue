@@ -423,6 +423,9 @@ export default {
       }
     });
   },
+  beforeDestroy() {
+    window.removeEventListener('beforeunload', this.beforeUnloadHandler);
+  },
   methods: {
     ...mapActions({
       updateInitialUrl: browsingActions.UPDATE_INITIAL_URL,
