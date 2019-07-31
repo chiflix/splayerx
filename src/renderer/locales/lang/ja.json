@@ -263,7 +263,7 @@
       "settings": "設定"
     },
     "privacy": {
-      "privacySetting": "翻訳設定",
+      "privacySetting": "プライバシー",
       "enable": "Privacy Protectionを開く",
       "smartMode": "Intelligent Mode",
       "smartDescription": "機密性の高いコンテンツや作業に適さないコンテンツをオフラインで識別し、フォルダプレイリストでの再生時または終了時に再生履歴を消去します。",
