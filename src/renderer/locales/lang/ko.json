@@ -204,11 +204,11 @@
       "youtube": "Youtube"
     },
     "edit": {
-      "name": "",
-      "cut": "",
-      "copy": "",
-      "paste": "",
-      "selectAll": ""
+      "name": "편집",
+      "cut": "잘라내기",
+      "copy": "복사",
+      "paste": "풀",
+      "selectAll": "전체 선택"
     },
     "history": {
       "name": "역사",
@@ -222,7 +222,7 @@
     "nextInPlaylist": "다음 재생 목록에서"
   },
   "welcome": {
-    "welcomeTitle": "",
+    "welcomeTitle": "Welcome to SPlayer",
     "welcomeDescription": "",
     "agreement": "",
     "policy": "",
