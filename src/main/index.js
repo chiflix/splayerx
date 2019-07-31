@@ -342,13 +342,11 @@ function registerMainWindowEvent(mainWindow) {
   registerMediaTasks();
 
   ipcMain.on('labor-task-add', (evt, ...rest) => {
-    console.log('labor-task-add', ...rest);
     if (laborWindow && !laborWindow.webContents.isDestroyed()) {
       laborWindow.webContents.send('labor-task-add', ...rest);
     }
   });
   ipcMain.on('labor-task-done', (evt, ...rest) => {
-    console.log('labor-task-done', ...rest);
     if (mainWindow && !mainWindow.webContents.isDestroyed()) {
       mainWindow.webContents.send('labor-task-done', ...rest);
     }

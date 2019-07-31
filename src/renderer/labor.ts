@@ -31,9 +31,7 @@ function waitForTasks() {
     args?: Json,
     options?: { cache?: boolean },
   ) => {
-    console.log('labor-task-add received', type, id, args, options);
     function notifyTaskDone(result: Json) {
-      console.log('labor-task-done', type, id, result);
       ipcRenderer.send('labor-task-done', type, id, result);
     }
     const labor = pickLabor(type);
@@ -46,9 +44,7 @@ function waitForTasks() {
       notifyTaskDone(caches[taskKey]);
       return;
     }
-    console.time(taskKey);
     const result = await labor.doWork(args);
-    console.timeEnd(taskKey);
     notifyTaskDone(result);
   });
 }

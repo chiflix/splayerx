@@ -8,7 +8,6 @@ export default class NSFWFilterByLaborService implements IMediaFilter {
    */
   public async checkImage(src: string) {
     let taskDoneListener: Function | null = null;
-    console.time(src);
     try {
       return await Promise.race<Promise<boolean>>([
         new Promise<boolean>((resolve) => {
@@ -25,7 +24,6 @@ export default class NSFWFilterByLaborService implements IMediaFilter {
       console.error(ex, src);
       return false;
     } finally {
-      console.timeEnd(src);
       if (taskDoneListener) ipcRenderer.removeListener('labor-task-done', taskDoneListener);
     }
   }

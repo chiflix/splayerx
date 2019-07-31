@@ -15,7 +15,7 @@ export default class NSFWFilterService implements IMediaFilter {
   private async getNsfwNet() {
     if (this.nsfwnet) return this.nsfwnet;
     this.nsfwnet = new NSFWJS({ size: IMAGE_SIZE });
-    await this.nsfwnet.load(filePathToUrl(path.join(__static, 'nsfw/model.json'))); // TODO: slow, may put in a worker process
+    await this.nsfwnet.load(filePathToUrl(path.join(__static, 'nsfw/model.json')));
     return this.nsfwnet;
   }
 
@@ -34,9 +34,11 @@ export default class NSFWFilterService implements IMediaFilter {
         setTimeout(() => reject(new Error('NSFW img timeout')), 1000);
       });
       const result = await nsfwnet.classify(img);
-      return result.some(item => (
+      const isNsfw = result.some(item => (
         item.className === NSFW_CLASSES[1] || item.className === NSFW_CLASSES[3]
-      ) && item.probability >= 0.5);
+      ) && item.probability >= 0.8);
+      if (isNsfw) console.log(src, result);
+      return isNsfw;
     } catch (ex) {
       console.error(ex, src);
       return false;
