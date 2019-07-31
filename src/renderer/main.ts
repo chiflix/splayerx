@@ -214,12 +214,12 @@ new Vue({
         this.topOnWindow = val;
       }
       this.menuService.updateMenuItemChecked('window.keepPlayingWindowFront', val);
+      this.menuService.updateBrowsingViewTop(val);
     },
     isPip(val: boolean) {
       if (!val && this.topOnWindow) {
-        this.updatePipAlwaysOnTop(this.topOnWindow);
         this.topOnWindow = false;
-      } else if (this.pipAlwaysOnTop) {
+      } else if (this.browsingViewTop) {
         this.topOnWindow = true;
       }
     },
@@ -627,7 +627,6 @@ new Vue({
       changeSecondarySubDelay: SubtitleManager.alterSecondaryDelay,
       updateBarrageOpen: browsingActions.UPDATE_BARRAGE_OPEN,
       updateInitialUrl: browsingActions.UPDATE_INITIAL_URL,
-      updatePipAlwaysOnTop: browsingActions.UPDATE_PIP_ALWAYS_ON_TOP,
       showAudioTranslateModal: atActions.AUDIO_TRANSLATE_SHOW_MODAL,
     }),
     async initializeMenuSettings() {
