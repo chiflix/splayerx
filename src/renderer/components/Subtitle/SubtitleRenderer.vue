@@ -364,6 +364,7 @@ export default {
   left: 0;
   top: 0;
   z-index: auto;
+  pointer-events: none; /* fix click subtitle can not close control menu*/
   .primary-sub, .secondary-sub {
     margin: 0 auto 0 auto;
   }
