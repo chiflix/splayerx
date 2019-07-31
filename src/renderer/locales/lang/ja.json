@@ -265,7 +265,7 @@
     },
     "privacy": {
       "privacySetting": "翻訳設定",
-      "enable": "",
+      "enable": "Privacy Protectionを開く",
       "smartMode": "",
       "smartDescription": "",
       "incognitoMode": "",
