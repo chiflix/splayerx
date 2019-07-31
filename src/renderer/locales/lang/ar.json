@@ -5,10 +5,10 @@
     "changeTrack": "مقطع صوتي",
     "chosenTrack": "افتراضي",
     "fontItems": [
-      "",
-      "",
-      "",
-      ""
+      "S",
+      "M",
+      "L",
+      "XL"
     ],
     "fontSize": "حجم الخط",
     "fontStyle": "نوع الخط",
@@ -19,24 +19,24 @@
   },
   "css": {
     "titleFontSize": {
-      "fontSize": ""
+      "fontSize": "21px"
     },
     "versionFontSize": {
-      "fontSize": ""
+      "fontSize": "14px"
     }
   },
   "errorFile": {
     "ENOSPC": {
-      "content": "",
-      "title": ""
+      "content": "لا توجد مساحة كافية على القرص.",
+      "title": "فتح فشل"
     },
     "EACCES": {
-      "content": "",
-      "title": ""
+      "content": "ليس لديك إذن كافي.",
+      "title": "فتح فشل"
     },
     "ENOENT": {
-      "content": "",
-      "title": ""
+      "content": "لم يتم العثور على الملف.",
+      "title": "فتح فشل"
     },
     "addNoVideo": {
       "content": "لا يمكن العثور على الملف القابل للتشغيل.",
@@ -100,10 +100,14 @@
       "name": "ملف",
       "open": "افتح…",
       "openRecent": "فتح الأخيرة",
-      "openURL": "رابط مفتوح…"
+      "openURL": "رابط مفتوح…",
+      "copy": "نسخ",
+      "paste": "معجون"
     },
     "help": {
       "name": "مساعدة",
+      "feedback": "ردود الفعل",
+      "homepage": "موقع الكتروني",
       "splayerxHelp": "مساعدة",
       "shortCuts": "قائمة الاختصارات",
       "crashReportLocation": "عرض سجل الأخطاء",
@@ -112,7 +116,6 @@
     "playback": {
       "backwardL": "خطوة الى الوراء - 60s",
       "backwardS": "خطوة الى الوراء - 5S",
-      "windowRotate": "تدوير °90 في اتجاه عقارب الساعة",
       "captureScreen": "التقاط الشاشة",
       "captureVideoClip": "التقاط الفيديو كليب",
       "decreasePlaybackSpeed": "تقليل سرعة التشغيل",
@@ -120,7 +123,6 @@
       "forwardS": "خطوة إلى الأمام 5s",
       "fullScreen": "شاشة كاملة",
       "increasePlaybackSpeed": "زيادة سرعة التشغيل",
-      "keepPlayingWindowFront": "تطفو عند اللعب",
       "name": "تشغيل",
       "pause": "وقفة",
       "play": "لعب",
@@ -132,10 +134,8 @@
     },
     "splayerx": {
       "about": "حول SPlayer",
-      "feedback": "ردود الفعل",
       "hide": "إخفاء",
       "hideOthers": "إخفاء الآخرين",
-      "homepage": "موقع الكتروني",
       "preferences": "تفضيلات",
       "quit": "قم بإنهاء برنامج SPlayer",
       "showAll": "عرض الكل"
@@ -157,6 +157,8 @@
       "noSubtitle": "غير معثور عليه",
       "notToShowSubtitle": "قريب",
       "secondarySubtitle": "الترجمة الثانوية",
+      "subtitleSetting": "إعدادات الترجمة",
+      "subtitleDelay": "العنوان الفرعي تأخير",
       "size1": "صغير",
       "size2": "اساسي",
       "size3": "كبير",
@@ -171,7 +173,7 @@
       "subtitleStyle": "نوع الخط",
       "uploadSelectedSubtitle": "تحميل العنوان الفرعي المحدد"
     },
-    "titleName": "",
+    "titleName": "SPlayer",
     "update": {
       "message": "أعد تشغيل التطبيق الآن لتثبيت التحديث؟",
       "no": "لا",
@@ -180,6 +182,8 @@
       "yes": "نعم فعلا"
     },
     "window": {
+      "windowRotate": "درجة في اتجاه عقارب الساعة",
+      "keepPlayingWindowFront": "تطفو عند اللعب",
       "backToLandingView": "العودة إلى صفحة الإطلاق",
       "bossKey": "مدرب مفتاح",
       "doubleSize": "200٪",
@@ -189,12 +193,46 @@
       "maxmize": "تكبير",
       "minimize": "خفض",
       "name": "نافذة او شباك",
-      "originSize": "100٪"
+      "originSize": "100٪",
+      "enterPip": "أدخل صورة في صورة",
+      "exitPip": "الخروج من الصورة في صورة"
+    },
+    "favourite": {
+      "name": "قناة",
+      "iqiyi": "iQIYI",
+      "bilibili": "Bilibili",
+      "youtube": "Youtube"
+    },
+    "edit": {
+      "name": "",
+      "cut": "",
+      "copy": "",
+      "paste": "",
+      "selectAll": ""
+    },
+    "history": {
+      "name": "التاريخ",
+      "reload": "إعادة تحميل الصفحة",
+      "back": "ظهر",
+      "forward": "تقدم"
     }
   },
   "nextVideo": {
     "nextInFolder": "التالي في المجلد",
     "nextInPlaylist": "التالي في قائمة التشغيل"
+  },
+  "welcome": {
+    "welcomeTitle": "",
+    "welcomeDescription": "",
+    "agreement": "",
+    "policy": "",
+    "languageTitle1": "",
+    "languageTitle2": "",
+    "primary": "",
+    "secondary": "",
+    "chooseSecondary": "",
+    "languageDescription": "",
+    "none": ""
   },
   "preferences": {
     "general": {
@@ -213,13 +251,13 @@
       "others": "الآخرين",
       "switchDisplayLanguages": "تتحكم لغة العرض في اللغة التي تراها في SPlayer."
     },
-    "privacy": {
+    "translate": {
       "languageDescription": ".قم بتحميل بيانات مجهولة المصدر لجلب نتائج الترجمة باللغة التالية ، ولن يتم تضمين معلومات خصوصية",
       "languagePriority": "تفضيل اللغات",
       "none": "لا شيء",
       "primary": "ابتدائي",
-      "privacyConfirm": "تمكين الترجمة الذكية",
-      "privacySetting": "ترجمة",
+      "translateConfirm": "تمكين الترجمة الذكية",
+      "translateSetting": "ترجمة",
       "secondary": "ثانوي",
       "setAsDefault": "تعيين SPlayer كتطبيق افتراضي",
       "settings": "الإعدادات"
@@ -240,7 +278,7 @@
     "tryToDisable": {
       "button": "حسنا",
       "partOne": "يستخدم SPlayer بيانات مجهولة لتعزيز تجربة المستخدم. سيتم تعطيل الترجمة الذكية إذا كنت",
-      "partTwo": "",
+      "partTwo": ".",
       "underlinedContent": "تعارض"
     }
   },
@@ -252,6 +290,7 @@
   },
   "subtitle": {
     "embedded": "تضمين",
+    "generate": "توفير",
     "language": {
       "ar": "عربى",
       "de": "ألمانية",
@@ -292,5 +331,72 @@
   "loadVideoBySubtitleFailed": {
     "content": "العثور على أي فيديو ذات صلة في المجلد",
     "title": ""
+  },
+  "translateModal": {
+    "selectLanguageLabel": "لغة الصوت",
+    "select": {
+      "title": "اختر لغة الصوت",
+      "content": "لإنشاء نتيجة ترجمة ، يرجى تحديد اللغة التي تسمعها في الفيديو والنقر على زر إنشاء. قد تستغرق العملية بعض الوقت."
+    },
+    "translate": {
+      "title": "حوالي {time} اليسار",
+      "content": "يرجى عدم تخطي الفيديو أو إغلاق التطبيق. يمكنك التحقق من التقدم المحرز في لوحة الترجمة.",
+      "minute": "{number} ثواني",
+      "second": "{number} ثانية",
+      "hour": "{number} ساعة"
+    },
+    "success": {
+      "title": "تم الترجمة",
+      "content": "AI Translation جاهزة ، يرجى التحقق من ذلك على لوحة الترجمة."
+    },
+    "discard": {
+      "title": "AI Translation قيد التقدم",
+      "content": "هل أنت متأكد من أنك تريد الخروج؟ إذا قمت بالإنهاء ، فلن تتم استعادة تقدم الترجمة."
+    },
+    "noLineFail": {
+      "title": "خطأ بالشبكه",
+      "content": "الاتصال بالإنترنت غير متوفر.\nحاول مرة أخرى لاحقاً."
+    },
+    "timeOutFail": {
+      "title": "مهلة الاتصال",
+      "content": "فشل الاتصال بالخادم. يرجى المحاولة لاحقا."
+    },
+    "serverErrorFail": {
+      "title": "فشل الترجمة",
+      "content": "فشلت الترجمة بسبب خطأ في الخادم. يرجى المحاولة لاحقا."
+    },
+    "cancel": "إلغاء",
+    "quit": "استقال",
+    "generate": "توفير",
+    "ok": "حسنا",
+    "continue": "إلغاء"
+  },
+  "translateBubble": {
+    "bubbleWhenGrab": "سيتم إحباط ترجمة AI إذا استمرت ، فهل تريد المتابعة على أي حال؟",
+    "bubbleWhenTranslate": "تتم معالجة ترجمة AI على الخادم. يمكنك التحقق من التقدم عند مشاهدة الفيديو في المرة القادمة.",
+    "bubbleFunctionForbidden": "سيتم إحباط ترجمة AI إذا استمرت ، فهل تريد المتابعة على أي حال؟",
+    "bubbleWhenSuccess": {
+      "title": "",
+      "content": "AI Translation جاهزة الآن ، يرجى التحقق من ذلك على لوحة الترجمة."
+    },
+    "bubbleWhenSuccessOnOtherVideo": {
+      "title": "",
+      "content": "الترجمة AI جاهزة الآن. سيتم تحميله تلقائيًا في المرة القادمة عندما تشاهد الفيديو."
+    },
+    "bubbleTranslateNoLineFail": {
+      "title": "خطأ بالشبكه",
+      "content": "الاتصال بالإنترنت غير متوفر.\nحاول مرة أخرى لاحقاً."
+    },
+    "bubbleTranslateTimeOutFail": {
+      "title": "مهلة الاتصال",
+      "content": "فشل الاتصال بالخادم. يرجى المحاولة لاحقا."
+    },
+    "bubbleTranslateServerErrorFail": {
+      "title": "فشل الترجمة",
+      "content": "فشلت الترجمة بسبب خطأ في الخادم. يرجى المحاولة لاحقا."
+    },
+    "ok": "حسنا",
+    "cancel": "إلغاء",
+    "continue": "استمر"
   }
 }

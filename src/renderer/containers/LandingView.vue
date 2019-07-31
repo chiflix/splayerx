@@ -1,12 +1,13 @@
 <template>
   <div class="wrapper">
-    <titlebar
-      key="playing-view"
-      current-view="LandingView"
+    <open-url
+      v-show="openUrlShow"
+      :open-input-url="openInputUrl"
+      :close-url-input="closeUrlInput"
     />
     <transition name="background-container-transition">
       <div
-        v-if="item.backgroundUrl && !hideVideoHistoryOnExit"
+        v-if="item.backgroundUrl"
         class="background"
       >
         <transition
@@ -48,16 +49,16 @@
         </div>
       </div>
     </transition>
-    <transition name="welcome-container-transition">
-      <div
-        v-if="!item.backgroundUrl || hideVideoHistoryOnExit"
-        class="welcome-container"
-      >
-        <div class="logo-container">
+    <div class="welcome-container">
+      <transition :name="logoTransition">
+        <div
+          v-if="pageMounted && (!item.backgroundUrl)"
+          class="logo-container"
+        >
           <Icon type="logo" />
         </div>
-      </div>
-    </transition>
+      </transition>
+    </div>
     <div
       ref="mask"
       class="mask"
@@ -80,10 +81,9 @@
             width:`${thumbnailWidth}px`,
             marginRight: `${marginRight}px`,
             backgroundColor:
-              item.backgroundUrl && !hideVideoHistoryOnExit
+              item.backgroundUrl
                 ? 'rgba(255,255,255,0.12) ': 'rgba(255,255,255,0.05)',
           }"
-          :class="{ 'backdrop': useBlur }"
           @click="openOrMove"
           class="button"
         >
@@ -98,8 +98,9 @@
         <component
           :is="playlistLength > 1 ? 'PlaylistItem' : 'VideoItem'"
           v-for="({ backgroundUrl, id, playlistLength }, index) in landingViewItems"
-          v-if="!hideVideoHistoryOnExit"
           :key="id"
+          :cursor-url="cursorUrl"
+          :can-hover="canHover"
           :backgroundUrl="backgroundUrl"
           :index="index"
           :is-in-range="index + 1 >= firstIndex && index + 1 <= lastIndex"
@@ -121,17 +122,21 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import { mapGetters } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
+import { join } from 'path';
+import { Route } from 'vue-router';
+import { filePathToUrl } from '@/helpers/path';
 import { playInfoStorageService } from '@/services/storage/PlayInfoStorageService';
 import { recentPlayService } from '@/services/media/RecentPlayService';
 import Icon from '@/components/BaseIconContainer.vue';
-import Titlebar from '@/components/Titlebar.vue';
+import OpenUrl from '@/components/LandingView/OpenUrl.vue';
 import NotificationBubble from '@/components/NotificationBubble.vue';
 import PlaylistItem from '@/components/LandingView/PlaylistItem.vue';
 import VideoItem from '@/components/LandingView/VideoItem.vue';
 import { log } from '@/libs/Log';
 import Sagi from '@/libs/sagi';
-import { deleteSubtitlesByPlaylistId } from '../services/storage/SubtitleStorage';
+import { Browsing as browsingActions } from '@/store/actionTypes';
+import { Features, isFeatureEnabled } from '@/helpers/featureSwitch';
 
 Vue.component('PlaylistItem', PlaylistItem);
 Vue.component('VideoItem', VideoItem);
@@ -140,23 +145,27 @@ export default {
   name: 'LandingView',
   components: {
     Icon,
-    Titlebar,
     NotificationBubble,
+    'open-url': OpenUrl,
   },
   data() {
     return {
       landingViewItems: [],
       sagiHealthStatus: 'UNSET',
       invalidTimeRepresentation: '--',
+      isBrowsingViewEnabled: false,
+      openUrlShow: false,
       item: {},
       tranFlag: true,
       shifting: false,
       firstIndex: 0,
-      useBlur: false,
+      pageMounted: false,
+      logoTransition: '',
+      canHover: false,
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'defaultDir', 'isFullScreen', 'hideVideoHistoryOnExit']),
+    ...mapGetters(['winWidth', 'defaultDir', 'isFullScreen', 'incognitoMode', 'hideNSFW']),
     lastIndex: {
       get() {
         return (this.firstIndex + this.showItemNum) - 1;
@@ -168,6 +177,10 @@ export default {
           this.firstIndex = (val - this.showItemNum) + 1;
         }
       },
+    },
+    cursorUrl() {
+      if (this.firstIndex === 0) return `url("${filePathToUrl(join(__static, 'cursor/cursorRight.svg') as string)}")`;
+      return `url("${filePathToUrl(join(__static, 'cursor/cursorLeft.svg') as string)}")`;
     },
     move() {
       return -(this.firstIndex * (this.thumbnailWidth + this.marginRight));
@@ -223,10 +236,18 @@ export default {
       }
     },
   },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  beforeRouteEnter(to: Route, { name: from }: Route, next: (vm: any) => void) {
+    next((vm: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+      vm.logoTransition = from === 'language-setting' ? 'scale' : '';
+      vm.pageMounted = true;
+    });
+  },
+  /* eslint-disable @typescript-eslint/no-explicit-any */
   created() {
-    this.useBlur = window.devicePixelRatio === 1;
+    window.addEventListener('mousemove', this.globalMoveHandler);
     // Get all data and show
-    if (!this.$store.getters.deleteVideoHistoryOnExit) {
+    if (!this.incognitoMode) {
       recentPlayService.getRecords().then((results) => {
         this.landingViewItems = results;
       });
@@ -258,7 +279,7 @@ export default {
       if (this.$refs.mask) this.$refs.mask.style.setProperty('background-color', 'rgba(255, 255, 255, 0)');
     });
   },
-  mounted() {
+  async mounted() {
     this.$store.dispatch('refreshVersion');
 
     const { app } = this.$electron.remote;
@@ -272,23 +293,43 @@ export default {
         log.info('LandingView.vue', `launching: ${app.getName()} ${app.getVersion()}`);
       }
     });
+    this.$bus.$on('open-url-show', (val: boolean) => {
+      this.openUrlShow = val;
+    });
     window.addEventListener('keyup', this.keyboardHandler);
-    window.addEventListener('beforeunload', this.beforeUnloadHandler);
     this.$electron.ipcRenderer.on('quit', () => {
       this.quit = true;
     });
+
+    this.isBrowsingViewEnabled = await isFeatureEnabled(Features.BrowsingView);
   },
   destroyed() {
+    window.removeEventListener('mousemove', this.globalMoveHandler);
     window.removeEventListener('keyup', this.keyboardHandler);
-    window.removeEventListener('beforeunload', this.beforeUnloadHandler);
   },
   methods: {
-    beforeUnloadHandler(e: BeforeUnloadEvent) {
-      if (process.env.NODE_ENV === 'development') { // app.hide() will disable app refresh and not good for dev
-      } else if (process.platform === 'darwin' && !this.quit) {
-        e.returnValue = false;
-        this.$electron.remote.app.hide();
+    ...mapActions({
+      updateInitialUrl: browsingActions.UPDATE_INITIAL_URL,
+    }),
+    handleBrowsingOpen(url: string) {
+      this.updateInitialUrl(url);
+      this.$router.push({
+        name: 'browsing-view',
+      });
+    },
+    closeUrlInput() {
+      this.$bus.$emit('open-url-show', false);
+    },
+    openInputUrl(inputUrl: string) {
+      if (this.openFileByPlayingView(inputUrl)) {
+        this.openUrlFile(inputUrl);
+      } else {
+        this.handleBrowsingOpen(inputUrl);
       }
+    },
+    globalMoveHandler() {
+      this.logoTransition = 'welcome-container-transition';
+      this.canHover = true;
     },
     keyboardHandler(e: KeyboardEvent) {
       if (e.key === 'ArrowRight') {
@@ -349,7 +390,6 @@ export default {
         this.lastIndex = this.landingViewItems.length;
       }
       playInfoStorageService.deleteRecentPlayedBy(deletedItem.id);
-      deleteSubtitlesByPlaylistId(deletedItem.id);
     },
   },
 };
@@ -398,9 +438,6 @@ $themeColor-Light: white;
       transition-delay: 200ms;
       cursor: pointer;
     }
-    .backdrop {
-      backdrop-filter: blur(9.8px);
-    }
 
     .button:hover {
       background-color: rgba(123, 123, 123, 0.12);
@@ -413,10 +450,11 @@ $themeColor-Light: white;
       height: 100%;
       border: 1px solid rgba(255, 255, 255, 0.15);
       display: flex;
-    }
+      transition: border 50ms linear;
 
-    .btnMask:hover {
-      border: 1px solid rgba(255, 255, 255, 0.6);
+      &:hover {
+        border: 1px solid rgba(255, 255, 255, 0.6);
+      }
     }
 
     .addUi {
@@ -522,8 +560,6 @@ $themeColor-Light: white;
   --client-height: 100vh;
   --pos-y: calc(var(--client-height) * 0.37 - 46px);
   transform: translateY(var(--pos-y));
-}
-.logo-container {
   -webkit-user-select: none;
   text-align: center;
 }
@@ -533,32 +569,49 @@ main {
 }
 
 
-.background-transition-enter-active, .background-transition-leave-active {
-  transition: opacity 300ms linear;
-}
-.background-transition-enter, .background-transition-leave-to {
-  opacity: 0;
-}
-.background-transition-enter-to, .background-transition-leave {
-  opacity: 1;
-}
-
-.welcome-container-transition-enter-active, .welcome-container-transition-leave-active{
-  transition: opacity .3s ease-in;
-  transition-delay: .2s;
+.background-transition {
+  &-enter-active, &-leave-active {
+    transition: opacity 300ms linear;
+  }
+  &-enter, &-leave-to {
+    opacity: 0;
+  }
 }
 
-.welcome-container-transition-enter, .welcome-container-transition-leave-to {
-  opacity: 0;
+.welcome-container-transition {
+  &-enter-active {
+    transition: opacity .3s ease-in;
+    transition-delay: 50ms;
+  }
+  &-leave-active {
+    transition: opacity 300ms ease-in;
+    transition-delay: 100ms;
+  }
+
+  &-enter, &-leave-to {
+    opacity: 0;
+  }
 }
 
-.background-container-transition-enter-active, .background-container-transition-leave-active{
-  transition: opacity .3s ease-in;
-  transition-delay: .2s;
+.background-container-transition {
+  &-enter-active, &-leave-active {
+    transition: opacity .3s ease-in;
+    transition-delay: .2s;
+  }
+
+  &-enter, &-leave-to{
+    opacity: 0;
+  }
 }
 
-.background-container-transition-enter, .background-container-transition-leave-to{
-  opacity: 0;
+.scale {
+  &-enter-active {
+    transition: all 300ms ease-out;
+  }
+  &-enter {
+    transform: scale(0.9, 0.9);
+    opacity: 0;
+  }
 }
 
 </style>

@@ -60,6 +60,10 @@ module.exports = {
         'CONTENT'
       ]
     }],
+    // interface name must use `I` prefix
+    '@typescript-eslint/interface-name-prefix': ['error', 'always'],
+    // class methods can without use this
+    'class-methods-use-this': 0,
     // can use types to define Obejct
     '@typescript-eslint/prefer-interface': 0,
     // JSON style for interfaces && types
@@ -73,5 +77,10 @@ module.exports = {
         'requireLast': false
       }
     },
-  }
+    '@typescript-eslint/interface-name-prefix': 'always',
+    '@typescript-eslint/explicit-function-return-type': 0,
+    '@typescript-eslint/no-explicit-any': ['error', {
+      ignoreRestArgs: true,
+    }]
+  },
 }

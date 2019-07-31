@@ -101,10 +101,14 @@
       "name": "File",
       "open": "Open…",
       "openRecent": "Open Recent",
-      "openURL": "Open URL…"
+      "openURL": "Open URL…",
+      "copy": "Copy",
+      "paste": "Paste"
     },
     "help": {
       "name": "Help",
+      "feedback": "Feedback",
+      "homepage": "Website",
       "splayerxHelp": "Help",
       "shortCuts": "Shortcuts List",
       "crashReportLocation": "Show Crash Reports",
@@ -113,7 +117,6 @@
     "playback": {
       "backwardL": "Step Backward -60s",
       "backwardS": "Step Backward -5s",
-      "windowRotate": "Rotate 90° Clockwise",
       "captureScreen": "Capture Screen",
       "captureVideoClip": "Capture Video Clip",
       "decreasePlaybackSpeed": "Decrease Playback Speed",
@@ -121,7 +124,6 @@
       "forwardS": "Step Forward +5s",
       "fullScreen": "Full Screen",
       "increasePlaybackSpeed": "Increase Playback Speed",
-      "keepPlayingWindowFront": "Float When Playing",
       "name": "Playback",
       "pause": "Pause",
       "play": "Play",
@@ -133,10 +135,8 @@
     },
     "splayerx": {
       "about": "About SPlayer",
-      "feedback": "Feedback",
       "hide": "Hide",
       "hideOthers": "Hide Others",
-      "homepage": "Website",
       "preferences": "Preferences",
       "quit": "Quit SPlayer",
       "showAll": "Show All"
@@ -158,6 +158,8 @@
       "noSubtitle": "Not Found",
       "notToShowSubtitle": "Off",
       "secondarySubtitle": "Secondary Subtitle",
+      "subtitleSetting": "Subtitle Settings",
+      "subtitleDelay": "Subtitle Delay",
       "size1": "Small",
       "size2": "Standard",
       "size3": "Large",
@@ -181,6 +183,8 @@
       "yes": "yes"
     },
     "window": {
+      "windowRotate": "Rotate 90° Clockwise",
+      "keepPlayingWindowFront": "Float When Playing",
       "backToLandingView": "Back to Launching Page",
       "bossKey": "Boss Key",
       "doubleSize": "200%",
@@ -190,12 +194,46 @@
       "maxmize": "Zoom",
       "minimize": "Minimize",
       "name": "Window",
-      "originSize": "100%"
+      "originSize": "100%",
+      "enterPip": "Enter Picture In Picture",
+      "exitPip": "Exit Picture In Picture"
+    },
+    "favourite": {
+      "name": "Channel",
+      "iqiyi": "iQIYI",
+      "bilibili": "Bilibili",
+      "youtube": "Youtube"
+    },
+    "edit": {
+      "name": "Edit",
+      "cut": "Cut",
+      "copy": "Copy",
+      "paste": "Paste",
+      "selectAll": "Select All"
+    },
+    "history": {
+      "name": "History",
+      "reload": "Reload Page",
+      "back": "Back",
+      "forward": "Forward"
     }
   },
   "nextVideo": {
     "nextInFolder": "Next in Folder",
     "nextInPlaylist": "Next in Playlist"
+  },
+  "welcome": {
+    "welcomeTitle": "Welcome to SPlayer",
+    "welcomeDescription": "All-new lightweight design, incredible performance with smart translation to let you enjoy your videos like never before.",
+    "agreement": "By using SPlayer, you agree to our ",
+    "policy": "Privacy Policy",
+    "languageTitle1": "Set your preferred subtitle",
+    "languageTitle2": "languages to fetch translations",
+    "primary": "Primary",
+    "secondary": "Secondary",
+    "chooseSecondary": "Select Secondary Language",
+    "languageDescription": "* You can change your settings in preferences later",
+    "none": "None"
   },
   "preferences": {
     "general": {
@@ -214,16 +252,24 @@
       "others": "Others",
       "switchDisplayLanguages": "Display Language controls the language you see in SPlayer."
     },
-    "privacy": {
+    "translate": {
       "languageDescription": "Upload anonymous data to fetch translation results in the following language,  no privacy information will be included.",
       "languagePriority": "Language Preference",
       "none": "None",
       "primary": "Primary",
-      "privacyConfirm": "Enable Smart Translation",
-      "privacySetting": "Translation",
+      "translateConfirm": "Enable Smart Translation",
+      "translateSetting": "Translation",
       "secondary": "Secondary",
       "setAsDefault": "Set SPlayer as the Default Application",
       "settings": "Settings"
+    },
+    "privacy": {
+      "privacySetting": "Privacy",
+      "enable": "Enable Privacy Protection",
+      "smartMode": "Intelligent Mode",
+      "smartDescription": "Offline identify sensitive or not-suitable-for-work contents, and clear the playback history when playing in a folder playlist or when quitting.",
+      "incognitoMode": "Incognito Mode",
+      "incognitoDescription": "No playback history will be saved."
     }
   },
   "privacyBubble": {
@@ -245,6 +291,11 @@
       "underlinedContent": "disagree"
     }
   },
+  "protectBubble": {
+    "agree": "OK",
+    "setting": "Setting",
+    "content": "Smart Privacy Protection is enabled. Sensitive or not-suitable-for-work playback history will be removed."
+  },
   "recentPlaylist": {
     "folderSource": "Folder",
     "playing": "Playing",
@@ -253,6 +304,7 @@
   },
   "subtitle": {
     "embedded": "Embed",
+    "generate": "Generate",
     "language": {
       "ar": "Arabic",
       "de": "German",
@@ -293,5 +345,72 @@
   "loadVideoBySubtitleFailed": {
     "content": "Cannot find any related video in the folder",
     "title": ""
+  },
+  "translateModal": {
+    "selectLanguageLabel": "Audio Language",
+    "select": {
+      "title": "Select Audio Language",
+      "content": "To generate a translation result, please select the language you hear in the video and click the generate button. The process might take some time."
+    },
+    "translate": {
+      "title": "About {time} Left",
+      "content": "Please do not skip the video or close the application. You can check the progress on the translation panel.",
+      "minute": "{number} min",
+      "second": "{number} sec",
+      "hour": "{number} hr"
+    },
+    "success": {
+      "title": "Translation Done",
+      "content": "AI Translation is ready, please check it on the translation panel."
+    },
+    "discard": {
+      "title": "AI Translation is in Progress",
+      "content": "Are you sure you want to quit? If you quit, the translation progress will not be restored."
+    },
+    "noLineFail": {
+      "title": "Network Error",
+      "content": "Please check your network connection and try again."
+    },
+    "timeOutFail": {
+      "title": "Connection Timeout",
+      "content": "The connection to the server failed. Please try later."
+    },
+    "serverErrorFail": {
+      "title": "Translation Failed",
+      "content": "Translation failed because of a server error. Please try later."
+    },
+    "cancel": "Cancel",
+    "quit": "Quit",
+    "generate": "Generate",
+    "ok": "OK",
+    "continue": "Cancel"
+  },
+  "translateBubble": {
+    "bubbleWhenGrab": "AI Translation will be aborted If you go on, do you want to continue anyway?",
+    "bubbleWhenTranslate": "AI Translation is being processed on the server. You can check the progress when you watch the video next time.",
+    "bubbleFunctionForbidden": "AI Translation will be aborted If you go on, do you want to continue anyway?",
+    "bubbleWhenSuccess": {
+      "title": "",
+      "content": "AI Translation is ready now, please check it on the translation panel."
+    },
+    "bubbleWhenSuccessOnOtherVideo": {
+      "title": "",
+      "content": "AI Translation is ready now. It will be automatically loaded next time when you watch the video."
+    },
+    "bubbleTranslateNoLineFail": {
+      "title": "Network Error",
+      "content": "Please check your network connection and try again."
+    },
+    "bubbleTranslateTimeOutFail": {
+      "title": "Connection Timeout",
+      "content": "The connection to the server failed. Please try later."
+    },
+    "bubbleTranslateServerErrorFail": {
+      "title": "Translation Failed",
+      "content": "Translation failed because of a server error. Please try later."
+    },
+    "ok": "OK",
+    "cancel": "Cancel",
+    "continue": "Continue"
   }
 }

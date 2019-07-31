@@ -2,8 +2,10 @@
 import path, { join } from 'path';
 import electron from 'electron';
 import { ICacheFileStorable } from '@/interfaces/ICacheFileStorable';
-import { ELECTRON_CACHE_DIRNAME, DEFAULT_DIRNAME, VIDEO_DIRNAME } from '@/constants';
-import { mkdir, checkPathExist, readDir, deleteDir } from './file';
+import { ELECTRON_CACHE_DIRNAME, DEFAULT_DIRNAME, VIDEO_DIRNAME } from '../constants';
+import {
+  mkdir, checkPathExist, readDir, deleteDir,
+} from './file';
 
 const app = electron.app || electron.remote.app;
 
@@ -23,19 +25,20 @@ export default class CacheFile implements ICacheFileStorable {
    * @param {string} mediaHash
    * @returns {string} 返回改视频对应的缓存路径
    */
-  getPathBy(mediaHash: string): string {
+  public getPathBy(mediaHash: string): string {
     return join(`${getDefaultDataPath()}/${VIDEO_DIRNAME}/`, mediaHash);
   }
-  removeFile(path: string): Promise<boolean> {
-    throw new Error("Method not implemented.");
+
+  public removeFile(): Promise<boolean> {
+    throw new Error('Method not implemented.');
   }
 
-  readFile(path: string): Promise<Buffer | null> {
-    throw new Error("Method not implemented.");
+  public readFile(): Promise<Buffer | null> {
+    throw new Error('Method not implemented.');
   }
 
-  writeFile(path: string, content: Buffer): Promise<boolean> {
-    throw new Error("Method not implemented.");
+  public writeFile(): Promise<boolean> {
+    throw new Error('Method not implemented.');
   }
 
   /** 公开API 根据mediaHash创建该视频的缓存目录
@@ -44,7 +47,7 @@ export default class CacheFile implements ICacheFileStorable {
    * @param {string} mediaHash
    * @returns {Promise<boolean>} 成功是否成功
    */
-  async createDirBy(mediaHash: string): Promise<boolean> {
+  public async createDirBy(mediaHash: string): Promise<boolean> {
     try {
       const path = join(`${getDefaultDataPath()}/${VIDEO_DIRNAME}/`, mediaHash);
       await mkdir(path);
@@ -60,7 +63,7 @@ export default class CacheFile implements ICacheFileStorable {
    * @param {string} mediaHash
    * @returns {(Promise<string[] | null>)} 返回当前目录下的文件列表
    */
-  async readDirBy(mediaHash: string): Promise<string[] | null> {
+  public async readDirBy(mediaHash: string): Promise<string[] | null> {
     let path = '';
     try {
       path = join(`${getDefaultDataPath()}/${VIDEO_DIRNAME}/`, mediaHash);
@@ -73,7 +76,7 @@ export default class CacheFile implements ICacheFileStorable {
         await mkdir(path);
       }
     }
-    return []
+    return [];
   }
 
   /** 公开API 根据mediaHash删除改视频相关目录
@@ -82,7 +85,7 @@ export default class CacheFile implements ICacheFileStorable {
    * @param {string} mediaHash
    * @returns {Promise<boolean>} 是否删除成功
    */
-  async removeDirBy(mediaHash: string): Promise<boolean> {
+  public async removeDirBy(mediaHash: string): Promise<boolean> {
     try {
       const path = join(`${getDefaultDataPath()}/${VIDEO_DIRNAME}/`, mediaHash);
       await deleteDir(path);
@@ -93,4 +96,4 @@ export default class CacheFile implements ICacheFileStorable {
   }
 }
 
-export const cacheFile = new CacheFile()
+export const cacheFile = new CacheFile();

@@ -1,4 +1,4 @@
-import { MediaItem, PlaylistItem } from "./IDB";
+import { MediaItem, PlaylistItem } from './IDB';
 
 export interface IPlayInfoStorable {
   /**
@@ -34,5 +34,11 @@ export interface IPlayInfoStorable {
    * @returns {Promise<PlaylistItem>}
    * 返回指定ID的播放列表记录
    */
-  getPlaylistRecord(playlistId: number): Promise<PlaylistItem> 
+  getPlaylistRecord(playlistId: number): Promise<PlaylistItem>
+  /**
+   * @param  {number} mediaitemId 视频ID
+   * @returns {Promise<MediaItem>}
+   * 返回指定ID的视频记录
+   */
+  getMediaItem(mediaitemId: number): Promise<MediaItem>
 }

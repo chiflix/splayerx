@@ -5,34 +5,41 @@ interface IMouse {
 }
 
 class WinMouse implements IMouse {
-  private mouse: any;
-  constructor() {
+  private mouse: {
+    on(channel: string, callback: (x: number, y: number) => void): void,
+    off(channel: string, callback?: (x: number, y: number) => void): void,
+    destroy(): void,
+  } | null;
+
+  public constructor() {
     try {
-      const mouseConstructor = require('win-mouse');
+      const mouseConstructor = require('win-mouse'); //eslint-disable-line
       this.mouse = mouseConstructor();
-    } catch(ex) {
+    } catch (ex) {
       console.error(ex);
     }
   }
 
-  on(channel: string, callback: (x: number, y: number) => void) {
+  public on(channel: string, callback: (x: number, y: number) => void) {
     if (this.mouse) this.mouse.on(channel, callback);
   }
 
-  off(channel: string, callback?: (x: number, y: number) => void) {
+  public off(channel: string, callback?: (x: number, y: number) => void) {
     if (this.mouse) this.mouse.off(channel, callback);
   }
 
-  dispose() {
+  public dispose() {
     if (this.mouse) this.mouse.destroy();
     this.mouse = null;
   }
 }
 
 class FakeMouse implements IMouse {
-  on() {}
-  off() {}
-  dispose() {}
+  public on() {} //eslint-disable-line
+
+  public off() {} //eslint-disable-line
+
+  public dispose() {} //eslint-disable-line
 }
 
 const Mouse = process.platform === 'win32' ? WinMouse : FakeMouse;

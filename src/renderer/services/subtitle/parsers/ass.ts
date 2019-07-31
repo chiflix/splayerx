@@ -1,8 +1,8 @@
-import { Dialogue, Format, Cue, Tags } from '@/interfaces/ISubtitle';
-import { BaseParser } from './base';
 import { pick } from 'lodash';
 // @ts-ignore
 import { compile } from 'ass-compiler';
+import { Format, Cue, ITags } from '@/interfaces/ISubtitle';
+import { BaseParser } from './base';
 
 interface IAssTags {
   b: number;
@@ -35,9 +35,11 @@ type CompiledSubtitle = {
 }
 
 export class AssParser extends BaseParser {
-  readonly payload: string = '';
-  format = Format.AdvancedSubStationAplha;
-  constructor(assPayload: string) {
+  public readonly payload: string = '';
+
+  public format = Format.AdvancedSubStationAplha;
+
+  public constructor(assPayload: string) {
     super();
     this.payload = assPayload;
   }
@@ -55,6 +57,7 @@ export class AssParser extends BaseParser {
     // 'Video Zoom': '8',
     // 'Video Position': '0',
   };
+
   private baseTags = {
     // fn: '',
     // fs: '',
@@ -82,11 +85,12 @@ export class AssParser extends BaseParser {
     alignment: 2,
     pos: null,
   };
+
   private normalize(compiledSubtitle: CompiledSubtitle) {
     if (!compiledSubtitle.dialogues.length) throw new Error('Unsupported Subtitle');
     const finalDialogues: Cue[] = [];
     const { info, dialogues } = compiledSubtitle;
-    this.info = pick(info, Object.keys(this.baseInfo));
+    this.metadata = pick(info, Object.keys(this.baseInfo));
     dialogues.forEach((dialogue) => {
       const {
         start, end, alignment, slices, pos,
@@ -114,13 +118,13 @@ export class AssParser extends BaseParser {
             };
           });
           let txt = '';
-          let tags: Tags = {} as Tags;
-          processedFragments.forEach((f: { text: string, tags: Tags }, i: number) => {
+          let tags: ITags = {};
+          processedFragments.forEach((f: { text: string, tags: ITags }, i: number) => {
             if (i === 0) {
               tags = f.tags;
             }
             txt += f.text;
-          })
+          });
           const finalDialogue = {
             ...baseDiagolue,
             text: txt,
@@ -133,7 +137,8 @@ export class AssParser extends BaseParser {
     });
     this.dialogues = finalDialogues;
   }
-  async parse() {
+
+  public async parse() {
     this.normalize(compile(this.payload) as CompiledSubtitle);
   }
 }

@@ -1,6 +1,9 @@
 <template>
   <div
     :class="isDarwin ? 'darwin-titlebar' : 'titlebar'"
+    :style="{
+      width: ['playing-view', 'browsing-view'].includes($route.name) ? '100%' : ''
+    }"
     @dblclick.stop="handleDbClick"
   >
     <div
@@ -14,7 +17,7 @@
         type="titleBarWinExitFull"
       />
       <Icon
-        v-show="middleButtonStatus === 'maximize'"
+        v-show="middleButtonStatus === 'maximize' && enableFullScreenButton"
         @mouseup.native="handleWinFull"
         class="title-button no-drag"
         type="titleBarWinFull"
@@ -62,7 +65,7 @@
       />
       <Icon
         id="maximize"
-        v-show="middleButtonStatus !== 'exit-fullscreen'"
+        v-show="middleButtonStatus !== 'exit-fullscreen' && enableFullScreenButton"
         :type="itemType"
         :state="state"
         :style="{ transform: isMaxScreen ? 'rotate(45deg)' : ''}"
@@ -84,7 +87,7 @@
 <script lang="ts">
 import { mapGetters } from 'vuex';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
-import Icon from './BaseIconContainer.vue';
+import Icon from '@/components/BaseIconContainer.vue';
 
 export default {
   name: 'Titlebar',
@@ -99,6 +102,10 @@ export default {
       default: true,
     },
     recentPlaylist: Boolean,
+    enableFullScreenButton: {
+      type: Boolean,
+      default: true,
+    },
   },
   data() {
     return {
@@ -162,10 +169,12 @@ export default {
   },
   methods: {
     handleDbClick() {
-      if (!this.isMaximized) {
-        this.$electron.ipcRenderer.send('callMainWindowMethod', 'maximize');
-      } else {
-        this.$electron.ipcRenderer.send('callMainWindowMethod', 'unmaximize');
+      if (['playing-view', 'browsing-view'].includes(this.$route.name)) {
+        if (!this.isMaximized) {
+          this.$electron.ipcRenderer.send('callMainWindowMethod', 'maximize');
+        } else {
+          this.$electron.ipcRenderer.send('callMainWindowMethod', 'unmaximize');
+        }
       }
     },
     handleMouseOver() {
@@ -208,23 +217,25 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .titlebar {
-  position: absolute;
   top: 0;
+  right: 0;
   border-radius: 10px;
-  width: 100%;
-  height: 28px;
+  width: 135px;
+  height: 36px;
   z-index: 6;
+  display: flex;
+  position: absolute;
   .win-icons {
     display: flex;
     flex-wrap: nowrap;
     position: absolute;
-    right: 5px;
+    right: 0;
     .title-button {
-      margin: 0px 2px 2px 0px;
       width: 45px;
-      height: 28px;
+      height: 36px;
+      display: flex;
       background-color: rgba(255,255,255,0);
       transition: background-color 200ms;
     }
@@ -237,15 +248,13 @@ export default {
   }
 }
 .darwin-titlebar {
-  position: absolute;
   z-index: 6;
-  box-sizing: content-box;
   height: 36px;
-  width: 100%;
+  width: 90px;
+  display: flex;
+  position: absolute;
   .mac-icons {
-    position: absolute;
-    top: 12px;
-    left: 12px;
+    margin: auto auto auto 10px;
     display: flex;
     flex-wrap: nowrap;
   }
@@ -254,6 +263,7 @@ export default {
     height: 12px;
     margin-right: 8px;
     background-repeat: no-repeat;
+    -webkit-app-region: no-drag;
     border-radius: 100%;
   }
   #minimize {

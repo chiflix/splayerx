@@ -1,11 +1,21 @@
-import { Tags, Entity } from '@/interfaces/ISubtitle';
 import { detect } from 'chardet';
 import { encodingExists, decode } from 'iconv-lite';
-import { open, read, close, readFile } from 'fs-extra';
+import {
+  open, read, close, readFile,
+} from 'fs-extra';
 import { extname } from 'path';
+import {
+  ITags, IOrigin, Type, Format, IParser,
+} from '@/interfaces/ISubtitle';
 import { LanguageCode } from '@/libs/language';
-import { Format, Parser } from '@/interfaces/ISubtitle';
-import { AssParser, SrtParser, SagiParser, VttParser } from '@/services/subtitle';
+
+import {
+  AssParser, SrtParser, SagiParser, VttParser,
+} from '@/services/subtitle';
+
+import { assFragmentLanguageLoader, srtFragmentLanguageLoader, vttFragmentLanguageLoader } from './languageLoader';
+import { IEmbeddedOrigin } from '../loaders';
+import { SagiSubtitlePayload } from '../parsers';
 
 /**
  * Cue tags getter for SubRip, SubStation Alpha and Online Transcript subtitles.
@@ -15,7 +25,7 @@ import { AssParser, SrtParser, SagiParser, VttParser } from '@/services/subtitle
  * @param {object} baseTags - default tags for the cue.
  * @returns {object} tags object for the cue
  */
-export function tagsGetter(text: string, baseTags: Tags) {
+export function tagsGetter(text: string, baseTags: ITags) {
   const tagRegex = /\{[^{}]*\}/g;
   const matchTags = text.match(tagRegex);
   const finalTags = { ...baseTags };
@@ -23,7 +33,8 @@ export function tagsGetter(text: string, baseTags: Tags) {
     const tagGetters = {
       an: (tag: string) => {
         const matchedAligment = tag.match(/\d/g);
-        if (matchedAligment) return Number.parseFloat(matchedAligment[0])
+        if (matchedAligment) return Number.parseFloat(matchedAligment[0]);
+        return undefined;
       },
       pos: (tag: string) => {
         const matchedCoords = tag.match(/\((.*)\)/);
@@ -36,6 +47,7 @@ export function tagsGetter(text: string, baseTags: Tags) {
             },
           });
         }
+        return undefined;
       },
     };
     for (let tag of matchTags) {
@@ -100,8 +112,6 @@ export async function loadLocalFile(path: string, encoding?: string) {
   return decode(fileBuffer, fileEncoding);
 }
 
-import { assFragmentLanguageLoader, srtFragmentLanguageLoader, vttFragmentLanguageLoader } from './languageLoader';
-
 export function pathToFormat(path: string): Format {
   const extension = extname(path).slice(1);
   switch (extension) {
@@ -115,6 +125,33 @@ export function pathToFormat(path: string): Format {
       return Format.WebVTT;
     default:
       return Format.Unknown;
+  }
+}
+
+export function sourceToFormat(subtitleSource: IOrigin) {
+  switch (subtitleSource.type) {
+    case Type.Online:
+    case Type.Translated:
+      return Format.Sagi;
+    case Type.Embedded: {
+      const { extractedSrc } = (subtitleSource as IEmbeddedOrigin).source;
+      if (extractedSrc) return pathToFormat(extractedSrc);
+      return Format.Unknown;
+    }
+    default:
+      return pathToFormat(subtitleSource.source as string);
+  }
+}
+
+export function formatToExtension(format: Format): string {
+  switch (format) {
+    case Format.Sagi:
+    case Format.WebVTT:
+      return 'vtt';
+    case Format.SubRip:
+      return 'srt';
+    default:
+      return format;
   }
 }
 
@@ -134,17 +171,18 @@ export async function inferLanguageFromPath(path: string): Promise<LanguageCode>
   }
 }
 
-export function getParser(subtitle: Entity): Parser {
-  switch(subtitle.format) {
+export function getParser(format: Format, payload: unknown): IParser {
+  switch (format) {
     case Format.AdvancedSubStationAplha:
     case Format.SubStationAlpha:
-      return new AssParser(subtitle.payload);
+      return new AssParser(payload as string);
     case Format.SubRip:
-      return new SrtParser(subtitle.payload);
+      return new SrtParser(payload as string);
     case Format.Sagi:
-      return new SagiParser(subtitle.payload);
+      return new SagiParser(payload as SagiSubtitlePayload);
     case Format.WebVTT:
-      return new VttParser(subtitle.payload);
+      return new VttParser(payload as string);
+    default:
+      throw new Error();
   }
-  throw new Error();
 }

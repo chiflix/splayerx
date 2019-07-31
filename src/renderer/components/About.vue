@@ -69,6 +69,10 @@ export default {
       return process.platform === 'darwin';
     },
   },
+  mounted() {
+    document.title = 'About SPlayer';
+    document.body.classList.add('drag');
+  },
   methods: {
     handleClose() {
       electron.remote.BrowserWindow.getFocusedWindow().close();

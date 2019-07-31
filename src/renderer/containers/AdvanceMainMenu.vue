@@ -1,7 +1,6 @@
 <template>
   <base-info-card
     ref="cardWidth"
-    :use-blur="useBlur"
     :border-radius="7"
     :content-min-height="119"
     :content-min-width="cardWidth > minInfoCardWidth ? cardWidth : minInfoCardWidth"
@@ -186,8 +185,8 @@
           :handle-select-click="changeSubtitleDelay"
           :size="computedSize"
           :is-chosen="subDelayChosen"
-          :primary-sub-delay="primarySubDelay"
-          :secondary-sub-delay="secondarySubDelay"
+          :primary-sub-delay="primaryDelay"
+          :secondary-sub-delay="secondaryDelay"
           @click.left.native="handleDelayClick"
           selected-type="subtitle"
         />
@@ -283,16 +282,15 @@ export default {
       showTrack: false,
       hoverAudioIndex: -1,
       backAudioHover: false,
-      cardWidth: 170,
+      cardWidth: 180,
       normalFont: 'Avenir, Roboto-Regular, PingFang SC, Microsoft Yahei',
-      useBlur: false,
       shiftItemHovered: false,
     };
   },
   computed: {
     ...mapGetters(['winWidth', 'primarySubtitleId', 'secondarySubtitleId', 'enabledSecondarySub', 'winHeight', 'rate', 'chosenSize', 'subToTop',
       'displayLanguage', 'winRatio', 'chosenStyle', 'audioTrackList', 'currentAudioTrackId', 'isPrimarySubSettings',
-      'computedHeight', 'computedWidth', 'audioDelay', 'lastChosenSize', 'primarySubDelay', 'secondarySubDelay']),
+      'computedHeight', 'computedWidth', 'audioDelay', 'lastChosenSize', 'primaryDelay', 'secondaryDelay']),
     ChosenSizeContent() {
       const compareContent = ['S', 'M', 'L', 'XL'];
       const enContent = ['Small', 'Normal', 'Large', 'Extra Large'];
@@ -301,12 +299,12 @@ export default {
     },
     minInfoCardWidth() {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
-        return 170;
+        return 180;
       }
       if (this.computedSize >= 481 && this.computedSize < 1080) {
-        return 204;
+        return 216;
       }
-      return 285.6;
+      return 302.4;
     },
     leftTitleToShow() { // 菜单左侧显示的text
       if (this.readyShow === 'audioMenu') {
@@ -551,7 +549,6 @@ export default {
         this.handleSubClick();
       }, 0);
     });
-    this.useBlur = window.devicePixelRatio === 1;
     this.$bus.$on('switch-audio-track', (index: number) => {
       this.switchAudioTrack(this.audioTrackList[index]);
     });

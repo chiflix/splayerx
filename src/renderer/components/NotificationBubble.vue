@@ -4,7 +4,6 @@
       <NextVideo
         ref="nextVideo"
         v-if="showNextVideo"
-        :use-blur="useBlur"
         @close-next-video="closeNextVideo"
         @manualclose-next-video="manualClose"
         @ready-to-show="readyToShow = true"
@@ -13,16 +12,30 @@
     </transition>
     <PrivacyBubble
       v-if="showPrivacyBubble && !isMas"
-      :use-blur="useBlur"
       @close-privacy-bubble="closePrivacyBubble"
       class="privacy-bubble"
     />
     <MASPrivacyBubble
       v-if="showPrivacyBubble && isMas"
-      :use-blur="useBlur"
       @close-privacy-bubble="closePrivacyBubble"
       class="mas-privacy-bubble"
     />
+    <NSFW
+      v-if="showNSFWBubble"
+      :handle-agree="handleAgree"
+      :handle-setting="handleSetting"
+      class="mas-privacy-bubble"
+    />
+    <transition name="bubble">
+      <TranslateBubble
+        v-if="isTranslateBubbleVisiable"
+        :message="translateBubbleMessage"
+        :type="translateBubbleType"
+        @disCardTranslate="discardTranslate"
+        @backStageTranslate="backStageTranslate"
+        @hide="hideTranslateBubble"
+      />
+    </transition>
     <transition-group
       name="toast"
       class="transGroup"
@@ -37,7 +50,7 @@
         <div
           :class="[
             m.type === 'result' ? 'resultContainer' : 'stateContainer',
-            useBlur ? 'backdrop' : 'backdrop-fallback',
+            'backdrop-fallback',
           ]"
         >
           <div class="bubbleContent">
@@ -64,11 +77,14 @@
 </template>
 
 <script lang="ts">
-import { mapGetters } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
 import NextVideo from '@/components/PlayingView/NextVideo.vue';
 import PrivacyBubble from '@/components/PlayingView/PrivacyConfirmBubble.vue';
+import TranslateBubble from '@/components/PlayingView/TranslateBubble.vue';
 import MASPrivacyBubble from '@/components/PlayingView/MASPrivacyConfirmBubble.vue';
+import NSFW from '@/components/PlayingView/NSFW.vue';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
+import { AudioTranslate as atActions } from '@/store/actionTypes';
 import Icon from './BaseIconContainer.vue';
 
 export default {
@@ -80,6 +96,8 @@ export default {
     NextVideo,
     PrivacyBubble,
     MASPrivacyBubble,
+    NSFW,
+    TranslateBubble,
   },
   data() {
     return {
@@ -87,11 +105,14 @@ export default {
       showNextVideo: false,
       readyToShow: false, // show after video element is loaded
       showPrivacyBubble: false,
-      useBlur: false,
+      showNSFWBubble: false,
     };
   },
   computed: {
-    ...mapGetters(['nextVideo', 'nextVideoPreviewTime', 'duration', 'singleCycle', 'privacyAgreement']),
+    ...mapGetters([
+      'nextVideo', 'nextVideoPreviewTime', 'duration', 'singleCycle', 'privacyAgreement', 'nsfwProcessDone',
+      'translateBubbleMessage', 'translateBubbleType', 'isTranslateBubbleVisiable', 'failBubbleId',
+    ]),
     messages() {
       const messages = this.$store.getters.messageInfo;
       if (this.showNextVideo && this.showPrivacyBubble) {
@@ -126,14 +147,33 @@ export default {
     },
   },
   mounted() {
-    this.useBlur = window.devicePixelRatio === 1;
+    this.$bus.$on('nsfw', () => {
+      if (!this.nsfwProcessDone) this.showNSFWBubble = true;
+    });
     this.$bus.$on('privacy-confirm', () => {
       this.showPrivacyBubble = true;
     });
   },
   methods: {
+    ...mapActions({
+      hideTranslateBubble: atActions.AUDIO_TRANSLATE_HIDE_BUBBLE,
+      discardTranslate: atActions.AUDIO_TRANSLATE_DISCARD,
+      backStageTranslate: atActions.AUDIO_TRANSLATE_BACKSATGE,
+      hideBubbleCallBack: atActions.AUDIO_TRANSLATE_HIDE_BUBBLE,
+    }),
     closePrivacyBubble() {
       this.showPrivacyBubble = false;
+    },
+    handleAgree() {
+      this.closeNSFWBubble();
+    },
+    handleSetting() {
+      this.$electron.ipcRenderer.send('add-preference', 'privacy');
+      this.closeNSFWBubble();
+    },
+    closeNSFWBubble() {
+      this.showNSFWBubble = false;
+      this.$store.dispatch('nsfwProcessDone');
     },
     manualClose() {
       this.manualClosed = true;
@@ -145,6 +185,10 @@ export default {
     },
     closeMessage(id: string) {
       this.$store.dispatch('removeMessages', id);
+      // 如果是x掉智能翻译失败的气泡，就执行智能翻译bubble cancal的回调
+      if (id === this.failBubbleId) {
+        this.hideBubbleCallBack();
+      }
     },
     checkNextVideoUI(time: number) {
       if (time > this.nextVideoPreviewTime && time < this.duration - 1 && this.duration > 240) {
@@ -318,6 +362,14 @@ export default {
 .stateContainer {
   display: flex;
   justify-content: flex-start;
+  background-image: radial-gradient(
+    80% 130%,
+    rgba(85,85,85,0.88) 20%,
+    rgba(85,85,85,0.78) 50%,
+    rgba(85,85,85,0.72) 60%,
+    rgba(85,85,85,0.46) 80%,
+    rgba(85,85,85,0.00) 100%
+  );
   backdrop-filter: blur(8px);
   z-index: 8;
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px),
@@ -473,7 +525,14 @@ export default {
 
 .resultContainer {
   display: flex;
-  background-color: rgba(85, 85, 85, 0.88);
+  background-image: radial-gradient(
+    80% 130%,
+    rgba(85,85,85,0.88) 20%,
+    rgba(85,85,85,0.78) 50%,
+    rgba(85,85,85,0.72) 60%,
+    rgba(85,85,85,0.46) 80%,
+    rgba(85,85,85,0.00) 100%
+  );
   backdrop-filter: blur(8px);
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px),
   screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
@@ -609,12 +668,6 @@ export default {
       margin: 25.5px 28px auto auto;
     }
   }
-}
-.backdrop {
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background-image: none;
-  background-color: rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(8px);
 }
 
 .toast-leave-active {

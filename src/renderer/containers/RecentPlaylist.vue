@@ -79,6 +79,9 @@
             v-for="(item, index) in playingList"
             :key="item"
             :index="index"
+            :cursor-url="index === (lastIndex + 1)
+              ? cursorRight
+              : (firstIndex !== 0 && index === firstIndex - 1) ? cursorLeft : ''"
             :path="item"
             :paused="paused"
             :is-last-page="lastIndex === maxIndex && firstIndex > 0"
@@ -111,7 +114,6 @@
               minWidth: `${thumbnailWidth}px`,
               minHeight: `${thumbnailHeight}px`,
             }"
-            :use-blur="useBlur"
             :item-moving="itemMoving"
             :index="addIndex"
             :add-mouseup="addMouseup"
@@ -136,6 +138,7 @@ import path from 'path';
 import {
   mapState, mapGetters, mapActions, mapMutations,
 } from 'vuex';
+import { filePathToUrl } from '@/helpers/path';
 import { mediaQuickHash } from '@/libs/utils';
 import { Input as inputMutations } from '@/store/mutationTypes';
 import { Input as InputActions, Subtitle as subtitleActions } from '@/store/actionTypes';
@@ -193,10 +196,11 @@ export default {
       lastIndexOnMousedown: 0,
       currentTime: NaN,
       shiftingTimeout: NaN,
+      cursorLeft: `url("${filePathToUrl(path.join(__static, 'cursor/cursorLeft.svg') as string)}")`,
+      cursorRight: `url("${filePathToUrl(path.join(__static, 'cursor/cursorRight.svg') as string)}")`,
     };
   },
   created() {
-    this.useBlur = window.devicePixelRatio === 1;
     window.addEventListener('keyup', this.keyboardHandler);
     this.$bus.$on('delete-file', async (path: string, id: number) => {
       this.$store.dispatch('RemoveItemFromPlayingList', path);

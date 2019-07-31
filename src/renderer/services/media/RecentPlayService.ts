@@ -1,18 +1,29 @@
-import IRecentPlay, { LandingViewDisplayInfo } from '@/interfaces/IRecentPlay';
-import { mediaStorageService } from '@/services/storage/MediaStorageService';
 import { basename, extname } from 'path';
+import { IRecentPlay, ILandingViewDisplayInfo, IMenuDisplayInfo } from '@/interfaces/IRecentPlay';
+import { mediaStorageService } from '@/services/storage/MediaStorageService';
 import { playInfoStorageService } from '@/services/storage/PlayInfoStorageService';
 import { info } from '@/libs/DataBase';
 import { mediaQuickHash } from '@/libs/utils';
 import { filePathToUrl } from '@/helpers/path';
+
+type coverViedoItem = {
+  lastPlayedTime: number,
+  duration: number,
+  path: string,
+  playedIndex: number,
+  playlistLength: number,
+  shortCut: string,
+  id: number,
+};
+
 export default class RecentPlayService implements IRecentPlay {
-  constructor() {
-  }
-  async getRecords(): Promise<LandingViewDisplayInfo[]> {
+  public async getRecords(): Promise<ILandingViewDisplayInfo[]> {
     const recentPlayedResults = await playInfoStorageService.getAllRecentPlayed();
     const coverVideos = (await Promise.all(
       recentPlayedResults.map(async (value) => {
         const { items, playedIndex, id } = value;
+        if (playedIndex > items.length) console.error('PlayedIndex incorrectly bigger than items.length');
+        if (!items[playedIndex]) console.error('Cover video non-existed');
         const coverVideoId = items[playedIndex] as number;
         if (!coverVideoId) return null;
         const mediaItem = await info.getValueByKey('media-item', coverVideoId);
@@ -24,12 +35,14 @@ export default class RecentPlayService implements IRecentPlay {
           playedIndex,
           playlistLength: items.length,
         };
-      })
-    )).filter((item) => !!item);
+      }),
+    )).filter(item => !!item);
     const getBasename = (path: string) => basename(path, extname(path));
-    const results: LandingViewDisplayInfo[] = await Promise.all(
-      coverVideos.map(async (item: any): Promise<LandingViewDisplayInfo> => {
-        const { lastPlayedTime, duration, path, playedIndex, playlistLength, shortCut, id } = item;
+    const results: ILandingViewDisplayInfo[] = await Promise.all(
+      coverVideos.map(async (item: coverViedoItem): Promise<ILandingViewDisplayInfo> => {
+        const {
+          lastPlayedTime, duration, path, playedIndex, playlistLength, shortCut, id,
+        } = item;
         const percentage = (lastPlayedTime / duration) * 100;
         let backgroundUrl;
 
@@ -58,8 +71,15 @@ export default class RecentPlayService implements IRecentPlay {
           playedIndex,
           playlistLength,
         };
-      }));
+      }),
+    );
     return results.splice(0, 9);
+  }
+
+  public async getMenuDisplayInfo(): Promise<IMenuDisplayInfo[]> {
+    const results = (await this.getRecords())
+      .map(({ id, path }: ILandingViewDisplayInfo) => ({ id, label: path }));
+    return results;
   }
 }
 

@@ -19,24 +19,24 @@
   },
   "css": {
     "titleFontSize": {
-      "fontSize": ""
+      "fontSize": "21px"
     },
     "versionFontSize": {
-      "fontSize": ""
+      "fontSize": "14px"
     }
   },
   "errorFile": {
     "ENOSPC": {
-      "content": "",
-      "title": ""
+      "content": "ディスク容量が不足しています。",
+      "title": "オープン失敗"
     },
     "EACCES": {
-      "content": "",
-      "title": ""
+      "content": "十分な許可がありません。",
+      "title": "開けませんでした"
     },
     "ENOENT": {
-      "content": "",
-      "title": ""
+      "content": "ファイルが見つかりません。",
+      "title": "開く失敗"
     },
     "addNoVideo": {
       "content": "再生できるファイルが見つかりませんでした。",
@@ -100,10 +100,14 @@
       "name": "ファイル",
       "open": "ファイルを開く…",
       "openRecent": "最近使用した項目を開く",
-      "openURL": "URLから開く…"
+      "openURL": "URLから開く…",
+      "copy": "コピー",
+      "paste": "貼り付け"
     },
     "help": {
       "name": "ヘルプ",
+      "feedback": "フィードバック",
+      "homepage": "ホームページ",
       "splayerxHelp": "ヘルプ",
       "shortCuts": "ショートカットリスト",
       "crashReportLocation": "エラーログを表示する",
@@ -112,7 +116,6 @@
     "playback": {
       "backwardL": "戻る -60s",
       "backwardS": "戻る -5s",
-      "windowRotate": "時計回りに90°回転",
       "captureScreen": "スクリンショット",
       "captureVideoClip": "トリム",
       "decreasePlaybackSpeed": "再生速度の低下",
@@ -120,7 +123,6 @@
       "forwardS": "進む +5s",
       "fullScreen": "ズーム\/フルスクリーンを解除",
       "increasePlaybackSpeed": "再生速度の増加",
-      "keepPlayingWindowFront": "再生時に最前面に表示",
       "name": "プレイ",
       "pause": "停止",
       "play": "プレイ",
@@ -132,10 +134,8 @@
     },
     "splayerx": {
       "about": "SPlayerについて",
-      "feedback": "フィードバック",
       "hide": "SPlayerを隠す",
       "hideOthers": "その他を隠す",
-      "homepage": "ホームページ",
       "preferences": "環境設定",
       "quit": "SPlayerを終了",
       "showAll": "すべて表示"
@@ -157,6 +157,8 @@
       "noSubtitle": "見つかりませんでした",
       "notToShowSubtitle": "閉じる",
       "secondarySubtitle": "第二字幕",
+      "subtitleSetting": "字幕の設定",
+      "subtitleDelay": "字幕ディレイ",
       "size1": "小",
       "size2": "通常",
       "size3": "大",
@@ -171,7 +173,7 @@
       "subtitleStyle": "字幕スタイル",
       "uploadSelectedSubtitle": "字幕をアップロード"
     },
-    "titleName": "",
+    "titleName": "SPlayer",
     "update": {
       "message": "更新已就绪，是否现在重启?",
       "no": "暂不更新",
@@ -180,21 +182,57 @@
       "yes": "更新"
     },
     "window": {
+      "windowRotate": "時計回りに90°回転",
+      "keepPlayingWindowFront": "再生時に最前面に表示",
       "backToLandingView": "起動ページに戻る",
       "bossKey": "ボスキー",
-      "doubleSize": "",
+      "doubleSize": "200%",
       "enterFullScreen": "フルスクリーン",
       "exitFullScreen": "フルスクリーンを解除",
-      "halfSize": "",
+      "halfSize": "50%",
       "maxmize": "最大化",
       "minimize": "最小化",
       "name": "ウィンドウ",
-      "originSize": ""
+      "originSize": "100%",
+      "enterPip": "画中画を開じる",
+      "exitPip": "画中画を閉じる"
+    },
+    "favourite": {
+      "name": "チャンネル",
+      "iqiyi": "iQIYI",
+      "bilibili": "Bilibili",
+      "youtube": "Youtube"
+    },
+    "edit": {
+      "name": "",
+      "cut": "",
+      "copy": "",
+      "paste": "",
+      "selectAll": ""
+    },
+    "history": {
+      "name": "履歴",
+      "reload": "ページを再読み込み",
+      "back": "戻る",
+      "forward": "進む"
     }
   },
   "nextVideo": {
     "nextInFolder": "ホルダー中の次のビデオ",
     "nextInPlaylist": "プレイリスト中の次のビデオ"
+  },
+  "welcome": {
+    "welcomeTitle": "",
+    "welcomeDescription": "",
+    "agreement": "",
+    "policy": "",
+    "languageTitle1": "",
+    "languageTitle2": "",
+    "primary": "",
+    "secondary": "",
+    "chooseSecondary": "",
+    "languageDescription": "",
+    "none": "None"
   },
   "preferences": {
     "general": {
@@ -213,13 +251,13 @@
       "others": "その他",
       "switchDisplayLanguages": "SPlayerの言語表示を修正。"
     },
-    "privacy": {
+    "translate": {
       "languageDescription": "次の言語で翻訳結果を取得するために匿名データをアップロードします。プライバシー情報は含まれません。",
       "languagePriority": "言語選択",
       "none": "なし",
       "primary": "ファースト",
-      "privacyConfirm": "Smart Translationを開く",
-      "privacySetting": "翻訳設定",
+      "translateConfirm": "Smart Translationを開く",
+      "translateSetting": "翻訳設定",
       "secondary": "セカンド",
       "setAsDefault": "SPlayerをデフォルトにする",
       "settings": "設定"
@@ -252,6 +290,7 @@
   },
   "subtitle": {
     "embedded": "埋め込み式",
+    "generate": "生成する",
     "language": {
       "ar": "サウジアラビア語",
       "de": "ドイツ語",
@@ -292,5 +331,72 @@
   "loadVideoBySubtitleFailed": {
     "content": "フォルダ内に関連するビデオが見つかりません",
     "title": ""
+  },
+  "translateModal": {
+    "selectLanguageLabel": "音声の言語",
+    "select": {
+      "title": "ビデオソースの言語を選択",
+      "content": "翻訳結果を生成するには、ビデオで聞く言語を選択して[生成] ボタンをクリックしてください。"
+    },
+    "translate": {
+      "title": "{time} について",
+      "content": "動画をスキップしたり、アプリケーションを閉じたりしないでください翻訳パネルで進行状況を確認できます。",
+      "minute": "{number} 分",
+      "second": "{number} 秒",
+      "hour": "{number} 時間"
+    },
+    "success": {
+      "title": "翻訳完了",
+      "content": "AIの翻訳は完了し、翻訳結果リストに表示されます。"
+    },
+    "discard": {
+      "title": "AI翻訳が進行中です",
+      "content": "翻訳をキャンセルするには終了をクリックします終了後、翻訳の進行状況は復元されません。"
+    },
+    "noLineFail": {
+      "title": "ネットワークエラー",
+      "content": "ネットワーク接続を確認して、もう一度お試しください"
+    },
+    "timeOutFail": {
+      "title": "接続タイムアウト",
+      "content": "サーバーへの接続に失敗しました。後でもう一度やり直してください!"
+    },
+    "serverErrorFail": {
+      "title": "翻訳失敗",
+      "content": "サーバーエラーのため翻訳に失敗しました。 後でお試しください。"
+    },
+    "cancel": "キャンセル",
+    "quit": "やめる",
+    "generate": "生成する",
+    "ok": "はい",
+    "continue": "キャンセル"
+  },
+  "translateBubble": {
+    "bubbleWhenGrab": "この操作は進行中の翻訳を中止させるでしょう。",
+    "bubbleWhenTranslate": "AIの翻訳は引き続きクラウドで処理され、翻訳の進行状況は次回の動画再生時に自動的に取得されます。",
+    "bubbleFunctionForbidden": "この操作は進行中の翻訳を中止させるでしょう。",
+    "bubbleWhenSuccess": {
+      "title": "",
+      "content": "AIの翻訳は完了し、翻訳結果リストに表示されます。"
+    },
+    "bubbleWhenSuccessOnOtherVideo": {
+      "title": "",
+      "content": "AIの翻訳は完了し、次回ビデオを開いたときに自動的に表示されます。"
+    },
+    "bubbleTranslateNoLineFail": {
+      "title": "ネットワークエラー",
+      "content": "ネットワーク接続を確認して、もう一度お試しください"
+    },
+    "bubbleTranslateTimeOutFail": {
+      "title": "接続タイムアウト",
+      "content": "サーバーへの接続に失敗しました。後でもう一度やり直してください!"
+    },
+    "bubbleTranslateServerErrorFail": {
+      "title": "翻訳失敗",
+      "content": "サーバーエラーのため翻訳に失敗しました。 後でお試しください。"
+    },
+    "ok": "はい",
+    "cancel": "キャンセル",
+    "continue": "続ける"
   }
 }

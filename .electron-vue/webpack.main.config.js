@@ -31,7 +31,7 @@ let mainConfig = {
   module: {
     rules: [
       {
-        test: /\.(js)$/,
+        test: /\.(ts|js)$/,
         enforce: 'pre',
         exclude: /node_modules/,
         use: {
@@ -78,7 +78,10 @@ let mainConfig = {
   plugins: [],
   resolve: {
     extensions: ['.ts', '.js', '.json', '.node'],
-    alias: _moduleAliases || {},
+    alias: {
+      "electron"  : "@chiflix/electron",
+      "grpc": "@grpc/grpc-js"
+    },
   },
   target: 'electron-main'
 }
@@ -89,6 +92,7 @@ let mainConfig = {
 if (process.env.NODE_ENV !== 'production') {
   mainConfig.plugins.push(
     new webpack.DefinePlugin({
+      'process.env.SAGI_API': `"${process.env.SAGI_API || 'apis.stage.sagittarius.ai:8443'}"`,
       '__static': `"${path.join(__dirname, '../static').replace(/\\/g, '\\\\')}"`
     })
   )
@@ -101,6 +105,7 @@ if (process.env.NODE_ENV === 'production') {
   mainConfig.mode = 'production';
   mainConfig.plugins.push(
     new webpack.DefinePlugin({
+      'process.env.SAGI_API': `"${process.env.SAGI_API || 'apis.sagittarius.ai:8443'}"`,
       'process.env.SENTRY_RELEASE': `"${release}"`,
       'process.env.NODE_ENV': '"production"'
     })

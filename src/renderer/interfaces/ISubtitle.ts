@@ -1,4 +1,4 @@
-import { LanguageCode } from '@/libs/language';
+import { LanguageCode } from '../libs/language';
 
 type Partial<T> = { [P in keyof T]?: T[P] };
 
@@ -6,53 +6,73 @@ export enum Type {
   Online = 'online',
   Embedded = 'embedded',
   Local = 'local',
+  Translated = 'translated',
 }
 export enum Format {
   AdvancedSubStationAplha = 'ass',
   Sagi = 'sagi',
-  SubRip = 'srt',
+  SubRip = 'subrip',
   SubStationAlpha = 'ssa',
   WebVTT = 'webvtt',
   Unknown = 'unknown',
 }
 
-export interface Origin {
+export interface IOrigin {
   type: Type;
-  source: any;
+  source: unknown;
 }
 export type Entity = {
-  source: Origin;
+  source: IOrigin;
   type: Type;
   format: Format;
   language: LanguageCode;
-  payload: any;
+  payload: unknown;
   hash: string;
+  metadata: IMetadata;
+  delay: number;
 }
+export const defaultEntity: Entity = {
+  source: {
+    type: Type.Local,
+    source: '',
+  },
+  type: Type.Local,
+  format: Format.Unknown,
+  language: LanguageCode.Default,
+  payload: '',
+  hash: '',
+  metadata: {},
+  delay: 0,
+};
 export type SubtitleControlListItem = {
   id: string;
   hash: string;
   type: Type;
   language: LanguageCode;
-  source: any,
-  name?: string,
+  source: unknown;
+  name?: string;
+  delay: number;
 };
 
-export interface EntityGenerator {
-  getSource(): Promise<Origin>
-  getStoredSource?: any
+export interface IEntityGenerator {
+  /** get real source to fetch subtitle from */
+  getSource(): Promise<IOrigin>
+  /** get fake source for display use */
+  getStoredSource?: () => Promise<IOrigin>
+  getDelay?: () => Promise<number>
   getType(): Promise<Type>
   getFormat(): Promise<Format>
   getLanguage(): Promise<LanguageCode>
-  getPayload(): Promise<any>
+  getPayload(): Promise<unknown>
   getHash(): Promise<string>
 }
 
-export interface Info {
-  PlayResX?: string | undefined;
-  PlayResY?: string | undefined;
+export interface IMetadata {
+  PlayResX?: string;
+  PlayResY?: string;
 }
 
-export interface Tags {
+export interface ITags {
   b?: number;
   i?: number;
   u?: number;
@@ -69,7 +89,7 @@ export interface Tags {
   // size: string;
   // align: string';
 }
-export type TagsPartial = Partial<Tags>;
+export type TagsPartial = Partial<ITags>;
 
 export type Cue = {
   category?: string,
@@ -77,30 +97,30 @@ export type Cue = {
   end: number,
   text: string,
   format: string,
-  tags: Tags,
+  tags: ITags,
 }
-export interface Dialogue {
+export interface IDialogue {
   start: number;
   end: number;
   text?: string;
-  tags?: Tags;
+  tags?: ITags;
   fragments?: {
     text: string;
-    tags: Tags;
+    tags: ITags;
   }[];
 }
-export interface VideoSegment {
+export interface IVideoSegment {
   start: number;
   end: number;
   played: boolean;
 }
 
-export interface Parser {
+export interface IParser {
   parse(): void;
-  readonly payload: any;
-  getInfo(): Promise<Info>;
+  readonly payload: unknown;
+  getMetadata(): Promise<IMetadata>;
   getDialogues(time?: number): Promise<Cue[]>;
-  getVideoSegments(duration: number): Promise<VideoSegment[]>;
+  getVideoSegments(duration: number): Promise<IVideoSegment[]>;
   updateVideoSegments(lastTime: number, currentTime: number): number;
 }
 
@@ -113,3 +133,5 @@ export type Subtitle = {
   loading: string,
   type: string,
 }
+
+export const NOT_SELECTED_SUBTITLE = 'NOT_SELECTED_SUBTITLE';

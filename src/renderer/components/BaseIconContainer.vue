@@ -62,7 +62,8 @@ export default {
 .titleBarWinExitFull, .titleBarWinFull, .titleBarWinClose, .titleBarWinRestore, .titleBarWinResize {
   display: flex;
   width: 45px;
-  height: 28px;
+  height: 36px;
+  margin: auto;
 }
 .hoverState {
   display: flex;
@@ -171,6 +172,34 @@ export default {
   width: 100%;
   height: 100%;
   display: block;
+}
+
+.nextStep {
+  width: 100%;
+  height: 100%;
+  opacity: 0.7;
+  cursor: pointer;
+  transition: opacity 200ms;
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.nextStepDisable {
+  width: 100%;
+  height: 100%;
+  opacity: 0.1;
+}
+
+.welcomeNike {
+  width: 100%;
+  height: 100%;
+  opacity: 0.7;
+  cursor: pointer;
+  transition: opacity 200ms;
+  &:hover {
+    opacity: 1;
+  }
 }
 
 .close {
@@ -356,6 +385,11 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   width: 14px;
   height: 15px;
 }
+.radio {
+  display: block;
+  width: 8px;
+  height: 8px;
+}
 .speed {
   display: block;
   @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px),
@@ -479,6 +513,203 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     width: 16.8px;
     height: 16.8px;
+  }
+}
+.picInpic {
+  width: 20px;
+  height: 16px;
+  .default {
+    display: block;
+  }
+  .hover {
+    display: none;
+  }
+  .active {
+    display: none;
+  }
+  &:active {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: none;
+    }
+    .active {
+      display: block;
+    }
+  }
+}
+.picInpicDisabled {
+  width: 20px;
+  height: 16px;
+  display: block;
+}
+.backDisabled, .forwardDisabled {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+.back, .forward, .pageRefresh {
+  width: 20px;
+  height: 20px;
+  .default {
+    display: block;
+  }
+  .hover {
+    display: none;
+  }
+  .active {
+    display: none;
+  }
+  &:hover {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: block;
+    }
+    .active {
+      display: none;
+    }
+  }
+  &:active {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: none;
+    }
+    .active {
+      display: block;
+    }
+  }
+}
+.showMarks, .hideMarks, .closeSearch {
+  width: 18px;
+  height: 18px;
+  .default {
+    display: block;
+  }
+  .hover {
+    display: none;
+  }
+  .active {
+    display: none;
+  }
+  &:hover {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: block;
+    }
+    .active {
+      display: none;
+    }
+  }
+}
+.danmu, .noDanmu {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+.youtube, .bilibili, .iqiyi {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+.showFavicon, .hideFavicon {
+  width: 10px;
+  height: 10px;
+  display: block;
+}
+.closeInput {
+  width: 10px;
+  height: 10px;
+  margin: auto;
+  .default {
+    display: block;
+  }
+  .hover {
+    display: none;
+  }
+  .active {
+    display: none;
+  }
+  &:hover {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: block;
+    }
+    .active {
+      display: none;
+    }
+  }
+}
+.pipDisabled, .videoRecordDisabled {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+.pip {
+  width: 20px;
+  height: 20px;
+  .default {
+    display: block;
+  }
+  .hover {
+    display: none;
+  }
+  .active {
+    display: none;
+  }
+  &:hover {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: block;
+    }
+    .active {
+      display: none;
+    }
+  }
+  &:active {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: none;
+    }
+    .active {
+      display: block;
+    }
+  }
+}
+.pipRecord, .pipBack {
+  width: 20px;
+  height: 20px;
+  .default {
+    display: block;
+  }
+  .hover {
+    display: none;
+  }
+  .active {
+    display: none;
+  }
+  &:active {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: none;
+    }
+    .active {
+      display: block;
+    }
   }
 }
 </style>

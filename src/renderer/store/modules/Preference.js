@@ -2,17 +2,25 @@ import asyncStorage from '@/helpers/asyncStorage';
 import syncStorage from '@/helpers/syncStorage';
 
 const state = {
-  hideVideoHistoryOnExit: false,
+  nsfwProcessDone: false,
+  welcomeProcessDone: false,
+  protectPrivacy: false,
+  hideNSFW: true,
   privacyAgreement: undefined,
   displayLanguage: '',
-  primaryLanguage: '',
-  secondaryLanguage: '',
+  primaryLanguage: undefined,
+  secondaryLanguage: undefined,
   singleCycle: false,
   reverseScrolling: false,
+  subtitleOff: false,
 };
 const getters = {
+  nsfwProcessDone: state => state.nsfwProcessDone,
+  welcomeProcessDone: state => state.welcomeProcessDone,
   preferenceData: state => state,
-  hideVideoHistoryOnExit: state => state.hideVideoHistoryOnExit,
+  protectPrivacy: state => state.protectPrivacy,
+  hideNSFW: state => state.hideNSFW,
+  incognitoMode: state => state.protectPrivacy && !state.hideNSFW,
   reverseScrolling: state => state.reverseScrolling,
   privacyAgreement: state => state.privacyAgreement,
   displayLanguage: (state) => {
@@ -25,14 +33,24 @@ const getters = {
   primaryLanguage: state => state.primaryLanguage,
   secondaryLanguage: state => state.secondaryLanguage,
   singleCycle: state => state.singleCycle,
+  subtitleOff: state => state.subtitleOff,
 };
 
 const mutations = {
+  nsfwProcessDone(state) {
+    state.nsfwProcessDone = true;
+  },
+  welcomeProcessDone(state) {
+    state.welcomeProcessDone = true;
+  },
   displayLanguage(state, payload) {
     state.displayLanguage = payload;
   },
-  hideVideoHistoryOnExit(state, payload) {
-    state.hideVideoHistoryOnExit = payload;
+  hideNSFW(state, payload) {
+    state.hideNSFW = payload;
+  },
+  protectPrivacy(state, payload) {
+    state.protectPrivacy = payload;
   },
   reverseScrolling(state, payload) {
     state.reverseScrolling = payload;
@@ -56,8 +74,22 @@ const mutations = {
     const data = syncStorage.getSync('preferences');
     Object.assign(state, data);
   },
+  subtitleOff(state, payload) {
+    state.subtitleOff = !!payload;
+  },
 };
 const actions = {
+  nsfwProcessDone({ commit, state }) {
+    commit('nsfwProcessDone');
+    return asyncStorage.set('preferences', state);
+  },
+  welcomeProcess({ commit, state }, payload) {
+    commit('welcomeProcessDone');
+    commit('privacyAgreement', payload.privacyAgreement);
+    commit('primaryLanguage', payload.primaryLanguage);
+    commit('secondaryLanguage', payload.secondaryLanguage);
+    return asyncStorage.set('preferences', state);
+  },
   displayLanguage({ commit, state }, payload) {
     commit('displayLanguage', payload);
     return asyncStorage.set('preferences', state);
@@ -78,12 +110,16 @@ const actions = {
     commit('reverseScrolling', false);
     return asyncStorage.set('preferences', state);
   },
-  hideVideoHistoryOnExit({ commit, state }) {
-    commit('hideVideoHistoryOnExit', true);
+  hideNSFW({ commit, state }, payload) {
+    commit('hideNSFW', !!payload);
     return asyncStorage.set('preferences', state);
   },
-  nothideVideoHistoryOnExit({ commit, state }) {
-    commit('hideVideoHistoryOnExit', false);
+  protectPrivacy({ commit, state }) {
+    commit('protectPrivacy', true);
+    return asyncStorage.set('preferences', state);
+  },
+  notprotectPrivacy({ commit, state }) {
+    commit('protectPrivacy', false);
     return asyncStorage.set('preferences', state);
   },
   primaryLanguage({ commit, state }, payload) {
@@ -104,6 +140,10 @@ const actions = {
   },
   setPreference({ commit, state }, payload) {
     commit('setPreference', payload);
+    return asyncStorage.set('preferences', state);
+  },
+  setSubtitleOff({ commit, state }, payload) {
+    commit('subtitleOff', payload);
     return asyncStorage.set('preferences', state);
   },
 };

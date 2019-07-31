@@ -41,14 +41,21 @@
                 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
               height: hoverIndex === index ?
                 `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
-              cursor: currentSubtitleIndex === index ? 'default' : 'pointer',
+              cursor: currentSubtitleIndex === index &&
+                !(item.type === 'translated' && item.source === '') ? 'default' : 'pointer',
+              justifyContent: item.type === 'translated' ? 'space-between' : ''
             }"
             @mouseup="toggleItemClick($event, index)"
             @mouseover="toggleItemsMouseOver(index)"
             @mouseleave="toggleItemsMouseLeave(index)"
             class="menu-item-text-wrapper"
           >
-            <div class="textContainer">
+            <div
+              :style="{
+                width: item.type === 'translated' ? 'auto' : '',
+              }"
+              class="textContainer"
+            >
               <div
                 :style="{
                   wordBreak: hoverIndex === index && showAllName ? 'break-all' : '',
@@ -59,7 +66,12 @@
                 {{ item.name }}
               </div>
             </div>
-            <div class="iconContainer">
+            <div
+              :style="{
+                width: item.type === 'translated' ? 'auto' : '',
+              }"
+              class="iconContainer"
+            >
               <transition name="sub-delete">
                 <Icon
                   v-show="item.type === 'local' && hoverIndex === index"
@@ -68,6 +80,28 @@
                   class="deleteIcon"
                 />
               </transition>
+              <transition
+                v-if="item.type === 'translated' && item.source === ''
+                  && (item.language !== translateLanguage || translateProgress <= 0)"
+                name="sub-delete"
+              >
+                <div
+                  v-show="item.type === 'translated' && hoverIndex === index"
+                  class="txt"
+                >
+                  {{ $t('subtitle.generate') }}
+                </div>
+              </transition>
+              <div
+                v-else-if="translateProgress > 0 && item.type === 'translated' && item.source === ''
+                  && item.language === translateLanguage"
+                class="translateProgress"
+              >
+                <Progress
+                  :progress="translateProgress"
+                  :type="'circle'"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -93,7 +127,6 @@
             transition: transFlag ?
               'all 100ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' : '',
           }"
-          :class="{ 'backdrop': useBlur }"
           class="card"
         />
       </div>
@@ -105,6 +138,7 @@
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import { SubtitleControlListItem } from '@/interfaces/ISubtitle';
 import Icon from '../BaseIconContainer.vue';
+import Progress from './Progress.vue';
 
 export default {
   name: 'SubtitleList',
@@ -112,12 +146,9 @@ export default {
   type: INPUT_COMPONENT_TYPE,
   components: {
     Icon,
+    Progress,
   },
   props: {
-    useBlur: {
-      type: Boolean,
-      default: false,
-    },
     computedSize: {
       type: Number,
       required: true,
@@ -168,6 +199,14 @@ export default {
     },
     changeSubtitle: {
       type: Function,
+      required: true,
+    },
+    translateProgress: {
+      type: Number,
+      default: 0,
+    },
+    translateLanguage: {
+      type: String,
       required: true,
     },
   },
@@ -294,7 +333,7 @@ export default {
     toggleItemClick(event: MouseEvent, index: number) {
       if ((event.target as HTMLElement).nodeName === 'DIV') {
         const { computedAvailableItems } = this;
-        this.changeSubtitle(computedAvailableItems[index].id);
+        this.changeSubtitle(computedAvailableItems[index]);
         setTimeout(() => {
           this.showSubtitleDetails(index);
         }, 0);
@@ -329,6 +368,14 @@ export default {
 .menu-item-text-wrapper {
   .iconContainer {
     display: flex;
+    align-items: center;
+    .txt {
+      font-family: $font-medium;
+      font-size: 9px;
+      color: rgba(255,255,255,0.6);
+      letter-spacing: 0.45px;
+      cursor: pointer;
+    }
   }
   .deleteIcon {
     transition-delay: 75ms;
@@ -364,26 +411,22 @@ export default {
   );
   box-sizing: border-box;
 }
-.backdrop {
-  border: 0.5px solid rgba(255, 255, 255, 0.20);
-  opacity: 0.4;
-  background-image: radial-gradient(
-    60% 134%,
-  rgba(255, 255, 255, 0.09) 44%,
-  rgba(255, 255, 255, 0.05) 100%
-  );
+.translateProgress {
+  width: 10px;
+  height: 10px;
+  margin-right: 8px;
 }
 @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
 screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
   .scrollScope {
-    width: 160px;
+    width: 170px;
     margin: auto auto 10px auto;
     max-height: 89px
   }
   .menu-item-text-wrapper {
-    width: 142px;
+    width: 146px;
     display: flex;
-    margin: auto auto 4px 9px;
+    margin: auto auto 4px auto;
     .textContainer {
       width: 116px;
       display: flex;
@@ -392,13 +435,18 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480p
       font-size: 11px;
       letter-spacing: 0.2px;
       line-height: 13px;
-      margin: auto 0 auto 9px;
+      margin: auto 0 auto 10px;
     }
     .iconContainer {
-      width: 26px;
+      width: 30px;
       height: 27px;
       .deleteIcon {
-        margin: auto 9px auto auto;
+        margin: auto 10px auto auto;
+      }
+      .txt {
+        margin-right: 10px;
+        font-size: 9px;
+        line-height: 13px;
       }
     }
   }
@@ -416,36 +464,46 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480p
     }
   }
   .card {
-    width: 142px;
-    margin-left: 9px;
+    width: 146px;
+    margin-left: 12px;
   }
 }
 @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
 screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+  .translateProgress {
+    width: 14px;
+    height: 14px;
+    margin-right: 10px;
+  }
   .scrollScope {
-    width: 191px;
+    width: 204px;
     margin: auto auto 12px auto;
     max-height: 180px
   }
   .menu-item-text-wrapper {
-    width: 174px;
+    width: 175.2px;
     display: flex;
-    margin: auto auto 5px 9.5px;
+    margin: auto auto 5px auto;
     .textContainer {
-      width: 141px;
+      width: 139.2px;
       display: flex;
     }
     .text {
       font-size: 13.2px;
       letter-spacing: 0.2px;
       line-height: 16px;
-      margin: auto 0 auto 12.73px;
+      margin: auto 0 auto 12px;
     }
     .iconContainer {
-      width: 33px;
+      width: 36px;
       height: 32px;
       .deleteIcon {
-        margin: auto 10.8px auto auto;
+        margin: auto 12px auto auto;
+      }
+      .txt {
+        margin-right: 12px;
+        font-size: 10.8px;
+        line-height: 16px;
       }
     }
   }
@@ -463,36 +521,46 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080
     }
   }
   .card {
-    width: 172px;
-    margin-left: 9.5px;
+    width: 175.2px;
+    margin-left: 14.4px;
   }
 }
 @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
 screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+  .translateProgress {
+    width: 20px;
+    height: 20px;
+    margin-right: 14px;
+  }
   .scrollScope {
-    width: 266px;
+    width: 285.6px;
     margin: auto auto 19px auto;
     max-height: 350px
   }
   .menu-item-text-wrapper {
-    width: 242px;
+    width: 245.28px;
     display: flex;
-    margin: auto auto 7px 12px;
+    margin: auto auto 7px auto;
     .textContainer {
-      width: 196px;
+      width: 194.88px;
       display: flex;
     }
     .text {
       font-size: 18.48px;
       letter-spacing: 0.27px;
       line-height: 20px;
-      margin: auto 0 auto 17.89px;
+      margin: auto 0 auto 14.4px;
     }
     .iconContainer {
-      width: 46px;
+      width: 50.4px;
       height: 44px;
       .deleteIcon {
-        margin: auto 15.12px auto auto;
+        margin: auto 14.4px auto auto;
+      }
+      .txt {
+        margin-right: 14.4px;
+        font-size: 15.12px;
+        line-height: 20px;
       }
     }
   }
@@ -506,12 +574,18 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
       font-size: 16px;
       letter-spacing: 0.27px;
       line-height: 16px;
-      margin: auto 17.89px;
+      margin: auto 0 auto 20.16px;
     }
   }
   .card {
-    width: 242px;
-    margin-left: 12px;
+    width: 245.28px;
+    margin-left: 20.16px;
   }
+}
+.sub-delete-enter-active, .sub-delete-leave-active {
+  transition: opacity 150ms;
+}
+.sub-delete-enter, .sub-delete-leave-to {
+  opacity: 0;
 }
 </style>

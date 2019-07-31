@@ -1,7 +1,6 @@
 <template>
   <div class="nextVideo">
     <div
-      :class="{ 'backdrop': useBlur }"
       class="nextVideo__plane"
     >
       <div
@@ -55,12 +54,6 @@ export default {
   name: 'NextVideo',
   components: {
     Icon,
-  },
-  props: {
-    useBlur: {
-      type: Boolean,
-      default: false,
-    },
   },
   data() {
     return {
@@ -165,7 +158,7 @@ export default {
   &__plane {
     width: 340px;
     height: 70px;
-    border: 1px solid rgba(255,255,255,0.1);
+    border: 1px solid rgba(160,160,160,0.7);
     border-radius: 7px;
 
     background-image: radial-gradient(
@@ -177,12 +170,6 @@ export default {
       rgba(85,85,85,0.00) 100%
     );
     box-shadow: 0 0 1px rgba(0,0,0,0.1);
-  }
-  .backdrop {
-    background-image: none;
-    border-width: 0px;
-    background-color: rgba(0,0,0,0.2);
-    backdrop-filter: blur(10px);
   }
 
   &__progress {

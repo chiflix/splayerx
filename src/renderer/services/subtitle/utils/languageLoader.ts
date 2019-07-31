@@ -1,7 +1,7 @@
-import { normalizeCode, LanguageCode } from '@/libs/language';
 import franc from 'franc';
 // @ts-ignore
 import { isSimplified } from 'traditional-or-simplified';
+import { normalizeCode, LanguageCode } from '@/libs/language';
 
 function dialogueTextToDialogues(dialogueText: string, textRegex: RegExp, identifierLocation: RegExp = /(?<=\S)\n{2,}(?=\S)/g) {
   const texts = dialogueText.replace(textRegex, '');
@@ -29,9 +29,9 @@ function dialoguesToLanguageCodes(dialogues: string[], splitterRegex: RegExp = /
   return result.map(str => franc(str)).map((iso6393code, index) => {
     if (iso6393code === 'cmn') {
       try {
-        return isSimplified(result[index]) ? LanguageCode["zh-CN"] : LanguageCode["zh-TW"];
+        return isSimplified(result[index]) ? LanguageCode['zh-CN'] : LanguageCode['zh-TW'];
       } catch (e) {
-        return LanguageCode["zh-CN"];
+        return LanguageCode['zh-CN'];
       }
     }
     return normalizeCode(iso6393code);

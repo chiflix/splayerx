@@ -27,7 +27,7 @@ function generateHtmlWebpackPluginConfig(name) {
   return {
     chunks: [name],
     filename: `${name}.html`,
-    template: path.resolve(__dirname, `../src/${name}.ejs`),
+    template: path.resolve(__dirname, `../src/index.ejs`),
     minify: {
       collapseWhitespace: true,
       removeAttributeQuotes: true,
@@ -54,7 +54,8 @@ let rendererConfig = {
   entry: {
     preference: path.join(__dirname, '../src/renderer/preference.js'),
     about: path.join(__dirname, '../src/renderer/about.js'),
-    index: path.join(__dirname, '../src/renderer/main.ts')
+    labor: path.join(__dirname, '../src/renderer/labor.ts'),
+    index: path.join(__dirname, '../src/renderer/main.ts'),
   },
   externals: [
     ...Object.keys(Object.assign({}, dependencies, optionalDependencies)).filter(d => !whiteListedModules.includes(d))
@@ -62,7 +63,7 @@ let rendererConfig = {
   module: {
     rules: [
       {
-        test: /\.(js|vue)$/,
+        test: /\.(ts|js|vue)$/,
         enforce: 'pre',
         exclude: /node_modules/,
         use: {
@@ -198,6 +199,7 @@ let rendererConfig = {
     new VueLoaderPlugin(),
     new ExtractTextPlugin('styles.css'),
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('index')),
+    new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('labor')),
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('about')),
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('preference')),
     new webpack.HotModuleReplacementPlugin(),
@@ -227,6 +229,7 @@ if (process.env.NODE_ENV !== 'production') {
   rendererConfig.plugins.push(
     new webpack.DefinePlugin({
       'process.platform': `"${process.platform}"`,
+      'process.env.SAGI_API': `"${process.env.SAGI_API || 'apis.stage.sagittarius.ai:8443'}"`,
       '__static': `"${path.join(__dirname, '../static').replace(/\\/g, '\\\\')}"`
     })
   )
@@ -249,6 +252,7 @@ if (process.env.NODE_ENV === 'production') {
     ]),
     new webpack.DefinePlugin({
       'process.platform': `"${process.platform}"`,
+      'process.env.SAGI_API': `"${process.env.SAGI_API || 'apis.sagittarius.ai:8443'}"`,
       'process.env.SENTRY_RELEASE': `"${release}"`,
       'process.env.NODE_ENV': '"production"'
     }),

@@ -18,8 +18,7 @@
           class="no-drag sub-menu-wrapper subtitle-scroll-items"
         >
           <div
-            :class="useBlur ? 'backdrop' : 'backdrop-fallback'"
-            class="element bottom"
+            class="backdrop-fallback element bottom"
           >
             <div class="element content">
               <div class="topContainer">
@@ -65,7 +64,6 @@
                 />
               </div>
               <subtitle-list
-                :use-blur="useBlur"
                 :computed-size="computedSize"
                 :current-subtitle-index="currentSubtitleIndex"
                 :no-subtitle="noSubtitle"
@@ -78,7 +76,9 @@
                 :show-attached="showAttached"
                 :ref-animation.sync="refAnimation"
                 :enabled-secondary-sub="enabledSecondarySub"
-                :change-subtitle="isFirstSubtitle ? changeFirstSubtitle : changeSecondarySubtitle"
+                :change-subtitle="changeSubtitle"
+                :translate-progress="translateProgress"
+                :translate-language="selectedTargetLanugage"
                 @off-subtitle="offCurrentSubtitle"
                 @remove-subtitle="deleteCurrentSubtitle"
               />
@@ -109,15 +109,21 @@
 <script lang="ts">
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { AnimationItem } from 'lottie-web';
-import { Input as InputActions, Subtitle as subtitleActions, SubtitleManager as smActions } from '@/store/actionTypes';
-import { SubtitleControlListItem, Type } from '@/interfaces/ISubtitle';
+import { flatMap, sortBy } from 'lodash';
+import {
+  Input as InputActions,
+  Subtitle as subtitleActions,
+  SubtitleManager as smActions,
+  AudioTranslate as atActions,
+} from '@/store/actionTypes';
+import { SubtitleControlListItem, Type, NOT_SELECTED_SUBTITLE } from '@/interfaces/ISubtitle';
 import lottie from '@/components/lottie.vue';
 import animationData from '@/assets/subtitle.json';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import SubtitleList from '@/components/PlayingView/SubtitleList.vue';
 import Icon from '../BaseIconContainer.vue';
 import { addBubble } from '@/helpers/notificationControl';
-import { SUBTITLE_OFFLINE } from '@/helpers/notificationcodes';
+import { SUBTITLE_OFFLINE, TRANSLATE_NO_LINE } from '@/helpers/notificationcodes';
 
 export default {
   name: 'SubtitleControl',
@@ -135,7 +141,6 @@ export default {
   },
   data() {
     return {
-      useBlur: false,
       clicks: 0,
       defaultOptions: { animationData },
       anim: {},
@@ -155,7 +160,7 @@ export default {
   },
   computed: {
     ...mapGetters(['winWidth', 'originSrc', 'primarySubtitleId', 'secondarySubtitleId', 'list', 'privacyAgreement',
-      'calculatedNoSub', 'winHeight', 'isFirstSubtitle', 'enabledSecondarySub', 'isRefreshing', 'winRatio']),
+      'calculatedNoSub', 'winHeight', 'isFirstSubtitle', 'enabledSecondarySub', 'isRefreshing', 'winRatio', 'translateProgress', 'selectedTargetLanugage']),
     ...mapState({
       loadingTypes: ({ Subtitle }) => {
         const { loadingStates, types } = Subtitle;
@@ -192,6 +197,13 @@ export default {
     },
     currentSubtitleIndex() {
       const { computedAvailableItems } = this;
+      if (
+        (this.isFirstSubtitle && this.primarySubtitleId === NOT_SELECTED_SUBTITLE)
+        || (
+          !this.isFirstSubtitle && this.enabledSecondarySub
+          && this.secondarySubtitleId === NOT_SELECTED_SUBTITLE
+        )
+      ) return -2;
       return !this.isFirstSubtitle && this.enabledSecondarySub
         ? computedAvailableItems
           .findIndex((sub: SubtitleControlListItem) => sub.id === this.secondarySubtitleId)
@@ -210,10 +222,34 @@ export default {
     enabledSecondarySub(val: boolean) {
       if (!val) this.updateSubtitleType(true);
     },
-    computedAvailableItems(val: SubtitleControlListItem[]) {
-      this.updateNoSubtitle(!val.length);
-    },
     list(val: SubtitleControlListItem[]) {
+      val = flatMap(val
+        .reduce((prev, currentSub) => {
+          switch (currentSub.type) {
+            default:
+              break;
+            case Type.Local:
+              prev[0].push(currentSub);
+              break;
+            case Type.Embedded:
+              prev[1].push(currentSub);
+              break;
+            case Type.Online:
+            case Type.Translated:
+              prev[2].push(currentSub);
+              break;
+          }
+          return prev;
+        }, [[], [], []] as SubtitleControlListItem[][])
+        .map((subList, index) => {
+          switch (index) {
+            default:
+              return subList;
+            case 1: // this is embedded subtitle list
+              // @ts-ignore
+              return sortBy(subList, ({ source }) => source.streamIndex);
+          }
+        }));
       this.computedAvailableItems = val.map((sub: SubtitleControlListItem) => ({
         ...sub,
         name: this.getSubName(sub, val),
@@ -270,10 +306,10 @@ export default {
       this.isInitial = true;
       this.$emit('update:showAttached', false);
       this.computedAvailableItems = [];
+      this.updateSubtitleType(true);
     },
     showAttached(val: boolean) {
       if (!val) {
-        this.updateSubtitleType(true);
         this.anim.playSegments([79, 92], true);
         if (!this.validEnter) {
           this.isShowingHovered = false;
@@ -306,7 +342,6 @@ export default {
       }, 0);
     },
   },
-  created() { this.useBlur = window.devicePixelRatio === 1; },
   mounted() {
     this.$refs.refreshRotate.$el.addEventListener('animationiteration', () => {
       this.count += 1;
@@ -338,21 +373,18 @@ export default {
         this.mouseDown = false;
       }
     });
-    if (navigator.onLine) {
-      this.initializeManager();
-    }
   },
   methods: {
     ...mapActions({
       clearMousedown: InputActions.MOUSEDOWN_UPDATE,
       clearMouseup: InputActions.MOUSEUP_UPDATE,
       initializeManager: smActions.initializeManager,
-      changeFirstSubtitle: smActions.changePrimarySubtitle,
-      changeSecondarySubtitle: smActions.changeSecondarySubtitle,
+      changeFirstSubtitle: smActions.manualChangePrimarySubtitle,
+      changeSecondarySubtitle: smActions.manualChangeSecondarySubtitle,
       refreshSubtitles: smActions.refreshSubtitles,
       deleteCurrentSubtitle: smActions.deleteSubtitlesByUuid,
-      updateNoSubtitle: subtitleActions.UPDATE_NO_SUBTITLE,
       updateSubtitleType: subtitleActions.UPDATE_SUBTITLE_TYPE,
+      showAudioTranslateModal: atActions.AUDIO_TRANSLATE_SHOW_MODAL,
     }),
     offCurrentSubtitle() {
       if (this.isFirstSubtitle) {
@@ -434,6 +466,19 @@ export default {
       }
       return item.name;
     },
+    changeSubtitle(item: SubtitleControlListItem) {
+      if (!navigator.onLine && item.type === Type.Translated && item.source === '') {
+        addBubble(TRANSLATE_NO_LINE);
+      } else if (item.type === Type.Translated && item.source === '') {
+        this.showAudioTranslateModal(item);
+        // ga 字幕面板中点击 "Generate" 的次数
+        this.$ga.event('app', 'ai-translate-generate-button-click');
+      } else if (this.isFirstSubtitle) {
+        this.changeFirstSubtitle(item.id);
+      } else {
+        this.changeSecondarySubtitle(item.id);
+      }
+    },
   },
 };
 </script>
@@ -464,13 +509,6 @@ export default {
       width: 100%;
       height: 100%;
       top: 0;
-    }
-    .backdrop {
-      overflow: hidden;
-      border-width: 0px;
-      background-image: none;
-      background-color: rgba(0, 0, 0, 0.1);
-      backdrop-filter: blur(10px);
     }
     .middle {
       width: 100%;
@@ -506,6 +544,7 @@ export default {
   screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
     .sub-menu-wrapper {
       height: auto;
+      min-width: 172px;
       max-height: 138px;
     }
     .topContainer {
@@ -515,7 +554,7 @@ export default {
       display: flex;
       flex-direction: row;
       p {
-        margin: 15px 0 auto 14px;
+        margin: 15px 0 auto 17px;
         letter-spacing: 0.2px;
         line-height: 15px;
         font-size: 13px;
@@ -547,8 +586,8 @@ export default {
     .sub-menu-wrapper {
       position: absolute;
       bottom: 32px;
-      left: -102px;
-      width: 170px;
+      left: -113px;
+      width: 180px;
       max-height: 138px;
     }
   }
@@ -557,6 +596,7 @@ export default {
     .sub-menu-wrapper {
       height: auto;
       max-height: 239px;
+      min-width: 206px;
     }
     .topContainer {
       cursor: default;
@@ -565,7 +605,7 @@ export default {
       display: flex;
       flex-direction: row;
       p {
-        margin: 18px 0 auto 16px;
+        margin: 18px 0 auto 20.04px;
         letter-spacing: 0.23px;
         line-height: 17px;
         font-size: 15.6px;
@@ -597,8 +637,8 @@ export default {
     .sub-menu-wrapper {
       position: absolute;
       bottom: 44px;
-      left: -106px;
-      width: 204px;
+      left: -117px;
+      width: 216px;
       max-height: 239px;
     }
   }
@@ -607,6 +647,7 @@ export default {
     .sub-menu-wrapper {
       height: auto;
       max-height: 433px;
+      min-width: 288px;
     }
     .topContainer {
       cursor: default;
@@ -615,7 +656,7 @@ export default {
       display: flex;
       flex-direction: row;
       p {
-        margin: 24px 0 auto 24px;
+        margin: 24px 0 auto 28.48px;
         letter-spacing: 0.32px;
         line-height: 23px;
         font-size: 21.84px;
@@ -647,8 +688,8 @@ export default {
     .sub-menu-wrapper {
       position: absolute;
       bottom: 70px;
-      left: -133px;
-      width: 286px;
+      left: -148.8px;
+      width: 302.4px;
       max-height: 433px;
     }
   }
@@ -664,12 +705,6 @@ export default {
   position: absolute;
 }
 
-.sub-delete-enter-active, .sub-delete-leave-active {
-  transition: opacity 150ms;
-}
-.sub-delete-enter, .sub-delete-leave-to {
-  opacity: 0;
-}
 .icon-rotate-animation {
   animation: icon-rotate 1s linear 1 normal forwards;
   animation-iteration-count: 10;
