@@ -274,6 +274,8 @@ export default {
           this.asyncTasksDone = true;
           window.close();
         });
+      } else if (this.quit) {
+        this.$electron.remote.app.quit();
       }
     });
     (document.querySelector('#app') as HTMLElement).addEventListener('mouseleave', () => {
@@ -420,6 +422,9 @@ export default {
         }, 3000 - (loadingTime % 3000));
       }
     });
+  },
+  beforeDestroy() {
+    window.removeEventListener('beforeunload', this.beforeUnloadHandler);
   },
   methods: {
     ...mapActions({
