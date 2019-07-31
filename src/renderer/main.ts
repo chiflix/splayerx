@@ -328,9 +328,10 @@ new Vue({
       if (data.privacyAgreement === undefined) this.$bus.$emit('privacy-confirm');
       if (!data.primaryLanguage) {
         const { app } = this.$electron.remote;
-        const locale = process.platform === 'win32' ? app.getLocale() : osLocale.sync();
-        if (locale === 'zh_TW' || locale === 'zh_CN') {
-          this.$store.dispatch('primaryLanguage', locale.replace('_', '-'));
+        let locale = process.platform === 'win32' ? app.getLocale() : osLocale.sync();
+        locale = locale.replace('_', '-');
+        if (locale === 'zh-TW' || locale === 'zh-CN') {
+          this.$store.dispatch('primaryLanguage', locale);
         } else {
           this.$store.dispatch('primaryLanguage', 'en');
         }
