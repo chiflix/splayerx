@@ -108,6 +108,10 @@ export default {
       this.mouseDown = false;
     };
   },
+  mounted() {
+    document.title = 'Preference SPlayer';
+    document.body.classList.add('drag');
+  },
   beforeDestroy() {
     window.onmousedown = null;
     window.onmousemove = null;

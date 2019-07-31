@@ -61,6 +61,7 @@ app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 let menuService = null;
 let routeName = null;
 let mainWindow = null;
+let laborWindow = null;
 let aboutWindow = null;
 let preferenceWindow = null;
 let tray = null;
@@ -73,6 +74,9 @@ const subRegex = getValidSubtitleRegex();
 const mainURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080'
   : `file://${__dirname}/index.html`;
+const laborURL = process.env.NODE_ENV === 'development'
+  ? 'http://localhost:9080/labor.html'
+  : `file://${__dirname}/labor.html`;
 const aboutURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080/about.html'
   : `file://${__dirname}/about.html`;
@@ -180,7 +184,7 @@ function getAllValidVideo(onlySubtitle, files) {
   }
 }
 
-function createPreference(e, route) {
+function createPreferenceWindow(e, route) {
   const preferenceWindowOptions = {
     useContentSize: true,
     frame: false,
@@ -217,6 +221,61 @@ function createPreference(e, route) {
   preferenceWindow.once('ready-to-show', () => {
     preferenceWindow.show();
   });
+}
+
+function createAboutWindow() {
+  const aboutWindowOptions = {
+    useContentSize: true,
+    frame: false,
+    titleBarStyle: 'none',
+    width: 190,
+    height: 280,
+    transparent: true,
+    resizable: false,
+    show: false,
+    webPreferences: {
+      webSecurity: false,
+      nodeIntegration: true,
+      experimentalFeatures: true,
+    },
+    acceptFirstMouse: true,
+    fullscreenable: false,
+    maximizable: false,
+    minimizable: false,
+  };
+  if (!aboutWindow) {
+    aboutWindow = new BrowserWindow(aboutWindowOptions);
+    // 如果播放窗口顶置，打开关于也顶置
+    if (mainWindow.isAlwaysOnTop()) {
+      aboutWindow.setAlwaysOnTop(true);
+    }
+    aboutWindow.loadURL(`${aboutURL}`);
+    aboutWindow.on('closed', () => {
+      aboutWindow = null;
+    });
+  }
+  aboutWindow.once('ready-to-show', () => {
+    aboutWindow.show();
+  });
+}
+
+function createLaborWindow() {
+  const laborWindowOptions = {
+    show: false,
+    webPreferences: {
+      webSecurity: false,
+      nodeIntegration: true,
+      experimentalFeatures: true,
+    },
+  };
+  if (!laborWindow) {
+    laborWindow = new BrowserWindow(laborWindowOptions);
+    laborWindow.on('closed', () => {
+      laborWindow = null;
+    });
+    if (process.env.NODE_ENV === 'development') laborWindow.openDevTools({ mode: 'detach' });
+    laborWindow.loadURL(laborURL);
+  }
 }
 
 function registerMainWindowEvent(mainWindow) {
@@ -281,6 +340,20 @@ function registerMainWindowEvent(mainWindow) {
 
 
   registerMediaTasks();
+
+  ipcMain.on('labor-task-add', (evt, ...rest) => {
+    console.log('labor-task-add', ...rest);
+    if (laborWindow && !laborWindow.webContents.isDestroyed()) {
+      laborWindow.webContents.send('labor-task-add', ...rest);
+    }
+  });
+  ipcMain.on('labor-task-done', (evt, ...rest) => {
+    console.log('labor-task-done', ...rest);
+    if (mainWindow && !mainWindow.webContents.isDestroyed()) {
+      mainWindow.webContents.send('labor-task-done', ...rest);
+    }
+  });
+
   ipcMain.on('callMainWindowMethod', (evt, method, args = []) => {
     try {
       mainWindow[method](...args);
@@ -339,7 +412,7 @@ function registerMainWindowEvent(mainWindow) {
     app.relaunch({ args: argv.slice(1), execPath: argv[0] });
     app.quit();
   });
-  ipcMain.on('add-preference', createPreference);
+  ipcMain.on('add-preference', createPreferenceWindow);
   ipcMain.on('preference-to-main', (e, args) => {
     if (mainWindow && !mainWindow.webContents.isDestroyed()) {
       mainWindow.webContents.send('mainDispatch', 'setPreference', args);
@@ -374,7 +447,8 @@ function registerMainWindowEvent(mainWindow) {
   /** grab audio logic in main process end */
 }
 
-function createWindow(openDialog) {
+function createMainWindow(openDialog) {
+  createLaborWindow();
   mainWindow = new BrowserWindow({
     useContentSize: true,
     frame: false,
@@ -417,6 +491,7 @@ function createWindow(openDialog) {
     ipcMain.removeAllListeners(); // FIXME: decouple mainWindow and ipcMain
     mainWindow = null;
     menuService.closed();
+    if (laborWindow) laborWindow.close();
   });
 
   mainWindow.once('ready-to-show', () => {
@@ -470,7 +545,7 @@ app.on('second-instance', () => {
     if (mainWindow.isMinimized()) mainWindow.restore();
     mainWindow.focus();
   } else if (app.isReady()) {
-    createWindow();
+    createMainWindow();
   }
 });
 
@@ -500,7 +575,7 @@ async function darwinOpenFilesToStart() {
     if (mainWindow.isMinimized()) mainWindow.restore();
     mainWindow.focus();
   } else if (app.isReady() && !mainWindow) {
-    createWindow();
+    createMainWindow();
   }
 }
 const darwinOpenFilesToStartDebounced = debounce(darwinOpenFilesToStart, 100);
@@ -549,7 +624,7 @@ if (process.platform === 'darwin') {
     tmpVideoToOpen.concat(tmpSubsToOpen));
   app.on('second-instance', (event, argv) => {
     if (!mainWindow || mainWindow.webContents.isDestroyed()) {
-      if (app.isReady()) createWindow();
+      if (app.isReady()) createMainWindow();
     }
     const opendFiles = argv.slice(app.isPackaged ? 3 : 2);
     opendFiles.forEach((file) => {
@@ -595,7 +670,7 @@ app.on('ready', () => {
     systemPreferences.setUserDefault('NSDisabledDictationMenuItem', 'boolean', true);
     systemPreferences.setUserDefault('NSDisabledCharacterPaletteMenuItem', 'boolean', true);
   }
-  createWindow();
+  createMainWindow();
   app.setName('SPlayer');
   globalShortcut.register('CmdOrCtrl+Shift+I+O+P', () => {
     if (mainWindow) mainWindow.openDevTools({ mode: 'detach' });
@@ -639,47 +714,12 @@ app.on('web-contents-created', (webContentsCreatedEvent, contents) => {
   }
 });
 
-function createAbout() {
-  const aboutWindowOptions = {
-    useContentSize: true,
-    frame: false,
-    titleBarStyle: 'none',
-    width: 190,
-    height: 280,
-    transparent: true,
-    resizable: false,
-    show: false,
-    webPreferences: {
-      webSecurity: false,
-      nodeIntegration: true,
-      experimentalFeatures: true,
-    },
-    acceptFirstMouse: true,
-    fullscreenable: false,
-    maximizable: false,
-    minimizable: false,
-  };
-  if (!aboutWindow) {
-    aboutWindow = new BrowserWindow(aboutWindowOptions);
-    // 如果播放窗口顶置，打开关于也顶置
-    if (mainWindow.isAlwaysOnTop()) {
-      aboutWindow.setAlwaysOnTop(true);
-    }
-    aboutWindow.loadURL(`${aboutURL}`);
-    aboutWindow.on('closed', () => {
-      aboutWindow = null;
-    });
-  }
-  aboutWindow.once('ready-to-show', () => {
-    aboutWindow.show();
-  });
-}
 app.on('bossKey', handleBossKey);
-app.on('add-preference', createPreference);
-app.on('add-windows-about', createAbout);
+app.on('add-preference', createPreferenceWindow);
+app.on('add-windows-about', createAboutWindow);
 
 app.on('menu-create-main-window', () => {
-  if (!mainWindow) createWindow();
+  if (!mainWindow) createMainWindow();
   else if (mainWindow.isMinimized()) {
     mainWindow.restore();
   } else if (!mainWindow.isVisible()) {
@@ -688,12 +728,12 @@ app.on('menu-create-main-window', () => {
 });
 
 app.on('menu-open-dialog', () => {
-  createWindow(true);
+  createMainWindow(true);
 });
 
 app.on('activate', () => {
   if (!mainWindow) {
-    if (app.isReady()) createWindow();
+    if (app.isReady()) createMainWindow();
   } else if (!mainWindow.isVisible()) {
     mainWindow.show();
   }
