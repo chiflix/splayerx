@@ -253,8 +253,8 @@
       "switchDisplayLanguages": "Mostrar idioma controla el idioma que ves en SPlayer."
     },
     "translate": {
-      "languageDescription": "",
-      "languagePriority": "",
+      "languageDescription": "Cargue datos anónimos para obtener resultados de traducción en el siguiente idioma, no se incluirá información de privacidad.",
+      "languagePriority": "Preferencia de idioma",
       "none": "",
       "primary": "",
       "translateConfirm": "",
