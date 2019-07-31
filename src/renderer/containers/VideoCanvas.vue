@@ -92,12 +92,18 @@ export default {
     winAngle(val: number) {
       this.changeWindowRotate(val);
     },
-    playListId(val: number, oldVal: number) {
-      if (oldVal) this.updatePlaylist(oldVal);
-    },
-    videoId(val: number, oldVal: number) {
+    async playListId(val: number, oldVal: number) {
       this.nsfwDetected = false;
-      this.handleLeaveVideo(oldVal);
+      if (oldVal) {
+        const screenshot: ShortCut = await this.generateScreenshot();
+        if (!(await this.handleNSFW(screenshot.shortCut, oldVal))) {
+          await this.updatePlaylist(oldVal);
+        }
+      }
+    },
+    async videoId(val: number, oldVal: number) {
+      const screenshot: ShortCut = await this.generateScreenshot();
+      await this.saveScreenshot(oldVal, screenshot);
     },
     originSrc(val: string, oldVal: string) {
       if (process.mas && oldVal) {
@@ -366,21 +372,26 @@ export default {
     savePlaybackStates() {
       return settingStorageService.updatePlaybackStates({ volume: this.volume, muted: this.muted });
     },
-    async handleLeaveVideo(videoId: number) {
-      const screenshot: ShortCut = await this.generateScreenshot();
+    async handleNSFW(src: string, playListId: number) {
       if (this.hideNSFW) {
-        if (this.nsfwDetected || await nsfwThumbnailFilterService.checkImage(screenshot.shortCut)) {
+        if (this.nsfwDetected || await nsfwThumbnailFilterService.checkImage(src)) {
           if (!this.nsfwProcessDone) this.$bus.$emit('nsfw');
-          await playInfoStorageService.deleteRecentPlayedBy(this.playListId);
-          return null;
+          await playInfoStorageService.deleteRecentPlayedBy(playListId);
+          return true;
         }
       }
+      return false;
+    },
+    async handleLeaveVideo(videoId: number) {
+      const playListId = this.playListId;
+      const screenshot: ShortCut = await this.generateScreenshot();
+      if (await this.handleNSFW(screenshot.shortCut, playListId)) return null;
 
       let savePromise = this.saveScreenshot(videoId, screenshot)
-        .then(() => this.updatePlaylist(this.playListId));
+        .then(() => this.updatePlaylist(playListId));
       if (process.mas && this.$store.getters.source === 'drop') {
         savePromise = savePromise.then(async () => {
-          await playInfoStorageService.deleteRecentPlayedBy(this.playListId);
+          await playInfoStorageService.deleteRecentPlayedBy(playListId);
         });
       }
       return savePromise
