@@ -7,8 +7,7 @@
       class="privacy-bubble"
     >
       <div
-        :class="useBlur ? 'backdrop' : 'backdrop-fallback'"
-        class="plane-background"
+        class="backdrop-fallback plane-background"
       >
         <div class="plane">
           <div class="content">

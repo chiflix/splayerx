@@ -617,7 +617,7 @@ new Vue({
       updateChosenSize: subtitleActions.UPDATE_SUBTITLE_SIZE,
       updateEnabledSecondarySub: subtitleActions.UPDATE_ENABLED_SECONDARY_SUBTITLE,
       changeFirstSubtitle: smActions.manualChangePrimarySubtitle,
-      manualChangeSecondarySubtitle: smActions.manualChangeSecondarySubtitle,
+      changeSecondarySubtitle: smActions.manualChangeSecondarySubtitle,
       refreshSubtitles: smActions.refreshSubtitles,
       addLocalSubtitlesWithSelect: smActions.addLocalSubtitlesWithSelect,
       updateSubtitleType: subtitleActions.UPDATE_SUBTITLE_TYPE,
