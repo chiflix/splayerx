@@ -204,11 +204,11 @@
       "youtube": "Youtube"
     },
     "edit": {
-      "name": "",
-      "cut": "",
-      "copy": "",
-      "paste": "",
-      "selectAll": ""
+      "name": "حرّر",
+      "cut": "قص",
+      "copy": "نسخ",
+      "paste": "معجون",
+      "selectAll": "تحديد الكل"
     },
     "history": {
       "name": "التاريخ",
@@ -222,21 +222,21 @@
     "nextInPlaylist": "التالي في قائمة التشغيل"
   },
   "welcome": {
-    "welcomeTitle": "",
-    "welcomeDescription": "",
-    "agreement": "",
-    "policy": "",
-    "languageTitle1": "",
-    "languageTitle2": "",
-    "primary": "",
-    "secondary": "",
-    "chooseSecondary": "",
-    "languageDescription": "",
-    "none": ""
+    "welcomeTitle": "Welcome to SPlayer",
+    "welcomeDescription": "All-new lightweight design, incredible performance with smart translation to let you enjoy your videos like never before.",
+    "agreement": "By using SPlayer, you agree to our ",
+    "policy": "Privacy Policy",
+    "languageTitle1": "Set your preferred subtitle",
+    "languageTitle2": "languages to fetch translations",
+    "primary": "Primary",
+    "secondary": "Secondary",
+    "chooseSecondary": "Select Secondary Language",
+    "languageDescription": "* You can change your settings in preferences later",
+    "none": "لا شيء"
   },
   "preferences": {
     "general": {
-      "hideNSFW": "",
+      "hideNSFW": "Hide Sensitive Content",
       "hideHistory": "إخفاء سجل التشغيل",
       "clearHistory": "قم دائمًا بمسح سجل التشغيل عند الخروج",
       "reverseScrolling": "التمرير عكس الماوس",
@@ -253,22 +253,22 @@
       "switchDisplayLanguages": "تتحكم لغة العرض في اللغة التي تراها في SPlayer."
     },
     "translate": {
-      "languageDescription": "",
-      "languagePriority": "",
-      "none": "",
-      "primary": "",
-      "translateConfirm": "",
-      "translateSetting": "",
-      "secondary": "",
-      "setAsDefault": "",
-      "settings": ""
+      "languageDescription": ". قم بتحميل بيانات مجهولة المصدر لجلب نتائج الترجمة باللغة التالية ، ولن يتم تضمين معلومات خصوصية.",
+      "languagePriority": "تفضيل اللغات",
+      "none": "لا شيء",
+      "primary": "ابتدائي",
+      "translateConfirm": "تمكين الترجمة الذكية",
+      "translateSetting": "ترجمة",
+      "secondary": "ثانوي",
+      "setAsDefault": "تعيين SPlayer كتطبيق افتراضي",
+      "settings": "الإعدادات"
     },
     "privacy": {
       "privacySetting": "ترجمة",
       "enable": "",
       "smartMode": "",
       "smartDescription": "",
-      "incognitoMode": "",
+      "incognitoMode": "وضع التخفي",
       "incognitoDescription": ""
     }
   },
@@ -292,8 +292,8 @@
     }
   },
   "protectBubble": {
-    "agree": "",
-    "setting": "",
+    "agree": "حسنا",
+    "setting": "المشهد",
     "content": ""
   },
   "recentPlaylist": {
