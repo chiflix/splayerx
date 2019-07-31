@@ -153,7 +153,6 @@ export default {
       landingViewItems: [],
       sagiHealthStatus: 'UNSET',
       invalidTimeRepresentation: '--',
-      isBrowsingViewEnabled: false,
       openUrlShow: false,
       item: {},
       tranFlag: true,
@@ -300,8 +299,6 @@ export default {
     this.$electron.ipcRenderer.on('quit', () => {
       this.quit = true;
     });
-
-    this.isBrowsingViewEnabled = await isFeatureEnabled(Features.BrowsingView);
   },
   destroyed() {
     window.removeEventListener('mousemove', this.globalMoveHandler);
