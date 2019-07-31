@@ -27,7 +27,7 @@ function generateHtmlWebpackPluginConfig(name) {
   return {
     chunks: [name],
     filename: `${name}.html`,
-    template: path.resolve(__dirname, `../src/${name}.ejs`),
+    template: path.resolve(__dirname, `../src/index.ejs`),
     minify: {
       collapseWhitespace: true,
       removeAttributeQuotes: true,
@@ -54,6 +54,7 @@ let rendererConfig = {
   entry: {
     preference: path.join(__dirname, '../src/renderer/preference.js'),
     about: path.join(__dirname, '../src/renderer/about.js'),
+    labor: path.join(__dirname, '../src/renderer/labor.ts'),
     index: path.join(__dirname, '../src/renderer/main.ts'),
   },
   externals: [
@@ -198,6 +199,7 @@ let rendererConfig = {
     new VueLoaderPlugin(),
     new ExtractTextPlugin('styles.css'),
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('index')),
+    new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('labor')),
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('about')),
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('preference')),
     new webpack.HotModuleReplacementPlugin(),

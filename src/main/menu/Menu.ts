@@ -161,7 +161,9 @@ export default class Menubar {
   public updateFullScreen(isFullScreen: boolean) {
     if (this.isFullScreen !== isFullScreen) {
       this.isFullScreen = isFullScreen;
-      this.refreshWindowMenu();
+      if (this._routeName !== 'browsing-view') {
+        this.refreshWindowMenu();
+      }
     }
   }
 

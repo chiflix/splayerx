@@ -155,7 +155,7 @@
       "menuLoading": "正在匹配翻译结果 ...",
       "name": "字幕",
       "noSubtitle": "暂未找到翻译结果",
-      "notToShowSubtitle": "关闭",
+      "notToShowSubtitle": "无",
       "secondarySubtitle": "第二字幕",
       "subtitleSetting": "字幕设置",
       "subtitleDelay": "字幕延迟",
@@ -204,11 +204,11 @@
       "youtube": "Youtube"
     },
     "edit": {
-      "name": "",
-      "cut": "",
-      "copy": "",
-      "paste": "",
-      "selectAll": ""
+      "name": "编辑",
+      "cut": "剪切",
+      "copy": "复制",
+      "paste": "粘贴",
+      "selectAll": "全选"
     },
     "history": {
       "name": "历史",
@@ -261,6 +261,14 @@
       "secondary": "次要语言",
       "setAsDefault": "将SPlayer设为默认播放器",
       "settings": "设置"
+    },
+    "privacy": {
+      "privacySetting": "智能翻译",
+      "enable": "启用隐私保护",
+      "smartMode": "智能模式",
+      "smartDescription": "离线识别不宜在工作或公众场合浏览的敏感内容，并在自动加载同目录文件或退出时抹除相关痕迹。",
+      "incognitoMode": "无痕模式",
+      "incognitoDescription": "不保留任何播放记录。"
     }
   },
   "privacyBubble": {
@@ -281,6 +289,11 @@
       "partTwo": "匿名信息会导致智能翻译无法使用。",
       "underlinedContent": "禁用"
     }
+  },
+  "protectBubble": {
+    "agree": "好的",
+    "setting": "设置",
+    "content": "保护不宜在工作或公众场合播放的内容，自动删除播放痕迹。"
   },
   "recentPlaylist": {
     "folderSource": "文件夹",

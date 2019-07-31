@@ -204,11 +204,11 @@
       "youtube": "Youtube"
     },
     "edit": {
-      "name": "",
-      "cut": "",
-      "copy": "",
-      "paste": "",
-      "selectAll": ""
+      "name": "編集",
+      "cut": "切り取り",
+      "copy": "コピー",
+      "paste": "貼り付け",
+      "selectAll": "全て選択"
     },
     "history": {
       "name": "履歴",
@@ -222,16 +222,16 @@
     "nextInPlaylist": "プレイリスト中の次のビデオ"
   },
   "welcome": {
-    "welcomeTitle": "",
-    "welcomeDescription": "",
-    "agreement": "",
-    "policy": "",
-    "languageTitle1": "",
-    "languageTitle2": "",
-    "primary": "",
-    "secondary": "",
-    "chooseSecondary": "",
-    "languageDescription": "",
+    "welcomeTitle": "Welcome to SPlayer",
+    "welcomeDescription": "All-new lightweight design, incredible performance with smart translation to let you enjoy your videos like never before.",
+    "agreement": "By using SPlayer, you agree to our ",
+    "policy": "Privacy Policy",
+    "languageTitle1": "Set your preferred subtitle",
+    "languageTitle2": "languages to fetch translations",
+    "primary": "Primary",
+    "secondary": "Secondary",
+    "chooseSecondary": "Select Secondary Language",
+    "languageDescription": "* You can change your settings in preferences later",
     "none": "None"
   },
   "preferences": {
@@ -261,6 +261,14 @@
       "secondary": "セカンド",
       "setAsDefault": "SPlayerをデフォルトにする",
       "settings": "設定"
+    },
+    "privacy": {
+      "privacySetting": "翻訳設定",
+      "enable": "Privacy Protectionを開く",
+      "smartMode": "Intelligent Mode",
+      "smartDescription": "機密性の高いコンテンツや作業に適さないコンテンツをオフラインで識別し、フォルダプレイリストでの再生時または終了時に再生履歴を消去します。",
+      "incognitoMode": "Incognito Mode",
+      "incognitoDescription": "再生履歴は保存されません。"
     }
   },
   "privacyBubble": {
@@ -281,6 +289,11 @@
       "partTwo": "プライバシーを解除するとSmart Translationの使用ができなくなる。",
       "underlinedContent": "禁止"
     }
+  },
+  "protectBubble": {
+    "agree": "確定",
+    "setting": "設定",
+    "content": "スマートプライバシー保護が有効になります。 機密性の高い、または作業に不適切な再生履歴は削除されます。"
   },
   "recentPlaylist": {
     "folderSource": "ホルダー",

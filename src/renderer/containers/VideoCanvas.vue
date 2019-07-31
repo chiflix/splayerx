@@ -46,7 +46,7 @@ import { debounce } from 'lodash';
 import { windowRectService } from '@/services/window/WindowRectService';
 import { playInfoStorageService } from '@/services/storage/PlayInfoStorageService';
 import { settingStorageService } from '@/services/storage/SettingStorageService';
-import { nsfwThumbnailFilterService } from '@/services/filter/NSFWThumbnailFilterService';
+import { nsfwThumbnailFilterService } from '@/services/filter/NSFWThumbnailFilterByLaborService';
 import { generateShortCutImageBy, ShortCut } from '@/libs/utils';
 import { Video as videoActions, AudioTranslate as atActions } from '@/store/actionTypes';
 import { videodata } from '@/store/video';
@@ -136,6 +136,7 @@ export default {
         this.addTranslateBubbleCallBack(() => {
           this.handleLeaveVideo(this.videoId)
             .finally(() => {
+              this.removeAllAudioTrack();
               this.$store.dispatch('Init');
               this.$bus.$off();
               this.$router.push({
@@ -150,6 +151,7 @@ export default {
       this.discardTranslate();
       this.handleLeaveVideo(this.videoId)
         .finally(() => {
+          this.removeAllAudioTrack();
           this.$store.dispatch('Init');
           this.$bus.$off();
           this.$router.push({
@@ -383,8 +385,7 @@ export default {
       }
       return savePromise
         .then(this.saveSubtitleStyle)
-        .then(this.savePlaybackStates)
-        .then(this.removeAllAudioTrack);
+        .then(this.savePlaybackStates);
     },
     beforeUnloadHandler(e: BeforeUnloadEvent) {
       // 如果当前有翻译任务进行，而不是再后台进行
@@ -401,6 +402,7 @@ export default {
         e.returnValue = false;
         this.handleLeaveVideo(this.videoId)
           .finally(() => {
+            this.removeAllAudioTrack();
             this.$store.dispatch('SRC_SET', { src: '', mediaHash: '', id: NaN });
             this.asyncTasksDone = true;
             window.close();
