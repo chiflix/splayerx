@@ -274,6 +274,8 @@ export default {
           this.asyncTasksDone = true;
           window.close();
         });
+      } else if (this.quit) {
+        this.$electron.remote.app.quit();
       }
     });
     (document.querySelector('#app') as HTMLElement).addEventListener('mouseleave', () => {
