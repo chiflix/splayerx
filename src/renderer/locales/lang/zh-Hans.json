@@ -236,7 +236,7 @@
   },
   "preferences": {
     "general": {
-      "hideNSFW": "",
+      "hideNSFW": "Hide Sensitive Content",
       "hideHistory": "隐藏历史记录",
       "clearHistory": "退出时自动清空播放记录",
       "reverseScrolling": "鼠标滚轮反向",
@@ -253,9 +253,9 @@
       "switchDisplayLanguages": "您可以在此修改射手影音播放器菜单、对话框中的显示语言。"
     },
     "translate": {
-      "languageDescription": "",
-      "languagePriority": "",
-      "none": "关闭",
+      "languageDescription": "按以下语言提供翻译结果，翻译需上传匿名信息但不会包含任何隐私数据。",
+      "languagePriority": "选择翻译语言",
+      "none": "无",
       "primary": "首要语言",
       "translateConfirm": "启用智能翻译",
       "translateSetting": "智能翻译",
