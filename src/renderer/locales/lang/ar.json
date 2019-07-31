@@ -236,7 +236,6 @@
   },
   "preferences": {
     "general": {
-      "hideNSFW": "Hide Sensitive Content",
       "hideHistory": "إخفاء سجل التشغيل",
       "clearHistory": "قم دائمًا بمسح سجل التشغيل عند الخروج",
       "reverseScrolling": "التمرير عكس الماوس",
