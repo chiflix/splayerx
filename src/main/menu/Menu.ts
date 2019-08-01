@@ -153,8 +153,10 @@ export default class Menubar {
   public updateLocale() {
     this.locale.getDisplayLanguage();
     this.menuStateControl();
-    this.refreshPlaybackMenu();
-    this.refreshWindowMenu();
+    if (this._routeName) {
+      this.refreshPlaybackMenu();
+      this.refreshWindowMenu();
+    }
   }
 
   public updatePaused(paused: boolean) {
