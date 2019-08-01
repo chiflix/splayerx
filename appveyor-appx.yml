@@ -21,7 +21,7 @@ install:
   - git reset --hard HEAD
   - node --version
   - npm i
-  - npx electron scripts/check-electron-version.js
+  - node scripts/check-electron-version.js
 
 before_build:
   - ps: ${env:REV} = (git rev-list --count HEAD)
