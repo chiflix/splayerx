@@ -60,9 +60,7 @@
             >
               {{ m.title }}
             </p>
-            <p class="content">
-              {{ m.content }}
-            </p>
+            <p class="content"><!--eslint-disable-line-->{{ m.content }}</p>
           </div>
           <Icon
             v-if="m.type === 'result'"
