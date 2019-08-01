@@ -80,7 +80,7 @@ export default {
     ...mapGetters([
       'videoId', 'nextVideoId', 'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId', 'enabledSecondarySub', 'lastChosenSize', 'subToTop',
       'winSize', 'winPos', 'winAngle', 'isFullScreen', 'winWidth', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo', 'loop', 'playinglistRate', 'isFolderList', 'playingList', 'playingIndex', 'playListId', 'items',
-      'previousVideo', 'previousVideoId', 'hideNSFW', 'isTranslating', 'nsfwProcessDone',
+      'previousVideo', 'previousVideoId', 'smartMode', 'isTranslating', 'nsfwProcessDone',
     ]),
     ...mapGetters({
       videoWidth: 'intrinsicWidth',
@@ -355,7 +355,7 @@ export default {
       return settingStorageService.updatePlaybackStates({ volume: this.volume, muted: this.muted });
     },
     async handleNSFW(src: string, playListId: number) {
-      if (this.hideNSFW) {
+      if (this.smartMode) {
         if (this.nsfwDetected || await nsfwThumbnailFilterService.checkImage(src)) {
           if (!this.nsfwProcessDone) this.$bus.$emit('nsfw');
           await playInfoStorageService.deleteRecentPlayedBy(playListId);

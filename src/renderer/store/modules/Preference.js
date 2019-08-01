@@ -20,6 +20,7 @@ const getters = {
   preferenceData: state => state,
   protectPrivacy: state => state.protectPrivacy,
   hideNSFW: state => state.hideNSFW,
+  smartMode: state => state.protectPrivacy && state.hideNSFW,
   incognitoMode: state => state.protectPrivacy && !state.hideNSFW,
   reverseScrolling: state => state.reverseScrolling,
   privacyAgreement: state => state.privacyAgreement,
