@@ -25,6 +25,7 @@ install:
   - git reset --hard HEAD
   - node --version
   - npm i
+  - npx electron scripts/check-electron-version.js
 
 build_script:
   - npm run build
