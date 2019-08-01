@@ -26,7 +26,6 @@ document.addEventListener('DOMContentLoaded', () => {
     mousedown = false;
     mousedownPos = null;
     windowSize = null;
-    if (isDragging) evt.stopImmediatePropagation();
   }, true);
   if (mouse) {
     mouse.on('left-drag', (x, y) => {
@@ -72,6 +71,8 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('keydown', (evt) => {
     if (document.webkitIsFullScreen && evt.keyCode === 27) {
       document.webkitCancelFullScreen();
+    } else if (evt.keyCode === 80) {
+      sendToHost('keydown', { targetName: evt.target.tagName });
     }
   });
   document.addEventListener('fullscreenchange', () => {

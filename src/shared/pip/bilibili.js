@@ -1,5 +1,5 @@
 export function bilibiliBarrageAdapt(type, barrageOpen) {
-  if (type === 'video') {
+  if (['video', 'bangumi'].includes(type)) {
     return `document.querySelector(".bilibili-player-video-danmaku").style.opacity = ${barrageOpen} ? "1" : "0";`;
   }
   if (type === 'videoStreaming') {
@@ -12,6 +12,37 @@ export function bilibiliBarrageAdapt(type, barrageOpen) {
 }
 
 export function bilibili(type, barrageOpen, winSize) {
+  if (type === 'bangumi') {
+    return {
+      adapter: `var player = document.querySelector("#bofqi");
+        document.body.prepend(player);
+        document.body.style.overflow = "hidden";
+        document.querySelector("#app").style.display = "none";
+        player.style.position = "absolute";
+        player.style.width = "100%";
+        player.style.height = "100%";
+        player.style.zIndex = 99999;
+        ${bilibiliBarrageAdapt(type, barrageOpen)}
+        document.querySelector(".player").style.height = "100%";
+        document.querySelector(".bilibili-player-auxiliary-area").style.display = "none";
+        document.querySelector(".bilibili-player-video-message").style.display = "none";
+        document.querySelector(".bilibili-player-video-sendbar").style.setProperty("display", "none");
+        Object.defineProperty(document.querySelector(".bilibili-player-video-sendbar").style, "display", { get: function() {return "none";}, set: function(){}});`,
+      watcher: '',
+      recover: 'var player = document.querySelector("#bofqi");'
+        + 'document.querySelector(".bangumi-player").insertBefore(player, document.querySelector(".bgray-btn-wrap").nextSibling);'
+        + 'player.style.position = "relative";'
+        + 'player.style.height = "";'
+        + 'player.style.zIndex = "";'
+        + 'document.body.style.overflow = "";'
+        + 'document.querySelector(".player").style.height = "";'
+        + 'document.querySelector("#app").style.display = "";'
+        + 'document.querySelector(".bilibili-player-auxiliary-area").style.display = "";'
+        + 'document.querySelector(".bilibili-player-video-message").style.display = "";'
+        + 'Object.defineProperty(document.querySelector(".bilibili-player-video-sendbar").style, "display", { get: function() {return this._display;}, set: function(val){ this._display = val; document.querySelector(".bilibili-player-video-sendbar").style.setProperty("display", val);}});'
+        + 'document.querySelector(".bilibili-player-video-sendbar").style.setProperty("display", "");',
+    };
+  }
   if (type === 'video') {
     return {
       adapter: `var theater = document.querySelector(".player-wrap");
@@ -130,4 +161,4 @@ export function bilibili(type, barrageOpen, winSize) {
   };
 }
 
-export const bilibiliFindType = '[document.querySelector(".live-player-ctnr"), document.querySelector("iframe"), document.querySelector("#bofqi")]';
+export const bilibiliFindType = '[document.querySelector(".bilibili-player-video-message"), document.querySelector(".live-player-ctnr"), document.querySelector("iframe"), document.querySelector("#bofqi")]';
