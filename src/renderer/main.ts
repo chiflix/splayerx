@@ -339,7 +339,7 @@ new Vue({
       if (!data.displayLanguage) {
         this.$store.dispatch('displayLanguage', getSystemLocale());
       }
-      if (!data.protectPrivacy) {
+      if (data.protectPrivacy === undefined) {
         this.$store.dispatch('protectPrivacy');
         this.$store.dispatch('hideNSFW', true);
       }
