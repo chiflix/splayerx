@@ -184,6 +184,10 @@ export default {
           this.othersRecover();
         }
       } else {
+        if (!this.pipPos.length) {
+          this.$store.dispatch('updatePipPos', [window.screen.availLeft + 70,
+            window.screen.availTop + window.screen.availHeight - 236 - 70]);
+        }
         this.$store.dispatch('updateBrowsingSize', this.winSize);
         this.$store.dispatch('updateBrowsingPos', this.winPos);
         this.$electron.ipcRenderer.send('update-enabled', 'window.keepPlayingWindowFront', true);

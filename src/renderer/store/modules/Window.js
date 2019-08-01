@@ -11,8 +11,7 @@ const state = {
   sizePercent: 0,
   browsingSize: [1200, 900],
   pipSize: [420, 236],
-  pipPos: [window.screen.availLeft + 70,
-    window.screen.availTop + window.screen.availHeight - 236 - 70],
+  pipPos: [],
   browsingPos: [0, 0],
 };
 
