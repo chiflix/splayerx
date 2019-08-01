@@ -73,7 +73,7 @@ export default class RecentPlayService implements IRecentPlay {
         };
       }),
     );
-    return results.splice(0, 9);
+    return results;
   }
 
   public async getMenuDisplayInfo(): Promise<IMenuDisplayInfo[]> {

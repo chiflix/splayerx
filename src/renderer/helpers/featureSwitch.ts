@@ -3,6 +3,8 @@ import syncStorage from '@/helpers/syncStorage';
 import { crc32 } from '@/libs/utils';
 import { version } from '@/../../package.json';
 
+const [major, minor] = version.split('.');
+
 /**
  * 'on'/'off'/number means need to check again next time
  * 'always' means always be enabled
@@ -34,7 +36,7 @@ async function getConfig() {
   let config: {[key: string]: FeatureConfig} = {};
   try {
     config = syncStorage.getSync('featureAlways') || config;
-    const onlineConfig = await getOnlineConfig(`https://splayer.org/switch/v${version}.json`);
+    const onlineConfig = await getOnlineConfig(`https://splayer.org/switch/v${major}.${minor}.json`);
     config = Object.assign(config, onlineConfig);
     const featureAlways = Object.keys(config)
       .filter(f => config[f] === 'always')
@@ -52,7 +54,7 @@ export enum Features {
   BrowsingView,
 }
 
-export async function isFeatureEnabled(feature: Features) {
+export async function isFeatureEnabled(feature: Features, defaultValue = false) {
   const featureName = Features[feature];
   try {
     if (process.env.NODE_ENV === 'development'
@@ -71,5 +73,5 @@ export async function isFeatureEnabled(feature: Features) {
     if (featureSwitch <= 0 || !userId) return false;
     return Math.abs(crc32(userId)) % 100 <= featureSwitch * 100;
   }
-  return false;
+  return defaultValue;
 }

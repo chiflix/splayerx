@@ -46,6 +46,8 @@ export default class Menubar {
 
   private playingViewTop = false;
 
+  private browsingViewTop = false;
+
   private primarySubs: {
     id: string, label: string, checked: boolean, subtitleItem: SubtitleControlListItem,
   }[];
@@ -76,7 +78,7 @@ export default class Menubar {
 
   public setMainWindow(window: Electron.BrowserWindow | null) {
     // may replace this way of getting mainWindow by window service or else...
-    this.playingViewTop = this.isFullScreen = false;
+    this.playingViewTop = this.browsingViewTop = this.isFullScreen = false;
     this.mainWindow = window;
   }
 
@@ -177,6 +179,12 @@ export default class Menubar {
   public updatePlayingViewTop(playingViewTop: boolean) {
     if (this.playingViewTop !== playingViewTop) {
       this.playingViewTop = playingViewTop;
+    }
+  }
+
+  public updateBrowsingViewTop(browsingViewTop: boolean) {
+    if (this.browsingViewTop !== browsingViewTop) {
+      this.browsingViewTop = browsingViewTop;
     }
   }
 
@@ -358,6 +366,7 @@ export default class Menubar {
 
     const items = this.getMenuItemTemplate('window').items;
     const floatMenuItem = items.find((item: MenubarMenuItem) => item.id === 'window.keepPlayingWindowFront') as IMenubarMenuItemAction;
+    floatMenuItem.checked = this.browsingViewTop;
     const minimizeMenuItem = items.find((item: MenubarMenuItem) => item.id === 'window.minimize') as IMenubarMenuItemRole;
     const maxmizeMenuItem = items.find((item: MenubarMenuItem) => item.id === 'window.maxmize') as IMenubarMenuItemAction;
     const landingViewMenuItem = items.find((item: MenubarMenuItem) => item.id === 'window.backToLandingView') as IMenubarMenuItemAction;
@@ -905,6 +914,8 @@ export default class Menubar {
   }
 
   private createMenuItemByTemplate(menuItem: IMenubarMenuItemAction) {
+    if (menuItem.enabled === undefined) menuItem.enabled = true;
+
     const {
       id, accelerator, winAccelerator, enabled, checked,
     } = menuItem;

@@ -155,7 +155,7 @@ import { parseNameFromPath } from '@/libs/utils';
 import Icon from '@/components/BaseIconContainer.vue';
 import RecentPlayService from '@/services/media/PlaylistService';
 import { mediaStorageService } from '@/services/storage/MediaStorageService';
-import { nsfwThumbnailFilterService } from '@/services/filter/NSFWThumbnailFilterService';
+import { nsfwThumbnailFilterService } from '@/services/filter/NSFWThumbnailFilterByLaborService';
 
 export default {
   components: {
@@ -412,15 +412,15 @@ export default {
       this.path,
       this.items[this.index],
     );
-    this.recentPlayService.on('image-loaded', async () => {
-      await this.updateUI();
-      if (this.hideNSFW && this.isFolderList) {
-        if (await nsfwThumbnailFilterService.checkImage(this.imageSrc)) {
-          if (!this.nsfwProcessDone) this.$bus.$emit('nsfw');
-          if (!this.isPlaying) this.$store.dispatch('RemoveItemFromPlayingList', this.path);
-          this.$bus.$emit('nsfw-detected');
-        }
-      }
+    this.recentPlayService.on('image-loaded', () => {
+      this.updateUI();
+      // if (this.hideNSFW && this.isFolderList) {
+      //   if (await nsfwThumbnailFilterService.checkImage(this.imageSrc)) {
+      //     if (!this.nsfwProcessDone) this.$bus.$emit('nsfw');
+      //     if (!this.isPlaying) this.$store.dispatch('RemoveItemFromPlayingList', this.path);
+      //     this.$bus.$emit('nsfw-detected');
+      //   }
+      // }
     });
     this.updateUI();
     this.$bus.$on('database-saved', this.updateUI);

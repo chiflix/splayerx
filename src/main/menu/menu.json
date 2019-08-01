@@ -251,7 +251,8 @@
         "id": "window.keepPlayingWindowFront",
         "label": "msg.window.keepPlayingWindowFront",
         "accelerator": "T",
-        "checked": false
+        "checked": false,
+        "enabled": true
       },
       {
         "id": "menubar.separator"

@@ -333,6 +333,7 @@ export default {
     // open an existed play list
     async openPlayList(id) {
       const playlist = await this.infoDB.get('recent-played', id);
+      if (!playlist) return;
       await this.infoDB.update('recent-played', { ...playlist, lastOpened: Date.now() }, playlist.id);
       if (playlist.items.length > 1) {
         let currentVideo = await this.infoDB.get('media-item', playlist.items[playlist.playedIndex]);

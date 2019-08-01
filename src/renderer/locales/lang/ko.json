@@ -204,11 +204,11 @@
       "youtube": "Youtube"
     },
     "edit": {
-      "name": "",
-      "cut": "",
-      "copy": "",
-      "paste": "",
-      "selectAll": ""
+      "name": "편집",
+      "cut": "잘라내기",
+      "copy": "복사",
+      "paste": "풀",
+      "selectAll": "전체 선택"
     },
     "history": {
       "name": "역사",
@@ -222,17 +222,17 @@
     "nextInPlaylist": "다음 재생 목록에서"
   },
   "welcome": {
-    "welcomeTitle": "",
-    "welcomeDescription": "",
-    "agreement": "",
-    "policy": "",
-    "languageTitle1": "",
-    "languageTitle2": "",
-    "primary": "",
-    "secondary": "",
-    "chooseSecondary": "",
-    "languageDescription": "",
-    "none": ""
+    "welcomeTitle": "Welcome to SPlayer",
+    "welcomeDescription": "All-new lightweight design, incredible performance with smart translation to let you enjoy your videos like never before.",
+    "agreement": "By using SPlayer, you agree to our ",
+    "policy": "Privacy Policy",
+    "languageTitle1": "Set your preferred subtitle",
+    "languageTitle2": "languages to fetch translations",
+    "primary": "Primary",
+    "secondary": "Secondary",
+    "chooseSecondary": "Select Secondary Language",
+    "languageDescription": "* You can change your settings in preferences later",
+    "none": "None"
   },
   "preferences": {
     "general": {
@@ -261,6 +261,14 @@
       "secondary": "반성",
       "setAsDefault": "SPlayer를 기본 응용 프로그램으로 설정",
       "settings": "설정"
+    },
+    "privacy": {
+      "privacySetting": "은둔",
+      "enable": "개인 정보 보호 사용",
+      "smartMode": "Intelligent Mode",
+      "smartDescription": "오프라인은 민감하거나 부적합한 작업 내용을 식별하고 폴더 재생 목록에서 재생할 때 또는 종료 할 때 재생 기록을 삭제합니다.",
+      "incognitoMode": "Incognito Mode",
+      "incognitoDescription": "재생 기록이 저장되지 않습니다."
     }
   },
   "privacyBubble": {
@@ -281,6 +289,11 @@
       "partTwo": ".",
       "underlinedContent": "동의하지 않는다"
     }
+  },
+  "protectBubble": {
+    "agree": "승인",
+    "setting": "설정",
+    "content": "스마트 개인 정보 보호가 사용됩니다. 민감하거나 작동에 적합하지 않은 재생 기록은 삭제됩니다."
   },
   "recentPlaylist": {
     "folderSource": "폴더",

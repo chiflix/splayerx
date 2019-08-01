@@ -25,7 +25,11 @@ export default class MenuService {
   }
 
   public updatePlayingViewTop(topOnWindow: boolean) {
-    ipcRenderer.send('update-top-on-window', topOnWindow);
+    ipcRenderer.send('update-playingview-on-top', topOnWindow);
+  }
+
+  public updateBrowsingViewTop(topOnWindow: boolean) {
+    ipcRenderer.send('update-browsingview-on-top', topOnWindow);
   }
 
   public updatePip(isPip: boolean) {

@@ -204,11 +204,11 @@
       "youtube": "Youtube"
     },
     "edit": {
-      "name": "",
-      "cut": "",
-      "copy": "",
-      "paste": "",
-      "selectAll": ""
+      "name": "Editar",
+      "cut": "Cortar",
+      "copy": "Copiar",
+      "paste": "Pegar",
+      "selectAll": "Selecciona todo"
     },
     "history": {
       "name": "Historia",
@@ -222,17 +222,17 @@
     "nextInPlaylist": "Siguiente en Playlist"
   },
   "welcome": {
-    "welcomeTitle": "",
-    "welcomeDescription": "",
-    "agreement": "",
-    "policy": "",
-    "languageTitle1": "",
-    "languageTitle2": "",
-    "primary": "",
-    "secondary": "",
-    "chooseSecondary": "",
-    "languageDescription": "",
-    "none": ""
+    "welcomeTitle": "Welcome to SPlayer",
+    "welcomeDescription": "All-new lightweight design, incredible performance with smart translation to let you enjoy your videos like never before.",
+    "agreement": "By using SPlayer, you agree to our ",
+    "policy": "Privacy Policy",
+    "languageTitle1": "Set your preferred subtitle",
+    "languageTitle2": "languages to fetch translations",
+    "primary": "Primary",
+    "secondary": "Secondary",
+    "chooseSecondary": "Select Secondary Language",
+    "languageDescription": "* You can change your settings in preferences later",
+    "none": "None"
   },
   "preferences": {
     "general": {
@@ -261,6 +261,14 @@
       "secondary": "Secundario",
       "setAsDefault": "Establecer SPlayer como la aplicación predeterminada",
       "settings": "Ajustes"
+    },
+    "privacy": {
+      "privacySetting": "Intimidad",
+      "enable": "Habilitar protección de privacidad",
+      "smartMode": "Modo inteligente",
+      "smartDescription": "No se puede identificar contenidos sensibles o no adecuados para trabajar, y borrar el historial de reproducción cuando se reproduce en una lista de carpetas o cuando se sale.",
+      "incognitoMode": "Modo incógnito",
+      "incognitoDescription": "No se guardará el historial de reproducción."
     }
   },
   "privacyBubble": {
@@ -281,6 +289,11 @@
       "partTwo": ".",
       "underlinedContent": "Prohibir"
     }
+  },
+  "protectBubble": {
+    "agree": "OK",
+    "setting": "Configurando",
+    "content": "Protección de privacidad inteligente está activada. Se eliminará el historial de reproducción sensorial o no adecuado para trabajar."
   },
   "recentPlaylist": {
     "folderSource": "Carpeta",
