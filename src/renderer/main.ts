@@ -903,9 +903,9 @@ new Vue({
       this.menuService.on('window.maxmize', () => {
         this.changeWindowSize(3);
       });
-      this.menuService.on('window.windowRotate', () => {
+      this.menuService.on('window.windowRotate', throttle(() => {
         this.windowRotate();
-      });
+      }, 150));
       this.menuService.on('window.backToLandingView', () => {
         this.$bus.$emit('back-to-landingview');
       });

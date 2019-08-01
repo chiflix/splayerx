@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-05 16:03:32
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-07-31 17:19:29
+ * @Last Modified time: 2019-08-01 14:18:29
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @ts-ignore
@@ -326,6 +326,8 @@ const actions = {
           clearInterval(taskTimer);
         }
         audioTranslateService.stop();
+        // 成功后清理任务缓存
+        mediaStorageService.clearAsyncTaskInfo(state.key);
         commit(m.AUDIO_TRANSLATE_UPDATE_STATUS, AudioTranslateStatus.Fail);
         let bubbleType = TRANSLATE_SERVER_ERROR_FAIL;
         let fileType = AudioTranslateFailType.ServerError;
