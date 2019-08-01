@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-05 16:03:32
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-07-31 17:19:29
+ * @Last Modified time: 2019-08-01 17:23:30
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @ts-ignore
@@ -23,6 +23,7 @@ import {
   TRANSLATE_SUCCESS_WHEN_VIDEO_CHANGE, TRANSLATE_REQUEST_TIMEOUT,
 } from '../../helpers/notificationcodes';
 import { LanguageCode } from '@/libs/language';
+import { addSubtitleItemsToList } from '@/services/storage/subtitle';
 
 let taskTimer: number;
 let timerCount: number;
@@ -326,6 +327,8 @@ const actions = {
           clearInterval(taskTimer);
         }
         audioTranslateService.stop();
+        // 成功后清理任务缓存
+        mediaStorageService.clearAsyncTaskInfo(grab.mediaHash);
         commit(m.AUDIO_TRANSLATE_UPDATE_STATUS, AudioTranslateStatus.Fail);
         let bubbleType = TRANSLATE_SERVER_ERROR_FAIL;
         let fileType = AudioTranslateFailType.ServerError;
@@ -399,7 +402,7 @@ const actions = {
         commit(m.AUDIO_TRANSLATE_HIDE_MODAL);
         commit(m.AUDIO_TRANSLATE_UPDATE_STATUS, AudioTranslateStatus.Success);
         // 成功后清理任务缓存
-        mediaStorageService.clearAsyncTaskInfo(state.key);
+        mediaStorageService.clearAsyncTaskInfo(grab.mediaHash);
         // 结束任务
         audioTranslateService.stop();
         let result = TRANSLATE_SUCCESS_WHEN_VIDEO_CHANGE;
@@ -411,6 +414,8 @@ const actions = {
           const subtitle = await dispatch(smActions.addSubtitle, {
             generator, mediaHash: audioTranslateService.mediaHash,
           });
+          // 保存本次字幕到数据库
+          addSubtitleItemsToList([subtitle], audioTranslateService.mediaHash);
           if (subtitle && subtitle.id) {
             // 选中当前翻译的字幕
             if (getters.primarySubtitleId === selectId) {
@@ -444,7 +449,9 @@ const actions = {
         // 如果当前有其他气泡需要用户确认，就先不出成功的气泡
         if (!state.isBubbleVisible) {
           // 提示翻译成功
-          addBubble(result);
+          setTimeout(() => {
+            addBubble(result);
+          }, 100);
         } else {
           commit(m.AUDIO_TRANSLATE_BUBBLE_CANCEL_CALLBACK, () => {
             // 提示翻译成功

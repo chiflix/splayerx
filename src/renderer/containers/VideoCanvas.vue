@@ -140,31 +140,13 @@ export default {
       if (this.isTranslating) {
         this.showTranslateBubble(AudioTranslateBubbleOrigin.WindowClose);
         this.addTranslateBubbleCallBack(() => {
-          this.handleLeaveVideo(this.videoId)
-            .finally(() => {
-              this.removeAllAudioTrack();
-              this.$store.dispatch('Init');
-              this.$bus.$off();
-              this.$router.push({
-                name: 'landing-view',
-              });
-              windowRectService.uploadWindowBy(false, 'landing-view');
-            });
+          this.backToLandingView();
         });
         return false;
       }
       // 如果有back翻译任务，直接丢弃掉
       this.discardTranslate();
-      this.handleLeaveVideo(this.videoId)
-        .finally(() => {
-          this.removeAllAudioTrack();
-          this.$store.dispatch('Init');
-          this.$bus.$off();
-          this.$router.push({
-            name: 'landing-view',
-          });
-          windowRectService.uploadWindowBy(false, 'landing-view');
-        });
+      this.backToLandingView();
       return false;
     });
     this.$electron.ipcRenderer.on('quit', (e: Event, needToRestore: boolean) => {
@@ -425,6 +407,20 @@ export default {
       } else if (this.quit) {
         this.$electron.remote.app.quit();
       }
+    },
+    backToLandingView() {
+      this.handleLeaveVideo(this.videoId)
+        .finally(() => {
+          this.removeAllAudioTrack();
+          this.$store.dispatch('Init');
+          this.$bus.$off();
+          this.$router.push({
+            name: 'landing-view',
+          });
+          setTimeout(() => {
+            windowRectService.uploadWindowBy(false, 'landing-view');
+          }, 200);
+        });
     },
   },
 };

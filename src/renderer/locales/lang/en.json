@@ -391,11 +391,11 @@
     "bubbleFunctionForbidden": "AI Translation will be aborted If you go on, do you want to continue anyway?",
     "bubbleWhenSuccess": {
       "title": "",
-      "content": "AI Translation is ready now, please check it on the translation panel."
+      "content": "AI Translation is ready now, \nplease check it on the translation panel."
     },
     "bubbleWhenSuccessOnOtherVideo": {
       "title": "",
-      "content": "AI Translation is ready now. It will be automatically loaded next time when you watch the video."
+      "content": "AI Translation is ready now. \nIt will be automatically loaded next time when you watch the video."
     },
     "bubbleTranslateNoLineFail": {
       "title": "Network Error",
