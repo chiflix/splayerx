@@ -26,7 +26,6 @@ document.addEventListener('DOMContentLoaded', () => {
     mousedown = false;
     mousedownPos = null;
     windowSize = null;
-    if (isDragging) evt.stopImmediatePropagation();
   }, true);
   if (mouse) {
     mouse.on('left-drag', (x, y) => {
