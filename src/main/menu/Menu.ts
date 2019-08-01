@@ -117,9 +117,11 @@ export default class Menubar {
       case 'language-setting':
         this.menubar = this.createWelcomeViewMenu();
         break;
+
       case 'browsing-view':
         this.menubar = this.createBrowsingViewMenu();
         break;
+
       default:
         break;
     }
@@ -151,6 +153,8 @@ export default class Menubar {
   public updateLocale() {
     this.locale.getDisplayLanguage();
     this.menuStateControl();
+    this.refreshPlaybackMenu();
+    this.refreshWindowMenu();
   }
 
   public updatePaused(paused: boolean) {
