@@ -1,33 +1,26 @@
-const { app, splayerx } = require('electron');
 const { execSync } = require('child_process');
 
-const electronVersion = app.getVersion();
-
-function updateElectron() {
-  if (process.platform === 'win32') {
-    execSync(`set force_no_cache=true && npm i @chiflix/electron@${electronVersion}`, { stdio: 'inherit' });
-  } else {
-    execSync(`force_no_cache=true npm i @chiflix/electron@${electronVersion}`, { stdio: 'inherit' });
-  }
+function updateElectron(version) {
+  console.log('Update Electron...');
+  execSync(`npx cross-env force_no_cache=true npm i @chiflix/electron@${version}`, { stdio: 'inherit' });
 }
 
 try {
   console.log('Checking Electron hash...');
-  const expectedHash = execSync(
-    `curl -L https://github.com/chiflix/electron/releases/download/v${electronVersion}/ELECTRONSLIM_VERSION_HASH.txt`,
+  const versionAndHash = execSync(
+    'npx electron scripts/get-electron-hash.js',
     { encoding: 'utf-8' },
   ).trim();
-  const actualHash = splayerx.getVersionHash().trim();
+  console.log(versionAndHash);
+  const [version, actualHash] = versionAndHash.split(' ');
+  const expectedHash = execSync(
+    `curl -L https://github.com/chiflix/electron/releases/download/v${version}/ELECTRONSLIM_VERSION_HASH.txt`,
+    { encoding: 'utf-8' },
+  ).trim();
   console.log({ expectedHash, actualHash });
-  if (expectedHash !== actualHash) updateElectron();
+  if (expectedHash !== actualHash) updateElectron(version);
   process.exit(0);
 } catch (ex) {
   console.error(ex);
-  try {
-    updateElectron();
-    process.exit(0);
-  } catch (updateEx) {
-    console.error(updateEx);
-    process.exit(1);
-  }
+  process.exit(1);
 }
