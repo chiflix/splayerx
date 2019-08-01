@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }, true);
   window.addEventListener('mouseup', (evt) => {
+    if (isDragging) evt.stopImmediatePropagation();
     mousedown = false;
     mousedownPos = null;
     windowSize = null;
