@@ -394,7 +394,11 @@ export default {
       if (!this.asyncTasksDone && !this.needToRestore) {
         e.returnValue = false;
         if (this.quit) {
-          this.$electron.remote.app.hide();
+          if (typeof this.$electron.remote.app.hide === 'function') { // macOS only
+            this.$electron.remote.app.hide();
+          } else {
+            this.$electron.remote.getCurrentWindow().hide();
+          }
           this.$electron.remote.getCurrentWebContents().setAudioMuted(true);
         }
         this.handleLeaveVideo(this.videoId)
