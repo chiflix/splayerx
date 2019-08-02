@@ -110,6 +110,7 @@ export default {
       pipRestore: false,
       acceleratorAvailable: true,
       oldDisplayId: 0,
+      backToLandingView: false,
     };
   },
   computed: {
@@ -151,10 +152,10 @@ export default {
       }
     },
     dropFiles(val: string[]) {
+      this.backToLandingView = false;
       const onlyFolders = val.every((file: fs.PathLike) => fs.statSync(file).isDirectory());
-      if (this.currentRouteName === 'playing-view' || onlyFolders
-        || val.every((file: fs.PathLike) => getValidVideoRegex()
-          .test(file) && !getValidSubtitleRegex().test(file))) {
+      if (onlyFolders || val.every((file: fs.PathLike) => getValidVideoRegex()
+        .test(file) && !getValidSubtitleRegex().test(file))) {
         val.forEach((file: fs.PathLike) => this.$electron.remote.app.addRecentDocument(file));
         if (onlyFolders) {
           this.openFolder(...val);
@@ -242,6 +243,7 @@ export default {
     },
   },
   created() {
+    this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [570, 375]);
     windowRectService.calculateWindowRect(
       this.browsingSize,
       true,
@@ -249,7 +251,6 @@ export default {
     );
     this.$store.dispatch('updateBrowsingPos', this.winPos);
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [0]);
-    this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [570, 375]);
   },
   mounted() {
     this.menuService = new MenuService();
@@ -307,21 +308,9 @@ export default {
       }
     });
     this.$bus.$on('back-to-landingview', () => {
-      asyncStorage.set('browsing', {
-        pipSize: this.pipSize,
-        pipPos: this.pipPos,
-        browsingSize: this.browsingSize,
-        browsingPos: this.browsingPos,
-        barrageOpen: this.barrageOpen,
-      }).finally(() => {
-        this.$store.dispatch(this.isPip ? 'updatePipSize' : 'updateBrowsingSize', this.winSize);
-        this.$store.dispatch(this.isPip ? 'updatePipPos' : 'updateBrowsingPos', this.winPos);
-        this.updateIsPip(false);
-        this.$bus.$off();
-        this.$router.push({
-          name: 'landing-view',
-        });
-        windowRectService.uploadWindowBy(false, 'landing-view');
+      this.backToLandingView = true;
+      this.$router.push({
+        name: 'landing-view',
       });
     });
     this.$refs.webView.addEventListener('load-commit', () => {
@@ -437,7 +426,21 @@ export default {
     });
   },
   beforeDestroy() {
-    window.removeEventListener('beforeunload', this.beforeUnloadHandler);
+    asyncStorage.set('browsing', {
+      pipSize: this.pipSize,
+      pipPos: this.pipPos,
+      browsingSize: this.browsingSize,
+      browsingPos: this.browsingPos,
+      barrageOpen: this.barrageOpen,
+    }).then(() => {
+      this.$store.dispatch(this.isPip ? 'updatePipSize' : 'updateBrowsingSize', this.winSize);
+      this.$store.dispatch(this.isPip ? 'updatePipPos' : 'updateBrowsingPos', this.winPos);
+      this.updateIsPip(false);
+    }).finally(() => {
+      if (this.backToLandingView) {
+        windowRectService.uploadWindowBy(false, 'landing-view');
+      }
+    });
   },
   methods: {
     ...mapActions({
