@@ -10,6 +10,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const SentryWebpackPlugin = require('@sentry/webpack-plugin')
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin')
 const { dependencies, optionalDependencies } = require('../package.json')
 
 let release = '';
@@ -91,6 +92,7 @@ let rendererConfig = {
           {
             loader: 'ts-loader',
             options: {
+              transpileOnly: true,
               appendTsSuffixTo: [ /\.vue$/ ]
             }
           }
@@ -203,6 +205,7 @@ let rendererConfig = {
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('about')),
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('preference')),
     new webpack.HotModuleReplacementPlugin(),
+    new ForkTsCheckerWebpackPlugin({ eslint: true }),
   ],
   output: {
     filename: '[name].js',
