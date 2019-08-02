@@ -7,6 +7,7 @@ const childProcess = require('child_process')
 const webpack = require('webpack')
 const SentryWebpackPlugin = require('@sentry/webpack-plugin')
 const { dependencies, optionalDependencies, _moduleAliases } = require('../package.json')
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin')
 
 let release = '';
 try {
@@ -44,7 +45,12 @@ let mainConfig = {
       {
         test: /\.ts$/,
         exclude: /node_modules/,
-        use: 'ts-loader'
+        use: {
+          loader: 'ts-loader',
+          options: {
+            transpileOnly: true
+          }
+        }
       },
       {
         test: /\.js$/,
@@ -75,7 +81,7 @@ let mainConfig = {
     libraryTarget: 'commonjs2',
     path: path.join(__dirname, '../dist/electron')
   },
-  plugins: [],
+  plugins: [new ForkTsCheckerWebpackPlugin({ eslint: true })],
   resolve: {
     extensions: ['.ts', '.js', '.json', '.node'],
     alias: {

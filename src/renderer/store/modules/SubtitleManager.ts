@@ -636,7 +636,9 @@ const actions = {
             source: subtitle.source.source,
             delay: subtitle.delay,
           };
-          commit(m.addSubtitleId, subtitleControlListItem);
+          if (options.mediaHash === state.mediaHash) {
+            commit(m.addSubtitleId, subtitleControlListItem);
+          }
           return subtitleControlListItem;
         }
       } catch (ex) {
