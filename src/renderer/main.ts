@@ -903,7 +903,8 @@ new Vue({
         this.changeWindowSize(2);
       });
       this.menuService.on('window.maxmize', () => {
-        if (!this.isMaximized) {
+        const browserWindow = this.$electron.remote.getCurrentWindow();
+        if (!browserWindow.isMaximized()) {
           this.$electron.ipcRenderer.send('callMainWindowMethod', 'maximize');
         } else {
           this.$electron.ipcRenderer.send('callMainWindowMethod', 'unmaximize');
