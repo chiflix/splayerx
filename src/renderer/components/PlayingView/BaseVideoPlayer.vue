@@ -151,9 +151,10 @@ export default {
     // tracks
     currentAudioTrackId(newVal: string, oldVal: string) {
       if (parseInt(oldVal, 10) !== -1) {
-        this.$refs.video.audioTracks.forEach((track: AudioTrack) => {
-          track.enabled = track.id === newVal;
-        });
+        const audioTracks = this.$refs.video.audioTracks;
+        for (let i = 0; i < audioTracks.length; i += 1) {
+          audioTracks[i].enabled = audioTracks[i].id === newVal;
+        }
         this.$bus.$emit('seek', videodata.time);
       }
     },
