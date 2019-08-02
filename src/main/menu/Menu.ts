@@ -153,7 +153,7 @@ export default class Menubar {
   public updateLocale() {
     this.locale.getDisplayLanguage();
     this.menuStateControl();
-    if (this._routeName) {
+    if (this._routeName === 'playing-view') {
       this.refreshPlaybackMenu();
       this.refreshWindowMenu();
     }

@@ -238,22 +238,16 @@ export default {
       this.isSettingDefault = true;
       try {
         await setAsDefaultApp();
-        clearTimeout(this.defaultButtonTimeoutId);
         this.defaultState = 'success';
-        this.defaultButtonTimeoutId = setTimeout(() => {
-          this.defaultState = '';
-          this.isSettingDefault = false;
-          this.$refs.button1.style.setProperty('transition-delay', '');
-        }, 1500);
       } catch (ex) {
-        clearTimeout(this.defaultButtonTimeoutId);
         this.defaultState = 'failed';
+      } finally {
+        clearTimeout(this.defaultButtonTimeoutId);
         this.defaultButtonTimeoutId = setTimeout(() => {
           this.defaultState = '';
           this.isSettingDefault = false;
-          this.$refs.button1.style.setProperty('transition-delay', '');
+          if (this.$refs.button1) this.$refs.button1.style.setProperty('transition-delay', '');
         }, 1500);
-      } finally {
         this.buttonDown = 0;
         if (this.$refs.button1) this.$refs.button1.removeEventListener('mouseup', this.setDefault);
       }
