@@ -133,9 +133,6 @@ export default {
     this.updatePlayinglistRate({ oldDir: '', newDir: path.dirname(this.originSrc), playingList: this.playingList });
   },
   mounted() {
-    this.$bus.$on('nsfw-detected', () => {
-      this.nsfwDetected = true;
-    });
     this.$bus.$on('back-to-landingview', () => {
       if (this.isTranslating) {
         this.showTranslateBubble(AudioTranslateBubbleOrigin.WindowClose);
@@ -155,16 +152,27 @@ export default {
       }
       // 如果有back翻译任务，直接丢弃掉
       this.discardTranslate();
-      this.handleLeaveVideo(this.videoId)
-        .finally(() => {
-          this.removeAllAudioTrack();
-          this.$store.dispatch('Init');
-          this.$bus.$off();
-          this.$router.push({
-            name: 'landing-view',
+      if (!this.nsfwDetected) {
+        this.handleLeaveVideo(this.videoId)
+          .finally(() => {
+            if (this.nsfwDetected) return;
+            this.removeAllAudioTrack();
+            this.$store.dispatch('Init');
+            this.$bus.$off();
+            this.$router.push({
+              name: 'landing-view',
+            });
+            windowRectService.uploadWindowBy(false, 'landing-view');
           });
-          windowRectService.uploadWindowBy(false, 'landing-view');
+      } else {
+        this.removeAllAudioTrack();
+        this.$store.dispatch('Init');
+        this.$bus.$off();
+        this.$router.push({
+          name: 'landing-view',
         });
+        windowRectService.uploadWindowBy(false, 'landing-view');
+      }
       return false;
     });
     this.$electron.ipcRenderer.on('quit', (e: Event, needToRestore: boolean) => {
@@ -375,7 +383,10 @@ export default {
     async handleNSFW(src: string, playListId: number) {
       if (this.smartMode) {
         if (this.nsfwDetected || await nsfwThumbnailFilterService.checkImage(src)) {
-          if (!this.nsfwProcessDone) this.$bus.$emit('nsfw');
+          if (!this.nsfwProcessDone) {
+            this.$bus.$emit('nsfw');
+            this.nsfwDetected = true;
+          }
           await playInfoStorageService.deleteRecentPlayedBy(playListId);
           return true;
         }
@@ -420,7 +431,7 @@ export default {
             this.removeAllAudioTrack();
             this.$store.dispatch('SRC_SET', { src: '', mediaHash: '', id: NaN });
             this.asyncTasksDone = true;
-            window.close();
+            if (!this.nsfwDetected) window.close();
           });
       } else if (this.quit) {
         this.$electron.remote.app.quit();
