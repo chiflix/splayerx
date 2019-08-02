@@ -109,6 +109,8 @@ export default {
       menuService: null,
       pipRestore: false,
       acceleratorAvailable: true,
+      oldDisplayId: 0,
+      backToLandingView: false,
     };
   },
   computed: {
@@ -150,10 +152,10 @@ export default {
       }
     },
     dropFiles(val: string[]) {
+      this.backToLandingView = false;
       const onlyFolders = val.every((file: fs.PathLike) => fs.statSync(file).isDirectory());
-      if (this.currentRouteName === 'playing-view' || onlyFolders
-        || val.every((file: fs.PathLike) => getValidVideoRegex()
-          .test(file) && !getValidSubtitleRegex().test(file))) {
+      if (onlyFolders || val.every((file: fs.PathLike) => getValidVideoRegex()
+        .test(file) && !getValidSubtitleRegex().test(file))) {
         val.forEach((file: fs.PathLike) => this.$electron.remote.app.addRecentDocument(file));
         if (onlyFolders) {
           this.openFolder(...val);
@@ -184,10 +186,6 @@ export default {
           this.othersRecover();
         }
       } else {
-        if (!this.pipPos.length) {
-          this.$store.dispatch('updatePipPos', [window.screen.availLeft + 70,
-            window.screen.availTop + window.screen.availHeight - 236 - 70]);
-        }
         this.$store.dispatch('updateBrowsingSize', this.winSize);
         this.$store.dispatch('updateBrowsingPos', this.winPos);
         this.$electron.ipcRenderer.send('update-enabled', 'window.keepPlayingWindowFront', true);
@@ -245,6 +243,7 @@ export default {
     },
   },
   created() {
+    this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [570, 375]);
     windowRectService.calculateWindowRect(
       this.browsingSize,
       true,
@@ -252,7 +251,6 @@ export default {
     );
     this.$store.dispatch('updateBrowsingPos', this.winPos);
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [0]);
-    this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [570, 375]);
   },
   mounted() {
     this.menuService = new MenuService();
@@ -310,21 +308,9 @@ export default {
       }
     });
     this.$bus.$on('back-to-landingview', () => {
-      asyncStorage.set('browsing', {
-        pipSize: this.pipSize,
-        pipPos: this.pipPos,
-        browsingSize: this.browsingSize,
-        browsingPos: this.browsingPos,
-        barrageOpen: this.barrageOpen,
-      }).finally(() => {
-        this.$store.dispatch(this.isPip ? 'updatePipSize' : 'updateBrowsingSize', this.winSize);
-        this.$store.dispatch(this.isPip ? 'updatePipPos' : 'updateBrowsingPos', this.winPos);
-        this.updateIsPip(false);
-        this.$bus.$off();
-        this.$router.push({
-          name: 'landing-view',
-        });
-        windowRectService.uploadWindowBy(false, 'landing-view');
+      this.backToLandingView = true;
+      this.$router.push({
+        name: 'landing-view',
       });
     });
     this.$refs.webView.addEventListener('load-commit', () => {
@@ -440,7 +426,21 @@ export default {
     });
   },
   beforeDestroy() {
-    window.removeEventListener('beforeunload', this.beforeUnloadHandler);
+    asyncStorage.set('browsing', {
+      pipSize: this.pipSize,
+      pipPos: this.pipPos,
+      browsingSize: this.browsingSize,
+      browsingPos: this.browsingPos,
+      barrageOpen: this.barrageOpen,
+    }).then(() => {
+      this.$store.dispatch(this.isPip ? 'updatePipSize' : 'updateBrowsingSize', this.winSize);
+      this.$store.dispatch(this.isPip ? 'updatePipPos' : 'updateBrowsingPos', this.winPos);
+      this.updateIsPip(false);
+    }).finally(() => {
+      if (this.backToLandingView) {
+        windowRectService.uploadWindowBy(false, 'landing-view');
+      }
+    });
   },
   methods: {
     ...mapActions({
@@ -483,12 +483,25 @@ export default {
       this.pipBtnsKeepShow = false;
     },
     handleWindowChangeEnterPip() {
+      const newDisplayId = this.$electron.screen
+        .getDisplayNearestPoint({ x: this.winPos[0], y: this.winPos[1] }).id;
+      const useDefaultPosition = !this.pipPos.length || this.oldDisplayId !== newDisplayId;
+      this.oldDisplayId = newDisplayId;
       this.$refs.webView.executeJavaScript(this.getVideoStyle, (result: CSSStyleDeclaration) => {
         const videoAspectRatio = parseFloat(result.width as string)
           / parseFloat(result.height as string);
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [videoAspectRatio]);
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [420, Math.round(420 / videoAspectRatio)]);
-        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', this.pipPos);
+        if (useDefaultPosition) {
+          this.$store.dispatch('updatePipPos', [window.screen.availLeft + 70,
+            window.screen.availTop + window.screen.availHeight - 236 - 70])
+            .then(() => {
+              this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', [window.screen.availLeft + 70,
+                window.screen.availTop + window.screen.availHeight - 236 - 70]);
+            });
+        } else {
+          this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', this.pipPos);
+        }
         const calculateSize = this.pipSize[0] / this.pipSize[1] >= videoAspectRatio
           ? [this.pipSize[0], Math.round(this.pipSize[0] / videoAspectRatio)]
           : [Math.round(this.pipSize[1] * videoAspectRatio), this.pipSize[1]];
@@ -496,10 +509,21 @@ export default {
       });
     },
     handleWindowChangeExitPip() {
+      const newDisplayId = this.$electron.screen
+        .getDisplayNearestPoint({ x: this.winPos[0], y: this.winPos[1] }).id;
+      if (this.oldDisplayId !== newDisplayId) {
+        windowRectService.calculateWindowRect(
+          this.browsingSize,
+          true,
+          this.winPos.concat(this.winSize),
+        );
+      } else {
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', this.browsingSize);
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', this.browsingPos);
+      }
+      this.oldDisplayId = newDisplayId;
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [0]);
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [570, 375]);
-      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', this.browsingSize);
-      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', this.browsingPos);
     },
     handleDanmuDisplay() {
       if (this.pipType === 'iqiyi') {

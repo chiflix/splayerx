@@ -1,5 +1,8 @@
 <template>
-  <div class="header">
+  <div
+    @dblclick="handleDbClick"
+    class="header"
+  >
     <browsing-control
       :handle-url-reload="handleUrlReload"
       :handle-url-back="handleUrlBack"
@@ -87,7 +90,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['recordUrl']),
+    ...mapGetters(['recordUrl', 'isMaximized']),
     picInPicType() {
       return this.webInfo.hasVideo ? 'pip' : 'pipDisabled';
     },
@@ -99,6 +102,13 @@ export default {
     ...mapActions({
       updateInitialUrl: browsingActions.UPDATE_INITIAL_URL,
     }),
+    handleDbClick() {
+      if (!this.isMaximized) {
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'maximize');
+      } else {
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'unmaximize');
+      }
+    },
     closeUrlInput() {
       this.$bus.$emit('open-url-show', false);
     },

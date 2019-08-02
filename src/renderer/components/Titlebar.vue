@@ -2,7 +2,7 @@
   <div
     :class="isDarwin ? 'darwin-titlebar' : 'titlebar'"
     :style="{
-      width: ['playing-view', 'browsing-view'].includes($route.name) ? '100%' : ''
+      width: '100%'
     }"
     @dblclick.stop="handleDbClick"
   >
@@ -169,12 +169,10 @@ export default {
   },
   methods: {
     handleDbClick() {
-      if (['playing-view', 'browsing-view'].includes(this.$route.name)) {
-        if (!this.isMaximized) {
-          this.$electron.ipcRenderer.send('callMainWindowMethod', 'maximize');
-        } else {
-          this.$electron.ipcRenderer.send('callMainWindowMethod', 'unmaximize');
-        }
+      if (!this.isMaximized) {
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'maximize');
+      } else {
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'unmaximize');
       }
     },
     handleMouseOver() {
