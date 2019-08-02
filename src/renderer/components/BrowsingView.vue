@@ -482,17 +482,23 @@ export default {
     handleWindowChangeEnterPip() {
       const newDisplayId = this.$electron.screen
         .getDisplayNearestPoint({ x: this.winPos[0], y: this.winPos[1] }).id;
-      if (!this.pipPos.length || this.oldDisplayId !== newDisplayId) {
-        this.$store.dispatch('updatePipPos', [window.screen.availLeft + 70,
-          window.screen.availTop + window.screen.availHeight - 236 - 70]);
-      }
+      const useDefaultPosition = !this.pipPos.length || this.oldDisplayId !== newDisplayId;
       this.oldDisplayId = newDisplayId;
       this.$refs.webView.executeJavaScript(this.getVideoStyle, (result: CSSStyleDeclaration) => {
         const videoAspectRatio = parseFloat(result.width as string)
           / parseFloat(result.height as string);
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [videoAspectRatio]);
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [420, Math.round(420 / videoAspectRatio)]);
-        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', this.pipPos);
+        if (useDefaultPosition) {
+          this.$store.dispatch('updatePipPos', [window.screen.availLeft + 70,
+            window.screen.availTop + window.screen.availHeight - 236 - 70])
+            .then(() => {
+              this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', [window.screen.availLeft + 70,
+                window.screen.availTop + window.screen.availHeight - 236 - 70]);
+            });
+        } else {
+          this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', this.pipPos);
+        }
         const calculateSize = this.pipSize[0] / this.pipSize[1] >= videoAspectRatio
           ? [this.pipSize[0], Math.round(this.pipSize[0] / videoAspectRatio)]
           : [Math.round(this.pipSize[1] * videoAspectRatio), this.pipSize[1]];
