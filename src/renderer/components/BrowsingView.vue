@@ -108,6 +108,7 @@ export default {
       headerToShow: true,
       menuService: null,
       pipRestore: false,
+      acceleratorAvailable: true,
     };
   },
   computed: {
@@ -183,6 +184,10 @@ export default {
           this.othersRecover();
         }
       } else {
+        if (!this.pipPos.length) {
+          this.$store.dispatch('updatePipPos', [window.screen.availLeft + 70,
+            window.screen.availTop + window.screen.availHeight - 236 - 70]);
+        }
         this.$store.dispatch('updateBrowsingSize', this.winSize);
         this.$store.dispatch('updateBrowsingPos', this.winPos);
         this.$electron.ipcRenderer.send('update-enabled', 'window.keepPlayingWindowFront', true);
@@ -255,9 +260,14 @@ export default {
     this.$bus.$on('toggle-back', this.handleUrlBack);
     this.$bus.$on('toggle-forward', this.handleUrlForward);
     this.$bus.$on('toggle-pip', () => {
-      if (this.hasVideo) {
-        this.updateIsPip(!this.isPip);
-      }
+      setTimeout(() => {
+        if (this.hasVideo && this.acceleratorAvailable) {
+          this.updateIsPip(!this.isPip);
+        }
+        if (!this.acceleratorAvailable) {
+          this.acceleratorAvailable = true;
+        }
+      }, 0);
     });
     window.addEventListener('beforeunload', (e: BeforeUnloadEvent) => {
       if (!this.asyncTasksDone) {
@@ -347,6 +357,7 @@ export default {
         x?: number,
         y?: number,
         url?: string,
+        targetName?: string,
       }[] } = evt;
       switch (channel) {
         case 'open-url':
@@ -387,6 +398,11 @@ export default {
           break;
         case 'fullscreenchange':
           this.headerToShow = !args[0].isFullScreen;
+          break;
+        case 'keydown':
+          if (['INPUT', 'TEXTAREA'].includes(args[0].targetName as string)) {
+            this.acceleratorAvailable = false;
+          }
           break;
         default:
           console.warn(`Unhandled ipc-message: ${channel}`, args);
@@ -549,7 +565,7 @@ export default {
     },
     bilibiliAdapter() {
       this.$refs.webView.executeJavaScript(bilibiliFindType, (r: (HTMLElement | null)[]) => {
-        this.bilibiliType = ['videoStreaming', 'iframeStreaming', 'video'][r.findIndex(i => i)] || 'others';
+        this.bilibiliType = ['bangumi', 'videoStreaming', 'iframeStreaming', 'video'][r.findIndex(i => i)] || 'others';
       }).then(() => {
         this.handleWindowChangeEnterPip();
         this.$refs.webView.executeJavaScript(this.bilibiliPip.adapter);

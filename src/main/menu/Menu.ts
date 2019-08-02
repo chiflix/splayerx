@@ -221,6 +221,7 @@ export default class Menubar {
 
   public updateRecentPlay(items: IMenuDisplayInfo[]) {
     const recentMenu = this.getSubmenuById('file.openRecent');
+    if (!recentMenu) return;
     // @ts-ignore
     recentMenu.clear();
 
@@ -399,6 +400,7 @@ export default class Menubar {
 
   private refreshWindowMenu() {
     const windowMenu = this.getSubmenuById('window');
+    if (!windowMenu) return;
     // @ts-ignore
     windowMenu.clear();
 

@@ -365,7 +365,9 @@ new Vue({
       this.$store.dispatch('updateBrowsingSize', data.browsingSize || this.browsingSize);
       this.$store.dispatch('updatePipSize', data.pipSize || this.pipSize);
       this.$store.dispatch('updatePipPos', data.pipPos || this.pipPos);
-      this.$store.dispatch('updateBrowsingPos', data.browsingPos || [0, 0]);
+      if (data.browsingPos) {
+        this.$store.dispatch('updateBrowsingPos', data.browsingPos);
+      }
       this.updateBarrageOpen(data.barrageOpen || this.barrageOpen);
     });
     this.$bus.$on('delete-file', () => {
@@ -907,9 +909,9 @@ new Vue({
           this.$electron.ipcRenderer.send('callMainWindowMethod', 'unmaximize');
         }
       });
-      this.menuService.on('window.windowRotate', () => {
+      this.menuService.on('window.windowRotate', throttle(() => {
         this.windowRotate();
-      });
+      }, 150));
       this.menuService.on('window.backToLandingView', () => {
         this.$bus.$emit('back-to-landingview');
       });

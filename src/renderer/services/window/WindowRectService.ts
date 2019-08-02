@@ -11,7 +11,7 @@ const MINSIZE = [320, 180];
  * @constant
  * @type number[]
  */
-const WINDOWRECT = [
+const getWindowRect = () => [
   window.screen.availLeft, window.screen.availTop,
   window.screen.availWidth, window.screen.availHeight,
 ];
@@ -127,7 +127,7 @@ export default class WindowRectService implements IWindowRectRequest {
     ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [fullScreen]);
     if (!fullScreen && whichView === 'landing-view') {
       ipcRenderer.send('callMainWindowMethod', 'setSize', LANDINGVIEWRECT.slice(0, 2));
-      ipcRenderer.send('callMainWindowMethod', 'setPosition', LANDINGVIEWRECT.slice(2, 4));
+      // ipcRenderer.send('callMainWindowMethod', 'setPosition', LANDINGVIEWRECT.slice(2, 4));
       setTimeout(() => window.dispatchEvent(new Event('resize')), 10);
       newRect = LANDINGVIEWRECT;
     } else if (!fullScreen && lastWindowSize && windowPosition
@@ -136,12 +136,13 @@ export default class WindowRectService implements IWindowRectRequest {
         || (!(windowAngle === 90 || windowAngle === 270)
           && (lastWindowAngle === 90 || lastWindowAngle === 270)))) {
       const videoSize = [lastWindowSize[1], lastWindowSize[0]];
-      const newVideoSize = this.calculateWindowSize(MINSIZE, WINDOWRECT.slice(2, 4), videoSize);
+      const newVideoSize = this
+        .calculateWindowSize(MINSIZE, getWindowRect().slice(2, 4), videoSize);
       // 退出全屏，计算pos依赖旧窗口大小，现在设置旧窗口大小为新大小的反转，
       // 这样在那里全屏，退出全屏后窗口还在那个位置。
       const newPosition = this.calculateWindowPosition(
         windowPosition.concat([newVideoSize[1], newVideoSize[0]]),
-        WINDOWRECT,
+        getWindowRect(),
         newVideoSize,
       );
       newRect = newPosition.concat(newVideoSize);
@@ -169,14 +170,14 @@ export default class WindowRectService implements IWindowRectRequest {
     maxSize?: number[],
   ): number[] {
     if (!maxSize) {
-      maxSize = WINDOWRECT.slice(2, 4);
+      maxSize = getWindowRect().slice(2, 4);
     }
-    const screenSize = WINDOWRECT.slice(2, 4);
+    const screenSize = getWindowRect().slice(2, 4);
     const [newWidth, newHeight] = this.calculateWindowSize(
       MINSIZE, maxSize, videoSize, videoExisted, screenSize,
     );
     const [newLeft, newTop] = this.calculateWindowPosition(
-      oldRect, WINDOWRECT, [newWidth, newHeight],
+      oldRect, getWindowRect(), [newWidth, newHeight],
     );
     const rect = [newLeft, newTop, newWidth, newHeight];
     ipcRenderer.send('callMainWindowMethod', 'setSize', rect.slice(2, 4));

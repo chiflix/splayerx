@@ -666,7 +666,7 @@ const actions = {
   }: any, id: string) {
     if (!getters.subtitleOff) {
       if (!id) {
-        commit(m.setNotSelectedSubtitle);
+        commit(m.setNotSelectedSubtitle, 'primary');
       } else {
         const primary = id;
         let secondary = getters.secondarySubtitleId;
@@ -694,7 +694,7 @@ const actions = {
   }: any, id: string) {
     if (!getters.subtitleOff) {
       if (!id) {
-        commit(m.setNotSelectedSubtitle);
+        commit(m.setNotSelectedSubtitle, 'secondary');
       } else {
         let primary = getters.primarySubtitleId;
         const secondary = id;
