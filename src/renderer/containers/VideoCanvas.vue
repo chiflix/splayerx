@@ -133,9 +133,6 @@ export default {
     this.updatePlayinglistRate({ oldDir: '', newDir: path.dirname(this.originSrc), playingList: this.playingList });
   },
   mounted() {
-    this.$bus.$on('nsfw-detected', () => {
-      this.nsfwDetected = true;
-    });
     this.$bus.$on('back-to-landingview', () => {
       if (this.isTranslating) {
         this.showTranslateBubble(AudioTranslateBubbleOrigin.WindowClose);
@@ -357,7 +354,10 @@ export default {
     async handleNSFW(src: string, playListId: number) {
       if (this.smartMode) {
         if (this.nsfwDetected || await nsfwThumbnailFilterService.checkImage(src)) {
-          if (!this.nsfwProcessDone) this.$bus.$emit('nsfw');
+          if (!this.nsfwProcessDone) {
+            this.$bus.$emit('nsfw');
+            this.nsfwDetected = true;
+          }
           await playInfoStorageService.deleteRecentPlayedBy(playListId);
           return true;
         }
@@ -394,7 +394,11 @@ export default {
       if (!this.asyncTasksDone && !this.needToRestore) {
         e.returnValue = false;
         if (this.quit) {
-          this.$electron.remote.app.hide();
+          if (typeof this.$electron.remote.app.hide === 'function') { // macOS only
+            this.$electron.remote.app.hide();
+          } else {
+            this.$electron.remote.getCurrentWindow().hide();
+          }
           this.$electron.remote.getCurrentWebContents().setAudioMuted(true);
         }
         this.handleLeaveVideo(this.videoId)
@@ -402,25 +406,39 @@ export default {
             this.removeAllAudioTrack();
             this.$store.dispatch('SRC_SET', { src: '', mediaHash: '', id: NaN });
             this.asyncTasksDone = true;
-            window.close();
+            if (!this.nsfwDetected) window.close();
           });
       } else if (this.quit) {
         this.$electron.remote.app.quit();
       }
     },
     backToLandingView() {
-      this.handleLeaveVideo(this.videoId)
-        .finally(() => {
-          this.removeAllAudioTrack();
-          this.$store.dispatch('Init');
-          this.$bus.$off();
-          this.$router.push({
-            name: 'landing-view',
+      if (!this.nsfwDetected) {
+        this.handleLeaveVideo(this.videoId)
+          .finally(() => {
+            if (!this.nsfwDetected) {
+              this.removeAllAudioTrack();
+              this.$store.dispatch('Init');
+              this.$bus.$off();
+              this.$router.push({
+                name: 'landing-view',
+              });
+              setTimeout(() => {
+                windowRectService.uploadWindowBy(false, 'landing-view');
+              }, 200);
+            }
           });
-          setTimeout(() => {
-            windowRectService.uploadWindowBy(false, 'landing-view');
-          }, 200);
+      } else {
+        this.removeAllAudioTrack();
+        this.$store.dispatch('Init');
+        this.$bus.$off();
+        this.$router.push({
+          name: 'landing-view',
         });
+        setTimeout(() => {
+          windowRectService.uploadWindowBy(false, 'landing-view');
+        }, 200);
+      }
     },
   },
 };
