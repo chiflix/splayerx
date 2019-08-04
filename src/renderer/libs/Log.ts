@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import electron from 'electron';
 import winston from 'winston';
 import DailyRotateFile from 'winston-daily-rotate-file';
@@ -53,10 +54,20 @@ export default class Log implements ILog {
   }
 
   /**
+   * @description 开发时输出的调试信息，不记录到日志
+   * @author tanghaixiang
+   * @param {string} label 类名或者文件名
+   * @param {unknown} message 打印信息
+   */
+  public debug(label: string, message: unknown, ...optionalParams: unknown[]): void {
+    if (process.env.NODE_ENV === 'development') console.log(label, message, ...optionalParams);
+  }
+
+  /**
    * @description 记录程序状态日志
    * @author tanghaixiang
    * @param {string} label 类名或者文件名
-   * @param {string} message 打印信息
+   * @param {string | Error} message 打印信息
    */
   public info(label: string, message: string | Error): void {
     this.log(label, 'info', message);
@@ -66,7 +77,7 @@ export default class Log implements ILog {
    * @description 记录程序状态日志
    * @author tanghaixiang
    * @param {string} label 类名或者文件名
-   * @param {string} message 打印信息
+   * @param {string | Error} message 打印信息
    */
   public warn(label: string, message: string | Error): void {
     this.log(label, 'warn', message);

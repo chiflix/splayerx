@@ -86,10 +86,6 @@ export default {
         }
       }
     },
-    handleLinkClick() {
-      console.log(this.$i18n.locale);
-      // if (this.$i18n.locale === 'zh')
-    },
   },
 };
 </script>

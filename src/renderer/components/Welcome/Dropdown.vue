@@ -36,6 +36,7 @@
   </div>
 </template>
 <script lang="ts">
+import { log } from '@/libs/Log';
 import Icon from '@/components/BaseIconContainer.vue';
 
 export default {
@@ -69,7 +70,7 @@ export default {
     },
     handleSelection: {
       type: Function,
-      default: (selection: string) => { console.log(`Select: ${selection}`); },
+      default: (selection: string) => { log.debug('Dropdown.vue', `Select: ${selection}`); },
     },
     selectedFormater: {
       type: Function,

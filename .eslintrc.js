@@ -20,7 +20,7 @@ module.exports = {
     'vue'
   ],
   'rules': {
-    'no-console': 0,
+    'no-console': ['error', { allow: ['trace', 'warn', 'error', 'time', 'timeEnd'] }],
     'no-unused-expressions': 0,
     'no-unused-vars': 1,
     'global-require': 0,

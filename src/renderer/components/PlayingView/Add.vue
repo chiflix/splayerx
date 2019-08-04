@@ -18,6 +18,7 @@
   </div>
 </template>
 <script lang="ts">
+import { log } from '@/libs/Log';
 import Icon from '@/components/BaseIconContainer.vue';
 
 export default {
@@ -28,7 +29,7 @@ export default {
     addMouseup: {
       type: Function,
       default: () => {
-        console.log('mouse up on add button');
+        log.debug('Add.vue', 'mouse up on add button');
       },
     },
     itemMoving: {
