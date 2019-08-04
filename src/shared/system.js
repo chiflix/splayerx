@@ -18,7 +18,11 @@ export async function setAsDefaultApp() {
     await spawn('python', ['-c', code]);
   } else if (process.platform === 'win32') {
     // for Windows 10
-    if (shell.openExternal('ms-settings:defaultapps', { activate: true })) return;
+    try {
+      if (shell.openExternal('ms-settings:defaultapps', { activate: true })) return;
+    } catch (ex) {
+      //
+    }
     // for old versions
     let cmd = process.argv[0];
     cmd = `${cmd} %1`;
