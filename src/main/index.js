@@ -207,7 +207,7 @@ function createPreferenceWindow(e, route) {
   if (!preferenceWindow) {
     preferenceWindow = new BrowserWindow(preferenceWindowOptions);
     // 如果播放窗口顶置，打开首选项也顶置
-    if (mainWindow.isAlwaysOnTop()) {
+    if (mainWindow && mainWindow.isAlwaysOnTop()) {
       preferenceWindow.setAlwaysOnTop(true);
     }
     if (route) preferenceWindow.loadURL(`${preferenceURL}#/${route}`);
@@ -246,7 +246,7 @@ function createAboutWindow() {
   if (!aboutWindow) {
     aboutWindow = new BrowserWindow(aboutWindowOptions);
     // 如果播放窗口顶置，打开关于也顶置
-    if (mainWindow.isAlwaysOnTop()) {
+    if (mainWindow && mainWindow.isAlwaysOnTop()) {
       aboutWindow.setAlwaysOnTop(true);
     }
     aboutWindow.loadURL(`${aboutURL}`);
