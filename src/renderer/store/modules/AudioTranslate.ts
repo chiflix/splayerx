@@ -22,6 +22,7 @@ import {
   TRANSLATE_SERVER_ERROR_FAIL, TRANSLATE_SUCCESS,
   TRANSLATE_SUCCESS_WHEN_VIDEO_CHANGE, TRANSLATE_REQUEST_TIMEOUT,
 } from '../../helpers/notificationcodes';
+import { log } from '@/libs/Log';
 import { LanguageCode } from '@/libs/language';
 import { addSubtitleItemsToList } from '@/services/storage/subtitle';
 
@@ -106,7 +107,7 @@ const state = {
 
 
 const taskCallback = (taskInfo: AITaskInfo) => {
-  console.log(taskInfo, 'audio-log');
+  log.debug('AudioTranslate', taskInfo, 'audio-log');
   // @ts-ignore
   if (taskInfo.mediaHash !== store.getters.mediaHash) {
     return;
@@ -322,7 +323,7 @@ const actions = {
         commit(m.AUDIO_TRANSLATE_UPDATE_PROGRESS, progress);
       });
       grab.on('error', (error: Error) => {
-        console.log(error, 'audio-log');
+        log.debug('AudioTranslate', error, 'audio-log');
         if (taskTimer) {
           clearInterval(taskTimer);
         }
@@ -365,7 +366,7 @@ const actions = {
         }
       });
       grab.on('grabCompleted', () => {
-        console.log('grabCompleted');
+        log.debug('AudioTranslate', 'grabCompleted');
         // 假进度
         timerCount = 1;
         let startEstimateTime = state.translateEstimateTime;
@@ -393,7 +394,7 @@ const actions = {
       grab.removeListener('task', taskCallback);
       grab.on('task', taskCallback);
       grab.on('transcriptInfo', async (transcriptInfo: TranscriptInfo) => {
-        console.log(transcriptInfo, 'audio-log');
+        log.debug('AudioTranslate', transcriptInfo, 'audio-log');
         // 清除task阶段倒计时定时器
         if (taskTimer) {
           clearInterval(taskTimer);

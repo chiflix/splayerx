@@ -2,6 +2,7 @@ import path from 'path';
 import { IMediaFilter } from '@/interfaces/IMediaFilter';
 import { filePathToUrl } from '@/helpers/path';
 import NSFWJS, { NSFW_CLASSES } from '@/libs/NSFWJS';
+import { log } from '@/libs/Log';
 
 // const IMAGE_SIZE = 224; // Mobilenet v2
 const IMAGE_SIZE = 299; // Inception v3
@@ -40,7 +41,7 @@ export default class NSFWFilterService implements IMediaFilter {
       const isNsfw = result.some(item => (
         item.className === NSFW_CLASSES[1] || item.className === NSFW_CLASSES[3]
       ) && item.probability >= 0.8);
-      if (isNsfw) console.log(src, result);
+      if (isNsfw) log.debug('nsfw', src, result);
       return isNsfw;
     } catch (ex) {
       console.error(ex, src);

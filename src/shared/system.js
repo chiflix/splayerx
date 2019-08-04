@@ -4,7 +4,7 @@ import { getAllValidExtensions } from './utils';
 async function spawn(...args) {
   return new Promise((resolve, reject) => {
     const proc = require('child_process').spawn(...args);
-    proc.stdout.on('data', data => console.log(`stdout: ${data}`));
+    proc.stdout.on('data', data => console.log(`stdout: ${data}`)); // eslint-disable-line no-console
     proc.stderr.on('data', data => console.warn(`stderr: ${data}`));
     proc.on('close', code => (code === 0 ? resolve(code) : reject(code)));
   });

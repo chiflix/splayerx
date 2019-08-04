@@ -4,6 +4,8 @@
 </template>
 
 <script>
+import { log } from '@/libs/Log';
+
 export default {
   name: 'UpdaterProgressIndicator',
   components: {
@@ -11,7 +13,7 @@ export default {
   },
   mounted() {
     this.$electron.ipcRenderer.on('update-message-test', (event, text) => {
-      console.log(text);
+      log.debug(text);
     });
   },
 };

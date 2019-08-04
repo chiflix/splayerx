@@ -118,6 +118,7 @@ import {
   createNamespacedHelpers,
 } from 'vuex';
 import path from 'path';
+import { log } from '@/libs/Log';
 import {
   Input as inputActions,
   Video as videoActions,
@@ -586,7 +587,7 @@ export default {
         // 但是气泡和modal显示着，就不自动切，用户手动关闭再切
         const translateFailBubbleExist = this.messageInfo
           && this.messageInfo.find((e: { id: string }) => e.id === this.failBubbleId);
-        console.log(translateFailBubbleExist, this.messageInfo, this.failBubbleId);
+        log.debug('TheVideoController.vue', translateFailBubbleExist, this.messageInfo, this.failBubbleId);
         if (this.translateStatus === AudioTranslateStatus.Fail && this.isTranslateModalVisiable) {
           this.$store.dispatch(videoActions.PAUSE_VIDEO);
           this.updateHideModalCallback(() => {
