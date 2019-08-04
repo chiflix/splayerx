@@ -34,7 +34,7 @@ function getAnchor(bounds, mousePosition) {
 }
 
 function keepAspectRatio(evt, newBounds) {
-  if (!this._aspectRatio || this.isMaximized() || this.isFullScreen()) return;
+  if (this.isDestroyed() || !this._aspectRatio || this.isMaximized() || this.isFullScreen()) return;
   evt.preventDefault();
 
   const currentBounds = this.getBounds();
