@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-05 16:03:32
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-08-01 17:23:30
+ * @Last Modified time: 2019-08-05 15:01:40
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @ts-ignore
@@ -333,9 +333,11 @@ const actions = {
         commit(m.AUDIO_TRANSLATE_UPDATE_STATUS, AudioTranslateStatus.Fail);
         let bubbleType = TRANSLATE_SERVER_ERROR_FAIL;
         let fileType = AudioTranslateFailType.ServerError;
+        let failReason = 'server-error';
         if (error && error.message === 'time out') {
           bubbleType = TRANSLATE_REQUEST_TIMEOUT;
           fileType = AudioTranslateFailType.TimeOut;
+          failReason = 'time-out';
         }
         commit(m.AUDIO_TRANSLATE_UPDATE_FAIL_TYPE, fileType);
         if (!state.isModalVisiable) {
@@ -360,7 +362,7 @@ const actions = {
         try {
           // TODO 目前grabAudioFrame出错直接继续提取，需要确认错误类型
           // ga 翻译过程(第二步)失败的次数
-          event('app', 'ai-translate-server-translate-fail');
+          event('app', 'ai-translate-server-translate-fail', failReason);
         } catch (error) {
           // empty
         }
