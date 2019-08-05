@@ -19,6 +19,14 @@ module.exports = {
   plugins: [
     'vue'
   ],
+  'overrides': [
+    {
+      'files': ['*.ts'],
+      'rules': {
+        'no-dupe-class-members': 'off'
+      }
+    }
+  ],
   'rules': {
     'no-console': ['error', { allow: ['trace', 'warn', 'error', 'time', 'timeEnd'] }],
     'no-unused-expressions': 0,
@@ -73,7 +81,7 @@ module.exports = {
         'requireLast': true
       },
       'singleline': {
-        "delimiter": 'comma',
+        'delimiter': 'comma',
         'requireLast': false
       }
     },

@@ -38,6 +38,8 @@ export default class Menubar {
 
   private menubar: Electron.Menu;
 
+  private currentMenuState: {};
+
   private paused = false;
 
   private isFullScreen = false;
@@ -192,6 +194,11 @@ export default class Menubar {
     if (this.browsingViewTop !== browsingViewTop) {
       this.browsingViewTop = browsingViewTop;
     }
+  }
+
+  // merge fullscreen, play/pause
+  public updateMenuItemLabel(id: string, label: string) {
+    // refreshMenu
   }
 
   public updateMenuItemChecked(id: string, checked: boolean) {
@@ -356,7 +363,7 @@ export default class Menubar {
           if (isAction(menuItem) && this._disable) {
             menuItem.enabled = !this._disable;
           }
-          const item = this.createMenuItemByTemplate(menuItem);
+          const item = this.createMenuItem(menuItem);
           playbackMenu.append(item);
         }
       });
@@ -380,18 +387,14 @@ export default class Menubar {
 
     const actions = [];
     actions.push(...[
-      this.createMenuItemByTemplate(floatMenuItem),
+      this.createMenuItem(floatMenuItem),
       separator(),
       this.createMenuItem(this.isPip ? 'msg.window.exitPip' : 'msg.window.enterPip', undefined, 'P', true, undefined, 'window.pip'),
       separator(),
-      this.createRoleMenuItem(
-        minimizeMenuItem.label,
-        minimizeMenuItem.role,
-        minimizeMenuItem.enabled,
-      ),
-      this.createMenuItemByTemplate(maxmizeMenuItem),
+      this.createRoleMenuItem(minimizeMenuItem),
+      this.createMenuItem(maxmizeMenuItem),
       separator(),
-      this.createMenuItemByTemplate(landingViewMenuItem),
+      this.createMenuItem(landingViewMenuItem),
     ]);
 
     actions.forEach(i => windowMenu.append(i));
@@ -409,7 +412,7 @@ export default class Menubar {
         const item = separator();
         windowMenu.append(item);
       } else if (isRole(menuItem)) {
-        const item = this.createRoleMenuItem(menuItem.label, menuItem.role, menuItem.enabled);
+        const item = this.createRoleMenuItem(menuItem);
         windowMenu.append(item);
       } else {
         if (menuItem.id === 'window.fullscreen') {
@@ -420,7 +423,7 @@ export default class Menubar {
           menuItem.checked = this.playingViewTop;
         }
         if (isAction(menuItem) && this._disable) menuItem.enabled = !this._disable;
-        const item = this.createMenuItemByTemplate(menuItem);
+        const item = this.createMenuItem(menuItem);
         windowMenu.append(item);
       }
     });
@@ -451,13 +454,13 @@ export default class Menubar {
       this.getMenuItemTemplate('file').items.forEach((item: MenubarMenuItem) => {
         if (item.id === 'file.open') {
           const menuItem = item as IMenubarMenuItemAction;
-          menubar.append(this.createMenuItemByTemplate(menuItem));
+          menubar.append(this.createMenuItem(menuItem));
         } else if (item.id === 'file.openRecent') {
           const menuItem = item as IMenubarMenuItemSubmenu;
-          menubar.append(this.createSubMenuItem(`msg.${menuItem.id}`, menuItem.submenu));
+          menubar.append(this.createSubMenuItem(menuItem));
         } else if (item.id === 'file.closeWindow') {
           const menuItem = item as IMenubarMenuItemRole;
-          menubar.append(this.createRoleMenuItem(menuItem.label, menuItem.role, menuItem.enabled));
+          menubar.append(this.createRoleMenuItem(menuItem));
         }
       });
 
@@ -482,15 +485,11 @@ export default class Menubar {
 
     const fullscreenMenuItem = items.find((item: MenubarMenuItem) => item.id === 'window.fullscreen') as IMenubarMenuItemAction;
 
-    windowMenu.append(this.createMenuItemByTemplate(fullscreenMenuItem));
+    windowMenu.append(this.createMenuItem(fullscreenMenuItem));
 
     const minimizeMenuItem = items.find((item: MenubarMenuItem) => item.id === 'window.minimize') as IMenubarMenuItemRole;
 
-    windowMenu.append(this.createRoleMenuItem(
-      minimizeMenuItem.label,
-      minimizeMenuItem.role,
-      minimizeMenuItem.enabled,
-    ));
+    windowMenu.append(this.createRoleMenuItem(minimizeMenuItem));
 
     const windowMenuItem = new MenuItem({ id: 'window', label: this.$t('msg.window.name'), submenu: windowMenu });
 
@@ -531,13 +530,13 @@ export default class Menubar {
       this.getMenuItemTemplate('file').items.forEach((item: MenubarMenuItem) => {
         if (item.id === 'file.open') {
           const menuItem = item as IMenubarMenuItemAction;
-          menubar.append(this.createMenuItemByTemplate(menuItem));
+          menubar.append(this.createMenuItem(menuItem));
         } else if (item.id === 'file.openRecent') {
           const menuItem = item as IMenubarMenuItemSubmenu;
-          menubar.append(this.createSubMenuItem(`msg.${menuItem.id}`, menuItem.submenu));
+          menubar.append(this.createSubMenuItem(menuItem));
         } else if (item.id === 'file.closeWindow') {
           const menuItem = item as IMenubarMenuItemRole;
-          menubar.append(this.createRoleMenuItem(menuItem.label, menuItem.role, menuItem.enabled));
+          menubar.append(this.createRoleMenuItem(menuItem));
         }
       });
 
@@ -603,17 +602,13 @@ export default class Menubar {
       const playbackItems = this.getMenuItemTemplate('playback').items;
 
       const openMenuItemTemplate = items.find((item: MenubarMenuItem) => item.id === 'file.open') as IMenubarMenuItemAction;
-      const openMenuItem = this.createMenuItemByTemplate(openMenuItemTemplate);
+      const openMenuItem = this.createMenuItem(openMenuItemTemplate);
 
       const closeWindowTemplate = items.find((item: MenubarMenuItem) => item.id === 'file.closeWindow') as IMenubarMenuItemRole;
-      const closeMenuItem = this.createRoleMenuItem(
-        closeWindowTemplate.label,
-        closeWindowTemplate.role,
-        closeWindowTemplate.enabled,
-      );
+      const closeMenuItem = this.createRoleMenuItem(closeWindowTemplate);
 
       const snapShotTemplate = playbackItems.find((item: MenubarMenuItem) => item.id === 'playback.snapShot') as IMenubarMenuItemAction;
-      const snapShotMenuItem = this.createMenuItemByTemplate(snapShotTemplate);
+      const snapShotMenuItem = this.createMenuItem(snapShotTemplate);
       [openMenuItem, closeMenuItem, separator(), snapShotMenuItem].forEach(i => fileMenu.append(i));
 
       const fileMenuItem = new MenuItem({ label: this.$t('msg.file.name'), submenu: fileMenu });
@@ -624,10 +619,10 @@ export default class Menubar {
       this.getMenuItemTemplate('file').items.forEach((item: MenubarMenuItem) => {
         if (item.id === 'file.open') {
           const menuItem = item as IMenubarMenuItemAction;
-          menubar.append(this.createMenuItemByTemplate(menuItem));
+          menubar.append(this.createMenuItem(menuItem));
         } else if (item.id === 'file.closeWindow') {
           const menuItem = item as IMenubarMenuItemRole;
-          menubar.append(this.createRoleMenuItem(menuItem.label, menuItem.role, menuItem.enabled));
+          menubar.append(this.createRoleMenuItem(menuItem));
         }
       });
 
@@ -783,18 +778,14 @@ export default class Menubar {
 
     const actions = [];
     actions.push(...[
-      this.createMenuItemByTemplate(floatMenuItem),
+      this.createMenuItem(floatMenuItem),
       separator(),
       this.createMenuItem('msg.window.enterPip', undefined, 'P', false, undefined, 'window.pip'),
       separator(),
-      this.createRoleMenuItem(
-        minimizeMenuItem.label,
-        minimizeMenuItem.role,
-        minimizeMenuItem.enabled,
-      ),
-      this.createMenuItemByTemplate(maxmizeMenuItem),
+      this.createRoleMenuItem(minimizeMenuItem),
+      this.createMenuItem(maxmizeMenuItem),
       separator(),
-      this.createMenuItemByTemplate(landingViewMenuItem),
+      this.createMenuItem(landingViewMenuItem),
     ]);
 
     actions.forEach(i => window.append(i));
@@ -848,24 +839,42 @@ export default class Menubar {
     return helpMenuItem;
   }
 
+  private createSubMenuItem(menuItem: IMenubarMenuItemSubmenu): Electron.MenuItem
+
   private createSubMenuItem(
     label: string,
+    enabled?: boolean,
     submenu?: IMenubarMenu,
+  ): Electron.MenuItem
+
+  private createSubMenuItem(
+    arg1: string | IMenubarMenuItemSubmenu,
     enabled = true,
+    submenu?: IMenubarMenu,
   ): Electron.MenuItem {
-    const id = label.replace(/^msg./g, '');
-    label = this.$t(label);
+    let id;
+    let label;
+
+    if (typeof arg1 === 'string') {
+      id = arg1.replace(/^msg./g, '');
+      label = this.$t(arg1);
+    } else {
+      id = arg1.id;
+      label = this.$t(arg1.label);
+    }
+
     const newMenu = new Menu();
+    if (!submenu && typeof arg1 !== 'string') submenu = arg1.submenu;
     if (submenu) {
       submenu.items.forEach((menuItem: MenubarMenuItem) => {
         if (isSeparator(menuItem)) {
           const item = separator();
           newMenu.append(item);
         } else if (isSubmenu(menuItem)) {
-          const item = this.createSubMenuItem(`msg.${menuItem.id}`, menuItem.submenu);
+          const item = this.createSubMenuItem(menuItem);
           newMenu.append(item);
         } else {
-          const item = this.createMenuItemByTemplate(menuItem);
+          const item = this.createMenuItem(menuItem);
           newMenu.append(item);
         }
       });
@@ -875,77 +884,95 @@ export default class Menubar {
     });
   }
 
+  private createRoleMenuItem(menuItem: IMenubarMenuItemRole): Electron.MenuItem
+
   private createRoleMenuItem(
     label: string,
     role: ('undo' | 'redo' | 'cut' | 'copy' | 'paste' | 'pasteandmatchstyle' | 'delete' | 'selectall' | 'reload' | 'forcereload' | 'toggledevtools' | 'resetzoom' | 'zoomin' | 'zoomout' | 'togglefullscreen' | 'window' | 'minimize' | 'close' | 'help' | 'about' | 'services' | 'hide' | 'hideothers' | 'unhide' | 'quit' | 'startspeaking' | 'stopspeaking' | 'close' | 'minimize' | 'zoom' | 'front' | 'appMenu' | 'fileMenu' | 'editMenu' | 'viewMenu' | 'windowMenu'),
+    enabled?: boolean,
+  ): Electron.MenuItem
+
+  private createRoleMenuItem(
+    arg1: string | IMenubarMenuItemRole,
+    role?: ('undo' | 'redo' | 'cut' | 'copy' | 'paste' | 'pasteandmatchstyle' | 'delete' | 'selectall' | 'reload' | 'forcereload' | 'toggledevtools' | 'resetzoom' | 'zoomin' | 'zoomout' | 'togglefullscreen' | 'window' | 'minimize' | 'close' | 'help' | 'about' | 'services' | 'hide' | 'hideothers' | 'unhide' | 'quit' | 'startspeaking' | 'stopspeaking' | 'close' | 'minimize' | 'zoom' | 'front' | 'appMenu' | 'fileMenu' | 'editMenu' | 'viewMenu' | 'windowMenu'),
     enabled = true,
   ): Electron.MenuItem {
-    const id = label.replace(/^msg./g, '');
-    label = this.$t(label);
+    if (typeof arg1 === 'string') {
+      const id = arg1.replace(/^msg./g, '');
+      arg1 = this.$t(arg1);
+      return new MenuItem({
+        id, label: arg1, enabled, role,
+      });
+    }
+    arg1.label = this.$t(arg1.label);
     return new MenuItem({
-      id, label, enabled, role,
+      id: arg1.id, label: arg1.label, role: arg1.role, enabled: arg1.enabled,
     });
   }
 
+  private createMenuItem(menuItem: IMenubarMenuItemAction): Electron.MenuItem
+
   private createMenuItem(
-    label: string,
+    label: string, click?: (menuItem: Electron.MenuItem) => void,
+    accelerator?: string, enabled?: boolean, checked?: boolean, id?: string
+  ): Electron.MenuItem
+
+  private createMenuItem(
+    arg1: string | IMenubarMenuItemAction,
     click?: (menuItem: Electron.MenuItem) => void,
     accelerator?: string,
     enabled = false,
     checked?: boolean,
     id?: string,
   ): Electron.MenuItem {
-    if (!id) id = label.replace(/^msg./g, '');
-    label = this.$t(label);
-    if (!click) {
-      click = (menuItem: Electron.MenuItem) => {
-        if (this.mainWindow) {
-          this.mainWindow.webContents.send(id as string, menuItem);
-        }
-        app.emit('menu-create-main-window', id, menuItem);
-      };
-    }
-
-    const options: Electron.MenuItemConstructorOptions = {
-      id,
-      label,
-      click,
-      enabled,
-      accelerator,
-    };
-
-    if (checked !== undefined) {
-      options.type = 'checkbox';
-      options.checked = checked;
-    }
-    return new MenuItem(options);
-  }
-
-  private createMenuItemByTemplate(menuItem: IMenubarMenuItemAction) {
-    if (menuItem.enabled === undefined) menuItem.enabled = true;
-
-    const {
-      id, accelerator, winAccelerator, enabled, checked,
-    } = menuItem;
-
-    const label = this.$t(menuItem.label);
-
-    const click = (menuItem: Electron.MenuItem) => {
-      if (this.mainWindow) {
-        this.mainWindow.webContents.send(id, menuItem);
+    if (typeof arg1 === 'string') {
+      if (!id) id = arg1.replace(/^msg./g, '');
+      arg1 = this.$t(arg1);
+      if (!click) {
+        click = () => {
+          if (this.mainWindow) {
+            this.mainWindow.webContents.send(id as string);
+          }
+          app.emit('menu-create-main-window', id);
+        };
       }
-      app.emit('menu-create-main-window', id, menuItem);
-    };
+
+      const options: Electron.MenuItemConstructorOptions = {
+        id,
+        label: arg1,
+        click,
+        enabled,
+        accelerator,
+      };
+
+      if (checked !== undefined) {
+        options.type = 'checkbox';
+        options.checked = checked;
+      }
+      return new MenuItem(options);
+    }
+    if (arg1.enabled === undefined) arg1.enabled = true;
+
+    const label = this.$t(arg1.label);
 
     const options: Electron.MenuItemConstructorOptions = {
-      id, label, click, enabled, accelerator,
+      id: arg1.id,
+      label,
+      click: () => {
+        if (this.mainWindow) {
+          this.mainWindow.webContents.send(arg1.id as string);
+        }
+        app.emit('menu-create-main-window', id);
+      },
+      enabled: arg1.enabled,
+      accelerator: arg1.accelerator,
     };
 
-    if (winAccelerator && !IsMacintosh) {
-      options.accelerator = winAccelerator;
+    if (arg1.winAccelerator && !IsMacintosh) {
+      options.accelerator = arg1.winAccelerator;
     }
 
-    if (checked !== undefined) {
+    if (arg1.checked !== undefined) {
       options.type = 'checkbox';
       options.checked = checked;
     }
@@ -964,13 +991,13 @@ export default class Menubar {
         const item = separator();
         newMenu.append(item);
       } else if (isSubmenu(menuItem)) {
-        const item = this.createSubMenuItem(`msg.${menuItem.id}`, menuItem.submenu);
+        const item = this.createSubMenuItem(menuItem);
         newMenu.append(item);
       } else if (isRole(menuItem)) {
-        const item = this.createRoleMenuItem(menuItem.label, menuItem.role, menuItem.enabled);
+        const item = this.createRoleMenuItem(menuItem);
         newMenu.append(item);
       } else {
-        const item = this.createMenuItemByTemplate(menuItem);
+        const item = this.createMenuItem(menuItem);
         newMenu.append(item);
       }
     });
