@@ -1,6 +1,7 @@
 import {
   Menu, MenuItem, app, shell,
 } from 'electron';
+import { cloneDeep } from 'lodash';
 import {
   MenubarMenuItem,
   IMenubarMenu,
@@ -8,6 +9,8 @@ import {
   IMenubarMenuItemSeparator,
   IMenubarMenuItemAction,
   IMenubarMenuItemRole,
+  IMenubarMenuState,
+  MenuName,
 } from './common/Menubar';
 import { IsMacintosh } from '../../shared/common/platform';
 import Locale from '../../shared/common/localize';
@@ -38,7 +41,7 @@ export default class Menubar {
 
   private menubar: Electron.Menu;
 
-  private currentMenuState: {};
+  private currentMenuState: IMenubarMenuState;
 
   private paused = false;
 
@@ -75,6 +78,7 @@ export default class Menubar {
 
   public constructor() {
     this.locale = new Locale();
+    this.currentMenuState = cloneDeep(menuTemplate as IMenubarMenuState);
     this.menuStateControl();
   }
 
@@ -202,7 +206,9 @@ export default class Menubar {
   }
 
   public updateMenuItemChecked(id: string, checked: boolean) {
-    if (this.menubar.getMenuItemById(id)) this.menubar.getMenuItemById(id).checked = checked;
+    if (this.menubar.getMenuItemById(id)) {
+      this.menubar.getMenuItemById(id).checked = checked;
+    }
   }
 
   public updateMenuItemEnabled(id: string, enabled: boolean) {
@@ -345,8 +351,18 @@ export default class Menubar {
     return menuItem && menuItem.submenu;
   }
 
+  private refreshMenu(id: string) {
+    // const menu = this.getSubmenuById(id);
+
+    // if (menu) {
+    //   menu.clear();
+
+    // }
+  }
+
   private refreshPlaybackMenu() {
     const playbackMenu = this.getSubmenuById('playback');
+
     if (playbackMenu) {
       // @ts-ignore
       playbackMenu.clear();
@@ -960,7 +976,7 @@ export default class Menubar {
       label,
       click: () => {
         if (this.mainWindow) {
-          this.mainWindow.webContents.send(arg1.id as string);
+          if (typeof arg1 !== 'string') this.mainWindow.webContents.send(arg1.id as string);
         }
         app.emit('menu-create-main-window', id);
       },
@@ -980,11 +996,11 @@ export default class Menubar {
     return new MenuItem(options);
   }
 
-  private getMenuItemTemplate(menu: string): IMenubarMenu {
-    return menuTemplate[menu];
+  private getMenuItemTemplate(menu: MenuName): IMenubarMenu {
+    return this.currentMenuState[menu];
   }
 
-  private convertFromMenuItemTemplate(menu: string): Electron.Menu {
+  private convertFromMenuItemTemplate(menu: MenuName): Electron.Menu {
     const newMenu = new Menu();
     this.getMenuItemTemplate(menu).items.forEach((menuItem: MenubarMenuItem) => {
       if (isSeparator(menuItem)) {

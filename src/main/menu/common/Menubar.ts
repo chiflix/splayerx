@@ -1,4 +1,3 @@
-
 export interface IMenubarMenu {
   items: MenubarMenuItem[];
 }
@@ -9,6 +8,12 @@ export type MenubarMenuItem =
   | IMenubarMenuItemSeparator
   | IMenubarMenuItemRole
   | IMenubarMenuItemRadio;
+
+export type MenuName = 'audio' | 'file' | 'help' | 'playback' | 'splayerx' | 'subtitle' | 'window' | 'edit' | 'history' | 'favourite';
+
+export type IMenubarMenuState = {
+  [menuName in MenuName]: IMenubarMenu;
+};
 
 export interface IMenubarMenuItemAction {
   id: string;
