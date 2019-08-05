@@ -130,10 +130,8 @@ export default Vue.extend({
     display: flex;
     align-items: center;
     justify-content: center;
-    .un_select, .static_label, .arrow {
-      opacity: 0.3;
-    }
     .arrow {
+      opacity: 0.3;
       margin-left: 4px;
       margin-right: 4px;
     }
