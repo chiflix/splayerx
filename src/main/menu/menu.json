@@ -215,23 +215,27 @@
             {
               "id": "subtitle.increasePrimarySubtitleDelay",
               "label": "msg.subtitle.increasePrimarySubtitleDelay",
-              "accelerator": "CmdOrCtrl+'"
+              "accelerator": "CmdOrCtrl+'",
+              "enabled": false
             },
             {
               "id": "subtitle.decreasePrimarySubtitleDelay",
               "label": "msg.subtitle.decreasePrimarySubtitleDelay",
-              "accelerator": "CmdOrCtrl+;"
+              "accelerator": "CmdOrCtrl+;",
+              "enabled": false
             },
             {
               "id": "menubar.separator"
             },
             {
               "id": "subtitle.increaseSecondarySubtitleDelay",
-              "label": "msg.subtitle.increaseSecondarySubtitleDelay"
+              "label": "msg.subtitle.increaseSecondarySubtitleDelay",
+              "enabled": false
             },
             {
               "id": "subtitle.decreaseSecondarySubtitleDelay",
-              "label": "msg.subtitle.decreaseSecondarySubtitleDelay"
+              "label": "msg.subtitle.decreaseSecondarySubtitleDelay",
+              "enabled": false
             }
           ]
         }
