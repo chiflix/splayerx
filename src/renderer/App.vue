@@ -13,7 +13,7 @@
       :name="transitionMode"
       mode="out-in"
     >
-      <router-view :open-file-args="openFileArgs"/>
+      <router-view />
     </transition>
   </div>
 </template>
@@ -33,7 +33,6 @@ export default {
   data() {
     return {
       transitionMode: '',
-      openFileArgs: null,
     };
   },
   watch: {
@@ -43,9 +42,6 @@ export default {
     },
   },
   mounted() {
-    ipcRenderer.on('open-file', (event: Event, args: { onlySubtitle: boolean, files: string[] }) => {
-      this.openFileArgs = args;
-    });
     // to-do: specify commitType and commitPayload with vuex typescriptened
     ipcRenderer.on('mainCommit', (event: Event, commitType: string, commitPayload: any) => {
       this.mainCommitProxy(commitType, commitPayload);
