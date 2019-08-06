@@ -155,7 +155,6 @@ import Select from '@/components/PlayingView/Select.vue';
 import Icon from '@/components/BaseIconContainer.vue';
 import Progress from '@/components/PlayingView/Progress.vue';
 import { AudioTranslateStatus, AudioTranslateFailType } from '../store/modules/AudioTranslate';
-import { log } from '../libs/Log';
 
 export default Vue.extend({
   name: 'AudioTranslateModal',
@@ -256,7 +255,6 @@ export default Vue.extend({
       } else if (translateStatus === AudioTranslateStatus.Translating) {
         message = this.$t('translateModal.translate.contentTranslate');
       }
-      log.debug('modal', this.didGrab);
       return message;
     },
   },
@@ -283,7 +281,6 @@ export default Vue.extend({
       } else if (status === AudioTranslateStatus.Searching) {
         this.didGrab = false;
       }
-      log.debug('modal', this.didGrab);
     },
   },
   methods: {
