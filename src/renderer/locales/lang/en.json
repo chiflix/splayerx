@@ -362,7 +362,7 @@
       "contentTranslate": "Subtitle in source language found, translation in process ...",
       "contentGrabbing": "Subtitle in source language not found, extracting audio ...",
       "contentGrabComplated": "Audio extracted, uploading now ...",
-      "contentSpeech": "Audio uploaded, speech recoginition and translation in process ..."
+      "contentSpeech": "Audio uploaded, speech recognition and translation in process ..."
     },
     "success": {
       "title": "Translation Done",
@@ -387,7 +387,7 @@
     "cancel": "Cancel",
     "quit": "Quit",
     "generate": "Generate",
-    "ok": "Background",
+    "ok": "Run in Background",
     "continue": "Cancel"
   },
   "translateBubble": {

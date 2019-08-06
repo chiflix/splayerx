@@ -46,7 +46,10 @@
       <p v-else-if="isProgress && isTranslateFail">
         {{ failContent }}
       </p>
-      <p v-else-if="isProgress">
+      <p
+        v-else-if="isProgress"
+        class="two-line"
+      >
         {{ progressContent }}
       </p>
       <div
@@ -399,6 +402,14 @@ export default Vue.extend({
     color: rgba(255,255,255,0.50);
     line-height: 16px;
     margin-bottom: 10px;
+    &.two-line {
+      height: 32px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+    }
   }
   .select {
     cursor: pointer;
