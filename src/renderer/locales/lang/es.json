@@ -128,8 +128,8 @@
       "play": "Jugar",
       "resetSpeed": "Restablecer velocidad de reproducción",
       "nextVideo": "Siguiente Video",
-      "showPlaylist": "",
-      "hidePlaylist": "",
+      "showPlaylist": "Mostrar lista de reproducción",
+      "hidePlaylist": "Ocultar lista de reproducción",
       "previousVideo": "Video Anterior",
       "singleCycle": "Repetir una",
       "snapShot": "Instantánea"
@@ -302,7 +302,7 @@
     "playing": "Jugando",
     "paused": "En pausa",
     "playlistSource": "Lista",
-    "add": ""
+    "add": "Agregar a la lista de reproducción"
   },
   "subtitle": {
     "embedded": "Empotrar",
