@@ -353,10 +353,15 @@
     },
     "translate": {
       "title": "Acerca de {time} izquierda",
-      "content": "Por favor, no omita el vídeo o cierra la aplicación. Puedes comprobar el progreso en el panel de traducción.",
       "minute": "{number} min",
       "second": "{number} seg",
-      "hour": "{number} hr"
+      "hour": "{number} hr",
+      "content": "Por favor, no omita el vídeo o cierra la aplicación. Puedes comprobar el progreso en el panel de traducción.",
+      "contentSearch": "",
+      "contentTranslate": "",
+      "contentGrabbing": "",
+      "contentGrabComplated": "",
+      "contentSpeech": ""
     },
     "success": {
       "title": "Traducción realizada",
