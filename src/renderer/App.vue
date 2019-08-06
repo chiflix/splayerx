@@ -13,7 +13,7 @@
       :name="transitionMode"
       mode="out-in"
     >
-      <router-view :open-file-args="openFileArgs"/>
+      <router-view :open-file-args="openFileArgs" />
     </transition>
   </div>
 </template>

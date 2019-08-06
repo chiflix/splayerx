@@ -37,6 +37,7 @@ export default {
   props: {
     openFileArgs: {
       type: Object,
+      default: () => undefined,
     },
   },
   data() {
