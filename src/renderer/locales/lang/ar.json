@@ -128,8 +128,8 @@
       "play": "لعب",
       "resetSpeed": "إعادة ضبط سرعة التشغيل",
       "nextVideo": "الفيديو التالي",
-      "showPlaylist": "",
-      "hidePlaylist": "",
+      "showPlaylist": "عرض قائمة التشغيل",
+      "hidePlaylist": "إخفاء قائمة التشغيل",
       "previousVideo": "الفيديو السابق",
       "singleCycle": "كرر مرة واحدة",
       "snapShot": "لمحة"
@@ -302,7 +302,7 @@
     "playing": "تلعب",
     "paused": "توقف",
     "playlistSource": "قائمة التشغيل",
-    "add": ""
+    "add": "أضف إلى قائمة التشغيل"
   },
   "subtitle": {
     "embedded": "تضمين",
