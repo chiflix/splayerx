@@ -414,7 +414,7 @@ new Vue({
         this.menuService.popupWinMenu();
       }
     });
-    window.addEventListener('keydown', (e) => {
+    window.addEventListener('keydown', (e) => { // eslint-disable-line complexity
       switch (e.keyCode) {
         case 27:
           if (this.isFullScreen && !this.playlistDisplayState) {
@@ -446,6 +446,14 @@ new Vue({
         case 85:
           if (e.metaKey && e.shiftKey) {
             this.$bus.$emit('open-url-show', true);
+          }
+          break;
+        case 76:
+          if (
+            (process.platform === 'darwin' && !e.metaKey)
+            || (process.platform === 'win32' && !e.ctrlKey)
+          ) {
+            this.$bus.$emit('switch-playlist');
           }
           break;
         default:
