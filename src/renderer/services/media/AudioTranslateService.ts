@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-06-20 18:03:14
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-07-29 14:43:33
+ * @Last Modified time: 2019-08-06 11:45:20
  */
 
 // @ts-ignore
@@ -70,15 +70,15 @@ class AudioTranslateService extends EventEmitter {
   }: {
     time?: Buffer, end?: boolean, error?: string, result?: StreamingTranslationResponse.AsObject
   }) {
-    if (time) {
-      this.emit('grab', time);
-    } else if (end) {
+    if (end) {
       this.emit('grabCompleted');
     } else if (result) {
       this.handleMainCallBack(result);
     } else if (error) {
       this.emit('error', new Error(error));
       this.stop();
+    } else if (time) {
+      this.emit('grab', time);
     }
   }
 
