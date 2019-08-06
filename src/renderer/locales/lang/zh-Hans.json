@@ -128,6 +128,8 @@
       "play": "播放",
       "resetSpeed": "重置播放速度",
       "nextVideo": "下一集",
+      "showPlaylist": "打开播放列表",
+      "hidePlaylist": "收起播放列表",
       "previousVideo": "上一集",
       "singleCycle": "循环单个文件",
       "snapShot": "截图"
@@ -299,7 +301,8 @@
     "folderSource": "文件夹",
     "playing": "正在播放",
     "paused": "已暂停",
-    "playlistSource": "播放列表"
+    "playlistSource": "播放列表",
+    "add": "添加到播放列表"
   },
   "subtitle": {
     "embedded": "内嵌",
@@ -353,10 +356,15 @@
     },
     "translate": {
       "title": "大约还需 {time}",
-      "content": "请不要切换视频或关闭播放器，您可以在该视频的翻译结果列表中查看进度。",
       "minute": "{number} 分钟",
       "second": "{number} 秒",
-      "hour": "{number} 小时"
+      "hour": "{number} 小时",
+      "content": "请不要切换视频或关闭播放器，您可以在该视频的翻译结果列表中查看进度。",
+      "contentSearch": "正在查找 ...",
+      "contentTranslate": "已经找到源语言字幕，正在智能翻译 ...",
+      "contentGrabbing": "未找到源语言字幕，正在提取音频 ...",
+      "contentGrabComplated": "音频提取完成，正在上传 ...",
+      "contentSpeech": "音频上传完毕，正在语音识别和智能翻译 ..."
     },
     "success": {
       "title": "翻译完成",
@@ -381,7 +389,7 @@
     "cancel": "取消",
     "quit": "退出",
     "generate": "生成",
-    "ok": "好的",
+    "ok": "後台運行",
     "continue": "取消"
   },
   "translateBubble": {
