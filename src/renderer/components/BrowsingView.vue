@@ -79,7 +79,7 @@ import BrowsingHeader from '@/components/BrowsingView/BrowsingHeader.vue';
 import Icon from '@/components/BaseIconContainer.vue';
 import NotificationBubble from '@/components/NotificationBubble.vue';
 import asyncStorage from '@/helpers/asyncStorage';
-import { BrowsingTab } from "@/interfaces/IBrowsingView";
+import { BrowsingTab } from '@/interfaces/IBrowsingView';
 import {
   bilibili, bilibiliFindType, bilibiliBarrageAdapt, bilibiliVideoPause,
 } from '../../shared/pip/bilibili';
