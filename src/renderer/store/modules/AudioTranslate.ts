@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-05 16:03:32
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-08-06 15:01:18
+ * @Last Modified time: 2019-08-06 15:26:03
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @ts-ignore
@@ -128,8 +128,6 @@ const taskCallback = (taskInfo: AITaskInfo) => {
     startEstimateTime = stopPoint;
   } else if (startEstimateTime < slowPoint) {
     reduce = 0.7;
-  } else if (startEstimateTime > staticEstimateTime * 0.6) {
-    startEstimateTime = staticEstimateTime * 0.6;
   } else if (startEstimateTime > staticEstimateTime * 0.6) {
     startEstimateTime = staticEstimateTime * 0.6;
   }
