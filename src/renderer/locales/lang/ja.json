@@ -128,8 +128,8 @@
       "play": "プレイ",
       "resetSpeed": "重置播放速度",
       "nextVideo": "次のビデオ",
-      "showPlaylist": "",
-      "hidePlaylist": "",
+      "showPlaylist": "プレイリストを表示",
+      "hidePlaylist": "プレイリストを隠す",
       "previousVideo": "前のビデオ",
       "singleCycle": "リピート",
       "snapShot": "スナップショット"
@@ -302,7 +302,7 @@
     "playing": "再生中",
     "paused": "一時停止",
     "playlistSource": "プレイリスト",
-    "add": ""
+    "add": "プレイリストに追加する"
   },
   "subtitle": {
     "embedded": "埋め込み式",
