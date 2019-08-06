@@ -26,7 +26,7 @@
           mode="out-in"
         >
           <div
-            :key="hoverIndex"
+            :key="filename"
             :style="{
               marginTop: sizeAdaption(53),
               paddingLeft: sizeAdaption(40),
@@ -117,6 +117,8 @@
             :item-moving="itemMoving"
             :index="addIndex"
             :add-mouseup="addMouseup"
+            :on-item-mouseout="onItemMouseout"
+            :on-item-mouseover="onItemMouseover"
           />
           <div
             v-if="thumbnailNumber < numberOfPlaylistItem"
@@ -468,15 +470,19 @@ export default {
       this.indexOfMovingItem = this.playingList.length;
       this.movementX = this.movementY = 0;
     },
-    onItemMouseover(index: number, recentPlayService: RecentPlayService) {
+    onItemMouseover(index?: number, recentPlayService?: RecentPlayService) {
       this.$emit('can-hover-item');
-      this.hoverIndex = index;
-      this.hoveredDuration = recentPlayService.duration;
-      this.filename = this.pathBaseName(recentPlayService.path);
-      if (recentPlayService.lastPlayedTime) {
-        this.hoveredLastPlayedTime = recentPlayService.lastPlayedTime;
+      if (index && recentPlayService) {
+        this.hoverIndex = index;
+        this.hoveredDuration = recentPlayService.duration;
+        this.filename = this.pathBaseName(recentPlayService.path);
+        if (recentPlayService.lastPlayedTime) {
+          this.hoveredLastPlayedTime = recentPlayService.lastPlayedTime;
+        } else {
+          this.hoveredLastPlayedTime = 0;
+        }
       } else {
-        this.hoveredLastPlayedTime = 0;
+        this.filename = '添加视频到列表中';
       }
     },
     onItemMouseout() {
