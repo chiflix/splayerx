@@ -303,7 +303,10 @@ new Vue({
       } else if (!val && this.playingViewTop) {
         this.topOnWindow = true;
       }
-      this.menuService.updatePaused(val);
+      this.menuService.updateMenuItemLabel(
+        'playback.playOrPause',
+        val ? this.$t('msg.playback.play') : this.$t('msg.playback.pause'),
+      );
     },
     ableToPushCurrentSubtitle(val) {
       this.menuService.updateMenuItemEnabled('subtitle.uploadSelectedSubtitle', val);

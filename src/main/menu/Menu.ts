@@ -212,8 +212,14 @@ export default class Menubar {
   // merge fullscreen, play/pause, playlist
   public updateMenuItemLabel(id: string, label: string) {
     // refreshMenuState
+    const idArray = id.split('.');
+    const result = this.currentMenuState[idArray[0]]
+      .items.find((menuItem: MenubarMenuItem) => menuItem.id === id);
+    result.label = label;
     // find menu need to be refreshed
+    const menu = idArray[0];
     // refreshMenu
+    this.refreshMenu(menu as MenuName);
   }
 
   public updateMenuItemChecked(id: string, checked: boolean) {
@@ -362,44 +368,43 @@ export default class Menubar {
     return menuItem && menuItem.submenu;
   }
 
-  private refreshMenu(id: string) {
-    // const menu = this.getSubmenuById(id);
+  private refreshMenu(menuName: MenuName) {
+    let menu = this.getSubmenuById(id);
 
-    // if (menu) {
-    //   menu.clear();
+    if (!menu) return;
+    // @ts-ignore
+    menu.clear();
 
-    // }
+    menu = this.convertFromMenuItemTemplate(menuName);
+
+    Menu.setApplicationMenu(this.menubar);
   }
 
   private refreshPlaybackMenu() {
     const playbackMenu = this.getSubmenuById('playback');
 
-    if (playbackMenu) {
-      // @ts-ignore
-      playbackMenu.clear();
+    if (!playbackMenu) return;
+    // @ts-ignore
+    playbackMenu.clear();
 
-      this.getMenuItemTemplate('playback').items.forEach((menuItem: MenubarMenuItem) => {
-        if (isSeparator(menuItem)) {
-          const item = separator();
-          playbackMenu.append(item);
-        } else {
-          if (menuItem.id === 'playback.playOrPause') {
-            menuItem.label = this.paused ? this.$t('msg.playback.play') : this.$t('msg.playback.pause');
-          }
-          if (menuItem.id === 'playback.playlist') {
-            menuItem.label = this.playlistOpened ? this.$t('msg.playback.hidePlaylist') : this.$t('msg.playback.showPlaylist');
-          }
-          // @ts-ignore
-          if (isAction(menuItem) && this._disable) {
-            menuItem.enabled = !this._disable;
-          }
-          const item = this.createMenuItem(menuItem);
-          playbackMenu.append(item);
+    this.getMenuItemTemplate('playback').items.forEach((menuItem: MenubarMenuItem) => {
+      if (isSeparator(menuItem)) {
+        const item = separator();
+        playbackMenu.append(item);
+      } else {
+        // if (menuItem.id === 'playback.playlist') {
+        //   menuItem.label = this.playlistOpened ? this.$t('msg.playback.hidePlaylist') : this.$t('msg.playback.showPlaylist');
+        // }
+        // @ts-ignore
+        if (isAction(menuItem) && this._disable) {
+          menuItem.enabled = !this._disable;
         }
-      });
+        const item = this.createMenuItem(menuItem);
+        playbackMenu.append(item);
+      }
+    });
 
-      Menu.setApplicationMenu(this.menubar);
-    }
+    Menu.setApplicationMenu(this.menubar);
   }
 
   private refreshBrowsingWindowMenu() {
@@ -767,7 +772,8 @@ export default class Menubar {
   }
 
   private createAudioMenu() {
-    const audioMenu = this.convertFromMenuItemTemplate('audio');
+    const audioMenu = new Menu();
+    this.convertFromMenuItemTemplate(audioMenu);
     const audioMenuItem = new MenuItem({ id: 'audio', label: this.$t('msg.audio.name'), submenu: audioMenu });
     return audioMenuItem;
   }
