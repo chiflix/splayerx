@@ -357,11 +357,11 @@
       "second": "{number} 秒",
       "hour": "{number} 時間",
       "content": "動画をスキップしたり、アプリケーションを閉じたりしないでください翻訳パネルで進行状況を確認できます。",
-      "contentSearch": "",
-      "contentTranslate": "",
-      "contentGrabbing": "",
-      "contentGrabComplated": "",
-      "contentSpeech": ""
+      "contentSearch": "探しています...",
+      "contentTranslate": "ソース言語の字幕が発見され、知的に翻訳されています...",
+      "contentGrabbing": "ソース言語の字幕が見つかりません。音声を抽出しています...",
+      "contentGrabComplated": "音声の抽出が完了しました、アップロードしています...",
+      "contentSpeech": "オーディオのアップロードが完了し、音声認識とインテリジェントな翻訳..."
     },
     "success": {
       "title": "翻訳完了",
