@@ -128,8 +128,8 @@
       "play": "놀이",
       "resetSpeed": "재생 속도 재설정",
       "nextVideo": "다음 동영상",
-      "showPlaylist": "",
-      "hidePlaylist": "",
+      "showPlaylist": "재생 목록 표시",
+      "hidePlaylist": "재생 목록 숨기기",
       "previousVideo": "이전 비디오",
       "singleCycle": "하나 반복",
       "snapShot": "스냅 샷"
@@ -302,7 +302,7 @@
     "playing": "연주 중",
     "paused": "일시 중지 된",
     "playlistSource": "재생 목록",
-    "add": ""
+    "add": "재생 목록에 추가"
   },
   "subtitle": {
     "embedded": "깊숙이 박다",
