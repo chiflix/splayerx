@@ -455,8 +455,11 @@ export default {
       this.widgetsStatus.PlaylistControl.showAttached = true;
       clearTimeout(this.openPlayListTimeId);
       this.openPlayListTimeId = setTimeout(() => {
-        this.widgetsStatus.PlaylistControl.showAttached = true;
+        this.widgetsStatus.PlaylistControl.showAttached = false;
       }, 4000);
+    });
+    this.$bus.$on('switch-playlist', () => {
+      this.widgetsStatus.PlaylistControl.showAttached = !this.tempRecentPlaylistDisplayState;
     });
     this.$bus.$on('drag-over', () => {
       this.clock.clearTimeout(this.openPlayListTimeId);

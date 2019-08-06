@@ -226,6 +226,7 @@ new Vue({
     playlistDisplayState(val: boolean) {
       this.menuService.updateMenuItemEnabled('playback.forwardS', !val);
       this.menuService.updateMenuItemEnabled('playback.backwardS', !val);
+      this.menuService.updatePlaylist(val);
     },
     displayLanguage(val) {
       if (messages[val]) {
@@ -414,7 +415,7 @@ new Vue({
         this.menuService.popupWinMenu();
       }
     });
-    window.addEventListener('keydown', (e) => {
+    window.addEventListener('keydown', (e) => { // eslint-disable-line complexity
       switch (e.keyCode) {
         case 27:
           if (this.isFullScreen && !this.playlistDisplayState) {
@@ -735,6 +736,9 @@ new Vue({
       });
       this.menuService.on('playback.resetSpeed', () => {
         this.$store.dispatch(videoActions.CHANGE_RATE, 1);
+      });
+      this.menuService.on('playback.playlist', () => {
+        this.$bus.$emit('switch-playlist');
       });
       this.menuService.on('playback.previousVideo', () => {
         this.$bus.$emit('previous-video');

@@ -47,6 +47,8 @@ export default class Menubar {
 
   private isFullScreen = false;
 
+  private playlistOpened = false;
+
   private isPip = false;
 
   private playingViewTop = false;
@@ -84,7 +86,7 @@ export default class Menubar {
 
   public setMainWindow(window: Electron.BrowserWindow | null) {
     // may replace this way of getting mainWindow by window service or else...
-    this.playingViewTop = this.browsingViewTop = this.isFullScreen = false;
+    this.playingViewTop = this.browsingViewTop = this.isFullScreen = this.playlistOpened = false;
     this.mainWindow = window;
   }
 
@@ -178,6 +180,13 @@ export default class Menubar {
       if (this._routeName !== 'browsing-view') {
         this.refreshWindowMenu();
       }
+    }
+  }
+
+  public updatePlaylist(playlistOpened: boolean) {
+    if (this.playlistOpened !== playlistOpened) {
+      this.playlistOpened = playlistOpened;
+      this.refreshPlaybackMenu();
     }
   }
 
@@ -374,6 +383,9 @@ export default class Menubar {
         } else {
           if (menuItem.id === 'playback.playOrPause') {
             menuItem.label = this.paused ? this.$t('msg.playback.play') : this.$t('msg.playback.pause');
+          }
+          if (menuItem.id === 'playback.playlist') {
+            menuItem.label = this.playlistOpened ? this.$t('msg.playback.hidePlaylist') : this.$t('msg.playback.showPlaylist');
           }
           // @ts-ignore
           if (isAction(menuItem) && this._disable) {
