@@ -156,116 +156,125 @@ export default {
     },
   },
   watch: {
-    activeTab(val: BrowsingTab, oldVal: BrowsingTab) {
-      setTimeout(() => {
-        const lastWebViewIndex = this.tabGroup
-          .findIndex((tab: BrowsingTab) => tab.id === oldVal.id);
-        if (this.$refs.webView[lastWebViewIndex].isCurrentlyAudible()) {
-          if (oldVal.id === 'bilibili') {
-            this.$refs.webView[lastWebViewIndex]
-              .executeJavaScript(bilibiliFindType, (r: (HTMLElement | null)[]) => {
-                this.bilibiliType = ['bangumi', 'videoStreaming', 'iframeStreaming', 'video'][r.findIndex(i => i)] || 'others';
-              }).then(() => {
-                this.$refs.webView[lastWebViewIndex]
-                  .executeJavaScript(bilibiliVideoPause(this.bilibiliType));
-              });
-          } else {
-            this.$refs.webView[lastWebViewIndex].executeJavaScript('document.querySelector("video").pause();');
+    activeTab: {
+      handler(val: BrowsingTab, oldVal: BrowsingTab) {
+        setTimeout(() => {
+          const lastWebViewIndex = this.tabGroup
+            .findIndex((tab: BrowsingTab) => oldVal && tab.id === oldVal.id);
+          if (lastWebViewIndex !== -1
+            && this.$refs.webView[lastWebViewIndex].isCurrentlyAudible()) {
+            if (oldVal.id === 'bilibili') {
+              this.$refs.webView[lastWebViewIndex]
+                .executeJavaScript(bilibiliFindType, (r: (HTMLElement | null)[]) => {
+                  this.bilibiliType = ['bangumi', 'videoStreaming', 'iframeStreaming', 'video'][r.findIndex(i => i)] || 'others';
+                }).then(() => {
+                  this.$refs.webView[lastWebViewIndex]
+                    .executeJavaScript(bilibiliVideoPause(this.bilibiliType));
+                });
+            } else {
+              this.$refs.webView[lastWebViewIndex].executeJavaScript('document.querySelector("video").pause();');
+            }
           }
-        }
-        this.activeWebView.addEventListener('load-commit', () => {
-          this.currentUrl = this.activeWebView.getURL();
-        });
-        // https://github.com/electron/typescript-definitions/issues/27 fixed in 6.0.0
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        this.activeWebView.addEventListener('ipc-message', (evt: any) => {
-          const { channel, args }: { channel: string, args:
-          { dragover?: boolean,
-            files?: string[],
-            isFullScreen?: boolean,
-            windowSize?: number[] | null,
-            x?: number,
-            y?: number,
-            url?: string,
-            targetName?: string,
-          }[] } = evt;
-          switch (channel) {
-            case 'open-url':
-              this.handleOpenUrl(args[0]);
-              break;
-            case 'dragover':
-            case 'dragleave':
-              this.maskToShow = args[0].dragover;
-              break;
-            case 'drop':
-              this.maskToShow = false;
-              this.dropFiles = args[0].files;
-              break;
-            case 'mousemove':
-              if (this.isPip) {
-                this.timeout = true;
-                if (this.timer) {
-                  clearTimeout(this.timer);
+          this.activeWebView.addEventListener('load-commit', () => {
+            this.currentUrl = this.activeWebView.getURL();
+          });
+          // https://github.com/electron/typescript-definitions/issues/27 fixed in 6.0.0
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          this.activeWebView.addEventListener('ipc-message', (evt: any) => {
+            const { channel, args }: {
+              channel: string, args:
+              {
+                dragover?: boolean,
+                files?: string[],
+                isFullScreen?: boolean,
+                windowSize?: number[] | null,
+                x?: number,
+                y?: number,
+                url?: string,
+                targetName?: string,
+              }[]
+            } = evt;
+            switch (channel) {
+              case 'open-url':
+                this.handleOpenUrl(args[0]);
+                break;
+              case 'dragover':
+              case 'dragleave':
+                this.maskToShow = args[0].dragover;
+                break;
+              case 'drop':
+                this.maskToShow = false;
+                if ((args[0].files as string[]).length) {
+                  this.dropFiles = args[0].files;
                 }
-                this.timer = setTimeout(() => {
-                  this.timeout = false;
-                }, 3000);
-              }
-              break;
-            case 'left-drag':
-              if (this.isPip) {
-                if (args[0].windowSize) {
-                  this.$electron.ipcRenderer.send('callMainWindowMethod', 'setBounds', [{
-                    x: args[0].x,
-                    y: args[0].y,
-                    width: args[0].windowSize[0],
-                    height: args[0].windowSize[1],
-                  }]);
-                } else {
-                  this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', [args[0].x, args[0].y]);
+                break;
+              case 'mousemove':
+                if (this.isPip) {
+                  this.timeout = true;
+                  if (this.timer) {
+                    clearTimeout(this.timer);
+                  }
+                  this.timer = setTimeout(() => {
+                    this.timeout = false;
+                  }, 3000);
                 }
-              }
-              break;
-            case 'fullscreenchange':
-              this.headerToShow = !args[0].isFullScreen;
-              break;
-            case 'keydown':
-              if (['INPUT', 'TEXTAREA'].includes(args[0].targetName as string)) {
-                this.acceleratorAvailable = false;
-              }
-              break;
-            default:
-              console.warn(`Unhandled ipc-message: ${channel}`, args);
-              break;
-          }
-        });
-        this.activeWebView.addEventListener('dom-ready', () => { // for webview test
-          window.focus();
-          this.activeWebView.focus();
-          if (process.env.NODE_ENV === 'development') this.activeWebView.openDevTools();
-        });
-        // https://github.com/electron/typescript-definitions/issues/27 fixed in 6.0.0
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        this.activeWebView.addEventListener('new-window', (e: any) => {
-          if (e.disposition !== 'new-window') {
-            this.handleOpenUrl(e);
-          }
-        });
-        this.activeWebView.addEventListener('did-start-loading', () => {
-          this.startTime = new Date().getTime();
-          this.loadingState = true;
-        });
-        this.activeWebView.addEventListener('did-stop-loading', () => {
-          const loadingTime: number = new Date().getTime() - this.startTime;
-          if (loadingTime % 3000 === 0) {
-            this.loadingState = false;
-          } else {
-            setTimeout(() => {
+                break;
+              case 'left-drag':
+                if (this.isPip) {
+                  if (args[0].windowSize) {
+                    this.$electron.ipcRenderer.send('callMainWindowMethod', 'setBounds', [{
+                      x: args[0].x,
+                      y: args[0].y,
+                      width: args[0].windowSize[0],
+                      height: args[0].windowSize[1],
+                    }]);
+                  } else {
+                    this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', [args[0].x, args[0].y]);
+                  }
+                }
+                break;
+              case 'fullscreenchange':
+                this.headerToShow = !args[0].isFullScreen;
+                break;
+              case 'keydown':
+                if (['INPUT', 'TEXTAREA'].includes(args[0].targetName as string)) {
+                  this.acceleratorAvailable = false;
+                }
+                break;
+              default:
+                console.warn(`Unhandled ipc-message: ${channel}`, args);
+                break;
+            }
+          });
+          this.activeWebView.addEventListener('dom-ready', () => { // for webview test
+            window.focus();
+            this.activeWebView.focus();
+            if (process.env.NODE_ENV === 'development') this.activeWebView.openDevTools();
+          });
+          // https://github.com/electron/typescript-definitions/issues/27 fixed in 6.0.0
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          this.activeWebView.addEventListener('new-window', (e: any) => {
+            if (e.disposition !== 'new-window') {
+              this.handleOpenUrl(e);
+            }
+          });
+          this.activeWebView.addEventListener('did-start-loading', () => {
+            this.startTime = new Date().getTime();
+            this.loadingState = true;
+          });
+          this.activeWebView.addEventListener('did-stop-loading', () => {
+            const loadingTime: number = new Date().getTime() - this.startTime;
+            if (loadingTime % 3000 === 0) {
               this.loadingState = false;
-            }, 3000 - (loadingTime % 3000));
-          }
-        });
-      }, 0);
+            } else {
+              setTimeout(() => {
+                this.loadingState = false;
+              }, 3000 - (loadingTime % 3000));
+            }
+          });
+        }, 0);
+      },
+      immediate: true,
     },
     isFullScreen(val: string) {
       if (!val) {
@@ -434,102 +443,8 @@ export default {
         name: 'landing-view',
       });
     });
-    this.activeWebView.addEventListener('load-commit', () => {
-      this.currentUrl = this.activeWebView.getURL();
-    });
-    // https://github.com/electron/typescript-definitions/issues/27 fixed in 6.0.0
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    this.activeWebView.addEventListener('ipc-message', (evt: any) => {
-      const { channel, args }: { channel: string, args:
-      { dragover?: boolean,
-        files?: string[],
-        isFullScreen?: boolean,
-        windowSize?: number[] | null,
-        x?: number,
-        y?: number,
-        url?: string,
-        targetName?: string,
-      }[] } = evt;
-      switch (channel) {
-        case 'open-url':
-          this.handleOpenUrl(args[0]);
-          break;
-        case 'dragover':
-        case 'dragleave':
-          this.maskToShow = args[0].dragover;
-          break;
-        case 'drop':
-          this.maskToShow = false;
-          if ((args[0].files as string[]).length) {
-            this.dropFiles = args[0].files;
-          }
-          break;
-        case 'mousemove':
-          if (this.isPip) {
-            this.timeout = true;
-            if (this.timer) {
-              clearTimeout(this.timer);
-            }
-            this.timer = setTimeout(() => {
-              this.timeout = false;
-            }, 3000);
-          }
-          break;
-        case 'left-drag':
-          if (this.isPip) {
-            if (args[0].windowSize) {
-              this.$electron.ipcRenderer.send('callMainWindowMethod', 'setBounds', [{
-                x: args[0].x,
-                y: args[0].y,
-                width: args[0].windowSize[0],
-                height: args[0].windowSize[1],
-              }]);
-            } else {
-              this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', [args[0].x, args[0].y]);
-            }
-          }
-          break;
-        case 'fullscreenchange':
-          this.headerToShow = !args[0].isFullScreen;
-          break;
-        case 'keydown':
-          if (['INPUT', 'TEXTAREA'].includes(args[0].targetName as string)) {
-            this.acceleratorAvailable = false;
-          }
-          break;
-        default:
-          console.warn(`Unhandled ipc-message: ${channel}`, args);
-          break;
-      }
-    });
     this.$electron.ipcRenderer.on('quit', () => {
       this.quit = true;
-    });
-    this.activeWebView.addEventListener('dom-ready', () => { // for webview test
-      window.focus();
-      this.activeWebView.focus();
-      if (process.env.NODE_ENV === 'development') this.activeWebView.openDevTools();
-    });
-    // https://github.com/electron/typescript-definitions/issues/27 fixed in 6.0.0
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    this.activeWebView.addEventListener('new-window', (e: any) => {
-      if (e.disposition !== 'new-window') {
-        this.handleOpenUrl(e);
-      }
-    });
-    this.activeWebView.addEventListener('did-start-loading', () => {
-      this.startTime = new Date().getTime();
-      this.loadingState = true;
-    });
-    this.activeWebView.addEventListener('did-stop-loading', () => {
-      const loadingTime: number = new Date().getTime() - this.startTime;
-      if (loadingTime % 3000 === 0) {
-        this.loadingState = false;
-      } else {
-        setTimeout(() => {
-          this.loadingState = false;
-        }, 3000 - (loadingTime % 3000));
-      }
     });
   },
   beforeDestroy() {
