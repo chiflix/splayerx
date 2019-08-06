@@ -357,11 +357,11 @@
       "second": "{number} seg",
       "hour": "{number} hr",
       "content": "Por favor, no omita el vídeo o cierra la aplicación. Puedes comprobar el progreso en el panel de traducción.",
-      "contentSearch": "",
-      "contentTranslate": "",
-      "contentGrabbing": "",
-      "contentGrabComplated": "",
-      "contentSpeech": ""
+      "contentSearch": "Buscando ...",
+      "contentTranslate": "Se han encontrado subtítulos en el idioma de origen, se están traduciendo de forma inteligente ...",
+      "contentGrabbing": "Subtítulo en el idioma de origen no encontrado, extracción de audio ...",
+      "contentGrabComplated": "Audio extraído, subiendo ahora ...",
+      "contentSpeech": "Audio subido, recolocación de voz y traducción en proceso ..."
     },
     "success": {
       "title": "Traducción realizada",
