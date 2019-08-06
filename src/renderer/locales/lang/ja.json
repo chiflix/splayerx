@@ -389,7 +389,7 @@
     "cancel": "キャンセル",
     "quit": "やめる",
     "generate": "生成する",
-    "ok": "はい",
+    "ok": "バックグラウンドで実行",
     "continue": "キャンセル"
   },
   "translateBubble": {
