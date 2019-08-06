@@ -357,11 +357,11 @@
       "second": "{number} 秒",
       "hour": "{number} 小時",
       "content": "請不要切換視頻或關閉播放器，您可以在該視頻的翻譯結果列表中查看進度。",
-      "contentSearch": "",
-      "contentTranslate": "",
-      "contentGrabbing": "",
-      "contentGrabComplated": "",
-      "contentSpeech": ""
+      "contentSearch": "正在查找 ...",
+      "contentTranslate": "已經找到源語言字幕，正在智能翻譯 ...",
+      "contentGrabbing": "未找到源語言字幕，正在提取音頻 ...",
+      "contentGrabComplated": "音頻提取完成，正在上傳 ...",
+      "contentSpeech": "音頻上傳完畢，正在語音識別和智能翻譯 ..."
     },
     "success": {
       "title": "翻譯完成",
