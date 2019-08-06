@@ -32,14 +32,6 @@ export default class MenuService {
     this.menu.disable = hide;
   }
 
-  public updatePaused(paused: boolean) {
-    this.menu.updatePaused(paused);
-  }
-
-  public updateFullScreen(isFullScreen: boolean) {
-    this.menu.updateFullScreen(isFullScreen);
-  }
-
   public updateIsPip(isPip: boolean) {
     this.menu.updateIsPip(isPip);
   }
@@ -65,12 +57,6 @@ export default class MenuService {
     });
     ipcMain.on('update-route-name', (e: Event, routeName: string) => {
       this.menu.routeName = routeName;
-    });
-    ipcMain.on('update-paused', (e: Event, paused: boolean) => {
-      this.updatePaused(paused);
-    });
-    ipcMain.on('update-playlist', (e: Event, playlistOpened: boolean) => {
-      this.menu.updatePlaylist(playlistOpened);
     });
     ipcMain.on('update-playingview-on-top', (e: Event, topOnWindow: boolean) => {
       this.menu.updatePlayingViewTop(topOnWindow);

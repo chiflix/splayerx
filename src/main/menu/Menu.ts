@@ -161,33 +161,6 @@ export default class Menubar {
   public updateLocale() {
     this.locale.getDisplayLanguage();
     this.menuStateControl();
-    if (this._routeName === 'playing-view') {
-      this.refreshPlaybackMenu();
-      this.refreshWindowMenu();
-    }
-  }
-
-  public updatePaused(paused: boolean) {
-    if (this.paused !== paused) {
-      this.paused = paused;
-      this.refreshPlaybackMenu();
-    }
-  }
-
-  public updateFullScreen(isFullScreen: boolean) {
-    if (this.isFullScreen !== isFullScreen) {
-      this.isFullScreen = isFullScreen;
-      if (this._routeName !== 'browsing-view') {
-        this.refreshWindowMenu();
-      }
-    }
-  }
-
-  public updatePlaylist(playlistOpened: boolean) {
-    if (this.playlistOpened !== playlistOpened) {
-      this.playlistOpened = playlistOpened;
-      this.refreshPlaybackMenu();
-    }
   }
 
   public updateIsPip(isPip: boolean) {
@@ -215,7 +188,7 @@ export default class Menubar {
     const idArray = id.split('.');
     const result = this.currentMenuState[idArray[0]]
       .items.find((menuItem: MenubarMenuItem) => menuItem.id === id);
-    result.label = label;
+    if (result) result.label = label;
     // find menu need to be refreshed
     const menu = idArray[0];
     // refreshMenu
@@ -223,12 +196,22 @@ export default class Menubar {
   }
 
   public updateMenuItemChecked(id: string, checked: boolean) {
+    const idArray = id.split('.');
+    const result = this.currentMenuState[idArray[0]]
+      .items.find((menuItem: MenubarMenuItem) => menuItem.id === id);
+    if (result) {
+      result.checked = checked;
+    }
     if (this.menubar.getMenuItemById(id)) {
       this.menubar.getMenuItemById(id).checked = checked;
     }
   }
 
   public updateMenuItemEnabled(id: string, enabled: boolean) {
+    const idArray = id.split('.');
+    const result = this.currentMenuState[idArray[0]]
+      .items.find((menuItem: MenubarMenuItem) => menuItem.id === id);
+    if (result) result.enabled = enabled;
     if (this.menubar.getMenuItemById(id)) {
       this.menubar.getMenuItemById(id).enabled = enabled;
       Menu.setApplicationMenu(this.menubar);
@@ -369,13 +352,27 @@ export default class Menubar {
   }
 
   private refreshMenu(menuName: MenuName) {
-    let menu = this.getSubmenuById(id);
+    const menu = this.getSubmenuById(menuName);
 
     if (!menu) return;
     // @ts-ignore
     menu.clear();
 
-    menu = this.convertFromMenuItemTemplate(menuName);
+    this.getMenuItemTemplate(menuName).items.forEach((menuItem: MenubarMenuItem) => {
+      if (isSeparator(menuItem)) {
+        const item = separator();
+        menu.append(item);
+      } else if (isSubmenu(menuItem)) {
+        const item = this.createSubMenuItem(menuItem);
+        menu.append(item);
+      } else if (isRole(menuItem)) {
+        const item = this.createRoleMenuItem(menuItem);
+        menu.append(item);
+      } else {
+        const item = this.createMenuItem(menuItem);
+        menu.append(item);
+      }
+    });
 
     Menu.setApplicationMenu(this.menubar);
   }
@@ -392,9 +389,6 @@ export default class Menubar {
         const item = separator();
         playbackMenu.append(item);
       } else {
-        // if (menuItem.id === 'playback.playlist') {
-        //   menuItem.label = this.playlistOpened ? this.$t('msg.playback.hidePlaylist') : this.$t('msg.playback.showPlaylist');
-        // }
         // @ts-ignore
         if (isAction(menuItem) && this._disable) {
           menuItem.enabled = !this._disable;
@@ -450,13 +444,6 @@ export default class Menubar {
         const item = this.createRoleMenuItem(menuItem);
         windowMenu.append(item);
       } else {
-        if (menuItem.id === 'window.fullscreen') {
-          menuItem.label = this.isFullScreen ? this.$t('msg.window.exitFullScreen') : this.$t('msg.window.enterFullScreen');
-        }
-        if (menuItem.id === 'window.keepPlayingWindowFront') {
-          // @ts-ignore
-          menuItem.checked = this.playingViewTop;
-        }
         if (isAction(menuItem) && this._disable) menuItem.enabled = !this._disable;
         const item = this.createMenuItem(menuItem);
         windowMenu.append(item);
@@ -753,27 +740,18 @@ export default class Menubar {
 
   private createFileMenu(): Electron.MenuItem {
     const fileMenu = this.convertFromMenuItemTemplate('file');
-    fileMenu.getMenuItemById('file.open').click = () => {
-      if (!this.mainWindow) {
-        app.emit('menu-open-dialog');
-      } else {
-        this.mainWindow.webContents.send('file.open');
-      }
-    };
     const fileMenuItem = new MenuItem({ id: 'file', label: this.$t('msg.file.name'), submenu: fileMenu });
     return fileMenuItem;
   }
 
   private createPlaybackMenu() {
     const playbackMenu = this.convertFromMenuItemTemplate('playback');
-    playbackMenu.getMenuItemById('playback.playOrPause').label = this.paused ? this.$t('msg.playback.play') : this.$t('msg.playback.pause');
     const playbackMenuItem = new MenuItem({ id: 'playback', label: this.$t('msg.playback.name'), submenu: playbackMenu });
     return playbackMenuItem;
   }
 
   private createAudioMenu() {
-    const audioMenu = new Menu();
-    this.convertFromMenuItemTemplate(audioMenu);
+    const audioMenu = this.convertFromMenuItemTemplate('audio');
     const audioMenuItem = new MenuItem({ id: 'audio', label: this.$t('msg.audio.name'), submenu: audioMenu });
     return audioMenuItem;
   }
@@ -832,10 +810,6 @@ export default class Menubar {
 
   private createWindowMenu() {
     const windowMenu = this.convertFromMenuItemTemplate('window');
-    windowMenu.getMenuItemById('window.bossKey').click = () => {
-      app.emit('bossKey');
-    };
-    windowMenu.getMenuItemById('window.keepPlayingWindowFront').checked = this.playingViewTop;
     const windowMenuItem = new MenuItem({ id: 'window', label: this.$t('msg.window.name'), submenu: windowMenu });
     return windowMenuItem;
   }
@@ -990,6 +964,7 @@ export default class Menubar {
     if (arg1.enabled === undefined) arg1.enabled = true;
 
     const label = this.$t(arg1.label);
+    if (arg1.id.startsWith('playback')) console.log(arg1.label);
 
     const options: Electron.MenuItemConstructorOptions = {
       id: arg1.id,
@@ -1004,13 +979,27 @@ export default class Menubar {
       accelerator: arg1.accelerator,
     };
 
+    if (arg1.id === 'file.open') {
+      options.click = () => {
+        if (!this.mainWindow) {
+          app.emit('menu-open-dialog');
+        } else {
+          this.mainWindow.webContents.send('file.open');
+        }
+      };
+    } else if (arg1.id === 'window.bossKey') {
+      options.click = () => {
+        app.emit('bossKey');
+      };
+    }
+
     if (arg1.winAccelerator && !IsMacintosh) {
       options.accelerator = arg1.winAccelerator;
     }
 
     if (arg1.checked !== undefined) {
       options.type = 'checkbox';
-      options.checked = checked;
+      options.checked = arg1.checked;
     }
 
     return new MenuItem(options);

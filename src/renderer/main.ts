@@ -198,6 +198,12 @@ new Vue({
     },
   },
   watch: {
+    isFullScreen(val) {
+      this.menuService.updateMenuItemLabel(
+        'window.fullscreen',
+        val ? 'msg.window.exitFullScreen' : 'msg.window.enterFullScreen',
+      );
+    },
     topOnWindow(val: boolean) {
       const browserWindow = this.$electron.remote.getCurrentWindow();
       browserWindow.setAlwaysOnTop(val);
@@ -214,7 +220,6 @@ new Vue({
         this.topOnWindow = val;
       }
       this.menuService.updateMenuItemChecked('window.keepPlayingWindowFront', val);
-      this.menuService.updateBrowsingViewTop(val);
     },
     isPip(val: boolean) {
       if (!val && this.topOnWindow) {
@@ -226,7 +231,10 @@ new Vue({
     playlistDisplayState(val: boolean) {
       this.menuService.updateMenuItemEnabled('playback.forwardS', !val);
       this.menuService.updateMenuItemEnabled('playback.backwardS', !val);
-      this.menuService.updatePlaylist(val);
+      this.menuService.updateMenuItemLabel(
+        'playback.playlist',
+        val ? 'msg.playback.hidePlaylist' : 'msg.playback.showPlaylist',
+      );
     },
     displayLanguage(val) {
       if (messages[val]) {
@@ -247,6 +255,7 @@ new Vue({
       if (val === 'landing-view' || val === 'playing-view') this.menuService.addRecentPlayItems();
       if (val === 'landing-view') this.topOnWindow = false;
       if (val === 'playing-view' && this.playingViewTop) {
+        this.menuService.updateMenuItemChecked('window.keepPlayingWindowFront', this.playingViewTop);
         this.topOnWindow = true;
       }
     },
@@ -305,7 +314,7 @@ new Vue({
       }
       this.menuService.updateMenuItemLabel(
         'playback.playOrPause',
-        val ? this.$t('msg.playback.play') : this.$t('msg.playback.pause'),
+        val ? 'msg.playback.play' : 'msg.playback.pause',
       );
     },
     ableToPushCurrentSubtitle(val) {
