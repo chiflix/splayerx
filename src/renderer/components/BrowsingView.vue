@@ -58,6 +58,7 @@
       allowpopups
       webpreferences="nativeWindowOpen=yes"
     />
+    <NotificationBubble/>
   </div>
 </template>
 
@@ -73,6 +74,7 @@ import { Browsing as browsingActions } from '@/store/actionTypes';
 import BrowsingHeader from '@/components/BrowsingView/BrowsingHeader.vue';
 import Icon from '@/components/BaseIconContainer.vue';
 import asyncStorage from '@/helpers/asyncStorage';
+import NotificationBubble from '@/components/NotificationBubble.vue';
 import { bilibili, bilibiliFindType, bilibiliBarrageAdapt } from '../../shared/pip/bilibili';
 import youtube from '../../shared/pip/youtube';
 import iqiyi, { iqiyiBarrageAdapt } from '../../shared/pip/iqiyi';
@@ -85,6 +87,7 @@ export default {
   components: {
     'browsing-header': BrowsingHeader,
     Icon,
+    NotificationBubble,
   },
   data() {
     return {
@@ -355,7 +358,9 @@ export default {
           break;
         case 'drop':
           this.maskToShow = false;
-          this.dropFiles = args[0].files;
+          if ((args[0].files as string[]).length) {
+            this.dropFiles = args[0].files;
+          }
           break;
         case 'mousemove':
           if (this.isPip) {
