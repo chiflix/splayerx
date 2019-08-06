@@ -353,10 +353,15 @@
     },
     "translate": {
       "title": "حوالي {time} اليسار",
-      "content": "يرجى عدم تخطي الفيديو أو إغلاق التطبيق. يمكنك التحقق من التقدم المحرز في لوحة الترجمة.",
       "minute": "{number} ثواني",
       "second": "{number} ثانية",
-      "hour": "{number} ساعة"
+      "hour": "{number} ساعة",
+      "content": "يرجى عدم تخطي الفيديو أو إغلاق التطبيق. يمكنك التحقق من التقدم المحرز في لوحة الترجمة.",
+      "contentSearch": "",
+      "contentTranslate": "",
+      "contentGrabbing": "",
+      "contentGrabComplated": "",
+      "contentSpeech": ""
     },
     "success": {
       "title": "تم الترجمة",
