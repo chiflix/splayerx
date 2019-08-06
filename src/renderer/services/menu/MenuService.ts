@@ -40,6 +40,10 @@ export default class MenuService {
     ipcRenderer.send('update-pip', isPip);
   }
 
+  public updateMenuItemLabel(id: string, label: string) {
+    ipcRenderer.send('update-label', id, label);
+  }
+
   public updateMenuItemChecked(id: string, checked: boolean) {
     ipcRenderer.send('update-checked', id, checked);
   }

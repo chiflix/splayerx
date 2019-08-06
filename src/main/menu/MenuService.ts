@@ -81,6 +81,9 @@ export default class MenuService {
     ipcMain.on('update-pip', (e: Event, isPip: boolean) => {
       this.updateIsPip(isPip);
     });
+    ipcMain.on('update-label', (e: Event, id: string, label: string) => {
+      this.menu.updateMenuItemLabel(id, label);
+    });
     ipcMain.on('update-checked', (e: Event, id: string, checked: boolean) => {
       this.menu.updateMenuItemChecked(id, checked);
     });

@@ -209,8 +209,10 @@ export default class Menubar {
     }
   }
 
-  // merge fullscreen, play/pause
+  // merge fullscreen, play/pause, playlist
   public updateMenuItemLabel(id: string, label: string) {
+    // refreshMenuState
+    // find menu need to be refreshed
     // refreshMenu
   }
 
