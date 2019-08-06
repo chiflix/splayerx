@@ -141,6 +141,11 @@
         "id": "menubar.separator"
       },
       {
+        "id":"playback.playlist",
+        "label": "msg.playback.openPlaylist",
+        "accelerator": "L"
+      },
+      {
         "id":"playback.previousVideo",
         "label": "msg.playback.previousVideo",
         "accelerator": "CmdOrCtrl+Left",

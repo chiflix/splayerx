@@ -226,6 +226,7 @@ new Vue({
     playlistDisplayState(val: boolean) {
       this.menuService.updateMenuItemEnabled('playback.forwardS', !val);
       this.menuService.updateMenuItemEnabled('playback.backwardS', !val);
+      this.menuService.updatePlaylist(val);
     },
     displayLanguage(val) {
       if (messages[val]) {
@@ -446,14 +447,6 @@ new Vue({
         case 85:
           if (e.metaKey && e.shiftKey) {
             this.$bus.$emit('open-url-show', true);
-          }
-          break;
-        case 76:
-          if (
-            (process.platform === 'darwin' && !e.metaKey)
-            || (process.platform === 'win32' && !e.ctrlKey)
-          ) {
-            this.$bus.$emit('switch-playlist');
           }
           break;
         default:
@@ -743,6 +736,9 @@ new Vue({
       });
       this.menuService.on('playback.resetSpeed', () => {
         this.$store.dispatch(videoActions.CHANGE_RATE, 1);
+      });
+      this.menuService.on('playback.playlist', () => {
+        this.$bus.$emit('switch-playlist');
       });
       this.menuService.on('playback.previousVideo', () => {
         this.$bus.$emit('previous-video');
