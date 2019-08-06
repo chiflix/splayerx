@@ -34,6 +34,7 @@
             class="info"
           >
             <div
+              v-show="showTopContent"
               :style="{
                 fontSize: sizeAdaption(14),
                 lineHeight: sizeAdaption(14),
@@ -198,6 +199,7 @@ export default {
       lastIndexOnMousedown: 0,
       currentTime: NaN,
       shiftingTimeout: NaN,
+      showTopContent: true,
       cursorLeft: `url("${filePathToUrl(path.join(__static, 'cursor/cursorLeft.svg') as string)}")`,
       cursorRight: `url("${filePathToUrl(path.join(__static, 'cursor/cursorRight.svg') as string)}")`,
     };
@@ -483,9 +485,11 @@ export default {
         }
       } else {
         this.filename = this.$t('recentPlaylist.add');
+        this.showTopContent = false;
       }
     },
     onItemMouseout() {
+      this.showTopContent = true;
       this.hoverIndex = this.playingIndex;
       this.hoveredDuration = this.duration;
       this.filename = this.pathBaseName(this.originSrc);
