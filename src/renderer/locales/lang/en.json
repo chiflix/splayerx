@@ -300,7 +300,8 @@
     "folderSource": "Folder",
     "playing": "Playing",
     "paused": "Paused",
-    "playlistSource": "Playlist"
+    "playlistSource": "Playlist",
+    "add": "Add To Playlist"
   },
   "subtitle": {
     "embedded": "Embed",

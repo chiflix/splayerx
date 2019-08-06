@@ -482,7 +482,7 @@ export default {
           this.hoveredLastPlayedTime = 0;
         }
       } else {
-        this.filename = '添加视频到列表中';
+        this.filename = this.$t('recentPlaylist.add');
       }
     },
     onItemMouseout() {
