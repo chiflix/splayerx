@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-05 16:03:32
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-08-06 10:34:06
+ * @Last Modified time: 2019-08-06 15:01:18
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @ts-ignore
@@ -128,6 +128,8 @@ const taskCallback = (taskInfo: AITaskInfo) => {
     startEstimateTime = stopPoint;
   } else if (startEstimateTime < slowPoint) {
     reduce = 0.7;
+  } else if (startEstimateTime > staticEstimateTime * 0.6) {
+    startEstimateTime = staticEstimateTime * 0.6;
   } else if (startEstimateTime > staticEstimateTime * 0.6) {
     startEstimateTime = staticEstimateTime * 0.6;
   }
@@ -294,7 +296,11 @@ const actions = {
     });
     if (grab) {
       // 旋转对应目标语言的字幕
-      dispatch(smActions.autoChangePrimarySubtitle, state.selectedTargetSubtitleId);
+      if (getters.isFirstSubtitle) {
+        dispatch(smActions.manualChangePrimarySubtitle, state.selectedTargetSubtitleId);
+      } else {
+        dispatch(smActions.manualChangeSecondarySubtitle, state.selectedTargetSubtitleId);
+      }
       // 设置智能翻译的状态
       commit(m.AUDIO_TRANSLATE_UPDATE_STATUS, AudioTranslateStatus.Searching);
       timerCount = 1;
@@ -349,9 +355,9 @@ const actions = {
           commit(m.AUDIO_TRANSLATE_UPDATE_PROGRESS, 0);
           const selectId = state.selectedTargetSubtitleId;
           if (getters.primarySubtitleId === selectId) {
-            dispatch(smActions.autoChangePrimarySubtitle, '');
+            dispatch(smActions.manualChangePrimarySubtitle, '');
           } else if (getters.secondarySubtitleId === selectId) {
-            dispatch(smActions.autoChangeSecondarySubtitle, '');
+            dispatch(smActions.manualChangeSecondarySubtitle, '');
           }
           const failBubbleId = uuidv4();
           commit(m.AUDIO_TRANSLATE_UPDATE_FAIL_BUBBLE_ID, failBubbleId);
@@ -428,9 +434,9 @@ const actions = {
           if (subtitle && subtitle.id) {
             // 选中当前翻译的字幕
             if (getters.primarySubtitleId === selectId) {
-              dispatch(smActions.autoChangePrimarySubtitle, subtitle.id);
+              dispatch(smActions.manualChangePrimarySubtitle, subtitle.id);
             } else if (getters.secondarySubtitleId === selectId) {
-              dispatch(smActions.autoChangeSecondarySubtitle, subtitle.id);
+              dispatch(smActions.manualChangeSecondarySubtitle, subtitle.id);
             }
           }
           // 先删除AI按钮对应的ID
@@ -484,29 +490,34 @@ const actions = {
     const {
       primaryLanguage, secondaryLanguage, mediaHash,
     } = getters;
+    const list = getters.list as SubtitleControlListItem[];
     const key = `${getters.mediaHash}`;
     const taskInfo = mediaStorageService.getAsyncTaskInfo(key);
     if (taskInfo && getters.mediaHash === taskInfo.mediaHash
       && (taskInfo.targetLanguage === primaryLanguage
         || taskInfo.targetLanguage === secondaryLanguage)) {
-      let sub = null;
-      try {
-        sub = await dispatch(smActions.addSubtitle, {
-          generator: new TranslatedGenerator(
-            null, taskInfo.targetLanguage as LanguageCode,
-          ),
-          mediaHash,
-        });
-      } catch (error) {
-        // empty
+      let sub = list.find((
+        sub: SubtitleControlListItem,
+      ) => sub.type === Type.Translated && sub.language === taskInfo.targetLanguage);
+      if (!sub) {
+        try {
+          sub = await dispatch(smActions.addSubtitle, {
+            generator: new TranslatedGenerator(
+              null, taskInfo.targetLanguage as LanguageCode,
+            ),
+            mediaHash,
+          });
+        } catch (error) {
+          // empty
+        }
       }
       commit(m.AUDIO_TRANSLATE_UPDATE_LAST_AUDIO_LANGUAGE, taskInfo.audioLanguageCode);
       if (sub) {
         commit(m.AUDIO_TRANSLATE_SELECTED_UPDATE, sub);
         if (getters.isFirstSubtitle) {
-          dispatch(smActions.autoChangePrimarySubtitle, sub.id);
+          dispatch(smActions.manualChangePrimarySubtitle, sub.id);
         } else {
-          dispatch(smActions.autoChangeSecondarySubtitle, sub.id);
+          dispatch(smActions.manualChangeSecondarySubtitle, sub.id);
         }
       }
       dispatch(a.AUDIO_TRANSLATE_START, taskInfo.audioLanguageCode);
@@ -581,9 +592,9 @@ const actions = {
     // 丢弃任务，执行用户强制操作
     const selectId = state.selectedTargetSubtitleId;
     if (getters.primarySubtitleId === selectId) {
-      dispatch(smActions.autoChangePrimarySubtitle, '');
+      dispatch(smActions.manualChangePrimarySubtitle, '');
     } else if (getters.secondarySubtitleId === selectId) {
-      dispatch(smActions.autoChangeSecondarySubtitle, '');
+      dispatch(smActions.manualChangeSecondarySubtitle, '');
     }
     commit(m.AUDIO_TRANSLATE_RECOVERY);
     state.callbackAfterBubble();
@@ -613,9 +624,9 @@ const actions = {
     if ((getters.isTranslating || state.status === AudioTranslateStatus.Back)
       && state.selectedTargetSubtitleId === sub.id) {
       if (getters.isFirstSubtitle) {
-        dispatch(smActions.autoChangePrimarySubtitle, sub.id);
+        dispatch(smActions.manualChangePrimarySubtitle, sub.id);
       } else {
-        dispatch(smActions.autoChangeSecondarySubtitle, sub.id);
+        dispatch(smActions.manualChangeSecondarySubtitle, sub.id);
       }
       commit(m.AUDIO_TRANSLATE_SHOW_MODAL);
     } else if (getters.isTranslating || state.status === AudioTranslateStatus.Back) {
@@ -643,66 +654,63 @@ const actions = {
     commit(m.AUDIO_TRANSLATE_UPDATE_STATUS, status);
   },
   [a.AUDIO_TRANSLATE_SHOW_BUBBLE]( // eslint-disable-line complexity
-    { commit, state }: any,
+    { commit, state, getters }: any,
     origin: string,
   ) {
     const messageWhenGrab = this.$i18n.t('translateBubble.bubbleWhenGrab', this.$i18n.locale, this.$i18n.locale);
     const messageWhenTranslate = this.$i18n.t('translateBubble.bubbleWhenTranslate', this.$i18n.locale, this.$i18n.locale);
     const messageWhenForbidden = this.$i18n.t('translateBubble.bubbleFunctionForbidden', this.$i18n.locale, this.$i18n.locale);
     if (origin === AudioTranslateBubbleOrigin.VideoChange
-      && state.status === AudioTranslateStatus.Grabbing) {
+      && (getters.isTranslating && state.status !== AudioTranslateStatus.Translating)) {
       // 当正在提取音频，切换视频
       commit(m.AUDIO_TRANSLATE_BUBBLE_INFO_UPDATE, {
         type: AudioTranslateBubbleType.ChangeWhenGrab,
         message: messageWhenGrab,
       });
     } else if (origin === AudioTranslateBubbleOrigin.NextVideoChange
-      && state.status === AudioTranslateStatus.Grabbing) {
+      && (getters.isTranslating && state.status !== AudioTranslateStatus.Translating)) {
       // 当正在提取音频，自动下一个视频
       commit(m.AUDIO_TRANSLATE_BUBBLE_INFO_UPDATE, {
         type: AudioTranslateBubbleType.NextVideoWhenGrab,
         message: messageWhenGrab,
       });
     } else if (origin === AudioTranslateBubbleOrigin.WindowClose
-      && state.status === AudioTranslateStatus.Grabbing) {
+      && (getters.isTranslating && state.status !== AudioTranslateStatus.Translating)) {
       // 当前正在提取音频, 关闭窗口
       commit(m.AUDIO_TRANSLATE_BUBBLE_INFO_UPDATE, {
         type: AudioTranslateBubbleType.CloseWhenGrab,
         message: messageWhenGrab,
       });
     } else if (origin === AudioTranslateBubbleOrigin.VideoChange
-      && state.status === AudioTranslateStatus.Translating) {
+      && getters.isTranslating) {
       // 当正在后台翻译，切换视频
       commit(m.AUDIO_TRANSLATE_BUBBLE_INFO_UPDATE, {
         type: AudioTranslateBubbleType.ChangeWhenTranslate,
         message: messageWhenTranslate,
       });
     } else if (origin === AudioTranslateBubbleOrigin.NextVideoChange
-      && state.status === AudioTranslateStatus.Translating) {
+      && getters.isTranslating) {
       // 当正在后台翻译，切换视频
       commit(m.AUDIO_TRANSLATE_BUBBLE_INFO_UPDATE, {
         type: AudioTranslateBubbleType.NextVideoWhenTranslate,
         message: messageWhenTranslate,
       });
     } else if (origin === AudioTranslateBubbleOrigin.WindowClose
-      && state.status === AudioTranslateStatus.Translating) {
+      && getters.isTranslating) {
       // 当正在后台翻译，关闭window
       commit(m.AUDIO_TRANSLATE_BUBBLE_INFO_UPDATE, {
         type: AudioTranslateBubbleType.CloseWhenTranslate,
         message: messageWhenTranslate,
       });
     } else if (origin === AudioTranslateBubbleOrigin.OtherAIButtonClick
-      && (state.status === AudioTranslateStatus.Translating
-        || state.status === AudioTranslateStatus.Back
-        || state.status === AudioTranslateStatus.Grabbing)) {
+      && (state.status === AudioTranslateStatus.Back || getters.isTranslating)) {
       // 当又一个AI翻译正在进行时，还想再AI翻译
       commit(m.AUDIO_TRANSLATE_BUBBLE_INFO_UPDATE, {
         type: AudioTranslateBubbleType.ClickWhenTranslate,
         message: messageWhenForbidden,
       });
     } else if (origin === AudioTranslateBubbleOrigin.Refresh
-      && (state.status === AudioTranslateStatus.Translating
-        || state.status === AudioTranslateStatus.Grabbing)) {
+      && getters.isTranslating) {
       // 当当前有一个AI翻译正在进行时，想刷新字幕列表
       commit(m.AUDIO_TRANSLATE_BUBBLE_INFO_UPDATE, {
         type: AudioTranslateBubbleType.RefreshWhenTranslate,
