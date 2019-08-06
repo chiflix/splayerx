@@ -27,11 +27,17 @@
   </div>
 </template>
 <script lang="ts">
+import fs from 'fs';
 import Icon from '@/components/BaseIconContainer.vue';
 
 export default {
   components: {
     Icon,
+  },
+  props: {
+    openFileArgs: {
+      type: Object,
+    },
   },
   data() {
     return {
@@ -39,6 +45,9 @@ export default {
     };
   },
   computed: {
+    openPlayingView() {
+      return !!this.openFileArgs;
+    },
     privacyAgreement() {
       return this.$store.getters.privacyAgreement;
     },
@@ -82,7 +91,17 @@ export default {
           && this.welcomePayload.primaryLanguage
         ) {
           this.$store.dispatch('welcomeProcess', this.welcomePayload);
-          this.$router.push({ name: 'landing-view' });
+          if (this.openPlayingView) {
+            const onlyFolders = this.openFileArgs.files
+              .every((file: string) => fs.statSync(file).isDirectory());
+            if (onlyFolders) {
+              this.openFolder(...this.openFileArgs.files);
+            } else {
+              this.openFile(...this.openFileArgs.files);
+            }
+          } else {
+            this.$router.push({ name: 'landing-view' });
+          }
         }
       }
     },
