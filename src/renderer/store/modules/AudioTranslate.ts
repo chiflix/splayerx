@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-05 16:03:32
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-08-06 16:26:32
+ * @Last Modified time: 2019-08-06 16:57:33
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @ts-ignore
@@ -120,9 +120,9 @@ const taskCallback = (taskInfo: AITaskInfo) => {
   let startEstimateTime = store.getters.translateEstimateTime;
   let reduce = 1.2;
   let slowPoint = staticEstimateTime * 0.2;
-  slowPoint = slowPoint < 50 ? 50 : slowPoint;
+  slowPoint = slowPoint < 20 ? 20 : slowPoint;
   let stopPoint = staticEstimateTime * 0.07;
-  stopPoint = stopPoint < 15 ? 15 : stopPoint;
+  stopPoint = stopPoint < 7 ? 7 : stopPoint;
   if (startEstimateTime < stopPoint) {
     reduce = 0;
     startEstimateTime = stopPoint;
@@ -303,7 +303,7 @@ const actions = {
       commit(m.AUDIO_TRANSLATE_UPDATE_STATUS, AudioTranslateStatus.Searching);
       timerCount = 1;
       // 提取audio大概是暂视频总长的0.006，听写大概是视频的1/4
-      staticEstimateTime = (getters.duration * 0.256);
+      staticEstimateTime = (getters.duration * 0.256) < 100 ? 100 : (getters.duration * 0.256);
       // 但是如果时间超过5分钟就按5分钟倒计时
       // staticEstimateTime = staticEstimateTime > 300 ? 300 : staticEstimateTime;
       commit(m.AUDIO_TRANSLATE_UPDATE_ESTIMATE_TIME, staticEstimateTime);
