@@ -362,7 +362,7 @@ export default class Menubar {
             menuItem.label = this.paused ? this.$t('msg.playback.play') : this.$t('msg.playback.pause');
           }
           if (menuItem.id === 'playback.playlist') {
-            menuItem.label = this.playlistOpened ? this.$t('msg.playback.closePlaylist') : this.$t('msg.playback.openPlaylist');
+            menuItem.label = this.playlistOpened ? this.$t('msg.playback.hidePlaylist') : this.$t('msg.playback.showPlaylist');
           }
           // @ts-ignore
           if (isAction(menuItem) && this._disable) {

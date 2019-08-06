@@ -129,8 +129,8 @@
       "play": "Play",
       "resetSpeed": "Reset Playback Speed",
       "nextVideo": "Next Video",
-      "openPlaylist": "Open Playlist",
-      "closePlaylist": "Close Playlist",
+      "showPlaylist": "Show Playlist",
+      "hidePlaylist": "Hide Playlist",
       "previousVideo": "Previous Video",
       "singleCycle": "Repeat One",
       "snapShot": "Snapshot"

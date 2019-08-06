@@ -142,7 +142,7 @@
       },
       {
         "id":"playback.playlist",
-        "label": "msg.playback.openPlaylist",
+        "label": "msg.playback.showPlaylist",
         "accelerator": "L"
       },
       {
