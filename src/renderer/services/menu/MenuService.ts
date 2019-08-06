@@ -24,6 +24,10 @@ export default class MenuService {
     ipcRenderer.send('update-paused', paused);
   }
 
+  public updatePlaylist(playlistOpened: boolean) {
+    ipcRenderer.send('update-playlist', playlistOpened);
+  }
+
   public updatePlayingViewTop(topOnWindow: boolean) {
     ipcRenderer.send('update-playingview-on-top', topOnWindow);
   }

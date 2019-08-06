@@ -129,6 +129,8 @@
       "play": "Play",
       "resetSpeed": "Reset Playback Speed",
       "nextVideo": "Next Video",
+      "showPlaylist": "Show Playlist",
+      "hidePlaylist": "Hide Playlist",
       "previousVideo": "Previous Video",
       "singleCycle": "Repeat One",
       "snapShot": "Snapshot"
@@ -300,7 +302,8 @@
     "folderSource": "Folder",
     "playing": "Playing",
     "paused": "Paused",
-    "playlistSource": "Playlist"
+    "playlistSource": "Playlist",
+    "add": "Add To Playlist"
   },
   "subtitle": {
     "embedded": "Embed",

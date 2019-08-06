@@ -35,17 +35,31 @@ export default {
     itemMoving: {
       type: Boolean,
     },
+    onItemMouseout: {
+      type: Function,
+      default: () => {
+        log.debug('Add.vue', 'mouse out on add button');
+      },
+    },
+    onItemMouseover: {
+      type: Function,
+      default: () => {
+        log.debug('Add.vue', 'mouse over on add button');
+      },
+    },
   },
   methods: {
     addMouseenter() {
       if (!this.itemMoving) {
         this.$refs.button.style.setProperty('background-color', 'rgba(123, 123, 123, 0.12)');
         this.$refs.btnMask.style.setProperty('border-color', 'rgba(255, 255, 255, 0.6)');
+        this.onItemMouseover();
       }
     },
     addMouseleave() {
       this.$refs.button.style.setProperty('background-color', 'rgba(0, 0, 0, 0.12)');
       this.$refs.btnMask.style.setProperty('border-color', 'rgba(255, 255, 255, 0.15)');
+      this.onItemMouseout();
     },
   },
 };

@@ -26,7 +26,7 @@
           mode="out-in"
         >
           <div
-            :key="hoverIndex"
+            :key="filename"
             :style="{
               marginTop: sizeAdaption(53),
               paddingLeft: sizeAdaption(40),
@@ -34,6 +34,7 @@
             class="info"
           >
             <div
+              v-show="showTopContent"
               :style="{
                 fontSize: sizeAdaption(14),
                 lineHeight: sizeAdaption(14),
@@ -117,6 +118,8 @@
             :item-moving="itemMoving"
             :index="addIndex"
             :add-mouseup="addMouseup"
+            :on-item-mouseout="onItemMouseout"
+            :on-item-mouseover="onItemMouseover"
           />
           <div
             v-if="thumbnailNumber < numberOfPlaylistItem"
@@ -196,6 +199,7 @@ export default {
       lastIndexOnMousedown: 0,
       currentTime: NaN,
       shiftingTimeout: NaN,
+      showTopContent: true,
       cursorLeft: `url("${filePathToUrl(path.join(__static, 'cursor/cursorLeft.svg') as string)}")`,
       cursorRight: `url("${filePathToUrl(path.join(__static, 'cursor/cursorRight.svg') as string)}")`,
     };
@@ -468,18 +472,24 @@ export default {
       this.indexOfMovingItem = this.playingList.length;
       this.movementX = this.movementY = 0;
     },
-    onItemMouseover(index: number, recentPlayService: RecentPlayService) {
+    onItemMouseover(index?: number, recentPlayService?: RecentPlayService) {
       this.$emit('can-hover-item');
-      this.hoverIndex = index;
-      this.hoveredDuration = recentPlayService.duration;
-      this.filename = this.pathBaseName(recentPlayService.path);
-      if (recentPlayService.lastPlayedTime) {
-        this.hoveredLastPlayedTime = recentPlayService.lastPlayedTime;
+      if (index && recentPlayService) {
+        this.hoverIndex = index;
+        this.hoveredDuration = recentPlayService.duration;
+        this.filename = this.pathBaseName(recentPlayService.path);
+        if (recentPlayService.lastPlayedTime) {
+          this.hoveredLastPlayedTime = recentPlayService.lastPlayedTime;
+        } else {
+          this.hoveredLastPlayedTime = 0;
+        }
       } else {
-        this.hoveredLastPlayedTime = 0;
+        this.filename = this.$t('recentPlaylist.add');
+        this.showTopContent = false;
       }
     },
     onItemMouseout() {
+      this.showTopContent = true;
       this.hoverIndex = this.playingIndex;
       this.hoveredDuration = this.duration;
       this.filename = this.pathBaseName(this.originSrc);

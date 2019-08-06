@@ -226,6 +226,7 @@ new Vue({
     playlistDisplayState(val: boolean) {
       this.menuService.updateMenuItemEnabled('playback.forwardS', !val);
       this.menuService.updateMenuItemEnabled('playback.backwardS', !val);
+      this.menuService.updatePlaylist(val);
     },
     displayLanguage(val) {
       if (messages[val]) {
@@ -414,7 +415,7 @@ new Vue({
         this.menuService.popupWinMenu();
       }
     });
-    window.addEventListener('keydown', (e) => {
+    window.addEventListener('keydown', (e) => { // eslint-disable-line complexity
       switch (e.keyCode) {
         case 27:
           if (this.isFullScreen && !this.playlistDisplayState) {
@@ -562,6 +563,7 @@ new Vue({
     /* eslint-disable */
 
     window.addEventListener('drop', (e) => {
+      if (this.currentRouteName !== 'landing-view' && this.currentRouteName !== 'playing-view') return;
       e.preventDefault();
       this.$bus.$emit('drop');
       this.$store.commit('source', 'drop');
@@ -580,6 +582,7 @@ new Vue({
       }
     });
     window.addEventListener('dragover', (e) => {
+      if (this.currentRouteName !== 'landing-view' && this.currentRouteName !== 'playing-view') return;
       e.preventDefault();
       e.dataTransfer!.dropEffect = process.platform === 'darwin' ? 'copy' : '';
       this.$bus.$emit('drag-over');
@@ -593,7 +596,8 @@ new Vue({
       this.openFilesByDialog();
     });
 
-    this.$electron.ipcRenderer.on('open-file', (event: Event, args: { onlySubtitle: boolean, files: Array<string> }) => {
+    this.$electron.ipcRenderer.on('open-file', (event: Event, args: { onlySubtitle: boolean, files: string[] }) => {
+      if (this.currentRouteName !== 'landing-view' && this.currentRouteName !== 'playing-view') return;
       if (!args.files.length && args.onlySubtitle) {
         log.info('helpers/index.js', `Cannot find any related video in the folder: ${args.files}`);
         addBubble(LOAD_SUBVIDEO_FAILED);
@@ -735,6 +739,9 @@ new Vue({
       });
       this.menuService.on('playback.resetSpeed', () => {
         this.$store.dispatch(videoActions.CHANGE_RATE, 1);
+      });
+      this.menuService.on('playback.playlist', () => {
+        this.$bus.$emit('switch-playlist');
       });
       this.menuService.on('playback.previousVideo', () => {
         this.$bus.$emit('previous-video');
