@@ -357,11 +357,11 @@
       "second": "{number} ثانية",
       "hour": "{number} ساعة",
       "content": "يرجى عدم تخطي الفيديو أو إغلاق التطبيق. يمكنك التحقق من التقدم المحرز في لوحة الترجمة.",
-      "contentSearch": "",
-      "contentTranslate": "",
-      "contentGrabbing": "",
-      "contentGrabComplated": "",
-      "contentSpeech": ""
+      "contentSearch": "تبحث عن ...",
+      "contentTranslate": "تم العثور على ترجمات لغة المصدر ، ويتم ترجمتها بذكاء ...",
+      "contentGrabbing": "لم يتم العثور على العنوان الفرعي للغة المصدر ، واستخراج الصوت ...",
+      "contentGrabComplated": "اكتمل استخراج الصوت ، جارٍ التحميل ...",
+      "contentSpeech": "اكتمل التحميل الصوتي والتعرف على الكلام والترجمة الذكية ..."
     },
     "success": {
       "title": "تم الترجمة",
