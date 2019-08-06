@@ -1,5 +1,6 @@
 import { ipcMain, splayerx, Event } from 'electron';
 import { existsSync } from 'fs';
+import { writeFile } from 'fs-extra';
 
 function reply(event: Event, channel: string, ...args: unknown[]) {
   if (event.sender && !event.sender.isDestroyed()) event.reply(channel, ...args);
@@ -28,17 +29,39 @@ export default function registerMediaTasks() {
       );
     } else reply(event, 'snapshot-reply', new Error('File does not exist.'));
   });
+
+  let lastVideoPath = '';
+  let lastStreamIndex = -1;
+  let subtitleText = '';
+  let lastSubtitlePos = 0;
   ipcMain.on('subtitle-request', (event,
     videoPath, subtitlePath,
     streamIndex) => {
-    if (existsSync(subtitlePath)) reply(event, 'subtitle-reply', undefined, subtitlePath);
+    if (existsSync(subtitlePath)) reply(event, 'subtitle-reply', undefined, true, subtitlePath);
     else if (existsSync(videoPath)) {
+      if (videoPath !== lastVideoPath || lastStreamIndex !== streamIndex) {
+        lastVideoPath = videoPath;
+        lastStreamIndex = streamIndex;
+        subtitleText = '';
+        lastSubtitlePos = 0;
+      }
       splayerx.extractSubtitles(
-        videoPath, subtitlePath,
+        videoPath,
         streamIndex,
-        (err) => {
-          if (err === '0' && existsSync(subtitlePath)) reply(event, 'subtitle-reply', undefined, subtitlePath);
-          else reply(event, 'subtitle-reply', new Error(err));
+        lastSubtitlePos,
+        false,
+        20,
+        (error, position, data) => {
+          if (error && error !== 'EOF') reply(event, 'subtitle-reply', new Error(error));
+          else if (!error) {
+            const stringToBeConcated = data ? data.toString('utf8') : '';
+            subtitleText = subtitleText.concat(stringToBeConcated);
+            lastSubtitlePos = position;
+            reply(event, 'subtitle-reply', undefined, false);
+          } else {
+            writeFile(subtitlePath, subtitleText, { encoding: 'utf8' })
+              .then(() => reply(event, 'subtitle-reply', undefined, true, subtitlePath));
+          }
         },
       );
     } else reply(event, 'subtitle-reply', new Error('File does not exist.'));

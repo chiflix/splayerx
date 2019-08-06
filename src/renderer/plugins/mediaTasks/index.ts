@@ -1,11 +1,12 @@
 import MediaInfoQueue, { CodecType, ISubtitleStream } from './mediaInfoQueue';
-import SnapshotSubtitleQueue from './snapshotSubtitleQueue';
+import SnapshotQueue from './snapshotSubtitleQueue';
+import SubtitleQueue from './subtitleQueue';
 import ThumbnailQueue from './thumbnailQueue';
-import { Format } from '@/interfaces/ISubtitle';
 import { log } from '@/libs/Log';
 
 const mediaInfoQueue = new MediaInfoQueue();
-const snapshotSubtitleQueue = new SnapshotSubtitleQueue();
+const snapshotQueue = new SnapshotQueue();
+const subtitleQueue = new SubtitleQueue();
 const thumbnailQueue = new ThumbnailQueue();
 
 export async function getMediaInfo(path: string) {
@@ -36,7 +37,7 @@ export async function getSnapshotPath(
   width: number = 1920, height: number = 1080,
 ) {
   try {
-    return snapshotSubtitleQueue.getSnapshotPath(
+    return snapshotQueue.getSnapshotPath(
       videoPath,
       timeInSeconds,
       width, height,
@@ -46,9 +47,9 @@ export async function getSnapshotPath(
     return '';
   }
 }
-export async function getSubtitlePath(videoPath: string, streamIndex: number, format: Format) {
+export async function getSubtitlePath(videoPath: string, streamIndex: number) {
   try {
-    return snapshotSubtitleQueue.getSubtitlePath(videoPath, streamIndex, format);
+    return subtitleQueue.getSubtitlePath(videoPath, streamIndex);
   } catch (error) {
     log.error('[MediaTask|Subtitle]', error);
     return '';

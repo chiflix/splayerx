@@ -95,17 +95,25 @@ declare module 'electron' {
         err: string,
       ) => void,
     ): void;
-    /** extract one subtitle from a video file given stream index and format */
+    /** extract subtitle fragment from a video file (@cliflix/electron@4.0.7-dev.1) */
     extractSubtitles(
       /** source video path to extract subtitle from */
       srcVideoPath: string,
-      /** subtitle path to save */
-      subtitlePath: string,
-      /** stream index string in the form of 0:s:0 */
-      streamIndex?: string,
+      /** subtitle stream index to extract, if -1 will auto select the default track */
+      streamIndex: number,
+      /** position of the last subtitle extracted or seconds of the video */
+      posOrSeconds: number,
+      /** whether posOrSeconds param is seconds of the video */
+      isSeconds: boolean,
+      /** subtitle dialogues count */
+      dialogueCount: number,
       callback: (
-        /** if not '0', an error occurred */
-        err: string,
+        /** if not '', an error occurred */
+        error: string,
+        /** video position of the last extracted dialogue */
+        position: number,
+        /** buffer of the extracted dialogues */
+        data: Buffer | null,
       ) => void,
     ): void;
     /** generate thumbnails in the order of left-to-right and top-to-bottom */
@@ -169,7 +177,7 @@ declare module 'electron' {
     ) => void): this;
     on(channel: 'subtitle-request', listener: (event: Event,
       videoPath: string, subtitlePath: string,
-      streamIndex: string,
+      streamIndex: number,
     ) => void): this;
     on(channel: 'thumbnail-request', listener: (event: Event,
       videoPath: string, imagePath: string,
@@ -187,7 +195,7 @@ declare module 'electron' {
     ): void;
     send(channel: 'subtitle-request',
       videoPath: string, subtitlePath: string,
-      streamIndex: string,
+      streamIndex: number,
     ): void;
     send(channel: 'thumbnail-request',
       videoPath: string, imagePath: string,
@@ -197,12 +205,12 @@ declare module 'electron' {
 
     on(channel: 'media-info-reply', listener: (event: Event, error?: Error, info: string) => void): this;
     on(channel: 'snapshot-reply', listener: (event: Event, error?: Error, path: string) => void): this;
-    on(channel: 'subtitle-reply', listener: (event: Event, error: Error | undefined, path: string) => void): this;
+    on(channel: 'subtitle-reply', listener: (event: Event, error: Error | undefined, finished: boolean, path: string) => void): this;
     on(channel: 'thumbnail-reply', listener: (event: Event, error?: Error, path: string) => void): this;
 
     once(channel: 'media-info-reply', listener: (event: Event, error?: Error, info: string) => void): this;
     once(channel: 'snapshot-reply', listener: (event: Event, error?: Error, path: string) => void): this;
-    once(channel: 'subtitle-reply', listener: (event: Event, error: Error | undefined, path: string) => void): this;
+    once(channel: 'subtitle-reply', listener: (event: Event, error: Error | undefined, finished: boolean, path: string) => void): this;
     once(channel: 'thumbnail-reply', listener: (event: Event, error?: Error, path: string) => void): this;
   }
 
@@ -210,7 +218,7 @@ declare module 'electron' {
     reply(channel: string, ...args: any[]): void;
     reply(channel: 'media-info-reply', error?: Error, info: string): void;
     reply(channel: 'snapshot-reply', error?: Error, path: string): this;
-    reply(channel: 'subtitle-reply', error: Error | undefined, path: string): this;
+    reply(channel: 'subtitle-reply', error: Error | undefined, finished: boolean, path: string): this;
     reply(channel: 'thumbnail-reply', error?: Error, path: string): void;
   }
 }
