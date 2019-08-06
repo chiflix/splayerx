@@ -60,7 +60,7 @@ export class EmbeddedGenerator implements IEntityGenerator {
   private async getExtractedSrc() {
     const { videoSrc, streamIndex, extractedSrc } = this.origin.source;
     if (!extractedSrc) {
-      this.origin.source.extractedSrc = await getSubtitlePath(videoSrc, streamIndex, this.format);
+      this.origin.source.extractedSrc = await getSubtitlePath(videoSrc, streamIndex);
       return this.origin.source.extractedSrc;
     }
     return extractedSrc;
@@ -74,7 +74,7 @@ export class EmbeddedGenerator implements IEntityGenerator {
     if (this.language !== LanguageCode.Default) return this.language;
     const { videoSrc, streamIndex, extractedSrc } = this.origin.source;
     if (!extractedSrc) {
-      this.origin.source.extractedSrc = await getSubtitlePath(videoSrc, streamIndex, this.format);
+      this.origin.source.extractedSrc = await getSubtitlePath(videoSrc, streamIndex);
     }
     this.language = await inferLanguageFromPath(this.origin.source.extractedSrc);
     return this.language;

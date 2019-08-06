@@ -5,7 +5,9 @@ import { remote } from 'electron';
 import {
   copyFile, existsSync, outputFile, ensureDirSync, remove, readdir,
 } from 'fs-extra';
-import { Entity, IOrigin, Type } from '@/interfaces/ISubtitle';
+import {
+  Entity, IOrigin, Type, Format,
+} from '@/interfaces/ISubtitle';
 import { embeddedSrcLoader, IEmbeddedOrigin, SagiSubtitlePayload } from '@/services/subtitle';
 import { sagiSubtitleToWebVTT } from '@/services/subtitle/utils/transcoders';
 import { updateSubtitle } from '.';
@@ -32,10 +34,10 @@ export async function cacheLocalSubtitle(subtitle: Entity): Promise<IOrigin> {
 }
 /** copy the subtitle if extracted */
 export async function cacheEmbeddedSubtitle(subtitle: Entity): Promise<IOrigin> {
-  const { hash, format } = subtitle;
-  const storedPath = join(subtitleCacheDirPath, `${hash}.${formatToExtension(subtitle.format)}`);
+  const { hash } = subtitle;
+  const storedPath = join(subtitleCacheDirPath, `${hash}.${Format.AdvancedSubStationAplha}`);
   const { extractedSrc, videoSrc, streamIndex } = (subtitle.source as IEmbeddedOrigin).source;
-  const srcPath = extractedSrc || await embeddedSrcLoader(videoSrc, streamIndex, format);
+  const srcPath = extractedSrc || await embeddedSrcLoader(videoSrc, streamIndex);
   ensureDirSync(subtitleCacheDirPath);
   if (!existsSync(srcPath)) await copyFile(srcPath, storedPath);
   return {

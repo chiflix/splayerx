@@ -140,7 +140,6 @@ export class DatabaseGenerator implements IEntityGenerator {
         const embeddedSrc = await embeddedSrcLoader(
           source.videoSrc,
           source.streamIndex,
-          this.format,
         );
         return loadLocalFile(embeddedSrc);
       }
