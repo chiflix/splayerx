@@ -14,15 +14,12 @@ import { log } from '@/libs/Log';
  * You can change schema info in 'constants.js'
  */
 export class InfoDB {
-  public db: IDBPDatabase;
-
   /**
    * Create InfoDB if doesn't exist
    * Update InfoDB if new schema or new index has added
    */
   public async getDB(): Promise<IDBPDatabase> {
-    if (this.db) return this.db;
-    this.db = await openDB(
+    return openDB(
       INFO_DATABASE_NAME, INFODB_VERSION, {
         upgrade(db: IDBPDatabase, oldVersion: number) {
           if (oldVersion === 1) {
@@ -42,7 +39,6 @@ export class InfoDB {
         },
       },
     );
-    return this.db;
   }
 
   // deprecated! will be deleted soon

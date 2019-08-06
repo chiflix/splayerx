@@ -1,3 +1,5 @@
+import { log } from '@/libs/Log';
+
 export interface IMediaTask<T = unknown> {
   getId(): string;
   execute(): Promise<T>;
@@ -38,7 +40,7 @@ export default class BaseMediaTaskQueue {
         try {
           const result = await Promise.race([
             new Promise((resolve, reject) => setTimeout(
-              () => reject(new Error('timeout')),
+              () => reject(new Error(`Timeout: ${task.constructor.name}`)),
               timeout || defaultOptions.timeout,
             )),
             task.execute(),
@@ -67,11 +69,15 @@ export default class BaseMediaTaskQueue {
     }
   }
 
-  private processTasks() {
+  private async processTasks() {
     const task = this.pendingTasks.shift();
     if (task) {
       this.executing = true;
-      task.run();
+      try {
+        task.run();
+      } catch (ex) {
+        log.error('BaseMediaTask', ex);
+      }
     }
   }
 }

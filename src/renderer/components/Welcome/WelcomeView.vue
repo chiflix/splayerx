@@ -77,15 +77,14 @@ export default {
       if (this.mousedown) {
         if (this.iconType === 'nextStep') {
           this.$router.push({ name: 'language-setting' });
-        } else if (this.iconType === 'welcomeNike') {
+        } else if (
+          this.iconType === 'welcomeNike'
+          && this.welcomePayload.primaryLanguage
+        ) {
           this.$store.dispatch('welcomeProcess', this.welcomePayload);
           this.$router.push({ name: 'landing-view' });
         }
       }
-    },
-    handleLinkClick() {
-      console.log(this.$i18n.locale);
-      // if (this.$i18n.locale === 'zh')
     },
   },
 };

@@ -238,7 +238,7 @@ const actions = {
           source: preference.list,
           mediaHash: state.mediaHash,
         }),
-        new Promise((resolve, reject) => setTimeout(() => reject(new Error('timeout')), 10000)),
+        new Promise((resolve, reject) => setTimeout(() => reject(new Error('Timeout: addDatabaseSubtitles')), 10000)),
       ])
         .then(() => dispatch(a.chooseSelectedSubtitles, preference.selected))
         .catch(console.error)
@@ -278,7 +278,7 @@ const actions = {
           source: await searchForLocalList(originSrc),
         }),
       ]),
-      new Promise((resolve, reject) => setTimeout(() => reject(new Error('timeout')), 10000)),
+      new Promise((resolve, reject) => setTimeout(() => reject(new Error('Timeout: addLocalSubtitles')), 10000)),
     ])
       .catch(console.error)
       .finally(() => {
@@ -320,7 +320,7 @@ const actions = {
         onlinePromise,
         dispatch(a.addLocalSubtitles, { mediaHash, source: await searchForLocalList(originSrc) }),
       ]),
-      new Promise((resolve, reject) => setTimeout(() => reject(new Error('timeout')), 10000)),
+      new Promise((resolve, reject) => setTimeout(() => reject(new Error('Timeout: refreshOnlineSubtitles')), 10000)),
     ])
       .catch(console.error)
       .finally(() => {

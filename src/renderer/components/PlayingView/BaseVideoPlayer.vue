@@ -29,9 +29,11 @@ export default {
         const fileSrcRegexes = [
           RegExp('^(http|https)://'),
           RegExp('^file:///?'),
-          RegExp(/^[a-zA-Z]:\/(((?![<>:"//|?*]).)+((?<![ .])\/)?)*$/),
+          RegExp(/^[a-zA-Z]:\\[\\\S|*\S]?.*$/),
         ];
-        return value.length > 0 && fileSrcRegexes.some(rule => rule.test(value));
+        const valid = value.length > 0 && fileSrcRegexes.some(rule => rule.test(value));
+        if (!valid) log.debug('BaseVideoPlayer props.src.validator', value);
+        return valid;
       },
     },
     crossOrigin: {

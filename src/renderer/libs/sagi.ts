@@ -63,7 +63,7 @@ export class Sagi {
     log.info('Sagi.mediaTranslate', `hash-${mediaIdentity}***language-${languageCode}***hints-${hints}`);
     return new Promise((resolve, reject) => {
       client.translateMedia(req, (err, res) => {
-        console.log(res.toObject());
+        log.debug('Sagi.mediaTranslate', res && res.toObject());
         if (err) reject(err);
         else resolve(res.toObject().resultsList);
       });
@@ -77,7 +77,7 @@ export class Sagi {
     req.setTranscriptIdentity(transcriptIdentity);
     return new Promise((resolve, reject) => {
       client.transcript(req, (err, res) => {
-        console.log(res.toObject(), 'audio-log');
+        log.debug('Sagi.getTranscript', res && res.toObject());
         if (err) reject(err);
         else resolve(res.toObject().transcriptsList);
       });
@@ -136,7 +136,7 @@ export class Sagi {
         if (err) reject(err);
         else {
           const status = response.getStatus();
-          console.log(`[Sagi]Version: ${response.getVersion()}, Status: ${status}.`);
+          log.info('sagi', `[Sagi]Version: ${response.getVersion()}, Status: ${status}.`);
           if (status !== HealthCheckResponse.ServingStatus.SERVING) {
             reject(HealthCheckResponse.ServingStatus[status]);
           } else resolve({ status, version: response.getVersion() });
