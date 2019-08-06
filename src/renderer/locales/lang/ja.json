@@ -353,10 +353,15 @@
     },
     "translate": {
       "title": "{time} について",
-      "content": "動画をスキップしたり、アプリケーションを閉じたりしないでください翻訳パネルで進行状況を確認できます。",
       "minute": "{number} 分",
       "second": "{number} 秒",
-      "hour": "{number} 時間"
+      "hour": "{number} 時間",
+      "content": "動画をスキップしたり、アプリケーションを閉じたりしないでください翻訳パネルで進行状況を確認できます。",
+      "contentSearch": "",
+      "contentTranslate": "",
+      "contentGrabbing": "",
+      "contentGrabComplated": "",
+      "contentSpeech": ""
     },
     "success": {
       "title": "翻訳完了",
