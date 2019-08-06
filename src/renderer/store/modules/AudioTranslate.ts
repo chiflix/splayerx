@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-05 16:03:32
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-08-05 15:01:40
+ * @Last Modified time: 2019-08-06 10:34:06
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @ts-ignore
@@ -33,7 +33,9 @@ let staticEstimateTime: number;
 export enum AudioTranslateStatus {
   Default = 'default',
   Selecting = 'selecting',
+  Searching = 'searching',
   Grabbing = 'grabbing',
+  GrabCompleted= 'grab-completed',
   Translating = 'translating',
   Back = 'back',
   Fail = 'fail',
@@ -173,7 +175,9 @@ const getters = {
     return state.isBubbleVisible;
   },
   isTranslating(state: AudioTranslateState) {
-    return state.status === AudioTranslateStatus.Grabbing
+    return state.status === AudioTranslateStatus.Searching
+      || state.status === AudioTranslateStatus.Grabbing
+      || state.status === AudioTranslateStatus.GrabCompleted
       || state.status === AudioTranslateStatus.Translating;
   },
   translateStatus(state: AudioTranslateState) {
@@ -292,7 +296,7 @@ const actions = {
       // 旋转对应目标语言的字幕
       dispatch(smActions.autoChangePrimarySubtitle, state.selectedTargetSubtitleId);
       // 设置智能翻译的状态
-      commit(m.AUDIO_TRANSLATE_UPDATE_STATUS, AudioTranslateStatus.Grabbing);
+      commit(m.AUDIO_TRANSLATE_UPDATE_STATUS, AudioTranslateStatus.Searching);
       timerCount = 1;
       // 提取audio大概是暂视频总长的0.006，听写大概是视频的1/4
       staticEstimateTime = (getters.duration * 0.256);
@@ -301,7 +305,7 @@ const actions = {
       commit(m.AUDIO_TRANSLATE_UPDATE_ESTIMATE_TIME, staticEstimateTime);
       commit(m.AUDIO_TRANSLATE_UPDATE_PROGRESS, timerCount);
       taskTimer = window.setInterval(() => {
-        if (state.status !== AudioTranslateStatus.Grabbing) {
+        if (state.status !== AudioTranslateStatus.Searching) {
           clearInterval(taskTimer);
           return;
         }
@@ -321,6 +325,7 @@ const actions = {
         const progress = ((staticEstimateTime - estimateTime) / staticEstimateTime) * 100;
         commit(m.AUDIO_TRANSLATE_UPDATE_ESTIMATE_TIME, estimateTime);
         commit(m.AUDIO_TRANSLATE_UPDATE_PROGRESS, progress);
+        commit(m.AUDIO_TRANSLATE_UPDATE_STATUS, AudioTranslateStatus.Grabbing);
       });
       grab.on('error', (error: Error) => {
         log.debug('AudioTranslate', error, 'audio-log');
@@ -375,8 +380,9 @@ const actions = {
         if (startEstimateTime > staticEstimateTime * 0.6) {
           startEstimateTime = staticEstimateTime * 0.6;
         }
+        commit(m.AUDIO_TRANSLATE_UPDATE_STATUS, AudioTranslateStatus.GrabCompleted);
         taskTimer = window.setInterval(() => {
-          if (state.status !== AudioTranslateStatus.Grabbing) {
+          if (state.status !== AudioTranslateStatus.GrabCompleted) {
             clearInterval(taskTimer);
             return;
           }

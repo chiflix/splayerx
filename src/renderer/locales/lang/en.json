@@ -354,10 +354,15 @@
     },
     "translate": {
       "title": "About {time} Left",
-      "content": "Please do not skip the video or close the application. You can check the progress on the translation panel.",
       "minute": "{number} min",
       "second": "{number} sec",
-      "hour": "{number} hr"
+      "hour": "{number} hr",
+      "content": "Please do not skip the video or close the application. You can check the progress on the translation panel.",
+      "contentSearch": "Searching ...",
+      "contentTranslate": "Subtitle in source language found, translation in process ...",
+      "contentGrabbing": "Subtitle in source language not found, extracting audio ...",
+      "contentGrabComplated": "Audio extracted, uploading now ...",
+      "contentSpeech": "Audio uploaded, speech recoginition and translation in process ..."
     },
     "success": {
       "title": "Translation Done",
@@ -382,7 +387,7 @@
     "cancel": "Cancel",
     "quit": "Quit",
     "generate": "Generate",
-    "ok": "OK",
+    "ok": "Background",
     "continue": "Cancel"
   },
   "translateBubble": {

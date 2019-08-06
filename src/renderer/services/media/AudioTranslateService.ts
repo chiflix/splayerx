@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-06-20 18:03:14
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-07-29 14:43:33
+ * @Last Modified time: 2019-08-06 10:36:28
  */
 
 // @ts-ignore
@@ -17,6 +17,7 @@ import { AITaskInfo } from '@/interfaces/IMediaStorable';
 import sagi from '@/libs/sagi';
 import MediaStorageService, { mediaStorageService } from '../storage/MediaStorageService';
 import { TranscriptInfo } from '../subtitle';
+import { log } from '@/libs/Log';
 
 type JobData = {
   audioId: string,
@@ -70,15 +71,19 @@ class AudioTranslateService extends EventEmitter {
   }: {
     time?: Buffer, end?: boolean, error?: string, result?: StreamingTranslationResponse.AsObject
   }) {
-    if (time) {
-      this.emit('grab', time);
-    } else if (end) {
+    log.debug('audio', {
+      time, end, error, result,
+    });
+    if (end) {
+      log.debug('audio', 'completed');
       this.emit('grabCompleted');
     } else if (result) {
       this.handleMainCallBack(result);
     } else if (error) {
       this.emit('error', new Error(error));
       this.stop();
+    } else if (time) {
+      this.emit('grab', time);
     }
   }
 
