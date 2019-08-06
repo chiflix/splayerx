@@ -123,6 +123,8 @@
 <script lang="ts">
 import Vue from 'vue';
 import { mapGetters, mapActions } from 'vuex';
+// @ts-ignore
+import urlParseLax from 'url-parse-lax';
 import { join } from 'path';
 import { Route } from 'vue-router';
 import { filePathToUrl } from '@/helpers/path';
@@ -305,10 +307,15 @@ export default {
   },
   methods: {
     ...mapActions({
-      updateInitialUrl: browsingActions.UPDATE_INITIAL_URL,
+      addTabGroup: browsingActions.ADD_TAB_GROUP,
     }),
     handleBrowsingOpen(url: string) {
-      this.updateInitialUrl(url);
+      const parsedUrl = urlParseLax(url);
+      this.addTabGroup({
+        id: 'open-url',
+        active: true,
+        url: parsedUrl.protocol ? parsedUrl.href : `http://${url}`,
+      });
       this.$router.push({
         name: 'browsing-view',
       });

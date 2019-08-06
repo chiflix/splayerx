@@ -11,6 +11,19 @@ export function bilibiliBarrageAdapt(type, barrageOpen) {
   return '';
 }
 
+export function bilibiliVideoPause(type) {
+  if (['video', 'bangumi'].includes(type)) {
+    return 'document.querySelector(".bilibili-player-video-btn").click()';
+  }
+  if (type === 'videoStreaming') {
+    return 'document.querySelector(".bilibili-live-player-video-controller-btn-item").children[0].click()';
+  }
+  if (type === 'iframeStreaming') {
+    return 'document.querySelector("iframe").contentDocument.querySelector(".bilibili-live-player-video-controller-btn-item").children[0].click()';
+  }
+  return 'document.querySelector(".bilibili-live-player-video-controller-btn-item").children[0].click()';
+}
+
 export function bilibili(type, barrageOpen, winSize) {
   if (type === 'bangumi') {
     return {

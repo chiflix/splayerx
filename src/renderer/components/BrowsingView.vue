@@ -50,14 +50,19 @@
     </div>
     <webview
       ref="webView"
-      :src="availableUrl"
-      :style="{ webkitAppRegion: isPip && isDarwin ? 'drag' : 'no-drag' }"
+      v-for="tab in tabGroup"
+      v-show="tab.active"
+      :src="tab.url"
+      :style="{
+        webkitAppRegion: isPip && isDarwin ? 'drag' : 'no-drag'
+      }"
       :preload="preload"
       autosize
       class="web-view"
       allowpopups
       webpreferences="nativeWindowOpen=yes"
     />
+    <NotificationBubble/>
   </div>
 </template>
 
@@ -72,8 +77,12 @@ import { windowRectService } from '@/services/window/WindowRectService';
 import { Browsing as browsingActions } from '@/store/actionTypes';
 import BrowsingHeader from '@/components/BrowsingView/BrowsingHeader.vue';
 import Icon from '@/components/BaseIconContainer.vue';
+import NotificationBubble from '@/components/NotificationBubble.vue';
 import asyncStorage from '@/helpers/asyncStorage';
-import { bilibili, bilibiliFindType, bilibiliBarrageAdapt } from '../../shared/pip/bilibili';
+import { BrowsingTab } from "@/interfaces/IBrowsingView";
+import {
+  bilibili, bilibiliFindType, bilibiliBarrageAdapt, bilibiliVideoPause,
+} from '../../shared/pip/bilibili';
 import youtube from '../../shared/pip/youtube';
 import iqiyi, { iqiyiBarrageAdapt } from '../../shared/pip/iqiyi';
 import globalPip from '../../shared/pip/others';
@@ -85,6 +94,7 @@ export default {
   components: {
     'browsing-header': BrowsingHeader,
     Icon,
+    NotificationBubble,
   },
   data() {
     return {
@@ -93,7 +103,6 @@ export default {
       startTime: 0,
       pipType: '',
       bilibiliType: 'video',
-      supportedRecordHost: ['www.youtube.com', 'www.bilibili.com', 'www.iqiyi.com'],
       preload: `file:${require('path').resolve(__static, 'pip/preload.js')}`,
       maskToShow: false,
       dropFiles: [],
@@ -114,7 +123,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['winPos', 'isFullScreen', 'initialUrl', 'winWidth', 'winSize', 'browsingSize', 'pipSize', 'pipPos', 'barrageOpen', 'browsingPos', 'isFullScreen', 'isFocused', 'isPip']),
+    ...mapGetters(['winPos', 'isFullScreen', 'winWidth', 'winSize', 'browsingSize', 'pipSize', 'pipPos', 'barrageOpen', 'browsingPos', 'isFullScreen', 'isFocused', 'isPip', 'tabGroup', 'activeTab']),
     isDarwin() {
       return process.platform === 'darwin';
     },
@@ -133,22 +142,135 @@ export default {
     othersPip() {
       return globalPip(this.winSize);
     },
-    availableUrl() {
-      const parsedUrl = urlParseLax(this.initialUrl);
-      return parsedUrl.protocol ? parsedUrl.href : `http://${this.initialUrl}`;
-    },
     danmuType() {
       return this.barrageOpen ? 'danmu' : 'noDanmu';
     },
     danmuIconState() {
       return ['youtube', 'others'].includes(this.pipType) || (this.pipType === 'bilibili' && this.bilibiliType === 'others') ? 0.2 : 1;
     },
+    activeWebView() {
+      const index = this.tabGroup
+        .findIndex((tab: {
+          active: boolean, id: string, url: string, reopen?: boolean }) => tab.active);
+      return this.$refs.webView[index];
+    },
   },
   watch: {
+    activeTab(val: BrowsingTab, oldVal: BrowsingTab) {
+      setTimeout(() => {
+        const lastWebViewIndex = this.tabGroup
+          .findIndex((tab: BrowsingTab) => tab.id === oldVal.id);
+        if (this.$refs.webView[lastWebViewIndex].isCurrentlyAudible()) {
+          if (oldVal.id === 'bilibili') {
+            this.$refs.webView[lastWebViewIndex]
+              .executeJavaScript(bilibiliFindType, (r: (HTMLElement | null)[]) => {
+                this.bilibiliType = ['bangumi', 'videoStreaming', 'iframeStreaming', 'video'][r.findIndex(i => i)] || 'others';
+              }).then(() => {
+                this.$refs.webView[lastWebViewIndex]
+                  .executeJavaScript(bilibiliVideoPause(this.bilibiliType));
+              });
+          } else {
+            this.$refs.webView[lastWebViewIndex].executeJavaScript('document.querySelector("video").pause();');
+          }
+        }
+        this.activeWebView.addEventListener('load-commit', () => {
+          this.currentUrl = this.activeWebView.getURL();
+        });
+        // https://github.com/electron/typescript-definitions/issues/27 fixed in 6.0.0
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        this.activeWebView.addEventListener('ipc-message', (evt: any) => {
+          const { channel, args }: { channel: string, args:
+          { dragover?: boolean,
+            files?: string[],
+            isFullScreen?: boolean,
+            windowSize?: number[] | null,
+            x?: number,
+            y?: number,
+            url?: string,
+            targetName?: string,
+          }[] } = evt;
+          switch (channel) {
+            case 'open-url':
+              this.handleOpenUrl(args[0]);
+              break;
+            case 'dragover':
+            case 'dragleave':
+              this.maskToShow = args[0].dragover;
+              break;
+            case 'drop':
+              this.maskToShow = false;
+              this.dropFiles = args[0].files;
+              break;
+            case 'mousemove':
+              if (this.isPip) {
+                this.timeout = true;
+                if (this.timer) {
+                  clearTimeout(this.timer);
+                }
+                this.timer = setTimeout(() => {
+                  this.timeout = false;
+                }, 3000);
+              }
+              break;
+            case 'left-drag':
+              if (this.isPip) {
+                if (args[0].windowSize) {
+                  this.$electron.ipcRenderer.send('callMainWindowMethod', 'setBounds', [{
+                    x: args[0].x,
+                    y: args[0].y,
+                    width: args[0].windowSize[0],
+                    height: args[0].windowSize[1],
+                  }]);
+                } else {
+                  this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', [args[0].x, args[0].y]);
+                }
+              }
+              break;
+            case 'fullscreenchange':
+              this.headerToShow = !args[0].isFullScreen;
+              break;
+            case 'keydown':
+              if (['INPUT', 'TEXTAREA'].includes(args[0].targetName as string)) {
+                this.acceleratorAvailable = false;
+              }
+              break;
+            default:
+              console.warn(`Unhandled ipc-message: ${channel}`, args);
+              break;
+          }
+        });
+        this.activeWebView.addEventListener('dom-ready', () => { // for webview test
+          window.focus();
+          this.activeWebView.focus();
+          if (process.env.NODE_ENV === 'development') this.activeWebView.openDevTools();
+        });
+        // https://github.com/electron/typescript-definitions/issues/27 fixed in 6.0.0
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        this.activeWebView.addEventListener('new-window', (e: any) => {
+          if (e.disposition !== 'new-window') {
+            this.handleOpenUrl(e);
+          }
+        });
+        this.activeWebView.addEventListener('did-start-loading', () => {
+          this.startTime = new Date().getTime();
+          this.loadingState = true;
+        });
+        this.activeWebView.addEventListener('did-stop-loading', () => {
+          const loadingTime: number = new Date().getTime() - this.startTime;
+          if (loadingTime % 3000 === 0) {
+            this.loadingState = false;
+          } else {
+            setTimeout(() => {
+              this.loadingState = false;
+            }, 3000 - (loadingTime % 3000));
+          }
+        });
+      }, 0);
+    },
     isFullScreen(val: string) {
       if (!val) {
         this.headerToShow = true;
-        this.$refs.webView.executeJavaScript('document.webkitCancelFullScreen();');
+        this.activeWebView.executeJavaScript('document.webkitCancelFullScreen();');
       }
     },
     dropFiles(val: string[]) {
@@ -169,8 +291,8 @@ export default {
     isPip(val: boolean) {
       this.menuService.updatePip(val);
       this.$electron.ipcRenderer.send('update-enabled', 'window.pip', true);
-      this.$electron.ipcRenderer.send('update-enabled', 'history.back', !val && this.$refs.webView.canGoBack());
-      this.$electron.ipcRenderer.send('update-enabled', 'history.forward', !val && this.$refs.webView.canGoForward());
+      this.$electron.ipcRenderer.send('update-enabled', 'history.back', !val && this.activeWebView.canGoBack());
+      this.$electron.ipcRenderer.send('update-enabled', 'history.forward', !val && this.activeWebView.canGoForward());
       if (!val) {
         this.$store.dispatch('updatePipSize', this.winSize);
         this.$store.dispatch('updatePipPos', this.winPos);
@@ -211,32 +333,31 @@ export default {
       }
     },
     loadingState(val: boolean) {
-      const loadUrl = this.$refs.webView.getURL();
-      const recordIndex = this.supportedRecordHost.indexOf(urlParseLax(loadUrl).hostname);
-      this.$electron.ipcRenderer.send('update-enabled', 'history.back', this.$refs.webView.canGoBack());
-      this.$electron.ipcRenderer.send('update-enabled', 'history.forward', this.$refs.webView.canGoForward());
+      const loadUrl = this.activeWebView.getURL();
+      this.$electron.ipcRenderer.send('update-enabled', 'history.back', this.activeWebView.canGoBack());
+      this.$electron.ipcRenderer.send('update-enabled', 'history.forward', this.activeWebView.canGoForward());
       if (val) {
         this.hasVideo = false;
         this.$electron.ipcRenderer.send('update-enabled', 'window.pip', false);
         this.$refs.browsingHeader.updateWebInfo({
           hasVideo: this.hasVideo,
           url: loadUrl,
-          canGoBack: this.$refs.webView.canGoBack(),
-          canGoForward: this.$refs.webView.canGoForward(),
+          canGoBack: this.activeWebView.canGoBack(),
+          canGoForward: this.activeWebView.canGoForward(),
         });
       } else {
         if (this.pipRestore) {
           this.pipAdapter();
           this.pipRestore = false;
         }
-        this.$refs.webView.executeJavaScript(this.calculateVideoNum, (r: number) => {
-          this.hasVideo = recordIndex === 0 && !getVideoId(loadUrl).id ? false : !!r;
+        this.activeWebView.executeJavaScript(this.calculateVideoNum, (r: number) => {
+          this.hasVideo = this.activeTab.id === 'youtube' && !getVideoId(loadUrl).id ? false : !!r;
           this.$electron.ipcRenderer.send('update-enabled', 'window.pip', this.hasVideo);
           this.$refs.browsingHeader.updateWebInfo({
             hasVideo: this.hasVideo,
             url: loadUrl,
-            canGoBack: this.$refs.webView.canGoBack(),
-            canGoForward: this.$refs.webView.canGoForward(),
+            canGoBack: this.activeWebView.canGoBack(),
+            canGoForward: this.activeWebView.canGoForward(),
           });
         });
       }
@@ -313,28 +434,12 @@ export default {
         name: 'landing-view',
       });
     });
-    this.$refs.webView.addEventListener('load-commit', () => {
-      const loadUrl = this.$refs.webView.getURL();
-      this.currentUrl = loadUrl;
-      const recordIndex = this.supportedRecordHost.indexOf(urlParseLax(loadUrl).hostname);
-      if (recordIndex !== -1) {
-        switch (recordIndex) {
-          case 0:
-            this.updateRecordUrl({ youtube: loadUrl });
-            break;
-          case 1:
-            this.updateRecordUrl({ bilibili: loadUrl });
-            break;
-          case 2:
-            this.updateRecordUrl({ iqiyi: loadUrl });
-            break;
-          default:
-            break;
-        }
-      }
+    this.activeWebView.addEventListener('load-commit', () => {
+      this.currentUrl = this.activeWebView.getURL();
     });
+    // https://github.com/electron/typescript-definitions/issues/27 fixed in 6.0.0
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    this.$refs.webView.addEventListener('ipc-message', (evt: any) => { // https://github.com/electron/typescript-definitions/issues/27 fixed in 6.0.0
+    this.activeWebView.addEventListener('ipc-message', (evt: any) => {
       const { channel, args }: { channel: string, args:
       { dragover?: boolean,
         files?: string[],
@@ -355,7 +460,9 @@ export default {
           break;
         case 'drop':
           this.maskToShow = false;
-          this.dropFiles = args[0].files;
+          if ((args[0].files as string[]).length) {
+            this.dropFiles = args[0].files;
+          }
           break;
         case 'mousemove':
           if (this.isPip) {
@@ -398,23 +505,23 @@ export default {
     this.$electron.ipcRenderer.on('quit', () => {
       this.quit = true;
     });
-    this.$refs.webView.addEventListener('dom-ready', () => { // for webview test
+    this.activeWebView.addEventListener('dom-ready', () => { // for webview test
       window.focus();
-      this.$refs.webView.focus();
-      if (process.env.NODE_ENV === 'development') this.$refs.webView.openDevTools();
+      this.activeWebView.focus();
+      if (process.env.NODE_ENV === 'development') this.activeWebView.openDevTools();
     });
     // https://github.com/electron/typescript-definitions/issues/27 fixed in 6.0.0
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    this.$refs.webView.addEventListener('new-window', (e: any) => {
+    this.activeWebView.addEventListener('new-window', (e: any) => {
       if (e.disposition !== 'new-window') {
         this.handleOpenUrl(e);
       }
     });
-    this.$refs.webView.addEventListener('did-start-loading', () => {
+    this.activeWebView.addEventListener('did-start-loading', () => {
       this.startTime = new Date().getTime();
       this.loadingState = true;
     });
-    this.$refs.webView.addEventListener('did-stop-loading', () => {
+    this.activeWebView.addEventListener('did-stop-loading', () => {
       const loadingTime: number = new Date().getTime() - this.startTime;
       if (loadingTime % 3000 === 0) {
         this.loadingState = false;
@@ -444,17 +551,19 @@ export default {
   },
   methods: {
     ...mapActions({
-      updateInitialUrl: browsingActions.UPDATE_INITIAL_URL,
-      updateRecordUrl: browsingActions.UPDATE_RECORD_URL,
       updateBarrageOpen: browsingActions.UPDATE_BARRAGE_OPEN,
       updateIsPip: browsingActions.UPDATE_IS_PIP,
+      updateTabUrl: browsingActions.UPDATE_TAB_URL,
     }),
     handleOpenUrl({ url }: { url: string }) {
       if (!url || url === 'about:blank') return;
       if (this.isPip) {
         this.updateIsPip(false);
       }
-      this.updateInitialUrl(url);
+      this.updateTabUrl({
+        id: this.activeTab.id,
+        url,
+      });
     },
     pipAdapter() {
       const parseUrl = urlParseLax(this.currentUrl);
@@ -483,11 +592,11 @@ export default {
       this.pipBtnsKeepShow = false;
     },
     handleWindowChangeEnterPip() {
-      const newDisplayId = this.$electron.screen
+      const newDisplayId = this.$electron.remote.screen
         .getDisplayNearestPoint({ x: this.winPos[0], y: this.winPos[1] }).id;
       const useDefaultPosition = !this.pipPos.length || this.oldDisplayId !== newDisplayId;
       this.oldDisplayId = newDisplayId;
-      this.$refs.webView.executeJavaScript(this.getVideoStyle, (result: CSSStyleDeclaration) => {
+      this.activeWebView.executeJavaScript(this.getVideoStyle, (result: CSSStyleDeclaration) => {
         const videoAspectRatio = parseFloat(result.width as string)
           / parseFloat(result.height as string);
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [videoAspectRatio]);
@@ -509,7 +618,7 @@ export default {
       });
     },
     handleWindowChangeExitPip() {
-      const newDisplayId = this.$electron.screen
+      const newDisplayId = this.$electron.remote.screen
         .getDisplayNearestPoint({ x: this.winPos[0], y: this.winPos[1] }).id;
       if (this.oldDisplayId !== newDisplayId) {
         windowRectService.calculateWindowRect(
@@ -528,24 +637,24 @@ export default {
     handleDanmuDisplay() {
       if (this.pipType === 'iqiyi') {
         this.updateBarrageOpen(!this.barrageOpen);
-        this.$refs.webView.executeJavaScript(this.iqiyiBarrage);
+        this.activeWebView.executeJavaScript(this.iqiyiBarrage);
       } else if (this.pipType === 'bilibili') {
         this.updateBarrageOpen(!this.barrageOpen);
-        this.$refs.webView.executeJavaScript(this.bilibiliBarrage);
+        this.activeWebView.executeJavaScript(this.bilibiliBarrage);
       }
     },
     handleUrlForward() {
-      if (this.$refs.webView.canGoForward()) {
-        this.$refs.webView.goForward();
+      if (this.activeWebView.canGoForward()) {
+        this.activeWebView.goForward();
       }
     },
     handleUrlBack() {
-      if (this.$refs.webView.canGoBack()) {
-        this.$refs.webView.goBack();
+      if (this.activeWebView.canGoBack()) {
+        this.activeWebView.goBack();
       }
     },
     handleUrlReload() {
-      this.$refs.webView.reload();
+      this.activeWebView.reload();
       if (this.isPip) {
         this.pipRestore = true;
       }
@@ -562,44 +671,44 @@ export default {
     },
     othersAdapter() {
       this.handleWindowChangeEnterPip();
-      this.$refs.webView.executeJavaScript(this.othersPip.adapter);
+      this.activeWebView.executeJavaScript(this.othersPip.adapter);
     },
     othersWatcher() {
-      this.$refs.webView.executeJavaScript(this.othersPip.watcher);
+      this.activeWebView.executeJavaScript(this.othersPip.watcher);
     },
     othersRecover() {
-      this.$refs.webView.executeJavaScript(this.othersPip.recover);
+      this.activeWebView.executeJavaScript(this.othersPip.recover);
     },
     iqiyiAdapter() {
       this.handleWindowChangeEnterPip();
-      this.$refs.webView.executeJavaScript(this.iqiyiPip.adapter);
+      this.activeWebView.executeJavaScript(this.iqiyiPip.adapter);
     },
     iqiyiWatcher() {
-      this.$refs.webView.executeJavaScript(this.iqiyiPip.watcher);
+      this.activeWebView.executeJavaScript(this.iqiyiPip.watcher);
     },
     iqiyiRecover() {
-      this.$refs.webView.executeJavaScript(this.iqiyiPip.recover);
+      this.activeWebView.executeJavaScript(this.iqiyiPip.recover);
     },
     youtubeAdapter() {
       this.handleWindowChangeEnterPip();
-      this.$refs.webView.executeJavaScript(youtube.adapter);
+      this.activeWebView.executeJavaScript(youtube.adapter);
     },
     youtubeRecover() {
-      this.$refs.webView.executeJavaScript(youtube.recover);
+      this.activeWebView.executeJavaScript(youtube.recover);
     },
     bilibiliAdapter() {
-      this.$refs.webView.executeJavaScript(bilibiliFindType, (r: (HTMLElement | null)[]) => {
+      this.activeWebView.executeJavaScript(bilibiliFindType, (r: (HTMLElement | null)[]) => {
         this.bilibiliType = ['bangumi', 'videoStreaming', 'iframeStreaming', 'video'][r.findIndex(i => i)] || 'others';
       }).then(() => {
         this.handleWindowChangeEnterPip();
-        this.$refs.webView.executeJavaScript(this.bilibiliPip.adapter);
+        this.activeWebView.executeJavaScript(this.bilibiliPip.adapter);
       });
     },
     bilibiliWatcher() {
-      this.$refs.webView.executeJavaScript(this.bilibiliPip.watcher);
+      this.activeWebView.executeJavaScript(this.bilibiliPip.watcher);
     },
     bilibiliRecover() {
-      this.$refs.webView.executeJavaScript(this.bilibiliPip.recover);
+      this.activeWebView.executeJavaScript(this.bilibiliPip.recover);
     },
   },
 };

@@ -15,8 +15,7 @@
       }"
     />
     <browsing-favicons
-      :record-url="recordUrl"
-      :update-initial-url="updateInitialUrl"
+      :add-tab-group="addTabGroup"
       :style="{
         order: isDarwin ? 2 : 3,
       }"
@@ -48,6 +47,8 @@
 </template>
 
 <script lang="ts">
+// @ts-ignore
+import urlParseLax from 'url-parse-lax';
 import { mapActions, mapGetters } from 'vuex';
 import { Browsing as browsingActions } from '@/store/actionTypes';
 import BrowsingFavicons from '@/components/BrowsingView/BrowsingFavicons.vue';
@@ -90,7 +91,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['recordUrl', 'isMaximized']),
+    ...mapGetters(['isMaximized']),
     picInPicType() {
       return this.webInfo.hasVideo ? 'pip' : 'pipDisabled';
     },
@@ -100,7 +101,7 @@ export default {
   },
   methods: {
     ...mapActions({
-      updateInitialUrl: browsingActions.UPDATE_INITIAL_URL,
+      addTabGroup: browsingActions.ADD_TAB_GROUP,
     }),
     handleDbClick() {
       if (!this.isMaximized) {
@@ -116,7 +117,12 @@ export default {
       if (this.openFileByPlayingView(inputUrl)) {
         this.openUrlFile(inputUrl);
       } else {
-        this.updateInitialUrl(inputUrl);
+        const parsedUrl = urlParseLax(inputUrl);
+        this.addTabGroup({
+          id: 'open-url',
+          active: true,
+          url: parsedUrl.protocol ? parsedUrl.href : `http://${inputUrl}`,
+        });
       }
     },
     updateWebInfo(info: {

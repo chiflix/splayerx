@@ -628,8 +628,8 @@ new Vue({
       changePrimarySubDelay: SubtitleManager.alterPrimaryDelay,
       changeSecondarySubDelay: SubtitleManager.alterSecondaryDelay,
       updateBarrageOpen: browsingActions.UPDATE_BARRAGE_OPEN,
-      updateInitialUrl: browsingActions.UPDATE_INITIAL_URL,
       showAudioTranslateModal: atActions.AUDIO_TRANSLATE_SHOW_MODAL,
+      addTabGroup: browsingActions.ADD_TAB_GROUP,
     }),
     async initializeMenuSettings() {
       if (this.currentRouteName !== 'welcome-privacy' && this.currentRouteName !== 'language-setting') {
@@ -686,19 +686,34 @@ new Vue({
         this.refreshMenu();
       });
       this.menuService.on('favourite.iqiyi', () => {
-        this.updateInitialUrl('https://www.iqiyi.com');
+        this.addTabGroup({
+          id: 'iqiyi',
+          active: true,
+          url: 'https://www.iqiyi.com',
+          reopen: true,
+        });
         this.$router.push({
           name: 'browsing-view',
         });
       });
       this.menuService.on('favourite.bilibili', () => {
-        this.updateInitialUrl('https://www.bilibili.com');
+        this.addTabGroup({
+          id: 'bilibili',
+          active: true,
+          url: 'https://www.bilibili.com',
+          reopen: true,
+        });
         this.$router.push({
           name: 'browsing-view',
         });
       });
       this.menuService.on('favourite.youtube', () => {
-        this.updateInitialUrl('https://www.youtube.com');
+        this.addTabGroup({
+          id: 'youtube',
+          active: true,
+          url: 'https://www.youtube.com',
+          reopen: true,
+        });
         this.$router.push({
           name: 'browsing-view',
         });
