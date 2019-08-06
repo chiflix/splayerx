@@ -1,5 +1,5 @@
 import MediaInfoQueue, { CodecType, ISubtitleStream } from './mediaInfoQueue';
-import SnapshotQueue from './snapshotSubtitleQueue';
+import SnapshotQueue from './snapshotQueue';
 import SubtitleQueue from './subtitleQueue';
 import ThumbnailQueue from './thumbnailQueue';
 import { log } from '@/libs/Log';
