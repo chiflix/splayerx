@@ -563,6 +563,7 @@ new Vue({
     /* eslint-disable */
 
     window.addEventListener('drop', (e) => {
+      if (this.currentRouteName !== 'landing-view' || this.currentRouteName !== 'playing-view') return;
       e.preventDefault();
       this.$bus.$emit('drop');
       this.$store.commit('source', 'drop');
@@ -581,6 +582,7 @@ new Vue({
       }
     });
     window.addEventListener('dragover', (e) => {
+      if (this.currentRouteName !== 'landing-view' || this.currentRouteName !== 'playing-view') return;
       e.preventDefault();
       e.dataTransfer!.dropEffect = process.platform === 'darwin' ? 'copy' : '';
       this.$bus.$emit('drag-over');
