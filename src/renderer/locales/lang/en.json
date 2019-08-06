@@ -387,7 +387,7 @@
     "cancel": "Cancel",
     "quit": "Quit",
     "generate": "Generate",
-    "ok": "Background",
+    "ok": "Run in Background",
     "continue": "Cancel"
   },
   "translateBubble": {

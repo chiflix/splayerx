@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-05 16:03:32
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-08-06 15:26:03
+ * @Last Modified time: 2019-08-06 16:12:56
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @ts-ignore
@@ -308,6 +308,9 @@ const actions = {
       // staticEstimateTime = staticEstimateTime > 300 ? 300 : staticEstimateTime;
       commit(m.AUDIO_TRANSLATE_UPDATE_ESTIMATE_TIME, staticEstimateTime);
       commit(m.AUDIO_TRANSLATE_UPDATE_PROGRESS, timerCount);
+      if (taskTimer) {
+        clearInterval(taskTimer);
+      }
       taskTimer = window.setInterval(() => {
         if (state.status !== AudioTranslateStatus.Searching) {
           clearInterval(taskTimer);
@@ -385,6 +388,9 @@ const actions = {
           startEstimateTime = staticEstimateTime * 0.6;
         }
         commit(m.AUDIO_TRANSLATE_UPDATE_STATUS, AudioTranslateStatus.GrabCompleted);
+        if (taskTimer) {
+          clearInterval(taskTimer);
+        }
         taskTimer = window.setInterval(() => {
           if (state.status !== AudioTranslateStatus.GrabCompleted) {
             clearInterval(taskTimer);
