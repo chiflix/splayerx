@@ -353,10 +353,15 @@
     },
     "translate": {
       "title": "大约还需 {time}",
-      "content": "请不要切换视频或关闭播放器，您可以在该视频的翻译结果列表中查看进度。",
       "minute": "{number} 分钟",
       "second": "{number} 秒",
-      "hour": "{number} 小时"
+      "hour": "{number} 小时",
+      "content": "请不要切换视频或关闭播放器，您可以在该视频的翻译结果列表中查看进度。",
+      "contentSearch": "",
+      "contentTranslate": "",
+      "contentGrabbing": "",
+      "contentGrabComplated": "",
+      "contentSpeech": ""
     },
     "success": {
       "title": "翻译完成",
