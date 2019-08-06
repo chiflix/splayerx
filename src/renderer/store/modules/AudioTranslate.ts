@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-05 16:03:32
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-08-06 16:12:56
+ * @Last Modified time: 2019-08-06 16:26:32
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @ts-ignore
@@ -664,57 +664,67 @@ const actions = {
     const messageWhenGrab = this.$i18n.t('translateBubble.bubbleWhenGrab', this.$i18n.locale, this.$i18n.locale);
     const messageWhenTranslate = this.$i18n.t('translateBubble.bubbleWhenTranslate', this.$i18n.locale, this.$i18n.locale);
     const messageWhenForbidden = this.$i18n.t('translateBubble.bubbleFunctionForbidden', this.$i18n.locale, this.$i18n.locale);
+    if (origin === AudioTranslateBubbleOrigin.OtherAIButtonClick
+      && state.status === AudioTranslateStatus.Back) {
+      // 当又一个AI翻译正在进行时，还想再AI翻译
+      commit(m.AUDIO_TRANSLATE_BUBBLE_INFO_UPDATE, {
+        type: AudioTranslateBubbleType.ClickWhenTranslate,
+        message: messageWhenForbidden,
+      });
+      commit(m.AUDIO_TRANSLATE_SHOW_BUBBLE);
+      return;
+    }
+
+    if (!getters.isTranslating) {
+      return;
+    }
+
     if (origin === AudioTranslateBubbleOrigin.VideoChange
-      && (getters.isTranslating && state.status !== AudioTranslateStatus.Translating)) {
+      && state.status !== AudioTranslateStatus.Translating) {
       // 当正在提取音频，切换视频
       commit(m.AUDIO_TRANSLATE_BUBBLE_INFO_UPDATE, {
         type: AudioTranslateBubbleType.ChangeWhenGrab,
         message: messageWhenGrab,
       });
     } else if (origin === AudioTranslateBubbleOrigin.NextVideoChange
-      && (getters.isTranslating && state.status !== AudioTranslateStatus.Translating)) {
+      && state.status !== AudioTranslateStatus.Translating) {
       // 当正在提取音频，自动下一个视频
       commit(m.AUDIO_TRANSLATE_BUBBLE_INFO_UPDATE, {
         type: AudioTranslateBubbleType.NextVideoWhenGrab,
         message: messageWhenGrab,
       });
     } else if (origin === AudioTranslateBubbleOrigin.WindowClose
-      && (getters.isTranslating && state.status !== AudioTranslateStatus.Translating)) {
+      && state.status !== AudioTranslateStatus.Translating) {
       // 当前正在提取音频, 关闭窗口
       commit(m.AUDIO_TRANSLATE_BUBBLE_INFO_UPDATE, {
         type: AudioTranslateBubbleType.CloseWhenGrab,
         message: messageWhenGrab,
       });
-    } else if (origin === AudioTranslateBubbleOrigin.VideoChange
-      && getters.isTranslating) {
+    } else if (origin === AudioTranslateBubbleOrigin.VideoChange) {
       // 当正在后台翻译，切换视频
       commit(m.AUDIO_TRANSLATE_BUBBLE_INFO_UPDATE, {
         type: AudioTranslateBubbleType.ChangeWhenTranslate,
         message: messageWhenTranslate,
       });
-    } else if (origin === AudioTranslateBubbleOrigin.NextVideoChange
-      && getters.isTranslating) {
+    } else if (origin === AudioTranslateBubbleOrigin.NextVideoChange) {
       // 当正在后台翻译，切换视频
       commit(m.AUDIO_TRANSLATE_BUBBLE_INFO_UPDATE, {
         type: AudioTranslateBubbleType.NextVideoWhenTranslate,
         message: messageWhenTranslate,
       });
-    } else if (origin === AudioTranslateBubbleOrigin.WindowClose
-      && getters.isTranslating) {
+    } else if (origin === AudioTranslateBubbleOrigin.WindowClose) {
       // 当正在后台翻译，关闭window
       commit(m.AUDIO_TRANSLATE_BUBBLE_INFO_UPDATE, {
         type: AudioTranslateBubbleType.CloseWhenTranslate,
         message: messageWhenTranslate,
       });
-    } else if (origin === AudioTranslateBubbleOrigin.OtherAIButtonClick
-      && (state.status === AudioTranslateStatus.Back || getters.isTranslating)) {
+    } else if (origin === AudioTranslateBubbleOrigin.OtherAIButtonClick) {
       // 当又一个AI翻译正在进行时，还想再AI翻译
       commit(m.AUDIO_TRANSLATE_BUBBLE_INFO_UPDATE, {
         type: AudioTranslateBubbleType.ClickWhenTranslate,
         message: messageWhenForbidden,
       });
-    } else if (origin === AudioTranslateBubbleOrigin.Refresh
-      && getters.isTranslating) {
+    } else if (origin === AudioTranslateBubbleOrigin.Refresh) {
       // 当当前有一个AI翻译正在进行时，想刷新字幕列表
       commit(m.AUDIO_TRANSLATE_BUBBLE_INFO_UPDATE, {
         type: AudioTranslateBubbleType.RefreshWhenTranslate,
