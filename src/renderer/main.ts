@@ -894,11 +894,7 @@ new Vue({
         this.$store.dispatch(SubtitleManager.manualUploadAllSubtitles);
       });
       this.menuService.on('window.keepPlayingWindowFront', () => {
-        if (this.currentRouteName === 'playing-view') this.playingViewTop = !this.playingViewTop;
-        if (this.currentRouteName === 'browsing-view') this.browsingViewTop = !this.browsingViewTop;
-      });
-      this.menuService.on('window.pip', () => {
-        this.$bus.$emit('toggle-pip');
+        this.playingViewTop = !this.playingViewTop;
       });
       this.menuService.on('window.fullscreen', () => {
         if (this.isFullScreen) {
@@ -930,6 +926,23 @@ new Vue({
         this.windowRotate();
       }, 150));
       this.menuService.on('window.backToLandingView', () => {
+        this.$bus.$emit('back-to-landingview');
+      });
+      this.menuService.on('browsing.window.keepPipFront', () => {
+        this.browsingViewTop = !this.browsingViewTop;
+      });
+      this.menuService.on('browsing.window.pip', () => {
+        this.$bus.$emit('toggle-pip');
+      });
+      this.menuService.on('browsing.window.maxmize', () => {
+        const browserWindow = this.$electron.remote.getCurrentWindow();
+        if (!browserWindow.isMaximized()) {
+          this.$electron.ipcRenderer.send('callMainWindowMethod', 'maximize');
+        } else {
+          this.$electron.ipcRenderer.send('callMainWindowMethod', 'unmaximize');
+        }
+      });
+      this.menuService.on('browsing.window.backToLandingView', () => {
         this.$bus.$emit('back-to-landingview');
       });
       this.menuService.on('help.crashReportLocation', () => {

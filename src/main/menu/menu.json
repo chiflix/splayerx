@@ -390,6 +390,48 @@
         "label": "msg.favourite.youtube"
       }
     ]
+  },
+  "browsing.window": {
+    "items": [
+      {
+        "id": "browsing.window.keepPipFront",
+        "label": "msg.window.keepPlayingWindowFront",
+        "accelerator": "T",
+        "checked": false,
+        "enabled": false
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "browsing.window.pip",
+        "label": "msg.window.enterPip",
+        "accelerator": "P",
+        "enabled": false
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "browsing.window.minimize",
+        "label": "msg.window.minimize",
+        "role": "minimize",
+        "enabled": true
+      },
+      {
+        "id": "browsing.window.maxmize",
+        "label": "msg.window.maxmize",
+        "accelerator": "CmdOrCtrl+3"
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "browsing.window.backToLandingView",
+        "label": "msg.window.backToLandingView",
+        "accelerator": "CmdOrCtrl+E"
+      }
+    ]
   }
 }
 

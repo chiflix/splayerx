@@ -43,12 +43,6 @@ export default class Menubar {
 
   private currentMenuState: IMenubarMenuState;
 
-  private paused = false;
-
-  private isFullScreen = false;
-
-  private playlistOpened = false;
-
   private isPip = false;
 
   private playingViewTop = false;
@@ -182,36 +176,30 @@ export default class Menubar {
     }
   }
 
-  // merge fullscreen, play/pause, playlist
   public updateMenuItemLabel(id: string, label: string) {
-    // refreshMenuState
-    const idArray = id.split('.');
-    const result = this.currentMenuState[idArray[0]]
-      .items.find((menuItem: MenubarMenuItem) => menuItem.id === id);
+    const result = this.getMenuStateById(id);
+    // @ts-ignore
     if (result) result.label = label;
-    // find menu need to be refreshed
-    const menu = idArray[0];
-    // refreshMenu
+    // @ts-ignore
+    const menu = this.getRelatedMenuById(id);
     this.refreshMenu(menu as MenuName);
   }
 
   public updateMenuItemChecked(id: string, checked: boolean) {
-    const idArray = id.split('.');
-    const result = this.currentMenuState[idArray[0]]
-      .items.find((menuItem: MenubarMenuItem) => menuItem.id === id);
-    if (result) {
-      result.checked = checked;
-    }
+    const result = this.getMenuStateById(id);
+    // @ts-ignore
+    if (result) result.checked = checked;
+
     if (this.menubar.getMenuItemById(id)) {
       this.menubar.getMenuItemById(id).checked = checked;
     }
   }
 
   public updateMenuItemEnabled(id: string, enabled: boolean) {
-    const idArray = id.split('.');
-    const result = this.currentMenuState[idArray[0]]
-      .items.find((menuItem: MenubarMenuItem) => menuItem.id === id);
+    const result = this.getMenuStateById(id);
+    // @ts-ignore
     if (result) result.enabled = enabled;
+
     if (this.menubar.getMenuItemById(id)) {
       this.menubar.getMenuItemById(id).enabled = enabled;
       Menu.setApplicationMenu(this.menubar);
@@ -344,6 +332,24 @@ export default class Menubar {
 
       Menu.setApplicationMenu(this.menubar);
     }
+  }
+
+  private getRelatedMenuById(id: string): string {
+    if (id.startsWith('browsing')) return 'browsing.window';
+    const idArray = id.split('.');
+    return idArray[0];
+  }
+
+  private getMenuStateById(id: string):
+  MenubarMenuItem | undefined {
+    if (id.startsWith('browsing')) {
+      return this.currentMenuState['browsing.window']
+        .items.find((menuItem: MenubarMenuItem) => menuItem.id === id);
+    }
+    const idArray = id.split('.');
+    const result = this.currentMenuState[idArray[0]]
+      .items.find((menuItem: MenubarMenuItem) => menuItem.id === id);
+    return result;
   }
 
   private getSubmenuById(id: string) {
@@ -781,29 +787,7 @@ export default class Menubar {
   }
 
   private createBrowsingWindowMenu() {
-    const window = new Menu();
-
-    const items = this.getMenuItemTemplate('window').items;
-    const floatMenuItem = items.find((item: MenubarMenuItem) => item.id === 'window.keepPlayingWindowFront') as IMenubarMenuItemAction;
-    const minimizeMenuItem = items.find((item: MenubarMenuItem) => item.id === 'window.minimize') as IMenubarMenuItemRole;
-    const maxmizeMenuItem = items.find((item: MenubarMenuItem) => item.id === 'window.maxmize') as IMenubarMenuItemAction;
-    const landingViewMenuItem = items.find((item: MenubarMenuItem) => item.id === 'window.backToLandingView') as IMenubarMenuItemAction;
-    floatMenuItem.enabled = false;
-
-    const actions = [];
-    actions.push(...[
-      this.createMenuItem(floatMenuItem),
-      separator(),
-      this.createMenuItem('msg.window.enterPip', undefined, 'P', false, undefined, 'window.pip'),
-      separator(),
-      this.createRoleMenuItem(minimizeMenuItem),
-      this.createMenuItem(maxmizeMenuItem),
-      separator(),
-      this.createMenuItem(landingViewMenuItem),
-    ]);
-
-    actions.forEach(i => window.append(i));
-
+    const window = this.convertFromMenuItemTemplate('browsing.window');
     const windowMenuItem = new MenuItem({ id: 'browsing.window', label: this.$t('msg.window.name'), submenu: window });
     return windowMenuItem;
   }
@@ -964,7 +948,6 @@ export default class Menubar {
     if (arg1.enabled === undefined) arg1.enabled = true;
 
     const label = this.$t(arg1.label);
-    if (arg1.id.startsWith('playback')) console.log(arg1.label);
 
     const options: Electron.MenuItemConstructorOptions = {
       id: arg1.id,
