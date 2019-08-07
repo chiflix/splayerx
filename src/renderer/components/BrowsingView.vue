@@ -429,6 +429,7 @@ export default {
     });
   },
   beforeDestroy() {
+    if (this.isPip) this.menuService.updateMenuItemEnabled('browsing.window.keepPipFront', false);
     asyncStorage.set('browsing', {
       pipSize: this.pipSize,
       pipPos: this.pipPos,

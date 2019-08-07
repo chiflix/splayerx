@@ -20,24 +20,12 @@ export default class MenuService {
     ipcRenderer.send('update-route-name', routeName);
   }
 
-  public updatePaused(paused: boolean) {
-    ipcRenderer.send('update-paused', paused);
-  }
-
-  public updatePlaylist(playlistOpened: boolean) {
-    ipcRenderer.send('update-playlist', playlistOpened);
-  }
-
   public updatePlayingViewTop(topOnWindow: boolean) {
     ipcRenderer.send('update-playingview-on-top', topOnWindow);
   }
 
   public updateBrowsingViewTop(topOnWindow: boolean) {
     ipcRenderer.send('update-browsingview-on-top', topOnWindow);
-  }
-
-  public updatePip(isPip: boolean) {
-    ipcRenderer.send('update-pip', isPip);
   }
 
   public updateMenuItemLabel(id: string, label: string) {

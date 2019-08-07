@@ -32,10 +32,6 @@ export default class MenuService {
     this.menu.disable = hide;
   }
 
-  public updateIsPip(isPip: boolean) {
-    this.menu.updateIsPip(isPip);
-  }
-
   private registeMenuActions() {
     ipcMain.on('popup-menu', () => {
       this.menu.popupMenu();
@@ -63,9 +59,6 @@ export default class MenuService {
     });
     ipcMain.on('update-browsingview-on-top', (e: Event, topOnWindow: boolean) => {
       this.menu.updateBrowsingViewTop(topOnWindow);
-    });
-    ipcMain.on('update-pip', (e: Event, isPip: boolean) => {
-      this.updateIsPip(isPip);
     });
     ipcMain.on('update-label', (e: Event, id: string, label: string) => {
       this.menu.updateMenuItemLabel(id, label);

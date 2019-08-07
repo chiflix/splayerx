@@ -219,12 +219,13 @@ new Vue({
       if (this.currentRouteName === 'browsing-view' && this.isPip) {
         this.topOnWindow = val;
       }
-      this.menuService.updateMenuItemChecked('window.keepPlayingWindowFront', val);
+      this.menuService.updateMenuItemChecked('browsing.window.keepPipFront', val);
     },
     isPip(val: boolean) {
       if (!val && this.topOnWindow) {
         this.topOnWindow = false;
-      } else if (this.browsingViewTop) {
+      } else if (val && this.browsingViewTop) {
+        this.menuService.updateMenuItemChecked('browsing.window.keepPipFront', this.browsingViewTop);
         this.topOnWindow = true;
       }
     },

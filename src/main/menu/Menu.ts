@@ -157,13 +157,6 @@ export default class Menubar {
     this.menuStateControl();
   }
 
-  public updateIsPip(isPip: boolean) {
-    if (this.isPip !== isPip) {
-      this.isPip = isPip;
-      this.refreshBrowsingWindowMenu();
-    }
-  }
-
   public updatePlayingViewTop(playingViewTop: boolean) {
     if (this.playingViewTop !== playingViewTop) {
       this.playingViewTop = playingViewTop;
