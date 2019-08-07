@@ -54,12 +54,6 @@ export default class MenuService {
     ipcMain.on('update-route-name', (e: Event, routeName: string) => {
       this.menu.routeName = routeName;
     });
-    ipcMain.on('update-playingview-on-top', (e: Event, topOnWindow: boolean) => {
-      this.menu.updatePlayingViewTop(topOnWindow);
-    });
-    ipcMain.on('update-browsingview-on-top', (e: Event, topOnWindow: boolean) => {
-      this.menu.updateBrowsingViewTop(topOnWindow);
-    });
     ipcMain.on('update-label', (e: Event, id: string, label: string) => {
       this.menu.updateMenuItemLabel(id, label);
     });
@@ -68,9 +62,6 @@ export default class MenuService {
     });
     ipcMain.on('update-enabled', (e: Event, id: string, enabled: boolean) => {
       this.menu.updateMenuItemEnabled(id, enabled);
-    });
-    ipcMain.on('enable-submenu-item', (e: Event, id: string, enabled: boolean) => {
-      this.menu.enableSubmenuItem(id, enabled);
     });
   }
 }

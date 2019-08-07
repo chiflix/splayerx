@@ -213,7 +213,6 @@ new Vue({
         this.topOnWindow = val;
       }
       this.menuService.updateMenuItemChecked('window.keepPlayingWindowFront', val);
-      this.menuService.updatePlayingViewTop(val);
     },
     browsingViewTop(val: boolean) {
       if (this.currentRouteName === 'browsing-view' && this.isPip) {

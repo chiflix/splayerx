@@ -43,12 +43,6 @@ export default class Menubar {
 
   private currentMenuState: IMenubarMenuState;
 
-  private isPip = false;
-
-  private playingViewTop = false;
-
-  private browsingViewTop = false;
-
   private primarySubs: {
     id: string, label: string, checked: boolean, subtitleItem: SubtitleControlListItem,
   }[];
@@ -74,13 +68,14 @@ export default class Menubar {
 
   public constructor() {
     this.locale = new Locale();
-    this.currentMenuState = cloneDeep(menuTemplate as IMenubarMenuState);
-    this.menuStateControl();
   }
 
   public setMainWindow(window: Electron.BrowserWindow | null) {
     // may replace this way of getting mainWindow by window service or else...
-    this.playingViewTop = this.browsingViewTop = this.isFullScreen = this.playlistOpened = false;
+    if (window) {
+      this.currentMenuState = cloneDeep(menuTemplate as IMenubarMenuState);
+      this.menuStateControl();
+    }
     this.mainWindow = window;
   }
 
@@ -146,6 +141,12 @@ export default class Menubar {
       }
     }
 
+    if (this._routeName === 'browsing-view') {
+      this.enableSubmenuItem('edit', enable);
+      this.enableSubmenuItem('history', enable);
+      this.enableSubmenuItem('browsing.window', enable);
+    }
+
     this.enableSubmenuItem('window', enable);
     this.enableSubmenuItem('file.openRecent', enable);
     this.updateMenuItemEnabled('file.clearHistory', enable);
@@ -155,18 +156,6 @@ export default class Menubar {
   public updateLocale() {
     this.locale.getDisplayLanguage();
     this.menuStateControl();
-  }
-
-  public updatePlayingViewTop(playingViewTop: boolean) {
-    if (this.playingViewTop !== playingViewTop) {
-      this.playingViewTop = playingViewTop;
-    }
-  }
-
-  public updateBrowsingViewTop(browsingViewTop: boolean) {
-    if (this.browsingViewTop !== browsingViewTop) {
-      this.browsingViewTop = browsingViewTop;
-    }
   }
 
   public updateMenuItemLabel(id: string, label: string) {
@@ -203,9 +192,19 @@ export default class Menubar {
     const menuItem = this.menubar.getMenuItemById(id);
     if (menuItem && menuItem.submenu) {
       menuItem.submenu.items.forEach((item: Electron.MenuItem) => {
+        if (item.id) {
+          const result = this.getMenuStateById(item.id);
+          // @ts-ignore
+          if (result) result.enabled = enabled;
+        }
         item.enabled = enabled;
         if (item.submenu) {
           item.submenu.items.forEach((item: Electron.MenuItem) => {
+            if (item.id) {
+              const result = this.getMenuStateById(item.id);
+              // @ts-ignore
+              if (result) result.enabled = enabled;
+            }
             item.enabled = enabled;
           });
         }
@@ -394,58 +393,6 @@ export default class Menubar {
         }
         const item = this.createMenuItem(menuItem);
         playbackMenu.append(item);
-      }
-    });
-
-    Menu.setApplicationMenu(this.menubar);
-  }
-
-  private refreshBrowsingWindowMenu() {
-    const windowMenu = this.getSubmenuById('browsing.window');
-    if (!windowMenu) return;
-    // @ts-ignore
-    windowMenu.clear();
-
-    const items = this.getMenuItemTemplate('window').items;
-    const floatMenuItem = items.find((item: MenubarMenuItem) => item.id === 'window.keepPlayingWindowFront') as IMenubarMenuItemAction;
-    floatMenuItem.checked = this.browsingViewTop;
-    const minimizeMenuItem = items.find((item: MenubarMenuItem) => item.id === 'window.minimize') as IMenubarMenuItemRole;
-    const maxmizeMenuItem = items.find((item: MenubarMenuItem) => item.id === 'window.maxmize') as IMenubarMenuItemAction;
-    const landingViewMenuItem = items.find((item: MenubarMenuItem) => item.id === 'window.backToLandingView') as IMenubarMenuItemAction;
-
-    const actions = [];
-    actions.push(...[
-      this.createMenuItem(floatMenuItem),
-      separator(),
-      this.createMenuItem(this.isPip ? 'msg.window.exitPip' : 'msg.window.enterPip', undefined, 'P', true, undefined, 'window.pip'),
-      separator(),
-      this.createRoleMenuItem(minimizeMenuItem),
-      this.createMenuItem(maxmizeMenuItem),
-      separator(),
-      this.createMenuItem(landingViewMenuItem),
-    ]);
-
-    actions.forEach(i => windowMenu.append(i));
-    Menu.setApplicationMenu(this.menubar);
-  }
-
-  private refreshWindowMenu() {
-    const windowMenu = this.getSubmenuById('window');
-    if (!windowMenu) return;
-    // @ts-ignore
-    windowMenu.clear();
-
-    this.getMenuItemTemplate('window').items.forEach((menuItem: MenubarMenuItem) => {
-      if (isSeparator(menuItem)) {
-        const item = separator();
-        windowMenu.append(item);
-      } else if (isRole(menuItem)) {
-        const item = this.createRoleMenuItem(menuItem);
-        windowMenu.append(item);
-      } else {
-        if (isAction(menuItem) && this._disable) menuItem.enabled = !this._disable;
-        const item = this.createMenuItem(menuItem);
-        windowMenu.append(item);
       }
     });
 
