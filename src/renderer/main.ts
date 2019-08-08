@@ -817,8 +817,7 @@ new Vue({
         this.$store.dispatch(videoActions.DECREASE_VOLUME);
         this.$bus.$emit('change-volume-menu');
       });
-      this.menuService.on('audio.mute', (e: Event, menuItem: Electron.MenuItem) => {
-        this.menuService.updateMenuItemChecked('audio.mute', menuItem.checked);
+      this.menuService.on('audio.mute', () => {
         this.$bus.$emit('toggle-muted');
       });
       this.menuService.on('audio.switchAudioTrack', (e: Event, id: number) => {
