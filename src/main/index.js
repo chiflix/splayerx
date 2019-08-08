@@ -446,7 +446,6 @@ function registerMainWindowEvent(mainWindow) {
 }
 
 function createMainWindow(openDialog) {
-  createLaborWindow();
   mainWindow = new BrowserWindow({
     useContentSize: true,
     frame: false,
@@ -507,6 +506,7 @@ function createMainWindow(openDialog) {
     tmpSubsToOpen.splice(0, tmpSubsToOpen.length);
     tmpVideoToOpen.splice(0, tmpVideoToOpen.length);
     inited = true;
+    createLaborWindow();
   });
 
   registerMainWindowEvent(mainWindow);
