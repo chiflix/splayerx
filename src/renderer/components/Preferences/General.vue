@@ -261,6 +261,8 @@ export default {
         this.isRestoring = false;
         this.buttonDown = 0;
         return;
+      } else {
+        window.localStorage.needToRelaunch = false;
       }
       if (!this.isMas) {
         electron.ipcRenderer.send('relaunch');
