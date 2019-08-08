@@ -30,9 +30,6 @@ function isSubmenu(menuItem: MenubarMenuItem): menuItem is IMenubarMenuItemSubme
 function isRole(menuItem: MenubarMenuItem): menuItem is IMenubarMenuItemRole {
   return (menuItem as IMenubarMenuItemRole).role !== undefined;
 }
-function isAction(menuItem: MenubarMenuItem): menuItem is IMenubarMenuItemAction {
-  return (menuItem as IMenubarMenuItemAction).accelerator !== undefined;
-}
 
 export default class Menubar {
   private mainWindow: Electron.BrowserWindow | null;
