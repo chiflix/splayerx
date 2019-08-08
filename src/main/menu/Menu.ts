@@ -382,25 +382,6 @@ export default class Menubar {
     Menu.setApplicationMenu(this.menubar);
   }
 
-  private restoreSubMenu(menuName: MenuName) {
-    const menu = this.getSubmenuById(menuName);
-
-    if (!menu) return;
-
-    this.getMenuItemTemplate(menuName).items.forEach((menuItem: MenubarMenuItem) => {
-      if (!isSeparator(menuItem) && menuItem.enabled) {
-        this.menubar.getMenuItemById(menuItem.id).enabled = menuItem.enabled;
-        if (isSubmenu(menuItem)) {
-          menuItem.submenu.items.forEach((menuItem: MenubarMenuItem) => {
-            if (!isSeparator(menuItem) && menuItem.enabled) {
-              this.menubar.getMenuItemById(menuItem.id).enabled = menuItem.enabled;
-            }
-          });
-        }
-      }
-    });
-  }
-
   private disableSubmenuItem(id: string) {
     const menuItem = this.menubar.getMenuItemById(id);
     if (menuItem && menuItem.submenu) {
