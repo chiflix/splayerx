@@ -11,6 +11,7 @@ import { sagiSubtitleToWebVTT } from '@/services/subtitle/utils/transcoders';
 import { updateSubtitle } from '.';
 import { ELECTRON_CACHE_DIRNAME, DEFAULT_DIRNAME, SUBTITLE_DIRNAME } from '@/constants';
 import { formatToExtension } from '@/services/subtitle/utils';
+import { mediaQuickHash } from '@/libs/utils';
 
 const { app } = remote;
 
@@ -32,8 +33,10 @@ export async function cacheLocalSubtitle(subtitle: Entity): Promise<IOrigin> {
 }
 /** copy the subtitle if extracted */
 export async function cacheEmbeddedSubtitle(subtitle: Entity): Promise<IOrigin> {
-  const { hash, format } = subtitle;
-  const storedPath = join(subtitleCacheDirPath, `${hash}.${formatToExtension(subtitle.format)}`);
+  const { format } = subtitle;
+  const source = subtitle.source as IEmbeddedOrigin;
+  const videoHash = await mediaQuickHash.try(source.source.videoSrc);
+  const storedPath = join(subtitleCacheDirPath, `${videoHash}-${source.source.streamIndex}.${formatToExtension(subtitle.format)}`);
   const { extractedSrc, videoSrc, streamIndex } = (subtitle.source as IEmbeddedOrigin).source;
   const srcPath = extractedSrc || await embeddedSrcLoader(videoSrc, streamIndex, format);
   ensureDirSync(subtitleCacheDirPath);
