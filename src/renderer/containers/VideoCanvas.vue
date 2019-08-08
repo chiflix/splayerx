@@ -353,10 +353,12 @@ export default {
     },
     async handleNSFW(src: string, playListId: number) {
       if (this.smartMode) {
-        if (this.nsfwDetected || await nsfwThumbnailFilterService.checkImage(src)) {
+        const isNeedFilter = await nsfwThumbnailFilterService.checkImage(src);
+        if (this.nsfwDetected || isNeedFilter) {
           if (!this.nsfwProcessDone) {
             this.$bus.$emit('nsfw');
             this.nsfwDetected = true;
+            this.quit = false;
           }
           await playInfoStorageService.deleteRecentPlayedBy(playListId);
           return true;
@@ -388,12 +390,13 @@ export default {
           window.close();
         });
         e.returnValue = true;
+        return;
       }
       // 如果有back翻译任务，直接丢弃掉
       this.discardTranslate();
       if (!this.asyncTasksDone && !this.needToRestore) {
         e.returnValue = false;
-        if (this.quit) {
+        if (this.nsfwProcessDone) {
           if (typeof this.$electron.remote.app.hide === 'function') { // macOS only
             this.$electron.remote.app.hide();
           } else {
