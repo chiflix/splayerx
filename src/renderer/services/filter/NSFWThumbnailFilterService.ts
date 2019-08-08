@@ -4,8 +4,7 @@ import { filePathToUrl } from '@/helpers/path';
 import NSFWJS, { NSFW_CLASSES } from '@/libs/NSFWJS';
 import { log } from '@/libs/Log';
 
-// const IMAGE_SIZE = 224; // Mobilenet v2
-const IMAGE_SIZE = 299; // Inception v3
+const IMAGE_SIZE = 224; // default to Mobilenet v2
 
 export default class NSFWFilterService implements IMediaFilter {
   public constructor() {
@@ -17,9 +16,7 @@ export default class NSFWFilterService implements IMediaFilter {
   private async getNsfwNet() {
     if (this.nsfwnet) return this.nsfwnet;
     this.nsfwnet = new NSFWJS({ size: IMAGE_SIZE });
-    console.time('nsfw load');
     await this.nsfwnet.load(filePathToUrl(path.join(__static, 'nsfw/model.json')));
-    console.timeEnd('nsfw load');
     return this.nsfwnet;
   }
 
