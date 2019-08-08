@@ -149,7 +149,7 @@ export default {
       restoreState: '',
       defaultButtonTimeoutId: NaN,
       restoreButtonTimeoutId: NaN,
-      needToRelaunch: !!window.localStorage.needToRelaunch,
+      needToRelaunch: !!window.localStorage.getItem('needToRelaunch'),
       languages: ['en', 'zh-Hans', 'zh-Hant', 'ja', 'ko', 'es', 'ar'],
       buttonDown: 0,
     };
@@ -256,13 +256,13 @@ export default {
       this.isRestoring = true;
       if (!this.needToRelaunch) {
         electron.ipcRenderer.send('need-to-restore');
-        window.localStorage.needToRelaunch = true;
+        window.localStorage.setItem('needToRelaunch', '1');
         this.needToRelaunch = true;
         this.isRestoring = false;
         this.buttonDown = 0;
         return;
       }
-      window.localStorage.needToRelaunch = false;
+      window.localStorage.removeItem('needToRelaunch');
 
       if (!this.isMas) {
         electron.ipcRenderer.send('relaunch');
