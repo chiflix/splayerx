@@ -575,6 +575,7 @@ new Vue({
     /* eslint-disable */
 
     window.addEventListener('drop', (e) => {
+      if (this.currentRouteName !== 'landing-view' && this.currentRouteName !== 'playing-view') return;
       e.preventDefault();
       this.$bus.$emit('drop');
       this.$store.commit('source', 'drop');
@@ -593,6 +594,7 @@ new Vue({
       }
     });
     window.addEventListener('dragover', (e) => {
+      if (this.currentRouteName !== 'landing-view' && this.currentRouteName !== 'playing-view') return;
       e.preventDefault();
       e.dataTransfer!.dropEffect = process.platform === 'darwin' ? 'copy' : '';
       this.$bus.$emit('drag-over');
@@ -607,7 +609,8 @@ new Vue({
       else this.openPlayList(playlistId);
     });
 
-    this.$electron.ipcRenderer.on('open-file', (event: Event, args: { onlySubtitle: boolean, files: Array<string> }) => {
+    this.$electron.ipcRenderer.on('open-file', (event: Event, args: { onlySubtitle: boolean, files: string[] }) => {
+      if (this.currentRouteName !== 'landing-view' && this.currentRouteName !== 'playing-view') return;
       if (!args.files.length && args.onlySubtitle) {
         log.info('helpers/index.js', `Cannot find any related video in the folder: ${args.files}`);
         addBubble(LOAD_SUBVIDEO_FAILED);

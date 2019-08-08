@@ -46,8 +46,11 @@
       <p v-else-if="isProgress && isTranslateFail">
         {{ failContent }}
       </p>
-      <p v-else-if="isProgress">
-        {{ $t('translateModal.translate.content') }}
+      <p
+        v-else-if="isProgress"
+        class="two-line"
+      >
+        {{ progressContent }}
       </p>
       <div
         v-if="!isProgress && !isConfirmCancelTranlate"
@@ -192,6 +195,7 @@ export default Vue.extend({
         },
       ],
       isConfirmCancelTranlate: false,
+      didGrab: false, // 是否提取音频，区分听写和机翻
     };
   },
   computed: {
@@ -240,6 +244,22 @@ export default Vue.extend({
       }
       return message;
     },
+    progressContent() {
+      const { didGrab, translateStatus } = this;
+      let message = this.$t('translateModal.translate.content');
+      if (translateStatus === AudioTranslateStatus.Searching) {
+        message = this.$t('translateModal.translate.contentSearch');
+      } else if (translateStatus === AudioTranslateStatus.Grabbing) {
+        message = this.$t('translateModal.translate.contentGrabbing');
+      } else if (translateStatus === AudioTranslateStatus.GrabCompleted) {
+        message = this.$t('translateModal.translate.contentGrabComplated');
+      } else if (translateStatus === AudioTranslateStatus.Translating && didGrab) {
+        message = this.$t('translateModal.translate.contentSpeech');
+      } else if (translateStatus === AudioTranslateStatus.Translating) {
+        message = this.$t('translateModal.translate.contentTranslate');
+      }
+      return message;
+    },
   },
   watch: {
     mediaHash() {
@@ -255,6 +275,14 @@ export default Vue.extend({
           label: this.getLanguageLabel(val),
           value: val,
         };
+      }
+    },
+    translateStatus(status: AudioTranslateStatus) {
+      if (status === AudioTranslateStatus.GrabCompleted
+        || status === AudioTranslateStatus.Grabbing) {
+        this.didGrab = true;
+      } else if (status === AudioTranslateStatus.Searching) {
+        this.didGrab = false;
       }
     },
   },
@@ -374,6 +402,14 @@ export default Vue.extend({
     color: rgba(255,255,255,0.50);
     line-height: 16px;
     margin-bottom: 10px;
+    &.two-line {
+      height: 32px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+    }
   }
   .select {
     cursor: pointer;
