@@ -113,6 +113,7 @@ const actions = {
   },
   hideNSFW({ commit, state }, payload) {
     commit('hideNSFW', !!payload);
+    if (payload) this.$electron.ipcRenderer.send('labor-task-add', 'nsfw-warmup');
     return asyncStorage.set('preferences', state);
   },
   protectPrivacy({ commit, state }) {

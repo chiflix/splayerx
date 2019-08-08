@@ -7,11 +7,9 @@ import { log } from '@/libs/Log';
 const IMAGE_SIZE = 224; // default to Mobilenet v2
 
 export default class NSFWFilterService implements IMediaFilter {
-  public constructor() {
-    setTimeout(() => this.getNsfwNet()); // warmup
-  }
-
   private nsfwnet: NSFWJS;
+
+  private getNsfwNetPromise: Promise<NSFWJS> | null;
 
   private async getNsfwNet() {
     if (this.nsfwnet) return this.nsfwnet;
@@ -20,13 +18,29 @@ export default class NSFWFilterService implements IMediaFilter {
     return this.nsfwnet;
   }
 
+  private async getNsfwNeWithtLock() {
+    try {
+      if (!this.getNsfwNetPromise) this.getNsfwNetPromise = this.getNsfwNet();
+      const nsfwnet = await this.getNsfwNetPromise;
+      return nsfwnet;
+    } finally {
+      this.getNsfwNetPromise = null;
+    }
+  }
+
+  public warmup() {
+    setTimeout(() => this.getNsfwNeWithtLock());
+  }
+
   /**
    * Check if image is not safe for work
    * @param src Source of image
    */
   public async checkImage(src: string) {
     try {
-      const nsfwnet = await this.getNsfwNet();
+      const timeKey = Math.random().toString();
+      console.time(timeKey);
+      const nsfwnet = await this.getNsfwNeWithtLock();
       const img = new Image();
       await new Promise((resolve, reject) => {
         img.onload = resolve;
@@ -39,6 +53,7 @@ export default class NSFWFilterService implements IMediaFilter {
         item.className === NSFW_CLASSES[1] || item.className === NSFW_CLASSES[3]
       ) && item.probability >= 0.8);
       if (isNsfw) log.debug('nsfw', src, result);
+      console.timeEnd(timeKey);
       return isNsfw;
     } catch (ex) {
       console.error(ex, src);
