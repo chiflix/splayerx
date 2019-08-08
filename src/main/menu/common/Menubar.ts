@@ -35,12 +35,14 @@ export interface IMenubarMenuItemSubmenu {
   id: string;
   label: string;
   submenu: IMenubarMenu;
+  enabled?: boolean;
 }
 
 export interface IMenubarMenuItemRadio {
   id: string;
   label: string;
   type: 'radio';
+  enabled?: boolean;
 }
 
 export interface IMenubarMenuItemSeparator {

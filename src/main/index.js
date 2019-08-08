@@ -64,7 +64,7 @@ let mainWindow = null;
 let laborWindow = null;
 let aboutWindow = null;
 let preferenceWindow = null;
-let tray = null;
+// let tray = null;
 let needToRestore = false;
 let inited = false;
 let finalVideoToOpen = [];
@@ -89,31 +89,33 @@ if (!fs.existsSync(tempFolderPath)) fs.mkdirSync(tempFolderPath);
 
 
 function handleBossKey() {
-  if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
-  if (mainWindow.isVisible()) {
-    if (process.platform === 'darwin' && mainWindow.isFullScreen()) {
-      mainWindow.once('leave-full-screen', handleBossKey);
-      mainWindow.setFullScreen(false);
-      return;
-    }
-    mainWindow.webContents.send('mainCommit', 'PAUSED_UPDATE', true);
-    mainWindow.webContents.send('mainCommit', 'isHiddenByBossKey', true);
-    mainWindow.hide();
-    menuService.handleBossKey(true);
-    if (process.platform === 'win32') {
-      tray = new Tray(nativeImage.createFromDataURL(require('../../build/icons/1024x1024.png')));
-      tray.on('click', () => {
-        mainWindow.show();
-        mainWindow.webContents.send('mainCommit', 'isHiddenByBossKey', false);
-        // Destroy tray in its callback may cause app crash
-        setTimeout(() => {
-          if (!tray) return;
-          tray.destroy();
-          tray = null;
-        }, 10);
-      });
-    }
-  }
+  mainWindow.blur();
+  mainWindow.hide();
+  // if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
+  // if (mainWindow.isVisible()) {
+  //   if (process.platform === 'darwin' && mainWindow.isFullScreen()) {
+  //     mainWindow.once('leave-full-screen', handleBossKey);
+  //     mainWindow.setFullScreen(false);
+  //     return;
+  //   }
+  //   mainWindow.webContents.send('mainCommit', 'PAUSED_UPDATE', true);
+  //   mainWindow.webContents.send('mainCommit', 'isHiddenByBossKey', true);
+  //   mainWindow.hide();
+  //   // mainWindow.blur();
+  //   if (process.platform === 'win32') {
+  //     tray = new Tray(nativeImage.createFromDataURL(require('../../build/icons/1024x1024.png')));
+  //     tray.on('click', () => {
+  //       mainWindow.show();
+  //       mainWindow.webContents.send('mainCommit', 'isHiddenByBossKey', false);
+  //       // Destroy tray in its callback may cause app crash
+  //       setTimeout(() => {
+  //         if (!tray) return;
+  //         tray.destroy();
+  //         tray = null;
+  //       }, 10);
+  //     });
+  //   }
+  // }
 }
 
 function markNeedToRestore() {
@@ -301,22 +303,20 @@ function registerMainWindowEvent(mainWindow) {
     mainWindow.webContents.send('mainCommit', 'isMaximized', false);
   });
   mainWindow.on('minimize', () => {
-    menuService.minimize(true);
+    menuService.enableMenu(false);
     if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
     mainWindow.webContents.send('mainCommit', 'isMinimized', true);
   });
   mainWindow.on('restore', () => {
-    menuService.minimize(false);
+    menuService.enableMenu(true);
     if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
     mainWindow.webContents.send('mainCommit', 'isMinimized', false);
   });
   mainWindow.on('show', () => {
-    menuService.handleBossKey(false);
     if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
     mainWindow.webContents.send('mainCommit', 'isMinimized', false);
   });
   mainWindow.on('focus', () => {
-    menuService.handleBossKey(false);
     if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
     mainWindow.webContents.send('mainCommit', 'isFocused', true);
     mainWindow.webContents.send('mainCommit', 'isHiddenByBossKey', false);
@@ -484,7 +484,7 @@ function createMainWindow(openDialog) {
   mainWindow.on('closed', () => {
     ipcMain.removeAllListeners(); // FIXME: decouple mainWindow and ipcMain
     mainWindow = null;
-    menuService.closed();
+    menuService.setMainWindow(null);
     if (laborWindow) laborWindow.close();
   });
 

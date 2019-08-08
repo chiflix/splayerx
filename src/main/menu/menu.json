@@ -26,6 +26,7 @@
       {
         "id": "audio.switchAudioTrack",
         "label": "msg.audio.switchAudioTrack",
+        "enabled": true,
         "submenu": {
           "items": []
         }
@@ -194,6 +195,7 @@
       {
         "id": "subtitle.mainSubtitle",
         "label": "msg.subtitle.mainSubtitle",
+        "enable": true,
         "submenu": {
           "items": []
         }
@@ -201,6 +203,7 @@
       {
         "id": "subtitle.secondarySubtitle",
         "label": "msg.subtitle.secondarySubtitle",
+        "enable": true,
         "submenu": {
           "items": []
         }

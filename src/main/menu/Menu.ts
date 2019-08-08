@@ -43,6 +43,8 @@ export default class Menubar {
 
   private currentMenuState: IMenubarMenuState;
 
+  private audioTracks: { id: string, label: string }[];
+
   private primarySubs: {
     id: string, label: string, checked: boolean, subtitleItem: SubtitleControlListItem,
   }[];
@@ -54,20 +56,15 @@ export default class Menubar {
 
   private _routeName: string;
 
-  private _disable: boolean;
-
   public set routeName(val: string) {
     this._routeName = val;
     this.menuStateControl();
   }
 
-  public set disable(val: boolean) {
-    this._disable = val;
-    this.enableMenu(!val);
-  }
-
   public constructor() {
     this.locale = new Locale();
+    this.currentMenuState = cloneDeep(menuTemplate as IMenubarMenuState);
+    this.menuStateControl();
   }
 
   public setMainWindow(window: Electron.BrowserWindow | null) {
@@ -82,6 +79,21 @@ export default class Menubar {
   public popupMenu() {
     if (this.mainWindow) {
       this.menubar.popup();
+    }
+  }
+
+  public closedMenu() {
+    const oldMenu = Menu.getApplicationMenu();
+
+    // @ts-ignore
+    if (oldMenu) oldMenu.clear();
+
+    this.menubar = this.createClosedMenu();
+
+    if (this.menubar.items && this.menubar.items.length > 0) {
+      Menu.setApplicationMenu(this.menubar);
+    } else {
+      Menu.setApplicationMenu(null);
     }
   }
 
@@ -131,24 +143,37 @@ export default class Menubar {
   }
 
   public enableMenu(enable: boolean) {
-    if (this._routeName === 'playing-view') {
-      this.enableSubmenuItem('playback', enable);
-      this.enableSubmenuItem('audio', enable);
-      this.enableSubmenuItem('subtitle', enable);
-      if (enable) {
+    if (enable) {
+      if (this._routeName === 'playing-view') {
+        this.refreshMenu('playback');
+        this.refreshMenu('audio');
+        this.refreshMenu('subtitle');
+        this.refreshMenu('window');
+
+        this.updateAudioTrack();
         this.updatePrimarySub();
         this.updateSecondarySub();
+      } else if (this._routeName === 'browsing-view') {
+        this.refreshMenu('edit');
+        this.refreshMenu('history');
+        this.refreshMenu('browsing.window');
+      }
+    } else {
+      if (this._routeName === 'playing-view') {
+        this.disableSubmenuItem('playback');
+        this.disableSubmenuItem('audio');
+        this.disableSubmenuItem('subtitle');
+        this.disableSubmenuItem('window');
+      }
+
+      if (this._routeName === 'browsing-view') {
+        this.disableSubmenuItem('edit');
+        this.disableSubmenuItem('history');
+        this.disableSubmenuItem('browsing.window');
       }
     }
 
-    if (this._routeName === 'browsing-view') {
-      this.enableSubmenuItem('edit', enable);
-      this.enableSubmenuItem('history', enable);
-      this.enableSubmenuItem('browsing.window', enable);
-    }
-
-    this.enableSubmenuItem('window', enable);
-    this.enableSubmenuItem('file.openRecent', enable);
+    // this.disableSubmenuItem('file.openRecent', enable);
     this.updateMenuItemEnabled('file.clearHistory', enable);
     this.updateMenuItemEnabled('file.closeWindow', enable);
   }
@@ -184,31 +209,6 @@ export default class Menubar {
 
     if (this.menubar.getMenuItemById(id)) {
       this.menubar.getMenuItemById(id).enabled = enabled;
-      Menu.setApplicationMenu(this.menubar);
-    }
-  }
-
-  public enableSubmenuItem(id: string, enabled: boolean) {
-    const menuItem = this.menubar.getMenuItemById(id);
-    if (menuItem && menuItem.submenu) {
-      menuItem.submenu.items.forEach((item: Electron.MenuItem) => {
-        if (item.id) {
-          const result = this.getMenuStateById(item.id);
-          // @ts-ignore
-          if (result) result.enabled = enabled;
-        }
-        item.enabled = enabled;
-        if (item.submenu) {
-          item.submenu.items.forEach((item: Electron.MenuItem) => {
-            if (item.id) {
-              const result = this.getMenuStateById(item.id);
-              // @ts-ignore
-              if (result) result.enabled = enabled;
-            }
-            item.enabled = enabled;
-          });
-        }
-      });
     }
   }
 
@@ -303,12 +303,13 @@ export default class Menubar {
     }
   }
 
-  public updateAudioTrack(items: { id: string, label: string }[]) {
+  public updateAudioTrack(items?: { id: string, label: string }[]) {
+    if (items) this.audioTracks = items;
     const audioTrackMenu = this.getSubmenuById('audio.switchAudioTrack');
     if (audioTrackMenu) {
       // @ts-ignore
       audioTrackMenu.clear();
-      items.forEach(({ id, label }) => {
+      this.audioTracks.forEach(({ id, label }) => {
         const item = new MenuItem({
           id: `audio.switchAudioTrack.${id}`,
           type: 'radio',
@@ -375,32 +376,70 @@ export default class Menubar {
     Menu.setApplicationMenu(this.menubar);
   }
 
-  private refreshPlaybackMenu() {
-    const playbackMenu = this.getSubmenuById('playback');
+  private restoreSubMenu(menuName: MenuName) {
+    const menu = this.getSubmenuById(menuName);
 
-    if (!playbackMenu) return;
-    // @ts-ignore
-    playbackMenu.clear();
+    if (!menu) return;
 
-    this.getMenuItemTemplate('playback').items.forEach((menuItem: MenubarMenuItem) => {
-      if (isSeparator(menuItem)) {
-        const item = separator();
-        playbackMenu.append(item);
-      } else {
-        // @ts-ignore
-        if (isAction(menuItem) && this._disable) {
-          menuItem.enabled = !this._disable;
+    this.getMenuItemTemplate(menuName).items.forEach((menuItem: MenubarMenuItem) => {
+      if (!isSeparator(menuItem) && menuItem.enabled) {
+        this.menubar.getMenuItemById(menuItem.id).enabled = menuItem.enabled;
+        if (isSubmenu(menuItem)) {
+          menuItem.submenu.items.forEach((menuItem: MenubarMenuItem) => {
+            if (!isSeparator(menuItem) && menuItem.enabled) {
+              this.menubar.getMenuItemById(menuItem.id).enabled = menuItem.enabled;
+            }
+          });
         }
-        const item = this.createMenuItem(menuItem);
-        playbackMenu.append(item);
       }
     });
+  }
 
-    Menu.setApplicationMenu(this.menubar);
+  private disableSubmenuItem(id: string) {
+    const menuItem = this.menubar.getMenuItemById(id);
+    if (menuItem && menuItem.submenu) {
+      menuItem.submenu.items.forEach((item: Electron.MenuItem) => {
+        item.enabled = false;
+        if (item.submenu) {
+          item.submenu.items.forEach((item: Electron.MenuItem) => {
+            item.enabled = false;
+          });
+        }
+      });
+    }
   }
 
   private $t(msg: string): string {
     return this.locale.$t(msg);
+  }
+
+  private createClosedMenu(): Electron.Menu {
+    const menubar = new Menu();
+
+    if (IsMacintosh) {
+      // Mac: Application
+      const macApplicationMenuItem = this.createMacApplicationMenu();
+
+      menubar.append(macApplicationMenuItem);
+
+      // File
+      const fileMenu = new Menu();
+
+      const menuItem = this.getMenuItemTemplate('file').items
+        .find((item: MenubarMenuItem) => item.id === 'file.open') as IMenubarMenuItemAction;
+
+      fileMenu.append(this.createMenuItem(menuItem));
+
+      const fileMenuItem = new MenuItem({ id: 'file', label: this.$t('msg.file.name'), submenu: fileMenu });
+
+      menubar.append(fileMenuItem);
+    }
+    // Help
+    const helpMenuItem = this.createHelpMenu();
+
+    menubar.append(helpMenuItem);
+
+    return menubar;
   }
 
   private createLandingViewMenu(): Electron.Menu {
@@ -650,6 +689,10 @@ export default class Menubar {
       menubar.append(quitMenuItem);
     }
 
+    const helpMenuItem = this.createHelpMenu();
+
+    menubar.append(helpMenuItem);
+
     return menubar;
   }
 
@@ -660,7 +703,7 @@ export default class Menubar {
     }, undefined, true);
     const preference = this.createMenuItem('msg.splayerx.preferences', () => {
       app.emit('add-preference');
-    }, 'CmdOrCtrl+,', this._routeName !== 'welcome-privacy' && this._routeName !== 'language-setting');
+    }, 'CmdOrCtrl+,');
 
     const hide = this.createRoleMenuItem('msg.splayerx.hide', 'hide');
     const hideOthers = this.createRoleMenuItem('msg.splayerx.hideOthers', 'hideothers');
@@ -670,8 +713,14 @@ export default class Menubar {
     const actions = [about];
     actions.push(...[
       separator(),
-      preference,
-      separator(),
+    ]);
+    if (this._routeName !== 'welcome-privacy' && this._routeName !== 'language-setting') {
+      actions.push(...[
+        preference,
+        separator(),
+      ]);
+    }
+    actions.push(...[
       hide,
       hideOthers,
       unhide,
@@ -855,7 +904,7 @@ export default class Menubar {
     arg1: string | IMenubarMenuItemAction,
     click?: (menuItem: Electron.MenuItem) => void,
     accelerator?: string,
-    enabled = false,
+    enabled = true,
     checked?: boolean,
     id?: string,
   ): Electron.MenuItem {

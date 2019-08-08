@@ -6,30 +6,18 @@ import { SubtitleControlListItem } from '../../renderer/interfaces/ISubtitle';
 export default class MenuService {
   private menu: Menu;
 
-  private windowClosed: boolean;
-
   public constructor() {
     this.menu = new Menu();
   }
 
-  public setMainWindow(window: Electron.BrowserWindow) {
-    this.windowClosed = false;
+  public setMainWindow(window: Electron.BrowserWindow | null) {
     this.menu.setMainWindow(window);
-    this.registeMenuActions();
+    if (window) this.registeMenuActions();
+    else this.menu.closedMenu();
   }
 
-  public minimize(isMinimized: boolean) {
-    this.menu.disable = isMinimized;
-  }
-
-  public closed() {
-    this.windowClosed = true;
-    this.menu.disable = true;
-    this.menu.setMainWindow(null);
-  }
-
-  public handleBossKey(hide: boolean) {
-    this.menu.disable = hide;
+  public enableMenu(enable: boolean) {
+    this.menu.enableMenu(enable);
   }
 
   private registeMenuActions() {
