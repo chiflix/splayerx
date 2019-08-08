@@ -177,7 +177,6 @@ export default class Menubar {
       }
     }
 
-    // this.disableSubmenuItem('file.openRecent', enable);
     this.updateMenuItemEnabled('file.clearHistory', enable);
     this.updateMenuItemEnabled('file.closeWindow', enable);
   }
