@@ -43,6 +43,8 @@ export default class Menubar {
 
   private currentMenuState: IMenubarMenuState;
 
+  private recentPlay: IMenuDisplayInfo[];
+
   private audioTracks: { id: string, label: string }[];
 
   private primarySubs: {
@@ -89,6 +91,8 @@ export default class Menubar {
     if (oldMenu) oldMenu.clear();
 
     this.menubar = this.createClosedMenu();
+
+    this.updateRecentPlay();
 
     if (this.menubar.items && this.menubar.items.length > 0) {
       Menu.setApplicationMenu(this.menubar);
@@ -212,19 +216,22 @@ export default class Menubar {
     }
   }
 
-  public updateRecentPlay(items: IMenuDisplayInfo[]) {
+  public updateRecentPlay(items?: IMenuDisplayInfo[]) {
+    if (items) this.recentPlay = items;
     const recentMenu = this.getSubmenuById('file.openRecent');
     if (!recentMenu) return;
     // @ts-ignore
     recentMenu.clear();
 
-    items.forEach(({ id, label }) => {
+    this.recentPlay.forEach(({ id, label }) => {
       const item = new MenuItem({
         id: `file.openRecent.${id}`,
         label,
         click: () => {
           if (this.mainWindow) {
             this.mainWindow.webContents.send('file.openRecent', id);
+          } else {
+            app.emit('menu-open-dialog', id);
           }
         },
       });
@@ -425,10 +432,15 @@ export default class Menubar {
       // File
       const fileMenu = new Menu();
 
-      const menuItem = this.getMenuItemTemplate('file').items
-        .find((item: MenubarMenuItem) => item.id === 'file.open') as IMenubarMenuItemAction;
+      fileMenu.append(this.createMenuItem(
+        this.getMenuItemTemplate('file').items
+          .find((item: MenubarMenuItem) => item.id === 'file.open') as IMenubarMenuItemAction,
+      ));
 
-      fileMenu.append(this.createMenuItem(menuItem));
+      fileMenu.append(this.createSubMenuItem(
+        this.getMenuItemTemplate('file').items
+          .find((item: MenubarMenuItem) => item.id === 'file.openRecent') as IMenubarMenuItemSubmenu,
+      ));
 
       const fileMenuItem = new MenuItem({ id: 'file', label: this.$t('msg.file.name'), submenu: fileMenu });
 

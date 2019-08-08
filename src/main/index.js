@@ -64,7 +64,7 @@ let mainWindow = null;
 let laborWindow = null;
 let aboutWindow = null;
 let preferenceWindow = null;
-// let tray = null;
+let tray = null;
 let needToRestore = false;
 let inited = false;
 let finalVideoToOpen = [];
@@ -89,33 +89,30 @@ if (!fs.existsSync(tempFolderPath)) fs.mkdirSync(tempFolderPath);
 
 
 function handleBossKey() {
-  mainWindow.blur();
-  mainWindow.hide();
-  // if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
-  // if (mainWindow.isVisible()) {
-  //   if (process.platform === 'darwin' && mainWindow.isFullScreen()) {
-  //     mainWindow.once('leave-full-screen', handleBossKey);
-  //     mainWindow.setFullScreen(false);
-  //     return;
-  //   }
-  //   mainWindow.webContents.send('mainCommit', 'PAUSED_UPDATE', true);
-  //   mainWindow.webContents.send('mainCommit', 'isHiddenByBossKey', true);
-  //   mainWindow.hide();
-  //   // mainWindow.blur();
-  //   if (process.platform === 'win32') {
-  //     tray = new Tray(nativeImage.createFromDataURL(require('../../build/icons/1024x1024.png')));
-  //     tray.on('click', () => {
-  //       mainWindow.show();
-  //       mainWindow.webContents.send('mainCommit', 'isHiddenByBossKey', false);
-  //       // Destroy tray in its callback may cause app crash
-  //       setTimeout(() => {
-  //         if (!tray) return;
-  //         tray.destroy();
-  //         tray = null;
-  //       }, 10);
-  //     });
-  //   }
-  // }
+  if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
+  if (mainWindow.isVisible()) {
+    if (process.platform === 'darwin' && mainWindow.isFullScreen()) {
+      mainWindow.once('leave-full-screen', handleBossKey);
+      mainWindow.setFullScreen(false);
+      return;
+    }
+    mainWindow.webContents.send('mainCommit', 'PAUSED_UPDATE', true);
+    mainWindow.webContents.send('mainCommit', 'isHiddenByBossKey', true);
+    mainWindow.hide();
+    if (process.platform === 'win32') {
+      tray = new Tray(nativeImage.createFromDataURL(require('../../build/icons/1024x1024.png')));
+      tray.on('click', () => {
+        mainWindow.show();
+        mainWindow.webContents.send('mainCommit', 'isHiddenByBossKey', false);
+        // Destroy tray in its callback may cause app crash
+        setTimeout(() => {
+          if (!tray) return;
+          tray.destroy();
+          tray = null;
+        }, 10);
+      });
+    }
+  }
 }
 
 function markNeedToRestore() {
@@ -441,7 +438,7 @@ function registerMainWindowEvent(mainWindow) {
   /** grab audio logic in main process end */
 }
 
-function createMainWindow(openDialog) {
+function createMainWindow(openDialog, playlistId) {
   createLaborWindow();
   mainWindow = new BrowserWindow({
     useContentSize: true,
@@ -469,7 +466,7 @@ function createMainWindow(openDialog) {
   });
   jsonStorage.get('preferences').then((data) => {
     let url = mainURL;
-    if (finalVideoToOpen.length) url = `${mainURL}#/play`;
+    if (finalVideoToOpen.length || playlistId) url = `${mainURL}#/play`;
     else if (!data.welcomeProcessDone) url = `${mainURL}#/welcome`;
     mainWindow.loadURL(url);
   }).catch(() => {
@@ -498,7 +495,7 @@ function createMainWindow(openDialog) {
     } else if (tmpVideoToOpen.length + tmpSubsToOpen.length > 0) {
       mainWindow.webContents.send('open-file', { onlySubtitle: !tmpVideoToOpen.length, files: finalVideoToOpen });
     }
-    if (openDialog) mainWindow.webContents.send('open-dialog');
+    if (openDialog) mainWindow.webContents.send('open-dialog', playlistId);
     finalVideoToOpen.splice(0, finalVideoToOpen.length);
     tmpSubsToOpen.splice(0, tmpSubsToOpen.length);
     tmpVideoToOpen.splice(0, tmpVideoToOpen.length);
@@ -721,8 +718,8 @@ app.on('menu-create-main-window', () => {
   }
 });
 
-app.on('menu-open-dialog', () => {
-  createMainWindow(true);
+app.on('menu-open-dialog', (playlistId) => {
+  createMainWindow(true, playlistId);
 });
 
 app.on('activate', () => {

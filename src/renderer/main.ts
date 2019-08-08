@@ -602,8 +602,9 @@ new Vue({
       this.$bus.$emit('drag-leave');
     });
 
-    this.$electron.ipcRenderer.on('open-dialog', () => {
-      this.openFilesByDialog();
+    this.$electron.ipcRenderer.on('open-dialog', (e: Event, playlistId?: number) => {
+      if (!playlistId) this.openFilesByDialog();
+      else this.openPlayList(playlistId);
     });
 
     this.$electron.ipcRenderer.on('open-file', (event: Event, args: { onlySubtitle: boolean, files: Array<string> }) => {
