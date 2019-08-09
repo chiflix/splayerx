@@ -14,6 +14,7 @@
         :events="['loadedmetadata', 'audiotrack']"
         :styles="{objectFit: 'contain', width: 'calc(100% - 0.1px)', height: '100%'}"
         :loop="loop"
+        :crossOrigin="'anonymous'"
         :src="convertedSrc"
         :playback-rate="rate"
         :volume="volume"
