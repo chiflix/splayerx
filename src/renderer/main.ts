@@ -987,12 +987,8 @@ new Vue({
         submenu.splice(index + 1, 1, this.recentSubTmp(item, true));
       });
       const menuItem = submenu.find(menuItem => menuItem.id === this.primarySubtitleId);
-      const offMenuItem = submenu.find(menuItem => menuItem.id === 'off');
       if (menuItem) {
         menuItem.checked = true;
-        if (offMenuItem) offMenuItem.checked = false;
-      } else if (offMenuItem) {
-        offMenuItem.checked = true;
       }
       return submenu;
     },
@@ -1012,12 +1008,8 @@ new Vue({
         submenu.splice(index + 3, 1, this.recentSubTmp(item, false));
       });
       const menuItem = submenu.find(menuItem => menuItem.id === this.secondarySubtitleId);
-      const offMenuItem = submenu.find(menuItem => menuItem.id === 'off');
       if (menuItem) {
         menuItem.checked = true;
-        if (offMenuItem) offMenuItem.checked = false;
-      } else if (offMenuItem) {
-        offMenuItem.checked = true;
       }
       return submenu;
     },
