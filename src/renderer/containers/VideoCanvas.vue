@@ -388,6 +388,7 @@ export default {
           window.close();
         });
         e.returnValue = true;
+        return;
       }
       // 如果有back翻译任务，直接丢弃掉
       this.discardTranslate();
