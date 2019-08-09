@@ -46,7 +46,7 @@ import { addBubble } from './helpers/notificationControl';
 import { SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, LOAD_SUBVIDEO_FAILED } from './helpers/notificationcodes';
 import InputPlugin, { getterTypes as iGT } from '@/plugins/input';
 import { VueDevtools } from './plugins/vueDevtools.dev';
-import { SubtitleControlListItem, Type } from './interfaces/ISubtitle';
+import { SubtitleControlListItem, Type, NOT_SELECTED_SUBTITLE } from './interfaces/ISubtitle';
 import { getValidVideoRegex, getValidSubtitleRegex } from '../shared/utils';
 import MenuService from './services/menu/MenuService';
 
@@ -275,24 +275,36 @@ new Vue({
       this.menuService.updateMenuItemEnabled('subtitle.decreaseSecondarySubtitleDelay', !!this.secondarySubtitleId);
       this.menuService.updateMenuItemEnabled('subtitle.uploadSelectedSubtitle', !!this.ableToPushCurrentSubtitle);
     },
-    primarySubtitleId(id: string) {
+    primarySubtitleId(id: string, oldId: string) {
       if (this.currentRouteName !== 'playing-view') return;
       this.menuService.updateMenuItemEnabled('subtitle.increasePrimarySubtitleDelay', !!id);
       this.menuService.updateMenuItemEnabled('subtitle.decreasePrimarySubtitleDelay', !!id);
-      if (id) {
-        this.menuService.updateMenuItemChecked(`subtitle.mainSubtitle.${id}`, true);
-      } else if (!id) {
+      if (id === '') {
         this.menuService.updateMenuItemChecked('subtitle.mainSubtitle.off', true);
+        this.menuService.updateMenuItemChecked(`subtitle.mainSubtitle.${oldId}`, false);
+      } else if (id === NOT_SELECTED_SUBTITLE) {
+        this.menuService.updateMenuItemChecked('subtitle.mainSubtitle.off', false);
+        this.menuService.updateMenuItemChecked(`subtitle.mainSubtitle.${oldId}`, false);
+      } else if (id) {
+        this.menuService.updateMenuItemChecked('subtitle.mainSubtitle.off', false);
+        this.menuService.updateMenuItemChecked(`subtitle.mainSubtitle.${id}`, true);
+        this.menuService.updateMenuItemChecked(`subtitle.mainSubtitle.${oldId}`, false);
       }
     },
-    secondarySubtitleId(id: string) {
+    secondarySubtitleId(id: string, oldId: string) {
       if (this.currentRouteName !== 'playing-view') return;
       this.menuService.updateMenuItemEnabled('subtitle.increaseSecondarySubtitleDelay', !!id);
       this.menuService.updateMenuItemEnabled('subtitle.decreaseSecondarySubtitleDelay', !!id);
-      if (id) {
-        this.menuService.updateMenuItemChecked(`subtitle.secondarySubtitle.${id}`, true);
-      } else if (!id) {
+      if (id === '') {
         this.menuService.updateMenuItemChecked('subtitle.secondarySubtitle.off', true);
+        this.menuService.updateMenuItemChecked(`subtitle.secondarySubtitle.${oldId}`, false);
+      } else if (id === NOT_SELECTED_SUBTITLE) {
+        this.menuService.updateMenuItemChecked('subtitle.secondarySubtitle.off', false);
+        this.menuService.updateMenuItemChecked(`subtitle.secondarySubtitle.${oldId}`, false);
+      } else if (id) {
+        this.menuService.updateMenuItemChecked('subtitle.secondarySubtitle.off', false);
+        this.menuService.updateMenuItemChecked(`subtitle.secondarySubtitle.${id}`, true);
+        this.menuService.updateMenuItemChecked(`subtitle.secondarySubtitle.${oldId}`, false);
       }
     },
     audioTrackList(val, oldval) {
@@ -856,7 +868,6 @@ new Vue({
         if (id === 'off') this.changeFirstSubtitle('');
         else if (item.type === Type.Translated && item.source === '') {
           this.showAudioTranslateModal(item);
-          // this.menuService.updateMenuItemChecked('subtitle.mainSubtitle.off', true);
         } else {
           this.updateSubtitleType(true);
           this.changeFirstSubtitle(item.id);
@@ -868,7 +879,6 @@ new Vue({
           this.updateEnabledSecondarySub(!this.enabledSecondarySub)
         } else if (item.type === Type.Translated && item.source === '') {
           this.showAudioTranslateModal(item);
-          // this.menuService.updateMenuItemChecked('subtitle.mainSubtitle.off', true);
         } else {
           this.updateSubtitleType(false);
           this.changeSecondarySubtitle(id);
@@ -972,53 +982,47 @@ new Vue({
         id: `${item.id}`,
         enabled: isFirstSubtitleType ? true: this.enabledSecondarySub,
         label: this.getSubName(item, this.list),
-        checked: false,
+        checked: isFirstSubtitleType ? item.id === this.primarySubtitleId : item.id === this.secondarySubtitleId,
         subtitleItem: item,
       };
     },
     recentSubMenu() {
       const submenu: Electron.MenuItemConstructorOptions[] = [];
-      submenu.splice(0, 1, {
+      const offItem = {
         id: 'off',
         label: this.calculatedNoSub ? this.$t('msg.subtitle.noSubtitle') : this.$t('msg.subtitle.notToShowSubtitle'),
         checked: false,
-      });
+      }
+      submenu.push(offItem);
+
       this.list.forEach((item: SubtitleControlListItem, index: number) => {
-        submenu.splice(index + 1, 1, this.recentSubTmp(item, true));
+        submenu.push(this.recentSubTmp(item, true));
       });
-      const menuItem = submenu.find(menuItem => menuItem.id === this.primarySubtitleId);
-      const offItem = submenu.find(menuItem => menuItem.id === 'off');
-      if (menuItem) {
-        menuItem.checked = true;
-      }
-      if (this.primarySubtitleId === '' && offItem) {
-        offItem.checked = true;
-      }
+
+      if (this.primarySubtitleId === '') offItem.checked = true;
+
       return submenu;
     },
     recentSecondarySubMenu() {
       const submenu: Electron.MenuItemConstructorOptions[] = [];
-      submenu.splice(0, 1, this.updateSecondarySub);
-      submenu.splice(1, 1, {
+      submenu.push(this.updateSecondarySub);
+      submenu.push({
         id: 'menubar.separator',
       });
-      submenu.splice(2, 1, {
+      const offItem = {
         id: 'off',
         label: this.calculatedNoSub ? this.$t('msg.subtitle.noSubtitle') : this.$t('msg.subtitle.notToShowSubtitle'),
         enabled: this.enabledSecondarySub,
         checked: false,
-      });
+      }
+      submenu.push(offItem);
+
       this.list.forEach((item: SubtitleControlListItem, index: number) => {
-        submenu.splice(index + 3, 1, this.recentSubTmp(item, false));
+        submenu.push(this.recentSubTmp(item, false));
       });
-      const menuItem = submenu.find(menuItem => menuItem.id === this.secondarySubtitleId);
-      const offItem = submenu.find(menuItem => menuItem.id === 'off');
-      if (menuItem) {
-        menuItem.checked = true;
-      }
-      if (this.secondarySubtitleId === '' && offItem) {
-        offItem.checked = true;
-      }
+
+      if (this.secondarySubtitleId === '') offItem.checked = true;
+
       return submenu;
     },
     updateAudioTrackItem(key: number, value: string) {
