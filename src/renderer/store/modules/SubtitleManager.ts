@@ -687,9 +687,10 @@ const actions = {
       }
     } else if (getters.subtitleOff) commit(m.setPrimarySubtitleId, '');
   },
-  async [a.manualChangePrimarySubtitle]({ dispatch }: any, id: string) {
+  async [a.manualChangePrimarySubtitle]({ dispatch, commit, state }: any, id: string) {
     await dispatch('setSubtitleOff', !id);
     if (!id) dispatch(a.autoChangeSecondarySubtitle, '');
+    else if (!state.secondarySubtitleId) commit(m.setNotSelectedSubtitle, 'secondary');
     dispatch(a.autoChangePrimarySubtitle, id);
   },
   async [a.autoChangeSecondarySubtitle]({
@@ -715,9 +716,10 @@ const actions = {
       }
     } else if (getters.subtitleOff) commit(m.setSecondarySubtitleId, '');
   },
-  async [a.manualChangeSecondarySubtitle]({ dispatch }: any, id: string) {
+  async [a.manualChangeSecondarySubtitle]({ dispatch, commit, state }: any, id: string) {
     await dispatch('setSubtitleOff', !id);
     if (!id) dispatch(a.autoChangePrimarySubtitle, '');
+    else if (!state.primarySubtitleId) commit(m.setNotSelectedSubtitle, 'primary');
     dispatch(a.autoChangeSecondarySubtitle, id);
   },
   async [a.storeSelectedSubtitles]({ state }: any, ids: string[]) {
