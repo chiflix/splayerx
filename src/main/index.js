@@ -66,6 +66,8 @@ let aboutWindow = null;
 let preferenceWindow = null;
 let tray = null;
 let needToRestore = false;
+let forceQuit = false; // 大退app 关闭所有windows
+let needBlockCloseLaborWindow = true; // 标记是否阻塞nsfw窗口关闭
 let inited = false;
 let finalVideoToOpen = [];
 const tmpVideoToOpen = [];
@@ -270,12 +272,23 @@ function createLaborWindow() {
   };
   if (!laborWindow) {
     laborWindow = new BrowserWindow(laborWindowOptions);
+    laborWindow.on('close', (event) => {
+      if ((mainWindow && !mainWindow.webContents.isDestroyed()) && needBlockCloseLaborWindow) {
+        event.preventDefault();
+      }
+    });
     laborWindow.on('closed', () => {
       laborWindow = null;
+      if (forceQuit) {
+        app.quit();
+      }
     });
     if (process.env.NODE_ENV === 'development') laborWindow.openDevTools({ mode: 'detach' });
     laborWindow.loadURL(laborURL);
   }
+  // 重置参数
+  forceQuit = false;
+  needBlockCloseLaborWindow = true;
 }
 
 function registerMainWindowEvent(mainWindow) {
@@ -404,6 +417,8 @@ function registerMainWindowEvent(mainWindow) {
     markNeedToRestore();
   });
   ipcMain.on('relaunch', () => {
+    forceQuit = true;
+    needBlockCloseLaborWindow = false;
     const switches = process.argv.filter(a => a.startsWith('-'));
     const argv = process.argv.filter(a => !a.startsWith('-'))
       .slice(0, app.isPackaged ? 1 : 2).concat(switches);
@@ -490,6 +505,9 @@ function createMainWindow(openDialog) {
     ipcMain.removeAllListeners(); // FIXME: decouple mainWindow and ipcMain
     mainWindow = null;
     menuService.closed();
+    if (forceQuit) {
+      needBlockCloseLaborWindow = false;
+    }
     if (laborWindow) laborWindow.close();
   });
 
@@ -533,6 +551,7 @@ app.on('before-quit', () => {
   } else {
     mainWindow.webContents.send('quit');
   }
+  forceQuit = true;
 });
 
 app.on('quit', () => {
