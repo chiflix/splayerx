@@ -210,6 +210,7 @@ export default {
       this.$store.dispatch('RemoveItemFromPlayingList', path);
       this.infoDB.delete('media-item', id);
       const playlist = await this.infoDB.get('recent-played', this.playListId);
+      if (!playlist) return;
       await this.infoDB.update('recent-played', {
         ...playlist,
         items: this.items,
