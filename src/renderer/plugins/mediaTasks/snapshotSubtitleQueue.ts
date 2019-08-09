@@ -1,3 +1,4 @@
+// @ts-ignore
 import { ipcRenderer } from 'electron';
 import { join } from 'path';
 import BaseMediaTaskQueue, { IMediaTask } from './baseMediaTaskQueue';
@@ -59,7 +60,7 @@ class SnapshotTask implements IMediaTask<string> {
         this.videoPath, this.imagePath,
         this.timeString,
         this.width, this.height);
-      ipcRenderer.once('snapshot-reply', (event, error, path) => {
+      ipcRenderer.once('snapshot-reply', (event: Event, error: Error | null, path: string) => {
         if (error) reject(error);
         else resolve(path);
       });
@@ -106,7 +107,7 @@ class SubtitleTask implements IMediaTask<string> {
       ipcRenderer.send('subtitle-request',
         this.videoPath, this.subtitlePath,
         `0:${this.streamIndex}:0`);
-      ipcRenderer.once('subtitle-reply', (event, error, path) => {
+      ipcRenderer.once('subtitle-reply', (event: Event, error: Error | null, path: string) => {
         if (error) reject(error);
         else resolve(path);
       });

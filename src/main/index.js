@@ -11,7 +11,6 @@ import fs from 'fs';
 import rimraf from 'rimraf';
 // import { audioHandler } from './helpers/audioHandler';
 import { audioGrabService } from './helpers/AudioGrabService';
-import { jsonStorage } from '../renderer/libs/JsonStorage';
 import './helpers/electronPrototypes';
 import writeLog from './helpers/writeLog';
 import { getValidVideoRegex, getValidSubtitleRegex } from '../shared/utils';
@@ -58,6 +57,7 @@ if (process.env.NODE_ENV !== 'development') {
 
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 
+let welcomeProcessDone = false;
 let menuService = null;
 let routeName = null;
 let mainWindow = null;
@@ -471,14 +471,15 @@ function createMainWindow(openDialog) {
       win32: {},
     })[process.platform],
   });
-  jsonStorage.get('preferences').then((data) => {
-    let url = mainURL;
-    if (!data.welcomeProcessDone) url = `${mainURL}#/welcome`;
-    else if (finalVideoToOpen.length) url = `${mainURL}#/play`;
-    mainWindow.loadURL(url);
-  }).catch(() => {
-    mainWindow.loadURL(mainURL);
-  });
+  if (
+    (!welcomeProcessDone && fs.existsSync(path.join(userDataPath, 'WELCOME_PROCESS_MARK')))
+    || welcomeProcessDone
+  ) {
+    welcomeProcessDone = true;
+    finalVideoToOpen.length ? mainWindow.loadURL(`${mainURL}#/play`) : mainWindow.loadURL(mainURL);
+  } else {
+    mainWindow.loadURL(`${mainURL}#/welcome`);
+  }
   mainWindow.webContents.setUserAgent(
     `${mainWindow.webContents.getUserAgent().replace(/Electron\S+/i, '')
     } SPlayerX@2018 ${os.platform()} ${os.release()} Version ${app.getVersion()}`,
