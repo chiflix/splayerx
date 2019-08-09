@@ -222,8 +222,9 @@ class MediaInfoTask implements IMediaTask<IMediaInfo> {
 
   /** generate a MediaInfoTask instance by file path */
   public static async from(path: string) {
-    const hash = await mediaQuickHash(path);
-    return new MediaInfoTask(path, hash);
+    const hash = await mediaQuickHash.try(path);
+    if (hash) return new MediaInfoTask(path, hash);
+    return undefined;
   }
 
   public getId() { return this.hash; }
@@ -364,7 +365,8 @@ class MediaInfoTask implements IMediaTask<IMediaInfo> {
 
 export default class MediaInfoQueue extends BaseMediaTaskQueue {
   /** get media info by path(result will be cached) */
-  public getMediaInfo(path: string) {
-    return MediaInfoTask.from(path).then(task => super.addTask<IMediaInfo>(task, { cache: true }));
+  public async getMediaInfo(path: string) {
+    const task = await MediaInfoTask.from(path);
+    return task ? super.addTask<IMediaInfo>(task, { cache: true }) : undefined;
   }
 }

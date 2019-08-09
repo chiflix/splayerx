@@ -32,19 +32,22 @@ export async function cacheLocalSubtitle(subtitle: Entity): Promise<IOrigin> {
   };
 }
 /** copy the subtitle if extracted */
-export async function cacheEmbeddedSubtitle(subtitle: Entity): Promise<IOrigin> {
+export async function cacheEmbeddedSubtitle(subtitle: Entity): Promise<IOrigin | undefined> {
   const { format } = subtitle;
   const source = subtitle.source as IEmbeddedOrigin;
   const videoHash = await mediaQuickHash.try(source.source.videoSrc);
-  const storedPath = join(subtitleCacheDirPath, `${videoHash}-${source.source.streamIndex}.${formatToExtension(subtitle.format)}`);
-  const { extractedSrc, videoSrc, streamIndex } = (subtitle.source as IEmbeddedOrigin).source;
-  const srcPath = extractedSrc || await embeddedSrcLoader(videoSrc, streamIndex, format);
-  ensureDirSync(subtitleCacheDirPath);
-  if (!existsSync(srcPath)) await copyFile(srcPath, storedPath);
-  return {
-    type: Type.Local,
-    source: storedPath,
-  };
+  if (videoHash) {
+    const storedPath = join(subtitleCacheDirPath, `${videoHash}-${source.source.streamIndex}.${formatToExtension(subtitle.format)}`);
+    const { extractedSrc, videoSrc, streamIndex } = (subtitle.source as IEmbeddedOrigin).source;
+    const srcPath = extractedSrc || await embeddedSrcLoader(videoSrc, streamIndex, format);
+    ensureDirSync(subtitleCacheDirPath);
+    if (!existsSync(srcPath)) await copyFile(srcPath, storedPath);
+    return {
+      type: Type.Local,
+      source: storedPath,
+    };
+  }
+  return undefined;
 }
 /** convert payload to WebVTT subtitle and cache it */
 export async function cacheOnlineSubtitle(subtitle: Entity): Promise<IOrigin | undefined> {
