@@ -58,7 +58,7 @@
       allowpopups
       webpreferences="nativeWindowOpen=yes"
     />
-    <NotificationBubble/>
+    <NotificationBubble />
   </div>
 </template>
 
