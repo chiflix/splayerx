@@ -48,7 +48,7 @@ import { windowRectService } from '@/services/window/WindowRectService';
 import { playInfoStorageService } from '@/services/storage/PlayInfoStorageService';
 import { settingStorageService } from '@/services/storage/SettingStorageService';
 import { nsfwThumbnailFilterService } from '@/services/filter/NSFWThumbnailFilterByLaborService';
-import { generateShortCutImageBy, ShortCut } from '@/libs/utils';
+import { generateShortCutImageBy, ShortCut, saveNsfwFistFilter } from '@/libs/utils';
 import { Video as videoActions, AudioTranslate as atActions } from '@/store/actionTypes';
 import { videodata } from '@/store/video';
 import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer.vue';
@@ -74,7 +74,6 @@ export default {
       needToRestore: false,
       winAngleBeforeFullScreen: 0, // winAngel before full screen
       winSizeBeforeFullScreen: [], // winSize before full screen
-      nsfwDetected: false,
     };
   },
   computed: {
@@ -94,7 +93,6 @@ export default {
       this.changeWindowRotate(val);
     },
     async playListId(val: number, oldVal: number) {
-      this.nsfwDetected = false;
       if (oldVal) {
         const screenshot: ShortCut = await this.generateScreenshot();
         if (!(await this.handleNSFW(screenshot.shortCut, oldVal))) {
@@ -355,11 +353,10 @@ export default {
     async handleNSFW(src: string, playListId: number) {
       if (this.smartMode) {
         const isNeedFilter = await nsfwThumbnailFilterService.checkImage(src);
-        if (this.nsfwDetected || isNeedFilter) {
+        if (isNeedFilter) {
           if (!this.nsfwProcessDone) {
-            this.$bus.$emit('nsfw');
-            this.nsfwDetected = true;
-            this.quit = false;
+            // 记录本次nsfw拦截记录
+            saveNsfwFistFilter();
           }
           await playInfoStorageService.deleteRecentPlayedBy(playListId);
           return true;
@@ -397,52 +394,36 @@ export default {
       this.discardTranslate();
       if (!this.asyncTasksDone && !this.needToRestore) {
         e.returnValue = false;
-        if (this.nsfwProcessDone) {
-          if (typeof this.$electron.remote.app.hide === 'function') { // macOS only
-            this.$electron.remote.app.hide();
-          } else {
-            this.$electron.remote.getCurrentWindow().hide();
-          }
-          this.$electron.remote.getCurrentWebContents().setAudioMuted(true);
+        if (typeof this.$electron.remote.app.hide === 'function') { // macOS only
+          this.$electron.remote.app.hide();
+        } else {
+          this.$electron.remote.getCurrentWindow().hide();
         }
+        this.$electron.remote.getCurrentWebContents().setAudioMuted(true);
         this.handleLeaveVideo(this.videoId)
           .finally(() => {
             this.removeAllAudioTrack();
             this.$store.dispatch('SRC_SET', { src: '', mediaHash: '', id: NaN });
             this.asyncTasksDone = true;
-            if (!this.nsfwDetected) window.close();
+            window.close();
           });
       } else if (this.quit) {
         this.$electron.remote.app.quit();
       }
     },
     backToLandingView() {
-      if (!this.nsfwDetected) {
-        this.handleLeaveVideo(this.videoId)
-          .finally(() => {
-            if (!this.nsfwDetected) {
-              this.removeAllAudioTrack();
-              this.$store.dispatch('Init');
-              this.$bus.$off();
-              this.$router.push({
-                name: 'landing-view',
-              });
-              setTimeout(() => {
-                windowRectService.uploadWindowBy(false, 'landing-view');
-              }, 200);
-            }
+      this.handleLeaveVideo(this.videoId)
+        .finally(() => {
+          this.removeAllAudioTrack();
+          this.$store.dispatch('Init');
+          this.$bus.$off();
+          this.$router.push({
+            name: 'landing-view',
           });
-      } else {
-        this.removeAllAudioTrack();
-        this.$store.dispatch('Init');
-        this.$bus.$off();
-        this.$router.push({
-          name: 'landing-view',
+          setTimeout(() => {
+            windowRectService.uploadWindowBy(false, 'landing-view');
+          }, 200);
         });
-        setTimeout(() => {
-          windowRectService.uploadWindowBy(false, 'landing-view');
-        }, 200);
-      }
     },
   },
 };

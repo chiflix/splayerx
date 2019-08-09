@@ -11,7 +11,6 @@ import fs from 'fs';
 import rimraf from 'rimraf';
 // import { audioHandler } from './helpers/audioHandler';
 import { audioGrabService } from './helpers/AudioGrabService';
-import { jsonStorage } from '../renderer/libs/JsonStorage';
 import './helpers/electronPrototypes';
 import writeLog from './helpers/writeLog';
 import { getValidVideoRegex, getValidSubtitleRegex } from '../shared/utils';
@@ -462,6 +461,7 @@ function registerMainWindowEvent(mainWindow) {
 }
 
 function createMainWindow(openDialog) {
+  createLaborWindow();
   mainWindow = new BrowserWindow({
     useContentSize: true,
     frame: false,
@@ -526,7 +526,6 @@ function createMainWindow(openDialog) {
     tmpSubsToOpen.splice(0, tmpSubsToOpen.length);
     tmpVideoToOpen.splice(0, tmpVideoToOpen.length);
     inited = true;
-    createLaborWindow();
   });
 
   registerMainWindowEvent(mainWindow);
