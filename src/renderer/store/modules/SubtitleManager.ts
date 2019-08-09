@@ -673,12 +673,15 @@ const actions = {
       } else {
         const primary = id;
         let secondary = getters.secondarySubtitleId;
-        if (id === secondary) secondary = '';
+        if (id === secondary) {
+          secondary = '';
+          commit(m.setNotSelectedSubtitle, 'secondary');
+        }
         commit(m.setPrimarySubtitleId, primary);
+        if (primary) commit(m.setSecondarySubtitleId, secondary);
         if (state.allSubtitles[primary]) {
           commit(m.setPrimaryDelay, state.allSubtitles[primary].delay);
         }
-        commit(m.setSecondarySubtitleId, secondary);
         if (state.allSubtitles[secondary]) {
           commit(m.setSecondaryDelay, state.allSubtitles[secondary].delay);
         }
@@ -702,12 +705,15 @@ const actions = {
       } else {
         let primary = getters.primarySubtitleId;
         const secondary = id;
-        if (id && id === primary) primary = '';
-        commit(m.setPrimarySubtitleId, primary);
+        if (id && id === primary) {
+          primary = '';
+          commit(m.setNotSelectedSubtitle, 'primary');
+        }
+        commit(m.setSecondarySubtitleId, secondary);
+        if (primary) commit(m.setPrimarySubtitleId, primary);
         if (state.allSubtitles[primary]) {
           commit(m.setPrimaryDelay, state.allSubtitles[primary].delay);
         }
-        commit(m.setSecondarySubtitleId, secondary);
         if (state.allSubtitles[secondary]) {
           commit(m.setSecondaryDelay, state.allSubtitles[secondary].delay);
         }
