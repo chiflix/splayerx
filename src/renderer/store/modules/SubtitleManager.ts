@@ -191,7 +191,6 @@ function initializeManager({ getters, commit, dispatch }: any) {
   const list = getters.list as SubtitleControlListItem[];
   list.forEach(s => dispatch(a.removeSubtitle, s.id));
   commit(m.setMediaHash, getters.mediaHash);
-  dispatch(atActions.AUDIO_TRANSLATE_CONTINUE);
   dispatch(a.refreshSubtitlesInitially);
 }
 const debouncedInitializeManager = debounce(initializeManager, 1000);
@@ -289,6 +288,8 @@ const actions = {
         dispatch(a.checkSubtitleList);
         commit(m.setIsRefreshing, false);
         dispatch(legacyActions.UPDATE_SUBTITLE_TYPE, true);
+        // 继续上次的翻译任务
+        dispatch(atActions.AUDIO_TRANSLATE_CONTINUE);
       });
   },
   async [a.refreshSubtitles]({
