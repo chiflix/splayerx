@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
+// eslint-disable-next-line no-console
 console.log('preloaded~~~~~~~');
 const { ipcRenderer, remote } = require('electron');
 const mouse = process.platform === 'win32' ? require('win-mouse')() : null;
@@ -8,7 +9,7 @@ let isDragging = false;
 let mousedownPos = null;
 let windowSize = null;
 function sendToHost(channel, message) {
-  ipcRenderer.sendToHost(channel, message);
+  ipcRenderer.send(channel, message);
 }
 function getRatio() {
   return window.devicePixelRatio || 1;

@@ -52,10 +52,6 @@ export default {
       type: Object,
       required: true,
     },
-    updateInitialUrl: {
-      type: Function,
-      required: true,
-    },
   },
   data() {
     return {
@@ -96,7 +92,10 @@ export default {
       this.faviconIndex = -1;
     },
     handleFavOpen(item: { name: string, type: string, url: string }) {
-      this.updateInitialUrl(this.recordUrl[item.type] ? this.recordUrl[item.type] : item.url);
+      this.$electron.remote.BrowserView.getAllViews()[0].webContents
+        .loadURL(this.recordUrl[item.type] ? this.recordUrl[item.type] : item.url);
+      this.$electron.remote.BrowserView.getAllViews()[1].webContents
+        .loadURL(this.recordUrl[item.type] ? this.recordUrl[item.type] : item.url);
     },
     handleFavAnimEnd(e: AnimationEvent) {
       const target = e.target as HTMLElement;

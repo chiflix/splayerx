@@ -122,7 +122,9 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import { mapGetters, mapActions } from 'vuex';
+import { mapGetters } from 'vuex';
+// @ts-ignore
+import urlParseLax from 'url-parse-lax';
 import { join } from 'path';
 import { Route } from 'vue-router';
 import { filePathToUrl } from '@/helpers/path';
@@ -135,7 +137,6 @@ import PlaylistItem from '@/components/LandingView/PlaylistItem.vue';
 import VideoItem from '@/components/LandingView/VideoItem.vue';
 import { log } from '@/libs/Log';
 import Sagi from '@/libs/sagi';
-import { Browsing as browsingActions } from '@/store/actionTypes';
 
 Vue.component('PlaylistItem', PlaylistItem);
 Vue.component('VideoItem', VideoItem);
@@ -304,11 +305,10 @@ export default {
     window.removeEventListener('keyup', this.keyboardHandler);
   },
   methods: {
-    ...mapActions({
-      updateInitialUrl: browsingActions.UPDATE_INITIAL_URL,
-    }),
     handleBrowsingOpen(url: string) {
-      this.updateInitialUrl(url);
+      const parsedUrl = urlParseLax(url);
+      this.$electron.ipcRenderer.send('add-browsing');
+      this.$electron.ipcRenderer.send('create-browser-view', { url: parsedUrl.protocol ? parsedUrl.href : `http://${url}` });
       this.$router.push({
         name: 'browsing-view',
       });

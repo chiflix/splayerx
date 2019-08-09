@@ -628,7 +628,6 @@ new Vue({
       changePrimarySubDelay: SubtitleManager.alterPrimaryDelay,
       changeSecondarySubDelay: SubtitleManager.alterSecondaryDelay,
       updateBarrageOpen: browsingActions.UPDATE_BARRAGE_OPEN,
-      updateInitialUrl: browsingActions.UPDATE_INITIAL_URL,
       showAudioTranslateModal: atActions.AUDIO_TRANSLATE_SHOW_MODAL,
     }),
     async initializeMenuSettings() {
@@ -686,19 +685,22 @@ new Vue({
         this.refreshMenu();
       });
       this.menuService.on('favourite.iqiyi', () => {
-        this.updateInitialUrl('https://www.iqiyi.com');
+        this.$electron.ipcRenderer.send('add-browsing');
+        this.$electron.ipcRenderer.send('create-browser-view', { url: 'https://www.iqiyi.com' });
         this.$router.push({
           name: 'browsing-view',
         });
       });
       this.menuService.on('favourite.bilibili', () => {
-        this.updateInitialUrl('https://www.bilibili.com');
+        this.$electron.ipcRenderer.send('add-browsing');
+        this.$electron.ipcRenderer.send('create-browser-view', { url: 'https://www.bilibili.com' });
         this.$router.push({
           name: 'browsing-view',
         });
       });
       this.menuService.on('favourite.youtube', () => {
-        this.updateInitialUrl('https://www.youtube.com');
+        this.$electron.ipcRenderer.send('add-browsing');
+        this.$electron.ipcRenderer.send('create-browser-view', { url: 'https://www.youtube.com' });
         this.$router.push({
           name: 'browsing-view',
         });

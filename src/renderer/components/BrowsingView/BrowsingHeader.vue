@@ -16,7 +16,6 @@
     />
     <browsing-favicons
       :record-url="recordUrl"
-      :update-initial-url="updateInitialUrl"
       :style="{
         order: isDarwin ? 2 : 3,
       }"
@@ -48,8 +47,8 @@
 </template>
 
 <script lang="ts">
-import { mapActions, mapGetters } from 'vuex';
-import { Browsing as browsingActions } from '@/store/actionTypes';
+import electron from 'electron';
+import { mapGetters } from 'vuex';
 import BrowsingFavicons from '@/components/BrowsingView/BrowsingFavicons.vue';
 import BrowsingInput from '@/components/BrowsingView/BrowsingInput.vue';
 import BrowsingControl from '@/components/BrowsingView/BrowsingControl.vue';
@@ -99,14 +98,11 @@ export default {
     },
   },
   methods: {
-    ...mapActions({
-      updateInitialUrl: browsingActions.UPDATE_INITIAL_URL,
-    }),
     handleDbClick() {
       if (!this.isMaximized) {
-        this.$electron.ipcRenderer.send('callMainWindowMethod', 'maximize');
+        electron.ipcRenderer.send('callMainWindowMethod', 'maximize');
       } else {
-        this.$electron.ipcRenderer.send('callMainWindowMethod', 'unmaximize');
+        electron.ipcRenderer.send('callMainWindowMethod', 'unmaximize');
       }
     },
     closeUrlInput() {
@@ -116,7 +112,8 @@ export default {
       if (this.openFileByPlayingView(inputUrl)) {
         this.openUrlFile(inputUrl);
       } else {
-        this.updateInitialUrl(inputUrl);
+        this.$electron.remote.BrowserView.getAllViews()[1].webContents.loadURL(inputUrl);
+        this.$electron.remote.BrowserView.getAllViews()[0].webContents.loadURL(inputUrl);
       }
     },
     updateWebInfo(info: {

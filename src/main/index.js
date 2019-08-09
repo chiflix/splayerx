@@ -1,7 +1,7 @@
 // Be sure to call Sentry function as early as possible in the main process
 import '../shared/sentry';
 
-import { app, BrowserWindow, session, Tray, ipcMain, globalShortcut, nativeImage, splayerx, systemPreferences } from 'electron' // eslint-disable-line
+import { app, BrowserWindow, session, Tray, ipcMain, globalShortcut, nativeImage, splayerx, systemPreferences, BrowserView } from 'electron' // eslint-disable-line
 import { throttle, debounce, uniq } from 'lodash';
 import os from 'os';
 import path, {
@@ -64,6 +64,8 @@ let mainWindow = null;
 let laborWindow = null;
 let aboutWindow = null;
 let preferenceWindow = null;
+let browsingWindow = null;
+let browserViews = [];
 let tray = null;
 let needToRestore = false;
 let inited = false;
@@ -83,6 +85,9 @@ const aboutURL = process.env.NODE_ENV === 'development'
 const preferenceURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080/preference.html'
   : `file://${__dirname}/preference.html`;
+const browsingURL = process.env.NODE_ENV === 'development'
+  ? 'http://localhost:9080/browsing.html'
+  : `file://${__dirname}/browsing.html`;
 
 const tempFolderPath = path.join(app.getPath('temp'), 'splayer');
 if (!fs.existsSync(tempFolderPath)) fs.mkdirSync(tempFolderPath);
@@ -259,6 +264,35 @@ function createAboutWindow() {
   });
 }
 
+function createBrowsingWindow() {
+  const browsingWindowOptions = {
+    useContentSize: true,
+    frame: false,
+    titleBarStyle: 'none',
+    transparent: true,
+    movable: true,
+    webPreferences: {
+      webSecurity: false,
+      nodeIntegration: true,
+      experimentalFeatures: true,
+      webviewTag: true,
+    },
+    backgroundColor: '#6a6a6a',
+    acceptFirstMouse: false,
+    show: false,
+  };
+  if (!browsingWindow) {
+    browsingWindow = new BrowserWindow(browsingWindowOptions);
+    browsingWindow.loadURL(`${browsingURL}`);
+    browsingWindow.on('closed', () => {
+      browsingWindow = null;
+    });
+  }
+  browsingWindow.once('ready-to-show', () => {
+    // browsingWindow.show();
+  });
+}
+
 function createLaborWindow() {
   const laborWindowOptions = {
     show: false,
@@ -352,12 +386,92 @@ function registerMainWindowEvent(mainWindow) {
     }
   });
 
+  ipcMain.on('callBrowsingWindowMethod', (evt, method, args = []) => {
+    try {
+      browsingWindow[method](...args);
+    } catch (ex) {
+      console.error('callBrowsingWindowMethod', method, JSON.stringify(args), '\n', ex);
+    }
+  });
   ipcMain.on('callMainWindowMethod', (evt, method, args = []) => {
     try {
       mainWindow[method](...args);
     } catch (ex) {
       console.error('callMainWindowMethod', method, JSON.stringify(args), '\n', ex);
     }
+  });
+  ipcMain.on('store-pip-info', () => {
+    mainWindow.send('store-pip-info', [
+      browsingWindow.getPosition()[0],
+      browsingWindow.getPosition()[1],
+      browsingWindow.getSize()[0],
+      browsingWindow.getSize()[1],
+    ]);
+  });
+  ipcMain.on('remove-pip-browser', () => { // close pip window
+    browsingWindow.removeBrowserView(browserViews[0]);
+    if (browserViews[0].webContents.canGoBack()) {
+      browserViews[0].webContents.goBack();
+    }
+    browsingWindow.hide();
+  });
+  ipcMain.on('remove-browser', (evt, isPip) => {
+    if (isPip) {
+      mainWindow.removeBrowserView(browserViews[1]);
+      browsingWindow.removeBrowserView(browserViews[0]);
+    } else {
+      mainWindow.removeBrowserView(browserViews[0]);
+    }
+    browserViews.forEach((view) => {
+      view.destroy();
+    });
+    browsingWindow.hide();
+  });
+  ipcMain.on('create-browser-view', (evt, args) => {
+    const isDestroyed = browserViews.filter(view => view.isDestroyed()).length;
+    if (!browserViews.length || isDestroyed) {
+      browserViews = [
+        new BrowserView({
+          webPreferences: {
+            preload: `${require('path').resolve(__static, 'pip/preload.js')}`,
+          },
+        }),
+        new BrowserView({
+          webPreferences: {
+            preload: `${require('path').resolve(__static, 'pip/preload.js')}`,
+          },
+        }),
+      ];
+    }
+    mainWindow.addBrowserView(browserViews[0]);
+    browserViews.forEach((view) => {
+      view.webContents.loadURL(args.url);
+      view.webContents.openDevTools();
+    });
+  });
+  ipcMain.on('enter-pip', () => {
+    if (!browsingWindow) {
+      createBrowsingWindow();
+    }
+    browsingWindow.show();
+    browsingWindow.openDevTools();
+    mainWindow.removeBrowserView(browserViews[0]);
+    browsingWindow.removeBrowserView(browserViews[1]);
+    mainWindow.addBrowserView(browserViews[1]);
+    browsingWindow.addBrowserView(browserViews[0]);
+  });
+  ipcMain.on('exit-pip', () => {
+    mainWindow.removeBrowserView(browserViews[1]);
+    browsingWindow.removeBrowserView(browserViews[0]);
+    if (browserViews[1].webContents.canGoBack()) {
+      browserViews[1].webContents.goBack();
+    }
+    mainWindow.addBrowserView(browserViews[0]);
+    browsingWindow.addBrowserView(browserViews[1]);
+    browsingWindow.hide();
+  });
+  ipcMain.on('update-header-to-show', (e, headerToShow) => {
+    mainWindow.send('update-header-to-show', headerToShow);
   });
   ipcMain.on('update-route-name', (e, route) => {
     routeName = route;
@@ -411,6 +525,7 @@ function registerMainWindowEvent(mainWindow) {
     app.quit();
   });
   ipcMain.on('add-preference', createPreferenceWindow);
+  ipcMain.on('add-browsing', createBrowsingWindow);
   ipcMain.on('preference-to-main', (e, args) => {
     if (mainWindow && !mainWindow.webContents.isDestroyed()) {
       mainWindow.webContents.send('mainDispatch', 'setPreference', args);
@@ -714,6 +829,7 @@ app.on('web-contents-created', (webContentsCreatedEvent, contents) => {
 
 app.on('bossKey', handleBossKey);
 app.on('add-preference', createPreferenceWindow);
+app.on('add-browsing', createBrowsingWindow);
 app.on('add-windows-about', createAboutWindow);
 
 app.on('menu-create-main-window', () => {
