@@ -11,7 +11,6 @@ import fs from 'fs';
 import rimraf from 'rimraf';
 // import { audioHandler } from './helpers/audioHandler';
 import { audioGrabService } from './helpers/AudioGrabService';
-import { jsonStorage } from '../renderer/libs/JsonStorage';
 import './helpers/electronPrototypes';
 import writeLog from './helpers/writeLog';
 import { getValidVideoRegex, getValidSubtitleRegex } from '../shared/utils';
