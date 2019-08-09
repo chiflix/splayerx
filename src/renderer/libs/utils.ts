@@ -4,7 +4,7 @@ import romanize from 'romanize';
 import { times, padStart, sortBy } from 'lodash';
 import { sep, basename, join } from 'path';
 import { ensureDir } from 'fs-extra';
-import electron, { remote } from 'electron';
+import { remote } from 'electron';
 // @ts-ignore
 import { promises as fsPromises } from 'fs';
 // @ts-ignore
@@ -19,15 +19,13 @@ import {
 import { codeToLanguageName, LanguageCode } from './language';
 import { checkPathExist, write, deleteDir } from './file';
 
-const app = electron.app || electron.remote.app;
-
 /**
  * @description 获取electron应用用户目录下的设定的缓存路径
  * @author tanghaixiang
  * @returns String 缓存路径
  */
 export function getDefaultDataPath() {
-  return join(app.getPath(ELECTRON_CACHE_DIRNAME), DEFAULT_DIRNAME);
+  return join(remote.app.getPath(ELECTRON_CACHE_DIRNAME), DEFAULT_DIRNAME);
 }
 
 /** 计算文本宽度
@@ -337,14 +335,14 @@ export function crc32(str: string, crc?: number) {
 }
 
 export function saveNsfwFistFilter() {
-  const path = join(getDefaultDataPath(), 'nsfw-filter.splayer');
+  const path = join(getDefaultDataPath(), 'NSFW_FILTER_MARK');
   const buf = Buffer.alloc(0);
   write(path, buf);
 }
 
 export async function findNsfwFistFilter() {
   let success = false;
-  const path = join(getDefaultDataPath(), 'nsfw-filter.splayer');
+  const path = join(getDefaultDataPath(), 'NSFW_FILTER_MARK');
   try {
     success = await checkPathExist(path);
   } catch (error) {
