@@ -138,7 +138,11 @@ export default {
       if (finalSeekTime < 0 || !newVal || !finalSeekTime) finalSeekTime = 0;
       else if (finalSeekTime > this.duration) finalSeekTime = this.duration;
       // seek the video
-      this.$refs.video.currentTime = finalSeekTime;
+      if (Number.isFinite(finalSeekTime)) {
+        this.$refs.video.currentTime = finalSeekTime;
+      } else {
+        log.warn('BaseVideoPlayer', `Invalid currentTime: ${JSON.stringify(finalSeekTime)}`);
+      }
       // update the seek time
       if (this.needtimeupdate) {
         videodata.time = this.$refs.video.currentTime;
