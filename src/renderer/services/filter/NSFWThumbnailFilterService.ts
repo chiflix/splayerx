@@ -29,7 +29,13 @@ export default class NSFWFilterService implements IMediaFilter {
   }
 
   public warmup() {
-    setTimeout(() => this.getNsfwNeWithtLock());
+    setTimeout(() => {
+      try {
+        this.getNsfwNeWithtLock();
+      } catch (ex) {
+        //
+      }
+    });
   }
 
   /**
