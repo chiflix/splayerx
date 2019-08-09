@@ -67,7 +67,7 @@ export class EmbeddedGenerator implements IEntityGenerator {
   }
 
   public async getHash() {
-    return mediaQuickHash(await this.getExtractedSrc());
+    return (await mediaQuickHash.try(await this.getExtractedSrc())) || `mediahashfallback-${Math.random()}`;
   }
 
   public async getLanguage() {

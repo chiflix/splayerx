@@ -222,7 +222,7 @@ class MediaInfoTask implements IMediaTask<IMediaInfo> {
 
   /** generate a MediaInfoTask instance by file path */
   public static async from(path: string) {
-    const hash = await mediaQuickHash(path);
+    const hash = await mediaQuickHash.try(path) || `mediahashfallback-${Math.random()}`;
     return new MediaInfoTask(path, hash);
   }
 

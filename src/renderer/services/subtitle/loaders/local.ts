@@ -48,6 +48,6 @@ export class LocalGenerator implements IEntityGenerator {
   }
 
   public async getHash() {
-    return mediaQuickHash(this.origin.source);
+    return (await mediaQuickHash.try(this.origin.source)) || `mediahashfallback-${Math.random()}`;
   }
 }

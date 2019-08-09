@@ -34,7 +34,7 @@ class ThumbnailTask implements IMediaTask<string> {
     width: number,
     rowCount: number, columnCount: number,
   ) {
-    const videoHash = await mediaQuickHash(videoPath);
+    const videoHash = await mediaQuickHash.try(videoPath) || `mediahashfallback-${Math.random()}`;
     const dirPath = await getVideoDir(videoHash);
     const imagePath = join(dirPath, `${[width, rowCount, columnCount].join('-')}.jpg`);
     return new ThumbnailTask(
