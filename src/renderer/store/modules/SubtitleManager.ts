@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import uuidv4 from 'uuid/v4';
 import {
-  isEqual, sortBy, differenceWith, flatten, remove, debounce,
+  isEqual, sortBy, differenceWith, flatten, remove, debounce, pick,
 } from 'lodash';
 import Vue from 'vue';
 import { extname } from 'path';
@@ -20,7 +20,7 @@ import {
 import {
   TranscriptInfo,
   searchForLocalList, retrieveEmbeddedList, fetchOnlineList,
-  OnlineGenerator, LocalGenerator, EmbeddedGenerator, TranslatedGenerator,
+  OnlineGenerator, LocalGenerator, EmbeddedGenerator, TranslatedGenerator, IEmbeddedOrigin,
 } from '@/services/subtitle';
 import { generateHints, calculatedName } from '@/libs/utils';
 import { log } from '@/libs/Log';
@@ -221,7 +221,7 @@ const actions = {
       privacyAgreement,
     } = getters;
     const { mediaHash } = state;
-    const list = getters.list as SubtitleControlListItem[];
+
     const preference = await retrieveSubtitlePreference(state.mediaHash);
     const hasStoredSubtitles = !!preference && !!preference.list.length;
     const languageHasChanged = (
@@ -246,6 +246,8 @@ const actions = {
           commit(m.setIsRefreshing, false);
           dispatch(legacyActions.UPDATE_SUBTITLE_TYPE, true);
           dispatch(a.stopAISelection);
+          retrieveEmbeddedList(originSrc)
+            .then(streams => dispatch(a.addEmbeddedSubtitles, { mediaHash, source: streams }));
         });
     }
 
@@ -253,7 +255,11 @@ const actions = {
       await dispatch(a.addDatabaseSubtitles, {
         source: preference.list,
         mediaHash: state.mediaHash,
-      }).then(() => dispatch(a.chooseSelectedSubtitles, preference.selected));
+      }).then(() => {
+        dispatch(a.chooseSelectedSubtitles, preference.selected);
+        retrieveEmbeddedList(originSrc)
+          .then(streams => dispatch(a.addEmbeddedSubtitles, { mediaHash, source: streams }));
+      });
     }
 
     let onlinePromise = Promise.resolve();
@@ -262,14 +268,9 @@ const actions = {
     if (onlineNeeded) {
       onlinePromise = dispatch(a.refreshOnlineSubtitles, { mediaHash, bubble: false });
     }
-    /** whether or not to refresh embedded subtitles */
-    const embeddedNeeded = !list
-      .some(({ type }: SubtitleControlListItem) => type === Type.Embedded);
-    if (embeddedNeeded) {
-      retrieveEmbeddedList(originSrc)
-        .then(streams => dispatch(a.addEmbeddedSubtitles, { mediaHash, source: streams }));
-    }
 
+    retrieveEmbeddedList(originSrc)
+      .then(streams => dispatch(a.addEmbeddedSubtitles, { mediaHash, source: streams }));
     return Promise.race([
       Promise.all([
         onlinePromise,
@@ -315,6 +316,7 @@ const actions = {
     const onlinePromise = onlineNeeded
       ? dispatch(a.refreshOnlineSubtitles, { mediaHash, bubble: true })
       : Promise.resolve();
+
     return Promise.race([
       Promise.all([
         onlinePromise,
@@ -620,8 +622,18 @@ const actions = {
         const hash = await subtitleGenerator.getHash();
         const type = await subtitleGenerator.getType();
         const existedHash = list.find(subtitle => subtitle.hash === hash && subtitle.type === type);
-        const source = await subtitleGenerator.getSource();
-        const existedOrigin = list.find(subtitle => isEqual(subtitle.source, source.source));
+        const source = subtitleGenerator.getStoredSource
+          ? await subtitleGenerator.getStoredSource()
+          : await subtitleGenerator.getSource();
+        const existedOrigin = list.find((subtitle) => {
+          if (source.type !== Type.Embedded) return isEqual(subtitle.source, source.source);
+          const storedSource = (source as IEmbeddedOrigin).source;
+          const newSource = (subtitle as IEmbeddedOrigin).source;
+          return isEqual(
+            pick(storedSource, ['streamIndex', 'extractedSrc']),
+            pick(newSource, ['streamIndex', 'extractedSrc']),
+          );
+        });
         if (!existedHash || !existedOrigin) {
           const id = uuidv4();
           store.registerModule([id], { ...SubtitleModule, name: `${id}` });
