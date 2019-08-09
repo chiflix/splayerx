@@ -129,6 +129,8 @@
       "play": "Play",
       "resetSpeed": "Reset Playback Speed",
       "nextVideo": "Next Video",
+      "showPlaylist": "Show Playlist",
+      "hidePlaylist": "Hide Playlist",
       "previousVideo": "Previous Video",
       "singleCycle": "Repeat One",
       "snapShot": "Snapshot"
@@ -300,7 +302,8 @@
     "folderSource": "Folder",
     "playing": "Playing",
     "paused": "Paused",
-    "playlistSource": "Playlist"
+    "playlistSource": "Playlist",
+    "add": "Add To Playlist"
   },
   "subtitle": {
     "embedded": "Embed",
@@ -354,10 +357,15 @@
     },
     "translate": {
       "title": "About {time} Left",
-      "content": "Please do not skip the video or close the application. You can check the progress on the translation panel.",
       "minute": "{number} min",
       "second": "{number} sec",
-      "hour": "{number} hr"
+      "hour": "{number} hr",
+      "content": "Please do not skip the video or close the application. You can check the progress on the translation panel.",
+      "contentSearch": "Searching ...",
+      "contentTranslate": "Subtitle in source language found, translation in process ...",
+      "contentGrabbing": "Subtitle in source language not found, extracting audio ...",
+      "contentGrabComplated": "Audio extracted, uploading now ...",
+      "contentSpeech": "Audio uploaded, speech recognition and translation in process ..."
     },
     "success": {
       "title": "Translation Done",
@@ -382,7 +390,7 @@
     "cancel": "Cancel",
     "quit": "Quit",
     "generate": "Generate",
-    "ok": "OK",
+    "ok": "Run in Background",
     "continue": "Cancel"
   },
   "translateBubble": {

@@ -128,6 +128,8 @@
       "play": "Jugar",
       "resetSpeed": "Restablecer velocidad de reproducción",
       "nextVideo": "Siguiente Video",
+      "showPlaylist": "Mostrar lista de reproducción",
+      "hidePlaylist": "Ocultar lista de reproducción",
       "previousVideo": "Video Anterior",
       "singleCycle": "Repetir una",
       "snapShot": "Instantánea"
@@ -299,7 +301,8 @@
     "folderSource": "Carpeta",
     "playing": "Jugando",
     "paused": "En pausa",
-    "playlistSource": "Lista"
+    "playlistSource": "Lista",
+    "add": "Agregar a la lista de reproducción"
   },
   "subtitle": {
     "embedded": "Empotrar",
@@ -353,10 +356,15 @@
     },
     "translate": {
       "title": "Acerca de {time} izquierda",
-      "content": "Por favor, no omita el vídeo o cierra la aplicación. Puedes comprobar el progreso en el panel de traducción.",
       "minute": "{number} min",
       "second": "{number} seg",
-      "hour": "{number} hr"
+      "hour": "{number} hr",
+      "content": "Por favor, no omita el vídeo o cierra la aplicación. Puedes comprobar el progreso en el panel de traducción.",
+      "contentSearch": "Buscando ...",
+      "contentTranslate": "Se han encontrado subtítulos en el idioma de origen, se están traduciendo de forma inteligente ...",
+      "contentGrabbing": "Subtítulo en el idioma de origen no encontrado, extracción de audio ...",
+      "contentGrabComplated": "Audio extraído, subiendo ahora ...",
+      "contentSpeech": "Audio subido, recolocación de voz y traducción en proceso ..."
     },
     "success": {
       "title": "Traducción realizada",

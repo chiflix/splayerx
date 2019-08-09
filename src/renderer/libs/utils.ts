@@ -214,8 +214,10 @@ export function calculatedName(
       (s: SubtitleControlListItem) => (s as IEmbeddedOrigin).source.streamIndex,
     );
     const sort = embeddedList.findIndex((s: SubtitleControlListItem) => s.id === item.id) + 1;
-    name = item.language === LanguageCode.No || item.language === LanguageCode.Default
-      ? `${romanize(sort)}` : `${romanize(sort)} - ${codeToLanguageName(item.language)}`;
+    const { language } = item;
+    if (language === LanguageCode.No || language === LanguageCode.Default) return `${romanize(sort)}`;
+    if (language === LanguageCode['zh-CN'] || language === LanguageCode['zh-TW']) return `${romanize(sort)} - 中文`;
+    return `${romanize(sort)} - ${codeToLanguageName(item.language)}`;
   } else if (item.type === Type.Online) {
     const sort = list
       .filter((s: SubtitleControlListItem) => s.type === Type.Online

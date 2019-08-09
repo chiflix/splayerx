@@ -588,8 +588,8 @@ function createMainWindow(openDialog) {
   });
   jsonStorage.get('preferences').then((data) => {
     let url = mainURL;
-    if (finalVideoToOpen.length) url = `${mainURL}#/play`;
-    else if (!data.welcomeProcessDone) url = `${mainURL}#/welcome`;
+    if (!data.welcomeProcessDone) url = `${mainURL}#/welcome`;
+    else if (finalVideoToOpen.length) url = `${mainURL}#/play`;
     mainWindow.loadURL(url);
   }).catch(() => {
     mainWindow.loadURL(mainURL);
