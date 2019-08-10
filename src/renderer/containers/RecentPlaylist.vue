@@ -474,7 +474,7 @@ export default {
     },
     onItemMouseover(index?: number, recentPlayService?: RecentPlayService) {
       this.$emit('can-hover-item');
-      if (index && recentPlayService) {
+      if (index !== undefined && recentPlayService) {
         this.hoverIndex = index;
         this.hoveredDuration = recentPlayService.duration;
         this.filename = this.pathBaseName(recentPlayService.path);
