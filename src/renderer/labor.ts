@@ -41,7 +41,9 @@ function waitForTasks() {
     args?: Json,
     options?: { cache?: boolean },
   ) => {
-    log.debug('task received:', type, id, args, options);
+    log.debug('task received:', {
+      type, id, args, options,
+    });
     function notifyTaskDone(result: Json) {
       ipcRenderer.send('labor-task-done', type, id, result);
     }

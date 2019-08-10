@@ -473,9 +473,14 @@ export default {
       this.indexOfMovingItem = this.playingList.length;
       this.movementX = this.movementY = 0;
     },
-    onItemMouseover(index?: number, recentPlayService?: RecentPlayService) {
+    onItemMouseover(index?: number, recentPlayService?: RecentPlayService, isAdd?: boolean) {
       this.$emit('can-hover-item');
-      if (index && recentPlayService) {
+      if (isAdd) {
+        this.filename = this.$t('recentPlaylist.add');
+        this.showTopContent = false;
+        return;
+      }
+      if (recentPlayService) {
         this.hoverIndex = index;
         this.hoveredDuration = recentPlayService.duration;
         this.filename = this.pathBaseName(recentPlayService.path);
@@ -484,9 +489,6 @@ export default {
         } else {
           this.hoveredLastPlayedTime = 0;
         }
-      } else {
-        this.filename = this.$t('recentPlaylist.add');
-        this.showTopContent = false;
       }
     },
     onItemMouseout() {

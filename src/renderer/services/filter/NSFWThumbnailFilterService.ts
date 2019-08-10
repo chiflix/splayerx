@@ -44,8 +44,6 @@ export default class NSFWFilterService implements IMediaFilter {
    */
   public async checkImage(src: string) {
     try {
-      const timeKey = Math.random().toString();
-      console.time(timeKey);
       const nsfwnet = await this.getNsfwNeWithtLock();
       const img = new Image();
       await new Promise((resolve, reject) => {
@@ -58,11 +56,10 @@ export default class NSFWFilterService implements IMediaFilter {
       const isNsfw = result.some(item => (
         item.className === NSFW_CLASSES[1] || item.className === NSFW_CLASSES[3]
       ) && item.probability >= 0.8);
-      if (isNsfw) log.debug('nsfw', src, result);
-      console.timeEnd(timeKey);
+      if (isNsfw) log.debug('nsfw', { src, result });
       return isNsfw;
     } catch (ex) {
-      console.error(ex, src);
+      console.error(ex, { src });
       return false;
     }
   }
