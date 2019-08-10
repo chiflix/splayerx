@@ -1,5 +1,5 @@
 import path from 'path';
-import { remote } from 'electron';
+import { remote, ipcRenderer } from 'electron';
 import fs from 'fs';
 import asyncStorage from '@/helpers/asyncStorage';
 import syncStorage from '@/helpers/syncStorage';
@@ -111,7 +111,7 @@ const actions = {
   },
   hideNSFW({ commit, state }, payload) {
     commit('hideNSFW', !!payload);
-    if (payload) this.$electron.ipcRenderer.send('labor-task-add', 'nsfw-warmup');
+    if (payload) ipcRenderer.send('labor-task-add', 'nsfw-warmup');
     return asyncStorage.set('preferences', state);
   },
   protectPrivacy({ commit, state }) {

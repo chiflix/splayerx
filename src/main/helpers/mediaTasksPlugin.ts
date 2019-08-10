@@ -42,7 +42,7 @@ export default function registerMediaTasks() {
     if (existsSync(imagePath)) {
       reply(event, 'snapshot-reply', undefined, imagePath);
     } else if (existsSync(videoPath)) {
-      () => splayerxProxy.snapshotVideo(
+      splayerxProxy.snapshotVideo(
         videoPath, imagePath,
         timeString,
         width.toString(), height.toString(),
