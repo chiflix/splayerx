@@ -47,17 +47,20 @@ export default function registerMediaTasks() {
         timeString,
         width.toString(), height.toString(),
         (err) => {
-          if (err === '0' && existsSync(imagePath)) reply(event, 'snapshot-reply', null, imagePath);
-          else reply(event, 'snapshot-reply', err);
+          setTimeout(() => { // fix "Waiting for the task completion." from splayrx
+            if (err === '0' && existsSync(imagePath)) {
+              reply(event, 'snapshot-reply', null, imagePath);
+            } else {
+              reply(event, 'snapshot-reply', err);
+            }
+          }, 5);
         },
       );
     } else {
       reply(event, 'snapshot-reply', 'File does not exist.');
     }
   });
-  ipcMain.on('subtitle-request', (event,
-    videoPath, subtitlePath,
-    streamIndex) => {
+  ipcMain.on('subtitle-request', (event, videoPath, subtitlePath, streamIndex) => {
     if (existsSync(subtitlePath)) {
       reply(event, 'subtitle-reply', null, subtitlePath);
     } else if (existsSync(videoPath)) {
