@@ -55,8 +55,8 @@ class ThumbnailTask implements IMediaTask<string> {
         this.videoPath, this.imagePath,
         this.width,
         this.rowCount, this.columnCount);
-      ipcRenderer.once('thumbnail-reply', (event, error, path) => {
-        if (error) reject(error);
+      ipcRenderer.once('thumbnail-reply', (event, error: string | null, path: string) => {
+        if (error) reject(new Error(error));
         else resolve(path);
       });
     });

@@ -355,8 +355,8 @@ class MediaInfoTask implements IMediaTask<IMediaInfo> {
   public execute(): Promise<IMediaInfo> {
     return new Promise((resolve, reject) => {
       ipcRenderer.send('media-info-request', this.path);
-      ipcRenderer.once('media-info-reply', (event, error, info) => {
-        if (error) reject(error);
+      ipcRenderer.once('media-info-reply', (event, error: string | null, info: string) => {
+        if (error) reject(new Error(error));
         else resolve(MediaInfoTask.mediaInfoMapper(JSON.parse(info) as IRawMediaInfo));
       });
     });

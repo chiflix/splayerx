@@ -30,9 +30,9 @@ const splayerxProxy = new Proxy(splayerx, {
 export default function registerMediaTasks() {
   ipcMain.on('media-info-request', (event, path) => {
     if (existsSync(path)) {
-      splayerxProxy.getMediaInfo(path, info => reply(event, 'media-info-reply', undefined, info));
+      splayerxProxy.getMediaInfo(path, info => reply(event, 'media-info-reply', null, info));
     } else {
-      reply(event, 'media-info-reply', new Error('File does not exist.'));
+      reply(event, 'media-info-reply', 'File does not exist.');
     }
   });
   ipcMain.on('snapshot-request', (event,
@@ -40,37 +40,37 @@ export default function registerMediaTasks() {
     timeString,
     width, height) => {
     if (existsSync(imagePath)) {
-      reply(event, 'snapshot-reply', undefined, imagePath);
+      reply(event, 'snapshot-reply', null, imagePath);
     } else if (existsSync(videoPath)) {
       splayerxProxy.snapshotVideo(
         videoPath, imagePath,
         timeString,
         width.toString(), height.toString(),
         (err) => {
-          if (err === '0' && existsSync(imagePath)) reply(event, 'snapshot-reply', undefined, imagePath);
-          else reply(event, 'snapshot-reply', new Error(err));
+          if (err === '0' && existsSync(imagePath)) reply(event, 'snapshot-reply', null, imagePath);
+          else reply(event, 'snapshot-reply', err);
         },
       );
     } else {
-      reply(event, 'snapshot-reply', new Error('File does not exist.'));
+      reply(event, 'snapshot-reply', 'File does not exist.');
     }
   });
   ipcMain.on('subtitle-request', (event,
     videoPath, subtitlePath,
     streamIndex) => {
     if (existsSync(subtitlePath)) {
-      reply(event, 'subtitle-reply', undefined, subtitlePath);
+      reply(event, 'subtitle-reply', null, subtitlePath);
     } else if (existsSync(videoPath)) {
       splayerxProxy.extractSubtitles(
         videoPath, subtitlePath,
         streamIndex,
         (err) => {
-          if (err === '0' && existsSync(subtitlePath)) reply(event, 'subtitle-reply', undefined, subtitlePath);
-          else reply(event, 'subtitle-reply', new Error(err));
+          if (err === '0' && existsSync(subtitlePath)) reply(event, 'subtitle-reply', null, subtitlePath);
+          else reply(event, 'subtitle-reply', err);
         },
       );
     } else {
-      reply(event, 'subtitle-reply', new Error('File does not exist.'));
+      reply(event, 'subtitle-reply', 'File does not exist.');
     }
   });
   ipcMain.on('thumbnail-request', (event,
@@ -78,19 +78,19 @@ export default function registerMediaTasks() {
     thumbnailWidth,
     rowThumbnailCount, columnThumbnailCount) => {
     if (existsSync(imagePath)) {
-      reply(event, 'thumbnail-reply', undefined, imagePath);
+      reply(event, 'thumbnail-reply', null, imagePath);
     } else if (existsSync(videoPath)) {
       splayerxProxy.generateThumbnails(
         videoPath, imagePath,
         thumbnailWidth.toString(),
         rowThumbnailCount.toString(), columnThumbnailCount.toString(),
         (err) => {
-          if (err === '0' && existsSync(imagePath)) reply(event, 'thumbnail-reply', undefined, imagePath);
-          else reply(event, 'thumbnail-reply', new Error(err));
+          if (err === '0' && existsSync(imagePath)) reply(event, 'thumbnail-reply', null, imagePath);
+          else reply(event, 'thumbnail-reply', err);
         },
       );
     } else {
-      reply(event, 'thumbnail-reply', new Error('File does not exist.'));
+      reply(event, 'thumbnail-reply', 'File does not exist.');
     }
   });
 }
