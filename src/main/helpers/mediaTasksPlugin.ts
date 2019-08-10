@@ -47,7 +47,7 @@ export default function registerMediaTasks() {
         timeString,
         width.toString(), height.toString(),
         (err) => {
-          setTimeout(() => { // fix "Waiting for the task completion." from splayrx
+          setTimeout(() => { // fix "Waiting for the task completion." from electron.splayerx
             if (err === '0' && existsSync(imagePath)) {
               reply(event, 'snapshot-reply', null, imagePath);
             } else {
