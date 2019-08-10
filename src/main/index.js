@@ -272,6 +272,9 @@ function createLaborWindow() {
   };
   if (!laborWindow) {
     laborWindow = new BrowserWindow(laborWindowOptions);
+    laborWindow.once('ready-to-show', () => {
+      laborWindow.readyToShow = true;
+    });
     laborWindow.on('close', (event) => {
       if ((mainWindow && !mainWindow.webContents.isDestroyed()) && needBlockCloseLaborWindow) {
         event.preventDefault();
@@ -356,7 +359,8 @@ function registerMainWindowEvent(mainWindow) {
 
   ipcMain.on('labor-task-add', (evt, ...rest) => {
     if (laborWindow && !laborWindow.webContents.isDestroyed()) {
-      laborWindow.webContents.send('labor-task-add', ...rest);
+      if (laborWindow.readyToShow) laborWindow.webContents.send('labor-task-add', ...rest);
+      else laborWindow.once('ready-to-show', () => laborWindow.webContents.send('labor-task-add', ...rest));
     }
   });
   ipcMain.on('labor-task-done', (evt, ...rest) => {
