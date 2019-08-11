@@ -23,18 +23,17 @@ export default class NSFWFilterService implements IMediaFilter {
       if (!this.getNsfwNetPromise) this.getNsfwNetPromise = this.getNsfwNet();
       const nsfwnet = await this.getNsfwNetPromise;
       return nsfwnet;
+    } catch (ex) {
+      console.error(ex);
+      return null;
     } finally {
       this.getNsfwNetPromise = null;
     }
   }
 
   public warmup() {
-    setTimeout(() => {
-      try {
-        this.getNsfwNeWithtLock();
-      } catch (ex) {
-        //
-      }
+    setTimeout(async () => {
+      await this.getNsfwNeWithtLock();
     });
   }
 
@@ -45,6 +44,7 @@ export default class NSFWFilterService implements IMediaFilter {
   public async checkImage(src: string) {
     try {
       const nsfwnet = await this.getNsfwNeWithtLock();
+      if (!nsfwnet) return false;
       const img = new Image();
       await new Promise((resolve, reject) => {
         img.onload = resolve;
