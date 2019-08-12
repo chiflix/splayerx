@@ -9,6 +9,8 @@ branches:
     - develop
     - testing
 
+skip_branch_with_pr: true
+
 image: Visual Studio 2017
 
 platform:
