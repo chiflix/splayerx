@@ -108,6 +108,7 @@ export default {
       acceleratorAvailable: true,
       oldDisplayId: -1,
       backToLandingView: false,
+      browsingWindowClose: false,
     };
   },
   computed: {
@@ -140,12 +141,6 @@ export default {
     danmuIconState() {
       return ['youtube', 'others'].includes(this.pipType) || (this.pipType === 'bilibili' && this.bilibiliType === 'others') ? 0.2 : 1;
     },
-    currentBrowserView() {
-      return this.$electron.remote.BrowserView.getAllViews()[1];
-    },
-    currentPipBrowserView() {
-      return this.$electron.remote.BrowserView.getAllViews()[0];
-    },
   },
   watch: {
     dropFiles(val: string[]) {
@@ -166,23 +161,9 @@ export default {
     isPip(val: boolean) {
       this.menuService.updatePip(val);
       this.$electron.ipcRenderer.send('update-enabled', 'window.pip', true);
-      this.$electron.ipcRenderer.send('update-enabled', 'history.back', !val && this.currentBrowserView.webContents.canGoBack());
-      this.$electron.ipcRenderer.send('update-enabled', 'history.forward', !val && this.currentBrowserView.webContents.canGoForward());
-      if (!val) {
-        this.$electron.ipcRenderer.send('exit-pip');
-        this.$electron.ipcRenderer.send('store-pip-pos');
-        this.$electron.ipcRenderer.send('update-enabled', 'window.keepPlayingWindowFront', false);
-        this.handleWindowChangeExitPip();
-        if (this.pipType === 'youtube') {
-          this.youtubeRecover();
-        } else if (this.pipType === 'bilibili') {
-          this.bilibiliRecover();
-        } else if (this.pipType === 'iqiyi') {
-          this.iqiyiRecover();
-        } else {
-          this.othersRecover();
-        }
-      } else {
+      this.$electron.ipcRenderer.send('update-enabled', 'history.back', !val && this.$electron.remote.getCurrentWindow().getBrowserView().webContents.canGoBack());
+      this.$electron.ipcRenderer.send('update-enabled', 'history.forward', !val && this.$electron.remote.getCurrentWindow().getBrowserView().webContents.canGoForward());
+      if (val) {
         this.$electron.ipcRenderer.send('enter-pip');
         this.$store.dispatch('updateBrowsingSize', this.winSize);
         this.$store.dispatch('updateBrowsingPos', this.winPos);
@@ -195,6 +176,23 @@ export default {
           this.timeout = false;
         }, 3000);
         this.pipAdapter();
+      } else {
+        if (!this.browsingWindowClose) {
+          this.$electron.ipcRenderer.send('exit-pip');
+          this.$electron.ipcRenderer.send('store-pip-pos');
+          this.$electron.ipcRenderer.send('update-enabled', 'window.keepPlayingWindowFront', false);
+          this.handleWindowChangeExitPip();
+        }
+        this.browsingWindowClose = false;
+        if (this.pipType === 'youtube') {
+          this.youtubeRecover();
+        } else if (this.pipType === 'bilibili') {
+          this.bilibiliRecover();
+        } else if (this.pipType === 'iqiyi') {
+          this.iqiyiRecover();
+        } else {
+          this.othersRecover();
+        }
       }
     },
     pipSize() {
@@ -209,39 +207,44 @@ export default {
       }
     },
     loadingState(val: boolean) {
-      const loadUrl = this.currentBrowserView.webContents.getURL();
+      const loadUrl = this.$electron.remote.getCurrentWindow()
+        .getBrowserView().webContents.getURL();
       const recordIndex = this.supportedRecordHost.indexOf(urlParseLax(loadUrl).hostname);
-      this.$electron.ipcRenderer.send('update-enabled', 'history.back', this.currentBrowserView.webContents.canGoBack());
-      this.$electron.ipcRenderer.send('update-enabled', 'history.forward', this.currentBrowserView.webContents.canGoForward());
+      this.$electron.ipcRenderer.send('update-enabled', 'history.back', this.$electron.remote.getCurrentWindow().getBrowserView().webContents.canGoBack());
+      this.$electron.ipcRenderer.send('update-enabled', 'history.forward', this.$electron.remote.getCurrentWindow().getBrowserView().webContents.canGoForward());
       if (val) {
         this.hasVideo = false;
         this.$electron.ipcRenderer.send('update-enabled', 'window.pip', false);
         this.$refs.browsingHeader.updateWebInfo({
           hasVideo: this.hasVideo,
           url: loadUrl,
-          canGoBack: this.currentBrowserView.webContents.canGoBack(),
-          canGoForward: this.currentBrowserView.webContents.canGoForward(),
+          canGoBack: this.$electron.remote.getCurrentWindow()
+            .getBrowserView().webContents.canGoBack(),
+          canGoForward: this.$electron.remote.getCurrentWindow()
+            .getBrowserView().webContents.canGoForward(),
         });
       } else {
         if (this.pipRestore) {
           this.pipAdapter();
           this.pipRestore = false;
         }
-        this.currentBrowserView.webContents
+        this.$electron.remote.getCurrentWindow().getBrowserView().webContents
           .executeJavaScript(this.calculateVideoNum, (r: number) => {
             this.hasVideo = recordIndex === 0 && !getVideoId(loadUrl).id ? false : !!r;
             this.$electron.ipcRenderer.send('update-enabled', 'window.pip', this.hasVideo);
             this.$refs.browsingHeader.updateWebInfo({
               hasVideo: this.hasVideo,
               url: loadUrl,
-              canGoBack: this.currentBrowserView.webContents.canGoBack(),
-              canGoForward: this.currentBrowserView.webContents.canGoForward(),
+              canGoBack: this.$electron.remote.getCurrentWindow()
+                .getBrowserView().webContents.canGoBack(),
+              canGoForward: this.$electron.remote.getCurrentWindow()
+                .getBrowserView().webContents.canGoForward(),
             });
           });
       }
     },
     headerToShow(val: boolean) {
-      const currentView = this.isPip ? this.currentPipBrowserView : this.currentBrowserView;
+      const currentView = this.$electron.remote.getCurrentWindow().getBrowserView();
       if (!val) {
         currentView.setBounds({
           x: 0, y: 0, width: window.screen.width, height: window.screen.height,
@@ -262,10 +265,11 @@ export default {
     );
     this.$store.dispatch('updateBrowsingPos', this.winPos);
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [0]);
-    this.currentBrowserView.setBounds({
+    this.$electron.remote.getCurrentWindow().getBrowserView().setBounds({
       x: 0, y: 36, width: this.browsingSize[0], height: this.browsingSize[1] - 36,
     });
-    this.currentBrowserView.setAutoResize({ width: true, height: true });
+    this.$electron.remote.getCurrentWindow()
+      .getBrowserView().setAutoResize({ width: true, height: true });
   },
   mounted() {
     this.menuService = new MenuService();
@@ -338,7 +342,7 @@ export default {
       this.$store.dispatch('updatePipPos', pos);
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any,complexity
-    this.currentBrowserView.webContents.addListener('ipc-message', (evt: any, channel: string, args: any) => { // https://github.com/electron/typescript-definitions/issues/27 fixed in 6.0.0
+    this.$electron.remote.getCurrentWindow().getBrowserView().webContents.addListener('ipc-message', (evt: any, channel: string, args: any) => { // https://github.com/electron/typescript-definitions/issues/27 fixed in 6.0.0
       switch (channel) {
         case 'open-url':
           this.handleOpenUrl(args);
@@ -350,7 +354,7 @@ export default {
         case 'drop':
           this.maskToShow = false;
           if ((args.files as string[]).length) {
-            this.currentBrowserView.setBounds({
+            this.$electron.remote.getCurrentWindow().getBrowserView().setBounds({
               x: 0, y: 36, width: 0, height: 0,
             });
             this.dropFiles = args.files;
@@ -406,27 +410,29 @@ export default {
     this.$electron.ipcRenderer.on('update-header-to-show', (ev: any, headerToShow: boolean) => {
       this.headerToShow = headerToShow;
     });
-    this.$electron.ipcRenderer.on('quit-pip', () => {
-      this.isPip = false;
+    this.$electron.ipcRenderer.on('update-pip-state', () => {
+      this.browsingWindowClose = true;
+      this.updateIsPip(false);
     });
-    this.currentBrowserView.webContents.addListener('dom-ready', () => { // for webview test
+    this.$electron.remote.getCurrentWindow().getBrowserView().webContents.addListener('dom-ready', () => { // for webview test
       window.focus();
-      this.currentBrowserView.webContents.focus();
-      if (process.env.NODE_ENV === 'development') this.currentBrowserView.webContents.openDevTools();
+      this.$electron.remote.getCurrentWindow().getBrowserView().webContents.focus();
+      if (process.env.NODE_ENV === 'development') this.$electron.remote.getCurrentWindow().getBrowserView().webContents.openDevTools();
     });
     // https://github.com/electron/typescript-definitions/issues/27 fixed in 6.0.0
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    this.currentBrowserView.webContents.addListener('new-window', (e: any, url: string, disposition: string) => {
+    this.$electron.remote.getCurrentWindow().getBrowserView().webContents.addListener('new-window', (e: any, url: string, disposition: string) => {
       if (disposition !== 'new-window') {
         this.handleOpenUrl({ url });
       }
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    this.currentBrowserView.webContents.addListener('did-start-navigation', (e: any, url: string) => {
+    this.$electron.remote.getCurrentWindow().getBrowserView().webContents.addListener('did-start-navigation', (e: any, url: string) => {
       if (!url || url === 'about:blank') return;
       this.startTime = new Date().getTime();
       this.loadingState = true;
-      const loadUrl = this.currentBrowserView.webContents.getURL();
+      const loadUrl = this.$electron.remote.getCurrentWindow()
+        .getBrowserView().webContents.getURL();
       this.currentUrl = loadUrl;
       const recordIndex = this.supportedRecordHost.indexOf(urlParseLax(loadUrl).hostname);
       if (recordIndex !== -1) {
@@ -445,7 +451,7 @@ export default {
         }
       }
     });
-    this.currentBrowserView.webContents.addListener('did-stop-loading', () => {
+    this.$electron.remote.getCurrentWindow().getBrowserView().webContents.addListener('did-stop-loading', () => {
       const loadingTime: number = new Date().getTime() - this.startTime;
       if (loadingTime % 3000 === 0) {
         this.loadingState = false;
@@ -489,7 +495,7 @@ export default {
       if (this.isPip) {
         this.updateIsPip(false);
       }
-      this.currentBrowserView.webContents.loadURL(urlParseLax(url).protocol ? url : `https:${url}`);
+      this.$electron.remote.getCurrentWindow().getBrowserView().webContents.loadURL(urlParseLax(url).protocol ? url : `https:${url}`);
     },
     pipAdapter() {
       const parseUrl = urlParseLax(this.currentUrl);
@@ -518,16 +524,20 @@ export default {
       this.pipBtnsKeepShow = false;
     },
     handleWindowChangeEnterPip() {
+      const currentBrowserView = this.$electron.remote.getCurrentWindow().getBrowserView();
+      const currentPipBrowserView = this.$electron.remote.BrowserView.getAllViews()
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .filter((view: any) => view.id !== currentBrowserView.id)[0];
       const newDisplayId = this.$electron.remote.screen
         .getDisplayNearestPoint({ x: this.winPos[0], y: this.winPos[1] }).id;
       const useDefaultPosition = !this.pipPos.length
         || (this.oldDisplayId !== newDisplayId && this.oldDisplayId !== -1);
       this.oldDisplayId = newDisplayId;
-      this.currentPipBrowserView.setBounds({
+      currentBrowserView.setBounds({
         x: 0, y: 36, width: this.winSize[0], height: this.winSize[1] - 36,
       });
-      this.currentPipBrowserView.setAutoResize({ width: true, height: true });
-      this.currentBrowserView.webContents
+      currentBrowserView.setAutoResize({ width: true, height: true });
+      currentPipBrowserView.webContents
         .executeJavaScript(this.getVideoStyle, (result: CSSStyleDeclaration) => {
           const videoAspectRatio = parseFloat(result.width as string)
             / parseFloat(result.height as string);
@@ -547,7 +557,7 @@ export default {
             ? [this.pipSize[0], Math.round(this.pipSize[0] / videoAspectRatio)]
             : [Math.round(this.pipSize[1] * videoAspectRatio), this.pipSize[1]];
           this.$electron.ipcRenderer.send('callBrowsingWindowMethod', 'setSize', calculateSize);
-          this.currentBrowserView.setBounds({
+          currentPipBrowserView.setBounds({
             x: 0, y: 0, width: calculateSize[0], height: calculateSize[1],
           });
         });
@@ -555,8 +565,9 @@ export default {
     handleWindowChangeExitPip() {
       const newDisplayId = this.$electron.remote.screen
         .getDisplayNearestPoint({ x: this.winPos[0], y: this.winPos[1] }).id;
-      this.currentBrowserView.setAutoResize({ width: false, height: false });
-      this.currentBrowserView.setBounds({
+      this.$electron.remote.getCurrentWindow()
+        .getBrowserView().setAutoResize({ width: false, height: false });
+      this.$electron.remote.getCurrentWindow().getBrowserView().setBounds({
         x: 0, y: 36, width: this.winSize[0], height: this.winSize[1] - 36,
       });
       // if (this.oldDisplayId !== newDisplayId) {
@@ -572,41 +583,36 @@ export default {
       this.oldDisplayId = newDisplayId;
       // this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [0]);
       // this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [570, 375]);
-      this.currentBrowserView.setAutoResize({ width: true, height: true });
+      this.$electron.remote.getCurrentWindow()
+        .getBrowserView().setAutoResize({ width: true, height: true });
     },
     handleDanmuDisplay() {
       if (this.pipType === 'iqiyi') {
         this.updateBarrageOpen(!this.barrageOpen);
-        this.currentBrowserView.webContents.executeJavaScript(this.iqiyiBarrage);
+        this.$electron.remote.getCurrentWindow()
+          .getBrowserView().webContents.executeJavaScript(this.iqiyiBarrage);
       } else if (this.pipType === 'bilibili') {
         this.updateBarrageOpen(!this.barrageOpen);
-        this.currentBrowserView.webContents.executeJavaScript(this.bilibiliBarrage);
+        this.$electron.remote.getCurrentWindow()
+          .getBrowserView().webContents.executeJavaScript(this.bilibiliBarrage);
       }
     },
     handleUrlForward() {
-      if (!this.isPip) {
-        if (this.currentBrowserView.webContents.canGoForward()) {
-          this.currentBrowserView.webContents.goForward();
-        }
-      } else if (this.currentPipBrowserView.webContents.canGoForward()) {
-        this.currentPipBrowserView.webContents.goForward();
+      if (this.$electron.remote.getCurrentWindow().getBrowserView().webContents.canGoForward()) {
+        this.$electron.remote.getCurrentWindow().getBrowserView().webContents.goForward();
       }
     },
     handleUrlBack() {
-      if (!this.isPip) {
-        if (this.currentBrowserView.webContents.canGoBack()) {
-          this.currentBrowserView.webContents.goBack();
-        }
-      } else if (this.currentPipBrowserView.webContents.canGoBack()) {
-        this.currentPipBrowserView.webContents.goBack();
+      if (this.$electron.remote.getCurrentWindow().getBrowserView().webContents.canGoBack()) {
+        this.$electron.remote.getCurrentWindow().getBrowserView().webContents.goBack();
       }
     },
     handleUrlReload() {
       if (this.isPip) {
         this.pipRestore = true;
-        this.currentPipBrowserView.webContents.reload();
+        this.$electron.remote.getCurrentWindow().getBrowserView().webContents.reload();
       } else {
-        this.currentBrowserView.webContents.reload();
+        this.$electron.remote.getCurrentWindow().getBrowserView().webContents.reload();
       }
     },
     handleEnterPip() {
@@ -620,46 +626,78 @@ export default {
       }
     },
     othersAdapter() {
+      const currentBrowserView = this.$electron.remote.getCurrentWindow().getBrowserView();
+      const currentPipBrowserView = this.$electron.remote.BrowserView.getAllViews()
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .filter((view: any) => view.id !== currentBrowserView.id)[0];
       this.handleWindowChangeEnterPip();
-      this.currentBrowserView.webContents.executeJavaScript(this.othersPip.adapter);
+      currentPipBrowserView.webContents.executeJavaScript(this.othersPip.adapter);
     },
     othersWatcher() {
-      this.currentBrowserView.webContents.executeJavaScript(this.othersPip.watcher);
+      const currentBrowserView = this.$electron.remote.getCurrentWindow().getBrowserView();
+      const currentPipBrowserView = this.$electron.remote.BrowserView.getAllViews()
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .filter((view: any) => view.id !== currentBrowserView.id)[0];
+      currentPipBrowserView.webContents.executeJavaScript(this.othersPip.watcher);
     },
     othersRecover() {
-      this.currentBrowserView.webContents.executeJavaScript(this.othersPip.recover);
+      this.$electron.remote.getCurrentWindow()
+        .getBrowserView().webContents.executeJavaScript(this.othersPip.recover);
     },
     iqiyiAdapter() {
+      const currentBrowserView = this.$electron.remote.getCurrentWindow().getBrowserView();
+      const currentPipBrowserView = this.$electron.remote.BrowserView.getAllViews()
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .filter((view: any) => view.id !== currentBrowserView.id)[0];
       this.handleWindowChangeEnterPip();
-      this.currentBrowserView.webContents.executeJavaScript(this.iqiyiPip.adapter);
+      currentPipBrowserView.webContents.executeJavaScript(this.iqiyiPip.adapter);
     },
     iqiyiWatcher() {
-      this.currentBrowserView.webContents.executeJavaScript(this.iqiyiPip.watcher);
+      const currentBrowserView = this.$electron.remote.getCurrentWindow().getBrowserView();
+      const currentPipBrowserView = this.$electron.remote.BrowserView.getAllViews()
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .filter((view: any) => view.id !== currentBrowserView.id)[0];
+      currentPipBrowserView.webContents.executeJavaScript(this.iqiyiPip.watcher);
     },
     iqiyiRecover() {
-      this.currentBrowserView.webContents.executeJavaScript(this.iqiyiPip.recover);
+      this.$electron.remote.getCurrentWindow()
+        .getBrowserView().webContents.executeJavaScript(this.iqiyiPip.recover);
     },
     youtubeAdapter() {
+      const currentBrowserView = this.$electron.remote.getCurrentWindow().getBrowserView();
+      const currentPipBrowserView = this.$electron.remote.BrowserView.getAllViews()
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .filter((view: any) => view.id !== currentBrowserView.id)[0];
       this.handleWindowChangeEnterPip();
-      this.currentBrowserView.webContents.executeJavaScript(youtube.adapter);
+      currentPipBrowserView.webContents.executeJavaScript(youtube.adapter);
     },
     youtubeRecover() {
-      this.currentBrowserView.webContents.executeJavaScript(youtube.recover);
+      this.$electron.remote.getCurrentWindow()
+        .getBrowserView().webContents.executeJavaScript(youtube.recover);
     },
     bilibiliAdapter() {
-      this.currentBrowserView.webContents
+      const currentBrowserView = this.$electron.remote.getCurrentWindow().getBrowserView();
+      const currentPipBrowserView = this.$electron.remote.BrowserView.getAllViews()
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .filter((view: any) => view.id !== currentBrowserView.id)[0];
+      currentPipBrowserView.webContents
         .executeJavaScript(bilibiliFindType, (r: (HTMLElement | null)[]) => {
           this.bilibiliType = ['bangumi', 'videoStreaming', 'iframeStreaming', 'video'][r.findIndex(i => i)] || 'others';
         }).then(() => {
           this.handleWindowChangeEnterPip();
-          this.currentBrowserView.webContents.executeJavaScript(this.bilibiliPip.adapter);
+          currentPipBrowserView.webContents.executeJavaScript(this.bilibiliPip.adapter);
         });
     },
     bilibiliWatcher() {
-      this.currentBrowserView.webContents.executeJavaScript(this.bilibiliPip.watcher);
+      const currentBrowserView = this.$electron.remote.getCurrentWindow().getBrowserView();
+      const currentPipBrowserView = this.$electron.remote.BrowserView.getAllViews()
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .filter((view: any) => view.id !== currentBrowserView.id)[0];
+      currentPipBrowserView.webContents.executeJavaScript(this.bilibiliPip.watcher);
     },
     bilibiliRecover() {
-      this.currentBrowserView.webContents.executeJavaScript(this.bilibiliPip.recover);
+      this.$electron.remote.getCurrentWindow()
+        .getBrowserView().webContents.executeJavaScript(this.bilibiliPip.recover);
     },
   },
 };

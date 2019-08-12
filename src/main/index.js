@@ -426,6 +426,9 @@ function registerMainWindowEvent(mainWindow) {
     });
     if (browsingWindow) browsingWindow.hide();
   });
+  ipcMain.on('update-pip-state', () => {
+    mainWindow.send('update-pip-state');
+  });
   ipcMain.on('create-browser-view', (evt, args) => {
     const isDestroyed = browserViews.filter(view => view.isDestroyed()).length;
     if (!browserViews.length || isDestroyed) {
@@ -443,30 +446,41 @@ function registerMainWindowEvent(mainWindow) {
       ];
     }
     mainWindow.addBrowserView(browserViews[0]);
+    browsingWindow.addBrowserView(browserViews[1]);
     browserViews.forEach((view) => {
       view.webContents.loadURL(args.url);
       view.webContents.openDevTools();
     });
   });
   ipcMain.on('enter-pip', () => {
+    const mainView = mainWindow.getBrowserView();
     if (!browsingWindow) {
       createBrowsingWindow();
+      browsingWindow.openDevTools();
+      const browView = BrowserView.getAllViews().find(view => view.id !== mainView.id);
+      mainWindow.removeBrowserView(mainView);
+      browsingWindow.addBrowserView(mainView);
+      mainWindow.addBrowserView(browView);
+      browsingWindow.show();
+    } else {
+      const browView = browsingWindow.getBrowserView();
+      mainWindow.removeBrowserView(mainView);
+      browsingWindow.removeBrowserView(browView);
+      mainWindow.addBrowserView(browView);
+      browsingWindow.addBrowserView(mainView);
+      browsingWindow.show();
     }
-    browsingWindow.openDevTools();
-    mainWindow.removeBrowserView(mainWindow.getBrowserView());
-    browsingWindow.removeBrowserView(browsingWindow.getBrowserView());
-    mainWindow.addBrowserView(browserViews[1]);
-    browsingWindow.addBrowserView(browserViews[0]);
-    browsingWindow.show();
   });
   ipcMain.on('exit-pip', () => {
-    mainWindow.removeBrowserView(mainWindow.getBrowserView());
-    if (browsingWindow) browsingWindow.removeBrowserView(browsingWindow.getBrowserView());
-    if (browserViews[1].webContents.canGoBack()) {
-      browserViews[1].webContents.goBack();
+    const mainView = mainWindow.getBrowserView();
+    const browView = browsingWindow.getBrowserView();
+    mainWindow.removeBrowserView(mainView);
+    if (browsingWindow) browsingWindow.removeBrowserView(browView);
+    if (mainView.webContents.canGoBack()) {
+      mainView.webContents.goBack();
     }
-    mainWindow.addBrowserView(browserViews[0]);
-    if (browsingWindow) browsingWindow.addBrowserView(browserViews[1]);
+    mainWindow.addBrowserView(browView);
+    if (browsingWindow) browsingWindow.addBrowserView(mainView);
     if (browsingWindow) {
       if (browsingWindow.isFullScreen()) {
         hideBrowsingWindow = true;

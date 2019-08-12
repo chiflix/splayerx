@@ -33,6 +33,7 @@ export default {
         }
         electron.remote.getCurrentWindow().removeBrowserView(view);
       }
+      electron.ipcRenderer.send('update-pip-state');
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.currentBrowserView.webContents.addListener('ipc-message', (evt: any, channel: string, args: any) => { // https://github.com/electron/typescript-definitions/issues/27 fixed in 6.0.0
