@@ -70,6 +70,7 @@ export default class BaseMediaTaskQueue {
   }
 
   private async processTasks() {
+    if (!this.pendingTasks.length) return;
     const task = this.pendingTasks.shift();
     if (task) {
       this.executing = true;
@@ -78,6 +79,8 @@ export default class BaseMediaTaskQueue {
       } catch (ex) {
         log.error('BaseMediaTask', ex);
       }
+    } else {
+      this.processTasks();
     }
   }
 }

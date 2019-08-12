@@ -122,10 +122,6 @@ export default {
     handleIconMousedown() {
       this.mousedown = true;
     },
-    handleIconMouseup() {
-      if (this.mousedown) this.$router.push({ name: 'landing-view' });
-      this.mousedown = true;
-    },
     handlePrimarySelection(selection: string) {
       if (selection === this.secondaryLanguage) this.secondaryLanguage = '';
       this.primaryLanguage = selection;
