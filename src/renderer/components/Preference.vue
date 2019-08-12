@@ -92,6 +92,16 @@ export default {
     isDarwin() {
       return process.platform === 'darwin';
     },
+    displayLanguage: {
+      get() {
+        return this.$store.getters.displayLanguage;
+      },
+    },
+  },
+  watch: {
+    displayLanguage(val: string) {
+      if (val) this.$i18n.locale = val;
+    },
   },
   created() {
     electron.ipcRenderer.on('preferenceDispatch', (event: Event, actionType: string, actionPayload: string) => {
