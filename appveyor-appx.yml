@@ -2,7 +2,12 @@
 # https://simulatedgreg.gitbooks.io/electron-vue/content/en/testing.html#on-the-subject-of-ci-testing
 version: 0.1.{build}
 
-# branches:
+branches:
+  only:
+    - master
+    - release
+    - develop
+    - testing
 
 image: Visual Studio 2017
 
@@ -47,5 +52,3 @@ deploy:
   region: ap-northeast-1
   unzip: false
   set_public: true
-  on:
-    branch: develop
