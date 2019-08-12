@@ -60,3 +60,5 @@ deploy:
   region: ap-northeast-1
   unzip: false
   set_public: true
+  on:
+    appveyor_repo_tag: true # deploy on tag push only
