@@ -7,7 +7,7 @@
     <div
       @mousedown="handleMousedown"
       @mouseup="handleMouseup"
-      :class="iconClass"
+      :class="[iconClass, { 'no-drag': showAllWidgets }]"
       class="icon-wrapper"
     >
       <Icon
