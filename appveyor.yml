@@ -2,7 +2,14 @@
 # https://simulatedgreg.gitbooks.io/electron-vue/content/en/testing.html#on-the-subject-of-ci-testing
 version: 0.1.{build}
 
-# branches:
+branches:
+  only:
+    - master
+    - release
+    - develop
+    - testing
+
+skip_branch_with_pr: true
 
 image: Visual Studio 2017
 
@@ -12,10 +19,10 @@ platform:
 configuration: Release
 
 cache:
-  #- node_modules
-  #- '%APPDATA%\npm-cache'
-  #- '%USERPROFILE%\.electron'
-  #- '%USERPROFILE%\AppData\Local\Yarn\cache'
+  - node_modules
+  - '%APPDATA%\npm-cache'
+  - '%USERPROFILE%\.electron'
+  - '%USERPROFILE%\AppData\Local\Yarn\cache'
 
 init:
   - git config --global core.autocrlf input
@@ -55,5 +62,4 @@ deploy:
   draft: false
   prerelease: false
   on:
-    appveyor_repo_tag: true        # deploy on tag push only
-    # branch: master                 # release from master branch only
+    appveyor_repo_tag: true # deploy on tag push only
