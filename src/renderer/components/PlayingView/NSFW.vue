@@ -218,7 +218,6 @@ export default {
           padding-left: 10px;
           padding-right: 10px;
           letter-spacing: 0.34px;
-          line-height: 17px;
         }
         &:hover {
           cursor: pointer;

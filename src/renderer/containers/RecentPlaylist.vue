@@ -210,6 +210,7 @@ export default {
       this.$store.dispatch('RemoveItemFromPlayingList', path);
       this.infoDB.delete('media-item', id);
       const playlist = await this.infoDB.get('recent-played', this.playListId);
+      if (!playlist) return;
       await this.infoDB.update('recent-played', {
         ...playlist,
         items: this.items,
@@ -472,9 +473,14 @@ export default {
       this.indexOfMovingItem = this.playingList.length;
       this.movementX = this.movementY = 0;
     },
-    onItemMouseover(index?: number, recentPlayService?: RecentPlayService) {
+    onItemMouseover(index?: number, recentPlayService?: RecentPlayService, isAdd?: boolean) {
       this.$emit('can-hover-item');
-      if (index !== undefined && recentPlayService) {
+      if (isAdd) {
+        this.filename = this.$t('recentPlaylist.add');
+        this.showTopContent = false;
+        return;
+      }
+      if (recentPlayService) {
         this.hoverIndex = index;
         this.hoveredDuration = recentPlayService.duration;
         this.filename = this.pathBaseName(recentPlayService.path);
@@ -483,9 +489,6 @@ export default {
         } else {
           this.hoveredLastPlayedTime = 0;
         }
-      } else {
-        this.filename = this.$t('recentPlaylist.add');
-        this.showTopContent = false;
       }
     },
     onItemMouseout() {
