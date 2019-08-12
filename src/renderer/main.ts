@@ -444,6 +444,20 @@ new Vue({
             this.$store.dispatch(videoActions.INCREASE_RATE);
           }
           break;
+        case 187:
+          if (process.platform === 'win32') {
+            this.$ga.event('app', 'volume', 'keyboard');
+            this.$store.dispatch(videoActions.INCREASE_VOLUME);
+            this.$bus.$emit('change-volume-menu');
+          }
+          break;
+        case 189:
+          if (process.platform === 'win32') {
+            this.$ga.event('app', 'volume', 'keyboard');
+            this.$store.dispatch(videoActions.DECREASE_VOLUME);
+            this.$bus.$emit('change-volume-menu');
+          }
+          break;
         case 85:
           if (e.metaKey && e.shiftKey) {
             this.$bus.$emit('open-url-show', true);
