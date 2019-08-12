@@ -1,11 +1,12 @@
 <template>
   <div
-    @mousedown="handleMousedown"
-    @mouseup="handleMouseup"
     @mouseenter="handleMouseenter"
     @mouseleave="handleMouseleave"
+    class="play-button"
   >
     <div
+      @mousedown="handleMousedown"
+      @mouseup="handleMouseup"
       :class="iconClass"
       class="icon-wrapper"
     >
@@ -166,6 +167,12 @@ export default {
 
 
 <style lang="scss" scoped>
+.play-button {
+  padding-top: 20vh;
+  padding-left: 20vh;
+  padding-right: 20vh;
+  padding-bottom: 20vh;
+}
 .icon-ani-fade-in {
   animation: ytp-bezel-fadein 110ms linear 1 normal forwards;
 }
@@ -227,8 +234,8 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480p
 @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
 screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
   .icon-wrapper {
-    width: 93px;
-    height: 93px;
+    width: 140px;
+    height: 140px;
   }
   .play {
     margin-left: 3px;
@@ -237,8 +244,8 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080
 @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
 screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   .icon-wrapper {
-    width: 129px;
-    height: 129px;
+    width: 180px;
+    height: 180px;
   }
   .play {
     margin-left: 3px;
