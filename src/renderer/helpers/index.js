@@ -369,6 +369,8 @@ export default {
         await this.playFile(currentVideo.path, currentVideo.videoId);
         const paths = [];
         for (const videoId of playlist.items) {
+          // TODO: find out why videoId is undefined
+          if (!videoId) continue; // eslint-disable-line
           const mediaItem = await this.infoDB.get('media-item', videoId);
           paths.push(mediaItem.path);
         }
