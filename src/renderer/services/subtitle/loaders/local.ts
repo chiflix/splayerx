@@ -48,6 +48,7 @@ export class LocalGenerator implements IEntityGenerator {
   }
 
   public async getHash() {
-    return mediaQuickHash(this.origin.source);
+    const hash = await mediaQuickHash(this.origin.source);
+    return (hash || '') as unknown as string;
   }
 }

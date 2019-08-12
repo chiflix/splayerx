@@ -21,7 +21,7 @@ export default class NSFWFilterByLaborService implements IMediaFilter {
         new Promise((resolve, reject) => setTimeout(() => reject(new Error('NSFW labor timeout')), 2000)),
       ]);
     } catch (ex) {
-      console.error(ex, src);
+      console.error(ex, { src });
       return false;
     } finally {
       if (taskDoneListener) ipcRenderer.removeListener('labor-task-done', taskDoneListener);

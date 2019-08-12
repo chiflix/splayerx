@@ -1,3 +1,4 @@
+// @ts-ignore
 import { ipcRenderer } from 'electron';
 import { join } from 'path';
 import BaseMediaTaskQueue, { IMediaTask } from './baseMediaTaskQueue';
@@ -39,13 +40,16 @@ class SnapshotTask implements IMediaTask<string> {
     timeInSeconds: number,
     width: number, height: number,
   ) {
-    const videoHash = await mediaQuickHash(videoPath);
-    const dirPath = await getVideoDir(videoHash);
-    const imagePath = join(dirPath, 'cover.jpg');
-    return new SnapshotTask(
-      videoPath, videoHash, imagePath,
-      timeInSeconds, width, height,
-    );
+    const videoHash = await mediaQuickHash.try(videoPath);
+    if (videoHash) {
+      const dirPath = await getVideoDir(videoHash);
+      const imagePath = join(dirPath, 'cover.jpg');
+      return new SnapshotTask(
+        videoPath, videoHash, imagePath,
+        timeInSeconds, width, height,
+      );
+    }
+    return undefined;
   }
 
   public getId() { return [this.videoHash, this.width, this.height].join('-'); }
@@ -56,8 +60,8 @@ class SnapshotTask implements IMediaTask<string> {
         this.videoPath, this.imagePath,
         this.timeString,
         this.width, this.height);
-      ipcRenderer.once('snapshot-reply', (event, error, path) => {
-        if (error) reject(error);
+      ipcRenderer.once('snapshot-reply', (event: Event, error: string | null, path: string) => {
+        if (error) reject(new Error(error));
         else resolve(path);
       });
     });
@@ -84,13 +88,16 @@ class SubtitleTask implements IMediaTask<string> {
   }
 
   public static async from(videoPath: string, streamIndex: number, format: Format) {
-    const videoHash = await mediaQuickHash(videoPath);
-    const dirPath = await getSubtitleDir();
-    const subtitlePath = join(dirPath, `${[videoHash, streamIndex].join('-')}.${formatToExtension(format)}`);
-    return new SubtitleTask(
-      videoPath, videoHash, subtitlePath,
-      streamIndex,
-    );
+    const videoHash = await mediaQuickHash.try(videoPath);
+    if (videoHash) {
+      const dirPath = await getSubtitleDir();
+      const subtitlePath = join(dirPath, `${[videoHash, streamIndex].join('-')}.${formatToExtension(format)}`);
+      return new SubtitleTask(
+        videoPath, videoHash, subtitlePath,
+        streamIndex,
+      );
+    }
+    return undefined;
   }
 
   public getId() { return `${[this.videoHash, this.streamIndex]}`; }
@@ -100,8 +107,8 @@ class SubtitleTask implements IMediaTask<string> {
       ipcRenderer.send('subtitle-request',
         this.videoPath, this.subtitlePath,
         `0:${this.streamIndex}:0`);
-      ipcRenderer.once('subtitle-reply', (event, error, path) => {
-        if (error) reject(error);
+      ipcRenderer.once('subtitle-reply', (event: Event, error: string | null, path: string) => {
+        if (error) reject(new Error(error));
         else resolve(path);
       });
     });
@@ -110,21 +117,22 @@ class SubtitleTask implements IMediaTask<string> {
 
 export default class SnapshotSubtitleQueue extends BaseMediaTaskQueue {
   /** get snapshot path, generate it if not exist */
-  public getSnapshotPath(
+  public async getSnapshotPath(
     videoPath: string,
     timeInSeconds: number,
     width: number, height: number,
   ) {
-    return SnapshotTask.from(
+    const task = await SnapshotTask.from(
       videoPath,
       timeInSeconds,
       width, height,
-    ).then(task => super.addTask<string>(task));
+    );
+    return task ? super.addTask<string>(task) : '';
   }
 
   /** get a embedded subtitle path, extract it if not exist */
-  public getSubtitlePath(videoPath: string, streamIndex: number, format: Format) {
-    return SubtitleTask.from(videoPath, streamIndex, format)
-      .then(task => super.addTask<string>(task));
+  public async getSubtitlePath(videoPath: string, streamIndex: number, format: Format) {
+    const task = await SubtitleTask.from(videoPath, streamIndex, format);
+    return task ? super.addTask<string>(task) : '';
   }
 }

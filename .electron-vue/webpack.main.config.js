@@ -32,7 +32,7 @@ let mainConfig = {
   module: {
     rules: [
       {
-        test: /\.(ts|js)$/,
+        test: /\.(js)$/,
         enforce: 'pre',
         exclude: /node_modules/,
         use: {
@@ -81,7 +81,7 @@ let mainConfig = {
     libraryTarget: 'commonjs2',
     path: path.join(__dirname, '../dist/electron')
   },
-  plugins: [new ForkTsCheckerWebpackPlugin({ eslint: true })],
+  plugins: [],
   resolve: {
     extensions: ['.ts', '.js', '.json', '.node'],
     alias: {
@@ -97,6 +97,7 @@ let mainConfig = {
  */
 if (process.env.NODE_ENV !== 'production') {
   mainConfig.plugins.push(
+    new ForkTsCheckerWebpackPlugin({ eslint: true }),
     new webpack.DefinePlugin({
       'process.env.SAGI_API': `"${process.env.SAGI_API || 'apis.stage.sagittarius.ai:8443'}"`,
       '__static': `"${path.join(__dirname, '../static').replace(/\\/g, '\\\\')}"`
@@ -116,6 +117,13 @@ if (process.env.NODE_ENV === 'production') {
       'process.env.NODE_ENV': '"production"'
     })
   )
+
+  if (process.platform === 'darwin') { // only check on mac, to speed up Windows build
+    mainConfig.plugins.push(
+      new ForkTsCheckerWebpackPlugin({ eslint: true })
+    )
+  }
+
   if (release && process.env.SENTRY_AUTH_TOKEN) {
     mainConfig.plugins.push(
       new SentryWebpackPlugin({
