@@ -69,6 +69,7 @@ let browserViews = [];
 let tray = null;
 let needToRestore = false;
 let inited = false;
+let hideBrowsingWindow = false;
 let finalVideoToOpen = [];
 const tmpVideoToOpen = [];
 const tmpSubsToOpen = [];
@@ -270,7 +271,6 @@ function createBrowsingWindow() {
     frame: false,
     titleBarStyle: 'none',
     transparent: true,
-    movable: true,
     webPreferences: {
       webSecurity: false,
       nodeIntegration: true,
@@ -290,6 +290,12 @@ function createBrowsingWindow() {
   }
   browsingWindow.once('ready-to-show', () => {
     // browsingWindow.show();
+  });
+  browsingWindow.on('leave-full-screen', () => {
+    if (hideBrowsingWindow) {
+      hideBrowsingWindow = false;
+      browsingWindow.hide();
+    }
   });
 }
 
@@ -400,32 +406,25 @@ function registerMainWindowEvent(mainWindow) {
       console.error('callMainWindowMethod', method, JSON.stringify(args), '\n', ex);
     }
   });
-  ipcMain.on('store-pip-info', () => {
-    mainWindow.send('store-pip-info', [
-      browsingWindow.getPosition()[0],
-      browsingWindow.getPosition()[1],
-      browsingWindow.getSize()[0],
-      browsingWindow.getSize()[1],
-    ]);
-  });
-  ipcMain.on('remove-pip-browser', () => { // close pip window
-    browsingWindow.removeBrowserView(browserViews[0]);
-    if (browserViews[0].webContents.canGoBack()) {
-      browserViews[0].webContents.goBack();
+  ipcMain.on('store-pip-pos', () => {
+    if (browsingWindow) {
+      mainWindow.send('store-pip-pos', browsingWindow.getPosition());
     }
-    browsingWindow.hide();
+  });
+  ipcMain.on('pip-window-size', (evt, size) => {
+    mainWindow.send('pip-window-size', size);
   });
   ipcMain.on('remove-browser', (evt, isPip) => {
     if (isPip) {
-      mainWindow.removeBrowserView(browserViews[1]);
-      browsingWindow.removeBrowserView(browserViews[0]);
+      mainWindow.removeBrowserView(mainWindow.getBrowserView());
+      if (browsingWindow) browsingWindow.removeBrowserView(browsingWindow.getBrowserView());
     } else {
-      mainWindow.removeBrowserView(browserViews[0]);
+      mainWindow.removeBrowserView(mainWindow.getBrowserView());
     }
     browserViews.forEach((view) => {
       view.destroy();
     });
-    browsingWindow.hide();
+    if (browsingWindow) browsingWindow.hide();
   });
   ipcMain.on('create-browser-view', (evt, args) => {
     const isDestroyed = browserViews.filter(view => view.isDestroyed()).length;
@@ -453,22 +452,29 @@ function registerMainWindowEvent(mainWindow) {
     if (!browsingWindow) {
       createBrowsingWindow();
     }
-    browsingWindow.show();
     browsingWindow.openDevTools();
-    mainWindow.removeBrowserView(browserViews[0]);
-    browsingWindow.removeBrowserView(browserViews[1]);
+    mainWindow.removeBrowserView(mainWindow.getBrowserView());
+    browsingWindow.removeBrowserView(browsingWindow.getBrowserView());
     mainWindow.addBrowserView(browserViews[1]);
     browsingWindow.addBrowserView(browserViews[0]);
+    browsingWindow.show();
   });
   ipcMain.on('exit-pip', () => {
-    mainWindow.removeBrowserView(browserViews[1]);
-    browsingWindow.removeBrowserView(browserViews[0]);
+    mainWindow.removeBrowserView(mainWindow.getBrowserView());
+    if (browsingWindow) browsingWindow.removeBrowserView(browsingWindow.getBrowserView());
     if (browserViews[1].webContents.canGoBack()) {
       browserViews[1].webContents.goBack();
     }
     mainWindow.addBrowserView(browserViews[0]);
-    browsingWindow.addBrowserView(browserViews[1]);
-    browsingWindow.hide();
+    if (browsingWindow) browsingWindow.addBrowserView(browserViews[1]);
+    if (browsingWindow) {
+      if (browsingWindow.isFullScreen()) {
+        hideBrowsingWindow = true;
+        browsingWindow.setFullScreen(false);
+      } else {
+        browsingWindow.hide();
+      }
+    }
   });
   ipcMain.on('update-header-to-show', (e, headerToShow) => {
     mainWindow.send('update-header-to-show', headerToShow);

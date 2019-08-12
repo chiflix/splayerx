@@ -5,6 +5,7 @@
 <script lang="ts">
 // @ts-ignore
 import urlParseLax from 'url-parse-lax';
+import { throttle } from 'lodash';
 import electron from 'electron';
 
 export default {
@@ -20,8 +21,18 @@ export default {
     },
   },
   mounted() {
+    window.addEventListener('resize', throttle(() => {
+      electron.ipcRenderer.send('pip-window-size', electron.remote.getCurrentWindow().getSize());
+    }, 100));
     window.addEventListener('beforeunload', () => {
-      electron.ipcRenderer.send('remove-pip-browser');
+      electron.ipcRenderer.send('store-pip-pos');
+      const view = electron.remote.getCurrentWindow().getBrowserView();
+      if (view) {
+        if (view.webContents.canGoBack()) {
+          view.webContents.goBack();
+        }
+        electron.remote.getCurrentWindow().removeBrowserView(view);
+      }
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.currentBrowserView.webContents.addListener('ipc-message', (evt: any, channel: string, args: any) => { // https://github.com/electron/typescript-definitions/issues/27 fixed in 6.0.0

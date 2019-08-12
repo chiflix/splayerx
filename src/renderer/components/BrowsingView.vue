@@ -106,7 +106,7 @@ export default {
       menuService: null,
       pipRestore: false,
       acceleratorAvailable: true,
-      oldDisplayId: 0,
+      oldDisplayId: -1,
       backToLandingView: false,
     };
   },
@@ -116,19 +116,23 @@ export default {
       return process.platform === 'darwin';
     },
     iqiyiPip() {
-      return iqiyi(this.barrageOpen, this.winSize);
+      return iqiyi(this.barrageOpen, this.pipSize);
     },
     iqiyiBarrage() {
       return iqiyiBarrageAdapt(this.barrageOpen);
     },
     bilibiliPip() {
-      return bilibili(this.bilibiliType, this.barrageOpen, this.winSize);
+      return bilibili(
+        this.bilibiliType,
+        this.barrageOpen,
+        this.pipSize,
+      );
     },
     bilibiliBarrage() {
       return bilibiliBarrageAdapt(this.bilibiliType, this.barrageOpen);
     },
     othersPip() {
-      return globalPip(this.winSize);
+      return globalPip(this.pipSize);
     },
     danmuType() {
       return this.barrageOpen ? 'danmu' : 'noDanmu';
@@ -166,7 +170,7 @@ export default {
       this.$electron.ipcRenderer.send('update-enabled', 'history.forward', !val && this.currentBrowserView.webContents.canGoForward());
       if (!val) {
         this.$electron.ipcRenderer.send('exit-pip');
-        this.$electron.ipcRenderer.send('store-pip-info');
+        this.$electron.ipcRenderer.send('store-pip-pos');
         this.$electron.ipcRenderer.send('update-enabled', 'window.keepPlayingWindowFront', false);
         this.handleWindowChangeExitPip();
         if (this.pipType === 'youtube') {
@@ -193,7 +197,7 @@ export default {
         this.pipAdapter();
       }
     },
-    winWidth() {
+    pipSize() {
       if (this.isPip && this.pipType !== 'youtube') {
         if (this.pipType === 'iqiyi') {
           this.iqiyiWatcher();
@@ -283,7 +287,7 @@ export default {
       if (!this.asyncTasksDone) {
         e.returnValue = false;
         if (this.isPip) {
-          this.$electron.ipcRenderer.send('store-pip-info');
+          this.$electron.ipcRenderer.send('store-pip-pos');
         } else {
           this.$store.dispatch('updateBrowsingSize', this.winSize);
           this.$store.dispatch('updateBrowsingPos', this.winPos);
@@ -330,9 +334,8 @@ export default {
         name: 'landing-view',
       });
     });
-    this.$electron.ipcRenderer.on('store-pip-info', (e: Event, info: number[]) => {
-      this.$store.dispatch('updatePipSize', info.slice(2, 4));
-      this.$store.dispatch('updatePipPos', info.slice(0, 2));
+    this.$electron.ipcRenderer.on('store-pip-pos', (e: Event, pos: number[]) => {
+      this.$store.dispatch('updatePipPos', pos);
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any,complexity
     this.currentBrowserView.webContents.addListener('ipc-message', (evt: any, channel: string, args: any) => { // https://github.com/electron/typescript-definitions/issues/27 fixed in 6.0.0
@@ -392,6 +395,9 @@ export default {
           console.warn(`Unhandled ipc-message: ${channel}`, args);
           break;
       }
+    });
+    this.$electron.ipcRenderer.on('pip-window-size', (e: Event, size: number[]) => {
+      this.$store.dispatch('updatePipSize', size);
     });
     this.$electron.ipcRenderer.on('quit', () => {
       this.quit = true;
@@ -460,7 +466,7 @@ export default {
       barrageOpen: this.barrageOpen,
     }).then(() => {
       if (this.isPip) {
-        this.$electron.ipcRenderer.send('store-pip-info');
+        this.$electron.ipcRenderer.send('store-pip-pos');
       } else {
         this.$store.dispatch('updateBrowsingSize', this.winSize);
         this.$store.dispatch('updateBrowsingPos', this.winPos);
@@ -514,7 +520,8 @@ export default {
     handleWindowChangeEnterPip() {
       const newDisplayId = this.$electron.remote.screen
         .getDisplayNearestPoint({ x: this.winPos[0], y: this.winPos[1] }).id;
-      const useDefaultPosition = !this.pipPos.length || this.oldDisplayId !== newDisplayId;
+      const useDefaultPosition = !this.pipPos.length
+        || (this.oldDisplayId !== newDisplayId && this.oldDisplayId !== -1);
       this.oldDisplayId = newDisplayId;
       this.currentPipBrowserView.setBounds({
         x: 0, y: 36, width: this.winSize[0], height: this.winSize[1] - 36,
