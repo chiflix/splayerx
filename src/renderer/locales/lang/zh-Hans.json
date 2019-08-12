@@ -255,7 +255,7 @@
     },
     "translate": {
       "languageDescription": "按以下语言提供翻译结果，翻译需上传匿名信息但不会包含任何隐私数据。",
-      "languagePriority": "选择翻译语言",
+      "languagePriority": "选择目标语言",
       "none": "无",
       "primary": "首要语言",
       "translateConfirm": "启用智能翻译",
