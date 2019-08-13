@@ -679,28 +679,27 @@ const actions = {
   async [a.autoChangePrimarySubtitle]({
     dispatch, commit, getters, state,
   }: any, id: string) {
-    if (!getters.subtitleOff) {
-      if (!id) {
-        commit(m.setNotSelectedSubtitle, 'primary');
-      } else {
-        const primary = id;
-        let secondary = getters.secondarySubtitleId;
-        if (id === secondary) {
-          secondary = '';
-          commit(m.setNotSelectedSubtitle, 'secondary');
-        }
-        commit(m.setPrimarySubtitleId, primary);
-        if (primary) commit(m.setSecondarySubtitleId, secondary);
-        if (state.allSubtitles[primary]) {
-          commit(m.setPrimaryDelay, state.allSubtitles[primary].delay);
-        }
-        if (state.allSubtitles[secondary]) {
-          commit(m.setSecondaryDelay, state.allSubtitles[secondary].delay);
-        }
-        dispatch(a.storeSelectedSubtitles, [primary, secondary]);
-        if (id && store.hasModule(id)) await dispatch(`${id}/${subActions.load}`);
+    if (getters.subtitleOff) commit(m.setPrimarySubtitleId, '');
+    else {
+      const primaryId = id;
+      const secondaryId = state.secondarySubtitleId;
+
+      if (primaryId === secondaryId) {
+        if (!primaryId) commit(m.setNotSelectedSubtitle);
+        else commit(m.setNotSelectedSubtitle, 'secondary');
       }
-    } else if (getters.subtitleOff) commit(m.setPrimarySubtitleId, '');
+
+      if (!primaryId) commit(m.setNotSelectedSubtitle, 'primary');
+      else {
+        commit(m.setPrimarySubtitleId, primaryId);
+        if (state.allSubtitles[primaryId]) {
+          commit(m.setPrimaryDelay, state.allSubtitles[primaryId].delay);
+        }
+        if (store.hasModule(primaryId)) await dispatch(`${id}/${subActions.load}`);
+      }
+
+      dispatch(a.storeSelectedSubtitles, [primaryId, secondaryId]);
+    }
   },
   async [a.manualChangePrimarySubtitle]({ dispatch, commit, state }: any, id: string) {
     await dispatch('setSubtitleOff', !id);
@@ -711,28 +710,27 @@ const actions = {
   async [a.autoChangeSecondarySubtitle]({
     dispatch, commit, getters, state,
   }: any, id: string) {
-    if (!getters.subtitleOff) {
-      if (!id) {
-        commit(m.setNotSelectedSubtitle, 'secondary');
-      } else {
-        let primary = getters.primarySubtitleId;
-        const secondary = id;
-        if (id && id === primary) {
-          primary = '';
-          commit(m.setNotSelectedSubtitle, 'primary');
-        }
-        commit(m.setSecondarySubtitleId, secondary);
-        if (primary) commit(m.setPrimarySubtitleId, primary);
-        if (state.allSubtitles[primary]) {
-          commit(m.setPrimaryDelay, state.allSubtitles[primary].delay);
-        }
-        if (state.allSubtitles[secondary]) {
-          commit(m.setSecondaryDelay, state.allSubtitles[secondary].delay);
-        }
-        dispatch(a.storeSelectedSubtitles, [primary, secondary]);
-        if (id && store.hasModule(id)) await dispatch(`${id}/${subActions.load}`);
+    if (getters.subtitleOff) commit(m.setSecondarySubtitleId, '');
+    else {
+      const primaryId = state.primarySubtitleId;
+      const secondaryId = id;
+
+      if (primaryId === secondaryId) {
+        if (!primaryId) commit(m.setNotSelectedSubtitle);
+        else commit(m.setNotSelectedSubtitle, 'primary');
       }
-    } else if (getters.subtitleOff) commit(m.setSecondarySubtitleId, '');
+
+      if (!secondaryId) commit(m.setNotSelectedSubtitle, 'secondary');
+      else {
+        commit(m.setSecondarySubtitleId, secondaryId);
+        if (state.allSubtitles[secondaryId]) {
+          commit(m.setSecondaryDelay, state.allSubtitles[secondaryId].delay);
+        }
+        if (store.hasModule(secondaryId)) await dispatch(`${id}/${subActions.load}`);
+      }
+
+      dispatch(a.storeSelectedSubtitles, [primaryId, secondaryId]);
+    }
   },
   async [a.manualChangeSecondarySubtitle]({ dispatch, commit, state }: any, id: string) {
     await dispatch('setSubtitleOff', !id);
