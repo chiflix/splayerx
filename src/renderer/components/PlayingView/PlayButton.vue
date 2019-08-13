@@ -1,5 +1,6 @@
 <template>
   <div
+    @mousedown="handleMousedownOnOutside"
     @mouseenter="handleMouseenter"
     @mouseleave="handleMouseleave"
     @dblclick="handleDoubleClick"
@@ -60,6 +61,7 @@ export default {
       cursorAppear: false, // control whether the cursor show up or not
       mouseover: false,
       mousedown: false,
+      onIcon: false,
       showPlayIcon: false,
       animationMode: 'icon-ani-fade-in',
       iconClass: 'fade-out',
@@ -125,12 +127,16 @@ export default {
       }
     },
     mouseOnIcon() {
-      if (!this.attachedShown && this.isFocused && !this.mousedownOnVolume) {
-        this.iconClass = 'highlight';
-      }
+      this.iconClass = 'highlight';
+      this.cursorAppear = true;
+      this.onIcon = true;
     },
     mouseOutIcon() {
-      this.iconClass = 'dehighlight';
+      if (this.showAllWidgets) {
+        this.iconClass = 'dehighlight';
+        this.cursorAppear = false;
+        this.onIcon = false;
+      }
     },
     handleDoubleClick() {
       this.$bus.$emit('toggle-fullscreen');
@@ -138,7 +144,6 @@ export default {
     handleMouseenter() {
       this.mouseover = true;
       if (!this.attachedShown && this.isFocused && !this.mousedownOnVolume) {
-        this.cursorAppear = true;
         this.iconClass = 'fade-in';
         this.justMousedownOnVolume = false;
       } else if (!this.isFocused) {
@@ -147,11 +152,17 @@ export default {
       if (this.iconFadingId) clearTimeout(this.iconFadingId);
     },
     handleMouseleave() {
-      this.cursorAppear = this.mouseover = false;
+      this.mouseover = false;
       if (this.iconFadingId) clearTimeout(this.iconFadingId);
       this.iconFadingId = setTimeout(() => {
         this.iconClass = 'fade-out';
       }, 200);
+    },
+    handleMousedownOnOutside() {
+      if (!this.showAllWidgets && !this.attachedShown && this.isFocused) {
+        this.cursorAppear = true;
+        this.iconClass = this.onIcon ? 'hightlight' : 'fade-in';
+      }
     },
     handleMousedown() { // eslint-disable-line complexity
       if (
@@ -171,7 +182,7 @@ export default {
         this.$emit('update:playbutton-state', true);
       } else if (!this.showAllWidgets && !this.attachedShown && this.isFocused) {
         this.cursorAppear = true;
-        this.iconClass = 'dehightlight';
+        this.iconClass = 'highlight';
       }
     },
     handleMouseup() {
@@ -228,7 +239,7 @@ export default {
   animation: highlight 100ms linear 1 normal forwards;
 }
 .dehighlight {
-  animation: dehighlight 100ms linear 1 normal forwards;
+  animation: dehighlight 200ms linear 1 normal forwards;
 }
 .fade-in {
   animation: fadein 100ms linear 1 normal forwards;
