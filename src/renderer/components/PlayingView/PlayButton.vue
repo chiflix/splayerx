@@ -188,9 +188,10 @@ export default {
 <style lang="scss" scoped>
 .play-button {
   padding-top: 10vh;
-  padding-left: 15vw;
-  padding-right: 15vw;
+  padding-left: 12vw;
+  padding-right: 12vw;
   padding-bottom: 10vh;
+  // border-radius: 30px / 20px;
 }
 .icon-ani-fade-in {
   animation: ytp-bezel-fadein 110ms linear 1 normal forwards;
