@@ -191,7 +191,7 @@ export default {
   padding-left: 12vw;
   padding-right: 12vw;
   padding-bottom: 10vh;
-  // border-radius: 30px / 20px;
+  border-radius: 50%;
 }
 .icon-ani-fade-in {
   animation: ytp-bezel-fadein 110ms linear 1 normal forwards;
