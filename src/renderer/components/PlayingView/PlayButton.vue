@@ -7,8 +7,6 @@
     class="play-button"
   >
     <div
-      @mouseenter="mouseOnIcon"
-      @mouseleave="mouseOutIcon"
       @mousedown="handleMousedown"
       @mouseup="handleMouseup"
       @dblclick.stop=""
@@ -61,7 +59,6 @@ export default {
       cursorAppear: false, // control whether the cursor show up or not
       mouseover: false,
       mousedown: false,
-      onIcon: false,
       showPlayIcon: false,
       animationMode: 'icon-ani-fade-in',
       iconClass: 'fade-out',
@@ -126,24 +123,13 @@ export default {
         this.$emit('update:playbutton-state', false);
       }
     },
-    mouseOnIcon() {
-      this.iconClass = 'highlight';
-      this.cursorAppear = true;
-      this.onIcon = true;
-    },
-    mouseOutIcon() {
-      if (this.showAllWidgets) {
-        this.iconClass = 'dehighlight';
-        this.cursorAppear = false;
-        this.onIcon = false;
-      }
-    },
     handleDoubleClick() {
       this.$bus.$emit('toggle-fullscreen');
     },
     handleMouseenter() {
       this.mouseover = true;
       if (!this.attachedShown && this.isFocused && !this.mousedownOnVolume) {
+        this.cursorAppear = true;	
         this.iconClass = 'fade-in';
         this.justMousedownOnVolume = false;
       } else if (!this.isFocused) {
@@ -152,7 +138,7 @@ export default {
       if (this.iconFadingId) clearTimeout(this.iconFadingId);
     },
     handleMouseleave() {
-      this.mouseover = false;
+      this.cursorAppear = this.mouseover = false;
       if (this.iconFadingId) clearTimeout(this.iconFadingId);
       this.iconFadingId = setTimeout(() => {
         this.iconClass = 'fade-out';
@@ -161,7 +147,7 @@ export default {
     handleMousedownOnOutside() {
       if (!this.showAllWidgets && !this.attachedShown && this.isFocused) {
         this.cursorAppear = true;
-        this.iconClass = this.onIcon ? 'hightlight' : 'fade-in';
+        this.iconClass = 'fade-in';
       }
     },
     handleMousedown() { // eslint-disable-line complexity
@@ -173,16 +159,16 @@ export default {
       ) {
         this.justFocused = this.justCloseAttached = this.justMousedownOnVolume = false;
         this.cursorAppear = true;
-        this.iconClass = 'highlight';
+        this.iconClass = 'fade-in';
       } else if (this.showAllWidgets && !this.attachedShown && this.isFocused) {
         this.cursorAppear = true;
-        this.iconClass = 'highlight';
+        this.iconClass = 'fade-in';
         this.mousedown = true;
         this.animationMode = 'icon-ani-fade-out';
         this.$emit('update:playbutton-state', true);
       } else if (!this.showAllWidgets && !this.attachedShown && this.isFocused) {
         this.cursorAppear = true;
-        this.iconClass = 'highlight';
+        this.iconClass = 'fade-in';
       }
     },
     handleMouseup() {
@@ -220,26 +206,11 @@ export default {
 }
 @keyframes fadein {
   from {opacity: 0};
-  to {opacity: 0.7};
-}
-@keyframes fadeout {
-  from {opacity: 0.7};
-  to {opacity: 0};
-}
-@keyframes highlight {
-  from {opacity: 0.7};
   to {opacity: 1};
 }
-@keyframes dehighlight {
+@keyframes fadeout {
   from {opacity: 1};
-  to {opacity: 0.7};
-}
-
-.highlight {
-  animation: highlight 100ms linear 1 normal forwards;
-}
-.dehighlight {
-  animation: dehighlight 200ms linear 1 normal forwards;
+  to {opacity: 0};
 }
 .fade-in {
   animation: fadein 100ms linear 1 normal forwards;
