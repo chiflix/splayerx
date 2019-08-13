@@ -2,12 +2,17 @@
   <div
     @mouseenter="handleMouseenter"
     @mouseleave="handleMouseleave"
+    @dblclick="handleDoubleClick"
     class="play-button"
   >
     <div
       @mousedown="handleMousedown"
       @mouseup="handleMouseup"
+      @dblclick.stop=""
       :class="[iconClass, { 'no-drag': showAllWidgets }]"
+      :style="{
+        zIndex: mouseover ? '99' : '0',
+      }"
       class="icon-wrapper"
     >
       <Icon
@@ -120,6 +125,9 @@ export default {
         this.$emit('update:playbutton-state', false);
       }
     },
+    handleDoubleClick() {
+      this.$bus.$emit('toggle-fullscreen');
+    },
     handleMouseenter() {
       this.mouseover = true;
       if (!this.attachedShown && this.isFocused && !this.mousedownOnVolume) {
@@ -169,8 +177,8 @@ export default {
 <style lang="scss" scoped>
 .play-button {
   padding-top: 20vh;
-  padding-left: 20vh;
-  padding-right: 20vh;
+  padding-left: 20vw;
+  padding-right: 20vw;
   padding-bottom: 20vh;
 }
 .icon-ani-fade-in {
