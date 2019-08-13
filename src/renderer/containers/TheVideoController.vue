@@ -65,7 +65,6 @@
       :handle-update-volume="updateVolume"
       :handle-update-muted="updateMuted"
       @update:volume-state="updateVolumeState"
-      class="no-drag"
     />
     <div
       v-fade-in="showAllWidgets"
