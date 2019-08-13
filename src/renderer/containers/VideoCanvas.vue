@@ -275,6 +275,15 @@ export default {
         videoSize = [this.videoHeight, this.videoWidth];
       } else {
         videoSize = [this.videoWidth, this.videoHeight];
+        const availWidth = window.screen.availWidth;
+        const availHeight = window.screen.availHeight;
+        if (this.ratio > 1 && videoSize[0] > availWidth * 0.5) {
+          videoSize[0] = availWidth * 0.5;
+          videoSize[1] = videoSize[0] / this.ratio;
+        } else if (this.ratio <= 1 && videoSize[1] > availHeight * 0.7) {
+          videoSize[1] = availHeight * 0.7;
+          videoSize[0] = videoSize[1] * this.ratio;
+        }
         this.videoExisted = true;
       }
       const oldRect = this.winPos.concat(this.winSize);

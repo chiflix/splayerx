@@ -1063,8 +1063,17 @@ new Vue({
       this.$store.dispatch('updateSizePercent', key);
       const availWidth = window.screen.availWidth;
       const availHeight = window.screen.availHeight;
-      const videoSize = [this.intrinsicWidth * key, this.intrinsicHeight * key];
-      if (key === 3) {
+      let videoSize = [this.intrinsicWidth * key, this.intrinsicHeight * key];
+      if (key === 0.5) {
+        videoSize = [this.intrinsicWidth, this.intrinsicHeight];
+        if (this.ratio > 1 && videoSize[0] > availWidth * 0.5) {
+          videoSize[0] = availWidth * 0.5;
+          videoSize[1] = videoSize[0] / this.ratio;
+        } else if (this.ratio <= 1 && videoSize[1] > availHeight * 0.7) {
+          videoSize[1] = availHeight * 0.7;
+          videoSize[0] = videoSize[1] * this.ratio;
+        }
+      } else if (key === 3) {
         if (videoSize[0] < availWidth && videoSize[1] < availHeight) {
           videoSize[1] = availHeight;
           videoSize[0] = videoSize[1] * this.ratio;
