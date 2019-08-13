@@ -180,7 +180,6 @@ export default class Menubar {
 
   public updateLocale() {
     this.locale.getDisplayLanguage();
-    console.log('update-locale');
     this.menuStateControl();
   }
 
