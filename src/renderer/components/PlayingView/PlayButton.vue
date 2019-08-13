@@ -6,13 +6,12 @@
     class="play-button"
   >
     <div
+      @mouseenter="mouseOnIcon"
+      @mouseleave="mouseOutIcon"
       @mousedown="handleMousedown"
       @mouseup="handleMouseup"
       @dblclick.stop=""
       :class="[iconClass, { 'no-drag': showAllWidgets }]"
-      :style="{
-        zIndex: mouseover ? '99' : '0',
-      }"
       class="icon-wrapper"
     >
       <Icon
@@ -125,6 +124,14 @@ export default {
         this.$emit('update:playbutton-state', false);
       }
     },
+    mouseOnIcon() {
+      if (!this.attachedShown && this.isFocused && !this.mousedownOnVolume) {
+        this.iconClass = 'highlight';
+      }
+    },
+    mouseOutIcon() {
+      this.iconClass = 'dehighlight';
+    },
     handleDoubleClick() {
       this.$bus.$emit('toggle-fullscreen');
     },
@@ -147,20 +154,24 @@ export default {
       }, 200);
     },
     handleMousedown() { // eslint-disable-line complexity
-      if (this.justFocused || (this.showAllWidgets
-        && (this.justCloseAttached || this.justMousedownOnVolume))) {
+      if (
+        this.justFocused
+        || (
+          this.showAllWidgets && (this.justCloseAttached || this.justMousedownOnVolume)
+        )
+      ) {
         this.justFocused = this.justCloseAttached = this.justMousedownOnVolume = false;
         this.cursorAppear = true;
-        this.iconClass = 'fade-in';
+        this.iconClass = 'highlight';
       } else if (this.showAllWidgets && !this.attachedShown && this.isFocused) {
         this.cursorAppear = true;
-        this.iconClass = 'fade-in';
+        this.iconClass = 'highlight';
         this.mousedown = true;
         this.animationMode = 'icon-ani-fade-out';
         this.$emit('update:playbutton-state', true);
       } else if (!this.showAllWidgets && !this.attachedShown && this.isFocused) {
         this.cursorAppear = true;
-        this.iconClass = 'fade-in';
+        this.iconClass = 'dehightlight';
       }
     },
     handleMouseup() {
@@ -176,10 +187,10 @@ export default {
 
 <style lang="scss" scoped>
 .play-button {
-  padding-top: 20vh;
-  padding-left: 20vw;
-  padding-right: 20vw;
-  padding-bottom: 20vh;
+  padding-top: 10vh;
+  padding-left: 15vw;
+  padding-right: 15vw;
+  padding-bottom: 10vh;
 }
 .icon-ani-fade-in {
   animation: ytp-bezel-fadein 110ms linear 1 normal forwards;
@@ -188,20 +199,35 @@ export default {
   animation: ytp-bezel-fadeout 110ms linear 1 normal forwards;
 }
 @keyframes ytp-bezel-fadein {
-  0% {opacity: 0.7; transform: scale(0.8)};
-  100% {opacity: 1; transform: scale(1)};
+  from {opacity: 0.7; transform: scale(0.8)};
+  to {opacity: 1; transform: scale(1)};
 }
 @keyframes ytp-bezel-fadeout {
-  0% {opacity: 1; transform: scale(1)};
-  100% {opacity: 0.7; transform: scale(0.8)};
+  from {opacity: 1; transform: scale(1)};
+  to {opacity: 0.7; transform: scale(0.8)};
 }
 @keyframes fadein {
-  0% {opacity: 0};
-  100% {opacity: 1};
+  from {opacity: 0};
+  to {opacity: 0.7};
 }
 @keyframes fadeout {
-  0% {opacity: 1};
-  100% {opacity: 0};
+  from {opacity: 0.7};
+  to {opacity: 0};
+}
+@keyframes highlight {
+  from {opacity: 0.7};
+  to {opacity: 1};
+}
+@keyframes dehighlight {
+  from {opacity: 1};
+  to {opacity: 0.7};
+}
+
+.highlight {
+  animation: highlight 100ms linear 1 normal forwards;
+}
+.dehighlight {
+  animation: dehighlight 100ms linear 1 normal forwards;
 }
 .fade-in {
   animation: fadein 100ms linear 1 normal forwards;
