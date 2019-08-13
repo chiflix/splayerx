@@ -34,14 +34,17 @@ class ThumbnailTask implements IMediaTask<string> {
     width: number,
     rowCount: number, columnCount: number,
   ) {
-    const videoHash = await mediaQuickHash(videoPath);
-    const dirPath = await getVideoDir(videoHash);
-    const imagePath = join(dirPath, `${[width, rowCount, columnCount].join('-')}.jpg`);
-    return new ThumbnailTask(
-      videoPath, videoHash, imagePath,
-      width,
-      rowCount, columnCount,
-    );
+    const videoHash = await mediaQuickHash.try(videoPath);
+    if (videoHash) {
+      const dirPath = await getVideoDir(videoHash);
+      const imagePath = join(dirPath, `${[width, rowCount, columnCount].join('-')}.jpg`);
+      return new ThumbnailTask(
+        videoPath, videoHash, imagePath,
+        width,
+        rowCount, columnCount,
+      );
+    }
+    return undefined;
   }
 
   public getId() { return [this.videoHash, this.width, this.rowCount, this.columnCount].join('-'); }
@@ -52,8 +55,8 @@ class ThumbnailTask implements IMediaTask<string> {
         this.videoPath, this.imagePath,
         this.width,
         this.rowCount, this.columnCount);
-      ipcRenderer.once('thumbnail-reply', (event, error, path) => {
-        if (error) reject(error);
+      ipcRenderer.once('thumbnail-reply', (event, error: string | null, path: string) => {
+        if (error) reject(new Error(error));
         else resolve(path);
       });
     });
@@ -62,15 +65,16 @@ class ThumbnailTask implements IMediaTask<string> {
 
 export default class ThumbnailQueue extends BaseMediaTaskQueue {
   /** get a thumbnail's path, generate it if not exist */
-  public getThumbnailPath(
+  public async getThumbnailPath(
     videoPath: string,
     width: number,
     rowCount: number, columnCount: number,
   ) {
-    return ThumbnailTask.from(
+    const task = await ThumbnailTask.from(
       videoPath,
       width,
       rowCount, columnCount,
-    ).then(task => super.addTask<string>(task));
+    );
+    return task ? super.addTask<string>(task) : undefined;
   }
 }

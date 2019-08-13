@@ -13,7 +13,7 @@
           value="smartMode"
           name="mode"
         >
-          {{ $t('preferences.privacy.smartMode') }}
+          {{ $t('preferences.privacy.smartMode') }} <span style="opacity: 0.6">Beta</span>
         </BaseRadio>
         <div class="privacy_radio_description">
           {{ $t('preferences.privacy.smartDescription') }}
