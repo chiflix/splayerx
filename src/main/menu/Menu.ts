@@ -85,7 +85,7 @@ export default class Menubar {
     const oldMenu = Menu.getApplicationMenu();
 
     // @ts-ignore
-    if (oldMenu) oldMenu.clear();
+    if (oldMenu !== null) oldMenu.clear();
 
     this.menubar = this.createClosedMenu();
 
@@ -180,6 +180,7 @@ export default class Menubar {
 
   public updateLocale() {
     this.locale.getDisplayLanguage();
+    console.log('update-locale');
     this.menuStateControl();
   }
 
@@ -876,9 +877,9 @@ export default class Menubar {
         id, label: arg1, enabled, role,
       });
     }
-    arg1.label = this.$t(arg1.label);
+    const label = this.$t(arg1.label);
     return new MenuItem({
-      id: arg1.id, label: arg1.label, role: arg1.role, enabled: arg1.enabled,
+      id: arg1.id, label, role: arg1.role, enabled: arg1.enabled,
     });
   }
 
