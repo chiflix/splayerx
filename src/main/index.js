@@ -414,13 +414,9 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('pip-window-size', (evt, size) => {
     mainWindow.send('pip-window-size', size);
   });
-  ipcMain.on('remove-browser', (evt, isPip) => {
-    if (isPip) {
-      mainWindow.removeBrowserView(mainWindow.getBrowserView());
-      if (browsingWindow) browsingWindow.removeBrowserView(browsingWindow.getBrowserView());
-    } else {
-      mainWindow.removeBrowserView(mainWindow.getBrowserView());
-    }
+  ipcMain.on('remove-browser', () => {
+    mainWindow.removeBrowserView(mainWindow.getBrowserView());
+    if (browsingWindow) browsingWindow.removeBrowserView(browsingWindow.getBrowserView());
     browserViews.forEach((view) => {
       view.destroy();
     });

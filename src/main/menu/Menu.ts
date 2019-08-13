@@ -44,7 +44,7 @@ export default class Menubar {
 
   private playlistOpened = false;
 
-  private isPip = false;
+  private focusOnMainWindow = true;
 
   private playingViewTop = false;
 
@@ -184,9 +184,9 @@ export default class Menubar {
     }
   }
 
-  public updateIsPip(isPip: boolean) {
-    if (this.isPip !== isPip) {
-      this.isPip = isPip;
+  public updateFocusedWindow(isMainWindow: boolean) {
+    if (this.focusOnMainWindow !== isMainWindow) {
+      this.focusOnMainWindow = isMainWindow;
       this.refreshBrowsingWindowMenu();
     }
   }
@@ -394,7 +394,7 @@ export default class Menubar {
     actions.push(...[
       this.createMenuItemByTemplate(floatMenuItem),
       separator(),
-      this.createMenuItem(this.isPip ? 'msg.window.exitPip' : 'msg.window.enterPip', undefined, 'P', true, undefined, 'window.pip'),
+      this.createMenuItem(this.focusOnMainWindow ? 'msg.window.enterPip' : 'msg.window.exitPip', undefined, 'P', true, undefined, 'window.pip'),
       separator(),
       this.createRoleMenuItem(
         minimizeMenuItem.label,

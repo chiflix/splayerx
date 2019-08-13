@@ -40,8 +40,8 @@ export default class MenuService {
     this.menu.updateFullScreen(isFullScreen);
   }
 
-  public updateIsPip(isPip: boolean) {
-    this.menu.updateIsPip(isPip);
+  public updateFocusedWindow(isPip: boolean) {
+    this.menu.updateFocusedWindow(isPip);
   }
 
   private registeMenuActions() {
@@ -78,8 +78,8 @@ export default class MenuService {
     ipcMain.on('update-browsingview-on-top', (e: Event, topOnWindow: boolean) => {
       this.menu.updateBrowsingViewTop(topOnWindow);
     });
-    ipcMain.on('update-pip', (e: Event, isPip: boolean) => {
-      this.updateIsPip(isPip);
+    ipcMain.on('update-focused-window', (e: Event, isMainWindow: boolean) => {
+      this.updateFocusedWindow(isMainWindow);
     });
     ipcMain.on('update-checked', (e: Event, id: string, checked: boolean) => {
       this.menu.updateMenuItemChecked(id, checked);

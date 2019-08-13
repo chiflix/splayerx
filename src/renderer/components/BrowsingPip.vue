@@ -21,6 +21,11 @@ export default {
     },
   },
   mounted() {
+    window.addEventListener('focus', () => {
+      electron.ipcRenderer.send('update-focused-window', false);
+      electron.ipcRenderer.send('update-enabled', 'window.pip', true);
+      electron.ipcRenderer.send('update-enabled', 'window.keepPlayingWindowFront', true);
+    });
     window.addEventListener('resize', throttle(() => {
       electron.ipcRenderer.send('pip-window-size', electron.remote.getCurrentWindow().getSize());
     }, 100));
@@ -128,16 +133,16 @@ export default {
         }
       }
     });
-    this.currentBrowserView.webContents.addListener('did-stop-loading', () => {
-      const loadingTime: number = new Date().getTime() - this.startTime;
-      if (loadingTime % 3000 === 0) {
-        this.loadingState = false;
-      } else {
-        setTimeout(() => {
-          this.loadingState = false;
-        }, 3000 - (loadingTime % 3000));
-      }
-    });
+    // this.currentBrowserView.webContents.addListener('did-stop-loading', () => {
+    //   const loadingTime: number = new Date().getTime() - this.startTime;
+    //   if (loadingTime % 3000 === 0) {
+    //     this.loadingState = false;
+    //   } else {
+    //     setTimeout(() => {
+    //       this.loadingState = false;
+    //     }, 3000 - (loadingTime % 3000));
+    //   }
+    // });
   },
   methods: {
     handleOpenUrl({ url }: { url: string }) {

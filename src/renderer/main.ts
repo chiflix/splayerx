@@ -199,8 +199,7 @@ new Vue({
   },
   watch: {
     topOnWindow(val: boolean) {
-      const browserWindow = this.$electron.remote.getCurrentWindow();
-      browserWindow.setAlwaysOnTop(val);
+      this.$electron.ipcRenderer.send(this.currentRouteName === 'browsing-view' ? 'callBrowsingWindowMethod' : 'callMainWindowMethod', 'setAlwaysOnTop', [val]);
     },
     playingViewTop(val: boolean) {
       if (this.currentRouteName === 'playing-view' && !this.paused) {
@@ -891,7 +890,7 @@ new Vue({
         if (this.currentRouteName === 'browsing-view') this.browsingViewTop = !this.browsingViewTop;
       });
       this.menuService.on('window.pip', () => {
-        this.$bus.$emit('toggle-pip');
+        this.$bus.$emit('toggle-pip', !this.isPip);
       });
       this.menuService.on('window.fullscreen', () => {
         if (this.isFullScreen) {

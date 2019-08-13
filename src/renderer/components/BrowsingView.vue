@@ -160,14 +160,10 @@ export default {
     },
     isPip(val: boolean) {
       this.menuService.updatePip(val);
-      this.$electron.ipcRenderer.send('update-enabled', 'window.pip', true);
-      this.$electron.ipcRenderer.send('update-enabled', 'history.back', !val && this.$electron.remote.getCurrentWindow().getBrowserView().webContents.canGoBack());
-      this.$electron.ipcRenderer.send('update-enabled', 'history.forward', !val && this.$electron.remote.getCurrentWindow().getBrowserView().webContents.canGoForward());
       if (val) {
         this.$electron.ipcRenderer.send('enter-pip');
         this.$store.dispatch('updateBrowsingSize', this.winSize);
         this.$store.dispatch('updateBrowsingPos', this.winPos);
-        this.$electron.ipcRenderer.send('update-enabled', 'window.keepPlayingWindowFront', true);
         this.timeout = true;
         if (this.timer) {
           clearTimeout(this.timer);
@@ -180,7 +176,6 @@ export default {
         if (!this.browsingWindowClose) {
           this.$electron.ipcRenderer.send('exit-pip');
           this.$electron.ipcRenderer.send('store-pip-pos');
-          this.$electron.ipcRenderer.send('update-enabled', 'window.keepPlayingWindowFront', false);
           this.handleWindowChangeExitPip();
         }
         this.browsingWindowClose = false;
@@ -276,18 +271,35 @@ export default {
     this.$bus.$on('toggle-reload', this.handleUrlReload);
     this.$bus.$on('toggle-back', this.handleUrlBack);
     this.$bus.$on('toggle-forward', this.handleUrlForward);
-    this.$bus.$on('toggle-pip', () => {
+    this.$bus.$on('toggle-pip', (state: boolean) => {
       setTimeout(() => {
-        if (this.hasVideo && this.acceleratorAvailable) {
-          this.updateIsPip(!this.isPip);
-        }
-        if (!this.acceleratorAvailable) {
+        if (this.acceleratorAvailable) {
+          if (!state) {
+            this.updateIsPip(false);
+          } else if (this.hasVideo) {
+            this.updateIsPip(true);
+          }
+        } else {
           this.acceleratorAvailable = true;
         }
       }, 0);
     });
+    window.addEventListener('focus', () => {
+      this.$electron.ipcRenderer.send('update-focused-window', true);
+      this.$electron.ipcRenderer.send('update-enabled', 'history.back', this.$electron.remote.getCurrentWindow().getBrowserView().webContents.canGoBack());
+      this.$electron.ipcRenderer.send('update-enabled', 'history.forward', this.$electron.remote.getCurrentWindow().getBrowserView().webContents.canGoForward());
+      this.$electron.ipcRenderer.send('update-enabled', 'window.keepPlayingWindowFront', false);
+      const loadUrl = this.$electron.remote.getCurrentWindow()
+        .getBrowserView().webContents.getURL();
+      const recordIndex = this.supportedRecordHost.indexOf(urlParseLax(loadUrl).hostname);
+      this.$electron.remote.getCurrentWindow().getBrowserView().webContents
+        .executeJavaScript(this.calculateVideoNum, (r: number) => {
+          this.hasVideo = recordIndex === 0 && !getVideoId(loadUrl).id ? false : !!r;
+          this.$electron.ipcRenderer.send('update-enabled', 'window.pip', this.hasVideo);
+        });
+    });
     window.addEventListener('beforeunload', (e: BeforeUnloadEvent) => {
-      this.$electron.ipcRenderer.send('remove-browser', this.isPip);
+      this.$electron.ipcRenderer.send('remove-browser');
       if (!this.asyncTasksDone) {
         e.returnValue = false;
         if (this.isPip) {
@@ -342,7 +354,7 @@ export default {
       this.$store.dispatch('updatePipPos', pos);
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any,complexity
-    this.$electron.remote.getCurrentWindow().getBrowserView().webContents.addListener('ipc-message', (evt: any, channel: string, args: any) => { // https://github.com/electron/typescript-definitions/issues/27 fixed in 6.0.0
+    this.$electron.remote.getCurrentWindow().getBrowserView().webContents.addListener('ipc-message', (evt: Event, channel: string, args: any) => { // https://github.com/electron/typescript-definitions/issues/27 fixed in 6.0.0
       switch (channel) {
         case 'open-url':
           this.handleOpenUrl(args);
@@ -406,8 +418,7 @@ export default {
     this.$electron.ipcRenderer.on('quit', () => {
       this.quit = true;
     });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    this.$electron.ipcRenderer.on('update-header-to-show', (ev: any, headerToShow: boolean) => {
+    this.$electron.ipcRenderer.on('update-header-to-show', (ev: Event, headerToShow: boolean) => {
       this.headerToShow = headerToShow;
     });
     this.$electron.ipcRenderer.on('update-pip-state', () => {
@@ -419,15 +430,12 @@ export default {
       this.$electron.remote.getCurrentWindow().getBrowserView().webContents.focus();
       if (process.env.NODE_ENV === 'development') this.$electron.remote.getCurrentWindow().getBrowserView().webContents.openDevTools();
     });
-    // https://github.com/electron/typescript-definitions/issues/27 fixed in 6.0.0
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    this.$electron.remote.getCurrentWindow().getBrowserView().webContents.addListener('new-window', (e: any, url: string, disposition: string) => {
+    this.$electron.remote.getCurrentWindow().getBrowserView().webContents.addListener('new-window', (e: Event, url: string, disposition: string) => {
       if (disposition !== 'new-window') {
         this.handleOpenUrl({ url });
       }
     });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    this.$electron.remote.getCurrentWindow().getBrowserView().webContents.addListener('did-start-navigation', (e: any, url: string) => {
+    this.$electron.remote.getCurrentWindow().getBrowserView().webContents.addListener('did-start-navigation', (e: Event, url: string) => {
       if (!url || url === 'about:blank') return;
       this.startTime = new Date().getTime();
       this.loadingState = true;
@@ -463,7 +471,7 @@ export default {
     });
   },
   beforeDestroy() {
-    this.$electron.ipcRenderer.send('remove-browser', this.isPip);
+    this.$electron.ipcRenderer.send('remove-browser');
     asyncStorage.set('browsing', {
       pipSize: this.pipSize,
       pipPos: this.pipPos,
@@ -526,8 +534,7 @@ export default {
     handleWindowChangeEnterPip() {
       const currentBrowserView = this.$electron.remote.getCurrentWindow().getBrowserView();
       const currentPipBrowserView = this.$electron.remote.BrowserView.getAllViews()
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .filter((view: any) => view.id !== currentBrowserView.id)[0];
+        .filter((view: Electron.BrowserView) => view.id !== currentBrowserView.id)[0];
       const newDisplayId = this.$electron.remote.screen
         .getDisplayNearestPoint({ x: this.winPos[0], y: this.winPos[1] }).id;
       const useDefaultPosition = !this.pipPos.length
@@ -628,16 +635,14 @@ export default {
     othersAdapter() {
       const currentBrowserView = this.$electron.remote.getCurrentWindow().getBrowserView();
       const currentPipBrowserView = this.$electron.remote.BrowserView.getAllViews()
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .filter((view: any) => view.id !== currentBrowserView.id)[0];
+        .filter((view: Electron.BrowserView) => view.id !== currentBrowserView.id)[0];
       this.handleWindowChangeEnterPip();
       currentPipBrowserView.webContents.executeJavaScript(this.othersPip.adapter);
     },
     othersWatcher() {
       const currentBrowserView = this.$electron.remote.getCurrentWindow().getBrowserView();
       const currentPipBrowserView = this.$electron.remote.BrowserView.getAllViews()
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .filter((view: any) => view.id !== currentBrowserView.id)[0];
+        .filter((view: Electron.BrowserView) => view.id !== currentBrowserView.id)[0];
       currentPipBrowserView.webContents.executeJavaScript(this.othersPip.watcher);
     },
     othersRecover() {
@@ -647,16 +652,14 @@ export default {
     iqiyiAdapter() {
       const currentBrowserView = this.$electron.remote.getCurrentWindow().getBrowserView();
       const currentPipBrowserView = this.$electron.remote.BrowserView.getAllViews()
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .filter((view: any) => view.id !== currentBrowserView.id)[0];
+        .filter((view: Electron.BrowserView) => view.id !== currentBrowserView.id)[0];
       this.handleWindowChangeEnterPip();
       currentPipBrowserView.webContents.executeJavaScript(this.iqiyiPip.adapter);
     },
     iqiyiWatcher() {
       const currentBrowserView = this.$electron.remote.getCurrentWindow().getBrowserView();
       const currentPipBrowserView = this.$electron.remote.BrowserView.getAllViews()
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .filter((view: any) => view.id !== currentBrowserView.id)[0];
+        .filter((view: Electron.BrowserView) => view.id !== currentBrowserView.id)[0];
       currentPipBrowserView.webContents.executeJavaScript(this.iqiyiPip.watcher);
     },
     iqiyiRecover() {
@@ -666,8 +669,7 @@ export default {
     youtubeAdapter() {
       const currentBrowserView = this.$electron.remote.getCurrentWindow().getBrowserView();
       const currentPipBrowserView = this.$electron.remote.BrowserView.getAllViews()
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .filter((view: any) => view.id !== currentBrowserView.id)[0];
+        .filter((view: Electron.BrowserView) => view.id !== currentBrowserView.id)[0];
       this.handleWindowChangeEnterPip();
       currentPipBrowserView.webContents.executeJavaScript(youtube.adapter);
     },
@@ -678,8 +680,7 @@ export default {
     bilibiliAdapter() {
       const currentBrowserView = this.$electron.remote.getCurrentWindow().getBrowserView();
       const currentPipBrowserView = this.$electron.remote.BrowserView.getAllViews()
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .filter((view: any) => view.id !== currentBrowserView.id)[0];
+        .filter((view: Electron.BrowserView) => view.id !== currentBrowserView.id)[0];
       currentPipBrowserView.webContents
         .executeJavaScript(bilibiliFindType, (r: (HTMLElement | null)[]) => {
           this.bilibiliType = ['bangumi', 'videoStreaming', 'iframeStreaming', 'video'][r.findIndex(i => i)] || 'others';
@@ -691,8 +692,7 @@ export default {
     bilibiliWatcher() {
       const currentBrowserView = this.$electron.remote.getCurrentWindow().getBrowserView();
       const currentPipBrowserView = this.$electron.remote.BrowserView.getAllViews()
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .filter((view: any) => view.id !== currentBrowserView.id)[0];
+        .filter((view: Electron.BrowserView) => view.id !== currentBrowserView.id)[0];
       currentPipBrowserView.webContents.executeJavaScript(this.bilibiliPip.watcher);
     },
     bilibiliRecover() {
