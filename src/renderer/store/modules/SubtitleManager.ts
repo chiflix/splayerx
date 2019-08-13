@@ -682,9 +682,10 @@ const actions = {
     if (getters.subtitleOff) commit(m.setPrimarySubtitleId, '');
     else {
       const primaryId = id;
-      const secondaryId = state.secondarySubtitleId;
+      let secondaryId = state.secondarySubtitleId;
 
       if (primaryId === secondaryId) {
+        secondaryId = '';
         if (!primaryId) commit(m.setNotSelectedSubtitle);
         else commit(m.setNotSelectedSubtitle, 'secondary');
       }
@@ -712,11 +713,12 @@ const actions = {
   }: any, id: string) {
     if (getters.subtitleOff) commit(m.setSecondarySubtitleId, '');
     else {
-      const primaryId = state.primarySubtitleId;
+      let primaryId = state.primarySubtitleId;
       const secondaryId = id;
 
       if (primaryId === secondaryId) {
-        if (!primaryId) commit(m.setNotSelectedSubtitle);
+        primaryId = '';
+        if (!secondaryId) commit(m.setNotSelectedSubtitle);
         else commit(m.setNotSelectedSubtitle, 'primary');
       }
 
@@ -741,11 +743,10 @@ const actions = {
   async [a.storeSelectedSubtitles]({ state }: any, ids: string[]) {
     const { allSubtitles, mediaHash } = state;
     const subtitles = ids
-      .filter(id => allSubtitles[id]
-        && !(allSubtitles[id].type === Type.Translated && allSubtitles[id].source === ''))
       .map((id) => {
-        const { hash, source } = allSubtitles[id];
-        return { hash, source };
+        const subtitle = allSubtitles[id];
+        if (subtitle && subtitle.type !== Type.Translated && subtitle.source) return subtitle;
+        return undefined;
       });
     storeSelectedSubtitles(subtitles as SelectedSubtitle[], mediaHash);
   },
