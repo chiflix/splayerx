@@ -47,7 +47,7 @@
       :attached-shown="attachedShown"
       :on-play-button-mouseup="togglePlay"
       @update:playbutton-state="updatePlayButtonState"
-      :class="`${showAllWidgets ? 'play-button no-drag' : 'play-button'}`"
+      class="play-button"
     />
     <volume-indicator
       ref="volumeIndicator"
@@ -65,7 +65,6 @@
       :handle-update-volume="updateVolume"
       :handle-update-muted="updateMuted"
       @update:volume-state="updateVolumeState"
-      class="no-drag"
     />
     <div
       v-fade-in="showAllWidgets"

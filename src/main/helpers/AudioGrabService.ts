@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-22 17:18:34
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-08-14 15:57:13
+ * @Last Modified time: 2019-08-14 16:01:41
  */
 
 import { EventEmitter } from 'events';
@@ -212,7 +212,7 @@ export default class AudioGrabService extends EventEmitter {
       this.emit('data', {
         error: 'time out',
       });
-    }, 1000 * 1);
+    }, 1000 * 10);
   }
 
   private grpcCallBack( // eslint-disable-line complexity
