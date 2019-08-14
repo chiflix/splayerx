@@ -129,7 +129,7 @@ export default {
     handleMouseenter() {
       this.mouseover = true;
       if (!this.attachedShown && this.isFocused && !this.mousedownOnVolume) {
-        this.cursorAppear = true;	
+        this.cursorAppear = true;
         this.iconClass = 'fade-in';
         this.justMousedownOnVolume = false;
       } else if (!this.isFocused) {
