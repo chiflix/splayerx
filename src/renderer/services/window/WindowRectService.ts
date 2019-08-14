@@ -83,25 +83,24 @@ export default class WindowRectService implements IWindowRectRequest {
   ): number[] {
     const tempRect = currentRect.slice(0, 2)
       .map((value, index) => value + (currentRect.slice(2, 4)[index] / 2))
-      .map((value, index) => Math.floor(value - (newSize[index] / 2))).concat(newSize);
-    return ((windowRect, tempRect) => {
-      const alterPos = (
-        boundX: number,
-        boundLength: number,
-        videoX: number,
-        videoLength: number,
-      ) => {
-        if (videoX < boundX) return boundX;
-        if (videoX + videoLength > boundX + boundLength) {
-          return (boundX + boundLength) - videoLength;
-        }
-        return videoX;
-      };
-      return [
-        alterPos(windowRect[0], windowRect[2], tempRect[0], tempRect[2]),
-        alterPos(windowRect[1], windowRect[3], tempRect[1], tempRect[3]),
-      ];
-    })(windowRect, tempRect);
+      .map((value, index) => Math.floor(value - (newSize[index] / 2)))
+      .concat(newSize);
+    const alterPos = (
+      boundX: number,
+      boundLength: number,
+      videoX: number,
+      videoLength: number,
+    ) => {
+      if (videoX < boundX) return boundX;
+      if (videoX + videoLength > boundX + boundLength) {
+        return (boundX + boundLength) - videoLength;
+      }
+      return videoX;
+    };
+    return [
+      alterPos(windowRect[0], windowRect[2], tempRect[0], tempRect[2]),
+      alterPos(windowRect[1], windowRect[3], tempRect[1], tempRect[3]),
+    ];
   }
 
   /**
@@ -115,7 +114,7 @@ export default class WindowRectService implements IWindowRectRequest {
    * @param {number[]} [windowPosition]
    * @returns {number[]} 返回新的窗口大小和位置
    */
-  public uploadWindowBy(
+  public uploadWindowBy( // eslint-disable-line complexity
     fullScreen: boolean,
     whichView?: string,
     windowAngle?: number,
@@ -125,11 +124,9 @@ export default class WindowRectService implements IWindowRectRequest {
   ): number[] {
     let newRect: number[] = [];
     ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [fullScreen]);
-    if (!fullScreen && whichView === 'landing-view') {
-      ipcRenderer.send('callMainWindowMethod', 'setSize', LANDINGVIEWRECT.slice(0, 2));
-      // ipcRenderer.send('callMainWindowMethod', 'setPosition', LANDINGVIEWRECT.slice(2, 4));
-      setTimeout(() => window.dispatchEvent(new Event('resize')), 10);
-      newRect = LANDINGVIEWRECT;
+    if (!fullScreen && whichView === 'landing-view' && lastWindowSize && windowPosition) {
+      const oldRect = windowPosition.concat(lastWindowSize);
+      newRect = this.calculateWindowRect(LANDINGVIEWRECT.slice(0, 2), false, oldRect);
     } else if (!fullScreen && lastWindowSize && windowPosition
       && (((windowAngle === 90 || windowAngle === 270)
         && (lastWindowAngle === 0 || lastWindowAngle === 180))
