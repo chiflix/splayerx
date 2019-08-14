@@ -1,7 +1,6 @@
 import electron from 'electron';
 import osLocale from 'os-locale';
-import { isString } from 'lodash';
-import { join, basename } from 'path';
+import { join } from 'path';
 import { readFileSync } from 'fs';
 import { IsMacintosh, IsElectronRenderer } from './platform';
 import messages from '../../renderer/locales/index';
