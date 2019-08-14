@@ -38,7 +38,12 @@ export default class Locale {
     } catch (err) {
       jsonString = JSON.stringify({});
     }
-    const data = JSON.parse(jsonString);
+    let data;
+    try {
+      data = JSON.parse(jsonString);
+    } catch (err) {
+      data = {};
+    }
     if (data.displayLanguage) {
       if (data.displayLanguage === 'zh-TW' || data.displayLanguage === 'zh-HK' || data.displayLanguage === 'zh-Hant') {
         data.displayLanguage = 'zh-Hant';

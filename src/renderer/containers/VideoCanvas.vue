@@ -230,7 +230,7 @@ export default {
       addTranslateBubbleCallBack: atActions.AUDIO_TRANSLATE_BUBBLE_CALLBACK,
       discardTranslate: atActions.AUDIO_TRANSLATE_DISCARD,
     }),
-    async onMetaLoaded(event: Event) {
+    async onMetaLoaded(event: Event) { // eslint-disable-line complexity
       const target = event.target as HTMLVideoElement;
       this.videoElement = target;
       this.videoConfigInitialize({
@@ -252,17 +252,6 @@ export default {
         intrinsicHeight: target.videoHeight,
         ratio: target.videoWidth / target.videoHeight,
       });
-      const mediaInfo = this.videoId
-        ? await playInfoStorageService.getMediaItem(this.videoId)
-        : null;
-      if (mediaInfo && mediaInfo.lastPlayedTime
-        && target.duration - mediaInfo.lastPlayedTime > 10) {
-        this.$bus.$emit('seek', mediaInfo.lastPlayedTime);
-      } else {
-        this.$bus.$emit('seek', 0);
-      }
-      if (mediaInfo && mediaInfo.audioTrackId) this.lastAudioTrackId = mediaInfo.audioTrackId;
-      this.$bus.$emit('video-loaded');
       this.changeWindowRotate(this.winAngle);
 
       let maxVideoSize;
@@ -275,10 +264,30 @@ export default {
         videoSize = [this.videoHeight, this.videoWidth];
       } else {
         videoSize = [this.videoWidth, this.videoHeight];
+        const availWidth = window.screen.availWidth;
+        const availHeight = window.screen.availHeight;
+        if (this.ratio > 1 && videoSize[0] > availWidth * 0.7) {
+          videoSize[0] = availWidth * 0.7;
+          videoSize[1] = videoSize[0] / this.ratio;
+        } else if (this.ratio <= 1 && videoSize[1] > availHeight * 0.7) {
+          videoSize[1] = availHeight * 0.7;
+          videoSize[0] = videoSize[1] * this.ratio;
+        }
         this.videoExisted = true;
       }
       const oldRect = this.winPos.concat(this.winSize);
       windowRectService.calculateWindowRect(videoSize, true, oldRect, maxVideoSize);
+
+      const mediaInfo = this.videoId
+        ? await playInfoStorageService.getMediaItem(this.videoId)
+        : null;
+      if (mediaInfo && mediaInfo.lastPlayedTime
+        && target.duration - mediaInfo.lastPlayedTime > 10) {
+        this.$bus.$emit('seek', mediaInfo.lastPlayedTime);
+      } else {
+        this.$bus.$emit('seek', 0);
+      }
+      if (mediaInfo && mediaInfo.audioTrackId) this.lastAudioTrackId = mediaInfo.audioTrackId;
     },
     onAudioTrack(event: TrackEvent) {
       const { type, track } = event;
@@ -421,7 +430,7 @@ export default {
             name: 'landing-view',
           });
           setTimeout(() => {
-            windowRectService.uploadWindowBy(false, 'landing-view');
+            windowRectService.uploadWindowBy(false, 'landing-view', undefined, undefined, this.winSize, this.winPos);
           }, 200);
         });
     },
