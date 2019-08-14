@@ -1,6 +1,7 @@
 import electron from 'electron';
 import osLocale from 'os-locale';
-import { join } from 'path';
+import { isString } from 'lodash';
+import { join, basename } from 'path';
 import { readFileSync } from 'fs';
 import { IsMacintosh, IsElectronRenderer } from './platform';
 import messages from '../../renderer/locales/index';
@@ -38,7 +39,12 @@ export default class Locale {
     } catch (err) {
       jsonString = JSON.stringify({});
     }
-    const data = JSON.parse(jsonString);
+    let data;
+    try {
+      data = JSON.parse(jsonString);
+    } catch (err) {
+      data = {};
+    }
     if (data.displayLanguage) {
       if (data.displayLanguage === 'zh-TW' || data.displayLanguage === 'zh-HK' || data.displayLanguage === 'zh-Hant') {
         data.displayLanguage = 'zh-Hant';
