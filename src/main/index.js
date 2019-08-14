@@ -69,6 +69,7 @@ let pipControlView = null;
 let browserViews = [];
 let tray = null;
 let pipTimer = 0;
+let initialUrl = '';
 let needToRestore = false;
 let inited = false;
 let hideBrowsingWindow = false;
@@ -127,6 +128,7 @@ function handleBossKey() {
 }
 
 function createPipControlView() {
+  if (pipControlView) pipControlView.destroy();
   pipControlView = new BrowserView({
     webPreferences: {
       preload: `${require('path').resolve(__static, 'pip/preload.js')}`,
@@ -424,8 +426,17 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('pip-window-size', (evt, size) => {
     mainWindow.send('pip-window-size', size);
   });
+  ipcMain.on('pip-window-close', () => {
+    const views = browsingWindow.getBrowserViews();
+    browsingWindow.removeBrowserView(views[0]);
+    browsingWindow.removeBrowserView(views[1]);
+    views[0].webContents.loadURL(initialUrl).then(() => {
+      views[0].webContents.clearHistory();
+    });
+  });
   ipcMain.on('remove-browser', () => {
-    mainWindow.removeBrowserView(mainWindow.getBrowserView());
+    const mainView = mainWindow.getBrowserView();
+    mainWindow.removeBrowserView(mainView);
     if (browsingWindow) {
       const views = browsingWindow.getBrowserViews();
       views.forEach((view) => {
@@ -433,17 +444,18 @@ function registerMainWindowEvent(mainWindow) {
       });
     }
     browserViews.forEach((view) => {
-      view.destroy();
+      view.webContents.loadURL(initialUrl).then(() => {
+        view.webContents.clearHistory();
+      });
     });
-    pipControlView.destroy();
     if (browsingWindow) browsingWindow.hide();
   });
   ipcMain.on('update-pip-state', () => {
     mainWindow.send('update-pip-state');
   });
   ipcMain.on('create-browser-view', (evt, args) => {
-    const isDestroyed = browserViews.filter(view => view.isDestroyed()).length;
-    if (!browserViews.length || isDestroyed) {
+    initialUrl = args.url;
+    if (!browserViews.length) {
       browserViews = [
         new BrowserView({
           webPreferences: {
@@ -505,17 +517,34 @@ function registerMainWindowEvent(mainWindow) {
       pipControlView.webContents.executeJavaScript('document.querySelector(".pip-buttons").style.display = "none";');
     }
   });
+  ipcMain.on('shift-pip', () => {
+    const mainView = mainWindow.getBrowserView();
+    mainWindow.removeBrowserView(mainView);
+    browsingWindow.getBrowserViews().forEach((view) => {
+      browsingWindow.removeBrowserView(view);
+      view.webContents.loadURL(initialUrl);
+    });
+    createPipControlView();
+    browsingWindow.addBrowserView(mainView);
+    browsingWindow.addBrowserView(pipControlView);
+    mainWindow.addBrowserView(browserViews.find(view => view.id !== mainView.id));
+    pipControlView.webContents.openDevTools();
+    pipControlView.webContents.loadURL(`file:${require('path').resolve(__static, 'pip/pipControl.html')}`);
+    pipControlView.setBackgroundColor('#00FFFFFF');
+    browsingWindow.blur();
+    browsingWindow.focus();
+  });
   ipcMain.on('enter-pip', () => {
     const mainView = mainWindow.getBrowserView();
     createPipControlView();
     if (!browsingWindow) {
       createBrowsingWindow();
       browsingWindow.openDevTools();
-      const browView = BrowserView.getAllViews().find(view => view.id !== mainView.id);
+      const browView = browserViews.find(view => view.id !== mainView.id);
       mainWindow.removeBrowserView(mainView);
+      mainWindow.addBrowserView(browView);
       browsingWindow.addBrowserView(mainView);
       browsingWindow.addBrowserView(pipControlView);
-      mainWindow.addBrowserView(browView);
       browsingWindow.show();
     } else {
       const browView = browsingWindow.getBrowserView();
@@ -526,11 +555,11 @@ function registerMainWindowEvent(mainWindow) {
       browsingWindow.addBrowserView(pipControlView);
       browsingWindow.show();
     }
-    browsingWindow.blur();
-    browsingWindow.focus();
     pipControlView.webContents.openDevTools();
     pipControlView.webContents.loadURL(`file:${require('path').resolve(__static, 'pip/pipControl.html')}`);
     pipControlView.setBackgroundColor('#00FFFFFF');
+    browsingWindow.blur();
+    browsingWindow.focus();
   });
   ipcMain.on('set-control-bounds', (evt, args) => {
     if (pipControlView) pipControlView.setBounds(args);

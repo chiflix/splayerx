@@ -31,13 +31,7 @@ export default {
     }, 100));
     window.addEventListener('beforeunload', () => {
       electron.ipcRenderer.send('store-pip-pos');
-      const view = electron.remote.getCurrentWindow().getBrowserView();
-      if (view) {
-        if (view.webContents.canGoBack()) {
-          view.webContents.goBack();
-        }
-        electron.remote.getCurrentWindow().removeBrowserView(view);
-      }
+      electron.ipcRenderer.send('pip-window-close');
       electron.ipcRenderer.send('update-pip-state');
     });
   },

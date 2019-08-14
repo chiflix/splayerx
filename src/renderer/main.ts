@@ -890,7 +890,7 @@ new Vue({
         if (this.currentRouteName === 'browsing-view') this.browsingViewTop = !this.browsingViewTop;
       });
       this.menuService.on('window.pip', () => {
-        this.$bus.$emit('toggle-pip', !this.isPip);
+        this.$bus.$emit('toggle-pip', this.$electron.remote.BrowserWindow.getFocusedWindow().id === this.$electron.remote.getCurrentWindow().id);
       });
       this.menuService.on('window.fullscreen', () => {
         if (this.isFullScreen) {

@@ -29,29 +29,6 @@
       v-show="loadingState && headerToShow"
       class="loading-state loading-animation"
     />
-    <div
-      v-show="isPip && timeout"
-      class="pip-buttons"
-    >
-      <Icon
-        :style="{
-          marginBottom: '12px',
-          cursor: pipType === 'youtube' ? 'default' : 'pointer',
-          opacity: danmuIconState,
-        }"
-        @mouseup.native="handleDanmuDisplay"
-        @mouseenter.native="handleMouseenter"
-        @mouseleave.native="handleMouseleave"
-        :type="danmuType"
-      />
-      <Icon
-        :style="{ cursor: 'pointer' }"
-        @mouseup.native="handleExitPip"
-        @mouseenter.native="handleMouseenter"
-        @mouseleave.native="handleMouseleave"
-        type="pipBack"
-      />
-    </div>
     <NotificationBubble />
   </div>
 </template>
@@ -66,7 +43,6 @@ import getVideoId from 'get-video-id';
 import { windowRectService } from '@/services/window/WindowRectService';
 import { Browsing as browsingActions } from '@/store/actionTypes';
 import BrowsingHeader from '@/components/BrowsingView/BrowsingHeader.vue';
-import Icon from '@/components/BaseIconContainer.vue';
 import asyncStorage from '@/helpers/asyncStorage';
 import NotificationBubble from '@/components/NotificationBubble.vue';
 import { bilibili, bilibiliFindType, bilibiliBarrageAdapt } from '../../shared/pip/bilibili';
@@ -79,7 +55,6 @@ export default {
   name: 'BrowsingView',
   components: {
     'browsing-header': BrowsingHeader,
-    Icon,
     NotificationBubble,
   },
   data() {
@@ -95,8 +70,6 @@ export default {
       dropFiles: [],
       hasVideo: false,
       currentUrl: '',
-      timeout: false,
-      timer: 0,
       calculateVideoNum: 'var iframe = document.querySelector("iframe");if (iframe && iframe.contentDocument) {document.getElementsByTagName("video").length + iframe.contentDocument.getElementsByTagName("video").length} else {document.getElementsByTagName("video").length}',
       getVideoStyle: 'getComputedStyle(document.querySelector("video") || document.querySelector("iframe").contentDocument.querySelector("video"))',
       pipBtnsKeepShow: false,
@@ -133,12 +106,6 @@ export default {
     othersPip() {
       return globalPip(this.pipSize);
     },
-    danmuType() {
-      return this.barrageOpen ? 'danmu' : 'noDanmu';
-    },
-    danmuIconState() {
-      return ['youtube', 'others'].includes(this.pipType) || (this.pipType === 'bilibili' && this.bilibiliType === 'others') ? 0.2 : 1;
-    },
   },
   watch: {
     barrageOpen(val: boolean) {
@@ -159,38 +126,7 @@ export default {
         this.$electron.ipcRenderer.send('drop-subtitle', val);
       }
     },
-    isPip(val: boolean) {
-      if (val) {
-        this.$electron.ipcRenderer.send('enter-pip');
-        this.$store.dispatch('updateBrowsingSize', this.winSize);
-        this.$store.dispatch('updateBrowsingPos', this.winPos);
-        this.timeout = true;
-        if (this.timer) {
-          clearTimeout(this.timer);
-        }
-        this.timer = setTimeout(() => {
-          this.timeout = false;
-        }, 3000);
-        this.pipAdapter();
-        const opacity = ['youtube', 'others'].includes(this.pipType) || (this.pipType === 'bilibili' && this.bilibiliType === 'others') ? 0.2 : 1;
-        this.$electron.ipcRenderer.send('init-danmu-state', { opacity, barrageOpen: opacity === 1 ? this.barrageOpen : false });
-      } else {
-        if (!this.browsingWindowClose) {
-          this.$electron.ipcRenderer.send('exit-pip');
-          this.$electron.ipcRenderer.send('store-pip-pos');
-          this.handleWindowChangeExitPip();
-        }
-        this.browsingWindowClose = false;
-        if (this.pipType === 'youtube') {
-          this.youtubeRecover();
-        } else if (this.pipType === 'bilibili') {
-          this.bilibiliRecover();
-        } else if (this.pipType === 'iqiyi') {
-          this.iqiyiRecover();
-        } else {
-          this.othersRecover();
-        }
-      }
+    isPip() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any,complexity
       this.$electron.remote.getCurrentWindow().getBrowserViews()[0].webContents.addListener('ipc-message', (evt: Event, channel: string, args: any) => { // https://github.com/electron/typescript-definitions/issues/27 fixed in 6.0.0
         switch (channel) {
@@ -208,17 +144,6 @@ export default {
                 x: 0, y: 36, width: 0, height: 0,
               });
               this.dropFiles = args.files;
-            }
-            break;
-          case 'mousemove':
-            if (this.isPip) {
-              this.timeout = true;
-              if (this.timer) {
-                clearTimeout(this.timer);
-              }
-              this.timer = setTimeout(() => {
-                this.timeout = false;
-              }, 3000);
             }
             break;
           case 'left-drag':
@@ -380,8 +305,14 @@ export default {
         if (this.acceleratorAvailable) {
           if (!state) {
             this.updateIsPip(false);
+            this.exitPipOperation();
           } else if (this.hasVideo) {
-            this.updateIsPip(true);
+            if (this.isPip) {
+              this.shiftPipOperation();
+            } else {
+              this.updateIsPip(true);
+              this.enterPipOperation();
+            }
           }
         } else {
           this.acceleratorAvailable = true;
@@ -424,27 +355,6 @@ export default {
         });
       } else if (this.quit) {
         this.$electron.remote.app.quit();
-      }
-    });
-    (document.querySelector('#app') as HTMLElement).addEventListener('mouseleave', () => {
-      setTimeout(() => {
-        if (this.isPip) {
-          this.timeout = false;
-          if (this.timer) {
-            clearTimeout(this.timer);
-          }
-        }
-      }, 50);
-    });
-    window.addEventListener('mousemove', () => {
-      if (this.isPip && !this.pipBtnsKeepShow && this.isFocused) {
-        this.timeout = true;
-        if (this.timer) {
-          clearTimeout(this.timer);
-        }
-        this.timer = setTimeout(() => {
-          this.timeout = false;
-        }, 3000);
       }
     });
     this.$bus.$on('back-to-landingview', () => {
@@ -493,17 +403,6 @@ export default {
               x: 0, y: 36, width: 0, height: 0,
             });
             this.dropFiles = args.files;
-          }
-          break;
-        case 'mousemove':
-          if (this.isPip) {
-            this.timeout = true;
-            if (this.timer) {
-              clearTimeout(this.timer);
-            }
-            this.timer = setTimeout(() => {
-              this.timeout = false;
-            }, 3000);
           }
           break;
         case 'left-drag':
@@ -631,16 +530,6 @@ export default {
         this.othersAdapter();
       }
     },
-    handleMouseenter() {
-      this.pipBtnsKeepShow = true;
-      this.timeout = true;
-      if (this.timer) {
-        clearTimeout(this.timer);
-      }
-    },
-    handleMouseleave() {
-      this.pipBtnsKeepShow = false;
-    },
     currentPipBrowserView() {
       const currentBrowserView = this.$electron.remote.getCurrentWindow().getBrowserViews()[0];
       return this.$electron.remote.BrowserView.getAllViews().filter(
@@ -741,13 +630,52 @@ export default {
         this.$electron.remote.getCurrentWindow().getBrowserViews()[0].webContents.reload();
       }
     },
+    shiftPipOperation() {
+      this.$electron.ipcRenderer.send('shift-pip');
+      this.$store.dispatch('updateBrowsingSize', this.winSize);
+      this.$store.dispatch('updateBrowsingPos', this.winPos);
+      this.pipAdapter();
+      const opacity = ['youtube', 'others'].includes(this.pipType) || (this.pipType === 'bilibili' && this.bilibiliType === 'others') ? 0.2 : 1;
+      this.$electron.ipcRenderer.send('init-danmu-state', { opacity, barrageOpen: opacity === 1 ? this.barrageOpen : false });
+    },
+    enterPipOperation() {
+      this.$electron.ipcRenderer.send('enter-pip');
+      this.$store.dispatch('updateBrowsingSize', this.winSize);
+      this.$store.dispatch('updateBrowsingPos', this.winPos);
+      this.pipAdapter();
+      const opacity = ['youtube', 'others'].includes(this.pipType) || (this.pipType === 'bilibili' && this.bilibiliType === 'others') ? 0.2 : 1;
+      this.$electron.ipcRenderer.send('init-danmu-state', { opacity, barrageOpen: opacity === 1 ? this.barrageOpen : false });
+    },
+    exitPipOperation() {
+      if (!this.browsingWindowClose) {
+        this.$electron.ipcRenderer.send('exit-pip');
+        this.$electron.ipcRenderer.send('store-pip-pos');
+        this.handleWindowChangeExitPip();
+      }
+      this.browsingWindowClose = false;
+      if (this.pipType === 'youtube') {
+        this.youtubeRecover();
+      } else if (this.pipType === 'bilibili') {
+        this.bilibiliRecover();
+      } else if (this.pipType === 'iqiyi') {
+        this.iqiyiRecover();
+      } else {
+        this.othersRecover();
+      }
+    },
     handleEnterPip() {
       if (this.hasVideo) {
-        this.updateIsPip(true);
+        if (this.isPip) {
+          this.shiftPipOperation();
+        } else {
+          this.updateIsPip(true);
+          this.enterPipOperation();
+        }
       }
     },
     handleExitPip() {
       if (this.isPip) {
+        this.exitPipOperation();
         this.updateIsPip(false);
       }
     },
