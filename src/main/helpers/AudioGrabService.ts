@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-22 17:18:34
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-08-14 11:08:15
+ * @Last Modified time: 2019-08-14 15:57:13
  */
 
 import { EventEmitter } from 'events';
@@ -212,7 +212,7 @@ export default class AudioGrabService extends EventEmitter {
       this.emit('data', {
         error: 'time out',
       });
-    }, 1000 * 10);
+    }, 1000 * 1);
   }
 
   private grpcCallBack( // eslint-disable-line complexity
@@ -262,6 +262,9 @@ export default class AudioGrabService extends EventEmitter {
     splayerx.stopGrabAudioFrame();
     if (this.streamClient) {
       this.streamClient.removeAllListeners();
+      this.streamClient.once('error', () => {
+        // TODO log error
+      });
       this.streamClient = null;
     }
     if (this.timeoutTimer) {

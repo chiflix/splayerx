@@ -156,7 +156,7 @@ export default {
   },
   computed: {
     isMas() {
-      return !!process.mas;
+      return true;
     },
     preferenceData() {
       return this.$store.getters.preferenceData;
@@ -262,9 +262,9 @@ export default {
         this.buttonDown = 0;
         return;
       }
-      window.localStorage.removeItem('needToRelaunch');
 
       if (!this.isMas) {
+        window.localStorage.removeItem('needToRelaunch');
         electron.ipcRenderer.send('relaunch');
         this.isRestoring = false;
         if (this.$refs.button2) this.$refs.button2.removeEventListener('mouseup', this.restoreSettings);

@@ -49,12 +49,17 @@ function getSync(key) {
       } else {
         log.warn('syncStorage', err);
         addBubble(err.code);
-        throw err;
+        // throw err;
       }
     }
   }
+  let objectJson = {};
   // then parseJsonObject from last step
-  const objectJson = JSON.parse(data);
+  try {
+    objectJson = JSON.parse(data);
+  } catch (error) {
+    // empty
+  }
 
   return objectJson;
 }
