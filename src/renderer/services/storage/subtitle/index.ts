@@ -191,7 +191,7 @@ export async function cacheSubtitle(subtitle: Entity) {
   switch (subtitle.type) {
     case Type.Embedded:
       return cacheEmbeddedSubtitle(subtitle)
-        .then(source => addNewSourceToDb(subtitle, source));
+        .then((source) => { if (source) addNewSourceToDb(subtitle, source); });
     case Type.Local:
       return cacheLocalSubtitle(subtitle)
         .then(source => addNewSourceToDb(subtitle, source));

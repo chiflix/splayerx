@@ -128,6 +128,8 @@
       "play": "プレイ",
       "resetSpeed": "重置播放速度",
       "nextVideo": "次のビデオ",
+      "showPlaylist": "プレイリストを表示",
+      "hidePlaylist": "プレイリストを隠す",
       "previousVideo": "前のビデオ",
       "singleCycle": "リピート",
       "snapShot": "スナップショット"
@@ -299,7 +301,8 @@
     "folderSource": "ホルダー",
     "playing": "再生中",
     "paused": "一時停止",
-    "playlistSource": "プレイリスト"
+    "playlistSource": "プレイリスト",
+    "add": "プレイリストに追加する"
   },
   "subtitle": {
     "embedded": "埋め込み式",
@@ -353,10 +356,15 @@
     },
     "translate": {
       "title": "{time} について",
-      "content": "動画をスキップしたり、アプリケーションを閉じたりしないでください翻訳パネルで進行状況を確認できます。",
       "minute": "{number} 分",
       "second": "{number} 秒",
-      "hour": "{number} 時間"
+      "hour": "{number} 時間",
+      "content": "動画をスキップしたり、アプリケーションを閉じたりしないでください翻訳パネルで進行状況を確認できます。",
+      "contentSearch": "探しています...",
+      "contentTranslate": "ソース言語の字幕が発見され、知的に翻訳されています...",
+      "contentGrabbing": "ソース言語の字幕が見つかりません。音声を抽出しています...",
+      "contentGrabComplated": "音声の抽出が完了しました、アップロードしています...",
+      "contentSpeech": "オーディオのアップロードが完了し、音声認識とインテリジェントな翻訳..."
     },
     "success": {
       "title": "翻訳完了",
@@ -381,7 +389,7 @@
     "cancel": "キャンセル",
     "quit": "やめる",
     "generate": "生成する",
-    "ok": "はい",
+    "ok": "バックグラウンドで実行",
     "continue": "キャンセル"
   },
   "translateBubble": {

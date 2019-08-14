@@ -226,6 +226,7 @@ new Vue({
     playlistDisplayState(val: boolean) {
       this.menuService.updateMenuItemEnabled('playback.forwardS', !val);
       this.menuService.updateMenuItemEnabled('playback.backwardS', !val);
+      this.menuService.updatePlaylist(val);
     },
     displayLanguage(val) {
       if (messages[val]) {
@@ -342,6 +343,9 @@ new Vue({
       if (data.protectPrivacy === undefined) {
         this.$store.dispatch('protectPrivacy');
         this.$store.dispatch('hideNSFW', true);
+        this.$electron.ipcRenderer.send('labor-task-add', 'nsfw-warmup');
+      } else if (data.protectPrivacy && data.hideNSFW) {
+        this.$electron.ipcRenderer.send('labor-task-add', 'nsfw-warmup');
       }
     });
     asyncStorage.get('subtitle-style').then((data) => {
@@ -414,7 +418,7 @@ new Vue({
         this.menuService.popupWinMenu();
       }
     });
-    window.addEventListener('keydown', (e) => {
+    window.addEventListener('keydown', (e) => { // eslint-disable-line complexity
       switch (e.keyCode) {
         case 27:
           if (this.isFullScreen && !this.playlistDisplayState) {
@@ -441,6 +445,20 @@ new Vue({
             this.$bus.$emit('toggle-forward');
           } else {
             this.$store.dispatch(videoActions.INCREASE_RATE);
+          }
+          break;
+        case 187:
+          if (process.platform === 'win32') {
+            this.$ga.event('app', 'volume', 'keyboard');
+            this.$store.dispatch(videoActions.INCREASE_VOLUME);
+            this.$bus.$emit('change-volume-menu');
+          }
+          break;
+        case 189:
+          if (process.platform === 'win32') {
+            this.$ga.event('app', 'volume', 'keyboard');
+            this.$store.dispatch(videoActions.DECREASE_VOLUME);
+            this.$bus.$emit('change-volume-menu');
           }
           break;
         case 85:
@@ -562,6 +580,7 @@ new Vue({
     /* eslint-disable */
 
     window.addEventListener('drop', (e) => {
+      if (this.currentRouteName !== 'landing-view' && this.currentRouteName !== 'playing-view') return;
       e.preventDefault();
       this.$bus.$emit('drop');
       this.$store.commit('source', 'drop');
@@ -580,6 +599,7 @@ new Vue({
       }
     });
     window.addEventListener('dragover', (e) => {
+      if (this.currentRouteName !== 'landing-view' && this.currentRouteName !== 'playing-view') return;
       e.preventDefault();
       e.dataTransfer!.dropEffect = process.platform === 'darwin' ? 'copy' : '';
       this.$bus.$emit('drag-over');
@@ -593,7 +613,8 @@ new Vue({
       this.openFilesByDialog();
     });
 
-    this.$electron.ipcRenderer.on('open-file', (event: Event, args: { onlySubtitle: boolean, files: Array<string> }) => {
+    this.$electron.ipcRenderer.on('open-file', (event: Event, args: { onlySubtitle: boolean, files: string[] }) => {
+      if (this.currentRouteName !== 'landing-view' && this.currentRouteName !== 'playing-view') return;
       if (!args.files.length && args.onlySubtitle) {
         log.info('helpers/index.js', `Cannot find any related video in the folder: ${args.files}`);
         addBubble(LOAD_SUBVIDEO_FAILED);
@@ -735,6 +756,9 @@ new Vue({
       });
       this.menuService.on('playback.resetSpeed', () => {
         this.$store.dispatch(videoActions.CHANGE_RATE, 1);
+      });
+      this.menuService.on('playback.playlist', () => {
+        this.$bus.$emit('switch-playlist');
       });
       this.menuService.on('playback.previousVideo', () => {
         this.$bus.$emit('previous-video');

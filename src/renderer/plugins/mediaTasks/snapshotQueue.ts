@@ -1,3 +1,4 @@
+// @ts-ignore
 import { ipcRenderer } from 'electron';
 import { join } from 'path';
 import BaseMediaTaskQueue, { IMediaTask } from './baseMediaTaskQueue';
@@ -37,13 +38,16 @@ class SnapshotTask implements IMediaTask<string> {
     timeInSeconds: number,
     width: number, height: number,
   ) {
-    const videoHash = await mediaQuickHash(videoPath);
-    const dirPath = await getVideoDir(videoHash);
-    const imagePath = join(dirPath, 'cover.jpg');
-    return new SnapshotTask(
-      videoPath, videoHash, imagePath,
-      timeInSeconds, width, height,
-    );
+    const videoHash = await mediaQuickHash.try(videoPath);
+    if (videoHash) {
+      const dirPath = await getVideoDir(videoHash);
+      const imagePath = join(dirPath, 'cover.jpg');
+      return new SnapshotTask(
+        videoPath, videoHash, imagePath,
+        timeInSeconds, width, height,
+      );
+    }
+    return undefined;
   }
 
   public getId() { return [this.videoHash, this.width, this.height].join('-'); }
@@ -54,8 +58,8 @@ class SnapshotTask implements IMediaTask<string> {
         this.videoPath, this.imagePath,
         this.timeString,
         this.width, this.height);
-      ipcRenderer.once('snapshot-reply', (event, error, path) => {
-        if (error) reject(error);
+      ipcRenderer.once('snapshot-reply', (event: Event, error: string | null, path: string) => {
+        if (error) reject(new Error(error));
         else resolve(path);
       });
     });
@@ -65,15 +69,16 @@ class SnapshotTask implements IMediaTask<string> {
 
 export default class SnapshotQueue extends BaseMediaTaskQueue {
   /** get snapshot path, generate it if not exist */
-  public getSnapshotPath(
+  public async getSnapshotPath(
     videoPath: string,
     timeInSeconds: number,
     width: number, height: number,
   ) {
-    return SnapshotTask.from(
+    const task = await SnapshotTask.from(
       videoPath,
       timeInSeconds,
       width, height,
-    ).then(task => super.addTask<string>(task));
+    );
+    return task ? super.addTask<string>(task) : '';
   }
 }

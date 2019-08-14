@@ -128,6 +128,8 @@
       "play": "놀이",
       "resetSpeed": "재생 속도 재설정",
       "nextVideo": "다음 동영상",
+      "showPlaylist": "재생 목록 표시",
+      "hidePlaylist": "재생 목록 숨기기",
       "previousVideo": "이전 비디오",
       "singleCycle": "하나 반복",
       "snapShot": "스냅 샷"
@@ -299,7 +301,8 @@
     "folderSource": "폴더",
     "playing": "연주 중",
     "paused": "일시 중지 된",
-    "playlistSource": "재생 목록"
+    "playlistSource": "재생 목록",
+    "add": "재생 목록에 추가"
   },
   "subtitle": {
     "embedded": "깊숙이 박다",
@@ -353,10 +356,15 @@
     },
     "translate": {
       "title": "{time} 정보 남음",
-      "content": "비디오를 건너 뛰거나 응용 프로그램을 닫지 마십시오. 번역 패널에서 진행률을 확인할 수 있습니다.",
       "minute": "{number} 분",
       "second": "{number} 초",
-      "hour": "{number} 시간"
+      "hour": "{number} 시간",
+      "content": "비디오를 건너 뛰거나 응용 프로그램을 닫지 마십시오. 번역 패널에서 진행률을 확인할 수 있습니다.",
+      "contentSearch": "찾고 ...",
+      "contentTranslate": "소스 언어 자막이 발견되어 지능적으로 번역되고 있습니다 ...",
+      "contentGrabbing": "오디오를 추출하는 중 소스 언어 자막을 찾을 수 없습니다 ...",
+      "contentGrabComplated": "오디오 추출이 완료되어 업로드 중 ...",
+      "contentSpeech": "오디오 업로드 완료, 음성 인식 및 지능형 번역 ..."
     },
     "success": {
       "title": "번역 완료",
@@ -381,7 +389,7 @@
     "cancel": "취소",
     "quit": "떠나다",
     "generate": "일으키다",
-    "ok": "승인",
+    "ok": "Ejecutar en segundo plano",
     "continue": "취소"
   },
   "translateBubble": {

@@ -69,6 +69,9 @@ export default class MenuService {
     ipcMain.on('update-paused', (e: Event, paused: boolean) => {
       this.updatePaused(paused);
     });
+    ipcMain.on('update-playlist', (e: Event, playlistOpened: boolean) => {
+      this.menu.updatePlaylist(playlistOpened);
+    });
     ipcMain.on('update-playingview-on-top', (e: Event, topOnWindow: boolean) => {
       this.menu.updatePlayingViewTop(topOnWindow);
     });

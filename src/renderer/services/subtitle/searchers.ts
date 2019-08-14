@@ -44,14 +44,14 @@ export async function fetchOnlineList(
     || languageCode === LanguageCode.Default
     || languageCode === LanguageCode.No
   ) return [];
-  const mediaIdentity = await calculateMediaIdentity(videoSrc);
-  return Sagi.mediaTranslate({
+  const mediaIdentity = await calculateMediaIdentity.try(videoSrc);
+  return mediaIdentity ? Sagi.mediaTranslate({
     mediaIdentity,
     languageCode,
     hints: hints || basename(videoSrc, extname(videoSrc)),
     format: '',
     startTime: 0, // tempoary useless params according to server-side
-  }).catch(() => []);
+  }).catch(() => []) : [];
 }
 
 export function retrieveEmbeddedList(

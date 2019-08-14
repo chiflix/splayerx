@@ -30,7 +30,7 @@ const getters = {
   nextVideo: (state, getters) => {
     const list = state.playList;
     const index = list.findIndex(value => value === getters.originSrc);
-    if (!getters.singleCycle) {
+    if (!getters.singleCycle && list.length) {
       if (index !== -1 && index + 1 < list.length) {
         return list[index + 1];
       }
