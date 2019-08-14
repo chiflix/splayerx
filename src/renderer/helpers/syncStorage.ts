@@ -15,7 +15,7 @@ const electron = require('electron');
   使用这两个同步函数！！！！
 
 */
-function getFileName(key) {
+function getFileName(key: string) {
   const app = electron.remote.app || electron.app;
   const defaultPath = path.join(app.getPath('userData'), 'storage');
 
@@ -36,54 +36,45 @@ function getFileName(key) {
   const filename = path.join(defaultPath, escapedFileName);
   return filename;
 }
-function getSync(key): unknown {
+function getSync(key: string): unknown {
   const filename = getFileName(key);
-  // then fs.readFile
-  let data;
   try {
-    data = fs.readFileSync(filename);
+    const data = fs.readFileSync(filename, 'utf8');
+    return JSON.parse(data);
   } catch (err) {
     if (err instanceof Error) {
-      if (err.code === 'ENOENT') {
-        data = JSON.stringify({});
-      } else {
-        log.warn('syncStorage', err);
-        addBubble(err.code);
-        // throw err;
+      const fsErr = err as NodeJS.ErrnoException;
+      if (fsErr.code !== 'ENOENT') { // ENOENT for new storage
+        log.warn('syncStorage', fsErr);
+        addBubble(fsErr.code);
       }
     }
+    return {};
   }
-  let objectJson = {};
-  // then parseJsonObject from last step
-  try {
-    objectJson = JSON.parse(data);
-  } catch (error) {
-    // empty
-  }
-
-  return objectJson;
 }
-function setSync(key, json) {
+function setSync(key: string, json: unknown): boolean {
   const filename = getFileName(key);
   const data = JSON.stringify(json);
 
   if (!data) {
-    return Error('Invalid JSON data');
+    log.warn('syncStorage.setSync', 'Empty data');
+    return false;
   }
   try {
     fs.mkdirSync(path.dirname(filename));
+    return true;
   } catch (err) {
     if (err instanceof Error) {
-      if (err.code !== 'EEXIST') {
-        log.warn('syncStorage', err);
-        addBubble(err.code);
+      const fsErr = err as NodeJS.ErrnoException;
+      if (fsErr.code !== 'EEXIST') {
+        log.warn('syncStorage', fsErr);
+        addBubble(fsErr.code);
       }
     }
+    return false;
   } finally {
     fs.writeFileSync(filename, data);
   }
-
-  return 1;
 }
 export default {
   getSync,
