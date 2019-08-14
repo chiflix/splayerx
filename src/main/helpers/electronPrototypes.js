@@ -87,6 +87,7 @@ if (process.platform !== 'darwin') {
     resetResizeState();
     if (!this._keepAspectRatioListener) {
       const onLeftDown = (x, y) => {
+        if (this.isDestroyed()) return;
         const mousePosition = screen.getCursorScreenPoint();
         const scaleFactor = screen.getDisplayNearestPoint(mousePosition).scaleFactor;
         x /= scaleFactor;
@@ -100,6 +101,7 @@ if (process.platform !== 'darwin') {
         if (!onHorizontalEdge && onVerticalEdge) this._resizeType = 'horizontal';
       };
       const onLeftUp = () => {
+        if (this.isDestroyed()) return;
         resetResizeState();
       };
 

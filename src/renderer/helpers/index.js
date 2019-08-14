@@ -369,6 +369,8 @@ export default {
         await this.playFile(currentVideo.path, currentVideo.videoId);
         const paths = [];
         for (const videoId of playlist.items) {
+          // TODO: find out why videoId is undefined
+          if (!videoId) continue; // eslint-disable-line
           const mediaItem = await this.infoDB.get('media-item', videoId);
           paths.push(mediaItem.path);
         }
@@ -417,7 +419,9 @@ export default {
 
       const videoId = playlistItem.items[playlistItem.playedIndex];
       this.$store.dispatch('SRC_SET', { src: videoFiles[0], id: videoId, mediaHash: hash });
-      this.$router.push({ name: 'playing-view' });
+      if (this.$router.currentRoute.name !== 'playing-view') {
+        this.$router.push({ name: 'playing-view' });
+      }
       this.$bus.$emit('new-file-open');
       this.$bus.$emit('open-playlist');
     },

@@ -65,7 +65,7 @@ let rendererConfig = {
   module: {
     rules: [
       {
-        test: /\.(ts|js|vue)$/,
+        test: /\.(js)$/,
         enforce: 'pre',
         exclude: /node_modules/,
         use: {
@@ -207,7 +207,6 @@ let rendererConfig = {
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('preference')),
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('browsing')),
     new webpack.HotModuleReplacementPlugin(),
-    new ForkTsCheckerWebpackPlugin({ eslint: true }),
   ],
   output: {
     filename: '[name].js',
@@ -232,6 +231,7 @@ let rendererConfig = {
  */
 if (process.env.NODE_ENV !== 'production') {
   rendererConfig.plugins.push(
+    new ForkTsCheckerWebpackPlugin({ eslint: true, vue: true }),
     new webpack.DefinePlugin({
       'process.platform': `"${process.platform}"`,
       'process.env.SAGI_API': `"${process.env.SAGI_API || 'apis.stage.sagittarius.ai:8443'}"`,
@@ -265,6 +265,12 @@ if (process.env.NODE_ENV === 'production') {
       minimize: true
     })
   )
+
+  if (process.platform === 'darwin') { // only check on mac, to speed up Windows build
+    rendererConfig.plugins.push(
+      new ForkTsCheckerWebpackPlugin({ eslint: true, vue: true })
+    )
+  }
 
   if (release && process.env.SENTRY_AUTH_TOKEN) {
     rendererConfig.plugins.push(

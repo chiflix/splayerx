@@ -1,5 +1,5 @@
 import {
-  access, readdir, accessSync, constants,
+  access, readdir, accessSync, constants, writeFile,
 } from 'fs';
 import mkdirp from 'mkdirp';
 import rimraf from 'rimraf';
@@ -99,6 +99,18 @@ export function readDir(p: string): Promise<string[]> {
 export function deleteDir(path: string): Promise<boolean> {
   return new Promise((resolve, reject) => {
     rimraf(path, (err: Error) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(true);
+      }
+    });
+  });
+}
+
+export function write(path: string, content: Buffer): Promise<boolean> {
+  return new Promise((resolve, reject) => {
+    writeFile(path, content, (err: NodeJS.ErrnoException | null) => {
       if (err) {
         reject(err);
       } else {

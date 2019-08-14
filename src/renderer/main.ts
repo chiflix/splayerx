@@ -342,6 +342,9 @@ new Vue({
       if (data.protectPrivacy === undefined) {
         this.$store.dispatch('protectPrivacy');
         this.$store.dispatch('hideNSFW', true);
+        this.$electron.ipcRenderer.send('labor-task-add', 'nsfw-warmup');
+      } else if (data.protectPrivacy && data.hideNSFW) {
+        this.$electron.ipcRenderer.send('labor-task-add', 'nsfw-warmup');
       }
     });
     asyncStorage.get('subtitle-style').then((data) => {
@@ -441,6 +444,20 @@ new Vue({
             this.$bus.$emit('toggle-forward');
           } else {
             this.$store.dispatch(videoActions.INCREASE_RATE);
+          }
+          break;
+        case 187:
+          if (process.platform === 'win32') {
+            this.$ga.event('app', 'volume', 'keyboard');
+            this.$store.dispatch(videoActions.INCREASE_VOLUME);
+            this.$bus.$emit('change-volume-menu');
+          }
+          break;
+        case 189:
+          if (process.platform === 'win32') {
+            this.$ga.event('app', 'volume', 'keyboard');
+            this.$store.dispatch(videoActions.DECREASE_VOLUME);
+            this.$bus.$emit('change-volume-menu');
           }
           break;
         case 85:

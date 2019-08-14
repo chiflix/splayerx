@@ -155,6 +155,7 @@ import { parseNameFromPath } from '@/libs/utils';
 import Icon from '@/components/BaseIconContainer.vue';
 import RecentPlayService from '@/services/media/PlaylistService';
 import { mediaStorageService } from '@/services/storage/MediaStorageService';
+import { setElementStyle } from '@/libs/dom';
 
 export default {
   components: {
@@ -312,17 +313,17 @@ export default {
     aboutToDelete(val: boolean) {
       if (val) {
         this.deleteTimeId = setTimeout(() => {
-          this.$refs.whiteHover.style.backgroundColor = 'rgba(0,0,0,0.6)';
-          this.$refs.info.style.opacity = '0';
-          this.$refs.deleteUi.style.opacity = '1';
+          setElementStyle(this.$refs.whiteHover, 'background-color', 'rgba(0,0,0,0.6)');
+          setElementStyle(this.$refs.info, 'opacity', '0');
+          setElementStyle(this.$refs.deleteUi, 'opacity', '1');
           this.$emit('can-remove');
         }, 250);
       } else {
         clearTimeout(this.deleteTimeId);
         requestAnimationFrame(() => {
-          this.$refs.whiteHover.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
-          this.$refs.info.style.opacity = '1';
-          this.$refs.deleteUi.style.opacity = '0';
+          setElementStyle(this.$refs.whiteHover, 'background-color', 'rgba(255, 255, 255, 0.2)');
+          setElementStyle(this.$refs.info, 'opacity', '1');
+          setElementStyle(this.$refs.deleteUi, 'opacity', '0');
         });
       }
     },
@@ -344,9 +345,9 @@ export default {
         const marginRight = this.winWidth > 1355 ? (this.winWidth / 1355) * 15 : 15;
         const distance = marginRight + this.thumbnailWidth;
         if (val !== this.index) {
-          this.$refs.recentPlaylistItem.style.setProperty('transform', `translate(${(val - this.index) * distance}px,0)`);
+          setElementStyle(this.$refs.recentPlaylistItem, 'transform', `translate(${(val - this.index) * distance}px,0)`);
         } else {
-          this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,0)');
+          setElementStyle(this.$refs.recentPlaylistItem, 'transform', 'translate(0,0)');
         }
       });
     },
@@ -372,7 +373,7 @@ export default {
     pageSwitching(val: boolean, oldVal: boolean) {
       if (!val && oldVal && this.selfMoving) {
         requestAnimationFrame(() => {
-          this.$refs.recentPlaylistItem.style.setProperty('transform', `translate(${this.movementX}px, ${this.movementY}px)`);
+          setElementStyle(this.$refs.recentPlaylistItem, 'transform', `translate(${this.movementX}px, ${this.movementY}px)`);
         });
       }
     },
@@ -398,7 +399,7 @@ export default {
     },
     playingList() {
       this.tranFlag = false;
-      this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,0)');
+      setElementStyle(this.$refs.recentPlaylistItem, 'transform', 'translate(0,0)');
       setTimeout(() => {
         this.tranFlag = true;
       }, 0);
@@ -429,13 +430,13 @@ export default {
       document.onmousemove = (e) => {
         this.selfMoving = true;
         this.tranFlag = false;
-        this.$refs.recentPlaylistItem.style.zIndex = 200;
-        this.$refs.content.style.zIndex = 200;
+        setElementStyle(this.$refs.recentPlaylistItem, 'z-index', '200');
+        setElementStyle(this.$refs.content, 'z-index', '200');
         this.outOfWindow = e.pageX > window.innerWidth || e.pageX < 0
           || e.pageY > window.innerHeight || e.pageY < 0;
         this.onItemMousemove(this.index, e.pageX, e.pageY, e);
         requestAnimationFrame(() => {
-          this.$refs.recentPlaylistItem.style.setProperty('transform', `translate(${this.movementX}px, ${this.movementY}px)`);
+          setElementStyle(this.$refs.recentPlaylistItem, 'transform', `translate(${this.movementX}px, ${this.movementY}px)`);
         });
       };
       document.onmouseup = () => {
@@ -443,10 +444,10 @@ export default {
         this.selfMoving = false;
         this.tranFlag = true;
         requestAnimationFrame(() => {
-          this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,0)');
-          this.$refs.progress.style.setProperty('opacity', '0');
-          this.$refs.recentPlaylistItem.style.zIndex = 0;
-          this.$refs.content.style.zIndex = 10;
+          setElementStyle(this.$refs.recentPlaylistItem, 'transform', 'translate(0,0)');
+          setElementStyle(this.$refs.progress, 'opacity', '0');
+          setElementStyle(this.$refs.recentPlaylistItem, 'z-index', '0');
+          setElementStyle(this.$refs.content, 'z-index', '10');
           this.updateAnimationOut();
         });
         this.onItemMouseout();
@@ -458,31 +459,31 @@ export default {
       this.selfMoving = false;
       this.tranFlag = true;
       requestAnimationFrame(() => {
-        this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,0)');
-        this.$refs.progress.style.setProperty('opacity', '0');
-        this.$refs.recentPlaylistItem.style.zIndex = 0;
-        this.$refs.content.style.zIndex = 10;
+        setElementStyle(this.$refs.recentPlaylistItem, 'transform', 'translate(0,0)');
+        setElementStyle(this.$refs.progress, 'opacity', '0');
+        setElementStyle(this.$refs.recentPlaylistItem, 'z-index', '0');
+        setElementStyle(this.$refs.content, 'z-index', '10');
       });
       this.onItemMouseup(this.index);
     },
     updateAnimationIn() {
-      this.$refs.border.style.setProperty('border-color', 'rgba(255,255,255,0.6)');
+      setElementStyle(this.$refs.border, 'border-color', 'rgba(255,255,255,0.6)');
       if (this.isPlaying) {
         return;
       }
-      if (!this.itemMoving) this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,-9px)');
-      this.$refs.content.style.setProperty('height', `${this.thumbnailHeight + 10}px`);
-      this.$refs.title.style.setProperty('color', 'rgba(255,255,255,0.8)');
+      if (!this.itemMoving) setElementStyle(this.$refs.recentPlaylistItem, 'transform', 'translate(0,-9px)');
+      setElementStyle(this.$refs.content, 'height', `${this.thumbnailHeight + 10}px`);
+      setElementStyle(this.$refs.title, 'color', 'rgba(255,255,255,0.8)');
       if (!this.isPlaying && this.sliderPercentage > 0) {
-        this.$refs.progress.style.setProperty('opacity', '1');
+        setElementStyle(this.$refs.progress, 'opacity', '1');
       }
     },
     updateAnimationOut() {
-      if (!this.itemMoving) this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,0)');
-      this.$refs.content.style.setProperty('height', '100%');
-      this.$refs.border.style.setProperty('border-color', 'rgba(255,255,255,0.15)');
-      this.$refs.title.style.setProperty('color', 'rgba(255,255,255,0.40)');
-      this.$refs.progress.style.setProperty('opacity', '0');
+      if (!this.itemMoving) setElementStyle(this.$refs.recentPlaylistItem, 'transform', 'translate(0,0)');
+      setElementStyle(this.$refs.content, 'height', '100%');
+      setElementStyle(this.$refs.border, 'border-color', 'rgba(255,255,255,0.15)');
+      setElementStyle(this.$refs.title, 'color', 'rgba(255,255,255,0.40)');
+      setElementStyle(this.$refs.progress, 'opacity', '0');
     },
     mouseoverVideo() {
       if (this.isInRange && !this.isShifting

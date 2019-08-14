@@ -53,7 +53,7 @@ export default {
       if (!this.itemMoving) {
         this.$refs.button.style.setProperty('background-color', 'rgba(123, 123, 123, 0.12)');
         this.$refs.btnMask.style.setProperty('border-color', 'rgba(255, 255, 255, 0.6)');
-        this.onItemMouseover();
+        this.onItemMouseover(null, null, true);
       }
     },
     addMouseleave() {

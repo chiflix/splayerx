@@ -137,6 +137,7 @@ import PlaylistItem from '@/components/LandingView/PlaylistItem.vue';
 import VideoItem from '@/components/LandingView/VideoItem.vue';
 import { log } from '@/libs/Log';
 import Sagi from '@/libs/sagi';
+import { findNsfwFistFilter } from '@/libs/utils';
 
 Vue.component('PlaylistItem', PlaylistItem);
 Vue.component('VideoItem', VideoItem);
@@ -164,7 +165,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'defaultDir', 'isFullScreen', 'incognitoMode', 'hideNSFW']),
+    ...mapGetters(['winWidth', 'defaultDir', 'isFullScreen', 'incognitoMode', 'hideNSFW', 'smartMode', 'nsfwProcessDone']),
     lastIndex: {
       get() {
         return (this.firstIndex + this.showItemNum) - 1;
@@ -299,6 +300,11 @@ export default {
     this.$electron.ipcRenderer.on('quit', () => {
       this.quit = true;
     });
+    // 如果没有确定nsfw功能，但是有nsfw过滤记录，就出气泡
+    if (this.smartMode && !this.nsfwProcessDone && await findNsfwFistFilter()) {
+      this.$bus.$emit('nsfw');
+      this.$store.dispatch('nsfwProcessDone');
+    }
   },
   destroyed() {
     window.removeEventListener('mousemove', this.globalMoveHandler);
