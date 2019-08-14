@@ -156,7 +156,7 @@ export default {
   },
   computed: {
     isMas() {
-      return true;
+      return !!process.mas;
     },
     preferenceData() {
       return this.$store.getters.preferenceData;
