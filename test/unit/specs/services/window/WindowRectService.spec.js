@@ -69,7 +69,7 @@ describe('WindowRectService logic service', () => {
       expect(JSON.stringify(r3)).to.be.equal(JSON.stringify(target));
       expect(JSON.stringify(r4)).to.be.equal(JSON.stringify(target));
     });
-    it('should return size [720, 405] && scale by the center point when back to landing-view & not in fullscreen', () => {
+    it.only('should return size [720, 405] && scale by the center point when back to landing-view & not in fullscreen', () => {
       const winSize = [500, 500];
       const winPos = [200, 200];
 
@@ -84,7 +84,7 @@ describe('WindowRectService logic service', () => {
         [720, 405],
       ).concat([720, 405]);
 
-      expect(JSON.stringify(r1)).to.be.equal(JSON.stringify(expectResult));
+      expect(r1).to.be.deep.equal(expectResult);
     });
     it('should return size correct size when direction changed && is not fullscreen && not in landing-view', () => {
       const r1 = windowRectService.uploadWindowBy(false, 'playing-view', 90, 180, [520, 300], [50, 100]);
