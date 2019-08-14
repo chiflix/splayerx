@@ -124,9 +124,6 @@ export function generateShortCutImageBy(
     );
     const imagePath = canvas.toDataURL(SHORT_CURT_TYPE, SHORT_CURT_QUALITY);
     result.shortCut = result.smallShortCut = imagePath;
-    // 用于测试截图的代码，以后可能还会用到
-    // const img = imagePath.replace(/^data:image\/\w+;base64,/, '');
-    // writeFileSync('/Users/jinnaide/Desktop/screenshot.png', img, 'base64');
   }
   return result;
 }
