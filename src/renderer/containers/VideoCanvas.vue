@@ -52,7 +52,7 @@ import { generateShortCutImageBy, ShortCut, saveNsfwFistFilter } from '@/libs/ut
 import { Video as videoActions, AudioTranslate as atActions } from '@/store/actionTypes';
 import { videodata } from '@/store/video';
 import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer.vue';
-import { MediaItem, PlaylistItem } from '../interfaces/IDB';
+import { MediaItem } from '../interfaces/IDB';
 import { AudioTranslateBubbleOrigin } from '../store/modules/AudioTranslate';
 
 export default {
@@ -313,7 +313,7 @@ export default {
       if (!Number.isNaN(playlistId) && !this.isFolderList) {
         const playlistRecord = await playInfoStorageService.getPlaylistRecord(playlistId);
         playlistRecord.playedIndex = this.playingIndex;
-        
+
         await playInfoStorageService
           .updateRecentPlayedBy(playlistId, playlistRecord);
       }
