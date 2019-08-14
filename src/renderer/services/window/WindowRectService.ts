@@ -132,6 +132,7 @@ export default class WindowRectService implements IWindowRectRequest {
         ipcRenderer.send('callMainWindowMethod', 'setSize', LANDINGVIEWRECT.slice(0, 2));
         // ipcRenderer.send('callMainWindowMethod', 'setPosition', LANDINGVIEWRECT.slice(2, 4));
         setTimeout(() => window.dispatchEvent(new Event('resize')), 10);
+        newRect = LANDINGVIEWRECT;
       }
     } else if (!fullScreen && lastWindowSize && windowPosition
       && (((windowAngle === 90 || windowAngle === 270)

@@ -69,19 +69,22 @@ describe('WindowRectService logic service', () => {
       expect(JSON.stringify(r3)).to.be.equal(JSON.stringify(target));
       expect(JSON.stringify(r4)).to.be.equal(JSON.stringify(target));
     });
-    it('should return size [720, 405] && center in screen when is not fullscreen && in landing-view', () => {
-      const r1 = windowRectService.uploadWindowBy(false, 'landing-view', 0, 180, [720, 520], [50, 100]);
-      const r2 = windowRectService.uploadWindowBy(false, 'landing-view', 0, 90, [720, 520], [50, 100]);
-      const r3 = windowRectService.uploadWindowBy(false, 'landing-view', 270, 90, [300, 520], [400, 100]);
-      const r4 = windowRectService.uploadWindowBy(false, 'landing-view', 270, 0, [300, 520], [400, 100]);
-      const target = [720, 405].concat([
-        (window.screen.width - 720) / 2,
-        (window.screen.height - 400) / 2,
-      ]);
-      expect(JSON.stringify(r1)).to.be.equal(JSON.stringify(target));
-      expect(JSON.stringify(r2)).to.be.equal(JSON.stringify(target));
-      expect(JSON.stringify(r3)).to.be.equal(JSON.stringify(target));
-      expect(JSON.stringify(r4)).to.be.equal(JSON.stringify(target));
+    it('should return size [720, 405] && scale by the center point when back to landing-view & not in fullscreen', () => {
+      const winSize = [500, 500];
+      const winPos = [200, 200];
+
+      const r1 = windowRectService.uploadWindowBy(false, 'landing-view', undefined, undefined, winSize, winPos);
+
+      const expectResult = windowRectService.calculateWindowPosition(
+        winPos.concat(winSize),
+        [
+          window.screen.availLeft, window.screen.availTop,
+          window.screen.availWidth, window.screen.availHeight,
+        ],
+        [720, 405],
+      ).concat([720, 405]);
+
+      expect(JSON.stringify(r1)).to.be.equal(JSON.stringify(expectResult));
     });
     it('should return size correct size when direction changed && is not fullscreen && not in landing-view', () => {
       const r1 = windowRectService.uploadWindowBy(false, 'playing-view', 90, 180, [520, 300], [50, 100]);
