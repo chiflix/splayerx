@@ -36,7 +36,7 @@ function getFileName(key) {
   const filename = path.join(defaultPath, escapedFileName);
   return filename;
 }
-function getSync(key) {
+function getSync(key): unknown {
   const filename = getFileName(key);
   // then fs.readFile
   let data;

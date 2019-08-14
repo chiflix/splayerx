@@ -35,7 +35,7 @@ async function getConfig() {
   if (cachedConfig) return cachedConfig;
   let config: {[key: string]: FeatureConfig} = {};
   try {
-    config = syncStorage.getSync('featureAlways') || config;
+    config = syncStorage.getSync('featureAlways') as {[key: string]: FeatureConfig} || config;
     const onlineConfig = await getOnlineConfig(`https://splayer.org/switch/v${major}.${minor}.json`);
     config = Object.assign(config, onlineConfig);
     const featureAlways = Object.keys(config)
