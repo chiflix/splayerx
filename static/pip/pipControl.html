@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+    .pip-buttons {
+      width: 20px;
+      height: auto;
+      display: flex;
+      padding: 22px 15px 22px 15px;
+      border-radius: 40px;
+      flex-direction: column;
+      justify-content: space-between;
+      position: absolute;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 100;
+    }
+    .danmu, .pip {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+    .danmu {
+      margin-bottom: 20px;
+    }
+    .pip:active, .danmu:active {
+      opacity: 0.1667;
+    }
+  </style>
+</head>
+<body draggable="false">
+  <div class="pip-buttons" draggable="false">
+    <img class="danmu" src="../../src/renderer/assets/icon/noDanmu-default-icon.svg" draggable="false">
+    <img class="pip" src="../../src/renderer/assets/icon/pipBack-default-icon.svg" draggable="false">
+  </div>
+</body>
+</html>

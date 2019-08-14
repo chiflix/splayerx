@@ -8,6 +8,7 @@ let mousedown = false;
 let isDragging = false;
 let mousedownPos = null;
 let windowSize = null;
+let pipTimer = 0;
 function sendToHost(channel, message) {
   ipcRenderer.send(channel, message);
 }
@@ -16,6 +17,39 @@ function getRatio() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  const danmu = document.querySelector('.danmu');
+  const pip = document.querySelector('.pip');
+  const pipBtns = document.querySelector('.pip-buttons');
+  if (pipBtns) {
+    pipBtns.style.display = '';
+    pipBtns.addEventListener('mouseenter', () => {
+      if (pipTimer) clearTimeout(pipTimer);
+      sendToHost('mouseenter', 'mouseenter');
+      pipBtns.style.display = '';
+    });
+    pipTimer = setTimeout(() => {
+      pipBtns.style.display = 'none';
+    }, 3000);
+  }
+  if (danmu) {
+    danmu.addEventListener('mouseup', () => {
+      sendToHost('danmu', 'danmu');
+    });
+  }
+  if (pip) {
+    pip.addEventListener('mouseup', () => {
+      sendToHost('pip', 'pip');
+    });
+  }
+  window.addEventListener('mouseleave', (evt) => {
+    if (!pipBtns) {
+      const winSize = remote.getCurrentWindow().getSize();
+      if (evt.pageX <= 0 || evt.pageY <= 0
+        || evt.pageX >= winSize[0] || evt.pageY >= winSize[1]) {
+        sendToHost('mouseleave', 'leave');
+      }
+    }
+  }, true);
   window.addEventListener('mousedown', (evt) => {
     mousedown = true;
     mousedownPos = [evt.clientX, evt.clientY];
@@ -43,7 +77,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
   window.addEventListener('mousemove', (evt) => {
-    sendToHost('mousemove', 'isMoving');
+    if (!pipBtns && remote.getCurrentWindow().getBrowserViews().length > 1) {
+      if (pipTimer) clearTimeout(pipTimer);
+      sendToHost('mousemove', 'isMoving');
+    }
     if (mousedown) isDragging = true;
   }, true);
   window.addEventListener('click', (evt) => {

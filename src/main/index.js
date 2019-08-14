@@ -1,7 +1,7 @@
 // Be sure to call Sentry function as early as possible in the main process
 import '../shared/sentry';
 
-import { app, BrowserWindow, session, Tray, ipcMain, globalShortcut, nativeImage, splayerx, systemPreferences, BrowserView } from 'electron' // eslint-disable-line
+import { app, BrowserWindow, session, Tray, ipcMain, globalShortcut, nativeImage, splayerx, systemPreferences, BrowserView, webContents } from 'electron' // eslint-disable-line
 import { throttle, debounce, uniq } from 'lodash';
 import os from 'os';
 import path, {
@@ -65,8 +65,10 @@ let laborWindow = null;
 let aboutWindow = null;
 let preferenceWindow = null;
 let browsingWindow = null;
+let pipControlView = null;
 let browserViews = [];
 let tray = null;
+let pipTimer = 0;
 let needToRestore = false;
 let inited = false;
 let hideBrowsingWindow = false;
@@ -122,6 +124,14 @@ function handleBossKey() {
       });
     }
   }
+}
+
+function createPipControlView() {
+  pipControlView = new BrowserView({
+    webPreferences: {
+      preload: `${require('path').resolve(__static, 'pip/preload.js')}`,
+    },
+  });
 }
 
 function markNeedToRestore() {
@@ -416,10 +426,16 @@ function registerMainWindowEvent(mainWindow) {
   });
   ipcMain.on('remove-browser', () => {
     mainWindow.removeBrowserView(mainWindow.getBrowserView());
-    if (browsingWindow) browsingWindow.removeBrowserView(browsingWindow.getBrowserView());
+    if (browsingWindow) {
+      const views = browsingWindow.getBrowserViews();
+      views.forEach((view) => {
+        browsingWindow.removeBrowserView(view);
+      });
+    }
     browserViews.forEach((view) => {
       view.destroy();
     });
+    pipControlView.destroy();
     if (browsingWindow) browsingWindow.hide();
   });
   ipcMain.on('update-pip-state', () => {
@@ -448,14 +464,57 @@ function registerMainWindowEvent(mainWindow) {
       view.webContents.openDevTools();
     });
   });
+  ipcMain.on('update-danmu-state', (evt, val) => {
+    pipControlView.webContents.executeJavaScript(`document.querySelector(".danmu").src = ${val} ? "../../src/renderer/assets/icon/danmu-default-icon.svg" : "../../src/renderer/assets/icon/noDanmu-default-icon.svg"`);
+  });
+  ipcMain.on('init-danmu-state', (evt, args) => {
+    pipControlView.webContents.executeJavaScript(
+      `const danmu = document.querySelector(".danmu");
+      danmu.src = ${args.barrageOpen} ? "../../src/renderer/assets/icon/danmu-default-icon.svg" : "../../src/renderer/assets/icon/noDanmu-default-icon.svg";
+      danmu.style.opacity = ${args.opacity};
+      danmu.style.cursor = ${args.opacity} === 1 ? "cursor" : "default"`,
+    );
+  });
+  ipcMain.on('pip', () => {
+    mainWindow.send('handle-exit-pip');
+  });
+  ipcMain.on('danmu', () => {
+    mainWindow.send('handle-danmu-display');
+  });
+  ipcMain.on('mousemove', () => {
+    if (browsingWindow && browsingWindow.isFocused()) {
+      pipControlView.webContents.executeJavaScript('document.querySelector(".pip-buttons").style.display = "";');
+      if (pipTimer) {
+        clearTimeout(pipTimer);
+      }
+      pipTimer = setTimeout(() => {
+        pipControlView.webContents.executeJavaScript('document.querySelector(".pip-buttons").style.display = "none";');
+      }, 3000);
+    }
+  });
+  ipcMain.on('mouseenter', () => {
+    if (pipTimer) {
+      clearTimeout(pipTimer);
+    }
+  });
+  ipcMain.on('mouseleave', () => {
+    if (browsingWindow && browsingWindow.isFocused()) {
+      if (pipTimer) {
+        clearTimeout(pipTimer);
+      }
+      pipControlView.webContents.executeJavaScript('document.querySelector(".pip-buttons").style.display = "none";');
+    }
+  });
   ipcMain.on('enter-pip', () => {
     const mainView = mainWindow.getBrowserView();
+    createPipControlView();
     if (!browsingWindow) {
       createBrowsingWindow();
       browsingWindow.openDevTools();
       const browView = BrowserView.getAllViews().find(view => view.id !== mainView.id);
       mainWindow.removeBrowserView(mainView);
       browsingWindow.addBrowserView(mainView);
+      browsingWindow.addBrowserView(pipControlView);
       mainWindow.addBrowserView(browView);
       browsingWindow.show();
     } else {
@@ -464,18 +523,30 @@ function registerMainWindowEvent(mainWindow) {
       browsingWindow.removeBrowserView(browView);
       mainWindow.addBrowserView(browView);
       browsingWindow.addBrowserView(mainView);
+      browsingWindow.addBrowserView(pipControlView);
       browsingWindow.show();
     }
+    browsingWindow.blur();
+    browsingWindow.focus();
+    pipControlView.webContents.openDevTools();
+    pipControlView.webContents.loadURL(`file:${require('path').resolve(__static, 'pip/pipControl.html')}`);
+    pipControlView.setBackgroundColor('#00FFFFFF');
+  });
+  ipcMain.on('set-control-bounds', (evt, args) => {
+    if (pipControlView) pipControlView.setBounds(args);
   });
   ipcMain.on('exit-pip', () => {
     const mainView = mainWindow.getBrowserView();
-    const browView = browsingWindow.getBrowserView();
+    const browViews = browsingWindow.getBrowserViews();
     mainWindow.removeBrowserView(mainView);
-    if (browsingWindow) browsingWindow.removeBrowserView(browView);
+    if (browsingWindow) {
+      browsingWindow.removeBrowserView(browViews[0]);
+      browsingWindow.removeBrowserView(pipControlView);
+    }
     if (mainView.webContents.canGoBack()) {
       mainView.webContents.goBack();
     }
-    mainWindow.addBrowserView(browView);
+    mainWindow.addBrowserView(browViews[0]);
     if (browsingWindow) browsingWindow.addBrowserView(mainView);
     if (browsingWindow) {
       if (browsingWindow.isFullScreen()) {

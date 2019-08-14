@@ -36,10 +36,6 @@ export default class MenuService {
     ipcRenderer.send('update-browsingview-on-top', topOnWindow);
   }
 
-  public updatePip(isPip: boolean) {
-    ipcRenderer.send('update-pip', isPip);
-  }
-
   public updateMenuItemChecked(id: string, checked: boolean) {
     ipcRenderer.send('update-checked', id, checked);
   }
