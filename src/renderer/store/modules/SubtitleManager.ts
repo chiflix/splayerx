@@ -247,6 +247,8 @@ const actions = {
           dispatch(a.stopAISelection);
           retrieveEmbeddedList(originSrc)
             .then(streams => dispatch(a.addEmbeddedSubtitles, { mediaHash, source: streams }));
+          // 继续上次的翻译任务
+          dispatch(atActions.AUDIO_TRANSLATE_CONTINUE);
         });
     }
 
