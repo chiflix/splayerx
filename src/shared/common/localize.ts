@@ -32,14 +32,14 @@ export default class Locale {
   public getDisplayLanguage() {
     const { app } = IsElectronRenderer ? electron.remote : electron;
     const preferencesPath = join(app.getPath('userData'), 'storage', 'preferences.json');
-    let jsonString;
+    let data;
     try {
-      jsonString = readFileSync(preferencesPath) as unknown as string;
+      const jsonString = readFileSync(preferencesPath) as unknown as string;
+      data = JSON.parse(jsonString);
     } catch (err) {
-      jsonString = JSON.stringify({});
+      data = {};
     }
-    const data = JSON.parse(jsonString);
-    if (data.displayLanguage) {
+    if (data && data.displayLanguage) {
       if (data.displayLanguage === 'zh-TW' || data.displayLanguage === 'zh-HK' || data.displayLanguage === 'zh-Hant') {
         data.displayLanguage = 'zh-Hant';
       } else if (data.displayLanguage.startsWith('zh')) {

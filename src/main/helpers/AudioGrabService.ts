@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-22 17:18:34
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-07-29 14:24:43
+ * @Last Modified time: 2019-08-14 11:08:15
  */
 
 import { EventEmitter } from 'events';
@@ -97,6 +97,7 @@ export default class AudioGrabService extends EventEmitter {
     // @ts-ignore
     const audioConfig = new global.proto.google.cloud.speech.v1
       .RecognitionConfig([1, this.rate, this.audioLanguageCode]);
+    // 1 LINEAR16, 2 FLAC, 3 MULAW, 4 AMR, 5 AMR_WB, 6 OGG_OPUS
     requestConfig.setStreamingConfig(audioConfig);
     requestConfig.setAudioLanguageCode(this.audioLanguageCode);
     requestConfig.setTargetLanguageCode(this.targetLanguageCode);
