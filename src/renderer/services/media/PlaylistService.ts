@@ -80,12 +80,15 @@ export default class PlaylistService extends EventEmitter implements IPlaylistRe
    */
   public async getRecord(videoId?: number): Promise<void> {
     let record;
-    if (videoId) {
-      record = await info.getValueByKey('media-item', videoId);
-    } else {
+    if (videoId === undefined && this.videoId === undefined) {
       const records = await info.getAllValueByIndex('media-item', 'source', '');
       record = records.find(record => record.path === this.path);
+      this.videoId = record && record.videoId;
+    } else {
+      const id = videoId || this.videoId;
+      record = await info.getValueByKey('media-item', id as number);
     }
+
     if (record) {
       this.record = record;
       if (this.record.lastPlayedTime) {

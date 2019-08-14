@@ -420,7 +420,8 @@ export default {
   },
   methods: {
     async updateUI() {
-      await this.recentPlayService.getRecord(this.items[this.index]);
+      if (this.isFolderList) await this.recentPlayService.getRecord();
+      else await this.recentPlayService.getRecord(this.items[this.index]);
       this.imageSrc = this.recentPlayService.imageSrc;
       this.sliderPercentage = this.recentPlayService.percentage;
     },

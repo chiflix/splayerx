@@ -83,7 +83,7 @@ const MAX_SHORT_CUT_SIZE = 1080;
  * @constant
  * @type number
  */
-const MIN_SHORT_CUT_SIZE = 122.6;
+// const MIN_SHORT_CUT_SIZE = 122.6;
 /** 最后一帧图的图片质量
  * @constant
  * @type number
