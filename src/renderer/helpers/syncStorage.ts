@@ -36,7 +36,7 @@ function getFileName(key: string) {
   const filename = path.join(defaultPath, escapedFileName);
   return filename;
 }
-function getSync(key: string): unknown {
+function getSync(key: string): any { // eslint-disable-line
   const filename = getFileName(key);
   try {
     const data = fs.readFileSync(filename, 'utf8');

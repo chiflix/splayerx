@@ -25,7 +25,7 @@ function removeAll(): Promise<void>[] {
     return Promise.all(taskArray);
   });
 }
-function get(key: string) {
+function get(key: string): Promise<any> { // eslint-disable-line
   return new Promise((resolve, reject) => {
     storage.get(key, (err: NodeJS.ErrnoException, data: unknown) => {
       if (err) {
