@@ -84,7 +84,13 @@ export default class MediaStorageService implements IMediaStorable {
 
   public getAsyncTaskInfo(key: string): AITaskInfo | undefined {
     const result = localStorage.getItem(key);
-    const info: AITaskInfo | undefined = result ? JSON.parse(result) : undefined;
+    let info: AITaskInfo | undefined;
+    try {
+      info = result ? JSON.parse(result) : undefined;
+    } catch (error) {
+      // empty
+      info = undefined;
+    }
     if (info && info.taskId) {
       return info as AITaskInfo;
     }
