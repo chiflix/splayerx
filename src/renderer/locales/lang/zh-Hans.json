@@ -240,7 +240,7 @@
     "general": {
       "hideHistory": "隐藏历史记录",
       "clearHistory": "退出时自动清空播放记录",
-      "reverseScrolling": "鼠标滚轮反向",
+      "reverseScrolling": "鼠标滚轮调节音量反向",
       "setDefault": "设为默认播放器",
       "setDefaultDescription": "所有视频文件都自动使用SPlayer打开。",
       "restoreSettings": "抹掉所有内容和设置",

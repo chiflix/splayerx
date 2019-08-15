@@ -10,6 +10,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const SentryWebpackPlugin = require('@sentry/webpack-plugin')
+const TerserPlugin = require('terser-webpack-plugin')
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin')
 const { dependencies, optionalDependencies } = require('../package.json')
 
@@ -263,6 +264,14 @@ if (process.env.NODE_ENV === 'production') {
       minimize: true
     })
   )
+
+  rendererConfig.optimization = {
+    minimizer: [new TerserPlugin({
+      terserOptions: {
+        keep_classnames: true
+      }
+    })],
+  }
 
   if (process.platform === 'darwin') { // only check on mac, to speed up Windows build
     rendererConfig.plugins.push(
