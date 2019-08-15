@@ -20,12 +20,14 @@
       @close-privacy-bubble="closePrivacyBubble"
       class="mas-privacy-bubble"
     />
-    <NSFW
-      v-if="showNSFWBubble"
-      :handle-agree="handleAgree"
-      :handle-setting="handleSetting"
-      class="mas-privacy-bubble"
-    />
+    <transition name="bubble">
+      <NSFW
+        v-if="showNSFWBubble"
+        :handle-agree="handleAgree"
+        :handle-setting="handleSetting"
+        class="mas-privacy-bubble"
+      />
+    </transition>
     <transition name="bubble">
       <TranslateBubble
         v-if="isTranslateBubbleVisiable"
