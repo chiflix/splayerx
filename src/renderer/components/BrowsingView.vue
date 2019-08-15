@@ -170,14 +170,17 @@ export default {
       }
     },
     isPip(val: boolean) {
-      this.menuService.updatePip(val);
-      this.$electron.ipcRenderer.send('update-enabled', 'window.pip', true);
-      this.$electron.ipcRenderer.send('update-enabled', 'history.back', !val && this.$refs.webView.canGoBack());
-      this.$electron.ipcRenderer.send('update-enabled', 'history.forward', !val && this.$refs.webView.canGoForward());
+      this.menuService.updateMenuItemLabel(
+        'browsing.window.pip',
+        this.isPip ? 'msg.window.exitPip' : 'msg.window.enterPip',
+      );
+      this.menuService.updateMenuItemEnabled('browsing.window.pip', true);
+      this.menuService.updateMenuItemEnabled('history.back', !val && this.$refs.webView.canGoBack());
+      this.menuService.updateMenuItemEnabled('history.forward', !val && this.$refs.webView.canGoForward());
       if (!val) {
         this.$store.dispatch('updatePipSize', this.winSize);
         this.$store.dispatch('updatePipPos', this.winPos);
-        this.$electron.ipcRenderer.send('update-enabled', 'window.keepPlayingWindowFront', false);
+        this.menuService.updateMenuItemEnabled('browsing.window.keepPipFront', false);
         this.handleWindowChangeExitPip();
         if (this.pipType === 'youtube') {
           this.youtubeRecover();
@@ -191,7 +194,7 @@ export default {
       } else {
         this.$store.dispatch('updateBrowsingSize', this.winSize);
         this.$store.dispatch('updateBrowsingPos', this.winPos);
-        this.$electron.ipcRenderer.send('update-enabled', 'window.keepPlayingWindowFront', true);
+        this.menuService.updateMenuItemEnabled('browsing.window.keepPipFront', true);
         this.timeout = true;
         if (this.timer) {
           clearTimeout(this.timer);
@@ -216,11 +219,11 @@ export default {
     loadingState(val: boolean) {
       const loadUrl = this.$refs.webView.getURL();
       const recordIndex = this.supportedRecordHost.indexOf(urlParseLax(loadUrl).hostname);
-      this.$electron.ipcRenderer.send('update-enabled', 'history.back', this.$refs.webView.canGoBack());
-      this.$electron.ipcRenderer.send('update-enabled', 'history.forward', this.$refs.webView.canGoForward());
+      this.menuService.updateMenuItemEnabled('history.back', this.$refs.webView.canGoBack());
+      this.menuService.updateMenuItemEnabled('history.forward', this.$refs.webView.canGoForward());
       if (val) {
         this.hasVideo = false;
-        this.$electron.ipcRenderer.send('update-enabled', 'window.pip', false);
+        this.menuService.updateMenuItemEnabled('browsing.window.pip', false);
         this.$refs.browsingHeader.updateWebInfo({
           hasVideo: this.hasVideo,
           url: loadUrl,
@@ -234,7 +237,7 @@ export default {
         }
         this.$refs.webView.executeJavaScript(this.calculateVideoNum, (r: number) => {
           this.hasVideo = recordIndex === 0 && !getVideoId(loadUrl).id ? false : !!r;
-          this.$electron.ipcRenderer.send('update-enabled', 'window.pip', this.hasVideo);
+          this.menuService.updateMenuItemEnabled('browsing.window.pip', this.hasVideo);
           this.$refs.browsingHeader.updateWebInfo({
             hasVideo: this.hasVideo,
             url: loadUrl,
@@ -431,6 +434,7 @@ export default {
     });
   },
   beforeDestroy() {
+    if (this.isPip) this.menuService.updateMenuItemEnabled('browsing.window.keepPipFront', false);
     asyncStorage.set('browsing', {
       pipSize: this.pipSize,
       pipPos: this.pipPos,

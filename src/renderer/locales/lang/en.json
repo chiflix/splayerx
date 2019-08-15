@@ -241,7 +241,7 @@
     "general": {
       "hideHistory": "Hide playback history",
       "clearHistory": "Always clear playback history on exit",
-      "reverseScrolling": "Reverse mouse scrolling",
+      "reverseScrolling": "Reverse mouse scrolling when adjusting volume",
       "setDefault": "Set as the Default Video Player",
       "setDefaultDescription": "Open all video files with SPlayer.",
       "restoreSettings": "Reset All Content and Settings",
