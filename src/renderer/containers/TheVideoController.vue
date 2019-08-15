@@ -47,7 +47,7 @@
       :attached-shown="attachedShown"
       :on-play-button-mouseup="togglePlay"
       @update:playbutton-state="updatePlayButtonState"
-      :class="`${showAllWidgets ? 'play-button no-drag' : 'play-button'}`"
+      class="play-button"
     />
     <volume-indicator
       ref="volumeIndicator"
@@ -65,7 +65,6 @@
       :handle-update-volume="updateVolume"
       :handle-update-muted="updateMuted"
       @update:volume-state="updateVolumeState"
-      class="no-drag"
     />
     <div
       v-fade-in="showAllWidgets"
@@ -226,6 +225,7 @@ export default {
     }),
     ...mapGetters([
       'originSrc', 'paused', 'ratio', 'duration', 'intrinsicWidth', 'intrinsicHeight', 'singleCycle', 'rate', 'muted', 'volume',
+      'winWidth',
       'playingList', 'isFolderList',
       'isFullScreen', 'isFocused', 'isMinimized',
       'leftMousedown', 'progressKeydown', 'volumeKeydown', 'wheelTriggered', 'volumeWheelTriggered',
@@ -646,11 +646,16 @@ export default {
     },
     UIDisplayManager() {
       const tempObject = {
+        PlaylistControl: true,
         RecentPlaylist: false,
       };
       Object.keys(this.displayState).forEach((index) => {
         tempObject[index] = !this.widgetsStatus.PlaylistControl.showAttached;
       });
+      const ratio = window.innerWidth / window.innerHeight;
+      if (ratio < 1 && this.winWidth < 512) {
+        tempObject.PlaylistControl = false;
+      }
       tempObject.RecentPlaylist = this.widgetsStatus.PlaylistControl.showAttached
         && !this.dragOver;
       this.displayState = tempObject;
