@@ -4,6 +4,9 @@
     @mouseenter="addMouseenter"
     @mouseleave="addMouseleave"
     @mouseup.left="addMouseup"
+    :style="{
+      cursor: isInRange ? 'pointer' : `${cursorUrl}, pointer`,
+    }"
     class="button"
   >
     <div
@@ -26,6 +29,14 @@ export default {
     Icon,
   },
   props: {
+    cursorUrl: {
+      type: String,
+      default: '',
+    },
+    isInRange: {
+      type: Boolean,
+      default: false,
+    },
     addMouseup: {
       type: Function,
       default: () => {
@@ -50,7 +61,7 @@ export default {
   },
   methods: {
     addMouseenter() {
-      if (!this.itemMoving) {
+      if (!this.itemMoving && this.isInRange) {
         this.$refs.button.style.setProperty('background-color', 'rgba(123, 123, 123, 0.12)');
         this.$refs.btnMask.style.setProperty('border-color', 'rgba(255, 255, 255, 0.6)');
         this.onItemMouseover(null, null, true);

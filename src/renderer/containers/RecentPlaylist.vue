@@ -115,6 +115,8 @@
               minWidth: `${thumbnailWidth}px`,
               minHeight: `${thumbnailHeight}px`,
             }"
+            :is-in-range="playingList.length === lastIndex"
+            :cursor-url="cursorRight"
             :item-moving="itemMoving"
             :index="addIndex"
             :add-mouseup="addMouseup"
