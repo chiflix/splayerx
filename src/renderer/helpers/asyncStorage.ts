@@ -11,7 +11,7 @@ import { addBubble } from '@/helpers/notificationControl';
     在需要使用的组件中
     import asyncStorage from '@/helpers/asyncStorage';
 */
-function removeAll(): Promise<void>[] {
+function removeAll(): Promise<void[]> {
   const dirPath = storage.getDataPath();
   const taskArray: Promise<void>[] = [];
   return fsPromises.readdir(dirPath).then((files: string[]) => {
