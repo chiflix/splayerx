@@ -52,7 +52,7 @@ import { generateShortCutImageBy, ShortCut, saveNsfwFistFilter } from '@/libs/ut
 import { Video as videoActions, AudioTranslate as atActions } from '@/store/actionTypes';
 import { videodata } from '@/store/video';
 import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer.vue';
-import { MediaItem, PlaylistItem } from '../interfaces/IDB';
+import { MediaItem } from '../interfaces/IDB';
 import { AudioTranslateBubbleOrigin } from '../store/modules/AudioTranslate';
 
 export default {
@@ -93,7 +93,7 @@ export default {
       this.changeWindowRotate(val);
     },
     async playListId(val: number, oldVal: number) {
-      if (oldVal) {
+      if (oldVal && !this.isFolderList) {
         const screenshot: ShortCut = await this.generateScreenshot();
         if (!(await this.handleNSFW(screenshot.shortCut, oldVal))) {
           await this.updatePlaylist(oldVal);
@@ -321,12 +321,10 @@ export default {
     async updatePlaylist(playlistId: number) {
       if (!Number.isNaN(playlistId) && !this.isFolderList) {
         const playlistRecord = await playInfoStorageService.getPlaylistRecord(playlistId);
-        const recentPlayedData = {
-          ...playlistRecord,
-          playedIndex: this.playingIndex,
-        };
+        playlistRecord.playedIndex = this.playingIndex;
+
         await playInfoStorageService
-          .updateRecentPlayedBy(playlistId, recentPlayedData as PlaylistItem);
+          .updateRecentPlayedBy(playlistId, playlistRecord);
       }
     },
     async generateScreenshot(): Promise<ShortCut> {
