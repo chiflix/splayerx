@@ -7,6 +7,7 @@ const childProcess = require('child_process')
 const webpack = require('webpack')
 const SentryWebpackPlugin = require('@sentry/webpack-plugin')
 const { dependencies, optionalDependencies, _moduleAliases } = require('../package.json')
+const TerserPlugin = require('terser-webpack-plugin')
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin')
 
 let release = '';
@@ -117,6 +118,13 @@ if (process.env.NODE_ENV === 'production') {
       'process.env.NODE_ENV': '"production"'
     })
   )
+  mainConfig.optimization = {
+    minimizer: [new TerserPlugin({
+      terserOptions: {
+        keep_classnames: true
+      }
+    })],
+  }
 
   if (process.platform === 'darwin') { // only check on mac, to speed up Windows build
     mainConfig.plugins.push(
