@@ -398,6 +398,7 @@ export default {
       }
     },
     playingList() {
+      if (!this.itemMoving) return;
       this.tranFlag = false;
       setElementStyle(this.$refs.recentPlaylistItem, 'transform', 'translate(0,0)');
       setTimeout(() => {

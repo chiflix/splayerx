@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import helpers from '@/helpers/index';
+import { info } from '@/libs/DataBase';
 
 const state = {
   source: '', // 'drop' or '', used on mas version
@@ -111,15 +112,22 @@ const actions = {
   },
   PlayingList({ commit }, payload) {
     commit('isPlayingList');
+    commit('id', payload.id ? payload.id : '');
     if (payload.paths) commit('playList', payload.paths);
     if (payload.items) commit('items', payload.items);
-    commit('id', payload.id ? payload.id : '');
   },
-  FolderList({ commit }, payload) {
+  async FolderList({ commit }, payload) {
     commit('isFolderList');
+    commit('id', payload.id);
     commit('playList', payload.paths);
     if (payload.items) commit('items', payload.items);
-    commit('id', payload.id);
+    else {
+      const records = await info.getAllValueByIndex('media-item', 'source', '');
+      const items = new Array(payload.paths.length);
+      payload.paths.forEach((path, index) => {
+        items[index] = records.find(record => record.path === this.path);
+      });
+    }
   },
   RemoveItemFromPlayingList({ state, commit }, item) {
     const pos = state.playList.indexOf(item);
