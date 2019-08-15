@@ -179,7 +179,6 @@ export default {
     }, 50, { leading: true }));
     this.$bus.$on('next-video', () => {
       if (this.switchingVideo) return;
-      console.log('next');
       this.switchingVideo = true;
       if (this.switchingId) clearTimeout(this.switchingId);
       this.switchingId = setTimeout(() => {
@@ -196,7 +195,6 @@ export default {
     });
     this.$bus.$on('previous-video', () => {
       if (this.switchingVideo) return;
-      console.log('previous');
       this.switchingVideo = true;
       if (this.switchingId) clearTimeout(this.switchingId);
       this.switchingId = setTimeout(() => {
@@ -308,7 +306,6 @@ export default {
         this.$bus.$emit('seek', 0);
       }
       if (mediaInfo && mediaInfo.audioTrackId) this.lastAudioTrackId = mediaInfo.audioTrackId;
-      console.log('loaded');
       this.metaloaded = true;
     },
     onAudioTrack(event: TrackEvent) {
