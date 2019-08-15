@@ -16,6 +16,7 @@
     />
     <browsing-favicons
       :record-url="recordUrl"
+      :handle-bookmark-open="handleBookmarkOpen"
       :style="{
         order: isDarwin ? 2 : 3,
       }"
@@ -32,7 +33,7 @@
         zIndex: '6',
         order: isDarwin ? 3 : 1,
         webkitAppRegion: 'no-drag',
-        cursor: webInfo.hasVideo ? 'pointer' : '',
+        cursor: hasVideo ? 'pointer' : '',
       }"
     >
       <Icon
@@ -79,22 +80,43 @@ export default {
       type: Function,
       required: true,
     },
+    handleBookmarkOpen: {
+      type: Function,
+      required: true,
+    },
   },
   data() {
     return {
       showOpenUrl: false,
-      webInfo: {},
       backType: 'backDisabled',
       forwardType: 'forwardDisabled',
+      hasVideo: false,
+      url: '',
+      canGoBack: false,
+      canGoForward: false,
     };
   },
   computed: {
     ...mapGetters(['recordUrl', 'isMaximized']),
     picInPicType() {
-      return this.webInfo.hasVideo ? 'pip' : 'pipDisabled';
+      return this.hasVideo ? 'pip' : 'pipDisabled';
     },
     isDarwin() {
       return process.platform === 'darwin';
+    },
+    webInfo() {
+      return {
+        canGoBack: this.canGoBack,
+        canGoForward: this.canGoForward,
+      };
+    },
+  },
+  watch: {
+    canGoBack(val: boolean) {
+      this.backType = val ? 'back' : 'backDisabled';
+    },
+    canGoForward(val: boolean) {
+      this.forwardType = val ? 'forward' : 'forwardDisabled';
     },
   },
   methods: {
@@ -117,11 +139,12 @@ export default {
       }
     },
     updateWebInfo(info: {
-      hasVideo: boolean, url: string, canGoBack: boolean, canGoForward: boolean
+      hasVideo?: boolean, url?: string, canGoBack?: boolean, canGoForward?: boolean
     }) {
-      this.webInfo = info;
-      this.backType = info.canGoBack ? 'back' : 'backDisabled';
-      this.forwardType = info.canGoForward ? 'forward' : 'forwardDisabled';
+      const keys = Object.keys(info);
+      keys.forEach((key: string) => {
+        this[key] = info[key];
+      });
     },
   },
 };

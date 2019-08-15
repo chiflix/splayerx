@@ -9,6 +9,7 @@ import path, {
 } from 'path';
 import fs from 'fs';
 import rimraf from 'rimraf';
+import urlParse from 'url-parse-lax';
 // import { audioHandler } from './helpers/audioHandler';
 import { audioGrabService } from './helpers/AudioGrabService';
 import './helpers/electronPrototypes';
@@ -67,15 +68,19 @@ let preferenceWindow = null;
 let browsingWindow = null;
 let pipControlView = null;
 let browserViews = [];
+let currentBrowserHostname = '';
+let currentPipHostname = '';
 let tray = null;
 let pipTimer = 0;
-let initialUrl = '';
+let initialBrowserUrl = '';
+let lastBrowserUrl = '';
 let needToRestore = false;
 let forceQuit = false; // 大退app 关闭所有windows
 let needBlockCloseLaborWindow = true; // 标记是否阻塞nsfw窗口关闭
 let inited = false;
 let hideBrowsingWindow = false;
 let finalVideoToOpen = [];
+const tabGroups = [];
 const tmpVideoToOpen = [];
 const tmpSubsToOpen = [];
 const subRegex = getValidSubtitleRegex();
@@ -447,7 +452,7 @@ function registerMainWindowEvent(mainWindow) {
     const views = browsingWindow.getBrowserViews();
     browsingWindow.removeBrowserView(views[0]);
     browsingWindow.removeBrowserView(views[1]);
-    views[0].webContents.loadURL(initialUrl).then(() => {
+    views[0].webContents.loadURL(initialBrowserUrl).then(() => {
       views[0].webContents.clearHistory();
     });
   });
@@ -461,7 +466,7 @@ function registerMainWindowEvent(mainWindow) {
       });
     }
     browserViews.forEach((view) => {
-      view.webContents.loadURL(initialUrl).then(() => {
+      view.webContents.loadURL('about:blank').then(() => {
         view.webContents.clearHistory();
       });
     });
@@ -470,9 +475,15 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('update-pip-state', () => {
     mainWindow.send('update-pip-state');
   });
-  ipcMain.on('create-browser-view', (evt, args) => {
-    initialUrl = args.url;
-    if (!browserViews.length) {
+  ipcMain.on('shift-page-tab', (evt, url) => {
+    const isPip = browsingWindow.isVisible();
+    currentPipHostname = isPip ? currentBrowserHostname : urlParse(url).hostname;
+    currentBrowserHostname = urlParse(url).hostname;
+    const index = tabGroups.findIndex(tab => Object.keys(tab)[0] === currentBrowserHostname);
+    lastBrowserUrl = initialBrowserUrl;
+    initialBrowserUrl = url;
+    if (currentBrowserHostname !== 'blank' && index === -1) {
+      mainWindow.removeBrowserView(mainWindow.getBrowserView());
       browserViews = [
         new BrowserView({
           webPreferences: {
@@ -485,13 +496,53 @@ function registerMainWindowEvent(mainWindow) {
           },
         }),
       ];
+      tabGroups.push({ [`${currentBrowserHostname}`]: browserViews });
+      mainWindow.addBrowserView(browserViews[0]);
+      if (!isPip) {
+        browsingWindow.removeBrowserView(browsingWindow.getBrowserViews()[0]);
+        browsingWindow.addBrowserView(browserViews[1]);
+      }
+      browserViews.forEach((view) => {
+        view.webContents.loadURL(url);
+        view.webContents.openDevTools();
+      });
+    } else {
+      browserViews = tabGroups[index][currentBrowserHostname];
+      mainWindow.removeBrowserView(mainWindow.getBrowserView());
+      mainWindow.addBrowserView(browserViews[isPip ? 1 : 0]);
+      if (!isPip) {
+        browsingWindow.removeBrowserView(browsingWindow.getBrowserViews()[0]);
+        browsingWindow.addBrowserView(browserViews[1]);
+      }
     }
-    mainWindow.addBrowserView(browserViews[0]);
-    browsingWindow.addBrowserView(browserViews[1]);
-    browserViews.forEach((view) => {
-      view.webContents.loadURL(args.url);
-      view.webContents.openDevTools();
-    });
+    mainWindow.send('current-browser-id', browserViews.map(v => v.id));
+    mainWindow.send('update-browser-view', !(currentBrowserHostname !== 'blank' && index === -1));
+  });
+  ipcMain.on('create-browser-view', (evt, args) => {
+    currentBrowserHostname = currentPipHostname = urlParse(args.url).hostname;
+    if (currentBrowserHostname !== 'blank' && !Object.keys(tabGroups).includes(currentBrowserHostname)) {
+      initialBrowserUrl = args.url;
+      browserViews = [
+        new BrowserView({
+          webPreferences: {
+            preload: `${require('path').resolve(__static, 'pip/preload.js')}`,
+          },
+        }),
+        new BrowserView({
+          webPreferences: {
+            preload: `${require('path').resolve(__static, 'pip/preload.js')}`,
+          },
+        }),
+      ];
+      mainWindow.send('current-browser-id', browserViews.map(v => v.id));
+      tabGroups.push({ [`${currentBrowserHostname}`]: browserViews });
+      mainWindow.addBrowserView(browserViews[0]);
+      browsingWindow.addBrowserView(browserViews[1]);
+      browserViews.forEach((view) => {
+        view.webContents.loadURL(args.url);
+        view.webContents.openDevTools();
+      });
+    }
   });
   ipcMain.on('update-danmu-state', (evt, val) => {
     pipControlView.webContents.executeJavaScript(`document.querySelector(".danmu").src = ${val} ? "../../src/renderer/assets/icon/danmu-default-icon.svg" : "../../src/renderer/assets/icon/noDanmu-default-icon.svg"`);
@@ -535,16 +586,19 @@ function registerMainWindowEvent(mainWindow) {
     }
   });
   ipcMain.on('shift-pip', () => {
+    const isDifferentBrowser = currentPipHostname !== '' && currentBrowserHostname !== currentPipHostname;
     const mainView = mainWindow.getBrowserView();
     mainWindow.removeBrowserView(mainView);
-    browsingWindow.getBrowserViews().forEach((view) => {
-      browsingWindow.removeBrowserView(view);
-      view.webContents.loadURL(initialUrl);
-    });
+    const index = tabGroups.findIndex(tab => Object.keys(tab)[0] === currentBrowserHostname);
+    const browserView = browsingWindow.getBrowserViews()[0];
+    browsingWindow.removeBrowserView(browserView);
+    browsingWindow.removeBrowserView(pipControlView);
+    browserView.webContents.loadURL(isDifferentBrowser ? lastBrowserUrl : initialBrowserUrl);
     createPipControlView();
     browsingWindow.addBrowserView(mainView);
     browsingWindow.addBrowserView(pipControlView);
-    mainWindow.addBrowserView(browserViews.find(view => view.id !== mainView.id));
+    mainWindow.addBrowserView(isDifferentBrowser ? tabGroups[index][currentBrowserHostname]
+      .find(tab => tab.id !== mainView.id) : browserView);
     pipControlView.webContents.openDevTools();
     pipControlView.webContents.loadURL(`file:${require('path').resolve(__static, 'pip/pipControl.html')}`);
     pipControlView.setBackgroundColor('#00FFFFFF');
@@ -572,7 +626,7 @@ function registerMainWindowEvent(mainWindow) {
       browsingWindow.addBrowserView(pipControlView);
       browsingWindow.show();
     }
-    pipControlView.webContents.openDevTools();
+    pipControlView.webContents.openDevTools({ mode: 'detach' });
     pipControlView.webContents.loadURL(`file:${require('path').resolve(__static, 'pip/pipControl.html')}`);
     pipControlView.setBackgroundColor('#00FFFFFF');
     browsingWindow.blur();
