@@ -74,6 +74,9 @@ export default {
       needToRestore: false,
       winAngleBeforeFullScreen: 0, // winAngel before full screen
       winSizeBeforeFullScreen: [], // winSize before full screen
+      switchingVideo: false,
+      switchingId: NaN,
+      metaloaded: false,
     };
   },
   computed: {
@@ -101,6 +104,8 @@ export default {
       }
     },
     async videoId(val: number, oldVal: number) {
+      if (!this.metaloaded) return;
+      this.metaloaded = false;
       const screenshot: ShortCut = await this.generateScreenshot();
       await this.saveScreenshot(oldVal, screenshot);
     },
@@ -108,11 +113,12 @@ export default {
       if (process.mas && oldVal) {
         this.$bus.$emit(`stop-accessing-${oldVal}`, oldVal);
       }
+      this.play();
+      if (!this.metaloaded) return;
       // this.$bus.$emit('show-speedlabel');
       this.videoConfigInitialize({
         audioTrackList: [],
       });
-      this.play();
       this.updatePlayinglistRate({
         oldDir: path.dirname(oldVal), newDir: path.dirname(val), playingList: this.playingList,
       });
@@ -172,6 +178,13 @@ export default {
       this.$ga.event('app', 'toggle-playback');
     }, 50, { leading: true }));
     this.$bus.$on('next-video', () => {
+      if (this.switchingVideo) return;
+      console.log('next');
+      this.switchingVideo = true;
+      if (this.switchingId) clearTimeout(this.switchingId);
+      this.switchingId = setTimeout(() => {
+        this.switchingVideo = false;
+      }, 500);
       videodata.paused = false;
       if (this.nextVideo) {
         this.$store.commit('LOOP_UPDATE', false);
@@ -182,6 +195,13 @@ export default {
       }
     });
     this.$bus.$on('previous-video', () => {
+      if (this.switchingVideo) return;
+      console.log('previous');
+      this.switchingVideo = true;
+      if (this.switchingId) clearTimeout(this.switchingId);
+      this.switchingId = setTimeout(() => {
+        this.switchingVideo = false;
+      }, 500);
       videodata.paused = false;
       if (this.previousVideo) {
         this.$store.commit('LOOP_UPDATE', false);
@@ -288,6 +308,8 @@ export default {
         this.$bus.$emit('seek', 0);
       }
       if (mediaInfo && mediaInfo.audioTrackId) this.lastAudioTrackId = mediaInfo.audioTrackId;
+      console.log('loaded');
+      this.metaloaded = true;
     },
     onAudioTrack(event: TrackEvent) {
       const { type, track } = event;

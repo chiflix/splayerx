@@ -38,7 +38,7 @@ export default class RecentPlayService implements IRecentPlay {
       }),
     )).filter(item => !!item);
     const getBasename = (path: string) => basename(path, extname(path));
-    const results: ILandingViewDisplayInfo[] = await Promise.all(
+    const results: ILandingViewDisplayInfo[] = (await Promise.all(
       coverVideos.map(async (item: coverViedoItem): Promise<ILandingViewDisplayInfo> => {
         const {
           lastPlayedTime, duration, path, playedIndex, playlistLength, shortCut, id,
@@ -72,7 +72,7 @@ export default class RecentPlayService implements IRecentPlay {
           playlistLength,
         };
       }),
-    );
+    )).filter(item => !!item.lastPlayedTime && !!item.backgroundUrl);
     return results;
   }
 
