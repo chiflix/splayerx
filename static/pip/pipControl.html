@@ -2,12 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Title</title>
+  <title>pipControl</title>
   <style>
     * {
       margin: 0;
       padding: 0;
       user-select: none;
+      -webkit-user-drag: none;
     }
     .pip-buttons {
       width: 20px;
@@ -30,14 +31,14 @@
       margin-bottom: 20px;
     }
     .pip:active, .danmu:active {
-      opacity: 0.1667;
+      opacity: 0.333;
     }
   </style>
 </head>
 <body draggable="false">
-  <div class="pip-buttons" draggable="false">
-    <img class="danmu" src="../../src/renderer/assets/icon/noDanmu-default-icon.svg" draggable="false">
-    <img class="pip" src="../../src/renderer/assets/icon/pipBack-default-icon.svg" draggable="false">
+  <div class="pip-buttons">
+    <img class="danmu" src="assets/noDanmu-default-icon.svg">
+    <img class="pip" src="assets/pipBack-default-icon.svg">
   </div>
 </body>
 </html>

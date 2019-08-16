@@ -5,7 +5,7 @@ import { app, BrowserWindow, session, Tray, ipcMain, globalShortcut, nativeImage
 import { throttle, debounce, uniq } from 'lodash';
 import os from 'os';
 import path, {
-  basename, dirname, extname, join,
+  basename, dirname, extname, join, resolve,
 } from 'path';
 import fs from 'fs';
 import rimraf from 'rimraf';
@@ -67,6 +67,7 @@ let aboutWindow = null;
 let preferenceWindow = null;
 let browsingWindow = null;
 let pipControlView = null;
+let titlebarView = null;
 let browserViews = [];
 let currentBrowserHostname = '';
 let currentPipHostname = '';
@@ -84,6 +85,7 @@ const tabGroups = [];
 const tmpVideoToOpen = [];
 const tmpSubsToOpen = [];
 const subRegex = getValidSubtitleRegex();
+const titlebarUrl = process.platform === 'darwin' ? `file:${resolve(__static, 'pip/macTitlebar.html')}` : `file:${resolve(__static, 'pip/winTitlebar.html')}`;
 const mainURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080'
   : `file://${__dirname}/index.html`;
@@ -139,6 +141,15 @@ function createPipControlView() {
   pipControlView = new BrowserView({
     webPreferences: {
       preload: `${require('path').resolve(__static, 'pip/preload.js')}`,
+    },
+  });
+}
+
+function createTitlebarView() {
+  if (titlebarView) titlebarView.destroy();
+  titlebarView = new BrowserView({
+    webPreferences: {
+      preload: `${require('path').resolve(__static, 'pip/titlebarPreload.js')}`,
     },
   });
 }
@@ -504,7 +515,6 @@ function registerMainWindowEvent(mainWindow) {
       }
       browserViews.forEach((view) => {
         view.webContents.loadURL(url);
-        view.webContents.openDevTools();
       });
     } else {
       browserViews = tabGroups[index][currentBrowserHostname];
@@ -540,17 +550,16 @@ function registerMainWindowEvent(mainWindow) {
       browsingWindow.addBrowserView(browserViews[1]);
       browserViews.forEach((view) => {
         view.webContents.loadURL(args.url);
-        view.webContents.openDevTools();
       });
     }
   });
   ipcMain.on('update-danmu-state', (evt, val) => {
-    pipControlView.webContents.executeJavaScript(`document.querySelector(".danmu").src = ${val} ? "../../src/renderer/assets/icon/danmu-default-icon.svg" : "../../src/renderer/assets/icon/noDanmu-default-icon.svg"`);
+    pipControlView.webContents.executeJavaScript(`document.querySelector(".danmu").src = ${val} ? "assets/danmu-default-icon.svg" : "assets/noDanmu-default-icon.svg"`);
   });
   ipcMain.on('init-danmu-state', (evt, args) => {
     pipControlView.webContents.executeJavaScript(
       `const danmu = document.querySelector(".danmu");
-      danmu.src = ${args.barrageOpen} ? "../../src/renderer/assets/icon/danmu-default-icon.svg" : "../../src/renderer/assets/icon/noDanmu-default-icon.svg";
+      danmu.src = ${args.barrageOpen} ? "assets/danmu-default-icon.svg" : "assets/noDanmu-default-icon.svg";
       danmu.style.opacity = ${args.opacity};
       danmu.style.cursor = ${args.opacity} === 1 ? "cursor" : "default"`,
     );
@@ -585,6 +594,44 @@ function registerMainWindowEvent(mainWindow) {
       pipControlView.webContents.executeJavaScript('document.querySelector(".pip-buttons").style.display = "none";');
     }
   });
+  ipcMain.on('maximizable', (evt, val) => {
+    console.log(val);
+    if (val) {
+      titlebarView.webContents.executeJavaScript('document.querySelector(".titlebarMax").style.display = mouseenter ? "block" : "none";'
+        + 'document.querySelector(".titlebarFull").style.display = mouseenter ? "none" : "block";');
+    } else {
+      titlebarView.webContents.executeJavaScript('document.querySelector(".titlebarMax").style.display = "none";'
+        + 'document.querySelector(".titlebarFull").style.display = "block";');
+    }
+  });
+  ipcMain.on('mouseup', (evt, type) => {
+    switch (type) {
+      case 'close':
+        browsingWindow.close();
+        break;
+      case 'min':
+        browsingWindow.minimize();
+        break;
+      case 'full':
+        browsingWindow.setFullScreen(true);
+        titlebarView.webContents.executeJavaScript('document.querySelector(".titlebarFull").src = "assets/titleBarRecover-default-icon.svg";'
+          + 'document.querySelector(".titlebarMin").style.pointerEvents = "none";'
+          + 'document.querySelector(".titlebarMin").style.opacity = "0.25";'
+          + 'document.querySelector(".titlebarFull").style.display = "none";'
+          + 'document.querySelector(".titlebarRecover").style.display = "block";');
+        break;
+      case 'recover':
+        browsingWindow.setFullScreen(false);
+        titlebarView.webContents.executeJavaScript('document.querySelector(".titlebarFull").src = "assets/titleBarFull-default-icon.svg";'
+          + 'document.querySelector(".titlebarMin").style.pointerEvents = "";'
+          + 'document.querySelector(".titlebarMin").style.opacity = "1";'
+          + 'document.querySelector(".titlebarFull").style.display = "";'
+          + 'document.querySelector(".titlebarRecover").style.display = "none";');
+        break;
+      default:
+        break;
+    }
+  });
   ipcMain.on('shift-pip', () => {
     const isDifferentBrowser = currentPipHostname !== '' && currentBrowserHostname !== currentPipHostname;
     const mainView = mainWindow.getBrowserView();
@@ -593,21 +640,30 @@ function registerMainWindowEvent(mainWindow) {
     const browserView = browsingWindow.getBrowserViews()[0];
     browsingWindow.removeBrowserView(browserView);
     browsingWindow.removeBrowserView(pipControlView);
+    browsingWindow.removeBrowserView(titlebarView);
     browserView.webContents.loadURL(isDifferentBrowser ? lastBrowserUrl : initialBrowserUrl);
     createPipControlView();
+    createTitlebarView();
     browsingWindow.addBrowserView(mainView);
     browsingWindow.addBrowserView(pipControlView);
+    browsingWindow.addBrowserView(titlebarView);
     mainWindow.addBrowserView(isDifferentBrowser ? tabGroups[index][currentBrowserHostname]
       .find(tab => tab.id !== mainView.id) : browserView);
-    pipControlView.webContents.openDevTools();
     pipControlView.webContents.loadURL(`file:${require('path').resolve(__static, 'pip/pipControl.html')}`);
     pipControlView.setBackgroundColor('#00FFFFFF');
+    titlebarView.webContents.loadURL(titlebarUrl);
+    titlebarView.setBackgroundColor('#00FFFFFF');
+    titlebarView.setBounds({
+      x: 0, y: 0, width: browsingWindow.getSize()[0], height: 36,
+    });
     browsingWindow.blur();
     browsingWindow.focus();
   });
   ipcMain.on('enter-pip', () => {
     const mainView = mainWindow.getBrowserView();
     createPipControlView();
+    createTitlebarView();
+    titlebarView.webContents.openDevTools({ mode: 'detach' });
     if (!browsingWindow) {
       createBrowsingWindow();
       browsingWindow.openDevTools();
@@ -616,6 +672,7 @@ function registerMainWindowEvent(mainWindow) {
       mainWindow.addBrowserView(browView);
       browsingWindow.addBrowserView(mainView);
       browsingWindow.addBrowserView(pipControlView);
+      browsingWindow.addBrowserView(titlebarView);
       browsingWindow.show();
     } else {
       const browView = browsingWindow.getBrowserView();
@@ -624,16 +681,24 @@ function registerMainWindowEvent(mainWindow) {
       mainWindow.addBrowserView(browView);
       browsingWindow.addBrowserView(mainView);
       browsingWindow.addBrowserView(pipControlView);
+      browsingWindow.addBrowserView(titlebarView);
       browsingWindow.show();
     }
-    pipControlView.webContents.openDevTools({ mode: 'detach' });
     pipControlView.webContents.loadURL(`file:${require('path').resolve(__static, 'pip/pipControl.html')}`);
     pipControlView.setBackgroundColor('#00FFFFFF');
+    titlebarView.webContents.loadURL(titlebarUrl);
+    titlebarView.setBackgroundColor('#00FFFFFF');
+    titlebarView.setBounds({
+      x: 0, y: 0, width: browsingWindow.getSize()[0], height: 36,
+    });
     browsingWindow.blur();
     browsingWindow.focus();
   });
   ipcMain.on('set-control-bounds', (evt, args) => {
     if (pipControlView) pipControlView.setBounds(args);
+  });
+  ipcMain.on('set-titlebar-bounds', (evt, args) => {
+    if (titlebarView) titlebarView.setBounds(args);
   });
   ipcMain.on('exit-pip', () => {
     const mainView = mainWindow.getBrowserView();
@@ -642,6 +707,7 @@ function registerMainWindowEvent(mainWindow) {
     if (browsingWindow) {
       browsingWindow.removeBrowserView(browViews[0]);
       browsingWindow.removeBrowserView(pipControlView);
+      browsingWindow.removeBrowserView(titlebarView);
     }
     if (mainView.webContents.canGoBack()) {
       mainView.webContents.goBack();

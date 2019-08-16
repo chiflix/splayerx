@@ -14,6 +14,14 @@ export default {
     };
   },
   mounted() {
+    window.addEventListener('keydown', (e) => {
+      if (e.keyCode === 18) {
+        electron.ipcRenderer.send('maximizable', true);
+      }
+    });
+    window.addEventListener('keyup', () => {
+      electron.ipcRenderer.send('maximizable', false);
+    });
     window.addEventListener('focus', () => {
       electron.ipcRenderer.send('update-focused-window', false);
       electron.ipcRenderer.send('update-enabled', 'window.pip', true);
@@ -22,6 +30,12 @@ export default {
     window.addEventListener('resize', throttle(() => {
       const size = electron.remote.getCurrentWindow().getSize();
       electron.ipcRenderer.send('pip-window-size', size);
+      electron.ipcRenderer.send('set-titlebar-bounds', {
+        x: 0,
+        y: 0,
+        width: size[0],
+        height: 36,
+      });
       electron.ipcRenderer.send('set-control-bounds', {
         x: Math.round(size[0] - 65),
         y: Math.round(size[1] / 2 - 54),
