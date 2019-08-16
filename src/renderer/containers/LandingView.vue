@@ -1,123 +1,141 @@
 <template>
-  <div class="wrapper">
-    <open-url
-      v-show="openUrlShow"
-      :open-input-url="openInputUrl"
-      :close-url-input="closeUrlInput"
-    />
-    <transition name="background-container-transition">
+  <div class="landing-view">
+    <transition name="sidebar">
       <div
-        v-if="item.backgroundUrl"
-        class="background"
+        class="side-bar"
       >
-        <transition
-          name="background-transition"
-          mode="in-out"
-        >
-          <div
-            :key="item.path"
-            :style="{
-              backgroundImage: item.backgroundUrl,
-            }"
-            class="background-image"
-          >
-            <div class="background-mask" />
-          </div>
-        </transition>
-        <div class="item-info">
-          <div class="item-name">
-            {{ item.basename }}
-          </div>
-          <div class="item-description" />
-          <div class="item-timing">
-            <span class="timing-played">
-              {{ timeInvalidForm(timecodeFromSeconds(item.lastPlayedTime)) }}
-              / {{ timeInvalidForm(timecodeFromSeconds(item.duration)) }}
-              <span v-if="item.playlistLength > 1">
-                ·&nbsp;{{
-                  $t('recentPlaylist.playlistSource')
-                }}&nbsp;&nbsp;{{ item.playedIndex + 1 }} / {{ item.playlistLength }}
-              </span>
-            </span>
-          </div>
-          <div class="item-progress">
-            <div
-              :style="{ width: item.percentage + '%' }"
-              class="progress-played"
-            />
-          </div>
+        <div class="icon-box">
+          <Icon type="bilibiliSidebar" @mouseup="handleSidebarIcon('bilibili')" />
+          <Icon type="iqiyiSidebar" @mouseup="handleSidebarIcon('iqiyi')" />
+          <Icon type="youtubeSidebar" @mouseup="handleSidebarIcon('youtube')" />
         </div>
       </div>
     </transition>
-    <div class="welcome-container">
-      <transition :name="logoTransition">
-        <div
-          v-if="pageMounted && (!item.backgroundUrl)"
-          class="logo-container"
-        >
-          <Icon type="logo" />
-        </div>
-      </transition>
-    </div>
-    <div
-      ref="mask"
-      class="mask"
-    />
     <div
       :style="{
-        transform: isFullScreen ? '' : `translateX(${move}px)`,
-        bottom: winWidth > 1355 ? `${40 / 1355 * winWidth}px` : '40px',
-        transition: tranFlag ? 'transform 400ms cubic-bezier(0.42, 0, 0.58, 1)' : '',
+        width: showSidebar ? 'calc(100% - 76px)' : '100%',
       }"
-      class="controller"
+      class="wrapper"
     >
-      <div
-        :style="{marginLeft: winWidth > 1355 ? `${50 / 1355 * winWidth}px` : '50px'}"
-        class="playlist no-drag"
-      >
+      <open-url
+        v-show="openUrlShow"
+        :open-input-url="openInputUrl"
+        :close-url-input="closeUrlInput"
+      />
+      <transition name="background-container-transition">
         <div
-          :style="{
-            height:`${thumbnailHeight}px`,
-            width:`${thumbnailWidth}px`,
-            marginRight: `${marginRight}px`,
-            cursor: firstIndex === 0 ? 'pointer' : `${cursorUrl}, pointer`,
-            backgroundColor:
-              item.backgroundUrl
-                ? 'rgba(255,255,255,0.12) ': 'rgba(255,255,255,0.05)',
-          }"
-          @click="openOrMove"
-          class="button"
+          v-if="item.backgroundUrl"
+          class="background"
         >
-          <div class="btnMask">
-            <Icon
-              class="addUi"
-              type="add"
-            />
+          <transition
+            name="background-transition"
+            mode="in-out"
+          >
+            <div
+              :key="item.path"
+              :style="{
+                backgroundImage: item.backgroundUrl,
+              }"
+              class="background-image"
+            >
+              <div class="background-mask" />
+            </div>
+          </transition>
+          <div class="item-info">
+            <div class="item-name">
+              {{ item.basename }}
+            </div>
+            <div class="item-description" />
+            <div class="item-timing">
+              <span class="timing-played">
+                {{ timeInvalidForm(timecodeFromSeconds(item.lastPlayedTime)) }}
+                / {{ timeInvalidForm(timecodeFromSeconds(item.duration)) }}
+                <span v-if="item.playlistLength > 1">
+                  ·&nbsp;{{
+                    $t('recentPlaylist.playlistSource')
+                  }}&nbsp;&nbsp;{{ item.playedIndex + 1 }} / {{ item.playlistLength }}
+                </span>
+              </span>
+            </div>
+            <div class="item-progress">
+              <div
+                :style="{ width: item.percentage + '%' }"
+                class="progress-played"
+              />
+            </div>
           </div>
         </div>
-        <!-- eslint-disable-next-line vue/require-component-is -->
-        <component
-          :is="playlistLength > 1 ? 'PlaylistItem' : 'VideoItem'"
-          v-for="({ backgroundUrl, id, playlistLength }, index) in landingViewItems"
-          :key="id"
-          :cursor-url="cursorUrl"
-          :can-hover="canHover"
-          :backgroundUrl="backgroundUrl"
-          :index="index"
-          :is-in-range="index + 1 >= firstIndex && index + 1 <= lastIndex"
-          :thumbnail-width="thumbnailWidth"
-          :thumbnail-height="thumbnailHeight"
-          :shifting="shifting"
-          :style="{
-            marginRight: `${marginRight}px`,
-          }"
-          :on-item-mouseover="onItemMouseover"
-          :on-item-click="onItemClick"
-          :on-item-delete="onItemDelete"
-        />
+      </transition>
+      <div class="welcome-container">
+        <transition :name="logoTransition">
+          <div
+            v-if="pageMounted && (!item.backgroundUrl)"
+            class="logo-container"
+          >
+            <Icon type="logo" />
+          </div>
+        </transition>
       </div>
+      <div
+        ref="mask"
+        class="mask"
+      />
+      <div
+        :style="{
+          transform: isFullScreen ? '' : `translateX(${move}px)`,
+          bottom: winWidth > 1355 ? `${40 / 1355 * winWidth}px` : '40px',
+          transition: tranFlag ? 'transform 400ms cubic-bezier(0.42, 0, 0.58, 1)' : '',
+        }"
+        class="controller"
+      >
+        <div
+          :style="{marginLeft: winWidth > 1355 ? `${50 / 1355 * winWidth}px` : '50px'}"
+          class="playlist no-drag"
+        >
+          <div
+            :style="{
+              height:`${thumbnailHeight}px`,
+              width:`${thumbnailWidth}px`,
+              marginRight: `${marginRight}px`,
+              cursor: firstIndex === 0 ? 'pointer' : `${cursorUrl}, pointer`,
+              backgroundColor:
+                item.backgroundUrl
+                  ? 'rgba(255,255,255,0.12) ': 'rgba(255,255,255,0.05)',
+            }"
+            @click="openOrMove"
+            class="button"
+          >
+            <div class="btnMask">
+              <Icon
+                class="addUi"
+                type="add"
+              />
+            </div>
+          </div>
+          <!-- eslint-disable-next-line vue/require-component-is -->
+          <component
+            :is="playlistLength > 1 ? 'PlaylistItem' : 'VideoItem'"
+            v-for="({ backgroundUrl, id, playlistLength }, index) in landingViewItems"
+            :key="id"
+            :cursor-url="cursorUrl"
+            :can-hover="canHover"
+            :backgroundUrl="backgroundUrl"
+            :index="index"
+            :is-in-range="index + 1 >= firstIndex && index + 1 <= lastIndex"
+            :thumbnail-width="thumbnailWidth"
+            :thumbnail-height="thumbnailHeight"
+            :shifting="shifting"
+            :style="{
+              marginRight: `${marginRight}px`,
+            }"
+            :on-item-mouseover="onItemMouseover"
+            :on-item-click="onItemClick"
+            :on-item-delete="onItemDelete"
+          />
+        </div>
+      </div>
+      <NotificationBubble />
     </div>
-    <NotificationBubble />
   </div>
 </template>
 
@@ -162,10 +180,11 @@ export default {
       pageMounted: false,
       logoTransition: '',
       canHover: false,
+      showSidebar: false,
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'defaultDir', 'isFullScreen', 'incognitoMode', 'hideNSFW', 'smartMode', 'nsfwProcessDone']),
+    ...mapGetters(['winWidth', 'winPos', 'defaultDir', 'isFullScreen', 'incognitoMode', 'hideNSFW', 'smartMode', 'nsfwProcessDone']),
     lastIndex: {
       get() {
         return (this.firstIndex + this.showItemNum) - 1;
@@ -296,6 +315,12 @@ export default {
     this.$bus.$on('open-url-show', (val: boolean) => {
       this.openUrlShow = val;
     });
+    this.$bus.$on('side-bar-mouseup', () => {
+      this.showSidebar = !this.showSidebar;
+      // const winWidth = this.showSidebar ? 720 : 796;
+      // this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [winWidth, 405, true]);
+      // this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [winWidth / 405]);
+    });
     window.addEventListener('keyup', this.keyboardHandler);
     this.$electron.ipcRenderer.on('quit', () => {
       this.quit = true;
@@ -314,6 +339,12 @@ export default {
     ...mapActions({
       updateInitialUrl: browsingActions.UPDATE_INITIAL_URL,
     }),
+    handleSidebarIcon(site: string) {
+      this.updateInitialUrl(`https://www.${site}.com`);
+      this.$router.push({
+        name: 'browsing-view',
+      });
+    },
     handleBrowsingOpen(url: string) {
       this.updateInitialUrl(url);
       this.$router.push({
@@ -399,28 +430,47 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
 $themeColor-Light: white;
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-.wrapper {
-  background-image: linear-gradient(-28deg, #414141 0%, #545454 47%, #7B7B7B 100%);
+.landing-view {
   height: 100vh;
   width: 100vw;
-  z-index: -1;
+}
+.side-bar {
+  position: absolute;
+  background-color: #39383F;
+  z-index: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+
+  .icon-box {
+    width: 40px;
+    margin-top: 46px;
+    margin-left: 18px;
+    margin-right: 18px;
+    display: flex;
+    flex-direction: column;
+  }
+}
+.wrapper {
+  border-radius: 4px;
+  will-change: width;
+  transition-property: width;
+  transition-duration: 100ms;
+  transition-timing-function: ease-out;
+  background-color: #444349;
+  position: absolute;
+  right: 0;
+  height: 100%;
+  z-index: 1;
   .mask {
+    border-radius: 4px;
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background-image: url(../assets/noise-bg.png);
-    background-repeat: repeat;
     transition: background-color 120ms linear;
   }
 }
@@ -448,6 +498,7 @@ $themeColor-Light: white;
     }
 
     .btnMask {
+      box-sizing: border-box;
       border-radius: 2px;
       width: 100%;
       height: 100%;

@@ -6,6 +6,7 @@
   >
     <Titlebar
       v-if="$route.name !== 'playing-view'"
+      :is-landing-view="$route.name === 'landing-view'"
       :enable-full-screen-button="['landing-view', 'playing-view', 'browsing-view']
         .includes($route.name)"
     />

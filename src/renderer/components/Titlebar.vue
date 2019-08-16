@@ -80,6 +80,16 @@
         class="title-button no-drag"
         type="titleBarRecover"
       />
+      <Icon
+        id="restore"
+        v-show="isLandingView"
+        :style="{
+          transform: `translateX(${showSidebar ? 15 : 0}px)`,
+        }"
+        @mouseup.native="handleSidebar"
+        class="sidebar no-drag"
+        type="sidebar"
+      />
     </div>
   </div>
 </template>
@@ -97,6 +107,10 @@ export default {
     Icon,
   },
   props: {
+    isLandingView: {
+      type: Boolean,
+      default: false,
+    },
     showAllWidgets: {
       type: Boolean,
       default: true,
@@ -118,6 +132,7 @@ export default {
       keyAlt: false,
       keyOver: false,
       showTitleBar: true,
+      showSidebar: false,
     };
   },
   computed: {
@@ -168,6 +183,10 @@ export default {
     });
   },
   methods: {
+    handleSidebar() {
+      this.$bus.$emit('side-bar-mouseup');
+      this.showSidebar = !this.showSidebar;
+    },
     handleDbClick() {
       if (!this.isMaximized) {
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'maximize');
@@ -255,6 +274,9 @@ export default {
     margin: auto auto auto 10px;
     display: flex;
     flex-wrap: nowrap;
+  }
+  .sidebar {
+    transition: transform 150ms linear;
   }
   .title-button {
     width: 12px;

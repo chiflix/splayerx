@@ -65,6 +65,15 @@ export default {
   height: 36px;
   margin: auto;
 }
+.sidebar {
+  width: 12px;
+  height: 12px;
+}
+.iqiyiSidebar, .bilibiliSidebar, .youtubeSidebar {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 16px;
+}
 .hoverState {
   display: flex;
   width: 12px;
