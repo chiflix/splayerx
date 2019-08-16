@@ -518,8 +518,9 @@ function registerMainWindowEvent(mainWindow) {
       });
     } else {
       browserViews = tabGroups[index][currentBrowserHostname];
-      mainWindow.removeBrowserView(mainWindow.getBrowserView());
+      const id = mainWindow.getBrowserView().id;
       mainWindow.addBrowserView(browserViews[isPip ? 1 : 0]);
+      mainWindow.removeBrowserView(mainWindow.getBrowserViews().find(view => view.id === id));
       if (!isPip) {
         browsingWindow.removeBrowserView(browsingWindow.getBrowserViews()[0]);
         browsingWindow.addBrowserView(browserViews[1]);
