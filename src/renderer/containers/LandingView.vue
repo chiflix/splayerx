@@ -5,9 +5,15 @@
         class="side-bar"
       >
         <div class="icon-box">
-          <Icon type="bilibiliSidebar" @mouseup="handleSidebarIcon('bilibili')" />
-          <Icon type="iqiyiSidebar" @mouseup="handleSidebarIcon('iqiyi')" />
-          <Icon type="youtubeSidebar" @mouseup="handleSidebarIcon('youtube')" />
+          <div @mouseup="handleSidebarIcon('bilibili')" >
+            <Icon type="bilibiliSidebar" />
+          </div>
+          <div @mouseup="handleSidebarIcon('iqiyi')">
+            <Icon type="iqiyiSidebar" />
+          </div>
+          <div @mouseup="handleSidebarIcon('youtube')">
+            <Icon type="youtubeSidebar" />
+          </div>
         </div>
       </div>
     </transition>
@@ -317,6 +323,7 @@ export default {
     });
     this.$bus.$on('side-bar-mouseup', () => {
       this.showSidebar = !this.showSidebar;
+      this.$emit('update-side-bar', this.showSidebar);
       // const winWidth = this.showSidebar ? 720 : 796;
       // this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [winWidth, 405, true]);
       // this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [winWidth / 405]);

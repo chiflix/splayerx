@@ -7,6 +7,7 @@
     <Titlebar
       v-if="$route.name !== 'playing-view'"
       :is-landing-view="$route.name === 'landing-view'"
+      :show-sidebar="showSidebar"
       :enable-full-screen-button="['landing-view', 'playing-view', 'browsing-view']
         .includes($route.name)"
     />
@@ -14,7 +15,7 @@
       :name="transitionMode"
       mode="out-in"
     >
-      <router-view :open-file-args="openFileArgs" />
+      <router-view :open-file-args="openFileArgs" @update-side-bar="showSidebar = $event" />
     </transition>
   </div>
 </template>
@@ -35,12 +36,14 @@ export default {
     return {
       transitionMode: '',
       openFileArgs: null,
+      showSidebar: false,
     };
   },
   watch: {
     $route(to: any, from: any) {
       if (to.name === 'landing-view' && from.name === 'language-setting') this.transitionMode = 'fade';
       else this.transitionMode = '';
+      this.showSidebar = false;
     },
   },
   mounted() {

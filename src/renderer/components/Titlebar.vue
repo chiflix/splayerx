@@ -107,6 +107,10 @@ export default {
     Icon,
   },
   props: {
+    showSidebar: {
+      type: Boolean,
+      default: false,
+    },
     isLandingView: {
       type: Boolean,
       default: false,
@@ -132,7 +136,6 @@ export default {
       keyAlt: false,
       keyOver: false,
       showTitleBar: true,
-      showSidebar: false,
     };
   },
   computed: {
@@ -185,7 +188,6 @@ export default {
   methods: {
     handleSidebar() {
       this.$bus.$emit('side-bar-mouseup');
-      this.showSidebar = !this.showSidebar;
     },
     handleDbClick() {
       if (!this.isMaximized) {
