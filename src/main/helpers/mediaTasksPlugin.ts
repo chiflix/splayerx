@@ -51,7 +51,8 @@ export default function registerMediaTasks() {
             if (err === '0' && existsSync(imagePath)) {
               reply(event, 'snapshot-reply', null, imagePath);
             } else {
-              reply(event, 'snapshot-reply', err);
+              if (typeof err !== 'string') err = `${err}, type: ${typeof err}`;
+              reply(event, 'snapshot-reply', `snapshot-reply: ${err}`);
             }
           }, 5);
         },
@@ -68,8 +69,12 @@ export default function registerMediaTasks() {
         videoPath, subtitlePath,
         streamIndex,
         (err) => {
-          if (err === '0' && existsSync(subtitlePath)) reply(event, 'subtitle-reply', null, subtitlePath);
-          else reply(event, 'subtitle-reply', err);
+          if (err === '0' && existsSync(subtitlePath)) {
+            reply(event, 'subtitle-reply', null, subtitlePath);
+          } else {
+            if (typeof err !== 'string') err = `${err}, type: ${typeof err}`;
+            reply(event, 'subtitle-reply', `subtitle-reply: ${err}`);
+          }
         },
       );
     } else {
@@ -88,8 +93,12 @@ export default function registerMediaTasks() {
         thumbnailWidth.toString(),
         rowThumbnailCount.toString(), columnThumbnailCount.toString(),
         (err) => {
-          if (err === '0' && existsSync(imagePath)) reply(event, 'thumbnail-reply', null, imagePath);
-          else reply(event, 'thumbnail-reply', err);
+          if (err === '0' && existsSync(imagePath)) {
+            reply(event, 'thumbnail-reply', null, imagePath);
+          } else {
+            if (typeof err !== 'string') err = `${err}, type: ${typeof err}`;
+            reply(event, 'thumbnail-reply', `thumbnail-reply: ${err}`);
+          }
         },
       );
     } else {
