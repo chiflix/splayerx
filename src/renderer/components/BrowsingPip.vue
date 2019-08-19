@@ -14,6 +14,9 @@ export default {
     };
   },
   mounted() {
+    electron.remote.getCurrentWindow().addListener('enter-html-full-screen', () => {
+      electron.ipcRenderer.send('mouseup', 'full');
+    });
     window.addEventListener('focus', () => {
       electron.ipcRenderer.send('update-focused-window', false);
       electron.ipcRenderer.send('update-enabled', 'window.pip', true);
@@ -47,7 +50,7 @@ export default {
 <style scoped>
 .pip {
   width: 100%;
-  height: 10px;
+  height: 36px;
   -webkit-app-region: drag;
   position: absolute;
   top: 0;

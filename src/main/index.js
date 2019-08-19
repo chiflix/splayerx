@@ -461,30 +461,31 @@ function registerMainWindowEvent(mainWindow) {
   });
   ipcMain.on('pip-window-close', () => {
     const views = browsingWindow.getBrowserViews();
+    const index = tabGroups.findIndex(tab => Object.keys(tab)[0] === currentPipHostname);
+    const url = tabGroups[index][currentPipHostname]
+      .find(view => view.id !== views[0].id).webContents.getURL();
+    views[0].webContents.loadURL(url);
     views.forEach((view) => {
       browsingWindow.removeBrowserView(view);
     });
-    views[0].webContents.loadURL(initialBrowserUrl).then(() => {
-      views[0].webContents.clearHistory();
-    });
-    const index = tabGroups.findIndex(tab => Object.keys(tab)[0] === currentPipHostname);
     tabGroups[index][currentPipHostname].reverse();
   });
   ipcMain.on('remove-browser', () => {
     const mainView = mainWindow.getBrowserView();
-    mainWindow.removeBrowserView(mainView);
-    if (browsingWindow) {
-      const views = browsingWindow.getBrowserViews();
-      views.forEach((view) => {
-        browsingWindow.removeBrowserView(view);
+    if (mainView) {
+      lastBrowserUrl = mainView.webContents.getURL();
+      mainWindow.removeBrowserView(mainView);
+      if (browsingWindow) {
+        const views = browsingWindow.getBrowserViews();
+        views.forEach((view) => {
+          browsingWindow.removeBrowserView(view);
+        });
+      }
+      browserViews.forEach((view) => {
+        view.destroy();
       });
+      if (browsingWindow) browsingWindow.hide();
     }
-    browserViews.forEach((view) => {
-      view.webContents.loadURL('about:blank').then(() => {
-        view.webContents.clearHistory();
-      });
-    });
-    if (browsingWindow) browsingWindow.hide();
   });
   ipcMain.on('update-pip-state', () => {
     mainWindow.send('update-pip-state');
@@ -495,7 +496,6 @@ function registerMainWindowEvent(mainWindow) {
     if (!isPip) currentPipHostname = urlParse(url).hostname;
     currentBrowserHostname = urlParse(url).hostname;
     const index = tabGroups.findIndex(tab => Object.keys(tab)[0] === currentBrowserHostname);
-    lastBrowserUrl = initialBrowserUrl;
     initialBrowserUrl = url;
     if (currentBrowserHostname !== 'blank' && index === -1) {
       mainWindow.removeBrowserView(mainWindow.getBrowserView());
@@ -540,30 +540,41 @@ function registerMainWindowEvent(mainWindow) {
     mainWindow.send('current-browser-id', [mainId, browserId]);
     mainWindow.send('update-browser-view', !(currentBrowserHostname !== 'blank' && index === -1));
   });
+  ipcMain.on('keep-browsers-cache', (evt, url) => {
+    if (browsingWindow) {
+      browsingWindow.getBrowserViews()[0].webContents.loadURL(url);
+    }
+  });
   ipcMain.on('create-browser-view', (evt, args) => {
     currentBrowserHostname = currentPipHostname = urlParse(args.url).hostname;
-    if (currentBrowserHostname !== 'blank' && !Object.keys(tabGroups).includes(currentBrowserHostname)) {
-      initialBrowserUrl = args.url;
-      browserViews = [
-        new BrowserView({
-          webPreferences: {
-            preload: `${require('path').resolve(__static, 'pip/preload.js')}`,
-          },
-        }),
-        new BrowserView({
-          webPreferences: {
-            preload: `${require('path').resolve(__static, 'pip/preload.js')}`,
-          },
-        }),
-      ];
-      mainWindow.send('current-browser-id', browserViews.map(v => v.id));
+    const index = tabGroups.findIndex(tab => Object.keys(tab)[0] === currentBrowserHostname);
+    initialBrowserUrl = args.url;
+    browserViews = [
+      new BrowserView({
+        webPreferences: {
+          preload: `${require('path').resolve(__static, 'pip/preload.js')}`,
+        },
+      }),
+      new BrowserView({
+        webPreferences: {
+          preload: `${require('path').resolve(__static, 'pip/preload.js')}`,
+        },
+      }),
+    ];
+    if (index === -1) {
       tabGroups.push({ [`${currentBrowserHostname}`]: browserViews });
-      mainWindow.addBrowserView(browserViews[0]);
-      browsingWindow.addBrowserView(browserViews[1]);
       browserViews.forEach((view) => {
         view.webContents.loadURL(args.url);
       });
+    } else if (tabGroups[index][currentBrowserHostname][0].isDestroyed()) {
+      tabGroups[index][currentBrowserHostname].splice(0, 2, ...browserViews);
+      browserViews.forEach((view) => {
+        view.webContents.loadURL(lastBrowserUrl);
+      });
     }
+    mainWindow.send('current-browser-id', browserViews.map(v => v.id));
+    mainWindow.addBrowserView(browserViews[0]);
+    browsingWindow.addBrowserView(browserViews[1]);
   });
   ipcMain.on('update-danmu-state', (evt, val) => {
     pipControlView.webContents.executeJavaScript(`document.querySelector(".danmu").src = ${val} ? "assets/danmu-default-icon.svg" : "assets/noDanmu-default-icon.svg"`);
@@ -666,11 +677,15 @@ function registerMainWindowEvent(mainWindow) {
       browsingWindow.addBrowserView(mainView);
       browsingWindow.addBrowserView(pipControlView);
       browsingWindow.addBrowserView(titlebarView);
-      browViews[0].webContents.loadURL(lastBrowserUrl);
+      const pipIndex = tabGroups.findIndex(tab => Object.keys(tab)[0] === currentPipHostname);
+      const url = tabGroups[pipIndex][currentPipHostname]
+        .find(view => view.id !== browViews[0].id).webContents.getURL();
+      browViews[0].webContents.loadURL(url);
     } else {
       mainWindow.addBrowserView(browViews[0]);
       browsingWindow.addBrowserView(mainView);
-      browViews[0].webContents.loadURL(initialBrowserUrl);
+      browViews[0].webContents
+        .loadURL(mainView.webContents.history[mainView.webContents.history.length - 2]);
       browsingWindow.addBrowserView(pipControlView);
       browsingWindow.addBrowserView(titlebarView);
     }
@@ -692,6 +707,9 @@ function registerMainWindowEvent(mainWindow) {
     createPipControlView();
     createTitlebarView();
     titlebarView.webContents.openDevTools({ mode: 'detach' });
+    if (browsingWindow.getBrowserViews()[0].webContents.canGoBack()) {
+      browsingWindow.getBrowserViews()[0].webContents.goBack();
+    }
     if (!browsingWindow) {
       createBrowsingWindow();
       const index = tabGroups.findIndex(tab => Object.keys(tab)[0] === currentBrowserHostname);

@@ -79,7 +79,6 @@ export default {
       acceleratorAvailable: true,
       oldDisplayId: -1,
       backToLandingView: false,
-      browsingWindowClose: false,
       browserIds: [1, 2],
     };
   },
@@ -316,13 +315,11 @@ export default {
       this.headerToShow = headerToShow;
     });
     this.$electron.ipcRenderer.on('update-pip-state', () => {
-      this.browsingWindowClose = true;
       this.updateIsPip(false);
     });
     this.addListenerToBrowser();
   },
   beforeDestroy() {
-    this.$electron.ipcRenderer.send('remove-browser');
     asyncStorage.set('browsing', {
       pipSize: this.pipSize,
       pipPos: this.pipPos,
@@ -339,6 +336,7 @@ export default {
       this.updateIsPip(false);
     }).finally(() => {
       if (this.backToLandingView) {
+        this.$electron.ipcRenderer.send('remove-browser');
         windowRectService.uploadWindowBy(false, 'landing-view');
       }
     });
@@ -368,6 +366,9 @@ export default {
         this.newWindow(url, disposition);
       });
       this.$electron.remote.getCurrentWindow().getBrowserViews()[0].webContents.addListener('did-start-navigation', (e: Event, url: string) => {
+        if (url !== 'about:blank' && !this.isPip) {
+          this.$electron.ipcRenderer.send('keep-browsers-cache', url);
+        }
         this.didStartNavigation(url);
       });
       this.$electron.remote.getCurrentWindow().getBrowserViews()[0].webContents.addListener('did-stop-loading', this.didStopLoading);
@@ -615,12 +616,9 @@ export default {
       this.$electron.ipcRenderer.send('init-danmu-state', { opacity, barrageOpen: opacity === 1 ? this.barrageOpen : false });
     },
     exitPipOperation() {
-      if (!this.browsingWindowClose) {
-        this.$electron.ipcRenderer.send('exit-pip');
-        this.$electron.ipcRenderer.send('store-pip-pos');
-        this.handleWindowChangeExitPip();
-      }
-      this.browsingWindowClose = false;
+      this.$electron.ipcRenderer.send('exit-pip');
+      this.$electron.ipcRenderer.send('store-pip-pos');
+      this.handleWindowChangeExitPip();
       if (this.pipType === 'youtube') {
         this.youtubeRecover();
       } else if (this.pipType === 'bilibili') {
