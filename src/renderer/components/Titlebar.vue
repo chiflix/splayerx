@@ -279,6 +279,7 @@ export default {
     flex-wrap: nowrap;
   }
   .sidebar {
+    margin-left: 4px;
     transition: transform 100ms linear;
   }
   .title-button {

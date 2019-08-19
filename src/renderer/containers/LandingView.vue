@@ -1,22 +1,20 @@
 <template>
   <div class="landing-view">
-    <transition name="sidebar">
-      <div
-        class="side-bar"
-      >
-        <div class="icon-box">
-          <div @mouseup="handleSidebarIcon('bilibili')" >
-            <Icon type="bilibiliSidebar" />
-          </div>
-          <div @mouseup="handleSidebarIcon('iqiyi')">
-            <Icon type="iqiyiSidebar" />
-          </div>
-          <div @mouseup="handleSidebarIcon('youtube')">
-            <Icon type="youtubeSidebar" />
-          </div>
+    <div
+      class="side-bar"
+    >
+      <div class="icon-box">
+        <div @mouseup="handleSidebarIcon('bilibili')" >
+          <Icon type="bilibiliSidebar" />
+        </div>
+        <div @mouseup="handleSidebarIcon('iqiyi')">
+          <Icon type="iqiyiSidebar" />
+        </div>
+        <div @mouseup="handleSidebarIcon('youtube')">
+          <Icon type="youtubeSidebar" />
         </div>
       </div>
-    </transition>
+    </div>
     <div
       :style="{
         width: showSidebar ? 'calc(100% - 76px)' : '100%',
@@ -193,6 +191,7 @@ export default {
     ...mapGetters(['winWidth', 'winPos', 'defaultDir', 'isFullScreen', 'incognitoMode', 'hideNSFW', 'smartMode', 'nsfwProcessDone']),
     lastIndex: {
       get() {
+        if (this.showSidebar) return (this.firstIndex + this.showItemNum) - 2;
         return (this.firstIndex + this.showItemNum) - 1;
       },
       set(val: number) {
@@ -208,7 +207,7 @@ export default {
       return `url("${filePathToUrl(join(__static, 'cursor/cursorLeft.svg') as string)}")`;
     },
     move() {
-      return -(this.firstIndex * (this.thumbnailWidth + this.marginRight));
+      return -(this.firstIndex * (this.thumbnailWidth + this.marginRight) + (this.showSidebar && this.firstIndex !== 0 ? 76 : 0));
     },
     marginRight() {
       return this.winWidth > 1355 ? (this.winWidth / 1355) * 15 : 15;
@@ -322,11 +321,12 @@ export default {
       this.openUrlShow = val;
     });
     this.$bus.$on('side-bar-mouseup', () => {
+      this.tranFlag = false;
+      setTimeout(() => {
+        this.tranFlag = true;
+      });
       this.showSidebar = !this.showSidebar;
       this.$emit('update-side-bar', this.showSidebar);
-      // const winWidth = this.showSidebar ? 720 : 796;
-      // this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [winWidth, 405, true]);
-      // this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [winWidth / 405]);
     });
     window.addEventListener('keyup', this.keyboardHandler);
     this.$electron.ipcRenderer.on('quit', () => {
@@ -461,6 +461,7 @@ $themeColor-Light: white;
   }
 }
 .wrapper {
+  overflow: hidden;
   border-radius: 4px;
   will-change: width;
   transition-property: width;
