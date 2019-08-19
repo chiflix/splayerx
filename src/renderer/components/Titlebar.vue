@@ -80,17 +80,16 @@
         class="title-button no-drag"
         type="titleBarRecover"
       />
-      <Icon
-        id="restore"
-        v-show="isLandingView"
-        :style="{
-          transform: `translateX(${showSidebar ? 15 : 0}px)`,
-        }"
-        @mouseup.native="handleSidebar"
-        class="sidebar no-drag"
-        type="sidebar"
-      />
     </div>
+    <Icon
+      v-if="isDarwin && isLandingView"
+      :style="{
+        transform: `translateX(${showSidebar ? 15 : 0}px)`,
+      }"
+      @mouseup.native="handleSidebar"
+      class="sidebar no-drag"
+      type="sidebar"
+    />
   </div>
 </template>
 
@@ -271,14 +270,16 @@ export default {
   height: 36px;
   width: 90px;
   display: flex;
+  justify-content: flex-start;
+  align-items: center;
   position: absolute;
   .mac-icons {
-    margin: auto auto auto 10px;
     display: flex;
+    margin-left: 10px;
     flex-wrap: nowrap;
   }
   .sidebar {
-    transition: transform 150ms linear;
+    transition: transform 100ms linear;
   }
   .title-button {
     width: 12px;
