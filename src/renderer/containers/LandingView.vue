@@ -8,13 +8,13 @@
     >
       <div class="icon-box">
         <div @mouseup="handleSidebarIcon('bilibili')" >
-          <Icon type="bilibiliSidebar" />
+          <BilibiliSidebarIcon />
         </div>
         <div @mouseup="handleSidebarIcon('iqiyi')">
-          <Icon type="iqiyiSidebar" />
+          <iQiyiSidebarIcon />
         </div>
         <div @mouseup="handleSidebarIcon('youtube')">
-          <Icon type="youtubeSidebar" />
+          <YoutubeSidebarIcon />
         </div>
       </div>
     </div>
@@ -162,6 +162,9 @@ import { filePathToUrl } from '@/helpers/path';
 import { playInfoStorageService } from '@/services/storage/PlayInfoStorageService';
 import { recentPlayService } from '@/services/media/RecentPlayService';
 import Icon from '@/components/BaseIconContainer.vue';
+import BilibiliSidebarIcon from '@/components/LandingView/BilibiliSidebarIcon.vue';
+import iQiyiSidebarIcon from '@/components/LandingView/iQiyiSidebarIcon.vue';
+import YoutubeSidebarIcon from '@/components/LandingView/YoutubeSidebarIcon.vue';
 import OpenUrl from '@/components/LandingView/OpenUrl.vue';
 import NotificationBubble from '@/components/NotificationBubble.vue';
 import PlaylistItem from '@/components/LandingView/PlaylistItem.vue';
@@ -178,6 +181,9 @@ export default {
   name: 'LandingView',
   components: {
     Icon,
+    BilibiliSidebarIcon,
+    iQiyiSidebarIcon,
+    YoutubeSidebarIcon,
     NotificationBubble,
     'open-url': OpenUrl,
   },
@@ -474,6 +480,11 @@ $themeColor-Light: white;
     margin-right: 18px;
     display: flex;
     flex-direction: column;
+    div {
+      width: 40px;
+      height: 40px;
+      margin-bottom: 16px;
+    }
   }
 }
 .wrapper {

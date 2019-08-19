@@ -1,12 +1,12 @@
-
-<svg width="42px" height="42px" viewBox="0 0 42 42" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<template>
+  <svg width="42px" height="42px" viewBox="0 0 42 42" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <defs>
         <circle id="path-1" cx="20" cy="20" r="20"></circle>
     </defs>
     <g id="页面-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
         <g id="2" transform="translate(-17.000000, -101.000000)">
             <g id="sideBarItems" transform="translate(18.000000, 46.000000)">
-                <g id="sideBarItem--iqiyi" transform="translate(0.000000, 56.000000)">
+                <g id="sideBarItem--iqiyi" class="abc" transform="translate(0.000000, 56.000000)">
                     <mask id="mask-2" fill="white">
                         <use xlink:href="#path-1"></use>
                     </mask>
@@ -21,3 +21,20 @@
         </g>
     </g>
 </svg>
+</template>
+<script lang="ts">
+export default {
+  
+};
+</script>
+<style lang="scss" scoped>
+.abc {
+  circle {
+    opacity: 0.4;
+    transition: opacity 50ms ease-in;
+  }
+  &:hover circle {
+    opacity: 1;
+  }
+}
+</style>
