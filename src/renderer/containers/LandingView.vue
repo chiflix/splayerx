@@ -1,6 +1,9 @@
 <template>
   <div class="landing-view">
     <div
+      :style="{
+        width: showSidebar ? '76px' : '0',
+      }"
       class="side-bar"
     >
       <div class="icon-box">
@@ -86,9 +89,12 @@
       />
       <div
         :style="{
-          transform: isFullScreen ? '' : `translateX(${move}px)`,
+          left: playlistLeft,
+          right: playlistRight,
           bottom: winWidth > 1355 ? `${40 / 1355 * winWidth}px` : '40px',
-          transition: tranFlag ? 'transform 400ms cubic-bezier(0.42, 0, 0.58, 1)' : '',
+          transition: tranFlag ?
+            'left 400ms cubic-bezier(0.42, 0, 0.58, 1)'
+            : 'right 400ms cubic-bezier(0.42, 0, 0.58, 1)',
         }"
         class="controller"
       >
@@ -125,7 +131,11 @@
             :can-hover="canHover"
             :backgroundUrl="backgroundUrl"
             :index="index"
-            :is-in-range="index + 1 >= firstIndex && index + 1 <= lastIndex"
+            :is-in-range="
+              firstIndex === 0
+              ? index + 1 <= lastIndex - (showSidebar ? 1 : 0)
+              : index + 1 >= firstIndex + (showSidebar ? 1 : 0)
+            "
             :thumbnail-width="thumbnailWidth"
             :thumbnail-height="thumbnailHeight"
             :shifting="shifting"
@@ -185,13 +195,14 @@ export default {
       logoTransition: '',
       canHover: false,
       showSidebar: false,
+      playlistLeft: '0',
+      playlistRight: '',
     };
   },
   computed: {
     ...mapGetters(['winWidth', 'winPos', 'defaultDir', 'isFullScreen', 'incognitoMode', 'hideNSFW', 'smartMode', 'nsfwProcessDone']),
     lastIndex: {
       get() {
-        if (this.showSidebar) return (this.firstIndex + this.showItemNum) - 2;
         return (this.firstIndex + this.showItemNum) - 1;
       },
       set(val: number) {
@@ -205,9 +216,6 @@ export default {
     cursorUrl() {
       if (this.firstIndex === 0) return `url("${filePathToUrl(join(__static, 'cursor/cursorRight.svg') as string)}")`;
       return `url("${filePathToUrl(join(__static, 'cursor/cursorLeft.svg') as string)}")`;
-    },
-    move() {
-      return -(this.firstIndex * (this.thumbnailWidth + this.marginRight) + (this.showSidebar && this.firstIndex !== 0 ? 76 : 0));
     },
     marginRight() {
       return this.winWidth > 1355 ? (this.winWidth / 1355) * 15 : 15;
@@ -240,8 +248,23 @@ export default {
     },
   },
   watch: {
-    firstIndex() {
+    firstIndex(val: number, oldVal: number) {
       this.shifting = true;
+      if (val === 0) {
+        this.playlistRight = `-${this.move(oldVal) - 35}px`;
+        setTimeout(() => {
+          this.tranFlag = true;
+          this.playlistLeft = '0';
+          this.playlistRight = '';
+        }, 400);
+      } else {
+        this.playlistLeft = `-${this.move((this.landingViewItems.length - ((oldVal + this.showItemNum) - 1)))}px`;
+        setTimeout(() => {
+          this.tranFlag = false;
+          this.playlistRight = '35px';
+          this.playlistLeft = '';
+        }, 400);
+      }
     },
     lastIndex() {
       this.shifting = true;
@@ -255,7 +278,6 @@ export default {
     },
     showItemNum() {
       if (this.firstIndex !== 0) {
-        this.tranFlag = false;
         this.lastIndex = this.landingViewItems.length;
       }
     },
@@ -321,10 +343,6 @@ export default {
       this.openUrlShow = val;
     });
     this.$bus.$on('side-bar-mouseup', () => {
-      this.tranFlag = false;
-      setTimeout(() => {
-        this.tranFlag = true;
-      });
       this.showSidebar = !this.showSidebar;
       this.$emit('update-side-bar', this.showSidebar);
     });
@@ -346,6 +364,9 @@ export default {
     ...mapActions({
       updateInitialUrl: browsingActions.UPDATE_INITIAL_URL,
     }),
+    move(steps: number) {
+      return steps * (this.thumbnailWidth + this.marginRight);
+    },
     handleSidebarIcon(site: string) {
       this.updateInitialUrl(`https://www.${site}.com`);
       this.$router.push({
@@ -375,11 +396,9 @@ export default {
     keyboardHandler(e: KeyboardEvent) {
       if (e.key === 'ArrowRight') {
         this.shifting = true;
-        this.tranFlag = true;
         this.lastIndex = this.landingViewItems.length;
       } else if (e.key === 'ArrowLeft') {
         this.shifting = true;
-        this.tranFlag = true;
         this.firstIndex = 0;
       }
     },
@@ -395,7 +414,6 @@ export default {
     },
     openOrMove() {
       if (this.firstIndex === 1) {
-        this.tranFlag = true;
         this.firstIndex = 0;
       } else if (this.winWidth > 1355) {
         this.open();
@@ -410,13 +428,11 @@ export default {
       this.item = this.landingViewItems[index];
     },
     onItemClick(index: number) {
-      if (index === this.lastIndex && !this.isFullScreen) {
+      if (index === (this.lastIndex - (this.showSidebar ? 1 : 0)) && !this.isFullScreen) {
         this.shifting = true;
-        this.tranFlag = true;
         this.lastIndex = this.landingViewItems.length;
-      } else if (index + 1 < this.firstIndex && !this.isFullScreen) {
+      } else if (index + 1 < (this.firstIndex + (this.showSidebar ? 1 : 0)) && !this.isFullScreen) {
         this.shifting = true;
-        this.tranFlag = true;
         this.firstIndex = 0;
       } else if (!this.filePathNeedToDelete) {
         this.openPlayList(this.landingViewItems[index].id);
@@ -427,7 +443,6 @@ export default {
       const [deletedItem] = this.landingViewItems.splice(index, 1);
       if (this.firstIndex !== 0) {
         this.shifting = true;
-        this.tranFlag = true;
         this.lastIndex = this.landingViewItems.length;
       }
       playInfoStorageService.deleteRecentPlayedBy(deletedItem.id);
@@ -449,7 +464,8 @@ $themeColor-Light: white;
   z-index: 0;
   left: 0;
   height: 100%;
-  width: 100%;
+  transition: width 100ms ease-out;
+  will-change: width;
 
   .icon-box {
     width: 40px;
@@ -462,7 +478,6 @@ $themeColor-Light: white;
 }
 .wrapper {
   overflow: hidden;
-  border-radius: 4px;
   will-change: width;
   transition-property: width;
   transition-duration: 100ms;
@@ -473,7 +488,6 @@ $themeColor-Light: white;
   height: 100%;
   z-index: 1;
   .mask {
-    border-radius: 4px;
     position: absolute;
     top: 0;
     left: 0;
@@ -485,7 +499,6 @@ $themeColor-Light: white;
 .controller {
   position: absolute;
   z-index: 6;
-  left: 0;
   width: auto;
 
   .playlist {
