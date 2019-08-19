@@ -96,7 +96,7 @@ export default {
       this.faviconIndex = -1;
     },
     handleFavOpen(item: { name: string, type: string, url: string }) {
-      this.handleBookmarkOpen(this.recordUrl[item.type] ? this.recordUrl[item.type] : item.url);
+      this.handleBookmarkOpen(item.url);
     },
     handleFavAnimEnd(e: AnimationEvent) {
       const target = e.target as HTMLElement;

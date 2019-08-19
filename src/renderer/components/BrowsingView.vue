@@ -484,8 +484,7 @@ export default {
       this.$electron.remote.getCurrentWindow().getBrowserViews()[0].webContents.loadURL(urlParseLax(url).protocol ? url : `https:${url}`);
     },
     pipAdapter() {
-      const parseUrl = urlParseLax(this.$electron.remote.getCurrentWindow()
-        .getBrowserViews()[0].webContents.getURL());
+      const parseUrl = urlParseLax(this.currentPipBrowserView().webContents.getURL());
       if (parseUrl.host.includes('youtube')) {
         this.pipType = 'youtube';
         this.youtubeAdapter();

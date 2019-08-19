@@ -67,37 +67,6 @@
       <img class="titlebarRecover" src="assets/titleBarRecover-default-icon.svg">
     </div>
   </div>
-  <script>
-    let mouseenter = false;
-    document.querySelector('.content').addEventListener('mouseenter', (e) => {
-      mouseenter = true;
-      const fullScreen = document.querySelector('.titlebarRecover').style.display === "block" ;
-      document.querySelector('.titlebarClose').src = 'assets/titleBarClose-hover-icon.svg';
-      if (!fullScreen) {
-        if (e.altKey) {
-          document.querySelector('.titlebarFull').style.display = "none";
-          document.querySelector('.titlebarMax').style.display = "block";
-        }
-        document.querySelector('.titlebarMin').src = 'assets/titleBarExitFull-hover-icon.svg';
-        document.querySelector('.titlebarFull').src = 'assets/titleBarFull-hover-icon.svg';
-      } else {
-        document.querySelector('.titlebarRecover').src = 'assets/titlebarRecover-hover-icon.svg';
-      }
-    });
-    document.querySelector('.content').addEventListener('mouseleave', () => {
-      mouseenter = false;
-      const fullScreen = document.querySelector('.titlebarRecover').style.display === "block" ;
-      document.querySelector('.titlebarClose').src = 'assets/titleBarClose-default-icon.svg';
-      document.querySelector('.titlebarMin').src = 'assets/titleBarExitFull-default-icon.svg';
-      if (!fullScreen) {
-        document.querySelector('.titlebarFull').src = 'assets/titleBarFull-default-icon.svg';
-        document.querySelector(".titlebarFull").style.display = "block";
-        document.querySelector('.titlebarMax').style.display = "none";
-      } else {
-        document.querySelector('.titlebarRecover').src = 'assets/titlebarRecover-default-icon.svg';
-      }
-    });
-  </script>
 </body>
 
 </html>

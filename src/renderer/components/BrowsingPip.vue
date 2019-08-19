@@ -14,14 +14,6 @@ export default {
     };
   },
   mounted() {
-    window.addEventListener('keydown', (e) => {
-      if (e.keyCode === 18) {
-        electron.ipcRenderer.send('maximizable', true);
-      }
-    });
-    window.addEventListener('keyup', () => {
-      electron.ipcRenderer.send('maximizable', false);
-    });
     window.addEventListener('focus', () => {
       electron.ipcRenderer.send('update-focused-window', false);
       electron.ipcRenderer.send('update-enabled', 'window.pip', true);
