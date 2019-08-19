@@ -73,7 +73,6 @@ let currentBrowserHostname = '';
 let currentPipHostname = '';
 let tray = null;
 let pipTimer = 0;
-let initialBrowserUrl = '';
 let lastBrowserUrl = '';
 let needToRestore = false;
 let forceQuit = false; // 大退app 关闭所有windows
@@ -496,7 +495,6 @@ function registerMainWindowEvent(mainWindow) {
     if (!isPip) currentPipHostname = urlParse(url).hostname;
     currentBrowserHostname = urlParse(url).hostname;
     const index = tabGroups.findIndex(tab => Object.keys(tab)[0] === currentBrowserHostname);
-    initialBrowserUrl = url;
     if (currentBrowserHostname !== 'blank' && index === -1) {
       mainWindow.removeBrowserView(mainWindow.getBrowserView());
       browserViews = [
@@ -548,7 +546,6 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('create-browser-view', (evt, args) => {
     currentBrowserHostname = currentPipHostname = urlParse(args.url).hostname;
     const index = tabGroups.findIndex(tab => Object.keys(tab)[0] === currentBrowserHostname);
-    initialBrowserUrl = args.url;
     browserViews = [
       new BrowserView({
         webPreferences: {
@@ -714,7 +711,6 @@ function registerMainWindowEvent(mainWindow) {
       createBrowsingWindow();
       const index = tabGroups.findIndex(tab => Object.keys(tab)[0] === currentBrowserHostname);
       browserViews = tabGroups[index][currentBrowserHostname];
-      browsingWindow.openDevTools();
       mainWindow.removeBrowserView(browserViews[0]);
       mainWindow.addBrowserView(browserViews[1]);
       browsingWindow.addBrowserView(browserViews[0]);
@@ -722,8 +718,10 @@ function registerMainWindowEvent(mainWindow) {
       browsingWindow.addBrowserView(titlebarView);
       browsingWindow.show();
     } else {
+      browsingWindow.getBrowserViews().forEach((view) => {
+        browsingWindow.removeBrowserView(view);
+      });
       mainWindow.removeBrowserView(browserViews[0]);
-      browsingWindow.removeBrowserView(browserViews[1]);
       mainWindow.addBrowserView(browserViews[1]);
       browsingWindow.addBrowserView(browserViews[0]);
       browsingWindow.addBrowserView(pipControlView);
@@ -747,24 +745,29 @@ function registerMainWindowEvent(mainWindow) {
     if (titlebarView) titlebarView.setBounds(args);
   });
   ipcMain.on('exit-pip', () => {
-    mainWindow.removeBrowserView(browserViews[1]);
-    if (browsingWindow) {
-      browsingWindow.removeBrowserView(browserViews[0]);
-      browsingWindow.removeBrowserView(pipControlView);
-      browsingWindow.removeBrowserView(titlebarView);
+    const isDifferentBrowser = currentPipHostname !== '' && currentBrowserHostname !== currentPipHostname;
+    const index = tabGroups.findIndex(tab => Object.keys(tab)[0] === currentPipHostname);
+    const mainView = mainWindow.getBrowserView();
+    mainWindow.removeBrowserView(mainView);
+    const browViews = browsingWindow.getBrowserViews();
+    browViews.forEach((view) => {
+      browsingWindow.removeBrowserView(view);
+    });
+    if (isDifferentBrowser) {
+      mainWindow.addBrowserView(browViews[0]);
+      browsingWindow.addBrowserView(tabGroups[index][currentPipHostname]
+        .find(view => view.id !== browViews[0].id));
+    } else {
+      mainView.webContents
+        .loadURL(mainView.webContents.history[mainView.webContents.history.length - 2]);
+      mainWindow.addBrowserView(browViews[0]);
+      browsingWindow.addBrowserView(mainView);
     }
-    if (browserViews[1].webContents.canGoBack()) {
-      browserViews[1].webContents.goBack();
-    }
-    mainWindow.addBrowserView(browserViews[0]);
-    if (browsingWindow) browsingWindow.addBrowserView(browserViews[1]);
-    if (browsingWindow) {
-      if (browsingWindow.isFullScreen()) {
-        hideBrowsingWindow = true;
-        browsingWindow.setFullScreen(false);
-      } else {
-        browsingWindow.hide();
-      }
+    if (browsingWindow.isFullScreen()) {
+      hideBrowsingWindow = true;
+      browsingWindow.setFullScreen(false);
+    } else {
+      browsingWindow.hide();
     }
   });
   ipcMain.on('update-header-to-show', (e, headerToShow) => {
