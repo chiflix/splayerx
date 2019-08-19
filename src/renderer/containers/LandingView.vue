@@ -251,14 +251,14 @@ export default {
     firstIndex(val: number, oldVal: number) {
       this.shifting = true;
       if (val === 0) {
-        this.playlistRight = `-${this.move(oldVal) - 35}px`;
+        this.playlistRight = `-${(this.move(oldVal) - 35) + (this.showSidebar ? 76 : 0)}px`;
         setTimeout(() => {
           this.tranFlag = true;
           this.playlistLeft = '0';
           this.playlistRight = '';
         }, 400);
       } else {
-        this.playlistLeft = `-${this.move((this.landingViewItems.length - ((oldVal + this.showItemNum) - 1)))}px`;
+        this.playlistLeft = `-${this.move((this.landingViewItems.length - ((oldVal + this.showItemNum) - 1))) + (this.showSidebar ? 76 : 0)}px`;
         setTimeout(() => {
           this.tranFlag = false;
           this.playlistRight = '35px';
