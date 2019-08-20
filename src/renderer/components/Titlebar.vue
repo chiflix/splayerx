@@ -7,19 +7,23 @@
     @dblclick="handleDbClick"
   >
     <div
-      v-if="!isDarwin"
-      v-fade-in="showTitleBar"
-      class="win-icons"
+      :style="{
+        width: showSidebar ? '89px' : '13px',
+      }"
+      @dblclick.stop=""
+      class="sidebar"
     >
       <SidebarIcon
         v-if="!isDarwin && isLandingView"
         @mouseup.native="handleSidebar"
-        :style="{
-          marginLeft: showSidebar ? '19px' : '4px',
-        }"
-        class="sidebar no-drag"
-        type="sidebar"
+        class="no-drag"
       />
+    </div>
+    <div
+      v-if="!isDarwin"
+      v-fade-in="showTitleBar"
+      class="win-icons"
+    >
       <Icon
         @mouseup.native="handleMinimize"
         class="title-button no-drag"
@@ -259,7 +263,15 @@ export default {
   height: 36px;
   z-index: 6;
   display: flex;
+  justify-content: space-between;
   position: absolute;
+  .sidebar {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 6px;
+    margin-left: 12px;
+    transition: width 100ms linear;
+  }
   .win-icons {
     display: flex;
     flex-wrap: nowrap;
