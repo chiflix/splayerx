@@ -81,7 +81,7 @@
         type="titleBarRecover"
       />
     </div>
-    <Icon
+    <SidebarIcon
       v-if="isDarwin && isLandingView"
       :style="{
         transform: `translateX(${showSidebar ? 15 : 0}px)`,
@@ -97,6 +97,7 @@
 import { mapGetters } from 'vuex';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import Icon from '@/components/BaseIconContainer.vue';
+import SidebarIcon from '@/components/LandingView/SidebarIcon.vue';
 
 export default {
   name: 'Titlebar',
@@ -104,6 +105,7 @@ export default {
   type: INPUT_COMPONENT_TYPE,
   components: {
     Icon,
+    SidebarIcon,
   },
   props: {
     showSidebar: {

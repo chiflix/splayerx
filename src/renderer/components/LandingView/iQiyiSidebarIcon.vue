@@ -6,7 +6,7 @@
     <g id="页面-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
         <g id="2" transform="translate(-17.000000, -101.000000)">
             <g id="sideBarItems" transform="translate(18.000000, 46.000000)">
-                <g id="sideBarItem--iqiyi" class="abc" transform="translate(0.000000, 56.000000)">
+                <g id="sideBarItem--iqiyi" class="sidebar" transform="translate(0.000000, 56.000000)">
                     <mask id="mask-2" fill="white">
                         <use xlink:href="#path-1"></use>
                     </mask>
@@ -28,12 +28,11 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.abc {
-  circle {
-    opacity: 0.4;
-    transition: opacity 50ms ease-in;
-  }
-  &:hover circle {
+.sidebar {
+  opacity: 0.5;
+  transition: opacity 50ms ease-in;
+  &:hover {
+    cursor: pointer;
     opacity: 1;
   }
 }
