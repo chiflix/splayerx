@@ -1,5 +1,10 @@
 <template>
-  <div class="pip" />
+  <div
+    :style="{
+      webkitAppRegion: isDarwin ? 'drag' : 'no-drag',
+    }"
+    class="pip"
+  />
 </template>
 
 <script lang="ts">
@@ -12,6 +17,11 @@ export default {
     return {
       supportedRecordHost: ['www.youtube.com', 'www.bilibili.com', 'www.iqiyi.com'],
     };
+  },
+  computed: {
+    isDarwin() {
+      return process.platform === 'darwin';
+    },
   },
   mounted() {
     electron.remote.getCurrentWindow().addListener('enter-html-full-screen', () => {
@@ -55,7 +65,6 @@ export default {
 .pip {
   width: 100%;
   height: 36px;
-  -webkit-app-region: drag;
   position: absolute;
   top: 0;
 }
