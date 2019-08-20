@@ -1,10 +1,5 @@
 <template>
-  <div
-    @mouseover="mouseover = true"
-    @mouseout="mouseover = false"
-    :style="{
-    }"
-  >
+  <div>
     <svg width="13px" height="12px" viewBox="0 0 13 12" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
         <g id="页面-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
             <g id="2" transform="translate(-88.000000, -12.000000)" fill="#D8D8D8" stroke="#979797">
@@ -16,23 +11,6 @@
 </template>
 <script lang="ts">
 export default {
-  data() {
-    return {
-      mouseover: false,
-      mousedown: false,
-    };
-  },
-  created() {
-    document.addEventListener('mouseup', this.globalMouseup);
-  },
-  destroyed() {
-    document.removeEventListener('mouseup', this.globalMouseup);
-  },
-  methods: {
-    globalMouseup() {
-      if (this.mousedown) this.mousedown = false;
-    },
-  },
 };
 </script>
 <style lang="scss" scoped>

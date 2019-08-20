@@ -4,7 +4,7 @@
     :style="{
       width: '100%'
     }"
-    @dblclick.stop="handleDbClick"
+    @dblclick="handleDbClick"
   >
     <div
       v-if="!isDarwin"
@@ -41,55 +41,60 @@
       />
     </div>
     <div
-      v-if="isDarwin"
-      v-fade-in="showTitleBar"
-      @mouseover="handleMouseOver"
-      @mouseout="handleMouseOut"
+      @dblclick.stop=""
       class="mac-icons"
     >
-      <Icon
-        id="close"
-        :state="state"
-        @mouseup.native="handleClose"
-        class="title-button no-drag"
-        type="titleBarClose"
-      />
-      <Icon
-        id="minimize"
-        :class="{ disabled: middleButtonStatus === 'exit-fullscreen' }"
-        :state="state"
-        :is-full-screen="middleButtonStatus"
-        @mouseup.native="handleMinimize"
-        class="title-button no-drag"
-        type="titleBarExitFull"
-      />
-      <Icon
-        id="maximize"
-        v-show="middleButtonStatus !== 'exit-fullscreen' && enableFullScreenButton"
-        :type="itemType"
-        :state="state"
-        :style="{ transform: isMaxScreen ? 'rotate(45deg)' : ''}"
-        @mouseup.native="handleMacFull"
-        class="title-button no-drag"
-      />
-      <Icon
-        id="restore"
-        v-show="middleButtonStatus === 'exit-fullscreen'"
-        :state="state"
-        @mouseup.native="handleFullscreenExit"
-        class="title-button no-drag"
-        type="titleBarRecover"
+      <div
+        v-if="isDarwin"
+        v-fade-in="showTitleBar"
+        @mouseover="handleMouseOver"
+        @mouseout="handleMouseOut"
+        class="system-icons"
+      >
+        <Icon
+          id="close"
+          :state="state"
+          @mouseup.native="handleClose"
+          class="title-button no-drag"
+          type="titleBarClose"
+        />
+        <Icon
+          id="minimize"
+          :class="{ disabled: middleButtonStatus === 'exit-fullscreen' }"
+          :state="state"
+          :is-full-screen="middleButtonStatus"
+          @mouseup.native="handleMinimize"
+          class="title-button no-drag"
+          type="titleBarExitFull"
+        />
+        <Icon
+          id="maximize"
+          v-show="middleButtonStatus !== 'exit-fullscreen' && enableFullScreenButton"
+          :type="itemType"
+          :state="state"
+          :style="{ transform: isMaxScreen ? 'rotate(45deg)' : ''}"
+          @mouseup.native="handleMacFull"
+          class="title-button no-drag"
+        />
+        <Icon
+          id="restore"
+          v-show="middleButtonStatus === 'exit-fullscreen'"
+          :state="state"
+          @mouseup.native="handleFullscreenExit"
+          class="title-button no-drag"
+          type="titleBarRecover"
+        />
+      </div>
+      <SidebarIcon
+        v-if="isDarwin && isLandingView"
+        @mouseup.native="handleSidebar"
+        :style="{
+          marginLeft: showSidebar ? '19px' : '4px',
+        }"
+        class="sidebar no-drag"
+        type="sidebar"
       />
     </div>
-    <SidebarIcon
-      v-if="isDarwin && isLandingView"
-      :style="{
-        transform: `translateX(${showSidebar ? 15 : 0}px)`,
-      }"
-      @mouseup.native="handleSidebar"
-      class="sidebar no-drag"
-      type="sidebar"
-    />
   </div>
 </template>
 
@@ -270,19 +275,23 @@ export default {
 .darwin-titlebar {
   z-index: 6;
   height: 36px;
-  width: 90px;
   display: flex;
-  justify-content: flex-start;
-  align-items: center;
   position: absolute;
   .mac-icons {
+    width: 92px;
     display: flex;
+    justify-content: flex-start;
+    align-items: center;
     margin-left: 10px;
     flex-wrap: nowrap;
-  }
-  .sidebar {
-    margin-left: 4px;
-    transition: transform 100ms linear;
+    .system-icons {
+      display: flex;
+    }
+    .sidebar {
+      margin-top: 1px;
+      margin-left: 4px;
+      transition: margin-left 100ms linear;
+    }
   }
   .title-button {
     width: 12px;
