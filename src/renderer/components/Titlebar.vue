@@ -7,6 +7,7 @@
     @dblclick="handleDbClick"
   >
     <div
+      v-if="!isDarwin && isLandingView"
       :style="{
         width: showSidebar ? '89px' : '13px',
       }"
@@ -14,7 +15,6 @@
       class="sidebar"
     >
       <SidebarIcon
-        v-if="!isDarwin && isLandingView"
         @mouseup.native="handleSidebar"
         class="no-drag"
       />
