@@ -476,7 +476,7 @@ function createMainWindow(openDialog, playlistId) {
       webviewTag: true,
     },
     // See https://github.com/electron/electron/blob/master/docs/api/browser-window.md#showing-window-gracefully
-    backgroundColor: '#6a6a6a',
+    backgroundColor: '#000000',
     acceptFirstMouse: false,
     show: false,
     ...({
