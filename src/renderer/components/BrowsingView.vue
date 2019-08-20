@@ -342,13 +342,17 @@ export default {
       updateIsPip: browsingActions.UPDATE_IS_PIP,
     }),
     handleBookmarkOpen(url: string) {
-      this.removeListener();
-      this.hasVideo = false;
-      this.$electron.ipcRenderer.send('update-enabled', 'window.pip', false);
-      this.$refs.browsingHeader.updateWebInfo({
-        hasVideo: this.hasVideo,
-      });
-      this.$electron.ipcRenderer.send('shift-page-tab', url);
+      const currentUrl = this.$electron.remote.getCurrentWindow()
+        .getBrowserView().webContents.getURL();
+      if (urlParseLax(currentUrl).hostname !== urlParseLax(url).hostname) {
+        this.removeListener();
+        this.hasVideo = false;
+        this.$electron.ipcRenderer.send('update-enabled', 'window.pip', false);
+        this.$refs.browsingHeader.updateWebInfo({
+          hasVideo: this.hasVideo,
+        });
+        this.$electron.ipcRenderer.send('shift-page-tab', url);
+      }
     },
     addListenerToBrowser() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

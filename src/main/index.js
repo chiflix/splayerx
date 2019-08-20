@@ -779,8 +779,9 @@ function registerMainWindowEvent(mainWindow) {
       browsingWindow.addBrowserView(tabGroups[index][currentPipHostname]
         .find(view => view.id !== browViews[0].id));
     } else {
-      mainView.webContents
-        .loadURL(mainView.webContents.history[mainView.webContents.history.length - 2]);
+      mainView.webContents.loadURL(mainView.webContents
+        .history[mainView.webContents.history.length >= 2
+          ? mainView.webContents.history.length - 2 : 0]);
       mainWindow.addBrowserView(browViews[0]);
       browsingWindow.addBrowserView(mainView);
     }
