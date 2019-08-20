@@ -210,15 +210,9 @@ export default {
       setTimeout(() => {
         if (this.acceleratorAvailable) {
           if (!focusedOnMainWindow) {
-            this.updateIsPip(false);
-            this.exitPipOperation();
-          } else if (this.hasVideo) {
-            if (this.isPip) {
-              this.shiftPipOperation();
-            } else {
-              this.updateIsPip(true);
-              this.enterPipOperation();
-            }
+            this.handleExitPip();
+          } else {
+            this.handleEnterPip();
           }
         } else {
           this.acceleratorAvailable = true;
@@ -365,7 +359,9 @@ export default {
       this.$electron.remote.getCurrentWindow().getBrowserViews()[0].webContents.addListener('new-window', (e: Event, url: string, disposition: string) => {
         this.newWindow(url, disposition);
       });
-      this.$electron.remote.getCurrentWindow().getBrowserViews()[0].webContents.addListener('did-start-navigation', (e: Event, url: string) => {
+      this.$electron.remote.getCurrentWindow().getBrowserViews()[0].webContents.addListener('did-start-navigation', () => {
+        const url = this.$electron.remote.getCurrentWindow()
+          .getBrowserViews()[0].webContents.getURL();
         if (url !== 'about:blank' && !this.isPip) {
           this.$electron.ipcRenderer.send('keep-browsers-cache', url);
         }
@@ -461,7 +457,6 @@ export default {
           }
           break;
         default:
-          console.warn(`Unhandled ipc-message: ${channel}`, args);
           break;
       }
     },
@@ -631,12 +626,32 @@ export default {
     },
     handleEnterPip() {
       if (this.hasVideo) {
+        const loadUrl = this.$electron.remote.getCurrentWindow()
+          .getBrowserViews()[0].webContents.getURL();
+        const recordIndex = this.supportedRecordHost.indexOf(urlParseLax(loadUrl).hostname);
         if (this.isPip) {
           this.shiftPipOperation();
         } else {
           this.updateIsPip(true);
           this.enterPipOperation();
         }
+        this.$electron.ipcRenderer.send('update-enabled', 'window.pip', false);
+        this.$refs.browsingHeader.updateWebInfo({
+          hasVideo: false,
+          url: loadUrl,
+          canGoBack: this.$electron.remote.getCurrentWindow()
+            .getBrowserViews()[0].webContents.canGoBack(),
+          canGoForward: this.$electron.remote.getCurrentWindow()
+            .getBrowserViews()[0].webContents.canGoForward(),
+        });
+        this.$electron.remote.getCurrentWindow().getBrowserViews()[0].webContents
+          .executeJavaScript(this.calculateVideoNum, (r: number) => {
+            this.hasVideo = recordIndex === 0 && !getVideoId(loadUrl).id ? false : !!r;
+            this.$electron.ipcRenderer.send('update-enabled', 'window.pip', this.hasVideo);
+            this.$refs.browsingHeader.updateWebInfo({
+              hasVideo: this.hasVideo,
+            });
+          });
       }
     },
     handleExitPip() {

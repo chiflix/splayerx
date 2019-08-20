@@ -21,27 +21,31 @@ export default {
       electron.ipcRenderer.send('update-focused-window', false);
       electron.ipcRenderer.send('update-enabled', 'window.pip', true);
       electron.ipcRenderer.send('update-enabled', 'window.keepPlayingWindowFront', true);
+      electron.ipcRenderer.send('update-enabled', 'history.back', false);
+      electron.ipcRenderer.send('update-enabled', 'history.forward', false);
+      electron.ipcRenderer.send('update-enabled', 'history.reload', false);
     });
     window.addEventListener('resize', throttle(() => {
       const size = electron.remote.getCurrentWindow().getSize();
       electron.ipcRenderer.send('pip-window-size', size);
-      electron.ipcRenderer.send('set-titlebar-bounds', {
-        x: 0,
-        y: 0,
-        width: size[0],
-        height: 36,
-      });
-      electron.ipcRenderer.send('set-control-bounds', {
-        x: Math.round(size[0] - 65),
-        y: Math.round(size[1] / 2 - 54),
-        width: 50,
-        height: 104,
+      electron.ipcRenderer.send('set-bounds', {
+        titlebar: {
+          x: 0,
+          y: 0,
+          width: size[0],
+          height: 36,
+        },
+        control: {
+          x: Math.round(size[0] - 65),
+          y: Math.round(size[1] / 2 - 54),
+          width: 50,
+          height: 104,
+        },
       });
     }, 100));
     window.addEventListener('beforeunload', () => {
       electron.ipcRenderer.send('store-pip-pos');
       electron.ipcRenderer.send('pip-window-close');
-      electron.ipcRenderer.send('update-pip-state');
     });
   },
 };
