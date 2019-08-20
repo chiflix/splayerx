@@ -11,6 +11,15 @@
       v-fade-in="showTitleBar"
       class="win-icons"
     >
+      <SidebarIcon
+        v-if="!isDarwin && isLandingView"
+        @mouseup.native="handleSidebar"
+        :style="{
+          marginLeft: showSidebar ? '19px' : '4px',
+        }"
+        class="sidebar no-drag"
+        type="sidebar"
+      />
       <Icon
         @mouseup.native="handleMinimize"
         class="title-button no-drag"
@@ -247,7 +256,6 @@ export default {
   top: 0;
   right: 0;
   border-radius: 10px;
-  width: 135px;
   height: 36px;
   z-index: 6;
   display: flex;
