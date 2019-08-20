@@ -136,6 +136,13 @@
         </div>
       </div>
       <div
+        v-else-if="isTranslateFail"
+        @click="hideTranslateModal"
+        class="button"
+      >
+        {{ $t('translateModal.cancel') }}
+      </div>
+      <div
         v-else
         @click="hideTranslateModal"
         class="button"
