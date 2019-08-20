@@ -15,7 +15,10 @@
       :name="transitionMode"
       mode="out-in"
     >
-      <router-view :open-file-args="openFileArgs" @update-side-bar="showSidebar = $event" />
+      <router-view
+        :open-file-args="openFileArgs"
+        @update-side-bar="showSidebar = $event"
+      />
     </transition>
   </div>
 </template>

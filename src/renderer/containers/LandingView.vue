@@ -7,7 +7,7 @@
       class="side-bar"
     >
       <div class="icon-box">
-        <div @mouseup="handleSidebarIcon('bilibili')" >
+        <div @mouseup="handleSidebarIcon('bilibili')">
           <BilibiliSidebarIcon />
         </div>
         <div @mouseup="handleSidebarIcon('iqiyi')">
