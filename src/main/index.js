@@ -728,9 +728,6 @@ function registerMainWindowEvent(mainWindow) {
     createTitlebarView();
     titlebarView.webContents.openDevTools({ mode: 'detach' });
     pipControlView.webContents.openDevTools({ mode: 'detach' });
-    if (browsingWindow.getBrowserViews()[0].webContents.canGoBack()) {
-      browsingWindow.getBrowserViews()[0].webContents.goBack();
-    }
     if (!browsingWindow) {
       createBrowsingWindow();
       const index = tabGroups.findIndex(tab => Object.keys(tab)[0] === currentBrowserHostname);
@@ -742,6 +739,9 @@ function registerMainWindowEvent(mainWindow) {
       browsingWindow.addBrowserView(titlebarView);
       browsingWindow.show();
     } else {
+      if (browsingWindow.getBrowserViews()[0].webContents.canGoBack()) {
+        browsingWindow.getBrowserViews()[0].webContents.goBack();
+      }
       browsingWindow.getBrowserViews().forEach((view) => {
         browsingWindow.removeBrowserView(view);
       });
