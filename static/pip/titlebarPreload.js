@@ -7,20 +7,16 @@ const isDarwin = process.platform === 'darwin';
 document.addEventListener('DOMContentLoaded', () => {
   const titlebar = document.querySelector('.titlebar');
   const content = document.querySelector('.content');
-  let close = null;
-  let min = null;
-  let full = null;
-  let recover = null;
-  let max = null;
+  const close = document.querySelector('.titlebarClose');
+  const min = document.querySelector('.titlebarMin');
+  const full = document.querySelector('.titlebarFull');
+  const recover = document.querySelector('.titlebarRecover');
+  const unmax = document.querySelector('.titlebarUnMax');
+  const max = document.querySelector('.titlebarMax');
   if (titlebar) {
     titlebar.addEventListener('dblclick', () => ipcRenderer.send('mouseup', 'max'));
   }
   if (isDarwin) {
-    close = document.querySelector('.titlebarClose');
-    min = document.querySelector('.titlebarMin');
-    full = document.querySelector('.titlebarFull');
-    recover = document.querySelector('.titlebarRecover');
-    max = document.querySelector('.titlebarMax');
     let mouseenter = false;
 
     if (content) {
@@ -66,8 +62,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
     }
-  } else {
-    console.log(123);
   }
   if (close) {
     close.addEventListener('mouseup', () => ipcRenderer.send('mouseup', 'close'));
@@ -83,5 +77,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   if (max) {
     max.addEventListener('mouseup', () => ipcRenderer.send('mouseup', 'max'));
+  }
+  if (unmax) {
+    unmax.addEventListener('mouseup', () => ipcRenderer.send('mouseup', 'unmax'));
   }
 });

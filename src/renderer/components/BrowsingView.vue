@@ -13,7 +13,7 @@
       :handle-url-back="handleUrlBack"
       :handle-url-forward="handleUrlForward"
       :handle-bookmark-open="handleBookmarkOpen"
-      :style="{ webkitAppRegion: 'drag' }"
+      :style="{ webkitAppRegion: isDarwin ? 'drag' : 'no-drag' }"
       v-show="headerToShow"
     />
     <div

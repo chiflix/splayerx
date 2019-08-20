@@ -632,25 +632,48 @@ function registerMainWindowEvent(mainWindow) {
         break;
       case 'full':
         browsingWindow.setFullScreen(true);
-        titlebarView.webContents.executeJavaScript('document.querySelector(".titlebarFull").src = "assets/titleBarRecover-default-icon.svg";'
-          + 'document.querySelector(".titlebarMin").style.pointerEvents = "none";'
-          + 'document.querySelector(".titlebarMin").style.opacity = "0.25";'
-          + 'document.querySelector(".titlebarFull").style.display = "none";'
-          + 'document.querySelector(".titlebarRecover").style.display = "block";');
+        if (process.platform === 'darwin') {
+          titlebarView.webContents.executeJavaScript('document.querySelector(".titlebarMin").style.pointerEvents = "none";'
+            + 'document.querySelector(".titlebarMin").style.opacity = "0.25";'
+            + 'document.querySelector(".titlebarFull").style.display = "none";'
+            + 'document.querySelector(".titlebarRecover").style.display = "block";');
+        } else {
+          titlebarView.webContents.executeJavaScript('document.querySelector(".titlebarMax").style.display = "none";'
+            + 'document.querySelector(".titlebarUnMax").style.display = "none";'
+            + 'document.querySelector(".titlebarRecover").style.display = "block";');
+        }
         break;
       case 'recover':
         browsingWindow.setFullScreen(false);
-        titlebarView.webContents.executeJavaScript('document.querySelector(".titlebarFull").src = "assets/titleBarFull-default-icon.svg";'
-          + 'document.querySelector(".titlebarMin").style.pointerEvents = "";'
-          + 'document.querySelector(".titlebarMin").style.opacity = "1";'
-          + 'document.querySelector(".titlebarFull").style.display = "";'
-          + 'document.querySelector(".titlebarRecover").style.display = "none";');
+        if (process.platform === 'darwin') {
+          titlebarView.webContents.executeJavaScript('document.querySelector(".titlebarMin").style.pointerEvents = "";'
+            + 'document.querySelector(".titlebarMin").style.opacity = "1";'
+            + 'document.querySelector(".titlebarFull").style.display = "";'
+            + 'document.querySelector(".titlebarRecover").style.display = "none";');
+        } else {
+          titlebarView.webContents.executeJavaScript('document.querySelector(".titlebarMax").style.display = "block";'
+            + 'document.querySelector(".titlebarUnMax").style.display = "none";'
+            + 'document.querySelector(".titlebarRecover").style.display = "none";');
+        }
         break;
       case 'max':
         if (browsingWindow.isMaximized()) {
           browsingWindow.unmaximize();
         } else {
           browsingWindow.maximize();
+          if (process.platform === 'win32') {
+            titlebarView.webContents.executeJavaScript('document.querySelector(".titlebarMax").style.display = "none";'
+              + 'document.querySelector(".titlebarUnMax").style.display = "block";'
+              + 'document.querySelector(".titlebarRecover").style.display = "none";');
+          }
+        }
+        break;
+      case 'unmax':
+        browsingWindow.unmaximize();
+        if (process.platform === 'win32') {
+          titlebarView.webContents.executeJavaScript('document.querySelector(".titlebarMax").style.display = "block";'
+            + 'document.querySelector(".titlebarUnMax").style.display = "none";'
+            + 'document.querySelector(".titlebarRecover").style.display = "none";');
         }
         break;
       default:
