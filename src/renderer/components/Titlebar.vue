@@ -4,8 +4,21 @@
     :style="{
       width: '100%'
     }"
-    @dblclick.stop="handleDbClick"
+    @dblclick="handleDbClick"
   >
+    <div
+      v-if="!isDarwin && isLandingView"
+      :style="{
+        width: showSidebar ? '89px' : '13px',
+      }"
+      @dblclick.stop=""
+      class="sidebar"
+    >
+      <SidebarIcon
+        @mouseup.native="handleSidebar"
+        class="no-drag"
+      />
+    </div>
     <div
       v-if="!isDarwin"
       v-fade-in="showTitleBar"
@@ -41,44 +54,58 @@
       />
     </div>
     <div
-      v-if="isDarwin"
-      v-fade-in="showTitleBar"
-      @mouseover="handleMouseOver"
-      @mouseout="handleMouseOut"
+      @dblclick.stop=""
       class="mac-icons"
     >
-      <Icon
-        id="close"
-        :state="state"
-        @mouseup.native="handleClose"
-        class="title-button no-drag"
-        type="titleBarClose"
-      />
-      <Icon
-        id="minimize"
-        :class="{ disabled: middleButtonStatus === 'exit-fullscreen' }"
-        :state="state"
-        :is-full-screen="middleButtonStatus"
-        @mouseup.native="handleMinimize"
-        class="title-button no-drag"
-        type="titleBarExitFull"
-      />
-      <Icon
-        id="maximize"
-        v-show="middleButtonStatus !== 'exit-fullscreen' && enableFullScreenButton"
-        :type="itemType"
-        :state="state"
-        :style="{ transform: isMaxScreen ? 'rotate(45deg)' : ''}"
-        @mouseup.native="handleMacFull"
-        class="title-button no-drag"
-      />
-      <Icon
-        id="restore"
-        v-show="middleButtonStatus === 'exit-fullscreen'"
-        :state="state"
-        @mouseup.native="handleFullscreenExit"
-        class="title-button no-drag"
-        type="titleBarRecover"
+      <div
+        v-if="isDarwin"
+        v-fade-in="showTitleBar"
+        @mouseover="handleMouseOver"
+        @mouseout="handleMouseOut"
+        class="system-icons"
+      >
+        <Icon
+          id="close"
+          :state="state"
+          @mouseup.native="handleClose"
+          class="title-button no-drag"
+          type="titleBarClose"
+        />
+        <Icon
+          id="minimize"
+          :class="{ disabled: middleButtonStatus === 'exit-fullscreen' }"
+          :state="state"
+          :is-full-screen="middleButtonStatus"
+          @mouseup.native="handleMinimize"
+          class="title-button no-drag"
+          type="titleBarExitFull"
+        />
+        <Icon
+          id="maximize"
+          v-show="middleButtonStatus !== 'exit-fullscreen' && enableFullScreenButton"
+          :type="itemType"
+          :state="state"
+          :style="{ transform: isMaxScreen ? 'rotate(45deg)' : ''}"
+          @mouseup.native="handleMacFull"
+          class="title-button no-drag"
+        />
+        <Icon
+          id="restore"
+          v-show="middleButtonStatus === 'exit-fullscreen'"
+          :state="state"
+          @mouseup.native="handleFullscreenExit"
+          class="title-button no-drag"
+          type="titleBarRecover"
+        />
+      </div>
+      <SidebarIcon
+        v-if="isDarwin && isLandingView"
+        @mouseup.native="handleSidebar"
+        :style="{
+          marginLeft: showSidebar ? '19px' : '4px',
+        }"
+        class="sidebar no-drag"
+        type="sidebar"
       />
     </div>
   </div>
@@ -88,6 +115,7 @@
 import { mapGetters } from 'vuex';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import Icon from '@/components/BaseIconContainer.vue';
+import SidebarIcon from '@/components/LandingView/SidebarIcon.vue';
 
 export default {
   name: 'Titlebar',
@@ -95,8 +123,17 @@ export default {
   type: INPUT_COMPONENT_TYPE,
   components: {
     Icon,
+    SidebarIcon,
   },
   props: {
+    showSidebar: {
+      type: Boolean,
+      default: false,
+    },
+    isLandingView: {
+      type: Boolean,
+      default: false,
+    },
     showAllWidgets: {
       type: Boolean,
       default: true,
@@ -168,6 +205,9 @@ export default {
     });
   },
   methods: {
+    handleSidebar() {
+      this.$bus.$emit('side-bar-mouseup');
+    },
     handleDbClick() {
       if (!this.isMaximized) {
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'maximize');
@@ -220,11 +260,18 @@ export default {
   top: 0;
   right: 0;
   border-radius: 10px;
-  width: 135px;
   height: 36px;
   z-index: 6;
   display: flex;
+  justify-content: space-between;
   position: absolute;
+  .sidebar {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 6px;
+    margin-left: 12px;
+    transition: width 100ms linear;
+  }
   .win-icons {
     display: flex;
     flex-wrap: nowrap;
@@ -248,13 +295,23 @@ export default {
 .darwin-titlebar {
   z-index: 6;
   height: 36px;
-  width: 90px;
   display: flex;
   position: absolute;
   .mac-icons {
-    margin: auto auto auto 10px;
+    width: 92px;
     display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin-left: 10px;
     flex-wrap: nowrap;
+    .system-icons {
+      display: flex;
+    }
+    .sidebar {
+      margin-top: 1px;
+      margin-left: 4px;
+      transition: margin-left 100ms linear;
+    }
   }
   .title-button {
     width: 12px;
