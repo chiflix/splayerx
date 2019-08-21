@@ -13,7 +13,11 @@
           value="smartMode"
           name="mode"
         >
-          {{ $t('preferences.privacy.smartMode') }} <span style="opacity: 0.6">Beta</span>
+          {{ $t('preferences.privacy.smartMode') }}
+          <span
+            v-if="!isMas"
+            style="opacity: 0.6"
+          >Beta</span>
         </BaseRadio>
         <div class="privacy_radio_description">
           {{ $t('preferences.privacy.smartDescription') }}
@@ -50,6 +54,9 @@ export default {
     };
   },
   computed: {
+    isMas() {
+      return !!process.mas;
+    },
     preferenceData() {
       return this.$store.getters.preferenceData;
     },
