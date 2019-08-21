@@ -245,6 +245,7 @@ export default {
   },
   /* eslint-disable @typescript-eslint/no-explicit-any */
   created() {
+    console.log(this.$electron.remote.app.getPath('userData'));
     this.createTouchBar();
     window.addEventListener('mousemove', this.globalMoveHandler);
     // Get all data and show
@@ -315,12 +316,6 @@ export default {
     ...mapActions({
       updateInitialUrl: browsingActions.UPDATE_INITIAL_URL,
     }),
-    createIcon(iconPath: string) {
-      const { nativeImage } = this.$electron.remote;
-      return nativeImage.createFromPath(join(__static, iconPath)).resize({
-        width: 20,
-      });
-    },
     createTouchBar() {
       const { TouchBar } = this.$electron.remote;
       const {

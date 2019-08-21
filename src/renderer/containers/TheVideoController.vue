@@ -507,12 +507,6 @@ export default {
       updateHideModalCallback: atActions.AUDIO_TRANSLATE_MODAL_HIDE_CALLBACK,
       updateHideBubbleCallback: atActions.AUDIO_TRANSLATE_BUBBLE_CANCEL_CALLBACK,
     }),
-    createIcon(iconPath: string) {
-      const { nativeImage } = this.$electron.remote;
-      return nativeImage.createFromPath(path.join(__static, iconPath)).resize({
-        width: 20,
-      });
-    },
     createTouchBar() {
       const { TouchBar } = this.$electron.remote;
       const {
