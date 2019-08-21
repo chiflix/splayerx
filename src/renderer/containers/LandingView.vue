@@ -381,7 +381,9 @@ export default {
 
       this.sidebarButton = new TouchBarButton({
         icon: this.createIcon('touchBar/sidebar.png'),
-        click: () => {},
+        click: () => {
+          this.$bus.$emit('side-bar-mouseup');
+        },
       });
       this.openFileButton = new TouchBarButton({
         icon: this.createIcon('touchBar/addVideo.png'),
