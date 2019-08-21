@@ -69,7 +69,7 @@
     "rimraf": "^2.6.3",
     "rollup": "^1.17.0",
     "romanize": "^1.1.1",
-    "sagi-api": "^0.0.18",
+    "sagi-api": "^0.0.19",
     "source-map-support": "^0.5.9",
     "subtitle": "^2.0.1",
     "traditional-or-simplified": "^1.0.3",
