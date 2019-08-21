@@ -12,7 +12,7 @@ import {
   IMenubarMenuState,
   MenuName,
 } from './common/Menubar';
-import { IsMacintosh } from '../../shared/common/platform';
+import { IsMacintosh, IsBetaVersion } from '../../shared/common/platform';
 import Locale from '../../shared/common/localize';
 import menuTemplate from './menu.json';
 import { IMenuDisplayInfo } from '../../renderer/interfaces/IRecentPlay';
@@ -690,6 +690,9 @@ export default class Menubar {
     const about = this.createMenuItem('msg.splayerx.about', () => {
       app.emit('add-windows-about');
     }, undefined, true);
+    const checkForUpdates = this.createMenuItem('msg.splayerx.checkForUpdates', () => {
+      app.emit('check-for-updates');
+    }, undefined, true);
     const preference = this.createMenuItem('msg.splayerx.preferences', () => {
       app.emit('add-preference');
     }, 'CmdOrCtrl+,');
@@ -703,7 +706,15 @@ export default class Menubar {
     actions.push(...[
       separator(),
     ]);
-    if (this._routeName !== 'welcome-privacy' && this._routeName !== 'language-setting') {
+    // beta
+    if (IsBetaVersion && this._routeName !== 'welcome-privacy' && this._routeName !== 'language-setting') {
+      actions.push(...[
+        checkForUpdates,
+        separator(),
+        preference,
+        separator(),
+      ]);
+    } else if (this._routeName !== 'welcome-privacy' && this._routeName !== 'language-setting') {
       actions.push(...[
         preference,
         separator(),
@@ -779,7 +790,23 @@ export default class Menubar {
   private createHelpMenu() {
     const helpMenu = new Menu();
 
-    if (!IsMacintosh) {
+    if (!IsMacintosh && (process.platform === 'win32' && !process.windowsStore)) {
+      const about = this.createMenuItem('msg.splayerx.about', () => {
+        app.emit('add-windows-about');
+      }, undefined, true);
+
+      helpMenu.append(about);
+
+      helpMenu.append(separator());
+
+      const checkForUpdates = this.createMenuItem('msg.splayerx.checkForUpdates', () => {
+        app.emit('check-for-updates');
+      }, undefined, true);
+
+      helpMenu.append(checkForUpdates);
+
+      helpMenu.append(separator());
+    } else if (!IsMacintosh) {
       const about = this.createMenuItem('msg.splayerx.about', () => {
         app.emit('add-windows-about');
       }, undefined, true);

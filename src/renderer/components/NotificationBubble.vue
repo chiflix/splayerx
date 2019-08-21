@@ -29,6 +29,17 @@
       />
     </transition>
     <transition name="bubble">
+      <ConfirmBubble
+        v-if="showUpdateBubble"
+        :content="checkForUpdatesContent"
+        :confirm-button-text="$t('checkForUpdatesBubble.needUpdate.confirm')"
+        :cancel-button-text="$t('checkForUpdatesBubble.needUpdate.cancel')"
+        :confirm="confirmUpdate"
+        :cancel="cancelUpdate"
+        class="mas-privacy-bubble"
+      />
+    </transition>
+    <transition name="bubble">
       <TranslateBubble
         v-if="isTranslateBubbleVisiable"
         :message="translateBubbleMessage"
@@ -83,9 +94,11 @@ import PrivacyBubble from '@/components/PlayingView/PrivacyConfirmBubble.vue';
 import TranslateBubble from '@/components/PlayingView/TranslateBubble.vue';
 import MASPrivacyBubble from '@/components/PlayingView/MASPrivacyConfirmBubble.vue';
 import NSFW from '@/components/PlayingView/NSFW.vue';
+import ConfirmBubble from '@/components/PlayingView/ConfirmBubble.vue';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import { AudioTranslate as atActions } from '@/store/actionTypes';
 import Icon from './BaseIconContainer.vue';
+import { skipCheckForUpdate } from '../libs/utils';
 
 export default {
   name: 'NotificationBubble',
@@ -98,6 +111,7 @@ export default {
     MASPrivacyBubble,
     NSFW,
     TranslateBubble,
+    ConfirmBubble,
   },
   data() {
     return {
@@ -106,6 +120,10 @@ export default {
       readyToShow: false, // show after video element is loaded
       showPrivacyBubble: false,
       showNSFWBubble: false,
+      showUpdateBubble: false, // show update bubble
+      checkForUpdatesContent: '',
+      checkForUpdatesDownloadUrl: '',
+      checkForUpdatesReleaseUrl: '',
     };
   },
   computed: {
@@ -152,6 +170,12 @@ export default {
     });
     this.$bus.$on('privacy-confirm', () => {
       this.showPrivacyBubble = true;
+    });
+    this.$bus.$on('new-version', (info: { version: string, landingPage: string, url: string }) => {
+      this.checkForUpdatesContent = this.$t('checkForUpdatesBubble.needUpdate.content', { version: info.version });
+      this.checkForUpdatesDownloadUrl = info.url;
+      this.checkForUpdatesReleaseUrl = info.landingPage;
+      this.showUpdateBubble = true;
     });
   },
   methods: {
@@ -203,6 +227,18 @@ export default {
       if (this.$refs.nextVideo) {
         this.$refs.nextVideo.updatePlayingTime(time);
       }
+    },
+    confirmUpdate() {
+      // go to web site
+      const { checkForUpdatesDownloadUrl, checkForUpdatesReleaseUrl } = this;
+      this.$electron.shell.openExternal(checkForUpdatesDownloadUrl);
+      this.$electron.shell.openExternal(checkForUpdatesReleaseUrl);
+      this.showUpdateBubble = false;
+    },
+    cancelUpdate() {
+      // today not to show
+      skipCheckForUpdate();
+      this.showUpdateBubble = false;
     },
   },
 };

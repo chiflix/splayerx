@@ -732,6 +732,10 @@ app.on('web-contents-created', (webContentsCreatedEvent, contents) => {
 app.on('bossKey', handleBossKey);
 app.on('add-preference', createPreferenceWindow);
 app.on('add-windows-about', createAboutWindow);
+app.on('check-for-updates', () => {
+  if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
+  mainWindow.webContents.send('check-for-updates');
+});
 
 app.on('menu-create-main-window', () => {
   if (!mainWindow) createMainWindow();

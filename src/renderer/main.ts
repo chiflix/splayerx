@@ -40,14 +40,17 @@ import {
   AudioTranslate as atActions,
 } from '@/store/actionTypes';
 import { log } from '@/libs/Log';
+import { checkForUpdate } from '@/libs/utils';
 import asyncStorage from '@/helpers/asyncStorage';
 import { videodata } from '@/store/video';
-import { addBubble } from './helpers/notificationControl';
+import { addBubble } from '@/helpers/notificationControl';
+import { SUBTITLE_OFFLINE, REQUEST_TIMEOUT } from '@/helpers/notificationcodes';
 import { SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, LOAD_SUBVIDEO_FAILED } from './helpers/notificationcodes';
 import InputPlugin, { getterTypes as iGT } from '@/plugins/input';
 import { VueDevtools } from './plugins/vueDevtools.dev';
 import { SubtitleControlListItem, Type, NOT_SELECTED_SUBTITLE } from './interfaces/ISubtitle';
 import { getValidVideoRegex, getValidSubtitleRegex } from '../shared/utils';
+import { IsBetaVersion } from '../shared/common/platform';
 import MenuService from './services/menu/MenuService';
 
 
@@ -658,6 +661,43 @@ new Vue({
     this.$electron.ipcRenderer.on('add-local-subtitles', (event: Event, file: string[]) => {
       this.addLocalSubtitlesWithSelect(file);
     });
+    // win32 exe || mac beta
+    const canUseCheckForUpdates = (process.platform === 'win32' && !process.windowsStore) || IsBetaVersion;
+    if (navigator.onLine && canUseCheckForUpdates) {
+      // auto check for updates
+      checkForUpdate(true).then((
+        json: { version: string, isLastest: boolean, landingPage: string, url: string }
+      ) => {
+        if (!json.isLastest) {
+          this.$bus.$emit('new-version', json);
+        }
+      }).catch((err: Error) => {
+        // empty
+      });
+    }
+    // manual check for updates
+    this.$electron.ipcRenderer.on('check-for-updates', (event: Event) => {
+      // if not (win32 exe || mac beta) return
+      if (!canUseCheckForUpdates) return;
+      // check online
+      if (!navigator.onLine) return addBubble(SUBTITLE_OFFLINE);
+      checkForUpdate(false).then((
+        json: { version: string, isLastest: boolean, landingPage: string, url: string }
+      ) => {
+        if (!json.isLastest) {
+          this.$bus.$emit('new-version', json);
+        } else {
+          this.$store.dispatch('addMessages', {
+            type: 'result',
+            title: '',
+            content: this.$t('checkForUpdatesBubble.noNeed.content', { version: json.version }),
+            dismissAfter: 5000,
+          });
+        }
+      }).catch((err: Error) => {
+        addBubble(REQUEST_TIMEOUT);
+      });
+    });
   },
   methods: {
     ...mapActions({
@@ -997,7 +1037,7 @@ new Vue({
     recentSubTmp(item: SubtitleControlListItem, isFirstSubtitleType: boolean) {
       return {
         id: `${item.id}`,
-        enabled: isFirstSubtitleType ? true: this.enabledSecondarySub,
+        enabled: isFirstSubtitleType ? true : this.enabledSecondarySub,
         label: this.getSubName(item, this.list),
         checked: isFirstSubtitleType ? item.id === this.primarySubtitleId : item.id === this.secondarySubtitleId,
         subtitleItem: item,

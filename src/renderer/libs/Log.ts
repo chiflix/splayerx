@@ -60,7 +60,7 @@ export default class Log implements ILog {
    * @param {unknown} message 打印信息
    */
   public debug(label: string, message: unknown, ...optionalParams: unknown[]): void {
-    if (process.env.NODE_ENV === 'development') console.log(label, message, ...optionalParams);
+    console.log(label, message, ...optionalParams);
   }
 
   /**
