@@ -6,9 +6,9 @@ export interface IPlayInfoStorable {
    * @author tanghaixiang
    * @param {number} videoID 视频在数据库存的ID
    * @param {MediaItem} data 视频播放信息
-   * @returns {Promise<boolean>} 返回是否成功更新
+   * @returns {Promise<MediaItem | boolean>} 返回是否成功更新
    */
-  updateMediaItemBy(videoID: number, data: MediaItem): Promise<boolean>
+  updateMediaItemBy(videoID: number, data: MediaItem): Promise<MediaItem | boolean>
   /**
    * @description 更新最近播放列表
    * @author tanghaixiang

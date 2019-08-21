@@ -83,7 +83,7 @@ const MAX_SHORT_CUT_SIZE = 1080;
  * @constant
  * @type number
  */
-const MIN_SHORT_CUT_SIZE = 122.6;
+// const MIN_SHORT_CUT_SIZE = 122.6;
 /** 最后一帧图的图片质量
  * @constant
  * @type number
@@ -123,18 +123,7 @@ export function generateShortCutImageBy(
       0, 0, (videoWidth / videoHeight) * MAX_SHORT_CUT_SIZE, MAX_SHORT_CUT_SIZE,
     );
     const imagePath = canvas.toDataURL(SHORT_CURT_TYPE, SHORT_CURT_QUALITY);
-    result.shortCut = imagePath;
-    // 用于测试截图的代码，以后可能还会用到
-    // const img = imagePath.replace(/^data:image\/\w+;base64,/, '');
-    // fs.writeFileSync('/Users/jinnaide/Desktop/screenshot.png', img, 'base64');
-    [canvas.width, canvas.height] = [(videoWidth / videoHeight)
-      * MIN_SHORT_CUT_SIZE, MIN_SHORT_CUT_SIZE];
-    canvasCTX.drawImage(
-      video, 0, 0, videoWidth, videoHeight,
-      0, 0, (videoWidth / videoHeight) * MIN_SHORT_CUT_SIZE, MIN_SHORT_CUT_SIZE,
-    );
-    const smallImagePath = canvas.toDataURL(SHORT_CURT_TYPE, SHORT_CURT_QUALITY);
-    result.smallShortCut = smallImagePath;
+    result.shortCut = result.smallShortCut = imagePath;
   }
   return result;
 }

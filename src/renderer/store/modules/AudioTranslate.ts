@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-05 16:03:32
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-08-06 16:57:33
+ * @Last Modified time: 2019-08-20 17:37:01
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @ts-ignore
@@ -335,7 +335,7 @@ const actions = {
         commit(m.AUDIO_TRANSLATE_UPDATE_STATUS, AudioTranslateStatus.Grabbing);
       });
       grab.on('error', (error: Error) => {
-        log.debug('AudioTranslate', error, 'audio-log');
+        log.error('AudioTranslate', error);
         if (taskTimer) {
           clearInterval(taskTimer);
         }
@@ -651,7 +651,9 @@ const actions = {
   [a.AUDIO_TRANSLATE_HIDE_MODAL]({ commit, dispatch }: any) {
     commit(m.AUDIO_TRANSLATE_HIDE_MODAL);
     if (state.status === AudioTranslateStatus.Fail) {
-      dispatch(a.AUDIO_TRANSLATE_DISCARD);
+      setTimeout(() => {
+        dispatch(a.AUDIO_TRANSLATE_DISCARD);
+      }, 300);
     }
   },
   [a.AUDIO_TRANSLATE_UPDATE_STATUS]({ commit }: any, status: string) {

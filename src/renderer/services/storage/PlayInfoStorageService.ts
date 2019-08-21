@@ -9,12 +9,12 @@ export default class PlayInfoStorageService implements IPlayInfoStorable {
    * @author tanghaixiang
    * @param {number} videoID
    * @param {MediaItem} data
-   * @returns {Promise<boolean>} 返回布尔值, 是否成功更新
+   * @returns {Promise<MediaItem | boolean>} 返回布尔值, 是否成功更新
    */
   public async updateMediaItemBy(
     videoID: number,
     data: MediaItem,
-  ): Promise<boolean> {
+  ): Promise<MediaItem | boolean> {
     let value = null;
     try {
       value = await info.getValueByKey(VIDEO_OBJECT_STORE_NAME, videoID);
@@ -25,7 +25,7 @@ export default class PlayInfoStorageService implements IPlayInfoStorable {
       try {
         const updateData: MediaItem = { ...value, ...data };
         await info.update(VIDEO_OBJECT_STORE_NAME, videoID, updateData);
-        return true;
+        return updateData;
       } catch (error) {
         return false;
       }

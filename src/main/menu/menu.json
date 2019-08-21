@@ -26,6 +26,7 @@
       {
         "id": "audio.switchAudioTrack",
         "label": "msg.audio.switchAudioTrack",
+        "enabled": true,
         "submenu": {
           "items": []
         }
@@ -194,6 +195,7 @@
       {
         "id": "subtitle.mainSubtitle",
         "label": "msg.subtitle.mainSubtitle",
+        "enable": true,
         "submenu": {
           "items": []
         }
@@ -201,6 +203,7 @@
       {
         "id": "subtitle.secondarySubtitle",
         "label": "msg.subtitle.secondarySubtitle",
+        "enable": true,
         "submenu": {
           "items": []
         }
@@ -220,23 +223,27 @@
             {
               "id": "subtitle.increasePrimarySubtitleDelay",
               "label": "msg.subtitle.increasePrimarySubtitleDelay",
-              "accelerator": "CmdOrCtrl+'"
+              "accelerator": "CmdOrCtrl+'",
+              "enabled": false
             },
             {
               "id": "subtitle.decreasePrimarySubtitleDelay",
               "label": "msg.subtitle.decreasePrimarySubtitleDelay",
-              "accelerator": "CmdOrCtrl+;"
+              "accelerator": "CmdOrCtrl+;",
+              "enabled": false
             },
             {
               "id": "menubar.separator"
             },
             {
               "id": "subtitle.increaseSecondarySubtitleDelay",
-              "label": "msg.subtitle.increaseSecondarySubtitleDelay"
+              "label": "msg.subtitle.increaseSecondarySubtitleDelay",
+              "enabled": false
             },
             {
               "id": "subtitle.decreaseSecondarySubtitleDelay",
-              "label": "msg.subtitle.decreaseSecondarySubtitleDelay"
+              "label": "msg.subtitle.decreaseSecondarySubtitleDelay",
+              "enabled": false
             }
           ]
         }
@@ -384,6 +391,48 @@
       {
         "id": "favourite.youtube",
         "label": "msg.favourite.youtube"
+      }
+    ]
+  },
+  "browsing.window": {
+    "items": [
+      {
+        "id": "browsing.window.keepPipFront",
+        "label": "msg.window.keepPlayingWindowFront",
+        "accelerator": "T",
+        "checked": false,
+        "enabled": false
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "browsing.window.pip",
+        "label": "msg.window.enterPip",
+        "accelerator": "P",
+        "enabled": false
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "browsing.window.minimize",
+        "label": "msg.window.minimize",
+        "role": "minimize",
+        "enabled": true
+      },
+      {
+        "id": "browsing.window.maxmize",
+        "label": "msg.window.maxmize",
+        "accelerator": "CmdOrCtrl+3"
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "browsing.window.backToLandingView",
+        "label": "msg.window.backToLandingView",
+        "accelerator": "CmdOrCtrl+E"
       }
     ]
   }

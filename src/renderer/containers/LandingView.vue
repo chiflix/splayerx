@@ -80,6 +80,7 @@
             height:`${thumbnailHeight}px`,
             width:`${thumbnailWidth}px`,
             marginRight: `${marginRight}px`,
+            cursor: firstIndex === 0 ? 'pointer' : `${cursorUrl}, pointer`,
             backgroundColor:
               item.backgroundUrl
                 ? 'rgba(255,255,255,0.12) ': 'rgba(255,255,255,0.05)',

@@ -95,15 +95,12 @@ function handleBossKey() {
   if (mainWindow.isVisible()) {
     if (process.platform === 'darwin' && mainWindow.isFullScreen()) {
       mainWindow.once('leave-full-screen', handleBossKey);
-      menuService.updateFullScreen(false);
       mainWindow.setFullScreen(false);
       return;
     }
     mainWindow.webContents.send('mainCommit', 'PAUSED_UPDATE', true);
     mainWindow.webContents.send('mainCommit', 'isHiddenByBossKey', true);
     mainWindow.hide();
-    menuService.updatePaused(true);
-    menuService.handleBossKey(true);
     if (process.platform === 'win32') {
       tray = new Tray(nativeImage.createFromDataURL(require('../../build/icons/1024x1024.png')));
       tray.on('click', () => {
@@ -301,13 +298,11 @@ function registerMainWindowEvent(mainWindow) {
     mainWindow.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
   }, 100));
   mainWindow.on('enter-full-screen', () => {
-    menuService.updateFullScreen(true);
     if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
     mainWindow.webContents.send('mainCommit', 'isFullScreen', true);
     mainWindow.webContents.send('mainCommit', 'isMaximized', mainWindow.isMaximized());
   });
   mainWindow.on('leave-full-screen', () => {
-    menuService.updateFullScreen(false);
     if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
     mainWindow.webContents.send('mainCommit', 'isFullScreen', false);
     mainWindow.webContents.send('mainCommit', 'isMaximized', mainWindow.isMaximized());
@@ -321,22 +316,20 @@ function registerMainWindowEvent(mainWindow) {
     mainWindow.webContents.send('mainCommit', 'isMaximized', false);
   });
   mainWindow.on('minimize', () => {
-    menuService.minimize(true);
+    menuService.enableMenu(false);
     if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
     mainWindow.webContents.send('mainCommit', 'isMinimized', true);
   });
   mainWindow.on('restore', () => {
-    menuService.minimize(false);
+    menuService.enableMenu(true);
     if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
     mainWindow.webContents.send('mainCommit', 'isMinimized', false);
   });
   mainWindow.on('show', () => {
-    menuService.handleBossKey(false);
     if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
     mainWindow.webContents.send('mainCommit', 'isMinimized', false);
   });
   mainWindow.on('focus', () => {
-    menuService.handleBossKey(false);
     if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
     mainWindow.webContents.send('mainCommit', 'isFocused', true);
     mainWindow.webContents.send('mainCommit', 'isHiddenByBossKey', false);
@@ -464,7 +457,7 @@ function registerMainWindowEvent(mainWindow) {
   /** grab audio logic in main process end */
 }
 
-function createMainWindow(openDialog) {
+function createMainWindow(openDialog, playlistId) {
   createLaborWindow();
   mainWindow = new BrowserWindow({
     useContentSize: true,
@@ -483,7 +476,7 @@ function createMainWindow(openDialog) {
       webviewTag: true,
     },
     // See https://github.com/electron/electron/blob/master/docs/api/browser-window.md#showing-window-gracefully
-    backgroundColor: '#6a6a6a',
+    backgroundColor: '#000000',
     acceptFirstMouse: false,
     show: false,
     ...({
@@ -508,7 +501,7 @@ function createMainWindow(openDialog) {
   mainWindow.on('closed', () => {
     ipcMain.removeAllListeners(); // FIXME: decouple mainWindow and ipcMain
     mainWindow = null;
-    menuService.closed();
+    menuService.setMainWindow(null);
     if (forceQuit) {
       needBlockCloseLaborWindow = false;
     }
@@ -525,7 +518,7 @@ function createMainWindow(openDialog) {
     } else if (tmpVideoToOpen.length + tmpSubsToOpen.length > 0) {
       mainWindow.webContents.send('open-file', { onlySubtitle: !tmpVideoToOpen.length, files: finalVideoToOpen });
     }
-    if (openDialog) mainWindow.webContents.send('open-dialog');
+    if (openDialog) mainWindow.webContents.send('open-dialog', playlistId);
     finalVideoToOpen.splice(0, finalVideoToOpen.length);
     tmpSubsToOpen.splice(0, tmpSubsToOpen.length);
     tmpVideoToOpen.splice(0, tmpVideoToOpen.length);
@@ -749,8 +742,8 @@ app.on('menu-create-main-window', () => {
   }
 });
 
-app.on('menu-open-dialog', () => {
-  createMainWindow(true);
+app.on('menu-open-dialog', (playlistId) => {
+  createMainWindow(true, playlistId);
 });
 
 app.on('activate', () => {

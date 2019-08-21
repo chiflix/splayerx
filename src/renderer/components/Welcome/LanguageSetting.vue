@@ -31,7 +31,7 @@
 <script lang="ts">
 import { concat } from 'lodash';
 import Dropdown from '@/components/Welcome/Dropdown.vue';
-import { codeToLanguageName, allCodes } from '@/libs/language';
+import { codeToLanguageName, LanguageCode } from '@/libs/language';
 
 export default {
   components: {
@@ -45,6 +45,22 @@ export default {
       noLanguage: this.$t('welcome.none'),
       iconDisplay: true,
       payload: null,
+      supportedLanguageCodes: [
+        LanguageCode.en,
+        LanguageCode['zh-CN'],
+        LanguageCode['zh-TW'],
+        LanguageCode.ja,
+        LanguageCode.ko,
+        LanguageCode.es,
+        LanguageCode.fr,
+        LanguageCode.de,
+        LanguageCode.it,
+        LanguageCode.pt,
+        LanguageCode.ca,
+        LanguageCode.ru,
+        LanguageCode.id,
+        LanguageCode.ar,
+      ],
     };
   },
   computed: {
@@ -52,7 +68,7 @@ export default {
       return this.$store.getters.preferenceData;
     },
     languages() {
-      return concat('', Object.keys(allCodes));
+      return concat('', this.supportedLanguageCodes);
     },
     primaryLanguage: {
       get() {

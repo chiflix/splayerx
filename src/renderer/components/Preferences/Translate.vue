@@ -107,7 +107,7 @@
 <script>
 import { concat } from 'lodash';
 import electron from 'electron';
-import { codeToLanguageName, allCodes } from '@/libs/language';
+import { codeToLanguageName, LanguageCode } from '@/libs/language';
 import Icon from '@/components/BaseIconContainer.vue';
 import BaseCheckBox from './BaseCheckBox.vue';
 
@@ -120,6 +120,26 @@ export default {
   props: {
     mouseDown: Boolean,
     isMoved: Boolean,
+    supportedLanguageCodes: {
+      type: Array,
+      default: () => [
+        LanguageCode.en,
+        LanguageCode['zh-CN'],
+        LanguageCode['zh-TW'],
+        LanguageCode.ja,
+        LanguageCode.ko,
+        LanguageCode.es,
+        LanguageCode.fr,
+        LanguageCode.de,
+        LanguageCode.it,
+        LanguageCode.pt,
+        LanguageCode.ca,
+        LanguageCode.ru,
+        LanguageCode.id,
+        LanguageCode.ar,
+      ],
+      required: true,
+    },
   },
   data() {
     return {
@@ -130,7 +150,7 @@ export default {
   },
   computed: {
     languages() {
-      return concat('', Object.keys(allCodes));
+      return concat('', this.supportedLanguageCodes);
     },
     primaryLanguages() {
       return this.languages.filter(language => language && language !== this.primaryLanguage);
