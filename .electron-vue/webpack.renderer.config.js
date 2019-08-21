@@ -231,17 +231,26 @@ let rendererConfig = {
   target: 'electron-renderer',
 };
 
+const sharedDefinedVariables = {
+  'process.platform': `"${process.platform}"`,
+};
+
+if (process.env.ENVIRONMENT_NAME === 'APPX') {
+  // quick fix for process.windowsStore undefined on Windows Store build
+  sharedDefinedVariables['process.windowsStore'] = 'true';
+}
 /**
  * Adjust rendererConfig for development settings
  */
 if (process.env.NODE_ENV !== 'production') {
   rendererConfig.plugins.push(
     new ForkTsCheckerWebpackPlugin({ eslint: true, vue: true }),
-    new webpack.DefinePlugin({
-      'process.platform': `"${process.platform}"`,
-      'process.env.SAGI_API': `"${process.env.SAGI_API || 'apis.stage.sagittarius.ai:8443'}"`,
-      __static: `"${path.join(__dirname, '../static').replace(/\\/g, '\\\\')}"`,
-    }),
+    new webpack.DefinePlugin(
+      Object.assign(sharedDefinedVariables, {
+        'process.env.SAGI_API': `"${process.env.SAGI_API || 'apis.stage.sagittarius.ai:8443'}"`,
+        __static: `"${path.join(__dirname, '../static').replace(/\\/g, '\\\\')}"`,
+      }),
+    ),
   );
 }
 
@@ -260,12 +269,13 @@ if (process.env.NODE_ENV === 'production') {
         ignore: ['.*'],
       },
     ]),
-    new webpack.DefinePlugin({
-      'process.platform': `"${process.platform}"`,
-      'process.env.SAGI_API': `"${process.env.SAGI_API || 'apis.sagittarius.ai:8443'}"`,
-      'process.env.SENTRY_RELEASE': `"${release}"`,
-      'process.env.NODE_ENV': '"production"',
-    }),
+    new webpack.DefinePlugin(
+      Object.assign(sharedDefinedVariables, {
+        'process.env.SAGI_API': `"${process.env.SAGI_API || 'apis.sagittarius.ai:8443'}"`,
+        'process.env.SENTRY_RELEASE': `"${release}"`,
+        'process.env.NODE_ENV': '"production"',
+      }),
+    ),
     new webpack.LoaderOptionsPlugin({
       minimize: true,
     }),

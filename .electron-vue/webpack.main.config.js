@@ -96,16 +96,18 @@ let mainConfig = {
   target: 'electron-main',
 };
 
+const sharedDefinedVariables = {};
+
 /**
  * Adjust mainConfig for development settings
  */
 if (process.env.NODE_ENV !== 'production') {
   mainConfig.plugins.push(
     new ForkTsCheckerWebpackPlugin({ eslint: true }),
-    new webpack.DefinePlugin({
+    new webpack.DefinePlugin(Object.assign(sharedDefinedVariables, {
       'process.env.SAGI_API': `"${process.env.SAGI_API || 'apis.stage.sagittarius.ai:8443'}"`,
       __static: `"${path.join(__dirname, '../static').replace(/\\/g, '\\\\')}"`,
-    }),
+    })),
   );
 }
 
@@ -115,11 +117,11 @@ if (process.env.NODE_ENV !== 'production') {
 if (process.env.NODE_ENV === 'production') {
   mainConfig.mode = 'production';
   mainConfig.plugins.push(
-    new webpack.DefinePlugin({
+    new webpack.DefinePlugin(Object.assign(sharedDefinedVariables, {
       'process.env.SAGI_API': `"${process.env.SAGI_API || 'apis.sagittarius.ai:8443'}"`,
       'process.env.SENTRY_RELEASE': `"${release}"`,
       'process.env.NODE_ENV': '"production"',
-    }),
+    })),
   );
   mainConfig.optimization = {
     minimizer: [
