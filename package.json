@@ -12,7 +12,7 @@
   },
   "scripts": {
     "build": "node .electron-vue/build.js && electron-builder --p never",
-    "build:appx": "node .electron-vue/build.js && electron-builder --p never -w appx",
+    "build:appx": "cross-env ENVIRONMENT_NAME=APPX node .electron-vue/build.js && electron-builder --p never -w appx",
     "build:mas": "scripts/mas-build.sh mas",
     "build:mas-dev": "scripts/mas-build.sh mas-dev",
     "build:clean": "cross-env BUILD_TARGET=clean node .electron-vue/build.js",
