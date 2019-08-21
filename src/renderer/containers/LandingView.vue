@@ -245,6 +245,7 @@ export default {
   },
   /* eslint-disable @typescript-eslint/no-explicit-any */
   created() {
+    this.createTouchBar();
     window.addEventListener('mousemove', this.globalMoveHandler);
     // Get all data and show
     if (!this.incognitoMode) {
@@ -314,6 +315,38 @@ export default {
     ...mapActions({
       updateInitialUrl: browsingActions.UPDATE_INITIAL_URL,
     }),
+    createIcon(iconPath: string) {
+      const { nativeImage } = this.$electron.remote;
+      return nativeImage.createFromPath(join(__static, iconPath)).resize({
+        width: 20,
+      });
+    },
+    createTouchBar() {
+      const { TouchBar } = this.$electron.remote;
+      const {
+        TouchBarLabel, TouchBarButton,
+        TouchBarSpacer,
+      } = TouchBar;
+
+      this.sidebarButton = new TouchBarButton({
+        icon: this.createIcon('touchBar/sidebar.png'),
+        click: () => {},
+      });
+      this.openFileButton = new TouchBarButton({
+        icon: this.createIcon('touchBar/addVideo.png'),
+        click: () => {
+          this.open();
+        },
+      });
+      this.touchBar = new TouchBar({
+        items: [
+          this.sidebarButton,
+          new TouchBarSpacer({ size: 'large' }),
+          this.openFileButton,
+        ],
+      });
+      this.$electron.remote.getCurrentWindow().setTouchBar(this.touchBar);
+    },
     handleBrowsingOpen(url: string) {
       this.updateInitialUrl(url);
       this.$router.push({
