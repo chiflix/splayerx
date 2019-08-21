@@ -297,7 +297,6 @@ export default {
   },
   /* eslint-disable @typescript-eslint/no-explicit-any */
   created() {
-    console.log(this.$electron.remote.app.getPath('userData'));
     this.createTouchBar();
     window.addEventListener('mousemove', this.globalMoveHandler);
     // Get all data and show
