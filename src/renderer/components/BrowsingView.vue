@@ -144,11 +144,13 @@ export default {
       const loadUrl = this.$electron.remote.getCurrentWindow()
         .getBrowserViews()[0].webContents.getURL();
       const recordIndex = this.supportedRecordHost.indexOf(urlParseLax(loadUrl).hostname);
-      this.$electron.ipcRenderer.send('update-enabled', 'history.back', this.$electron.remote.getCurrentWindow().getBrowserViews()[0].webContents.canGoBack());
-      this.$electron.ipcRenderer.send('update-enabled', 'history.forward', this.$electron.remote.getCurrentWindow().getBrowserViews()[0].webContents.canGoForward());
+      this.updateCanGoBack(this.$electron.remote.getCurrentWindow()
+        .getBrowserViews()[0].webContents.canGoBack());
+      this.updateCanGoForward(this.$electron.remote.getCurrentWindow()
+        .getBrowserViews()[0].webContents.canGoForward());
       if (val) {
         this.hasVideo = false;
-        this.$electron.ipcRenderer.send('update-enabled', 'window.pip', false);
+        this.updatePipState(false);
         this.$refs.browsingHeader.updateWebInfo({
           hasVideo: this.hasVideo,
           url: loadUrl,
@@ -165,7 +167,7 @@ export default {
         this.$electron.remote.getCurrentWindow().getBrowserViews()[0].webContents
           .executeJavaScript(this.calculateVideoNum, (r: number) => {
             this.hasVideo = recordIndex === 0 && !getVideoId(loadUrl).id ? false : !!r;
-            this.$electron.ipcRenderer.send('update-enabled', 'window.pip', this.hasVideo);
+            this.updatePipState(this.hasVideo);
             this.$refs.browsingHeader.updateWebInfo({
               hasVideo: this.hasVideo,
               url: loadUrl,
@@ -221,16 +223,18 @@ export default {
     });
     window.addEventListener('focus', () => {
       this.$electron.ipcRenderer.send('update-focused-window', true);
-      this.$electron.ipcRenderer.send('update-enabled', 'history.back', this.$electron.remote.getCurrentWindow().getBrowserViews()[0].webContents.canGoBack());
-      this.$electron.ipcRenderer.send('update-enabled', 'history.forward', this.$electron.remote.getCurrentWindow().getBrowserViews()[0].webContents.canGoForward());
-      this.$electron.ipcRenderer.send('update-enabled', 'window.keepPlayingWindowFront', false);
+      this.updateCanGoBack(this.$electron.remote.getCurrentWindow()
+        .getBrowserViews()[0].webContents.canGoBack());
+      this.updateCanGoForward(this.$electron.remote.getCurrentWindow()
+        .getBrowserViews()[0].webContents.canGoForward());
+      this.updateReload(true);
       const loadUrl = this.$electron.remote.getCurrentWindow()
         .getBrowserViews()[0].webContents.getURL();
       const recordIndex = this.supportedRecordHost.indexOf(urlParseLax(loadUrl).hostname);
       this.$electron.remote.getCurrentWindow().getBrowserViews()[0].webContents
         .executeJavaScript(this.calculateVideoNum, (r: number) => {
           this.hasVideo = recordIndex === 0 && !getVideoId(loadUrl).id ? false : !!r;
-          this.$electron.ipcRenderer.send('update-enabled', 'window.pip', this.hasVideo);
+          this.updatePipState(this.hasVideo);
         });
     });
     window.addEventListener('beforeunload', (e: BeforeUnloadEvent) => {
@@ -278,7 +282,7 @@ export default {
         this.$electron.remote.getCurrentWindow().getBrowserViews()[0].webContents
           .executeJavaScript(this.calculateVideoNum, (r: number) => {
             this.hasVideo = recordIndex === 0 && !getVideoId(loadUrl).id ? false : !!r;
-            this.$electron.ipcRenderer.send('update-enabled', 'window.pip', this.hasVideo);
+            this.updatePipState(this.hasVideo);
             this.$refs.browsingHeader.updateWebInfo({
               hasVideo: this.hasVideo,
               url: loadUrl,
@@ -341,13 +345,33 @@ export default {
       updateBarrageOpen: browsingActions.UPDATE_BARRAGE_OPEN,
       updateIsPip: browsingActions.UPDATE_IS_PIP,
     }),
+    updateReload(val: boolean) {
+      if (this.$electron.remote.getCurrentWindow().isFocused()) {
+        this.$electron.ipcRenderer.send('update-enabled', 'history.reload', val);
+      }
+    },
+    updatePipState(available: boolean) {
+      if (this.$electron.remote.getCurrentWindow().isFocused()) {
+        this.$electron.ipcRenderer.send('update-enabled', 'window.pip', available);
+      }
+    },
+    updateCanGoBack(val: boolean) {
+      if (this.$electron.remote.getCurrentWindow().isFocused()) {
+        this.$electron.ipcRenderer.send('update-enabled', 'history.back', val);
+      }
+    },
+    updateCanGoForward(val: boolean) {
+      if (this.$electron.remote.getCurrentWindow().isFocused()) {
+        this.$electron.ipcRenderer.send('update-enabled', 'history.forward', val);
+      }
+    },
     handleBookmarkOpen(url: string) {
       const currentUrl = this.$electron.remote.getCurrentWindow()
         .getBrowserView().webContents.getURL();
       if (urlParseLax(currentUrl).hostname !== urlParseLax(url).hostname) {
         this.removeListener();
         this.hasVideo = false;
-        this.$electron.ipcRenderer.send('update-enabled', 'window.pip', false);
+        this.updatePipState(false);
         this.$refs.browsingHeader.updateWebInfo({
           hasVideo: this.hasVideo,
         });
@@ -363,13 +387,13 @@ export default {
       this.$electron.remote.getCurrentWindow().getBrowserViews()[0].webContents.addListener('new-window', (e: Event, url: string, disposition: string) => {
         this.newWindow(url, disposition);
       });
-      this.$electron.remote.getCurrentWindow().getBrowserViews()[0].webContents.addListener('did-start-navigation', () => {
+      this.$electron.remote.getCurrentWindow().getBrowserViews()[0].webContents.addListener('did-start-loading', () => {
         const url = this.$electron.remote.getCurrentWindow()
           .getBrowserViews()[0].webContents.getURL();
         if (url !== 'about:blank' && !this.isPip) {
           this.$electron.ipcRenderer.send('keep-browsers-cache', url);
         }
-        this.didStartNavigation(url);
+        this.didStartLoading(url);
       });
       this.$electron.remote.getCurrentWindow().getBrowserViews()[0].webContents.addListener('did-stop-loading', this.didStopLoading);
     },
@@ -379,7 +403,7 @@ export default {
       currentWebContents.removeListener('did-stop-loading', this.didStopLoading);
       currentWebContents.removeListener('dom-ready', this.domReady);
       currentWebContents.removeListener('ipc-message', this.ipcMessage);
-      currentWebContents.removeListener('did-start-navigation', this.didStartNavigation);
+      currentWebContents.removeListener('did-start-navigation', this.didStartLoading);
       currentWebContents.removeListener('new-window', this.newWindow);
     },
     newWindow(url: string, disposition: string) {
@@ -394,7 +418,7 @@ export default {
       this.$electron.remote.getCurrentWindow()
         .getBrowserViews()[0].setAutoResize({ width: true, height: true });
     },
-    didStartNavigation(url: string) {
+    didStartLoading(url: string) {
       if (!url || url === 'about:blank') return;
       this.startTime = new Date().getTime();
       this.loadingState = true;
@@ -639,7 +663,7 @@ export default {
           this.updateIsPip(true);
           this.enterPipOperation();
         }
-        this.$electron.ipcRenderer.send('update-enabled', 'window.pip', false);
+        this.updatePipState(false);
         this.$refs.browsingHeader.updateWebInfo({
           hasVideo: false,
           url: loadUrl,
@@ -651,7 +675,7 @@ export default {
         this.$electron.remote.getCurrentWindow().getBrowserViews()[0].webContents
           .executeJavaScript(this.calculateVideoNum, (r: number) => {
             this.hasVideo = recordIndex === 0 && !getVideoId(loadUrl).id ? false : !!r;
-            this.$electron.ipcRenderer.send('update-enabled', 'window.pip', this.hasVideo);
+            this.updatePipState(this.hasVideo);
             this.$refs.browsingHeader.updateWebInfo({
               hasVideo: this.hasVideo,
             });

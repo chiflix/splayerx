@@ -318,7 +318,6 @@ function createBrowsingWindow() {
     });
   }
   browsingWindow.once('ready-to-show', () => {
-    browsingWindow.webContents.openDevTools();
     // browsingWindow.show();
   });
   browsingWindow.on('leave-full-screen', () => {
@@ -452,7 +451,7 @@ function registerMainWindowEvent(mainWindow) {
     }
   });
   ipcMain.on('store-pip-pos', () => {
-    if (browsingWindow) {
+    if (!browsingWindow.isClosable()) {
       mainWindow.send('store-pip-pos', browsingWindow.getPosition());
     }
   });
@@ -461,15 +460,17 @@ function registerMainWindowEvent(mainWindow) {
   });
   ipcMain.on('pip-window-close', () => {
     const views = browsingWindow.getBrowserViews();
-    const index = tabGroups.findIndex(tab => Object.keys(tab)[0] === currentPipHostname);
-    const url = tabGroups[index][currentPipHostname]
-      .find(view => view.id !== views[0].id).webContents.getURL();
-    views[0].webContents.loadURL(url);
-    views.forEach((view) => {
-      browsingWindow.removeBrowserView(view);
-    });
-    tabGroups[index][currentPipHostname].reverse();
-    mainWindow.send('update-pip-state');
+    if (views.length) {
+      const index = tabGroups.findIndex(tab => Object.keys(tab)[0] === currentPipHostname);
+      const url = tabGroups[index][currentPipHostname]
+        .find(view => view.id !== views[0].id).webContents.getURL();
+      views[0].webContents.loadURL(url);
+      views.forEach((view) => {
+        browsingWindow.removeBrowserView(view);
+      });
+      tabGroups[index][currentPipHostname].reverse();
+      mainWindow.send('update-pip-state');
+    }
   });
   ipcMain.on('remove-browser', () => {
     const mainView = mainWindow.getBrowserView();
@@ -480,12 +481,11 @@ function registerMainWindowEvent(mainWindow) {
         const views = browsingWindow.getBrowserViews();
         views.forEach((view) => {
           browsingWindow.removeBrowserView(view);
+          view.destroy();
         });
       }
-      browserViews.forEach((view) => {
-        view.destroy();
-      });
-      if (browsingWindow) browsingWindow.hide();
+      mainView.destroy();
+      if (browsingWindow) browsingWindow.close();
     }
   });
   ipcMain.on('shift-page-tab', (evt, url) => {
@@ -527,10 +527,12 @@ function registerMainWindowEvent(mainWindow) {
         mainWindow.removeBrowserView(mainWindow.getBrowserViews().find(view => view.id === id));
       } else {
         mainWindow.addBrowserView(browserViews[0]);
-        mainWindow.removeBrowserView(mainWindow.getBrowserViews().find(view => view.id === id));
         browsingWindow.removeBrowserView(browsingWindow.getBrowserView());
         browsingWindow.addBrowserView(browserViews[1]);
       }
+      setTimeout(() => {
+        mainWindow.removeBrowserView(mainWindow.getBrowserViews().find(view => view.id === id));
+      }, 150);
     }
     const mainId = mainWindow.getBrowserViews()[0].id;
     const browserId = browsingWindow.getBrowserViews()[0].id;
@@ -591,12 +593,14 @@ function registerMainWindowEvent(mainWindow) {
   });
   ipcMain.on('mousemove', () => {
     if (browsingWindow && browsingWindow.isFocused()) {
-      pipControlView.webContents.executeJavaScript('document.querySelector(".pip-buttons").style.display = "";');
+      pipControlView.webContents.executeJavaScript('document.querySelector(".pip-buttons").style.display = "flex";');
       if (pipTimer) {
         clearTimeout(pipTimer);
       }
       pipTimer = setTimeout(() => {
-        pipControlView.webContents.executeJavaScript('document.querySelector(".pip-buttons").style.display = "none";');
+        if (pipControlView && !pipControlView.isDestroyed()) {
+          pipControlView.webContents.executeJavaScript('document.querySelector(".pip-buttons").style.display = "none";');
+        }
       }, 3000);
     }
   });
@@ -721,13 +725,12 @@ function registerMainWindowEvent(mainWindow) {
     titlebarView.setBounds({
       x: 0, y: 0, width: browsingWindow.getSize()[0], height: 36,
     });
-    browsingWindow.blur();
+    menuService.updateFocusedWindow(false);
+    browsingWindow.focus();
   });
   ipcMain.on('enter-pip', () => {
     createPipControlView();
     createTitlebarView();
-    titlebarView.webContents.openDevTools({ mode: 'detach' });
-    pipControlView.webContents.openDevTools({ mode: 'detach' });
     if (!browsingWindow) {
       createBrowsingWindow();
       const index = tabGroups.findIndex(tab => Object.keys(tab)[0] === currentBrowserHostname);
@@ -754,12 +757,19 @@ function registerMainWindowEvent(mainWindow) {
     }
     pipControlView.webContents.loadURL(`file:${require('path').resolve(__static, 'pip/pipControl.html')}`);
     pipControlView.setBackgroundColor('#00FFFFFF');
+    pipControlView.setBounds({
+      x: Math.round(browsingWindow.getSize()[0] - 65),
+      y: Math.round(browsingWindow.getSize()[1] / 2 - 54),
+      width: 50,
+      height: 104,
+    });
     titlebarView.webContents.loadURL(titlebarUrl);
     titlebarView.setBackgroundColor('#00FFFFFF');
     titlebarView.setBounds({
       x: 0, y: 0, width: browsingWindow.getSize()[0], height: 36,
     });
-    browsingWindow.blur();
+    menuService.updateFocusedWindow(false);
+    browsingWindow.focus();
   });
   ipcMain.on('set-bounds', (evt, args) => {
     if (pipControlView) pipControlView.setBounds(args.control);
@@ -791,6 +801,8 @@ function registerMainWindowEvent(mainWindow) {
     } else {
       browsingWindow.hide();
     }
+    menuService.updateFocusedWindow(true);
+    mainWindow.focus();
   });
   ipcMain.on('update-header-to-show', (e, headerToShow) => {
     mainWindow.send('update-header-to-show', headerToShow);
@@ -1179,5 +1191,8 @@ app.on('activate', () => {
     if (app.isReady()) createMainWindow();
   } else if (!mainWindow.isVisible()) {
     mainWindow.show();
+  }
+  if (browsingWindow && browsingWindow.isMinimized()) {
+    browsingWindow.restore();
   }
 });

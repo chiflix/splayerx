@@ -21,11 +21,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const pip = document.querySelector('.pip');
   const pipBtns = document.querySelector('.pip-buttons');
   if (pipBtns) {
-    pipBtns.style.display = '';
+    pipBtns.style.display = 'flex';
     pipBtns.addEventListener('mouseenter', () => {
       if (pipTimer) clearTimeout(pipTimer);
       sendToHost('mouseenter', 'mouseenter');
-      pipBtns.style.display = '';
+      pipBtns.style.display = 'flex';
     });
     pipTimer = setTimeout(() => {
       pipBtns.style.display = 'none';

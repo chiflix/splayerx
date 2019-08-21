@@ -29,11 +29,6 @@ export default {
     });
     window.addEventListener('focus', () => {
       electron.ipcRenderer.send('update-focused-window', false);
-      electron.ipcRenderer.send('update-enabled', 'window.pip', true);
-      electron.ipcRenderer.send('update-enabled', 'window.keepPlayingWindowFront', true);
-      electron.ipcRenderer.send('update-enabled', 'history.back', false);
-      electron.ipcRenderer.send('update-enabled', 'history.forward', false);
-      electron.ipcRenderer.send('update-enabled', 'history.reload', false);
     });
     window.addEventListener('resize', throttle(() => {
       const size = electron.remote.getCurrentWindow().getSize();

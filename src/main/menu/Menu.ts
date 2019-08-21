@@ -186,6 +186,12 @@ export default class Menubar {
 
   public updateFocusedWindow(isMainWindow: boolean) {
     if (this.focusOnMainWindow !== isMainWindow) {
+      if (!isMainWindow) {
+        this.updateMenuItemEnabled('history.back', false);
+        this.updateMenuItemEnabled('history.forward', false);
+        this.updateMenuItemEnabled('history.reload', false);
+        this.updateMenuItemEnabled('window.pip', true);
+      }
       this.focusOnMainWindow = isMainWindow;
       this.refreshBrowsingWindowMenu();
     }
@@ -389,6 +395,7 @@ export default class Menubar {
     const minimizeMenuItem = items.find((item: MenubarMenuItem) => item.id === 'window.minimize') as IMenubarMenuItemRole;
     const maxmizeMenuItem = items.find((item: MenubarMenuItem) => item.id === 'window.maxmize') as IMenubarMenuItemAction;
     const landingViewMenuItem = items.find((item: MenubarMenuItem) => item.id === 'window.backToLandingView') as IMenubarMenuItemAction;
+    floatMenuItem.enabled = !this.focusOnMainWindow;
 
     const actions = [];
     actions.push(...[
