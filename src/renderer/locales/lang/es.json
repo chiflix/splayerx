@@ -136,6 +136,7 @@
     },
     "splayerx": {
       "about": "Acerca de SPlayer",
+      "checkForUpdates": "",
       "hide": "Esconder",
       "hideOthers": "Esconder otros",
       "preferences": "Preferencias",
@@ -296,6 +297,16 @@
     "agree": "OK",
     "setting": "Configurando",
     "content": "Protección de privacidad inteligente está activada. Se eliminará el historial de reproducción sensorial o no adecuado para trabajar."
+  },
+  "checkForUpdatesBubble": {
+    "needUpdate": {
+      "confirm": "",
+      "cancel": "",
+      "content": ""
+    },
+    "noNeed": {
+      "content": ""
+    }
   },
   "recentPlaylist": {
     "folderSource": "Carpeta",
