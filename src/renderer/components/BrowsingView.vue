@@ -257,7 +257,6 @@ export default {
     },
   },
   created() {
-    this.createTouchBar();
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [570, 375]);
     windowRectService.calculateWindowRect(
       this.browsingSize,
@@ -479,13 +478,13 @@ export default {
         click: () => {},
       });
       this.backwardButton = new TouchBarButton({
-        icon: this.createIcon('touchBar/backward.png'),
+        icon: this.createIcon(`touchBar/${this.$refs.webView.canGoBack() ? 'backward' : 'backward-disabled'}.png`),
         click: () => {
           this.$bus.$emit('toggle-back');
         },
       });
       this.forwardButton = new TouchBarButton({
-        icon: this.createIcon('touchBar/forward.png'),
+        icon: this.createIcon(`touchBar/${this.$refs.webView.canGoForward() ? 'forward' : 'forward-disabled'}.png`),
         click: () => {
           this.$bus.$emit('toggle-forward');
         },
