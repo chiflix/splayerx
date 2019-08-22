@@ -136,7 +136,7 @@
     },
     "splayerx": {
       "about": "Acerca de SPlayer",
-      "checkForUpdates": "",
+      "checkForUpdates": "Buscar actualizaciones",
       "hide": "Esconder",
       "hideOthers": "Esconder otros",
       "preferences": "Preferencias",
@@ -300,12 +300,12 @@
   },
   "checkForUpdatesBubble": {
     "needUpdate": {
-      "confirm": "",
-      "cancel": "",
-      "content": ""
+      "confirm": "Descargar",
+      "cancel": "Saltar",
+      "content": "SPlayer {version} está disponible, ¿quieres descargarlo ahora?"
     },
     "noNeed": {
-      "content": ""
+      "content": "SPlayer está actualizado. Versión {version}"
     }
   },
   "recentPlaylist": {
