@@ -20,7 +20,7 @@ import {
 } from '@/constants';
 import { codeToLanguageName, LanguageCode } from './language';
 import { checkPathExist, write, deleteDir } from './file';
-import { log } from './Log';
+import { isBetaVersion } from '../../shared/common/platform';
 
 /**
  * @description 获取electron应用用户目录下的设定的缓存路径
@@ -368,28 +368,23 @@ export function checkForUpdate(
     localStorage.removeItem('skip-check-for-update');
   }
 
-  const url = /beta/gi.test(version)
+  const url = isBetaVersion
     ? 'https://beta.splayer.org/beta/latest.json' : 'https://www.splayer.org/stable/latest.json';
-  return new Promise((resolve, reject) => {
-    axios.get(url, { timeout: 10000 }).then((res: AxiosResponse) => {
-      log.debug('check', res);
-      const result = {
-        version,
-        isLastest: true,
-        landingPage: '',
-        url: '',
-      };
-      // check package.json.version with res.data
-      if (res.data && res.data.name !== version) {
-        result.version = res.data.name;
-        result.isLastest = false;
-        result.landingPage = res.data.landingPage;
-        result.url = res.data.files[process.platform].url;
-      }
-      resolve(result);
-    }).catch((err: Error) => {
-      reject(err);
-    });
+  return axios.get(url, { timeout: 10000 }).then((res: AxiosResponse) => {
+    const result = {
+      version,
+      isLastest: true,
+      landingPage: '',
+      url: '',
+    };
+    // check package.json.version with res.data
+    if (res.data && res.data.name !== version) {
+      result.version = res.data.name;
+      result.isLastest = false;
+      result.landingPage = res.data.landingPage;
+      result.url = res.data.files[process.platform].url;
+    }
+    return result;
   });
 }
 

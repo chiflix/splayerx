@@ -44,13 +44,13 @@ import { checkForUpdate } from '@/libs/utils';
 import asyncStorage from '@/helpers/asyncStorage';
 import { videodata } from '@/store/video';
 import { addBubble } from '@/helpers/notificationControl';
-import { SUBTITLE_OFFLINE, REQUEST_TIMEOUT } from '@/helpers/notificationcodes';
+import { CHECK_FOR_UPDATES_OFFLINE, REQUEST_TIMEOUT } from '@/helpers/notificationcodes';
 import { SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, LOAD_SUBVIDEO_FAILED } from './helpers/notificationcodes';
 import InputPlugin, { getterTypes as iGT } from '@/plugins/input';
 import { VueDevtools } from './plugins/vueDevtools.dev';
 import { SubtitleControlListItem, Type, NOT_SELECTED_SUBTITLE } from './interfaces/ISubtitle';
 import { getValidVideoRegex, getValidSubtitleRegex } from '../shared/utils';
-import { IsBetaVersion } from '../shared/common/platform';
+import { isBetaVersion, isWindowsExE } from '../shared/common/platform';
 import MenuService from './services/menu/MenuService';
 
 
@@ -662,7 +662,7 @@ new Vue({
       this.addLocalSubtitlesWithSelect(file);
     });
     // win32 exe || mac beta
-    const canUseCheckForUpdates = (process.platform === 'win32' && !process.windowsStore) || IsBetaVersion;
+    const canUseCheckForUpdates = isWindowsExE || isBetaVersion;
     if (navigator.onLine && canUseCheckForUpdates) {
       // auto check for updates
       checkForUpdate(true).then((
@@ -680,7 +680,7 @@ new Vue({
       // if not (win32 exe || mac beta) return
       if (!canUseCheckForUpdates) return;
       // check online
-      if (!navigator.onLine) return addBubble(SUBTITLE_OFFLINE);
+      if (!navigator.onLine) return addBubble(CHECK_FOR_UPDATES_OFFLINE);
       checkForUpdate(false).then((
         json: { version: string, isLastest: boolean, landingPage: string, url: string }
       ) => {
