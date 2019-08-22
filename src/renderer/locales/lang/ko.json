@@ -302,7 +302,7 @@
     "needUpdate": {
       "confirm": "",
       "cancel": "",
-      "content": ""
+      "content": "새 버전 {version} 이릴리스되었습니다. 업데이트를 즉시 다운로드 하시겠습니까?"
     },
     "noNeed": {
       "content": ""
