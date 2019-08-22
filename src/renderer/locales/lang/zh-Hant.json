@@ -136,7 +136,7 @@
     },
     "splayerx": {
       "about": "關於射手影音",
-      "checkForUpdates": "",
+      "checkForUpdates": "檢查更新",
       "hide": "隱藏射手影音",
       "hideOthers": "隱藏其他",
       "preferences": "偏好設置",
@@ -300,12 +300,12 @@
   },
   "checkForUpdatesBubble": {
     "needUpdate": {
-      "confirm": "",
-      "cancel": "",
-      "content": ""
+      "confirm": "下載",
+      "cancel": "略過",
+      "content": "新版本 {version} 已發布，是否立刻下載更新？"
     },
     "noNeed": {
-      "content": ""
+      "content": "目前已經是最新版本 {version}"
     }
   },
   "recentPlaylist": {
