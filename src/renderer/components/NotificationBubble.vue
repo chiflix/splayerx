@@ -124,6 +124,7 @@ export default {
       checkForUpdatesContent: '',
       checkForUpdatesDownloadUrl: '',
       checkForUpdatesReleaseUrl: '',
+      checkForUpdatesVersion: '',
     };
   },
   computed: {
@@ -175,6 +176,7 @@ export default {
       this.checkForUpdatesContent = this.$t('checkForUpdatesBubble.needUpdate.content', { version: info.version });
       this.checkForUpdatesDownloadUrl = info.url;
       this.checkForUpdatesReleaseUrl = info.landingPage;
+      this.checkForUpdatesVersion = info.version;
       this.showUpdateBubble = true;
     });
   },
@@ -236,8 +238,9 @@ export default {
       this.showUpdateBubble = false;
     },
     cancelUpdate() {
-      // today not to show
-      skipCheckForUpdate();
+      // this version not auto check show
+      const { checkForUpdatesVersion } = this;
+      skipCheckForUpdate(checkForUpdatesVersion);
       this.showUpdateBubble = false;
     },
   },

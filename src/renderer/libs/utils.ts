@@ -353,21 +353,7 @@ export async function findNsfwFistFilter() {
 export function checkForUpdate(
   auto: boolean,
 ): Promise<{ version: string, isLastest: boolean, landingPage: string, url: string }> {
-  const result = localStorage.getItem('skip-check-for-update');
-  if (auto && result) {
-    const date = new Date(result);
-    const dateString = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
-    const today = new Date();
-    const todayString = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
-    if (dateString === todayString) {
-      // skip
-      return new Promise((resolve, reject) => {
-        reject(new Error('skip'));
-      });
-    }
-    localStorage.removeItem('skip-check-for-update');
-  }
-
+  const skipVersion = localStorage.getItem('skip-check-for-update');
   const url = isBetaVersion
     ? 'https://beta.splayer.org/beta/latest.json' : 'https://www.splayer.org/stable/latest.json';
   return axios.get(url, { timeout: 10000 }).then((res: AxiosResponse) => {
@@ -378,7 +364,7 @@ export function checkForUpdate(
       url: '',
     };
     // check package.json.version with res.data
-    if (res.data && res.data.name !== version) {
+    if (res.data && res.data.name !== version && !(res.data.name === skipVersion && auto)) {
       result.version = res.data.name;
       result.isLastest = false;
       result.landingPage = res.data.landingPage;
@@ -388,6 +374,11 @@ export function checkForUpdate(
   });
 }
 
-export function skipCheckForUpdate() {
-  localStorage.setItem('skip-check-for-update', new Date().toDateString());
+/**
+ * @description skip version
+ * @author tanghaixiang
+ * @param {string} version product version
+ */
+export function skipCheckForUpdate(version: string) {
+  localStorage.setItem('skip-check-for-update', version);
 }

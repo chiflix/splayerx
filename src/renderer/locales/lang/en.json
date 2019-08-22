@@ -302,7 +302,7 @@
   "checkForUpdatesBubble": {
     "needUpdate": {
       "confirm": "Download",
-      "cancel": "Later",
+      "cancel": "Skip",
       "content": "SPlayer {version} is now available. \nWould you like to download it now?"
     },
     "noNeed": {
