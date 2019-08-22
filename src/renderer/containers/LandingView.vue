@@ -332,6 +332,10 @@ export default {
     this.$bus.$on('drop', () => {
       if (this.$refs.mask) this.$refs.mask.style.setProperty('background-color', 'rgba(255, 255, 255, 0)');
     });
+    this.$event.on('side-bar-mouseup', () => {
+      this.showSidebar = !this.showSidebar;
+      this.$emit('update-side-bar', this.showSidebar);
+    });
   },
   async mounted() {
     this.$store.dispatch('refreshVersion');
@@ -349,10 +353,6 @@ export default {
     });
     this.$bus.$on('open-url-show', (val: boolean) => {
       this.openUrlShow = val;
-    });
-    this.$bus.$on('side-bar-mouseup', () => {
-      this.showSidebar = !this.showSidebar;
-      this.$emit('update-side-bar', this.showSidebar);
     });
     window.addEventListener('keyup', this.keyboardHandler);
     this.$electron.ipcRenderer.on('quit', () => {

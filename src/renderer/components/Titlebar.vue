@@ -212,7 +212,7 @@ export default {
   },
   methods: {
     handleSidebar() {
-      this.$bus.$emit('side-bar-mouseup');
+      this.$event.emit('side-bar-mouseup');
     },
     handleDbClick() {
       if (!this.isMaximized) {
