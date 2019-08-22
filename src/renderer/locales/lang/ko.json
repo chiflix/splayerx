@@ -136,6 +136,7 @@
     },
     "splayerx": {
       "about": "SPlayer 정보",
+      "checkForUpdates": "",
       "hide": "숨는 장소",
       "hideOthers": "다른 사람 숨기기",
       "preferences": "환경 설정",
@@ -296,6 +297,16 @@
     "agree": "승인",
     "setting": "설정",
     "content": "스마트 개인 정보 보호가 사용됩니다. 민감하거나 작동에 적합하지 않은 재생 기록은 삭제됩니다."
+  },
+  "checkForUpdatesBubble": {
+    "needUpdate": {
+      "confirm": "",
+      "cancel": "",
+      "content": ""
+    },
+    "noNeed": {
+      "content": ""
+    }
   },
   "recentPlaylist": {
     "folderSource": "폴더",
