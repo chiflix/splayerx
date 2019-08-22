@@ -376,7 +376,8 @@ export default {
       return steps * (this.thumbnailWidth + this.marginRight);
     },
     handleSidebarIcon(site: string) {
-      this.updateInitialUrl(`https://www.${site}.com`);
+      this.$electron.ipcRenderer.send('add-browsing');
+      this.$electron.ipcRenderer.send('create-browser-view', { url: `https://www.${site}.com` });
       this.$router.push({
         name: 'browsing-view',
       });

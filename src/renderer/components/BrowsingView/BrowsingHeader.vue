@@ -16,7 +16,7 @@
     />
     <browsing-favicons
       :record-url="recordUrl"
-      :update-initial-url="updateInitialUrl"
+      :handle-bookmark-open="handleBookmarkOpen"
       :style="{
         order: isDarwin ? 2 : 3,
       }"
@@ -33,7 +33,7 @@
         zIndex: '6',
         order: isDarwin ? 3 : 1,
         webkitAppRegion: 'no-drag',
-        cursor: webInfo.hasVideo ? 'pointer' : '',
+        cursor: hasVideo ? 'pointer' : '',
       }"
     >
       <Icon
@@ -48,8 +48,8 @@
 </template>
 
 <script lang="ts">
-import { mapActions, mapGetters } from 'vuex';
-import { Browsing as browsingActions } from '@/store/actionTypes';
+import electron from 'electron';
+import { mapGetters } from 'vuex';
 import BrowsingFavicons from '@/components/BrowsingView/BrowsingFavicons.vue';
 import BrowsingInput from '@/components/BrowsingView/BrowsingInput.vue';
 import BrowsingControl from '@/components/BrowsingView/BrowsingControl.vue';
@@ -80,33 +80,51 @@ export default {
       type: Function,
       required: true,
     },
+    handleBookmarkOpen: {
+      type: Function,
+      required: true,
+    },
   },
   data() {
     return {
       showOpenUrl: false,
-      webInfo: {},
       backType: 'backDisabled',
       forwardType: 'forwardDisabled',
+      hasVideo: false,
+      url: '',
+      canGoBack: false,
+      canGoForward: false,
     };
   },
   computed: {
     ...mapGetters(['recordUrl', 'isMaximized']),
     picInPicType() {
-      return this.webInfo.hasVideo ? 'pip' : 'pipDisabled';
+      return this.hasVideo ? 'pip' : 'pipDisabled';
     },
     isDarwin() {
       return process.platform === 'darwin';
     },
+    webInfo() {
+      return {
+        canGoBack: this.canGoBack,
+        canGoForward: this.canGoForward,
+      };
+    },
+  },
+  watch: {
+    canGoBack(val: boolean) {
+      this.backType = val ? 'back' : 'backDisabled';
+    },
+    canGoForward(val: boolean) {
+      this.forwardType = val ? 'forward' : 'forwardDisabled';
+    },
   },
   methods: {
-    ...mapActions({
-      updateInitialUrl: browsingActions.UPDATE_INITIAL_URL,
-    }),
     handleDbClick() {
       if (!this.isMaximized) {
-        this.$electron.ipcRenderer.send('callMainWindowMethod', 'maximize');
+        electron.ipcRenderer.send('callMainWindowMethod', 'maximize');
       } else {
-        this.$electron.ipcRenderer.send('callMainWindowMethod', 'unmaximize');
+        electron.ipcRenderer.send('callMainWindowMethod', 'unmaximize');
       }
     },
     closeUrlInput() {
@@ -116,15 +134,17 @@ export default {
       if (this.openFileByPlayingView(inputUrl)) {
         this.openUrlFile(inputUrl);
       } else {
-        this.updateInitialUrl(inputUrl);
+        this.$electron.remote.BrowserView.getAllViews()[1].webContents.loadURL(inputUrl);
+        this.$electron.remote.BrowserView.getAllViews()[0].webContents.loadURL(inputUrl);
       }
     },
     updateWebInfo(info: {
-      hasVideo: boolean, url: string, canGoBack: boolean, canGoForward: boolean
+      hasVideo?: boolean, url?: string, canGoBack?: boolean, canGoForward?: boolean
     }) {
-      this.webInfo = info;
-      this.backType = info.canGoBack ? 'back' : 'backDisabled';
-      this.forwardType = info.canGoForward ? 'forward' : 'forwardDisabled';
+      const keys = Object.keys(info);
+      keys.forEach((key: string) => {
+        this[key] = info[key];
+      });
     },
   },
 };
