@@ -50,7 +50,7 @@ import InputPlugin, { getterTypes as iGT } from '@/plugins/input';
 import { VueDevtools } from './plugins/vueDevtools.dev';
 import { SubtitleControlListItem, Type, NOT_SELECTED_SUBTITLE } from './interfaces/ISubtitle';
 import { getValidVideoRegex, getValidSubtitleRegex } from '../shared/utils';
-import { isBetaVersion, isWindowsExE } from '../shared/common/platform';
+import { isWindowsExE, isMacintoshDMG } from '../shared/common/platform';
 import MenuService from './services/menu/MenuService';
 
 
@@ -661,8 +661,8 @@ new Vue({
     this.$electron.ipcRenderer.on('add-local-subtitles', (event: Event, file: string[]) => {
       this.addLocalSubtitlesWithSelect(file);
     });
-    // win32 exe || mac beta
-    const canUseCheckForUpdates = isWindowsExE || isBetaVersion;
+    // win32 exe || mac dmg
+    const canUseCheckForUpdates = isWindowsExE || isMacintoshDMG;
     if (navigator.onLine && canUseCheckForUpdates) {
       // auto check for updates
       checkForUpdate(true).then((

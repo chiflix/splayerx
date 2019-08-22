@@ -128,10 +128,12 @@ export default {
     &:hover {
       background-image: none;
       background-color: rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.7);
     }
     &:active {
       background-image: none;
       background-color: rgba(0,0,0,0.2);
+      color: rgba(255,255,255,0.7);
     }
     &--lower {
       cursor: pointer;
@@ -141,7 +143,7 @@ export default {
       background: none;
       color: rgba(255,255,255,0.2);
       &:hover {
-        color: rgba(255,255,255,0.4);
+        color: rgba(255,255,255,0.5);
       }
     }
   }

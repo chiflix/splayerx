@@ -303,7 +303,7 @@
     "needUpdate": {
       "confirm": "Download",
       "cancel": "Skip",
-      "content": "SPlayer {version} is now available. \nWould you like to download it now?"
+      "content": "SPlayer {version} is now available, would you like to download it now?"
     },
     "noNeed": {
       "content": "SPlayer is up to date. Version {version}"

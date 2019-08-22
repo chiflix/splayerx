@@ -12,7 +12,7 @@ import {
   IMenubarMenuState,
   MenuName,
 } from './common/Menubar';
-import { isMacintosh, isBetaVersion, isWindowsExE } from '../../shared/common/platform';
+import { isMacintosh, isWindowsExE, isMacintoshDMG } from '../../shared/common/platform';
 import Locale from '../../shared/common/localize';
 import menuTemplate from './menu.json';
 import { IMenuDisplayInfo } from '../../renderer/interfaces/IRecentPlay';
@@ -706,8 +706,8 @@ export default class Menubar {
     actions.push(...[
       separator(),
     ]);
-    // beta
-    if (isBetaVersion && this._routeName !== 'welcome-privacy' && this._routeName !== 'language-setting') {
+    // mac dmg
+    if (isMacintoshDMG && this._routeName !== 'welcome-privacy' && this._routeName !== 'language-setting') {
       actions.push(...[
         checkForUpdates,
         separator(),
