@@ -5,12 +5,14 @@ import { times, padStart, sortBy } from 'lodash';
 import { sep, basename, join } from 'path';
 import { ensureDir } from 'fs-extra';
 import { remote } from 'electron';
+import axios, { AxiosResponse } from 'axios';
 // @ts-ignore
 import { promises as fsPromises } from 'fs';
 // @ts-ignore
 import nzh from 'nzh';
 import { SubtitleControlListItem, Type } from '@/interfaces/ISubtitle';
 import { IEmbeddedOrigin } from '@/services/subtitle';
+import { version } from '@/../../package.json';
 import {
   ELECTRON_CACHE_DIRNAME,
   DEFAULT_DIRNAME,
@@ -18,6 +20,7 @@ import {
 } from '@/constants';
 import { codeToLanguageName, LanguageCode } from './language';
 import { checkPathExist, write, deleteDir } from './file';
+import { isBetaVersion } from '../../shared/common/platform';
 
 /**
  * @description 获取electron应用用户目录下的设定的缓存路径
@@ -316,9 +319,9 @@ export function crc32(str: string, crc?: number) {
   let x = 0; // an hex number
   crc = crc ^ (-1); // eslint-disable-line
   for (let i = 0, iTop = str.length; i < iTop; i += 1) {
-    n = ( crc ^ str.charCodeAt( i ) ) & 0xFF; // eslint-disable-line
-    x = Number('0x' + table.substr( n * 9, 8 )); // eslint-disable-line
-    crc = ( crc >>> 8 ) ^ x; // eslint-disable-line
+    n = (crc ^ str.charCodeAt(i)) & 0xFF; // eslint-disable-line
+    x = Number('0x' + table.substr(n * 9, 8)); // eslint-disable-line
+    crc = (crc >>> 8) ^ x; // eslint-disable-line
   }
   return crc ^ (-1); // eslint-disable-line
 }
@@ -339,4 +342,43 @@ export async function findNsfwFistFilter() {
   }
   deleteDir(path);
   return success;
+}
+
+/**
+ * @description check for updates
+ * @author tanghaixiang
+ * @param {boolean} auto is auto check for updates
+ * @returns {Promise} example { version: "4.2.2", isLastest: true }
+ */
+export function checkForUpdate(
+  auto: boolean,
+): Promise<{ version: string, isLastest: boolean, landingPage: string, url: string }> {
+  const skipVersion = localStorage.getItem('skip-check-for-update');
+  const url = isBetaVersion
+    ? 'https://beta.splayer.org/beta/latest.json' : 'https://www.splayer.org/stable/latest.json';
+  return axios.get(url, { timeout: 10000 }).then((res: AxiosResponse) => {
+    const result = {
+      version,
+      isLastest: true,
+      landingPage: '',
+      url: '',
+    };
+    // check package.json.version with res.data
+    if (res.data && res.data.name !== version && !(res.data.name === skipVersion && auto)) {
+      result.version = res.data.name;
+      result.isLastest = false;
+      result.landingPage = res.data.landingPage;
+      result.url = res.data.files[process.platform].url;
+    }
+    return result;
+  });
+}
+
+/**
+ * @description skip version
+ * @author tanghaixiang
+ * @param {string} version product version
+ */
+export function skipCheckForUpdate(version: string) {
+  localStorage.setItem('skip-check-for-update', version);
 }

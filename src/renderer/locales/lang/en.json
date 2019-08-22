@@ -137,6 +137,7 @@
     },
     "splayerx": {
       "about": "About SPlayer",
+      "checkForUpdates": "Check for Updates",
       "hide": "Hide",
       "hideOthers": "Hide Others",
       "preferences": "Preferences",
@@ -297,6 +298,16 @@
     "agree": "OK",
     "setting": "Setting",
     "content": "Smart Privacy Protection is enabled. Sensitive or not-suitable-for-work playback history will be removed."
+  },
+  "checkForUpdatesBubble": {
+    "needUpdate": {
+      "confirm": "Download",
+      "cancel": "Skip",
+      "content": "SPlayer {version} is now available, would you like to download it now?"
+    },
+    "noNeed": {
+      "content": "SPlayer is up to date. Version {version}"
+    }
   },
   "recentPlaylist": {
     "folderSource": "Folder",

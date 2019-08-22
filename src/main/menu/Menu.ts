@@ -12,7 +12,7 @@ import {
   IMenubarMenuState,
   MenuName,
 } from './common/Menubar';
-import { IsMacintosh } from '../../shared/common/platform';
+import { isMacintosh, isWindowsExE, isMacintoshDMG } from '../../shared/common/platform';
 import Locale from '../../shared/common/localize';
 import menuTemplate from './menu.json';
 import { IMenuDisplayInfo } from '../../renderer/interfaces/IRecentPlay';
@@ -107,7 +107,7 @@ export default class Menubar {
 
     // If we don't have a menu yet, set it to null to avoid the electron menu.
     // This should only happen on the first launch ever
-    if (!oldMenu && IsMacintosh) {
+    if (!oldMenu && isMacintosh) {
       Menu.setApplicationMenu(new Menu());
       return;
     }
@@ -400,7 +400,7 @@ export default class Menubar {
   private createClosedMenu(): Electron.Menu {
     const menubar = new Menu();
 
-    if (IsMacintosh) {
+    if (isMacintosh) {
       // Mac: Application
       const macApplicationMenuItem = this.createMacApplicationMenu();
 
@@ -435,7 +435,7 @@ export default class Menubar {
     // Menus
     const menubar = new Menu();
 
-    if (IsMacintosh) {
+    if (isMacintosh) {
       // Mac: Application
       const macApplicationMenuItem = this.createMacApplicationMenu();
 
@@ -496,7 +496,7 @@ export default class Menubar {
 
     menubar.append(helpMenuItem);
 
-    if (!IsMacintosh) {
+    if (!isMacintosh) {
       const quitMenuItem = this.createMenuItem('msg.splayerx.quit', () => {
         app.quit();
       }, 'Ctrl+q', true);
@@ -511,7 +511,7 @@ export default class Menubar {
     // Menus
     const menubar = new Menu();
 
-    if (IsMacintosh) {
+    if (isMacintosh) {
       // Mac: Application
       const macApplicationMenuItem = this.createMacApplicationMenu();
 
@@ -570,7 +570,7 @@ export default class Menubar {
 
     menubar.append(helpMenuItem);
 
-    if (!IsMacintosh) {
+    if (!isMacintosh) {
       const quitMenuItem = this.createMenuItem('msg.splayerx.quit', () => {
         app.quit();
       }, 'Ctrl+q', true);
@@ -585,7 +585,7 @@ export default class Menubar {
     // Menus
     const menubar = new Menu();
 
-    if (IsMacintosh) {
+    if (isMacintosh) {
       // Mac: Application
       const macApplicationMenuItem = this.createMacApplicationMenu();
 
@@ -651,7 +651,7 @@ export default class Menubar {
 
     menubar.append(helpMenuItem);
 
-    if (!IsMacintosh) {
+    if (!isMacintosh) {
       const quitMenuItem = this.createMenuItem('msg.splayerx.quit', () => {
         app.quit();
       }, 'Ctrl+q', true);
@@ -665,7 +665,7 @@ export default class Menubar {
   private createWelcomeViewMenu() {
     // Menus
     const menubar = new Menu();
-    if (IsMacintosh) {
+    if (isMacintosh) {
       // Mac: Application
       const macApplicationMenuItem = this.createMacApplicationMenu();
 
@@ -690,6 +690,9 @@ export default class Menubar {
     const about = this.createMenuItem('msg.splayerx.about', () => {
       app.emit('add-windows-about');
     }, undefined, true);
+    const checkForUpdates = this.createMenuItem('msg.splayerx.checkForUpdates', () => {
+      app.emit('check-for-updates');
+    }, undefined, true);
     const preference = this.createMenuItem('msg.splayerx.preferences', () => {
       app.emit('add-preference');
     }, 'CmdOrCtrl+,');
@@ -703,7 +706,15 @@ export default class Menubar {
     actions.push(...[
       separator(),
     ]);
-    if (this._routeName !== 'welcome-privacy' && this._routeName !== 'language-setting') {
+    // mac dmg
+    if (isMacintoshDMG && this._routeName !== 'welcome-privacy' && this._routeName !== 'language-setting') {
+      actions.push(...[
+        checkForUpdates,
+        separator(),
+        preference,
+        separator(),
+      ]);
+    } else if (this._routeName !== 'welcome-privacy' && this._routeName !== 'language-setting') {
       actions.push(...[
         preference,
         separator(),
@@ -779,7 +790,23 @@ export default class Menubar {
   private createHelpMenu() {
     const helpMenu = new Menu();
 
-    if (!IsMacintosh) {
+    if (!isMacintosh && isWindowsExE) {
+      const about = this.createMenuItem('msg.splayerx.about', () => {
+        app.emit('add-windows-about');
+      }, undefined, true);
+
+      helpMenu.append(about);
+
+      helpMenu.append(separator());
+
+      const checkForUpdates = this.createMenuItem('msg.splayerx.checkForUpdates', () => {
+        app.emit('check-for-updates');
+      }, undefined, true);
+
+      helpMenu.append(checkForUpdates);
+
+      helpMenu.append(separator());
+    } else if (!isMacintosh) {
       const about = this.createMenuItem('msg.splayerx.about', () => {
         app.emit('add-windows-about');
       }, undefined, true);
@@ -954,7 +981,7 @@ export default class Menubar {
       };
     }
 
-    if (arg1.winAccelerator && !IsMacintosh) {
+    if (arg1.winAccelerator && !isMacintosh) {
       options.accelerator = arg1.winAccelerator;
     }
 
