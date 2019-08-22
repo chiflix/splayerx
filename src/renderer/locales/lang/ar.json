@@ -136,6 +136,7 @@
     },
     "splayerx": {
       "about": "حول SPlayer",
+      "checkForUpdates": "",
       "hide": "إخفاء",
       "hideOthers": "إخفاء الآخرين",
       "preferences": "تفضيلات",
@@ -296,6 +297,16 @@
     "agree": "حسنا",
     "setting": "المشهد",
     "content": "تم تمكين حماية الخصوصية الذكية. ستتم إزالة محفوظات التشغيل الحساسة أو غير المناسبة للعمل."
+  },
+  "checkForUpdatesBubble": {
+    "needUpdate": {
+      "confirm": "",
+      "cancel": "",
+      "content": ""
+    },
+    "noNeed": {
+      "content": ""
+    }
   },
   "recentPlaylist": {
     "folderSource": "مجلد",
