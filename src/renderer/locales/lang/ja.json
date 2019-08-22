@@ -302,7 +302,7 @@
     "needUpdate": {
       "confirm": "ダウンロード",
       "cancel": "スキップ",
-      "content": ""
+      "content": "新しいバージョン {version} がリリースされましたが、ダウンロードされますか？"
     },
     "noNeed": {
       "content": "すでに最新バージョン {version}"
