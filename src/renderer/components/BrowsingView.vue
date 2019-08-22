@@ -114,6 +114,11 @@ export default {
       acceleratorAvailable: true,
       oldDisplayId: 0,
       backToLandingView: false,
+      sidebarButton: null,
+      backwardButton: null,
+      forwardButton: null,
+      refreshButton: null,
+      pipButton: null,
     };
   },
   computed: {
@@ -170,6 +175,7 @@ export default {
       }
     },
     isPip(val: boolean) {
+      if (this.pipButton) this.pipButton.icon = this.createIcon(`touchBar/${val ? 'pop' : 'pip'}.png`);
       this.menuService.updateMenuItemLabel(
         'browsing.window.pip',
         this.isPip ? 'msg.window.exitPip' : 'msg.window.enterPip',
@@ -495,7 +501,7 @@ export default {
         click: () => {
           this.$bus.$emit('toggle-pip');
         },
-      }) : undefined;
+      }) : null;
       const touchbarItems = [
         this.sidebarButton,
         new TouchBarSpacer({ size: 'large' }),
