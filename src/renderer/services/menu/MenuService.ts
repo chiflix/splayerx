@@ -32,6 +32,10 @@ export default class MenuService {
     ipcRenderer.send('update-enabled', id, enabled);
   }
 
+  public updateFocusedWindow(isFocusedOnMain: boolean) {
+    ipcRenderer.send('update-focused-window', isFocusedOnMain);
+  }
+
   public resolveMute(state: boolean) {
     this.updateMenuItemChecked('audio.mute', state);
   }

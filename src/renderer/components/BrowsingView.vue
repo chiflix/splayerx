@@ -51,6 +51,7 @@ import youtube from '../../shared/pip/youtube';
 import iqiyi, { iqiyiBarrageAdapt } from '../../shared/pip/iqiyi';
 import globalPip from '../../shared/pip/others';
 import { getValidVideoRegex, getValidSubtitleRegex } from '../../shared/utils';
+import MenuService from '@/services/menu/MenuService';
 
 export default {
   name: 'BrowsingView',
@@ -80,6 +81,7 @@ export default {
       oldDisplayId: -1,
       backToLandingView: false,
       browserIds: [1, 2],
+      menuService: null,
     };
   },
   computed: {
@@ -204,6 +206,7 @@ export default {
     this.initialBrowserViewRect();
   },
   mounted() {
+    this.menuService = new MenuService();
     this.$bus.$on('toggle-reload', this.handleUrlReload);
     this.$bus.$on('toggle-back', this.handleUrlBack);
     this.$bus.$on('toggle-forward', this.handleUrlForward);
@@ -222,7 +225,7 @@ export default {
       }, 0);
     });
     window.addEventListener('focus', () => {
-      this.$electron.ipcRenderer.send('update-focused-window', true);
+      this.menuService.updateFocusedWindow(true);
       this.updateCanGoBack(this.$electron.remote.getCurrentWindow()
         .getBrowserViews()[0].webContents.canGoBack());
       this.updateCanGoForward(this.$electron.remote.getCurrentWindow()
@@ -352,7 +355,7 @@ export default {
     },
     updatePipState(available: boolean) {
       if (this.$electron.remote.getCurrentWindow().isFocused()) {
-        this.$electron.ipcRenderer.send('update-enabled', 'window.pip', available);
+        this.menuService.updateMenuItemEnabled('browsing.window.pip', available);
       }
     },
     updateCanGoBack(val: boolean) {

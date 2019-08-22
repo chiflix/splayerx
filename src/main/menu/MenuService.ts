@@ -20,6 +20,10 @@ export default class MenuService {
     this.menu.enableMenu(enable);
   }
 
+  public updateFocusedWindow(isFocusedOnMain: boolean) {
+    this.menu.updateFocusedWindow(isFocusedOnMain);
+  }
+
   private registeMenuActions() {
     ipcMain.on('popup-menu', () => {
       this.menu.popupMenu();
@@ -50,6 +54,9 @@ export default class MenuService {
     });
     ipcMain.on('update-enabled', (e: Event, id: string, enabled: boolean) => {
       this.menu.updateMenuItemEnabled(id, enabled);
+    });
+    ipcMain.on('update-focused-window', (e: Event, isFocusedOnMain: boolean) => {
+      this.menu.updateFocusedWindow(isFocusedOnMain);
     });
   }
 }

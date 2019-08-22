@@ -10,12 +10,14 @@
 <script lang="ts">
 import { throttle } from 'lodash';
 import electron from 'electron';
+import MenuService from '@/services/menu/MenuService';
 
 export default {
   name: 'BrowsingPip',
   data() {
     return {
       supportedRecordHost: ['www.youtube.com', 'www.bilibili.com', 'www.iqiyi.com'],
+      menuService: null,
     };
   },
   computed: {
@@ -24,11 +26,12 @@ export default {
     },
   },
   mounted() {
+    this.menuService = new MenuService();
     electron.remote.getCurrentWindow().addListener('enter-html-full-screen', () => {
       electron.ipcRenderer.send('mouseup', 'full');
     });
     window.addEventListener('focus', () => {
-      electron.ipcRenderer.send('update-focused-window', false);
+      this.menuService.updateFocusedWindow(false);
     });
     window.addEventListener('resize', throttle(() => {
       const size = electron.remote.getCurrentWindow().getSize();
