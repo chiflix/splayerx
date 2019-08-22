@@ -136,6 +136,7 @@
     },
     "splayerx": {
       "about": "SPlayerについて",
+      "checkForUpdates": "",
       "hide": "SPlayerを隠す",
       "hideOthers": "その他を隠す",
       "preferences": "環境設定",
@@ -296,6 +297,16 @@
     "agree": "確定",
     "setting": "設定",
     "content": "スマートプライバシー保護が有効になります。 機密性の高い、または作業に不適切な再生履歴は削除されます。"
+  },
+  "checkForUpdatesBubble": {
+    "needUpdate": {
+      "confirm": "",
+      "cancel": "",
+      "content": ""
+    },
+    "noNeed": {
+      "content": ""
+    }
   },
   "recentPlaylist": {
     "folderSource": "ホルダー",
