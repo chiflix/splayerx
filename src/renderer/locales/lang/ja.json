@@ -136,7 +136,7 @@
     },
     "splayerx": {
       "about": "SPlayerについて",
-      "checkForUpdates": "",
+      "checkForUpdates": "アップデートを確認",
       "hide": "SPlayerを隠す",
       "hideOthers": "その他を隠す",
       "preferences": "環境設定",
@@ -300,12 +300,12 @@
   },
   "checkForUpdatesBubble": {
     "needUpdate": {
-      "confirm": "",
-      "cancel": "",
+      "confirm": "ダウンロード",
+      "cancel": "スキップ",
       "content": ""
     },
     "noNeed": {
-      "content": ""
+      "content": "すでに最新バージョン {version}"
     }
   },
   "recentPlaylist": {
