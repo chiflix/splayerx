@@ -507,13 +507,6 @@ export default {
       updateHideModalCallback: atActions.AUDIO_TRANSLATE_MODAL_HIDE_CALLBACK,
       updateHideBubbleCallback: atActions.AUDIO_TRANSLATE_BUBBLE_CANCEL_CALLBACK,
     }),
-    createIcon(iconPath: string) {
-      const { nativeImage } = this.$electron.remote;
-      // @ts-ignore
-      return nativeImage.createFromPath(path.join(__static, iconPath)).resize({
-        width: 20,
-      });
-    },
     createTouchBar() {
       const { TouchBar } = this.$electron.remote;
       const {
@@ -523,10 +516,28 @@ export default {
 
       this.timeLabel = new TouchBarLabel();
 
+      this.previousButton = new TouchBarButton({
+        icon: this.createIcon('touchBar/lastVideo.png'),
+        click: () => {
+          this.$bus.$emit('previous-video');
+        },
+      });
+      this.restartButton = new TouchBarButton({
+        icon: this.createIcon('touchBar/restart.png'),
+        click: () => {
+          this.$bus.$emit('seek', 0);
+        },
+      });
       this.playButton = new TouchBarButton({
         icon: this.createIcon('touchBar/pause.png'),
         click: () => {
           this.$bus.$emit('toggle-playback');
+        },
+      });
+      this.nextButton = new TouchBarButton({
+        icon: this.createIcon('touchBar/nextVideo.png'),
+        click: () => {
+          this.$bus.$emit('next-video');
         },
       });
       this.fullScreenBar = new TouchBarButton({
@@ -538,7 +549,11 @@ export default {
       this.touchBar = new TouchBar({
         items: [
           this.fullScreenBar,
+          new TouchBarSpacer({ size: 'large' }),
+          this.previousButton,
           this.playButton,
+          this.nextButton,
+          this.restartButton,
           new TouchBarSpacer({ size: 'large' }),
           this.timeLabel,
           new TouchBarSpacer({ size: 'large' }),

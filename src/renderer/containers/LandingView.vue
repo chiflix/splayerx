@@ -297,6 +297,7 @@ export default {
   },
   /* eslint-disable @typescript-eslint/no-explicit-any */
   created() {
+    this.createTouchBar();
     window.addEventListener('mousemove', this.globalMoveHandler);
     // Get all data and show
     if (!this.incognitoMode) {
@@ -372,6 +373,34 @@ export default {
     ...mapActions({
       updateInitialUrl: browsingActions.UPDATE_INITIAL_URL,
     }),
+    createTouchBar() {
+      const { TouchBar } = this.$electron.remote;
+      const {
+        TouchBarLabel, TouchBarButton,
+        TouchBarSpacer,
+      } = TouchBar;
+
+      this.sidebarButton = new TouchBarButton({
+        icon: this.createIcon('touchBar/sidebar.png'),
+        click: () => {
+          this.$event.emit('side-bar-mouseup');
+        },
+      });
+      this.openFileButton = new TouchBarButton({
+        icon: this.createIcon('touchBar/addVideo.png'),
+        click: () => {
+          this.open();
+        },
+      });
+      this.touchBar = new TouchBar({
+        items: [
+          this.sidebarButton,
+          new TouchBarSpacer({ size: 'large' }),
+          this.openFileButton,
+        ],
+      });
+      this.$electron.remote.getCurrentWindow().setTouchBar(this.touchBar);
+    },
     move(steps: number) {
       return steps * (this.thumbnailWidth + this.marginRight);
     },
