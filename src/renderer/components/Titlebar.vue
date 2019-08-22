@@ -15,7 +15,10 @@
       class="sidebar"
     >
       <SidebarIcon
+        @mouseover.native="mouseoverSidebar = true"
+        @mouseout.native="mouseoverSidebar = false"
         @mouseup.native="handleSidebar"
+        :mouseover="mouseoverSidebar"
         class="no-drag"
       />
     </div>
@@ -100,10 +103,13 @@
       </div>
       <SidebarIcon
         v-if="isDarwin && isLandingView"
+        @mouseover.native="mouseoverSidebar = true"
+        @mouseout.native="mouseoverSidebar = false"
         @mouseup.native="handleSidebar"
         :style="{
           marginLeft: showSidebar ? '19px' : '4px',
         }"
+        :mouseover="mouseoverSidebar"
         class="sidebar no-drag"
         type="sidebar"
       />
@@ -155,6 +161,7 @@ export default {
       keyAlt: false,
       keyOver: false,
       showTitleBar: true,
+      mouseoverSidebar: false,
     };
   },
   computed: {

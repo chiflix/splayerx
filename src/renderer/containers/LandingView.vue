@@ -310,6 +310,7 @@ export default {
       // just for delete thumbnail display
       this.firstIndex = 0;
       this.item = {};
+      this.$bus.$emit('highlight-sidebar', false);
       this.landingViewItems = [];
     });
     // responsible for delete the thumbnail on display which had already deleted in DB
@@ -318,6 +319,7 @@ export default {
         .findIndex((file: { id: number }) => file.id === id);
       if (deleteIndex >= 0) {
         this.item = {};
+        this.$bus.$emit('highlight-sidebar', false);
         this.landingViewItems.splice(deleteIndex, 1);
       }
     });
@@ -432,6 +434,7 @@ export default {
     },
     onItemMouseover(index: number) {
       this.item = this.landingViewItems[index];
+      this.$bus.$emit('highlight-sidebar', true);
     },
     onItemClick(index: number) {
       if (index === (this.lastIndex - (this.showSidebar ? 1 : 0)) && !this.isFullScreen) {
@@ -446,6 +449,7 @@ export default {
     },
     onItemDelete(index: number) {
       this.item = {};
+      this.$bus.$emit('highlight-sidebar', false);
       const [deletedItem] = this.landingViewItems.splice(index, 1);
       if (this.firstIndex !== 0) {
         this.shifting = true;
