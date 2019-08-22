@@ -136,7 +136,7 @@
     },
     "splayerx": {
       "about": "SPlayer 정보",
-      "checkForUpdates": "",
+      "checkForUpdates": "업데이트 확인",
       "hide": "숨는 장소",
       "hideOthers": "다른 사람 숨기기",
       "preferences": "환경 설정",
@@ -300,12 +300,12 @@
   },
   "checkForUpdatesBubble": {
     "needUpdate": {
-      "confirm": "",
-      "cancel": "",
+      "confirm": "다운로드",
+      "cancel": "버킷",
       "content": "새 버전 {version} 이릴리스되었습니다. 업데이트를 즉시 다운로드 하시겠습니까?"
     },
     "noNeed": {
-      "content": ""
+      "content": "SPlayer가 최신입니다. 버전 {version}"
     }
   },
   "recentPlaylist": {
