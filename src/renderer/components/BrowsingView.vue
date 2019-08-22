@@ -224,6 +224,7 @@ export default {
       if (val) {
         this.hasVideo = false;
         this.menuService.updateMenuItemEnabled('browsing.window.pip', false);
+        this.createTouchBar(false);
         this.$refs.browsingHeader.updateWebInfo({
           hasVideo: this.hasVideo,
           url: loadUrl,
@@ -238,6 +239,7 @@ export default {
         this.$refs.webView.executeJavaScript(this.calculateVideoNum, (r: number) => {
           this.hasVideo = recordIndex === 0 && !getVideoId(loadUrl).id ? false : !!r;
           this.menuService.updateMenuItemEnabled('browsing.window.pip', this.hasVideo);
+          this.createTouchBar(this.hasVideo);
           this.$refs.browsingHeader.updateWebInfo({
             hasVideo: this.hasVideo,
             url: loadUrl,
@@ -249,6 +251,7 @@ export default {
     },
   },
   created() {
+    this.createTouchBar();
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [570, 375]);
     windowRectService.calculateWindowRect(
       this.browsingSize,
@@ -458,6 +461,53 @@ export default {
       updateBarrageOpen: browsingActions.UPDATE_BARRAGE_OPEN,
       updateIsPip: browsingActions.UPDATE_IS_PIP,
     }),
+    createTouchBar(enablePip: boolean) {
+      const { TouchBar } = this.$electron.remote;
+      const {
+        TouchBarLabel, TouchBarButton,
+        TouchBarSpacer,
+      } = TouchBar;
+
+      this.sidebarButton = new TouchBarButton({
+        icon: this.createIcon('touchBar/sidebar.png'),
+        click: () => {},
+      });
+      this.backwardButton = new TouchBarButton({
+        icon: this.createIcon('touchBar/backward.png'),
+        click: () => {
+          this.$bus.$emit('toggle-back');
+        },
+      });
+      this.forwardButton = new TouchBarButton({
+        icon: this.createIcon('touchBar/forward.png'),
+        click: () => {
+          this.$bus.$emit('toggle-forward');
+        },
+      });
+      this.refreshButton = new TouchBarButton({
+        icon: this.createIcon('touchBar/refresh.png'),
+        click: () => {
+          this.$bus.$emit('toggle-reload');
+        },
+      });
+      this.pipButton = enablePip ? new TouchBarButton({
+        icon: this.createIcon('touchBar/pip.png'),
+        click: () => {
+          this.$bus.$emit('toggle-pip');
+        },
+      }) : undefined;
+      const touchbarItems = [
+        this.sidebarButton,
+        new TouchBarSpacer({ size: 'large' }),
+        this.backwardButton,
+        this.forwardButton,
+        this.refreshButton,
+        new TouchBarSpacer({ size: 'large' }),
+      ];
+      if (enablePip) touchbarItems.push(this.pipButton);
+      this.touchBar = new TouchBar({ items: touchbarItems });
+      this.$electron.remote.getCurrentWindow().setTouchBar(this.touchBar);
+    },
     handleOpenUrl({ url }: { url: string }) {
       if (!url || url === 'about:blank') return;
       if (this.isPip) {

@@ -523,7 +523,7 @@ export default {
         },
       });
       this.restartButton = new TouchBarButton({
-        icon: this.createIcon('touchBar/refresh.png'),
+        icon: this.createIcon('touchBar/restart.png'),
         click: () => {
           this.$bus.$emit('seek', 0);
         },
