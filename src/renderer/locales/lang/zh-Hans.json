@@ -136,6 +136,7 @@
     },
     "splayerx": {
       "about": "关于射手影音",
+      "checkForUpdates": "",
       "hide": "隐藏射手影音",
       "hideOthers": "隐藏其他",
       "preferences": "偏好设置",
@@ -240,7 +241,7 @@
     "general": {
       "hideHistory": "隐藏历史记录",
       "clearHistory": "退出时自动清空播放记录",
-      "reverseScrolling": "鼠标滚轮反向",
+      "reverseScrolling": "鼠标滚轮调节音量反向",
       "setDefault": "设为默认播放器",
       "setDefaultDescription": "所有视频文件都自动使用SPlayer打开。",
       "restoreSettings": "抹掉所有内容和设置",
@@ -296,6 +297,16 @@
     "agree": "好的",
     "setting": "设置",
     "content": "保护不宜在工作或公众场合播放的内容，自动删除播放痕迹。"
+  },
+  "checkForUpdatesBubble": {
+    "needUpdate": {
+      "confirm": "",
+      "cancel": "",
+      "content": ""
+    },
+    "noNeed": {
+      "content": ""
+    }
   },
   "recentPlaylist": {
     "folderSource": "文件夹",
