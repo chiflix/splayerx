@@ -111,7 +111,6 @@
         }"
         :mouseover="mouseoverSidebar"
         class="sidebar no-drag"
-        type="sidebar"
       />
     </div>
   </div>
