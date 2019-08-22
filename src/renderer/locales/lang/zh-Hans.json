@@ -136,6 +136,7 @@
     },
     "splayerx": {
       "about": "关于射手影音",
+      "checkForUpdates": "检查更新",
       "hide": "隐藏射手影音",
       "hideOthers": "隐藏其他",
       "preferences": "偏好设置",
@@ -296,6 +297,16 @@
     "agree": "好的",
     "setting": "设置",
     "content": "保护不宜在工作或公众场合播放的内容，自动删除播放痕迹。"
+  },
+  "checkForUpdatesBubble": {
+    "needUpdate": {
+      "confirm": "下载",
+      "cancel": "忽略",
+      "content": "新版本 {version} 已发布，是否立刻下载更新？"
+    },
+    "noNeed": {
+      "content": "目前已经是最新版本 {version}"
+    }
   },
   "recentPlaylist": {
     "folderSource": "文件夹",
