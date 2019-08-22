@@ -1,8 +1,8 @@
 <template>
   <svg
-    width="40px"
-    height="40px"
-    viewBox="0 0 41 41"
+    width="42px"
+    height="42px"
+    viewBox="0 0 42 42"
     version="1.1"
     xmlns="http://www.w3.org/2000/svg"
     xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -16,7 +16,7 @@
       />
     </defs>
     <g
-      id="页面-1"
+      id="LandingView"
       stroke="none"
       stroke-width="1"
       fill="none"
@@ -44,9 +44,9 @@
               stroke="#EBECF0"
               fill="#20B0E3"
               stroke-width="1"
-              cx="19"
-              cy="19"
-              r="19.5"
+              cx="20"
+              cy="20"
+              r="20.5"
             />
             <g
               id="logo--bilibili"
@@ -57,7 +57,7 @@
             >
               <g
                 id="形状"
-                transform="translate(9.000000, 9.000000)"
+                transform="translate(10.000000, 10.000000)"
                 fill-rule="nonzero"
               >
                 <path :d="d1" />
@@ -82,7 +82,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 .sidebar {
-  opacity: 0.5;
+  opacity: 0.7;
   transition: opacity 100ms ease-in;
   &:hover {
     cursor: pointer;

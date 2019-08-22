@@ -81,7 +81,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 .sidebar {
-  opacity: 0.5;
+  opacity: 0.7;
   transition: opacity 50ms ease-in;
   &:hover {
     cursor: pointer;
