@@ -380,8 +380,6 @@ export default {
       this.$electron.ipcRenderer.send('create-browser-view', { url: `https://www.${site}.com` });
       this.$router.push({
         name: 'browsing-view',
-      }).then(() => {
-        console.log(123);
       });
     },
     handleBrowsingOpen(url: string) {

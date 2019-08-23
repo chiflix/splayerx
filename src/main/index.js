@@ -18,6 +18,7 @@ import { getValidVideoRegex, getValidSubtitleRegex } from '../shared/utils';
 import { mouse } from './helpers/mouse';
 import MenuService from './menu/MenuService';
 import registerMediaTasks from './helpers/mediaTasksPlugin';
+import { BrowserViewManager } from './helpers/BrowserViewManager';
 
 // requestSingleInstanceLock is not going to work for mas
 // https://github.com/electron-userland/electron-packager/issues/923
@@ -66,6 +67,7 @@ let laborWindow = null;
 let aboutWindow = null;
 let preferenceWindow = null;
 let browsingWindow = null;
+let browserViewManager = null;
 let pipControlView = null;
 let titlebarView = null;
 let browserViews = [];
@@ -73,7 +75,6 @@ let currentBrowserHostname = '';
 let currentPipHostname = '';
 let tray = null;
 let pipTimer = 0;
-let lastBrowserUrl = '';
 let needToRestore = false;
 let forceQuit = false; // 大退app 关闭所有windows
 let needBlockCloseLaborWindow = true; // 标记是否阻塞nsfw窗口关闭
@@ -468,7 +469,6 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('remove-browser', () => {
     const mainView = mainWindow.getBrowserView();
     if (mainView) {
-      lastBrowserUrl = mainView.webContents.getURL();
       mainWindow.removeBrowserView(mainView);
       if (browsingWindow) {
         const views = browsingWindow.getBrowserViews();
@@ -537,35 +537,65 @@ function registerMainWindowEvent(mainWindow) {
       browsingWindow.getBrowserViews()[0].webContents.loadURL(url);
     }
   });
+  ipcMain.on('go-to-offset', (evt, val) => {
+    if (!browserViewManager) return;
+    const newBrowser = val === 1 ? browserViewManager.forward() : browserViewManager.back();
+    mainWindow.removeBrowserView(mainWindow.getBrowserView());
+    mainWindow.addBrowserView(newBrowser.view);
+    console.log(newBrowser);
+    newBrowser.view.setBounds({
+      x: 0, y: 36, width: mainWindow.getSize()[0], height: mainWindow.getSize()[1] - 36,
+    });
+    newBrowser.view.setAutoResize({
+      width: true, height: true,
+    });
+    mainWindow.send('update-browser-state', { canGoBack: newBrowser.canBack, canGoForward: newBrowser.canForward });
+  });
   ipcMain.on('create-browser-view', (evt, args) => {
-    currentBrowserHostname = currentPipHostname = urlParse(args.url).hostname;
-    const index = tabGroups.findIndex(tab => Object.keys(tab)[0] === currentBrowserHostname);
-    browserViews = [
-      new BrowserView({
-        webPreferences: {
-          preload: `${require('path').resolve(__static, 'pip/preload.js')}`,
-        },
-      }),
-      new BrowserView({
-        webPreferences: {
-          preload: `${require('path').resolve(__static, 'pip/preload.js')}`,
-        },
-      }),
-    ];
-    if (index === -1) {
-      tabGroups.push({ [`${currentBrowserHostname}`]: browserViews });
-      browserViews.forEach((view) => {
-        view.webContents.loadURL(args.url);
-      });
-    } else if (tabGroups[index][currentBrowserHostname][0].isDestroyed()) {
-      tabGroups[index][currentBrowserHostname].splice(0, 2, ...browserViews);
-      browserViews.forEach((view) => {
-        view.webContents.loadURL(lastBrowserUrl);
-      });
+    if (!browserViewManager) browserViewManager = new BrowserViewManager();
+    const currentMainBrowserView = browserViewManager.create(urlParse(args.url).hostname, args.url);
+    const isMainBrowser = mainWindow.getBrowserView();
+    if (isMainBrowser) {
+      mainWindow.removeBrowserView(mainWindow.getBrowserViews()[0]);
+      mainWindow.addBrowserView(currentMainBrowserView.view); // TODO need to pause video
+    } else {
+      mainWindow.addBrowserView(currentMainBrowserView.view);
     }
-    mainWindow.send('current-browser-id', browserViews.map(v => v.id));
-    mainWindow.addBrowserView(browserViews[0]);
-    browsingWindow.addBrowserView(browserViews[1]);
+    currentMainBrowserView.view.setBounds({
+      x: 0, y: 36, width: mainWindow.getSize()[0], height: mainWindow.getSize()[1] - 36,
+    });
+    currentMainBrowserView.view.setAutoResize({
+      width: true, height: true,
+    });
+    mainWindow.send('update-browser-state', { url: args.url, canGoBack: currentMainBrowserView.canBack, canGoForward: currentMainBrowserView.canForward });
+    // currentBrowserHostname = currentPipHostname = urlParse(args.url).hostname;
+    // const index = tabGroups.findIndex(tab => Object.keys(tab)[0] === currentBrowserHostname);
+    // browserViews = [
+    //   new BrowserView({
+    //     webPreferences: {
+    //       preload: `${require('path').resolve(__static, 'pip/preload.js')}`,
+    //     },
+    //   }),
+    //   new BrowserView({
+    //     webPreferences: {
+    //       preload: `${require('path').resolve(__static, 'pip/preload.js')}`,
+    //     },
+    //   }),
+    // ];
+    // if (index === -1) {
+    //   tabGroups.push({ [`${currentBrowserHostname}`]: browserViews });
+    //   browserViews.forEach((view) => {
+    //     view.webContents.loadURL(args.url);
+    //   });
+    // } else if (tabGroups[index][currentBrowserHostname][0].isDestroyed()) {
+    //   tabGroups[index][currentBrowserHostname].splice(0, 2, ...browserViews);
+    //   browserViews.forEach((view) => {
+    //     view.webContents.loadURL(lastBrowserUrl);
+    //   });
+    // }
+    // mainWindow.send('current-browser-id', browserViews.map(v => v.id));
+    // mainWindow.addBrowserView(browserViews[0]);
+    // browsingWindow.addBrowserView(browserViews[1]);
   });
   ipcMain.on('update-danmu-state', (evt, val) => {
     pipControlView.webContents.executeJavaScript(`document.querySelector(".danmu").src = ${val} ? "assets/danmu-default-icon.svg" : "assets/noDanmu-default-icon.svg"`);

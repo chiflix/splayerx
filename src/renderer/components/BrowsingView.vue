@@ -82,6 +82,9 @@ export default {
       backToLandingView: false,
       browserIds: [1, 2],
       menuService: null,
+      currentUrl: '',
+      canGoBack: false,
+      canGoForward: false,
     };
   },
   computed: {
@@ -155,11 +158,6 @@ export default {
         this.updatePipState(false);
         this.$refs.browsingHeader.updateWebInfo({
           hasVideo: this.hasVideo,
-          url: loadUrl,
-          canGoBack: this.$electron.remote.getCurrentWindow()
-            .getBrowserViews()[0].webContents.canGoBack(),
-          canGoForward: this.$electron.remote.getCurrentWindow()
-            .getBrowserViews()[0].webContents.canGoForward(),
         });
       } else {
         if (this.pipRestore) {
@@ -172,11 +170,6 @@ export default {
             this.updatePipState(this.hasVideo);
             this.$refs.browsingHeader.updateWebInfo({
               hasVideo: this.hasVideo,
-              url: loadUrl,
-              canGoBack: this.$electron.remote.getCurrentWindow()
-                .getBrowserViews()[0].webContents.canGoBack(),
-              canGoForward: this.$electron.remote.getCurrentWindow()
-                .getBrowserViews()[0].webContents.canGoForward(),
             });
           });
       }
@@ -203,7 +196,6 @@ export default {
     );
     this.$store.dispatch('updateBrowsingPos', this.winPos);
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [0]);
-    this.initialBrowserViewRect();
   },
   mounted() {
     this.menuService = new MenuService();
@@ -288,11 +280,6 @@ export default {
             this.updatePipState(this.hasVideo);
             this.$refs.browsingHeader.updateWebInfo({
               hasVideo: this.hasVideo,
-              url: loadUrl,
-              canGoBack: this.$electron.remote.getCurrentWindow()
-                .getBrowserViews()[0].webContents.canGoBack(),
-              canGoForward: this.$electron.remote.getCurrentWindow()
-                .getBrowserViews()[0].webContents.canGoForward(),
             });
           });
       }
@@ -317,6 +304,16 @@ export default {
     });
     this.$electron.ipcRenderer.on('update-pip-state', () => {
       this.updateIsPip(false);
+    });
+    this.$electron.ipcRenderer.on('update-browser-state', (e: Event, state: { url?: string, canGoBack: boolean, canGoForward: boolean }) => {
+      if (state.url) this.currentUrl = state.url;
+      this.addListenerToBrowser();
+      this.canGoBack = state.canGoBack;
+      this.canGoForward = state.canGoForward;
+      this.$refs.browsingHeader.updateWebInfo({
+        canGoBack: state.canGoBack,
+        canGoForward: state.canGoForward,
+      });
     });
     this.addListenerToBrowser();
   },
@@ -392,10 +389,9 @@ export default {
       });
       this.$electron.remote.getCurrentWindow().getBrowserViews()[0].webContents.addListener('did-start-loading', () => {
         const url = this.$electron.remote.getCurrentWindow()
-          .getBrowserViews()[0].webContents.getURL();
-        if (url !== 'about:blank' && !this.isPip) {
-          this.$electron.ipcRenderer.send('keep-browsers-cache', url);
-        }
+          .getBrowserView().webContents.getURL();
+        if (!url || url === 'about:blank' || urlParseLax(this.currentUrl).href === urlParseLax(url).href) return;
+        this.currentUrl = url;
         this.didStartLoading(url);
       });
       this.$electron.remote.getCurrentWindow().getBrowserViews()[0].webContents.addListener('did-stop-loading', this.didStopLoading);
@@ -422,27 +418,10 @@ export default {
         .getBrowserViews()[0].setAutoResize({ width: true, height: true });
     },
     didStartLoading(url: string) {
-      if (!url || url === 'about:blank') return;
       this.startTime = new Date().getTime();
       this.loadingState = true;
-      const loadUrl = this.$electron.remote.getCurrentWindow()
-        .getBrowserViews()[0].webContents.getURL();
-      const recordIndex = this.supportedRecordHost.indexOf(urlParseLax(loadUrl).hostname);
-      if (recordIndex !== -1) {
-        switch (recordIndex) {
-          case 0:
-            this.updateRecordUrl({ youtube: loadUrl });
-            break;
-          case 1:
-            this.updateRecordUrl({ bilibili: loadUrl });
-            break;
-          case 2:
-            this.updateRecordUrl({ iqiyi: loadUrl });
-            break;
-          default:
-            break;
-        }
-      }
+      this.$electron.ipcRenderer.send('create-browser-view', { url });
+      this.removeListener();
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ipcMessage(channel: string, args: any) {
@@ -507,8 +486,8 @@ export default {
       }
     },
     handleOpenUrl({ url }: { url: string }) {
-      if (!url || url === 'about:blank') return;
-      this.$electron.remote.getCurrentWindow().getBrowserViews()[0].webContents.loadURL(urlParseLax(url).protocol ? url : `https:${url}`);
+      if (!url || url === 'about:blank' || url === this.$electron.remote.getCurrentWindow().getBrowserView().webContents.getURL()) return;
+      this.$electron.ipcRenderer.send('create-browser-view', { url });
     },
     pipAdapter() {
       const parseUrl = urlParseLax(this.currentPipBrowserView().webContents.getURL());
@@ -607,14 +586,13 @@ export default {
       }
     },
     handleUrlForward() {
-      if (this.$electron.remote.getCurrentWindow()
-        .getBrowserViews()[0].webContents.canGoForward()) {
-        this.$electron.remote.getCurrentWindow().getBrowserViews()[0].webContents.goForward();
+      if (this.canGoForward) {
+        this.$electron.ipcRenderer.send('go-to-offset', 1);
       }
     },
     handleUrlBack() {
-      if (this.$electron.remote.getCurrentWindow().getBrowserViews()[0].webContents.canGoBack()) {
-        this.$electron.remote.getCurrentWindow().getBrowserViews()[0].webContents.goBack();
+      if (this.canGoBack) {
+        this.$electron.ipcRenderer.send('go-to-offset', -1);
       }
     },
     handleUrlReload() {
@@ -669,11 +647,6 @@ export default {
         this.updatePipState(false);
         this.$refs.browsingHeader.updateWebInfo({
           hasVideo: false,
-          url: loadUrl,
-          canGoBack: this.$electron.remote.getCurrentWindow()
-            .getBrowserViews()[0].webContents.canGoBack(),
-          canGoForward: this.$electron.remote.getCurrentWindow()
-            .getBrowserViews()[0].webContents.canGoForward(),
         });
         this.$electron.remote.getCurrentWindow().getBrowserViews()[0].webContents
           .executeJavaScript(this.calculateVideoNum, (r: number) => {
