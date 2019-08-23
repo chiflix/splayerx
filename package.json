@@ -71,7 +71,7 @@
     "romanize": "^1.1.1",
     "sagi-api": "^0.0.19",
     "source-map-support": "^0.5.9",
-    "subtitle": "^2.0.1",
+    "subtitle": "github:YvonTre/subtitle.js",
     "traditional-or-simplified": "^1.0.3",
     "url-parse-lax": "^3.0.0",
     "uuid": "^3.2.1",
