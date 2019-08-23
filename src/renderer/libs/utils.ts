@@ -345,6 +345,34 @@ export async function findNsfwFistFilter() {
 }
 
 /**
+ * @description get version numbers
+ * @author tanghaixiang
+ * @param {string} version app version string
+ * @returns {number[]} [4, 10, 13]
+ */
+function getNumbersFromVersion(version: string): number[] {
+  const reg = /^(\d+)\.(\d+)\.(\d+)(\D+)?(\d+)?$/i;
+  const numbers: number[] = [0, 0, 0, 0];
+  version.replace(reg, (
+    match: string,
+    $0: string,
+    $1: string,
+    $2: string,
+    $3: string,
+    $4: string,
+  ) => {
+    numbers[0] = Number($0);
+    numbers[1] = Number($1);
+    numbers[2] = Number($2);
+    if ($4 !== undefined) {
+      numbers[3] = Number($4);
+    }
+    return match;
+  });
+  return numbers;
+}
+
+/**
  * @description check for updates
  * @author tanghaixiang
  * @param {boolean} auto is auto check for updates
@@ -356,22 +384,39 @@ export function checkForUpdate(
   const skipVersion = localStorage.getItem('skip-check-for-update');
   const url = isBetaVersion
     ? 'https://beta.splayer.org/beta/latest.json' : 'https://www.splayer.org/stable/latest.json';
-  return axios.get(url, { timeout: 10000 }).then((res: AxiosResponse) => {
-    const result = {
-      version,
-      isLastest: true,
-      landingPage: '',
-      url: '',
-    };
-    // check package.json.version with res.data
-    if (res.data && res.data.name !== version && !(res.data.name === skipVersion && auto)) {
-      result.version = res.data.name;
-      result.isLastest = false;
-      result.landingPage = res.data.landingPage;
-      result.url = res.data.files[process.platform].url;
-    }
-    return result;
-  });
+  return axios.get(url, { timeout: 10000 })
+    .then((res: AxiosResponse) => { // eslint-disable-line complexity
+      const result = {
+        version,
+        isLastest: true,
+        landingPage: '',
+        url: '',
+      };
+      // check package.json.version with res.data
+      if (res.data && res.data.name !== version && !(res.data.name === skipVersion && auto)) {
+        let isNeedUpdate = false;
+        const current = getNumbersFromVersion(version);
+        const checked = getNumbersFromVersion(res.data.name);
+        if (checked[0] > current[0]) {
+          isNeedUpdate = true;
+        } else if (checked[0] === current[0] && checked[1] > current[1]) {
+          isNeedUpdate = true;
+        } else if (checked[0] === current[0] && checked[1] === current[1]
+          && checked[2] > current[2]) {
+          isNeedUpdate = true;
+        } else if (checked[0] === current[0] && checked[1] === current[1]
+          && checked[2] === current[2] && checked[3] > current[3]) {
+          isNeedUpdate = true;
+        }
+        if (isNeedUpdate) {
+          result.version = res.data.name;
+          result.isLastest = false;
+          result.landingPage = res.data.landingPage;
+          result.url = res.data.files[process.platform].url;
+        }
+      }
+      return result;
+    });
 }
 
 /**
