@@ -11,7 +11,7 @@ const MINSIZE = [320, 180];
  * @constant
  * @type number[]
  */
-const getWindowRect = () => [
+const getScreenRect = () => [
   window.screen.availLeft, window.screen.availTop,
   window.screen.availWidth, window.screen.availHeight,
 ];
@@ -69,7 +69,7 @@ export default class WindowRectService implements IWindowRectRequest {
   }
 
   /**
-   * @description 计算最新的窗口位置
+   * @description 根据窗口中点进行缩放，计算出新视频的左上点的位置，并当视频超出当前屏幕边缘时做回弹处理
    * @author tanghaixiang
    * @param {number[]} currentRect
    * @param {number[]} windowRect
@@ -141,12 +141,12 @@ export default class WindowRectService implements IWindowRectRequest {
           && (lastWindowAngle === 90 || lastWindowAngle === 270)))) {
       const videoSize = [lastWindowSize[1], lastWindowSize[0]];
       const newVideoSize = this
-        .calculateWindowSize(MINSIZE, getWindowRect().slice(2, 4), videoSize);
+        .calculateWindowSize(MINSIZE, getScreenRect().slice(2, 4), videoSize);
       // 退出全屏，计算pos依赖旧窗口大小，现在设置旧窗口大小为新大小的反转，
       // 这样在那里全屏，退出全屏后窗口还在那个位置。
       const newPosition = this.calculateWindowPosition(
         windowPosition.concat([newVideoSize[1], newVideoSize[0]]),
-        getWindowRect(),
+        getScreenRect(),
         newVideoSize,
       );
       newRect = newPosition.concat(newVideoSize);
@@ -174,14 +174,14 @@ export default class WindowRectService implements IWindowRectRequest {
     maxSize?: number[],
   ): number[] {
     if (!maxSize) {
-      maxSize = getWindowRect().slice(2, 4);
+      maxSize = getScreenRect().slice(2, 4);
     }
-    const screenSize = getWindowRect().slice(2, 4);
+    const screenSize = getScreenRect().slice(2, 4);
     const [newWidth, newHeight] = this.calculateWindowSize(
       MINSIZE, maxSize, videoSize, videoExisted, screenSize,
     );
     const [newLeft, newTop] = this.calculateWindowPosition(
-      oldRect, getWindowRect(), [newWidth, newHeight],
+      oldRect, getScreenRect(), [newWidth, newHeight],
     );
     const rect = [newLeft, newTop, newWidth, newHeight];
     ipcRenderer.send('callMainWindowMethod', 'setSize', rect.slice(2, 4));
