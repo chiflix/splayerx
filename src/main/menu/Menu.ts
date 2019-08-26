@@ -402,7 +402,7 @@ export default class Menubar {
 
     if (isMacintosh) {
       // Mac: Application
-      const macApplicationMenuItem = this.createMacApplicationMenu();
+      const macApplicationMenuItem = this.createMacApplicationMenu(true);
 
       menubar.append(macApplicationMenuItem);
 
@@ -667,7 +667,7 @@ export default class Menubar {
     const menubar = new Menu();
     if (isMacintosh) {
       // Mac: Application
-      const macApplicationMenuItem = this.createMacApplicationMenu();
+      const macApplicationMenuItem = this.createMacApplicationMenu(true);
 
       menubar.append(macApplicationMenuItem);
     } else {
@@ -685,7 +685,7 @@ export default class Menubar {
     return menubar;
   }
 
-  private createMacApplicationMenu(): Electron.MenuItem {
+  private createMacApplicationMenu(hideCheckBtn: boolean = false): Electron.MenuItem {
     const applicationMenu = new Menu();
     const about = this.createMenuItem('msg.splayerx.about', () => {
       app.emit('add-windows-about');
@@ -707,7 +707,7 @@ export default class Menubar {
       separator(),
     ]);
     // mac dmg
-    if (isMacintoshDMG && this._routeName !== 'welcome-privacy' && this._routeName !== 'language-setting') {
+    if (isMacintoshDMG && !hideCheckBtn && this._routeName !== 'welcome-privacy' && this._routeName !== 'language-setting') {
       actions.push(...[
         checkForUpdates,
         separator(),
