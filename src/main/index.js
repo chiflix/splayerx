@@ -70,9 +70,6 @@ let browsingWindow = null;
 let browserViewManager = null;
 let pipControlView = null;
 let titlebarView = null;
-let browserViews = [];
-let currentBrowserHostname = '';
-let currentPipHostname = '';
 let tray = null;
 let pipTimer = 0;
 let needToRestore = false;
@@ -81,7 +78,6 @@ let needBlockCloseLaborWindow = true; // 标记是否阻塞nsfw窗口关闭
 let inited = false;
 let hideBrowsingWindow = false;
 let finalVideoToOpen = [];
-const tabGroups = [];
 const tmpVideoToOpen = [];
 const tmpSubsToOpen = [];
 const subRegex = getValidSubtitleRegex();
@@ -134,11 +130,20 @@ function handleBossKey() {
 }
 
 function createPipControlView() {
-  if (pipControlView) pipControlView.destroy();
+  if (pipControlView && !pipControlView.isDestroyed()) pipControlView.destroy();
   pipControlView = new BrowserView({
     webPreferences: {
       preload: `${require('path').resolve(__static, 'pip/preload.js')}`,
     },
+  });
+  browsingWindow.addBrowserView(pipControlView);
+  pipControlView.webContents.loadURL(`file:${require('path').resolve(__static, 'pip/pipControl.html')}`);
+  pipControlView.setBackgroundColor('#00FFFFFF');
+  pipControlView.setBounds({
+    x: Math.round(browsingWindow.getSize()[0] - 65),
+    y: Math.round(browsingWindow.getSize()[1] / 2 - 54),
+    width: 50,
+    height: 104,
   });
 }
 
@@ -148,6 +153,12 @@ function createTitlebarView() {
     webPreferences: {
       preload: `${require('path').resolve(__static, 'pip/titlebarPreload.js')}`,
     },
+  });
+  browsingWindow.addBrowserView(titlebarView);
+  titlebarView.webContents.loadURL(titlebarUrl);
+  titlebarView.setBackgroundColor('#00FFFFFF');
+  titlebarView.setBounds({
+    x: 0, y: 0, width: browsingWindow.getSize()[0], height: 36,
   });
 }
 
@@ -452,108 +463,72 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('pip-window-size', (evt, size) => {
     mainWindow.send('pip-window-size', size);
   });
+  ipcMain.on('pip-watcher', (evt, args) => {
+    browsingWindow.getBrowserViews()[0].webContents.executeJavaScript(args);
+  });
   ipcMain.on('pip-window-close', () => {
     const views = browsingWindow.getBrowserViews();
     if (views.length) {
-      const index = tabGroups.findIndex(tab => Object.keys(tab)[0] === currentPipHostname);
-      const url = tabGroups[index][currentPipHostname]
-        .find(view => view.id !== views[0].id).webContents.getURL();
-      views[0].webContents.loadURL(url);
       views.forEach((view) => {
         browsingWindow.removeBrowserView(view);
       });
-      tabGroups[index][currentPipHostname].reverse();
+      browserViewManager.pipClose();
       mainWindow.send('update-pip-state');
     }
   });
   ipcMain.on('remove-browser', () => {
     const mainView = mainWindow.getBrowserView();
-    if (mainView) {
-      mainWindow.removeBrowserView(mainView);
-      if (browsingWindow) {
-        const views = browsingWindow.getBrowserViews();
-        views.forEach((view) => {
-          browsingWindow.removeBrowserView(view);
-          view.destroy();
-        });
-      }
-      mainView.destroy();
-      if (browsingWindow) browsingWindow.close();
-    }
-  });
-  ipcMain.on('shift-page-tab', (evt, url) => {
-    if (!browsingWindow) createBrowsingWindow();
-    const isPip = browsingWindow && browsingWindow.isVisible();
-    if (!isPip) currentPipHostname = urlParse(url).hostname;
-    currentBrowserHostname = urlParse(url).hostname;
-    const index = tabGroups.findIndex(tab => Object.keys(tab)[0] === currentBrowserHostname);
-    if (currentBrowserHostname !== 'blank' && index === -1) {
-      mainWindow.removeBrowserView(mainWindow.getBrowserView());
-      browserViews = [
-        new BrowserView({
-          webPreferences: {
-            preload: `${require('path').resolve(__static, 'pip/preload.js')}`,
-          },
-        }),
-        new BrowserView({
-          webPreferences: {
-            preload: `${require('path').resolve(__static, 'pip/preload.js')}`,
-          },
-        }),
-      ];
-      tabGroups.push({ [`${currentBrowserHostname}`]: browserViews });
-      mainWindow.addBrowserView(browserViews[0]);
-      if (!isPip) {
-        browsingWindow.removeBrowserView(browsingWindow.getBrowserViews()[0]);
-        browsingWindow.addBrowserView(browserViews[1]);
-      }
-      browserViews.forEach((view) => {
-        view.webContents.loadURL(url);
+    // TODO need to pause video
+    mainWindow.removeBrowserView(mainView);
+    if (browsingWindow) {
+      const views = browsingWindow.getBrowserViews();
+      views.forEach((view) => {
+        browsingWindow.removeBrowserView(view);
       });
-    } else {
-      browserViews = tabGroups[index][currentBrowserHostname];
-      const id = mainWindow.getBrowserView().id;
-      if (isPip) {
-        mainWindow.addBrowserView(
-          browserViews[currentPipHostname === currentBrowserHostname ? 1 : 0],
-        );
-        mainWindow.removeBrowserView(mainWindow.getBrowserViews().find(view => view.id === id));
-      } else {
-        mainWindow.addBrowserView(browserViews[0]);
-        browsingWindow.removeBrowserView(browsingWindow.getBrowserView());
-        browsingWindow.addBrowserView(browserViews[1]);
-      }
-      setTimeout(() => {
-        mainWindow.removeBrowserView(mainWindow.getBrowserViews().find(view => view.id === id));
-      }, 150);
-    }
-    const mainId = mainWindow.getBrowserViews()[0].id;
-    const browserId = browsingWindow.getBrowserViews()[0].id;
-    mainWindow.send('current-browser-id', [mainId, browserId]);
-    mainWindow.send('update-browser-view', !(currentBrowserHostname !== 'blank' && index === -1));
-  });
-  ipcMain.on('keep-browsers-cache', (evt, url) => {
-    if (browsingWindow && !browsingWindow.getBrowserViews()[0].webContents.history.includes(url)) {
-      browsingWindow.getBrowserViews()[0].webContents.loadURL(url);
+      browserViewManager.pipClose();
+      browsingWindow.close();
     }
   });
   ipcMain.on('go-to-offset', (evt, val) => {
     if (!browserViewManager) return;
     const newBrowser = val === 1 ? browserViewManager.forward() : browserViewManager.back();
     mainWindow.removeBrowserView(mainWindow.getBrowserView());
-    mainWindow.addBrowserView(newBrowser.view);
-    console.log(newBrowser);
-    newBrowser.view.setBounds({
+    mainWindow.addBrowserView(newBrowser.page.view);
+    newBrowser.page.view.setBounds({
       x: 0, y: 36, width: mainWindow.getSize()[0], height: mainWindow.getSize()[1] - 36,
     });
-    newBrowser.view.setAutoResize({
+    newBrowser.page.view.setAutoResize({
       width: true, height: true,
     });
-    mainWindow.send('update-browser-state', { canGoBack: newBrowser.canBack, canGoForward: newBrowser.canForward });
+    mainWindow.send('update-browser-state', {
+      url: newBrowser.page.url,
+      canGoBack: newBrowser.canBack,
+      canGoForward: newBrowser.canForward,
+    });
+  });
+  ipcMain.on('change-channel', (evt, args) => {
+    if (!browserViewManager) return;
+    const newChannel = browserViewManager.changeChanel(args.channel, args.url);
+    const view = newChannel.view ? newChannel.view : newChannel.page.view;
+    const url = newChannel.view ? args.url : newChannel.page.url;
+    mainWindow.removeBrowserView(mainWindow.getBrowserView());
+    mainWindow.addBrowserView(view);
+    view.setBounds({
+      x: 0, y: 36, width: mainWindow.getSize()[0], height: mainWindow.getSize()[1] - 36,
+    });
+    view.setAutoResize({
+      width: true, height: true,
+    });
+    mainWindow.send('update-browser-state', {
+      url,
+      canGoBack: newChannel.canBack,
+      canGoForward: newChannel.canForward,
+    });
   });
   ipcMain.on('create-browser-view', (evt, args) => {
     if (!browserViewManager) browserViewManager = new BrowserViewManager();
-    const currentMainBrowserView = browserViewManager.create(urlParse(args.url).hostname, args.url);
+    const currentMainBrowserView = browserViewManager
+      .create(urlParse(args.url).hostname, args.url);
     const isMainBrowser = mainWindow.getBrowserView();
     if (isMainBrowser) {
       mainWindow.removeBrowserView(mainWindow.getBrowserViews()[0]);
@@ -567,46 +542,16 @@ function registerMainWindowEvent(mainWindow) {
     currentMainBrowserView.view.setAutoResize({
       width: true, height: true,
     });
-    mainWindow.send('update-browser-state', { url: args.url, canGoBack: currentMainBrowserView.canBack, canGoForward: currentMainBrowserView.canForward });
-    // currentBrowserHostname = currentPipHostname = urlParse(args.url).hostname;
-    // const index = tabGroups.findIndex(tab => Object.keys(tab)[0] === currentBrowserHostname);
-    // browserViews = [
-    //   new BrowserView({
-    //     webPreferences: {
-    //       preload: `${require('path').resolve(__static, 'pip/preload.js')}`,
-    //     },
-    //   }),
-    //   new BrowserView({
-    //     webPreferences: {
-    //       preload: `${require('path').resolve(__static, 'pip/preload.js')}`,
-    //     },
-    //   }),
-    // ];
-    // if (index === -1) {
-    //   tabGroups.push({ [`${currentBrowserHostname}`]: browserViews });
-    //   browserViews.forEach((view) => {
-    //     view.webContents.loadURL(args.url);
-    //   });
-    // } else if (tabGroups[index][currentBrowserHostname][0].isDestroyed()) {
-    //   tabGroups[index][currentBrowserHostname].splice(0, 2, ...browserViews);
-    //   browserViews.forEach((view) => {
-    //     view.webContents.loadURL(lastBrowserUrl);
-    //   });
-    // }
-    // mainWindow.send('current-browser-id', browserViews.map(v => v.id));
-    // mainWindow.addBrowserView(browserViews[0]);
-    // browsingWindow.addBrowserView(browserViews[1]);
+    setTimeout(() => {
+      mainWindow.send('update-browser-state', {
+        url: args.url,
+        canGoBack: currentMainBrowserView.canBack,
+        canGoForward: currentMainBrowserView.canForward,
+      });
+    }, 0);
   });
   ipcMain.on('update-danmu-state', (evt, val) => {
     pipControlView.webContents.executeJavaScript(`document.querySelector(".danmu").src = ${val} ? "assets/danmu-default-icon.svg" : "assets/noDanmu-default-icon.svg"`);
-  });
-  ipcMain.on('init-danmu-state', (evt, args) => {
-    pipControlView.webContents.executeJavaScript(
-      `const danmu = document.querySelector(".danmu");
-      danmu.src = ${args.barrageOpen} ? "assets/danmu-default-icon.svg" : "assets/noDanmu-default-icon.svg";
-      danmu.style.opacity = ${args.opacity};
-      danmu.style.cursor = ${args.opacity} === 1 ? "cursor" : "default"`,
-    );
   });
   ipcMain.on('pip', () => {
     mainWindow.send('handle-exit-pip');
@@ -632,7 +577,7 @@ function registerMainWindowEvent(mainWindow) {
       clearTimeout(pipTimer);
     }
   });
-  ipcMain.on('mouseleave', () => {
+  ipcMain.on('mouseout', () => {
     if (browsingWindow && browsingWindow.isFocused()) {
       if (pipTimer) {
         clearTimeout(pipTimer);
@@ -707,8 +652,8 @@ function registerMainWindowEvent(mainWindow) {
         break;
     }
   });
-  ipcMain.on('shift-pip', () => {
-    const isDifferentBrowser = currentPipHostname !== '' && currentBrowserHostname !== currentPipHostname;
+  ipcMain.on('shift-pip', (evt, args) => {
+    if (!browserViewManager) return;
     const mainView = mainWindow.getBrowserView();
     mainWindow.removeBrowserView(mainView);
     const browViews = browsingWindow.getBrowserViews();
@@ -717,80 +662,79 @@ function registerMainWindowEvent(mainWindow) {
     });
     createPipControlView();
     createTitlebarView();
-    if (isDifferentBrowser) {
-      const index = tabGroups.findIndex(tab => Object.keys(tab)[0] === currentBrowserHostname);
-      mainWindow.addBrowserView(tabGroups[index][currentBrowserHostname][1]);
-      browsingWindow.addBrowserView(mainView);
-      browsingWindow.addBrowserView(pipControlView);
-      browsingWindow.addBrowserView(titlebarView);
-      const pipIndex = tabGroups.findIndex(tab => Object.keys(tab)[0] === currentPipHostname);
-      const url = tabGroups[pipIndex][currentPipHostname]
-        .find(view => view.id !== browViews[0].id).webContents.getURL();
-      browViews[0].webContents.loadURL(url);
-    } else {
-      const index = browViews[0].webContents.history
-        .findIndex(url => url === mainView.webContents.getURL());
-      browViews[0].webContents
-        .loadURL(mainView.webContents.history[index - 1]);
-      mainWindow.addBrowserView(browViews[0]);
-      browsingWindow.addBrowserView(mainView);
-      browsingWindow.addBrowserView(pipControlView);
-      browsingWindow.addBrowserView(titlebarView);
-    }
-    currentPipHostname = urlParse(browsingWindow.getBrowserViews()[0]
-      .webContents.getURL()).hostname;
-    currentBrowserHostname = urlParse(mainWindow.getBrowserView()
-      .webContents.getURL()).hostname;
-    pipControlView.webContents.loadURL(`file:${require('path').resolve(__static, 'pip/pipControl.html')}`);
-    pipControlView.setBackgroundColor('#00FFFFFF');
-    titlebarView.webContents.loadURL(titlebarUrl);
-    titlebarView.setBackgroundColor('#00FFFFFF');
-    titlebarView.setBounds({
-      x: 0, y: 0, width: browsingWindow.getSize()[0], height: 36,
+    const browsers = browserViewManager.changePip(urlParse(mainView.webContents.getURL()).hostname);
+    const pipBrowser = browsers.pipBrowser;
+    const mainBrowser = browsers.mainBrowser;
+    mainWindow.addBrowserView(mainBrowser.page.view);
+    browsingWindow.addBrowserView(pipBrowser);
+    browsingWindow.addBrowserView(pipControlView);
+    browsingWindow.addBrowserView(titlebarView);
+    pipBrowser.setBounds({
+      x: 0, y: 0, width: browsingWindow.getSize()[0], height: browsingWindow.getSize()[1],
     });
+    pipBrowser.setAutoResize({
+      width: true, height: true,
+    });
+    mainWindow.send('update-browser-state', {
+      url: mainBrowser.page.url,
+      canGoBack: mainBrowser.canBack,
+      canGoForward: mainBrowser.canForward,
+    });
+    pipControlView.webContents.executeJavaScript(
+      `const danmu = document.querySelector(".danmu");
+      danmu.src = ${args.barrageOpen} ? "assets/danmu-default-icon.svg" : "assets/noDanmu-default-icon.svg";
+      danmu.style.opacity = ${args.opacity};
+      danmu.style.cursor = ${args.opacity} === 1 ? "cursor" : "default"`,
+    );
     menuService.updateFocusedWindow(false);
     browsingWindow.focus();
   });
-  ipcMain.on('enter-pip', () => {
-    createPipControlView();
-    createTitlebarView();
+  ipcMain.on('enter-pip', (evt, args) => {
+    if (!browserViewManager) return;
+    const browsers = browserViewManager.enterPip();
+    const pipBrowser = browsers.pipBrowser;
+    const mainBrowser = browsers.mainBrowser;
     if (!browsingWindow) {
       createBrowsingWindow();
-      const index = tabGroups.findIndex(tab => Object.keys(tab)[0] === currentBrowserHostname);
-      browserViews = tabGroups[index][currentBrowserHostname];
-      mainWindow.removeBrowserView(browserViews[0]);
-      mainWindow.addBrowserView(browserViews[1]);
-      browsingWindow.addBrowserView(browserViews[0]);
-      browsingWindow.addBrowserView(pipControlView);
-      browsingWindow.addBrowserView(titlebarView);
+      mainWindow.removeBrowserView(mainWindow.getBrowserView());
+      mainWindow.addBrowserView(mainBrowser.page.view);
+      browsingWindow.addBrowserView(pipBrowser);
+      createPipControlView();
+      createTitlebarView();
       browsingWindow.show();
     } else {
-      if (browsingWindow.getBrowserViews()[0].webContents.canGoBack()) {
-        browsingWindow.getBrowserViews()[0].webContents.goBack();
-      }
-      browsingWindow.getBrowserViews().forEach((view) => {
-        browsingWindow.removeBrowserView(view);
-      });
-      mainWindow.removeBrowserView(browserViews[0]);
-      mainWindow.addBrowserView(browserViews[1]);
-      browsingWindow.addBrowserView(browserViews[0]);
-      browsingWindow.addBrowserView(pipControlView);
-      browsingWindow.addBrowserView(titlebarView);
+      mainWindow.removeBrowserView(mainWindow.getBrowserView());
+      mainWindow.addBrowserView(mainBrowser.page.view);
+      browsingWindow.addBrowserView(pipBrowser);
+      createPipControlView();
+      createTitlebarView();
       browsingWindow.show();
     }
-    pipControlView.webContents.loadURL(`file:${require('path').resolve(__static, 'pip/pipControl.html')}`);
-    pipControlView.setBackgroundColor('#00FFFFFF');
-    pipControlView.setBounds({
-      x: Math.round(browsingWindow.getSize()[0] - 65),
-      y: Math.round(browsingWindow.getSize()[1] / 2 - 54),
-      width: 50,
-      height: 104,
+    pipBrowser.webContents.openDevTools();
+    mainBrowser.page.view.setBounds({
+      x: 0, y: 36, width: mainWindow.getSize()[0], height: mainWindow.getSize()[1] - 36,
     });
-    titlebarView.webContents.loadURL(titlebarUrl);
-    titlebarView.setBackgroundColor('#00FFFFFF');
-    titlebarView.setBounds({
-      x: 0, y: 0, width: browsingWindow.getSize()[0], height: 36,
+    mainBrowser.page.view.setAutoResize({
+      width: true,
+      height: true,
     });
+    pipBrowser.setBounds({
+      x: 0, y: 0, width: browsingWindow.getSize()[0], height: browsingWindow.getSize()[1],
+    });
+    pipBrowser.setAutoResize({
+      width: true, height: true,
+    });
+    mainWindow.send('update-browser-state', {
+      url: mainBrowser.page.url,
+      canGoBack: mainBrowser.canBack,
+      canGoForward: mainBrowser.canForward,
+    });
+    pipControlView.webContents.executeJavaScript(
+      `const danmu = document.querySelector(".danmu");
+      danmu.src = ${args.barrageOpen} ? "assets/danmu-default-icon.svg" : "assets/noDanmu-default-icon.svg";
+      danmu.style.opacity = ${args.opacity};
+      danmu.style.cursor = ${args.opacity} === 1 ? "cursor" : "default"`,
+    );
     menuService.updateFocusedWindow(false);
     browsingWindow.focus();
   });
@@ -799,25 +743,27 @@ function registerMainWindowEvent(mainWindow) {
     if (titlebarView) titlebarView.setBounds(args.titlebar);
   });
   ipcMain.on('exit-pip', () => {
-    const isDifferentBrowser = currentPipHostname !== '' && currentBrowserHostname !== currentPipHostname;
-    const index = tabGroups.findIndex(tab => Object.keys(tab)[0] === currentPipHostname);
+    if (!browserViewManager) return;
     const mainView = mainWindow.getBrowserView();
     mainWindow.removeBrowserView(mainView);
     const browViews = browsingWindow.getBrowserViews();
     browViews.forEach((view) => {
       browsingWindow.removeBrowserView(view);
     });
-    if (isDifferentBrowser) {
-      mainWindow.addBrowserView(browViews[0]);
-      browsingWindow.addBrowserView(tabGroups[index][currentPipHostname]
-        .find(view => view.id !== browViews[0].id));
-    } else {
-      mainView.webContents.loadURL(mainView.webContents
-        .history[mainView.webContents.history.length >= 2
-          ? mainView.webContents.history.length - 2 : 0]);
-      mainWindow.addBrowserView(browViews[0]);
-      browsingWindow.addBrowserView(mainView);
-    }
+    const exitBrowser = browserViewManager.exitPip();
+    mainWindow.addBrowserView(exitBrowser.page.view);
+    exitBrowser.page.view.setBounds({
+      x: 0, y: 36, width: mainWindow.getSize()[0], height: mainWindow.getSize()[1] - 36,
+    });
+    exitBrowser.page.view.setAutoResize({
+      width: true,
+      height: true,
+    });
+    mainWindow.send('update-browser-state', {
+      url: exitBrowser.page.url,
+      canGoBack: exitBrowser.canBack,
+      canGoForward: exitBrowser.canForward,
+    });
     if (browsingWindow.isFullScreen()) {
       hideBrowsingWindow = true;
       browsingWindow.setFullScreen(false);

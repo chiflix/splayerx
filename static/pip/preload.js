@@ -41,12 +41,13 @@ document.addEventListener('DOMContentLoaded', () => {
       sendToHost('pip', 'pip');
     });
   }
-  window.addEventListener('mouseleave', (evt) => {
-    if (!pipBtns) {
+  window.addEventListener('mouseout', (evt) => {
+    if (!pipBtns && remote.getCurrentWindow()
+      && remote.getCurrentWindow().getBrowserViews().length > 1) {
       const winSize = remote.getCurrentWindow().getSize();
       if (evt.pageX <= 0 || evt.pageY <= 0
         || evt.pageX >= winSize[0] || evt.pageY >= winSize[1]) {
-        sendToHost('mouseleave', 'leave');
+        sendToHost('mouseout', 'out');
       }
     }
   }, true);
@@ -77,7 +78,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
   window.addEventListener('mousemove', (evt) => {
-    if (!pipBtns && remote.getCurrentWindow().getBrowserViews().length > 1) {
+    if (!pipBtns && remote.getCurrentWindow()
+      && remote.getCurrentWindow().getBrowserViews().length > 1) {
       if (pipTimer) clearTimeout(pipTimer);
       sendToHost('mousemove', 'isMoving');
     }

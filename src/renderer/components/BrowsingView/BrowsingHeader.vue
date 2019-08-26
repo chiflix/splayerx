@@ -119,6 +119,16 @@ export default {
       this.forwardType = val ? 'forward' : 'forwardDisabled';
     },
   },
+  mounted() {
+    this.$bus.$on('update-web-info', (info: {
+      hasVideo?: boolean, url?: string, canGoBack?: boolean, canGoForward?: boolean
+    }) => {
+      const keys = Object.keys(info);
+      keys.forEach((key: string) => {
+        this[key] = info[key];
+      });
+    });
+  },
   methods: {
     handleDbClick() {
       if (!this.isMaximized) {
