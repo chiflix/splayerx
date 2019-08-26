@@ -78,8 +78,8 @@ export default class WindowRectService implements IWindowRectRequest {
    */
   private calculateWindowPosition(
     currentRect: number[],
-    windowRect: number[],
     newSize: number[],
+    windowRect: number[],
   ): number[] {
     const tempRect = currentRect.slice(0, 2)
       .map((value, index) => value + (currentRect.slice(2, 4)[index] / 2))
@@ -146,8 +146,8 @@ export default class WindowRectService implements IWindowRectRequest {
       // 这样在那里全屏，退出全屏后窗口还在那个位置。
       const newPosition = this.calculateWindowPosition(
         windowPosition.concat([newVideoSize[1], newVideoSize[0]]),
-        getScreenRect(),
         newVideoSize,
+        getScreenRect(),
       );
       newRect = newPosition.concat(newVideoSize);
       ipcRenderer.send('callMainWindowMethod', 'setSize', newRect.slice(2, 4));
@@ -172,16 +172,17 @@ export default class WindowRectService implements IWindowRectRequest {
     videoExisted: boolean,
     oldRect: number[],
     maxSize?: number[],
+    minSize?: number[],
   ): number[] {
     if (!maxSize) {
       maxSize = getScreenRect().slice(2, 4);
     }
-    const screenSize = getScreenRect().slice(2, 4);
+    if (!minSize) minSize = MINSIZE;
     const [newWidth, newHeight] = this.calculateWindowSize(
-      MINSIZE, maxSize, videoSize, videoExisted, screenSize,
+      minSize, maxSize, videoSize, videoExisted, getScreenRect().slice(2, 4),
     );
     const [newLeft, newTop] = this.calculateWindowPosition(
-      oldRect, getScreenRect(), [newWidth, newHeight],
+      oldRect, [newWidth, newHeight], getScreenRect(),
     );
     const rect = [newLeft, newTop, newWidth, newHeight];
     ipcRenderer.send('callMainWindowMethod', 'setSize', rect.slice(2, 4));

@@ -74,6 +74,7 @@ export default {
       needToRestore: false,
       winAngleBeforeFullScreen: 0, // winAngel before full screen
       winSizeBeforeFullScreen: [], // winSize before full screen
+      switchInPlaylist: false,
     };
   },
   computed: {
@@ -174,6 +175,7 @@ export default {
     this.$bus.$on('next-video', () => {
       videodata.paused = false;
       if (this.nextVideo) {
+        this.switchInPlaylist = true;
         this.$store.commit('LOOP_UPDATE', false);
         if (this.isFolderList) this.openVideoFile(this.nextVideo);
         else this.playFile(this.nextVideo, this.nextVideoId);
@@ -184,6 +186,7 @@ export default {
     this.$bus.$on('previous-video', () => {
       videodata.paused = false;
       if (this.previousVideo) {
+        this.switchInPlaylist = true;
         this.$store.commit('LOOP_UPDATE', false);
         if (this.isFolderList) this.openVideoFile(this.previousVideo);
         else this.playFile(this.previousVideo, this.previousVideoId);
@@ -254,6 +257,25 @@ export default {
       });
       this.changeWindowRotate(this.winAngle);
 
+      this.windowRectControl();
+
+      const mediaInfo = this.videoId
+        ? await playInfoStorageService.getMediaItem(this.videoId)
+        : null;
+      if (mediaInfo && mediaInfo.lastPlayedTime
+        && target.duration - mediaInfo.lastPlayedTime > 10) {
+        this.$bus.$emit('seek', mediaInfo.lastPlayedTime);
+      } else {
+        this.$bus.$emit('seek', 0);
+      }
+      if (mediaInfo && mediaInfo.audioTrackId) this.lastAudioTrackId = mediaInfo.audioTrackId;
+    },
+    onAudioTrack(event: TrackEvent) {
+      const { type, track } = event;
+      this[`${type}AudioTrack`](track);
+    },
+    windowRectControl() {
+      // 新打开视频、拖入视频
       let maxVideoSize;
       let videoSize;
       if (this.videoExisted && (this.winAngle === 0 || this.winAngle === 180)) {
@@ -276,22 +298,13 @@ export default {
         this.videoExisted = true;
       }
       const oldRect = this.winPos.concat(this.winSize);
-      windowRectService.calculateWindowRect(videoSize, true, oldRect, maxVideoSize);
-
-      const mediaInfo = this.videoId
-        ? await playInfoStorageService.getMediaItem(this.videoId)
-        : null;
-      if (mediaInfo && mediaInfo.lastPlayedTime
-        && target.duration - mediaInfo.lastPlayedTime > 10) {
-        this.$bus.$emit('seek', mediaInfo.lastPlayedTime);
-      } else {
-        this.$bus.$emit('seek', 0);
+      // 通过播放列表切换视频不缩小屏幕尺寸
+      let minSize;
+      if (this.switchInPlaylist) {
+        minSize = this.winSize;
+        this.switchInPlaylist = false;
       }
-      if (mediaInfo && mediaInfo.audioTrackId) this.lastAudioTrackId = mediaInfo.audioTrackId;
-    },
-    onAudioTrack(event: TrackEvent) {
-      const { type, track } = event;
-      this[`${type}AudioTrack`](track);
+      windowRectService.calculateWindowRect(videoSize, true, oldRect, maxVideoSize, minSize);
     },
     changeWindowRotate(val: number) {
       requestAnimationFrame(() => {
