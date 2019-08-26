@@ -10,25 +10,41 @@ import { ELECTRON_CACHE_DIRNAME, DEFAULT_LOG_DIRNAME } from '@/constants';
 const app = electron.app || electron.remote.app;
 const defaultPath = join(app.getPath(ELECTRON_CACHE_DIRNAME), DEFAULT_LOG_DIRNAME);
 
-const transport = new DailyRotateFile({
-  filename: `${defaultPath}/%DATE%.log`,
-  datePattern: 'YYYY-MM-DD',
-  zippedArchive: true,
-  maxSize: '20m',
-  maxFiles: '14d',
-});
-
-const logger = winston.createLogger({
-  format: winston.format.combine(winston.format.printf((info) => {
-    if (info.stack) {
-      return `${info.time} - ${info.level}: ${info.message}-${info.stack}`;
-    }
-    return `${info.time} - ${info.level}: ${info.message}`;
-  })),
-  transports: [transport],
-});
-
 export default class Log implements ILog {
+  private _logger: winston.Logger;
+
+  public get logger() {
+    if (this._logger) return this._logger;
+
+    try {
+      const transport = new DailyRotateFile({
+        filename: `${defaultPath}/%DATE%.log`,
+        datePattern: 'YYYY-MM-DD',
+        zippedArchive: true,
+        maxSize: '20m',
+        maxFiles: '14d',
+      });
+
+      this._logger = winston.createLogger({
+        format: winston.format.combine(winston.format.printf((info) => {
+          if (info.stack) {
+            return `${info.time} - ${info.level}: ${info.message}-${info.stack}`;
+          }
+          return `${info.time} - ${info.level}: ${info.message}`;
+        })),
+        transports: [transport],
+      });
+
+      return this._logger;
+    } catch (ex) {
+      return {
+        log() {
+          // do nothing
+        },
+      };
+    }
+  }
+
   private log(label: string, level: string, message: string | Error) {
     if (level in console) console[level](label, message);
     else console.log(label, message);
@@ -42,7 +58,7 @@ export default class Log implements ILog {
     }
 
     try {
-      logger.log({
+      this.logger.log({
         time: new Date().toISOString(),
         level,
         message,
