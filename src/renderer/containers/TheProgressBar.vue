@@ -27,12 +27,12 @@
           height: hovering ? '10px' : '4px',
           backgroundColor: leftFakeProgressBackgroundColor,
         }"
-        class="fake-progress"
+        class="fake-progress left"
       >
         <div
           v-if="hoveredCurrentTime === 0 && hovering"
           :style="{
-            width: '20px',
+            width: '25px',
             height: '10px',
             borderTopRightRadius: '20px',
             borderBottomRightRadius: '20px',
@@ -72,7 +72,7 @@
           height: hovering ? '10px' : '4px',
           backgroundColor: rightFakeProgressBackgroundColor,
         }"
-        class="fake-progress"
+        class="fake-progress right"
       />
     </div>
   </div>
@@ -109,10 +109,10 @@ export default {
   computed: {
     ...mapGetters(['winWidth', 'winHeight', 'winRatio', 'duration', 'ratio', 'nextVideo']),
     hoveredPercent() {
-      return this.hovering ? this.pageXToProportion(this.hoveredPageX, 20, this.winWidth) * 100 : 0;
+      return this.hovering ? this.pageXToProportion(this.hoveredPageX, 25, this.winWidth) * 100 : 0;
     },
     hoveredCurrentTime() {
-      return this.duration * this.pageXToProportion(this.hoveredPageX, 20, this.winWidth);
+      return this.duration * this.pageXToProportion(this.hoveredPageX, 25, this.winWidth);
     },
     convertedHoveredCurrentTime() {
       return this.timecodeFromSeconds(this.hoveredCurrentTime);
@@ -142,7 +142,7 @@ export default {
     },
     thumbnailPosition() {
       return this.pageXToThumbnailPosition(
-        this.hoveredPageX, 20,
+        this.hoveredPageX, 10,
         this.thumbnailWidth, this.winWidth,
       );
     },
@@ -349,16 +349,24 @@ export default {
 
   .fake-button {
     position: relative;
-    width: 20px;
+    width: 30px;
     .fake-progress {
       transition: height 150ms;
-      width: inherit;
       position: absolute;
       bottom: 0;
+      &.left {
+        width: 25px;
+      }
+      &.right {
+        width: 30px;
+      }
+    }
+    &.left {
+      width: 25px;
     }
     &.left .radius{
       content: '';
-      width: inherit;
+      width: 25px;
       height: inherit;
       position: absolute;
     }
@@ -368,7 +376,7 @@ export default {
     display: flex;
     flex-direction: row;
     position: relative;
-    width: calc(100% - 40px);
+    width: calc(100% - 55px);
     .hovered {
       position: relative;
     }

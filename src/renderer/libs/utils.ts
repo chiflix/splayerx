@@ -350,9 +350,9 @@ export async function findNsfwFistFilter() {
  * @param {string} version app version string
  * @returns {number[]} [4, 10, 13]
  */
-function getNumbersFromVersion(version: string): number[] {
+export function getNumbersFromVersion(version: string): number[] {
   const reg = /^(\d+)\.(\d+)\.(\d+)(\D+)?(\d+)?$/i;
-  const numbers: number[] = [0, 0, 0, 0];
+  const numbers: number[] = [0, 0, 0, Number.POSITIVE_INFINITY];
   version.replace(reg, (
     match: string,
     $0: string,
@@ -370,6 +370,31 @@ function getNumbersFromVersion(version: string): number[] {
     return match;
   });
   return numbers;
+}
+
+/**
+ * @description compare to versions
+ * @author tanghaixiang
+ * @param {string} left left version
+ * @param {string} right right version
+ * @returns {boolean} left version is bigger than right
+ */
+export function compareVersions(left: string, right: string): boolean {
+  let isNeedUpdate = false;
+  const current = getNumbersFromVersion(left);
+  const checked = getNumbersFromVersion(right);
+  if (checked[0] > current[0]) {
+    isNeedUpdate = true;
+  } else if (checked[0] === current[0] && checked[1] > current[1]) {
+    isNeedUpdate = true;
+  } else if (checked[0] === current[0] && checked[1] === current[1]
+    && checked[2] > current[2]) {
+    isNeedUpdate = true;
+  } else if (checked[0] === current[0] && checked[1] === current[1]
+    && checked[2] === current[2] && checked[3] > current[3]) {
+    isNeedUpdate = true;
+  }
+  return isNeedUpdate;
 }
 
 /**
@@ -393,27 +418,12 @@ export function checkForUpdate(
         url: '',
       };
       // check package.json.version with res.data
-      if (res.data && res.data.name !== version && !(res.data.name === skipVersion && auto)) {
-        let isNeedUpdate = false;
-        const current = getNumbersFromVersion(version);
-        const checked = getNumbersFromVersion(res.data.name);
-        if (checked[0] > current[0]) {
-          isNeedUpdate = true;
-        } else if (checked[0] === current[0] && checked[1] > current[1]) {
-          isNeedUpdate = true;
-        } else if (checked[0] === current[0] && checked[1] === current[1]
-          && checked[2] > current[2]) {
-          isNeedUpdate = true;
-        } else if (checked[0] === current[0] && checked[1] === current[1]
-          && checked[2] === current[2] && checked[3] > current[3]) {
-          isNeedUpdate = true;
-        }
-        if (isNeedUpdate) {
-          result.version = res.data.name;
-          result.isLastest = false;
-          result.landingPage = res.data.landingPage;
-          result.url = res.data.files[process.platform].url;
-        }
+      if (res.data && res.data.name !== version && !(res.data.name === skipVersion && auto)
+        && compareVersions(version, res.data.name)) {
+        result.version = res.data.name;
+        result.isLastest = false;
+        result.landingPage = res.data.landingPage;
+        result.url = res.data.files[process.platform].url;
       }
       return result;
     });

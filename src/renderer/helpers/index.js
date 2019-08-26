@@ -541,6 +541,12 @@ export default {
       }
       return false;
     },
+    createIcon(iconPath) {
+      const { nativeImage } = this.$electron.remote;
+      return nativeImage.createFromPath(path.join(__static, iconPath)).resize({
+        width: 25,
+      });
+    },
     openFileByPlayingView(url) {
       const protocol = urlParseLax(url).protocol;
       return !['https:', 'http:'].includes(protocol) || document.createElement('video').canPlayType(`video/${url.slice(url.lastIndexOf('.') + 1, url.length)}`);

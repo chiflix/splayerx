@@ -19,7 +19,7 @@ describe('PlayInfoStorageService logic service', () => {
     sinon.stub(info, 'getValueByKey').callsFake(() => demo);
     sinon.stub(info, 'update').callsFake(() => demo);
     const result = await playInfoStorageService.updateMediaItemBy(1, {});
-    expect(result).to.be.equal(true);
+    expect(result.videoId).to.be.equal(1);
   });
 
   it('should fail updateMediaItemBy when video do not have storage', async () => {
