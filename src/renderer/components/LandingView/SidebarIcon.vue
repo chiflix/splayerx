@@ -57,12 +57,6 @@ export default {
   transition: opacity 150ms linear;
   transition-delay: 10ms;
 }
-svg {
-  cursor: pointer;
-  &:hover {
-    cursor: pointer;
-  }
-}
 path {
   transition: fill 300ms linear;
   transition-delay: 50ms;

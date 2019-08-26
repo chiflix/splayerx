@@ -116,7 +116,6 @@ import {
   mapState, mapGetters, mapActions,
   createNamespacedHelpers,
 } from 'vuex';
-import path from 'path';
 import { log } from '@/libs/Log';
 import {
   Input as inputActions,

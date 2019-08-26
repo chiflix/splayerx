@@ -468,10 +468,7 @@ export default {
     }),
     createTouchBar(enablePip: boolean) {
       const { TouchBar } = this.$electron.remote;
-      const {
-        TouchBarLabel, TouchBarButton,
-        TouchBarSpacer,
-      } = TouchBar;
+      const { TouchBarButton, TouchBarSpacer } = TouchBar;
 
       this.sidebarButton = new TouchBarButton({
         icon: this.createIcon('touchBar/sidebar.png'),
