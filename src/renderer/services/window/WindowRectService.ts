@@ -45,8 +45,8 @@ export default class WindowRectService implements IWindowRectRequest {
   ): number[] {
     let result = videoSize;
     const getRatio = (size: number[]) => size[0] / size[1];
-    const setWidthByHeight = (size: number[]) => [size[1] * getRatio(videoSize), size[1]];
-    const setHeightByWidth = (size: number[]) => [size[0], size[0] / getRatio(videoSize)];
+    const setSizeByHeight = (size: number[]) => [size[1] * getRatio(videoSize), size[1]];
+    const setSizeByWidth = (size: number[]) => [size[0], size[0] / getRatio(videoSize)];
     const biggerSize = (
       size: number[],
       diffedSize: number[],
@@ -54,16 +54,16 @@ export default class WindowRectService implements IWindowRectRequest {
     const biggerWidth = (size: number[], diffedSize: number[]) => size[0] >= diffedSize[0];
     const biggerRatio = (size1: number[], size2: number[]) => getRatio(size1) > getRatio(size2);
     if (videoExisted && biggerWidth(result, maxSize)) {
-      result = setHeightByWidth(maxSize);
+      result = setSizeByWidth(maxSize);
     }
     const realMaxSize = videoExisted && screenSize ? screenSize : maxSize;
     if (biggerSize(result, realMaxSize)) {
       result = biggerRatio(result, realMaxSize)
-        ? setHeightByWidth(realMaxSize) : setWidthByHeight(realMaxSize);
+        ? setSizeByWidth(realMaxSize) : setSizeByHeight(realMaxSize);
     }
     if (biggerSize(minSize, result)) {
       result = biggerRatio(minSize, result)
-        ? setHeightByWidth(minSize) : setWidthByHeight(minSize);
+        ? setSizeByWidth(minSize) : setSizeByHeight(minSize);
     }
     return result.map(Math.round);
   }
