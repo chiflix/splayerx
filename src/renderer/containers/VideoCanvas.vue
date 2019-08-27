@@ -280,7 +280,7 @@ export default {
       const oldRatio = winWidth / winHeight;
       const isLandscape = (ratio: number) => ratio > 1;
       if (
-        this.videoExisted && this.swichInPlaylist
+        this.videoExisted && this.switchInPlaylist
         && (isLandscape(this.ratio) === isLandscape(oldRatio)) // 同为landscpae或portrait
       ) {
         if (this.ratio > 1) {
