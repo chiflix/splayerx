@@ -288,7 +288,6 @@ export default {
         } else {
           videoSize = [winWidth, winWidth / this.ratio];
         }
-        if (this.winAngle !== 0 && this.winAngle !== 180) videoSize.reverse();
       } else {
         videoSize = [this.videoWidth, this.videoHeight];
         const availWidth = window.screen.availWidth;
@@ -302,6 +301,7 @@ export default {
         }
         this.videoExisted = true;
       }
+      if (this.winAngle !== 0 && this.winAngle !== 180) videoSize.reverse();
       const oldRect = this.winPos.concat(this.winSize);
       windowRectService.calculateWindowRect(videoSize, true, oldRect);
     },
