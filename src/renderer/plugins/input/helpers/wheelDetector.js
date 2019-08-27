@@ -99,11 +99,13 @@ class ElectronWheel extends WheelPhaseCalculator {
 
   _canInertialScroll = false;
 
+  scrollEnd = false;
+
   constructor(interval) {
     super(interval);
 
-    ipcRenderer.on('scroll-touch-begin', () => { this._isTrackPad = true; });
-    ipcRenderer.on('scroll-touch-end', () => { this._canInertialScroll = true; });
+    ipcRenderer.on('scroll-touch-begin', () => { this._isTrackPad = true; this.scrollEnd = false; });
+    ipcRenderer.on('scroll-touch-end', () => { this._canInertialScroll = this.scrollEnd = true; });
   }
 
   calculate(event) {
