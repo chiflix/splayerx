@@ -440,7 +440,7 @@ export default {
             name: 'landing-view',
           });
           setTimeout(() => {
-            windowRectService.uploadWindowBy(false, 'landing-view', undefined, undefined, this.winSize, this.winPos);
+            windowRectService.uploadWindowBy(false, 'landing-view', undefined, undefined, this.winSize, this.winPos, this.isFullScreen);
           }, 200);
         });
     },
