@@ -222,47 +222,10 @@ export default {
         }
       }, 0);
     });
-    window.addEventListener('focus', () => {
-      this.menuService.updateFocusedWindow(true);
-      this.updateCanGoBack(this.$electron.remote.getCurrentWindow()
-        .getBrowserViews()[0].webContents.canGoBack());
-      this.updateCanGoForward(this.$electron.remote.getCurrentWindow()
-        .getBrowserViews()[0].webContents.canGoForward());
-      this.updateReload(true);
-      const loadUrl = this.$electron.remote.getCurrentWindow()
-        .getBrowserViews()[0].webContents.getURL();
-      const recordIndex = this.supportedRecordHost.indexOf(urlParseLax(loadUrl).hostname);
-      this.$electron.remote.getCurrentWindow().getBrowserViews()[0].webContents
-        .executeJavaScript(this.calculateVideoNum, (r: number) => {
-          this.hasVideo = recordIndex === 0 && !getVideoId(loadUrl).id ? false : !!r;
-        });
-    });
-    window.addEventListener('beforeunload', (e: BeforeUnloadEvent) => {
-      this.$electron.ipcRenderer.send('remove-browser');
-      this.removeListener();
-      if (!this.asyncTasksDone) {
-        e.returnValue = false;
-        if (this.isPip) {
-          this.$electron.ipcRenderer.send('store-pip-pos');
-        } else {
-          this.$store.dispatch('updateBrowsingSize', this.winSize);
-          this.$store.dispatch('updateBrowsingPos', this.winPos);
-        }
-        asyncStorage.set('browsing', {
-          pipSize: this.pipSize,
-          pipPos: this.pipPos,
-          browsingSize: this.browsingSize,
-          browsingPos: this.browsingPos,
-          barrageOpen: this.barrageOpen,
-        }).finally(() => {
-          this.asyncTasksDone = true;
-          window.close();
-        });
-      } else if (this.quit) {
-        this.$electron.remote.app.quit();
-      }
-    });
+    window.addEventListener('focus', this.focusHandler);
+    window.addEventListener('beforeunload', this.beforeUnloadHandler);
     this.$bus.$on('back-to-landingview', () => {
+      this.removeListener();
       this.backToLandingView = true;
       this.$bus.$off();
       this.$router.push({
@@ -292,6 +255,7 @@ export default {
     });
     this.$electron.ipcRenderer.on('update-browser-state', (e: Event, state: { url: string, canGoBack: boolean, canGoForward: boolean }) => {
       this.currentUrl = state.url;
+      this.removeListener();
       this.addListenerToBrowser();
       this.canGoBack = state.canGoBack;
       this.canGoForward = state.canGoForward;
@@ -307,9 +271,9 @@ export default {
         canGoForward: state.canGoForward,
       });
     });
-    this.addListenerToBrowser();
   },
   beforeDestroy() {
+    this.removeListener();
     asyncStorage.set('browsing', {
       pipSize: this.pipSize,
       pipPos: this.pipPos,
@@ -325,6 +289,8 @@ export default {
       }
       this.updateIsPip(false);
     }).finally(() => {
+      window.removeEventListener('beforeunload', this.beforeUnloadHandler);
+      window.removeEventListener('focus', this.focusHandler);
       if (this.backToLandingView) {
         this.$electron.ipcRenderer.send('remove-browser');
         windowRectService.uploadWindowBy(false, 'landing-view');
@@ -337,6 +303,46 @@ export default {
       updateBarrageOpen: browsingActions.UPDATE_BARRAGE_OPEN,
       updateIsPip: browsingActions.UPDATE_IS_PIP,
     }),
+    focusHandler() {
+      this.menuService.updateFocusedWindow(true);
+      this.updateCanGoBack(this.$electron.remote.getCurrentWindow()
+        .getBrowserViews()[0].webContents.canGoBack());
+      this.updateCanGoForward(this.$electron.remote.getCurrentWindow()
+        .getBrowserViews()[0].webContents.canGoForward());
+      this.updateReload(true);
+      const loadUrl = this.$electron.remote.getCurrentWindow()
+        .getBrowserViews()[0].webContents.getURL();
+      const recordIndex = this.supportedRecordHost.indexOf(urlParseLax(loadUrl).hostname);
+      this.$electron.remote.getCurrentWindow().getBrowserViews()[0].webContents
+        .executeJavaScript(this.calculateVideoNum, (r: number) => {
+          this.hasVideo = recordIndex === 0 && !getVideoId(loadUrl).id ? false : !!r;
+        });
+    },
+    beforeUnloadHandler(e: BeforeUnloadEvent) {
+      this.removeListener();
+      this.$electron.ipcRenderer.send('remove-browser');
+      if (!this.asyncTasksDone) {
+        e.returnValue = false;
+        if (this.isPip) {
+          this.$electron.ipcRenderer.send('store-pip-pos');
+        } else {
+          this.$store.dispatch('updateBrowsingSize', this.winSize);
+          this.$store.dispatch('updateBrowsingPos', this.winPos);
+        }
+        asyncStorage.set('browsing', {
+          pipSize: this.pipSize,
+          pipPos: this.pipPos,
+          browsingSize: this.browsingSize,
+          browsingPos: this.browsingPos,
+          barrageOpen: this.barrageOpen,
+        }).finally(() => {
+          this.asyncTasksDone = true;
+          window.close();
+        });
+      } else if (this.quit) {
+        this.$electron.remote.app.quit();
+      }
+    },
     updateReload(val: boolean) {
       if (this.$electron.remote.getCurrentWindow().isFocused()) {
         this.$electron.ipcRenderer.send('update-enabled', 'history.reload', val);
@@ -361,7 +367,7 @@ export default {
       if (urlParseLax(this.currentUrl).hostname !== urlParseLax(url).hostname) {
         this.removeListener();
         this.hasVideo = false;
-        this.$electron.ipcRenderer.send('change-channel', { url, channel: urlParseLax(url).hostname });
+        this.$electron.ipcRenderer.send('change-channel', { url });
       }
     },
     addListenerToBrowser() {
@@ -381,14 +387,16 @@ export default {
       });
     },
     removeListener() {
-      const currentWebContents = this.$electron.remote.getCurrentWindow()
-        .getBrowserViews()[0].webContents;
-      currentWebContents.removeListener('did-stop-loading', this.didStopLoading);
-      currentWebContents.removeListener('dom-ready', this.domReady);
-      currentWebContents.removeListener('ipc-message', this.ipcMessage);
-      currentWebContents.removeListener('did-start-loading', this.didStartLoading);
-      currentWebContents.removeListener('new-window', this.newWindow);
-      currentWebContents.removeListener('will-navigate', this.willNavigate);
+      const currentBrowserViews = this.$electron.remote.getCurrentWindow().getBrowserViews();
+      if (currentBrowserViews.length) {
+        const currentWebContents = currentBrowserViews[0].webContents;
+        currentWebContents.removeListener('did-stop-loading', this.didStopLoading);
+        currentWebContents.removeListener('dom-ready', this.domReady);
+        currentWebContents.removeListener('ipc-message', this.ipcMessage);
+        currentWebContents.removeListener('did-start-loading', this.didStartLoading);
+        currentWebContents.removeListener('new-window', this.newWindow);
+        currentWebContents.removeListener('will-navigate', this.willNavigate);
+      }
     },
     newWindow(url: string, disposition: string) {
       if (disposition !== 'new-window') {
@@ -404,7 +412,6 @@ export default {
       this.removeListener();
     },
     didStartLoading() {
-      console.log(123);
       const url = this.$electron.remote.getCurrentWindow()
         .getBrowserView().webContents.getURL();
       if (!url || url === 'about:blank' || urlParseLax(this.currentUrl).href === urlParseLax(url).href) return;
@@ -466,7 +473,6 @@ export default {
       this.$electron.remote.getCurrentWindow().getBrowserViews()[0].webContents.focus();
     },
     didStopLoading() {
-      console.log('stop');
       const loadingTime: number = new Date().getTime() - this.startTime;
       if (loadingTime % 3000 === 0) {
         this.loadingState = false;
@@ -508,7 +514,7 @@ export default {
         || (this.oldDisplayId !== newDisplayId && this.oldDisplayId !== -1);
       this.oldDisplayId = newDisplayId;
       this.currentPipBrowserView().webContents
-        .executeJavaScript(this.getVideoStyle, (result: CSSStyleDeclaration) => {
+        .executeJavaScript(this.getVideoStyle).then((result: CSSStyleDeclaration) => {
           const videoAspectRatio = parseFloat(result.width as string)
             / parseFloat(result.height as string);
           this.$electron.ipcRenderer.send('callBrowsingWindowMethod', 'setAspectRatio', [videoAspectRatio]);
@@ -602,19 +608,10 @@ export default {
     },
     handleEnterPip() {
       if (this.hasVideo) {
+        this.hasVideo = false;
         this.adaptFinished = false;
-        const loadUrl = this.$electron.remote.getCurrentWindow()
-          .getBrowserViews()[0].webContents.getURL();
-        const recordIndex = this.supportedRecordHost.indexOf(urlParseLax(loadUrl).hostname);
         this.enterPipOperation();
         this.updatePipState(false);
-        this.$refs.browsingHeader.updateWebInfo({
-          hasVideo: false,
-        });
-        this.$electron.remote.getCurrentWindow().getBrowserViews()[0].webContents
-          .executeJavaScript(this.calculateVideoNum, (r: number) => {
-            this.hasVideo = recordIndex === 0 && !getVideoId(loadUrl).id ? false : !!r;
-          });
       }
     },
     handleExitPip() {
@@ -669,7 +666,7 @@ export default {
     },
     bilibiliAdapter() {
       this.currentPipBrowserView().webContents
-        .executeJavaScript(bilibiliFindType, (r: (HTMLElement | null)[]) => {
+        .executeJavaScript(bilibiliFindType).then((r: (HTMLElement | null)[]) => {
           this.bilibiliType = ['bangumi', 'videoStreaming', 'iframeStreaming', 'video'][r.findIndex(i => i)] || 'others';
         }).then(() => {
           this.handleWindowChangeEnterPip();

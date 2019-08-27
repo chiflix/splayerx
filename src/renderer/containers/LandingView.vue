@@ -377,7 +377,8 @@ export default {
     },
     handleSidebarIcon(site: string) {
       this.$electron.ipcRenderer.send('add-browsing');
-      this.$electron.ipcRenderer.send('create-browser-view', { url: `https://www.${site}.com` });
+      const url = `https://www.${site}.com`;
+      this.$electron.ipcRenderer.send('change-channel', { url });
       this.$router.push({
         name: 'browsing-view',
       });

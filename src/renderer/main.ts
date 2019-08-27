@@ -729,25 +729,15 @@ new Vue({
         this.$bus.$emit('clean-landingViewItems');
         this.refreshMenu();
       });
-      this.menuService.on('favourite.iqiyi', () => {
-        this.$electron.ipcRenderer.send('add-browsing');
-        this.$electron.ipcRenderer.send('create-browser-view', { url: 'https://www.iqiyi.com' });
-        this.$router.push({
-          name: 'browsing-view',
-        });
-      });
-      this.menuService.on('favourite.bilibili', () => {
-        this.$electron.ipcRenderer.send('add-browsing');
-        this.$electron.ipcRenderer.send('create-browser-view', { url: 'https://www.bilibili.com' });
-        this.$router.push({
-          name: 'browsing-view',
-        });
-      });
-      this.menuService.on('favourite.youtube', () => {
-        this.$electron.ipcRenderer.send('add-browsing');
-        this.$electron.ipcRenderer.send('create-browser-view', { url: 'https://www.youtube.com' });
-        this.$router.push({
-          name: 'browsing-view',
+      const urls = ['https://www.iqiyi.com', 'https://www.bilibili.com', 'https://www.youtube.com'];
+      const channels = ['iqiyi', 'bilibili', 'youtube'];
+      channels.forEach((channel: string, index: number) => {
+        this.menuService.on(`favourite.${channel}`, () => {
+          this.$electron.ipcRenderer.send('add-browsing');
+          this.$electron.ipcRenderer.send('change-channel', { url: urls[index] });
+          this.$router.push({
+            name: 'browsing-view',
+          });
         });
       });
       this.menuService.on('history.reload', () => {

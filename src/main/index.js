@@ -492,49 +492,55 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('go-to-offset', (evt, val) => {
     if (!browserViewManager) return;
     const newBrowser = val === 1 ? browserViewManager.forward() : browserViewManager.back();
-    mainWindow.removeBrowserView(mainWindow.getBrowserView());
+    const id = mainWindow.getBrowserView().id;
     mainWindow.addBrowserView(newBrowser.page.view);
+    setTimeout(() => {
+      mainWindow.removeBrowserView(BrowserView.fromId(id));
+      mainWindow.send('update-browser-state', {
+        url: newBrowser.page.url,
+        canGoBack: newBrowser.canBack,
+        canGoForward: newBrowser.canForward,
+      });
+    }, 150);
     newBrowser.page.view.setBounds({
       x: 0, y: 36, width: mainWindow.getSize()[0], height: mainWindow.getSize()[1] - 36,
     });
     newBrowser.page.view.setAutoResize({
       width: true, height: true,
     });
-    mainWindow.send('update-browser-state', {
-      url: newBrowser.page.url,
-      canGoBack: newBrowser.canBack,
-      canGoForward: newBrowser.canForward,
-    });
   });
   ipcMain.on('change-channel', (evt, args) => {
-    if (!browserViewManager) return;
-    const newChannel = browserViewManager.changeChanel(args.channel, args.url);
+    if (!browserViewManager) browserViewManager = new BrowserViewManager();
+    const channel = urlParse(args.url).hostname.includes('bilibili') ? 'www.bilibili.com' : urlParse(args.url).hostname;
+    const newChannel = browserViewManager.changeChanel(channel, args.url);
     const view = newChannel.view ? newChannel.view : newChannel.page.view;
     const url = newChannel.view ? args.url : newChannel.page.url;
-    mainWindow.removeBrowserView(mainWindow.getBrowserView());
+    const mainBrowser = mainWindow.getBrowserView();
     mainWindow.addBrowserView(view);
+    setTimeout(() => {
+      if (mainBrowser) mainWindow.removeBrowserView(BrowserView.fromId(mainBrowser.id));
+      mainWindow.send('update-browser-state', {
+        url,
+        canGoBack: newChannel.canBack,
+        canGoForward: newChannel.canForward,
+      });
+    }, mainBrowser ? 150 : 0);
     view.setBounds({
       x: 0, y: 36, width: mainWindow.getSize()[0], height: mainWindow.getSize()[1] - 36,
     });
     view.setAutoResize({
       width: true, height: true,
     });
-    mainWindow.send('update-browser-state', {
-      url,
-      canGoBack: newChannel.canBack,
-      canGoForward: newChannel.canForward,
-    });
   });
   ipcMain.on('create-browser-view', (evt, args) => {
     if (!browserViewManager) browserViewManager = new BrowserViewManager();
+    const channel = urlParse(args.url).hostname.includes('bilibili') ? 'www.bilibili.com' : urlParse(args.url).hostname;
     const currentMainBrowserView = browserViewManager
-      .create(urlParse(args.url).hostname, args.url);
-    const isMainBrowser = mainWindow.getBrowserView();
-    if (isMainBrowser) {
-      mainWindow.removeBrowserView(mainWindow.getBrowserViews()[0]);
-      mainWindow.addBrowserView(currentMainBrowserView.view); // TODO need to pause video
-    } else {
-      mainWindow.addBrowserView(currentMainBrowserView.view);
+      .create(channel, args.url);
+    const mainBrowser = mainWindow.getBrowserView();
+    mainWindow.addBrowserView(currentMainBrowserView.view);
+    if (mainBrowser) {
+      mainWindow.removeBrowserView(BrowserView.fromId(mainBrowser.id));
     }
     currentMainBrowserView.view.setBounds({
       x: 0, y: 36, width: mainWindow.getSize()[0], height: mainWindow.getSize()[1] - 36,
@@ -660,15 +666,13 @@ function registerMainWindowEvent(mainWindow) {
     browViews.forEach((view) => {
       browsingWindow.removeBrowserView(view);
     });
-    createPipControlView();
-    createTitlebarView();
     const browsers = browserViewManager.changePip(urlParse(mainView.webContents.getURL()).hostname);
     const pipBrowser = browsers.pipBrowser;
     const mainBrowser = browsers.mainBrowser;
     mainWindow.addBrowserView(mainBrowser.page.view);
     browsingWindow.addBrowserView(pipBrowser);
-    browsingWindow.addBrowserView(pipControlView);
-    browsingWindow.addBrowserView(titlebarView);
+    createPipControlView();
+    createTitlebarView();
     pipBrowser.setBounds({
       x: 0, y: 0, width: browsingWindow.getSize()[0], height: browsingWindow.getSize()[1],
     });
@@ -710,7 +714,6 @@ function registerMainWindowEvent(mainWindow) {
       createTitlebarView();
       browsingWindow.show();
     }
-    pipBrowser.webContents.openDevTools();
     mainBrowser.page.view.setBounds({
       x: 0, y: 36, width: mainWindow.getSize()[0], height: mainWindow.getSize()[1] - 36,
     });

@@ -1,4 +1,5 @@
 import { BrowserView } from 'electron';
+import { bilibiliVideoPause, bilibiliFindType } from '../../shared/pip/bilibili';
 
 type ChannelData = {
   currentIndex: number,
@@ -19,7 +20,7 @@ export class BrowserViewManager implements IBrowserViewManager {
   private currentPip: {
     pipIndex: number,
     pipChannel: string,
-    pipPage: BrowserViewHistory,
+    pipPage: BrowserViewHistory | null,
   };
 
   public constructor() {
@@ -27,10 +28,7 @@ export class BrowserViewManager implements IBrowserViewManager {
     this.currentPip = {
       pipIndex: -1,
       pipChannel: '',
-      pipPage: {
-        url: '',
-        view: new BrowserView(),
-      },
+      pipPage: null,
     };
   }
 
@@ -58,6 +56,18 @@ export class BrowserViewManager implements IBrowserViewManager {
     // last view go back
     if (lastPage) {
       lastPage.view.webContents.loadURL(lastPage.url);
+      lastPage.view.webContents.once('media-started-playing', () => {
+        if (this.currentChannel.includes('bilibili')) {
+          let type = '';
+          lastPage.view.webContents
+            .executeJavaScript(bilibiliFindType).then((r: (HTMLElement | null)[]) => {
+              type = ['bangumi', 'videoStreaming', 'iframeStreaming', 'video'][r.findIndex(i => i)] || 'others';
+              lastPage.view.webContents.executeJavaScript(bilibiliVideoPause(type));
+            });
+        } else {
+          lastPage.view.webContents.executeJavaScript('setTimeout(() => { document.querySelector("video").pause(); }, 100)');
+        }
+      });
     }
 
     this.history[channel].list.push(page);
@@ -83,6 +93,7 @@ export class BrowserViewManager implements IBrowserViewManager {
     if (!this.history[channel]) {
       return this.create(channel, url);
     }
+    this.pauseVideo();
     this.currentChannel = channel;
     this.history[channel].lastUpdateTime = Date.now();
     return {
@@ -141,21 +152,36 @@ export class BrowserViewManager implements IBrowserViewManager {
   public changePip(channel: string): { pipBrowser: Electron.BrowserView;
     mainBrowser: BrowserViewData } {
     this.currentChannel = channel;
-    // TODO clear last pip browserView
+    this.pauseVideo((this.currentPip.pipPage as BrowserViewHistory).view);
     return this.enterPip();
   }
 
+  public pauseVideo(view?: BrowserView): void {
+    const currentIndex = this.history[this.currentChannel].currentIndex;
+    const currentView = view || this.history[this.currentChannel].list[currentIndex].view;
+    if (currentView.webContents.isCurrentlyAudible()) {
+      if (this.currentChannel.includes('bilibili')) {
+        let type = '';
+        currentView.webContents
+          .executeJavaScript(bilibiliFindType).then((r: (HTMLElement | null)[]) => {
+            type = ['bangumi', 'videoStreaming', 'iframeStreaming', 'video'][r.findIndex(i => i)] || 'others';
+            currentView.webContents.executeJavaScript(bilibiliVideoPause(type));
+          });
+      } else {
+        currentView.webContents.executeJavaScript('setTimeout(() => { document.querySelector("video").pause(); }, 100)');
+      }
+    }
+  }
+
   public pipClose(): void {
-    this.currentPip.pipPage.view.destroy();
+    if (this.currentPip.pipPage) this.currentPip.pipPage.view.destroy();
     this.currentPip.pipIndex = -1;
     this.currentPip.pipChannel = '';
-    this.currentPip.pipPage = {
-      url: '',
-      view: new BrowserView(),
-    };
+    this.currentPip.pipPage = null;
   }
 
   private jump(left: boolean): BrowserViewData {
+    this.pauseVideo();
     const channel: ChannelData = this.history[this.currentChannel];
     const result: BrowserViewData = {
       canBack: false,
@@ -192,4 +218,5 @@ export interface IBrowserViewManager {
   exitPip(): BrowserViewData
   changePip(channel: string): { pipBrowser: BrowserView, mainBrowser: BrowserViewData }
   pipClose(): void
+  pauseVideo(): void
 }
