@@ -49,7 +49,7 @@ import { SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, LOAD_SUBVIDEO_FAILED } from './helpe
 import InputPlugin, { getterTypes as iGT } from '@/plugins/input';
 import { VueDevtools } from './plugins/vueDevtools.dev';
 import { SubtitleControlListItem, Type, NOT_SELECTED_SUBTITLE } from './interfaces/ISubtitle';
-import { getValidVideoRegex, getValidSubtitleRegex } from '../shared/utils';
+import { getValidSubtitleRegex } from '../shared/utils';
 import { isWindowsExE, isMacintoshDMG } from '../shared/common/platform';
 import MenuService from './services/menu/MenuService';
 
@@ -613,16 +613,15 @@ new Vue({
       this.$store.commit('source', 'drop');
       const files = Array.prototype.map.call(e.dataTransfer!.files, (f: File) => f.path)
       const onlyFolders = files.every((file: fs.PathLike) => fs.statSync(file).isDirectory());
-      if (this.currentRouteName === 'playing-view' || onlyFolders
-        || files.every((file: fs.PathLike) => getValidVideoRegex().test(file) && !getValidSubtitleRegex().test(file))) {
+      if (!onlyFolders && files.every((file: fs.PathLike) => getValidSubtitleRegex().test(file))) {
+        this.$electron.ipcRenderer.send('drop-subtitle', files);
+      } else {
         files.forEach((file: fs.PathLike) => this.$electron.remote.app.addRecentDocument(file));
         if (onlyFolders) {
           this.openFolder(...files);
         } else {
           this.openFile(...files);
         }
-      } else {
-        this.$electron.ipcRenderer.send('drop-subtitle', files);
       }
     });
     window.addEventListener('dragover', (e) => {
@@ -687,12 +686,7 @@ new Vue({
         if (!json.isLastest) {
           this.$bus.$emit('new-version', json);
         } else {
-          this.$store.dispatch('addMessages', {
-            type: 'result',
-            title: '',
-            content: this.$t('checkForUpdatesBubble.noNeed.content', { version: json.version }),
-            dismissAfter: 5000,
-          });
+          this.$bus.$emit('lastest-version', json);
         }
       }).catch((err: Error) => {
         addBubble(REQUEST_TIMEOUT);

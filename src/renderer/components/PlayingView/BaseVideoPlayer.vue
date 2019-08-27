@@ -14,7 +14,7 @@ import { mapGetters } from 'vuex';
 import _ from 'lodash';
 import { DEFAULT_VIDEO_EVENTS } from '@/constants';
 import { addBubble } from '@/helpers/notificationControl';
-import { OPEN_FAILED } from '@/helpers/notificationcodes';
+import { ENOENT } from '@/helpers/notificationcodes';
 import { log } from '@/libs/Log';
 import { videodata } from '../../store/video';
 
@@ -183,7 +183,7 @@ export default {
         await this.$refs.video[action]();
       } catch (ex) {
         log.warn('play video error', ex);
-        addBubble(OPEN_FAILED);
+        addBubble(ENOENT);
       }
     },
     // events

@@ -56,8 +56,8 @@
       "title": "File Not Found"
     },
     "playlistNonExist": {
-      "content": "This item is removed.",
-      "title": "File Not Found"
+      "content": "File(s) has been removed or renamed.",
+      "title": "File(s) Not Found"
     },
     "fileNonExistInPlaylist": {
       "content": "Files has been removed from the list.",
@@ -293,6 +293,9 @@
       "partTwo": ".",
       "underlinedContent": "disagree"
     }
+  },
+  "alertBubble": {
+    "button": "OK"
   },
   "protectBubble": {
     "agree": "OK",

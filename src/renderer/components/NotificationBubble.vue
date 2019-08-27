@@ -15,19 +15,25 @@
       @close-privacy-bubble="closePrivacyBubble"
       class="privacy-bubble"
     />
-    <MASPrivacyBubble
-      v-if="showPrivacyBubble && isMas"
-      @close-privacy-bubble="closePrivacyBubble"
-      class="mas-privacy-bubble"
-    />
+    <transition name="bubble">
+      <ConfirmBubble
+        v-if="showPrivacyBubble && isMas"
+        :content="$t('privacyBubble.masVersion.content')"
+        :confirm-button-text="$t('privacyBubble.masVersion.agree')"
+        :cancel-button-text="$t('privacyBubble.masVersion.disagree')"
+        :confirm="handleAgreePrivacy"
+        :cancel="handleDisagreePrivacy"
+        class="mas-privacy-bubble"
+      />
+    </transition>
     <transition name="bubble">
       <ConfirmBubble
         v-if="showNSFWBubble"
         :content="$t('protectBubble.content')"
         :confirm-button-text="$t('protectBubble.agree')"
         :cancel-button-text="$t('protectBubble.setting')"
-        :confirm="handleAgree"
-        :cancel="handleSetting"
+        :confirm="handleAgreeNSFW"
+        :cancel="handleNSFWSetting"
         class="mas-privacy-bubble"
       />
     </transition>
@@ -39,6 +45,14 @@
         :cancel-button-text="$t('checkForUpdatesBubble.needUpdate.cancel')"
         :confirm="confirmUpdate"
         :cancel="cancelUpdate"
+        class="mas-privacy-bubble"
+      />
+    </transition>
+    <transition name="bubble">
+      <AlertBubble
+        v-if="showLastestUpdateBubble"
+        :content="lastestUpdateContent"
+        :close="closeLastestUpdateBubble"
         class="mas-privacy-bubble"
       />
     </transition>
@@ -82,11 +96,11 @@
 import { mapGetters, mapActions } from 'vuex';
 import StatusBubble from '@/components/Bubbles/StatusBubble.vue';
 import ErrorBubble from '@/components/Bubbles/ErrorBubble.vue';
+import AlertBubble from '@/components/Bubbles/AlertBubble.vue';
 import ConfirmBubble from '@/components/Bubbles/ConfirmBubble.vue';
 import NextVideo from '@/components/Bubbles/NextVideo.vue';
 import PrivacyBubble from '@/components/Bubbles/PrivacyConfirmBubble.vue';
 import TranslateBubble from '@/components/Bubbles/TranslateBubble.vue';
-import MASPrivacyBubble from '@/components/Bubbles/MASPrivacyConfirmBubble.vue';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import { AudioTranslate as atActions } from '@/store/actionTypes';
 import { skipCheckForUpdate } from '../libs/utils';
@@ -98,10 +112,10 @@ export default {
   components: {
     StatusBubble,
     ErrorBubble,
+    AlertBubble,
     ConfirmBubble,
     NextVideo,
     PrivacyBubble,
-    MASPrivacyBubble,
     TranslateBubble,
   },
   data() {
@@ -116,12 +130,14 @@ export default {
       checkForUpdatesDownloadUrl: '',
       checkForUpdatesReleaseUrl: '',
       checkForUpdatesVersion: '',
+      showLastestUpdateBubble: false, // show update bubble
+      lastestUpdateContent: '',
     };
   },
   computed: {
     ...mapGetters([
       'nextVideo', 'nextVideoPreviewTime', 'duration', 'singleCycle', 'privacyAgreement', 'nsfwProcessDone',
-      'translateBubbleMessage', 'translateBubbleType', 'isTranslateBubbleVisiable', 'failBubbleId',
+      'translateBubbleMessage', 'translateBubbleType', 'isTranslateBubbleVisiable', 'failBubbleId', 'preferenceData',
     ]),
     messages() {
       const messages = this.$store.getters.messageInfo;
@@ -170,6 +186,11 @@ export default {
       this.checkForUpdatesVersion = info.version;
       this.showUpdateBubble = true;
     });
+    // 检查当前版本是最新版本
+    this.$bus.$on('lastest-version', (info: { version: string }) => {
+      this.lastestUpdateContent = this.$t('checkForUpdatesBubble.noNeed.content', { version: info.version });
+      this.showLastestUpdateBubble = true;
+    });
   },
   methods: {
     ...mapActions({
@@ -181,16 +202,27 @@ export default {
     closePrivacyBubble() {
       this.showPrivacyBubble = false;
     },
-    handleAgree() {
-      this.closeNSFWBubble();
+    handleAgreePrivacy() {
+      this.$store.dispatch('agreeOnPrivacyPolicy').then(() => {
+        this.$electron.ipcRenderer.send('main-to-preference', this.preferenceData);
+      });
     },
-    handleSetting() {
-      this.$electron.ipcRenderer.send('add-preference', 'privacy');
-      this.closeNSFWBubble();
+    handleDisagreePrivacy() {
+      this.$store.dispatch('disagreeOnPrivacyPolicy').then(() => {
+        this.$electron.ipcRenderer.send('main-to-preference', this.preferenceData);
+      });
     },
-    closeNSFWBubble() {
+    handleAgreeNSFW() {
       this.showNSFWBubble = false;
       this.$store.dispatch('nsfwProcessDone');
+    },
+    handleNSFWSetting() {
+      this.$electron.ipcRenderer.send('add-preference', 'privacy');
+      this.showNSFWBubble = false;
+      this.$store.dispatch('nsfwProcessDone');
+    },
+    closeLastestUpdateBubble() {
+      this.showLastestUpdateBubble = false;
     },
     manualClose() {
       this.manualClosed = true;
