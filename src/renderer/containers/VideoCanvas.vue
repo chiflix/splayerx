@@ -275,15 +275,20 @@ export default {
       this[`${type}AudioTrack`](track);
     },
     windowRectControl() {
-      // 新打开视频、拖入视频
-      let maxVideoSize;
       let videoSize;
-      if (this.videoExisted && (this.winAngle === 0 || this.winAngle === 180)) {
-        maxVideoSize = this.winSize;
-        videoSize = [this.videoWidth, this.videoHeight];
-      } else if (this.videoExisted) {
-        maxVideoSize = this.winSize;
-        videoSize = [this.videoHeight, this.videoWidth];
+      const [winWidth, winHeight] = this.winSize;
+      const oldRatio = winWidth / winHeight;
+      const isLandscape = (ratio: number) => ratio > 1;
+      if (
+        this.videoExisted && this.swichInPlaylist
+        && (isLandscape(this.ratio) === isLandscape(oldRatio)) // 同为landscpae或portrait
+      ) {
+        if (this.ratio > 1) {
+          videoSize = [winHeight * this.ratio, winHeight];
+        } else {
+          videoSize = [winWidth, winWidth / this.ratio];
+        }
+        if (this.winAngle !== 0 && this.winAngle !== 180) videoSize.reverse();
       } else {
         videoSize = [this.videoWidth, this.videoHeight];
         const availWidth = window.screen.availWidth;
@@ -298,13 +303,7 @@ export default {
         this.videoExisted = true;
       }
       const oldRect = this.winPos.concat(this.winSize);
-      // 通过播放列表切换视频不缩小屏幕尺寸
-      let minSize;
-      if (this.switchInPlaylist) {
-        minSize = this.winSize;
-        this.switchInPlaylist = false;
-      }
-      windowRectService.calculateWindowRect(videoSize, true, oldRect, maxVideoSize, minSize);
+      windowRectService.calculateWindowRect(videoSize, true, oldRect);
     },
     changeWindowRotate(val: number) {
       requestAnimationFrame(() => {
