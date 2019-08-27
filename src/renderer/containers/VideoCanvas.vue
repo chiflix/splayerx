@@ -74,7 +74,6 @@ export default {
       needToRestore: false,
       winAngleBeforeFullScreen: 0, // winAngel before full screen
       winSizeBeforeFullScreen: [], // winSize before full screen
-      switchInPlaylist: false,
     };
   },
   computed: {
@@ -151,9 +150,6 @@ export default {
       this.quit = true;
     });
     this.videoElement = this.$refs.videoCanvas.videoElement();
-    this.$bus.$on('playlist-open-video', () => {
-      this.switchInPlaylist = true;
-    });
     this.$bus.$on('toggle-fullscreen', () => {
       if (!this.isFullScreen) {
         this.toFullScreen();
@@ -178,7 +174,6 @@ export default {
     this.$bus.$on('next-video', () => {
       videodata.paused = false;
       if (this.nextVideo) {
-        this.switchInPlaylist = true;
         this.$store.commit('LOOP_UPDATE', false);
         if (this.isFolderList) this.openVideoFile(this.nextVideo);
         else this.playFile(this.nextVideo, this.nextVideoId);
@@ -189,7 +184,6 @@ export default {
     this.$bus.$on('previous-video', () => {
       videodata.paused = false;
       if (this.previousVideo) {
-        this.switchInPlaylist = true;
         this.$store.commit('LOOP_UPDATE', false);
         if (this.isFolderList) this.openVideoFile(this.previousVideo);
         else this.playFile(this.previousVideo, this.previousVideoId);
@@ -283,10 +277,9 @@ export default {
       const oldRatio = winWidth / winHeight;
       const isLandscape = (ratio: number) => ratio > 1;
       if (
-        this.videoExisted && this.switchInPlaylist
+        this.videoExisted
         && (isLandscape(this.ratio) === isLandscape(oldRatio)) // 同为landscpae或portrait
       ) {
-        this.switchInPlaylist = false;
         if (this.ratio > 1) {
           videoSize = [winHeight * this.ratio, winHeight];
         } else {
