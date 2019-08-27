@@ -151,6 +151,9 @@ export default {
       this.quit = true;
     });
     this.videoElement = this.$refs.videoCanvas.videoElement();
+    this.$bus.$on('playlist-open-video', () => {
+      this.switchInPlaylist = true;
+    });
     this.$bus.$on('toggle-fullscreen', () => {
       if (!this.isFullScreen) {
         this.toFullScreen();
@@ -283,6 +286,7 @@ export default {
         this.videoExisted && this.switchInPlaylist
         && (isLandscape(this.ratio) === isLandscape(oldRatio)) // 同为landscpae或portrait
       ) {
+        this.switchInPlaylist = false;
         if (this.ratio > 1) {
           videoSize = [winHeight * this.ratio, winHeight];
         } else {

@@ -466,6 +466,7 @@ export default {
         && this.indexOfMovingItem === this.playingList.length
         && this.filePathNeedToDelete !== this.playingList[index]) {
         this.mousedownIndex = NaN;
+        this.$bus.$emit('playlist-open-video');
         if (this.isFolderList) this.openVideoFile(this.playingList[index]);
         else this.playFile(this.playingList[index], this.items[index]);
       } else if (index === this.playingIndex
