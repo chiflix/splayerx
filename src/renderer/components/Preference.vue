@@ -204,12 +204,7 @@ export default {
   &__tabs {
     width: 110px;
     height: 100%;
-    background-image: linear-gradient(
-      -28deg,
-      rgba(65,65,65,0.97) 0%,
-      rgba(84,84,84,0.97) 47%,
-      rgba(123,123,123,0.97) 100%
-    );
+    background-color: #39383F;
   }
 
   &__tab {
@@ -244,12 +239,7 @@ export default {
 
   &__tabpanel {
     width: 430px;
-    background-image: linear-gradient(
-      -28deg,
-      rgba(65,65,65,0.99) 0%,
-      rgba(84,84,84,0.99) 47%,
-      rgba(123,123,123,0.99) 100%
-    );
+    background-color: #444349;
   }
 
   &__tabcontent {
