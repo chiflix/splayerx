@@ -11,6 +11,7 @@
 import { throttle } from 'lodash';
 import electron from 'electron';
 import MenuService from '@/services/menu/MenuService';
+import asyncStorage from '@/helpers/asyncStorage';
 
 export default {
   name: 'BrowsingPip',
@@ -18,6 +19,7 @@ export default {
     return {
       supportedRecordHost: ['www.youtube.com', 'www.bilibili.com', 'www.iqiyi.com'],
       menuService: null,
+      asyncTasksDone: false,
     };
   },
   computed: {
@@ -35,7 +37,6 @@ export default {
     });
     window.addEventListener('resize', throttle(() => {
       const size = electron.remote.getCurrentWindow().getSize();
-      electron.ipcRenderer.send('pip-window-size', size);
       electron.ipcRenderer.send('set-bounds', {
         titlebar: {
           x: 0,
@@ -51,9 +52,21 @@ export default {
         },
       });
     }, 100));
-    window.addEventListener('beforeunload', () => {
-      electron.ipcRenderer.send('store-pip-pos');
-      electron.ipcRenderer.send('pip-window-close');
+    window.addEventListener('beforeunload', (e) => {
+      if (!this.asyncTasksDone) {
+        e.returnValue = false;
+        const size = electron.remote.getCurrentWindow().getSize();
+        const position = electron.remote.getCurrentWindow().getPosition();
+        asyncStorage.set('browsingPip', {
+          pipSize: size,
+          pipPos: position,
+        }).then(() => {
+          electron.ipcRenderer.send('pip-window-close', { size, position });
+        }).finally(() => {
+          this.asyncTasksDone = true;
+          window.close();
+        });
+      }
     });
   },
 };

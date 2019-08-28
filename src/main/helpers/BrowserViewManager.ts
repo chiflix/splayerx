@@ -41,6 +41,33 @@ export class BrowserViewManager implements IBrowserViewManager {
         list: [],
       };
     }
+
+    // 暂停当前视频
+    if (this.currentChannel) {
+      const currentIndex = this.history[this.currentChannel].currentIndex;
+      if (channel !== this.currentChannel) {
+        const view = this.history[this.currentChannel].list[currentIndex].view;
+        this.pauseVideo(view);
+      } else {
+        const lastPage = this.history[channel].list[currentIndex];
+        if (lastPage) {
+          lastPage.view.webContents.loadURL(lastPage.url);
+          lastPage.view.webContents.once('media-started-playing', () => {
+            if (this.currentChannel.includes('bilibili')) {
+              let type = '';
+              lastPage.view.webContents
+                .executeJavaScript(bilibiliFindType).then((r: (HTMLElement | null)[]) => {
+                  type = ['bangumi', 'videoStreaming', 'iframeStreaming', 'video'][r.findIndex(i => i)] || 'others';
+                  console.log(type);
+                  lastPage.view.webContents.executeJavaScript(bilibiliVideoPause(type));
+                });
+            } else {
+              lastPage.view.webContents.executeJavaScript('setTimeout(() => { document.querySelector("video").pause(); }, 100)');
+            }
+          });
+        }
+      }
+    }
     // 创建当前view数据
     const page = {
       url,
@@ -52,23 +79,6 @@ export class BrowserViewManager implements IBrowserViewManager {
     };
     // loadURL
     page.view.webContents.loadURL(page.url);
-    const lastPage = this.history[channel].list[this.history[channel].list.length - 1];
-    // last view go back
-    if (lastPage) {
-      lastPage.view.webContents.loadURL(lastPage.url);
-      lastPage.view.webContents.once('media-started-playing', () => {
-        if (this.currentChannel.includes('bilibili')) {
-          let type = '';
-          lastPage.view.webContents
-            .executeJavaScript(bilibiliFindType).then((r: (HTMLElement | null)[]) => {
-              type = ['bangumi', 'videoStreaming', 'iframeStreaming', 'video'][r.findIndex(i => i)] || 'others';
-              lastPage.view.webContents.executeJavaScript(bilibiliVideoPause(type));
-            });
-        } else {
-          lastPage.view.webContents.executeJavaScript('setTimeout(() => { document.querySelector("video").pause(); }, 100)');
-        }
-      });
-    }
 
     this.history[channel].list.push(page);
     this.history[channel].currentIndex = this.history[channel].list.length - 1;
@@ -123,7 +133,7 @@ export class BrowserViewManager implements IBrowserViewManager {
     return { pipBrowser, mainBrowser };
   }
 
-  public exitPip(): BrowserViewData { // normal exit
+  public exitPip(): BrowserViewData {
     const { pipIndex, pipChannel } = this.currentPip;
     const list = this.history[pipChannel].list;
     this.history[pipChannel].list = list
@@ -136,11 +146,10 @@ export class BrowserViewManager implements IBrowserViewManager {
     this.history[pipChannel].currentIndex = pipIndex;
     this.history[pipChannel].lastUpdateTime = Date.now();
     this.currentChannel = pipChannel;
-    this.currentPip.pipIndex = -1;
-    this.currentPip.pipChannel = '';
-    this.currentPip.pipPage = {
-      url: '',
-      view: new BrowserView(),
+    this.currentPip = {
+      pipIndex: -1,
+      pipChannel: '',
+      pipPage: null,
     };
     return {
       canBack: this.history[this.currentChannel].currentIndex > 0,

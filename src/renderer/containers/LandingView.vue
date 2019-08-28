@@ -173,6 +173,7 @@ import { log } from '@/libs/Log';
 import Sagi from '@/libs/sagi';
 import { findNsfwFistFilter } from '@/libs/utils';
 import { Browsing as browsingActions } from '@/store/actionTypes';
+import asyncStorage from '@/helpers/asyncStorage';
 
 Vue.component('PlaylistItem', PlaylistItem);
 Vue.component('VideoItem', VideoItem);
@@ -206,7 +207,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'winPos', 'defaultDir', 'isFullScreen', 'incognitoMode', 'hideNSFW', 'smartMode', 'nsfwProcessDone']),
+    ...mapGetters(['winWidth', 'winPos', 'defaultDir', 'isFullScreen', 'incognitoMode', 'hideNSFW', 'smartMode', 'nsfwProcessDone', 'pipSize', 'pipPos']),
     lastIndex: {
       get() {
         return (this.firstIndex + this.showItemNum) - 1;
@@ -376,7 +377,11 @@ export default {
       return steps * (this.thumbnailWidth + this.marginRight);
     },
     handleSidebarIcon(site: string) {
-      this.$electron.ipcRenderer.send('add-browsing');
+      asyncStorage.get('browsingPip').then((data) => {
+        this.$store.dispatch('updatePipSize', data.pipSize || this.pipSize);
+        this.$store.dispatch('updatePipPos', data.pipPos || this.pipPos);
+        this.$electron.ipcRenderer.send('add-browsing', { size: data.pipSize || this.pipSize, position: data.pipPos || this.pipPos });
+      });
       const url = `https://www.${site}.com`;
       this.$electron.ipcRenderer.send('change-channel', { url });
       this.$router.push({

@@ -390,12 +390,14 @@ new Vue({
     });
     asyncStorage.get('browsing').then((data) => {
       this.$store.dispatch('updateBrowsingSize', data.browsingSize || this.browsingSize);
-      this.$store.dispatch('updatePipSize', data.pipSize || this.pipSize);
-      this.$store.dispatch('updatePipPos', data.pipPos || this.pipPos);
       if (data.browsingPos) {
         this.$store.dispatch('updateBrowsingPos', data.browsingPos);
       }
       this.updateBarrageOpen(data.barrageOpen || this.barrageOpen);
+    });
+    asyncStorage.get('browsingPip').then((data) => {
+      this.$store.dispatch('updatePipSize', data.pipSize || this.pipSize);
+      this.$store.dispatch('updatePipPos', data.pipPos || this.pipPos);
     });
     this.$bus.$on('delete-file', () => {
       this.refreshMenu();

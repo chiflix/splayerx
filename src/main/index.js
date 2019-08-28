@@ -303,7 +303,7 @@ function createAboutWindow() {
   });
 }
 
-function createBrowsingWindow() {
+function createBrowsingWindow(args) {
   const browsingWindowOptions = {
     useContentSize: true,
     frame: false,
@@ -327,7 +327,10 @@ function createBrowsingWindow() {
     });
   }
   browsingWindow.once('ready-to-show', () => {
-    // browsingWindow.show();
+    browsingWindow.setSize(args.size[0], args.size[1]);
+    if (args.position.length) {
+      browsingWindow.setPosition(args.position[0], args.position[1]);
+    }
   });
   browsingWindow.on('leave-full-screen', () => {
     if (hideBrowsingWindow) {
@@ -455,31 +458,23 @@ function registerMainWindowEvent(mainWindow) {
       console.error('callMainWindowMethod', method, JSON.stringify(args), '\n', ex);
     }
   });
-  ipcMain.on('store-pip-pos', () => {
-    if (!browsingWindow.isClosable()) {
-      mainWindow.send('store-pip-pos', browsingWindow.getPosition());
-    }
-  });
-  ipcMain.on('pip-window-size', (evt, size) => {
-    mainWindow.send('pip-window-size', size);
-  });
   ipcMain.on('pip-watcher', (evt, args) => {
     browsingWindow.getBrowserViews()[0].webContents.executeJavaScript(args);
   });
-  ipcMain.on('pip-window-close', () => {
+  ipcMain.on('pip-window-close', (evt, args) => {
     const views = browsingWindow.getBrowserViews();
     if (views.length) {
       views.forEach((view) => {
         browsingWindow.removeBrowserView(view);
       });
       browserViewManager.pipClose();
-      mainWindow.send('update-pip-state');
+      mainWindow.send('update-pip-state', args);
     }
   });
   ipcMain.on('remove-browser', () => {
     const mainView = mainWindow.getBrowserView();
-    // TODO need to pause video
     mainWindow.removeBrowserView(mainView);
+    browserViewManager.pauseVideo();
     if (browsingWindow) {
       const views = browsingWindow.getBrowserViews();
       views.forEach((view) => {
@@ -524,7 +519,7 @@ function registerMainWindowEvent(mainWindow) {
         canGoBack: newChannel.canBack,
         canGoForward: newChannel.canForward,
       });
-    }, mainBrowser ? 150 : 0);
+    }, 150);
     view.setBounds({
       x: 0, y: 36, width: mainWindow.getSize()[0], height: mainWindow.getSize()[1] - 36,
     });
@@ -700,6 +695,9 @@ function registerMainWindowEvent(mainWindow) {
     const mainBrowser = browsers.mainBrowser;
     if (!browsingWindow) {
       createBrowsingWindow();
+      browsingWindow.setSize(args.pipInfo.pipSize[0], args.pipInfo.pipSize[1]);
+      browsingWindow.setPosition(args.pipInfo.pipPos[0], args.pipInfo.pipPos[1]);
+      mainWindow.send('init-pip-position');
       mainWindow.removeBrowserView(mainWindow.getBrowserView());
       mainWindow.addBrowserView(mainBrowser.page.view);
       browsingWindow.addBrowserView(pipBrowser);
@@ -714,6 +712,8 @@ function registerMainWindowEvent(mainWindow) {
       createTitlebarView();
       browsingWindow.show();
     }
+    browsingWindow.setAspectRatio(args.pipInfo.aspectRatio);
+    browsingWindow.setMinimumSize(args.pipInfo.minimumSize[0], args.pipInfo.minimumSize[1]);
     mainBrowser.page.view.setBounds({
       x: 0, y: 36, width: mainWindow.getSize()[0], height: mainWindow.getSize()[1] - 36,
     });
@@ -833,7 +833,9 @@ function registerMainWindowEvent(mainWindow) {
     app.quit();
   });
   ipcMain.on('add-preference', createPreferenceWindow);
-  ipcMain.on('add-browsing', createBrowsingWindow);
+  ipcMain.on('add-browsing', (e, args) => {
+    createBrowsingWindow(args);
+  });
   ipcMain.on('preference-to-main', (e, args) => {
     if (mainWindow && !mainWindow.webContents.isDestroyed()) {
       mainWindow.webContents.send('mainDispatch', 'setPreference', args);
@@ -1142,7 +1144,6 @@ app.on('web-contents-created', (webContentsCreatedEvent, contents) => {
 
 app.on('bossKey', handleBossKey);
 app.on('add-preference', createPreferenceWindow);
-app.on('add-browsing', createBrowsingWindow);
 app.on('add-windows-about', createAboutWindow);
 
 app.on('menu-create-main-window', () => {
