@@ -776,9 +776,6 @@ function registerMainWindowEvent(mainWindow) {
     menuService.updateFocusedWindow(true);
     mainWindow.focus();
   });
-  ipcMain.on('update-header-to-show', (e, headerToShow) => {
-    mainWindow.send('update-header-to-show', headerToShow);
-  });
   ipcMain.on('update-route-name', (e, route) => {
     routeName = route;
   });

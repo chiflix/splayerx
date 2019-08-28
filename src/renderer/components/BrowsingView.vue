@@ -189,19 +189,15 @@ export default {
         });
       } else {
         currentView.setBounds({
-          x: 0, y: 36, width: this.browsingSize[0], height: this.browsingSize[1],
+          x: 0, y: 36, width: this.winSize[0], height: this.winSize[1] - 36,
         });
       }
     },
   },
   created() {
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [570, 375]);
-    windowRectService.calculateWindowRect(
-      this.browsingSize,
-      true,
-      this.winPos.concat(this.winSize),
-    );
-    this.$store.dispatch('updateBrowsingPos', this.winPos);
+    this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', this.browsingSize);
+    this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', this.browsingPos);
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [0]);
   },
   mounted() {
@@ -241,9 +237,6 @@ export default {
     });
     this.$electron.ipcRenderer.on('quit', () => {
       this.quit = true;
-    });
-    this.$electron.ipcRenderer.on('update-header-to-show', (e: Event, headerToShow: boolean) => {
-      this.headerToShow = headerToShow;
     });
     this.$electron.ipcRenderer.on('update-pip-state', (e: Event, info: { size: number[], position: number[] }) => {
       this.$store.dispatch('updatePipPos', info.position);
@@ -358,18 +351,12 @@ export default {
     addListenerToBrowser() {
       const view = this.$electron.remote.getCurrentWindow().getBrowserViews()[0];
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      view.webContents.addListener('ipc-message', (evt: Event, channel: string, args: any) => {
-        this.ipcMessage(channel, args);
-      });
+      view.webContents.addListener('ipc-message', this.ipcMessage);
       view.webContents.addListener('dom-ready', this.domReady);
-      view.webContents.addListener('new-window', (e: Event, url: string, disposition: string) => {
-        this.newWindow(url, disposition);
-      });
+      view.webContents.addListener('new-window', this.newWindow);
       view.webContents.addListener('did-start-loading', this.didStartLoading);
       view.webContents.addListener('did-stop-loading', this.didStopLoading);
-      view.webContents.addListener('will-navigate', (e: Event, url: string) => {
-        this.willNavigate(url);
-      });
+      view.webContents.addListener('will-navigate', this.willNavigate);
     },
     removeListener() {
       const currentBrowserViews = this.$electron.remote.getCurrentWindow().getBrowserViews();
@@ -383,12 +370,12 @@ export default {
         currentWebContents.removeListener('will-navigate', this.willNavigate);
       }
     },
-    newWindow(url: string, disposition: string) {
+    newWindow(e: Event, url: string, disposition: string) {
       if (disposition !== 'new-window') {
         this.handleOpenUrl({ url });
       }
     },
-    willNavigate(url: string) {
+    willNavigate(e: Event, url: string) {
       if (!url || url === 'about:blank' || urlParseLax(this.currentUrl).href === urlParseLax(url).href) return;
       this.currentUrl = urlParseLax(url).href;
       this.startTime = new Date().getTime();
@@ -407,7 +394,7 @@ export default {
       this.removeListener();
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ipcMessage(channel: string, args: any) {
+    ipcMessage(evt: Event, channel: string, args: any) {
       switch (channel) {
         case 'open-url':
           this.handleOpenUrl(args);
