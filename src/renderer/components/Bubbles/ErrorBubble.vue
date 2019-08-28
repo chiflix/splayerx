@@ -109,8 +109,8 @@ export default {
     }
     .content {
       white-space: pre-line;
-      color: rgba(255, 255, 255, 0.7);
-      font-size: 10px;
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 11px;
       line-height: 14px;
       letter-spacing: 0.2px;
     }

@@ -46,6 +46,23 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+.bubble-enter-active, .bubble-leave-active {
+  transition: transform 400ms cubic-bezier(0.17, 0.67, 0.17, 0.98);
+}
+.bubble-enter, .bubble-leave-to {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+    transform: translateX(350px);
+  }
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+    transform: translateX(420px);
+  }
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+    transform: translateX(593px);
+  }
+}
 .bubble {
   position: relative;
   @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px),
@@ -93,7 +110,7 @@ export default {
     .content {
       white-space: pre-line;
       color: rgba(255, 255, 255, 0.7);
-      font-size: 10px;
+      font-size: 12px;
       line-height: 14px;
       letter-spacing: 0.2px;
     }

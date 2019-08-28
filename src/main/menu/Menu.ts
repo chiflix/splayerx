@@ -215,7 +215,7 @@ export default class Menubar {
   public updateRecentPlay(items?: IMenuDisplayInfo[]) {
     if (items) this.recentPlay = items;
     const recentMenu = this.getSubmenuById('file.openRecent');
-    if (!recentMenu) return;
+    if (!recentMenu || !this.recentPlay) return;
     // @ts-ignore
     recentMenu.clear();
 
@@ -244,7 +244,7 @@ export default class Menubar {
   ) {
     if (items) this.primarySubs = items;
     const primarySubMenu = this.getSubmenuById('subtitle.mainSubtitle');
-    if (primarySubMenu) {
+    if (primarySubMenu && this.primarySubs) {
       // @ts-ignore
       primarySubMenu.clear();
       this.primarySubs.forEach(({
@@ -277,7 +277,7 @@ export default class Menubar {
   ) {
     if (items) this.secondarySubs = items;
     const secondarySubMenu = this.getSubmenuById('subtitle.secondarySubtitle');
-    if (secondarySubMenu) {
+    if (secondarySubMenu && this.secondarySubs) {
       // @ts-ignore
       secondarySubMenu.clear();
       this.secondarySubs.forEach(({
@@ -309,7 +309,7 @@ export default class Menubar {
   public updateAudioTrack(items?: { id: string, label: string }[]) {
     if (items) this.audioTracks = items;
     const audioTrackMenu = this.getSubmenuById('audio.switchAudioTrack');
-    if (audioTrackMenu) {
+    if (audioTrackMenu && this.audioTracks) {
       // @ts-ignore
       audioTrackMenu.clear();
       this.audioTracks.forEach(({ id, label }) => {
