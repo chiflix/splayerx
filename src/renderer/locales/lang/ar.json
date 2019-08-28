@@ -55,7 +55,7 @@
       "title": "لم يتم العثور على الملف"
     },
     "playlistNonExist": {
-      "content": ".تمت إزالة هذا العنصر",
+      "content": "تمت إزالة الملف أو إعادة تسميته.",
       "title": "لم يتم العثور على الملف"
     },
     "fileNonExistInPlaylist": {
