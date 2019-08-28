@@ -55,7 +55,7 @@
       "title": "未找到文件"
     },
     "playlistNonExist": {
-      "content": "该条记录已被移除。",
+      "content": "文件被移动、删除或重命名。",
       "title": "文件未找到"
     },
     "fileNonExistInPlaylist": {
@@ -294,7 +294,7 @@
     }
   },
   "alertBubble": {
-    "button": ""
+    "button": "确定"
   },
   "protectBubble": {
     "agree": "好的",
@@ -347,7 +347,7 @@
     "title": "上传失败"
   },
   "uploadingSuccess": {
-    "content": "字幕已成功上传。",
+    "content": "字幕已成功上传",
     "title": "上传成功"
   },
   "snapshotSuccess": {
