@@ -293,6 +293,9 @@
       "underlinedContent": "Prohibir"
     }
   },
+  "alertBubble": {
+    "button": ""
+  },
   "protectBubble": {
     "agree": "OK",
     "setting": "Configurando",
