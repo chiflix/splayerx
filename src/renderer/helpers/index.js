@@ -445,7 +445,7 @@ export default {
       if (quickHash && playlist) {
         id = playlist.id;
         playlist.lastOpened = Date.now();
-        await this.infoDB.update('recent-played', playlist, playlist.id);
+        this.infoDB.update('recent-played', playlist, playlist.id);
       } else if (quickHash) {
         playlist = {
           items: [],
@@ -462,7 +462,7 @@ export default {
         const videoId = await this.infoDB.add('media-item', data);
         playlist.items.push(videoId);
         playlist.hpaths.push(`${quickHash}-${videoFile}`);
-        id = this.infoDB.add('recent-played', playlist);
+        id = await this.infoDB.add('recent-played', playlist);
       }
 
       try {

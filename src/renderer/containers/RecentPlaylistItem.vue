@@ -419,7 +419,8 @@ export default {
     this.$bus.$on('database-saved', this.updateUI);
   },
   methods: {
-    async updateUI() {
+    async updateUI(path: string) {
+      if (path !== this.path) return;
       await this.recentPlayService.getRecord(this.items[this.index]);
       this.imageSrc = this.recentPlayService.imageSrc;
       this.sliderPercentage = this.recentPlayService.percentage;
