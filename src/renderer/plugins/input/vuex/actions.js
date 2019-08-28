@@ -116,7 +116,8 @@ const allActions = {
       wheelDetector.on('phase-change', (phase) => {
         commit(mt.WHEEL_PHASE, phase);
         if (
-          phase === wheelStopped && (process.platform === 'darwin' && wheelDetector.scrollEnd)
+          phase === wheelStopped
+          && ((process.platform === 'darwin' && wheelDetector.scrollEnd) || process.platform !== 'darwin')
         ) commit(mt.WHEEL_DIRECTION, no);
       });
     }
