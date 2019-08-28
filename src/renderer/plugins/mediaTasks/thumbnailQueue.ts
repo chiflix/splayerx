@@ -12,49 +12,43 @@ class ThumbnailTask implements IMediaTask<string> {
 
   private readonly width: number;
 
-  private readonly rowCount: number;
+  private readonly cols: number;
 
-  private readonly columnCount: number;
+  private readonly interval: number;
 
   public constructor(
     videoPath: string, videoHash: string, imagePath: string,
-    width: number,
-    rowCount: number, columnCount: number,
+    interval: number, width: number, cols: number,
   ) {
     this.videoPath = videoPath;
     this.videoHash = videoHash;
     this.imagePath = imagePath;
     this.width = width;
-    this.rowCount = rowCount;
-    this.columnCount = columnCount;
+    this.cols = cols;
+    this.interval = interval;
   }
 
   public static async from(
-    videoPath: string,
-    width: number,
-    rowCount: number, columnCount: number,
+    videoPath: string, interval: number, width: number, cols: number,
   ) {
     const videoHash = await mediaQuickHash.try(videoPath);
     if (videoHash) {
       const dirPath = await getVideoDir(videoHash);
-      const imagePath = join(dirPath, `${[width, rowCount, columnCount].join('-')}.jpg`);
+      const imagePath = join(dirPath, `${[width, cols, interval].join('-')}.jpg`);
       return new ThumbnailTask(
         videoPath, videoHash, imagePath,
-        width,
-        rowCount, columnCount,
+        interval, width, cols,
       );
     }
     return undefined;
   }
 
-  public getId() { return [this.videoHash, this.width, this.rowCount, this.columnCount].join('-'); }
+  public getId() { return [this.videoHash, this.width, this.cols, this.interval].join('-'); }
 
   public async execute(): Promise<string> {
     return new Promise((resolve, reject) => {
       ipcRenderer.send('thumbnail-request',
-        this.videoPath, this.imagePath,
-        this.width,
-        this.rowCount, this.columnCount);
+        this.videoPath, this.imagePath, this.interval, this.width, this.cols);
       ipcRenderer.once('thumbnail-reply', (event, error: string | null, path: string) => {
         if (error) reject(new Error(error));
         else resolve(path);
@@ -66,14 +60,13 @@ class ThumbnailTask implements IMediaTask<string> {
 export default class ThumbnailQueue extends BaseMediaTaskQueue {
   /** get a thumbnail's path, generate it if not exist */
   public async getThumbnailPath(
-    videoPath: string,
-    width: number,
-    rowCount: number, columnCount: number,
+    videoPath: string, interval: number, width: number, cols: number,
   ) {
     const task = await ThumbnailTask.from(
       videoPath,
+      interval,
       width,
-      rowCount, columnCount,
+      cols,
     );
     return task ? super.addTask<string>(task) : undefined;
   }
