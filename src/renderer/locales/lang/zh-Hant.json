@@ -293,6 +293,9 @@
       "underlinedContent": "禁用"
     }
   },
+  "alertBubble": {
+    "button": ""
+  },
   "protectBubble": {
     "agree": "好的",
     "setting": "設定",
