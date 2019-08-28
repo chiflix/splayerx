@@ -623,7 +623,7 @@ export default {
     bilibiliAdapter() {
       this.currentPipBrowserView().webContents
         .executeJavaScript(bilibiliFindType).then((r: (HTMLElement | null)[]) => {
-          this.bilibiliType = ['bangumi', 'videoStreaming', 'iframeStreaming', 'video'][r.findIndex(i => i)] || 'others';
+          this.bilibiliType = ['bangumi', 'videoStreaming', 'iframeStreaming', 'iframeStreaming', 'video'][r.findIndex(i => i)] || 'others';
         }).then(() => {
           this.currentPipBrowserView().webContents.executeJavaScript(this.bilibiliPip.adapter);
         }).then(() => {

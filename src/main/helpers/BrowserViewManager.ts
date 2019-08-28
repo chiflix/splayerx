@@ -1,4 +1,5 @@
 import { BrowserView } from 'electron';
+import { remove } from 'lodash';
 import { bilibiliVideoPause, bilibiliFindType } from '../../shared/pip/bilibili';
 
 type ChannelData = {
@@ -23,6 +24,8 @@ export class BrowserViewManager implements IBrowserViewManager {
     pipPage: BrowserViewHistory | null,
   };
 
+  private backPage: BrowserViewHistory[];
+
   public constructor() {
     this.history = new Map();
     this.currentPip = {
@@ -30,6 +33,7 @@ export class BrowserViewManager implements IBrowserViewManager {
       pipChannel: '',
       pipPage: null,
     };
+    this.backPage = [];
   }
 
   public create(channel: string, url: string): BrowserViewData {
@@ -49,7 +53,19 @@ export class BrowserViewManager implements IBrowserViewManager {
         const view = this.history[this.currentChannel].list[currentIndex].view;
         this.pauseVideo(view);
       } else {
-        const lastPage = this.history[channel].list[currentIndex];
+        const list = this.history[this.currentChannel].list;
+        if (this.backPage.length) {
+          remove(this.history[this.currentChannel].list,
+            (list: BrowserViewHistory) => {
+              if (this.backPage.includes(list)) {
+                list.view.destroy();
+                return true;
+              }
+              return false;
+            });
+          this.backPage = [];
+        }
+        const lastPage = list[currentIndex];
         if (lastPage) {
           lastPage.view.webContents.loadURL(lastPage.url);
           lastPage.view.webContents.once('media-started-playing', () => {
@@ -57,8 +73,7 @@ export class BrowserViewManager implements IBrowserViewManager {
               let type = '';
               lastPage.view.webContents
                 .executeJavaScript(bilibiliFindType).then((r: (HTMLElement | null)[]) => {
-                  type = ['bangumi', 'videoStreaming', 'iframeStreaming', 'video'][r.findIndex(i => i)] || 'others';
-                  console.log(type);
+                  type = ['bangumi', 'videoStreaming', 'iframeStreaming', 'iframeStreaming', 'video'][r.findIndex(i => i)] || 'others';
                   lastPage.view.webContents.executeJavaScript(bilibiliVideoPause(type));
                 });
             } else {
@@ -92,10 +107,15 @@ export class BrowserViewManager implements IBrowserViewManager {
   }
 
   public back(): BrowserViewData {
+    const index = this.history[this.currentChannel].currentIndex;
+    this.backPage.push(this.history[this.currentChannel].list[index]);
     return this.jump(true);
   }
 
   public forward(): BrowserViewData {
+    if (this.backPage.length) {
+      this.backPage.pop();
+    }
     return this.jump(false);
   }
 
@@ -173,7 +193,7 @@ export class BrowserViewManager implements IBrowserViewManager {
         let type = '';
         currentView.webContents
           .executeJavaScript(bilibiliFindType).then((r: (HTMLElement | null)[]) => {
-            type = ['bangumi', 'videoStreaming', 'iframeStreaming', 'video'][r.findIndex(i => i)] || 'others';
+            type = ['bangumi', 'videoStreaming', 'iframeStreaming', 'iframeStreaming', 'video'][r.findIndex(i => i)] || 'others';
             currentView.webContents.executeJavaScript(bilibiliVideoPause(type));
           });
       } else {
