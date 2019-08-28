@@ -293,6 +293,9 @@
       "underlinedContent": "禁止"
     }
   },
+  "alertBubble": {
+    "button": ""
+  },
   "protectBubble": {
     "agree": "確定",
     "setting": "設定",
