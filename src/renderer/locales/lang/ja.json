@@ -55,7 +55,7 @@
       "title": "ファイルが見つかりませんでした。"
     },
     "playlistNonExist": {
-      "content": "このアイテムは削除されました。",
+      "content": "ファイルは削除または名前変更されました。",
       "title": "ファイルが見つかりませんでした"
     },
     "fileNonExistInPlaylist": {
@@ -294,7 +294,7 @@
     }
   },
   "alertBubble": {
-    "button": ""
+    "button": "はい"
   },
   "protectBubble": {
     "agree": "確定",
