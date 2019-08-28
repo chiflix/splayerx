@@ -74,6 +74,7 @@ export default {
       needToRestore: false,
       winAngleBeforeFullScreen: 0, // winAngel before full screen
       winSizeBeforeFullScreen: [], // winSize before full screen
+      switchingLock: false,
     };
   },
   computed: {
@@ -172,6 +173,8 @@ export default {
       this.$ga.event('app', 'toggle-playback');
     }, 50, { leading: true }));
     this.$bus.$on('next-video', () => {
+      if (this.switchingLock) return;
+      this.switchingLock = true;
       videodata.paused = false;
       if (this.nextVideo) {
         this.$store.commit('LOOP_UPDATE', false);
@@ -182,6 +185,8 @@ export default {
       }
     });
     this.$bus.$on('previous-video', () => {
+      if (this.switchingLock) return;
+      this.switchingLock = true;
       videodata.paused = false;
       if (this.previousVideo) {
         this.$store.commit('LOOP_UPDATE', false);
@@ -231,6 +236,7 @@ export default {
       discardTranslate: atActions.AUDIO_TRANSLATE_DISCARD,
     }),
     async onMetaLoaded(event: Event) { // eslint-disable-line complexity
+      this.switchingLock = false;
       const target = event.target as HTMLVideoElement;
       this.videoElement = target;
       this.videoConfigInitialize({
