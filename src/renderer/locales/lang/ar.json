@@ -293,6 +293,9 @@
       "underlinedContent": "تعارض"
     }
   },
+  "alertBubble": {
+    "button": ""
+  },
   "protectBubble": {
     "agree": "حسنا",
     "setting": "المشهد",
