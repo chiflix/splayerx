@@ -293,6 +293,9 @@
       "underlinedContent": "동의하지 않는다"
     }
   },
+  "alertBubble": {
+    "button": ""
+  },
   "protectBubble": {
     "agree": "승인",
     "setting": "설정",
