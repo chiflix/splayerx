@@ -50,7 +50,7 @@ import InputPlugin, { getterTypes as iGT } from '@/plugins/input';
 import { VueDevtools } from './plugins/vueDevtools.dev';
 import { SubtitleControlListItem, Type, NOT_SELECTED_SUBTITLE } from './interfaces/ISubtitle';
 import { getValidVideoRegex, getValidSubtitleRegex } from '../shared/utils';
-import { isWindowsExE, isMacintoshDMG } from '../shared/common/platform';
+import { isWindowsExE, isMacintosh, isWindows } from '../shared/common/platform';
 import MenuService from './services/menu/MenuService';
 
 
@@ -1154,7 +1154,7 @@ new Vue({
     // eslint-disable-next-line complexity
     wheelEventHandler({ x }: { x: number }) {
       if (this.duration && this.wheelDirection === 'horizontal' && !this.playlistDisplayState) {
-        const eventName = x < 0 ? 'seek-forward' : 'seek-backward';
+        const eventName = (x < 0 && isMacintosh) || (x > 0 && isWindows) ? 'seek-forward' : 'seek-backward';
         const absX = Math.abs(x);
 
         let finalSeekSpeed = 0;
