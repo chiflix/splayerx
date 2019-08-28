@@ -345,7 +345,7 @@ export default {
             await fsPromises.access(video.path, fs.constants.F_OK);
           } catch (err) {
             deleteItems.push(item);
-            this.infoDB.delete('media-item', video.videoId);
+            // this.infoDB.delete('media-item', video.videoId);
           }
         }));
         if (deleteItems.length > 0) {
@@ -359,9 +359,7 @@ export default {
             currentVideo = await this.infoDB.get('media-item', playlist.items[0]);
             addBubble(FILE_NON_EXIST_IN_PLAYLIST);
           } else {
-            this.infoDB.delete('recent-played', playlist.id);
             addBubble(PLAYLIST_NON_EXIST);
-            this.$bus.$emit('delete-file', id);
             return;
           }
         }
@@ -403,9 +401,7 @@ export default {
           }
           this.playFile(video.path, video.videoId);
         } catch (err) {
-          this.infoDB.delete('recent-played', id);
           addBubble(PLAYLIST_NON_EXIST);
-          this.$bus.$emit('delete-file', id);
         }
       }
     },
