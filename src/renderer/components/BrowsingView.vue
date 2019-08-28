@@ -458,7 +458,8 @@ export default {
       if (!url || url === 'about:blank' || urlParseLax(url).href === urlParseLax(this.currentUrl).href) return;
       this.loadingState = true;
       this.currentUrl = urlParseLax(url).href;
-      this.$electron.ipcRenderer.send('create-browser-view', { url: urlParseLax(url).href });
+      const protocol = urlParseLax(url).protocol;
+      this.$electron.ipcRenderer.send('create-browser-view', { url: protocol ? this.currentUrl : `https:${this.currentUrl}` });
     },
     pipAdapter() {
       const parseUrl = urlParseLax(this.currentPipBrowserView().webContents.getURL());
@@ -543,6 +544,7 @@ export default {
       }
     },
     enterPipOperation() {
+      this.handleWindowChangeEnterPip();
       this.$store.dispatch('updateBrowsingSize', this.winSize);
       this.$store.dispatch('updateBrowsingPos', this.winPos);
       this.pipAdapter();
@@ -582,7 +584,6 @@ export default {
       }
     },
     othersAdapter() {
-      this.handleWindowChangeEnterPip();
       this.currentPipBrowserView().webContents.executeJavaScript(this.othersPip.adapter)
         .then(() => {
           this.adaptFinished = true;
@@ -596,7 +597,6 @@ export default {
         .getBrowserViews()[0].webContents.executeJavaScript(this.othersPip.recover);
     },
     iqiyiAdapter() {
-      this.handleWindowChangeEnterPip();
       this.currentPipBrowserView().webContents.executeJavaScript(this.iqiyiPip.adapter).then(() => {
         this.adaptFinished = true;
       });
@@ -609,7 +609,6 @@ export default {
         .getBrowserViews()[0].webContents.executeJavaScript(this.iqiyiPip.recover);
     },
     youtubeAdapter() {
-      this.handleWindowChangeEnterPip();
       this.currentPipBrowserView().webContents.executeJavaScript(youtube.adapter).then(() => {
         this.adaptFinished = true;
       });
@@ -623,7 +622,6 @@ export default {
         .executeJavaScript(bilibiliFindType).then((r: (HTMLElement | null)[]) => {
           this.bilibiliType = ['bangumi', 'videoStreaming', 'iframeStreaming', 'video'][r.findIndex(i => i)] || 'others';
         }).then(() => {
-          this.handleWindowChangeEnterPip();
           this.currentPipBrowserView().webContents.executeJavaScript(this.bilibiliPip.adapter);
         }).then(() => {
           this.adaptFinished = true;
