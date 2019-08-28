@@ -1154,7 +1154,7 @@ new Vue({
     // eslint-disable-next-line complexity
     wheelEventHandler({ x }: { x: number }) {
       if (this.duration && this.wheelDirection === 'horizontal' && !this.playlistDisplayState) {
-        const eventName = (x < 0 && isMacintosh) || (x > 0 && isWindows) ? 'seek-forward' : 'seek-backward';
+        const eventName = x < 0 ? 'seek-forward' : 'seek-backward';
         const absX = Math.abs(x);
 
         let finalSeekSpeed = 0;
