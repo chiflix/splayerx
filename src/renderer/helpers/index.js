@@ -438,13 +438,35 @@ export default {
       if (this.translateFilter(() => {
         this.openVideoFile(videoFile);
       })) return;
-      const id = await this.infoDB.addPlaylist([videoFile]);
-      const playlistItem = (await this.infoDB.get('recent-played', id)) || {
-        id, items: [], hpaths: [], lastOpened: Date.now(), playedIndex: 0,
-      };
-      let similarVideos;
+      let id;
+      let playlist;
+      const quickHash = await mediaQuickHash.try(videoFile);
+      playlist = await this.infoDB.get('recent-played', 'hpaths', [`${quickHash}-${videoFile}`]);
+      if (quickHash && playlist) {
+        id = playlist.id;
+        playlist.lastOpened = Date.now();
+        await this.infoDB.update('recent-played', playlist, playlist.id);
+      } else if (quickHash) {
+        playlist = {
+          items: [],
+          hpaths: [],
+          playedIndex: 0,
+          lastOpened: Date.now(),
+        };
+        const data = {
+          quickHash,
+          type: 'video',
+          path: videoFile,
+          source: '',
+        };
+        const videoId = await this.infoDB.add('media-item', data);
+        playlist.items.push(videoId);
+        playlist.hpaths.push(`${quickHash}-${videoFile}`);
+        id = this.infoDB.add('recent-played', playlist);
+      }
+
       try {
-        similarVideos = await this.findSimilarVideoByVidPath(videoFile);
+        const similarVideos = await this.findSimilarVideoByVidPath(videoFile);
         this.$store.dispatch('FolderList', {
           id,
           paths: similarVideos,
@@ -455,11 +477,11 @@ export default {
           this.$store.dispatch('FolderList', {
             id,
             paths: [videoFile],
-            items: playlistItem.items.slice(0, 1),
+            items: playlist.items.slice(0, 1),
           });
         }
       }
-      this.playFile(videoFile, playlistItem.items[playlistItem.playedIndex]);
+      this.playFile(videoFile, playlist.items[0]);
     },
     bookmarkAccessing(vidPath) {
       const bookmarkObj = syncStorage.getSync('bookmark');
