@@ -402,7 +402,7 @@ new Vue({
       this.updateBarrageOpen(data.barrageOpen || this.barrageOpen);
     });
     this.$bus.$on('delete-file', () => {
-      this.refreshMenu();
+      this.menuService.addRecentPlayItems();
     });
     this.$event.on('playlist-display-state', (e: boolean) => {
       this.playlistDisplayState = e;
@@ -416,7 +416,9 @@ new Vue({
     this.menuService.updateRouteName(this.currentRouteName);
     this.registeMenuActions();
     this.initializeMenuSettings();
-    this.$bus.$on('new-file-open', this.refreshMenu);
+    this.$bus.$on('new-file-open', () => {
+      this.menuService.addRecentPlayItems();
+    });
     // TODO: Setup user identity
     this.$storage.get('user-uuid', (err: Error, userUUID: string) => {
       if (err || Object.keys(userUUID).length === 0) {
@@ -763,7 +765,7 @@ new Vue({
         this.infoDB.clearAll();
         app.clearRecentDocuments();
         this.$bus.$emit('clean-landingViewItems');
-        this.refreshMenu();
+        this.menuService.addRecentPlayItems();
       });
       this.menuService.on('favourite.iqiyi', () => {
         this.updateInitialUrl('https://www.iqiyi.com');
@@ -1108,9 +1110,6 @@ new Vue({
         return path.toString().replace(/^file:\/\/\//, '');
       }
       return path.toString().replace(/^file\/\//, '');
-    },
-    refreshMenu() {
-      this.initializeMenuSettings();
     },
     windowRotate() {
       this.$store.dispatch('windowRotate90Deg');
