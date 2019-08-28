@@ -238,6 +238,9 @@ export default {
     this.$electron.ipcRenderer.on('quit', () => {
       this.quit = true;
     });
+    this.$electron.ipcRenderer.on('update-pip-size', (e: Event, args: number[]) => {
+      this.$store.dispatch('updatePipSize', args);
+    });
     this.$electron.ipcRenderer.on('update-pip-state', (e: Event, info: { size: number[], position: number[] }) => {
       this.$store.dispatch('updatePipPos', info.position);
       this.$store.dispatch('updatePipSize', info.size);

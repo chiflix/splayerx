@@ -741,6 +741,9 @@ function registerMainWindowEvent(mainWindow) {
     menuService.updateFocusedWindow(false);
     browsingWindow.focus();
   });
+  ipcMain.on('update-pip-size', (evt, args) => {
+    mainWindow.send('update-pip-size', args);
+  });
   ipcMain.on('set-bounds', (evt, args) => {
     if (pipControlView) pipControlView.setBounds(args.control);
     if (titlebarView) titlebarView.setBounds(args.titlebar);

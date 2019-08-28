@@ -37,6 +37,7 @@ export default {
     });
     window.addEventListener('resize', throttle(() => {
       const size = electron.remote.getCurrentWindow().getSize();
+      electron.ipcRenderer.send('update-pip-size', size);
       electron.ipcRenderer.send('set-bounds', {
         titlebar: {
           x: 0,
