@@ -156,6 +156,7 @@ import Icon from '@/components/BaseIconContainer.vue';
 import RecentPlayService from '@/services/media/PlaylistService';
 import { mediaStorageService } from '@/services/storage/MediaStorageService';
 import { setElementStyle } from '@/libs/dom';
+import { MediaItem } from '../interfaces/IDB';
 
 export default {
   components: {
@@ -419,8 +420,9 @@ export default {
     this.$bus.$on('database-saved', this.updateUI);
   },
   methods: {
-    async updateUI() {
-      await this.recentPlayService.getRecord(this.items[this.index]);
+    async updateUI(result: MediaItem) {
+      if (result !== undefined && result.path !== this.path) return;
+      await this.recentPlayService.getRecord(this.items[this.index], result);
       this.imageSrc = this.recentPlayService.imageSrc;
       this.sliderPercentage = this.recentPlayService.percentage;
     },
