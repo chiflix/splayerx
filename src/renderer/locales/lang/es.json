@@ -364,6 +364,8 @@
   },
   "translateModal": {
     "selectLanguageLabel": "Idioma de audio",
+    "audioLanguageLoading": "",
+    "audioLanguageLoadFail": "",
     "select": {
       "title": "Seleccionar idioma de audio",
       "content": "Para generar un resultado de tranlación, por favor seleccione el idioma que escuche en el vídeo y haga clic en el botón generar. El proceso puede tardar algún tiempo."
