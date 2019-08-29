@@ -228,13 +228,13 @@ export default {
       'playingList', 'isFolderList',
       'isFullScreen', 'isFocused', 'isMinimized',
       'leftMousedown', 'progressKeydown', 'volumeKeydown', 'wheelTriggered', 'volumeWheelTriggered',
-      'enabledSecondarySub', 'isTranslateModalVisiable', 'translateStatus', 'failBubbleId', 'messageInfo',
+      'enabledSecondarySub', 'isTranslateModalVisible', 'translateStatus', 'failBubbleId', 'messageInfo',
     ]),
     ...inputMapGetters({
       inputWheelDirection: iGT.GET_WHEEL_DIRECTION,
     }),
     showAllWidgets() {
-      if (this.isTranslateModalVisiable) {
+      if (this.isTranslateModalVisible) {
         return false;
       }
       return !this.tempRecentPlaylistDisplayState
@@ -251,7 +251,7 @@ export default {
       );
     },
     cursorStyle() {
-      if (this.isTranslateModalVisiable) {
+      if (this.isTranslateModalVisible) {
         return 'default';
       }
       return this.showAllWidgets || !this.isFocused
@@ -394,7 +394,7 @@ export default {
         this.updateMousedown({ componentName: '' });
       }
     },
-    isTranslateModalVisiable(visible: boolean) {
+    isTranslateModalVisible(visible: boolean) {
       const { ratio } = this;
       let minimumSize = [320, 180];
       // 弹窗出现的时候窗口缩小到一定尺寸应该不能再缩小
@@ -605,7 +605,7 @@ export default {
         const translateFailBubbleExist = this.messageInfo
           && this.messageInfo.find((e: { id: string }) => e.id === this.failBubbleId);
         log.debug('TheVideoController.vue', translateFailBubbleExist, this.messageInfo, this.failBubbleId);
-        if (this.translateStatus === AudioTranslateStatus.Fail && this.isTranslateModalVisiable) {
+        if (this.translateStatus === AudioTranslateStatus.Fail && this.isTranslateModalVisible) {
           this.$store.dispatch(videoActions.PAUSE_VIDEO);
           this.updateHideModalCallback(() => {
             this.$bus.$emit('next-video');
