@@ -115,13 +115,12 @@ export default {
       this.thumbnailCount = num;
       this.backgroundSize = `1000% ${Math.ceil(this.thumbnailCount / 10) * 100}%`;
       getThumbnailPath(this.originSrc, 272, 10, Math.ceil(num / 10))
-        .then((thumbnail: ThumbnailReplyType) => {
-          if (thumbnail.videoPath === this.originSrc) {
+        .then((thumbnail?: ThumbnailReplyType) => {
+          if (thumbnail && thumbnail.videoPath === this.originSrc) {
             this.imgSrc = thumbnail.imgPath;
             this.imgExisted = true;
           }
-        })
-        .catch(console.error);
+        });
     });
   },
   methods: {
