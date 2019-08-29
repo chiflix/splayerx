@@ -280,7 +280,7 @@ export default {
     }
 
     &__description {
-      font-family: $font-normal;
+      font-family: $font-medium;
       font-size: 11px;
       color: rgba(255,255,255,0.25);
       margin-top: 7px;

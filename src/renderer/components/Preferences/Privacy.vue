@@ -120,7 +120,7 @@ export default {
     }
     &_description {
       width: 282px;
-      font-family: $font-normal;
+      font-family: $font-medium;
       font-size: 11px;
       color: rgba(255,255,255,0.25);
       letter-spacing: 0;
