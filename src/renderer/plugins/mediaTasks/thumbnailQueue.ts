@@ -3,7 +3,12 @@ import { join } from 'path';
 import BaseMediaTaskQueue, { IMediaTask } from './baseMediaTaskQueue';
 import { mediaQuickHash, getVideoDir } from '@/libs/utils';
 
-class ThumbnailTask implements IMediaTask<string> {
+export type ThumbnailReplyType = {
+  imgPath: string;
+  videoPath: string;
+}
+
+class ThumbnailTask implements IMediaTask<ThumbnailReplyType> {
   private readonly videoPath: string;
 
   private readonly videoHash: string;
@@ -49,15 +54,15 @@ class ThumbnailTask implements IMediaTask<string> {
 
   public getId() { return [this.videoHash, this.width, this.rowCount, this.columnCount].join('-'); }
 
-  public async execute(): Promise<string> {
+  public async execute(): Promise<ThumbnailReplyType> {
     return new Promise((resolve, reject) => {
       ipcRenderer.send('thumbnail-request',
         this.videoPath, this.imagePath,
         this.width,
         this.rowCount, this.columnCount);
-      ipcRenderer.once('thumbnail-reply', (event, error: string | null, path: string) => {
+      ipcRenderer.once('thumbnail-reply', (event: Event, error: string | null, path: string, videoPath: string) => {
         if (error) reject(new Error(error));
-        else resolve(path);
+        else resolve({ imgPath: path, videoPath });
       });
     });
   }
@@ -75,6 +80,9 @@ export default class ThumbnailQueue extends BaseMediaTaskQueue {
       width,
       rowCount, columnCount,
     );
-    return task ? super.addTask<string>(task) : undefined;
+    if (this.pendingTasks.length !== 0) {
+      this.pendingTasks.splice(0);
+    }
+    return task ? this.addTask<ThumbnailReplyType>(task) : undefined;
   }
 }

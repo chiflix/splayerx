@@ -86,7 +86,7 @@ export default function registerMediaTasks() {
     thumbnailWidth,
     rowThumbnailCount, columnThumbnailCount) => {
     if (existsSync(imagePath)) {
-      reply(event, 'thumbnail-reply', null, imagePath);
+      reply(event, 'thumbnail-reply', null, imagePath, videoPath);
     } else if (existsSync(videoPath)) {
       splayerxProxy.generateThumbnails(
         videoPath, imagePath,
@@ -94,7 +94,7 @@ export default function registerMediaTasks() {
         rowThumbnailCount.toString(), columnThumbnailCount.toString(),
         (err) => {
           if (err === '0' && existsSync(imagePath)) {
-            reply(event, 'thumbnail-reply', null, imagePath);
+            reply(event, 'thumbnail-reply', null, imagePath, videoPath);
           } else {
             if (typeof err !== 'string') err = `${err}, type: ${typeof err}`;
             reply(event, 'thumbnail-reply', `thumbnail-reply: ${err}`);

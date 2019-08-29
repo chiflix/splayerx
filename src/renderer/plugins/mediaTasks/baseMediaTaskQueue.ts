@@ -26,7 +26,7 @@ export default class BaseMediaTaskQueue {
 
   private cachedResults: Record<string, unknown> = {};
 
-  private pendingTasks: TaskInfo[] = [];
+  protected pendingTasks: TaskInfo[] = [];
 
   public addTask<T>(task: IMediaTask<T>, options: IAddTaskOptions = defaultOptions): Promise<T> {
     return new Promise((resolve, reject) => {
