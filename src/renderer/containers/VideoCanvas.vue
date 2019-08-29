@@ -351,8 +351,8 @@ export default {
       };
 
       const result = await playInfoStorageService.updateMediaItemBy(videoId, data as MediaItem);
-      // @ts-ignore
-      if (result) this.$bus.$emit('database-saved', result.path);
+        // @ts-ignore
+      if (result) this.$bus.$emit('database-saved', result);
     },
     saveSubtitleStyle() {
       return settingStorageService.updateSubtitleStyle({
