@@ -44,6 +44,7 @@ import ThumbnailDisplay from '@/components/PlayingView/ThumbnailDisplay.vue';
 // @ts-ignore
 import Icon from '@/components/BaseIconContainer.vue';
 import { getThumbnailPath } from '../plugins/mediaTasks';
+import { ThumbnailReplyType } from '../plugins/mediaTasks/thumbnailQueue';
 
 export default {
   components: {
@@ -114,9 +115,11 @@ export default {
       this.thumbnailCount = num;
       this.backgroundSize = `1000% ${Math.ceil(this.thumbnailCount / 10) * 100}%`;
       getThumbnailPath(this.originSrc, 272, 10, Math.ceil(num / 10))
-        .then((path) => {
-          this.imgSrc = path;
-          this.imgExisted = true;
+        .then((thumbnail: ThumbnailReplyType) => {
+          if (thumbnail.videoPath === this.originSrc) {
+            this.imgSrc = thumbnail.imgPath;
+            this.imgExisted = true;
+          }
         })
         .catch(console.error);
     });
