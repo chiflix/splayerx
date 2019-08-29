@@ -728,6 +728,10 @@ function registerMainWindowEvent(mainWindow) {
       createTitlebarView();
       browsingWindow.show();
     }
+    if (args.isGlobal) {
+      browserViewManager.pauseVideo(mainWindow.getBrowserView());
+      mainWindow.hide();
+    }
     browsingWindow.setAspectRatio(args.pipInfo.aspectRatio);
     browsingWindow.setMinimumSize(args.pipInfo.minimumSize[0], args.pipInfo.minimumSize[1]);
     mainBrowser.page.view.setBounds({
@@ -764,7 +768,7 @@ function registerMainWindowEvent(mainWindow) {
     if (pipControlView) pipControlView.setBounds(args.control);
     if (titlebarView) titlebarView.setBounds(args.titlebar);
   });
-  ipcMain.on('exit-pip', () => {
+  ipcMain.on('exit-pip', (evt, args) => {
     if (!browserViewManager) return;
     const mainView = mainWindow.getBrowserView();
     mainWindow.removeBrowserView(mainView);
@@ -786,6 +790,9 @@ function registerMainWindowEvent(mainWindow) {
       canGoBack: exitBrowser.canBack,
       canGoForward: exitBrowser.canForward,
     });
+    if (!mainWindow.isVisible()) {
+      mainWindow.show();
+    }
     if (browsingWindow.isFullScreen()) {
       hideBrowsingWindow = true;
       browsingWindow.setFullScreen(false);
@@ -1181,7 +1188,7 @@ app.on('menu-open-dialog', (playlistId) => {
 app.on('activate', () => {
   if (!mainWindow) {
     if (app.isReady()) createMainWindow();
-  } else if (!mainWindow.isVisible()) {
+  } else if (!mainWindow.isVisible() && !browsingWindow) {
     mainWindow.show();
   }
   if (browsingWindow && browsingWindow.isMinimized()) {

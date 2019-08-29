@@ -28,7 +28,7 @@
     />
     <div
       :style="{
-        width: isDarwin ? '40px' : '50px',
+        width: isDarwin ? '80px' : '100px',
         display: 'flex',
         zIndex: '6',
         order: isDarwin ? 3 : 1,
@@ -36,6 +36,13 @@
         cursor: hasVideo ? 'pointer' : '',
       }"
     >
+      <Icon
+        :type="picInPicType"
+        :style="{
+          margin: isDarwin ? 'auto 10px auto auto' : 'auto auto auto 15px',
+        }"
+        @mouseup.native="handleGlobalPip"
+      />
       <Icon
         :type="picInPicType"
         :style="{
@@ -81,6 +88,10 @@ export default {
       required: true,
     },
     handleBookmarkOpen: {
+      type: Function,
+      required: true,
+    },
+    handleGlobalPip: {
       type: Function,
       required: true,
     },

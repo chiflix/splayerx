@@ -70,7 +70,7 @@ export default {
   },
   computed: {
     calculateWidth() {
-      return this.isDarwin ? 'calc(100% - 70px - 114px - 40px)' : 'calc(100% - 50px - 110px - 135px)';
+      return this.isDarwin ? 'calc(100% - 70px - 114px - 80px)' : 'calc(100% - 100px - 110px - 135px)';
     },
     favAnimClass() {
       if (this.isDarwin) {

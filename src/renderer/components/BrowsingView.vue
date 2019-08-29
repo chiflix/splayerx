@@ -9,6 +9,7 @@
     <browsing-header
       ref="browsingHeader"
       :handle-enter-pip="handleEnterPip"
+      :handle-global-pip="handleGlobalPip"
       :handle-url-reload="handleUrlReload"
       :handle-url-back="handleUrlBack"
       :handle-url-forward="handleUrlForward"
@@ -86,6 +87,7 @@ export default {
       canGoForward: false,
       adaptFinished: false,
       pipInfo: {},
+      isGlobal: false,
     };
   },
   computed: {
@@ -123,7 +125,12 @@ export default {
     adaptFinished(val: boolean) {
       if (val) {
         const opacity = ['youtube', 'others'].includes(this.pipType) || (this.pipType === 'bilibili' && this.bilibiliType === 'others') ? 0.2 : 1;
-        this.$electron.ipcRenderer.send(this.isPip ? 'shift-pip' : 'enter-pip', { opacity, barrageOpen: opacity === 1 ? this.barrageOpen : false, pipInfo: this.pipInfo });
+        this.$electron.ipcRenderer.send(this.isPip ? 'shift-pip' : 'enter-pip', {
+          isGlobal: this.isGlobal,
+          opacity,
+          barrageOpen: opacity === 1 ? this.barrageOpen : false,
+          pipInfo: this.pipInfo,
+        });
         this.updateIsPip(true);
       }
     },
@@ -209,10 +216,11 @@ export default {
     this.$bus.$on('toggle-back', this.handleUrlBack);
     this.$bus.$on('toggle-forward', this.handleUrlForward);
     this.$bus.$on('toggle-pip', () => {
-      const focusedOnMainWindow = this.$electron.remote.getCurrentWindow().isFocused();
+      const focusedOnMainWindow = this.$electron.remote.getCurrentWindow().isVisible()
+        && this.$electron.remote.getCurrentWindow().isFocused();
       setTimeout(() => {
         if (this.acceleratorAvailable) {
-          if (!focusedOnMainWindow) {
+          if (!focusedOnMainWindow || this.isGlobal) {
             this.handleExitPip();
           } else {
             this.handleEnterPip();
@@ -296,6 +304,10 @@ export default {
       updateBarrageOpen: browsingActions.UPDATE_BARRAGE_OPEN,
       updateIsPip: browsingActions.UPDATE_IS_PIP,
     }),
+    handleGlobalPip() {
+      this.isGlobal = true;
+      this.handleEnterPip();
+    },
     focusHandler() {
       this.menuService.updateFocusedWindow(true);
       this.updatePipState(this.hasVideo);
@@ -584,6 +596,7 @@ export default {
     },
     exitPipOperation() {
       this.$electron.ipcRenderer.send('exit-pip');
+      this.isGlobal = false;
       this.handleWindowChangeExitPip();
       if (this.pipType === 'youtube') {
         this.youtubeRecover();
@@ -634,9 +647,10 @@ export default {
         .getBrowserViews()[0].webContents.executeJavaScript(this.othersPip.recover);
     },
     iqiyiAdapter() {
-      this.currentMainBrowserView().webContents.executeJavaScript(this.iqiyiPip.adapter).then(() => {
-        this.adaptFinished = true;
-      });
+      this.currentMainBrowserView().webContents
+        .executeJavaScript(this.iqiyiPip.adapter).then(() => {
+          this.adaptFinished = true;
+        });
     },
     iqiyiWatcher() {
       this.$electron.ipcRenderer.send('pip-watcher', this.iqiyiPip.watcher);
