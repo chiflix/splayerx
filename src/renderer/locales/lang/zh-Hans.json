@@ -121,7 +121,7 @@
       "decreasePlaybackSpeed": "减缓播放速度",
       "forwardL": "前进 +60s",
       "forwardS": "前进 +5s",
-      "fullScreen": "全屏\/退出全屏",
+      "fullScreen": "全屏/退出全屏",
       "increasePlaybackSpeed": "加快播放速度",
       "name": "播放",
       "pause": "暂停",
@@ -364,6 +364,8 @@
   },
   "translateModal": {
     "selectLanguageLabel": "视频源语言",
+    "audioLanguageLoading": "",
+    "audioLanguageLoadFail": "",
     "select": {
       "title": "选择视频源语言",
       "content": "如要生成智能翻译，请选择您在视频中所听到的语言并点击生成，该过程将持续一段时间。"
