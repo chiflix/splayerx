@@ -153,7 +153,6 @@
   </div>
 </template>
 <script lang="ts">
-import * as configcat from 'configcat-js';
 import Vue from 'vue';
 import { mapActions, mapGetters } from 'vuex';
 import {
@@ -305,11 +304,11 @@ export default Vue.extend({
           throw new Error();
         }
       } catch (ex) {
-          const failLabel = this.$t('translateModal.audioLanguageLoadFail');
-          this.lanugages = [{
-            value: '',
-            label: failLabel,
-          }];
+        const failLabel = this.$t('translateModal.audioLanguageLoadFail');
+        this.lanugages = [{
+          value: '',
+          label: failLabel,
+        }];
       } finally {
         this.loadConfigCatCompleted = true;
       }
