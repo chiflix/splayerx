@@ -768,7 +768,7 @@ function registerMainWindowEvent(mainWindow) {
     if (pipControlView) pipControlView.setBounds(args.control);
     if (titlebarView) titlebarView.setBounds(args.titlebar);
   });
-  ipcMain.on('exit-pip', (evt, args) => {
+  ipcMain.on('exit-pip', () => {
     if (!browserViewManager) return;
     const mainView = mainWindow.getBrowserView();
     mainWindow.removeBrowserView(mainView);

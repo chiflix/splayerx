@@ -45,8 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!pipBtns && remote.getCurrentWindow()
       && remote.getCurrentWindow().getBrowserViews().length > 1) {
       const winSize = remote.getCurrentWindow().getSize();
-      if (evt.pageX <= 0 || evt.pageY <= 0
-        || evt.pageX >= winSize[0] || evt.pageY >= winSize[1]) {
+      if (evt.clientX <= 0 || evt.clientX >= winSize[0] || evt.clientY >= winSize[1]) {
         sendToHost('mouseout', 'out');
       }
     }

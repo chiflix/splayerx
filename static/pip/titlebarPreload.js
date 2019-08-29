@@ -66,6 +66,15 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('keydown', (e) => {
     ipcRenderer.send('key-events', e.keyCode);
   });
+  window.addEventListener('mousemove', () => {
+    ipcRenderer.send('mousemove');
+  });
+  window.addEventListener('mouseout', (e) => {
+    const winSize = remote.getCurrentWindow().getSize();
+    if (e.clientY <= 0 || e.clientX <= 0 || e.clientX >= winSize[1]) {
+      ipcRenderer.send('mouseout', 'out');
+    }
+  });
   if (close) {
     close.addEventListener('mouseup', () => ipcRenderer.send('mouseup', 'close'));
   }
