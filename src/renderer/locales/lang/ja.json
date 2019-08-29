@@ -121,7 +121,7 @@
       "decreasePlaybackSpeed": "再生速度の低下",
       "forwardL": "進む +60s",
       "forwardS": "進む +5s",
-      "fullScreen": "ズーム\/フルスクリーンを解除",
+      "fullScreen": "ズーム/フルスクリーンを解除",
       "increasePlaybackSpeed": "再生速度の増加",
       "name": "プレイ",
       "pause": "停止",
@@ -364,6 +364,8 @@
   },
   "translateModal": {
     "selectLanguageLabel": "音声の言語",
+    "audioLanguageLoading": "",
+    "audioLanguageLoadFail": "",
     "select": {
       "title": "ビデオソースの言語を選択",
       "content": "翻訳結果を生成するには、ビデオで聞く言語を選択して[生成] ボタンをクリックしてください。"
