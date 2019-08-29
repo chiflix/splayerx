@@ -63,6 +63,9 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
   }
+  window.addEventListener('keydown', (e) => {
+    ipcRenderer.send('key-events', e.keyCode);
+  });
   if (close) {
     close.addEventListener('mouseup', () => ipcRenderer.send('mouseup', 'close'));
   }

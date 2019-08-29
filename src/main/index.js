@@ -315,7 +315,7 @@ function createBrowsingWindow(args) {
       experimentalFeatures: true,
       webviewTag: true,
     },
-    backgroundColor: '#6a6a6a',
+    backgroundColor: '#000000',
     acceptFirstMouse: false,
     show: false,
   };
@@ -506,7 +506,11 @@ function registerMainWindowEvent(mainWindow) {
   });
   ipcMain.on('change-channel', (evt, args) => {
     if (!browserViewManager) browserViewManager = new BrowserViewManager();
-    const channel = urlParse(args.url).hostname.includes('bilibili') ? 'www.bilibili.com' : urlParse(args.url).hostname;
+    const hostname = urlParse(args.url).hostname;
+    let channel = hostname.slice(hostname.indexOf('.') + 1, hostname.length);
+    if (args.url.includes('youtube')) {
+      channel = 'youtube.com';
+    }
     const newChannel = browserViewManager.changeChanel(channel, args.url);
     const view = newChannel.view ? newChannel.view : newChannel.page.view;
     const url = newChannel.view ? args.url : newChannel.page.url;
@@ -529,7 +533,11 @@ function registerMainWindowEvent(mainWindow) {
   });
   ipcMain.on('create-browser-view', (evt, args) => {
     if (!browserViewManager) browserViewManager = new BrowserViewManager();
-    const channel = urlParse(args.url).hostname.includes('bilibili') ? 'www.bilibili.com' : urlParse(args.url).hostname;
+    const hostname = urlParse(args.url).hostname;
+    let channel = hostname.slice(hostname.indexOf('.') + 1, hostname.length);
+    if (args.url.includes('youtube')) {
+      channel = 'youtube.com';
+    }
     const currentMainBrowserView = browserViewManager
       .create(channel, args.url);
     const mainBrowser = mainWindow.getBrowserView();
@@ -559,6 +567,9 @@ function registerMainWindowEvent(mainWindow) {
   });
   ipcMain.on('danmu', () => {
     mainWindow.send('handle-danmu-display');
+  });
+  ipcMain.on('handle-danmu-display', (evt, code) => {
+    browsingWindow.getBrowserViews()[0].webContents.executeJavaScript(code);
   });
   ipcMain.on('mousemove', () => {
     if (browsingWindow && browsingWindow.isFocused()) {
@@ -661,7 +672,12 @@ function registerMainWindowEvent(mainWindow) {
     browViews.forEach((view) => {
       browsingWindow.removeBrowserView(view);
     });
-    const browsers = browserViewManager.changePip(urlParse(mainView.webContents.getURL()).hostname);
+    const hostname = urlParse(mainView.webContents.getURL()).hostname;
+    let channel = hostname.slice(hostname.indexOf('.') + 1, hostname.length);
+    if (mainView.webContents.getURL().includes('youtube')) {
+      channel = 'youtube.com';
+    }
+    const browsers = browserViewManager.changePip(channel);
     const pipBrowser = browsers.pipBrowser;
     const mainBrowser = browsers.mainBrowser;
     mainWindow.addBrowserView(mainBrowser.page.view);
@@ -781,6 +797,9 @@ function registerMainWindowEvent(mainWindow) {
   });
   ipcMain.on('update-route-name', (e, route) => {
     routeName = route;
+  });
+  ipcMain.on('key-events', (e, keyCode) => {
+    browsingWindow.getBrowserViews()[0].webContents.executeJavaScript(`var event = new KeyboardEvent("keydown", { keyCode: ${keyCode} });window.dispatchEvent(event)`);
   });
   ipcMain.on('drop-subtitle', (event, args) => {
     if (!mainWindow || mainWindow.webContents.isDestroyed()) return;

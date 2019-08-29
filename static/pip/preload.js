@@ -106,6 +106,9 @@ document.addEventListener('DOMContentLoaded', () => {
     sendToHost('dragleave', { dragover: false });
   });
   window.addEventListener('keydown', (evt) => {
+    if (pipBtns) {
+      sendToHost('key-events', evt.keyCode);
+    }
     if (document.webkitIsFullScreen && evt.keyCode === 27) {
       document.webkitCancelFullScreen();
     } else if (evt.keyCode === 80) {
