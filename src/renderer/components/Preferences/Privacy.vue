@@ -108,7 +108,8 @@ export default {
     width: 366px;
     height: fit-content;
     margin-top: 15px;
-    background-color: rgba(0,0,0,0.05);
+    background-color: rgba(0,0,0,0.07);
+    border-radius: 5px;
   }
   &_radio {
     margin-left: 29px;
@@ -119,9 +120,9 @@ export default {
     }
     &_description {
       width: 282px;
-      font-family: $font-medium;
+      font-family: $font-normal;
       font-size: 11px;
-      color: rgba(255,255,255,0.50);
+      color: rgba(255,255,255,0.25);
       letter-spacing: 0;
       line-height: 16px;
       margin-top: 6px;

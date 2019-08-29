@@ -496,7 +496,7 @@ $themeColor-Light: white;
 }
 .side-bar {
   position: absolute;
-  background-color: #39383F;
+  background-color: #3B3B41;
   z-index: 0;
   left: 0;
   height: 100%;
@@ -523,7 +523,7 @@ $themeColor-Light: white;
   transition-property: width;
   transition-duration: 100ms;
   transition-timing-function: ease-out;
-  background-color: #444349;
+  background-color: #434349;
   position: absolute;
   right: 0;
   height: 100%;

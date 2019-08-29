@@ -85,7 +85,7 @@ export default {
 // global scss
 // @import "@/css/style.scss";
 .landing-view {
-  background-color: #444349;
+  background-color: #434349;
 }
 
 .fade {
