@@ -80,6 +80,6 @@ export default class ThumbnailQueue extends BaseMediaTaskQueue {
       width,
       rowCount, columnCount,
     );
-    return task ? super.addTask<string>(task) : undefined;
+    return task ? super.addTask<ThumbnailReplyType>(task) : undefined;
   }
 }
