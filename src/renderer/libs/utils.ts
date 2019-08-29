@@ -437,3 +437,13 @@ export function checkForUpdate(
 export function skipCheckForUpdate(version: string) {
   localStorage.setItem('skip-check-for-update', version);
 }
+
+/**
+ * @description get main version
+ * @author tanghaixiang
+ * @returns string
+ */
+export function getMainVersion(): string {
+  const vs = getNumbersFromVersion(version);
+  return `${vs[0]}.${vs[1]}.${vs[2]}`;
+}

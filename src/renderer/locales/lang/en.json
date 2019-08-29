@@ -365,6 +365,8 @@
   },
   "translateModal": {
     "selectLanguageLabel": "Audio Language",
+    "audioLanguageLoading": "Fetching language list ...",
+    "audioLanguageLoadFail": "Connection failed, please try later",
     "select": {
       "title": "Select Audio Language",
       "content": "To generate a translation result, please select the language you hear in the video and click the generate button. The process might take some time."

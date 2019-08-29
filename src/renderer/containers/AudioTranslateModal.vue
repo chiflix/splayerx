@@ -153,6 +153,7 @@
   </div>
 </template>
 <script lang="ts">
+import * as configcat from 'configcat-js';
 import Vue from 'vue';
 import { mapActions, mapGetters } from 'vuex';
 import {
@@ -165,6 +166,8 @@ import Select from '@/components/PlayingView/Select.vue';
 import Icon from '@/components/BaseIconContainer.vue';
 import Progress from '@/components/PlayingView/Progress.vue';
 import { AudioTranslateStatus, AudioTranslateFailType } from '../store/modules/AudioTranslate';
+import { log } from '@/libs/Log';
+import { getMainVersion } from '@/libs/utils';
 
 export default Vue.extend({
   name: 'AudioTranslateModal',
@@ -177,32 +180,17 @@ export default Vue.extend({
   },
   data() {
     const label = this.$t('translateModal.selectLanguageLabel');
+    const placeholder = this.$t('translateModal.audioLanguageLoading');
     return {
       audioLanguage: { label, value: '' },
-      lanugages: [
-        {
-          value: 'en',
-          label: 'English',
-        },
-        {
-          value: 'zh',
-          label: '普通话（国语）',
-        },
-        {
-          value: 'yue-Hant-HK',
-          label: '廣東話（粤语）',
-        },
-        {
-          value: 'ja-JP',
-          label: '日本語',
-        },
-        {
-          value: 'ko-KR',
-          label: '한국어',
-        },
-      ],
+      lanugages: [{
+        value: '',
+        label: placeholder,
+      }],
       isConfirmCancelTranlate: false,
       didGrab: false, // 是否提取音频，区分听写和机翻
+      configCatClient: null, // config cat 配置 对象
+      loadConfigCatCompleted: false,
     };
   },
   computed: {
@@ -292,6 +280,25 @@ export default Vue.extend({
         this.didGrab = false;
       }
     },
+    isTranslateModalVisiable(visiable: boolean) {
+      if (visiable && !this.loadConfigCatCompleted && this.configCatClient) {
+        this.configCatClient.forceRefresh(() => {
+          this.refreshConfig();
+        });
+      } else if (visiable && !this.loadConfigCatCompleted && !this.configCatClient) {
+        this.configCatClient = configcat.createClientWithLazyLoad('WizXCIVndyJUn4cCRD3qvQ/8uwWLI_KhUmuOrOaDDsaxQ', {
+          cacheTimeToLiveSeconds: 600,
+        });
+        this.refreshConfig();
+      }
+    },
+  },
+  mounted() {
+    // config cat setting
+    this.configCatClient = configcat.createClientWithLazyLoad('WizXCIVndyJUn4cCRD3qvQ/8uwWLI_KhUmuOrOaDDsaxQ', {
+      cacheTimeToLiveSeconds: 600,
+    });
+    this.refreshConfig();
   },
   methods: {
     ...mapActions({
@@ -301,6 +308,29 @@ export default Vue.extend({
       updateWheel: inputActions.WHEEL_UPDATE,
       audioTranslateStoreInit: atActions.AUDIO_TRANSLATE_INIT,
     }),
+    refreshConfig() {
+      const version = getMainVersion();
+      if (!this.configCatClient) return;
+      this.configCatClient.getValue('audioLanguage', '{"list": []}', (value: string) => {
+        try {
+          this.lanugages = JSON.parse(value).list;
+        } catch (error) {
+          log.error('configCat', error);
+          const failLabel = this.$t('translateModal.audioLanguageLoadFail');
+          this.lanugages = [{
+            value: '',
+            label: failLabel,
+          }];
+        }
+        this.loadConfigCatCompleted = true;
+      },
+      {
+        identifier: Vue.axios.defaults.headers.common['X-Application-Token'],
+        custom: {
+          version,
+        },
+      });
+    },
     translate() {
       const { audioLanguage } = this;
       if (audioLanguage && audioLanguage.value) {
