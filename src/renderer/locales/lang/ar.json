@@ -364,6 +364,8 @@
   },
   "translateModal": {
     "selectLanguageLabel": "لغة الصوت",
+    "audioLanguageLoading": "",
+    "audioLanguageLoadFail": "",
     "select": {
       "title": "اختر لغة الصوت",
       "content": "لإنشاء نتيجة ترجمة ، يرجى تحديد اللغة التي تسمعها في الفيديو والنقر على زر إنشاء. قد تستغرق العملية بعض الوقت."
