@@ -58,7 +58,7 @@
     </transition>
     <transition name="bubble">
       <TranslateBubble
-        v-if="isTranslateBubbleVisiable"
+        v-if="isTranslateBubbleVisible"
         :message="translateBubbleMessage"
         :type="translateBubbleType"
         @disCardTranslate="discardTranslate"
@@ -137,7 +137,7 @@ export default {
   computed: {
     ...mapGetters([
       'nextVideo', 'nextVideoPreviewTime', 'duration', 'singleCycle', 'privacyAgreement', 'nsfwProcessDone',
-      'translateBubbleMessage', 'translateBubbleType', 'isTranslateBubbleVisiable', 'failBubbleId', 'preferenceData',
+      'translateBubbleMessage', 'translateBubbleType', 'isTranslateBubbleVisible', 'failBubbleId', 'preferenceData',
     ]),
     messages() {
       const messages = this.$store.getters.messageInfo;
