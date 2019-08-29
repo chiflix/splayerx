@@ -59,7 +59,7 @@
       "title": "Archivo no encontrado"
     },
     "fileNonExistInPlaylist": {
-      "content": "Los archivos se han eliminados de la lista.",
+      "content": "El archivo ha sido eliminado o renombrado.",
       "title": "Algunos archivos no fueron encontrados"
     },
     "loadFailed": {
@@ -292,6 +292,9 @@
       "partTwo": ".",
       "underlinedContent": "Prohibir"
     }
+  },
+  "alertBubble": {
+    "button": "OK"
   },
   "protectBubble": {
     "agree": "OK",

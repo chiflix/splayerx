@@ -55,7 +55,7 @@
       "title": "未找到文件"
     },
     "playlistNonExist": {
-      "content": "该条记录已被移除。",
+      "content": "文件被移動、刪除或重命名。",
       "title": "文件未找到"
     },
     "fileNonExistInPlaylist": {
@@ -292,6 +292,9 @@
       "partTwo": "匿名信息會導致智能翻譯無法使用。",
       "underlinedContent": "禁用"
     }
+  },
+  "alertBubble": {
+    "button": "確定"
   },
   "protectBubble": {
     "agree": "好的",

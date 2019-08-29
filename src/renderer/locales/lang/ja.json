@@ -55,7 +55,7 @@
       "title": "ファイルが見つかりませんでした。"
     },
     "playlistNonExist": {
-      "content": "このアイテムは削除されました。",
+      "content": "ファイルは削除または名前変更されました。",
       "title": "ファイルが見つかりませんでした"
     },
     "fileNonExistInPlaylist": {
@@ -292,6 +292,9 @@
       "partTwo": "プライバシーを解除するとSmart Translationの使用ができなくなる。",
       "underlinedContent": "禁止"
     }
+  },
+  "alertBubble": {
+    "button": "はい"
   },
   "protectBubble": {
     "agree": "確定",

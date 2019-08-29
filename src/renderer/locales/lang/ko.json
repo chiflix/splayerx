@@ -59,7 +59,7 @@
       "title": "파일을 찾을 수 없음"
     },
     "fileNonExistInPlaylist": {
-      "content": "파일이 목록에서 제거됩니다.",
+      "content": "파일이 제거되었거나 이름이 변경되었습니다.",
       "title": "일부 파일을 찾을 수 없습니다"
     },
     "loadFailed": {
@@ -292,6 +292,9 @@
       "partTwo": ".",
       "underlinedContent": "동의하지 않는다"
     }
+  },
+  "alertBubble": {
+    "button": "승인"
   },
   "protectBubble": {
     "agree": "승인",
