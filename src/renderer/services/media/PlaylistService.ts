@@ -83,7 +83,7 @@ export default class PlaylistService extends EventEmitter implements IPlaylistRe
       this.record = record;
       if (record.lastPlayedTime) {
         this.lastPlayedTime = record.lastPlayedTime;
-        this.imageSrc = record.smallShortCut;
+        if (this.lastPlayedTime > 2) this.imageSrc = record.smallShortCut;
       }
       return;
     }
@@ -97,7 +97,7 @@ export default class PlaylistService extends EventEmitter implements IPlaylistRe
       this.record = record;
       if (record.lastPlayedTime) {
         this.lastPlayedTime = record.lastPlayedTime;
-        this.imageSrc = record.smallShortCut;
+        if (this.lastPlayedTime > 5) this.imageSrc = record.smallShortCut;
       }
     }
   }
