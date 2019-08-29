@@ -254,29 +254,7 @@ export default {
       });
       this.changeWindowRotate(this.winAngle);
 
-      let maxVideoSize;
-      let videoSize;
-      if (this.videoExisted && (this.winAngle === 0 || this.winAngle === 180)) {
-        maxVideoSize = this.winSize;
-        videoSize = [this.videoWidth, this.videoHeight];
-      } else if (this.videoExisted) {
-        maxVideoSize = this.winSize;
-        videoSize = [this.videoHeight, this.videoWidth];
-      } else {
-        videoSize = [this.videoWidth, this.videoHeight];
-        const availWidth = window.screen.availWidth;
-        const availHeight = window.screen.availHeight;
-        if (this.ratio > 1 && videoSize[0] > availWidth * 0.7) {
-          videoSize[0] = availWidth * 0.7;
-          videoSize[1] = videoSize[0] / this.ratio;
-        } else if (this.ratio <= 1 && videoSize[1] > availHeight * 0.7) {
-          videoSize[1] = availHeight * 0.7;
-          videoSize[0] = videoSize[1] * this.ratio;
-        }
-        this.videoExisted = true;
-      }
-      const oldRect = this.winPos.concat(this.winSize);
-      windowRectService.calculateWindowRect(videoSize, true, oldRect, maxVideoSize);
+      this.windowRectControl();
 
       const mediaInfo = this.videoId
         ? await playInfoStorageService.getMediaItem(this.videoId)
@@ -292,6 +270,37 @@ export default {
     onAudioTrack(event: TrackEvent) {
       const { type, track } = event;
       this[`${type}AudioTrack`](track);
+    },
+    windowRectControl() {
+      let videoSize;
+      const [winWidth, winHeight] = this.winSize;
+      const oldRatio = winWidth / winHeight;
+      const isLandscape = (ratio: number) => ratio > 1;
+      if (
+        this.videoExisted
+        && (isLandscape(this.ratio) === isLandscape(oldRatio)) // 同为landscpae或portrait
+      ) {
+        if (this.ratio > 1) {
+          videoSize = [winHeight * this.ratio, winHeight];
+        } else {
+          videoSize = [winWidth, winWidth / this.ratio];
+        }
+      } else {
+        videoSize = [this.videoWidth, this.videoHeight];
+        const availWidth = window.screen.availWidth;
+        const availHeight = window.screen.availHeight;
+        if (this.ratio > 1 && videoSize[0] > availWidth * 0.7) {
+          videoSize[0] = availWidth * 0.7;
+          videoSize[1] = videoSize[0] / this.ratio;
+        } else if (this.ratio <= 1 && videoSize[1] > availHeight * 0.7) {
+          videoSize[1] = availHeight * 0.7;
+          videoSize[0] = videoSize[1] * this.ratio;
+        }
+        this.videoExisted = true;
+      }
+      if (this.winAngle !== 0 && this.winAngle !== 180) videoSize.reverse();
+      const oldRect = this.winPos.concat(this.winSize);
+      windowRectService.calculateWindowRect(videoSize, true, oldRect);
     },
     changeWindowRotate(val: number) {
       requestAnimationFrame(() => {
@@ -428,7 +437,7 @@ export default {
             name: 'landing-view',
           });
           setTimeout(() => {
-            windowRectService.uploadWindowBy(false, 'landing-view', undefined, undefined, this.winSize, this.winPos);
+            windowRectService.uploadWindowBy(false, 'landing-view', undefined, undefined, this.winSize, this.winPos, this.isFullScreen);
           }, 200);
         });
     },
