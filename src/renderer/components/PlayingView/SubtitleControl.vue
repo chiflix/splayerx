@@ -162,6 +162,7 @@ export default {
     ...mapGetters(['winWidth', 'originSrc', 'primarySubtitleId', 'secondarySubtitleId', 'list', 'privacyAgreement',
       'calculatedNoSub', 'winHeight', 'isFirstSubtitle', 'enabledSecondarySub', 'isRefreshing', 'winRatio', 'translateProgress', 'selectedTargetLanugage']),
     ...mapState({
+      // @ts-ignore
       loadingTypes: ({ Subtitle }) => {
         const { loadingStates, types } = Subtitle;
         const loadingSubtitles = Object.keys(loadingStates)
