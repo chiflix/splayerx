@@ -363,6 +363,8 @@
     "title": ""
   },
   "translateModal": {
+    "videoLanguageLabel": "",
+    "subtitleLanguageLabel": "",
     "selectLanguageLabel": "오디오 언어",
     "audioLanguageLoading": "언어 목록을 가져 오는 중 ...",
     "audioLanguageLoadFail": "연결에 실패했습니다. 나중에 다시 시도하십시오",
