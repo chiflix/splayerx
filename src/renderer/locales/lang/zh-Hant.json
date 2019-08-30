@@ -363,14 +363,14 @@
     "title": ""
   },
   "translateModal": {
-    "videoLanguageLabel": "",
-    "subtitleLanguageLabel": "",
-    "selectLanguageLabel": "視頻源語言",
+    "videoLanguageLabel": "視頻語言",
+    "subtitleLanguageLabel": "翻譯爲",
+    "selectLanguageLabel": "選擇",
     "audioLanguageLoading": "獲取語言列表中 ...",
     "audioLanguageLoadFail": "連接錯誤，請稍後重試",
     "select": {
-      "title": "選擇視頻源語言",
-      "content": "如要生成智能翻譯，請選擇您在視頻中所聽到的語言並點擊生成，該過程將持續一段時間。"
+      "title": "AI 智能翻譯",
+      "content": "選擇您在視頻中所聽到的語言並點擊生成。"
     },
     "translate": {
       "title": "大約剩餘 {time}",
