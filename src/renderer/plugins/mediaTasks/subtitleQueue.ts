@@ -27,7 +27,7 @@ class SubtitleMetadataTask implements IMediaTask<string> {
     return new SubtitleMetadataTask(videoPath, streamIndex, subtitlePath);
   }
 
-  public getId() { return `${[this.videoPath, this.streamIndex].join('-')}`; }
+  public getId() { return `${['metadata', this.videoPath, this.streamIndex].join('-')}`; }
 
   public execute(): Promise<string> {
     return new Promise((resolve, reject) => {
@@ -52,7 +52,7 @@ class SubtitleCacheTask implements IMediaTask<string | undefined> {
   }
 
   public getId() {
-    return `${[this.videoPath, this.streamIndex].join('-')}`;
+    return `${['cache', this.videoPath, this.streamIndex].join('-')}`;
   }
 
   public execute(): Promise<string | undefined> {
@@ -83,6 +83,7 @@ class SubtitleFragmentTask implements IMediaTask<string> {
 
   public getId() {
     return `${[
+      'fragment',
       this.videoPath,
       this.streamIndex,
     ].join('-')}`;
@@ -94,6 +95,31 @@ class SubtitleFragmentTask implements IMediaTask<string> {
       ipcRenderer.once('subtitle-stream-reply', (event, error, data) => {
         if (error) reject(error);
         else resolve(data);
+      });
+    });
+  }
+}
+
+class SubtitleDestroyTask implements IMediaTask<void> {
+  private readonly videoPath: string;
+
+  private readonly streamIndex: number;
+
+  public constructor(videoPath: string, streamIndex: number) {
+    this.videoPath = videoPath;
+    this.streamIndex = streamIndex;
+  }
+
+  public getId() {
+    return `${['finished', this.videoPath, this.streamIndex].join('-')}`;
+  }
+
+  public execute(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      ipcRenderer.send('subtitle-destroy-request', this.videoPath, this.streamIndex);
+      ipcRenderer.once('subtitle-destroy-reply', (event, error) => {
+        if (error) reject(error);
+        else resolve();
       });
     });
   }
@@ -114,5 +140,13 @@ export default class SubtitleQueue extends BaseMediaTaskQueue {
       new SubtitleFragmentTask(videoPath, streamIndex, videoTime),
       { piority: 2 },
     );
+  }
+
+  public stopSubtitleExtraction(videoPath: string, streamIndex: number) {
+    const task = new SubtitleDestroyTask(videoPath, streamIndex);
+    this.pendingTasks
+      .filter(({ id }) => new RegExp(`${videoPath}-${streamIndex}`).test(id))
+      .forEach(({ id }) => this.cancelTask(id));
+    return super.addTask(task, { piority: 4 });
   }
 }

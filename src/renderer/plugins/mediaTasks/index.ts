@@ -76,6 +76,13 @@ export async function getSubtitleFragment(
     return '';
   }
 }
+export async function finishSubtitleExtraction(videoPath: string, streamIndex: number) {
+  try {
+    subtitleQueue.stopSubtitleExtraction(videoPath, streamIndex);
+  } catch (error) {
+    log.error('[MediaTask|SubtitleFragment]', error);
+  }
+}
 
 /**
  * 获取进度条缩略图路径
