@@ -1,8 +1,10 @@
 // @ts-ignore
 import { parse, toMS } from 'subtitle';
-import { Format, Cue } from '@/interfaces/ISubtitle';
-import { BaseParser } from './base';
-import { tagsGetter } from '../utils';
+import {
+  Format, Cue, IParser, IVideoSegments,
+} from '@/interfaces/ISubtitle';
+import { tagsGetter, getDialogues } from '../utils';
+import { LocalTextLoader } from '../utils/loaders';
 
 type ParsedSubtitle = {
   start: string;
@@ -10,17 +12,21 @@ type ParsedSubtitle = {
   text: string;
 }[];
 
-export class SrtParser extends BaseParser {
-  public payload = '';
+export class SrtParser implements IParser {
+  public get format() { return Format.SubRip; }
 
-  public format = Format.SubRip;
+  public readonly loader: LocalTextLoader;
 
-  public constructor(srtPayload: string) {
-    super();
-    this.payload = srtPayload;
+  public readonly videoSegments: IVideoSegments;
+
+  public constructor(textLoader: LocalTextLoader, videoSegments: IVideoSegments) {
+    this.loader = textLoader;
+    this.videoSegments = videoSegments;
   }
 
-  public dialogues: Cue[];
+  public async getMetadata() { return { PlayResX: '', PlayResY: '' }; }
+
+  private dialogues: Cue[];
 
   private baseTags = { alignment: 2, pos: undefined };
 
@@ -37,9 +43,14 @@ export class SrtParser extends BaseParser {
       });
     });
     this.dialogues = finalDialogues;
+    this.dialogues.forEach(({ start, end }) => this.videoSegments.insert(start, end));
   }
 
-  public async parse() {
-    this.normalizer(parse(this.payload));
+  public async getDialogues(time?: number) {
+    if (!this.loader.fullyRead) {
+      const payload = await this.loader.getPayload() as string;
+      if (this.loader.fullyRead) this.normalizer(parse(payload));
+    }
+    return getDialogues(this.dialogues, time);
   }
 }

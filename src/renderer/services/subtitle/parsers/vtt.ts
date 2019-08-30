@@ -1,7 +1,10 @@
 // @ts-ignore
 import { parse, toMS } from 'subtitle';
-import { Format, Cue } from '@/interfaces/ISubtitle';
-import { BaseParser } from './base';
+import {
+  Format, Cue, IParser, IVideoSegments,
+} from '@/interfaces/ISubtitle';
+import { tagsGetter, getDialogues } from '../utils';
+import { LocalTextLoader } from '../utils/loaders';
 
 type ParsedSubtitle = {
   start: number;
@@ -10,26 +13,23 @@ type ParsedSubtitle = {
   settings: string;
 }[];
 
-export class VttParser extends BaseParser {
-  public readonly payload: string = '';
+export class VttParser implements IParser {
+  public get format() { return Format.SubRip; }
 
-  public format = Format.WebVTT;
+  public readonly loader: LocalTextLoader;
 
-  public constructor(vttString: string) {
-    super();
-    this.payload = vttString;
+  public readonly videoSegments: IVideoSegments;
+
+  public constructor(textLoader: LocalTextLoader, videoSegments: IVideoSegments) {
+    this.loader = textLoader;
+    this.videoSegments = videoSegments;
   }
 
-  public dialogues: Cue[];
+  public async getMetadata() { return { PlayResX: '', PlayResY: '' }; }
 
-  private baseTags = {
-    // https://developer.mozilla.org/en-US/docs/Web/API/WebVTT_API#Cue_settings
-    vertical: '',
-    line: '',
-    position: '',
-    // size: '',
-    // align: '',
-  };
+  private dialogues: Cue[];
+
+  private baseTags = { alignment: 2, pos: undefined };
 
   private normalizer(parsedSubtitle: ParsedSubtitle) {
     if (!parsedSubtitle.length) throw new Error('Unsupported Subtitle');
@@ -38,26 +38,20 @@ export class VttParser extends BaseParser {
       finalDialogues.push({
         start: toMS(subtitle.start) / 1000,
         end: toMS(subtitle.end) / 1000,
+        tags: tagsGetter(subtitle.text, this.baseTags),
         text: subtitle.text.replace(/\{[^{}]*\}/g, '').replace(/[\\/][Nn]|\r?\n|\r/g, '\n'),
-        tags: !subtitle.settings ? this.baseTags : {
-          ...this.baseTags,
-          ...subtitle.settings
-            .split(' ')
-            .reduce(
-              (accu: {}, curr: string) => ({
-                ...accu,
-                [curr.split(':')[0]]: curr.split(':')[1],
-              }),
-              {},
-            ),
-        },
         format: this.format,
       });
     });
     this.dialogues = finalDialogues;
+    this.dialogues.forEach(({ start, end }) => this.videoSegments.insert(start, end));
   }
 
-  public async parse() {
-    this.normalizer(parse(this.payload));
+  public async getDialogues(time?: number) {
+    if (!this.loader.fullyRead) {
+      const payload = await this.loader.getPayload() as string;
+      if (this.loader.fullyRead) this.normalizer(parse(payload));
+    }
+    return getDialogues(this.dialogues, time);
   }
 }
