@@ -60,7 +60,7 @@
       "title": "File(s) Not Found"
     },
     "fileNonExistInPlaylist": {
-      "content": "Files has been removed from the list.",
+      "content": "File(s) has been removed from the list.",
       "title": "File(s) Not Found"
     },
     "loadFailed": {
@@ -348,7 +348,7 @@
     "title": "Upload Failed"
   },
   "uploadingSuccess": {
-    "content": "Subtitle has been uploaded.",
+    "content": "Subtitle has been uploaded",
     "title": "Upload Successfully"
   },
   "snapshotSuccess": {
@@ -364,12 +364,14 @@
     "title": ""
   },
   "translateModal": {
-    "selectLanguageLabel": "Audio Language",
+    "videoLanguageLabel": "Audio Language",
+    "subtitleLanguageLabel": "Translate To",
+    "selectLanguageLabel": "Select",
     "audioLanguageLoading": "Fetching language list ...",
     "audioLanguageLoadFail": "Connection failed, please try later",
     "select": {
-      "title": "Select Audio Language",
-      "content": "To generate a translation result, please select the language you hear in the video and click the generate button. The process might take some time."
+      "title": "AI Translation",
+      "content": "Select the language you hear in the video and click the generate button."
     },
     "translate": {
       "title": "About {time} Left",

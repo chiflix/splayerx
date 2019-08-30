@@ -428,6 +428,7 @@ new Vue({
       }
 
       Vue.axios.defaults.headers.common['X-Application-Token'] = userUUID;
+      Vue.axios.defaults.headers.common['X-Application-Display-Language'] = this.displayLanguage;
 
       // set userUUID to google analytics uid
       this.$ga && this.$ga.set('userId', userUUID);

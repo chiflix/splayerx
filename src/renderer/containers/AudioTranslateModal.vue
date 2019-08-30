@@ -11,6 +11,16 @@
     >
       <div
         v-if="!isProgress && !isConfirmCancelTranlate"
+        @click="hideTranslateModal"
+        class="close-box"
+      >
+        <Icon
+          class="icon"
+          type="closeSquare"
+        />
+      </div>
+      <div
+        v-if="!isProgress && !isConfirmCancelTranlate"
         class="select-title"
       >
         <h1>
@@ -56,11 +66,23 @@
         v-if="!isProgress && !isConfirmCancelTranlate"
         class="select"
       >
-        <Select
-          :static-label="translateLanguageLabel"
-          :selected.sync="audioLanguage"
-          :list="lanugages"
-        />
+        <div class="left">
+          <label for="">{{ $t("translateModal.videoLanguageLabel") }}</label>
+          <Select
+            :static-label="''"
+            :selected.sync="audioLanguage"
+            :list="lanugages"
+          />
+        </div>
+        <div class="middle">
+          →
+        </div>
+        <div class="right">
+          <label for="">{{ $t("translateModal.subtitleLanguageLabel") }}</label>
+          <div class="target">
+            {{ translateLanguageLabel }}
+          </div>
+        </div>
       </div>
       <div
         v-else-if="isProgress && !isConfirmCancelTranlate"
@@ -103,20 +125,10 @@
       </div>
       <div
         v-if="!isProgress && !isConfirmCancelTranlate"
-        class="button-wraper"
+        @click="translate"
+        :class="`${audioLanguage.value ? '' : 'disabled'} button`"
       >
-        <div
-          @click="hideTranslateModal"
-          class="button"
-        >
-          {{ $t('translateModal.cancel') }}
-        </div>
-        <div
-          @click="translate"
-          :class="`${audioLanguage.value ? '' : 'disabled'} button`"
-        >
-          {{ $t('translateModal.generate') }}
-        </div>
+        {{ $t('translateModal.generate') }}
       </div>
       <div
         v-else-if="isConfirmCancelTranlate"
@@ -160,12 +172,13 @@ import {
   AudioTranslate as atActions,
 } from '@/store/actionTypes';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
-import { codeToLanguageName } from '@/libs/language';
+import { codeToLanguageName, normalizeCode } from '@/libs/language';
 import Select from '@/components/PlayingView/Select.vue';
 import Icon from '@/components/BaseIconContainer.vue';
 import Progress from '@/components/PlayingView/Progress.vue';
 import { AudioTranslateStatus, AudioTranslateFailType } from '../store/modules/AudioTranslate';
 import { getJsonConfig, forceRefresh } from '@/helpers/featureSwitch';
+import { log } from '../libs/Log';
 
 export default Vue.extend({
   name: 'AudioTranslateModal',
@@ -192,7 +205,7 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters([
-      'currentAudioTrackId', 'mediaHash',
+      'currentAudioTrackId', 'mediaHash', 'audioTrackList', 'currentAudioTrackId',
       'isTranslateModalVisible', 'translateProgress', 'isTranslating', 'selectedTargetLanugage',
       'translateEstimateTime', 'translateStatus', 'lastAudioLanguage', 'failType',
     ]),
@@ -295,11 +308,35 @@ export default Vue.extend({
       updateWheel: inputActions.WHEEL_UPDATE,
       audioTranslateStoreInit: atActions.AUDIO_TRANSLATE_INIT,
     }),
+    getAudioLanguage() {
+      const { lanugages } = this;
+      let audioLanguage = '';
+      try {
+        const track = this.audioTrackList
+          .find((track: { id: string }) => track.id === String(this.currentAudioTrackId));
+        log.debug('translate', track);
+        if (track && normalizeCode(track.language) === 'zh-CN') {
+          audioLanguage = 'zh';
+        } else if (track && normalizeCode(track.language) === 'en') {
+          audioLanguage = 'en';
+        } else if (track && normalizeCode(track.language) === 'ja') {
+          audioLanguage = 'ja-JP';
+        }
+      } catch (ex) {
+        // empty
+      }
+      const language = lanugages
+        .find((l: { value: string, label: string }) => l.value === audioLanguage);
+      if (language && language.value) {
+        this.audioLanguage = language;
+      }
+    },
     async refreshConfig() {
       try {
         const supportedAudioLanguage = await getJsonConfig('audioLanguage', null);
         if (supportedAudioLanguage && supportedAudioLanguage['list']) {
           this.lanugages = supportedAudioLanguage['list'];
+          // this.getAudioLanguage();
         } else {
           throw new Error();
         }
@@ -356,8 +393,8 @@ export default Vue.extend({
 }
 .select-language-modal {
   position: fixed;
-  width: 280px;
-  padding: 22px;
+  width: 330px;
+  padding: 24px 30px;
   box-sizing: border-box;
   left: 50%;
   top: 50%;
@@ -375,6 +412,17 @@ export default Vue.extend({
   border-radius: 7px;
   box-shadow: 0 0 1px 0 rgba(0,0,0,0.10);
   zoom: 1;
+  .close-box {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    -webkit-app-region: no-drag;
+    .icon {
+      width: 11px;
+      height: 11px;
+      cursor: pointer;
+    }
+  }
   .select-title {
     display: flex;
     .beta-mark {
@@ -431,10 +479,44 @@ export default Vue.extend({
     }
   }
   .select {
-    cursor: pointer;
+    display: flex;
     width: 100%;
     margin-bottom: 10px;
     z-index: 100;
+    justify-content: space-between;
+    .left {
+      cursor: pointer;
+    }
+    .left, .right {
+      width: 120px;
+      label {
+        font-size: 11px;
+        color: rgba(255,255,255,0.70);
+        font-weight: 500;
+        letter-spacing: 0.2px;
+        line-height: 16px;
+        margin-bottom: 5px;
+        display: block;
+      }
+    }
+    .right {
+      .target {
+        background: rgba(0,0,0,0.04);
+        border: 1px solid rgba(255,255,255,0.30);
+        border-radius: 2px;
+        font-size: 11px;
+        color: rgba(255,255,255,0.80);
+        letter-spacing: 0;
+        text-align: center;
+        line-height: 27.5px;
+      }
+    }
+    .middle {
+      padding-top: 22px;
+      line-height: 28px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.5);
+    }
   }
   .progress-wraper {
     margin-bottom: 14px;
@@ -471,7 +553,7 @@ export default Vue.extend({
     display: flex;
     justify-content: space-between;
     .button {
-      width: 111px;
+      width: 126px;
     }
   }
   .button {
