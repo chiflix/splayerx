@@ -152,7 +152,7 @@ export class AssParser implements IParser {
         this.timeout = false;
         this.timer = setTimeout(() => { this.timeout = true; }, 10000);
         const payload = await this.loader.getPayload(time) as string;
-        const newLines = payload.replace(/\r?\n/, '\n').split(/\n/);
+        const newLines = payload.split(/\r?\n/);
         const deDuplicatedPayload = newLines.filter(line => !this.lastLines.includes(line)).join('\n');
         this.lastLines = newLines;
         const result = this.assStream.compile(deDuplicatedPayload);

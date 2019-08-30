@@ -200,7 +200,7 @@ export class EmbeddedTextStreamLoader extends EventEmitter implements ILoader {
       if (result) {
         if (this.initialRandom) {
           this.initialRandom = false;
-          this._payloadString = this._metadataString.concat(result);
+          this._payloadString += `${this._metadataString}\n${result}`;
         } else this._payloadString = result;
       }
     }

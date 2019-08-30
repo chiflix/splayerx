@@ -100,8 +100,10 @@ export default function registerMediaTasks() {
             if (error || !data) reply(event, 'subtitle-metadata-reply', new Error(error));
             else {
               subtitle.position = pos;
-              subtitle.payload = subtitle.metadata = data.toString('utf8');
-              subtitle.lastLines = subtitle.metadata.replace(/\r?\n/, '\n').split(/\n/);
+              subtitle.payload = subtitle.metadata = data.toString('utf8')
+                .replace(/\n(Dialogue|Comment)[\s\S]*/g, '')
+                .split(/\r?\n/)
+                .join('\n');
             }
             reply(event, 'subtitle-metadata-reply', undefined, subtitle.finished, subtitle.metadata);
           });
@@ -126,10 +128,10 @@ export default function registerMediaTasks() {
           (error, pos, data) => {
             if (pos) subtitle.position = pos;
             if (data) {
-              const newLines = data.toString('utf8').replace(/\r?\n/, '\n').split(/\n/);
+              const newLines = data.toString('utf8').split(/\r?\n/);
               const finalPayload = newLines.filter(line => !subtitle.lastLines.includes(line)).join('\n');
               subtitle.lastLines = newLines;
-              subtitle.payload += finalPayload;
+              subtitle.payload += `\n${finalPayload}`;
             }
             if (error === 'EOF') {
               subtitle.finished = true;
