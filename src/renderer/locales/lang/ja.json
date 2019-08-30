@@ -363,6 +363,8 @@
     "title": ""
   },
   "translateModal": {
+    "videoLanguageLabel": "",
+    "subtitleLanguageLabel": "",
     "selectLanguageLabel": "音声の言語",
     "audioLanguageLoading": "言語リストの取得 ...",
     "audioLanguageLoadFail": "接続に失敗しました。もう一度お試しください",
