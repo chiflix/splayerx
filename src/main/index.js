@@ -471,6 +471,10 @@ function registerMainWindowEvent(mainWindow) {
       mainWindow.send('update-pip-state', args);
     }
   });
+  ipcMain.on('remove-main-window', () => {
+    browserViewManager.pauseVideo(mainWindow.getBrowserView());
+    mainWindow.hide();
+  });
   ipcMain.on('remove-browser', () => {
     const mainView = mainWindow.getBrowserView();
     mainWindow.removeBrowserView(mainView);
@@ -584,10 +588,20 @@ function registerMainWindowEvent(mainWindow) {
       }, 3000);
     }
   });
-  ipcMain.on('mouseenter', () => {
+  ipcMain.on('pip-btn-mousemove', () => {
     if (pipTimer) {
       clearTimeout(pipTimer);
     }
+  });
+  ipcMain.on('pip-btn-mouseout', () => {
+    if (pipTimer) {
+      clearTimeout(pipTimer);
+    }
+    pipTimer = setTimeout(() => {
+      if (pipControlView && !pipControlView.isDestroyed()) {
+        pipControlView.webContents.executeJavaScript('document.querySelector(".pip-buttons").style.display = "none";');
+      }
+    }, 3000);
   });
   ipcMain.on('mouseout', () => {
     if (browsingWindow && browsingWindow.isFocused()) {
@@ -684,6 +698,10 @@ function registerMainWindowEvent(mainWindow) {
     browsingWindow.addBrowserView(pipBrowser);
     createPipControlView();
     createTitlebarView();
+    if (args.isGlobal) {
+      browserViewManager.pauseVideo(mainWindow.getBrowserView());
+      mainWindow.hide();
+    }
     pipBrowser.setBounds({
       x: 0, y: 0, width: browsingWindow.getSize()[0], height: browsingWindow.getSize()[1],
     });
@@ -770,6 +788,7 @@ function registerMainWindowEvent(mainWindow) {
   });
   ipcMain.on('exit-pip', () => {
     if (!browserViewManager) return;
+    mainWindow.show();
     const mainView = mainWindow.getBrowserView();
     mainWindow.removeBrowserView(mainView);
     const browViews = browsingWindow.getBrowserViews();

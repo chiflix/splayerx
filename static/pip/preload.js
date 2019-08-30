@@ -22,9 +22,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const pipBtns = document.querySelector('.pip-buttons');
   if (pipBtns) {
     pipBtns.style.display = 'flex';
-    pipBtns.addEventListener('mouseenter', () => {
+    pipBtns.addEventListener('mousemove', () => {
       if (pipTimer) clearTimeout(pipTimer);
-      sendToHost('mouseenter', 'mouseenter');
+      sendToHost('pip-btn-mousemove');
       pipBtns.style.display = 'flex';
     });
     pipTimer = setTimeout(() => {
@@ -42,7 +42,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
   window.addEventListener('mouseout', (evt) => {
-    if (!pipBtns && remote.getCurrentWindow()
+    if (pipBtns) {
+      sendToHost('pip-btn-mouseout');
+    } else if (remote.getCurrentWindow()
       && remote.getCurrentWindow().getBrowserViews().length > 1) {
       const winSize = remote.getCurrentWindow().getSize();
       if (evt.clientX <= 0 || evt.clientX >= winSize[0] || evt.clientY >= winSize[1]) {
@@ -58,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }, true);
   window.addEventListener('mouseup', (evt) => {
-    if (isDragging) evt.stopImmediatePropagation();
+    if (isDragging && !pipBtns) evt.stopImmediatePropagation();
     mousedown = false;
     mousedownPos = null;
     windowSize = null;

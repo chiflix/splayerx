@@ -212,6 +212,7 @@ export default {
   },
   mounted() {
     this.menuService = new MenuService();
+    this.menuService.updateMenuItemEnabled('file.open', false);
     this.$bus.$on('toggle-reload', this.handleUrlReload);
     this.$bus.$on('toggle-back', this.handleUrlBack);
     this.$bus.$on('toggle-forward', this.handleUrlForward);
@@ -290,6 +291,7 @@ export default {
       browsingPos: this.browsingPos,
       barrageOpen: this.barrageOpen,
     }).finally(() => {
+      this.menuService.updateMenuItemEnabled('file.open', true);
       window.removeEventListener('beforeunload', this.beforeUnloadHandler);
       window.removeEventListener('focus', this.focusHandler);
       if (this.backToLandingView) {
@@ -330,7 +332,6 @@ export default {
     },
     beforeUnloadHandler(e: BeforeUnloadEvent) {
       this.removeListener();
-      this.$electron.ipcRenderer.send('remove-browser');
       if (!this.asyncTasksDone) {
         e.returnValue = false;
         this.$store.dispatch('updateBrowsingSize', this.winSize);
@@ -341,7 +342,12 @@ export default {
           barrageOpen: this.barrageOpen,
         }).finally(() => {
           this.asyncTasksDone = true;
-          window.close();
+          if (!this.isPip) {
+            window.close();
+          } else {
+            this.isGlobal = true;
+            this.$electron.ipcRenderer.send('remove-main-window');
+          }
         });
       } else if (this.quit) {
         this.$electron.remote.app.quit();
@@ -596,6 +602,7 @@ export default {
     },
     exitPipOperation() {
       this.$electron.ipcRenderer.send('exit-pip');
+      this.asyncTasksDone = false;
       this.isGlobal = false;
       this.handleWindowChangeExitPip();
       if (this.pipType === 'youtube') {
@@ -610,6 +617,7 @@ export default {
     },
     handleEnterPip() {
       if (this.hasVideo) {
+        this.removeListener();
         this.hasVideo = false;
         this.adaptFinished = false;
         this.enterPipOperation();
