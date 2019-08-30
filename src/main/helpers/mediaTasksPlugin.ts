@@ -90,7 +90,6 @@ export default function registerMediaTasks() {
       splayerxProxy.generateThumbnails(
         videoPath, imagePath, interval,
         thumbnailWidth.toString(), cols.toString(), '0',
-        // @ts-ignore
         (err) => {
           if (err === '0' && existsSync(imagePath)) {
             reply(event, 'thumbnail-reply', null, imagePath);
