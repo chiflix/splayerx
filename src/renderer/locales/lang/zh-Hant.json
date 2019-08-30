@@ -364,8 +364,8 @@
   },
   "translateModal": {
     "selectLanguageLabel": "視頻源語言",
-    "audioLanguageLoading": "",
-    "audioLanguageLoadFail": "",
+    "audioLanguageLoading": "獲取語言列表中 ...",
+    "audioLanguageLoadFail": "連接錯誤，請稍後重試",
     "select": {
       "title": "選擇視頻源語言",
       "content": "如要生成智能翻譯，請選擇您在視頻中所聽到的語言並點擊生成，該過程將持續一段時間。"
