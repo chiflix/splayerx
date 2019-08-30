@@ -21,50 +21,65 @@ export interface IOrigin {
   type: Type;
   source: unknown;
 }
-export type Entity = {
-  source: IOrigin;
-  type: Type;
+export interface IEntity {
+  displaySource: IOrigin;
+  realSource: IOrigin;
+  hash: string;
   format: Format;
   language: LanguageCode;
-  payload: unknown;
-  hash: string;
-  metadata: IMetadata;
   delay: number;
 }
-export const defaultEntity: Entity = {
-  source: {
-    type: Type.Local,
-    source: '',
-  },
-  type: Type.Local,
-  format: Format.Unknown,
-  language: LanguageCode.Default,
-  payload: '',
-  hash: '',
-  metadata: {},
-  delay: 0,
-};
-export type SubtitleControlListItem = {
+export interface IEntityGenerator {
+  getDisplaySource(): Promise<IOrigin>;
+  getRealSource(): Promise<IOrigin>;
+  getHash(): Promise<string>
+  getFormat(): Promise<Format>
+  getLanguage(): Promise<LanguageCode>
+  getDelay(): Promise<number>
+  getVideoSegments?: () => Promise<IRawVideoSegment[]>
+  getAutoUploaded?: () => Promise<boolean>
+}
+export interface ISubtitleControlListItem {
   id: string;
   hash: string;
   type: Type;
   language: LanguageCode;
-  source: unknown;
+  source: IOrigin;
   name?: string;
-  delay: number;
-};
-
-export interface IEntityGenerator {
-  /** get real source to fetch subtitle from */
-  getSource(): Promise<IOrigin>
-  /** get fake source for display use */
-  getStoredSource?: () => Promise<IOrigin>
-  getDelay?: () => Promise<number>
-  getType(): Promise<Type>
-  getFormat(): Promise<Format>
-  getLanguage(): Promise<LanguageCode>
-  getPayload(): Promise<unknown>
-  getHash(): Promise<string>
+}
+export interface ILoader {
+  readonly source: IOrigin;
+  readonly canPreload: boolean;
+  readonly canCache: boolean;
+  readonly canUpload: boolean;
+  readonly fullyRead: boolean;
+  getPayload(time?: number): Promise<unknown>;
+  pause(): void | Promise<void>;
+  cache(): Promise<IOrigin>;
+  on(event: 'cache' | 'read' | 'upload', callback: (result: boolean) => void): void;
+  once(event: 'cache' | 'read' | 'upload', callback: (result: boolean) => void): void;
+}
+export interface IParser {
+  readonly format: Format;
+  readonly loader: ILoader;
+  readonly videoSegments: IVideoSegments;
+  getMetadata(): Promise<IMetadata>;
+  getDialogues(time?: number): Promise<Cue[]>;
+}
+export interface ITimeSegments {
+  insert(start: number, end: number): void;
+  check(time: number): boolean;
+}
+export interface IVideoSegments extends ITimeSegments {
+  updatePlayed(timeStamp: number, lastTimeStamp?: number): void;
+  playedTime: number;
+  export(): IRawVideoSegment[];
+  restore(videoSegments: IRawVideoSegment[]): void;
+}
+export interface IRawVideoSegment {
+  start: number;
+  end: number;
+  played: boolean;
 }
 
 export interface IMetadata {
@@ -98,30 +113,6 @@ export type Cue = {
   text: string,
   format: string,
   tags: ITags,
-}
-export interface IDialogue {
-  start: number;
-  end: number;
-  text?: string;
-  tags?: ITags;
-  fragments?: {
-    text: string;
-    tags: ITags;
-  }[];
-}
-export interface IVideoSegment {
-  start: number;
-  end: number;
-  played: boolean;
-}
-
-export interface IParser {
-  parse(): void;
-  readonly payload: unknown;
-  getMetadata(): Promise<IMetadata>;
-  getDialogues(time?: number): Promise<Cue[]>;
-  getVideoSegments(duration: number): Promise<IVideoSegment[]>;
-  updateVideoSegments(lastTime: number, currentTime: number): number;
 }
 
 export type Subtitle = {
