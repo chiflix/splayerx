@@ -428,11 +428,11 @@
     },
     "bubbleTranslateTimeOutFail": {
       "title": "接続タイムアウト",
-      "content": "サーバーへの接続に失敗しました。後でもう一度やり直してください!"
+      "content": "サーバーへの接続に失敗しました。暫くしてからまたお試しください!"
     },
     "bubbleTranslateServerErrorFail": {
       "title": "翻訳失敗",
-      "content": "サーバーエラーのため翻訳に失敗しました。 後でお試しください。"
+      "content": "クラウドエラーで翻訳失敗しました。 暫くしてからまたお試しください。"
     },
     "ok": "はい",
     "cancel": "キャンセル",
