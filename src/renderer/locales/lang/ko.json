@@ -364,6 +364,8 @@
   },
   "translateModal": {
     "selectLanguageLabel": "오디오 언어",
+    "audioLanguageLoading": "언어 목록을 가져 오는 중 ...",
+    "audioLanguageLoadFail": "연결에 실패했습니다. 나중에 다시 시도하십시오",
     "select": {
       "title": "오디오 언어 선택",
       "content": "번역 결과를 생성하려면 동영상에서 들리는 언어를 선택하고 생성 버튼을 클릭하십시오. 과정에 약간의 시간이 걸릴 수 있습니다."
