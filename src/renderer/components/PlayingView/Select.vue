@@ -81,6 +81,7 @@ export default Vue.extend({
       }
     },
     change(item: { value: string, label: string }) {
+      if (!item.value) return;
       this.$emit('update:selected', item);
     },
   },
@@ -115,7 +116,7 @@ export default Vue.extend({
     }
     &--list {
       @extend .dropdown__toggle;
-      height: 148px;
+      max-height: 148px;
       border: 1px solid rgba(255,255,255,0.3);
       background-color: rgba(120, 120, 120, 1);
       border-radius: 2px;
@@ -140,7 +141,7 @@ export default Vue.extend({
   &__listItems {
     cursor: pointer;
     position: relative;
-    height: 112px;
+    max-height: 112px;
     margin: 4px 4px 4px 6px;
     overflow-y: scroll;
     &:focus {

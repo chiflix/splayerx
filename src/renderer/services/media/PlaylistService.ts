@@ -78,8 +78,15 @@ export default class PlaylistService extends EventEmitter implements IPlaylistRe
    * @param  {number} videoId
    * @returns Promise 获取播放记录
    */
-  public async getRecord(videoId?: number): Promise<void> {
-    let record;
+  public async getRecord(videoId?: number, record?: MediaItem): Promise<void> {
+    if (record) {
+      this.record = record;
+      if (record.lastPlayedTime) {
+        this.lastPlayedTime = record.lastPlayedTime;
+        if (this.lastPlayedTime > 2) this.imageSrc = record.smallShortCut;
+      }
+      return;
+    }
     if (videoId) {
       record = await info.getValueByKey('media-item', videoId);
     } else {
@@ -88,9 +95,9 @@ export default class PlaylistService extends EventEmitter implements IPlaylistRe
     }
     if (record) {
       this.record = record;
-      if (this.record.lastPlayedTime) {
-        this.lastPlayedTime = this.record.lastPlayedTime;
-        this.imageSrc = this.record.smallShortCut;
+      if (record.lastPlayedTime) {
+        this.lastPlayedTime = record.lastPlayedTime;
+        if (this.lastPlayedTime > 5) this.imageSrc = record.smallShortCut;
       }
     }
   }

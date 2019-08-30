@@ -5,11 +5,13 @@ import { times, padStart, sortBy } from 'lodash';
 import { sep, basename, join } from 'path';
 import { ensureDir } from 'fs-extra';
 import { remote } from 'electron';
+import axios, { AxiosResponse } from 'axios';
 // @ts-ignore
 import { promises as fsPromises } from 'fs';
 // @ts-ignore
 import nzh from 'nzh';
 import { ISubtitleControlListItem, Type } from '@/interfaces/ISubtitle';
+import { version } from '@/../../package.json';
 import {
   ELECTRON_CACHE_DIRNAME,
   DEFAULT_DIRNAME,
@@ -18,6 +20,7 @@ import {
 import { codeToLanguageName, LanguageCode } from './language';
 import { checkPathExist, write, deleteDir } from './file';
 import { IEmbeddedOrigin } from '@/services/subtitle/utils/loaders';
+import { isBetaVersion } from '../../shared/common/platform';
 
 /**
  * @description 获取electron应用用户目录下的设定的缓存路径
@@ -83,7 +86,7 @@ const MAX_SHORT_CUT_SIZE = 1080;
  * @constant
  * @type number
  */
-const MIN_SHORT_CUT_SIZE = 122.6;
+// const MIN_SHORT_CUT_SIZE = 122.6;
 /** 最后一帧图的图片质量
  * @constant
  * @type number
@@ -123,18 +126,7 @@ export function generateShortCutImageBy(
       0, 0, (videoWidth / videoHeight) * MAX_SHORT_CUT_SIZE, MAX_SHORT_CUT_SIZE,
     );
     const imagePath = canvas.toDataURL(SHORT_CURT_TYPE, SHORT_CURT_QUALITY);
-    result.shortCut = imagePath;
-    // 用于测试截图的代码，以后可能还会用到
-    // const img = imagePath.replace(/^data:image\/\w+;base64,/, '');
-    // fs.writeFileSync('/Users/jinnaide/Desktop/screenshot.png', img, 'base64');
-    [canvas.width, canvas.height] = [(videoWidth / videoHeight)
-      * MIN_SHORT_CUT_SIZE, MIN_SHORT_CUT_SIZE];
-    canvasCTX.drawImage(
-      video, 0, 0, videoWidth, videoHeight,
-      0, 0, (videoWidth / videoHeight) * MIN_SHORT_CUT_SIZE, MIN_SHORT_CUT_SIZE,
-    );
-    const smallImagePath = canvas.toDataURL(SHORT_CURT_TYPE, SHORT_CURT_QUALITY);
-    result.smallShortCut = smallImagePath;
+    result.shortCut = result.smallShortCut = imagePath;
   }
   return result;
 }
@@ -327,9 +319,9 @@ export function crc32(str: string, crc?: number) {
   let x = 0; // an hex number
   crc = crc ^ (-1); // eslint-disable-line
   for (let i = 0, iTop = str.length; i < iTop; i += 1) {
-    n = ( crc ^ str.charCodeAt( i ) ) & 0xFF; // eslint-disable-line
-    x = Number('0x' + table.substr( n * 9, 8 )); // eslint-disable-line
-    crc = ( crc >>> 8 ) ^ x; // eslint-disable-line
+    n = (crc ^ str.charCodeAt(i)) & 0xFF; // eslint-disable-line
+    x = Number('0x' + table.substr(n * 9, 8)); // eslint-disable-line
+    crc = (crc >>> 8) ^ x; // eslint-disable-line
   }
   return crc ^ (-1); // eslint-disable-line
 }
@@ -350,4 +342,108 @@ export async function findNsfwFistFilter() {
   }
   deleteDir(path);
   return success;
+}
+
+/**
+ * @description get version numbers
+ * @author tanghaixiang
+ * @param {string} version app version string
+ * @returns {number[]} [4, 10, 13]
+ */
+export function getNumbersFromVersion(version: string): number[] {
+  const reg = /^(\d+)\.(\d+)\.(\d+)(\D+)?(\d+)?$/i;
+  const numbers: number[] = [0, 0, 0, Number.POSITIVE_INFINITY];
+  version.replace(reg, (
+    match: string,
+    $0: string,
+    $1: string,
+    $2: string,
+    $3: string,
+    $4: string,
+  ) => {
+    numbers[0] = Number($0);
+    numbers[1] = Number($1);
+    numbers[2] = Number($2);
+    if ($4 !== undefined) {
+      numbers[3] = Number($4);
+    }
+    return match;
+  });
+  return numbers;
+}
+
+/**
+ * @description compare to versions
+ * @author tanghaixiang
+ * @param {string} left left version
+ * @param {string} right right version
+ * @returns {boolean} left version is bigger than right
+ */
+export function compareVersions(left: string, right: string): boolean {
+  let isNeedUpdate = false;
+  const current = getNumbersFromVersion(left);
+  const checked = getNumbersFromVersion(right);
+  if (checked[0] > current[0]) {
+    isNeedUpdate = true;
+  } else if (checked[0] === current[0] && checked[1] > current[1]) {
+    isNeedUpdate = true;
+  } else if (checked[0] === current[0] && checked[1] === current[1]
+    && checked[2] > current[2]) {
+    isNeedUpdate = true;
+  } else if (checked[0] === current[0] && checked[1] === current[1]
+    && checked[2] === current[2] && checked[3] > current[3]) {
+    isNeedUpdate = true;
+  }
+  return isNeedUpdate;
+}
+
+/**
+ * @description check for updates
+ * @author tanghaixiang
+ * @param {boolean} auto is auto check for updates
+ * @returns {Promise} example { version: "4.2.2", isLastest: true }
+ */
+export function checkForUpdate(
+  auto: boolean,
+): Promise<{ version: string, isLastest: boolean, landingPage: string, url: string }> {
+  const skipVersion = localStorage.getItem('skip-check-for-update');
+  const url = isBetaVersion
+    ? 'https://beta.splayer.org/beta/latest.json' : 'https://www.splayer.org/stable/latest.json';
+  return axios.get(url, { timeout: 10000 })
+    .then((res: AxiosResponse) => { // eslint-disable-line complexity
+      const result = {
+        version,
+        isLastest: true,
+        landingPage: '',
+        url: '',
+      };
+      // check package.json.version with res.data
+      if (res.data && res.data.name !== version && !(res.data.name === skipVersion && auto)
+        && compareVersions(version, res.data.name)) {
+        result.version = res.data.name;
+        result.isLastest = false;
+        result.landingPage = res.data.landingPage;
+        result.url = res.data.files[process.platform].url;
+      }
+      return result;
+    });
+}
+
+/**
+ * @description skip version
+ * @author tanghaixiang
+ * @param {string} version product version
+ */
+export function skipCheckForUpdate(version: string) {
+  localStorage.setItem('skip-check-for-update', version);
+}
+
+/**
+ * @description get main version
+ * @author tanghaixiang
+ * @returns string
+ */
+export function getMainVersion(): string {
+  const vs = getNumbersFromVersion(version);
+  return `${vs[0]}.${vs[1]}.${vs[2]}`;
 }

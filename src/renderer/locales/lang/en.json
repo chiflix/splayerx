@@ -56,8 +56,8 @@
       "title": "File Not Found"
     },
     "playlistNonExist": {
-      "content": "This item is removed.",
-      "title": "File Not Found"
+      "content": "File(s) has been removed or renamed.",
+      "title": "File(s) Not Found"
     },
     "fileNonExistInPlaylist": {
       "content": "Files has been removed from the list.",
@@ -137,6 +137,7 @@
     },
     "splayerx": {
       "about": "About SPlayer",
+      "checkForUpdates": "Check for Updates",
       "hide": "Hide",
       "hideOthers": "Hide Others",
       "preferences": "Preferences",
@@ -293,10 +294,23 @@
       "underlinedContent": "disagree"
     }
   },
+  "alertBubble": {
+    "button": "OK"
+  },
   "protectBubble": {
     "agree": "OK",
     "setting": "Setting",
     "content": "Smart Privacy Protection is enabled. Sensitive or not-suitable-for-work playback history will be removed."
+  },
+  "checkForUpdatesBubble": {
+    "needUpdate": {
+      "confirm": "Download",
+      "cancel": "Skip",
+      "content": "SPlayer {version} is now available, would you like to download it now?"
+    },
+    "noNeed": {
+      "content": "SPlayer is up to date. Version {version}"
+    }
   },
   "recentPlaylist": {
     "folderSource": "Folder",
@@ -351,6 +365,8 @@
   },
   "translateModal": {
     "selectLanguageLabel": "Audio Language",
+    "audioLanguageLoading": "Fetching language list ...",
+    "audioLanguageLoadFail": "Connection failed, please try later",
     "select": {
       "title": "Select Audio Language",
       "content": "To generate a translation result, please select the language you hear in the video and click the generate button. The process might take some time."

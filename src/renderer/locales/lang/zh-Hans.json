@@ -55,7 +55,7 @@
       "title": "未找到文件"
     },
     "playlistNonExist": {
-      "content": "该条记录已被移除。",
+      "content": "文件被移动、删除或重命名。",
       "title": "文件未找到"
     },
     "fileNonExistInPlaylist": {
@@ -136,6 +136,7 @@
     },
     "splayerx": {
       "about": "关于射手影音",
+      "checkForUpdates": "检查更新",
       "hide": "隐藏射手影音",
       "hideOthers": "隐藏其他",
       "preferences": "偏好设置",
@@ -240,7 +241,7 @@
     "general": {
       "hideHistory": "隐藏历史记录",
       "clearHistory": "退出时自动清空播放记录",
-      "reverseScrolling": "鼠标滚轮反向",
+      "reverseScrolling": "鼠标滚轮调节音量反向",
       "setDefault": "设为默认播放器",
       "setDefaultDescription": "所有视频文件都自动使用SPlayer打开。",
       "restoreSettings": "抹掉所有内容和设置",
@@ -292,10 +293,23 @@
       "underlinedContent": "禁用"
     }
   },
+  "alertBubble": {
+    "button": "确定"
+  },
   "protectBubble": {
     "agree": "好的",
     "setting": "设置",
     "content": "保护不宜在工作或公众场合播放的内容，自动删除播放痕迹。"
+  },
+  "checkForUpdatesBubble": {
+    "needUpdate": {
+      "confirm": "下载",
+      "cancel": "忽略",
+      "content": "新版本 {version} 已发布，是否立刻下载更新？"
+    },
+    "noNeed": {
+      "content": "目前已经是最新版本 {version}"
+    }
   },
   "recentPlaylist": {
     "folderSource": "文件夹",
@@ -333,7 +347,7 @@
     "title": "上传失败"
   },
   "uploadingSuccess": {
-    "content": "字幕已成功上传。",
+    "content": "字幕已成功上传",
     "title": "上传成功"
   },
   "snapshotSuccess": {

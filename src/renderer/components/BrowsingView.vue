@@ -114,6 +114,11 @@ export default {
       acceleratorAvailable: true,
       oldDisplayId: 0,
       backToLandingView: false,
+      sidebarButton: null,
+      backwardButton: null,
+      forwardButton: null,
+      refreshButton: null,
+      pipButton: null,
     };
   },
   computed: {
@@ -170,14 +175,18 @@ export default {
       }
     },
     isPip(val: boolean) {
-      this.menuService.updatePip(val);
-      this.$electron.ipcRenderer.send('update-enabled', 'window.pip', true);
-      this.$electron.ipcRenderer.send('update-enabled', 'history.back', !val && this.$refs.webView.canGoBack());
-      this.$electron.ipcRenderer.send('update-enabled', 'history.forward', !val && this.$refs.webView.canGoForward());
+      if (this.pipButton) this.pipButton.icon = this.createIcon(`touchBar/${val ? 'pop' : 'pip'}.png`);
+      this.menuService.updateMenuItemLabel(
+        'browsing.window.pip',
+        this.isPip ? 'msg.window.exitPip' : 'msg.window.enterPip',
+      );
+      this.menuService.updateMenuItemEnabled('browsing.window.pip', true);
+      this.menuService.updateMenuItemEnabled('history.back', !val && this.$refs.webView.canGoBack());
+      this.menuService.updateMenuItemEnabled('history.forward', !val && this.$refs.webView.canGoForward());
       if (!val) {
         this.$store.dispatch('updatePipSize', this.winSize);
         this.$store.dispatch('updatePipPos', this.winPos);
-        this.$electron.ipcRenderer.send('update-enabled', 'window.keepPlayingWindowFront', false);
+        this.menuService.updateMenuItemEnabled('browsing.window.keepPipFront', false);
         this.handleWindowChangeExitPip();
         if (this.pipType === 'youtube') {
           this.youtubeRecover();
@@ -191,7 +200,7 @@ export default {
       } else {
         this.$store.dispatch('updateBrowsingSize', this.winSize);
         this.$store.dispatch('updateBrowsingPos', this.winPos);
-        this.$electron.ipcRenderer.send('update-enabled', 'window.keepPlayingWindowFront', true);
+        this.menuService.updateMenuItemEnabled('browsing.window.keepPipFront', true);
         this.timeout = true;
         if (this.timer) {
           clearTimeout(this.timer);
@@ -216,11 +225,12 @@ export default {
     loadingState(val: boolean) {
       const loadUrl = this.$refs.webView.getURL();
       const recordIndex = this.supportedRecordHost.indexOf(urlParseLax(loadUrl).hostname);
-      this.$electron.ipcRenderer.send('update-enabled', 'history.back', this.$refs.webView.canGoBack());
-      this.$electron.ipcRenderer.send('update-enabled', 'history.forward', this.$refs.webView.canGoForward());
+      this.menuService.updateMenuItemEnabled('history.back', this.$refs.webView.canGoBack());
+      this.menuService.updateMenuItemEnabled('history.forward', this.$refs.webView.canGoForward());
       if (val) {
         this.hasVideo = false;
-        this.$electron.ipcRenderer.send('update-enabled', 'window.pip', false);
+        this.menuService.updateMenuItemEnabled('browsing.window.pip', false);
+        this.createTouchBar(false);
         this.$refs.browsingHeader.updateWebInfo({
           hasVideo: this.hasVideo,
           url: loadUrl,
@@ -234,7 +244,8 @@ export default {
         }
         this.$refs.webView.executeJavaScript(this.calculateVideoNum, (r: number) => {
           this.hasVideo = recordIndex === 0 && !getVideoId(loadUrl).id ? false : !!r;
-          this.$electron.ipcRenderer.send('update-enabled', 'window.pip', this.hasVideo);
+          this.menuService.updateMenuItemEnabled('browsing.window.pip', this.hasVideo);
+          this.createTouchBar(this.hasVideo);
           this.$refs.browsingHeader.updateWebInfo({
             hasVideo: this.hasVideo,
             url: loadUrl,
@@ -431,6 +442,7 @@ export default {
     });
   },
   beforeDestroy() {
+    if (this.isPip) this.menuService.updateMenuItemEnabled('browsing.window.keepPipFront', false);
     asyncStorage.set('browsing', {
       pipSize: this.pipSize,
       pipPos: this.pipPos,
@@ -454,6 +466,50 @@ export default {
       updateBarrageOpen: browsingActions.UPDATE_BARRAGE_OPEN,
       updateIsPip: browsingActions.UPDATE_IS_PIP,
     }),
+    createTouchBar(enablePip: boolean) {
+      const { TouchBar } = this.$electron.remote;
+      const { TouchBarButton, TouchBarSpacer } = TouchBar;
+
+      this.sidebarButton = new TouchBarButton({
+        icon: this.createIcon('touchBar/sidebar.png'),
+        click: () => {},
+      });
+      this.backwardButton = new TouchBarButton({
+        icon: this.createIcon(`touchBar/${this.$refs.webView.canGoBack() ? 'backward' : 'backward-disabled'}.png`),
+        click: () => {
+          this.$bus.$emit('toggle-back');
+        },
+      });
+      this.forwardButton = new TouchBarButton({
+        icon: this.createIcon(`touchBar/${this.$refs.webView.canGoForward() ? 'forward' : 'forward-disabled'}.png`),
+        click: () => {
+          this.$bus.$emit('toggle-forward');
+        },
+      });
+      this.refreshButton = new TouchBarButton({
+        icon: this.createIcon('touchBar/refresh.png'),
+        click: () => {
+          this.$bus.$emit('toggle-reload');
+        },
+      });
+      this.pipButton = enablePip ? new TouchBarButton({
+        icon: this.createIcon('touchBar/pip.png'),
+        click: () => {
+          this.$bus.$emit('toggle-pip');
+        },
+      }) : null;
+      const touchbarItems = [
+        this.sidebarButton,
+        new TouchBarSpacer({ size: 'large' }),
+        this.backwardButton,
+        this.forwardButton,
+        this.refreshButton,
+        new TouchBarSpacer({ size: 'large' }),
+      ];
+      if (enablePip) touchbarItems.push(this.pipButton);
+      this.touchBar = new TouchBar({ items: touchbarItems });
+      this.$electron.remote.getCurrentWindow().setTouchBar(this.touchBar);
+    },
     handleOpenUrl({ url }: { url: string }) {
       if (!url || url === 'about:blank') return;
       if (this.isPip) {

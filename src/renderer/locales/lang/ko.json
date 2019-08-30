@@ -59,7 +59,7 @@
       "title": "파일을 찾을 수 없음"
     },
     "fileNonExistInPlaylist": {
-      "content": "파일이 목록에서 제거됩니다.",
+      "content": "파일이 제거되었거나 이름이 변경되었습니다.",
       "title": "일부 파일을 찾을 수 없습니다"
     },
     "loadFailed": {
@@ -136,6 +136,7 @@
     },
     "splayerx": {
       "about": "SPlayer 정보",
+      "checkForUpdates": "업데이트 확인",
       "hide": "숨는 장소",
       "hideOthers": "다른 사람 숨기기",
       "preferences": "환경 설정",
@@ -292,10 +293,23 @@
       "underlinedContent": "동의하지 않는다"
     }
   },
+  "alertBubble": {
+    "button": "승인"
+  },
   "protectBubble": {
     "agree": "승인",
     "setting": "설정",
     "content": "스마트 개인 정보 보호가 사용됩니다. 민감하거나 작동에 적합하지 않은 재생 기록은 삭제됩니다."
+  },
+  "checkForUpdatesBubble": {
+    "needUpdate": {
+      "confirm": "다운로드",
+      "cancel": "버킷",
+      "content": "새 버전 {version} 이릴리스되었습니다. 업데이트를 즉시 다운로드 하시겠습니까?"
+    },
+    "noNeed": {
+      "content": "SPlayer가 최신입니다. 버전 {version}"
+    }
   },
   "recentPlaylist": {
     "folderSource": "폴더",

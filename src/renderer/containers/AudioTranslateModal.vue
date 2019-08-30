@@ -1,6 +1,6 @@
 <template>
   <div
-    v-fade-in="isTranslateModalVisiable"
+    v-fade-in="isTranslateModalVisible"
     class="audio-translate"
   >
     <div
@@ -136,6 +136,13 @@
         </div>
       </div>
       <div
+        v-else-if="isTranslateFail"
+        @click="hideTranslateModal"
+        class="button"
+      >
+        {{ $t('translateModal.cancel') }}
+      </div>
+      <div
         v-else
         @click="hideTranslateModal"
         class="button"
@@ -158,6 +165,7 @@ import Select from '@/components/PlayingView/Select.vue';
 import Icon from '@/components/BaseIconContainer.vue';
 import Progress from '@/components/PlayingView/Progress.vue';
 import { AudioTranslateStatus, AudioTranslateFailType } from '../store/modules/AudioTranslate';
+import { getJsonConfig, forceRefresh } from '@/helpers/featureSwitch';
 
 export default Vue.extend({
   name: 'AudioTranslateModal',
@@ -170,38 +178,22 @@ export default Vue.extend({
   },
   data() {
     const label = this.$t('translateModal.selectLanguageLabel');
+    const placeholder = this.$t('translateModal.audioLanguageLoading');
     return {
       audioLanguage: { label, value: '' },
-      lanugages: [
-        {
-          value: 'en',
-          label: 'English',
-        },
-        {
-          value: 'zh',
-          label: '普通话（国语）',
-        },
-        {
-          value: 'yue-Hant-HK',
-          label: '廣東話（粤语）',
-        },
-        {
-          value: 'ja-JP',
-          label: '日本語',
-        },
-        {
-          value: 'ko-KR',
-          label: '한국어',
-        },
-      ],
+      lanugages: [{
+        value: '',
+        label: placeholder,
+      }],
       isConfirmCancelTranlate: false,
       didGrab: false, // 是否提取音频，区分听写和机翻
+      loadConfigCatCompleted: false,
     };
   },
   computed: {
     ...mapGetters([
       'currentAudioTrackId', 'mediaHash',
-      'isTranslateModalVisiable', 'translateProgress', 'isTranslating', 'selectedTargetLanugage',
+      'isTranslateModalVisible', 'translateProgress', 'isTranslating', 'selectedTargetLanugage',
       'translateEstimateTime', 'translateStatus', 'lastAudioLanguage', 'failType',
     ]),
     translateLanguageLabel() {
@@ -285,6 +277,15 @@ export default Vue.extend({
         this.didGrab = false;
       }
     },
+    async isTranslateModalVisible(visible: boolean) {
+      if (visible) {
+        if (!this.loadConfigCatCompleted) await forceRefresh();
+        await this.refreshConfig();
+      }
+    },
+  },
+  mounted() {
+    this.refreshConfig();
   },
   methods: {
     ...mapActions({
@@ -294,6 +295,24 @@ export default Vue.extend({
       updateWheel: inputActions.WHEEL_UPDATE,
       audioTranslateStoreInit: atActions.AUDIO_TRANSLATE_INIT,
     }),
+    async refreshConfig() {
+      try {
+        const supportedAudioLanguage = await getJsonConfig('audioLanguage', null);
+        if (supportedAudioLanguage && supportedAudioLanguage['list']) {
+          this.lanugages = supportedAudioLanguage['list'];
+        } else {
+          throw new Error();
+        }
+      } catch (ex) {
+        const failLabel = this.$t('translateModal.audioLanguageLoadFail');
+        this.lanugages = [{
+          value: '',
+          label: failLabel,
+        }];
+      } finally {
+        this.loadConfigCatCompleted = true;
+      }
+    },
     translate() {
       const { audioLanguage } = this;
       if (audioLanguage && audioLanguage.value) {

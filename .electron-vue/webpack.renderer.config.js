@@ -1,26 +1,32 @@
-'use strict'
+'use strict';
 
-process.env.BABEL_ENV = 'renderer'
+process.env.BABEL_ENV = 'renderer';
 
-const path = require('path')
-const childProcess = require('child_process')
-const webpack = require('webpack')
-const { VueLoaderPlugin } = require('vue-loader')
-const CopyWebpackPlugin = require('copy-webpack-plugin')
-const ExtractTextPlugin = require('extract-text-webpack-plugin')
-const HtmlWebpackPlugin = require('html-webpack-plugin')
-const SentryWebpackPlugin = require('@sentry/webpack-plugin')
-const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin')
-const { dependencies, optionalDependencies } = require('../package.json')
+const path = require('path');
+const childProcess = require('child_process');
+const webpack = require('webpack');
+const { VueLoaderPlugin } = require('vue-loader');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const SentryWebpackPlugin = require('@sentry/webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
+const { dependencies, optionalDependencies } = require('../package.json');
 
 let release = '';
 try {
-  const result = childProcess.spawnSync('git', ['describe', '--tag', '--exact-match', '--abbrev=0']);
+  const result = childProcess.spawnSync('git', [
+    'describe',
+    '--tag',
+    '--exact-match',
+    '--abbrev=0',
+  ]);
   if (result.status === 0) {
     const tag = result.stdout.toString('utf8').replace(/^\s+|\s+$/g, '');
     if (tag) release = `SPlayer${tag}`;
   }
-} catch(ex) {
+} catch (ex) {
   console.error(ex);
 }
 
@@ -32,11 +38,10 @@ function generateHtmlWebpackPluginConfig(name) {
     minify: {
       collapseWhitespace: true,
       removeAttributeQuotes: true,
-      removeComments: true
+      removeComments: true,
     },
-    nodeModules: process.env.NODE_ENV !== 'production'
-      ? path.resolve(__dirname, '../node_modules')
-      : false
+    nodeModules:
+      process.env.NODE_ENV !== 'production' ? path.resolve(__dirname, '../node_modules') : false,
   };
 }
 
@@ -47,7 +52,7 @@ function generateHtmlWebpackPluginConfig(name) {
  * that provide pure *.vue files that need compiling
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/webpack-configurations.html#white-listing-externals
  */
-let whiteListedModules = ['vue']
+let whiteListedModules = ['vue'];
 
 let rendererConfig = {
   mode: 'development',
@@ -59,7 +64,9 @@ let rendererConfig = {
     index: path.join(__dirname, '../src/renderer/main.ts'),
   },
   externals: [
-    ...Object.keys(Object.assign({}, dependencies, optionalDependencies)).filter(d => !whiteListedModules.includes(d))
+    ...Object.keys(Object.assign({}, dependencies, optionalDependencies)).filter(
+      d => !whiteListedModules.includes(d),
+    ),
   ],
   module: {
     rules: [
@@ -70,20 +77,20 @@ let rendererConfig = {
         use: {
           loader: 'eslint-loader',
           options: {
-            formatter: require('eslint-friendly-formatter')
-          }
-        }
+            formatter: require('eslint-friendly-formatter'),
+          },
+        },
       },
       {
         test: /\.css$/,
         use: ExtractTextPlugin.extract({
           fallback: 'style-loader',
-          use: 'css-loader'
-        })
+          use: 'css-loader',
+        }),
       },
       {
         test: /\.html$/,
-        use: 'vue-html-loader'
+        use: 'vue-html-loader',
       },
       {
         test: /\.tsx?$/,
@@ -93,26 +100,26 @@ let rendererConfig = {
             loader: 'ts-loader',
             options: {
               transpileOnly: true,
-              appendTsSuffixTo: [ /\.vue$/ ]
-            }
-          }
-        ]
+              appendTsSuffixTo: [/\.vue$/],
+            },
+          },
+        ],
       },
       {
         test: /\.js$/,
         use: 'babel-loader',
-        exclude: /node_modules/
+        exclude: /node_modules/,
       },
       {
         // 匹配 *.worker.js
         test: /\.worker\.js$/,
         use: {
           loader: 'workerize-loader',
-        }
+        },
       },
       {
         test: /\.node$/,
-        use: 'node-loader'
+        use: 'node-loader',
       },
       {
         test: /\.vue$/,
@@ -121,22 +128,22 @@ let rendererConfig = {
           options: {
             extractCSS: process.env.NODE_ENV === 'production',
             loaders: {
-              i18n: 'vue-i18n-loader'
-            }
-          }
-        }
+              i18n: 'vue-i18n-loader',
+            },
+          },
+        },
       },
       {
         test: /\.sass$/,
         use: [
           'vue-style-loader',
           'css-loader',
-          { loader: 'sass-loader', options: { indentedSyntax: 1 }},
+          { loader: 'sass-loader', options: { indentedSyntax: 1 } },
           {
             loader: 'sass-resources-loader',
             options: { resources: path.join(__dirname, '../src/renderer/css/global.scss') },
           },
-        ]
+        ],
       },
       {
         test: /\.scss$/,
@@ -148,7 +155,7 @@ let rendererConfig = {
             loader: 'sass-resources-loader',
             options: { resources: path.join(__dirname, '../src/renderer/css/global.scss') },
           },
-        ]
+        ],
       },
       {
         test: /\.svg$/,
@@ -156,9 +163,9 @@ let rendererConfig = {
         use: {
           loader: 'svg-sprite-loader',
           options: {
-            symbolId: '[name]'
-          }
-        }
+            symbolId: '[name]',
+          },
+        },
       },
       {
         test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
@@ -167,9 +174,9 @@ let rendererConfig = {
           loader: 'url-loader',
           query: {
             limit: 10000,
-            name: 'imgs/[name]--[folder].[ext]'
-          }
-        }
+            name: 'imgs/[name]--[folder].[ext]',
+          },
+        },
       },
       {
         test: /\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/,
@@ -177,9 +184,9 @@ let rendererConfig = {
           loader: 'url-loader',
           options: {
             limit: 10000,
-            name: 'media/[name]--[folder].[ext]'
-          }
-        }
+            name: 'media/[name]--[folder].[ext]',
+          },
+        },
       },
       {
         test: /\.(woff2?|eot|ttf|ttc|otf)(\?.*)?$/,
@@ -187,15 +194,15 @@ let rendererConfig = {
           loader: 'url-loader',
           query: {
             limit: 10000,
-            name: 'fonts/[name]--[folder].[ext]'
-          }
-        }
-      }
-    ]
+            name: 'fonts/[name]--[folder].[ext]',
+          },
+        },
+      },
+    ],
   },
   node: {
     __dirname: process.env.NODE_ENV !== 'production',
-    __filename: process.env.NODE_ENV !== 'production'
+    __filename: process.env.NODE_ENV !== 'production',
   },
   plugins: [
     new VueLoaderPlugin(),
@@ -215,27 +222,36 @@ let rendererConfig = {
   resolve: {
     alias: {
       '@': path.join(__dirname, '../src/renderer'),
-      'vue$': 'vue/dist/vue.esm.js',
-      "electron"  : "@chiflix/electron",
-      "grpc": "@grpc/grpc-js"
+      vue$: 'vue/dist/vue.esm.js',
+      electron: '@chiflix/electron',
+      grpc: '@grpc/grpc-js',
     },
-    extensions: ['.ts', '.tsx', '.js', '.json', '.node']
+    extensions: ['.ts', '.tsx', '.js', '.json', '.node'],
   },
-  target: 'electron-renderer'
-}
+  target: 'electron-renderer',
+};
 
+const sharedDefinedVariables = {
+  'process.platform': `"${process.platform}"`,
+};
+
+if (process.env.ENVIRONMENT_NAME === 'APPX') {
+  // quick fix for process.windowsStore undefined on Windows Store build
+  sharedDefinedVariables['process.windowsStore'] = 'true';
+}
 /**
  * Adjust rendererConfig for development settings
  */
 if (process.env.NODE_ENV !== 'production') {
   rendererConfig.plugins.push(
     new ForkTsCheckerWebpackPlugin({ eslint: true, vue: true }),
-    new webpack.DefinePlugin({
-      'process.platform': `"${process.platform}"`,
-      'process.env.SAGI_API': `"${process.env.SAGI_API || 'apis.stage.sagittarius.ai:8443'}"`,
-      '__static': `"${path.join(__dirname, '../static').replace(/\\/g, '\\\\')}"`
-    })
-  )
+    new webpack.DefinePlugin(
+      Object.assign(sharedDefinedVariables, {
+        'process.env.SAGI_API': `"${process.env.SAGI_API || 'apis.stage.sagittarius.ai:8443'}"`,
+        __static: `"${path.join(__dirname, '../static').replace(/\\/g, '\\\\')}"`,
+      }),
+    ),
+  );
 }
 
 /**
@@ -243,31 +259,41 @@ if (process.env.NODE_ENV !== 'production') {
  */
 if (process.env.NODE_ENV === 'production') {
   rendererConfig.mode = 'production';
-  rendererConfig.devtool = '#source-map'
+  rendererConfig.devtool = '#source-map';
 
   rendererConfig.plugins.push(
     new CopyWebpackPlugin([
       {
         from: path.join(__dirname, '../static'),
         to: path.join(__dirname, '../dist/electron/static'),
-        ignore: ['.*']
-      }
+        ignore: ['.*'],
+      },
     ]),
-    new webpack.DefinePlugin({
-      'process.platform': `"${process.platform}"`,
-      'process.env.SAGI_API': `"${process.env.SAGI_API || 'apis.sagittarius.ai:8443'}"`,
-      'process.env.SENTRY_RELEASE': `"${release}"`,
-      'process.env.NODE_ENV': '"production"'
-    }),
+    new webpack.DefinePlugin(
+      Object.assign(sharedDefinedVariables, {
+        'process.env.SAGI_API': `"${process.env.SAGI_API || 'apis.sagittarius.ai:8443'}"`,
+        'process.env.SENTRY_RELEASE': `"${release}"`,
+        'process.env.NODE_ENV': '"production"',
+      }),
+    ),
     new webpack.LoaderOptionsPlugin({
-      minimize: true
-    })
-  )
+      minimize: true,
+    }),
+  );
 
-  if (process.platform === 'darwin') { // only check on mac, to speed up Windows build
-    rendererConfig.plugins.push(
-      new ForkTsCheckerWebpackPlugin({ eslint: true, vue: true })
-    )
+  rendererConfig.optimization = {
+    minimizer: [
+      new TerserPlugin({
+        terserOptions: {
+          keep_classnames: true,
+        },
+      }),
+    ],
+  };
+
+  if (process.platform === 'darwin') {
+    // only check on mac, to speed up Windows build
+    rendererConfig.plugins.push(new ForkTsCheckerWebpackPlugin({ eslint: true, vue: true }));
   }
 
   if (release && process.env.SENTRY_AUTH_TOKEN) {
@@ -277,17 +303,17 @@ if (process.env.NODE_ENV === 'production') {
         include: './dist',
         urlPrefix: 'app:///dist/',
         ext: ['js', 'map'],
-        ignore: ['node_modules']
+        ignore: ['node_modules'],
       }),
       new SentryWebpackPlugin({
         release,
         include: './src',
         urlPrefix: 'webpack:///./src/',
         ext: ['js', 'ts', 'vue'],
-        ignore: ['node_modules']
-      })
+        ignore: ['node_modules'],
+      }),
     );
   }
 }
 
-module.exports = rendererConfig
+module.exports = rendererConfig;

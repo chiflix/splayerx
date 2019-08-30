@@ -15,20 +15,50 @@
       @close-privacy-bubble="closePrivacyBubble"
       class="privacy-bubble"
     />
-    <MASPrivacyBubble
-      v-if="showPrivacyBubble && isMas"
-      @close-privacy-bubble="closePrivacyBubble"
-      class="mas-privacy-bubble"
-    />
-    <NSFW
-      v-if="showNSFWBubble"
-      :handle-agree="handleAgree"
-      :handle-setting="handleSetting"
-      class="mas-privacy-bubble"
-    />
+    <transition name="bubble">
+      <ConfirmBubble
+        v-if="showPrivacyBubble && isMas"
+        :content="$t('privacyBubble.masVersion.content')"
+        :confirm-button-text="$t('privacyBubble.masVersion.agree')"
+        :cancel-button-text="$t('privacyBubble.masVersion.disagree')"
+        :confirm="handleAgreePrivacy"
+        :cancel="handleDisagreePrivacy"
+        class="mas-privacy-bubble"
+      />
+    </transition>
+    <transition name="bubble">
+      <ConfirmBubble
+        v-if="showNSFWBubble"
+        :content="$t('protectBubble.content')"
+        :confirm-button-text="$t('protectBubble.agree')"
+        :cancel-button-text="$t('protectBubble.setting')"
+        :confirm="handleAgreeNSFW"
+        :cancel="handleNSFWSetting"
+        class="mas-privacy-bubble"
+      />
+    </transition>
+    <transition name="bubble">
+      <ConfirmBubble
+        v-if="showUpdateBubble"
+        :content="checkForUpdatesContent"
+        :confirm-button-text="$t('checkForUpdatesBubble.needUpdate.confirm')"
+        :cancel-button-text="$t('checkForUpdatesBubble.needUpdate.cancel')"
+        :confirm="confirmUpdate"
+        :cancel="cancelUpdate"
+        class="mas-privacy-bubble"
+      />
+    </transition>
+    <transition name="bubble">
+      <AlertBubble
+        v-if="showLastestUpdateBubble"
+        :content="lastestUpdateContent"
+        :close="closeLastestUpdateBubble"
+        class="mas-privacy-bubble"
+      />
+    </transition>
     <transition name="bubble">
       <TranslateBubble
-        v-if="isTranslateBubbleVisiable"
+        v-if="isTranslateBubbleVisible"
         :message="translateBubbleMessage"
         :type="translateBubbleType"
         @disCardTranslate="discardTranslate"
@@ -46,29 +76,17 @@
         :key="m.id"
         class="messageContainer"
       >
-        <div :class="m.type === 'result' ? 'black-gradient-result' : 'black-gradient-state'" />
-        <div
-          :class="[
-            m.type === 'result' ? 'resultContainer' : 'stateContainer',
-            'backdrop-fallback',
-          ]"
-        >
-          <div class="bubbleContent">
-            <p
-              v-if="m.type === 'result' && m.title !== ''"
-              class="title"
-            >
-              {{ m.title }}
-            </p>
-            <p class="content"><!--eslint-disable-line-->{{ m.content }}</p>
-          </div>
-          <Icon
-            v-if="m.type === 'result'"
-            @click.native.left="closeMessage(m.id, m.title)"
-            type="close"
-            class="bubbleClose"
-          />
-        </div>
+        <ErrorBubble
+          v-if="m.type === 'result'"
+          :id="m.id"
+          :title="m.title"
+          :content="m.content"
+          :close="closeMessage"
+        />
+        <StatusBubble
+          v-else
+          :content="m.content"
+        />
       </div>
     </transition-group>
   </div>
@@ -76,25 +94,28 @@
 
 <script lang="ts">
 import { mapGetters, mapActions } from 'vuex';
-import NextVideo from '@/components/PlayingView/NextVideo.vue';
-import PrivacyBubble from '@/components/PlayingView/PrivacyConfirmBubble.vue';
-import TranslateBubble from '@/components/PlayingView/TranslateBubble.vue';
-import MASPrivacyBubble from '@/components/PlayingView/MASPrivacyConfirmBubble.vue';
-import NSFW from '@/components/PlayingView/NSFW.vue';
+import StatusBubble from '@/components/Bubbles/StatusBubble.vue';
+import ErrorBubble from '@/components/Bubbles/ErrorBubble.vue';
+import AlertBubble from '@/components/Bubbles/AlertBubble.vue';
+import ConfirmBubble from '@/components/Bubbles/ConfirmBubble.vue';
+import NextVideo from '@/components/Bubbles/NextVideo.vue';
+import PrivacyBubble from '@/components/Bubbles/PrivacyConfirmBubble.vue';
+import TranslateBubble from '@/components/Bubbles/TranslateBubble.vue';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import { AudioTranslate as atActions } from '@/store/actionTypes';
-import Icon from './BaseIconContainer.vue';
+import { skipCheckForUpdate } from '../libs/utils';
 
 export default {
   name: 'NotificationBubble',
   // @ts-ignore
   type: INPUT_COMPONENT_TYPE,
   components: {
-    Icon,
+    StatusBubble,
+    ErrorBubble,
+    AlertBubble,
+    ConfirmBubble,
     NextVideo,
     PrivacyBubble,
-    MASPrivacyBubble,
-    NSFW,
     TranslateBubble,
   },
   data() {
@@ -104,12 +125,19 @@ export default {
       readyToShow: false, // show after video element is loaded
       showPrivacyBubble: false,
       showNSFWBubble: false,
+      showUpdateBubble: false, // show update bubble
+      checkForUpdatesContent: '',
+      checkForUpdatesDownloadUrl: '',
+      checkForUpdatesReleaseUrl: '',
+      checkForUpdatesVersion: '',
+      showLastestUpdateBubble: false, // show update bubble
+      lastestUpdateContent: '',
     };
   },
   computed: {
     ...mapGetters([
       'nextVideo', 'nextVideoPreviewTime', 'duration', 'singleCycle', 'privacyAgreement', 'nsfwProcessDone',
-      'translateBubbleMessage', 'translateBubbleType', 'isTranslateBubbleVisiable', 'failBubbleId',
+      'translateBubbleMessage', 'translateBubbleType', 'isTranslateBubbleVisible', 'failBubbleId', 'preferenceData',
     ]),
     messages() {
       const messages = this.$store.getters.messageInfo;
@@ -151,6 +179,18 @@ export default {
     this.$bus.$on('privacy-confirm', () => {
       this.showPrivacyBubble = true;
     });
+    this.$bus.$on('new-version', (info: { version: string, landingPage: string, url: string }) => {
+      this.checkForUpdatesContent = this.$t('checkForUpdatesBubble.needUpdate.content', { version: info.version });
+      this.checkForUpdatesDownloadUrl = info.url;
+      this.checkForUpdatesReleaseUrl = info.landingPage;
+      this.checkForUpdatesVersion = info.version;
+      this.showUpdateBubble = true;
+    });
+    // 检查当前版本是最新版本
+    this.$bus.$on('lastest-version', (info: { version: string }) => {
+      this.lastestUpdateContent = this.$t('checkForUpdatesBubble.noNeed.content', { version: info.version });
+      this.showLastestUpdateBubble = true;
+    });
   },
   methods: {
     ...mapActions({
@@ -162,16 +202,27 @@ export default {
     closePrivacyBubble() {
       this.showPrivacyBubble = false;
     },
-    handleAgree() {
-      this.closeNSFWBubble();
+    handleAgreePrivacy() {
+      this.$store.dispatch('agreeOnPrivacyPolicy').then(() => {
+        this.$electron.ipcRenderer.send('main-to-preference', this.preferenceData);
+      });
     },
-    handleSetting() {
-      this.$electron.ipcRenderer.send('add-preference', 'privacy');
-      this.closeNSFWBubble();
+    handleDisagreePrivacy() {
+      this.$store.dispatch('disagreeOnPrivacyPolicy').then(() => {
+        this.$electron.ipcRenderer.send('main-to-preference', this.preferenceData);
+      });
     },
-    closeNSFWBubble() {
+    handleAgreeNSFW() {
       this.showNSFWBubble = false;
       this.$store.dispatch('nsfwProcessDone');
+    },
+    handleNSFWSetting() {
+      this.$electron.ipcRenderer.send('add-preference', 'privacy');
+      this.showNSFWBubble = false;
+      this.$store.dispatch('nsfwProcessDone');
+    },
+    closeLastestUpdateBubble() {
+      this.showLastestUpdateBubble = false;
     },
     manualClose() {
       this.manualClosed = true;
@@ -201,6 +252,19 @@ export default {
       if (this.$refs.nextVideo) {
         this.$refs.nextVideo.updatePlayingTime(time);
       }
+    },
+    confirmUpdate() {
+      // go to web site
+      const { checkForUpdatesDownloadUrl, checkForUpdatesReleaseUrl } = this;
+      this.$electron.shell.openExternal(checkForUpdatesDownloadUrl);
+      this.$electron.shell.openExternal(checkForUpdatesReleaseUrl);
+      this.showUpdateBubble = false;
+    },
+    cancelUpdate() {
+      // this version not auto check show
+      const { checkForUpdatesVersion } = this;
+      skipCheckForUpdate(checkForUpdatesVersion);
+      this.showUpdateBubble = false;
     },
   },
 };
@@ -357,95 +421,6 @@ export default {
   flex-direction: column;
   align-items: flex-end;
 }
-.stateContainer {
-  display: flex;
-  justify-content: flex-start;
-  background-image: radial-gradient(
-    80% 130%,
-    rgba(85,85,85,0.88) 20%,
-    rgba(85,85,85,0.78) 50%,
-    rgba(85,85,85,0.72) 60%,
-    rgba(85,85,85,0.46) 80%,
-    rgba(85,85,85,0.00) 100%
-  );
-  backdrop-filter: blur(8px);
-  z-index: 8;
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px),
-  screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
-    height: 32px;
-    border-radius: 6px;
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
-  screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
-    height: 36px;
-    border-radius: 7px;
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
-  screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
-    height: 43px;
-    border-radius: 8px;
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
-  screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
-    height: 60px;
-    border-radius: 11px;
-  }
-
-  .bubbleContent {
-    @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px),
-    screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
-      width: auto;
-      height: 11px;
-      margin: auto 14px auto 14px;
-    }
-    @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
-    screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
-      width: auto;
-      height: 12px;
-      margin: auto 16px auto 16px;
-    }
-    @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
-    screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
-      width: auto;
-      height: 15px;
-      margin: auto 19px auto 19px;
-    }
-    @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
-    screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
-      width: auto;
-      height: 21px;
-      margin: auto 26px auto 26px;
-    }
-    .content {
-      color: rgba(255, 255, 255, 0.8);
-      text-align: center;
-      @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px),
-      screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
-        font-size: 11px;
-        line-height: 11px;
-        letter-spacing: 0.4px;
-      }
-      @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
-      screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
-        font-size: 12px;
-        line-height: 12px;
-        letter-spacing: 0.4px;
-      }
-      @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
-      screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
-        font-size: 15px;
-        line-height: 15px;
-        letter-spacing: 0.4px;
-      }
-      @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
-      screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
-        font-size: 21px;
-        line-height: 21px;
-        letter-spacing: 0.7px;
-      }
-    }
-  }
-}
 .messageContainer {
   z-index: 8;
   transition: 400ms cubic-bezier(0.17, 0.67, 0.17, 0.98);
@@ -470,207 +445,8 @@ export default {
     margin-bottom: 18px;
   }
 }
-.black-gradient-result {
-  position: absolute;
-  width: 100%;
-  box-shadow: 0 0 2px 0 rgba(0,0,0,0.30);
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px),
-  screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
-    height: 47px;
-    border-radius: 6px;
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
-  screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
-    height: 52px;
-    border-radius: 7px;
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
-  screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
-    height: 62px;
-    border-radius: 8px;
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
-  screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
-    height: 87px;
-    border-radius: 11px;
-  }
-}
-.black-gradient-state {
-  position: absolute;
-  width: 100%;
-  box-shadow: 0 0 2px 0 rgba(0,0,0,0.30);
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px),
-  screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
-    height: 32px;
-    border-radius: 6px;
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
-  screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
-    height: 36px;
-    border-radius: 7px;
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
-  screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
-    height: 43px;
-    border-radius: 8px;
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
-  screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
-    height: 60px;
-    border-radius: 11px;
-  }
-}
-
-.resultContainer {
-  display: flex;
-  background-image: radial-gradient(
-    80% 130%,
-    rgba(85,85,85,0.88) 20%,
-    rgba(85,85,85,0.78) 50%,
-    rgba(85,85,85,0.72) 60%,
-    rgba(85,85,85,0.46) 80%,
-    rgba(85,85,85,0.00) 100%
-  );
-  backdrop-filter: blur(8px);
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px),
-  screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
-    height: 47px;
-    border-radius: 6px;
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
-  screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
-    height: 52px;
-    border-radius: 7px;
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
-  screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
-    height: 62px;
-    border-radius: 8px;
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
-  screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
-    height: 87px;
-    border-radius: 11px;
-  }
-
-  .bubbleContent {
-    @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px),
-    screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
-      width: auto;
-      height: 23px;
-      margin: 12px 10px auto 14px;
-    }
-    @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
-    screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
-      width: auto;
-      height: 26px;
-      margin: 13px 15px auto 16px;
-    }
-    @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
-    screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
-      width: auto;
-      height: 32px;
-      margin: 15px 20px auto 19px;
-    }
-    @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
-    screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
-      width: auto;
-      height: 45px;
-      margin: 21px 25px auto 26px;
-    }
-    .title {
-      color: rgba(255, 255, 255, 1);
-      @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px),
-      screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
-        font-size: 11px;
-        line-height: 11px;
-        letter-spacing: 0.4px;
-        margin-bottom: 3px;
-      }
-      @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
-      screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
-        font-size: 12px;
-        line-height: 12px;
-        letter-spacing: 0.4px;
-        margin-bottom: 4px;
-      }
-      @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
-      screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
-        font-size: 15px;
-        line-height: 15px;
-        letter-spacing: 0.4px;
-        margin-bottom: 5px;
-      }
-      @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
-      screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
-        font-size: 21px;
-        line-height: 21px;
-        letter-spacing: 0.7px;
-        margin-bottom: 7px;
-      }
-    }
-    .content {
-      white-space: pre-line;
-      color: rgba(255, 255, 255, 0.7);
-      @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px),
-      screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
-        font-size: 9px;
-        line-height: 9px;
-        letter-spacing: 0.2px;
-      }
-      @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
-      screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
-        font-size: 10px;
-        line-height: 14px;
-        letter-spacing: 0.2px;
-      }
-      @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
-      screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
-        font-size: 12px;
-        line-height: 16px;
-        letter-spacing: 0.24px;
-      }
-      @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
-      screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
-        font-size: 17px;
-        line-height: 22px;
-        letter-spacing: 0.3px;
-      }
-    }
-  }
-
-  .bubbleClose {
-    cursor: pointer;
-
-    @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px),
-    screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
-      width: 20px;
-      height: 20px;
-      margin: 13.5px 14px auto auto;
-    }
-    @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
-    screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
-      width: 22px;
-      height: 22px;
-      margin: 15px 16px auto auto;
-    }
-    @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
-    screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
-      width: 26px;
-      height: 26px;
-      margin: 18px 20px auto auto;
-    }
-    @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
-    screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
-      width: 36px;
-      height: 36px;
-      margin: 25.5px 28px auto auto;
-    }
-  }
-}
-
 .toast-leave-active {
-  position: absolute;
+  // position: absolute;
   transition: transform 500ms cubic-bezier(0.17, 0.67, 0.17, 0.98);
 }
 .toast-enter-active {
@@ -688,6 +464,4 @@ export default {
 .nextvideo-leave-active {
   position: absolute;
 }
-
-
 </style>

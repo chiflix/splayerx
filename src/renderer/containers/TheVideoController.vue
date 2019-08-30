@@ -47,7 +47,7 @@
       :attached-shown="attachedShown"
       :on-play-button-mouseup="togglePlay"
       @update:playbutton-state="updatePlayButtonState"
-      :class="`${showAllWidgets ? 'play-button no-drag' : 'play-button'}`"
+      class="play-button"
     />
     <volume-indicator
       ref="volumeIndicator"
@@ -65,7 +65,6 @@
       :handle-update-volume="updateVolume"
       :handle-update-muted="updateMuted"
       @update:volume-state="updateVolumeState"
-      class="no-drag"
     />
     <div
       v-fade-in="showAllWidgets"
@@ -117,7 +116,6 @@ import {
   mapState, mapGetters, mapActions,
   createNamespacedHelpers,
 } from 'vuex';
-import path from 'path';
 import { log } from '@/libs/Log';
 import {
   Input as inputActions,
@@ -226,16 +224,17 @@ export default {
     }),
     ...mapGetters([
       'originSrc', 'paused', 'ratio', 'duration', 'intrinsicWidth', 'intrinsicHeight', 'singleCycle', 'rate', 'muted', 'volume',
+      'winWidth',
       'playingList', 'isFolderList',
       'isFullScreen', 'isFocused', 'isMinimized',
       'leftMousedown', 'progressKeydown', 'volumeKeydown', 'wheelTriggered', 'volumeWheelTriggered',
-      'enabledSecondarySub', 'isTranslateModalVisiable', 'translateStatus', 'failBubbleId', 'messageInfo',
+      'enabledSecondarySub', 'isTranslateModalVisible', 'translateStatus', 'failBubbleId', 'messageInfo',
     ]),
     ...inputMapGetters({
       inputWheelDirection: iGT.GET_WHEEL_DIRECTION,
     }),
     showAllWidgets() {
-      if (this.isTranslateModalVisiable) {
+      if (this.isTranslateModalVisible) {
         return false;
       }
       return !this.tempRecentPlaylistDisplayState
@@ -252,7 +251,7 @@ export default {
       );
     },
     cursorStyle() {
-      if (this.isTranslateModalVisiable) {
+      if (this.isTranslateModalVisible) {
         return 'default';
       }
       return this.showAllWidgets || !this.isFocused
@@ -395,7 +394,7 @@ export default {
         this.updateMousedown({ componentName: '' });
       }
     },
-    isTranslateModalVisiable(visible: boolean) {
+    isTranslateModalVisible(visible: boolean) {
       const { ratio } = this;
       let minimumSize = [320, 180];
       // 弹窗出现的时候窗口缩小到一定尺寸应该不能再缩小
@@ -507,13 +506,6 @@ export default {
       updateHideModalCallback: atActions.AUDIO_TRANSLATE_MODAL_HIDE_CALLBACK,
       updateHideBubbleCallback: atActions.AUDIO_TRANSLATE_BUBBLE_CANCEL_CALLBACK,
     }),
-    createIcon(iconPath: string) {
-      const { nativeImage } = this.$electron.remote;
-      // @ts-ignore
-      return nativeImage.createFromPath(path.join(__static, iconPath)).resize({
-        width: 20,
-      });
-    },
     createTouchBar() {
       const { TouchBar } = this.$electron.remote;
       const {
@@ -523,10 +515,28 @@ export default {
 
       this.timeLabel = new TouchBarLabel();
 
+      this.previousButton = new TouchBarButton({
+        icon: this.createIcon('touchBar/lastVideo.png'),
+        click: () => {
+          this.$bus.$emit('previous-video');
+        },
+      });
+      this.restartButton = new TouchBarButton({
+        icon: this.createIcon('touchBar/restart.png'),
+        click: () => {
+          this.$bus.$emit('seek', 0);
+        },
+      });
       this.playButton = new TouchBarButton({
         icon: this.createIcon('touchBar/pause.png'),
         click: () => {
           this.$bus.$emit('toggle-playback');
+        },
+      });
+      this.nextButton = new TouchBarButton({
+        icon: this.createIcon('touchBar/nextVideo.png'),
+        click: () => {
+          this.$bus.$emit('next-video');
         },
       });
       this.fullScreenBar = new TouchBarButton({
@@ -538,7 +548,11 @@ export default {
       this.touchBar = new TouchBar({
         items: [
           this.fullScreenBar,
+          new TouchBarSpacer({ size: 'large' }),
+          this.previousButton,
           this.playButton,
+          this.nextButton,
+          this.restartButton,
           new TouchBarSpacer({ size: 'large' }),
           this.timeLabel,
           new TouchBarSpacer({ size: 'large' }),
@@ -591,7 +605,7 @@ export default {
         const translateFailBubbleExist = this.messageInfo
           && this.messageInfo.find((e: { id: string }) => e.id === this.failBubbleId);
         log.debug('TheVideoController.vue', translateFailBubbleExist, this.messageInfo, this.failBubbleId);
-        if (this.translateStatus === AudioTranslateStatus.Fail && this.isTranslateModalVisiable) {
+        if (this.translateStatus === AudioTranslateStatus.Fail && this.isTranslateModalVisible) {
           this.$store.dispatch(videoActions.PAUSE_VIDEO);
           this.updateHideModalCallback(() => {
             this.$bus.$emit('next-video');
@@ -646,11 +660,16 @@ export default {
     },
     UIDisplayManager() {
       const tempObject = {
+        PlaylistControl: true,
         RecentPlaylist: false,
       };
       Object.keys(this.displayState).forEach((index) => {
         tempObject[index] = !this.widgetsStatus.PlaylistControl.showAttached;
       });
+      const ratio = window.innerWidth / window.innerHeight;
+      if (ratio < 1 && this.winWidth < 512) {
+        tempObject.PlaylistControl = false;
+      }
       tempObject.RecentPlaylist = this.widgetsStatus.PlaylistControl.showAttached
         && !this.dragOver;
       this.displayState = tempObject;

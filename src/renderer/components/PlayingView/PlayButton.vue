@@ -1,12 +1,16 @@
 <template>
   <div
-    @mousedown="handleMousedown"
-    @mouseup="handleMouseup"
+    @mousedown="handleMousedownOnOutside"
     @mouseenter="handleMouseenter"
     @mouseleave="handleMouseleave"
+    @dblclick="handleDoubleClick"
+    class="play-button"
   >
     <div
-      :class="iconClass"
+      @mousedown="handleMousedown"
+      @mouseup="handleMouseup"
+      @dblclick.stop=""
+      :class="[iconClass, { 'no-drag': showAllWidgets }]"
       class="icon-wrapper"
     >
       <Icon
@@ -119,6 +123,9 @@ export default {
         this.$emit('update:playbutton-state', false);
       }
     },
+    handleDoubleClick() {
+      this.$bus.$emit('toggle-fullscreen');
+    },
     handleMouseenter() {
       this.mouseover = true;
       if (!this.attachedShown && this.isFocused && !this.mousedownOnVolume) {
@@ -137,9 +144,19 @@ export default {
         this.iconClass = 'fade-out';
       }, 200);
     },
+    handleMousedownOnOutside() {
+      if (!this.showAllWidgets && !this.attachedShown && this.isFocused) {
+        this.cursorAppear = true;
+        this.iconClass = 'fade-in';
+      }
+    },
     handleMousedown() { // eslint-disable-line complexity
-      if (this.justFocused || (this.showAllWidgets
-        && (this.justCloseAttached || this.justMousedownOnVolume))) {
+      if (
+        this.justFocused
+        || (
+          this.showAllWidgets && (this.justCloseAttached || this.justMousedownOnVolume)
+        )
+      ) {
         this.justFocused = this.justCloseAttached = this.justMousedownOnVolume = false;
         this.cursorAppear = true;
         this.iconClass = 'fade-in';
@@ -166,6 +183,13 @@ export default {
 
 
 <style lang="scss" scoped>
+.play-button {
+  padding-top: 10vh;
+  padding-left: 12vw;
+  padding-right: 12vw;
+  padding-bottom: 10vh;
+  border-radius: 50%;
+}
 .icon-ani-fade-in {
   animation: ytp-bezel-fadein 110ms linear 1 normal forwards;
 }
@@ -173,20 +197,20 @@ export default {
   animation: ytp-bezel-fadeout 110ms linear 1 normal forwards;
 }
 @keyframes ytp-bezel-fadein {
-  0% {opacity: 0.7; transform: scale(0.8)};
-  100% {opacity: 1; transform: scale(1)};
+  from {opacity: 0.7; transform: scale(0.8)};
+  to {opacity: 1; transform: scale(1)};
 }
 @keyframes ytp-bezel-fadeout {
-  0% {opacity: 1; transform: scale(1)};
-  100% {opacity: 0.7; transform: scale(0.8)};
+  from {opacity: 1; transform: scale(1)};
+  to {opacity: 0.7; transform: scale(0.8)};
 }
 @keyframes fadein {
-  0% {opacity: 0};
-  100% {opacity: 1};
+  from {opacity: 0};
+  to {opacity: 1};
 }
 @keyframes fadeout {
-  0% {opacity: 1};
-  100% {opacity: 0};
+  from {opacity: 1};
+  to {opacity: 0};
 }
 .fade-in {
   animation: fadein 100ms linear 1 normal forwards;
@@ -227,8 +251,8 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480p
 @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
 screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
   .icon-wrapper {
-    width: 93px;
-    height: 93px;
+    width: 140px;
+    height: 140px;
   }
   .play {
     margin-left: 3px;
@@ -237,8 +261,8 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080
 @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
 screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   .icon-wrapper {
-    width: 129px;
-    height: 129px;
+    width: 180px;
+    height: 180px;
   }
   .play {
     margin-left: 3px;

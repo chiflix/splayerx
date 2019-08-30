@@ -11,7 +11,7 @@ const MINSIZE = [320, 180];
  * @constant
  * @type number[]
  */
-const getWindowRect = () => [
+const getScreenRect = () => [
   window.screen.availLeft, window.screen.availTop,
   window.screen.availWidth, window.screen.availHeight,
 ];
@@ -45,8 +45,8 @@ export default class WindowRectService implements IWindowRectRequest {
   ): number[] {
     let result = videoSize;
     const getRatio = (size: number[]) => size[0] / size[1];
-    const setWidthByHeight = (size: number[]) => [size[1] * getRatio(videoSize), size[1]];
-    const setHeightByWidth = (size: number[]) => [size[0], size[0] / getRatio(videoSize)];
+    const setSizeByHeight = (size: number[]) => [size[1] * getRatio(videoSize), size[1]];
+    const setSizeByWidth = (size: number[]) => [size[0], size[0] / getRatio(videoSize)];
     const biggerSize = (
       size: number[],
       diffedSize: number[],
@@ -54,22 +54,22 @@ export default class WindowRectService implements IWindowRectRequest {
     const biggerWidth = (size: number[], diffedSize: number[]) => size[0] >= diffedSize[0];
     const biggerRatio = (size1: number[], size2: number[]) => getRatio(size1) > getRatio(size2);
     if (videoExisted && biggerWidth(result, maxSize)) {
-      result = setHeightByWidth(maxSize);
+      result = setSizeByWidth(maxSize);
     }
     const realMaxSize = videoExisted && screenSize ? screenSize : maxSize;
     if (biggerSize(result, realMaxSize)) {
       result = biggerRatio(result, realMaxSize)
-        ? setHeightByWidth(realMaxSize) : setWidthByHeight(realMaxSize);
+        ? setSizeByWidth(realMaxSize) : setSizeByHeight(realMaxSize);
     }
     if (biggerSize(minSize, result)) {
       result = biggerRatio(minSize, result)
-        ? setHeightByWidth(minSize) : setWidthByHeight(minSize);
+        ? setSizeByWidth(minSize) : setSizeByHeight(minSize);
     }
     return result.map(Math.round);
   }
 
   /**
-   * @description 计算最新的窗口位置
+   * @description 根据窗口中点进行缩放，计算出新视频的左上点的位置，并当视频超出当前屏幕边缘时做回弹处理
    * @author tanghaixiang
    * @param {number[]} currentRect
    * @param {number[]} windowRect
@@ -78,30 +78,29 @@ export default class WindowRectService implements IWindowRectRequest {
    */
   private calculateWindowPosition(
     currentRect: number[],
-    windowRect: number[],
     newSize: number[],
+    windowRect: number[],
   ): number[] {
     const tempRect = currentRect.slice(0, 2)
       .map((value, index) => value + (currentRect.slice(2, 4)[index] / 2))
-      .map((value, index) => Math.floor(value - (newSize[index] / 2))).concat(newSize);
-    return ((windowRect, tempRect) => {
-      const alterPos = (
-        boundX: number,
-        boundLength: number,
-        videoX: number,
-        videoLength: number,
-      ) => {
-        if (videoX < boundX) return boundX;
-        if (videoX + videoLength > boundX + boundLength) {
-          return (boundX + boundLength) - videoLength;
-        }
-        return videoX;
-      };
-      return [
-        alterPos(windowRect[0], windowRect[2], tempRect[0], tempRect[2]),
-        alterPos(windowRect[1], windowRect[3], tempRect[1], tempRect[3]),
-      ];
-    })(windowRect, tempRect);
+      .map((value, index) => Math.floor(value - (newSize[index] / 2)))
+      .concat(newSize);
+    const alterPos = (
+      boundX: number,
+      boundLength: number,
+      videoX: number,
+      videoLength: number,
+    ) => {
+      if (videoX < boundX) return boundX;
+      if (videoX + videoLength > boundX + boundLength) {
+        return (boundX + boundLength) - videoLength;
+      }
+      return videoX;
+    };
+    return [
+      alterPos(windowRect[0], windowRect[2], tempRect[0], tempRect[2]),
+      alterPos(windowRect[1], windowRect[3], tempRect[1], tempRect[3]),
+    ];
   }
 
   /**
@@ -115,21 +114,27 @@ export default class WindowRectService implements IWindowRectRequest {
    * @param {number[]} [windowPosition]
    * @returns {number[]} 返回新的窗口大小和位置
    */
-  public uploadWindowBy(
+  public uploadWindowBy( // eslint-disable-line complexity
     fullScreen: boolean,
     whichView?: string,
     windowAngle?: number,
     lastWindowAngle?: number,
     lastWindowSize?: number[],
     windowPosition?: number[],
+    isFullScreen?: boolean,
   ): number[] {
     let newRect: number[] = [];
     ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [fullScreen]);
     if (!fullScreen && whichView === 'landing-view') {
-      ipcRenderer.send('callMainWindowMethod', 'setSize', LANDINGVIEWRECT.slice(0, 2));
-      // ipcRenderer.send('callMainWindowMethod', 'setPosition', LANDINGVIEWRECT.slice(2, 4));
-      setTimeout(() => window.dispatchEvent(new Event('resize')), 10);
-      newRect = LANDINGVIEWRECT;
+      if (lastWindowSize && windowPosition && isFullScreen === false) {
+        const oldRect = windowPosition.concat(lastWindowSize);
+        newRect = this.calculateWindowRect(LANDINGVIEWRECT.slice(0, 2), false, oldRect);
+      } else {
+        ipcRenderer.send('callMainWindowMethod', 'setSize', LANDINGVIEWRECT.slice(0, 2));
+        // ipcRenderer.send('callMainWindowMethod', 'setPosition', LANDINGVIEWRECT.slice(2, 4));
+        setTimeout(() => window.dispatchEvent(new Event('resize')), 10);
+        newRect = LANDINGVIEWRECT;
+      }
     } else if (!fullScreen && lastWindowSize && windowPosition
       && (((windowAngle === 90 || windowAngle === 270)
         && (lastWindowAngle === 0 || lastWindowAngle === 180))
@@ -137,13 +142,13 @@ export default class WindowRectService implements IWindowRectRequest {
           && (lastWindowAngle === 90 || lastWindowAngle === 270)))) {
       const videoSize = [lastWindowSize[1], lastWindowSize[0]];
       const newVideoSize = this
-        .calculateWindowSize(MINSIZE, getWindowRect().slice(2, 4), videoSize);
+        .calculateWindowSize(MINSIZE, getScreenRect().slice(2, 4), videoSize);
       // 退出全屏，计算pos依赖旧窗口大小，现在设置旧窗口大小为新大小的反转，
       // 这样在那里全屏，退出全屏后窗口还在那个位置。
       const newPosition = this.calculateWindowPosition(
         windowPosition.concat([newVideoSize[1], newVideoSize[0]]),
-        getWindowRect(),
         newVideoSize,
+        getScreenRect(),
       );
       newRect = newPosition.concat(newVideoSize);
       ipcRenderer.send('callMainWindowMethod', 'setSize', newRect.slice(2, 4));
@@ -168,16 +173,17 @@ export default class WindowRectService implements IWindowRectRequest {
     videoExisted: boolean,
     oldRect: number[],
     maxSize?: number[],
+    minSize?: number[],
   ): number[] {
     if (!maxSize) {
-      maxSize = getWindowRect().slice(2, 4);
+      maxSize = getScreenRect().slice(2, 4);
     }
-    const screenSize = getWindowRect().slice(2, 4);
+    if (!minSize) minSize = MINSIZE;
     const [newWidth, newHeight] = this.calculateWindowSize(
-      MINSIZE, maxSize, videoSize, videoExisted, screenSize,
+      minSize, maxSize, videoSize, videoExisted, getScreenRect().slice(2, 4),
     );
     const [newLeft, newTop] = this.calculateWindowPosition(
-      oldRect, getWindowRect(), [newWidth, newHeight],
+      oldRect, [newWidth, newHeight], getScreenRect(),
     );
     const rect = [newLeft, newTop, newWidth, newHeight];
     ipcRenderer.send('callMainWindowMethod', 'setSize', rect.slice(2, 4));

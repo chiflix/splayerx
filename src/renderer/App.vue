@@ -6,6 +6,8 @@
   >
     <Titlebar
       v-if="$route.name !== 'playing-view'"
+      :is-landing-view="$route.name === 'landing-view'"
+      :show-sidebar="showSidebar"
       :enable-full-screen-button="['landing-view', 'playing-view', 'browsing-view']
         .includes($route.name)"
     />
@@ -13,7 +15,10 @@
       :name="transitionMode"
       mode="out-in"
     >
-      <router-view :open-file-args="openFileArgs" />
+      <router-view
+        :open-file-args="openFileArgs"
+        @update-side-bar="showSidebar = $event"
+      />
     </transition>
   </div>
 </template>
@@ -34,12 +39,14 @@ export default {
     return {
       transitionMode: '',
       openFileArgs: null,
+      showSidebar: false,
     };
   },
   watch: {
     $route(to: any, from: any) {
       if (to.name === 'landing-view' && from.name === 'language-setting') this.transitionMode = 'fade';
       else this.transitionMode = '';
+      this.showSidebar = false;
     },
   },
   mounted() {
@@ -78,7 +85,7 @@ export default {
 // global scss
 // @import "@/css/style.scss";
 .landing-view {
-  background-image: linear-gradient(-28deg, #414141 0%, #545454 47%, #7B7B7B 100%);
+  background-color: #434349;
 }
 
 .fade {

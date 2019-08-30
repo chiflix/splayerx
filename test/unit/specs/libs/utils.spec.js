@@ -6,6 +6,8 @@ import {
   timecodeFromSeconds,
   parseNameFromPath,
   crc32,
+  getNumbersFromVersion,
+  compareVersions,
 } from '@/libs/utils';
 
 describe('libs utils', () => {
@@ -36,9 +38,9 @@ describe('libs utils', () => {
   });
   it('should return correct hash value', async () => {
     const expectedResult = '84f0e9e5e05f04b58f53e2617cc9c866-'
-                         + 'f54d6eb31bef84839c3ce4fc2f57991c-'
-                         + 'b1f0696aec64577228d93eabcc8eb69b-'
-                         + 'f497c6684c4c6e50d0856b5328a4bedc';
+      + 'f54d6eb31bef84839c3ce4fc2f57991c-'
+      + 'b1f0696aec64577228d93eabcc8eb69b-'
+      + 'f497c6684c4c6e50d0856b5328a4bedc';
     expect(await mediaQuickHash('./test/assets/test.avi')).to.be.equal(expectedResult);
     try {
       await mediaQuickHash('./test/assets/test_not_exist.avi');
@@ -166,5 +168,34 @@ describe('libs utils', () => {
 
   it('should compute correct result for crc32', () => {
     expect(crc32('test')).to.be.equal(-662733300);
+  });
+
+  it('should get right result for getNumbersFromVersion', () => {
+    const versionArray1 = getNumbersFromVersion('4.2.0');
+    expect(versionArray1.toString()).to.be.equal('4,2,0,Infinity');
+    const versionArray2 = getNumbersFromVersion('5.22.1000');
+    expect(versionArray2.toString()).to.be.equal('5,22,1000,Infinity');
+    const versionArray3 = getNumbersFromVersion('5.2.0-beat.2');
+    expect(versionArray3.toString()).to.be.equal('5,2,0,2');
+    const versionArray4 = getNumbersFromVersion('5.32.10-beat.12');
+    expect(versionArray4.toString()).to.be.equal('5,32,10,12');
+    const versionArray5 = getNumbersFromVersion('5.32.10-beat-12');
+    expect(versionArray5.toString()).to.be.equal('5,32,10,12');
+    const versionArray6 = getNumbersFromVersion('5.32.10.beat-12');
+    expect(versionArray6.toString()).to.be.equal('5,32,10,12');
+    const versionArray7 = getNumbersFromVersion('5.32.10.bEAt-12');
+    expect(versionArray7.toString()).to.be.equal('5,32,10,12');
+    const versionArray8 = getNumbersFromVersion('5.32.10.BEAT.102');
+    expect(versionArray8.toString()).to.be.equal('5,32,10,102');
+  });
+
+  it('should get right result for compareVersions', () => {
+    expect(compareVersions('4.2.0', '4.2.0')).to.be.equal(false);
+    expect(compareVersions('4.2.0', '4.3.0')).to.be.equal(true);
+    expect(compareVersions('4.22.10', '5.1.0')).to.be.equal(true);
+    expect(compareVersions('4.2.0', '4.2.0-beta.100')).to.be.equal(false);
+    expect(compareVersions('4.2.0-beat.1', '4.2.0-beta.100')).to.be.equal(true);
+    expect(compareVersions('4.2.0-beat.10000', '4.2.0-beta.100')).to.be.equal(false);
+    expect(compareVersions('4.22.110-beat.10000', '5.2.0-beta.100')).to.be.equal(true);
   });
 });

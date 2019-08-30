@@ -3,6 +3,7 @@
     ref="showArea"
     @mouseenter="enterArea"
     @mouseleave="leaveArea"
+    @dblclick="handleDbClick"
     class="show-area"
   >
     <div
@@ -11,7 +12,8 @@
       @mouseenter="actionArea"
       @mouseleave="leaveActionArea"
       @mousedown="mouseDownOnIndicator"
-      class="trigger-area"
+      @dblclick.stop=""
+      class="trigger-area no-drag"
     >
       <div
         ref="indicatorContainer"
@@ -195,6 +197,9 @@ export default {
     }
   },
   methods: {
+    handleDbClick() {
+      this.$bus.$emit('toggle-fullscreen');
+    },
     enterArea() {
       this.inArea = true;
       if (this.volumeFadingId) clearTimeout(this.volumeFadingId);

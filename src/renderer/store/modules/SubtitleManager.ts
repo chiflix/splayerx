@@ -43,7 +43,7 @@ import {
 import { LanguageCode } from '@/libs/language';
 import { AudioTranslateBubbleOrigin } from './AudioTranslate';
 import { ISubtitleStream } from '@/plugins/mediaTasks';
-import { Features, isFeatureEnabled } from '@/helpers/featureSwitch';
+import { isAIEnabled } from '@/helpers/featureSwitch';
 
 const sortOfTypes = {
   local: 0,
@@ -264,6 +264,8 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
           dispatch(a.stopAISelection);
           retrieveEmbeddedList(originSrc)
             .then(streams => dispatch(a.addEmbeddedSubtitles, { mediaHash, source: streams }));
+          // 继续上次的翻译任务
+          dispatch(atActions.AUDIO_TRANSLATE_CONTINUE);
         });
     }
 
@@ -481,7 +483,7 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
         .filter((info: TranscriptInfo) => info.languageCode === primaryLanguage);
       const secondaryNotExistedResults = notExistedNewSubs
         .filter((info: TranscriptInfo) => info.languageCode === secondaryLanguage);
-      if ((await isFeatureEnabled(Features.AI, true))) {
+      if ((await isAIEnabled())) {
         // 出现AI按钮的情况
         // 1. 在线字幕tags都是ES(模糊搜索)
         // 2. 没有在线字幕
@@ -675,71 +677,80 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
     dispatch, commit, getters, state,
   }, id: string) {
     const lastSelected = [state.primarySubtitleId, state.secondarySubtitleId];
-    if (!getters.subtitleOff) {
-      if (!id) {
-        commit(m.setNotSelectedSubtitle, 'primary');
-      } else {
-        const primary = id;
-        let secondary = getters.secondarySubtitleId;
+    if (getters.subtitleOff) commit(m.setPrimarySubtitleId, '');
+    else {
+      const primaryId = id;
+      let secondaryId = state.secondarySubtitleId;
 
-        if (id === secondary) secondary = '';
-        commit(m.setPrimarySubtitleId, primary);
-        if (state.allSubtitles[primary]) {
-          commit(m.setPrimaryDelay, state.allSubtitles[primary].delay);
-        }
-        commit(m.setSecondarySubtitleId, secondary);
-        if (state.allSubtitles[secondary]) {
-          commit(m.setSecondaryDelay, state.allSubtitles[secondary].delay);
-        }
-        dispatch(a.storeSelectedSubtitles, [primary, secondary]);
+      if (primaryId === secondaryId) {
+        secondaryId = '';
+        if (!primaryId) commit(m.setNotSelectedSubtitle);
+        else commit(m.setNotSelectedSubtitle, 'secondary');
       }
-    } else if (getters.subtitleOff) commit(m.setPrimarySubtitleId, '');
-    const finalSelected = [state.primarySubtitleId, state.secondarySubtitleId];
-    difference(lastSelected, finalSelected).forEach((id) => {
-      if (store.hasModule(id)) dispatch(`${id}/${subActions.pause}`);
-    });
-    difference(finalSelected, lastSelected).forEach((id) => {
-      if (store.hasModule(id)) dispatch(`${id}/${subActions.resume}`);
-    });
+
+      if (!primaryId) commit(m.setNotSelectedSubtitle, 'primary');
+      else {
+        commit(m.setPrimarySubtitleId, primaryId);
+        if (state.allSubtitles[primaryId]) {
+          commit(m.setPrimaryDelay, state.allSubtitles[primaryId].delay);
+        }
+      }
+
+      const finalSelected = [state.primarySubtitleId, state.secondarySubtitleId];
+      difference(lastSelected, finalSelected).forEach((id) => {
+        if (store.hasModule(id)) dispatch(`${id}/${subActions.pause}`);
+      });
+      difference(finalSelected, lastSelected).forEach((id) => {
+        if (store.hasModule(id)) dispatch(`${id}/${subActions.resume}`);
+      });
+
+      dispatch(a.storeSelectedSubtitles, [primaryId, secondaryId]);
+    }
   },
-  async [a.manualChangePrimarySubtitle]({ dispatch }, id: string) {
+  async [a.manualChangePrimarySubtitle]({ dispatch, commit, state }, id: string) {
     await dispatch('setSubtitleOff', !id);
     if (!id) dispatch(a.autoChangeSecondarySubtitle, '');
+    else if (!state.secondarySubtitleId) commit(m.setNotSelectedSubtitle, 'secondary');
     dispatch(a.autoChangePrimarySubtitle, id);
   },
   async [a.autoChangeSecondarySubtitle]({
     dispatch, commit, getters, state,
   }, id: string) {
     const lastSelected = [state.primarySubtitleId, state.secondarySubtitleId];
-    if (!getters.subtitleOff) {
-      if (!id) {
-        commit(m.setNotSelectedSubtitle, 'secondary');
-      } else {
-        let primary = getters.primarySubtitleId;
-        const secondary = id;
-        if (id && id === primary) primary = '';
-        commit(m.setPrimarySubtitleId, primary);
-        if (state.allSubtitles[primary]) {
-          commit(m.setPrimaryDelay, state.allSubtitles[primary].delay);
-        }
-        commit(m.setSecondarySubtitleId, secondary);
-        if (state.allSubtitles[secondary]) {
-          commit(m.setSecondaryDelay, state.allSubtitles[secondary].delay);
-        }
-        dispatch(a.storeSelectedSubtitles, [primary, secondary]);
+    if (getters.subtitleOff) commit(m.setSecondarySubtitleId, '');
+    else {
+      let primaryId = state.primarySubtitleId;
+      const secondaryId = id;
+
+      if (primaryId === secondaryId) {
+        primaryId = '';
+        if (!secondaryId) commit(m.setNotSelectedSubtitle);
+        else commit(m.setNotSelectedSubtitle, 'primary');
       }
-    } else if (getters.subtitleOff) commit(m.setSecondarySubtitleId, '');
-    const finalSelected = [state.primarySubtitleId, state.secondarySubtitleId];
-    difference(lastSelected, finalSelected).forEach((id) => {
-      if (store.hasModule(id)) dispatch(`${id}/${subActions.pause}`);
-    });
-    difference(finalSelected, lastSelected).forEach((id) => {
-      if (store.hasModule(id)) dispatch(`${id}/${subActions.resume}`);
-    });
+
+      if (!secondaryId) commit(m.setNotSelectedSubtitle, 'secondary');
+      else {
+        commit(m.setSecondarySubtitleId, secondaryId);
+        if (state.allSubtitles[secondaryId]) {
+          commit(m.setSecondaryDelay, state.allSubtitles[secondaryId].delay);
+        }
+      }
+
+      const finalSelected = [state.primarySubtitleId, state.secondarySubtitleId];
+      difference(lastSelected, finalSelected).forEach((id) => {
+        if (store.hasModule(id)) dispatch(`${id}/${subActions.pause}`);
+      });
+      difference(finalSelected, lastSelected).forEach((id) => {
+        if (store.hasModule(id)) dispatch(`${id}/${subActions.resume}`);
+      });
+
+      dispatch(a.storeSelectedSubtitles, [primaryId, secondaryId]);
+    }
   },
-  async [a.manualChangeSecondarySubtitle]({ dispatch }, id: string) {
+  async [a.manualChangeSecondarySubtitle]({ dispatch, commit, state }, id: string) {
     await dispatch('setSubtitleOff', !id);
     if (!id) dispatch(a.autoChangePrimarySubtitle, '');
+    else if (!state.primarySubtitleId) commit(m.setNotSelectedSubtitle, 'primary');
     dispatch(a.autoChangeSecondarySubtitle, id);
   },
   async [a.storeSelectedSubtitles]({ state }, ids: string[]) {
