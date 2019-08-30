@@ -364,8 +364,8 @@
   },
   "translateModal": {
     "videoLanguageLabel": "视频语言",
-    "subtitleLanguageLabel": "翻译为",
-    "selectLanguageLabel": "选择",
+    "subtitleLanguageLabel": "翻译至",
+    "selectLanguageLabel": "请选择",
     "audioLanguageLoading": "获取语言列表中 ...",
     "audioLanguageLoadFail": "连接错误，请稍后重试",
     "select": {

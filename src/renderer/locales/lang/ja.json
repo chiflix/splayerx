@@ -221,7 +221,7 @@
     }
   },
   "nextVideo": {
-    "nextInFolder": "ホルダー中の次のビデオ",
+    "nextInFolder": "再生リスト中の次のビデオ",
     "nextInPlaylist": "プレイリスト中の次のビデオ"
   },
   "welcome": {
@@ -252,7 +252,7 @@
       "displayLanguage": "言語表示",
       "generalSetting": "通常設定",
       "others": "その他",
-      "switchDisplayLanguages": "SPlayerの言語表示を修正。"
+      "switchDisplayLanguages": "SPlayerの言語表示を変更。"
     },
     "translate": {
       "languageDescription": "次の言語で翻訳結果を取得するために匿名データをアップロードします。プライバシー情報は含まれません。",
@@ -312,7 +312,7 @@
     }
   },
   "recentPlaylist": {
-    "folderSource": "ホルダー",
+    "folderSource": "再生リスト",
     "playing": "再生中",
     "paused": "一時停止",
     "playlistSource": "プレイリスト",
