@@ -553,7 +553,7 @@ export default Vue.extend({
     display: flex;
     justify-content: space-between;
     .button {
-      width: 111px;
+      width: 126px;
     }
   }
   .button {
