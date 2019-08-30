@@ -19,16 +19,26 @@ function getUserId() {
   }
 }
 
+function getApplicationDisplayLanguage() {
+  try {
+    return Vue.axios.defaults.headers.common['X-Application-Display-Language'] || '';
+  } catch (ex) {
+    return '';
+  }
+}
+
 function getUserObject() {
   return {
     identifier: getUserId(),
     custom: {
       version: getMainVersion(),
+      displayLanguage: getApplicationDisplayLanguage(),
     },
   };
 }
 
 export async function getConfig<T>(configKey: string, defaultValue?: T): Promise<T> {
+  log.debug('configKey', getUserObject());
   return new Promise((resolve) => {
     setTimeout(() => resolve(defaultValue), 10000);
     client.getValue(configKey, defaultValue, (value: T) => {
