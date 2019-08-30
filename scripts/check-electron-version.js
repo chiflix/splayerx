@@ -2,7 +2,7 @@ const { execSync } = require('child_process');
 
 function updateElectron(version) {
   console.log('Update Electron...');
-  execSync(`npx cross-env force_no_cache=true npm i @chiflix/electron@${version}`, {
+  execSync(`npx cross-env force_no_cache=true npm i @chiflix/electron@${version} --save --save-exact`, {
     stdio: 'inherit',
   });
 }
@@ -18,6 +18,7 @@ try {
     `curl -L https://github.com/chiflix/electron/releases/download/v${version}/${process.platform}_ELECTRONSLIM_VERSION_HASH.txt`,
     { encoding: 'utf-8' },
   ).trim();
+  console.log(`version: ${version}`);
   console.log({ expectedHash, actualHash });
   if (expectedHash !== actualHash) updateElectron(version);
   process.exit(0);
