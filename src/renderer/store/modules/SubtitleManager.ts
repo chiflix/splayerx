@@ -141,6 +141,7 @@ const mutations: MutationTree<ISubtitleManagerState> = {
   },
   [m.deleteSubtitleId](state, id: string) {
     Vue.set(state.allSubtitles, id, undefined);
+    delete state.allSubtitles[id];
   },
   [m.deletaAllSubtitleIds](state) { state.allSubtitles = {}; },
   [m.setPrimaryDelay](state, delayInSeconds: number) {
@@ -402,7 +403,7 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
           });
         }
         await dispatch(a.addOnlineSubtitles, { mediaHash, source: result.add })
-          .then(() => dispatch(a.deleteSubtitlesByUuid, result.delete));
+          .then(() => dispatch(a.deleteSubtitlesByHash, result.delete.map(({ hash }) => hash)));
       });
   },
   async [a.refreshOnlineSubtitles](
@@ -422,7 +423,7 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
       const results = flatten(resultsList);
       const newSubtitlesToAdd: TranscriptInfo[] = [];
       const oldSubtitlesToDel: ISubtitleControlListItem[] = [];
-      const oldSubtitles = [...(getters as { list: ISubtitleControlListItem[] }).list];
+      const oldSubtitles: ISubtitleControlListItem[] = [...getters.list];
 
       // 将Translated类型的都删除掉
       const translatedSubs = remove(oldSubtitles, ({
@@ -535,20 +536,19 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
         });
       }
       await dispatch(a.addOnlineSubtitles, { mediaHash, source: result.add })
-        .then(() => dispatch(a.deleteSubtitlesByUuid, result.delete));
+        .then(() => dispatch(a.deleteSubtitlesByUuid, result.delete.map(({ id }) => id)));
     });
   },
   [a.checkLocalSubtitles]({ state, dispatch }) {
-    const localInvalidSubtitles = Object.keys(state.allSubtitles)
+    const localInvalidSubtitleIds = Object.keys(state.allSubtitles)
       .filter(id => state.allSubtitles[id])
       .filter((id) => {
         const subtitle = state.allSubtitles[id];
         const source = subtitle.displaySource;
         return source && source.type === Type.Local && !existsSync(source.source as string);
-      })
-      .map(id => state.allSubtitles[id]);
-    if (localInvalidSubtitles.length) {
-      dispatch(a.deleteSubtitlesByUuid, localInvalidSubtitles)
+      });
+    if (localInvalidSubtitleIds.length) {
+      dispatch(a.deleteSubtitlesByUuid, localInvalidSubtitleIds)
         .then(() => addBubble(LOCAL_SUBTITLE_REMOVED));
     }
   },
@@ -638,7 +638,7 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
     if (options.mediaHash === state.mediaHash) {
       const subtitleGenerator = options.generator;
       try {
-        const list = Object.values(state.allSubtitles);
+        const list = Object.values(state.allSubtitles).filter(v => v);
         const hash = await subtitleGenerator.getHash();
         const source = await subtitleGenerator.getDisplaySource();
         const existed = list
@@ -659,7 +659,7 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
     return {};
   },
   [a.removeSubtitle]({ commit, getters }, id: string) {
-    store.unregisterModule(id);
+    if (store.hasModule(id)) store.unregisterModule(id);
     commit(m.deleteSubtitleId, id);
     if (getters.isFirstSubtitle && getters.primarySubtitleId === id) {
       commit(m.setNotSelectedSubtitle, 'primary');
@@ -667,11 +667,17 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
       commit(m.setNotSelectedSubtitle, 'secondary');
     }
   },
-  async [a.deleteSubtitlesByUuid]({ state, dispatch }, ids: IEntity[]) {
-    ids.forEach((id) => {
-      dispatch(a.removeSubtitle, id);
-    });
-    return removeSubtitleItemsFromList(ids, state.mediaHash);
+  async [a.deleteSubtitlesByUuid]({ state, dispatch }, ids: string[]) {
+    ids.forEach(id => dispatch(a.removeSubtitle, id));
+    return removeSubtitleItemsFromList(ids.map(id => state.allSubtitles[id]), state.mediaHash);
+  },
+  async [a.deleteSubtitlesByHash]({ state, dispatch }, hashes: string[]) {
+    const { allSubtitles } = state;
+    const ids = hashes
+      .map(hash => Object.keys(allSubtitles).find(id => allSubtitles[id].hash === hash) || '')
+      .filter(id => id);
+    ids.forEach(id => dispatch(a.removeSubtitle, id));
+    return removeSubtitleItemsFromList(ids.map(id => state.allSubtitles[id]), state.mediaHash);
   },
   async [a.autoChangePrimarySubtitle]({
     dispatch, commit, getters, state,

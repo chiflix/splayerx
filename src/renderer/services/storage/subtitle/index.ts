@@ -6,6 +6,7 @@ import { LanguageCode } from '@/libs/language';
 import { SelectedSubtitle, IStoredSubtitleItem } from '@/interfaces/ISubtitleStorage';
 import { SubtitleDataBase } from './db';
 import { SUBTITLE_REAL_DIRNAME } from '@/constants';
+import { sourceToFormat } from '@/services/subtitle/utils';
 
 const db = new SubtitleDataBase();
 
@@ -113,13 +114,9 @@ export class DatabaseGenerator implements IEntityGenerator {
 
   public async getDisplaySource() { return this.displaySource; }
 
-  private sources: IOrigin[];
+  private realSource: IOrigin;
 
-  public async getRealSource() {
-    return this.sources
-      .find(({ type, source }) => type === Type.Local
-        && dirname(source as string) === SUBTITLE_REAL_DIRNAME) || this.sources[0];
-  }
+  public async getRealSource() { return this.realSource; }
 
   private hash: string;
 
@@ -139,10 +136,12 @@ export class DatabaseGenerator implements IEntityGenerator {
     if (storedSubtitle) {
       const newGenerator = new DatabaseGenerator();
       newGenerator.displaySource = source;
-      const { sources, format, language } = storedSubtitle;
-      newGenerator.format = format;
+      const { sources, language } = storedSubtitle;
+      newGenerator.realSource = sources
+        .find(({ type, source }) => type === Type.Local
+          && dirname(source as string) === SUBTITLE_REAL_DIRNAME) || sources[0];
+      newGenerator.format = sourceToFormat(newGenerator.realSource);
       newGenerator.language = language;
-      newGenerator.sources = sources;
       newGenerator.hash = hash;
       newGenerator.delayInSeconds = delay || 0;
       return newGenerator;
