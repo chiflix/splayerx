@@ -101,7 +101,7 @@ export default {
       const postion = thumbnailService.calculateThumbnailPosition(
         val, this.thumbnailInterval, this.thumbnailCols,
       );
-      this.backgroundPosition = `-${postion[0]}% -${postion[1]}%`;
+      this.backgroundPosition = `-${postion[0] * 100}% -${postion[1] * 100}%`;
     },
     originSrc() {
       this.isSaved = false;
