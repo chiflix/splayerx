@@ -364,8 +364,8 @@
   },
   "translateModal": {
     "selectLanguageLabel": "音声の言語",
-    "audioLanguageLoading": "",
-    "audioLanguageLoadFail": "",
+    "audioLanguageLoading": "言語リストの取得 ...",
+    "audioLanguageLoadFail": "接続に失敗しました。もう一度お試しください",
     "select": {
       "title": "ビデオソースの言語を選択",
       "content": "翻訳結果を生成するには、ビデオで聞く言語を選択して[生成] ボタンをクリックしてください。"
