@@ -364,8 +364,8 @@
   },
   "translateModal": {
     "videoLanguageLabel": "視頻語言",
-    "subtitleLanguageLabel": "翻譯爲",
-    "selectLanguageLabel": "選擇",
+    "subtitleLanguageLabel": "翻譯至",
+    "selectLanguageLabel": "請選擇",
     "audioLanguageLoading": "獲取語言列表中 ...",
     "audioLanguageLoadFail": "連接錯誤，請稍後重試",
     "select": {
