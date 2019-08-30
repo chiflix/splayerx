@@ -363,6 +363,8 @@
     "title": ""
   },
   "translateModal": {
+    "videoLanguageLabel": "Idioma de audio",
+    "subtitleLanguageLabel": "Traducir a",
     "selectLanguageLabel": "Idioma de audio",
     "audioLanguageLoading": "Obteniendo la lista de idiomas ...",
     "audioLanguageLoadFail": "Conexión fallida, intente más tarde",

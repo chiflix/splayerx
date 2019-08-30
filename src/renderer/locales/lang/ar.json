@@ -363,6 +363,8 @@
     "title": ""
   },
   "translateModal": {
+    "videoLanguageLabel": "لغة الصوت",
+    "subtitleLanguageLabel": "ترجم إلى",
     "selectLanguageLabel": "لغة الصوت",
     "audioLanguageLoading": "جارٍ إحضار قائمة اللغات ...",
     "audioLanguageLoadFail": "فشل الاتصال ، يرجى المحاولة لاحقًا",
