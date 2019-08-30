@@ -56,8 +56,8 @@
       "title": "File Not Found"
     },
     "playlistNonExist": {
-      "content": "This item is removed.",
-      "title": "File Not Found"
+      "content": "File(s) has been removed or renamed.",
+      "title": "File(s) Not Found"
     },
     "fileNonExistInPlaylist": {
       "content": "Files has been removed from the list.",
@@ -294,6 +294,9 @@
       "underlinedContent": "disagree"
     }
   },
+  "alertBubble": {
+    "button": "OK"
+  },
   "protectBubble": {
     "agree": "OK",
     "setting": "Setting",
@@ -362,6 +365,8 @@
   },
   "translateModal": {
     "selectLanguageLabel": "Audio Language",
+    "audioLanguageLoading": "Fetching language list ...",
+    "audioLanguageLoadFail": "Connection failed, please try later",
     "select": {
       "title": "Select Audio Language",
       "content": "To generate a translation result, please select the language you hear in the video and click the generate button. The process might take some time."

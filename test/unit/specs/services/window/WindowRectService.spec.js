@@ -73,15 +73,15 @@ describe('WindowRectService logic service', () => {
       const winSize = [500, 500];
       const winPos = [200, 200];
 
-      const r1 = windowRectService.uploadWindowBy(false, 'landing-view', undefined, undefined, winSize, winPos);
+      const r1 = windowRectService.uploadWindowBy(false, 'landing-view', undefined, undefined, winSize, winPos, false);
 
       const expectResult = windowRectService.calculateWindowPosition(
         winPos.concat(winSize),
+        [720, 405],
         [
           window.screen.availLeft, window.screen.availTop,
           window.screen.availWidth, window.screen.availHeight,
         ],
-        [720, 405],
       ).concat([720, 405]);
 
       expect(r1).to.be.deep.equal(expectResult);

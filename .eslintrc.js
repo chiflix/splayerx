@@ -29,6 +29,7 @@ module.exports = {
     'import/no-unresolved': 0,
     'no-param-reassign': 0,
     'no-shadow': 0,
+    'dot-notation': 0,
     'import/extensions': [
       'error',
       { js: 'never', json: 'ignorePackages', vue: 'always', scss: 'always' },

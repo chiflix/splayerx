@@ -52,7 +52,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['scaleNum', 'subToTop', 'primarySubtitleId', 'secondarySubtitleId', 'winHeight', 'chosenStyle', 'chosenSize', 'originSrc', 'enabledSecondarySub', 'duration', 'isTranslateBubbleVisiable', 'translateBubbleType']),
+    ...mapGetters(['scaleNum', 'subToTop', 'primarySubtitleId', 'secondarySubtitleId', 'winHeight', 'chosenStyle', 'chosenSize', 'originSrc', 'enabledSecondarySub', 'duration', 'isTranslateBubbleVisible', 'translateBubbleType']),
     concatCurrentCues() {
       if (this.currentCues.length === 2) {
         return [this.currentCues[0].cues, this.currentCues[1].cues];
@@ -120,7 +120,7 @@ export default {
       requestAnimationFrame(this.loopCues);
       // when next video trigger translate bubble,
       // user trigger video data, hide translate bubble
-      if (this.isTranslateBubbleVisiable
+      if (this.isTranslateBubbleVisible
         && (this.translateBubbleType === AudioTranslateBubbleType.NextVideoWhenGrab
         || this.translateBubbleType === AudioTranslateBubbleType.NextVideoWhenTranslate)
         && Math.ceil(videodata.time) < Math.ceil(this.duration)) {

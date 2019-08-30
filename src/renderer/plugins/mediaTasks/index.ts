@@ -76,6 +76,6 @@ export async function getThumbnailPath(
     );
   } catch (error) {
     log.error('[MediaTask|Thumbnail]', error);
-    return '';
+    return undefined;
   }
 }

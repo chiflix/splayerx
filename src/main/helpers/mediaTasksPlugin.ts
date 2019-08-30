@@ -85,14 +85,14 @@ export default function registerMediaTasks() {
     videoPath, imagePath, interval,
     thumbnailWidth, cols) => {
     if (existsSync(imagePath)) {
-      reply(event, 'thumbnail-reply', null, imagePath);
+      reply(event, 'thumbnail-reply', null, imagePath, videoPath);
     } else if (existsSync(videoPath)) {
       splayerxProxy.generateThumbnails(
         videoPath, imagePath, interval,
         thumbnailWidth.toString(), cols.toString(), '0',
         (err) => {
           if (err === '0' && existsSync(imagePath)) {
-            reply(event, 'thumbnail-reply', null, imagePath);
+            reply(event, 'thumbnail-reply', null, imagePath, videoPath);
           } else {
             if (typeof err !== 'string') err = `${err}, type: ${typeof err}`;
             reply(event, 'thumbnail-reply', `thumbnail-reply: ${err}`);

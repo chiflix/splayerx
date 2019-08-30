@@ -310,10 +310,12 @@ function registerMainWindowEvent(mainWindow) {
   mainWindow.on('maximize', () => {
     if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
     mainWindow.webContents.send('mainCommit', 'isMaximized', true);
+    mainWindow.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
   });
   mainWindow.on('unmaximize', () => {
     if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
     mainWindow.webContents.send('mainCommit', 'isMaximized', false);
+    mainWindow.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
   });
   mainWindow.on('minimize', () => {
     menuService.enableMenu(false);

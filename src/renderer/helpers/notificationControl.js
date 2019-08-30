@@ -147,8 +147,8 @@ export function addBubble(code, options = {}) { // eslint-disable-line complexit
     case UPLOAD_SUCCESS:
       store.dispatch('addMessages', {
         id,
-        type: 'result',
-        title: i18n.t('uploadingSuccess.title', i18n.locale, i18n.messages),
+        type: 'state',
+        title: '',
         content: i18n.t('uploadingSuccess.content', i18n.locale, i18n.messages),
         dismissAfter: 5000,
       });

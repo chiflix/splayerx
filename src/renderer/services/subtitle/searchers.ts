@@ -60,6 +60,6 @@ export function retrieveEmbeddedList(
 ): Promise<[string, ISubtitleStream][]> {
   return getSubtitleStreams(videoSrc).then(streams => streams
     .filter(({ index }) => !excludedStreamIndexes.includes(index))
-    .filter(({ codecName }) => Object.values(Format).includes(codecName))
+    .filter(({ codecName }) => Object.values(Format).includes(codecName as Format))
     .map(stream => [videoSrc, stream]));
 }

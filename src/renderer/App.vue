@@ -85,7 +85,7 @@ export default {
 // global scss
 // @import "@/css/style.scss";
 .landing-view {
-  background-image: linear-gradient(-28deg, #414141 0%, #545454 47%, #7B7B7B 100%);
+  background-color: #434349;
 }
 
 .fade {
