@@ -136,7 +136,7 @@
 
 <script lang="ts">
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
-import { SubtitleControlListItem } from '@/interfaces/ISubtitle';
+import { ISubtitleControlListItem } from '@/interfaces/ISubtitle';
 import Icon from '../BaseIconContainer.vue';
 import Progress from './Progress.vue';
 
@@ -311,7 +311,7 @@ export default {
         }
       }
     },
-    handleSubDelete(e: MouseEvent, item: SubtitleControlListItem) {
+    handleSubDelete(e: MouseEvent, item: ISubtitleControlListItem) {
       if ((e.target as HTMLElement).nodeName !== 'DIV') {
         setTimeout(() => {
           this.$emit('update:transFlag', false);

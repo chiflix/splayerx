@@ -13,7 +13,7 @@ import { IsMacintosh } from '../../shared/common/platform';
 import Locale from '../../shared/common/localize';
 import menuTemplate from './menu.json';
 import { IMenuDisplayInfo } from '../../renderer/interfaces/IRecentPlay';
-import { SubtitleControlListItem, Type } from '../../renderer/interfaces/ISubtitle';
+import { ISubtitleControlListItem, Type } from '../../renderer/interfaces/ISubtitle';
 
 function separator(): Electron.MenuItem {
   return new MenuItem({ type: 'separator' });
@@ -51,12 +51,12 @@ export default class Menubar {
   private browsingViewTop = false;
 
   private primarySubs: {
-    id: string, label: string, checked: boolean, subtitleItem: SubtitleControlListItem,
+    id: string, label: string, checked: boolean, subtitleItem: ISubtitleControlListItem,
   }[];
 
   private secondarySubs: {
     id: string, label: string, checked: boolean,
-    enabled: boolean, subtitleItem: SubtitleControlListItem,
+    enabled: boolean, subtitleItem: ISubtitleControlListItem,
   }[];
 
   private _routeName: string;
@@ -252,7 +252,7 @@ export default class Menubar {
 
   public updatePrimarySub(
     items?: {
-      id: string, label: string, checked: boolean, subtitleItem: SubtitleControlListItem,
+      id: string, label: string, checked: boolean, subtitleItem: ISubtitleControlListItem,
     }[],
   ) {
     if (items) this.primarySubs = items;
@@ -285,7 +285,7 @@ export default class Menubar {
   public updateSecondarySub(
     items?: {
       id: string, label: string, checked: boolean,
-      enabled: boolean, subtitleItem: SubtitleControlListItem,
+      enabled: boolean, subtitleItem: ISubtitleControlListItem,
     }[],
   ) {
     if (items) this.secondarySubs = items;

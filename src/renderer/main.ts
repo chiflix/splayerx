@@ -46,7 +46,7 @@ import { addBubble } from './helpers/notificationControl';
 import { SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, LOAD_SUBVIDEO_FAILED } from './helpers/notificationcodes';
 import InputPlugin, { getterTypes as iGT } from '@/plugins/input';
 import { VueDevtools } from './plugins/vueDevtools.dev';
-import { SubtitleControlListItem, Type } from './interfaces/ISubtitle';
+import { ISubtitleControlListItem, Type } from './interfaces/ISubtitle';
 import { getValidVideoRegex, getValidSubtitleRegex } from '../shared/utils';
 import MenuService from './services/menu/MenuService';
 
@@ -674,7 +674,7 @@ new Vue({
           }
         });
 
-        this.list.forEach((item: SubtitleControlListItem) => {
+        this.list.forEach((item: ISubtitleControlListItem) => {
           if (item.id === this.primarySubtitleId) {
             this.menuService.updateMenuItemChecked(`subtitle.mainSubtitle.${item.id}`, true);
           }
@@ -857,9 +857,9 @@ new Vue({
           }
         });
       });
-      this.menuService.on('subtitle.mainSubtitle', (e: Event, id: string, item: SubtitleControlListItem) => {
+      this.menuService.on('subtitle.mainSubtitle', (e: Event, id: string, item: ISubtitleControlListItem) => {
         if (id === 'off') this.changeFirstSubtitle('');
-        else if (item.type === Type.Translated && item.source === '') {
+        else if (item.type === Type.Translated && item.source.source === '') {
           this.showAudioTranslateModal(item);
           // this.menuService.updateMenuItemChecked('subtitle.mainSubtitle.off', true);
         } else {
@@ -867,11 +867,11 @@ new Vue({
           this.changeFirstSubtitle(item.id);
         }
       });
-      this.menuService.on('subtitle.secondarySubtitle', (e: Event, id: string, item: SubtitleControlListItem) => {
+      this.menuService.on('subtitle.secondarySubtitle', (e: Event, id: string, item: ISubtitleControlListItem) => {
         if (id === 'off') this.changeSecondarySubtitle('');
         else if (id === 'secondarySub') {
           this.updateEnabledSecondarySub(!this.enabledSecondarySub)
-        } else if (item.type === Type.Translated && item.source === '') {
+        } else if (item.type === Type.Translated && item.source.source === '') {
           this.showAudioTranslateModal(item);
           // this.menuService.updateMenuItemChecked('subtitle.mainSubtitle.off', true);
         } else {
@@ -953,13 +953,13 @@ new Vue({
         }
       });
     },
-    getSubName(item: SubtitleControlListItem) {
+    getSubName(item: ISubtitleControlListItem) {
       if (item.type === Type.Embedded) {
         return `${this.$t('subtitle.embedded')} ${item.name}`;
       }
       return item.name;
     },
-    recentSubTmp(item: SubtitleControlListItem, isFirstSubtitleType: boolean) {
+    recentSubTmp(item: ISubtitleControlListItem, isFirstSubtitleType: boolean) {
       return {
         id: `${item.id}`,
         enabled: isFirstSubtitleType ? true: this.enabledSecondarySub,
@@ -975,7 +975,7 @@ new Vue({
         label: this.calculatedNoSub ? this.$t('msg.subtitle.noSubtitle') : this.$t('msg.subtitle.notToShowSubtitle'),
         checked: false,
       });
-      this.list.forEach((item: SubtitleControlListItem, index: number) => {
+      this.list.forEach((item: ISubtitleControlListItem, index: number) => {
         submenu.splice(index + 1, 1, this.recentSubTmp(item, true));
       });
       const menuItem = submenu.find(menuItem => menuItem.id === this.primarySubtitleId);
@@ -1000,7 +1000,7 @@ new Vue({
         enabled: this.enabledSecondarySub,
         checked: false,
       });
-      this.list.forEach((item: SubtitleControlListItem, index: number) => {
+      this.list.forEach((item: ISubtitleControlListItem, index: number) => {
         submenu.splice(index + 3, 1, this.recentSubTmp(item, false));
       });
       const menuItem = submenu.find(menuItem => menuItem.id === this.secondarySubtitleId);
