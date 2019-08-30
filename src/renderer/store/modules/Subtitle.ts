@@ -248,6 +248,11 @@ const actions: ActionTree<ISubtitleState, {}> = {
   [a.resetDelay]({ commit }) {
     commit(m.setDelay, 0);
   },
+  async [a.destroy]({ state }) {
+    const subtitle = subtitleLoaderParserMap.get(state.hash);
+    if (subtitle && subtitle.loader) await subtitle.loader.destroy();
+    subtitleLoaderParserMap.delete(state.id);
+  },
 };
 
 const Subtitle: Module<ISubtitleState, {}> = {

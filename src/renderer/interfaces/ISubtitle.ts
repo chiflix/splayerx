@@ -58,6 +58,7 @@ export interface ILoader {
   cache(): Promise<IOrigin>;
   on(event: 'cache' | 'read' | 'upload', callback: (result: boolean) => void): void;
   once(event: 'cache' | 'read' | 'upload', callback: (result: boolean) => void): void;
+  destroy(): Promise<void>
 }
 export interface IParser {
   readonly format: Format;

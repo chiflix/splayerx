@@ -12,7 +12,9 @@ import { mediaQuickHash, getSubtitleDir } from '@/libs/utils';
 import Sagi from '@/libs/sagi';
 import { SagiSubtitlePayload } from '../parsers';
 import { sagiSubtitleToWebVTT } from './transcoders';
-import { getSubtitleMetadata, cacheSubtitle, getSubtitleFragment } from '@/plugins/mediaTasks';
+import {
+  getSubtitleMetadata, cacheSubtitle, getSubtitleFragment, finishSubtitleExtraction,
+} from '@/plugins/mediaTasks';
 
 enum Status {
   NOT_STARTED,
@@ -81,6 +83,8 @@ export class LocalTextLoader extends EventEmitter implements ILoader {
     }
     throw new Error('Cannot cache now.');
   }
+
+  public async destroy() { this._payloadString = ''; }
 }
 export interface IEmbeddedOrigin extends IOrigin {
   type: Type.Embedded;
@@ -210,6 +214,12 @@ export class EmbeddedTextStreamLoader extends EventEmitter implements ILoader {
   private paused = false;
 
   public pause() { this.paused = true; }
+
+  public async destroy() {
+    this.removeAllListeners();
+    this._payloadString = '';
+    await finishSubtitleExtraction(this.source.source.videoPath, this.source.source.streamIndex);
+  }
 }
 export interface ISagiOrigin extends IOrigin {
   type: Type.Online;
@@ -272,4 +282,6 @@ export class SagiLoader extends EventEmitter implements ILoader {
     }
     throw new Error('Cannot cache now.');
   }
+
+  public async destroy() { this._payloads = []; }
 }

@@ -143,7 +143,6 @@ const mutations: MutationTree<ISubtitleManagerState> = {
     Vue.set(state.allSubtitles, id, undefined);
     delete state.allSubtitles[id];
   },
-  [m.deletaAllSubtitleIds](state) { state.allSubtitles = {}; },
   [m.setPrimaryDelay](state, delayInSeconds: number) {
     state.primaryDelay = delayInSeconds;
     const subtitle = state.allSubtitles[state.primarySubtitleId];
@@ -203,10 +202,7 @@ function fetchOnlineListWrapper(
   });
 }
 function initializeManager(context: ActionContext<ISubtitleManagerState, {}>) {
-  const {
-    state, commit, dispatch, getters,
-  } = context;
-  Object.keys(state.allSubtitles).forEach(id => dispatch(a.removeSubtitle, id));
+  const { commit, dispatch, getters } = context;
   commit(m.setMediaHash, getters.mediaHash);
   dispatch(a.refreshSubtitlesInitially);
 }
@@ -216,13 +212,13 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
   async [a.initializeManager](context) {
     debouncedInitializeManager(context);
   },
-  [a.resetManager]({ commit }) {
+  async [a.resetManager]({ commit, dispatch }) {
     commit(m.setMediaHash, '');
     commit(m.setNotSelectedSubtitle);
     commit(m.setIsRefreshing, false);
-    commit(m.deletaAllSubtitleIds);
     primarySelectionComplete = false;
     secondarySelectionComplete = false;
+    await Promise.all(Object.keys(state.allSubtitles).map(id => dispatch(a.removeSubtitle, id)));
   },
   async [a.refreshSubtitlesInitially]({
     state, getters, dispatch, commit,
@@ -658,13 +654,16 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
     }
     return {};
   },
-  [a.removeSubtitle]({ commit, getters }, id: string) {
-    if (store.hasModule(id)) store.unregisterModule(id);
+  async [a.removeSubtitle]({ commit, getters, dispatch }, id: string) {
     commit(m.deleteSubtitleId, id);
     if (getters.isFirstSubtitle && getters.primarySubtitleId === id) {
       commit(m.setNotSelectedSubtitle, 'primary');
     } else if (!getters.isFirstSubtitle && getters.secondarySubtitleId === id) {
       commit(m.setNotSelectedSubtitle, 'secondary');
+    }
+    if (store.hasModule(id)) {
+      await dispatch(`${id}/${subActions.destroy}`);
+      store.unregisterModule(id);
     }
   },
   async [a.deleteSubtitlesByUuid]({ state, dispatch }, ids: string[]) {
