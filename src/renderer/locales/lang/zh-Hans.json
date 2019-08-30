@@ -363,6 +363,8 @@
     "title": ""
   },
   "translateModal": {
+    "videoLanguageLabel": "",
+    "subtitleLanguageLabel": "",
     "selectLanguageLabel": "视频源语言",
     "audioLanguageLoading": "获取语言列表中 ...",
     "audioLanguageLoadFail": "连接错误，请稍后重试",
