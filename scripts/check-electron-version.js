@@ -15,7 +15,7 @@ try {
   console.log(versionAndHash);
   const [version, actualHash] = versionAndHash.split(' ');
   const expectedHash = execSync(
-    `curl -L https://github.com/chiflix/electron/releases/download/v${version}/ELECTRONSLIM_VERSION_HASH.txt`,
+    `curl -L https://github.com/chiflix/electron/releases/download/v${version}/${process.platform}_ELECTRONSLIM_VERSION_HASH.txt`,
     { encoding: 'utf-8' },
   ).trim();
   console.log({ expectedHash, actualHash });
