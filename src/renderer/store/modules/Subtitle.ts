@@ -1,298 +1,261 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { cloneDeep } from 'lodash';
 import {
-  IEntityGenerator, Entity, IParser, Type, Format, IOrigin, defaultEntity, SubtitleControlListItem,
+  MutationTree, GetterTree, ActionTree,
+  Module,
+} from 'vuex';
+import {
+  IEntityGenerator, IParser, Format, IOrigin, ILoader, IEntity,
 } from '@/interfaces/ISubtitle';
 import { LanguageCode } from '@/libs/language';
-import {
-  storeSubtitle, removeSubtitle, removeSubtitleItemsFromList, cacheSubtitle,
-} from '@/services/storage/subtitle';
+import { storeSubtitle, addSubtitleItemsToList } from '@/services/storage/subtitle';
 import { newSubtitle as m } from '@/store/mutationTypes';
-import { newSubtitle as a, SubtitleManager as parentActions } from '@/store/actionTypes';
-import { getParser, sourceToFormat } from '@/services/subtitle/utils';
+import { newSubtitle as a } from '@/store/actionTypes';
+import { getParser, getLoader } from '@/services/subtitle/utils';
 import { SubtitleUploadParameter } from '@/services/subtitle';
 import { generateHints } from '@/libs/utils';
 import upload from '@/services/subtitle/upload';
-import { addBubble } from '../../helpers/notificationControl';
-import { NOT_SUPPORTED_SUBTITLE } from '../../helpers/notificationcodes';
-import store from '..';
-import { isCachedSubtitle, removeCachedSubtitle } from '@/services/storage/subtitle/file';
+import { VideoTimeSegments } from '@/libs/TimeSegments';
 
-type SubtitleState = {
-  moduleId: string;
-  source: unknown;
-  realSource: unknown;
-  type?: Type;
-  format: Format;
-  language: LanguageCode;
-  delay: number;
-  playedTime: number;
-  hash: string;
-};
-enum CacheStatus {
-  NOT_CACHED,
-  CACHING,
-  CACHED,
+enum ErrorCodes {
+  REAL_SOURCE_MISSING = 'REAL_SOURCE_MISSING',
+  LOADER_MISSING = 'LOADER_MISSING',
+  PARSER_MISSING = 'PARSER_MISSING',
+  CANNOT_UPLOAD = 'CANNOT_UPLOAD',
 }
-const subtitleMap: Map<string, {
-  entity: Entity;
-  loader: () => Promise<unknown>;
-  parser?: IParser;
-  cached: CacheStatus;
-}> = new Map();
+interface ISubtitleState {
+  mediaHash: string;
+  id: string;
+  displaySource?: IOrigin;
+  realSource?: IOrigin;
+  language: LanguageCode;
+  hash: string;
+  format: Format;
+  delay: number;
+  // loader reactive properties
+  canCache: boolean;
+  canUpload: boolean;
+  fullyRead: boolean;
+  // parser reactive properties
+  autoUploaded: boolean;
+  playedTime: number;
+}
+/**
+ * map to store loader and parser for each subtitle
+ * @summary
+ * We still need map because:
+ * - TypeScript's private properties are not really private.
+ * - Vue will add reactive getter/setter to every property, which is really annoying.
+ */
+const subtitleLoaderParserMap: Map<string, { loader?: ILoader, parser?: IParser }> = new Map();
 
-let autoUpload = false;
-const state = (): SubtitleState => ({
-  moduleId: '',
-  source: '',
-  realSource: '',
-  type: undefined,
+const state = (): ISubtitleState => ({
+  mediaHash: '',
+  id: '',
+  hash: '',
+  displaySource: undefined,
+  realSource: undefined,
   format: Format.Unknown,
   language: LanguageCode.Default,
   delay: 0,
-  hash: '',
+  canCache: false,
+  canUpload: false,
+  fullyRead: false,
+  autoUploaded: false,
   playedTime: 0,
 });
-const getters = {};
-const mutations = {
-  [m.setModuleId](state: SubtitleState, id: string) {
-    state.moduleId = id;
+const getters: GetterTree<ISubtitleState, {}> = {
+  entity(state): IEntity | undefined {
+    return state.displaySource && state.realSource && {
+      hash: state.hash,
+      displaySource: state.displaySource,
+      realSource: state.realSource,
+      format: state.format,
+      language: state.language,
+      delay: state.delay,
+    };
   },
-  [m.setSource](state: SubtitleState, source: unknown) {
-    state.source = source;
+  canCache(state): boolean {
+    return !!state.realSource && state.canCache && state.fullyRead;
   },
-  [m.setRealSource](state: SubtitleState, source: unknown) {
-    state.realSource = source;
+  canUpload(state): boolean {
+    return !!state.realSource && state.canUpload && state.fullyRead;
   },
-  [m.setType](state: SubtitleState, type: Type) {
-    state.type = type;
+  canAutoUpload(state, getters, rootState, rootGetters): boolean {
+    return (!state.autoUploaded && getters.canUpload)
+      && (state.playedTime >= 0.5 * rootGetters.duration);
   },
-  [m.setFormat](state: SubtitleState, format: Format) {
-    state.format = format;
-  },
-  [m.setLanguage](state: SubtitleState, languageCode: LanguageCode) {
-    state.language = languageCode;
-  },
-  [m.setDelay](state: SubtitleState, delayInSeconds: number) {
-    state.delay = delayInSeconds;
-  },
-  [m.setPlayedTime](state: SubtitleState, playedTime: number) {
-    state.playedTime = playedTime;
-  },
-  [m.setHash](state: SubtitleState, hash: string) {
-    state.hash = hash;
+  getUploadParam(
+    state, getters, rootState, rootGetters,
+  ): (payload?: Buffer) => SubtitleUploadParameter {
+    return (payload?: Buffer) => ({
+      mediaIdentity: rootGetters.mediaHash,
+      languageCode: state.language,
+      format: state.format,
+      playedTime: state.playedTime,
+      totalTime: rootGetters.duration,
+      delay: state.delay * 1000,
+      hints: generateHints(rootGetters.originSrc),
+      transcriptIdentity: state.format === Format.Sagi ? state.hash : '',
+      payload: state.format !== Format.Sagi ? payload || '' : '',
+    });
   },
 };
-const actions = {
-  [a.initialize]({ commit }: any, moduleId: string) {
-    subtitleMap.set(moduleId, {
-      entity: cloneDeep(defaultEntity),
-      loader: () => Promise.resolve(),
-      parser: undefined,
-      cached: CacheStatus.NOT_CACHED,
-    });
-    commit(m.setModuleId, moduleId);
+const mutations: MutationTree<ISubtitleState> = {
+  [m.setMediaHash](state, hash: string) {
+    state.mediaHash = hash;
   },
-  async [a.add]({ commit, state }: any, generator: IEntityGenerator) {
-    const subtitle = subtitleMap.get(state.moduleId);
-    if (subtitle) {
-      subtitle.loader = generator.getPayload.bind(generator);
-      const { entity } = subtitle;
-      await Promise.all([
-        generator.getStoredSource
-          ? generator.getStoredSource()
-            .then((src) => {
-              entity.source = src;
-              return generator.getSource();
-            })
-            .then((src: IOrigin) => commit(m.setRealSource, src))
-          : generator.getSource().then((src: IOrigin) => {
-            entity.source = src;
-            commit(m.setRealSource, src);
-          }),
-        generator.getFormat().then((format) => {
-          entity.format = format;
-          commit(m.setFormat, format);
-        }),
-        generator.getLanguage().then((language) => {
-          entity.language = language;
-          commit(m.setLanguage, language);
-        }),
-        generator.getType().then((type) => {
-          entity.type = type;
-          commit(m.setType, type);
-        }),
-        generator.getHash().then((hash) => {
-          entity.hash = hash;
-          commit(m.setHash, hash);
-        }),
-        generator.getDelay ? generator.getDelay().then((delay) => {
-          entity.delay = delay;
-          commit(m.setDelay, delay);
-        }) : () => {},
-      ]);
-      if (isCachedSubtitle(entity.source)) subtitle.cached = CacheStatus.CACHED;
-      return entity;
-    }
-    throw new Error(`Subtitle ${state.moduleId} not found.`);
+  [m.setId](state, id: string) {
+    state.id = id;
   },
-  async [a.load]({ state, dispatch }: any) {
-    const subtitle = subtitleMap.get(state.moduleId);
-    if (subtitle) {
-      const { entity, loader } = subtitle;
-      entity.payload = await loader();
-      // 如果是translate 按钮就skip
-      if (entity && !(entity.type === Type.Translated && entity.payload === '')) {
-        await dispatch(a.cache);
+  [m.setHash](state, hash: string) {
+    state.hash = hash;
+  },
+  [m.setDisplaySource](state, source: IOrigin) {
+    state.displaySource = source;
+  },
+  [m.setRealSource](state, source: IOrigin) {
+    state.realSource = source;
+  },
+  [m.setFormat](state, format: Format) {
+    state.format = format;
+  },
+  [m.setLanguage](state, languageCode: LanguageCode) {
+    state.language = languageCode;
+  },
+  [m.setDelay](state, delayInSeconds: number) {
+    state.delay = delayInSeconds;
+  },
+  [m.setCanCache](state, canCache: boolean) {
+    state.canCache = canCache;
+  },
+  [m.setCanUpload](state, canUpload: boolean) {
+    state.canUpload = canUpload;
+  },
+  [m.setFullyRead](state, fullyRead: boolean) {
+    state.fullyRead = fullyRead;
+  },
+  [m.setAutoUploaded](state, autoUploaded: boolean) {
+    state.autoUploaded = autoUploaded;
+  },
+  [m.setPlayedTime](state, time: number) {
+    state.playedTime = time;
+  },
+};
+const actions: ActionTree<ISubtitleState, {}> = {
+  [a.initialize]({ commit }, { id, mediaHash }: { id: string, mediaHash: string }) {
+    commit(m.setId, id);
+    commit(m.setMediaHash, mediaHash);
+  },
+  async [a.add]({ commit, getters, state }, generator: IEntityGenerator) {
+    await Promise.all([
+      generator.getHash().then((hash) => { commit(m.setHash, hash); }),
+      generator.getDisplaySource().then((src) => { commit(m.setDisplaySource, src); }),
+      generator.getRealSource().then((src) => { commit(m.setRealSource, src); }),
+      generator.getFormat().then((format) => { commit(m.setFormat, format); }),
+      generator.getLanguage().then((language) => { commit(m.setLanguage, language); }),
+      generator.getDelay().then((delay) => { commit(m.setDelay, delay); }),
+    ]);
+    subtitleLoaderParserMap.set(state.hash, {});
+    return getters.entity;
+  },
+  async [a.getDialogues]({
+    state, rootGetters, commit, dispatch, getters,
+  }, time: number) {
+    const subtitle = subtitleLoaderParserMap.get(state.hash);
+    if (state.realSource && subtitle) {
+      if (!subtitle.loader) {
+        subtitle.loader = getLoader(state.realSource);
+        subtitle.loader.on('cache', async (result) => {
+          commit(m.setCanCache, result);
+          if (result) {
+            const result = await dispatch(a.cache) as undefined | IOrigin;
+            if (result) {
+              commit(m.setRealSource, result);
+              storeSubtitle(getters.entity);
+              addSubtitleItemsToList([getters.entity], state.mediaHash);
+            }
+          }
+        });
+        subtitle.loader.on('upload', result => commit(m.setCanUpload, result));
+        subtitle.loader.on('read', result => commit(m.setFullyRead, result));
       }
-    }
-  },
-  async [a.getDialogues]({ state, rootGetters, dispatch }: any, time: number) {
-    const subtitle = subtitleMap.get(state.moduleId);
-    const result = {
-      metadata: {},
-      dialogues: [],
-    };
-    if (subtitle) {
-      const { entity, parser } = subtitle;
-      if (!entity.payload) return result;
-      if (!parser) {
-        const realFormat = sourceToFormat(state.realSource);
-        subtitle.parser = getParser(realFormat, entity.payload);
-        try {
-          await subtitle.parser.parse();
-          entity.metadata = await subtitle.parser.getMetadata();
-          await dispatch(a.startWatchPlayedTime);
-        } catch (err) {
-          addBubble(NOT_SUPPORTED_SUBTITLE);
-          const subtitleToRemoveFromList = rootGetters.list
-            .find((sub: SubtitleControlListItem) => sub.id === state.moduleId);
-          store.dispatch(parentActions.deleteSubtitlesByUuid, [subtitleToRemoveFromList]);
-        }
+      if (subtitle.loader && !subtitle.parser) {
+        const videoSegments = new VideoTimeSegments(rootGetters.duration);
+        subtitle.parser = getParser(state.format, subtitle.loader, videoSegments);
       }
-      if (parser && parser.payload) {
+      if (subtitle.parser) {
         return {
-          metadata: {},
-          dialogues: await parser.getDialogues(time - state.delay),
+          metadata: await subtitle.parser.getMetadata(),
+          dialogues: await subtitle.parser.getDialogues(time),
         };
       }
     }
-    return result;
+    return { metadata: {}, dialogues: [] };
   },
-  async [a.store]({ state }: any) {
-    const subtitle = subtitleMap.get(state.moduleId);
-    if (subtitle) {
-      await storeSubtitle(subtitle.entity);
-    }
-  },
-  async [a.cache]({ state }: any) {
-    const subtitle = subtitleMap.get(state.moduleId);
-    if (subtitle) {
-      if (subtitle.cached === CacheStatus.NOT_CACHED) {
-        subtitle.cached = CacheStatus.CACHING;
-        await cacheSubtitle(subtitle.entity);
-        subtitle.cached = CacheStatus.CACHED;
+  async [a.store]({ getters }) { return storeSubtitle(getters.entity); },
+  async [a.upload]({ state, getters, commit }) {
+    const subtitle = subtitleLoaderParserMap.get(state.hash);
+    if (getters.canAutoUpload && subtitle && subtitle.loader) {
+      if (state.format !== Format.Sagi) {
+        const payload = Buffer.from(await subtitle.loader.getPayload() as string);
+        return upload.add(getters.getUploadParam(payload))
+          .then(() => commit(m.setAutoUploaded, true));
       }
+      return upload.add(getters.getUploadParam())
+        .then(() => commit(m.setAutoUploaded, true));
     }
+    throw new Error(ErrorCodes.CANNOT_UPLOAD);
   },
-  async [a.delete]({ state, rootGetters }: any) {
-    const subtitleToRemoveFromList = rootGetters.list
-      .find((sub: SubtitleControlListItem) => sub.id === state.moduleId);
-    const { mediaHash } = store.state.SubtitleManager;
-    const subtitle = subtitleMap.get(state.moduleId);
-    if (subtitle) {
-      subtitleMap.delete(state.moduleId);
-      await removeSubtitle(subtitle.entity);
-      if (subtitle.cached) {
-        const cachedSource = await removeCachedSubtitle(subtitle.entity.hash);
-        if (cachedSource) await removeSubtitle({ ...subtitle.entity, source: cachedSource });
+  [a.pause]({ state }) {
+    const subtitle = subtitleLoaderParserMap.get(state.hash);
+    if (subtitle && subtitle.loader) subtitle.loader.pause();
+  },
+  [a.resume]({ state }) {
+    const subtitle = subtitleLoaderParserMap.get(state.hash);
+    if (subtitle && subtitle.loader) subtitle.loader.getPayload();
+  },
+  async [a.cache]({ state }) {
+    const subtitle = subtitleLoaderParserMap.get(state.hash);
+    if (getters.canCache && subtitle && subtitle.loader) return subtitle.loader.cache();
+    return undefined;
+  },
+  async [a.manualUpload]({ state, getters }) {
+    const subtitle = subtitleLoaderParserMap.get(state.hash);
+    if (getters.canUpload && subtitle && subtitle.loader) {
+      if (state.format !== Format.Sagi) {
+        const payload = Buffer.from(await subtitle.loader.getPayload() as string);
+        return upload.addManually(getters.getUploadParam(payload));
       }
+      return upload.addManually(getters.getUploadParam());
     }
-    removeSubtitleItemsFromList([subtitleToRemoveFromList], mediaHash);
-  },
-  async [a.upload]({ state, dispatch, rootGetters }: any) {
-    const subtitle = subtitleMap.get(state.moduleId);
-    if (subtitle && !autoUpload) {
-      const uploadParam: SubtitleUploadParameter = {
-        mediaIdentity: rootGetters.mediaHash,
-        languageCode: state.language,
-        format: state.format,
-        playedTime: state.playedTime,
-        totalTime: rootGetters.duration,
-        delay: state.delay * 1000,
-        hints: await generateHints(rootGetters.originSrc),
-        transcriptIdentity: state.format === Format.Sagi ? state.hash : '',
-        payload: state.format === Format.Sagi ? '' : Buffer.from(subtitle.entity.payload as string),
-      };
-      const result = await upload.add(uploadParam);
-      dispatch(a.stopWatchPlayedTime);
-      return result;
-    }
-    throw new Error(`Subtitle ${state.moduleId} not found.`);
-  },
-  async [a.manualUpload]({ state, rootGetters }: any) {
-    const subtitle = subtitleMap.get(state.moduleId);
-    if (subtitle) {
-      const uploadParam: SubtitleUploadParameter = {
-        mediaIdentity: rootGetters.mediaHash,
-        languageCode: state.language,
-        format: state.format,
-        playedTime: state.playedTime,
-        totalTime: rootGetters.duration,
-        delay: state.delay * 1000,
-        hints: await generateHints(rootGetters.originSrc),
-        transcriptIdentity: state.format === Format.Sagi ? state.hash : '',
-        payload: state.format === Format.Sagi ? '' : Buffer.from(subtitle.entity.payload as string),
-      };
-      return upload.addManually(uploadParam);
-    }
-    throw new Error(`Subtitle ${state.moduleId} not found.`);
+    throw new Error(ErrorCodes.CANNOT_UPLOAD);
   },
   // played time actions
-  async [a.updatePlayedTime]({ state, commit }: any, times: { last: number, current: number }) {
-    const subtitle = subtitleMap.get(state.moduleId);
-    if (subtitle) {
-      const { entity, parser } = subtitle;
-      if (entity.payload && parser && parser.payload) {
-        // @ts-ignore
-        const playedTime = await subtitle.parser.updateVideoSegments(...Object.values(times));
-        if (playedTime !== state.playedTime) commit(m.setPlayedTime, playedTime);
-      }
+  async [a.updatePlayedTime]({ state, commit }, times: { last: number, current: number }) {
+    const subtitle = subtitleLoaderParserMap.get(state.hash);
+    if (subtitle && subtitle.parser) {
+      subtitle.parser.videoSegments.updatePlayed(times.current, times.last);
+      commit(m.setPlayedTime, subtitle.parser.videoSegments.playedTime);
     }
   },
-  [a.startWatchPlayedTime]({ state, rootGetters, commit }: any) {
-    const subtitle = subtitleMap.get(state.moduleId);
-    if (subtitle && !autoUpload) {
-      const { entity, parser } = subtitle;
-      if (entity.payload && parser && parser.payload) {
-        parser.getVideoSegments(rootGetters.duration);
-        commit(m.setPlayedTime, 0);
-      }
-    }
-  },
-  [a.stopWatchPlayedTime]() {
-    autoUpload = true;
-  },
-  [a.alterDelay]({ state, commit }: any, deltaInSeconds: number) {
-    const subtitle = subtitleMap.get(state.moduleId);
-    if (subtitle) {
-      const alfterAltered = +(state.delay + deltaInSeconds).toFixed(1);
-      if (Math.abs(alfterAltered) < 10000) {
-        commit(m.setDelay, alfterAltered);
-        subtitle.entity.delay = alfterAltered;
-      }
+  // subtitle delay actions
+  [a.alterDelay]({ state, commit }, deltaInSeconds: number) {
+    const alfterAltered = +(state.delay + deltaInSeconds).toFixed(1);
+    if (Math.abs(alfterAltered) < 10000) {
+      commit(m.setDelay, alfterAltered);
     }
     return state.delay;
   },
-  [a.resetDelay]({ commit }: any) {
+  [a.resetDelay]({ commit }) {
     commit(m.setDelay, 0);
   },
 };
 
-export default {
+const Subtitle: Module<ISubtitleState, {}> = {
   namespaced: true,
   state,
   getters,
   mutations,
   actions,
 };
+
+export default Subtitle;

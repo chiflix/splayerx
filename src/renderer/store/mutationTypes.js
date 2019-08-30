@@ -72,15 +72,19 @@ export const Subtitle = {
 };
 
 export const newSubtitle = {
-  setModuleId: 'SET_MODULE_ID',
-  setSource: 'SET_SOURCE',
+  setMediaHash: 'SET_MEDIA_HASH',
+  setId: 'SET_ID',
+  setDisplaySource: 'SET_DISPLAY_SOURCE',
   setRealSource: 'SET_REAL_SOURCE',
-  setType: 'SET_TYPE',
   setFormat: 'SET_FORMAT',
   setLanguage: 'SET_LANGUAGE',
   setDelay: 'SET_DELAY',
-  setPlayedTime: 'SET_PLAYED_TIME',
   setHash: 'SET_HASH',
+  setCanCache: 'SET_CAN_CACHE',
+  setCanUpload: 'SET_CAN_UPLOAD',
+  setFullyRead: 'SET_FULLY_READ',
+  setAutoUploaded: 'SET_AUTO_UPLOADED',
+  setPlayedTime: 'SET_PLAYED_TIME',
 };
 
 export const SubtitleManager = {
