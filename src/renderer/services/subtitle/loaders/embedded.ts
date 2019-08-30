@@ -1,18 +1,9 @@
 import { cloneDeep } from 'lodash';
-import {
-  IOrigin, Type, IEntityGenerator, Format,
-} from '@/interfaces/ISubtitle';
+import { Type, IEntityGenerator, Format } from '@/interfaces/ISubtitle';
 import { LanguageCode } from '@/libs/language';
 import { mediaQuickHash } from '@/libs/utils';
 import { ISubtitleStream } from '@/plugins/mediaTasks';
-
-export interface IEmbeddedOrigin extends IOrigin {
-  type: Type.Embedded,
-  source: {
-    streamIndex: number;
-    videoSrc: string;
-  };
-}
+import { IEmbeddedOrigin } from '../utils/loaders';
 
 export class EmbeddedGenerator implements IEntityGenerator {
   private origin: IEmbeddedOrigin;
@@ -21,11 +12,11 @@ export class EmbeddedGenerator implements IEntityGenerator {
 
   public readonly isDefault: boolean;
 
-  public constructor(videoSrc: string, stream: ISubtitleStream) {
+  public constructor(videoPath: string, stream: ISubtitleStream) {
     this.origin = {
       type: Type.Embedded,
       source: {
-        videoSrc,
+        videoPath,
         streamIndex: stream.index,
       },
     };
@@ -40,8 +31,8 @@ export class EmbeddedGenerator implements IEntityGenerator {
   public async getFormat() { return Format.AdvancedSubStationAplha; }
 
   public async getHash() {
-    const { videoSrc, streamIndex } = this.origin.source;
-    return `${await mediaQuickHash.try(videoSrc) || ''}-${streamIndex}`;
+    const { videoPath, streamIndex } = this.origin.source;
+    return `${await mediaQuickHash.try(videoPath) || ''}-${streamIndex}`;
   }
 
   public async getLanguage() { return this.language; }
