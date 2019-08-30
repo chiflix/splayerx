@@ -393,7 +393,7 @@ export default Vue.extend({
 }
 .select-language-modal {
   position: fixed;
-  width: 320px;
+  width: 330px;
   padding: 24px 30px;
   box-sizing: border-box;
   left: 50%;
@@ -491,7 +491,8 @@ export default Vue.extend({
       width: 120px;
       label {
         font-size: 11px;
-        color: rgba(255,255,255,0.50);
+        color: rgba(255,255,255,0.70);
+        font-weight: 500;
         letter-spacing: 0.2px;
         line-height: 16px;
         margin-bottom: 5px;
@@ -501,10 +502,10 @@ export default Vue.extend({
     .right {
       .target {
         background: rgba(0,0,0,0.04);
-        border: 1px solid rgba(255,255,255,0.70);
+        border: 1px solid rgba(255,255,255,0.30);
         border-radius: 2px;
         font-size: 11px;
-        color: #FFFFFF;
+        color: rgba(255,255,255,0.80);
         letter-spacing: 0;
         text-align: center;
         line-height: 27.5px;
@@ -514,7 +515,7 @@ export default Vue.extend({
       padding-top: 22px;
       line-height: 28px;
       font-size: 12px;
-      color: rgba(255,255,255,0.25);
+      color: rgba(255,255,255,0.5);
     }
   }
   .progress-wraper {

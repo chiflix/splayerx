@@ -1,8 +1,7 @@
 <template>
   <div class="dropdown">
     <div
-      :class="showSelection ?
-        'dropdown__toggle--list' : `dropdown__toggle--display${ disabled ? '-disable' : ''}`"
+      :class="selectClass"
       @mouseup.stop="toogle"
       class="no-drag"
     >
@@ -72,6 +71,16 @@ export default Vue.extend({
     };
   },
   computed: {
+    selectClass() {
+      if (this.disable) {
+        return 'dropdown__toggle--display--disabled';
+      } if (this.showSelection) {
+        return 'dropdown__toggle--list';
+      } if (this.selected.value) {
+        return 'dropdown__toggle--display--active';
+      }
+      return 'dropdown__toggle--display';
+    },
   },
   mounted() {
     document.addEventListener('mouseup', this.globalMouseUp);
@@ -115,16 +124,22 @@ export default Vue.extend({
     border-radius: 2px;
     overflow: hidden;
     transition: all 200ms;
-    &--display-disable, &--display {
+    &--display--disable, &--display--active, &--display {
       @extend .dropdown__toggle;
       height: 28px;
-      border: 1px solid rgba(255,255,255,0.10);
+      border: 1px solid rgba(255,255,255,0.30);
       border-radius: 2px;
       background-color: rgba(0, 0, 0, .04);
     }
     &--display {
       &:hover {
         border: 1px solid rgba(255, 255, 255, 0.2);
+        background-color: rgba(255, 255, 255, 0.08);
+      }
+    }
+    &--display--active {
+      border-color: rgba(255,255,255,0.30);
+      &:hover {
         background-color: rgba(255, 255, 255, 0.08);
       }
     }
@@ -149,6 +164,9 @@ export default Vue.extend({
       opacity: 0.3;
       margin-left: 4px;
       margin-right: 4px;
+    }
+    .un_select {
+      color: rgba(255,255,255,0.20);
     }
   }
 
