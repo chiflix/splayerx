@@ -27,6 +27,7 @@ export class SagiParser implements IParser {
 
   private normalizer(parsedSubtitle: SagiSubtitlePayload) {
     const finalDialogues: Cue[] = [];
+    parsedSubtitle = Array.isArray(parsedSubtitle) ? parsedSubtitle : [];
     parsedSubtitle.forEach(({ startTime, endTime, text }) => {
       finalDialogues.push({
         start: startTime,

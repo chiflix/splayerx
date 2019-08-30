@@ -27,7 +27,7 @@ export class VttParser implements IParser {
 
   public async getMetadata() { return { PlayResX: '', PlayResY: '' }; }
 
-  private dialogues: Cue[];
+  private dialogues: Cue[] = [];
 
   private baseTags = { alignment: 2, pos: undefined };
 

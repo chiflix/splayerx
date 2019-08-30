@@ -6,7 +6,7 @@ import { EventEmitter } from 'events';
 import {
   ILoader, IOrigin, Type, Format,
 } from '@/interfaces/ISubtitle';
-import { loadLocalFile } from '.';
+import { loadLocalFile, formatToExtension } from '.';
 import { SUBTITLE_REAL_DIRNAME } from '@/constants';
 import { mediaQuickHash, getSubtitleDir } from '@/libs/utils';
 import Sagi from '@/libs/sagi';
@@ -260,7 +260,7 @@ export class SagiLoader extends EventEmitter implements ILoader {
     if (this.canCache) {
       const { source } = this.source;
       this._cacheStatus = Status.NOT_STARTED;
-      const storedPath = join(SUBTITLE_REAL_DIRNAME, `${source}.${Format.WebVTT}`);
+      const storedPath = join(SUBTITLE_REAL_DIRNAME, `${source}.${formatToExtension(Format.WebVTT)}`);
       if (!existsSync(storedPath)) {
         await outputFile(storedPath, sagiSubtitleToWebVTT(this._payloads));
       }

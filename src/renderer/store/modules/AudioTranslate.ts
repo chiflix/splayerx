@@ -596,9 +596,10 @@ const actions = {
     // 丢弃任务，执行用户强制操作
     const selectId = state.selectedTargetSubtitleId;
     if (getters.primarySubtitleId === selectId) {
-      dispatch(smActions.manualChangePrimarySubtitle, '');
+      // do not directly pass empty string to manualChangeSubtitle
+      dispatch(smActions.autoChangePrimarySubtitle, '');
     } else if (getters.secondarySubtitleId === selectId) {
-      dispatch(smActions.manualChangeSecondarySubtitle, '');
+      dispatch(smActions.autoChangeSecondarySubtitle, '');
     }
     commit(m.AUDIO_TRANSLATE_RECOVERY);
     state.callbackAfterBubble();
