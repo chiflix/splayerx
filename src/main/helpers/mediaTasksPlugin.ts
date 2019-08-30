@@ -82,16 +82,14 @@ export default function registerMediaTasks() {
     }
   });
   ipcMain.on('thumbnail-request', (event,
-    videoPath, imagePath,
-    thumbnailWidth,
-    rowThumbnailCount, columnThumbnailCount) => {
+    videoPath, imagePath, interval,
+    thumbnailWidth, cols) => {
     if (existsSync(imagePath)) {
       reply(event, 'thumbnail-reply', null, imagePath, videoPath);
     } else if (existsSync(videoPath)) {
       splayerxProxy.generateThumbnails(
-        videoPath, imagePath,
-        thumbnailWidth.toString(),
-        rowThumbnailCount.toString(), columnThumbnailCount.toString(),
+        videoPath, imagePath, interval,
+        thumbnailWidth.toString(), cols.toString(), '0',
         (err) => {
           if (err === '0' && existsSync(imagePath)) {
             reply(event, 'thumbnail-reply', null, imagePath, videoPath);

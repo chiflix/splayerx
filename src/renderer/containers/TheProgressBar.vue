@@ -112,7 +112,9 @@ export default {
       return this.hovering ? this.pageXToProportion(this.hoveredPageX, 25, this.winWidth) * 100 : 0;
     },
     hoveredCurrentTime() {
-      return this.duration * this.pageXToProportion(this.hoveredPageX, 25, this.winWidth);
+      return Math.ceil(
+        this.duration * this.pageXToProportion(this.hoveredPageX, 25, this.winWidth),
+      );
     },
     convertedHoveredCurrentTime() {
       return this.timecodeFromSeconds(this.hoveredCurrentTime);

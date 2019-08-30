@@ -248,10 +248,7 @@ export default {
         currentTime: 0,
       });
       if (target.duration && Number.isFinite(target.duration)) {
-        const generationInterval = Math.round(target.duration
-          / (window.screen.width / 4)) || 1;
-        const maxThumbnailCount = Math.floor(target.duration / generationInterval);
-        this.$bus.$emit('generate-thumbnails', maxThumbnailCount);
+        this.$bus.$emit('generate-thumbnails');
       }
       this.updateMetaInfo({
         intrinsicWidth: target.videoWidth,

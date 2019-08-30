@@ -54,4 +54,4 @@ export async function forceRefresh() {
   });
 }
 
-export const isAIEnabled = async () => getJsonConfig('isAIEnabled', false);
+export const isAIEnabled = async () => getConfig('isAIEnabled', false);
