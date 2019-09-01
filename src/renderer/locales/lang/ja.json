@@ -1,8 +1,8 @@
 {
   "advance": {
-    "audioDelay": "オディオディレイ",
+    "audioDelay": "オーディオディレイ",
     "audioMenu": "オーディオ",
-    "changeTrack": "オディオトラック",
+    "changeTrack": "オーディオトラック",
     "chosenTrack": "デフォルト",
     "fontItems": [
       "小",
@@ -31,12 +31,12 @@
       "title": "オープン失敗"
     },
     "EACCES": {
-      "content": "十分な許可がありません。",
-      "title": "開けませんでした"
+      "content": "権限を持ってません。",
+      "title": "オープン失敗"
     },
     "ENOENT": {
       "content": "ファイルが見つかりません。",
-      "title": "開く失敗"
+      "title": "オープン失敗"
     },
     "addNoVideo": {
       "content": "再生できるファイルが見つかりませんでした。",
