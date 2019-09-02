@@ -515,7 +515,7 @@ function registerMainWindowEvent(mainWindow) {
     if (args.url.includes('youtube')) {
       channel = 'youtube.com';
     }
-    const newChannel = browserViewManager.changeChanel(channel, args.url);
+    const newChannel = browserViewManager.changeChanel(channel, args);
     const view = newChannel.view ? newChannel.view : newChannel.page.view;
     const url = newChannel.view ? args.url : newChannel.page.url;
     const mainBrowser = mainWindow.getBrowserView();
@@ -542,19 +542,7 @@ function registerMainWindowEvent(mainWindow) {
     if (args.url.includes('youtube')) {
       channel = 'youtube.com';
     }
-    const currentMainBrowserView = browserViewManager
-      .create(channel, args.url);
-    const mainBrowser = mainWindow.getBrowserView();
-    mainWindow.addBrowserView(currentMainBrowserView.view);
-    if (mainBrowser) {
-      mainWindow.removeBrowserView(BrowserView.fromId(mainBrowser.id));
-    }
-    currentMainBrowserView.view.setBounds({
-      x: 0, y: 36, width: mainWindow.getSize()[0], height: mainWindow.getSize()[1] - 36,
-    });
-    currentMainBrowserView.view.setAutoResize({
-      width: true, height: true,
-    });
+    const currentMainBrowserView = browserViewManager.create(channel, args);
     setTimeout(() => {
       mainWindow.send('update-browser-state', {
         url: args.url,
@@ -702,6 +690,12 @@ function registerMainWindowEvent(mainWindow) {
       browserViewManager.pauseVideo(mainWindow.getBrowserView());
       mainWindow.hide();
     }
+    mainBrowser.page.view.setBounds({
+      x: 0, y: 36, width: mainWindow.getSize()[0], height: mainWindow.getSize()[1] - 36,
+    });
+    mainBrowser.page.view.setAutoResize({
+      width: true, height: true,
+    });
     pipBrowser.setBounds({
       x: 0, y: 0, width: browsingWindow.getSize()[0], height: browsingWindow.getSize()[1],
     });

@@ -88,6 +88,7 @@ export default {
       adaptFinished: false,
       pipInfo: {},
       isGlobal: false,
+      startLoading: false,
     };
   },
   computed: {
@@ -392,7 +393,6 @@ export default {
       } else if (this.currentUrl === url && supportedPage.includes(this.currentUrl)) {
         this.currentMainBrowserView().webContents.reload();
       } else {
-        this.removeListener();
         const homePage = urlParseLax(`https://www.${newChannel}`).href;
         this.$electron.ipcRenderer.send('create-browser-view', { url: homePage });
       }
@@ -425,22 +425,26 @@ export default {
       }
     },
     willNavigate(e: Event, url: string) {
-      if (!url || url === 'about:blank' || urlParseLax(this.currentUrl).href === urlParseLax(url).href) return;
-      this.currentUrl = urlParseLax(url).href;
-      this.startTime = new Date().getTime();
-      this.loadingState = true;
-      this.$electron.ipcRenderer.send('create-browser-view', { url });
-      this.removeListener();
+      if (!this.startLoading) {
+        this.startLoading = true;
+        if (!url || url === 'about:blank' || urlParseLax(this.currentUrl).href === urlParseLax(url).href) return;
+        this.currentUrl = urlParseLax(url).href;
+        this.startTime = new Date().getTime();
+        this.loadingState = true;
+        this.$electron.ipcRenderer.send('create-browser-view', { url });
+      }
     },
     didStartLoading() {
-      const url = this.$electron.remote.getCurrentWindow()
-        .getBrowserView().webContents.getURL();
-      if (!url || url === 'about:blank' || urlParseLax(this.currentUrl).href === urlParseLax(url).href) return;
-      this.currentUrl = urlParseLax(url).href;
-      this.startTime = new Date().getTime();
-      this.loadingState = true;
-      this.$electron.ipcRenderer.send('create-browser-view', { url });
-      this.removeListener();
+      if (!this.startLoading) {
+        this.startLoading = true;
+        const url = this.$electron.remote.getCurrentWindow()
+          .getBrowserView().webContents.getURL();
+        if (!url || url === 'about:blank' || urlParseLax(this.currentUrl).href === urlParseLax(url).href) return;
+        this.currentUrl = urlParseLax(url).href;
+        this.startTime = new Date().getTime();
+        this.loadingState = true;
+        this.$electron.ipcRenderer.send('create-browser-view', { url });
+      }
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ipcMessage(evt: Event, channel: string, args: any) {
@@ -496,6 +500,7 @@ export default {
       this.$electron.remote.getCurrentWindow().getBrowserViews()[0].webContents.focus();
     },
     didStopLoading() {
+      this.startLoading = false;
       const loadingTime: number = new Date().getTime() - this.startTime;
       if (loadingTime % 3000 === 0) {
         this.loadingState = false;
@@ -506,11 +511,14 @@ export default {
       }
     },
     handleOpenUrl({ url }: { url: string }) {
-      if (!url || url === 'about:blank' || urlParseLax(url).href === urlParseLax(this.currentUrl).href) return;
-      this.loadingState = true;
-      this.currentUrl = urlParseLax(url).href;
-      const protocol = urlParseLax(url).protocol;
-      this.$electron.ipcRenderer.send('create-browser-view', { url: protocol ? this.currentUrl : `https:${this.currentUrl}` });
+      if (!this.startLoading) {
+        this.startLoading = true;
+        if (!url || url === 'about:blank' || urlParseLax(url).href === urlParseLax(this.currentUrl).href) return;
+        this.loadingState = true;
+        this.currentUrl = urlParseLax(url).href;
+        const protocol = urlParseLax(url).protocol;
+        this.$electron.ipcRenderer.send('create-browser-view', { url: protocol ? this.currentUrl : `https:${this.currentUrl}`, isNewWindow: true });
+      }
     },
     pipAdapter() {
       const parseUrl = urlParseLax(this.currentMainBrowserView().webContents.getURL());

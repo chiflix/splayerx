@@ -36,7 +36,7 @@ export class BrowserViewManager implements IBrowserViewManager {
     this.backPage = [];
   }
 
-  public create(channel: string, url: string): BrowserViewData {
+  public create(channel: string, args: { url: string, isNewWindow?: boolean }): BrowserViewData {
     // 初始化频道数据
     if (!this.history[channel]) {
       this.history[channel] = {
@@ -46,14 +46,35 @@ export class BrowserViewManager implements IBrowserViewManager {
       };
     }
 
+    // load URL
+    const index = this.history[channel].currentIndex;
+    const lastUrl = this.history[channel].list.length
+      ? this.history[channel].list[index].url : args.url;
+    if (this.history[channel].list.length) {
+      this.history[channel].list[index].url = args.url;
+      if (args.isNewWindow) this.history[channel].list[index].view.webContents.loadURL(args.url);
+    }
+
+    // 创建上一个view数据
+    const page = {
+      url: lastUrl,
+      view: new BrowserView({
+        webPreferences: {
+          preload: `${require('path').resolve(__static, 'pip/preload.js')}`,
+        },
+      }),
+    };
+    // loadURL
+    page.view.webContents.loadURL(page.url);
+
     // 暂停当前视频
     if (this.currentChannel) {
-      const currentIndex = this.history[this.currentChannel].currentIndex;
       if (channel !== this.currentChannel) {
+        const currentIndex = this.history[this.currentChannel].currentIndex;
         const view = this.history[this.currentChannel].list[currentIndex].view;
         this.pauseVideo(view);
       } else {
-        const list = this.history[this.currentChannel].list;
+        // 清除后退的记录
         if (this.backPage.length) {
           remove(this.history[this.currentChannel].list,
             (list: BrowserViewHistory) => {
@@ -65,37 +86,26 @@ export class BrowserViewManager implements IBrowserViewManager {
             });
           this.backPage = [];
         }
-        const lastPage = list[currentIndex];
-        if (lastPage) {
-          lastPage.view.webContents.loadURL(lastPage.url);
-          lastPage.view.webContents.once('media-started-playing', () => {
+        const hasLastPage = this.history[channel].list.length;
+        if (hasLastPage) {
+          page.view.webContents.once('media-started-playing', () => {
             if (this.currentChannel.includes('bilibili')) {
               let type = '';
-              lastPage.view.webContents
+              page.view.webContents
                 .executeJavaScript(bilibiliFindType).then((r: (HTMLElement | null)[]) => {
                   type = ['bangumi', 'videoStreaming', 'iframeStreaming', 'iframeStreaming', 'video'][r.findIndex(i => i)] || 'others';
-                  lastPage.view.webContents.executeJavaScript(bilibiliVideoPause(type));
+                  page.view.webContents.executeJavaScript(bilibiliVideoPause(type));
                 });
             } else {
-              lastPage.view.webContents.executeJavaScript('setTimeout(() => { document.querySelector("video").pause(); }, 100)');
+              page.view.webContents.executeJavaScript('setTimeout(() => { document.querySelector("video").pause(); }, 100)');
             }
           });
         }
       }
     }
-    // 创建当前view数据
-    const page = {
-      url,
-      view: new BrowserView({
-        webPreferences: {
-          preload: `${require('path').resolve(__static, 'pip/preload.js')}`,
-        },
-      }),
-    };
-    // loadURL
-    page.view.webContents.loadURL(page.url);
 
-    this.history[channel].list.push(page);
+    // 插入view到当前view的上一个位置
+    this.history[channel].list.splice(index, 0, page);
     this.history[channel].currentIndex = this.history[channel].list.length - 1;
     this.history[channel].lastUpdateTime = Date.now();
     this.currentChannel = channel;
@@ -119,9 +129,10 @@ export class BrowserViewManager implements IBrowserViewManager {
     return this.jump(false);
   }
 
-  public changeChanel(channel: string, url: string): BrowserViewData {
+  public changeChanel(channel: string,
+    args: { url: string, isNewWindow?: boolean }): BrowserViewData {
     if (!this.history[channel]) {
-      return this.create(channel, url);
+      return this.create(channel, args);
     }
     this.pauseVideo();
     this.currentChannel = channel;
@@ -239,10 +250,10 @@ export type BrowserViewData = {
 }
 
 export interface IBrowserViewManager {
-  create(channel: string, url: string): BrowserViewData
+  create(channel: string, args: { url: string, isNewWindow?: boolean }): BrowserViewData
   back(): BrowserViewData
   forward(): BrowserViewData
-  changeChanel(channel: string, url: string): BrowserViewData
+  changeChanel(channel: string, args: { url: string, isNewWindow?: boolean }): BrowserViewData
   enterPip(): { pipBrowser: BrowserView, mainBrowser: BrowserViewData }
   exitPip(): BrowserViewData
   changePip(channel: string): { pipBrowser: BrowserView, mainBrowser: BrowserViewData }
