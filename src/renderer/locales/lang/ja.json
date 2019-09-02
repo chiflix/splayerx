@@ -80,7 +80,7 @@
     }
   },
   "loading": {
-    "content": "翻訳の読み込み ...",
+    "content": "翻訳を読み込み中 ...",
     "title": ""
   },
   "msg": {
@@ -95,7 +95,7 @@
       "switchAudioTrack": "オーディオトラック"
     },
     "file": {
-      "clearHistory": "プレイ履歴をクリア",
+      "clearHistory": "再生履歴をクリア",
       "closeWindow": "閉じる",
       "name": "ファイル",
       "open": "ファイルを開く…",
@@ -119,14 +119,14 @@
       "captureScreen": "スクリンショット",
       "captureVideoClip": "トリム",
       "decreasePlaybackSpeed": "再生速度の低下",
-      "forwardL": "進む +60s",
-      "forwardS": "進む +5s",
+      "forwardL": "早送り +60s",
+      "forwardS": "早送り +5s",
       "fullScreen": "ズーム/フルスクリーンを解除",
       "increasePlaybackSpeed": "再生速度の増加",
       "name": "プレイ",
-      "pause": "停止",
+      "pause": "ポーズ",
       "play": "プレイ",
-      "resetSpeed": "重置播放速度",
+      "resetSpeed": "再生速度をリセット",
       "nextVideo": "次のビデオ",
       "showPlaylist": "プレイリストを表示",
       "hidePlaylist": "プレイリストを隠す",
@@ -178,11 +178,11 @@
     },
     "titleName": "SPlayer",
     "update": {
-      "message": "更新已就绪，是否现在重启?",
-      "no": "暂不更新",
+      "message": "今再起動してアップデートをインストールしますか？",
+      "no": "後にする",
       "title": "更新就绪",
-      "updateInstalled": "播放器已更新至最新版本!",
-      "yes": "更新"
+      "updateInstalled": "最新バージョンにアップデート済み!",
+      "yes": "はい"
     },
     "window": {
       "windowRotate": "時計回りに90°回転",
@@ -241,7 +241,7 @@
     "general": {
       "hideHistory": "再生履歴を隠す",
       "clearHistory": "終了時にプレイ履歴を削除",
-      "reverseScrolling": "マウスの逆スクロール",
+      "reverseScrolling": "マウスのスクロール方向を逆に設定",
       "setDefault": "デフォルトのプレーヤーとして設定",
       "setDefaultDescription": "SPlayer ですべてのビデオファイルを開く。",
       "restoreSettings": "すべての設定をリセット",
@@ -314,7 +314,7 @@
   "recentPlaylist": {
     "folderSource": "再生リスト",
     "playing": "再生中",
-    "paused": "一時停止",
+    "paused": "ポーズ中",
     "playlistSource": "プレイリスト",
     "add": "プレイリストに追加する"
   },
