@@ -178,10 +178,10 @@
     },
     "titleName": "SPlayer",
     "update": {
-      "message": "更新已就绪，是否现在重启?",
-      "no": "暂不更新",
+      "message": "今再起動してアップデートをインストールしますか？",
+      "no": "後にする",
       "title": "更新就绪",
-      "updateInstalled": "播放器已更新至最新版本!",
+      "updateInstalled": "最新バージョンにアップデート済み!",
       "yes": "更新"
     },
     "window": {
