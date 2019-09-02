@@ -493,6 +493,9 @@ new Vue({
             this.$bus.$emit('open-url-show', true);
           }
           break;
+        case 70:
+          this.$bus.$emit('toggle-fullscreen');
+          break;
         default:
           break;
       }
