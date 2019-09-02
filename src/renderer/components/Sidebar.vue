@@ -42,7 +42,7 @@ export default {
         this.$electron.ipcRenderer.send('add-browsing', { size: data.pipSize || this.pipSize, position: data.pipPos || this.pipPos });
       });
       const url = `https://www.${site}.com`;
-      this.$electron.ipcRenderer.send('change-channel', { url });
+      this.$electron.ipcRenderer.send('change-channel', { url, sidebar: this.showSidebar });
       if (this.$router.currentRoute.name !== 'browsing-view') this.$router.push({ name: 'browsing-view' });
     },
 
