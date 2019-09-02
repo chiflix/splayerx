@@ -139,7 +139,7 @@
       "checkForUpdates": "アップデートを確認",
       "hide": "SPlayerを隠す",
       "hideOthers": "その他を隠す",
-      "preferences": "環境設定",
+      "preferences": "オプション設定",
       "quit": "SPlayerを終了",
       "showAll": "すべて表示"
     },
@@ -234,13 +234,13 @@
     "primary": "Primary",
     "secondary": "Secondary",
     "chooseSecondary": "Select Secondary Language",
-    "languageDescription": "* You can change your settings in preferences later",
+    "languageDescription": "*後でもオプション設定で変更できます。",
     "none": "None"
   },
   "preferences": {
     "general": {
       "hideHistory": "再生履歴を隠す",
-      "clearHistory": "終了時にプレイ履歴を削除",
+      "clearHistory": "終了時に再生履歴を削除",
       "reverseScrolling": "マウスのスクロール方向を逆に設定",
       "setDefault": "デフォルトのプレーヤーとして設定",
       "setDefaultDescription": "SPlayer ですべてのビデオファイルを開く。",
