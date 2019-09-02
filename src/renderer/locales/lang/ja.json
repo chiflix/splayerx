@@ -241,7 +241,7 @@
     "general": {
       "hideHistory": "再生履歴を隠す",
       "clearHistory": "終了時にプレイ履歴を削除",
-      "reverseScrolling": "マウスの逆スクロール",
+      "reverseScrolling": "マウスのスクロール方向を逆に設定",
       "setDefault": "デフォルトのプレーヤーとして設定",
       "setDefaultDescription": "SPlayer ですべてのビデオファイルを開く。",
       "restoreSettings": "すべての設定をリセット",
