@@ -51,7 +51,7 @@
       "title": "エラー"
     },
     "fileNonExist": {
-      "content": "プライリストから削除する。",
+      "content": "再生リストから削除する。",
       "title": "ファイルが見つかりませんでした。"
     },
     "playlistNonExist": {
