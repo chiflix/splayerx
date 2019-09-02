@@ -525,7 +525,10 @@ function registerMainWindowEvent(mainWindow) {
       });
     }, 150);
     view.setBounds({
-      x: 0, y: 36, width: mainWindow.getSize()[0], height: mainWindow.getSize()[1] - 36,
+      x: args.sidebar ? 76 : 0,
+      y: 36,
+      width: args.sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
+      height: mainWindow.getSize()[1] - 36,
     });
     view.setAutoResize({
       width: true, height: true,

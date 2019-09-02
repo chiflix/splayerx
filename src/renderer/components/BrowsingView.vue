@@ -60,6 +60,12 @@ export default {
     'browsing-header': BrowsingHeader,
     NotificationBubble,
   },
+  props: {
+    showSidebar: {
+      type: Boolean,
+      default: false,
+    },
+  },
   data() {
     return {
       quit: false,
@@ -209,6 +215,9 @@ export default {
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', this.browsingSize);
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', this.browsingPos);
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [0]);
+    if (this.showSidebar) {
+      const browserWindow = this.$electron.remote.getCurrentWindow().getBrowserViews();
+    }
   },
   mounted() {
     this.menuService = new MenuService();
@@ -691,6 +700,8 @@ export default {
 
 <style scoped lang="scss">
 .browsing {
+  position: absolute;
+  right: 0;
   height: 100vh;
   width: 100vw;
   display: flex;

@@ -1,29 +1,5 @@
 <template>
   <div class="landing-view">
-    <div
-      :style="{
-        width: showSidebar ? '76px' : '0',
-      }"
-      class="side-bar"
-    >
-      <div class="icon-box">
-        <div @mouseup="handleSidebarIcon('bilibili')">
-          <BilibiliSidebarIcon />
-        </div>
-        <div @mouseup="handleSidebarIcon('iqiyi')">
-          <iQiyiSidebarIcon />
-        </div>
-        <div @mouseup="handleSidebarIcon('youtube')">
-          <YoutubeSidebarIcon />
-        </div>
-      </div>
-    </div>
-    <div
-      :style="{
-        width: showSidebar ? 'calc(100% - 76px)' : '100%',
-      }"
-      class="wrapper"
-    >
       <open-url
         v-show="openUrlShow"
         :open-input-url="openInputUrl"
@@ -149,7 +125,6 @@
         </div>
       </div>
       <NotificationBubble />
-    </div>
   </div>
 </template>
 
@@ -162,9 +137,6 @@ import { filePathToUrl } from '@/helpers/path';
 import { playInfoStorageService } from '@/services/storage/PlayInfoStorageService';
 import { recentPlayService } from '@/services/media/RecentPlayService';
 import Icon from '@/components/BaseIconContainer.vue';
-import BilibiliSidebarIcon from '@/components/LandingView/BilibiliSidebarIcon.vue';
-import iQiyiSidebarIcon from '@/components/LandingView/iQiyiSidebarIcon.vue';
-import YoutubeSidebarIcon from '@/components/LandingView/YoutubeSidebarIcon.vue';
 import OpenUrl from '@/components/LandingView/OpenUrl.vue';
 import NotificationBubble from '@/components/NotificationBubble.vue';
 import PlaylistItem from '@/components/LandingView/PlaylistItem.vue';
@@ -173,7 +145,6 @@ import { log } from '@/libs/Log';
 import Sagi from '@/libs/sagi';
 import { findNsfwFistFilter } from '@/libs/utils';
 import { Browsing as browsingActions } from '@/store/actionTypes';
-import asyncStorage from '@/helpers/asyncStorage';
 
 Vue.component('PlaylistItem', PlaylistItem);
 Vue.component('VideoItem', VideoItem);
@@ -182,9 +153,6 @@ export default {
   name: 'LandingView',
   components: {
     Icon,
-    BilibiliSidebarIcon,
-    iQiyiSidebarIcon,
-    YoutubeSidebarIcon,
     NotificationBubble,
     'open-url': OpenUrl,
   },
@@ -376,18 +344,6 @@ export default {
     move(steps: number) {
       return steps * (this.thumbnailWidth + this.marginRight);
     },
-    handleSidebarIcon(site: string) {
-      asyncStorage.get('browsingPip').then((data) => {
-        this.$store.dispatch('updatePipSize', data.pipSize || this.pipSize);
-        this.$store.dispatch('updatePipPos', data.pipPos || this.pipPos);
-        this.$electron.ipcRenderer.send('add-browsing', { size: data.pipSize || this.pipSize, position: data.pipPos || this.pipPos });
-      });
-      const url = `https://www.${site}.com`;
-      this.$electron.ipcRenderer.send('change-channel', { url });
-      this.$router.push({
-        name: 'browsing-view',
-      });
-    },
     handleBrowsingOpen(url: string) {
       this.updateInitialUrl(url);
       this.$router.push({
@@ -472,33 +428,6 @@ export default {
 $themeColor-Light: white;
 
 .landing-view {
-  height: 100vh;
-  width: 100vw;
-}
-.side-bar {
-  position: absolute;
-  background-color: #39383F;
-  z-index: 0;
-  left: 0;
-  height: 100%;
-  transition: width 100ms ease-out;
-  will-change: width;
-
-  .icon-box {
-    width: 40px;
-    margin-top: 46px;
-    margin-left: 18px;
-    margin-right: 18px;
-    display: flex;
-    flex-direction: column;
-    div {
-      width: 40px;
-      height: 40px;
-      margin-bottom: 16px;
-    }
-  }
-}
-.wrapper {
   overflow: hidden;
   will-change: width;
   transition-property: width;
