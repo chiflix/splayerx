@@ -494,7 +494,13 @@ new Vue({
           }
           break;
         case 70:
-          this.$bus.$emit('toggle-fullscreen');
+          if (this.isFullScreen) {
+            this.$bus.$emit('off-fullscreen');
+            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
+          } else {
+            this.$bus.$emit('to-fullscreen');
+            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [true]);
+          }
           break;
         default:
           break;
