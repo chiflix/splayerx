@@ -140,6 +140,15 @@ export default {
     },
   },
   watch: {
+    showSidebar(val: boolean) {
+      const browserView = this.$electron.remote.getCurrentWindow().getBrowserViews()[0];
+      browserView.setBounds({
+        x: val ? 76 : 0,
+        y: 40,
+        width: val ? window.innerWidth - 76 : window.innerWidth,
+        height: window.innerHeight - 40,
+      });
+    },
     hasVideo(val: boolean) {
       this.$refs.browsingHeader.updateWebInfo({
         hasVideo: val,
