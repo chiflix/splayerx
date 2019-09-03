@@ -19,6 +19,7 @@
         @mouseout.native="mouseoverSidebar = false"
         @mouseup.native="handleSidebar"
         :mouseover="mouseoverSidebar"
+        :fill="isBrowsingView ? '#BBBACC' : ''"
         class="no-drag"
       />
     </div>
@@ -110,6 +111,7 @@
           marginLeft: showSidebar ? '19px' : '4px',
         }"
         :mouseover="mouseoverSidebar"
+        :fill="isBrowsingView ? '#BBBACC' : ''"
         class="sidebar no-drag"
       />
     </div>
@@ -136,6 +138,10 @@ export default {
       default: false,
     },
     isLandingView: {
+      type: Boolean,
+      default: false,
+    },
+    isBrowsingView: {
       type: Boolean,
       default: false,
     },

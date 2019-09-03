@@ -24,7 +24,7 @@
           <path
             id="icon-sidebar"
             :d="d1"
-            :fill="highlight ? '#FFF' : '#ACACAC'"
+            :fill="fill ? fill : highlight ? '#FFF' : '#ACACAC'"
           />
         </g>
       </g>
@@ -34,6 +34,10 @@
 <script lang="ts">
 export default {
   props: {
+    fill: {
+      type: String,
+      default: '',
+    },
     mouseover: {
       type: Boolean,
       default: false,

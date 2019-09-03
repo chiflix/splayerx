@@ -699,6 +699,7 @@ export default {
 .browsing {
   position: absolute;
   right: 0;
+  border-top-left-radius: 4px;
   height: 100vh;
   width: 100vw;
   display: flex;

@@ -11,46 +11,20 @@
       :forward-type="forwardType"
       :web-info="webInfo"
       :style="{
-        order: isDarwin ? 1 : 2,
-      }"
-    />
-    <browsing-favicons
-      :record-url="recordUrl"
-      :handle-bookmark-open="handleBookmarkOpen"
-      :style="{
-        order: isDarwin ? 2 : 3,
       }"
     />
     <browsing-input
-      v-show="showOpenUrl"
       :close-url-input="closeUrlInput"
       :play-file-with-playing-view="playFileWithPlayingView"
-    />
-    <div
       :style="{
-        width: isDarwin ? '80px' : '100px',
-        display: 'flex',
-        zIndex: '6',
-        order: isDarwin ? 3 : 1,
-        webkitAppRegion: 'no-drag',
-        cursor: hasVideo ? 'pointer' : '',
       }"
-    >
-      <Icon
-        :type="picInPicType"
-        :style="{
-          margin: isDarwin ? 'auto 10px auto auto' : 'auto auto auto 15px',
-        }"
-        @mouseup.native="handleGlobalPip"
-      />
-      <Icon
-        :type="picInPicType"
-        :style="{
-          margin: isDarwin ? 'auto 10px auto auto' : 'auto auto auto 15px',
-        }"
-        @mouseup.native="handleEnterPip"
-      />
-    </div>
+    />
+    <browsing-pip
+      :handle-enter-pip="handleEnterPip"
+      :handle-global-pip="handleGlobalPip"
+      :style="{
+      }"
+    />
   </div>
 </template>
 
@@ -60,6 +34,7 @@ import { mapGetters } from 'vuex';
 import BrowsingFavicons from '@/components/BrowsingView/BrowsingFavicons.vue';
 import BrowsingInput from '@/components/BrowsingView/BrowsingInput.vue';
 import BrowsingControl from '@/components/BrowsingView/BrowsingControl.vue';
+import BrowsingPip from '@/components/BrowsingView/BrowsingPip.vue';
 import Icon from '@/components/BaseIconContainer.vue';
 
 export default {
@@ -68,6 +43,7 @@ export default {
     'browsing-favicons': BrowsingFavicons,
     'browsing-input': BrowsingInput,
     'browsing-control': BrowsingControl,
+    'browsing-pip': BrowsingPip,
     Icon,
   },
   props: {
@@ -109,9 +85,6 @@ export default {
   },
   computed: {
     ...mapGetters(['recordUrl', 'isMaximized']),
-    picInPicType() {
-      return this.hasVideo ? 'pip' : 'pipDisabled';
-    },
     isDarwin() {
       return process.platform === 'darwin';
     },
@@ -173,9 +146,15 @@ export default {
 
 <style scoped lang="scss">
 .header {
+  border-top-left-radius: 4px;
+  box-sizing: border-box;
   width: 100%;
-  height: 36px;
+  height: 40px;
   display: flex;
-  background: rgba(65, 65, 65, 1);
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #FFF;
+  border-bottom: 1px solid #F2F1F4;
 }
 </style>

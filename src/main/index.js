@@ -526,9 +526,9 @@ function registerMainWindowEvent(mainWindow) {
     }, 150);
     view.setBounds({
       x: args.sidebar ? 76 : 0,
-      y: 36,
+      y: 40,
       width: args.sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
-      height: mainWindow.getSize()[1] - 36,
+      height: mainWindow.getSize()[1] - 40,
     });
     view.setAutoResize({
       width: true, height: true,

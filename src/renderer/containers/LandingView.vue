@@ -1,130 +1,130 @@
 <template>
   <div class="landing-view">
-      <open-url
-        v-show="openUrlShow"
-        :open-input-url="openInputUrl"
-        :close-url-input="closeUrlInput"
-      />
-      <transition name="background-container-transition">
-        <div
-          v-if="item.backgroundUrl"
-          class="background"
+    <open-url
+      v-show="openUrlShow"
+      :open-input-url="openInputUrl"
+      :close-url-input="closeUrlInput"
+    />
+    <transition name="background-container-transition">
+      <div
+        v-if="item.backgroundUrl"
+        class="background"
+      >
+        <transition
+          name="background-transition"
+          mode="in-out"
         >
-          <transition
-            name="background-transition"
-            mode="in-out"
-          >
-            <div
-              :key="item.path"
-              :style="{
-                backgroundImage: item.backgroundUrl,
-              }"
-              class="background-image"
-            >
-              <div class="background-mask" />
-            </div>
-          </transition>
-          <div class="item-info">
-            <div class="item-name">
-              {{ item.basename }}
-            </div>
-            <div class="item-description" />
-            <div class="item-timing">
-              <span class="timing-played">
-                {{ timeInvalidForm(timecodeFromSeconds(item.lastPlayedTime)) }}
-                / {{ timeInvalidForm(timecodeFromSeconds(item.duration)) }}
-                <span v-if="item.playlistLength > 1">
-                  ·&nbsp;{{
-                    $t('recentPlaylist.playlistSource')
-                  }}&nbsp;&nbsp;{{ item.playedIndex + 1 }} / {{ item.playlistLength }}
-                </span>
-              </span>
-            </div>
-            <div class="item-progress">
-              <div
-                :style="{ width: item.percentage + '%' }"
-                class="progress-played"
-              />
-            </div>
-          </div>
-        </div>
-      </transition>
-      <div class="welcome-container">
-        <transition :name="logoTransition">
           <div
-            v-if="pageMounted && (!item.backgroundUrl)"
-            class="logo-container"
+            :key="item.path"
+            :style="{
+              backgroundImage: item.backgroundUrl,
+            }"
+            class="background-image"
           >
-            <Icon type="logo" />
+            <div class="background-mask" />
           </div>
         </transition>
+        <div class="item-info">
+          <div class="item-name">
+            {{ item.basename }}
+          </div>
+          <div class="item-description" />
+          <div class="item-timing">
+            <span class="timing-played">
+              {{ timeInvalidForm(timecodeFromSeconds(item.lastPlayedTime)) }}
+              / {{ timeInvalidForm(timecodeFromSeconds(item.duration)) }}
+              <span v-if="item.playlistLength > 1">
+                ·&nbsp;{{
+                  $t('recentPlaylist.playlistSource')
+                }}&nbsp;&nbsp;{{ item.playedIndex + 1 }} / {{ item.playlistLength }}
+              </span>
+            </span>
+          </div>
+          <div class="item-progress">
+            <div
+              :style="{ width: item.percentage + '%' }"
+              class="progress-played"
+            />
+          </div>
+        </div>
       </div>
+    </transition>
+    <div class="welcome-container">
+      <transition :name="logoTransition">
+        <div
+          v-if="pageMounted && (!item.backgroundUrl)"
+          class="logo-container"
+        >
+          <Icon type="logo" />
+        </div>
+      </transition>
+    </div>
+    <div
+      ref="mask"
+      class="mask"
+    />
+    <div
+      :style="{
+        left: playlistLeft,
+        right: playlistRight,
+        bottom: winWidth > 1355 ? `${40 / 1355 * winWidth}px` : '40px',
+        transition: tranFlag ?
+          'left 400ms cubic-bezier(0.42, 0, 0.58, 1)'
+          : 'right 400ms cubic-bezier(0.42, 0, 0.58, 1)',
+      }"
+      class="controller"
+    >
       <div
-        ref="mask"
-        class="mask"
-      />
-      <div
-        :style="{
-          left: playlistLeft,
-          right: playlistRight,
-          bottom: winWidth > 1355 ? `${40 / 1355 * winWidth}px` : '40px',
-          transition: tranFlag ?
-            'left 400ms cubic-bezier(0.42, 0, 0.58, 1)'
-            : 'right 400ms cubic-bezier(0.42, 0, 0.58, 1)',
-        }"
-        class="controller"
+        :style="{marginLeft: winWidth > 1355 ? `${50 / 1355 * winWidth}px` : '50px'}"
+        class="playlist no-drag"
       >
         <div
-          :style="{marginLeft: winWidth > 1355 ? `${50 / 1355 * winWidth}px` : '50px'}"
-          class="playlist no-drag"
+          :style="{
+            height:`${thumbnailHeight}px`,
+            width:`${thumbnailWidth}px`,
+            marginRight: `${marginRight}px`,
+            cursor: firstIndex === 0 ? 'pointer' : `${cursorUrl}, pointer`,
+            backgroundColor:
+              item.backgroundUrl
+                ? 'rgba(255,255,255,0.12) ': 'rgba(255,255,255,0.05)',
+          }"
+          @click="openOrMove"
+          class="button"
         >
-          <div
-            :style="{
-              height:`${thumbnailHeight}px`,
-              width:`${thumbnailWidth}px`,
-              marginRight: `${marginRight}px`,
-              cursor: firstIndex === 0 ? 'pointer' : `${cursorUrl}, pointer`,
-              backgroundColor:
-                item.backgroundUrl
-                  ? 'rgba(255,255,255,0.12) ': 'rgba(255,255,255,0.05)',
-            }"
-            @click="openOrMove"
-            class="button"
-          >
-            <div class="btnMask">
-              <Icon
-                class="addUi"
-                type="add"
-              />
-            </div>
+          <div class="btnMask">
+            <Icon
+              class="addUi"
+              type="add"
+            />
           </div>
-          <!-- eslint-disable-next-line vue/require-component-is -->
-          <component
-            :is="playlistLength > 1 ? 'PlaylistItem' : 'VideoItem'"
-            v-for="({ backgroundUrl, id, playlistLength }, index) in landingViewItems"
-            :key="id"
-            :cursor-url="cursorUrl"
-            :can-hover="canHover"
-            :backgroundUrl="backgroundUrl"
-            :index="index"
-            :is-in-range="
+        </div>
+        <!-- eslint-disable-next-line vue/require-component-is -->
+        <component
+          :is="playlistLength > 1 ? 'PlaylistItem' : 'VideoItem'"
+          v-for="({ backgroundUrl, id, playlistLength }, index) in landingViewItems"
+          :key="id"
+          :cursor-url="cursorUrl"
+          :can-hover="canHover"
+          :backgroundUrl="backgroundUrl"
+          :index="index"
+          :is-in-range="
               firstIndex === 0
               ? index + 1 <= lastIndex - (showSidebar ? 1 : 0)
               : index + 1 >= firstIndex + (showSidebar ? 1 : 0)
             "
-            :thumbnail-width="thumbnailWidth"
-            :thumbnail-height="thumbnailHeight"
-            :shifting="shifting"
-            :style="{
-              marginRight: `${marginRight}px`,
-            }"
-            :on-item-mouseover="onItemMouseover"
-            :on-item-click="onItemClick"
-            :on-item-delete="onItemDelete"
-          />
-        </div>
+          :thumbnail-width="thumbnailWidth"
+          :thumbnail-height="thumbnailHeight"
+          :shifting="shifting"
+          :style="{
+            marginRight: `${marginRight}px`,
+          }"
+          :on-item-mouseover="onItemMouseover"
+          :on-item-click="onItemClick"
+          :on-item-delete="onItemDelete"
+        />
       </div>
-      <NotificationBubble />
+    </div>
+    <NotificationBubble />
   </div>
 </template>
 
