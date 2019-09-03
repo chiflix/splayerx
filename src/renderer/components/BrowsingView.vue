@@ -215,9 +215,6 @@ export default {
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', this.browsingSize);
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', this.browsingPos);
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [0]);
-    if (this.showSidebar) {
-      const browserWindow = this.$electron.remote.getCurrentWindow().getBrowserViews();
-    }
   },
   mounted() {
     this.menuService = new MenuService();
