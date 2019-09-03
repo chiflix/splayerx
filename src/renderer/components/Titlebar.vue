@@ -17,7 +17,6 @@
       <SidebarIcon
         @mouseover.native="mouseoverSidebar = true"
         @mouseout.native="mouseoverSidebar = false"
-        @mouseup.native="handleSidebar"
         :mouseover="mouseoverSidebar"
         :fill="isBrowsingView ? '#BBBACC' : ''"
         class="no-drag"
@@ -106,7 +105,6 @@
         v-if="isDarwin && isLandingView"
         @mouseover.native="mouseoverSidebar = true"
         @mouseout.native="mouseoverSidebar = false"
-        @mouseup.native="handleSidebar"
         :style="{
           marginLeft: showSidebar ? '19px' : '4px',
         }"
@@ -217,9 +215,6 @@ export default {
     });
   },
   methods: {
-    handleSidebar() {
-      this.$event.emit('side-bar-mouseup');
-    },
     handleDbClick() {
       if (!this.isMaximized) {
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'maximize');

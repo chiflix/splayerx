@@ -1,5 +1,7 @@
 <template>
-  <div>
+  <div
+    @mouseup="handleSidebar"
+  >
     <svg
       :opacity="mouseover ? '1' : '0.5'"
       class="side-bar"
@@ -53,6 +55,11 @@ export default {
     this.$bus.$on('highlight-sidebar', (highlight: boolean) => {
       this.highlight = highlight;
     });
+  },
+  methods: {
+    handleSidebar() {
+      this.$event.emit('side-bar-mouseup');
+    },
   },
 };
 </script>

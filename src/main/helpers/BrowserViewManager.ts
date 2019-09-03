@@ -93,19 +93,17 @@ export class BrowserViewManager implements IBrowserViewManager {
         const currentIndex = this.history[this.currentChannel].currentIndex;
         const view = this.history[this.currentChannel].list[currentIndex].view;
         this.pauseVideo(view);
-      } else {
+      } else if (this.backPage.length) {
         // 清除后退的记录
-        if (this.backPage.length) {
-          remove(this.history[this.currentChannel].list,
-            (list: BrowserViewHistory) => {
-              if (this.backPage.includes(list)) {
-                list.view.destroy();
-                return true;
-              }
-              return false;
-            });
-          this.backPage = [];
-        }
+        remove(this.history[this.currentChannel].list,
+          (list: BrowserViewHistory) => {
+            if (this.backPage.includes(list)) {
+              list.view.destroy();
+              return true;
+            }
+            return false;
+          });
+        this.backPage = [];
       }
     }
 

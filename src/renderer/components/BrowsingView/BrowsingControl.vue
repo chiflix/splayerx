@@ -6,9 +6,8 @@
     class="browsing-control"
   >
     <SidebarIcon
-      @mouseover.native="mouseoverSidebar = true"
-      @mouseout.native="mouseoverSidebar = false"
-      @mouseup.native="handleSidebar"
+      @mouseover="mouseoverSidebar = true"
+      @mouseout="mouseoverSidebar = false"
       :mouseover="mouseoverSidebar"
       class="sidebar no-drag"
     />
@@ -73,6 +72,8 @@ export default {
     isDarwin() {
       return process.platform === 'darwin';
     },
+  },
+  methods: {
   },
 };
 </script>

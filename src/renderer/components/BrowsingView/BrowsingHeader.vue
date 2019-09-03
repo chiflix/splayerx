@@ -1,6 +1,5 @@
 <template>
   <div
-    @dblclick="handleDbClick"
     class="header"
   >
     <browsing-control
@@ -10,20 +9,14 @@
       :back-type="backType"
       :forward-type="forwardType"
       :web-info="webInfo"
-      :style="{
-      }"
     />
     <browsing-input
       :close-url-input="closeUrlInput"
       :play-file-with-playing-view="playFileWithPlayingView"
-      :style="{
-      }"
     />
     <browsing-pip-control
       :handle-enter-pip="handleEnterPip"
       :handle-global-pip="handleGlobalPip"
-      :style="{
-      }"
     />
   </div>
 </template>
@@ -31,22 +24,22 @@
 <script lang="ts">
 import electron from 'electron';
 import { mapGetters } from 'vuex';
-import BrowsingFavicons from '@/components/BrowsingView/BrowsingFavicons.vue';
 import BrowsingInput from '@/components/BrowsingView/BrowsingInput.vue';
 import BrowsingControl from '@/components/BrowsingView/BrowsingControl.vue';
 import BrowsingPipControl from '@/components/BrowsingView/BrowsingPipControl.vue';
-import Icon from '@/components/BaseIconContainer.vue';
 
 export default {
   name: 'BrowsingHeader',
   components: {
-    'browsing-favicons': BrowsingFavicons,
     'browsing-input': BrowsingInput,
     'browsing-control': BrowsingControl,
     'browsing-pip-control': BrowsingPipControl,
-    Icon,
   },
   props: {
+    showSidebar: {
+      type: Boolean,
+      default: false,
+    },
     handleEnterPip: {
       type: Function,
       required: true,
@@ -114,13 +107,6 @@ export default {
     });
   },
   methods: {
-    handleDbClick() {
-      if (!this.isMaximized) {
-        electron.ipcRenderer.send('callMainWindowMethod', 'maximize');
-      } else {
-        electron.ipcRenderer.send('callMainWindowMethod', 'unmaximize');
-      }
-    },
     closeUrlInput() {
       this.$bus.$emit('open-url-show', false);
     },
@@ -146,9 +132,11 @@ export default {
 
 <style scoped lang="scss">
 .header {
+  position: absolute;
+  right: 0;
+  width: calc(100vw - 76px);
   border-top-left-radius: 4px;
   box-sizing: border-box;
-  width: 100%;
   height: 40px;
   display: flex;
   flex-direction: row;

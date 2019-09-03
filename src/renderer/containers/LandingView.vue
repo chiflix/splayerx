@@ -156,6 +156,12 @@ export default {
     NotificationBubble,
     'open-url': OpenUrl,
   },
+  props: {
+    showSidebar: {
+      type: Boolean,
+      default: false,
+    },
+  },
   data() {
     return {
       landingViewItems: [],
@@ -169,7 +175,6 @@ export default {
       pageMounted: false,
       logoTransition: '',
       canHover: false,
-      showSidebar: false,
       playlistLeft: '0',
       playlistRight: '',
     };
@@ -300,10 +305,6 @@ export default {
     });
     this.$bus.$on('drop', () => {
       if (this.$refs.mask) this.$refs.mask.style.setProperty('background-color', 'rgba(255, 255, 255, 0)');
-    });
-    this.$event.on('side-bar-mouseup', () => {
-      this.showSidebar = !this.showSidebar;
-      this.$emit('update-side-bar', this.showSidebar);
     });
   },
   async mounted() {

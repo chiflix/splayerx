@@ -75,7 +75,7 @@ export default {
     width: 100%;
     height: 24px;
     outline: none;
-    background-color: #FFF; 
+    background-color: #FFF;
     border: none;
     z-index: 6;
     text-indent: 15px;
