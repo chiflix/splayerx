@@ -7,16 +7,27 @@
     <Titlebar
       v-if="$route.name !== 'playing-view'"
       :is-landing-view="$route.name === 'landing-view'"
+      :is-browsing-view="$route.name === 'browsing-view'"
       :show-sidebar="showSidebar"
       :enable-full-screen-button="['landing-view', 'playing-view', 'browsing-view']
         .includes($route.name)"
     />
+    <transition name="sidebar">
+      <Sidebar
+        v-if="showSidebar"
+        :show-sidebar="showSidebar"
+      />
+    </transition>
     <transition
       :name="transitionMode"
       mode="out-in"
     >
       <router-view
+        :style="{
+          width: showSidebar ? 'calc(100% - 76px)' : '100%',
+        }"
         :open-file-args="openFileArgs"
+        :show-sidebar="showSidebar"
         @update-side-bar="showSidebar = $event"
       />
     </transition>
@@ -27,6 +38,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ipcRenderer, Event } from 'electron';
 import Titlebar from '@/components/Titlebar.vue';
+import Sidebar from '@/components/Sidebar.vue';
 import '@/css/style.scss';
 import drag from '@/helpers/drag';
 
@@ -34,6 +46,7 @@ export default {
   name: 'Splayer',
   components: {
     Titlebar,
+    Sidebar,
   },
   data() {
     return {
@@ -46,7 +59,7 @@ export default {
     $route(to: any, from: any) {
       if (to.name === 'landing-view' && from.name === 'language-setting') this.transitionMode = 'fade';
       else this.transitionMode = '';
-      this.showSidebar = false;
+      if (to.name !== 'browsing-view') this.showSidebar = false;
     },
   },
   mounted() {
@@ -84,10 +97,17 @@ export default {
 <style lang="scss">
 // global scss
 // @import "@/css/style.scss";
-.landing-view {
-  background-image: linear-gradient(-28deg, #414141 0%, #545454 47%, #7B7B7B 100%);
+.sidebar {
+  &-enter-active {
+    transition: width 500ms ease-out;
+  }
+  &-leave-active {
+    transition: width 250ms ease-in;
+  }
+  &-enter, &-leave-to {
+    width: 0;
+  }
 }
-
 .fade {
   &-enter-active {
     transition: opacity 500ms ease-out;
@@ -95,10 +115,7 @@ export default {
   &-leave-active {
     transition: opacity 250ms ease-in;
   }
-  &-enter {
-    opacity: 0;
-  }
-  &-leave-to {
+  &-enter, &-leave-to {
     opacity: 0;
   }
 }
