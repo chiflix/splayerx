@@ -1,26 +1,21 @@
 <template>
   <div
-    :style="{
-      left: isDarwin ? '' : '15px',
-      right: isDarwin ? '15px' : '',
-    }"
     class="search-url"
   >
     <input
       ref="searchValue"
-      :style="{ order: isDarwin ? '1' : '2' }"
       @keypress="handleSearchKey"
       class="url-search"
-      placeholder="请输入URL..."
+      placeholder="Splayer"
       onfocus="select()"
     >
     <Icon
+      @mouseup.native="handleUrlReload"
       :style="{
-        order: isDarwin ? '2' : '1',
-        margin: isDarwin ? 'auto 0 auto 10px' : 'auto 10px auto 0' }"
-      @mouseup.native="handleCloseUrlInput"
-      type="closeInput"
-      class="close-search-icon"
+        cursor: 'pointer',
+      }"
+      type="pageRefresh"
+      class="page-refresh-icon"
     />
   </div>
 </template>
@@ -71,29 +66,32 @@ export default {
 }
 .search-url {
   display: flex;
-  width: auto;
+  justify-content: flex-start;
+  align-items: center;
+  width: 100%;
   height: 24px;
-  position: absolute;
-  top: 6px;
   z-index: 6;
   .url-search {
-    width: 275px;
+    width: 100%;
     height: 24px;
     outline: none;
-    background: rgba(255, 255, 255, 0.08);
-    border-radius: 12px;
+    background-color: #FFF;
     border: none;
     z-index: 6;
     text-indent: 15px;
-    font-size: 13px;
-    color: rgba(255, 255, 255, 0.8);
+
+    font-size: 12px;
+    color: rgba(15, 26, 59, 0.5);
+    letter-spacing: 0.09px;
+    text-align: center;
+    line-height: 40px;
   }
-  .close-search-icon {
-    width: 10px;
-    height: 10px;
-    z-index: 6;
-    display: flex;
-    cursor: pointer;
+  .page-refresh-icon {
+    width: 16px;
+    height: 16px;
+    -webkit-app-region: no-drag;
+    margin-right: 16px;
+    margin-left: 12px;
   }
 }
 </style>

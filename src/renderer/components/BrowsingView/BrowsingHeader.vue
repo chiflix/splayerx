@@ -1,6 +1,5 @@
 <template>
   <div
-    @dblclick="handleDbClick"
     class="header"
   >
     <browsing-control
@@ -10,67 +9,37 @@
       :back-type="backType"
       :forward-type="forwardType"
       :web-info="webInfo"
-      :style="{
-        order: isDarwin ? 1 : 2,
-      }"
-    />
-    <browsing-favicons
-      :record-url="recordUrl"
-      :handle-bookmark-open="handleBookmarkOpen"
-      :style="{
-        order: isDarwin ? 2 : 3,
-      }"
     />
     <browsing-input
-      v-show="showOpenUrl"
       :close-url-input="closeUrlInput"
       :play-file-with-playing-view="playFileWithPlayingView"
     />
-    <div
-      :style="{
-        width: isDarwin ? '80px' : '100px',
-        display: 'flex',
-        zIndex: '6',
-        order: isDarwin ? 3 : 1,
-        webkitAppRegion: 'no-drag',
-        cursor: hasVideo ? 'pointer' : '',
-      }"
-    >
-      <Icon
-        :type="picInPicType"
-        :style="{
-          margin: isDarwin ? 'auto 10px auto auto' : 'auto auto auto 15px',
-        }"
-        @mouseup.native="handleGlobalPip"
-      />
-      <Icon
-        :type="picInPicType"
-        :style="{
-          margin: isDarwin ? 'auto 10px auto auto' : 'auto auto auto 15px',
-        }"
-        @mouseup.native="handleEnterPip"
-      />
-    </div>
+    <browsing-pip-control
+      :handle-enter-pip="handleEnterPip"
+      :handle-global-pip="handleGlobalPip"
+    />
   </div>
 </template>
 
 <script lang="ts">
 import electron from 'electron';
 import { mapGetters } from 'vuex';
-import BrowsingFavicons from '@/components/BrowsingView/BrowsingFavicons.vue';
 import BrowsingInput from '@/components/BrowsingView/BrowsingInput.vue';
 import BrowsingControl from '@/components/BrowsingView/BrowsingControl.vue';
-import Icon from '@/components/BaseIconContainer.vue';
+import BrowsingPipControl from '@/components/BrowsingView/BrowsingPipControl.vue';
 
 export default {
   name: 'BrowsingHeader',
   components: {
-    'browsing-favicons': BrowsingFavicons,
     'browsing-input': BrowsingInput,
     'browsing-control': BrowsingControl,
-    Icon,
+    'browsing-pip-control': BrowsingPipControl,
   },
   props: {
+    showSidebar: {
+      type: Boolean,
+      default: false,
+    },
     handleEnterPip: {
       type: Function,
       required: true,
@@ -109,9 +78,6 @@ export default {
   },
   computed: {
     ...mapGetters(['recordUrl', 'isMaximized']),
-    picInPicType() {
-      return this.hasVideo ? 'pip' : 'pipDisabled';
-    },
     isDarwin() {
       return process.platform === 'darwin';
     },
@@ -141,13 +107,6 @@ export default {
     });
   },
   methods: {
-    handleDbClick() {
-      if (!this.isMaximized) {
-        electron.ipcRenderer.send('callMainWindowMethod', 'maximize');
-      } else {
-        electron.ipcRenderer.send('callMainWindowMethod', 'unmaximize');
-      }
-    },
     closeUrlInput() {
       this.$bus.$emit('open-url-show', false);
     },
@@ -173,9 +132,17 @@ export default {
 
 <style scoped lang="scss">
 .header {
-  width: 100%;
-  height: 36px;
+  position: absolute;
+  right: 0;
+  width: calc(100vw - 76px);
+  border-top-left-radius: 4px;
+  box-sizing: border-box;
+  height: 40px;
   display: flex;
-  background: rgba(65, 65, 65, 1);
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #FFF;
+  border-bottom: 1px solid #F2F1F4;
 }
 </style>

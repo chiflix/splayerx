@@ -63,6 +63,9 @@ export default {
     },
   },
   mounted() {
+    this.$event.on('side-bar-mouseup', () => {
+      this.showSidebar = !this.showSidebar;
+    });
     ipcRenderer.on('open-file', (event: Event, args: { onlySubtitle: boolean, files: string[] }) => {
       this.openFileArgs = args;
     });

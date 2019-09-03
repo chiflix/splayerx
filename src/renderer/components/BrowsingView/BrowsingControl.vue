@@ -1,11 +1,16 @@
 <template>
   <div
     :style="{
-      width: isDarwin ? '114px' : '110px',
-      margin: isDarwin ? 'auto 0 auto 70px' : 'auto 0 auto 5px',
+      width: isDarwin ? '113px' : '110px',
     }"
     class="browsing-control"
   >
+    <SidebarIcon
+      @mouseover="mouseoverSidebar = true"
+      @mouseout="mouseoverSidebar = false"
+      :mouseover="mouseoverSidebar"
+      class="sidebar no-drag"
+    />
     <Icon
       ref="back"
       :type="backType"
@@ -24,23 +29,17 @@
       @mouseup.native="handleUrlForward"
       class="forward-icon"
     />
-    <Icon
-      @mouseup.native="handleUrlReload"
-      :style="{
-        cursor: 'pointer',
-      }"
-      type="pageRefresh"
-      class="page-refresh-icon"
-    />
   </div>
 </template>
 
 <script lang="ts">
 import Icon from '@/components/BaseIconContainer.vue';
+import SidebarIcon from '@/components/LandingView/SidebarIcon.vue';
 
 export default {
   name: 'BrowsingControl',
   components: {
+    SidebarIcon,
     Icon,
   },
   props: {
@@ -74,31 +73,36 @@ export default {
       return process.platform === 'darwin';
     },
   },
+  methods: {
+  },
 };
 </script>
 
 <style scoped lang="scss">
 .browsing-control {
-  height: 20px;
+  height: 100%;
   display: flex;
+  align-items: center;
   z-index: 6;
+  border-right: 1px solid #F2F1F4;
+  .sidebar {
+    display: flex;
+    justify-content: flex-end;
+    margin-left: 15px;
+    transition: width 100ms linear;
+  }
   .back-icon {
     width: 16px;
     height: 16px;
-    margin: auto 20px auto 7px;
+    margin-left: 21px;
+    margin-right: 18px;
     -webkit-app-region: no-drag;
   }
   .forward-icon {
     width: 16px;
     height: 16px;
-    margin: auto 20px auto 0;
+    margin-right: 17px;
     -webkit-app-region: no-drag;
-  }
-  .page-refresh-icon {
-    width: 16px;
-    height: 16px;
-    -webkit-app-region: no-drag;
-    margin: auto 0 auto 0;
   }
 }
 </style>
