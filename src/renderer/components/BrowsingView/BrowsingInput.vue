@@ -67,11 +67,10 @@ export default {
   justify-content: flex-start;
   align-items: center;
   width: 100%;
-  height: 24px;
+  height: 40px;
   z-index: 6;
   .url-search {
     width: 100%;
-    height: 40px;
     outline: none;
     background-color: #FFF;
     border: none;
@@ -81,7 +80,6 @@ export default {
     color: rgba(15, 26, 59, 0.5);
     letter-spacing: 0.09px;
     text-align: center;
-    line-height: 40px;
   }
   .page-refresh-icon {
     width: 16px;
