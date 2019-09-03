@@ -26,11 +26,11 @@
 <script lang="ts">
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ipcRenderer, Event } from 'electron';
+import { mapActions } from 'vuex';
 import { SubtitleManager as smActions } from '@/store/actionTypes';
 import Titlebar from '@/components/Titlebar.vue';
 import '@/css/style.scss';
 import drag from '@/helpers/drag';
-import { mapActions } from 'vuex';
 
 export default {
   name: 'Splayer',

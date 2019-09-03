@@ -1,10 +1,10 @@
 import { pick } from 'lodash';
 import { compile, CompiledASS, AssStream } from 'ass-compiler';
 import {
-  Format, IParser, ILoader, IMetadata, Cue, ITimeSegments, IVideoSegments,
+  Format, IParser, ILoader, IMetadata, Cue, IVideoSegments,
 } from '@/interfaces/ISubtitle';
 import { getDialogues } from '../utils';
-import { SubtitleTimeSegments } from '@/libs/TimeSegments';
+import { StreamTimeSegments } from '@/libs/TimeSegments';
 
 export class AssParser implements IParser {
   public get format() { return Format.AdvancedSubStationAplha; }
@@ -118,7 +118,7 @@ export class AssParser implements IParser {
 
   private assStream?: AssStream;
 
-  private timeSegments?: ITimeSegments;
+  private timeSegments?: StreamTimeSegments;
 
   private timer?: NodeJS.Timeout;
 
@@ -157,9 +157,8 @@ export class AssParser implements IParser {
         this.lastLines = newLines;
         if (!this.assStream) this.assStream = new AssStream();
         const result = this.assStream.compile(deDuplicatedPayload);
-        if (!this.timeSegments) this.timeSegments = new SubtitleTimeSegments();
-        result
-          .forEach(({ Start, End }) => this.timeSegments && this.timeSegments.insert(Start, End));
+        if (!this.timeSegments) this.timeSegments = new StreamTimeSegments();
+        this.timeSegments.bulkInsert(result.map(({ Start, End }) => [Start, End]), time || 0);
         this.normalize(this.assStream.compiled);
         this.isRequesting = false;
       }

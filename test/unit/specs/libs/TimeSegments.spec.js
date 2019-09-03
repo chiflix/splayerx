@@ -9,7 +9,7 @@ describe('StreamTimeSegments', () => {
   });
 
   describe('checkWithIndex', () => {
-    it('should return false and -1 when time is lower than least', () => {
+    it('should return false and -1 when time is lower than the minimum', () => {
       const result = timeSeg.checkWithIndex(0.5);
 
       expect(result).to.deep.equal({ in: false, index: -1 });
@@ -40,6 +40,12 @@ describe('StreamTimeSegments', () => {
 
       expect(timeSeg.startTimestamps).to.deep.equal([1, 3, 5]);
       expect(timeSeg.endTimestamps).to.deep.equal([2.5, 4, 6]);
+    });
+    it('should ignore two same numbers', () => {
+      timeSeg.insert(1, 1);
+
+      expect(timeSeg.startTimestamps).to.deep.equal([1, 3, 5]);
+      expect(timeSeg.endTimestamps).to.deep.equal([2, 4, 6]);
     });
   });
 });
@@ -197,10 +203,6 @@ describe('SubtitleTimeSegments', () => {
   it('should check return false when last segments changed', () => {
     expect(timeSeg.check(0)).to.equal(false);
     expect(timeSeg.check(2)).to.equal(false);
-  });
-
-  it('should check return false when no segments matched', () => {
-    expect(timeSeg.check(1.5)).to.equal(false);
   });
 
   it('should check return true when last segments not changed', () => {

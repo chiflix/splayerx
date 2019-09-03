@@ -12,7 +12,7 @@ export class StreamTimeSegments implements ITimeSegments {
 
   private checkWithIndex(time: number) {
     const index = this.startTimestamps.findIndex((timestamp, index, arr) => (
-      timestamp <= time && (!arr[index + 1] || arr[index + 1] > time)
+      timestamp <= time && (!arr[index + 1] || arr[index + 1] >= time)
     ));
     return {
       in: index !== -1 && this.endTimestamps[index] >= time,
@@ -23,7 +23,7 @@ export class StreamTimeSegments implements ITimeSegments {
   public check(time: number) { return this.checkWithIndex(time).in; }
 
   public insert(start: number, end: number) {
-    if (this.isValidNumber(start) && this.isValidNumber(end)) {
+    if (this.isValidNumber(start) && this.isValidNumber(end) && start !== end) {
       const [startTime, endTime] = [start, end].sort();
       const { in: startIn, index: startIndex } = this.checkWithIndex(startTime);
       const { in: endIn, index: endIndex } = this.checkWithIndex(endTime);
@@ -42,6 +42,13 @@ export class StreamTimeSegments implements ITimeSegments {
         this.endTimestamps.splice(deleteIndex, deleteCount);
       }
     }
+  }
+
+  public bulkInsert(segments: [number, number][], time: number) {
+    const allTimeStamps = segments.flatMap(nums => nums)
+      .concat([time])
+      .filter(num => this.isValidNumber(num));
+    this.insert(Math.min(...allTimeStamps), Math.max(...allTimeStamps));
   }
 }
 
@@ -156,7 +163,6 @@ export class SubtitleTimeSegments implements ITimeSegments {
 
   public check(time: number) {
     const segments = this.segments.filter(({ start, end }) => start <= time && end >= time);
-    if (!segments.length) return false;
     const result = isEqual(this.lastSegments, segments);
     this.lastSegments = segments;
     return result;
