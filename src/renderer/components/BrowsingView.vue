@@ -556,10 +556,7 @@ export default {
       }
     },
     addListenerToBrowser() {
-      const view = this.$electron.remote
-        .getCurrentWindow()
-        .getBrowserViews()[0];
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const view = this.$electron.remote.getCurrentWindow().getBrowserViews()[0];
       view.webContents.addListener('ipc-message', this.ipcMessage);
       view.webContents.addListener('dom-ready', this.domReady);
       view.webContents.addListener('new-window', this.newWindow);

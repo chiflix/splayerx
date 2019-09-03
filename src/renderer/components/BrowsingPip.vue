@@ -17,7 +17,6 @@ export default {
       asyncTasksDone: false,
       windowSize: [],
       offset: [],
-      movePos: [],
     };
   },
   computed: {
@@ -35,24 +34,27 @@ export default {
       this.windowSize = null;
     });
     electron.ipcRenderer.on('mouse-left-drag', (evt: Event, x: number, y: number) => {
-      if (!this.offset) {
-        const cursorPoint = electron.screen.getCursorScreenPoint();
+      if (!this.offset || !this.offset.length) {
+        const cursorPoint = electron.remote.screen.getCursorScreenPoint();
         const windowPos = electron.remote.getCurrentWindow().getPosition();
         this.offset = [cursorPoint.x - windowPos[0], cursorPoint.y - windowPos[1]];
         if (this.getRatio() !== 1) {
           this.windowSize = electron.remote.getCurrentWindow().getSize();
         }
-      }
-      x = Math.round((x / this.getRatio()) - this.offset[0]);
-      y = Math.round((y / this.getRatio()) - this.offset[1]);
-      if (this.isDarwin) {
-        electron.ipcRenderer.send('callBrowsingWindowMethod', 'setPosition', [x || 0, y || 0]);
-      } else if (this.windowSize) {
-        electron.ipcRenderer.send('callBrowsingWindowMethod', 'setBounds', [{
-          x, y, width: this.windowSize[0], height: this.windowSize[1],
-        }]);
       } else {
-        electron.ipcRenderer.send('callBrowsingWindowMethod', 'setPosition', [x, y]);
+        x = Math.round((x / this.getRatio()) - this.offset[0]) === 0
+          ? 0 : Math.round((x / this.getRatio()) - this.offset[0]);
+        y = Math.round((y / this.getRatio()) - this.offset[1]) === 0
+          ? 0 : Math.round((y / this.getRatio()) - this.offset[1]);
+        if (this.isDarwin) {
+          electron.ipcRenderer.send('callBrowsingWindowMethod', 'setPosition', [x, y]);
+        } else if (this.windowSize) {
+          electron.ipcRenderer.send('callBrowsingWindowMethod', 'setBounds', [{
+            x, y, width: this.windowSize[0], height: this.windowSize[1],
+          }]);
+        } else {
+          electron.ipcRenderer.send('callBrowsingWindowMethod', 'setPosition', [x, y]);
+        }
       }
     });
     this.menuService = new MenuService();
