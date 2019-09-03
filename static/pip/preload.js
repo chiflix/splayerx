@@ -57,7 +57,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (getRatio() !== 1) {
       windowSize = remote.getCurrentWindow().getSize();
     }
-    if (!pipBtns) {
+    if (!pipBtns && remote.getCurrentWindow()
+      && remote.getCurrentWindow().getBrowserViews().length > 1) {
       sendToHost('update-mouse-info', { offset, windowSize });
     }
   }, true);

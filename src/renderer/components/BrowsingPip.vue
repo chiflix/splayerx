@@ -26,14 +26,6 @@ export default {
     },
   },
   mounted() {
-    window.addEventListener('focus', () => {
-      const cursorPoint = electron.screen.getCursorScreenPoint();
-      const windowPos = electron.remote.getCurrentWindow().getPosition();
-      this.offset = [cursorPoint.x - windowPos[0], cursorPoint.y - windowPos[1]];
-      if (this.getRatio() !== 1) {
-        this.windowSize = electron.remote.getCurrentWindow().getSize();
-      }
-    });
     electron.ipcRenderer.on('update-mouse-info', (evt: Event, args: { windowSize: number[] | null, offset: number[]}) => {
       this.offset = args.offset;
       this.windowSize = args.windowSize;
@@ -43,10 +35,19 @@ export default {
       this.windowSize = null;
     });
     electron.ipcRenderer.on('mouse-left-drag', (evt: Event, x: number, y: number) => {
-      if (!this.offset) return;
+      if (!this.offset) {
+        const cursorPoint = electron.screen.getCursorScreenPoint();
+        const windowPos = electron.remote.getCurrentWindow().getPosition();
+        this.offset = [cursorPoint.x - windowPos[0], cursorPoint.y - windowPos[1]];
+        if (this.getRatio() !== 1) {
+          this.windowSize = electron.remote.getCurrentWindow().getSize();
+        }
+      }
       x = Math.round((x / this.getRatio()) - this.offset[0]);
       y = Math.round((y / this.getRatio()) - this.offset[1]);
-      if (this.windowSize) {
+      if (this.isDarwin) {
+        electron.ipcRenderer.send('callBrowsingWindowMethod', 'setPosition', [x || 0, y || 0]);
+      } else if (this.windowSize) {
         electron.ipcRenderer.send('callBrowsingWindowMethod', 'setBounds', [{
           x, y, width: this.windowSize[0], height: this.windowSize[1],
         }]);

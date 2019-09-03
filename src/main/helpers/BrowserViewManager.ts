@@ -65,7 +65,27 @@ export class BrowserViewManager implements IBrowserViewManager {
       }),
     };
     // loadURL
-    page.view.webContents.loadURL(page.url);
+    page.view.webContents.loadURL(page.url).then(() => {
+      if (channel === this.currentChannel) {
+        page.view.webContents.executeJavaScript('var iframe = document.querySelector("iframe");if (iframe && iframe.contentDocument) {document.getElementsByTagName("video").length + iframe.contentDocument.getElementsByTagName("video").length} else {document.getElementsByTagName("video").length}').then((r: number) => {
+          const hasLastPage = this.history[channel].list.length;
+          if (hasLastPage && r) {
+            page.view.webContents.once('media-started-playing', () => {
+              if (this.currentChannel.includes('bilibili')) {
+                let type = '';
+                page.view.webContents
+                  .executeJavaScript(bilibiliFindType).then((r: (HTMLElement | null)[]) => {
+                    type = ['bangumi', 'videoStreaming', 'iframeStreaming', 'iframeStreaming', 'video'][r.findIndex(i => i)] || 'others';
+                    page.view.webContents.executeJavaScript(bilibiliVideoPause(type));
+                  });
+              } else {
+                page.view.webContents.executeJavaScript('setTimeout(() => { document.querySelector("video").pause(); }, 100)');
+              }
+            });
+          }
+        });
+      }
+    });
 
     // 暂停当前视频
     if (this.currentChannel) {
@@ -85,21 +105,6 @@ export class BrowserViewManager implements IBrowserViewManager {
               return false;
             });
           this.backPage = [];
-        }
-        const hasLastPage = this.history[channel].list.length;
-        if (hasLastPage) {
-          page.view.webContents.once('media-started-playing', () => {
-            if (this.currentChannel.includes('bilibili')) {
-              let type = '';
-              page.view.webContents
-                .executeJavaScript(bilibiliFindType).then((r: (HTMLElement | null)[]) => {
-                  type = ['bangumi', 'videoStreaming', 'iframeStreaming', 'iframeStreaming', 'video'][r.findIndex(i => i)] || 'others';
-                  page.view.webContents.executeJavaScript(bilibiliVideoPause(type));
-                });
-            } else {
-              page.view.webContents.executeJavaScript('setTimeout(() => { document.querySelector("video").pause(); }, 100)');
-            }
-          });
         }
       }
     }
@@ -192,15 +197,17 @@ export class BrowserViewManager implements IBrowserViewManager {
   public changePip(channel: string): { pipBrowser: Electron.BrowserView;
     mainBrowser: BrowserViewData } {
     this.currentChannel = channel;
-    this.pauseVideo((this.currentPip.pipPage as BrowserViewHistory).view);
+    this.pauseVideo((this.currentPip.pipPage as BrowserViewHistory).view,
+      this.currentPip.pipChannel);
     return this.enterPip();
   }
 
-  public pauseVideo(view?: BrowserView): void {
+  public pauseVideo(view?: BrowserView, currentChannel?: string): void {
+    const pausedChannel = currentChannel || this.currentChannel;
     const currentIndex = this.history[this.currentChannel].currentIndex;
     const currentView = view || this.history[this.currentChannel].list[currentIndex].view;
     if (currentView.webContents.isCurrentlyAudible()) {
-      if (this.currentChannel.includes('bilibili')) {
+      if (pausedChannel.includes('bilibili')) {
         let type = '';
         currentView.webContents
           .executeJavaScript(bilibiliFindType).then((r: (HTMLElement | null)[]) => {
@@ -258,5 +265,5 @@ export interface IBrowserViewManager {
   exitPip(): BrowserViewData
   changePip(channel: string): { pipBrowser: BrowserView, mainBrowser: BrowserViewData }
   pipClose(): void
-  pauseVideo(): void
+  pauseVideo(view?: BrowserView, currentChannel?: string): void
 }

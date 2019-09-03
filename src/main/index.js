@@ -996,9 +996,9 @@ function createMainWindow(openDialog, playlistId) {
 
 ['left-drag', 'left-up'].forEach((channel) => {
   mouse.on(channel, (...args) => {
-    if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
     if (process.platform === 'win32') {
-      BrowserWindow.getFocusedWindow().webContents.send(`mouse-${channel}`, ...args);
+      const focusedWindow = BrowserWindow.getFocusedWindow();
+      if (focusedWindow) focusedWindow.send(`mouse-${channel}`, ...args);
     } else if (browsingWindow && browsingWindow.isFocused()) {
       browsingWindow.webContents.send(`mouse-${channel}`, ...args);
     }
