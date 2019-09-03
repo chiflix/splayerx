@@ -3,7 +3,11 @@ console.log('titlebar-preloaded~~~~~~~');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { ipcRenderer, remote } = require('electron');
 const isDarwin = process.platform === 'darwin';
-
+let offset = null;
+let windowSize = null;
+function getRatio() {
+  return window.devicePixelRatio || 1;
+}
 document.addEventListener('DOMContentLoaded', () => {
   const titlebar = document.querySelector('.titlebar');
   const content = document.querySelector('.content');
@@ -63,6 +67,18 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
   }
+  window.addEventListener('mousedown', (evt) => {
+    offset = [evt.clientX, evt.clientY];
+    if (getRatio() !== 1) {
+      windowSize = remote.getCurrentWindow().getSize();
+    }
+    if ([content, titlebar].includes(evt.target)) ipcRenderer.send('update-mouse-info', { offset, windowSize });
+  }, true);
+  window.addEventListener('mouseup', () => {
+    offset = null;
+    windowSize = null;
+    ipcRenderer.send('update-mouse-info', { offset, windowSize });
+  });
   window.addEventListener('keydown', (e) => {
     ipcRenderer.send('key-events', e.keyCode);
   });

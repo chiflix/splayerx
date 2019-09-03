@@ -608,6 +608,11 @@ function registerMainWindowEvent(mainWindow) {
         + 'document.querySelector(".titlebarFull").style.display = "block";');
     }
   });
+  ipcMain.on('update-mouse-info', (evt, args) => {
+    if (browsingWindow && browsingWindow.isFocused()) {
+      browsingWindow.send('update-mouse-info', args);
+    }
+  });
   ipcMain.on('mouseup', (evt, type) => {
     switch (type) {
       case 'close':
@@ -989,7 +994,11 @@ function createMainWindow(openDialog, playlistId) {
 ['left-drag', 'left-up'].forEach((channel) => {
   mouse.on(channel, (...args) => {
     if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
-    mainWindow.webContents.send(`mouse-${channel}`, ...args);
+    if (process.platform === 'win32') {
+      BrowserWindow.getFocusedWindow().webContents.send(`mouse-${channel}`, ...args);
+    } else if (browsingWindow && browsingWindow.isFocused()) {
+      browsingWindow.webContents.send(`mouse-${channel}`, ...args);
+    }
   });
 });
 
