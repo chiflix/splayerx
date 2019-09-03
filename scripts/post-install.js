@@ -7,11 +7,13 @@ require('events').EventEmitter.prototype._maxListeners = 10000;
 const commands = [
   'npx rimraf node_modules/**/.git',
   'npm run lint:fix',
+  'npm run install-app-deps',
 ];
 
 if (process.platform === 'win32') {
-  commands.push('npm run install-app-deps');
   commands.push('npm run rebuild:win-mouse');
+} else {
+  commands.push('npm run rebuild:osx-mouse-cocoa');
 }
 
 exec(commands.join('&&'), (error, stdout) => {

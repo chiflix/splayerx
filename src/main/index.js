@@ -471,6 +471,10 @@ function registerMainWindowEvent(mainWindow) {
       mainWindow.send('update-pip-state', args);
     }
   });
+  ipcMain.on('remove-main-window', () => {
+    browserViewManager.pauseVideo(mainWindow.getBrowserView());
+    mainWindow.hide();
+  });
   ipcMain.on('remove-browser', () => {
     const mainView = mainWindow.getBrowserView();
     mainWindow.removeBrowserView(mainView);
@@ -511,7 +515,7 @@ function registerMainWindowEvent(mainWindow) {
     if (args.url.includes('youtube')) {
       channel = 'youtube.com';
     }
-    const newChannel = browserViewManager.changeChanel(channel, args.url);
+    const newChannel = browserViewManager.changeChanel(channel, args);
     const view = newChannel.view ? newChannel.view : newChannel.page.view;
     const url = newChannel.view ? args.url : newChannel.page.url;
     const mainBrowser = mainWindow.getBrowserView();
@@ -541,19 +545,7 @@ function registerMainWindowEvent(mainWindow) {
     if (args.url.includes('youtube')) {
       channel = 'youtube.com';
     }
-    const currentMainBrowserView = browserViewManager
-      .create(channel, args.url);
-    const mainBrowser = mainWindow.getBrowserView();
-    mainWindow.addBrowserView(currentMainBrowserView.view);
-    if (mainBrowser) {
-      mainWindow.removeBrowserView(BrowserView.fromId(mainBrowser.id));
-    }
-    currentMainBrowserView.view.setBounds({
-      x: 0, y: 36, width: mainWindow.getSize()[0], height: mainWindow.getSize()[1] - 36,
-    });
-    currentMainBrowserView.view.setAutoResize({
-      width: true, height: true,
-    });
+    const currentMainBrowserView = browserViewManager.create(channel, args);
     setTimeout(() => {
       mainWindow.send('update-browser-state', {
         url: args.url,
@@ -587,10 +579,20 @@ function registerMainWindowEvent(mainWindow) {
       }, 3000);
     }
   });
-  ipcMain.on('mouseenter', () => {
+  ipcMain.on('pip-btn-mousemove', () => {
     if (pipTimer) {
       clearTimeout(pipTimer);
     }
+  });
+  ipcMain.on('pip-btn-mouseout', () => {
+    if (pipTimer) {
+      clearTimeout(pipTimer);
+    }
+    pipTimer = setTimeout(() => {
+      if (pipControlView && !pipControlView.isDestroyed()) {
+        pipControlView.webContents.executeJavaScript('document.querySelector(".pip-buttons").style.display = "none";');
+      }
+    }, 3000);
   });
   ipcMain.on('mouseout', () => {
     if (browsingWindow && browsingWindow.isFocused()) {
@@ -607,6 +609,11 @@ function registerMainWindowEvent(mainWindow) {
     } else {
       titlebarView.webContents.executeJavaScript('document.querySelector(".titlebarMax").style.display = "none";'
         + 'document.querySelector(".titlebarFull").style.display = "block";');
+    }
+  });
+  ipcMain.on('update-mouse-info', (evt, args) => {
+    if (browsingWindow && browsingWindow.isFocused()) {
+      browsingWindow.send('update-mouse-info', args);
     }
   });
   ipcMain.on('mouseup', (evt, type) => {
@@ -687,6 +694,16 @@ function registerMainWindowEvent(mainWindow) {
     browsingWindow.addBrowserView(pipBrowser);
     createPipControlView();
     createTitlebarView();
+    if (args.isGlobal) {
+      browserViewManager.pauseVideo(mainWindow.getBrowserView());
+      mainWindow.hide();
+    }
+    mainBrowser.page.view.setBounds({
+      x: 0, y: 36, width: mainWindow.getSize()[0], height: mainWindow.getSize()[1] - 36,
+    });
+    mainBrowser.page.view.setAutoResize({
+      width: true, height: true,
+    });
     pipBrowser.setBounds({
       x: 0, y: 0, width: browsingWindow.getSize()[0], height: browsingWindow.getSize()[1],
     });
@@ -773,6 +790,7 @@ function registerMainWindowEvent(mainWindow) {
   });
   ipcMain.on('exit-pip', () => {
     if (!browserViewManager) return;
+    mainWindow.show();
     const mainView = mainWindow.getBrowserView();
     mainWindow.removeBrowserView(mainView);
     const browViews = browsingWindow.getBrowserViews();
@@ -979,7 +997,11 @@ function createMainWindow(openDialog, playlistId) {
 ['left-drag', 'left-up'].forEach((channel) => {
   mouse.on(channel, (...args) => {
     if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
-    mainWindow.webContents.send(`mouse-${channel}`, ...args);
+    if (process.platform === 'win32') {
+      BrowserWindow.getFocusedWindow().webContents.send(`mouse-${channel}`, ...args);
+    } else if (browsingWindow && browsingWindow.isFocused()) {
+      browsingWindow.webContents.send(`mouse-${channel}`, ...args);
+    }
   });
 });
 

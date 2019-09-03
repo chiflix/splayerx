@@ -4,7 +4,7 @@ interface IMouse {
   dispose(): void,
 }
 
-class WinMouse implements IMouse {
+class Mouse implements IMouse {
   private mouse: {
     on(channel: string, callback: (x: number, y: number) => void): void,
     off(channel: string, callback?: (x: number, y: number) => void): void,
@@ -13,7 +13,7 @@ class WinMouse implements IMouse {
 
   public constructor() {
     try {
-      const mouseConstructor = require('win-mouse'); //eslint-disable-line
+      const mouseConstructor = process.platform === 'win32' ? require('win-mouse') : require('osx-mouse-cocoa'); //eslint-disable-line
       this.mouse = mouseConstructor();
     } catch (ex) {
       console.error(ex);
@@ -33,15 +33,5 @@ class WinMouse implements IMouse {
     this.mouse = null;
   }
 }
-
-class FakeMouse implements IMouse {
-  public on() {} //eslint-disable-line
-
-  public off() {} //eslint-disable-line
-
-  public dispose() {} //eslint-disable-line
-}
-
-const Mouse = process.platform === 'win32' ? WinMouse : FakeMouse;
 
 export const mouse: IMouse = new Mouse();

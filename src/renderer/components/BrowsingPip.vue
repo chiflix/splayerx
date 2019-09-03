@@ -1,10 +1,5 @@
 <template>
-  <div
-    :style="{
-      webkitAppRegion: isDarwin ? 'drag' : 'no-drag',
-    }"
-    class="pip"
-  />
+  <div class="pip" />
 </template>
 
 <script lang="ts">
@@ -20,6 +15,9 @@ export default {
       supportedRecordHost: ['www.youtube.com', 'www.bilibili.com', 'www.iqiyi.com'],
       menuService: null,
       asyncTasksDone: false,
+      windowSize: [],
+      offset: [],
+      movePos: [],
     };
   },
   computed: {
@@ -28,6 +26,34 @@ export default {
     },
   },
   mounted() {
+    window.addEventListener('focus', () => {
+      const cursorPoint = electron.screen.getCursorScreenPoint();
+      const windowPos = electron.remote.getCurrentWindow().getPosition();
+      this.offset = [cursorPoint.x - windowPos[0], cursorPoint.y - windowPos[1]];
+      if (this.getRatio() !== 1) {
+        this.windowSize = electron.remote.getCurrentWindow().getSize();
+      }
+    });
+    electron.ipcRenderer.on('update-mouse-info', (evt: Event, args: { windowSize: number[] | null, offset: number[]}) => {
+      this.offset = args.offset;
+      this.windowSize = args.windowSize;
+    });
+    electron.ipcRenderer.on('mouse-left-up', () => {
+      this.offset = null;
+      this.windowSize = null;
+    });
+    electron.ipcRenderer.on('mouse-left-drag', (evt: Event, x: number, y: number) => {
+      if (!this.offset) return;
+      x = Math.round((x / this.getRatio()) - this.offset[0]);
+      y = Math.round((y / this.getRatio()) - this.offset[1]);
+      if (this.windowSize) {
+        electron.ipcRenderer.send('callBrowsingWindowMethod', 'setBounds', [{
+          x, y, width: this.windowSize[0], height: this.windowSize[1],
+        }]);
+      } else {
+        electron.ipcRenderer.send('callBrowsingWindowMethod', 'setPosition', [x, y]);
+      }
+    });
     this.menuService = new MenuService();
     electron.remote.getCurrentWindow().addListener('enter-html-full-screen', () => {
       electron.ipcRenderer.send('mouseup', 'full');
@@ -70,6 +96,11 @@ export default {
       }
     });
   },
+  methods: {
+    getRatio() {
+      return process.platform === 'win32' ? window.devicePixelRatio || 1 : 1;
+    },
+  },
 };
 </script>
 
@@ -79,5 +110,6 @@ export default {
   height: 36px;
   position: absolute;
   top: 0;
+  -webkit-app-region: no-drag;
 }
 </style>

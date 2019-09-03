@@ -2,11 +2,10 @@
 // eslint-disable-next-line no-console
 console.log('preloaded~~~~~~~');
 const { ipcRenderer, remote } = require('electron');
-const mouse = process.platform === 'win32' ? require('win-mouse')() : null;
 
 let mousedown = false;
 let isDragging = false;
-let mousedownPos = null;
+let offset = null;
 let windowSize = null;
 let pipTimer = 0;
 function sendToHost(channel, message) {
@@ -22,9 +21,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const pipBtns = document.querySelector('.pip-buttons');
   if (pipBtns) {
     pipBtns.style.display = 'flex';
-    pipBtns.addEventListener('mouseenter', () => {
+    pipBtns.addEventListener('mousemove', () => {
       if (pipTimer) clearTimeout(pipTimer);
-      sendToHost('mouseenter', 'mouseenter');
+      sendToHost('pip-btn-mousemove');
       pipBtns.style.display = 'flex';
     });
     pipTimer = setTimeout(() => {
@@ -42,7 +41,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
   window.addEventListener('mouseout', (evt) => {
-    if (!pipBtns && remote.getCurrentWindow()
+    if (pipBtns) {
+      sendToHost('pip-btn-mouseout');
+    } else if (remote.getCurrentWindow()
       && remote.getCurrentWindow().getBrowserViews().length > 1) {
       const winSize = remote.getCurrentWindow().getSize();
       if (evt.clientX <= 0 || evt.clientX >= winSize[0] || evt.clientY >= winSize[1]) {
@@ -52,30 +53,21 @@ document.addEventListener('DOMContentLoaded', () => {
   }, true);
   window.addEventListener('mousedown', (evt) => {
     mousedown = true;
-    mousedownPos = [evt.clientX, evt.clientY];
+    offset = [evt.clientX, evt.clientY];
     if (getRatio() !== 1) {
       windowSize = remote.getCurrentWindow().getSize();
     }
+    if (!pipBtns) {
+      sendToHost('update-mouse-info', { offset, windowSize });
+    }
   }, true);
   window.addEventListener('mouseup', (evt) => {
-    if (isDragging) evt.stopImmediatePropagation();
+    if (isDragging && !pipBtns) evt.stopImmediatePropagation();
     mousedown = false;
-    mousedownPos = null;
+    offset = null;
     windowSize = null;
+    if (!pipBtns) sendToHost('update-mouse-info', { offset, windowSize });
   }, true);
-  if (mouse) {
-    mouse.on('left-drag', (x, y) => {
-      sendToHost('mousemove', 'isMoving');
-      isDragging = true;
-      if (mousedownPos) {
-        sendToHost('left-drag', {
-          windowSize,
-          x: Math.round(x / getRatio() - mousedownPos[0]),
-          y: Math.round(y / getRatio() - mousedownPos[1]),
-        });
-      }
-    });
-  }
   window.addEventListener('mousemove', (evt) => {
     if (!pipBtns && remote.getCurrentWindow()
       && remote.getCurrentWindow().getBrowserViews().length > 1) {
@@ -87,8 +79,9 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('click', (evt) => {
     if (isDragging) evt.stopImmediatePropagation();
     isDragging = false;
-    mousedownPos = null;
+    offset = null;
     windowSize = null;
+    if (!pipBtns) sendToHost('update-mouse-info', { offset, windowSize });
   }, true);
   window.addEventListener('drop', (evt) => {
     evt.preventDefault();
