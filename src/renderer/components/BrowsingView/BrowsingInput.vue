@@ -6,7 +6,7 @@
       ref="searchValue"
       @keypress="handleSearchKey"
       class="url-search"
-      placeholder="请输入URL..."
+      placeholder="Splayer"
       onfocus="select()"
     >
     <Icon
@@ -67,6 +67,7 @@ export default {
 .search-url {
   display: flex;
   justify-content: flex-start;
+  align-items: center;
   width: 100%;
   height: 24px;
   z-index: 6;
@@ -74,19 +75,23 @@ export default {
     width: 100%;
     height: 24px;
     outline: none;
-    background: rgba(255, 255, 255, 0.08);
-    border-radius: 12px;
+    background-color: #FFF; 
     border: none;
     z-index: 6;
     text-indent: 15px;
-    font-size: 13px;
-    color: rgba(255, 255, 255, 0.8);
+
+    font-size: 12px;
+    color: rgba(15, 26, 59, 0.5);
+    letter-spacing: 0.09px;
+    text-align: center;
+    line-height: 40px;
   }
   .page-refresh-icon {
     width: 16px;
     height: 16px;
     -webkit-app-region: no-drag;
-    margin: auto 0 auto 0;
+    margin-right: 16px;
+    margin-left: 12px;
   }
 }
 </style>

@@ -94,13 +94,13 @@ export default {
     width: 16px;
     height: 16px;
     margin-left: 21px;
-    margin-right: 17px;
+    margin-right: 18px;
     -webkit-app-region: no-drag;
   }
   .forward-icon {
     width: 16px;
     height: 16px;
-    margin-left: 18px;
+    margin-right: 17px;
     -webkit-app-region: no-drag;
   }
 }

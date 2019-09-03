@@ -1,20 +1,11 @@
 <template>
   <div
-    :style="{
-      width: '80px',
-      display: 'flex',
-      zIndex: '6',
-      webkitAppRegion: 'no-drag',
-      cursor: hasVideo ? 'pointer' : '',
-    }"
+    class="pip-control"
   >
     <Icon
       :type="picInPicType"
       @mouseup.native="handleGlobalPip"
-    />
-    <Icon
-      :type="picInPicType"
-      @mouseup.native="handleEnterPip"
+      class="control"
     />
   </div>
 </template>
@@ -45,5 +36,17 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-
+.pip-control {
+  z-index: 6;
+  display: flex;
+  height: 100%;
+  justify-content: space-between;
+  align-items: center;
+  border-left: 1px solid #F2F1F4;
+  .control {
+    width: 46px;
+    margin-right: 8px;
+    margin-left: 8px;
+  }
+}
 </style>

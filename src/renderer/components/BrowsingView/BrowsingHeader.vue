@@ -19,7 +19,7 @@
       :style="{
       }"
     />
-    <browsing-pip
+    <browsing-pip-control
       :handle-enter-pip="handleEnterPip"
       :handle-global-pip="handleGlobalPip"
       :style="{
@@ -34,7 +34,7 @@ import { mapGetters } from 'vuex';
 import BrowsingFavicons from '@/components/BrowsingView/BrowsingFavicons.vue';
 import BrowsingInput from '@/components/BrowsingView/BrowsingInput.vue';
 import BrowsingControl from '@/components/BrowsingView/BrowsingControl.vue';
-import BrowsingPip from '@/components/BrowsingView/BrowsingPip.vue';
+import BrowsingPipControl from '@/components/BrowsingView/BrowsingPipControl.vue';
 import Icon from '@/components/BaseIconContainer.vue';
 
 export default {
@@ -43,7 +43,7 @@ export default {
     'browsing-favicons': BrowsingFavicons,
     'browsing-input': BrowsingInput,
     'browsing-control': BrowsingControl,
-    'browsing-pip': BrowsingPip,
+    'browsing-pip-control': BrowsingPipControl,
     Icon,
   },
   props: {
