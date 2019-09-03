@@ -31,7 +31,7 @@ class WheelPhaseCalculator extends EventEmitter {
   set lastPhase(phase) {
     if (phase !== this._lastPhase && this._availablePhases.includes(phase)) {
       this._lastPhase = phase;
-      if (this._availablePhases.includes(phase)) this.emit('phase-change', phase);
+      this.emit('phase-change', phase);
     }
   }
 
@@ -99,11 +99,13 @@ class ElectronWheel extends WheelPhaseCalculator {
 
   _canInertialScroll = false;
 
+  scrollEnd = false;
+
   constructor(interval) {
     super(interval);
 
-    ipcRenderer.on('scroll-touch-begin', () => { this._isTrackPad = true; });
-    ipcRenderer.on('scroll-touch-end', () => { this._canInertialScroll = true; });
+    ipcRenderer.on('scroll-touch-begin', () => { this._isTrackPad = true; this.scrollEnd = false; });
+    ipcRenderer.on('scroll-touch-end', () => { this._canInertialScroll = this.scrollEnd = true; });
   }
 
   calculate(event) {

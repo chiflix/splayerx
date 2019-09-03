@@ -38,12 +38,14 @@
 
 <script lang="ts">
 import { mapGetters } from 'vuex';
+import { log } from '@/libs/Log';
 import { filePathToUrl } from '@/helpers/path';
 import { thumbnailService } from '@/services/media/ThumbnailService';
 import ThumbnailDisplay from '@/components/PlayingView/ThumbnailDisplay.vue';
 // @ts-ignore
 import Icon from '@/components/BaseIconContainer.vue';
 import { getThumbnailPath } from '../plugins/mediaTasks';
+import { ThumbnailReplyType } from '../plugins/mediaTasks/thumbnailQueue';
 
 export default {
   components: {
@@ -78,6 +80,8 @@ export default {
   },
   data() {
     return {
+      thumbnailInterval: 1,
+      thumbnailCols: 20,
       thumbnailCount: 0,
       isSaved: false,
       imgExisted: false,
@@ -94,9 +98,10 @@ export default {
   },
   watch: {
     currentTime(val: number) {
-      const postion = thumbnailService
-        .calculateThumbnailPosition(val, this.duration, this.thumbnailCount);
-      this.backgroundPosition = `-${postion[0]}% -${postion[1]}%`;
+      const postion = thumbnailService.calculateThumbnailPosition(
+        val, this.thumbnailInterval, this.thumbnailCols,
+      );
+      this.backgroundPosition = `-${postion[0] * 100}% -${postion[1] * 100}%`;
     },
     originSrc() {
       this.isSaved = false;
@@ -110,13 +115,22 @@ export default {
         this.isSaved = true;
       }
     });
-    this.$bus.$on('generate-thumbnails', async (num: number) => {
-      this.thumbnailCount = num;
-      this.backgroundSize = `1000% ${Math.ceil(this.thumbnailCount / 10) * 100}%`;
-      getThumbnailPath(this.originSrc, 272, 10, Math.ceil(num / 10))
-        .then((path) => {
-          this.imgSrc = path;
-          this.imgExisted = true;
+    this.$bus.$on('generate-thumbnails', async () => {
+      const maxThumbnailCount = 1024;
+      const width = 272;
+      this.thumbnailInterval = Math.ceil(
+        this.duration / Math.min(this.duration, window.screen.width, maxThumbnailCount),
+      );
+      this.thumbnailCount = Math.ceil(this.duration / this.thumbnailInterval);
+      this.backgroundSize = `2000% ${Math.ceil(this.thumbnailCount / this.thumbnailCols) * 100}%`;
+
+      log.debug('generate-thumbnails', this.thumbnailInterval, this.thumbnailCount);
+      getThumbnailPath(this.originSrc, this.thumbnailInterval, width, this.thumbnailCols)
+        .then((thumbnail?: ThumbnailReplyType) => {
+          if (thumbnail && thumbnail.videoPath === this.originSrc) {
+            this.imgSrc = thumbnail.imgPath;
+            this.imgExisted = true;
+          }
         })
         .catch(console.error);
     });

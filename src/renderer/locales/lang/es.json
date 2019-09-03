@@ -59,7 +59,7 @@
       "title": "Archivo no encontrado"
     },
     "fileNonExistInPlaylist": {
-      "content": "Los archivos se han eliminados de la lista.",
+      "content": "El archivo ha sido eliminado o renombrado.",
       "title": "Algunos archivos no fueron encontrados"
     },
     "loadFailed": {
@@ -136,6 +136,7 @@
     },
     "splayerx": {
       "about": "Acerca de SPlayer",
+      "checkForUpdates": "Buscar actualizaciones",
       "hide": "Esconder",
       "hideOthers": "Esconder otros",
       "preferences": "Preferencias",
@@ -292,10 +293,23 @@
       "underlinedContent": "Prohibir"
     }
   },
+  "alertBubble": {
+    "button": "OK"
+  },
   "protectBubble": {
     "agree": "OK",
     "setting": "Configurando",
     "content": "Protección de privacidad inteligente está activada. Se eliminará el historial de reproducción sensorial o no adecuado para trabajar."
+  },
+  "checkForUpdatesBubble": {
+    "needUpdate": {
+      "confirm": "Descargar",
+      "cancel": "Saltar",
+      "content": "SPlayer {version} está disponible, ¿quieres descargarlo ahora?"
+    },
+    "noNeed": {
+      "content": "SPlayer está actualizado. Versión {version}"
+    }
   },
   "recentPlaylist": {
     "folderSource": "Carpeta",
@@ -349,7 +363,11 @@
     "title": ""
   },
   "translateModal": {
+    "videoLanguageLabel": "Idioma de audio",
+    "subtitleLanguageLabel": "Traducir a",
     "selectLanguageLabel": "Idioma de audio",
+    "audioLanguageLoading": "Obteniendo la lista de idiomas ...",
+    "audioLanguageLoadFail": "Conexión fallida, intente más tarde",
     "select": {
       "title": "Seleccionar idioma de audio",
       "content": "Para generar un resultado de tranlación, por favor seleccione el idioma que escuche en el vídeo y haga clic en el botón generar. El proceso puede tardar algún tiempo."

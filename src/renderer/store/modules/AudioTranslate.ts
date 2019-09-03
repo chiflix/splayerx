@@ -76,7 +76,7 @@ type AudioTranslateState = {
   selectedTargetSubtitleId: string,
   translateProgress: number,
   translateEstimateTime: number,
-  isModalVisiable: boolean,
+  isModalVisible: boolean,
   callbackAfterBubble: Function,
   isBubbleVisible: boolean,
   bubbleMessage: string,
@@ -95,7 +95,7 @@ const state = {
   selectedTargetSubtitleId: '',
   translateProgress: 0,
   translateEstimateTime: 0,
-  isModalVisiable: false,
+  isModalVisible: false,
   isBubbleVisible: false,
   bubbleMessage: '',
   bubbleType: '',
@@ -168,10 +168,10 @@ const getters = {
   translateEstimateTime(state: AudioTranslateState) {
     return state.translateEstimateTime;
   },
-  isTranslateModalVisiable(state: AudioTranslateState) {
-    return state.isModalVisiable;
+  isTranslateModalVisible(state: AudioTranslateState) {
+    return state.isModalVisible;
   },
-  isTranslateBubbleVisiable(state: AudioTranslateState) {
+  isTranslateBubbleVisible(state: AudioTranslateState) {
     return state.isBubbleVisible;
   },
   isTranslating(state: AudioTranslateState) {
@@ -205,10 +205,10 @@ const mutations = {
     state.key = key;
   },
   [m.AUDIO_TRANSLATE_SHOW_MODAL](state: AudioTranslateState) {
-    state.isModalVisiable = true;
+    state.isModalVisible = true;
   },
   [m.AUDIO_TRANSLATE_HIDE_MODAL](state: AudioTranslateState) {
-    state.isModalVisiable = false;
+    state.isModalVisible = false;
   },
   [m.AUDIO_TRANSLATE_SELECTED_UPDATE](state: AudioTranslateState, sub: SubtitleControlListItem) {
     state.selectedTargetLanugage = sub.language;
@@ -252,7 +252,7 @@ const mutations = {
     state.selectedTargetSubtitleId = '';
     state.selectedTargetLanugage = '';
     state.key = '';
-    state.isModalVisiable = false;
+    state.isModalVisible = false;
     state.isBubbleVisible = false;
     state.bubbleType = '';
     state.bubbleMessage = '';
@@ -352,7 +352,7 @@ const actions = {
           failReason = 'time-out';
         }
         commit(m.AUDIO_TRANSLATE_UPDATE_FAIL_TYPE, fileType);
-        if (!state.isModalVisiable) {
+        if (!state.isModalVisible) {
           commit(m.AUDIO_TRANSLATE_UPDATE_PROGRESS, 0);
           const selectId = state.selectedTargetSubtitleId;
           if (getters.primarySubtitleId === selectId) {
