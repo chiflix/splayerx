@@ -4,7 +4,7 @@ import {
   Format, IParser, ILoader, IMetadata, Cue, ITimeSegments, IVideoSegments,
 } from '@/interfaces/ISubtitle';
 import { getDialogues } from '../utils';
-import { StreamTimeSegments } from '@/libs/TimeSegments';
+import { SubtitleTimeSegments } from '@/libs/TimeSegments';
 
 export class AssParser implements IParser {
   public get format() { return Format.AdvancedSubStationAplha; }
@@ -126,13 +126,13 @@ export class AssParser implements IParser {
 
   private currentTime?: number;
 
+  private isRequesting: boolean = false;
+
   private get canRequestPayload() {
-    return !this.loader.canPreload && (
+    return !this.loader.canPreload && !this.isRequesting && (
       (this.timeSegments && !this.timeSegments.check(this.currentTime || 0)) || this.timeout
     );
   }
-
-  private initialInsert: boolean = true;
 
   private lastLines: string[] = [];
 
@@ -145,26 +145,23 @@ export class AssParser implements IParser {
         }
       }
     } else if (!this.loader.fullyRead) {
-      if (!this.assStream) this.assStream = new AssStream();
       this.currentTime = time || 0;
       if (this.canRequestPayload) {
         if (this.timer) clearTimeout(this.timer);
         this.timeout = false;
         this.timer = setTimeout(() => { this.timeout = true; }, 10000);
-        const payload = await this.loader.getPayload(time) as string;
+        this.isRequesting = true;
+        const payload = await this.loader.getPayload(time) as string || '';
         const newLines = payload.split(/\r?\n/);
         const deDuplicatedPayload = newLines.filter(line => !this.lastLines.includes(line)).join('\n');
         this.lastLines = newLines;
+        if (!this.assStream) this.assStream = new AssStream();
         const result = this.assStream.compile(deDuplicatedPayload);
-        if (!this.timeSegments) this.timeSegments = new StreamTimeSegments();
-        const times = result
-          .filter(({ Start }) => typeof Start === 'number')
-          .map(({ Start }) => Start);
-        if (this.initialInsert) {
-          this.initialInsert = false;
-          this.timeSegments.insert(0, Math.max(...times));
-        } else this.timeSegments.insert(Math.min(...times), Math.max(...times));
+        if (!this.timeSegments) this.timeSegments = new SubtitleTimeSegments();
+        result
+          .forEach(({ Start, End }) => this.timeSegments && this.timeSegments.insert(Start, End));
         this.normalize(this.assStream.compiled);
+        this.isRequesting = false;
       }
     }
     return getDialogues(this.dialogues, time);

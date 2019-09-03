@@ -1,3 +1,4 @@
+import { isEqual } from 'lodash';
 import { ITimeSegments, IVideoSegments } from '@/interfaces/ISubtitle';
 
 export class StreamTimeSegments implements ITimeSegments {
@@ -11,10 +12,10 @@ export class StreamTimeSegments implements ITimeSegments {
 
   private checkWithIndex(time: number) {
     const index = this.startTimestamps.findIndex((timestamp, index, arr) => (
-      timestamp <= time && (!arr[index + 1] || arr[index + 1] >= time)
+      timestamp <= time && (!arr[index + 1] || arr[index + 1] > time)
     ));
     return {
-      in: index !== -1,
+      in: index !== -1 && this.endTimestamps[index] >= time,
       index,
     };
   }
@@ -68,18 +69,19 @@ export class VideoTimeSegments implements IVideoSegments {
       start = Math.min(start, end);
       const result = this.checkWithIndex(start);
       if (result.in && this.timestamps[result.index] !== start) {
-        this.timestamps.splice(result.index, 0, start);
-        this.played.splice(result.index, 0, false);
+        this.timestamps.splice(result.index + 1, 0, start);
+        this.played.splice(result.index + 1, 0, false);
       }
     }
   }
 
   private checkWithIndex(time: number) {
     const index = this.timestamps.findIndex((timestamp, index, arr) => (
-      timestamp <= time && (!arr[index + 1] || arr[index + 1] >= time)
+      timestamp <= time && (!arr[index + 1] || arr[index + 1] > time)
     ));
+    const lastTimeStamp = this.timestamps[this.timestamps.length - 1];
     return {
-      in: index !== -1,
+      in: index !== -1 && lastTimeStamp >= time,
       index,
     };
   }
@@ -93,21 +95,22 @@ export class VideoTimeSegments implements IVideoSegments {
   public updatePlayed(timeStamp: number, lastTimeStamp: number = 0) {
     if (this.isValidNumber(timeStamp) && this.isValidNumber(lastTimeStamp)) {
       [timeStamp, lastTimeStamp] = [
-        Math.min(timeStamp, lastTimeStamp),
         Math.max(timeStamp, lastTimeStamp),
+        Math.min(timeStamp, lastTimeStamp),
       ];
-      const result = this.checkWithIndex(timeStamp);
-      if (result.in) {
-        const { lastIndex } = this;
-        if (result.index === this.lastIndex) this.lastPlayedTime += lastTimeStamp - timeStamp;
-        else {
-          if (result.index === this.lastIndex + 1) {
-            const lastSegmentTime = this.timestamps[lastIndex + 1] - this.timestamps[lastIndex];
-            if (this.lastPlayedTime / lastSegmentTime >= 0.9) this.played[lastIndex] = true;
-          }
-          this.lastIndex = result.index;
-          this.lastPlayedTime += lastTimeStamp - timeStamp;
-        }
+      const { in: currentIn, index: currentIndex } = this.checkWithIndex(timeStamp);
+      const { in: lastIn, index: lastIndex } = this.checkWithIndex(lastTimeStamp);
+      if (currentIn && lastIn && !this.played[currentIndex]) {
+        let playedTime = timeStamp - lastTimeStamp;
+        if (lastIndex !== currentIndex) playedTime = timeStamp - this.timestamps[currentIndex];
+        if (this.lastIndex !== currentIndex) {
+          this.lastIndex = currentIndex;
+          this.lastPlayedTime = playedTime;
+        } else this.lastPlayedTime += playedTime;
+      }
+      if (this.lastIndex !== -1) {
+        const segmentTime = this.timestamps[this.lastIndex + 1] - this.timestamps[this.lastIndex];
+        if (this.lastPlayedTime / segmentTime >= 0.9) this.played[this.lastIndex] = true;
       }
     }
   }
@@ -135,5 +138,27 @@ export class VideoTimeSegments implements IVideoSegments {
     this.timestamps = timeSegments.map(({ start }) => start);
     this.timestamps.push(timeSegments[timeSegments.length - 1].end);
     this.played = timeSegments.map(({ played }) => played);
+  }
+}
+
+export class SubtitleTimeSegments implements ITimeSegments {
+  private isValidNumber(num: number) {
+    return typeof num === 'number' && Number.isFinite(num) && !Number.isNaN(num) && num >= 0;
+  }
+
+  private segments: { start: number, end: number }[] = [];
+
+  public insert(start: number, end: number) {
+    if (this.isValidNumber(start) && this.isValidNumber(end)) this.segments.push({ start, end });
+  }
+
+  private lastSegments: { start: number, end: number }[] = [];
+
+  public check(time: number) {
+    const segments = this.segments.filter(({ start, end }) => start <= time && end >= time);
+    if (!segments.length) return false;
+    const result = isEqual(this.lastSegments, segments);
+    this.lastSegments = segments;
+    return result;
   }
 }
