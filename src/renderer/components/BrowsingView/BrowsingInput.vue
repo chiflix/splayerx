@@ -2,13 +2,11 @@
   <div
     class="search-url"
   >
-    <input
-      ref="searchValue"
-      @keypress="handleSearchKey"
+    <div
       class="url-search"
-      placeholder="Splayer"
-      onfocus="select()"
     >
+      Splayer
+    </div>
     <Icon
       @mouseup.native="handleUrlReload"
       :style="{
@@ -73,12 +71,11 @@ export default {
   z-index: 6;
   .url-search {
     width: 100%;
-    height: 24px;
+    height: 40px;
     outline: none;
     background-color: #FFF;
     border: none;
     z-index: 6;
-    text-indent: 15px;
 
     font-size: 12px;
     color: rgba(15, 26, 59, 0.5);
