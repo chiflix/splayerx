@@ -46,7 +46,7 @@ export default {
       x = Math.round((x / this.getRatio()) - this.offset[0]);
       y = Math.round((y / this.getRatio()) - this.offset[1]);
       if (this.isDarwin) {
-        electron.ipcRenderer.send('callBrowsingWindowMethod', 'setPosition', [x, y]);
+        electron.ipcRenderer.send('callBrowsingWindowMethod', 'setPosition', [x || 0, y || 0]);
       } else if (this.windowSize) {
         electron.ipcRenderer.send('callBrowsingWindowMethod', 'setBounds', [{
           x, y, width: this.windowSize[0], height: this.windowSize[1],
