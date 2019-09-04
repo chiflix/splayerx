@@ -95,19 +95,29 @@ declare module 'electron' {
         err: string,
       ) => void,
     ): void;
-    /** extract one subtitle from a video file given stream index and format */
+    /** extract subtitle fragment from a video file (@cliflix/electron@4.0.7-dev.1) */
     extractSubtitles(
       /** source video path to extract subtitle from */
       srcVideoPath: string,
-      /** subtitle path to save */
-      subtitlePath: string,
-      /** stream index string in the form of 0:s:0 */
-      streamIndex?: string,
+      /** subtitle stream index to extract, if -1 will auto select the default track */
+      streamIndex: number,
+      /** position of the last subtitle extracted or seconds of the video */
+      posOrSeconds: number,
+      /** whether posOrSeconds param is seconds of the video */
+      isSeconds: boolean,
+      /** subtitle dialogues count */
+      dialogueCount: number,
       callback: (
-        /** if not '0', an error occurred */
-        err: string,
+        /** if not '', an error occurred */
+        error: string,
+        /** video position of the last extracted dialogue */
+        position: number,
+        /** buffer of the extracted dialogues */
+        data: Buffer | null,
       ) => void,
     ): void;
+    /** stop the subtitle extraction */
+    stopExtractSubtitles(): void;
     /** generate thumbnails in the order of left-to-right and top-to-bottom */
     generateThumbnails(
       /** source video path to extract thumbnails from */
