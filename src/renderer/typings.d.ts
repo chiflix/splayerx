@@ -180,9 +180,17 @@ declare module 'electron' {
       timeString: string,
       width: number, height: number,
     ) => void): this;
-    on(channel: 'subtitle-request', listener: (event: Event,
-      videoPath: string, subtitlePath: string,
-      streamIndex: string,
+    on(channel: 'subtitle-metadata-request', listener: (event: Event,
+      videoPath: string, streamIndex: number, subtitlePath: string,
+    ) => void): this;
+    on(channel: 'subtitle-cache-request', listener: (event: Event,
+      videoPath: string, streamIndex: number
+    ) => void): this;
+    on(channel: 'subtitle-stream-request', listener: (event: Event,
+      videoPath: string, streamIndex: number, time: number,
+    ) => void): this;
+    on(channel: 'subtitle-destroy-request', listener: (event: Event,
+      videoPath: string, streamIndex: number,
     ) => void): this;
     on(channel: 'thumbnail-request', listener: (event: Event,
       videoPath: string, imagePath: string,
@@ -198,10 +206,18 @@ declare module 'electron' {
       timeString: string,
       width: number, height: number,
     ): void;
-    send(channel: 'subtitle-request',
-      videoPath: string, subtitlePath: string,
-      streamIndex: string,
-    ): void;
+    send(channel: 'subtitle-metadata-request',
+      videoPath: string, streamIndex: number, subtitlePath: string,
+    ): this;
+    send(channel: 'subtitle-cache-request',
+      videoPath: string, streamIndex: number
+    ): this;
+    send(channel: 'subtitle-stream-request',
+      videoPath: string, streamIndex: number, time: number,
+    ): this;
+    send(channel: 'subtitle-destroy-request',
+      videoPath: string, streamIndex: number
+    ): this;
     send(channel: 'thumbnail-request',
       videoPath: string, imagePath: string,
       thumbnailWidth: number,
@@ -210,12 +226,18 @@ declare module 'electron' {
 
     on(channel: 'media-info-reply', listener: (event: Event, error?: Error, info: string) => void): this;
     on(channel: 'snapshot-reply', listener: (event: Event, error?: Error, path: string) => void): this;
-    on(channel: 'subtitle-reply', listener: (event: Event, error: Error | undefined, path: string) => void): this;
+    on(channel: 'subtitle-metadata-reply', listener: (event: Event, error?: Error, finished: boolean, matadata?: string) => void): this;
+    on(channel: 'subtitle-cache-reply', listener: (event: Event, error?: Error, finished: boolean, payload?: string) => void): this;
+    on(channel: 'subtitle-stream-reply', listener: (event: Event, error?: Error, dialogue: string) => void): this;
+    on(channel: 'subtitle-destroy-reply', listener: (event: Event, error?: Error) => void): this;
     on(channel: 'thumbnail-reply', listener: (event: Event, error?: Error, path: string) => void): this;
 
     once(channel: 'media-info-reply', listener: (event: Event, error?: Error, info: string) => void): this;
     once(channel: 'snapshot-reply', listener: (event: Event, error?: Error, path: string) => void): this;
-    once(channel: 'subtitle-reply', listener: (event: Event, error: Error | undefined, path: string) => void): this;
+    once(channel: 'subtitle-metadata-reply', listener: (event: Event, error?: Error, finished: boolean, matadata?: string) => void): this;
+    once(channel: 'subtitle-cache-reply', listener: (event: Event, error?: Error, finished: boolean, payload?: string) => void): this;
+    once(channel: 'subtitle-stream-reply', listener: (event: Event, error?: Error, dialogue: string) => void): this;
+    once(channel: 'subtitle-destroy-reply', listener: (event: Event, error?: Error) => void): this;
     once(channel: 'thumbnail-reply', listener: (event: Event, error?: Error, path: string) => void): this;
   }
 
@@ -223,7 +245,10 @@ declare module 'electron' {
     reply(channel: string, ...args: any[]): void;
     reply(channel: 'media-info-reply', error?: Error, info: string): void;
     reply(channel: 'snapshot-reply', error?: Error, path: string): this;
-    reply(channel: 'subtitle-reply', error: Error | undefined, path: string): this;
+    reply(channel: 'subtitle-metadata-reply', error?: Error, finished: boolean, matadata: string): this;
+    reply(channel: 'subtitle-cache-reply', error?: Error, finished: boolean): this;
+    reply(channel: 'subtitle-stream-reply', error?: Error, dialogue: string): this;
+    reply(channel: 'subtitle-destroy-reply', error?: Error): this;
     reply(channel: 'thumbnail-reply', error?: Error, path: string): void;
   }
 }
