@@ -5,7 +5,7 @@ import {
 } from 'fs-extra';
 import { extname } from 'path';
 import {
-  ITags, IOrigin, Type, Format, IParser,
+  ITags, IOrigin, Type, Format, IParser, ILoader,
 } from '@/interfaces/ISubtitle';
 import { LanguageCode } from '@/libs/language';
 
@@ -14,8 +14,11 @@ import {
 } from '@/services/subtitle';
 
 import { assFragmentLanguageLoader, srtFragmentLanguageLoader, vttFragmentLanguageLoader } from './languageLoader';
-import { IEmbeddedOrigin } from '../loaders';
 import { SagiSubtitlePayload } from '../parsers';
+import {
+  IEmbeddedOrigin,
+  EmbeddedTextStreamLoader, LocalTextLoader, SagiLoader,
+} from './loaders';
 
 /**
  * Cue tags getter for SubRip, SubStation Alpha and Online Transcript subtitles.
@@ -133,11 +136,8 @@ export function sourceToFormat(subtitleSource: IOrigin) {
     case Type.Online:
     case Type.Translated:
       return Format.Sagi;
-    case Type.Embedded: {
-      const { extractedSrc } = (subtitleSource as IEmbeddedOrigin).source;
-      if (extractedSrc) return pathToFormat(extractedSrc);
-      return Format.Unknown;
-    }
+    case Type.Embedded:
+      return Format.AdvancedSubStationAplha;
     default:
       return pathToFormat(subtitleSource.source as string);
   }
@@ -168,6 +168,22 @@ export async function inferLanguageFromPath(path: string): Promise<LanguageCode>
       return vttFragmentLanguageLoader(textFragment)[0];
     default:
       throw new Error(`Unsupported format ${format}.`);
+  }
+}
+
+export function getLoader(source: IOrigin): ILoader {
+  switch (source.type) {
+    default:
+      throw new Error('Unknown source type.');
+    case Type.Embedded: {
+      const { videoPath, streamIndex } = (source as IEmbeddedOrigin).source;
+      return new EmbeddedTextStreamLoader(videoPath, streamIndex);
+    }
+    case Type.Local:
+      return new LocalTextLoader(source.source as string);
+    case Type.Online:
+    case Type.Translated:
+      return new SagiLoader(source.source as string);
   }
 }
 
