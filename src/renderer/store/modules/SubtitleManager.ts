@@ -974,9 +974,8 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
     setDelayTimeout();
   },
   async [a.storeSubtitleDelays]({ getters, state }) {
-    const { list } = getters;
-    const { mediaHash } = state;
-    updateSubtitleList(list, mediaHash);
+    const list = getters.list.map(({ id }: ISubtitleControlListItem) => getters[`${id}/entity`]);
+    updateSubtitleList(list, state.mediaHash);
   },
 };
 
