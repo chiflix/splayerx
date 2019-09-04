@@ -91,6 +91,9 @@ export default {
     color: rgba(15, 26, 59, 0.5);
     letter-spacing: 0.09px;
     text-align: center;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
   }
   .control-button {
     width: 30px;

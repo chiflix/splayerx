@@ -16,6 +16,7 @@
       :play-file-with-playing-view="playFileWithPlayingView"
     />
     <browsing-pip-control
+      :has-video="hasVideo"
       :handle-enter-pip="handleEnterPip"
       :handle-global-pip="handleGlobalPip"
     />
