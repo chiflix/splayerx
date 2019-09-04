@@ -5,10 +5,10 @@ import {
 import { LanguageCode } from '@/libs/language';
 import { DATADB_NAME } from '@/constants';
 import {
-  Type, Format, IOrigin, IVideoSegment,
+  Type, Format, IOrigin, IRawVideoSegment,
 } from '@/interfaces/ISubtitle';
 import {
-  IStoredSubtitle, IStoredSubtitleItem, ISubtitlePreference, SelectedSubtitle,
+  IStoredSubtitle, IStoredSubtitleItem, ISubtitlePreference, SelectedSubtitle, IPrimarySecondary,
 } from '@/interfaces/ISubtitleStorage';
 
 interface IDataDBV3 extends DBSchema {
@@ -28,6 +28,32 @@ interface IDataDBV3 extends DBSchema {
 interface IDataDBV4 extends DBSchema {
   'subtitles': {
     key: string;
+    value: {
+      hash: string;
+      source: IOrigin[];
+      format: Format;
+      language: LanguageCode;
+    };
+  };
+  'subtitle-preferences': {
+    key: string;
+    value: {
+      mediaHash: string;
+      list: {
+        hash: string;
+        type: Type;
+        source: unknown;
+        videoSegments?: IRawVideoSegment[];
+        delay: number;
+      }[];
+      language: IPrimarySecondary<LanguageCode>;
+      selected: IPrimarySecondary<SelectedSubtitle>;
+    };
+  };
+}
+interface IDataDBV5 extends DBSchema {
+  'subtitles': {
+    key: string;
     value: IStoredSubtitle;
   };
   'subtitle-preferences': {
@@ -37,14 +63,14 @@ interface IDataDBV4 extends DBSchema {
 }
 
 interface IAddSubtitleOptions {
-  source: IOrigin;
   hash: string;
+  source: IOrigin;
   format: Format;
   language: LanguageCode;
 }
 interface IRemoveSubtitleOptions {
-  source: unknown;
   hash: string;
+  source: IOrigin;
 }
 interface IUpdateSubtitleOptions {
   hash: string;
@@ -54,32 +80,34 @@ interface IUpdateSubtitleOptions {
 }
 interface IUpdateSubtitleItemOptions {
   hash: string;
-  type?: Type;
-  source?: unknown;
-  videoSegments?: IVideoSegment[];
+  source?: IOrigin;
+  videoSegments?: IRawVideoSegment[];
   delay?: number;
 }
 
 export class SubtitleDataBase {
-  private db: IDBPDatabase<IDataDBV4>;
+  private db: IDBPDatabase<IDataDBV5>;
 
   private async getDb() {
     if (!this.db) {
-      this.db = await openDB<IDataDBV4>(
+      this.db = await openDB<IDataDBV5>(
         DATADB_NAME,
-        4,
+        5,
         {
           async upgrade(db, version) {
-            if (version === 0) {
-              db.createObjectStore('subtitles', { keyPath: 'hash' });
-            }
             if (version > 0 && version < 3) {
               db.deleteObjectStore('subtitles');
               db.createObjectStore('subtitles', { keyPath: 'hash' });
             } else if (version === 3) {
               const v3Db = db as unknown as IDBPDatabase<IDataDBV3>;
+              v3Db.deleteObjectStore('subtitles');
               v3Db.deleteObjectStore('preferences');
+            } else if (version === 4) {
+              const v4Db = db as unknown as IDBPDatabase<IDataDBV4>;
+              v4Db.deleteObjectStore('subtitles');
+              v4Db.deleteObjectStore('subtitle-preferences');
             }
+            db.createObjectStore('subtitles', { keyPath: 'hash' });
             db.createObjectStore('subtitle-preferences', { keyPath: 'mediaHash' });
           },
         },
@@ -103,12 +131,12 @@ export class SubtitleDataBase {
     if (!storedSubtitle) {
       return objectStore.add({
         ...subtitle,
-        source: [subtitle.source],
+        sources: [subtitle.source],
       });
     }
     return objectStore.put({
       ...subtitle,
-      source: uniqWith(storedSubtitle.source.concat(subtitle.source), isEqual),
+      sources: uniqWith(storedSubtitle.sources.concat(subtitle.source), isEqual),
     });
   }
 
@@ -118,8 +146,8 @@ export class SubtitleDataBase {
       .objectStore('subtitles');
     const storedSubtitle = await objectStore.get(subtitle.hash);
     if (storedSubtitle) {
-      remove(storedSubtitle.source, storedSource => isEqual(storedSource, subtitle.source));
-      if (!storedSubtitle.source.length) {
+      remove(storedSubtitle.sources, storedSource => isEqual(storedSource, subtitle.source));
+      if (!storedSubtitle.sources.length) {
         return objectStore.delete(subtitle.hash);
       }
       return objectStore.put({ ...storedSubtitle });
@@ -144,7 +172,7 @@ export class SubtitleDataBase {
     let cursor = await objectStore.openCursor();
     const deletedSubtitleHashes: string[] = [];
     while (cursor && Object.keys(hashSourcesMap).length) {
-      const { hash, source: storedSources } = cursor.value;
+      const { hash, sources: storedSources } = cursor.value;
       const sourcesToDelete = hashSourcesMap[hash];
       if (sourcesToDelete) {
         remove(storedSources, ({ source }) => sourcesToDelete.some(sub => isEqual(sub, source)));
@@ -166,7 +194,7 @@ export class SubtitleDataBase {
     const oldSubtitle = await objectStore.get(subtitle.hash);
     if (oldSubtitle) {
       const newSubtitle = { ...oldSubtitle };
-      if (source) newSubtitle.source = unionWith(oldSubtitle.source.concat([source]), isEqual);
+      if (source) newSubtitle.sources = unionWith(oldSubtitle.sources.concat([source]), isEqual);
       if (format) newSubtitle.format = format;
       if (language) newSubtitle.language = language;
       return objectStore.put(newSubtitle);
@@ -184,15 +212,9 @@ export class SubtitleDataBase {
   private static generateDefaultPreference(mediaHash: string): ISubtitlePreference {
     return {
       mediaHash,
-      language: {
-        primary: LanguageCode.Default,
-        secondary: LanguageCode.Default,
-      },
       list: [],
-      selected: {
-        primary: { hash: '' },
-        secondary: { hash: '' },
-      },
+      language: {},
+      selected: {},
     };
   }
 
@@ -267,10 +289,7 @@ export class SubtitleDataBase {
         keyBy(subtitlesToUpdate, ({ hash }) => hash),
         (objVal: IStoredSubtitleItem, srcVal: IStoredSubtitleItem) => {
           const destObj = { ...objVal };
-          const {
-            type, source, videoSegments, delay,
-          } = srcVal;
-          if (type) destObj.type = type;
+          const { source, videoSegments, delay } = srcVal;
           if (source) destObj.source = source;
           if (videoSegments) destObj.videoSegments = videoSegments;
           if (isFinite(delay)) destObj.delay = delay;
