@@ -5,7 +5,7 @@ import {
 } from 'fs-extra';
 import { extname } from 'path';
 import {
-  ITags, IOrigin, Type, Format, IParser, ILoader,
+  ITags, IOrigin, Type, Format, IParser, ILoader, Cue, IVideoSegments,
 } from '@/interfaces/ISubtitle';
 import { LanguageCode } from '@/libs/language';
 
@@ -14,7 +14,6 @@ import {
 } from '@/services/subtitle';
 
 import { assFragmentLanguageLoader, srtFragmentLanguageLoader, vttFragmentLanguageLoader } from './languageLoader';
-import { SagiSubtitlePayload } from '../parsers';
 import {
   IEmbeddedOrigin,
   EmbeddedTextStreamLoader, LocalTextLoader, SagiLoader,
@@ -171,6 +170,13 @@ export async function inferLanguageFromPath(path: string): Promise<LanguageCode>
   }
 }
 
+export function getDialogues(dialogues: Cue[], time?: number) {
+  return typeof time === 'undefined' ? dialogues
+    : dialogues.filter(({ start, end, text }) => (
+      (start <= time && end >= time) && !!text
+    ));
+}
+
 export function getLoader(source: IOrigin): ILoader {
   switch (source.type) {
     default:
@@ -182,23 +188,28 @@ export function getLoader(source: IOrigin): ILoader {
     case Type.Local:
       return new LocalTextLoader(source.source as string);
     case Type.Online:
+      return new SagiLoader(source.source as string);
     case Type.Translated:
       return new SagiLoader(source.source as string);
   }
 }
 
-export function getParser(format: Format, payload: unknown): IParser {
+export function getParser(
+  format: Format,
+  loader: ILoader,
+  videoSegments: IVideoSegments,
+): IParser {
   switch (format) {
+    default:
+      throw new Error('Unknown format');
     case Format.AdvancedSubStationAplha:
     case Format.SubStationAlpha:
-      return new AssParser(payload as string);
-    case Format.SubRip:
-      return new SrtParser(payload as string);
+      return new AssParser(loader, videoSegments);
     case Format.Sagi:
-      return new SagiParser(payload as SagiSubtitlePayload);
+      return new SagiParser(loader as SagiLoader, videoSegments);
+    case Format.SubRip:
+      return new SrtParser(loader as LocalTextLoader, videoSegments);
     case Format.WebVTT:
-      return new VttParser(payload as string);
-    default:
-      throw new Error();
+      return new VttParser(loader as LocalTextLoader, videoSegments);
   }
 }
