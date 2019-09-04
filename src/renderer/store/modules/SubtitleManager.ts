@@ -44,6 +44,7 @@ import { LanguageCode } from '@/libs/language';
 import { AudioTranslateBubbleOrigin } from './AudioTranslate';
 import { ISubtitleStream } from '@/plugins/mediaTasks';
 import { isAIEnabled } from '@/helpers/featureSwitch';
+import { IEmbeddedOrigin } from '@/services/subtitle/utils/loaders';
 
 const sortOfTypes = {
   local: 0,
@@ -82,6 +83,10 @@ const getters: GetterTree<ISubtitleManagerState, {}> = {
       if ((type === Type.Online || type === Type.Translated)
         && sub.language !== store.getters.primaryLanguage) {
         return sortOfTypes[type] + 2;
+      }
+      if (type === Type.Embedded) {
+        const embeddedRank = (sub.displaySource as IEmbeddedOrigin).source.streamIndex / 10;
+        return sortOfTypes[type] + embeddedRank;
       }
       return sortOfTypes[type];
     }).map(({ id, sub }) => ({
