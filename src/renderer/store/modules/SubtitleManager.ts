@@ -597,7 +597,7 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
         generator: new EmbeddedGenerator(stream[0], stream[1]),
         mediaHash,
       })),
-    );
+    ).then(subtitles => addSubtitleItemsToList(subtitles, mediaHash));
   },
   async [a.addOnlineSubtitles](
     { dispatch },

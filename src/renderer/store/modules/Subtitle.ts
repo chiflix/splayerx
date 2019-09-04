@@ -6,7 +6,7 @@ import {
   IEntityGenerator, IParser, Format, IOrigin, ILoader, IEntity,
 } from '@/interfaces/ISubtitle';
 import { LanguageCode } from '@/libs/language';
-import { storeSubtitle, addSubtitleItemsToList } from '@/services/storage/subtitle';
+import { storeSubtitle } from '@/services/storage/subtitle';
 import { newSubtitle as m } from '@/store/mutationTypes';
 import { newSubtitle as a } from '@/store/actionTypes';
 import { getParser, getLoader } from '@/services/subtitle/utils';
@@ -87,7 +87,7 @@ const getters: GetterTree<ISubtitleState, {}> = {
     state, getters, rootState, rootGetters,
   ): (payload?: Buffer) => SubtitleUploadParameter {
     return (payload?: Buffer) => ({
-      mediaIdentity: rootGetters.mediaHash,
+      mediaIdentity: state.mediaHash,
       languageCode: state.language,
       format: state.format,
       playedTime: state.playedTime,
@@ -171,7 +171,6 @@ const actions: ActionTree<ISubtitleState, {}> = {
             if (result) {
               commit(m.setRealSource, result);
               storeSubtitle(getters.entity);
-              addSubtitleItemsToList([getters.entity], state.mediaHash);
             }
           }
         });
