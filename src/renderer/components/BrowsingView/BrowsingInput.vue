@@ -27,6 +27,10 @@ export default {
     Icon,
   },
   props: {
+    handleUrlReload: {
+      type: Function,
+      required: true,
+    },
     closeUrlInput: {
       type: Function,
       required: true,

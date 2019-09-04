@@ -49,10 +49,6 @@ export default {
     Icon,
   },
   props: {
-    handleUrlReload: {
-      type: Function,
-      required: true,
-    },
     handleUrlBack: {
       type: Function,
       required: true,
