@@ -1,45 +1,51 @@
 <template>
   <div
     :style="{
-      width: isDarwin ? '113px' : '110px',
+      width: isDarwin ? '114px' : '110px',
     }"
     class="browsing-control"
   >
-    <SidebarIcon
-      @mouseover="mouseoverSidebar = true"
-      @mouseout="mouseoverSidebar = false"
-      :mouseover="mouseoverSidebar"
-      class="sidebar no-drag"
-    />
-    <Icon
-      ref="back"
-      :type="backType"
-      :style="{
-        cursor: webInfo.canGoBack ? 'pointer' : ''
-      }"
-      @mouseup.native="handleUrlBack"
-      class="back-icon"
-    />
-    <Icon
-      ref="forward"
-      :type="forwardType"
-      :style="{
-        cursor: webInfo.canGoForward ? 'pointer' : ''
-      }"
-      @mouseup.native="handleUrlForward"
-      class="forward-icon"
-    />
+    <div
+      @mouseup="handleSidebar"
+      class="control-button sidebar-icon no-drag"
+    >
+      <Icon
+        type="sidebar"
+      />
+    </div>
+    <div
+      @mouseup="handleUrlBack"
+      class="control-button back-icon"
+    >
+      <Icon
+        ref="back"
+        :type="backType"
+        :style="{
+          cursor: webInfo.canGoBack ? 'pointer' : ''
+        }"
+      />
+    </div>
+    <div
+      @mouseup="handleUrlForward"
+      class="control-button forward-icon"
+    >
+      <Icon
+        ref="forward"
+        :type="forwardType"
+        :style="{
+          cursor: webInfo.canGoForward ? 'pointer' : ''
+        }"
+      />
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import Icon from '@/components/BaseIconContainer.vue';
-import SidebarIcon from '@/components/LandingView/SidebarIcon.vue';
 
 export default {
   name: 'BrowsingControl',
   components: {
-    SidebarIcon,
     Icon,
   },
   props: {
@@ -74,6 +80,9 @@ export default {
     },
   },
   methods: {
+    handleSidebar() {
+      this.$event.emit('side-bar-mouseup');
+    },
   },
 };
 </script>
@@ -85,24 +94,27 @@ export default {
   align-items: center;
   z-index: 6;
   border-right: 1px solid #F2F1F4;
-  .sidebar {
+  .control-button {
+    width: 30px;
+    height: 30px;
+    border-radius: 100%;
     display: flex;
-    justify-content: flex-end;
-    margin-left: 15px;
-    transition: width 100ms linear;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 100ms ease-in;
+    &:hover {
+      background-color: #F5F6F8;
+    }
+  }
+  .sidebar-icon {
+    margin-left: 8px;
   }
   .back-icon {
-    width: 16px;
-    height: 16px;
-    margin-left: 21px;
-    margin-right: 18px;
-    -webkit-app-region: no-drag;
+    margin-left: 4px;
+    margin-right: 4px;
   }
   .forward-icon {
-    width: 16px;
-    height: 16px;
-    margin-right: 17px;
-    -webkit-app-region: no-drag;
+    margin-right: 8px;
   }
 }
 </style>
