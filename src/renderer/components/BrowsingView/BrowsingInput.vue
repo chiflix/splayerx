@@ -7,14 +7,17 @@
     >
       {{ title }}
     </div>
-    <Icon
-      @mouseup.native="handleUrlReload"
-      :style="{
-        cursor: 'pointer',
-      }"
-      type="pageRefresh"
-      class="page-refresh-icon"
-    />
+    <div
+      @mouseup="handleUrlReload"
+      class="control-button page-refresh-icon no-drag"
+    >
+      <Icon
+        :style="{
+          cursor: 'pointer',
+        }"
+        type="pageRefresh"
+      />
+    </div>
   </div>
 </template>
 
@@ -89,12 +92,20 @@ export default {
     letter-spacing: 0.09px;
     text-align: center;
   }
+  .control-button {
+    width: 30px;
+    height: 30px;
+    border-radius: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 100ms ease-in;
+    &:hover {
+      background-color: #F5F6F8;
+    }
+  }
   .page-refresh-icon {
-    width: 16px;
-    height: 16px;
-    -webkit-app-region: no-drag;
-    margin-right: 16px;
-    margin-left: 12px;
+    margin-right: 8px;
   }
 }
 </style>
