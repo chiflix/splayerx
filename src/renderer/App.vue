@@ -28,7 +28,6 @@
         }"
         :open-file-args="openFileArgs"
         :show-sidebar="showSidebar"
-        @update-side-bar="showSidebar = $event"
       />
     </transition>
   </div>

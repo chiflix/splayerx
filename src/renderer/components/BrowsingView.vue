@@ -28,10 +28,6 @@
       }"
       v-show="maskToShow"
     />
-    <div
-      v-show="loadingState && headerToShow"
-      class="loading-state loading-animation"
-    />
     <NotificationBubble />
   </div>
 </template>
@@ -324,6 +320,7 @@ export default {
         }
       }, 0);
     });
+    this.$bus.$on('sidebar-selected', this.handleBookmarkOpen);
     window.addEventListener('focus', this.focusHandler);
     window.addEventListener('beforeunload', this.beforeUnloadHandler);
     this.$bus.$on('back-to-landingview', () => {

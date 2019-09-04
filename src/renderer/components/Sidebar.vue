@@ -36,16 +36,20 @@ export default {
   },
   methods: {
     handleSidebarIcon(site: string) {
-      asyncStorage.get('browsingPip').then((data) => {
-        this.$store.dispatch('updatePipSize', data.pipSize || this.pipSize);
-        this.$store.dispatch('updatePipPos', data.pipPos || this.pipPos);
-        this.$electron.ipcRenderer.send('add-browsing', { size: data.pipSize || this.pipSize, position: data.pipPos || this.pipPos });
-      });
       const url = `https://www.${site}.com`;
-      this.$electron.ipcRenderer.send('change-channel', { url, sidebar: this.showSidebar });
-      if (this.$router.currentRoute.name !== 'browsing-view') this.$router.push({ name: 'browsing-view' });
-    },
 
+      if (this.$route.name === 'browsing-view') {
+        this.$bus.$emit('sidebar-selected', url);
+      } else {
+        asyncStorage.get('browsingPip').then((data) => {
+          this.$store.dispatch('updatePipSize', data.pipSize || this.pipSize);
+          this.$store.dispatch('updatePipPos', data.pipPos || this.pipPos);
+          this.$electron.ipcRenderer.send('add-browsing', { size: data.pipSize || this.pipSize, position: data.pipPos || this.pipPos });
+        });
+        this.$electron.ipcRenderer.send('change-channel', { url, sidebar: this.showSidebar });
+        if (this.$router.currentRoute.name !== 'browsing-view') this.$router.push({ name: 'browsing-view' });
+      }
+    },
   },
 };
 </script>
