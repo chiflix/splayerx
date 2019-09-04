@@ -5,7 +5,7 @@
     <div
       class="url-search"
     >
-      Splayer
+      {{ title }}
     </div>
     <Icon
       @mouseup.native="handleUrlReload"
@@ -27,6 +27,10 @@ export default {
     Icon,
   },
   props: {
+    title: {
+      type: String,
+      default: 'Splayer',
+    },
     handleUrlReload: {
       type: Function,
       required: true,

@@ -9,6 +9,7 @@
     <browsing-header
       ref="browsingHeader"
       :show-sidebar="showSidebar"
+      :title="title"
       :handle-enter-pip="handleEnterPip"
       :handle-global-pip="handleGlobalPip"
       :handle-url-reload="handleUrlReload"
@@ -98,6 +99,7 @@ export default {
       pipInfo: {},
       isGlobal: false,
       startLoading: false,
+      title: 'Splayer',
     };
   },
   computed: {
@@ -302,6 +304,9 @@ export default {
   mounted() {
     this.menuService = new MenuService();
     this.menuService.updateMenuItemEnabled('file.open', false);
+
+    this.title = this.$electron.remote.getCurrentWindow().getBrowserViews()[0].webContents.getTitle();
+
     this.$bus.$on('toggle-reload', this.handleUrlReload);
     this.$bus.$on('toggle-back', this.handleUrlBack);
     this.$bus.$on('toggle-forward', this.handleUrlForward);
@@ -360,6 +365,7 @@ export default {
         e: Event,
         state: { url: string; canGoBack: boolean; canGoForward: boolean },
       ) => {
+        this.title = this.$electron.remote.getCurrentWindow().getBrowserViews()[0].webContents.getTitle();
         this.currentUrl = urlParseLax(state.url).href;
         this.removeListener();
         this.addListenerToBrowser();
@@ -425,6 +431,9 @@ export default {
     handleGlobalPip() {
       this.isGlobal = true;
       this.handleEnterPip();
+    },
+    handlePageTitle(e: Event, title: string) {
+      this.title = title;
     },
     focusHandler() {
       this.menuService.updateFocusedWindow(true);
@@ -555,6 +564,7 @@ export default {
     addListenerToBrowser() {
       const view = this.$electron.remote.getCurrentWindow().getBrowserViews()[0];
       view.webContents.addListener('ipc-message', this.ipcMessage);
+      view.webContents.addListener('page-title-updated', this.handlePageTitle);
       view.webContents.addListener('dom-ready', this.domReady);
       view.webContents.addListener('new-window', this.newWindow);
       view.webContents.addListener('did-start-loading', this.didStartLoading);
@@ -571,6 +581,7 @@ export default {
           'did-stop-loading',
           this.didStopLoading,
         );
+        currentWebContents.removeListener('page-title-updated', this.handlePageTitle);
         currentWebContents.removeListener('dom-ready', this.domReady);
         currentWebContents.removeListener('ipc-message', this.ipcMessage);
         currentWebContents.removeListener(

@@ -11,6 +11,7 @@
     />
     <browsing-input
       :handle-url-reload="handleUrlReload"
+      :title="title"
       :close-url-input="closeUrlInput"
       :play-file-with-playing-view="playFileWithPlayingView"
     />
@@ -39,6 +40,10 @@ export default {
     showSidebar: {
       type: Boolean,
       default: false,
+    },
+    title: {
+      type: String,
+      default: 'Splayer',
     },
     handleEnterPip: {
       type: Function,
