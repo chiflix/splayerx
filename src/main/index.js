@@ -59,6 +59,7 @@ if (process.env.NODE_ENV !== 'development') {
 
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 
+let sidebar = false;
 let welcomeProcessDone = false;
 let menuService = null;
 let routeName = null;
@@ -502,7 +503,10 @@ function registerMainWindowEvent(mainWindow) {
       });
     }, 150);
     newBrowser.page.view.setBounds({
-      x: 0, y: 36, width: mainWindow.getSize()[0], height: mainWindow.getSize()[1] - 36,
+      x: sidebar ? 76 : 0,
+      y: 40,
+      width: sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
+      height: mainWindow.getSize()[1] - 40,
     });
     newBrowser.page.view.setAutoResize({
       width: true, height: true,
@@ -529,9 +533,9 @@ function registerMainWindowEvent(mainWindow) {
       });
     }, 150);
     view.setBounds({
-      x: args.sidebar ? 76 : 0,
+      x: sidebar ? 76 : 0,
       y: 40,
-      width: args.sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
+      width: sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
       height: mainWindow.getSize()[1] - 40,
     });
     view.setAutoResize({
@@ -699,7 +703,10 @@ function registerMainWindowEvent(mainWindow) {
       mainWindow.hide();
     }
     mainBrowser.page.view.setBounds({
-      x: 0, y: 36, width: mainWindow.getSize()[0], height: mainWindow.getSize()[1] - 36,
+      x: sidebar ? 76 : 0,
+      y: 40,
+      width: sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
+      height: mainWindow.getSize()[1] - 40,
     });
     mainBrowser.page.view.setAutoResize({
       width: true, height: true,
@@ -755,7 +762,10 @@ function registerMainWindowEvent(mainWindow) {
     browsingWindow.setAspectRatio(args.pipInfo.aspectRatio);
     browsingWindow.setMinimumSize(args.pipInfo.minimumSize[0], args.pipInfo.minimumSize[1]);
     mainBrowser.page.view.setBounds({
-      x: 0, y: 36, width: mainWindow.getSize()[0], height: mainWindow.getSize()[1] - 36,
+      x: sidebar ? 76 : 0,
+      y: 40,
+      width: sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
+      height: mainWindow.getSize()[1] - 40,
     });
     mainBrowser.page.view.setAutoResize({
       width: true,
@@ -784,6 +794,9 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('update-pip-size', (evt, args) => {
     mainWindow.send('update-pip-size', args);
   });
+  ipcMain.on('update-sidebar', (evt, sidebarstate) => {
+    sidebar = sidebarstate;
+  });
   ipcMain.on('set-bounds', (evt, args) => {
     if (pipControlView) pipControlView.setBounds(args.control);
     if (titlebarView) titlebarView.setBounds(args.titlebar);
@@ -800,7 +813,10 @@ function registerMainWindowEvent(mainWindow) {
     const exitBrowser = browserViewManager.exitPip();
     mainWindow.addBrowserView(exitBrowser.page.view);
     exitBrowser.page.view.setBounds({
-      x: 0, y: 36, width: mainWindow.getSize()[0], height: mainWindow.getSize()[1] - 36,
+      x: sidebar ? 76 : 0,
+      y: 40,
+      width: sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
+      height: mainWindow.getSize()[1] - 40,
     });
     exitBrowser.page.view.setAutoResize({
       width: true,

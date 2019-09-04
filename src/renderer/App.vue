@@ -60,6 +60,9 @@ export default {
       else this.transitionMode = '';
       if (to.name !== 'browsing-view') this.showSidebar = false;
     },
+    showSidebar(val: boolean) {
+      ipcRenderer.send('update-sidebar', val);
+    },
   },
   mounted() {
     this.$event.on('side-bar-mouseup', () => {
