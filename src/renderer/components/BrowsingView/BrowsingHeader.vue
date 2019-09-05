@@ -24,7 +24,6 @@
 </template>
 
 <script lang="ts">
-import electron from 'electron';
 import { mapGetters } from 'vuex';
 import BrowsingInput from '@/components/BrowsingView/BrowsingInput.vue';
 import BrowsingControl from '@/components/BrowsingView/BrowsingControl.vue';
