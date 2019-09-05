@@ -29,6 +29,12 @@
       }"
       v-show="maskToShow"
     />
+    <div
+      :style="{
+        width: `${progress}%`,
+      }"
+      class="progress"
+    />
     <NotificationBubble />
   </div>
 </template>
@@ -100,6 +106,7 @@ export default {
       isGlobal: false,
       startLoading: false,
       title: 'Splayer',
+      readyState: '',
     };
   },
   computed: {
@@ -135,6 +142,18 @@ export default {
     },
     othersPip() {
       return globalPip(this.pipSize);
+    },
+    progress() {
+      switch (this.readyState) {
+        case 'loading':
+          return 30; 
+        case 'interactive':
+          return 70;
+        case 'complete':
+          return 100;
+        default:
+          return 0;
+      }
     },
   },
   watch: {
@@ -986,11 +1005,12 @@ export default {
   position: absolute;
   right: 0;
   border-top-left-radius: 4px;
-  height: 100vh;
+  height: 39px;
   width: 100vw;
   display: flex;
   flex-direction: column;
   background: rgba(255, 255, 255, 1);
+  border-bottom: 1px solid #F2F1F4;
   .web-view {
     flex: 1;
     background: rgba(255, 255, 255, 1);
@@ -1024,6 +1044,15 @@ export default {
     background: rgba(0, 0, 0, 0.4);
     z-index: 100;
   }
+}
+.progress {
+  position: absolute;
+  left: 0;
+  top: 38px;
+  z-index: 6;
+  height: 2px;
+  transition: width 100ms linear;
+  background-color: #FF672D;
 }
 .loading-animation {
   animation: loading 3s linear 1 normal forwards;
