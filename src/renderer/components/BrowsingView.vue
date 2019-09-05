@@ -92,7 +92,6 @@ export default {
       pipBtnsKeepShow: false,
       asyncTasksDone: false,
       headerToShow: true,
-      pipRestore: false,
       acceleratorAvailable: true,
       oldDisplayId: -1,
       backToLandingView: false,
@@ -107,6 +106,16 @@ export default {
       startLoading: false,
       title: 'Splayer',
       readyState: '',
+      oauthRegex: [
+        /^https:\/\/cnpassport.youku.com\//i,
+        /^https:\/\/passport.iqiyi.com\/apis\/thirdparty/i,
+        /^https:\/\/api.weibo.com\/oauth2/i,
+        /^https:\/\/graph.qq.com\//i,
+        /^https:\/\/open.weixin.qq.com\//i,
+        /^https:\/\/openapi.baidu.com\//i,
+        /^https:\/\/auth.alipay.com\/login\//i,
+        /^https:\/\/account.xiaomi.com\/pass\//i,
+      ],
     };
   },
   computed: {
@@ -146,7 +155,7 @@ export default {
     progress() {
       switch (this.readyState) {
         case 'loading':
-          return 30; 
+          return 30;
         case 'interactive':
           return 70;
         case 'complete':
@@ -239,45 +248,8 @@ export default {
       }
     },
     loadingState(val: boolean) {
-      const loadUrl = this.$electron.remote
-        .getCurrentWindow()
-        .getBrowserViews()[0]
-        .webContents.getURL();
-      const hostname = urlParseLax(loadUrl).hostname;
-      let channel = hostname.slice(hostname.indexOf('.') + 1, hostname.length);
-      if (loadUrl.includes('youtube')) {
-        channel = 'youtube.com';
-      }
-      this.updateCanGoBack(
-        this.$electron.remote
-          .getCurrentWindow()
-          .getBrowserViews()[0]
-          .webContents.canGoBack(),
-      );
-      this.updateCanGoForward(
-        this.$electron.remote
-          .getCurrentWindow()
-          .getBrowserViews()[0]
-          .webContents.canGoForward(),
-      );
       if (val) {
         this.hasVideo = false;
-      } else {
-        if (this.pipRestore) {
-          this.pipAdapter();
-          this.pipRestore = false;
-        }
-        this.$electron.remote
-          .getCurrentWindow()
-          .getBrowserViews()[0]
-          .webContents.executeJavaScript(
-            this.calculateVideoNum,
-            (r: number) => {
-              this.hasVideo = channel === 'youtube.com' && !getVideoId(loadUrl).id
-                ? false
-                : !!r;
-            },
-          );
       }
     },
     headerToShow(val: boolean) {
@@ -324,7 +296,8 @@ export default {
     this.menuService = new MenuService();
     this.menuService.updateMenuItemEnabled('file.open', false);
 
-    this.title = this.$electron.remote.getCurrentWindow().getBrowserViews()[0].webContents.getTitle();
+    this.title = this.$electron.remote.getCurrentWindow()
+      .getBrowserViews()[0].webContents.getTitle();
 
     this.$bus.$on('toggle-reload', this.handleUrlReload);
     this.$bus.$on('toggle-back', this.handleUrlBack);
@@ -670,30 +643,6 @@ export default {
           //   this.dropFiles = args.files;
           // }
           break;
-        case 'left-drag':
-          if (this.isPip) {
-            if (args.windowSize) {
-              this.$electron.ipcRenderer.send(
-                'callBrowsingWindowMethod',
-                'setBounds',
-                [
-                  {
-                    x: args.x,
-                    y: args.y,
-                    width: args.windowSize[0],
-                    height: args.windowSize[1],
-                  },
-                ],
-              );
-            } else {
-              this.$electron.ipcRenderer.send(
-                'callBrowsingWindowMethod',
-                'setPosition',
-                [args.x, args.y],
-              );
-            }
-          }
-          break;
         case 'fullscreenchange':
           if (!this.isPip) {
             this.headerToShow = !args.isFullScreen;
@@ -727,41 +676,40 @@ export default {
       }
     },
     handleOpenUrl({ url }: { url: string }) {
-      if (!this.startLoading) {
-        this.startLoading = true;
-        if (
-          !url
-          || url === 'about:blank'
-          || urlParseLax(url).href === urlParseLax(this.currentUrl).href
-        ) return;
-        const protocol = urlParseLax(url).protocol;
-        const openUrl = protocol ? url : `https:${url}`;
-        const newHostname = urlParseLax(openUrl).hostname;
-        const oldHostname = urlParseLax(this.currentUrl).hostname;
-        let newChannel = newHostname.slice(
-          newHostname.indexOf('.') + 1,
-          newHostname.length,
-        );
-        let oldChannel = oldHostname.slice(
-          oldHostname.indexOf('.') + 1,
-          oldHostname.length,
-        );
-        if (openUrl.includes('youtube')) {
-          newChannel = 'youtube.com';
-        }
-        if (this.currentUrl.includes('youtube')) {
-          oldChannel = 'youtube.com';
-        }
-        if (oldChannel === newChannel) {
-          this.loadingState = true;
-          this.currentUrl = urlParseLax(openUrl).href;
-          this.$electron.ipcRenderer.send('create-browser-view', {
-            url: openUrl,
-            isNewWindow: true,
-          });
-        } else {
-          this.$electron.shell.openExternal(openUrl);
-        }
+      this.startLoading = true;
+      const protocol = urlParseLax(url).protocol;
+      const openUrl = protocol ? url : `https:${url}`;
+      if (
+        !url
+        || url === 'about:blank'
+        || urlParseLax(openUrl).href === urlParseLax(this.currentUrl).href
+      ) return;
+      const newHostname = urlParseLax(openUrl).hostname;
+      const oldHostname = urlParseLax(this.currentUrl).hostname;
+      let newChannel = newHostname.slice(
+        newHostname.indexOf('.') + 1,
+        newHostname.length,
+      );
+      let oldChannel = oldHostname.slice(
+        oldHostname.indexOf('.') + 1,
+        oldHostname.length,
+      );
+      if (openUrl.includes('youtube')) {
+        newChannel = 'youtube.com';
+      }
+      if (this.currentUrl.includes('youtube')) {
+        oldChannel = 'youtube.com';
+      }
+      if (this.oauthRegex.some((re: RegExp) => re.test(url))) return;
+      if (oldChannel === newChannel) {
+        this.loadingState = true;
+        this.currentUrl = urlParseLax(openUrl).href;
+        this.$electron.ipcRenderer.send('create-browser-view', {
+          url: openUrl,
+          isNewWindow: true,
+        });
+      } else {
+        this.$electron.shell.openExternal(openUrl);
       }
     },
     pipAdapter() {
@@ -871,7 +819,6 @@ export default {
     },
     handleUrlReload() {
       if (this.isPip) {
-        this.pipRestore = true;
         this.$electron.remote
           .getCurrentWindow()
           .getBrowserViews()[0]
@@ -917,29 +864,6 @@ export default {
       if (this.isPip) {
         this.exitPipOperation();
         this.updateIsPip(false);
-        const loadUrl = this.$electron.remote
-          .getCurrentWindow()
-          .getBrowserViews()[0]
-          .webContents.getURL();
-        const hostname = urlParseLax(loadUrl).hostname;
-        let channel = hostname.slice(
-          hostname.indexOf('.') + 1,
-          hostname.length,
-        );
-        if (loadUrl.includes('youtube')) {
-          channel = 'youtube.com';
-        }
-        this.$electron.remote
-          .getCurrentWindow()
-          .getBrowserViews()[0]
-          .webContents.executeJavaScript(
-            this.calculateVideoNum,
-            (r: number) => {
-              this.hasVideo = channel === 'youtube.com' && !getVideoId(loadUrl).id
-                ? false
-                : !!r;
-            },
-          );
       }
     },
     othersAdapter() {

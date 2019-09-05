@@ -1199,7 +1199,7 @@ const oauthRegex = [
   /^https:\/\/account.xiaomi.com\/pass\//i,
 ];
 app.on('web-contents-created', (webContentsCreatedEvent, contents) => {
-  if (contents.getType() === 'webview') {
+  if (contents.getType() === 'browserView') {
     contents.on('new-window', (newWindowEvent, url) => {
       if (!oauthRegex.some(re => re.test(url))) {
         newWindowEvent.preventDefault();
