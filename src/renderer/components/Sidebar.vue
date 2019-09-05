@@ -36,7 +36,7 @@ export default {
   },
   methods: {
     handleSidebarIcon(site: string) {
-      const url = `https://www.${site}.com`;
+      const url = `https://www.${site}.com/`;
 
       if (this.$route.name === 'browsing-view') {
         this.$bus.$emit('sidebar-selected', url);
