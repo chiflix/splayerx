@@ -61,6 +61,7 @@ export class BrowserViewManager implements IBrowserViewManager {
       view: new BrowserView({
         webPreferences: {
           preload: `${require('path').resolve(__static, 'pip/preload.js')}`,
+          nativeWindowOpen: true,
         },
       }),
     };
