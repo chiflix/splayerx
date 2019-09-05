@@ -293,10 +293,10 @@ export default {
         });
       } else {
         currentView.setBounds({
-          x: 0,
-          y: 36,
-          width: this.winSize[0],
-          height: this.winSize[1] - 36,
+          x: this.showSidebar ? 76 : 0,
+          y: 40,
+          width: this.showSidebar ? this.winSize[0] - 76 : this.winSize[0],
+          height: this.winSize[1] - 40,
         });
       }
     },
