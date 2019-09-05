@@ -365,7 +365,8 @@ export default {
         e: Event,
         state: { url: string; canGoBack: boolean; canGoForward: boolean },
       ) => {
-        this.title = this.$electron.remote.getCurrentWindow().getBrowserViews()[0].webContents.getTitle();
+        this.title = this.$electron.remote.getCurrentWindow()
+          .getBrowserViews()[0].webContents.getTitle();
         this.currentUrl = urlParseLax(state.url).href;
         this.removeListener();
         this.addListenerToBrowser();
@@ -480,8 +481,8 @@ export default {
             barrageOpen: this.barrageOpen,
           })
           .finally(() => {
-            this.asyncTasksDone = true;
             if (!this.isPip) {
+              this.asyncTasksDone = true;
               this.$electron.ipcRenderer.send('remove-browser');
               window.close();
             } else {
@@ -558,39 +559,38 @@ export default {
       } else {
         const homePage = urlParseLax(`https://www.${newChannel}`).href;
         this.$electron.ipcRenderer.send('create-browser-view', {
-          url: homePage,
+          url: homePage, isNewWindow: true,
         });
       }
     },
     addListenerToBrowser() {
       const view = this.$electron.remote.getCurrentWindow().getBrowserViews()[0];
-      view.webContents.addListener('ipc-message', this.ipcMessage);
-      view.webContents.addListener('page-title-updated', this.handlePageTitle);
-      view.webContents.addListener('dom-ready', this.domReady);
-      view.webContents.addListener('new-window', this.newWindow);
-      view.webContents.addListener('did-start-loading', this.didStartLoading);
-      view.webContents.addListener('did-stop-loading', this.didStopLoading);
-      view.webContents.addListener('will-navigate', this.willNavigate);
+      if (view) {
+        view.webContents.addListener('ipc-message', this.ipcMessage);
+        view.webContents.addListener('page-title-updated', this.handlePageTitle);
+        view.webContents.addListener('dom-ready', this.domReady);
+        view.webContents.addListener('new-window', this.newWindow);
+        view.webContents.addListener('did-start-loading', this.didStartLoading);
+        view.webContents.addListener('did-stop-loading', this.didStopLoading);
+        view.webContents.addListener('will-navigate', this.willNavigate);
+      }
     },
     removeListener() {
-      const currentBrowserViews = this.$electron.remote
-        .getCurrentWindow()
-        .getBrowserViews();
-      if (currentBrowserViews.length) {
-        const currentWebContents = currentBrowserViews[0].webContents;
-        currentWebContents.removeListener(
+      const view = this.$electron.remote.getCurrentWindow().getBrowserViews()[0];
+      if (view) {
+        view.webContents.removeListener(
           'did-stop-loading',
           this.didStopLoading,
         );
-        currentWebContents.removeListener('page-title-updated', this.handlePageTitle);
-        currentWebContents.removeListener('dom-ready', this.domReady);
-        currentWebContents.removeListener('ipc-message', this.ipcMessage);
-        currentWebContents.removeListener(
+        view.webContents.removeListener('page-title-updated', this.handlePageTitle);
+        view.webContents.removeListener('dom-ready', this.domReady);
+        view.webContents.removeListener('ipc-message', this.ipcMessage);
+        view.webContents.removeListener(
           'did-start-loading',
           this.didStartLoading,
         );
-        currentWebContents.removeListener('new-window', this.newWindow);
-        currentWebContents.removeListener('will-navigate', this.willNavigate);
+        view.webContents.removeListener('new-window', this.newWindow);
+        view.webContents.removeListener('will-navigate', this.willNavigate);
       }
     },
     newWindow(e: Event, url: string, disposition: string) {
@@ -715,13 +715,34 @@ export default {
           || url === 'about:blank'
           || urlParseLax(url).href === urlParseLax(this.currentUrl).href
         ) return;
-        this.loadingState = true;
-        this.currentUrl = urlParseLax(url).href;
         const protocol = urlParseLax(url).protocol;
-        this.$electron.ipcRenderer.send('create-browser-view', {
-          url: protocol ? this.currentUrl : `https:${this.currentUrl}`,
-          isNewWindow: true,
-        });
+        const openUrl = protocol ? url : `https:${url}`;
+        const newHostname = urlParseLax(openUrl).hostname;
+        const oldHostname = urlParseLax(this.currentUrl).hostname;
+        let newChannel = newHostname.slice(
+          newHostname.indexOf('.') + 1,
+          newHostname.length,
+        );
+        let oldChannel = oldHostname.slice(
+          oldHostname.indexOf('.') + 1,
+          oldHostname.length,
+        );
+        if (openUrl.includes('youtube')) {
+          newChannel = 'youtube.com';
+        }
+        if (this.currentUrl.includes('youtube')) {
+          oldChannel = 'youtube.com';
+        }
+        if (oldChannel === newChannel) {
+          this.loadingState = true;
+          this.currentUrl = urlParseLax(openUrl).href;
+          this.$electron.ipcRenderer.send('create-browser-view', {
+            url: openUrl,
+            isNewWindow: true,
+          });
+        } else {
+          this.$electron.shell.openExternal(openUrl);
+        }
       }
     },
     pipAdapter() {

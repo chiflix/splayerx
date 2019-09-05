@@ -777,6 +777,7 @@ function registerMainWindowEvent(mainWindow) {
     pipBrowser.setAutoResize({
       width: true, height: true,
     });
+    browsingWindow.send('update-pip-listener');
     mainWindow.send('update-browser-state', {
       url: mainBrowser.page.url,
       canGoBack: mainBrowser.canBack,
@@ -803,6 +804,7 @@ function registerMainWindowEvent(mainWindow) {
   });
   ipcMain.on('exit-pip', () => {
     if (!browserViewManager) return;
+    browsingWindow.send('remove-pip-listener');
     mainWindow.show();
     const mainView = mainWindow.getBrowserView();
     mainWindow.removeBrowserView(mainView);
@@ -827,9 +829,6 @@ function registerMainWindowEvent(mainWindow) {
       canGoBack: exitBrowser.canBack,
       canGoForward: exitBrowser.canForward,
     });
-    if (!mainWindow.isVisible()) {
-      mainWindow.show();
-    }
     if (browsingWindow.isFullScreen()) {
       hideBrowsingWindow = true;
       browsingWindow.setFullScreen(false);
@@ -1217,7 +1216,7 @@ app.on('menu-create-main-window', () => {
   if (!mainWindow) createMainWindow();
   else if (mainWindow.isMinimized()) {
     mainWindow.restore();
-  } else if (!mainWindow.isVisible()) {
+  } else if (!mainWindow.isVisible() && (!browsingWindow || !browsingWindow.isVisible())) {
     mainWindow.show();
   }
 });
@@ -1229,7 +1228,7 @@ app.on('menu-open-dialog', (playlistId) => {
 app.on('activate', () => {
   if (!mainWindow) {
     if (app.isReady()) createMainWindow();
-  } else if (!mainWindow.isVisible() && !browsingWindow) {
+  } else if (!mainWindow.isVisible()) {
     mainWindow.show();
   }
   if (browsingWindow && browsingWindow.isMinimized()) {

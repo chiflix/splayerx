@@ -5,6 +5,8 @@
 <script lang="ts">
 import { throttle } from 'lodash';
 import electron from 'electron';
+// @ts-ignore
+import urlParseLax from 'url-parse-lax';
 import MenuService from '@/services/menu/MenuService';
 import asyncStorage from '@/helpers/asyncStorage';
 
@@ -17,6 +19,8 @@ export default {
       asyncTasksDone: false,
       windowSize: [],
       offset: [],
+      currentUrl: '',
+      canListenUrlChange: false,
     };
   },
   computed: {
@@ -25,6 +29,31 @@ export default {
     },
   },
   mounted() {
+    electron.ipcRenderer.on('remove-pip-listener', () => {
+      const view = electron.remote.getCurrentWindow().getBrowserViews()[0];
+      if (view) {
+        if (this.canListenUrlChange) {
+          view.webContents.removeListener('dom-ready', this.handleDomReady);
+        } else {
+          view.webContents.removeListener('did-start-loading', this.handleStartLoading);
+        }
+        view.webContents.removeListener('new-window', this.handleNewWindow);
+        view.webContents.removeListener('ipc-message', this.handleIpcMessage);
+      }
+    });
+    electron.ipcRenderer.on('update-pip-listener', () => {
+      this.currentUrl = electron.remote.getCurrentWindow()
+        .getBrowserViews()[0].webContents.getURL();
+      this.canListenUrlChange = this.currentUrl.includes('iqiyi') || this.currentUrl.includes('youtube');
+      const view = electron.remote.getCurrentWindow().getBrowserViews()[0];
+      if (this.canListenUrlChange) {
+        view.webContents.addListener('dom-ready', this.handleDomReady);
+      } else {
+        view.webContents.addListener('did-start-loading', this.handleStartLoading);
+      }
+      view.webContents.addListener('new-window', this.handleNewWindow);
+      view.webContents.addListener('ipc-message', this.handleIpcMessage);
+    });
     electron.ipcRenderer.on('update-mouse-info', (evt: Event, args: { windowSize: number[] | null, offset: number[]}) => {
       this.offset = args.offset;
       this.windowSize = args.windowSize;
@@ -103,6 +132,63 @@ export default {
     getRatio() {
       return process.platform === 'win32' ? window.devicePixelRatio || 1 : 1;
     },
+    handleUrlChange(url: string) {
+      const newHostname = urlParseLax(url).hostname;
+      const oldHostname = urlParseLax(this.currentUrl).hostname;
+      let newChannel = newHostname.slice(
+        newHostname.indexOf('.') + 1,
+        newHostname.length,
+      );
+      let oldChannel = oldHostname.slice(
+        oldHostname.indexOf('.') + 1,
+        oldHostname.length,
+      );
+      if (url.includes('youtube')) {
+        newChannel = 'youtube.com';
+      }
+      if (this.currentUrl.includes('youtube')) {
+        oldChannel = 'youtube.com';
+      }
+      if (url !== this.currentUrl) {
+        if (newChannel === oldChannel) {
+          this.currentUrl = url;
+          const view = electron.remote.getCurrentWindow().getBrowserViews()[0];
+          if (this.canListenUrlChange) {
+            view.webContents.removeListener('dom-ready', this.handleDomReady);
+          } else {
+            view.webContents.removeListener('did-start-loading', this.handleStartLoading);
+          }
+          view.webContents.removeListener('new-window', this.handleNewWindow);
+          view.webContents.removeListener('ipc-message', this.handleIpcMessage);
+          electron.ipcRenderer.send('pip');
+        } else {
+          electron.shell.openExternal(url);
+        }
+      }
+    },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    handleIpcMessage(evt: Event, channel: string, args: any) {
+      if (channel === 'open-url') {
+        this.handleUrlChange(args.url);
+      }
+    },
+    handleDomReady() {
+      const views = electron.remote.getCurrentWindow().getBrowserViews();
+      if (views[0]) {
+        const url = views[0].webContents.getURL();
+        this.handleUrlChange(url);
+      }
+    },
+    handleNewWindow(e: Event, url: string) {
+      this.handleUrlChange(url);
+    },
+    handleStartLoading() {
+      const views = electron.remote.getCurrentWindow().getBrowserViews();
+      if (views[0]) {
+        const url = views[0].webContents.getURL();
+        this.handleUrlChange(url);
+      }
+    },
   },
 };
 </script>
@@ -110,7 +196,7 @@ export default {
 <style scoped>
 .pip {
   width: 100%;
-  height: 36px;
+  height: 0;
   position: absolute;
   top: 0;
   -webkit-app-region: no-drag;
