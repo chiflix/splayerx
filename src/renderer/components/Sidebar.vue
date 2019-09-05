@@ -3,15 +3,21 @@
     class="side-bar"
   >
     <div class="icon-box">
-      <div @mouseup="handleSidebarIcon('bilibili')">
-        <BilibiliSidebarIcon />
-      </div>
-      <div @mouseup="handleSidebarIcon('iqiyi')">
-        <iQiyiSidebarIcon />
-      </div>
-      <div @mouseup="handleSidebarIcon('youtube')">
-        <YoutubeSidebarIcon />
-      </div>
+      <BilibiliSidebarIcon
+        :selected="currentUrl.startsWith('https://www.bilibili.com/')"
+        :url="'https://www.bilibili.com/'"
+        :mouseup-on-icon="handleSidebarIcon"
+      />
+      <iQiyiSidebarIcon
+        :selected="currentUrl.startsWith('https://www.iqiyi.com/')"
+        :url="'https://www.iqiyi.com/'"
+        :mouseup-on-icon="handleSidebarIcon"
+      />
+      <YoutubeSidebarIcon
+        :selected="currentUrl.startsWith('https://www.youtube.com/')"
+        :url="'https://www.youtube.com/'"
+        :mouseup-on-icon="handleSidebarIcon"
+      />
     </div>
   </div>
 </template>
@@ -33,11 +39,13 @@ export default {
       type: Boolean,
       default: false,
     },
+    currentUrl: {
+      type: String,
+      default: '',
+    },
   },
   methods: {
-    handleSidebarIcon(site: string) {
-      const url = `https://www.${site}.com/`;
-
+    handleSidebarIcon(url: string) {
       if (this.$route.name === 'browsing-view') {
         this.$bus.$emit('sidebar-selected', url);
       } else {

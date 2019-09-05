@@ -157,6 +157,9 @@ export default {
     },
   },
   watch: {
+    currentUrl(val: string) {
+      this.$emit('update-current-url', val);
+    },
     showSidebar(val: boolean) {
       const browserView = this.$electron.remote.getCurrentWindow().getBrowserViews()[0];
       if (!val) {
