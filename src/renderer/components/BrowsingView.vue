@@ -476,6 +476,7 @@ export default {
           .finally(() => {
             this.asyncTasksDone = true;
             if (!this.isPip) {
+              this.$electron.ipcRenderer.send('remove-browser');
               window.close();
             } else {
               this.isGlobal = true;

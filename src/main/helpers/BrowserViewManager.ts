@@ -65,27 +65,25 @@ export class BrowserViewManager implements IBrowserViewManager {
       }),
     };
     // loadURL
-    page.view.webContents.loadURL(page.url).then(() => {
-      if (channel === this.currentChannel) {
-        page.view.webContents.executeJavaScript('var iframe = document.querySelector("iframe");if (iframe && iframe.contentDocument) {document.getElementsByTagName("video").length + iframe.contentDocument.getElementsByTagName("video").length} else {document.getElementsByTagName("video").length}').then((r: number) => {
-          const hasLastPage = this.history[channel].list.length;
-          if (hasLastPage && r) {
-            page.view.webContents.once('media-started-playing', () => {
-              if (this.currentChannel.includes('bilibili')) {
-                let type = '';
-                page.view.webContents
-                  .executeJavaScript(bilibiliFindType).then((r: (HTMLElement | null)[]) => {
-                    type = ['bangumi', 'videoStreaming', 'iframeStreaming', 'iframeStreaming', 'video'][r.findIndex(i => i)] || 'others';
-                    page.view.webContents.executeJavaScript(bilibiliVideoPause(type));
-                  });
-              } else {
-                page.view.webContents.executeJavaScript('setTimeout(() => { document.querySelector("video").pause(); }, 100)');
-              }
-            });
+    page.view.webContents.loadURL(page.url);
+    if (channel === this.currentChannel) {
+      const hasLastPage = this.history[channel].list.length;
+      if (hasLastPage) {
+        page.view.webContents.once('media-started-playing', () => {
+          if (page.view.webContents.getURL() !== page.url) return;
+          if (this.currentChannel.includes('bilibili')) {
+            let type = '';
+            page.view.webContents
+              .executeJavaScript(bilibiliFindType).then((r: (HTMLElement | null)[]) => {
+                type = ['bangumi', 'videoStreaming', 'iframeStreaming', 'iframeStreaming', 'video'][r.findIndex(i => i)] || 'others';
+                page.view.webContents.executeJavaScript(bilibiliVideoPause(type));
+              });
+          } else {
+            page.view.webContents.executeJavaScript('setTimeout(() => { document.querySelector("video").pause(); }, 100)');
           }
         });
       }
-    });
+    }
 
     // 暂停当前视频
     if (this.currentChannel) {

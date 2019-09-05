@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   window.addEventListener('mouseout', (e) => {
     const winSize = remote.getCurrentWindow().getSize();
-    if (e.clientY <= 0 || e.clientX <= 0 || e.clientX >= winSize[1]) {
+    if (e.clientY <= 0 || e.clientX <= 0 || e.clientX >= winSize[0]) {
       ipcRenderer.send('mouseout', 'out');
     }
   });
