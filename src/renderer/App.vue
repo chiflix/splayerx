@@ -28,7 +28,6 @@
         }"
         :open-file-args="openFileArgs"
         :show-sidebar="showSidebar"
-        @update-side-bar="showSidebar = $event"
       />
     </transition>
   </div>
@@ -59,7 +58,10 @@ export default {
     $route(to: any, from: any) {
       if (to.name === 'landing-view' && from.name === 'language-setting') this.transitionMode = 'fade';
       else this.transitionMode = '';
-      if (to.name !== 'browsing-view') this.showSidebar = false;
+      if (to.name !== 'browsing-view' && !(to.name === 'landing-view' && from.name === 'browsing-view')) this.showSidebar = false;
+    },
+    showSidebar(val: boolean) {
+      ipcRenderer.send('update-sidebar', val);
     },
   },
   mounted() {

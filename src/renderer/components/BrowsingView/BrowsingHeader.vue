@@ -3,7 +3,6 @@
     class="header"
   >
     <browsing-control
-      :handle-url-reload="handleUrlReload"
       :handle-url-back="handleUrlBack"
       :handle-url-forward="handleUrlForward"
       :back-type="backType"
@@ -11,10 +10,13 @@
       :web-info="webInfo"
     />
     <browsing-input
+      :handle-url-reload="handleUrlReload"
+      :title="title"
       :close-url-input="closeUrlInput"
       :play-file-with-playing-view="playFileWithPlayingView"
     />
     <browsing-pip-control
+      :has-video="hasVideo"
       :handle-enter-pip="handleEnterPip"
       :handle-global-pip="handleGlobalPip"
     />
@@ -38,6 +40,10 @@ export default {
     showSidebar: {
       type: Boolean,
       default: false,
+    },
+    title: {
+      type: String,
+      default: 'Splayer',
     },
     handleEnterPip: {
       type: Function,
