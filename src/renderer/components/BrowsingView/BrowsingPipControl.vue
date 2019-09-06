@@ -4,6 +4,10 @@
   >
     <div
       @mouseup="handlePip"
+      :style="{
+        opacity: hasVideo ? 1.0 : 0.3,
+      }"
+      :class="hasVideo ? 'button-hover': ''"
       class="pip-icon no-drag"
     >
       <Icon
@@ -15,7 +19,7 @@
       @mouseover="mouseover = true"
       @mouseout="mouseover = false"
       :style="{
-        opacity: mouseover ? 1.0 : 0.7,
+        opacity: mouseover ? 1.0 : 0.3,
       }"
       class="down-icon"
     >
@@ -51,8 +55,7 @@ export default {
   computed: {
     pipType() {
       if (!this.hasVideo) return 'pipDisabled';
-      if (this.pip === 'Enter') return 'pip';
-      return 'pop';
+      return this.pip === 'Enter' ? 'pipDisabled' : 'pop';
     },
   },
   methods: {
@@ -82,21 +85,34 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
-    transition: background-color 100ms ease-in;
-    &:hover {
-      background-color: #F5F6F8;
-    }
+    transition: background-color 100ms ease-in, opacity 100ms ease-in;
+  }
+  .button-hover:hover {
+    background-color: #F5F6F8;
   }
   .down-icon {
-    width: 8px;
+    width: 23px;
     height: 20px;
-    margin-right: 15px;
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
     .icon {
       margin-top: 1px;
     }
+  }
+  @keyframes translate {
+    0% {
+      transfrom: translateX(0);
+    };
+    50% {
+      transfrom: translateX(10px);
+    };
+    100% {
+      transfrom: translateX(0);
+    };
+  }
+  .translate {
+    animation: translate 100ms linear 1 normal forwards;
   }
 }
 </style>

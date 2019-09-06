@@ -11,6 +11,7 @@
       :show-sidebar="showSidebar"
       :title="title"
       :is-reloading="isReloading"
+      :has-vide="hasVideo"
       :handle-enter-pip="handleEnterPip"
       :handle-url-reload="handleUrlReload"
       :handle-url-back="handleUrlBack"
