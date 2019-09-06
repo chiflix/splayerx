@@ -627,7 +627,7 @@ new Vue({
       this.$store.commit('source', 'drop');
       const files = Array.prototype.map.call(e.dataTransfer!.files, (f: File) => f.path)
       const onlyFolders = files.every((file: fs.PathLike) => fs.statSync(file).isDirectory());
-      if (!onlyFolders && files.every((file: fs.PathLike) => getValidSubtitleRegex().test(file))) {
+      if (this.currentRouteName === 'landing-view' && !onlyFolders && files.every((file: fs.PathLike) => getValidSubtitleRegex().test(file))) {
         this.$electron.ipcRenderer.send('drop-subtitle', files);
       } else {
         files.forEach((file: fs.PathLike) => this.$electron.remote.app.addRecentDocument(file));

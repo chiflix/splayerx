@@ -424,7 +424,9 @@ export default {
         this.subMenuShow = false;
       }, 3000);
       this.tempRecentPlaylistDisplayState = false;
-      this.$refs.advance.handleMenuShow();
+      if (this.$refs.advance) {
+        this.$refs.advance.handleMenuShow();
+      }
       this.updateMouseup({ componentName: '' });
       this.updateMousedown({ componentName: '' });
     });
