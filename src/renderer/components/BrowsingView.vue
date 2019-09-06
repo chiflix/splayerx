@@ -136,6 +136,7 @@ export default {
       'isFullScreen',
       'isFocused',
       'isPip',
+      'pipMode',
     ]),
     isDarwin() {
       return process.platform === 'darwin';
@@ -254,7 +255,6 @@ export default {
       }
     },
     loadingState(val: boolean) {
-      console.log(val);
       if (val) {
         this.webInfo.hasVideo = false;
       } else {
@@ -411,9 +411,9 @@ export default {
         if (loadUrl.includes('youtube')) {
           channel = 'youtube.com';
         }
+        this.startLoading = false;
         if (!this.$electron.remote.getCurrentWindow()
           .getBrowserViews()[0].webContents.isLoading()) {
-          this.startLoading = false;
           this.$electron.remote
             .getCurrentWindow()
             .getBrowserViews()[0]
@@ -439,6 +439,7 @@ export default {
         browsingSize: this.browsingSize,
         browsingPos: this.browsingPos,
         barrageOpen: this.barrageOpen,
+        pipMode: this.pipMode,
       })
       .finally(() => {
         this.menuService.updateMenuItemEnabled('file.open', true);
@@ -492,6 +493,7 @@ export default {
             browsingSize: this.browsingSize,
             browsingPos: this.browsingPos,
             barrageOpen: this.barrageOpen,
+            pipMode: this.pipMode,
           })
           .finally(() => {
             if (!this.isPip) {
@@ -690,41 +692,43 @@ export default {
       this.loadingState = false;
     },
     handleOpenUrl({ url }: { url: string }) {
-      this.startLoading = true;
-      const protocol = urlParseLax(url).protocol;
-      const openUrl = protocol ? url : `https:${url}`;
-      if (
-        !url
-        || url === 'about:blank'
-        || urlParseLax(openUrl).href === urlParseLax(this.currentUrl).href
-      ) return;
-      this.loadingState = true;
-      const newHostname = urlParseLax(openUrl).hostname;
-      const oldHostname = urlParseLax(this.currentUrl).hostname;
-      let newChannel = newHostname.slice(
-        newHostname.indexOf('.') + 1,
-        newHostname.length,
-      );
-      let oldChannel = oldHostname.slice(
-        oldHostname.indexOf('.') + 1,
-        oldHostname.length,
-      );
-      if (openUrl.includes('youtube')) {
-        newChannel = 'youtube.com';
-      }
-      if (this.currentUrl.includes('youtube')) {
-        oldChannel = 'youtube.com';
-      }
-      if (this.oauthRegex.some((re: RegExp) => re.test(url))) return;
-      if (oldChannel === newChannel) {
+      if (!this.startLoading) {
+        this.startLoading = true;
+        const protocol = urlParseLax(url).protocol;
+        const openUrl = protocol ? url : `https:${url}`;
+        if (
+          !url
+          || url === 'about:blank'
+          || urlParseLax(openUrl).href === urlParseLax(this.currentUrl).href
+        ) return;
         this.loadingState = true;
-        this.currentUrl = urlParseLax(openUrl).href;
-        this.$electron.ipcRenderer.send('create-browser-view', {
-          url: openUrl,
-          isNewWindow: true,
-        });
-      } else {
-        this.$electron.shell.openExternal(openUrl);
+        const newHostname = urlParseLax(openUrl).hostname;
+        const oldHostname = urlParseLax(this.currentUrl).hostname;
+        let newChannel = newHostname.slice(
+          newHostname.indexOf('.') + 1,
+          newHostname.length,
+        );
+        let oldChannel = oldHostname.slice(
+          oldHostname.indexOf('.') + 1,
+          oldHostname.length,
+        );
+        if (openUrl.includes('youtube')) {
+          newChannel = 'youtube.com';
+        }
+        if (this.currentUrl.includes('youtube')) {
+          oldChannel = 'youtube.com';
+        }
+        if (this.oauthRegex.some((re: RegExp) => re.test(url))) return;
+        if (oldChannel === newChannel) {
+          this.loadingState = true;
+          this.currentUrl = urlParseLax(openUrl).href;
+          this.$electron.ipcRenderer.send('create-browser-view', {
+            url: openUrl,
+            isNewWindow: true,
+          });
+        } else {
+          this.$electron.shell.openExternal(openUrl);
+        }
       }
     },
     pipAdapter() {
