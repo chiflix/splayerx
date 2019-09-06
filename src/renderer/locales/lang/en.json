@@ -198,7 +198,9 @@
       "name": "Window",
       "originSize": "100%",
       "enterPip": "Enter Picture In Picture",
-      "exitPip": "Exit Picture In Picture"
+      "exitPip": "Exit Picture In Picture",
+      "playInNewWindow": "Play In New Window",
+      "backToBrowser": "Back To Browser"
     },
     "favourite": {
       "name": "Channel",

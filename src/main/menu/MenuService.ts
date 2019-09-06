@@ -24,6 +24,10 @@ export default class MenuService {
     this.menu.updateFocusedWindow(isFocusedOnMain);
   }
 
+  public updatePipIcon() {
+    this.menu.updatePipIcon();
+  }
+
   private registeMenuActions() {
     ipcMain.on('popup-menu', () => {
       this.menu.popupMenu();

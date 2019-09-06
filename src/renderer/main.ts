@@ -959,7 +959,10 @@ new Vue({
         this.browsingViewTop = !this.browsingViewTop;
       });
       this.menuService.on('browsing.window.pip', () => {
-        this.$bus.$emit('toggle-pip');
+        this.$bus.$emit('toggle-pip', true);
+      });
+      this.menuService.on('browsing.window.playInNewWindow', () => {
+        this.$bus.$emit('toggle-pip', false);
       });
       this.menuService.on('browsing.window.maxmize', () => {
         const browserWindow = this.$electron.remote.getCurrentWindow();

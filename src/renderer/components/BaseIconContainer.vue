@@ -553,7 +553,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   width: 16px;
   height: 16px;
 }
-.back, .forward, .pageRefresh {
+.back, .forward, .pageRefresh, .reloadStop {
   width: 16px;
   height: 16px;
  .default {

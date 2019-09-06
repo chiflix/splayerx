@@ -10,9 +10,9 @@
       ref="browsingHeader"
       :show-sidebar="showSidebar"
       :title="title"
+      :is-reloading="isReloading"
       :has-vide="hasVideo"
       :handle-enter-pip="handleEnterPip"
-      :handle-global-pip="handleGlobalPip"
       :handle-url-reload="handleUrlReload"
       :handle-url-back="handleUrlBack"
       :handle-url-forward="handleUrlForward"
@@ -117,6 +117,7 @@ export default {
         /^https:\/\/auth.alipay.com\/login\//i,
         /^https:\/\/account.xiaomi.com\/pass\//i,
       ],
+      isReloading: false,
     };
   },
   computed: {
@@ -254,6 +255,32 @@ export default {
     loadingState(val: boolean) {
       if (val) {
         this.hasVideo = false;
+      } else {
+        setTimeout(() => {
+          const loadUrl = this.$electron.remote
+            .getCurrentWindow()
+            .getBrowserViews()[0]
+            .webContents.getURL();
+          const hostname = urlParseLax(loadUrl).hostname;
+          let channel = hostname.slice(
+            hostname.indexOf('.') + 1,
+            hostname.length,
+          );
+          if (loadUrl.includes('youtube')) {
+            channel = 'youtube.com';
+          }
+          this.$electron.remote
+            .getCurrentWindow()
+            .getBrowserViews()[0]
+            .webContents.executeJavaScript(
+              this.calculateVideoNum,
+              (r: number) => {
+                this.hasVideo = channel === 'youtube.com' && !getVideoId(loadUrl).id
+                  ? false
+                  : !!r;
+              },
+            );
+        }, 1000);
       }
     },
     headerToShow(val: boolean) {
@@ -306,7 +333,7 @@ export default {
     this.$bus.$on('toggle-reload', this.handleUrlReload);
     this.$bus.$on('toggle-back', this.handleUrlBack);
     this.$bus.$on('toggle-forward', this.handleUrlForward);
-    this.$bus.$on('toggle-pip', () => {
+    this.$bus.$on('toggle-pip', (isGlobal: boolean) => {
       const focusedOnMainWindow = this.$electron.remote.getCurrentWindow().isVisible()
         && this.$electron.remote.getCurrentWindow().isFocused();
       setTimeout(() => {
@@ -314,7 +341,7 @@ export default {
           if (!focusedOnMainWindow || this.isGlobal) {
             this.handleExitPip();
           } else {
-            this.handleEnterPip();
+            this.handleEnterPip(isGlobal);
           }
         } else {
           this.acceleratorAvailable = true;
@@ -380,17 +407,20 @@ export default {
         if (loadUrl.includes('youtube')) {
           channel = 'youtube.com';
         }
-        this.$electron.remote
-          .getCurrentWindow()
-          .getBrowserViews()[0]
-          .webContents.executeJavaScript(
-            this.calculateVideoNum,
-            (r: number) => {
-              this.hasVideo = channel === 'youtube.com' && !getVideoId(loadUrl).id
-                ? false
-                : !!r;
-            },
-          );
+        if (!this.$electron.remote.getCurrentWindow()
+          .getBrowserViews()[0].webContents.isLoading()) {
+          this.$electron.remote
+            .getCurrentWindow()
+            .getBrowserViews()[0]
+            .webContents.executeJavaScript(
+              this.calculateVideoNum,
+              (r: number) => {
+                this.hasVideo = channel === 'youtube.com' && !getVideoId(loadUrl).id
+                  ? false
+                  : !!r;
+              },
+            );
+        }
         this.$bus.$emit('update-web-info', {
           canGoBack: state.canGoBack,
           canGoForward: state.canGoForward,
@@ -425,10 +455,6 @@ export default {
       updateBarrageOpen: browsingActions.UPDATE_BARRAGE_OPEN,
       updateIsPip: browsingActions.UPDATE_IS_PIP,
     }),
-    handleGlobalPip() {
-      this.isGlobal = true;
-      this.handleEnterPip();
-    },
     handlePageTitle(e: Event, title: string) {
       this.title = title;
     },
@@ -503,6 +529,10 @@ export default {
       if (this.$electron.remote.getCurrentWindow().isFocused()) {
         this.menuService.updateMenuItemEnabled(
           'browsing.window.pip',
+          available,
+        );
+        this.menuService.updateMenuItemEnabled(
+          'browsing.window.playInNewWindow',
           available,
         );
       }
@@ -596,7 +626,6 @@ export default {
     },
     willNavigate(e: Event, url: string) {
       if (!this.startLoading) {
-        this.startLoading = true;
         if (
           !url
           || url === 'about:blank'
@@ -610,7 +639,6 @@ export default {
     },
     didStartLoading() {
       if (!this.startLoading) {
-        this.startLoading = true;
         const url = this.$electron.remote
           .getCurrentWindow()
           .getBrowserView()
@@ -669,14 +697,8 @@ export default {
         .webContents.focus();
     },
     didStopLoading() {
-      const loadingTime: number = new Date().getTime() - this.startTime;
-      if (loadingTime % 3000 === 0) {
-        this.loadingState = false;
-      } else {
-        setTimeout(() => {
-          this.loadingState = false;
-        }, 3000 - (loadingTime % 3000));
-      }
+      this.isReloading = false;
+      this.loadingState = false;
     },
     handleOpenUrl({ url }: { url: string }) {
       this.startLoading = true;
@@ -821,16 +843,14 @@ export default {
       }
     },
     handleUrlReload() {
-      if (this.isPip) {
-        this.$electron.remote
-          .getCurrentWindow()
-          .getBrowserViews()[0]
-          .webContents.reload();
+      if (!this.isReloading) {
+        this.isReloading = true;
+        this.$electron.remote.getCurrentWindow()
+          .getBrowserViews()[0].webContents.reload();
       } else {
-        this.$electron.remote
-          .getCurrentWindow()
-          .getBrowserViews()[0]
-          .webContents.reload();
+        this.isReloading = false;
+        this.$electron.remote.getCurrentWindow()
+          .getBrowserViews()[0].webContents.stop();
       }
     },
     enterPipOperation() {
@@ -854,8 +874,9 @@ export default {
         this.othersRecover();
       }
     },
-    handleEnterPip() {
+    handleEnterPip(isGlobal: boolean) {
       if (this.hasVideo) {
+        this.isGlobal = isGlobal;
         this.removeListener();
         this.hasVideo = false;
         this.adaptFinished = false;
