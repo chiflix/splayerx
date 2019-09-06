@@ -16,6 +16,7 @@
   </div>
 </template>
 <script lang="ts">
+import { mapGetters } from 'vuex';
 import BilibiliSidebarIcon from '@/components/LandingView/BilibiliSidebarIcon.vue';
 import iQiyiSidebarIcon from '@/components/LandingView/iQiyiSidebarIcon.vue';
 import YoutubeSidebarIcon from '@/components/LandingView/YoutubeSidebarIcon.vue';
@@ -33,6 +34,9 @@ export default {
       type: Boolean,
       default: false,
     },
+  },
+  computed: {
+    ...mapGetters(['pipSize', 'pipPos']),
   },
   methods: {
     handleSidebarIcon(site: string) {

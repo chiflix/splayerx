@@ -120,7 +120,6 @@ export default {
     .fav-icon-container {
       width: auto;
       height: 20px;
-      cursor: pointer;
       display: flex;
       border-radius: 13px;
       .icon-detail {
@@ -135,7 +134,6 @@ export default {
   .fav-display {
     width: 10px;
     height: 10px;
-    cursor: pointer;
   }
 }
 .fav-show-animation {
