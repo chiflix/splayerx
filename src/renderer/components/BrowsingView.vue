@@ -746,7 +746,9 @@ export default {
 
       this.sidebarButton = new TouchBarButton({
         icon: this.createIcon('touchBar/sidebar.png'),
-        click: () => {},
+        click: () => {
+          this.$event.emit('side-bar-mouseup');
+        },
       });
       this.backwardButton = new TouchBarButton({
         icon: this.createIcon(`touchBar/${this.webInfo.canGoBack ? 'backward' : 'backward-disabled'}.png`),
