@@ -25,7 +25,6 @@
     "pack": "npm run pack:main && npm run pack:renderer",
     "pack:main": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.main.config.js",
     "pack:renderer": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.renderer.config.js",
-    "rebuild:win-mouse": "electron-rebuild -f -e node_modules/@chiflix/electron -w win-mouse",
     "test": "npm run unit",
     "unit": "karma start test/unit/karma.conf.js",
     "postinstall": "node ./scripts/post-install.js"
@@ -136,7 +135,6 @@
     "electron-builder": "21.2.0",
     "electron-debug": "^3.0.1",
     "electron-mocha": "^8.1.2",
-    "electron-rebuild": "^1.8.6",
     "eslint": "^5.16.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-friendly-formatter": "^4.0.1",
