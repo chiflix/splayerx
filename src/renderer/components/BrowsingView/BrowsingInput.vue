@@ -55,7 +55,7 @@ export default {
   },
   methods: {
     handleDbClick() {
-      if (!this.isMaximized) {
+      if (!this.$electron.remote.getCurrentWindow().isMaximized()) {
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'maximize');
       } else {
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'unmaximize');
