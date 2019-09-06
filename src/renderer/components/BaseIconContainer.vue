@@ -65,10 +65,6 @@ export default {
   height: 36px;
   margin: auto;
 }
-.sidebar {
-  width: 16px;
-  height: 16px;
-}
 .hoverState {
   display: flex;
   width: 12px;
@@ -548,24 +544,6 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   height: 16px;
   display: block;
 }
-.backDisabled, .forwardDisabled {
-  display: block;
-  width: 16px;
-  height: 16px;
-}
-.back, .forward, .pageRefresh, .reloadStop {
-  width: 16px;
-  height: 16px;
- .default {
-    display: block;
-  }
-  .hover {
-    display: none;
-  }
-  .active {
-    display: none;
-  } 
-}
 .down {
   width: 5px;
   height: 7px;
@@ -636,10 +614,6 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
 }
 .videoRecordDisabled {
   display: block;
-  width: 20px;
-  height: 20px;
-}
-.pip, .pop, .pipDisabled {
   width: 20px;
   height: 20px;
 }
