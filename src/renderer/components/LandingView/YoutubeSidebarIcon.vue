@@ -53,8 +53,8 @@
                 :stroke-width="selected ? 2 : 0"
                 stroke="#EBECF0"
                 fill="#FF0000"
-                cx="20"
-                cy="20"
+                cx="21"
+                cy="21"
                 r="21"
               />
               <g
@@ -65,7 +65,7 @@
               >
                 <g
                   id="路径"
-                  transform="translate(-2.376364, 4.000000)"
+                  transform="translate(-1.376364, 5.000000)"
                   fill-rule="nonzero"
                 >
                   <polygon
