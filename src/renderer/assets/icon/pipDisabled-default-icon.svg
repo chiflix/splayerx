@@ -2,8 +2,8 @@
 <svg width="30px" height="23px" viewBox="0 0 30 23" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <!-- Generator: Sketch 52.2 (67145) - http://www.bohemiancoding.com/sketch -->
     <desc>Created with Sketch.</desc>
-    <g id="页面1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" fill-opacity="0.15">
-        <g id="browseing" transform="translate(-431.000000, -324.000000)" fill="#BBBACC">
+    <g id="页面1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" fill-opacity="1">
+        <g id="browseing" transform="translate(-431.000000, -324.000000)" fill="#6E7085">
             <g id="control-bar" transform="translate(238.000000, 300.000000)">
                 <g id="icon-pictureInPicture" transform="translate(192.000000, 19.000000)">
                     <path d="M3.43,5 L28.57,5 C29.9120519,5 31,6.08794806 31,7.43 L31,25.07 C31,26.4120519 29.9120519,27.5 28.57,27.5 L3.43,27.5 C2.08794806,27.5 1,26.4120519 1,25.07 L1,7.43 C1,6.08794806 2.08794806,5 3.43,5 Z M3.5,8.3 L3.5,24.2 C3.5,24.6418278 3.8581722,25 4.3,25 L27.7,25 C28.1418278,25 28.5,24.6418278 28.5,24.2 L28.5,8.3 C28.5,7.8581722 28.1418278,7.5 27.7,7.5 L4.3,7.5 C3.8581722,7.5 3.5,7.8581722 3.5,8.3 Z M14.6696026,14.5395022 L25.4438391,14.5395022 C25.8911898,14.5395022 26.2538391,14.9021515 26.2538391,15.3495022 L26.2538391,21.7295022 C26.2538391,22.1768528 25.8911898,22.5395022 25.4438391,22.5395022 L14.6696026,22.5395022 C14.222252,22.5395022 13.8596026,22.1768528 13.8596026,21.7295022 L13.8596026,15.3495022 C13.8596026,14.9021515 14.222252,14.5395022 14.6696026,14.5395022 Z" id="pictureInPicture"></path>

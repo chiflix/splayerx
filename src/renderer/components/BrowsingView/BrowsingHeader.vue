@@ -69,13 +69,16 @@ export default {
       type: Function,
       required: true,
     },
+    hasVideo: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
       showOpenUrl: false,
       backType: 'backDisabled',
       forwardType: 'forwardDisabled',
-      hasVideo: false,
       url: '',
       canGoBack: false,
       canGoForward: false,

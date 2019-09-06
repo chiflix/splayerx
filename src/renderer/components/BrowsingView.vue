@@ -10,6 +10,7 @@
       ref="browsingHeader"
       :show-sidebar="showSidebar"
       :title="title"
+      :has-vide="hasVideo"
       :handle-enter-pip="handleEnterPip"
       :handle-global-pip="handleGlobalPip"
       :handle-url-reload="handleUrlReload"
