@@ -9,9 +9,14 @@
       <Icon
         :type="picInPicType"
       />
+    </div>
+    <div
+      @mouseup="switchPipType"
+      class="down-icon"
+    >
       <Icon
         type="down"
-        class="down-icon"
+        class="icon"
       />
     </div>
   </div>
@@ -48,19 +53,17 @@ export default {
 </script>
 <style lang="scss" scoped>
 .pip-control {
-  min-width: 62px;
+  min-width: 65px;
   z-index: 6;
   display: flex;
   width: 62px;
   height: 100%;
-  justify-content: center;
   align-items: center;
   border-left: 1px solid #F2F1F4;
   .pip-icon {
-    width: 46px;
+    width: 30px;
     height: 30px;
-    margin-right: 8px;
-    margin-left: 8px;
+    margin-left: 15px;
     border-radius: 15px;
     display: flex;
     justify-content: center;
@@ -71,7 +74,15 @@ export default {
     }
   }
   .down-icon {
-    margin-left: 5.5px;
+    width: 8px;
+    height: 20px;
+    margin-right: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    .icon {
+      margin-top: 1px;
+    }
   }
 }
 </style>

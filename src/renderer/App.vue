@@ -16,6 +16,7 @@
       <Sidebar
         v-if="showSidebar"
         :show-sidebar="showSidebar"
+        :current-url="currentUrl"
       />
     </transition>
     <transition
@@ -28,6 +29,7 @@
         }"
         :open-file-args="openFileArgs"
         :show-sidebar="showSidebar"
+        @update-current-url="currentUrl = $event"
       />
     </transition>
   </div>
@@ -52,6 +54,7 @@ export default {
       transitionMode: '',
       openFileArgs: null,
       showSidebar: false,
+      currentUrl: '',
     };
   },
   watch: {
@@ -59,6 +62,7 @@ export default {
       if (to.name === 'landing-view' && from.name === 'language-setting') this.transitionMode = 'fade';
       else this.transitionMode = '';
       if (to.name !== 'browsing-view' && !(to.name === 'landing-view' && from.name === 'browsing-view')) this.showSidebar = false;
+      if (from.name === 'browsing-view' && to.name === 'landing-view') this.currentUrl = '';
     },
     showSidebar(val: boolean) {
       ipcRenderer.send('update-sidebar', val);

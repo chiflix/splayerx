@@ -558,8 +558,8 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   height: 16px;
 }
 .down {
-  width: 7px;
-  height: 5px;
+  width: 5px;
+  height: 7px;
 }
 .showMarks, .hideMarks, .closeSearch {
   width: 18px;
