@@ -630,7 +630,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   width: 20px;
   height: 20px;
 }
-.pip, .pipDisabled{
+.pip, .pop, .pipDisabled {
   width: 18px;
   height: 14px;
 }

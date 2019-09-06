@@ -3,15 +3,20 @@
     class="pip-control"
   >
     <div
-      @mouseup="handleGlobalPip"
+      @mouseup="handlePip"
       class="pip-icon no-drag"
     >
       <Icon
-        :type="picInPicType"
+        :type="pipType"
       />
     </div>
     <div
       @mouseup="switchPipType"
+      @mouseover="mouseover = true"
+      @mouseout="mouseover = false"
+      :style="{
+        opacity: mouseover ? 1.0 : 0.7,
+      }"
       class="down-icon"
     >
       <Icon
@@ -42,12 +47,25 @@ export default {
       default: false,
     },
   },
+  data() {
+    return {
+      pip: 'Enter',
+    };
+  },
   computed: {
-    picInPicType() {
-      return this.hasVideo ? 'pip' : 'pipDisabled';
+    pipType() {
+      if (!this.hasVideo) return 'pipDisabled';
+      else if (this.pip === 'Enter') return 'pip';
+      return 'pop';
     },
   },
   methods: {
+    handlePip() {
+      this.pip === 'Enter' ? this.handleEnterPip() : this.handleGlobalPip();
+    },
+    switchPipType() {
+      this.pip = this.pip === 'Enter' ? 'Global' : 'Enter';
+    },
   },
 };
 </script>
