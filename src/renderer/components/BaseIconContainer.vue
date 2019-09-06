@@ -556,6 +556,15 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
 .back, .forward, .pageRefresh {
   width: 16px;
   height: 16px;
+ .default {
+    display: block;
+  }
+  .hover {
+    display: none;
+  }
+  .active {
+    display: none;
+  } 
 }
 .down {
   width: 5px;
