@@ -205,6 +205,7 @@ export default {
   &__tabs {
     width: 110px;
     height: 100%;
+    box-sizing: border-box;
     background-color: #3B3B41;
     border-right: 1px solid rgba(255,255,255,.03);
   }
