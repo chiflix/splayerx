@@ -96,7 +96,7 @@ export default {
     transition: background-color 100ms ease-in;
   }
   .button-hover:hover {
-    background-color: #F5F6F8;
+    background-color: #ECEEF0;
   }
   .sidebar-icon {
     margin-left: 8px;

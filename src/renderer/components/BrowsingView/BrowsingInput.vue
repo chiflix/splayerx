@@ -109,7 +109,7 @@ export default {
     align-items: center;
     transition: background-color 100ms ease-in;
     &:hover {
-      background-color: #F5F6F8;
+      background-color: #ECEEF0;
     }
   }
   .page-refresh-icon {

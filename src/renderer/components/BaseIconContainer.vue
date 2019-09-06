@@ -66,8 +66,8 @@ export default {
   margin: auto;
 }
 .sidebar {
-  width: 14px;
-  height: 12px;
+  width: 16px;
+  height: 16px;
 }
 .hoverState {
   display: flex;
@@ -631,8 +631,8 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   height: 20px;
 }
 .pip, .pop, .pipDisabled {
-  width: 18px;
-  height: 14px;
+  width: 20px;
+  height: 20px;
 }
 .pipRecord, .pipBack {
   width: 20px;
