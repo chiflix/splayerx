@@ -28,10 +28,11 @@
         type="browsingclose"
       />
     </div>
-  </div>  
+  </div>
 </template>
 <script lang="ts">
 import Icon from '@/components/BaseIconContainer.vue';
+
 export default {
   components: {
     Icon,
