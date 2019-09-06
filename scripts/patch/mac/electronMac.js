@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.createMacApp = createMacApp;
 
 function _bluebirdLst() {
-  const data = _interopRequireWildcard(require("bluebird-lst"));
+  const data = _interopRequireDefault(require("bluebird-lst"));
 
   _bluebirdLst = function () {
     return data;
@@ -35,20 +35,10 @@ function _fs() {
   return data;
 }
 
-function _promise() {
-  const data = require("builder-util/out/promise");
+function _fsExtra() {
+  const data = require("fs-extra");
 
-  _promise = function () {
-    return data;
-  };
-
-  return data;
-}
-
-function _fsExtraP() {
-  const data = require("fs-extra-p");
-
-  _fsExtraP = function () {
+  _fsExtra = function () {
     return data;
   };
 
@@ -56,16 +46,6 @@ function _fsExtraP() {
 }
 
 var path = _interopRequireWildcard(require("path"));
-
-function _plist() {
-  const data = require("plist");
-
-  _plist = function () {
-    return data;
-  };
-
-  return data;
-}
 
 function _appInfo() {
   const data = require("../appInfo");
@@ -87,10 +67,22 @@ function _platformPackager() {
   return data;
 }
 
+function _appBuilder() {
+  const data = require("../util/appBuilder");
+
+  _appBuilder = function () {
+    return data;
+  };
+
+  return data;
+}
+
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
 
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 function doRename(basePath, oldName, newName) {
-  return (0, _fsExtraP().rename)(path.join(basePath, oldName), path.join(basePath, newName));
+  return (0, _fsExtra().rename)(path.join(basePath, oldName), path.join(basePath, newName));
 }
 
 function moveHelpers(helperSuffixes, frameworksPath, appName, prefix) {
@@ -100,7 +92,7 @@ function moveHelpers(helperSuffixes, frameworksPath, appName, prefix) {
   });
 }
 
-function getAvailableHelperSuffixes(helperEHPlist, helperNPPlist) {
+function getAvailableHelperSuffixes(helperEHPlist, helperNPPlist, helperRendererPlist, helperPluginPlist, helperGPUPlist) {
   const result = [" Helper"];
 
   if (helperEHPlist != null) {
@@ -111,156 +103,205 @@ function getAvailableHelperSuffixes(helperEHPlist, helperNPPlist) {
     result.push(" Helper NP");
   }
 
+  if (helperRendererPlist != null) {
+    result.push(" Helper (Renderer)");
+  }
+
+  if (helperPluginPlist != null) {
+    result.push(" Helper (Plugin)");
+  }
+
+  if (helperGPUPlist != null) {
+    result.push(" Helper (GPU)");
+  }
+
   return result;
 }
 /** @internal */
 
 
-function createMacApp(_x, _x2, _x3, _x4) {
-  return _createMacApp.apply(this, arguments);
-}
+async function createMacApp(packager, appOutDir, asarIntegrity, isMas) {
+  const appInfo = packager.appInfo;
+  const appFilename = appInfo.productFilename;
+  const contentsPath = path.join(appOutDir, packager.info.framework.distMacOsAppName, "Contents");
+  const frameworksPath = path.join(contentsPath, "Frameworks");
+  const loginItemPath = path.join(contentsPath, "Library", "LoginItems");
+  const appPlistFilename = path.join(contentsPath, "Info.plist");
+  const helperPlistFilename = path.join(frameworksPath, "Electron Helper.app", "Contents", "Info.plist");
+  const helperEHPlistFilename = path.join(frameworksPath, "Electron Helper EH.app", "Contents", "Info.plist");
+  const helperNPPlistFilename = path.join(frameworksPath, "Electron Helper NP.app", "Contents", "Info.plist");
+  const helperRendererPlistFilename = path.join(frameworksPath, "Electron Helper (Renderer).app", "Contents", "Info.plist");
+  const helperPluginPlistFilename = path.join(frameworksPath, "Electron Helper (Plugin).app", "Contents", "Info.plist");
+  const helperGPUPlistFilename = path.join(frameworksPath, "Electron Helper (GPU).app", "Contents", "Info.plist");
+  const helperLoginPlistFilename = path.join(loginItemPath, "Electron Login Helper.app", "Contents", "Info.plist");
+  const plistContent = await (0, _appBuilder().executeAppBuilderAsJson)(["decode-plist", "-f", appPlistFilename, "-f", helperPlistFilename, "-f", helperEHPlistFilename, "-f", helperNPPlistFilename, "-f", helperRendererPlistFilename, "-f", helperPluginPlistFilename, "-f", helperGPUPlistFilename, "-f", helperLoginPlistFilename]);
 
-function _createMacApp() {
-  _createMacApp = (0, _bluebirdLst().coroutine)(function* (packager, appOutDir, asarIntegrity, isMas) {
-    const appInfo = packager.appInfo;
-    const appFilename = appInfo.productFilename;
-    const contentsPath = path.join(appOutDir, packager.info.framework.distMacOsAppName, "Contents");
-    const frameworksPath = path.join(contentsPath, "Frameworks");
-    const loginItemPath = path.join(contentsPath, "Library", "LoginItems");
-    const appPlistFilename = path.join(contentsPath, "Info.plist");
-    const helperPlistFilename = path.join(frameworksPath, `${packager.electronDistMacOsExecutableName} Helper.app`, "Contents", "Info.plist");
-    const helperEHPlistFilename = path.join(frameworksPath, `${packager.electronDistMacOsExecutableName} Helper EH.app`, "Contents", "Info.plist");
-    const helperNPPlistFilename = path.join(frameworksPath, `${packager.electronDistMacOsExecutableName} Helper NP.app`, "Contents", "Info.plist");
-    const helperLoginPlistFilename = path.join(loginItemPath, `${packager.electronDistMacOsExecutableName} Login Helper.app`, "Contents", "Info.plist");
-    const buildMetadata = packager.config;
-    const fileContents = yield _bluebirdLst().default.map([appPlistFilename, helperPlistFilename, helperEHPlistFilename, helperNPPlistFilename, helperLoginPlistFilename, buildMetadata["extend-info"]], it => it == null ? it : (0, _promise().orIfFileNotExist)((0, _fsExtraP().readFile)(it, "utf8"), null));
-    const appPlist = (0, _plist().parse)(fileContents[0]);
-    const helperPlist = (0, _plist().parse)(fileContents[1]);
-    const helperEHPlist = fileContents[2] == null ? null : (0, _plist().parse)(fileContents[2]);
-    const helperNPPlist = fileContents[3] == null ? null : (0, _plist().parse)(fileContents[3]);
-    const helperLoginPlist = fileContents[4] == null ? null : (0, _plist().parse)(fileContents[4]); // if an extend-info file was supplied, copy its contents in first
+  if (plistContent[0] == null) {
+    throw new Error("corrupted Electron dist");
+  }
 
-    if (fileContents[5] != null) {
-      Object.assign(appPlist, (0, _plist().parse)(fileContents[5]));
-    }
+  const appPlist = plistContent[0];
+  const helperPlist = plistContent[1];
+  const helperEHPlist = plistContent[2];
+  const helperNPPlist = plistContent[3];
+  const helperRendererPlist = plistContent[4];
+  const helperPluginPlist = plistContent[5];
+  const helperGPUPlist = plistContent[6];
+  const helperLoginPlist = plistContent[7]; // if an extend-info file was supplied, copy its contents in first
 
-    const oldHelperBundleId = buildMetadata["helper-bundle-id"];
+  if (plistContent[8] != null) {
+    Object.assign(appPlist, plistContent[8]);
+  }
 
-    if (oldHelperBundleId != null) {
-      _builderUtil().log.warn("build.helper-bundle-id is deprecated, please set as build.mac.helperBundleId");
-    }
+  const buildMetadata = packager.config;
+  const oldHelperBundleId = buildMetadata["helper-bundle-id"];
 
-    const helperBundleIdentifier = (0, _appInfo().filterCFBundleIdentifier)(packager.platformSpecificBuildOptions.helperBundleId || oldHelperBundleId || `${appInfo.macBundleIdentifier}.helper`);
-    yield packager.applyCommonInfo(appPlist, contentsPath); // required for electron-updater proxy
+  if (oldHelperBundleId != null) {
+    _builderUtil().log.warn("build.helper-bundle-id is deprecated, please set as build.mac.helperBundleId");
+  }
 
-    if (!isMas) {
-      configureLocalhostAts(appPlist);
-    }
+  const helperBundleIdentifier = (0, _appInfo().filterCFBundleIdentifier)(packager.platformSpecificBuildOptions.helperBundleId || oldHelperBundleId || `${appInfo.macBundleIdentifier}.helper`);
+  await packager.applyCommonInfo(appPlist, contentsPath); // required for electron-updater proxy
 
-    helperPlist.CFBundleExecutable = `${appFilename} Helper`;
-    helperPlist.CFBundleDisplayName = `${appInfo.productName} Helper`;
-    helperPlist.CFBundleIdentifier = helperBundleIdentifier;
-    helperPlist.CFBundleVersion = appPlist.CFBundleVersion;
+  if (!isMas) {
+    configureLocalhostAts(appPlist);
+  }
 
-    function configureHelper(helper, postfix) {
-      helper.CFBundleExecutable = `${appFilename} Helper ${postfix}`;
-      helper.CFBundleDisplayName = `${appInfo.productName} Helper ${postfix}`;
-      helper.CFBundleIdentifier = `${helperBundleIdentifier}.${postfix}`;
-      helper.CFBundleVersion = appPlist.CFBundleVersion;
-    }
+  helperPlist.CFBundleExecutable = `${appFilename} Helper`;
+  helperPlist.CFBundleDisplayName = `${appInfo.productName} Helper`;
+  helperPlist.CFBundleIdentifier = helperBundleIdentifier;
+  helperPlist.CFBundleVersion = appPlist.CFBundleVersion;
 
-    if (helperEHPlist != null) {
-      configureHelper(helperEHPlist, "EH");
-    }
+  function configureHelper(helper, postfix) {
+    helper.CFBundleExecutable = `${appFilename} Helper ${postfix}`;
+    helper.CFBundleDisplayName = `${appInfo.productName} Helper ${postfix}`;
+    helper.CFBundleIdentifier = `${helperBundleIdentifier}.${postfix}`;
+    helper.CFBundleVersion = appPlist.CFBundleVersion;
+  }
 
-    if (helperNPPlist != null) {
-      configureHelper(helperNPPlist, "NP");
-    }
+  if (helperRendererPlist != null) {
+    configureHelper(helperRendererPlist, "(Renderer)");
+  }
 
-    if (helperLoginPlist != null) {
-      helperLoginPlist.CFBundleExecutable = `${appFilename} Login Helper`;
-      helperLoginPlist.CFBundleDisplayName = `${appInfo.productName} Login Helper`; // noinspection SpellCheckingInspection
+  if (helperPluginPlist != null) {
+    configureHelper(helperPluginPlist, "(Plugin)");
+  }
 
-      helperLoginPlist.CFBundleIdentifier = `${appInfo.macBundleIdentifier}.loginhelper`;
-      helperLoginPlist.CFBundleVersion = appPlist.CFBundleVersion;
-    }
+  if (helperGPUPlist != null) {
+    configureHelper(helperGPUPlist, "(GPU)");
+  }
 
-    const protocols = (0, _builderUtil().asArray)(buildMetadata.protocols).concat((0, _builderUtil().asArray)(packager.platformSpecificBuildOptions.protocols));
+  if (helperEHPlist != null) {
+    configureHelper(helperEHPlist, "EH");
+  }
 
-    if (protocols.length > 0) {
-      appPlist.CFBundleURLTypes = protocols.map(protocol => {
-        const schemes = (0, _builderUtil().asArray)(protocol.schemes);
+  if (helperNPPlist != null) {
+    configureHelper(helperNPPlist, "NP");
+  }
 
-        if (schemes.length === 0) {
-          throw new (_builderUtil().InvalidConfigurationError)(`Protocol "${protocol.name}": must be at least one scheme specified`);
-        }
+  if (helperLoginPlist != null) {
+    helperLoginPlist.CFBundleExecutable = `${appFilename} Login Helper`;
+    helperLoginPlist.CFBundleDisplayName = `${appInfo.productName} Login Helper`; // noinspection SpellCheckingInspection
 
-        return {
-          CFBundleURLName: protocol.name,
-          CFBundleTypeRole: protocol.role || "Editor",
-          CFBundleURLSchemes: schemes.slice()
-        };
-      });
-    }
+    helperLoginPlist.CFBundleIdentifier = `${appInfo.macBundleIdentifier}.loginhelper`;
+    helperLoginPlist.CFBundleVersion = appPlist.CFBundleVersion;
+  }
 
-    const fileAssociations = packager.fileAssociations;
+  const protocols = (0, _builderUtil().asArray)(buildMetadata.protocols).concat((0, _builderUtil().asArray)(packager.platformSpecificBuildOptions.protocols));
 
-    if (fileAssociations.length > 0) {
-      appPlist.CFBundleDocumentTypes = yield _bluebirdLst().default.map(fileAssociations,
-      /*#__PURE__*/
-      function () {
-        var _ref = (0, _bluebirdLst().coroutine)(function* (fileAssociation) {
-          const extensions = (0, _builderUtil().asArray)(fileAssociation.ext).map(_platformPackager().normalizeExt);
-          const customIcon = yield packager.getResource((0, _builderUtil().getPlatformIconFileName)(fileAssociation.icon, true), `${extensions[0]}.icns`);
-          let iconFile = appPlist.CFBundleIconFile;
+  if (protocols.length > 0) {
+    appPlist.CFBundleURLTypes = protocols.map(protocol => {
+      const schemes = (0, _builderUtil().asArray)(protocol.schemes);
 
-          if (customIcon != null) {
-            iconFile = path.basename(customIcon);
-            yield (0, _fs().copyOrLinkFile)(customIcon, path.join(path.join(contentsPath, "Resources"), iconFile));
-          }
+      if (schemes.length === 0) {
+        throw new (_builderUtil().InvalidConfigurationError)(`Protocol "${protocol.name}": must be at least one scheme specified`);
+      }
 
-          const result = {
-            CFBundleTypeExtensions: extensions,
-            CFBundleTypeName: fileAssociation.name || extensions[0],
-            CFBundleTypeRole: fileAssociation.role || "Editor",
-            LSHandlerRank: fileAssociation.rank || "Default",
-            CFBundleTypeIconFile: iconFile
-          };
+      return {
+        CFBundleURLName: protocol.name,
+        CFBundleTypeRole: protocol.role || "Editor",
+        CFBundleURLSchemes: schemes.slice()
+      };
+    });
+  }
 
-          if (fileAssociation.isPackage) {
-            result.LSTypeIsPackage = true;
-          }
+  const fileAssociations = packager.fileAssociations;
 
-          return result;
-        });
+  if (fileAssociations.length > 0) {
+    appPlist.CFBundleDocumentTypes = await _bluebirdLst().default.map(fileAssociations, async fileAssociation => {
+      const extensions = (0, _builderUtil().asArray)(fileAssociation.ext).map(_platformPackager().normalizeExt);
+      const customIcon = await packager.getResource((0, _builderUtil().getPlatformIconFileName)(fileAssociation.icon, true), `${extensions[0]}.icns`);
+      let iconFile = appPlist.CFBundleIconFile;
 
-        return function (_x5) {
-          return _ref.apply(this, arguments);
-        };
-      }());
-    }
+      if (customIcon != null) {
+        iconFile = path.basename(customIcon);
+        await (0, _fs().copyOrLinkFile)(customIcon, path.join(path.join(contentsPath, "Resources"), iconFile));
+      }
 
-    if (asarIntegrity != null) {
-      appPlist.AsarIntegrity = JSON.stringify(asarIntegrity);
-    }
+      const result = {
+        CFBundleTypeExtensions: extensions,
+        CFBundleTypeName: fileAssociation.name || extensions[0],
+        CFBundleTypeRole: fileAssociation.role || "Editor",
+        LSHandlerRank: fileAssociation.rank || "Default",
+        CFBundleTypeIconFile: iconFile
+      };
 
-    yield Promise.all([(0, _fsExtraP().writeFile)(appPlistFilename, (0, _plist().build)(appPlist)), (0, _fsExtraP().writeFile)(helperPlistFilename, (0, _plist().build)(helperPlist)), helperEHPlist == null ? Promise.resolve() : (0, _fsExtraP().writeFile)(helperEHPlistFilename, (0, _plist().build)(helperEHPlist)), helperNPPlist == null ? Promise.resolve() : (0, _fsExtraP().writeFile)(helperNPPlistFilename, (0, _plist().build)(helperNPPlist)), helperLoginPlist == null ? Promise.resolve() : (0, _fsExtraP().writeFile)(helperLoginPlistFilename, (0, _plist().build)(helperLoginPlist)), doRename(path.join(contentsPath, "MacOS"), packager.electronDistMacOsExecutableName, appPlist.CFBundleExecutable), (0, _fs().unlinkIfExists)(path.join(appOutDir, "LICENSE")), (0, _fs().unlinkIfExists)(path.join(appOutDir, "LICENSES.chromium.html"))]);
-    yield moveHelpers(getAvailableHelperSuffixes(helperEHPlist, helperNPPlist), frameworksPath, appFilename, packager.electronDistMacOsExecutableName);
+      if (fileAssociation.isPackage) {
+        result.LSTypeIsPackage = true;
+      }
 
-    if (helperLoginPlist != null) {
-      const prefix = packager.electronDistMacOsExecutableName;
-      const suffix = " Login Helper";
-      const executableBasePath = path.join(loginItemPath, `${prefix}${suffix}.app`, "Contents", "MacOS");
-      yield doRename(executableBasePath, `${prefix}${suffix}`, appFilename + suffix).then(() => doRename(loginItemPath, `${prefix}${suffix}.app`, `${appFilename}${suffix}.app`));
-    }
+      return result;
+    });
+  }
 
-    const appPath = path.join(appOutDir, `${appFilename}.app`);
-    yield (0, _fsExtraP().rename)(path.dirname(contentsPath), appPath); // https://github.com/electron-userland/electron-builder/issues/840
+  if (asarIntegrity != null) {
+    appPlist.AsarIntegrity = JSON.stringify(asarIntegrity);
+  }
 
-    const now = Date.now() / 1000;
-    yield (0, _fsExtraP().utimes)(appPath, now, now);
-  });
-  return _createMacApp.apply(this, arguments);
+  const plistDataToWrite = {
+    [appPlistFilename]: appPlist,
+    [helperPlistFilename]: helperPlist
+  };
+
+  if (helperEHPlist != null) {
+    plistDataToWrite[helperEHPlistFilename] = helperEHPlist;
+  }
+
+  if (helperNPPlist != null) {
+    plistDataToWrite[helperNPPlistFilename] = helperNPPlist;
+  }
+
+  if (helperRendererPlist != null) {
+    plistDataToWrite[helperRendererPlistFilename] = helperRendererPlist;
+  }
+
+  if (helperPluginPlist != null) {
+    plistDataToWrite[helperPluginPlistFilename] = helperPluginPlist;
+  }
+
+  if (helperGPUPlist != null) {
+    plistDataToWrite[helperGPUPlistFilename] = helperGPUPlist;
+  }
+
+  if (helperLoginPlist != null) {
+    plistDataToWrite[helperLoginPlistFilename] = helperLoginPlist;
+  }
+
+  await Promise.all([(0, _appBuilder().executeAppBuilderAndWriteJson)(["encode-plist"], plistDataToWrite), doRename(path.join(contentsPath, "MacOS"), "Electron", appPlist.CFBundleExecutable), (0, _fs().unlinkIfExists)(path.join(appOutDir, "LICENSE")), (0, _fs().unlinkIfExists)(path.join(appOutDir, "LICENSES.chromium.html"))]);
+  await moveHelpers(getAvailableHelperSuffixes(helperEHPlist, helperNPPlist, helperRendererPlist, helperPluginPlist, helperGPUPlist), frameworksPath, appFilename, "Electron");
+
+  if (helperLoginPlist != null) {
+    const prefix = "Electron";
+    const suffix = " Login Helper";
+    const executableBasePath = path.join(loginItemPath, `${prefix}${suffix}.app`, "Contents", "MacOS");
+    await doRename(executableBasePath, `${prefix}${suffix}`, appFilename + suffix).then(() => doRename(loginItemPath, `${prefix}${suffix}.app`, `${appFilename}${suffix}.app`));
+  }
+
+  const appPath = path.join(appOutDir, `${appFilename}.app`);
+  await (0, _fsExtra().rename)(path.dirname(contentsPath), appPath); // https://github.com/electron-userland/electron-builder/issues/840
+
+  const now = Date.now() / 1000;
+  await (0, _fsExtra().utimes)(appPath, now, now);
 }
 
 function configureLocalhostAts(appPlist) {
@@ -272,7 +313,9 @@ function configureLocalhostAts(appPlist) {
     appPlist.NSAppTransportSecurity = ats;
   }
 
-  ats.NSAllowsLocalNetworking = true;
+  ats.NSAllowsLocalNetworking = true; // https://github.com/electron-userland/electron-builder/issues/3377#issuecomment-446035814
+
+  ats.NSAllowsArbitraryLoads = true;
   let exceptionDomains = ats.NSExceptionDomains;
 
   if (exceptionDomains == null) {

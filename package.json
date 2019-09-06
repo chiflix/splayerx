@@ -133,7 +133,7 @@
     "css-loader": "^2.1.1",
     "del": "^3.0.0",
     "devtron": "^1.4.0",
-    "electron-builder": "^21.2.0",
+    "electron-builder": "21.2.0",
     "electron-debug": "^3.0.1",
     "electron-mocha": "^8.1.2",
     "electron-rebuild": "^1.8.6",
