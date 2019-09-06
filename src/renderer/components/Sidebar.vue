@@ -4,17 +4,17 @@
   >
     <div class="icon-box">
       <BilibiliSidebarIcon
-        :selected="currentUrl.startsWith('https://www.bilibili.com/')"
+        :selected="currentUrl.includes('bilibili')"
         :url="'https://www.bilibili.com/'"
         :mouseup-on-icon="handleSidebarIcon"
       />
       <iQiyiSidebarIcon
-        :selected="currentUrl.startsWith('https://www.iqiyi.com/')"
+        :selected="currentUrl.includes('iqiyi')"
         :url="'https://www.iqiyi.com/'"
         :mouseup-on-icon="handleSidebarIcon"
       />
       <YoutubeSidebarIcon
-        :selected="currentUrl.startsWith('https://www.youtube.com/')"
+        :selected="currentUrl.includes('youtube')"
         :url="'https://www.youtube.com/'"
         :mouseup-on-icon="handleSidebarIcon"
       />
