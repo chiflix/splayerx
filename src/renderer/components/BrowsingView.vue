@@ -203,6 +203,7 @@ export default {
     },
     hasVideo(val: boolean) {
       this.updatePipState(val);
+      this.createTouchBar(val);
     },
     adaptFinished(val: boolean) {
       if (val) {
@@ -313,6 +314,7 @@ export default {
     },
   },
   created() {
+    this.createTouchBar(false);
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [
       570,
       375,
@@ -432,6 +434,7 @@ export default {
               },
             );
         }
+        this.createTouchBar(this.webInfo.hasVideo);
       },
     );
   },
@@ -746,13 +749,13 @@ export default {
         click: () => {},
       });
       this.backwardButton = new TouchBarButton({
-        icon: this.createIcon(`touchBar/${this.$refs.webView.canGoBack() ? 'backward' : 'backward-disabled'}.png`),
+        icon: this.createIcon(`touchBar/${this.webInfo.canGoBack ? 'backward' : 'backward-disabled'}.png`),
         click: () => {
           this.$bus.$emit('toggle-back');
         },
       });
       this.forwardButton = new TouchBarButton({
-        icon: this.createIcon(`touchBar/${this.$refs.webView.canGoForward() ? 'forward' : 'forward-disabled'}.png`),
+        icon: this.createIcon(`touchBar/${this.webInfo.canGoForward ? 'forward' : 'forward-disabled'}.png`),
         click: () => {
           this.$bus.$emit('toggle-forward');
         },
