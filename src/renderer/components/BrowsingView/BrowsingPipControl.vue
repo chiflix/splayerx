@@ -7,7 +7,7 @@
       :style="{
         opacity: hasVideo ? 1.0 : 0.3,
       }"
-      :class="hasVideo ? 'button-hover': ''"
+      :class="hasVideo ? 'button-hover' : ''"
       class="pip-icon no-drag"
     >
       <Icon
@@ -19,8 +19,8 @@
       @mouseover="mouseover = true"
       @mouseout="mouseover = false"
       :style="{
-        opacity: mouseover ? 1.0 : 0.3,
       }"
+      :class="switchPip ? 'translate' : ''"
       class="down-icon"
     >
       <Icon
@@ -50,6 +50,7 @@ export default {
   data() {
     return {
       pip: 'Enter',
+      switchPip: false,
     };
   },
   computed: {
@@ -64,6 +65,7 @@ export default {
     },
     switchPipType() {
       this.pip = this.pip === 'Enter' ? 'Global' : 'Enter';
+      this.switchPip = true;
     },
   },
 };
@@ -75,6 +77,7 @@ export default {
   display: flex;
   width: 62px;
   height: 100%;
+  justify-content: flex-start;
   align-items: center;
   border-left: 1px solid #F2F1F4;
   .pip-icon {
@@ -88,16 +91,23 @@ export default {
     transition: background-color 100ms ease-in, opacity 100ms ease-in;
   }
   .button-hover:hover {
-    background-color: #F5F6F8;
+    background-color: #ECEEF0;
   }
   .down-icon {
-    width: 23px;
+    width: 8px;
     height: 20px;
+    margin-left: 2px;
+    margin-right: 3px;
     display: flex;
     justify-content: flex-start;
     align-items: center;
+    opacity: 0.3;
+    transition: opacity 50ms linear;
     .icon {
       margin-top: 1px;
+    }
+    &:hover {
+      opacity: 1.0;
     }
   }
   @keyframes translate {
