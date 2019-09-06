@@ -5,7 +5,7 @@
       :open-input-url="openInputUrl"
       :close-url-input="closeUrlInput"
     />
-    <transition name="background-container-transition">
+    <transition name="basidebckground-container-transition">
       <div
         v-if="item.backgroundUrl"
         class="background"
@@ -455,33 +455,6 @@ export default {
 $themeColor-Light: white;
 
 .landing-view {
-  height: 100vh;
-  width: 100vw;
-}
-.side-bar {
-  position: absolute;
-  background-color: #3B3B41;
-  z-index: 0;
-  left: 0;
-  height: 100%;
-  transition: width 100ms ease-out;
-  will-change: width;
-
-  .icon-box {
-    width: 40px;
-    margin-top: 46px;
-    margin-left: 18px;
-    margin-right: 18px;
-    display: flex;
-    flex-direction: column;
-    div {
-      width: 40px;
-      height: 40px;
-      margin-bottom: 16px;
-    }
-  }
-}
-.wrapper {
   overflow: hidden;
   will-change: width;
   transition-property: width;
