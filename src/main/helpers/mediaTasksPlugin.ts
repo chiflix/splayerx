@@ -95,8 +95,9 @@ export default function registerMediaTasks() {
       } else if (!subtitle.metadata) {
         splayerxProxy.extractSubtitles(videoPath, streamIndex, 0, false, 1,
           (error, pos, data) => {
-            if (error || !data) reply(event, 'subtitle-metadata-reply', new Error(error));
-            else {
+            if (error || !data) {
+              reply(event, 'subtitle-metadata-reply', new Error(error || 'Missing subtitle data.'));
+            } else {
               subtitle.position = pos;
               subtitle.payload = subtitle.metadata = data.toString('utf8')
                 .replace(/\n(Dialogue|Comment)[\s\S]*/g, '')
@@ -105,7 +106,9 @@ export default function registerMediaTasks() {
             }
             reply(event, 'subtitle-metadata-reply', undefined, subtitle.finished, subtitle.metadata);
           });
-      } else reply(event, 'subtitle-metadata-reply', undefined, subtitle.finished, subtitle.metadata);
+      } else {
+        reply(event, 'subtitle-metadata-reply', undefined, subtitle.finished, subtitle.metadata);
+      }
       streamSubtitlesMap.set(streamIndex, subtitle);
     }
   });
@@ -132,8 +135,11 @@ export default function registerMediaTasks() {
             if (error === 'EOF') {
               subtitle.finished = true;
               reply(event, 'subtitle-cache-reply', undefined, subtitle.finished, subtitle.payload);
-            } else if (error) reply(event, 'subtitle-cache-reply', new Error(error));
-            else reply(event, 'subtitle-cache-reply', undefined, subtitle.finished);
+            } else if (error) {
+              reply(event, 'subtitle-cache-reply', new Error(error));
+            } else {
+              reply(event, 'subtitle-cache-reply', undefined, subtitle.finished);
+            }
           });
         streamSubtitlesMap.set(streamIndex, subtitle);
       } else reply(event, 'subtitle-cache-reply', new Error('Missing subtitle entry, should request metadata first.'));
@@ -146,8 +152,11 @@ export default function registerMediaTasks() {
       if (subtitle) {
         splayerxProxy.extractSubtitles(videoPath, streamIndex, time, true, 20,
           (error, pos, data) => {
-            if (data) reply(event, 'subtitle-stream-reply', undefined, data.toString('utf8'));
-            else reply(event, 'subtitle-stream-reply', new Error(!error || !data ? 'Missing data' : error));
+            if (data) {
+              reply(event, 'subtitle-stream-reply', undefined, data.toString('utf8'));
+            } else {
+              reply(event, 'subtitle-stream-reply', new Error(!error || !data ? 'Missing subtitle data' : error));
+            }
           });
       } else reply(event, 'subtitle-stream-reply', new Error('Missing subtitle entry, should request metadata first.'));
     } else reply(event, 'subtitle-stream-reply', new Error('Missing videoPath entry, should request metadata first.'));

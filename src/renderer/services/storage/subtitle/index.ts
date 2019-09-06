@@ -5,7 +5,7 @@ import {
 import { LanguageCode } from '@/libs/language';
 import { SelectedSubtitle, IStoredSubtitleItem } from '@/interfaces/ISubtitleStorage';
 import { SubtitleDataBase } from './db';
-import { SUBTITLE_REAL_DIRNAME } from '@/constants';
+import { SUBTITLE_FULL_DIRNAME } from '@/constants';
 import { sourceToFormat } from '@/services/subtitle/utils';
 
 const db = new SubtitleDataBase();
@@ -139,7 +139,7 @@ export class DatabaseGenerator implements IEntityGenerator {
       const { sources, language } = storedSubtitle;
       newGenerator.realSource = sources
         .find(({ type, source }) => type === Type.Local
-          && dirname(source as string) === SUBTITLE_REAL_DIRNAME) || sources[0];
+          && dirname(source as string) === SUBTITLE_FULL_DIRNAME) || sources[0];
       newGenerator.format = sourceToFormat(newGenerator.realSource);
       newGenerator.language = language;
       newGenerator.hash = hash;

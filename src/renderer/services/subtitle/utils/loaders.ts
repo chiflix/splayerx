@@ -7,7 +7,7 @@ import {
   ILoader, IOrigin, Type, Format,
 } from '@/interfaces/ISubtitle';
 import { loadLocalFile, formatToExtension } from '.';
-import { SUBTITLE_REAL_DIRNAME } from '@/constants';
+import { SUBTITLE_FULL_DIRNAME } from '@/constants';
 import { mediaQuickHash, getSubtitleDir } from '@/libs/utils';
 import Sagi from '@/libs/sagi';
 import { SagiSubtitlePayload } from '../parsers';
@@ -45,7 +45,7 @@ export class LocalTextLoader extends EventEmitter implements ILoader {
   public constructor(path: string) {
     super();
     this.source = { type: Type.Local, source: path };
-    if (dirname(path) === SUBTITLE_REAL_DIRNAME) this._cacheStatus = Status.FINISHED;
+    if (dirname(path) === SUBTITLE_FULL_DIRNAME) this._cacheStatus = Status.FINISHED;
   }
 
   private _payloadString: string = '';
@@ -70,8 +70,8 @@ export class LocalTextLoader extends EventEmitter implements ILoader {
       const hash = await mediaQuickHash.try(source);
       if (hash) {
         this._cacheStatus = Status.WORKING;
-        const storedPath = join(SUBTITLE_REAL_DIRNAME, `${hash}${extname(source)}`);
-        ensureDirSync(SUBTITLE_REAL_DIRNAME);
+        const storedPath = join(SUBTITLE_FULL_DIRNAME, `${hash}${extname(source)}`);
+        ensureDirSync(SUBTITLE_FULL_DIRNAME);
         if (!existsSync(storedPath)) await copyFile(source, storedPath);
         this._cacheStatus = Status.FINISHED;
         return {
@@ -270,7 +270,7 @@ export class SagiLoader extends EventEmitter implements ILoader {
     if (this.canCache) {
       const { source } = this.source;
       this._cacheStatus = Status.NOT_STARTED;
-      const storedPath = join(SUBTITLE_REAL_DIRNAME, `${source}.${formatToExtension(Format.WebVTT)}`);
+      const storedPath = join(SUBTITLE_FULL_DIRNAME, `${source}.${formatToExtension(Format.WebVTT)}`);
       if (!existsSync(storedPath)) {
         await outputFile(storedPath, sagiSubtitleToWebVTT(this._payloads));
       }
