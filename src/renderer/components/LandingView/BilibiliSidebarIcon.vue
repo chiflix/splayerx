@@ -9,9 +9,9 @@
     class="sidebar"
   >
     <svg
-      width="42px"
-      height="42px"
-      viewBox="0 0 42 42"
+      width="44x"
+      height="44px"
+      viewBox="0 0 44 44"
       version="1.1"
       xmlns="http://www.w3.org/2000/svg"
       xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -19,9 +19,9 @@
       <defs>
         <circle
           id="path-1"
-          cx="20"
-          cy="20"
-          r="20"
+          cx="22"
+          cy="22"
+          r="22"
         />
       </defs>
       <g
@@ -52,9 +52,9 @@
                 :stroke-width="selected ? 2 : 0"
                 stroke="#EBECF0"
                 fill="#20B0E3"
-                cx="20"
-                cy="20"
-                r="20"
+                cx="21"
+                cy="21"
+                r="21"
               />
               <g
                 id="logo--bilibili"
@@ -65,7 +65,7 @@
               >
                 <g
                   id="形状"
-                  transform="translate(10.000000, 10.000000)"
+                  transform="translate(11.000000, 11.000000)"
                   fill-rule="nonzero"
                 >
                   <path :d="d1" />

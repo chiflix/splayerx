@@ -4,14 +4,11 @@
   >
     <div
       @mouseup="handleEnterPip(pip === 'Enter')"
-      :style="{
-        opacity: hasVideo ? 1.0 : 0.3,
-      }"
       :class="hasVideo ? 'button-hover' : ''"
       class="pip-icon no-drag"
     >
       <Icon
-        :type="pipType"
+        :type="pipMode"
       />
     </div>
     <div
@@ -24,7 +21,7 @@
       class="down-icon"
     >
       <Icon
-        type="down"
+        type="switchMode"
         class="icon"
       />
     </div>
@@ -54,9 +51,14 @@ export default {
     };
   },
   computed: {
+    pipMode() {
+      return this.pip === 'Enter' ? this.pipType : this.popType;
+    },
     pipType() {
-      if (!this.hasVideo) return 'pipDisabled';
-      return this.pip === 'Enter' ? 'pipDisabled' : 'pop';
+      return this.hasVideo ? 'pip' : 'pipDisabled';
+    },
+    popType() {
+      return this.hasVideo ? 'pop' : 'popDisabled';
     },
   },
   methods: {
@@ -69,7 +71,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 .pip-control {
-  min-width: 65px;
+  min-width: 62px;
   z-index: 6;
   display: flex;
   width: 62px;
@@ -78,9 +80,9 @@ export default {
   align-items: center;
   border-left: 1px solid #F2F1F4;
   .pip-icon {
-    width: 30px;
+    width: 34px;
     height: 30px;
-    margin-left: 15px;
+    margin-left: 8px;
     border-radius: 15px;
     display: flex;
     justify-content: center;
@@ -91,9 +93,8 @@ export default {
     background-color: #ECEEF0;
   }
   .down-icon {
-    width: 8px;
-    height: 20px;
-    margin-left: 2px;
+    width: 12px;
+    height: 30px;
     margin-right: 3px;
     display: flex;
     justify-content: flex-start;

@@ -97,7 +97,7 @@ export default {
     z-index: 6;
 
     font-size: 12px;
-    color: rgba(15, 26, 59, 0.5);
+    color: #7E808E;
     letter-spacing: 0.09px;
     text-align: center;
     overflow: hidden;
