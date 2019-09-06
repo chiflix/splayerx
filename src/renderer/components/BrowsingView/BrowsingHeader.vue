@@ -20,6 +20,9 @@
       :has-video="hasVideo"
       :handle-enter-pip="handleEnterPip"
     />
+    <browsing-title-bar
+      v-if="!isDarwin"
+    />
   </div>
 </template>
 
@@ -28,6 +31,7 @@ import { mapGetters } from 'vuex';
 import BrowsingInput from '@/components/BrowsingView/BrowsingInput.vue';
 import BrowsingControl from '@/components/BrowsingView/BrowsingControl.vue';
 import BrowsingPipControl from '@/components/BrowsingView/BrowsingPipControl.vue';
+import BrowsingTitleBar from '@/components/BrowsingView/BrowsingTitleBar.vue';
 
 export default {
   name: 'BrowsingHeader',
@@ -35,6 +39,7 @@ export default {
     'browsing-input': BrowsingInput,
     'browsing-control': BrowsingControl,
     'browsing-pip-control': BrowsingPipControl,
+    'browsing-title-bar': BrowsingTitleBar,
   },
   props: {
     showSidebar: {

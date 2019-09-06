@@ -4,12 +4,18 @@
   >
     <div
       @dblclick="handleDbClick"
+      :style="{
+        order: isDarwin ? 1 : 2,
+      }"
       class="url-search"
     >
       {{ title }}
     </div>
     <div
       @mouseup="handleUrlReload"
+      :style="{
+        order: isDarwin ? 2 : 1,
+      }"
       class="control-button page-refresh-icon no-drag"
     >
       <Icon
@@ -118,6 +124,7 @@ export default {
   }
   .page-refresh-icon {
     margin-right: 8px;
+    margin-left: 8px;
   }
 }
 </style>
