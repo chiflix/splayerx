@@ -40,14 +40,17 @@ import {
   AudioTranslate as atActions,
 } from '@/store/actionTypes';
 import { log } from '@/libs/Log';
+import { checkForUpdate } from '@/libs/utils';
 import asyncStorage from '@/helpers/asyncStorage';
 import { videodata } from '@/store/video';
-import { addBubble } from './helpers/notificationControl';
+import { addBubble } from '@/helpers/notificationControl';
+import { CHECK_FOR_UPDATES_OFFLINE, REQUEST_TIMEOUT } from '@/helpers/notificationcodes';
 import { SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, LOAD_SUBVIDEO_FAILED } from './helpers/notificationcodes';
 import InputPlugin, { getterTypes as iGT } from '@/plugins/input';
 import { VueDevtools } from './plugins/vueDevtools.dev';
 import { SubtitleControlListItem, Type, NOT_SELECTED_SUBTITLE } from './interfaces/ISubtitle';
-import { getValidVideoRegex, getValidSubtitleRegex } from '../shared/utils';
+import { getValidSubtitleRegex } from '../shared/utils';
+import { isWindowsExE, isMacintoshDMG } from '../shared/common/platform';
 import MenuService from './services/menu/MenuService';
 
 
@@ -401,7 +404,7 @@ new Vue({
       this.$store.dispatch('updatePipPos', data.pipPos || this.pipPos);
     });
     this.$bus.$on('delete-file', () => {
-      this.refreshMenu();
+      this.menuService.addRecentPlayItems();
     });
     this.$event.on('playlist-display-state', (e: boolean) => {
       this.playlistDisplayState = e;
@@ -415,7 +418,9 @@ new Vue({
     this.menuService.updateRouteName(this.currentRouteName);
     this.registeMenuActions();
     this.initializeMenuSettings();
-    this.$bus.$on('new-file-open', this.refreshMenu);
+    this.$bus.$on('new-file-open', () => {
+      this.menuService.addRecentPlayItems();
+    });
     // TODO: Setup user identity
     this.$storage.get('user-uuid', (err: Error, userUUID: string) => {
       if (err || Object.keys(userUUID).length === 0) {
@@ -425,6 +430,7 @@ new Vue({
       }
 
       Vue.axios.defaults.headers.common['X-Application-Token'] = userUUID;
+      Vue.axios.defaults.headers.common['X-Application-Display-Language'] = this.displayLanguage;
 
       // set userUUID to google analytics uid
       this.$ga && this.$ga.set('userId', userUUID);
@@ -490,6 +496,15 @@ new Vue({
         case 85:
           if (e.metaKey && e.shiftKey) {
             this.$bus.$emit('open-url-show', true);
+          }
+          break;
+        case 70:
+          if (this.isFullScreen) {
+            this.$bus.$emit('off-fullscreen');
+            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
+          } else {
+            this.$bus.$emit('to-fullscreen');
+            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [true]);
           }
           break;
         default:
@@ -612,16 +627,15 @@ new Vue({
       this.$store.commit('source', 'drop');
       const files = Array.prototype.map.call(e.dataTransfer!.files, (f: File) => f.path)
       const onlyFolders = files.every((file: fs.PathLike) => fs.statSync(file).isDirectory());
-      if (this.currentRouteName === 'playing-view' || onlyFolders
-        || files.every((file: fs.PathLike) => getValidVideoRegex().test(file) && !getValidSubtitleRegex().test(file))) {
+      if (this.currentRouteName === 'landing-view' && !onlyFolders && files.every((file: fs.PathLike) => getValidSubtitleRegex().test(file))) {
+        this.$electron.ipcRenderer.send('drop-subtitle', files);
+      } else {
         files.forEach((file: fs.PathLike) => this.$electron.remote.app.addRecentDocument(file));
         if (onlyFolders) {
           this.openFolder(...files);
         } else {
           this.openFile(...files);
         }
-      } else {
-        this.$electron.ipcRenderer.send('drop-subtitle', files);
       }
     });
     window.addEventListener('dragover', (e) => {
@@ -659,6 +673,38 @@ new Vue({
     });
     this.$electron.ipcRenderer.on('add-local-subtitles', (event: Event, file: string[]) => {
       this.addLocalSubtitlesWithSelect(file);
+    });
+    // win32 exe || mac dmg
+    const canUseCheckForUpdates = isWindowsExE || isMacintoshDMG;
+    if (navigator.onLine && canUseCheckForUpdates) {
+      // auto check for updates
+      checkForUpdate(true).then((
+        json: { version: string, isLastest: boolean, landingPage: string, url: string }
+      ) => {
+        if (!json.isLastest) {
+          this.$bus.$emit('new-version', json);
+        }
+      }).catch((err: Error) => {
+        // empty
+      });
+    }
+    // manual check for updates
+    this.$electron.ipcRenderer.on('check-for-updates', (event: Event) => {
+      // if not (win32 exe || mac beta) return
+      if (!canUseCheckForUpdates) return;
+      // check online
+      if (!navigator.onLine) return addBubble(CHECK_FOR_UPDATES_OFFLINE);
+      checkForUpdate(false).then((
+        json: { version: string, isLastest: boolean, landingPage: string, url: string }
+      ) => {
+        if (!json.isLastest) {
+          this.$bus.$emit('new-version', json);
+        } else {
+          this.$bus.$emit('lastest-version', json);
+        }
+      }).catch((err: Error) => {
+        addBubble(REQUEST_TIMEOUT);
+      });
     });
   },
   methods: {
@@ -731,7 +777,7 @@ new Vue({
         this.infoDB.clearAll();
         app.clearRecentDocuments();
         this.$bus.$emit('clean-landingViewItems');
-        this.refreshMenu();
+        this.menuService.addRecentPlayItems();
       });
       const urls = ['https://www.iqiyi.com', 'https://www.bilibili.com', 'https://www.youtube.com'];
       const channels = ['iqiyi', 'bilibili', 'youtube'];
@@ -994,7 +1040,7 @@ new Vue({
     recentSubTmp(item: SubtitleControlListItem, isFirstSubtitleType: boolean) {
       return {
         id: `${item.id}`,
-        enabled: isFirstSubtitleType ? true: this.enabledSecondarySub,
+        enabled: isFirstSubtitleType ? true : this.enabledSecondarySub,
         label: this.getSubName(item, this.list),
         checked: isFirstSubtitleType ? item.id === this.primarySubtitleId : item.id === this.secondarySubtitleId,
         subtitleItem: item,
@@ -1071,9 +1117,6 @@ new Vue({
         return path.toString().replace(/^file:\/\/\//, '');
       }
       return path.toString().replace(/^file\/\//, '');
-    },
-    refreshMenu() {
-      this.initializeMenuSettings();
     },
     windowRotate() {
       this.$store.dispatch('windowRotate90Deg');

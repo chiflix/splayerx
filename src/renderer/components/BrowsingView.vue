@@ -94,6 +94,11 @@ export default {
       acceleratorAvailable: true,
       oldDisplayId: -1,
       backToLandingView: false,
+      sidebarButton: null,
+      backwardButton: null,
+      forwardButton: null,
+      refreshButton: null,
+      pipButton: null,
       browserIds: [1, 2],
       menuService: null,
       currentUrl: '',
@@ -257,6 +262,7 @@ export default {
     loadingState(val: boolean) {
       if (val) {
         this.webInfo.hasVideo = false;
+        this.createTouchBar(false);
       } else {
         setTimeout(() => {
           const loadUrl = this.$electron.remote
@@ -730,6 +736,50 @@ export default {
           this.$electron.shell.openExternal(openUrl);
         }
       }
+    },
+    createTouchBar(enablePip: boolean) {
+      const { TouchBar } = this.$electron.remote;
+      const { TouchBarButton, TouchBarSpacer } = TouchBar;
+
+      this.sidebarButton = new TouchBarButton({
+        icon: this.createIcon('touchBar/sidebar.png'),
+        click: () => {},
+      });
+      this.backwardButton = new TouchBarButton({
+        icon: this.createIcon(`touchBar/${this.$refs.webView.canGoBack() ? 'backward' : 'backward-disabled'}.png`),
+        click: () => {
+          this.$bus.$emit('toggle-back');
+        },
+      });
+      this.forwardButton = new TouchBarButton({
+        icon: this.createIcon(`touchBar/${this.$refs.webView.canGoForward() ? 'forward' : 'forward-disabled'}.png`),
+        click: () => {
+          this.$bus.$emit('toggle-forward');
+        },
+      });
+      this.refreshButton = new TouchBarButton({
+        icon: this.createIcon('touchBar/refresh.png'),
+        click: () => {
+          this.$bus.$emit('toggle-reload');
+        },
+      });
+      this.pipButton = enablePip ? new TouchBarButton({
+        icon: this.createIcon('touchBar/pip.png'),
+        click: () => {
+          this.$bus.$emit('toggle-pip');
+        },
+      }) : null;
+      const touchbarItems = [
+        this.sidebarButton,
+        new TouchBarSpacer({ size: 'large' }),
+        this.backwardButton,
+        this.forwardButton,
+        this.refreshButton,
+        new TouchBarSpacer({ size: 'large' }),
+      ];
+      if (enablePip) touchbarItems.push(this.pipButton);
+      this.touchBar = new TouchBar({ items: touchbarItems });
+      this.$electron.remote.getCurrentWindow().setTouchBar(this.touchBar);
     },
     pipAdapter() {
       const parseUrl = urlParseLax(

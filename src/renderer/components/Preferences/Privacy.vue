@@ -13,7 +13,11 @@
           value="smartMode"
           name="mode"
         >
-          {{ $t('preferences.privacy.smartMode') }} <span style="opacity: 0.6">Beta</span>
+          {{ $t('preferences.privacy.smartMode') }}
+          <span
+            v-if="!isMas"
+            style="opacity: 0.6"
+          >Beta</span>
         </BaseRadio>
         <div class="privacy_radio_description">
           {{ $t('preferences.privacy.smartDescription') }}
@@ -50,6 +54,9 @@ export default {
     };
   },
   computed: {
+    isMas() {
+      return !!process.mas;
+    },
     preferenceData() {
       return this.$store.getters.preferenceData;
     },
@@ -101,7 +108,8 @@ export default {
     width: 366px;
     height: fit-content;
     margin-top: 15px;
-    background-color: rgba(0,0,0,0.05);
+    background-color: rgba(0,0,0,0.07);
+    border-radius: 5px;
   }
   &_radio {
     margin-left: 29px;
@@ -114,7 +122,7 @@ export default {
       width: 282px;
       font-family: $font-medium;
       font-size: 11px;
-      color: rgba(255,255,255,0.50);
+      color: rgba(255,255,255,0.25);
       letter-spacing: 0;
       line-height: 16px;
       margin-top: 6px;

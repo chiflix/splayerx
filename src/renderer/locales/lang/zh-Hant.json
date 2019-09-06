@@ -55,7 +55,7 @@
       "title": "未找到文件"
     },
     "playlistNonExist": {
-      "content": "该条记录已被移除。",
+      "content": "文件被移動、刪除或重命名。",
       "title": "文件未找到"
     },
     "fileNonExistInPlaylist": {
@@ -121,7 +121,7 @@
       "decreasePlaybackSpeed": "減緩播放速度",
       "forwardL": "前進 +60s",
       "forwardS": "前進 +5s",
-      "fullScreen": "全屏\/退出全屏",
+      "fullScreen": "全屏/退出全屏",
       "increasePlaybackSpeed": "加快播放速度",
       "name": "播放",
       "pause": "暫停",
@@ -136,6 +136,7 @@
     },
     "splayerx": {
       "about": "關於射手影音",
+      "checkForUpdates": "檢查更新",
       "hide": "隱藏射手影音",
       "hideOthers": "隱藏其他",
       "preferences": "偏好設置",
@@ -292,10 +293,23 @@
       "underlinedContent": "禁用"
     }
   },
+  "alertBubble": {
+    "button": "確定"
+  },
   "protectBubble": {
     "agree": "好的",
     "setting": "設定",
     "content": "保護不宜在工作或公眾場合播放的內容，自動刪除播放痕跡。"
+  },
+  "checkForUpdatesBubble": {
+    "needUpdate": {
+      "confirm": "下載",
+      "cancel": "略過",
+      "content": "新版本 {version} 已發布，是否立刻下載更新？"
+    },
+    "noNeed": {
+      "content": "目前已經是最新版本 {version}"
+    }
   },
   "recentPlaylist": {
     "folderSource": "文件夾",
@@ -349,10 +363,14 @@
     "title": ""
   },
   "translateModal": {
-    "selectLanguageLabel": "視頻源語言",
+    "videoLanguageLabel": "視頻語言",
+    "subtitleLanguageLabel": "翻譯至",
+    "selectLanguageLabel": "請選擇",
+    "audioLanguageLoading": "獲取語言列表中 ...",
+    "audioLanguageLoadFail": "連接錯誤，請稍後重試",
     "select": {
-      "title": "選擇視頻源語言",
-      "content": "如要生成智能翻譯，請選擇您在視頻中所聽到的語言並點擊生成，該過程將持續一段時間。"
+      "title": "AI 智能翻譯",
+      "content": "選擇您在視頻中所聽到的語言並點擊生成。"
     },
     "translate": {
       "title": "大約剩餘 {time}",

@@ -2,14 +2,14 @@
   <div
     @mouseover="mouseover = true"
     @mouseout="mouseover = false"
-    @mouseup="mouseupOnIcon(url)"
+    @click="mouseupOnIcon(url)"
     :style="{
       opacity: mouseover || selected ? '1.0' : '0.7',
     }"
     class="sidebar"
   >
     <svg
-      width="44x"
+      width="44px"
       height="44px"
       viewBox="0 0 44 44"
       version="1.1"

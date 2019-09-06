@@ -251,7 +251,7 @@ export default {
   width: 30px;
   height: 30px;
 }
-.minus, .plus, .reset {
+.minus, .plus, .reset, .closeSquare {
   -webkit-app-region: no-drag;
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
   screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {

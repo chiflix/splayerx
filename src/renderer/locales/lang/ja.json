@@ -1,8 +1,8 @@
 {
   "advance": {
-    "audioDelay": "オディオディレイ",
+    "audioDelay": "オーディオディレイ",
     "audioMenu": "オーディオ",
-    "changeTrack": "オディオトラック",
+    "changeTrack": "オーディオトラック",
     "chosenTrack": "デフォルト",
     "fontItems": [
       "小",
@@ -31,12 +31,12 @@
       "title": "オープン失敗"
     },
     "EACCES": {
-      "content": "十分な許可がありません。",
-      "title": "開けませんでした"
+      "content": "権限を持ってません。",
+      "title": "オープン失敗"
     },
     "ENOENT": {
       "content": "ファイルが見つかりません。",
-      "title": "開く失敗"
+      "title": "オープン失敗"
     },
     "addNoVideo": {
       "content": "再生できるファイルが見つかりませんでした。",
@@ -51,11 +51,11 @@
       "title": "エラー"
     },
     "fileNonExist": {
-      "content": "プライリストから削除する。",
+      "content": "再生リストから削除する。",
       "title": "ファイルが見つかりませんでした。"
     },
     "playlistNonExist": {
-      "content": "このアイテムは削除されました。",
+      "content": "ファイルは削除または名前変更されました。",
       "title": "ファイルが見つかりませんでした"
     },
     "fileNonExistInPlaylist": {
@@ -80,7 +80,7 @@
     }
   },
   "loading": {
-    "content": "翻訳の読み込み ...",
+    "content": "翻訳を読み込み中 ...",
     "title": ""
   },
   "msg": {
@@ -95,7 +95,7 @@
       "switchAudioTrack": "オーディオトラック"
     },
     "file": {
-      "clearHistory": "プレイ履歴をクリア",
+      "clearHistory": "再生履歴をクリア",
       "closeWindow": "閉じる",
       "name": "ファイル",
       "open": "ファイルを開く…",
@@ -119,14 +119,14 @@
       "captureScreen": "スクリンショット",
       "captureVideoClip": "トリム",
       "decreasePlaybackSpeed": "再生速度の低下",
-      "forwardL": "進む +60s",
-      "forwardS": "進む +5s",
-      "fullScreen": "ズーム\/フルスクリーンを解除",
+      "forwardL": "早送り +60s",
+      "forwardS": "早送り +5s",
+      "fullScreen": "ズーム/フルスクリーンを解除",
       "increasePlaybackSpeed": "再生速度の増加",
       "name": "プレイ",
-      "pause": "停止",
+      "pause": "ポーズ",
       "play": "プレイ",
-      "resetSpeed": "重置播放速度",
+      "resetSpeed": "再生速度をリセット",
       "nextVideo": "次のビデオ",
       "showPlaylist": "プレイリストを表示",
       "hidePlaylist": "プレイリストを隠す",
@@ -136,9 +136,10 @@
     },
     "splayerx": {
       "about": "SPlayerについて",
+      "checkForUpdates": "アップデートを確認",
       "hide": "SPlayerを隠す",
       "hideOthers": "その他を隠す",
-      "preferences": "環境設定",
+      "preferences": "オプション設定",
       "quit": "SPlayerを終了",
       "showAll": "すべて表示"
     },
@@ -177,11 +178,11 @@
     },
     "titleName": "SPlayer",
     "update": {
-      "message": "更新已就绪，是否现在重启?",
-      "no": "暂不更新",
+      "message": "今再起動してアップデートをインストールしますか？",
+      "no": "後にする",
       "title": "更新就绪",
-      "updateInstalled": "播放器已更新至最新版本!",
-      "yes": "更新"
+      "updateInstalled": "最新バージョンにアップデート済み!",
+      "yes": "はい"
     },
     "window": {
       "windowRotate": "時計回りに90°回転",
@@ -220,7 +221,7 @@
     }
   },
   "nextVideo": {
-    "nextInFolder": "ホルダー中の次のビデオ",
+    "nextInFolder": "再生リスト中の次のビデオ",
     "nextInPlaylist": "プレイリスト中の次のビデオ"
   },
   "welcome": {
@@ -233,14 +234,14 @@
     "primary": "Primary",
     "secondary": "Secondary",
     "chooseSecondary": "Select Secondary Language",
-    "languageDescription": "* You can change your settings in preferences later",
+    "languageDescription": "*後でもオプション設定で変更できます。",
     "none": "None"
   },
   "preferences": {
     "general": {
       "hideHistory": "再生履歴を隠す",
-      "clearHistory": "終了時にプレイ履歴を削除",
-      "reverseScrolling": "マウスの逆スクロール",
+      "clearHistory": "終了時に再生履歴を削除",
+      "reverseScrolling": "マウスのスクロール方向を逆に設定",
       "setDefault": "デフォルトのプレーヤーとして設定",
       "setDefaultDescription": "SPlayer ですべてのビデオファイルを開く。",
       "restoreSettings": "すべての設定をリセット",
@@ -251,7 +252,7 @@
       "displayLanguage": "言語表示",
       "generalSetting": "通常設定",
       "others": "その他",
-      "switchDisplayLanguages": "SPlayerの言語表示を修正。"
+      "switchDisplayLanguages": "SPlayerの言語表示を変更。"
     },
     "translate": {
       "languageDescription": "次の言語で翻訳結果を取得するために匿名データをアップロードします。プライバシー情報は含まれません。",
@@ -261,7 +262,7 @@
       "translateConfirm": "Smart Translationを開く",
       "translateSetting": "翻訳設定",
       "secondary": "セカンド",
-      "setAsDefault": "SPlayerをデフォルトにする",
+      "setAsDefault": "SPlayerをデフォルトプレーヤーに設定",
       "settings": "設定"
     },
     "privacy": {
@@ -292,15 +293,28 @@
       "underlinedContent": "禁止"
     }
   },
+  "alertBubble": {
+    "button": "はい"
+  },
   "protectBubble": {
     "agree": "確定",
     "setting": "設定",
     "content": "スマートプライバシー保護が有効になります。 機密性の高い、または作業に不適切な再生履歴は削除されます。"
   },
+  "checkForUpdatesBubble": {
+    "needUpdate": {
+      "confirm": "ダウンロード",
+      "cancel": "スキップ",
+      "content": "新しいバージョン {version} がリリースされましたが、ダウンロードされますか？"
+    },
+    "noNeed": {
+      "content": "すでに最新バージョン {version}"
+    }
+  },
   "recentPlaylist": {
-    "folderSource": "ホルダー",
+    "folderSource": "再生リスト",
     "playing": "再生中",
-    "paused": "一時停止",
+    "paused": "ポーズ中",
     "playlistSource": "プレイリスト",
     "add": "プレイリストに追加する"
   },
@@ -349,10 +363,14 @@
     "title": ""
   },
   "translateModal": {
+    "videoLanguageLabel": "音声の言語",
+    "subtitleLanguageLabel": "以下に翻訳",
     "selectLanguageLabel": "音声の言語",
+    "audioLanguageLoading": "言語リストの取得 ...",
+    "audioLanguageLoadFail": "接続に失敗しました。もう一度お試しください",
     "select": {
       "title": "ビデオソースの言語を選択",
-      "content": "翻訳結果を生成するには、ビデオで聞く言語を選択して[生成] ボタンをクリックしてください。"
+      "content": "ビデオで聞こえる言語を選択し生成をクリックします。"
     },
     "translate": {
       "title": "{time} について",
@@ -410,11 +428,11 @@
     },
     "bubbleTranslateTimeOutFail": {
       "title": "接続タイムアウト",
-      "content": "サーバーへの接続に失敗しました。後でもう一度やり直してください!"
+      "content": "サーバーへの接続に失敗しました。暫くしてからまたお試しください!"
     },
     "bubbleTranslateServerErrorFail": {
       "title": "翻訳失敗",
-      "content": "サーバーエラーのため翻訳に失敗しました。 後でお試しください。"
+      "content": "クラウドエラーで翻訳失敗しました。 暫くしてからまたお試しください。"
     },
     "ok": "はい",
     "cancel": "キャンセル",

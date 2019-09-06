@@ -7,16 +7,19 @@
         :selected="currentUrl.includes('bilibili')"
         :url="'https://www.bilibili.com/'"
         :mouseup-on-icon="handleSidebarIcon"
+        class="no-drag"
       />
       <iQiyiSidebarIcon
         :selected="currentUrl.includes('iqiyi')"
         :url="'https://www.iqiyi.com/'"
         :mouseup-on-icon="handleSidebarIcon"
+        class="no-drag"
       />
       <YoutubeSidebarIcon
         :selected="currentUrl.includes('youtube')"
         :url="'https://www.youtube.com/'"
         :mouseup-on-icon="handleSidebarIcon"
+        class="no-drag"
       />
     </div>
   </div>

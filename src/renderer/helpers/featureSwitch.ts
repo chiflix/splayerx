@@ -1,16 +1,15 @@
 import Vue from 'vue';
-import syncStorage from '@/helpers/syncStorage';
-import { crc32 } from '@/libs/utils';
-import { version } from '@/../../package.json';
+import * as configcat from 'configcat-js';
+import { log } from '@/libs/Log';
+import { getMainVersion } from '@/libs/utils';
 
-const [major, minor] = version.split('.');
+const configCatApiKey = process.env.NODE_ENV === 'development'
+  ? 'WizXCIVndyJUn4cCRD3qvQ/8uwWLI_KhUmuOrOaDDsaxQ'
+  : 'WizXCIVndyJUn4cCRD3qvQ/M9CQx_MXgEeuIc8uO4Aowg';
 
-/**
- * 'on'/'off'/number means need to check again next time
- * 'always' means always be enabled
- * number refers to a ratio, based on user id
- */
-type FeatureConfig = 'on' | 'off' | 'always' | number;
+const client = configcat.createClientWithLazyLoad(configCatApiKey, {
+  cacheTimeToLiveSeconds: 600,
+});
 
 function getUserId() {
   try {
@@ -20,58 +19,49 @@ function getUserId() {
   }
 }
 
-async function getOnlineConfig(url: string) {
-  const headers = new Headers();
-  headers.append('pragma', 'no-cache');
-  headers.append('cache-control', 'no-cache');
-  return Promise.race([
-    fetch(url, { method: 'GET', headers }).then(res => res.json()),
-    new Promise(resolve => setTimeout(() => resolve({}), 5000)),
-  ]);
-}
-
-let cachedConfig: {[key: string]: FeatureConfig};
-async function getConfig() {
-  if (cachedConfig) return cachedConfig;
-  let config: {[key: string]: FeatureConfig} = {};
+function getApplicationDisplayLanguage() {
   try {
-    config = syncStorage.getSync('featureAlways') as {[key: string]: FeatureConfig} || config;
-    const onlineConfig = await getOnlineConfig(`https://splayer.org/switch/v${major}.${minor}.json`);
-    config = Object.assign(config, onlineConfig);
-    const featureAlways = Object.keys(config)
-      .filter(f => config[f] === 'always')
-      .reduce((obj, f) => Object.assign(obj, { [f]: 'always' }), {});
-    syncStorage.setSync('featureAlways', featureAlways);
-    cachedConfig = config;
-    return config;
+    return Vue.axios.defaults.headers.common['X-Application-Display-Language'] || '';
   } catch (ex) {
-    return config;
+    return '';
   }
 }
 
-export enum Features {
-  AI,
-  BrowsingView,
+function getUserObject() {
+  return {
+    identifier: getUserId(),
+    custom: {
+      version: getMainVersion(),
+      displayLanguage: getApplicationDisplayLanguage(),
+    },
+  };
 }
 
-export async function isFeatureEnabled(feature: Features, defaultValue = false) {
-  const featureName = Features[feature];
+export async function getConfig<T>(configKey: string, defaultValue?: T): Promise<T> {
+  log.debug('configKey', getUserObject());
+  return new Promise((resolve) => {
+    setTimeout(() => resolve(defaultValue), 10000);
+    client.getValue(configKey, defaultValue, (value: T) => {
+      resolve(value);
+    }, getUserObject());
+  });
+}
+
+export async function getJsonConfig(configKey: string, defaultValue: Json): Promise<Json> {
+  const configString = await getConfig<string>(configKey);
+  if (!configString) return defaultValue;
   try {
-    if (process.env.NODE_ENV === 'development'
-      && !window.localStorage.featureSwitch) return true;
-    if (window.localStorage[featureName]) return true;
+    return JSON.parse(configString);
   } catch (ex) {
-    //
+    log.error('featureSwitch getJsonConfig', ex);
+    return defaultValue;
   }
-  const userId = getUserId();
-  const config = await getConfig();
-  const featureSwitch = config[featureName]; // eslint-disable-line
-  if (typeof featureSwitch === 'string') {
-    return featureSwitch === 'on' || featureSwitch === 'always';
-  }
-  if (typeof featureSwitch === 'number') {
-    if (featureSwitch <= 0 || !userId) return false;
-    return Math.abs(crc32(userId)) % 100 <= featureSwitch * 100;
-  }
-  return defaultValue;
 }
+
+export async function forceRefresh() {
+  return new Promise((resolve) => {
+    client.forceRefresh(() => resolve());
+  });
+}
+
+export const isAIEnabled = async () => getConfig('isAIEnabled', false);

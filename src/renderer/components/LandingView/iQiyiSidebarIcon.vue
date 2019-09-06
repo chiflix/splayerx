@@ -2,7 +2,7 @@
   <div
     @mouseover="mouseover = true"
     @mouseout="mouseover = false"
-    @mouseup="mouseupOnIcon(url)"
+    @click="mouseupOnIcon(url)"
     :style="{
       opacity: mouseover || selected ? '1.0' : '0.7',
     }"

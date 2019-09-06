@@ -1,8 +1,8 @@
 <template>
   <div class="dropdown">
     <div
-      :class="showSelection ? 'dropdown__toggle--list' : 'dropdown__toggle--display'"
-      @mouseup.stop="showSelection = !showSelection"
+      :class="selectClass"
+      @mouseup.stop="toogle"
       class="no-drag"
     >
       <div class="dropdown__displayItem">
@@ -10,11 +10,11 @@
           {{ selected.label }}
         </span>
         <span
-          v-show="!showSelection"
+          v-show="!showSelection && staticLabel !== ''"
           class="arrow"
         >→</span>
         <span
-          v-show="!showSelection"
+          v-show="!showSelection && staticLabel !== ''"
           class="static_label"
         >{{ staticLabel }}</span>
       </div>
@@ -26,7 +26,7 @@
         <div
           v-for="(item) in list"
           :key="item.value"
-          @mouseup.stop="change(item);showSelection= false;"
+          @mouseup.stop="change(item);"
           class="dropdownListItem"
         >
           {{ item.label }}
@@ -48,6 +48,10 @@ export default Vue.extend({
   components: {
   },
   props: {
+    disabled: {
+      type: Boolean,
+      default: false,
+    },
     selected: {
       type: Object,
       required: true,
@@ -67,6 +71,16 @@ export default Vue.extend({
     };
   },
   computed: {
+    selectClass() {
+      if (this.disable) {
+        return 'dropdown__toggle--display--disabled';
+      } if (this.showSelection) {
+        return 'dropdown__toggle--list';
+      } if (this.selected.value) {
+        return 'dropdown__toggle--display--active';
+      }
+      return 'dropdown__toggle--display';
+    },
   },
   mounted() {
     document.addEventListener('mouseup', this.globalMouseUp);
@@ -75,13 +89,21 @@ export default Vue.extend({
     document.removeEventListener('mouseup', this.globalMouseUp);
   },
   methods: {
+    toogle() {
+      if (this.disabled) return;
+      this.showSelection = !this.showSelection;
+    },
     globalMouseUp() {
+      if (this.disabled) return;
       if (this.showSelection) {
         this.showSelection = false;
       }
     },
     change(item: { value: string, label: string }) {
+      if (this.disabled) return;
+      if (!item.value) return;
       this.$emit('update:selected', item);
+      this.showSelection = false;
     },
   },
 });
@@ -102,20 +124,28 @@ export default Vue.extend({
     border-radius: 2px;
     overflow: hidden;
     transition: all 200ms;
-    &--display {
+    &--display--disable, &--display--active, &--display {
       @extend .dropdown__toggle;
       height: 28px;
-      border: 1px solid rgba(255,255,255,0.10);
+      border: 1px solid rgba(255,255,255,0.30);
       border-radius: 2px;
       background-color: rgba(0, 0, 0, .04);
+    }
+    &--display {
       &:hover {
         border: 1px solid rgba(255, 255, 255, 0.2);
         background-color: rgba(255, 255, 255, 0.08);
       }
     }
+    &--display--active {
+      border-color: rgba(255,255,255,0.30);
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.08);
+      }
+    }
     &--list {
       @extend .dropdown__toggle;
-      height: 148px;
+      max-height: 148px;
       border: 1px solid rgba(255,255,255,0.3);
       background-color: rgba(120, 120, 120, 1);
       border-radius: 2px;
@@ -135,12 +165,15 @@ export default Vue.extend({
       margin-left: 4px;
       margin-right: 4px;
     }
+    .un_select {
+      color: rgba(255,255,255,0.20);
+    }
   }
 
   &__listItems {
     cursor: pointer;
     position: relative;
-    height: 112px;
+    max-height: 112px;
     margin: 4px 4px 4px 6px;
     overflow-y: scroll;
     &:focus {

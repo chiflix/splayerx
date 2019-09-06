@@ -18,7 +18,7 @@
       :style="{
       }"
       :class="switchPip ? 'translate' : ''"
-      class="down-icon"
+      class="down-icon no-drag"
     >
       <Icon
         type="switchMode"
