@@ -7,7 +7,7 @@
   >
     <div
       @mouseup="handleSidebar"
-      class="control-button sidebar-icon no-drag"
+      class="control-button sidebar-icon no-drag button-hover"
     >
       <Icon
         type="sidebar"
@@ -15,26 +15,22 @@
     </div>
     <div
       @mouseup="handleUrlBack"
+      :class="backType.toString() === 'back' ? 'button-hover' : ''"
       class="control-button back-icon"
     >
       <Icon
         ref="back"
         :type="backType"
-        :style="{
-          cursor: webInfo.canGoBack ? 'pointer' : ''
-        }"
       />
     </div>
     <div
       @mouseup="handleUrlForward"
+      :class="forwardType.toString() === 'forward' ? 'button-hover' : ''"
       class="control-button forward-icon"
     >
       <Icon
         ref="forward"
         :type="forwardType"
-        :style="{
-          cursor: webInfo.canGoForward ? 'pointer' : ''
-        }"
       />
     </div>
   </div>
@@ -98,9 +94,9 @@ export default {
     justify-content: center;
     align-items: center;
     transition: background-color 100ms ease-in;
-    &:hover {
-      background-color: #F5F6F8;
-    }
+  }
+  .button-hover:hover {
+    background-color: #F5F6F8;
   }
   .sidebar-icon {
     margin-left: 8px;

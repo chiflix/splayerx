@@ -71,7 +71,7 @@ export class BrowserViewManager implements IBrowserViewManager {
       const hasLastPage = this.history[channel].list.length;
       if (hasLastPage) {
         page.view.webContents.once('media-started-playing', () => {
-          if (page.view.webContents.getURL() !== page.url) return;
+          if (lastUrl !== page.url) return;
           if (this.currentChannel.includes('bilibili')) {
             let type = '';
             page.view.webContents

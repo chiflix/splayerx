@@ -13,9 +13,6 @@
       class="control-button page-refresh-icon no-drag"
     >
       <Icon
-        :style="{
-          cursor: 'pointer',
-        }"
         type="pageRefresh"
       />
     </div>
