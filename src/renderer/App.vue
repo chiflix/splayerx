@@ -5,7 +5,7 @@
     class="application"
   >
     <Titlebar
-      v-if="$route.name !== 'playing-view'"
+      v-if="!($route.name === 'playing-view' || ($route.name === 'browsing-view' && !isDarwin))"
       :is-landing-view="$route.name === 'landing-view'"
       :is-browsing-view="$route.name === 'browsing-view'"
       :show-sidebar="showSidebar"
@@ -56,6 +56,11 @@ export default {
       showSidebar: false,
       currentUrl: '',
     };
+  },
+  computed: {
+    isDarwin() {
+      return process.platform === 'darwin';
+    },
   },
   watch: {
     $route(to: any, from: any) {

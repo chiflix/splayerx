@@ -92,7 +92,7 @@ export default {
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  width: 100%;
+  width: calc(100% - 176px);
   height: 40px;
   z-index: 6;
   .url-search {
