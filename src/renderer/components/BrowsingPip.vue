@@ -90,9 +90,6 @@ export default {
     electron.remote.getCurrentWindow().addListener('enter-html-full-screen', () => {
       electron.ipcRenderer.send('mouseup', 'full');
     });
-    window.addEventListener('focus', () => {
-      this.menuService.updateFocusedWindow(false);
-    });
     window.addEventListener('resize', throttle(() => {
       const size = electron.remote.getCurrentWindow().getSize();
       electron.ipcRenderer.send('update-pip-size', size);
