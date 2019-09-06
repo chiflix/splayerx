@@ -46,7 +46,7 @@ export default class RecentPlayService implements IRecentPlay {
         const percentage = (lastPlayedTime / duration) * 100;
         let backgroundUrl;
 
-        if (duration - lastPlayedTime < 5) {
+        if (duration - lastPlayedTime < 5 || lastPlayedTime < 2) {
           try {
             const mediaHash = await mediaQuickHash(path);
             const coverSrc = await mediaStorageService.getImageBy(mediaHash, 'cover');

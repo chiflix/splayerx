@@ -271,6 +271,7 @@ export default {
   },
   /* eslint-disable @typescript-eslint/no-explicit-any */
   created() {
+    this.createTouchBar();
     window.addEventListener('mousemove', this.globalMoveHandler);
     // Get all data and show
     if (!this.incognitoMode) {
@@ -342,6 +343,31 @@ export default {
     ...mapActions({
       updateInitialUrl: browsingActions.UPDATE_INITIAL_URL,
     }),
+    createTouchBar() {
+      const { TouchBar } = this.$electron.remote;
+      const { TouchBarButton, TouchBarSpacer } = TouchBar;
+
+      this.sidebarButton = new TouchBarButton({
+        icon: this.createIcon('touchBar/sidebar.png'),
+        click: () => {
+          this.$event.emit('side-bar-mouseup');
+        },
+      });
+      this.openFileButton = new TouchBarButton({
+        icon: this.createIcon('touchBar/addVideo.png'),
+        click: () => {
+          this.open();
+        },
+      });
+      this.touchBar = new TouchBar({
+        items: [
+          this.sidebarButton,
+          new TouchBarSpacer({ size: 'large' }),
+          this.openFileButton,
+        ],
+      });
+      this.$electron.remote.getCurrentWindow().setTouchBar(this.touchBar);
+    },
     move(steps: number) {
       return steps * (this.thumbnailWidth + this.marginRight);
     },
@@ -429,12 +455,39 @@ export default {
 $themeColor-Light: white;
 
 .landing-view {
+  height: 100vh;
+  width: 100vw;
+}
+.side-bar {
+  position: absolute;
+  background-color: #3B3B41;
+  z-index: 0;
+  left: 0;
+  height: 100%;
+  transition: width 100ms ease-out;
+  will-change: width;
+
+  .icon-box {
+    width: 40px;
+    margin-top: 46px;
+    margin-left: 18px;
+    margin-right: 18px;
+    display: flex;
+    flex-direction: column;
+    div {
+      width: 40px;
+      height: 40px;
+      margin-bottom: 16px;
+    }
+  }
+}
+.wrapper {
   overflow: hidden;
   will-change: width;
   transition-property: width;
   transition-duration: 100ms;
   transition-timing-function: ease-out;
-  background-color: #444349;
+  background-color: #434349;
   position: absolute;
   right: 0;
   height: 100%;

@@ -8,9 +8,6 @@
   >
     <div
       v-if="!isDarwin && isLandingView"
-      :style="{
-        width: showSidebar ? '89px' : '13px',
-      }"
       @dblclick.stop=""
       class="sidebar"
     >
@@ -19,7 +16,11 @@
         @mouseout.native="mouseoverSidebar = false"
         :mouseover="mouseoverSidebar"
         :fill="isBrowsingView ? '#BBBACC' : ''"
-        class="no-drag"
+        @mouseup.native="handleSidebar"
+        :style="{
+          transform: `translateX(${showSidebar ? '76' : '0'}px)`,
+        }"
+        class="sidebar-icon no-drag"
       />
     </div>
     <div
@@ -273,11 +274,13 @@ export default {
   justify-content: space-between;
   position: absolute;
   .sidebar {
-    display: flex;
-    justify-content: flex-end;
+    width: 89px;
     margin-top: 6px;
     margin-left: 12px;
-    transition: width 100ms linear;
+    &-icon {
+      width: fit-content;
+      transition: transform 100ms linear;
+    }
   }
   .win-icons {
     display: flex;

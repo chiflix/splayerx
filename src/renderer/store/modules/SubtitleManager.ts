@@ -40,7 +40,7 @@ import {
 import { LanguageCode } from '@/libs/language';
 import { AudioTranslateBubbleOrigin } from './AudioTranslate';
 import { ISubtitleStream } from '@/plugins/mediaTasks';
-import { Features, isFeatureEnabled } from '@/helpers/featureSwitch';
+import { isAIEnabled } from '@/helpers/featureSwitch';
 
 const sortOfTypes = {
   local: 0,
@@ -466,7 +466,7 @@ const actions = {
         .filter((info: TranscriptInfo) => info.languageCode === primaryLanguage);
       const secondaryNotExistedResults = notExistedNewSubs
         .filter((info: TranscriptInfo) => info.languageCode === secondaryLanguage);
-      if ((await isFeatureEnabled(Features.AI, true))) {
+      if ((await isAIEnabled())) {
         // 出现AI按钮的情况
         // 1. 在线字幕tags都是ES(模糊搜索)
         // 2. 没有在线字幕

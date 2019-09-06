@@ -288,13 +288,13 @@ export default {
     &__title {
       font-family: $font-medium;
       font-size: 13px;
-      color: rgba(255,255,255,0.9);
+      color: rgba(255,255,255,0.7);
     }
 
     &__description {
       font-family: $font-medium;
       font-size: 11px;
-      color: rgba(255,255,255,0.5);
+      color: rgba(255,255,255,0.25);
       margin-top: 7px;
     }
 
@@ -303,7 +303,7 @@ export default {
       cursor: pointer;
       font-family: $font-semibold;
       font-size: 11px;
-      color: #FFFFFF;
+      color: rgba(255,255,255,.7);
       text-align: center;
       border-radius: 2px;
       border: 1px solid rgba(255,255,255,0.1);
@@ -350,7 +350,7 @@ export default {
       &--list {
         height: 148px;
         border: 1px solid rgba(255,255,255,0.3);
-        background-color: rgba(120,120,120,1);
+        background-color: #49484E;
         .dropdown__displayItem {
           border-bottom: 1px solid rgba(255,255,255,0.1);
         }
@@ -441,7 +441,7 @@ export default {
     &__text {
       font-family: $font-medium;
       font-size: 11px;
-      color: #FFFFFF;
+      color: rgba(255,255,255,.7);
       letter-spacing: 0;
       text-align: center;
       line-height: 26px;

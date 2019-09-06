@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-22 17:18:34
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-08-14 16:01:41
+ * @Last Modified time: 2019-08-20 17:47:35
  */
 
 import { EventEmitter } from 'events';
@@ -102,6 +102,7 @@ export default class AudioGrabService extends EventEmitter {
     requestConfig.setAudioLanguageCode(this.audioLanguageCode);
     requestConfig.setTargetLanguageCode(this.targetLanguageCode);
     requestConfig.setMediaIdentity(this.mediaHash);
+    requestConfig.setAudioTrack(String(this.audioId));
     request.setStreamingConfig(requestConfig);
     this.streamClient.write(request);
     this.streamClient.once('data', this.grpcCallBack.bind(this));

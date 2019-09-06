@@ -1,15 +1,13 @@
 <template>
   <div>
     <div class="bubble bubbleLayout--column">
-      <p class="bubble__info">
-        {{ $t('protectBubble.content') }}
-      </p>
+      <p class="bubble__info"><!--eslint-disable-line-->{{ content }}</p>
       <div class="buttonGroup">
         <div
-          @mouseup.stop="handleSetting"
+          @mouseup.stop="cancel"
           class="bubble__button--lower"
         >
-          {{ $t('protectBubble.setting') }}
+          {{ cancelButtonText }}
         </div>
         <div
           :class="{
@@ -17,10 +15,10 @@
           }"
           @mouseover.stop="agreeHovered = true"
           @mouseout.stop="agreeHovered = false"
-          @mouseup.stop="handleAgree"
+          @mouseup.stop="confirm"
           class="bubble__button"
         >
-          {{ $t('protectBubble.agree') }}
+          {{ confirmButtonText }}
         </div>
       </div>
     </div>
@@ -28,17 +26,29 @@
 </template>
 <script lang="ts">
 export default {
-  name: 'PrivacyBubble',
+  name: 'ConfirmBubble',
   props: {
     useBlur: {
       type: Boolean,
       default: false,
     },
-    handleAgree: {
+    content: {
+      type: String,
+      required: true,
+    },
+    confirmButtonText: {
+      type: String,
+      required: true,
+    },
+    cancelButtonText: {
+      type: String,
+      required: true,
+    },
+    confirm: {
       type: Function,
       required: true,
     },
-    handleSetting: {
+    cancel: {
       type: Function,
       required: true,
     },
@@ -98,6 +108,7 @@ export default {
     height: fit-content;
     font-size: 11px;
     line-height: 15px;
+    white-space: pre-line;
   }
   &__button {
     color: rgba(255,255,255,0.5);
@@ -117,10 +128,12 @@ export default {
     &:hover {
       background-image: none;
       background-color: rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.7);
     }
     &:active {
       background-image: none;
       background-color: rgba(0,0,0,0.2);
+      color: rgba(255,255,255,0.7);
     }
     &--lower {
       cursor: pointer;
@@ -130,7 +143,7 @@ export default {
       background: none;
       color: rgba(255,255,255,0.2);
       &:hover {
-        color: rgba(255,255,255,0.4);
+        color: rgba(255,255,255,0.5);
       }
     }
   }

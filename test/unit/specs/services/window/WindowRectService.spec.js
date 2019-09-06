@@ -69,19 +69,19 @@ describe('WindowRectService logic service', () => {
       expect(JSON.stringify(r3)).to.be.equal(JSON.stringify(target));
       expect(JSON.stringify(r4)).to.be.equal(JSON.stringify(target));
     });
-    it.only('should return size [720, 405] && scale by the center point when back to landing-view & not in fullscreen', () => {
+    it('should return size [720, 405] && scale by the center point when back to landing-view & not in fullscreen', () => {
       const winSize = [500, 500];
       const winPos = [200, 200];
 
-      const r1 = windowRectService.uploadWindowBy(false, 'landing-view', undefined, undefined, winSize, winPos);
+      const r1 = windowRectService.uploadWindowBy(false, 'landing-view', undefined, undefined, winSize, winPos, false);
 
       const expectResult = windowRectService.calculateWindowPosition(
         winPos.concat(winSize),
+        [720, 405],
         [
           window.screen.availLeft, window.screen.availTop,
           window.screen.availWidth, window.screen.availHeight,
         ],
-        [720, 405],
       ).concat([720, 405]);
 
       expect(r1).to.be.deep.equal(expectResult);

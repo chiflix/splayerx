@@ -117,6 +117,9 @@ export default {
     width: 0;
   }
 }
+.landing-view {
+  background-color: #434349;
+}
 .fade {
   &-enter-active {
     transition: opacity 500ms ease-out;

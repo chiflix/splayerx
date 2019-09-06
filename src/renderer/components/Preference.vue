@@ -144,6 +144,7 @@ export default {
 
 <style scoped lang="scss">
 .preference {
+  background-color: #3B3B41;
   .titlebar {
     display: flex;
     flex-wrap: nowrap;
@@ -204,12 +205,8 @@ export default {
   &__tabs {
     width: 110px;
     height: 100%;
-    background-image: linear-gradient(
-      -28deg,
-      rgba(65,65,65,0.97) 0%,
-      rgba(84,84,84,0.97) 47%,
-      rgba(123,123,123,0.97) 100%
-    );
+    background-color: #3B3B41;
+    border-right: 1px solid rgba(255,255,255,.03);
   }
 
   &__tab {
@@ -217,39 +214,30 @@ export default {
     -webkit-app-region: no-drag;
     font-family: $font-semibold;
     font-size: 14px;
-    padding-left: 15px;
     letter-spacing: 0;
     line-height: 42px;
-    color: rgba(255,255,255,0.3);
-    border-left: 1px solid rgba(0,0,0,0);
-    background-color: rgba(255,255,255,0);
+    text-align: center;
+    color: rgba(255,255,255,.25);
+    margin: 5px 10px;
+    background-color: rgba(83, 52, 52, 0);
     transition: background-color 200ms;
+    border-radius: 50px;
     &:hover {
-      background-color: rgba(255,255,255,0.03);
+      color: rgba(255,255,255,.7);
     }
 
     &--selected {
-      color: rgba(255,255,255,1);
-      border-left: 1px solid white;
-      background-image: linear-gradient(
-        99deg,
-        rgba(243,243,243,0.15) 0%,
-        rgba(255,255,255,0.0675) 81%
-      );
+      color: rgba(255,255,255,.7);
+      background-color: rgba(0,0,0,0.12);
       &:hover {
-        background-color: rgba(255,255,255,0);
+        color: rgba(255,255,255,.7);
       }
     }
   }
 
   &__tabpanel {
     width: 430px;
-    background-image: linear-gradient(
-      -28deg,
-      rgba(65,65,65,0.99) 0%,
-      rgba(84,84,84,0.99) 47%,
-      rgba(123,123,123,0.99) 100%
-    );
+    background-color: #3B3B41;
   }
 
   &__tabcontent {

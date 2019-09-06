@@ -74,6 +74,7 @@ export default {
       needToRestore: false,
       winAngleBeforeFullScreen: 0, // winAngel before full screen
       winSizeBeforeFullScreen: [], // winSize before full screen
+      switchingLock: false,
     };
   },
   computed: {
@@ -172,6 +173,8 @@ export default {
       this.$ga.event('app', 'toggle-playback');
     }, 50, { leading: true }));
     this.$bus.$on('next-video', () => {
+      if (this.switchingLock) return;
+      this.switchingLock = true;
       videodata.paused = false;
       if (this.nextVideo) {
         this.$store.commit('LOOP_UPDATE', false);
@@ -182,6 +185,8 @@ export default {
       }
     });
     this.$bus.$on('previous-video', () => {
+      if (this.switchingLock) return;
+      this.switchingLock = true;
       videodata.paused = false;
       if (this.previousVideo) {
         this.$store.commit('LOOP_UPDATE', false);
@@ -231,6 +236,7 @@ export default {
       discardTranslate: atActions.AUDIO_TRANSLATE_DISCARD,
     }),
     async onMetaLoaded(event: Event) { // eslint-disable-line complexity
+      this.switchingLock = false;
       const target = event.target as HTMLVideoElement;
       this.videoElement = target;
       this.videoConfigInitialize({
@@ -242,10 +248,7 @@ export default {
         currentTime: 0,
       });
       if (target.duration && Number.isFinite(target.duration)) {
-        const generationInterval = Math.round(target.duration
-          / (window.screen.width / 4)) || 1;
-        const maxThumbnailCount = Math.floor(target.duration / generationInterval);
-        this.$bus.$emit('generate-thumbnails', maxThumbnailCount);
+        this.$bus.$emit('generate-thumbnails');
       }
       this.updateMetaInfo({
         intrinsicWidth: target.videoWidth,
@@ -254,29 +257,7 @@ export default {
       });
       this.changeWindowRotate(this.winAngle);
 
-      let maxVideoSize;
-      let videoSize;
-      if (this.videoExisted && (this.winAngle === 0 || this.winAngle === 180)) {
-        maxVideoSize = this.winSize;
-        videoSize = [this.videoWidth, this.videoHeight];
-      } else if (this.videoExisted) {
-        maxVideoSize = this.winSize;
-        videoSize = [this.videoHeight, this.videoWidth];
-      } else {
-        videoSize = [this.videoWidth, this.videoHeight];
-        const availWidth = window.screen.availWidth;
-        const availHeight = window.screen.availHeight;
-        if (this.ratio > 1 && videoSize[0] > availWidth * 0.7) {
-          videoSize[0] = availWidth * 0.7;
-          videoSize[1] = videoSize[0] / this.ratio;
-        } else if (this.ratio <= 1 && videoSize[1] > availHeight * 0.7) {
-          videoSize[1] = availHeight * 0.7;
-          videoSize[0] = videoSize[1] * this.ratio;
-        }
-        this.videoExisted = true;
-      }
-      const oldRect = this.winPos.concat(this.winSize);
-      windowRectService.calculateWindowRect(videoSize, true, oldRect, maxVideoSize);
+      this.windowRectControl();
 
       const mediaInfo = this.videoId
         ? await playInfoStorageService.getMediaItem(this.videoId)
@@ -292,6 +273,37 @@ export default {
     onAudioTrack(event: TrackEvent) {
       const { type, track } = event;
       this[`${type}AudioTrack`](track);
+    },
+    windowRectControl() {
+      let videoSize;
+      const [winWidth, winHeight] = this.winSize;
+      const oldRatio = winWidth / winHeight;
+      const isLandscape = (ratio: number) => ratio > 1;
+      if (
+        this.videoExisted
+        && (isLandscape(this.ratio) === isLandscape(oldRatio)) // 同为landscpae或portrait
+      ) {
+        if (this.ratio > 1) {
+          videoSize = [winHeight * this.ratio, winHeight];
+        } else {
+          videoSize = [winWidth, winWidth / this.ratio];
+        }
+      } else {
+        videoSize = [this.videoWidth, this.videoHeight];
+        const availWidth = window.screen.availWidth;
+        const availHeight = window.screen.availHeight;
+        if (this.ratio > 1 && videoSize[0] > availWidth * 0.7) {
+          videoSize[0] = availWidth * 0.7;
+          videoSize[1] = videoSize[0] / this.ratio;
+        } else if (this.ratio <= 1 && videoSize[1] > availHeight * 0.7) {
+          videoSize[1] = availHeight * 0.7;
+          videoSize[0] = videoSize[1] * this.ratio;
+        }
+        this.videoExisted = true;
+      }
+      if (this.winAngle !== 0 && this.winAngle !== 180) videoSize.reverse();
+      const oldRect = this.winPos.concat(this.winSize);
+      windowRectService.calculateWindowRect(videoSize, true, oldRect);
     },
     changeWindowRotate(val: number) {
       requestAnimationFrame(() => {
@@ -345,7 +357,8 @@ export default {
       };
 
       const result = await playInfoStorageService.updateMediaItemBy(videoId, data as MediaItem);
-      if (result) this.$bus.$emit('database-saved');
+      // @ts-ignore
+      if (result) this.$bus.$emit('database-saved', result);
     },
     saveSubtitleStyle() {
       return settingStorageService.updateSubtitleStyle({
@@ -428,7 +441,7 @@ export default {
             name: 'landing-view',
           });
           setTimeout(() => {
-            windowRectService.uploadWindowBy(false, 'landing-view', undefined, undefined, this.winSize, this.winPos);
+            windowRectService.uploadWindowBy(false, 'landing-view', undefined, undefined, this.winSize, this.winPos, this.isFullScreen);
           }, 200);
         });
     },

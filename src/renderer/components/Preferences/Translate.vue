@@ -260,9 +260,10 @@ export default {
 .tabcontent {
   .settingItem {
     &__attached {
-      background-color: rgba(0,0,0,0.05);
+      background-color: rgba(0,0,0,0.07);
       margin-top: 15px;
       padding: 20px 28px;
+      border-radius: 5px;
 
       table {
         width: 100%;
@@ -275,14 +276,15 @@ export default {
     &__title {
       font-family: $font-medium;
       font-size: 13px;
-      color: rgba(255,255,255,0.9);
+      color: rgba(255,255,255,0.7);
     }
 
     &__description {
       font-family: $font-medium;
       font-size: 11px;
-      color: rgba(255,255,255,0.5);
+      color: rgba(255,255,255,0.25);
       margin-top: 7px;
+      margin-bottom: 7px;
     }
 
     &__input {
@@ -290,7 +292,7 @@ export default {
       cursor: pointer;
       font-family: $font-semibold;
       font-size: 11px;
-      color: #FFFFFF;
+      color: rgba(255,255,255,.7);
       text-align: center;
       border-radius: 2px;
       border: 1px solid rgba(255,255,255,0.1);
@@ -346,7 +348,7 @@ export default {
         @extend .dropdown__toggle;
         height: 148px;
         border: 1px solid rgba(255,255,255,0.3);
-        background-color: rgba(120,120,120,1);
+        background-color: #49484E;
         .dropdown__displayItem {
           border-bottom: 1px solid rgba(255,255,255,0.1);
         }
