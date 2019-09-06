@@ -11,7 +11,7 @@
       :show-sidebar="showSidebar"
       :title="title"
       :is-reloading="isReloading"
-      :has-vide="hasVideo"
+      :web-info="webInfo"
       :handle-enter-pip="handleEnterPip"
       :handle-url-reload="handleUrlReload"
       :handle-url-back="handleUrlBack"
@@ -79,13 +79,11 @@ export default {
     return {
       quit: false,
       loadingState: false,
-      startTime: 0,
       pipType: '',
       bilibiliType: 'video',
       preload: `file:${require('path').resolve(__static, 'pip/preload.js')}`,
       maskToShow: false,
       dropFiles: [],
-      hasVideo: false,
       calculateVideoNum:
         'var iframe = document.querySelector("iframe");if (iframe && iframe.contentDocument) {document.getElementsByTagName("video").length + iframe.contentDocument.getElementsByTagName("video").length} else {document.getElementsByTagName("video").length}',
       getVideoStyle:
@@ -99,8 +97,6 @@ export default {
       browserIds: [1, 2],
       menuService: null,
       currentUrl: '',
-      canGoBack: false,
-      canGoForward: false,
       adaptFinished: false,
       pipInfo: {},
       isGlobal: false,
@@ -118,6 +114,12 @@ export default {
         /^https:\/\/account.xiaomi.com\/pass\//i,
       ],
       isReloading: false,
+      webInfo: {
+        hasVideo: false,
+        url: '',
+        canGoForward: false,
+        canGoBack: false,
+      },
     };
   },
   computed: {
@@ -166,6 +168,9 @@ export default {
           return 0;
       }
     },
+    hasVideo() {
+      return this.webInfo.hasVideo;
+    },
   },
   watch: {
     currentUrl(val: string) {
@@ -192,9 +197,6 @@ export default {
       }
     },
     hasVideo(val: boolean) {
-      this.$refs.browsingHeader.updateWebInfo({
-        hasVideo: val,
-      });
       this.updatePipState(val);
     },
     adaptFinished(val: boolean) {
@@ -254,7 +256,7 @@ export default {
     },
     loadingState(val: boolean) {
       if (val) {
-        this.hasVideo = false;
+        this.webInfo.hasVideo = false;
       } else {
         setTimeout(() => {
           const loadUrl = this.$electron.remote
@@ -275,7 +277,7 @@ export default {
             .webContents.executeJavaScript(
               this.calculateVideoNum,
               (r: number) => {
-                this.hasVideo = channel === 'youtube.com' && !getVideoId(loadUrl).id
+                this.webInfo.hasVideo = channel === 'youtube.com' && !getVideoId(loadUrl).id
                   ? false
                   : !!r;
               },
@@ -393,8 +395,10 @@ export default {
         this.currentUrl = urlParseLax(state.url).href;
         this.removeListener();
         this.addListenerToBrowser();
-        this.canGoBack = state.canGoBack;
-        this.canGoForward = state.canGoForward;
+        this.webInfo.canGoBack = state.canGoBack;
+        this.webInfo.canGoForward = state.canGoForward;
+        this.updateCanGoBack(this.webInfo.canGoBack);
+        this.updateCanGoForward(this.webInfo.canGoForward);
         const loadUrl = this.$electron.remote
           .getCurrentWindow()
           .getBrowserViews()[0]
@@ -409,22 +413,19 @@ export default {
         }
         if (!this.$electron.remote.getCurrentWindow()
           .getBrowserViews()[0].webContents.isLoading()) {
+          this.startLoading = false;
           this.$electron.remote
             .getCurrentWindow()
             .getBrowserViews()[0]
             .webContents.executeJavaScript(
               this.calculateVideoNum,
               (r: number) => {
-                this.hasVideo = channel === 'youtube.com' && !getVideoId(loadUrl).id
+                this.webInfo.hasVideo = channel === 'youtube.com' && !getVideoId(loadUrl).id
                   ? false
                   : !!r;
               },
             );
         }
-        this.$bus.$emit('update-web-info', {
-          canGoBack: state.canGoBack,
-          canGoForward: state.canGoForward,
-        });
       },
     );
   },
@@ -460,19 +461,9 @@ export default {
     },
     focusHandler() {
       this.menuService.updateFocusedWindow(true);
-      this.updatePipState(this.hasVideo);
-      this.updateCanGoBack(
-        this.$electron.remote
-          .getCurrentWindow()
-          .getBrowserViews()[0]
-          .webContents.canGoBack(),
-      );
-      this.updateCanGoForward(
-        this.$electron.remote
-          .getCurrentWindow()
-          .getBrowserViews()[0]
-          .webContents.canGoForward(),
-      );
+      this.updatePipState(this.webInfo.hasVideo);
+      this.updateCanGoBack(this.webInfo.canGoBack);
+      this.updateCanGoForward(this.webInfo.canGoForward);
       this.updateReload(true);
       const loadUrl = this.$electron.remote
         .getCurrentWindow()
@@ -487,7 +478,7 @@ export default {
         .getCurrentWindow()
         .getBrowserViews()[0]
         .webContents.executeJavaScript(this.calculateVideoNum, (r: number) => {
-          this.hasVideo = channel === 'youtube.com' && !getVideoId(loadUrl).id ? false : !!r;
+          this.webInfo.hasVideo = channel === 'youtube.com' && !getVideoId(loadUrl).id ? false : !!r;
         });
     },
     beforeUnloadHandler(e: BeforeUnloadEvent) {
@@ -539,13 +530,15 @@ export default {
     },
     updateCanGoBack(val: boolean) {
       if (this.$electron.remote.getCurrentWindow().isFocused()) {
-        this.$electron.ipcRenderer.send('update-enabled', 'history.back', val);
+        this.menuService.updateMenuItemEnabled(
+          'history.back',
+          val,
+        );
       }
     },
     updateCanGoForward(val: boolean) {
       if (this.$electron.remote.getCurrentWindow().isFocused()) {
-        this.$electron.ipcRenderer.send(
-          'update-enabled',
+        this.menuService.updateMenuItemEnabled(
           'history.forward',
           val,
         );
@@ -573,7 +566,7 @@ export default {
       if (this.currentUrl.includes('youtube')) {
         oldChannel = 'youtube.com';
       }
-      this.hasVideo = false;
+      this.webInfo.hasVideo = false;
       if (newChannel !== oldChannel) {
         this.removeListener();
         this.$electron.ipcRenderer.send('change-channel', { url });
@@ -626,13 +619,13 @@ export default {
     },
     willNavigate(e: Event, url: string) {
       if (!this.startLoading) {
+        this.startLoading = true;
         if (
           !url
           || url === 'about:blank'
           || urlParseLax(this.currentUrl).href === urlParseLax(url).href
         ) return;
         this.currentUrl = urlParseLax(url).href;
-        this.startTime = new Date().getTime();
         this.loadingState = true;
         this.$electron.ipcRenderer.send('create-browser-view', { url });
       }
@@ -649,7 +642,6 @@ export default {
           || urlParseLax(this.currentUrl).href === urlParseLax(url).href
         ) return;
         this.currentUrl = urlParseLax(url).href;
-        this.startTime = new Date().getTime();
         this.loadingState = true;
         this.$electron.ipcRenderer.send('create-browser-view', { url });
       }
@@ -676,9 +668,7 @@ export default {
           // }
           break;
         case 'fullscreenchange':
-          if (!this.isPip) {
-            this.headerToShow = !args.isFullScreen;
-          }
+          this.headerToShow = !args.isFullScreen;
           break;
         case 'keydown':
           if (['INPUT', 'TEXTAREA'].includes(args.targetName as string)) {
@@ -831,13 +821,13 @@ export default {
       }
     },
     handleUrlForward() {
-      if (this.canGoForward) {
+      if (this.webInfo.canGoForward) {
         this.removeListener();
         this.$electron.ipcRenderer.send('go-to-offset', 1);
       }
     },
     handleUrlBack() {
-      if (this.canGoBack) {
+      if (this.webInfo.canGoBack) {
         this.removeListener();
         this.$electron.ipcRenderer.send('go-to-offset', -1);
       }
@@ -875,10 +865,10 @@ export default {
       }
     },
     handleEnterPip(isGlobal: boolean) {
-      if (this.hasVideo) {
+      if (this.webInfo.hasVideo) {
         this.isGlobal = isGlobal;
         this.removeListener();
-        this.hasVideo = false;
+        this.webInfo.hasVideo = false;
         this.adaptFinished = false;
         this.enterPipOperation();
         this.updatePipState(false);

@@ -564,7 +564,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   }
   .active {
     display: none;
-  } 
+  }
 }
 .down {
   width: 5px;

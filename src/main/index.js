@@ -841,6 +841,21 @@ function registerMainWindowEvent(mainWindow) {
     menuService.updateFocusedWindow(true, mainWindow && mainWindow.isVisible());
     mainWindow.focus();
   });
+  ipcMain.on('set-window-maximize', () => {
+    if (mainWindow && mainWindow.isFocused()) {
+      if (!mainWindow.isMaximized()) {
+        mainWindow.maximize();
+      } else {
+        mainWindow.unmaximize();
+      }
+    } else if (browsingWindow && browsingWindow.isFocused()) {
+      if (!browsingWindow.isMaximized()) {
+        browsingWindow.maximize();
+      } else {
+        browsingWindow.unmaximize();
+      }
+    }
+  });
   ipcMain.on('update-route-name', (e, route) => {
     routeName = route;
   });
@@ -1236,7 +1251,7 @@ app.on('menu-open-dialog', (playlistId) => {
 app.on('activate', () => {
   if (!mainWindow) {
     if (app.isReady()) createMainWindow();
-  } else if (!mainWindow.isVisible()) {
+  } else if (!mainWindow.isVisible() && (!browsingWindow || !browsingWindow.isVisible())) {
     mainWindow.show();
   }
   if (browsingWindow && browsingWindow.isMinimized()) {

@@ -965,12 +965,7 @@ new Vue({
         this.$bus.$emit('toggle-pip', false);
       });
       this.menuService.on('browsing.window.maxmize', () => {
-        const browserWindow = this.$electron.remote.getCurrentWindow();
-        if (!browserWindow.isMaximized()) {
-          this.$electron.ipcRenderer.send('callMainWindowMethod', 'maximize');
-        } else {
-          this.$electron.ipcRenderer.send('callMainWindowMethod', 'unmaximize');
-        }
+        this.$electron.ipcRenderer.send('set-window-maximize');
       });
       this.menuService.on('browsing.window.backToLandingView', () => {
         this.$bus.$emit('back-to-landingview');
