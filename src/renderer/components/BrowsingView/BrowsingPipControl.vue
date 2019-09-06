@@ -38,10 +38,6 @@ export default {
       type: Function,
       required: true,
     },
-    handleGlobalPip: {
-      type: Function,
-      required: true,
-    },
     hasVideo: {
       type: Boolean,
       default: false,
@@ -55,13 +51,13 @@ export default {
   computed: {
     pipType() {
       if (!this.hasVideo) return 'pipDisabled';
-      else if (this.pip === 'Enter') return 'pip';
+      if (this.pip === 'Enter') return 'pip';
       return 'pop';
     },
   },
   methods: {
     handlePip() {
-      this.pip === 'Enter' ? this.handleEnterPip() : this.handleGlobalPip();
+      this.pip === 'Enter' ? this.handleEnterPip(true) : this.handleEnterPip(false);
     },
     switchPipType() {
       this.pip = this.pip === 'Enter' ? 'Global' : 'Enter';

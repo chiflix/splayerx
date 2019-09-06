@@ -12,13 +12,13 @@
     <browsing-input
       :handle-url-reload="handleUrlReload"
       :title="title"
+      :is-reloading="isReloading"
       :close-url-input="closeUrlInput"
       :play-file-with-playing-view="playFileWithPlayingView"
     />
     <browsing-pip-control
       :has-video="hasVideo"
       :handle-enter-pip="handleEnterPip"
-      :handle-global-pip="handleGlobalPip"
     />
   </div>
 </template>
@@ -45,6 +45,10 @@ export default {
       type: String,
       default: 'Splayer',
     },
+    isReloading: {
+      type: Boolean,
+      required: true,
+    },
     handleEnterPip: {
       type: Function,
       required: true,
@@ -64,12 +68,7 @@ export default {
     handleBookmarkOpen: {
       type: Function,
       required: true,
-    },
-    handleGlobalPip: {
-      type: Function,
-      required: true,
-    },
-  },
+    },},
   data() {
     return {
       showOpenUrl: false,

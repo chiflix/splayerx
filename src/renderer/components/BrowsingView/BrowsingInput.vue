@@ -13,7 +13,7 @@
       class="control-button page-refresh-icon no-drag"
     >
       <Icon
-        type="pageRefresh"
+        :type="isReloading ? 'reloadStop' : 'pageRefresh'"
       />
     </div>
   </div>
@@ -31,6 +31,10 @@ export default {
     title: {
       type: String,
       default: 'Splayer',
+    },
+    isReloading: {
+      type: Boolean,
+      required: true,
     },
     handleUrlReload: {
       type: Function,
