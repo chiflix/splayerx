@@ -3,7 +3,7 @@
     class="pip-control"
   >
     <div
-      @mouseup="handlePip"
+      @mouseup="handleEnterPip(pip === 'Enter')"
       :style="{
         opacity: hasVideo ? 1.0 : 0.3,
       }"
@@ -60,9 +60,6 @@ export default {
     },
   },
   methods: {
-    handlePip() {
-      this.pip === 'Enter' ? this.handleEnterPip(true) : this.handleEnterPip(false);
-    },
     switchPipType() {
       this.pip = this.pip === 'Enter' ? 'Global' : 'Enter';
       this.switchPip = true;
