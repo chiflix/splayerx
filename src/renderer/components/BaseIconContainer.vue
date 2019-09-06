@@ -544,6 +544,24 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   height: 16px;
   display: block;
 }
+.backDisabled, .forwardDisabled {
+  display: block;
+  width: 16px;
+  height: 16px;
+}
+.back, .forward, .pageRefresh, .reloadStop {
+  width: 16px;
+  height: 16px;
+ .default {
+    display: block;
+  }
+  .hover {
+    display: none;
+  }
+  .active {
+    display: none;
+  }
+}
 .down {
   width: 5px;
   height: 7px;

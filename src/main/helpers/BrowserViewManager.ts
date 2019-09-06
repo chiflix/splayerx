@@ -150,6 +150,11 @@ export class BrowserViewManager implements IBrowserViewManager {
     const currentIndex = this.history[this.currentChannel].currentIndex;
     const list = this.history[this.currentChannel].list;
     const pipBrowser = list[currentIndex].view;
+    const mainBrowser = {
+      canBack: currentIndex - 1 > 0,
+      canForward: false,
+      page: list[currentIndex - 1],
+    };
     this.currentPip = {
       pipIndex: currentIndex,
       pipChannel: this.currentChannel,
@@ -158,11 +163,6 @@ export class BrowserViewManager implements IBrowserViewManager {
     this.history[this.currentChannel].list.splice(currentIndex, 1);
     this.history[this.currentChannel].lastUpdateTime = Date.now();
     this.history[this.currentChannel].currentIndex = currentIndex - 1;
-    const mainBrowser = {
-      canBack: currentIndex - 1 > 0,
-      canForward: false,
-      page: list[currentIndex - 1],
-    };
     return { pipBrowser, mainBrowser };
   }
 

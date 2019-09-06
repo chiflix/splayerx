@@ -332,6 +332,9 @@ function createBrowsingWindow(args) {
     if (args.position.length) {
       browsingWindow.setPosition(args.position[0], args.position[1]);
     }
+    browsingWindow.on('focus', () => {
+      menuService.updateFocusedWindow(false, mainWindow && mainWindow.isVisible());
+    });
   });
   browsingWindow.on('leave-full-screen', () => {
     if (hideBrowsingWindow) {
@@ -728,7 +731,7 @@ function registerMainWindowEvent(mainWindow) {
       danmu.style.opacity = ${args.opacity};
       danmu.style.cursor = ${args.opacity} === 1 ? "cursor" : "default"`,
     );
-    menuService.updateFocusedWindow(false);
+    menuService.updateFocusedWindow(false, mainWindow && mainWindow.isVisible());
     browsingWindow.focus();
   });
   ipcMain.on('enter-pip', (evt, args) => {
@@ -789,7 +792,7 @@ function registerMainWindowEvent(mainWindow) {
       danmu.style.opacity = ${args.opacity};
       danmu.style.cursor = ${args.opacity} === 1 ? "cursor" : "default"`,
     );
-    menuService.updateFocusedWindow(false);
+    menuService.updateFocusedWindow(false, mainWindow && mainWindow.isVisible());
     browsingWindow.focus();
   });
   ipcMain.on('update-pip-size', (evt, args) => {
@@ -835,8 +838,23 @@ function registerMainWindowEvent(mainWindow) {
     } else {
       browsingWindow.hide();
     }
-    menuService.updateFocusedWindow(true);
+    menuService.updateFocusedWindow(true, mainWindow && mainWindow.isVisible());
     mainWindow.focus();
+  });
+  ipcMain.on('set-window-maximize', () => {
+    if (mainWindow && mainWindow.isFocused()) {
+      if (!mainWindow.isMaximized()) {
+        mainWindow.maximize();
+      } else {
+        mainWindow.unmaximize();
+      }
+    } else if (browsingWindow && browsingWindow.isFocused()) {
+      if (!browsingWindow.isMaximized()) {
+        browsingWindow.maximize();
+      } else {
+        browsingWindow.unmaximize();
+      }
+    }
   });
   ipcMain.on('update-route-name', (e, route) => {
     routeName = route;
@@ -1233,7 +1251,7 @@ app.on('menu-open-dialog', (playlistId) => {
 app.on('activate', () => {
   if (!mainWindow) {
     if (app.isReady()) createMainWindow();
-  } else if (!mainWindow.isVisible()) {
+  } else if (!mainWindow.isVisible() && (!browsingWindow || !browsingWindow.isVisible())) {
     mainWindow.show();
   }
   if (browsingWindow && browsingWindow.isMinimized()) {

@@ -62,14 +62,13 @@ export default class Menubar {
     this.menuStateControl();
   }
 
-  public updateFocusedWindow(isMainWindow: boolean) {
+  public updateFocusedWindow(isMainWindow: boolean, isNewWindow: boolean) {
     if (this.focusOnMainWindow !== isMainWindow) {
       if (!isMainWindow) {
         this.updateMenuItemEnabled('history.back', false);
         this.updateMenuItemEnabled('history.forward', false);
         this.updateMenuItemEnabled('history.reload', false);
-        this.updateMenuItemEnabled('browsing.window.pip', true);
-        this.updateMenuItemEnabled('browsing.window.playInNewWindow', true);
+        this.updateMenuItemEnabled(isNewWindow ? 'browsing.window.playInNewWindow' : 'browsing.window.pip', true);
         this.updateMenuItemEnabled('browsing.window.keepPipFront', true);
         this.updateMenuItemLabel('browsing.window.pip', 'msg.window.exitPip');
         this.updateMenuItemLabel('browsing.window.playInNewWindow', 'msg.window.backToBrowser');

@@ -5,8 +5,8 @@
     <browsing-control
       :handle-url-back="handleUrlBack"
       :handle-url-forward="handleUrlForward"
-      :back-type="backType"
-      :forward-type="forwardType"
+      :back-type="webInfo.canGoBack ? 'back' : 'backDisabled'"
+      :forward-type="webInfo.canGoForward ? 'forward' : 'forwardDisabled'"
       :web-info="webInfo"
     />
     <browsing-input
@@ -17,7 +17,7 @@
       :play-file-with-playing-view="playFileWithPlayingView"
     />
     <browsing-pip-control
-      :has-video="hasVideo"
+      :has-video="webInfo.hasVideo"
       :handle-enter-pip="handleEnterPip"
     />
     <browsing-title-bar
@@ -74,19 +74,14 @@ export default {
       type: Function,
       required: true,
     },
-    hasVideo: {
-      type: Boolean,
-      default: false,
+    webInfo: {
+      type: Object,
+      required: true,
     },
   },
   data() {
     return {
       showOpenUrl: false,
-      backType: 'backDisabled',
-      forwardType: 'forwardDisabled',
-      url: '',
-      canGoBack: false,
-      canGoForward: false,
     };
   },
   computed: {
@@ -94,30 +89,6 @@ export default {
     isDarwin() {
       return process.platform === 'darwin';
     },
-    webInfo() {
-      return {
-        canGoBack: this.canGoBack,
-        canGoForward: this.canGoForward,
-      };
-    },
-  },
-  watch: {
-    canGoBack(val: boolean) {
-      this.backType = val ? 'back' : 'backDisabled';
-    },
-    canGoForward(val: boolean) {
-      this.forwardType = val ? 'forward' : 'forwardDisabled';
-    },
-  },
-  mounted() {
-    this.$bus.$on('update-web-info', (info: {
-      hasVideo?: boolean, url?: string, canGoBack?: boolean, canGoForward?: boolean
-    }) => {
-      const keys = Object.keys(info);
-      keys.forEach((key: string) => {
-        this[key] = info[key];
-      });
-    });
   },
   methods: {
     closeUrlInput() {
@@ -130,14 +101,6 @@ export default {
         this.$electron.remote.BrowserView.getAllViews()[1].webContents.loadURL(inputUrl);
         this.$electron.remote.BrowserView.getAllViews()[0].webContents.loadURL(inputUrl);
       }
-    },
-    updateWebInfo(info: {
-      hasVideo?: boolean, url?: string, canGoBack?: boolean, canGoForward?: boolean
-    }) {
-      const keys = Object.keys(info);
-      keys.forEach((key: string) => {
-        this[key] = info[key];
-      });
     },
   },
 };

@@ -62,6 +62,9 @@ export default {
       this.offset = null;
       this.windowSize = null;
     });
+    window.addEventListener('focus', () => {
+      electron.remote.getCurrentWindow().getBrowserViews()[0].webContents.focus();
+    });
     electron.ipcRenderer.on('mouse-left-drag', (evt: Event, x: number, y: number) => {
       if (!this.offset || !this.offset.length) {
         const cursorPoint = electron.remote.screen.getCursorScreenPoint();
@@ -89,9 +92,6 @@ export default {
     this.menuService = new MenuService();
     electron.remote.getCurrentWindow().addListener('enter-html-full-screen', () => {
       electron.ipcRenderer.send('mouseup', 'full');
-    });
-    window.addEventListener('focus', () => {
-      this.menuService.updateFocusedWindow(false);
     });
     window.addEventListener('resize', throttle(() => {
       const size = electron.remote.getCurrentWindow().getSize();
