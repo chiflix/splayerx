@@ -1,8 +1,11 @@
 <template>
   <div 
-    @mouseover="mouseover === true"
-    @mouseout="mouseover === false"
+    @mouseover="handleMouseover"
+    @mouseout="handleMouseout"
     @mouseup="mouseupOnIcon(url)"
+    :style="{
+      opacity: mouseover || selected ? '1.0' : '0.7',
+    }"
   >
   <svg
     width="42px"
@@ -52,7 +55,7 @@
               :stroke-width="selected ? 2 : 0"
               cx="20"
               cy="20"
-              r="20.5"
+              r="20"
             />
             <g
               id="logo--iqiyi"
@@ -101,15 +104,18 @@ export default {
       mouseover: false,
     };
   },
+  methods: {
+    handleMouseover() {
+      this.mouseover = true;
+    },
+    handleMouseout() {
+      this.mouseover = false;
+    },
+  },
 };
 </script>
 <style lang="scss" scoped>
 .sidebar {
-  opacity: 0.7;
-  transition: opacity 50ms ease-in;
-  &:hover {
-    cursor: pointer;
-    opacity: 1;
-  }
+  transition: opacity 100ms ease-in;
 }
 </style>
