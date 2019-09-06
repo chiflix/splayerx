@@ -8,9 +8,9 @@
     }"
   >
     <svg
-      width="42px"
-      height="42px"
-      viewBox="0 0 42 42"
+      width="44px"
+      height="44px"
+      viewBox="0 0 44 44"
       version="1.1"
       xmlns="http://www.w3.org/2000/svg"
       xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -55,7 +55,7 @@
                 fill="#FF0000"
                 cx="20"
                 cy="20"
-                r="20"
+                r="21"
               />
               <g
                 id="logo--youtube"

@@ -77,17 +77,16 @@ export default {
   will-change: width;
 
   .icon-box {
-    width: 40px;
+    width: 44px;
     margin-top: 46px;
     margin-left: 18px;
     margin-right: 18px;
     display: flex;
     flex-direction: column;
     div {
-      width: 40px;
-      height: 40px;
+      width: 44px;
+      height: 44px;
       margin-bottom: 16px;
-      cursor: pointer;
     }
   }
 }
