@@ -197,10 +197,10 @@
       "minimize": "Minimize",
       "name": "Window",
       "originSize": "100%",
-      "enterPip": "Enter Picture In Picture",
-      "exitPip": "Exit Picture In Picture",
-      "playInNewWindow": "Play In New Window",
-      "backToBrowser": "Back To Browser"
+      "enterPip": "Enter Picture in Picture",
+      "exitPip": "Exit Picture in Picture",
+      "playInNewWindow": "Play in New Window",
+      "backToBrowser": "Back to Browser"
     },
     "favourite": {
       "name": "Channel",

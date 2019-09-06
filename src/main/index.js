@@ -753,6 +753,7 @@ function registerMainWindowEvent(mainWindow) {
     } else {
       mainWindow.removeBrowserView(mainWindow.getBrowserView());
       mainWindow.addBrowserView(mainBrowser.page.view);
+      browsingWindow.setSize(browsingWindow.getSize()[0] + 1, browsingWindow.getSize()[1]);
       browsingWindow.addBrowserView(pipBrowser);
       createPipControlView();
       createTitlebarView();
@@ -1177,13 +1178,13 @@ if (process.platform === 'darwin') {
 }
 
 app.on('ready', () => {
-  systemPreferences.subscribeNotification('AppleInterfaceThemeChangedNotification', () => {
-    if (routeName === 'browsing-view') {
-      menuService.updatePipIcon();
-    }
-  });
   menuService = new MenuService();
   if (process.platform === 'darwin') {
+    systemPreferences.subscribeNotification('AppleInterfaceThemeChangedNotification', () => {
+      if (routeName === 'browsing-view') {
+        menuService.updatePipIcon();
+      }
+    });
     systemPreferences.setUserDefault('NSDisabledDictationMenuItem', 'boolean', true);
     systemPreferences.setUserDefault('NSDisabledCharacterPaletteMenuItem', 'boolean', true);
   }

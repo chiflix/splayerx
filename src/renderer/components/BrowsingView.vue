@@ -10,7 +10,7 @@
       ref="browsingHeader"
       :show-sidebar="showSidebar"
       :title="title"
-      :is-reloading="isReloading"
+      :is-reloading="loadingState"
       :web-info="webInfo"
       :handle-enter-pip="handleEnterPip"
       :handle-url-reload="handleUrlReload"
@@ -113,7 +113,6 @@ export default {
         /^https:\/\/auth.alipay.com\/login\//i,
         /^https:\/\/account.xiaomi.com\/pass\//i,
       ],
-      isReloading: false,
       webInfo: {
         hasVideo: false,
         url: '',
@@ -255,6 +254,7 @@ export default {
       }
     },
     loadingState(val: boolean) {
+      console.log(val);
       if (val) {
         this.webInfo.hasVideo = false;
       } else {
@@ -687,7 +687,6 @@ export default {
         .webContents.focus();
     },
     didStopLoading() {
-      this.isReloading = false;
       this.loadingState = false;
     },
     handleOpenUrl({ url }: { url: string }) {
@@ -699,6 +698,7 @@ export default {
         || url === 'about:blank'
         || urlParseLax(openUrl).href === urlParseLax(this.currentUrl).href
       ) return;
+      this.loadingState = true;
       const newHostname = urlParseLax(openUrl).hostname;
       const oldHostname = urlParseLax(this.currentUrl).hostname;
       let newChannel = newHostname.slice(
@@ -833,12 +833,12 @@ export default {
       }
     },
     handleUrlReload() {
-      if (!this.isReloading) {
-        this.isReloading = true;
+      if (!this.isLoading) {
+        this.loadingState = true;
         this.$electron.remote.getCurrentWindow()
           .getBrowserViews()[0].webContents.reload();
       } else {
-        this.isReloading = false;
+        this.loadingState = false;
         this.$electron.remote.getCurrentWindow()
           .getBrowserViews()[0].webContents.stop();
       }
