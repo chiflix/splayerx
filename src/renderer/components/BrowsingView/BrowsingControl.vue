@@ -16,7 +16,7 @@
     <div
       @mouseup="handleUrlBack"
       :class="backType.toString() === 'back' ? 'button-hover' : ''"
-      class="control-button back-icon"
+      class="control-button back-icon no-drag"
     >
       <Icon
         ref="back"
@@ -26,7 +26,7 @@
     <div
       @mouseup="handleUrlForward"
       :class="forwardType.toString() === 'forward' ? 'button-hover' : ''"
-      class="control-button forward-icon"
+      class="control-button forward-icon no-drag"
     >
       <Icon
         ref="forward"
