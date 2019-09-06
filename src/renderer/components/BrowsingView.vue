@@ -740,7 +740,7 @@ export default {
         }
       }
     },
-    createTouchBar(enablePip: boolean) {
+    createTouchBar() {
       const { TouchBar } = this.$electron.remote;
       const { TouchBarButton, TouchBarSpacer } = TouchBar;
 
@@ -768,12 +768,12 @@ export default {
           this.$bus.$emit('toggle-reload');
         },
       });
-      this.pipButton = enablePip ? new TouchBarButton({
-        icon: this.createIcon('touchBar/pip.png'),
-        click: () => {
-          this.$bus.$emit('toggle-pip');
-        },
-      }) : null;
+      // this.pipButton = enablePip ? new TouchBarButton({
+      //   icon: this.createIcon('touchBar/pip.png'),
+      //   click: () => {
+      //     this.$bus.$emit('toggle-pip');
+      //   },
+      // }) : null;
       const touchbarItems = [
         this.sidebarButton,
         new TouchBarSpacer({ size: 'large' }),
@@ -782,7 +782,7 @@ export default {
         this.refreshButton,
         new TouchBarSpacer({ size: 'large' }),
       ];
-      if (enablePip) touchbarItems.push(this.pipButton);
+      // if (enablePip) touchbarItems.push(this.pipButton);
       this.touchBar = new TouchBar({ items: touchbarItems });
       this.$electron.remote.getCurrentWindow().setTouchBar(this.touchBar);
     },
