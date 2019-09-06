@@ -617,6 +617,10 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   width: 20px;
   height: 20px;
 }
+.pip {
+  width: 30px;
+  height: 30px;
+}
 .pipRecord, .pipBack {
   width: 20px;
   height: 20px;
