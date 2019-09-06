@@ -87,6 +87,7 @@ export default {
       width: 40px;
       height: 40px;
       margin-bottom: 16px;
+      cursor: pointer;
     }
   }
 }
