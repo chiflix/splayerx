@@ -1,5 +1,5 @@
 <template>
-  <div 
+  <div
     @mouseover="mouseover = true"
     @mouseout="mouseover = false"
     @mouseup="mouseupOnIcon(url)"
@@ -49,9 +49,9 @@
                 <use xlink:href="#path-1" />
               </mask>
               <circle
+                :stroke-width="selected ? 2 : 0"
                 stroke="#EBECF0"
                 fill="#20B0E3"
-                :stroke-width="selected ? 2 : 0"
                 cx="20"
                 cy="20"
                 r="20"
@@ -81,6 +81,7 @@
 </template>
 <script lang="ts">
 import { log } from '@/libs/Log';
+
 export default {
   props: {
     selected: {
@@ -96,7 +97,7 @@ export default {
       default: () => {
         log.debug('BilibiliSidebarIcon.vue', 'mouse up on button');
       },
-    },  
+    },
   },
   data() {
     return {

@@ -1,5 +1,5 @@
 <template>
-  <div 
+  <div
     @mouseover="mouseover = true"
     @mouseout="mouseover = false"
     @mouseup="mouseupOnIcon(url)"
@@ -7,7 +7,7 @@
       opacity: mouseover || selected ? '1.0' : '0.7',
     }"
   >
-   <svg
+    <svg
       width="42px"
       height="42px"
       viewBox="0 0 42 42"
@@ -50,9 +50,9 @@
                 <use xlink:href="#path-1" />
               </mask>
               <circle
+                :stroke-width="selected ? 2 : 0"
                 stroke="#EBECF0"
                 fill="#FF0000"
-                :stroke-width="selected ? 2 : 0"
                 cx="20"
                 cy="20"
                 r="20"
@@ -83,6 +83,7 @@
 </template>
 <script lang="ts">
 import { log } from '@/libs/Log';
+
 export default {
   props: {
     selected: {

@@ -1,5 +1,5 @@
 <template>
-  <div 
+  <div
     @mouseover="mouseover = true"
     @mouseout="mouseover = false"
     @mouseup="mouseupOnIcon(url)"
@@ -50,9 +50,9 @@
               <use xlink:href="#path-1" />
             </mask>
             <circle
+              :stroke-width="selected ? 2 : 0"
               stroke="#EBECF0"
               fill="#42BD56"
-              :stroke-width="selected ? 2 : 0"
               cx="20"
               cy="20"
               r="20"

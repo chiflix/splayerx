@@ -224,9 +224,8 @@ export default class Menubar {
     }
   }
 
-  public updatePipIcon(isDarkMode: boolean) {
-    this.menubar.getMenuItemById('browsing.window.pip').icon = isDarkMode ? nativeImage.createFromDataURL(require('../../../build/icons/mojave-pip.png')) : nativeImage.createFromDataURL(require('../../../build/icons/mojave-window.png'));
-    this.menubar.getMenuItemById('browsing.window.playInNewWindow').icon = isDarkMode ? nativeImage.createFromDataURL(require('../../../build/icons/mojave-window.png')) : nativeImage.createFromDataURL(require('../../../build/icons/normal-window.png'));
+  public updatePipIcon() {
+    this.refreshMenu('browsing.window');
   }
 
   public updateMenuItemEnabled(id: string, enabled: boolean) {

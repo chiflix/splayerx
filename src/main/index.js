@@ -1161,7 +1161,7 @@ if (process.platform === 'darwin') {
 app.on('ready', () => {
   systemPreferences.subscribeNotification('AppleInterfaceThemeChangedNotification', () => {
     if (routeName === 'browsing-view') {
-      menuService.updatePipIcon(systemPreferences.isDarkMode());
+      menuService.updatePipIcon();
     }
   });
   menuService = new MenuService();

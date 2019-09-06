@@ -24,8 +24,8 @@ export default class MenuService {
     this.menu.updateFocusedWindow(isFocusedOnMain);
   }
 
-  public updatePipIcon(isDarkMode: boolean) {
-    this.menu.updatePipIcon(isDarkMode);
+  public updatePipIcon() {
+    this.menu.updatePipIcon();
   }
 
   private registeMenuActions() {
