@@ -474,10 +474,11 @@ export default {
       } catch (err) {
         if (process.mas && get(err, 'code') === 'EPERM') {
           // TODO: maybe this.openFolderByDialog(videoFiles[0]) ?
+          const items = playlist ? playlist.items.slice(0, 1) : [];
           this.$store.dispatch('FolderList', {
             id,
             paths: [videoFile],
-            items: playlist.items.slice(0, 1),
+            items,
           });
         }
       }

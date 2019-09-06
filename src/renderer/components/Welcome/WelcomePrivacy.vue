@@ -33,8 +33,8 @@ export default {
   },
   methods: {
     handleLinkClick() {
-      if (this.$i18n.locale === 'zh-Hans') this.$electron.shell.openExternal('http://splayer.org/zh-Hans/terms/');
-      else if (this.$i18n.locale === 'zh-Hant') this.$electron.shell.openExternal('http://splayer.org/zh-Hant/terms/');
+      if (this.$i18n && this.$i18n.locale === 'zh-Hans') this.$electron.shell.openExternal('http://splayer.org/zh-Hans/terms/');
+      else if (this.$i18n && this.$i18n.locale === 'zh-Hant') this.$electron.shell.openExternal('http://splayer.org/zh-Hant/terms/');
       else this.$electron.shell.openExternal('http://splayer.org/en/terms/');
     },
   },
