@@ -3,12 +3,12 @@
     class="pip-control"
   >
     <div
-      @mouseup="handleEnterPip(pip === 'Enter')"
+      @mouseup="handleEnterPip(pipMode === 'Enter')"
       :class="hasVideo ? 'button-hover' : ''"
       class="pip-icon no-drag"
     >
       <Icon
-        :type="pipMode"
+        :type="pipIconType"
       />
     </div>
     <div
@@ -18,7 +18,7 @@
       :style="{
       }"
       :class="switchPip ? 'translate' : ''"
-      class="down-icon"
+      class="down-icon no-drag"
     >
       <Icon
         type="switchMode"
@@ -28,7 +28,9 @@
   </div>
 </template>
 <script lang="ts">
+import { mapGetters, mapActions } from 'vuex';
 import Icon from '@/components/BaseIconContainer.vue';
+import { Browsing as browsingActions } from '@/store/actionTypes';
 
 export default {
   components: {
@@ -46,13 +48,13 @@ export default {
   },
   data() {
     return {
-      pip: 'Enter',
       switchPip: false,
     };
   },
   computed: {
-    pipMode() {
-      return this.pip === 'Enter' ? this.pipType : this.popType;
+    ...mapGetters(['pipMode']),
+    pipIconType() {
+      return this.pipMode === 'Enter' ? this.pipType : this.popType;
     },
     pipType() {
       return this.hasVideo ? 'pip' : 'pipDisabled';
@@ -62,8 +64,11 @@ export default {
     },
   },
   methods: {
+    ...mapActions({
+      updatePipMode: browsingActions.UPDATE_PIP_MODE,
+    }),
     switchPipType() {
-      this.pip = this.pip === 'Enter' ? 'Global' : 'Enter';
+      this.updatePipMode(this.pipMode === 'Enter' ? 'Global' : 'Enter');
       this.switchPip = true;
     },
   },
