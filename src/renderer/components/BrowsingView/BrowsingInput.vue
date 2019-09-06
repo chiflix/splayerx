@@ -3,6 +3,7 @@
     class="search-url"
   >
     <div
+      @dblclick="handleDbClick"
       class="url-search"
     >
       {{ title }}
@@ -53,6 +54,13 @@ export default {
     },
   },
   methods: {
+    handleDbClick() {
+      if (!this.isMaximized) {
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'maximize');
+      } else {
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'unmaximize');
+      }
+    },
     handleCloseUrlInput() {
       this.closeUrlInput();
     },
