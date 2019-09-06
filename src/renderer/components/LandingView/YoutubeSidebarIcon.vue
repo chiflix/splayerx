@@ -1,7 +1,7 @@
 <template>
   <div 
-    @mouseover="handleMouseover"
-    @mouseout="handleMouseout"
+    @mouseover="mouseover = true"
+    @mouseout="mouseover = false"
     @mouseup="mouseupOnIcon(url)"
     :style="{
       opacity: mouseover || selected ? '1.0' : '0.7',
@@ -104,14 +104,6 @@ export default {
     return {
       mouseover: false,
     };
-  },
-  methods: {
-    handleMouseover() {
-      this.mouseover = true;
-    },
-    handleMouseout() {
-      this.mouseover = false;
-    },
   },
 };
 </script>
