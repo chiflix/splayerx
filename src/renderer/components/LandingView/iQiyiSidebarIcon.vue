@@ -7,80 +7,81 @@
       opacity: mouseover || selected ? '1.0' : '0.7',
     }"
   >
-  <svg
-    width="42px"
-    height="42px"
-    viewBox="0 0 42 42"
-    version="1.1"
-    xmlns="http://www.w3.org/2000/svg"
-    xmlns:xlink="http://www.w3.org/1999/xlink"
-  >
-    <defs>
-      <circle
-        id="path-1"
-        cx="20"
-        cy="20"
-        r="20"
-      />
-    </defs>
-    <g
-      id="页面-1"
-      stroke="none"
-      stroke-width="1"
-      fill="none"
-      fill-rule="evenodd"
+    <svg
+      width="42px"
+      height="42px"
+      viewBox="0 0 42 42"
+      version="1.1"
+      xmlns="http://www.w3.org/2000/svg"
+      xmlns:xlink="http://www.w3.org/1999/xlink"
     >
+      <defs>
+        <circle
+          id="path-1"
+          cx="20"
+          cy="20"
+          r="20"
+        />
+      </defs>
       <g
-        id="2"
-        transform="translate(-17.000000, -101.000000)"
+        id="页面-1"
+        stroke="none"
+        stroke-width="1"
+        fill="none"
+        fill-rule="evenodd"
       >
         <g
-          id="sideBarItems"
-          transform="translate(18.000000, 46.000000)"
+          id="2"
+          transform="translate(-17.000000, -101.000000)"
         >
           <g
-            id="sideBarItem--iqiyi"
-            class="sidebar"
-            transform="translate(0.000000, 56.000000)"
+            id="sideBarItems"
+            transform="translate(18.000000, 46.000000)"
           >
-            <mask
-              id="mask-2"
-              fill="white"
-            >
-              <use xlink:href="#path-1" />
-            </mask>
-            <circle
-              :stroke-width="selected ? 2 : 0"
-              stroke="#EBECF0"
-              fill="#42BD56"
-              cx="20"
-              cy="20"
-              r="20"
-            />
             <g
-              id="logo--iqiyi"
-              stroke-width="1"
-              fill-rule="evenodd"
-              mask="url(#mask-2)"
-              fill="#FFFFFF"
+              id="sideBarItem--iqiyi"
+              class="sidebar"
+              transform="translate(0.000000, 56.000000)"
             >
-              <g
-                id="形状"
-                transform="translate(8.177778, 9.777778)"
-                fill-rule="nonzero"
+              <mask
+                id="mask-2"
+                fill="white"
               >
-                <path :d="d1" />
+                <use xlink:href="#path-1" />
+              </mask>
+              <circle
+                :stroke-width="selected ? 2 : 0"
+                stroke="#EBECF0"
+                fill="#42BD56"
+                cx="20"
+                cy="20"
+                r="20"
+              />
+              <g
+                id="logo--iqiyi"
+                stroke-width="1"
+                fill-rule="evenodd"
+                mask="url(#mask-2)"
+                fill="#FFFFFF"
+              >
+                <g
+                  id="形状"
+                  transform="translate(8.177778, 9.777778)"
+                  fill-rule="nonzero"
+                >
+                  <path :d="d1" />
+                </g>
               </g>
             </g>
           </g>
         </g>
       </g>
-    </g>
-  </svg>
+    </svg>
   </div>
 </template>
 <script lang="ts">
 import { log } from '@/libs/Log';
+
 export default {
   props: {
     selected: {
