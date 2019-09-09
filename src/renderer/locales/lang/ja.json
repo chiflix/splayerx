@@ -198,7 +198,9 @@
       "name": "ウィンドウ",
       "originSize": "100%",
       "enterPip": "画中画を開じる",
-      "exitPip": "画中画を閉じる"
+      "exitPip": "画中画を閉じる",
+      "playInNewWindow": "",
+      "backToBrowser": ""
     },
     "favourite": {
       "name": "チャンネル",
