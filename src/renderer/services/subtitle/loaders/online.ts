@@ -1,11 +1,9 @@
 import { TranscriptInfo } from 'sagi-api/translation/v1/translation_pb';
 import { cloneDeep } from 'lodash';
 import { LanguageCode, normalizeCode } from '@/libs/language';
-import Sagi from '@/libs/sagi';
 import {
   IOrigin, IEntityGenerator, Type, Format,
 } from '@/interfaces/ISubtitle';
-import { SagiSubtitlePayload } from '../parsers';
 
 export type TranscriptInfo = TranscriptInfo.AsObject;
 
@@ -32,11 +30,9 @@ export class OnlineGenerator implements IEntityGenerator {
     this.delayInSeconds = transcriptInfo.delay / 1000;
   }
 
-  private type = Type.Online
+  public async getDisplaySource() { return cloneDeep(this.origin); }
 
-  public async getType() { return this.type; }
-
-  public async getSource() { return cloneDeep(this.origin); }
+  public async getRealSource() { return cloneDeep(this.origin); }
 
   public async getLanguage() {
     return this.language;
@@ -49,16 +45,4 @@ export class OnlineGenerator implements IEntityGenerator {
   public async getFormat() { return this.format; }
 
   public async getHash() { return this.origin.source; }
-
-  private payload: SagiSubtitlePayload | undefined;
-
-  public async getPayload() {
-    if (!this.payload) {
-      this.payload = await Sagi.getTranscript({
-        transcriptIdentity: this.origin.source,
-        startTime: 0,
-      });
-    }
-    return this.payload;
-  }
 }
