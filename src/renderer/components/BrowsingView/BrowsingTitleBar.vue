@@ -31,8 +31,8 @@
   </div>
 </template>
 <script lang="ts">
-import Icon from '@/components/BaseIconContainer.vue';
 import { mapGetters } from 'vuex';
+import Icon from '@/components/BaseIconContainer.vue';
 
 export default {
   components: {

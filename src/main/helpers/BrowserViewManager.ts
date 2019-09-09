@@ -1,6 +1,6 @@
 import { BrowserView } from 'electron';
 import { remove } from 'lodash';
-import { bilibiliVideoPause, bilibiliFindType } from '../../shared/pip/bilibili';
+import InjectJSManager from '../../shared/pip/InjectJSManager';
 
 type ChannelData = {
   currentIndex: number,
@@ -79,12 +79,13 @@ export class BrowserViewManager implements IBrowserViewManager {
           if (this.currentChannel.includes('bilibili')) {
             let type = '';
             page.view.webContents
-              .executeJavaScript(bilibiliFindType).then((r: (HTMLElement | null)[]) => {
+              .executeJavaScript(InjectJSManager.bilibiliFindType())
+              .then((r: (HTMLElement | null)[]) => {
                 type = ['bangumi', 'videoStreaming', 'iframeStreaming', 'iframeStreaming', 'video'][r.findIndex(i => i)] || 'others';
-                page.view.webContents.executeJavaScript(bilibiliVideoPause(type));
+                page.view.webContents.executeJavaScript(InjectJSManager.pauseVideo('bilibili', type));
               });
           } else {
-            page.view.webContents.executeJavaScript('setTimeout(() => { document.querySelector("video").pause(); }, 100)');
+            page.view.webContents.executeJavaScript(InjectJSManager.pauseVideo('normal'));
           }
         });
       }
@@ -220,12 +221,13 @@ export class BrowserViewManager implements IBrowserViewManager {
       if (pausedChannel.includes('bilibili')) {
         let type = '';
         currentView.webContents
-          .executeJavaScript(bilibiliFindType).then((r: (HTMLElement | null)[]) => {
+          .executeJavaScript(InjectJSManager.bilibiliFindType())
+          .then((r: (HTMLElement | null)[]) => {
             type = ['bangumi', 'videoStreaming', 'iframeStreaming', 'iframeStreaming', 'video'][r.findIndex(i => i)] || 'others';
-            currentView.webContents.executeJavaScript(bilibiliVideoPause(type));
+            currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('bilibili', type));
           });
       } else {
-        currentView.webContents.executeJavaScript('setTimeout(() => { document.querySelector("video").pause(); }, 100)');
+        currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('normal'));
       }
     }
   }
