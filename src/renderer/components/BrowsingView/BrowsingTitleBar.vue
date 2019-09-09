@@ -11,12 +11,12 @@
       />
     </div>
     <div
-      @mouseup="handleFullScreen"
+      @mouseup="handleMiddleButton"
       class="control-button fullscreen-icon button-hover"
     >
       <Icon
         ref="back"
-        type="browsingfullscreen"
+        :type="isMaximized ? 'browsingrestore' : 'browsingfullscreen'"
       />
     </div>
     <div
@@ -32,17 +32,25 @@
 </template>
 <script lang="ts">
 import Icon from '@/components/BaseIconContainer.vue';
+import { mapGetters } from 'vuex';
 
 export default {
   components: {
     Icon,
   },
+  computed:  {
+    ...mapGetters(['isMaximized']),
+  },
   methods: {
     handleMinimize() {
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'minimize');
     },
-    handleFullScreen() {
-      this.$electron.ipcRenderer.send('callMainWindowMethod', 'maximize');
+    handleMiddleButton() {
+      if (this.isMaximized) {
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'unmaximize');
+      } else {
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'maximize');
+      }
     },
     handleClose() {
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'close');
