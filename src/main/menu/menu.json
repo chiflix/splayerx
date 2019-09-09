@@ -409,7 +409,15 @@
       {
         "id": "browsing.window.pip",
         "label": "msg.window.enterPip",
+        "icon": "enter-pip",
         "accelerator": "P",
+        "enabled": false
+      },
+      {
+        "id": "browsing.window.playInNewWindow",
+        "label": "msg.window.playInNewWindow",
+        "icon": "play-in-new-window",
+        "accelerator": "O",
         "enabled": false
       },
       {

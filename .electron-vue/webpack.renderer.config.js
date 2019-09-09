@@ -62,6 +62,7 @@ let rendererConfig = {
     about: path.join(__dirname, '../src/renderer/about.js'),
     labor: path.join(__dirname, '../src/renderer/labor.ts'),
     index: path.join(__dirname, '../src/renderer/main.ts'),
+    browsing: path.join(__dirname, '../src/renderer/browsing.ts'),
   },
   externals: [
     ...Object.keys(Object.assign({}, dependencies, optionalDependencies)).filter(
@@ -109,17 +110,6 @@ let rendererConfig = {
         test: /\.js$/,
         use: 'babel-loader',
         exclude: /node_modules/,
-      },
-      {
-        // 匹配 *.worker.js
-        test: /\.worker\.js$/,
-        use: {
-          loader: 'workerize-loader',
-        },
-      },
-      {
-        test: /\.node$/,
-        use: 'node-loader',
       },
       {
         test: /\.vue$/,
@@ -211,6 +201,7 @@ let rendererConfig = {
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('labor')),
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('about')),
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('preference')),
+    new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('browsing')),
     new webpack.HotModuleReplacementPlugin(),
   ],
   output: {

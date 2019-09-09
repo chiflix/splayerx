@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>macTitlebar</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+    .titlebar {
+      width: 100%;
+      height: 36px;
+      display: flex;
+    }
+    .content {
+      margin: auto auto auto 10px;
+      display: flex;
+      flex-wrap: nowrap;
+    }
+    .titlebarClose, .titlebarMin {
+      width: 12px;
+      height: 12px;
+      margin-right: 8px;
+    }
+    .titlebarFull {
+      width: 12px;
+      height: 12px;
+    }
+    .titlebarRecover {
+      width: 12px;
+      height: 12px;
+      display: none;
+    }
+    .titlebarMax {
+      width: 12px;
+      height: 12px;
+      display: none;
+      transform: rotate(45deg);
+    }
+    .titlebarFull:active {
+      content: url("assets/titleBarFull-active-icon.svg");
+    }
+    .titlebarClose:active {
+      content: url("assets/titleBarClose-active-icon.svg");
+    }
+    .titlebarMin:active {
+      content: url("assets/titleBarExitFull-active-icon.svg");
+    }
+    .titlebarRecover:active {
+      content: url("assets/titleBarRecover-active-icon.svg");
+    }
+    .titlebarMax:active {
+      content: url("assets/titleBarClose-active-icon.svg");
+    }
+  </style>
+</head>
+<body>
+  <div class="titlebar">
+    <div class="content">
+      <img class="titlebarClose" src="assets/titleBarClose-default-icon.svg">
+      <img class="titlebarMin" src="assets/titleBarExitFull-default-icon.svg">
+      <img class="titlebarFull" src="assets/titleBarFull-default-icon.svg">
+      <img class="titlebarMax" src="assets/titleBarClose-hover-icon.svg">
+      <img class="titlebarRecover" src="assets/titleBarRecover-default-icon.svg">
+    </div>
+  </div>
+</body>
+
+</html>

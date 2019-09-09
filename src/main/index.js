@@ -1,14 +1,15 @@
 // Be sure to call Sentry function as early as possible in the main process
 import '../shared/sentry';
 
-import { app, BrowserWindow, session, Tray, ipcMain, globalShortcut, nativeImage, splayerx, systemPreferences } from 'electron' // eslint-disable-line
+import { app, BrowserWindow, session, Tray, ipcMain, globalShortcut, nativeImage, splayerx, systemPreferences, BrowserView, webContents } from 'electron' // eslint-disable-line
 import { throttle, debounce, uniq } from 'lodash';
 import os from 'os';
 import path, {
-  basename, dirname, extname, join,
+  basename, dirname, extname, join, resolve,
 } from 'path';
 import fs from 'fs';
 import rimraf from 'rimraf';
+import urlParse from 'url-parse-lax';
 // import { audioHandler } from './helpers/audioHandler';
 import { audioGrabService } from './helpers/AudioGrabService';
 import './helpers/electronPrototypes';
@@ -17,6 +18,7 @@ import { getValidVideoRegex, getValidSubtitleRegex } from '../shared/utils';
 import { mouse } from './helpers/mouse';
 import MenuService from './menu/MenuService';
 import registerMediaTasks from './helpers/mediaTasksPlugin';
+import { BrowserViewManager } from './helpers/BrowserViewManager';
 
 // requestSingleInstanceLock is not going to work for mas
 // https://github.com/electron-userland/electron-packager/issues/923
@@ -57,6 +59,7 @@ if (process.env.NODE_ENV !== 'development') {
 
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 
+let sidebar = false;
 let welcomeProcessDone = false;
 let menuService = null;
 let routeName = null;
@@ -64,15 +67,23 @@ let mainWindow = null;
 let laborWindow = null;
 let aboutWindow = null;
 let preferenceWindow = null;
+let browsingWindow = null;
+let browserViewManager = null;
+let pipControlView = null;
+let titlebarView = null;
+let isBrowsingWindowMax = false;
 let tray = null;
+let pipTimer = 0;
 let needToRestore = false;
 let forceQuit = false; // 大退app 关闭所有windows
 let needBlockCloseLaborWindow = true; // 标记是否阻塞nsfw窗口关闭
 let inited = false;
+let hideBrowsingWindow = false;
 let finalVideoToOpen = [];
 const tmpVideoToOpen = [];
 const tmpSubsToOpen = [];
 const subRegex = getValidSubtitleRegex();
+const titlebarUrl = process.platform === 'darwin' ? `file:${resolve(__static, 'pip/macTitlebar.html')}` : `file:${resolve(__static, 'pip/winTitlebar.html')}`;
 const mainURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080'
   : `file://${__dirname}/index.html`;
@@ -85,6 +96,9 @@ const aboutURL = process.env.NODE_ENV === 'development'
 const preferenceURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080/preference.html'
   : `file://${__dirname}/preference.html`;
+const browsingURL = process.env.NODE_ENV === 'development'
+  ? 'http://localhost:9080/browsing.html'
+  : `file://${__dirname}/browsing.html`;
 
 const tempFolderPath = path.join(app.getPath('temp'), 'splayer');
 if (!fs.existsSync(tempFolderPath)) fs.mkdirSync(tempFolderPath);
@@ -115,6 +129,39 @@ function handleBossKey() {
       });
     }
   }
+}
+
+function createPipControlView() {
+  if (pipControlView && !pipControlView.isDestroyed()) pipControlView.destroy();
+  pipControlView = new BrowserView({
+    webPreferences: {
+      preload: `${require('path').resolve(__static, 'pip/preload.js')}`,
+    },
+  });
+  browsingWindow.addBrowserView(pipControlView);
+  pipControlView.webContents.loadURL(`file:${require('path').resolve(__static, 'pip/pipControl.html')}`);
+  pipControlView.setBackgroundColor('#00FFFFFF');
+  pipControlView.setBounds({
+    x: Math.round(browsingWindow.getSize()[0] - 65),
+    y: Math.round(browsingWindow.getSize()[1] / 2 - 54),
+    width: 50,
+    height: 104,
+  });
+}
+
+function createTitlebarView() {
+  if (titlebarView) titlebarView.destroy();
+  titlebarView = new BrowserView({
+    webPreferences: {
+      preload: `${require('path').resolve(__static, 'pip/titlebarPreload.js')}`,
+    },
+  });
+  browsingWindow.addBrowserView(titlebarView);
+  titlebarView.webContents.loadURL(titlebarUrl);
+  titlebarView.setBackgroundColor('#00FFFFFF');
+  titlebarView.setBounds({
+    x: 0, y: 0, width: browsingWindow.getSize()[0], height: 36,
+  });
 }
 
 function markNeedToRestore() {
@@ -258,6 +305,46 @@ function createAboutWindow() {
   });
 }
 
+function createBrowsingWindow(args) {
+  const browsingWindowOptions = {
+    useContentSize: true,
+    frame: false,
+    titleBarStyle: 'none',
+    transparent: true,
+    webPreferences: {
+      webSecurity: false,
+      nodeIntegration: true,
+      experimentalFeatures: true,
+      webviewTag: true,
+    },
+    backgroundColor: '#000000',
+    acceptFirstMouse: false,
+    show: false,
+  };
+  if (!browsingWindow) {
+    browsingWindow = new BrowserWindow(browsingWindowOptions);
+    browsingWindow.loadURL(`${browsingURL}`);
+    browsingWindow.on('closed', () => {
+      browsingWindow = null;
+    });
+  }
+  browsingWindow.once('ready-to-show', () => {
+    browsingWindow.setSize(args.size[0], args.size[1]);
+    if (args.position.length) {
+      browsingWindow.setPosition(args.position[0], args.position[1]);
+    }
+    browsingWindow.on('focus', () => {
+      menuService.updateFocusedWindow(false, mainWindow && mainWindow.isVisible());
+    });
+  });
+  browsingWindow.on('leave-full-screen', () => {
+    if (hideBrowsingWindow) {
+      hideBrowsingWindow = false;
+      browsingWindow.hide();
+    }
+  });
+}
+
 function createLaborWindow() {
   const laborWindowOptions = {
     show: false,
@@ -364,6 +451,13 @@ function registerMainWindowEvent(mainWindow) {
     }
   });
 
+  ipcMain.on('callBrowsingWindowMethod', (evt, method, args = []) => {
+    try {
+      browsingWindow[method](...args);
+    } catch (ex) {
+      console.error('callBrowsingWindowMethod', method, JSON.stringify(args), '\n', ex);
+    }
+  });
   ipcMain.on('callMainWindowMethod', (evt, method, args = []) => {
     try {
       mainWindow[method](...args);
@@ -371,8 +465,421 @@ function registerMainWindowEvent(mainWindow) {
       console.error('callMainWindowMethod', method, JSON.stringify(args), '\n', ex);
     }
   });
+  ipcMain.on('pip-watcher', (evt, args) => {
+    browsingWindow.getBrowserViews()[0].webContents.executeJavaScript(args);
+  });
+  ipcMain.on('pip-window-close', (evt, args) => {
+    const views = browsingWindow.getBrowserViews();
+    if (views.length) {
+      views.forEach((view) => {
+        browsingWindow.removeBrowserView(view);
+      });
+      browserViewManager.pipClose();
+      mainWindow.send('update-pip-state', args);
+    }
+  });
+  ipcMain.on('remove-main-window', () => {
+    browserViewManager.pauseVideo(mainWindow.getBrowserView());
+    mainWindow.hide();
+  });
+  ipcMain.on('remove-browser', () => {
+    const mainView = mainWindow.getBrowserView();
+    mainWindow.removeBrowserView(mainView);
+    browserViewManager.pauseVideo();
+    if (browsingWindow) {
+      const views = browsingWindow.getBrowserViews();
+      views.forEach((view) => {
+        browsingWindow.removeBrowserView(view);
+      });
+      browserViewManager.pipClose();
+      browsingWindow.close();
+    }
+  });
+  ipcMain.on('go-to-offset', (evt, val) => {
+    if (!browserViewManager) return;
+    const newBrowser = val === 1 ? browserViewManager.forward() : browserViewManager.back();
+    const id = mainWindow.getBrowserView().id;
+    mainWindow.addBrowserView(newBrowser.page.view);
+    setTimeout(() => {
+      mainWindow.removeBrowserView(BrowserView.fromId(id));
+      mainWindow.send('update-browser-state', {
+        url: newBrowser.page.url,
+        canGoBack: newBrowser.canBack,
+        canGoForward: newBrowser.canForward,
+      });
+    }, 150);
+    newBrowser.page.view.setBounds({
+      x: sidebar ? 76 : 0,
+      y: 40,
+      width: sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
+      height: mainWindow.getSize()[1] - 40,
+    });
+    newBrowser.page.view.setAutoResize({
+      width: true, height: true,
+    });
+  });
+  ipcMain.on('change-channel', (evt, args) => {
+    if (!browserViewManager) browserViewManager = new BrowserViewManager();
+    const hostname = urlParse(args.url).hostname;
+    let channel = hostname.slice(hostname.indexOf('.') + 1, hostname.length);
+    if (args.url.includes('youtube')) {
+      channel = 'youtube.com';
+    }
+    const newChannel = browserViewManager.changeChanel(channel, args);
+    const view = newChannel.view ? newChannel.view : newChannel.page.view;
+    const url = newChannel.view ? args.url : newChannel.page.url;
+    const mainBrowser = mainWindow.getBrowserView();
+    mainWindow.addBrowserView(view);
+    setTimeout(() => {
+      if (mainBrowser) mainWindow.removeBrowserView(BrowserView.fromId(mainBrowser.id));
+      mainWindow.send('update-browser-state', {
+        url,
+        canGoBack: newChannel.canBack,
+        canGoForward: newChannel.canForward,
+      });
+    }, 150);
+    view.setBounds({
+      x: sidebar ? 76 : 0,
+      y: 40,
+      width: sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
+      height: mainWindow.getSize()[1] - 40,
+    });
+    view.setAutoResize({
+      width: true, height: true,
+    });
+  });
+  ipcMain.on('create-browser-view', (evt, args) => {
+    if (!browserViewManager) browserViewManager = new BrowserViewManager();
+    const hostname = urlParse(args.url).hostname;
+    let channel = hostname.slice(hostname.indexOf('.') + 1, hostname.length);
+    if (args.url.includes('youtube')) {
+      channel = 'youtube.com';
+    }
+    const currentMainBrowserView = browserViewManager.create(channel, args);
+    setTimeout(() => {
+      mainWindow.send('update-browser-state', {
+        url: args.url,
+        canGoBack: currentMainBrowserView.canBack,
+        canGoForward: currentMainBrowserView.canForward,
+      });
+    }, 0);
+  });
+  ipcMain.on('update-danmu-state', (evt, val) => {
+    pipControlView.webContents.executeJavaScript(`document.querySelector(".danmu").src = ${val} ? "assets/danmu-default-icon.svg" : "assets/noDanmu-default-icon.svg"`);
+  });
+  ipcMain.on('pip', () => {
+    mainWindow.send('handle-exit-pip');
+  });
+  ipcMain.on('danmu', () => {
+    mainWindow.send('handle-danmu-display');
+  });
+  ipcMain.on('handle-danmu-display', (evt, code) => {
+    browsingWindow.getBrowserViews()[0].webContents.executeJavaScript(code);
+  });
+  ipcMain.on('mousemove', () => {
+    if (browsingWindow && browsingWindow.isFocused()) {
+      pipControlView.webContents.executeJavaScript('document.querySelector(".pip-buttons").style.display = "flex";');
+      if (pipTimer) {
+        clearTimeout(pipTimer);
+      }
+      pipTimer = setTimeout(() => {
+        if (pipControlView && !pipControlView.isDestroyed()) {
+          pipControlView.webContents.executeJavaScript('document.querySelector(".pip-buttons").style.display = "none";');
+        }
+      }, 3000);
+    }
+  });
+  ipcMain.on('pip-btn-mousemove', () => {
+    if (pipTimer) {
+      clearTimeout(pipTimer);
+    }
+  });
+  ipcMain.on('pip-btn-mouseout', () => {
+    if (pipTimer) {
+      clearTimeout(pipTimer);
+    }
+    pipTimer = setTimeout(() => {
+      if (pipControlView && !pipControlView.isDestroyed()) {
+        pipControlView.webContents.executeJavaScript('document.querySelector(".pip-buttons").style.display = "none";');
+      }
+    }, 3000);
+  });
+  ipcMain.on('mouseout', () => {
+    if (browsingWindow && browsingWindow.isFocused()) {
+      if (pipTimer) {
+        clearTimeout(pipTimer);
+      }
+      pipControlView.webContents.executeJavaScript('document.querySelector(".pip-buttons").style.display = "none";');
+    }
+  });
+  ipcMain.on('maximizable', (evt, val) => {
+    if (val) {
+      titlebarView.webContents.executeJavaScript('document.querySelector(".titlebarMax").style.display = "block";'
+        + 'document.querySelector(".titlebarFull").style.display = "none"');
+    } else {
+      titlebarView.webContents.executeJavaScript('document.querySelector(".titlebarMax").style.display = "none";'
+        + 'document.querySelector(".titlebarFull").style.display = "block";');
+    }
+  });
+  ipcMain.on('update-mouse-info', (evt, args) => {
+    if (browsingWindow && browsingWindow.isFocused()) {
+      browsingWindow.send('update-mouse-info', args);
+    }
+  });
+  ipcMain.on('mouseup', (evt, type) => {
+    switch (type) {
+      case 'close':
+        browsingWindow.close();
+        break;
+      case 'min':
+        browsingWindow.minimize();
+        break;
+      case 'full':
+        browsingWindow.setFullScreen(true);
+        if (process.platform === 'darwin') {
+          titlebarView.webContents.executeJavaScript('document.querySelector(".titlebarMin").style.pointerEvents = "none";'
+            + 'document.querySelector(".titlebarMin").style.opacity = "0.25";'
+            + 'document.querySelector(".titlebarFull").style.display = "none";'
+            + 'document.querySelector(".titlebarRecover").style.display = "block";');
+        } else {
+          titlebarView.webContents.executeJavaScript('document.querySelector(".titlebarMax").style.display = "none";'
+            + 'document.querySelector(".titlebarUnMax").style.display = "none";'
+            + 'document.querySelector(".titlebarRecover").style.display = "block";');
+        }
+        break;
+      case 'recover':
+        browsingWindow.setFullScreen(false);
+        if (process.platform === 'darwin') {
+          titlebarView.webContents.executeJavaScript('document.querySelector(".titlebarMin").style.pointerEvents = "";'
+            + 'document.querySelector(".titlebarMin").style.opacity = "1";'
+            + 'document.querySelector(".titlebarFull").style.display = "";'
+            + 'document.querySelector(".titlebarRecover").style.display = "none";');
+        } else {
+          titlebarView.webContents.executeJavaScript('document.querySelector(".titlebarMax").style.display = "block";'
+            + 'document.querySelector(".titlebarUnMax").style.display = "none";'
+            + 'document.querySelector(".titlebarRecover").style.display = "none";');
+        }
+        break;
+      case 'max':
+        if (browsingWindow.isMaximized()) {
+          browsingWindow.unmaximize();
+          isBrowsingWindowMax = false;
+        } else {
+          browsingWindow.maximize();
+          isBrowsingWindowMax = true;
+          if (process.platform === 'win32') {
+            titlebarView.webContents.executeJavaScript('document.querySelector(".titlebarMax").style.display = "none";'
+              + 'document.querySelector(".titlebarUnMax").style.display = "block";'
+              + 'document.querySelector(".titlebarRecover").style.display = "none";');
+          }
+        }
+        break;
+      case 'unmax':
+        browsingWindow.unmaximize();
+        isBrowsingWindowMax = false;
+        if (process.platform === 'win32') {
+          titlebarView.webContents.executeJavaScript('document.querySelector(".titlebarMax").style.display = "block";'
+            + 'document.querySelector(".titlebarUnMax").style.display = "none";'
+            + 'document.querySelector(".titlebarRecover").style.display = "none";');
+        }
+        break;
+      default:
+        break;
+    }
+  });
+  ipcMain.on('shift-pip', (evt, args) => {
+    if (!browserViewManager) return;
+    const mainView = mainWindow.getBrowserView();
+    mainWindow.removeBrowserView(mainView);
+    const browViews = browsingWindow.getBrowserViews();
+    browViews.forEach((view) => {
+      browsingWindow.removeBrowserView(view);
+    });
+    const hostname = urlParse(mainView.webContents.getURL()).hostname;
+    let channel = hostname.slice(hostname.indexOf('.') + 1, hostname.length);
+    if (mainView.webContents.getURL().includes('youtube')) {
+      channel = 'youtube.com';
+    }
+    const browsers = browserViewManager.changePip(channel);
+    const pipBrowser = browsers.pipBrowser;
+    const mainBrowser = browsers.mainBrowser;
+    mainWindow.addBrowserView(mainBrowser.page.view);
+    browsingWindow.addBrowserView(pipBrowser);
+    createPipControlView();
+    createTitlebarView();
+    if (args.isGlobal) {
+      browserViewManager.pauseVideo(mainWindow.getBrowserView());
+      mainWindow.hide();
+    }
+    mainBrowser.page.view.setBounds({
+      x: sidebar ? 76 : 0,
+      y: 40,
+      width: sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
+      height: mainWindow.getSize()[1] - 40,
+    });
+    mainBrowser.page.view.setAutoResize({
+      width: true, height: true,
+    });
+    pipBrowser.setBounds({
+      x: 0, y: 0, width: browsingWindow.getSize()[0], height: browsingWindow.getSize()[1],
+    });
+    pipBrowser.setAutoResize({
+      width: true, height: true,
+    });
+    mainWindow.send('update-browser-state', {
+      url: mainBrowser.page.url,
+      canGoBack: mainBrowser.canBack,
+      canGoForward: mainBrowser.canForward,
+    });
+    pipControlView.webContents.executeJavaScript(
+      `const danmu = document.querySelector(".danmu");
+      danmu.src = ${args.barrageOpen} ? "assets/danmu-default-icon.svg" : "assets/noDanmu-default-icon.svg";
+      danmu.style.opacity = ${args.opacity};
+      danmu.style.cursor = ${args.opacity} === 1 ? "cursor" : "default"`,
+    );
+    menuService.updateFocusedWindow(false, mainWindow && mainWindow.isVisible());
+    browsingWindow.focus();
+  });
+  ipcMain.on('enter-pip', (evt, args) => {
+    if (!browserViewManager) return;
+    const browsers = browserViewManager.enterPip();
+    const pipBrowser = browsers.pipBrowser;
+    const mainBrowser = browsers.mainBrowser;
+    if (!browsingWindow) {
+      createBrowsingWindow();
+      browsingWindow.setSize(args.pipInfo.pipSize[0], args.pipInfo.pipSize[1]);
+      browsingWindow.setPosition(args.pipInfo.pipPos[0], args.pipInfo.pipPos[1]);
+      mainWindow.send('init-pip-position');
+      mainWindow.removeBrowserView(mainWindow.getBrowserView());
+      mainWindow.addBrowserView(mainBrowser.page.view);
+      browsingWindow.addBrowserView(pipBrowser);
+      createPipControlView();
+      createTitlebarView();
+      browsingWindow.show();
+    } else {
+      mainWindow.removeBrowserView(mainWindow.getBrowserView());
+      mainWindow.addBrowserView(mainBrowser.page.view);
+      browsingWindow.setSize(browsingWindow.getSize()[0] + 1, browsingWindow.getSize()[1]);
+      browsingWindow.addBrowserView(pipBrowser);
+      createPipControlView();
+      createTitlebarView();
+      browsingWindow.show();
+    }
+    if (args.isGlobal) {
+      browserViewManager.pauseVideo(mainWindow.getBrowserView());
+      mainWindow.hide();
+    }
+    browsingWindow.setAspectRatio(args.pipInfo.aspectRatio);
+    browsingWindow.setMinimumSize(args.pipInfo.minimumSize[0], args.pipInfo.minimumSize[1]);
+    mainBrowser.page.view.setBounds({
+      x: sidebar ? 76 : 0,
+      y: 40,
+      width: sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
+      height: mainWindow.getSize()[1] - 40,
+    });
+    mainBrowser.page.view.setAutoResize({
+      width: true,
+      height: true,
+    });
+    pipBrowser.setBounds({
+      x: 0, y: 0, width: browsingWindow.getSize()[0], height: browsingWindow.getSize()[1],
+    });
+    pipBrowser.setAutoResize({
+      width: true, height: true,
+    });
+    browsingWindow.send('update-pip-listener');
+    mainWindow.send('update-browser-state', {
+      url: mainBrowser.page.url,
+      canGoBack: mainBrowser.canBack,
+      canGoForward: mainBrowser.canForward,
+    });
+    pipControlView.webContents.executeJavaScript(
+      `const danmu = document.querySelector(".danmu");
+      danmu.src = ${args.barrageOpen} ? "assets/danmu-default-icon.svg" : "assets/noDanmu-default-icon.svg";
+      danmu.style.opacity = ${args.opacity};
+      danmu.style.cursor = ${args.opacity} === 1 ? "cursor" : "default"`,
+    );
+    menuService.updateFocusedWindow(false, mainWindow && mainWindow.isVisible());
+    browsingWindow.focus();
+  });
+  ipcMain.on('update-pip-size', (evt, args) => {
+    mainWindow.send('update-pip-size', args);
+  });
+  ipcMain.on('update-sidebar', (evt, sidebarstate) => {
+    sidebar = sidebarstate;
+  });
+  ipcMain.on('set-bounds', (evt, args) => {
+    if (pipControlView) pipControlView.setBounds(args.control);
+    if (titlebarView) titlebarView.setBounds(args.titlebar);
+  });
+  ipcMain.on('exit-pip', () => {
+    if (!browserViewManager) return;
+    browsingWindow.send('remove-pip-listener');
+    mainWindow.show();
+    const mainView = mainWindow.getBrowserView();
+    mainWindow.removeBrowserView(mainView);
+    const browViews = browsingWindow.getBrowserViews();
+    browViews.forEach((view) => {
+      browsingWindow.removeBrowserView(view);
+    });
+    const exitBrowser = browserViewManager.exitPip();
+    mainWindow.addBrowserView(exitBrowser.page.view);
+    exitBrowser.page.view.setBounds({
+      x: sidebar ? 76 : 0,
+      y: 40,
+      width: sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
+      height: mainWindow.getSize()[1] - 40,
+    });
+    exitBrowser.page.view.setAutoResize({
+      width: true,
+      height: true,
+    });
+    mainWindow.send('update-browser-state', {
+      url: exitBrowser.page.url,
+      canGoBack: exitBrowser.canBack,
+      canGoForward: exitBrowser.canForward,
+    });
+    if (browsingWindow.isFullScreen()) {
+      hideBrowsingWindow = true;
+      browsingWindow.setFullScreen(false);
+    } else {
+      browsingWindow.hide();
+    }
+    menuService.updateFocusedWindow(true, mainWindow && mainWindow.isVisible());
+    mainWindow.focus();
+  });
+  ipcMain.on('set-window-maximize', () => {
+    if (mainWindow && mainWindow.isFocused()) {
+      if (!mainWindow.isMaximized()) {
+        mainWindow.maximize();
+      } else {
+        mainWindow.unmaximize();
+      }
+    } else if (browsingWindow && browsingWindow.isFocused()) {
+      if (!isBrowsingWindowMax) {
+        browsingWindow.maximize();
+        isBrowsingWindowMax = true;
+        if (process.platform === 'win32') {
+          titlebarView.webContents.executeJavaScript('document.querySelector(".titlebarMax").style.display = "none";'
+            + 'document.querySelector(".titlebarUnMax").style.display = "block";'
+            + 'document.querySelector(".titlebarRecover").style.display = "none";');
+        }
+      } else {
+        browsingWindow.unmaximize();
+        isBrowsingWindowMax = false;
+        if (process.platform === 'win32') {
+          titlebarView.webContents.executeJavaScript('document.querySelector(".titlebarMax").style.display = "block";'
+            + 'document.querySelector(".titlebarUnMax").style.display = "none";'
+            + 'document.querySelector(".titlebarRecover").style.display = "none";');
+        }
+      }
+    }
+  });
   ipcMain.on('update-route-name', (e, route) => {
     routeName = route;
+  });
+  ipcMain.on('key-events', (e, keyCode) => {
+    browsingWindow.getBrowserViews()[0].webContents.executeJavaScript(`var event = new KeyboardEvent("keydown", { keyCode: ${keyCode} });window.dispatchEvent(event)`);
   });
   ipcMain.on('drop-subtitle', (event, args) => {
     if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
@@ -425,6 +932,9 @@ function registerMainWindowEvent(mainWindow) {
     app.quit();
   });
   ipcMain.on('add-preference', createPreferenceWindow);
+  ipcMain.on('add-browsing', (e, args) => {
+    createBrowsingWindow(args);
+  });
   ipcMain.on('preference-to-main', (e, args) => {
     if (mainWindow && !mainWindow.webContents.isDestroyed()) {
       mainWindow.webContents.send('mainDispatch', 'setPreference', args);
@@ -538,8 +1048,12 @@ function createMainWindow(openDialog, playlistId) {
 
 ['left-drag', 'left-up'].forEach((channel) => {
   mouse.on(channel, (...args) => {
-    if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
-    mainWindow.webContents.send(`mouse-${channel}`, ...args);
+    if (process.platform === 'win32') {
+      const focusedWindow = BrowserWindow.getFocusedWindow();
+      if (focusedWindow) focusedWindow.send(`mouse-${channel}`, ...args);
+    } else if (browsingWindow && browsingWindow.isFocused()) {
+      browsingWindow.webContents.send(`mouse-${channel}`, ...args);
+    }
   });
 });
 
@@ -684,6 +1198,11 @@ if (process.platform === 'darwin') {
 app.on('ready', () => {
   menuService = new MenuService();
   if (process.platform === 'darwin') {
+    systemPreferences.subscribeNotification('AppleInterfaceThemeChangedNotification', () => {
+      if (routeName === 'browsing-view') {
+        menuService.updatePipIcon();
+      }
+    });
     systemPreferences.setUserDefault('NSDisabledDictationMenuItem', 'boolean', true);
     systemPreferences.setUserDefault('NSDisabledCharacterPaletteMenuItem', 'boolean', true);
   }
@@ -722,7 +1241,7 @@ const oauthRegex = [
   /^https:\/\/account.xiaomi.com\/pass\//i,
 ];
 app.on('web-contents-created', (webContentsCreatedEvent, contents) => {
-  if (contents.getType() === 'webview') {
+  if (contents.getType() === 'browserView') {
     contents.on('new-window', (newWindowEvent, url) => {
       if (!oauthRegex.some(re => re.test(url))) {
         newWindowEvent.preventDefault();
@@ -743,7 +1262,7 @@ app.on('menu-create-main-window', () => {
   if (!mainWindow) createMainWindow();
   else if (mainWindow.isMinimized()) {
     mainWindow.restore();
-  } else if (!mainWindow.isVisible()) {
+  } else if (!mainWindow.isVisible() && (!browsingWindow || !browsingWindow.isVisible())) {
     mainWindow.show();
   }
 });
@@ -755,7 +1274,10 @@ app.on('menu-open-dialog', (playlistId) => {
 app.on('activate', () => {
   if (!mainWindow) {
     if (app.isReady()) createMainWindow();
-  } else if (!mainWindow.isVisible()) {
+  } else if (!mainWindow.isVisible() && (!browsingWindow || !browsingWindow.isVisible())) {
     mainWindow.show();
+  }
+  if (browsingWindow && browsingWindow.isMinimized()) {
+    browsingWindow.restore();
   }
 });

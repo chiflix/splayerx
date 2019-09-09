@@ -4,12 +4,11 @@ const { exec } = require('child_process');
 
 require('events').EventEmitter.prototype._maxListeners = 10000;
 
-const commands = ['npx rimraf node_modules/**/.git', 'npm run lint:fix'];
-
-if (process.platform === 'win32') {
-  commands.push('npm run install-app-deps');
-  commands.push('npm run rebuild:win-mouse');
-}
+const commands = [
+  'npx rimraf node_modules/**/.git',
+  'npm run lint:fix',
+  'npm run install-app-deps',
+];
 
 exec(commands.join('&&'), (error, stdout) => {
   if (error) throw error;
