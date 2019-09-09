@@ -31,6 +31,7 @@
       v-show="maskToShow"
     />
     <div
+      v-show="showProgress"
       :style="{
         width: `${progress}%`,
       }"
@@ -107,6 +108,8 @@ export default {
       isGlobal: false,
       startLoading: false,
       title: 'Splayer',
+      progress: 0,
+      showProgress: false,
       readyState: '',
       oauthRegex: [
         /^https:\/\/cnpassport.youku.com\//i,
@@ -160,18 +163,6 @@ export default {
     },
     othersPip() {
       return globalPip(this.pipSize);
-    },
-    progress() {
-      switch (this.readyState) {
-        case 'loading':
-          return 30;
-        case 'interactive':
-          return 70;
-        case 'complete':
-          return 100;
-        default:
-          return 0;
-      }
     },
     hasVideo() {
       return this.webInfo.hasVideo;
@@ -260,12 +251,17 @@ export default {
         }
       }
     },
-    loadingState(val: boolean) {
+    loadingState(val: boolean, oldVal: boolean) {
       if (val) {
         this.webInfo.hasVideo = false;
         this.createTouchBar(false);
+        this.showProgress = true;
+        this.progress = 70;
       } else {
+        this.progress = 100;
         setTimeout(() => {
+          this.showProgress = false;
+          this.progress = 0;
           const loadUrl = this.$electron.remote
             .getCurrentWindow()
             .getBrowserViews()[0]
@@ -1073,7 +1069,9 @@ export default {
   top: 38px;
   z-index: 6;
   height: 2px;
-  transition: width 100ms linear;
+  transition-property: width;
+  transition-timing-function: ease-out;
+  transition-duration: 500ms;
   background-color: #FF672D;
 }
 .loading-animation {
