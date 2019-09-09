@@ -4,53 +4,11 @@ import {
 } from 'lodash';
 import { LanguageCode } from '@/libs/language';
 import { DATADB_NAME } from '@/constants';
+import { Format, IOrigin, IRawVideoSegment } from '@/interfaces/ISubtitle';
 import {
-  Type, Format, IOrigin, IRawVideoSegment,
-} from '@/interfaces/ISubtitle';
-import {
-  IStoredSubtitle, IStoredSubtitleItem, ISubtitlePreference, SelectedSubtitle, IPrimarySecondary,
+  IStoredSubtitle, IStoredSubtitleItem, ISubtitlePreference, SelectedSubtitle,
 } from '@/interfaces/ISubtitleStorage';
 
-interface IDataDBV3 extends DBSchema {
-  'subtitles': {
-    key: string;
-    value: IStoredSubtitle;
-  };
-  'preferences': {
-    key: number;
-    value: ISubtitlePreference;
-    indexes: {
-      'byPlaylist': number,
-      'byMediaItem': string,
-    },
-  };
-}
-interface IDataDBV4 extends DBSchema {
-  'subtitles': {
-    key: string;
-    value: {
-      hash: string;
-      source: IOrigin[];
-      format: Format;
-      language: LanguageCode;
-    };
-  };
-  'subtitle-preferences': {
-    key: string;
-    value: {
-      mediaHash: string;
-      list: {
-        hash: string;
-        type: Type;
-        source: unknown;
-        videoSegments?: IRawVideoSegment[];
-        delay: number;
-      }[];
-      language: IPrimarySecondary<LanguageCode>;
-      selected: IPrimarySecondary<SelectedSubtitle>;
-    };
-  };
-}
 interface IDataDBV5 extends DBSchema {
   'subtitles': {
     key: string;
@@ -95,18 +53,16 @@ export class SubtitleDataBase {
         5,
         {
           async upgrade(db, version) {
-            if (version > 0 && version < 3) {
+            if (version > 0 && version < 5) {
               db.deleteObjectStore('subtitles');
-              db.createObjectStore('subtitles', { keyPath: 'hash' });
-            } else if (version === 3) {
-              const v3Db = db as unknown as IDBPDatabase<IDataDBV3>;
-              v3Db.deleteObjectStore('subtitles');
-              v3Db.deleteObjectStore('preferences');
-            } else if (version === 4) {
-              const v4Db = db as unknown as IDBPDatabase<IDataDBV4>;
-              v4Db.deleteObjectStore('subtitles');
-              v4Db.deleteObjectStore('subtitle-preferences');
             }
+            if (version === 3) {
+              db.deleteObjectStore('preferences' as any); // eslint-disable-line @typescript-eslint/no-explicit-any
+            }
+            if (version === 4) {
+              db.deleteObjectStore('subtitle-preferences');
+            }
+
             db.createObjectStore('subtitles', { keyPath: 'hash' });
             db.createObjectStore('subtitle-preferences', { keyPath: 'mediaHash' });
           },
