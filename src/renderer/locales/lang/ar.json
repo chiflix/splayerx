@@ -199,8 +199,8 @@
       "originSize": "100٪",
       "enterPip": "أدخل صورة في صورة",
       "exitPip": "الخروج من الصورة في صورة",
-      "playInNewWindow": "",
-      "backToBrowser": ""
+      "playInNewWindow": "اللعب في نافذة جديدة",
+      "backToBrowser": "العودة إلى المتصفح"
     },
     "favourite": {
       "name": "قناة",
