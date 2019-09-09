@@ -199,8 +199,8 @@
       "originSize": "100 %",
       "enterPip": "Picture In Picture 사용",
       "exitPip": "Picture In Picture 퇴출",
-      "playInNewWindow": "",
-      "backToBrowser": ""
+      "playInNewWindow": "새 창에서 놀다",
+      "backToBrowser": "브라우저로 돌아 가기"
     },
     "favourite": {
       "name": "채널",
