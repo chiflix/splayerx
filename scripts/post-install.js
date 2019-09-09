@@ -10,12 +10,6 @@ const commands = [
   'npm run install-app-deps',
 ];
 
-if (process.platform === 'win32') {
-  commands.push('npm run rebuild:win-mouse');
-} else {
-  commands.push('npm run rebuild:osx-mouse-cocoa');
-}
-
 exec(commands.join('&&'), (error, stdout) => {
   if (error) throw error;
   console.log(stdout);

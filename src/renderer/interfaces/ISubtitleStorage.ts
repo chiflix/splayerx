@@ -1,29 +1,25 @@
 import {
-  Format, Type, IVideoSegment, IOrigin,
+  Format, IRawVideoSegment, IOrigin,
 } from './ISubtitle';
 import { LanguageCode } from '@/libs/language';
 
 export interface IStoredSubtitle {
   hash: string;
-  source: IOrigin[];
+  sources: IOrigin[];
   format: Format;
   language: LanguageCode;
 }
 export interface IStoredSubtitleItem {
-  /** must be real hash to retrieve real subtitle from db */
   hash: string;
-  /** may be fake type for display use only */
-  type: Type;
-  /** may also be fake source for display use only */
-  source: unknown;
-  videoSegments?: IVideoSegment[];
+  source: IOrigin;
+  videoSegments?: IRawVideoSegment[];
   delay: number;
 }
-interface IPrimarySecondary<T> {
+export interface IPrimarySecondary<T> {
   primary?: T;
   secondary?: T;
 }
-export type SelectedSubtitle = { hash: string, source?: IOrigin };
+export type SelectedSubtitle = { hash: string, source: IOrigin };
 export interface ISubtitlePreference {
   mediaHash: string;
   list: IStoredSubtitleItem[];

@@ -38,6 +38,8 @@
 <script lang="ts">
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ipcRenderer, Event } from 'electron';
+import { mapActions } from 'vuex';
+import { SubtitleManager as smActions } from '@/store/actionTypes';
 import Titlebar from '@/components/Titlebar.vue';
 import Sidebar from '@/components/Sidebar.vue';
 import '@/css/style.scss';
@@ -65,6 +67,7 @@ export default {
   watch: {
     $route(to: any, from: any) {
       if (to.name === 'landing-view' && from.name === 'language-setting') this.transitionMode = 'fade';
+      if (from.name === 'playing-view' && to.name !== 'playing-view') this.resetManager();
       else this.transitionMode = '';
       if (to.name !== 'browsing-view' && !(to.name === 'landing-view' && from.name === 'browsing-view')) this.showSidebar = false;
       if (from.name === 'browsing-view' && to.name === 'landing-view') this.currentUrl = '';
@@ -98,6 +101,9 @@ export default {
     }, 1500000); // keep alive every 25 min.
   },
   methods: {
+    ...mapActions({
+      resetManager: smActions.resetManager,
+    }),
     mainCommitProxy(commitType: string, commitPayload: any) {
       this.$store.commit(commitType, commitPayload);
     },

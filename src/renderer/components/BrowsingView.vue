@@ -456,7 +456,9 @@ export default {
         window.removeEventListener('focus', this.focusHandler);
         if (this.backToLandingView) {
           this.$electron.ipcRenderer.send('remove-browser');
-          windowRectService.uploadWindowBy(false, 'landing-view');
+          setTimeout(() => {
+            windowRectService.uploadWindowBy(false, 'landing-view', undefined, undefined, this.winSize, this.winPos, this.isFullScreen);
+          }, 200);
         }
       });
   },
