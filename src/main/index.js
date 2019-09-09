@@ -539,6 +539,7 @@ function createMainWindow(openDialog, playlistId) {
 ['left-drag', 'left-up'].forEach((channel) => {
   mouse.on(channel, (...args) => {
     if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
+    if (mainWindow.isMaximized()) return;
     mainWindow.webContents.send(`mouse-${channel}`, ...args);
   });
 });
