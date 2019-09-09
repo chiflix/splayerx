@@ -11,6 +11,19 @@ export function bilibiliBarrageAdapt(type, barrageOpen) {
   return '';
 }
 
+export function bilibiliVideoPause(type) {
+  if (['video', 'bangumi'].includes(type)) {
+    return 'document.querySelector(".bilibili-player-video-btn").click()';
+  }
+  if (type === 'videoStreaming') {
+    return 'document.querySelector(".bilibili-live-player-video-controller-btn-item").children[0].click()';
+  }
+  if (type === 'iframeStreaming') {
+    return 'document.querySelector("iframe").contentDocument.querySelector(".bilibili-live-player-video-controller-btn-item").children[0].click()';
+  }
+  return 'document.querySelector(".bilibili-live-player-video-controller-btn-item").children[0].click()';
+}
+
 export function bilibili(type, barrageOpen, winSize) {
   if (type === 'bangumi') {
     return {
@@ -93,11 +106,16 @@ export function bilibili(type, barrageOpen, winSize) {
         document.body.style.cssText = "overflow: hidden";
         Object.defineProperty(document.body.style, "overflow", {get: function(){return "hidden"}, set: function(){}});
         document.querySelector("iframe").contentDocument.querySelector(".aside-area").style.display = "none";
-        document.querySelector(".game-header").style.display = "none";
-        document.querySelector(".link-navbar").style.display = "none";
+        var header = document.querySelector(".game-header");
+        var navbar = document.querySelector(".link-navbar");
+        var sidebar = document.querySelector(".agile-sidebar");
+        var navwrapper = document.querySelector(".bili-header-m");
+        if (header) header.style.display = "none";
+        if (navbar) navbar.style.display = "none";
+        if (sidebar) sidebar.style.display = "none";
+        if (navwrapper) navwrapper.style.display = "none";
         document.querySelector("iframe").contentDocument.querySelector("#head-info-vm").style.display = "none";
         document.querySelector("iframe").contentDocument.querySelector(".aside-area-toggle-btn").style.display = "none";
-        document.querySelector(".agile-sidebar").style.display = "none";
         document.querySelector("iframe").contentDocument.querySelector("#gift-control-vm").style.display = "none";
         var el = document.querySelector("iframe");
         el.style.cssText = "position: fixed; left: 0; top: 0; z-index: 9999";
@@ -115,11 +133,16 @@ export function bilibili(type, barrageOpen, winSize) {
       recover: 'Object.defineProperty(document.body.style, "overflow", {value: "scroll",writable: true});'
         + 'document.body.style.cssText = "overflow: scroll";'
         + 'document.querySelector("iframe").contentDocument.querySelector(".aside-area").style.display = "";'
-        + 'document.querySelector(".game-header").style.display = "";'
-        + 'document.querySelector(".link-navbar").style.display = "";'
+        + 'var header = document.querySelector(".game-header");'
+        + 'var navbar = document.querySelector(".link-navbar");'
+        + 'var sidebar = document.querySelector(".agile-sidebar");'
+        + 'var navwrapper = document.querySelector(".bili-header-m");'
+        + 'if (navwrapper) navwrapper.style.display = "";'
+        + 'if (sidebar) sidebar.style.display = "";'
+        + 'if (navbar) navbar.style.display = "";'
+        + 'if (header) header.style.display = "";'
         + 'document.querySelector("iframe").contentDocument.querySelector("#head-info-vm").style.display = "";'
         + 'document.querySelector("iframe").contentDocument.querySelector(".aside-area-toggle-btn").style.display = "";'
-        + 'document.querySelector(".agile-sidebar").style.display = "";'
         + 'document.querySelector("iframe").contentDocument.querySelector("#gift-control-vm").style.display = "";'
         + 'document.querySelector("iframe").contentDocument.querySelector(".bilibili-live-player-video-danmaku").style.opacity = "1";'
         + 'var el = document.querySelector("iframe");'
@@ -161,4 +184,4 @@ export function bilibili(type, barrageOpen, winSize) {
   };
 }
 
-export const bilibiliFindType = '[document.querySelector(".bilibili-player-video-message"), document.querySelector(".live-player-ctnr"), document.querySelector("iframe"), document.querySelector("#bofqi")]';
+export const bilibiliFindType = 'var contents = document.querySelector("iframe") ? document.querySelector("iframe").contentDocument : null;[document.querySelector(".bilibili-player-video-message"), document.querySelector(".live-player-ctnr"), document.querySelector(".container-wrapper"), contents ? contents.querySelector(".live-room-app") : null, document.querySelector("#bofqi")]';

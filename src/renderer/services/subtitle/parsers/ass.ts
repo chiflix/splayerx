@@ -1,47 +1,34 @@
-import { pick } from 'lodash';
-// @ts-ignore
-import { compile } from 'ass-compiler';
-import { Format, Cue, ITags } from '@/interfaces/ISubtitle';
-import { BaseParser } from './base';
+import { pick, get } from 'lodash';
+import { compile, CompiledASS, AssStream } from 'ass-compiler';
+import {
+  Format, IParser, ILoader, IMetadata, Cue, IVideoSegments,
+} from '@/interfaces/ISubtitle';
+import { getDialogues } from '../utils';
+import { StreamTimeSegments } from '@/libs/TimeSegments';
 
-interface IAssTags {
-  b: number;
-  i: number;
-  u: number;
-  s: number;
-}
-type CompiledSubtitle = {
-  info: {
-    PlayResX: string;
-    PlayResY: string;
-  };
-  dialogues: {
-    start: number;
-    end: number;
-    alignment: number;
-    pos: {
-      x: number;
-      y: number;
-    };
-    slices: {
-      tag: IAssTags;
-      fragments: {
-        tag: IAssTags;
-        text: string;
-        drawing: null | object;
-      }[];
-    }[];
-  }[];
-}
+export class AssParser implements IParser {
+  public get format() { return Format.AdvancedSubStationAplha; }
 
-export class AssParser extends BaseParser {
-  public readonly payload: string = '';
+  public readonly loader: ILoader;
 
-  public format = Format.AdvancedSubStationAplha;
+  public readonly videoSegments: IVideoSegments;
 
-  public constructor(assPayload: string) {
-    super();
-    this.payload = assPayload;
+  public constructor(assPayload: ILoader, videoSegments: IVideoSegments) {
+    this.loader = assPayload;
+    this.videoSegments = videoSegments;
+    this.loader.once('read', (result) => {
+      if (result) {
+        this.loader.getPayload()
+          .then((payload) => {
+            this.dialogues = [];
+            this.normalize(compile(payload as string));
+            // some clean up
+            if (this.timer) clearTimeout(this.timer);
+            this.assStream = undefined;
+            this.timeSegments = undefined;
+          });
+      }
+    });
   }
 
   private baseInfo = {
@@ -83,62 +70,105 @@ export class AssParser extends BaseParser {
     // yshad: 2,
     // q: 0,
     alignment: 2,
-    pos: null,
+    pos: undefined,
   };
 
-  private normalize(compiledSubtitle: CompiledSubtitle) {
-    if (!compiledSubtitle.dialogues.length) throw new Error('Unsupported Subtitle');
-    const finalDialogues: Cue[] = [];
+  private metadata: IMetadata;
+
+  private dialogues: Cue[] = [];
+
+  private normalize(compiledSubtitle: CompiledASS) {
+    if (!compiledSubtitle.dialogues.length) return;
     const { info, dialogues } = compiledSubtitle;
     this.metadata = pick(info, Object.keys(this.baseInfo));
-    dialogues.forEach((dialogue) => {
+    this.dialogues = dialogues.map((dialogue) => {
       const {
         start, end, alignment, slices, pos,
       } = dialogue;
-      const baseDiagolue = {
-        start, end,
+      const finalText = slices
+        .reduce(
+          (prevSliceString, { fragments }) => prevSliceString.concat(fragments
+            .reduce(
+              (prevFragmentString, { text }) => prevFragmentString.concat(text
+                // replace soft and hard line breaks with \n
+                .replace(/[\\/][Nn]|\r?\n|\r/g, '\n')
+                // replace hard space with space
+                .replace(/\\h/g, ' ')),
+              '',
+            )),
+          '',
+        );
+      const finalTags = {
+        ...this.baseTags,
+        alignment,
+        pos,
+        ...pick(
+          Object.assign({},
+            get(slices, '[0].tag'),
+            get(slices, '[0].fragments[0].tag')),
+          ['b', 'i', 'u', 's'],
+        ),
       };
-      Object.values(slices).forEach((slice) => {
-        const { tag: sliceTag, fragments } = slice;
-        const hasDrawing = fragments.some(({ drawing }) => !!drawing);
-        if (!hasDrawing) {
-          const processedFragments = fragments.map((fragment) => {
-            const { tag: fragmentTag, text } = fragment;
-            const finalTags = {
-              ...this.baseTags,
-              alignment,
-              pos,
-              ...pick(Object.assign({}, sliceTag, fragmentTag), ['b', 'i', 'u', 's']),
-            };
-            return {
-              text: text
-                .replace(/[\\/][Nn]|\r?\n|\r/g, '\n') // replace soft and hard line breaks with \n
-                .replace(/\\h/g, ' '), // replace hard space with space
-              tags: finalTags,
-            };
-          });
-          let txt = '';
-          let tags: ITags = {};
-          processedFragments.forEach((f: { text: string, tags: ITags }, i: number) => {
-            if (i === 0) {
-              tags = f.tags;
-            }
-            txt += f.text;
-          });
-          const finalDialogue = {
-            ...baseDiagolue,
-            text: txt,
-            tags,
-            format: this.format,
-          };
-          finalDialogues.push(finalDialogue);
-        }
-      });
+      return {
+        start,
+        end,
+        text: finalText,
+        tags: finalTags,
+        format: Format.AdvancedSubStationAplha,
+      };
     });
-    this.dialogues = finalDialogues;
+    this.dialogues.forEach(({ start, end }) => this.videoSegments.insert(start, end));
   }
 
-  public async parse() {
-    this.normalize(compile(this.payload) as CompiledSubtitle);
+  public async getMetadata() { return this.metadata; }
+
+  private assStream?: AssStream;
+
+  private timeSegments?: StreamTimeSegments;
+
+  private timer?: NodeJS.Timeout;
+
+  private timeout: boolean = true;
+
+  private currentTime?: number;
+
+  private isRequesting: boolean = false;
+
+  private get canRequestPayload() {
+    return !this.loader.canPreload && !this.isRequesting && (
+      (this.timeSegments && !this.timeSegments.check(this.currentTime || 0)) || this.timeout
+    );
+  }
+
+  private lastLines: string[] = [];
+
+  public async getDialogues(time?: number) {
+    if (this.loader.canPreload) {
+      if (!this.loader.fullyRead) {
+        const payload = await this.loader.getPayload() as string;
+        if (this.loader.fullyRead) {
+          this.normalize(compile(payload));
+        }
+      }
+    } else if (!this.loader.fullyRead) {
+      this.currentTime = time || 0;
+      if (this.canRequestPayload) {
+        if (this.timer) clearTimeout(this.timer);
+        this.timeout = false;
+        this.timer = setTimeout(() => { this.timeout = true; }, 10000);
+        this.isRequesting = true;
+        const payload = await this.loader.getPayload(time) as string || '';
+        const newLines = payload.split(/\r?\n/);
+        const deDuplicatedPayload = newLines.filter(line => !this.lastLines.includes(line)).join('\n');
+        this.lastLines = newLines;
+        if (!this.assStream) this.assStream = new AssStream();
+        const result = this.assStream.compile(deDuplicatedPayload);
+        if (!this.timeSegments) this.timeSegments = new StreamTimeSegments();
+        this.timeSegments.bulkInsert(result.map(({ Start, End }) => [Start, End]), time || 0);
+        this.normalize(this.assStream.compiled);
+        this.isRequesting = false;
+      }
+    }
+    return getDialogues(this.dialogues, time);
   }
 }
