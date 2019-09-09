@@ -198,7 +198,9 @@
       "name": "窗口",
       "originSize": "100%",
       "enterPip": "進入畫中畫模式",
-      "exitPip": "退出畫中畫模式"
+      "exitPip": "退出畫中畫模式",
+      "playInNewWindow": "",
+      "backToBrowser": ""
     },
     "favourite": {
       "name": "頻道",
