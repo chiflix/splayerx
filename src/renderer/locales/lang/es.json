@@ -198,7 +198,9 @@
       "name": "Ventana",
       "originSize": "100%",
       "enterPip": "Habilitar Picture in Picture",
-      "exitPip": "Salir de Picture in Picture"
+      "exitPip": "Salir de Picture in Picture",
+      "playInNewWindow": "",
+      "backToBrowser": ""
     },
     "favourite": {
       "name": "Canal",
