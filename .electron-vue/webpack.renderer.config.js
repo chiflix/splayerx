@@ -111,17 +111,6 @@ let rendererConfig = {
         exclude: /node_modules/,
       },
       {
-        // 匹配 *.worker.js
-        test: /\.worker\.js$/,
-        use: {
-          loader: 'workerize-loader',
-        },
-      },
-      {
-        test: /\.node$/,
-        use: 'node-loader',
-      },
-      {
         test: /\.vue$/,
         use: {
           loader: 'vue-loader',

@@ -35,10 +35,10 @@ function _fs() {
   return data;
 }
 
-function _fsExtraP() {
-  const data = require("fs-extra-p");
+function _fsExtra() {
+  const data = require("fs-extra");
 
-  _fsExtraP = function () {
+  _fsExtra = function () {
     return data;
   };
 
@@ -61,16 +61,6 @@ function _core() {
   const data = require("../core");
 
   _core = function () {
-    return data;
-  };
-
-  return data;
-}
-
-function _platformPackager() {
-  const data = require("../platformPackager");
-
-  _platformPackager = function () {
     return data;
   };
 
@@ -166,11 +156,11 @@ class AppXTarget extends _core().Target {
       const outFile = vm.toVmFile(stageDir.getTempFile("resources.pri"));
       const makePriPath = vm.toVmFile(path.join(vendorPath, "windows-10", _builderUtil().Arch[arch], "makepri.exe"));
       const assetRoot = stageDir.getTempFile("appx/assets");
-      await (0, _fsExtraP().emptyDir)(assetRoot);
+      await (0, _fsExtra().emptyDir)(assetRoot);
       await _bluebirdLst().default.map(assetInfo.allAssets, it => (0, _fs().copyOrLinkFile)(it, path.join(assetRoot, path.basename(it))));
       await vm.exec(makePriPath, ["new", "/Overwrite", "/Manifest", vm.toVmFile(manifestFile), "/ProjectRoot", vm.toVmFile(path.dirname(assetRoot)), "/ConfigXml", vm.toVmFile(path.join((0, _pathManager().getTemplatePath)("appx"), "priconfig.xml")), "/OutputFile", outFile]); // in addition to resources.pri, resources.scale-140.pri and other such files will be generated
 
-      for (const resourceFile of (await (0, _fsExtraP().readdir)(stageDir.dir)).filter(it => it.startsWith("resources.")).sort()) {
+      for (const resourceFile of (await (0, _fsExtra().readdir)(stageDir.dir)).filter(it => it.startsWith("resources.")).sort()) {
         mappingList.push([`"${vm.toVmFile(stageDir.getTempFile(resourceFile))}" "${resourceFile}"`]);
       }
 
@@ -183,7 +173,7 @@ class AppXTarget extends _core().Target {
       mapping += "\r\n" + list.join("\r\n");
     }
 
-    await (0, _fsExtraP().writeFile)(mappingFile, mapping);
+    await (0, _fsExtra().writeFile)(mappingFile, mapping);
     packager.debugLogger.add("appx.mapping", mapping);
 
     if (this.options.makeappxArgs != null) {
@@ -211,7 +201,7 @@ class AppXTarget extends _core().Target {
     if (userAssetDir == null) {
       userAssets = [];
     } else {
-      userAssets = (await (0, _fsExtraP().readdir)(userAssetDir)).filter(it => !it.startsWith(".") && !it.endsWith(".db") && it.includes("."));
+      userAssets = (await (0, _fsExtra().readdir)(userAssetDir)).filter(it => !it.startsWith(".") && !it.endsWith(".db") && it.includes("."));
 
       for (const name of userAssets) {
         mappings.push(`"${vm.toVmFile(userAssetDir)}${vm.pathSep}${name}" "assets\\${name}"`);
@@ -260,7 +250,7 @@ class AppXTarget extends _core().Target {
     const options = this.options;
     const executable = `app\\${appInfo.productFilename}.exe`;
     const displayName = options.displayName || appInfo.productName;
-    const manifest = (await (0, _fsExtraP().readFile)(path.join((0, _pathManager().getTemplatePath)("appx"), "appxmanifest.xml"), "utf8")).replace(/\${([a-zA-Z0-9]+)}/g, (match, p1) => {
+    const manifest = (await (0, _fsExtra().readFile)(path.join((0, _pathManager().getTemplatePath)("appx"), "appxmanifest.xml"), "utf8")).replace(/\${([a-zA-Z0-9]+)}/g, (match, p1) => {
       switch (p1) {
         case "publisher":
           return publisher;
@@ -275,7 +265,7 @@ class AppXTarget extends _core().Target {
           return name;
 
         case "version":
-          return appInfo.getVersionInWeirdWindowsForm(false);
+          return appInfo.getVersionInWeirdWindowsForm(options.setBuildNumber === true);
 
         case "applicationId":
           const result = options.applicationId || options.identityName || appInfo.name;
@@ -338,7 +328,7 @@ class AppXTarget extends _core().Target {
           throw new Error(`Macro ${p1} is not defined`);
       }
     });
-    await (0, _fsExtraP().writeFile)(outFile, manifest);
+    await (0, _fsExtra().writeFile)(outFile, manifest);
   }
 
   getExtensions(executable, displayName) {
@@ -351,7 +341,7 @@ class AppXTarget extends _core().Target {
       isAddAutoLaunchExtension = deps != null && deps["electron-winstore-auto-launch"] != null;
     }
 
-    if (!isAddAutoLaunchExtension && uriSchemes.length === 0 && fileAssociations.length === 0) {
+    if (!isAddAutoLaunchExtension && uriSchemes.length === 0) {
       return "";
     }
 
@@ -374,6 +364,7 @@ class AppXTarget extends _core().Target {
           </uap:Extension>`;
       }
     }
+
 
     if (fileAssociations.length) {
       const appName = this.options.applicationId || this.options.identityName || this.packager.appInfo.name;
@@ -400,7 +391,6 @@ class AppXTarget extends _core().Target {
     }
 
     extensions += "</Extensions>";
-
     return extensions;
   }
 
@@ -465,6 +455,6 @@ function isDefaultAssetIncluded(userAssets, defaultAsset) {
 
 function isScaledAssetsProvided(userAssets) {
   return userAssets.some(it => it.includes(".scale-") || it.includes(".targetsize-"));
-} 
+}
 // __ts-babel@6.0.4
 //# sourceMappingURL=AppxTarget.js.map

@@ -8,7 +8,6 @@ const commands = ['npx rimraf node_modules/**/.git', 'npm run lint:fix'];
 
 if (process.platform === 'win32') {
   commands.push('npm run install-app-deps');
-  commands.push('npm run rebuild:win-mouse');
 }
 
 exec(commands.join('&&'), (error, stdout) => {
