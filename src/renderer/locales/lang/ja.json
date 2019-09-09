@@ -199,8 +199,8 @@
       "originSize": "100%",
       "enterPip": "画中画を開じる",
       "exitPip": "画中画を閉じる",
-      "playInNewWindow": "",
-      "backToBrowser": ""
+      "playInNewWindow": "新しいウィンドウで遊ぶ",
+      "backToBrowser": "ブラウザに戻る"
     },
     "favourite": {
       "name": "チャンネル",
