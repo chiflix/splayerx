@@ -71,6 +71,7 @@ let browsingWindow = null;
 let browserViewManager = null;
 let pipControlView = null;
 let titlebarView = null;
+let isBrowsingWindowMax = false;
 let tray = null;
 let pipTimer = 0;
 let needToRestore = false;
@@ -662,8 +663,10 @@ function registerMainWindowEvent(mainWindow) {
       case 'max':
         if (browsingWindow.isMaximized()) {
           browsingWindow.unmaximize();
+          isBrowsingWindowMax = false;
         } else {
           browsingWindow.maximize();
+          isBrowsingWindowMax = true;
           if (process.platform === 'win32') {
             titlebarView.webContents.executeJavaScript('document.querySelector(".titlebarMax").style.display = "none";'
               + 'document.querySelector(".titlebarUnMax").style.display = "block";'
@@ -673,6 +676,7 @@ function registerMainWindowEvent(mainWindow) {
         break;
       case 'unmax':
         browsingWindow.unmaximize();
+        isBrowsingWindowMax = false;
         if (process.platform === 'win32') {
           titlebarView.webContents.executeJavaScript('document.querySelector(".titlebarMax").style.display = "block";'
             + 'document.querySelector(".titlebarUnMax").style.display = "none";'
@@ -852,10 +856,22 @@ function registerMainWindowEvent(mainWindow) {
         mainWindow.unmaximize();
       }
     } else if (browsingWindow && browsingWindow.isFocused()) {
-      if (!browsingWindow.isMaximized()) {
+      if (!isBrowsingWindowMax) {
         browsingWindow.maximize();
+        isBrowsingWindowMax = true;
+        if (process.platform === 'win32') {
+          titlebarView.webContents.executeJavaScript('document.querySelector(".titlebarMax").style.display = "none";'
+            + 'document.querySelector(".titlebarUnMax").style.display = "block";'
+            + 'document.querySelector(".titlebarRecover").style.display = "none";');
+        }
       } else {
         browsingWindow.unmaximize();
+        isBrowsingWindowMax = false;
+        if (process.platform === 'win32') {
+          titlebarView.webContents.executeJavaScript('document.querySelector(".titlebarMax").style.display = "block";'
+            + 'document.querySelector(".titlebarUnMax").style.display = "none";'
+            + 'document.querySelector(".titlebarRecover").style.display = "none";');
+        }
       }
     }
   });

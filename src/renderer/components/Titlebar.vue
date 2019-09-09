@@ -16,7 +16,6 @@
         @mouseout.native="mouseoverSidebar = false"
         :mouseover="mouseoverSidebar"
         :fill="isBrowsingView ? '#BBBACC' : ''"
-        @mouseup.native="handleSidebar"
         :style="{
           transform: `translateX(${showSidebar ? '76' : '0'}px)`,
         }"
