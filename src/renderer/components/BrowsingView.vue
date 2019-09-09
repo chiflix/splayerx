@@ -486,12 +486,12 @@ export default {
       if (loadUrl.includes('youtube')) {
         channel = 'youtube.com';
       }
-      this.$electron.remote
-        .getCurrentWindow()
-        .getBrowserViews()[0]
-        .webContents.executeJavaScript(this.calculateVideoNum, (r: number) => {
+      const view = this.$electron.remote.getCurrentWindow().getBrowserViews()[0];
+      if (view) {
+        view.webContents.executeJavaScript(this.calculateVideoNum, (r: number) => {
           this.webInfo.hasVideo = channel === 'youtube.com' && !getVideoId(loadUrl).id ? false : !!r;
         });
+      }
     },
     beforeUnloadHandler(e: BeforeUnloadEvent) {
       this.removeListener();
@@ -894,14 +894,15 @@ export default {
       }
     },
     handleUrlReload() {
-      if (!this.isLoading) {
-        this.loadingState = true;
-        this.$electron.remote.getCurrentWindow()
-          .getBrowserViews()[0].webContents.reload();
-      } else {
-        this.loadingState = false;
-        this.$electron.remote.getCurrentWindow()
-          .getBrowserViews()[0].webContents.stop();
+      const view = this.$electron.remote.getCurrentWindow().getBrowserViews()[0];
+      if (view) {
+        if (!this.loadingState) {
+          this.loadingState = true;
+          view.webContents.reload();
+        } else {
+          this.loadingState = false;
+          view.webContents.stop();
+        }
       }
     },
     enterPipOperation() {
