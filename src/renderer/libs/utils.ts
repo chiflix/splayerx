@@ -10,7 +10,8 @@ import axios, { AxiosResponse } from 'axios';
 import { promises as fsPromises } from 'fs';
 // @ts-ignore
 import nzh from 'nzh';
-import { ISubtitleControlListItem, Type } from '@/interfaces/ISubtitle';
+import { SubtitleControlListItem, Type } from '@/interfaces/ISubtitle';
+import { IEmbeddedOrigin } from '@/services/subtitle';
 import { version } from '@/../../package.json';
 import {
   ELECTRON_CACHE_DIRNAME,
@@ -19,7 +20,6 @@ import {
 } from '@/constants';
 import { codeToLanguageName, LanguageCode } from './language';
 import { checkPathExist, write, deleteDir } from './file';
-import { IEmbeddedOrigin } from '@/services/subtitle/utils/loaders';
 import { isBetaVersion } from '../../shared/common/platform';
 
 /**
@@ -202,29 +202,29 @@ export function generateHints(videoSrc: string): string {
 }
 
 export function calculatedName(
-  item: ISubtitleControlListItem,
-  list: ISubtitleControlListItem[],
+  item: SubtitleControlListItem,
+  list: SubtitleControlListItem[],
 ): string {
   let name = '';
   if (item.type === Type.Local) {
-    name = basename(item.source.source as string);
+    name = basename(item.source as string);
   } else if (item.type === Type.Embedded) {
     let embeddedList = list
-      .filter((s: ISubtitleControlListItem) => s.type === Type.Embedded);
+      .filter((s: SubtitleControlListItem) => s.type === Type.Embedded);
     embeddedList = sortBy(
       embeddedList,
-      (s: ISubtitleControlListItem) => (s.source as IEmbeddedOrigin).source.streamIndex,
+      (s: SubtitleControlListItem) => (s as IEmbeddedOrigin).source.streamIndex,
     );
-    const sort = embeddedList.findIndex((s: ISubtitleControlListItem) => s.id === item.id) + 1;
+    const sort = embeddedList.findIndex((s: SubtitleControlListItem) => s.id === item.id) + 1;
     const { language } = item;
     if (language === LanguageCode.No || language === LanguageCode.Default) return `${romanize(sort)}`;
     if (language === LanguageCode['zh-CN'] || language === LanguageCode['zh-TW']) return `${romanize(sort)} - 中文`;
     return `${romanize(sort)} - ${codeToLanguageName(item.language)}`;
   } else if (item.type === Type.Online) {
     const sort = list
-      .filter((s: ISubtitleControlListItem) => s.type === Type.Online
+      .filter((s: SubtitleControlListItem) => s.type === Type.Online
         && s.language === item.language)
-      .findIndex((s: ISubtitleControlListItem) => s.id === item.id) + 1;
+      .findIndex((s: SubtitleControlListItem) => s.id === item.id) + 1;
     name = `${codeToLanguageName(item.language)} ${romanize(sort)}`;
   } else if (item.type === Type.Translated) {
     name = `${codeToLanguageName(item.language)} AI`;

@@ -1,12 +1,11 @@
 import MediaInfoQueue, { CodecType, ISubtitleStream } from './mediaInfoQueue';
-import SnapshotQueue from './snapshotSubtitleQueue';
-import SubtitleQueue from './subtitleQueue';
+import SnapshotSubtitleQueue from './snapshotSubtitleQueue';
 import ThumbnailQueue from './thumbnailQueue';
+import { Format } from '@/interfaces/ISubtitle';
 import { log } from '@/libs/Log';
 
 const mediaInfoQueue = new MediaInfoQueue();
-const snapshotQueue = new SnapshotQueue();
-const subtitleQueue = new SubtitleQueue();
+const snapshotSubtitleQueue = new SnapshotSubtitleQueue();
 const thumbnailQueue = new ThumbnailQueue();
 
 export async function getMediaInfo(path: string) {
@@ -37,7 +36,7 @@ export async function getSnapshotPath(
   width: number = 1920, height: number = 1080,
 ) {
   try {
-    return snapshotQueue.getSnapshotPath(
+    return snapshotSubtitleQueue.getSnapshotPath(
       videoPath,
       timeInSeconds,
       width, height,
@@ -47,40 +46,12 @@ export async function getSnapshotPath(
     return '';
   }
 }
-
-export async function getSubtitleMetadata(videoPath: string, streamIndex: number) {
+export async function getSubtitlePath(videoPath: string, streamIndex: number, format: Format) {
   try {
-    return subtitleQueue.getSubtitleMetadata(videoPath, streamIndex);
+    return snapshotSubtitleQueue.getSubtitlePath(videoPath, streamIndex, format);
   } catch (error) {
-    log.error('[MediaTask|SubtitleMetadata]', error);
+    log.error('[MediaTask|Subtitle]', error);
     return '';
-  }
-}
-export async function cacheSubtitle(videoPath: string, streamIndex: number) {
-  try {
-    return subtitleQueue.cacheSubtitle(videoPath, streamIndex);
-  } catch (error) {
-    log.error('[MediaTask|SubtitleCache]', error);
-    return '';
-  }
-}
-export async function getSubtitleFragment(
-  videoPath: string,
-  streamIndex: number,
-  videoTime: number,
-) {
-  try {
-    return subtitleQueue.getSubtitleFragment(videoPath, streamIndex, videoTime);
-  } catch (error) {
-    log.error('[MediaTask|SubtitleFragment]', error);
-    return '';
-  }
-}
-export async function finishSubtitleExtraction(videoPath: string, streamIndex: number) {
-  try {
-    subtitleQueue.stopSubtitleExtraction(videoPath, streamIndex);
-  } catch (error) {
-    log.error('[MediaTask|SubtitleFragment]', error);
   }
 }
 

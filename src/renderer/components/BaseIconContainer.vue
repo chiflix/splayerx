@@ -65,6 +65,10 @@ export default {
   height: 36px;
   margin: auto;
 }
+.sidebar {
+  width: 12px;
+  height: 12px;
+}
 .hoverState {
   display: flex;
   width: 12px;
@@ -544,9 +548,45 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   height: 16px;
   display: block;
 }
-.down {
-  width: 5px;
-  height: 7px;
+.backDisabled, .forwardDisabled {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+.back, .forward, .pageRefresh {
+  width: 20px;
+  height: 20px;
+  .default {
+    display: block;
+  }
+  .hover {
+    display: none;
+  }
+  .active {
+    display: none;
+  }
+  &:hover {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: block;
+    }
+    .active {
+      display: none;
+    }
+  }
+  &:active {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: none;
+    }
+    .active {
+      display: block;
+    }
+  }
 }
 .showMarks, .hideMarks, .closeSearch {
   width: 18px;
@@ -612,14 +652,45 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     }
   }
 }
-.videoRecordDisabled {
+.pipDisabled, .videoRecordDisabled {
   display: block;
   width: 20px;
   height: 20px;
 }
-.pip, .pop, .pipDisabled, .popDisabled {
-  width: 30px;
-  height: 30px;
+.pip {
+  width: 20px;
+  height: 20px;
+  .default {
+    display: block;
+  }
+  .hover {
+    display: none;
+  }
+  .active {
+    display: none;
+  }
+  &:hover {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: block;
+    }
+    .active {
+      display: none;
+    }
+  }
+  &:active {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: none;
+    }
+    .active {
+      display: block;
+    }
+  }
 }
 .pipRecord, .pipBack {
   width: 20px;

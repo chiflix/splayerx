@@ -5,7 +5,7 @@ import {
 } from 'fs-extra';
 import { extname } from 'path';
 import {
-  ITags, IOrigin, Type, Format, IParser, ILoader, Cue, IVideoSegments,
+  ITags, IOrigin, Type, Format, IParser,
 } from '@/interfaces/ISubtitle';
 import { LanguageCode } from '@/libs/language';
 
@@ -14,10 +14,8 @@ import {
 } from '@/services/subtitle';
 
 import { assFragmentLanguageLoader, srtFragmentLanguageLoader, vttFragmentLanguageLoader } from './languageLoader';
-import {
-  IEmbeddedOrigin,
-  EmbeddedTextStreamLoader, LocalTextLoader, SagiLoader,
-} from './loaders';
+import { IEmbeddedOrigin } from '../loaders';
+import { SagiSubtitlePayload } from '../parsers';
 
 /**
  * Cue tags getter for SubRip, SubStation Alpha and Online Transcript subtitles.
@@ -135,8 +133,11 @@ export function sourceToFormat(subtitleSource: IOrigin) {
     case Type.Online:
     case Type.Translated:
       return Format.Sagi;
-    case Type.Embedded:
-      return Format.AdvancedSubStationAplha;
+    case Type.Embedded: {
+      const { extractedSrc } = (subtitleSource as IEmbeddedOrigin).source;
+      if (extractedSrc) return pathToFormat(extractedSrc);
+      return Format.Unknown;
+    }
     default:
       return pathToFormat(subtitleSource.source as string);
   }
@@ -170,46 +171,18 @@ export async function inferLanguageFromPath(path: string): Promise<LanguageCode>
   }
 }
 
-export function getDialogues(dialogues: Cue[], time?: number) {
-  return typeof time === 'undefined' ? dialogues
-    : dialogues.filter(({ start, end, text }) => (
-      (start <= time && end >= time) && !!text
-    ));
-}
-
-export function getLoader(source: IOrigin): ILoader {
-  switch (source.type) {
-    default:
-      throw new Error('Unknown source type.');
-    case Type.Embedded: {
-      const { videoPath, streamIndex } = (source as IEmbeddedOrigin).source;
-      return new EmbeddedTextStreamLoader(videoPath, streamIndex);
-    }
-    case Type.Local:
-      return new LocalTextLoader(source.source as string);
-    case Type.Online:
-      return new SagiLoader(source.source as string);
-    case Type.Translated:
-      return new SagiLoader(source.source as string);
-  }
-}
-
-export function getParser(
-  format: Format,
-  loader: ILoader,
-  videoSegments: IVideoSegments,
-): IParser {
+export function getParser(format: Format, payload: unknown): IParser {
   switch (format) {
-    default:
-      throw new Error('Unknown format');
     case Format.AdvancedSubStationAplha:
     case Format.SubStationAlpha:
-      return new AssParser(loader, videoSegments);
-    case Format.Sagi:
-      return new SagiParser(loader as SagiLoader, videoSegments);
+      return new AssParser(payload as string);
     case Format.SubRip:
-      return new SrtParser(loader as LocalTextLoader, videoSegments);
+      return new SrtParser(payload as string);
+    case Format.Sagi:
+      return new SagiParser(payload as SagiSubtitlePayload);
     case Format.WebVTT:
-      return new VttParser(loader as LocalTextLoader, videoSegments);
+      return new VttParser(payload as string);
+    default:
+      throw new Error();
   }
 }

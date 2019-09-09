@@ -5,6 +5,7 @@ import { LanguageCode, normalizeCode } from '@/libs/language';
 import {
   IOrigin, IEntityGenerator, Type, Format,
 } from '@/interfaces/ISubtitle';
+import Sagi from '@/libs/sagi';
 
 
 interface ITranslatedOrigin extends IOrigin {
@@ -23,10 +24,10 @@ export class TranslatedGenerator implements IEntityGenerator {
 
   public readonly ranking: number;
 
-  private translatedType: TranslatedGeneratorType;
+  private tranlsatedType: TranslatedGeneratorType;
 
   public constructor(transcriptInfo: TranscriptInfo.AsObject | null, languageCode?: LanguageCode) {
-    this.translatedType = transcriptInfo ? TranslatedGeneratorType.Subtitle
+    this.tranlsatedType = transcriptInfo ? TranslatedGeneratorType.Subtitle
       : TranslatedGeneratorType.Button;
     this.origin = {
       type: Type.Translated,
@@ -42,22 +43,27 @@ export class TranslatedGenerator implements IEntityGenerator {
     this.ranking = transcriptInfo ? transcriptInfo.ranking : 0;
   }
 
-  public async getDisplaySource() { return cloneDeep(this.origin); }
+  public async getType() { return Type.Translated; }
 
-  public async getRealSource() { return cloneDeep(this.origin); }
+  public async getSource() { return cloneDeep(this.origin); }
 
   public async getLanguage() {
     return this.language;
   }
 
-  public async getFormat() { return Format.Sagi; }
+  public async getFormat() {
+    return this.tranlsatedType === TranslatedGeneratorType.Subtitle ? Format.Sagi : Format.Unknown;
+  }
 
   public async getHash() {
-    if (this.translatedType === TranslatedGeneratorType.Subtitle) {
+    if (this.tranlsatedType === TranslatedGeneratorType.Subtitle) {
       return this.origin.source;
     }
     return uuidv4();
   }
 
-  public async getDelay() { return 0; }
+  public async getPayload() {
+    return this.tranlsatedType === TranslatedGeneratorType.Subtitle
+      ? Sagi.getTranscript({ transcriptIdentity: this.origin.source, startTime: 0 }) : '';
+  }
 }
