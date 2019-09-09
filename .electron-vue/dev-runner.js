@@ -173,7 +173,8 @@ function greeting() {
   const cols = process.stdout.columns;
   let text = '';
 
-  if (cols > 76) text = 'SPlayer';
+  if (cols > 104) text = 'electron-vue';
+  else if (cols > 76) text = 'electron-|vue';
   else text = false;
 
   if (text) {
@@ -182,7 +183,7 @@ function greeting() {
       font: 'simple3d',
       space: false,
     });
-  } else console.log(chalk.yellow.bold('\n  SPlayer'));
+  } else console.log(chalk.yellow.bold('\n  electron-vue'));
   console.log(chalk.blue('  getting ready...') + '\n');
 }
 

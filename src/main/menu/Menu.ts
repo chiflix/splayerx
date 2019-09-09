@@ -1,22 +1,22 @@
 import {
-  app, Menu, MenuItem, shell, nativeImage, systemPreferences,
+  Menu, MenuItem, app, shell,
 } from 'electron';
 import { cloneDeep } from 'lodash';
 import {
+  MenubarMenuItem,
   IMenubarMenu,
+  IMenubarMenuItemSubmenu,
+  IMenubarMenuItemSeparator,
   IMenubarMenuItemAction,
   IMenubarMenuItemRole,
-  IMenubarMenuItemSeparator,
-  IMenubarMenuItemSubmenu,
   IMenubarMenuState,
-  MenubarMenuItem,
   MenuName,
 } from './common/Menubar';
 import { isMacintosh, isWindowsExE, isMacintoshDMG } from '../../shared/common/platform';
 import Locale from '../../shared/common/localize';
 import menuTemplate from './menu.json';
 import { IMenuDisplayInfo } from '../../renderer/interfaces/IRecentPlay';
-import { ISubtitleControlListItem, Type } from '../../renderer/interfaces/ISubtitle';
+import { SubtitleControlListItem, Type } from '../../renderer/interfaces/ISubtitle';
 
 function separator(): Electron.MenuItem {
   return new MenuItem({ type: 'separator' });
@@ -44,15 +44,13 @@ export default class Menubar {
 
   private audioTracks: { id: string, label: string }[];
 
-  private focusOnMainWindow = true;
-
   private primarySubs: {
-    id: string, label: string, checked: boolean, subtitleItem: ISubtitleControlListItem,
+    id: string, label: string, checked: boolean, subtitleItem: SubtitleControlListItem,
   }[];
 
   private secondarySubs: {
     id: string, label: string, checked: boolean,
-    enabled: boolean, subtitleItem: ISubtitleControlListItem,
+    enabled: boolean, subtitleItem: SubtitleControlListItem,
   }[];
 
   private _routeName: string;
@@ -60,25 +58,6 @@ export default class Menubar {
   public set routeName(val: string) {
     this._routeName = val;
     this.menuStateControl();
-  }
-
-  public updateFocusedWindow(isMainWindow: boolean, isNewWindow: boolean) {
-    if (this.focusOnMainWindow !== isMainWindow) {
-      if (!isMainWindow) {
-        this.updateMenuItemEnabled('history.back', false);
-        this.updateMenuItemEnabled('history.forward', false);
-        this.updateMenuItemEnabled('history.reload', false);
-        this.updateMenuItemEnabled(isNewWindow ? 'browsing.window.playInNewWindow' : 'browsing.window.pip', true);
-        this.updateMenuItemEnabled('browsing.window.keepPipFront', true);
-        this.updateMenuItemLabel('browsing.window.pip', 'msg.window.exitPip');
-        this.updateMenuItemLabel('browsing.window.playInNewWindow', 'msg.window.backToBrowser');
-      } else {
-        this.updateMenuItemEnabled('browsing.window.keepPipFront', false);
-        this.updateMenuItemLabel('browsing.window.pip', 'msg.window.enterPip');
-        this.updateMenuItemLabel('browsing.window.playInNewWindow', 'msg.window.playInNewWindow');
-      }
-      this.focusOnMainWindow = isMainWindow;
-    }
   }
 
   public constructor() {
@@ -223,10 +202,6 @@ export default class Menubar {
     }
   }
 
-  public updatePipIcon() {
-    this.refreshMenu('browsing.window');
-  }
-
   public updateMenuItemEnabled(id: string, enabled: boolean) {
     const result = this.getMenuStateById(id);
     // @ts-ignore
@@ -264,7 +239,7 @@ export default class Menubar {
 
   public updatePrimarySub(
     items?: {
-      id: string, label: string, checked: boolean, subtitleItem: ISubtitleControlListItem,
+      id: string, label: string, checked: boolean, subtitleItem: SubtitleControlListItem,
     }[],
   ) {
     if (items) this.primarySubs = items;
@@ -297,7 +272,7 @@ export default class Menubar {
   public updateSecondarySub(
     items?: {
       id: string, label: string, checked: boolean,
-      enabled: boolean, subtitleItem: ISubtitleControlListItem,
+      enabled: boolean, subtitleItem: SubtitleControlListItem,
     }[],
   ) {
     if (items) this.secondarySubs = items;
@@ -754,52 +729,62 @@ export default class Menubar {
     ]);
     actions.forEach(i => applicationMenu.append(i));
 
-    return new MenuItem({ label: this.$t('msg.splayerx.name'), submenu: applicationMenu });
+    const applicationMenuItem = new MenuItem({ label: this.$t('msg.splayerx.name'), submenu: applicationMenu });
+    return applicationMenuItem;
   }
 
   private createFileMenu(): Electron.MenuItem {
     const fileMenu = this.convertFromMenuItemTemplate('file');
-    return new MenuItem({ id: 'file', label: this.$t('msg.file.name'), submenu: fileMenu });
+    const fileMenuItem = new MenuItem({ id: 'file', label: this.$t('msg.file.name'), submenu: fileMenu });
+    return fileMenuItem;
   }
 
   private createPlaybackMenu() {
     const playbackMenu = this.convertFromMenuItemTemplate('playback');
-    return new MenuItem({ id: 'playback', label: this.$t('msg.playback.name'), submenu: playbackMenu });
+    const playbackMenuItem = new MenuItem({ id: 'playback', label: this.$t('msg.playback.name'), submenu: playbackMenu });
+    return playbackMenuItem;
   }
 
   private createAudioMenu() {
     const audioMenu = this.convertFromMenuItemTemplate('audio');
-    return new MenuItem({ id: 'audio', label: this.$t('msg.audio.name'), submenu: audioMenu });
+    const audioMenuItem = new MenuItem({ id: 'audio', label: this.$t('msg.audio.name'), submenu: audioMenu });
+    return audioMenuItem;
   }
 
   private createSubtitleMenu() {
     const subtitleMenu = this.convertFromMenuItemTemplate('subtitle');
-    return new MenuItem({ id: 'subtitle', label: this.$t('msg.subtitle.name'), submenu: subtitleMenu });
+    const subtitleMenuItem = new MenuItem({ id: 'subtitle', label: this.$t('msg.subtitle.name'), submenu: subtitleMenu });
+    return subtitleMenuItem;
   }
 
   private createEditMenu() {
     const editMenu = this.convertFromMenuItemTemplate('edit');
-    return new MenuItem({ id: 'edit', label: this.$t('msg.edit.name'), submenu: editMenu });
+    const editMenuItem = new MenuItem({ id: 'edit', label: this.$t('msg.edit.name'), submenu: editMenu });
+    return editMenuItem;
   }
 
   private createHistoryMenu() {
     const historyMenu = this.convertFromMenuItemTemplate('history');
-    return new MenuItem({ id: 'history', label: this.$t('msg.history.name'), submenu: historyMenu });
+    const historyMenuItem = new MenuItem({ id: 'history', label: this.$t('msg.history.name'), submenu: historyMenu });
+    return historyMenuItem;
   }
 
   private createFavouriteMenu() {
     const favouriteMenu = this.convertFromMenuItemTemplate('favourite');
-    return new MenuItem({ id: 'favourite', label: this.$t('msg.favourite.name'), submenu: favouriteMenu });
+    const favouriteMenuItem = new MenuItem({ id: 'favourite', label: this.$t('msg.favourite.name'), submenu: favouriteMenu });
+    return favouriteMenuItem;
   }
 
   private createBrowsingWindowMenu() {
     const window = this.convertFromMenuItemTemplate('browsing.window');
-    return new MenuItem({ id: 'browsing.window', label: this.$t('msg.window.name'), submenu: window });
+    const windowMenuItem = new MenuItem({ id: 'browsing.window', label: this.$t('msg.window.name'), submenu: window });
+    return windowMenuItem;
   }
 
   private createWindowMenu() {
     const windowMenu = this.convertFromMenuItemTemplate('window');
-    return new MenuItem({ id: 'window', label: this.$t('msg.window.name'), submenu: windowMenu });
+    const windowMenuItem = new MenuItem({ id: 'window', label: this.$t('msg.window.name'), submenu: windowMenu });
+    return windowMenuItem;
   }
 
   private createHelpMenu() {
@@ -966,18 +951,7 @@ export default class Menubar {
       return new MenuItem(options);
     }
     if (arg1.enabled === undefined) arg1.enabled = true;
-    let menuIcon: string | Electron.nativeImage = '';
-    switch (arg1.icon) {
-      case 'enter-pip':
-        menuIcon = systemPreferences.isDarkMode() ? nativeImage.createFromDataURL(require('../../../build/icons/mojave-pip.png')) : nativeImage.createFromDataURL(require('../../../build/icons/normal-pip.png'));
-        break;
-      case 'play-in-new-window':
-        menuIcon = systemPreferences.isDarkMode() ? nativeImage.createFromDataURL(require('../../../build/icons/mojave-window.png')) : nativeImage.createFromDataURL(require('../../../build/icons/normal-window.png'));
-        break;
-      default:
-        menuIcon = '';
-        break;
-    }
+
     const label = this.$t(arg1.label);
 
     const options: Electron.MenuItemConstructorOptions = {
@@ -991,7 +965,6 @@ export default class Menubar {
       },
       enabled: arg1.enabled,
       accelerator: arg1.accelerator,
-      icon: menuIcon,
     };
 
     if (arg1.id === 'file.open') {
@@ -1016,6 +989,7 @@ export default class Menubar {
       options.type = 'checkbox';
       options.checked = arg1.checked;
     }
+
     return new MenuItem(options);
   }
 

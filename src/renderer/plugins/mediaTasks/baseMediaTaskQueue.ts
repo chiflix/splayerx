@@ -1,16 +1,13 @@
 import { log } from '@/libs/Log';
 
-export interface IMediaTask<ResultType, CancelType = void> {
+export interface IMediaTask<T = unknown> {
   getId(): string;
-  execute(): ResultType | Promise<ResultType>;
-  cancel?: () => (CancelType | Promise<CancelType>);
+  execute(): Promise<T>;
 }
 type TaskInfo = {
   id: string;
   run: () => Promise<void>;
-  cancel: () => Promise<void>;
   piority: number;
-  needCancel: boolean;
 }
 interface IAddTaskOptions {
   piority?: number;
@@ -57,59 +54,18 @@ export default class BaseMediaTaskQueue {
           this.processTasks();
         }
       };
-      const cancel = async (): Promise<void> => {
-        try {
-          const result = task.cancel ? await Promise.race([
-            new Promise((resolve, reject) => setTimeout(
-              () => reject(new Error(`Timeout: ${task.constructor.name}`)),
-              timeout || defaultOptions.timeout,
-            )),
-            task.cancel(),
-          ]) : () => {};
-          resolve(result as T);
-        } catch (error) {
-          reject(error);
-        } finally {
-          this.executing = false;
-          this.processTasks();
-        }
-      };
-      this.enqueue(run, cancel, id, piority || 0);
+      this.enqueue(run, id, piority || 0);
       if (!this.executing) this.processTasks();
     });
   }
 
-  public cancelTask(id: string) {
-    const taskIndex = this.pendingTasks.findIndex(task => task.id === id);
-    if (taskIndex !== -1) {
-      const task = this.pendingTasks.splice(taskIndex, 1)[0];
-      task.needCancel = true;
-      this.pendingTasks.unshift(task);
-    }
-  }
-
-  private enqueue(
-    run: () => Promise<void>, cancel: () => Promise<void>,
-    id: string, piority: number,
-  ) {
+  private enqueue(run: () => Promise<void>, id: string, piority: number) {
     if (!this.pendingTasks.length
       || this.pendingTasks[this.pendingTasks.length - 1].piority >= piority) {
-      this.pendingTasks.push({
-        id,
-        run,
-        cancel,
-        piority,
-        needCancel: false,
-      });
+      this.pendingTasks.push({ id, run, piority });
     } else {
       const index = this.pendingTasks.findIndex(task => task.piority < piority);
-      this.pendingTasks.splice(index, 0, {
-        id,
-        run,
-        cancel,
-        piority,
-        needCancel: false,
-      });
+      this.pendingTasks.splice(index, 0, { id, run, piority });
     }
   }
 
@@ -119,8 +75,7 @@ export default class BaseMediaTaskQueue {
     if (task) {
       this.executing = true;
       try {
-        if (task.needCancel) task.cancel();
-        else task.run();
+        task.run();
       } catch (ex) {
         log.error('BaseMediaTask', ex);
       }

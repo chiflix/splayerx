@@ -116,7 +116,7 @@ import {
   SubtitleManager as smActions,
   AudioTranslate as atActions,
 } from '@/store/actionTypes';
-import { ISubtitleControlListItem, Type, NOT_SELECTED_SUBTITLE } from '@/interfaces/ISubtitle';
+import { SubtitleControlListItem, Type, NOT_SELECTED_SUBTITLE } from '@/interfaces/ISubtitle';
 import lottie from '@/components/lottie.vue';
 import animationData from '@/assets/subtitle.json';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
@@ -207,9 +207,9 @@ export default {
       ) return -2;
       return !this.isFirstSubtitle && this.enabledSecondarySub
         ? computedAvailableItems
-          .findIndex((sub: ISubtitleControlListItem) => sub.id === this.secondarySubtitleId)
+          .findIndex((sub: SubtitleControlListItem) => sub.id === this.secondarySubtitleId)
         : computedAvailableItems
-          .findIndex((sub: ISubtitleControlListItem) => sub.id === this.primarySubtitleId);
+          .findIndex((sub: SubtitleControlListItem) => sub.id === this.primarySubtitleId);
     },
     noSubtitle() {
       if (this.animClass) {
@@ -223,7 +223,7 @@ export default {
     enabledSecondarySub(val: boolean) {
       if (!val) this.updateSubtitleType(true);
     },
-    list(val: ISubtitleControlListItem[]) {
+    list(val: SubtitleControlListItem[]) {
       val = flatMap(val
         .reduce((prev, currentSub) => {
           switch (currentSub.type) {
@@ -241,7 +241,7 @@ export default {
               break;
           }
           return prev;
-        }, [[], [], []] as ISubtitleControlListItem[][])
+        }, [[], [], []] as SubtitleControlListItem[][])
         .map((subList, index) => {
           switch (index) {
             default:
@@ -251,7 +251,7 @@ export default {
               return sortBy(subList, ({ source }) => source.streamIndex);
           }
         }));
-      this.computedAvailableItems = val.map((sub: ISubtitleControlListItem) => ({
+      this.computedAvailableItems = val.map((sub: SubtitleControlListItem) => ({
         ...sub,
         name: this.getSubName(sub, val),
       }));
@@ -461,16 +461,16 @@ export default {
         }
       }
     },
-    getSubName(item: ISubtitleControlListItem) {
+    getSubName(item: SubtitleControlListItem) {
       if (item.type === Type.Embedded) {
         return `${this.$t('subtitle.embedded')} ${item.name}`;
       }
       return item.name;
     },
-    changeSubtitle(item: ISubtitleControlListItem) {
-      if (!navigator.onLine && item.type === Type.Translated && item.source.source === '') {
+    changeSubtitle(item: SubtitleControlListItem) {
+      if (!navigator.onLine && item.type === Type.Translated && item.source === '') {
         addBubble(TRANSLATE_NO_LINE);
-      } else if (item.type === Type.Translated && item.source.source === '') {
+      } else if (item.type === Type.Translated && item.source === '') {
         this.showAudioTranslateModal(item);
         // ga 字幕面板中点击 "Generate" 的次数
         this.$ga.event('app', 'ai-translate-generate-button-click');

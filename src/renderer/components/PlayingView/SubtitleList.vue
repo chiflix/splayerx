@@ -42,7 +42,7 @@
               height: hoverIndex === index ?
                 `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
               cursor: currentSubtitleIndex === index &&
-                !(item.type === 'translated' && item.source.source === '') ? 'default' : 'pointer',
+                !(item.type === 'translated' && item.source === '') ? 'default' : 'pointer',
               justifyContent: item.type === 'translated' ? 'space-between' : ''
             }"
             @mouseup="toggleItemClick($event, index)"
@@ -81,7 +81,7 @@
                 />
               </transition>
               <transition
-                v-if="item.type === 'translated' && item.source.source === ''
+                v-if="item.type === 'translated' && item.source === ''
                   && (item.language !== translateLanguage || translateProgress <= 0)"
                 name="sub-delete"
               >
@@ -93,11 +93,8 @@
                 </div>
               </transition>
               <div
-                v-else-if="
-                  translateProgress > 0
-                    && item.type === 'translated' && item.source.source === ''
-                    && item.language === translateLanguage
-                "
+                v-else-if="translateProgress > 0 && item.type === 'translated' && item.source === ''
+                  && item.language === translateLanguage"
                 class="translateProgress"
               >
                 <Progress
@@ -139,7 +136,7 @@
 
 <script lang="ts">
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
-import { ISubtitleControlListItem } from '@/interfaces/ISubtitle';
+import { SubtitleControlListItem } from '@/interfaces/ISubtitle';
 import Icon from '../BaseIconContainer.vue';
 import Progress from './Progress.vue';
 
@@ -314,12 +311,12 @@ export default {
         }
       }
     },
-    handleSubDelete(e: MouseEvent, item: ISubtitleControlListItem) {
+    handleSubDelete(e: MouseEvent, item: SubtitleControlListItem) {
       if ((e.target as HTMLElement).nodeName !== 'DIV') {
         setTimeout(() => {
           this.$emit('update:transFlag', false);
           this.$emit('update:hoverHeight', 0);
-          this.$emit('remove-subtitle', [item.id]);
+          this.$emit('remove-subtitle', [item]);
         }, 0);
       }
     },

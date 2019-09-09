@@ -1,5 +1,5 @@
 import { cloneDeep } from 'lodash';
-import { pathToFormat, inferLanguageFromPath } from '../utils';
+import { pathToFormat, loadLocalFile, inferLanguageFromPath } from '../utils';
 
 import {
   IOrigin, Type, IEntityGenerator, Format,
@@ -15,6 +15,8 @@ export class LocalGenerator implements IEntityGenerator {
 
   private format: Format;
 
+  private type = Type.Local;
+
   public constructor(subtitlePath: string) {
     this.origin = { type: Type.Local, source: subtitlePath };
     const format = pathToFormat(subtitlePath);
@@ -22,9 +24,9 @@ export class LocalGenerator implements IEntityGenerator {
     this.format = format;
   }
 
-  public async getDisplaySource() { return cloneDeep(this.origin); }
+  public async getSource() { return cloneDeep(this.origin); }
 
-  public async getRealSource() { return cloneDeep(this.origin); }
+  public async getType() { return this.type; }
 
   public async getFormat() {
     if (this.format) return this.format;
@@ -38,10 +40,15 @@ export class LocalGenerator implements IEntityGenerator {
     return inferLanguageFromPath(this.origin.source);
   }
 
+  private payload: string;
+
+  public async getPayload() {
+    if (!this.payload) this.payload = await loadLocalFile(this.origin.source);
+    return this.payload;
+  }
+
   public async getHash() {
     const hash = await mediaQuickHash(this.origin.source);
     return (hash || '') as unknown as string;
   }
-
-  public async getDelay() { return 0; }
 }

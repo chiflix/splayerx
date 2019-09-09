@@ -1,7 +1,5 @@
 <template>
-  <div
-    @mouseup="handleSidebar"
-  >
+  <div>
     <svg
       :opacity="mouseover ? '1' : '0.5'"
       class="side-bar"
@@ -26,7 +24,7 @@
           <path
             id="icon-sidebar"
             :d="d1"
-            :fill="fill ? fill : highlight ? '#FFF' : '#ACACAC'"
+            :fill="highlight ? '#FFF' : '#ACACAC'"
           />
         </g>
       </g>
@@ -36,10 +34,6 @@
 <script lang="ts">
 export default {
   props: {
-    fill: {
-      type: String,
-      default: '',
-    },
     mouseover: {
       type: Boolean,
       default: false,
@@ -55,11 +49,6 @@ export default {
     this.$bus.$on('highlight-sidebar', (highlight: boolean) => {
       this.highlight = highlight;
     });
-  },
-  methods: {
-    handleSidebar() {
-      this.$event.emit('side-bar-mouseup');
-    },
   },
 };
 </script>

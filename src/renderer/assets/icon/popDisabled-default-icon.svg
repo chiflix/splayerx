@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="30px" height="30px" viewBox="0 0 30 30" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <!-- Generator: Sketch 57.1 (83088) - https://sketch.com -->
-    <title>menuBar/__icon/--pictureOutPictureinactive</title>
-    <desc>Created with Sketch.</desc>
-    <g id="menuBar/__icon/--pictureOutPicture" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <path d="M21.542,8.75 C22.3472312,8.75 23,9.40276883 23,10.208 L23,15.5 L24.389,15.5 C24.6574104,15.5 24.875,15.7175896 24.875,15.986 L24.875,21.764 C24.875,22.0324104 24.6574104,22.25 24.389,22.25 L15.111,22.25 C14.8425896,22.25 14.625,22.0324104 14.625,21.764 L14.625,20.75 L7.458,20.75 C6.65276883,20.75 6,20.0972312 6,19.292 L6,10.208 C6,9.40276883 6.65276883,8.75 7.458,8.75 L21.542,8.75 Z M21.02,10.25 L7.98,10.25 C7.71490332,10.25 7.5,10.4649033 7.5,10.73 L7.5,18.77 C7.5,19.0350967 7.71490332,19.25 7.98,19.25 L14.625,19.25 L14.625,15.986 C14.625,15.7175896 14.8425896,15.5 15.111,15.5 L21.5,15.5 L21.5,10.73 C21.5,10.4649033 21.2850967,10.25 21.02,10.25 Z" id="icon--pictureOutPicture" fill="#CFD0DA" fill-rule="nonzero"></path>
-    </g>
-</svg>

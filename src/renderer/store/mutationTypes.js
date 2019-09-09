@@ -72,19 +72,15 @@ export const Subtitle = {
 };
 
 export const newSubtitle = {
-  setMediaHash: 'SET_MEDIA_HASH',
-  setId: 'SET_ID',
-  setDisplaySource: 'SET_DISPLAY_SOURCE',
+  setModuleId: 'SET_MODULE_ID',
+  setSource: 'SET_SOURCE',
   setRealSource: 'SET_REAL_SOURCE',
+  setType: 'SET_TYPE',
   setFormat: 'SET_FORMAT',
   setLanguage: 'SET_LANGUAGE',
   setDelay: 'SET_DELAY',
-  setHash: 'SET_HASH',
-  setCanCache: 'SET_CAN_CACHE',
-  setCanUpload: 'SET_CAN_UPLOAD',
-  setFullyRead: 'SET_FULLY_READ',
-  setAutoUploaded: 'SET_AUTO_UPLOADED',
   setPlayedTime: 'SET_PLAYED_TIME',
+  setHash: 'SET_HASH',
 };
 
 export const SubtitleManager = {
@@ -95,6 +91,7 @@ export const SubtitleManager = {
   setIsRefreshing: 'SET_IS_REFRESHING',
   addSubtitleId: 'ADD_SUBTITLE_ID',
   deleteSubtitleId: 'DELETE_SUBTITLE_ID',
+  deletaAllSubtitleIds: 'DELETE_ALL_SUBTITLE_IDS',
   setPrimaryDelay: 'SET_PRIMARY_DELAY',
   setSecondaryDelay: 'SET_SECONDARY_DELAY',
 };
@@ -136,5 +133,4 @@ export const Browsing = {
   RECORD_URL_UPDATE: 'RECORD_URL_UPDATE',
   BARRAGE_OPEN_UPDATE: 'BARRAGE_OPEN_UPDATE',
   IS_PIP_UPDATE: 'IS_PIP_UPDATE',
-  PIP_MODE_UPDATE: 'PIP_MODE_UPDATE',
 };

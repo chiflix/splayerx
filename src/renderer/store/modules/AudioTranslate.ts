@@ -14,7 +14,7 @@ import { AudioTranslate as a, SubtitleManager as smActions } from '@/store/actio
 import { audioTranslateService } from '@/services/media/AudioTranslateService';
 import { AITaskInfo } from '@/interfaces/IMediaStorable';
 import { TranscriptInfo } from '@/services/subtitle';
-import { ISubtitleControlListItem, Type } from '@/interfaces/ISubtitle';
+import { SubtitleControlListItem, Type } from '@/interfaces/ISubtitle';
 import { mediaStorageService } from '@/services/storage/MediaStorageService';
 import { TranslatedGenerator } from '@/services/subtitle/loaders/translated';
 import { addBubble } from '../../helpers/notificationControl';
@@ -210,7 +210,7 @@ const mutations = {
   [m.AUDIO_TRANSLATE_HIDE_MODAL](state: AudioTranslateState) {
     state.isModalVisible = false;
   },
-  [m.AUDIO_TRANSLATE_SELECTED_UPDATE](state: AudioTranslateState, sub: ISubtitleControlListItem) {
+  [m.AUDIO_TRANSLATE_SELECTED_UPDATE](state: AudioTranslateState, sub: SubtitleControlListItem) {
     state.selectedTargetLanugage = sub.language;
     state.selectedTargetSubtitleId = sub.id;
   },
@@ -356,10 +356,9 @@ const actions = {
           commit(m.AUDIO_TRANSLATE_UPDATE_PROGRESS, 0);
           const selectId = state.selectedTargetSubtitleId;
           if (getters.primarySubtitleId === selectId) {
-            // do not directly pass empty string to manualChangeSubtitle
-            dispatch(smActions.autoChangePrimarySubtitle, '');
+            dispatch(smActions.manualChangePrimarySubtitle, '');
           } else if (getters.secondarySubtitleId === selectId) {
-            dispatch(smActions.autoChangeSecondarySubtitle, '');
+            dispatch(smActions.manualChangeSecondarySubtitle, '');
           }
           const failBubbleId = uuidv4();
           commit(m.AUDIO_TRANSLATE_UPDATE_FAIL_BUBBLE_ID, failBubbleId);
@@ -452,11 +451,11 @@ const actions = {
           } = getters;
           const secondaryAIButtonExist = list
             .find((
-              sub: ISubtitleControlListItem,
+              sub: SubtitleControlListItem,
             ) => sub.language === secondaryLanguage && !sub.source && sub.type === Type.Translated);
           const primaryAIButtonExist = list
             .find((
-              sub: ISubtitleControlListItem,
+              sub: SubtitleControlListItem,
             ) => sub.language === primaryLanguage && !sub.source && sub.type === Type.Translated);
           if (primaryLanguage === subtitle.language
             && !!secondaryLanguage && !!secondaryAIButtonExist) {
@@ -495,14 +494,14 @@ const actions = {
     const {
       primaryLanguage, secondaryLanguage, mediaHash,
     } = getters;
-    const list = getters.list as ISubtitleControlListItem[];
+    const list = getters.list as SubtitleControlListItem[];
     const key = `${getters.mediaHash}`;
     const taskInfo = mediaStorageService.getAsyncTaskInfo(key);
     if (taskInfo && getters.mediaHash === taskInfo.mediaHash
       && (taskInfo.targetLanguage === primaryLanguage
         || taskInfo.targetLanguage === secondaryLanguage)) {
       let sub = list.find((
-        sub: ISubtitleControlListItem,
+        sub: SubtitleControlListItem,
       ) => sub.type === Type.Translated && sub.language === taskInfo.targetLanguage);
       if (!sub) {
         try {
@@ -597,10 +596,9 @@ const actions = {
     // 丢弃任务，执行用户强制操作
     const selectId = state.selectedTargetSubtitleId;
     if (getters.primarySubtitleId === selectId) {
-      // do not directly pass empty string to manualChangeSubtitle
-      dispatch(smActions.autoChangePrimarySubtitle, '');
+      dispatch(smActions.manualChangePrimarySubtitle, '');
     } else if (getters.secondarySubtitleId === selectId) {
-      dispatch(smActions.autoChangeSecondarySubtitle, '');
+      dispatch(smActions.manualChangeSecondarySubtitle, '');
     }
     commit(m.AUDIO_TRANSLATE_RECOVERY);
     state.callbackAfterBubble();
@@ -623,7 +621,7 @@ const actions = {
   },
   [a.AUDIO_TRANSLATE_SHOW_MODAL]({
     commit, getters, state, dispatch,
-  }: any, sub: ISubtitleControlListItem) {
+  }: any, sub: SubtitleControlListItem) {
     dispatch(a.AUDIO_TRANSLATE_HIDE_BUBBLE);
     const key = `${getters.mediaHash}`;
     const taskInfo = mediaStorageService.getAsyncTaskInfo(key);

@@ -1,10 +1,7 @@
-import {
-  MutationTree, GetterTree, ActionTree,
-  Module, ActionContext,
-} from 'vuex';
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import uuidv4 from 'uuid/v4';
 import {
-  isEqual, sortBy, differenceWith, flatten, remove, debounce, difference,
+  isEqual, sortBy, differenceWith, flatten, remove, debounce, pick,
 } from 'lodash';
 import Vue from 'vue';
 import { extname } from 'path';
@@ -18,12 +15,12 @@ import {
   AudioTranslate as atActions,
 } from '@/store/actionTypes';
 import {
-  ISubtitleControlListItem, Type, IEntityGenerator, IEntity, NOT_SELECTED_SUBTITLE,
+  SubtitleControlListItem, Type, IEntityGenerator, Entity, NOT_SELECTED_SUBTITLE,
 } from '@/interfaces/ISubtitle';
 import {
   TranscriptInfo,
   searchForLocalList, retrieveEmbeddedList, fetchOnlineList,
-  OnlineGenerator, LocalGenerator, EmbeddedGenerator, TranslatedGenerator,
+  OnlineGenerator, LocalGenerator, EmbeddedGenerator, TranslatedGenerator, IEmbeddedOrigin,
 } from '@/services/subtitle';
 import { generateHints, calculatedName } from '@/libs/utils';
 import { log } from '@/libs/Log';
@@ -44,7 +41,6 @@ import { LanguageCode } from '@/libs/language';
 import { AudioTranslateBubbleOrigin } from './AudioTranslate';
 import { ISubtitleStream } from '@/plugins/mediaTasks';
 import { isAIEnabled } from '@/helpers/featureSwitch';
-import { IEmbeddedOrigin } from '@/services/subtitle/utils/loaders';
 
 const sortOfTypes = {
   local: 0,
@@ -55,79 +51,63 @@ const sortOfTypes = {
 
 let unwatch: Function;
 
-interface ISubtitleManagerState {
-  mediaHash: string;
-  primarySubtitleId: string;
-  secondarySubtitleId: string;
-  isRefreshing: boolean;
-  allSubtitles: { [id: string]: IEntity };
-  primaryDelay: number;
-  secondaryDelay: number;
+type SubtitleManagerState = {
+  mediaHash: string,
+  primarySubtitleId: string,
+  secondarySubtitleId: string,
+  isRefreshing: boolean,
+  allSubtitles: { [id: string]: SubtitleControlListItem },
+  primaryDelay: number,
+  secondaryDelay: number,
 }
 const state = {
   mediaHash: '',
-  isRefreshing: false,
-  allSubtitles: {},
   primarySubtitleId: '',
   secondarySubtitleId: '',
+  isRefreshing: false,
+  allSubtitles: {},
   primaryDelay: 0,
   secondaryDelay: 0,
 };
-const getters: GetterTree<ISubtitleManagerState, {}> = {
-  list(state): ISubtitleControlListItem[] {
-    const list = Object.keys(state.allSubtitles)
-      .filter(id => state.allSubtitles[id])
-      .map(id => ({ id, sub: state.allSubtitles[id] }));
-    const controlList = sortBy(list, ({ sub }) => {
-      const { type } = sub.displaySource;
-      if ((type === Type.Online || type === Type.Translated)
+const getters = {
+  list(state: SubtitleManagerState) {
+    const list = Object.values(state.allSubtitles).filter(v => !!v);
+    return sortBy(list, (sub: SubtitleControlListItem) => {
+      if ((sub.type === Type.Online || sub.type === Type.Translated)
         && sub.language !== store.getters.primaryLanguage) {
-        return sortOfTypes[type] + 2;
+        return sortOfTypes[sub.type] + 2;
       }
-      if (type === Type.Embedded) {
-        const embeddedRank = (sub.displaySource as IEmbeddedOrigin).source.streamIndex / 10;
-        return sortOfTypes[type] + embeddedRank;
-      }
-      return sortOfTypes[type];
-    }).map(({ id, sub }) => ({
-      id,
-      hash: sub.hash,
-      language: sub.language,
-      source: sub.displaySource,
-      type: sub.displaySource.type,
+      return sortOfTypes[sub.type];
+    }).map((sub: SubtitleControlListItem) => ({
+      ...sub,
+      name: calculatedName(sub, list),
     }));
-    return controlList.map(sub => ({ ...sub, name: calculatedName(sub, controlList) }));
   },
-  primarySubtitleId(state): string { return state.primarySubtitleId; },
-  secondarySubtitleId(state): string { return state.secondarySubtitleId; },
-  isRefreshing(state): boolean { return state.isRefreshing; },
-  ableToPushCurrentSubtitle(state, getters, rootState): boolean {
-    const { primarySubtitleId: pid, secondarySubtitleId: sid } = state;
-    return (((store.hasModule(sid) || store.hasModule(pid))
-      && ((!store.hasModule(pid) || rootState[pid].canUpload)))
-      && ((!store.hasModule(sid) || rootState[sid].canUpload)));
+  primarySubtitleId(state: SubtitleManagerState): string { return state.primarySubtitleId; },
+  secondarySubtitleId(state: SubtitleManagerState): string { return state.secondarySubtitleId; },
+  isRefreshing(state: SubtitleManagerState): boolean { return state.isRefreshing; },
+  ableToPushCurrentSubtitle(state: SubtitleManagerState): boolean {
+    let enable = false;
+    if (state.primarySubtitleId || state.secondarySubtitleId) {
+      enable = true;
+    }
+    return enable;
   },
-  primaryDelay({ primaryDelay }) { return primaryDelay; },
-  secondaryDelay({ secondaryDelay }) { return secondaryDelay; },
-  calculatedNoSub(state, { list }) { return !list.length; },
+  primaryDelay({ primaryDelay }: SubtitleManagerState) { return primaryDelay; },
+  secondaryDelay({ secondaryDelay }: SubtitleManagerState) { return secondaryDelay; },
+  calculatedNoSub(state: SubtitleManagerState, { list }: any) { return !list.length; },
 };
-const mutations: MutationTree<ISubtitleManagerState> = {
-  [m.setMediaHash](state, hash: string) {
+const mutations = {
+  [m.setMediaHash](state: SubtitleManagerState, hash: string) {
     state.mediaHash = hash;
   },
-  [m.setPrimarySubtitleId](state, id: string) {
-    const lastId = state.primarySubtitleId;
+  [m.setPrimarySubtitleId](state: SubtitleManagerState, id: string) {
     state.primarySubtitleId = id;
-    if (store.hasModule(lastId)) store.dispatch(`${lastId}/${subActions.pause}`);
-    if (store.hasModule(id)) store.dispatch(`${id}/${subActions.resume}`);
   },
-  [m.setSecondarySubtitleId](state, id: string) {
-    const lastId = state.secondarySubtitleId;
+  [m.setSecondarySubtitleId](state: SubtitleManagerState, id: string) {
     state.secondarySubtitleId = id;
-    if (store.hasModule(lastId)) store.dispatch(`${lastId}/${subActions.pause}`);
-    if (store.hasModule(id)) store.dispatch(`${id}/${subActions.resume}`);
   },
-  [m.setNotSelectedSubtitle](state, subtitle?: 'primary' | 'secondary') {
+  [m.setNotSelectedSubtitle](state: SubtitleManagerState, subtitle?: 'primary' | 'secondary') {
     if (subtitle === 'primary') state.primarySubtitleId = NOT_SELECTED_SUBTITLE;
     else if (subtitle === 'secondary') state.secondarySubtitleId = NOT_SELECTED_SUBTITLE;
     else {
@@ -135,25 +115,26 @@ const mutations: MutationTree<ISubtitleManagerState> = {
       state.secondarySubtitleId = NOT_SELECTED_SUBTITLE;
     }
   },
-  [m.setIsRefreshing](state, isRefreshing: boolean) {
+  [m.setIsRefreshing](state: SubtitleManagerState, isRefreshing: boolean) {
     state.isRefreshing = isRefreshing;
   },
-  [m.addSubtitleId](state, { id, entity }: { id: string, entity: IEntity }) {
-    Vue.set(state.allSubtitles, id, entity);
+  [m.addSubtitleId](state: SubtitleManagerState, controlItem: SubtitleControlListItem) {
+    const { id } = controlItem;
+    Vue.set(state.allSubtitles, id, controlItem);
     const { primarySubtitleId, secondarySubtitleId } = state;
     if (primarySubtitleId && !state.allSubtitles[primarySubtitleId]) state.primarySubtitleId = '';
     if (secondarySubtitleId && !state.allSubtitles[secondarySubtitleId]) state.secondarySubtitleId = '';
   },
-  [m.deleteSubtitleId](state, id: string) {
+  [m.deleteSubtitleId](state: SubtitleManagerState, id: string) {
     Vue.set(state.allSubtitles, id, undefined);
-    delete state.allSubtitles[id];
   },
-  [m.setPrimaryDelay](state, delayInSeconds: number) {
+  [m.deletaAllSubtitleIds](state: SubtitleManagerState) { state.allSubtitles = {}; },
+  [m.setPrimaryDelay](state: SubtitleManagerState, delayInSeconds: number) {
     state.primaryDelay = delayInSeconds;
     const subtitle = state.allSubtitles[state.primarySubtitleId];
     if (subtitle) subtitle.delay = delayInSeconds;
   },
-  [m.setSecondaryDelay](state, delayInSeconds: number) {
+  [m.setSecondaryDelay](state: SubtitleManagerState, delayInSeconds: number) {
     state.secondaryDelay = delayInSeconds;
     const subtitle = state.allSubtitles[state.secondarySubtitleId];
     if (subtitle) subtitle.delay = delayInSeconds;
@@ -182,7 +163,7 @@ function setDelayTimeout() {
   clearTimeout(alterDelayTimeoutId);
   alterDelayTimeoutId = setTimeout(() => store.dispatch(a.storeSubtitleDelays), 10000);
 }
-function fetchOnlineListWrapper(
+function fetchOnlineListWraper(
   bubble: boolean,
   videoSrc: string,
   languageCode: LanguageCode,
@@ -206,28 +187,28 @@ function fetchOnlineListWrapper(
     }
   });
 }
-function initializeManager(context: ActionContext<ISubtitleManagerState, {}>) {
-  const { commit, dispatch, getters } = context;
+function initializeManager({ getters, commit, dispatch }: any) {
+  const list = getters.list as SubtitleControlListItem[];
+  list.forEach(s => dispatch(a.removeSubtitle, s.id));
   commit(m.setMediaHash, getters.mediaHash);
   dispatch(a.refreshSubtitlesInitially);
 }
-
 const debouncedInitializeManager = debounce(initializeManager, 1000);
-const actions: ActionTree<ISubtitleManagerState, {}> = {
-  async [a.initializeManager](context) {
+const actions = {
+  async [a.initializeManager](context: any) {
     debouncedInitializeManager(context);
   },
-  async [a.resetManager]({ commit, dispatch }) {
+  [a.resetManager]({ commit }: any) {
     commit(m.setMediaHash, '');
     commit(m.setNotSelectedSubtitle);
     commit(m.setIsRefreshing, false);
+    commit(m.deletaAllSubtitleIds);
     primarySelectionComplete = false;
     secondarySelectionComplete = false;
-    await Promise.all(Object.keys(state.allSubtitles).map(id => dispatch(a.removeSubtitle, id)));
   },
   async [a.refreshSubtitlesInitially]({
     state, getters, dispatch, commit,
-  }) {
+  }: any) {
     primarySelectionComplete = false;
     secondarySelectionComplete = false;
     commit(m.setIsRefreshing, true);
@@ -315,7 +296,7 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
   },
   async [a.refreshSubtitles]({
     state, getters, dispatch, commit,
-  }) {
+  }: any) {
     const {
       originSrc, isTranslating,
       primaryLanguage, secondaryLanguage,
@@ -358,7 +339,7 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
   },
   // 这个方法仅仅给智能翻译成功后去加载另外一个AI翻译
   async [a.fetchSubtitleWhenTrabslateSuccess](
-    { getters, dispatch, state }, languageCode: LanguageCode,
+    { getters, dispatch, state }: any, languageCode: LanguageCode,
   ) {
     const {
       mediaHash,
@@ -367,17 +348,17 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
       originSrc,
     } = getters;
     const hints = generateHints(originSrc);
-    fetchOnlineListWrapper(false, originSrc, languageCode, hints)
+    fetchOnlineListWraper(false, originSrc, languageCode, hints)
       .then(async (resultsList) => {
         const results = flatten(resultsList);
         const newSubtitlesToAdd: TranscriptInfo[] = [];
-        const oldSubtitlesToDel: IEntity[] = [];
-        const oldSubtitles = [...Object.values(state.allSubtitles)];
+        const oldSubtitlesToDel: SubtitleControlListItem[] = [];
+        const oldSubtitles = [...(getters as { list: SubtitleControlListItem[] }).list];
         // 删除这个语言已经加载的字幕
         const lastSubs = remove(
           oldSubtitles,
-          ({ displaySource: s, language }) => (
-            (s.type === Type.Translated || s.type === Type.Online)
+          ({ type, language }) => (
+            (type === Type.Translated || type === Type.Online)
             && language === languageCode
           ),
         );
@@ -404,11 +385,11 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
           });
         }
         await dispatch(a.addOnlineSubtitles, { mediaHash, source: result.add })
-          .then(() => dispatch(a.deleteSubtitlesByHash, result.delete.map(({ hash }) => hash)));
+          .then(() => dispatch(a.deleteSubtitlesByUuid, result.delete));
       });
   },
   async [a.refreshOnlineSubtitles](
-    { getters, dispatch },
+    { getters, dispatch }: any,
     { mediaHash, bubble }: { mediaHash: string, bubble: boolean },
   ) {
     const {
@@ -418,13 +399,13 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
     if (bubble) addBubble(ONLINE_LOADING);
     const hints = generateHints(originSrc);
     return Promise.all([
-      fetchOnlineListWrapper(!!bubble, originSrc, primaryLanguage, hints),
-      fetchOnlineListWrapper(!!bubble, originSrc, secondaryLanguage, hints),
+      fetchOnlineListWraper(!!bubble, originSrc, primaryLanguage, hints),
+      fetchOnlineListWraper(!!bubble, originSrc, secondaryLanguage, hints),
     ]).then(async (resultsList) => {
       const results = flatten(resultsList);
       const newSubtitlesToAdd: TranscriptInfo[] = [];
-      const oldSubtitlesToDel: ISubtitleControlListItem[] = [];
-      const oldSubtitles: ISubtitleControlListItem[] = [...getters.list];
+      const oldSubtitlesToDel: SubtitleControlListItem[] = [];
+      const oldSubtitles = [...(getters as { list: SubtitleControlListItem[] }).list];
 
       // 将Translated类型的都删除掉
       const translatedSubs = remove(oldSubtitles, ({
@@ -457,12 +438,12 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
       let addSecondaryAIButton = false;
       const oldPrimarySubs = oldSubtitles
         .filter((
-          sub: ISubtitleControlListItem,
+          sub: SubtitleControlListItem,
         ) => (sub.type === Type.Online || sub.type === Type.Translated)
           && sub.language === primaryLanguage);
       const oldSecondarySubs = oldSubtitles
         .filter((
-          sub: ISubtitleControlListItem,
+          sub: SubtitleControlListItem,
         ) => (sub.type === Type.Online || sub.type === Type.Translated)
           && sub.language === secondaryLanguage);
       // sagi 结果
@@ -471,10 +452,10 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
       const secondaryResults = results
         .filter((info: TranscriptInfo) => info.languageCode === secondaryLanguage);
       const oldPrimaryAISubs = oldPrimarySubs.filter((
-        sub: ISubtitleControlListItem,
+        sub: SubtitleControlListItem,
       ) => sub.type === Type.Translated);
       const oldSecondaryAISubs = oldSecondarySubs.filter((
-        sub: ISubtitleControlListItem,
+        sub: SubtitleControlListItem,
       ) => sub.type === Type.Translated);
       const isAllPrimaryResultsFromES = primaryResults
         .every((info: TranscriptInfo) => info.tagsList.length > 0 && info.tagsList.indexOf('ES') > -1);
@@ -537,24 +518,20 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
         });
       }
       await dispatch(a.addOnlineSubtitles, { mediaHash, source: result.add })
-        .then(() => dispatch(a.deleteSubtitlesByUuid, result.delete.map(({ id }) => id)));
+        .then(() => dispatch(a.deleteSubtitlesByUuid, result.delete));
     });
   },
-  [a.checkLocalSubtitles]({ state, dispatch }) {
-    const localInvalidSubtitleIds = Object.keys(state.allSubtitles)
-      .filter(id => state.allSubtitles[id])
-      .filter((id) => {
-        const subtitle = state.allSubtitles[id];
-        const source = subtitle.displaySource;
-        return source && source.type === Type.Local && !existsSync(source.source as string);
-      });
-    if (localInvalidSubtitleIds.length) {
-      dispatch(a.deleteSubtitlesByUuid, localInvalidSubtitleIds)
+  [a.checkLocalSubtitles]({ dispatch, getters }: any) {
+    const list = getters.list as SubtitleControlListItem[];
+    const localInvalidSubtitles = list
+      .filter(({ type, source }) => type === Type.Local && !existsSync(source as string));
+    if (localInvalidSubtitles.length) {
+      dispatch(a.deleteSubtitlesByUuid, localInvalidSubtitles)
         .then(() => addBubble(LOCAL_SUBTITLE_REMOVED));
     }
   },
   async [a.addLocalSubtitles](
-    { dispatch },
+    { dispatch }: any,
     { mediaHash, source = [] }: IAddSubtitlesOptions<string>,
   ) {
     return Promise.all(
@@ -564,7 +541,7 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
       })),
     ).then(subtitles => addSubtitleItemsToList(subtitles, mediaHash));
   },
-  async [a.addLocalSubtitlesWithSelect]({ state, dispatch, getters }, paths: string[]) {
+  async [a.addLocalSubtitlesWithSelect]({ state, dispatch, getters }: any, paths: string[]) {
     let selectedHash = paths[0];
     const { mediaHash } = state;
     // tempoary solution, need db validation schema to ensure data consistent
@@ -577,13 +554,16 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
               selectedHash = await g.getHash();
             } catch (ex) { console.error(ex); }
           }
-          return dispatch(a.addSubtitle, { generator: g, mediaHash });
+          return dispatch(a.addSubtitle, {
+            generator: g,
+            mediaHash,
+          });
         }),
       )
-        .then((list: IEntity[]) => addSubtitleItemsToList(list, state.mediaHash))
+        .then((list: SubtitleControlListItem[]) => addSubtitleItemsToList(list, state.mediaHash))
         .then(() => {
           const sub = getters.list
-            .find((sub: ISubtitleControlListItem) => sub.hash === selectedHash);
+            .find((sub: SubtitleControlListItem) => sub.hash === selectedHash);
           if (sub && getters.isFirstSubtitle) {
             dispatch(a.manualChangePrimarySubtitle, sub.id);
           } else if (sub && !getters.isFirstSubtitle) {
@@ -594,7 +574,7 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
     return {};
   },
   async [a.addEmbeddedSubtitles](
-    { dispatch },
+    { dispatch }: any,
     { mediaHash, source = [] }: IAddSubtitlesOptions<[string, ISubtitleStream]>,
   ) {
     return Promise.all(
@@ -605,7 +585,7 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
     ).then(subtitles => addSubtitleItemsToList(subtitles, mediaHash));
   },
   async [a.addOnlineSubtitles](
-    { dispatch },
+    { dispatch }: any,
     { mediaHash, source = [] }: IAddSubtitlesOptions<TranscriptInfo>,
   ) {
     return Promise.all(
@@ -625,7 +605,7 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
     ).then(subtitles => addSubtitleItemsToList(subtitles, mediaHash));
   },
   async [a.addDatabaseSubtitles](
-    { dispatch },
+    { dispatch }: any,
     { source = [], mediaHash }: IAddSubtitlesOptions<IStoredSubtitleItem>,
   ) {
     return Promise.all(
@@ -635,23 +615,46 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
       })),
     );
   },
-  async [a.addSubtitle]({ state, dispatch, commit }, options: IAddSubtitleOptions) {
+  async [a.addSubtitle]({
+    state, commit, dispatch, getters,
+  }: any, options: IAddSubtitleOptions) {
     if (options.mediaHash === state.mediaHash) {
       const subtitleGenerator = options.generator;
       try {
-        const list = Object.values(state.allSubtitles).filter(v => v);
+        const list = getters.list as SubtitleControlListItem[];
         const hash = await subtitleGenerator.getHash();
-        const source = await subtitleGenerator.getDisplaySource();
-        const existed = list
-          .find(subtitle => subtitle.hash === hash && isEqual(subtitle.displaySource, source));
-        if (!existed) {
+        const type = await subtitleGenerator.getType();
+        const existedHash = list.find(subtitle => subtitle.hash === hash && subtitle.type === type);
+        const source = subtitleGenerator.getStoredSource
+          ? await subtitleGenerator.getStoredSource()
+          : await subtitleGenerator.getSource();
+        const existedOrigin = list.find((subtitle) => {
+          if (source.type !== Type.Embedded) return isEqual(subtitle.source, source.source);
+          const storedSource = (source as IEmbeddedOrigin).source;
+          const newSource = (subtitle as IEmbeddedOrigin).source;
+          return isEqual(
+            pick(storedSource, ['streamIndex', 'extractedSrc']),
+            pick(newSource, ['streamIndex', 'extractedSrc']),
+          );
+        });
+        if (!existedHash || !existedOrigin) {
           const id = uuidv4();
           store.registerModule([id], { ...SubtitleModule, name: `${id}` });
-          dispatch(`${id}/${subActions.initialize}`, { id, mediaHash: state.mediaHash });
-          const subtitle: IEntity = await dispatch(`${id}/${subActions.add}`, subtitleGenerator);
+          dispatch(`${id}/${subActions.initialize}`, id);
+          const subtitle: Entity = await dispatch(`${id}/${subActions.add}`, subtitleGenerator);
           await dispatch(`${id}/${subActions.store}`);
-          commit(m.addSubtitleId, { id, entity: subtitle });
-          return subtitle;
+          const subtitleControlListItem: SubtitleControlListItem = {
+            id,
+            hash: subtitle.hash,
+            type: subtitle.type,
+            language: subtitle.language,
+            source: subtitle.source.source,
+            delay: subtitle.delay,
+          };
+          if (options.mediaHash === state.mediaHash) {
+            commit(m.addSubtitleId, subtitleControlListItem);
+          }
+          return subtitleControlListItem;
         }
       } catch (ex) {
         log.warn('SubtitleManager addSubtitle action', ex);
@@ -659,34 +662,25 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
     }
     return {};
   },
-  async [a.removeSubtitle]({ commit, getters, dispatch }, id: string) {
+  [a.removeSubtitle]({ commit, getters }: any, id: string) {
+    store.unregisterModule(id);
     commit(m.deleteSubtitleId, id);
     if (getters.isFirstSubtitle && getters.primarySubtitleId === id) {
       commit(m.setNotSelectedSubtitle, 'primary');
     } else if (!getters.isFirstSubtitle && getters.secondarySubtitleId === id) {
       commit(m.setNotSelectedSubtitle, 'secondary');
     }
-    if (store.hasModule(id)) {
-      await dispatch(`${id}/${subActions.destroy}`);
-      store.unregisterModule(id);
-    }
   },
-  async [a.deleteSubtitlesByUuid]({ state, dispatch }, ids: string[]) {
-    ids.forEach(id => dispatch(a.removeSubtitle, id));
-    return removeSubtitleItemsFromList(ids.map(id => state.allSubtitles[id]), state.mediaHash);
-  },
-  async [a.deleteSubtitlesByHash]({ state, dispatch }, hashes: string[]) {
-    const { allSubtitles } = state;
-    const ids = hashes
-      .map(hash => Object.keys(allSubtitles).find(id => allSubtitles[id].hash === hash) || '')
-      .filter(id => id);
-    ids.forEach(id => dispatch(a.removeSubtitle, id));
-    return removeSubtitleItemsFromList(ids.map(id => state.allSubtitles[id]), state.mediaHash);
+  async [a.deleteSubtitlesByUuid]({ state, dispatch }: any, subtitles: SubtitleControlListItem[]) {
+    subtitles.forEach(({ id }) => {
+      if (store.hasModule(id)) dispatch(`${id}/${subActions.delete}`);
+      dispatch(a.removeSubtitle, id);
+    });
+    return removeSubtitleItemsFromList(subtitles, state.mediaHash);
   },
   async [a.autoChangePrimarySubtitle]({
     dispatch, commit, getters, state,
-  }, id: string) {
-    const lastSelected = [state.primarySubtitleId, state.secondarySubtitleId];
+  }: any, id: string) {
     if (getters.subtitleOff) commit(m.setPrimarySubtitleId, '');
     else {
       const primaryId = id;
@@ -704,20 +698,13 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
         if (state.allSubtitles[primaryId]) {
           commit(m.setPrimaryDelay, state.allSubtitles[primaryId].delay);
         }
+        if (store.hasModule(primaryId)) await dispatch(`${id}/${subActions.load}`);
       }
-
-      const finalSelected = [state.primarySubtitleId, state.secondarySubtitleId];
-      difference(lastSelected, finalSelected).forEach((id) => {
-        if (store.hasModule(id)) dispatch(`${id}/${subActions.pause}`);
-      });
-      difference(finalSelected, lastSelected).forEach((id) => {
-        if (store.hasModule(id)) dispatch(`${id}/${subActions.resume}`);
-      });
 
       dispatch(a.storeSelectedSubtitles, [primaryId, secondaryId]);
     }
   },
-  async [a.manualChangePrimarySubtitle]({ dispatch, commit, state }, id: string) {
+  async [a.manualChangePrimarySubtitle]({ dispatch, commit, state }: any, id: string) {
     await dispatch('setSubtitleOff', !id);
     if (!id) dispatch(a.autoChangeSecondarySubtitle, '');
     else if (!state.secondarySubtitleId) commit(m.setNotSelectedSubtitle, 'secondary');
@@ -725,8 +712,7 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
   },
   async [a.autoChangeSecondarySubtitle]({
     dispatch, commit, getters, state,
-  }, id: string) {
-    const lastSelected = [state.primarySubtitleId, state.secondarySubtitleId];
+  }: any, id: string) {
     if (getters.subtitleOff) commit(m.setSecondarySubtitleId, '');
     else {
       let primaryId = state.primarySubtitleId;
@@ -744,49 +730,38 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
         if (state.allSubtitles[secondaryId]) {
           commit(m.setSecondaryDelay, state.allSubtitles[secondaryId].delay);
         }
+        if (store.hasModule(secondaryId)) await dispatch(`${id}/${subActions.load}`);
       }
-
-      const finalSelected = [state.primarySubtitleId, state.secondarySubtitleId];
-      difference(lastSelected, finalSelected).forEach((id) => {
-        if (store.hasModule(id)) dispatch(`${id}/${subActions.pause}`);
-      });
-      difference(finalSelected, lastSelected).forEach((id) => {
-        if (store.hasModule(id)) dispatch(`${id}/${subActions.resume}`);
-      });
 
       dispatch(a.storeSelectedSubtitles, [primaryId, secondaryId]);
     }
   },
-  async [a.manualChangeSecondarySubtitle]({ dispatch, commit, state }, id: string) {
+  async [a.manualChangeSecondarySubtitle]({ dispatch, commit, state }: any, id: string) {
     await dispatch('setSubtitleOff', !id);
     if (!id) dispatch(a.autoChangePrimarySubtitle, '');
     else if (!state.primarySubtitleId) commit(m.setNotSelectedSubtitle, 'primary');
     dispatch(a.autoChangeSecondarySubtitle, id);
   },
-  async [a.storeSelectedSubtitles]({ state }, ids: string[]) {
+  async [a.storeSelectedSubtitles]({ state }: any, ids: string[]) {
     const { allSubtitles, mediaHash } = state;
     const subtitles = ids
-      .filter(id => state.allSubtitles[id])
-      .filter((id) => {
-        const source = state.allSubtitles[id].displaySource;
-        return source && source.type !== Type.Translated && source.source;
-      })
       .map((id) => {
-        const { hash, displaySource } = allSubtitles[id];
-        return { hash, source: displaySource };
+        const subtitle = allSubtitles[id];
+        if (subtitle && subtitle.type !== Type.Translated && subtitle.source) return subtitle;
+        return undefined;
       });
     storeSelectedSubtitles(subtitles as SelectedSubtitle[], mediaHash);
   },
   async [a.chooseSelectedSubtitles](
-    { getters, dispatch },
+    { getters, dispatch }: any,
     { primary, secondary }: { primary: SelectedSubtitle, secondary?: SelectedSubtitle },
   ) {
-    const { list } = getters as { list: ISubtitleControlListItem[] };
+    const { list } = getters as { list: SubtitleControlListItem[] };
     let primaryId = '';
     let secondaryId = '';
     if (primary) {
       let subtitles = list
-        .filter((sub: ISubtitleControlListItem) => sub.hash === primary.hash);
+        .filter((sub: SubtitleControlListItem) => sub.hash === primary.hash);
       if (subtitles.length > 1) {
         subtitles = subtitles.filter(sub => isEqual(sub.source, primary.source));
       }
@@ -794,7 +769,7 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
     }
     if (secondary) {
       let subtitles = list
-        .filter((sub: ISubtitleControlListItem) => sub.hash === secondary.hash);
+        .filter((sub: SubtitleControlListItem) => sub.hash === secondary.hash);
       if (subtitles.length > 1) {
         subtitles = subtitles.filter(sub => isEqual(sub.source, secondary.source));
       }
@@ -808,9 +783,9 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
       secondarySelectionComplete = true;
     });
   },
-  async [a.startAISelection]({ dispatch }) {
+  async [a.startAISelection]({ dispatch }: any) {
     unwatch = store.watch(
-      (state: ISubtitleManagerState, getters: { list: ISubtitleControlListItem[] }) => getters.list
+      (state: any, getters: { list: SubtitleControlListItem[] }) => getters.list
         .map(({
           id, type, source, language,
         }) => ({
@@ -819,8 +794,8 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
       () => dispatch(a.checkSubtitleList),
     );
   },
-  [a.checkSubtitleList]({ getters, dispatch, commit }) {
-    const { list } = getters as { list: ISubtitleControlListItem[] };
+  [a.checkSubtitleList]({ getters, dispatch, commit }: any) {
+    const { list } = getters as { list: SubtitleControlListItem[] };
     if (list.length) {
       const { primaryLanguage, secondaryLanguage } = getters;
       if (!primarySelectionComplete || !secondarySelectionComplete) {
@@ -855,7 +830,7 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
   async [a.stopAISelection]() {
     if (typeof unwatch === 'function') unwatch();
   },
-  async [a.getCues]({ dispatch, getters }, time?: number) {
+  async [a.getCues]({ dispatch, getters }: any, time?: number) {
     const firstSub = {
       cues: [],
       subPlayResX: 720,
@@ -896,10 +871,10 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
     return [firstSub, secondSub];
   },
   async [a.updatePlayedTime](
-    { state, dispatch, getters },
+    { state, dispatch, getters }: any,
     times: { start: number, end: number },
   ) {
-    const actions: Promise<unknown>[] = [];
+    const actions: Promise<any>[] = [];
     if (times.start !== times.end) {
       const { primarySubtitleId, secondarySubtitleId } = state;
       const bubbleId = `${Date.now()}-${Math.random()}`;
@@ -934,10 +909,10 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
     }
     return Promise.all(actions);
   },
-  async [a.manualUploadAllSubtitles]({ state, dispatch }) {
+  async [a.manualUploadAllSubtitles]({ state, dispatch }: any) {
     if (navigator.onLine) {
       addBubble(SUBTITLE_UPLOAD);
-      const actions: Promise<boolean>[] = [];
+      const actions: Promise<any>[] = [];
       const { primarySubtitleId, secondarySubtitleId } = state;
       if (primarySubtitleId && store.hasModule(primarySubtitleId)) actions.push(dispatch(`${primarySubtitleId}/${subActions.manualUpload}`));
       if (secondarySubtitleId && store.hasModule(secondarySubtitleId)) actions.push(dispatch(`${secondarySubtitleId}/${subActions.manualUpload}`));
@@ -948,42 +923,41 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
     }
     return addBubble(UPLOAD_FAILED);
   },
-  async [a.alterPrimaryDelay]({ state, dispatch, commit }, deltaInSeconds: number) {
+  async [a.alterPrimaryDelay]({ state, dispatch, commit }: any, deltaInSeconds: number) {
     const { primarySubtitleId } = state;
     if (!store.hasModule(primarySubtitleId)) return;
     const delay = await dispatch(`${primarySubtitleId}/${subActions.alterDelay}`, deltaInSeconds);
     commit(m.setPrimaryDelay, delay);
     setDelayTimeout();
   },
-  async [a.resetPrimaryDelay]({ state, dispatch, commit }) {
+  async [a.resetPrimaryDelay]({ state, dispatch, commit }: any) {
     const { primarySubtitleId } = state;
     await dispatch(`${primarySubtitleId}/${subActions.resetDelay}`);
     commit(m.setPrimaryDelay, 0);
     setDelayTimeout();
   },
-  async [a.alterSecondaryDelay]({ state, dispatch, commit }, deltaInSeconds: number) {
+  async [a.alterSecondaryDelay]({ state, dispatch, commit }: any, deltaInSeconds: number) {
     const { secondarySubtitleId } = state;
     const delay = await dispatch(`${secondarySubtitleId}/${subActions.alterDelay}`, deltaInSeconds);
     commit(m.setSecondaryDelay, delay);
     setDelayTimeout();
   },
-  async [a.resetSecondaryDelay]({ state, dispatch, commit }) {
+  async [a.resetSecondaryDelay]({ state, dispatch, commit }: any) {
     const { secondarySubtitleId } = state;
     await dispatch(`${secondarySubtitleId}/${subActions.resetDelay}`);
     commit(m.setSecondaryDelay, 0);
     setDelayTimeout();
   },
-  async [a.storeSubtitleDelays]({ getters, state }) {
-    const list = getters.list.map(({ id }: ISubtitleControlListItem) => getters[`${id}/entity`]);
-    updateSubtitleList(list, state.mediaHash);
+  async [a.storeSubtitleDelays]({ getters, state }: any) {
+    const { list } = getters;
+    const { mediaHash } = state;
+    updateSubtitleList(list, mediaHash);
   },
 };
 
-const SubtitleManager: Module<ISubtitleManagerState, {}> = {
+export default {
   state,
   getters,
   mutations,
   actions,
 };
-
-export default SubtitleManager;

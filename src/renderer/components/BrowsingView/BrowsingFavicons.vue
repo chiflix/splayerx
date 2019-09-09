@@ -52,7 +52,7 @@ export default {
       type: Object,
       required: true,
     },
-    handleBookmarkOpen: {
+    updateInitialUrl: {
       type: Function,
       required: true,
     },
@@ -61,16 +61,16 @@ export default {
     return {
       showFavicon: true,
       favicon: [
-        { name: '爱奇艺', type: 'iqiyi', url: 'https://www.iqiyi.com/' },
-        { name: 'Bilibili', type: 'bilibili', url: 'https://www.bilibili.com/' },
-        { name: 'YouTube', type: 'youtube', url: 'https://www.youtube.com/' },
+        { name: '爱奇艺', type: 'iqiyi', url: 'https://www.iqiyi.com' },
+        { name: 'Bilibili', type: 'bilibili', url: 'https://www.bilibili.com' },
+        { name: 'YouTube', type: 'youtube', url: 'https://www.youtube.com' },
       ],
       faviconIndex: -1,
     };
   },
   computed: {
     calculateWidth() {
-      return this.isDarwin ? 'calc(100% - 70px - 114px - 80px)' : 'calc(100% - 100px - 110px - 135px)';
+      return this.isDarwin ? 'calc(100% - 70px - 114px - 40px)' : 'calc(100% - 50px - 110px - 135px)';
     },
     favAnimClass() {
       if (this.isDarwin) {
@@ -96,7 +96,7 @@ export default {
       this.faviconIndex = -1;
     },
     handleFavOpen(item: { name: string, type: string, url: string }) {
-      this.handleBookmarkOpen(item.url);
+      this.updateInitialUrl(this.recordUrl[item.type] ? this.recordUrl[item.type] : item.url);
     },
     handleFavAnimEnd(e: AnimationEvent) {
       const target = e.target as HTMLElement;
@@ -120,6 +120,7 @@ export default {
     .fav-icon-container {
       width: auto;
       height: 20px;
+      cursor: pointer;
       display: flex;
       border-radius: 13px;
       .icon-detail {
@@ -134,6 +135,7 @@ export default {
   .fav-display {
     width: 10px;
     height: 10px;
+    cursor: pointer;
   }
 }
 .fav-show-animation {

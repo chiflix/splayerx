@@ -2,37 +2,36 @@
   <div
     :style="{
       width: isDarwin ? '114px' : '110px',
+      margin: isDarwin ? 'auto 0 auto 70px' : 'auto 0 auto 5px',
     }"
     class="browsing-control"
   >
-    <div
-      @mouseup="handleSidebar"
-      class="control-button sidebar-icon no-drag button-hover"
-    >
-      <Icon
-        type="sidebar"
-      />
-    </div>
-    <div
-      @mouseup="handleUrlBack"
-      :class="backType.toString() === 'back' ? 'button-hover' : ''"
-      class="control-button back-icon no-drag"
-    >
-      <Icon
-        ref="back"
-        :type="backType"
-      />
-    </div>
-    <div
-      @mouseup="handleUrlForward"
-      :class="forwardType.toString() === 'forward' ? 'button-hover' : ''"
-      class="control-button forward-icon no-drag"
-    >
-      <Icon
-        ref="forward"
-        :type="forwardType"
-      />
-    </div>
+    <Icon
+      ref="back"
+      :type="backType"
+      :style="{
+        cursor: webInfo.canGoBack ? 'pointer' : ''
+      }"
+      @mouseup.native="handleUrlBack"
+      class="back-icon"
+    />
+    <Icon
+      ref="forward"
+      :type="forwardType"
+      :style="{
+        cursor: webInfo.canGoForward ? 'pointer' : ''
+      }"
+      @mouseup.native="handleUrlForward"
+      class="forward-icon"
+    />
+    <Icon
+      @mouseup.native="handleUrlReload"
+      :style="{
+        cursor: 'pointer',
+      }"
+      type="pageRefresh"
+      class="page-refresh-icon"
+    />
   </div>
 </template>
 
@@ -45,6 +44,10 @@ export default {
     Icon,
   },
   props: {
+    handleUrlReload: {
+      type: Function,
+      required: true,
+    },
     handleUrlBack: {
       type: Function,
       required: true,
@@ -71,42 +74,31 @@ export default {
       return process.platform === 'darwin';
     },
   },
-  methods: {
-    handleSidebar() {
-      this.$event.emit('side-bar-mouseup');
-    },
-  },
 };
 </script>
 
 <style scoped lang="scss">
 .browsing-control {
-  height: 100%;
+  height: 20px;
   display: flex;
-  align-items: center;
   z-index: 6;
-  border-right: 1px solid #F2F1F4;
-  .control-button {
-    width: 30px;
-    height: 30px;
-    border-radius: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: background-color 100ms ease-in;
-  }
-  .button-hover:hover {
-    background-color: #ECEEF0;
-  }
-  .sidebar-icon {
-    margin-left: 8px;
-  }
   .back-icon {
-    margin-left: 4px;
-    margin-right: 4px;
+    width: 16px;
+    height: 16px;
+    margin: auto 20px auto 7px;
+    -webkit-app-region: no-drag;
   }
   .forward-icon {
-    margin-right: 8px;
+    width: 16px;
+    height: 16px;
+    margin: auto 20px auto 0;
+    -webkit-app-region: no-drag;
+  }
+  .page-refresh-icon {
+    width: 16px;
+    height: 16px;
+    -webkit-app-region: no-drag;
+    margin: auto 0 auto 0;
   }
 }
 </style>
