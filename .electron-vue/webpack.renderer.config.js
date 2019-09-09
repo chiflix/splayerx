@@ -62,6 +62,7 @@ let rendererConfig = {
     about: path.join(__dirname, '../src/renderer/about.js'),
     labor: path.join(__dirname, '../src/renderer/labor.ts'),
     index: path.join(__dirname, '../src/renderer/main.ts'),
+    browsing: path.join(__dirname, '../src/renderer/browsing.ts'),
   },
   externals: [
     ...Object.keys(Object.assign({}, dependencies, optionalDependencies)).filter(
@@ -200,6 +201,7 @@ let rendererConfig = {
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('labor')),
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('about')),
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('preference')),
+    new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('browsing')),
     new webpack.HotModuleReplacementPlugin(),
   ],
   output: {
