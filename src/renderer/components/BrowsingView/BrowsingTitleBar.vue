@@ -38,7 +38,7 @@ export default {
   components: {
     Icon,
   },
-  computed:  {
+  computed: {
     ...mapGetters(['isMaximized']),
   },
   methods: {
