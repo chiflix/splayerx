@@ -41,7 +41,10 @@ export class VttParser implements IParser {
           start: toMS(subtitle.start) / 1000,
           end: toMS(subtitle.end) / 1000,
           tags: tagsGetter(subtitle.text, this.baseTags),
-          text: subtitle.text.replace(/\{[^{}]*\}/g, '').replace(/[\\/][Nn]|\r?\n|\r/g, '\n'),
+          text: subtitle.text
+            .replace(/<\/?[^bius]+?>/g, '')
+            .replace(/\{[^{}]*\}/g, '')
+            .replace(/[\\/][Nn]|\r?\n|\r/g, '\n'),
           format: this.format,
         });
       });
