@@ -639,8 +639,8 @@ new Vue({
       }
     });
     window.addEventListener('dragover', (e) => {
-      if (this.currentRouteName !== 'landing-view' && this.currentRouteName !== 'playing-view') return;
       e.preventDefault();
+      if (this.currentRouteName !== 'landing-view' && this.currentRouteName !== 'playing-view') return;
       e.dataTransfer!.dropEffect = process.platform === 'darwin' ? 'copy' : '';
       this.$bus.$emit('drag-over');
     });
