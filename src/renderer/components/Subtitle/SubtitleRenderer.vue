@@ -368,7 +368,7 @@ export default {
   .primary-sub, .secondary-sub {
     margin: 0 auto 0 auto;
   }
-  .subtitle-alignment2 {
+  .subtitle-alignment2, .subtitle-alignment8 {
     .primary-sub, .secondary-sub {
       white-space: normal;
       word-break: keep-all;
