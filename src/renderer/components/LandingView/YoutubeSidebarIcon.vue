@@ -18,64 +18,40 @@
       <defs>
         <circle
           id="path-1"
-          cx="20"
-          cy="20"
-          r="20"
+          cx="22"
+          cy="22"
+          r="22"
         />
       </defs>
       <g
-        id="页面-1"
+        id="组件"
         stroke="none"
         stroke-width="1"
         fill="none"
         fill-rule="evenodd"
       >
         <g
-          id="2"
-          transform="translate(-17.000000, -157.000000)"
+          id="sideBarItem/__logoWithColorBg/--youtube"
+          transform="translate(0.000000, 0.000000)"
         >
-          <g
-            id="sideBarItems"
-            transform="translate(18.000000, 46.000000)"
+          <mask
+            id="mask-2"
+            fill="white"
           >
-            <g
-              id="sideBarItem--youtube"
-              class="sidebar"
-              transform="translate(0.000000, 112.000000)"
-            >
-              <mask
-                id="mask-2"
-                fill="white"
-              >
-                <use xlink:href="#path-1" />
-              </mask>
-              <circle
-                :stroke-width="selected ? 2 : 0"
-                stroke="#EBECF0"
-                fill="#FF0000"
-                cx="21"
-                cy="21"
-                r="21"
-              />
-              <g
-                id="logo--youtube"
-                stroke-width="1"
-                fill-rule="evenodd"
-                mask="url(#mask-2)"
-              >
-                <g
-                  id="路径"
-                  transform="translate(-1.376364, 5.000000)"
-                  fill-rule="nonzero"
-                >
-                  <polygon
-                    fill="#FFFFFF"
-                    points="18.2909091 22.8581818 30.1672727 16 18.2909091 9.14181818"
-                  />
-                </g>
-              </g>
-            </g>
-          </g>
+            <use xlink:href="#path-1" />
+          </mask>
+          <use
+            id="colorBg"
+            fill="#FF0000"
+            xlink:href="#path-1"
+          />
+          <polygon
+            id="路径"
+            fill="#FFFFFF"
+            fill-rule="nonzero"
+            mask="url(#mask-2)"
+            points="17.1970909 29.544 30.2610909 22 17.1970909 14.456"
+          />
         </g>
       </g>
     </svg>

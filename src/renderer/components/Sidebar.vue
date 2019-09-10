@@ -7,18 +7,21 @@
         :selected="currentUrl.includes('bilibili')"
         :url="'https://www.bilibili.com/'"
         :mouseup-on-icon="handleSidebarIcon"
+        :class="{ selected: currentUrl.includes('bilibili') }"
         class="no-drag"
       />
       <iQiyiSidebarIcon
         :selected="currentUrl.includes('iqiyi')"
         :url="'https://www.iqiyi.com/'"
         :mouseup-on-icon="handleSidebarIcon"
+        :class="{ selected: currentUrl.includes('iqiyi') }"
         class="no-drag"
       />
       <YoutubeSidebarIcon
         :selected="currentUrl.includes('youtube')"
         :url="'https://www.youtube.com/'"
         :mouseup-on-icon="handleSidebarIcon"
+        :class="{ selected: currentUrl.includes('youtube') }"
         class="no-drag"
       />
     </div>
@@ -81,15 +84,24 @@ export default {
 
   .icon-box {
     width: 44px;
-    margin-top: 46px;
-    margin-left: 18px;
-    margin-right: 18px;
+    margin-top: 42px;
+    margin-left: 16px;
+    margin-right: 16px;
     display: flex;
     flex-direction: column;
     div {
       width: 44px;
       height: 44px;
-      margin-bottom: 16px;
+      margin-bottom: 12px;
+    }
+    .selected::before {
+      content: '';
+      position: absolute;
+      width: 44px;
+      height: 44px;
+      border: 2px solid #fff;
+      border-radius: 100%;
+      box-sizing: border-box;
     }
   }
 }
