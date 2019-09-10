@@ -84,6 +84,7 @@ export default {
       acceleratorAvailable: true,
       oldDisplayId: -1,
       backToLandingView: false,
+      // touchbar buttons
       sidebarButton: null,
       backwardButton: null,
       forwardButton: null,
@@ -247,9 +248,15 @@ export default {
       if (val) {
         this.webInfo.hasVideo = false;
         this.createTouchBar(false);
+        if (this.refreshButton) {
+          this.refreshButton.icon = this.createIcon('touchBar/stopRefresh.png');
+        }
         this.showProgress = true;
         this.progress = 70;
       } else {
+        if (this.refreshButton) {
+          this.refreshButton.icon = this.createIcon('touchBar/refresh.png');
+        }
         this.progress = 100;
         setTimeout(() => {
           this.showProgress = false;
@@ -754,9 +761,7 @@ export default {
       });
       this.refreshButton = new TouchBarButton({
         icon: this.createIcon('touchBar/refresh.png'),
-        click: () => {
-          this.$bus.$emit('toggle-reload');
-        },
+        click: this.handleUrlReload,
       });
       // this.pipButton = enablePip ? new TouchBarButton({
       //   icon: this.createIcon('touchBar/pip.png'),
