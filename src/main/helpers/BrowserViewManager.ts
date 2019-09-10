@@ -163,11 +163,13 @@ export class BrowserViewManager implements IBrowserViewManager {
     this.historyByChannel[this.currentChannel].list.splice(currentIndex, 1);
     this.historyByChannel[this.currentChannel].lastUpdateTime = Date.now();
     this.historyByChannel[this.currentChannel].currentIndex = currentIndex - 1;
+    mainBrowser.page.view.webContents.removeAllListeners('media-started-playing');
     return { pipBrowser, mainBrowser };
   }
 
   // 退出画中画
   public exitPip(): BrowserViewData {
+    this.pauseVideo();
     const { pipIndex, pipChannel } = this.currentPip;
     const list = this.historyByChannel[pipChannel].list;
     this.historyByChannel[pipChannel].list = list

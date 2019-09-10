@@ -327,7 +327,6 @@ export default {
   },
   mounted() {
     this.menuService = new MenuService();
-    this.menuService.updateMenuItemEnabled('file.open', false);
 
     this.title = this.$electron.remote.getCurrentWindow()
       .getBrowserViews()[0].webContents.getTitle();
@@ -443,11 +442,10 @@ export default {
         pipMode: this.pipMode,
       })
       .finally(() => {
-        this.menuService.updateMenuItemEnabled('file.open', true);
         window.removeEventListener('beforeunload', this.beforeUnloadHandler);
         window.removeEventListener('focus', this.focusHandler);
+        this.$electron.ipcRenderer.send('remove-browser');
         if (this.backToLandingView) {
-          this.$electron.ipcRenderer.send('remove-browser');
           setTimeout(() => {
             windowRectService.uploadWindowBy(false, 'landing-view', undefined, undefined, this.winSize, this.winPos, this.isFullScreen);
           }, 200);
