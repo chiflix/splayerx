@@ -368,5 +368,27 @@ export default {
   .primary-sub, .secondary-sub {
     margin: 0 auto 0 auto;
   }
+  .subtitle-alignment2 {
+    .primary-sub, .secondary-sub {
+      white-space: normal;
+      word-break: keep-all;
+    }
+    @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px),
+    screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
+      width: 100%;
+    }
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
+    screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+      width: calc(100% - 280px);
+    }
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+    screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+      width: calc(100% - 394px);
+    }
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+    screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+      width: calc(100% - 610px);
+    }
+  }
 }
 </style>
