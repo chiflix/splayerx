@@ -18,7 +18,10 @@
       :style="{
         opacity: hasVideo ? '1.0' : '0.3',
       }"
-      :class="switchPip ? 'switch' : ''"
+      :class="[
+        { switch: switchPip },
+        { 'icon-hover': hasVideo },
+      ]"
       class="down-icon no-drag"
     >
       <Icon
@@ -111,12 +114,12 @@ export default {
     align-items: center;
     opacity: 0.3;
     transition: opacity 50ms linear, margin-left 100ms ease-in;
-    &:hover {
-      margin-left: 2px;
-    }
     .icon {
       margin-top: 1px;
     }
+  }
+  .icon-hover:hover {
+    margin-left: 2px;
   }
   @keyframes icon-translate {
     0% { margin-left: 2px; }
