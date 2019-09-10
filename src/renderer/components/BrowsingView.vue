@@ -72,7 +72,7 @@ export default {
   data() {
     return {
       quit: false,
-      loadingState: false,
+      loadingState: true,
       pipType: '',
       bilibiliType: 'video',
       preload: `file:${require('path').resolve(__static, 'pip/preload.js')}`,
@@ -309,7 +309,6 @@ export default {
     },
   },
   created() {
-    this.loadingState = true;
     this.createTouchBar(false);
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [
       570,
