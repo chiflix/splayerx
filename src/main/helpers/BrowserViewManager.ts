@@ -223,7 +223,6 @@ export class BrowserViewManager implements IBrowserViewManager {
       }
     }
     currentView.webContents.addListener('media-started-playing', () => {
-      console.log(123);
       if (pausedChannel.includes('bilibili')) {
         let type = '';
         currentView.webContents

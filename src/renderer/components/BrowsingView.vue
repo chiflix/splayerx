@@ -10,7 +10,7 @@
       ref="browsingHeader"
       :show-sidebar="showSidebar"
       :title="title"
-      :is-reloading="loadingState"
+      :is-loading="loadingState"
       :web-info="webInfo"
       :handle-enter-pip="handleEnterPip"
       :handle-url-reload="handleUrlReload"
@@ -244,7 +244,7 @@ export default {
         }
       }
     },
-    loadingState(val: boolean, oldVal: boolean) {
+    loadingState(val: boolean) {
       if (val) {
         this.webInfo.hasVideo = false;
         this.createTouchBar(false);
@@ -309,6 +309,7 @@ export default {
     },
   },
   created() {
+    this.loadingState = true;
     this.createTouchBar(false);
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [
       570,
