@@ -548,6 +548,10 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   width: 5px;
   height: 7px;
 }
+.bilibiliSidebar, .iqiyiSidebar, .youtubeSidebar {
+  width: 44px;
+  height: 44px;
+}
 .showMarks, .hideMarks, .closeSearch {
   width: 18px;
   height: 18px;

@@ -3,43 +3,39 @@
     class="side-bar"
   >
     <div class="icon-box">
-      <BilibiliSidebarIcon
-        :selected="currentUrl.includes('bilibili')"
-        :url="'https://www.bilibili.com/'"
-        :mouseup-on-icon="handleSidebarIcon"
+      <div
+        @click="handleSidebarIcon('https://www.bilibili.com/')"
         :class="{ selected: currentUrl.includes('bilibili') }"
-        class="no-drag"
-      />
-      <iQiyiSidebarIcon
-        :selected="currentUrl.includes('iqiyi')"
-        :url="'https://www.iqiyi.com/'"
-        :mouseup-on-icon="handleSidebarIcon"
+        class="icon-hover"
+      >
+        <Icon type="bilibiliSidebar"/>
+      </div>
+      <div
+        @click="handleSidebarIcon('https://www.iqiyi.com/')"
         :class="{ selected: currentUrl.includes('iqiyi') }"
-        class="no-drag"
-      />
-      <YoutubeSidebarIcon
-        :selected="currentUrl.includes('youtube')"
-        :url="'https://www.youtube.com/'"
-        :mouseup-on-icon="handleSidebarIcon"
+        class="icon-hover"
+      >
+        <Icon type="iqiyiSidebar"/>
+      </div>
+      <div
+        @click="handleSidebarIcon('https://www.youtube.com/')"
         :class="{ selected: currentUrl.includes('youtube') }"
-        class="no-drag"
-      />
+        class="icon-hover"
+      >
+        <Icon type="youtubeSidebar"/>
+      </div>
     </div>
   </div>
 </template>
 <script lang="ts">
 import { mapGetters } from 'vuex';
-import BilibiliSidebarIcon from '@/components/LandingView/BilibiliSidebarIcon.vue';
-import iQiyiSidebarIcon from '@/components/LandingView/iQiyiSidebarIcon.vue';
-import YoutubeSidebarIcon from '@/components/LandingView/YoutubeSidebarIcon.vue';
+import Icon from '@/components/BaseIconContainer.vue';
 import asyncStorage from '@/helpers/asyncStorage';
 
 export default {
   name: 'Sidebar',
   components: {
-    BilibiliSidebarIcon,
-    iQiyiSidebarIcon,
-    YoutubeSidebarIcon,
+    Icon,
   },
   props: {
     showSidebar: {
@@ -90,18 +86,26 @@ export default {
     display: flex;
     flex-direction: column;
     div {
+      transition: opacity 100ms ease-in;
+      opacity: 0.7;
       width: 44px;
       height: 44px;
       margin-bottom: 12px;
     }
-    .selected::before {
-      content: '';
-      position: absolute;
-      width: 44px;
-      height: 44px;
-      border: 2px solid #fff;
-      border-radius: 100%;
-      box-sizing: border-box;
+    .icon-hover:hover {
+      opacity: 1.0;
+    }
+    .selected {
+      opacity: 1.0;
+      &::before {
+        content: '';
+        position: absolute;
+        width: 44px;
+        height: 44px;
+        border: 2px solid #fff;
+        border-radius: 100%;
+        box-sizing: border-box;
+      }
     }
   }
 }
