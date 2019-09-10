@@ -1,5 +1,8 @@
 <template>
   <div
+    :style="{
+      width: isDarwin || (!isDarwin && showSidebar) ? 'calc(100vw - 76px)' : '100vw',
+    }"
     class="header"
   >
     <browsing-control
@@ -110,7 +113,6 @@ export default {
 .header {
   position: absolute;
   right: 0;
-  width: calc(100vw - 76px);
   border-top-left-radius: 4px;
   box-sizing: border-box;
   height: 40px;
