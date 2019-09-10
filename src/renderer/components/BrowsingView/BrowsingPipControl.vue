@@ -16,8 +16,9 @@
       @mouseover="mouseover = true"
       @mouseout="mouseover = false"
       :style="{
+        opacity: hasVideo ? '1.0' : '0.3',
       }"
-      :class="switchPip ? 'translate' : ''"
+      :class="switchPip ? 'switch' : ''"
       class="down-icon no-drag"
     >
       <Icon
@@ -68,8 +69,12 @@ export default {
       updatePipMode: browsingActions.UPDATE_PIP_MODE,
     }),
     switchPipType() {
+      if (!this.hasVideo) return;
       this.updatePipMode(this.pipMode === 'Enter' ? 'Global' : 'Enter');
       this.switchPip = true;
+      setTimeout(() => {
+        this.switchPip = false;
+      }, 300);
     },
   },
 };
@@ -100,32 +105,26 @@ export default {
   .down-icon {
     width: 12px;
     height: 30px;
-    margin-right: 3px;
+    margin-left: 0;
     display: flex;
     justify-content: flex-start;
     align-items: center;
     opacity: 0.3;
-    transition: opacity 50ms linear;
+    transition: opacity 50ms linear, margin-left 100ms ease-in;
+    &:hover {
+      margin-left: 2px;
+    }
     .icon {
       margin-top: 1px;
     }
-    &:hover {
-      opacity: 1.0;
-    }
   }
-  @keyframes translate {
-    0% {
-      transfrom: translateX(0);
-    };
-    50% {
-      transfrom: translateX(10px);
-    };
-    100% {
-      transfrom: translateX(0);
-    };
+  @keyframes icon-translate {
+    0% { margin-left: 2px; }
+    50% { margin-left: 6px; }
+    100% { margin-left: 2px; }
   }
-  .translate {
-    animation: translate 100ms linear 1 normal forwards;
+  .switch {
+    animation: icon-translate 350ms linear 1;
   }
 }
 </style>
