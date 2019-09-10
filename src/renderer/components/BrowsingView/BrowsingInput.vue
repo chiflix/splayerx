@@ -1,7 +1,7 @@
 <template>
   <div
     :style="{
-        width: isDarwin ? 'calc(100% - 176px)' : 'calc(100% - 290px)',
+      width: isDarwin ? 'calc(100% - 176px)' : 'calc(100% - 290px)',
     }"
     class="search-url"
   >
@@ -22,7 +22,7 @@
       class="control-button page-refresh-icon no-drag"
     >
       <Icon
-        :type="isReloading ? 'reloadStop' : 'pageRefresh'"
+        :type="isLoading ? 'reloadStop' : 'pageRefresh'"
       />
     </div>
   </div>
@@ -41,7 +41,7 @@ export default {
       type: String,
       default: 'Splayer',
     },
-    isReloading: {
+    isLoading: {
       type: Boolean,
       required: true,
     },

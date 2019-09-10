@@ -10,7 +10,7 @@
       ref="browsingHeader"
       :show-sidebar="showSidebar"
       :title="title"
-      :is-reloading="loadingState"
+      :is-loading="loadingState"
       :web-info="webInfo"
       :handle-enter-pip="handleEnterPip"
       :handle-url-reload="handleUrlReload"
@@ -244,7 +244,7 @@ export default {
         }
       }
     },
-    loadingState(val: boolean, oldVal: boolean) {
+    loadingState(val: boolean) {
       if (val) {
         this.webInfo.hasVideo = false;
         this.createTouchBar(false);
@@ -309,6 +309,7 @@ export default {
     },
   },
   created() {
+    this.loadingState = true;
     this.createTouchBar(false);
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [
       570,
@@ -330,7 +331,6 @@ export default {
   },
   mounted() {
     this.menuService = new MenuService();
-    this.menuService.updateMenuItemEnabled('file.open', false);
 
     this.title = this.$electron.remote.getCurrentWindow()
       .getBrowserViews()[0].webContents.getTitle();
@@ -446,11 +446,10 @@ export default {
         pipMode: this.pipMode,
       })
       .finally(() => {
-        this.menuService.updateMenuItemEnabled('file.open', true);
         window.removeEventListener('beforeunload', this.beforeUnloadHandler);
         window.removeEventListener('focus', this.focusHandler);
+        this.$electron.ipcRenderer.send('remove-browser');
         if (this.backToLandingView) {
-          this.$electron.ipcRenderer.send('remove-browser');
           setTimeout(() => {
             windowRectService.uploadWindowBy(false, 'landing-view', undefined, undefined, this.winSize, this.winPos, this.isFullScreen);
           }, 200);

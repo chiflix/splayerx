@@ -28,6 +28,12 @@ export default {
       return process.platform === 'darwin';
     },
   },
+  beforeDestroy() {
+    const view = electron.remote.getCurrentWindow().getBrowserViews()[0];
+    if (view) {
+      view.webContents.removeAllListeners();
+    }
+  },
   mounted() {
     electron.ipcRenderer.on('remove-pip-listener', () => {
       const view = electron.remote.getCurrentWindow().getBrowserViews()[0];
@@ -59,6 +65,10 @@ export default {
       this.windowSize = args.windowSize;
     });
     electron.ipcRenderer.on('mouse-left-up', () => {
+      this.offset = null;
+      this.windowSize = null;
+    });
+    window.addEventListener('blur', () => {
       this.offset = null;
       this.windowSize = null;
     });

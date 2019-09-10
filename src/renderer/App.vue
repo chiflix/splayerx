@@ -71,6 +71,7 @@ export default {
       else this.transitionMode = '';
       if (to.name !== 'browsing-view' && !(to.name === 'landing-view' && from.name === 'browsing-view')) this.showSidebar = false;
       if (from.name === 'browsing-view' && to.name === 'landing-view') this.currentUrl = '';
+      if (from.name === 'browsing-view' && to.name === 'playing-view') this.currentUrl = '';
     },
     showSidebar(val: boolean) {
       ipcRenderer.send('update-sidebar', val);
