@@ -77,7 +77,7 @@ export default {
       this.switchPip = true;
       setTimeout(() => {
         this.switchPip = false;
-      }, 300);
+      }, 400);
     },
   },
 };
@@ -106,28 +106,29 @@ export default {
     background-color: #ECEEF0;
   }
   .down-icon {
-    width: 12px;
+    width: 28px;
     height: 30px;
-    margin-left: 0;
+    padding-left: 0;
     display: flex;
     justify-content: flex-start;
     align-items: center;
     opacity: 0.3;
-    transition: opacity 50ms linear, margin-left 100ms ease-in;
+    transition: opacity 50ms linear, padding-left 100ms ease-in;
     .icon {
+      width: 12px;
       margin-top: 1px;
     }
   }
   .icon-hover:hover {
-    margin-left: 2px;
+    padding-left: 2px;
   }
   @keyframes icon-translate {
-    0% { margin-left: 2px; }
-    50% { margin-left: 6px; }
-    100% { margin-left: 2px; }
+    0% { padding-left: 2px; }
+    50% { padding-left: 6px; }
+    100% { padding-left: 2px; }
   }
   .switch {
-    animation: icon-translate 350ms linear 1;
+    animation: icon-translate 400ms ease-out 1;
   }
 }
 </style>
