@@ -1,4 +1,7 @@
-import { DBSchema, IDBPDatabase, openDB } from 'idb';
+import {
+  DBSchema, IDBPDatabase,
+  openDB, deleteDB,
+} from 'idb';
 import {
   unionWith, uniqWith, remove, isEqual, some, pick, keyBy, mergeWith, isFinite,
 } from 'lodash';
@@ -46,28 +49,29 @@ interface IUpdateSubtitleItemOptions {
 export class SubtitleDataBase {
   private db: IDBPDatabase<IDataDBV5>;
 
+  private upgradeDb(db: IDBPDatabase<IDataDBV5>, version: number) {
+    if (version > 0 && version < 5) {
+      db.deleteObjectStore('subtitles');
+    }
+    if (version === 3) {
+      db.deleteObjectStore('preferences' as any); // eslint-disable-line @typescript-eslint/no-explicit-any
+    }
+    if (version >= 4) {
+      db.deleteObjectStore('subtitle-preferences');
+    }
+
+    db.createObjectStore('subtitles', { keyPath: 'hash' });
+    db.createObjectStore('subtitle-preferences', { keyPath: 'mediaHash' });
+  }
+
   private async getDb() {
     if (!this.db) {
-      this.db = await openDB<IDataDBV5>(
-        DATADB_NAME,
-        5,
-        {
-          async upgrade(db, version) {
-            if (version > 0 && version < 5) {
-              db.deleteObjectStore('subtitles');
-            }
-            if (version === 3) {
-              db.deleteObjectStore('preferences' as any); // eslint-disable-line @typescript-eslint/no-explicit-any
-            }
-            if (version === 4) {
-              db.deleteObjectStore('subtitle-preferences');
-            }
-
-            db.createObjectStore('subtitles', { keyPath: 'hash' });
-            db.createObjectStore('subtitle-preferences', { keyPath: 'mediaHash' });
-          },
-        },
-      );
+      try {
+        this.db = await openDB<IDataDBV5>(DATADB_NAME, 5, { upgrade: this.upgradeDb });
+      } catch (error) {
+        await deleteDB(DATADB_NAME);
+        this.db = await openDB<IDataDBV5>(DATADB_NAME, 5, { upgrade: this.upgradeDb });
+      }
     }
     return this.db;
   }

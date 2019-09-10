@@ -91,6 +91,7 @@ export default class PlaylistService extends EventEmitter implements IPlaylistRe
       record = await info.getValueByKey('media-item', videoId);
     } else {
       const records = await info.getAllValueByIndex('media-item', 'source', '');
+      // @ts-ignore
       record = records.find(record => record.path === this.path);
     }
     if (record) {
