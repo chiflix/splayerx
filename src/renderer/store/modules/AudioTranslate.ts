@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-05 16:03:32
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-08-20 17:37:01
+ * @Last Modified time: 2019-09-06 16:17:46
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @ts-ignore
@@ -285,8 +285,10 @@ const actions = {
     }
     commit(m.AUDIO_TRANSLATE_SAVE_KEY, `${getters.mediaHash}`);
     audioTranslateService.stop();
+    const audioInfo = getters.audioStreams[getters.currentAudioTrackId - 2];
     const grab = audioTranslateService.startJob({
       audioId: getters.currentAudioTrackId,
+      audioInfo,
       mediaHash: getters.mediaHash,
       videoSrc: getters.originSrc,
       audioLanguageCode,

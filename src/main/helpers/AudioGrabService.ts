@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-22 17:18:34
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-08-20 17:47:35
+ * @Last Modified time: 2019-09-10 11:46:29
  */
 
 import { EventEmitter } from 'events';
@@ -19,10 +19,12 @@ import {
   StreamingTranslationRequest,
   StreamingTranslationRequestConfig,
 } from 'sagi-api/translation/v1/translation_pb';
+import { IAudioStream } from '@/plugins/mediaTasks/mediaInfoQueue';
 
 type JobData = {
   videoSrc: string,
   audioId: number,
+  audioInfo: IAudioStream,
   mediaHash: string,
   audioLanguageCode: string,
   targetLanguageCode: string,
@@ -45,6 +47,8 @@ export default class AudioGrabService extends EventEmitter {
   private videoSrc: string;
 
   private audioId: number;
+
+  private audioInfo: IAudioStream;
 
   private pts: string;
 
@@ -81,6 +85,7 @@ export default class AudioGrabService extends EventEmitter {
     // 计算audioID
     this.videoSrc = data.videoSrc;
     this.audioId = data.audioId;
+    this.audioInfo = data.audioInfo;
     // 保存本次任务信息
     this.mediaHash = data.mediaHash;
     this.videoSrc = data.videoSrc;
@@ -162,7 +167,7 @@ export default class AudioGrabService extends EventEmitter {
 
   private write(framebuf: Buffer) {
     try {
-      // fs.appendFileSync('/Users/harry/Desktop/6.caf', framebuf);
+      // fs.appendFileSync('/Users/harry/Desktop/6.pcm', framebuf);
       if (this.streamClient) {
         const request = new StreamingTranslationRequest();
         request.setAudioContent(framebuf);
@@ -248,11 +253,30 @@ export default class AudioGrabService extends EventEmitter {
     });
   }
 
+  private getAudioChannel(audioInfo: IAudioStream): number {
+    if (!audioInfo || !audioInfo.channels) return 0;
+    // 5.1 ac3/eac3/aac/dts 左前、右前、中置、左后、右后、重低音
+    if (audioInfo.channels === 6
+      && (audioInfo.codecName === 'ac3'
+        || audioInfo.codecName === 'eac3'
+        || audioInfo.codecName === 'aac'
+        || audioInfo.codecName === 'dts')) return 6;
+    // 6.1 truehd 左前、右前、前中置、左后、右后、后中置、重低音
+    // if (audioInfo.channels === 7
+    //   && (audioInfo.codecName === 'truehd')) return 4;
+    // 7.1 dts 左前、右前、中置、左中、右中、左后、右后、重低音
+    if (audioInfo.channels === 8
+      && (audioInfo.codecName === 'dts')) return 3;
+    // if (audioInfo.channels === 8
+    //   && (audioInfo.codecName === 'truehd')) return 4;
+    return 0;
+  }
+
   public next() {
     this.pts = '0';
     this.grabTime = 0;
     this.status = 0;
-    this.audioChannel = 0;
+    this.audioChannel = this.getAudioChannel(this.audioInfo);
     this.grabAudio();
     this.streamClient.once('data', this.grpcCallBack.bind(this));
   }

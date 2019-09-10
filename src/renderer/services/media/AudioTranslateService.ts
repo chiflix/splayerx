@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-06-20 18:03:14
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-08-06 11:45:20
+ * @Last Modified time: 2019-09-06 16:18:49
  */
 
 // @ts-ignore
@@ -17,9 +17,11 @@ import { AITaskInfo } from '@/interfaces/IMediaStorable';
 import sagi from '@/libs/sagi';
 import MediaStorageService, { mediaStorageService } from '../storage/MediaStorageService';
 import { TranscriptInfo } from '../subtitle';
+import { Stream } from '@/plugins/mediaTasks/mediaInfoQueue';
 
 type JobData = {
   audioId: string,
+  audioInfo: Stream | undefined,
   mediaHash: string,
   videoSrc: string,
   audioLanguageCode: string,
@@ -103,6 +105,7 @@ class AudioTranslateService extends EventEmitter {
       audioLanguageCode: this.audioLanguageCode,
       targetLanguageCode: this.targetLanguageCode,
       audioId: this.audioId,
+      audioInfo: data.audioInfo,
       uuid: Vue.axios.defaults.headers.common['X-Application-Token'],
       agent: navigator.userAgent,
     });

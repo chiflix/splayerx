@@ -20,13 +20,20 @@
 
 <script lang="ts">
 import { mapActions, mapGetters } from 'vuex';
-import { Subtitle as subtitleActions, SubtitleManager as smActions, AudioTranslate as atActions } from '@/store/actionTypes';
+import {
+  Subtitle as subtitleActions,
+  SubtitleManager as smActions,
+  AudioTranslate as atActions,
+  Audio as audioActions,
+} from '@/store/actionTypes';
 import SubtitleRenderer from '@/components/Subtitle/SubtitleRenderer.vue';
 import VideoCanvas from '@/containers/VideoCanvas.vue';
 import TheVideoController from '@/containers/TheVideoController.vue';
+import { Stream } from '@/plugins/mediaTasks/mediaInfoQueue';
 import { AudioTranslateBubbleType } from '@/store/modules/AudioTranslate';
 import { videodata } from '../store/video';
 import { getStreams } from '../plugins/mediaTasks';
+import { log } from '../libs/Log';
 
 export default {
   name: 'PlayingView',
@@ -76,7 +83,12 @@ export default {
       handler: function (newVal: string) {
         this.resetManager();
         if (newVal) {
-          getStreams(newVal);
+          getStreams(newVal).then((res: Stream[]) => {
+            this.updateAudioStreams(res);
+            log.debug('PlayingView/getStreams', res);
+          }).catch((err: Error) => {
+            log.error('PlayingView/getStreams', err);
+          });
           this.initializeManager();
         }
       },
@@ -112,6 +124,7 @@ export default {
       getCues: smActions.getCues,
       updatePlayTime: smActions.updatePlayedTime,
       hideTranslateBubble: atActions.AUDIO_TRANSLATE_HIDE_BUBBLE,
+      updateAudioStreams: audioActions.UPDATE_AUDIO_STREAMS,
     }),
     // Compute UI states
     // When the video is playing the ontick is triggered by ontimeupdate of Video tag,
