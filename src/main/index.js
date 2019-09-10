@@ -19,6 +19,7 @@ import { mouse } from './helpers/mouse';
 import MenuService from './menu/MenuService';
 import registerMediaTasks from './helpers/mediaTasksPlugin';
 import { BrowserViewManager } from './helpers/BrowserViewManager';
+import InjectJSManager from '../../src/shared/pip/InjectJSManager';
 
 // requestSingleInstanceLock is not going to work for mas
 // https://github.com/electron-userland/electron-packager/issues/923
@@ -565,7 +566,7 @@ function registerMainWindowEvent(mainWindow) {
     }, 0);
   });
   ipcMain.on('update-danmu-state', (evt, val) => {
-    pipControlView.webContents.executeJavaScript(`document.querySelector(".danmu").src = ${val} ? "assets/danmu-default-icon.svg" : "assets/noDanmu-default-icon.svg"`);
+    pipControlView.webContents.executeJavaScript(InjectJSManager.initBarrageIcon(val));
   });
   ipcMain.on('pip', () => {
     mainWindow.send('handle-exit-pip');
@@ -578,13 +579,14 @@ function registerMainWindowEvent(mainWindow) {
   });
   ipcMain.on('mousemove', () => {
     if (browsingWindow && browsingWindow.isFocused()) {
-      pipControlView.webContents.executeJavaScript('document.querySelector(".pip-buttons").style.display = "flex";');
+      pipControlView.webContents.executeJavaScript(InjectJSManager.updatePipControlState(true));
       if (pipTimer) {
         clearTimeout(pipTimer);
       }
       pipTimer = setTimeout(() => {
         if (pipControlView && !pipControlView.isDestroyed()) {
-          pipControlView.webContents.executeJavaScript('document.querySelector(".pip-buttons").style.display = "none";');
+          pipControlView.webContents
+            .executeJavaScript(InjectJSManager.updatePipControlState(false));
         }
       }, 3000);
     }
@@ -600,7 +602,7 @@ function registerMainWindowEvent(mainWindow) {
     }
     pipTimer = setTimeout(() => {
       if (pipControlView && !pipControlView.isDestroyed()) {
-        pipControlView.webContents.executeJavaScript('document.querySelector(".pip-buttons").style.display = "none";');
+        pipControlView.webContents.executeJavaScript(InjectJSManager.updatePipControlState(false));
       }
     }, 3000);
   });
@@ -609,16 +611,16 @@ function registerMainWindowEvent(mainWindow) {
       if (pipTimer) {
         clearTimeout(pipTimer);
       }
-      pipControlView.webContents.executeJavaScript('document.querySelector(".pip-buttons").style.display = "none";');
+      pipControlView.webContents.executeJavaScript(InjectJSManager.updatePipControlState(false));
     }
   });
   ipcMain.on('maximizable', (evt, val) => {
     if (val) {
-      titlebarView.webContents.executeJavaScript('document.querySelector(".titlebarMax").style.display = "block";'
-        + 'document.querySelector(".titlebarFull").style.display = "none"');
+      titlebarView.webContents.executeJavaScript(InjectJSManager.updateTitlebarState('.titlebarMax', true)
+        + InjectJSManager.updateTitlebarState('.titlebarFull', false));
     } else {
-      titlebarView.webContents.executeJavaScript('document.querySelector(".titlebarMax").style.display = "none";'
-        + 'document.querySelector(".titlebarFull").style.display = "block";');
+      titlebarView.webContents.executeJavaScript(InjectJSManager.updateTitlebarState('.titlebarMax', false)
+        + InjectJSManager.updateTitlebarState('.titlebarFull', true));
     }
   });
   ipcMain.on('update-mouse-info', (evt, args) => {
@@ -636,29 +638,11 @@ function registerMainWindowEvent(mainWindow) {
         break;
       case 'full':
         browsingWindow.setFullScreen(true);
-        if (process.platform === 'darwin') {
-          titlebarView.webContents.executeJavaScript('document.querySelector(".titlebarMin").style.pointerEvents = "none";'
-            + 'document.querySelector(".titlebarMin").style.opacity = "0.25";'
-            + 'document.querySelector(".titlebarFull").style.display = "none";'
-            + 'document.querySelector(".titlebarRecover").style.display = "block";');
-        } else {
-          titlebarView.webContents.executeJavaScript('document.querySelector(".titlebarMax").style.display = "none";'
-            + 'document.querySelector(".titlebarUnMax").style.display = "none";'
-            + 'document.querySelector(".titlebarRecover").style.display = "block";');
-        }
+        titlebarView.webContents.executeJavaScript(InjectJSManager.updateFullScreenIcon(true));
         break;
       case 'recover':
         browsingWindow.setFullScreen(false);
-        if (process.platform === 'darwin') {
-          titlebarView.webContents.executeJavaScript('document.querySelector(".titlebarMin").style.pointerEvents = "";'
-            + 'document.querySelector(".titlebarMin").style.opacity = "1";'
-            + 'document.querySelector(".titlebarFull").style.display = "";'
-            + 'document.querySelector(".titlebarRecover").style.display = "none";');
-        } else {
-          titlebarView.webContents.executeJavaScript('document.querySelector(".titlebarMax").style.display = "block";'
-            + 'document.querySelector(".titlebarUnMax").style.display = "none";'
-            + 'document.querySelector(".titlebarRecover").style.display = "none";');
-        }
+        titlebarView.webContents.executeJavaScript(InjectJSManager.updateFullScreenIcon(false));
         break;
       case 'max':
         if (browsingWindow.isMaximized()) {
@@ -668,9 +652,7 @@ function registerMainWindowEvent(mainWindow) {
           browsingWindow.maximize();
           isBrowsingWindowMax = true;
           if (process.platform === 'win32') {
-            titlebarView.webContents.executeJavaScript('document.querySelector(".titlebarMax").style.display = "none";'
-              + 'document.querySelector(".titlebarUnMax").style.display = "block";'
-              + 'document.querySelector(".titlebarRecover").style.display = "none";');
+            titlebarView.webContents.executeJavaScript(InjectJSManager.updateWinMaxIcon(true));
           }
         }
         break;
@@ -678,9 +660,7 @@ function registerMainWindowEvent(mainWindow) {
         browsingWindow.unmaximize();
         isBrowsingWindowMax = false;
         if (process.platform === 'win32') {
-          titlebarView.webContents.executeJavaScript('document.querySelector(".titlebarMax").style.display = "block";'
-            + 'document.querySelector(".titlebarUnMax").style.display = "none";'
-            + 'document.querySelector(".titlebarRecover").style.display = "none";');
+          titlebarView.webContents.executeJavaScript(InjectJSManager.updateWinMaxIcon(false));
         }
         break;
       default:
@@ -731,12 +711,8 @@ function registerMainWindowEvent(mainWindow) {
       canGoBack: mainBrowser.canBack,
       canGoForward: mainBrowser.canForward,
     });
-    pipControlView.webContents.executeJavaScript(
-      `const danmu = document.querySelector(".danmu");
-      danmu.src = ${args.barrageOpen} ? "assets/danmu-default-icon.svg" : "assets/noDanmu-default-icon.svg";
-      danmu.style.opacity = ${args.opacity};
-      danmu.style.cursor = ${args.opacity} === 1 ? "cursor" : "default"`,
-    );
+    pipControlView.webContents
+      .executeJavaScript(InjectJSManager.updateBarrageState(args.barrageOpen, args.opacity));
     menuService.updateFocusedWindow(false, mainWindow && mainWindow.isVisible());
     browsingWindow.focus();
   });
@@ -793,12 +769,8 @@ function registerMainWindowEvent(mainWindow) {
       canGoBack: mainBrowser.canBack,
       canGoForward: mainBrowser.canForward,
     });
-    pipControlView.webContents.executeJavaScript(
-      `const danmu = document.querySelector(".danmu");
-      danmu.src = ${args.barrageOpen} ? "assets/danmu-default-icon.svg" : "assets/noDanmu-default-icon.svg";
-      danmu.style.opacity = ${args.opacity};
-      danmu.style.cursor = ${args.opacity} === 1 ? "cursor" : "default"`,
-    );
+    pipControlView.webContents
+      .executeJavaScript(InjectJSManager.updateBarrageState(args.barrageOpen, args.opacity));
     menuService.updateFocusedWindow(false, mainWindow && mainWindow.isVisible());
     browsingWindow.focus();
   });
@@ -860,17 +832,13 @@ function registerMainWindowEvent(mainWindow) {
         browsingWindow.maximize();
         isBrowsingWindowMax = true;
         if (process.platform === 'win32') {
-          titlebarView.webContents.executeJavaScript('document.querySelector(".titlebarMax").style.display = "none";'
-            + 'document.querySelector(".titlebarUnMax").style.display = "block";'
-            + 'document.querySelector(".titlebarRecover").style.display = "none";');
+          titlebarView.webContents.executeJavaScript(InjectJSManager.updateWinMaxIcon(true));
         }
       } else {
         browsingWindow.unmaximize();
         isBrowsingWindowMax = false;
         if (process.platform === 'win32') {
-          titlebarView.webContents.executeJavaScript('document.querySelector(".titlebarMax").style.display = "block";'
-            + 'document.querySelector(".titlebarUnMax").style.display = "none";'
-            + 'document.querySelector(".titlebarRecover").style.display = "none";');
+          titlebarView.webContents.executeJavaScript(InjectJSManager.updateWinMaxIcon(false));
         }
       }
     }
@@ -879,7 +847,8 @@ function registerMainWindowEvent(mainWindow) {
     routeName = route;
   });
   ipcMain.on('key-events', (e, keyCode) => {
-    browsingWindow.getBrowserViews()[0].webContents.executeJavaScript(`var event = new KeyboardEvent("keydown", { keyCode: ${keyCode} });window.dispatchEvent(event)`);
+    browsingWindow.getBrowserViews()[0].webContents
+      .executeJavaScript(InjectJSManager.emitKeydownEvent(keyCode));
   });
   ipcMain.on('drop-subtitle', (event, args) => {
     if (!mainWindow || mainWindow.webContents.isDestroyed()) return;

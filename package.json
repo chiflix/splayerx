@@ -8,7 +8,7 @@
   "license": "GPL-3.0-or-later",
   "main": "./dist/electron/main.js",
   "engines": {
-    "node": ">=11.0.0"
+    "node": "^12"
   },
   "scripts": {
     "build": "node .electron-vue/build.js && electron-builder --p never",

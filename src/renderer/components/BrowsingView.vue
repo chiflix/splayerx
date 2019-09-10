@@ -31,6 +31,7 @@
       v-show="maskToShow"
     />
     <div
+      v-show="showProgress"
       :style="{
         width: `${progress}%`,
       }"
@@ -52,16 +53,9 @@ import { Browsing as browsingActions } from '@/store/actionTypes';
 import BrowsingHeader from '@/components/BrowsingView/BrowsingHeader.vue';
 import asyncStorage from '@/helpers/asyncStorage';
 import NotificationBubble from '@/components/NotificationBubble.vue';
-import {
-  bilibili,
-  bilibiliFindType,
-  bilibiliBarrageAdapt,
-} from '../../shared/pip/bilibili';
-import youtube from '../../shared/pip/youtube';
-import iqiyi, { iqiyiBarrageAdapt } from '../../shared/pip/iqiyi';
-import globalPip from '../../shared/pip/others';
 import { getValidVideoRegex, getValidSubtitleRegex } from '../../shared/utils';
 import MenuService from '@/services/menu/MenuService';
+import InjectJSManager from '../../shared/pip/InjectJSManager';
 
 export default {
   name: 'BrowsingView',
@@ -84,10 +78,6 @@ export default {
       preload: `file:${require('path').resolve(__static, 'pip/preload.js')}`,
       maskToShow: false,
       dropFiles: [],
-      calculateVideoNum:
-        'var iframe = document.querySelector("iframe");if (iframe && iframe.contentDocument) {document.getElementsByTagName("video").length + iframe.contentDocument.getElementsByTagName("video").length} else {document.getElementsByTagName("video").length}',
-      getVideoStyle:
-        'getComputedStyle(document.querySelector("video") || document.querySelector("iframe").contentDocument.querySelector("video"))',
       pipBtnsKeepShow: false,
       asyncTasksDone: false,
       headerToShow: true,
@@ -107,6 +97,8 @@ export default {
       isGlobal: false,
       startLoading: false,
       title: 'Splayer',
+      progress: 0,
+      showProgress: false,
       readyState: '',
       oauthRegex: [
         /^https:\/\/cnpassport.youku.com\//i,
@@ -146,32 +138,23 @@ export default {
     isDarwin() {
       return process.platform === 'darwin';
     },
+    youtubePip() {
+      return InjectJSManager.getPipByChannel('youtube');
+    },
     iqiyiPip() {
-      return iqiyi(this.barrageOpen, this.pipSize);
+      return InjectJSManager.getPipByChannel('iqiyi', this.barrageOpen, this.pipSize);
     },
     iqiyiBarrage() {
-      return iqiyiBarrageAdapt(this.barrageOpen);
+      return InjectJSManager.getPipBarrage('iqiyi', this.barrageOpen);
     },
     bilibiliPip() {
-      return bilibili(this.bilibiliType, this.barrageOpen, this.pipSize);
+      return InjectJSManager.getPipByChannel('bilibili', this.bilibiliType, this.barrageOpen, this.pipSize);
     },
     bilibiliBarrage() {
-      return bilibiliBarrageAdapt(this.bilibiliType, this.barrageOpen);
+      return InjectJSManager.getPipBarrage('bilibili', this.barrageOpen, this.bilibiliType);
     },
     othersPip() {
-      return globalPip(this.pipSize);
-    },
-    progress() {
-      switch (this.readyState) {
-        case 'loading':
-          return 30;
-        case 'interactive':
-          return 70;
-        case 'complete':
-          return 100;
-        default:
-          return 0;
-      }
+      return InjectJSManager.getPipByChannel('others', this.pipSize);
     },
     hasVideo() {
       return this.webInfo.hasVideo;
@@ -260,12 +243,17 @@ export default {
         }
       }
     },
-    loadingState(val: boolean) {
+    loadingState(val: boolean, oldVal: boolean) {
       if (val) {
         this.webInfo.hasVideo = false;
         this.createTouchBar(false);
+        this.showProgress = true;
+        this.progress = 70;
       } else {
+        this.progress = 100;
         setTimeout(() => {
+          this.showProgress = false;
+          this.progress = 0;
           const loadUrl = this.$electron.remote
             .getCurrentWindow()
             .getBrowserViews()[0]
@@ -282,7 +270,7 @@ export default {
             .getCurrentWindow()
             .getBrowserViews()[0]
             .webContents.executeJavaScript(
-              this.calculateVideoNum,
+              InjectJSManager.calcVideoNum(),
               (r: number) => {
                 this.webInfo.hasVideo = channel === 'youtube.com' && !getVideoId(loadUrl).id
                   ? false
@@ -426,7 +414,7 @@ export default {
             .getCurrentWindow()
             .getBrowserViews()[0]
             .webContents.executeJavaScript(
-              this.calculateVideoNum,
+              InjectJSManager.calcVideoNum(),
               (r: number) => {
                 this.webInfo.hasVideo = channel === 'youtube.com' && !getVideoId(loadUrl).id
                   ? false
@@ -488,7 +476,7 @@ export default {
       }
       const view = this.$electron.remote.getCurrentWindow().getBrowserViews()[0];
       if (view) {
-        view.webContents.executeJavaScript(this.calculateVideoNum, (r: number) => {
+        view.webContents.executeJavaScript(InjectJSManager.calcVideoNum(), (r: number) => {
           this.webInfo.hasVideo = channel === 'youtube.com' && !getVideoId(loadUrl).id ? false : !!r;
         });
       }
@@ -818,7 +806,7 @@ export default {
         || (this.oldDisplayId !== newDisplayId && this.oldDisplayId !== -1);
       this.oldDisplayId = newDisplayId;
       this.currentMainBrowserView()
-        .webContents.executeJavaScript(this.getVideoStyle)
+        .webContents.executeJavaScript(InjectJSManager.getVideoStyle())
         .then((result: CSSStyleDeclaration) => {
           const videoAspectRatio = parseFloat(result.width as string)
             / parseFloat(result.height as string);
@@ -976,7 +964,7 @@ export default {
     },
     youtubeAdapter() {
       this.currentMainBrowserView()
-        .webContents.executeJavaScript(youtube.adapter)
+        .webContents.executeJavaScript(this.youtubePip.adapter)
         .then(() => {
           this.adaptFinished = true;
         });
@@ -985,11 +973,11 @@ export default {
       this.$electron.remote
         .getCurrentWindow()
         .getBrowserViews()[0]
-        .webContents.executeJavaScript(youtube.recover);
+        .webContents.executeJavaScript(this.youtubePip.recover);
     },
     bilibiliAdapter() {
       this.currentMainBrowserView()
-        .webContents.executeJavaScript(bilibiliFindType)
+        .webContents.executeJavaScript(InjectJSManager.bilibiliFindType())
         .then((r: (HTMLElement | null)[]) => {
           this.bilibiliType = [
             'bangumi',
@@ -1073,7 +1061,9 @@ export default {
   top: 38px;
   z-index: 6;
   height: 2px;
-  transition: width 100ms linear;
+  transition-property: width;
+  transition-timing-function: ease-out;
+  transition-duration: 500ms;
   background-color: #FF672D;
 }
 .loading-animation {
