@@ -140,22 +140,18 @@ export default {
       return process.platform === 'darwin';
     },
     youtubePip() {
-      return InjectJSManager.getPipByChannel('youtube');
+      return InjectJSManager.getPipByChannel({ channel: 'youtube' });
     },
     iqiyiPip() {
-      return InjectJSManager.getPipByChannel('iqiyi', this.barrageOpen, this.pipSize);
-    },
-    iqiyiBarrage() {
-      return InjectJSManager.getPipBarrage('iqiyi', this.barrageOpen);
+      return InjectJSManager.getPipByChannel({ channel: 'iqiyi', barrageState: this.barrageOpen, winSize: this.pipSize });
     },
     bilibiliPip() {
-      return InjectJSManager.getPipByChannel('bilibili', this.bilibiliType, this.barrageOpen, this.pipSize);
-    },
-    bilibiliBarrage() {
-      return InjectJSManager.getPipBarrage('bilibili', this.barrageOpen, this.bilibiliType);
+      return InjectJSManager.getPipByChannel({
+        channel: 'bilibili', type: this.bilibiliType, barrageState: this.barrageOpen, winSize: this.pipSize,
+      });
     },
     othersPip() {
-      return InjectJSManager.getPipByChannel('others', this.pipSize);
+      return InjectJSManager.getPipByChannel({ channel: 'others', winSize: this.pipSize });
     },
     hasVideo() {
       return this.webInfo.hasVideo;
@@ -863,13 +859,13 @@ export default {
         this.updateBarrageOpen(!this.barrageOpen);
         this.$electron.ipcRenderer.send(
           'handle-danmu-display',
-          this.iqiyiBarrage,
+          this.iqiyiPip.iqiyiBarrageAdapt(this.barrageOpen),
         );
       } else if (this.pipType === 'bilibili') {
         this.updateBarrageOpen(!this.barrageOpen);
         this.$electron.ipcRenderer.send(
           'handle-danmu-display',
-          this.bilibiliBarrage,
+          this.bilibiliPip.bilibiliBarrageAdapt(this.bilibiliType, this.barrageOpen),
         );
       }
     },

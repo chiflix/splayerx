@@ -1,9 +1,5 @@
-import youtube from './youtube';
-import {
-  bilibili, bilibiliBarrageAdapt, bilibiliFindType, bilibiliVideoPause,
-} from './bilibili';
-import iqiyi, { iqiyiBarrageAdapt } from './iqiyi';
-import globalPip from './others';
+import { bilibiliFindType, bilibiliVideoPause } from './Bilibili';
+import PipFactory from './PipFactory';
 
 class InjectJSManager implements IInjectJSManager {
   private readonly calcVideoNumCode: string;
@@ -23,31 +19,9 @@ class InjectJSManager implements IInjectJSManager {
     this.pauseNormalVideo = 'setTimeout(() => { document.querySelector("video").pause(); }, 100)';
   }
 
-  public getPipByChannel(channel: string, type?: string,
-    barrageState?: boolean, winSize?: number[]) {
-    switch (channel) {
-      case 'youtube':
-        return youtube;
-      case 'bilibili':
-        return bilibili(type, barrageState, winSize);
-      case 'iqiyi':
-        return iqiyi(barrageState, winSize);
-      case 'others':
-        return globalPip(winSize);
-      default:
-        return globalPip(winSize);
-    }
-  }
-
-  public getPipBarrage(channel: string, barrageState: boolean, type?: string) {
-    switch (channel) {
-      case 'bilibili':
-        return bilibiliBarrageAdapt(type, barrageState);
-      case 'iqiyi':
-        return iqiyiBarrageAdapt(barrageState);
-      default:
-        return '';
-    }
+  public getPipByChannel(info: { channel: string, type?: string,
+    barrageState?: boolean, winSize?: number[] }) {
+    return PipFactory.getPipByChannel(info);
   }
 
   public initBarrageIcon(barrageState: boolean) {
@@ -61,7 +35,7 @@ class InjectJSManager implements IInjectJSManager {
   public pauseVideo(channel: string, type?: string): string {
     switch (channel) {
       case 'bilibili':
-        return bilibiliVideoPause(type);
+        return bilibiliVideoPause(type as string);
       case 'normal':
         return this.pauseNormalVideo;
       default:
@@ -118,9 +92,9 @@ class InjectJSManager implements IInjectJSManager {
 export interface IInjectJSManager {
   calcVideoNum(): string
   getVideoStyle(): string
-  getPipByChannel(channel: string, type?: string, barrageState?: boolean, winSize?: number[]):
-  { adapter: string, watcher?: string, recover: string }
-  getPipBarrage(channel: string, barrageState: boolean, type?: string): string
+  getPipByChannel(info: { channel: string, type?: string,
+    barrageState?: boolean, winSize?: number[] }):
+  { adapter: string, watcher: string, recover: string }
   bilibiliFindType(): string
   pauseVideo(channel: string, type?: string): string
   initBarrageIcon(barrageState: boolean): string
