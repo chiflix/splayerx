@@ -1,20 +1,19 @@
 import infoDB, { InfoDB } from '@/helpers/infoDB';
-import dataDB, { DataDb } from '@/helpers/dataDb';
 import {
   IDB, MediaItem, PlaylistItem, SubtitleDataItem, RawMediaItem, RawPlaylistItem,
 } from '@/interfaces/IDB';
 
 export default class DataBase implements IDB {
-  private db: InfoDB | DataDb;
+  private db: InfoDB;
 
-  public constructor(db: InfoDB | DataDb) {
+  public constructor(db: InfoDB) {
     this.db = db;
   }
 
   public async add(
     objectStore: string,
     data: RawMediaItem | RawPlaylistItem | SubtitleDataItem,
-  ): Promise<number> {
+  ): Promise<IDBValidKey> {
     return this.db.add(objectStore, data);
   }
 
@@ -22,7 +21,7 @@ export default class DataBase implements IDB {
     objectStore: string,
     key: number,
     data: PlaylistItem | MediaItem | SubtitleDataItem,
-  ): Promise<number> {
+  ): Promise<IDBValidKey> {
     if (!key) throw new Error('KeyPath requied!');
     return this.db.update(objectStore, data, key);
   }
@@ -62,4 +61,3 @@ export default class DataBase implements IDB {
 }
 
 export const info = new DataBase(infoDB);
-export const data = new DataBase(dataDB);

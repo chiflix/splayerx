@@ -79,7 +79,7 @@ export interface IDB {
    * @param  {RawMediaItem|RawPlaylistItem} data
    * 向 database -> objectStore 中添加data，返回key值
    */
-  add(objectStore: string, data: RawMediaItem | RawPlaylistItem): Promise<number>
+  add(objectStore: string, data: RawMediaItem | RawPlaylistItem): Promise<IDBValidKey>
   /**
    * @param  {string} database
    * @param  {string} objectStore
@@ -87,7 +87,7 @@ export interface IDB {
    * @param  {PlaylistItem|MediaItem} data
    * 向 database -> objectStore 中更新主键为key的数据，返回key值
    */
-  update(objectStore: string, key: number, data: PlaylistItem | MediaItem): Promise<number>
+  update(objectStore: string, key: number, data: PlaylistItem | MediaItem): Promise<IDBValidKey>
   /**
    * @param  {string} database
    * @param  {string} objectStore
