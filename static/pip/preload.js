@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   window.addEventListener('dragover', (evt) => {
     evt.preventDefault();
-    evt.dataTransfer.dropEffect = process.platform === 'darwin' ? 'copy' : '';
+    // evt.dataTransfer.dropEffect = process.platform === 'darwin' ? 'copy' : '';
     sendToHost('dragover', { dragover: true });
   });
   window.addEventListener('dragleave', (evt) => {

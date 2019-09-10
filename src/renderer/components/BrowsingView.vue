@@ -10,7 +10,7 @@
       ref="browsingHeader"
       :show-sidebar="showSidebar"
       :title="title"
-      :is-reloading="loadingState"
+      :is-loading="loadingState"
       :web-info="webInfo"
       :handle-enter-pip="handleEnterPip"
       :handle-url-reload="handleUrlReload"
@@ -72,7 +72,7 @@ export default {
   data() {
     return {
       quit: false,
-      loadingState: false,
+      loadingState: true,
       pipType: '',
       bilibiliType: 'video',
       preload: `file:${require('path').resolve(__static, 'pip/preload.js')}`,
@@ -84,6 +84,7 @@ export default {
       acceleratorAvailable: true,
       oldDisplayId: -1,
       backToLandingView: false,
+      // touchbar buttons
       sidebarButton: null,
       backwardButton: null,
       forwardButton: null,
@@ -243,13 +244,19 @@ export default {
         }
       }
     },
-    loadingState(val: boolean, oldVal: boolean) {
+    loadingState(val: boolean) {
       if (val) {
         this.webInfo.hasVideo = false;
         this.createTouchBar(false);
+        if (this.refreshButton) {
+          this.refreshButton.icon = this.createIcon('touchBar/stopRefresh.png');
+        }
         this.showProgress = true;
         this.progress = 70;
       } else {
+        if (this.refreshButton) {
+          this.refreshButton.icon = this.createIcon('touchBar/refresh.png');
+        }
         this.progress = 100;
         setTimeout(() => {
           this.showProgress = false;
@@ -323,7 +330,6 @@ export default {
   },
   mounted() {
     this.menuService = new MenuService();
-    this.menuService.updateMenuItemEnabled('file.open', false);
 
     this.title = this.$electron.remote.getCurrentWindow()
       .getBrowserViews()[0].webContents.getTitle();
@@ -439,11 +445,10 @@ export default {
         pipMode: this.pipMode,
       })
       .finally(() => {
-        this.menuService.updateMenuItemEnabled('file.open', true);
         window.removeEventListener('beforeunload', this.beforeUnloadHandler);
         window.removeEventListener('focus', this.focusHandler);
+        this.$electron.ipcRenderer.send('remove-browser');
         if (this.backToLandingView) {
-          this.$electron.ipcRenderer.send('remove-browser');
           setTimeout(() => {
             windowRectService.uploadWindowBy(false, 'landing-view', undefined, undefined, this.winSize, this.winPos, this.isFullScreen);
           }, 200);
@@ -754,9 +759,7 @@ export default {
       });
       this.refreshButton = new TouchBarButton({
         icon: this.createIcon('touchBar/refresh.png'),
-        click: () => {
-          this.$bus.$emit('toggle-reload');
-        },
+        click: this.handleUrlReload,
       });
       // this.pipButton = enablePip ? new TouchBarButton({
       //   icon: this.createIcon('touchBar/pip.png'),
@@ -795,7 +798,7 @@ export default {
       }
     },
     currentMainBrowserView() {
-      return this.$electron.remote.getCurrentWindow().getBrowserView();
+      return this.$electron.remote.getCurrentWindow().getBrowserViews()[0];
     },
     handleWindowChangeEnterPip() {
       const newDisplayId = this.$electron.remote.screen.getDisplayNearestPoint({
