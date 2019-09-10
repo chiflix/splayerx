@@ -798,7 +798,7 @@ export default {
       }
     },
     currentMainBrowserView() {
-      return this.$electron.remote.getCurrentWindow().getBrowserView();
+      return this.$electron.remote.getCurrentWindow().getBrowserViews()[0];
     },
     handleWindowChangeEnterPip() {
       const newDisplayId = this.$electron.remote.screen.getDisplayNearestPoint({
