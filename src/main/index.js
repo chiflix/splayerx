@@ -1017,12 +1017,11 @@ function createMainWindow(openDialog, playlistId) {
 
 ['left-drag', 'left-up'].forEach((channel) => {
   mouse.on(channel, (...args) => {
-    if (process.platform === 'win32') {
-      const focusedWindow = BrowserWindow.getFocusedWindow();
-      if (focusedWindow) focusedWindow.send(`mouse-${channel}`, ...args);
-    } else if (browsingWindow && browsingWindow.isFocused()) {
-      browsingWindow.webContents.send(`mouse-${channel}`, ...args);
-    }
+    const focusedWindow = BrowserWindow.getFocusedWindow();
+    if (!focusedWindow || focusedWindow.webContents.isDestroyed()) return;
+    if (focusedWindow.isMaximized()) return;
+    if (process.platform === 'darwin' && focusedWindow !== browsingWindow) return;
+    focusedWindow.send(`mouse-${channel}`, ...args);
   });
 });
 
