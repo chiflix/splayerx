@@ -1,5 +1,8 @@
 <template>
   <div
+    :style="{
+        width: isDarwin ? 'calc(100% - 176px)' : 'calc(100% - 290px)',
+    }"
     class="search-url"
   >
     <div
@@ -92,11 +95,11 @@ export default {
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  width: calc(100% - 176px);
   height: 40px;
   z-index: 6;
   .url-search {
     width: 100%;
+    margin-left: 8px;
     outline: none;
     background-color: #FFF;
     border: none;
