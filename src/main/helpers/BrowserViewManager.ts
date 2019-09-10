@@ -54,6 +54,7 @@ export class BrowserViewManager implements IBrowserViewManager {
       ? this.historyByChannel[channel].list[index].url : args.url;
     if (this.historyByChannel[channel].list.length) {
       this.historyByChannel[channel].list[index].url = args.url;
+      this.historyByChannel[channel].list[index].view.webContents.removeAllListeners('media-start-playing');
       if (args.isNewWindow) {
         this.historyByChannel[channel].list[index].view.webContents.loadURL(args.url);
       }
@@ -74,20 +75,7 @@ export class BrowserViewManager implements IBrowserViewManager {
     if (channel === this.currentChannel) {
       const hasLastPage = this.historyByChannel[channel].list.length;
       if (hasLastPage) {
-        page.view.webContents.once('media-started-playing', () => {
-          if (lastUrl !== page.url) return;
-          if (this.currentChannel.includes('bilibili')) {
-            let type = '';
-            page.view.webContents
-              .executeJavaScript(InjectJSManager.bilibiliFindType())
-              .then((r: (HTMLElement | null)[]) => {
-                type = ['bangumi', 'videoStreaming', 'iframeStreaming', 'iframeStreaming', 'video'][r.findIndex(i => i)] || 'others';
-                page.view.webContents.executeJavaScript(InjectJSManager.pauseVideo('bilibili', type));
-              });
-          } else {
-            page.view.webContents.executeJavaScript(InjectJSManager.pauseVideo('normal'));
-          }
-        });
+        this.pauseVideo(page.view);
       }
     }
 
@@ -147,11 +135,13 @@ export class BrowserViewManager implements IBrowserViewManager {
     this.pauseVideo();
     this.currentChannel = channel;
     this.historyByChannel[channel].lastUpdateTime = Date.now();
+    const page = this.historyByChannel[channel].list[this.historyByChannel[channel].currentIndex];
+    page.view.webContents.removeAllListeners('media-started-playing');
     return {
       canBack: this.historyByChannel[channel].currentIndex > 0,
       canForward: this.historyByChannel[channel].currentIndex
         < this.historyByChannel[channel].list.length - 1,
-      page: this.historyByChannel[channel].list[this.historyByChannel[channel].currentIndex],
+      page,
     };
   }
 
@@ -230,6 +220,19 @@ export class BrowserViewManager implements IBrowserViewManager {
         currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('normal'));
       }
     }
+    currentView.webContents.addListener('media-started-playing', () => {
+      if (pausedChannel.includes('bilibili')) {
+        let type = '';
+        currentView.webContents
+          .executeJavaScript(InjectJSManager.bilibiliFindType())
+          .then((r: (HTMLElement | null)[]) => {
+            type = ['bangumi', 'videoStreaming', 'iframeStreaming', 'iframeStreaming', 'video'][r.findIndex(i => i)] || 'others';
+            currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('bilibili', type));
+          });
+      } else {
+        currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('normal'));
+      }
+    });
   }
 
   // 关闭画中画窗口
@@ -258,6 +261,7 @@ export class BrowserViewManager implements IBrowserViewManager {
     result.page = list[index];
     channel.lastUpdateTime = Date.now();
     channel.currentIndex = index;
+    result.page.view.webContents.removeAllListeners('media-started-playing');
     return result;
   }
 }
