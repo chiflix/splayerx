@@ -1,26 +1,33 @@
 import { TranscriptResponse } from 'sagi-api/translation/v1/translation_pb';
-import { Format, Cue } from '@/interfaces/ISubtitle';
-import { BaseParser } from './base';
-import { tagsGetter } from '../utils';
+import {
+  Format, Cue, IParser, IVideoSegments,
+} from '@/interfaces/ISubtitle';
+import { tagsGetter, getDialogues } from '../utils';
+import { SagiLoader } from '../utils/loaders';
 
 export type SagiSubtitlePayload = TranscriptResponse.Cue.AsObject[];
 
-export class SagiParser extends BaseParser {
-  public payload: SagiSubtitlePayload;
+export class SagiParser implements IParser {
+  public get format() { return Format.Sagi; }
 
-  public format = Format.Sagi;
+  public readonly loader: SagiLoader;
 
-  public constructor(sagiPayload: SagiSubtitlePayload) {
-    super();
-    this.payload = sagiPayload;
+  public readonly videoSegments: IVideoSegments;
+
+  public constructor(loader: SagiLoader, videoSegments: IVideoSegments) {
+    this.loader = loader;
+    this.videoSegments = videoSegments;
   }
 
-  public dialogues: Cue[] = [];
+  public async getMetadata() { return { PlayResX: '', PlayResY: '' }; }
+
+  private dialogues: Cue[] = [];
 
   private baseTags = { alignment: 2, pos: undefined };
 
   private normalizer(parsedSubtitle: SagiSubtitlePayload) {
     const finalDialogues: Cue[] = [];
+    parsedSubtitle = Array.isArray(parsedSubtitle) ? parsedSubtitle : [];
     parsedSubtitle.forEach(({ startTime, endTime, text }) => {
       finalDialogues.push({
         start: startTime,
@@ -33,9 +40,14 @@ export class SagiParser extends BaseParser {
       });
     });
     this.dialogues = finalDialogues;
+    this.dialogues.forEach(({ start, end }) => this.videoSegments.insert(start, end));
   }
 
-  public async parse() {
-    this.normalizer(this.payload);
+  public async getDialogues(time?: number) {
+    if (!this.loader.fullyRead) {
+      const payload = await this.loader.getPayload() as SagiSubtitlePayload;
+      if (this.loader.fullyRead) this.normalizer(payload);
+    }
+    return getDialogues(this.dialogues, time);
   }
 }

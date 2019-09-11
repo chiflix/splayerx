@@ -205,7 +205,7 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters([
-      'currentAudioTrackId', 'mediaHash', 'audioTrackList', 'currentAudioTrackId',
+      'currentAudioTrackId', 'mediaHash', 'audioTrackList', 'currentAudioTrackId', 'displayLanguage',
       'isTranslateModalVisible', 'translateProgress', 'isTranslating', 'selectedTargetLanugage',
       'translateEstimateTime', 'translateStatus', 'lastAudioLanguage', 'failType',
     ]),
@@ -267,6 +267,9 @@ export default Vue.extend({
     },
   },
   watch: {
+    displayLanguage() {
+      this.audioLanguage = { label: this.$t('translateModal.selectLanguageLabel'), value: '' };
+    },
     mediaHash() {
       this.audioLanguage = { label: this.$t('translateModal.selectLanguageLabel'), value: '' };
       this.audioTranslateStoreInit();

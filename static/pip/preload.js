@@ -1,55 +1,88 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
+// eslint-disable-next-line no-console
 console.log('preloaded~~~~~~~');
 const { ipcRenderer, remote } = require('electron');
-const mouse = process.platform === 'win32' ? require('win-mouse')() : null;
 
 let mousedown = false;
 let isDragging = false;
-let mousedownPos = null;
+let offset = null;
 let windowSize = null;
+let pipTimer = 0;
 function sendToHost(channel, message) {
-  ipcRenderer.sendToHost(channel, message);
+  ipcRenderer.send(channel, message);
 }
 function getRatio() {
   return window.devicePixelRatio || 1;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  const danmu = document.querySelector('.danmu');
+  const pip = document.querySelector('.pip');
+  const pipBtns = document.querySelector('.pip-buttons');
+  if (pipBtns) {
+    pipBtns.style.display = 'flex';
+    pipBtns.addEventListener('mousemove', () => {
+      if (pipTimer) clearTimeout(pipTimer);
+      sendToHost('pip-btn-mousemove');
+      pipBtns.style.display = 'flex';
+    });
+    pipTimer = setTimeout(() => {
+      pipBtns.style.display = 'none';
+    }, 3000);
+  }
+  if (danmu) {
+    danmu.addEventListener('mouseup', () => {
+      sendToHost('danmu', 'danmu');
+    });
+  }
+  if (pip) {
+    pip.addEventListener('mouseup', () => {
+      sendToHost('pip', 'pip');
+    });
+  }
+  window.addEventListener('mouseout', (evt) => {
+    if (pipBtns) {
+      sendToHost('pip-btn-mouseout');
+    } else if (remote.getCurrentWindow()
+      && remote.getCurrentWindow().getBrowserViews().length > 1) {
+      const winSize = remote.getCurrentWindow().getSize();
+      if (evt.clientX <= 0 || evt.clientX >= winSize[0] || evt.clientY >= winSize[1]) {
+        sendToHost('mouseout', 'out');
+      }
+    }
+  }, true);
   window.addEventListener('mousedown', (evt) => {
     mousedown = true;
-    mousedownPos = [evt.clientX, evt.clientY];
+    offset = [evt.clientX, evt.clientY];
     if (getRatio() !== 1) {
       windowSize = remote.getCurrentWindow().getSize();
     }
+    if (!pipBtns && remote.getCurrentWindow()
+      && remote.getCurrentWindow().getBrowserViews().length > 1) {
+      sendToHost('update-mouse-info', { offset, windowSize });
+    }
   }, true);
   window.addEventListener('mouseup', (evt) => {
-    if (isDragging) evt.stopImmediatePropagation();
+    if (isDragging && !pipBtns) evt.stopImmediatePropagation();
     mousedown = false;
-    mousedownPos = null;
+    offset = null;
     windowSize = null;
+    if (!pipBtns) sendToHost('update-mouse-info', { offset, windowSize });
   }, true);
-  if (mouse) {
-    mouse.on('left-drag', (x, y) => {
-      sendToHost('mousemove', 'isMoving');
-      isDragging = true;
-      if (mousedownPos) {
-        sendToHost('left-drag', {
-          windowSize,
-          x: Math.round(x / getRatio() - mousedownPos[0]),
-          y: Math.round(y / getRatio() - mousedownPos[1]),
-        });
-      }
-    });
-  }
   window.addEventListener('mousemove', (evt) => {
-    sendToHost('mousemove', 'isMoving');
+    if (!pipBtns && remote.getCurrentWindow()
+      && remote.getCurrentWindow().getBrowserViews().length > 1) {
+      if (pipTimer) clearTimeout(pipTimer);
+      sendToHost('mousemove', 'isMoving');
+    }
     if (mousedown) isDragging = true;
   }, true);
   window.addEventListener('click', (evt) => {
     if (isDragging) evt.stopImmediatePropagation();
     isDragging = false;
-    mousedownPos = null;
+    offset = null;
     windowSize = null;
+    if (!pipBtns) sendToHost('update-mouse-info', { offset, windowSize });
   }, true);
   window.addEventListener('drop', (evt) => {
     evt.preventDefault();
@@ -58,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   window.addEventListener('dragover', (evt) => {
     evt.preventDefault();
-    evt.dataTransfer.dropEffect = process.platform === 'darwin' ? 'copy' : '';
+    // evt.dataTransfer.dropEffect = process.platform === 'darwin' ? 'copy' : '';
     sendToHost('dragover', { dragover: true });
   });
   window.addEventListener('dragleave', (evt) => {
@@ -66,6 +99,9 @@ document.addEventListener('DOMContentLoaded', () => {
     sendToHost('dragleave', { dragover: false });
   });
   window.addEventListener('keydown', (evt) => {
+    if (pipBtns) {
+      sendToHost('key-events', evt.keyCode);
+    }
     if (document.webkitIsFullScreen && evt.keyCode === 27) {
       document.webkitCancelFullScreen();
     } else if (evt.keyCode === 80) {

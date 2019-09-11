@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>pipControl</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+    .pip-buttons {
+      width: 20px;
+      height: auto;
+      display: flex;
+      padding: 22px 15px 22px 15px;
+      border-radius: 40px;
+      flex-direction: column;
+      justify-content: space-between;
+      position: absolute;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 100;
+    }
+    .danmu, .pip {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+    .danmu {
+      margin-bottom: 20px;
+    }
+    .pip:active, .danmu:active {
+      opacity: 0.333;
+    }
+  </style>
+</head>
+<body draggable="false">
+  <div class="pip-buttons">
+    <img class="danmu" src="assets/noDanmu-default-icon.svg">
+    <img class="pip" src="assets/pipBack-default-icon.svg">
+  </div>
+</body>
+</html>

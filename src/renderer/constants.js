@@ -1,3 +1,6 @@
+import { remote } from 'electron';
+import { join } from 'path';
+
 export const DEFAULT_VIDEO_EVENTS = [
   'abort',
   'canplay',
@@ -65,50 +68,6 @@ export const INFO_SCHEMAS = [
 
 export const DATADB_NAME = 'data';
 export const SUBTITLE_OBJECTSTORE_NAME = 'subtitles';
-export const DATADB_VERSION = 1;
-export const DATADB_SHCEMAS = [
-  {
-    version: 1,
-    schema: [
-      {
-        name: SUBTITLE_OBJECTSTORE_NAME,
-        options: {
-          autoIncrement: true,
-        },
-        indexes: [
-          {
-            name: 'type',
-            unique: false,
-          },
-          {
-            name: 'src',
-            unique: false,
-          },
-          {
-            name: 'format',
-            unique: false,
-          },
-          {
-            name: 'language',
-            unique: false,
-          },
-          {
-            name: 'lastOpened',
-            unique: false,
-          },
-        ],
-        properties: [
-          'type',
-          'src',
-          'format',
-          'language',
-          'data',
-          'lastOpened',
-        ],
-      },
-    ],
-  },
-];
 
 /** electron 缓存用户数据路径
  * @constant
@@ -133,3 +92,8 @@ export const DEFAULT_LOG_DIRNAME = 'logs';
  */
 export const VIDEO_DIRNAME = 'videos'; // 视频缓存目录
 export const SUBTITLE_DIRNAME = 'subtitles'; // 视频缓存目录
+export const SUBTITLE_FULL_DIRNAME = join(
+  remote.app.getPath(ELECTRON_CACHE_DIRNAME),
+  DEFAULT_DIRNAME,
+  SUBTITLE_DIRNAME,
+);

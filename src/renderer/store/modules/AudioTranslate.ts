@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-05 16:03:32
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-09-06 16:17:46
+ * @Last Modified time: 2019-09-11 18:05:09
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @ts-ignore
@@ -14,14 +14,15 @@ import { AudioTranslate as a, SubtitleManager as smActions } from '@/store/actio
 import { audioTranslateService } from '@/services/media/AudioTranslateService';
 import { AITaskInfo } from '@/interfaces/IMediaStorable';
 import { TranscriptInfo } from '@/services/subtitle';
-import { SubtitleControlListItem, Type } from '@/interfaces/ISubtitle';
+import { ISubtitleControlListItem, Type } from '@/interfaces/ISubtitle';
 import { mediaStorageService } from '@/services/storage/MediaStorageService';
 import { TranslatedGenerator } from '@/services/subtitle/loaders/translated';
-import { addBubble } from '../../helpers/notificationControl';
+import { isAudioCenterChannelEnabled } from '@/helpers/featureSwitch';
+import { addBubble } from '@/helpers/notificationControl';
 import {
   TRANSLATE_SERVER_ERROR_FAIL, TRANSLATE_SUCCESS,
   TRANSLATE_SUCCESS_WHEN_VIDEO_CHANGE, TRANSLATE_REQUEST_TIMEOUT,
-} from '../../helpers/notificationcodes';
+} from '@/helpers/notificationcodes';
 import { log } from '@/libs/Log';
 import { LanguageCode } from '@/libs/language';
 import { addSubtitleItemsToList } from '@/services/storage/subtitle';
@@ -35,7 +36,7 @@ export enum AudioTranslateStatus {
   Selecting = 'selecting',
   Searching = 'searching',
   Grabbing = 'grabbing',
-  GrabCompleted= 'grab-completed',
+  GrabCompleted = 'grab-completed',
   Translating = 'translating',
   Back = 'back',
   Fail = 'fail',
@@ -210,7 +211,7 @@ const mutations = {
   [m.AUDIO_TRANSLATE_HIDE_MODAL](state: AudioTranslateState) {
     state.isModalVisible = false;
   },
-  [m.AUDIO_TRANSLATE_SELECTED_UPDATE](state: AudioTranslateState, sub: SubtitleControlListItem) {
+  [m.AUDIO_TRANSLATE_SELECTED_UPDATE](state: AudioTranslateState, sub: ISubtitleControlListItem) {
     state.selectedTargetLanugage = sub.language;
     state.selectedTargetSubtitleId = sub.id;
   },
@@ -273,7 +274,7 @@ const mutations = {
 };
 
 const actions = {
-  [a.AUDIO_TRANSLATE_START]({
+  async [a.AUDIO_TRANSLATE_START]({
     commit, getters, state, dispatch,
   }: any, audioLanguageCode: string) {
     // 记录当前智能翻译的信息
@@ -285,7 +286,9 @@ const actions = {
     }
     commit(m.AUDIO_TRANSLATE_SAVE_KEY, `${getters.mediaHash}`);
     audioTranslateService.stop();
-    const audioInfo = getters.audioStreams[getters.currentAudioTrackId - 2];
+    const audioInfo = (await isAudioCenterChannelEnabled())
+      ? getters.audioStreams[getters.currentAudioTrackId - 2] : undefined;
+    log.debug('translate/audioInfo', audioInfo);
     const grab = audioTranslateService.startJob({
       audioId: getters.currentAudioTrackId,
       audioInfo,
@@ -358,9 +361,10 @@ const actions = {
           commit(m.AUDIO_TRANSLATE_UPDATE_PROGRESS, 0);
           const selectId = state.selectedTargetSubtitleId;
           if (getters.primarySubtitleId === selectId) {
-            dispatch(smActions.manualChangePrimarySubtitle, '');
+            // do not directly pass empty string to manualChangeSubtitle
+            dispatch(smActions.autoChangePrimarySubtitle, '');
           } else if (getters.secondarySubtitleId === selectId) {
-            dispatch(smActions.manualChangeSecondarySubtitle, '');
+            dispatch(smActions.autoChangeSecondarySubtitle, '');
           }
           const failBubbleId = uuidv4();
           commit(m.AUDIO_TRANSLATE_UPDATE_FAIL_BUBBLE_ID, failBubbleId);
@@ -413,8 +417,22 @@ const actions = {
       });
       grab.removeListener('task', taskCallback);
       grab.on('task', taskCallback);
-      grab.on('transcriptInfo', async (transcriptInfo: TranscriptInfo) => {
+      grab.on('transcriptInfo', async (transcriptInfo: TranscriptInfo) => { // eslint-disable-line complexity
         log.debug('AudioTranslate', transcriptInfo, 'audio-log');
+        // 记录成功日志到sentry, 排查成功后没有数据的音频中置声道错误
+        try {
+          log.save('translate-audio-log', {
+            mediaHash: grab.mediaHash,
+            taskId: grab.taskInfo ? grab.taskInfo.taskId : undefined,
+          }, {
+            audioInfo: grab.audioInfo,
+            taskInfo: grab.taskInfo,
+            audioTrack: grab.audioId,
+            videoSrc: grab.videoSrc,
+          });
+        } catch (error) {
+          // empty
+        }
         // 清除task阶段倒计时定时器
         if (taskTimer) {
           clearInterval(taskTimer);
@@ -453,11 +471,11 @@ const actions = {
           } = getters;
           const secondaryAIButtonExist = list
             .find((
-              sub: SubtitleControlListItem,
+              sub: ISubtitleControlListItem,
             ) => sub.language === secondaryLanguage && !sub.source && sub.type === Type.Translated);
           const primaryAIButtonExist = list
             .find((
-              sub: SubtitleControlListItem,
+              sub: ISubtitleControlListItem,
             ) => sub.language === primaryLanguage && !sub.source && sub.type === Type.Translated);
           if (primaryLanguage === subtitle.language
             && !!secondaryLanguage && !!secondaryAIButtonExist) {
@@ -496,14 +514,14 @@ const actions = {
     const {
       primaryLanguage, secondaryLanguage, mediaHash,
     } = getters;
-    const list = getters.list as SubtitleControlListItem[];
+    const list = getters.list as ISubtitleControlListItem[];
     const key = `${getters.mediaHash}`;
     const taskInfo = mediaStorageService.getAsyncTaskInfo(key);
     if (taskInfo && getters.mediaHash === taskInfo.mediaHash
       && (taskInfo.targetLanguage === primaryLanguage
         || taskInfo.targetLanguage === secondaryLanguage)) {
       let sub = list.find((
-        sub: SubtitleControlListItem,
+        sub: ISubtitleControlListItem,
       ) => sub.type === Type.Translated && sub.language === taskInfo.targetLanguage);
       if (!sub) {
         try {
@@ -598,9 +616,10 @@ const actions = {
     // 丢弃任务，执行用户强制操作
     const selectId = state.selectedTargetSubtitleId;
     if (getters.primarySubtitleId === selectId) {
-      dispatch(smActions.manualChangePrimarySubtitle, '');
+      // do not directly pass empty string to manualChangeSubtitle
+      dispatch(smActions.autoChangePrimarySubtitle, '');
     } else if (getters.secondarySubtitleId === selectId) {
-      dispatch(smActions.manualChangeSecondarySubtitle, '');
+      dispatch(smActions.autoChangeSecondarySubtitle, '');
     }
     commit(m.AUDIO_TRANSLATE_RECOVERY);
     state.callbackAfterBubble();
@@ -623,7 +642,7 @@ const actions = {
   },
   [a.AUDIO_TRANSLATE_SHOW_MODAL]({
     commit, getters, state, dispatch,
-  }: any, sub: SubtitleControlListItem) {
+  }: any, sub: ISubtitleControlListItem) {
     dispatch(a.AUDIO_TRANSLATE_HIDE_BUBBLE);
     const key = `${getters.mediaHash}`;
     const taskInfo = mediaStorageService.getAsyncTaskInfo(key);

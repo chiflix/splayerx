@@ -14,11 +14,11 @@
       <SidebarIcon
         @mouseover.native="mouseoverSidebar = true"
         @mouseout.native="mouseoverSidebar = false"
-        @mouseup.native="handleSidebar"
+        :mouseover="mouseoverSidebar"
+        :fill="isBrowsingView ? '#BBBACC' : ''"
         :style="{
           transform: `translateX(${showSidebar ? '76' : '0'}px)`,
         }"
-        :mouseover="mouseoverSidebar"
         class="sidebar-icon no-drag"
       />
     </div>
@@ -105,11 +105,11 @@
         v-if="isDarwin && isLandingView"
         @mouseover.native="mouseoverSidebar = true"
         @mouseout.native="mouseoverSidebar = false"
-        @mouseup.native="handleSidebar"
         :style="{
           marginLeft: showSidebar ? '19px' : '4px',
         }"
         :mouseover="mouseoverSidebar"
+        :fill="isBrowsingView ? '#BBBACC' : ''"
         class="sidebar no-drag"
       />
     </div>
@@ -136,6 +136,10 @@ export default {
       default: false,
     },
     isLandingView: {
+      type: Boolean,
+      default: false,
+    },
+    isBrowsingView: {
       type: Boolean,
       default: false,
     },
@@ -211,11 +215,9 @@ export default {
     });
   },
   methods: {
-    handleSidebar() {
-      this.$event.emit('side-bar-mouseup');
-    },
     handleDbClick() {
-      if (!this.isMaximized) {
+      const browserWindow = this.$electron.remote.getCurrentWindow();
+      if (!browserWindow.isMaximized()) {
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'maximize');
       } else {
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'unmaximize');

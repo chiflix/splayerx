@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-22 17:18:34
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-09-10 11:46:29
+ * @Last Modified time: 2019-09-11 18:06:25
  */
 
 import { EventEmitter } from 'events';
@@ -24,7 +24,7 @@ import { IAudioStream } from '@/plugins/mediaTasks/mediaInfoQueue';
 type JobData = {
   videoSrc: string,
   audioId: number,
-  audioInfo: IAudioStream,
+  audioInfo?: IAudioStream,
   mediaHash: string,
   audioLanguageCode: string,
   targetLanguageCode: string,
@@ -48,7 +48,7 @@ export default class AudioGrabService extends EventEmitter {
 
   private audioId: number;
 
-  private audioInfo: IAudioStream;
+  private audioInfo?: IAudioStream;
 
   private pts: string;
 
@@ -253,7 +253,7 @@ export default class AudioGrabService extends EventEmitter {
     });
   }
 
-  private getAudioChannel(audioInfo: IAudioStream): number {
+  private getAudioChannel(audioInfo?: IAudioStream): number {
     if (!audioInfo || !audioInfo.channels) return 0;
     // 5.1 ac3/eac3/aac/dts 左前、右前、中置、左后、右后、重低音
     if (audioInfo.channels === 6
