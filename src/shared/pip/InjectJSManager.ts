@@ -47,6 +47,10 @@ class InjectJSManager implements IInjectJSManager {
     return `document.querySelector(".pip-buttons").style.display = ${shouldShow} ? "flex" : "none";`;
   }
 
+  public updatePipTitlebarToShow(shouldShow: boolean): string {
+    return `document.querySelector(".titlebar").style.display = ${shouldShow} ? "flex" : "none";`;
+  }
+
   public updateTitlebarState(className: string, state: boolean): string {
     return `document.querySelector(${className}).style.display = ${state} ? "block" : "none";`;
   }
@@ -99,6 +103,7 @@ export interface IInjectJSManager {
   pauseVideo(channel: string, type?: string): string
   initBarrageIcon(barrageState: boolean): string
   updatePipControlState(shouldShow: boolean): string
+  updatePipTitlebarToShow(shouldShow: boolean): string
   updateTitlebarState(className: string, state: boolean): string
   updateFullScreenIcon(isFullScreen: boolean): string
   updateWinMaxIcon(isMaximize: boolean): string
