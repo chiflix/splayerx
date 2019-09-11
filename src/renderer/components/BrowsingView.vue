@@ -139,19 +139,24 @@ export default {
     isDarwin() {
       return process.platform === 'darwin';
     },
-    youtubePip() {
-      return InjectJSManager.getPipByChannel({ channel: 'youtube' });
+    pipArgs() {
+      switch (this.pipType) {
+        case 'youtube':
+          return { channel: 'youtube' };
+        case 'bilibili':
+          return {
+            channel: 'bilibili', type: this.bilibiliType, barrageState: this.barrageOpen, winSize: this.pipSize,
+          };
+        case 'iqiyi':
+          return { channel: 'iqiyi', barrageState: this.barrageOpen, winSize: this.pipSize };
+        case 'others':
+          return { channel: 'others', winSize: this.pipSize };
+        default:
+          return { channel: 'others', winSize: this.pipSize };
+      }
     },
-    iqiyiPip() {
-      return InjectJSManager.getPipByChannel({ channel: 'iqiyi', barrageState: this.barrageOpen, winSize: this.pipSize });
-    },
-    bilibiliPip() {
-      return InjectJSManager.getPipByChannel({
-        channel: 'bilibili', type: this.bilibiliType, barrageState: this.barrageOpen, winSize: this.pipSize,
-      });
-    },
-    othersPip() {
-      return InjectJSManager.getPipByChannel({ channel: 'others', winSize: this.pipSize });
+    pip() {
+      return InjectJSManager.getPipByChannel(this.pipArgs);
     },
     hasVideo() {
       return this.webInfo.hasVideo;
@@ -858,13 +863,13 @@ export default {
         this.updateBarrageOpen(!this.barrageOpen);
         this.$electron.ipcRenderer.send(
           'handle-danmu-display',
-          this.iqiyiPip.iqiyiBarrageAdapt(this.barrageOpen),
+          this.pip.iqiyiBarrageAdapt(this.barrageOpen),
         );
       } else if (this.pipType === 'bilibili') {
         this.updateBarrageOpen(!this.barrageOpen);
         this.$electron.ipcRenderer.send(
           'handle-danmu-display',
-          this.bilibiliPip.bilibiliBarrageAdapt(this.bilibiliType, this.barrageOpen),
+          this.pip.bilibiliBarrageAdapt(this.bilibiliType, this.barrageOpen),
         );
       }
     },
@@ -931,39 +936,39 @@ export default {
     },
     othersAdapter() {
       this.currentMainBrowserView()
-        .webContents.executeJavaScript(this.othersPip.adapter)
+        .webContents.executeJavaScript(this.pip.adapter)
         .then(() => {
           this.adaptFinished = true;
         });
     },
     othersWatcher() {
-      this.$electron.ipcRenderer.send('pip-watcher', this.othersPip.watcher);
+      this.$electron.ipcRenderer.send('pip-watcher', this.pip.watcher);
     },
     othersRecover() {
       this.$electron.remote
         .getCurrentWindow()
         .getBrowserViews()[0]
-        .webContents.executeJavaScript(this.othersPip.recover);
+        .webContents.executeJavaScript(this.pip.recover);
     },
     iqiyiAdapter() {
       this.currentMainBrowserView()
-        .webContents.executeJavaScript(this.iqiyiPip.adapter)
+        .webContents.executeJavaScript(this.pip.adapter)
         .then(() => {
           this.adaptFinished = true;
         });
     },
     iqiyiWatcher() {
-      this.$electron.ipcRenderer.send('pip-watcher', this.iqiyiPip.watcher);
+      this.$electron.ipcRenderer.send('pip-watcher', this.pip.watcher);
     },
     iqiyiRecover() {
       this.$electron.remote
         .getCurrentWindow()
         .getBrowserViews()[0]
-        .webContents.executeJavaScript(this.iqiyiPip.recover);
+        .webContents.executeJavaScript(this.pip.recover);
     },
     youtubeAdapter() {
       this.currentMainBrowserView()
-        .webContents.executeJavaScript(this.youtubePip.adapter)
+        .webContents.executeJavaScript(this.pip.adapter)
         .then(() => {
           this.adaptFinished = true;
         });
@@ -972,7 +977,7 @@ export default {
       this.$electron.remote
         .getCurrentWindow()
         .getBrowserViews()[0]
-        .webContents.executeJavaScript(this.youtubePip.recover);
+        .webContents.executeJavaScript(this.pip.recover);
     },
     bilibiliAdapter() {
       this.currentMainBrowserView()
@@ -988,7 +993,7 @@ export default {
         })
         .then(() => {
           this.currentMainBrowserView().webContents.executeJavaScript(
-            this.bilibiliPip.adapter,
+            this.pip.adapter,
           );
         })
         .then(() => {
@@ -996,13 +1001,13 @@ export default {
         });
     },
     bilibiliWatcher() {
-      this.$electron.ipcRenderer.send('pip-watcher', this.bilibiliPip.watcher);
+      this.$electron.ipcRenderer.send('pip-watcher', this.pip.watcher);
     },
     bilibiliRecover() {
       this.$electron.remote
         .getCurrentWindow()
         .getBrowserViews()[0]
-        .webContents.executeJavaScript(this.bilibiliPip.recover);
+        .webContents.executeJavaScript(this.pip.recover);
     },
   },
 };
