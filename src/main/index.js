@@ -745,6 +745,7 @@ function registerMainWindowEvent(mainWindow) {
       browserViewManager.pauseVideo(mainWindow.getBrowserView());
       mainWindow.hide();
     }
+    browsingWindow.webContents.closeDevTools();
     browsingWindow.setAspectRatio(args.pipInfo.aspectRatio);
     browsingWindow.setMinimumSize(args.pipInfo.minimumSize[0], args.pipInfo.minimumSize[1]);
     mainBrowser.page.view.setBounds({
