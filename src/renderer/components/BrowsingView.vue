@@ -436,7 +436,7 @@ export default {
   beforeDestroy() {
     this.removeListener();
     this.$store.dispatch('updateBrowsingSize', this.winSize);
-    this.$store.dispatch('updateBrowsingPos', this.winPos);
+    this.boundBackPosition();
     this.updateIsPip(false);
     asyncStorage
       .set('browsing', {
@@ -465,6 +465,27 @@ export default {
     handlePageTitle(e: Event, title: string) {
       this.title = title;
     },
+    boundBackPosition() {
+      const position = this.winPos;
+      const size = this.winSize;
+
+      const [boundLeft, boundTop, windowWidth, windowHeight] = [
+        window.screen.availLeft, window.screen.availTop,
+        window.screen.availWidth, window.screen.availHeight,
+      ];
+
+      const boundbackPositon = (point: number, length: number, edge: number, edgeLength: number) => {
+        if (point < edge) return edge;
+        else if (point + length > edge + edgeLength) return edge + edgeLength - length;
+        return point;
+      }
+
+      position[0] = boundbackPositon(position[0], size[0], boundLeft, windowWidth);
+      position[1] = boundbackPositon(position[1], size[1], boundTop, windowHeight);
+
+
+      this.$store.dispatch('updateBrowsingPos', position);
+    },
     focusHandler() {
       this.menuService.updateFocusedWindow(true);
       this.updatePipState(this.webInfo.hasVideo);
@@ -492,7 +513,7 @@ export default {
       if (!this.asyncTasksDone) {
         e.returnValue = false;
         this.$store.dispatch('updateBrowsingSize', this.winSize);
-        this.$store.dispatch('updateBrowsingPos', this.winPos);
+        this.boundBackPosition();
         asyncStorage
           .set('browsing', {
             browsingSize: this.browsingSize,
