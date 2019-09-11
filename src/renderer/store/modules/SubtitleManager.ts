@@ -353,25 +353,45 @@ const actions = {
         const results = flatten(resultsList);
         const newSubtitlesToAdd: TranscriptInfo[] = [];
         const oldSubtitlesToDel: SubtitleControlListItem[] = [];
-        const oldSubtitles = [...(getters as { list: SubtitleControlListItem[] }).list];
-        // 删除这个语言已经加载的字幕
-        const lastSubs = remove(
+        const oldSubtitles = [...(getters as { list: SubtitleControlListItem[] }).list]
+          .filter(({ language }) => language === languageCode);
+        // 将Translated类型的都删除掉
+        const translatedSubs = remove(oldSubtitles, ({
+          type, source,
+        }) => type === Type.Translated && !source);
+        // delete subtitles not existed in the new subtitles
+        const notExistedOldSubs = remove(
           oldSubtitles,
-          ({ type, language }) => (
-            (type === Type.Translated || type === Type.Online)
-            && language === languageCode
+          ({ type, hash }) => (
+            (type === Type.Online || type === Type.Translated)
+            && !results.find(({ transcriptIdentity }) => transcriptIdentity === hash)
           ),
         );
-        oldSubtitlesToDel.push(...lastSubs);
+        oldSubtitlesToDel.push(...translatedSubs, ...notExistedOldSubs);
         // add subtitles not existed in the old subtitles
-        const isAllResultsFromES = results
+        const notExistedNewSubs = results
+          .filter(({ transcriptIdentity }) => !oldSubtitles
+            .find(({ hash }) => hash === transcriptIdentity));
+        const isAllResultsFromES = notExistedNewSubs
           .every((info: TranscriptInfo) => info.tagsList.length > 0 && info.tagsList.indexOf('ES') > -1);
         let addAIButton = false;
         if (results.length === 0 || isAllResultsFromES) {
           addAIButton = true;
-          newSubtitlesToAdd.push(...results.splice(0, 2));
+          const oldLen = oldSubtitles.length;
+          // 如果出现AI按钮，在线字幕列表不能超过2个
+          if (oldLen > 2) {
+            oldSubtitlesToDel.push(...oldSubtitles.splice(2, oldLen));
+          } else {
+            newSubtitlesToAdd.push(...notExistedNewSubs.splice(0, 2 - oldLen));
+          }
         } else {
-          newSubtitlesToAdd.push(...results);
+          const oldLen = oldSubtitles.length;
+          // 在线字幕列表不能超过3个
+          if (oldLen > 3) {
+            oldSubtitlesToDel.push(...oldSubtitles.splice(3, oldLen));
+          } else {
+            newSubtitlesToAdd.push(...notExistedNewSubs.splice(0, 3 - oldLen));
+          }
         }
         return {
           delete: oldSubtitlesToDel,
