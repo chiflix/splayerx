@@ -8,21 +8,21 @@
         :class="{ selected: currentUrl.includes('bilibili') }"
         class="icon-hover"
       >
-        <Icon type="bilibiliSidebar"/>
+        <Icon type="bilibiliSidebar" />
       </div>
       <div
         @click="handleSidebarIcon('https://www.iqiyi.com/')"
         :class="{ selected: currentUrl.includes('iqiyi') }"
         class="icon-hover"
       >
-        <Icon type="iqiyiSidebar"/>
+        <Icon type="iqiyiSidebar" />
       </div>
       <div
         @click="handleSidebarIcon('https://www.youtube.com/')"
         :class="{ selected: currentUrl.includes('youtube') }"
         class="icon-hover"
       >
-        <Icon type="youtubeSidebar"/>
+        <Icon type="youtubeSidebar" />
       </div>
     </div>
   </div>

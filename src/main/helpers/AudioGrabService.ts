@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-22 17:18:34
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-09-11 18:06:25
+ * @Last Modified time: 2019-09-11 18:41:23
  */
 
 import { EventEmitter } from 'events';
@@ -260,7 +260,7 @@ export default class AudioGrabService extends EventEmitter {
       && (audioInfo.codecName === 'ac3'
         || audioInfo.codecName === 'eac3'
         || audioInfo.codecName === 'aac'
-        || audioInfo.codecName === 'dts')) return 6;
+        || audioInfo.codecName === 'dts')) return 3;
     // 6.1 truehd 左前、右前、前中置、左后、右后、后中置、重低音
     // if (audioInfo.channels === 7
     //   && (audioInfo.codecName === 'truehd')) return 4;
