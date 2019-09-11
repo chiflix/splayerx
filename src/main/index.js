@@ -337,6 +337,10 @@ function createBrowsingWindow(args) {
     browsingWindow.on('focus', () => {
       menuService.updateFocusedWindow(false, mainWindow && mainWindow.isVisible());
     });
+    browsingWindow.on('move', throttle(() => {
+      if (!mainWindow) return;
+      mainWindow.send('update-pip-pos', browsingWindow.getPosition());
+    }, 100));
   });
   browsingWindow.on('leave-full-screen', () => {
     if (hideBrowsingWindow) {

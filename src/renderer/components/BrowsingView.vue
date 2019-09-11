@@ -315,15 +315,8 @@ export default {
       570,
       375,
     ]);
-    this.$electron.ipcRenderer.send(
-      'callMainWindowMethod',
-      'setSize',
-      this.browsingSize,
-    );
-    this.$electron.ipcRenderer.send(
-      'callMainWindowMethod',
-      'setPosition',
-      this.browsingPos,
+    windowRectService.calculateWindowRect(
+      this.browsingSize, true, this.winPos.concat(this.winSize),
     );
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [
       0,
@@ -369,6 +362,9 @@ export default {
     });
     this.$electron.ipcRenderer.on('handle-danmu-display', () => {
       this.handleDanmuDisplay();
+    });
+    this.$electron.ipcRenderer.on('update-pip-pos', (e: Event, pos: number[]) => {
+      this.$store.dispatch('updatePipPos', pos);
     });
     this.$electron.ipcRenderer.on('quit', () => {
       this.quit = true;
@@ -814,26 +810,6 @@ export default {
         .then((result: CSSStyleDeclaration) => {
           const videoAspectRatio = parseFloat(result.width as string)
             / parseFloat(result.height as string);
-          if (useDefaultPosition) {
-            this.$store
-              .dispatch('updatePipPos', [
-                window.screen.availLeft + 70,
-                window.screen.availTop + window.screen.availHeight - 236 - 70,
-              ])
-              .then(() => {
-                this.$electron.ipcRenderer.send(
-                  'callBrowsingWindowMethod',
-                  'setPosition',
-                  [
-                    window.screen.availLeft + 70,
-                    window.screen.availTop
-                      + window.screen.availHeight
-                      - 236
-                      - 70,
-                  ],
-                );
-              });
-          }
           const calculateSize = this.pipSize[0] / this.pipSize[1] >= videoAspectRatio
             ? [
               this.pipSize[0],
@@ -849,13 +825,48 @@ export default {
             pipSize: calculateSize,
             pipPos: this.pipPos,
           };
+          if (useDefaultPosition) {
+            this.$store
+              .dispatch('updatePipPos', [
+                window.screen.availLeft + 70,
+                window.screen.availTop + window.screen.availHeight - calculateSize[1] - 70,
+              ])
+              .then(() => {
+                this.$electron.ipcRenderer.send(
+                  'callBrowsingWindowMethod',
+                  'setPosition',
+                  [
+                    window.screen.availLeft + 70,
+                    window.screen.availTop
+                      + window.screen.availHeight
+                      - calculateSize[1]
+                      - 70,
+                  ],
+                );
+              });
+          }
         });
     },
     handleWindowChangeExitPip() {
-      const newDisplayId = this.$electron.remote.screen.getDisplayNearestPoint({
-        x: this.winPos[0],
-        y: this.winPos[1],
-      }).id;
+      const screen = this.$electron.remote.screen.getDisplayNearestPoint({
+        x: this.pipPos[0],
+        y: this.pipPos[1],
+      });
+      const rect = screen.workArea;
+      const newDisplayId = screen.id;
+      if (this.oldDisplayId !== newDisplayId) {
+        windowRectService.calculateWindowRect(
+          this.browsingSize,
+          true,
+          this.pipPos.concat(this.pipSize),
+          undefined,
+          undefined,
+          [rect.x, rect.y, rect.width, rect.height],
+        );
+      } else {
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', this.browsingSize);
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', this.browsingPos);
+      }
       this.oldDisplayId = newDisplayId;
     },
     handleDanmuDisplay() {

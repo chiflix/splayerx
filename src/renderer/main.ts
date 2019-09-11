@@ -401,7 +401,8 @@ new Vue({
     });
     asyncStorage.get('browsingPip').then((data) => {
       this.$store.dispatch('updatePipSize', data.pipSize || this.pipSize);
-      this.$store.dispatch('updatePipPos', data.pipPos || this.pipPos);
+      this.$store.dispatch('updatePipPos', data.pipPos || [window.screen.availLeft + 70,
+        window.screen.availTop + window.screen.availHeight - 236 - 70]);
     });
     this.$bus.$on('delete-file', () => {
       this.menuService.addRecentPlayItems();
@@ -783,11 +784,7 @@ new Vue({
       const channels = ['iqiyi', 'bilibili', 'youtube'];
       channels.forEach((channel: string, index: number) => {
         this.menuService.on(`favourite.${channel}`, () => {
-          asyncStorage.get('browsingPip').then((data) => {
-            this.$store.dispatch('updatePipSize', data.pipSize || this.pipSize);
-            this.$store.dispatch('updatePipPos', data.pipPos || this.pipPos);
-            this.$electron.ipcRenderer.send('add-browsing', { size: data.pipSize || this.pipSize, position: data.pipPos || this.pipPos });
-          });
+          this.$electron.ipcRenderer.send('add-browsing', { size: this.pipSize, position: this.pipPos });
           this.$electron.ipcRenderer.send('change-channel', { url: urls[index] });
           this.$router.push({
             name: 'browsing-view',
