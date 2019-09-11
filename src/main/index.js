@@ -580,6 +580,7 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('mousemove', () => {
     if (browsingWindow && browsingWindow.isFocused()) {
       pipControlView.webContents.executeJavaScript(InjectJSManager.updatePipControlState(true));
+      titlebarView.webContents.executeJavaScript(InjectJSManager.updatePipTitlebarToShow(true));
       if (pipTimer) {
         clearTimeout(pipTimer);
       }
@@ -587,6 +588,8 @@ function registerMainWindowEvent(mainWindow) {
         if (pipControlView && !pipControlView.isDestroyed()) {
           pipControlView.webContents
             .executeJavaScript(InjectJSManager.updatePipControlState(false));
+          titlebarView.webContents
+            .executeJavaScript(InjectJSManager.updatePipTitlebarToShow(false));
         }
       }, 3000);
     }
@@ -612,6 +615,7 @@ function registerMainWindowEvent(mainWindow) {
         clearTimeout(pipTimer);
       }
       pipControlView.webContents.executeJavaScript(InjectJSManager.updatePipControlState(false));
+      titlebarView.webContents.executeJavaScript(InjectJSManager.updatePipTitlebarToShow(false));
     }
   });
   ipcMain.on('maximizable', (evt, val) => {
@@ -745,6 +749,7 @@ function registerMainWindowEvent(mainWindow) {
       browserViewManager.pauseVideo(mainWindow.getBrowserView());
       mainWindow.hide();
     }
+    browsingWindow.webContents.closeDevTools();
     browsingWindow.setAspectRatio(args.pipInfo.aspectRatio);
     browsingWindow.setMinimumSize(args.pipInfo.minimumSize[0], args.pipInfo.minimumSize[1]);
     mainBrowser.page.view.setBounds({

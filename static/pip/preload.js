@@ -51,23 +51,49 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
   }, true);
+
+  // eslint-disable-next-line complexity
   window.addEventListener('mousedown', (evt) => {
-    mousedown = true;
-    offset = [evt.clientX, evt.clientY];
-    if (getRatio() !== 1) {
-      windowSize = remote.getCurrentWindow().getSize();
-    }
     if (!pipBtns && remote.getCurrentWindow()
       && remote.getCurrentWindow().getBrowserViews().length > 1) {
-      sendToHost('update-mouse-info', { offset, windowSize });
+      const url = window.location.href;
+      switch (true) {
+        case url.includes('bilibili'):
+          if (evt.target.tagName === 'VIDEO' || ['bilibili-player-video-top-title', 'bilibili-player-video-toast-top', 'bilibili-player-ending-panel', 'bilibili-player-electric-panel', 'bilibili-player-electric-panel-wrap'].includes(evt.target.classList[0])) {
+            offset = [evt.clientX, evt.clientY];
+            if (getRatio() !== 1) {
+              windowSize = remote.getCurrentWindow().getSize();
+            }
+          }
+          break;
+        case url.includes('youtube'):
+          if (evt.target.tagName === 'VIDEO' || ['ytp-ad-overlay-container', 'ytp-cued-thumbnail-overlay-image', 'ytp-upnext-paused', 'ytp-ad-text'].includes(evt.target.classList[0])) {
+            offset = [evt.clientX, evt.clientY];
+            if (getRatio() !== 1) {
+              windowSize = remote.getCurrentWindow().getSize();
+            }
+          }
+          break;
+        case url.includes('iqiyi'):
+          if (['VIDEO', 'CANVAS'].includes(evt.target.tagName)) {
+            offset = [evt.clientX, evt.clientY];
+            if (getRatio() !== 1) {
+              windowSize = remote.getCurrentWindow().getSize();
+            }
+          }
+          break;
+        default:
+          offset = [evt.clientX, evt.clientY];
+          if (getRatio() !== 1) {
+            windowSize = remote.getCurrentWindow().getSize();
+          }
+          break;
+      }
+      if (offset) {
+        mousedown = true;
+        sendToHost('update-mouse-info', { offset, windowSize });
+      }
     }
-  }, true);
-  window.addEventListener('mouseup', (evt) => {
-    if (isDragging && !pipBtns) evt.stopImmediatePropagation();
-    mousedown = false;
-    offset = null;
-    windowSize = null;
-    if (!pipBtns) sendToHost('update-mouse-info', { offset, windowSize });
   }, true);
   window.addEventListener('mousemove', (evt) => {
     if (!pipBtns && remote.getCurrentWindow()
@@ -78,7 +104,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (mousedown) isDragging = true;
   }, true);
   window.addEventListener('click', (evt) => {
-    if (isDragging) evt.stopImmediatePropagation();
+    if (isDragging && !pipBtns && offset) evt.stopImmediatePropagation();
+    mousedown = false;
     isDragging = false;
     offset = null;
     windowSize = null;
