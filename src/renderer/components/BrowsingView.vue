@@ -20,6 +20,7 @@
       :style="{ webkitAppRegion: isDarwin ? 'drag' : 'no-drag' }"
       v-show="headerToShow"
     />
+    <div class="border-bottom" />
     <div
       :style="{
         position: 'absolute',
@@ -1023,10 +1024,16 @@ export default {
   display: flex;
   flex-direction: column;
   background: rgba(255, 255, 255, 1);
-  border-bottom: 1px solid #F2F1F4;
   .web-view {
     flex: 1;
     background: rgba(255, 255, 255, 1);
+  }
+  .border-bottom {
+    position: absolute;
+    top: 39px;
+    width: 100vw;
+    height: 1px;
+    background-color: #F2F1F4;
   }
   .loading-state {
     width: 100%;

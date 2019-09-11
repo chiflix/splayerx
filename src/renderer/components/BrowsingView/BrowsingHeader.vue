@@ -121,6 +121,5 @@ export default {
   justify-content: space-between;
   align-items: center;
   background-color: #FFF;
-  border-bottom: 1px solid #F2F1F4;
 }
 </style>
