@@ -123,6 +123,7 @@ export default {
         e.returnValue = false;
         const size = electron.remote.getCurrentWindow().getSize();
         const position = electron.remote.getCurrentWindow().getPosition();
+
         asyncStorage.set('browsingPip', {
           pipSize: size,
           pipPos: position,
