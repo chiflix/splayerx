@@ -128,7 +128,7 @@ export default class Log implements ILog {
       Object.keys(message).forEach((key: string) => {
         scope.setExtra(key, message[key]);
       });
-      Sentry.captureException(label);
+      Sentry.captureMessage(label);
     });
   }
 }

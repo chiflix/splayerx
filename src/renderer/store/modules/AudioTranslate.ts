@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-05 16:03:32
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-09-11 18:05:09
+ * @Last Modified time: 2019-09-12 10:49:02
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @ts-ignore
@@ -26,6 +26,8 @@ import {
 import { log } from '@/libs/Log';
 import { LanguageCode } from '@/libs/language';
 import { addSubtitleItemsToList } from '@/services/storage/subtitle';
+import { Stream, CodecType } from '@/plugins/mediaTasks/mediaInfoQueue';
+import { getStreams } from '@/plugins/mediaTasks';
 
 let taskTimer: number;
 let timerCount: number;
@@ -108,6 +110,17 @@ const state = {
   failType: AudioTranslateFailType.Default,
 };
 
+const getCurrentAudioInfo = async (
+  currentAudioTrackId: number,
+  path: string,
+) => {
+  const streams = await getStreams(path);
+  const audioStreams = streams.filter((e: Stream) => e.codecType === CodecType.Audio);
+  const index = currentAudioTrackId - 2;
+  const audioInfo = (await isAudioCenterChannelEnabled()) ? audioStreams[index] : undefined;
+  log.debug('translate/audioInfo', audioInfo);
+  return audioInfo;
+};
 
 const taskCallback = (taskInfo: AITaskInfo) => {
   log.debug('AudioTranslate', taskInfo, 'audio-log');
@@ -286,9 +299,8 @@ const actions = {
     }
     commit(m.AUDIO_TRANSLATE_SAVE_KEY, `${getters.mediaHash}`);
     audioTranslateService.stop();
-    const audioInfo = (await isAudioCenterChannelEnabled())
-      ? getters.audioStreams[getters.currentAudioTrackId - 2] : undefined;
-    log.debug('translate/audioInfo', audioInfo);
+    // audio index in audio streams
+    const audioInfo = await getCurrentAudioInfo(getters.currentAudioTrackId, getters.originSrc);
     const grab = audioTranslateService.startJob({
       audioId: getters.currentAudioTrackId,
       audioInfo,
