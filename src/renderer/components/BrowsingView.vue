@@ -474,11 +474,14 @@ export default {
         window.screen.availWidth, window.screen.availHeight,
       ];
 
-      const boundbackPositon = (point: number, length: number, edge: number, edgeLength: number) => {
+      const boundbackPositon = (
+        point: number, length: number,
+        edge: number, edgeLength: number,
+      ) => {
         if (point < edge) return edge;
-        else if (point + length > edge + edgeLength) return edge + edgeLength - length;
+        if (point + length > edge + edgeLength) return edge + edgeLength - length;
         return point;
-      }
+      };
 
       position[0] = boundbackPositon(position[0], size[0], boundLeft, windowWidth);
       position[1] = boundbackPositon(position[1], size[1], boundTop, windowHeight);
