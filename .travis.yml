@@ -1,10 +1,8 @@
 sudo: required
-os:
-- osx
-dist: trusty
+os: osx
+osx_image: xcode11
 language: node_js
-node_js:
-- "12"
+node_js: "12"
 matrix:
   allow_failures:
 cache:
