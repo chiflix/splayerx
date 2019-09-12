@@ -52,6 +52,15 @@ export default class Bilibili {
         var isTheater = theater ? theater.style.height !== "auto" : true;
         if (!isTheater) {document.querySelector(".bilibili-player-video-btn-widescreen").click();};
         var wrapper = document.querySelector(".bilibili-player-video-wrap");
+        if (document.querySelector("#player_module")) {
+        document.querySelector("#player_module").style.width = "100%";
+        document.querySelector("#player_module").style.height = "100%";
+        document.querySelector("#player_module").style.position = "fixed";
+        document.querySelector(".media-wrapper").style.display = "none";
+        document.querySelector(".plp-r").style.display = "none";
+        Object.defineProperty(document.querySelector("#player_module").style, "width", {get: function(){return "100%"}, set: function(){}});
+        Object.defineProperty(document.querySelector("#player_module").style, "height", {get: function(){return "100%"}, set: function(){}});
+        }
         wrapper.style.position = "fixed";
         wrapper.style.left="0";
         wrapper.style.top="0";
@@ -65,6 +74,15 @@ export default class Bilibili {
       this.watcher = '';
       this.recover = 'document.querySelector(".bilibili-player-video-danmaku").style.opacity = "1";'
         + 'var wrapper = document.querySelector(".bilibili-player-video-wrap");'
+        + 'if (document.querySelector("#player_module")) {'
+        + 'document.querySelector("#player_module").style.position = "";'
+        + 'document.querySelector(".media-wrapper").style.display = "";'
+        + 'document.querySelector(".plp-r").style.display = "";'
+        + 'Object.defineProperty(document.querySelector("#player_module").style, "width", {get: function(){return this._width}, set: function(val){this._width = val;document.querySelector("#player_module").style.setProperty("width", val);}});'
+        + 'Object.defineProperty(document.querySelector("#player_module").style, "height", {get: function(){return this._height}, set: function(val){this._height = val;document.querySelector("#player_module").style.setProperty("height", val);}});'
+        + 'document.querySelector("#player_module").style.setProperty("width", "");'
+        + 'document.querySelector("#player_module").style.setProperty("height", "");'
+        + '}'
         + 'wrapper.style.position = "relative";'
         + 'wrapper.style.left="";'
         + 'wrapper.style.top="";'
