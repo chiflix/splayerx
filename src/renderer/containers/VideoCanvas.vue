@@ -214,6 +214,7 @@ export default {
       this.maskBackground = 'rgba(255, 255, 255, 0)';
       this.$ga.event('app', 'drop');
     });
+    this.$bus.$on('mask-highlight', (on: boolean) => { this.maskBackground = `rgba(255, 255, 255, ${on ? 0.18 : 0})`; });
     window.addEventListener('beforeunload', this.beforeUnloadHandler);
   },
   beforeDestroy() {
