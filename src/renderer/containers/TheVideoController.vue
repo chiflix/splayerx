@@ -212,6 +212,9 @@ export default {
       changeVolumeByMenu: false,
       subMenuShow: false,
       subMenuTimer: 0,
+      splashTimer: 0,
+      invokeAllWidgets: false,
+      invokeAllWidgetsTimer: 0,
     };
   },
   computed: {
@@ -234,9 +237,8 @@ export default {
       inputWheelDirection: iGT.GET_WHEEL_DIRECTION,
     }),
     showAllWidgets() {
-      if (this.isTranslateModalVisible) {
-        return false;
-      }
+      if (this.isTranslateModalVisible) return false;
+      if (this.invokeAllWidgets) return true;
       return !this.tempRecentPlaylistDisplayState
         && ((!this.mouseStopped && !this.mouseLeftWindow)
         || (!this.mouseLeftWindow && this.onOtherWidget)
@@ -468,6 +470,16 @@ export default {
     });
     this.$bus.$on('drag-leave', () => {
       this.dragOver = false;
+    });
+    this.$bus.$on('invoke-all-widgets', () => {
+      clearTimeout(this.splashTimer);
+      clearTimeout(this.invokeAllWidgetsTimer);
+
+      this.$bus.$emit('mask-highlight', true);
+      this.splashTimer = setTimeout(() => { this.$bus.$emit('mask-highlight', false); }, 300);
+
+      this.invokeAllWidgets = true;
+      this.invokeAllWidgetsTimer = setTimeout(() => { this.invokeAllWidgets = false; }, 3000);
     });
     this.$bus.$on('drop', () => {
       this.dragOver = false;

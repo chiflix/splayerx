@@ -970,6 +970,7 @@ new Vue({
       });
       this.menuService.on('window.keepPlayingWindowFront', () => {
         this.playingViewTop = !this.playingViewTop;
+        this.$bus.$emit('invoke-all-widgets');
       });
       this.menuService.on('window.fullscreen', () => {
         if (this.isFullScreen) {
