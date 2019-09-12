@@ -73,7 +73,6 @@ export default {
       this.windowSize = null;
     });
     window.addEventListener('focus', () => {
-      electron.remote.getCurrentWindow().getBrowserViews()[0].webContents.focus();
       const cursorPoint = electron.remote.screen.getCursorScreenPoint();
       const windowPos = electron.remote.getCurrentWindow().getPosition();
       this.offset = [cursorPoint.x - windowPos[0], cursorPoint.y - windowPos[1]];
@@ -124,6 +123,7 @@ export default {
         e.returnValue = false;
         const size = electron.remote.getCurrentWindow().getSize();
         const position = electron.remote.getCurrentWindow().getPosition();
+
         asyncStorage.set('browsingPip', {
           pipSize: size,
           pipPos: position,

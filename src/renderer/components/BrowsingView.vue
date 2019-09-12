@@ -20,6 +20,7 @@
       :style="{ webkitAppRegion: isDarwin ? 'drag' : 'no-drag' }"
       v-show="headerToShow"
     />
+    <div class="border-bottom" />
     <div
       :style="{
         position: 'absolute',
@@ -139,23 +140,24 @@ export default {
     isDarwin() {
       return process.platform === 'darwin';
     },
-    youtubePip() {
-      return InjectJSManager.getPipByChannel('youtube');
+    pipArgs() {
+      switch (this.pipType) {
+        case 'youtube':
+          return { channel: 'youtube' };
+        case 'bilibili':
+          return {
+            channel: 'bilibili', type: this.bilibiliType, barrageState: this.barrageOpen, winSize: this.pipSize,
+          };
+        case 'iqiyi':
+          return { channel: 'iqiyi', barrageState: this.barrageOpen, winSize: this.pipSize };
+        case 'others':
+          return { channel: 'others', winSize: this.pipSize };
+        default:
+          return { channel: 'others', winSize: this.pipSize };
+      }
     },
-    iqiyiPip() {
-      return InjectJSManager.getPipByChannel('iqiyi', this.barrageOpen, this.pipSize);
-    },
-    iqiyiBarrage() {
-      return InjectJSManager.getPipBarrage('iqiyi', this.barrageOpen);
-    },
-    bilibiliPip() {
-      return InjectJSManager.getPipByChannel('bilibili', this.bilibiliType, this.barrageOpen, this.pipSize);
-    },
-    bilibiliBarrage() {
-      return InjectJSManager.getPipBarrage('bilibili', this.barrageOpen, this.bilibiliType);
-    },
-    othersPip() {
-      return InjectJSManager.getPipByChannel('others', this.pipSize);
+    pip() {
+      return InjectJSManager.getPipByChannel(this.pipArgs);
     },
     hasVideo() {
       return this.webInfo.hasVideo;
@@ -435,7 +437,7 @@ export default {
   beforeDestroy() {
     this.removeListener();
     this.$store.dispatch('updateBrowsingSize', this.winSize);
-    this.$store.dispatch('updateBrowsingPos', this.winPos);
+    this.boundBackPosition();
     this.updateIsPip(false);
     asyncStorage
       .set('browsing', {
@@ -464,6 +466,30 @@ export default {
     handlePageTitle(e: Event, title: string) {
       this.title = title;
     },
+    boundBackPosition() {
+      const position = this.winPos;
+      const size = this.winSize;
+
+      const [boundLeft, boundTop, windowWidth, windowHeight] = [
+        window.screen.availLeft, window.screen.availTop,
+        window.screen.availWidth, window.screen.availHeight,
+      ];
+
+      const boundbackPositon = (
+        point: number, length: number,
+        edge: number, edgeLength: number,
+      ) => {
+        if (point < edge) return edge;
+        if (point + length > edge + edgeLength) return edge + edgeLength - length;
+        return point;
+      };
+
+      position[0] = boundbackPositon(position[0], size[0], boundLeft, windowWidth);
+      position[1] = boundbackPositon(position[1], size[1], boundTop, windowHeight);
+
+
+      this.$store.dispatch('updateBrowsingPos', position);
+    },
     focusHandler() {
       this.menuService.updateFocusedWindow(true);
       this.updatePipState(this.webInfo.hasVideo);
@@ -491,7 +517,7 @@ export default {
       if (!this.asyncTasksDone) {
         e.returnValue = false;
         this.$store.dispatch('updateBrowsingSize', this.winSize);
-        this.$store.dispatch('updateBrowsingPos', this.winPos);
+        this.boundBackPosition();
         asyncStorage
           .set('browsing', {
             browsingSize: this.browsingSize,
@@ -862,13 +888,13 @@ export default {
         this.updateBarrageOpen(!this.barrageOpen);
         this.$electron.ipcRenderer.send(
           'handle-danmu-display',
-          this.iqiyiBarrage,
+          this.pip.iqiyiBarrageAdapt(this.barrageOpen),
         );
       } else if (this.pipType === 'bilibili') {
         this.updateBarrageOpen(!this.barrageOpen);
         this.$electron.ipcRenderer.send(
           'handle-danmu-display',
-          this.bilibiliBarrage,
+          this.pip.bilibiliBarrageAdapt(this.bilibiliType, this.barrageOpen),
         );
       }
     },
@@ -935,39 +961,39 @@ export default {
     },
     othersAdapter() {
       this.currentMainBrowserView()
-        .webContents.executeJavaScript(this.othersPip.adapter)
+        .webContents.executeJavaScript(this.pip.adapter)
         .then(() => {
           this.adaptFinished = true;
         });
     },
     othersWatcher() {
-      this.$electron.ipcRenderer.send('pip-watcher', this.othersPip.watcher);
+      this.$electron.ipcRenderer.send('pip-watcher', this.pip.watcher);
     },
     othersRecover() {
       this.$electron.remote
         .getCurrentWindow()
         .getBrowserViews()[0]
-        .webContents.executeJavaScript(this.othersPip.recover);
+        .webContents.executeJavaScript(this.pip.recover);
     },
     iqiyiAdapter() {
       this.currentMainBrowserView()
-        .webContents.executeJavaScript(this.iqiyiPip.adapter)
+        .webContents.executeJavaScript(this.pip.adapter)
         .then(() => {
           this.adaptFinished = true;
         });
     },
     iqiyiWatcher() {
-      this.$electron.ipcRenderer.send('pip-watcher', this.iqiyiPip.watcher);
+      this.$electron.ipcRenderer.send('pip-watcher', this.pip.watcher);
     },
     iqiyiRecover() {
       this.$electron.remote
         .getCurrentWindow()
         .getBrowserViews()[0]
-        .webContents.executeJavaScript(this.iqiyiPip.recover);
+        .webContents.executeJavaScript(this.pip.recover);
     },
     youtubeAdapter() {
       this.currentMainBrowserView()
-        .webContents.executeJavaScript(this.youtubePip.adapter)
+        .webContents.executeJavaScript(this.pip.adapter)
         .then(() => {
           this.adaptFinished = true;
         });
@@ -976,7 +1002,7 @@ export default {
       this.$electron.remote
         .getCurrentWindow()
         .getBrowserViews()[0]
-        .webContents.executeJavaScript(this.youtubePip.recover);
+        .webContents.executeJavaScript(this.pip.recover);
     },
     bilibiliAdapter() {
       this.currentMainBrowserView()
@@ -992,7 +1018,7 @@ export default {
         })
         .then(() => {
           this.currentMainBrowserView().webContents.executeJavaScript(
-            this.bilibiliPip.adapter,
+            this.pip.adapter,
           );
         })
         .then(() => {
@@ -1000,13 +1026,13 @@ export default {
         });
     },
     bilibiliWatcher() {
-      this.$electron.ipcRenderer.send('pip-watcher', this.bilibiliPip.watcher);
+      this.$electron.ipcRenderer.send('pip-watcher', this.pip.watcher);
     },
     bilibiliRecover() {
       this.$electron.remote
         .getCurrentWindow()
         .getBrowserViews()[0]
-        .webContents.executeJavaScript(this.bilibiliPip.recover);
+        .webContents.executeJavaScript(this.pip.recover);
     },
   },
 };
@@ -1023,10 +1049,16 @@ export default {
   display: flex;
   flex-direction: column;
   background: rgba(255, 255, 255, 1);
-  border-bottom: 1px solid #F2F1F4;
   .web-view {
     flex: 1;
     background: rgba(255, 255, 255, 1);
+  }
+  .border-bottom {
+    position: absolute;
+    top: 39px;
+    width: 100vw;
+    height: 1px;
+    background-color: #F2F1F4;
   }
   .loading-state {
     width: 100%;

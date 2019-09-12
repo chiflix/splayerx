@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-05 16:03:32
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-09-12 10:49:02
+ * @Last Modified time: 2019-09-12 14:40:24
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @ts-ignore
@@ -26,7 +26,6 @@ import {
 import { log } from '@/libs/Log';
 import { LanguageCode } from '@/libs/language';
 import { addSubtitleItemsToList } from '@/services/storage/subtitle';
-import { Stream, CodecType } from '@/plugins/mediaTasks/mediaInfoQueue';
 import { getStreams } from '@/plugins/mediaTasks';
 
 let taskTimer: number;
@@ -115,9 +114,11 @@ const getCurrentAudioInfo = async (
   path: string,
 ) => {
   const streams = await getStreams(path);
-  const audioStreams = streams.filter((e: Stream) => e.codecType === CodecType.Audio);
-  const index = currentAudioTrackId - 2;
-  const audioInfo = (await isAudioCenterChannelEnabled()) ? audioStreams[index] : undefined;
+  // currentAudioTrackId 是从stream的索引是从1开始的
+  const index = currentAudioTrackId - 1;
+  log.debug('translate/track', currentAudioTrackId);
+  log.debug('translate/track', index);
+  const audioInfo = (await isAudioCenterChannelEnabled()) ? streams[index] : undefined;
   log.debug('translate/audioInfo', audioInfo);
   return audioInfo;
 };
