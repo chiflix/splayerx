@@ -167,10 +167,9 @@ export default {
       this.$emit('update-current-url', val);
     },
     showSidebar(val: boolean) {
-      const browserView = this.$electron.remote.getCurrentWindow().getBrowserViews()[0];
       if (!val) {
         setTimeout(() => {
-          browserView.setBounds({
+          this.currentMainBrowserView().setBounds({
             x: val ? 76 : 0,
             y: 40,
             width: val ? window.innerWidth - 76 : window.innerWidth,
@@ -178,7 +177,7 @@ export default {
           });
         }, 100);
       } else {
-        browserView.setBounds({
+        this.currentMainBrowserView().setBounds({
           x: val ? 76 : 0,
           y: 40,
           width: val ? window.innerWidth - 76 : window.innerWidth,
@@ -235,14 +234,8 @@ export default {
       this.addListenerToBrowser();
     },
     pipSize() {
-      if (this.isPip && this.pipType !== 'youtube') {
-        if (this.pipType === 'iqiyi') {
-          this.iqiyiWatcher();
-        } else if (this.pipType === 'bilibili') {
-          this.bilibiliWatcher();
-        } else {
-          this.othersWatcher();
-        }
+      if (this.isPip) {
+        this.$electron.ipcRenderer.send('pip-watcher', this.pip.watcher);
       }
     },
     loadingState(val: boolean) {
@@ -262,10 +255,7 @@ export default {
         setTimeout(() => {
           this.showProgress = false;
           this.progress = 0;
-          const loadUrl = this.$electron.remote
-            .getCurrentWindow()
-            .getBrowserViews()[0]
-            .webContents.getURL();
+          const loadUrl = this.currentMainBrowserView().webContents.getURL();
           const hostname = urlParseLax(loadUrl).hostname;
           let channel = hostname.slice(
             hostname.indexOf('.') + 1,
@@ -274,33 +264,27 @@ export default {
           if (loadUrl.includes('youtube')) {
             channel = 'youtube.com';
           }
-          this.$electron.remote
-            .getCurrentWindow()
-            .getBrowserViews()[0]
-            .webContents.executeJavaScript(
-              InjectJSManager.calcVideoNum(),
-              (r: number) => {
-                this.webInfo.hasVideo = channel === 'youtube.com' && !getVideoId(loadUrl).id
-                  ? false
-                  : !!r;
-              },
-            );
+          this.currentMainBrowserView().webContents.executeJavaScript(
+            InjectJSManager.calcVideoNum(),
+            (r: number) => {
+              this.webInfo.hasVideo = channel === 'youtube.com' && !getVideoId(loadUrl).id
+                ? false
+                : !!r;
+            },
+          );
         }, 1000);
       }
     },
     headerToShow(val: boolean) {
-      const currentView = this.$electron.remote
-        .getCurrentWindow()
-        .getBrowserViews()[0];
       if (!val) {
-        currentView.setBounds({
+        this.currentMainBrowserView().setBounds({
           x: 0,
           y: 0,
           width: window.screen.width,
           height: window.screen.height,
         });
       } else {
-        currentView.setBounds({
+        this.currentMainBrowserView().setBounds({
           x: this.showSidebar ? 76 : 0,
           y: 40,
           width: this.showSidebar ? this.winSize[0] - 76 : this.winSize[0],
@@ -325,8 +309,7 @@ export default {
   mounted() {
     this.menuService = new MenuService();
 
-    this.title = this.$electron.remote.getCurrentWindow()
-      .getBrowserViews()[0].webContents.getTitle();
+    this.title = this.currentMainBrowserView().webContents.getTitle();
 
     this.$bus.$on('toggle-reload', this.handleUrlReload);
     this.$bus.$on('toggle-back', this.handleUrlBack);
@@ -389,8 +372,7 @@ export default {
         e: Event,
         state: { url: string; canGoBack: boolean; canGoForward: boolean },
       ) => {
-        this.title = this.$electron.remote.getCurrentWindow()
-          .getBrowserViews()[0].webContents.getTitle();
+        this.title = this.currentMainBrowserView().webContents.getTitle();
         this.currentUrl = urlParseLax(state.url).href;
         this.removeListener();
         this.addListenerToBrowser();
@@ -398,10 +380,7 @@ export default {
         this.webInfo.canGoForward = state.canGoForward;
         this.updateCanGoBack(this.webInfo.canGoBack);
         this.updateCanGoForward(this.webInfo.canGoForward);
-        const loadUrl = this.$electron.remote
-          .getCurrentWindow()
-          .getBrowserViews()[0]
-          .webContents.getURL();
+        const loadUrl = this.currentMainBrowserView().webContents.getURL();
         const hostname = urlParseLax(loadUrl).hostname;
         let channel = hostname.slice(
           hostname.indexOf('.') + 1,
@@ -411,19 +390,15 @@ export default {
           channel = 'youtube.com';
         }
         this.startLoading = false;
-        if (!this.$electron.remote.getCurrentWindow()
-          .getBrowserViews()[0].webContents.isLoading()) {
-          this.$electron.remote
-            .getCurrentWindow()
-            .getBrowserViews()[0]
-            .webContents.executeJavaScript(
-              InjectJSManager.calcVideoNum(),
-              (r: number) => {
-                this.webInfo.hasVideo = channel === 'youtube.com' && !getVideoId(loadUrl).id
-                  ? false
-                  : !!r;
-              },
-            );
+        if (!this.currentMainBrowserView().webContents.isLoading()) {
+          this.currentMainBrowserView().webContents.executeJavaScript(
+            InjectJSManager.calcVideoNum(),
+            (r: number) => {
+              this.webInfo.hasVideo = channel === 'youtube.com' && !getVideoId(loadUrl).id
+                ? false
+                : !!r;
+            },
+          );
         }
         this.createTouchBar(this.webInfo.hasVideo);
       },
@@ -467,20 +442,17 @@ export default {
       this.updateCanGoBack(this.webInfo.canGoBack);
       this.updateCanGoForward(this.webInfo.canGoForward);
       this.updateReload(true);
-      const loadUrl = this.$electron.remote
-        .getCurrentWindow()
-        .getBrowserViews()[0]
-        .webContents.getURL();
+      const loadUrl = this.currentMainBrowserView().webContents.getURL();
       const hostname = urlParseLax(loadUrl).hostname;
       let channel = hostname.slice(hostname.indexOf('.') + 1, hostname.length);
       if (loadUrl.includes('youtube')) {
         channel = 'youtube.com';
       }
-      const view = this.$electron.remote.getCurrentWindow().getBrowserViews()[0];
-      if (view) {
-        view.webContents.executeJavaScript(InjectJSManager.calcVideoNum(), (r: number) => {
-          this.webInfo.hasVideo = channel === 'youtube.com' && !getVideoId(loadUrl).id ? false : !!r;
-        });
+      if (this.currentMainBrowserView()) {
+        this.currentMainBrowserView().webContents
+          .executeJavaScript(InjectJSManager.calcVideoNum(), (r: number) => {
+            this.webInfo.hasVideo = channel === 'youtube.com' && !getVideoId(loadUrl).id ? false : !!r;
+          });
       }
     },
     beforeUnloadHandler(e: BeforeUnloadEvent) {
@@ -586,7 +558,7 @@ export default {
       }
     },
     addListenerToBrowser() {
-      const view = this.$electron.remote.getCurrentWindow().getBrowserViews()[0];
+      const view = this.currentMainBrowserView();
       if (view) {
         view.webContents.addListener('ipc-message', this.ipcMessage);
         view.webContents.addListener('page-title-updated', this.handlePageTitle);
@@ -598,7 +570,7 @@ export default {
       }
     },
     removeListener() {
-      const view = this.$electron.remote.getCurrentWindow().getBrowserViews()[0];
+      const view = this.currentMainBrowserView();
       if (view) {
         view.webContents.removeListener(
           'did-stop-loading',
@@ -684,10 +656,7 @@ export default {
     },
     domReady() {
       window.focus();
-      this.$electron.remote
-        .getCurrentWindow()
-        .getBrowserViews()[0]
-        .webContents.focus();
+      this.currentMainBrowserView().webContents.focus();
     },
     didStopLoading() {
       this.loadingState = false;
@@ -780,18 +749,37 @@ export default {
       const parseUrl = urlParseLax(
         this.currentMainBrowserView().webContents.getURL(),
       );
-      if (parseUrl.hostname.includes('youtube')) {
-        this.pipType = 'youtube';
-        this.youtubeAdapter();
-      } else if (parseUrl.hostname.includes('bilibili')) {
-        this.pipType = 'bilibili';
-        this.bilibiliAdapter();
-      } else if (parseUrl.hostname.includes('iqiyi')) {
-        this.pipType = 'iqiyi';
-        this.iqiyiAdapter();
+      const channels = ['youtube', 'bilibili', 'iqiyi'];
+      this.pipType = 'others';
+      channels.forEach((channel: string) => {
+        if (parseUrl.hostname.includes(channel)) this.pipType = channel;
+      });
+      if (this.pipType === 'bilibili') {
+        this.currentMainBrowserView()
+          .webContents.executeJavaScript(InjectJSManager.bilibiliFindType())
+          .then((r: (HTMLElement | null)[]) => {
+            this.bilibiliType = [
+              'bangumi',
+              'videoStreaming',
+              'iframeStreaming',
+              'iframeStreaming',
+              'video',
+            ][r.findIndex(i => i)] || 'others';
+          })
+          .then(() => {
+            this.currentMainBrowserView().webContents.executeJavaScript(
+              this.pip.adapter,
+            );
+          })
+          .then(() => {
+            this.adaptFinished = true;
+          });
       } else {
-        this.pipType = 'others';
-        this.othersAdapter();
+        this.currentMainBrowserView()
+          .webContents.executeJavaScript(this.pip.adapter)
+          .then(() => {
+            this.adaptFinished = true;
+          });
       }
     },
     currentMainBrowserView() {
@@ -897,7 +885,7 @@ export default {
       }
     },
     handleUrlReload() {
-      const view = this.$electron.remote.getCurrentWindow().getBrowserViews()[0];
+      const view = this.currentMainBrowserView();
       if (view) {
         if (!this.loadingState) {
           this.loadingState = true;
@@ -919,15 +907,8 @@ export default {
       this.asyncTasksDone = false;
       this.isGlobal = false;
       this.handleWindowChangeExitPip();
-      if (this.pipType === 'youtube') {
-        this.youtubeRecover();
-      } else if (this.pipType === 'bilibili') {
-        this.bilibiliRecover();
-      } else if (this.pipType === 'iqiyi') {
-        this.iqiyiRecover();
-      } else {
-        this.othersRecover();
-      }
+      this.currentMainBrowserView().webContents.executeJavaScript(this.pip.recover);
+      this.pipType = '';
     },
     handleEnterPip(isGlobal: boolean) {
       if (this.webInfo.hasVideo) {
@@ -944,81 +925,6 @@ export default {
         this.exitPipOperation();
         this.updateIsPip(false);
       }
-    },
-    othersAdapter() {
-      this.currentMainBrowserView()
-        .webContents.executeJavaScript(this.pip.adapter)
-        .then(() => {
-          this.adaptFinished = true;
-        });
-    },
-    othersWatcher() {
-      this.$electron.ipcRenderer.send('pip-watcher', this.pip.watcher);
-    },
-    othersRecover() {
-      this.$electron.remote
-        .getCurrentWindow()
-        .getBrowserViews()[0]
-        .webContents.executeJavaScript(this.pip.recover);
-    },
-    iqiyiAdapter() {
-      this.currentMainBrowserView()
-        .webContents.executeJavaScript(this.pip.adapter)
-        .then(() => {
-          this.adaptFinished = true;
-        });
-    },
-    iqiyiWatcher() {
-      this.$electron.ipcRenderer.send('pip-watcher', this.pip.watcher);
-    },
-    iqiyiRecover() {
-      this.$electron.remote
-        .getCurrentWindow()
-        .getBrowserViews()[0]
-        .webContents.executeJavaScript(this.pip.recover);
-    },
-    youtubeAdapter() {
-      this.currentMainBrowserView()
-        .webContents.executeJavaScript(this.pip.adapter)
-        .then(() => {
-          this.adaptFinished = true;
-        });
-    },
-    youtubeRecover() {
-      this.$electron.remote
-        .getCurrentWindow()
-        .getBrowserViews()[0]
-        .webContents.executeJavaScript(this.pip.recover);
-    },
-    bilibiliAdapter() {
-      this.currentMainBrowserView()
-        .webContents.executeJavaScript(InjectJSManager.bilibiliFindType())
-        .then((r: (HTMLElement | null)[]) => {
-          this.bilibiliType = [
-            'bangumi',
-            'videoStreaming',
-            'iframeStreaming',
-            'iframeStreaming',
-            'video',
-          ][r.findIndex(i => i)] || 'others';
-        })
-        .then(() => {
-          this.currentMainBrowserView().webContents.executeJavaScript(
-            this.pip.adapter,
-          );
-        })
-        .then(() => {
-          this.adaptFinished = true;
-        });
-    },
-    bilibiliWatcher() {
-      this.$electron.ipcRenderer.send('pip-watcher', this.pip.watcher);
-    },
-    bilibiliRecover() {
-      this.$electron.remote
-        .getCurrentWindow()
-        .getBrowserViews()[0]
-        .webContents.executeJavaScript(this.pip.recover);
     },
   },
 };
