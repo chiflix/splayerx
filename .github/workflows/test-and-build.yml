@@ -1,0 +1,26 @@
+name: Test and Build SPlayer
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: macOS-latest
+
+    strategy:
+      matrix:
+        node-version: [12.x]
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - name: npm install, test, and build
+      run: |
+        npm install
+        npm test
+        npm run build --if-present
+      env:
+        CI: true
