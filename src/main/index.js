@@ -477,6 +477,8 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('pip-window-fullscreen', () => {
     if (browsingWindow && browsingWindow.isFocused()) {
       browsingWindow.setFullScreen(!browsingWindow.isFullScreen());
+      titlebarView.webContents
+        .executeJavaScript(InjectJSManager.updateFullScreenIcon(browsingWindow.isFullScreen()));
     }
   });
   ipcMain.on('pip-window-close', (evt, args) => {
@@ -864,6 +866,8 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('key-events', (e, keyCode) => {
     if (keyCode === 13) {
       browsingWindow.setFullScreen(!browsingWindow.isFullScreen());
+      titlebarView.webContents
+        .executeJavaScript(InjectJSManager.updateFullScreenIcon(browsingWindow.isFullScreen()));
     } else {
       browsingWindow.getBrowserViews()[0].webContents
         .executeJavaScript(InjectJSManager.emitKeydownEvent(keyCode));

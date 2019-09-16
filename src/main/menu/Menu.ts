@@ -981,7 +981,7 @@ export default class Menubar {
     }
     const label = this.$t(arg1.label);
 
-    const fullScreenAccelerator = process.platform === 'darwin' ? 'CmdOrCtrl+Shift+F' : 'F11';
+    const fullScreenAccelerator = process.platform === 'darwin' ? 'Cmd+Ctrl+F' : 'F11';
     const finalAccelerator = arg1.id === 'window.fullscreen' ? fullScreenAccelerator : arg1.accelerator;
     const options: Electron.MenuItemConstructorOptions = {
       id: arg1.id,

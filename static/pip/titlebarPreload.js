@@ -20,14 +20,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const max = document.querySelector('.titlebarMax');
   if (titlebar) {
     titlebar.addEventListener('dblclick', () => ipcRenderer.send('mouseup', 'max'));
-    titlebar.style.visibility = 'visible';
-    titlebar.addEventListener('mousemove', () => {
+    titlebar.style.display = 'flex';
+    document.addEventListener('mousemove', () => {
       if (pipTimer) clearTimeout(pipTimer);
       ipcRenderer.send('pip-btn-mousemove');
-      titlebar.style.visibility = 'visible';
+      titlebar.style.display = 'flex';
     });
     pipTimer = setTimeout(() => {
-      titlebar.style.visibility = 'hidden';
+      titlebar.style.display = 'none';
     }, 3000);
   }
   if (isDarwin) {

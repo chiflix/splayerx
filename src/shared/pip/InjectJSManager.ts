@@ -48,7 +48,7 @@ class InjectJSManager implements IInjectJSManager {
   }
 
   public updatePipTitlebarToShow(shouldShow: boolean): string {
-    return `document.querySelector(".titlebar").style.visibility = ${shouldShow} ? "visible" : "hidden";`;
+    return `document.querySelector(".titlebar").style.display = ${shouldShow} ? "flex" : "none";`;
   }
 
   public updateTitlebarState(className: string, state: boolean): string {

@@ -37,8 +37,8 @@ export default {
   mounted() {
     window.addEventListener('keydown', (e) => {
       if (e.keyCode === 13) {
-        electron.remote.getCurrentWindow()
-          .setFullScreen(!electron.remote.getCurrentWindow().isFullScreen());
+        const isFullScreen = electron.remote.getCurrentWindow().isFullScreen();
+        electron.ipcRenderer.send('mouseup', isFullScreen ? 'recover' : 'full');
       }
     });
     electron.ipcRenderer.on('remove-pip-listener', () => {
