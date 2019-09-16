@@ -215,7 +215,8 @@ export default {
       this.$event.emit('side-bar-mouseup');
     },
     handleDbClick() {
-      if (!this.isMaximized) {
+      const browserWindow = this.$electron.remote.getCurrentWindow();
+      if (!browserWindow.isMaximized()) {
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'maximize');
       } else {
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'unmaximize');
