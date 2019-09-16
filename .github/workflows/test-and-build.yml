@@ -4,13 +4,11 @@ on: [push]
 
 jobs:
   build:
-
-    runs-on: macOS-latest
-
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        os: [macOS-latest, windows-latest]
         node-version: [12.x]
-
     steps:
     - uses: actions/checkout@v1
     - name: Use Node.js ${{ matrix.node-version }}
