@@ -1,6 +1,6 @@
 name: Test and Build SPlayer
 
-on: [push]
+on: [pull_request]
 
 jobs:
   build:
