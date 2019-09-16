@@ -346,6 +346,7 @@ function createBrowsingWindow(args) {
     if (hideBrowsingWindow) {
       hideBrowsingWindow = false;
       browsingWindow.hide();
+      mainWindow.focus();
     }
   });
 }
@@ -856,8 +857,12 @@ function registerMainWindowEvent(mainWindow) {
     routeName = route;
   });
   ipcMain.on('key-events', (e, keyCode) => {
-    browsingWindow.getBrowserViews()[0].webContents
-      .executeJavaScript(InjectJSManager.emitKeydownEvent(keyCode));
+    if (keyCode === 13) {
+      browsingWindow.setFullScreen(!browsingWindow.isFullScreen());
+    } else {
+      browsingWindow.getBrowserViews()[0].webContents
+        .executeJavaScript(InjectJSManager.emitKeydownEvent(keyCode));
+    }
   });
   ipcMain.on('drop-subtitle', (event, args) => {
     if (!mainWindow || mainWindow.webContents.isDestroyed()) return;

@@ -816,7 +816,7 @@ export default class Menubar {
 
       const checkForUpdates = this.createMenuItem('msg.splayerx.checkForUpdates', () => {
         app.emit('check-for-updates');
-      }, undefined, true);
+      }, undefined, true, undefined, 'splayerx.checkForUpdates');
 
       helpMenu.append(checkForUpdates);
 
@@ -931,6 +931,7 @@ export default class Menubar {
     accelerator?: string, enabled?: boolean, checked?: boolean, id?: string
   ): Electron.MenuItem
 
+  // eslint-disable-next-line complexity
   private createMenuItem(
     arg1: string | IMenubarMenuItemAction,
     click?: (menuItem: Electron.MenuItem) => void,
@@ -980,6 +981,8 @@ export default class Menubar {
     }
     const label = this.$t(arg1.label);
 
+    const fullScreenAccelerator = process.platform === 'darwin' ? 'CmdOrCtrl+Shift+F' : 'F11';
+    const finalAccelerator = arg1.id === 'window.fullscreen' ? fullScreenAccelerator : arg1.accelerator;
     const options: Electron.MenuItemConstructorOptions = {
       id: arg1.id,
       label,
@@ -990,7 +993,7 @@ export default class Menubar {
         app.emit('menu-create-main-window', id);
       },
       enabled: arg1.enabled,
-      accelerator: arg1.accelerator,
+      accelerator: finalAccelerator,
       icon: menuIcon,
     };
 

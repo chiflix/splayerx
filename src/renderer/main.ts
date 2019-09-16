@@ -499,13 +499,15 @@ new Vue({
             this.$bus.$emit('open-url-show', true);
           }
           break;
-        case 70:
-          if (this.isFullScreen) {
-            this.$bus.$emit('off-fullscreen');
-            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
-          } else {
-            this.$bus.$emit('to-fullscreen');
-            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [true]);
+        case 13:
+          if (this.currentRouteName === 'playing-view') {
+            if (this.isFullScreen) {
+              this.$bus.$emit('off-fullscreen');
+              this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
+            } else {
+              this.$bus.$emit('to-fullscreen');
+              this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [true]);
+            }
           }
           break;
         default:

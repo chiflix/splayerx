@@ -48,11 +48,11 @@ class InjectJSManager implements IInjectJSManager {
   }
 
   public updatePipTitlebarToShow(shouldShow: boolean): string {
-    return `document.querySelector(".titlebar").style.display = ${shouldShow} ? "flex" : "none";`;
+    return `document.querySelector(".titlebar").style.visibility = ${shouldShow} ? "visible" : "hidden";`;
   }
 
   public updateTitlebarState(className: string, state: boolean): string {
-    return `document.querySelector(${className}).style.display = ${state} ? "block" : "none";`;
+    return `document.querySelector("${className}").style.display = ${state} ? "block" : "none";`;
   }
 
   public updateFullScreenIcon(isFullScreen: boolean): string {

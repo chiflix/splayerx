@@ -246,7 +246,7 @@ export default {
         if (this.refreshButton) {
           this.refreshButton.icon = this.createIcon('touchBar/stopRefresh.png');
         }
-        this.showProgress = true;
+        if (!this.currentUrl.includes('youtube')) this.showProgress = true;
         this.progress = 70;
       } else {
         if (this.refreshButton) {
@@ -309,7 +309,7 @@ export default {
   },
   mounted() {
     this.menuService = new MenuService();
-
+    this.menuService.updateMenuItemEnabled('splayerx.checkForUpdates', false);
     this.title = this.currentMainBrowserView().webContents.getTitle();
 
     this.$bus.$on('toggle-reload', this.handleUrlReload);
@@ -418,6 +418,7 @@ export default {
         pipMode: this.pipMode,
       })
       .finally(() => {
+        this.menuService.updateMenuItemEnabled('splayerx.checkForUpdates', true);
         window.removeEventListener('beforeunload', this.beforeUnloadHandler);
         window.removeEventListener('focus', this.focusHandler);
         this.$electron.ipcRenderer.send('remove-browser');

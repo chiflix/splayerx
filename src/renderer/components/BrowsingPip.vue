@@ -35,6 +35,12 @@ export default {
     }
   },
   mounted() {
+    window.addEventListener('keydown', (e) => {
+      if (e.keyCode === 13) {
+        electron.remote.getCurrentWindow()
+          .setFullScreen(!electron.remote.getCurrentWindow().isFullScreen());
+      }
+    });
     electron.ipcRenderer.on('remove-pip-listener', () => {
       const view = electron.remote.getCurrentWindow().getBrowserViews()[0];
       if (view) {
