@@ -70,7 +70,7 @@ class InjectJSManager implements IInjectJSManager {
   public updateWinMaxIcon(isMaximize: boolean): string {
     return `document.querySelector(".titlebarMax").style.display = ${isMaximize} ? "none" : "block";
       document.querySelector(".titlebarUnMax").style.display = ${isMaximize} ? "block" : "none";
-      document.querySelector(".titlebarRecover").style.display = ${isMaximize} ? "none" : "block";`;
+      document.querySelector(".titlebarRecover").style.display = "none";`;
   }
 
   public updateBarrageState(barrageState: boolean, opacity: number): string {

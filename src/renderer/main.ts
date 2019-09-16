@@ -972,12 +972,16 @@ new Vue({
         this.$bus.$emit('invoke-all-widgets');
       });
       this.menuService.on('window.fullscreen', () => {
-        if (this.isFullScreen) {
-          this.$bus.$emit('off-fullscreen');
-          this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
+        if (this.$electron.remote.getCurrentWindow().isFocused()) {
+          if (this.isFullScreen) {
+            this.$bus.$emit('off-fullscreen');
+            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
+          } else {
+            this.$bus.$emit('to-fullscreen');
+            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [true]);
+          }
         } else {
-          this.$bus.$emit('to-fullscreen');
-          this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [true]);
+          this.$electron.ipcRenderer.send('pip-window-fullscreen');
         }
       });
       this.menuService.on('window.halfSize', () => {

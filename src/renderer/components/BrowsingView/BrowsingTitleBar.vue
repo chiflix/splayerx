@@ -16,7 +16,8 @@
     >
       <Icon
         ref="back"
-        :type="isMaximized ? 'browsingrestore' : 'browsingfullscreen'"
+        :type="isFullScreen ? 'browsingExitFull'
+          : isMaximized ? 'browsingrestore' : 'browsingfullscreen'"
       />
     </div>
     <div
@@ -45,7 +46,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['isMaximized']),
+    ...mapGetters(['isMaximized', 'isFullScreen']),
   },
   methods: {
     handleMinimize() {

@@ -474,6 +474,11 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('pip-watcher', (evt, args) => {
     browsingWindow.getBrowserViews()[0].webContents.executeJavaScript(args);
   });
+  ipcMain.on('pip-window-fullscreen', () => {
+    if (browsingWindow && browsingWindow.isFocused()) {
+      browsingWindow.setFullScreen(!browsingWindow.isFullScreen());
+    }
+  });
   ipcMain.on('pip-window-close', (evt, args) => {
     const views = browsingWindow.getBrowserViews();
     if (views.length) {
