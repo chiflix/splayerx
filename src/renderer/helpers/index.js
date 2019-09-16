@@ -22,6 +22,7 @@ import {
 import { addBubble } from './notificationControl';
 
 import { ipcRenderer, remote } from 'electron'; // eslint-disable-line
+import sortVideoFile from '@/helpers/sort';
 
 const clock = lolex.createClock();
 
@@ -86,6 +87,7 @@ export default {
       }
       await Promise.all(tasks);
       videoFiles.sort();
+      videoFiles.sort(sortVideoFile);
       for (let i = 0; i < videoFiles.length; i += 1) {
         videoFiles[i] = path.join(dirPath, videoFiles[i]);
       }
