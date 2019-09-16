@@ -520,7 +520,8 @@ export default {
       this.previousButton = new TouchBarButton({
         icon: this.createIcon('touchBar/lastVideo.png'),
         click: () => {
-          this.$bus.$emit('previous-video');
+          if (!this.singleCycle) this.$bus.$emit('previous-video');
+          else this.$bus.$emit('seek', 0);
         },
       });
       this.restartButton = new TouchBarButton({
@@ -538,7 +539,7 @@ export default {
       this.nextButton = new TouchBarButton({
         icon: this.createIcon('touchBar/nextVideo.png'),
         click: () => {
-          this.$bus.$emit('next-video');
+          this.$bus.$emit('seek', this.duration);
         },
       });
       this.fullScreenBar = new TouchBarButton({
