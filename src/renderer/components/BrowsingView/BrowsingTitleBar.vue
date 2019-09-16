@@ -54,7 +54,9 @@ export default {
     },
     handleMiddleButton() {
       const currentWindow = this.$electron.remote.getCurrentWindow();
-      if (this.isMaximized) {
+      if (this.isFullScreen) {
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
+      } else if (this.isMaximized) {
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'unmaximize');
         currentWindow.getBrowserViews()[0].setBounds({
           x: this.showSidebar ? 76 : 0,
