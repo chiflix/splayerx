@@ -60,7 +60,11 @@ class InjectJSManager implements IInjectJSManager {
       return `document.querySelector(".titlebarMin").style.pointerEvents = ${isFullScreen} ? "none" : "";
         document.querySelector(".titlebarMin").style.opacity = ${isFullScreen} ? "0.25" : "1";
         document.querySelector(".titlebarFull").style.display = ${isFullScreen} ? "none" : "";
-        document.querySelector(".titlebarRecover").style.display = ${isFullScreen} ? "block" : "none";`;
+        document.querySelector(".titlebarRecover").style.display = ${isFullScreen} ? "block" : "none";
+        document.querySelector(".titlebarMin").src = "assets/titleBarExitFull-default-icon.svg"
+        document.querySelector(".titlebarFull").src = "assets/titleBarFull-default-icon.svg";
+        document.querySelector(".titlebarRecover").src = "assets/titleBarRecover-default-icon.svg";
+        document.querySelector(".titlebarClose").src = "assets/titleBarClose-default-icon.svg";`;
     }
     return `document.querySelector(".titlebarMax").style.display = ${isFullScreen} ? "none" : "block";
       document.querySelector(".titlebarUnMax").style.display = ${isFullScreen} ? "none" : "block";

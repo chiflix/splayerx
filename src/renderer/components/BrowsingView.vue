@@ -783,14 +783,8 @@ export default {
       if (this.pipType === 'bilibili') {
         this.currentMainBrowserView()
           .webContents.executeJavaScript(InjectJSManager.bilibiliFindType())
-          .then((r: (HTMLElement | null)[]) => {
-            this.bilibiliType = [
-              'bangumi',
-              'videoStreaming',
-              'iframeStreaming',
-              'iframeStreaming',
-              'video',
-            ][r.findIndex(i => i)] || 'others';
+          .then((r: string) => {
+            this.bilibiliType = r;
           })
           .then(() => {
             this.currentMainBrowserView().webContents.executeJavaScript(

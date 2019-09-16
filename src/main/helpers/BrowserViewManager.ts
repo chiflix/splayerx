@@ -214,8 +214,8 @@ export class BrowserViewManager implements IBrowserViewManager {
         let type = '';
         currentView.webContents
           .executeJavaScript(InjectJSManager.bilibiliFindType())
-          .then((r: (HTMLElement | null)[]) => {
-            type = ['bangumi', 'videoStreaming', 'iframeStreaming', 'iframeStreaming', 'video'][r.findIndex(i => i)] || 'others';
+          .then((r: string) => {
+            type = r;
             currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('bilibili', type));
           });
       } else {
@@ -228,8 +228,8 @@ export class BrowserViewManager implements IBrowserViewManager {
           let type = '';
           currentView.webContents
             .executeJavaScript(InjectJSManager.bilibiliFindType())
-            .then((r: (HTMLElement | null)[]) => {
-              type = ['bangumi', 'videoStreaming', 'iframeStreaming', 'iframeStreaming', 'video'][r.findIndex(i => i)] || 'others';
+            .then((r: string) => {
+              type = r;
               currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('bilibili', type));
             });
         } else {
