@@ -499,13 +499,15 @@ new Vue({
             this.$bus.$emit('open-url-show', true);
           }
           break;
-        case 70:
-          if (this.isFullScreen) {
-            this.$bus.$emit('off-fullscreen');
-            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
-          } else {
-            this.$bus.$emit('to-fullscreen');
-            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [true]);
+        case 13:
+          if (this.currentRouteName === 'playing-view') {
+            if (this.isFullScreen) {
+              this.$bus.$emit('off-fullscreen');
+              this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
+            } else {
+              this.$bus.$emit('to-fullscreen');
+              this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [true]);
+            }
           }
           break;
         default:
@@ -970,12 +972,16 @@ new Vue({
         this.$bus.$emit('invoke-all-widgets');
       });
       this.menuService.on('window.fullscreen', () => {
-        if (this.isFullScreen) {
-          this.$bus.$emit('off-fullscreen');
-          this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
+        if (this.$electron.remote.getCurrentWindow().isFocused()) {
+          if (this.isFullScreen) {
+            this.$bus.$emit('off-fullscreen');
+            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
+          } else {
+            this.$bus.$emit('to-fullscreen');
+            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [true]);
+          }
         } else {
-          this.$bus.$emit('to-fullscreen');
-          this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [true]);
+          this.$electron.ipcRenderer.send('pip-window-fullscreen');
         }
       });
       this.menuService.on('window.halfSize', () => {

@@ -118,6 +118,8 @@ export default {
         canGoForward: false,
         canGoBack: false,
       },
+      allChannels: ['youtube', 'bilibili', 'iqiyi'],
+      hideMainWindow: false,
     };
   },
   computed: {
@@ -164,6 +166,13 @@ export default {
     },
   },
   watch: {
+    isFullScreen(val: boolean) {
+      this.$store.dispatch('updateBrowsingSize', this.winSize);
+      if (!val && this.hideMainWindow) {
+        this.hideMainWindow = false;
+        this.$electron.remote.getCurrentWindow().hide();
+      }
+    },
     currentUrl(val: string) {
       this.$emit('update-current-url', val);
     },
@@ -246,7 +255,7 @@ export default {
         if (this.refreshButton) {
           this.refreshButton.icon = this.createIcon('touchBar/stopRefresh.png');
         }
-        this.showProgress = true;
+        if (!this.currentUrl.includes('youtube')) this.showProgress = true;
         this.progress = 70;
       } else {
         if (this.refreshButton) {
@@ -309,7 +318,7 @@ export default {
   },
   mounted() {
     this.menuService = new MenuService();
-
+    this.menuService.updateMenuItemEnabled('splayerx.checkForUpdates', false);
     this.title = this.currentMainBrowserView().webContents.getTitle();
 
     this.$bus.$on('toggle-reload', this.handleUrlReload);
@@ -418,6 +427,7 @@ export default {
         pipMode: this.pipMode,
       })
       .finally(() => {
+        this.menuService.updateMenuItemEnabled('splayerx.checkForUpdates', true);
         window.removeEventListener('beforeunload', this.beforeUnloadHandler);
         window.removeEventListener('focus', this.focusHandler);
         this.$electron.ipcRenderer.send('remove-browser');
@@ -699,19 +709,22 @@ export default {
         this.loadingState = true;
         const newHostname = urlParseLax(openUrl).hostname;
         const oldHostname = urlParseLax(this.currentUrl).hostname;
-        let newChannel = newHostname.slice(
-          newHostname.indexOf('.') + 1,
-          newHostname.length,
-        );
         let oldChannel = oldHostname.slice(
           oldHostname.indexOf('.') + 1,
           oldHostname.length,
         );
-        if (openUrl.includes('youtube')) {
-          newChannel = 'youtube.com';
-        }
         if (this.currentUrl.includes('youtube')) {
           oldChannel = 'youtube.com';
+        }
+        let newChannel = oldChannel;
+        if (newHostname.includes(...this.allChannels)) {
+          newChannel = newHostname.slice(
+            newHostname.indexOf('.') + 1,
+            newHostname.length,
+          );
+          if (openUrl.includes('youtube')) {
+            newChannel = 'youtube.com';
+          }
         }
         if (this.oauthRegex.some((re: RegExp) => re.test(url))) return;
         if (oldChannel === newChannel) {
@@ -782,14 +795,8 @@ export default {
       if (this.pipType === 'bilibili') {
         this.currentMainBrowserView()
           .webContents.executeJavaScript(InjectJSManager.bilibiliFindType())
-          .then((r: (HTMLElement | null)[]) => {
-            this.bilibiliType = [
-              'bangumi',
-              'videoStreaming',
-              'iframeStreaming',
-              'iframeStreaming',
-              'video',
-            ][r.findIndex(i => i)] || 'others';
+          .then((r: string) => {
+            this.bilibiliType = r;
           })
           .then(() => {
             this.currentMainBrowserView().webContents.executeJavaScript(
@@ -811,6 +818,13 @@ export default {
       return this.$electron.remote.getCurrentWindow().getBrowserViews()[0];
     },
     handleWindowChangeEnterPip() {
+      if (this.isFullScreen) {
+        this.hideMainWindow = this.isGlobal;
+        this.currentMainBrowserView().webContents
+          .executeJavaScript(InjectJSManager.changeFullScreen(false));
+        this.headerToShow = true;
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
+      }
       const newDisplayId = this.$electron.remote.screen.getDisplayNearestPoint({
         x: this.winPos[0],
         y: this.winPos[1],

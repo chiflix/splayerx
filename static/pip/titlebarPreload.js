@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (titlebar) {
     titlebar.addEventListener('dblclick', () => ipcRenderer.send('mouseup', 'max'));
     titlebar.style.display = 'flex';
-    titlebar.addEventListener('mousemove', () => {
+    document.addEventListener('mousemove', () => {
       if (pipTimer) clearTimeout(pipTimer);
       ipcRenderer.send('pip-btn-mousemove');
       titlebar.style.display = 'flex';

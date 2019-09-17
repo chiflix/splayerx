@@ -32,6 +32,10 @@ class InjectJSManager implements IInjectJSManager {
     return bilibiliFindType;
   }
 
+  public changeFullScreen(enterFullScreen: boolean): string {
+    return enterFullScreen ? 'document.body.requestFullscreen()' : 'document.webkitCancelFullScreen()';
+  }
+
   public pauseVideo(channel: string, type?: string): string {
     switch (channel) {
       case 'bilibili':
@@ -52,7 +56,7 @@ class InjectJSManager implements IInjectJSManager {
   }
 
   public updateTitlebarState(className: string, state: boolean): string {
-    return `document.querySelector(${className}).style.display = ${state} ? "block" : "none";`;
+    return `document.querySelector("${className}").style.display = ${state} ? "block" : "none";`;
   }
 
   public updateFullScreenIcon(isFullScreen: boolean): string {
@@ -60,7 +64,11 @@ class InjectJSManager implements IInjectJSManager {
       return `document.querySelector(".titlebarMin").style.pointerEvents = ${isFullScreen} ? "none" : "";
         document.querySelector(".titlebarMin").style.opacity = ${isFullScreen} ? "0.25" : "1";
         document.querySelector(".titlebarFull").style.display = ${isFullScreen} ? "none" : "";
-        document.querySelector(".titlebarRecover").style.display = ${isFullScreen} ? "block" : "none";`;
+        document.querySelector(".titlebarRecover").style.display = ${isFullScreen} ? "block" : "none";
+        document.querySelector(".titlebarMin").src = "assets/titleBarExitFull-default-icon.svg"
+        document.querySelector(".titlebarFull").src = "assets/titleBarFull-default-icon.svg";
+        document.querySelector(".titlebarRecover").src = "assets/titleBarRecover-default-icon.svg";
+        document.querySelector(".titlebarClose").src = "assets/titleBarClose-default-icon.svg";`;
     }
     return `document.querySelector(".titlebarMax").style.display = ${isFullScreen} ? "none" : "block";
       document.querySelector(".titlebarUnMax").style.display = ${isFullScreen} ? "none" : "block";
@@ -70,7 +78,7 @@ class InjectJSManager implements IInjectJSManager {
   public updateWinMaxIcon(isMaximize: boolean): string {
     return `document.querySelector(".titlebarMax").style.display = ${isMaximize} ? "none" : "block";
       document.querySelector(".titlebarUnMax").style.display = ${isMaximize} ? "block" : "none";
-      document.querySelector(".titlebarRecover").style.display = ${isMaximize} ? "none" : "block";`;
+      document.querySelector(".titlebarRecover").style.display = "none";`;
   }
 
   public updateBarrageState(barrageState: boolean, opacity: number): string {
@@ -109,6 +117,7 @@ export interface IInjectJSManager {
   updateWinMaxIcon(isMaximize: boolean): string
   updateBarrageState(barrageState: boolean, opacity: number): string
   emitKeydownEvent(keyCode: number): string
+  changeFullScreen(enterFullScreen: boolean): string
 }
 
 export default new InjectJSManager();

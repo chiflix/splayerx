@@ -23,26 +23,36 @@ export default class Bilibili {
       this.adapter = `var player = document.querySelector("#bofqi");
         document.body.prepend(player);
         document.body.style.overflow = "hidden";
+        if (document.querySelector("#app")) {
         document.querySelector("#app").style.display = "none";
+        } else {
+        document.querySelector("#viewlater-app").style.display = "none";
+        }
         player.style.position = "absolute";
         player.style.width = "100%";
         player.style.height = "100%";
         player.style.zIndex = 99999;
         ${this.bilibiliBarrageAdapt(type, barrageOpen)}
         document.querySelector(".player").style.height = "100%";
+        document.querySelector(".player").style.width = "100%";
         document.querySelector(".bilibili-player-auxiliary-area").style.display = "none";
         document.querySelector(".bilibili-player-video-message").style.display = "none";
         document.querySelector(".bilibili-player-video-sendbar").style.setProperty("display", "none");
         Object.defineProperty(document.querySelector(".bilibili-player-video-sendbar").style, "display", { get: function() {return "none";}, set: function(){}});`;
       this.watcher = '';
       this.recover = 'var player = document.querySelector("#bofqi");'
-        + 'document.querySelector(".bangumi-player").insertBefore(player, document.querySelector(".bgray-btn-wrap").nextSibling);'
+        + 'document.querySelector(".bgray-btn-wrap").parentNode.insertBefore(player, document.querySelector(".bgray-btn-wrap").nextSibling);'
         + 'player.style.position = "relative";'
         + 'player.style.height = "";'
         + 'player.style.zIndex = "";'
         + 'document.body.style.overflow = "";'
         + 'document.querySelector(".player").style.height = "";'
+        + '  document.querySelector(".player").style.width = "";'
+        + 'if (document.querySelector("#app")) {'
         + 'document.querySelector("#app").style.display = "";'
+        + '} else {'
+        + 'document.querySelector("#viewlater-app").style.display = "";'
+        + '}'
         + 'document.querySelector(".bilibili-player-auxiliary-area").style.display = "";'
         + 'document.querySelector(".bilibili-player-video-message").style.display = "";'
         + 'Object.defineProperty(document.querySelector(".bilibili-player-video-sendbar").style, "display", { get: function() {return this._display;}, set: function(val){ this._display = val; document.querySelector(".bilibili-player-video-sendbar").style.setProperty("display", val);}});'
@@ -198,4 +208,5 @@ export default class Bilibili {
   }
 }
 
-export const bilibiliFindType = 'var contents = document.querySelector("iframe") ? document.querySelector("iframe").contentDocument : null;[document.querySelector(".bilibili-player-video-message"), document.querySelector(".live-player-ctnr"), document.querySelector(".container-wrapper"), contents ? contents.querySelector(".live-room-app") : null, document.querySelector("#bofqi")]';
+export const bilibiliFindType = 'var contents = document.querySelector("iframe") ? document.querySelector("iframe").contentDocument : null;'
+  + 'if (document.querySelector(".bilibili-player-video-message")) { "bangumi" } else if (document.querySelector(".live-player-ctnr")) { "videoStreaming" } else if (document.querySelector(".container-wrapper") || contents ? contents.querySelector(".live-room-app") : null) { "iframeStreaming" } else if (document.querySelector("#bofqi")) { "video" } else { "others" };';
