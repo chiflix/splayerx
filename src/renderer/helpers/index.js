@@ -86,7 +86,6 @@ export default {
         }));
       }
       await Promise.all(tasks);
-      videoFiles.sort();
       videoFiles.sort(sortVideoFile);
       for (let i = 0; i < videoFiles.length; i += 1) {
         videoFiles[i] = path.join(dirPath, videoFiles[i]);
@@ -267,7 +266,6 @@ export default {
           }
         }
       }
-      videoFiles.sort();
       videoFiles.sort(sortVideoFile);
       if (videoFiles.length !== 0) {
         // 如果有翻译任务就阻止
