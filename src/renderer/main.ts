@@ -836,7 +836,7 @@ new Vue({
         else this.$bus.$emit('seek', 0);
       });
       this.menuService.on('playback.nextVideo', () => {
-        this.$bus.$emit('seek', this.duration);
+        this.$bus.$emit('seek', Math.ceil(this.duration));
       });
       this.menuService.on('playback.singleCycle', () => {
         if (this.singleCycle) {

@@ -539,7 +539,7 @@ export default {
       this.nextButton = new TouchBarButton({
         icon: this.createIcon('touchBar/nextVideo.png'),
         click: () => {
-          this.$bus.$emit('seek', this.duration);
+          this.$bus.$emit('seek', Math.ceil(this.duration));
         },
       });
       this.fullScreenBar = new TouchBarButton({
