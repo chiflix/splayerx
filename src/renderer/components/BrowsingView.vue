@@ -118,6 +118,7 @@ export default {
         canGoForward: false,
         canGoBack: false,
       },
+      allChannels: ['youtube', 'bilibili', 'iqiyi'],
     };
   },
   computed: {
@@ -700,19 +701,22 @@ export default {
         this.loadingState = true;
         const newHostname = urlParseLax(openUrl).hostname;
         const oldHostname = urlParseLax(this.currentUrl).hostname;
-        let newChannel = newHostname.slice(
-          newHostname.indexOf('.') + 1,
-          newHostname.length,
-        );
         let oldChannel = oldHostname.slice(
           oldHostname.indexOf('.') + 1,
           oldHostname.length,
         );
-        if (openUrl.includes('youtube')) {
-          newChannel = 'youtube.com';
-        }
         if (this.currentUrl.includes('youtube')) {
           oldChannel = 'youtube.com';
+        }
+        let newChannel = oldChannel;
+        if (newHostname.includes(...this.allChannels)) {
+          newChannel = newHostname.slice(
+            newHostname.indexOf('.') + 1,
+            newHostname.length,
+          );
+          if (openUrl.includes('youtube')) {
+            newChannel = 'youtube.com';
+          }
         }
         if (this.oauthRegex.some((re: RegExp) => re.test(url))) return;
         if (oldChannel === newChannel) {

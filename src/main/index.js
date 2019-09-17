@@ -346,7 +346,9 @@ function createBrowsingWindow(args) {
     if (hideBrowsingWindow) {
       hideBrowsingWindow = false;
       browsingWindow.hide();
-      mainWindow.focus();
+      setTimeout(() => {
+        mainWindow.focus();
+      }, 0);
     }
   });
 }
@@ -831,11 +833,11 @@ function registerMainWindowEvent(mainWindow) {
     if (browsingWindow.isFullScreen()) {
       hideBrowsingWindow = true;
       browsingWindow.setFullScreen(false);
+      exitBrowser.page.view.webContents.executeJavaScript('document.webkitCancelFullScreen();');
     } else {
       browsingWindow.hide();
     }
     menuService.updateFocusedWindow(true, mainWindow && mainWindow.isVisible());
-    mainWindow.focus();
   });
   ipcMain.on('set-window-maximize', () => {
     if (mainWindow && mainWindow.isFocused()) {
