@@ -2,7 +2,10 @@
   <div
     class="side-bar"
   >
-    <div class="icon-box">
+    <div
+      :class="{ 'win': !isDarwin }"
+      class="icon-box"
+    >
       <div
         @click="handleSidebarIcon('https://www.bilibili.com/')"
         :class="{ selected: currentUrl.includes('bilibili') }"
@@ -49,6 +52,9 @@ export default {
   },
   computed: {
     ...mapGetters(['pipSize', 'pipPos']),
+    isDarwin() {
+      return process.platform === 'darwin';
+    },
   },
   methods: {
     handleSidebarIcon(url: string) {
@@ -102,11 +108,14 @@ export default {
         position: absolute;
         width: 44px;
         height: 44px;
-        border: 2px solid #fff;
+        border: 2px solid #E0E0EA;
         border-radius: 100%;
         box-sizing: border-box;
       }
     }
+  }
+  .win {
+    margin-top: 16px;
   }
 }
 </style>
