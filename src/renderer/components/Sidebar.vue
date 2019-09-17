@@ -2,7 +2,10 @@
   <div
     class="side-bar"
   >
-    <div class="icon-box">
+    <div
+      :class="{ 'win': !isDarwin }"
+      class="icon-box"
+    >
       <div
         v-for="(channel, index) in channels"
         @click="handleSidebarIcon(channel)"
@@ -45,6 +48,9 @@ export default {
     ...mapGetters(['pipSize', 'pipPos']),
     selectedIndex() {
       return this.selectedTypes.findIndex((type: string) => this.currentUrl.includes(type));
+    },
+    isDarwin() {
+      return process.platform === 'darwin';
     },
   },
   methods: {
@@ -104,6 +110,9 @@ export default {
         box-sizing: border-box;
       }
     }
+  }
+  .win {
+    margin-top: 16px;
   }
 }
 </style>
