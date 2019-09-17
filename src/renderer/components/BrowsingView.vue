@@ -119,6 +119,7 @@ export default {
         canGoBack: false,
       },
       allChannels: ['youtube', 'bilibili', 'iqiyi'],
+      hideMainWindow: false,
     };
   },
   computed: {
@@ -165,6 +166,13 @@ export default {
     },
   },
   watch: {
+    isFullScreen(val: boolean) {
+      this.$store.dispatch('updateBrowsingSize', this.winSize);
+      if (!val && this.hideMainWindow) {
+        this.hideMainWindow = false;
+        this.$electron.remote.getCurrentWindow().hide();
+      }
+    },
     currentUrl(val: string) {
       this.$emit('update-current-url', val);
     },
@@ -810,6 +818,13 @@ export default {
       return this.$electron.remote.getCurrentWindow().getBrowserViews()[0];
     },
     handleWindowChangeEnterPip() {
+      if (this.isFullScreen) {
+        this.hideMainWindow = this.isGlobal;
+        this.currentMainBrowserView().webContents
+          .executeJavaScript(InjectJSManager.changeFullScreen(false));
+        this.headerToShow = true;
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
+      }
       const newDisplayId = this.$electron.remote.screen.getDisplayNearestPoint({
         x: this.winPos[0],
         y: this.winPos[1],

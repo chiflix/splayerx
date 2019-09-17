@@ -733,12 +733,13 @@ export default class Menubar {
     ]);
     // mac dmg
     if (isMacintoshDMG && !hideCheckBtn && this._routeName !== 'welcome-privacy' && this._routeName !== 'language-setting') {
-      actions.push(...[
+      const items = this._routeName === 'browsing-view' ? [preference, separator()] : [
         checkForUpdates,
         separator(),
         preference,
         separator(),
-      ]);
+      ];
+      actions.push(...items);
     } else if (this._routeName !== 'welcome-privacy' && this._routeName !== 'language-setting') {
       actions.push(...[
         preference,

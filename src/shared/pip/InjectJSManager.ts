@@ -32,6 +32,10 @@ class InjectJSManager implements IInjectJSManager {
     return bilibiliFindType;
   }
 
+  public changeFullScreen(enterFullScreen: boolean): string {
+    return enterFullScreen ? 'document.body.requestFullscreen()' : 'document.webkitCancelFullScreen()';
+  }
+
   public pauseVideo(channel: string, type?: string): string {
     switch (channel) {
       case 'bilibili':
@@ -113,6 +117,7 @@ export interface IInjectJSManager {
   updateWinMaxIcon(isMaximize: boolean): string
   updateBarrageState(barrageState: boolean, opacity: number): string
   emitKeydownEvent(keyCode: number): string
+  changeFullScreen(enterFullScreen: boolean): string
 }
 
 export default new InjectJSManager();
