@@ -127,7 +127,7 @@ export default {
   }
   .page-refresh-icon {
     margin-right: 8px;
-    margin-left: 4px;
+    margin-left: 8px;
   }
 }
 </style>

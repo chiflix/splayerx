@@ -1,5 +1,8 @@
 <template>
   <div
+    :style="{
+      borderLeft: isDarwin ? '1px solid #F2F1F4' : '',
+    }"
     class="pip-control"
   >
     <div
@@ -57,6 +60,9 @@ export default {
   },
   computed: {
     ...mapGetters(['pipMode']),
+    isDarwin() {
+      return process.platform === 'darwin';
+    },
     pipIconType() {
       return this.pipMode === 'Enter' ? this.pipType : this.popType;
     },
@@ -91,7 +97,6 @@ export default {
   height: 100%;
   justify-content: flex-start;
   align-items: center;
-  border-left: 1px solid #F2F1F4;
   .pip-icon {
     width: 34px;
     height: 30px;
