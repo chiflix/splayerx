@@ -18,6 +18,7 @@ jobs:
     - name: npm install, test, and build
       run: |
         npm install
+        node scripts/check-electron-version.js
         npm test
         npm run build --if-present
       env:
