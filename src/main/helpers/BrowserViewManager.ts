@@ -67,6 +67,7 @@ export class BrowserViewManager implements IBrowserViewManager {
         webPreferences: {
           preload: `${require('path').resolve(__static, 'pip/preload.js')}`,
           nativeWindowOpen: true,
+          // disableHtmlFullscreenWindowResize: true, // Electron 6 required
         },
       }),
     };

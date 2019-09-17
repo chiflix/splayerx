@@ -117,28 +117,38 @@ if (process.platform !== 'darwin') {
     }
   };
 
-  // fix isMaximized always returns false
-  const originMaximize = BrowserWindow.prototype.maximize;
-  BrowserWindow.prototype.maximize = function maximize(...args) {
-    this._isMaximized = true;
-    originMaximize.apply(this, args);
+  // fix isMaximized and isFullScreen always returns false
+  const originLoadURL = BrowserWindow.prototype.loadURL;
+  BrowserWindow.prototype.loadURL = function loadURl(...args) {
+    if (!this._customPrototypeInited) {
+      this._customPrototypeInited = true;
+      this.on('maximize', function onMaximize() {
+        this._isMaximized = true;
+      });
+      this.on('unmaximize', function onUnmaximize() {
+        this._isMaximized = false;
+      });
+      this.on('enter-full-screen', function onEnterFullScreen() {
+        this._isFullScreen = true;
+      });
+      this.on('leave-full-screen', function onLeaveFullScreen() {
+        this._isFullScreen = false;
+      });
+      this.on('enter-html-full-screen', function onEnterFullScreen() {
+        this._isFullScreen = true;
+      });
+      this.on('leave-html-full-screen', function onLeaveFullScreen() {
+        this._isFullScreen = false;
+      });
+    }
+    originLoadURL.apply(this, args);
   };
-  const originUnmaximize = BrowserWindow.prototype.unmaximize;
-  BrowserWindow.prototype.unmaximize = function unmaximize(...args) {
-    this._isMaximized = false;
-    originUnmaximize.apply(this, args);
-  };
+
   const originIsMaximize = BrowserWindow.prototype.isMaximized;
   BrowserWindow.prototype.isMaximized = function isMaximized(...args) {
     return originIsMaximize.apply(this, args) || this._isMaximized;
   };
 
-  // fix isFullScreen always returns false
-  const originSetFullScreen = BrowserWindow.prototype.setFullScreen;
-  BrowserWindow.prototype.setFullScreen = function setFullScreen(isFullScreen, ...args) {
-    this._isFullScreen = isFullScreen;
-    originSetFullScreen.call(this, isFullScreen, ...args);
-  };
   const originIsFullScreen = BrowserWindow.prototype.isFullScreen;
   BrowserWindow.prototype.isFullScreen = function isFullScreen(...args) {
     return originIsFullScreen.apply(this, args) || this._isFullScreen;
