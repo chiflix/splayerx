@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const url = window.location.href;
       switch (true) {
         case url.includes('bilibili'):
-          if (evt.target.tagName === 'VIDEO' || ['bilibili-player-video-top-title', 'bilibili-player-video-toast-top', 'bilibili-player-ending-panel', 'bilibili-player-electric-panel', 'bilibili-player-electric-panel-wrap'].includes(evt.target.classList[0])) {
+          if (evt.target.tagName === 'VIDEO' || ['bilibili-player-video-subtitle', 'bilibili-player-video-top-title', 'bilibili-player-video-toast-top', 'bilibili-player-ending-panel', 'bilibili-player-electric-panel', 'bilibili-player-electric-panel-wrap'].includes(evt.target.classList[0])) {
             offset = [evt.clientX, evt.clientY];
             if (getRatio() !== 1) {
               windowSize = remote.getCurrentWindow().getSize();
