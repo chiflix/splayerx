@@ -806,7 +806,6 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('exit-pip', () => {
     if (!browserViewManager) return;
     browsingWindow.send('remove-pip-listener');
-    mainWindow.show();
     const mainView = mainWindow.getBrowserView();
     mainWindow.removeBrowserView(mainView);
     const browViews = browsingWindow.getBrowserViews();
@@ -837,6 +836,7 @@ function registerMainWindowEvent(mainWindow) {
     } else {
       browsingWindow.hide();
     }
+    mainWindow.show();
     menuService.updateFocusedWindow(true, mainWindow && mainWindow.isVisible());
   });
   ipcMain.on('set-window-maximize', () => {

@@ -79,6 +79,7 @@ export default {
       this.windowSize = null;
     });
     window.addEventListener('focus', () => {
+      electron.remote.getCurrentWindow().getBrowserViews()[0].webContents.focus();
       const cursorPoint = electron.remote.screen.getCursorScreenPoint();
       const windowPos = electron.remote.getCurrentWindow().getPosition();
       this.offset = [cursorPoint.x - windowPos[0], cursorPoint.y - windowPos[1]];
