@@ -4,25 +4,12 @@
   >
     <div class="icon-box">
       <div
-        @click="handleSidebarIcon('https://www.bilibili.com/')"
-        :class="{ selected: currentUrl.includes('bilibili') }"
+        v-for="(channel, index) in channels"
+        @click="handleSidebarIcon(channel)"
+        :class="{ selected: selectedIndex === index }"
         class="icon-hover"
       >
-        <Icon type="bilibiliSidebar" />
-      </div>
-      <div
-        @click="handleSidebarIcon('https://www.iqiyi.com/')"
-        :class="{ selected: currentUrl.includes('iqiyi') }"
-        class="icon-hover"
-      >
-        <Icon type="iqiyiSidebar" />
-      </div>
-      <div
-        @click="handleSidebarIcon('https://www.youtube.com/')"
-        :class="{ selected: currentUrl.includes('youtube') }"
-        class="icon-hover"
-      >
-        <Icon type="youtubeSidebar" />
+        <Icon :type="chanelIcons[index]" />
       </div>
     </div>
   </div>
@@ -47,8 +34,18 @@ export default {
       default: '',
     },
   },
+  data() {
+    return {
+      channels: ['https://www.bilibili.com/', 'https://www.iqiyi.com/', 'https://www.youtube.com/', 'https://www.douyu.com/'],
+      chanelIcons: ['bilibiliSidebar', 'iqiyiSidebar', 'youtubeSidebar', 'douyuSidebar'],
+      selectedTypes: ['bilibili', 'iqiyi', 'youtube', 'douyu'],
+    };
+  },
   computed: {
     ...mapGetters(['pipSize', 'pipPos']),
+    selectedIndex() {
+      return this.selectedTypes.findIndex((type: string) => this.currentUrl.includes(type));
+    },
   },
   methods: {
     handleSidebarIcon(url: string) {
@@ -102,7 +99,7 @@ export default {
         position: absolute;
         width: 44px;
         height: 44px;
-        border: 2px solid #fff;
+        border: 2px solid #E0E0EA;
         border-radius: 100%;
         box-sizing: border-box;
       }
