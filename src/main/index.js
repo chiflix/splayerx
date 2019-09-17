@@ -73,7 +73,8 @@ let browserViewManager = null;
 let pipControlView = null;
 let titlebarView = null;
 let maskView = null;
-let maskTimer = 0;
+let maskEventTimer = 0;
+let maskDisappearTimer = 0;
 let isBrowsingWindowMax = false;
 let tray = null;
 let pipTimer = 0;
@@ -177,6 +178,9 @@ function createMaskView() {
   maskView.setBounds({
     x: 0, y: 0, width: browsingWindow.getSize()[0], height: browsingWindow.getSize()[1],
   });
+  maskView.webContents.executeJavaScript(`
+    document.body.style.backgroundColor = 'rgba(255, 255, 255, 0.18)';
+  `);
 }
 function markNeedToRestore() {
   fs.closeSync(fs.openSync(path.join(app.getPath('userData'), 'NEED_TO_RESTORE_MARK'), 'w'));
@@ -473,12 +477,17 @@ function registerMainWindowEvent(mainWindow) {
     }
   });
   ipcMain.on('browser-window-mask', () => {
-    clearTimeout(maskTimer);
-    if (maskView && browsingWindow.getBrowserViews().includes(maskView)) {
-      browsingWindow.removeBrowserView(maskView);
-    }
-    createMaskView();
-    maskTimer = setTimeout(() => { browsingWindow.removeBrowserView(maskView); }, 600);
+    if (!browsingWindow.getBrowserViews().includes(maskView)) createMaskView();
+    clearTimeout(maskEventTimer);
+    maskEventTimer = setTimeout(() => {
+      if (maskView) {
+        maskView.webContents.executeJavaScript(`
+          document.body.style.backgroundColor = 'rgba(255, 255, 255, 0)';
+          `);
+        clearTimeout(maskDisappearTimer);
+        maskDisappearTimer = setTimeout(() => { browsingWindow.removeBrowserView(maskView); }, 120);
+      }
+    }, 300);
   });
   ipcMain.on('callMainWindowMethod', (evt, method, args = []) => {
     try {
