@@ -116,4 +116,31 @@ if (process.platform !== 'darwin') {
       };
     }
   };
+
+  // fix isMaximized always returns false
+  const originMaximize = BrowserWindow.prototype.maximize;
+  BrowserWindow.prototype.maximize = function maximize(...args) {
+    this._isMaximized = true;
+    originMaximize.apply(this, args);
+  };
+  const originUnmaximize = BrowserWindow.prototype.unmaximize;
+  BrowserWindow.prototype.unmaximize = function unmaximize(...args) {
+    this._isMaximized = false;
+    originUnmaximize.apply(this, args);
+  };
+  const originIsMaximize = BrowserWindow.prototype.isMaximized;
+  BrowserWindow.prototype.isMaximized = function isMaximized(...args) {
+    return originIsMaximize.apply(this, args) || this._isMaximized;
+  };
+
+  // fix isFullScreen always returns false
+  const originSetFullScreen = BrowserWindow.prototype.setFullScreen;
+  BrowserWindow.prototype.setFullScreen = function setFullScreen(isFullScreen, ...args) {
+    this._isFullScreen = isFullScreen;
+    originSetFullScreen.call(this, isFullScreen, ...args);
+  };
+  const originIsFullScreen = BrowserWindow.prototype.isFullScreen;
+  BrowserWindow.prototype.isFullScreen = function isFullScreen(...args) {
+    return originIsFullScreen.apply(this, args) || this._isFullScreen;
+  };
 }
