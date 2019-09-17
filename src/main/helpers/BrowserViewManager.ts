@@ -150,19 +150,43 @@ export class BrowserViewManager implements IBrowserViewManager {
     const currentIndex = this.historyByChannel[this.currentChannel].currentIndex;
     const list = this.historyByChannel[this.currentChannel].list;
     const pipBrowser = list[currentIndex].view;
-    const mainBrowser = {
-      canBack: currentIndex - 1 > 0,
-      canForward: false,
-      page: list[currentIndex - 1],
-    };
+    let mainBrowser;
+    if (currentIndex === 0) {
+      mainBrowser = {
+        canBack: false,
+        canForward: false,
+        page: {
+          url: list[currentIndex].url,
+          view: new BrowserView({
+            webPreferences: {
+              preload: `${require('path').resolve(__static, 'pip/preload.js')}`,
+              nativeWindowOpen: true,
+            },
+          }),
+        },
+      };
+      mainBrowser.page.view.webContents.loadURL(mainBrowser.page.url);
+    } else {
+      mainBrowser = {
+        canBack: currentIndex - 1 > 0,
+        canForward: false,
+        page: list[currentIndex - 1],
+      };
+    }
     this.currentPip = {
       pipIndex: currentIndex,
       pipChannel: this.currentChannel,
       pipPage: this.historyByChannel[this.currentChannel].list.splice(currentIndex, 1)[0],
     };
-    this.historyByChannel[this.currentChannel].list.splice(currentIndex, 1);
+    if (currentIndex === 0) {
+      this.historyByChannel[this.currentChannel].list
+        .splice(currentIndex, 1, { url: mainBrowser.page.url, view: mainBrowser.page.view });
+      this.historyByChannel[this.currentChannel].currentIndex = 0;
+    } else {
+      this.historyByChannel[this.currentChannel].list.splice(currentIndex, 1);
+      this.historyByChannel[this.currentChannel].currentIndex = currentIndex - 1;
+    }
     this.historyByChannel[this.currentChannel].lastUpdateTime = Date.now();
-    this.historyByChannel[this.currentChannel].currentIndex = currentIndex - 1;
     mainBrowser.page.view.webContents.removeAllListeners('media-started-playing');
     return { pipBrowser, mainBrowser };
   }

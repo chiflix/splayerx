@@ -76,6 +76,7 @@ export default {
       loadingState: true,
       pipType: '',
       bilibiliType: 'video',
+      douyuType: 'normal',
       preload: `file:${require('path').resolve(__static, 'pip/preload.js')}`,
       maskToShow: false,
       dropFiles: [],
@@ -118,7 +119,7 @@ export default {
         canGoForward: false,
         canGoBack: false,
       },
-      allChannels: ['youtube', 'bilibili', 'iqiyi'],
+      allChannels: ['youtube', 'bilibili', 'iqiyi', 'douyu'],
       hideMainWindow: false,
     };
   },
@@ -152,6 +153,10 @@ export default {
           };
         case 'iqiyi':
           return { channel: 'iqiyi', barrageState: this.barrageOpen, winSize: this.pipSize };
+        case 'douyu':
+          return {
+            channel: 'douyu', type: this.douyuType, barrageState: this.barrageOpen, winSize: this.pipSize,
+          };
         case 'others':
           return { channel: 'others', winSize: this.pipSize };
         default:
@@ -559,6 +564,7 @@ export default {
         'https://www.youtube.com/',
         'https://www.bilibili.com/',
         'https://www.iqiyi.com/',
+        'https://www.douyu.com',
       ];
       const newHostname = urlParseLax(url).hostname;
       const oldHostname = urlParseLax(this.currentUrl).hostname;
@@ -787,7 +793,7 @@ export default {
       const parseUrl = urlParseLax(
         this.currentMainBrowserView().webContents.getURL(),
       );
-      const channels = ['youtube', 'bilibili', 'iqiyi'];
+      const channels = ['youtube', 'bilibili', 'iqiyi', 'douyu'];
       this.pipType = 'others';
       channels.forEach((channel: string) => {
         if (parseUrl.hostname.includes(channel)) this.pipType = channel;
@@ -804,6 +810,14 @@ export default {
             );
           })
           .then(() => {
+            this.adaptFinished = true;
+          });
+      } else if (this.pipType === 'douyu') {
+        this.currentMainBrowserView()
+          .webContents.executeJavaScript(InjectJSManager.douyuFindType()).then((r: string) => {
+            this.douyuType = r;
+            this.currentMainBrowserView().webContents.executeJavaScript(this.pip.adapter);
+          }).then(() => {
             this.adaptFinished = true;
           });
       } else {
@@ -908,6 +922,12 @@ export default {
         this.$electron.ipcRenderer.send(
           'handle-danmu-display',
           this.pip.bilibiliBarrageAdapt(this.bilibiliType, this.barrageOpen),
+        );
+      } else if (this.pipType === 'douyu') {
+        this.updateBarrageOpen(!this.barrageOpen);
+        this.$electron.ipcRenderer.send(
+          'handle-danmu-display',
+          this.pip.douyuBarrageAdapt(this.barrageOpen),
         );
       }
     },

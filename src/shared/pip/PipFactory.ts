@@ -1,6 +1,7 @@
 import Bilibili from './Bilibili';
 import Youtube from './Youtube';
 import Iqiyi from './Iqiyi';
+import Douyu from './Douyu';
 import Others from './Others';
 
 type pipMode = {
@@ -30,6 +31,9 @@ export default class PipFactory {
         return new Youtube();
       case 'iqiyi':
         return new Iqiyi(info.barrageState as boolean, info.winSize as number[]);
+      case 'douyu':
+        return new Douyu(info.type as string,
+          info.barrageState as boolean, info.winSize as number[]);
       case 'others':
         return new Others(info.winSize as number[]);
       default:

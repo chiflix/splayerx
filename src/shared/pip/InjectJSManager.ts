@@ -1,5 +1,6 @@
 import { bilibiliFindType, bilibiliVideoPause } from './Bilibili';
 import PipFactory from './PipFactory';
+import { douyuFindType } from './Douyu';
 
 class InjectJSManager implements IInjectJSManager {
   private readonly calcVideoNumCode: string;
@@ -30,6 +31,10 @@ class InjectJSManager implements IInjectJSManager {
 
   public bilibiliFindType(): string {
     return bilibiliFindType;
+  }
+
+  public douyuFindType(): string {
+    return douyuFindType;
   }
 
   public changeFullScreen(enterFullScreen: boolean): string {
@@ -108,6 +113,7 @@ export interface IInjectJSManager {
     barrageState?: boolean, winSize?: number[] }):
   { adapter: string, watcher: string, recover: string }
   bilibiliFindType(): string
+  douyuFindType(): string
   pauseVideo(channel: string, type?: string): string
   initBarrageIcon(barrageState: boolean): string
   updatePipControlState(shouldShow: boolean): string
