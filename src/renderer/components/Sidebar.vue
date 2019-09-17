@@ -39,9 +39,9 @@ export default {
   },
   data() {
     return {
-      channels: ['https://www.bilibili.com/', 'https://www.iqiyi.com/', 'https://www.youtube.com/', 'https://www.douyu.com/'],
-      chanelIcons: ['bilibiliSidebar', 'iqiyiSidebar', 'youtubeSidebar', 'douyuSidebar'],
-      selectedTypes: ['bilibili', 'iqiyi', 'youtube', 'douyu'],
+      channels: ['https://www.bilibili.com/', 'https://www.iqiyi.com/', 'https://www.douyu.com/', 'https://www.youtube.com/'],
+      chanelIcons: ['bilibiliSidebar', 'iqiyiSidebar', 'douyuSidebar', 'youtubeSidebar'],
+      selectedTypes: ['bilibili', 'iqiyi', 'douyu', 'youtube'],
     };
   },
   computed: {
