@@ -268,7 +268,7 @@ export default {
         }
       }
       videoFiles.sort();
-      videoFiles.sort(sortVideoFile); 
+      videoFiles.sort(sortVideoFile);
       if (videoFiles.length !== 0) {
         // 如果有翻译任务就阻止
         if (this.translateFilter(() => { this.createPlayList(...videoFiles); })) {
