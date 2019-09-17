@@ -72,6 +72,8 @@ let browsingWindow = null;
 let browserViewManager = null;
 let pipControlView = null;
 let titlebarView = null;
+let maskView = null;
+let maskTimer = 0;
 let isBrowsingWindowMax = false;
 let tray = null;
 let pipTimer = 0;
@@ -85,6 +87,7 @@ const tmpVideoToOpen = [];
 const tmpSubsToOpen = [];
 const subRegex = getValidSubtitleRegex();
 const titlebarUrl = process.platform === 'darwin' ? `file:${resolve(__static, 'pip/macTitlebar.html')}` : `file:${resolve(__static, 'pip/winTitlebar.html')}`;
+const maskUrl = process.platform === 'darwin' ? `file:${resolve(__static, 'pip/mask.html')}` : `file:${resolve(__static, 'pip/mask.html')}`;
 const mainURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080'
   : `file://${__dirname}/index.html`;
@@ -165,6 +168,16 @@ function createTitlebarView() {
   });
 }
 
+function createMaskView() {
+  if (maskView) maskView.destroy();
+  maskView = new BrowserView();
+  browsingWindow.addBrowserView(maskView);
+  maskView.webContents.loadURL(maskUrl);
+  maskView.setBackgroundColor('#00FFFFFF');
+  maskView.setBounds({
+    x: 0, y: 0, width: browsingWindow.getSize()[0], height: browsingWindow.getSize()[1],
+  });
+}
 function markNeedToRestore() {
   fs.closeSync(fs.openSync(path.join(app.getPath('userData'), 'NEED_TO_RESTORE_MARK'), 'w'));
 }
@@ -458,6 +471,14 @@ function registerMainWindowEvent(mainWindow) {
     } catch (ex) {
       console.error('callBrowsingWindowMethod', method, JSON.stringify(args), '\n', ex);
     }
+  });
+  ipcMain.on('browser-window-mask', () => {
+    clearTimeout(maskTimer);
+    if (maskView && browsingWindow.getBrowserViews().includes(maskView)) {
+      browsingWindow.removeBrowserView(maskView);
+    }
+    createMaskView();
+    maskTimer = setTimeout(() => { browsingWindow.removeBrowserView(maskView); }, 600);
   });
   ipcMain.on('callMainWindowMethod', (evt, method, args = []) => {
     try {
