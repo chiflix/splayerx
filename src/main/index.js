@@ -485,7 +485,9 @@ function registerMainWindowEvent(mainWindow) {
           document.body.style.backgroundColor = 'rgba(255, 255, 255, 0)';
           `);
         clearTimeout(maskDisappearTimer);
-        maskDisappearTimer = setTimeout(() => { browsingWindow.removeBrowserView(maskView); }, 120);
+        maskDisappearTimer = setTimeout(() => {
+          if (browsingWindow) browsingWindow.removeBrowserView(maskView);
+        }, 120);
       }
     }, 300);
   });
@@ -510,12 +512,12 @@ function registerMainWindowEvent(mainWindow) {
     }
   });
   ipcMain.on('remove-main-window', () => {
-    browserViewManager.pauseVideo(mainWindow.getBrowserView());
+    browserViewManager.pauseVideo(mainWindow.getBrowserViews()[0]);
     mainWindow.hide();
   });
   ipcMain.on('remove-browser', () => {
-    const mainView = mainWindow.getBrowserView();
-    mainWindow.removeBrowserView(mainView);
+    mainWindow.getBrowserViews()
+      .forEach(mainWindowView => mainWindow.removeBrowserView(mainWindowView));
     browserViewManager.pauseVideo();
     if (browsingWindow) {
       const views = browsingWindow.getBrowserViews();
@@ -529,7 +531,7 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('go-to-offset', (evt, val) => {
     if (!browserViewManager) return;
     const newBrowser = val === 1 ? browserViewManager.forward() : browserViewManager.back();
-    const id = mainWindow.getBrowserView().id;
+    const id = mainWindow.getBrowserViews()[0].id;
     mainWindow.addBrowserView(newBrowser.page.view);
     setTimeout(() => {
       mainWindow.removeBrowserView(BrowserView.fromId(id));
@@ -559,7 +561,7 @@ function registerMainWindowEvent(mainWindow) {
     const newChannel = browserViewManager.changeChanel(channel, args);
     const view = newChannel.view ? newChannel.view : newChannel.page.view;
     const url = newChannel.view ? args.url : newChannel.page.url;
-    const mainBrowser = mainWindow.getBrowserView();
+    const mainBrowser = mainWindow.getBrowserViews()[0];
     mainWindow.addBrowserView(view);
     setTimeout(() => {
       if (mainBrowser) mainWindow.removeBrowserView(BrowserView.fromId(mainBrowser.id));
@@ -703,8 +705,10 @@ function registerMainWindowEvent(mainWindow) {
   });
   ipcMain.on('shift-pip', (evt, args) => {
     if (!browserViewManager) return;
-    const mainView = mainWindow.getBrowserView();
-    mainWindow.removeBrowserView(mainView);
+    const mainWindowViews = mainWindow.getBrowserViews();
+    const mainView = mainWindowViews[0];
+    mainWindowViews
+      .forEach(mainWindowView => mainWindow.removeBrowserView(mainWindowView));
     const browViews = browsingWindow.getBrowserViews();
     browViews.forEach((view) => {
       browsingWindow.removeBrowserView(view);
@@ -722,7 +726,7 @@ function registerMainWindowEvent(mainWindow) {
     createPipControlView();
     createTitlebarView();
     if (args.isGlobal) {
-      browserViewManager.pauseVideo(mainWindow.getBrowserView());
+      browserViewManager.pauseVideo(mainWindow.getBrowserViews()[0]);
       mainWindow.hide();
     }
     mainBrowser.page.view.setBounds({
@@ -760,14 +764,14 @@ function registerMainWindowEvent(mainWindow) {
       browsingWindow.setSize(args.pipInfo.pipSize[0], args.pipInfo.pipSize[1]);
       browsingWindow.setPosition(args.pipInfo.pipPos[0], args.pipInfo.pipPos[1]);
       mainWindow.send('init-pip-position');
-      mainWindow.removeBrowserView(mainWindow.getBrowserView());
+      mainWindow.removeBrowserView(mainWindow.getBrowserViews()[0]);
       mainWindow.addBrowserView(mainBrowser.page.view);
       browsingWindow.addBrowserView(pipBrowser);
       createPipControlView();
       createTitlebarView();
       browsingWindow.show();
     } else {
-      mainWindow.removeBrowserView(mainWindow.getBrowserView());
+      mainWindow.removeBrowserView(mainWindow.getBrowserViews()[0]);
       mainWindow.addBrowserView(mainBrowser.page.view);
       browsingWindow.setSize(browsingWindow.getSize()[0] + 1, browsingWindow.getSize()[1]);
       browsingWindow.addBrowserView(pipBrowser);
@@ -776,7 +780,7 @@ function registerMainWindowEvent(mainWindow) {
       browsingWindow.show();
     }
     if (args.isGlobal) {
-      browserViewManager.pauseVideo(mainWindow.getBrowserView());
+      browserViewManager.pauseVideo(mainWindow.getBrowserViews()[0]);
       mainWindow.hide();
     }
     browsingWindow.webContents.closeDevTools();
@@ -823,8 +827,8 @@ function registerMainWindowEvent(mainWindow) {
     if (!browserViewManager) return;
     browsingWindow.send('remove-pip-listener');
     mainWindow.show();
-    const mainView = mainWindow.getBrowserView();
-    mainWindow.removeBrowserView(mainView);
+    mainWindow.getBrowserViews()
+      .forEach(mainWindowView => mainWindow.removeBrowserView(mainWindowView));
     const browViews = browsingWindow.getBrowserViews();
     browViews.forEach((view) => {
       browsingWindow.removeBrowserView(view);
