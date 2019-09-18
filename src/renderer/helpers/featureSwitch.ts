@@ -65,3 +65,5 @@ export async function forceRefresh() {
 }
 
 export const isAIEnabled = async () => getConfig('isAIEnabled', false);
+
+export const isAudioCenterChannelEnabled = async () => getConfig('isAudioCenterChannelEnabled', false);

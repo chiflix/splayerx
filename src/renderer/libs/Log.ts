@@ -111,6 +111,26 @@ export default class Log implements ILog {
       Sentry.captureException(message);
     }
   }
+
+  /**
+   * @description 往sentry记录临时数据，用户排查
+   * @author tanghaixiang
+   * @param {string} label sentry 事件名称
+   * @param {object} tags 事件标签字典，方便查找
+   * @param {object} message 事件数据
+   */
+  public save(label: string, tags: object, message: object): void {
+    if (process.env.NODE_ENV === 'development') console.log(label, message);
+    Sentry.withScope((scope) => {
+      Object.keys(tags).forEach((key: string) => {
+        scope.setTag(key, tags[key]);
+      });
+      Object.keys(message).forEach((key: string) => {
+        scope.setExtra(key, message[key]);
+      });
+      Sentry.captureMessage(label);
+    });
+  }
 }
 
 export const log = new Log();

@@ -4,7 +4,7 @@ import '../shared/sentry';
 
 import path from 'path';
 import fs from 'fs';
-import electron from 'electron';
+import electron, { ipcRenderer } from 'electron';
 import Vue from 'vue';
 import VueI18n from 'vue-i18n';
 import axios from 'axios';
@@ -1019,6 +1019,7 @@ new Vue({
       });
       this.menuService.on('browsing.window.keepPipFront', () => {
         this.browsingViewTop = !this.browsingViewTop;
+        ipcRenderer.send('browser-window-mask');
       });
       this.menuService.on('browsing.window.pip', () => {
         this.$bus.$emit('toggle-pip', true);

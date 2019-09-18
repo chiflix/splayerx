@@ -26,7 +26,7 @@
     />
     <browsing-title-bar
       v-if="!isDarwin"
-      :show-side-bar="showSidebar"
+      :show-sidebar="showSidebar"
     />
   </div>
 </template>
