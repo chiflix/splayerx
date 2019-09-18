@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-05 16:03:32
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-08-20 17:37:01
+ * @Last Modified time: 2019-09-12 14:40:24
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @ts-ignore
@@ -17,14 +17,16 @@ import { TranscriptInfo } from '@/services/subtitle';
 import { ISubtitleControlListItem, Type } from '@/interfaces/ISubtitle';
 import { mediaStorageService } from '@/services/storage/MediaStorageService';
 import { TranslatedGenerator } from '@/services/subtitle/loaders/translated';
-import { addBubble } from '../../helpers/notificationControl';
+import { isAudioCenterChannelEnabled } from '@/helpers/featureSwitch';
+import { addBubble } from '@/helpers/notificationControl';
 import {
   TRANSLATE_SERVER_ERROR_FAIL, TRANSLATE_SUCCESS,
   TRANSLATE_SUCCESS_WHEN_VIDEO_CHANGE, TRANSLATE_REQUEST_TIMEOUT,
-} from '../../helpers/notificationcodes';
+} from '@/helpers/notificationcodes';
 import { log } from '@/libs/Log';
 import { LanguageCode } from '@/libs/language';
 import { addSubtitleItemsToList } from '@/services/storage/subtitle';
+import { getStreams } from '@/plugins/mediaTasks';
 
 let taskTimer: number;
 let timerCount: number;
@@ -35,7 +37,7 @@ export enum AudioTranslateStatus {
   Selecting = 'selecting',
   Searching = 'searching',
   Grabbing = 'grabbing',
-  GrabCompleted= 'grab-completed',
+  GrabCompleted = 'grab-completed',
   Translating = 'translating',
   Back = 'back',
   Fail = 'fail',
@@ -107,6 +109,19 @@ const state = {
   failType: AudioTranslateFailType.Default,
 };
 
+const getCurrentAudioInfo = async (
+  currentAudioTrackId: number,
+  path: string,
+) => {
+  const streams = await getStreams(path);
+  // currentAudioTrackId 是从stream的索引是从1开始的
+  const index = currentAudioTrackId - 1;
+  log.debug('translate/track', currentAudioTrackId);
+  log.debug('translate/track', index);
+  const audioInfo = (await isAudioCenterChannelEnabled()) ? streams[index] : undefined;
+  log.debug('translate/audioInfo', audioInfo);
+  return audioInfo;
+};
 
 const taskCallback = (taskInfo: AITaskInfo) => {
   log.debug('AudioTranslate', taskInfo, 'audio-log');
@@ -273,7 +288,7 @@ const mutations = {
 };
 
 const actions = {
-  [a.AUDIO_TRANSLATE_START]({
+  async [a.AUDIO_TRANSLATE_START]({
     commit, getters, state, dispatch,
   }: any, audioLanguageCode: string) {
     // 记录当前智能翻译的信息
@@ -285,8 +300,11 @@ const actions = {
     }
     commit(m.AUDIO_TRANSLATE_SAVE_KEY, `${getters.mediaHash}`);
     audioTranslateService.stop();
+    // audio index in audio streams
+    const audioInfo = await getCurrentAudioInfo(getters.currentAudioTrackId, getters.originSrc);
     const grab = audioTranslateService.startJob({
       audioId: getters.currentAudioTrackId,
+      audioInfo,
       mediaHash: getters.mediaHash,
       videoSrc: getters.originSrc,
       audioLanguageCode,
@@ -412,8 +430,22 @@ const actions = {
       });
       grab.removeListener('task', taskCallback);
       grab.on('task', taskCallback);
-      grab.on('transcriptInfo', async (transcriptInfo: TranscriptInfo) => {
+      grab.on('transcriptInfo', async (transcriptInfo: TranscriptInfo) => { // eslint-disable-line complexity
         log.debug('AudioTranslate', transcriptInfo, 'audio-log');
+        // 记录成功日志到sentry, 排查成功后没有数据的音频中置声道错误
+        try {
+          log.save('translate-audio-log', {
+            mediaHash: grab.mediaHash,
+            taskId: grab.taskInfo ? grab.taskInfo.taskId : undefined,
+          }, {
+            audioInfo: grab.audioInfo,
+            taskInfo: grab.taskInfo,
+            audioTrack: grab.audioId,
+            videoSrc: grab.videoSrc,
+          });
+        } catch (error) {
+          // empty
+        }
         // 清除task阶段倒计时定时器
         if (taskTimer) {
           clearInterval(taskTimer);

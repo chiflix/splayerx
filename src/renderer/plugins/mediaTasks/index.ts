@@ -1,4 +1,4 @@
-import MediaInfoQueue, { CodecType, ISubtitleStream } from './mediaInfoQueue';
+import MediaInfoQueue, { CodecType, ISubtitleStream, Stream } from './mediaInfoQueue';
 import SnapshotQueue from './snapshotSubtitleQueue';
 import SubtitleQueue from './subtitleQueue';
 import ThumbnailQueue from './thumbnailQueue';
@@ -8,6 +8,9 @@ const mediaInfoQueue = new MediaInfoQueue();
 const snapshotQueue = new SnapshotQueue();
 const subtitleQueue = new SubtitleQueue();
 const thumbnailQueue = new ThumbnailQueue();
+
+// 存储每个path 对应的 streams
+const infos: { [key: string]: Stream[]; } = {};
 
 export async function getMediaInfo(path: string) {
   try {
@@ -22,8 +25,10 @@ export async function getFormat(path: string) {
   return info && info.format;
 }
 export async function getStreams(path: string) {
+  if (infos[path]) return infos[path];
   const info = await getMediaInfo(path);
-  return (info && info.streams) || [];
+  infos[path] = (info && info.streams) || [];
+  return infos[path];
 }
 export async function getSubtitleStreams(path: string) {
   return (await getStreams(path))

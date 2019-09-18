@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-06-20 18:03:14
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-08-06 11:45:20
+ * @Last Modified time: 2019-09-12 11:30:43
  */
 
 // @ts-ignore
@@ -17,9 +17,11 @@ import { AITaskInfo } from '@/interfaces/IMediaStorable';
 import sagi from '@/libs/sagi';
 import MediaStorageService, { mediaStorageService } from '../storage/MediaStorageService';
 import { TranscriptInfo } from '../subtitle';
+import { Stream } from '@/plugins/mediaTasks/mediaInfoQueue';
 
 type JobData = {
   audioId: string,
+  audioInfo?: Stream,
   mediaHash: string,
   videoSrc: string,
   audioLanguageCode: string,
@@ -48,6 +50,8 @@ class AudioTranslateService extends EventEmitter {
   public streamClient: any; // eslint-disable-line
 
   public taskInfo?: AITaskInfo;
+
+  public audioInfo?: Stream;
 
   public loopTimer: NodeJS.Timer;
 
@@ -97,12 +101,14 @@ class AudioTranslateService extends EventEmitter {
     this.videoSrc = data.videoSrc;
     this.audioLanguageCode = data.audioLanguageCode;
     this.targetLanguageCode = data.targetLanguageCode;
+    this.audioInfo = data.audioInfo;
     ipcRenderer.send('grab-audio', {
       mediaHash: this.mediaHash,
       videoSrc: this.videoSrc,
       audioLanguageCode: this.audioLanguageCode,
       targetLanguageCode: this.targetLanguageCode,
       audioId: this.audioId,
+      audioInfo: this.audioInfo,
       uuid: Vue.axios.defaults.headers.common['X-Application-Token'],
       agent: navigator.userAgent,
     });
