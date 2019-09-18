@@ -72,6 +72,9 @@ let browsingWindow = null;
 let browserViewManager = null;
 let pipControlView = null;
 let titlebarView = null;
+let maskView = null;
+let maskEventTimer = 0;
+let maskDisappearTimer = 0;
 let isBrowsingWindowMax = false;
 let tray = null;
 let pipTimer = 0;
@@ -85,6 +88,7 @@ const tmpVideoToOpen = [];
 const tmpSubsToOpen = [];
 const subRegex = getValidSubtitleRegex();
 const titlebarUrl = process.platform === 'darwin' ? `file:${resolve(__static, 'pip/macTitlebar.html')}` : `file:${resolve(__static, 'pip/winTitlebar.html')}`;
+const maskUrl = process.platform === 'darwin' ? `file:${resolve(__static, 'pip/mask.html')}` : `file:${resolve(__static, 'pip/mask.html')}`;
 const mainURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080'
   : `file://${__dirname}/index.html`;
@@ -165,6 +169,19 @@ function createTitlebarView() {
   });
 }
 
+function createMaskView() {
+  if (maskView) maskView.destroy();
+  maskView = new BrowserView();
+  browsingWindow.addBrowserView(maskView);
+  maskView.webContents.loadURL(maskUrl);
+  maskView.setBackgroundColor('#00FFFFFF');
+  maskView.setBounds({
+    x: 0, y: 0, width: browsingWindow.getSize()[0], height: browsingWindow.getSize()[1],
+  });
+  maskView.webContents.executeJavaScript(`
+    document.body.style.backgroundColor = 'rgba(255, 255, 255, 0.18)';
+  `);
+}
 function markNeedToRestore() {
   fs.closeSync(fs.openSync(path.join(app.getPath('userData'), 'NEED_TO_RESTORE_MARK'), 'w'));
 }
@@ -466,6 +483,21 @@ function registerMainWindowEvent(mainWindow) {
       console.error('callBrowsingWindowMethod', method, JSON.stringify(args), '\n', ex);
     }
   });
+  ipcMain.on('browser-window-mask', () => {
+    if (!browsingWindow.getBrowserViews().includes(maskView)) createMaskView();
+    clearTimeout(maskEventTimer);
+    maskEventTimer = setTimeout(() => {
+      if (maskView) {
+        maskView.webContents.executeJavaScript(`
+          document.body.style.backgroundColor = 'rgba(255, 255, 255, 0)';
+          `);
+        clearTimeout(maskDisappearTimer);
+        maskDisappearTimer = setTimeout(() => {
+          if (browsingWindow) browsingWindow.removeBrowserView(maskView);
+        }, 120);
+      }
+    }, 300);
+  });
   ipcMain.on('callMainWindowMethod', (evt, method, args = []) => {
     try {
       mainWindow[method](...args);
@@ -494,12 +526,12 @@ function registerMainWindowEvent(mainWindow) {
     }
   });
   ipcMain.on('remove-main-window', () => {
-    browserViewManager.pauseVideo(mainWindow.getBrowserView());
+    browserViewManager.pauseVideo(mainWindow.getBrowserViews()[0]);
     mainWindow.hide();
   });
   ipcMain.on('remove-browser', () => {
-    const mainView = mainWindow.getBrowserView();
-    mainWindow.removeBrowserView(mainView);
+    mainWindow.getBrowserViews()
+      .forEach(mainWindowView => mainWindow.removeBrowserView(mainWindowView));
     browserViewManager.pauseVideo();
     if (browsingWindow) {
       const views = browsingWindow.getBrowserViews();
@@ -513,7 +545,7 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('go-to-offset', (evt, val) => {
     if (!browserViewManager) return;
     const newBrowser = val === 1 ? browserViewManager.forward() : browserViewManager.back();
-    const id = mainWindow.getBrowserView().id;
+    const id = mainWindow.getBrowserViews()[0].id;
     mainWindow.addBrowserView(newBrowser.page.view);
     setTimeout(() => {
       mainWindow.removeBrowserView(BrowserView.fromId(id));
@@ -543,7 +575,7 @@ function registerMainWindowEvent(mainWindow) {
     const newChannel = browserViewManager.changeChanel(channel, args);
     const view = newChannel.view ? newChannel.view : newChannel.page.view;
     const url = newChannel.view ? args.url : newChannel.page.url;
-    const mainBrowser = mainWindow.getBrowserView();
+    const mainBrowser = mainWindow.getBrowserViews()[0];
     mainWindow.addBrowserView(view);
     setTimeout(() => {
       if (mainBrowser) mainWindow.removeBrowserView(BrowserView.fromId(mainBrowser.id));
@@ -687,8 +719,10 @@ function registerMainWindowEvent(mainWindow) {
   });
   ipcMain.on('shift-pip', (evt, args) => {
     if (!browserViewManager) return;
-    const mainView = mainWindow.getBrowserView();
-    mainWindow.removeBrowserView(mainView);
+    const mainWindowViews = mainWindow.getBrowserViews();
+    const mainView = mainWindowViews[0];
+    mainWindowViews
+      .forEach(mainWindowView => mainWindow.removeBrowserView(mainWindowView));
     const browViews = browsingWindow.getBrowserViews();
     browViews.forEach((view) => {
       browsingWindow.removeBrowserView(view);
@@ -706,7 +740,7 @@ function registerMainWindowEvent(mainWindow) {
     createPipControlView();
     createTitlebarView();
     if (args.isGlobal) {
-      browserViewManager.pauseVideo(mainWindow.getBrowserView());
+      browserViewManager.pauseVideo(mainWindow.getBrowserViews()[0]);
       mainWindow.hide();
     }
     mainBrowser.page.view.setBounds({
@@ -744,14 +778,14 @@ function registerMainWindowEvent(mainWindow) {
       browsingWindow.setSize(args.pipInfo.pipSize[0], args.pipInfo.pipSize[1]);
       browsingWindow.setPosition(args.pipInfo.pipPos[0], args.pipInfo.pipPos[1]);
       mainWindow.send('init-pip-position');
-      mainWindow.removeBrowserView(mainWindow.getBrowserView());
+      mainWindow.removeBrowserView(mainWindow.getBrowserViews()[0]);
       mainWindow.addBrowserView(mainBrowser.page.view);
       browsingWindow.addBrowserView(pipBrowser);
       createPipControlView();
       createTitlebarView();
       browsingWindow.show();
     } else {
-      mainWindow.removeBrowserView(mainWindow.getBrowserView());
+      mainWindow.removeBrowserView(mainWindow.getBrowserViews()[0]);
       mainWindow.addBrowserView(mainBrowser.page.view);
       browsingWindow.setSize(browsingWindow.getSize()[0] + 1, browsingWindow.getSize()[1]);
       browsingWindow.addBrowserView(pipBrowser);
@@ -760,7 +794,7 @@ function registerMainWindowEvent(mainWindow) {
       browsingWindow.show();
     }
     if (args.isGlobal) {
-      browserViewManager.pauseVideo(mainWindow.getBrowserView());
+      browserViewManager.pauseVideo(mainWindow.getBrowserViews()[0]);
       mainWindow.hide();
     }
     browsingWindow.webContents.closeDevTools();
@@ -806,8 +840,9 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('exit-pip', () => {
     if (!browserViewManager) return;
     browsingWindow.send('remove-pip-listener');
-    const mainView = mainWindow.getBrowserView();
-    mainWindow.removeBrowserView(mainView);
+    mainWindow.show();
+    mainWindow.getBrowserViews()
+      .forEach(mainWindowView => mainWindow.removeBrowserView(mainWindowView));
     const browViews = browsingWindow.getBrowserViews();
     browViews.forEach((view) => {
       browsingWindow.removeBrowserView(view);
