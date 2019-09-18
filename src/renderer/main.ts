@@ -203,7 +203,7 @@ new Vue({
   watch: {
     isFullScreen(val) {
       this.menuService.updateMenuItemLabel(
-        'window.fullscreen',
+        this.currentRouteName === 'browsing-view' ? 'browsing.window.fullscreen' : 'window.fullscreen',
         val ? 'msg.window.exitFullScreen' : 'msg.window.enterFullScreen',
       );
     },
@@ -973,6 +973,15 @@ new Vue({
         this.$bus.$emit('invoke-all-widgets');
       });
       this.menuService.on('window.fullscreen', () => {
+        if (this.isFullScreen) {
+          this.$bus.$emit('off-fullscreen');
+          this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
+        } else {
+          this.$bus.$emit('to-fullscreen');
+          this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [true]);
+        }
+      });
+      this.menuService.on('browsing.window.fullscreen', () => {
         if (this.$electron.remote.getCurrentWindow().isFocused()) {
           if (this.isFullScreen) {
             this.$bus.$emit('off-fullscreen');

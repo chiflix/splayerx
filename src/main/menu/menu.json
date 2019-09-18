@@ -423,7 +423,7 @@
         "id": "menubar.separator"
       },
       {
-        "id": "window.fullscreen",
+        "id": "browsing.window.fullscreen",
         "label": "msg.window.enterFullScreen"
       },
       {

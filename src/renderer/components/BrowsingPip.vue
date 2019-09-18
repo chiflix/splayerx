@@ -107,6 +107,9 @@ export default {
     electron.remote.getCurrentWindow().addListener('enter-html-full-screen', () => {
       electron.ipcRenderer.send('mouseup', 'full');
     });
+    electron.remote.getCurrentWindow().addListener('leave-html-full-screen', () => {
+      electron.ipcRenderer.send('mouseup', 'recover');
+    });
     window.addEventListener('resize', throttle(() => {
       const size = electron.remote.getCurrentWindow().getSize();
       electron.ipcRenderer.send('update-pip-size', size);
