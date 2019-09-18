@@ -381,6 +381,12 @@ export default {
         this.updateIsPip(false);
       },
     );
+    this.$electron.remote.getCurrentWindow().on('enter-html-full-screen', () => {
+      this.headerToShow = false;
+    });
+    this.$electron.remote.getCurrentWindow().on('leave-html-full-screen', () => {
+      this.headerToShow = true;
+    });
     this.$electron.ipcRenderer.on(
       'update-browser-state',
       (
@@ -683,9 +689,6 @@ export default {
           //   this.dropFiles = args.files;
           // }
           break;
-        case 'fullscreenchange':
-          this.headerToShow = !args.isFullScreen;
-          break;
         case 'keydown':
           if (['INPUT', 'TEXTAREA'].includes(args.targetName as string)) {
             this.acceleratorAvailable = false;
@@ -927,7 +930,7 @@ export default {
         this.updateBarrageOpen(!this.barrageOpen);
         this.$electron.ipcRenderer.send(
           'handle-danmu-display',
-          this.pip.douyuBarrageAdapt(this.barrageOpen),
+          this.pip.douyuBarrageAdapt(this.douyuType, this.barrageOpen),
         );
       }
     },

@@ -136,9 +136,6 @@ document.addEventListener('DOMContentLoaded', () => {
       sendToHost('keydown', { targetName: evt.target.tagName });
     }
   });
-  document.addEventListener('fullscreenchange', () => {
-    sendToHost('fullscreenchange', { isFullScreen: document.webkitIsFullScreen });
-  });
 });
 
 const oauthRegex = [
