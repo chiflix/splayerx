@@ -174,16 +174,18 @@ export default class WindowRectService implements IWindowRectRequest {
     oldRect: number[],
     maxSize?: number[],
     minSize?: number[],
+    screenRect?: number[],
   ): number[] {
     if (!maxSize) {
       maxSize = getScreenRect().slice(2, 4);
     }
+    screenRect = screenRect || getScreenRect();
     if (!minSize) minSize = MINSIZE;
     const [newWidth, newHeight] = this.calculateWindowSize(
-      minSize, maxSize, videoSize, videoExisted, getScreenRect().slice(2, 4),
+      minSize, maxSize, videoSize, videoExisted, screenRect.slice(2, 4),
     );
     const [newLeft, newTop] = this.calculateWindowPosition(
-      oldRect, [newWidth, newHeight], getScreenRect(),
+      oldRect, [newWidth, newHeight], screenRect,
     );
     const rect = [newLeft, newTop, newWidth, newHeight];
     ipcRenderer.send('callMainWindowMethod', 'setSize', rect.slice(2, 4));

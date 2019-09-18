@@ -5,6 +5,7 @@ const { ipcRenderer, remote } = require('electron');
 const isDarwin = process.platform === 'darwin';
 let offset = null;
 let windowSize = null;
+let pipTimer = null;
 function getRatio() {
   return window.devicePixelRatio || 1;
 }
@@ -19,6 +20,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const max = document.querySelector('.titlebarMax');
   if (titlebar) {
     titlebar.addEventListener('dblclick', () => ipcRenderer.send('mouseup', 'max'));
+    titlebar.style.display = 'flex';
+    document.addEventListener('mousemove', () => {
+      if (pipTimer) clearTimeout(pipTimer);
+      ipcRenderer.send('pip-btn-mousemove');
+      titlebar.style.display = 'flex';
+    });
+    pipTimer = setTimeout(() => {
+      titlebar.style.display = 'none';
+    }, 3000);
   }
   if (isDarwin) {
     let mouseenter = false;
@@ -81,9 +91,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   window.addEventListener('keydown', (e) => {
     ipcRenderer.send('key-events', e.keyCode);
-  });
-  window.addEventListener('mousemove', () => {
-    ipcRenderer.send('mousemove');
   });
   window.addEventListener('mouseout', (e) => {
     const winSize = remote.getCurrentWindow().getSize();

@@ -11,7 +11,7 @@
         :key="videoId"
         :needtimeupdate="true"
         :last-audio-track-id="lastAudioTrackId"
-        :events="['loadedmetadata', 'audiotrack']"
+        :events="['loadedmetadata', 'audiotrack', 'playing']"
         :styles="{objectFit: 'contain', width: 'calc(100% - 0.1px)', height: '100%'}"
         :loop="loop"
         :crossOrigin="'anonymous'"
@@ -23,6 +23,7 @@
         :current-time="seekTime"
         :current-audio-track-id="currentAudioTrackId.toString()"
         @loadedmetadata="onMetaLoaded"
+        @playing="switchingLock = false"
         @audiotrack="onAudioTrack"
       />
       <!-- calc(100% - 0.1px) fix for mac book pro 15 full screen after
@@ -214,6 +215,7 @@ export default {
       this.maskBackground = 'rgba(255, 255, 255, 0)';
       this.$ga.event('app', 'drop');
     });
+    this.$bus.$on('mask-highlight', (on: boolean) => { this.maskBackground = `rgba(255, 255, 255, ${on ? 0.18 : 0})`; });
     window.addEventListener('beforeunload', this.beforeUnloadHandler);
   },
   beforeDestroy() {
@@ -236,7 +238,6 @@ export default {
       discardTranslate: atActions.AUDIO_TRANSLATE_DISCARD,
     }),
     async onMetaLoaded(event: Event) { // eslint-disable-line complexity
-      this.switchingLock = false;
       const target = event.target as HTMLVideoElement;
       this.videoElement = target;
       this.videoConfigInitialize({

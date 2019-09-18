@@ -2,27 +2,30 @@
   <div
     class="side-bar"
   >
-    <div class="icon-box">
+    <div
+      :class="{ 'win': !isDarwin }"
+      class="icon-box"
+    >
       <div
         @click="handleSidebarIcon('https://www.bilibili.com/')"
         :class="{ selected: currentUrl.includes('bilibili') }"
         class="icon-hover"
       >
-        <Icon type="bilibiliSidebar"/>
+        <Icon type="bilibiliSidebar" />
       </div>
       <div
         @click="handleSidebarIcon('https://www.iqiyi.com/')"
         :class="{ selected: currentUrl.includes('iqiyi') }"
         class="icon-hover"
       >
-        <Icon type="iqiyiSidebar"/>
+        <Icon type="iqiyiSidebar" />
       </div>
       <div
         @click="handleSidebarIcon('https://www.youtube.com/')"
         :class="{ selected: currentUrl.includes('youtube') }"
         class="icon-hover"
       >
-        <Icon type="youtubeSidebar"/>
+        <Icon type="youtubeSidebar" />
       </div>
     </div>
   </div>
@@ -49,6 +52,9 @@ export default {
   },
   computed: {
     ...mapGetters(['pipSize', 'pipPos']),
+    isDarwin() {
+      return process.platform === 'darwin';
+    },
   },
   methods: {
     handleSidebarIcon(url: string) {
@@ -102,11 +108,14 @@ export default {
         position: absolute;
         width: 44px;
         height: 44px;
-        border: 2px solid #fff;
+        border: 2px solid #E0E0EA;
         border-radius: 100%;
         box-sizing: border-box;
       }
     }
+  }
+  .win {
+    margin-top: 16px;
   }
 }
 </style>

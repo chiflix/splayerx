@@ -337,11 +337,18 @@ function createBrowsingWindow(args) {
     browsingWindow.on('focus', () => {
       menuService.updateFocusedWindow(false, mainWindow && mainWindow.isVisible());
     });
+    browsingWindow.on('move', throttle(() => {
+      if (!mainWindow) return;
+      mainWindow.send('update-pip-pos', browsingWindow.getPosition());
+    }, 100));
   });
   browsingWindow.on('leave-full-screen', () => {
     if (hideBrowsingWindow) {
       hideBrowsingWindow = false;
       browsingWindow.hide();
+      setTimeout(() => {
+        mainWindow.focus();
+      }, 0);
     }
   });
 }
@@ -469,6 +476,13 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('pip-watcher', (evt, args) => {
     browsingWindow.getBrowserViews()[0].webContents.executeJavaScript(args);
   });
+  ipcMain.on('pip-window-fullscreen', () => {
+    if (browsingWindow && browsingWindow.isFocused()) {
+      browsingWindow.setFullScreen(!browsingWindow.isFullScreen());
+      titlebarView.webContents
+        .executeJavaScript(InjectJSManager.updateFullScreenIcon(browsingWindow.isFullScreen()));
+    }
+  });
   ipcMain.on('pip-window-close', (evt, args) => {
     const views = browsingWindow.getBrowserViews();
     if (views.length) {
@@ -580,6 +594,7 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('mousemove', () => {
     if (browsingWindow && browsingWindow.isFocused()) {
       pipControlView.webContents.executeJavaScript(InjectJSManager.updatePipControlState(true));
+      titlebarView.webContents.executeJavaScript(InjectJSManager.updatePipTitlebarToShow(true));
       if (pipTimer) {
         clearTimeout(pipTimer);
       }
@@ -587,6 +602,8 @@ function registerMainWindowEvent(mainWindow) {
         if (pipControlView && !pipControlView.isDestroyed()) {
           pipControlView.webContents
             .executeJavaScript(InjectJSManager.updatePipControlState(false));
+          titlebarView.webContents
+            .executeJavaScript(InjectJSManager.updatePipTitlebarToShow(false));
         }
       }, 3000);
     }
@@ -612,6 +629,7 @@ function registerMainWindowEvent(mainWindow) {
         clearTimeout(pipTimer);
       }
       pipControlView.webContents.executeJavaScript(InjectJSManager.updatePipControlState(false));
+      titlebarView.webContents.executeJavaScript(InjectJSManager.updatePipTitlebarToShow(false));
     }
   });
   ipcMain.on('maximizable', (evt, val) => {
@@ -745,6 +763,7 @@ function registerMainWindowEvent(mainWindow) {
       browserViewManager.pauseVideo(mainWindow.getBrowserView());
       mainWindow.hide();
     }
+    browsingWindow.webContents.closeDevTools();
     browsingWindow.setAspectRatio(args.pipInfo.aspectRatio);
     browsingWindow.setMinimumSize(args.pipInfo.minimumSize[0], args.pipInfo.minimumSize[1]);
     mainBrowser.page.view.setBounds({
@@ -787,7 +806,6 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('exit-pip', () => {
     if (!browserViewManager) return;
     browsingWindow.send('remove-pip-listener');
-    mainWindow.show();
     const mainView = mainWindow.getBrowserView();
     mainWindow.removeBrowserView(mainView);
     const browViews = browsingWindow.getBrowserViews();
@@ -814,11 +832,12 @@ function registerMainWindowEvent(mainWindow) {
     if (browsingWindow.isFullScreen()) {
       hideBrowsingWindow = true;
       browsingWindow.setFullScreen(false);
+      exitBrowser.page.view.webContents.executeJavaScript('document.webkitCancelFullScreen();');
     } else {
       browsingWindow.hide();
     }
+    mainWindow.show();
     menuService.updateFocusedWindow(true, mainWindow && mainWindow.isVisible());
-    mainWindow.focus();
   });
   ipcMain.on('set-window-maximize', () => {
     if (mainWindow && mainWindow.isFocused()) {
@@ -847,8 +866,14 @@ function registerMainWindowEvent(mainWindow) {
     routeName = route;
   });
   ipcMain.on('key-events', (e, keyCode) => {
-    browsingWindow.getBrowserViews()[0].webContents
-      .executeJavaScript(InjectJSManager.emitKeydownEvent(keyCode));
+    if (keyCode === 13) {
+      browsingWindow.setFullScreen(!browsingWindow.isFullScreen());
+      titlebarView.webContents
+        .executeJavaScript(InjectJSManager.updateFullScreenIcon(browsingWindow.isFullScreen()));
+    } else {
+      browsingWindow.getBrowserViews()[0].webContents
+        .executeJavaScript(InjectJSManager.emitKeydownEvent(keyCode));
+    }
   });
   ipcMain.on('drop-subtitle', (event, args) => {
     if (!mainWindow || mainWindow.webContents.isDestroyed()) return;

@@ -35,6 +35,12 @@ export default {
     }
   },
   mounted() {
+    window.addEventListener('keydown', (e) => {
+      if (e.keyCode === 13) {
+        const isFullScreen = electron.remote.getCurrentWindow().isFullScreen();
+        electron.ipcRenderer.send('mouseup', isFullScreen ? 'recover' : 'full');
+      }
+    });
     electron.ipcRenderer.on('remove-pip-listener', () => {
       const view = electron.remote.getCurrentWindow().getBrowserViews()[0];
       if (view) {
@@ -124,6 +130,7 @@ export default {
         e.returnValue = false;
         const size = electron.remote.getCurrentWindow().getSize();
         const position = electron.remote.getCurrentWindow().getPosition();
+
         asyncStorage.set('browsingPip', {
           pipSize: size,
           pipPos: position,

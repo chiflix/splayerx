@@ -1,6 +1,12 @@
-export default function globalPip(winSize) {
-  return {
-    adapter: `var video = document.querySelector("video");
+export default class Others {
+  public adapter: string;
+
+  public watcher: string;
+
+  public recover: string;
+
+  public constructor(winSize: number[]) {
+    this.adapter = `var video = document.querySelector("video");
       var parentElement = video.parentElement;
       document.scrollingElement.scrollTop = 0;
       var width = video.style.width;
@@ -15,11 +21,11 @@ export default function globalPip(winSize) {
       video.style.background = "rgb(0, 0, 0)";
       video.style.position = "absolute";
       Object.defineProperty(document.querySelector("video").style, "width", {get: function(){return this._width}, set: function(val){this._width = val.width;if (val.flag) document.querySelector("video").style.setProperty("width", val.width);}});
-      Object.defineProperty(document.querySelector("video").style, "height", {get: function(){return this._height}, set: function(val){this._height = val.height; if (val.flag) document.querySelector("video").style.setProperty("height", val.height);}});`,
-    watcher: `var video = document.querySelector("video");
+      Object.defineProperty(document.querySelector("video").style, "height", {get: function(){return this._height}, set: function(val){this._height = val.height; if (val.flag) document.querySelector("video").style.setProperty("height", val.height);}});`;
+    this.watcher = `var video = document.querySelector("video");
       video.style.width = { width: "${winSize[0]}px", flag: true };
-      video.style.height = { height: "${winSize[1]}px", flag: true }`,
-    recover: 'var video = document.querySelector("video");'
+      video.style.height = { height: "${winSize[1]}px", flag: true }`;
+    this.recover = 'var video = document.querySelector("video");'
       + 'parentElement.prepend(video);'
       + 'document.body.style.overflow = "";'
       + 'video.style.zIndex = zIndex;'
@@ -28,6 +34,6 @@ export default function globalPip(winSize) {
       + 'Object.defineProperty(document.querySelector("video").style, "width", {get: function(){return this._width}, set: function(val){this._width = val;document.querySelector("video").style.setProperty("width", val);}});'
       + 'Object.defineProperty(document.querySelector("video").style, "height", {get: function(){return this._height}, set: function(val){this._height = val;document.querySelector("video").style.setProperty("height", val);}});'
       + 'video.style.width = width;'
-      + 'video.style.height = height;',
-  };
+      + 'video.style.height = height;';
+  }
 }

@@ -118,6 +118,8 @@ export default {
         canGoForward: false,
         canGoBack: false,
       },
+      allChannels: ['youtube', 'bilibili', 'iqiyi'],
+      hideMainWindow: false,
     };
   },
   computed: {
@@ -140,37 +142,44 @@ export default {
     isDarwin() {
       return process.platform === 'darwin';
     },
-    youtubePip() {
-      return InjectJSManager.getPipByChannel('youtube');
+    pipArgs() {
+      switch (this.pipType) {
+        case 'youtube':
+          return { channel: 'youtube' };
+        case 'bilibili':
+          return {
+            channel: 'bilibili', type: this.bilibiliType, barrageState: this.barrageOpen, winSize: this.pipSize,
+          };
+        case 'iqiyi':
+          return { channel: 'iqiyi', barrageState: this.barrageOpen, winSize: this.pipSize };
+        case 'others':
+          return { channel: 'others', winSize: this.pipSize };
+        default:
+          return { channel: 'others', winSize: this.pipSize };
+      }
     },
-    iqiyiPip() {
-      return InjectJSManager.getPipByChannel('iqiyi', this.barrageOpen, this.pipSize);
-    },
-    iqiyiBarrage() {
-      return InjectJSManager.getPipBarrage('iqiyi', this.barrageOpen);
-    },
-    bilibiliPip() {
-      return InjectJSManager.getPipByChannel('bilibili', this.bilibiliType, this.barrageOpen, this.pipSize);
-    },
-    bilibiliBarrage() {
-      return InjectJSManager.getPipBarrage('bilibili', this.barrageOpen, this.bilibiliType);
-    },
-    othersPip() {
-      return InjectJSManager.getPipByChannel('others', this.pipSize);
+    pip() {
+      return InjectJSManager.getPipByChannel(this.pipArgs);
     },
     hasVideo() {
       return this.webInfo.hasVideo;
     },
   },
   watch: {
+    isFullScreen(val: boolean) {
+      this.$store.dispatch('updateBrowsingSize', this.winSize);
+      if (!val && this.hideMainWindow) {
+        this.hideMainWindow = false;
+        this.$electron.remote.getCurrentWindow().hide();
+      }
+    },
     currentUrl(val: string) {
       this.$emit('update-current-url', val);
     },
     showSidebar(val: boolean) {
-      const browserView = this.$electron.remote.getCurrentWindow().getBrowserViews()[0];
       if (!val) {
         setTimeout(() => {
-          browserView.setBounds({
+          this.currentMainBrowserView().setBounds({
             x: val ? 76 : 0,
             y: 40,
             width: val ? window.innerWidth - 76 : window.innerWidth,
@@ -178,7 +187,7 @@ export default {
           });
         }, 100);
       } else {
-        browserView.setBounds({
+        this.currentMainBrowserView().setBounds({
           x: val ? 76 : 0,
           y: 40,
           width: val ? window.innerWidth - 76 : window.innerWidth,
@@ -235,14 +244,8 @@ export default {
       this.addListenerToBrowser();
     },
     pipSize() {
-      if (this.isPip && this.pipType !== 'youtube') {
-        if (this.pipType === 'iqiyi') {
-          this.iqiyiWatcher();
-        } else if (this.pipType === 'bilibili') {
-          this.bilibiliWatcher();
-        } else {
-          this.othersWatcher();
-        }
+      if (this.isPip) {
+        this.$electron.ipcRenderer.send('pip-watcher', this.pip.watcher);
       }
     },
     loadingState(val: boolean) {
@@ -252,7 +255,7 @@ export default {
         if (this.refreshButton) {
           this.refreshButton.icon = this.createIcon('touchBar/stopRefresh.png');
         }
-        this.showProgress = true;
+        if (!this.currentUrl.includes('youtube')) this.showProgress = true;
         this.progress = 70;
       } else {
         if (this.refreshButton) {
@@ -262,10 +265,7 @@ export default {
         setTimeout(() => {
           this.showProgress = false;
           this.progress = 0;
-          const loadUrl = this.$electron.remote
-            .getCurrentWindow()
-            .getBrowserViews()[0]
-            .webContents.getURL();
+          const loadUrl = this.currentMainBrowserView().webContents.getURL();
           const hostname = urlParseLax(loadUrl).hostname;
           let channel = hostname.slice(
             hostname.indexOf('.') + 1,
@@ -274,33 +274,27 @@ export default {
           if (loadUrl.includes('youtube')) {
             channel = 'youtube.com';
           }
-          this.$electron.remote
-            .getCurrentWindow()
-            .getBrowserViews()[0]
-            .webContents.executeJavaScript(
-              InjectJSManager.calcVideoNum(),
-              (r: number) => {
-                this.webInfo.hasVideo = channel === 'youtube.com' && !getVideoId(loadUrl).id
-                  ? false
-                  : !!r;
-              },
-            );
+          this.currentMainBrowserView().webContents.executeJavaScript(
+            InjectJSManager.calcVideoNum(),
+            (r: number) => {
+              this.webInfo.hasVideo = channel === 'youtube.com' && !getVideoId(loadUrl).id
+                ? false
+                : !!r;
+            },
+          );
         }, 1000);
       }
     },
     headerToShow(val: boolean) {
-      const currentView = this.$electron.remote
-        .getCurrentWindow()
-        .getBrowserViews()[0];
       if (!val) {
-        currentView.setBounds({
+        this.currentMainBrowserView().setBounds({
           x: 0,
           y: 0,
           width: window.screen.width,
           height: window.screen.height,
         });
       } else {
-        currentView.setBounds({
+        this.currentMainBrowserView().setBounds({
           x: this.showSidebar ? 76 : 0,
           y: 40,
           width: this.showSidebar ? this.winSize[0] - 76 : this.winSize[0],
@@ -315,15 +309,8 @@ export default {
       570,
       375,
     ]);
-    this.$electron.ipcRenderer.send(
-      'callMainWindowMethod',
-      'setSize',
-      this.browsingSize,
-    );
-    this.$electron.ipcRenderer.send(
-      'callMainWindowMethod',
-      'setPosition',
-      this.browsingPos,
+    windowRectService.calculateWindowRect(
+      this.browsingSize, true, this.winPos.concat(this.winSize),
     );
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [
       0,
@@ -331,9 +318,8 @@ export default {
   },
   mounted() {
     this.menuService = new MenuService();
-
-    this.title = this.$electron.remote.getCurrentWindow()
-      .getBrowserViews()[0].webContents.getTitle();
+    this.menuService.updateMenuItemEnabled('splayerx.checkForUpdates', false);
+    this.title = this.currentMainBrowserView().webContents.getTitle();
 
     this.$bus.$on('toggle-reload', this.handleUrlReload);
     this.$bus.$on('toggle-back', this.handleUrlBack);
@@ -370,6 +356,9 @@ export default {
     this.$electron.ipcRenderer.on('handle-danmu-display', () => {
       this.handleDanmuDisplay();
     });
+    this.$electron.ipcRenderer.on('update-pip-pos', (e: Event, pos: number[]) => {
+      this.$store.dispatch('updatePipPos', pos);
+    });
     this.$electron.ipcRenderer.on('quit', () => {
       this.quit = true;
     });
@@ -393,8 +382,7 @@ export default {
         e: Event,
         state: { url: string; canGoBack: boolean; canGoForward: boolean },
       ) => {
-        this.title = this.$electron.remote.getCurrentWindow()
-          .getBrowserViews()[0].webContents.getTitle();
+        this.title = this.currentMainBrowserView().webContents.getTitle();
         this.currentUrl = urlParseLax(state.url).href;
         this.removeListener();
         this.addListenerToBrowser();
@@ -402,10 +390,7 @@ export default {
         this.webInfo.canGoForward = state.canGoForward;
         this.updateCanGoBack(this.webInfo.canGoBack);
         this.updateCanGoForward(this.webInfo.canGoForward);
-        const loadUrl = this.$electron.remote
-          .getCurrentWindow()
-          .getBrowserViews()[0]
-          .webContents.getURL();
+        const loadUrl = this.currentMainBrowserView().webContents.getURL();
         const hostname = urlParseLax(loadUrl).hostname;
         let channel = hostname.slice(
           hostname.indexOf('.') + 1,
@@ -415,19 +400,15 @@ export default {
           channel = 'youtube.com';
         }
         this.startLoading = false;
-        if (!this.$electron.remote.getCurrentWindow()
-          .getBrowserViews()[0].webContents.isLoading()) {
-          this.$electron.remote
-            .getCurrentWindow()
-            .getBrowserViews()[0]
-            .webContents.executeJavaScript(
-              InjectJSManager.calcVideoNum(),
-              (r: number) => {
-                this.webInfo.hasVideo = channel === 'youtube.com' && !getVideoId(loadUrl).id
-                  ? false
-                  : !!r;
-              },
-            );
+        if (!this.currentMainBrowserView().webContents.isLoading()) {
+          this.currentMainBrowserView().webContents.executeJavaScript(
+            InjectJSManager.calcVideoNum(),
+            (r: number) => {
+              this.webInfo.hasVideo = channel === 'youtube.com' && !getVideoId(loadUrl).id
+                ? false
+                : !!r;
+            },
+          );
         }
         this.createTouchBar(this.webInfo.hasVideo);
       },
@@ -436,7 +417,7 @@ export default {
   beforeDestroy() {
     this.removeListener();
     this.$store.dispatch('updateBrowsingSize', this.winSize);
-    this.$store.dispatch('updateBrowsingPos', this.winPos);
+    this.boundBackPosition();
     this.updateIsPip(false);
     asyncStorage
       .set('browsing', {
@@ -446,6 +427,7 @@ export default {
         pipMode: this.pipMode,
       })
       .finally(() => {
+        this.menuService.updateMenuItemEnabled('splayerx.checkForUpdates', true);
         window.removeEventListener('beforeunload', this.beforeUnloadHandler);
         window.removeEventListener('focus', this.focusHandler);
         this.$electron.ipcRenderer.send('remove-browser');
@@ -465,26 +447,47 @@ export default {
     handlePageTitle(e: Event, title: string) {
       this.title = title;
     },
+    boundBackPosition() {
+      const position = this.winPos;
+      const size = this.winSize;
+
+      const [boundLeft, boundTop, windowWidth, windowHeight] = [
+        window.screen.availLeft, window.screen.availTop,
+        window.screen.availWidth, window.screen.availHeight,
+      ];
+
+      const boundbackPositon = (
+        point: number, length: number,
+        edge: number, edgeLength: number,
+      ) => {
+        if (point < edge) return edge;
+        if (point + length > edge + edgeLength) return edge + edgeLength - length;
+        return point;
+      };
+
+      position[0] = boundbackPositon(position[0], size[0], boundLeft, windowWidth);
+      position[1] = boundbackPositon(position[1], size[1], boundTop, windowHeight);
+
+
+      this.$store.dispatch('updateBrowsingPos', position);
+    },
     focusHandler() {
       this.menuService.updateFocusedWindow(true);
       this.updatePipState(this.webInfo.hasVideo);
       this.updateCanGoBack(this.webInfo.canGoBack);
       this.updateCanGoForward(this.webInfo.canGoForward);
       this.updateReload(true);
-      const loadUrl = this.$electron.remote
-        .getCurrentWindow()
-        .getBrowserViews()[0]
-        .webContents.getURL();
+      const loadUrl = this.currentMainBrowserView().webContents.getURL();
       const hostname = urlParseLax(loadUrl).hostname;
       let channel = hostname.slice(hostname.indexOf('.') + 1, hostname.length);
       if (loadUrl.includes('youtube')) {
         channel = 'youtube.com';
       }
-      const view = this.$electron.remote.getCurrentWindow().getBrowserViews()[0];
-      if (view) {
-        view.webContents.executeJavaScript(InjectJSManager.calcVideoNum(), (r: number) => {
-          this.webInfo.hasVideo = channel === 'youtube.com' && !getVideoId(loadUrl).id ? false : !!r;
-        });
+      if (this.currentMainBrowserView()) {
+        this.currentMainBrowserView().webContents
+          .executeJavaScript(InjectJSManager.calcVideoNum(), (r: number) => {
+            this.webInfo.hasVideo = channel === 'youtube.com' && !getVideoId(loadUrl).id ? false : !!r;
+          });
       }
     },
     beforeUnloadHandler(e: BeforeUnloadEvent) {
@@ -492,7 +495,7 @@ export default {
       if (!this.asyncTasksDone) {
         e.returnValue = false;
         this.$store.dispatch('updateBrowsingSize', this.winSize);
-        this.$store.dispatch('updateBrowsingPos', this.winPos);
+        this.boundBackPosition();
         asyncStorage
           .set('browsing', {
             browsingSize: this.browsingSize,
@@ -590,7 +593,7 @@ export default {
       }
     },
     addListenerToBrowser() {
-      const view = this.$electron.remote.getCurrentWindow().getBrowserViews()[0];
+      const view = this.currentMainBrowserView();
       if (view) {
         view.webContents.addListener('ipc-message', this.ipcMessage);
         view.webContents.addListener('page-title-updated', this.handlePageTitle);
@@ -602,7 +605,7 @@ export default {
       }
     },
     removeListener() {
-      const view = this.$electron.remote.getCurrentWindow().getBrowserViews()[0];
+      const view = this.currentMainBrowserView();
       if (view) {
         view.webContents.removeListener(
           'did-stop-loading',
@@ -688,10 +691,7 @@ export default {
     },
     domReady() {
       window.focus();
-      this.$electron.remote
-        .getCurrentWindow()
-        .getBrowserViews()[0]
-        .webContents.focus();
+      this.currentMainBrowserView().webContents.focus();
     },
     didStopLoading() {
       this.loadingState = false;
@@ -709,19 +709,22 @@ export default {
         this.loadingState = true;
         const newHostname = urlParseLax(openUrl).hostname;
         const oldHostname = urlParseLax(this.currentUrl).hostname;
-        let newChannel = newHostname.slice(
-          newHostname.indexOf('.') + 1,
-          newHostname.length,
-        );
         let oldChannel = oldHostname.slice(
           oldHostname.indexOf('.') + 1,
           oldHostname.length,
         );
-        if (openUrl.includes('youtube')) {
-          newChannel = 'youtube.com';
-        }
         if (this.currentUrl.includes('youtube')) {
           oldChannel = 'youtube.com';
+        }
+        let newChannel = oldChannel;
+        if (newHostname.includes(...this.allChannels)) {
+          newChannel = newHostname.slice(
+            newHostname.indexOf('.') + 1,
+            newHostname.length,
+          );
+          if (openUrl.includes('youtube')) {
+            newChannel = 'youtube.com';
+          }
         }
         if (this.oauthRegex.some((re: RegExp) => re.test(url))) return;
         if (oldChannel === newChannel) {
@@ -784,24 +787,44 @@ export default {
       const parseUrl = urlParseLax(
         this.currentMainBrowserView().webContents.getURL(),
       );
-      if (parseUrl.hostname.includes('youtube')) {
-        this.pipType = 'youtube';
-        this.youtubeAdapter();
-      } else if (parseUrl.hostname.includes('bilibili')) {
-        this.pipType = 'bilibili';
-        this.bilibiliAdapter();
-      } else if (parseUrl.hostname.includes('iqiyi')) {
-        this.pipType = 'iqiyi';
-        this.iqiyiAdapter();
+      const channels = ['youtube', 'bilibili', 'iqiyi'];
+      this.pipType = 'others';
+      channels.forEach((channel: string) => {
+        if (parseUrl.hostname.includes(channel)) this.pipType = channel;
+      });
+      if (this.pipType === 'bilibili') {
+        this.currentMainBrowserView()
+          .webContents.executeJavaScript(InjectJSManager.bilibiliFindType())
+          .then((r: string) => {
+            this.bilibiliType = r;
+          })
+          .then(() => {
+            this.currentMainBrowserView().webContents.executeJavaScript(
+              this.pip.adapter,
+            );
+          })
+          .then(() => {
+            this.adaptFinished = true;
+          });
       } else {
-        this.pipType = 'others';
-        this.othersAdapter();
+        this.currentMainBrowserView()
+          .webContents.executeJavaScript(this.pip.adapter)
+          .then(() => {
+            this.adaptFinished = true;
+          });
       }
     },
     currentMainBrowserView() {
       return this.$electron.remote.getCurrentWindow().getBrowserViews()[0];
     },
     handleWindowChangeEnterPip() {
+      if (this.isFullScreen) {
+        this.hideMainWindow = this.isGlobal;
+        this.currentMainBrowserView().webContents
+          .executeJavaScript(InjectJSManager.changeFullScreen(false));
+        this.headerToShow = true;
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
+      }
       const newDisplayId = this.$electron.remote.screen.getDisplayNearestPoint({
         x: this.winPos[0],
         y: this.winPos[1],
@@ -814,26 +837,6 @@ export default {
         .then((result: CSSStyleDeclaration) => {
           const videoAspectRatio = parseFloat(result.width as string)
             / parseFloat(result.height as string);
-          if (useDefaultPosition) {
-            this.$store
-              .dispatch('updatePipPos', [
-                window.screen.availLeft + 70,
-                window.screen.availTop + window.screen.availHeight - 236 - 70,
-              ])
-              .then(() => {
-                this.$electron.ipcRenderer.send(
-                  'callBrowsingWindowMethod',
-                  'setPosition',
-                  [
-                    window.screen.availLeft + 70,
-                    window.screen.availTop
-                      + window.screen.availHeight
-                      - 236
-                      - 70,
-                  ],
-                );
-              });
-          }
           const calculateSize = this.pipSize[0] / this.pipSize[1] >= videoAspectRatio
             ? [
               this.pipSize[0],
@@ -849,13 +852,48 @@ export default {
             pipSize: calculateSize,
             pipPos: this.pipPos,
           };
+          if (useDefaultPosition) {
+            this.$store
+              .dispatch('updatePipPos', [
+                window.screen.availLeft + 70,
+                window.screen.availTop + window.screen.availHeight - calculateSize[1] - 70,
+              ])
+              .then(() => {
+                this.$electron.ipcRenderer.send(
+                  'callBrowsingWindowMethod',
+                  'setPosition',
+                  [
+                    window.screen.availLeft + 70,
+                    window.screen.availTop
+                      + window.screen.availHeight
+                      - calculateSize[1]
+                      - 70,
+                  ],
+                );
+              });
+          }
         });
     },
     handleWindowChangeExitPip() {
-      const newDisplayId = this.$electron.remote.screen.getDisplayNearestPoint({
-        x: this.winPos[0],
-        y: this.winPos[1],
-      }).id;
+      const screen = this.$electron.remote.screen.getDisplayNearestPoint({
+        x: this.pipPos[0],
+        y: this.pipPos[1],
+      });
+      const rect = screen.workArea;
+      const newDisplayId = screen.id;
+      if (this.oldDisplayId !== newDisplayId) {
+        windowRectService.calculateWindowRect(
+          this.browsingSize,
+          true,
+          this.pipPos.concat(this.pipSize),
+          undefined,
+          undefined,
+          [rect.x, rect.y, rect.width, rect.height],
+        );
+      } else {
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', this.browsingSize);
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', this.browsingPos);
+      }
       this.oldDisplayId = newDisplayId;
     },
     handleDanmuDisplay() {
@@ -863,13 +901,13 @@ export default {
         this.updateBarrageOpen(!this.barrageOpen);
         this.$electron.ipcRenderer.send(
           'handle-danmu-display',
-          this.iqiyiBarrage,
+          this.pip.iqiyiBarrageAdapt(this.barrageOpen),
         );
       } else if (this.pipType === 'bilibili') {
         this.updateBarrageOpen(!this.barrageOpen);
         this.$electron.ipcRenderer.send(
           'handle-danmu-display',
-          this.bilibiliBarrage,
+          this.pip.bilibiliBarrageAdapt(this.bilibiliType, this.barrageOpen),
         );
       }
     },
@@ -886,7 +924,7 @@ export default {
       }
     },
     handleUrlReload() {
-      const view = this.$electron.remote.getCurrentWindow().getBrowserViews()[0];
+      const view = this.currentMainBrowserView();
       if (view) {
         if (!this.loadingState) {
           this.loadingState = true;
@@ -908,15 +946,8 @@ export default {
       this.asyncTasksDone = false;
       this.isGlobal = false;
       this.handleWindowChangeExitPip();
-      if (this.pipType === 'youtube') {
-        this.youtubeRecover();
-      } else if (this.pipType === 'bilibili') {
-        this.bilibiliRecover();
-      } else if (this.pipType === 'iqiyi') {
-        this.iqiyiRecover();
-      } else {
-        this.othersRecover();
-      }
+      this.currentMainBrowserView().webContents.executeJavaScript(this.pip.recover);
+      this.pipType = '';
     },
     handleEnterPip(isGlobal: boolean) {
       if (this.webInfo.hasVideo) {
@@ -933,81 +964,6 @@ export default {
         this.exitPipOperation();
         this.updateIsPip(false);
       }
-    },
-    othersAdapter() {
-      this.currentMainBrowserView()
-        .webContents.executeJavaScript(this.othersPip.adapter)
-        .then(() => {
-          this.adaptFinished = true;
-        });
-    },
-    othersWatcher() {
-      this.$electron.ipcRenderer.send('pip-watcher', this.othersPip.watcher);
-    },
-    othersRecover() {
-      this.$electron.remote
-        .getCurrentWindow()
-        .getBrowserViews()[0]
-        .webContents.executeJavaScript(this.othersPip.recover);
-    },
-    iqiyiAdapter() {
-      this.currentMainBrowserView()
-        .webContents.executeJavaScript(this.iqiyiPip.adapter)
-        .then(() => {
-          this.adaptFinished = true;
-        });
-    },
-    iqiyiWatcher() {
-      this.$electron.ipcRenderer.send('pip-watcher', this.iqiyiPip.watcher);
-    },
-    iqiyiRecover() {
-      this.$electron.remote
-        .getCurrentWindow()
-        .getBrowserViews()[0]
-        .webContents.executeJavaScript(this.iqiyiPip.recover);
-    },
-    youtubeAdapter() {
-      this.currentMainBrowserView()
-        .webContents.executeJavaScript(this.youtubePip.adapter)
-        .then(() => {
-          this.adaptFinished = true;
-        });
-    },
-    youtubeRecover() {
-      this.$electron.remote
-        .getCurrentWindow()
-        .getBrowserViews()[0]
-        .webContents.executeJavaScript(this.youtubePip.recover);
-    },
-    bilibiliAdapter() {
-      this.currentMainBrowserView()
-        .webContents.executeJavaScript(InjectJSManager.bilibiliFindType())
-        .then((r: (HTMLElement | null)[]) => {
-          this.bilibiliType = [
-            'bangumi',
-            'videoStreaming',
-            'iframeStreaming',
-            'iframeStreaming',
-            'video',
-          ][r.findIndex(i => i)] || 'others';
-        })
-        .then(() => {
-          this.currentMainBrowserView().webContents.executeJavaScript(
-            this.bilibiliPip.adapter,
-          );
-        })
-        .then(() => {
-          this.adaptFinished = true;
-        });
-    },
-    bilibiliWatcher() {
-      this.$electron.ipcRenderer.send('pip-watcher', this.bilibiliPip.watcher);
-    },
-    bilibiliRecover() {
-      this.$electron.remote
-        .getCurrentWindow()
-        .getBrowserViews()[0]
-        .webContents.executeJavaScript(this.bilibiliPip.recover);
     },
   },
 };

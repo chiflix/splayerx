@@ -16,7 +16,8 @@
     >
       <Icon
         ref="back"
-        :type="isMaximized ? 'browsingrestore' : 'browsingfullscreen'"
+        :type="isFullScreen ? 'browsingExitFull'
+          : isMaximized ? 'browsingrestore' : 'browsingfullscreen'"
       />
     </div>
     <div
@@ -38,18 +39,42 @@ export default {
   components: {
     Icon,
   },
+  props: {
+    showSidebar: {
+      type: Boolean,
+      required: true,
+    },
+  },
   computed: {
-    ...mapGetters(['isMaximized']),
+    ...mapGetters(['isMaximized', 'isFullScreen']),
   },
   methods: {
     handleMinimize() {
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'minimize');
     },
     handleMiddleButton() {
-      if (this.isMaximized) {
+      const currentWindow = this.$electron.remote.getCurrentWindow();
+      if (this.isFullScreen) {
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
+      } else if (this.isMaximized) {
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'unmaximize');
+        currentWindow.getBrowserViews()[0].setBounds({
+          x: this.showSidebar ? 76 : 0,
+          y: 40,
+          width: this.showSidebar ? currentWindow.getSize()[0] - 76
+            : currentWindow.getSize()[0],
+          height: currentWindow.getSize()[1] - 40,
+        });
       } else {
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'maximize');
+        const bounds = currentWindow.getBounds();
+        currentWindow.getBrowserViews()[0].setBounds({
+          x: this.showSidebar ? 76 : 0,
+          y: 40,
+          width: this.showSidebar ? bounds.width + (bounds.x * 2) - 76
+            : bounds.width + (bounds.x * 2),
+          height: bounds.height - 40,
+        });
       }
     },
     handleClose() {

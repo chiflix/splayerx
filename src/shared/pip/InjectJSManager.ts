@@ -1,9 +1,5 @@
-import youtube from './youtube';
-import {
-  bilibili, bilibiliBarrageAdapt, bilibiliFindType, bilibiliVideoPause,
-} from './bilibili';
-import iqiyi, { iqiyiBarrageAdapt } from './iqiyi';
-import globalPip from './others';
+import { bilibiliFindType, bilibiliVideoPause } from './Bilibili';
+import PipFactory from './PipFactory';
 
 class InjectJSManager implements IInjectJSManager {
   private readonly calcVideoNumCode: string;
@@ -23,31 +19,9 @@ class InjectJSManager implements IInjectJSManager {
     this.pauseNormalVideo = 'setTimeout(() => { document.querySelector("video").pause(); }, 100)';
   }
 
-  public getPipByChannel(channel: string, type?: string,
-    barrageState?: boolean, winSize?: number[]) {
-    switch (channel) {
-      case 'youtube':
-        return youtube;
-      case 'bilibili':
-        return bilibili(type, barrageState, winSize);
-      case 'iqiyi':
-        return iqiyi(barrageState, winSize);
-      case 'others':
-        return globalPip(winSize);
-      default:
-        return globalPip(winSize);
-    }
-  }
-
-  public getPipBarrage(channel: string, barrageState: boolean, type?: string) {
-    switch (channel) {
-      case 'bilibili':
-        return bilibiliBarrageAdapt(type, barrageState);
-      case 'iqiyi':
-        return iqiyiBarrageAdapt(barrageState);
-      default:
-        return '';
-    }
+  public getPipByChannel(info: { channel: string, type?: string,
+    barrageState?: boolean, winSize?: number[] }) {
+    return PipFactory.getPipByChannel(info);
   }
 
   public initBarrageIcon(barrageState: boolean) {
@@ -58,10 +32,14 @@ class InjectJSManager implements IInjectJSManager {
     return bilibiliFindType;
   }
 
+  public changeFullScreen(enterFullScreen: boolean): string {
+    return enterFullScreen ? 'document.body.requestFullscreen()' : 'document.webkitCancelFullScreen()';
+  }
+
   public pauseVideo(channel: string, type?: string): string {
     switch (channel) {
       case 'bilibili':
-        return bilibiliVideoPause(type);
+        return bilibiliVideoPause(type as string);
       case 'normal':
         return this.pauseNormalVideo;
       default:
@@ -73,8 +51,12 @@ class InjectJSManager implements IInjectJSManager {
     return `document.querySelector(".pip-buttons").style.display = ${shouldShow} ? "flex" : "none";`;
   }
 
+  public updatePipTitlebarToShow(shouldShow: boolean): string {
+    return `document.querySelector(".titlebar").style.display = ${shouldShow} ? "flex" : "none";`;
+  }
+
   public updateTitlebarState(className: string, state: boolean): string {
-    return `document.querySelector(${className}).style.display = ${state} ? "block" : "none";`;
+    return `document.querySelector("${className}").style.display = ${state} ? "block" : "none";`;
   }
 
   public updateFullScreenIcon(isFullScreen: boolean): string {
@@ -82,7 +64,11 @@ class InjectJSManager implements IInjectJSManager {
       return `document.querySelector(".titlebarMin").style.pointerEvents = ${isFullScreen} ? "none" : "";
         document.querySelector(".titlebarMin").style.opacity = ${isFullScreen} ? "0.25" : "1";
         document.querySelector(".titlebarFull").style.display = ${isFullScreen} ? "none" : "";
-        document.querySelector(".titlebarRecover").style.display = ${isFullScreen} ? "block" : "none";`;
+        document.querySelector(".titlebarRecover").style.display = ${isFullScreen} ? "block" : "none";
+        document.querySelector(".titlebarMin").src = "assets/titleBarExitFull-default-icon.svg"
+        document.querySelector(".titlebarFull").src = "assets/titleBarFull-default-icon.svg";
+        document.querySelector(".titlebarRecover").src = "assets/titleBarRecover-default-icon.svg";
+        document.querySelector(".titlebarClose").src = "assets/titleBarClose-default-icon.svg";`;
     }
     return `document.querySelector(".titlebarMax").style.display = ${isFullScreen} ? "none" : "block";
       document.querySelector(".titlebarUnMax").style.display = ${isFullScreen} ? "none" : "block";
@@ -92,7 +78,7 @@ class InjectJSManager implements IInjectJSManager {
   public updateWinMaxIcon(isMaximize: boolean): string {
     return `document.querySelector(".titlebarMax").style.display = ${isMaximize} ? "none" : "block";
       document.querySelector(".titlebarUnMax").style.display = ${isMaximize} ? "block" : "none";
-      document.querySelector(".titlebarRecover").style.display = ${isMaximize} ? "none" : "block";`;
+      document.querySelector(".titlebarRecover").style.display = "none";`;
   }
 
   public updateBarrageState(barrageState: boolean, opacity: number): string {
@@ -118,18 +104,20 @@ class InjectJSManager implements IInjectJSManager {
 export interface IInjectJSManager {
   calcVideoNum(): string
   getVideoStyle(): string
-  getPipByChannel(channel: string, type?: string, barrageState?: boolean, winSize?: number[]):
-  { adapter: string, watcher?: string, recover: string }
-  getPipBarrage(channel: string, barrageState: boolean, type?: string): string
+  getPipByChannel(info: { channel: string, type?: string,
+    barrageState?: boolean, winSize?: number[] }):
+  { adapter: string, watcher: string, recover: string }
   bilibiliFindType(): string
   pauseVideo(channel: string, type?: string): string
   initBarrageIcon(barrageState: boolean): string
   updatePipControlState(shouldShow: boolean): string
+  updatePipTitlebarToShow(shouldShow: boolean): string
   updateTitlebarState(className: string, state: boolean): string
   updateFullScreenIcon(isFullScreen: boolean): string
   updateWinMaxIcon(isMaximize: boolean): string
   updateBarrageState(barrageState: boolean, opacity: number): string
   emitKeydownEvent(keyCode: number): string
+  changeFullScreen(enterFullScreen: boolean): string
 }
 
 export default new InjectJSManager();
