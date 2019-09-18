@@ -54,7 +54,7 @@ export class BrowserViewManager implements IBrowserViewManager {
       ? this.historyByChannel[channel].list[index].url : args.url;
     if (this.historyByChannel[channel].list.length) {
       this.historyByChannel[channel].list[index].url = args.url;
-      this.historyByChannel[channel].list[index].view.webContents.removeAllListeners('media-start-playing');
+      this.historyByChannel[channel].list[index].view.webContents.removeAllListeners('media-started-playing');
       if (args.isNewWindow) {
         this.historyByChannel[channel].list[index].view.webContents.loadURL(args.url);
       }
@@ -67,6 +67,7 @@ export class BrowserViewManager implements IBrowserViewManager {
         webPreferences: {
           preload: `${require('path').resolve(__static, 'pip/preload.js')}`,
           nativeWindowOpen: true,
+          // disableHtmlFullscreenWindowResize: true, // Electron 6 required
         },
       }),
     };
@@ -214,8 +215,8 @@ export class BrowserViewManager implements IBrowserViewManager {
         let type = '';
         currentView.webContents
           .executeJavaScript(InjectJSManager.bilibiliFindType())
-          .then((r: (HTMLElement | null)[]) => {
-            type = ['bangumi', 'videoStreaming', 'iframeStreaming', 'iframeStreaming', 'video'][r.findIndex(i => i)] || 'others';
+          .then((r: string) => {
+            type = r;
             currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('bilibili', type));
           });
       } else {
@@ -223,17 +224,19 @@ export class BrowserViewManager implements IBrowserViewManager {
       }
     }
     currentView.webContents.addListener('media-started-playing', () => {
-      if (pausedChannel.includes('bilibili')) {
-        let type = '';
-        currentView.webContents
-          .executeJavaScript(InjectJSManager.bilibiliFindType())
-          .then((r: (HTMLElement | null)[]) => {
-            type = ['bangumi', 'videoStreaming', 'iframeStreaming', 'iframeStreaming', 'video'][r.findIndex(i => i)] || 'others';
-            currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('bilibili', type));
-          });
-      } else {
-        currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('normal'));
-      }
+      setTimeout(() => {
+        if (pausedChannel.includes('bilibili')) {
+          let type = '';
+          currentView.webContents
+            .executeJavaScript(InjectJSManager.bilibiliFindType())
+            .then((r: string) => {
+              type = r;
+              currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('bilibili', type));
+            });
+        } else {
+          currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('normal'));
+        }
+      }, 50);
     });
   }
 

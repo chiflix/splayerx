@@ -370,7 +370,7 @@ export default {
   }
   .subtitle-alignment2, .subtitle-alignment8 {
     .primary-sub, .secondary-sub {
-      white-space: normal;
+      white-space: pre-wrap;
       word-break: normal;
     }
     @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px),
