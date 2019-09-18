@@ -687,11 +687,11 @@ function registerMainWindowEvent(mainWindow) {
         browsingWindow.minimize();
         break;
       case 'full':
-        browsingWindow.setFullScreen(true);
+        if (process === 'darwin') browsingWindow.setFullScreen(true);
         titlebarView.webContents.executeJavaScript(InjectJSManager.updateFullScreenIcon(true));
         break;
       case 'recover':
-        browsingWindow.setFullScreen(false);
+        if (process === 'darwin') browsingWindow.setFullScreen(false);
         titlebarView.webContents.executeJavaScript(InjectJSManager.updateFullScreenIcon(false));
         break;
       case 'max':
