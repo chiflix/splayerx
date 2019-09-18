@@ -346,6 +346,9 @@ function createBrowsingWindow(args) {
     if (hideBrowsingWindow) {
       hideBrowsingWindow = false;
       browsingWindow.hide();
+      setTimeout(() => {
+        mainWindow.focus();
+      }, 0);
     }
   });
 }
@@ -472,6 +475,13 @@ function registerMainWindowEvent(mainWindow) {
   });
   ipcMain.on('pip-watcher', (evt, args) => {
     browsingWindow.getBrowserViews()[0].webContents.executeJavaScript(args);
+  });
+  ipcMain.on('pip-window-fullscreen', () => {
+    if (browsingWindow && browsingWindow.isFocused()) {
+      browsingWindow.setFullScreen(!browsingWindow.isFullScreen());
+      titlebarView.webContents
+        .executeJavaScript(InjectJSManager.updateFullScreenIcon(browsingWindow.isFullScreen()));
+    }
   });
   ipcMain.on('pip-window-close', (evt, args) => {
     const views = browsingWindow.getBrowserViews();
@@ -796,7 +806,6 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('exit-pip', () => {
     if (!browserViewManager) return;
     browsingWindow.send('remove-pip-listener');
-    mainWindow.show();
     const mainView = mainWindow.getBrowserView();
     mainWindow.removeBrowserView(mainView);
     const browViews = browsingWindow.getBrowserViews();
@@ -823,11 +832,12 @@ function registerMainWindowEvent(mainWindow) {
     if (browsingWindow.isFullScreen()) {
       hideBrowsingWindow = true;
       browsingWindow.setFullScreen(false);
+      exitBrowser.page.view.webContents.executeJavaScript('document.webkitCancelFullScreen();');
     } else {
       browsingWindow.hide();
     }
+    mainWindow.show();
     menuService.updateFocusedWindow(true, mainWindow && mainWindow.isVisible());
-    mainWindow.focus();
   });
   ipcMain.on('set-window-maximize', () => {
     if (mainWindow && mainWindow.isFocused()) {
@@ -856,8 +866,14 @@ function registerMainWindowEvent(mainWindow) {
     routeName = route;
   });
   ipcMain.on('key-events', (e, keyCode) => {
-    browsingWindow.getBrowserViews()[0].webContents
-      .executeJavaScript(InjectJSManager.emitKeydownEvent(keyCode));
+    if (keyCode === 13) {
+      browsingWindow.setFullScreen(!browsingWindow.isFullScreen());
+      titlebarView.webContents
+        .executeJavaScript(InjectJSManager.updateFullScreenIcon(browsingWindow.isFullScreen()));
+    } else {
+      browsingWindow.getBrowserViews()[0].webContents
+        .executeJavaScript(InjectJSManager.emitKeydownEvent(keyCode));
+    }
   });
   ipcMain.on('drop-subtitle', (event, args) => {
     if (!mainWindow || mainWindow.webContents.isDestroyed()) return;

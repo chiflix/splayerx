@@ -35,6 +35,12 @@ export default {
     }
   },
   mounted() {
+    window.addEventListener('keydown', (e) => {
+      if (e.keyCode === 13) {
+        const isFullScreen = electron.remote.getCurrentWindow().isFullScreen();
+        electron.ipcRenderer.send('mouseup', isFullScreen ? 'recover' : 'full');
+      }
+    });
     electron.ipcRenderer.on('remove-pip-listener', () => {
       const view = electron.remote.getCurrentWindow().getBrowserViews()[0];
       if (view) {
@@ -73,6 +79,7 @@ export default {
       this.windowSize = null;
     });
     window.addEventListener('focus', () => {
+      electron.remote.getCurrentWindow().getBrowserViews()[0].webContents.focus();
       const cursorPoint = electron.remote.screen.getCursorScreenPoint();
       const windowPos = electron.remote.getCurrentWindow().getPosition();
       this.offset = [cursorPoint.x - windowPos[0], cursorPoint.y - windowPos[1]];

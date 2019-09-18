@@ -271,8 +271,7 @@
       },
       {
         "id": "window.fullscreen",
-        "label": "msg.window.enterFullScreen",
-        "accelerator": "Enter"
+        "label": "msg.window.enterFullScreen"
       },
       {
         "id": "window.minimize",
@@ -422,6 +421,10 @@
       },
       {
         "id": "menubar.separator"
+      },
+      {
+        "id": "window.fullscreen",
+        "label": "msg.window.enterFullScreen"
       },
       {
         "id": "browsing.window.minimize",

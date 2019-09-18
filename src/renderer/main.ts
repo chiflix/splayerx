@@ -499,13 +499,15 @@ new Vue({
             this.$bus.$emit('open-url-show', true);
           }
           break;
-        case 70:
-          if (this.isFullScreen) {
-            this.$bus.$emit('off-fullscreen');
-            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
-          } else {
-            this.$bus.$emit('to-fullscreen');
-            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [true]);
+        case 13:
+          if (this.currentRouteName === 'playing-view') {
+            if (this.isFullScreen) {
+              this.$bus.$emit('off-fullscreen');
+              this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
+            } else {
+              this.$bus.$emit('to-fullscreen');
+              this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [true]);
+            }
           }
           break;
         default:
@@ -828,10 +830,11 @@ new Vue({
         this.$bus.$emit('switch-playlist');
       });
       this.menuService.on('playback.previousVideo', () => {
-        this.$bus.$emit('previous-video');
+        if (!this.singleCycle) this.$bus.$emit('previous-video');
+        else this.$bus.$emit('seek', 0);
       });
       this.menuService.on('playback.nextVideo', () => {
-        this.$bus.$emit('next-video');
+        this.$bus.$emit('seek', Math.ceil(this.duration));
       });
       this.menuService.on('playback.singleCycle', () => {
         if (this.singleCycle) {
@@ -970,12 +973,16 @@ new Vue({
         this.$bus.$emit('invoke-all-widgets');
       });
       this.menuService.on('window.fullscreen', () => {
-        if (this.isFullScreen) {
-          this.$bus.$emit('off-fullscreen');
-          this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
+        if (this.$electron.remote.getCurrentWindow().isFocused()) {
+          if (this.isFullScreen) {
+            this.$bus.$emit('off-fullscreen');
+            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
+          } else {
+            this.$bus.$emit('to-fullscreen');
+            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [true]);
+          }
         } else {
-          this.$bus.$emit('to-fullscreen');
-          this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [true]);
+          this.$electron.ipcRenderer.send('pip-window-fullscreen');
         }
       });
       this.menuService.on('window.halfSize', () => {

@@ -116,4 +116,41 @@ if (process.platform !== 'darwin') {
       };
     }
   };
+
+  // fix isMaximized and isFullScreen always returns false
+  const originLoadURL = BrowserWindow.prototype.loadURL;
+  BrowserWindow.prototype.loadURL = function loadURl(...args) {
+    if (!this._customPrototypeInited) {
+      this._customPrototypeInited = true;
+      this.on('maximize', function onMaximize() {
+        this._isMaximized = true;
+      });
+      this.on('unmaximize', function onUnmaximize() {
+        this._isMaximized = false;
+      });
+      this.on('enter-full-screen', function onEnterFullScreen() {
+        this._isFullScreen = true;
+      });
+      this.on('leave-full-screen', function onLeaveFullScreen() {
+        this._isFullScreen = false;
+      });
+      this.on('enter-html-full-screen', function onEnterFullScreen() {
+        this._isFullScreen = true;
+      });
+      this.on('leave-html-full-screen', function onLeaveFullScreen() {
+        this._isFullScreen = false;
+      });
+    }
+    originLoadURL.apply(this, args);
+  };
+
+  const originIsMaximize = BrowserWindow.prototype.isMaximized;
+  BrowserWindow.prototype.isMaximized = function isMaximized(...args) {
+    return originIsMaximize.apply(this, args) || this._isMaximized;
+  };
+
+  const originIsFullScreen = BrowserWindow.prototype.isFullScreen;
+  BrowserWindow.prototype.isFullScreen = function isFullScreen(...args) {
+    return originIsFullScreen.apply(this, args) || this._isFullScreen;
+  };
 }

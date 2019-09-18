@@ -138,7 +138,6 @@ export default {
         LanguageCode.id,
         LanguageCode.ar,
       ],
-      required: true,
     },
   },
   data() {
