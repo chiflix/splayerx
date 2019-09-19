@@ -1036,6 +1036,9 @@ new Vue({
           });
         }
       });
+      this.menuService.on('account.logout', () => {
+        this.menuService.updateAccount();
+      });
     },
     getSubName(item: ISubtitleControlListItem) {
       if (item.type === Type.Embedded) {

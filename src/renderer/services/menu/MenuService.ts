@@ -62,6 +62,10 @@ export default class MenuService {
     return false;
   }
 
+  public updateAccount() {
+    ipcRenderer.send('update-account');
+  }
+
   private getMenuItemById(id: string): Electron.MenuItem {
     if (!this.menu) this.menu = remote.Menu.getApplicationMenu() as Electron.Menu;
     return this.menu.getMenuItemById(id);

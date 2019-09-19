@@ -1,4 +1,7 @@
+import axios from 'axios';
 import electronBuilderConfig from '../../electron-builder.json';
+
+let ip = null;
 
 const subtitleExtensions = Object.freeze(['srt', 'ass', 'vtt', 'ssa'].map(ext => ext.toLowerCase()));
 export function getValidSubtitleExtensions() {
@@ -45,4 +48,21 @@ export function getAllValidExtensions() {
     }, []);
   allValidExtensions = Object.freeze(allValidExtensions);
   return allValidExtensions;
+}
+
+
+export function getIP() {
+  return new Promise((resolve, reject) => {
+    if (ip !== null) {
+      resolve(ip);
+    } else {
+      axios.get('https://ip.xindong.com/myip', { responseType: 'text' })
+        .then((response) => {
+          ip = response.data;
+          resolve(ip);
+        }, (error) => {
+          reject(error);
+        });
+    }
+  });
 }

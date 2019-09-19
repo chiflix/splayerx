@@ -28,6 +28,10 @@ export default class MenuService {
     this.menu.updatePipIcon();
   }
 
+  public updateAccount(user?: { id: string }) {
+    this.menu.updateAccount(user);
+  }
+
   private registeMenuActions() {
     ipcMain.on('popup-menu', () => {
       this.menu.popupMenu();
@@ -49,6 +53,10 @@ export default class MenuService {
     });
     ipcMain.on('update-route-name', (e: Event, routeName: string) => {
       this.menu.routeName = routeName;
+    });
+    ipcMain.on('update-account', (e: Event, user?: { id: string }) => {
+      console.log(user);
+      this.menu.updateAccount(user);
     });
     ipcMain.on('update-label', (e: Event, id: string, label: string) => {
       this.menu.updateMenuItemLabel(id, label);

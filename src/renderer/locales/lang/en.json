@@ -105,6 +105,11 @@
       "copy": "Copy",
       "paste": "Paste"
     },
+    "account": {
+      "name": "Account",
+      "login": "Account",
+      "logout": "Sign Out"
+    },
     "help": {
       "name": "Help",
       "feedback": "Feedback",
@@ -440,5 +445,15 @@
     "ok": "OK",
     "cancel": "Cancel",
     "continue": "Continue"
+  },
+  "loginModal": {
+    "title": "Sign in with phone number",
+    "sendCode": "Send",
+    "placeholder": {
+      "mobile": "Your phone number",
+      "code": "Enter verification code"
+    },
+    "submit": "Sign In",
+    "error": "* Incorrect Verification Code"
   }
 }

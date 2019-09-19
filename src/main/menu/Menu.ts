@@ -331,6 +331,33 @@ export default class Menubar {
     }
   }
 
+  public updateAccount(user?: { id: string }) {
+    const accountMenu = this.getSubmenuById('account');
+    if (accountMenu && user) {
+      // @ts-ignore
+      accountMenu.clear();
+      const idMenu = this.createMenuItem(`ID: ${user.id}`, () => {
+      }, undefined, false);
+      accountMenu.append(idMenu);
+      const logout = this.createMenuItem('msg.account.logout', () => {
+        if (this.mainWindow) {
+          this.mainWindow.webContents.send('account.logout');
+        }
+      }, undefined, true);
+      accountMenu.append(logout);
+      Menu.setApplicationMenu(this.menubar);
+    } else if (accountMenu) {
+      // @ts-ignore
+      accountMenu.clear();
+      const login = this.createMenuItem('msg.account.login', () => {
+        app.emit('add-login');
+      }, undefined, true);
+
+      accountMenu.append(login);
+      Menu.setApplicationMenu(this.menubar);
+    }
+  }
+
   public updateAudioTrack(items?: { id: string, label: string }[]) {
     if (items) this.audioTracks = items;
     const audioTrackMenu = this.getSubmenuById('audio.switchAudioTrack');
@@ -361,8 +388,7 @@ export default class Menubar {
     return idArray[0];
   }
 
-  private getMenuStateById(id: string):
-  MenubarMenuItem | undefined {
+  private getMenuStateById(id: string): MenubarMenuItem | undefined {
     if (id.startsWith('browsing')) {
       return this.currentMenuState['browsing.window']
         .items.find((menuItem: MenubarMenuItem) => menuItem.id === id);
@@ -515,6 +541,11 @@ export default class Menubar {
     const windowMenuItem = new MenuItem({ id: 'window', label: this.$t('msg.window.name'), submenu: windowMenu });
 
     menubar.append(windowMenuItem);
+
+    // account
+    const account = this.createAccountMenu();
+
+    menubar.append(account);
 
     // Help
     const helpMenuItem = this.createHelpMenu();
@@ -801,6 +832,17 @@ export default class Menubar {
   private createWindowMenu() {
     const windowMenu = this.convertFromMenuItemTemplate('window');
     return new MenuItem({ id: 'window', label: this.$t('msg.window.name'), submenu: windowMenu });
+  }
+
+  private createAccountMenu() {
+    const accountMenu = new Menu();
+    const login = this.createMenuItem('msg.account.login', () => {
+      app.emit('add-login');
+    }, undefined, true);
+
+    accountMenu.append(login);
+    const accountMenuItem = new MenuItem({ id: 'account', label: this.$t('msg.account.name'), submenu: accountMenu });
+    return accountMenuItem;
   }
 
   private createHelpMenu() {

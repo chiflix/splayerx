@@ -14,7 +14,7 @@ import urlParse from 'url-parse-lax';
 import { audioGrabService } from './helpers/AudioGrabService';
 import './helpers/electronPrototypes';
 import writeLog from './helpers/writeLog';
-import { getValidVideoRegex, getValidSubtitleRegex } from '../shared/utils';
+import { getValidVideoRegex, getValidSubtitleRegex, getIP } from '../shared/utils';
 import { mouse } from './helpers/mouse';
 import MenuService from './menu/MenuService';
 import registerMediaTasks from './helpers/mediaTasksPlugin';
@@ -65,6 +65,7 @@ let welcomeProcessDone = false;
 let menuService = null;
 let routeName = null;
 let mainWindow = null;
+let loginWindow = null;
 let laborWindow = null;
 let aboutWindow = null;
 let preferenceWindow = null;
@@ -101,6 +102,9 @@ const aboutURL = process.env.NODE_ENV === 'development'
 const preferenceURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080/preference.html'
   : `file://${__dirname}/preference.html`;
+const loginURL = process.env.NODE_ENV === 'development'
+  ? 'http://localhost:9080/login.html'
+  : `file://${__dirname}/login.html`;
 const browsingURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080/browsing.html'
   : `file://${__dirname}/browsing.html`;
@@ -284,6 +288,57 @@ function createPreferenceWindow(e, route) {
   }
   preferenceWindow.once('ready-to-show', () => {
     preferenceWindow.show();
+  });
+}
+
+function createLoginWindow(e, route) {
+  const loginWindowOptions = {
+    useContentSize: true,
+    frame: false,
+    titleBarStyle: 'none',
+    width: 400,
+    height: 284,
+    transparent: true,
+    resizable: false,
+    show: false,
+    webPreferences: {
+      webSecurity: false,
+      nodeIntegration: true,
+      experimentalFeatures: true,
+    },
+    acceptFirstMouse: true,
+    fullscreenable: false,
+    maximizable: false,
+    minimizable: false,
+    backgroundColor: '#000000',
+  };
+  if (!loginWindow) {
+    loginWindow = new BrowserWindow(loginWindowOptions);
+    // 如果播放窗口顶置，打开首选项也顶置
+    if (mainWindow && mainWindow.isAlwaysOnTop()) {
+      loginWindow.setAlwaysOnTop(true);
+    }
+
+    if (route) loginWindow.loadURL(`${loginURL}#/${route}`);
+    else loginWindow.loadURL(`${loginURL}`);
+
+    loginWindow.on('closed', () => {
+      loginWindow = null;
+    });
+    loginWindow.webContents.setUserAgent(
+      `${loginWindow.webContents.getUserAgent().replace(/Electron\S+/i, '')
+      } SPlayerX@2018 ${os.platform()} ${os.release()} Version ${app.getVersion()}`,
+    );
+    if (process.env.NODE_ENV === 'development') {
+      setTimeout(() => { // wait some time to prevent `Object not found` error
+        if (loginWindow) loginWindow.openDevTools({ mode: 'detach' });
+      }, 1000);
+    }
+  } else {
+    loginWindow.focus();
+  }
+  loginWindow.once('ready-to-show', () => {
+    loginWindow.show();
   });
 }
 
@@ -961,6 +1016,7 @@ function registerMainWindowEvent(mainWindow) {
     app.quit();
   });
   ipcMain.on('add-preference', createPreferenceWindow);
+
   ipcMain.on('add-browsing', (e, args) => {
     createBrowsingWindow(args);
   });
@@ -996,6 +1052,14 @@ function registerMainWindowEvent(mainWindow) {
     audioGrabService.stop();
   });
   /** grab audio logic in main process end */
+
+  ipcMain.on('add-login', createLoginWindow);
+
+  ipcMain.on('login-success', (e, args) => {
+    if (menuService) {
+      menuService.updateAccount(args.user);
+    }
+  });
 }
 
 function createMainWindow(openDialog, playlistId) {
@@ -1073,6 +1137,11 @@ function createMainWindow(openDialog, playlistId) {
       if (mainWindow) mainWindow.openDevTools({ mode: 'detach' });
     }, 1000);
   }
+
+  // get ip
+  getIP().then((ip) => {
+    global['static_ip'] = ip;
+  }).catch(console.error);
 }
 
 ['left-drag', 'left-up'].forEach((channel) => {
@@ -1242,6 +1311,9 @@ app.on('ready', () => {
   globalShortcut.register('CmdOrCtrl+Shift+J+K+L', () => {
     if (preferenceWindow) preferenceWindow.openDevTools({ mode: 'detach' });
   });
+  globalShortcut.register('CmdOrCtrl+Shift+A+S+D', () => {
+    if (loginWindow) loginWindow.openDevTools({ mode: 'detach' });
+  });
 
   if (process.platform === 'win32') {
     globalShortcut.register('CmdOrCtrl+`', () => {
@@ -1280,6 +1352,7 @@ app.on('web-contents-created', (webContentsCreatedEvent, contents) => {
 
 app.on('bossKey', handleBossKey);
 app.on('add-preference', createPreferenceWindow);
+app.on('add-login', createLoginWindow);
 app.on('add-windows-about', createAboutWindow);
 app.on('check-for-updates', () => {
   if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
