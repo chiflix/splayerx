@@ -336,7 +336,7 @@ export default {
     async openPlayList(id) {
       const playlist = await this.infoDB.get('recent-played', id);
       if (!playlist) return;
-      await this.infoDB.update('recent-played', { ...playlist, lastOpened: Date.now() }, playlist.id);
+      if (!this.$store.getters.incognitoMode) await this.infoDB.update('recent-played', { ...playlist, lastOpened: Date.now() }, playlist.id);
       if (playlist.items.length > 1) {
         let currentVideo = await this.infoDB.get('media-item', playlist.items[playlist.playedIndex]);
 
@@ -444,7 +444,7 @@ export default {
       let playlist;
       const quickHash = await mediaQuickHash.try(videoFile);
       playlist = await this.infoDB.get('recent-played', 'hpaths', [`${quickHash}-${videoFile}`]);
-      if (quickHash && playlist) {
+      if (quickHash && playlist && !this.$store.getters.incognitoMode) {
         id = playlist.id;
         playlist.lastOpened = Date.now();
         this.infoDB.update('recent-played', playlist, playlist.id);
