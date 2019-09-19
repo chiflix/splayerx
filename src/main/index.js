@@ -533,6 +533,7 @@ function registerMainWindowEvent(mainWindow) {
     mainWindow.getBrowserViews()
       .forEach(mainWindowView => mainWindow.removeBrowserView(mainWindowView));
     browserViewManager.pauseVideo();
+    browserViewManager.clearAllBrowserViews();
     if (browsingWindow) {
       const views = browsingWindow.getBrowserViews();
       views.forEach((view) => {
