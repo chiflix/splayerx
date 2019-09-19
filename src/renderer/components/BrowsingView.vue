@@ -265,23 +265,25 @@ export default {
         setTimeout(() => {
           this.showProgress = false;
           this.progress = 0;
-          const loadUrl = this.currentMainBrowserView().webContents.getURL();
-          const hostname = urlParseLax(loadUrl).hostname;
-          let channel = hostname.slice(
-            hostname.indexOf('.') + 1,
-            hostname.length,
-          );
-          if (loadUrl.includes('youtube')) {
-            channel = 'youtube.com';
+          if (this.currentMainBrowserView()) {
+            const loadUrl = this.currentMainBrowserView().webContents.getURL();
+            const hostname = urlParseLax(loadUrl).hostname;
+            let channel = hostname.slice(
+              hostname.indexOf('.') + 1,
+              hostname.length,
+            );
+            if (loadUrl.includes('youtube')) {
+              channel = 'youtube.com';
+            }
+            this.currentMainBrowserView().webContents.executeJavaScript(
+              InjectJSManager.calcVideoNum(),
+              (r: number) => {
+                this.webInfo.hasVideo = channel === 'youtube.com' && !getVideoId(loadUrl).id
+                  ? false
+                  : !!r;
+              },
+            );
           }
-          this.currentMainBrowserView().webContents.executeJavaScript(
-            InjectJSManager.calcVideoNum(),
-            (r: number) => {
-              this.webInfo.hasVideo = channel === 'youtube.com' && !getVideoId(loadUrl).id
-                ? false
-                : !!r;
-            },
-          );
         }, 1000);
       }
     },
