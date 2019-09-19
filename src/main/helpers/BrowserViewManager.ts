@@ -128,7 +128,7 @@ export class BrowserViewManager implements IBrowserViewManager {
   }
 
   // 浏览器切换频道
-  public changeChanel(channel: string,
+  public changeChannel(channel: string,
     args: { url: string, isNewWindow?: boolean }): BrowserViewData {
     if (!this.historyByChannel[channel]) {
       return this.create(channel, args);
@@ -144,9 +144,9 @@ export class BrowserViewManager implements IBrowserViewManager {
       });
       page.view.webContents.loadURL(page.url);
     }
-    this.pauseVideo();
     this.currentChannel = channel;
     this.historyByChannel[channel].lastUpdateTime = Date.now();
+    this.pauseVideo();
     page.view.webContents.removeAllListeners('media-started-playing');
     return {
       canBack: this.historyByChannel[channel].currentIndex > 0,
@@ -260,6 +260,7 @@ export class BrowserViewManager implements IBrowserViewManager {
 
   public clearAllBrowserViews(): void {
     Object.values(this.historyByChannel).forEach((history) => {
+      history.lastUpdateTime = Date.now();
       history.list.forEach((item: BrowserViewHistoryItem) => {
         item.view.destroy();
       });
@@ -310,7 +311,7 @@ export interface IBrowserViewManager {
   create(channel: string, args: { url: string, isNewWindow?: boolean }): BrowserViewData
   back(): BrowserViewData
   forward(): BrowserViewData
-  changeChanel(channel: string, args: { url: string, isNewWindow?: boolean }): BrowserViewData
+  changeChannel(channel: string, args: { url: string, isNewWindow?: boolean }): BrowserViewData
   enterPip(): { pipBrowser: BrowserView, mainBrowser: BrowserViewData }
   exitPip(): BrowserViewData
   changePip(channel: string): { pipBrowser: BrowserView, mainBrowser: BrowserViewData }
