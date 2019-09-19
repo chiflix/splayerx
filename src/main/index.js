@@ -588,6 +588,7 @@ function registerMainWindowEvent(mainWindow) {
     mainWindow.getBrowserViews()
       .forEach(mainWindowView => mainWindow.removeBrowserView(mainWindowView));
     browserViewManager.pauseVideo();
+    browserViewManager.clearAllBrowserViews();
     if (browsingWindow) {
       const views = browsingWindow.getBrowserViews();
       views.forEach((view) => {
@@ -627,7 +628,7 @@ function registerMainWindowEvent(mainWindow) {
     if (args.url.includes('youtube')) {
       channel = 'youtube.com';
     }
-    const newChannel = browserViewManager.changeChanel(channel, args);
+    const newChannel = browserViewManager.changeChannel(channel, args);
     const view = newChannel.view ? newChannel.view : newChannel.page.view;
     const url = newChannel.view ? args.url : newChannel.page.url;
     const mainBrowser = mainWindow.getBrowserViews()[0];
@@ -733,6 +734,9 @@ function registerMainWindowEvent(mainWindow) {
       browsingWindow.send('update-mouse-info', args);
     }
   });
+  ipcMain.on('update-full-state', (evt, isFullScreen) => {
+    titlebarView.webContents.executeJavaScript(InjectJSManager.updateFullScreenIcon(isFullScreen));
+  });
   ipcMain.on('mouseup', (evt, type) => {
     switch (type) {
       case 'close':
@@ -747,6 +751,8 @@ function registerMainWindowEvent(mainWindow) {
         break;
       case 'recover':
         browsingWindow.setFullScreen(false);
+        browsingWindow.getBrowserViews()[0].webContents
+          .executeJavaScript(InjectJSManager.changeFullScreen(false));
         titlebarView.webContents.executeJavaScript(InjectJSManager.updateFullScreenIcon(false));
         break;
       case 'max':

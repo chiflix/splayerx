@@ -71,7 +71,7 @@ class InjectJSManager implements IInjectJSManager {
         document.querySelector(".titlebarClose").src = "assets/titleBarClose-default-icon.svg";`;
     }
     return `document.querySelector(".titlebarMax").style.display = ${isFullScreen} ? "none" : "block";
-      document.querySelector(".titlebarUnMax").style.display = ${isFullScreen} ? "none" : "block";
+      document.querySelector(".titlebarUnMax").style.display = "none";
       document.querySelector(".titlebarRecover").style.display = ${isFullScreen} ? "block" : "none";`;
   }
 
