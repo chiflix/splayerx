@@ -711,7 +711,12 @@ export default {
       if (!this.startLoading) {
         this.startLoading = true;
         const protocol = urlParseLax(url).protocol;
-        const openUrl = protocol ? url : `https:${url}`;
+        let openUrl = '';
+        if (this.currentUrl.includes('douyu')) {
+          openUrl = protocol ? url : `https://www.douyu.com${url}`;
+        } else {
+          openUrl = protocol ? url : `https:${url}`;
+        }
         if (
           !url
           || url === 'about:blank'

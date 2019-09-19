@@ -82,6 +82,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
           }
           break;
+        case url.includes('douyu'):
+          if (['video-container-dbc7dc'].includes(evt.target.classList[0])) {
+            offset = [evt.clientX, evt.clientY];
+            if (getRatio() !== 1) {
+              windowSize = remote.getCurrentWindow().getSize();
+            }
+          }
+          break;
         default:
           offset = [evt.clientX, evt.clientY];
           if (getRatio() !== 1) {

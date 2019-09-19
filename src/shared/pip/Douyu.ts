@@ -18,18 +18,38 @@ export default class Douyu {
         ${this.douyuBarrageAdapt(type, barrageState)}
         videoPlayer.style.position = "fixed";
         videoPlayer.style.zIndex = "999999999";
+        videoPlayer.style.width = "100%";
+        videoPlayer.style.height = "100%";
+        videoPlayer.style.right = "0";
+        videoPlayer.style.bottom = "0";
+        var room = document.querySelector(".room-Player-Box");
+        room.style.width = "100%";
+        room.style.height = "100%";
+        room.style.right = "0";
+        room.style.bottom = "0";
         document.querySelector("video").style.width = "100%";
         document.querySelector("video").style.height = "100%";
         document.body.style.overflow = "hidden";
+        document.querySelector("._1Osm4fzGmcuRK9M8IVy3u6").style.width = "100%";
+        document.querySelector("._1Osm4fzGmcuRK9M8IVy3u6").style.height = "100%";
         Object.defineProperty(document.querySelector("video").style, "width", {get: function(){return this._width}, set: function(val){this._width = val.width;if (val.flag) document.querySelector("video").style.setProperty("width", val.width);}});
         Object.defineProperty(document.querySelector("video").style, "height", {get: function(){return this._height}, set: function(val){this._height = val.height; if (val.flag) document.querySelector("video").style.setProperty("height", val.height);}});`;
       this.watcher = '';
       this.recover = 'var videoPlayer = document.querySelector(".layout-Player-videoMain");'
-        + 'videoPlayer.style.position = "absolute";'
+        + 'videoPlayer.style.position = "";'
         + 'videoPlayer.style.zIndex = "";'
+        + 'videoPlayer.style.width = "";'
+        + 'videoPlayer.style.height = "";'
+        + 'videoPlayer.style.right = "";'
+        + 'videoPlayer.style.bottom = "";'
         + 'document.body.style.overflow = "";'
-        + 'Object.defineProperty(document.querySelector("video").style, "width", {get: function(){return this._width}, set: function(val){this._width = val;document.querySelector("video").style.setProperty("width", val);}});'
-        + 'Object.defineProperty(document.querySelector("video").style, "height", {get: function(){return this._height}, set: function(val){this._height = val;document.querySelector("video").style.setProperty("height", val);}});';
+        + 'var room = document.querySelector(".room-Player-Box");'
+        + 'room.style.width = "";'
+        + 'room.style.height = "";'
+        + 'room.style.right = "";'
+        + 'room.style.bottom = "";'
+        + 'document.querySelector("._1Osm4fzGmcuRK9M8IVy3u6").style.width = "100%";'
+        + 'document.querySelector("._1Osm4fzGmcuRK9M8IVy3u6").style.height = "100%";';
     } else if (type === 'video') {
       this.adapter = `var videoPlayer = document.querySelector(".app-7b4311");
         ${this.douyuBarrageAdapt(type, barrageState)}
