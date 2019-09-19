@@ -1,3 +1,10 @@
+export function douyuVideoPause(type: string) {
+  if (['normal', 'others'].includes(type)) {
+    return 'document.querySelector(".pause-c594e8").click()';
+  }
+  return 'document.querySelector(".pause-81a5c3").click()';
+}
+
 export default class Douyu {
   public adapter: string;
 
@@ -35,7 +42,7 @@ export default class Douyu {
         document.body.style.overflow = "hidden";
         document.querySelector(".controlbar-a2580a").style.width = "100%";
         document.querySelector(".controlbar-a2580a").children[0].style.width = "100%";
-        document.querySelector("#header").style.display = "none";`
+        document.querySelector("#header").style.display = "none";`;
       this.watcher = '';
       this.recover = 'var videoPlayer = document.querySelector(".app-7b4311");'
       + 'videoPlayer.style.position = "relative";'
@@ -64,13 +71,13 @@ export default class Douyu {
         video.style.height = { height: "${winSize[1]}px", flag: true }`;
       this.recover = 'var video = document.querySelector("video");'
         + 'parentElement.prepend(video);'
-      + 'document.body.style.overflow = "";'
-      + 'video.style.zIndex = zIndex;'
-      + 'video.style.background = "";'
-      + 'Object.defineProperty(document.querySelector("video").style, "width", {get: function(){return this._width}, set: function(val){this._width = val;document.querySelector("video").style.setProperty("width", val);}});'
-      + 'Object.defineProperty(document.querySelector("video").style, "height", {get: function(){return this._height}, set: function(val){this._height = val;document.querySelector("video").style.setProperty("height", val);}});'
-      + 'video.style.width = width;'
-      + 'video.style.height = height;';
+        + 'document.body.style.overflow = "";'
+        + 'video.style.zIndex = zIndex;'
+        + 'video.style.background = "";'
+        + 'Object.defineProperty(document.querySelector("video").style, "width", {get: function(){return this._width}, set: function(val){this._width = val;document.querySelector("video").style.setProperty("width", val);}});'
+        + 'Object.defineProperty(document.querySelector("video").style, "height", {get: function(){return this._height}, set: function(val){this._height = val;document.querySelector("video").style.setProperty("height", val);}});'
+        + 'video.style.width = width;'
+        + 'video.style.height = height;';
     }
   }
 

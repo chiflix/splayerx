@@ -611,7 +611,7 @@ export default {
         view.webContents.addListener('page-title-updated', this.handlePageTitle);
         view.webContents.addListener('dom-ready', this.domReady);
         view.webContents.addListener('new-window', this.newWindow);
-        view.webContents.addListener('did-start-loading', this.didStartLoading);
+        if (!view.webContents.getURL().includes('douyu')) view.webContents.addListener('did-start-loading', this.didStartLoading);
         view.webContents.addListener('did-stop-loading', this.didStopLoading);
         view.webContents.addListener('will-navigate', this.willNavigate);
       }
@@ -619,10 +619,12 @@ export default {
     removeListener() {
       const view = this.currentMainBrowserView();
       if (view) {
-        view.webContents.removeListener(
-          'did-stop-loading',
-          this.didStopLoading,
-        );
+        if (!view.webContents.getURL().includes('douyu')) {
+          view.webContents.removeListener(
+            'did-stop-loading',
+            this.didStopLoading,
+          );
+        }
         view.webContents.removeListener('page-title-updated', this.handlePageTitle);
         view.webContents.removeListener('dom-ready', this.domReady);
         view.webContents.removeListener('ipc-message', this.ipcMessage);

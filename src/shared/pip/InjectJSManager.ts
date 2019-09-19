@@ -1,6 +1,6 @@
 import { bilibiliFindType, bilibiliVideoPause } from './Bilibili';
 import PipFactory from './PipFactory';
-import { douyuFindType } from './Douyu';
+import { douyuFindType, douyuVideoPause } from './Douyu';
 
 class InjectJSManager implements IInjectJSManager {
   private readonly calcVideoNumCode: string;
@@ -45,6 +45,8 @@ class InjectJSManager implements IInjectJSManager {
     switch (channel) {
       case 'bilibili':
         return bilibiliVideoPause(type as string);
+      case 'douyu':
+        return douyuVideoPause(type as string);
       case 'normal':
         return this.pauseNormalVideo;
       default:

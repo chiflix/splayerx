@@ -234,32 +234,54 @@ export class BrowserViewManager implements IBrowserViewManager {
     const currentIndex = this.historyByChannel[this.currentChannel].currentIndex;
     const currentView = view || this.historyByChannel[this.currentChannel].list[currentIndex].view;
     if (currentView.webContents.isCurrentlyAudible()) {
-      if (pausedChannel.includes('bilibili')) {
-        let type = '';
-        currentView.webContents
-          .executeJavaScript(InjectJSManager.bilibiliFindType())
-          .then((r: string) => {
-            type = r;
-            currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('bilibili', type));
-          });
-      } else {
-        currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('normal'));
-      }
-    }
-    currentView.webContents.addListener('media-started-playing', () => {
-      setTimeout(() => {
-        if (pausedChannel.includes('bilibili')) {
-          let type = '';
+      let type = '';
+      switch (true) {
+        case pausedChannel.includes('bilibili'):
           currentView.webContents
             .executeJavaScript(InjectJSManager.bilibiliFindType())
             .then((r: string) => {
               type = r;
               currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('bilibili', type));
             });
-        } else {
+          break;
+        case pausedChannel.includes('douyu'):
+          currentView.webContents
+            .executeJavaScript(InjectJSManager.douyuFindType())
+            .then((r: string) => {
+              type = r;
+              currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('douyu', type));
+            });
+          break;
+        default:
           currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('normal'));
+          break;
+      }
+    }
+    currentView.webContents.addListener('media-started-playing', () => {
+      setTimeout(() => {
+        let type = '';
+        switch (true) {
+          case pausedChannel.includes('bilibili'):
+            currentView.webContents
+              .executeJavaScript(InjectJSManager.bilibiliFindType())
+              .then((r: string) => {
+                type = r;
+                currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('bilibili', type));
+              });
+            break;
+          case pausedChannel.includes('douyu'):
+            currentView.webContents
+              .executeJavaScript(InjectJSManager.douyuFindType())
+              .then((r: string) => {
+                type = r;
+                currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('douyu', type));
+              });
+            break;
+          default:
+            currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('normal'));
+            break;
         }
-      }, 50);
+      }, 100);
     });
   }
 
