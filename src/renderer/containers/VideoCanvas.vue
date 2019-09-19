@@ -101,7 +101,6 @@ export default {
         
         if (mediaItem.lastPlayedTime) return;
         else {
-          console.log('playlistId', playlistItem, mediaItem);
           await playInfoStorageService.deleteRecentPlayedBy(oldVal);
           return;
         }
