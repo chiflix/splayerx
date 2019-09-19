@@ -97,13 +97,13 @@ export default {
     async playListId(val: number, oldVal: number) {
       if (this.incognitoMode && oldVal) {
         const playlistItem = await playInfoStorageService.getPlaylistRecord(oldVal);
-        const mediaItem = await playInfoStorageService.getMediaItem(playlistItem.items[playlistItem.playedIndex]); 
-        
+        const mediaItem = await playInfoStorageService
+          .getMediaItem(playlistItem.items[playlistItem.playedIndex]);
+
         if (mediaItem.lastPlayedTime) return;
-        else {
-          await playInfoStorageService.deleteRecentPlayedBy(oldVal);
-          return;
-        }
+
+        await playInfoStorageService.deleteRecentPlayedBy(oldVal);
+        return;
       }
       if (oldVal && !this.isFolderList) {
         const screenshot: ShortCut = await this.generateScreenshot();
@@ -401,17 +401,17 @@ export default {
       // incognito mode
       if (this.incognitoMode) {
         const playlistItem = await playInfoStorageService.getPlaylistRecord(playListId);
-        const mediaItem = await playInfoStorageService.getMediaItem(playlistItem.items[playlistItem.playedIndex]); 
-        
+        const mediaItem = await playInfoStorageService
+          .getMediaItem(playlistItem.items[playlistItem.playedIndex]);
+
         if (mediaItem.lastPlayedTime) return;
-        else {
-          await playInfoStorageService.deleteRecentPlayedBy(playListId);
-          return;
-        }
+
+        await playInfoStorageService.deleteRecentPlayedBy(playListId);
+        return;
       }
 
       const screenshot: ShortCut = await this.generateScreenshot();
-      if (await this.handleNSFW(screenshot.shortCut, playListId)) return null;
+      if (await this.handleNSFW(screenshot.shortCut, playListId)) return;
 
       let savePromise = this.saveScreenshot(videoId, screenshot)
         .then(() => this.updatePlaylist(playListId));
@@ -420,9 +420,9 @@ export default {
           await playInfoStorageService.deleteRecentPlayedBy(playListId);
         });
       }
-      return savePromise
+      await (savePromise
         .then(this.saveSubtitleStyle)
-        .then(this.savePlaybackStates);
+        .then(this.savePlaybackStates));
     },
     beforeUnloadHandler(e: BeforeUnloadEvent) {
       // 如果当前有翻译任务进行，而不是再后台进行
