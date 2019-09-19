@@ -678,6 +678,9 @@ function registerMainWindowEvent(mainWindow) {
       browsingWindow.send('update-mouse-info', args);
     }
   });
+  ipcMain.on('update-full-state', (evt, isFullScreen) => {
+    titlebarView.webContents.executeJavaScript(InjectJSManager.updateFullScreenIcon(isFullScreen));
+  });
   ipcMain.on('mouseup', (evt, type) => {
     switch (type) {
       case 'close':
@@ -692,6 +695,8 @@ function registerMainWindowEvent(mainWindow) {
         break;
       case 'recover':
         browsingWindow.setFullScreen(false);
+        browsingWindow.getBrowserViews()[0].webContents
+          .executeJavaScript(InjectJSManager.changeFullScreen(false));
         titlebarView.webContents.executeJavaScript(InjectJSManager.updateFullScreenIcon(false));
         break;
       case 'max':

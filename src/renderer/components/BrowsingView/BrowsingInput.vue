@@ -6,7 +6,6 @@
     class="search-url"
   >
     <div
-      @dblclick="handleDbClick"
       :style="{
         order: isDarwin ? 1 : 2,
       }"
@@ -64,13 +63,6 @@ export default {
     },
   },
   methods: {
-    handleDbClick() {
-      if (!this.$electron.remote.getCurrentWindow().isMaximized()) {
-        this.$electron.ipcRenderer.send('callMainWindowMethod', 'maximize');
-      } else {
-        this.$electron.ipcRenderer.send('callMainWindowMethod', 'unmaximize');
-      }
-    },
     handleCloseUrlInput() {
       this.closeUrlInput();
     },
