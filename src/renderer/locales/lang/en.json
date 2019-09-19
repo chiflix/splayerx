@@ -274,7 +274,7 @@
       "smartMode": "Intelligent Mode",
       "smartDescription": "Offline identify sensitive or not-suitable-for-work contents, and clear the playback history when playing in a folder playlist or when quitting.",
       "incognitoMode": "Incognito Mode",
-      "incognitoDescription": "Watch in a private session where your playback history will not be stored."
+      "incognitoDescription": "Your playback history will not be stored anymore."
     }
   },
   "privacyBubble": {
