@@ -85,7 +85,7 @@ export class BrowserViewManager implements IBrowserViewManager {
       if (channel !== this.currentChannel) {
         const currentIndex = this.historyByChannel[this.currentChannel].currentIndex;
         const view = this.historyByChannel[this.currentChannel].list[currentIndex].view;
-        if (!view.isDestroyed()) this.pauseVideo(view);
+        if (view && !view.isDestroyed()) this.pauseVideo(view);
       } else if (this.history.length) {
         // 清除后退的记录
         remove(this.historyByChannel[this.currentChannel].list,
@@ -134,7 +134,7 @@ export class BrowserViewManager implements IBrowserViewManager {
       return this.create(channel, args);
     }
     const page = this.historyByChannel[channel].list[this.historyByChannel[channel].currentIndex];
-    if (page.view.isDestroyed()) {
+    if (page.view && page.view.isDestroyed()) {
       page.view = new BrowserView({
         webPreferences: {
           preload: `${require('path').resolve(__static, 'pip/preload.js')}`,
@@ -143,10 +143,11 @@ export class BrowserViewManager implements IBrowserViewManager {
         },
       });
       page.view.webContents.loadURL(page.url);
+    } else {
+      this.pauseVideo();
     }
     this.currentChannel = channel;
     this.historyByChannel[channel].lastUpdateTime = Date.now();
-    this.pauseVideo();
     page.view.webContents.removeAllListeners('media-started-playing');
     return {
       canBack: this.historyByChannel[channel].currentIndex > 0,
@@ -285,7 +286,7 @@ export class BrowserViewManager implements IBrowserViewManager {
     result.page = list[index];
     channel.lastUpdateTime = Date.now();
     channel.currentIndex = index;
-    if (result.page.view.isDestroyed()) {
+    if (result.page.view && result.page.view.isDestroyed()) {
       result.page.view = new BrowserView({
         webPreferences: {
           preload: `${require('path').resolve(__static, 'pip/preload.js')}`,
