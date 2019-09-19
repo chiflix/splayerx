@@ -1,8 +1,8 @@
 export function douyuVideoPause(type: string) {
   if (['normal', 'others'].includes(type)) {
-    return 'document.querySelector(".pause-c594e8").click()';
+    return 'document.querySelector("video").pause();var timer = setInterval(() => { const pause = document.querySelector(".pause-c594e8"); if (pause) { clearInterval(timer);pause.click(); } }, 100);';
   }
-  return 'document.querySelector(".pause-81a5c3").click()';
+  return 'document.querySelector("video").pause();var timer = setInterval(() => { const pause = document.querySelector(".pause-81a5c3"); if (pause) { clearInterval(timer);pause.click(); } }, 100);';
 }
 
 export default class Douyu {

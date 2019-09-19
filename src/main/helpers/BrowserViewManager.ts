@@ -258,30 +258,29 @@ export class BrowserViewManager implements IBrowserViewManager {
       }
     }
     currentView.webContents.addListener('media-started-playing', () => {
-      setTimeout(() => {
-        let type = '';
-        switch (true) {
-          case pausedChannel.includes('bilibili'):
-            currentView.webContents
-              .executeJavaScript(InjectJSManager.bilibiliFindType())
-              .then((r: string) => {
-                type = r;
-                currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('bilibili', type));
-              });
-            break;
-          case pausedChannel.includes('douyu'):
-            currentView.webContents
-              .executeJavaScript(InjectJSManager.douyuFindType())
-              .then((r: string) => {
-                type = r;
-                currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('douyu', type));
-              });
-            break;
-          default:
-            currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('normal'));
-            break;
-        }
-      }, 100);
+      let type = '';
+      switch (true) {
+        case pausedChannel.includes('bilibili'):
+          currentView.webContents
+            .executeJavaScript(InjectJSManager.bilibiliFindType())
+            .then((r: string) => {
+              type = r;
+              console.log(r);
+              currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('bilibili', type));
+            });
+          break;
+        case pausedChannel.includes('douyu'):
+          currentView.webContents
+            .executeJavaScript(InjectJSManager.douyuFindType())
+            .then((r: string) => {
+              type = r;
+              currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('douyu', type));
+            });
+          break;
+        default:
+          currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('normal'));
+          break;
+      }
     });
   }
 
