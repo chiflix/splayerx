@@ -82,7 +82,7 @@ export default {
     ...mapGetters([
       'videoId', 'nextVideoId', 'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId', 'enabledSecondarySub', 'lastChosenSize', 'subToTop',
       'winSize', 'winPos', 'winAngle', 'isFullScreen', 'winWidth', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo', 'loop', 'playinglistRate', 'isFolderList', 'playingList', 'playingIndex', 'playListId', 'items',
-      'previousVideo', 'previousVideoId', 'smartMode', 'isTranslating', 'nsfwProcessDone',
+      'previousVideo', 'previousVideoId', 'smartMode', 'incognitoMode', 'isTranslating', 'nsfwProcessDone',
     ]),
     ...mapGetters({
       videoWidth: 'intrinsicWidth',
@@ -95,6 +95,17 @@ export default {
       this.changeWindowRotate(val);
     },
     async playListId(val: number, oldVal: number) {
+      if (this.incognitoMode && oldVal) {
+        const playlistItem = await playInfoStorageService.getPlaylistRecord(oldVal);
+        const mediaItem = await playInfoStorageService.getMediaItem(playlistItem.items[playlistItem.playedIndex]); 
+        
+        if (mediaItem.lastPlayedTime) return;
+        else {
+          console.log('playlistId', playlistItem, mediaItem);
+          await playInfoStorageService.deleteRecentPlayedBy(oldVal);
+          return;
+        }
+      }
       if (oldVal && !this.isFolderList) {
         const screenshot: ShortCut = await this.generateScreenshot();
         if (!(await this.handleNSFW(screenshot.shortCut, oldVal))) {
@@ -103,6 +114,7 @@ export default {
       }
     },
     async videoId(val: number, oldVal: number) {
+      if (this.incognitoMode) return;
       const screenshot: ShortCut = await this.generateScreenshot();
       await this.saveScreenshot(oldVal, screenshot);
     },
@@ -387,6 +399,18 @@ export default {
     },
     async handleLeaveVideo(videoId: number) {
       const playListId = this.playListId;
+      // incognito mode
+      if (this.incognitoMode) {
+        const playlistItem = await playInfoStorageService.getPlaylistRecord(playListId);
+        const mediaItem = await playInfoStorageService.getMediaItem(playlistItem.items[playlistItem.playedIndex]); 
+        
+        if (mediaItem.lastPlayedTime) return;
+        else {
+          await playInfoStorageService.deleteRecentPlayedBy(playListId);
+          return;
+        }
+      }
+
       const screenshot: ShortCut = await this.generateScreenshot();
       if (await this.handleNSFW(screenshot.shortCut, playListId)) return null;
 
