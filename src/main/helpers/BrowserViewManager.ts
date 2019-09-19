@@ -85,7 +85,7 @@ export class BrowserViewManager implements IBrowserViewManager {
       if (channel !== this.currentChannel) {
         const currentIndex = this.historyByChannel[this.currentChannel].currentIndex;
         const view = this.historyByChannel[this.currentChannel].list[currentIndex].view;
-        this.pauseVideo(view);
+        if (!view.isDestroyed()) this.pauseVideo(view);
       } else if (this.history.length) {
         // 清除后退的记录
         remove(this.historyByChannel[this.currentChannel].list,
