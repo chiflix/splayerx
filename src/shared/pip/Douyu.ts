@@ -21,7 +21,9 @@ export default class Douyu {
         videoPlayer.style.width = "100%";
         videoPlayer.style.height = "100%";
         videoPlayer.style.right = "0";
+        videoPlayer.style.left = "0";
         videoPlayer.style.bottom = "0";
+        videoPlayer.style.top = "0";
         var room = document.querySelector(".room-Player-Box");
         room.style.width = "100%";
         room.style.height = "100%";
@@ -43,6 +45,8 @@ export default class Douyu {
         + 'videoPlayer.style.height = "";'
         + 'videoPlayer.style.right = "";'
         + 'videoPlayer.style.bottom = "";'
+        + 'videoPlayer.style.left = "";'
+        + 'videoPlayer.style.top = "";'
         + 'document.body.style.overflow = "";'
         + 'var room = document.querySelector(".room-Player-Box");'
         + 'room.style.width = "";'
