@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-05 16:03:32
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-09-12 14:40:24
+ * @Last Modified time: 2019-09-20 11:29:17
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @ts-ignore
@@ -353,7 +353,20 @@ const actions = {
         commit(m.AUDIO_TRANSLATE_UPDATE_STATUS, AudioTranslateStatus.Grabbing);
       });
       grab.on('error', (error: Error) => {
-        log.error('AudioTranslate', error);
+        // 记录错误日志到sentry, 排除错误原因
+        try {
+          log.error('AudioTranslate', error);
+          log.save('translate-error-log', {
+            mediaHash: grab.mediaHash,
+            taskId: grab.taskInfo ? grab.taskInfo.taskId : undefined,
+          }, {
+            audioInfo: grab.audioInfo,
+            error,
+            videoSrc: grab.videoSrc,
+          });
+        } catch (error) {
+          // empty
+        }
         if (taskTimer) {
           clearInterval(taskTimer);
         }
@@ -515,6 +528,22 @@ const actions = {
         // ga 翻译过程(第二步)成功次数
         try {
           event('app', 'ai-translate-server-translate-success');
+        } catch (error) {
+          // empty
+        }
+      });
+      grab.on('grab-audio', () => {
+        // 第一步请求返回, 需要提取音频
+        try {
+          event('app', 'ai-translate-server-if-audio-need', 'audio-need');
+        } catch (error) {
+          // empty
+        }
+      });
+      grab.on('skip-audio', () => {
+        // 第一步请求返回， 不需要提取音频
+        try {
+          event('app', 'ai-translate-server-if-audio-need', 'audio-not-need');
         } catch (error) {
           // empty
         }
