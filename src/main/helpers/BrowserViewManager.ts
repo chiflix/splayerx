@@ -211,11 +211,15 @@ export class BrowserViewManager implements IBrowserViewManager {
       pipChannel: '',
       pipPage: null,
     };
+    const page = this.historyByChannel[this.currentChannel]
+      .list[this.historyByChannel[this.currentChannel].currentIndex];
+    page.view.setBounds({
+      x: 76, y: 0, width: 0, height: 0,
+    });
     return {
       canBack: this.historyByChannel[this.currentChannel].currentIndex > 0,
       canForward: false,
-      page: this.historyByChannel[this.currentChannel]
-        .list[this.historyByChannel[this.currentChannel].currentIndex],
+      page,
     };
   }
 

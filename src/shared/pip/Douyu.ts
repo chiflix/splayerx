@@ -27,6 +27,7 @@ export default class Douyu {
         room.style.height = "100%";
         room.style.right = "0";
         room.style.bottom = "0";
+        document.querySelector(".layout-Main").style.overflow = "hidden";
         document.querySelector("video").style.width = "100%";
         document.querySelector("video").style.height = "100%";
         document.body.style.overflow = "hidden";
@@ -48,6 +49,7 @@ export default class Douyu {
         + 'room.style.height = "";'
         + 'room.style.right = "";'
         + 'room.style.bottom = "";'
+        + 'document.querySelector(".layout-Main").style.overflow = "";'
         + 'document.querySelector("._1Osm4fzGmcuRK9M8IVy3u6").style.width = "100%";'
         + 'document.querySelector("._1Osm4fzGmcuRK9M8IVy3u6").style.height = "100%";';
     } else if (type === 'video') {
