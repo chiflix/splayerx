@@ -21,6 +21,12 @@
       >
     </div>
     <div class="code-box">
+      <button
+        :disabled="isValidMobile || count > 0"
+        @click="getCode"
+      >
+        {{ count > 0 ? countString(count) : $t('loginModal.sendCode') }}
+      </button>
       <input
         ref="code"
         @keydown.stop="keydown"
@@ -30,12 +36,6 @@
         @input="codeMaxLen"
         type="number"
       >
-      <div
-        :class="`button ${isValidMobile || count > 0 ? 'disabled' : ''}`"
-        @click="getCode"
-      >
-        {{ count > 0 ? countString(count) : $t('loginModal.sendCode') }}
-      </div>
     </div>
     <button
       :disabled="isAllValid || isLogin"
@@ -202,7 +202,7 @@ export default Vue.extend({
 });
 </script>
 <style lang="scss" scoped>
-input, button, .button {
+input, button {
   border: none;
   outline: none;
   box-sizing: border-box;
@@ -214,19 +214,27 @@ input, button, .button {
   color: rgba(255,255,255,0.80);
   letter-spacing: 0;
   padding: 0 16px;
-  background: rgba(94,93,102,0.25);
+  background-color: rgba(94,93,102,0.25);
+  transition: background-color 200ms; 
   &:disabled, &.disabled {
     opacity: 0.3;
     cursor: default;
+    &:hover {
+      background-color: rgba(94,93,102,0.25);
+    }
+  }
+  &:hover {
+    background-color: rgba(94,93,102,0.6);
+  }
+  &:focus {
+    border-color: #ffffff;
+    background-color: rgba(94,93,102,0.25);
   }
 }
 
 input {
   &::placeholder {
     color: rgba(255, 255, 255, 0.3);
-  }
-  &:focus {
-    border-color: #ffffff;
   }
 }
 input::-webkit-outer-spin-button,
@@ -236,9 +244,9 @@ input::-webkit-inner-spin-button {
 input[type="number"]{
   -moz-appearance: textfield;
 }
-button, .button {
-  // line-height: 14px;
+button {
   cursor: pointer;
+  line-height: 14px;
 }
 
 .box {
@@ -266,6 +274,9 @@ button, .button {
   display: flex;
   margin-bottom: 12px;
   position: relative;
+  &:hover input{
+    background-color: rgba(94,93,102,0.6);
+  }
   &.line {
     &::before {
     color: rgba(255,255,255,0.8);
@@ -281,6 +292,7 @@ button, .button {
   }
   &:focus-within input {
     border-color: #ffffff;
+    background-color: rgba(94,93,102,0.25);
   }
   input {
     border-radius: 0px 2px 2px 0px;
@@ -298,10 +310,11 @@ button, .button {
   display: flex;
   margin-bottom: 12px;
   justify-content: space-between;
+  flex-direction: row-reverse;
   input {
-    width: 190px;
+    width: 190px; 
   }
-  .button {
+  button {
     width: 110px;
     text-align: center;
   }
