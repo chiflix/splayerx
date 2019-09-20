@@ -62,7 +62,7 @@ export default class Bilibili {
         var isTheater = theater ? theater.style.height !== "auto" : true;
         if (!isTheater) {document.querySelector(".bilibili-player-video-btn-widescreen").click();};
         var wrapper = document.querySelector(".bilibili-player-video-wrap");
-        if (document.querySelector("#player_module")) {
+        if (document.querySelector("#player_module") && !document.querySelector(".plp-l")) {
         document.querySelector("#player_module").style.width = "100%";
         document.querySelector("#player_module").style.height = "100%";
         document.querySelector("#player_module").style.position = "fixed";
@@ -84,7 +84,7 @@ export default class Bilibili {
       this.watcher = '';
       this.recover = 'document.querySelector(".bilibili-player-video-danmaku").style.opacity = "1";'
         + 'var wrapper = document.querySelector(".bilibili-player-video-wrap");'
-        + 'if (document.querySelector("#player_module")) {'
+        + 'if (document.querySelector("#player_module") && !document.querySelector(".plp-l")) {'
         + 'document.querySelector("#player_module").style.position = "";'
         + 'document.querySelector(".media-wrapper").style.display = "";'
         + 'document.querySelector(".plp-r").style.display = "";'

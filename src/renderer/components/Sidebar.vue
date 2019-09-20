@@ -98,6 +98,9 @@ export default {
       height: 44px;
       margin-bottom: 12px;
     }
+    .icon-hover {
+      -webkit-app-region: no-drag;
+    }
     .icon-hover:hover {
       opacity: 1.0;
     }
