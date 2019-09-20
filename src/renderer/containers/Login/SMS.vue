@@ -17,18 +17,18 @@
       >
     </div>
     <div class="code-box">
-      <button
-        @click="getCode"
-        :disabled="isValidMobile"
-      >
-        {{ count > 0 ? countString(count) : $t('loginModal.sendCode') }}
-      </button>
       <input
         :disabled="isValidMobile"
         v-model="code"
         :placeholder="$t('loginModal.placeholder.code')"
         type="text"
       >
+      <button
+        @click="getCode"
+        :disabled="isValidMobile"
+      >
+        {{ count > 0 ? countString(count) : $t('loginModal.sendCode') }}
+      </button>
     </div>
     <button
       :disabled="isAllValid || isLogin"
@@ -148,11 +148,34 @@ export default Vue.extend({
 input, button {
   border: none;
   outline: none;
+  box-sizing: border-box;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+  height: 40px;
+  line-height: 40px;
   font-size: 14px;
   color: rgba(255,255,255,0.80);
   letter-spacing: 0;
-  line-height: 40px;
+  padding: 0 16px;
+  background: rgba(94,93,102,0.25);
+  &:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
 }
+input {
+  &::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+  }
+  &:focus {
+    border-color: #ffffff;
+  }
+}
+button {
+  line-height: 14px;
+  cursor: pointer;
+}
+
 .box {
   padding: 48px 50px 0 50px;
   h1 {
@@ -174,79 +197,37 @@ input, button {
   }
 }
 .mobile-box {
-  height: 40px;
-  box-sizing: border-box;
-  background: rgba(94,93,102,0.25);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 2px;
+  width: 100%;
   display: flex;
   margin-bottom: 12px;
-  &:focus-within {
+  &:focus-within input {
     border-color: #ffffff;
   }
   input {
+    border-radius: 0px 2px 2px 0px;
     width: 100%;
-    height: 100%;
-    padding: 0 16px;
-    box-sizing: border-box;
-    &::placeholder {
-      color: green;
-    }
   }
   input:first-child {
     width: 90px;
-    border-right: 1px solid rgba(255,255,255,0.30);
+    border-radius: 2px 0px 0px 2px;
+    border-right: none;
   }
 }
 .code-box {
-  height: 40px;
+  width: 100%;
   display: flex;
   margin-bottom: 12px;
   justify-content: space-between;
-  flex-direction: row-reverse;
   input {
-    width: 178px;
-    padding: 0 16px;
-    background: rgba(94,93,102,0.25);
-    border: 1px solid rgba(255,255,255,0.30);
-    border-radius: 2px;
-    box-sizing: border-box;
-    &:disabled {
-      opacity: 0.3;
-      cursor: default;
-    }
-    &::placeholder {
-      color: green;
-    }
-    &:focus {
-      border-color: #ffffff;
-    }
+    width: 190px;
   }
   button {
-    width: 100px;
-    background: rgba(94,93,102,0.25);
-    border: 1px solid rgba(255,255,255,0.30);
-    border-radius: 2px;
-    cursor: pointer;
-    &:disabled {
-      opacity: 0.3;
-      cursor: default;
-    }
+    width: 110px;
   }
 }
 .submit {
   width: 100%;
   display: block;
-  height: 40px;
-  box-sizing: border-box;
-  background: rgba(94,93,102,0.25);
-  border: 1px solid rgba(255,255,255,0.30);
-  border-radius: 2px;
-  cursor: pointer;
-  margin-bottom: 16px;
-  &:disabled {
-    opacity: 0.3;
-    cursor: default;
-  }
+  margin-bottom: 14px;
 }
 </style>

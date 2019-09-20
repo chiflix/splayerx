@@ -296,7 +296,7 @@ function createLoginWindow(e, route) {
     useContentSize: true,
     frame: false,
     titleBarStyle: 'none',
-    width: 400,
+    width: 412,
     height: 284,
     transparent: true,
     resizable: false,
