@@ -182,7 +182,7 @@ export default {
     });
     this.$bus.$on('toggle-playback', debounce(() => {
       this[this.paused ? 'play' : 'pause']();
-      this.$ga.event('app', 'toggle-playback');
+      // this.$ga.event('app', 'toggle-playback');
     }, 50, { leading: true }));
     this.$bus.$on('next-video', () => {
       if (this.switchingLock) return;
