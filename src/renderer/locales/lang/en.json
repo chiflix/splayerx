@@ -107,7 +107,7 @@
     },
     "account": {
       "name": "Account",
-      "login": "Account",
+      "login": "Sign In",
       "logout": "Sign Out"
     },
     "help": {

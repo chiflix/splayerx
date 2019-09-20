@@ -31,7 +31,6 @@
       >
         <Icon
           id="close"
-          :state="state"
           @mouseup.native="handleClose"
           class="title-button no-drag"
           type="titleBarClose"

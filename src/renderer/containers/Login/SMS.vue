@@ -5,30 +5,36 @@
     method="post"
   >
     <h1>{{ $t('loginModal.title') }}</h1>
-    <div class="mobile-box">
+    <div :class="`mobile-box ${countryCallCode.length > 0 ? 'line' : '' }`">
       <input
-        v-model="countryCallCodeString"
-        type="text"
+        @keydown.stop="keydown"
+        v-model="countryCallCode"
+        type="tel"
+        maxlength="4"
       >
       <input
         v-model="mobile"
+        @keydown.stop="keydown"
         :placeholder="$t('loginModal.placeholder.mobile')"
-        type="text"
+        :maxlength="maxLen"
+        type="tel"
       >
     </div>
     <div class="code-box">
-      <input
-        :disabled="isValidMobile"
-        v-model="code"
-        :placeholder="$t('loginModal.placeholder.code')"
-        type="text"
-      >
       <button
         @click="getCode"
-        :disabled="isValidMobile"
+        :disabled="isValidMobile || count > 0"
       >
         {{ count > 0 ? countString(count) : $t('loginModal.sendCode') }}
       </button>
+      <input
+        @keydown.stop="keydown"
+        :disabled="isValidMobile"
+        v-model="code"
+        :placeholder="$t('loginModal.placeholder.code')"
+        type="tel"
+        maxlength="6"
+      >
     </div>
     <button
       :disabled="isAllValid || isLogin"
@@ -45,12 +51,20 @@
 import Vue from 'vue';
 // @ts-ignore
 import geoip from 'geoip-lite';
-import { remote, ipcRenderer } from 'electron';
 // @ts-ignore
-import metadata from 'libphonenumber-js/metadata.full.json';
-import { parsePhoneNumberFromString, getCountryCallingCode } from 'libphonenumber-js';
+import metadata from 'libphonenumber-js/metadata.mobile.json';
+import { remote, ipcRenderer } from 'electron';
+import { parsePhoneNumberFromString as p, getCountryCallingCode } from 'libphonenumber-js';
 // import { AxiosResponse, AxiosError } from 'axios';
 import { log } from '@/libs/Log';
+
+function call(func: Function, s: string, t: string) {
+  const args = [s, t];
+  args.push(metadata);
+  return func.apply(this, args);
+}
+
+const parsePhoneNumberFromString = (s: string, t: string) => call(p, s, t);
 
 export default Vue.extend({
   name: 'SMS',
@@ -58,7 +72,7 @@ export default Vue.extend({
   },
   data() {
     return {
-      countryCallCodeString: '+86',
+      countryCallCode: '86',
       mobile: '',
       code: '',
       count: 0,
@@ -72,31 +86,39 @@ export default Vue.extend({
     isAllValid() {
       return !(this.validMobile() && this.validCode());
     },
-  },
-  created() {
-    log.debug('sms', metadata);
+    maxLen() {
+      let len = 20;
+      // const countryCallCodes = metadata.country_calling_codes[this.countryCallCode];
+      if (this.countryCallCode === '86') {
+        len = 11;
+      }
+      return len;
+    },
   },
   mounted() {
     const ip = remote.getGlobal('static_ip');
     const geo = geoip.lookup(ip);
     if (geo && geo.country && getCountryCallingCode(geo.country)) {
-      this.countryCallCode = `+${getCountryCallingCode(geo.country)}`;
+      this.countryCallCode = getCountryCallingCode(geo.country);
     }
   },
   methods: {
     validMobile() {
-      const countryCallCode = this.countryCallCodeString.replace(/\D/g, '');
-      const countryCallCodes = metadata.country_calling_codes[countryCallCode];
+      const countryCallCodes = metadata.country_calling_codes[this.countryCallCode];
       if (!countryCallCodes || countryCallCodes.length === 0) return false;
       let pass = false;
       for (let i = 0; i < countryCallCodes.length; i += 1) {
         const phoneNumber = parsePhoneNumberFromString(this.mobile, countryCallCodes[i]);
+        if (phoneNumber) {
+          log.debug('sms', phoneNumber);
+          log.debug('sms-0', phoneNumber.isValid());
+          log.debug('sms-1', phoneNumber.isPossible());
+        }
         if (phoneNumber && phoneNumber.isValid()) {
           pass = true;
           break;
         }
       }
-      log.debug('valid', pass);
       return pass;
     },
     validCode() {
@@ -141,6 +163,30 @@ export default Vue.extend({
         window.close();
       }
     },
+    keydown(e: KeyboardEvent) { // eslint-disable-line
+      const browserWindow = remote.BrowserWindow;
+      const focusWindow = browserWindow.getFocusedWindow();
+      const checkCmdOrCtrl = (process.platform === 'darwin' && e.metaKey) || (process.platform !== 'darwin' && e.ctrlKey);
+      if (e && e.keyCode === 65 && checkCmdOrCtrl && focusWindow) { // c+a
+        focusWindow.webContents.selectAll();
+        e.preventDefault();
+      } else if (e && e.keyCode === 67 && checkCmdOrCtrl && focusWindow) { // c+c
+        focusWindow.webContents.copy();
+        e.preventDefault();
+      } else if (e && e.keyCode === 86 && checkCmdOrCtrl && focusWindow) { // c+v
+        focusWindow.webContents.paste();
+        e.preventDefault();
+      } else if (e && e.keyCode === 88 && checkCmdOrCtrl && focusWindow) { // c+x
+        focusWindow.webContents.cut();
+        e.preventDefault();
+      } else if (e && e.keyCode === 90 && checkCmdOrCtrl && focusWindow) { // c+z
+        focusWindow.webContents.undo();
+        e.preventDefault();
+      } else if (e && e.keyCode === 90 && checkCmdOrCtrl && e.shiftKey && focusWindow) { // c+s+z
+        focusWindow.webContents.redo();
+        e.preventDefault();
+      }
+    },
   },
 });
 </script>
@@ -163,6 +209,7 @@ input, button {
     cursor: default;
   }
 }
+
 input {
   &::placeholder {
     color: rgba(255, 255, 255, 0.3);
@@ -170,6 +217,13 @@ input {
   &:focus {
     border-color: #ffffff;
   }
+}
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+}
+input[type="number"]{
+  -moz-appearance: textfield;
 }
 button {
   line-height: 14px;
@@ -200,6 +254,20 @@ button {
   width: 100%;
   display: flex;
   margin-bottom: 12px;
+  position: relative;
+  &.line {
+    &::before {
+    color: rgba(255,255,255,0.8);
+    }
+  }
+  &::before {
+    content: "+";
+    position: absolute;
+    left: 16px;
+    top: 10.5px;
+    color: rgba(255,255,255,0.3);
+    font-size: 14px;
+  }
   &:focus-within input {
     border-color: #ffffff;
   }
@@ -211,6 +279,7 @@ button {
     width: 90px;
     border-radius: 2px 0px 0px 2px;
     border-right: none;
+    padding-left: 26px;
   }
 }
 .code-box {
@@ -218,6 +287,7 @@ button {
   display: flex;
   margin-bottom: 12px;
   justify-content: space-between;
+  flex-direction: row-reverse;
   input {
     width: 190px;
   }
