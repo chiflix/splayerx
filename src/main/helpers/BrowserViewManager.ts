@@ -169,6 +169,16 @@ export class BrowserViewManager implements IBrowserViewManager {
       canForward: false,
       page: list[currentIndex - 1],
     };
+    if (mainBrowser.page.view && mainBrowser.page.view.isDestroyed()) {
+      mainBrowser.page.view = new BrowserView({
+        webPreferences: {
+          preload: `${require('path').resolve(__static, 'pip/preload.js')}`,
+          nativeWindowOpen: true,
+          // disableHtmlFullscreenWindowResize: true, // Electron 6 required
+        },
+      });
+      mainBrowser.page.view.webContents.loadURL(mainBrowser.page.url);
+    }
     this.currentPip = {
       pipIndex: currentIndex,
       pipChannel: this.currentChannel,
