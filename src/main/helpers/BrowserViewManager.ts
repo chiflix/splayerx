@@ -54,6 +54,7 @@ export class BrowserViewManager implements IBrowserViewManager {
       ? this.historyByChannel[channel].list[index].url : args.url;
     if (this.historyByChannel[channel].list.length) {
       this.historyByChannel[channel].list[index].url = args.url;
+      this.historyByChannel[channel].list[index].view.webContents.setAudioMuted(false);
       this.historyByChannel[channel].list[index].view.webContents.removeAllListeners('media-started-playing');
       if (args.isNewWindow) {
         this.historyByChannel[channel].list[index].view.webContents.loadURL(args.url);
@@ -148,6 +149,7 @@ export class BrowserViewManager implements IBrowserViewManager {
     }
     this.currentChannel = channel;
     this.historyByChannel[channel].lastUpdateTime = Date.now();
+    page.view.webContents.setAudioMuted(false);
     page.view.webContents.removeAllListeners('media-started-playing');
     return {
       canBack: this.historyByChannel[channel].currentIndex > 0,
@@ -175,6 +177,7 @@ export class BrowserViewManager implements IBrowserViewManager {
     this.historyByChannel[this.currentChannel].list.splice(currentIndex, 1);
     this.historyByChannel[this.currentChannel].lastUpdateTime = Date.now();
     this.historyByChannel[this.currentChannel].currentIndex = currentIndex - 1;
+    mainBrowser.page.view.webContents.setAudioMuted(false);
     mainBrowser.page.view.webContents.removeAllListeners('media-started-playing');
     return { pipBrowser, mainBrowser };
   }
@@ -239,6 +242,7 @@ export class BrowserViewManager implements IBrowserViewManager {
       }
     }
     currentView.webContents.addListener('media-started-playing', () => {
+      currentView.webContents.setAudioMuted(true);
       if (pausedChannel.includes('bilibili')) {
         let type = '';
         currentView.webContents
@@ -298,6 +302,7 @@ export class BrowserViewManager implements IBrowserViewManager {
       });
       result.page.view.webContents.loadURL(result.page.url);
     }
+    result.page.view.webContents.setAudioMuted(false);
     result.page.view.webContents.removeAllListeners('media-started-playing');
     return result;
   }

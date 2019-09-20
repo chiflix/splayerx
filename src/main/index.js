@@ -546,25 +546,27 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('go-to-offset', (evt, val) => {
     if (!browserViewManager) return;
     const newBrowser = val === 1 ? browserViewManager.forward() : browserViewManager.back();
-    const id = mainWindow.getBrowserViews()[0].id;
-    mainWindow.addBrowserView(newBrowser.page.view);
-    setTimeout(() => {
-      mainWindow.removeBrowserView(BrowserView.fromId(id));
-      mainWindow.send('update-browser-state', {
-        url: newBrowser.page.url,
-        canGoBack: newBrowser.canBack,
-        canGoForward: newBrowser.canForward,
+    if (newBrowser.page) {
+      const id = mainWindow.getBrowserViews()[0].id;
+      mainWindow.addBrowserView(newBrowser.page.view);
+      setTimeout(() => {
+        mainWindow.removeBrowserView(BrowserView.fromId(id));
+        mainWindow.send('update-browser-state', {
+          url: newBrowser.page.url,
+          canGoBack: newBrowser.canBack,
+          canGoForward: newBrowser.canForward,
+        });
+      }, 150);
+      newBrowser.page.view.setBounds({
+        x: sidebar ? 76 : 0,
+        y: 40,
+        width: sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
+        height: mainWindow.getSize()[1] - 40,
       });
-    }, 150);
-    newBrowser.page.view.setBounds({
-      x: sidebar ? 76 : 0,
-      y: 40,
-      width: sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
-      height: mainWindow.getSize()[1] - 40,
-    });
-    newBrowser.page.view.setAutoResize({
-      width: true, height: true,
-    });
+      newBrowser.page.view.setAutoResize({
+        width: true, height: true,
+      });
+    }
   });
   ipcMain.on('change-channel', (evt, args) => {
     if (!browserViewManager) browserViewManager = new BrowserViewManager();
