@@ -199,11 +199,15 @@ export class BrowserViewManager implements IBrowserViewManager {
       pipChannel: '',
       pipPage: null,
     };
+    const page = this.historyByChannel[this.currentChannel]
+      .list[this.historyByChannel[this.currentChannel].currentIndex];
+    page.view.setBounds({
+      x: 76, y: 0, width: 0, height: 0,
+    });
     return {
       canBack: this.historyByChannel[this.currentChannel].currentIndex > 0,
       canForward: false,
-      page: this.historyByChannel[this.currentChannel]
-        .list[this.historyByChannel[this.currentChannel].currentIndex],
+      page,
     };
   }
 
@@ -235,19 +239,17 @@ export class BrowserViewManager implements IBrowserViewManager {
       }
     }
     currentView.webContents.addListener('media-started-playing', () => {
-      setTimeout(() => {
-        if (pausedChannel.includes('bilibili')) {
-          let type = '';
-          currentView.webContents
-            .executeJavaScript(InjectJSManager.bilibiliFindType())
-            .then((r: string) => {
-              type = r;
-              currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('bilibili', type));
-            });
-        } else {
-          currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('normal'));
-        }
-      }, 50);
+      if (pausedChannel.includes('bilibili')) {
+        let type = '';
+        currentView.webContents
+          .executeJavaScript(InjectJSManager.bilibiliFindType())
+          .then((r: string) => {
+            type = r;
+            currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('bilibili', type));
+          });
+      } else {
+        currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('normal'));
+      }
     });
   }
 

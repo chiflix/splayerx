@@ -1,14 +1,14 @@
 export function bilibiliVideoPause(type: string) {
   if (['video', 'bangumi'].includes(type)) {
-    return 'document.querySelector(".bilibili-player-video-btn").click()';
+    return 'document.querySelector("video").pause();';
   }
   if (type === 'videoStreaming') {
-    return 'document.querySelector(".bilibili-live-player-video-controller-btn-item").children[0].click()';
+    return 'document.querySelector("video").pause();var timer = setInterval(() => { var pause = document.querySelector(".bilibili-live-player-video-controller-btn-item").children[0]; if (pause) { clearInterval(timer);pause.click(); } }, 100);';
   }
   if (type === 'iframeStreaming') {
-    return 'document.querySelector("iframe").contentDocument.querySelector(".bilibili-live-player-video-controller-btn-item").children[0].click()';
+    return 'document.querySelector("video").pause();var timer = setInterval(() => { var pause = document.querySelector("iframe").contentDocument.querySelector(".bilibili-live-player-video-controller-btn-item").children[0]; if (pause) { clearInterval(timer);pause.click(); } }, 100);';
   }
-  return 'document.querySelector(".bilibili-live-player-video-controller-btn-item").children[0].click()';
+  return 'document.querySelector("video").pause();var timer = setInterval(() => { var pause = document.querySelector(".bilibili-live-player-video-controller-btn-item").children[0]; if (pause) { clearInterval(timer);pause.click(); } }, 100);';
 }
 
 export default class Bilibili {
