@@ -9,32 +9,33 @@
       <input
         @keydown.stop="keydown"
         v-model="countryCallCode"
-        type="tel"
-        maxlength="4"
+        @input="countryCallCodeMaxLen"
+        type="number"
       >
       <input
         v-model="mobile"
         @keydown.stop="keydown"
         :placeholder="$t('loginModal.placeholder.mobile')"
-        :maxlength="maxLen"
-        type="tel"
+        @input="mobileMaxLen"
+        type="number"
       >
     </div>
     <div class="code-box">
-      <button
-        @click="getCode"
-        :disabled="isValidMobile || count > 0"
-      >
-        {{ count > 0 ? countString(count) : $t('loginModal.sendCode') }}
-      </button>
       <input
+        ref="code"
         @keydown.stop="keydown"
         :disabled="isValidMobile"
         v-model="code"
         :placeholder="$t('loginModal.placeholder.code')"
-        type="tel"
-        maxlength="6"
+        @input="codeMaxLen"
+        type="number"
       >
+      <div
+        :class="`button ${isValidMobile || count > 0 ? 'disabled' : ''}`"
+        @click="getCode"
+      >
+        {{ count > 0 ? countString(count) : $t('loginModal.sendCode') }}
+      </div>
     </div>
     <button
       :disabled="isAllValid || isLogin"
@@ -54,17 +55,9 @@ import geoip from 'geoip-lite';
 // @ts-ignore
 import metadata from 'libphonenumber-js/metadata.mobile.json';
 import { remote, ipcRenderer } from 'electron';
-import { parsePhoneNumberFromString as p, getCountryCallingCode } from 'libphonenumber-js';
+import { parsePhoneNumberFromString, getCountryCallingCode } from 'libphonenumber-js/mobile';
 // import { AxiosResponse, AxiosError } from 'axios';
 import { log } from '@/libs/Log';
-
-function call(func: Function, s: string, t: string) {
-  const args = [s, t];
-  args.push(metadata);
-  return func.apply(this, args);
-}
-
-const parsePhoneNumberFromString = (s: string, t: string) => call(p, s, t);
 
 export default Vue.extend({
   name: 'SMS',
@@ -103,6 +96,21 @@ export default Vue.extend({
     }
   },
   methods: {
+    countryCallCodeMaxLen() {
+      if (this.countryCallCode.length > 4) {
+        this.countryCallCode = this.countryCallCode.slice(0, 4);
+      }
+    },
+    mobileMaxLen() {
+      if (this.mobile.length > this.maxLen) {
+        this.mobile = this.mobile.slice(0, this.maxLen);
+      }
+    },
+    codeMaxLen() {
+      if (this.code.length > 6) {
+        this.code = this.code.slice(0, 6);
+      }
+    },
     validMobile() {
       const countryCallCodes = metadata.country_calling_codes[this.countryCallCode];
       if (!countryCallCodes || countryCallCodes.length === 0) return false;
@@ -129,6 +137,9 @@ export default Vue.extend({
       if (this.validMobile(this.mobile) && this.count === 0) {
         this.count = 60;
         this.countDown();
+        if (this.$refs.code) {
+          this.$refs.code.focus();
+        }
         // this.axios.post('/user', {
         //   firstName: 'Fred',
         //   lastName: 'Flintstone',
@@ -191,7 +202,7 @@ export default Vue.extend({
 });
 </script>
 <style lang="scss" scoped>
-input, button {
+input, button, .button {
   border: none;
   outline: none;
   box-sizing: border-box;
@@ -204,7 +215,7 @@ input, button {
   letter-spacing: 0;
   padding: 0 16px;
   background: rgba(94,93,102,0.25);
-  &:disabled {
+  &:disabled, &.disabled {
     opacity: 0.3;
     cursor: default;
   }
@@ -225,8 +236,8 @@ input::-webkit-inner-spin-button {
 input[type="number"]{
   -moz-appearance: textfield;
 }
-button {
-  line-height: 14px;
+button, .button {
+  // line-height: 14px;
   cursor: pointer;
 }
 
@@ -287,12 +298,12 @@ button {
   display: flex;
   margin-bottom: 12px;
   justify-content: space-between;
-  flex-direction: row-reverse;
   input {
     width: 190px;
   }
-  button {
+  .button {
     width: 110px;
+    text-align: center;
   }
 }
 .submit {
