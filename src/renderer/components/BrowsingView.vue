@@ -272,18 +272,10 @@ export default {
           this.progress = 0;
           if (this.currentMainBrowserView()) {
             const loadUrl = this.currentMainBrowserView().webContents.getURL();
-            const hostname = urlParseLax(loadUrl).hostname;
-            let channel = hostname.slice(
-              hostname.indexOf('.') + 1,
-              hostname.length,
-            );
-            if (loadUrl.includes('youtube')) {
-              channel = 'youtube.com';
-            }
             this.currentMainBrowserView().webContents.executeJavaScript(
               InjectJSManager.calcVideoNum(),
               (r: number) => {
-                this.webInfo.hasVideo = channel === 'youtube.com' && !getVideoId(loadUrl).id
+                this.webInfo.hasVideo = this.currentChannel() === 'youtube.com' && !getVideoId(loadUrl).id
                   ? false
                   : !!r;
               },
@@ -404,20 +396,12 @@ export default {
         this.updateCanGoBack(this.webInfo.canGoBack);
         this.updateCanGoForward(this.webInfo.canGoForward);
         const loadUrl = this.currentMainBrowserView().webContents.getURL();
-        const hostname = urlParseLax(loadUrl).hostname;
-        let channel = hostname.slice(
-          hostname.indexOf('.') + 1,
-          hostname.length,
-        );
-        if (loadUrl.includes('youtube')) {
-          channel = 'youtube.com';
-        }
         this.startLoading = false;
         if (!this.currentMainBrowserView().webContents.isLoading()) {
           this.currentMainBrowserView().webContents.executeJavaScript(
             InjectJSManager.calcVideoNum(),
             (r: number) => {
-              this.webInfo.hasVideo = channel === 'youtube.com' && !getVideoId(loadUrl).id
+              this.webInfo.hasVideo = this.currentChannel() === 'youtube.com' && !getVideoId(loadUrl).id
                 ? false
                 : !!r;
             },
@@ -492,15 +476,10 @@ export default {
       this.updateCanGoForward(this.webInfo.canGoForward);
       this.updateReload(true);
       const loadUrl = this.currentMainBrowserView().webContents.getURL();
-      const hostname = urlParseLax(loadUrl).hostname;
-      let channel = hostname.slice(hostname.indexOf('.') + 1, hostname.length);
-      if (loadUrl.includes('youtube')) {
-        channel = 'youtube.com';
-      }
       if (this.currentMainBrowserView()) {
         this.currentMainBrowserView().webContents
           .executeJavaScript(InjectJSManager.calcVideoNum(), (r: number) => {
-            this.webInfo.hasVideo = channel === 'youtube.com' && !getVideoId(loadUrl).id ? false : !!r;
+            this.webInfo.hasVideo = this.currentChannel() === 'youtube.com' && !getVideoId(loadUrl).id ? false : !!r;
           });
       }
     },
@@ -844,6 +823,20 @@ export default {
     currentMainBrowserView() {
       return this.$electron.remote.getCurrentWindow().getBrowserViews()[0];
     },
+    currentChannel() {
+      const loadUrl = this.currentMainBrowserView().webContents.getURL();
+      const hostname = urlParseLax(loadUrl).hostname;
+      let channel = '';
+      if (loadUrl.includes('youtube')) {
+        channel = 'youtube.com';
+      } else {
+        channel = hostname.slice(
+          hostname.indexOf('.') + 1,
+          hostname.length,
+        );
+      }
+      return channel;
+    },
     handleWindowChangeEnterPip() {
       if (this.isFullScreen) {
         this.hideMainWindow = this.isGlobal;
@@ -917,6 +910,7 @@ export default {
           undefined,
           [rect.x, rect.y, rect.width, rect.height],
         );
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [0]);
       } else {
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', this.browsingSize);
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', this.browsingPos);
