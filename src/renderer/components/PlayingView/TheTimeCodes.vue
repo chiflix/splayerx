@@ -11,12 +11,14 @@
         ref="timeContent"
         class="timeContent"
       />
-      <span
-        v-if="showFullTimeCode"
-        class="timeDuration"
-      >
-        / {{ formatedDuration }}
-      </span>
+      <transition name="fade-100">
+        <span
+          v-if="showFullTimeCode"
+          class="timeDuration"
+        >
+          / {{ formatedDuration }}
+        </span>
+      </transition>
     </div>
     <Labels
       :rate="rate"
