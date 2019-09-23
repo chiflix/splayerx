@@ -107,9 +107,6 @@ screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
     .timeDuration {
       font-size: 13px;
     }
-    .splitSign {
-      font-size: 13px;
-    }
   }
   .rate {
     margin: 4px 1px auto 7px;
@@ -131,8 +128,6 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480p
       font-size: 13px;
       line-height: 10px;
     }
-     .splitSign {
-       font-size: 14px;
      }
    }
   .rate {
@@ -155,9 +150,6 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080
       font-size: 17px;
       line-height: 13px;
     }
-    .splitSign {
-      font-size: 18px;
-    }
   }
   .rate {
     margin: auto 3px 0 11px;
@@ -178,9 +170,6 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     .timeDuration {
       font-size: 25px;
       line-height: 25px;
-    }
-    .splitSign {
-      font-size: 26px;
     }
   }
   .rate {
@@ -222,11 +211,6 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
       display: inline-block;
     }
   }
-
-  .splitSign {
-    color: rgba(255, 255, 255, 0.5);
-  }
-
 }
 .timing:hover {
   cursor: pointer;
