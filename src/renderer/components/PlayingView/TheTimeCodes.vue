@@ -94,15 +94,15 @@ screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
     height: 18px;
     .timeContent {
       font-size: 18px;
-      line-height: 15px;
+      line-height: 18px;
     }
     .timeDuration {
       font-size: 13px;
-      line-height: 10px;
+      line-height: 13px;
     }
   }
   .rate {
-    margin: 4px 1px auto 7px;
+    margin-left: 7px;
   }
 }
 @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
@@ -115,15 +115,15 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480p
     height: 18px;
     .timeContent {
       font-size: 18px;
-      line-height: 15px;
+      line-height: 18px;
     }
     .timeDuration {
       font-size: 13px;
-      line-height: 10px;
+      line-height: 13px;
     }
   }
   .rate {
-    margin: auto 2px 0 9px;
+    margin-left: 9px;
   }
 }
 @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
@@ -133,18 +133,18 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080
     left: 33px;
   }
   .timing {
-    height: 18px;
+    height: 23px;
     .timeContent {
       font-size: 23px;
-      line-height: 18px;
+      line-height: 23px;
     }
     .timeDuration {
       font-size: 17px;
-      line-height: 13px;
+      line-height: 17px;
     }
   }
   .rate {
-    margin: auto 3px 0 11px;
+    margin-left: 11px;
   }
 }
 @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
@@ -154,10 +154,10 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     left: 47px;
   }
   .timing {
-    height: 36px;
+    height: 35px;
     .timeContent {
       font-size: 35px;
-      line-height: 36px;
+      line-height: 35px;
     }
     .timeDuration {
       font-size: 25px;
@@ -165,7 +165,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     }
   }
   .rate {
-    margin: 9px 4px auto 13px;
+    margin-left: 13px;
   }
 }
 .cont {
@@ -174,6 +174,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   height: auto;
   display: flex;
   flex-direction: row;
+  align-items: flex-end;
   z-index: 5;
 }
 .timing {
