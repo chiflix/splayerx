@@ -105,7 +105,10 @@ export default {
     });
     this.menuService = new MenuService();
     electron.remote.getCurrentWindow().addListener('enter-html-full-screen', () => {
-      electron.ipcRenderer.send('mouseup', 'full');
+      electron.ipcRenderer.send('update-full-state', true);
+    });
+    electron.remote.getCurrentWindow().addListener('leave-html-full-screen', () => {
+      electron.ipcRenderer.send('update-full-state', false);
     });
     window.addEventListener('resize', throttle(() => {
       const size = electron.remote.getCurrentWindow().getSize();

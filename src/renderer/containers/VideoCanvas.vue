@@ -11,7 +11,7 @@
         :key="videoId"
         :needtimeupdate="true"
         :last-audio-track-id="lastAudioTrackId"
-        :events="['loadedmetadata', 'audiotrack']"
+        :events="['loadedmetadata', 'audiotrack', 'playing']"
         :styles="{objectFit: 'contain', width: 'calc(100% - 0.1px)', height: '100%'}"
         :loop="loop"
         :crossOrigin="'anonymous'"
@@ -23,6 +23,7 @@
         :current-time="seekTime"
         :current-audio-track-id="currentAudioTrackId.toString()"
         @loadedmetadata="onMetaLoaded"
+        @playing="switchingLock = false"
         @audiotrack="onAudioTrack"
       />
       <!-- calc(100% - 0.1px) fix for mac book pro 15 full screen after
@@ -81,7 +82,7 @@ export default {
     ...mapGetters([
       'videoId', 'nextVideoId', 'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId', 'enabledSecondarySub', 'lastChosenSize', 'subToTop',
       'winSize', 'winPos', 'winAngle', 'isFullScreen', 'winWidth', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo', 'loop', 'playinglistRate', 'isFolderList', 'playingList', 'playingIndex', 'playListId', 'items',
-      'previousVideo', 'previousVideoId', 'smartMode', 'isTranslating', 'nsfwProcessDone',
+      'previousVideo', 'previousVideoId', 'smartMode', 'incognitoMode', 'isTranslating', 'nsfwProcessDone',
     ]),
     ...mapGetters({
       videoWidth: 'intrinsicWidth',
@@ -94,6 +95,16 @@ export default {
       this.changeWindowRotate(val);
     },
     async playListId(val: number, oldVal: number) {
+      if (this.incognitoMode && oldVal) {
+        const playlistItem = await playInfoStorageService.getPlaylistRecord(oldVal);
+        const mediaItem = await playInfoStorageService
+          .getMediaItem(playlistItem.items[playlistItem.playedIndex]);
+
+        if (mediaItem.lastPlayedTime) return;
+
+        await playInfoStorageService.deleteRecentPlayedBy(oldVal);
+        return;
+      }
       if (oldVal && !this.isFolderList) {
         const screenshot: ShortCut = await this.generateScreenshot();
         if (!(await this.handleNSFW(screenshot.shortCut, oldVal))) {
@@ -102,6 +113,7 @@ export default {
       }
     },
     async videoId(val: number, oldVal: number) {
+      if (this.incognitoMode) return;
       const screenshot: ShortCut = await this.generateScreenshot();
       await this.saveScreenshot(oldVal, screenshot);
     },
@@ -170,7 +182,7 @@ export default {
     });
     this.$bus.$on('toggle-playback', debounce(() => {
       this[this.paused ? 'play' : 'pause']();
-      this.$ga.event('app', 'toggle-playback');
+      // this.$ga.event('app', 'toggle-playback');
     }, 50, { leading: true }));
     this.$bus.$on('next-video', () => {
       if (this.switchingLock) return;
@@ -237,7 +249,6 @@ export default {
       discardTranslate: atActions.AUDIO_TRANSLATE_DISCARD,
     }),
     async onMetaLoaded(event: Event) { // eslint-disable-line complexity
-      this.switchingLock = false;
       const target = event.target as HTMLVideoElement;
       this.videoElement = target;
       this.videoConfigInitialize({
@@ -387,8 +398,20 @@ export default {
     },
     async handleLeaveVideo(videoId: number) {
       const playListId = this.playListId;
+      // incognito mode
+      if (this.incognitoMode) {
+        const playlistItem = await playInfoStorageService.getPlaylistRecord(playListId);
+        const mediaItem = await playInfoStorageService
+          .getMediaItem(playlistItem.items[playlistItem.playedIndex]);
+
+        if (mediaItem.lastPlayedTime) return;
+
+        await playInfoStorageService.deleteRecentPlayedBy(playListId);
+        return;
+      }
+
       const screenshot: ShortCut = await this.generateScreenshot();
-      if (await this.handleNSFW(screenshot.shortCut, playListId)) return null;
+      if (await this.handleNSFW(screenshot.shortCut, playListId)) return;
 
       let savePromise = this.saveScreenshot(videoId, screenshot)
         .then(() => this.updatePlaylist(playListId));
@@ -397,9 +420,9 @@ export default {
           await playInfoStorageService.deleteRecentPlayedBy(playListId);
         });
       }
-      return savePromise
+      await (savePromise
         .then(this.saveSubtitleStyle)
-        .then(this.savePlaybackStates);
+        .then(this.savePlaybackStates));
     },
     beforeUnloadHandler(e: BeforeUnloadEvent) {
       // 如果当前有翻译任务进行，而不是再后台进行

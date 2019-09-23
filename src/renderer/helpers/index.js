@@ -22,6 +22,7 @@ import {
 import { addBubble } from './notificationControl';
 
 import { ipcRenderer, remote } from 'electron'; // eslint-disable-line
+import sortVideoFile from '@/helpers/sort';
 
 const clock = lolex.createClock();
 
@@ -85,7 +86,7 @@ export default {
         }));
       }
       await Promise.all(tasks);
-      videoFiles.sort();
+      videoFiles.sort(sortVideoFile);
       for (let i = 0; i < videoFiles.length; i += 1) {
         videoFiles[i] = path.join(dirPath, videoFiles[i]);
       }
@@ -265,6 +266,7 @@ export default {
           }
         }
       }
+      videoFiles.sort(sortVideoFile);
       if (videoFiles.length !== 0) {
         // 如果有翻译任务就阻止
         if (this.translateFilter(() => { this.createPlayList(...videoFiles); })) {
@@ -334,7 +336,7 @@ export default {
     async openPlayList(id) {
       const playlist = await this.infoDB.get('recent-played', id);
       if (!playlist) return;
-      await this.infoDB.update('recent-played', { ...playlist, lastOpened: Date.now() }, playlist.id);
+      if (!this.$store.getters.incognitoMode) await this.infoDB.update('recent-played', { ...playlist, lastOpened: Date.now() }, playlist.id);
       if (playlist.items.length > 1) {
         let currentVideo = await this.infoDB.get('media-item', playlist.items[playlist.playedIndex]);
 
@@ -442,7 +444,7 @@ export default {
       let playlist;
       const quickHash = await mediaQuickHash.try(videoFile);
       playlist = await this.infoDB.get('recent-played', 'hpaths', [`${quickHash}-${videoFile}`]);
-      if (quickHash && playlist) {
+      if (quickHash && playlist && !this.$store.getters.incognitoMode) {
         id = playlist.id;
         playlist.lastOpened = Date.now();
         this.infoDB.update('recent-played', playlist, playlist.id);

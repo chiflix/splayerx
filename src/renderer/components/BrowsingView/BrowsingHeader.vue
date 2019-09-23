@@ -3,6 +3,7 @@
     :style="{
       width: isDarwin || (!isDarwin && showSidebar) ? 'calc(100vw - 76px)' : '100vw',
     }"
+    @dblclick="handleDbClick"
     class="header"
   >
     <browsing-control
@@ -25,7 +26,7 @@
     />
     <browsing-title-bar
       v-if="!isDarwin"
-      :show-side-bar="showSidebar"
+      :show-sidebar="showSidebar"
     />
   </div>
 </template>
@@ -95,6 +96,15 @@ export default {
     },
   },
   methods: {
+    handleDbClick(e: Event) {
+      if ((e.target as HTMLElement).tagName !== 'svg') {
+        if (!this.$electron.remote.getCurrentWindow().isMaximized()) {
+          this.$electron.ipcRenderer.send('callMainWindowMethod', 'maximize');
+        } else {
+          this.$electron.ipcRenderer.send('callMainWindowMethod', 'unmaximize');
+        }
+      }
+    },
     closeUrlInput() {
       this.$bus.$emit('open-url-show', false);
     },

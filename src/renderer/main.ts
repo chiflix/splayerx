@@ -4,7 +4,7 @@ import '../shared/sentry';
 
 import path from 'path';
 import fs from 'fs';
-import electron from 'electron';
+import electron, { ipcRenderer } from 'electron';
 import Vue from 'vue';
 import VueI18n from 'vue-i18n';
 import axios from 'axios';
@@ -203,7 +203,7 @@ new Vue({
   watch: {
     isFullScreen(val) {
       this.menuService.updateMenuItemLabel(
-        'window.fullscreen',
+        this.currentRouteName === 'browsing-view' ? 'browsing.window.fullscreen' : 'window.fullscreen',
         val ? 'msg.window.exitFullScreen' : 'msg.window.enterFullScreen',
       );
     },
@@ -830,10 +830,11 @@ new Vue({
         this.$bus.$emit('switch-playlist');
       });
       this.menuService.on('playback.previousVideo', () => {
-        this.$bus.$emit('previous-video');
+        if (!this.singleCycle) this.$bus.$emit('previous-video');
+        else this.$bus.$emit('seek', 0);
       });
       this.menuService.on('playback.nextVideo', () => {
-        this.$bus.$emit('next-video');
+        this.$bus.$emit('seek', Math.ceil(this.duration));
       });
       this.menuService.on('playback.singleCycle', () => {
         if (this.singleCycle) {
@@ -972,6 +973,15 @@ new Vue({
         this.$bus.$emit('invoke-all-widgets');
       });
       this.menuService.on('window.fullscreen', () => {
+        if (this.isFullScreen) {
+          this.$bus.$emit('off-fullscreen');
+          this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
+        } else {
+          this.$bus.$emit('to-fullscreen');
+          this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [true]);
+        }
+      });
+      this.menuService.on('browsing.window.fullscreen', () => {
         if (this.$electron.remote.getCurrentWindow().isFocused()) {
           if (this.isFullScreen) {
             this.$bus.$emit('off-fullscreen');
@@ -1009,6 +1019,7 @@ new Vue({
       });
       this.menuService.on('browsing.window.keepPipFront', () => {
         this.browsingViewTop = !this.browsingViewTop;
+        ipcRenderer.send('browser-window-mask');
       });
       this.menuService.on('browsing.window.pip', () => {
         this.$bus.$emit('toggle-pip', true);

@@ -274,13 +274,9 @@ export default {
     this.createTouchBar();
     window.addEventListener('mousemove', this.globalMoveHandler);
     // Get all data and show
-    if (!this.incognitoMode) {
-      recentPlayService.getRecords().then((results) => {
-        this.landingViewItems = results;
-      });
-    } else {
-      this.infoDB.clearAll();
-    }
+    recentPlayService.getRecords().then((results) => {
+      this.landingViewItems = results;
+    });
     this.$bus.$on('clean-landingViewItems', () => {
       // just for delete thumbnail display
       this.firstIndex = 0;
