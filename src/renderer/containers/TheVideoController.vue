@@ -97,6 +97,7 @@
       :progress-trigger-stopped.sync="progressTriggerStopped"
       :show-all-widgets="showAllWidgets"
       :duration="duration"
+      :show-duration="true"
       :rate="rate"
       :show-cycle-label="!!singleCycle"
       :show-speed-label="showSpeedLabel"

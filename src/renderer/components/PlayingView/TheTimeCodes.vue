@@ -4,15 +4,20 @@
     class="cont"
   >
     <div
+      v-if="hasDuration"
       @mousedown="switchTimeContent"
       class="timing"
     >
       <span
         ref="timeContent"
-        v-if="hasDuration"
-        :class="{ remainTime: isRemainTime }"
         class="timeContent"
       />
+      <span
+        v-if="showDuration"
+        class="timeDuration"
+      >
+        / {{ formatedDuration }}
+      </span>
     </div>
     <Labels
       :rate="rate"
@@ -43,6 +48,7 @@ export default {
       type: Number,
       default: 1,
     },
+    showDuration: Boolean,
     showCycleLabel: Boolean,
     showSpeedLabel: Boolean,
     showAllWidgets: Boolean,
@@ -59,10 +65,9 @@ export default {
     hasDuration() {
       return !Number.isNaN(this.duration);
     },
-  },
-  watch: {
-  },
-  created() {
+    formatedDuration() {
+      return this.timecodeFromSeconds(Math.floor(this.duration));
+    },
   },
   methods: {
     switchTimeContent() {
@@ -79,8 +84,7 @@ export default {
     },
     updateTimeContent(time: number) {
       if (this.$refs.timeContent) {
-        this.$refs.timeContent.textContent = this.timecodeFromSeconds(this.isRemainTime
-          ? Math.floor(this.duration) - Math.floor(time) : Math.floor(time));
+        this.$refs.timeContent.textContent = this.timecodeFromSeconds( Math.floor(time));
       }
     },
   },
@@ -91,13 +95,16 @@ export default {
 @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px),
 screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
   .cont {
-    bottom: 23px;
+    bottom: 18px;
     left: 20px;
   }
   .timing {
-    height: 18px;
-    font-size: 18px;
-    .secondContent {
+    height: 15px;
+    .timeContent {
+      font-size: 18px;
+      line-height: 15px;
+    }
+    .timeDuration {
       font-size: 13px;
     }
     .splitSign {
@@ -111,15 +118,19 @@ screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
 @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
 screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
   .cont {
-    bottom: 27px;
+    bottom: 24px;
     left: 28px;
   }
   .timing {
-     height: 20px;
-     font-size: 18px;
-     .secondContent {
-       font-size: 14px;
-     }
+    height: 15px;
+    .timeContent {
+      font-size: 18px;
+      line-height: 15px;
+    }
+    .timeDuration {
+      font-size: 13px;
+      line-height: 10px;
+    }
      .splitSign {
        font-size: 14px;
      }
@@ -131,14 +142,18 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480p
 @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
 screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
   .cont {
-    bottom: 34px;
+    bottom: 31px;
     left: 33px;
   }
   .timing {
-    height: 24px;
-    font-size: 24px;
-    .secondContent {
-      font-size: 18px;
+    height: 18px;
+    .timeContent {
+      font-size: 23px;
+      line-height: 18px;
+    }
+    .timeDuration {
+      font-size: 17px;
+      line-height: 13px;
     }
     .splitSign {
       font-size: 18px;
@@ -151,14 +166,18 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080
 @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
 screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   .cont {
-    bottom: 44px;
-    left: 51px;
+    bottom: 38px;
+    left: 47px;
   }
   .timing {
     height: 36px;
-    font-size: 36px;
-    .secondContent {
-      font-size: 26px;
+    .timeContent {
+      font-size: 35px;
+      line-height: 36px;
+    }
+    .timeDuration {
+      font-size: 25px;
+      line-height: 25px;
     }
     .splitSign {
       font-size: 26px;
@@ -187,6 +206,12 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     font-weight: 600;
     letter-spacing: 0.9px;
     user-select: none;
+  }
+  .timeDuration {
+    border: 0 solid rgba(0,0,0,0.10);
+    color: rgba(255,255,255,0.50);
+    letter-spacing: 0;
+    font-weight: 600;
   }
 
   .remainTime {
