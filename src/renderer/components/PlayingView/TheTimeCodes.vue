@@ -4,8 +4,7 @@
     class="cont"
   >
     <div
-      v-if="hasDuration"
-      @mousedown="switchTimeContent"
+      @click="onTimeCodeClick"
       class="timing"
     >
       <span
@@ -13,7 +12,7 @@
         class="timeContent"
       />
       <span
-        v-if="showDuration"
+        v-if="showFullTimeCode"
         class="timeDuration"
       >
         / {{ formatedDuration }}
@@ -28,7 +27,6 @@
   </div>
 </template>
 <script lang="ts">
-import { videodata } from '@/store/video';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import Labels from './Labels.vue';
 
@@ -48,11 +46,15 @@ export default {
       type: Number,
       default: 1,
     },
-    showDuration: Boolean,
+    showFullTimeCode: Boolean,
     showCycleLabel: Boolean,
     showSpeedLabel: Boolean,
     showAllWidgets: Boolean,
     progressTriggerStopped: Boolean,
+    onTimeCodeClick: {
+      type: Function,
+      required: true,
+    },
   },
   data() {
     return {
@@ -70,21 +72,9 @@ export default {
     },
   },
   methods: {
-    switchTimeContent() {
-      this.isRemainTime = !this.isRemainTime;
-      if (this.$refs.timeContent) {
-        if (this.isRemainTime) {
-          this.$refs.timeContent.textContent = this.timecodeFromSeconds(
-            Math.floor(this.duration) - Math.floor(videodata.time),
-          );
-        } else {
-          this.$refs.timeContent.textContent = this.timecodeFromSeconds(Math.floor(videodata.time));
-        }
-      }
-    },
     updateTimeContent(time: number) {
       if (this.$refs.timeContent) {
-        this.$refs.timeContent.textContent = this.timecodeFromSeconds( Math.floor(time));
+        this.$refs.timeContent.textContent = this.timecodeFromSeconds(Math.floor(time));
       }
     },
   },
@@ -128,8 +118,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480p
       font-size: 13px;
       line-height: 10px;
     }
-     }
-   }
+  }
   .rate {
     margin: auto 2px 0 9px;
   }
