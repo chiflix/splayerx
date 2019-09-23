@@ -91,13 +91,14 @@ screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
     left: 20px;
   }
   .timing {
-    height: 15px;
+    height: 18px;
     .timeContent {
       font-size: 18px;
       line-height: 15px;
     }
     .timeDuration {
       font-size: 13px;
+      line-height: 10px;
     }
   }
   .rate {
@@ -111,7 +112,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480p
     left: 28px;
   }
   .timing {
-    height: 15px;
+    height: 18px;
     .timeContent {
       font-size: 18px;
       line-height: 15px;
@@ -188,19 +189,11 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     user-select: none;
   }
   .timeDuration {
+    display: inline-block;
     border: 0 solid rgba(0,0,0,0.10);
     color: rgba(255,255,255,0.50);
     letter-spacing: 0;
     font-weight: 600;
-  }
-
-  .remainTime {
-    &::before {
-      content: '-';
-      padding-right: 4px;
-      font-weight: 600;
-      display: inline-block;
-    }
   }
 }
 .timing:hover {
