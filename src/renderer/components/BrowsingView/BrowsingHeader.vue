@@ -3,7 +3,6 @@
     :style="{
       width: isDarwin || (!isDarwin && showSidebar) ? 'calc(100vw - 76px)' : '100vw',
     }"
-    @dblclick="handleDbClick"
     class="header"
   >
     <browsing-control
@@ -19,6 +18,7 @@
       :is-loading="isLoading"
       :close-url-input="closeUrlInput"
       :play-file-with-playing-view="playFileWithPlayingView"
+      @dblclick.native="handleDbClick"
     />
     <browsing-pip-control
       :has-video="webInfo.hasVideo"
