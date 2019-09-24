@@ -20,6 +20,10 @@ export class BrowserViewManager implements IBrowserViewManager {
 
   private currentChannel: string;
 
+  private multiPagesChannel: string[];
+
+  private singlePageChannel: string[];
+
   // 当前画中画BrowserView的info
   private currentPip: {
     pipIndex: number,
@@ -38,6 +42,8 @@ export class BrowserViewManager implements IBrowserViewManager {
       pipPage: null,
     };
     this.history = [];
+    this.multiPagesChannel = ['youtube.com', 'iqiyi.com'];
+    this.singlePageChannel = ['bilibili.com'];
   }
 
   public create(channel: string, args: { url: string, isNewWindow?: boolean }): BrowserViewData {
@@ -158,7 +164,9 @@ export class BrowserViewManager implements IBrowserViewManager {
     newHistory.lastUpdateTime = Date.now();
     page.view.webContents.setAudioMuted(false);
     page.view.webContents.removeAllListeners('media-started-playing');
-    BrowserViewCacheManager.changeCacheUrl(this.currentChannel, channel, page, page);
+    BrowserViewCacheManager.changeCacheUrl(
+      this.currentChannel, channel, page, page, this.multiPagesChannel.includes(channel),
+    );
     this.currentChannel = channel;
     return {
       canBack: newHistory.currentIndex > 0,
@@ -190,17 +198,22 @@ export class BrowserViewManager implements IBrowserViewManager {
       });
       mainBrowser.page.view.webContents.loadURL(mainBrowser.page.url);
     }
+    const deletePages = currentHistory.list.splice(currentIndex, currentHistory.list.length);
+    deletePages.forEach((page: BrowserViewHistoryItem, index: number) => {
+      if (index !== 0) page.view.destroy();
+    });
     this.currentPip = {
       pipIndex: currentIndex,
       pipChannel: this.currentChannel,
-      pipPage: currentHistory.list.splice(currentIndex, 1)[0],
+      pipPage: deletePages[0],
     };
-    currentHistory.list.splice(currentIndex, 1);
     currentHistory.lastUpdateTime = Date.now();
     currentHistory.currentIndex = currentIndex - 1;
     mainBrowser.page.lastUpdateTime = Date.now();
     mainBrowser.page.view.webContents.setAudioMuted(false);
     mainBrowser.page.view.webContents.removeAllListeners('media-started-playing');
+    BrowserViewCacheManager.removeCacheWhenEnterPip(this.currentChannel,
+      mainBrowser.page, this.currentPip.pipPage as BrowserViewHistoryItem, deletePages);
     return { pipBrowser, mainBrowser };
   }
 
@@ -231,6 +244,7 @@ export class BrowserViewManager implements IBrowserViewManager {
     page.view.setBounds({
       x: 76, y: 0, width: 0, height: 0,
     });
+    BrowserViewCacheManager.recoverCacheWhenExitPip(this.currentChannel, page, deleteList);
     return {
       canBack: currentHistory.currentIndex > 0,
       canForward: false,
@@ -335,17 +349,21 @@ export class BrowserViewManager implements IBrowserViewManager {
     result.page.view.webContents.setAudioMuted(false);
     result.page.view.webContents.removeAllListeners('media-started-playing');
     BrowserViewCacheManager.changeCacheUrl(
-      this.currentChannel, this.currentChannel, list[currentIndex], result.page);
+      this.currentChannel,
+      this.currentChannel,
+      list[currentIndex],
+      result.page,
+      this.multiPagesChannel.includes(this.currentChannel),
+    );
     return result;
   }
 
   private addCacheByChannel(channel: string, page: BrowserViewHistoryItem): void {
-    switch (channel) {
-      case 'youtube.com':
-      case 'iqiyi.com':
+    switch (true) {
+      case this.multiPagesChannel.includes(channel):
         BrowserViewCacheManager.addChannelToMulti(channel, page);
         break;
-      case 'bilibili.com':
+      case this.singlePageChannel.includes(channel):
         BrowserViewCacheManager.addChannelToSingle(channel, page);
         break;
       default:
