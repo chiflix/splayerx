@@ -31,7 +31,7 @@ class BrowserViewCacheManager implements IBrowserViewCacheManager {
     this.singlePageHistory = new Map();
     this.multiPageHistory = new Map();
     this.singleMaxNum = 1;
-    this.multiMaxNum = 2;
+    this.multiMaxNum = 1;
   }
 
   public addChannelToSingle(channel: string, info: BrowserViewHistoryItem): void {
@@ -55,7 +55,7 @@ class BrowserViewCacheManager implements IBrowserViewCacheManager {
   }
 
   public addChannelToMulti(channel: string, info: BrowserViewHistoryItem, pageNum?: number): void {
-    pageNum = pageNum || 3; // 默认每个channel最多缓存3个page
+    pageNum = pageNum || 2; // 默认每个channel最多缓存2个page
 
     if (this.singlePageHistory.has(channel)) this.singlePageHistory.delete(channel);
     if (this.multiPageHistory.has(channel)) {
@@ -71,20 +71,19 @@ class BrowserViewCacheManager implements IBrowserViewCacheManager {
     } else if (this.multiPageHistory.size >= this.multiMaxNum) { // 当前允许多页缓存的channel超过最大可缓存的限制
       const key = this.multiPageHistory.keys().next().value;
       const pages = (this.multiPageHistory.get(key) as BrowserMultiCache).pages;
-      // 单页缓存超过上限则清空当前多页缓存所有页面,未超过则转为单页缓存
+      // 单页缓存超过上限，清空最早产生的单页缓存，将当前多页缓存降为单页缓存
       if (this.singlePageHistory.size >= this.singleMaxNum) {
-        pages.forEach((item: BrowserViewHistoryItem) => {
-          item.view.destroy();
-        });
-      } else {
-        pages.forEach((page: BrowserViewHistoryItem, index: number) => {
-          if (index === 0) {
-            this.addChannelToSingle(key, page);
-          } else {
-            page.view.destroy();
-          }
-        });
+        const lastSingleKey = this.singlePageHistory.keys().next().value;
+        (this.singlePageHistory.get(lastSingleKey) as BrowserSingleCache).page.view.destroy();
+        this.singlePageHistory.delete(lastSingleKey);
       }
+      pages.forEach((page: BrowserViewHistoryItem, index: number) => {
+        if (index === 0) {
+          this.addChannelToSingle(key, page);
+        } else {
+          page.view.destroy();
+        }
+      });
       this.multiPageHistory.delete(key);
       this.multiPageHistory.set(channel, {
         lastUpdateTime: Date.now(),
@@ -118,14 +117,16 @@ class BrowserViewCacheManager implements IBrowserViewCacheManager {
       }
     } else {
       let isExist = false;
-      const pages = (this.multiPageHistory.get(newChannel) as BrowserMultiCache).pages;
-      // eslint-disable-next-line array-callback-return
-      pages.map((page: BrowserViewHistoryItem) => {
-        if (page.url === newPage.url) {
-          isExist = true;
-          page.lastUpdateTime = Date.now();
-        }
-      });
+      if (this.multiPageHistory.get(newChannel)) {
+        const pages = (this.multiPageHistory.get(newChannel) as BrowserMultiCache).pages;
+        // eslint-disable-next-line array-callback-return
+        pages.map((page: BrowserViewHistoryItem) => {
+          if (page.url === newPage.url) {
+            isExist = true;
+            page.lastUpdateTime = Date.now();
+          }
+        });
+      }
       if (!isExist) {
         this.addChannelToMulti(newChannel, newPage);
       } else {
