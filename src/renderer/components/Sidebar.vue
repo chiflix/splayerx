@@ -16,8 +16,8 @@
       />
     </div>
     <div class="bottom-icon no-drag">
-      <Icon type="open"/>
-      <Icon type="history"/>
+      <Icon type="open" />
+      <Icon type="history" />
     </div>
   </div>
 </template>
@@ -80,8 +80,8 @@ export default {
       });
       if (val) {
         const selectedChannel = this.channels.find(
-          (channel: { selectedType: string }) => val.includes(channel.selectedType)
-        );  
+          (channel: { selectedType: string }) => val.includes(channel.selectedType),
+        );
         if (selectedChannel) selectedChannel.selected = true;
       }
     },
