@@ -7,25 +7,13 @@
       class="icon-box"
     >
       <div
-        @click="handleSidebarIcon('https://www.bilibili.com/')"
-        :class="{ selected: currentUrl.includes('bilibili') }"
+        :key="url"
+        v-for="({ url, icon, selected }) in channels"
+        @click="handleSidebarIcon(url)"
+        :class="{ selected: selected }"
         class="icon-hover"
       >
-        <Icon type="bilibiliSidebar" />
-      </div>
-      <div
-        @click="handleSidebarIcon('https://www.iqiyi.com/')"
-        :class="{ selected: currentUrl.includes('iqiyi') }"
-        class="icon-hover"
-      >
-        <Icon type="iqiyiSidebar" />
-      </div>
-      <div
-        @click="handleSidebarIcon('https://www.youtube.com/')"
-        :class="{ selected: currentUrl.includes('youtube') }"
-        class="icon-hover"
-      >
-        <Icon type="youtubeSidebar" />
+        <Icon :type="icon" />
       </div>
     </div>
   </div>
@@ -50,6 +38,30 @@ export default {
       default: '',
     },
   },
+  data() {
+    return {
+      channels: [
+        {
+          url: 'https://www.bilibili.com/',
+          icon: 'bilibiliSidebar',
+          selectedType: 'bilibili',
+          selected: false,
+        },
+        {
+          url: 'https://www.iqiyi.com/',
+          icon: 'iqiyiSidebar',
+          selectedType: 'iqiyi',
+          selected: false,
+        },
+        {
+          url: 'https://www.youtube.com/',
+          icon: 'youtubeSidebar',
+          selectedType: 'youtube',
+          selected: false,
+        },
+      ],
+    };
+  },
   computed: {
     ...mapGetters(['pipSize', 'pipPos']),
     isDarwin() {
@@ -58,6 +70,8 @@ export default {
   },
   methods: {
     handleSidebarIcon(url: string) {
+      this.channels.forEach((channel: { selected: boolean }) => channel.selected = false);
+      this.channels.find((channel: { url: string }) => channel.url === url).selected = true;
       if (this.$route.name === 'browsing-view') {
         this.$bus.$emit('sidebar-selected', url);
       } else {
@@ -97,9 +111,6 @@ export default {
       width: 44px;
       height: 44px;
       margin-bottom: 12px;
-    }
-    .icon-hover {
-      -webkit-app-region: no-drag;
     }
     .icon-hover:hover {
       opacity: 1.0;
