@@ -4,15 +4,21 @@
     class="cont"
   >
     <div
-      @mousedown="switchTimeContent"
+      @click="onTimeCodeClick"
       class="timing"
     >
       <span
         ref="timeContent"
-        v-if="hasDuration"
-        :class="{ remainTime: isRemainTime }"
         class="timeContent"
       />
+      <transition name="fade-100">
+        <span
+          v-if="showFullTimeCode"
+          class="timeDuration"
+        >
+          / {{ formatedDuration }}
+        </span>
+      </transition>
     </div>
     <Labels
       :rate="rate"
@@ -23,7 +29,6 @@
   </div>
 </template>
 <script lang="ts">
-import { videodata } from '@/store/video';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import Labels from './Labels.vue';
 
@@ -43,10 +48,15 @@ export default {
       type: Number,
       default: 1,
     },
+    showFullTimeCode: Boolean,
     showCycleLabel: Boolean,
     showSpeedLabel: Boolean,
     showAllWidgets: Boolean,
     progressTriggerStopped: Boolean,
+    onTimeCodeClick: {
+      type: Function,
+      required: true,
+    },
   },
   data() {
     return {
@@ -59,28 +69,14 @@ export default {
     hasDuration() {
       return !Number.isNaN(this.duration);
     },
-  },
-  watch: {
-  },
-  created() {
+    formatedDuration() {
+      return this.timecodeFromSeconds(Math.floor(this.duration));
+    },
   },
   methods: {
-    switchTimeContent() {
-      this.isRemainTime = !this.isRemainTime;
-      if (this.$refs.timeContent) {
-        if (this.isRemainTime) {
-          this.$refs.timeContent.textContent = this.timecodeFromSeconds(
-            Math.floor(this.duration) - Math.floor(videodata.time),
-          );
-        } else {
-          this.$refs.timeContent.textContent = this.timecodeFromSeconds(Math.floor(videodata.time));
-        }
-      }
-    },
     updateTimeContent(time: number) {
       if (this.$refs.timeContent) {
-        this.$refs.timeContent.textContent = this.timecodeFromSeconds(this.isRemainTime
-          ? Math.floor(this.duration) - Math.floor(time) : Math.floor(time));
+        this.$refs.timeContent.textContent = this.timecodeFromSeconds(Math.floor(time));
       }
     },
   },
@@ -91,81 +87,85 @@ export default {
 @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px),
 screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
   .cont {
-    bottom: 23px;
+    bottom: 18px;
     left: 20px;
   }
   .timing {
     height: 18px;
-    font-size: 18px;
-    .secondContent {
-      font-size: 13px;
+    .timeContent {
+      font-size: 18px;
+      line-height: 18px;
     }
-    .splitSign {
+    .timeDuration {
       font-size: 13px;
+      line-height: 13px;
     }
   }
   .rate {
-    margin: 4px 1px auto 7px;
+    margin-left: 7px;
   }
 }
 @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
 screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
   .cont {
-    bottom: 27px;
+    bottom: 24px;
     left: 28px;
   }
   .timing {
-     height: 20px;
-     font-size: 18px;
-     .secondContent {
-       font-size: 14px;
-     }
-     .splitSign {
-       font-size: 14px;
-     }
-   }
+    height: 18px;
+    .timeContent {
+      font-size: 18px;
+      line-height: 18px;
+    }
+    .timeDuration {
+      font-size: 13px;
+      line-height: 13px;
+    }
+  }
   .rate {
-    margin: auto 2px 0 9px;
+    margin-left: 9px;
   }
 }
 @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
 screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
   .cont {
-    bottom: 34px;
+    bottom: 31px;
     left: 33px;
   }
   .timing {
-    height: 24px;
-    font-size: 24px;
-    .secondContent {
-      font-size: 18px;
+    height: 23px;
+    .timeContent {
+      font-size: 23px;
+      line-height: 23px;
     }
-    .splitSign {
-      font-size: 18px;
+    .timeDuration {
+      font-size: 17px;
+      line-height: 17px;
     }
   }
   .rate {
-    margin: auto 3px 0 11px;
+    margin-left: 11px;
   }
 }
 @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
 screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   .cont {
-    bottom: 44px;
-    left: 51px;
+    bottom: 38px;
+    left: 47px;
   }
   .timing {
-    height: 36px;
-    font-size: 36px;
-    .secondContent {
-      font-size: 26px;
+    height: 35px;
+    .timeContent {
+      font-size: 35px;
+      line-height: 35px;
     }
-    .splitSign {
-      font-size: 26px;
+    .timeDuration {
+      font-size: 25px;
+      line-height: 25px;
     }
   }
   .rate {
-    margin: 9px 4px auto 13px;
+    margin-left: 13px;
   }
 }
 .cont {
@@ -174,6 +174,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   height: auto;
   display: flex;
   flex-direction: row;
+  align-items: flex-end;
   z-index: 5;
 }
 .timing {
@@ -188,20 +189,13 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     letter-spacing: 0.9px;
     user-select: none;
   }
-
-  .remainTime {
-    &::before {
-      content: '-';
-      padding-right: 4px;
-      font-weight: 600;
-      display: inline-block;
-    }
+  .timeDuration {
+    display: inline-block;
+    border: 0 solid rgba(0,0,0,0.10);
+    color: rgba(255,255,255,0.50);
+    letter-spacing: 0;
+    font-weight: 600;
   }
-
-  .splitSign {
-    color: rgba(255, 255, 255, 0.5);
-  }
-
 }
 .timing:hover {
   cursor: pointer;

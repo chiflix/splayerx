@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-06-20 18:03:14
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-09-12 11:30:43
+ * @Last Modified time: 2019-09-20 11:20:41
  */
 
 // @ts-ignore
@@ -34,6 +34,8 @@ declare interface AudioTranslateService { // eslint-disable-line
   on(event: 'error', listener: (error: Error) => void): this;
   on(event: 'task', listener: (taskInfo: AITaskInfo) => void): this;
   on(event: 'transcriptInfo', listener: (transcriptInfo: TranscriptInfo) => void): this;
+  on(event: 'skip-audio', listener: () => void): this;
+  on(event: 'grab-audio', listener: () => void): this;
 }
 
 class AudioTranslateService extends EventEmitter {
@@ -128,13 +130,16 @@ class AudioTranslateService extends EventEmitter {
         ...result.taskinfo,
       };
       this.emit('task', this.taskInfo);
+      this.emit('skip-audio');
       this.loopTask(this.taskInfo);
     } else if (result && result.transcriptResult) {
       // get Transcript Info
       // return hash to render
       this.emit('transcriptInfo', result.transcriptResult);
+      this.emit('skip-audio');
       this.clearJob();
     } else if (result && result.error && result.error.code === 9100) {
+      this.emit('grab-audio');
       ipcRenderer.send('grab-audio-continue');
     } else if (result && result.error) {
       // return error to render

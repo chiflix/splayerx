@@ -97,9 +97,11 @@
       :progress-trigger-stopped.sync="progressTriggerStopped"
       :show-all-widgets="showAllWidgets"
       :duration="duration"
+      :show-full-time-code="showFullTimeCode"
       :rate="rate"
       :show-cycle-label="!!singleCycle"
       :show-speed-label="showSpeedLabel"
+      :on-time-code-click="onTimeCodeClick"
       :style="{ marginBottom: preFullScreen ? '10px' : '0' }"
     />
     <the-progress-bar
@@ -232,6 +234,7 @@ export default {
       'isFullScreen', 'isFocused', 'isMinimized',
       'leftMousedown', 'progressKeydown', 'volumeKeydown', 'wheelTriggered', 'volumeWheelTriggered',
       'enabledSecondarySub', 'isTranslateModalVisible', 'translateStatus', 'failBubbleId', 'messageInfo',
+      'showFullTimeCode',
     ]),
     ...inputMapGetters({
       inputWheelDirection: iGT.GET_WHEEL_DIRECTION,
@@ -520,6 +523,9 @@ export default {
       updateHideModalCallback: atActions.AUDIO_TRANSLATE_MODAL_HIDE_CALLBACK,
       updateHideBubbleCallback: atActions.AUDIO_TRANSLATE_BUBBLE_CANCEL_CALLBACK,
     }),
+    onTimeCodeClick() {
+      this.$store.dispatch('showFullTimeCode', !this.showFullTimeCode);
+    },
     createTouchBar() {
       const { TouchBar } = this.$electron.remote;
       const {
