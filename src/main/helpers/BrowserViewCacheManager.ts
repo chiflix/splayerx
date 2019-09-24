@@ -132,7 +132,7 @@ class BrowserViewCacheManager implements IBrowserViewCacheManager {
         (this.multiPageHistory.get(newChannel) as BrowserMultiCache).lastUpdateTime = Date.now();
         (this.multiPageHistory.get(newChannel) as BrowserMultiCache).pages
           .sort((a, b) => b.lastUpdateTime - a.lastUpdateTime);
-        console.log(this.multiPageHistory.get(newChannel));
+        console.log('multi', newChannel, this.multiPageHistory.get(newChannel));
       }
     }
   }
