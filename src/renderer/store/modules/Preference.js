@@ -15,6 +15,7 @@ const state = {
   singleCycle: false,
   reverseScrolling: false,
   subtitleOff: false,
+  showFullTimeCode: false,
 };
 const getters = {
   nsfwProcessDone: state => state.nsfwProcessDone,
@@ -36,6 +37,7 @@ const getters = {
   secondaryLanguage: state => state.secondaryLanguage,
   singleCycle: state => state.singleCycle,
   subtitleOff: state => state.subtitleOff,
+  showFullTimeCode: state => state.showFullTimeCode,
 };
 
 const mutations = {
@@ -75,6 +77,9 @@ const mutations = {
   },
   subtitleOff(state, payload) {
     state.subtitleOff = !!payload;
+  },
+  showFullTimeCode(state, payload) {
+    state.showFullTimeCode = payload;
   },
 };
 const actions = {
@@ -144,6 +149,10 @@ const actions = {
   },
   setSubtitleOff({ commit, state }, payload) {
     commit('subtitleOff', payload);
+    return asyncStorage.set('preferences', state);
+  },
+  showFullTimeCode({ commit, state }, payload) {
+    commit('showFullTimeCode', payload);
     return asyncStorage.set('preferences', state);
   },
 };
