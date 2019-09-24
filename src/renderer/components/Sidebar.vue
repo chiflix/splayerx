@@ -6,27 +6,26 @@
       :class="{ 'win': !isDarwin }"
       class="icon-box"
     >
-      <div
+      <SidebarIcon
         :key="url"
         v-for="({ url, icon, selected }) in channels"
-        @click="handleSidebarIcon(url)"
-        :class="{ selected: selected }"
-        class="icon-hover"
-      >
-        <Icon :type="icon" />
-      </div>
+        :url="url"
+        :icon="icon"
+        :selected="selected"
+        :select-sidebar-icon="handleSidebarIcon"
+      />
     </div>
   </div>
 </template>
 <script lang="ts">
 import { mapGetters } from 'vuex';
-import Icon from '@/components/BaseIconContainer.vue';
 import asyncStorage from '@/helpers/asyncStorage';
+import SidebarIcon from '@/components/SidebarIcon.vue';
 
 export default {
   name: 'Sidebar',
   components: {
-    Icon,
+    SidebarIcon,
   },
   props: {
     showSidebar: {
@@ -68,10 +67,21 @@ export default {
       return process.platform === 'darwin';
     },
   },
+  watch: {
+    currentUrl(val: string) {
+      this.channels.forEach((channel: { selected: boolean }) => {
+        channel.selected = false;
+      });
+      if (val) {
+        const selectedChannel = this.channels.find(
+          (channel: { selectedType: string }) => val.includes(channel.selectedType)
+        );  
+        if (selectedChannel) selectedChannel.selected = true;
+      }
+    },
+  },
   methods: {
     handleSidebarIcon(url: string) {
-      this.channels.forEach((channel: { selected: boolean }) => channel.selected = false);
-      this.channels.find((channel: { url: string }) => channel.url === url).selected = true;
       if (this.$route.name === 'browsing-view') {
         this.$bus.$emit('sidebar-selected', url);
       } else {
@@ -105,28 +115,6 @@ export default {
     margin-right: 16px;
     display: flex;
     flex-direction: column;
-    div {
-      transition: opacity 100ms ease-in;
-      opacity: 0.7;
-      width: 44px;
-      height: 44px;
-      margin-bottom: 12px;
-    }
-    .icon-hover:hover {
-      opacity: 1.0;
-    }
-    .selected {
-      opacity: 1.0;
-      &::before {
-        content: '';
-        position: absolute;
-        width: 44px;
-        height: 44px;
-        border: 2px solid #E0E0EA;
-        border-radius: 100%;
-        box-sizing: border-box;
-      }
-    }
   }
   .win {
     margin-top: 16px;
