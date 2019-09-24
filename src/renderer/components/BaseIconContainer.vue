@@ -621,6 +621,10 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   width: 20px;
   height: 20px;
 }
+.history, .open {
+  width: 30px;
+  height: 30px;
+}
 .pip, .pop, .pipDisabled, .popDisabled {
   width: 30px;
   height: 30px;

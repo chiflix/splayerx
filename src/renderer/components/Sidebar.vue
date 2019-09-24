@@ -4,7 +4,7 @@
   >
     <div
       :class="{ 'win': !isDarwin }"
-      class="icon-box"
+      class="icon-box no-drag"
     >
       <SidebarIcon
         :key="url"
@@ -15,16 +15,22 @@
         :select-sidebar-icon="handleSidebarIcon"
       />
     </div>
+    <div class="bottom-icon no-drag">
+      <Icon type="open"/>
+      <Icon type="history"/>
+    </div>
   </div>
 </template>
 <script lang="ts">
 import { mapGetters } from 'vuex';
 import asyncStorage from '@/helpers/asyncStorage';
+import Icon from '@/components/BaseIconContainer.vue';
 import SidebarIcon from '@/components/SidebarIcon.vue';
 
 export default {
   name: 'Sidebar',
   components: {
+    Icon,
     SidebarIcon,
   },
   props: {
@@ -100,6 +106,10 @@ export default {
 <style lang="scss" scoped>
 .side-bar {
   position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
   background-color: #39383F;
   z-index: 0;
   left: 0;
@@ -111,10 +121,13 @@ export default {
   .icon-box {
     width: 44px;
     margin-top: 42px;
-    margin-left: 16px;
-    margin-right: 16px;
     display: flex;
     flex-direction: column;
+  }
+  .bottom-icon {
+    display:flex;
+    flex-direction: column;
+    margin-bottom: 18px;
   }
   .win {
     margin-top: 16px;
