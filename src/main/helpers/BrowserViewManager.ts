@@ -42,8 +42,8 @@ export class BrowserViewManager implements IBrowserViewManager {
       pipPage: null,
     };
     this.history = [];
-    this.multiPagesChannel = ['youtube.com', 'iqiyi.com'];
-    this.singlePageChannel = ['bilibili.com'];
+    this.multiPagesChannel = ['youtube.com', 'iqiyi.com', 'bilibili.com'];
+    this.singlePageChannel = [];
   }
 
   public create(channel: string, args: { url: string, isNewWindow?: boolean }): BrowserViewData {

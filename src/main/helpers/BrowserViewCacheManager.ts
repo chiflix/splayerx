@@ -30,8 +30,8 @@ class BrowserViewCacheManager implements IBrowserViewCacheManager {
   public constructor() {
     this.singlePageHistory = new Map();
     this.multiPageHistory = new Map();
-    this.singleMaxNum = 3;
-    this.multiMaxNum = 3;
+    this.singleMaxNum = 1;
+    this.multiMaxNum = 2;
   }
 
   public addChannelToSingle(channel: string, info: BrowserViewHistoryItem): void {
