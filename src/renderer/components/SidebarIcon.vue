@@ -17,9 +17,18 @@ export default {
     Icon,
   },
   props: {
-    url: String,
-    icon: String,
-    selected: Boolean,
+    url: {
+      type: String,
+      default: '',
+    },
+    icon: {
+      type: String,
+      default: '',
+    },
+    selected: {
+      type: Boolean,
+      default: false,
+    },
     selectSidebarIcon: {
       type: Function,
       required: true,

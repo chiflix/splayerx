@@ -1,9 +1,11 @@
 <template>
-  <div class="history">History</div>  
+  <div class="history">
+    History
+  </div>
 </template>
 <script lang="ts">
 export default {
-  
+
 };
 </script>
 <style lang="scss" scoped>
