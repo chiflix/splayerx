@@ -10,7 +10,7 @@
         v-for="(channel, index) in channels"
         @click="handleSidebarIcon(channel)"
         :class="{ selected: selectedIndex === index }"
-        class="icon-hover"
+        class="icon-hover no-drag"
       >
         <Icon :type="chanelIcons[index]" />
       </div>
