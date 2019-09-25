@@ -8,8 +8,9 @@
     >
       <SidebarIcon
         :key="url"
-        v-for="({ url, icon, selected }) in channels"
+        v-for="({ url, icon, title, selected }) in channels"
         :url="url"
+        :title="title"
         :icon="icon"
         :selected="selected"
         :select-sidebar-icon="handleSidebarIcon"
@@ -21,6 +22,7 @@
     >
       <div
         @click="openFilesByDialog"
+        :title="$t('browsing.openLocalFile')"
         class="icon-hover"
       >
         <Icon type="open" />
@@ -58,18 +60,21 @@ export default {
           url: 'https://www.bilibili.com/',
           icon: 'bilibiliSidebar',
           selectedType: 'bilibili',
+          title: 'browsing.bilibili',
           selected: false,
         },
         {
           url: 'https://www.iqiyi.com/',
           icon: 'iqiyiSidebar',
           selectedType: 'iqiyi',
+          title: 'browsing.iqiyi',
           selected: false,
         },
         {
           url: 'https://www.youtube.com/',
           icon: 'youtubeSidebar',
           selectedType: 'youtube',
+          title: 'browsing.youtube',
           selected: false,
         },
       ],

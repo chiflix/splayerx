@@ -240,6 +240,12 @@
     "languageDescription": "* You can change your settings in preferences later",
     "none": "None"
   },
+  "browsing": {
+    "bilibili": "Bilibili",
+    "iqiyi": "iQiYi",
+    "youtube": "Youtube",
+    "openLocalFile": "open local file"
+  },
   "preferences": {
     "general": {
       "hideHistory": "Hide playback history",

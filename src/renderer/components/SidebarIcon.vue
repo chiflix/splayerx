@@ -1,6 +1,7 @@
 <template>
   <div
     @click="selectSidebarIcon(url)"
+    :title="$t(title)"
     :class="{ selected: selected }"
     class="icon-hover"
   >
@@ -18,6 +19,10 @@ export default {
   },
   props: {
     url: {
+      type: String,
+      default: '',
+    },
+    title: {
       type: String,
       default: '',
     },
