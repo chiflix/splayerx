@@ -969,11 +969,10 @@ export default {
       this.pipAdapter();
     },
     exitPipOperation() {
-      this.$electron.ipcRenderer.send('exit-pip');
+      this.$electron.ipcRenderer.send('exit-pip', this.pip.recover);
       this.asyncTasksDone = false;
       this.isGlobal = false;
       this.handleWindowChangeExitPip();
-      this.currentMainBrowserView().webContents.executeJavaScript(this.pip.recover);
       this.pipType = '';
     },
     handleEnterPip(isGlobal: boolean) {

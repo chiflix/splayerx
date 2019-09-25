@@ -845,7 +845,7 @@ function registerMainWindowEvent(mainWindow) {
     if (pipControlView) pipControlView.setBounds(args.control);
     if (titlebarView) titlebarView.setBounds(args.titlebar);
   });
-  ipcMain.on('exit-pip', () => {
+  ipcMain.on('exit-pip', (evt, args) => {
     if (!browserViewManager) return;
     browsingWindow.send('remove-pip-listener');
     mainWindow.show();
@@ -856,6 +856,7 @@ function registerMainWindowEvent(mainWindow) {
       browsingWindow.removeBrowserView(view);
     });
     const exitBrowser = browserViewManager.exitPip();
+    exitBrowser.page.view.webContents.executeJavaScript(args);
     mainWindow.addBrowserView(exitBrowser.page.view);
     exitBrowser.page.view.setBounds({
       x: sidebar ? 76 : 0,
