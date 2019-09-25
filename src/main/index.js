@@ -549,13 +549,11 @@ function registerMainWindowEvent(mainWindow) {
     const newBrowser = val === 1 ? browserViewManager.forward() : browserViewManager.back();
     if (newBrowser.page) {
       mainWindow.addBrowserView(newBrowser.page.view);
-      setTimeout(() => {
-        mainWindow.send('update-browser-state', {
-          url: newBrowser.page.url,
-          canGoBack: newBrowser.canBack,
-          canGoForward: newBrowser.canForward,
-        });
-      }, 150);
+      mainWindow.send('update-browser-state', {
+        url: newBrowser.page.url,
+        canGoBack: newBrowser.canBack,
+        canGoForward: newBrowser.canForward,
+      });
       newBrowser.page.view.setBounds({
         x: sidebar ? 76 : 0,
         y: 40,

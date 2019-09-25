@@ -387,25 +387,27 @@ export default {
         e: Event,
         state: { url: string; canGoBack: boolean; canGoForward: boolean },
       ) => {
-        this.title = this.currentMainBrowserView().webContents.getTitle();
-        this.currentUrl = urlParseLax(state.url).href;
-        this.removeListener();
-        this.addListenerToBrowser();
-        this.webInfo.canGoBack = state.canGoBack;
-        this.webInfo.canGoForward = state.canGoForward;
-        this.updateCanGoBack(this.webInfo.canGoBack);
-        this.updateCanGoForward(this.webInfo.canGoForward);
-        const loadUrl = this.currentMainBrowserView().webContents.getURL();
-        this.startLoading = false;
-        this.currentMainBrowserView().webContents.executeJavaScript(
-          InjectJSManager.calcVideoNum(),
-          (r: number) => {
-            this.webInfo.hasVideo = this.currentChannel() === 'youtube.com' && !getVideoId(loadUrl).id
-              ? false
-              : !!r;
-          },
-        );
-        this.createTouchBar(this.webInfo.hasVideo);
+        if (this.currentMainBrowserView()) {
+          this.title = this.currentMainBrowserView().webContents.getTitle();
+          this.currentUrl = urlParseLax(state.url).href;
+          this.removeListener();
+          this.addListenerToBrowser();
+          this.webInfo.canGoBack = state.canGoBack;
+          this.webInfo.canGoForward = state.canGoForward;
+          this.updateCanGoBack(this.webInfo.canGoBack);
+          this.updateCanGoForward(this.webInfo.canGoForward);
+          const loadUrl = this.currentMainBrowserView().webContents.getURL();
+          this.startLoading = false;
+          this.currentMainBrowserView().webContents.executeJavaScript(
+            InjectJSManager.calcVideoNum(),
+            (r: number) => {
+              this.webInfo.hasVideo = this.currentChannel() === 'youtube.com' && !getVideoId(loadUrl).id
+                ? false
+                : !!r;
+            },
+          );
+          this.createTouchBar(this.webInfo.hasVideo);
+        }
       },
     );
   },
@@ -831,18 +833,21 @@ export default {
       return this.$electron.remote.getCurrentWindow().getBrowserViews()[0];
     },
     currentChannel() {
-      const loadUrl = this.currentMainBrowserView().webContents.getURL();
-      const hostname = urlParseLax(loadUrl).hostname;
-      let channel = '';
-      if (loadUrl.includes('youtube')) {
-        channel = 'youtube.com';
-      } else {
-        channel = hostname.slice(
-          hostname.indexOf('.') + 1,
-          hostname.length,
-        );
+      if (this.currentMainBrowserView()) {
+        const loadUrl = this.currentMainBrowserView().webContents.getURL();
+        const hostname = urlParseLax(loadUrl).hostname;
+        let channel = '';
+        if (loadUrl.includes('youtube')) {
+          channel = 'youtube.com';
+        } else {
+          channel = hostname.slice(
+            hostname.indexOf('.') + 1,
+            hostname.length,
+          );
+        }
+        return channel;
       }
-      return channel;
+      return '';
     },
     handleWindowChangeEnterPip() {
       if (this.isFullScreen) {
