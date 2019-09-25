@@ -397,16 +397,14 @@ export default {
         this.updateCanGoForward(this.webInfo.canGoForward);
         const loadUrl = this.currentMainBrowserView().webContents.getURL();
         this.startLoading = false;
-        if (!this.currentMainBrowserView().webContents.isLoading()) {
-          this.currentMainBrowserView().webContents.executeJavaScript(
-            InjectJSManager.calcVideoNum(),
-            (r: number) => {
-              this.webInfo.hasVideo = this.currentChannel() === 'youtube.com' && !getVideoId(loadUrl).id
-                ? false
-                : !!r;
-            },
-          );
-        }
+        this.currentMainBrowserView().webContents.executeJavaScript(
+          InjectJSManager.calcVideoNum(),
+          (r: number) => {
+            this.webInfo.hasVideo = this.currentChannel() === 'youtube.com' && !getVideoId(loadUrl).id
+              ? false
+              : !!r;
+          },
+        );
         this.createTouchBar(this.webInfo.hasVideo);
       },
     );
