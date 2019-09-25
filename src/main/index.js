@@ -795,7 +795,7 @@ function registerMainWindowEvent(mainWindow) {
     } else {
       mainWindow.removeBrowserView(mainWindow.getBrowserViews()[0]);
       mainWindow.addBrowserView(mainBrowser.page.view);
-      browsingWindow.setSize(browsingWindow.getSize()[0] + 1, browsingWindow.getSize()[1]);
+      browsingWindow.setSize(args.pipInfo.pipSize[0], args.pipInfo.pipSize[1]);
       browsingWindow.addBrowserView(pipBrowser);
       createPipControlView();
       createTitlebarView();
