@@ -214,6 +214,7 @@ export class BrowserViewManager implements IBrowserViewManager {
     mainBrowser.page.view.webContents.removeAllListeners('media-started-playing');
     BrowserViewCacheManager.removeCacheWhenEnterPip(this.currentChannel,
       mainBrowser.page, this.currentPip.pipPage as BrowserViewHistoryItem, deletePages);
+    this.pauseVideo(mainBrowser.page.view, this.currentChannel, true);
     return { pipBrowser, mainBrowser };
   }
 
@@ -262,7 +263,7 @@ export class BrowserViewManager implements IBrowserViewManager {
   }
 
   // 暂停当前BrowserView下的视频
-  public pauseVideo(view?: BrowserView, currentChannel?: string): void {
+  public pauseVideo(view?: BrowserView, currentChannel?: string, enterPip?: boolean): void {
     const pausedChannel = currentChannel || this.currentChannel;
     const currentHistory = (this.historyByChannel.get(this.currentChannel) as ChannelData);
     const currentIndex = currentHistory.currentIndex;
@@ -280,20 +281,41 @@ export class BrowserViewManager implements IBrowserViewManager {
         currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('normal'));
       }
     }
-    currentView.webContents.addListener('media-started-playing', () => {
-      currentView.webContents.setAudioMuted(true);
-      if (pausedChannel.includes('bilibili')) {
-        let type = '';
-        currentView.webContents
-          .executeJavaScript(InjectJSManager.bilibiliFindType())
-          .then((r: string) => {
-            type = r;
-            currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('bilibili', type));
+    if (!enterPip) {
+      currentView.webContents.addListener('media-started-playing', () => {
+        currentView.webContents.setAudioMuted(true);
+        if (pausedChannel.includes('bilibili')) {
+          let type = '';
+          currentView.webContents
+            .executeJavaScript(InjectJSManager.bilibiliFindType())
+            .then((r: string) => {
+              type = r;
+              currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('bilibili', type));
+            });
+        } else {
+          currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('normal'));
+        }
+      });
+    } else if (currentView.webContents.isLoading()) {
+      currentView.webContents.once('media-started-playing', () => {
+        currentView.webContents.setAudioMuted(true);
+        if (pausedChannel.includes('bilibili')) {
+          let type = '';
+          currentView.webContents
+            .executeJavaScript(InjectJSManager.bilibiliFindType())
+            .then((r: string) => {
+              type = r;
+              currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('bilibili', type)).then(() => {
+                currentView.webContents.setAudioMuted(false);
+              });
+            });
+        } else {
+          currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('normal')).then(() => {
+            currentView.webContents.setAudioMuted(false);
           });
-      } else {
-        currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('normal'));
-      }
-    });
+        }
+      });
+    }
   }
 
   // 关闭画中画窗口
@@ -389,6 +411,6 @@ export interface IBrowserViewManager {
   exitPip(): BrowserViewData
   changePip(channel: string): { pipBrowser: BrowserView, mainBrowser: BrowserViewData }
   pipClose(): void
-  pauseVideo(view?: BrowserView, currentChannel?: string): void
+  pauseVideo(view?: BrowserView, currentChannel?: string, enterPip?: boolean): void
   clearAllBrowserViews(isDeepClear?: boolean): void
 }

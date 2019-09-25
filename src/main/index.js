@@ -801,7 +801,6 @@ function registerMainWindowEvent(mainWindow) {
       browsingWindow.show();
     }
     if (args.isGlobal) {
-      browserViewManager.pauseVideo(mainWindow.getBrowserViews()[0]);
       mainWindow.hide();
     }
     browsingWindow.webContents.closeDevTools();
