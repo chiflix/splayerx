@@ -624,14 +624,16 @@ export default {
     willNavigate(e: Event, url: string) {
       if (!this.startLoading) {
         this.startLoading = true;
-        if (
-          !url
+        if (!url
           || url === 'about:blank'
           || urlParseLax(this.currentUrl).href === urlParseLax(url).href
-        ) return;
-        this.currentUrl = urlParseLax(url).href;
-        this.loadingState = true;
-        this.$electron.ipcRenderer.send('create-browser-view', { url });
+        ) {
+          this.startLoading = false;
+        } else {
+          this.currentUrl = urlParseLax(url).href;
+          this.loadingState = true;
+          this.$electron.ipcRenderer.send('create-browser-view', {url});
+        }
       }
     },
     didStartLoading() {
@@ -697,41 +699,46 @@ export default {
         } else {
           openUrl = this.currentUrl.includes('douyu') ? `https://www.douyu.com${url}` : `https:${url}`;
         }
-        if (
-          !url
-          || url === 'about:blank'
-          || urlParseLax(openUrl).href === urlParseLax(this.currentUrl).href
-        ) return;
-        this.loadingState = true;
-        const newHostname = urlParseLax(openUrl).hostname;
-        const oldHostname = urlParseLax(this.currentUrl).hostname;
-        let oldChannel = oldHostname.slice(
-          oldHostname.indexOf('.') + 1,
-          oldHostname.length,
-        );
-        if (this.currentUrl.includes('youtube')) {
-          oldChannel = 'youtube.com';
-        }
-        let newChannel = oldChannel;
-        if (newHostname.includes(...this.allChannels)) {
-          newChannel = newHostname.slice(
-            newHostname.indexOf('.') + 1,
-            newHostname.length,
-          );
-          if (openUrl.includes('youtube')) {
-            newChannel = 'youtube.com';
-          }
-        }
-        if (this.oauthRegex.some((re: RegExp) => re.test(url))) return;
-        if (oldChannel === newChannel) {
+        if (!url || url === 'about:blank') {
+          this.startLoading = false;
+        } else if (urlParseLax(openUrl).href === urlParseLax(this.currentUrl).href) {
           this.loadingState = true;
-          this.currentUrl = urlParseLax(openUrl).href;
-          this.$electron.ipcRenderer.send('create-browser-view', {
-            url: openUrl,
-            isNewWindow: true,
+          this.currentMainBrowserView().webContents.loadURL(urlParseLax(openUrl).href).then(() => {
+            this.startLoading = false;
+            this.loadingState = false;
           });
         } else {
-          this.$electron.shell.openExternal(openUrl);
+          this.loadingState = true;
+          const newHostname = urlParseLax(openUrl).hostname;
+          const oldHostname = urlParseLax(this.currentUrl).hostname;
+          let oldChannel = oldHostname.slice(
+            oldHostname.indexOf('.') + 1,
+            oldHostname.length,
+          );
+          if (this.currentUrl.includes('youtube')) {
+            oldChannel = 'youtube.com';
+          }
+          let newChannel = oldChannel;
+          if (newHostname.includes(...this.allChannels)) {
+            newChannel = newHostname.slice(
+              newHostname.indexOf('.') + 1,
+              newHostname.length,
+            );
+            if (openUrl.includes('youtube')) {
+              newChannel = 'youtube.com';
+            }
+          }
+          if (this.oauthRegex.some((re: RegExp) => re.test(url))) return;
+          if (oldChannel === newChannel) {
+            this.loadingState = true;
+            this.currentUrl = urlParseLax(openUrl).href;
+            this.$electron.ipcRenderer.send('create-browser-view', {
+              url: openUrl,
+              isNewWindow: true,
+            });
+          } else {
+            this.$electron.shell.openExternal(openUrl);
+          }
         }
       }
     },
