@@ -624,6 +624,20 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
 .history, .open {
   width: 30px;
   height: 30px;
+  .default {
+    display: block;
+  }
+  .hover {
+    display: none;
+  }
+  &:hover {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: block;
+    }
+  }
 }
 .pip, .pop, .pipDisabled, .popDisabled {
   width: 30px;

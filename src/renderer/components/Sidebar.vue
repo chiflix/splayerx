@@ -16,8 +16,14 @@
       />
     </div>
     <div class="bottom-icon no-drag">
-      <Icon type="open" />
-      <Icon type="history" />
+      <div class="icon-hover">
+        <Icon type="open" />
+      </div>
+      <div class="icon-hover"
+        @click="openHistory"
+      >
+        <Icon type="history" />
+      </div>
     </div>
   </div>
 </template>
@@ -87,6 +93,9 @@ export default {
     },
   },
   methods: {
+    openHistory() {
+      
+    },
     handleSidebarIcon(url: string) {
       if (this.$route.name === 'browsing-view') {
         this.$bus.$emit('sidebar-selected', url);
