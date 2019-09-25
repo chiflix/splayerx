@@ -856,7 +856,8 @@ function registerMainWindowEvent(mainWindow) {
       browsingWindow.removeBrowserView(view);
     });
     const exitBrowser = browserViewManager.exitPip();
-    exitBrowser.page.view.webContents.executeJavaScript(args);
+    exitBrowser.page.view.webContents.executeJavaScript(args.jsRecover);
+    if (args.cssRecover) exitBrowser.page.view.webContents.insertCSS(args.cssRecover);
     mainWindow.addBrowserView(exitBrowser.page.view);
     exitBrowser.page.view.setBounds({
       x: sidebar ? 76 : 0,

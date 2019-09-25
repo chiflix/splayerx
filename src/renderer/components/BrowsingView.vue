@@ -809,6 +809,8 @@ export default {
           .webContents.executeJavaScript(InjectJSManager.douyuFindType()).then((r: string) => {
             this.douyuType = r;
             this.currentMainBrowserView().webContents.executeJavaScript(this.pip.adapter);
+            this.currentMainBrowserView().webContents
+              .insertCSS(InjectJSManager.douyuHideSelfPip(true));
           }).then(() => {
             this.adaptFinished = true;
           });
@@ -969,7 +971,7 @@ export default {
       this.pipAdapter();
     },
     exitPipOperation() {
-      this.$electron.ipcRenderer.send('exit-pip', this.pip.recover);
+      this.$electron.ipcRenderer.send('exit-pip', { jsRecover: this.pip.recover, cssRecover: InjectJSManager.douyuHideSelfPip(false) });
       this.asyncTasksDone = false;
       this.isGlobal = false;
       this.handleWindowChangeExitPip();

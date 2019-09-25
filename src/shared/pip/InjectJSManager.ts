@@ -37,6 +37,10 @@ class InjectJSManager implements IInjectJSManager {
     return douyuFindType;
   }
 
+  public douyuHideSelfPip(hide: boolean): string {
+    return hide ? '.pip-b1390f { display: none; }' : '.pip-b1390f { display: block; }';
+  }
+
   public changeFullScreen(enterFullScreen: boolean): string {
     return enterFullScreen ? 'document.body.requestFullscreen()' : 'document.webkitCancelFullScreen()';
   }
@@ -116,6 +120,7 @@ export interface IInjectJSManager {
   { adapter: string, watcher: string, recover: string }
   bilibiliFindType(): string
   douyuFindType(): string
+  douyuHideSelfPip(hide: boolean): string
   pauseVideo(channel: string, type?: string): string
   initBarrageIcon(barrageState: boolean): string
   updatePipControlState(shouldShow: boolean): string
