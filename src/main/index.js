@@ -587,12 +587,33 @@ function registerMainWindowEvent(mainWindow) {
         canGoForward: newChannel.canForward,
       });
     }, 150);
-    view.setBounds({
-      x: sidebar ? 76 : 0,
-      y: 40,
-      width: sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
-      height: mainWindow.getSize()[1] - 40,
-    });
+    if (mainWindow.isMaximized()) {
+      if (routeName !== 'browsing-view') {
+        mainWindow.maximize();
+        view.setBounds({
+          x: sidebar ? 76 : 0,
+          y: 40,
+          width: sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
+          height: mainWindow.getSize()[1] - 40,
+        });
+      } else {
+        const bounds = mainWindow.getBounds();
+        view.setBounds({
+          x: sidebar ? 76 : 0,
+          y: 40,
+          width: sidebar ? bounds.width + (bounds.x * 2) - 76
+            : bounds.width + (bounds.x * 2),
+          height: bounds.height - 40,
+        });
+      }
+    } else {
+      view.setBounds({
+        x: sidebar ? 76 : 0,
+        y: 40,
+        width: sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
+        height: mainWindow.getSize()[1] - 40,
+      });
+    }
     view.setAutoResize({
       width: true, height: true,
     });
@@ -884,10 +905,25 @@ function registerMainWindowEvent(mainWindow) {
   });
   ipcMain.on('set-window-maximize', () => {
     if (mainWindow && mainWindow.isFocused()) {
-      if (!mainWindow.isMaximized()) {
-        mainWindow.maximize();
-      } else {
+      if (mainWindow.isMaximized()) {
         mainWindow.unmaximize();
+        mainWindow.getBrowserViews()[0].setBounds({
+          x: sidebar ? 76 : 0,
+          y: 40,
+          width: sidebar ? mainWindow.getSize()[0] - 76
+            : mainWindow.getSize()[0],
+          height: mainWindow.getSize()[1] - 40,
+        });
+      } else {
+        mainWindow.maximize();
+        const bounds = mainWindow.getBounds();
+        mainWindow.getBrowserViews()[0].setBounds({
+          x: sidebar ? 76 : 0,
+          y: 40,
+          width: sidebar ? bounds.width + (bounds.x * 2) - 76
+            : bounds.width + (bounds.x * 2),
+          height: bounds.height - 40,
+        });
       }
     } else if (browsingWindow && browsingWindow.isFocused()) {
       if (!isBrowsingWindowMax) {
