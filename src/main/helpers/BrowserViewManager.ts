@@ -212,6 +212,9 @@ export class BrowserViewManager implements IBrowserViewManager {
     mainBrowser.page.lastUpdateTime = Date.now();
     mainBrowser.page.view.webContents.setAudioMuted(false);
     mainBrowser.page.view.webContents.removeAllListeners('media-started-playing');
+    mainBrowser.page.view.setBounds({
+      x: 76, y: 0, width: 0, height: 0,
+    });
     BrowserViewCacheManager.removeCacheWhenEnterPip(this.currentChannel,
       mainBrowser.page, this.currentPip.pipPage as BrowserViewHistoryItem, deletePages);
     this.pauseVideo(mainBrowser.page.view, this.currentChannel, true);
