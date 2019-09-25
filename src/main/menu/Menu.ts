@@ -1,22 +1,22 @@
 import {
-  Menu, MenuItem, app, shell,
+  app, Menu, MenuItem, shell, nativeImage, systemPreferences,
 } from 'electron';
 import { cloneDeep } from 'lodash';
 import {
-  MenubarMenuItem,
   IMenubarMenu,
-  IMenubarMenuItemSubmenu,
-  IMenubarMenuItemSeparator,
   IMenubarMenuItemAction,
   IMenubarMenuItemRole,
+  IMenubarMenuItemSeparator,
+  IMenubarMenuItemSubmenu,
   IMenubarMenuState,
+  MenubarMenuItem,
   MenuName,
 } from './common/Menubar';
 import { isMacintosh, isWindowsExE, isMacintoshDMG } from '../../shared/common/platform';
 import Locale from '../../shared/common/localize';
 import menuTemplate from './menu.json';
 import { IMenuDisplayInfo } from '../../renderer/interfaces/IRecentPlay';
-import { SubtitleControlListItem, Type } from '../../renderer/interfaces/ISubtitle';
+import { ISubtitleControlListItem, Type } from '../../renderer/interfaces/ISubtitle';
 
 function separator(): Electron.MenuItem {
   return new MenuItem({ type: 'separator' });
@@ -44,13 +44,15 @@ export default class Menubar {
 
   private audioTracks: { id: string, label: string }[];
 
+  private focusOnMainWindow = true;
+
   private primarySubs: {
-    id: string, label: string, checked: boolean, subtitleItem: SubtitleControlListItem,
+    id: string, label: string, checked: boolean, subtitleItem: ISubtitleControlListItem,
   }[];
 
   private secondarySubs: {
     id: string, label: string, checked: boolean,
-    enabled: boolean, subtitleItem: SubtitleControlListItem,
+    enabled: boolean, subtitleItem: ISubtitleControlListItem,
   }[];
 
   private _routeName: string;
@@ -58,6 +60,25 @@ export default class Menubar {
   public set routeName(val: string) {
     this._routeName = val;
     this.menuStateControl();
+  }
+
+  public updateFocusedWindow(isMainWindow: boolean, isNewWindow: boolean) {
+    if (this.focusOnMainWindow !== isMainWindow) {
+      if (!isMainWindow) {
+        this.updateMenuItemEnabled('history.back', false);
+        this.updateMenuItemEnabled('history.forward', false);
+        this.updateMenuItemEnabled('history.reload', false);
+        this.updateMenuItemEnabled(isNewWindow ? 'browsing.window.playInNewWindow' : 'browsing.window.pip', true);
+        this.updateMenuItemEnabled('browsing.window.keepPipFront', true);
+        this.updateMenuItemLabel('browsing.window.pip', 'msg.window.exitPip');
+        this.updateMenuItemLabel('browsing.window.playInNewWindow', 'msg.window.backToBrowser');
+      } else {
+        this.updateMenuItemEnabled('browsing.window.keepPipFront', false);
+        this.updateMenuItemLabel('browsing.window.pip', 'msg.window.enterPip');
+        this.updateMenuItemLabel('browsing.window.playInNewWindow', 'msg.window.playInNewWindow');
+      }
+      this.focusOnMainWindow = isMainWindow;
+    }
   }
 
   public constructor() {
@@ -202,6 +223,10 @@ export default class Menubar {
     }
   }
 
+  public updatePipIcon() {
+    this.refreshMenu('browsing.window');
+  }
+
   public updateMenuItemEnabled(id: string, enabled: boolean) {
     const result = this.getMenuStateById(id);
     // @ts-ignore
@@ -239,7 +264,7 @@ export default class Menubar {
 
   public updatePrimarySub(
     items?: {
-      id: string, label: string, checked: boolean, subtitleItem: SubtitleControlListItem,
+      id: string, label: string, checked: boolean, subtitleItem: ISubtitleControlListItem,
     }[],
   ) {
     if (items) this.primarySubs = items;
@@ -272,7 +297,7 @@ export default class Menubar {
   public updateSecondarySub(
     items?: {
       id: string, label: string, checked: boolean,
-      enabled: boolean, subtitleItem: SubtitleControlListItem,
+      enabled: boolean, subtitleItem: ISubtitleControlListItem,
     }[],
   ) {
     if (items) this.secondarySubs = items;
@@ -708,12 +733,13 @@ export default class Menubar {
     ]);
     // mac dmg
     if (isMacintoshDMG && !hideCheckBtn && this._routeName !== 'welcome-privacy' && this._routeName !== 'language-setting') {
-      actions.push(...[
+      const items = this._routeName === 'browsing-view' ? [preference, separator()] : [
         checkForUpdates,
         separator(),
         preference,
         separator(),
-      ]);
+      ];
+      actions.push(...items);
     } else if (this._routeName !== 'welcome-privacy' && this._routeName !== 'language-setting') {
       actions.push(...[
         preference,
@@ -729,62 +755,52 @@ export default class Menubar {
     ]);
     actions.forEach(i => applicationMenu.append(i));
 
-    const applicationMenuItem = new MenuItem({ label: this.$t('msg.splayerx.name'), submenu: applicationMenu });
-    return applicationMenuItem;
+    return new MenuItem({ label: this.$t('msg.splayerx.name'), submenu: applicationMenu });
   }
 
   private createFileMenu(): Electron.MenuItem {
     const fileMenu = this.convertFromMenuItemTemplate('file');
-    const fileMenuItem = new MenuItem({ id: 'file', label: this.$t('msg.file.name'), submenu: fileMenu });
-    return fileMenuItem;
+    return new MenuItem({ id: 'file', label: this.$t('msg.file.name'), submenu: fileMenu });
   }
 
   private createPlaybackMenu() {
     const playbackMenu = this.convertFromMenuItemTemplate('playback');
-    const playbackMenuItem = new MenuItem({ id: 'playback', label: this.$t('msg.playback.name'), submenu: playbackMenu });
-    return playbackMenuItem;
+    return new MenuItem({ id: 'playback', label: this.$t('msg.playback.name'), submenu: playbackMenu });
   }
 
   private createAudioMenu() {
     const audioMenu = this.convertFromMenuItemTemplate('audio');
-    const audioMenuItem = new MenuItem({ id: 'audio', label: this.$t('msg.audio.name'), submenu: audioMenu });
-    return audioMenuItem;
+    return new MenuItem({ id: 'audio', label: this.$t('msg.audio.name'), submenu: audioMenu });
   }
 
   private createSubtitleMenu() {
     const subtitleMenu = this.convertFromMenuItemTemplate('subtitle');
-    const subtitleMenuItem = new MenuItem({ id: 'subtitle', label: this.$t('msg.subtitle.name'), submenu: subtitleMenu });
-    return subtitleMenuItem;
+    return new MenuItem({ id: 'subtitle', label: this.$t('msg.subtitle.name'), submenu: subtitleMenu });
   }
 
   private createEditMenu() {
     const editMenu = this.convertFromMenuItemTemplate('edit');
-    const editMenuItem = new MenuItem({ id: 'edit', label: this.$t('msg.edit.name'), submenu: editMenu });
-    return editMenuItem;
+    return new MenuItem({ id: 'edit', label: this.$t('msg.edit.name'), submenu: editMenu });
   }
 
   private createHistoryMenu() {
     const historyMenu = this.convertFromMenuItemTemplate('history');
-    const historyMenuItem = new MenuItem({ id: 'history', label: this.$t('msg.history.name'), submenu: historyMenu });
-    return historyMenuItem;
+    return new MenuItem({ id: 'history', label: this.$t('msg.history.name'), submenu: historyMenu });
   }
 
   private createFavouriteMenu() {
     const favouriteMenu = this.convertFromMenuItemTemplate('favourite');
-    const favouriteMenuItem = new MenuItem({ id: 'favourite', label: this.$t('msg.favourite.name'), submenu: favouriteMenu });
-    return favouriteMenuItem;
+    return new MenuItem({ id: 'favourite', label: this.$t('msg.favourite.name'), submenu: favouriteMenu });
   }
 
   private createBrowsingWindowMenu() {
     const window = this.convertFromMenuItemTemplate('browsing.window');
-    const windowMenuItem = new MenuItem({ id: 'browsing.window', label: this.$t('msg.window.name'), submenu: window });
-    return windowMenuItem;
+    return new MenuItem({ id: 'browsing.window', label: this.$t('msg.window.name'), submenu: window });
   }
 
   private createWindowMenu() {
     const windowMenu = this.convertFromMenuItemTemplate('window');
-    const windowMenuItem = new MenuItem({ id: 'window', label: this.$t('msg.window.name'), submenu: windowMenu });
-    return windowMenuItem;
+    return new MenuItem({ id: 'window', label: this.$t('msg.window.name'), submenu: windowMenu });
   }
 
   private createHelpMenu() {
@@ -801,7 +817,7 @@ export default class Menubar {
 
       const checkForUpdates = this.createMenuItem('msg.splayerx.checkForUpdates', () => {
         app.emit('check-for-updates');
-      }, undefined, true);
+      }, undefined, true, undefined, 'splayerx.checkForUpdates');
 
       helpMenu.append(checkForUpdates);
 
@@ -916,6 +932,7 @@ export default class Menubar {
     accelerator?: string, enabled?: boolean, checked?: boolean, id?: string
   ): Electron.MenuItem
 
+  // eslint-disable-next-line complexity
   private createMenuItem(
     arg1: string | IMenubarMenuItemAction,
     click?: (menuItem: Electron.MenuItem) => void,
@@ -951,9 +968,22 @@ export default class Menubar {
       return new MenuItem(options);
     }
     if (arg1.enabled === undefined) arg1.enabled = true;
-
+    let menuIcon: string | Electron.nativeImage = '';
+    switch (arg1.icon) {
+      case 'enter-pip':
+        menuIcon = systemPreferences.isDarkMode() ? nativeImage.createFromDataURL(require('../../../build/icons/mojave-pip.png')) : nativeImage.createFromDataURL(require('../../../build/icons/normal-pip.png'));
+        break;
+      case 'play-in-new-window':
+        menuIcon = systemPreferences.isDarkMode() ? nativeImage.createFromDataURL(require('../../../build/icons/mojave-window.png')) : nativeImage.createFromDataURL(require('../../../build/icons/normal-window.png'));
+        break;
+      default:
+        menuIcon = '';
+        break;
+    }
     const label = this.$t(arg1.label);
 
+    const fullScreenAccelerator = process.platform === 'darwin' ? 'Cmd+Ctrl+F' : 'F11';
+    const finalAccelerator = ['window.fullscreen', 'browsing.window.fullscreen'].includes(arg1.id) ? fullScreenAccelerator : arg1.accelerator;
     const options: Electron.MenuItemConstructorOptions = {
       id: arg1.id,
       label,
@@ -964,7 +994,8 @@ export default class Menubar {
         app.emit('menu-create-main-window', id);
       },
       enabled: arg1.enabled,
-      accelerator: arg1.accelerator,
+      accelerator: finalAccelerator,
+      icon: menuIcon,
     };
 
     if (arg1.id === 'file.open') {
@@ -989,7 +1020,6 @@ export default class Menubar {
       options.type = 'checkbox';
       options.checked = arg1.checked;
     }
-
     return new MenuItem(options);
   }
 

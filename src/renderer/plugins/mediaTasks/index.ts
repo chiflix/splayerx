@@ -1,12 +1,16 @@
-import MediaInfoQueue, { CodecType, ISubtitleStream } from './mediaInfoQueue';
-import SnapshotSubtitleQueue from './snapshotSubtitleQueue';
+import MediaInfoQueue, { CodecType, ISubtitleStream, Stream } from './mediaInfoQueue';
+import SnapshotQueue from './snapshotSubtitleQueue';
+import SubtitleQueue from './subtitleQueue';
 import ThumbnailQueue from './thumbnailQueue';
-import { Format } from '@/interfaces/ISubtitle';
 import { log } from '@/libs/Log';
 
 const mediaInfoQueue = new MediaInfoQueue();
-const snapshotSubtitleQueue = new SnapshotSubtitleQueue();
+const snapshotQueue = new SnapshotQueue();
+const subtitleQueue = new SubtitleQueue();
 const thumbnailQueue = new ThumbnailQueue();
+
+// 存储每个path 对应的 streams
+const infos: { [key: string]: Stream[]; } = {};
 
 export async function getMediaInfo(path: string) {
   try {
@@ -21,8 +25,10 @@ export async function getFormat(path: string) {
   return info && info.format;
 }
 export async function getStreams(path: string) {
+  if (infos[path]) return infos[path];
   const info = await getMediaInfo(path);
-  return (info && info.streams) || [];
+  infos[path] = (info && info.streams) || [];
+  return infos[path];
 }
 export async function getSubtitleStreams(path: string) {
   return (await getStreams(path))
@@ -36,7 +42,7 @@ export async function getSnapshotPath(
   width: number = 1920, height: number = 1080,
 ) {
   try {
-    return snapshotSubtitleQueue.getSnapshotPath(
+    return snapshotQueue.getSnapshotPath(
       videoPath,
       timeInSeconds,
       width, height,
@@ -46,12 +52,40 @@ export async function getSnapshotPath(
     return '';
   }
 }
-export async function getSubtitlePath(videoPath: string, streamIndex: number, format: Format) {
+
+export async function getSubtitleMetadata(videoPath: string, streamIndex: number) {
   try {
-    return snapshotSubtitleQueue.getSubtitlePath(videoPath, streamIndex, format);
+    return subtitleQueue.getSubtitleMetadata(videoPath, streamIndex);
   } catch (error) {
-    log.error('[MediaTask|Subtitle]', error);
+    log.error('[MediaTask|SubtitleMetadata]', error);
     return '';
+  }
+}
+export async function cacheSubtitle(videoPath: string, streamIndex: number) {
+  try {
+    return subtitleQueue.cacheSubtitle(videoPath, streamIndex);
+  } catch (error) {
+    log.error('[MediaTask|SubtitleCache]', error);
+    return '';
+  }
+}
+export async function getSubtitleFragment(
+  videoPath: string,
+  streamIndex: number,
+  videoTime: number,
+) {
+  try {
+    return subtitleQueue.getSubtitleFragment(videoPath, streamIndex, videoTime);
+  } catch (error) {
+    log.error('[MediaTask|SubtitleFragment]', error);
+    return '';
+  }
+}
+export async function finishSubtitleExtraction(videoPath: string, streamIndex: number) {
+  try {
+    subtitleQueue.stopSubtitleExtraction(videoPath, streamIndex);
+  } catch (error) {
+    log.error('[MediaTask|SubtitleFragment]', error);
   }
 }
 

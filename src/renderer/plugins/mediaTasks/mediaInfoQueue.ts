@@ -163,7 +163,7 @@ interface IVideoStream extends IBaseStream {
   timecode?: string;
   refs?: number;
 }
-interface IAudioStream extends IBaseStream {
+export interface IAudioStream extends IBaseStream {
   codecType: CodecType.Audio;
   sampleFmt?: string;
   sampleRate?: number;
@@ -204,7 +204,7 @@ interface IFormat {
   bitRate?: number;
   probeScore?: number;
 }
-type Stream = IVideoStream | IAudioStream | ISubtitleStream | IAttachmentStream;
+export type Stream = IVideoStream | IAudioStream | ISubtitleStream | IAttachmentStream;
 interface IMediaInfo {
   streams?: Stream[];
   format?: IFormat;

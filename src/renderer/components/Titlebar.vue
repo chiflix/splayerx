@@ -14,11 +14,11 @@
       <SidebarIcon
         @mouseover.native="mouseoverSidebar = true"
         @mouseout.native="mouseoverSidebar = false"
-        @mouseup.native="handleSidebar"
+        :mouseover="mouseoverSidebar"
+        :fill="isBrowsingView ? '#BBBACC' : ''"
         :style="{
           transform: `translateX(${showSidebar ? '76' : '0'}px)`,
         }"
-        :mouseover="mouseoverSidebar"
         class="sidebar-icon no-drag"
       />
     </div>
@@ -105,11 +105,11 @@
         v-if="isDarwin && isLandingView"
         @mouseover.native="mouseoverSidebar = true"
         @mouseout.native="mouseoverSidebar = false"
-        @mouseup.native="handleSidebar"
         :style="{
           marginLeft: showSidebar ? '19px' : '4px',
         }"
         :mouseover="mouseoverSidebar"
+        :fill="isBrowsingView ? '#BBBACC' : ''"
         class="sidebar no-drag"
       />
     </div>
@@ -136,6 +136,10 @@ export default {
       default: false,
     },
     isLandingView: {
+      type: Boolean,
+      default: false,
+    },
+    isBrowsingView: {
       type: Boolean,
       default: false,
     },
@@ -211,9 +215,6 @@ export default {
     });
   },
   methods: {
-    handleSidebar() {
-      this.$event.emit('side-bar-mouseup');
-    },
     handleDbClick() {
       const browserWindow = this.$electron.remote.getCurrentWindow();
       if (!browserWindow.isMaximized()) {
@@ -273,10 +274,12 @@ export default {
   justify-content: space-between;
   position: absolute;
   .sidebar {
-    width: 89px;
-    margin-top: 6px;
-    margin-left: 12px;
+    width: 105px;
     &-icon {
+      padding-left: 16px;
+      padding-right: 16px;
+      padding-top: 8px;
+      padding-bottom: 8px;
       width: fit-content;
       transition: transform 100ms linear;
     }

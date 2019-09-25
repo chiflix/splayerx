@@ -97,9 +97,11 @@
       :progress-trigger-stopped.sync="progressTriggerStopped"
       :show-all-widgets="showAllWidgets"
       :duration="duration"
+      :show-full-time-code="showFullTimeCode"
       :rate="rate"
       :show-cycle-label="!!singleCycle"
       :show-speed-label="showSpeedLabel"
+      :on-time-code-click="onTimeCodeClick"
       :style="{ marginBottom: preFullScreen ? '10px' : '0' }"
     />
     <the-progress-bar
@@ -212,6 +214,9 @@ export default {
       changeVolumeByMenu: false,
       subMenuShow: false,
       subMenuTimer: 0,
+      splashTimer: 0,
+      invokeAllWidgets: false,
+      invokeAllWidgetsTimer: 0,
     };
   },
   computed: {
@@ -229,14 +234,14 @@ export default {
       'isFullScreen', 'isFocused', 'isMinimized',
       'leftMousedown', 'progressKeydown', 'volumeKeydown', 'wheelTriggered', 'volumeWheelTriggered',
       'enabledSecondarySub', 'isTranslateModalVisible', 'translateStatus', 'failBubbleId', 'messageInfo',
+      'showFullTimeCode',
     ]),
     ...inputMapGetters({
       inputWheelDirection: iGT.GET_WHEEL_DIRECTION,
     }),
     showAllWidgets() {
-      if (this.isTranslateModalVisible) {
-        return false;
-      }
+      if (this.isTranslateModalVisible) return false;
+      if (this.invokeAllWidgets) return true;
       return !this.tempRecentPlaylistDisplayState
         && ((!this.mouseStopped && !this.mouseLeftWindow)
         || (!this.mouseLeftWindow && this.onOtherWidget)
@@ -469,6 +474,16 @@ export default {
     this.$bus.$on('drag-leave', () => {
       this.dragOver = false;
     });
+    this.$bus.$on('invoke-all-widgets', () => {
+      clearTimeout(this.splashTimer);
+      clearTimeout(this.invokeAllWidgetsTimer);
+
+      this.$bus.$emit('mask-highlight', true);
+      this.splashTimer = setTimeout(() => { this.$bus.$emit('mask-highlight', false); }, 300);
+
+      this.invokeAllWidgets = true;
+      this.invokeAllWidgetsTimer = setTimeout(() => { this.invokeAllWidgets = false; }, 3000);
+    });
     this.$bus.$on('drop', () => {
       this.dragOver = false;
     });
@@ -508,6 +523,9 @@ export default {
       updateHideModalCallback: atActions.AUDIO_TRANSLATE_MODAL_HIDE_CALLBACK,
       updateHideBubbleCallback: atActions.AUDIO_TRANSLATE_BUBBLE_CANCEL_CALLBACK,
     }),
+    onTimeCodeClick() {
+      this.$store.dispatch('showFullTimeCode', !this.showFullTimeCode);
+    },
     createTouchBar() {
       const { TouchBar } = this.$electron.remote;
       const {

@@ -193,12 +193,14 @@
       "enterFullScreen": "进入全屏",
       "exitFullScreen": "退出全屏",
       "halfSize": "50%",
-      "maxmize": "最大化",
+      "maxmize": "缩放",
       "minimize": "最小化",
       "name": "窗口",
       "originSize": "100%",
-      "enterPip": "进入画中画模式",
-      "exitPip": "退出画中画模式"
+      "enterPip": "进入画中画",
+      "exitPip": "退出画中画",
+      "playInNewWindow": "新窗口播放",
+      "backToBrowser": "还原窗口"
     },
     "favourite": {
       "name": "频道",

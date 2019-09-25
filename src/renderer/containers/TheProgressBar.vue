@@ -268,7 +268,7 @@ export default {
       }
       if (this.hoveredCurrentTime !== this.duration) {
         this.$bus.$emit('seek', this.hoveredCurrentTime);
-        this.$ga.event('app', 'seek');
+        // this.$ga.event('app', 'seek');
       }
       if (this.hoveredCurrentTime === 0) {
         this.$bus.$emit('play');

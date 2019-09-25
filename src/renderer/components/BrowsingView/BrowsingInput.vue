@@ -1,27 +1,29 @@
 <template>
   <div
     :style="{
-      left: isDarwin ? '' : '15px',
-      right: isDarwin ? '15px' : '',
+      width: isDarwin ? 'calc(100% - 176px)' : 'calc(100% - 290px)',
     }"
     class="search-url"
   >
-    <input
-      ref="searchValue"
-      :style="{ order: isDarwin ? '1' : '2' }"
-      @keypress="handleSearchKey"
-      class="url-search"
-      placeholder="请输入URL..."
-      onfocus="select()"
-    >
-    <Icon
+    <div
       :style="{
-        order: isDarwin ? '2' : '1',
-        margin: isDarwin ? 'auto 0 auto 10px' : 'auto 10px auto 0' }"
-      @mouseup.native="handleCloseUrlInput"
-      type="closeInput"
-      class="close-search-icon"
-    />
+        order: isDarwin ? 1 : 2,
+      }"
+      class="url-search"
+    >
+      {{ title }}
+    </div>
+    <div
+      @mouseup="handleUrlReload"
+      :style="{
+        order: isDarwin ? 2 : 1,
+      }"
+      class="control-button page-refresh-icon no-drag"
+    >
+      <Icon
+        :type="isLoading ? 'reloadStop' : 'pageRefresh'"
+      />
+    </div>
   </div>
 </template>
 
@@ -34,6 +36,18 @@ export default {
     Icon,
   },
   props: {
+    title: {
+      type: String,
+      default: 'Splayer',
+    },
+    isLoading: {
+      type: Boolean,
+      required: true,
+    },
+    handleUrlReload: {
+      type: Function,
+      required: true,
+    },
     closeUrlInput: {
       type: Function,
       required: true,
@@ -71,29 +85,41 @@ export default {
 }
 .search-url {
   display: flex;
-  width: auto;
-  height: 24px;
-  position: absolute;
-  top: 6px;
+  justify-content: flex-start;
+  align-items: center;
+  height: 40px;
   z-index: 6;
   .url-search {
-    width: 275px;
-    height: 24px;
+    width: 100%;
+    margin-left: 8px;
     outline: none;
-    background: rgba(255, 255, 255, 0.08);
-    border-radius: 12px;
+    background-color: #FFF;
     border: none;
     z-index: 6;
-    text-indent: 15px;
-    font-size: 13px;
-    color: rgba(255, 255, 255, 0.8);
+
+    font-size: 12px;
+    color: #7E808E;
+    letter-spacing: 0.09px;
+    text-align: center;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
   }
-  .close-search-icon {
-    width: 10px;
-    height: 10px;
-    z-index: 6;
+  .control-button {
+    width: 30px;
+    height: 30px;
+    border-radius: 100%;
     display: flex;
-    cursor: pointer;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 100ms ease-in;
+    &:hover {
+      background-color: #ECEEF0;
+    }
+  }
+  .page-refresh-icon {
+    margin-right: 8px;
+    margin-left: 8px;
   }
 }
 </style>

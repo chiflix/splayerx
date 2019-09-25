@@ -5,7 +5,6 @@ process.env.BABEL_ENV = 'main';
 const path = require('path');
 const childProcess = require('child_process');
 const webpack = require('webpack');
-const SentryWebpackPlugin = require('@sentry/webpack-plugin');
 const { dependencies, optionalDependencies, _moduleAliases } = require('../package.json');
 const TerserPlugin = require('terser-webpack-plugin');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
@@ -103,7 +102,6 @@ const sharedDefinedVariables = {};
  */
 if (process.env.NODE_ENV !== 'production') {
   mainConfig.plugins.push(
-    new ForkTsCheckerWebpackPlugin({ eslint: true }),
     new webpack.DefinePlugin(Object.assign(sharedDefinedVariables, {
       'process.env.SAGI_API': `"${process.env.SAGI_API || 'apis.stage.sagittarius.ai:8443'}"`,
       __static: `"${path.join(__dirname, '../static').replace(/\\/g, '\\\\')}"`,
@@ -136,25 +134,6 @@ if (process.env.NODE_ENV === 'production') {
   if (process.platform === 'darwin') {
     // only check on mac, to speed up Windows build
     mainConfig.plugins.push(new ForkTsCheckerWebpackPlugin({ eslint: true }));
-  }
-
-  if (release && process.env.SENTRY_AUTH_TOKEN) {
-    mainConfig.plugins.push(
-      new SentryWebpackPlugin({
-        release,
-        include: './dist',
-        urlPrefix: 'app:///dist/',
-        ext: ['js', 'map'],
-        ignore: ['node_modules'],
-      }),
-      new SentryWebpackPlugin({
-        release,
-        include: './src',
-        urlPrefix: 'webpack:///./src/',
-        ext: ['js', 'ts', 'vue'],
-        ignore: ['node_modules'],
-      }),
-    );
   }
 }
 

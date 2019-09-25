@@ -1,155 +1,130 @@
 <template>
   <div class="landing-view">
-    <div
-      :style="{
-        width: showSidebar ? '76px' : '0',
-      }"
-      class="side-bar"
-    >
-      <div class="icon-box">
-        <div @mouseup="handleSidebarIcon('bilibili')">
-          <BilibiliSidebarIcon />
-        </div>
-        <div @mouseup="handleSidebarIcon('iqiyi')">
-          <iQiyiSidebarIcon />
-        </div>
-        <div @mouseup="handleSidebarIcon('youtube')">
-          <YoutubeSidebarIcon />
-        </div>
-      </div>
-    </div>
-    <div
-      :style="{
-        width: showSidebar ? 'calc(100% - 76px)' : '100%',
-      }"
-      class="wrapper"
-    >
-      <open-url
-        v-show="openUrlShow"
-        :open-input-url="openInputUrl"
-        :close-url-input="closeUrlInput"
-      />
-      <transition name="background-container-transition">
-        <div
-          v-if="item.backgroundUrl"
-          class="background"
+    <open-url
+      v-show="openUrlShow"
+      :open-input-url="openInputUrl"
+      :close-url-input="closeUrlInput"
+    />
+    <transition name="basidebckground-container-transition">
+      <div
+        v-if="item.backgroundUrl"
+        class="background"
+      >
+        <transition
+          name="background-transition"
+          mode="in-out"
         >
-          <transition
-            name="background-transition"
-            mode="in-out"
-          >
-            <div
-              :key="item.path"
-              :style="{
-                backgroundImage: item.backgroundUrl,
-              }"
-              class="background-image"
-            >
-              <div class="background-mask" />
-            </div>
-          </transition>
-          <div class="item-info">
-            <div class="item-name">
-              {{ item.basename }}
-            </div>
-            <div class="item-description" />
-            <div class="item-timing">
-              <span class="timing-played">
-                {{ timeInvalidForm(timecodeFromSeconds(item.lastPlayedTime)) }}
-                / {{ timeInvalidForm(timecodeFromSeconds(item.duration)) }}
-                <span v-if="item.playlistLength > 1">
-                  ·&nbsp;{{
-                    $t('recentPlaylist.playlistSource')
-                  }}&nbsp;&nbsp;{{ item.playedIndex + 1 }} / {{ item.playlistLength }}
-                </span>
-              </span>
-            </div>
-            <div class="item-progress">
-              <div
-                :style="{ width: item.percentage + '%' }"
-                class="progress-played"
-              />
-            </div>
-          </div>
-        </div>
-      </transition>
-      <div class="welcome-container">
-        <transition :name="logoTransition">
           <div
-            v-if="pageMounted && (!item.backgroundUrl)"
-            class="logo-container"
+            :key="item.path"
+            :style="{
+              backgroundImage: item.backgroundUrl,
+            }"
+            class="background-image"
           >
-            <Icon type="logo" />
+            <div class="background-mask" />
           </div>
         </transition>
+        <div class="item-info">
+          <div class="item-name">
+            {{ item.basename }}
+          </div>
+          <div class="item-description" />
+          <div class="item-timing">
+            <span class="timing-played">
+              {{ timeInvalidForm(timecodeFromSeconds(item.lastPlayedTime)) }}
+              / {{ timeInvalidForm(timecodeFromSeconds(item.duration)) }}
+              <span v-if="item.playlistLength > 1">
+                ·&nbsp;{{
+                  $t('recentPlaylist.playlistSource')
+                }}&nbsp;&nbsp;{{ item.playedIndex + 1 }} / {{ item.playlistLength }}
+              </span>
+            </span>
+          </div>
+          <div class="item-progress">
+            <div
+              :style="{ width: item.percentage + '%' }"
+              class="progress-played"
+            />
+          </div>
+        </div>
       </div>
+    </transition>
+    <div class="welcome-container">
+      <transition :name="logoTransition">
+        <div
+          v-if="pageMounted && (!item.backgroundUrl)"
+          class="logo-container"
+        >
+          <Icon type="logo" />
+        </div>
+      </transition>
+    </div>
+    <div
+      ref="mask"
+      class="mask"
+    />
+    <div
+      :style="{
+        left: playlistLeft,
+        right: playlistRight,
+        bottom: winWidth > 1355 ? `${40 / 1355 * winWidth}px` : '40px',
+        transition: tranFlag ?
+          'left 400ms cubic-bezier(0.42, 0, 0.58, 1)'
+          : 'right 400ms cubic-bezier(0.42, 0, 0.58, 1)',
+      }"
+      class="controller"
+    >
       <div
-        ref="mask"
-        class="mask"
-      />
-      <div
-        :style="{
-          left: playlistLeft,
-          right: playlistRight,
-          bottom: winWidth > 1355 ? `${40 / 1355 * winWidth}px` : '40px',
-          transition: tranFlag ?
-            'left 400ms cubic-bezier(0.42, 0, 0.58, 1)'
-            : 'right 400ms cubic-bezier(0.42, 0, 0.58, 1)',
-        }"
-        class="controller"
+        :style="{marginLeft: winWidth > 1355 ? `${50 / 1355 * winWidth}px` : '50px'}"
+        class="playlist no-drag"
       >
         <div
-          :style="{marginLeft: winWidth > 1355 ? `${50 / 1355 * winWidth}px` : '50px'}"
-          class="playlist no-drag"
+          :style="{
+            height:`${thumbnailHeight}px`,
+            width:`${thumbnailWidth}px`,
+            marginRight: `${marginRight}px`,
+            cursor: firstIndex === 0 ? 'pointer' : `${cursorUrl}, pointer`,
+            backgroundColor:
+              item.backgroundUrl
+                ? 'rgba(255,255,255,0.12) ': 'rgba(255,255,255,0.05)',
+          }"
+          @click="openOrMove"
+          class="button"
         >
-          <div
-            :style="{
-              height:`${thumbnailHeight}px`,
-              width:`${thumbnailWidth}px`,
-              marginRight: `${marginRight}px`,
-              cursor: firstIndex === 0 ? 'pointer' : `${cursorUrl}, pointer`,
-              backgroundColor:
-                item.backgroundUrl
-                  ? 'rgba(255,255,255,0.12) ': 'rgba(255,255,255,0.05)',
-            }"
-            @click="openOrMove"
-            class="button"
-          >
-            <div class="btnMask">
-              <Icon
-                class="addUi"
-                type="add"
-              />
-            </div>
+          <div class="btnMask">
+            <Icon
+              class="addUi"
+              type="add"
+            />
           </div>
-          <!-- eslint-disable-next-line vue/require-component-is -->
-          <component
-            :is="playlistLength > 1 ? 'PlaylistItem' : 'VideoItem'"
-            v-for="({ backgroundUrl, id, playlistLength }, index) in landingViewItems"
-            :key="id"
-            :cursor-url="cursorUrl"
-            :can-hover="canHover"
-            :backgroundUrl="backgroundUrl"
-            :index="index"
-            :is-in-range="
+        </div>
+        <!-- eslint-disable-next-line vue/require-component-is -->
+        <component
+          :is="playlistLength > 1 ? 'PlaylistItem' : 'VideoItem'"
+          v-for="({ backgroundUrl, id, playlistLength }, index) in landingViewItems"
+          :key="id"
+          :cursor-url="cursorUrl"
+          :can-hover="canHover"
+          :backgroundUrl="backgroundUrl"
+          :index="index"
+          :is-in-range="
               firstIndex === 0
               ? index + 1 <= lastIndex - (showSidebar ? 1 : 0)
               : index + 1 >= firstIndex + (showSidebar ? 1 : 0)
             "
-            :thumbnail-width="thumbnailWidth"
-            :thumbnail-height="thumbnailHeight"
-            :shifting="shifting"
-            :style="{
-              marginRight: `${marginRight}px`,
-            }"
-            :on-item-mouseover="onItemMouseover"
-            :on-item-click="onItemClick"
-            :on-item-delete="onItemDelete"
-          />
-        </div>
+          :thumbnail-width="thumbnailWidth"
+          :thumbnail-height="thumbnailHeight"
+          :shifting="shifting"
+          :style="{
+            marginRight: `${marginRight}px`,
+          }"
+          :on-item-mouseover="onItemMouseover"
+          :on-item-click="onItemClick"
+          :on-item-delete="onItemDelete"
+        />
       </div>
-      <NotificationBubble />
     </div>
+    <NotificationBubble />
   </div>
 </template>
 
@@ -162,9 +137,6 @@ import { filePathToUrl } from '@/helpers/path';
 import { playInfoStorageService } from '@/services/storage/PlayInfoStorageService';
 import { recentPlayService } from '@/services/media/RecentPlayService';
 import Icon from '@/components/BaseIconContainer.vue';
-import BilibiliSidebarIcon from '@/components/LandingView/BilibiliSidebarIcon.vue';
-import iQiyiSidebarIcon from '@/components/LandingView/iQiyiSidebarIcon.vue';
-import YoutubeSidebarIcon from '@/components/LandingView/YoutubeSidebarIcon.vue';
 import OpenUrl from '@/components/LandingView/OpenUrl.vue';
 import NotificationBubble from '@/components/NotificationBubble.vue';
 import PlaylistItem from '@/components/LandingView/PlaylistItem.vue';
@@ -181,11 +153,14 @@ export default {
   name: 'LandingView',
   components: {
     Icon,
-    BilibiliSidebarIcon,
-    iQiyiSidebarIcon,
-    YoutubeSidebarIcon,
     NotificationBubble,
     'open-url': OpenUrl,
+  },
+  props: {
+    showSidebar: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -200,13 +175,12 @@ export default {
       pageMounted: false,
       logoTransition: '',
       canHover: false,
-      showSidebar: false,
       playlistLeft: '0',
       playlistRight: '',
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'winPos', 'defaultDir', 'isFullScreen', 'incognitoMode', 'hideNSFW', 'smartMode', 'nsfwProcessDone']),
+    ...mapGetters(['winWidth', 'winPos', 'defaultDir', 'isFullScreen', 'incognitoMode', 'hideNSFW', 'smartMode', 'nsfwProcessDone', 'pipSize', 'pipPos']),
     lastIndex: {
       get() {
         return (this.firstIndex + this.showItemNum) - 1;
@@ -300,13 +274,9 @@ export default {
     this.createTouchBar();
     window.addEventListener('mousemove', this.globalMoveHandler);
     // Get all data and show
-    if (!this.incognitoMode) {
-      recentPlayService.getRecords().then((results) => {
-        this.landingViewItems = results;
-      });
-    } else {
-      this.infoDB.clearAll();
-    }
+    recentPlayService.getRecords().then((results) => {
+      this.landingViewItems = results;
+    });
     this.$bus.$on('clean-landingViewItems', () => {
       // just for delete thumbnail display
       this.firstIndex = 0;
@@ -332,10 +302,6 @@ export default {
     });
     this.$bus.$on('drop', () => {
       if (this.$refs.mask) this.$refs.mask.style.setProperty('background-color', 'rgba(255, 255, 255, 0)');
-    });
-    this.$event.on('side-bar-mouseup', () => {
-      this.showSidebar = !this.showSidebar;
-      this.$emit('update-side-bar', this.showSidebar);
     });
   },
   async mounted() {
@@ -400,12 +366,6 @@ export default {
     },
     move(steps: number) {
       return steps * (this.thumbnailWidth + this.marginRight);
-    },
-    handleSidebarIcon(site: string) {
-      this.updateInitialUrl(`https://www.${site}.com`);
-      this.$router.push({
-        name: 'browsing-view',
-      });
     },
     handleBrowsingOpen(url: string) {
       this.updateInitialUrl(url);
@@ -491,33 +451,6 @@ export default {
 $themeColor-Light: white;
 
 .landing-view {
-  height: 100vh;
-  width: 100vw;
-}
-.side-bar {
-  position: absolute;
-  background-color: #3B3B41;
-  z-index: 0;
-  left: 0;
-  height: 100%;
-  transition: width 100ms ease-out;
-  will-change: width;
-
-  .icon-box {
-    width: 40px;
-    margin-top: 46px;
-    margin-left: 18px;
-    margin-right: 18px;
-    display: flex;
-    flex-direction: column;
-    div {
-      width: 40px;
-      height: 40px;
-      margin-bottom: 16px;
-    }
-  }
-}
-.wrapper {
   overflow: hidden;
   will-change: width;
   transition-property: width;

@@ -1,69 +1,64 @@
 <template>
   <div
+    :style="{
+      width: isDarwin || (!isDarwin && showSidebar) ? 'calc(100vw - 76px)' : '100vw',
+    }"
     @dblclick="handleDbClick"
     class="header"
   >
     <browsing-control
-      :handle-url-reload="handleUrlReload"
       :handle-url-back="handleUrlBack"
       :handle-url-forward="handleUrlForward"
-      :back-type="backType"
-      :forward-type="forwardType"
+      :back-type="webInfo.canGoBack ? 'back' : 'backDisabled'"
+      :forward-type="webInfo.canGoForward ? 'forward' : 'forwardDisabled'"
       :web-info="webInfo"
-      :style="{
-        order: isDarwin ? 1 : 2,
-      }"
-    />
-    <browsing-favicons
-      :record-url="recordUrl"
-      :update-initial-url="updateInitialUrl"
-      :style="{
-        order: isDarwin ? 2 : 3,
-      }"
     />
     <browsing-input
-      v-show="showOpenUrl"
+      :handle-url-reload="handleUrlReload"
+      :title="title"
+      :is-loading="isLoading"
       :close-url-input="closeUrlInput"
       :play-file-with-playing-view="playFileWithPlayingView"
     />
-    <div
-      :style="{
-        width: isDarwin ? '40px' : '50px',
-        display: 'flex',
-        zIndex: '6',
-        order: isDarwin ? 3 : 1,
-        webkitAppRegion: 'no-drag',
-        cursor: webInfo.hasVideo ? 'pointer' : '',
-      }"
-    >
-      <Icon
-        :type="picInPicType"
-        :style="{
-          margin: isDarwin ? 'auto 10px auto auto' : 'auto auto auto 15px',
-        }"
-        @mouseup.native="handleEnterPip"
-      />
-    </div>
+    <browsing-pip-control
+      :has-video="webInfo.hasVideo"
+      :handle-enter-pip="handleEnterPip"
+    />
+    <browsing-title-bar
+      v-if="!isDarwin"
+      :show-sidebar="showSidebar"
+    />
   </div>
 </template>
 
 <script lang="ts">
-import { mapActions, mapGetters } from 'vuex';
-import { Browsing as browsingActions } from '@/store/actionTypes';
-import BrowsingFavicons from '@/components/BrowsingView/BrowsingFavicons.vue';
+import { mapGetters } from 'vuex';
 import BrowsingInput from '@/components/BrowsingView/BrowsingInput.vue';
 import BrowsingControl from '@/components/BrowsingView/BrowsingControl.vue';
-import Icon from '@/components/BaseIconContainer.vue';
+import BrowsingPipControl from '@/components/BrowsingView/BrowsingPipControl.vue';
+import BrowsingTitleBar from '@/components/BrowsingView/BrowsingTitleBar.vue';
 
 export default {
   name: 'BrowsingHeader',
   components: {
-    'browsing-favicons': BrowsingFavicons,
     'browsing-input': BrowsingInput,
     'browsing-control': BrowsingControl,
-    Icon,
+    'browsing-pip-control': BrowsingPipControl,
+    'browsing-title-bar': BrowsingTitleBar,
   },
   props: {
+    showSidebar: {
+      type: Boolean,
+      default: false,
+    },
+    title: {
+      type: String,
+      default: 'Splayer',
+    },
+    isLoading: {
+      type: Boolean,
+      required: true,
+    },
     handleEnterPip: {
       type: Function,
       required: true,
@@ -80,33 +75,34 @@ export default {
       type: Function,
       required: true,
     },
+    handleBookmarkOpen: {
+      type: Function,
+      required: true,
+    },
+    webInfo: {
+      type: Object,
+      required: true,
+    },
   },
   data() {
     return {
       showOpenUrl: false,
-      webInfo: {},
-      backType: 'backDisabled',
-      forwardType: 'forwardDisabled',
     };
   },
   computed: {
     ...mapGetters(['recordUrl', 'isMaximized']),
-    picInPicType() {
-      return this.webInfo.hasVideo ? 'pip' : 'pipDisabled';
-    },
     isDarwin() {
       return process.platform === 'darwin';
     },
   },
   methods: {
-    ...mapActions({
-      updateInitialUrl: browsingActions.UPDATE_INITIAL_URL,
-    }),
-    handleDbClick() {
-      if (!this.isMaximized) {
-        this.$electron.ipcRenderer.send('callMainWindowMethod', 'maximize');
-      } else {
-        this.$electron.ipcRenderer.send('callMainWindowMethod', 'unmaximize');
+    handleDbClick(e: Event) {
+      if ((e.target as HTMLElement).tagName !== 'svg') {
+        if (!this.$electron.remote.getCurrentWindow().isMaximized()) {
+          this.$electron.ipcRenderer.send('callMainWindowMethod', 'maximize');
+        } else {
+          this.$electron.ipcRenderer.send('callMainWindowMethod', 'unmaximize');
+        }
       }
     },
     closeUrlInput() {
@@ -116,15 +112,9 @@ export default {
       if (this.openFileByPlayingView(inputUrl)) {
         this.openUrlFile(inputUrl);
       } else {
-        this.updateInitialUrl(inputUrl);
+        this.$electron.remote.BrowserView.getAllViews()[1].webContents.loadURL(inputUrl);
+        this.$electron.remote.BrowserView.getAllViews()[0].webContents.loadURL(inputUrl);
       }
-    },
-    updateWebInfo(info: {
-      hasVideo: boolean, url: string, canGoBack: boolean, canGoForward: boolean
-    }) {
-      this.webInfo = info;
-      this.backType = info.canGoBack ? 'back' : 'backDisabled';
-      this.forwardType = info.canGoForward ? 'forward' : 'forwardDisabled';
     },
   },
 };
@@ -132,9 +122,15 @@ export default {
 
 <style scoped lang="scss">
 .header {
-  width: 100%;
-  height: 36px;
+  position: absolute;
+  right: 0;
+  border-top-left-radius: 4px;
+  box-sizing: border-box;
+  height: 40px;
   display: flex;
-  background: rgba(65, 65, 65, 1);
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #FFF;
 }
 </style>
