@@ -25,12 +25,6 @@
       >
         <Icon type="open" />
       </div>
-      <div
-        class="icon-hover"
-        @click="openHistory"
-      >
-        <Icon type="history" />
-      </div>
     </div>
   </div>
 </template>
