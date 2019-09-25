@@ -39,6 +39,10 @@
       class="progress"
     />
     <NotificationBubble />
+    <browsing-content
+      v-if="isHistory"
+      class="browsing-content"
+    />
   </div>
 </template>
 
@@ -52,6 +56,7 @@ import getVideoId from 'get-video-id';
 import { windowRectService } from '@/services/window/WindowRectService';
 import { Browsing as browsingActions } from '@/store/actionTypes';
 import BrowsingHeader from '@/components/BrowsingView/BrowsingHeader.vue';
+import BrowsingContent from '@/components/BrowsingView/BrowsingContent.vue';
 import asyncStorage from '@/helpers/asyncStorage';
 import NotificationBubble from '@/components/NotificationBubble.vue';
 import { getValidVideoRegex, getValidSubtitleRegex } from '../../shared/utils';
@@ -62,6 +67,7 @@ export default {
   name: 'BrowsingView',
   components: {
     'browsing-header': BrowsingHeader,
+    'browsing-content': BrowsingContent,
     NotificationBubble,
   },
   props: {
@@ -138,6 +144,7 @@ export default {
       'isFocused',
       'isPip',
       'pipMode',
+      'isHistory',
     ]),
     isDarwin() {
       return process.platform === 'darwin';
@@ -166,6 +173,9 @@ export default {
     },
   },
   watch: {
+    isHistory() {
+      this.$electron.ipcRenderer.send('open-browsing-history');
+    },
     isFullScreen(val: boolean) {
       this.$store.dispatch('updateBrowsingSize', this.winSize);
       if (!val && this.hideMainWindow) {
@@ -1034,6 +1044,12 @@ export default {
   transition-timing-function: ease-out;
   transition-duration: 500ms;
   background-color: #FF672D;
+}
+.browsing-content {
+  position: absolute;
+  top: 38px;
+  width: 100%;
+  height: 100%;
 }
 .loading-animation {
   animation: loading 3s linear 1 normal forwards;

@@ -15,11 +15,18 @@
         :select-sidebar-icon="handleSidebarIcon"
       />
     </div>
-    <div class="bottom-icon no-drag">
-      <div class="icon-hover">
+    <div
+      v-if="$route.name === 'browsing-view'"
+      class="bottom-icon no-drag"
+    >
+      <div
+        @click="openFilesByDialog"
+        class="icon-hover"
+      >
         <Icon type="open" />
       </div>
-      <div class="icon-hover"
+      <div
+        class="icon-hover"
         @click="openHistory"
       >
         <Icon type="history" />
@@ -28,7 +35,8 @@
   </div>
 </template>
 <script lang="ts">
-import { mapGetters } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
+import { Browsing as browsingActions } from '@/store/actionTypes';
 import asyncStorage from '@/helpers/asyncStorage';
 import Icon from '@/components/BaseIconContainer.vue';
 import SidebarIcon from '@/components/SidebarIcon.vue';
@@ -74,7 +82,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['pipSize', 'pipPos']),
+    ...mapGetters(['pipSize', 'pipPos', 'isHistory']),
     isDarwin() {
       return process.platform === 'darwin';
     },
@@ -93,8 +101,11 @@ export default {
     },
   },
   methods: {
+    ...mapActions({
+      updateIsHistoryPage: browsingActions.UPDATE_IS_HISTORY,
+    }),
     openHistory() {
-      
+      this.updateIsHistoryPage(!this.isHistory);
     },
     handleSidebarIcon(url: string) {
       if (this.$route.name === 'browsing-view') {
@@ -119,7 +130,7 @@ export default {
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  background-color: #39383F;
+  background-color: #3B3B41;
   z-index: 0;
   left: 0;
   width: 76px;
