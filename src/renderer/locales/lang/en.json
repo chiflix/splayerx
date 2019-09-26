@@ -242,7 +242,7 @@
   },
   "browsing": {
     "bilibili": "Bilibili",
-    "iqiyi": "iQiYi",
+    "iqiyi": "iQIYI",
     "youtube": "Youtube",
     "douyu": "Douyu",
     "openLocalFile": "Open Local File ...",
@@ -250,7 +250,7 @@
     "exitPip": "Exit Picture in Picture",
     "enterPop": "Play in New Window",
     "exitPop": "Back to Browser",
-    "danmu": "Show / Hide Danmaku"
+    "danmu": "Toggle Danmaku"
   },
   "preferences": {
     "general": {
