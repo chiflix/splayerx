@@ -244,7 +244,11 @@
     "bilibili": "Bilibili",
     "iqiyi": "iQiYi",
     "youtube": "Youtube",
-    "openLocalFile": "open local file"
+    "douyu": "Douyu",
+    "openLocalFile": "Open Local File...",
+    "pip": "Enter PiP/Exit PiP",
+    "pop": "Play in New Window/Back to Browser",
+    "sidebar": "Show/Hide Side Bar"
   },
   "preferences": {
     "general": {

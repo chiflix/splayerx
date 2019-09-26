@@ -7,6 +7,7 @@
   >
     <div
       @mouseup="handleEnterPip(pipMode === 'Enter')"
+      :title="$t(`browsing.${pipMode === 'Enter' ? 'pip' : 'pop'}`)"
       :class="hasVideo ? 'button-hover' : ''"
       class="pip-icon no-drag"
     >

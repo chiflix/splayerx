@@ -6,6 +6,7 @@
     class="browsing-control"
   >
     <div
+      :title="$t('browsing.sidebar')"
       @mouseup="handleSidebar"
       class="control-button sidebar-icon no-drag button-hover"
     >
