@@ -548,6 +548,10 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   width: 5px;
   height: 7px;
 }
+.sidebar {
+  width: 30px;
+  height: 30px;
+}
 .bilibiliSidebar, .iqiyiSidebar, .youtubeSidebar {
   width: 44px;
   height: 44px;
@@ -620,6 +624,24 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   display: block;
   width: 20px;
   height: 20px;
+}
+.history, .open {
+  width: 30px;
+  height: 30px;
+  .default {
+    display: block;
+  }
+  .hover {
+    display: none;
+  }
+  &:hover {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: block;
+    }
+  }
 }
 .pip, .pop, .pipDisabled, .popDisabled {
   width: 30px;

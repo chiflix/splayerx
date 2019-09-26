@@ -39,6 +39,10 @@
       class="progress"
     />
     <NotificationBubble />
+    <browsing-content
+      v-if="isHistory"
+      class="browsing-content"
+    />
   </div>
 </template>
 
@@ -138,6 +142,7 @@ export default {
       'isFocused',
       'isPip',
       'pipMode',
+      'isHistory',
     ]),
     isDarwin() {
       return process.platform === 'darwin';
@@ -166,6 +171,9 @@ export default {
     },
   },
   watch: {
+    isHistory() {
+      this.$electron.ipcRenderer.send('open-browsing-history');
+    },
     isFullScreen(val: boolean) {
       this.$store.dispatch('updateBrowsingSize', this.winSize);
       if (!val && this.hideMainWindow) {
@@ -344,14 +352,7 @@ export default {
     this.$bus.$on('sidebar-selected', this.handleBookmarkOpen);
     window.addEventListener('focus', this.focusHandler);
     window.addEventListener('beforeunload', this.beforeUnloadHandler);
-    this.$bus.$on('back-to-landingview', () => {
-      this.removeListener();
-      this.backToLandingView = true;
-      this.$bus.$off();
-      this.$router.push({
-        name: 'landing-view',
-      });
-    });
+    this.$bus.$on('back-to-landingview', this.backToLandingViewHandler);
     this.$electron.ipcRenderer.on('handle-exit-pip', () => {
       this.handleExitPip();
     });
@@ -416,6 +417,7 @@ export default {
   },
   beforeDestroy() {
     this.removeListener();
+    this.$bus.$off('back-to-landingview', this.backToLandingViewHandler);
     this.$store.dispatch('updateBrowsingSize', this.winSize);
     this.boundBackPosition();
     this.updateIsPip(false);
@@ -445,6 +447,14 @@ export default {
       updateBarrageOpen: browsingActions.UPDATE_BARRAGE_OPEN,
       updateIsPip: browsingActions.UPDATE_IS_PIP,
     }),
+    backToLandingViewHandler() {
+      this.removeListener();
+      this.backToLandingView = true;
+      this.$bus.$off();
+      this.$router.push({
+        name: 'landing-view',
+      });
+    },
     handlePageTitle(e: Event, title: string) {
       this.title = title;
     },
@@ -1032,6 +1042,12 @@ export default {
   transition-timing-function: ease-out;
   transition-duration: 500ms;
   background-color: #FF672D;
+}
+.browsing-content {
+  position: absolute;
+  top: 38px;
+  width: 100%;
+  height: 100%;
 }
 .loading-animation {
   animation: loading 3s linear 1 normal forwards;
