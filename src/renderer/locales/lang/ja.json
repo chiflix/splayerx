@@ -239,6 +239,18 @@
     "languageDescription": "*後でもオプション設定で変更できます。",
     "none": "None"
   },
+  "browsing": {
+    "bilibili": "",
+    "iqiyi": "",
+    "youtube": "",
+    "douyu": "",
+    "openLocalFile": "",
+    "enterPip": "",
+    "exitPip": "",
+    "enterPop": "",
+    "exitPop": "",
+    "danmu": ""
+  },
   "preferences": {
     "general": {
       "hideHistory": "再生履歴を隠す",
