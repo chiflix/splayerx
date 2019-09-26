@@ -138,3 +138,8 @@ export const Browsing = {
   IS_PIP_UPDATE: 'IS_PIP_UPDATE',
   PIP_MODE_UPDATE: 'PIP_MODE_UPDATE',
 };
+
+export const UserInfo = {
+  UPDATE_USER_TOKEN: 'UPDATE_USER_TOKEN',
+  UPDATE_USER_ID: 'UPDATE_USER_ID',
+};

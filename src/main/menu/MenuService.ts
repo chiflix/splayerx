@@ -29,6 +29,7 @@ export default class MenuService {
   }
 
   public updateAccount(user?: { id: string }) {
+    this.menu.isAccountEnabled = true;
     this.menu.updateAccount(user);
   }
 
@@ -53,10 +54,6 @@ export default class MenuService {
     });
     ipcMain.on('update-route-name', (e: Event, routeName: string) => {
       this.menu.routeName = routeName;
-    });
-    ipcMain.on('update-account', (e: Event, user?: { id: string }) => {
-      console.log(user);
-      this.menu.updateAccount(user);
     });
     ipcMain.on('update-label', (e: Event, id: string, label: string) => {
       this.menu.updateMenuItemLabel(id, label);

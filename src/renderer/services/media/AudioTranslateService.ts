@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-06-20 18:03:14
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-09-12 11:30:43
+ * @Last Modified time: 2019-09-26 15:22:36
  */
 
 // @ts-ignore
@@ -18,6 +18,7 @@ import sagi from '@/libs/sagi';
 import MediaStorageService, { mediaStorageService } from '../storage/MediaStorageService';
 import { TranscriptInfo } from '../subtitle';
 import { Stream } from '@/plugins/mediaTasks/mediaInfoQueue';
+import { isAccountEnabled } from '@/helpers/featureSwitch';
 
 type JobData = {
   audioId: string,
@@ -72,14 +73,14 @@ class AudioTranslateService extends EventEmitter {
   public ipcCallBack(event: Event, {
     time, end, error, result,
   }: {
-    time?: Buffer, end?: boolean, error?: string, result?: StreamingTranslationResponse.AsObject
+    time?: Buffer, end?: boolean, error?: Error, result?: StreamingTranslationResponse.AsObject
   }) {
     if (end) {
       this.emit('grabCompleted');
     } else if (result) {
       this.handleMainCallBack(result);
     } else if (error) {
-      this.emit('error', new Error(error));
+      this.emit('error', error);
       this.stop();
     } else if (time) {
       this.emit('grab', time);
@@ -117,9 +118,10 @@ class AudioTranslateService extends EventEmitter {
     return this;
   }
 
-  private handleMainCallBack( // eslint-disable-line complexity
+  private async handleMainCallBack( // eslint-disable-line complexity
     result: StreamingTranslationResponse.AsObject,
   ) {
+    const enabled = await isAccountEnabled();
     if (result && result.taskinfo) {
       this.taskInfo = {
         mediaHash: this.mediaHash,
@@ -136,6 +138,10 @@ class AudioTranslateService extends EventEmitter {
       this.clearJob();
     } else if (result && result.error && result.error.code === 9100) {
       ipcRenderer.send('grab-audio-continue');
+    } else if (enabled && result && result.error && result.error.code === 16) {
+      // return forbidden to render
+      this.emit('error', new Error('forbidden'));
+      this.stop();
     } else if (result && result.error) {
       // return error to render
       this.emit('error', result.error);

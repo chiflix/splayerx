@@ -57,6 +57,10 @@ export default class Menubar {
 
   private _routeName: string;
 
+  private user?: { id: string };
+
+  public isAccountEnabled: boolean;
+
   public set routeName(val: string) {
     this._routeName = val;
     this.menuStateControl();
@@ -83,6 +87,7 @@ export default class Menubar {
 
   public constructor() {
     this.locale = new Locale();
+    this.isAccountEnabled = false;
     this.currentMenuState = cloneDeep(menuTemplate as IMenubarMenuState);
     this.menuStateControl();
   }
@@ -332,7 +337,12 @@ export default class Menubar {
   }
 
   public updateAccount(user?: { id: string }) {
-    const accountMenu = this.getSubmenuById('account');
+    this.user = user;
+    const menuItem = this.menubar.getMenuItemById('account');
+    if (menuItem) {
+      menuItem.visible = this.isAccountEnabled;
+    }
+    const accountMenu = menuItem && menuItem.submenu;
     if (accountMenu && user) {
       // @ts-ignore
       accountMenu.clear();
@@ -340,9 +350,7 @@ export default class Menubar {
       }, undefined, false);
       accountMenu.append(idMenu);
       const logout = this.createMenuItem('msg.account.logout', () => {
-        if (this.mainWindow) {
-          this.mainWindow.webContents.send('account.logout');
-        }
+        app.emit('sign-out');
       }, undefined, true);
       accountMenu.append(logout);
       Menu.setApplicationMenu(this.menubar);
@@ -352,7 +360,6 @@ export default class Menubar {
       const login = this.createMenuItem('msg.account.login', () => {
         app.emit('add-login');
       }, undefined, true);
-
       accountMenu.append(login);
       Menu.setApplicationMenu(this.menubar);
     }
@@ -544,7 +551,6 @@ export default class Menubar {
 
     // account
     const account = this.createAccountMenu();
-
     menubar.append(account);
 
     // Help
@@ -620,6 +626,10 @@ export default class Menubar {
     const windowMenuItem = this.createWindowMenu();
 
     menubar.append(windowMenuItem);
+
+    // account
+    const account = this.createAccountMenu();
+    menubar.append(account);
 
     // Help
     const helpMenuItem = this.createHelpMenu();
@@ -699,8 +709,11 @@ export default class Menubar {
     // Window
     const windowMenuItem = this.createBrowsingWindowMenu();
 
-
     menubar.append(windowMenuItem);
+
+    // account
+    const account = this.createAccountMenu();
+    menubar.append(account);
 
     // Help
     const helpMenuItem = this.createHelpMenu();
@@ -836,12 +849,23 @@ export default class Menubar {
 
   private createAccountMenu() {
     const accountMenu = new Menu();
-    const login = this.createMenuItem('msg.account.login', () => {
-      app.emit('add-login');
-    }, undefined, true);
-
-    accountMenu.append(login);
-    const accountMenuItem = new MenuItem({ id: 'account', label: this.$t('msg.account.name'), submenu: accountMenu });
+    if (this.user) {
+      const idMenu = this.createMenuItem(`ID: ${this.user.id}`, () => {
+      }, undefined, false);
+      accountMenu.append(idMenu);
+      const logout = this.createMenuItem('msg.account.logout', () => {
+        app.emit('sign-out');
+      }, undefined, true);
+      accountMenu.append(logout);
+    } else {
+      const login = this.createMenuItem('msg.account.login', () => {
+        app.emit('add-login');
+      }, undefined, true);
+      accountMenu.append(login);
+    }
+    const accountMenuItem = new MenuItem({
+      id: 'account', label: this.$t('msg.account.name'), submenu: accountMenu, visible: this.isAccountEnabled,
+    });
     return accountMenuItem;
   }
 

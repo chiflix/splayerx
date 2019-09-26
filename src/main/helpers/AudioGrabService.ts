@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-22 17:18:34
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-09-11 18:41:23
+ * @Last Modified time: 2019-09-26 15:13:50
  */
 
 import { EventEmitter } from 'events';
@@ -192,6 +192,9 @@ export default class AudioGrabService extends EventEmitter {
       const metadata = new Metadata();
       metadata.set('uuid', uuid);
       metadata.set('agent', agent);
+      if (global['account'] && global['account'].token) {
+        metadata.set('Authorization', global['account'].token);
+      }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       axios.get('https://ip.xindong.com/myip', { responseType: 'text' }).then((response: any) => {
         metadata.set('clientip', response.data);

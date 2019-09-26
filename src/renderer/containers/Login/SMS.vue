@@ -43,8 +43,11 @@
     >
       {{ $t('loginModal.submit') }}
     </button>
-    <p class="error">
-      {{ $t('loginModal.error') }}
+    <p
+      v-show="message !== ''"
+      class="error"
+    >
+      {{ message }}
     </p>
   </form>
 </template>
@@ -54,10 +57,10 @@ import Vue from 'vue';
 import geoip from 'geoip-lite';
 // @ts-ignore
 import metadata from 'libphonenumber-js/metadata.mobile.json';
-import { remote, ipcRenderer } from 'electron';
+import { remote } from 'electron';
 import { parsePhoneNumberFromString, getCountryCallingCode } from 'libphonenumber-js/mobile';
-// import { AxiosResponse, AxiosError } from 'axios';
 import { log } from '@/libs/Log';
+import { signIn, getSMSCode } from '@/libs/apis';
 
 export default Vue.extend({
   name: 'SMS',
@@ -70,6 +73,7 @@ export default Vue.extend({
       code: '',
       count: 0,
       isLogin: false,
+      message: '',
     };
   },
   computed: {
@@ -107,8 +111,8 @@ export default Vue.extend({
       }
     },
     codeMaxLen() {
-      if (this.code.length > 6) {
-        this.code = this.code.slice(0, 6);
+      if (this.code.length > 4) {
+        this.code = this.code.slice(0, 4);
       }
     },
     validMobile() {
@@ -117,11 +121,6 @@ export default Vue.extend({
       let pass = false;
       for (let i = 0; i < countryCallCodes.length; i += 1) {
         const phoneNumber = parsePhoneNumberFromString(this.mobile, countryCallCodes[i]);
-        if (phoneNumber) {
-          log.debug('sms', phoneNumber);
-          log.debug('sms-0', phoneNumber.isValid());
-          log.debug('sms-1', phoneNumber.isPossible());
-        }
         if (phoneNumber && phoneNumber.isValid()) {
           pass = true;
           break;
@@ -131,28 +130,25 @@ export default Vue.extend({
     },
     validCode() {
       const code = this.code.trim();
-      return /\d{6}/g.test(code);
+      return /\d{4}/g.test(code);
     },
-    getCode() {
+    async getCode() {
       if (this.validMobile(this.mobile) && this.count === 0) {
         this.count = 60;
-        this.countDown();
         if (this.$refs.code) {
           this.$refs.code.focus();
         }
-        // this.axios.post('/user', {
-        //   firstName: 'Fred',
-        //   lastName: 'Flintstone',
-        // })
-        //   .then((response: AxiosResponse) => {
-        //     this.countDown();
-        //   })
-        //   .catch((error: AxiosError) => {
-        //   });
+        try {
+          await getSMSCode(`+${this.countryCallCode}${this.mobile}`);
+          this.countDown();
+        } catch (error) {
+          log.debug('sms', error);
+          this.count = 0;
+        }
       }
     },
     countString(count: number) {
-      return `${count}秒后重发`;
+      return this.$t('loginModal.countDown', { count });
     },
     countDown() {
       const timer = setInterval(() => {
@@ -162,16 +158,23 @@ export default Vue.extend({
         }
       }, 1000);
     },
-    submit() {
+    async submit() {
       if (this.validMobile() && this.validCode() && !this.isLogin) {
         this.isLogin = true;
-        ipcRenderer.send('login-success', {
-          token: '123',
-          user: {
-            id: 'xxx',
-          },
-        });
-        window.close();
+        this.message = '';
+        try {
+          await signIn('code', `+${this.countryCallCode}${this.mobile}`, this.code);
+          window.close();
+        } catch (error) {
+          if (error.code === '400') {
+            this.message = this.$t('loginModal.codeError');
+          } else {
+            this.message = this.$t('loginModal.netWorkError');
+          }
+          log.debug('submit', error);
+          this.count = 0;
+          this.isLogin = false;
+        }
       }
     },
     keydown(e: KeyboardEvent) { // eslint-disable-line
@@ -215,7 +218,7 @@ input, button {
   letter-spacing: 0;
   padding: 0 16px;
   background-color: rgba(94,93,102,0.25);
-  transition: background-color 200ms; 
+  transition: all 200ms;
   &:disabled, &.disabled {
     opacity: 0.3;
     cursor: default;
@@ -312,7 +315,7 @@ button {
   justify-content: space-between;
   flex-direction: row-reverse;
   input {
-    width: 190px; 
+    width: 190px;
   }
   button {
     width: 110px;

@@ -17,7 +17,7 @@
     "build:mas-dev": "scripts/mas-build.sh mas-dev",
     "build:clean": "cross-env BUILD_TARGET=clean node .electron-vue/build.js",
     "start": "npm run stage",
-    "dev": "cross-env SAGI_API=sagi-api:8443 node .electron-vue/dev-runner.js",
+    "dev": "cross-env SAGI_API=sagi-api:8443 REST_API=http://192.168.88.135:1024 node .electron-vue/dev-runner.js",
     "stage": "node .electron-vue/dev-runner.js",
     "install-app-deps": "electron-builder install-app-deps",
     "lint": "eslint --ext .ts,.js,.vue -f ./node_modules/eslint-friendly-formatter src test",

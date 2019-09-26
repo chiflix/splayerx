@@ -237,6 +237,8 @@ export default Vue.extend({
         title = this.$t('translateModal.noLineFail.title');
       } else if (this.failType === AudioTranslateFailType.TimeOut) {
         title = this.$t('translateModal.timeOutFail.title');
+      } else if (this.failType === AudioTranslateFailType.Forbidden) {
+        title = this.$t('translateModal.ForbiddenFail.title');
       }
       return title;
     },
@@ -246,6 +248,8 @@ export default Vue.extend({
         message = this.$t('translateModal.noLineFail.content');
       } else if (this.failType === AudioTranslateFailType.TimeOut) {
         message = this.$t('translateModal.timeOutFail.content');
+      } else if (this.failType === AudioTranslateFailType.Forbidden) {
+        message = this.$t('translateModal.ForbiddenFail.content');
       }
       return message;
     },

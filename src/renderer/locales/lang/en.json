@@ -412,6 +412,10 @@
       "title": "Translation Failed",
       "content": "Translation failed because of a server error. Please try later."
     },
+    "ForbiddenFail": {
+      "title": "Session Expired",
+      "content": "Please sign in again."
+    },
     "cancel": "Cancel",
     "quit": "Quit",
     "generate": "Generate",
@@ -442,6 +446,10 @@
       "title": "Translation Failed",
       "content": "Translation failed because of a server error. Please try later."
     },
+    "bubbleTranslateForbiddenFail": {
+      "title": "Session Expired",
+      "content": "Please sign in again."
+    },
     "ok": "OK",
     "cancel": "Cancel",
     "continue": "Continue"
@@ -449,11 +457,13 @@
   "loginModal": {
     "title": "Sign in with phone number",
     "sendCode": "Send",
+    "countDown": "{count} s",
     "placeholder": {
       "mobile": "Your phone number",
       "code": "Enter verification code"
     },
     "submit": "Sign In",
-    "error": "* Incorrect Verification Code"
+    "codeError": "* Incorrect Verification Code",
+    "netWorkError": "* net work error"
   }
 }

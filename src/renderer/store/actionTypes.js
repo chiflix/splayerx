@@ -132,3 +132,7 @@ export const Browsing = {
   UPDATE_IS_PIP: 'UPDATE_IS_PIP',
   UPDATE_PIP_MODE: 'UPDATE_PIP_MODE',
 };
+
+export const UserInfo = {
+  UPDATE_USER_INFO: 'UPDATE_USER_INFO',
+};

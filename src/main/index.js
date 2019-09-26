@@ -14,7 +14,9 @@ import urlParse from 'url-parse-lax';
 import { audioGrabService } from './helpers/AudioGrabService';
 import './helpers/electronPrototypes';
 import writeLog from './helpers/writeLog';
-import { getValidVideoRegex, getValidSubtitleRegex, getIP } from '../shared/utils';
+import {
+  getValidVideoRegex, getValidSubtitleRegex, getIP, getToken, saveToken,
+} from '../shared/utils';
 import { mouse } from './helpers/mouse';
 import MenuService from './menu/MenuService';
 import registerMediaTasks from './helpers/mediaTasksPlugin';
@@ -186,6 +188,7 @@ function createMaskView() {
     document.body.style.backgroundColor = 'rgba(255, 255, 255, 0.18)';
   `);
 }
+
 function markNeedToRestore() {
   fs.closeSync(fs.openSync(path.join(app.getPath('userData'), 'NEED_TO_RESTORE_MARK'), 'w'));
 }
@@ -314,11 +317,8 @@ function createLoginWindow(e, route) {
   };
   if (!loginWindow) {
     loginWindow = new BrowserWindow(loginWindowOptions);
-    // 如果播放窗口顶置，打开首选项也顶置
-    if (mainWindow && mainWindow.isAlwaysOnTop()) {
-      loginWindow.setAlwaysOnTop(true);
-    }
-
+    // 登录窗口顶置
+    loginWindow.setAlwaysOnTop(true);
     if (route) loginWindow.loadURL(`${loginURL}#/${route}`);
     else loginWindow.loadURL(`${loginURL}`);
 
@@ -1061,10 +1061,19 @@ function registerMainWindowEvent(mainWindow) {
 
   ipcMain.on('add-login', createLoginWindow);
 
-  ipcMain.on('login-success', (e, args) => {
-    if (menuService) {
-      menuService.updateAccount(args.user);
-    }
+  ipcMain.on('account-enabled', () => {
+    // get storage token
+    getToken().then((account) => {
+      if (account) {
+        global['account'] = account;
+        menuService.updateAccount(account);
+        if (mainWindow && !mainWindow.webContents.isDestroyed()) {
+          mainWindow.webContents.send('sign-in', account);
+        }
+      } else {
+        menuService.updateAccount(undefined);
+      }
+    }).catch(console.error);
   });
 }
 
@@ -1143,11 +1152,6 @@ function createMainWindow(openDialog, playlistId) {
       if (mainWindow) mainWindow.openDevTools({ mode: 'detach' });
     }, 1000);
   }
-
-  // get ip
-  getIP().then((ip) => {
-    global['static_ip'] = ip;
-  }).catch(console.error);
 }
 
 ['left-drag', 'left-up'].forEach((channel) => {
@@ -1326,6 +1330,10 @@ app.on('ready', () => {
       handleBossKey();
     });
   }
+  // get ip
+  getIP().then((ip) => {
+    global['static_ip'] = ip;
+  }).catch(console.error);
 });
 
 app.on('window-all-closed', () => {
@@ -1386,5 +1394,23 @@ app.on('activate', () => {
   }
   if (browsingWindow && browsingWindow.isMinimized()) {
     browsingWindow.restore();
+  }
+});
+
+app.on('sign-in', (account) => {
+  global['account'] = account;
+  menuService.updateAccount(account);
+  saveToken(account.token);
+  if (mainWindow && !mainWindow.webContents.isDestroyed()) {
+    mainWindow.webContents.send('sign-in', account);
+  }
+});
+
+app.on('sign-out', () => {
+  global['account'] = undefined;
+  menuService.updateAccount(undefined);
+  saveToken('');
+  if (mainWindow && !mainWindow.webContents.isDestroyed()) {
+    mainWindow.webContents.send('sign-in', undefined);
   }
 });
