@@ -245,10 +245,11 @@
     "iqiyi": "iQiYi",
     "youtube": "Youtube",
     "douyu": "Douyu",
-    "openLocalFile": "Open Local File...",
-    "pip": "Enter PiP/Exit PiP",
-    "pop": "Play in New Window/Back to Browser",
-    "sidebar": "Show/Hide Side Bar"
+    "openLocalFile": "Open Local File ...",
+    "enterPip": "Enter PiP",
+    "exitPip": "Exit PiP",
+    "enterPop": "Play in New Window",
+    "exitPop": "Back to Browser",
   },
   "preferences": {
     "general": {
