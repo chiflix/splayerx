@@ -98,7 +98,6 @@ export default {
       adaptFinished: false,
       pipInfo: {},
       isGlobal: false,
-      startLoading: false,
       title: 'Splayer',
       progress: 0,
       showProgress: false,
@@ -121,6 +120,7 @@ export default {
       },
       allChannels: ['youtube', 'bilibili', 'iqiyi', 'douyu'],
       hideMainWindow: false,
+      startLoadUrl: '',
     };
   },
   computed: {
@@ -171,6 +171,16 @@ export default {
     },
   },
   watch: {
+    startLoadUrl(val: string) {
+      if (
+        !val
+        || val === 'about:blank'
+        || urlParseLax(this.currentUrl).href === urlParseLax(val).href
+      ) return;
+      this.currentUrl = urlParseLax(val).href;
+      this.loadingState = true;
+      this.$electron.ipcRenderer.send('create-browser-view', { url: val });
+    },
     isFullScreen(val: boolean) {
       this.$store.dispatch('updateBrowsingSize', this.winSize);
       if (!val && this.hideMainWindow) {
@@ -390,6 +400,7 @@ export default {
         if (this.currentMainBrowserView()) {
           this.title = this.currentMainBrowserView().webContents.getTitle();
           this.currentUrl = urlParseLax(state.url).href;
+          this.startLoadUrl = this.currentUrl;
           this.removeListener();
           this.addListenerToBrowser();
           this.webInfo.canGoBack = state.canGoBack;
@@ -397,7 +408,6 @@ export default {
           this.updateCanGoBack(this.webInfo.canGoBack);
           this.updateCanGoForward(this.webInfo.canGoForward);
           const loadUrl = this.currentMainBrowserView().webContents.getURL();
-          this.startLoading = false;
           this.currentMainBrowserView().webContents.executeJavaScript(
             InjectJSManager.calcVideoNum(),
             (r: number) => {
@@ -624,35 +634,18 @@ export default {
       }
     },
     willNavigate(e: Event, url: string) {
-      if (!this.startLoading) {
-        this.startLoading = true;
-        if (!url
-          || url === 'about:blank'
-          || urlParseLax(this.currentUrl).href === urlParseLax(url).href
-        ) {
-          this.startLoading = false;
-        } else {
-          this.currentUrl = urlParseLax(url).href;
-          this.loadingState = true;
-          this.$electron.ipcRenderer.send('create-browser-view', { url });
-        }
-      }
+      if (
+        !url
+        || url === 'about:blank'
+        || urlParseLax(this.currentUrl).href === urlParseLax(url).href
+      ) return;
+      this.currentUrl = urlParseLax(url).href;
+      this.loadingState = true;
+      this.$electron.ipcRenderer.send('create-browser-view', { url });
     },
     didStartLoading() {
-      if (!this.startLoading) {
-        const url = this.$electron.remote
-          .getCurrentWindow()
-          .getBrowserView()
-          .webContents.getURL();
-        if (
-          !url
-          || url === 'about:blank'
-          || urlParseLax(this.currentUrl).href === urlParseLax(url).href
-        ) return;
-        this.currentUrl = urlParseLax(url).href;
-        this.loadingState = true;
-        this.$electron.ipcRenderer.send('create-browser-view', { url });
-      }
+      this.startLoadUrl = this.$electron.remote.getCurrentWindow()
+        .getBrowserView().webContents.getURL();
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ipcMessage(evt: Event, channel: string, args: any) {
@@ -692,55 +685,50 @@ export default {
       this.loadingState = false;
     },
     handleOpenUrl({ url }: { url: string }) {
-      if (!this.startLoading) {
-        this.startLoading = true;
-        const protocol = urlParseLax(url).protocol;
-        let openUrl = '';
-        if (protocol) {
-          openUrl = url;
-        } else {
-          openUrl = this.currentUrl.includes('douyu') ? `https://www.douyu.com${url}` : `https:${url}`;
+      const protocol = urlParseLax(url).protocol;
+      let openUrl = '';
+      if (protocol) {
+        openUrl = url;
+      } else {
+        openUrl = this.currentUrl.includes('douyu') ? `https://www.douyu.com${url}` : `https:${url}`;
+      }
+      if (!url || url === 'about:blank') return;
+      if (urlParseLax(openUrl).href === urlParseLax(this.currentUrl).href) {
+        this.loadingState = true;
+        this.currentMainBrowserView().webContents.loadURL(urlParseLax(openUrl).href).then(() => {
+          this.loadingState = false;
+        });
+      } else {
+        this.loadingState = true;
+        const newHostname = urlParseLax(openUrl).hostname;
+        const oldHostname = urlParseLax(this.currentUrl).hostname;
+        let oldChannel = oldHostname.slice(
+          oldHostname.indexOf('.') + 1,
+          oldHostname.length,
+        );
+        if (this.currentUrl.includes('youtube')) {
+          oldChannel = 'youtube.com';
         }
-        if (!url || url === 'about:blank') {
-          this.startLoading = false;
-        } else if (urlParseLax(openUrl).href === urlParseLax(this.currentUrl).href) {
+        let newChannel = oldChannel;
+        if (newHostname.includes(...this.allChannels)) {
+          newChannel = newHostname.slice(
+            newHostname.indexOf('.') + 1,
+            newHostname.length,
+          );
+          if (openUrl.includes('youtube')) {
+            newChannel = 'youtube.com';
+          }
+        }
+        if (this.oauthRegex.some((re: RegExp) => re.test(url))) return;
+        if (oldChannel === newChannel) {
           this.loadingState = true;
-          this.currentMainBrowserView().webContents.loadURL(urlParseLax(openUrl).href).then(() => {
-            this.startLoading = false;
-            this.loadingState = false;
+          this.currentUrl = urlParseLax(openUrl).href;
+          this.$electron.ipcRenderer.send('create-browser-view', {
+            url: openUrl,
+            isNewWindow: true,
           });
         } else {
-          this.loadingState = true;
-          const newHostname = urlParseLax(openUrl).hostname;
-          const oldHostname = urlParseLax(this.currentUrl).hostname;
-          let oldChannel = oldHostname.slice(
-            oldHostname.indexOf('.') + 1,
-            oldHostname.length,
-          );
-          if (this.currentUrl.includes('youtube')) {
-            oldChannel = 'youtube.com';
-          }
-          let newChannel = oldChannel;
-          if (newHostname.includes(...this.allChannels)) {
-            newChannel = newHostname.slice(
-              newHostname.indexOf('.') + 1,
-              newHostname.length,
-            );
-            if (openUrl.includes('youtube')) {
-              newChannel = 'youtube.com';
-            }
-          }
-          if (this.oauthRegex.some((re: RegExp) => re.test(url))) return;
-          if (oldChannel === newChannel) {
-            this.loadingState = true;
-            this.currentUrl = urlParseLax(openUrl).href;
-            this.$electron.ipcRenderer.send('create-browser-view', {
-              url: openUrl,
-              isNewWindow: true,
-            });
-          } else {
-            this.$electron.shell.openExternal(openUrl);
-          }
+          this.$electron.shell.openExternal(openUrl);
         }
       }
     },
