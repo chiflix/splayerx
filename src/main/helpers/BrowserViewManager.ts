@@ -444,6 +444,9 @@ export class BrowserViewManager implements IBrowserViewManager {
       result.page,
       this.multiPagesChannel.includes(this.currentChannel),
     );
+    result.page.view.setBounds({
+      x: 76, y: 0, width: 0, height: 0,
+    });
     return result;
   }
 
