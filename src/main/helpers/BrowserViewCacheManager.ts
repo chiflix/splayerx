@@ -140,7 +140,7 @@ class BrowserViewCacheManager implements IBrowserViewCacheManager {
     }
   }
 
-  // 清空所有缓存
+  // TODO 清空所有缓存(需要清空url和BrowserView)
   public clearAllCache(): void {
     this.singlePageHistory.clear();
     this.multiPageHistory.clear();

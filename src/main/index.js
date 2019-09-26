@@ -154,7 +154,6 @@ function createPipControlView() {
   });
   browsingWindow.addBrowserView(pipControlView);
   pipControlView.webContents.loadURL(`file:${require('path').resolve(__static, 'pip/pipControl.html')}`);
-  pipControlView.webContents.openDevTools();
   pipControlView.setBackgroundColor('#00FFFFFF');
   pipControlView.setBounds({
     x: Math.round(browsingWindow.getSize()[0] - 65),
@@ -520,7 +519,7 @@ function registerMainWindowEvent(mainWindow) {
   });
   ipcMain.on('update-locale', () => {
     locale.getDisplayLanguage();
-    if (pipControlView) {
+    if (pipControlView && !pipControlView.isDestroyed()) {
       pipControlViewTitle(isGlobal);
     }
   });
