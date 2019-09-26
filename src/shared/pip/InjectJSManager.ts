@@ -51,6 +51,10 @@ class InjectJSManager implements IInjectJSManager {
     return `document.querySelector(".pip-buttons").style.display = ${shouldShow} ? "flex" : "none";`;
   }
 
+  public updatePipControlTitle(title: string): string {
+    return `document.querySelector(".pip").title = "${title}";`;
+  }
+
   public updatePipTitlebarToShow(shouldShow: boolean): string {
     return `document.querySelector(".titlebar").style.display = ${shouldShow} ? "flex" : "none";`;
   }
