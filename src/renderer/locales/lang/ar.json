@@ -245,12 +245,12 @@
     "iqiyi": "iQIYI",
     "youtube": "Youtube",
     "douyu": "Douyu",
-    "openLocalFile": "",
+    "openLocalFile": " فتح ملف محلي ...",
     "enterPip": "أدخل صورة في صورة",
     "exitPip": "العودة إلى المتصفح",
     "enterPop": "اللعب في نافذة جديدة",
     "exitPop": "العودة إلى المتصفح",
-    "danmu": ""
+    "danmu": "وابل"
   },
   "preferences": {
     "general": {
