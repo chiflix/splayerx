@@ -402,16 +402,14 @@ export default {
           channel = 'youtube.com';
         }
         this.startLoading = false;
-        if (!this.currentMainBrowserView().webContents.isLoading()) {
-          this.currentMainBrowserView().webContents.executeJavaScript(
-            InjectJSManager.calcVideoNum(),
-            (r: number) => {
-              this.webInfo.hasVideo = channel === 'youtube.com' && !getVideoId(loadUrl).id
-                ? false
-                : !!r;
-            },
-          );
-        }
+        this.currentMainBrowserView().webContents.executeJavaScript(
+          InjectJSManager.calcVideoNum(),
+          (r: number) => {
+            this.webInfo.hasVideo = channel === 'youtube.com' && !getVideoId(loadUrl).id
+              ? false
+              : !!r;
+          },
+        );
         this.createTouchBar(this.webInfo.hasVideo);
       },
     );
