@@ -239,6 +239,18 @@
     "languageDescription": "* You can change your settings in preferences later",
     "none": "لا شيء"
   },
+  "browsing": {
+    "bilibili": "",
+    "iqiyi": "",
+    "youtube": "",
+    "douyu": "",
+    "openLocalFile": "",
+    "enterPip": "",
+    "exitPip": "",
+    "enterPop": "",
+    "exitPop": "",
+    "danmu": ""
+  },
   "preferences": {
     "general": {
       "hideHistory": "إخفاء سجل التشغيل",
