@@ -206,7 +206,7 @@
       "name": "قناة",
       "iqiyi": "iQIYI",
       "bilibili": "Bilibili",
-      "douyu": "",
+      "douyu": "Douyu",
       "youtube": "Youtube"
     },
     "edit": {
@@ -241,15 +241,15 @@
     "none": "لا شيء"
   },
   "browsing": {
-    "bilibili": "",
-    "iqiyi": "",
-    "youtube": "",
-    "douyu": "",
+    "bilibili": "Bilibili",
+    "iqiyi": "iQIYI",
+    "youtube": "Youtube",
+    "douyu": "Douyu",
     "openLocalFile": "",
-    "enterPip": "",
-    "exitPip": "",
-    "enterPop": "",
-    "exitPop": "",
+    "enterPip": "أدخل صورة في صورة",
+    "exitPip": "العودة إلى المتصفح",
+    "enterPop": "اللعب في نافذة جديدة",
+    "exitPop": "العودة إلى المتصفح",
     "danmu": ""
   },
   "preferences": {
