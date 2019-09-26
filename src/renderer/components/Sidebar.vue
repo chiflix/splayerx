@@ -71,6 +71,13 @@ export default {
           selected: false,
         },
         {
+          url: 'https://www.douyu.com/',
+          icon: 'douyuSidebar',
+          selectedType: 'douyu',
+          title: 'browsing.douyu',
+          selected: false,
+        },
+        {
           url: 'https://www.youtube.com/',
           icon: 'youtubeSidebar',
           selectedType: 'youtube',

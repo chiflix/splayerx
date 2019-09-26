@@ -154,7 +154,6 @@ function createPipControlView() {
   });
   browsingWindow.addBrowserView(pipControlView);
   pipControlView.webContents.loadURL(`file:${require('path').resolve(__static, 'pip/pipControl.html')}`);
-  pipControlView.webContents.openDevTools();
   pipControlView.setBackgroundColor('#00FFFFFF');
   pipControlView.setBounds({
     x: Math.round(browsingWindow.getSize()[0] - 65),
@@ -520,7 +519,7 @@ function registerMainWindowEvent(mainWindow) {
   });
   ipcMain.on('update-locale', () => {
     locale.getDisplayLanguage();
-    if (pipControlView) {
+    if (pipControlView && !pipControlView.isDestroyed()) {
       pipControlViewTitle(isGlobal);
     }
   });
@@ -551,6 +550,7 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('remove-browser', () => {
     mainWindow.getBrowserViews()
       .forEach(mainWindowView => mainWindow.removeBrowserView(mainWindowView));
+    if (mainWindow.isMaximized()) mainWindow.unmaximize();
     browserViewManager.pauseVideo();
     if (browsingWindow) {
       const views = browsingWindow.getBrowserViews();
@@ -568,13 +568,11 @@ function registerMainWindowEvent(mainWindow) {
     const newBrowser = val === 1 ? browserViewManager.forward() : browserViewManager.back();
     if (newBrowser.page) {
       mainWindow.addBrowserView(newBrowser.page.view);
-      setTimeout(() => {
-        mainWindow.send('update-browser-state', {
-          url: newBrowser.page.url,
-          canGoBack: newBrowser.canBack,
-          canGoForward: newBrowser.canForward,
-        });
-      }, 150);
+      mainWindow.send('update-browser-state', {
+        url: newBrowser.page.url,
+        canGoBack: newBrowser.canBack,
+        canGoForward: newBrowser.canForward,
+      });
       newBrowser.page.view.setBounds({
         x: sidebar ? 76 : 0,
         y: 40,
@@ -586,6 +584,7 @@ function registerMainWindowEvent(mainWindow) {
       });
     }
   });
+  // eslint-disable-next-line complexity
   ipcMain.on('change-channel', (evt, args) => {
     if (!browserViewManager) browserViewManager = new BrowserViewManager();
     const hostname = urlParse(args.url).hostname;
@@ -606,12 +605,24 @@ function registerMainWindowEvent(mainWindow) {
         canGoForward: newChannel.canForward,
       });
     }, 150);
-    view.setBounds({
-      x: sidebar ? 76 : 0,
-      y: 40,
-      width: sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
-      height: mainWindow.getSize()[1] - 40,
-    });
+
+    const bounds = mainWindow.getBounds();
+    if (process.platform === 'win32' && mainWindow.isMaximized() && (bounds.x < 0 || bounds.y < 0)) {
+      view.setBounds({
+        x: sidebar ? 76 : 0,
+        y: 40,
+        width: sidebar ? bounds.width + (bounds.x * 2) - 76
+          : bounds.width + (bounds.x * 2),
+        height: bounds.height - 40,
+      });
+    } else {
+      view.setBounds({
+        x: sidebar ? 76 : 0,
+        y: 40,
+        width: sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
+        height: mainWindow.getSize()[1] - 40,
+      });
+    }
     view.setAutoResize({
       width: true, height: true,
     });
@@ -814,7 +825,7 @@ function registerMainWindowEvent(mainWindow) {
     } else {
       mainWindow.removeBrowserView(mainWindow.getBrowserViews()[0]);
       mainWindow.addBrowserView(mainBrowser.page.view);
-      browsingWindow.setSize(browsingWindow.getSize()[0] + 1, browsingWindow.getSize()[1]);
+      browsingWindow.setSize(args.pipInfo.pipSize[0], args.pipInfo.pipSize[1]);
       browsingWindow.addBrowserView(pipBrowser);
       createPipControlView();
       createTitlebarView();
@@ -865,7 +876,7 @@ function registerMainWindowEvent(mainWindow) {
     if (pipControlView) pipControlView.setBounds(args.control);
     if (titlebarView) titlebarView.setBounds(args.titlebar);
   });
-  ipcMain.on('exit-pip', () => {
+  ipcMain.on('exit-pip', (evt, args) => {
     if (!browserViewManager) return;
     browsingWindow.send('remove-pip-listener');
     mainWindow.show();
@@ -876,6 +887,8 @@ function registerMainWindowEvent(mainWindow) {
       browsingWindow.removeBrowserView(view);
     });
     const exitBrowser = browserViewManager.exitPip();
+    exitBrowser.page.view.webContents.executeJavaScript(args.jsRecover);
+    if (args.cssRecover) exitBrowser.page.view.webContents.insertCSS(args.cssRecover);
     mainWindow.addBrowserView(exitBrowser.page.view);
     exitBrowser.page.view.setBounds({
       x: sidebar ? 76 : 0,
@@ -902,12 +915,31 @@ function registerMainWindowEvent(mainWindow) {
     mainWindow.show();
     menuService.updateFocusedWindow(true, mainWindow && mainWindow.isVisible());
   });
+  // eslint-disable-next-line complexity
   ipcMain.on('set-window-maximize', () => {
     if (mainWindow && mainWindow.isFocused()) {
-      if (!mainWindow.isMaximized()) {
-        mainWindow.maximize();
-      } else {
+      if (mainWindow.isMaximized()) {
         mainWindow.unmaximize();
+      } else {
+        mainWindow.maximize();
+      }
+      const bounds = mainWindow.getBounds();
+      if (process.platform === 'win32' && mainWindow.isMaximized() && (bounds.x < 0 || bounds.y < 0)) {
+        mainWindow.getBrowserViews()[0].setBounds({
+          x: sidebar ? 76 : 0,
+          y: 40,
+          width: sidebar ? bounds.width + (bounds.x * 2) - 76
+            : bounds.width + (bounds.x * 2),
+          height: bounds.height - 40,
+        });
+      } else {
+        mainWindow.getBrowserViews()[0].setBounds({
+          x: sidebar ? 76 : 0,
+          y: 40,
+          width: sidebar ? mainWindow.getSize()[0] - 76
+            : mainWindow.getSize()[0],
+          height: mainWindow.getSize()[1] - 40,
+        });
       }
     } else if (browsingWindow && browsingWindow.isFocused()) {
       if (!isBrowsingWindowMax) {
@@ -1335,5 +1367,8 @@ app.on('activate', () => {
   }
   if (browsingWindow && browsingWindow.isMinimized()) {
     browsingWindow.restore();
+  }
+  if (mainWindow && mainWindow.isMinimized()) {
+    mainWindow.restore();
   }
 });
