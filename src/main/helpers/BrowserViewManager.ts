@@ -24,6 +24,8 @@ export class BrowserViewManager implements IBrowserViewManager {
 
   private singlePageChannel: string[];
 
+  private browserViewCacheManager: BrowserViewCacheManager;
+
   // 当前画中画BrowserView的info
   private currentPip: {
     pipIndex: number,
@@ -35,6 +37,7 @@ export class BrowserViewManager implements IBrowserViewManager {
   private history: BrowserViewHistoryItem[];
 
   public constructor() {
+    this.browserViewCacheManager = new BrowserViewCacheManager();
     this.historyByChannel = new Map();
     this.currentPip = {
       pipIndex: -1,
@@ -108,7 +111,7 @@ export class BrowserViewManager implements IBrowserViewManager {
           return false;
         });
         remove(this.history, (list: BrowserViewHistoryItem) => deleteItems.includes(list));
-        BrowserViewCacheManager.clearBackPagesCache(channel, deleteItems);
+        this.browserViewCacheManager.clearBackPagesCache(channel, deleteItems);
       }
     }
 
@@ -164,7 +167,7 @@ export class BrowserViewManager implements IBrowserViewManager {
     newHistory.lastUpdateTime = Date.now();
     page.view.webContents.setAudioMuted(false);
     page.view.webContents.removeAllListeners('media-started-playing');
-    BrowserViewCacheManager.changeCacheUrl(
+    this.browserViewCacheManager.changeCacheUrl(
       this.currentChannel, channel, page, page, this.multiPagesChannel.includes(channel),
     );
     this.currentChannel = channel;
@@ -244,8 +247,8 @@ export class BrowserViewManager implements IBrowserViewManager {
     mainBrowser.page.view.setBounds({
       x: 76, y: 0, width: 0, height: 0,
     });
-    BrowserViewCacheManager.removeCacheWhenEnterPip(this.currentChannel,
-      mainBrowser.page, this.currentPip.pipPage as BrowserViewHistoryItem, deletePages);
+    this.browserViewCacheManager.removeCacheWhenEnterPip(this.currentChannel,
+      mainBrowser.page, deletePages);
     this.pauseVideo(mainBrowser.page.view, this.currentChannel, true);
     return { pipBrowser, mainBrowser };
   }
@@ -277,7 +280,7 @@ export class BrowserViewManager implements IBrowserViewManager {
     page.view.setBounds({
       x: 76, y: 0, width: 0, height: 0,
     });
-    BrowserViewCacheManager.recoverCacheWhenExitPip(this.currentChannel, page, deleteList);
+    this.browserViewCacheManager.recoverCacheWhenExitPip(this.currentChannel, page, deleteList);
     return {
       canBack: currentHistory.currentIndex > 0,
       canForward: false,
@@ -437,7 +440,7 @@ export class BrowserViewManager implements IBrowserViewManager {
     result.page.lastUpdateTime = Date.now();
     result.page.view.webContents.setAudioMuted(false);
     result.page.view.webContents.removeAllListeners('media-started-playing');
-    BrowserViewCacheManager.changeCacheUrl(
+    this.browserViewCacheManager.changeCacheUrl(
       this.currentChannel,
       this.currentChannel,
       list[currentIndex],
@@ -453,13 +456,13 @@ export class BrowserViewManager implements IBrowserViewManager {
   private addCacheByChannel(channel: string, page: BrowserViewHistoryItem): void {
     switch (true) {
       case this.multiPagesChannel.includes(channel):
-        BrowserViewCacheManager.addChannelToMulti(channel, page);
+        this.browserViewCacheManager.addChannelToMulti(channel, page);
         break;
       case this.singlePageChannel.includes(channel):
-        BrowserViewCacheManager.addChannelToSingle(channel, page);
+        this.browserViewCacheManager.addChannelToSingle(channel, page);
         break;
       default:
-        BrowserViewCacheManager.addChannelToSingle(channel, page);
+        this.browserViewCacheManager.addChannelToSingle(channel, page);
         break;
     }
   }

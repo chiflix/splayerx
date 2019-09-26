@@ -34,6 +34,7 @@ class BrowserViewCacheManager implements IBrowserViewCacheManager {
     this.multiMaxNum = 1;
   }
 
+  // 将只允许缓存一个页面的频道更新到单页缓存列表中
   public addChannelToSingle(channel: string, info: BrowserViewHistoryItem): void {
     // 当前允许单页缓存的channel超过最大可缓存的限制
     if (this.singlePageHistory.size >= this.singleMaxNum) {
@@ -51,32 +52,35 @@ class BrowserViewCacheManager implements IBrowserViewCacheManager {
       // 销毁上一个view
       info.view.destroy();
     }
-    console.log('single', channel, this.singlePageHistory.get(channel));
   }
 
+  // 将允许多页缓存的频道更新到多页缓存的列表中
   public addChannelToMulti(channel: string, info: BrowserViewHistoryItem, pageNum?: number): void {
     pageNum = pageNum || 2; // 默认每个channel最多缓存2个page
+    const multiPageHistory = this.multiPageHistory.get(channel) as BrowserMultiCache;
 
+    // 如果该频道存在于单页缓存则将其移除
     if (this.singlePageHistory.has(channel)) this.singlePageHistory.delete(channel);
     if (this.multiPageHistory.has(channel)) {
       // 该channel缓存页数量是否超过最大数量
-      if ((this.multiPageHistory.get(channel) as BrowserMultiCache).pages.length < pageNum) {
-        (this.multiPageHistory.get(channel) as BrowserMultiCache).pages.push(info);
+      if (multiPageHistory.pages.length < pageNum) {
+        multiPageHistory.pages.push(info);
       } else {
-        const destroyItem = (this.multiPageHistory.get(channel) as BrowserMultiCache).pages.pop();
+        const destroyItem = multiPageHistory.pages.pop();
         (destroyItem as BrowserViewHistoryItem).view.destroy();
-        (this.multiPageHistory.get(channel) as BrowserMultiCache).pages.push(info);
+        multiPageHistory.pages.push(info);
       }
-      (this.multiPageHistory.get(channel) as BrowserMultiCache).lastUpdateTime = Date.now();
-    } else if (this.multiPageHistory.size >= this.multiMaxNum) { // 当前允许多页缓存的channel超过最大可缓存的限制
+      multiPageHistory.lastUpdateTime = Date.now();
+    } else if (this.multiPageHistory.size >= this.multiMaxNum) { // 当前允许多页缓存的频道超过最大可缓存的限制
       const key = this.multiPageHistory.keys().next().value;
       const pages = (this.multiPageHistory.get(key) as BrowserMultiCache).pages;
-      // 单页缓存超过上限，清空最早产生的单页缓存，将当前多页缓存降为单页缓存
+      // 若当前单页缓存超过上限，清空最早产生的单页缓存
       if (this.singlePageHistory.size >= this.singleMaxNum) {
         const lastSingleKey = this.singlePageHistory.keys().next().value;
         (this.singlePageHistory.get(lastSingleKey) as BrowserSingleCache).page.view.destroy();
         this.singlePageHistory.delete(lastSingleKey);
       }
+      // 将多页缓存中最早记录的频道降为单页缓存
       pages.forEach((page: BrowserViewHistoryItem, index: number) => {
         if (index === 0) {
           this.addChannelToSingle(key, page);
@@ -85,11 +89,12 @@ class BrowserViewCacheManager implements IBrowserViewCacheManager {
         }
       });
       this.multiPageHistory.delete(key);
+      // 记录最新频道的多页缓存
       this.multiPageHistory.set(channel, {
         lastUpdateTime: Date.now(),
         pages: [info],
       });
-    } else {
+    } else { // 当前未超过多页缓存频道数量的限制，直接存入map
       this.multiPageHistory.set(channel, {
         lastUpdateTime: Date.now(),
         pages: [info],
@@ -98,7 +103,6 @@ class BrowserViewCacheManager implements IBrowserViewCacheManager {
 
     (this.multiPageHistory.get(channel) as BrowserMultiCache).pages
       .sort((a, b) => b.lastUpdateTime - a.lastUpdateTime);
-    console.log('multi', channel, this.multiPageHistory.get(channel));
   }
 
   // 更新已缓存的cache
@@ -113,7 +117,6 @@ class BrowserViewCacheManager implements IBrowserViewCacheManager {
           lastUpdateTime: Date.now(),
           page: newPage,
         });
-        console.log('single', newChannel, this.singlePageHistory.get(newChannel));
       }
     } else {
       let isExist = false;
@@ -133,16 +136,17 @@ class BrowserViewCacheManager implements IBrowserViewCacheManager {
         (this.multiPageHistory.get(newChannel) as BrowserMultiCache).lastUpdateTime = Date.now();
         (this.multiPageHistory.get(newChannel) as BrowserMultiCache).pages
           .sort((a, b) => b.lastUpdateTime - a.lastUpdateTime);
-        console.log('multi', newChannel, this.multiPageHistory.get(newChannel));
       }
     }
   }
 
+  // 清空所有缓存
   public clearAllCache(): void {
     this.singlePageHistory.clear();
     this.multiPageHistory.clear();
   }
 
+  // 由于后退产生的历史记录在被清空的时候同时也需要清空缓存
   public clearBackPagesCache(channel: string, items: BrowserViewHistoryItem[]): void {
     if (this.multiPageHistory.has(channel)) {
       (this.multiPageHistory.get(channel) as BrowserMultiCache)
@@ -151,22 +155,22 @@ class BrowserViewCacheManager implements IBrowserViewCacheManager {
     }
   }
 
+  // 进入画中画时将画中画页面移除缓存
   public removeCacheWhenEnterPip(channel: string, mainPage: BrowserViewHistoryItem,
-    pipPage: BrowserViewHistoryItem, deletePages: BrowserViewHistoryItem[]): void {
+    deletePages: BrowserViewHistoryItem[]): void {
     if (this.singlePageHistory.has(channel)) {
       this.singlePageHistory.set(channel, {
         lastUpdateTime: Date.now(),
         page: mainPage,
       });
-      console.log('single', channel, this.singlePageHistory.get(channel));
     } else {
       (this.multiPageHistory.get(channel) as BrowserMultiCache)
         .pages = (this.multiPageHistory.get(channel) as BrowserMultiCache).pages
           .filter((page: BrowserViewHistoryItem) => !deletePages.includes(page));
-      console.log('multi', channel, this.multiPageHistory.get(channel));
     }
   }
 
+  // 退出画中画时恢复画中画页面的缓存
   public recoverCacheWhenExitPip(channel: string,
     mainPage: BrowserViewHistoryItem, deletePages: BrowserViewHistoryItem[]): void {
     if (this.singlePageHistory.has(channel)) {
@@ -174,7 +178,6 @@ class BrowserViewCacheManager implements IBrowserViewCacheManager {
         lastUpdateTime: Date.now(),
         page: mainPage,
       });
-      console.log('single', channel, this.singlePageHistory.get(channel));
     } else {
       (this.multiPageHistory.get(channel) as BrowserMultiCache)
         .pages = (this.multiPageHistory.get(channel) as BrowserMultiCache).pages
@@ -199,11 +202,10 @@ interface IBrowserViewCacheManager {
   removeCacheWhenEnterPip(
     channel: string,
     mainPage: BrowserViewHistoryItem,
-    pipPage: BrowserViewHistoryItem,
     deletePages: BrowserViewHistoryItem[],
   ): void
   recoverCacheWhenExitPip(channel: string,
     mainPage: BrowserViewHistoryItem, deletePages: BrowserViewHistoryItem[]): void
 }
 
-export default new BrowserViewCacheManager();
+export default BrowserViewCacheManager;
