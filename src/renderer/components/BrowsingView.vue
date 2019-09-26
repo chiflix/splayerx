@@ -634,7 +634,7 @@ export default {
         } else {
           this.currentUrl = urlParseLax(url).href;
           this.loadingState = true;
-          this.$electron.ipcRenderer.send('create-browser-view', {url});
+          this.$electron.ipcRenderer.send('create-browser-view', { url });
         }
       }
     },
