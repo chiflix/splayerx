@@ -46,7 +46,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['isFullScreen']),
+    ...mapGetters(['isFullScreen', 'isMaximized']),
     isDarwin() {
       return process.platform === 'darwin';
     },

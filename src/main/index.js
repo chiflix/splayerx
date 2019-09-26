@@ -532,6 +532,7 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('remove-browser', () => {
     mainWindow.getBrowserViews()
       .forEach(mainWindowView => mainWindow.removeBrowserView(mainWindowView));
+    if (mainWindow.isMaximized()) mainWindow.unmaximize();
     browserViewManager.pauseVideo();
     if (browsingWindow) {
       const views = browsingWindow.getBrowserViews();
@@ -902,7 +903,7 @@ function registerMainWindowEvent(mainWindow) {
         mainWindow.maximize();
       }
       const bounds = mainWindow.getBounds();
-      if (process.platform === 'win32' && !mainWindow.isMaximized() && (bounds.x < 0 || bounds.y < 0)) {
+      if (process.platform === 'win32' && mainWindow.isMaximized() && (bounds.x < 0 || bounds.y < 0)) {
         mainWindow.getBrowserViews()[0].setBounds({
           x: sidebar ? 76 : 0,
           y: 40,
