@@ -20,6 +20,7 @@ import MenuService from './menu/MenuService';
 import registerMediaTasks from './helpers/mediaTasksPlugin';
 import { BrowserViewManager } from './helpers/BrowserViewManager';
 import InjectJSManager from '../../src/shared/pip/InjectJSManager';
+import Locale from '../shared/common/localize';
 
 // requestSingleInstanceLock is not going to work for mas
 // https://github.com/electron-userland/electron-packager/issues/923
@@ -60,6 +61,7 @@ if (process.env.NODE_ENV !== 'development') {
 
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 
+let isGlobal = false;
 let sidebar = false;
 let welcomeProcessDone = false;
 let menuService = null;
@@ -84,6 +86,7 @@ let needBlockCloseLaborWindow = true; // 标记是否阻塞nsfw窗口关闭
 let inited = false;
 let hideBrowsingWindow = false;
 let finalVideoToOpen = [];
+const locale = new Locale();
 const tmpVideoToOpen = [];
 const tmpSubsToOpen = [];
 const subRegex = getValidSubtitleRegex();
@@ -136,6 +139,12 @@ function handleBossKey() {
   }
 }
 
+function pipControlViewTitle(isGlobal) {
+  const danmu = locale.$t('browsing.danmu');
+  const title = isGlobal ? locale.$t('browsing.exitPip') : locale.$t('browsing.exitPop');
+  pipControlView.webContents.executeJavaScript(InjectJSManager.updatePipControlTitle(title, danmu));
+}
+
 function createPipControlView() {
   if (pipControlView && !pipControlView.isDestroyed()) pipControlView.destroy();
   pipControlView = new BrowserView({
@@ -145,6 +154,7 @@ function createPipControlView() {
   });
   browsingWindow.addBrowserView(pipControlView);
   pipControlView.webContents.loadURL(`file:${require('path').resolve(__static, 'pip/pipControl.html')}`);
+  pipControlView.webContents.openDevTools();
   pipControlView.setBackgroundColor('#00FFFFFF');
   pipControlView.setBounds({
     x: Math.round(browsingWindow.getSize()[0] - 65),
@@ -508,6 +518,12 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('pip-watcher', (evt, args) => {
     browsingWindow.getBrowserViews()[0].webContents.executeJavaScript(args);
   });
+  ipcMain.on('update-locale', () => {
+    locale.getDisplayLanguage();
+    if (pipControlView) {
+      pipControlViewTitle(isGlobal);
+    }
+  });
   ipcMain.on('pip-window-fullscreen', () => {
     if (browsingWindow && browsingWindow.isFocused()) {
       browsingWindow.setFullScreen(!browsingWindow.isFullScreen());
@@ -524,6 +540,9 @@ function registerMainWindowEvent(mainWindow) {
       browserViewManager.pipClose();
       mainWindow.send('update-pip-state', args);
     }
+  });
+  ipcMain.on('open-browsing-history', () => {
+    mainWindow.removeBrowserView(mainWindow.getBrowserViews()[0]);
   });
   ipcMain.on('remove-main-window', () => {
     browserViewManager.pauseVideo(mainWindow.getBrowserViews()[0]);
@@ -759,6 +778,7 @@ function registerMainWindowEvent(mainWindow) {
     createPipControlView();
     createTitlebarView();
     if (args.isGlobal) {
+      isGlobal = args.isGlobal;
       browserViewManager.pauseVideo(mainWindow.getBrowserViews()[0]);
       mainWindow.hide();
     }
@@ -813,6 +833,7 @@ function registerMainWindowEvent(mainWindow) {
       browsingWindow.show();
     }
     if (args.isGlobal) {
+      isGlobal = args.isGlobal;
       mainWindow.hide();
     }
     browsingWindow.webContents.closeDevTools();
@@ -842,6 +863,7 @@ function registerMainWindowEvent(mainWindow) {
     });
     pipControlView.webContents
       .executeJavaScript(InjectJSManager.updateBarrageState(args.barrageOpen, args.opacity));
+    pipControlViewTitle(args.isGlobal);
     menuService.updateFocusedWindow(false, mainWindow && mainWindow.isVisible());
     browsingWindow.focus();
   });

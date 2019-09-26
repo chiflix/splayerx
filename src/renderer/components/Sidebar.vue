@@ -4,28 +4,44 @@
   >
     <div
       :class="{ 'win': !isDarwin }"
-      class="icon-box"
+      class="icon-box no-drag"
+    >
+      <SidebarIcon
+        :key="url"
+        v-for="({ url, icon, title, selected }) in channels"
+        :url="url"
+        :title="title"
+        :icon="icon"
+        :selected="selected"
+        :select-sidebar-icon="handleSidebarIcon"
+      />
+    </div>
+    <div
+      v-if="$route.name === 'browsing-view'"
+      class="bottom-icon no-drag"
     >
       <div
-        v-for="(channel, index) in channels"
-        @click="handleSidebarIcon(channel)"
-        :class="{ selected: selectedIndex === index }"
-        class="icon-hover no-drag"
+        @click="openFilesByDialog"
+        :title="$t('browsing.openLocalFile')"
+        class="icon-hover"
       >
-        <Icon :type="chanelIcons[index]" />
+        <Icon type="open" />
       </div>
     </div>
   </div>
 </template>
 <script lang="ts">
-import { mapGetters } from 'vuex';
-import Icon from '@/components/BaseIconContainer.vue';
+import { mapGetters, mapActions } from 'vuex';
+import { Browsing as browsingActions } from '@/store/actionTypes';
 import asyncStorage from '@/helpers/asyncStorage';
+import Icon from '@/components/BaseIconContainer.vue';
+import SidebarIcon from '@/components/SidebarIcon.vue';
 
 export default {
   name: 'Sidebar',
   components: {
     Icon,
+    SidebarIcon,
   },
   props: {
     showSidebar: {
@@ -39,21 +55,64 @@ export default {
   },
   data() {
     return {
-      channels: ['https://www.bilibili.com/', 'https://www.iqiyi.com/', 'https://www.douyu.com/', 'https://www.youtube.com/'],
-      chanelIcons: ['bilibiliSidebar', 'iqiyiSidebar', 'douyuSidebar', 'youtubeSidebar'],
-      selectedTypes: ['bilibili', 'iqiyi', 'douyu', 'youtube'],
+      channels: [
+        {
+          url: 'https://www.bilibili.com/',
+          icon: 'bilibiliSidebar',
+          selectedType: 'bilibili',
+          title: 'browsing.bilibili',
+          selected: false,
+        },
+        {
+          url: 'https://www.iqiyi.com/',
+          icon: 'iqiyiSidebar',
+          selectedType: 'iqiyi',
+          title: 'browsing.iqiyi',
+          selected: false,
+        },
+        {
+          url: 'https://www.douyu.com/',
+          icon: 'douyuSidebar',
+          selectedType: 'douyu',
+          title: 'browsing.douyu',
+          selected: false,
+        },
+        {
+          url: 'https://www.youtube.com/',
+          icon: 'youtubeSidebar',
+          selectedType: 'youtube',
+          title: 'browsing.youtube',
+          selected: false,
+        },
+      ],
     };
   },
   computed: {
-    ...mapGetters(['pipSize', 'pipPos']),
-    selectedIndex() {
-      return this.selectedTypes.findIndex((type: string) => this.currentUrl.includes(type));
-    },
+    ...mapGetters(['pipSize', 'pipPos', 'isHistory']),
     isDarwin() {
       return process.platform === 'darwin';
     },
   },
+  watch: {
+    currentUrl(val: string) {
+      this.channels.forEach((channel: { selected: boolean }) => {
+        channel.selected = false;
+      });
+      if (val) {
+        const selectedChannel = this.channels.find(
+          (channel: { selectedType: string }) => val.includes(channel.selectedType),
+        );
+        if (selectedChannel) selectedChannel.selected = true;
+      }
+    },
+  },
   methods: {
+    ...mapActions({
+      updateIsHistoryPage: browsingActions.UPDATE_IS_HISTORY,
+    }),
+    openHistory() {
+      this.updateIsHistoryPage(!this.isHistory);
+    },
     handleSidebarIcon(url: string) {
       if (this.$route.name === 'browsing-view') {
         this.$bus.$emit('sidebar-selected', url);
@@ -73,7 +132,11 @@ export default {
 <style lang="scss" scoped>
 .side-bar {
   position: absolute;
-  background-color: #39383F;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #3B3B41;
   z-index: 0;
   left: 0;
   width: 76px;
@@ -84,35 +147,13 @@ export default {
   .icon-box {
     width: 44px;
     margin-top: 42px;
-    margin-left: 16px;
-    margin-right: 16px;
     display: flex;
     flex-direction: column;
-    div {
-      transition: opacity 100ms ease-in;
-      opacity: 0.7;
-      width: 44px;
-      height: 44px;
-      margin-bottom: 12px;
-    }
-    .icon-hover {
-      -webkit-app-region: no-drag;
-    }
-    .icon-hover:hover {
-      opacity: 1.0;
-    }
-    .selected {
-      opacity: 1.0;
-      &::before {
-        content: '';
-        position: absolute;
-        width: 44px;
-        height: 44px;
-        border: 2px solid #E0E0EA;
-        border-radius: 100%;
-        box-sizing: border-box;
-      }
-    }
+  }
+  .bottom-icon {
+    display:flex;
+    flex-direction: column;
+    margin-bottom: 18px;
   }
   .win {
     margin-top: 16px;
