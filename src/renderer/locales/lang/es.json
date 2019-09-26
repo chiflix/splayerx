@@ -206,7 +206,7 @@
       "name": "Canal",
       "iqiyi": "iQIYI",
       "bilibili": "Bilibili",
-      "douyu": "",
+      "douyu": "Douyu",
       "youtube": "Youtube"
     },
     "edit": {
@@ -241,16 +241,16 @@
     "none": "None"
   },
   "browsing": {
-    "bilibili": "",
-    "iqiyi": "",
-    "youtube": "",
-    "douyu": "",
-    "openLocalFile": "",
-    "enterPip": "",
-    "exitPip": "",
-    "enterPop": "",
-    "exitPop": "",
-    "danmu": ""
+    "bilibili": "Bilibili",
+    "iqiyi": "iQIYI",
+    "youtube": "Youtube",
+    "douyu": "Douyu",
+    "openLocalFile": "Abrir archivo local...",
+    "enterPip": "Habilitar Picture in Picture",
+    "exitPip": "Volver al navegador",
+    "enterPop": "Reproducir en ventana nueva",
+    "exitPop": "Volver al navegador",
+    "danmu": "Alternar Danmaku"
   },
   "preferences": {
     "general": {
