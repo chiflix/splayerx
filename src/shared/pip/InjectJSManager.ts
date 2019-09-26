@@ -16,7 +16,7 @@ class InjectJSManager implements IInjectJSManager {
       + 'document.getElementsByTagName("video").length'
       + '}';
     this.getVideoStyleCode = 'getComputedStyle(document.querySelector("video") || document.querySelector("iframe").contentDocument.querySelector("video"))';
-    this.pauseNormalVideo = 'setTimeout(() => { document.querySelector("video").pause(); }, 100)';
+    this.pauseNormalVideo = 'document.querySelector("video").pause();';
   }
 
   public getPipByChannel(info: { channel: string, type?: string,

@@ -588,7 +588,6 @@ function registerMainWindowEvent(mainWindow) {
     mainWindow.getBrowserViews()
       .forEach(mainWindowView => mainWindow.removeBrowserView(mainWindowView));
     browserViewManager.pauseVideo();
-    browserViewManager.clearAllBrowserViews();
     if (browsingWindow) {
       const views = browsingWindow.getBrowserViews();
       views.forEach((view) => {
@@ -597,29 +596,31 @@ function registerMainWindowEvent(mainWindow) {
       browserViewManager.pipClose();
       browsingWindow.close();
     }
+    browserViewManager.clearAllBrowserViews();
   });
   ipcMain.on('go-to-offset', (evt, val) => {
     if (!browserViewManager) return;
+    mainWindow.removeBrowserView(mainWindow.getBrowserViews()[0]);
     const newBrowser = val === 1 ? browserViewManager.forward() : browserViewManager.back();
-    const id = mainWindow.getBrowserViews()[0].id;
-    mainWindow.addBrowserView(newBrowser.page.view);
-    setTimeout(() => {
-      mainWindow.removeBrowserView(BrowserView.fromId(id));
-      mainWindow.send('update-browser-state', {
-        url: newBrowser.page.url,
-        canGoBack: newBrowser.canBack,
-        canGoForward: newBrowser.canForward,
+    if (newBrowser.page) {
+      mainWindow.addBrowserView(newBrowser.page.view);
+      setTimeout(() => {
+        mainWindow.send('update-browser-state', {
+          url: newBrowser.page.url,
+          canGoBack: newBrowser.canBack,
+          canGoForward: newBrowser.canForward,
+        });
+      }, 150);
+      newBrowser.page.view.setBounds({
+        x: sidebar ? 76 : 0,
+        y: 40,
+        width: sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
+        height: mainWindow.getSize()[1] - 40,
       });
-    }, 150);
-    newBrowser.page.view.setBounds({
-      x: sidebar ? 76 : 0,
-      y: 40,
-      width: sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
-      height: mainWindow.getSize()[1] - 40,
-    });
-    newBrowser.page.view.setAutoResize({
-      width: true, height: true,
-    });
+      newBrowser.page.view.setAutoResize({
+        width: true, height: true,
+      });
+    }
   });
   ipcMain.on('change-channel', (evt, args) => {
     if (!browserViewManager) browserViewManager = new BrowserViewManager();
@@ -628,13 +629,13 @@ function registerMainWindowEvent(mainWindow) {
     if (args.url.includes('youtube')) {
       channel = 'youtube.com';
     }
+    const mainBrowser = mainWindow.getBrowserViews()[0];
+    if (mainBrowser) mainWindow.removeBrowserView(mainBrowser);
     const newChannel = browserViewManager.changeChannel(channel, args);
     const view = newChannel.view ? newChannel.view : newChannel.page.view;
     const url = newChannel.view ? args.url : newChannel.page.url;
-    const mainBrowser = mainWindow.getBrowserViews()[0];
     mainWindow.addBrowserView(view);
     setTimeout(() => {
-      if (mainBrowser) mainWindow.removeBrowserView(BrowserView.fromId(mainBrowser.id));
       mainWindow.send('update-browser-state', {
         url,
         canGoBack: newChannel.canBack,
@@ -855,7 +856,6 @@ function registerMainWindowEvent(mainWindow) {
       browsingWindow.show();
     }
     if (args.isGlobal) {
-      browserViewManager.pauseVideo(mainWindow.getBrowserViews()[0]);
       mainWindow.hide();
     }
     browsingWindow.webContents.closeDevTools();
