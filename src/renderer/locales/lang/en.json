@@ -240,6 +240,17 @@
     "languageDescription": "* You can change your settings in preferences later",
     "none": "None"
   },
+  "browsing": {
+    "bilibili": "Bilibili",
+    "iqiyi": "iQiYi",
+    "youtube": "Youtube",
+    "douyu": "Douyu",
+    "openLocalFile": "Open Local File ...",
+    "enterPip": "Enter PiP",
+    "exitPip": "Exit PiP",
+    "enterPop": "Play in New Window",
+    "exitPop": "Back to Browser"
+  },
   "preferences": {
     "general": {
       "hideHistory": "Hide playback history",
