@@ -140,8 +140,9 @@ function handleBossKey() {
 }
 
 function pipControlViewTitle(isGlobal) {
+  const danmu = locale.$t('browsing.danmu');
   const title = isGlobal ? locale.$t('browsing.exitPip') : locale.$t('browsing.exitPop');
-  pipControlView.webContents.executeJavaScript(InjectJSManager.updatePipControlTitle(title));
+  pipControlView.webContents.executeJavaScript(InjectJSManager.updatePipControlTitle(title, danmu));
 }
 
 function createPipControlView() {
