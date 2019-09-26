@@ -239,6 +239,18 @@
     "languageDescription": "* 稍后您可以在偏好设置里更改",
     "none": "无"
   },
+  "browsing": {
+    "bilibili": "",
+    "iqiyi": "",
+    "youtube": "",
+    "douyu": "",
+    "openLocalFile": "",
+    "enterPip": "",
+    "exitPip": "",
+    "enterPop": "",
+    "exitPop": "",
+    "danmu": ""
+  },
   "preferences": {
     "general": {
       "hideHistory": "隐藏历史记录",
