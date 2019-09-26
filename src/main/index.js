@@ -1347,4 +1347,7 @@ app.on('activate', () => {
   if (browsingWindow && browsingWindow.isMinimized()) {
     browsingWindow.restore();
   }
+  if (mainWindow && mainWindow.isMinimized()) {
+    mainWindow.restore();
+  }
 });
