@@ -240,15 +240,15 @@
     "none": "无"
   },
   "browsing": {
-    "bilibili": "",
-    "iqiyi": "",
-    "youtube": "",
-    "douyu": "",
-    "openLocalFile": "",
-    "enterPip": "",
-    "exitPip": "",
-    "enterPop": "",
-    "exitPop": "",
+    "bilibili": "哔哩哔哩",
+    "iqiyi": "爱奇艺",
+    "youtube": "Youtube",
+    "douyu": "斗鱼",
+    "openLocalFile": "打开本地文件 ...",
+    "enterPip": "进入画中画",
+    "exitPip": "退出画中画",
+    "enterPop": "新窗口播放",
+    "exitPop": "还原窗口",
     "danmu": ""
   },
   "preferences": {
