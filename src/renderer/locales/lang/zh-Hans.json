@@ -206,7 +206,7 @@
       "name": "频道",
       "iqiyi": "爱奇艺",
       "bilibili": "哔哩哔哩",
-      "douyu": "",
+      "douyu": "斗鱼",
       "youtube": "Youtube"
     },
     "edit": {
@@ -250,7 +250,7 @@
     "exitPip": "退出画中画",
     "enterPop": "新窗口播放",
     "exitPop": "还原窗口",
-    "danmu": ""
+    "danmu": "弹幕开关"
   },
   "preferences": {
     "general": {
