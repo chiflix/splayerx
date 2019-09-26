@@ -206,7 +206,7 @@
       "name": "채널",
       "iqiyi": "iQIYI",
       "bilibili": "Bilibili",
-      "douyu": "",
+      "douyu": "Douyu",
       "youtube": "Youtube"
     },
     "edit": {
@@ -241,16 +241,16 @@
     "none": "None"
   },
   "browsing": {
-    "bilibili": "",
-    "iqiyi": "",
-    "youtube": "",
-    "douyu": "",
-    "openLocalFile": "",
-    "enterPip": "",
-    "exitPip": "",
-    "enterPop": "",
-    "exitPop": "",
-    "danmu": ""
+    "bilibili": "Bilibili",
+    "iqiyi": "iQIYI",
+    "youtube": "Youtube",
+    "douyu": "Douyu",
+    "openLocalFile": "로컬 파일 열기 ...",
+    "enterPip": "Picture In Picture 사용",
+    "exitPip": "브라우저로 돌아 가기",
+    "enterPop": "새 창에서 놀다",
+    "exitPop": "브라우저로 돌아 가기",
+    "danmu": "탄막"
   },
   "preferences": {
     "general": {
