@@ -388,6 +388,10 @@
         "label": "msg.favourite.bilibili"
       },
       {
+        "id": "favourite.douyu",
+        "label": "msg.favourite.douyu"
+      },
+      {
         "id": "favourite.youtube",
         "label": "msg.favourite.youtube"
       }
