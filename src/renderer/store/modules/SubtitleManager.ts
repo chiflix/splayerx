@@ -671,7 +671,7 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
           const subtitle: IEntity = await dispatch(`${id}/${subActions.add}`, subtitleGenerator);
           await dispatch(`${id}/${subActions.store}`);
           commit(m.addSubtitleId, { id, entity: subtitle });
-          return subtitle;
+          return Object.assign(subtitle, { id });
         }
       } catch (ex) {
         log.warn('SubtitleManager addSubtitle action', ex);
@@ -789,7 +789,7 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
       .filter(id => state.allSubtitles[id])
       .filter((id) => {
         const source = state.allSubtitles[id].displaySource;
-        return source && source.type !== Type.Translated && source.source;
+        return source && source.source;
       })
       .map((id) => {
         const { hash, displaySource } = allSubtitles[id];

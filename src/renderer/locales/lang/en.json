@@ -246,10 +246,11 @@
     "youtube": "Youtube",
     "douyu": "Douyu",
     "openLocalFile": "Open Local File ...",
-    "enterPip": "Enter PiP",
-    "exitPip": "Exit PiP",
+    "enterPip": "Enter Picture in Picture",
+    "exitPip": "Exit Picture in Picture",
     "enterPop": "Play in New Window",
-    "exitPop": "Back to Browser"
+    "exitPop": "Back to Browser",
+    "danmu": "Show / Hide Danmaku"
   },
   "preferences": {
     "general": {
