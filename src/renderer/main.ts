@@ -793,7 +793,6 @@ new Vue({
           });
         });
       });
-
       this.menuService.on('history.reload', () => {
         this.$bus.$emit('toggle-reload');
       });
