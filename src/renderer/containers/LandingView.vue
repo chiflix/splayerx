@@ -5,7 +5,7 @@
       :open-input-url="openInputUrl"
       :close-url-input="closeUrlInput"
     />
-    <transition name="basidebckground-container-transition">
+    <transition name="background-container-transition">
       <div
         v-if="item.backgroundUrl"
         class="background"

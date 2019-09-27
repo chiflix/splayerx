@@ -7,6 +7,7 @@ const state = {
   barrageOpen: false,
   isPip: false,
   pipMode: 'Enter',
+  isHistory: false,
 };
 const getters = {
   initialUrl: state => state.initialUrl,
@@ -14,6 +15,7 @@ const getters = {
   barrageOpen: state => state.barrageOpen,
   isPip: state => state.isPip,
   pipMode: state => state.pipMode,
+  isHistory: state => state.isHistory,
 };
 
 const mutations = {
@@ -32,6 +34,9 @@ const mutations = {
   [browsingMutations.PIP_MODE_UPDATE](state, payload) {
     state.pipMode = payload;
   },
+  [browsingMutations.IS_HISTORY_UPDATE](state, payload) {
+    state.isHistory = payload;
+  },
 };
 const actions = {
   [browsingActions.UPDATE_INITIAL_URL]({ commit }, delta) {
@@ -48,6 +53,9 @@ const actions = {
   },
   [browsingActions.UPDATE_PIP_MODE]({ commit }, delta) {
     commit(browsingMutations.PIP_MODE_UPDATE, delta);
+  },
+  [browsingActions.UPDATE_IS_HISTORY]({ commit }, delta) {
+    commit(browsingMutations.IS_HISTORY_UPDATE, delta);
   },
 };
 export default {

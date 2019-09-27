@@ -22,6 +22,7 @@ import MenuService from './menu/MenuService';
 import registerMediaTasks from './helpers/mediaTasksPlugin';
 import { BrowserViewManager } from './helpers/BrowserViewManager';
 import InjectJSManager from '../../src/shared/pip/InjectJSManager';
+import Locale from '../shared/common/localize';
 
 // requestSingleInstanceLock is not going to work for mas
 // https://github.com/electron-userland/electron-packager/issues/923
@@ -62,6 +63,7 @@ if (process.env.NODE_ENV !== 'development') {
 
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 
+let isGlobal = false;
 let sidebar = false;
 let welcomeProcessDone = false;
 let menuService = null;
@@ -88,6 +90,7 @@ let inited = false;
 let hideBrowsingWindow = false;
 let finalVideoToOpen = [];
 let ip = ''; // 本机ip地址
+const locale = new Locale();
 const tmpVideoToOpen = [];
 const tmpSubsToOpen = [];
 const subRegex = getValidSubtitleRegex();
@@ -141,6 +144,12 @@ function handleBossKey() {
       });
     }
   }
+}
+
+function pipControlViewTitle(isGlobal) {
+  const danmu = locale.$t('browsing.danmu');
+  const title = isGlobal ? locale.$t('browsing.exitPip') : locale.$t('browsing.exitPop');
+  pipControlView.webContents.executeJavaScript(InjectJSManager.updatePipControlTitle(title, danmu));
 }
 
 function createPipControlView() {
@@ -564,6 +573,12 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('pip-watcher', (evt, args) => {
     browsingWindow.getBrowserViews()[0].webContents.executeJavaScript(args);
   });
+  ipcMain.on('update-locale', () => {
+    locale.getDisplayLanguage();
+    if (pipControlView && !pipControlView.isDestroyed()) {
+      pipControlViewTitle(isGlobal);
+    }
+  });
   ipcMain.on('pip-window-fullscreen', () => {
     if (browsingWindow && browsingWindow.isFocused()) {
       browsingWindow.setFullScreen(!browsingWindow.isFullScreen());
@@ -581,6 +596,9 @@ function registerMainWindowEvent(mainWindow) {
       mainWindow.send('update-pip-state', args);
     }
   });
+  ipcMain.on('open-browsing-history', () => {
+    mainWindow.removeBrowserView(mainWindow.getBrowserViews()[0]);
+  });
   ipcMain.on('remove-main-window', () => {
     browserViewManager.pauseVideo(mainWindow.getBrowserViews()[0]);
     mainWindow.hide();
@@ -588,6 +606,7 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('remove-browser', () => {
     mainWindow.getBrowserViews()
       .forEach(mainWindowView => mainWindow.removeBrowserView(mainWindowView));
+    if (mainWindow.isMaximized()) mainWindow.unmaximize();
     browserViewManager.pauseVideo();
     if (browsingWindow) {
       const views = browsingWindow.getBrowserViews();
@@ -605,13 +624,11 @@ function registerMainWindowEvent(mainWindow) {
     const newBrowser = val === 1 ? browserViewManager.forward() : browserViewManager.back();
     if (newBrowser.page) {
       mainWindow.addBrowserView(newBrowser.page.view);
-      setTimeout(() => {
-        mainWindow.send('update-browser-state', {
-          url: newBrowser.page.url,
-          canGoBack: newBrowser.canBack,
-          canGoForward: newBrowser.canForward,
-        });
-      }, 150);
+      mainWindow.send('update-browser-state', {
+        url: newBrowser.page.url,
+        canGoBack: newBrowser.canBack,
+        canGoForward: newBrowser.canForward,
+      });
       newBrowser.page.view.setBounds({
         x: sidebar ? 76 : 0,
         y: 40,
@@ -623,6 +640,7 @@ function registerMainWindowEvent(mainWindow) {
       });
     }
   });
+  // eslint-disable-next-line complexity
   ipcMain.on('change-channel', (evt, args) => {
     if (!browserViewManager) browserViewManager = new BrowserViewManager();
     const hostname = urlParse(args.url).hostname;
@@ -643,12 +661,24 @@ function registerMainWindowEvent(mainWindow) {
         canGoForward: newChannel.canForward,
       });
     }, 150);
-    view.setBounds({
-      x: sidebar ? 76 : 0,
-      y: 40,
-      width: sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
-      height: mainWindow.getSize()[1] - 40,
-    });
+
+    const bounds = mainWindow.getBounds();
+    if (process.platform === 'win32' && mainWindow.isMaximized() && (bounds.x < 0 || bounds.y < 0)) {
+      view.setBounds({
+        x: sidebar ? 76 : 0,
+        y: 40,
+        width: sidebar ? bounds.width + (bounds.x * 2) - 76
+          : bounds.width + (bounds.x * 2),
+        height: bounds.height - 40,
+      });
+    } else {
+      view.setBounds({
+        x: sidebar ? 76 : 0,
+        y: 40,
+        width: sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
+        height: mainWindow.getSize()[1] - 40,
+      });
+    }
     view.setAutoResize({
       width: true, height: true,
     });
@@ -803,6 +833,7 @@ function registerMainWindowEvent(mainWindow) {
     createPipControlView();
     createTitlebarView();
     if (args.isGlobal) {
+      isGlobal = args.isGlobal;
       browserViewManager.pauseVideo(mainWindow.getBrowserViews()[0]);
       mainWindow.hide();
     }
@@ -850,13 +881,14 @@ function registerMainWindowEvent(mainWindow) {
     } else {
       mainWindow.removeBrowserView(mainWindow.getBrowserViews()[0]);
       mainWindow.addBrowserView(mainBrowser.page.view);
-      browsingWindow.setSize(browsingWindow.getSize()[0] + 1, browsingWindow.getSize()[1]);
+      browsingWindow.setSize(args.pipInfo.pipSize[0], args.pipInfo.pipSize[1]);
       browsingWindow.addBrowserView(pipBrowser);
       createPipControlView();
       createTitlebarView();
       browsingWindow.show();
     }
     if (args.isGlobal) {
+      isGlobal = args.isGlobal;
       mainWindow.hide();
     }
     browsingWindow.webContents.closeDevTools();
@@ -886,6 +918,7 @@ function registerMainWindowEvent(mainWindow) {
     });
     pipControlView.webContents
       .executeJavaScript(InjectJSManager.updateBarrageState(args.barrageOpen, args.opacity));
+    pipControlViewTitle(args.isGlobal);
     menuService.updateFocusedWindow(false, mainWindow && mainWindow.isVisible());
     browsingWindow.focus();
   });
@@ -899,7 +932,7 @@ function registerMainWindowEvent(mainWindow) {
     if (pipControlView) pipControlView.setBounds(args.control);
     if (titlebarView) titlebarView.setBounds(args.titlebar);
   });
-  ipcMain.on('exit-pip', () => {
+  ipcMain.on('exit-pip', (evt, args) => {
     if (!browserViewManager) return;
     browsingWindow.send('remove-pip-listener');
     mainWindow.show();
@@ -910,6 +943,8 @@ function registerMainWindowEvent(mainWindow) {
       browsingWindow.removeBrowserView(view);
     });
     const exitBrowser = browserViewManager.exitPip();
+    exitBrowser.page.view.webContents.executeJavaScript(args.jsRecover);
+    if (args.cssRecover) exitBrowser.page.view.webContents.insertCSS(args.cssRecover);
     mainWindow.addBrowserView(exitBrowser.page.view);
     exitBrowser.page.view.setBounds({
       x: sidebar ? 76 : 0,
@@ -936,12 +971,31 @@ function registerMainWindowEvent(mainWindow) {
     mainWindow.show();
     menuService.updateFocusedWindow(true, mainWindow && mainWindow.isVisible());
   });
+  // eslint-disable-next-line complexity
   ipcMain.on('set-window-maximize', () => {
     if (mainWindow && mainWindow.isFocused()) {
-      if (!mainWindow.isMaximized()) {
-        mainWindow.maximize();
-      } else {
+      if (mainWindow.isMaximized()) {
         mainWindow.unmaximize();
+      } else {
+        mainWindow.maximize();
+      }
+      const bounds = mainWindow.getBounds();
+      if (process.platform === 'win32' && mainWindow.isMaximized() && (bounds.x < 0 || bounds.y < 0)) {
+        mainWindow.getBrowserViews()[0].setBounds({
+          x: sidebar ? 76 : 0,
+          y: 40,
+          width: sidebar ? bounds.width + (bounds.x * 2) - 76
+            : bounds.width + (bounds.x * 2),
+          height: bounds.height - 40,
+        });
+      } else {
+        mainWindow.getBrowserViews()[0].setBounds({
+          x: sidebar ? 76 : 0,
+          y: 40,
+          width: sidebar ? mainWindow.getSize()[0] - 76
+            : mainWindow.getSize()[0],
+          height: mainWindow.getSize()[1] - 40,
+        });
       }
     } else if (browsingWindow && browsingWindow.isFocused()) {
       if (!isBrowsingWindowMax) {
@@ -1393,6 +1447,9 @@ app.on('activate', () => {
   }
   if (browsingWindow && browsingWindow.isMinimized()) {
     browsingWindow.restore();
+  }
+  if (mainWindow && mainWindow.isMinimized()) {
+    mainWindow.restore();
   }
 });
 

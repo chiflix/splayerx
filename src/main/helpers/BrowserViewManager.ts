@@ -24,6 +24,8 @@ export class BrowserViewManager implements IBrowserViewManager {
 
   private singlePageChannel: string[];
 
+  private browserViewCacheManager: BrowserViewCacheManager;
+
   // 当前画中画BrowserView的info
   private currentPip: {
     pipIndex: number,
@@ -35,6 +37,7 @@ export class BrowserViewManager implements IBrowserViewManager {
   private history: BrowserViewHistoryItem[];
 
   public constructor() {
+    this.browserViewCacheManager = new BrowserViewCacheManager();
     this.historyByChannel = new Map();
     this.currentPip = {
       pipIndex: -1,
@@ -42,7 +45,7 @@ export class BrowserViewManager implements IBrowserViewManager {
       pipPage: null,
     };
     this.history = [];
-    this.multiPagesChannel = ['youtube.com', 'iqiyi.com', 'bilibili.com'];
+    this.multiPagesChannel = ['youtube.com', 'iqiyi.com', 'bilibili.com', 'douyu.com'];
     this.singlePageChannel = [];
   }
 
@@ -108,7 +111,7 @@ export class BrowserViewManager implements IBrowserViewManager {
           return false;
         });
         remove(this.history, (list: BrowserViewHistoryItem) => deleteItems.includes(list));
-        BrowserViewCacheManager.clearBackPagesCache(channel, deleteItems);
+        this.browserViewCacheManager.clearBackPagesCache(channel, deleteItems);
       }
     }
 
@@ -164,7 +167,7 @@ export class BrowserViewManager implements IBrowserViewManager {
     newHistory.lastUpdateTime = Date.now();
     page.view.webContents.setAudioMuted(false);
     page.view.webContents.removeAllListeners('media-started-playing');
-    BrowserViewCacheManager.changeCacheUrl(
+    this.browserViewCacheManager.changeCacheUrl(
       this.currentChannel, channel, page, page, this.multiPagesChannel.includes(channel),
     );
     this.currentChannel = channel;
@@ -182,12 +185,31 @@ export class BrowserViewManager implements IBrowserViewManager {
     const currentIndex = currentHistory.currentIndex;
     const list = currentHistory.list;
     const pipBrowser = list[currentIndex].view;
+    let mainBrowser;
+    if (currentIndex === 0) {
+      mainBrowser = {
+        canBack: false,
+        canForward: false,
+        page: {
+          url: list[currentIndex].url,
+          view: new BrowserView({
+            webPreferences: {
+              preload: `${require('path').resolve(__static, 'pip/preload.js')}`,
+              nativeWindowOpen: true,
+            },
+          }),
+          lastUpdateTime: Date.now(),
+        },
+      };
+      mainBrowser.page.view.webContents.loadURL(mainBrowser.page.url);
+    } else {
+      mainBrowser = {
+        canBack: currentIndex - 1 > 0,
+        canForward: false,
+        page: list[currentIndex - 1],
+      };
+    }
     list[currentIndex].lastUpdateTime = Date.now();
-    const mainBrowser = {
-      canBack: currentIndex - 1 > 0,
-      canForward: false,
-      page: list[currentIndex - 1],
-    };
     if (mainBrowser.page.view && mainBrowser.page.view.isDestroyed()) {
       mainBrowser.page.view = new BrowserView({
         webPreferences: {
@@ -207,16 +229,26 @@ export class BrowserViewManager implements IBrowserViewManager {
       pipChannel: this.currentChannel,
       pipPage: deletePages[0],
     };
+    if (currentIndex === 0) {
+      currentHistory.list.splice(
+        currentIndex,
+        1,
+        { url: mainBrowser.page.url, view: mainBrowser.page.view, lastUpdateTime: Date.now() },
+      );
+      currentHistory.currentIndex = 0;
+    } else {
+      currentHistory.list.splice(currentIndex, 1);
+      currentHistory.currentIndex = currentIndex - 1;
+    }
     currentHistory.lastUpdateTime = Date.now();
-    currentHistory.currentIndex = currentIndex - 1;
     mainBrowser.page.lastUpdateTime = Date.now();
     mainBrowser.page.view.webContents.setAudioMuted(false);
     mainBrowser.page.view.webContents.removeAllListeners('media-started-playing');
     mainBrowser.page.view.setBounds({
       x: 76, y: 0, width: 0, height: 0,
     });
-    BrowserViewCacheManager.removeCacheWhenEnterPip(this.currentChannel,
-      mainBrowser.page, this.currentPip.pipPage as BrowserViewHistoryItem, deletePages);
+    this.browserViewCacheManager.removeCacheWhenEnterPip(this.currentChannel,
+      mainBrowser.page, deletePages);
     this.pauseVideo(mainBrowser.page.view, this.currentChannel, true);
     return { pipBrowser, mainBrowser };
   }
@@ -248,7 +280,7 @@ export class BrowserViewManager implements IBrowserViewManager {
     page.view.setBounds({
       x: 76, y: 0, width: 0, height: 0,
     });
-    BrowserViewCacheManager.recoverCacheWhenExitPip(this.currentChannel, page, deleteList);
+    this.browserViewCacheManager.recoverCacheWhenExitPip(this.currentChannel, page, deleteList);
     return {
       canBack: currentHistory.currentIndex > 0,
       canForward: false,
@@ -272,50 +304,85 @@ export class BrowserViewManager implements IBrowserViewManager {
     const currentIndex = currentHistory.currentIndex;
     const currentView = view || currentHistory.list[currentIndex].view;
     if (currentView.webContents.isCurrentlyAudible()) {
-      if (pausedChannel.includes('bilibili')) {
-        let type = '';
-        currentView.webContents
-          .executeJavaScript(InjectJSManager.bilibiliFindType())
-          .then((r: string) => {
-            type = r;
-            currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('bilibili', type));
-          });
-      } else {
-        currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('normal'));
-      }
-    }
-    if (!enterPip) {
-      currentView.webContents.addListener('media-started-playing', () => {
-        currentView.webContents.setAudioMuted(true);
-        if (pausedChannel.includes('bilibili')) {
-          let type = '';
+      let type = '';
+      switch (true) {
+        case pausedChannel.includes('bilibili'):
           currentView.webContents
             .executeJavaScript(InjectJSManager.bilibiliFindType())
             .then((r: string) => {
               type = r;
               currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('bilibili', type));
             });
-        } else {
+          break;
+        case pausedChannel.includes('douyu'):
+          currentView.webContents
+            .executeJavaScript(InjectJSManager.douyuFindType())
+            .then((r: string) => {
+              type = r;
+              currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('douyu', type));
+            });
+          break;
+        default:
           currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('normal'));
+          break;
+      }
+    }
+    if (!enterPip) {
+      currentView.webContents.addListener('media-started-playing', () => {
+        currentView.webContents.setAudioMuted(true);
+        let type = '';
+        switch (true) {
+          case pausedChannel.includes('bilibili'):
+            currentView.webContents
+              .executeJavaScript(InjectJSManager.bilibiliFindType())
+              .then((r: string) => {
+                type = r;
+                currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('bilibili', type));
+              });
+            break;
+          case pausedChannel.includes('douyu'):
+            currentView.webContents
+              .executeJavaScript(InjectJSManager.douyuFindType())
+              .then((r: string) => {
+                type = r;
+                currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('douyu', type));
+              });
+            break;
+          default:
+            currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('normal'));
+            break;
         }
       });
     } else if (currentView.webContents.isLoading()) {
       currentView.webContents.once('media-started-playing', () => {
         currentView.webContents.setAudioMuted(true);
-        if (pausedChannel.includes('bilibili')) {
-          let type = '';
-          currentView.webContents
-            .executeJavaScript(InjectJSManager.bilibiliFindType())
-            .then((r: string) => {
-              type = r;
-              currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('bilibili', type)).then(() => {
-                currentView.webContents.setAudioMuted(false);
+        let type = '';
+        switch (true) {
+          case pausedChannel.includes('bilibili'):
+            currentView.webContents
+              .executeJavaScript(InjectJSManager.bilibiliFindType())
+              .then((r: string) => {
+                type = r;
+                currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('bilibili', type)).then(() => {
+                  currentView.webContents.setAudioMuted(false);
+                });
               });
+            break;
+          case pausedChannel.includes('douyu'):
+            currentView.webContents
+              .executeJavaScript(InjectJSManager.douyuFindType())
+              .then((r: string) => {
+                type = r;
+                currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('douyu', type)).then(() => {
+                  currentView.webContents.setAudioMuted(false);
+                });
+              });
+            break;
+          default:
+            currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('normal')).then(() => {
+              currentView.webContents.setAudioMuted(false);
             });
-        } else {
-          currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('normal')).then(() => {
-            currentView.webContents.setAudioMuted(false);
-          });
+            break;
         }
       });
     }
@@ -373,26 +440,29 @@ export class BrowserViewManager implements IBrowserViewManager {
     result.page.lastUpdateTime = Date.now();
     result.page.view.webContents.setAudioMuted(false);
     result.page.view.webContents.removeAllListeners('media-started-playing');
-    BrowserViewCacheManager.changeCacheUrl(
+    this.browserViewCacheManager.changeCacheUrl(
       this.currentChannel,
       this.currentChannel,
       list[currentIndex],
       result.page,
       this.multiPagesChannel.includes(this.currentChannel),
     );
+    result.page.view.setBounds({
+      x: 76, y: 0, width: 0, height: 0,
+    });
     return result;
   }
 
   private addCacheByChannel(channel: string, page: BrowserViewHistoryItem): void {
     switch (true) {
       case this.multiPagesChannel.includes(channel):
-        BrowserViewCacheManager.addChannelToMulti(channel, page);
+        this.browserViewCacheManager.addChannelToMulti(channel, page);
         break;
       case this.singlePageChannel.includes(channel):
-        BrowserViewCacheManager.addChannelToSingle(channel, page);
+        this.browserViewCacheManager.addChannelToSingle(channel, page);
         break;
       default:
-        BrowserViewCacheManager.addChannelToSingle(channel, page);
+        this.browserViewCacheManager.addChannelToSingle(channel, page);
         break;
     }
   }
