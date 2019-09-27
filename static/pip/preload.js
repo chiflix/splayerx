@@ -140,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (document.webkitIsFullScreen && evt.keyCode === 27) {
       document.webkitCancelFullScreen();
-    } else if (evt.keyCode === 80) {
+    } else if ([79, 80].includes(evt.keyCode)) {
       sendToHost('keydown', { targetName: evt.target.tagName });
     }
   });

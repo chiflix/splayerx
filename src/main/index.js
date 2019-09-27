@@ -348,14 +348,12 @@ function createBrowsingWindow(args) {
     acceptFirstMouse: false,
     show: false,
   };
-  if (!browsingWindow) {
-    browsingWindow = new BrowserWindow(browsingWindowOptions);
-    browsingWindow.loadURL(`${browsingURL}`);
-    browsingWindow.on('closed', () => {
-      browsingWindow = null;
-    });
-  }
-  browsingWindow.once('ready-to-show', () => {
+  browsingWindow = new BrowserWindow(browsingWindowOptions);
+  browsingWindow.loadURL(`${browsingURL}`);
+  browsingWindow.on('closed', () => {
+    browsingWindow = null;
+  });
+  if (browsingWindow) {
     browsingWindow.setSize(args.size[0], args.size[1]);
     if (args.position.length) {
       browsingWindow.setPosition(args.position[0], args.position[1]);
@@ -367,16 +365,16 @@ function createBrowsingWindow(args) {
       if (!mainWindow) return;
       mainWindow.send('update-pip-pos', browsingWindow.getPosition());
     }, 100));
-  });
-  browsingWindow.on('leave-full-screen', () => {
-    if (hideBrowsingWindow) {
-      hideBrowsingWindow = false;
-      browsingWindow.hide();
-      setTimeout(() => {
-        mainWindow.focus();
-      }, 0);
-    }
-  });
+    browsingWindow.on('leave-full-screen', () => {
+      if (hideBrowsingWindow) {
+        hideBrowsingWindow = false;
+        browsingWindow.hide();
+        setTimeout(() => {
+          mainWindow.focus();
+        }, 0);
+      }
+    });
+  }
 }
 
 function createLaborWindow() {
@@ -807,9 +805,7 @@ function registerMainWindowEvent(mainWindow) {
     const pipBrowser = browsers.pipBrowser;
     const mainBrowser = browsers.mainBrowser;
     if (!browsingWindow) {
-      createBrowsingWindow();
-      browsingWindow.setSize(args.pipInfo.pipSize[0], args.pipInfo.pipSize[1]);
-      browsingWindow.setPosition(args.pipInfo.pipPos[0], args.pipInfo.pipPos[1]);
+      createBrowsingWindow({ size: args.pipInfo.pipSize, position: args.pipInfo.pipPos });
       mainWindow.send('init-pip-position');
       mainWindow.removeBrowserView(mainWindow.getBrowserViews()[0]);
       mainWindow.addBrowserView(mainBrowser.page.view);

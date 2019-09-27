@@ -925,7 +925,7 @@ export default {
       if (view) {
         if (!this.loadingState) {
           this.loadingState = true;
-          view.webContents.reload();
+          view.webContents.loadURL(this.cuurentUrl);
         } else {
           this.loadingState = false;
           view.webContents.stop();
