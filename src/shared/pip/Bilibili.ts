@@ -60,7 +60,7 @@ export default class Bilibili {
     } else if (type === 'video') {
       this.adapter = `var theater = document.querySelector(".player-wrap");
         var isTheater = theater ? theater.style.height !== "auto" : true;
-        if (!isTheater) {document.querySelector(".bilibili-player-video-btn-widescreen").click();};
+        if (!isTheater && document.querySelector(".bilibili-player-video-btn-widescreen")) {document.querySelector(".bilibili-player-video-btn-widescreen").click();};
         var wrapper = document.querySelector(".bilibili-player-video-wrap");
         if (document.querySelector("#player_module") && !document.querySelector(".plp-l")) {
         document.querySelector("#player_module").style.width = "100%";

@@ -109,9 +109,29 @@ export default class Douyu {
 
   public douyuBarrageAdapt(type: string, barrageOpen: boolean) {
     if (['normal', 'others'].includes(type)) {
-      return `document.querySelector(".comment-37342a").style.visibility = ${barrageOpen} ? 'visible' : 'hidden';`;
+      return `var barrage = document.querySelector(".comment-37342a");
+        if (barrage) {
+        barrage.style.visibility = ${barrageOpen} ? 'visible' : 'hidden';
+        } else {
+        var timer = setInterval(() => {
+        if (document.querySelector(".comment-37342a")) {
+          document.querySelector(".comment-37342a").style.visibility = ${barrageOpen} ? 'visible' : 'hidden';
+          clearInterval(timer);
+        }
+        }, 500);
+        }`;
     }
-    return `document.querySelector(".abp-container").style.visibility = ${barrageOpen} ? 'visible' : 'hidden'`;
+    return `var barrage = document.querySelector(".abp-container");
+      if (barrage) {
+      barrage.style.visibility = ${barrageOpen} ? 'visible' : 'hidden';
+      } else {
+      var timer = setInterval(() => {
+      if (document.querySelector(".abp-container")) {
+        document.querySelector(".abp-container").style.visibility = ${barrageOpen} ? 'visible' : 'hidden';
+        clearInterval(timer);
+      }
+      }, 500);
+      }`;
   }
 }
 
