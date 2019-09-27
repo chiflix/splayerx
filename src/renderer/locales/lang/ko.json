@@ -104,6 +104,11 @@
       "copy": "부",
       "paste": "풀"
     },
+    "account": {
+      "name": "계정",
+      "login": "로그인",
+      "logout": "로그 아웃"
+    },
     "help": {
       "name": "도움",
       "feedback": "피드백",
@@ -419,6 +424,10 @@
       "title": "번역 실패",
       "content": "서버 오류로 인해 변환에 실패했습니다. 나중에 다시 시도 해주세요."
     },
+    "ForbiddenFail": {
+      "title": "세션 만료됨",
+      "content": "로그인 해주시기 바랍니다"
+    },
     "cancel": "취소",
     "quit": "떠나다",
     "generate": "일으키다",
@@ -449,8 +458,25 @@
       "title": "번역 실패",
       "content": "서버 오류로 인해 변환에 실패했습니다. 나중에 다시 시도 해주세요."
     },
+    "bubbleTranslateForbiddenFail": {
+      "title": "세션 만료됨",
+      "content": "로그인 해주시기 바랍니다."
+    },
     "ok": "승인",
     "cancel": "취소",
     "continue": "잇다"
+  },
+  "loginModal": {
+    "title": "전화번호로 로그인",
+    "sendCode": "보내기",
+    "countDown": "{count} 초",
+    "placeholder": {
+      "mobile": "전화번호",
+      "code": "인증 코드 입력"
+    },
+    "submit": "로그인",
+    "codeError": "잘못된 검증 코드",
+    "netWorkError": "접속 시간 초과",
+    "noLineError": "연결된 네트워크가 없습니다"
   }
 }
