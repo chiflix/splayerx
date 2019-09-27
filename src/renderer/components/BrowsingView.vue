@@ -144,6 +144,8 @@ export default {
       'isPip',
       'pipMode',
       'isHistory',
+      'currentChannel',
+      'pipChannel',
     ]),
     isDarwin() {
       return process.platform === 'darwin';
@@ -224,6 +226,7 @@ export default {
     },
     adaptFinished(val: boolean) {
       if (val) {
+        this.updatePipChannel(this.currentChannel);
         const opacity = ['youtube', 'others'].includes(this.pipType)
           || (this.pipType === 'bilibili' && this.bilibiliType === 'others')
           ? 0.2
@@ -293,7 +296,7 @@ export default {
             this.currentMainBrowserView().webContents.executeJavaScript(
               InjectJSManager.calcVideoNum(),
               (r: number) => {
-                this.webInfo.hasVideo = this.currentChannel() === 'youtube.com' && !getVideoId(loadUrl).id
+                this.webInfo.hasVideo = this.currentChannel === 'youtube.com' && !getVideoId(loadUrl).id
                   ? false
                   : !!r;
               },
@@ -413,7 +416,7 @@ export default {
             this.currentMainBrowserView().webContents.executeJavaScript(
               InjectJSManager.calcVideoNum(),
               (r: number) => {
-                this.webInfo.hasVideo = this.currentChannel() === 'youtube.com' && !getVideoId(loadUrl).id
+                this.webInfo.hasVideo = this.currentChannel === 'youtube.com' && !getVideoId(loadUrl).id
                   ? false
                   : !!r;
               },
@@ -430,6 +433,7 @@ export default {
     this.$store.dispatch('updateBrowsingSize', this.winSize);
     this.boundBackPosition();
     this.updateIsPip(false);
+    this.updateCurrentChannel('');
     asyncStorage
       .set('browsing', {
         browsingSize: this.browsingSize,
@@ -455,6 +459,8 @@ export default {
       updateRecordUrl: browsingActions.UPDATE_RECORD_URL,
       updateBarrageOpen: browsingActions.UPDATE_BARRAGE_OPEN,
       updateIsPip: browsingActions.UPDATE_IS_PIP,
+      updateCurrentChannel: browsingActions.UPDATE_CURRENT_CHANNEL,
+      updatePipChannel: browsingActions.UPDATE_PIP_CHANNEL,
     }),
     backToLandingViewHandler() {
       this.removeListener();
@@ -501,7 +507,7 @@ export default {
       if (this.currentMainBrowserView()) {
         this.currentMainBrowserView().webContents
           .executeJavaScript(InjectJSManager.calcVideoNum(), (r: number) => {
-            this.webInfo.hasVideo = this.currentChannel() === 'youtube.com' && !getVideoId(loadUrl).id ? false : !!r;
+            this.webInfo.hasVideo = this.currentChannel === 'youtube.com' && !getVideoId(loadUrl).id ? false : !!r;
           });
       }
     },
@@ -569,43 +575,15 @@ export default {
         );
       }
     },
-    handleBookmarkOpen(url: string) {
-      const supportedPage = [
-        'https://www.youtube.com/',
-        'https://www.bilibili.com/',
-        'https://www.iqiyi.com/',
-        'https://www.douyu.com',
-      ];
-      const newHostname = urlParseLax(url).hostname;
-      const oldHostname = urlParseLax(this.currentUrl).hostname;
-      let newChannel = newHostname.slice(
-        newHostname.indexOf('.') + 1,
-        newHostname.length,
-      );
-      let oldChannel = oldHostname.slice(
-        oldHostname.indexOf('.') + 1,
-        oldHostname.length,
-      );
-      if (url.includes('youtube')) {
-        newChannel = 'youtube.com';
-      }
-      if (this.currentUrl.includes('youtube')) {
-        oldChannel = 'youtube.com';
-      }
+    handleBookmarkOpen(args: { url: string, currentChannel: string, newChannel: string }) {
       this.webInfo.hasVideo = false;
-      if (newChannel !== oldChannel) {
+      if (args.newChannel !== args.currentChannel) {
         this.removeListener();
-        this.$electron.ipcRenderer.send('change-channel', { url });
-      } else if (
-        this.currentUrl === url
-        && supportedPage.includes(this.currentUrl)
-      ) {
-        this.currentMainBrowserView().webContents.reload();
+        this.$electron.ipcRenderer.send('change-channel', { url: args.url, channel: args.newChannel });
+      } else if (this.currentUrl === args.url) {
+        this.currentMainBrowserView().webContents.loadURL(args.url);
       } else {
-        const homePage = urlParseLax(`https://www.${newChannel}`).href;
-        this.$electron.ipcRenderer.send('create-browser-view', {
-          url: homePage, isNewWindow: true,
-        });
+        this.$electron.ipcRenderer.send('create-browser-view', { url: args.url, isNewWindow: true });
       }
     },
     addListenerToBrowser() {
@@ -789,13 +767,10 @@ export default {
       this.$electron.remote.getCurrentWindow().setTouchBar(this.touchBar);
     },
     pipAdapter() {
-      const parseUrl = urlParseLax(
-        this.currentMainBrowserView().webContents.getURL(),
-      );
       const channels = ['youtube', 'bilibili', 'iqiyi', 'douyu'];
       this.pipType = 'others';
       channels.forEach((channel: string) => {
-        if (parseUrl.hostname.includes(channel)) this.pipType = channel;
+        if (this.currentChannel.includes(channel)) this.pipType = channel;
       });
       if (this.pipType === 'bilibili') {
         this.currentMainBrowserView()
@@ -831,23 +806,6 @@ export default {
     },
     currentMainBrowserView() {
       return this.$electron.remote.getCurrentWindow().getBrowserViews()[0];
-    },
-    currentChannel() {
-      if (this.currentMainBrowserView()) {
-        const loadUrl = this.currentMainBrowserView().webContents.getURL();
-        const hostname = urlParseLax(loadUrl).hostname;
-        let channel = '';
-        if (loadUrl.includes('youtube')) {
-          channel = 'youtube.com';
-        } else {
-          channel = hostname.slice(
-            hostname.indexOf('.') + 1,
-            hostname.length,
-          );
-        }
-        return channel;
-      }
-      return '';
     },
     handleWindowChangeEnterPip() {
       if (this.isFullScreen) {
@@ -967,7 +925,7 @@ export default {
       if (view) {
         if (!this.loadingState) {
           this.loadingState = true;
-          view.webContents.reload();
+          view.webContents.loadURL(this.currentUrl);
         } else {
           this.loadingState = false;
           view.webContents.stop();
@@ -985,6 +943,7 @@ export default {
       this.asyncTasksDone = false;
       this.isGlobal = false;
       this.handleWindowChangeExitPip();
+      this.updateCurrentChannel(this.pipChannel);
       this.pipType = '';
     },
     handleEnterPip(isGlobal: boolean) {
