@@ -104,6 +104,11 @@
       "copy": "Copiar",
       "paste": "Pegar"
     },
+    "account": {
+      "name": "",
+      "login": "",
+      "logout": ""
+    },
     "help": {
       "name": "Ayuda",
       "feedback": "Realimentación",
@@ -419,6 +424,10 @@
       "title": "Error al traducir",
       "content": "La traducción ha fallado debido a un error del servidor. Por favor, inténtalo más tarde."
     },
+    "ForbiddenFail": {
+      "title": "",
+      "content": ""
+    },
     "cancel": "Cancelar",
     "quit": "Salir",
     "generate": "Generar",
@@ -449,8 +458,25 @@
       "title": "Error al traducir",
       "content": "La traducción ha fallado debido a un error del servidor. Por favor, inténtalo más tarde."
     },
+    "bubbleTranslateForbiddenFail": {
+      "title": "",
+      "content": ""
+    },
     "ok": "OK",
     "cancel": "Cancelar",
     "continue": "Continuar"
+  },
+  "loginModal": {
+    "title": "",
+    "sendCode": "",
+    "countDown": "",
+    "placeholder": {
+      "mobile": "",
+      "code": ""
+    },
+    "submit": "",
+    "codeError": "",
+    "netWorkError": "",
+    "noLineError": ""
   }
 }
