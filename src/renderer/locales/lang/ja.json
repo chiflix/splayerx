@@ -105,9 +105,9 @@
       "paste": "貼り付け"
     },
     "account": {
-      "name": "",
-      "login": "",
-      "logout": ""
+      "name": "账户",
+      "login": "登入",
+      "logout": "登出"
     },
     "help": {
       "name": "ヘルプ",
@@ -425,8 +425,8 @@
       "content": "サーバーエラーのため翻訳に失敗しました。 後でお試しください。"
     },
     "ForbiddenFail": {
-      "title": "",
-      "content": ""
+      "title": "有効期限が切れました",
+      "content": "サインインしてください。"
     },
     "cancel": "キャンセル",
     "quit": "やめる",
@@ -459,24 +459,24 @@
       "content": "クラウドエラーで翻訳失敗しました。 暫くしてからまたお試しください。"
     },
     "bubbleTranslateForbiddenFail": {
-      "title": "",
-      "content": ""
+      "title": "有効期限が切れました",
+      "content": "サインインしてください。"
     },
     "ok": "はい",
     "cancel": "キャンセル",
     "continue": "続ける"
   },
   "loginModal": {
-    "title": "",
-    "sendCode": "",
-    "countDown": "",
+    "title": "手機番号でログイン",
+    "sendCode": "送信する",
+    "countDown": "{count} 秒",
     "placeholder": {
-      "mobile": "",
-      "code": ""
+      "mobile": "手機番号",
+      "code": "確認コードを入力"
     },
-    "submit": "",
-    "codeError": "",
-    "netWorkError": "",
-    "noLineError": ""
+    "submit": "登入",
+    "codeError": "間違った認証コード",
+    "netWorkError": "接続タイムアウト",
+    "noLineError": "ネットワークに接続していません"
   }
 }
