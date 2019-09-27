@@ -587,14 +587,9 @@ function registerMainWindowEvent(mainWindow) {
   // eslint-disable-next-line complexity
   ipcMain.on('change-channel', (evt, args) => {
     if (!browserViewManager) browserViewManager = new BrowserViewManager();
-    const hostname = urlParse(args.url).hostname;
-    let channel = hostname.slice(hostname.indexOf('.') + 1, hostname.length);
-    if (args.url.includes('youtube')) {
-      channel = 'youtube.com';
-    }
     const mainBrowser = mainWindow.getBrowserViews()[0];
     if (mainBrowser) mainWindow.removeBrowserView(mainBrowser);
-    const newChannel = browserViewManager.changeChannel(channel, args);
+    const newChannel = browserViewManager.changeChannel(args.channel, args);
     const view = newChannel.view ? newChannel.view : newChannel.page.view;
     const url = newChannel.view ? args.url : newChannel.page.url;
     mainWindow.addBrowserView(view);

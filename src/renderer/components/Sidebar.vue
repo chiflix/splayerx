@@ -7,13 +7,12 @@
       class="icon-box no-drag"
     >
       <SidebarIcon
-        :key="url"
-        v-for="({ url, icon, title, selected }) in channels"
-        :url="url"
-        :title="title"
-        :icon="icon"
-        :selected="selected"
-        :select-sidebar-icon="handleSidebarIcon"
+        v-for="(info, index) in channelsDetail"
+        :key="info.url"
+        :title="info.title"
+        :icon="info.icon"
+        :selected="info.type === currentChannel"
+        @click.native="handleSidebarIcon(info.url, index)"
       />
     </div>
     <div
@@ -55,76 +54,48 @@ export default {
   },
   data() {
     return {
-      channels: [
-        {
-          url: 'https://www.bilibili.com/',
-          icon: 'bilibiliSidebar',
-          selectedType: 'bilibili',
-          title: 'browsing.bilibili',
-          selected: false,
-        },
-        {
-          url: 'https://www.iqiyi.com/',
-          icon: 'iqiyiSidebar',
-          selectedType: 'iqiyi',
-          title: 'browsing.iqiyi',
-          selected: false,
-        },
-        {
-          url: 'https://www.douyu.com/',
-          icon: 'douyuSidebar',
-          selectedType: 'douyu',
-          title: 'browsing.douyu',
-          selected: false,
-        },
-        {
-          url: 'https://www.youtube.com/',
-          icon: 'youtubeSidebar',
-          selectedType: 'youtube',
-          title: 'browsing.youtube',
-          selected: false,
-        },
-      ],
+      channels: ['https://www.bilibili.com/', 'https://www.iqiyi.com/', 'https://www.douyu.com/', 'https://www.youtube.com/'],
     };
   },
   computed: {
-    ...mapGetters(['pipSize', 'pipPos', 'isHistory']),
+    ...mapGetters(['pipSize', 'pipPos', 'isHistory', 'currentChannel']),
     isDarwin() {
       return process.platform === 'darwin';
     },
-  },
-  watch: {
-    currentUrl(val: string) {
-      this.channels.forEach((channel: { selected: boolean }) => {
-        channel.selected = false;
+    channelsDetail() {
+      return this.channels.map((channel: string) => {
+        const basename = channel.slice(channel.indexOf('.') + 1, channel.lastIndexOf('.'));
+        return {
+          url: channel,
+          icon: `${basename}Sidebar`,
+          title: `browsing.${basename}`,
+          type: `${basename}.com`,
+        };
       });
-      if (val) {
-        const selectedChannel = this.channels.find(
-          (channel: { selectedType: string }) => val.includes(channel.selectedType),
-        );
-        if (selectedChannel) selectedChannel.selected = true;
-      }
     },
   },
   methods: {
     ...mapActions({
       updateIsHistoryPage: browsingActions.UPDATE_IS_HISTORY,
+      updateCurrentChannel: browsingActions.UPDATE_CURRENT_CHANNEL,
     }),
     openHistory() {
       this.updateIsHistoryPage(!this.isHistory);
     },
-    handleSidebarIcon(url: string) {
+    handleSidebarIcon(url: string, index: number) {
+      const newChannel = this.channelsDetail[index].type;
       if (this.$route.name === 'browsing-view') {
-        this.$bus.$emit('sidebar-selected', url);
+        this.$bus.$emit('sidebar-selected', { url, currentChannel: this.currentChannel, newChannel });
       } else {
         asyncStorage.get('browsingPip').then((data) => {
           this.$store.dispatch('updatePipSize', data.pipSize || this.pipSize);
           this.$store.dispatch('updatePipPos', data.pipPos || this.pipPos);
           this.$electron.ipcRenderer.send('add-browsing', { size: data.pipSize || this.pipSize, position: data.pipPos || this.pipPos });
         });
-        this.$electron.ipcRenderer.send('change-channel', { url, sidebar: this.showSidebar });
+        this.$electron.ipcRenderer.send('change-channel', { url, channel: newChannel });
         if (this.$router.currentRoute.name !== 'browsing-view') this.$router.push({ name: 'browsing-view' });
       }
+      this.updateCurrentChannel(newChannel);
     },
   },
 };

@@ -727,6 +727,7 @@ new Vue({
       updateBarrageOpen: browsingActions.UPDATE_BARRAGE_OPEN,
       showAudioTranslateModal: atActions.AUDIO_TRANSLATE_SHOW_MODAL,
       updatePipMode: browsingActions.UPDATE_PIP_MODE,
+      updateCurrentChannel: browsingActions.UPDATE_CURRENT_CHANNEL,
     }),
     async initializeMenuSettings() {
       if (this.currentRouteName !== 'welcome-privacy' && this.currentRouteName !== 'language-setting') {
@@ -786,8 +787,10 @@ new Vue({
       const channels = ['iqiyi', 'bilibili', 'douyu', 'youtube'];
       channels.forEach((channel: string, index: number) => {
         this.menuService.on(`favourite.${channel}`, () => {
+          const currentChannel = urls[index].slice(urls[index].indexOf('.') + 1, urls[index].length - 1);
+          this.updateCurrentChannel(currentChannel);
           this.$electron.ipcRenderer.send('add-browsing', { size: this.pipSize, position: this.pipPos });
-          this.$electron.ipcRenderer.send('change-channel', { url: urls[index] });
+          this.$electron.ipcRenderer.send('change-channel', { url: urls[index], channel: currentChannel });
           this.$router.push({
             name: 'browsing-view',
           });
