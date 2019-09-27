@@ -471,12 +471,12 @@
     "sendCode": "",
     "countDown": "",
     "placeholder": {
-      "mobile": "",
-      "code": ""
+      "mobile": "输入手机号码",
+      "code": "输入短信验证码"
     },
-    "submit": "",
-    "codeError": "",
-    "netWorkError": "",
-    "noLineError": ""
+    "submit": "登录",
+    "codeError": "验证码错误",
+    "netWorkError": "网络连接超时",
+    "noLineError": "无网络连接"
   }
 }
