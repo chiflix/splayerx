@@ -105,9 +105,9 @@
       "paste": "Pegar"
     },
     "account": {
-      "name": "",
-      "login": "",
-      "logout": ""
+      "name": "Cuenta",
+      "login": "Ingressar",
+      "logout": "Cerrar Sesión"
     },
     "help": {
       "name": "Ayuda",
@@ -425,8 +425,8 @@
       "content": "La traducción ha fallado debido a un error del servidor. Por favor, inténtalo más tarde."
     },
     "ForbiddenFail": {
-      "title": "",
-      "content": ""
+      "title": "Sesión caducada",
+      "content": "Inicie una sesión de nuevo."
     },
     "cancel": "Cancelar",
     "quit": "Salir",
@@ -459,24 +459,24 @@
       "content": "La traducción ha fallado debido a un error del servidor. Por favor, inténtalo más tarde."
     },
     "bubbleTranslateForbiddenFail": {
-      "title": "",
-      "content": ""
+      "title": "Sesión caducada",
+      "content": "Inicie una sesión de nuevo."
     },
     "ok": "OK",
     "cancel": "Cancelar",
     "continue": "Continuar"
   },
   "loginModal": {
-    "title": "",
-    "sendCode": "",
-    "countDown": "",
+    "title": "Iniciar sesión con número de teléfono",
+    "sendCode": "Enviar",
+    "countDown": "{count} s",
     "placeholder": {
-      "mobile": "",
-      "code": ""
+      "mobile": "Tu número de teléfono",
+      "code": "Introduzca el código de verificación"
     },
-    "submit": "",
-    "codeError": "",
-    "netWorkError": "",
-    "noLineError": ""
+    "submit": "Ingressar",
+    "codeError": "Código de vértificación incorrecto",
+    "netWorkError": "El tiempo para la conexión ha acabado",
+    "noLineError": "No hay conexión de red"
   }
 }
