@@ -28,8 +28,8 @@
         <Icon type="open" />
       </div>
       <div
-        class="icon-hover"
         @click="openHistory"
+        class="icon-hover"
       >
         <Icon type="history" />
       </div>
