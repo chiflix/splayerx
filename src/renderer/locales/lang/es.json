@@ -206,6 +206,7 @@
       "name": "Canal",
       "iqiyi": "iQIYI",
       "bilibili": "Bilibili",
+      "douyu": "Douyu",
       "youtube": "Youtube"
     },
     "edit": {
@@ -238,6 +239,18 @@
     "chooseSecondary": "Select Secondary Language",
     "languageDescription": "* You can change your settings in preferences later",
     "none": "None"
+  },
+  "browsing": {
+    "bilibili": "Bilibili",
+    "iqiyi": "iQIYI",
+    "youtube": "Youtube",
+    "douyu": "Douyu",
+    "openLocalFile": "Abrir archivo local...",
+    "enterPip": "Habilitar Picture in Picture",
+    "exitPip": "Volver al navegador",
+    "enterPop": "Reproducir en ventana nueva",
+    "exitPop": "Volver al navegador",
+    "danmu": "Alternar Danmaku"
   },
   "preferences": {
     "general": {

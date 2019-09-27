@@ -82,6 +82,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
           }
           break;
+        case url.includes('douyu'):
+          if (['VIDEO'].includes(evt.target.tagName) || ['video-container-dbc7dc'].includes(evt.target.classList[0])) {
+            offset = [evt.clientX, evt.clientY];
+            if (getRatio() !== 1) {
+              windowSize = remote.getCurrentWindow().getSize();
+            }
+          }
+          break;
         default:
           offset = [evt.clientX, evt.clientY];
           if (getRatio() !== 1) {
@@ -135,9 +143,6 @@ document.addEventListener('DOMContentLoaded', () => {
     } else if (evt.keyCode === 80) {
       sendToHost('keydown', { targetName: evt.target.tagName });
     }
-  });
-  document.addEventListener('fullscreenchange', () => {
-    sendToHost('fullscreenchange', { isFullScreen: document.webkitIsFullScreen });
   });
 });
 
