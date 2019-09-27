@@ -1,5 +1,7 @@
-import { remote } from 'electron';
+import electron from 'electron';
 import { join } from 'path';
+
+const app = electron.app || electron.remote.app;
 
 export const DEFAULT_VIDEO_EVENTS = [
   'abort',
@@ -92,8 +94,9 @@ export const DEFAULT_LOG_DIRNAME = 'logs';
  */
 export const VIDEO_DIRNAME = 'videos'; // 视频缓存目录
 export const SUBTITLE_DIRNAME = 'subtitles'; // 视频缓存目录
+export const TOKEN_FILE_NAME = 'session.txt'; // 视频缓存目录
 export const SUBTITLE_FULL_DIRNAME = join(
-  remote.app.getPath(ELECTRON_CACHE_DIRNAME),
+  app.getPath(ELECTRON_CACHE_DIRNAME),
   DEFAULT_DIRNAME,
   SUBTITLE_DIRNAME,
 );

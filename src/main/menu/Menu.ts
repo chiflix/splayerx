@@ -57,6 +57,10 @@ export default class Menubar {
 
   private _routeName: string;
 
+  private user?: { displayName: string };
+
+  public isAccountEnabled: boolean;
+
   public set routeName(val: string) {
     this._routeName = val;
     this.menuStateControl();
@@ -83,6 +87,7 @@ export default class Menubar {
 
   public constructor() {
     this.locale = new Locale();
+    this.isAccountEnabled = false;
     this.currentMenuState = cloneDeep(menuTemplate as IMenubarMenuState);
     this.menuStateControl();
   }
@@ -331,6 +336,36 @@ export default class Menubar {
     }
   }
 
+  public updateAccount(user?: { displayName: string }) {
+    this.user = user;
+    const menuItem = this.menubar.getMenuItemById('account');
+    if (menuItem) {
+      menuItem.visible = this.isAccountEnabled;
+    }
+    const accountMenu = menuItem && menuItem.submenu;
+    if (accountMenu && user) {
+      // @ts-ignore
+      accountMenu.clear();
+      const label = this.locale.$t('msg.account.name');
+      const idMenu = this.createMenuItem(`${label}: ${user.displayName}`, () => {
+      }, undefined, false);
+      accountMenu.append(idMenu);
+      const logout = this.createMenuItem('msg.account.logout', () => {
+        app.emit('sign-out');
+      }, undefined, true);
+      accountMenu.append(logout);
+      Menu.setApplicationMenu(this.menubar);
+    } else if (accountMenu) {
+      // @ts-ignore
+      accountMenu.clear();
+      const login = this.createMenuItem('msg.account.login', () => {
+        app.emit('add-login');
+      }, undefined, true);
+      accountMenu.append(login);
+      Menu.setApplicationMenu(this.menubar);
+    }
+  }
+
   public updateAudioTrack(items?: { id: string, label: string }[]) {
     if (items) this.audioTracks = items;
     const audioTrackMenu = this.getSubmenuById('audio.switchAudioTrack');
@@ -361,8 +396,7 @@ export default class Menubar {
     return idArray[0];
   }
 
-  private getMenuStateById(id: string):
-  MenubarMenuItem | undefined {
+  private getMenuStateById(id: string): MenubarMenuItem | undefined {
     if (id.startsWith('browsing')) {
       return this.currentMenuState['browsing.window']
         .items.find((menuItem: MenubarMenuItem) => menuItem.id === id);
@@ -516,6 +550,10 @@ export default class Menubar {
 
     menubar.append(windowMenuItem);
 
+    // account
+    const account = this.createAccountMenu();
+    menubar.append(account);
+
     // Help
     const helpMenuItem = this.createHelpMenu();
 
@@ -589,6 +627,10 @@ export default class Menubar {
     const windowMenuItem = this.createWindowMenu();
 
     menubar.append(windowMenuItem);
+
+    // account
+    const account = this.createAccountMenu();
+    menubar.append(account);
 
     // Help
     const helpMenuItem = this.createHelpMenu();
@@ -668,8 +710,11 @@ export default class Menubar {
     // Window
     const windowMenuItem = this.createBrowsingWindowMenu();
 
-
     menubar.append(windowMenuItem);
+
+    // account
+    const account = this.createAccountMenu();
+    menubar.append(account);
 
     // Help
     const helpMenuItem = this.createHelpMenu();
@@ -801,6 +846,29 @@ export default class Menubar {
   private createWindowMenu() {
     const windowMenu = this.convertFromMenuItemTemplate('window');
     return new MenuItem({ id: 'window', label: this.$t('msg.window.name'), submenu: windowMenu });
+  }
+
+  private createAccountMenu() {
+    const accountMenu = new Menu();
+    if (this.user) {
+      const label = this.locale.$t('msg.account.name');
+      const idMenu = this.createMenuItem(`${label}: ${this.user.displayName}`, () => {
+      }, undefined, false);
+      accountMenu.append(idMenu);
+      const logout = this.createMenuItem('msg.account.logout', () => {
+        app.emit('sign-out');
+      }, undefined, true);
+      accountMenu.append(logout);
+    } else {
+      const login = this.createMenuItem('msg.account.login', () => {
+        app.emit('add-login');
+      }, undefined, true);
+      accountMenu.append(login);
+    }
+    const accountMenuItem = new MenuItem({
+      id: 'account', label: this.$t('msg.account.name'), submenu: accountMenu, visible: this.isAccountEnabled,
+    });
+    return accountMenuItem;
   }
 
   private createHelpMenu() {

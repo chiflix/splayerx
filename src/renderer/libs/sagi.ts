@@ -26,7 +26,14 @@ export class Sagi {
 
   private creds: grpc.ChannelCredentials;
 
+  private ip: string;
+
   public constructor() {
+    this.creds = this.combinedCreds();
+  }
+
+  private combinedCreds(token?: string) {
+    const { ip } = this;
     const sslCreds = credentials.createSsl(
       // How to access resources with fs see:
       // https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
@@ -38,17 +45,28 @@ export class Sagi {
       const metadata = new Metadata();
       metadata.set('uuid', Vue.axios.defaults.headers.common['X-Application-Token']);
       metadata.set('agent', navigator.userAgent);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      Vue.axios.get('https://ip.xindong.com/myip', { responseType: 'text' }).then((response: any) => {
-        metadata.set('clientip', response.bodyText);
-        cb(null, metadata);
-      }, () => {
-        cb(null, metadata);
-      });
+      if (token) {
+        metadata.set('token', token);
+      }
+      if (ip) {
+        metadata.set('clientip', ip);
+      } else {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        Vue.axios.get('https://ip.xindong.com/myip', { responseType: 'text' }).then((response: any) => {
+          metadata.set('clientip', response.bodyText);
+          this.ip = response.bodyText;
+          cb(null, metadata);
+        }, () => {
+          cb(null, metadata);
+        });
+      }
     };
     const metadataCreds = credentials.createFromMetadataGenerator(metadataUpdater);
-    const combinedCreds = credentials.combineChannelCredentials(sslCreds, metadataCreds);
-    this.creds = combinedCreds;
+    return credentials.combineChannelCredentials(sslCreds, metadataCreds);
+  }
+
+  public setToken(token: string) {
+    this.creds = this.combinedCreds(token);
   }
 
   public mediaTranslate(

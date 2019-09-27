@@ -105,6 +105,11 @@
       "copy": "Copy",
       "paste": "Paste"
     },
+    "account": {
+      "name": "Account",
+      "login": "Sign In",
+      "logout": "Sign Out"
+    },
     "help": {
       "name": "Help",
       "feedback": "Feedback",
@@ -420,6 +425,10 @@
       "title": "Translation Failed",
       "content": "Translation failed because of a server error. Please try later."
     },
+    "ForbiddenFail": {
+      "title": "Session Expired",
+      "content": "Please sign in again."
+    },
     "cancel": "Cancel",
     "quit": "Quit",
     "generate": "Generate",
@@ -450,8 +459,25 @@
       "title": "Translation Failed",
       "content": "Translation failed because of a server error. Please try later."
     },
+    "bubbleTranslateForbiddenFail": {
+      "title": "Session Expired",
+      "content": "Please sign in again."
+    },
     "ok": "OK",
     "cancel": "Cancel",
     "continue": "Continue"
+  },
+  "loginModal": {
+    "title": "Sign in with phone number",
+    "sendCode": "Send",
+    "countDown": "{count} s",
+    "placeholder": {
+      "mobile": "Your phone number",
+      "code": "Enter verification code"
+    },
+    "submit": "Sign In",
+    "codeError": "Incorrect Vertification Code",
+    "netWorkError": "Connection Timeout",
+    "noLineError": "No Network Connection"
   }
 }

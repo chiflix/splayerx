@@ -2,11 +2,12 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-05 16:03:32
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-09-20 11:29:17
+ * @Last Modified time: 2019-09-26 16:24:50
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @ts-ignore
 import { event } from 'vue-analytics';
+import { ipcRenderer, remote } from 'electron';
 import uuidv4 from 'uuid/v4';
 import { AudioTranslate as m } from '@/store/mutationTypes';
 import store from '@/store';
@@ -17,11 +18,12 @@ import { TranscriptInfo } from '@/services/subtitle';
 import { ISubtitleControlListItem, Type } from '@/interfaces/ISubtitle';
 import { mediaStorageService } from '@/services/storage/MediaStorageService';
 import { TranslatedGenerator } from '@/services/subtitle/loaders/translated';
-import { isAudioCenterChannelEnabled } from '@/helpers/featureSwitch';
+import { isAudioCenterChannelEnabled, isAccountEnabled } from '@/helpers/featureSwitch';
 import { addBubble } from '@/helpers/notificationControl';
 import {
   TRANSLATE_SERVER_ERROR_FAIL, TRANSLATE_SUCCESS,
   TRANSLATE_SUCCESS_WHEN_VIDEO_CHANGE, TRANSLATE_REQUEST_TIMEOUT,
+  TRANSLATE_REQUEST_FORBIDDEN,
 } from '@/helpers/notificationcodes';
 import { log } from '@/libs/Log';
 import { LanguageCode } from '@/libs/language';
@@ -49,6 +51,7 @@ export enum AudioTranslateFailType {
   NoLine = 'noLine',
   TimeOut = 'timeOut',
   ServerError = 'serverError',
+  Forbidden = 'forbidden',
 }
 
 export enum AudioTranslateBubbleOrigin {
@@ -381,6 +384,10 @@ const actions = {
           bubbleType = TRANSLATE_REQUEST_TIMEOUT;
           fileType = AudioTranslateFailType.TimeOut;
           failReason = 'time-out';
+        } else if (error && error.message === 'forbidden') {
+          bubbleType = TRANSLATE_REQUEST_FORBIDDEN;
+          fileType = AudioTranslateFailType.Forbidden;
+          failReason = 'forbidden';
         }
         commit(m.AUDIO_TRANSLATE_UPDATE_FAIL_TYPE, fileType);
         if (!state.isModalVisible) {
@@ -410,6 +417,9 @@ const actions = {
         } catch (error) {
           // empty
         }
+        // 清楚登录信息， 开登录窗口
+        remote.app.emit('sign-out');
+        ipcRenderer.send('add-login');
       });
       grab.on('grabCompleted', () => {
         log.debug('AudioTranslate', 'grabCompleted');
@@ -682,9 +692,19 @@ const actions = {
     dispatch(a.AUDIO_TRANSLATE_HIDE_BUBBLE);
     audioTranslateService.removeListener('task', taskCallback);
   },
-  [a.AUDIO_TRANSLATE_SHOW_MODAL]({
+  async [a.AUDIO_TRANSLATE_SHOW_MODAL]({
     commit, getters, state, dispatch,
   }: any, sub: ISubtitleControlListItem) {
+    try {
+      const enabled = await isAccountEnabled();
+      if (enabled && !getters.token) {
+        // 未登录
+        ipcRenderer.send('add-login');
+        return;
+      }
+    } catch (error) {
+      // empty
+    }
     dispatch(a.AUDIO_TRANSLATE_HIDE_BUBBLE);
     const key = `${getters.mediaHash}`;
     const taskInfo = mediaStorageService.getAsyncTaskInfo(key);

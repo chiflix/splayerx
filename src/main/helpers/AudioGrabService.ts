@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-22 17:18:34
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-09-11 18:41:23
+ * @Last Modified time: 2019-09-27 10:11:29
  */
 
 import { EventEmitter } from 'events';
@@ -65,6 +65,12 @@ export default class AudioGrabService extends EventEmitter {
   public streamClient: any; // eslint-disable-line
 
   public timeoutTimer: NodeJS.Timer;
+
+  private token?: string;
+
+  public setToken(token?: string) {
+    this.token = token;
+  }
 
   public start(data: JobData) {
     if (this.queue) {
@@ -179,7 +185,7 @@ export default class AudioGrabService extends EventEmitter {
   }
 
   private openClient(): any { // eslint-disable-line
-    const { uuid, agent } = this;
+    const { uuid, agent, token } = this;
     const sslCreds = credentials.createSsl(
       // @ts-ignore
       fs.readFileSync(path.join(__static, '/certs/ca.pem')),
@@ -192,6 +198,10 @@ export default class AudioGrabService extends EventEmitter {
       const metadata = new Metadata();
       metadata.set('uuid', uuid);
       metadata.set('agent', agent);
+      if (token) {
+        metadata.set('Authorization', token);
+      }
+      console.log(metadata); // eslint-disable-line
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       axios.get('https://ip.xindong.com/myip', { responseType: 'text' }).then((response: any) => {
         metadata.set('clientip', response.data);
