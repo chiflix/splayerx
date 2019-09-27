@@ -104,6 +104,11 @@
       "copy": "نسخ",
       "paste": "معجون"
     },
+    "account": {
+      "name": "",
+      "login": "",
+      "logout": ""
+    },
     "help": {
       "name": "مساعدة",
       "feedback": "ردود الفعل",
@@ -419,6 +424,10 @@
       "title": "فشل الترجمة",
       "content": "فشلت الترجمة بسبب خطأ في الخادم. يرجى المحاولة لاحقا."
     },
+    "ForbiddenFail": {
+      "title": "",
+      "content": ""
+    },
     "cancel": "إلغاء",
     "quit": "استقال",
     "generate": "توفير",
@@ -449,8 +458,25 @@
       "title": "فشل الترجمة",
       "content": "فشلت الترجمة بسبب خطأ في الخادم. يرجى المحاولة لاحقا."
     },
+    "bubbleTranslateForbiddenFail": {
+      "title": "",
+      "content": ""
+    },
     "ok": "حسنا",
     "cancel": "إلغاء",
     "continue": "استمر"
+  },
+  "loginModal": {
+    "title": "",
+    "sendCode": "",
+    "countDown": "",
+    "placeholder": {
+      "mobile": "",
+      "code": ""
+    },
+    "submit": "",
+    "codeError": "",
+    "netWorkError": "",
+    "noLineError": ""
   }
 }
