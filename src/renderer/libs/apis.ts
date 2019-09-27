@@ -6,7 +6,7 @@ const instance = axios.create();
 
 instance.defaults.timeout = 1000 * 10;
 
-const endpoint = process.env.ACCOUNT_API as string;
+const endpoint = `${process.env.ACCOUNT_API}/api`;
 
 log.debug('sss', endpoint);
 
