@@ -105,9 +105,9 @@
       "paste": "معجون"
     },
     "account": {
-      "name": "",
-      "login": "",
-      "logout": ""
+      "name": "حساب",
+      "login": "تسجيل دخول",
+      "logout": "تسجيل الخروج"
     },
     "help": {
       "name": "مساعدة",
@@ -425,8 +425,8 @@
       "content": "فشلت الترجمة بسبب خطأ في الخادم. يرجى المحاولة لاحقا."
     },
     "ForbiddenFail": {
-      "title": "",
-      "content": ""
+      "title": "انتهت الجلسة",
+      "content": "يرجى تسجيل الدخول أولاً."
     },
     "cancel": "إلغاء",
     "quit": "استقال",
@@ -459,24 +459,24 @@
       "content": "فشلت الترجمة بسبب خطأ في الخادم. يرجى المحاولة لاحقا."
     },
     "bubbleTranslateForbiddenFail": {
-      "title": "",
-      "content": ""
+      "title": "انتهت الجلسة",
+      "content": "يرجى تسجيل الدخول أولاً."
     },
     "ok": "حسنا",
     "cancel": "إلغاء",
     "continue": "استمر"
   },
   "loginModal": {
-    "title": "",
-    "sendCode": "",
+    "title": "سجّل الدخول برقم الهاتف",
+    "sendCode": "إرسال",
     "countDown": "",
     "placeholder": {
-      "mobile": "",
-      "code": ""
+      "mobile": "رقم هاتفك",
+      "code": "أدخل رمز التحقق"
     },
-    "submit": "",
-    "codeError": "",
-    "netWorkError": "",
-    "noLineError": ""
+    "submit": "تسجيل دخول",
+    "codeError": "رمز التحقق غير صحيح",
+    "netWorkError": "مهلة الاتصال",
+    "noLineError": "لا يوجد اتصال شبكة"
   }
 }
