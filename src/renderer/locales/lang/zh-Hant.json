@@ -426,7 +426,7 @@
     },
     "ForbiddenFail": {
       "title": "登入已過期",
-      "content": "請重新登入"
+      "content": "請重新登入。"
     },
     "cancel": "取消",
     "quit": "退出",
@@ -460,7 +460,7 @@
     },
     "bubbleTranslateForbiddenFail": {
       "title": "登入已過期",
-      "content": "請重新登入"
+      "content": "請重新登入。"
     },
     "ok": "好的",
     "cancel": "取消",
@@ -471,7 +471,7 @@
     "sendCode": "獲取驗證碼",
     "countDown": "{count} 秒",
     "placeholder": {
-      "mobile": "您的手機號碼",
+      "mobile": "輸入手機號",
       "code": "輸入短信驗證碼"
     },
     "submit": "登入",
