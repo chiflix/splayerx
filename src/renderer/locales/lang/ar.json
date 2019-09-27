@@ -206,6 +206,7 @@
       "name": "قناة",
       "iqiyi": "iQIYI",
       "bilibili": "Bilibili",
+      "douyu": "Douyu",
       "youtube": "Youtube"
     },
     "edit": {
@@ -238,6 +239,18 @@
     "chooseSecondary": "Select Secondary Language",
     "languageDescription": "* You can change your settings in preferences later",
     "none": "لا شيء"
+  },
+  "browsing": {
+    "bilibili": "Bilibili",
+    "iqiyi": "iQIYI",
+    "youtube": "Youtube",
+    "douyu": "Douyu",
+    "openLocalFile": " فتح ملف محلي ...",
+    "enterPip": "أدخل صورة في صورة",
+    "exitPip": "العودة إلى المتصفح",
+    "enterPop": "اللعب في نافذة جديدة",
+    "exitPop": "العودة إلى المتصفح",
+    "danmu": "وابل"
   },
   "preferences": {
     "general": {

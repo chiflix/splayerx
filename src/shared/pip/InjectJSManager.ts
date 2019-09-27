@@ -1,5 +1,6 @@
 import { bilibiliFindType, bilibiliVideoPause } from './Bilibili';
 import PipFactory from './PipFactory';
+import { douyuFindType, douyuVideoPause } from './Douyu';
 
 class InjectJSManager implements IInjectJSManager {
   private readonly calcVideoNumCode: string;
@@ -32,6 +33,14 @@ class InjectJSManager implements IInjectJSManager {
     return bilibiliFindType;
   }
 
+  public douyuFindType(): string {
+    return douyuFindType;
+  }
+
+  public douyuHideSelfPip(hide: boolean): string {
+    return hide ? '.pip-b1390f { display: none; }' : '.pip-b1390f { display: block; }';
+  }
+
   public changeFullScreen(enterFullScreen: boolean): string {
     return enterFullScreen ? 'document.body.requestFullscreen()' : 'document.webkitCancelFullScreen()';
   }
@@ -40,6 +49,8 @@ class InjectJSManager implements IInjectJSManager {
     switch (channel) {
       case 'bilibili':
         return bilibiliVideoPause(type as string);
+      case 'douyu':
+        return douyuVideoPause(type as string);
       case 'normal':
         return this.pauseNormalVideo;
       default:
@@ -49,6 +60,13 @@ class InjectJSManager implements IInjectJSManager {
 
   public updatePipControlState(shouldShow: boolean): string {
     return `document.querySelector(".pip-buttons").style.display = ${shouldShow} ? "flex" : "none";`;
+  }
+
+  public updatePipControlTitle(title: string, danmu: string): string {
+    return `
+      document.querySelector(".pip").title = "${title}";
+      document.querySelector(".danmu").title = "${danmu}";
+    `;
   }
 
   public updatePipTitlebarToShow(shouldShow: boolean): string {
@@ -108,6 +126,8 @@ export interface IInjectJSManager {
     barrageState?: boolean, winSize?: number[] }):
   { adapter: string, watcher: string, recover: string }
   bilibiliFindType(): string
+  douyuFindType(): string
+  douyuHideSelfPip(hide: boolean): string
   pauseVideo(channel: string, type?: string): string
   initBarrageIcon(barrageState: boolean): string
   updatePipControlState(shouldShow: boolean): string
