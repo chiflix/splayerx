@@ -105,9 +105,9 @@
       "paste": "貼上"
     },
     "account": {
-      "name": "",
-      "login": "",
-      "logout": ""
+      "name": "帳號",
+      "login": "登入",
+      "logout": "登出"
     },
     "help": {
       "name": "幫助",
@@ -425,8 +425,8 @@
       "content": "雲端處理錯誤，請稍後重試。"
     },
     "ForbiddenFail": {
-      "title": "",
-      "content": ""
+      "title": "登入已過期",
+      "content": "請重新登入"
     },
     "cancel": "取消",
     "quit": "退出",
@@ -459,24 +459,24 @@
       "content": "雲端處理錯誤，請稍後重試。"
     },
     "bubbleTranslateForbiddenFail": {
-      "title": "",
-      "content": ""
+      "title": "登入已過期",
+      "content": "請重新登入"
     },
     "ok": "好的",
     "cancel": "取消",
     "continue": "中止"
   },
   "loginModal": {
-    "title": "",
-    "sendCode": "",
-    "countDown": "",
+    "title": "免註冊登入",
+    "sendCode": "獲取驗證碼",
+    "countDown": "{count} 秒",
     "placeholder": {
-      "mobile": "",
-      "code": ""
+      "mobile": "您的手機號碼",
+      "code": "輸入短信驗證碼"
     },
-    "submit": "",
-    "codeError": "",
-    "netWorkError": "",
-    "noLineError": ""
+    "submit": "登入",
+    "codeError": "驗證碼錯誤",
+    "netWorkError": "網絡連接超時",
+    "noLineError": "沒有網路連線"
   }
 }
