@@ -104,6 +104,11 @@
       "copy": "複製",
       "paste": "貼上"
     },
+    "account": {
+      "name": "",
+      "login": "",
+      "logout": ""
+    },
     "help": {
       "name": "幫助",
       "feedback": "意見反饋",
@@ -419,6 +424,10 @@
       "title": "翻譯失敗",
       "content": "雲端處理錯誤，請稍後重試。"
     },
+    "ForbiddenFail": {
+      "title": "",
+      "content": ""
+    },
     "cancel": "取消",
     "quit": "退出",
     "generate": "生成",
@@ -449,8 +458,25 @@
       "title": "翻譯失敗",
       "content": "雲端處理錯誤，請稍後重試。"
     },
+    "bubbleTranslateForbiddenFail": {
+      "title": "",
+      "content": ""
+    },
     "ok": "好的",
     "cancel": "取消",
     "continue": "中止"
+  },
+  "loginModal": {
+    "title": "",
+    "sendCode": "",
+    "countDown": "",
+    "placeholder": {
+      "mobile": "",
+      "code": ""
+    },
+    "submit": "",
+    "codeError": "",
+    "netWorkError": "",
+    "noLineError": ""
   }
 }
