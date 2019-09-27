@@ -104,6 +104,11 @@
       "copy": "부",
       "paste": "풀"
     },
+    "account": {
+      "name": "",
+      "login": "",
+      "logout": ""
+    },
     "help": {
       "name": "도움",
       "feedback": "피드백",
@@ -419,6 +424,10 @@
       "title": "번역 실패",
       "content": "서버 오류로 인해 변환에 실패했습니다. 나중에 다시 시도 해주세요."
     },
+    "ForbiddenFail": {
+      "title": "",
+      "content": ""
+    },
     "cancel": "취소",
     "quit": "떠나다",
     "generate": "일으키다",
@@ -449,8 +458,25 @@
       "title": "번역 실패",
       "content": "서버 오류로 인해 변환에 실패했습니다. 나중에 다시 시도 해주세요."
     },
+    "bubbleTranslateForbiddenFail": {
+      "title": "",
+      "content": ""
+    },
     "ok": "승인",
     "cancel": "취소",
     "continue": "잇다"
+  },
+  "loginModal": {
+    "title": "",
+    "sendCode": "",
+    "countDown": "",
+    "placeholder": {
+      "mobile": "",
+      "code": ""
+    },
+    "submit": "",
+    "codeError": "",
+    "netWorkError": "",
+    "noLineError": ""
   }
 }
