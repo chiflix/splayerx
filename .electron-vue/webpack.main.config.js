@@ -104,7 +104,7 @@ if (process.env.NODE_ENV !== 'production') {
   mainConfig.plugins.push(
     new webpack.DefinePlugin(Object.assign(sharedDefinedVariables, {
       'process.env.SAGI_API': `"${process.env.SAGI_API || 'apis.stage.sagittarius.ai:8443'}"`,
-      'process.env.ACCOUNT_API': `"${process.env.ACCOUNT_API || 'https://account.stage.splayer.org'}"`,
+      'process.env.ACCOUNT_API': `"${process.env.ACCOUNT_API || 'http://account.splayer.work'}"`,
       __static: `"${path.join(__dirname, '../static').replace(/\\/g, '\\\\')}"`,
     })),
   );
