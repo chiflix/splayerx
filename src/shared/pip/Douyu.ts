@@ -73,7 +73,6 @@ export default class Douyu {
       this.recover = 'var videoPlayer = document.querySelector(".app-7b4311");'
       + 'videoPlayer.style.position = "relative";'
       + 'videoPlayer.style.zIndex = "";'
-      + 'document.querySelector("video").style.width = "";'
       + 'document.querySelector("video").style.height = "";'
       + 'document.body.style.overflow = "";'
       + 'document.querySelector("#header").style.display = "";';
