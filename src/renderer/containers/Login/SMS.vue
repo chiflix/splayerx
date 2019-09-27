@@ -113,8 +113,8 @@ export default Vue.extend({
       }
     },
     codeMaxLen() {
-      if (this.code.length > 4) {
-        this.code = this.code.slice(0, 4);
+      if (this.code.length > 6) {
+        this.code = this.code.slice(0, 6);
       }
     },
     validMobile() {
