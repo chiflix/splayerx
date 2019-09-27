@@ -104,6 +104,11 @@
       "copy": "复制",
       "paste": "粘贴"
     },
+    "account": {
+      "name": "",
+      "login": "",
+      "logout": ""
+    },
     "help": {
       "name": "帮助",
       "feedback": "反馈",
@@ -419,6 +424,10 @@
       "title": "翻译失败",
       "content": "云端处理错误，请稍后重试。"
     },
+    "ForbiddenFail": {
+      "title": "",
+      "content": ""
+    },
     "cancel": "取消",
     "quit": "退出",
     "generate": "生成",
@@ -449,8 +458,25 @@
       "title": "翻译失败",
       "content": "云端处理错误，请稍后重试。"
     },
+    "bubbleTranslateForbiddenFail": {
+      "title": "",
+      "content": ""
+    },
     "ok": "好的",
     "cancel": "取消",
     "continue": "继续"
+  },
+  "loginModal": {
+    "title": "",
+    "sendCode": "",
+    "countDown": "",
+    "placeholder": {
+      "mobile": "",
+      "code": ""
+    },
+    "submit": "",
+    "codeError": "",
+    "netWorkError": "",
+    "noLineError": ""
   }
 }
