@@ -105,9 +105,9 @@
       "paste": "粘贴"
     },
     "account": {
-      "name": "",
-      "login": "",
-      "logout": ""
+      "name": "账户",
+      "login": "登录",
+      "logout": "注销"
     },
     "help": {
       "name": "帮助",
@@ -425,8 +425,8 @@
       "content": "云端处理错误，请稍后重试。"
     },
     "ForbiddenFail": {
-      "title": "",
-      "content": ""
+      "title": "登录已过期",
+      "content": "请重新登录"
     },
     "cancel": "取消",
     "quit": "退出",
@@ -459,17 +459,17 @@
       "content": "云端处理错误，请稍后重试。"
     },
     "bubbleTranslateForbiddenFail": {
-      "title": "",
-      "content": ""
+      "title": "登录已过期",
+      "content": "请重新登录"
     },
     "ok": "好的",
     "cancel": "取消",
     "continue": "继续"
   },
   "loginModal": {
-    "title": "",
-    "sendCode": "",
-    "countDown": "",
+    "title": "免注册登录",
+    "sendCode": "获取验证码",
+    "countDown": "{count} 秒",
     "placeholder": {
       "mobile": "输入手机号码",
       "code": "输入短信验证码"
