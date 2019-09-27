@@ -102,7 +102,7 @@ export default class Bilibili {
         + 'document.body.style.overflow = "";'
         + 'document.querySelector(".bili-header-m").style.display = "";'
         + 'if (document.querySelector("#entryOld")) {document.querySelector("#entryOld").style.display = "";}'
-        + 'if (!isTheater) {document.body.click();document.querySelector(".bilibili-player-video-btn-widescreen").click();};';
+        + 'if (!isTheater && document.querySelector(".bilibili-player-video-btn-widescreen")) {document.body.click();document.querySelector(".bilibili-player-video-btn-widescreen").click();};';
     } else if (type === 'videoStreaming') {
       this.adapter = `${this.bilibiliBarrageAdapt(type, barrageOpen)}
         document.body.prepend(document.querySelector(".live-player-ctnr"));
