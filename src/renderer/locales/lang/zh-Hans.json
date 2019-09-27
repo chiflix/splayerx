@@ -426,7 +426,7 @@
     },
     "ForbiddenFail": {
       "title": "登录已过期",
-      "content": "请重新登录"
+      "content": "请重新登录。"
     },
     "cancel": "取消",
     "quit": "退出",
@@ -460,7 +460,7 @@
     },
     "bubbleTranslateForbiddenFail": {
       "title": "登录已过期",
-      "content": "请重新登录"
+      "content": "请重新登录。"
     },
     "ok": "好的",
     "cancel": "取消",
