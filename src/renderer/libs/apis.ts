@@ -6,7 +6,7 @@ const instance = axios.create();
 
 instance.defaults.timeout = 1000 * 10;
 
-const endpoint = process.env.REST_API as string;
+const endpoint = process.env.ACCOUNT_API as string;
 
 log.debug('sss', endpoint);
 
@@ -18,16 +18,16 @@ function intercept(response: AxiosResponse) {
   const headers = response.headers;
   if (headers && headers.authorization) {
     const token = headers.authorization.replace('Bearer', '').trim();
-    let id = '';
+    let displayName = '';
     try {
-      id = JSON.parse(new Buffer(token.split('.')[1], 'base64').toString()).id; // eslint-disable-line
+      displayName = JSON.parse(new Buffer(token.split('.')[1], 'base64').toString()).display_name; // eslint-disable-line
     } catch (error) {
       // tmpty
     }
     log.debug('token', token);
     remote.app.emit('sign-in', {
       token,
-      id,
+      displayName,
     });
   }
 }

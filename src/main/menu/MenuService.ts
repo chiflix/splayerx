@@ -28,7 +28,7 @@ export default class MenuService {
     this.menu.updatePipIcon();
   }
 
-  public updateAccount(user?: { id: string }) {
+  public updateAccount(user?: { displayName: string }) {
     this.menu.isAccountEnabled = true;
     this.menu.updateAccount(user);
   }

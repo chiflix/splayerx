@@ -8,8 +8,6 @@ import { ELECTRON_CACHE_DIRNAME, TOKEN_FILE_NAME } from '../renderer/constants';
 import electronBuilderConfig from '../../electron-builder.json';
 
 const app = electron.app || electron.remote.app;
-
-let ip = null;
 const tokenPath = join(app.getPath(ELECTRON_CACHE_DIRNAME), TOKEN_FILE_NAME);
 
 const subtitleExtensions = Object.freeze(['srt', 'ass', 'vtt', 'ssa'].map(ext => ext.toLowerCase()));
@@ -61,17 +59,12 @@ export function getAllValidExtensions() {
 
 export function getIP() {
   return new Promise((resolve, reject) => {
-    if (ip !== null) {
-      resolve(ip);
-    } else {
-      axios.get('https://ip.xindong.com/myip', { responseType: 'text' })
-        .then((response) => {
-          ip = response.data;
-          resolve(ip);
-        }, (error) => {
-          reject(error);
-        });
-    }
+    axios.get('https://ip.xindong.com/myip', { responseType: 'text' })
+      .then((response) => {
+        resolve(response.data);
+      }, (error) => {
+        reject(error);
+      });
   });
 }
 
@@ -86,15 +79,15 @@ export async function getToken() {
     if (exist) {
       const token = await read(tokenPath);
       if (token) {
-        let id = '';
+        let displayName = '';
         try {
-          id = JSON.parse(new Buffer(token.split('.')[1], 'base64').toString()).id; // eslint-disable-line
+          displayName = JSON.parse(new Buffer(token.split('.')[1], 'base64').toString()).display_name; // eslint-disable-line
         } catch (error) {
           // tmpty
         }
         return {
           token,
-          id,
+          displayName,
         };
       }
     }

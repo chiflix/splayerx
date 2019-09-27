@@ -87,6 +87,7 @@ let needBlockCloseLaborWindow = true; // 标记是否阻塞nsfw窗口关闭
 let inited = false;
 let hideBrowsingWindow = false;
 let finalVideoToOpen = [];
+let ip = ''; // 本机ip地址
 const tmpVideoToOpen = [];
 const tmpSubsToOpen = [];
 const subRegex = getValidSubtitleRegex();
@@ -1067,11 +1068,13 @@ function registerMainWindowEvent(mainWindow) {
       if (account) {
         global['account'] = account;
         menuService.updateAccount(account);
+        audioGrabService.setToken(account.token);
         if (mainWindow && !mainWindow.webContents.isDestroyed()) {
           mainWindow.webContents.send('sign-in', account);
         }
       } else {
         menuService.updateAccount(undefined);
+        audioGrabService.setToken(undefined);
       }
     }).catch(console.error);
   });
@@ -1330,10 +1333,6 @@ app.on('ready', () => {
       handleBossKey();
     });
   }
-  // get ip
-  getIP().then((ip) => {
-    global['static_ip'] = ip;
-  }).catch(console.error);
 });
 
 app.on('window-all-closed', () => {
@@ -1400,6 +1399,7 @@ app.on('activate', () => {
 app.on('sign-in', (account) => {
   global['account'] = account;
   menuService.updateAccount(account);
+  audioGrabService.setToken(account.token);
   saveToken(account.token);
   if (mainWindow && !mainWindow.webContents.isDestroyed()) {
     mainWindow.webContents.send('sign-in', account);
@@ -1409,8 +1409,19 @@ app.on('sign-in', (account) => {
 app.on('sign-out', () => {
   global['account'] = undefined;
   menuService.updateAccount(undefined);
+  audioGrabService.setToken(undefined);
   saveToken('');
   if (mainWindow && !mainWindow.webContents.isDestroyed()) {
     mainWindow.webContents.send('sign-in', undefined);
   }
 });
+
+app.getIP = async () => {
+  if (ip) return ip;
+  try {
+    ip = await getIP();
+  } catch (error) {
+    // empty
+  }
+  return ip;
+};

@@ -57,7 +57,7 @@ export default class Menubar {
 
   private _routeName: string;
 
-  private user?: { id: string };
+  private user?: { displayName: string };
 
   public isAccountEnabled: boolean;
 
@@ -336,7 +336,7 @@ export default class Menubar {
     }
   }
 
-  public updateAccount(user?: { id: string }) {
+  public updateAccount(user?: { displayName: string }) {
     this.user = user;
     const menuItem = this.menubar.getMenuItemById('account');
     if (menuItem) {
@@ -346,7 +346,8 @@ export default class Menubar {
     if (accountMenu && user) {
       // @ts-ignore
       accountMenu.clear();
-      const idMenu = this.createMenuItem(`ID: ${user.id}`, () => {
+      const label = this.locale.$t('msg.account.name');
+      const idMenu = this.createMenuItem(`${label}: ${user.displayName}`, () => {
       }, undefined, false);
       accountMenu.append(idMenu);
       const logout = this.createMenuItem('msg.account.logout', () => {
@@ -850,7 +851,8 @@ export default class Menubar {
   private createAccountMenu() {
     const accountMenu = new Menu();
     if (this.user) {
-      const idMenu = this.createMenuItem(`ID: ${this.user.id}`, () => {
+      const label = this.locale.$t('msg.account.name');
+      const idMenu = this.createMenuItem(`${label}: ${this.user.displayName}`, () => {
       }, undefined, false);
       accountMenu.append(idMenu);
       const logout = this.createMenuItem('msg.account.logout', () => {

@@ -463,7 +463,8 @@
       "code": "Enter verification code"
     },
     "submit": "Sign In",
-    "codeError": "* Incorrect Verification Code",
-    "netWorkError": "* net work error"
+    "codeError": "Incorrect Vertification Code",
+    "netWorkError": "Connection Timeout",
+    "noLineError": "No Network Connection"
   }
 }

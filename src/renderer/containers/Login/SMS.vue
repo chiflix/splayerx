@@ -92,8 +92,10 @@ export default Vue.extend({
       return len;
     },
   },
-  mounted() {
-    const ip = remote.getGlobal('static_ip');
+  async mounted() {
+    // @ts-ignore
+    const ip = await remote.app.getIP();
+    log.debug('ip', ip);
     const geo = geoip.lookup(ip);
     if (geo && geo.country && getCountryCallingCode(geo.country)) {
       this.countryCallCode = getCountryCallingCode(geo.country);
@@ -134,6 +136,10 @@ export default Vue.extend({
     },
     async getCode() {
       if (this.validMobile(this.mobile) && this.count === 0) {
+        if (!navigator.onLine) {
+          this.message = this.$t('loginModal.noLineError');
+          return;
+        }
         this.count = 60;
         if (this.$refs.code) {
           this.$refs.code.focus();
@@ -141,8 +147,10 @@ export default Vue.extend({
         try {
           await getSMSCode(`+${this.countryCallCode}${this.mobile}`);
           this.countDown();
+          this.message = '';
         } catch (error) {
           log.debug('sms', error);
+          this.message = this.$t('loginModal.netWorkError');
           this.count = 0;
         }
       }
@@ -160,6 +168,10 @@ export default Vue.extend({
     },
     async submit() {
       if (this.validMobile() && this.validCode() && !this.isLogin) {
+        if (!navigator.onLine) {
+          this.message = this.$t('loginModal.noLineError');
+          return;
+        }
         this.isLogin = true;
         this.message = '';
         try {
