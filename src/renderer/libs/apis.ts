@@ -1,14 +1,17 @@
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { remote } from 'electron';
 import { log } from '@/libs/Log';
+import { apiOfAccountService } from '@/helpers/featureSwitch';
 
 const instance = axios.create();
 
 instance.defaults.timeout = 1000 * 10;
 
-const endpoint = `${process.env.ACCOUNT_API}/api`;
-
-log.debug('sss', endpoint);
+async function getEndpoint() {
+  const api = await apiOfAccountService();
+  log.debug('AccountService', api);
+  return `${api}/api`;
+}
 
 export function setToken(t: string) {
   instance.defaults.headers.common['Authorization'] = `Bearer ${t}`;
@@ -38,7 +41,8 @@ instance.interceptors.response.use((response: AxiosResponse) => {
 }, (error: AxiosError) => Promise.reject(error));
 
 export function checkToken() {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
+    const endpoint = await getEndpoint();
     instance.get(`${endpoint}/auth/check`)
       .then((response: AxiosResponse) => {
         log.debug('checkToken', response);
@@ -51,8 +55,9 @@ export function checkToken() {
 }
 
 export function getSMSCode(phone: string) {
-  log.debug('sms', `${endpoint}/auth/sms`);
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
+    const endpoint = await getEndpoint();
+    log.debug('sms', `${endpoint}/auth/sms`);
     instance.post(`${endpoint}/auth/sms`, {
       phone,
     })
@@ -68,7 +73,8 @@ export function getSMSCode(phone: string) {
 }
 
 export function signIn(type: string, phone: string, code?: string) {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
+    const endpoint = await getEndpoint();
     instance.post(`${endpoint}/auth/login`, {
       phone,
       type,

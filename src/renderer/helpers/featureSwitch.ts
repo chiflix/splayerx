@@ -69,3 +69,5 @@ export const isAIEnabled = async () => getConfig('isAIEnabled', false);
 export const isAudioCenterChannelEnabled = async () => getConfig('isAudioCenterChannelEnabled', false);
 
 export const isAccountEnabled = async () => getConfig('isAccountEnabled', false);
+
+export const apiOfAccountService = async () => getConfig('apiForAccountService', process.env.ACCOUNT_API);
