@@ -684,7 +684,7 @@ new Vue({
       checkForUpdate(true).then((
         json: { version: string, isLastest: boolean, landingPage: string, url: string }
       ) => {
-        if (!json.isLastest) {
+        if (!json.isLastest && this.currentRouteName !== 'browsing-view') {
           this.$bus.$emit('new-version', json);
         }
       }).catch((err: Error) => {

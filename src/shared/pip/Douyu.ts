@@ -57,7 +57,7 @@ export default class Douyu {
         + 'document.querySelector("._1Osm4fzGmcuRK9M8IVy3u6").style.width = "100%";'
         + 'document.querySelector("._1Osm4fzGmcuRK9M8IVy3u6").style.height = "100%";';
     } else if (type === 'video') {
-      this.adapter = `var videoPlayer = document.querySelector(".app-7b4311");
+      this.adapter = `var videoPlayer = document.querySelector(".video-holder").childNodes[0];
         ${this.douyuBarrageAdapt(type, barrageState)}
         videoPlayer.style.position = "fixed";
         videoPlayer.style.zIndex = "999999999";
@@ -66,14 +66,21 @@ export default class Douyu {
         document.querySelector("video").style.width = "100%";
         document.querySelector("video").style.height = "100%";
         document.body.style.overflow = "hidden";
-        document.querySelector(".controlbar-a2580a").style.width = "100%";
-        document.querySelector(".controlbar-a2580a").children[0].style.width = "100%";
+        var controlbar = null;
+        videoPlayer.childNodes.forEach(i => {
+        if (i.classList && i.classList.value.includes("controlbar")) {
+        controlbar = i;
+        }
+        });
+        if (controlbar) {
+        controlbar.style.width = "100%";
+        controlbar.children[0].style.width = "100%";
+        }
         document.querySelector("#header").style.display = "none";`;
       this.watcher = '';
-      this.recover = 'var videoPlayer = document.querySelector(".app-7b4311");'
+      this.recover = 'var videoPlayer = document.querySelector(".video-holder").childNodes[0];'
       + 'videoPlayer.style.position = "relative";'
       + 'videoPlayer.style.zIndex = "";'
-      + 'document.querySelector("video").style.height = "";'
       + 'document.body.style.overflow = "";'
       + 'document.querySelector("#header").style.display = "";';
     } else {
@@ -134,4 +141,4 @@ export default class Douyu {
   }
 }
 
-export const douyuFindType = 'if (document.querySelector(".layout-Player-videoMain")) { "normal"; } else if (document.querySelector(".app-7b4311")) { "video" } else { "others"; }';
+export const douyuFindType = 'if (document.querySelector(".layout-Player-videoMain")) { "normal"; } else if (document.querySelector(".video")) { "video" } else { "others"; }';
