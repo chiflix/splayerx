@@ -693,27 +693,16 @@ export default {
           this.loadingState = false;
         });
       } else {
+        if (this.oauthRegex.some((re: RegExp) => re.test(url))) return;
         this.loadingState = true;
         const newHostname = urlParseLax(openUrl).hostname;
-        const oldHostname = urlParseLax(this.currentUrl).hostname;
-        let oldChannel = oldHostname.slice(
-          oldHostname.indexOf('.') + 1,
-          oldHostname.length,
-        );
-        if (this.currentUrl.includes('youtube')) {
-          oldChannel = 'youtube.com';
-        }
+        const oldChannel = this.currentChannel;
         let newChannel = oldChannel;
-        if (newHostname.includes(...this.allChannels)) {
-          newChannel = newHostname.slice(
-            newHostname.indexOf('.') + 1,
-            newHostname.length,
-          );
-          if (openUrl.includes('youtube')) {
-            newChannel = 'youtube.com';
+        this.allChannels.forEach((channel: string) => {
+          if (newHostname.includes(channel)) {
+            newChannel = `${channel}.com`;
           }
-        }
-        if (this.oauthRegex.some((re: RegExp) => re.test(url))) return;
+        });
         if (oldChannel === newChannel) {
           log.info('new-window', openUrl);
           this.loadingState = true;
