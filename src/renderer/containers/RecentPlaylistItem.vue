@@ -336,7 +336,7 @@ export default {
         this.mouseoverVideo();
       }
     },
-    item(val: string, oldVal: string) {
+    item(val: string) {
       if (val) this.updateUI();
     },
     isPlaying(val: boolean) {
