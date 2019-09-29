@@ -697,7 +697,7 @@ export default {
         this.loadingState = true;
         const newHostname = urlParseLax(openUrl).hostname;
         const oldChannel = this.currentChannel;
-        let newChannel = oldChannel;
+        let newChannel = '';
         this.allChannels.forEach((channel: string) => {
           if (newHostname.includes(channel)) {
             newChannel = `${channel}.com`;
