@@ -241,7 +241,7 @@ if (process.env.NODE_ENV !== 'production') {
     new webpack.DefinePlugin(
       Object.assign(sharedDefinedVariables, {
         'process.env.SAGI_API': `"${process.env.SAGI_API || 'apis.stage.sagittarius.ai:8443'}"`,
-        'process.env.ACCOUNT_API': `"${process.env.ACCOUNT_API || 'http://account.splayer.work'}"`,
+        'process.env.ACCOUNT_API': `"${process.env.ACCOUNT_API || 'http://stage.account.splayer.work'}"`,
         __static: `"${path.join(__dirname, '../static').replace(/\\/g, '\\\\')}"`,
       }),
     ),
@@ -266,7 +266,7 @@ if (process.env.NODE_ENV === 'production') {
     new webpack.DefinePlugin(
       Object.assign(sharedDefinedVariables, {
         'process.env.SAGI_API': `"${process.env.SAGI_API || 'apis.sagittarius.ai:8443'}"`,
-        'process.env.ACCOUNT_API': `"${process.env.ACCOUNT_API || 'https://account.splayer.org'}"`,
+        'process.env.ACCOUNT_API': `"${process.env.ACCOUNT_API || 'https://account.splayer.work'}"`,
         'process.env.SENTRY_RELEASE': `"${release}"`,
         'process.env.NODE_ENV': '"production"',
       }),
