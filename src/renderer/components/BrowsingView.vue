@@ -694,7 +694,6 @@ export default {
         });
       } else {
         if (this.oauthRegex.some((re: RegExp) => re.test(url))) return;
-        this.loadingState = true;
         const newHostname = urlParseLax(openUrl).hostname;
         const oldChannel = this.currentChannel;
         let newChannel = '';
@@ -704,6 +703,7 @@ export default {
           }
         });
         if (oldChannel === newChannel) {
+          this.loadingState = true;
           log.info('new-window', openUrl);
           this.loadingState = true;
           this.currentUrl = urlParseLax(openUrl).href;
