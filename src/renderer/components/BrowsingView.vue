@@ -60,6 +60,7 @@ import asyncStorage from '@/helpers/asyncStorage';
 import NotificationBubble from '@/components/NotificationBubble.vue';
 import { getValidVideoRegex, getValidSubtitleRegex } from '../../shared/utils';
 import MenuService from '@/services/menu/MenuService';
+import { log } from '@/libs/Log';
 import InjectJSManager from '../../shared/pip/InjectJSManager';
 
 export default {
@@ -184,6 +185,8 @@ export default {
         || val === 'about:blank'
         || urlParseLax(this.currentUrl).href === urlParseLax(val).href
       ) return;
+      if (val.includes('bilibili') && urlParseLax(this.currentUrl).query === urlParseLax(val).query) return;
+      log.info('did-start-loading', val);
       this.currentUrl = urlParseLax(val).href;
       this.loadingState = true;
       this.$electron.ipcRenderer.send('create-browser-view', { url: val });
@@ -629,6 +632,7 @@ export default {
         || url === 'about:blank'
         || urlParseLax(this.currentUrl).href === urlParseLax(url).href
       ) return;
+      log.info('will-navigate', url);
       this.currentUrl = urlParseLax(url).href;
       this.loadingState = true;
       this.$electron.ipcRenderer.send('create-browser-view', { url });
@@ -711,6 +715,7 @@ export default {
         }
         if (this.oauthRegex.some((re: RegExp) => re.test(url))) return;
         if (oldChannel === newChannel) {
+          log.info('new-window', openUrl);
           this.loadingState = true;
           this.currentUrl = urlParseLax(openUrl).href;
           this.$electron.ipcRenderer.send('create-browser-view', {

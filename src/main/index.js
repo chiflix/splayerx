@@ -627,12 +627,23 @@ function registerMainWindowEvent(mainWindow) {
         canGoBack: newBrowser.canBack,
         canGoForward: newBrowser.canForward,
       });
-      newBrowser.page.view.setBounds({
-        x: sidebar ? 76 : 0,
-        y: 40,
-        width: sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
-        height: mainWindow.getSize()[1] - 40,
-      });
+      const bounds = mainWindow.getBounds();
+      if (process.platform === 'win32' && mainWindow.isMaximized() && (bounds.x < 0 || bounds.y < 0)) {
+        newBrowser.page.view.setBounds({
+          x: sidebar ? 76 : 0,
+          y: 40,
+          width: sidebar ? bounds.width + (bounds.x * 2) - 76
+            : bounds.width + (bounds.x * 2),
+          height: bounds.height - 40,
+        });
+      } else {
+        newBrowser.page.view.setBounds({
+          x: sidebar ? 76 : 0,
+          y: 40,
+          width: sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
+          height: mainWindow.getSize()[1] - 40,
+        });
+      }
       newBrowser.page.view.setAutoResize({
         width: true, height: true,
       });
@@ -872,7 +883,6 @@ function registerMainWindowEvent(mainWindow) {
     } else {
       mainWindow.removeBrowserView(mainWindow.getBrowserViews()[0]);
       mainWindow.addBrowserView(mainBrowser.page.view);
-      browsingWindow.setSize(args.pipInfo.pipSize[0], args.pipInfo.pipSize[1]);
       browsingWindow.addBrowserView(pipBrowser);
       createPipControlView();
       createTitlebarView();
@@ -885,6 +895,7 @@ function registerMainWindowEvent(mainWindow) {
     browsingWindow.webContents.closeDevTools();
     browsingWindow.setAspectRatio(args.pipInfo.aspectRatio);
     browsingWindow.setMinimumSize(args.pipInfo.minimumSize[0], args.pipInfo.minimumSize[1]);
+    browsingWindow.setSize(args.pipInfo.pipSize[0], args.pipInfo.pipSize[1]);
     mainBrowser.page.view.setBounds({
       x: sidebar ? 76 : 0,
       y: 40,
