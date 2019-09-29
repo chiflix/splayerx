@@ -104,6 +104,11 @@
       "copy": "复制",
       "paste": "粘贴"
     },
+    "account": {
+      "name": "账户",
+      "login": "登录",
+      "logout": "注销"
+    },
     "help": {
       "name": "帮助",
       "feedback": "反馈",
@@ -206,6 +211,7 @@
       "name": "频道",
       "iqiyi": "爱奇艺",
       "bilibili": "哔哩哔哩",
+      "douyu": "斗鱼",
       "youtube": "Youtube"
     },
     "edit": {
@@ -238,6 +244,18 @@
     "chooseSecondary": "选择次要语言",
     "languageDescription": "* 稍后您可以在偏好设置里更改",
     "none": "无"
+  },
+  "browsing": {
+    "bilibili": "哔哩哔哩",
+    "iqiyi": "爱奇艺",
+    "youtube": "Youtube",
+    "douyu": "斗鱼",
+    "openLocalFile": "打开本地文件 ...",
+    "enterPip": "进入画中画",
+    "exitPip": "退出画中画",
+    "enterPop": "新窗口播放",
+    "exitPop": "还原窗口",
+    "danmu": "弹幕开关"
   },
   "preferences": {
     "general": {
@@ -406,6 +424,10 @@
       "title": "翻译失败",
       "content": "云端处理错误，请稍后重试。"
     },
+    "ForbiddenFail": {
+      "title": "登录已过期",
+      "content": "请重新登录。"
+    },
     "cancel": "取消",
     "quit": "退出",
     "generate": "生成",
@@ -436,8 +458,25 @@
       "title": "翻译失败",
       "content": "云端处理错误，请稍后重试。"
     },
+    "bubbleTranslateForbiddenFail": {
+      "title": "登录已过期",
+      "content": "请重新登录。"
+    },
     "ok": "好的",
     "cancel": "取消",
     "continue": "继续"
+  },
+  "loginModal": {
+    "title": "免注册登录",
+    "sendCode": "获取验证码",
+    "countDown": "{count} 秒",
+    "placeholder": {
+      "mobile": "输入手机号码",
+      "code": "输入短信验证码"
+    },
+    "submit": "登录",
+    "codeError": "验证码错误",
+    "netWorkError": "网络连接超时",
+    "noLineError": "无网络连接"
   }
 }

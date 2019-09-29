@@ -285,6 +285,9 @@ export default {
     aboutToDelete() {
       return this.selfMoving && (-(this.movementY) > this.thumbnailHeight * 1.5);
     },
+    item() {
+      return this.items[this.index];
+    },
     baseName() {
       const parsedName = parseNameFromPath(this.path);
       if (parsedName.episode && parsedName.season) {
@@ -333,8 +336,8 @@ export default {
         this.mouseoverVideo();
       }
     },
-    items() {
-      this.updateUI();
+    item(val: string, oldVal: string) {
+      if (val) this.updateUI();
     },
     isPlaying(val: boolean) {
       if (val) {

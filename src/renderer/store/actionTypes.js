@@ -135,3 +135,7 @@ export const Browsing = {
   UPDATE_CURRENT_CHANNEL: 'UPDATE_CURRENT_CHANNEL',
   UPDATE_PIP_CHANNEL: 'UPDATE_PIP_CHANNEL',
 };
+
+export const UserInfo = {
+  UPDATE_USER_INFO: 'UPDATE_USER_INFO',
+};

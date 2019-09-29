@@ -104,6 +104,11 @@
       "copy": "Copiar",
       "paste": "Pegar"
     },
+    "account": {
+      "name": "Cuenta",
+      "login": "Ingressar",
+      "logout": "Cerrar Sesión"
+    },
     "help": {
       "name": "Ayuda",
       "feedback": "Realimentación",
@@ -206,6 +211,7 @@
       "name": "Canal",
       "iqiyi": "iQIYI",
       "bilibili": "Bilibili",
+      "douyu": "Douyu",
       "youtube": "Youtube"
     },
     "edit": {
@@ -238,6 +244,18 @@
     "chooseSecondary": "Select Secondary Language",
     "languageDescription": "* You can change your settings in preferences later",
     "none": "None"
+  },
+  "browsing": {
+    "bilibili": "Bilibili",
+    "iqiyi": "iQIYI",
+    "youtube": "Youtube",
+    "douyu": "Douyu",
+    "openLocalFile": "Abrir archivo local...",
+    "enterPip": "Habilitar Picture in Picture",
+    "exitPip": "Volver al navegador",
+    "enterPop": "Reproducir en ventana nueva",
+    "exitPop": "Volver al navegador",
+    "danmu": "Alternar Danmaku"
   },
   "preferences": {
     "general": {
@@ -406,6 +424,10 @@
       "title": "Error al traducir",
       "content": "La traducción ha fallado debido a un error del servidor. Por favor, inténtalo más tarde."
     },
+    "ForbiddenFail": {
+      "title": "Sesión caducada",
+      "content": "Inicie una sesión de nuevo."
+    },
     "cancel": "Cancelar",
     "quit": "Salir",
     "generate": "Generar",
@@ -436,8 +458,25 @@
       "title": "Error al traducir",
       "content": "La traducción ha fallado debido a un error del servidor. Por favor, inténtalo más tarde."
     },
+    "bubbleTranslateForbiddenFail": {
+      "title": "Sesión caducada",
+      "content": "Inicie una sesión de nuevo."
+    },
     "ok": "OK",
     "cancel": "Cancelar",
     "continue": "Continuar"
+  },
+  "loginModal": {
+    "title": "Iniciar sesión con número de teléfono",
+    "sendCode": "Enviar",
+    "countDown": "{count} s",
+    "placeholder": {
+      "mobile": "Tu número de teléfono",
+      "code": "Introduzca el código de verificación"
+    },
+    "submit": "Ingressar",
+    "codeError": "Código de vértificación incorrecto",
+    "netWorkError": "El tiempo para la conexión ha acabado",
+    "noLineError": "No hay conexión de red"
   }
 }

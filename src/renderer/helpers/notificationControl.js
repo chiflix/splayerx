@@ -24,6 +24,7 @@ import {
   TRANSLATE_NO_LINE,
   TRANSLATE_SERVER_ERROR_FAIL,
   TRANSLATE_REQUEST_TIMEOUT,
+  TRANSLATE_REQUEST_FORBIDDEN,
   TRANSLATE_SUCCESS,
   TRANSLATE_SUCCESS_WHEN_VIDEO_CHANGE,
   CHECK_FOR_UPDATES_OFFLINE,
@@ -231,6 +232,14 @@ export function addBubble(code, options = {}) { // eslint-disable-line complexit
         type: 'result',
         title: i18n.t('translateBubble.bubbleTranslateTimeOutFail.title', i18n.locale, i18n.messages),
         content: i18n.t('translateBubble.bubbleTranslateTimeOutFail.content', i18n.locale, i18n.messages),
+      });
+      break;
+    case TRANSLATE_REQUEST_FORBIDDEN:
+      store.dispatch('addMessages', {
+        id,
+        type: 'result',
+        title: i18n.t('translateBubble.bubbleTranslateForbiddenFail.title', i18n.locale, i18n.messages),
+        content: i18n.t('translateBubble.bubbleTranslateForbiddenFail.content', i18n.locale, i18n.messages),
       });
       break;
     case TRANSLATE_SERVER_ERROR_FAIL:

@@ -104,6 +104,11 @@
       "copy": "コピー",
       "paste": "貼り付け"
     },
+    "account": {
+      "name": "账户",
+      "login": "登入",
+      "logout": "登出"
+    },
     "help": {
       "name": "ヘルプ",
       "feedback": "フィードバック",
@@ -206,6 +211,7 @@
       "name": "チャンネル",
       "iqiyi": "iQIYI",
       "bilibili": "Bilibili",
+      "douyu": "Douyu",
       "youtube": "Youtube"
     },
     "edit": {
@@ -238,6 +244,18 @@
     "chooseSecondary": "Select Secondary Language",
     "languageDescription": "*後でもオプション設定で変更できます。",
     "none": "None"
+  },
+  "browsing": {
+    "bilibili": "Bilibili",
+    "iqiyi": "iQIYI",
+    "youtube": "Youtube",
+    "douyu": "Douyu",
+    "openLocalFile": "ローカルファイルを開く",
+    "enterPip": "画中画を開じる",
+    "exitPip": "ブラウザに戻る",
+    "enterPop": "新しいウィンドウで遊ぶ",
+    "exitPop": "ブラウザに戻る",
+    "danmu": "だんまくスイッチ"
   },
   "preferences": {
     "general": {
@@ -406,6 +424,10 @@
       "title": "翻訳失敗",
       "content": "サーバーエラーのため翻訳に失敗しました。 後でお試しください。"
     },
+    "ForbiddenFail": {
+      "title": "有効期限が切れました",
+      "content": "サインインしてください。"
+    },
     "cancel": "キャンセル",
     "quit": "やめる",
     "generate": "生成する",
@@ -436,8 +458,25 @@
       "title": "翻訳失敗",
       "content": "クラウドエラーで翻訳失敗しました。 暫くしてからまたお試しください。"
     },
+    "bubbleTranslateForbiddenFail": {
+      "title": "有効期限が切れました",
+      "content": "サインインしてください。"
+    },
     "ok": "はい",
     "cancel": "キャンセル",
     "continue": "続ける"
+  },
+  "loginModal": {
+    "title": "手機番号でログイン",
+    "sendCode": "送信する",
+    "countDown": "{count} 秒",
+    "placeholder": {
+      "mobile": "手機番号",
+      "code": "確認コードを入力"
+    },
+    "submit": "登入",
+    "codeError": "間違った認証コード",
+    "netWorkError": "接続タイムアウト",
+    "noLineError": "ネットワークに接続していません"
   }
 }
