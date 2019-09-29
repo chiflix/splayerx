@@ -213,7 +213,7 @@
       "iqiyi": "iQIYI",
       "bilibili": "Bilibili",
       "douyu": "Douyu",
-      "youtube": "Youtube"
+      "youtube": "YouTube"
     },
     "edit": {
       "name": "Edit",
@@ -249,7 +249,7 @@
   "browsing": {
     "bilibili": "Bilibili",
     "iqiyi": "iQIYI",
-    "youtube": "Youtube",
+    "youtube": "YouTube",
     "douyu": "Douyu",
     "openLocalFile": "Open Local File ...",
     "enterPip": "Enter Picture in Picture",
