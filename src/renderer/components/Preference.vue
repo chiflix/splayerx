@@ -176,9 +176,8 @@ export default {
       position: fixed;
 
       .titlebar__button {
-        margin: 0px 2px 2px 0px;
         width: 45px;
-        height: 28px;
+        height: 36px;
         background-color: rgba(255,255,255,0);
         transition: background-color 200ms;
 
