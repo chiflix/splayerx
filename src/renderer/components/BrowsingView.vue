@@ -123,7 +123,7 @@ export default {
         canGoForward: false,
         canGoBack: false,
       },
-      allChannels: ['youtube', 'bilibili', 'iqiyi', 'douyu'],
+      allChannels: ['youtube', 'bilibili', 'iqiyi', 'douyu', 'huya'],
       hideMainWindow: false,
       startLoadUrl: '',
     };
