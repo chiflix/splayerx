@@ -776,7 +776,11 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('mouseup', (evt, type) => {
     switch (type) {
       case 'close':
-        browsingWindow.close();
+        if (process.platform === 'win32' && isGlobal) {
+          app.quit();
+        } else {
+          browsingWindow.close();
+        }
         break;
       case 'min':
         browsingWindow.minimize();
