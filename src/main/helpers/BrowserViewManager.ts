@@ -45,7 +45,7 @@ export class BrowserViewManager implements IBrowserViewManager {
       pipPage: null,
     };
     this.history = [];
-    this.multiPagesChannel = ['youtube.com', 'iqiyi.com', 'bilibili.com', 'douyu.com'];
+    this.multiPagesChannel = ['youtube.com', 'iqiyi.com', 'bilibili.com', 'douyu.com', 'huya.com'];
     this.singlePageChannel = [];
   }
 
@@ -321,6 +321,15 @@ export class BrowserViewManager implements IBrowserViewManager {
               currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('douyu', type));
             });
           break;
+        case pausedChannel.includes('huya'):
+          currentView.webContents
+            .executeJavaScript(InjectJSManager.huyaFindType())
+            .then((r: string) => {
+              type = r;
+              console.log(currentView.isDestroyed());
+              currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('huya', type));
+            });
+          break;
         default:
           currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('normal'));
           break;
@@ -345,6 +354,14 @@ export class BrowserViewManager implements IBrowserViewManager {
               .then((r: string) => {
                 type = r;
                 currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('douyu', type));
+              });
+            break;
+          case pausedChannel.includes('huya'):
+            currentView.webContents
+              .executeJavaScript(InjectJSManager.huyaFindType())
+              .then((r: string) => {
+                type = r;
+                currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('huya', type));
               });
             break;
           default:
@@ -375,6 +392,14 @@ export class BrowserViewManager implements IBrowserViewManager {
                 currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('douyu', type)).then(() => {
                   currentView.webContents.setAudioMuted(false);
                 });
+              });
+            break;
+          case pausedChannel.includes('huya'):
+            currentView.webContents
+              .executeJavaScript(InjectJSManager.huyaFindType())
+              .then((r: string) => {
+                type = r;
+                currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('huya', type));
               });
             break;
           default:

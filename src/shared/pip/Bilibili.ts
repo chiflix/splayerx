@@ -47,7 +47,7 @@ export default class Bilibili {
         + 'player.style.zIndex = "";'
         + 'document.body.style.overflow = "";'
         + 'document.querySelector(".player").style.height = "";'
-        + '  document.querySelector(".player").style.width = "";'
+        + 'document.querySelector(".player").style.width = "";'
         + 'if (document.querySelector("#app")) {'
         + 'document.querySelector("#app").style.display = "";'
         + '} else {'
