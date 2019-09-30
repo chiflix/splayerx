@@ -24,6 +24,9 @@
       </div>
       <div
         :class="$route.name === 'General' ? 'tablist__tab--selected' : ''"
+        :style="{
+          marginTop: !isDarwin ? '10px' : '',
+        }"
         @mouseup="handleMouseup('General')"
         class="tablist__tab"
       >
