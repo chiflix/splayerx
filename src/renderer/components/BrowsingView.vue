@@ -82,6 +82,7 @@ export default {
       pipType: '',
       bilibiliType: 'video',
       douyuType: 'normal',
+      huyaType: 'normal',
       preload: `file:${require('path').resolve(__static, 'pip/preload.js')}`,
       maskToShow: false,
       dropFiles: [],
@@ -123,7 +124,7 @@ export default {
         canGoForward: false,
         canGoBack: false,
       },
-      allChannels: ['youtube', 'bilibili', 'iqiyi', 'douyu'],
+      allChannels: ['youtube', 'bilibili', 'iqiyi', 'douyu', 'huya'],
       hideMainWindow: false,
       startLoadUrl: '',
     };
@@ -164,6 +165,10 @@ export default {
         case 'douyu':
           return {
             channel: 'douyu', type: this.douyuType, barrageState: this.barrageOpen, winSize: this.pipSize,
+          };
+        case 'huya':
+          return {
+            channel: 'huya', type: this.huyaType, barrageState: this.barrageOpen, winSize: this.pipSize,
           };
         case 'others':
           return { channel: 'others', winSize: this.pipSize };
@@ -712,6 +717,7 @@ export default {
             isNewWindow: true,
           });
         } else {
+          log.info('open-in-chrome', `${oldChannel}, ${newChannel}`);
           this.$electron.shell.openExternal(openUrl);
         }
       }
@@ -761,7 +767,7 @@ export default {
       this.$electron.remote.getCurrentWindow().setTouchBar(this.touchBar);
     },
     pipAdapter() {
-      const channels = ['youtube', 'bilibili', 'iqiyi', 'douyu'];
+      const channels = ['youtube', 'bilibili', 'iqiyi', 'douyu', 'huya'];
       this.pipType = 'others';
       channels.forEach((channel: string) => {
         if (this.currentChannel.includes(channel)) this.pipType = channel;
@@ -787,6 +793,14 @@ export default {
             this.currentMainBrowserView().webContents.executeJavaScript(this.pip.adapter);
             this.currentMainBrowserView().webContents
               .insertCSS(InjectJSManager.douyuHideSelfPip(true));
+          }).then(() => {
+            this.adaptFinished = true;
+          });
+      } else if (this.pipType === 'huya') {
+        this.currentMainBrowserView()
+          .webContents.executeJavaScript(InjectJSManager.huyaFindType()).then((r: string) => {
+            this.huyaType = r;
+            this.currentMainBrowserView().webContents.executeJavaScript(this.pip.adapter);
           }).then(() => {
             this.adaptFinished = true;
           });
@@ -899,6 +913,12 @@ export default {
         this.$electron.ipcRenderer.send(
           'handle-danmu-display',
           this.pip.douyuBarrageAdapt(this.douyuType, this.barrageOpen),
+        );
+      } else if (this.pipType === 'huya') {
+        this.updateBarrageOpen(!this.barrageOpen);
+        this.$electron.ipcRenderer.send(
+          'handle-danmu-display',
+          this.pip.huyaBarrageAdapt(this.huyaType, this.barrageOpen),
         );
       }
     },

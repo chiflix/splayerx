@@ -213,6 +213,7 @@
       "iqiyi": "iQIYI",
       "bilibili": "Bilibili",
       "douyu": "Douyu",
+      "huya": "Huya",
       "youtube": "YouTube"
     },
     "edit": {
@@ -250,6 +251,7 @@
     "bilibili": "Bilibili",
     "iqiyi": "iQIYI",
     "youtube": "YouTube",
+    "huya": "Huya",
     "douyu": "Douyu",
     "openLocalFile": "Open Local File ...",
     "enterPip": "Enter Picture in Picture",

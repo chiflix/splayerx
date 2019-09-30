@@ -392,6 +392,10 @@
         "label": "msg.favourite.douyu"
       },
       {
+        "id": "favourite.huya",
+        "label": "msg.favourite.huya"
+      },
+      {
         "id": "favourite.youtube",
         "label": "msg.favourite.youtube"
       }

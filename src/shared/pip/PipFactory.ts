@@ -3,6 +3,7 @@ import Youtube from './Youtube';
 import Iqiyi from './Iqiyi';
 import Douyu from './Douyu';
 import Others from './Others';
+import Huya from './Huya';
 
 type pipMode = {
   adapter: string,
@@ -33,6 +34,9 @@ export default class PipFactory {
         return new Iqiyi(info.barrageState as boolean, info.winSize as number[]);
       case 'douyu':
         return new Douyu(info.type as string,
+          info.barrageState as boolean, info.winSize as number[]);
+      case 'huya':
+        return new Huya(info.type as string,
           info.barrageState as boolean, info.winSize as number[]);
       case 'others':
         return new Others(info.winSize as number[]);
