@@ -33,6 +33,7 @@ export default class Douyu {
         document.querySelector("video").style.width = "100%";
         document.querySelector("video").style.height = "100%";
         document.body.style.overflow = "hidden";
+        document.querySelector(".roomSmallPlayerFloatLayout").style.display = "none";
         document.querySelector("._1Osm4fzGmcuRK9M8IVy3u6").style.width = "100%";
         document.querySelector("._1Osm4fzGmcuRK9M8IVy3u6").style.height = "100%";
         Object.defineProperty(document.querySelector("video").style, "width", {get: function(){return this._width}, set: function(val){this._width = val.width;if (val.flag) document.querySelector("video").style.setProperty("width", val.width);}});
@@ -54,6 +55,7 @@ export default class Douyu {
         + 'room.style.right = "";'
         + 'room.style.bottom = "";'
         + 'document.querySelector(".layout-Main").style.overflow = "";'
+        + 'document.querySelector(".roomSmallPlayerFloatLayout").style.display = "block";'
         + 'Object.defineProperty(document.querySelector("video").style, "width", {get: function(){return this._width}, set: function(val){this._width = val;document.querySelector("video").style.setProperty("width", val);}});'
         + 'Object.defineProperty(document.querySelector("video").style, "height", {get: function(){return this._height}, set: function(val){this._height = val;document.querySelector("video").style.setProperty("height", val);}});';
     } else if (type === 'video') {
