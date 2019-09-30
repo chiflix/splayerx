@@ -643,7 +643,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     }
   }
 }
-.pip, .pop, .pipDisabled, .popDisabled {
+.pip, .pop, .pipDisabled, .popDisabled, .back, .backDisabled, .forward, .forwardDisabled {
   width: 30px;
   height: 30px;
 }
