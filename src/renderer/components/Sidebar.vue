@@ -16,7 +16,7 @@
       />
     </div>
     <div
-      v-if="$route.name === 'browsing-view'"
+      v-if="showFileIcon"
       class="bottom-icon no-drag"
     >
       <div
@@ -55,6 +55,7 @@ export default {
   data() {
     return {
       channels: ['https://www.bilibili.com/', 'https://www.iqiyi.com/', 'https://www.douyu.com/', 'https://www.youtube.com/'],
+      showFileIcon: false,
     };
   },
   computed: {
@@ -72,6 +73,11 @@ export default {
           type: `${basename}.com`,
         };
       });
+    },
+  },
+  watch: {
+    currentUrl(val: string) {
+      this.showFileIcon = !!val;
     },
   },
   methods: {

@@ -408,6 +408,9 @@ function createBrowsingWindow(args) {
   browsingWindow.loadURL(`${browsingURL}`);
   browsingWindow.on('closed', () => {
     browsingWindow = null;
+    if (process.platform === 'win32' && isGlobal) {
+      app.quit();
+    }
   });
   if (browsingWindow) {
     browsingWindow.setSize(args.size[0], args.size[1]);
