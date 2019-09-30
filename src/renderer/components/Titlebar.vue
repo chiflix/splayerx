@@ -314,7 +314,7 @@ export default {
     display: flex;
     justify-content: flex-start;
     align-items: center;
-    margin-left: 10px;
+    margin-left: 12px;
     flex-wrap: nowrap;
     .system-icons {
       display: flex;
