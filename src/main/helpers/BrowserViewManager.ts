@@ -326,7 +326,6 @@ export class BrowserViewManager implements IBrowserViewManager {
             .executeJavaScript(InjectJSManager.huyaFindType())
             .then((r: string) => {
               type = r;
-              console.log(currentView.isDestroyed());
               currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('huya', type));
             });
           break;

@@ -27,6 +27,9 @@ export default class Huya {
         document.querySelector(".player-gift-wrap").style.display = "none";
         document.body.style.overflow = "hidden";
         document.querySelector("#main_col").style.overflow = "hidden";
+        document.querySelector("#player-pc-watch-btn").style.display = "none";
+        var navbar = document.querySelector(".nav-comp-wrap");
+        if (navbar) navbar.style.display = "none";
         ${this.huyaBarrageAdapt(type, barrageState)}`;
       this.watcher = '';
       this.recover = 'var videoPlayer = document.querySelector("#videoContainer");'
@@ -41,11 +44,42 @@ export default class Huya {
         + 'document.querySelector(".room-hd").style.display = "";'
         + 'document.querySelector(".player-gift-wrap").style.display = "";'
         + 'document.body.style.overflow = "";'
-        + 'document.querySelector("#main_col").style.overflow = "";';
+        + 'document.querySelector("#main_col").style.overflow = "";'
+        + 'document.querySelector("#player-pc-watch-btn").style.display = "";'
+        + 'var navbar = document.querySelector(".nav-comp-wrap");'
+        + 'if (navbar) navbar.style.display = "";';
     } else if (type === 'video') {
-      this.adapter = '';
+      this.adapter = 'var videoPlayer = document.querySelector(".qNaLj_XPyjPujVM0Dx5jZ");'
+        + 'videoPlayer.style.position = "fixed";'
+        + 'videoPlayer.style.left = "0";'
+        + 'videoPlayer.style.top = "0";'
+        + 'videoPlayer.style.zIndex = 9999999;'
+        + 'document.querySelector("._32rT1ZAlgtNPtfe9f7MKHz").style.display = "none";'
+        + 'document.querySelector("._2P2VjlA93Xla813NdL7vla").style.height = "100%";';
       this.watcher = '';
-      this.recover = '';
+      this.recover = 'var videoPlayer = document.querySelector(".qNaLj_XPyjPujVM0Dx5jZ");'
+        + 'videoPlayer.style.position = "relative";'
+        + 'videoPlayer.style.left = "";'
+        + 'videoPlayer.style.top = "";'
+        + 'videoPlayer.style.zIndex = "";'
+        + 'document.querySelector("._32rT1ZAlgtNPtfe9f7MKHz").style.display = "";'
+        + 'document.querySelector("._2P2VjlA93Xla813NdL7vla").style.height = "calc(100% - 57px)";';
+    } else if (type === 'cnt-video') {
+      this.adapter = 'var videoPlayer = document.querySelector(".QOwoXekJjKX5GAc7s-4qG");'
+        + 'videoPlayer.style.position = "fixed";'
+        + 'videoPlayer.style.left = "0";'
+        + 'videoPlayer.style.top = "0";'
+        + 'videoPlayer.style.zIndex = 9999999;'
+        + 'document.querySelector(".nhYqOPYwK9Y4VsNuH6-7L").style.display = "none";'
+        + 'document.body.style.overflow = "hidden";';
+      this.watcher = '';
+      this.recover = 'var videoPlayer = document.querySelector(".QOwoXekJjKX5GAc7s-4qG");'
+        + 'videoPlayer.style.position = "relative";'
+        + 'videoPlayer.style.left = "";'
+        + 'videoPlayer.style.top = "";'
+        + 'videoPlayer.style.zIndex = "";'
+        + 'document.querySelector(".nhYqOPYwK9Y4VsNuH6-7L").style.display = "";'
+        + 'document.body.style.overflow = "";';
     } else {
       this.adapter = `var video = document.querySelector("video");
         var parentElement = video.parentElement;
@@ -90,13 +124,26 @@ export default class Huya {
         }, 500);
         }`;
     }
-    return `var barrage = document.querySelector(".abp-container");
+    if (type === 'cnt-video') {
+      return `var barrage = document.querySelector("._27zNGHUfqGTKw5H0R78xAy");
       if (barrage) {
       barrage.style.visibility = ${barrageOpen} ? 'visible' : 'hidden';
       } else {
       var timer = setInterval(() => {
-      if (document.querySelector(".abp-container")) {
-        document.querySelector(".abp-container").style.visibility = ${barrageOpen} ? 'visible' : 'hidden';
+      if (document.querySelector("._27zNGHUfqGTKw5H0R78xAy")) {
+        document.querySelector("._27zNGHUfqGTKw5H0R78xAy").style.visibility = ${barrageOpen} ? 'visible' : 'hidden';
+        clearInterval(timer);
+      }
+      }, 500);
+      }`;
+    }
+    return `var barrage = document.querySelector("._3xTaMdPDW9JlnZ_ed9rxJ-");
+      if (barrage) {
+      barrage.style.visibility = ${barrageOpen} ? 'visible' : 'hidden';
+      } else {
+      var timer = setInterval(() => {
+      if (document.querySelector("._3xTaMdPDW9JlnZ_ed9rxJ-")) {
+        document.querySelector("._3xTaMdPDW9JlnZ_ed9rxJ-").style.visibility = ${barrageOpen} ? 'visible' : 'hidden';
         clearInterval(timer);
       }
       }, 500);
@@ -104,4 +151,4 @@ export default class Huya {
   }
 }
 
-export const huyaFindType = 'if (document.querySelector(".main-wrap")) { "normal"; } else if (document.querySelector(".vplayer-wrap")) { "video" } else { "others"; }';
+export const huyaFindType = 'if (document.querySelector(".cnt-wrap")) { "cnt-video"; } else if (document.querySelector(".main-wrap")) { "normal"; } else if (document.querySelector(".vplayer-wrap")) { "video" } else { "others"; }';

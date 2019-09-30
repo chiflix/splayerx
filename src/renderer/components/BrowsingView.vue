@@ -717,6 +717,7 @@ export default {
             isNewWindow: true,
           });
         } else {
+          log.info('open-in-chrome', `${oldChannel}, ${newChannel}`);
           this.$electron.shell.openExternal(openUrl);
         }
       }
