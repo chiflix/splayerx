@@ -8,6 +8,7 @@
       "repo": "splayerx"
     }
   ],
+  "afterSign": "scripts/notarize.js",
   "afterPack": "scripts/after-pack.js",
   "compression": "maximum",
   "directories": {
@@ -57,6 +58,8 @@
     ]
   },
   "mac": {
+    "hardenedRuntime": true,
+    "gatekeeperAssess": false,
     "icon": "icons/icon.icns",
     "target": [
       "dmg"

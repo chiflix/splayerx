@@ -22,4 +22,5 @@ jobs:
         npm test
         npm run build --if-present
       env:
+        NO_NOTARIZE: true
         CI: true
