@@ -122,7 +122,6 @@ export default {
     transition: opacity 50ms linear, padding-left 100ms ease-in;
     .icon {
       width: 12px;
-      margin-top: 1px;
     }
   }
   .icon-hover:hover {

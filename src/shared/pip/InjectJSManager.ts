@@ -1,6 +1,7 @@
 import { bilibiliFindType, bilibiliVideoPause } from './Bilibili';
 import PipFactory from './PipFactory';
 import { douyuFindType, douyuVideoPause } from './Douyu';
+import { huyaFindType, huyaVideoPause } from './Huya';
 
 class InjectJSManager implements IInjectJSManager {
   private readonly calcVideoNumCode: string;
@@ -37,6 +38,10 @@ class InjectJSManager implements IInjectJSManager {
     return douyuFindType;
   }
 
+  public huyaFindType(): string {
+    return huyaFindType;
+  }
+
   public douyuHideSelfPip(hide: boolean): string {
     return hide ? '.pip-b1390f { display: none; }' : '.pip-b1390f { display: block; }';
   }
@@ -51,6 +56,8 @@ class InjectJSManager implements IInjectJSManager {
         return bilibiliVideoPause(type as string);
       case 'douyu':
         return douyuVideoPause(type as string);
+      case 'huya':
+        return huyaVideoPause(type as string);
       case 'normal':
         return this.pauseNormalVideo;
       default:
@@ -128,6 +135,7 @@ export interface IInjectJSManager {
   bilibiliFindType(): string
   douyuFindType(): string
   douyuHideSelfPip(hide: boolean): string
+  huyaFindType(): string
   pauseVideo(channel: string, type?: string): string
   initBarrageIcon(barrageState: boolean): string
   updatePipControlState(shouldShow: boolean): string
