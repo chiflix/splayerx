@@ -58,8 +58,7 @@
     ]
   },
   "mac": {
-    "hardenedRuntime": true,
-    "gatekeeperAssess": false,
+    "hardenedRuntime": false,
     "icon": "icons/icon.icns",
     "target": [
       "dmg"
