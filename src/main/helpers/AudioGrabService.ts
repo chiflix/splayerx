@@ -194,19 +194,19 @@ export default class AudioGrabService extends EventEmitter {
       // @ts-ignore
       fs.readFileSync(path.join(__static, '/certs/cert.pem')),
     );
-    const metadataUpdater = async (_: {}, cb: Function) => {
+    const metadataUpdater = (_: {}, cb: Function) => {
       const metadata = new Metadata();
       metadata.set('uuid', uuid);
       metadata.set('agent', agent);
       if (token) {
-        metadata.set('Authorization', token);
+        metadata.set('token', token);
       }
-      try {
-        metadata.set('clientip', await getIP());
-      } finally {
+      getIP().then((ip) => {
+        metadata.set('clientip', ip);
+      }).finally(() => {
+        console.log(metadata); // eslint-disable-line
         cb(null, metadata);
-      }
-      console.log(metadata); // eslint-disable-line
+      });
     };
     const metadataCreds = credentials.createFromMetadataGenerator(metadataUpdater);
     const combinedCreds = credentials.combineChannelCredentials(sslCreds, metadataCreds);

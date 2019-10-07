@@ -29,7 +29,7 @@ fetcher.useResponseInterceptor((res) => {
     const token = authorization.replace('Bearer', '').trim();
     let displayName = '';
     try {
-      displayName = JSON.parse(new Buffer(token.split('.')[1], 'base64').toString()).display_name; // eslint-disable-line
+      displayName = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString()).display_name; // eslint-disable-line
       log.debug('apis/account/token', token);
       remote.app.emit('sign-in', {
         token,
