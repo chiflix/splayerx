@@ -59,6 +59,9 @@
   },
   "mac": {
     "hardenedRuntime": false,
+    "asarUnpack": [
+      "node_modules/osx-mouse-cocoa"
+    ],
     "icon": "icons/icon.icns",
     "target": [
       "dmg"
