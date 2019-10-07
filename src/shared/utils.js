@@ -1,16 +1,20 @@
-import axios from 'axios';
 import electron from 'electron';
 import { join } from 'path';
-import {
-  checkPathExist, read, write,
-} from '../renderer/libs/file';
+import osLocale from 'os-locale';
+import uuidv4 from 'uuid/v4';
+import storage from 'electron-json-storage';
+import { checkPathExist, read, write } from '../renderer/libs/file';
 import { ELECTRON_CACHE_DIRNAME, TOKEN_FILE_NAME } from '../renderer/constants';
 import electronBuilderConfig from '../../electron-builder.json';
+import Fetcher from './Fetcher';
 
 const app = electron.app || electron.remote.app;
+const fetcher = new Fetcher();
 const tokenPath = join(app.getPath(ELECTRON_CACHE_DIRNAME), TOKEN_FILE_NAME);
 
-const subtitleExtensions = Object.freeze(['srt', 'ass', 'vtt', 'ssa'].map(ext => ext.toLowerCase()));
+const subtitleExtensions = Object.freeze(
+  ['srt', 'ass', 'vtt', 'ssa'].map(ext => ext.toLowerCase()),
+);
 export function getValidSubtitleExtensions() {
   return subtitleExtensions;
 }
@@ -25,13 +29,14 @@ export function getValidSubtitleRegex() {
 let validVideoExtensions;
 export function getValidVideoExtensions() {
   if (validVideoExtensions) return validVideoExtensions;
-  validVideoExtensions = electronBuilderConfig[process.platform === 'darwin' ? 'mac' : 'win']
-    .fileAssociations.reduce((exts, fa) => {
-      if (!fa || !fa.ext || !fa.ext.length) return exts;
-      return exts.concat(
-        fa.ext.map(x => x.toLowerCase()).filter(x => !getValidSubtitleExtensions().includes(x)),
-      );
-    }, []);
+  validVideoExtensions = electronBuilderConfig[
+    process.platform === 'darwin' ? 'mac' : 'win'
+  ].fileAssociations.reduce((exts, fa) => {
+    if (!fa || !fa.ext || !fa.ext.length) return exts;
+    return exts.concat(
+      fa.ext.map(x => x.toLowerCase()).filter(x => !getValidSubtitleExtensions().includes(x)),
+    );
+  }, []);
   validVideoExtensions = Object.freeze(validVideoExtensions);
   return validVideoExtensions;
 }
@@ -46,32 +51,72 @@ export function getValidVideoRegex() {
 let allValidExtensions;
 export function getAllValidExtensions() {
   if (allValidExtensions) return allValidExtensions;
-  allValidExtensions = electronBuilderConfig[process.platform === 'darwin' ? 'mac' : 'win']
-    .fileAssociations.reduce((exts, fa) => {
-      if (!fa || !fa.ext || !fa.ext.length) return exts;
-      return exts.concat(
-        fa.ext.map(x => x.toLowerCase()),
-      );
-    }, []);
+  allValidExtensions = electronBuilderConfig[
+    process.platform === 'darwin' ? 'mac' : 'win'
+  ].fileAssociations.reduce((exts, fa) => {
+    if (!fa || !fa.ext || !fa.ext.length) return exts;
+    return exts.concat(fa.ext.map(x => x.toLowerCase()));
+  }, []);
   allValidExtensions = Object.freeze(allValidExtensions);
   return allValidExtensions;
 }
 
-export function getIP() {
-  return new Promise((resolve, reject) => {
-    axios.get('https://ip.xindong.com/myip', { responseType: 'text' })
-      .then((response) => {
-        resolve(response.data);
-      }, (error) => {
-        reject(error);
-      });
-  });
+export function getSystemLocale() {
+  const { app } = electron.remote;
+  let locale = process.platform === 'win32' ? app.getLocale() : osLocale.sync();
+  locale = locale.replace('_', '-');
+  if (locale === 'zh-TW' || locale === 'zh-HK' || locale === 'zh-Hant') {
+    return 'zh-Hant';
+  }
+  if (locale.startsWith('zh')) {
+    return 'zh-Hans';
+  }
+  return 'en';
 }
 
-export async function getUserInfo(token) {
-  axios.defaults.headers.common['X-Application-Token'] = token;
-  return axios.post('');
+if (process.type === 'browser') {
+  const crossThreadCache = {};
+  app.getCrossThreadCache = key => crossThreadCache[key];
+  app.setCrossThreadCache = (key, val) => {
+    crossThreadCache[key] = val;
+  };
 }
+function crossThreadCache(key, fn) {
+  const func = async () => {
+    if (typeof app.getCrossThreadCache !== 'function') return fn();
+    let val = app.getCrossThreadCache(key);
+    if (val) return val;
+    val = await fn();
+    app.setCrossThreadCache(key, val);
+    return val;
+  };
+  func.noCache = fn;
+  return func;
+}
+
+export const getIP = crossThreadCache('ip', async () => {
+  const res = await fetcher.get('https://ip.xindong.com/myip');
+  const ip = await res.text();
+  return ip;
+});
+
+export const getClientUUID = crossThreadCache(
+  'clientUUID',
+  () => new Promise((resolve) => {
+    if (process.env.NODE_ENV === 'testing') {
+      resolve('00000000-0000-0000-0000-000000000000');
+      return;
+    }
+    storage.get('user-uuid', (err, userUUID) => {
+      if (err || Object.keys(userUUID).length === 0) {
+        if (err) console.error(err);
+        userUUID = uuidv4();
+        storage.set('user-uuid', userUUID);
+      }
+      resolve(userUUID);
+    });
+  }),
+);
 
 export async function getToken() {
   try {
@@ -81,7 +126,8 @@ export async function getToken() {
       if (token) {
         let displayName = '';
         try {
-          displayName = JSON.parse(new Buffer(token.split('.')[1], 'base64').toString()).display_name; // eslint-disable-line
+          displayName = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
+            .display_name; // eslint-disable-line
         } catch (error) {
           // tmpty
         }

@@ -10,7 +10,6 @@ import { EventEmitter } from 'events';
 import { splayerx } from 'electron';
 import path from 'path';
 import fs from 'fs';
-import axios from 'axios';
 import { credentials, Metadata } from 'grpc';
 
 import { TranslationClient } from 'sagi-api/translation/v1/translation_grpc_pb';
@@ -20,6 +19,7 @@ import {
   StreamingTranslationRequestConfig,
 } from 'sagi-api/translation/v1/translation_pb';
 import { IAudioStream } from '@/plugins/mediaTasks/mediaInfoQueue';
+import { getIP } from '../../shared/utils';
 
 type JobData = {
   videoSrc: string,
@@ -199,14 +199,12 @@ export default class AudioGrabService extends EventEmitter {
       metadata.set('uuid', uuid);
       metadata.set('agent', agent);
       if (token) {
-        metadata.set('Authorization', token);
+        metadata.set('token', token);
       }
-      console.log(metadata); // eslint-disable-line
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      axios.get('https://ip.xindong.com/myip', { responseType: 'text' }).then((response: any) => {
-        metadata.set('clientip', response.data);
-        cb(null, metadata);
-      }, () => {
+      getIP().then((ip) => {
+        metadata.set('clientip', ip);
+      }).finally(() => {
+        console.log(metadata); // eslint-disable-line
         cb(null, metadata);
       });
     };

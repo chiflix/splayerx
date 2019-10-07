@@ -61,6 +61,7 @@ import { remote } from 'electron';
 import { parsePhoneNumberFromString, getCountryCallingCode } from 'libphonenumber-js/mobile';
 import { log } from '@/libs/Log';
 import { signIn, getSMSCode } from '@/libs/apis';
+import { getIP } from '@/../shared/utils';
 
 export default Vue.extend({
   name: 'SMS',
@@ -94,7 +95,7 @@ export default Vue.extend({
   },
   async mounted() {
     // @ts-ignore
-    const ip = await remote.app.getIP();
+    const ip = await getIP();
     log.debug('ip', ip);
     const geo = geoip.lookup(ip);
     if (geo && geo.country && getCountryCallingCode(geo.country)) {
@@ -178,7 +179,7 @@ export default Vue.extend({
           await signIn('code', `+${this.countryCallCode}${this.mobile}`, this.code);
           window.close();
         } catch (error) {
-          if (error.code === '400') {
+          if (error.status === 400) {
             this.message = this.$t('loginModal.codeError');
           } else {
             this.message = this.$t('loginModal.netWorkError');

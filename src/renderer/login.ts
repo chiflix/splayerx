@@ -1,9 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
-import axios from 'axios';
 import VueRouter from 'vue-router';
 import VueI18n from 'vue-i18n';
-import VueAxios from 'vue-axios';
 import electron from 'electron';
 import osLocale from 'os-locale';
 import { hookVue } from '@/kerning';
@@ -16,7 +14,6 @@ import '@/css/style.scss';
 Vue.use(VueI18n);
 Vue.use(Vuex);
 Vue.use(VueRouter);
-Vue.use(VueAxios, axios);
 
 function getSystemLocale() {
   const { app } = electron.remote;

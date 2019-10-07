@@ -1,7 +1,6 @@
 import path from 'path';
 import fs from 'fs';
 import grpc, { credentials, Metadata } from 'grpc';
-import Vue from 'vue';
 import { HealthCheckRequest, HealthCheckResponse } from 'sagi-api/health/v1/health_pb';
 import { HealthClient } from 'sagi-api/health/v1/health_grpc_pb';
 import {
@@ -17,6 +16,7 @@ import { TranslationClient } from 'sagi-api/translation/v1/translation_grpc_pb';
 import { TrainingData } from 'sagi-api/training/v1/training_pb';
 import { TrainngClient } from 'sagi-api/training/v1/training_grpc_pb';
 import { SagiSubtitlePayload } from '@/services/subtitle';
+import { getClientUUID, getIP } from '@/../shared/utils';
 import { log } from './Log';
 
 export class Sagi {
@@ -26,14 +26,11 @@ export class Sagi {
 
   private creds: grpc.ChannelCredentials;
 
-  private ip: string;
-
   public constructor() {
     this.creds = this.combinedCreds();
   }
 
   private combinedCreds(token?: string) {
-    const { ip } = this;
     const sslCreds = credentials.createSsl(
       // How to access resources with fs see:
       // https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
@@ -42,24 +39,16 @@ export class Sagi {
       fs.readFileSync(path.join(__static, '/certs/cert.pem')),
     );
     const metadataUpdater = (_: unknown, cb: Function) => {
-      const metadata = new Metadata();
-      metadata.set('uuid', Vue.axios.defaults.headers.common['X-Application-Token']);
-      metadata.set('agent', navigator.userAgent);
-      if (token) {
-        metadata.set('token', token);
-      }
-      if (ip) {
+      Promise.all([getClientUUID(), getIP()]).then(([uuid, ip]) => {
+        const metadata = new Metadata();
+        metadata.set('uuid', uuid);
+        metadata.set('agent', navigator.userAgent);
         metadata.set('clientip', ip);
-      } else {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        Vue.axios.get('https://ip.xindong.com/myip', { responseType: 'text' }).then((response: any) => {
-          metadata.set('clientip', response.bodyText);
-          this.ip = response.bodyText;
-          cb(null, metadata);
-        }, () => {
-          cb(null, metadata);
-        });
-      }
+        if (token) {
+          metadata.set('token', token);
+        }
+        cb(null, metadata);
+      });
     };
     const metadataCreds = credentials.createFromMetadataGenerator(metadataUpdater);
     return credentials.combineChannelCredentials(sslCreds, metadataCreds);

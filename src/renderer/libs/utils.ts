@@ -5,7 +5,6 @@ import { times, padStart, sortBy } from 'lodash';
 import { sep, basename, join } from 'path';
 import { ensureDir } from 'fs-extra';
 import { remote } from 'electron';
-import axios, { AxiosResponse } from 'axios';
 // @ts-ignore
 import { promises as fsPromises } from 'fs';
 // @ts-ignore
@@ -20,6 +19,7 @@ import {
 import { codeToLanguageName, LanguageCode } from './language';
 import { checkPathExist, write, deleteDir } from './file';
 import { IEmbeddedOrigin } from '@/services/subtitle/utils/loaders';
+import Fetcher from '@/../shared/Fetcher';
 import { isBetaVersion } from '../../shared/common/platform';
 
 /**
@@ -403,30 +403,30 @@ export function compareVersions(left: string, right: string): boolean {
  * @param {boolean} auto is auto check for updates
  * @returns {Promise} example { version: "4.2.2", isLastest: true }
  */
-export function checkForUpdate(
+export async function checkForUpdate(
   auto: boolean,
 ): Promise<{ version: string, isLastest: boolean, landingPage: string, url: string }> {
   const skipVersion = localStorage.getItem('skip-check-for-update');
   const url = isBetaVersion
     ? 'https://beta.splayer.org/beta/latest.json' : 'https://www.splayer.org/stable/latest.json';
-  return axios.get(url, { timeout: 10000 })
-    .then((res: AxiosResponse) => { // eslint-disable-line complexity
-      const result = {
-        version,
-        isLastest: true,
-        landingPage: '',
-        url: '',
-      };
-      // check package.json.version with res.data
-      if (res.data && res.data.name !== version && !(res.data.name === skipVersion && auto)
-        && compareVersions(version, res.data.name)) {
-        result.version = res.data.name;
-        result.isLastest = false;
-        result.landingPage = res.data.landingPage;
-        result.url = res.data.files[process.platform].url;
-      }
-      return result;
-    });
+  const fetcher = new Fetcher();
+  const res = await fetcher.fetch(url);
+  const data = await res.json();
+  const result = {
+    version,
+    isLastest: true,
+    landingPage: '',
+    url: '',
+  };
+  // check package.json.version with data
+  if (data && data.name !== version && !(data.name === skipVersion && auto)
+    && compareVersions(version, data.name)) {
+    result.version = data.name;
+    result.isLastest = false;
+    result.landingPage = data.landingPage;
+    result.url = data.files[process.platform].url;
+  }
+  return result;
 }
 
 /**
