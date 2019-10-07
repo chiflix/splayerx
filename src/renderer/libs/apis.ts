@@ -11,7 +11,7 @@ export class ApiError extends Error {
   public message: string;
 }
 
-const fetcher = new Fetcher({ timeout: 1000 * 10 });
+const fetcher = new Fetcher();
 
 async function getEndpoint() {
   const api = await apiOfAccountService();

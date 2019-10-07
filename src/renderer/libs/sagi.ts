@@ -138,11 +138,8 @@ export class Sagi {
   // check sagi-api health, return UNKNOWN(0), SERVING(1) or XXXXX
   public healthCheck(): Promise<HealthCheckResponse.AsObject> {
     const client = new HealthClient(Sagi.endpoint, this.creds);
-    console.log('client', Sagi.endpoint, this.creds); // eslint-disable-line
     return new Promise((resolve, reject) => {
-      console.log('promise'); // eslint-disable-line
       client.check(new HealthCheckRequest(), (err, response) => {
-        console.log('checked', err, response); // eslint-disable-line
         if (err) reject(err);
         else {
           const status = response.getStatus();

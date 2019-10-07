@@ -409,7 +409,7 @@ export async function checkForUpdate(
   const skipVersion = localStorage.getItem('skip-check-for-update');
   const url = isBetaVersion
     ? 'https://beta.splayer.org/beta/latest.json' : 'https://www.splayer.org/stable/latest.json';
-  const fetcher = new Fetcher({ timeout: 10000 });
+  const fetcher = new Fetcher();
   const res = await fetcher.fetch(url);
   const data = await res.json();
   const result = {

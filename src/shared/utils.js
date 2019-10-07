@@ -82,17 +82,20 @@ if (process.type === 'browser') {
   };
 }
 function crossThreadCache(key, fn) {
-  return async () => {
+  const func = async () => {
+    if (typeof app.getCrossThreadCache !== 'function') return fn();
     let val = app.getCrossThreadCache(key);
     if (val) return val;
     val = await fn();
     app.setCrossThreadCache(key, val);
     return val;
   };
+  func.noCache = fn;
+  return func;
 }
 
 export const getIP = crossThreadCache('ip', async () => {
-  const res = await fetcher.fetch('https://ip.xindong.com/myip');
+  const res = await fetcher.get('https://ip.xindong.com/myip');
   const ip = await res.text();
   return ip;
 });
@@ -100,6 +103,10 @@ export const getIP = crossThreadCache('ip', async () => {
 export const getClientUUID = crossThreadCache(
   'clientUUID',
   () => new Promise((resolve) => {
+    if (process.env.NODE_ENV === 'testing') {
+      resolve('00000000-0000-0000-0000-000000000000');
+      return;
+    }
     storage.get('user-uuid', (err, userUUID) => {
       if (err || Object.keys(userUUID).length === 0) {
         if (err) console.error(err);
