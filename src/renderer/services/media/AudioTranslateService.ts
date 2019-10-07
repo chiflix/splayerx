@@ -9,7 +9,6 @@
 import { ipcRenderer, Event } from 'electron';
 import { EventEmitter } from 'events';
 import { isNaN } from 'lodash';
-import Vue from 'vue';
 import {
   StreamingTranslationResponse,
 } from 'sagi-api/translation/v1/translation_pb';
@@ -19,6 +18,7 @@ import MediaStorageService, { mediaStorageService } from '../storage/MediaStorag
 import { TranscriptInfo } from '../subtitle';
 import { Stream } from '@/plugins/mediaTasks/mediaInfoQueue';
 import { isAccountEnabled } from '@/helpers/featureSwitch';
+import { getClientUUID } from '@/../shared/utils';
 
 type JobData = {
   audioId: string,
@@ -105,15 +105,17 @@ class AudioTranslateService extends EventEmitter {
     this.audioLanguageCode = data.audioLanguageCode;
     this.targetLanguageCode = data.targetLanguageCode;
     this.audioInfo = data.audioInfo;
-    ipcRenderer.send('grab-audio', {
-      mediaHash: this.mediaHash,
-      videoSrc: this.videoSrc,
-      audioLanguageCode: this.audioLanguageCode,
-      targetLanguageCode: this.targetLanguageCode,
-      audioId: this.audioId,
-      audioInfo: this.audioInfo,
-      uuid: Vue.axios.defaults.headers.common['X-Application-Token'],
-      agent: navigator.userAgent,
+    getClientUUID().then((uuid: string) => {
+      ipcRenderer.send('grab-audio', {
+        mediaHash: this.mediaHash,
+        videoSrc: this.videoSrc,
+        audioLanguageCode: this.audioLanguageCode,
+        targetLanguageCode: this.targetLanguageCode,
+        audioId: this.audioId,
+        audioInfo: this.audioInfo,
+        uuid,
+        agent: navigator.userAgent,
+      });
     });
     ipcRenderer.removeListener('grab-audio-update', this.ipcCallBack);
     ipcRenderer.on('grab-audio-update', this.ipcCallBack);

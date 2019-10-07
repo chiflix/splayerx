@@ -10,7 +10,6 @@ import { EventEmitter } from 'events';
 import { splayerx } from 'electron';
 import path from 'path';
 import fs from 'fs';
-import axios from 'axios';
 import { credentials, Metadata } from 'grpc';
 
 import { TranslationClient } from 'sagi-api/translation/v1/translation_grpc_pb';
@@ -20,6 +19,7 @@ import {
   StreamingTranslationRequestConfig,
 } from 'sagi-api/translation/v1/translation_pb';
 import { IAudioStream } from '@/plugins/mediaTasks/mediaInfoQueue';
+import { getIP } from '../../shared/utils';
 
 type JobData = {
   videoSrc: string,
@@ -194,21 +194,19 @@ export default class AudioGrabService extends EventEmitter {
       // @ts-ignore
       fs.readFileSync(path.join(__static, '/certs/cert.pem')),
     );
-    const metadataUpdater = (_: {}, cb: Function) => {
+    const metadataUpdater = async (_: {}, cb: Function) => {
       const metadata = new Metadata();
       metadata.set('uuid', uuid);
       metadata.set('agent', agent);
       if (token) {
         metadata.set('Authorization', token);
       }
+      try {
+        metadata.set('clientip', await getIP());
+      } finally {
+        cb(null, metadata);
+      }
       console.log(metadata); // eslint-disable-line
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      axios.get('https://ip.xindong.com/myip', { responseType: 'text' }).then((response: any) => {
-        metadata.set('clientip', response.data);
-        cb(null, metadata);
-      }, () => {
-        cb(null, metadata);
-      });
     };
     const metadataCreds = credentials.createFromMetadataGenerator(metadataUpdater);
     const combinedCreds = credentials.combineChannelCredentials(sslCreds, metadataCreds);

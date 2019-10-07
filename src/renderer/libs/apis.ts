@@ -1,11 +1,17 @@
-import axios, { AxiosError, AxiosResponse } from 'axios';
 import { remote } from 'electron';
 import { log } from '@/libs/Log';
 import { apiOfAccountService } from '@/helpers/featureSwitch';
+import Fetcher from '@/../shared/Fetcher';
 
-const instance = axios.create();
+export class ApiError extends Error {
+  /** HTTP status */
+  public status: number;
 
-instance.defaults.timeout = 1000 * 10;
+  /** Message from server */
+  public message: string;
+}
+
+const fetcher = new Fetcher({ timeout: 1000 * 10 });
 
 async function getEndpoint() {
   const api = await apiOfAccountService();
@@ -14,84 +20,60 @@ async function getEndpoint() {
 }
 
 export function setToken(t: string) {
-  instance.defaults.headers.common['Authorization'] = `Bearer ${t}`;
+  fetcher.setHeader('Authorization', `Bearer ${t}`);
 }
 
-function intercept(response: AxiosResponse) {
-  const headers = response.headers;
-  if (headers && headers.authorization) {
-    const token = headers.authorization.replace('Bearer', '').trim();
+fetcher.useResponseInterceptor((res) => {
+  const authorization = res.headers.get('Authorization');
+  if (authorization) {
+    const token = authorization.replace('Bearer', '').trim();
     let displayName = '';
     try {
       displayName = JSON.parse(new Buffer(token.split('.')[1], 'base64').toString()).display_name; // eslint-disable-line
+      log.debug('apis/account/token', token);
+      remote.app.emit('sign-in', {
+        token,
+        displayName,
+      });
     } catch (error) {
-      // tmpty
+      log.error('apis/account/token', token);
     }
-    log.debug('token', token);
-    remote.app.emit('sign-in', {
-      token,
-      displayName,
-    });
   }
+  return res;
+});
+
+export async function checkToken() {
+  const endpoint = await getEndpoint();
+  const res = await fetcher.get(`${endpoint}/auth/check`);
+  log.debug('api/account/checkToken', res);
+  return res.ok;
 }
 
-instance.interceptors.response.use((response: AxiosResponse) => {
-  intercept(response);
-  return response;
-}, (error: AxiosError) => Promise.reject(error));
-
-export function checkToken() {
-  return new Promise(async (resolve, reject) => {
-    const endpoint = await getEndpoint();
-    instance.get(`${endpoint}/auth/check`)
-      .then((response: AxiosResponse) => {
-        log.debug('checkToken', response);
-        resolve(true);
-      })
-      .catch((error: AxiosError) => {
-        reject(error);
-      });
-  });
+export async function getSMSCode(phone: string) {
+  const endpoint = await getEndpoint();
+  const res = await fetcher.post(`${endpoint}/auth/sms`, { phone });
+  log.debug('api/account/sms', res);
+  return res.ok;
 }
 
-export function getSMSCode(phone: string) {
-  return new Promise(async (resolve, reject) => {
-    const endpoint = await getEndpoint();
-    log.debug('sms', `${endpoint}/auth/sms`);
-    instance.post(`${endpoint}/auth/sms`, {
-      phone,
-    })
-      .then((response: AxiosResponse) => {
-        log.debug('sms', response);
-        resolve(true);
-      })
-      .catch((error: AxiosError) => {
-        log.debug('sms', error);
-        reject(error);
-      });
-  });
-}
-
-export function signIn(type: string, phone: string, code?: string) {
-  return new Promise(async (resolve, reject) => {
-    const endpoint = await getEndpoint();
-    instance.post(`${endpoint}/auth/login`, {
-      phone,
-      type,
-      code,
-    })
-      .then((response: AxiosResponse) => {
-        resolve(response.data);
-      })
-      .catch((error: AxiosError) => {
-        if (error && error.response && error.response.status === 400) {
-          error.code = '400';
-          reject(error);
-        } else {
-          reject(error);
-        }
-      });
-  });
+export async function signIn(type: string, phone: string, code: string) {
+  const endpoint = await getEndpoint();
+  const res = await fetcher.post(`${endpoint}/auth/login`, { phone, type, code });
+  if (res.ok) {
+    const data = await res.json();
+    log.debug('api/account/login', data);
+    return data;
+  }
+  const error = new ApiError();
+  error.status = res.status;
+  // Server message is not localized yet
+  // try {
+  //   const data = await res.json();
+  //   error.message = data.message;
+  // } catch (ex) {
+  //   error.message = '';
+  // }
+  throw error;
 }
 
 export function signOut() {

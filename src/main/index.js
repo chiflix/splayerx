@@ -15,7 +15,7 @@ import { audioGrabService } from './helpers/AudioGrabService';
 import './helpers/electronPrototypes';
 import writeLog from './helpers/writeLog';
 import {
-  getValidVideoRegex, getValidSubtitleRegex, getIP, getToken, saveToken,
+  getValidVideoRegex, getValidSubtitleRegex, getToken, saveToken,
 } from '../shared/utils';
 import { mouse } from './helpers/mouse';
 import MenuService from './menu/MenuService';
@@ -89,7 +89,6 @@ let needBlockCloseLaborWindow = true; // 标记是否阻塞nsfw窗口关闭
 let inited = false;
 let hideBrowsingWindow = false;
 let finalVideoToOpen = [];
-let ip = ''; // 本机ip地址
 const locale = new Locale();
 const tmpVideoToOpen = [];
 const tmpSubsToOpen = [];
@@ -1477,13 +1476,3 @@ app.on('sign-out', () => {
     mainWindow.webContents.send('sign-in', undefined);
   }
 });
-
-app.getIP = async () => {
-  if (ip) return ip;
-  try {
-    ip = await getIP();
-  } catch (error) {
-    // empty
-  }
-  return ip;
-};
