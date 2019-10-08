@@ -15,6 +15,8 @@ type pipMode = {
 export default class PipFactory {
   public static getPipByChannel(info: { channel: string }): pipMode
 
+  public static getPipByChannel(info: { channel: string, type: string }): pipMode
+
   public static getPipByChannel(info: { channel: string, type: string,
     barrageState: boolean, winSize: number[] }): pipMode
 
@@ -40,7 +42,7 @@ export default class PipFactory {
         return new Huya(info.type as string,
           info.barrageState as boolean, info.winSize as number[]);
       case 'qq':
-        return new QQ();
+        return new QQ(info.type as string);
       case 'others':
         return new Others(info.winSize as number[]);
       default:
