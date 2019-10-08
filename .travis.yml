@@ -13,14 +13,12 @@ cache:
 before_install:
 - bash test/ci/before_install.sh
 install:
-- npm install -g codecov
-- npm install -g electron-mocha
-- npm install
-- npm update
+- yarn global add codecov
+- yarn
 - node scripts/check-electron-version.js
 script:
-- npm run unit
-- npm run build
+- yarn test
+- yarn build
 deploy:
   provider: releases
   name: "$TRAVIS_TAG"
