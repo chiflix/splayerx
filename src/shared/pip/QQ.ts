@@ -1,5 +1,5 @@
 export function QQVideoPause(type: string) {
-  if (type === 'normal') {
+  if (['normal', 'hotVideo'].includes(type)) {
     return 'document.querySelector(".mod_player").getElementsByTagName("video")[0].pause();';
   }
   return 'document.querySelector(".poplayer_quickplay").getElementsByTagName("video")[0].pause();';
@@ -12,8 +12,41 @@ export default class QQ {
 
   public recover: string;
 
-  public constructor(type: string) {
+  public constructor(type: string, barrageState: boolean) {
     if (type === 'normal') {
+      this.adapter = `var player = document.querySelector(".txp_player");
+        ${this.barrageAdapt(barrageState)}
+        player.style.position = "fixed";
+        player.style.top = "0";
+        player.style.left = "0";
+        player.style.zIndex = "999999";
+        document.querySelector(".site_head").style.display  = "none";
+        var mod = document.querySelector(".mod_action");
+        if (mod) mod.style.display  = "none";
+        document.body.style.overflow = "hidden";
+        document.querySelector(".txp_ad_link").style.webkitUserDrag = "none";
+        var tools = document.querySelector(".x_fixed_tool");
+        if (tools) tools.style.display = "none";
+        document.querySelector(".txp_top_btns").style.display = "none";`;
+      this.watcher = '';
+      this.recover = 'var player = document.querySelector(".txp_player");'
+        + 'player.style.position = "relative";'
+        + 'player.style.top = "";'
+        + 'player.style.left = "";'
+        + 'player.style.zIndex = "";'
+        + 'document.querySelector(".site_head").style.display  = "";'
+        + 'var mod = document.querySelector(".mod_action");'
+        + 'if (mod) mod.style.display  = "";'
+        + 'var hotVideoModule = document.querySelector("#multi_feed_V");'
+        + 'if (hotVideoModule) hotVideoModule.style.zIndex = "999999";'
+        + 'var hotVideo = document.querySelector("#mod_player_multi_feed_V");'
+        + 'if (hotVideo) hotVideo.style.zIndex = "999999";'
+        + 'document.body.style.overflow = "";'
+        + 'document.querySelector(".txp_ad_link").style.webkitUserDrag = "";'
+        + 'var tools = document.querySelector(".x_fixed_tool");'
+        + 'if (tools) tools.style.display = "";'
+        + 'document.querySelector(".txp_top_btns").style.display = "";';
+    } else if (type === 'hotVideo') {
       this.adapter = 'var player = document.querySelector(".txp_player");'
         + 'player.style.position = "fixed";'
         + 'player.style.top = "0";'
@@ -69,6 +102,10 @@ export default class QQ {
         + 'Object.defineProperty(player.style, "height", {get: function(){return this._height}, set: function(val){this._height = val;player.style.setProperty("height", val);}});';
     }
   }
+
+  public barrageAdapt(barrageState: boolean) {
+    return `document.querySelector('.txp_barrage .txp_barrage_external').style.opacity = ${barrageState} ? "1" : "0";`;
+  }
 }
 
-export const QQFindType = 'if (!document.querySelector(".poplayer_quickplay").classList.value.includes("none")) { "quickPlay" } else { "normal" }';
+export const QQFindType = 'if (!document.querySelector(".poplayer_quickplay").classList.value.includes("none")) { "quickPlay" } else if (document.querySelector("#multi_feed_V")) { "hotVideo" } else { "normal" }';

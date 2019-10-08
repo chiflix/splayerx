@@ -169,7 +169,7 @@ export default {
             channel: 'huya', type: this.pipType, barrageState: this.barrageOpen, winSize: this.pipSize,
           };
         case 'qq':
-          return { channel: 'qq', type: this.pipType };
+          return { channel: 'qq', type: this.pipType, barrageState: this.barrageOpen };
         case 'others':
           return { channel: 'others', winSize: this.pipSize };
         default:
@@ -237,6 +237,7 @@ export default {
         this.updatePipChannel(this.currentChannel);
         const opacity = ['youtube', 'others'].includes(this.pipChannel)
           || (this.pipChannel === 'bilibili' && this.pipType === 'others')
+          || (this.pipChannel === 'qq' && this.pipType !== 'normal')
           ? 0.2
           : 1;
         this.$electron.ipcRenderer.send(
@@ -879,29 +880,16 @@ export default {
       this.oldDisplayId = newDisplayId;
     },
     handleDanmuDisplay() {
-      if (this.pipChannel === 'iqiyi') {
-        this.updateBarrageOpen(!this.barrageOpen);
+      this.updateBarrageOpen(!this.barrageOpen);
+      if (['bilibili', 'douyu', 'huya'].includes(this.pipChannel)) {
         this.$electron.ipcRenderer.send(
           'handle-danmu-display',
-          this.pip.iqiyiBarrageAdapt(this.barrageOpen),
+          this.pip.barrageAdapt(this.pipType, this.barrageOpen),
         );
-      } else if (this.pipChannel === 'bilibili') {
-        this.updateBarrageOpen(!this.barrageOpen);
+      } else if (['iqiyi', 'qq'].includes(this.pipChannel)) {
         this.$electron.ipcRenderer.send(
           'handle-danmu-display',
-          this.pip.bilibiliBarrageAdapt(this.pipType, this.barrageOpen),
-        );
-      } else if (this.pipChannel === 'douyu') {
-        this.updateBarrageOpen(!this.barrageOpen);
-        this.$electron.ipcRenderer.send(
-          'handle-danmu-display',
-          this.pip.douyuBarrageAdapt(this.pipType, this.barrageOpen),
-        );
-      } else if (this.pipChannel === 'huya') {
-        this.updateBarrageOpen(!this.barrageOpen);
-        this.$electron.ipcRenderer.send(
-          'handle-danmu-display',
-          this.pip.huyaBarrageAdapt(this.pipType, this.barrageOpen),
+          this.pip.barrageAdapt(this.barrageOpen),
         );
       }
     },

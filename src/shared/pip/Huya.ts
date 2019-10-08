@@ -30,7 +30,7 @@ export default class Huya {
         document.querySelector("#player-pc-watch-btn").style.display = "none";
         var navbar = document.querySelector(".nav-comp-wrap");
         if (navbar) navbar.style.display = "none";
-        ${this.huyaBarrageAdapt(type, barrageState)}`;
+        ${this.barrageAdapt(type, barrageState)}`;
       this.watcher = '';
       this.recover = 'var videoPlayer = document.querySelector("#videoContainer");'
         + 'videoPlayer.style.position = "relative";'
@@ -110,7 +110,7 @@ export default class Huya {
     }
   }
 
-  public huyaBarrageAdapt(type: string, barrageOpen: boolean) {
+  public barrageAdapt(type: string, barrageOpen: boolean) {
     if (['normal', 'others'].includes(type)) {
       return `var barrage = document.querySelector("#danmuwrap");
         if (barrage) {

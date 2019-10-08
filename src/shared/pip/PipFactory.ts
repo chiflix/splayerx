@@ -42,7 +42,7 @@ export default class PipFactory {
         return new Huya(info.type as string,
           info.barrageState as boolean, info.winSize as number[]);
       case 'qq':
-        return new QQ(info.type as string);
+        return new QQ(info.type as string, info.barrageState as boolean);
       case 'others':
         return new Others(info.winSize as number[]);
       default:
