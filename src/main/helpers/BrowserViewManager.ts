@@ -362,6 +362,13 @@ export class BrowserViewManager implements IBrowserViewManager {
   }
 
   public clearAllBrowserViews(isDeepClear?: boolean): void {
+    this.currentChannel = '';
+    this.currentPip = {
+      pipIndex: -1,
+      pipChannel: '',
+      pipPage: null,
+    };
+    this.history = [];
     isDeepClear = isDeepClear || false;
     this.historyByChannel.forEach((history) => {
       history.lastUpdateTime = Date.now();
