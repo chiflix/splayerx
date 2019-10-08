@@ -104,7 +104,7 @@ export default class QQ {
   }
 
   public barrageAdapt(barrageState: boolean) {
-    return `document.querySelector('.txp_barrage .txp_barrage_external').style.opacity = ${barrageState} ? "1" : "0";`;
+    return `document.querySelector('.txp_barrage .txp_barrage_external').parentElement.style.opacity = ${barrageState} ? "1" : "0";`;
   }
 }
 
