@@ -275,6 +275,7 @@ export default {
       }
     },
     isPip() {
+      this.removeListener();
       this.addListenerToBrowser();
     },
     pipSize() {
