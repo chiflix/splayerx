@@ -585,11 +585,6 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   height: 20px;
   display: block;
 }
-.youtube, .bilibili, .iqiyi {
-  width: 18px;
-  height: 18px;
-  display: block;
-}
 .showFavicon, .hideFavicon {
   width: 10px;
   height: 10px;
