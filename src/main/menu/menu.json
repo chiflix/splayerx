@@ -396,6 +396,10 @@
         "label": "msg.favourite.huya"
       },
       {
+        "id": "favourite.qq",
+        "label": "msg.favourite.qq"
+      },
+      {
         "id": "favourite.youtube",
         "label": "msg.favourite.youtube"
       }

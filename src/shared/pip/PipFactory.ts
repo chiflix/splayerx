@@ -4,6 +4,7 @@ import Iqiyi from './Iqiyi';
 import Douyu from './Douyu';
 import Others from './Others';
 import Huya from './Huya';
+import QQ from './QQ';
 
 type pipMode = {
   adapter: string,
@@ -38,6 +39,8 @@ export default class PipFactory {
       case 'huya':
         return new Huya(info.type as string,
           info.barrageState as boolean, info.winSize as number[]);
+      case 'qq':
+        return new QQ();
       case 'others':
         return new Others(info.winSize as number[]);
       default:

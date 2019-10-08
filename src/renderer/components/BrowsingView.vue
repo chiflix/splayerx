@@ -124,7 +124,7 @@ export default {
         canGoForward: false,
         canGoBack: false,
       },
-      allChannels: ['youtube', 'bilibili', 'iqiyi', 'douyu', 'huya'],
+      allChannels: ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya'],
       hideMainWindow: false,
       startLoadUrl: '',
     };
@@ -170,6 +170,8 @@ export default {
           return {
             channel: 'huya', type: this.huyaType, barrageState: this.barrageOpen, winSize: this.pipSize,
           };
+        case 'qq':
+          return { channel: 'qq' };
         case 'others':
           return { channel: 'others', winSize: this.pipSize };
         default:
@@ -768,7 +770,7 @@ export default {
       this.$electron.remote.getCurrentWindow().setTouchBar(this.touchBar);
     },
     pipAdapter() {
-      const channels = ['youtube', 'bilibili', 'iqiyi', 'douyu', 'huya'];
+      const channels = ['youtube', 'bilibili', 'iqiyi', 'douyu', 'huya', 'qq'];
       this.pipType = 'others';
       channels.forEach((channel: string) => {
         if (this.currentChannel.includes(channel)) this.pipType = channel;

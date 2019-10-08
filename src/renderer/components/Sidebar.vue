@@ -54,7 +54,7 @@ export default {
   },
   data() {
     return {
-      channels: ['https://www.bilibili.com/', 'https://www.iqiyi.com/', 'https://www.douyu.com/', 'https://www.huya.com/', 'https://www.youtube.com/'],
+      channels: ['https://www.bilibili.com/', 'https://www.iqiyi.com/', 'https://www.douyu.com/', 'https://www.huya.com/', 'https://v.qq.com/', 'https://www.youtube.com/'],
       showFileIcon: false,
     };
   },
