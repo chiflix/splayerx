@@ -213,7 +213,7 @@
       "bilibili": "哔哩哔哩",
       "douyu": "斗鱼",
       "huya": "虎牙",
-      "youtube": "Youtube"
+      "youtube": "YouTube"
     },
     "edit": {
       "name": "編輯",
@@ -249,7 +249,7 @@
   "browsing": {
     "bilibili": "哔哩哔哩",
     "iqiyi": "爱奇艺",
-    "youtube": "Youtube",
+    "youtube": "YouTube",
     "huya": "虎牙",
     "douyu": "斗鱼",
     "openLocalFile": "打開本地文件 ...",

@@ -213,7 +213,7 @@
       "bilibili": "Bilibili",
       "douyu": "Douyu",
       "huya": "",
-      "youtube": "Youtube"
+      "youtube": "YouTube"
     },
     "edit": {
       "name": "حرّر",
@@ -249,7 +249,7 @@
   "browsing": {
     "bilibili": "Bilibili",
     "iqiyi": "iQIYI",
-    "youtube": "Youtube",
+    "youtube": "YouTube",
     "huya": "",
     "douyu": "Douyu",
     "openLocalFile": " فتح ملف محلي ...",

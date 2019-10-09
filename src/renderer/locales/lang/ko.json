@@ -213,7 +213,7 @@
       "bilibili": "Bilibili",
       "douyu": "Douyu",
       "huya": "",
-      "youtube": "Youtube"
+      "youtube": "YouTube"
     },
     "edit": {
       "name": "편집",
@@ -249,7 +249,7 @@
   "browsing": {
     "bilibili": "Bilibili",
     "iqiyi": "iQIYI",
-    "youtube": "Youtube",
+    "youtube": "YouTube",
     "huya": "",
     "douyu": "Douyu",
     "openLocalFile": "로컬 파일 열기 ...",
