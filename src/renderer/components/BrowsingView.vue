@@ -109,6 +109,7 @@ export default {
       oauthRegex: [
         /^https:\/\/cnpassport.youku.com\//i,
         /^https:\/\/passport.iqiyi.com\/apis\/thirdparty/i,
+        /^https:\/\/udb3lgn.huya.com\//i,
         /^https:\/\/api.weibo.com\/oauth2/i,
         /^https:\/\/graph.qq.com\//i,
         /^https:\/\/open.weixin.qq.com\//i,
