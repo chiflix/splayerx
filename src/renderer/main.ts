@@ -39,6 +39,7 @@ import { checkForUpdate } from '@/libs/utils';
 import asyncStorage from '@/helpers/asyncStorage';
 import { videodata } from '@/store/video';
 import { addBubble } from '@/helpers/notificationControl';
+import { isAccountEnabled } from '@/helpers/featureSwitch';
 import { CHECK_FOR_UPDATES_OFFLINE, REQUEST_TIMEOUT } from '@/helpers/notificationcodes';
 import { SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, LOAD_SUBVIDEO_FAILED } from './helpers/notificationcodes';
 import InputPlugin, { getterTypes as iGT } from '@/plugins/input';
@@ -404,6 +405,15 @@ new Vue({
     });
     getClientUUID().then((clientId: string) => {
       this.$ga && this.$ga.set('userId', clientId);
+      // get config cat is account enabled
+      isAccountEnabled().then((enabled: boolean) => {
+        log.debug('account', enabled);
+        if (enabled) {
+          this.$electron.ipcRenderer.send('account-enabled');
+        }
+      }).catch(() => {
+        // empty
+      });
     });
     this.$on('wheel-event', this.wheelEventHandler);
 

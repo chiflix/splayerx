@@ -480,6 +480,7 @@
     "submit": "Sign In",
     "codeError": "Incorrect Vertification Code",
     "netWorkError": "Connection Timeout",
-    "noLineError": "No Network Connection"
+    "noLineError": "No Network Connection",
+    "afsError": "Captcha Validation Failed"
   }
 }

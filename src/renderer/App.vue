@@ -46,8 +46,7 @@ import '@/css/style.scss';
 import drag from '@/helpers/drag';
 import { setToken } from '@/libs/apis';
 import sagi from '@/libs/sagi';
-import { isAccountEnabled } from '@/helpers/featureSwitch';
-import { log } from './libs/Log';
+import { apiOfAccountService } from './helpers/featureSwitch';
 
 export default {
   name: 'Splayer',
@@ -112,6 +111,12 @@ export default {
       this.$ga.event('app', 'heartbeat');
     }, 1500000); // keep alive every 25 min.
 
+    // main window get sign in api send to main process
+    // for sign in window use
+    apiOfAccountService().then((api: string) => {
+      ipcRenderer.send('sign-in-end-point', api);
+    }).catch(() => {});
+
     // sign in success
     ipcRenderer.on('sign-in', (e: Event, account?: {
       token: string, id: string,
@@ -124,15 +129,6 @@ export default {
         setToken('');
         sagi.setToken('');
       }
-    });
-    // get config cat is account enabled
-    isAccountEnabled().then((enabled) => {
-      log.debug('account', enabled);
-      if (enabled) {
-        ipcRenderer.send('account-enabled');
-      }
-    }).catch(() => {
-      // empty
     });
     // load global data when sign in is opend
     // const account = remote.getGlobal('account');
