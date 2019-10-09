@@ -102,7 +102,7 @@ export default {
       adaptFinished: false,
       pipInfo: {},
       isGlobal: false,
-      title: 'Splayer',
+      title: 'SPlayer',
       progress: 0,
       showProgress: false,
       readyState: '',
@@ -685,6 +685,7 @@ export default {
       this.currentMainBrowserView().webContents.focus();
     },
     didStopLoading() {
+      this.title = this.currentMainBrowserView().webContents.getTitle();
       this.loadingState = false;
     },
     handleOpenUrl({ url }: { url: string }) {
