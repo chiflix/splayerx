@@ -261,6 +261,13 @@ export default {
         this.lastIndex = this.landingViewItems.length;
       }
     },
+    item: {
+      // eslint-disable-next-line
+      handler: function (val: { id: string }) {
+        this.$bus.$emit('showing-video-cover', val && !!val.id);
+      },
+      immediate: true,
+    },
   },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   beforeRouteEnter(to: Route, { name: from }: Route, next: (vm: any) => void) {

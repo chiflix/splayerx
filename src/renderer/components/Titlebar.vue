@@ -1,14 +1,14 @@
 <template>
   <div
-    :class="isDarwin ? 'darwin-titlebar' : 'titlebar'"
-    :style="{
-      width: '100%'
-    }"
+    :class="['titlebar', { darwin: isDarwin }]"
     @dblclick="handleDbClick"
   >
     <div
       v-if="!isDarwin && isLandingView"
       @dblclick.stop=""
+      :style="{
+        transform: `translateX(${showSidebar ? '76' : '0'}px)`,
+      }"
       class="sidebar"
     >
       <SidebarIcon
@@ -16,11 +16,11 @@
         @mouseout.native="mouseoverSidebar = false"
         :mouseover="mouseoverSidebar"
         :fill="isBrowsingView ? '#BBBACC' : ''"
-        :style="{
-          transform: `translateX(${showSidebar ? '76' : '0'}px)`,
-        }"
         class="sidebar-icon no-drag"
       />
+      <badge v-if="showBadge">
+        {{ $t('preferences.privacy.incognitoMode') }}
+      </badge>
     </div>
     <div
       v-if="!isDarwin"
@@ -57,11 +57,11 @@
       />
     </div>
     <div
+      v-if="isDarwin"
       @dblclick.stop=""
       class="mac-icons"
     >
       <div
-        v-if="isDarwin"
         v-fade-in="showTitleBar"
         @mouseover="handleMouseOver"
         @mouseout="handleMouseOut"
@@ -102,7 +102,7 @@
         />
       </div>
       <SidebarIcon
-        v-if="isDarwin && isLandingView"
+        v-if="isLandingView"
         @mouseover.native="mouseoverSidebar = true"
         @mouseout.native="mouseoverSidebar = false"
         :style="{
@@ -113,6 +113,9 @@
         class="sidebar no-drag"
       />
     </div>
+    <badge v-if="isDarwin && showBadge">
+      {{ $t('preferences.privacy.incognitoMode') }}
+    </badge>
   </div>
 </template>
 
@@ -121,6 +124,7 @@ import { mapGetters } from 'vuex';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import Icon from '@/components/BaseIconContainer.vue';
 import SidebarIcon from '@/components/LandingView/SidebarIcon.vue';
+import Badge from '@/components/LandingView/Badge.vue';
 
 export default {
   name: 'Titlebar',
@@ -129,6 +133,7 @@ export default {
   components: {
     Icon,
     SidebarIcon,
+    Badge,
   },
   props: {
     showSidebar: {
@@ -164,6 +169,7 @@ export default {
       keyAlt: false,
       keyOver: false,
       showTitleBar: true,
+      isShowingVideoCover: false,
       mouseoverSidebar: false,
     };
   },
@@ -179,6 +185,9 @@ export default {
       return this.isFullScreen ? 'exit-fullscreen' : this.isMaximized ? 'restore' : 'maximize'; // eslint-disable-line no-nested-ternary
     },
     isMaxScreen() { return this.itemType === this.itemTypeEnum.MAXSCREEN; },
+    showBadge() {
+      return this.isLandingView && !this.isShowingVideoCover && this.$store.getters.incognitoMode;
+    },
   },
   watch: {
     recentPlaylist(val: boolean) {
@@ -203,6 +212,7 @@ export default {
     },
   },
   mounted() {
+    this.$bus.$on('showing-video-cover', (showing: boolean) => { this.isShowingVideoCover = !!showing; });
     window.addEventListener('keydown', (e: KeyboardEvent) => {
       if (e.keyCode === 18) {
         this.keyAlt = true;
@@ -265,6 +275,7 @@ export default {
 
 <style lang="scss" scoped>
 .titlebar {
+  width: 100%;
   top: 0;
   right: 0;
   border-radius: 10px;
@@ -274,14 +285,13 @@ export default {
   justify-content: space-between;
   position: absolute;
   .sidebar {
-    width: 105px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    transition: transform 100ms linear;
     &-icon {
-      padding-left: 16px;
-      padding-right: 16px;
-      padding-top: 8px;
-      padding-bottom: 8px;
-      width: fit-content;
-      transition: transform 100ms linear;
+      margin-left: 16px;
+      margin-right: 10px;
     }
   }
   .win-icons {
@@ -304,27 +314,26 @@ export default {
     }
   }
 }
-.darwin-titlebar {
+.titlebar.darwin {
   z-index: 6;
   height: 36px;
   display: flex;
   position: absolute;
+  justify-content: space-between;
+  align-items: center;
   .mac-icons {
-    width: 92px;
     display: flex;
-    justify-content: flex-start;
     align-items: center;
     margin-left: 12px;
-    flex-wrap: nowrap;
     .system-icons {
       display: flex;
     }
     .sidebar {
-      margin-top: 1px;
       margin-left: 4px;
       transition: margin-left 100ms linear;
     }
   }
+  .badge { margin-right: 14px; }
   .title-button {
     width: 12px;
     height: 12px;
