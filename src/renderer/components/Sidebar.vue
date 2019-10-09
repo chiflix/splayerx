@@ -3,7 +3,14 @@
     class="side-bar"
   >
     <div
+      :style="{ boxShadow: topMask ? '0 2px 10px 0 rgba(0,0,0,0.50)' : '' }"
+      class="top-mask"
+    />
+    <div
       :class="{ 'win': !isDarwin }"
+      :style="{
+        height: `${maxHeight}px`,
+      }"
       class="icon-box no-drag"
     >
       <SidebarIcon
@@ -12,10 +19,14 @@
         :title="info.title"
         :icon="info.icon"
         :selected="info.type === currentChannel"
+        :style="{
+          margin: index !== channelsDetail.length - 1 ? '0 auto 12px auto' : '0 auto 0 auto',
+        }"
         @click.native="handleSidebarIcon(info.url, index)"
       />
     </div>
     <div
+      :style="{ boxShadow: bottomMask ? '0 -2px 10px 0 rgba(0,0,0,0.50)' : '' }"
       v-if="showFileIcon"
       class="bottom-icon no-drag"
     >
@@ -56,10 +67,19 @@ export default {
     return {
       channels: ['https://www.bilibili.com/', 'https://www.iqiyi.com/', 'https://www.douyu.com/', 'https://www.huya.com/', 'https://v.qq.com/', 'https://www.youtube.com/'],
       showFileIcon: false,
+      topMask: false,
+      bottomMask: false,
     };
   },
   computed: {
-    ...mapGetters(['pipSize', 'pipPos', 'isHistory', 'currentChannel']),
+    ...mapGetters(['pipSize', 'pipPos', 'isHistory', 'currentChannel', 'winHeight']),
+    totalHeight() {
+      return this.channels.length * 44 + (this.channels.length - 1) * 12;
+    },
+    maxHeight() {
+      const bottomHeight = this.$route.name === 'browsing-view' ? 66 : 0;
+      return this.winHeight - 42 - bottomHeight;
+    },
     isDarwin() {
       return process.platform === 'darwin';
     },
@@ -79,6 +99,20 @@ export default {
     currentUrl(val: string) {
       this.showFileIcon = !!val;
     },
+    winHeight() {
+      const scrollTop = (document.querySelector('.icon-box') as HTMLElement).scrollTop;
+      this.topMask = scrollTop !== 0;
+      this.bottomMask = scrollTop + this.maxHeight < this.totalHeight;
+    },
+  },
+  mounted() {
+    this.topMask = false;
+    this.bottomMask = this.maxHeight < this.totalHeight;
+    (document.querySelector('.icon-box') as HTMLElement).addEventListener('wheel', () => {
+      const scrollTop = (document.querySelector('.icon-box') as HTMLElement).scrollTop;
+      this.topMask = scrollTop !== 0;
+      this.bottomMask = scrollTop + this.maxHeight < this.totalHeight;
+    });
   },
   methods: {
     ...mapActions({
@@ -107,12 +141,14 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+::-webkit-scrollbar {
+  width: 0;
+}
 .side-bar {
   position: absolute;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
   background-color: #3B3B41;
   z-index: 0;
   left: 0;
@@ -121,16 +157,24 @@ export default {
   transition: width 100ms ease-out;
   will-change: width;
 
+  .top-mask {
+    width: 100%;
+    height: 42px;
+  }
   .icon-box {
-    width: 44px;
-    margin-top: 42px;
+    width: 100%;
     display: flex;
     flex-direction: column;
+    overflow-y: scroll;
   }
   .bottom-icon {
     display:flex;
     flex-direction: column;
-    margin-bottom: 18px;
+    width: 100%;
+    height: 66px;
+  }
+  .icon-hover {
+    margin: auto;
   }
   .win {
     margin-top: 16px;
