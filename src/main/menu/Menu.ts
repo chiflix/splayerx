@@ -287,6 +287,7 @@ export default class Menubar {
           checked,
           click: () => {
             if (this.mainWindow) {
+              // todo why this filter
               if (subtitleItem && subtitleItem.type === Type.Translated) this.menubar.getMenuItemById('subtitle.mainSubtitle.off').checked = true;
               this.mainWindow.webContents.send('subtitle.mainSubtitle', id, subtitleItem);
             }
@@ -324,6 +325,7 @@ export default class Menubar {
           enabled,
           click: () => {
             if (this.mainWindow) {
+              // todo why this filter
               if (subtitleItem && subtitleItem.type === Type.Translated) this.menubar.getMenuItemById('subtitle.secondarySubtitle.off').checked = true;
               this.mainWindow.webContents.send('subtitle.secondarySubtitle', id, subtitleItem);
             }

@@ -7,6 +7,7 @@ export enum Type {
   Embedded = 'embedded',
   Local = 'local',
   Translated = 'translated',
+  PreTranslated = 'preTranslated',
 }
 export enum Format {
   AdvancedSubStationAplha = 'ass',

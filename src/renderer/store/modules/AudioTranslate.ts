@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-05 16:03:32
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-09-26 16:24:50
+ * @Last Modified time: 2019-10-09 17:23:35
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @ts-ignore
@@ -17,7 +17,7 @@ import { AITaskInfo } from '@/interfaces/IMediaStorable';
 import { TranscriptInfo } from '@/services/subtitle';
 import { ISubtitleControlListItem, Type } from '@/interfaces/ISubtitle';
 import { mediaStorageService } from '@/services/storage/MediaStorageService';
-import { TranslatedGenerator } from '@/services/subtitle/loaders/translated';
+import { PreTranslatedGenerator } from '@/services/subtitle/loaders/preTranslated';
 import { isAudioCenterChannelEnabled, isAccountEnabled } from '@/helpers/featureSwitch';
 import { addBubble } from '@/helpers/notificationControl';
 import {
@@ -313,6 +313,14 @@ const actions = {
       audioLanguageCode,
       targetLanguageCode: getters.selectedTargetLanugage,
     });
+    // delete
+    dispatch(smActions.deleteSubtitlesByUuid, [state.selectedTargetSubtitleId]);
+    // add
+    const generator = new PreTranslatedGenerator(null, state.selectedTargetLanugage);
+    const subtitle = await dispatch(smActions.addSubtitle, {
+      generator, mediaHash: audioTranslateService.mediaHash,
+    });
+    commit(m.AUDIO_TRANSLATE_SELECTED_UPDATE, subtitle);
     if (grab) {
       // 旋转对应目标语言的字幕
       if (getters.isFirstSubtitle) {
@@ -485,7 +493,7 @@ const actions = {
           const selectId = state.selectedTargetSubtitleId;
           result = TRANSLATE_SUCCESS;
           // 加入刚刚翻译好的AI字幕
-          const generator = new TranslatedGenerator(transcriptInfo);
+          const generator = new PreTranslatedGenerator(transcriptInfo);
           const subtitle = await dispatch(smActions.addSubtitle, {
             generator, mediaHash: audioTranslateService.mediaHash,
           });
@@ -508,11 +516,13 @@ const actions = {
           const secondaryAIButtonExist = list
             .find((
               sub: ISubtitleControlListItem,
-            ) => sub.language === secondaryLanguage && !sub.source && sub.type === Type.Translated);
+            ) => sub.language === secondaryLanguage
+            && !sub.source && sub.type === Type.PreTranslated);
           const primaryAIButtonExist = list
             .find((
               sub: ISubtitleControlListItem,
-            ) => sub.language === primaryLanguage && !sub.source && sub.type === Type.Translated);
+            ) => sub.language === primaryLanguage
+            && !sub.source && sub.type === Type.PreTranslated);
           if (primaryLanguage === subtitle.language
             && !!secondaryLanguage && !!secondaryAIButtonExist) {
             dispatch(smActions.fetchSubtitleWhenTrabslateSuccess, secondaryLanguage);
@@ -574,11 +584,11 @@ const actions = {
         || taskInfo.targetLanguage === secondaryLanguage)) {
       let sub = list.find((
         sub: ISubtitleControlListItem,
-      ) => sub.type === Type.Translated && sub.language === taskInfo.targetLanguage);
+      ) => sub.type === Type.PreTranslated && sub.language === taskInfo.targetLanguage);
       if (!sub) {
         try {
           sub = await dispatch(smActions.addSubtitle, {
-            generator: new TranslatedGenerator(
+            generator: new PreTranslatedGenerator(
               null, taskInfo.targetLanguage as LanguageCode,
             ),
             mediaHash,
