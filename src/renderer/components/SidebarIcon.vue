@@ -1,9 +1,7 @@
 <template>
   <div
     :title="$t(title)"
-    :style="{
-      opacity: selected ? 1: 0.7,
-    }"
+    :class="{ light: selected }"
     class="icon-hover"
   >
     <Icon
@@ -53,6 +51,9 @@ div {
   height: 44px;
   position: relative;
   top: -50px;
+}
+.light {
+  opacity: 1;
 }
 .selected {
   opacity: 1;
