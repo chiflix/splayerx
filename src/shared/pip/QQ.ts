@@ -27,7 +27,10 @@ export default class QQ {
         document.querySelector(".txp_ad_link").style.webkitUserDrag = "none";
         var tools = document.querySelector(".x_fixed_tool");
         if (tools) tools.style.display = "none";
-        document.querySelector(".txp_top_btns").style.display = "none";`;
+        document.querySelector(".txp_top_btns").style.display = "none";
+        var container = document.querySelector(".player_container");
+        var wideMode = container.classList.value.includes("player_container_wide");
+        if (wideMode) { container.classList.remove("player_container_wide"); }`;
       this.watcher = '';
       this.recover = 'var player = document.querySelector(".txp_player");'
         + 'player.style.position = "relative";'
@@ -45,7 +48,8 @@ export default class QQ {
         + 'document.querySelector(".txp_ad_link").style.webkitUserDrag = "";'
         + 'var tools = document.querySelector(".x_fixed_tool");'
         + 'if (tools) tools.style.display = "";'
-        + 'document.querySelector(".txp_top_btns").style.display = "";';
+        + 'document.querySelector(".txp_top_btns").style.display = "";'
+        + 'if (wideMode) { container.classList.add("player_container_wide"); }';
     } else if (type === 'hotVideo') {
       this.adapter = 'var player = document.querySelector(".txp_player");'
         + 'player.style.position = "fixed";'
