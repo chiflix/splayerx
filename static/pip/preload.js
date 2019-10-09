@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
           }
           break;
         case url.includes('youku'):
-          if (evt.target.classList[0] === 'yk-trigger-layer') {
+          if (['youku-layer-wuliao', 'yk-trigger-layer'].includes(evt.target.classList[0]) || evt.target.parentElement.parentElement.classList[0] === 'h5-ext-layer') {
             offset = [evt.clientX, evt.clientY];
             if (getRatio() !== 1) {
               windowSize = remote.getCurrentWindow().getSize();

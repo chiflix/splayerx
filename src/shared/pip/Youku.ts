@@ -6,7 +6,6 @@ export default class Youku {
   public recover: string;
 
   public constructor(barrageState: boolean) {
-    console.log(barrageState, 111);
     this.adapter = `var player = document.querySelector("#ykPlayer");
       ${this.barrageAdapt(barrageState)}
       player.style.position = "fixed";
@@ -14,7 +13,11 @@ export default class Youku {
       player.style.top = "0";
       player.style.width = "100%";
       player.style.zIndex = "999999";
-      document.body.style.overflow = "hidden";`;
+      player.style.maxWidth = "100%";
+      player.style.maxHeight = "100%";
+      document.body.style.overflow = "hidden";
+      var pip = document.querySelector(".minisize-layer")
+      if (pip) pip.style.pointerEvents = "none";`;
     this.watcher = '';
     this.recover = 'var player = document.querySelector("#ykPlayer");'
       + 'player.style.position = "";'
@@ -22,10 +25,14 @@ export default class Youku {
       + 'player.style.top = "";'
       + 'player.style.width = "";'
       + 'player.style.zIndex = "";'
-      + 'document.body.style.overflow = "";';
+      + 'player.style.maxWidth = "";'
+      + 'player.style.maxHeight = "";'
+      + 'document.body.style.overflow = "";'
+      + 'var pip = document.querySelector(".minisize-layer");'
+      + 'if (pip) pip.style.pointerEvents = "auto";';
   }
 
   public barrageAdapt(barrageState: boolean) {
-    return `document.querySelector('.yk-player-danmu').style.opacity = ${barrageState} ? "1" : "0";`;
+    return `var danmu = document.querySelector('.yk-player-danmu'); if (danmu) danmu.style.opacity = ${barrageState} ? "1" : "0";`;
   }
 }
