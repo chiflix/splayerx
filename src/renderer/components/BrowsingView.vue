@@ -146,7 +146,6 @@ export default {
       'pipMode',
       'isHistory',
       'currentChannel',
-      'pipChannel',
     ]),
     isDarwin() {
       return process.platform === 'darwin';

@@ -132,8 +132,14 @@ class InjectJSManager implements IInjectJSManager {
       return 'if (!document.querySelector(".poplayer_quickplay").classList.value.includes("none")) {'
         + 'getComputedStyle(document.querySelector(".poplayer_quickplay").getElementsByTagName("video")[0]);'
         + '} else {'
-        + 'getComputedStyle(document.querySelector(".mod_player").getElementsByTagName("video")[0]);'
-        + '}';
+        + 'var container = document.querySelector(".player_container");'
+        + 'var wideMode = container.classList.value.includes("player_container_wide");'
+        + 'if (wideMode) { container.classList.remove("player_container_wide");'
+        + 'var style = { width: parseFloat(getComputedStyle(document.querySelector(".mod_player").getElementsByTagName("video")[0]).width) - parseFloat(getComputedStyle(document.querySelector(".mod_player_side")).width),'
+        + 'height: getComputedStyle(document.querySelector(".mod_player").getElementsByTagName("video")[0]).height,'
+        + '};'
+        + 'style;'
+        + '} else { getComputedStyle(document.querySelector(".mod_player").getElementsByTagName("video")[0]); }}';
     }
     return this.getVideoStyleCode;
   }
