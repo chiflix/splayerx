@@ -3,12 +3,12 @@ export function bilibiliVideoPause(type: string) {
     return 'document.querySelector("video").pause();';
   }
   if (type === 'videoStreaming') {
-    return 'document.querySelector("video").pause();var timer = setInterval(() => { var pause = document.querySelector(".bilibili-live-player-video-controller-btn-item").children[0]; if (pause) { clearInterval(timer);pause.click(); } }, 100);';
+    return 'document.querySelector("video").pause();var timer = setInterval(() => { var pause = document.querySelector(".bilibili-live-player-video-controller-btn-item").children[0]; if (pause && timer) { clearInterval(timer);timer = null;pause.click(); } }, 100);';
   }
   if (type === 'iframeStreaming') {
-    return 'document.querySelector("video").pause();var timer = setInterval(() => { var pause = document.querySelector("iframe").contentDocument.querySelector(".bilibili-live-player-video-controller-btn-item").children[0]; if (pause) { clearInterval(timer);pause.click(); } }, 100);';
+    return 'document.querySelector("video").pause();var timer = setInterval(() => { var pause = document.querySelector("iframe").contentDocument.querySelector(".bilibili-live-player-video-controller-btn-item").children[0]; if (pause && timer) { clearInterval(timer);timer = null;pause.click(); } }, 100);';
   }
-  return 'document.querySelector("video").pause();var timer = setInterval(() => { var pause = document.querySelector(".bilibili-live-player-video-controller-btn-item").children[0]; if (pause) { clearInterval(timer);pause.click(); } }, 100);';
+  return 'document.querySelector("video").pause();var timer = setInterval(() => { var pause = document.querySelector(".bilibili-live-player-video-controller-btn-item").children[0]; if (pause && timer) { clearInterval(timer);timer = null;pause.click(); } }, 100);';
 }
 
 export default class Bilibili {

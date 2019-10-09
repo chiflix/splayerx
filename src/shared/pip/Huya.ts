@@ -1,9 +1,6 @@
 export function huyaVideoPause(type: string) {
-  if (type === 'normal') {
-    return 'document.querySelector("video").pause();var timer = setInterval(() => { const pause = document.querySelector(".player-pause-btn"); if (pause) { clearInterval(timer);pause.click(); } }, 100);';
-  }
-  if (type === 'others') {
-    return 'document.querySelector("video").pause();';
+  if (['normal', 'others'].includes(type)) {
+    return 'document.querySelector("video").pause();var timer = setInterval(() => { const pause = document.querySelector(".player-pause-btn"); if (pause && timer) { clearInterval(timer);timer = null;pause.click(); } }, 100);';
   }
   return 'document.querySelector("video").pause();var timer = setInterval(() => { const pause = document.querySelector(".pause-81a5c3"); if (pause) { clearInterval(timer);pause.click(); } }, 100);';
 }
