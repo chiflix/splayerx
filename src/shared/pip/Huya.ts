@@ -30,6 +30,13 @@ export default class Huya {
         document.querySelector("#player-pc-watch-btn").style.display = "none";
         var navbar = document.querySelector(".nav-comp-wrap");
         if (navbar) navbar.style.display = "none";
+        var backToTop = document.querySelector(".room-backToTop");
+        if (backToTop) backToTop.style.display = "none";
+        var pip = document.querySelector("#player-pc-watch-btn");
+        if (pip) {
+        pip.style.display = "none";
+        Object.defineProperty(pip.style, "display", { get: function() { return "none"; }, set: function() {} });
+        }
         ${this.barrageAdapt(type, barrageState)}`;
       this.watcher = '';
       this.recover = 'var videoPlayer = document.querySelector("#videoContainer");'
@@ -47,7 +54,14 @@ export default class Huya {
         + 'document.querySelector("#main_col").style.overflow = "";'
         + 'document.querySelector("#player-pc-watch-btn").style.display = "";'
         + 'var navbar = document.querySelector(".nav-comp-wrap");'
-        + 'if (navbar) navbar.style.display = "";';
+        + 'if (navbar) navbar.style.display = "";'
+        + 'var backToTop = document.querySelector(".room-backToTop");'
+        + 'if (backToTop) backToTop.style.display = "";'
+        + 'var pip = document.querySelector("#player-pc-watch-btn");'
+        + 'if (pip) {'
+        + 'Object.defineProperty(pip.style, "display", {get: function(){return this._display}, set: function(val){this._display = val;pip.style.setProperty("display", val);}});'
+        + 'pip.style.display = "";'
+        + '}';
     } else if (type === 'video') {
       this.adapter = 'var videoPlayer = document.querySelector(".qNaLj_XPyjPujVM0Dx5jZ");'
         + 'videoPlayer.style.position = "fixed";'

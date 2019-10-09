@@ -26,7 +26,10 @@
       />
     </div>
     <div
-      :style="{ boxShadow: bottomMask ? '0 -2px 10px 0 rgba(0,0,0,0.50)' : '' }"
+      :style="{
+        boxShadow: bottomMask ? '0 -2px 10px 0 rgba(0,0,0,0.50)' : '',
+        height: showFileIcon ? '66px' : '',
+      }"
       v-if="showFileIcon"
       class="bottom-icon no-drag"
     >
@@ -77,7 +80,7 @@ export default {
       return this.channels.length * 44 + (this.channels.length - 1) * 12;
     },
     maxHeight() {
-      const bottomHeight = this.$route.name === 'browsing-view' ? 66 : 0;
+      const bottomHeight = this.showFileIcon ? 66 : 0;
       return this.winHeight - 42 - bottomHeight;
     },
     isDarwin() {
@@ -171,7 +174,6 @@ export default {
     display:flex;
     flex-direction: column;
     width: 100%;
-    height: 66px;
   }
   .icon-hover {
     margin: auto;

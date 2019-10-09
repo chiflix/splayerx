@@ -90,6 +90,22 @@ document.addEventListener('DOMContentLoaded', () => {
             }
           }
           break;
+        case url.includes('huya'):
+          if (['player-video', '_2yrglNsCHp7K38jZqGHfoV'].includes(evt.target.classList[0]) || evt.target.id === 'yanzhi-bg') {
+            offset = [evt.clientX, evt.clientY];
+            if (getRatio() !== 1) {
+              windowSize = remote.getCurrentWindow().getSize();
+            }
+          }
+          break;
+        case url.includes('qq'):
+          if (['txp_shadow', 'txp_ad_link'].includes(evt.target.classList[0])) {
+            offset = [evt.clientX, evt.clientY];
+            if (getRatio() !== 1) {
+              windowSize = remote.getCurrentWindow().getSize();
+            }
+          }
+          break;
         default:
           offset = [evt.clientX, evt.clientY];
           if (getRatio() !== 1) {

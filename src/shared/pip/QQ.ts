@@ -51,6 +51,8 @@ export default class QQ {
         + 'player.style.position = "fixed";'
         + 'player.style.top = "0";'
         + 'player.style.left = "0";'
+        + 'player.style.width = "100%";'
+        + 'player.style.height = "100%";'
         + 'player.style.zIndex = "999999";'
         + 'document.querySelector(".site_head").style.display  = "none";'
         + 'var mod = document.querySelector(".mod_action");'
@@ -70,6 +72,8 @@ export default class QQ {
         + 'player.style.top = "";'
         + 'player.style.left = "";'
         + 'player.style.zIndex = "";'
+        + 'player.style.width = "";'
+        + 'player.style.height = "";'
         + 'document.querySelector(".site_head").style.display  = "";'
         + 'var mod = document.querySelector(".mod_action");'
         + 'if (mod) mod.style.display  = "";'
@@ -104,7 +108,7 @@ export default class QQ {
   }
 
   public barrageAdapt(barrageState: boolean) {
-    return `document.querySelector('.txp_barrage .txp_barrage_external').parentElement.style.opacity = ${barrageState} ? "1" : "0";`;
+    return `document.querySelector('.txp_barrage .txp_barrage_external').parentElement.style.display = ${barrageState} ? "" : "none";`;
   }
 }
 

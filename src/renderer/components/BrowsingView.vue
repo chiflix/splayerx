@@ -705,7 +705,7 @@ export default {
         const oldChannel = this.currentChannel;
         let newChannel = '';
         this.allChannels.forEach((channel: string) => {
-          if (newHostname.includes(channel)) {
+          if (newHostname.includes(channel) && (channel !== 'qq' || (channel === 'qq' && newHostname.includes('v.qq.com')))) {
             newChannel = `${channel}.com`;
           }
         });
