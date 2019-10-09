@@ -400,6 +400,10 @@
         "label": "msg.favourite.qq"
       },
       {
+        "id": "favourite.youku",
+        "label": "msg.favourite.youku"
+      },
+      {
         "id": "favourite.youtube",
         "label": "msg.favourite.youtube"
       }

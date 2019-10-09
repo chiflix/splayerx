@@ -106,6 +106,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
           }
           break;
+        case url.includes('youku'):
+          if (evt.target.classList[0] === 'yk-trigger-layer') {
+            offset = [evt.clientX, evt.clientY];
+            if (getRatio() !== 1) {
+              windowSize = remote.getCurrentWindow().getSize();
+            }
+          }
+          break;
         default:
           offset = [evt.clientX, evt.clientY];
           if (getRatio() !== 1) {

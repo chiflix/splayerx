@@ -552,7 +552,8 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   width: 30px;
   height: 30px;
 }
-.bilibiliSidebar, .iqiyiSidebar, .youtubeSidebar, .douyuSidebar, .huyaSidebar, .qqSidebar {
+.bilibiliSidebar, .iqiyiSidebar, .youtubeSidebar,
+.douyuSidebar, .huyaSidebar, .qqSidebar, .youkuSidebar {
   width: 44px;
   height: 44px;
 }

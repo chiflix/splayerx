@@ -122,7 +122,7 @@ export default {
         canGoForward: false,
         canGoBack: false,
       },
-      allChannels: ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya'],
+      allChannels: ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku'],
       hideMainWindow: false,
       startLoadUrl: '',
     };
@@ -170,6 +170,8 @@ export default {
           };
         case 'qq':
           return { channel: 'qq', type: this.pipType, barrageState: this.barrageOpen };
+        case 'youku':
+          return { channel: 'youku', barrageState: this.barrageOpen };
         case 'others':
           return { channel: 'others', winSize: this.pipSize };
         default:
@@ -769,9 +771,8 @@ export default {
       this.$electron.remote.getCurrentWindow().setTouchBar(this.touchBar);
     },
     pipAdapter() {
-      const channels = ['youtube', 'bilibili', 'iqiyi', 'douyu', 'huya', 'qq'];
       this.pipChannel = 'others';
-      channels.forEach((channel: string) => {
+      this.allChannels.forEach((channel: string) => {
         if (this.currentChannel.includes(channel)) this.pipChannel = channel;
       });
       if (['bilibili', 'douyu', 'huya', 'qq'].includes(this.pipChannel)) {
@@ -886,7 +887,7 @@ export default {
           'handle-danmu-display',
           this.pip.barrageAdapt(this.pipType, this.barrageOpen),
         );
-      } else if (['iqiyi', 'qq'].includes(this.pipChannel)) {
+      } else if (['iqiyi', 'qq', 'youku'].includes(this.pipChannel)) {
         this.$electron.ipcRenderer.send(
           'handle-danmu-display',
           this.pip.barrageAdapt(this.barrageOpen),
