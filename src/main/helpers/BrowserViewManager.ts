@@ -302,6 +302,7 @@ export class BrowserViewManager implements IBrowserViewManager {
     const currentHistory = (this.historyByChannel.get(this.currentChannel) as ChannelData);
     const currentIndex = currentHistory.currentIndex;
     const currentView = view || currentHistory.list[currentIndex].view;
+    currentView.webContents.removeAllListeners('media-started-playing');
     if (currentView.webContents.isCurrentlyAudible()) {
       let type = '';
       if (['bilibili.com', 'douyu.com', 'huya.com', 'qq.com'].includes(pausedChannel)) {

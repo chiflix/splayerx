@@ -1,6 +1,9 @@
 export function huyaVideoPause(type: string) {
-  if (['normal', 'others'].includes(type)) {
+  if (type === 'normal') {
     return 'document.querySelector("video").pause();var timer = setInterval(() => { const pause = document.querySelector(".player-pause-btn"); if (pause) { clearInterval(timer);pause.click(); } }, 100);';
+  }
+  if (type === 'others') {
+    return 'document.querySelector("video").pause();';
   }
   return 'document.querySelector("video").pause();var timer = setInterval(() => { const pause = document.querySelector(".pause-81a5c3"); if (pause) { clearInterval(timer);pause.click(); } }, 100);';
 }
