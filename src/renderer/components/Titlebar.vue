@@ -212,7 +212,7 @@ export default {
     },
   },
   mounted() {
-    this.$bus.$on('showing-video-cover', () => { this.isShowingVideoCover = true; });
+    this.$bus.$on('showing-video-cover', (showing: boolean) => { this.isShowingVideoCover = !!showing; });
     window.addEventListener('keydown', (e: KeyboardEvent) => {
       if (e.keyCode === 18) {
         this.keyAlt = true;
