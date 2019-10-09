@@ -420,6 +420,7 @@ export default {
     },
     onItemMouseover(index: number) {
       this.item = this.landingViewItems[index];
+      if (this.item) this.$bus.$emit('showing-video-cover');
       this.$bus.$emit('highlight-sidebar', true);
     },
     onItemClick(index: number) {
