@@ -7,11 +7,13 @@
       class="icon-box no-drag"
     >
       <SidebarIcon
+        ref="sidebar"
         v-for="(info, index) in channelsDetail"
         :key="info.url"
         :title="info.title"
         :icon="info.icon"
         :selected="info.type === currentChannel"
+        @mousedown.native="handleMousedown"
         @click.native="handleSidebarIcon(info.url, index)"
       />
     </div>
@@ -35,6 +37,7 @@ import { Browsing as browsingActions } from '@/store/actionTypes';
 import asyncStorage from '@/helpers/asyncStorage';
 import Icon from '@/components/BaseIconContainer.vue';
 import SidebarIcon from '@/components/SidebarIcon.vue';
+import { setElementStyle } from '@/libs/dom';
 
 export default {
   name: 'Sidebar',
@@ -56,6 +59,7 @@ export default {
     return {
       channels: ['https://www.bilibili.com/', 'https://www.iqiyi.com/', 'https://www.douyu.com/', 'https://www.huya.com/', 'https://www.youtube.com/'],
       showFileIcon: false,
+      mousedown: NaN,
     };
   },
   computed: {
@@ -85,6 +89,20 @@ export default {
       updateIsHistoryPage: browsingActions.UPDATE_IS_HISTORY,
       updateCurrentChannel: browsingActions.UPDATE_CURRENT_CHANNEL,
     }),
+    handleMousedown(index: number, e) {
+      console.log('mousedown', index, e);
+      this.mousedown = index;
+      document.addEventListener('mousemove', this.handleMousemove);
+      document.addEventListener('mouseup', this.handleMouseup);
+    },
+    handleMousemove(e: MouseEvent) {
+      console.log('mousemove');
+      setElementStyle(this.$refs.sidebar[this.mousedown].$el, 'transform', 'translateX(-10px)');
+    },
+    handleMouseup(index: number) {
+      document.removeEventListener('mousemove', this.handleMousemove);
+      console.log('mouseup');
+    },
     openHistory() {
       this.updateIsHistoryPage(!this.isHistory);
     },
