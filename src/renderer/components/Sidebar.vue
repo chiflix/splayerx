@@ -14,13 +14,12 @@
       class="icon-box no-drag"
     >
       <SidebarIcon
-        ref="sidebar"
         v-for="(info, index) in channelsDetail"
+        :index="index"
         :key="info.url"
         :title="info.title"
         :icon="info.icon"
         :selected="info.type === currentChannel"
-        @mousedown.native="handleMousedown"
         :style="{
           margin: index !== channelsDetail.length - 1 ? '0 auto 12px auto' : '0 auto 0 auto',
         }"
