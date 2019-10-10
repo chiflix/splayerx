@@ -404,6 +404,10 @@
         "label": "msg.favourite.youku"
       },
       {
+        "id": "favourite.twitch",
+        "label": "msg.favourite.twitch"
+      },
+      {
         "id": "favourite.youtube",
         "label": "msg.favourite.youtube"
       }

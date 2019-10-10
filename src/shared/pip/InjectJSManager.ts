@@ -3,6 +3,7 @@ import PipFactory from './PipFactory';
 import { douyuFindType, douyuVideoPause } from './Douyu';
 import { huyaFindType, huyaVideoPause } from './Huya';
 import { QQFindType, QQVideoPause } from './QQ';
+import { twitchFindType } from './Twitch';
 
 class InjectJSManager implements IInjectJSManager {
   private readonly calcVideoNumCode: string;
@@ -41,6 +42,8 @@ class InjectJSManager implements IInjectJSManager {
         return huyaFindType;
       case 'qq':
         return QQFindType;
+      case 'twitch':
+        return twitchFindType;
       default:
         return '';
     }

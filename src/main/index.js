@@ -9,7 +9,6 @@ import path, {
 } from 'path';
 import fs from 'fs';
 import rimraf from 'rimraf';
-import urlParse from 'url-parse-lax';
 // import { audioHandler } from './helpers/audioHandler';
 import { audioGrabService } from './helpers/AudioGrabService';
 import './helpers/electronPrototypes';
@@ -691,12 +690,14 @@ function registerMainWindowEvent(mainWindow) {
   });
   ipcMain.on('create-browser-view', (evt, args) => {
     if (!browserViewManager) browserViewManager = new BrowserViewManager();
-    const hostname = urlParse(args.url).hostname;
-    let channel = hostname.slice(hostname.indexOf('.') + 1, hostname.length);
-    if (args.url.includes('youtube')) {
-      channel = 'youtube.com';
-    }
-    const currentMainBrowserView = browserViewManager.create(channel, args);
+    const allChannels = ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch'];
+    let currentChannel = '';
+    allChannels.forEach((channel) => {
+      if (args.url.includes(channel)) {
+        currentChannel = `${channel}.com`;
+      }
+    });
+    const currentMainBrowserView = browserViewManager.create(currentChannel, args);
     setTimeout(() => {
       mainWindow.send('update-browser-state', {
         url: args.url,
@@ -826,12 +827,14 @@ function registerMainWindowEvent(mainWindow) {
     browViews.forEach((view) => {
       browsingWindow.removeBrowserView(view);
     });
-    const hostname = urlParse(mainView.webContents.getURL()).hostname;
-    let channel = hostname.slice(hostname.indexOf('.') + 1, hostname.length);
-    if (mainView.webContents.getURL().includes('youtube')) {
-      channel = 'youtube.com';
-    }
-    const browsers = browserViewManager.changePip(channel);
+    const allChannels = ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch'];
+    let currentChannel = '';
+    allChannels.forEach((channel) => {
+      if (mainView.webContents.getURL().includes(channel)) {
+        currentChannel = `${channel}.com`;
+      }
+    });
+    const browsers = browserViewManager.changePip(currentChannel);
     const pipBrowser = browsers.pipBrowser;
     const mainBrowser = browsers.mainBrowser;
     mainWindow.addBrowserView(mainBrowser.page.view);

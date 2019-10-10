@@ -11,7 +11,7 @@
       :style="{
         height: `${maxHeight}px`,
       }"
-      class="icon-box no-drag"
+      class="icon-box"
     >
       <SidebarIcon
         v-for="(info, index) in channelsDetail"
@@ -23,8 +23,14 @@
           margin: index !== channelsDetail.length - 1 ? '0 auto 12px auto' : '0 auto 0 auto',
         }"
         @click.native="handleSidebarIcon(info.url, index)"
+        class="no-drag"
       />
     </div>
+    <div
+      v-if="!showFileIcon"
+      :style="{ boxShadow: bottomMask ? '0 -2px 10px 0 rgba(0,0,0,0.50)' : '' }"
+      class="bottom-mask"
+    />
     <div
       :style="{
         boxShadow: bottomMask ? '0 -2px 10px 0 rgba(0,0,0,0.50)' : '',
@@ -68,7 +74,16 @@ export default {
   },
   data() {
     return {
-      channels: ['https://www.bilibili.com/', 'https://www.iqiyi.com/', 'https://www.douyu.com/', 'https://www.huya.com/', 'https://v.qq.com/', 'https://www.youku.com/', 'https://www.youtube.com/'],
+      channels: [
+        'https://www.bilibili.com/',
+        'https://www.iqiyi.com/',
+        'https://www.douyu.com/',
+        'https://www.huya.com/',
+        'https://v.qq.com/',
+        'https://www.youku.com/',
+        'https://www.twitch.tv/',
+        'https://www.youtube.com/',
+      ],
       showFileIcon: false,
       topMask: false,
       bottomMask: false,
@@ -80,7 +95,7 @@ export default {
       return this.channels.length * 44 + (this.channels.length - 1) * 12;
     },
     maxHeight() {
-      const bottomHeight = this.showFileIcon ? 66 : 0;
+      const bottomHeight = this.showFileIcon ? 66 : 12;
       return this.winHeight - 42 - bottomHeight;
     },
     isDarwin() {
@@ -163,6 +178,10 @@ export default {
   .top-mask {
     width: 100%;
     height: 42px;
+  }
+  .bottom-mask {
+    width: 100%;
+    height: 12px;
   }
   .icon-box {
     width: 100%;

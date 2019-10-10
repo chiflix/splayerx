@@ -553,7 +553,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   height: 30px;
 }
 .bilibiliSidebar, .iqiyiSidebar, .youtubeSidebar,
-.douyuSidebar, .huyaSidebar, .qqSidebar, .youkuSidebar {
+.douyuSidebar, .huyaSidebar, .qqSidebar, .youkuSidebar, .twitchSidebar {
   width: 44px;
   height: 44px;
 }
