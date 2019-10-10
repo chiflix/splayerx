@@ -39,11 +39,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ipcRenderer, Event } from 'electron';
 import { mapActions } from 'vuex';
-import { SubtitleManager as smActions } from '@/store/actionTypes';
+import { SubtitleManager as smActions, UserInfo as uActions } from '@/store/actionTypes';
 import Titlebar from '@/components/Titlebar.vue';
 import Sidebar from '@/components/Sidebar.vue';
 import '@/css/style.scss';
 import drag from '@/helpers/drag';
+import { setToken } from '@/libs/apis';
+import sagi from '@/libs/sagi';
+import { isAccountEnabled } from '@/helpers/featureSwitch';
+import { log } from './libs/Log';
 
 export default {
   name: 'Splayer',
@@ -107,10 +111,43 @@ export default {
     setInterval(() => {
       this.$ga.event('app', 'heartbeat');
     }, 1500000); // keep alive every 25 min.
+
+    // sign in success
+    ipcRenderer.on('sign-in', (e: Event, account?: {
+      token: string, id: string,
+    }) => {
+      this.updateUserInfo(account);
+      if (account) {
+        setToken(account.token);
+        sagi.setToken(account.token);
+      } else {
+        setToken('');
+        sagi.setToken('');
+      }
+    });
+    // get config cat is account enabled
+    isAccountEnabled().then((enabled) => {
+      log.debug('account', enabled);
+      if (enabled) {
+        ipcRenderer.send('account-enabled');
+      }
+    }).catch(() => {
+      // empty
+    });
+    // load global data when sign in is opend
+    // const account = remote.getGlobal('account');
+    // this.updateUserInfo(account);
+    // if (account && account.token) {
+    //   setToken(account.token);
+    //   sagi.setToken(account.token);
+    //   // resfrsh
+    //   checkToken();
+    // }
   },
   methods: {
     ...mapActions({
       resetManager: smActions.resetManager,
+      updateUserInfo: uActions.UPDATE_USER_INFO,
     }),
     mainCommitProxy(commitType: string, commitPayload: any) {
       this.$store.commit(commitType, commitPayload);

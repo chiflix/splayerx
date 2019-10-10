@@ -1,7 +1,8 @@
-import Vue from 'vue';
 import * as configcat from 'configcat-js';
+import store from '@/store';
 import { log } from '@/libs/Log';
 import { getMainVersion } from '@/libs/utils';
+import { getSystemLocale, getClientUUID } from '@/../shared/utils';
 
 const configCatApiKey = process.env.NODE_ENV === 'development'
   ? 'WizXCIVndyJUn4cCRD3qvQ/8uwWLI_KhUmuOrOaDDsaxQ'
@@ -11,39 +12,24 @@ const client = configcat.createClientWithLazyLoad(configCatApiKey, {
   cacheTimeToLiveSeconds: 600,
 });
 
-function getUserId() {
-  try {
-    return Vue.axios.defaults.headers.common['X-Application-Token'] || '';
-  } catch (ex) {
-    return '';
-  }
-}
-
-function getApplicationDisplayLanguage() {
-  try {
-    return Vue.axios.defaults.headers.common['X-Application-Display-Language'] || '';
-  } catch (ex) {
-    return '';
-  }
-}
-
-function getUserObject() {
+async function getUserObject() {
   return {
-    identifier: getUserId(),
+    identifier: await getClientUUID(),
     custom: {
       version: getMainVersion(),
-      displayLanguage: getApplicationDisplayLanguage(),
+      displayLanguage: store.getters.displayLanguage || getSystemLocale(),
     },
   };
 }
 
 export async function getConfig<T>(configKey: string, defaultValue?: T): Promise<T> {
-  log.debug('configKey', getUserObject());
+  const userObject = await getUserObject();
+  log.debug('configKey', userObject);
   return new Promise((resolve) => {
     setTimeout(() => resolve(defaultValue), 10000);
     client.getValue(configKey, defaultValue, (value: T) => {
       resolve(value);
-    }, getUserObject());
+    }, userObject);
   });
 }
 
@@ -67,3 +53,7 @@ export async function forceRefresh() {
 export const isAIEnabled = async () => getConfig('isAIEnabled', false);
 
 export const isAudioCenterChannelEnabled = async () => getConfig('isAudioCenterChannelEnabled', false);
+
+export const isAccountEnabled = async () => getConfig('isAccountEnabled', false);
+
+export const apiOfAccountService = async () => getConfig('apiForAccountService', process.env.ACCOUNT_API);

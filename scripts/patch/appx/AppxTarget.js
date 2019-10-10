@@ -45,6 +45,16 @@ function _fsExtra() {
   return data;
 }
 
+function _platformPackager() {
+  const data = require("../platformPackager");
+
+  _platformPackager = function () {
+    return data;
+  };
+
+  return data;
+}
+
 var path = _interopRequireWildcard(require("path"));
 
 function _windowsCodeSign() {
@@ -341,7 +351,7 @@ class AppXTarget extends _core().Target {
       isAddAutoLaunchExtension = deps != null && deps["electron-winstore-auto-launch"] != null;
     }
 
-    if (!isAddAutoLaunchExtension && uriSchemes.length === 0) {
+    if (!isAddAutoLaunchExtension && uriSchemes.length === 0 && fileAssociations.length === 0) {
       return "";
     }
 
@@ -364,7 +374,6 @@ class AppXTarget extends _core().Target {
           </uap:Extension>`;
       }
     }
-
 
     if (fileAssociations.length) {
       const appName = this.options.applicationId || this.options.identityName || this.packager.appInfo.name;

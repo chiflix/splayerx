@@ -25,11 +25,11 @@ install:
   - ps: Install-Product node 12 x64
   - git reset --hard HEAD
   - node --version
-  - npm i
+  - yarn
   - node scripts/check-electron-version.js
 
 build_script:
-  - npm run build
+  - yarn build
 
 test: off
 

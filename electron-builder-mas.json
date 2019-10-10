@@ -13,51 +13,22 @@
   "directories": {
     "output": "build"
   },
-  "electronVersion": "5.0.7",
+  "electronVersion": "5.0.11",
   "electronDist": "node_modules/@chiflix/electron/dist",
   "electronDownload": {
     "mirror": "https://github.com/chiflix/electron/releases/download/v",
     "isVerifyChecksum": false,
-    "version": "5.0.7"
+    "version": "5.0.11"
   },
   "files": [
     "dist/electron/**/*"
   ],
-  "dmg": {
-    "background": "build/icons/dmg/bg.tiff",
-    "icon": "build/icons/dmg/install.icns",
-    "iconSize": 95,
-    "window": {
-      "width": 540,
-      "height": 320
-    },
-    "contents": [
-      {
-        "x": 400,
-        "y": 148,
-        "type": "link",
-        "path": "/Applications"
-      },
-      {
-        "x": 131,
-        "y": 150,
-        "type": "file"
-      }
-    ]
-  },
   "mac": {
-    "icon": "icons/icon.icns",
-    "target": [
-      "dmg"
+    "hardenedRuntime": false,
+    "asarUnpack": [
+      "node_modules/osx-mouse-cocoa"
     ],
-    "extendInfo": {
-      "NSUserNotificationAlertStyle": "alert",
-      "CFBundleDocumentTypes": [
-        {
-          "LSHandlerRank": "default"
-        }
-      ]
-    },
+    "icon": "icons/icon.icns",
     "fileAssociations": [
       {
         "name": "Video",
@@ -236,6 +207,38 @@
         ],
         "role": "Viewer",
         "icon": "build/icons/wmv.icns"
+      },
+      {
+        "name": "SRT",
+        "ext": [
+          "srt"
+        ],
+        "role": "Viewer",
+        "icon": "build/icons/srt.icns"
+      },
+      {
+        "name": "ASS",
+        "ext": [
+          "ass"
+        ],
+        "role": "Viewer",
+        "icon": "build/icons/ass.icns"
+      },
+      {
+        "name": "VTT",
+        "ext": [
+          "vtt"
+        ],
+        "role": "Viewer",
+        "icon": "build/icons/vtt.icns"
+      },
+      {
+        "name": "SSA",
+        "ext": [
+          "ssa"
+        ],
+        "role": "Viewer",
+        "icon": "build/icons/ssa.icns"
       }
     ]
   }

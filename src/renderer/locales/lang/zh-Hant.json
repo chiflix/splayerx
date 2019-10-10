@@ -104,6 +104,11 @@
       "copy": "複製",
       "paste": "貼上"
     },
+    "account": {
+      "name": "帳號",
+      "login": "登入",
+      "logout": "登出"
+    },
     "help": {
       "name": "幫助",
       "feedback": "意見反饋",
@@ -207,7 +212,8 @@
       "iqiyi": "爱奇艺",
       "bilibili": "哔哩哔哩",
       "douyu": "斗鱼",
-      "youtube": "Youtube"
+      "huya": "虎牙",
+      "youtube": "YouTube"
     },
     "edit": {
       "name": "編輯",
@@ -243,7 +249,8 @@
   "browsing": {
     "bilibili": "哔哩哔哩",
     "iqiyi": "爱奇艺",
-    "youtube": "Youtube",
+    "youtube": "YouTube",
+    "huya": "虎牙",
     "douyu": "斗鱼",
     "openLocalFile": "打開本地文件 ...",
     "enterPip": "進入畫中畫",
@@ -419,6 +426,10 @@
       "title": "翻譯失敗",
       "content": "雲端處理錯誤，請稍後重試。"
     },
+    "ForbiddenFail": {
+      "title": "登入已過期",
+      "content": "請重新登入。"
+    },
     "cancel": "取消",
     "quit": "退出",
     "generate": "生成",
@@ -449,8 +460,25 @@
       "title": "翻譯失敗",
       "content": "雲端處理錯誤，請稍後重試。"
     },
+    "bubbleTranslateForbiddenFail": {
+      "title": "登入已過期",
+      "content": "請重新登入。"
+    },
     "ok": "好的",
     "cancel": "取消",
     "continue": "中止"
+  },
+  "loginModal": {
+    "title": "免註冊登入",
+    "sendCode": "獲取驗證碼",
+    "countDown": "{count} 秒",
+    "placeholder": {
+      "mobile": "輸入手機號",
+      "code": "輸入短信驗證碼"
+    },
+    "submit": "登入",
+    "codeError": "驗證碼錯誤",
+    "netWorkError": "網絡連接超時",
+    "noLineError": "沒有網路連線"
   }
 }

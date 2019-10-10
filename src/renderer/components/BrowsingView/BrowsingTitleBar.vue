@@ -12,7 +12,7 @@
     </div>
     <div
       @mouseup="handleMiddleButton"
-      class="control-button fullscreen-icon button-hover"
+      class="control-button fullscreen-icon no-drag button-hover"
     >
       <Icon
         ref="back"
@@ -22,7 +22,7 @@
     </div>
     <div
       @mouseup="handleClose"
-      class="control-button close-icon button-hover"
+      class="control-button close-icon no-drag button-hover"
     >
       <Icon
         ref="forward"

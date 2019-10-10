@@ -59,6 +59,7 @@ let rendererConfig = {
   devtool: '#module-eval-source-map',
   entry: {
     preference: path.join(__dirname, '../src/renderer/preference.js'),
+    login: path.join(__dirname, '../src/renderer/login.ts'),
     about: path.join(__dirname, '../src/renderer/about.js'),
     labor: path.join(__dirname, '../src/renderer/labor.ts'),
     index: path.join(__dirname, '../src/renderer/main.ts'),
@@ -200,6 +201,7 @@ let rendererConfig = {
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('index')),
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('labor')),
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('about')),
+    new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('login')),
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('preference')),
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('browsing')),
     new webpack.HotModuleReplacementPlugin(),
@@ -239,6 +241,7 @@ if (process.env.NODE_ENV !== 'production') {
     new webpack.DefinePlugin(
       Object.assign(sharedDefinedVariables, {
         'process.env.SAGI_API': `"${process.env.SAGI_API || 'apis.stage.sagittarius.ai:8443'}"`,
+        'process.env.ACCOUNT_API': `"${process.env.ACCOUNT_API || 'http://stage.account.splayer.work'}"`,
         __static: `"${path.join(__dirname, '../static').replace(/\\/g, '\\\\')}"`,
       }),
     ),
@@ -263,6 +266,7 @@ if (process.env.NODE_ENV === 'production') {
     new webpack.DefinePlugin(
       Object.assign(sharedDefinedVariables, {
         'process.env.SAGI_API': `"${process.env.SAGI_API || 'apis.sagittarius.ai:8443'}"`,
+        'process.env.ACCOUNT_API': `"${process.env.ACCOUNT_API || 'https://account.splayer.work'}"`,
         'process.env.SENTRY_RELEASE': `"${release}"`,
         'process.env.NODE_ENV': '"production"',
       }),

@@ -7,14 +7,9 @@ import fs from 'fs';
 import electron, { ipcRenderer } from 'electron';
 import Vue from 'vue';
 import VueI18n from 'vue-i18n';
-import axios from 'axios';
 import { mapGetters, mapActions, createNamespacedHelpers } from 'vuex';
-import uuidv4 from 'uuid/v4';
 import osLocale from 'os-locale';
-import VueAxios from 'vue-axios';
 import { throttle } from 'lodash';
-// @ts-ignore
-import VueElectronJSONStorage from 'vue-electron-json-storage';
 // @ts-ignore
 import VueAnalytics from 'vue-analytics';
 // @ts-ignore
@@ -49,26 +44,13 @@ import { SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, LOAD_SUBVIDEO_FAILED } from './helpe
 import InputPlugin, { getterTypes as iGT } from '@/plugins/input';
 import { VueDevtools } from './plugins/vueDevtools.dev';
 import { ISubtitleControlListItem, Type, NOT_SELECTED_SUBTITLE } from './interfaces/ISubtitle';
-import { getValidSubtitleRegex } from '../shared/utils';
+import { getValidSubtitleRegex, getSystemLocale, getClientUUID } from '../shared/utils';
 import { isWindowsExE, isMacintoshDMG } from '../shared/common/platform';
 import MenuService from './services/menu/MenuService';
 
 
 // causing callbacks-registry.js 404 error. disable temporarily
 // require('source-map-support').install();
-
-function getSystemLocale() {
-  const { app } = electron.remote;
-  let locale = process.platform === 'win32' ? app.getLocale() : osLocale.sync();
-  locale = locale.replace('_', '-');
-  if (locale === 'zh-TW' || locale === 'zh-HK' || locale === 'zh-Hant') {
-    return 'zh-Hant';
-  }
-  if (locale.startsWith('zh')) {
-    return 'zh-Hans';
-  }
-  return 'en';
-}
 
 function getEnvironmentName() {
   if (process.platform === 'darwin') {
@@ -115,8 +97,6 @@ Vue.directive('fade-in', {
 
 Vue.use(VueElectron);
 Vue.use(VueI18n);
-Vue.use(VueElectronJSONStorage);
-Vue.use(VueAxios, axios);
 Vue.use(AsyncComputed);
 Vue.use(VueAnalytics, {
   id: (process.env.NODE_ENV === 'production') ? 'UA-2468227-6' : 'UA-2468227-5',
@@ -422,19 +402,8 @@ new Vue({
     this.$bus.$on('new-file-open', () => {
       this.menuService.addRecentPlayItems();
     });
-    // TODO: Setup user identity
-    this.$storage.get('user-uuid', (err: Error, userUUID: string) => {
-      if (err || Object.keys(userUUID).length === 0) {
-        err && log.error('render/main', err);
-        userUUID = uuidv4();
-        this.$storage.set('user-uuid', userUUID);
-      }
-
-      Vue.axios.defaults.headers.common['X-Application-Token'] = userUUID;
-      Vue.axios.defaults.headers.common['X-Application-Display-Language'] = this.displayLanguage;
-
-      // set userUUID to google analytics uid
-      this.$ga && this.$ga.set('userId', userUUID);
+    getClientUUID().then((clientId: string) => {
+      this.$ga && this.$ga.set('userId', clientId);
     });
     this.$on('wheel-event', this.wheelEventHandler);
 
@@ -684,7 +653,7 @@ new Vue({
       checkForUpdate(true).then((
         json: { version: string, isLastest: boolean, landingPage: string, url: string }
       ) => {
-        if (!json.isLastest) {
+        if (!json.isLastest && this.currentRouteName !== 'browsing-view') {
           this.$bus.$emit('new-version', json);
         }
       }).catch((err: Error) => {
@@ -727,6 +696,7 @@ new Vue({
       updateBarrageOpen: browsingActions.UPDATE_BARRAGE_OPEN,
       showAudioTranslateModal: atActions.AUDIO_TRANSLATE_SHOW_MODAL,
       updatePipMode: browsingActions.UPDATE_PIP_MODE,
+      updateCurrentChannel: browsingActions.UPDATE_CURRENT_CHANNEL,
     }),
     async initializeMenuSettings() {
       if (this.currentRouteName !== 'welcome-privacy' && this.currentRouteName !== 'language-setting') {
@@ -786,8 +756,10 @@ new Vue({
       const channels = ['iqiyi', 'bilibili', 'douyu', 'youtube'];
       channels.forEach((channel: string, index: number) => {
         this.menuService.on(`favourite.${channel}`, () => {
+          const currentChannel = urls[index].slice(urls[index].indexOf('.') + 1, urls[index].length - 1);
+          this.updateCurrentChannel(currentChannel);
           this.$electron.ipcRenderer.send('add-browsing', { size: this.pipSize, position: this.pipPos });
-          this.$electron.ipcRenderer.send('change-channel', { url: urls[index] });
+          this.$electron.ipcRenderer.send('change-channel', { url: urls[index], channel: currentChannel });
           this.$router.push({
             name: 'browsing-view',
           });

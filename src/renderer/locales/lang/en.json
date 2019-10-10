@@ -105,6 +105,11 @@
       "copy": "Copy",
       "paste": "Paste"
     },
+    "account": {
+      "name": "Account",
+      "login": "Sign In",
+      "logout": "Sign Out"
+    },
     "help": {
       "name": "Help",
       "feedback": "Feedback",
@@ -208,7 +213,8 @@
       "iqiyi": "iQIYI",
       "bilibili": "Bilibili",
       "douyu": "Douyu",
-      "youtube": "Youtube"
+      "huya": "Huya",
+      "youtube": "YouTube"
     },
     "edit": {
       "name": "Edit",
@@ -244,7 +250,8 @@
   "browsing": {
     "bilibili": "Bilibili",
     "iqiyi": "iQIYI",
-    "youtube": "Youtube",
+    "youtube": "YouTube",
+    "huya": "Huya",
     "douyu": "Douyu",
     "openLocalFile": "Open Local File ...",
     "enterPip": "Enter Picture in Picture",
@@ -283,7 +290,7 @@
     },
     "privacy": {
       "privacySetting": "Privacy",
-      "enable": "Enable Privacy Protection",
+      "enable": "Enable Privacy Protection When Playing Local Video Files",
       "smartMode": "Intelligent Mode",
       "smartDescription": "Offline identify sensitive or not-suitable-for-work contents, and clear the playback history when playing in a folder playlist or when quitting.",
       "incognitoMode": "Incognito Mode",
@@ -420,6 +427,10 @@
       "title": "Translation Failed",
       "content": "Translation failed because of a server error. Please try later."
     },
+    "ForbiddenFail": {
+      "title": "Session Expired",
+      "content": "Please sign in again."
+    },
     "cancel": "Cancel",
     "quit": "Quit",
     "generate": "Generate",
@@ -450,8 +461,25 @@
       "title": "Translation Failed",
       "content": "Translation failed because of a server error. Please try later."
     },
+    "bubbleTranslateForbiddenFail": {
+      "title": "Session Expired",
+      "content": "Please sign in again."
+    },
     "ok": "OK",
     "cancel": "Cancel",
     "continue": "Continue"
+  },
+  "loginModal": {
+    "title": "Sign in with phone number",
+    "sendCode": "Send",
+    "countDown": "{count} s",
+    "placeholder": {
+      "mobile": "Your phone number",
+      "code": "Enter verification code"
+    },
+    "submit": "Sign In",
+    "codeError": "Incorrect Vertification Code",
+    "netWorkError": "Connection Timeout",
+    "noLineError": "No Network Connection"
   }
 }

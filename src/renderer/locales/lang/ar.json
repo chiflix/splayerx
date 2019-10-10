@@ -104,6 +104,11 @@
       "copy": "نسخ",
       "paste": "معجون"
     },
+    "account": {
+      "name": "حساب",
+      "login": "تسجيل دخول",
+      "logout": "تسجيل الخروج"
+    },
     "help": {
       "name": "مساعدة",
       "feedback": "ردود الفعل",
@@ -207,7 +212,8 @@
       "iqiyi": "iQIYI",
       "bilibili": "Bilibili",
       "douyu": "Douyu",
-      "youtube": "Youtube"
+      "huya": "",
+      "youtube": "YouTube"
     },
     "edit": {
       "name": "حرّر",
@@ -243,7 +249,8 @@
   "browsing": {
     "bilibili": "Bilibili",
     "iqiyi": "iQIYI",
-    "youtube": "Youtube",
+    "youtube": "YouTube",
+    "huya": "",
     "douyu": "Douyu",
     "openLocalFile": " فتح ملف محلي ...",
     "enterPip": "أدخل صورة في صورة",
@@ -419,6 +426,10 @@
       "title": "فشل الترجمة",
       "content": "فشلت الترجمة بسبب خطأ في الخادم. يرجى المحاولة لاحقا."
     },
+    "ForbiddenFail": {
+      "title": "انتهت الجلسة",
+      "content": "يرجى تسجيل الدخول أولاً."
+    },
     "cancel": "إلغاء",
     "quit": "استقال",
     "generate": "توفير",
@@ -449,8 +460,25 @@
       "title": "فشل الترجمة",
       "content": "فشلت الترجمة بسبب خطأ في الخادم. يرجى المحاولة لاحقا."
     },
+    "bubbleTranslateForbiddenFail": {
+      "title": "انتهت الجلسة",
+      "content": "يرجى تسجيل الدخول أولاً."
+    },
     "ok": "حسنا",
     "cancel": "إلغاء",
     "continue": "استمر"
+  },
+  "loginModal": {
+    "title": "سجّل الدخول برقم الهاتف",
+    "sendCode": "إرسال",
+    "countDown": "",
+    "placeholder": {
+      "mobile": "رقم هاتفك",
+      "code": "أدخل رمز التحقق"
+    },
+    "submit": "تسجيل دخول",
+    "codeError": "رمز التحقق غير صحيح",
+    "netWorkError": "مهلة الاتصال",
+    "noLineError": "لا يوجد اتصال شبكة"
   }
 }

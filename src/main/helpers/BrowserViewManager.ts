@@ -45,7 +45,7 @@ export class BrowserViewManager implements IBrowserViewManager {
       pipPage: null,
     };
     this.history = [];
-    this.multiPagesChannel = ['youtube.com', 'iqiyi.com', 'bilibili.com', 'douyu.com'];
+    this.multiPagesChannel = ['youtube.com', 'iqiyi.com', 'bilibili.com', 'douyu.com', 'huya.com'];
     this.singlePageChannel = [];
   }
 
@@ -258,7 +258,6 @@ export class BrowserViewManager implements IBrowserViewManager {
     this.pauseVideo();
     const { pipIndex, pipChannel } = this.currentPip;
     const pipHistory = (this.historyByChannel.get(pipChannel) as ChannelData);
-    const currentHistory = (this.historyByChannel.get(this.currentChannel) as ChannelData);
     const list = pipHistory.list;
     pipHistory.list = list
       .filter((page: BrowserViewHistoryItem, index: number) => index < pipIndex);
@@ -266,7 +265,8 @@ export class BrowserViewManager implements IBrowserViewManager {
     deleteList.forEach((page: BrowserViewHistoryItem) => {
       page.view.destroy();
     });
-    pipHistory.list.push(this.currentPip.pipPage as BrowserViewHistoryItem);
+    const page = this.currentPip.pipPage as BrowserViewHistoryItem;
+    pipHistory.list.push(page);
     pipHistory.currentIndex = pipIndex;
     pipHistory.lastUpdateTime = Date.now();
     this.currentChannel = pipChannel;
@@ -275,14 +275,13 @@ export class BrowserViewManager implements IBrowserViewManager {
       pipChannel: '',
       pipPage: null,
     };
-    const page = currentHistory.list[currentHistory.currentIndex];
     page.lastUpdateTime = Date.now();
     page.view.setBounds({
       x: 76, y: 0, width: 0, height: 0,
     });
-    this.browserViewCacheManager.recoverCacheWhenExitPip(this.currentChannel, page, deleteList);
+    this.browserViewCacheManager.recoverCacheWhenExitPip(pipChannel, page, deleteList);
     return {
-      canBack: currentHistory.currentIndex > 0,
+      canBack: (this.historyByChannel.get(this.currentChannel) as ChannelData).currentIndex > 0,
       canForward: false,
       page,
     };
@@ -322,6 +321,14 @@ export class BrowserViewManager implements IBrowserViewManager {
               currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('douyu', type));
             });
           break;
+        case pausedChannel.includes('huya'):
+          currentView.webContents
+            .executeJavaScript(InjectJSManager.huyaFindType())
+            .then((r: string) => {
+              type = r;
+              currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('huya', type));
+            });
+          break;
         default:
           currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('normal'));
           break;
@@ -346,6 +353,14 @@ export class BrowserViewManager implements IBrowserViewManager {
               .then((r: string) => {
                 type = r;
                 currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('douyu', type));
+              });
+            break;
+          case pausedChannel.includes('huya'):
+            currentView.webContents
+              .executeJavaScript(InjectJSManager.huyaFindType())
+              .then((r: string) => {
+                type = r;
+                currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('huya', type));
               });
             break;
           default:
@@ -376,6 +391,14 @@ export class BrowserViewManager implements IBrowserViewManager {
                 currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('douyu', type)).then(() => {
                   currentView.webContents.setAudioMuted(false);
                 });
+              });
+            break;
+          case pausedChannel.includes('huya'):
+            currentView.webContents
+              .executeJavaScript(InjectJSManager.huyaFindType())
+              .then((r: string) => {
+                type = r;
+                currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('huya', type));
               });
             break;
           default:

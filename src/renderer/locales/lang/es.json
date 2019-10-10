@@ -104,6 +104,11 @@
       "copy": "Copiar",
       "paste": "Pegar"
     },
+    "account": {
+      "name": "Cuenta",
+      "login": "Ingressar",
+      "logout": "Cerrar Sesión"
+    },
     "help": {
       "name": "Ayuda",
       "feedback": "Realimentación",
@@ -207,7 +212,8 @@
       "iqiyi": "iQIYI",
       "bilibili": "Bilibili",
       "douyu": "Douyu",
-      "youtube": "Youtube"
+      "huya": "",
+      "youtube": "YouTube"
     },
     "edit": {
       "name": "Editar",
@@ -243,7 +249,8 @@
   "browsing": {
     "bilibili": "Bilibili",
     "iqiyi": "iQIYI",
-    "youtube": "Youtube",
+    "youtube": "YouTube",
+    "huya": "",
     "douyu": "Douyu",
     "openLocalFile": "Abrir archivo local...",
     "enterPip": "Habilitar Picture in Picture",
@@ -419,6 +426,10 @@
       "title": "Error al traducir",
       "content": "La traducción ha fallado debido a un error del servidor. Por favor, inténtalo más tarde."
     },
+    "ForbiddenFail": {
+      "title": "Sesión caducada",
+      "content": "Inicie una sesión de nuevo."
+    },
     "cancel": "Cancelar",
     "quit": "Salir",
     "generate": "Generar",
@@ -449,8 +460,25 @@
       "title": "Error al traducir",
       "content": "La traducción ha fallado debido a un error del servidor. Por favor, inténtalo más tarde."
     },
+    "bubbleTranslateForbiddenFail": {
+      "title": "Sesión caducada",
+      "content": "Inicie una sesión de nuevo."
+    },
     "ok": "OK",
     "cancel": "Cancelar",
     "continue": "Continuar"
+  },
+  "loginModal": {
+    "title": "Iniciar sesión con número de teléfono",
+    "sendCode": "Enviar",
+    "countDown": "{count} s",
+    "placeholder": {
+      "mobile": "Tu número de teléfono",
+      "code": "Introduzca el código de verificación"
+    },
+    "submit": "Ingressar",
+    "codeError": "Código de vértificación incorrecto",
+    "netWorkError": "El tiempo para la conexión ha acabado",
+    "noLineError": "No hay conexión de red"
   }
 }

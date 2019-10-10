@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const url = window.location.href;
       switch (true) {
         case url.includes('bilibili'):
-          if (evt.target.tagName === 'VIDEO' || ['bilibili-player-video-subtitle', 'bilibili-player-video-top-title', 'bilibili-player-video-toast-top', 'bilibili-player-ending-panel', 'bilibili-player-electric-panel', 'bilibili-player-electric-panel-wrap'].includes(evt.target.classList[0])) {
+          if (evt.target.tagName === 'VIDEO' || evt.target.parentElement.classList[0] === 'bilibili-live-player-video-operable-container' || ['bilibili-live-player-video-controller-container', 'bilibili-live-player-video-danmaku', 'bilibili-player-video-panel-image-detail', 'bilibili-player-video-panel', 'bilibili-player-video-subtitle', 'bilibili-player-video-top-title', 'bilibili-player-video-toast-top', 'bilibili-player-ending-panel', 'bilibili-player-electric-panel', 'bilibili-player-electric-panel-wrap'].includes(evt.target.classList[0])) {
             offset = [evt.clientX, evt.clientY];
             if (getRatio() !== 1) {
               windowSize = remote.getCurrentWindow().getSize();
@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
           }
           break;
         case url.includes('douyu'):
-          if (['VIDEO'].includes(evt.target.tagName) || ['video-container-dbc7dc'].includes(evt.target.classList[0])) {
+          if (['VIDEO'].includes(evt.target.tagName) || ['video-container-dbc7dc', 'roomSmallPlayerFloatLayout', 'layout-Player-videoSub'].includes(evt.target.classList[0])) {
             offset = [evt.clientX, evt.clientY];
             if (getRatio() !== 1) {
               windowSize = remote.getCurrentWindow().getSize();
@@ -140,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (document.webkitIsFullScreen && evt.keyCode === 27) {
       document.webkitCancelFullScreen();
-    } else if (evt.keyCode === 80) {
+    } else if ([79, 80].includes(evt.keyCode)) {
       sendToHost('keydown', { targetName: evt.target.tagName });
     }
   });
