@@ -174,6 +174,7 @@ class BrowserViewCacheManager implements IBrowserViewCacheManager {
   public recoverCacheWhenExitPip(channel: string,
     mainPage: BrowserViewHistoryItem, deletePages: BrowserViewHistoryItem[]): void {
     if (this.singlePageHistory.has(channel)) {
+      (this.singlePageHistory.get(channel) as BrowserSingleCache).page.view.destroy();
       this.singlePageHistory.set(channel, {
         lastUpdateTime: Date.now(),
         page: mainPage,

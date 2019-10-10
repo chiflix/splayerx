@@ -3,12 +3,12 @@ export function bilibiliVideoPause(type: string) {
     return 'document.querySelector("video").pause();';
   }
   if (type === 'videoStreaming') {
-    return 'document.querySelector("video").pause();var timer = setInterval(() => { var pause = document.querySelector(".bilibili-live-player-video-controller-btn-item").children[0]; if (pause) { clearInterval(timer);pause.click(); } }, 100);';
+    return 'document.querySelector("video").pause();var timer = setInterval(() => { var pause = document.querySelector(".bilibili-live-player-video-controller-btn-item").children[0]; if (pause && timer) { clearInterval(timer);timer = null;pause.click(); } }, 100);';
   }
   if (type === 'iframeStreaming') {
-    return 'document.querySelector("video").pause();var timer = setInterval(() => { var pause = document.querySelector("iframe").contentDocument.querySelector(".bilibili-live-player-video-controller-btn-item").children[0]; if (pause) { clearInterval(timer);pause.click(); } }, 100);';
+    return 'document.querySelector("video").pause();var timer = setInterval(() => { var pause = document.querySelector("iframe").contentDocument.querySelector(".bilibili-live-player-video-controller-btn-item").children[0]; if (pause && timer) { clearInterval(timer);timer = null;pause.click(); } }, 100);';
   }
-  return 'document.querySelector("video").pause();var timer = setInterval(() => { var pause = document.querySelector(".bilibili-live-player-video-controller-btn-item").children[0]; if (pause) { clearInterval(timer);pause.click(); } }, 100);';
+  return 'document.querySelector("video").pause();var timer = setInterval(() => { var pause = document.querySelector(".bilibili-live-player-video-controller-btn-item").children[0]; if (pause && timer) { clearInterval(timer);timer = null;pause.click(); } }, 100);';
 }
 
 export default class Bilibili {
@@ -32,7 +32,7 @@ export default class Bilibili {
         player.style.width = "100%";
         player.style.height = "100%";
         player.style.zIndex = 99999;
-        ${this.bilibiliBarrageAdapt(type, barrageOpen)}
+        ${this.barrageAdapt(type, barrageOpen)}
         document.querySelector(".player").style.height = "100%";
         document.querySelector(".player").style.width = "100%";
         document.querySelector(".bilibili-player-auxiliary-area").style.display = "none";
@@ -77,7 +77,7 @@ export default class Bilibili {
         wrapper.style.zIndex = "9999";
         wrapper.style.width="100%";
         wrapper.style.height="100%";
-        ${this.bilibiliBarrageAdapt(type, barrageOpen)}
+        ${this.barrageAdapt(type, barrageOpen)}
         document.body.style.overflow = "hidden";
         document.querySelector(".bili-header-m").style.display = "none";
         if (document.querySelector("#entryOld")) {document.querySelector("#entryOld").style.display = "none";}`;
@@ -104,7 +104,7 @@ export default class Bilibili {
         + 'if (document.querySelector("#entryOld")) {document.querySelector("#entryOld").style.display = "";}'
         + 'if (!isTheater && document.querySelector(".bilibili-player-video-btn-widescreen")) {document.body.click();document.querySelector(".bilibili-player-video-btn-widescreen").click();};';
     } else if (type === 'videoStreaming') {
-      this.adapter = `${this.bilibiliBarrageAdapt(type, barrageOpen)}
+      this.adapter = `${this.barrageAdapt(type, barrageOpen)}
         document.body.prepend(document.querySelector(".live-player-ctnr"));
         document.querySelector(".live-room-app").style.display = "none";
         document.body.style.overflow = "hidden";`;
@@ -114,7 +114,7 @@ export default class Bilibili {
         + 'document.querySelector(".live-room-app").style.display = "";'
         + 'document.body.style.overflow = "";';
     } else if (type === 'iframeStreaming') {
-      this.adapter = `${this.bilibiliBarrageAdapt(type, barrageOpen)}
+      this.adapter = `${this.barrageAdapt(type, barrageOpen)}
         document.body.style.cssText = "overflow: hidden";
         Object.defineProperty(document.body.style, "overflow", {get: function(){return "hidden"}, set: function(){}});
         document.querySelector("iframe").contentDocument.querySelector(".aside-area").style.display = "none";
@@ -194,7 +194,7 @@ export default class Bilibili {
     }
   }
 
-  public bilibiliBarrageAdapt(type: string, barrageOpen: boolean) {
+  public barrageAdapt(type: string, barrageOpen: boolean) {
     if (['video', 'bangumi'].includes(type)) {
       return `document.querySelector(".bilibili-player-video-danmaku").style.opacity = ${barrageOpen} ? "1" : "0";`;
     }

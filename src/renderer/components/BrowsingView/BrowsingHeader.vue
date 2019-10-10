@@ -53,7 +53,7 @@ export default {
     },
     title: {
       type: String,
-      default: 'Splayer',
+      default: 'SPlayer',
     },
     isLoading: {
       type: Boolean,

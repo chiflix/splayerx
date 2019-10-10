@@ -46,7 +46,7 @@ export class BrowserViewManager implements IBrowserViewManager {
     };
     this.history = [];
     this.multiPagesChannel = ['youtube.com', 'iqiyi.com', 'bilibili.com', 'douyu.com', 'huya.com'];
-    this.singlePageChannel = [];
+    this.singlePageChannel = ['qq.com', 'youku.com'];
   }
 
   public create(channel: string, args: { url: string, isNewWindow?: boolean }): BrowserViewData {
@@ -302,110 +302,53 @@ export class BrowserViewManager implements IBrowserViewManager {
     const currentHistory = (this.historyByChannel.get(this.currentChannel) as ChannelData);
     const currentIndex = currentHistory.currentIndex;
     const currentView = view || currentHistory.list[currentIndex].view;
+    currentView.webContents.removeAllListeners('media-started-playing');
     if (currentView.webContents.isCurrentlyAudible()) {
       let type = '';
-      switch (true) {
-        case pausedChannel.includes('bilibili'):
-          currentView.webContents
-            .executeJavaScript(InjectJSManager.bilibiliFindType())
-            .then((r: string) => {
-              type = r;
-              currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('bilibili', type));
-            });
-          break;
-        case pausedChannel.includes('douyu'):
-          currentView.webContents
-            .executeJavaScript(InjectJSManager.douyuFindType())
-            .then((r: string) => {
-              type = r;
-              currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('douyu', type));
-            });
-          break;
-        case pausedChannel.includes('huya'):
-          currentView.webContents
-            .executeJavaScript(InjectJSManager.huyaFindType())
-            .then((r: string) => {
-              type = r;
-              currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('huya', type));
-            });
-          break;
-        default:
-          currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('normal'));
-          break;
+      if (['bilibili.com', 'douyu.com', 'huya.com', 'qq.com'].includes(pausedChannel)) {
+        const channel = pausedChannel.slice(0, pausedChannel.indexOf('.'));
+        currentView.webContents
+          .executeJavaScript(InjectJSManager.pipFindType(channel))
+          .then((r: string) => {
+            type = r;
+            if (!currentView.webContents.isDestroyed()) {
+              currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo(channel, type));
+            }
+          });
+      } else {
+        currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('normal'));
       }
     }
     if (!enterPip) {
       currentView.webContents.addListener('media-started-playing', () => {
         currentView.webContents.setAudioMuted(true);
         let type = '';
-        switch (true) {
-          case pausedChannel.includes('bilibili'):
-            currentView.webContents
-              .executeJavaScript(InjectJSManager.bilibiliFindType())
-              .then((r: string) => {
-                type = r;
-                currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('bilibili', type));
-              });
-            break;
-          case pausedChannel.includes('douyu'):
-            currentView.webContents
-              .executeJavaScript(InjectJSManager.douyuFindType())
-              .then((r: string) => {
-                type = r;
-                currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('douyu', type));
-              });
-            break;
-          case pausedChannel.includes('huya'):
-            currentView.webContents
-              .executeJavaScript(InjectJSManager.huyaFindType())
-              .then((r: string) => {
-                type = r;
-                currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('huya', type));
-              });
-            break;
-          default:
-            currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('normal'));
-            break;
+        if (['bilibili.com', 'douyu.com', 'huya.com', 'qq.com'].includes(pausedChannel)) {
+          const channel = pausedChannel.slice(0, pausedChannel.indexOf('.'));
+          currentView.webContents
+            .executeJavaScript(InjectJSManager.pipFindType(channel))
+            .then((r: string) => {
+              type = r;
+              currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo(channel, type));
+            });
+        } else {
+          currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('normal'));
         }
       });
     } else if (currentView.webContents.isLoading()) {
       currentView.webContents.once('media-started-playing', () => {
         currentView.webContents.setAudioMuted(true);
         let type = '';
-        switch (true) {
-          case pausedChannel.includes('bilibili'):
-            currentView.webContents
-              .executeJavaScript(InjectJSManager.bilibiliFindType())
-              .then((r: string) => {
-                type = r;
-                currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('bilibili', type)).then(() => {
-                  currentView.webContents.setAudioMuted(false);
-                });
-              });
-            break;
-          case pausedChannel.includes('douyu'):
-            currentView.webContents
-              .executeJavaScript(InjectJSManager.douyuFindType())
-              .then((r: string) => {
-                type = r;
-                currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('douyu', type)).then(() => {
-                  currentView.webContents.setAudioMuted(false);
-                });
-              });
-            break;
-          case pausedChannel.includes('huya'):
-            currentView.webContents
-              .executeJavaScript(InjectJSManager.huyaFindType())
-              .then((r: string) => {
-                type = r;
-                currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('huya', type));
-              });
-            break;
-          default:
-            currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('normal')).then(() => {
-              currentView.webContents.setAudioMuted(false);
+        if (['bilibili.com', 'douyu.com', 'huya.com', 'qq.com'].includes(pausedChannel)) {
+          const channel = pausedChannel.slice(0, pausedChannel.indexOf('.'));
+          currentView.webContents
+            .executeJavaScript(InjectJSManager.pipFindType(channel))
+            .then((r: string) => {
+              type = r;
+              currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo(channel, type));
             });
-            break;
+        } else {
+          currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('normal'));
         }
       });
     }
@@ -420,6 +363,13 @@ export class BrowserViewManager implements IBrowserViewManager {
   }
 
   public clearAllBrowserViews(isDeepClear?: boolean): void {
+    this.currentChannel = '';
+    this.currentPip = {
+      pipIndex: -1,
+      pipChannel: '',
+      pipPage: null,
+    };
+    this.history = [];
     isDeepClear = isDeepClear || false;
     this.historyByChannel.forEach((history) => {
       history.lastUpdateTime = Date.now();

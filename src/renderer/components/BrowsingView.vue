@@ -79,10 +79,8 @@ export default {
     return {
       quit: false,
       loadingState: true,
+      pipChannel: '',
       pipType: '',
-      bilibiliType: 'video',
-      douyuType: 'normal',
-      huyaType: 'normal',
       preload: `file:${require('path').resolve(__static, 'pip/preload.js')}`,
       maskToShow: false,
       dropFiles: [],
@@ -104,13 +102,14 @@ export default {
       adaptFinished: false,
       pipInfo: {},
       isGlobal: false,
-      title: 'Splayer',
+      title: 'SPlayer',
       progress: 0,
       showProgress: false,
       readyState: '',
       oauthRegex: [
         /^https:\/\/cnpassport.youku.com\//i,
         /^https:\/\/passport.iqiyi.com\/apis\/thirdparty/i,
+        /^https:\/\/udb3lgn.huya.com\//i,
         /^https:\/\/api.weibo.com\/oauth2/i,
         /^https:\/\/graph.qq.com\//i,
         /^https:\/\/open.weixin.qq.com\//i,
@@ -124,7 +123,7 @@ export default {
         canGoForward: false,
         canGoBack: false,
       },
-      allChannels: ['youtube', 'bilibili', 'iqiyi', 'douyu', 'huya'],
+      allChannels: ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku'],
       hideMainWindow: false,
       startLoadUrl: '',
     };
@@ -147,29 +146,32 @@ export default {
       'pipMode',
       'isHistory',
       'currentChannel',
-      'pipChannel',
     ]),
     isDarwin() {
       return process.platform === 'darwin';
     },
     pipArgs() {
-      switch (this.pipType) {
+      switch (this.pipChannel) {
         case 'youtube':
           return { channel: 'youtube' };
         case 'bilibili':
           return {
-            channel: 'bilibili', type: this.bilibiliType, barrageState: this.barrageOpen, winSize: this.pipSize,
+            channel: 'bilibili', type: this.pipType, barrageState: this.barrageOpen, winSize: this.pipSize,
           };
         case 'iqiyi':
           return { channel: 'iqiyi', barrageState: this.barrageOpen, winSize: this.pipSize };
         case 'douyu':
           return {
-            channel: 'douyu', type: this.douyuType, barrageState: this.barrageOpen, winSize: this.pipSize,
+            channel: 'douyu', type: this.pipType, barrageState: this.barrageOpen, winSize: this.pipSize,
           };
         case 'huya':
           return {
-            channel: 'huya', type: this.huyaType, barrageState: this.barrageOpen, winSize: this.pipSize,
+            channel: 'huya', type: this.pipType, barrageState: this.barrageOpen, winSize: this.pipSize,
           };
+        case 'qq':
+          return { channel: 'qq', type: this.pipType, barrageState: this.barrageOpen };
+        case 'youku':
+          return { channel: 'youku', barrageState: this.barrageOpen };
         case 'others':
           return { channel: 'others', winSize: this.pipSize };
         default:
@@ -235,8 +237,9 @@ export default {
     adaptFinished(val: boolean) {
       if (val) {
         this.updatePipChannel(this.currentChannel);
-        const opacity = ['youtube', 'others'].includes(this.pipType)
-          || (this.pipType === 'bilibili' && this.bilibiliType === 'others')
+        const opacity = ['youtube', 'others'].includes(this.pipChannel)
+          || (this.pipChannel === 'bilibili' && this.pipType === 'others')
+          || (this.pipChannel === 'qq' && this.pipType !== 'normal')
           ? 0.2
           : 1;
         this.$electron.ipcRenderer.send(
@@ -275,6 +278,7 @@ export default {
       }
     },
     isPip() {
+      this.removeListener();
       this.addListenerToBrowser();
     },
     pipSize() {
@@ -681,6 +685,7 @@ export default {
       this.currentMainBrowserView().webContents.focus();
     },
     didStopLoading() {
+      this.title = this.currentMainBrowserView().webContents.getTitle();
       this.loadingState = false;
     },
     handleOpenUrl({ url }: { url: string }) {
@@ -703,7 +708,7 @@ export default {
         const oldChannel = this.currentChannel;
         let newChannel = '';
         this.allChannels.forEach((channel: string) => {
-          if (newHostname.includes(channel)) {
+          if (newHostname.includes(channel) && (channel !== 'qq' || (channel === 'qq' && newHostname.includes('v.qq.com')))) {
             newChannel = `${channel}.com`;
           }
         });
@@ -767,41 +772,22 @@ export default {
       this.$electron.remote.getCurrentWindow().setTouchBar(this.touchBar);
     },
     pipAdapter() {
-      const channels = ['youtube', 'bilibili', 'iqiyi', 'douyu', 'huya'];
-      this.pipType = 'others';
-      channels.forEach((channel: string) => {
-        if (this.currentChannel.includes(channel)) this.pipType = channel;
+      this.pipChannel = 'others';
+      this.allChannels.forEach((channel: string) => {
+        if (this.currentChannel.includes(channel)) this.pipChannel = channel;
       });
-      if (this.pipType === 'bilibili') {
+      if (['bilibili', 'douyu', 'huya', 'qq'].includes(this.pipChannel)) {
         this.currentMainBrowserView()
-          .webContents.executeJavaScript(InjectJSManager.bilibiliFindType())
+          .webContents.executeJavaScript(InjectJSManager.pipFindType(this.pipChannel))
           .then((r: string) => {
-            this.bilibiliType = r;
+            this.pipType = r;
+            this.currentMainBrowserView().webContents.executeJavaScript(this.pip.adapter);
+            if (this.pipChannel === 'douyu') {
+              this.currentMainBrowserView().webContents
+                .insertCSS(InjectJSManager.douyuHideSelfPip(true));
+            }
           })
           .then(() => {
-            this.currentMainBrowserView().webContents.executeJavaScript(
-              this.pip.adapter,
-            );
-          })
-          .then(() => {
-            this.adaptFinished = true;
-          });
-      } else if (this.pipType === 'douyu') {
-        this.currentMainBrowserView()
-          .webContents.executeJavaScript(InjectJSManager.douyuFindType()).then((r: string) => {
-            this.douyuType = r;
-            this.currentMainBrowserView().webContents.executeJavaScript(this.pip.adapter);
-            this.currentMainBrowserView().webContents
-              .insertCSS(InjectJSManager.douyuHideSelfPip(true));
-          }).then(() => {
-            this.adaptFinished = true;
-          });
-      } else if (this.pipType === 'huya') {
-        this.currentMainBrowserView()
-          .webContents.executeJavaScript(InjectJSManager.huyaFindType()).then((r: string) => {
-            this.huyaType = r;
-            this.currentMainBrowserView().webContents.executeJavaScript(this.pip.adapter);
-          }).then(() => {
             this.adaptFinished = true;
           });
       } else {
@@ -831,7 +817,7 @@ export default {
         || (this.oldDisplayId !== newDisplayId && this.oldDisplayId !== -1);
       this.oldDisplayId = newDisplayId;
       this.currentMainBrowserView()
-        .webContents.executeJavaScript(InjectJSManager.getVideoStyle())
+        .webContents.executeJavaScript(InjectJSManager.getVideoStyle(this.currentChannel))
         .then((result: CSSStyleDeclaration) => {
           const videoAspectRatio = parseFloat(result.width as string)
             / parseFloat(result.height as string);
@@ -896,29 +882,16 @@ export default {
       this.oldDisplayId = newDisplayId;
     },
     handleDanmuDisplay() {
-      if (this.pipType === 'iqiyi') {
-        this.updateBarrageOpen(!this.barrageOpen);
+      this.updateBarrageOpen(!this.barrageOpen);
+      if (['bilibili', 'douyu', 'huya'].includes(this.pipChannel)) {
         this.$electron.ipcRenderer.send(
           'handle-danmu-display',
-          this.pip.iqiyiBarrageAdapt(this.barrageOpen),
+          this.pip.barrageAdapt(this.pipType, this.barrageOpen),
         );
-      } else if (this.pipType === 'bilibili') {
-        this.updateBarrageOpen(!this.barrageOpen);
+      } else if (['iqiyi', 'qq', 'youku'].includes(this.pipChannel)) {
         this.$electron.ipcRenderer.send(
           'handle-danmu-display',
-          this.pip.bilibiliBarrageAdapt(this.bilibiliType, this.barrageOpen),
-        );
-      } else if (this.pipType === 'douyu') {
-        this.updateBarrageOpen(!this.barrageOpen);
-        this.$electron.ipcRenderer.send(
-          'handle-danmu-display',
-          this.pip.douyuBarrageAdapt(this.douyuType, this.barrageOpen),
-        );
-      } else if (this.pipType === 'huya') {
-        this.updateBarrageOpen(!this.barrageOpen);
-        this.$electron.ipcRenderer.send(
-          'handle-danmu-display',
-          this.pip.huyaBarrageAdapt(this.huyaType, this.barrageOpen),
+          this.pip.barrageAdapt(this.barrageOpen),
         );
       }
     },
@@ -957,7 +930,8 @@ export default {
       this.asyncTasksDone = false;
       this.isGlobal = false;
       this.handleWindowChangeExitPip();
-      this.updateCurrentChannel(this.pipChannel);
+      this.updateCurrentChannel(`${this.pipChannel}.com`);
+      this.pipChannel = '';
       this.pipType = '';
     },
     handleEnterPip(isGlobal: boolean) {

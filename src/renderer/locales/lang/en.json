@@ -214,6 +214,8 @@
       "bilibili": "Bilibili",
       "douyu": "Douyu",
       "huya": "Huya",
+      "qq": "Tencent Video",
+      "youku": "Youku",
       "youtube": "YouTube"
     },
     "edit": {
@@ -252,7 +254,9 @@
     "iqiyi": "iQIYI",
     "youtube": "YouTube",
     "huya": "Huya",
+    "qq": "Tencent Video",
     "douyu": "Douyu",
+    "youku": "Youku",
     "openLocalFile": "Open Local File ...",
     "enterPip": "Enter Picture in Picture",
     "exitPip": "Back to Browser",
