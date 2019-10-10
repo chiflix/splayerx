@@ -18,9 +18,11 @@
         :fill="isBrowsingView ? '#BBBACC' : ''"
         class="sidebar-icon no-drag"
       />
-      <badge v-if="showBadge">
-        {{ $t('preferences.privacy.incognitoMode') }}
-      </badge>
+      <transition name="badge">
+        <badge v-if="showBadge">
+          {{ $t('preferences.privacy.incognitoMode') }}
+        </badge>
+      </transition>
     </div>
     <div
       v-if="!isDarwin"
@@ -113,9 +115,11 @@
         class="sidebar no-drag"
       />
     </div>
-    <badge v-if="isDarwin && showBadge">
-      {{ $t('preferences.privacy.incognitoMode') }}
-    </badge>
+    <transition name="badge">
+      <badge v-if="isDarwin && showBadge">
+        {{ $t('preferences.privacy.incognitoMode') }}
+      </badge>
+    </transition>
   </div>
 </template>
 
@@ -353,6 +357,19 @@ export default {
       pointer-events: none;
       opacity: 0.25;
     }
+  }
+}
+.badge {
+  &-leave-active {
+    transition: opacity .2s ease-in;
+  }
+  &-enter-active {
+    transition: opacity .3s ease-in;
+    transition-delay: .2s;
+  }
+
+  &-enter, &-leave-to{
+    opacity: 0;
   }
 }
 </style>
