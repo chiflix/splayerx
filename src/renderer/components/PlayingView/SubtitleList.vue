@@ -17,7 +17,8 @@
             color: hoverIndex === -1 || currentSubtitleIndex === -1 || currentSubtitleIndex === -2 ?
               'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
             height: `${itemHeight}px`,
-            cursor: currentSubtitleIndex === -1 ? 'default' : 'pointer',
+            cursor: currentSubtitleIndex === -1 || currentSubtitleIndex === -2
+              ? 'default' : 'pointer',
           }"
           @mouseup="$emit('off-subtitle')"
           @mouseover="toggleItemsMouseOver(-1)"
@@ -42,7 +43,8 @@
               height: hoverIndex === index ?
                 `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
               cursor: currentSubtitleIndex === index &&
-                !(item.type === 'preTranslated') ? 'default' : 'pointer',
+                !(item.type === 'preTranslated' && item.source.source === '')
+                ? 'default' : 'pointer',
               justifyContent: item.type === 'preTranslated' ? 'space-between' : ''
             }"
             @mouseup="toggleItemClick($event, index)"

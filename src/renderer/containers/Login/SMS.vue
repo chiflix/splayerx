@@ -21,12 +21,12 @@
       >
     </div>
     <div class="code-box">
-      <button
+      <input
         :disabled="isValidMobile || count > 0"
         @click="getCode"
+        :value="count > 0 ? countString(count) : $t('loginModal.sendCode')"
+        type="button"
       >
-        {{ count > 0 ? countString(count) : $t('loginModal.sendCode') }}
-      </button>
       <input
         ref="code"
         @keydown.stop="keydown"
@@ -37,12 +37,12 @@
         type="number"
       >
     </div>
-    <button
+    <input
       :disabled="isAllValid || isLogin"
+      :value="$t('loginModal.submit')"
+      type="submit"
       class="submit"
     >
-      {{ $t('loginModal.submit') }}
-    </button>
     <p
       v-show="message !== ''"
       class="error"
@@ -179,7 +179,7 @@ export default Vue.extend({
           await signIn('code', `+${this.countryCallCode}${this.mobile}`, this.code);
           window.close();
         } catch (error) {
-          if (error.status === 400) {
+          if (error.status === 400 || error.status === 500) {
             this.message = this.$t('loginModal.codeError');
           } else {
             this.message = this.$t('loginModal.netWorkError');
@@ -330,7 +330,7 @@ button {
   input {
     width: 190px;
   }
-  button {
+  input[type="button"] {
     width: 110px;
     text-align: center;
   }
