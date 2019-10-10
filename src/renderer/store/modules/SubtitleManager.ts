@@ -406,7 +406,7 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
           }
           // 如果出现需要添加ai翻译按钮，先检查是不是有过翻译记录，有的话，就不添加ai翻译按钮，不删除翻译的记录
           const preTranslated = remove(oldSubtitlesToDel,
-            ({ type, source }) => (type === Type.PreTranslated && source));
+            ({ type, source, language }) => (type === Type.PreTranslated && language === languageCode && source.source !== ''));
           if (preTranslated.length > 0) {
             addAIButton = false;
           }
@@ -527,7 +527,7 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
           }
           // 如果出现需要添加ai翻译按钮，先检查是不是有过翻译记录，有的话，就不添加ai翻译按钮，不删除翻译的记录
           const primaryPreTranslated = remove(oldSubtitlesToDel,
-            ({ type, source }) => (type === Type.PreTranslated && source));
+            ({ type, source, language }) => (type === Type.PreTranslated && language === primaryLanguage && source.source !== ''));
           if (primaryPreTranslated.length > 0) {
             addPrimaryAIButton = false;
           }
@@ -547,7 +547,7 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
           }
           // 如果出现需要添加ai翻译按钮，先检查是不是有过翻译记录，有的话，就不添加ai翻译按钮，不删除翻译的记录
           const secondaryPreTranslated = remove(oldSubtitlesToDel,
-            ({ type, source }) => (type === Type.PreTranslated && source));
+            ({ type, source, language }) => (type === Type.PreTranslated && language === secondaryLanguage && source.source !== ''));
           if (secondaryPreTranslated.length > 0) {
             addSecondaryAIButton = false;
           }

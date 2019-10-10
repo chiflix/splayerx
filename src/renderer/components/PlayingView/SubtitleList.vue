@@ -14,7 +14,7 @@
       <div class="itemContainer">
         <div
           :style="{
-            color: hoverIndex === -1 || currentSubtitleIndex === -1 ?
+            color: hoverIndex === -1 || currentSubtitleIndex === -1 || currentSubtitleIndex === -2 ?
               'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
             height: `${itemHeight}px`,
             cursor: currentSubtitleIndex === -1 ? 'default' : 'pointer',

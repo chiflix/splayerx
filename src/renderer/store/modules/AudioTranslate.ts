@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-05 16:03:32
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-10-09 17:23:35
+ * @Last Modified time: 2019-10-10 16:06:42
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @ts-ignore
@@ -11,7 +11,7 @@ import { ipcRenderer, remote } from 'electron';
 import uuidv4 from 'uuid/v4';
 import { AudioTranslate as m } from '@/store/mutationTypes';
 import store from '@/store';
-import { AudioTranslate as a, SubtitleManager as smActions } from '@/store/actionTypes';
+import { AudioTranslate as a, SubtitleManager as smActions, UserInfo as uActions } from '@/store/actionTypes';
 import { audioTranslateService } from '@/services/media/AudioTranslateService';
 import { AITaskInfo } from '@/interfaces/IMediaStorable';
 import { TranscriptInfo } from '@/services/subtitle';
@@ -425,9 +425,11 @@ const actions = {
         } catch (error) {
           // empty
         }
-        // 清楚登录信息， 开登录窗口
-        remote.app.emit('sign-out');
-        ipcRenderer.send('add-login');
+        if (fileType === AudioTranslateFailType.Forbidden) {
+          // 清楚登录信息， 开登录窗口
+          remote.app.emit('sign-out');
+          ipcRenderer.send('add-login');
+        }
       });
       grab.on('grabCompleted', () => {
         log.debug('AudioTranslate', 'grabCompleted');
@@ -710,6 +712,9 @@ const actions = {
       if (enabled && !getters.token) {
         // 未登录
         ipcRenderer.send('add-login');
+        dispatch(uActions.UPDATE_SIGN_IN_CALLBACK, () => {
+          dispatch(a.AUDIO_TRANSLATE_SHOW_MODAL, sub);
+        });
         return;
       }
     } catch (error) {
