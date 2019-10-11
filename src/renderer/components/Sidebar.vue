@@ -80,6 +80,9 @@ export default {
       this.showFileIcon = !!val;
     },
   },
+  created() {
+    this.openHistory();
+  },
   methods: {
     ...mapActions({
       updateIsHistoryPage: browsingActions.UPDATE_IS_HISTORY,

@@ -40,7 +40,6 @@
     />
     <NotificationBubble />
     <browsing-content
-      v-if="isHistory"
       class="browsing-content"
     />
   </div>
@@ -56,6 +55,7 @@ import getVideoId from 'get-video-id';
 import { windowRectService } from '@/services/window/WindowRectService';
 import { Browsing as browsingActions } from '@/store/actionTypes';
 import BrowsingHeader from '@/components/BrowsingView/BrowsingHeader.vue';
+import BrowsingContent from '@/components/BrowsingView/BrowsingContent.vue';
 import asyncStorage from '@/helpers/asyncStorage';
 import NotificationBubble from '@/components/NotificationBubble.vue';
 import { getValidVideoRegex, getValidSubtitleRegex } from '../../shared/utils';
@@ -67,6 +67,7 @@ export default {
   name: 'BrowsingView',
   components: {
     'browsing-header': BrowsingHeader,
+    'browsing-content': BrowsingContent,
     NotificationBubble,
   },
   props: {
