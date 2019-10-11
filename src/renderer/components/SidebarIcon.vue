@@ -1,7 +1,7 @@
 <template>
   <div
     :title="$t(title)"
-    :class="{ light: selected }"
+    :class="[{ light: selected }, { drag: isDragging }]"
     :style="{
       transform: `translateY(${iconTranslateY}px)`,
       zIndex: isDragging ? '10' : '',
@@ -149,5 +149,9 @@ div {
   border: 2px solid #E0E0EA;
   border-radius: 100%;
   box-sizing: border-box;
+}
+.drag {
+  border-radius: 100%;
+  box-shadow: 0 0 6px 2px rgba(0,0,0,0.7);
 }
 </style>
