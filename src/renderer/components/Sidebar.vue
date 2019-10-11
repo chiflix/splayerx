@@ -3,8 +3,12 @@
     class="side-bar"
   >
     <div
-      :style="{ boxShadow: topMask ? '0 2px 10px 0 rgba(0,0,0,0.50)' : '' }"
-      class="top-mask"
+      :style="{
+        boxShadow: topMask ? 
+          isDarwin ? '0 2px 10px 0 rgba(0,0,0,0.50)' : '0 -3px 8px 0 rgba(0,0,0,0.60)'
+          : ''
+      }"
+      :class="isDarwin ? 'top-mask' : 'top-mask-win'"
     />
     <div
       :class="{ 'win': !isDarwin }"
@@ -106,7 +110,7 @@ export default {
     },
     maxHeight() {
       const bottomHeight = this.showFileIcon ? 66 : 0;
-      return this.winHeight - 42 - bottomHeight;
+      return this.winHeight - (this.isDarwin ? 42 : 0) - bottomHeight;
     },
     isDarwin() {
       return process.platform === 'darwin';
@@ -195,6 +199,12 @@ export default {
     width: 100%;
     height: 42px;
   }
+  .top-mask-win {
+    width: 100%;
+    height: 42px;
+    position: absolute;
+    top: -42px;
+  }
   .bottom-mask {
     position: absolute;
     width: 100%;
@@ -216,7 +226,7 @@ export default {
     margin: auto;
   }
   .win {
-    margin-top: 16px;
+    padding-top: 16px;
   }
 }
 </style>
