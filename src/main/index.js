@@ -1533,6 +1533,12 @@ app.on('sign-in', (account) => {
   }
 });
 
+app.on('sign-out-confirm', () => {
+  if (mainWindow && !mainWindow.webContents.isDestroyed()) {
+    mainWindow.webContents.send('sign-out-confirm', undefined);
+  }
+});
+
 app.on('sign-out', () => {
   global['account'] = undefined;
   menuService.updateAccount(undefined);

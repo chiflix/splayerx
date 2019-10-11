@@ -13,7 +13,7 @@ function intercept(response: Response) {
     const token = authorization.replace('Bearer', '').trim();
     let displayName = '';
     try {
-      displayName = JSON.parse(new Buffer(token.split('.')[1], 'base64').toString()).display_name; // eslint-disable-line
+      displayName = JSON.parse(new Buffer(token.split('.')[1], 'base64').toString()).displayName; // eslint-disable-line
     } catch (error) {
       // tmpty
     }

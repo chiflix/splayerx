@@ -133,7 +133,7 @@ export async function getToken() {
         let displayName = '';
         try {
           displayName = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
-            .display_name; // eslint-disable-line
+            .displayName; // eslint-disable-line
         } catch (error) {
           // tmpty
         }
