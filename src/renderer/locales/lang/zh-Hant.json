@@ -477,14 +477,23 @@
   "loginModal": {
     "title": "免註冊登入",
     "sendCode": "獲取驗證碼",
+    "sendingCode": "",
     "countDown": "{count} 秒",
     "placeholder": {
       "mobile": "輸入手機號",
       "code": "輸入短信驗證碼"
     },
     "submit": "登入",
+    "submitting": "",
     "codeError": "驗證碼錯誤",
     "netWorkError": "網絡連接超時",
-    "noLineError": "沒有網路連線"
+    "noLineError": "沒有網路連線",
+    "afsError": "",
+    "afs": {
+      "start": "",
+      "yes": "",
+      "error300": "",
+      "errorNetwork": ""
+    }
   }
 }
