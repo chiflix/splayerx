@@ -1,6 +1,6 @@
 <template>
   <div
-    @mouseup="handleSidebar"
+    @click="handleSidebar"
   >
     <svg
       :opacity="mouseover ? '1' : '0.5'"
