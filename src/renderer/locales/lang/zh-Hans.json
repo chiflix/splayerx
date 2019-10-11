@@ -477,14 +477,23 @@
   "loginModal": {
     "title": "免注册登录",
     "sendCode": "获取验证码",
+    "sendingCode": "",
     "countDown": "{count} 秒",
     "placeholder": {
       "mobile": "输入手机号码",
       "code": "输入短信验证码"
     },
     "submit": "登录",
+    "submitting": "",
     "codeError": "验证码错误",
     "netWorkError": "网络连接超时",
-    "noLineError": "无网络连接"
+    "noLineError": "无网络连接",
+    "afsError": "",
+    "afs": {
+      "start": "",
+      "yes": "",
+      "error300": "",
+      "errorNetwork": ""
+    }
   }
 }
