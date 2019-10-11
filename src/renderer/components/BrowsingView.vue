@@ -123,7 +123,8 @@ export default {
         canGoForward: false,
         canGoBack: false,
       },
-      allChannels: ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku'],
+      allChannels: ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch'],
+      compareStr: [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch']],
       hideMainWindow: false,
       startLoadUrl: '',
     };
@@ -172,6 +173,8 @@ export default {
           return { channel: 'qq', type: this.pipType, barrageState: this.barrageOpen };
         case 'youku':
           return { channel: 'youku', barrageState: this.barrageOpen };
+        case 'twitch':
+          return { channel: 'twitch', type: this.pipType, winSize: this.pipSize };
         case 'others':
           return { channel: 'others', winSize: this.pipSize };
         default:
@@ -599,13 +602,14 @@ export default {
       }
     },
     addListenerToBrowser() {
+      this.removeListener();
       const view = this.currentMainBrowserView();
       if (view) {
         view.webContents.addListener('ipc-message', this.ipcMessage);
         view.webContents.addListener('page-title-updated', this.handlePageTitle);
         view.webContents.addListener('dom-ready', this.domReady);
         view.webContents.addListener('new-window', this.newWindow);
-        if (!view.webContents.getURL().includes('douyu')) view.webContents.addListener('did-start-loading', this.didStartLoading);
+        if (!this.currentChannel.includes('douyu') && !this.currentChannel.includes('youku')) view.webContents.addListener('did-start-loading', this.didStartLoading);
         view.webContents.addListener('did-stop-loading', this.didStopLoading);
         view.webContents.addListener('will-navigate', this.willNavigate);
       }
@@ -613,7 +617,7 @@ export default {
     removeListener() {
       const view = this.currentMainBrowserView();
       if (view) {
-        if (!view.webContents.getURL().includes('douyu')) {
+        if (!this.currentChannel.includes('douyu') && !this.currentChannel.includes('youku')) {
           view.webContents.removeListener(
             'did-stop-loading',
             this.didStopLoading,
@@ -707,8 +711,8 @@ export default {
         const newHostname = urlParseLax(openUrl).hostname;
         const oldChannel = this.currentChannel;
         let newChannel = '';
-        this.allChannels.forEach((channel: string) => {
-          if (newHostname.includes(channel) && (channel !== 'qq' || (channel === 'qq' && newHostname.includes('v.qq.com')))) {
+        this.allChannels.forEach((channel: string, index: number) => {
+          if (this.compareStr[index].findIndex((str: string) => newHostname.includes(str)) !== -1) {
             newChannel = `${channel}.com`;
           }
         });
@@ -723,7 +727,7 @@ export default {
           });
         } else {
           log.info('open-in-chrome', `${oldChannel}, ${newChannel}`);
-          this.$electron.shell.openExternal(openUrl);
+          this.$electron.shell.openExternalSync(openUrl);
         }
       }
     },
@@ -776,7 +780,7 @@ export default {
       this.allChannels.forEach((channel: string) => {
         if (this.currentChannel.includes(channel)) this.pipChannel = channel;
       });
-      if (['bilibili', 'douyu', 'huya', 'qq'].includes(this.pipChannel)) {
+      if (['bilibili', 'douyu', 'huya', 'qq', 'twitch'].includes(this.pipChannel)) {
         this.currentMainBrowserView()
           .webContents.executeJavaScript(InjectJSManager.pipFindType(this.pipChannel))
           .then((r: string) => {

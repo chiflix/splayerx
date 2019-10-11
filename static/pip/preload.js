@@ -114,6 +114,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
           }
           break;
+        case url.includes('twitch'):
+          if (['VIDEO'].includes(evt.target.tagName) || ['pl-overlay', 'player-overlay', 'player-center-content', 'avap-ads-container'].includes(evt.target.classList[0])) {
+            offset = [evt.clientX, evt.clientY];
+            if (getRatio() !== 1) {
+              windowSize = remote.getCurrentWindow().getSize();
+            }
+          }
+          break;
         default:
           offset = [evt.clientX, evt.clientY];
           if (getRatio() !== 1) {

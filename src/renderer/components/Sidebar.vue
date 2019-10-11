@@ -24,13 +24,18 @@
         :selected="info.type === currentChannel"
         :select-sidebar="handleSidebarIcon"
         :style="{
-          margin: index !== channelsDetail.length - 1 ? '0 auto 12px auto' : '0 auto 0 auto',
+          margin: '0 auto 12px auto',
         }"
         @index-of-moving-item="indexOfMovingItem = $event"
         @index-of-moving-to="indexOfMovingTo = $event"
         @is-dragging="isDragging = $event"
       />
     </div>
+    <div
+      v-if="!showFileIcon"
+      :style="{ boxShadow: bottomMask ? '0 -3px 8px 0 rgba(0,0,0,0.60)' : '' }"
+      class="bottom-mask"
+    />
     <div
       :style="{
         boxShadow: bottomMask ? '0 -2px 10px 0 rgba(0,0,0,0.50)' : '',
@@ -75,7 +80,16 @@ export default {
   },
   data() {
     return {
-      channels: ['https://www.bilibili.com/', 'https://www.iqiyi.com/', 'https://www.douyu.com/', 'https://www.huya.com/', 'https://v.qq.com/', 'https://www.youku.com/', 'https://www.youtube.com/'],
+      channels: [
+        'https://www.bilibili.com/',
+        'https://www.iqiyi.com/',
+        'https://www.douyu.com/',
+        'https://www.huya.com/',
+        'https://v.qq.com/',
+        'https://www.youku.com/',
+        'https://www.twitch.tv/',
+        'https://www.youtube.com/',
+      ],
       showFileIcon: false,
       mousedown: NaN,
       topMask: false,
@@ -88,7 +102,7 @@ export default {
   computed: {
     ...mapGetters(['pipSize', 'pipPos', 'isHistory', 'currentChannel', 'winHeight']),
     totalHeight() {
-      return this.channels.length * 44 + (this.channels.length - 1) * 12;
+      return this.channels.length * 56;
     },
     maxHeight() {
       const bottomHeight = this.showFileIcon ? 66 : 0;
@@ -121,7 +135,7 @@ export default {
     },
     winHeight() {
       const scrollTop = (document.querySelector('.icon-box') as HTMLElement).scrollTop;
-      this.topMask = scrollTop !== 0;
+      this.topMask = this.maxHeight >= this.totalHeight ? false : scrollTop !== 0;
       this.bottomMask = scrollTop + this.maxHeight < this.totalHeight;
     },
   },
@@ -180,6 +194,12 @@ export default {
   .top-mask {
     width: 100%;
     height: 42px;
+  }
+  .bottom-mask {
+    position: absolute;
+    width: 100%;
+    height: 42px;
+    bottom: -42px;
   }
   .icon-box {
     width: 100%;

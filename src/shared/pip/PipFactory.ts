@@ -6,6 +6,7 @@ import Others from './Others';
 import Huya from './Huya';
 import QQ from './QQ';
 import Youku from './Youku';
+import Twitch from './Twitch';
 
 type pipMode = {
   adapter: string,
@@ -49,6 +50,8 @@ export default class PipFactory {
         return new QQ(info.type as string, info.barrageState as boolean);
       case 'youku':
         return new Youku(info.barrageState as boolean);
+      case 'twitch':
+        return new Twitch(info.type as string, info.winSize as number[]);
       case 'others':
         return new Others(info.winSize as number[]);
       default:
