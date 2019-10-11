@@ -40,26 +40,27 @@ export default class Douyu {
         Object.defineProperty(document.querySelector("video").style, "width", {get: function(){return this._width}, set: function(val){this._width = val.width;if (val.flag) document.querySelector("video").style.setProperty("width", val.width);}});
         Object.defineProperty(document.querySelector("video").style, "height", {get: function(){return this._height}, set: function(val){this._height = val.height; if (val.flag) document.querySelector("video").style.setProperty("height", val.height);}});`;
       this.watcher = '';
-      this.recover = 'var videoPlayer = document.querySelector(".layout-Player-videoMain");'
-        + 'videoPlayer.style.position = "";'
-        + 'videoPlayer.style.zIndex = "";'
-        + 'videoPlayer.style.width = "";'
-        + 'videoPlayer.style.height = "";'
-        + 'videoPlayer.style.right = "";'
-        + 'videoPlayer.style.bottom = "";'
-        + 'videoPlayer.style.left = "";'
-        + 'videoPlayer.style.top = "";'
-        + 'document.body.style.overflow = "";'
-        + 'var room = document.querySelector(".room-Player-Box");'
-        + 'room.style.width = "";'
-        + 'room.style.height = "";'
-        + 'room.style.right = "";'
-        + 'room.style.bottom = "";'
-        + 'document.querySelector(".layout-Main").style.overflow = "";'
-        + 'var roomPlayer = document.querySelector(".roomSmallPlayerFloatLayout");'
-        + 'if (roomPlayer) roomPlayer.style.display = "block";'
-        + 'Object.defineProperty(document.querySelector("video").style, "width", {get: function(){return this._width}, set: function(val){this._width = val;document.querySelector("video").style.setProperty("width", val);}});'
-        + 'Object.defineProperty(document.querySelector("video").style, "height", {get: function(){return this._height}, set: function(val){this._height = val;document.querySelector("video").style.setProperty("height", val);}});';
+      this.recover = ` ${this.barrageAdapt(type, barrageState)}
+        var videoPlayer = document.querySelector(".layout-Player-videoMain");
+        videoPlayer.style.position = "";
+        videoPlayer.style.zIndex = "";
+        videoPlayer.style.width = "";
+        videoPlayer.style.height = "";
+        videoPlayer.style.right = "";
+        videoPlayer.style.bottom = "";
+        videoPlayer.style.left = "";
+        videoPlayer.style.top = "";
+        document.body.style.overflow = "";
+        var room = document.querySelector(".room-Player-Box");
+        room.style.width = "";
+        room.style.height = "";
+        room.style.right = "";
+        room.style.bottom = "";
+        document.querySelector(".layout-Main").style.overflow = "";
+        var roomPlayer = document.querySelector(".roomSmallPlayerFloatLayout");
+        if (roomPlayer) roomPlayer.style.display = "block";
+        Object.defineProperty(document.querySelector("video").style, "width", {get: function(){return this._width}, set: function(val){this._width = val;document.querySelector("video").style.setProperty("width", val);}});
+        Object.defineProperty(document.querySelector("video").style, "height", {get: function(){return this._height}, set: function(val){this._height = val;document.querySelector("video").style.setProperty("height", val);}});`;
     } else if (type === 'video') {
       this.adapter = `var videoPlayer = document.querySelector(".video-holder").childNodes[0];
         ${this.barrageAdapt(type, barrageState)}
@@ -82,11 +83,12 @@ export default class Douyu {
         }
         document.querySelector("#header").style.display = "none";`;
       this.watcher = '';
-      this.recover = 'var videoPlayer = document.querySelector(".video-holder").childNodes[0];'
-      + 'videoPlayer.style.position = "relative";'
-      + 'videoPlayer.style.zIndex = "";'
-      + 'document.body.style.overflow = "";'
-      + 'document.querySelector("#header").style.display = "";';
+      this.recover = `${this.barrageAdapt(type, barrageState)}
+        var videoPlayer = document.querySelector(".video-holder").childNodes[0];
+        videoPlayer.style.position = "relative";
+        videoPlayer.style.zIndex = "";
+        document.body.style.overflow = "";
+        document.querySelector("#header").style.display = "";`;
     } else {
       this.adapter = `var video = document.querySelector("video");
         var parentElement = video.parentElement;
@@ -118,31 +120,28 @@ export default class Douyu {
   }
 
   public barrageAdapt(type: string, barrageOpen: boolean) {
-    if (['normal', 'others'].includes(type)) {
-      return `var barrage = document.querySelector(".comment-37342a");
-        if (barrage) {
-        barrage.style.visibility = ${barrageOpen} ? 'visible' : 'hidden';
-        } else {
-        var timer = setInterval(() => {
-        if (document.querySelector(".comment-37342a")) {
-          document.querySelector(".comment-37342a").style.visibility = ${barrageOpen} ? 'visible' : 'hidden';
-          clearInterval(timer);
-        }
-        }, 500);
+    if (type === 'normal') {
+      return `var danmu = !!document.getElementsByClassName("hidedanmu-5d54e2 removed-9d4c42").length;
+        if (danmu && ${!barrageOpen}) {
+          document.querySelector(".showdanmu-42b0ac").click();
+        } else if (!danmu && ${barrageOpen}) {
+          document.querySelector(".hidedanmu-5d54e2").click();
         }`;
     }
-    return `var barrage = document.querySelector(".abp-container");
-      if (barrage) {
-      barrage.style.visibility = ${barrageOpen} ? 'visible' : 'hidden';
-      } else {
-      var timer = setInterval(() => {
-      if (document.querySelector(".abp-container")) {
-        document.querySelector(".abp-container").style.visibility = ${barrageOpen} ? 'visible' : 'hidden';
-        clearInterval(timer);
-      }
-      }, 500);
-      }`;
+    if (type === 'video') {
+      return `var danmu = !!document.getElementsByClassName("s5-1d7124 input-76795c removed-fcaace").length;
+        if (danmu && ${!barrageOpen}) {
+          document.querySelector(".s4-2953ce").click();
+        } else if (!danmu && ${barrageOpen}) {
+          document.querySelector(".s5-1d7124").click();
+        }`;
+    }
+    return '';
   }
 }
 
-export const douyuFindType = 'if (document.querySelector(".layout-Player-videoMain")) { "normal"; } else if (document.querySelector(".video")) { "video" } else { "others"; }';
+export const douyuFindType = 'if (document.querySelector(".layout-Player-videoMain")) {'
+  + 'var r = { type: "normal", barrageState: !!document.getElementsByClassName("hidedanmu-5d54e2 removed-9d4c42").length };r;'
+  + '} else if (document.querySelector(".video")) {'
+  + 'var r = { type: "video", barrageState: !!document.getElementsByClassName("s5-1d7124 input-76795c removed-fcaace").length };r;'
+  + '} else { var r = { type: "others", barrageState: false };r; }';

@@ -125,7 +125,7 @@ export default class Huya {
   }
 
   public barrageAdapt(type: string, barrageOpen: boolean) {
-    if (['normal', 'others'].includes(type)) {
+    if (type === 'normal') {
       return `var barrage = document.querySelector("#danmuwrap");
         if (barrage) {
         barrage.style.visibility = ${barrageOpen} ? 'visible' : 'hidden';
@@ -140,29 +140,38 @@ export default class Huya {
     }
     if (type === 'cnt-video') {
       return `var barrage = document.querySelector("._27zNGHUfqGTKw5H0R78xAy");
-      if (barrage) {
-      barrage.style.visibility = ${barrageOpen} ? 'visible' : 'hidden';
-      } else {
-      var timer = setInterval(() => {
-      if (document.querySelector("._27zNGHUfqGTKw5H0R78xAy")) {
-        document.querySelector("._27zNGHUfqGTKw5H0R78xAy").style.visibility = ${barrageOpen} ? 'visible' : 'hidden';
-        clearInterval(timer);
-      }
-      }, 500);
-      }`;
+        if (barrage) {
+        barrage.style.visibility = ${barrageOpen} ? 'visible' : 'hidden';
+        } else {
+        var timer = setInterval(() => {
+        if (document.querySelector("._27zNGHUfqGTKw5H0R78xAy")) {
+          document.querySelector("._27zNGHUfqGTKw5H0R78xAy").style.visibility = ${barrageOpen} ? 'visible' : 'hidden';
+          clearInterval(timer);
+        }
+        }, 500);
+        }`;
     }
-    return `var barrage = document.querySelector("._3xTaMdPDW9JlnZ_ed9rxJ-");
-      if (barrage) {
-      barrage.style.visibility = ${barrageOpen} ? 'visible' : 'hidden';
-      } else {
-      var timer = setInterval(() => {
-      if (document.querySelector("._3xTaMdPDW9JlnZ_ed9rxJ-")) {
-        document.querySelector("._3xTaMdPDW9JlnZ_ed9rxJ-").style.visibility = ${barrageOpen} ? 'visible' : 'hidden';
-        clearInterval(timer);
-      }
-      }, 500);
-      }`;
+    if (type === 'video') {
+      return `var barrage = document.querySelector("._3xTaMdPDW9JlnZ_ed9rxJ-");
+        if (barrage) {
+        barrage.style.visibility = ${barrageOpen} ? 'visible' : 'hidden';
+        } else {
+        var timer = setInterval(() => {
+        if (document.querySelector("._3xTaMdPDW9JlnZ_ed9rxJ-")) {
+          document.querySelector("._3xTaMdPDW9JlnZ_ed9rxJ-").style.visibility = ${barrageOpen} ? 'visible' : 'hidden';
+          clearInterval(timer);
+        }
+        }, 500);
+        }`;
+    }
+    return '';
   }
 }
 
-export const huyaFindType = 'if (document.querySelector(".cnt-wrap")) { "cnt-video"; } else if (document.querySelector(".main-wrap")) { "normal"; } else if (document.querySelector(".vplayer-wrap")) { "video" } else { "others"; }';
+export const huyaFindType = 'if (document.querySelector(".cnt-wrap")) {'
+  + 'var r = { type: "cnt-video", barrageState: false };r;'
+  + '} else if (document.querySelector(".main-wrap")) {'
+  + 'var r = { type: "normal", barrageState: false };r;'
+  + '} else if (document.querySelector(".vplayer-wrap")) {'
+  + 'var r = { type: "video", barrageState: false };r;'
+  + '} else { var r = { type: "others", barrageState: false };r; }';
