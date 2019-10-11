@@ -596,7 +596,7 @@ function registerMainWindowEvent(mainWindow) {
       mainWindow.send('update-pip-state', args);
     }
   });
-  ipcMain.on('open-browsing-history', () => {
+  ipcMain.on('remove-browser-view', () => {
     mainWindow.removeBrowserView(mainWindow.getBrowserViews()[0]);
   });
   ipcMain.on('remove-main-window', () => {

@@ -198,7 +198,7 @@ export default {
       this.$electron.ipcRenderer.send('create-browser-view', { url: val });
     },
     isHistory() {
-      this.$electron.ipcRenderer.send('open-browsing-history');
+      this.$electron.ipcRenderer.send('remove-browser-view');
     },
     isFullScreen(val: boolean) {
       this.$store.dispatch('updateBrowsingSize', this.winSize);
