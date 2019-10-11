@@ -477,14 +477,23 @@
   "loginModal": {
     "title": "Iniciar sesión con número de teléfono",
     "sendCode": "Enviar",
+    "sendingCode": "",
     "countDown": "{count} s",
     "placeholder": {
       "mobile": "Tu número de teléfono",
       "code": "Introduzca el código de verificación"
     },
     "submit": "Ingressar",
+    "submitting": "",
     "codeError": "Código de vértificación incorrecto",
     "netWorkError": "El tiempo para la conexión ha acabado",
-    "noLineError": "No hay conexión de red"
+    "noLineError": "No hay conexión de red",
+    "afsError": "",
+    "afs": {
+      "start": "",
+      "yes": "",
+      "error300": "",
+      "errorNetwork": ""
+    }
   }
 }
