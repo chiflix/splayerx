@@ -84,16 +84,6 @@ export default {
   },
   data() {
     return {
-      channels: [
-        'https://www.bilibili.com/',
-        'https://www.iqiyi.com/',
-        'https://www.douyu.com/',
-        'https://www.huya.com/',
-        'https://v.qq.com/',
-        'https://www.youku.com/',
-        'https://www.twitch.tv/',
-        'https://www.youtube.com/',
-      ],
       showFileIcon: false,
       mousedown: NaN,
       topMask: false,
@@ -104,7 +94,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['pipSize', 'pipPos', 'isHistory', 'currentChannel', 'winHeight']),
+    ...mapGetters(['pipSize', 'pipPos', 'isHistory', 'currentChannel', 'winHeight', 'channels']),
     totalHeight() {
       return this.channels.length * 56;
     },
@@ -130,8 +120,9 @@ export default {
   watch: {
     isDragging(val: boolean, oldVal: boolean) {
       if (oldVal && !val) {
-        const item = this.channels.splice(this.indexOfMovingItem, 1)[0];
-        this.channels.splice(this.indexOfMovingTo, 0, item);
+        this.$store.dispatch('repositionChannels',
+          { from: this.indexOfMovingItem, to: this.indexOfMovingTo },
+        );
       }
     },
     currentUrl(val: string) {
