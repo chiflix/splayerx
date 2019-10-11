@@ -40,7 +40,7 @@
     </div>
     <div id="captcha" />
     <input
-      :disabled="isAllValid || isLogin"
+      :disabled="isAllValid || isLogin || isRobot"
       :value="isLogin ? $t('loginModal.submitting') : $t('loginModal.submit')"
       type="submit"
       class="submit"
@@ -62,7 +62,7 @@ import metadata from 'libphonenumber-js/metadata.mobile.json';
 import { parsePhoneNumberFromString, getCountryCallingCode, CountryCode } from 'libphonenumber-js/mobile';
 import { getSMSCode, signIn, getGeoIP } from '@/libs/webApis';
 
-const ALI_CAPTCHA_APP_KEY = 'FFFF0N000000000084CE';
+const ALI_CAPTCHA_APP_KEY = 'FFFF0N000000000084CE33333';
 const ALI_CAPTCHA_SCENE = 'nvc_message';
 
 export default Vue.extend({
@@ -124,6 +124,7 @@ export default Vue.extend({
         token: string,
       }) => {
         if (result && result.value === 'pass') {
+          this.message = '';
           // 滑动成功
           // @ts-ignore
           const afs = undefined;
@@ -306,6 +307,7 @@ export default Vue.extend({
       }, 100);
     },
     keydown(e: KeyboardEvent) { // eslint-disable-line
+      const rightCode = [8, 9, 13, 37, 39, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57];
       const { isDarwin } = this;
       // @ts-ignore
       const browserWindow = window.remote.BrowserWindow; // eslint-disable-line
@@ -328,6 +330,8 @@ export default Vue.extend({
         e.preventDefault();
       } else if (e && e.keyCode === 90 && checkCmdOrCtrl && e.shiftKey && focusWindow) { // c+s+z
         focusWindow.webContents.redo();
+        e.preventDefault();
+      } else if (e && !(rightCode.indexOf(e.keyCode) > -1)) {
         e.preventDefault();
       }
     },

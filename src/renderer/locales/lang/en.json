@@ -487,7 +487,7 @@
     "afs": {
       "start": "Please slide to verify",
       "yes": "Successful",
-      "error300": "Verification failed, please <a href=\"javascript:__nc.reset()\">refresh</a> ",
+      "error300": "Verification failed, please <a href=\"javascript:__nc.reset()\">retry</a> ",
       "errorNetwork": "Network Error. Please <a href=\"javascript:__nc.reset()\">retry</a > "
     }
   }

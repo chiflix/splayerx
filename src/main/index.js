@@ -307,6 +307,9 @@ function createPreferenceWindow(e, route) {
   preferenceWindow.once('ready-to-show', () => {
     preferenceWindow.show();
   });
+  preferenceWindow.on('focus', () => {
+    menuService.enableMenu(false);
+  });
 }
 
 /**
@@ -401,6 +404,9 @@ function createLoginWindow(e, route) {
   }
   loginWindow.once('ready-to-show', () => {
     loginWindow.show();
+  });
+  loginWindow.on('focus', () => {
+    menuService.enableMenu(false);
   });
 }
 
@@ -1279,6 +1285,9 @@ function createMainWindow(openDialog, playlistId) {
       if (mainWindow) mainWindow.openDevTools({ mode: 'detach' });
     }, 1000);
   }
+  mainWindow.on('focus', () => {
+    menuService.enableMenu(true);
+  });
 }
 
 ['left-drag', 'left-up'].forEach((channel) => {
