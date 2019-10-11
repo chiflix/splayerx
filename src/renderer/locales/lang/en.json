@@ -472,12 +472,14 @@
   "loginModal": {
     "title": "Sign in with phone number",
     "sendCode": "Send",
+    "sendingCode": "Sending ...",
     "countDown": "{count} s",
     "placeholder": {
       "mobile": "Your phone number",
       "code": "Enter verification code"
     },
     "submit": "Sign In",
+    "submitting": "Processing ...",
     "codeError": "Incorrect Vertification Code",
     "netWorkError": "Connection Timeout",
     "noLineError": "No Network Connection",

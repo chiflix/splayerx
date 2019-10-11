@@ -24,7 +24,8 @@
       <input
         :disabled="isValidMobile || isGettingCode || count > 0 || isRobot"
         @click="getCode"
-        :value="count > 0 ? countString(count) : $t('loginModal.sendCode')"
+        :value="count > 0 ? countString(count) : isGettingCode ?
+          $t('loginModal.sendingCode') : $t('loginModal.sendCode')"
         type="button"
       >
       <input
@@ -40,7 +41,7 @@
     <div id="captcha" />
     <input
       :disabled="isAllValid || isLogin"
-      :value="$t('loginModal.submit')"
+      :value="isLogin ? $t('loginModal.submitting') : $t('loginModal.submit')"
       type="submit"
       class="submit"
     >
