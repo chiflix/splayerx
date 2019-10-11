@@ -92,6 +92,8 @@ const locale = new Locale();
 const tmpVideoToOpen = [];
 const tmpSubsToOpen = [];
 const subRegex = getValidSubtitleRegex();
+const allChannels = ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch'];
+const compareStr = [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch']];
 const titlebarUrl = process.platform === 'darwin' ? `file:${resolve(__static, 'pip/macTitlebar.html')}` : `file:${resolve(__static, 'pip/winTitlebar.html')}`;
 const maskUrl = process.platform === 'darwin' ? `file:${resolve(__static, 'pip/mask.html')}` : `file:${resolve(__static, 'pip/mask.html')}`;
 const mainURL = process.env.NODE_ENV === 'development'
@@ -690,10 +692,9 @@ function registerMainWindowEvent(mainWindow) {
   });
   ipcMain.on('create-browser-view', (evt, args) => {
     if (!browserViewManager) browserViewManager = new BrowserViewManager();
-    const allChannels = ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch'];
     let currentChannel = '';
-    allChannels.forEach((channel) => {
-      if (args.url.includes(channel)) {
+    allChannels.forEach((channel, index) => {
+      if (compareStr[index].findIndex(str => args.url.includes(str)) !== -1) {
         currentChannel = `${channel}.com`;
       }
     });
@@ -827,10 +828,9 @@ function registerMainWindowEvent(mainWindow) {
     browViews.forEach((view) => {
       browsingWindow.removeBrowserView(view);
     });
-    const allChannels = ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch'];
     let currentChannel = '';
-    allChannels.forEach((channel) => {
-      if (mainView.webContents.getURL().includes(channel)) {
+    allChannels.forEach((channel, index) => {
+      if (compareStr[index].findIndex(str => mainView.webContents.getURL().includes(str)) !== -1) {
         currentChannel = `${channel}.com`;
       }
     });
@@ -889,6 +889,7 @@ function registerMainWindowEvent(mainWindow) {
       mainWindow.removeBrowserView(mainWindow.getBrowserViews()[0]);
       mainWindow.addBrowserView(mainBrowser.page.view);
       browsingWindow.addBrowserView(pipBrowser);
+      browsingWindow.setSize(420, 236);
       createPipControlView();
       createTitlebarView();
       browsingWindow.show();

@@ -20,7 +20,7 @@
         :icon="info.icon"
         :selected="info.type === currentChannel"
         :style="{
-          margin: index !== channelsDetail.length - 1 ? '0 auto 12px auto' : '0 auto 0 auto',
+          margin: '0 auto 12px auto',
         }"
         @click.native="handleSidebarIcon(info.url, index)"
         class="no-drag"
@@ -92,10 +92,10 @@ export default {
   computed: {
     ...mapGetters(['pipSize', 'pipPos', 'isHistory', 'currentChannel', 'winHeight']),
     totalHeight() {
-      return this.channels.length * 44 + (this.channels.length - 1) * 12;
+      return this.channels.length * 56;
     },
     maxHeight() {
-      const bottomHeight = this.showFileIcon ? 66 : 12;
+      const bottomHeight = this.showFileIcon ? 66 : 0;
       return this.winHeight - 42 - bottomHeight;
     },
     isDarwin() {
@@ -119,7 +119,7 @@ export default {
     },
     winHeight() {
       const scrollTop = (document.querySelector('.icon-box') as HTMLElement).scrollTop;
-      this.topMask = scrollTop !== 0;
+      this.topMask = this.maxHeight >= this.totalHeight ? false : scrollTop !== 0;
       this.bottomMask = scrollTop + this.maxHeight < this.totalHeight;
     },
   },
@@ -180,8 +180,10 @@ export default {
     height: 42px;
   }
   .bottom-mask {
+    position: absolute;
     width: 100%;
-    height: 12px;
+    height: 42px;
+    bottom: -42px;
   }
   .icon-box {
     width: 100%;

@@ -124,6 +124,7 @@ export default {
         canGoBack: false,
       },
       allChannels: ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch'],
+      compareStr: [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch']],
       hideMainWindow: false,
       startLoadUrl: '',
     };
@@ -710,8 +711,8 @@ export default {
         const newHostname = urlParseLax(openUrl).hostname;
         const oldChannel = this.currentChannel;
         let newChannel = '';
-        this.allChannels.forEach((channel: string) => {
-          if (newHostname.includes(channel) && (channel !== 'qq' || (channel === 'qq' && newHostname.includes('v.qq.com')))) {
+        this.allChannels.forEach((channel: string, index: number) => {
+          if (this.compareStr[index].findIndex((str: string) => newHostname.includes(str)) !== -1) {
             newChannel = `${channel}.com`;
           }
         });
@@ -726,7 +727,7 @@ export default {
           });
         } else {
           log.info('open-in-chrome', `${oldChannel}, ${newChannel}`);
-          this.$electron.shell.openExternal(openUrl);
+          this.$electron.shell.openExternalSync(openUrl);
         }
       }
     },
@@ -779,7 +780,7 @@ export default {
       this.allChannels.forEach((channel: string) => {
         if (this.currentChannel.includes(channel)) this.pipChannel = channel;
       });
-      if (['bilibili', 'douyu', 'huya', 'qq'].includes(this.pipChannel)) {
+      if (['bilibili', 'douyu', 'huya', 'qq', 'twitch'].includes(this.pipChannel)) {
         this.currentMainBrowserView()
           .webContents.executeJavaScript(InjectJSManager.pipFindType(this.pipChannel))
           .then((r: string) => {

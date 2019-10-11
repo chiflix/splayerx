@@ -46,7 +46,7 @@ export default class QQ {
         + 'var tools = document.querySelector(".x_fixed_tool");'
         + 'if (tools) tools.style.display = "";'
         + 'document.querySelector(".txp_top_btns").style.display = "";'
-        + 'if (wideMode) { container.classList.add("player_container_wide"); }';
+        + 'if (wideMode && containere) { container.classList.add("player_container_wide"); }';
     } else if (type === 'hotVideo') {
       this.adapter = 'var player = document.querySelector(".txp_player");'
         + 'player.style.position = "fixed";'
@@ -87,6 +87,40 @@ export default class QQ {
         + 'var tools = document.querySelector(".x_fixed_tool");'
         + 'if (tools) tools.style.display = "";'
         + 'document.querySelector(".txp_top_btns").style.display = "";';
+    } else if (type === 'feedPlayer') {
+      this.adapter = 'var player = document.querySelector(".txp_player");'
+        + 'player.style.position = "fixed";'
+        + 'player.style.top = "0";'
+        + 'player.style.left = "0";'
+        + 'player.style.width = "100%";'
+        + 'player.style.height = "100%";'
+        + 'player.style.zIndex = "999999";'
+        + 'document.querySelector(".site_common_head").style.display = "none";'
+        + 'document.querySelector("#_feed_player").style.height = "100%";'
+        + 'document.querySelector("#_feed_player").style.position = "fixed";'
+        + 'var feed = document.querySelector("._quickopen");'
+        + 'feed.style.position = "absolute";'
+        + 'feed.style.top = "0";'
+        + 'feed.style.zIndex = "999999";'
+        + 'document.body.style.overflow = "hidden";'
+        + 'document.querySelector(".txp_ad_link").style.webkitUserDrag = "none";';
+      this.watcher = '';
+      this.recover = 'var player = document.querySelector(".txp_player");'
+        + 'player.style.position = "relative";'
+        + 'player.style.top = "";'
+        + 'player.style.left = "";'
+        + 'player.style.width = "";'
+        + 'player.style.height = "";'
+        + 'player.style.zIndex = "";'
+        + 'document.querySelector(".site_common_head").style.display = "";'
+        + 'document.querySelector("#_feed_player").style.height = "";'
+        + 'document.querySelector("#_feed_player").style.position = "";'
+        + 'var feed = document.querySelector("._quickopen");'
+        + 'feed.style.position = "";'
+        + 'feed.style.top = "";'
+        + 'feed.style.zIndex = "";'
+        + 'document.body.style.overflow = "";'
+        + 'document.querySelector(".txp_ad_link").style.webkitUserDrag = "";';
     } else {
       this.adapter = 'var player = document.querySelector(".quickplay_player").children[0];'
         + 'player.style.position = "fixed";'
@@ -113,4 +147,4 @@ export default class QQ {
   }
 }
 
-export const QQFindType = 'if (!document.querySelector(".poplayer_quickplay").classList.value.includes("none")) { "quickPlay" } else if (document.querySelector("#multi_feed_V")) { "hotVideo" } else { "normal" }';
+export const QQFindType = 'if (!document.querySelector(".poplayer_quickplay").classList.value.includes("none")) { "quickPlay" } else if (document.querySelector("#multi_feed_V")) { "hotVideo" } else if (document.querySelector("#_feed_player")) { "feedPlayer" } else { "normal" }';
