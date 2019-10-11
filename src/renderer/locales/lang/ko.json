@@ -477,14 +477,23 @@
   "loginModal": {
     "title": "전화번호로 로그인",
     "sendCode": "보내기",
+    "sendingCode": "",
     "countDown": "{count} 초",
     "placeholder": {
       "mobile": "전화번호",
       "code": "인증 코드 입력"
     },
     "submit": "로그인",
+    "submitting": "",
     "codeError": "잘못된 검증 코드",
     "netWorkError": "접속 시간 초과",
-    "noLineError": "연결된 네트워크가 없습니다"
+    "noLineError": "연결된 네트워크가 없습니다",
+    "afsError": "",
+    "afs": {
+      "start": "",
+      "yes": "",
+      "error300": "",
+      "errorNetwork": ""
+    }
   }
 }
