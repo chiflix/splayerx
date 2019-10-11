@@ -4,7 +4,7 @@
     :class="{ light: selected }"
     :style="{
       transform: `translateY(${iconTranslateY}px)`,
-      zIndex: isDragging ? '10' : '0',
+      zIndex: isDragging ? '10' : '',
       opacity: isDragging ? '1.0' : '',
       transition: itemDragging && !isDragging ? 'transform 100ms linear' : '',
     }"
@@ -84,7 +84,7 @@ export default {
           this.iconTranslateY = -56;
         } else if (this.indexOfMovingTo <= this.index && this.indexOfMovingItem > this.index) {
           this.iconTranslateY = 56;
-        } else {
+        } else if (this.iconTranslateY !== 0) {
           this.iconTranslateY = 0;
         }
       }
