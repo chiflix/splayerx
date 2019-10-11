@@ -9,7 +9,7 @@
       transition: itemDragging && !isDragging ? 'transform 100ms linear' : '',
     }"
     @mousedown="handleMousedown"
-    class="icon-hover"
+    class="icon-hover no-drag"
   >
     <Icon
       :type="icon"

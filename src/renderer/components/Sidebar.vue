@@ -11,7 +11,7 @@
       :style="{
         height: `${maxHeight}px`,
       }"
-      class="icon-box no-drag"
+      class="icon-box"
     >
       <SidebarIcon
         v-for="(info, index) in channelsDetail"
