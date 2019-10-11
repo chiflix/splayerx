@@ -15,15 +15,20 @@
     >
       <SidebarIcon
         v-for="(info, index) in channelsDetail"
+        v-bind="info"
         :index="index"
         :key="info.url"
-        :title="info.title"
-        :icon="info.icon"
+        :item-dragging="isDragging"
+        :index-of-moving-to="indexOfMovingTo"
+        :index-of-moving-item="indexOfMovingItem"
         :selected="info.type === currentChannel"
+        :select-sidebar="handleSidebarIcon"
         :style="{
           margin: index !== channelsDetail.length - 1 ? '0 auto 12px auto' : '0 auto 0 auto',
         }"
-        @click.native="handleSidebarIcon(info.url, index)"
+        @index-of-moving-item="indexOfMovingItem = $event"
+        @index-of-moving-to="indexOfMovingTo = $event"
+        @is-dragging="isDragging = $event"
       />
     </div>
     <div
@@ -75,6 +80,9 @@ export default {
       mousedown: NaN,
       topMask: false,
       bottomMask: false,
+      indexOfMovingItem: NaN,
+      indexOfMovingTo: NaN,
+      isDragging: false,
     };
   },
   computed: {
@@ -102,6 +110,21 @@ export default {
     },
   },
   watch: {
+    indexOfMovingItem(val: number) {
+      console.log('indexofmovingiTem', val);
+    },
+    indexOfMovingTo(val: number) {
+      console.log('indexOFmovingTo', val);
+    },
+    isDragging(val: boolean, oldVal: boolean) {
+      console.log('isDragging', val);
+      if (oldVal && !val) {
+        console.log(this.channels);
+        const item = this.channels.splice(this.indexOfMovingItem, 1)[0];
+        this.channels.splice(this.indexOfMovingTo, 0, item);
+        console.log(this.channels);
+      }
+    },
     currentUrl(val: string) {
       this.showFileIcon = !!val;
     },
@@ -125,25 +148,11 @@ export default {
       updateIsHistoryPage: browsingActions.UPDATE_IS_HISTORY,
       updateCurrentChannel: browsingActions.UPDATE_CURRENT_CHANNEL,
     }),
-    handleMousedown(index: number, e) {
-      console.log('mousedown', index, e);
-      this.mousedown = index;
-      document.addEventListener('mousemove', this.handleMousemove);
-      document.addEventListener('mouseup', this.handleMouseup);
-    },
-    handleMousemove(e: MouseEvent) {
-      console.log('mousemove');
-      setElementStyle(this.$refs.sidebar[this.mousedown].$el, 'transform', 'translateX(-10px)');
-    },
-    handleMouseup(index: number) {
-      document.removeEventListener('mousemove', this.handleMousemove);
-      console.log('mouseup');
-    },
     openHistory() {
       this.updateIsHistoryPage(!this.isHistory);
     },
-    handleSidebarIcon(url: string, index: number) {
-      const newChannel = this.channelsDetail[index].type;
+    handleSidebarIcon(url: string, type: string) {
+      const newChannel = type;
       if (this.$route.name === 'browsing-view') {
         this.$bus.$emit('sidebar-selected', { url, currentChannel: this.currentChannel, newChannel });
       } else {
