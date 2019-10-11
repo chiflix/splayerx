@@ -32,7 +32,7 @@ const fetcher = new Fetcher({
 });
 
 // @ts-ignore
-const endpoint = window.remote.app.getSignInEndPoint();
+const endpoint = window.remote && window.remote.app.getSignInEndPoint();
 
 /**
  * @description get IP && geo data from server
