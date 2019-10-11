@@ -287,7 +287,10 @@ export default class Menubar {
           checked,
           click: () => {
             if (this.mainWindow) {
-              if (subtitleItem && subtitleItem.type === Type.Translated) this.menubar.getMenuItemById('subtitle.mainSubtitle.off').checked = true;
+              // if is AI button can't choose
+              if (subtitleItem && subtitleItem.type === Type.PreTranslated && subtitleItem.source.source === '') {
+                this.menubar.getMenuItemById('subtitle.mainSubtitle.off').checked = true;
+              }
               this.mainWindow.webContents.send('subtitle.mainSubtitle', id, subtitleItem);
             }
           },
@@ -324,7 +327,10 @@ export default class Menubar {
           enabled,
           click: () => {
             if (this.mainWindow) {
-              if (subtitleItem && subtitleItem.type === Type.Translated) this.menubar.getMenuItemById('subtitle.secondarySubtitle.off').checked = true;
+              // if is AI button can't choose
+              if (subtitleItem && subtitleItem.type === Type.PreTranslated && subtitleItem.source.source === '') {
+                this.menubar.getMenuItemById('subtitle.secondarySubtitle.off').checked = true;
+              }
               this.mainWindow.webContents.send('subtitle.secondarySubtitle', id, subtitleItem);
             }
           },

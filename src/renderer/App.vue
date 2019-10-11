@@ -38,7 +38,7 @@
 <script lang="ts">
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ipcRenderer, Event } from 'electron';
-import { mapActions } from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
 import { SubtitleManager as smActions, UserInfo as uActions } from '@/store/actionTypes';
 import Titlebar from '@/components/Titlebar.vue';
 import Sidebar from '@/components/Sidebar.vue';
@@ -64,6 +64,7 @@ export default {
     };
   },
   computed: {
+    ...mapGetters(['signInCallback']),
     isDarwin() {
       return process.platform === 'darwin';
     },
@@ -130,6 +131,11 @@ export default {
           this.checkedToken = true;
           checkToken();
         }
+        // sign in success, callback
+        if (this.signInCallback) {
+          this.signInCallback();
+          this.removeCallback(() => { });
+        }
       } else {
         setToken('');
         sagi.setToken('');
@@ -149,6 +155,7 @@ export default {
     ...mapActions({
       resetManager: smActions.resetManager,
       updateUserInfo: uActions.UPDATE_USER_INFO,
+      removeCallback: uActions.UPDATE_SIGN_IN_CALLBACK,
     }),
     mainCommitProxy(commitType: string, commitPayload: any) {
       this.$store.commit(commitType, commitPayload);

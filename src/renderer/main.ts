@@ -910,7 +910,7 @@ new Vue({
       });
       this.menuService.on('subtitle.mainSubtitle', (e: Event, id: string, item: ISubtitleControlListItem) => {
         if (id === 'off') this.changeFirstSubtitle('');
-        else if (item.type === Type.Translated && item.source.source === '') {
+        else if (item.type === Type.PreTranslated && item.source.source === '') {
           this.showAudioTranslateModal(item);
         } else {
           this.updateSubtitleType(true);
@@ -921,7 +921,7 @@ new Vue({
         if (id === 'off') this.changeSecondarySubtitle('');
         else if (id === 'secondarySub') {
           this.updateEnabledSecondarySub(!this.enabledSecondarySub)
-        } else if (item.type === Type.Translated && item.source.source === '') {
+        } else if (item.type === Type.PreTranslated && item.source.source === '') {
           this.showAudioTranslateModal(item);
         } else {
           this.updateSubtitleType(false);
