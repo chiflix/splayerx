@@ -213,6 +213,9 @@
       "bilibili": "哔哩哔哩",
       "douyu": "斗鱼",
       "huya": "虎牙",
+      "qq": "",
+      "twitch": "",
+      "youku": "",
       "youtube": "Youtube"
     },
     "edit": {
@@ -251,7 +254,10 @@
     "iqiyi": "爱奇艺",
     "youtube": "YouTube",
     "huya": "虎牙",
+    "qq": "",
     "douyu": "斗鱼",
+    "twitch": "",
+    "youku": "",
     "openLocalFile": "打开本地文件 ...",
     "enterPip": "进入画中画",
     "exitPip": "退出画中画",
