@@ -139,8 +139,8 @@ div {
 .mask {
   width: 44px;
   height: 44px;
-  position: relative;
-  top: -50px;
+  position: absolute;
+  top: 0px; 
 }
 .light {
   opacity: 1;
