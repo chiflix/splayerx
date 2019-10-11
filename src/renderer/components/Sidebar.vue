@@ -110,19 +110,10 @@ export default {
     },
   },
   watch: {
-    indexOfMovingItem(val: number) {
-      console.log('indexofmovingiTem', val);
-    },
-    indexOfMovingTo(val: number) {
-      console.log('indexOFmovingTo', val);
-    },
     isDragging(val: boolean, oldVal: boolean) {
-      console.log('isDragging', val);
       if (oldVal && !val) {
-        console.log(this.channels);
         const item = this.channels.splice(this.indexOfMovingItem, 1)[0];
         this.channels.splice(this.indexOfMovingTo, 0, item);
-        console.log(this.channels);
       }
     },
     currentUrl(val: string) {
