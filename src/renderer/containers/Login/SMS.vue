@@ -22,9 +22,10 @@
     </div>
     <div class="code-box">
       <input
-        :disabled="isValidMobile || count > 0"
+        :disabled="isValidMobile || isGettingCode || count > 0 || isRobot"
         @click="getCode"
-        :value="count > 0 ? countString(count) : $t('loginModal.sendCode')"
+        :value="count > 0 ? countString(count) : isGettingCode ?
+          $t('loginModal.sendingCode') : $t('loginModal.sendCode')"
         type="button"
       >
       <input
@@ -37,9 +38,10 @@
         type="number"
       >
     </div>
+    <div id="captcha" />
     <input
-      :disabled="isAllValid || isLogin"
-      :value="$t('loginModal.submit')"
+      :disabled="isAllValid || isLogin || isRobot"
+      :value="isLogin ? $t('loginModal.submitting') : $t('loginModal.submit')"
       type="submit"
       class="submit"
     >
@@ -52,16 +54,16 @@
   </form>
 </template>
 <script lang="ts">
+/* eslint-disable @typescript-eslint/camelcase */
+/* eslint-disable no-script-url */
 import Vue from 'vue';
 // @ts-ignore
-import geoip from 'geoip-lite';
-// @ts-ignore
 import metadata from 'libphonenumber-js/metadata.mobile.json';
-import { remote } from 'electron';
-import { parsePhoneNumberFromString, getCountryCallingCode } from 'libphonenumber-js/mobile';
-import { log } from '@/libs/Log';
-import { signIn, getSMSCode } from '@/libs/apis';
-import { getIP } from '@/../shared/utils';
+import { parsePhoneNumberFromString, getCountryCallingCode, CountryCode } from 'libphonenumber-js/mobile';
+import { getSMSCode, signIn, getGeoIP } from '@/libs/webApis';
+
+const ALI_CAPTCHA_APP_KEY = 'FFFF0N000000000084CE';
+const ALI_CAPTCHA_SCENE = 'nvc_message';
 
 export default Vue.extend({
   name: 'SMS',
@@ -73,11 +75,17 @@ export default Vue.extend({
       mobile: '',
       code: '',
       count: 0,
+      isGettingCode: false,
       isLogin: false,
       message: '',
+      isRobot: false,
     };
   },
   computed: {
+    isDarwin() {
+      // @ts-ignore
+      return window.isDarwin; // eslint-disable-line
+    },
     isValidMobile() {
       return !this.validMobile();
     },
@@ -93,13 +101,93 @@ export default Vue.extend({
       return len;
     },
   },
-  async mounted() {
+  created() {
     // @ts-ignore
-    const ip = await getIP();
-    log.debug('ip', ip);
-    const geo = geoip.lookup(ip);
-    if (geo && geo.country && getCountryCallingCode(geo.country)) {
-      this.countryCallCode = getCountryCallingCode(geo.country);
+    window.NVC_Opt = { // eslint-disable-line
+      // 无痕配置 && 滑动验证、刮刮卡通用配置
+      appkey: ALI_CAPTCHA_APP_KEY,
+      scene: ALI_CAPTCHA_SCENE,
+      isH5: false,
+      popUp: false,
+      renderTo: '#captcha',
+      trans: {},
+      language: 'en',
+      // 滑动验证长度配置
+      customWidth: 312,
+      // 刮刮卡配置项
+      width: 321,
+      height: 125,
+      callback: async (result?: {
+        value: string,
+        csessionid: string,
+        sig: string,
+        token: string,
+      }) => {
+        if (result && result.value === 'pass') {
+          this.message = '';
+          // 滑动成功
+          // @ts-ignore
+          const afs = undefined;
+          const sms = {
+            session: result.csessionid,
+            sig: result.sig,
+            token: result.token,
+            scene: ALI_CAPTCHA_SCENE,
+            appKey: ALI_CAPTCHA_APP_KEY,
+            // @ts-ignore
+            remoteIp: window.client_ip, // eslint-disable-line
+          };
+          this.isGettingCode = true;
+          getSMSCode(`+${this.countryCallCode}${this.mobile}`, afs, sms) // eslint-disable-line
+            .then((pass) => {
+              this.isGettingCode = false;
+              if (pass) {
+                this.count = 60;
+                if (this.$refs.code) {
+                  this.$refs.code.focus();
+                }
+                this.countDown();
+                this.message = '';
+                this.isRobot = false;
+              } else {
+                this.message = this.$t('loginModal.afsError');
+                this.count = 0;
+                this.showNvc();
+              }
+            }).catch(() => {
+              this.message = this.$t('loginModal.netWorkError');
+              this.count = 0;
+              this.isGettingCode = false;
+              this.showNvc();
+            });
+        }
+      },
+      elements: [
+        'https://img.alicdn.com/tfs/TB17cwllsLJ8KJjy0FnXXcFDpXa-50-74.png',
+        'https://img.alicdn.com/tfs/TB17cwllsLJ8KJjy0FnXXcFDpXa-50-74.png',
+      ],
+      bg_back_prepared: 'https://img.alicdn.com/tps/TB1skE5SFXXXXb3XXXXXXXXXXXX-100-80.png',
+      bg_front: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABQCAMAAADY1yDdAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAAADUExURefk5w+ruswAAAAfSURBVFjD7cExAQAAAMKg9U9tCU+gAAAAAAAAAIC3AR+QAAFPlUGoAAAAAElFTkSuQmCC',
+      obj_ok: 'https://img.alicdn.com/tfs/TB1rmyTltfJ8KJjy0FeXXXKEXXa-50-74.png',
+      bg_back_pass: '//img.alicdn.com/tfs/TB1KDxCSVXXXXasXFXXXXXXXXXX-100-80.png',
+      obj_error: 'https://img.alicdn.com/tfs/TB1q9yTltfJ8KJjy0FeXXXKEXXa-50-74.png',
+      bg_back_fail: 'https://img.alicdn.com/tfs/TB1w2oOSFXXXXb4XpXXXXXXXXXX-100-80.png',
+    };
+    const date = new Date().toISOString().split('T')[0];
+    const guideScript = document.createElement('script');
+    guideScript.setAttribute('src', `//g.alicdn.com/sd/nvc/1.1.112/guide.js?t=${date}`);
+    document.head.appendChild(guideScript);
+  },
+  async mounted() {
+    try {
+      const geo = await getGeoIP();
+      // @ts-ignore
+      window.client_ip = geo.ip;
+      if (geo.countryCode && getCountryCallingCode(geo.countryCode as CountryCode)) {
+        this.countryCallCode = getCountryCallingCode(geo.countryCode as CountryCode);
+      }
+    } catch (error) {
+      // empty
     }
   },
   methods: {
@@ -136,23 +224,33 @@ export default Vue.extend({
       return /\d{4}/g.test(code);
     },
     async getCode() {
-      if (this.validMobile(this.mobile) && this.count === 0) {
+      if (this.validMobile(this.mobile) && !this.isGettingCode) {
         if (!navigator.onLine) {
           this.message = this.$t('loginModal.noLineError');
           return;
         }
-        this.count = 60;
-        if (this.$refs.code) {
-          this.$refs.code.focus();
-        }
+        this.isGettingCode = true;
         try {
-          await getSMSCode(`+${this.countryCallCode}${this.mobile}`);
-          this.countDown();
-          this.message = '';
+          // @ts-ignore
+          const afs =  getNVCVal() // eslint-disable-line
+          const result = await getSMSCode(`+${this.countryCallCode}${this.mobile}`, afs);
+          if (result) {
+            this.count = 60;
+            if (this.$refs.code) {
+              this.$refs.code.focus();
+            }
+            this.countDown();
+            this.message = '';
+            this.isRobot = false;
+          } else {
+            this.count = 0;
+            this.showNvc();
+          }
+          this.isGettingCode = false;
         } catch (error) {
-          log.debug('sms', error);
           this.message = this.$t('loginModal.netWorkError');
           this.count = 0;
+          this.isGettingCode = false;
         }
       }
     },
@@ -176,24 +274,45 @@ export default Vue.extend({
         this.isLogin = true;
         this.message = '';
         try {
-          await signIn('code', `+${this.countryCallCode}${this.mobile}`, this.code);
-          window.close();
-        } catch (error) {
-          if (error.status === 400 || error.status === 500) {
-            this.message = this.$t('loginModal.codeError');
+          const result = await signIn('code', `+${this.countryCallCode}${this.mobile}`, this.code);
+          if (result) {
+            window.close();
           } else {
-            this.message = this.$t('loginModal.netWorkError');
+            this.message = this.$t('loginModal.codeError');
           }
-          log.debug('submit', error);
-          this.count = 0;
-          this.isLogin = false;
+        } catch (error) {
+          this.message = this.$t('loginModal.netWorkError');
         }
+        this.isLogin = false;
       }
     },
+    showNvc() {
+      this.isRobot = true;
+      // @ts-ignore
+      window.ipcRenderer.send('login-captcha'); // eslint-disable-line
+      setTimeout(() => {
+        // 唤醒滑动验证
+        // @ts-ignore
+        getNC().then(() => { // eslint-disable-line
+          // @ts-ignore
+          _nvc_nc.upLang('en', { // eslint-disable-line
+            _startTEXT: this.$t('loginModal.afs.start'),
+            _yesTEXT: this.$t('loginModal.afs.yes'),
+            _error300: this.$t('loginModal.afs.error300'),
+            _errorNetwork: this.$t('loginModal.afs.errorNetwork'),
+          });
+          // @ts-ignore
+          _nvc_nc.reset(); // eslint-disable-line
+        });
+      }, 100);
+    },
     keydown(e: KeyboardEvent) { // eslint-disable-line
-      const browserWindow = remote.BrowserWindow;
+      const rightCode = [8, 9, 13, 37, 39, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57];
+      const { isDarwin } = this;
+      // @ts-ignore
+      const browserWindow = window.remote.BrowserWindow; // eslint-disable-line
       const focusWindow = browserWindow.getFocusedWindow();
-      const checkCmdOrCtrl = (process.platform === 'darwin' && e.metaKey) || (process.platform !== 'darwin' && e.ctrlKey);
+      const checkCmdOrCtrl = (isDarwin && e.metaKey) || (isDarwin && e.ctrlKey); // eslint-disable-line
       if (e && e.keyCode === 65 && checkCmdOrCtrl && focusWindow) { // c+a
         focusWindow.webContents.selectAll();
         e.preventDefault();
@@ -211,6 +330,8 @@ export default Vue.extend({
         e.preventDefault();
       } else if (e && e.keyCode === 90 && checkCmdOrCtrl && e.shiftKey && focusWindow) { // c+s+z
         focusWindow.webContents.redo();
+        e.preventDefault();
+      } else if (e && !(rightCode.indexOf(e.keyCode) > -1)) {
         e.preventDefault();
       }
     },
@@ -335,9 +456,77 @@ button {
     text-align: center;
   }
 }
+#captcha {
+  -webkit-app-region: no-drag;
+  margin-bottom: 12px;
+}
 .submit {
   width: 100%;
   display: block;
   margin-bottom: 14px;
 }
+</style>
+<style lang="scss">
+  .nc_scale {
+    height: 40px !important;
+    background: rgba(94, 93, 102, .25) !important;
+  }
+  .nc_scale div.nc_bg {
+    background: rgba(94, 93, 102, .6) !important;
+  }
+  .nc_scale .scale_text {
+    width: 310px !important;
+    line-height: 38px !important;
+    color: rgba(255, 255, 255, 80) !important;
+    span[data-nc-lang='_startTEXT'] {
+      -webkit-text-fill-color: rgba(255,255,255,0.3) !important;
+      color: rgba(255,255,255,0.3) !important;
+    }
+  }
+  .nc_scale .scale_text2 {
+    width: 310px !important;
+    height: 38px !important;
+    border: 1px solid rgba(255,255,255,0.30) !important;
+    border-radius: 2px !important;
+    span[data-nc-lang='_Loading'], span[data-nc-lang='_yesTEXT'] {
+      border: none !important;
+    }
+  }
+  .nc_scale span {
+    line-height: 38px !important;
+    border: 1px solid #FFFFFF !important;
+    border-radius: 2px !important;
+    &.nc_lang_cnt {
+      width: calc(100% - 2px) !important;
+      height: 38px;
+    }
+  }
+  .errloading {
+    width: 300px !important;
+    height: 20px !important;
+    padding: 9px 5px !important;
+    border: 1px solid #FFFFFF !important;
+    color: rgba(255,255,255,0.8) !important;
+    border-radius: 2px !important;
+    .icon_warn {
+      color: rgba(255,255,255,1) !important;
+      margin-right: 5px!important;
+    }
+    a {
+      color: #f5a623 !important;
+    }
+  }
+  .nc_scale .btn_slide {
+    height: 38px !important;
+    line-height: 38px !important;
+    background-color: #A4A4A8 !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+  }
+  .nc_scale .btn_ok {
+    height: 38px !important;
+    color: #FFFFFF !important;
+    background-color: #A4A4A8 !important;
+    border-color: rgba(255,255,255,0.30) !important;
+  }
 </style>

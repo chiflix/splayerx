@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-22 17:18:34
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-09-27 10:11:29
+ * @Last Modified time: 2019-10-11 14:22:07
  */
 
 import { EventEmitter } from 'events';
@@ -204,7 +204,6 @@ export default class AudioGrabService extends EventEmitter {
       getIP().then((ip) => {
         metadata.set('clientip', ip);
       }).finally(() => {
-        console.log(metadata); // eslint-disable-line
         cb(null, metadata);
       });
     };

@@ -357,7 +357,7 @@ export default class Menubar {
       }, undefined, false);
       accountMenu.append(idMenu);
       const logout = this.createMenuItem('msg.account.logout', () => {
-        app.emit('sign-out');
+        app.emit('sign-out-confirm');
       }, undefined, true);
       accountMenu.append(logout);
       Menu.setApplicationMenu(this.menubar);
@@ -865,7 +865,7 @@ export default class Menubar {
       }, undefined, false);
       accountMenu.append(idMenu);
       const logout = this.createMenuItem('msg.account.logout', () => {
-        app.emit('sign-out');
+        app.emit('sign-out-confirm');
       }, undefined, true);
       accountMenu.append(logout);
     } else {
