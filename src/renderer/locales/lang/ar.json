@@ -477,14 +477,23 @@
   "loginModal": {
     "title": "سجّل الدخول برقم الهاتف",
     "sendCode": "إرسال",
+    "sendingCode": "",
     "countDown": "",
     "placeholder": {
       "mobile": "رقم هاتفك",
       "code": "أدخل رمز التحقق"
     },
     "submit": "تسجيل دخول",
+    "submitting": "",
     "codeError": "رمز التحقق غير صحيح",
     "netWorkError": "مهلة الاتصال",
-    "noLineError": "لا يوجد اتصال شبكة"
+    "noLineError": "لا يوجد اتصال شبكة",
+    "afsError": "",
+    "afs": {
+      "start": "",
+      "yes": "",
+      "error300": "",
+      "errorNetwork": ""
+    }
   }
 }
