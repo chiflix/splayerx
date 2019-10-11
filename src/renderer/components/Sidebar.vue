@@ -28,7 +28,7 @@
     </div>
     <div
       v-if="!showFileIcon"
-      :style="{ boxShadow: bottomMask ? '0 -2px 10px 0 rgba(0,0,0,0.50)' : '' }"
+      :style="{ boxShadow: bottomMask ? '0 -3px 8px 0 rgba(0,0,0,0.60)' : '' }"
       class="bottom-mask"
     />
     <div
