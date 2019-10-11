@@ -3,11 +3,13 @@
     class="side-bar"
   >
     <div
-      :style="{ boxShadow: topMask ? '0 2px 10px 0 rgba(0,0,0,0.50)' : '' }"
+      :style="{
+        boxShadow: topMask ? '0 2px 10px 0 rgba(0,0,0,0.50)' : '',
+        height: `${topMaskHeight}px`
+      }"
       class="top-mask"
     />
     <div
-      :class="{ 'win': !isDarwin }"
       :style="{
         height: `${maxHeight}px`,
       }"
@@ -94,9 +96,12 @@ export default {
     totalHeight() {
       return this.channels.length * 56;
     },
+    topMaskHeight() {
+      return this.isDarwin ? 42 : 16;
+    },
     maxHeight() {
       const bottomHeight = this.showFileIcon ? 66 : 0;
-      return this.winHeight - 42 - bottomHeight;
+      return this.winHeight - this.topMaskHeight - bottomHeight;
     },
     isDarwin() {
       return process.platform === 'darwin';
@@ -126,7 +131,7 @@ export default {
   mounted() {
     this.topMask = false;
     this.bottomMask = this.maxHeight < this.totalHeight;
-    (document.querySelector('.icon-box') as HTMLElement).addEventListener('wheel', () => {
+    (document.querySelector('.icon-box') as HTMLElement).addEventListener('scroll', () => {
       const scrollTop = (document.querySelector('.icon-box') as HTMLElement).scrollTop;
       this.topMask = scrollTop !== 0;
       this.bottomMask = scrollTop + this.maxHeight < this.totalHeight;
@@ -177,7 +182,6 @@ export default {
 
   .top-mask {
     width: 100%;
-    height: 42px;
   }
   .bottom-mask {
     position: absolute;
@@ -198,9 +202,6 @@ export default {
   }
   .icon-hover {
     margin: auto;
-  }
-  .win {
-    margin-top: 16px;
   }
 }
 </style>
