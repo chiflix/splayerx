@@ -103,9 +103,10 @@ export default {
       this.iconTranslateY = e.clientY - this.mousedownY;
       this.$emit('is-dragging', true);
       const offset = 15;
-      const movingTo = e.clientY - this.mousedownY > 0
+      let movingTo = e.clientY - this.mousedownY > 0
         ? Math.floor((e.clientY - this.mousedownY + offset) / 56 + this.index)
         : Math.ceil((e.clientY - this.mousedownY - offset) / 56 + this.index);
+      if (movingTo < 0) movingTo = 0;
       this.$emit('index-of-moving-to', movingTo);
     },
     handleMouseup(index: number) {
