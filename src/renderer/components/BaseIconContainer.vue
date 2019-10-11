@@ -552,7 +552,8 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   width: 30px;
   height: 30px;
 }
-.bilibiliSidebar, .iqiyiSidebar, .youtubeSidebar, .douyuSidebar, .huyaSidebar {
+.bilibiliSidebar, .iqiyiSidebar, .youtubeSidebar,
+.douyuSidebar, .huyaSidebar, .qqSidebar, .youkuSidebar, .twitchSidebar {
   width: 44px;
   height: 44px;
 }
@@ -583,11 +584,6 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
 .danmu, .noDanmu {
   width: 20px;
   height: 20px;
-  display: block;
-}
-.youtube, .bilibili, .iqiyi {
-  width: 18px;
-  height: 18px;
   display: block;
 }
 .showFavicon, .hideFavicon {

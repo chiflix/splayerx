@@ -1,11 +1,15 @@
 <template>
   <div
     :title="$t(title)"
-    :class="{ selected: selected }"
+    :class="{ light: selected }"
     class="icon-hover"
   >
     <Icon
       :type="icon"
+    />
+    <div
+      :class="{ selected: selected }"
+      class="mask"
     />
   </div>
 </template>
@@ -38,21 +42,23 @@ div {
   opacity: 0.7;
   width: 44px;
   height: 44px;
-  margin-bottom: 12px;
 }
 .icon-hover:hover {
   opacity: 1.0;
 }
+.mask {
+  width: 44px;
+  height: 44px;
+  position: relative;
+  top: -50px;
+}
+.light {
+  opacity: 1;
+}
 .selected {
-  opacity: 1.0;
-  &::before {
-    content: '';
-    position: absolute;
-    width: 44px;
-    height: 44px;
-    border: 2px solid #E0E0EA;
-    border-radius: 100%;
-    box-sizing: border-box;
-  }
+  opacity: 1;
+  border: 2px solid #E0E0EA;
+  border-radius: 100%;
+  box-sizing: border-box;
 }
 </style>

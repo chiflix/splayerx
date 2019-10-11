@@ -38,7 +38,7 @@ export default {
   props: {
     title: {
       type: String,
-      default: 'Splayer',
+      default: 'SPlayer',
     },
     isLoading: {
       type: Boolean,

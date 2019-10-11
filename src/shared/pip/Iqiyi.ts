@@ -9,7 +9,7 @@ export default class Iqiyi {
     this.adapter = `document.body.style.overflow = "hidden";
       var header = document.querySelector(".qy-header");
       if (header) header.style.display = "none";
-      ${this.iqiyiBarrageAdapt(barrageState)}
+      ${this.barrageAdapt(barrageState)}
       var iqpPlayer = document.querySelector(".iqp-player");
       var screenShots = document.querySelector(".iqp-screenshot");
       if (screenShots) screenShots.style.display = "none";
@@ -44,7 +44,7 @@ export default class Iqiyi {
       + 'if (blockB) {blockB.style.display = ""};';
   }
 
-  public iqiyiBarrageAdapt(barrageState: boolean) {
+  public barrageAdapt(barrageState: boolean) {
     return `document.getElementsByClassName("iqp-barrage")[document.getElementsByClassName("iqp-barrage").length - 1].style.opacity = ${barrageState} ? "1" : "0";`;
   }
 }

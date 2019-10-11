@@ -10,7 +10,6 @@ import path, {
 import fs from 'fs';
 import http from 'http';
 import rimraf from 'rimraf';
-import urlParse from 'url-parse-lax';
 import { audioGrabService } from './helpers/AudioGrabService';
 import './helpers/electronPrototypes';
 import writeLog from './helpers/writeLog';
@@ -99,6 +98,8 @@ const locale = new Locale();
 const tmpVideoToOpen = [];
 const tmpSubsToOpen = [];
 const subRegex = getValidSubtitleRegex();
+const allChannels = ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch'];
+const compareStr = [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch']];
 const titlebarUrl = process.platform === 'darwin' ? `file:${resolve(__static, 'pip/macTitlebar.html')}` : `file:${resolve(__static, 'pip/winTitlebar.html')}`;
 const maskUrl = process.platform === 'darwin' ? `file:${resolve(__static, 'pip/mask.html')}` : `file:${resolve(__static, 'pip/mask.html')}`;
 const mainURL = process.env.NODE_ENV === 'development'
@@ -750,12 +751,13 @@ function registerMainWindowEvent(mainWindow) {
   });
   ipcMain.on('create-browser-view', (evt, args) => {
     if (!browserViewManager) browserViewManager = new BrowserViewManager();
-    const hostname = urlParse(args.url).hostname;
-    let channel = hostname.slice(hostname.indexOf('.') + 1, hostname.length);
-    if (args.url.includes('youtube')) {
-      channel = 'youtube.com';
-    }
-    const currentMainBrowserView = browserViewManager.create(channel, args);
+    let currentChannel = '';
+    allChannels.forEach((channel, index) => {
+      if (compareStr[index].findIndex(str => args.url.includes(str)) !== -1) {
+        currentChannel = `${channel}.com`;
+      }
+    });
+    const currentMainBrowserView = browserViewManager.create(currentChannel, args);
     setTimeout(() => {
       mainWindow.send('update-browser-state', {
         url: args.url,
@@ -885,12 +887,13 @@ function registerMainWindowEvent(mainWindow) {
     browViews.forEach((view) => {
       browsingWindow.removeBrowserView(view);
     });
-    const hostname = urlParse(mainView.webContents.getURL()).hostname;
-    let channel = hostname.slice(hostname.indexOf('.') + 1, hostname.length);
-    if (mainView.webContents.getURL().includes('youtube')) {
-      channel = 'youtube.com';
-    }
-    const browsers = browserViewManager.changePip(channel);
+    let currentChannel = '';
+    allChannels.forEach((channel, index) => {
+      if (compareStr[index].findIndex(str => mainView.webContents.getURL().includes(str)) !== -1) {
+        currentChannel = `${channel}.com`;
+      }
+    });
+    const browsers = browserViewManager.changePip(currentChannel);
     const pipBrowser = browsers.pipBrowser;
     const mainBrowser = browsers.mainBrowser;
     mainWindow.addBrowserView(mainBrowser.page.view);
@@ -945,6 +948,7 @@ function registerMainWindowEvent(mainWindow) {
       mainWindow.removeBrowserView(mainWindow.getBrowserViews()[0]);
       mainWindow.addBrowserView(mainBrowser.page.view);
       browsingWindow.addBrowserView(pipBrowser);
+      browsingWindow.setSize(420, 236);
       createPipControlView();
       createTitlebarView();
       browsingWindow.show();
@@ -1478,6 +1482,7 @@ app.on('window-all-closed', () => {
 
 const oauthRegex = [
   /^https:\/\/cnpassport.youku.com\//i,
+  /^https:\/\/udb3lgn.huya.com\//i,
   /^https:\/\/passport.iqiyi.com\/apis\/thirdparty/i,
   /^https:\/\/api.weibo.com\/oauth2/i,
   /^https:\/\/graph.qq.com\//i,
