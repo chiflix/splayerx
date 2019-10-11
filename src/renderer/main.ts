@@ -752,8 +752,8 @@ new Vue({
         this.$bus.$emit('clean-landingViewItems');
         this.menuService.addRecentPlayItems();
       });
-      const urls = ['https://www.iqiyi.com/', 'https://www.bilibili.com/', 'https://www.douyu.com/', 'https://www.youtube.com/'];
-      const channels = ['iqiyi', 'bilibili', 'douyu', 'youtube'];
+      const urls = ['https://www.iqiyi.com/', 'https://www.bilibili.com/', 'https://www.douyu.com/', 'https://www.huya.com/', 'https://v.qq.com/', 'https://www.youku.com/', 'https://www.twitch.tv/', 'https://www.youtube.com/'];
+      const channels = ['iqiyi', 'bilibili', 'douyu', 'huya', 'qq', 'youku', 'twitch', 'youtube'];
       channels.forEach((channel: string, index: number) => {
         this.menuService.on(`favourite.${channel}`, () => {
           const currentChannel = urls[index].slice(urls[index].indexOf('.') + 1, urls[index].length - 1);

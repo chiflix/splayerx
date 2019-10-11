@@ -1,6 +1,6 @@
 export function huyaVideoPause(type: string) {
   if (['normal', 'others'].includes(type)) {
-    return 'document.querySelector("video").pause();var timer = setInterval(() => { const pause = document.querySelector(".player-pause-btn"); if (pause) { clearInterval(timer);pause.click(); } }, 100);';
+    return 'document.querySelector("video").pause();var timer = setInterval(() => { const pause = document.querySelector(".player-pause-btn"); if (pause && timer) { clearInterval(timer);timer = null;pause.click(); } }, 100);';
   }
   return 'document.querySelector("video").pause();var timer = setInterval(() => { const pause = document.querySelector(".pause-81a5c3"); if (pause) { clearInterval(timer);pause.click(); } }, 100);';
 }
@@ -30,7 +30,14 @@ export default class Huya {
         document.querySelector("#player-pc-watch-btn").style.display = "none";
         var navbar = document.querySelector(".nav-comp-wrap");
         if (navbar) navbar.style.display = "none";
-        ${this.huyaBarrageAdapt(type, barrageState)}`;
+        var backToTop = document.querySelector(".room-backToTop");
+        if (backToTop) backToTop.style.display = "none";
+        var pip = document.querySelector("#player-pc-watch-btn");
+        if (pip) {
+        pip.style.display = "none";
+        Object.defineProperty(pip.style, "display", { get: function() { return "none"; }, set: function() {} });
+        }
+        ${this.barrageAdapt(type, barrageState)}`;
       this.watcher = '';
       this.recover = 'var videoPlayer = document.querySelector("#videoContainer");'
         + 'videoPlayer.style.position = "relative";'
@@ -47,7 +54,14 @@ export default class Huya {
         + 'document.querySelector("#main_col").style.overflow = "";'
         + 'document.querySelector("#player-pc-watch-btn").style.display = "";'
         + 'var navbar = document.querySelector(".nav-comp-wrap");'
-        + 'if (navbar) navbar.style.display = "";';
+        + 'if (navbar) navbar.style.display = "";'
+        + 'var backToTop = document.querySelector(".room-backToTop");'
+        + 'if (backToTop) backToTop.style.display = "";'
+        + 'var pip = document.querySelector("#player-pc-watch-btn");'
+        + 'if (pip) {'
+        + 'Object.defineProperty(pip.style, "display", {get: function(){return this._display}, set: function(val){this._display = val;pip.style.setProperty("display", val);}});'
+        + 'pip.style.display = "";'
+        + '}';
     } else if (type === 'video') {
       this.adapter = 'var videoPlayer = document.querySelector(".qNaLj_XPyjPujVM0Dx5jZ");'
         + 'videoPlayer.style.position = "fixed";'
@@ -110,7 +124,7 @@ export default class Huya {
     }
   }
 
-  public huyaBarrageAdapt(type: string, barrageOpen: boolean) {
+  public barrageAdapt(type: string, barrageOpen: boolean) {
     if (['normal', 'others'].includes(type)) {
       return `var barrage = document.querySelector("#danmuwrap");
         if (barrage) {
