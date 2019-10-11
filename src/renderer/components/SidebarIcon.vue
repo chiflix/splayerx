@@ -102,16 +102,17 @@ export default {
       this.isDragging = true;
       this.iconTranslateY = e.clientY - this.mousedownY;
       this.$emit('is-dragging', true);
-      this.$emit(
-        'index-of-moving-to',
-        Math.floor((e.clientY - this.mousedownY) / 56 + this.index),
-      );
+      const offset = 15;
+      const movingTo = e.clientY - this.mousedownY > 0
+        ? Math.floor((e.clientY - this.mousedownY + offset) / 56 + this.index)
+        : Math.ceil((e.clientY - this.mousedownY - offset) / 56 + this.index);
+      this.$emit('index-of-moving-to', movingTo);
     },
     handleMouseup(index: number) {
+      document.removeEventListener('mousemove', this.handleMousemove);
       if (this.isDragging) {
         this.isDragging = false;
         this.$emit('is-dragging', false);
-        document.removeEventListener('mousemove', this.handleMousemove);
         this.iconTranslateY = 0;
         this.mousedown = false;
       } else {
