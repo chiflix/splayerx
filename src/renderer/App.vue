@@ -44,7 +44,7 @@ import Titlebar from '@/components/Titlebar.vue';
 import Sidebar from '@/components/Sidebar.vue';
 import '@/css/style.scss';
 import drag from '@/helpers/drag';
-import { setToken } from '@/libs/apis';
+import { setToken, checkToken } from '@/libs/apis';
 import sagi from '@/libs/sagi';
 import { apiOfAccountService } from './helpers/featureSwitch';
 
@@ -60,6 +60,7 @@ export default {
       openFileArgs: null,
       showSidebar: false,
       currentUrl: '',
+      checkedToken: false,
     };
   },
   computed: {
@@ -125,6 +126,10 @@ export default {
       if (account) {
         setToken(account.token);
         sagi.setToken(account.token);
+        if (!this.checkedToken) {
+          this.checkedToken = true;
+          checkToken();
+        }
       } else {
         setToken('');
         sagi.setToken('');

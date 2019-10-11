@@ -21,12 +21,12 @@
       >
     </div>
     <div class="code-box">
-      <button
+      <input
         :disabled="isValidMobile || isGettingCode || count > 0 || isRobot"
         @click="getCode"
+        :value="count > 0 ? countString(count) : $t('loginModal.sendCode')"
+        type="button"
       >
-        {{ count > 0 ? countString(count) : $t('loginModal.sendCode') }}
-      </button>
       <input
         ref="code"
         @keydown.stop="keydown"
@@ -38,12 +38,12 @@
       >
     </div>
     <div id="captcha" />
-    <button
+    <input
       :disabled="isAllValid || isLogin"
+      :value="$t('loginModal.submit')"
+      type="submit"
       class="submit"
     >
-      {{ $t('loginModal.submit') }}
-    </button>
     <p
       v-show="message !== ''"
       class="error"
@@ -58,10 +58,10 @@
 import Vue from 'vue';
 // @ts-ignore
 import metadata from 'libphonenumber-js/metadata.mobile.json';
-import { parsePhoneNumberFromString, getCountryCallingCode } from 'libphonenumber-js/mobile';
-import { getSMSCode, signIn } from '@/libs/webApis';
+import { parsePhoneNumberFromString, getCountryCallingCode, CountryCode } from 'libphonenumber-js/mobile';
+import { getSMSCode, signIn, getGeoIP } from '@/libs/webApis';
 
-const ALI_CAPTCHA_APP_KEY = 'FFFF0N000000000084CE';
+const ALI_CAPTCHA_APP_KEY = 'CF_APP_1';
 const ALI_CAPTCHA_SCENE = 'nvc_message';
 
 export default Vue.extend({
@@ -110,7 +110,7 @@ export default Vue.extend({
       popUp: false,
       renderTo: '#captcha',
       trans: {},
-      language: 'cn',
+      language: 'en',
       // 滑动验证长度配置
       customWidth: 312,
       // 刮刮卡配置项
@@ -131,9 +131,9 @@ export default Vue.extend({
             sig: result.sig,
             token: result.token,
             scene: ALI_CAPTCHA_SCENE,
-            app_key: ALI_CAPTCHA_APP_KEY,
+            appKey: ALI_CAPTCHA_APP_KEY,
             // @ts-ignore
-            remote_ip: window.client_ip, // eslint-disable-line
+            remoteIp: window.client_ip, // eslint-disable-line
           };
           this.isGettingCode = true;
           getSMSCode(`+${this.countryCallCode}${this.mobile}`, afs, sms) // eslint-disable-line
@@ -156,6 +156,7 @@ export default Vue.extend({
               this.message = this.$t('loginModal.netWorkError');
               this.count = 0;
               this.isGettingCode = false;
+              this.showNvc();
             });
         }
       },
@@ -169,17 +170,6 @@ export default Vue.extend({
       bg_back_pass: '//img.alicdn.com/tfs/TB1KDxCSVXXXXasXFXXXXXXXXXX-100-80.png',
       obj_error: 'https://img.alicdn.com/tfs/TB1q9yTltfJ8KJjy0FeXXXKEXXa-50-74.png',
       bg_back_fail: 'https://img.alicdn.com/tfs/TB1w2oOSFXXXXb4XpXXXXXXXXXX-100-80.png',
-      upLang: {
-        cn: {
-          _ggk_guide: '请摁住鼠标左键，刮出两面盾牌',
-          _ggk_success: '恭喜您成功刮出盾牌<br/>继续下一步操作吧',
-          _ggk_loading: '加载中',
-          _ggk_fail: ['呀，盾牌不见了<br/>请', 'javascript:noCaptcha.reset()', '再来一次', '或', 'https://survey.taobao.com/survey/QgzQDdDd?token=%TOKEN', '反馈问题'],
-          _ggk_action_timeout: ['我等得太久啦<br/>请', 'javascript:noCaptcha.reset()', '再来一次', '或', 'https://survey.taobao.com/survey/QgzQDdDd?token=%TOKEN', '反馈问题'],
-          _ggk_net_err: ['网络实在不给力<br/>请', 'javascript:noCaptcha.reset()', '再来一次', '或', 'https://survey.taobao.com/survey/QgzQDdDd?token=%TOKEN', '反馈问题'],
-          _ggk_too_fast: ['您刮得太快啦<br/>请', 'javascript:noCaptcha.reset()', '再来一次', '或', 'https://survey.taobao.com/survey/QgzQDdDd?token=%TOKEN', '反馈问题'],
-        },
-      },
     };
     const date = new Date().toISOString().split('T')[0];
     const guideScript = document.createElement('script');
@@ -187,14 +177,15 @@ export default Vue.extend({
     document.head.appendChild(guideScript);
   },
   async mounted() {
-    // @ts-ignore
-    const ip = await window.remote.app.getIP(); // eslint-disable-line
-    // @ts-ignore
-    window.client_ip = ip; // eslint-disable-line
-    // @ts-ignore
-    const geo = window.lookup(ip); // eslint-disable-line
-    if (geo && geo.country && getCountryCallingCode(geo.country)) {
-      this.countryCallCode = getCountryCallingCode(geo.country);
+    try {
+      const geo = await getGeoIP();
+      // @ts-ignore
+      window.client_ip = geo.ip;
+      if (geo.countryCode && getCountryCallingCode(geo.countryCode as CountryCode)) {
+        this.countryCallCode = getCountryCallingCode(geo.countryCode as CountryCode);
+      }
+    } catch (error) {
+      // empty
     }
   },
   methods: {
@@ -281,15 +272,14 @@ export default Vue.extend({
         this.isLogin = true;
         this.message = '';
         try {
-          await signIn('code', `+${this.countryCallCode}${this.mobile}`, this.code);
-          window.close();
-        } catch (error) {
-          if (error.status === 400) {
-            this.message = this.$t('loginModal.codeError');
+          const result = await signIn('code', `+${this.countryCallCode}${this.mobile}`, this.code);
+          if (result) {
+            window.close();
           } else {
-            this.message = this.$t('loginModal.netWorkError');
+            this.message = this.$t('loginModal.codeError');
           }
-          this.count = 0;
+        } catch (error) {
+          this.message = this.$t('loginModal.netWorkError');
         }
         this.isLogin = false;
       }
@@ -303,11 +293,11 @@ export default Vue.extend({
         // @ts-ignore
         getNC().then(() => { // eslint-disable-line
           // @ts-ignore
-          _nvc_nc.upLang('cn', { // eslint-disable-line
-            _startTEXT: '请按住滑块，拖动到最右边',
-            _yesTEXT: '验证通过',
-            _error300: '哎呀，出错了，点击<a href="javascript:__nc.reset()">刷新</a>再来一次',
-            _errorNetwork: '网络不给力，请<a href="javascript:__nc.reset()">点击刷新</a>',
+          _nvc_nc.upLang('en', { // eslint-disable-line
+            _startTEXT: this.$t('loginModal.afs.start'),
+            _yesTEXT: this.$t('loginModal.afs.yes'),
+            _error300: this.$t('loginModal.afs.error300'),
+            _errorNetwork: this.$t('loginModal.afs.errorNetwork'),
           });
           // @ts-ignore
           _nvc_nc.reset(); // eslint-disable-line
@@ -456,7 +446,7 @@ button {
   input {
     width: 190px;
   }
-  button {
+  input[type="button"] {
     width: 110px;
     text-align: center;
   }

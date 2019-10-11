@@ -1556,5 +1556,4 @@ app.getSignInEndPoint = () => signInEndPoint;
 
 getRightPort().then((port) => {
   localHostPort = port;
-  console.log(localHostPort);
 }).catch(console.error);

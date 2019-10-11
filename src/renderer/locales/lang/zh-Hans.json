@@ -293,7 +293,7 @@
       "smartMode": "智能模式",
       "smartDescription": "离线识别不宜在工作或公众场合浏览的敏感内容，并在自动加载同目录文件或退出时抹除相关痕迹。",
       "incognitoMode": "无痕模式",
-      "incognitoDescription": "不保留任何播放记录。"
+      "incognitoDescription": "开启后将不再保留任何新的播放记录。"
     }
   },
   "privacyBubble": {

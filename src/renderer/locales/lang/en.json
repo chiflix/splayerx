@@ -290,7 +290,7 @@
     },
     "privacy": {
       "privacySetting": "Privacy",
-      "enable": "Enable Privacy Protection",
+      "enable": "Enable Privacy Protection When Playing Local Video Files",
       "smartMode": "Intelligent Mode",
       "smartDescription": "Offline identify sensitive or not-suitable-for-work contents, and clear the playback history when playing in a folder playlist or when quitting.",
       "incognitoMode": "Incognito Mode",
@@ -481,6 +481,12 @@
     "codeError": "Incorrect Vertification Code",
     "netWorkError": "Connection Timeout",
     "noLineError": "No Network Connection",
-    "afsError": "Captcha Validation Failed"
+    "afsError": "Captcha Validation Failed",
+    "afs": {
+      "start": "Please slide to verify",
+      "yes": "Successful",
+      "error300": "Verification failed, please <a href=\"javascript:__nc.reset()\">refresh</a> ",
+      "errorNetwork": "Network Error. Please <a href=\"javascript:__nc.reset()\">retry</a > "
+    }
   }
 }

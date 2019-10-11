@@ -39,10 +39,14 @@ const endpoint = window.remote.app.getSignInEndPoint();
  * @author tanghaixiang
  * @returns Promise
  */
-export function getGeoIP() {
+export function getGeoIP(): Promise<{ip: string, countryCode: string}> {
   return new Promise((resolve, reject) => {
-    fetcher.get(`${endpoint}/api/auth/login`).then((response) => {
-      resolve(response);
+    fetcher.get(`${endpoint}/api/geoip`).then((response: Response) => {
+      if (response.ok) {
+        response.json().then((data: { ip: string, countryCode: string }) => resolve(data));
+      } else {
+        reject(new Error());
+      }
     }).catch((error) => {
       reject(error);
     });
@@ -59,8 +63,8 @@ export function getGeoIP() {
  *   sig: string,
  *   token: string,
  *   scene: string,
- *   app_key: string, // eslint-disable-line
- *   remote_ip: string, // eslint-disable-line
+ *   appKey: string, // eslint-disable-line
+ *   remoteIp: string, // eslint-disable-line
  * }} [sms]
  * @returns Promise
  */
@@ -69,8 +73,8 @@ export function getSMSCode(phone: string, afs?: string, sms?: {
   sig: string,
   token: string,
   scene: string,
-  app_key: string, // eslint-disable-line
-  remote_ip: string, // eslint-disable-line
+  appKey: string, // eslint-disable-line
+  remoteIp: string, // eslint-disable-line
 }) {
   return new Promise((resolve, reject) => {
     const data = {
@@ -112,16 +116,15 @@ export function signIn(type: string, phone: string, code: string) {
       type,
       code,
     })
-      .then((response) => {
-        resolve(response.body);
+      .then((response: Response) => {
+        if (response.ok) {
+          resolve(true);
+        } else {
+          resolve(false);
+        }
       })
       .catch((error) => {
-        if (error && error.response && error.response.status === 400) {
-          error.code = '400';
-          reject(error);
-        } else {
-          reject(error);
-        }
+        reject(error);
       });
   });
 }
