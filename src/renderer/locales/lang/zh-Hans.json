@@ -263,7 +263,13 @@
     "exitPip": "退出画中画",
     "enterPop": "新窗口播放",
     "exitPop": "还原窗口",
-    "danmu": "弹幕开关"
+    "danmu": "弹幕开关",
+    "error": {
+      "offline": "",
+      "try": "",
+      "firstLine": "",
+      "secondLine": ""
+    }
   },
   "preferences": {
     "general": {
