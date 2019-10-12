@@ -50,4 +50,4 @@ export default class Iqiyi {
   }
 }
 
-export const iqiyiFindType = 'var r = { barrageState: !document.getElementsByClassName("barrage-switch barrage-switch-open").length }';
+export const iqiyiFindType = 'var r = { barrageState: !document.getElementsByClassName("barrage-switch barrage-switch-open").length };r;';

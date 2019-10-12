@@ -164,7 +164,6 @@ export default {
         case 'iqiyi':
           return { channel: 'iqiyi', barrageState, winSize: this.pipSize };
         case 'douyu':
-          console.log(this.pipType);
           return {
             channel: 'douyu', type: this.pipType, barrageState, winSize: this.pipSize,
           };
