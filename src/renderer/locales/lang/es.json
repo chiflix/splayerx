@@ -263,7 +263,13 @@
     "exitPip": "Volver al navegador",
     "enterPop": "Reproducir en ventana nueva",
     "exitPop": "Volver al navegador",
-    "danmu": "Alternar Danmaku"
+    "danmu": "Alternar Danmaku",
+    "error": {
+      "offline": "",
+      "try": "",
+      "firstLine": "",
+      "secondLine": ""
+    }
   },
   "preferences": {
     "general": {
