@@ -2,6 +2,8 @@ import { bilibiliFindType, bilibiliVideoPause } from './Bilibili';
 import PipFactory from './PipFactory';
 import { douyuFindType, douyuVideoPause } from './Douyu';
 import { huyaFindType, huyaVideoPause } from './Huya';
+import { QQFindType, QQVideoPause } from './QQ';
+import { twitchFindType } from './Twitch';
 
 class InjectJSManager implements IInjectJSManager {
   private readonly calcVideoNumCode: string;
@@ -30,16 +32,21 @@ class InjectJSManager implements IInjectJSManager {
     return `document.querySelector(".danmu").src = ${barrageState} ? "assets/danmu-default-icon.svg" : "assets/noDanmu-default-icon.svg"`;
   }
 
-  public bilibiliFindType(): string {
-    return bilibiliFindType;
-  }
-
-  public douyuFindType(): string {
-    return douyuFindType;
-  }
-
-  public huyaFindType(): string {
-    return huyaFindType;
+  public pipFindType(channel: string): string {
+    switch (channel) {
+      case 'bilibili':
+        return bilibiliFindType;
+      case 'douyu':
+        return douyuFindType;
+      case 'huya':
+        return huyaFindType;
+      case 'qq':
+        return QQFindType;
+      case 'twitch':
+        return twitchFindType;
+      default:
+        return '';
+    }
   }
 
   public douyuHideSelfPip(hide: boolean): string {
@@ -58,6 +65,8 @@ class InjectJSManager implements IInjectJSManager {
         return douyuVideoPause(type as string);
       case 'huya':
         return huyaVideoPause(type as string);
+      case 'qq':
+        return QQVideoPause(type as string);
       case 'normal':
         return this.pauseNormalVideo;
       default:
@@ -121,21 +130,33 @@ class InjectJSManager implements IInjectJSManager {
     return this.calcVideoNumCode;
   }
 
-  public getVideoStyle() {
+  public getVideoStyle(channel: string) {
+    if (channel === 'qq.com') {
+      return 'if (!document.querySelector(".poplayer_quickplay").classList.value.includes("none")) {'
+        + 'getComputedStyle(document.querySelector(".poplayer_quickplay").getElementsByTagName("video")[0]);'
+        + '} else if (document.querySelector(".mod_player")) {'
+        + 'var container = document.querySelector(".player_container");'
+        + 'var wideMode = container ? container.classList.value.includes("player_container_wide") : null;'
+        + 'if (wideMode) { container.classList.remove("player_container_wide");'
+        + 'var style = { width: parseFloat(getComputedStyle(document.querySelector(".mod_player").getElementsByTagName("video")[0]).width) - parseFloat(getComputedStyle(document.querySelector(".mod_player_side")).width),'
+        + 'height: getComputedStyle(document.querySelector(".mod_player").getElementsByTagName("video")[0]).height,'
+        + '};'
+        + 'style;'
+        + '} else { getComputedStyle(document.querySelector(".mod_player").getElementsByTagName("video")[0]); }'
+        + '} else { getComputedStyle(document.querySelector("#_feed_player").getElementsByTagName("video")[0]); }';
+    }
     return this.getVideoStyleCode;
   }
 }
 
 export interface IInjectJSManager {
   calcVideoNum(): string
-  getVideoStyle(): string
+  getVideoStyle(channel: string): string
   getPipByChannel(info: { channel: string, type?: string,
     barrageState?: boolean, winSize?: number[] }):
   { adapter: string, watcher: string, recover: string }
-  bilibiliFindType(): string
-  douyuFindType(): string
+  pipFindType(channel: string): string
   douyuHideSelfPip(hide: boolean): string
-  huyaFindType(): string
   pauseVideo(channel: string, type?: string): string
   initBarrageIcon(barrageState: boolean): string
   updatePipControlState(shouldShow: boolean): string

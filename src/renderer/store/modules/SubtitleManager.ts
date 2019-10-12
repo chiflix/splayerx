@@ -23,7 +23,7 @@ import {
 import {
   TranscriptInfo,
   searchForLocalList, retrieveEmbeddedList, fetchOnlineList,
-  OnlineGenerator, LocalGenerator, EmbeddedGenerator, TranslatedGenerator,
+  OnlineGenerator, LocalGenerator, EmbeddedGenerator, TranslatedGenerator, PreTranslatedGenerator,
 } from '@/services/subtitle';
 import { generateHints, calculatedName } from '@/libs/utils';
 import { log } from '@/libs/Log';
@@ -51,6 +51,7 @@ const sortOfTypes = {
   embedded: 1,
   online: 2,
   translated: 3,
+  preTranslated: 3,
 };
 
 let unwatch: Function;
@@ -80,7 +81,7 @@ const getters: GetterTree<ISubtitleManagerState, {}> = {
       .map(id => ({ id, sub: state.allSubtitles[id] }));
     const controlList = sortBy(list, ({ sub }) => {
       const { type } = sub.displaySource;
-      if ((type === Type.Online || type === Type.Translated)
+      if ((type === Type.Online || type === Type.Translated || type === Type.PreTranslated)
         && sub.language !== store.getters.primaryLanguage) {
         return sortOfTypes[type] + 2;
       }
@@ -376,8 +377,8 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
           .filter(({ language }) => language === languageCode);
         // 将Translated类型的都删除掉
         const translatedSubs = remove(oldSubtitles, ({
-          type, source,
-        }) => type === Type.Translated && !source);
+          type,
+        }) => type === Type.PreTranslated);
         // delete subtitles not existed in the new subtitles
         const notExistedOldSubs = remove(
           oldSubtitles,
@@ -403,6 +404,12 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
           } else {
             newSubtitlesToAdd.push(...notExistedNewSubs.splice(0, 2 - oldLen));
           }
+          // 如果出现需要添加ai翻译按钮，先检查是不是有过翻译记录，有的话，就不添加ai翻译按钮，不删除翻译的记录
+          const preTranslated = remove(oldSubtitlesToDel,
+            ({ type, source, language }) => (type === Type.PreTranslated && language === languageCode && source.source !== ''));
+          if (preTranslated.length > 0) {
+            addAIButton = false;
+          }
         } else {
           const oldLen = oldSubtitles.length;
           // 在线字幕列表不能超过3个
@@ -420,7 +427,7 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
       }).then(async (result) => {
         if (result.addAIButton) {
           dispatch(a.addSubtitle, {
-            generator: new TranslatedGenerator(null, languageCode), mediaHash,
+            generator: new PreTranslatedGenerator(null, languageCode), mediaHash,
           });
         }
         await dispatch(a.addOnlineSubtitles, { mediaHash, source: result.add })
@@ -445,11 +452,10 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
       const newSubtitlesToAdd: TranscriptInfo[] = [];
       const oldSubtitlesToDel: ISubtitleControlListItem[] = [];
       const oldSubtitles: ISubtitleControlListItem[] = [...getters.list];
-
       // 将Translated类型的都删除掉
       const translatedSubs = remove(oldSubtitles, ({
-        type, source,
-      }) => type === Type.Translated && !source);
+        type,
+      }) => type === Type.PreTranslated);
       // delete subtitles not matching the current language preference
       const wrongLanguageSubs = remove(
         oldSubtitles,
@@ -519,6 +525,12 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
           } else {
             newSubtitlesToAdd.push(...primaryNotExistedResults.splice(0, 2 - oldLen));
           }
+          // 如果出现需要添加ai翻译按钮，先检查是不是有过翻译记录，有的话，就不添加ai翻译按钮，不删除翻译的记录
+          const primaryPreTranslated = remove(oldSubtitlesToDel,
+            ({ type, source, language }) => (type === Type.PreTranslated && language === primaryLanguage && source.source !== ''));
+          if (primaryPreTranslated.length > 0) {
+            addPrimaryAIButton = false;
+          }
         } else {
           newSubtitlesToAdd.push(...primaryNotExistedResults);
         }
@@ -532,6 +544,12 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
             oldSubtitlesToDel.push(...oldSecondarySubs.splice(2, oldLen));
           } else {
             newSubtitlesToAdd.push(...secondaryNotExistedResults.splice(0, 2 - oldLen));
+          }
+          // 如果出现需要添加ai翻译按钮，先检查是不是有过翻译记录，有的话，就不添加ai翻译按钮，不删除翻译的记录
+          const secondaryPreTranslated = remove(oldSubtitlesToDel,
+            ({ type, source, language }) => (type === Type.PreTranslated && language === secondaryLanguage && source.source !== ''));
+          if (secondaryPreTranslated.length > 0) {
+            addSecondaryAIButton = false;
           }
         } else {
           newSubtitlesToAdd.push(...secondaryNotExistedResults);
@@ -548,12 +566,12 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
     }).then(async (result) => {
       if (result.addPrimaryAIButton) {
         dispatch(a.addSubtitle, {
-          generator: new TranslatedGenerator(null, primaryLanguage), mediaHash,
+          generator: new PreTranslatedGenerator(null, primaryLanguage), mediaHash,
         });
       }
       if (result.addSecondaryAIButton) {
         dispatch(a.addSubtitle, {
-          generator: new TranslatedGenerator(null, secondaryLanguage), mediaHash,
+          generator: new PreTranslatedGenerator(null, secondaryLanguage), mediaHash,
         });
       }
       await dispatch(a.addOnlineSubtitles, { mediaHash, source: result.add })
@@ -845,9 +863,11 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
       const { primaryLanguage, secondaryLanguage } = getters;
       if (!primarySelectionComplete || !secondarySelectionComplete) {
         const hasPrimaryLanguage = list
-          .find(({ language, type }) => language === primaryLanguage && type !== Type.Translated);
+          .find(({ language, type }) => language === primaryLanguage
+            && !(type === Type.Translated || type === Type.PreTranslated));
         const hasSecondaryLanguage = list
-          .find(({ language, type }) => language === secondaryLanguage && type !== Type.Translated);
+          .find(({ language, type }) => language === secondaryLanguage
+            && !(type === Type.Translated || type === Type.PreTranslated));
         if (hasPrimaryLanguage) {
           dispatch(a.autoChangePrimarySubtitle, hasPrimaryLanguage.id);
           primarySelectionComplete = true;

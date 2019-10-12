@@ -3,8 +3,17 @@
     class="side-bar"
   >
     <div
-      :class="{ 'win': !isDarwin }"
-      class="icon-box no-drag"
+      :style="{
+        boxShadow: topMask ? '0 2px 10px 0 rgba(0,0,0,0.50)' : '',
+        height: `${topMaskHeight}px`
+      }"
+      class="top-mask"
+    />
+    <div
+      :style="{
+        height: `${maxHeight}px`,
+      }"
+      class="icon-box"
     >
       <SidebarIcon
         v-for="(info, index) in channelsDetail"
@@ -12,10 +21,23 @@
         :title="info.title"
         :icon="info.icon"
         :selected="info.type === currentChannel"
+        :style="{
+          margin: '0 auto 12px auto',
+        }"
         @click.native="handleSidebarIcon(info.url, index)"
+        class="no-drag"
       />
     </div>
     <div
+      v-if="!showFileIcon"
+      :style="{ boxShadow: bottomMask ? '0 -3px 8px 0 rgba(0,0,0,0.60)' : '' }"
+      class="bottom-mask"
+    />
+    <div
+      :style="{
+        boxShadow: bottomMask ? '0 -2px 10px 0 rgba(0,0,0,0.50)' : '',
+        height: showFileIcon ? '66px' : '',
+      }"
       v-if="showFileIcon"
       class="bottom-icon no-drag"
     >
@@ -54,12 +76,33 @@ export default {
   },
   data() {
     return {
-      channels: ['https://www.bilibili.com/', 'https://www.iqiyi.com/', 'https://www.douyu.com/', 'https://www.huya.com/', 'https://www.youtube.com/'],
+      channels: [
+        'https://www.bilibili.com/',
+        'https://www.iqiyi.com/',
+        'https://www.douyu.com/',
+        'https://www.huya.com/',
+        'https://v.qq.com/',
+        'https://www.youku.com/',
+        'https://www.twitch.tv/',
+        'https://www.youtube.com/',
+      ],
       showFileIcon: false,
+      topMask: false,
+      bottomMask: false,
     };
   },
   computed: {
-    ...mapGetters(['pipSize', 'pipPos', 'isHistory', 'currentChannel']),
+    ...mapGetters(['pipSize', 'pipPos', 'isHistory', 'currentChannel', 'winHeight']),
+    totalHeight() {
+      return this.channels.length * 56;
+    },
+    topMaskHeight() {
+      return this.isDarwin ? 42 : 16;
+    },
+    maxHeight() {
+      const bottomHeight = this.showFileIcon ? 66 : 0;
+      return this.winHeight - this.topMaskHeight - bottomHeight;
+    },
     isDarwin() {
       return process.platform === 'darwin';
     },
@@ -79,6 +122,20 @@ export default {
     currentUrl(val: string) {
       this.showFileIcon = !!val;
     },
+    winHeight() {
+      const scrollTop = (document.querySelector('.icon-box') as HTMLElement).scrollTop;
+      this.topMask = this.maxHeight >= this.totalHeight ? false : scrollTop !== 0;
+      this.bottomMask = scrollTop + this.maxHeight < this.totalHeight;
+    },
+  },
+  mounted() {
+    this.topMask = false;
+    this.bottomMask = this.maxHeight < this.totalHeight;
+    (document.querySelector('.icon-box') as HTMLElement).addEventListener('scroll', () => {
+      const scrollTop = (document.querySelector('.icon-box') as HTMLElement).scrollTop;
+      this.topMask = scrollTop !== 0;
+      this.bottomMask = scrollTop + this.maxHeight < this.totalHeight;
+    });
   },
   created() {
     this.openHistory();
@@ -110,12 +167,14 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+::-webkit-scrollbar {
+  width: 0;
+}
 .side-bar {
   position: absolute;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
   background-color: #3B3B41;
   z-index: 0;
   left: 0;
@@ -124,19 +183,28 @@ export default {
   transition: width 100ms ease-out;
   will-change: width;
 
+  .top-mask {
+    width: 100%;
+  }
+  .bottom-mask {
+    position: absolute;
+    width: 100%;
+    height: 42px;
+    bottom: -42px;
+  }
   .icon-box {
-    width: 44px;
-    margin-top: 42px;
+    width: 100%;
     display: flex;
     flex-direction: column;
+    overflow-y: scroll;
   }
   .bottom-icon {
     display:flex;
     flex-direction: column;
-    margin-bottom: 18px;
+    width: 100%;
   }
-  .win {
-    margin-top: 16px;
+  .icon-hover {
+    margin: auto;
   }
 }
 </style>

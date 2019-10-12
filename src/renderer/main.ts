@@ -39,6 +39,7 @@ import { checkForUpdate } from '@/libs/utils';
 import asyncStorage from '@/helpers/asyncStorage';
 import { videodata } from '@/store/video';
 import { addBubble } from '@/helpers/notificationControl';
+import { isAccountEnabled } from '@/helpers/featureSwitch';
 import { CHECK_FOR_UPDATES_OFFLINE, REQUEST_TIMEOUT } from '@/helpers/notificationcodes';
 import { SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, LOAD_SUBVIDEO_FAILED } from './helpers/notificationcodes';
 import InputPlugin, { getterTypes as iGT } from '@/plugins/input';
@@ -404,6 +405,15 @@ new Vue({
     });
     getClientUUID().then((clientId: string) => {
       this.$ga && this.$ga.set('userId', clientId);
+      // get config cat is account enabled
+      isAccountEnabled().then((enabled: boolean) => {
+        log.debug('account', enabled);
+        if (enabled) {
+          this.$electron.ipcRenderer.send('account-enabled');
+        }
+      }).catch(() => {
+        // empty
+      });
     });
     this.$on('wheel-event', this.wheelEventHandler);
 
@@ -752,8 +762,8 @@ new Vue({
         this.$bus.$emit('clean-landingViewItems');
         this.menuService.addRecentPlayItems();
       });
-      const urls = ['https://www.iqiyi.com/', 'https://www.bilibili.com/', 'https://www.douyu.com/', 'https://www.youtube.com/'];
-      const channels = ['iqiyi', 'bilibili', 'douyu', 'youtube'];
+      const urls = ['https://www.iqiyi.com/', 'https://www.bilibili.com/', 'https://www.douyu.com/', 'https://www.huya.com/', 'https://v.qq.com/', 'https://www.youku.com/', 'https://www.twitch.tv/', 'https://www.youtube.com/'];
+      const channels = ['iqiyi', 'bilibili', 'douyu', 'huya', 'qq', 'youku', 'twitch', 'youtube'];
       channels.forEach((channel: string, index: number) => {
         this.menuService.on(`favourite.${channel}`, () => {
           const currentChannel = urls[index].slice(urls[index].indexOf('.') + 1, urls[index].length - 1);
@@ -900,7 +910,7 @@ new Vue({
       });
       this.menuService.on('subtitle.mainSubtitle', (e: Event, id: string, item: ISubtitleControlListItem) => {
         if (id === 'off') this.changeFirstSubtitle('');
-        else if (item.type === Type.Translated && item.source.source === '') {
+        else if (item.type === Type.PreTranslated && item.source.source === '') {
           this.showAudioTranslateModal(item);
         } else {
           this.updateSubtitleType(true);
@@ -911,7 +921,7 @@ new Vue({
         if (id === 'off') this.changeSecondarySubtitle('');
         else if (id === 'secondarySub') {
           this.updateEnabledSecondarySub(!this.enabledSecondarySub)
-        } else if (item.type === Type.Translated && item.source.source === '') {
+        } else if (item.type === Type.PreTranslated && item.source.source === '') {
           this.showAudioTranslateModal(item);
         } else {
           this.updateSubtitleType(false);

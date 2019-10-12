@@ -34,7 +34,7 @@ function generateHtmlWebpackPluginConfig(name) {
   return {
     chunks: [name],
     filename: `${name}.html`,
-    template: path.resolve(__dirname, `../src/index.ejs`),
+    template: path.resolve(__dirname, `../src/login.ejs`),
     minify: {
       collapseWhitespace: true,
       removeAttributeQuotes: true,
@@ -52,17 +52,14 @@ function generateHtmlWebpackPluginConfig(name) {
  * that provide pure *.vue files that need compiling
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/webpack-configurations.html#white-listing-externals
  */
-let whiteListedModules = ['vue'];
+let whiteListedModules = ['vue', 'vuex', 'vue-router', 'vue-i18n', 'vue-axios', 'axios'];
 
 let rendererConfig = {
   mode: 'development',
   devtool: '#module-eval-source-map',
   entry: {
-    preference: path.join(__dirname, '../src/renderer/preference.js'),
-    about: path.join(__dirname, '../src/renderer/about.js'),
-    labor: path.join(__dirname, '../src/renderer/labor.ts'),
-    index: path.join(__dirname, '../src/renderer/main.ts'),
-    browsing: path.join(__dirname, '../src/renderer/browsing.ts'),
+    index: path.join(__dirname, '../src/renderer/login.ts'),
+    login: path.join(__dirname, '../src/renderer/login.ts'),
   },
   externals: [
     ...Object.keys(Object.assign({}, dependencies, optionalDependencies)).filter(
@@ -198,15 +195,12 @@ let rendererConfig = {
     new VueLoaderPlugin(),
     new ExtractTextPlugin('styles.css'),
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('index')),
-    new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('labor')),
-    new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('about')),
-    new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('preference')),
-    new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('browsing')),
+    new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('login')),
     new webpack.HotModuleReplacementPlugin(),
   ],
   output: {
     filename: '[name].js',
-    libraryTarget: 'commonjs2',
+    libraryTarget: 'umd',
     path: path.join(__dirname, '../dist/electron'),
     globalObject: 'this',
   },
@@ -219,7 +213,7 @@ let rendererConfig = {
     },
     extensions: ['.ts', '.tsx', '.js', '.json', '.node'],
   },
-  target: 'electron-renderer',
+  target: 'web',
 };
 
 const sharedDefinedVariables = {
@@ -239,7 +233,7 @@ if (process.env.NODE_ENV !== 'production') {
     new webpack.DefinePlugin(
       Object.assign(sharedDefinedVariables, {
         'process.env.SAGI_API': `"${process.env.SAGI_API || 'apis.stage.sagittarius.ai:8443'}"`,
-        'process.env.ACCOUNT_API': `"${process.env.ACCOUNT_API || 'http://stage.account.splayer.work'}"`,
+        'process.env.ACCOUNT_API': `"${process.env.ACCOUNT_API || 'https://account.stage.splayer.org'}"`,
         __static: `"${path.join(__dirname, '../static').replace(/\\/g, '\\\\')}"`,
       }),
     ),
@@ -264,7 +258,7 @@ if (process.env.NODE_ENV === 'production') {
     new webpack.DefinePlugin(
       Object.assign(sharedDefinedVariables, {
         'process.env.SAGI_API': `"${process.env.SAGI_API || 'apis.sagittarius.ai:8443'}"`,
-        'process.env.ACCOUNT_API': `"${process.env.ACCOUNT_API || 'https://account.splayer.work'}"`,
+        'process.env.ACCOUNT_API': `"${process.env.ACCOUNT_API || 'https://account.splayer.org'}"`,
         'process.env.SENTRY_RELEASE': `"${release}"`,
         'process.env.NODE_ENV': '"production"',
       }),

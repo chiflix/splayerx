@@ -90,6 +90,38 @@ document.addEventListener('DOMContentLoaded', () => {
             }
           }
           break;
+        case url.includes('huya'):
+          if (['player-video', '_2yrglNsCHp7K38jZqGHfoV'].includes(evt.target.classList[0]) || evt.target.id === 'yanzhi-bg') {
+            offset = [evt.clientX, evt.clientY];
+            if (getRatio() !== 1) {
+              windowSize = remote.getCurrentWindow().getSize();
+            }
+          }
+          break;
+        case url.includes('qq'):
+          if (['txp_shadow', 'txp_ad_link'].includes(evt.target.classList[0])) {
+            offset = [evt.clientX, evt.clientY];
+            if (getRatio() !== 1) {
+              windowSize = remote.getCurrentWindow().getSize();
+            }
+          }
+          break;
+        case url.includes('youku'):
+          if (['youku-layer-wuliao', 'yk-trigger-layer'].includes(evt.target.classList[0]) || evt.target.parentElement.parentElement.classList[0] === 'h5-ext-layer') {
+            offset = [evt.clientX, evt.clientY];
+            if (getRatio() !== 1) {
+              windowSize = remote.getCurrentWindow().getSize();
+            }
+          }
+          break;
+        case url.includes('twitch'):
+          if (['VIDEO'].includes(evt.target.tagName) || ['pl-overlay', 'player-overlay', 'player-center-content', 'avap-ads-container'].includes(evt.target.classList[0])) {
+            offset = [evt.clientX, evt.clientY];
+            if (getRatio() !== 1) {
+              windowSize = remote.getCurrentWindow().getSize();
+            }
+          }
+          break;
         default:
           offset = [evt.clientX, evt.clientY];
           if (getRatio() !== 1) {
@@ -147,7 +179,9 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 const oauthRegex = [
+  /^https:\/\/cnpassport.youku.com\//i,
   /^https:\/\/passport.iqiyi.com\/apis\/thirdparty/i,
+  /^https:\/\/udb3lgn.huya.com\//i,
   /^https:\/\/api.weibo.com\/oauth2/i,
   /^https:\/\/graph.qq.com\//i,
   /^https:\/\/open.weixin.qq.com\//i,
