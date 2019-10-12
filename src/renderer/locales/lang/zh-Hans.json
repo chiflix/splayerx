@@ -492,8 +492,9 @@
     "afs": {
       "start": "请按住滑块，拖动到最右边",
       "yes": "验证成功",
-      "error300": "验证失败，请 <a href=\"javascript:__nc.reset()\">重试</a> ",
-      "errorNetwork": "网络错误，请 <a href=\"javascript:__nc.reset()\">重试</a > "
+      "retry": "重试",
+      "error300": "验证失败，请",
+      "errorNetwork": "网络错误，请"
     }
   }
 }
