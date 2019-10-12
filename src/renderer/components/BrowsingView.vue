@@ -147,6 +147,8 @@ export default {
       'isPip',
       'pipMode',
       'isHistory',
+      'isError',
+      'channels',
       'currentChannel',
     ]),
     isDarwin() {
@@ -190,6 +192,10 @@ export default {
     },
   },
   watch: {
+    currentChannel() {
+      this.updateIsError(false);
+      if (!navigator.onLine) this.didFailLoad();
+    },
     startLoadUrl(val: string) {
       if (
         !val
@@ -340,6 +346,8 @@ export default {
     },
   },
   created() {
+    window.addEventListener('online', this.onlineHandler);
+    window.addEventListener('offline', this.didFailLoad);
     this.createTouchBar(false);
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [
       570,
@@ -477,6 +485,7 @@ export default {
       updateIsPip: browsingActions.UPDATE_IS_PIP,
       updateCurrentChannel: browsingActions.UPDATE_CURRENT_CHANNEL,
       updatePipChannel: browsingActions.UPDATE_PIP_CHANNEL,
+      updateIsError: browsingActions.UPDATE_IS_ERROR,
     }),
     backToLandingViewHandler() {
       this.removeListener();
@@ -485,6 +494,10 @@ export default {
       this.$router.push({
         name: 'landing-view',
       });
+    },
+    onlineHandler() {
+      console.log('online');
+      this.updateIsError(false);
     },
     handlePageTitle(e: Event, title: string) {
       this.title = title;
@@ -612,6 +625,7 @@ export default {
         view.webContents.addListener('new-window', this.newWindow);
         if (!this.currentChannel.includes('douyu') && !this.currentChannel.includes('youku')) view.webContents.addListener('did-start-loading', this.didStartLoading);
         view.webContents.addListener('did-stop-loading', this.didStopLoading);
+        view.webContents.addListener('did-fail-load', this.didFailLoad);
         view.webContents.addListener('will-navigate', this.willNavigate);
       }
     },
@@ -692,6 +706,11 @@ export default {
     didStopLoading() {
       this.title = this.currentMainBrowserView().webContents.getTitle();
       this.loadingState = false;
+    },
+    didFailLoad() {
+      console.log('fail-load');
+      this.$electron.ipcRenderer.send('remove-browser-view');
+      this.updateIsError(true);
     },
     handleOpenUrl({ url }: { url: string }) {
       const protocol = urlParseLax(url).protocol;

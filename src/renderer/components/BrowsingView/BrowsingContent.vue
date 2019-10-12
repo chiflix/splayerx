@@ -1,24 +1,21 @@
 <template>
   <div class="browsing-content">
-    <div class="error-page">
-      <div class="title">未连接到互联网</div>
+    <div v-if="isError" class="error-page">
+      <div class="title">
+        未连接到互联网
+      </div>
       <div class="desciption">
         请试试以下办法：<br>检查网线、调制解调器和路由器<br>重新连接到 Wi-Fi 网络
-       </div>
+      </div>
     </div>
   </div>
 </template>
 <script lang="ts">
 import { mapGetters } from 'vuex';
+
 export default {
   computed: {
     ...mapGetters(['isError']),
-  },
-  data() {
-    return {
-    };
-  },
-  created() {
   },
 };
 </script>
