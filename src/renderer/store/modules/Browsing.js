@@ -5,7 +5,6 @@ const state = {
   initialUrl: '',
   recordUrl: {},
   barrageOpen: false,
-  barrageOpenByPage: false,
   isPip: false,
   pipMode: 'Enter',
   isHistory: false,
@@ -21,7 +20,6 @@ const getters = {
   isHistory: state => state.isHistory,
   currentChannel: state => state.currentChannel,
   pipChannel: state => state.pipChannel,
-  barrageOpenByPage: state => state.barrageOpenByPage,
 };
 
 const mutations = {
@@ -33,9 +31,6 @@ const mutations = {
   },
   [browsingMutations.BARRAGE_OPEN_UPDATE](state, payload) {
     state.barrageOpen = payload;
-  },
-  [browsingMutations.BARRAGE_OPEN_BY_PAGE_UPDATE](state, payload) {
-    state.barrageOpenByPage = payload;
   },
   [browsingMutations.IS_PIP_UPDATE](state, payload) {
     state.isPip = payload;
@@ -62,9 +57,6 @@ const actions = {
   },
   [browsingActions.UPDATE_BARRAGE_OPEN]({ commit }, delta) {
     commit(browsingMutations.BARRAGE_OPEN_UPDATE, delta);
-  },
-  [browsingActions.UPDATE_BARRAGE_OPEN_BY_PAGE]({ commit }, delta) {
-    commit(browsingMutations.BARRAGE_OPEN_BY_PAGE_UPDATE, delta);
   },
   [browsingActions.UPDATE_IS_PIP]({ commit }, delta) {
     commit(browsingMutations.IS_PIP_UPDATE, delta);

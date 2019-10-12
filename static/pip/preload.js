@@ -86,7 +86,6 @@ document.addEventListener('DOMContentLoaded', () => {
           }
           break;
         case url.includes('huya'):
-          console.log(evt.target);
           if (['VIDEO', 'BODY'].includes(evt.target.tagName) || ['player-video', '_2yrglNsCHp7K38jZqGHfoV', '_3bvIa9Kka-wJ8cwRu3Uylw'].includes(evt.target.classList[0]) || evt.target.id === 'yanzhi-bg') {
             offset = [evt.clientX, evt.clientY];
             if (getRatio() !== 1) {

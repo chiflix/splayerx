@@ -127,6 +127,7 @@ export default {
       compareStr: [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch']],
       hideMainWindow: false,
       startLoadUrl: '',
+      barrageOpenByPage: false,
     };
   },
   computed: {
@@ -140,7 +141,6 @@ export default {
       'pipSize',
       'pipPos',
       'barrageOpen',
-      'barrageOpenByPage',
       'browsingPos',
       'isFullScreen',
       'isFocused',
@@ -475,7 +475,6 @@ export default {
     ...mapActions({
       updateRecordUrl: browsingActions.UPDATE_RECORD_URL,
       updateBarrageOpen: browsingActions.UPDATE_BARRAGE_OPEN,
-      updateBarrageOpenByPage: browsingActions.UPDATE_BARRAGE_OPEN_BY_PAGE,
       updateIsPip: browsingActions.UPDATE_IS_PIP,
       updateCurrentChannel: browsingActions.UPDATE_CURRENT_CHANNEL,
       updatePipChannel: browsingActions.UPDATE_PIP_CHANNEL,
@@ -789,7 +788,7 @@ export default {
         .then((r?: { barrageState: boolean, type?: string }) => {
           if (r) {
             if (r.type) this.pipType = r.type;
-            this.updateBarrageOpenByPage(r.barrageState);
+            this.barrageOpenByPage = r.barrageState;
           }
           this.currentMainBrowserView().webContents.executeJavaScript(this.pip.adapter);
           if (this.pipChannel === 'douyu') {
