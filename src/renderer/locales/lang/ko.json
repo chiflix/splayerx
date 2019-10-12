@@ -263,7 +263,13 @@
     "exitPip": "브라우저로 돌아 가기",
     "enterPop": "새 창에서 놀다",
     "exitPop": "브라우저로 돌아 가기",
-    "danmu": "탄막"
+    "danmu": "탄막",
+    "error": {
+      "offline": "",
+      "try": "",
+      "firstLine": "",
+      "secondLine": ""
+    }
   },
   "preferences": {
     "general": {
