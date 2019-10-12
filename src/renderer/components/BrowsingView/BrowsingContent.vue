@@ -5,10 +5,12 @@
       class="error-page"
     >
       <div class="title">
-        {{ $t('browsing.error.offline' )}}
+        {{ $t('browsing.error.offline' ) }}
       </div>
       <div class="desciption">
-        {{ $t('browsing.error.try' )}}<br>{{ $t('browsing.error.firstLine')}}<br>{{ $t('browsing.error.secondLine' )}}
+        {{ $t('browsing.error.try' ) }}<br>
+        {{ $t('browsing.error.firstLine') }}<br>
+        {{ $t('browsing.error.secondLine' ) }}
       </div>
     </div>
   </div>
