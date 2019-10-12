@@ -213,7 +213,10 @@
       "bilibili": "Bilibili",
       "douyu": "Douyu",
       "huya": "",
-      "youtube": "Youtube"
+      "qq": "",
+      "twitch": "",
+      "youku": "",
+      "youtube": "YouTube"
     },
     "edit": {
       "name": "حرّر",
@@ -249,9 +252,12 @@
   "browsing": {
     "bilibili": "Bilibili",
     "iqiyi": "iQIYI",
-    "youtube": "Youtube",
+    "youtube": "YouTube",
     "huya": "",
+    "qq": "",
     "douyu": "Douyu",
+    "twitch": "",
+    "youku": "",
     "openLocalFile": " فتح ملف محلي ...",
     "enterPip": "أدخل صورة في صورة",
     "exitPip": "العودة إلى المتصفح",

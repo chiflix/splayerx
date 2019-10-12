@@ -213,7 +213,10 @@
       "bilibili": "哔哩哔哩",
       "douyu": "斗鱼",
       "huya": "虎牙",
-      "youtube": "Youtube"
+      "qq": "腾讯視頻",
+      "twitch": "Twitch",
+      "youku": "优酷",
+      "youtube": "YouTube"
     },
     "edit": {
       "name": "編輯",
@@ -249,9 +252,12 @@
   "browsing": {
     "bilibili": "哔哩哔哩",
     "iqiyi": "爱奇艺",
-    "youtube": "Youtube",
+    "youtube": "YouTube",
     "huya": "虎牙",
+    "qq": "腾讯視頻",
     "douyu": "斗鱼",
+    "twitch": "Twitch",
+    "youku": "优酷",
     "openLocalFile": "打開本地文件 ...",
     "enterPip": "進入畫中畫",
     "exitPip": "還原窗口",
@@ -293,7 +299,7 @@
       "smartMode": "智能模式",
       "smartDescription": "離線識別不宜在工作或公眾場合瀏覽的敏感內容，並在自動加載同目錄文件或退出時抹除相關痕跡。",
       "incognitoMode": "無痕模式",
-      "incognitoDescription": "不保留任何播放记录。"
+      "incognitoDescription": "開啟後將不再保留任何新的播放記錄。"
     }
   },
   "privacyBubble": {

@@ -15,11 +15,11 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-    - name: npm install, test, and build
+    - name: install, test, and build
       run: |
-        npm install
+        yarn
         node scripts/check-electron-version.js
-        npm test
-        npm run build --if-present
+        yarn test
+        yarn build
       env:
         CI: true

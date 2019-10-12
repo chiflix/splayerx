@@ -8,13 +8,16 @@ import path, {
   basename, dirname, extname, join, resolve,
 } from 'path';
 import fs from 'fs';
+import http from 'http';
 import rimraf from 'rimraf';
-// import { audioHandler } from './helpers/audioHandler';
 import { audioGrabService } from './helpers/AudioGrabService';
 import './helpers/electronPrototypes';
 import writeLog from './helpers/writeLog';
 import {
-  getValidVideoRegex, getValidSubtitleRegex, getToken, saveToken,
+  getValidVideoRegex, getValidSubtitleRegex,
+  getToken, saveToken,
+  getIP,
+  getRightPort,
 } from '../shared/utils';
 import { mouse } from './helpers/mouse';
 import MenuService from './menu/MenuService';
@@ -88,10 +91,15 @@ let needBlockCloseLaborWindow = true; // 标记是否阻塞nsfw窗口关闭
 let inited = false;
 let hideBrowsingWindow = false;
 let finalVideoToOpen = [];
+let signInEndPoint = '';
+let localHostPort = 0;
+let fileDirServerOnLine = false;
 const locale = new Locale();
 const tmpVideoToOpen = [];
 const tmpSubsToOpen = [];
 const subRegex = getValidSubtitleRegex();
+const allChannels = ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch'];
+const compareStr = [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch']];
 const titlebarUrl = process.platform === 'darwin' ? `file:${resolve(__static, 'pip/macTitlebar.html')}` : `file:${resolve(__static, 'pip/winTitlebar.html')}`;
 const maskUrl = process.platform === 'darwin' ? `file:${resolve(__static, 'pip/mask.html')}` : `file:${resolve(__static, 'pip/mask.html')}`;
 const mainURL = process.env.NODE_ENV === 'development'
@@ -106,8 +114,8 @@ const aboutURL = process.env.NODE_ENV === 'development'
 const preferenceURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080/preference.html'
   : `file://${__dirname}/preference.html`;
-const loginURL = process.env.NODE_ENV === 'development'
-  ? 'http://localhost:9080/login.html'
+let loginURL = process.env.NODE_ENV === 'development'
+  ? 'http://localhost:9081/login.html'
   : `file://${__dirname}/login.html`;
 const browsingURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080/browsing.html'
@@ -300,23 +308,73 @@ function createPreferenceWindow(e, route) {
   preferenceWindow.once('ready-to-show', () => {
     preferenceWindow.show();
   });
+  preferenceWindow.on('focus', () => {
+    menuService.enableMenu(false);
+  });
+}
+
+/**
+ * @description sign in window need aliyun nc valication with // protocal
+ * @author tanghaixiang
+ */
+function createFileDirServer() {
+  http.createServer((request, response) => {
+    console.log('request ', request.url);
+    let filePath = `${request.url}`;
+    if (filePath === '/') {
+      filePath = '/login.html';
+    }
+    const extname = String(path.extname(filePath)).toLowerCase();
+    const mimeTypes = {
+      '.html': 'text/html',
+      '.js': 'text/javascript',
+      '.css': 'text/css',
+      '.json': 'application/json',
+      '.png': 'image/png',
+      '.jpg': 'image/jpg',
+      '.gif': 'image/gif',
+      '.svg': 'image/svg+xml',
+      '.wav': 'audio/wav',
+      '.mp4': 'video/mp4',
+      '.woff': 'application/font-woff',
+      '.ttf': 'application/font-ttf',
+      '.eot': 'application/vnd.ms-fontobject',
+      '.otf': 'application/font-otf',
+      '.wasm': 'application/wasm',
+    };
+    const contentType = mimeTypes[extname] || 'application/octet-stream';
+    fs.readFile(`${__dirname}${filePath}`, (error, content) => {
+      if (error) {
+        return;
+      }
+      response.writeHead(200, { 'Content-Type': contentType });
+      response.end(content, 'utf-8');
+    });
+  }).listen(localHostPort);
 }
 
 function createLoginWindow(e, route) {
+  // in production use http protocal
+  // aliyun captcha use // protocal
+  if (process.env.NODE_ENV === 'production' && !fileDirServerOnLine) {
+    createFileDirServer();
+    fileDirServerOnLine = true;
+    loginURL = `http://localhost:${localHostPort}/login.html`;
+  }
   const loginWindowOptions = {
     useContentSize: true,
     frame: false,
     titleBarStyle: 'none',
     width: 412,
     height: 284,
+    webPreferences: {
+      experimentalFeatures: true,
+      webSecurity: false,
+      preload: `${require('path').resolve(__static, 'login/preload.js')}`,
+    },
     transparent: true,
     resizable: false,
     show: false,
-    webPreferences: {
-      webSecurity: false,
-      nodeIntegration: true,
-      experimentalFeatures: true,
-    },
     acceptFirstMouse: true,
     fullscreenable: false,
     maximizable: false,
@@ -347,6 +405,9 @@ function createLoginWindow(e, route) {
   }
   loginWindow.once('ready-to-show', () => {
     loginWindow.show();
+  });
+  loginWindow.on('focus', () => {
+    menuService.enableMenu(false);
   });
 }
 
@@ -690,10 +751,9 @@ function registerMainWindowEvent(mainWindow) {
   });
   ipcMain.on('create-browser-view', (evt, args) => {
     if (!browserViewManager) browserViewManager = new BrowserViewManager();
-    const allChannels = ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch'];
     let currentChannel = '';
-    allChannels.forEach((channel) => {
-      if (args.url.includes(channel)) {
+    allChannels.forEach((channel, index) => {
+      if (compareStr[index].findIndex(str => args.url.includes(str)) !== -1) {
         currentChannel = `${channel}.com`;
       }
     });
@@ -827,10 +887,9 @@ function registerMainWindowEvent(mainWindow) {
     browViews.forEach((view) => {
       browsingWindow.removeBrowserView(view);
     });
-    const allChannels = ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch'];
     let currentChannel = '';
-    allChannels.forEach((channel) => {
-      if (mainView.webContents.getURL().includes(channel)) {
+    allChannels.forEach((channel, index) => {
+      if (compareStr[index].findIndex(str => mainView.webContents.getURL().includes(str)) !== -1) {
         currentChannel = `${channel}.com`;
       }
     });
@@ -889,6 +948,7 @@ function registerMainWindowEvent(mainWindow) {
       mainWindow.removeBrowserView(mainWindow.getBrowserViews()[0]);
       mainWindow.addBrowserView(mainBrowser.page.view);
       browsingWindow.addBrowserView(pipBrowser);
+      browsingWindow.setSize(420, 236);
       createPipControlView();
       createTitlebarView();
       browsingWindow.show();
@@ -1092,6 +1152,9 @@ function registerMainWindowEvent(mainWindow) {
     if (mainWindow && !mainWindow.webContents.isDestroyed()) {
       mainWindow.webContents.send('mainDispatch', 'setPreference', args);
     }
+    if (loginWindow && !loginWindow.webContents.isDestroyed()) {
+      loginWindow.webContents.send('setPreference', args);
+    }
   });
   ipcMain.on('main-to-preference', (e, args) => {
     if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
@@ -1123,6 +1186,12 @@ function registerMainWindowEvent(mainWindow) {
 
   ipcMain.on('add-login', createLoginWindow);
 
+  ipcMain.on('login-captcha', () => {
+    if (loginWindow && !loginWindow.webContents.isDestroyed()) {
+      loginWindow.setSize(412, 336, true);
+    }
+  });
+
   ipcMain.on('account-enabled', () => {
     // get storage token
     getToken().then((account) => {
@@ -1138,6 +1207,10 @@ function registerMainWindowEvent(mainWindow) {
         audioGrabService.setToken(undefined);
       }
     }).catch(console.error);
+  });
+
+  ipcMain.on('sign-in-end-point', (events, data) => {
+    signInEndPoint = data;
   });
 }
 
@@ -1216,6 +1289,9 @@ function createMainWindow(openDialog, playlistId) {
       if (mainWindow) mainWindow.openDevTools({ mode: 'detach' });
     }, 1000);
   }
+  mainWindow.on('focus', () => {
+    menuService.enableMenu(true);
+  });
 }
 
 ['left-drag', 'left-up'].forEach((channel) => {
@@ -1471,6 +1547,12 @@ app.on('sign-in', (account) => {
   }
 });
 
+app.on('sign-out-confirm', () => {
+  if (mainWindow && !mainWindow.webContents.isDestroyed()) {
+    mainWindow.webContents.send('sign-out-confirm', undefined);
+  }
+});
+
 app.on('sign-out', () => {
   global['account'] = undefined;
   menuService.updateAccount(undefined);
@@ -1480,3 +1562,18 @@ app.on('sign-out', () => {
     mainWindow.webContents.send('sign-in', undefined);
   }
 });
+
+app.getDisplayLanguage = () => {
+  locale.getDisplayLanguage();
+  return locale.displayLanguage;
+};
+
+// export getIp to static login preload.js
+app.getIP = getIP;
+
+// export getSignInEndPoint to static login preload.js
+app.getSignInEndPoint = () => signInEndPoint;
+
+getRightPort().then((port) => {
+  localHostPort = port;
+}).catch(console.error);

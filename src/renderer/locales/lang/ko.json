@@ -213,7 +213,10 @@
       "bilibili": "Bilibili",
       "douyu": "Douyu",
       "huya": "",
-      "youtube": "Youtube"
+      "qq": "",
+      "twitch": "",
+      "youku": "",
+      "youtube": "YouTube"
     },
     "edit": {
       "name": "편집",
@@ -249,9 +252,12 @@
   "browsing": {
     "bilibili": "Bilibili",
     "iqiyi": "iQIYI",
-    "youtube": "Youtube",
+    "youtube": "YouTube",
     "huya": "",
+    "qq": "",
     "douyu": "Douyu",
+    "twitch": "",
+    "youku": "",
     "openLocalFile": "로컬 파일 열기 ...",
     "enterPip": "Picture In Picture 사용",
     "exitPip": "브라우저로 돌아 가기",

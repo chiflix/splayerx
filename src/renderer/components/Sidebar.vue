@@ -3,11 +3,13 @@
     class="side-bar"
   >
     <div
-      :style="{ boxShadow: topMask ? '0 2px 10px 0 rgba(0,0,0,0.50)' : '' }"
+      :style="{
+        boxShadow: topMask ? '0 2px 10px 0 rgba(0,0,0,0.50)' : '',
+        height: `${topMaskHeight}px`
+      }"
       class="top-mask"
     />
     <div
-      :class="{ 'win': !isDarwin }"
       :style="{
         height: `${maxHeight}px`,
       }"
@@ -20,7 +22,7 @@
         :icon="info.icon"
         :selected="info.type === currentChannel"
         :style="{
-          margin: index !== channelsDetail.length - 1 ? '0 auto 12px auto' : '0 auto 0 auto',
+          margin: '0 auto 12px auto',
         }"
         @click.native="handleSidebarIcon(info.url, index)"
         class="no-drag"
@@ -28,7 +30,7 @@
     </div>
     <div
       v-if="!showFileIcon"
-      :style="{ boxShadow: bottomMask ? '0 -2px 10px 0 rgba(0,0,0,0.50)' : '' }"
+      :style="{ boxShadow: bottomMask ? '0 -3px 8px 0 rgba(0,0,0,0.60)' : '' }"
       class="bottom-mask"
     />
     <div
@@ -92,11 +94,14 @@ export default {
   computed: {
     ...mapGetters(['pipSize', 'pipPos', 'isHistory', 'currentChannel', 'winHeight']),
     totalHeight() {
-      return this.channels.length * 44 + (this.channels.length - 1) * 12;
+      return this.channels.length * 56;
+    },
+    topMaskHeight() {
+      return this.isDarwin ? 42 : 16;
     },
     maxHeight() {
-      const bottomHeight = this.showFileIcon ? 66 : 12;
-      return this.winHeight - 42 - bottomHeight;
+      const bottomHeight = this.showFileIcon ? 66 : 0;
+      return this.winHeight - this.topMaskHeight - bottomHeight;
     },
     isDarwin() {
       return process.platform === 'darwin';
@@ -119,14 +124,14 @@ export default {
     },
     winHeight() {
       const scrollTop = (document.querySelector('.icon-box') as HTMLElement).scrollTop;
-      this.topMask = scrollTop !== 0;
+      this.topMask = this.maxHeight >= this.totalHeight ? false : scrollTop !== 0;
       this.bottomMask = scrollTop + this.maxHeight < this.totalHeight;
     },
   },
   mounted() {
     this.topMask = false;
     this.bottomMask = this.maxHeight < this.totalHeight;
-    (document.querySelector('.icon-box') as HTMLElement).addEventListener('wheel', () => {
+    (document.querySelector('.icon-box') as HTMLElement).addEventListener('scroll', () => {
       const scrollTop = (document.querySelector('.icon-box') as HTMLElement).scrollTop;
       this.topMask = scrollTop !== 0;
       this.bottomMask = scrollTop + this.maxHeight < this.totalHeight;
@@ -177,11 +182,12 @@ export default {
 
   .top-mask {
     width: 100%;
-    height: 42px;
   }
   .bottom-mask {
+    position: absolute;
     width: 100%;
-    height: 12px;
+    height: 42px;
+    bottom: -42px;
   }
   .icon-box {
     width: 100%;
@@ -196,9 +202,6 @@ export default {
   }
   .icon-hover {
     margin: auto;
-  }
-  .win {
-    margin-top: 16px;
   }
 }
 </style>
