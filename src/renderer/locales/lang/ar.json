@@ -493,7 +493,7 @@
       "start": "Please slide to verify",
       "yes": "Success",
       "error300": "",
-      "errorNetwork": ""
+      "errorNetwork": "<Network Error. Please <a href=\"javascript:__nc.reset()\">retry</a"
     }
   }
 }
