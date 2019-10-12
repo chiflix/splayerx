@@ -62,7 +62,7 @@ import metadata from 'libphonenumber-js/metadata.mobile.json';
 import { parsePhoneNumberFromString, getCountryCallingCode, CountryCode } from 'libphonenumber-js/mobile';
 import { getSMSCode, signIn, getGeoIP } from '@/libs/webApis';
 
-const ALI_CAPTCHA_APP_KEY = 'FFFF0N000000000084CE';
+const ALI_CAPTCHA_APP_KEY = 'FFFF0N0000000000858A';
 const ALI_CAPTCHA_SCENE = 'nvc_message';
 
 export default Vue.extend({
