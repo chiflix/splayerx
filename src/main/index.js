@@ -656,9 +656,6 @@ function registerMainWindowEvent(mainWindow) {
       mainWindow.send('update-pip-state', args);
     }
   });
-  ipcMain.on('remove-browser-view', () => {
-    mainWindow.removeBrowserView(mainWindow.getBrowserViews()[0]);
-  });
   ipcMain.on('remove-main-window', () => {
     browserViewManager.pauseVideo(mainWindow.getBrowserViews()[0]);
     mainWindow.hide();

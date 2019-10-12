@@ -194,7 +194,7 @@ export default {
   watch: {
     currentChannel() {
       this.updateIsError(false);
-      if (!navigator.onLine) this.didFailLoad();
+      if (!navigator.onLine) this.offlineHandler();
     },
     startLoadUrl(val: string) {
       if (
@@ -346,8 +346,8 @@ export default {
     },
   },
   created() {
+    if (!navigator.onLine) this.offlineHandler();
     window.addEventListener('online', this.onlineHandler);
-    window.addEventListener('offline', this.didFailLoad);
     this.createTouchBar(false);
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [
       570,
@@ -496,8 +496,20 @@ export default {
       });
     },
     onlineHandler() {
-      console.log('online');
+      this.currentMainBrowserView().setBounds({
+        x: this.showSidebar ? 76 : 0,
+        y: 40,
+        width: this.showSidebar ? this.winSize[0] - 76 : this.winSize[0],
+        height: this.winSize[1] - 40,
+      });
+      this.handleUrlReload();
       this.updateIsError(false);
+    },
+    offlineHandler() {
+      this.currentMainBrowserView().setBounds({
+        x: 76, y: 0, width: 0, height: 0,
+      });
+      this.updateIsError(true);
     },
     handlePageTitle(e: Event, title: string) {
       this.title = title;
@@ -708,9 +720,7 @@ export default {
       this.loadingState = false;
     },
     didFailLoad() {
-      console.log('fail-load');
-      this.$electron.ipcRenderer.send('remove-browser-view');
-      this.updateIsError(true);
+      // this.updateIsError(true);
     },
     handleOpenUrl({ url }: { url: string }) {
       const protocol = urlParseLax(url).protocol;
