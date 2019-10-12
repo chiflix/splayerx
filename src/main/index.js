@@ -124,6 +124,17 @@ const browsingURL = process.env.NODE_ENV === 'development'
 const tempFolderPath = path.join(app.getPath('temp'), 'splayer');
 if (!fs.existsSync(tempFolderPath)) fs.mkdirSync(tempFolderPath);
 
+function hackWindowsRightMenu(win) {
+  if (win) {
+    win.hookWindowMessage(278, () => {
+      win.setEnabled(false);
+      setTimeout(() => {
+        win.setEnabled(true);
+      }, 100);
+      return true;
+    });
+  }
+}
 
 function handleBossKey() {
   if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
@@ -311,6 +322,9 @@ function createPreferenceWindow(e, route) {
   preferenceWindow.on('focus', () => {
     menuService.enableMenu(false);
   });
+  if (process.platform === 'win32') {
+    hackWindowsRightMenu(preferenceWindow);
+  }
 }
 
 /**
@@ -409,6 +423,9 @@ function createLoginWindow(e, route) {
   loginWindow.on('focus', () => {
     menuService.enableMenu(false);
   });
+  if (process.platform === 'win32') {
+    hackWindowsRightMenu(loginWindow);
+  }
 }
 
 function createAboutWindow() {
@@ -445,6 +462,9 @@ function createAboutWindow() {
   aboutWindow.once('ready-to-show', () => {
     aboutWindow.show();
   });
+  if (process.platform === 'win32') {
+    hackWindowsRightMenu(aboutWindow);
+  }
 }
 
 function createBrowsingWindow(args) {
@@ -1324,6 +1344,11 @@ app.on('second-instance', () => {
   }
 });
 
+app.on('minimize', () => {
+  if (mainWindow && mainWindow.isFocused()) {
+    mainWindow.minimize();
+  }
+});
 
 async function darwinOpenFilesToStart() {
   if (mainWindow && !mainWindow.webContents.isDestroyed()) { // sencond instance

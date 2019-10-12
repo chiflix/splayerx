@@ -128,6 +128,7 @@ export default {
       compareStr: [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch']],
       hideMainWindow: false,
       startLoadUrl: '',
+      barrageOpenByPage: false,
     };
   },
   computed: {
@@ -155,27 +156,28 @@ export default {
       return process.platform === 'darwin';
     },
     pipArgs() {
+      const barrageState = this.isPip ? this.barrageOpenByPage : this.barrageOpen;
       switch (this.pipChannel) {
         case 'youtube':
           return { channel: 'youtube' };
         case 'bilibili':
           return {
-            channel: 'bilibili', type: this.pipType, barrageState: this.barrageOpen, winSize: this.pipSize,
+            channel: 'bilibili', type: this.pipType, barrageState, winSize: this.pipSize,
           };
         case 'iqiyi':
-          return { channel: 'iqiyi', barrageState: this.barrageOpen, winSize: this.pipSize };
+          return { channel: 'iqiyi', barrageState, winSize: this.pipSize };
         case 'douyu':
           return {
-            channel: 'douyu', type: this.pipType, barrageState: this.barrageOpen, winSize: this.pipSize,
+            channel: 'douyu', type: this.pipType, barrageState, winSize: this.pipSize,
           };
         case 'huya':
           return {
-            channel: 'huya', type: this.pipType, barrageState: this.barrageOpen, winSize: this.pipSize,
+            channel: 'huya', type: this.pipType, barrageState, winSize: this.pipSize,
           };
         case 'qq':
-          return { channel: 'qq', type: this.pipType, barrageState: this.barrageOpen };
+          return { channel: 'qq', type: this.pipType, barrageState };
         case 'youku':
-          return { channel: 'youku', barrageState: this.barrageOpen };
+          return { channel: 'youku', barrageState };
         case 'twitch':
           return { channel: 'twitch', type: this.pipType, winSize: this.pipSize };
         case 'others':
@@ -810,27 +812,23 @@ export default {
       this.allChannels.forEach((channel: string) => {
         if (this.currentChannel.includes(channel)) this.pipChannel = channel;
       });
-      if (['bilibili', 'douyu', 'huya', 'qq', 'twitch'].includes(this.pipChannel)) {
-        this.currentMainBrowserView()
-          .webContents.executeJavaScript(InjectJSManager.pipFindType(this.pipChannel))
-          .then((r: string) => {
-            this.pipType = r;
-            this.currentMainBrowserView().webContents.executeJavaScript(this.pip.adapter);
-            if (this.pipChannel === 'douyu') {
-              this.currentMainBrowserView().webContents
-                .insertCSS(InjectJSManager.douyuHideSelfPip(true));
-            }
-          })
-          .then(() => {
-            this.adaptFinished = true;
-          });
-      } else {
-        this.currentMainBrowserView()
-          .webContents.executeJavaScript(this.pip.adapter)
-          .then(() => {
-            this.adaptFinished = true;
-          });
-      }
+      const findType = InjectJSManager.pipFindType(this.pipChannel) || '';
+      this.currentMainBrowserView()
+        .webContents.executeJavaScript(findType)
+        .then((r?: { barrageState: boolean, type?: string }) => {
+          if (r) {
+            if (r.type) this.pipType = r.type;
+            this.barrageOpenByPage = r.barrageState;
+          }
+          this.currentMainBrowserView().webContents.executeJavaScript(this.pip.adapter);
+          if (this.pipChannel === 'douyu') {
+            this.currentMainBrowserView().webContents
+              .insertCSS(InjectJSManager.douyuHideSelfPip(true));
+          }
+        })
+        .then(() => {
+          this.adaptFinished = true;
+        });
     },
     currentMainBrowserView() {
       return this.$electron.remote.getCurrentWindow().getBrowserViews()[0];

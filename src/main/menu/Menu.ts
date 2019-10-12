@@ -1087,6 +1087,10 @@ export default class Menubar {
       options.click = () => {
         app.emit('bossKey');
       };
+    } else if (arg1.id === 'window.minimize') {
+      options.click = () => {
+        app.emit('minimize');
+      };
     }
 
     if (arg1.winAccelerator && !isMacintosh) {

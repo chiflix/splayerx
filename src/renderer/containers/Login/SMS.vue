@@ -62,7 +62,7 @@ import metadata from 'libphonenumber-js/metadata.mobile.json';
 import { parsePhoneNumberFromString, getCountryCallingCode, CountryCode } from 'libphonenumber-js/mobile';
 import { getSMSCode, signIn, getGeoIP } from '@/libs/webApis';
 
-const ALI_CAPTCHA_APP_KEY = 'FFFF0N000000000084CE';
+const ALI_CAPTCHA_APP_KEY = 'FFFF0N0000000000858A';
 const ALI_CAPTCHA_SCENE = 'nvc_message';
 
 export default Vue.extend({
@@ -294,12 +294,13 @@ export default Vue.extend({
         // 唤醒滑动验证
         // @ts-ignore
         getNC().then(() => { // eslint-disable-line
+          const retryText = ` <a href="javascript:__nc.reset()">${this.$t('loginModal.afs.retry')}</a > `;
           // @ts-ignore
           _nvc_nc.upLang('en', { // eslint-disable-line
             _startTEXT: this.$t('loginModal.afs.start'),
             _yesTEXT: this.$t('loginModal.afs.yes'),
-            _error300: this.$t('loginModal.afs.error300'),
-            _errorNetwork: this.$t('loginModal.afs.errorNetwork'),
+            _error300: this.$t('loginModal.afs.error300') + retryText,
+            _errorNetwork: this.$t('loginModal.afs.errorNetwork') + retryText,
           });
           // @ts-ignore
           _nvc_nc.reset(); // eslint-disable-line

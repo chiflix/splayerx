@@ -19,20 +19,26 @@ export default class Youku {
       var pip = document.querySelector(".minisize-layer")
       if (pip) pip.style.pointerEvents = "none";`;
     this.watcher = '';
-    this.recover = 'var player = document.querySelector("#ykPlayer");'
-      + 'player.style.position = "";'
-      + 'player.style.left = "";'
-      + 'player.style.top = "";'
-      + 'player.style.width = "";'
-      + 'player.style.zIndex = "";'
-      + 'player.style.maxWidth = "";'
-      + 'player.style.maxHeight = "";'
-      + 'document.body.style.overflow = "";'
-      + 'var pip = document.querySelector(".minisize-layer");'
-      + 'if (pip) pip.style.pointerEvents = "auto";';
+    this.recover = `${this.barrageAdapt(barrageState)}
+      var player = document.querySelector("#ykPlayer");
+      player.style.position = "";
+      player.style.left = "";
+      player.style.top = "";
+      player.style.width = "";
+      player.style.zIndex = "";
+      player.style.maxWidth = "";
+      player.style.maxHeight = "";
+      document.body.style.overflow = "";
+      var pip = document.querySelector(".minisize-layer");
+      if (pip) pip.style.pointerEvents = "auto";`;
   }
 
   public barrageAdapt(barrageState: boolean) {
-    return `var danmu = document.querySelector('.yk-player-danmu'); if (danmu) danmu.style.opacity = ${barrageState} ? "1" : "0";`;
+    return `var danmu = !!document.getElementsByClassName("yk_dm_button enable").length;
+    if (danmu !== ${barrageState}) {
+    document.querySelector(".yk_dm_button").click();
+    }`;
   }
 }
+
+export const youkuFindType = 'var r = { barrageState: !!document.getElementsByClassName("yk_dm_button enable").length };r;';

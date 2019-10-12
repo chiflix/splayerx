@@ -276,7 +276,7 @@
       {
         "id": "window.minimize",
         "label": "msg.window.minimize",
-        "role": "minimize",
+        "accelerator": "CmdOrCtrl+M",
         "enabled": true
       },
       {
@@ -449,7 +449,7 @@
       {
         "id": "browsing.window.minimize",
         "label": "msg.window.minimize",
-        "role": "minimize",
+        "accelerator": "CmdOrCtrl+M",
         "enabled": true
       },
       {
