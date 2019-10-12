@@ -1,6 +1,9 @@
 <template>
   <div class="browsing-content">
-    <div v-if="isError" class="error-page">
+    <div
+      v-if="isError"
+      class="error-page"
+    >
       <div class="title">
         未连接到互联网
       </div>
