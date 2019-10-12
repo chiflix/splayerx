@@ -84,7 +84,7 @@
 </template>
 <script lang="ts">
 import { isEqual } from 'lodash';
-import { Cue, ITags } from '@/interfaces/ISubtitle';
+import { Cue, ITags, NOT_SELECTED_SUBTITLE } from '@/interfaces/ISubtitle';
 import { calculateTextSize } from '@/libs/utils';
 
 export default {
@@ -229,7 +229,7 @@ export default {
         if (adaptedCues.length === 1 && !adaptedCues[0].text.includes('\n')) {
           return `${(secondarySubTextHeight * secondarySubScale + (60 / 1080) * winHeight) * 100 / winHeight}%`;
         }
-        if (adaptedCues.length === 0 && currentSecondarySubtitleId
+        if (adaptedCues.length === 0 && currentSecondarySubtitleId !== NOT_SELECTED_SUBTITLE
           && enabledSecondarySub && currentFirstSubtitleId) {
           return `${(subtitleSpace + (secondarySubTextHeight + padding) * 2 * secondarySubScale + (60 / 1080) * winHeight) * 100 / winHeight}%`;
         }
@@ -251,7 +251,7 @@ export default {
           return `${(60 / 1080 * winHeight + firstSubTextHeight * scaleNum) * 100 / winHeight}%`;
         }
         if (adaptedCues.length === 0 && currentSecondarySubtitleId
-          && enabledSecondarySub && currentFirstSubtitleId) {
+          && enabledSecondarySub && currentFirstSubtitleId !== NOT_SELECTED_SUBTITLE) {
           return `${(subtitleSpace + (firstSubTextHeight + padding) * 2 * scaleNum + 60 / 1080 * winHeight) * 100 / winHeight}%`;
         }
         return `${60 / 10.8}%`;
