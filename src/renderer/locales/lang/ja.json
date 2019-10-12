@@ -263,7 +263,13 @@
     "exitPip": "ブラウザに戻る",
     "enterPop": "新しいウィンドウで遊ぶ",
     "exitPop": "ブラウザに戻る",
-    "danmu": "だんまくスイッチ"
+    "danmu": "だんまくスイッチ",
+    "error": {
+      "offline": "",
+      "try": "",
+      "firstLine": "",
+      "secondLine": ""
+    }
   },
   "preferences": {
     "general": {
