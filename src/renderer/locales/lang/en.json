@@ -215,7 +215,7 @@
       "douyu": "Douyu",
       "huya": "Huya",
       "qq": "Tencent Video",
-      "twitch": "Twitch.tv",
+      "twitch": "Twitch",
       "youku": "Youku",
       "youtube": "YouTube"
     },
@@ -257,7 +257,7 @@
     "huya": "Huya",
     "qq": "Tencent Video",
     "douyu": "Douyu",
-    "twitch": "Twitch.tv",
+    "twitch": "Twitch",
     "youku": "Youku",
     "openLocalFile": "Open Local File ...",
     "enterPip": "Enter Picture in Picture",
