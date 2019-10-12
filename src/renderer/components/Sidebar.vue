@@ -142,9 +142,6 @@ export default {
       this.bottomMask = scrollTop + this.maxHeight < this.totalHeight;
     });
   },
-  created() {
-    this.openHistory();
-  },
   methods: {
     ...mapActions({
       updateIsHistoryPage: browsingActions.UPDATE_IS_HISTORY,
