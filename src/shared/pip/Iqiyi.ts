@@ -26,25 +26,28 @@ export default class Iqiyi {
       var blockB = document.querySelector("#block-W1");
       if (blockB) {blockB.style.display = "none"};`;
     this.watcher = `document.querySelector(".iqp-player").style.width="${winSize[0]}px";document.querySelector(".iqp-player").style.height="${winSize[1]}px"`;
-    this.recover = 'var iqpPlayer = document.querySelector(".iqp-player");'
-      + 'iqpPlayer.style.position = "relative";'
-      + 'iqpPlayer.style.left = "";'
-      + 'iqpPlayer.style.top = "";'
-      + 'iqpPlayer.style.zIndex="0";'
-      + 'var header = document.querySelector(".qy-header");'
-      + 'if (header) header.style.display = "";'
-      + 'var screenShots = document.querySelector(".iqp-screenshot");'
-      + 'if (screenShots) screenShots.style.display = "";'
-      + 'document.getElementsByClassName("iqp-barrage")[document.getElementsByClassName("iqp-barrage").length - 1].style.opacity = "1";'
-      + 'document.body.style.overflow = "";'
-      + 'iqpPlayer.style.width="100%";'
-      + 'iqpPlayer.style.height="100%";var blockA = document.querySelector(".player-mnc");'
-      + 'if (blockA) {blockA.style.zIndex = "";};'
-      + 'var blockB = document.querySelector("#block-W1");'
-      + 'if (blockB) {blockB.style.display = ""};';
+    this.recover = `${this.barrageAdapt(barrageState)}
+      var iqpPlayer = document.querySelector(".iqp-player");
+      iqpPlayer.style.position = "relative";
+      iqpPlayer.style.left = "";
+      iqpPlayer.style.top = "";
+      iqpPlayer.style.zIndex="0";
+      var header = document.querySelector(".qy-header");
+      if (header) header.style.display = "";
+      var screenShots = document.querySelector(".iqp-screenshot");
+      if (screenShots) screenShots.style.display = "";
+      document.getElementsByClassName("iqp-barrage")[document.getElementsByClassName("iqp-barrage").length - 1].style.opacity = "1";
+      document.body.style.overflow = "";
+      iqpPlayer.style.width="100%";
+      iqpPlayer.style.height="100%";var blockA = document.querySelector(".player-mnc");
+      if (blockA) {blockA.style.zIndex = "";};
+      var blockB = document.querySelector("#block-W1");
+      if (blockB) {blockB.style.display = ""};`;
   }
 
   public barrageAdapt(barrageState: boolean) {
     return `document.getElementsByClassName("iqp-barrage")[document.getElementsByClassName("iqp-barrage").length - 1].style.opacity = ${barrageState} ? "1" : "0";`;
   }
 }
+
+export const iqiyiFindType = 'var r = { barrageState: !document.getElementsByClassName("barrage-switch barrage-switch-open").length };r;';

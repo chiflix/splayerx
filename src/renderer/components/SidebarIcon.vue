@@ -22,7 +22,6 @@
 </template>
 <script lang="ts">
 import Icon from '@/components/BaseIconContainer.vue';
-import { setElementStyle } from '@/libs/dom';
 
 export default {
   components: {
@@ -31,6 +30,7 @@ export default {
   props: {
     index: {
       type: Number,
+      default: NaN,
     },
     title: {
       type: String,
@@ -54,6 +54,7 @@ export default {
     },
     selectSidebar: {
       type: Function,
+      default: null,
     },
     itemDragging: {
       type: Boolean,
@@ -61,9 +62,11 @@ export default {
     },
     indexOfMovingItem: {
       type: Number,
+      default: NaN,
     },
     indexOfMovingTo: {
       type: Number,
+      default: NaN,
     },
   },
   data() {
@@ -75,14 +78,14 @@ export default {
     };
   },
   watch: {
-    itemDragging(val: boolean) {
+    itemDragging() {
       this.iconTranslateY = 0;
     },
     indexOfMovingTo(index: number) {
       if (!this.isDragging) {
-        if (this.indexOfMovingTo >= this.index && this.indexOfMovingItem < this.index) {
+        if (index >= this.index && this.indexOfMovingItem < this.index) {
           this.iconTranslateY = -56;
-        } else if (this.indexOfMovingTo <= this.index && this.indexOfMovingItem > this.index) {
+        } else if (index <= this.index && this.indexOfMovingItem > this.index) {
           this.iconTranslateY = 56;
         } else if (this.iconTranslateY !== 0) {
           this.iconTranslateY = 0;
@@ -109,7 +112,7 @@ export default {
       if (movingTo < 0) movingTo = 0;
       this.$emit('index-of-moving-to', movingTo);
     },
-    handleMouseup(index: number) {
+    handleMouseup() {
       document.removeEventListener('mousemove', this.handleMousemove);
       if (this.isDragging) {
         this.isDragging = false;
@@ -140,7 +143,7 @@ div {
   width: 44px;
   height: 44px;
   position: absolute;
-  top: 0px; 
+  top: 0px;
 }
 .light {
   opacity: 1;
