@@ -212,10 +212,10 @@
       "iqiyi": "iQIYI",
       "bilibili": "Bilibili",
       "douyu": "Douyu",
-      "huya": "",
-      "qq": "",
-      "twitch": "",
-      "youku": "",
+      "huya": "Huya",
+      "qq": "Tencent Video",
+      "twitch": "Twitch",
+      "youku": "Youku",
       "youtube": "YouTube"
     },
     "edit": {
@@ -253,11 +253,11 @@
     "bilibili": "Bilibili",
     "iqiyi": "iQIYI",
     "youtube": "YouTube",
-    "huya": "",
-    "qq": "",
+    "huya": "Huya",
+    "qq": "Tencent Video",
     "douyu": "Douyu",
-    "twitch": "",
-    "youku": "",
+    "twitch": "Twitch",
+    "youku": "Youku",
     "openLocalFile": "Abrir archivo local...",
     "enterPip": "Habilitar Picture in Picture",
     "exitPip": "Volver al navegador",
@@ -477,21 +477,21 @@
   "loginModal": {
     "title": "Iniciar sesión con número de teléfono",
     "sendCode": "Enviar",
-    "sendingCode": "",
+    "sendingCode": "Enviando ...",
     "countDown": "{count} s",
     "placeholder": {
       "mobile": "Tu número de teléfono",
       "code": "Introduzca el código de verificación"
     },
     "submit": "Ingressar",
-    "submitting": "",
+    "submitting": "Procesando ...",
     "codeError": "Código de vértificación incorrecto",
     "netWorkError": "El tiempo para la conexión ha acabado",
     "noLineError": "No hay conexión de red",
-    "afsError": "",
+    "afsError": "Captcha Validation Failed",
     "afs": {
-      "start": "",
-      "yes": "",
+      "start": "Please slide to verify",
+      "yes": "Success",
       "error300": "",
       "errorNetwork": ""
     }
