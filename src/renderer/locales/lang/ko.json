@@ -492,6 +492,7 @@
     "afs": {
       "start": "Please slide to verify",
       "yes": "Success",
+      "retry": "",
       "error300": "",
       "errorNetwork": ""
     }
