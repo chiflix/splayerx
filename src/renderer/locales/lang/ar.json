@@ -263,7 +263,13 @@
     "exitPip": "العودة إلى المتصفح",
     "enterPop": "اللعب في نافذة جديدة",
     "exitPop": "العودة إلى المتصفح",
-    "danmu": "وابل"
+    "danmu": "وابل",
+    "error": {
+      "offline": "",
+      "try": "",
+      "firstLine": "",
+      "secondLine": ""
+    }
   },
   "preferences": {
     "general": {
