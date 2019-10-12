@@ -5,10 +5,10 @@
       class="error-page"
     >
       <div class="title">
-        未连接到互联网
+        {{ $t('browsing.error.offline' )}}
       </div>
       <div class="desciption">
-        请试试以下办法：<br>检查网线、调制解调器和路由器<br>重新连接到 Wi-Fi 网络
+        {{ $t('browsing.error.try' )}}<br>{{ $t('browsing.error.firstLine')}}<br>{{ $t('browsing.error.secondLine' )}}
       </div>
     </div>
   </div>

@@ -721,7 +721,16 @@ export default {
       this.title = this.currentMainBrowserView().webContents.getTitle();
       this.loadingState = false;
     },
-    didFailLoad() {
+    didFailLoad(
+      event: Event,
+      errorCode: number,
+      errorDescription: string,
+      validatedURL: string,
+      isMainFrame: boolean,
+      frameProcessId: number,
+      frameRoutingId: number,
+    ) {
+      console.log('did-fail-load', errorCode, errorDescription);
       // this.updateIsError(true);
     },
     handleOpenUrl({ url }: { url: string }) {

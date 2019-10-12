@@ -264,7 +264,13 @@
     "exitPip": "Back to Browser",
     "enterPop": "Play in New Window",
     "exitPop": "Back to Browser",
-    "danmu": "Toggle Danmaku"
+    "danmu": "Toggle Danmaku",
+    "error": {
+      "offline": "No Internet",
+      "try": "Try:",
+      "firstLine": "Checking the network cables,modem,and router",
+      "secondLine": "Reconnecting to Wi-Fi"
+    }
   },
   "preferences": {
     "general": {
