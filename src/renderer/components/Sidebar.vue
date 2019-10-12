@@ -187,6 +187,7 @@ export default {
 
   .top-mask {
     width: 100%;
+    height: 42px;
   }
   .top-mask-win {
     width: 100%;
