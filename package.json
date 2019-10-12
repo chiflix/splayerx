@@ -22,7 +22,7 @@
     "install-app-deps": "electron-builder install-app-deps",
     "lint": "eslint --ext .ts,.js,.vue -f ./node_modules/eslint-friendly-formatter src test",
     "lint:fix": "eslint --ext .ts,.js,.vue -f ./node_modules/eslint-friendly-formatter --fix src test",
-    "pack": "npm run pack:main && npm run pack:renderer",
+    "pack": "npm run pack:main && npm run pack:renderer && npm run pack:web",
     "pack:main": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.main.config.js",
     "pack:renderer": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.renderer.config.js",
     "pack:web": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.web.config.js",
