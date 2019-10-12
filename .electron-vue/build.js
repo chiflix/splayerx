@@ -32,7 +32,7 @@ function build() {
 
   del.sync(['dist/electron/*', '!.gitkeep']);
 
-  const tasks = ['main', 'renderer'];
+  const tasks = ['main', 'renderer', 'web'];
   const m = process.env.DISABLE_SPINNER
     ? { on() {}, success() {}, error() {} }
     : new Multispinner(tasks, {
@@ -61,29 +61,29 @@ function build() {
       process.exit(1);
     });
 
-    pack(rendererConfig)
-      .then(result => {
-        results += result + '\n\n';
-        m.success('renderer');
-      })
-      .catch(err => {
-        m.error('renderer');
-        console.log(`\n  ${errorLog}failed to build renderer process`);
-        console.error(`\n${err}\n`);
-        process.exit(1);
-      });
+  pack(rendererConfig)
+    .then(result => {
+      results += result + '\n\n';
+      m.success('renderer');
+    })
+    .catch(err => {
+      m.error('renderer');
+      console.log(`\n  ${errorLog}failed to build renderer process`);
+      console.error(`\n${err}\n`);
+      process.exit(1);
+    });
 
-    pack(webConfig)
-      .then(result => {
-        results += result + '\n\n';
-        m.success('renderer');
-      })
-      .catch(err => {
-        m.error('renderer');
-        console.log(`\n  ${errorLog}failed to build renderer process`);
-        console.error(`\n${err}\n`);
-        process.exit(1);
-      });
+  pack(webConfig)
+    .then(result => {
+      results += result + '\n\n';
+      m.success('web');
+    })
+    .catch(err => {
+      m.error('web');
+      console.log(`\n  ${errorLog}failed to build web process`);
+      console.error(`\n${err}\n`);
+      process.exit(1);
+    });
 }
 
 function pack(config) {
