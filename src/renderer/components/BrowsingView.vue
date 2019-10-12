@@ -786,11 +786,9 @@ export default {
       const findType = InjectJSManager.pipFindType(this.pipChannel) || '';
       this.currentMainBrowserView()
         .webContents.executeJavaScript(findType)
-        .then((r?: { type: string, barrageState: boolean}) => {
+        .then((r?: { barrageState: boolean, type?: string }) => {
           if (r) {
-            console.log(r);
-            this.pipType = r.type;
-            console.log(this.pipType);
+            if (r.type) this.pipType = r.type;
             this.updateBarrageOpenByPage(r.barrageState);
           }
           this.currentMainBrowserView().webContents.executeJavaScript(this.pip.adapter);

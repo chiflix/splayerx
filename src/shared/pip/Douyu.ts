@@ -141,7 +141,7 @@ export default class Douyu {
 }
 
 export const douyuFindType = 'if (document.querySelector(".layout-Player-videoMain")) {'
-  + 'var r = { type: "normal", barrageState: !!document.getElementsByClassName("hidedanmu-5d54e2 removed-9d4c42").length };r;'
+  + 'var r = { barrageState: !!document.getElementsByClassName("hidedanmu-5d54e2 removed-9d4c42").length, type: "normal" };r;'
   + '} else if (document.querySelector(".video")) {'
-  + 'var r = { type: "video", barrageState: !!document.getElementsByClassName("s5-1d7124 input-76795c removed-fcaace").length };r;'
-  + '} else { var r = { type: "others", barrageState: false };r; }';
+  + 'var r = { barrageState: !!document.getElementsByClassName("s5-1d7124 input-76795c removed-fcaace").length, type: "video" };r;'
+  + '} else { var r = { barrageState: false, type: "others" };r; }';

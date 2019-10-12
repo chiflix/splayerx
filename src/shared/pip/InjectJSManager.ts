@@ -4,6 +4,7 @@ import { douyuFindType, douyuVideoPause } from './Douyu';
 import { huyaFindType, huyaVideoPause } from './Huya';
 import { QQFindType, QQVideoPause } from './QQ';
 import { twitchFindType } from './Twitch';
+import { iqiyiFindType } from './Iqiyi';
 
 class InjectJSManager implements IInjectJSManager {
   private readonly calcVideoNumCode: string;
@@ -44,6 +45,8 @@ class InjectJSManager implements IInjectJSManager {
         return QQFindType;
       case 'twitch':
         return twitchFindType;
+      case 'iqiyi':
+        return iqiyiFindType;
       default:
         return '';
     }

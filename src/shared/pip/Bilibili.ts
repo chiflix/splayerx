@@ -227,11 +227,11 @@ export default class Bilibili {
 
 export const bilibiliFindType = 'var contents = document.querySelector("iframe") ? document.querySelector("iframe").contentDocument : null;'
   + 'if (document.querySelector(".bilibili-player-video-message")) {'
-  + 'var danmu = document.querySelector(".bilibili-player-video-danmaku-switch");var switchBtn = null;if (danmu) switchBtn = danmu.querySelector("input");var r = { type: "bangumi", barrageState: switchBtn ? switchBtn.checked : false };r;'
+  + 'var danmu = document.querySelector(".bilibili-player-video-danmaku-switch");var switchBtn = null;if (danmu) switchBtn = danmu.querySelector("input");var r = { barrageState: switchBtn ? switchBtn.checked : false, type: "bangumi" };r;'
   + '} else if (document.querySelector(".live-player-ctnr")) {'
-  + 'var danmu = document.querySelector(".bilibili-live-player-video-controller-hide-danmaku-container");var r = { type: "videoStreaming", barrageState: danmu ? danmu.style.display !== "none" : false };r;'
+  + 'var danmu = document.querySelector(".bilibili-live-player-video-controller-hide-danmaku-container");var r = { barrageState: danmu ? danmu.style.display !== "none" : false, type: "videoStreaming" };r;'
   + '} else if (document.querySelector(".container-wrapper") || contents ? contents.querySelector(".live-room-app") : null) {'
-  + 'var danmu = document.querySelector("iframe").contentDocument.querySelector(".bilibili-live-player-video-controller-hide-danmaku-container");var r = { type: "iframeStreaming", barrageState: danmu ? danmu.style.display !== "none" : false };r;'
+  + 'var danmu = document.querySelector("iframe").contentDocument.querySelector(".bilibili-live-player-video-controller-hide-danmaku-container");var r = { barrageState: danmu ? danmu.style.display !== "none" : false, type: "iframeStreaming" };r;'
   + '} else if (document.querySelector("#bofqi")) {'
-  + 'var danmu = document.querySelector(".bilibili-player-video-danmaku-switch");var switchBtn = null;if (danmu) switchBtn = danmu.querySelector("input");var r = { type: "video", barrageState: switchBtn ? switchBtn.checked : false };r;'
-  + '} else { var r = { type: "others", barrageState: false };r; }';
+  + 'var danmu = document.querySelector(".bilibili-player-video-danmaku-switch");var switchBtn = null;if (danmu) switchBtn = danmu.querySelector("input");var r = { barrageState: switchBtn ? switchBtn.checked : false, type: "video" };r;'
+  + '} else { var r = { barrageState: false, type: "others" };r; }';
