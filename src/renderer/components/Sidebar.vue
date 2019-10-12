@@ -4,10 +4,11 @@
   >
     <div
       :style="{
-        boxShadow: topMask ? '0 2px 10px 0 rgba(0,0,0,0.50)' : '',
-        height: `${topMaskHeight}px`
+        boxShadow: topMask ? 
+          isDarwin ? '0 2px 10px 0 rgba(0,0,0,0.50)' : '0 -3px 8px 0 rgba(0,0,0,0.60)'
+          : ''
       }"
-      class="top-mask"
+      :class="isDarwin ? 'top-mask' : 'top-mask-win'"
     />
     <div
       :style="{
@@ -17,15 +18,20 @@
     >
       <SidebarIcon
         v-for="(info, index) in channelsDetail"
+        v-bind="info"
+        :index="index"
         :key="info.url"
-        :title="info.title"
-        :icon="info.icon"
+        :item-dragging="isDragging"
+        :index-of-moving-to="indexOfMovingTo"
+        :index-of-moving-item="indexOfMovingItem"
         :selected="info.type === currentChannel"
+        :select-sidebar="handleSidebarIcon"
         :style="{
           margin: '0 auto 12px auto',
         }"
-        @click.native="handleSidebarIcon(info.url, index)"
-        class="no-drag"
+        @index-of-moving-item="indexOfMovingItem = $event"
+        @index-of-moving-to="indexOfMovingTo = $event"
+        @is-dragging="isDragging = $event"
       />
     </div>
     <div
@@ -57,6 +63,7 @@ import { Browsing as browsingActions } from '@/store/actionTypes';
 import asyncStorage from '@/helpers/asyncStorage';
 import Icon from '@/components/BaseIconContainer.vue';
 import SidebarIcon from '@/components/SidebarIcon.vue';
+import { setElementStyle } from '@/libs/dom';
 
 export default {
   name: 'Sidebar',
@@ -76,32 +83,23 @@ export default {
   },
   data() {
     return {
-      channels: [
-        'https://www.bilibili.com/',
-        'https://www.iqiyi.com/',
-        'https://www.douyu.com/',
-        'https://www.huya.com/',
-        'https://v.qq.com/',
-        'https://www.youku.com/',
-        'https://www.twitch.tv/',
-        'https://www.youtube.com/',
-      ],
       showFileIcon: false,
+      mousedown: NaN,
       topMask: false,
       bottomMask: false,
+      indexOfMovingItem: NaN,
+      indexOfMovingTo: NaN,
+      isDragging: false,
     };
   },
   computed: {
-    ...mapGetters(['pipSize', 'pipPos', 'isHistory', 'currentChannel', 'winHeight']),
+    ...mapGetters(['pipSize', 'pipPos', 'isHistory', 'currentChannel', 'winHeight', 'channels']),
     totalHeight() {
       return this.channels.length * 56;
     },
-    topMaskHeight() {
-      return this.isDarwin ? 42 : 16;
-    },
     maxHeight() {
       const bottomHeight = this.showFileIcon ? 66 : 0;
-      return this.winHeight - this.topMaskHeight - bottomHeight;
+      return this.winHeight - (this.isDarwin ? 42 : 0) - bottomHeight;
     },
     isDarwin() {
       return process.platform === 'darwin';
@@ -119,6 +117,13 @@ export default {
     },
   },
   watch: {
+    isDragging(val: boolean, oldVal: boolean) {
+      if (oldVal && !val) {
+        this.$store.dispatch('repositionChannels',
+          { from: this.indexOfMovingItem, to: this.indexOfMovingTo },
+        );
+      }
+    },
     currentUrl(val: string) {
       this.showFileIcon = !!val;
     },
@@ -148,8 +153,8 @@ export default {
     openHistory() {
       this.updateIsHistoryPage(!this.isHistory);
     },
-    handleSidebarIcon(url: string, index: number) {
-      const newChannel = this.channelsDetail[index].type;
+    handleSidebarIcon(url: string, type: string) {
+      const newChannel = type;
       if (this.$route.name === 'browsing-view') {
         this.$bus.$emit('sidebar-selected', { url, currentChannel: this.currentChannel, newChannel });
       } else {
@@ -185,6 +190,13 @@ export default {
 
   .top-mask {
     width: 100%;
+    height: 42px;
+  }
+  .top-mask-win {
+    width: 100%;
+    height: 42px;
+    position: absolute;
+    top: -42px;
   }
   .bottom-mask {
     position: absolute;
@@ -205,6 +217,9 @@ export default {
   }
   .icon-hover {
     margin: auto;
+  }
+  .win {
+    padding-top: 16px;
   }
 }
 </style>
