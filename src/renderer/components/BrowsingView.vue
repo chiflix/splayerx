@@ -40,7 +40,6 @@
     />
     <NotificationBubble />
     <browsing-content
-      v-if="isHistory"
       class="browsing-content"
     />
   </div>
@@ -56,6 +55,7 @@ import getVideoId from 'get-video-id';
 import { windowRectService } from '@/services/window/WindowRectService';
 import { Browsing as browsingActions } from '@/store/actionTypes';
 import BrowsingHeader from '@/components/BrowsingView/BrowsingHeader.vue';
+import BrowsingContent from '@/components/BrowsingView/BrowsingContent.vue';
 import asyncStorage from '@/helpers/asyncStorage';
 import NotificationBubble from '@/components/NotificationBubble.vue';
 import { getValidVideoRegex, getValidSubtitleRegex } from '../../shared/utils';
@@ -67,6 +67,7 @@ export default {
   name: 'BrowsingView',
   components: {
     'browsing-header': BrowsingHeader,
+    'browsing-content': BrowsingContent,
     NotificationBubble,
   },
   props: {
@@ -147,6 +148,8 @@ export default {
       'isPip',
       'pipMode',
       'isHistory',
+      'isError',
+      'channels',
       'currentChannel',
     ]),
     isDarwin() {
@@ -191,6 +194,10 @@ export default {
     },
   },
   watch: {
+    currentChannel() {
+      this.updateIsError(false);
+      if (!navigator.onLine) this.offlineHandler();
+    },
     startLoadUrl(val: string) {
       if (
         !val
@@ -204,7 +211,7 @@ export default {
       this.$electron.ipcRenderer.send('create-browser-view', { url: val });
     },
     isHistory() {
-      this.$electron.ipcRenderer.send('open-browsing-history');
+      this.$electron.ipcRenderer.send('remove-browser-view');
     },
     isFullScreen(val: boolean) {
       this.$store.dispatch('updateBrowsingSize', this.winSize);
@@ -341,6 +348,8 @@ export default {
     },
   },
   created() {
+    if (!navigator.onLine) this.offlineHandler();
+    window.addEventListener('online', this.onlineHandler);
     this.createTouchBar(false);
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [
       570,
@@ -478,6 +487,7 @@ export default {
       updateIsPip: browsingActions.UPDATE_IS_PIP,
       updateCurrentChannel: browsingActions.UPDATE_CURRENT_CHANNEL,
       updatePipChannel: browsingActions.UPDATE_PIP_CHANNEL,
+      updateIsError: browsingActions.UPDATE_IS_ERROR,
     }),
     backToLandingViewHandler() {
       this.removeListener();
@@ -486,6 +496,22 @@ export default {
       this.$router.push({
         name: 'landing-view',
       });
+    },
+    onlineHandler() {
+      this.currentMainBrowserView().setBounds({
+        x: this.showSidebar ? 76 : 0,
+        y: 40,
+        width: this.showSidebar ? this.winSize[0] - 76 : this.winSize[0],
+        height: this.winSize[1] - 40,
+      });
+      this.handleUrlReload();
+      this.updateIsError(false);
+    },
+    offlineHandler() {
+      this.currentMainBrowserView().setBounds({
+        x: 76, y: 0, width: 0, height: 0,
+      });
+      this.updateIsError(true);
     },
     handlePageTitle(e: Event, title: string) {
       this.title = title;
@@ -613,6 +639,7 @@ export default {
         view.webContents.addListener('new-window', this.newWindow);
         if (!this.currentChannel.includes('douyu') && !this.currentChannel.includes('youku')) view.webContents.addListener('did-start-loading', this.didStartLoading);
         view.webContents.addListener('did-stop-loading', this.didStopLoading);
+        view.webContents.addListener('did-fail-load', this.didFailLoad);
         view.webContents.addListener('will-navigate', this.willNavigate);
       }
     },
@@ -693,6 +720,9 @@ export default {
     didStopLoading() {
       this.title = this.currentMainBrowserView().webContents.getTitle();
       this.loadingState = false;
+    },
+    didFailLoad() {
+      // this.updateIsError(true);
     },
     handleOpenUrl({ url }: { url: string }) {
       const protocol = urlParseLax(url).protocol;
