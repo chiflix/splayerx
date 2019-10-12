@@ -213,6 +213,9 @@
       "bilibili": "Bilibili",
       "douyu": "Douyu",
       "huya": "",
+      "qq": "",
+      "twitch": "",
+      "youku": "",
       "youtube": "YouTube"
     },
     "edit": {
@@ -251,7 +254,10 @@
     "iqiyi": "iQIYI",
     "youtube": "YouTube",
     "huya": "",
+    "qq": "",
     "douyu": "Douyu",
+    "twitch": "",
+    "youku": "",
     "openLocalFile": " فتح ملف محلي ...",
     "enterPip": "أدخل صورة في صورة",
     "exitPip": "العودة إلى المتصفح",

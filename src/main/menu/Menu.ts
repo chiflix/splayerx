@@ -287,7 +287,10 @@ export default class Menubar {
           checked,
           click: () => {
             if (this.mainWindow) {
-              if (subtitleItem && subtitleItem.type === Type.Translated) this.menubar.getMenuItemById('subtitle.mainSubtitle.off').checked = true;
+              // if is AI button can't choose
+              if (subtitleItem && subtitleItem.type === Type.PreTranslated && subtitleItem.source.source === '') {
+                this.menubar.getMenuItemById('subtitle.mainSubtitle.off').checked = true;
+              }
               this.mainWindow.webContents.send('subtitle.mainSubtitle', id, subtitleItem);
             }
           },
@@ -324,7 +327,10 @@ export default class Menubar {
           enabled,
           click: () => {
             if (this.mainWindow) {
-              if (subtitleItem && subtitleItem.type === Type.Translated) this.menubar.getMenuItemById('subtitle.secondarySubtitle.off').checked = true;
+              // if is AI button can't choose
+              if (subtitleItem && subtitleItem.type === Type.PreTranslated && subtitleItem.source.source === '') {
+                this.menubar.getMenuItemById('subtitle.secondarySubtitle.off').checked = true;
+              }
               this.mainWindow.webContents.send('subtitle.secondarySubtitle', id, subtitleItem);
             }
           },
@@ -351,7 +357,7 @@ export default class Menubar {
       }, undefined, false);
       accountMenu.append(idMenu);
       const logout = this.createMenuItem('msg.account.logout', () => {
-        app.emit('sign-out');
+        app.emit('sign-out-confirm');
       }, undefined, true);
       accountMenu.append(logout);
       Menu.setApplicationMenu(this.menubar);
@@ -513,6 +519,9 @@ export default class Menubar {
         } else if (item.id === 'file.openRecent') {
           const menuItem = item as IMenubarMenuItemSubmenu;
           menubar.append(this.createSubMenuItem(menuItem));
+        } else if (item.id === 'file.clearHistory') {
+          const menuItem = item as IMenubarMenuItemAction;
+          menubar.append(this.createMenuItem(menuItem));
         } else if (item.id === 'file.closeWindow') {
           const menuItem = item as IMenubarMenuItemRole;
           menubar.append(this.createRoleMenuItem(menuItem));
@@ -856,7 +865,7 @@ export default class Menubar {
       }, undefined, false);
       accountMenu.append(idMenu);
       const logout = this.createMenuItem('msg.account.logout', () => {
-        app.emit('sign-out');
+        app.emit('sign-out-confirm');
       }, undefined, true);
       accountMenu.append(logout);
     } else {

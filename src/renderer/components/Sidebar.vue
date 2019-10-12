@@ -11,7 +11,6 @@
       :class="isDarwin ? 'top-mask' : 'top-mask-win'"
     />
     <div
-      :class="{ 'win': !isDarwin }"
       :style="{
         height: `${maxHeight}px`,
       }"
@@ -137,7 +136,7 @@ export default {
   mounted() {
     this.topMask = false;
     this.bottomMask = this.maxHeight < this.totalHeight;
-    (document.querySelector('.icon-box') as HTMLElement).addEventListener('wheel', () => {
+    (document.querySelector('.icon-box') as HTMLElement).addEventListener('scroll', () => {
       const scrollTop = (document.querySelector('.icon-box') as HTMLElement).scrollTop;
       this.topMask = scrollTop !== 0;
       this.bottomMask = scrollTop + this.maxHeight < this.totalHeight;
@@ -188,7 +187,6 @@ export default {
 
   .top-mask {
     width: 100%;
-    height: 42px;
   }
   .top-mask-win {
     width: 100%;

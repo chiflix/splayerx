@@ -478,14 +478,23 @@
   "loginModal": {
     "title": "Sign in with phone number",
     "sendCode": "Send",
+    "sendingCode": "Sending ...",
     "countDown": "{count} s",
     "placeholder": {
       "mobile": "Your phone number",
       "code": "Enter verification code"
     },
     "submit": "Sign In",
+    "submitting": "Processing ...",
     "codeError": "Incorrect Vertification Code",
     "netWorkError": "Connection Timeout",
-    "noLineError": "No Network Connection"
+    "noLineError": "No Network Connection",
+    "afsError": "Captcha Validation Failed",
+    "afs": {
+      "start": "Please slide to verify",
+      "yes": "Successful",
+      "error300": "Verification failed, please <a href=\"javascript:__nc.reset()\">retry</a> ",
+      "errorNetwork": "Network Error. Please <a href=\"javascript:__nc.reset()\">retry</a > "
+    }
   }
 }

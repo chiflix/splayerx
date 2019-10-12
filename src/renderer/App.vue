@@ -37,17 +37,21 @@
 
 <script lang="ts">
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ipcRenderer, Event } from 'electron';
-import { mapActions } from 'vuex';
-import { SubtitleManager as smActions, UserInfo as uActions } from '@/store/actionTypes';
+import { ipcRenderer, Event, remote } from 'electron';
+import { mapActions, mapGetters } from 'vuex';
+import {
+  SubtitleManager as smActions,
+  UserInfo as uActions,
+  AudioTranslate as atActions,
+} from '@/store/actionTypes';
 import Titlebar from '@/components/Titlebar.vue';
 import Sidebar from '@/components/Sidebar.vue';
 import '@/css/style.scss';
 import drag from '@/helpers/drag';
-import { setToken } from '@/libs/apis';
+import { setToken, checkToken } from '@/libs/apis';
 import sagi from '@/libs/sagi';
-import { isAccountEnabled } from '@/helpers/featureSwitch';
-import { log } from './libs/Log';
+import { apiOfAccountService } from './helpers/featureSwitch';
+import { AudioTranslateBubbleOrigin, AudioTranslateStatus } from '@/store/modules/AudioTranslate';
 
 export default {
   name: 'Splayer',
@@ -61,9 +65,11 @@ export default {
       openFileArgs: null,
       showSidebar: false,
       currentUrl: '',
+      checkedToken: false,
     };
   },
   computed: {
+    ...mapGetters(['signInCallback', 'isTranslating', 'translateStatus']),
     isDarwin() {
       return process.platform === 'darwin';
     },
@@ -112,6 +118,12 @@ export default {
       this.$ga.event('app', 'heartbeat');
     }, 1500000); // keep alive every 25 min.
 
+    // main window get sign in api send to main process
+    // for sign in window use
+    apiOfAccountService().then((api: string) => {
+      ipcRenderer.send('sign-in-end-point', api);
+    }).catch(() => {});
+
     // sign in success
     ipcRenderer.on('sign-in', (e: Event, account?: {
       token: string, id: string,
@@ -120,19 +132,31 @@ export default {
       if (account) {
         setToken(account.token);
         sagi.setToken(account.token);
+        if (!this.checkedToken) {
+          this.checkedToken = true;
+          checkToken();
+        }
+        // sign in success, callback
+        if (this.signInCallback) {
+          this.signInCallback();
+          this.removeCallback(() => { });
+        }
       } else {
         setToken('');
         sagi.setToken('');
       }
     });
-    // get config cat is account enabled
-    isAccountEnabled().then((enabled) => {
-      log.debug('account', enabled);
-      if (enabled) {
-        ipcRenderer.send('account-enabled');
+
+    ipcRenderer.on('sign-out-confirm', () => {
+      // is translating stop
+      if (this.isTranslating || this.translateStatus === AudioTranslateStatus.Back) {
+        this.showTranslateBubble(AudioTranslateBubbleOrigin.OtherAIButtonClick);
+        this.addTranslateBubbleCallBack(() => {
+          remote.app.emit('sign-out');
+        });
+      } else {
+        remote.app.emit('sign-out');
       }
-    }).catch(() => {
-      // empty
     });
     // load global data when sign in is opend
     // const account = remote.getGlobal('account');
@@ -148,6 +172,9 @@ export default {
     ...mapActions({
       resetManager: smActions.resetManager,
       updateUserInfo: uActions.UPDATE_USER_INFO,
+      removeCallback: uActions.UPDATE_SIGN_IN_CALLBACK,
+      showTranslateBubble: atActions.AUDIO_TRANSLATE_SHOW_BUBBLE,
+      addTranslateBubbleCallBack: atActions.AUDIO_TRANSLATE_BUBBLE_CALLBACK,
     }),
     mainCommitProxy(commitType: string, commitPayload: any) {
       this.$store.commit(commitType, commitPayload);

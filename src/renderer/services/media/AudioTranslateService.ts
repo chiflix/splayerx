@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-06-20 18:03:14
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-09-26 16:24:40
+ * @Last Modified time: 2019-10-10 16:17:33
  */
 
 // @ts-ignore
@@ -19,6 +19,7 @@ import { TranscriptInfo } from '../subtitle';
 import { Stream } from '@/plugins/mediaTasks/mediaInfoQueue';
 import { isAccountEnabled } from '@/helpers/featureSwitch';
 import { getClientUUID } from '@/../shared/utils';
+import { log } from '@/libs/Log';
 
 type JobData = {
   audioId: string,
@@ -80,6 +81,7 @@ class AudioTranslateService extends EventEmitter {
     if (end) {
       this.emit('grabCompleted');
     } else if (result) {
+      log.debug('audiotranslate', result);
       this.handleMainCallBack(result);
     } else if (error) {
       this.emit('error', error);

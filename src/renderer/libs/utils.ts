@@ -226,7 +226,7 @@ export function calculatedName(
         && s.language === item.language)
       .findIndex((s: ISubtitleControlListItem) => s.id === item.id) + 1;
     name = `${codeToLanguageName(item.language)} ${romanize(sort)}`;
-  } else if (item.type === Type.Translated) {
+  } else if (item.type === Type.Translated || item.type === Type.PreTranslated) {
     name = `${codeToLanguageName(item.language)} AI`;
   }
   return name;
