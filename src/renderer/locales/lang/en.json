@@ -268,7 +268,7 @@
     "error": {
       "offline": "No Internet",
       "try": "Try:",
-      "firstLine": "Checking the network cables,modem,and router",
+      "firstLine": "Checking the network cables, modem, and router",
       "secondLine": "Reconnecting to Wi-Fi"
     }
   },
