@@ -212,10 +212,10 @@
       "iqiyi": "iQIYI",
       "bilibili": "Bilibili",
       "douyu": "Douyu",
-      "huya": "",
-      "qq": "",
-      "twitch": "",
-      "youku": "",
+      "huya": "Huya",
+      "qq": "Tencent Video",
+      "twitch": "Twitch",
+      "youku": "Youku",
       "youtube": "YouTube"
     },
     "edit": {
@@ -253,11 +253,11 @@
     "bilibili": "Bilibili",
     "iqiyi": "iQIYI",
     "youtube": "YouTube",
-    "huya": "",
-    "qq": "",
+    "huya": "Huya",
+    "qq": "Tencent Video",
     "douyu": "Douyu",
-    "twitch": "",
-    "youku": "",
+    "twitch": "Twitch",
+    "youku": "Youku",
     "openLocalFile": " فتح ملف محلي ...",
     "enterPip": "أدخل صورة في صورة",
     "exitPip": "العودة إلى المتصفح",
@@ -477,14 +477,23 @@
   "loginModal": {
     "title": "سجّل الدخول برقم الهاتف",
     "sendCode": "إرسال",
-    "countDown": "",
+    "sendingCode": "Sending ...",
+    "countDown": "{count} s",
     "placeholder": {
       "mobile": "رقم هاتفك",
       "code": "أدخل رمز التحقق"
     },
     "submit": "تسجيل دخول",
+    "submitting": "Processing ...",
     "codeError": "رمز التحقق غير صحيح",
     "netWorkError": "مهلة الاتصال",
-    "noLineError": "لا يوجد اتصال شبكة"
+    "noLineError": "لا يوجد اتصال شبكة",
+    "afsError": "Captcha Validation Failed",
+    "afs": {
+      "start": "Please slide to verify",
+      "yes": "Success",
+      "error300": "",
+      "errorNetwork": ""
+    }
   }
 }

@@ -477,14 +477,23 @@
   "loginModal": {
     "title": "免注册登录",
     "sendCode": "获取验证码",
+    "sendingCode": "发送中 ...",
     "countDown": "{count} 秒",
     "placeholder": {
       "mobile": "输入手机号码",
       "code": "输入短信验证码"
     },
     "submit": "登录",
+    "submitting": "登录中 ...",
     "codeError": "验证码错误",
     "netWorkError": "网络连接超时",
-    "noLineError": "无网络连接"
+    "noLineError": "无网络连接",
+    "afsError": "验证失败",
+    "afs": {
+      "start": "请按住滑块，拖动到最右边",
+      "yes": "验证成功",
+      "error300": "验证失败，请 <a href=\"javascript:__nc.reset()\">重试</a> ",
+      "errorNetwork": "网络错误，请 <a href=\"javascript:__nc.reset()\">重试</a > "
+    }
   }
 }
