@@ -478,7 +478,7 @@
     "title": "سجّل الدخول برقم الهاتف",
     "sendCode": "إرسال",
     "sendingCode": "Sending ...",
-    "countDown": "",
+    "countDown": "{count} s",
     "placeholder": {
       "mobile": "رقم هاتفك",
       "code": "أدخل رمز التحقق"
@@ -493,7 +493,7 @@
       "start": "Please slide to verify",
       "yes": "Success",
       "error300": "",
-      "errorNetwork": "Network Error. Please <a href=\"javascript:__nc.reset()\">retry</a > "
+      "errorNetwork": ""
     }
   }
 }
