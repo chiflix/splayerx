@@ -263,7 +263,13 @@
     "exitPip": "還原窗口",
     "enterPop": "在新視窗播放",
     "exitPop": "還原窗口",
-    "danmu": "彈幕開關"
+    "danmu": "彈幕開關",
+    "error": {
+      "offline": "未連接到互聯網",
+      "try": "請試試以下辦法：",
+      "firstLine": "檢查網線、調製解調器和路由器",
+      "secondLine": "重新連接到 Wi-Fi 網絡"
+    }
   },
   "preferences": {
     "general": {
