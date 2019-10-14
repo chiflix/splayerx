@@ -549,6 +549,10 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   height: 16px;
   display: block;
 }
+.pin, .notPin {
+  width: 16px;
+  height: 16px;
+}
 .down {
   width: 5px;
   height: 7px;
