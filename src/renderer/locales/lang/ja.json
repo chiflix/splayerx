@@ -265,10 +265,10 @@
     "exitPop": "ブラウザに戻る",
     "danmu": "だんまくスイッチ",
     "error": {
-      "offline": "",
-      "try": "",
-      "firstLine": "",
-      "secondLine": ""
+      "offline": "インターネットがない",
+      "try": "お試しください:",
+      "firstLine": "ネットワークケーブル、モデム、およびルーターの確認",
+      "secondLine": "Wi-Fiへの再接続"
     }
   },
   "preferences": {
