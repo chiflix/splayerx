@@ -265,10 +265,10 @@
     "exitPop": "브라우저로 돌아 가기",
     "danmu": "탄막",
     "error": {
-      "offline": "",
-      "try": "",
-      "firstLine": "",
-      "secondLine": ""
+      "offline": "인터넷이 없습니다",
+      "try": "시험:",
+      "firstLine": "네트워크 케이블, 모뎀 및 라우터 확인",
+      "secondLine": "Wi-Fi에 다시 연결"
     }
   },
   "preferences": {
