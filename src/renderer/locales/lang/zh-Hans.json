@@ -265,10 +265,10 @@
     "exitPop": "还原窗口",
     "danmu": "弹幕开关",
     "error": {
-      "offline": "",
-      "try": "",
-      "firstLine": "",
-      "secondLine": ""
+      "offline": "未连接到互联网",
+      "try": "请试试以下办法：",
+      "firstLine": "检查网线、调制解调器和路由器",
+      "secondLine": "重新连接到 Wi-Fi 网络"
     }
   },
   "preferences": {
