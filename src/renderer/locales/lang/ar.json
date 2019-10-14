@@ -265,10 +265,10 @@
     "exitPop": "العودة إلى المتصفح",
     "danmu": "وابل",
     "error": {
-      "offline": "",
-      "try": "",
-      "firstLine": "",
-      "secondLine": ""
+      "offline": "لا يوجد إنترنت",
+      "try": "حاول:",
+      "firstLine": "فحص كبلات الشبكة والمودم وجهاز التوجيه",
+      "secondLine": "إعادة الاتصال بشبكة Wi-Fi"
     }
   },
   "preferences": {
