@@ -265,10 +265,10 @@
     "exitPop": "Volver al navegador",
     "danmu": "Alternar Danmaku",
     "error": {
-      "offline": "",
-      "try": "",
-      "firstLine": "",
-      "secondLine": ""
+      "offline": "Sin Internet",
+      "try": "Prueba:",
+      "firstLine": "Comprobando los cables de red, módem y router",
+      "secondLine": "Reconectando a Wi-Fi"
     }
   },
   "preferences": {
