@@ -4,13 +4,14 @@
   >
     <div
       :style="{
-        boxShadow: topMask ? 
+        boxShadow: topMask ?
           isDarwin ? '0 2px 10px 0 rgba(0,0,0,0.50)' : '0 -3px 8px 0 rgba(0,0,0,0.60)'
           : ''
       }"
       :class="isDarwin ? 'top-mask' : 'top-mask-win'"
     />
     <div
+      :class="{ win: !isDarwin }"
       :style="{
         height: `${maxHeight}px`,
       }"
@@ -63,7 +64,6 @@ import { Browsing as browsingActions } from '@/store/actionTypes';
 import asyncStorage from '@/helpers/asyncStorage';
 import Icon from '@/components/BaseIconContainer.vue';
 import SidebarIcon from '@/components/SidebarIcon.vue';
-import { setElementStyle } from '@/libs/dom';
 
 export default {
   name: 'Sidebar',
@@ -120,8 +120,7 @@ export default {
     isDragging(val: boolean, oldVal: boolean) {
       if (oldVal && !val) {
         this.$store.dispatch('repositionChannels',
-          { from: this.indexOfMovingItem, to: this.indexOfMovingTo },
-        );
+          { from: this.indexOfMovingItem, to: this.indexOfMovingTo });
       }
     },
     currentUrl(val: string) {

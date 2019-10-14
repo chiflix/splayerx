@@ -15,45 +15,40 @@ function getRatio() {
   return window.devicePixelRatio || 1;
 }
 
+window.onload = () => {
+  const pipBtns = document.querySelector('.pip-buttons');
+  if (window.location.href.includes('bilibili')) {
+    document.querySelector('iframe').contentWindow.addEventListener('mousedown', (evt) => {
+      if (!pipBtns && remote.getCurrentWindow()
+        && remote.getCurrentWindow().getBrowserViews().length > 1) {
+        if (evt.target.classList[0] === 'bilibili-live-player-video-danmaku') {
+          offset = [evt.clientX, evt.clientY];
+          if (getRatio() !== 1) {
+            windowSize = remote.getCurrentWindow().getSize();
+          }
+        }
+      }
+      if (offset) {
+        mousedown = true;
+        sendToHost('update-mouse-info', { offset, windowSize });
+      }
+    }, true);
+    document.querySelector('iframe').contentWindow.addEventListener('mousemove', () => {
+      if (!pipBtns && remote.getCurrentWindow()
+        && remote.getCurrentWindow().getBrowserViews().length > 1) {
+        if (pipTimer) clearTimeout(pipTimer);
+        sendToHost('mousemove', 'isMoving');
+      }
+      if (mousedown) isDragging = true;
+    });
+  }
+};
 document.addEventListener('DOMContentLoaded', () => {
   const danmu = document.querySelector('.danmu');
   const pip = document.querySelector('.pip');
   const pipBtns = document.querySelector('.pip-buttons');
-  if (pipBtns) {
-    pipBtns.style.display = 'flex';
-    pipBtns.addEventListener('mousemove', () => {
-      if (pipTimer) clearTimeout(pipTimer);
-      sendToHost('pip-btn-mousemove');
-      pipBtns.style.display = 'flex';
-    });
-    pipTimer = setTimeout(() => {
-      pipBtns.style.display = 'none';
-    }, 3000);
-  }
-  if (danmu) {
-    danmu.addEventListener('mouseup', () => {
-      sendToHost('danmu', 'danmu');
-    });
-  }
-  if (pip) {
-    pip.addEventListener('mouseup', () => {
-      sendToHost('pip', 'pip');
-    });
-  }
-  window.addEventListener('mouseout', (evt) => {
-    if (pipBtns) {
-      sendToHost('pip-btn-mouseout');
-    } else if (remote.getCurrentWindow()
-      && remote.getCurrentWindow().getBrowserViews().length > 1) {
-      const winSize = remote.getCurrentWindow().getSize();
-      if (evt.clientX <= 0 || evt.clientX >= winSize[0] || evt.clientY >= winSize[1]) {
-        sendToHost('mouseout', 'out');
-      }
-    }
-  }, true);
-
   // eslint-disable-next-line complexity
-  window.addEventListener('mousedown', (evt) => {
+  function handleMousedown(evt) {
     if (!pipBtns && remote.getCurrentWindow()
       && remote.getCurrentWindow().getBrowserViews().length > 1) {
       const url = window.location.href;
@@ -91,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
           }
           break;
         case url.includes('huya'):
-          if (['player-video', '_2yrglNsCHp7K38jZqGHfoV'].includes(evt.target.classList[0]) || evt.target.id === 'yanzhi-bg') {
+          if (['VIDEO', 'BODY'].includes(evt.target.tagName) || ['player-video', '_2yrglNsCHp7K38jZqGHfoV', '_3bvIa9Kka-wJ8cwRu3Uylw'].includes(evt.target.classList[0]) || evt.target.id === 'yanzhi-bg') {
             offset = [evt.clientX, evt.clientY];
             if (getRatio() !== 1) {
               windowSize = remote.getCurrentWindow().getSize();
@@ -134,7 +129,40 @@ document.addEventListener('DOMContentLoaded', () => {
         sendToHost('update-mouse-info', { offset, windowSize });
       }
     }
+  }
+  if (pipBtns) {
+    pipBtns.style.display = 'flex';
+    pipBtns.addEventListener('mousemove', () => {
+      if (pipTimer) clearTimeout(pipTimer);
+      sendToHost('pip-btn-mousemove');
+      pipBtns.style.display = 'flex';
+    });
+    pipTimer = setTimeout(() => {
+      pipBtns.style.display = 'none';
+    }, 3000);
+  }
+  if (danmu) {
+    danmu.addEventListener('mouseup', () => {
+      sendToHost('danmu', 'danmu');
+    });
+  }
+  if (pip) {
+    pip.addEventListener('mouseup', () => {
+      sendToHost('pip', 'pip');
+    });
+  }
+  window.addEventListener('mouseout', (evt) => {
+    if (pipBtns) {
+      sendToHost('pip-btn-mouseout');
+    } else if (remote.getCurrentWindow()
+      && remote.getCurrentWindow().getBrowserViews().length > 1) {
+      const winSize = remote.getCurrentWindow().getSize();
+      if (evt.clientX <= 0 || evt.clientX >= winSize[0] || evt.clientY >= winSize[1]) {
+        sendToHost('mouseout', 'out');
+      }
+    }
   }, true);
+  window.addEventListener('mousedown', handleMousedown, true);
   window.addEventListener('mousemove', (evt) => {
     if (!pipBtns && remote.getCurrentWindow()
       && remote.getCurrentWindow().getBrowserViews().length > 1) {

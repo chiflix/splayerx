@@ -212,10 +212,10 @@
       "iqiyi": "iQIYI",
       "bilibili": "Bilibili",
       "douyu": "Douyu",
-      "huya": "",
-      "qq": "",
-      "twitch": "",
-      "youku": "",
+      "huya": "Huya",
+      "qq": "Tencent Video",
+      "twitch": "Twitch",
+      "youku": "Youku",
       "youtube": "YouTube"
     },
     "edit": {
@@ -253,11 +253,11 @@
     "bilibili": "Bilibili",
     "iqiyi": "iQIYI",
     "youtube": "YouTube",
-    "huya": "",
-    "qq": "",
+    "huya": "Huya",
+    "qq": "Tencent Video",
     "douyu": "Douyu",
-    "twitch": "",
-    "youku": "",
+    "twitch": "Twitch",
+    "youku": "Youku",
     "openLocalFile": "ローカルファイルを開く",
     "enterPip": "画中画を開じる",
     "exitPip": "ブラウザに戻る",
@@ -477,14 +477,24 @@
   "loginModal": {
     "title": "手機番号でログイン",
     "sendCode": "送信する",
+    "sendingCode": "送信中 ...",
     "countDown": "{count} 秒",
     "placeholder": {
       "mobile": "手機番号",
       "code": "確認コードを入力"
     },
     "submit": "登入",
+    "submitting": "処理中...",
     "codeError": "間違った認証コード",
     "netWorkError": "接続タイムアウト",
-    "noLineError": "ネットワークに接続していません"
+    "noLineError": "ネットワークに接続していません",
+    "afsError": "Captcha Validation Failed",
+    "afs": {
+      "start": "Please slide to verify",
+      "yes": "Success",
+      "retry": "retry",
+      "error300": "Verification failed, please",
+      "errorNetwork": "Network Error. Please"
+    }
   }
 }

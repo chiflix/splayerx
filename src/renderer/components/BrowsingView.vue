@@ -40,7 +40,6 @@
     />
     <NotificationBubble />
     <browsing-content
-      v-if="isHistory"
       class="browsing-content"
     />
   </div>
@@ -56,6 +55,7 @@ import getVideoId from 'get-video-id';
 import { windowRectService } from '@/services/window/WindowRectService';
 import { Browsing as browsingActions } from '@/store/actionTypes';
 import BrowsingHeader from '@/components/BrowsingView/BrowsingHeader.vue';
+import BrowsingContent from '@/components/BrowsingView/BrowsingContent.vue';
 import asyncStorage from '@/helpers/asyncStorage';
 import NotificationBubble from '@/components/NotificationBubble.vue';
 import { getValidVideoRegex, getValidSubtitleRegex } from '../../shared/utils';
@@ -67,6 +67,7 @@ export default {
   name: 'BrowsingView',
   components: {
     'browsing-header': BrowsingHeader,
+    'browsing-content': BrowsingContent,
     NotificationBubble,
   },
   props: {
@@ -127,6 +128,7 @@ export default {
       compareStr: [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch']],
       hideMainWindow: false,
       startLoadUrl: '',
+      barrageOpenByPage: false,
     };
   },
   computed: {
@@ -146,33 +148,36 @@ export default {
       'isPip',
       'pipMode',
       'isHistory',
+      'isError',
+      'channels',
       'currentChannel',
     ]),
     isDarwin() {
       return process.platform === 'darwin';
     },
     pipArgs() {
+      const barrageState = this.isPip ? this.barrageOpenByPage : this.barrageOpen;
       switch (this.pipChannel) {
         case 'youtube':
           return { channel: 'youtube' };
         case 'bilibili':
           return {
-            channel: 'bilibili', type: this.pipType, barrageState: this.barrageOpen, winSize: this.pipSize,
+            channel: 'bilibili', type: this.pipType, barrageState, winSize: this.pipSize,
           };
         case 'iqiyi':
-          return { channel: 'iqiyi', barrageState: this.barrageOpen, winSize: this.pipSize };
+          return { channel: 'iqiyi', barrageState, winSize: this.pipSize };
         case 'douyu':
           return {
-            channel: 'douyu', type: this.pipType, barrageState: this.barrageOpen, winSize: this.pipSize,
+            channel: 'douyu', type: this.pipType, barrageState, winSize: this.pipSize,
           };
         case 'huya':
           return {
-            channel: 'huya', type: this.pipType, barrageState: this.barrageOpen, winSize: this.pipSize,
+            channel: 'huya', type: this.pipType, barrageState, winSize: this.pipSize,
           };
         case 'qq':
-          return { channel: 'qq', type: this.pipType, barrageState: this.barrageOpen };
+          return { channel: 'qq', type: this.pipType, barrageState };
         case 'youku':
-          return { channel: 'youku', barrageState: this.barrageOpen };
+          return { channel: 'youku', barrageState };
         case 'twitch':
           return { channel: 'twitch', type: this.pipType, winSize: this.pipSize };
         case 'others':
@@ -189,6 +194,10 @@ export default {
     },
   },
   watch: {
+    currentChannel() {
+      this.updateIsError(false);
+      if (!navigator.onLine) this.offlineHandler();
+    },
     startLoadUrl(val: string) {
       if (
         !val
@@ -202,7 +211,7 @@ export default {
       this.$electron.ipcRenderer.send('create-browser-view', { url: val });
     },
     isHistory() {
-      this.$electron.ipcRenderer.send('open-browsing-history');
+      this.$electron.ipcRenderer.send('remove-browser-view');
     },
     isFullScreen(val: boolean) {
       this.$store.dispatch('updateBrowsingSize', this.winSize);
@@ -339,6 +348,8 @@ export default {
     },
   },
   created() {
+    if (!navigator.onLine) this.offlineHandler();
+    window.addEventListener('online', this.onlineHandler);
     this.createTouchBar(false);
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [
       570,
@@ -476,6 +487,7 @@ export default {
       updateIsPip: browsingActions.UPDATE_IS_PIP,
       updateCurrentChannel: browsingActions.UPDATE_CURRENT_CHANNEL,
       updatePipChannel: browsingActions.UPDATE_PIP_CHANNEL,
+      updateIsError: browsingActions.UPDATE_IS_ERROR,
     }),
     backToLandingViewHandler() {
       this.removeListener();
@@ -484,6 +496,22 @@ export default {
       this.$router.push({
         name: 'landing-view',
       });
+    },
+    onlineHandler() {
+      this.currentMainBrowserView().setBounds({
+        x: this.showSidebar ? 76 : 0,
+        y: 40,
+        width: this.showSidebar ? this.winSize[0] - 76 : this.winSize[0],
+        height: this.winSize[1] - 40,
+      });
+      this.handleUrlReload();
+      this.updateIsError(false);
+    },
+    offlineHandler() {
+      this.currentMainBrowserView().setBounds({
+        x: 76, y: 0, width: 0, height: 0,
+      });
+      this.updateIsError(true);
     },
     handlePageTitle(e: Event, title: string) {
       this.title = title;
@@ -611,6 +639,7 @@ export default {
         view.webContents.addListener('new-window', this.newWindow);
         if (!this.currentChannel.includes('douyu') && !this.currentChannel.includes('youku')) view.webContents.addListener('did-start-loading', this.didStartLoading);
         view.webContents.addListener('did-stop-loading', this.didStopLoading);
+        view.webContents.addListener('did-fail-load', this.didFailLoad);
         view.webContents.addListener('will-navigate', this.willNavigate);
       }
     },
@@ -691,6 +720,9 @@ export default {
     didStopLoading() {
       this.title = this.currentMainBrowserView().webContents.getTitle();
       this.loadingState = false;
+    },
+    didFailLoad() {
+      // this.updateIsError(true);
     },
     handleOpenUrl({ url }: { url: string }) {
       const protocol = urlParseLax(url).protocol;
@@ -780,27 +812,23 @@ export default {
       this.allChannels.forEach((channel: string) => {
         if (this.currentChannel.includes(channel)) this.pipChannel = channel;
       });
-      if (['bilibili', 'douyu', 'huya', 'qq', 'twitch'].includes(this.pipChannel)) {
-        this.currentMainBrowserView()
-          .webContents.executeJavaScript(InjectJSManager.pipFindType(this.pipChannel))
-          .then((r: string) => {
-            this.pipType = r;
-            this.currentMainBrowserView().webContents.executeJavaScript(this.pip.adapter);
-            if (this.pipChannel === 'douyu') {
-              this.currentMainBrowserView().webContents
-                .insertCSS(InjectJSManager.douyuHideSelfPip(true));
-            }
-          })
-          .then(() => {
-            this.adaptFinished = true;
-          });
-      } else {
-        this.currentMainBrowserView()
-          .webContents.executeJavaScript(this.pip.adapter)
-          .then(() => {
-            this.adaptFinished = true;
-          });
-      }
+      const findType = InjectJSManager.pipFindType(this.pipChannel) || '';
+      this.currentMainBrowserView()
+        .webContents.executeJavaScript(findType)
+        .then((r?: { barrageState: boolean, type?: string }) => {
+          if (r) {
+            if (r.type) this.pipType = r.type;
+            this.barrageOpenByPage = r.barrageState;
+          }
+          this.currentMainBrowserView().webContents.executeJavaScript(this.pip.adapter);
+          if (this.pipChannel === 'douyu') {
+            this.currentMainBrowserView().webContents
+              .insertCSS(InjectJSManager.douyuHideSelfPip(true));
+          }
+        })
+        .then(() => {
+          this.adaptFinished = true;
+        });
     },
     currentMainBrowserView() {
       return this.$electron.remote.getCurrentWindow().getBrowserViews()[0];

@@ -477,14 +477,24 @@
   "loginModal": {
     "title": "免註冊登入",
     "sendCode": "獲取驗證碼",
+    "sendingCode": "發送中 ...",
     "countDown": "{count} 秒",
     "placeholder": {
       "mobile": "輸入手機號",
       "code": "輸入短信驗證碼"
     },
     "submit": "登入",
+    "submitting": "登錄中 ...",
     "codeError": "驗證碼錯誤",
     "netWorkError": "網絡連接超時",
-    "noLineError": "沒有網路連線"
+    "noLineError": "沒有網路連線",
+    "afsError": "驗證失敗",
+    "afs": {
+      "start": "請按住滑塊，拖動到最右邊",
+      "yes": "驗證成功",
+      "retry": "重試",
+      "error300": "驗證失敗，請",
+      "errorNetwork": "驗證失敗，請"
+    }
   }
 }
