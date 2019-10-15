@@ -141,9 +141,7 @@ export default {
     channelsDetail: {
       handler: (val: { url: string, channel: string,
         icon: string, title: string, path: string }[]) => {
-        asyncStorage.get('channels').then((data) => {
-          asyncStorage.set('channels', Object.assign(data, { channels: val }));
-        });
+        asyncStorage.set('channels', { channels: val });
       },
       deep: true,
     },
