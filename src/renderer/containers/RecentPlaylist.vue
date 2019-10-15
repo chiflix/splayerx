@@ -34,18 +34,33 @@
             class="info"
           >
             <div
-              v-if="incognitoMode"
+              v-if="!incognitoMode"
               class="pin-icon"
             >
-              <div @mouseup.stop="pinPlaylist" class="icon">
-                <Icon :type="pinIcon" />
+              <div
+                @mouseup.stop="pinPlaylist"
+                @mouseenter="showPinContent = true"
+                @mouseleave="showPinContent = false"
+                :style="{
+                  backgroundColor: showPinContent && isFolderList ? 'rgba(255,255,255,0.125)' : '',
+                }"
+                class="icon"
+              >
+                <Icon
+                  :type="pinIcon"
+                />
               </div>
-              <div class="pin-content">
-                保留此播放列表至启动页
-              </div>
+              <transition name="fade-200">
+                <div
+                  v-show="showPinContent"
+                  class="pin-content"
+                >
+                  保留此播放列表至启动页
+                </div>
+              </transition>
             </div>
             <div
-              v-else 
+              v-else
               class="badge"
             >
               {{ $t('preferences.privacy.incognitoMode') }}
@@ -223,6 +238,7 @@ export default {
       showTopContent: true,
       cursorLeft: `url("${filePathToUrl(path.join(__static, 'cursor/cursorLeft.svg') as string)}")`,
       cursorRight: `url("${filePathToUrl(path.join(__static, 'cursor/cursorRight.svg') as string)}")`,
+      showPinContent: false,
     };
   },
   created() {
@@ -398,7 +414,7 @@ export default {
       playlist.playedIndex = 0;
 
       this.infoDB.update('recent-played', playlist, playlist.id);
-      this.$store.dispatch('FolderList', { id: playlist.id, paths: this.playingList, items: this.items }); 
+      this.$store.dispatch('FolderList', { id: playlist.id, paths: this.playingList, items: this.items });
     },
     async setPlaylist() {
       const playlist = await this.infoDB.get('recent-played', this.playListId);
@@ -792,9 +808,6 @@ export default {
           display: flex;
           align-items: center;
           transition: background-color 50ms linear;
-          &:hover {
-            background-color: rgba(0,0,0,0.25);
-          }
         }
 
         .pin-content {
