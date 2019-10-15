@@ -17,6 +17,7 @@
       :title="title"
       :is-loading="isLoading"
       :close-url-input="closeUrlInput"
+      :can-reload="webInfo.canReload"
       :play-file-with-playing-view="playFileWithPlayingView"
       @dblclick.native="handleDbClick"
     />

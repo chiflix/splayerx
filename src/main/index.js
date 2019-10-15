@@ -680,6 +680,10 @@ function registerMainWindowEvent(mainWindow) {
     browserViewManager.pauseVideo(mainWindow.getBrowserViews()[0]);
     mainWindow.hide();
   });
+  ipcMain.on('clear-browsers-by-channel', (evt, channel) => {
+    if (!browserViewManager) return;
+    browserViewManager.clearBrowserViewsByChannel(channel);
+  });
   ipcMain.on('remove-browser', () => {
     mainWindow.getBrowserViews()
       .forEach(mainWindowView => mainWindow.removeBrowserView(mainWindowView));

@@ -21,7 +21,7 @@
       class="control-button page-refresh-icon no-drag"
     >
       <Icon
-        :type="isLoading ? 'reloadStop' : 'pageRefresh'"
+        :type="!canReload ? 'pageRefreshDisabled' : isLoading ? 'reloadStop' : 'pageRefresh'"
       />
     </div>
   </div>
@@ -55,6 +55,10 @@ export default {
     playFileWithPlayingView: {
       type: Function,
       required: true,
+    },
+    canReload: {
+      type: Boolean,
+      default: true,
     },
   },
   computed: {

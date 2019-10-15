@@ -7,16 +7,6 @@ import syncStorage from '@/helpers/syncStorage';
 const state = {
   nsfwProcessDone: false,
   protectPrivacy: false,
-  channels: [
-    'https://www.bilibili.com/',
-    'https://www.iqiyi.com/',
-    'https://www.douyu.com/',
-    'https://www.huya.com/',
-    'https://v.qq.com/',
-    'https://www.youku.com/',
-    'https://www.twitch.tv/',
-    'https://www.youtube.com/',
-  ],
   hideNSFW: true,
   privacyAgreement: undefined,
   displayLanguage: '',

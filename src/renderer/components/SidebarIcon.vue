@@ -44,7 +44,7 @@ export default {
       type: String,
       default: '',
     },
-    type: {
+    path: {
       type: String,
       default: '',
     },
@@ -120,7 +120,7 @@ export default {
         this.iconTranslateY = 0;
         this.mousedown = false;
       } else {
-        this.selectSidebar(this.url, this.type);
+        this.selectSidebar(this.url, this.path);
       }
     },
   },

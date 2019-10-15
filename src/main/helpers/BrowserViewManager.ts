@@ -312,11 +312,12 @@ export class BrowserViewManager implements IBrowserViewManager {
           .then((r: string) => {
             type = r;
             if (!currentView.webContents.isDestroyed()) {
-              currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo(channel, type));
+              currentView.webContents
+                .executeJavaScript(InjectJSManager.pauseVideo(pausedChannel, type));
             }
           });
       } else {
-        currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('normal'));
+        currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo());
       }
     }
     if (!enterPip) {
@@ -329,10 +330,11 @@ export class BrowserViewManager implements IBrowserViewManager {
             .executeJavaScript(InjectJSManager.pipFindType(channel))
             .then((r: string) => {
               type = r;
-              currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo(channel, type));
+              currentView.webContents
+                .executeJavaScript(InjectJSManager.pauseVideo(pausedChannel, type));
             });
         } else {
-          currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('normal'));
+          currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo());
         }
       });
     } else if (currentView.webContents.isLoading()) {
@@ -345,10 +347,11 @@ export class BrowserViewManager implements IBrowserViewManager {
             .executeJavaScript(InjectJSManager.pipFindType(channel))
             .then((r: string) => {
               type = r;
-              currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo(channel, type));
+              currentView.webContents
+                .executeJavaScript(InjectJSManager.pauseVideo(pausedChannel, type));
             });
         } else {
-          currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('normal'));
+          currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo());
         }
       });
     }
@@ -380,6 +383,11 @@ export class BrowserViewManager implements IBrowserViewManager {
     if (isDeepClear) {
       this.historyByChannel.clear();
     }
+  }
+
+  public clearBrowserViewsByChannel(channel: string): void {
+    this.browserViewCacheManager.clearCacheByChannel(channel);
+    this.historyByChannel.delete(channel);
   }
 
   private jump(left: boolean): BrowserViewData {
@@ -459,4 +467,5 @@ export interface IBrowserViewManager {
   pipClose(): void
   pauseVideo(view?: BrowserView, currentChannel?: string, enterPip?: boolean): void
   clearAllBrowserViews(isDeepClear?: boolean): void
+  clearBrowserViewsByChannel(channel: string): void
 }
