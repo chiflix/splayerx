@@ -3,7 +3,7 @@ import { Type, IEntityGenerator, Format } from '@/interfaces/ISubtitle';
 import { LanguageCode } from '@/libs/language';
 import { mediaQuickHash } from '@/libs/utils';
 import { ISubtitleStream } from '@/plugins/mediaTasks';
-import { IEmbeddedOrigin } from '../utils/loaders';
+import { IEmbeddedOrigin } from '@/interfaces/ISubtitleLoader';
 
 export class EmbeddedGenerator implements IEntityGenerator {
   private origin: IEmbeddedOrigin;

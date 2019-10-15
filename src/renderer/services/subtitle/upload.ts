@@ -1,7 +1,6 @@
 // @ts-ignore
 import PQueue from 'p-queue';
 import { TrainingData } from 'sagi-api/training/v1/training_pb';
-import Sagi from '@/libs/sagi';
 
 export type SubtitleUploadParameter = TrainingData.AsObject;
 
@@ -30,6 +29,7 @@ export class TranscriptQueue {
     options: { priority: 0 | 1 } = { priority: 0 },
   ) {
     const id = `${subtitle.hints}-${subtitle.mediaIdentity}`;
+    const Sagi = await require('@/libs/sagi');
     const task = subtitle.transcriptIdentity
       ? () => Sagi.pushTranscriptWithTranscriptIdentity(subtitle)
       : () => Sagi.pushTranscriptWithPayload(subtitle);

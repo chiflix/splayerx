@@ -141,8 +141,7 @@ import OpenUrl from '@/components/LandingView/OpenUrl.vue';
 import NotificationBubble from '@/components/NotificationBubble.vue';
 import PlaylistItem from '@/components/LandingView/PlaylistItem.vue';
 import VideoItem from '@/components/LandingView/VideoItem.vue';
-import { log } from '@/libs/Log';
-import Sagi from '@/libs/sagi';
+// import { log } from '@/libs/Log';
 import { findNsfwFistFilter } from '@/libs/utils';
 import { Browsing as browsingActions } from '@/store/actionTypes';
 
@@ -307,17 +306,19 @@ export default {
   async mounted() {
     this.$store.dispatch('refreshVersion');
 
-    const { app } = this.$electron.remote;
+    // const { app } = this.$electron.remote;
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setResizable', [true]);
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [720, 405]);
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [720 / 405]);
 
-    Sagi.healthCheck().then((res) => {
-      if (process.env.NODE_ENV !== 'production') {
-        this.sagiHealthStatus = res.status;
-        log.info('LandingView.vue', `launching: ${app.getName()} ${app.getVersion()}`);
-      }
-    });
+    // TODO: Put this code to when the windows is rendered after
+    // if (process.env.NODE_ENV !== 'production') {
+    //   const Sagi = await require('@/libs/sagi');
+    //   Sagi.healthCheck().then((res) => {
+    //     this.sagiHealthStatus = res.status;
+    //     log.info('LandingView.vue', `launching: ${app.getName()} ${app.getVersion()}`);
+    //   });
+    // }
     this.$bus.$on('open-url-show', (val: boolean) => {
       this.openUrlShow = val;
     });

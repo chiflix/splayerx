@@ -1,6 +1,9 @@
+import { TranscriptResponse } from 'sagi-api/translation/v1/translation_pb';
 import { LanguageCode } from '../libs/language';
 
 type Partial<T> = { [P in keyof T]?: T[P] };
+
+export type SagiSubtitlePayload = TranscriptResponse.Cue.AsObject[];
 
 export enum Type {
   Online = 'online',
@@ -148,5 +151,6 @@ export type Cue = {
   format: string,
   tags: ITags,
 }
+
 
 export const NOT_SELECTED_SUBTITLE = 'NOT_SELECTED_SUBTITLE';

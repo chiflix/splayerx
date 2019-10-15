@@ -163,7 +163,7 @@ const actions: ActionTree<ISubtitleState, {}> = {
     const subtitle = subtitleLoaderParserMap.get(state.hash);
     if (state.realSource && subtitle) {
       if (!subtitle.loader) {
-        subtitle.loader = getLoader(state.realSource);
+        subtitle.loader = await getLoader(state.realSource);
         subtitle.loader.on('cache', async (result) => {
           commit(m.setCanCache, result);
           if (result) {
@@ -179,7 +179,7 @@ const actions: ActionTree<ISubtitleState, {}> = {
       }
       if (subtitle.loader && !subtitle.parser) {
         const videoSegments = new VideoTimeSegments(rootGetters.duration);
-        subtitle.parser = getParser(state.format, subtitle.loader, videoSegments);
+        subtitle.parser = await getParser(state.format, subtitle.loader, videoSegments);
       }
       if (subtitle.parser) {
         return {

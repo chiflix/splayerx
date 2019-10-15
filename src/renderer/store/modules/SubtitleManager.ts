@@ -44,7 +44,7 @@ import { LanguageCode } from '@/libs/language';
 import { AudioTranslateBubbleOrigin } from './AudioTranslate';
 import { ISubtitleStream } from '@/plugins/mediaTasks';
 import { isAIEnabled } from '@/helpers/featureSwitch';
-import { IEmbeddedOrigin } from '@/services/subtitle/utils/loaders';
+import { IEmbeddedOrigin } from '@/interfaces/ISubtitleLoader';
 
 const sortOfTypes = {
   local: 0,

@@ -1,11 +1,9 @@
-import { TranscriptResponse } from 'sagi-api/translation/v1/translation_pb';
+
 import {
-  Format, Cue, IParser, IVideoSegments,
+  Format, Cue, IParser, IVideoSegments, SagiSubtitlePayload,
 } from '@/interfaces/ISubtitle';
 import { tagsGetter, getDialogues } from '../utils';
 import { SagiLoader } from '../utils/loaders';
-
-export type SagiSubtitlePayload = TranscriptResponse.Cue.AsObject[];
 
 export class SagiParser implements IParser {
   public get format() { return Format.Sagi; }

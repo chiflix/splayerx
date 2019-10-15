@@ -3,7 +3,6 @@ import { compile, CompiledASS, AssStream } from 'ass-compiler';
 import {
   Format, IParser, ILoader, IMetadata, Cue, IVideoSegments,
 } from '@/interfaces/ISubtitle';
-import { getDialogues } from '../utils';
 import { StreamTimeSegments } from '@/libs/TimeSegments';
 
 export class AssParser implements IParser {
@@ -169,6 +168,7 @@ export class AssParser implements IParser {
         this.isRequesting = false;
       }
     }
-    return getDialogues(this.dialogues, time);
+    const utils = await import('../utils');
+    return utils.getDialogues(this.dialogues, time);
   }
 }

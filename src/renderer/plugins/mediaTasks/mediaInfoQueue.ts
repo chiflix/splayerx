@@ -2,7 +2,6 @@ import { ipcRenderer } from 'electron';
 import { camelCase } from 'lodash';
 import BaseMediaTaskQueue, { IMediaTask } from './baseMediaTaskQueue';
 import { LanguageCode, normalizeCode } from '@/libs/language';
-import { mediaQuickHash } from '@/libs/utils';
 
 type EntryOf<T> = [keyof T, T[keyof T]];
 
@@ -222,7 +221,8 @@ class MediaInfoTask implements IMediaTask<IMediaInfo> {
 
   /** generate a MediaInfoTask instance by file path */
   public static async from(path: string) {
-    const hash = await mediaQuickHash.try(path);
+    const mediaUtils = await import('@/libs/utils');
+    const hash = await mediaUtils.mediaQuickHash.try(path);
     if (hash) return new MediaInfoTask(path, hash);
     return undefined;
   }

@@ -13,12 +13,9 @@ import {
   StreamingTranslationResponse,
 } from 'sagi-api/translation/v1/translation_pb';
 import { AITaskInfo } from '@/interfaces/IMediaStorable';
-import sagi from '@/libs/sagi';
 import MediaStorageService, { mediaStorageService } from '../storage/MediaStorageService';
 import { TranscriptInfo } from '../subtitle';
 import { Stream } from '@/plugins/mediaTasks/mediaInfoQueue';
-import { isAccountEnabled } from '@/helpers/featureSwitch';
-import { getClientUUID } from '@/../shared/utils';
 
 type JobData = {
   audioId: string,
@@ -52,7 +49,7 @@ class AudioTranslateService extends EventEmitter {
 
   public streamClient: any; // eslint-disable-line
 
-  public taskInfo?: AITaskInfo;
+  public taskInfo: AITaskInfo;
 
   public audioInfo?: Stream;
 
@@ -105,16 +102,18 @@ class AudioTranslateService extends EventEmitter {
     this.audioLanguageCode = data.audioLanguageCode;
     this.targetLanguageCode = data.targetLanguageCode;
     this.audioInfo = data.audioInfo;
-    getClientUUID().then((uuid: string) => {
-      ipcRenderer.send('grab-audio', {
-        mediaHash: this.mediaHash,
-        videoSrc: this.videoSrc,
-        audioLanguageCode: this.audioLanguageCode,
-        targetLanguageCode: this.targetLanguageCode,
-        audioId: this.audioId,
-        audioInfo: this.audioInfo,
-        uuid,
-        agent: navigator.userAgent,
+    import('@/../shared/utils').then((utils) => {
+      utils.getClientUUID().then((uuid: string) => {
+        ipcRenderer.send('grab-audio', {
+          mediaHash: this.mediaHash,
+          videoSrc: this.videoSrc,
+          audioLanguageCode: this.audioLanguageCode,
+          targetLanguageCode: this.targetLanguageCode,
+          audioId: this.audioId,
+          audioInfo: this.audioInfo,
+          uuid,
+          agent: navigator.userAgent,
+        });
       });
     });
     ipcRenderer.removeListener('grab-audio-update', this.ipcCallBack);
@@ -125,7 +124,8 @@ class AudioTranslateService extends EventEmitter {
   private async handleMainCallBack( // eslint-disable-line complexity
     result: StreamingTranslationResponse.AsObject,
   ) {
-    const enabled = await isAccountEnabled();
+    const featureSwitch = await require('@/helpers/featureSwitch');
+    const enabled = await featureSwitch.isAccountEnabled();
     if (result && result.taskinfo) {
       this.taskInfo = {
         mediaHash: this.mediaHash,
@@ -166,6 +166,7 @@ class AudioTranslateService extends EventEmitter {
     }
     this.loopTimer = setTimeout(async () => {
       try {
+        const sagi = await require('@/libs/sagi');
         const res = await sagi.streamingTranslationTask(taskId);
         const result = res && res.toObject();
         if (result && res.hasTranscriptinfo()) {

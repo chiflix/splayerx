@@ -1,6 +1,4 @@
 import { cloneDeep } from 'lodash';
-import { pathToFormat, inferLanguageFromPath } from '../utils';
-
 import {
   IOrigin, Type, IEntityGenerator, Format,
 } from '@/interfaces/ISubtitle';
@@ -15,9 +13,17 @@ export class LocalGenerator implements IEntityGenerator {
 
   private format: Format;
 
+  private getFormatByExt(subPath: string) {
+    let format;
+    import('../utils').then((utils) => {
+      format = utils.pathToFormat(subPath);
+    });
+    return format;
+  }
+
   public constructor(subtitlePath: string) {
     this.origin = { type: Type.Local, source: subtitlePath };
-    const format = pathToFormat(subtitlePath);
+    const format = this.getFormatByExt(subtitlePath);
     if (!format) throw new Error(`Unrecongnized subtitle format ${subtitlePath}.`);
     this.format = format;
   }
@@ -28,14 +34,15 @@ export class LocalGenerator implements IEntityGenerator {
 
   public async getFormat() {
     if (this.format) return this.format;
-    const format = pathToFormat(this.origin.source);
+    const format = this.getFormatByExt(this.origin.source);
     if (!format) throw new Error(`Unrecongnized subtitle format ${this.origin.source}.`);
     this.format = format;
     return this.format;
   }
 
   public async getLanguage() {
-    return inferLanguageFromPath(this.origin.source);
+    const utils = await import('../utils');
+    return utils.inferLanguageFromPath(this.origin.source);
   }
 
   public async getHash() {

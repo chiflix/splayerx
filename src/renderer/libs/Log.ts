@@ -1,49 +1,49 @@
 /* eslint-disable no-console */
-import electron from 'electron';
-import winston from 'winston';
-import DailyRotateFile from 'winston-daily-rotate-file';
-import { join } from 'path';
+// import electron from 'electron';
+// import winston from 'winston';
+// import DailyRotateFile from 'winston-daily-rotate-file';
+// import { join } from 'path';
 import { ILog } from '@/interfaces/ILog';
 import Sentry from '../../shared/sentry';
-import { ELECTRON_CACHE_DIRNAME, DEFAULT_LOG_DIRNAME } from '@/constants';
+// import { ELECTRON_CACHE_DIRNAME, DEFAULT_LOG_DIRNAME } from '@/constants';
 
-const app = electron.app || electron.remote.app;
-const defaultPath = join(app.getPath(ELECTRON_CACHE_DIRNAME), DEFAULT_LOG_DIRNAME);
+// const app = electron.app || electron.remote.app;
+// const defaultPath = join(app.getPath(ELECTRON_CACHE_DIRNAME), DEFAULT_LOG_DIRNAME);
 
 export default class Log implements ILog {
-  private _logger: winston.Logger;
+  // private _logger: winston.Logger;
 
-  public get logger() {
-    if (this._logger) return this._logger;
+  // public get logger() {
+  //   if (this._logger) return this._logger;
 
-    try {
-      const transport = new DailyRotateFile({
-        filename: `${defaultPath}/%DATE%.log`,
-        datePattern: 'YYYY-MM-DD',
-        zippedArchive: true,
-        maxSize: '20m',
-        maxFiles: '14d',
-      });
+  //   try {
+  //     const transport = new DailyRotateFile({
+  //       filename: `${defaultPath}/%DATE%.log`,
+  //       datePattern: 'YYYY-MM-DD',
+  //       zippedArchive: true,
+  //       maxSize: '20m',
+  //       maxFiles: '14d',
+  //     });
 
-      this._logger = winston.createLogger({
-        format: winston.format.combine(winston.format.printf((info) => {
-          if (info.stack) {
-            return `${info.time} - ${info.level}: ${info.message}-${info.stack}`;
-          }
-          return `${info.time} - ${info.level}: ${info.message}`;
-        })),
-        transports: [transport],
-      });
+  //     this._logger = winston.createLogger({
+  //       format: winston.format.combine(winston.format.printf((info) => {
+  //         if (info.stack) {
+  //           return `${info.time} - ${info.level}: ${info.message}-${info.stack}`;
+  //         }
+  //         return `${info.time} - ${info.level}: ${info.message}`;
+  //       })),
+  //       transports: [transport],
+  //     });
 
-      return this._logger;
-    } catch (ex) {
-      return {
-        log() {
-          // do nothing
-        },
-      };
-    }
-  }
+  //     return this._logger;
+  //   } catch (ex) {
+  //     return {
+  //       log() {
+  //         // do nothing
+  //       },
+  //     };
+  //   }
+  // }
 
   private log(label: string, level: string, message: string | Error) {
     if (level in console) console[level](label, message);
@@ -51,22 +51,22 @@ export default class Log implements ILog {
 
     Sentry.addBreadcrumb({ message: `Log: ${label} ${level} ${message}` });
 
-    let stack;
-    if (message instanceof Error) {
-      stack = message.stack;
-      message = message.message;
-    }
+    // let stack;
+    // if (message instanceof Error) {
+    //   stack = message.stack;
+    //   message = message.message;
+    // }
 
-    try {
-      this.logger.log({
-        time: new Date().toISOString(),
-        level,
-        message,
-        stack,
-      });
-    } catch (error) {
-      // empty
-    }
+    // try {
+    //   this.logger.log({
+    //     time: new Date().toISOString(),
+    //     level,
+    //     message,
+    //     stack,
+    //   });
+    // } catch (error) {
+    //   // empty
+    // }
   }
 
   /**

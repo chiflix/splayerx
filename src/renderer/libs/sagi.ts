@@ -15,7 +15,7 @@ import {
 import { TranslationClient } from 'sagi-api/translation/v1/translation_grpc_pb';
 import { TrainingData } from 'sagi-api/training/v1/training_pb';
 import { TrainngClient } from 'sagi-api/training/v1/training_grpc_pb';
-import { SagiSubtitlePayload } from '@/services/subtitle';
+import { SagiSubtitlePayload } from '@/interfaces/ISubtitle';
 import { getClientUUID, getIP } from '@/../shared/utils';
 import { log } from './Log';
 

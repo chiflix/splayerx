@@ -1,6 +1,5 @@
 import fs from 'fs';
 import path from 'path';
-import helpers from '@/helpers/index';
 
 const state = {
   source: '', // 'drop' or '', used on mas version
@@ -146,16 +145,18 @@ const actions = {
         Currently not judging whether app is mas version
         Until detecting same directory be abandoned on mas version
        */
-      helpers.methods.findSimilarVideoByVidPath(state.playList[0]).then((videoFiles) => {
-        commit('playList', videoFiles);
-      }, (err) => {
-        if (process.mas && (err && err.code === 'EPERM')) {
-          dispatch('FolderList', {
-            id: state.id,
-            paths: state.playList,
-            items: state.items,
-          });
-        }
+      import('@/helpers/index').then((helper) => {
+        helper.methods.findSimilarVideoByVidPath(state.playList[0]).then((videoFiles) => {
+          commit('playList', videoFiles);
+        }, (err) => {
+          if (process.mas && (err && err.code === 'EPERM')) {
+            dispatch('FolderList', {
+              id: state.id,
+              paths: state.playList,
+              items: state.items,
+            });
+          }
+        });
       });
     } else {
       for (let i = 0; i < state.playList.length; i += 1) {

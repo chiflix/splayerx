@@ -4,13 +4,12 @@ import {
 } from 'fs-extra';
 import { EventEmitter } from 'events';
 import {
-  ILoader, IOrigin, Type, Format,
+  ILoader, IOrigin, Type, Format, SagiSubtitlePayload,
 } from '@/interfaces/ISubtitle';
+import { IEmbeddedOrigin } from '@/interfaces/ISubtitleLoader';
 import { loadLocalFile, formatToExtension } from '.';
 import { SUBTITLE_FULL_DIRNAME } from '@/constants';
 import { mediaQuickHash, getSubtitleDir } from '@/libs/utils';
-import Sagi from '@/libs/sagi';
-import { SagiSubtitlePayload } from '../parsers';
 import { sagiSubtitleToWebVTT } from './transcoders';
 import {
   getSubtitleMetadata, cacheSubtitle, getSubtitleFragment, finishSubtitleExtraction,
@@ -41,6 +40,10 @@ export class LocalTextLoader extends EventEmitter implements ILoader {
   }
 
   public readonly source: ILocalTextOrigin;
+
+  public static instance(val: ILoader) {
+    return val as LocalTextLoader;
+  }
 
   public constructor(path: string) {
     super();
@@ -86,13 +89,7 @@ export class LocalTextLoader extends EventEmitter implements ILoader {
 
   public async destroy() { this._payloadString = ''; }
 }
-export interface IEmbeddedOrigin extends IOrigin {
-  type: Type.Embedded;
-  source: {
-    videoPath: string;
-    streamIndex: number;
-  };
-}
+
 export class EmbeddedTextStreamLoader extends EventEmitter implements ILoader {
   public readonly canPreload = false;
 
@@ -242,6 +239,10 @@ export class SagiLoader extends EventEmitter implements ILoader {
 
   public readonly source: ISagiOrigin;
 
+  public static instance(val: ILoader) {
+    return val as SagiLoader;
+  }
+
   public constructor(hash: string) {
     super();
     this.source = { type: Type.Online, source: hash };
@@ -252,7 +253,8 @@ export class SagiLoader extends EventEmitter implements ILoader {
   public async getPayload(): Promise<SagiSubtitlePayload> {
     if (this._loadingStatus === Status.NOT_STARTED) {
       this._loadingStatus = Status.WORKING;
-      this._payloads = await Sagi.getTranscript({
+      const sagi = await require('@/libs/sagi');
+      this._payloads = await sagi.getTranscript({
         transcriptIdentity: this.source.source,
         startTime: 0,
       });

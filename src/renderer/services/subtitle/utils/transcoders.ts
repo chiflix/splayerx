@@ -1,6 +1,6 @@
 // @ts-ignore
 import { toVttTime, stringifyVtt } from 'subtitle';
-import { SagiSubtitlePayload } from '../parsers';
+import { SagiSubtitlePayload } from '@/interfaces/ISubtitle';
 
 export function sagiSubtitleToWebVTT(subtitlePayload: SagiSubtitlePayload): string {
   const vttSubtitles = subtitlePayload

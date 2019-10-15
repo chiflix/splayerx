@@ -18,7 +18,6 @@ import { TranscriptInfo } from '@/services/subtitle';
 import { ISubtitleControlListItem, Type } from '@/interfaces/ISubtitle';
 import { mediaStorageService } from '@/services/storage/MediaStorageService';
 import { TranslatedGenerator } from '@/services/subtitle/loaders/translated';
-import { isAudioCenterChannelEnabled, isAccountEnabled } from '@/helpers/featureSwitch';
 import { addBubble } from '@/helpers/notificationControl';
 import {
   TRANSLATE_SERVER_ERROR_FAIL, TRANSLATE_SUCCESS,
@@ -27,8 +26,6 @@ import {
 } from '@/helpers/notificationcodes';
 import { log } from '@/libs/Log';
 import { LanguageCode } from '@/libs/language';
-import { addSubtitleItemsToList } from '@/services/storage/subtitle';
-import { getStreams } from '@/plugins/mediaTasks';
 
 let taskTimer: number;
 let timerCount: number;
@@ -116,12 +113,17 @@ const getCurrentAudioInfo = async (
   currentAudioTrackId: number,
   path: string,
 ) => {
-  const streams = await getStreams(path);
+  const mediaTask = await require('@/plugins/mediaTasks');
+  const streams = await mediaTask.getStreams(path);
   // currentAudioTrackId 是从stream的索引是从1开始的
   const index = currentAudioTrackId - 1;
   log.debug('translate/track', currentAudioTrackId);
   log.debug('translate/track', index);
-  const audioInfo = (await isAudioCenterChannelEnabled()) ? streams[index] : undefined;
+  const featureSwitch = await require('@/helpers/featureSwitch');
+  let audioInfo;
+  if (await featureSwitch.isAudioCenterChannelEnabled()) {
+    audioInfo = streams[index];
+  }
   log.debug('translate/audioInfo', audioInfo);
   return audioInfo;
 };
@@ -490,7 +492,8 @@ const actions = {
             generator, mediaHash: audioTranslateService.mediaHash,
           });
           // 保存本次字幕到数据库
-          addSubtitleItemsToList([subtitle], audioTranslateService.mediaHash);
+          const dbSubtitle = await require('@/services/storage/subtitle');
+          dbSubtitle.addSubtitleItemsToList([subtitle], audioTranslateService.mediaHash);
           if (subtitle && subtitle.id) {
             // 选中当前翻译的字幕
             if (getters.primarySubtitleId === selectId) {
@@ -696,7 +699,8 @@ const actions = {
     commit, getters, state, dispatch,
   }: any, sub: ISubtitleControlListItem) {
     try {
-      const enabled = await isAccountEnabled();
+      const featureSwitch = await require('@/helpers/featureSwitch');
+      const enabled = await featureSwitch.isAccountEnabled();
       if (enabled && !getters.token) {
         // 未登录
         ipcRenderer.send('add-login');

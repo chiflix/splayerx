@@ -3,22 +3,26 @@ import Router from 'vue-router';
 
 Vue.use(Router);
 
+const landingView = () => import('@/containers/LandingView.vue');
+const playingView = () => import('@/components/PlayingView.vue');
+const browsingView = () => import('@/components/BrowsingView.vue');
+
 export default new Router({
   routes: [
     {
       path: '/',
       name: 'landing-view',
-      component: require('@/containers/LandingView.vue').default,
+      component: landingView,
     },
     {
       path: '/play',
       name: 'playing-view',
-      component: require('@/components/PlayingView.vue').default,
+      component: playingView,
     },
     {
       path: '/browsing',
       name: 'browsing-view',
-      component: require('@/components/BrowsingView.vue').default,
+      component: browsingView,
     },
     {
       path: '*',

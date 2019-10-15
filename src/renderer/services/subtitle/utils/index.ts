@@ -1,8 +1,5 @@
 import { detect } from 'chardet';
 import { encodingExists, decode } from 'iconv-lite';
-import {
-  open, read, close, readFile,
-} from 'fs-extra';
 import { extname } from 'path';
 import {
   ITags, IOrigin, Type, Format, IParser, ILoader, Cue, IVideoSegments,
@@ -10,15 +7,12 @@ import {
 import { LanguageCode } from '@/libs/language';
 
 import {
-  AssParser, SrtParser, SagiParser, VttParser,
+  AssParser, SrtParser, VttParser,
 } from '@/services/subtitle';
 
-import { assFragmentLanguageLoader, srtFragmentLanguageLoader, vttFragmentLanguageLoader } from './languageLoader';
-import {
-  IEmbeddedOrigin,
-  EmbeddedTextStreamLoader, LocalTextLoader, SagiLoader,
-} from './loaders';
+import { SagiParser } from '@/services/subtitle/parsers/sagi';
 
+import { IEmbeddedOrigin } from '@/interfaces/ISubtitleLoader';
 /**
  * Cue tags getter for SubRip, SubStation Alpha and Online Transcript subtitles.
  *
@@ -80,19 +74,20 @@ export async function detectEncoding(buffer: Buffer) {
 
 export async function extractTextFragment(path: string, encoding?: string) {
   try {
-    const fd = await open(path, 'r');
+    const fsExtra = await import('fs-extra');
+    const fd = await fsExtra.open(path, 'r');
     if (!encoding) {
       const encodingBufferSize = 4096;
       const encodingBuffer = Buffer.alloc(4096);
-      await read(fd, encodingBuffer, 0, encodingBufferSize, 0);
+      await fsExtra.read(fd, encodingBuffer, 0, encodingBufferSize, 0);
       encoding = await detectEncoding(encodingBuffer);
     }
     if (!encodingExists(encoding)) throw new Error(`Unsupported encoding ${encoding}.`);
 
     const languageBufferSize = 4096 * 20;
     const languageBuffer = Buffer.alloc(languageBufferSize);
-    await read(fd, languageBuffer, 0, languageBufferSize, 0);
-    await close(fd);
+    await fsExtra.read(fd, languageBuffer, 0, languageBufferSize, 0);
+    await fsExtra.close(fd);
     return decode(languageBuffer, encoding).replace(/\r?\n|\r/g, '\n');
   } catch (e) {
     return '';
@@ -107,7 +102,8 @@ export async function extractTextFragment(path: string, encoding?: string) {
  * @returns string content or err when read/decoding file
  */
 export async function loadLocalFile(path: string, encoding?: string) {
-  const fileBuffer = await readFile(path);
+  const fsExtra = await import('fs-extra');
+  const fileBuffer = await fsExtra.readFile(path);
   if (encoding && encodingExists(encoding)) return decode(fileBuffer, encoding);
   const encodingBuffer = Buffer.from(fileBuffer, 4096);
   const fileEncoding = await detectEncoding(encodingBuffer);
@@ -157,14 +153,15 @@ export function formatToExtension(format: Format): string {
 export async function inferLanguageFromPath(path: string): Promise<LanguageCode> {
   const format = await pathToFormat(path);
   const textFragment = await extractTextFragment(path);
+  const langloader = await import('./languageLoader');
   switch (format) {
     case Format.AdvancedSubStationAplha:
     case Format.SubStationAlpha:
-      return assFragmentLanguageLoader(textFragment)[0];
+      return langloader.assFragmentLanguageLoader(textFragment)[0];
     case Format.SubRip:
-      return srtFragmentLanguageLoader(textFragment)[0];
+      return langloader.srtFragmentLanguageLoader(textFragment)[0];
     case Format.WebVTT:
-      return vttFragmentLanguageLoader(textFragment)[0];
+      return langloader.vttFragmentLanguageLoader(textFragment)[0];
     default:
       throw new Error(`Unsupported format ${format}.`);
   }
@@ -177,39 +174,43 @@ export function getDialogues(dialogues: Cue[], time?: number) {
     ));
 }
 
-export function getLoader(source: IOrigin): ILoader {
+export async function getLoader(source: IOrigin): Promise<ILoader> {
+  const loader = await import('./loaders');
   switch (source.type) {
     default:
       throw new Error('Unknown source type.');
     case Type.Embedded: {
       const { videoPath, streamIndex } = (source as IEmbeddedOrigin).source;
-      return new EmbeddedTextStreamLoader(videoPath, streamIndex);
+      return new loader.EmbeddedTextStreamLoader(videoPath, streamIndex);
     }
     case Type.Local:
-      return new LocalTextLoader(source.source as string);
+      return new loader.LocalTextLoader(source.source as string);
     case Type.Online:
-      return new SagiLoader(source.source as string);
+      return new loader.SagiLoader(source.source as string);
     case Type.Translated:
-      return new SagiLoader(source.source as string);
+      return new loader.SagiLoader(source.source as string);
   }
 }
 
-export function getParser(
+export async function getParser(
   format: Format,
   loader: ILoader,
   videoSegments: IVideoSegments,
-): IParser {
+): Promise<IParser> {
+  const SagiLoader = (await import('./loaders')).SagiLoader;
+  const LocalTextLoader = (await import('./loaders')).LocalTextLoader;
   switch (format) {
     default:
       throw new Error('Unknown format');
     case Format.AdvancedSubStationAplha:
     case Format.SubStationAlpha:
       return new AssParser(loader, videoSegments);
-    case Format.Sagi:
-      return new SagiParser(loader as SagiLoader, videoSegments);
+    case Format.Sagi: {
+      return new SagiParser(SagiLoader.instance(loader), videoSegments);
+    }
     case Format.SubRip:
-      return new SrtParser(loader as LocalTextLoader, videoSegments);
+      return new SrtParser(LocalTextLoader.instance(loader), videoSegments);
     case Format.WebVTT:
-      return new VttParser(loader as LocalTextLoader, videoSegments);
+      return new VttParser(LocalTextLoader.instance(loader), videoSegments);
   }
 }

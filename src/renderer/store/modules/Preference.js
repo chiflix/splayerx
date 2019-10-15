@@ -1,7 +1,6 @@
 import path from 'path';
 import { remote, ipcRenderer } from 'electron';
 import fs from 'fs';
-import asyncStorage from '@/helpers/asyncStorage';
 import syncStorage from '@/helpers/syncStorage';
 
 const state = {
@@ -82,58 +81,64 @@ const mutations = {
     state.showFullTimeCode = payload;
   },
 };
+
+async function SetPreferencesWithAsync(state) {
+  const asyncStorage = await import('@/helpers/asyncStorage');
+  return asyncStorage.set('preferences', state);
+}
+
 const actions = {
   nsfwProcessDone({ commit, state }) {
     commit('nsfwProcessDone');
-    return asyncStorage.set('preferences', state);
+    return SetPreferencesWithAsync(state);
   },
   welcomeProcess({ commit, state }, payload) {
     commit('privacyAgreement', payload.privacyAgreement);
     commit('primaryLanguage', payload.primaryLanguage);
     commit('secondaryLanguage', payload.secondaryLanguage);
     fs.closeSync(fs.openSync(path.join(remote.app.getPath('userData'), 'WELCOME_PROCESS_MARK'), 'w'));
-    return asyncStorage.set('preferences', state);
+    return SetPreferencesWithAsync(state);
   },
   displayLanguage({ commit, state }, payload) {
     commit('displayLanguage', payload);
-    return asyncStorage.set('preferences', state);
+    return SetPreferencesWithAsync(state);
   },
   agreeOnPrivacyPolicy({ commit, state }) {
     commit('privacyAgreement', true);
-    return asyncStorage.set('preferences', state);
+    return SetPreferencesWithAsync(state);
   },
   disagreeOnPrivacyPolicy({ commit, state }) {
     commit('privacyAgreement', false);
-    return asyncStorage.set('preferences', state);
+    return SetPreferencesWithAsync(state);
   },
   reverseScrolling({ commit, state }) {
     commit('reverseScrolling', true);
-    return asyncStorage.set('preferences', state);
+    return SetPreferencesWithAsync(state);
   },
   notReverseScrolling({ commit, state }) {
     commit('reverseScrolling', false);
-    return asyncStorage.set('preferences', state);
+    return SetPreferencesWithAsync(state);
   },
   hideNSFW({ commit, state }, payload) {
     commit('hideNSFW', !!payload);
     if (payload) ipcRenderer.send('labor-task-add', 'nsfw-warmup');
-    return asyncStorage.set('preferences', state);
+    return SetPreferencesWithAsync(state);
   },
   protectPrivacy({ commit, state }) {
     commit('protectPrivacy', true);
-    return asyncStorage.set('preferences', state);
+    return SetPreferencesWithAsync(state);
   },
   notprotectPrivacy({ commit, state }) {
     commit('protectPrivacy', false);
-    return asyncStorage.set('preferences', state);
+    return SetPreferencesWithAsync(state);
   },
   primaryLanguage({ commit, state }, payload) {
     commit('primaryLanguage', payload);
-    return asyncStorage.set('preferences', state);
+    return SetPreferencesWithAsync(state);
   },
   secondaryLanguage({ commit, state }, payload) {
     commit('secondaryLanguage', payload);
-    return asyncStorage.set('preferences', state);
+    return SetPreferencesWithAsync(state);
   },
   singleCycle({ commit }) {
     commit('singleCycle', true);
@@ -145,15 +150,15 @@ const actions = {
   },
   setPreference({ commit, state }, payload) {
     commit('setPreference', payload);
-    return asyncStorage.set('preferences', state);
+    return SetPreferencesWithAsync(state);
   },
   setSubtitleOff({ commit, state }, payload) {
     commit('subtitleOff', payload);
-    return asyncStorage.set('preferences', state);
+    return SetPreferencesWithAsync(state);
   },
   showFullTimeCode({ commit, state }, payload) {
     commit('showFullTimeCode', payload);
-    return asyncStorage.set('preferences', state);
+    return SetPreferencesWithAsync(state);
   },
 };
 export default {

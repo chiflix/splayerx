@@ -3,9 +3,6 @@ import path, { join } from 'path';
 import electron from 'electron';
 import { ICacheFileStorable } from '@/interfaces/ICacheFileStorable';
 import { ELECTRON_CACHE_DIRNAME, DEFAULT_DIRNAME, VIDEO_DIRNAME } from '../constants';
-import {
-  mkdir, checkPathExist, readDir, deleteDir,
-} from './file';
 
 const app = electron.app || electron.remote.app;
 
@@ -49,8 +46,9 @@ export default class CacheFile implements ICacheFileStorable {
    */
   public async createDirBy(mediaHash: string): Promise<boolean> {
     try {
+      const fs = await require('./file');
       const path = join(`${getDefaultDataPath()}/${VIDEO_DIRNAME}/`, mediaHash);
-      await mkdir(path);
+      await fs.mkdir(path);
       return true;
     } catch (error) {
       return false;
@@ -65,15 +63,16 @@ export default class CacheFile implements ICacheFileStorable {
    */
   public async readDirBy(mediaHash: string): Promise<string[] | null> {
     let path = '';
+    const fs = await require('./file');
     try {
       path = join(`${getDefaultDataPath()}/${VIDEO_DIRNAME}/`, mediaHash);
-      const isExist = await checkPathExist(path);
+      const isExist = await fs.checkPathExist(path);
       if (isExist) {
-        return await readDir(path);
+        return await fs.readDir(path);
       }
     } catch (error) {
       if (error.code === 'ENOENT') {
-        await mkdir(path);
+        await fs.mkdir(path);
       }
     }
     return [];
@@ -87,8 +86,9 @@ export default class CacheFile implements ICacheFileStorable {
    */
   public async removeDirBy(mediaHash: string): Promise<boolean> {
     try {
+      const fs = await require('./file');
       const path = join(`${getDefaultDataPath()}/${VIDEO_DIRNAME}/`, mediaHash);
-      await deleteDir(path);
+      await fs.deleteDir(path);
       return true;
     } catch (error) {
       return false;

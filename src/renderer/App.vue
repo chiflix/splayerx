@@ -45,7 +45,6 @@ import Sidebar from '@/components/Sidebar.vue';
 import '@/css/style.scss';
 import drag from '@/helpers/drag';
 import { setToken } from '@/libs/apis';
-import sagi from '@/libs/sagi';
 import { isAccountEnabled } from '@/helpers/featureSwitch';
 import { log } from './libs/Log';
 
@@ -113,10 +112,11 @@ export default {
     }, 1500000); // keep alive every 25 min.
 
     // sign in success
-    ipcRenderer.on('sign-in', (e: Event, account?: {
+    ipcRenderer.on('sign-in', async (e: Event, account?: {
       token: string, id: string,
     }) => {
       this.updateUserInfo(account);
+      const sagi = await require('@/libs/sagi');
       if (account) {
         setToken(account.token);
         sagi.setToken(account.token);

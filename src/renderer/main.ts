@@ -62,6 +62,7 @@ function getEnvironmentName() {
   return 'Unknown';
 }
 
+Vue.config.performance = true;
 Vue.config.productionTip = false;
 Vue.config.warnHandler = (warn) => {
   log.info('render/main', warn);
