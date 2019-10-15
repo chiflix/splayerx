@@ -47,16 +47,38 @@ export default {
     finalEffect() {
       return this.effect ? this.effect : 'icon';
     },
-    elementId() {
-      return `${this.type}-${this.finalState}-${this.finalEffect}`;
-    },
   },
   watch: {
-    elementId: {
+    type: {
       immediate: true,
-      handler(newId: string) {
-        // eslint-disable-next-line import/no-dynamic-require
-        if (newId && !document.getElementById(newId)) require(`@/assets/icon/${newId}.svg`);
+      handler(type: string) {
+        const defaultIcon = `${type}-${this.finalState}-${this.finalEffect}`;
+        const hoverIcon = `${type}-hover-${this.finalEffect}`;
+        const activeIcon = `${type}-active-${this.finalEffect}`;
+        if (type && !document.getElementById(defaultIcon)) {
+          try {
+            // eslint-disable-next-line import/no-dynamic-require
+            require(`@/assets/icon/${defaultIcon}.svg`);
+          } catch (error) {
+            // empty
+          }
+        }
+        if (type && !document.getElementById(hoverIcon)) {
+          try {
+            // eslint-disable-next-line import/no-dynamic-require
+            require(`@/assets/icon/${hoverIcon}.svg`);
+          } catch (error) {
+            // empty
+          }
+        }
+        if (type && !document.getElementById(activeIcon)) {
+          try {
+            // eslint-disable-next-line import/no-dynamic-require
+            require(`@/assets/icon/${activeIcon}.svg`);
+          } catch (error) {
+            // empty
+          }
+        }
       },
     },
   },
@@ -153,6 +175,43 @@ export default {
   display: block;
 }
 
+.downArrow, .subtitleDetach, .subtitleEdit, .subtitleExport, .reload, .subtitleEditorExit {
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: pointer;
+  .default {
+    display: block;
+  }
+  .hover {
+    display: none;
+  }
+  .active {
+    display: none;
+  }
+  &:hover {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: block;
+    }
+    .active {
+      display: none;
+    }
+  }
+  &:active {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: none;
+    }
+    .active {
+      display: block;
+    }
+  }
+}
 .volume {
   width: 100%;
   height: 100%;
@@ -471,7 +530,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   width: 15px;
   height: 15px;
 }
-.deleteSub, .reload  {
+.deleteSub {
   cursor: pointer;
   .default {
     display: block;

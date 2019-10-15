@@ -12,7 +12,8 @@
             cursor: 'default',
             transition: showAttached ? '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' :
               '150ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
-            height: `${contHeight + hoverHeight}px`,
+            height: panelVisiable ? `${contHeight + hoverHeight + itemHeight}px`
+              : `${contHeight + hoverHeight}px`,
             fontWeight: '900',
           }"
           class="no-drag sub-menu-wrapper subtitle-scroll-items"
@@ -71,12 +72,15 @@
                 :computed-available-items="computedAvailableItems"
                 :loading-types="loadingTypes"
                 :hover-height.sync="hoverHeight"
+                :item-height="itemHeight"
                 :trans-flag.sync="transFlag"
+                :panel-visiable.sync="panelVisiable"
                 :is-first-subtitle="isFirstSubtitle"
                 :show-attached="showAttached"
                 :ref-animation.sync="refAnimation"
                 :enabled-secondary-sub="enabledSecondarySub"
                 :change-subtitle="changeSubtitle"
+                :export-subtitle="exportSubtitle"
                 :translate-progress="translateProgress"
                 :translate-language="selectedTargetLanugage"
                 @off-subtitle="offCurrentSubtitle"
@@ -157,6 +161,7 @@ export default {
       refAnimation: '',
       transFlag: true,
       shiftItemHovered: false,
+      panelVisiable: true,
     };
   },
   computed: {
@@ -184,6 +189,15 @@ export default {
     },
     iconOpacity() {
       return this.isShowingHovered ? 0.9 : 0.77;
+    },
+    itemHeight() {
+      if (this.computedSize >= 289 && this.computedSize <= 480) {
+        return 27;
+      }
+      if (this.computedSize >= 481 && this.computedSize < 1080) {
+        return 32;
+      }
+      return 44;
     },
     contHeight() {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
@@ -388,6 +402,7 @@ export default {
       deleteCurrentSubtitle: smActions.deleteSubtitlesByUuid,
       updateSubtitleType: subtitleActions.UPDATE_SUBTITLE_TYPE,
       showAudioTranslateModal: atActions.AUDIO_TRANSLATE_SHOW_MODAL,
+      exportSubtitle: smActions.exportSubtitle,
     }),
     offCurrentSubtitle() {
       if (this.isFirstSubtitle) {
@@ -473,11 +488,6 @@ export default {
       this.showAudioTranslateModal(item);
       // ga 字幕面板中点击 "Generate" 的次数
       this.$ga.event('app', 'ai-translate-generate-button-click');
-      // if (this.isFirstSubtitle) {
-      //   this.changeFirstSubtitle(item.id);
-      // } else {
-      //   this.changeSecondarySubtitle(item.id);
-      // }
     },
     changeSubtitle(item: ISubtitleControlListItem) {
       if (!navigator.onLine && item.type === Type.PreTranslated && item.source.source === '') {

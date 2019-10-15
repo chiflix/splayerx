@@ -7,7 +7,8 @@ import {
   isEqual, sortBy, differenceWith, flatten, remove, debounce, difference,
 } from 'lodash';
 import Vue from 'vue';
-import { extname } from 'path';
+import { remote } from 'electron';
+import { extname, basename, join } from 'path';
 import { existsSync } from 'fs';
 import store from '@/store';
 import { SubtitleManager as m } from '@/store/mutationTypes';
@@ -45,6 +46,8 @@ import { AudioTranslateBubbleOrigin } from './AudioTranslate';
 import { ISubtitleStream } from '@/plugins/mediaTasks';
 import { isAIEnabled } from '@/helpers/featureSwitch';
 import { IEmbeddedOrigin } from '@/services/subtitle/utils/loaders';
+import { sagiSubtitleToSRT } from '@/services/subtitle/utils/transcoders';
+import { write } from '@/libs/file';
 
 const sortOfTypes = {
   local: 0,
@@ -1016,6 +1019,39 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
   async [a.storeSubtitleDelays]({ getters, state }) {
     const list = getters.list.map(({ id }: ISubtitleControlListItem) => getters[`${id}/entity`]);
     updateSubtitleList(list, state.mediaHash);
+  },
+  async [a.exportSubtitle]({ getters, dispatch }, item: ISubtitleControlListItem) {
+    if (item && item.type === 'translated') {
+      const { app, dialog } = remote;
+      const browserWindow = remote.BrowserWindow;
+      const focusWindow = browserWindow.getFocusedWindow();
+      let defaultPath = getters.defaultDir;
+      if (!defaultPath) {
+        defaultPath = process.platform === 'darwin' ? app.getPath('home') : app.getPath('desktop');
+      }
+      const originSrc = getters.originSrc;
+      const videoName = `${basename(originSrc, extname(originSrc))}`;
+      const name = `a-${videoName}-SPlayer`;
+      const fileName = `${basename(name, '.srt')}.srt`;
+      defaultPath = join(defaultPath, fileName);
+      if (focusWindow) {
+        dialog.showSaveDialog(focusWindow, {
+          defaultPath,
+        }, async (filePath) => {
+          if (filePath) {
+            const { dialogues = [] } = await dispatch(`${getters.primarySubtitleId}/${subActions.getDialogues}`, undefined);
+            log.debug('export', dialogues);
+            const str = sagiSubtitleToSRT(dialogues);
+            try {
+              write(filePath, Buffer.from(`\ufeff${str}`, 'utf8'));
+            } catch (err) {
+              log.error('exportSubtitle', err);
+            }
+            dispatch('UPDATE_DEFAULT_DIR', filePath);
+          }
+        });
+      }
+    }
   },
 };
 
