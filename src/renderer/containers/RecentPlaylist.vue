@@ -33,13 +33,22 @@
             }"
             class="info"
           >
-            <div class="pin-icon">
+            <div
+              v-if="incognitoMode"
+              class="pin-icon"
+            >
               <div @mouseup.stop="pinPlaylist" class="icon">
                 <Icon :type="pinIcon" />
               </div>
               <div class="pin-content">
                 保留此播放列表至启动页
               </div>
+            </div>
+            <div
+              v-else 
+              class="badge"
+            >
+              {{ $t('preferences.privacy.incognitoMode') }}
             </div>
             <div
               v-show="showTopContent"
@@ -648,7 +657,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['playingList', 'playListId', 'items', 'playListId', 'isFolderList', 'winWidth', 'playingIndex', 'duration', 'originSrc']),
+    ...mapGetters(['playingList', 'playListId', 'incognitoMode', 'items', 'playListId', 'isFolderList', 'winWidth', 'playingIndex', 'duration', 'originSrc']),
     ...mapState({
       currentMousedownComponent: ({ Input }) => Input.mousedownComponentName,
       currentMouseupComponent: ({ Input }) => Input.mouseupComponentName,
@@ -797,6 +806,22 @@ export default {
           line-height: 13px;
         }
       }
+
+      .badge {
+        margin-bottom: 7px;
+        background-color: rgba(255,255,255,0.2);
+        height: 20px;
+        width: 70px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 4px;
+
+        font-family: $font-normal;
+        font-size: 11px;
+        color: rgba(255,255,255,0.50);
+      }
+
       .top {
         font-family: $font-heavy;
         white-space:nowrap;
