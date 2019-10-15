@@ -685,6 +685,7 @@ function registerMainWindowEvent(mainWindow) {
     browserViewManager.clearBrowserViewsByChannel(channel);
   });
   ipcMain.on('remove-browser', () => {
+    if (!browserViewManager) return;
     if (mainWindow.getBrowserViews().length) browserViewManager.pauseVideo();
     mainWindow.getBrowserViews()
       .forEach(mainWindowView => mainWindow.removeBrowserView(mainWindowView));

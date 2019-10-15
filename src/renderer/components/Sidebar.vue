@@ -1,5 +1,6 @@
 <template>
   <div
+    :style="{ zIndex: isDarwin ? 0 : 7 }"
     class="side-bar"
   >
     <div
@@ -35,8 +36,7 @@
         @is-dragging="isDragging = $event"
       />
       <div
-        v-if="showFileIcon"
-        :class="{ 'channel-opacity': showChannelManager }"
+        :class="{ 'channel-opacity': showChannelManager && currentRouteName === 'browsing-view'}"
         @click="handleChannelManage"
         class="channel-manage no-drag"
       >
@@ -44,7 +44,7 @@
           type="channelManage"
         />
         <div
-          :class="{ selected: showChannelManager }"
+          :class="{ selected: showChannelManager && currentRouteName === 'browsing-view' }"
           class="mask"
         />
       </div>
@@ -109,6 +109,9 @@ export default {
   },
   computed: {
     ...mapGetters(['pipSize', 'pipPos', 'isHistory', 'currentChannel', 'winHeight']),
+    currentRouteName() {
+      return this.$route.name;
+    },
     showChannelManager() {
       return !this.currentChannel;
     },
@@ -138,11 +141,18 @@ export default {
     channelsDetail: {
       handler: (val: { url: string, channel: string,
         icon: string, title: string, path: string }[]) => {
-        asyncStorage.get('browsing').then((data) => {
-          asyncStorage.set('browsing', Object.assign(data, { channels: val }));
+        asyncStorage.get('channels').then((data) => {
+          asyncStorage.set('channels', Object.assign(data, { channels: val }));
         });
       },
       deep: true,
+    },
+    currentRouteName(val: string) {
+      if (val !== 'browsing-view') {
+        this.$bus.$on('available-channel-update', () => {
+          this.channelsDetail = BrowsingChannelManager.getAllAvailableChannels();
+        });
+      }
     },
     winHeight() {
       const scrollTop = (document.querySelector('.icon-box') as HTMLElement).scrollTop;
@@ -151,7 +161,7 @@ export default {
     },
   },
   created() {
-    asyncStorage.get('browsing').then((data) => {
+    asyncStorage.get('channels').then((data) => {
       if (data.channels) {
         this.channelsDetail = BrowsingChannelManager.initAvailableChannels(data.channels);
       } else {
@@ -177,6 +187,9 @@ export default {
       updateCurrentChannel: browsingActions.UPDATE_CURRENT_CHANNEL,
     }),
     handleChannelManage() {
+      if (this.currentRouteName !== 'browsing-view') {
+        this.$router.push({ name: 'browsing-view' });
+      }
       this.$bus.$emit('channel-manage');
     },
     openHistory() {
@@ -184,7 +197,7 @@ export default {
     },
     handleSidebarIcon(url: string, type: string) {
       const newChannel = type;
-      if (this.$route.name === 'browsing-view') {
+      if (this.currentRouteName === 'browsing-view') {
         this.$bus.$emit('sidebar-selected', { url, currentChannel: this.currentChannel, newChannel });
       } else {
         asyncStorage.get('browsingPip').then((data) => {
@@ -193,7 +206,7 @@ export default {
           this.$electron.ipcRenderer.send('add-browsing', { size: data.pipSize || this.pipSize, position: data.pipPos || this.pipPos });
         });
         this.$electron.ipcRenderer.send('change-channel', { url, channel: newChannel });
-        if (this.$router.currentRoute.name !== 'browsing-view') this.$router.push({ name: 'browsing-view' });
+        this.$router.push({ name: 'browsing-view' });
       }
       this.updateCurrentChannel(newChannel);
     },
@@ -210,7 +223,6 @@ export default {
   flex-direction: column;
   align-items: center;
   background-color: #3B3B41;
-  z-index: 0;
   left: 0;
   width: 76px;
   height: 100%;

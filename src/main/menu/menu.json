@@ -377,42 +377,6 @@
       }
     ]
   },
-  "favourite": {
-    "items": [
-      {
-        "id": "favourite.iqiyi",
-        "label": "msg.favourite.iqiyi"
-      },
-      {
-        "id": "favourite.bilibili",
-        "label": "msg.favourite.bilibili"
-      },
-      {
-        "id": "favourite.douyu",
-        "label": "msg.favourite.douyu"
-      },
-      {
-        "id": "favourite.huya",
-        "label": "msg.favourite.huya"
-      },
-      {
-        "id": "favourite.qq",
-        "label": "msg.favourite.qq"
-      },
-      {
-        "id": "favourite.youku",
-        "label": "msg.favourite.youku"
-      },
-      {
-        "id": "favourite.twitch",
-        "label": "msg.favourite.twitch"
-      },
-      {
-        "id": "favourite.youtube",
-        "label": "msg.favourite.youtube"
-      }
-    ]
-  },
   "browsing.window": {
     "items": [
       {

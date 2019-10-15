@@ -537,11 +537,6 @@ export default class Menubar {
       menubar.append(preference);
     }
 
-    // Favourite
-    const favouriteMenuItem = this.createFavouriteMenu();
-
-    menubar.append(favouriteMenuItem);
-
     // Window
     const windowMenu = new Menu();
 
@@ -840,11 +835,6 @@ export default class Menubar {
   private createHistoryMenu() {
     const historyMenu = this.convertFromMenuItemTemplate('history');
     return new MenuItem({ id: 'history', label: this.$t('msg.history.name'), submenu: historyMenu });
-  }
-
-  private createFavouriteMenu() {
-    const favouriteMenu = this.convertFromMenuItemTemplate('favourite');
-    return new MenuItem({ id: 'favourite', label: this.$t('msg.favourite.name'), submenu: favouriteMenu });
   }
 
   private createBrowsingWindowMenu() {

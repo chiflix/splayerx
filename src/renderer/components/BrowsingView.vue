@@ -374,7 +374,8 @@ export default {
   mounted() {
     this.menuService = new MenuService();
     this.menuService.updateMenuItemEnabled('splayerx.checkForUpdates', false);
-    this.title = this.currentMainBrowserView().webContents.getTitle();
+    this.title = this.currentChannel ? this.currentMainBrowserView().webContents.getTitle() : '添加站点';
+    if (!this.currentChannel) this.showChannelManager = true;
 
     this.$bus.$on('toggle-reload', this.handleUrlReload);
     this.$bus.$on('toggle-back', this.handleUrlBack);
@@ -396,9 +397,11 @@ export default {
     });
     this.$bus.$on('sidebar-selected', this.handleBookmarkOpen);
     this.$bus.$on('channel-manage', () => {
-      this.currentMainBrowserView().webContents
-        .executeJavaScript(InjectJSManager.pauseVideo(this.currentChannel));
-      this.$electron.remote.getCurrentWindow().removeBrowserView(this.currentMainBrowserView());
+      if (this.currentMainBrowserView()) {
+        this.currentMainBrowserView().webContents
+          .executeJavaScript(InjectJSManager.pauseVideo(this.currentChannel));
+        this.$electron.remote.getCurrentWindow().removeBrowserView(this.currentMainBrowserView());
+      }
       this.showChannelManager = true;
       this.title = '添加站点';
       this.webInfo.canGoBack = false;
