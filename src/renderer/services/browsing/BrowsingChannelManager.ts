@@ -72,21 +72,22 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
   }
 
   public setChannelAvailable(category: string, channel: string, available: boolean): void {
-    const availableInfo = this.allChannels.get(category) as channelInfo;
-    const allAvailableChannels: channelDetails[] = [];
     if (available) {
-      if (!availableInfo.availableChannels.includes(channel)) {
-        availableInfo.availableChannels.push(channel);
+      if (!this.allAvailableChannels.includes(channel)) {
+        this.allAvailableChannels.push(channel);
       }
     } else {
-      availableInfo.availableChannels = availableInfo.availableChannels
+      this.allAvailableChannels = this.allAvailableChannels
         .filter((aChannel: string) => aChannel !== channel);
     }
-    this.allChannels.set(category, availableInfo);
     this.allChannels.forEach((i: channelInfo) => {
-      allAvailableChannels.push(...i.channels);
+      const allItems = i.channels.map((item: channelDetails) => item.channel);
+      const available: string[] = [];
+      this.allAvailableChannels.forEach((channel: string) => {
+        if (allItems.includes(channel)) available.push(channel);
+      });
+      i.availableChannels = available;
     });
-    this.allAvailableChannels = allAvailableChannels.map((i: channelDetails) => i.channel);
   }
 
   public getAllAvailableChannels(): channelDetails[] {
@@ -111,9 +112,11 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
     this.allAvailableChannels = channels.map((i: channelDetails) => i.channel);
     this.allChannels.forEach((i: channelInfo) => {
       const allItems = i.channels.map((item: channelDetails) => item.channel);
+      const available: string[] = [];
       this.allAvailableChannels.forEach((channel: string) => {
-        if (allItems.includes(channel)) i.availableChannels.push(channel);
+        if (allItems.includes(channel)) available.push(channel);
       });
+      i.availableChannels = available;
     });
     return this.getAllAvailableChannels();
   }

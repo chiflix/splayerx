@@ -154,6 +154,8 @@ export default {
     asyncStorage.get('browsing').then((data) => {
       if (data.channels) {
         this.channelsDetail = BrowsingChannelManager.initAvailableChannels(data.channels);
+      } else {
+        this.channelsDetail = BrowsingChannelManager.getAllAvailableChannels();
       }
     });
   },

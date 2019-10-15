@@ -685,10 +685,10 @@ function registerMainWindowEvent(mainWindow) {
     browserViewManager.clearBrowserViewsByChannel(channel);
   });
   ipcMain.on('remove-browser', () => {
+    if (mainWindow.getBrowserViews().length) browserViewManager.pauseVideo();
     mainWindow.getBrowserViews()
       .forEach(mainWindowView => mainWindow.removeBrowserView(mainWindowView));
     if (mainWindow.isMaximized()) mainWindow.unmaximize();
-    browserViewManager.pauseVideo();
     if (browsingWindow) {
       const views = browsingWindow.getBrowserViews();
       views.forEach((view) => {
