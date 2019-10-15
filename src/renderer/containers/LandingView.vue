@@ -180,7 +180,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'winPos', 'defaultDir', 'isFullScreen', 'incognitoMode', 'hideNSFW', 'smartMode', 'nsfwProcessDone', 'pipSize', 'pipPos']),
+    ...mapGetters(['winWidth', 'winPos', 'defaultDir', 'isFullScreen', 'incognitoMode', 'hideNSFW', 'nsfwProcessDone', 'pipSize', 'pipPos']),
     lastIndex: {
       get() {
         return (this.firstIndex + this.showItemNum) - 1;
@@ -332,11 +332,6 @@ export default {
     this.$electron.ipcRenderer.on('quit', () => {
       this.quit = true;
     });
-    // 如果没有确定nsfw功能，但是有nsfw过滤记录，就出气泡
-    if (this.smartMode && !this.nsfwProcessDone && await findNsfwFistFilter()) {
-      this.$bus.$emit('nsfw');
-      this.$store.dispatch('nsfwProcessDone');
-    }
   },
   destroyed() {
     window.removeEventListener('mousemove', this.globalMoveHandler);

@@ -1165,6 +1165,11 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('add-browsing', (e, args) => {
     createBrowsingWindow(args);
   });
+  ipcMain.on('clear-history', () => {
+    if (mainWindow && !mainWindow.webContents.isDestroyed()) {
+      mainWindow.webContents.send('file.clearHistory');
+    }
+  });
   ipcMain.on('preference-to-main', (e, args) => {
     if (mainWindow && !mainWindow.webContents.isDestroyed()) {
       mainWindow.webContents.send('mainDispatch', 'setPreference', args);

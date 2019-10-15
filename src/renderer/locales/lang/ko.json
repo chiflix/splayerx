@@ -302,7 +302,6 @@
     "privacy": {
       "privacySetting": "은둔",
       "enable": "개인 정보 보호 사용",
-      "smartMode": "Intelligent Mode",
       "smartDescription": "오프라인은 민감하거나 부적합한 작업 내용을 식별하고 폴더 재생 목록에서 재생할 때 또는 종료 할 때 재생 기록을 삭제합니다.",
       "incognitoMode": "Incognito Mode",
       "incognitoDescription": "재생 기록이 저장되지 않습니다."

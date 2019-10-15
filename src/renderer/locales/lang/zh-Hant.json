@@ -302,7 +302,6 @@
     "privacy": {
       "privacySetting": "隱私設置",
       "enable": "啟用隱私保護",
-      "smartMode": "智能模式",
       "smartDescription": "離線識別不宜在工作或公眾場合瀏覽的敏感內容，並在自動加載同目錄文件或退出時抹除相關痕跡。",
       "incognitoMode": "無痕模式",
       "incognitoDescription": "開啟後將不再保留任何新的播放記錄。"

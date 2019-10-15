@@ -302,7 +302,6 @@
     "privacy": {
       "privacySetting": "プライバシー",
       "enable": "Privacy Protectionを開く",
-      "smartMode": "Intelligent Mode",
       "smartDescription": "機密性の高いコンテンツや作業に適さないコンテンツをオフラインで識別し、フォルダプレイリストでの再生時または終了時に再生履歴を消去します。",
       "incognitoMode": "Incognito Mode",
       "incognitoDescription": "再生履歴は保存されません。"

@@ -82,7 +82,7 @@ export default {
     ...mapGetters([
       'videoId', 'nextVideoId', 'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId', 'enabledSecondarySub', 'lastChosenSize', 'subToTop',
       'winSize', 'winPos', 'winAngle', 'isFullScreen', 'winWidth', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo', 'loop', 'playinglistRate', 'isFolderList', 'playingList', 'playingIndex', 'playListId', 'items',
-      'previousVideo', 'previousVideoId', 'smartMode', 'incognitoMode', 'isTranslating', 'nsfwProcessDone',
+      'previousVideo', 'previousVideoId', 'incognitoMode', 'isTranslating', 'nsfwProcessDone',
     ]),
     ...mapGetters({
       videoWidth: 'intrinsicWidth',
@@ -107,9 +107,6 @@ export default {
       }
       if (oldVal && !this.isFolderList) {
         const screenshot: ShortCut = await this.generateScreenshot();
-        if (!(await this.handleNSFW(screenshot.shortCut, oldVal))) {
-          await this.updatePlaylist(oldVal);
-        }
       }
     },
     async videoId(val: number, oldVal: number) {
@@ -382,20 +379,6 @@ export default {
     savePlaybackStates() {
       return settingStorageService.updatePlaybackStates({ volume: this.volume, muted: this.muted });
     },
-    async handleNSFW(src: string, playListId: number) {
-      if (this.smartMode) {
-        const isNeedFilter = await nsfwThumbnailFilterService.checkImage(src);
-        if (isNeedFilter) {
-          if (!this.nsfwProcessDone) {
-            // 记录本次nsfw拦截记录
-            saveNsfwFistFilter();
-          }
-          await playInfoStorageService.deleteRecentPlayedBy(playListId);
-          return true;
-        }
-      }
-      return false;
-    },
     async handleLeaveVideo(videoId: number) {
       const playListId = this.playListId;
       // incognito mode
@@ -411,7 +394,6 @@ export default {
       }
 
       const screenshot: ShortCut = await this.generateScreenshot();
-      if (await this.handleNSFW(screenshot.shortCut, playListId)) return;
 
       let savePromise = this.saveScreenshot(videoId, screenshot)
         .then(() => this.updatePlaylist(playListId));
