@@ -201,6 +201,7 @@ export default {
   },
   watch: {
     currentChannel(val: string) {
+      if (val) this.showChannelManager = false;
       this.webInfo.canReload = !!val;
       this.updateIsError(false);
       if (!navigator.onLine) this.offlineHandler();
