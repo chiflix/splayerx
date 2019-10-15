@@ -1,263 +1,506 @@
 {
-	"advance": {
-		"audioDelay": "オディオディレイ",
-		"audioMenu": "オーディオ",
-		"changeTrack": "オディオトラック",
-		"chosenTrack": "デフォルト",
-		"fontItems": [
-			"小",
-			"通常",
-			"大",
-			"最大"
-		],
-		"fontSize": "文字サイズ",
-		"fontStyle": "文字スタイル",
-		"rateTitle": "再生速度",
-		"subDelay": "字幕ディレイ",
-		"subMenu": "字幕設定",
-		"track": "トラック"
-	},
-	"css": {
-		"titleFontSize": {
-			"fontSize": "21px"
-		},
-		"versionFontSize": {
-			"fontSize": "14px"
-		}
-	},
-	"errorFile": {
-		"addNoVideo": {
-			"content": "再生できるファイルが見つかりませんでした。",
-			"title": "追加錯誤"
-		},
-		"default": {
-			"content": "ビデオタイプが再生できません。",
-			"title": "エラー"
-		},
-		"emptyFolder": {
-			"content": "再生できるファイルが見つかりませんでした。",
-			"title": "エラー"
-		},
-		"fileNonExist": {
-			"content": "プライリストから削除する。",
-			"title": "ファイルが見つかりませんでした。"
-		},
-		"loadFailed": {
-			"content": "字幕タイプが読み込めません。",
-			"title": "字幕読み込みエラー"
-		},
-		"offLine": {
-			"content": "ネットワークをお確かめの上、もう一度お試し下さい。",
-			"title": "ネットワーク接続エラー"
-		},
-		"timeout": {
-			"content": "ネットワークディレイもしくはサーバーエラー。",
-			"title": "リクエストタイムアウト"
+  "advance": {
+    "audioDelay": "オーディオディレイ",
+    "audioMenu": "オーディオ",
+    "changeTrack": "オーディオトラック",
+    "chosenTrack": "デフォルト",
+    "fontItems": [
+      "小",
+      "通常",
+      "大",
+      "最大"
+    ],
+    "fontSize": "文字サイズ",
+    "fontStyle": "文字スタイル",
+    "rateTitle": "再生速度",
+    "subDelay": "字幕ディレイ",
+    "subMenu": "字幕設定",
+    "track": "トラック"
+  },
+  "css": {
+    "titleFontSize": {
+      "fontSize": "21px"
+    },
+    "versionFontSize": {
+      "fontSize": "14px"
+    }
+  },
+  "errorFile": {
+    "ENOSPC": {
+      "content": "ディスク容量が不足しています。",
+      "title": "オープン失敗"
+    },
+    "EACCES": {
+      "content": "権限を持ってません。",
+      "title": "オープン失敗"
+    },
+    "ENOENT": {
+      "content": "ファイルが見つかりません。",
+      "title": "オープン失敗"
+    },
+    "addNoVideo": {
+      "content": "再生できるファイルが見つかりませんでした。",
+      "title": "追加錯誤"
+    },
+    "default": {
+      "content": "ビデオタイプが再生できません。",
+      "title": "エラー"
+    },
+    "emptyFolder": {
+      "content": "再生できるファイルが見つかりませんでした。",
+      "title": "エラー"
+    },
+    "fileNonExist": {
+      "content": "再生リストから削除する。",
+      "title": "ファイルが見つかりませんでした。"
+    },
+    "playlistNonExist": {
+      "content": "ファイルは削除または名前変更されました。",
+      "title": "ファイルが見つかりませんでした"
+    },
+    "fileNonExistInPlaylist": {
+      "content": "ファイルはリストから削除されます。",
+      "title": "ファイルが見つかりません"
+    },
+    "loadFailed": {
+      "content": "字幕タイプが読み込めません。",
+      "title": "字幕読み込みエラー"
+    },
+    "offLine": {
+      "content": "ネットワークをお確かめの上、もう一度お試し下さい。",
+      "title": "ネットワーク接続エラー"
+    },
+    "timeout": {
+      "content": "ネットワークディレイもしくはサーバーエラー。",
+      "title": "リクエストタイムアウト"
     },
     "localSubtitleRemoved": {
       "title": "字幕読み込みエラー",
       "content": "ローカル字幕が削除または名前変更されました。"
-		}
-	},
-	"loading": {
-		"content": "翻訳の読み込み ...",
-		"title": ""
-	},
-	"msg": {
-		"audio": {
-			"decreaseAudioDelay": "オ−ディオディレイ",
-			"decreaseVolume": "音量を下げる",
-			"defaultAudioTrack": "デフォルト",
-			"increaseAudioDelay": "オ−ディオディレイ",
-			"increaseVolume": "音量を上げる",
-			"mute": "ミュート",
-			"name": "オ−ディオ",
-			"switchAudioTrack": "オーディオトラック"
-		},
-		"file": {
-			"clearHistory": "プレイ履歴をクリア",
-			"closeWindow": "閉じる",
-			"name": "ファイル",
-			"open": "ファイルを開く…",
-			"openRecent": "最近使用した項目を開く",
-			"openURL": "URLから開く…"
-		},
-		"help": {
-			"name": "ヘルプ",
-			"splayerxHelp": "ヘルプ",
-			"shortCuts": "ショートカットリスト"
-		},
-		"playback": {
-			"backwardL": "戻る -60s",
-			"backwardS": "戻る -5s",
-			"windowRotate": "90° 回転",
-			"captureScreen": "スクリンショット",
-			"captureVideoClip": "トリム",
-			"decreasePlaybackSpeed": "再生速度の低下",
-			"forwardL": "進む +60s",
-			"forwardS": "進む +5s",
-			"fullScreen": "ズーム/フルスクリーンを解除",
-			"increasePlaybackSpeed": "再生速度の増加",
-			"keepPlayingWindowFront": "再生時に最前面に表示",
-			"name": "プレイ",
-			"pause": "停止",
-			"play": "プレイ",
-			"resetSpeed": "重置播放速度",
-			"singleCycle": "リピート",
-			"snapShot": "スナップショット"
-		},
-		"splayerx": {
-			"about": "SPlayerについて",
-			"feedback": "フィードバック",
-			"hide": "SPlayerを隠す",
-			"hideOthers": "その他を隠す",
-			"homepage": "ホームページ",
-			"preferences": "環境設定",
-			"quit": "SPlayerを終了"
-		},
-		"subtitle": {
-			"AITranslation": "トランスレーション結果を再読込",
-			"decreaseSubtitleDelayL": "字幕ディレイ -0.5s",
-			"decreaseSubtitleDelayS": "字幕ディレイ -0.1s",
-			"disabledSecondarySub": "第二字幕を閉じる",
-			"enabledSecondarySub": "第二字幕を開く",
-			"increaseSubtitleDelayL": "字幕ディレイ +0.5s",
-			"increaseSubtitleDelayS": "字幕ディレイ +0.1s",
-			"langEn": "英文",
-			"langZhCN": "中文",
-			"loadSubtitleFile": "字幕ファイルを開く…",
-			"mainSubtitle": "第一字幕",
-			"menuLoading": "ローディング ...",
-			"name": "字幕",
-			"noSubtitle": "見つかりませんでした",
-			"notToShowSubtitle": "なし",
-			"secondarySubtitle": "第二字幕",
-			"size1": "小",
-			"size2": "通常",
-			"size3": "大",
-			"size4": "最大",
-			"style1": "映画スタイル",
-			"style2": "アニメスタイル",
-			"style3": "クラシックスタイル",
-			"style4": "ニッポンスタイル",
-			"style5": "モダンクラシック",
-			"subtitleSelect": "翻訳",
-			"subtitleSize": "字幕サイズ",
-			"subtitleStyle": "字幕スタイル",
-			"uploadSelectedSubtitle": "字幕をアップロード"
-		},
-		"titleName": "SPlayer",
-		"update": {
-			"message": "更新已就绪，是否现在重启?",
-			"no": "暂不更新",
-			"title": "更新就绪",
-			"updateInstalled": "播放器已更新至最新版本!",
-			"yes": "更新"
-		},
-		"window": {
-			"bossKey": "ボスキー",
-			"doubleSize": "200%",
-			"enterFullScreen": "フルスクリーン",
-			"exitFullScreen": "フルスクリーンを解除",
-			"halfSize": "50%",
-			"maxmize": "最大化",
-			"minimize": "最小化",
-			"name": "ウィンドウ",
-			"originSize": "100%"
-		}
-	},
-	"nextVideo": {
-		"nextInFolder": "ホルダー中の次のビデオ",
-		"nextInPlaylist": "プレイリスト中の次のビデオ"
-	},
-	"preferences": {
-		"general": {
-			"clearHistory": "終了時にプレイ履歴を削除",
-			"reverseScrolling": "マウスの逆スクロール",
-			"setDefault": "デフォルトのプレーヤーとして設定",
-			"setDefaultDescription": "SPlayer ですべてのビデオファイルを開く。",
-			"restoreSettings": "すべての設定をリセット",
-			"restoreSettingsDescription": "すべてのデータとキャッシュを消去して再起動します。",
-			"setButton": "アプライ",
-			"relaunch": "再起動",
-			"displayLanguage": "言語表示",
-			"generalSetting": "通常設定",
-			"others": "その他",
-			"switchDisplayLanguages": "SPlayerの言語表示を修正。"
-		},
-		"privacy": {
-			"languageDescription": "次の言語で翻訳結果を取得するために匿名データをアップロードします。プライバシー情報は含まれません。",
-			"languagePriority": "言語選択",
-			"none": "なし",
-			"primary": "ファースト",
-			"privacyConfirm": "Smart Translationを開く",
-			"privacySetting": "翻訳設定",
-			"secondary": "セカンド",
-			"setAsDefault": "SPlayerをデフォルトにする",
-			"settings": "設定"
-		}
-	},
-	"privacyBubble": {
-		"confirmDisable": {
-			"button": "取り消し",
-			"partOne": "確認",
-			"partTwo": "プライバシーとSmart Translation。",
-			"underlinedContent": "禁止"
-		},
-		"masVersion": {
-			"agree": "許可",
-			"content": "Smart Translationを使用するには無記名メディア情報をアップロードし、それ以外の場合は翻訳できません。個人情報を収集することはありません。",
-			"disagree": "解除"
-		},
-		"tryToDisable": {
-			"button": "確定",
-			"partOne": "SPlayerがより良いサービスを提供するため，プライバシーに許可する。",
-			"partTwo": "プライバシーを解除するとSmart Translationの使用ができなくなる。",
-			"underlinedContent": "禁止"
-		}
-	},
-	"recentPlaylist": {
-		"folderSource": "ホルダー",
-		"playing": "再生中",
-		"playlistSource": "プレイリスト"
-	},
-	"subtitle": {
-		"embedded": "埋め込み式",
-		"language": {
-			"ar": "サウジアラビア語",
-			"de": "ドイツ語",
-			"en": "英語",
-			"es": "スペイン語",
-			"fr": "フランス語",
-			"hi": "ヒンディー語",
-			"it": "イタリア語",
-			"ja": "日本語",
-			"ko": "韓国語",
-			"pt": "スペイン語（ポルトガル、ブラジル）",
-			"ru": "ロシア語",
-			"zh": "中国語（簡体字）",
-			"zh-CN": "中国語（簡体字）",
-			"zh-TW": "中国語（繁体字）"
-		}
-	},
-	"uploading": {
-		"content": "アップロードしています...",
-		"title": ""
-	},
-	"uploadingFailed": {
-		"content": "後でお試しください。",
-		"title": "アップロードに失敗しました"
-	},
-	"uploadingSuccess": {
-		"content": "字幕がアップロードされました。",
-		"title": "アップロードに成功しました"
-	},
-	"snapshotSuccess": {
-		"content": "スナップショット成功",
-		"title": ""
-	},
-	"snapshotFailed": {
-		"content": "後でお試しください。",
-		"title": "スナップショット失敗"
-	}
+    }
+  },
+  "loading": {
+    "content": "翻訳を読み込み中 ...",
+    "title": ""
+  },
+  "msg": {
+    "audio": {
+      "decreaseAudioDelay": "オ−ディオディレイ",
+      "decreaseVolume": "音量を下げる",
+      "defaultAudioTrack": "デフォルト",
+      "increaseAudioDelay": "オ−ディオディレイ",
+      "increaseVolume": "音量を上げる",
+      "mute": "ミュート",
+      "name": "オ−ディオ",
+      "switchAudioTrack": "オーディオトラック"
+    },
+    "file": {
+      "clearHistory": "再生履歴をクリア",
+      "closeWindow": "閉じる",
+      "name": "ファイル",
+      "open": "ファイルを開く…",
+      "openRecent": "最近使用した項目を開く",
+      "openURL": "URLから開く…",
+      "copy": "コピー",
+      "paste": "貼り付け"
+    },
+    "account": {
+      "name": "账户",
+      "login": "登入",
+      "logout": "登出"
+    },
+    "help": {
+      "name": "ヘルプ",
+      "feedback": "フィードバック",
+      "homepage": "ホームページ",
+      "splayerxHelp": "ヘルプ",
+      "shortCuts": "ショートカットリスト",
+      "crashReportLocation": "エラーログを表示する",
+      "crashReportNotAvailable": "Found no crash report"
+    },
+    "playback": {
+      "backwardL": "戻る -60s",
+      "backwardS": "戻る -5s",
+      "captureScreen": "スクリンショット",
+      "captureVideoClip": "トリム",
+      "decreasePlaybackSpeed": "再生速度の低下",
+      "forwardL": "早送り +60s",
+      "forwardS": "早送り +5s",
+      "fullScreen": "ズーム/フルスクリーンを解除",
+      "increasePlaybackSpeed": "再生速度の増加",
+      "name": "プレイ",
+      "pause": "ポーズ",
+      "play": "プレイ",
+      "resetSpeed": "再生速度をリセット",
+      "nextVideo": "次のビデオ",
+      "showPlaylist": "プレイリストを表示",
+      "hidePlaylist": "プレイリストを隠す",
+      "previousVideo": "前のビデオ",
+      "singleCycle": "リピート",
+      "snapShot": "スナップショット"
+    },
+    "splayerx": {
+      "about": "SPlayerについて",
+      "checkForUpdates": "アップデートを確認",
+      "hide": "SPlayerを隠す",
+      "hideOthers": "その他を隠す",
+      "preferences": "オプション設定",
+      "quit": "SPlayerを終了",
+      "showAll": "すべて表示"
+    },
+    "subtitle": {
+      "AITranslation": "トランスレーション結果を再読込",
+      "decreasePrimarySubtitleDelay": "第一字幕オーディオ -0.1s",
+      "increasePrimarySubtitleDelay": "第一字幕オーディオ +0.1s",
+      "decreaseSecondarySubtitleDelay": "第二字幕オーディオ -0.1s",
+      "increaseSecondarySubtitleDelay": "第二字幕オーディオ +0.1s",
+      "disabledSecondarySub": "第二字幕を閉じる",
+      "enabledSecondarySub": "第二字幕を開く",
+      "langEn": "英文",
+      "langZhCN": "中文",
+      "loadSubtitleFile": "字幕ファイルを開く…",
+      "mainSubtitle": "第一字幕",
+      "menuLoading": "ローディング ...",
+      "name": "字幕",
+      "noSubtitle": "見つかりませんでした",
+      "notToShowSubtitle": "閉じる",
+      "secondarySubtitle": "第二字幕",
+      "subtitleSetting": "字幕の設定",
+      "subtitleDelay": "字幕ディレイ",
+      "size1": "小",
+      "size2": "通常",
+      "size3": "大",
+      "size4": "最大",
+      "style1": "映画スタイル",
+      "style2": "アニメスタイル",
+      "style3": "クラシックスタイル",
+      "style4": "ニッポンスタイル",
+      "style5": "モダンクラシック",
+      "subtitleSelect": "翻訳",
+      "subtitleSize": "字幕サイズ",
+      "subtitleStyle": "字幕スタイル",
+      "uploadSelectedSubtitle": "字幕をアップロード"
+    },
+    "titleName": "SPlayer",
+    "update": {
+      "message": "今再起動してアップデートをインストールしますか？",
+      "no": "後にする",
+      "title": "更新就绪",
+      "updateInstalled": "最新バージョンにアップデート済み!",
+      "yes": "はい"
+    },
+    "window": {
+      "windowRotate": "時計回りに90°回転",
+      "keepPlayingWindowFront": "再生時に最前面に表示",
+      "backToLandingView": "起動ページに戻る",
+      "bossKey": "ボスキー",
+      "doubleSize": "200%",
+      "enterFullScreen": "フルスクリーン",
+      "exitFullScreen": "フルスクリーンを解除",
+      "halfSize": "50%",
+      "maxmize": "ズーム",
+      "minimize": "最小化",
+      "name": "ウィンドウ",
+      "originSize": "100%",
+      "enterPip": "画中画を開じる",
+      "exitPip": "画中画を閉じる",
+      "playInNewWindow": "新しいウィンドウで遊ぶ",
+      "backToBrowser": "ブラウザに戻る"
+    },
+    "favourite": {
+      "name": "チャンネル",
+      "iqiyi": "iQIYI",
+      "bilibili": "Bilibili",
+      "douyu": "Douyu",
+      "huya": "Huya",
+      "qq": "Tencent Video",
+      "twitch": "Twitch",
+      "youku": "Youku",
+      "youtube": "YouTube"
+    },
+    "edit": {
+      "name": "編集",
+      "cut": "切り取り",
+      "copy": "コピー",
+      "paste": "貼り付け",
+      "selectAll": "全て選択"
+    },
+    "history": {
+      "name": "履歴",
+      "reload": "ページを再読み込み",
+      "back": "戻る",
+      "forward": "進む"
+    }
+  },
+  "nextVideo": {
+    "nextInFolder": "再生リスト中の次のビデオ",
+    "nextInPlaylist": "プレイリスト中の次のビデオ"
+  },
+  "welcome": {
+    "welcomeTitle": "Welcome to SPlayer",
+    "welcomeDescription": "All-new lightweight design, incredible performance with smart translation to let you enjoy your videos like never before.",
+    "agreement": "By using SPlayer, you agree to our ",
+    "policy": "Privacy Policy",
+    "languageTitle1": "Set your preferred subtitle",
+    "languageTitle2": "languages to fetch translations",
+    "primary": "Primary",
+    "secondary": "Secondary",
+    "chooseSecondary": "Select Secondary Language",
+    "languageDescription": "*後でもオプション設定で変更できます。",
+    "none": "None"
+  },
+  "browsing": {
+    "bilibili": "Bilibili",
+    "iqiyi": "iQIYI",
+    "youtube": "YouTube",
+    "huya": "Huya",
+    "qq": "Tencent Video",
+    "douyu": "Douyu",
+    "twitch": "Twitch",
+    "youku": "Youku",
+    "openLocalFile": "ローカルファイルを開く",
+    "enterPip": "画中画を開じる",
+    "exitPip": "ブラウザに戻る",
+    "enterPop": "新しいウィンドウで遊ぶ",
+    "exitPop": "ブラウザに戻る",
+    "danmu": "だんまくスイッチ",
+    "error": {
+      "offline": "インターネットがない",
+      "try": "お試しください:",
+      "firstLine": "ネットワークケーブル、モデム、およびルーターの確認",
+      "secondLine": "Wi-Fiへの再接続"
+    }
+  },
+  "preferences": {
+    "general": {
+      "hideHistory": "再生履歴を隠す",
+      "clearHistory": "終了時に再生履歴を削除",
+      "reverseScrolling": "マウスのスクロール方向を逆に設定",
+      "setDefault": "デフォルトのプレーヤーとして設定",
+      "setDefaultDescription": "SPlayer ですべてのビデオファイルを開く。",
+      "restoreSettings": "すべての設定をリセット",
+      "restoreSettingsDescription": "すべてのデータとキャッシュを消去して再起動します。",
+      "restoreSettingsAfterRelaunch": "適用を再開。",
+      "setButton": "アプライ",
+      "relaunch": "再起動",
+      "displayLanguage": "言語表示",
+      "generalSetting": "通常設定",
+      "others": "その他",
+      "switchDisplayLanguages": "SPlayerの言語表示を変更。"
+    },
+    "translate": {
+      "languageDescription": "次の言語で翻訳結果を取得するために匿名データをアップロードします。プライバシー情報は含まれません。",
+      "languagePriority": "言語選択",
+      "none": "なし",
+      "primary": "ファースト",
+      "translateConfirm": "Smart Translationを開く",
+      "translateSetting": "翻訳設定",
+      "secondary": "セカンド",
+      "setAsDefault": "SPlayerをデフォルトプレーヤーに設定",
+      "settings": "設定"
+    },
+    "privacy": {
+      "privacySetting": "プライバシー",
+      "enable": "Privacy Protectionを開く",
+      "smartMode": "Intelligent Mode",
+      "smartDescription": "機密性の高いコンテンツや作業に適さないコンテンツをオフラインで識別し、フォルダプレイリストでの再生時または終了時に再生履歴を消去します。",
+      "incognitoMode": "Incognito Mode",
+      "incognitoDescription": "再生履歴は保存されません。"
+    }
+  },
+  "privacyBubble": {
+    "confirmDisable": {
+      "button": "取り消し",
+      "partOne": "確認",
+      "partTwo": "プライバシーとSmart Translation。",
+      "underlinedContent": "禁止"
+    },
+    "masVersion": {
+      "agree": "許可",
+      "content": "Smart Translationを使用するには無記名メディア情報をアップロードし、それ以外の場合は翻訳できません。個人情報を収集することはありません。",
+      "disagree": "解除"
+    },
+    "tryToDisable": {
+      "button": "確定",
+      "partOne": "SPlayerがより良いサービスを提供するため，プライバシーに許可する。",
+      "partTwo": "プライバシーを解除するとSmart Translationの使用ができなくなる。",
+      "underlinedContent": "禁止"
+    }
+  },
+  "alertBubble": {
+    "button": "はい"
+  },
+  "protectBubble": {
+    "agree": "確定",
+    "setting": "設定",
+    "content": "スマートプライバシー保護が有効になります。 機密性の高い、または作業に不適切な再生履歴は削除されます。"
+  },
+  "checkForUpdatesBubble": {
+    "needUpdate": {
+      "confirm": "ダウンロード",
+      "cancel": "スキップ",
+      "content": "新しいバージョン {version} がリリースされましたが、ダウンロードされますか？"
+    },
+    "noNeed": {
+      "content": "すでに最新バージョン {version}"
+    }
+  },
+  "recentPlaylist": {
+    "folderSource": "再生リスト",
+    "playing": "再生中",
+    "paused": "ポーズ中",
+    "playlistSource": "プレイリスト",
+    "add": "プレイリストに追加する"
+  },
+  "subtitle": {
+    "embedded": "埋め込み式",
+    "generate": "生成する",
+    "language": {
+      "ar": "サウジアラビア語",
+      "de": "ドイツ語",
+      "en": "英語",
+      "es": "スペイン語",
+      "fr": "フランス語",
+      "hi": "ヒンディー語",
+      "it": "イタリア語",
+      "ja": "日本語",
+      "ko": "韓国語",
+      "pt": "スペイン語（ポルトガル、ブラジル）",
+      "ru": "ロシア語",
+      "zh": "中国語（簡体字）",
+      "zh-CN": "中国語（簡体字）",
+      "zh-TW": "中国語（繁体字）"
+    }
+  },
+  "uploading": {
+    "content": "アップロードしています...",
+    "title": ""
+  },
+  "uploadingFailed": {
+    "content": "後でお試しください。",
+    "title": "アップロードに失敗しました"
+  },
+  "uploadingSuccess": {
+    "content": "字幕がアップロードされました。",
+    "title": "アップロードに成功しました"
+  },
+  "snapshotSuccess": {
+    "content": "スナップショット成功",
+    "title": ""
+  },
+  "snapshotFailed": {
+    "content": "後でお試しください。",
+    "title": "スナップショット失敗"
+  },
+  "loadVideoBySubtitleFailed": {
+    "content": "フォルダ内に関連するビデオが見つかりません",
+    "title": ""
+  },
+  "translateModal": {
+    "videoLanguageLabel": "音声の言語",
+    "subtitleLanguageLabel": "以下に翻訳",
+    "selectLanguageLabel": "音声の言語",
+    "audioLanguageLoading": "言語リストの取得 ...",
+    "audioLanguageLoadFail": "接続に失敗しました。もう一度お試しください",
+    "select": {
+      "title": "ビデオソースの言語を選択",
+      "content": "ビデオで聞こえる言語を選択し生成をクリックします。"
+    },
+    "translate": {
+      "title": "{time} について",
+      "minute": "{number} 分",
+      "second": "{number} 秒",
+      "hour": "{number} 時間",
+      "content": "動画をスキップしたり、アプリケーションを閉じたりしないでください翻訳パネルで進行状況を確認できます。",
+      "contentSearch": "探しています...",
+      "contentTranslate": "ソース言語の字幕が発見され、知的に翻訳されています...",
+      "contentGrabbing": "ソース言語の字幕が見つかりません。音声を抽出しています...",
+      "contentGrabComplated": "音声の抽出が完了しました、アップロードしています...",
+      "contentSpeech": "オーディオのアップロードが完了し、音声認識とインテリジェントな翻訳..."
+    },
+    "success": {
+      "title": "翻訳完了",
+      "content": "AIの翻訳は完了し、翻訳結果リストに表示されます。"
+    },
+    "discard": {
+      "title": "AI翻訳が進行中です",
+      "content": "翻訳をキャンセルするには終了をクリックします終了後、翻訳の進行状況は復元されません。"
+    },
+    "noLineFail": {
+      "title": "ネットワークエラー",
+      "content": "ネットワーク接続を確認して、もう一度お試しください"
+    },
+    "timeOutFail": {
+      "title": "接続タイムアウト",
+      "content": "サーバーへの接続に失敗しました。後でもう一度やり直してください!"
+    },
+    "serverErrorFail": {
+      "title": "翻訳失敗",
+      "content": "サーバーエラーのため翻訳に失敗しました。 後でお試しください。"
+    },
+    "ForbiddenFail": {
+      "title": "有効期限が切れました",
+      "content": "サインインしてください。"
+    },
+    "cancel": "キャンセル",
+    "quit": "やめる",
+    "generate": "生成する",
+    "ok": "バックグラウンドで実行",
+    "continue": "キャンセル"
+  },
+  "translateBubble": {
+    "bubbleWhenGrab": "この操作は進行中の翻訳を中止させるでしょう。",
+    "bubbleWhenTranslate": "AIの翻訳は引き続きクラウドで処理され、翻訳の進行状況は次回の動画再生時に自動的に取得されます。",
+    "bubbleFunctionForbidden": "この操作は進行中の翻訳を中止させるでしょう。",
+    "bubbleWhenSuccess": {
+      "title": "",
+      "content": "AIの翻訳は完了し、翻訳結果リストに表示されます。"
+    },
+    "bubbleWhenSuccessOnOtherVideo": {
+      "title": "",
+      "content": "AIの翻訳は完了し、次回ビデオを開いたときに自動的に表示されます。"
+    },
+    "bubbleTranslateNoLineFail": {
+      "title": "ネットワークエラー",
+      "content": "ネットワーク接続を確認して、もう一度お試しください"
+    },
+    "bubbleTranslateTimeOutFail": {
+      "title": "接続タイムアウト",
+      "content": "サーバーへの接続に失敗しました。暫くしてからまたお試しください!"
+    },
+    "bubbleTranslateServerErrorFail": {
+      "title": "翻訳失敗",
+      "content": "クラウドエラーで翻訳失敗しました。 暫くしてからまたお試しください。"
+    },
+    "bubbleTranslateForbiddenFail": {
+      "title": "有効期限が切れました",
+      "content": "サインインしてください。"
+    },
+    "ok": "はい",
+    "cancel": "キャンセル",
+    "continue": "続ける"
+  },
+  "loginModal": {
+    "title": "手機番号でログイン",
+    "sendCode": "送信する",
+    "sendingCode": "送信中 ...",
+    "countDown": "{count} 秒",
+    "placeholder": {
+      "mobile": "手機番号",
+      "code": "確認コードを入力"
+    },
+    "submit": "登入",
+    "submitting": "処理中...",
+    "codeError": "間違った認証コード",
+    "netWorkError": "接続タイムアウト",
+    "noLineError": "ネットワークに接続していません",
+    "afsError": "Captcha Validation Failed",
+    "afs": {
+      "start": "Please slide to verify",
+      "yes": "Success",
+      "retry": "retry",
+      "error300": "Verification failed, please",
+      "errorNetwork": "Network Error. Please"
+    }
+  }
 }

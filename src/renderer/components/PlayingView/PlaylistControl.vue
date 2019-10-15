@@ -1,16 +1,27 @@
 <template>
-  <div @mousedown.left="handleDown" @mouseup.left="togglePlaylistDisplay" @mouseenter="handleEnter" @mouseleave="handleLeave">
-    <lottie v-on:animCreated="handleAnimation" :options="defaultOptions" lot="playlist"></lottie>
+  <div
+    @mousedown.left="handleDown"
+    @mouseup.left="togglePlaylistDisplay"
+    @mouseenter="handleEnter"
+    @mouseleave="handleLeave"
+  >
+    <lottie
+      :options="defaultOptions"
+      @animCreated="handleAnimation"
+      lot="playlist"
+    />
   </div>
 </template>
-<script>
+<script lang="ts">
 import { mapState } from 'vuex';
+import { AnimationItem } from 'lottie-web';
 import lottie from '@/components/lottie.vue';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import animationData from '@/assets/playlist.json';
 
 export default {
-  name: 'playlist-control',
+  name: 'PlaylistControl',
+  // @ts-ignore
   type: INPUT_COMPONENT_TYPE,
   components: {
     lottie,
@@ -33,23 +44,25 @@ export default {
     }),
   },
   methods: {
-    handleAnimation(anim) {
+    handleAnimation(anim: AnimationItem) {
       this.anim = anim;
     },
     togglePlaylistDisplay() {
-      this.clicks = this.showAttached ? 1 : 0;
-      this.clicks += 1;
-      switch (this.clicks) {
-        case 1:
-          this.$emit('update:showAttached', true);
-          break;
-        case 2:
-          this.$emit('update:showAttached', false);
-          this.clicks = 0;
-          break;
-        default:
-          this.clicks = 0;
-          break;
+      if (this.mouseDown) {
+        this.clicks = this.showAttached ? 1 : 0;
+        this.clicks += 1;
+        switch (this.clicks) {
+          case 1:
+            this.$emit('update:showAttached', true);
+            break;
+          case 2:
+            this.$emit('update:showAttached', false);
+            this.clicks = 0;
+            break;
+          default:
+            this.clicks = 0;
+            break;
+        }
       }
     },
     handleDown() {

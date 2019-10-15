@@ -1,63 +1,67 @@
 
 <template>
-<div class="item" ref="item"
-  :style="{
-    bottom: chosen ? '9px' : '0',
-    width: `${thumbnailWidth}px`,
-    height: `${thumbnailHeight}px`,
-  }">
-  <div class="content"
-    @click.stop="onRecentItemClick(item)"
-    @mouseout="onRecentItemMouseout"
-    @mouseover="onRecentItemMouseover"
-    @mousedown.stop="onRecentItemMousedown"
-    @mouseup="onRecentItemMouseup"
+  <div
     :style="{
+      bottom: chosen ? '9px' : '0',
       width: `${thumbnailWidth}px`,
-      height: chosen ? `${thumbnailHeight + 10}px` : `${thumbnailHeight}px`,
-    }">
-    <div class="border" ref="border"
+      height: `${thumbnailHeight}px`,
+      backgroundImage: backgroundUrl,
+      transform: `translate(${movementX}px, ${movementY}px)`,
+      zIndex: mousedown ? '5' : '',
+      cursor: isInRange ? 'pointer' : `${cursorUrl}, pointer`,
+    }"
+    class="item"
+  >
+    <div
       :style="{
-        left: `-${0.7 / 2}px`,
-        top: `-${0.7 / 2}px`,
-        width: `${thumbnailWidth - 0.7}px`,
-        height: `${thumbnailHeight - 0.7}px`,
-        border: chosen ? '0.7px solid rgba(255,255,255,0.6)' : '0.7px solid rgba(255,255,255,0.15)',
-      }">
-      <div class="deleteUi" ref="deleteUi"><Icon type="delete"/></div>
+        width: `${thumbnailWidth}px`,
+        height: chosen ? `${thumbnailHeight + 10}px` : `${thumbnailHeight}px`,
+      }"
+      @click.stop="onRecentItemClick(item)"
+      @mouseout="onRecentItemMouseout"
+      @mouseover="onRecentItemMouseover"
+      @mousedown.stop="onRecentItemMousedown"
+      @mouseup="onRecentItemMouseup"
+      class="content"
+    >
+      <div
+        :style="{
+          left: `-${0.7 / 2}px`,
+          top: `-${0.7 / 2}px`,
+          width: `${thumbnailWidth - 0.7}px`,
+          height: `${thumbnailHeight - 0.7}px`,
+          border: chosen ? '0.7px solid rgba(255,255,255,0.6)'
+            : '0.7px solid rgba(255,255,255,0.15)',
+          backgroundColor: aboutToDelete ? 'rgba(0,0,0,0.43)'
+            : chosen ? 'rgba(255,255,255,0.2)' : '',
+        }"
+        class="border"
+      >
+        <transition name="fade-100">
+          <Icon
+            v-show="aboutToDelete"
+            type="delete"
+          />
+        </transition>
+      </div>
     </div>
   </div>
-</div>
 </template>
 
-<script>
-import path from 'path';
-import { filePathToUrl } from '@/helpers/path';
-import { generateCoverPathByMediaHash } from '@/helpers/cacheFileStorage';
+<script lang="ts">
 import Icon from '../BaseIconContainer.vue';
 
 export default {
-  name: 'video-item',
+  name: 'VideoItem',
   components: { Icon },
-  data() {
-    return {
-      displayInfo: [],
-      item: null,
-      coverSrc: '',
-      isDragging: false,
-      aboutToDelete: false,
-      showShadow: true,
-      chosen: false,
-      disX: NaN,
-      disY: NaN,
-    };
-  },
   props: {
-    firstIndex: {
-      type: Number,
+    cursorUrl: {
+      type: String,
+      default: '',
     },
-    lastIndex: {
-      type: Number,
+    backgroundUrl: {
+      type: String,
+      default: '',
     },
     shifting: {
       type: Boolean,
@@ -67,134 +71,100 @@ export default {
     },
     index: {
       type: Number,
-    },
-    playlist: {
-      type: Object,
+      default: NaN,
     },
     thumbnailHeight: {
       type: Number,
+      default: 63,
     },
     thumbnailWidth: {
       type: Number,
+      default: 112,
     },
-    lastPlayedFile: {
-      type: Object.Array,
-      require: true,
-      default: () => [],
+    canHover: {
+      type: Boolean,
+      default: false,
     },
     isFullScreen: {
       type: Boolean,
     },
-    filePathNeedToDelete: {
-      type: String,
+    onItemMouseover: {
+      type: Function,
+      required: true,
+    },
+    onItemClick: {
+      type: Function,
+      required: true,
+    },
+    onItemDelete: {
+      type: Function,
+      required: true,
     },
   },
-  created() {
-    this.infoDB.get('media-item', this.playlist.items[this.playlist.playedIndex]).then((data) => {
-      this.item = data;
-      generateCoverPathByMediaHash(data.quickHash).then((path) => {
-        this.coverSrc = filePathToUrl(path);
-        this.$refs.item.style.setProperty(
-          'background-image',
-          this.itemShortcut(data.smallShortCut, data.lastPlayedTime, data.duration),
-        );
-      });
-    });
+  data() {
+    return {
+      displayInfo: [],
+      item: null,
+      coverSrc: '',
+      isDragging: false,
+      aboutToDelete: false,
+      chosen: false,
+      mousedown: false,
+      mousedownX: NaN,
+      mousedownY: NaN,
+      movementX: NaN,
+      movementY: NaN,
+    };
   },
   destroyed() {
     document.removeEventListener('mousemove', this.onRecentItemMousemove);
     document.removeEventListener('mouseup', this.onRecentItemMouseup);
   },
   methods: {
-    itemShortcut(shortCut, lastPlayedTime, duration) {
-      return duration - lastPlayedTime < 5 ? `url("${this.coverSrc}")` : `url("${shortCut}")`;
-    },
-    itemInfo() {
-      return {
-        baseName: path.basename(this.item.path, path.extname(this.item.path)),
-        lastTime: this.item.lastPlayedTime,
-        duration: this.item.duration,
-        percentage: (this.item.lastPlayedTime / this.item.duration) * 100,
-        path: this.item.path,
-        cover: this.item.cover,
-      };
-    },
     onRecentItemMouseover() {
-      if ((this.isInRange || this.isFullScreen) && !this.shifting) {
+      if ((this.isInRange || this.isFullScreen) && !this.shifting && this.canHover) {
+        this.onItemMouseover(this.index);
         this.chosen = true;
-        this.$refs.border.style.setProperty('background-color', 'rgba(255,255,255,0.2)');
-        if (this.item.shortCut !== '') {
-          this.isChanging = true;
-          this.$emit('showShortcutImage');
-        } else {
-          this.$emit('showLandingLogo');
-        }
-        this.displayInfo = {
-          ...this.itemInfo(),
-          backgroundUrl: this.itemShortcut(
-            this.item.shortCut,
-            this.item.lastPlayedTime,
-            this.item.duration,
-          ),
-        };
-        this.$emit('displayInfo', this.displayInfo);
       }
     },
     onRecentItemMouseout() {
       this.chosen = false;
-      this.$refs.border.style.setProperty('background-color', '');
     },
-    onRecentItemMousedown(e) {
-      this.disX = e.pageX;
-      this.disY = e.pageY;
+    onRecentItemMousedown(e: MouseEvent) {
+      this.mousedown = true;
       this.isDragging = false;
+      this.mousedownX = e.pageX;
+      this.mousedownY = e.pageY;
 
       if (this.isInRange) {
         document.addEventListener('mousemove', this.onRecentItemMousemove);
         document.addEventListener('mouseup', this.onRecentItemMouseup);
-        this.showShadow = false;
-        this.$refs.item.style.setProperty('z-index', '5');
       }
     },
-    onRecentItemMousemove(e) {
+    onRecentItemMousemove(e: MouseEvent) {
       this.isDragging = true;
-      const movementX = e.pageX - this.disX;
-      const movementY = e.pageY - this.disY;
-      this.$refs.item.style.setProperty('transform', `translate(${movementX}px, ${movementY}px)`);
-      if (Math.abs(movementX) >= this.thumbnailWidth
-        || Math.abs(movementY) >= this.thumbnailHeight) {
-        this.$refs.border.style.setProperty('background-color', 'rgba(0,0,0,0.43)');
-        this.$refs.deleteUi.style.setProperty('opacity', '1');
+      this.movementX = e.pageX - this.mousedownX;
+      this.movementY = e.pageY - this.mousedownY;
+      if (Math.abs(this.movementX) >= this.thumbnailWidth
+        || Math.abs(this.movementY) >= this.thumbnailHeight) {
         this.aboutToDelete = true;
       } else {
-        this.$refs.border.style.setProperty('background-color', 'rgba(255,255,255,0.2');
-        this.$refs.deleteUi.style.setProperty('opacity', '0');
         this.aboutToDelete = false;
       }
     },
     onRecentItemMouseup() {
       document.removeEventListener('mousemove', this.onRecentItemMousemove);
-      this.showShadow = true;
-      this.$refs.item.style.setProperty('transform', 'translate(0,0)');
-      this.$refs.item.style.setProperty('z-index', '');
+      document.removeEventListener('mouseup', this.onRecentItemMouseup);
+      this.mousedown = false;
+      this.movementX = this.movementY = 0;
       if (this.aboutToDelete) {
-        this.$emit('showLandingLogo');
-        this.$emit('delete-item', this.playlist);
+        this.onItemDelete(this.index);
         this.aboutToDelete = false;
-      }
-      if (this.firstIndex !== 0) {
-        this.$emit('next-page');
       }
     },
     onRecentItemClick() {
       if (!this.isDragging && !this.shifting) {
-        if (this.index === this.lastIndex && !this.isFullScreen) {
-          this.$emit('next-page');
-        } else if (this.index + 1 < this.firstIndex && !this.isFullScreen) {
-          this.$emit('previous-page');
-        } else if (!this.filePathNeedToDelete) {
-          this.openPlayList(this.playlist.id);
-        }
+        this.onItemClick(this.index);
       }
     },
   },
@@ -204,7 +174,7 @@ export default {
 <style lang="scss" scoped>
 $border-radius: 3px;
 .item {
-  transition: bottom 100ms ease-in, transform 10ms ease-in;
+  transition: bottom 100ms ease-in;
   position: relative;
   border-radius: $border-radius;
   cursor: pointer;
@@ -243,9 +213,5 @@ $border-radius: 3px;
   justify-content: center;
   align-items: center;
   transition: border 100ms ease-out, background-color 100ms ease-out;
-  .deleteUi {
-    opacity: 0;
-    transition: opacity 100ms ease-out;
-  }
 }
 </style>

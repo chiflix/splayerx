@@ -22,18 +22,18 @@ export function filePathToUrl(filePath) {
  * @param {string} fileUrl To url to be converted.
  * @returns Absolute path of the file.
  */
-export function fileUrlToPath(fileUrl) {
+export function fileUrlToPath(fileUrl, { platform } = { platform: process.platform }) {
   if (!fileUrl) throw new Error('fileUrl should not be empty');
   let filePath = fileUrl.replace('file://', '').replace(/([?#].*)/g, '');
   filePath = decodeURI(filePath);
-  if (process.platform === 'win32') {
+  if (platform === 'win32') {
     filePath = filePath.substr(1).replace(/\//g, '\\');
   }
   return filePath;
 }
 
 // season math reg
-const SEREG = /([\u005b.-\s_]?s[e]?(\d+)|season(\d+)|第(\d+)季|第([零一二三四五六七八九十百千]+)季)/i;
+const SEREG = /([\u005b.-\s_]s[e]?(\d+)|season(\d+)|第(\d+)季|第([零一二三四五六七八九十百千]+)季)/i;
 // episode match reg
 const EPREG = /(e[p]?(\d+)[\u005d.-\s_]?|episode(\d+)|第(\d+)集|第([零一二三四五六七八九十百千]+)集)/i;
 

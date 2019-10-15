@@ -1,33 +1,45 @@
 <template>
-  <div>
-    <svg :class="hoverState">
-      <use class='default' v-bind="{'xlink:href': `#${type}-${finalState}-${finalEffect}`}"></use>
-      <use class="hover" v-bind="{'xlink:href': `#${type}-hover-${finalEffect}`}"></use>
-      <use class="active" v-bind="{'xlink:href': `#${type}-active-${finalEffect}`}"></use>
-    </svg>
-  </div>
+  <svg :class="hoverState">
+    <use
+      v-bind="{'xlink:href': `#${type}-${finalState}-${finalEffect}`}"
+      class="default"
+    />
+    <use
+      v-bind="{'xlink:href': `#${type}-hover-${finalEffect}`}"
+      class="hover"
+    />
+    <use
+      v-bind="{'xlink:href': `#${type}-active-${finalEffect}`}"
+      class="active"
+    />
+  </svg>
 </template>
 
-<script>
+<script lang="ts">
 export default {
   name: 'Icon',
   props: {
     type: {
       type: String,
+      required: true,
     },
     effect: {
       type: String,
+      default: 'icon',
     },
     state: {
       type: String,
+      default: 'default',
     },
     isFullScreen: {
       type: String,
+      default: '',
     },
   },
   computed: {
     finalState() {
-      return this.state === 'hover' && this.isFullScreen !== 'exit-fullscreen' ? this.state : 'default';
+      return this.state === 'hover' && this.isFullScreen !== 'exit-fullscreen'
+        ? this.state : 'default';
     },
     hoverState() {
       return this.state === 'hover' ? 'hoverState' : this.type;
@@ -35,11 +47,18 @@ export default {
     finalEffect() {
       return this.effect ? this.effect : 'icon';
     },
+    elementId() {
+      return `${this.type}-${this.finalState}-${this.finalEffect}`;
+    },
   },
-  created() {
-    const requireAll = requireContext => requireContext.keys().map(requireContext);
-    const req = require.context('@/assets/icon', true, /\.svg$/);
-    requireAll(req);
+  watch: {
+    elementId: {
+      immediate: true,
+      handler(newId: string) {
+        // eslint-disable-next-line import/no-dynamic-require
+        if (newId && !document.getElementById(newId)) require(`@/assets/icon/${newId}.svg`);
+      },
+    },
   },
 };
 </script>
@@ -48,7 +67,8 @@ export default {
 .titleBarWinExitFull, .titleBarWinFull, .titleBarWinClose, .titleBarWinRestore, .titleBarWinResize {
   display: flex;
   width: 45px;
-  height: 28px;
+  height: 36px;
+  margin: auto;
 }
 .hoverState {
   display: flex;
@@ -142,6 +162,10 @@ export default {
   width: 100%;
   height: 100%;
 }
+.playlistpause {
+  width: 100%;
+  height: 100%;
+}
 
 .folder {
   width: 100%;
@@ -155,95 +179,97 @@ export default {
   display: block;
 }
 
-.close {
-  .default {
-    display: block;
-  }
-  .hover {
-    display: none;
-  }
-  .active {
-    display: none;
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
-    width: 20px;
-    height: 20px;
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
-    width: 22px;
-    height: 22px;
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
-    width: 26px;
-    height: 26px;
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
-    width: 36px;
-    height: 36px;
-  }
+.nextStep {
+  width: 100%;
+  height: 100%;
+  opacity: 0.7;
+  cursor: pointer;
+  transition: opacity 200ms;
   &:hover {
     opacity: 1;
+  }
+}
+
+.nextStepDisable {
+  width: 100%;
+  height: 100%;
+  opacity: 0.1;
+}
+
+.welcomeNike {
+  width: 100%;
+  height: 100%;
+  opacity: 0.7;
+  cursor: pointer;
+  transition: opacity 200ms;
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.close {
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+
+  .default {
+    transition: opacity 200ms;
+    opacity: 1;
+  }
+  .hover {
+    transition: opacity 200ms;
+    opacity: 0;
+  }
+  .active {
+    transition: opacity 200ms;
+    opacity: 0;
+  }
+
+  &:hover {
     .default {
-        display: none;
+        opacity: 0;
     }
     .hover {
-        display: block;
+        opacity: 1;
     }
     .active {
-        display: none;
+        opacity: 0;
     }
   }
   &:active {
     .default {
-        display: none;
+        opacity: 0;
     }
     .hover {
-        display: none;
+        opacity: 0;
     }
     .active {
-        display: block;
+        opacity: 1;
     }
   }
 }
 .notificationPlay {
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
-    width: 30.625px;
-    height: 24.5px;
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
-    width: 36.75px;
-    height: 33.25px;
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
-    width: 51.625px;
-    height: 46.375px;
-  }
+  width: 30px;
+  height: 30px;
 }
 .notificationPlayHover {
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
-    width: 30.625px;
-    height: 24.5px;
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
-    width: 36.75px;
-    height: 33.25px;
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
-    width: 51.625px;
-    height: 46.375px;
-  }
+  width: 30px;
+  height: 30px;
 }
-.minus, .plus, .reset {
+.minus, .plus, .reset, .closeSquare {
   -webkit-app-region: no-drag;
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
     width: 11px;
     height: 11px;
   }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
     width: 13.2px;
     height: 13.2px;
   }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     width: 18.48px;
     height: 18.48px;
   }
@@ -283,24 +309,29 @@ export default {
 .hoveredEnd {
   display: block;
   z-index: 20;
-  @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
+  @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px),
+  screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
     width: 6px;
     height: 6px;
   }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
     width: 8px;
     height: 8px;
   }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
     width: 10px;
     height: 10px;
   }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     width: 16px;
     height: 16px;
   }
 }
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
+screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
   .rightArrow {
     width: 13px;
     height: 13px;
@@ -316,7 +347,8 @@ export default {
     height: 13px;
   }
 }
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
   .rightArrow {
     width: 15.6px;
     height: 15.6px;
@@ -332,7 +364,8 @@ export default {
     height: 17px;
   }
 }
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   .rightArrow {
     width: 21.84px;
     height: 21.84px;
@@ -357,40 +390,53 @@ export default {
   width: 14px;
   height: 15px;
 }
+.radio {
+  display: block;
+  width: 8px;
+  height: 8px;
+}
 .speed {
   display: block;
-  @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
+  @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px),
+  screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
     width: 8px;
     height: 6px;
   }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
     width: 8px;
     height: 6px;
   }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
     width: 12px;
     height: 8.25px;
   }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     width: 14px;
     height: 11px;
   }
 }
 .cycle {
   display: block;
-  @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
+  @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px),
+  screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
     width: 11px;
     height: 7px;
   }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
     width: 11px;
     height: 7px;
   }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
     width: 13px;
     height: 8px;
   }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     width: 18px;
     height: 11.5px;
   }
@@ -425,7 +471,7 @@ export default {
   width: 15px;
   height: 15px;
 }
-.deleteSub {
+.deleteSub, .reload  {
   cursor: pointer;
   .default {
     display: block;
@@ -458,20 +504,172 @@ export default {
       display: block;
     }
   }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
-    width: 10px;
-    height: 10px;
-    margin: auto 9px auto auto;
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
     width: 12px;
     height: 12px;
-    margin: auto 10.8px auto auto;
   }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
-    width: 16.8px;
-    height: 16.8px;
-    margin: auto 15.12px auto auto;
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+    width: 14px;
+    height: 14px;
+  }
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+    width: 18.8px;
+    height: 18.8px;
+  }
+}
+.picInpic {
+  width: 20px;
+  height: 16px;
+  .default {
+    display: block;
+  }
+  .hover {
+    display: none;
+  }
+  .active {
+    display: none;
+  }
+  &:active {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: none;
+    }
+    .active {
+      display: block;
+    }
+  }
+}
+.picInpicDisabled {
+  width: 20px;
+  height: 16px;
+  display: block;
+}
+.down {
+  width: 5px;
+  height: 7px;
+}
+.sidebar {
+  width: 30px;
+  height: 30px;
+}
+.bilibiliSidebar, .iqiyiSidebar, .youtubeSidebar,
+.douyuSidebar, .huyaSidebar, .qqSidebar, .youkuSidebar, .twitchSidebar {
+  width: 44px;
+  height: 44px;
+}
+.showMarks, .hideMarks, .closeSearch {
+  width: 18px;
+  height: 18px;
+  .default {
+    display: block;
+  }
+  .hover {
+    display: none;
+  }
+  .active {
+    display: none;
+  }
+  &:hover {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: block;
+    }
+    .active {
+      display: none;
+    }
+  }
+}
+.danmu, .noDanmu {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+.showFavicon, .hideFavicon {
+  width: 10px;
+  height: 10px;
+  display: block;
+}
+.closeInput {
+  width: 10px;
+  height: 10px;
+  margin: auto;
+  .default {
+    display: block;
+  }
+  .hover {
+    display: none;
+  }
+  .active {
+    display: none;
+  }
+  &:hover {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: block;
+    }
+    .active {
+      display: none;
+    }
+  }
+}
+.videoRecordDisabled {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+.history, .open {
+  width: 30px;
+  height: 30px;
+  .default {
+    display: block;
+  }
+  .hover {
+    display: none;
+  }
+  &:hover {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: block;
+    }
+  }
+}
+.pip, .pop, .pipDisabled, .popDisabled {
+  width: 30px;
+  height: 30px;
+}
+.pipRecord, .pipBack {
+  width: 20px;
+  height: 20px;
+  .default {
+    display: block;
+  }
+  .hover {
+    display: none;
+  }
+  .active {
+    display: none;
+  }
+  &:active {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: none;
+    }
+    .active {
+      display: block;
+    }
   }
 }
 </style>

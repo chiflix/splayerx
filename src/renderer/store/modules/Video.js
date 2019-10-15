@@ -1,10 +1,13 @@
 import Vue from 'vue';
 
-import Helpers from '@/helpers';
 import romanize from 'romanize';
 import isEqual from 'lodash/isEqual';
+import { mediaQuickHash } from '@/libs/utils';
 import { Video as videoMutations } from '../mutationTypes';
-import { Video as videoActions, Subtitle as subtitleActions } from '../actionTypes';
+import {
+  Video as videoActions,
+  Subtitle as subtitleActions,
+} from '../actionTypes';
 
 const state = {
   // error state
@@ -15,9 +18,9 @@ const state = {
   src: process.env.NODE_ENV === 'testing' ? './test/assets/test.avi' : '',
   mediaHash: process.env.NODE_ENV === 'testing'
     ? '84f0e9e5e05f04b58f53e2617cc9c866-'
-      + 'f54d6eb31bef84839c3ce4fc2f57991c-'
-      + 'b1f0696aec64577228d93eabcc8eb69b-'
-      + 'f497c6684c4c6e50d0856b5328a4bedc'
+    + 'f54d6eb31bef84839c3ce4fc2f57991c-'
+    + 'b1f0696aec64577228d93eabcc8eb69b-'
+    + 'f497c6684c4c6e50d0856b5328a4bedc'
     : '',
   currentSrc: '',
   networkState: '',
@@ -53,7 +56,7 @@ const state = {
   intrinsicWidth: 0,
   intrinsicHeight: 0,
   ratio: 0,
-  AudioDelay: 0,
+  audioDelay: 0,
   defaultDir: '',
   snapshotSavedPath: '',
 };
@@ -62,8 +65,8 @@ const getters = {
   // network state
   originSrc: state => state.src,
   convertedSrc: (state) => {
-    const converted = process.platform === 'win32' ? encodeURIComponent(state.src).replace(/%3A/g, ':').replace(/(%5C)|(%2F)/g, '/') :
-      encodeURIComponent(state.src).replace(/%3A/g, ':').replace(/%2F/g, '/');
+    const converted = process.platform === 'win32' ? encodeURIComponent(state.src).replace(/%3A/g, ':').replace(/(%5C)|(%2F)/g, '/')
+      : encodeURIComponent(state.src).replace(/%3A/g, ':').replace(/%2F/g, '/');
     return process.platform === 'win32' ? converted : `file://${converted}`;
   },
   // playback state
@@ -85,7 +88,7 @@ const getters = {
   audioTrackList: state => state.audioTrackList,
   currentAudioTrackId: (state) => {
     const track = state.audioTrackList.filter(track => track.enabled)[0];
-    if (track && track.id) return track.id;
+    if (track && track.id) return Number(track.id);
     return -1;
   },
   // meta info
@@ -93,22 +96,22 @@ const getters = {
   intrinsicHeight: state => state.intrinsicHeight,
   computedWidth: (state, getters) => {
     if (getters.winAngle === 0 || getters.winAngle === 180) {
-      return Math.round(getters.winRatio > getters.ratio ?
-        getters.winHeight * getters.ratio : getters.winWidth);
+      return Math.round(getters.winRatio > getters.ratio
+        ? getters.winHeight * getters.ratio : getters.winWidth);
     }
-    return Math.round(getters.winRatio > 1 / getters.ratio ?
-      getters.winHeight * (1 / getters.ratio) : getters.winWidth);
+    return Math.round(getters.winRatio > 1 / getters.ratio
+      ? getters.winHeight * (1 / getters.ratio) : getters.winWidth);
   },
   computedHeight: (state, getters) => {
     if (getters.winAngle === 0 || getters.winAngle === 180) {
-      return Math.round(getters.winRatio < getters.ratio ?
-        getters.winWidth / getters.ratio : getters.winHeight);
+      return Math.round(getters.winRatio < getters.ratio
+        ? getters.winWidth / getters.ratio : getters.winHeight);
     }
-    return Math.round(getters.winRatio < 1 / getters.ratio ?
-      getters.winWidth / (1 / getters.ratio) : getters.winHeight);
+    return Math.round(getters.winRatio < 1 / getters.ratio
+      ? getters.winWidth / (1 / getters.ratio) : getters.winHeight);
   },
   ratio: state => state.ratio,
-  AudioDelay: state => state.AudioDelay,
+  audioDelay: state => state.audioDelay,
   mediaHash: state => state.mediaHash,
   videoId: state => state.id,
   defaultDir: state => state.defaultDir,
@@ -201,15 +204,13 @@ const actions = {
       windows: RegExp(/^[a-zA-Z]:\/(((?![<>:"//|?*]).)+((?<![ .])\/)?)*$/),
     };
     Object.keys(srcRegexes).forEach(async (type) => {
-      if (srcRegexes[type].test(src)) {
-        commit(videoMutations.SRC_UPDATE, src);
-        commit(
-          videoMutations.MEDIA_HASH_UPDATE,
-          mediaHash || await Helpers.methods.mediaQuickHash(src),
-        );
-        commit(videoMutations.ID_UPDATE, id);
-        dispatch(subtitleActions.INITIALIZE_VIDEO_SUBTITLE_MAP, { videoSrc: src });
-      }
+      if (!srcRegexes[type].test(src)) return;
+      mediaHash = mediaHash || await mediaQuickHash.try(src);
+      if (!mediaHash) return;
+      commit(videoMutations.SRC_UPDATE, src);
+      commit(videoMutations.MEDIA_HASH_UPDATE, mediaHash);
+      commit(videoMutations.ID_UPDATE, id);
+      dispatch(subtitleActions.INITIALIZE_VIDEO_SUBTITLE_MAP, { videoSrc: src });
     });
   },
   [videoActions.INITIALIZE]({ commit }, config) {

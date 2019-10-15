@@ -1,7 +1,6 @@
 @charset "UTF-8";
 @import './fonts.scss';
 @import './subtitle.scss';
-@import './ja.scss';
 
 * {
   margin: 0;
@@ -44,7 +43,31 @@ body {
 .no-drag {
   -webkit-app-region: no-drag;
 }
+.backdrop-fallback {
+  border: 1px solid rgba(160,160,160,0.7);
+  background-image: radial-gradient(
+    80% 130%,
+    rgba(85,85,85,0.88) 20%,
+    rgba(85,85,85,0.78) 50%,
+    rgba(85,85,85,0.72) 60%,
+    rgba(85,85,85,0.46) 80%,
+    rgba(85,85,85,0.00) 100%
+  );
+}
 
 .rtl p {
   direction: rtl;
+}
+
+.flex {
+  flex: 1;
+}
+
+.fade-100 {
+  &-enter, &-leave-to {
+    opacity: 0;
+  }
+  &-enter-active, &-leave-active {
+    transition: opacity 100ms ease-out;
+  }
 }

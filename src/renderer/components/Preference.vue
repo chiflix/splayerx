@@ -1,60 +1,92 @@
 <template>
-  <div class="preference">
-    <div class="left">
-      <div class="mac-icons no-drag"
+  <div class="preference tablist">
+    <div class="tablist__tabs">
+      <div
         v-if="isDarwin"
         @mouseover="state = 'hover'"
-        @mouseout="state = 'default'">
-        <Icon class="title-button"
-              type="titleBarClose"
-              :state="state"
-              @click.native="handleClose"/>
-        <Icon class="title-button-disable" type="titleBarExitFull"/>
-        <Icon class="title-button-disable" type="titleBarFull"/>
+        @mouseout="state = 'default'"
+        class="titlebar titlebar--mac no-drag"
+      >
+        <Icon
+          :state="state"
+          @click.native="handleClose"
+          class="titlebar__button"
+          type="titleBarClose"
+        />
+        <Icon
+          class="titlebar__button--disable"
+          type="titleBarExitFull"
+        />
+        <Icon
+          class="titlebar__button--disable"
+          type="titleBarFull"
+        />
       </div>
-      <div class="preferenceTitle"
-          :class="currentPreference === 'General' ? 'chosen' : ''"
-          @mouseup="handleMouseup('General')">{{ $t('preferences.general.generalSetting') }}</div>
-      <div class="preferenceTitle"
-          :class="currentPreference === 'Privacy' ? 'chosen' : ''"
-          @mouseup="handleMouseup('Privacy')">{{ $t('preferences.privacy.privacySetting') }}</div>
+      <div
+        :class="$route.name === 'General' ? 'tablist__tab--selected' : ''"
+        :style="{
+          marginTop: !isDarwin ? '10px' : '',
+        }"
+        @mouseup="handleMouseup('General')"
+        class="tablist__tab"
+      >
+        {{ $t('preferences.general.generalSetting') }}
+      </div>
+      <div
+        :class="$route.name === 'Translate' ? 'tablist__tab--selected' : ''"
+        @mouseup="handleMouseup('Translate')"
+        class="tablist__tab"
+      >
+        {{ $t('preferences.translate.translateSetting') }}
+      </div>
+      <div
+        :class="$route.name === 'Privacy' ? 'tablist__tab--selected' : ''"
+        @mouseup="handleMouseup('Privacy')"
+        class="tablist__tab"
+      >
+        {{ $t('preferences.privacy.privacySetting') }}
+      </div>
     </div>
-    <div class="right">
-      <div class="win-icons no-drag"
+    <div class="tablist__tabpanel">
+      <div
         v-if="!isDarwin"
         @mouseover="state = 'hover'"
-        @mouseout="state = 'default'">
-        <Icon class="title-button-disable"
-              type="titleBarWinExitFull"/>
-        <Icon class="title-button-disable" type="titleBarWinFull"/>
-        <Icon class="title-button" type="titleBarWinClose" @click.native="handleClose"/>
+        @mouseout="state = 'default'"
+        class="titlebar titlebar--win no-drag"
+      >
+        <Icon
+          class="titlebar__button--disable"
+          type="titleBarWinExitFull"
+        />
+        <Icon
+          class="titlebar__button--disable"
+          type="titleBarWinFull"
+        />
+        <Icon
+          @click.native="handleClose"
+          class="titlebar__button"
+          type="titleBarWinClose"
+        />
       </div>
-      <keep-alive>
-        <component :is="currentPreference"
-        @move-stoped="isMoved = false"
-        :mouseDown="mouseDown" :isMoved="isMoved"/>
-      </keep-alive>
+      <div class="tablist__tabcontent">
+        <router-view />
+      </div>
     </div>
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import electron from 'electron';
 import Icon from '@/components/BaseIconContainer.vue';
-import General from './Preferences/General.vue';
-import Privacy from './Preferences/Privacy.vue';
 
 export default {
   name: 'Preference',
   components: {
     Icon,
-    General,
-    Privacy,
   },
   data() {
     return {
       state: 'default',
-      currentPreference: 'General',
       mouseDown: false,
       isMoved: false,
     };
@@ -63,21 +95,19 @@ export default {
     isDarwin() {
       return process.platform === 'darwin';
     },
+    displayLanguage: {
+      get() {
+        return this.$store.getters.displayLanguage;
+      },
+    },
   },
-  methods: {
-    // Methods to handle window behavior
-    handleClose() {
-      electron.remote.getCurrentWindow().close();
-    },
-    mainDispatchProxy(actionType, actionPayload) {
-      this.$store.dispatch(actionType, actionPayload);
-    },
-    handleMouseup(panel) {
-      this.currentPreference = panel;
+  watch: {
+    displayLanguage(val: string) {
+      if (val) this.$i18n.locale = val;
     },
   },
   created() {
-    electron.ipcRenderer.on('preferenceDispatch', (event, actionType, actionPayload) => {
+    electron.ipcRenderer.on('preferenceDispatch', (event: Event, actionType: string, actionPayload: string) => {
       this.mainDispatchProxy(actionType, actionPayload);
     });
     window.onmousedown = () => {
@@ -91,99 +121,130 @@ export default {
       this.mouseDown = false;
     };
   },
+  mounted() {
+    document.title = 'Preference SPlayer';
+    document.body.classList.add('drag');
+  },
   beforeDestroy() {
     window.onmousedown = null;
     window.onmousemove = null;
     window.onmouseup = null;
+  },
+  methods: {
+    // Methods to handle window behavior
+    handleClose() {
+      electron.remote.getCurrentWindow().close();
+    },
+    mainDispatchProxy(actionType: string, actionPayload: string) {
+      this.$store.dispatch(actionType, actionPayload);
+    },
+    handleMouseup(panel: string) {
+      this.$router.push({ name: panel });
+    },
   },
 };
 </script>
 
 <style scoped lang="scss">
 .preference {
+  background-color: #3B3B41;
+  .titlebar {
+    display: flex;
+    flex-wrap: nowrap;
+
+    &--mac {
+      margin-top: 12px;
+      margin-left: 12px;
+      margin-bottom: 18px;
+      width: fit-content;
+
+      .titlebar__button {
+        margin-right: 8px;
+        width: 12px;
+        height: 12px;
+        background-repeat: no-repeat;
+        -webkit-app-region: no-drag;
+        border-radius: 100%;
+
+        &--disable {
+          pointer-events: none;
+          opacity: 0.25;
+        }
+      }
+    }
+
+    &--win {
+      top: 0;
+      right: 0;
+      position: fixed;
+
+      .titlebar__button {
+        width: 45px;
+        height: 36px;
+        background-color: rgba(255,255,255,0);
+        transition: background-color 200ms;
+
+        &--disable {
+          pointer-events: none;
+          opacity: 0.25;
+        }
+        &:hover {
+          background-color: rgba(221, 221, 221, 0.2);
+        }
+        &:active {
+          background-color: rgba(221, 221, 221, 0.5);
+        }
+      }
+    }
+  }
+}
+.tablist {
   display: flex;
   flex-direction: row;
   width: 100%;
   height: 100%;
-  .win-icons {
-    display: flex;
-    flex-wrap: nowrap;
-    position: fixed;
-    top: 0;
-    right: 0;
-    .title-button {
-      margin: 0px 2px 2px 0px;
-      width: 45px;
-      height: 28px;
-      background-color: rgba(255,255,255,0);
-      transition: background-color 200ms;
-      &:hover {
-        background-color: rgba(221, 221, 221, 0.2);
-      }
-      &:active {
-        background-color: rgba(221, 221, 221, 0.5);
-      }
-    }
-    .title-button-disable {
-      pointer-events: none;
-      opacity: 0.25;
-    }
-  }
-  .mac-icons {
-    margin-top: 12px;
-    margin-left: 12px;
-    margin-bottom: 18px;
-    width: fit-content;
-    display: flex;
-    flex-wrap: nowrap;
-    .title-button {
-      width: 12px;
-      height: 12px;
-      margin-right: 8px;
-      background-repeat: no-repeat;
-      -webkit-app-region: no-drag;
-      border-radius: 100%;
-    }
-    .title-button-disable {
-      pointer-events: none;
-      opacity: 0.25;
-    }
-  }
-  .left {
-    flex-basis: 110px;
-    height: 100%;
-    background-image: linear-gradient(-28deg, rgba(65,65,65,0.97) 0%, rgba(84,84,84,0.97) 47%, rgba(123,123,123,0.97) 100%);
-    .preferenceTitle {
-      cursor: pointer;
-      -webkit-app-region: no-drag;
-      border-left: 1px solid rgba(0,0,0,0);
-      padding-left: 15px;
-      padding-top: 13px;
-      padding-bottom: 13px;
-      background-color: rgba(255,255,255,0);
 
-      font-family: $font-semibold;
-      font-size: 14px;
-      color: rgba(255,255,255,0.3);
-      letter-spacing: 0;
-      line-height: 16px;
-      transition: background-color 200ms;
-      &:hover {
-        background-color: rgba(255,255,255,0.03);
-      }
+  &__tabs {
+    width: 110px;
+    height: 100%;
+    box-sizing: border-box;
+    background-color: #3B3B41;
+    border-right: 1px solid rgba(255,255,255,.03);
+  }
+
+  &__tab {
+    cursor: pointer;
+    -webkit-app-region: no-drag;
+    font-family: $font-semibold;
+    font-size: 14px;
+    letter-spacing: 0;
+    line-height: 42px;
+    text-align: center;
+    color: rgba(255,255,255,.25);
+    margin: 5px 10px;
+    background-color: rgba(83, 52, 52, 0);
+    transition: background-color 200ms;
+    border-radius: 50px;
+    &:hover {
+      color: rgba(255,255,255,.7);
     }
-    .chosen {
-      border-left: 1px solid white;
-      color: rgba(255,255,255,1);
-      background-image: linear-gradient(99deg, rgba(243,243,243,0.15) 0%, rgba(255,255,255,0.0675) 81%);
+
+    &--selected {
+      color: rgba(255,255,255,.7);
+      background-color: rgba(0,0,0,0.12);
       &:hover {
-        background-color: rgba(255,255,255,0);
+        color: rgba(255,255,255,.7);
       }
     }
   }
-  .right {
-    flex-basis: 430px;
-    background-image: linear-gradient(-28deg, rgba(65,65,65,0.99) 0%, rgba(84,84,84,0.99) 47%, rgba(123,123,123,0.99) 100%);
+
+  &__tabpanel {
+    width: 430px;
+    background-color: #3B3B41;
+  }
+
+  &__tabcontent {
+    padding: 32px 32px;
   }
 }
 </style>

@@ -1,0 +1,25 @@
+name: Test and Build SPlayer
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macOS-latest, windows-latest]
+        node-version: [12.x]
+    steps:
+    - uses: actions/checkout@v1
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - name: install, test, and build
+      run: |
+        yarn
+        node scripts/check-electron-version.js
+        yarn test
+        yarn build
+      env:
+        CI: true

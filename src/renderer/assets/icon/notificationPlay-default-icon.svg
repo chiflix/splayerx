@@ -1,30 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg viewBox="0 0 35 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg width="30px" height="30px" viewBox="0 0 30 30" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 54.1 (76490) - https://sketchapp.com -->
+    <desc>Created with Sketch.</desc>
     <defs>
-        <filter x="-27.6%" y="-30.0%" width="155.2%" height="160.0%" filterUnits="objectBoundingBox" id="filter-1">
-            <feOffset dx="0" dy="0" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
-            <feGaussianBlur stdDeviation="2" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
-            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.122622283 0" type="matrix" in="shadowBlurOuter1" result="shadowMatrixOuter1"></feColorMatrix>
-            <feMerge>
-                <feMergeNode in="shadowMatrixOuter1"></feMergeNode>
-                <feMergeNode in="SourceGraphic"></feMergeNode>
-            </feMerge>
-        </filter>
-        <radialGradient cx="50%" cy="65.549251%" fx="50%" fy="65.549251%" r="47.6609134%" gradientTransform="translate(0.500000,0.655493),scale(0.938879,1.000000),rotate(90.000000),translate(-0.500000,-0.655493)" id="radialGradient-2">
-            <stop stop-color="#FFFFFF" stop-opacity="0.109884511" offset="0%"></stop>
-            <stop stop-color="#FFFFFF" stop-opacity="0.227553216" offset="53.8768967%"></stop>
-            <stop stop-color="#FFFFFF" stop-opacity="0.447661911" offset="100%"></stop>
+        <radialGradient cx="50%" cy="65.549251%" fx="50%" fy="65.549251%" r="47.6609134%" gradientTransform="translate(0.500000,0.655493),scale(0.938879,1.000000),rotate(90.000000),translate(-0.500000,-0.655493)" id="radialGradient-1">
+            <stop stop-color="#FFFFFF" stop-opacity="0.35" offset="0%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.36" offset="43.5256546%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.5" offset="100%"></stop>
         </radialGradient>
-        <radialGradient cx="50%" cy="63.3385735%" fx="50%" fy="63.3385735%" r="50.4122753%" gradientTransform="translate(0.500000,0.633386),scale(0.938879,1.000000),rotate(90.000000),translate(-0.500000,-0.633386)" id="radialGradient-3">
-            <stop stop-color="#FFFFFF" stop-opacity="0.329398777" offset="0%"></stop>
-            <stop stop-color="#FFFFFF" stop-opacity="0.573822464" offset="53.8768967%"></stop>
-            <stop stop-color="#FFFFFF" stop-opacity="0.504868659" offset="100%"></stop>
+        <radialGradient cx="50%" cy="63.3385735%" fx="50%" fy="63.3385735%" r="50.4122753%" gradientTransform="translate(0.500000,0.633386),scale(0.938879,1.000000),rotate(90.000000),translate(-0.500000,-0.633386)" id="radialGradient-2">
+            <stop stop-color="#FFFFFF" stop-opacity="0.45" offset="0%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.55" offset="61.2146326%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.7" offset="100%"></stop>
         </radialGradient>
     </defs>
-    <g id="Notification-Special-Button-/-Play" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g id="Icon---Play" filter="url(#filter-1)" transform="translate(4.000000, 1.000000)">
-            <path d="M14.2960618,28.9375781 L2.05570641,28.9375781 C1.11539919,28.9375781 0.242710802,28.4487339 -0.248437314,27.6468916 L-0.248437314,27.6468916 C-0.738456456,26.8468923 -0.769795022,25.8476483 -0.330869174,25.0185152 L5.94526099,13.1628749 L11.4559789,2.75310202 C12.0126995,1.70145414 13.1043165,1.04286211 14.294231,1.04073388 L14.294231,1.04073388 C15.4834555,1.03860689 16.5760853,1.69514724 17.1324831,2.74618534 L22.6468625,13.1628749 L28.7337556,24.6610455 C29.2096741,25.5600578 29.1899816,26.6406019 28.6816216,27.5216762 L28.6816216,27.5216762 C28.176117,28.3978014 27.2414982,28.9375781 26.2299992,28.9375781 L14.2960618,28.9375781 Z" id="Basis" fill="url(#radialGradient-2)" opacity="0.907691592" transform="translate(14.218985, 14.987427) rotate(90.000000) translate(-14.218985, -14.987427) "></path>
-            <path d="M14.2960618,28.9375781 L2.05570641,28.9375781 C1.11539919,28.9375781 0.242710802,28.4487339 -0.248437314,27.6468916 L-0.248437314,27.6468916 C-0.738456456,26.8468923 -0.769795022,25.8476483 -0.330869174,25.0185152 L5.94526099,13.1628749 L11.4559789,2.75310202 C12.0126995,1.70145414 13.1043165,1.04286211 14.294231,1.04073388 L14.294231,1.04073388 C15.4834555,1.03860689 16.5760853,1.69514724 17.1324831,2.74618534 L22.6468625,13.1628749 L28.7337556,24.6610455 C29.2096741,25.5600578 29.1899816,26.6406019 28.6816216,27.5216762 L28.6816216,27.5216762 C28.176117,28.3978014 27.2414982,28.9375781 26.2299992,28.9375781 L14.2960618,28.9375781 Z" id="Border" stroke-opacity="0.437273551" stroke="#FFFFFF" stroke-width="0.5" fill="url(#radialGradient-3)" opacity="0.7" transform="translate(14.218985, 14.987427) rotate(90.000000) translate(-14.218985, -14.987427) "></path>
-        </g>
+    <g id="Icons/notificationPlay-default-icon" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" fill-opacity="0.7">
+        <path d="M15.5037672,26.9107812 L5.01203407,26.9107812 C4.20605645,26.9107812 3.45803783,26.4917719 3.03705373,25.8044785 L3.03705373,25.8044785 C2.61703732,25.1187648 2.5901757,24.2622699 2.96639785,23.5515845 L8.34593799,13.389607 L13.0694105,4.46694458 C13.5465995,3.56553212 14.4822713,3.00102467 15.502198,2.99920047 L15.502198,2.99920047 C16.5215333,2.99737733 17.4580731,3.56012621 17.9349855,4.46101601 L22.6615965,13.389607 L27.8789334,23.2451818 C28.2868635,24.0157639 28.2699842,24.9419445 27.8342471,25.697151 L27.8342471,25.697151 C27.4009575,26.4481155 26.5998556,26.9107812 25.7328565,26.9107812 L15.5037672,26.9107812 Z" id="Basis" fill="url(#radialGradient-1)" transform="translate(15.437702, 14.953509) rotate(90.000000) translate(-15.437702, -14.953509) "></path>
+        <path d="M15.5037672,26.9107812 L5.01203407,26.9107812 C4.20605645,26.9107812 3.45803783,26.4917719 3.03705373,25.8044785 L3.03705373,25.8044785 C2.61703732,25.1187648 2.5901757,24.2622699 2.96639785,23.5515845 L8.34593799,13.389607 L13.0694105,4.46694458 C13.5465995,3.56553212 14.4822713,3.00102467 15.502198,2.99920047 L15.502198,2.99920047 C16.5215333,2.99737733 17.4580731,3.56012621 17.9349855,4.46101601 L22.6615965,13.389607 L27.8789334,23.2451818 C28.2868635,24.0157639 28.2699842,24.9419445 27.8342471,25.697151 L27.8342471,25.697151 C27.4009575,26.4481155 26.5998556,26.9107812 25.7328565,26.9107812 L15.5037672,26.9107812 Z" id="Border" stroke-opacity="0.437273551" stroke="#FFFFFF" stroke-width="0.5" fill="url(#radialGradient-2)" transform="translate(15.437702, 14.953509) rotate(90.000000) translate(-15.437702, -14.953509) "></path>
     </g>
 </svg>

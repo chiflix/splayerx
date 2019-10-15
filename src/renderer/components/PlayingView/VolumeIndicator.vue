@@ -1,47 +1,100 @@
 <template>
-<div class="show-area" ref="showArea"
-  @mouseenter="enterArea"
-  @mouseleave="leaveArea">
-  <div class="trigger-area"
-    :class="showVolume ? 'fade-in' : 'fade-out'"
-    :style="{cursor: showAllWidgets ? 'pointer' : 'none'}"
-    @mouseenter="actionArea"
-    @mouseleave="leaveActionArea"
-    @mousedown="mouseDownOnIndicator">
-    <div ref="indicatorContainer"
-      :class="borderClass"
-      class="indicator-container">
-      <base-info-card class="card" ref="card">
-        <div class="indicator" ref="indicator"
-          :style="{
-            height: volume * 100 + '%',
-            opacity: muted ? 0.25 : 0.8,
-          }"/>
-      </base-info-card>
-    </div>
-    <div class="volume"
-      @mouseup="mouseupOnMuteIcon">
-      <transition name="fade">
-        <base-icon v-show="showIcon" class="volume-icon" type="volume" :effect="muted || volume <= 0 ? 'mute' : 'icon'" />
-      </transition>
+  <div
+    ref="showArea"
+    @mouseenter="enterArea"
+    @mouseleave="leaveArea"
+    @dblclick="handleDbClick"
+    class="show-area"
+  >
+    <div
+      :class="showVolume ? 'fade-in' : 'fade-out'"
+      :style="{cursor: showAllWidgets ? 'pointer' : 'none'}"
+      @mouseenter="actionArea"
+      @mouseleave="leaveActionArea"
+      @mousedown="mouseDownOnIndicator"
+      @dblclick.stop=""
+      class="trigger-area no-drag"
+    >
+      <div
+        ref="indicatorContainer"
+        :class="borderClass"
+        class="indicator-container"
+      >
+        <div class="container card">
+          <div class="element bottom">
+            <div class="element content">
+              <div
+                ref="indicator"
+                :style="{
+                  height: volume * 100 + '%',
+                  opacity: muted ? 0.25 : 0.8,
+                }"
+                class="indicator"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        @mouseup="mouseupOnMuteIcon"
+        class="volume"
+      >
+        <transition name="fade">
+          <base-icon
+            v-show="showIcon"
+            :effect="muted || volume <= 0 ? 'mute' : 'icon'"
+            class="volume-icon"
+            type="volume"
+          />
+        </transition>
+      </div>
     </div>
   </div>
-</div>
 </template>
 
-<script>
-import { mapGetters, mapState } from 'vuex';
-import { Video as videoActions } from '@/store/actionTypes';
+<script lang="ts">
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
-import BaseInfoCard from './InfoCard.vue';
 import BaseIcon from '../BaseIconContainer.vue';
 
 export default {
-  name: 'volume-indicator',
+  name: 'VolumeIndicator',
+  // @ts-ignore
   type: INPUT_COMPONENT_TYPE,
   components: {
-    'base-info-card': BaseInfoCard,
     'base-icon': BaseIcon,
+  },
+  props: {
+    showAllWidgets: Boolean,
+    mousedownOnPlayButton: Boolean,
+    attachedShown: Boolean,
+    muted: Boolean,
+    volume: {
+      type: Number,
+      default: 1,
+    },
+    volumeKeydown: Boolean,
+    ratio: {
+      type: Number,
+      default: 1,
+    },
+    isFullScreen: Boolean,
+    wheelTriggered: {
+      type: Number,
+      default: 0,
+    },
+    volumeWheelTriggered: Boolean,
+    currentWidget: {
+      type: String,
+      default: '',
+    },
+    handleUpdateVolume: {
+      type: Function,
+      default: () => {},
+    },
+    handleUpdateMuted: {
+      type: Function,
+      default: () => {},
+    },
   },
   data() {
     return {
@@ -52,27 +105,17 @@ export default {
       inArea: false,
       mouseover: false,
       mousedown: false,
+      isMoved: false,
       canToggleMute: false,
+      firstAppear: true, // appear the volume indicator when switch from LandingView to PlayingView
     };
   },
-  props: ['showAllWidgets', 'mousedownOnPlayButton', 'attachedShown'],
   computed: {
-    ...mapGetters(['muted', 'volumeKeydown', 'ratio', 'isFullScreen', 'wheelTriggered', 'volumeWheelTriggered']),
-    ...mapState({
-      currentWidget: ({ Input }) => Input.mousemoveComponentName,
-    }),
     showVolume() {
       return (this.inArea && this.showAllWidgets
         && !this.mousedownOnPlayButton && !this.attachedShown)
+        || this.firstAppear
         || this.mousedown || this.volumeTriggerStopped || (this.muted && this.showAllWidgets);
-    },
-    volume: {
-      get() {
-        return this.$store.getters.volume;
-      },
-      set(val) {
-        this.$store.dispatch(videoActions.VOLUME_UPDATE, val * 100);
-      },
     },
     borderClass() {
       return this.volumeTriggerStopped || this.mouseover || this.mousedown ? 'border-in' : 'border-out';
@@ -81,104 +124,8 @@ export default {
       return this.volumeTriggerStopped || this.mouseover || this.mousedown || this.muted;
     },
   },
-  methods: {
-    enterArea() {
-      this.inArea = true;
-      if (this.volumeFadingId) clearTimeout(this.volumeFadingId);
-    },
-    leaveArea() {
-      if (this.volumeFadingId) clearTimeout(this.volumeFadingId);
-      this.volumeFadingId = setTimeout(() => {
-        this.inArea = false;
-      }, 200);
-    },
-    actionArea() {
-      this.mouseover = true;
-      if (this.borderFadingId) clearTimeout(this.borderFadingId);
-    },
-    leaveActionArea() {
-      if (!this.mousedown) {
-        if (this.borderFadingId) clearTimeout(this.borderFadingId);
-        this.borderFadingId = setTimeout(() => {
-          this.mouseover = false;
-        }, 200);
-      }
-    },
-    mouseDownOnIndicator(e) {
-      this.canToggleMute = true;
-      const backgroundHeight = 100 + ((window.innerHeight - 180) / 3);
-      const containerTop = (window.innerHeight - (backgroundHeight + 26)) / 2;
-      const percentOfVolume = ((window.innerHeight - e.clientY) - (containerTop) - 19) /
-        this.$refs.indicatorContainer.clientHeight;
-      if (percentOfVolume > 0) this.volume = percentOfVolume;
-      this.mousedown = true;
-      this.$emit('update:volume-state', true);
-      let isMoved = false;
-      document.onmousemove = (e) => {
-        isMoved = true;
-        const percentOfVolume = ((window.innerHeight - e.clientY) - (containerTop) - 19) /
-          this.$refs.indicatorContainer.clientHeight;
-        if (percentOfVolume > 0) this.volume = percentOfVolume;
-      };
-      document.onmouseup = () => {
-        if (isMoved) {
-          this.$ga.event('app', 'volume', 'drag');
-        } else {
-          this.$ga.event('app', 'volume', 'mousedown');
-        }
-        document.onmousemove = null;
-        this.mousedown = false;
-        this.$emit('update:volume-state', false);
-        if (!this.inArea) this.mouseover = false;
-        this.canToggleMute = false;
-      };
-    },
-    mouseupOnMuteIcon() {
-      if (this.canToggleMute) {
-        if (this.volume <= 0) {
-          this.volume = 0.1;
-        } else {
-          this.$store.dispatch(videoActions.TOGGLE_MUTED);
-        }
-      }
-    },
-    handleFullScreen() {
-      const winHeight = window.screen.height;
-      const winWidth = window.screen.width;
-      const winRatio = winWidth / winHeight;
-      // the height of video after scaling
-      const videoRealHeight = winRatio > this.ratio ? winHeight : winWidth / this.ratio;
-      const backgroundHeight = videoRealHeight <= 1080 ? ((videoRealHeight - 180) / 3) + 100
-        : winHeight * 0.37;
-      const muteTop = videoRealHeight <= 1080 ? backgroundHeight + 2 : backgroundHeight + 4;
-      if (!this.isFullScreen) {
-        requestAnimationFrame(() => {
-          this.$refs.showArea.style.setProperty('--background-height', `${backgroundHeight}px`);
-          this.$refs.showArea.style.setProperty('--mute-top', `${muteTop}px`);
-        });
-      } else {
-        requestAnimationFrame(() => {
-          this.$refs.showArea.style.setProperty('--background-height', '');
-          this.$refs.showArea.style.setProperty('--mute-top', '');
-        });
-      }
-    },
-  },
-  created() {
-    this.enterArea();
-    this.actionArea();
-    setTimeout(() => {
-      this.leaveArea();
-    }, 2000);
-    if (this.muted) {
-      this.volumeTriggerStopped = this.showAllWidgets;
-    }
-    this.$bus.$on('toggle-fullscreen', this.handleFullScreen);
-    this.$bus.$on('to-fullscreen', this.handleFullScreen);
-    this.$bus.$on('off-fullscreen', this.handleFullScreen);
-  },
   watch: {
-    showAllWidgets(val) {
+    showAllWidgets(val: boolean) {
       if (!val) this.volumeTriggerStopped = false;
     },
     wheelTriggered() {
@@ -191,10 +138,10 @@ export default {
         }, 1000);
       }
     },
-    showVolume(val) {
+    showVolume(val: boolean) {
       if (!val) document.onmouseup = null;
     },
-    muted(val) {
+    muted(val: boolean) {
       const { clock, volumeTriggerTimerId } = this;
       if (!this.volumeKeydown && this.volume !== 0) {
         this.volumeTriggerStopped = true;
@@ -225,7 +172,7 @@ export default {
         }, 1000);
       }
     },
-    volumeKeydown(newVal, oldVal) {
+    volumeKeydown(newVal: boolean, oldVal: boolean) {
       const { clock, volumeTriggerTimerId } = this;
       if (newVal) {
         this.volumeTriggerStopped = true;
@@ -235,6 +182,89 @@ export default {
         this.volumeTriggerTimerId = clock.setTimeout(() => {
           this.volumeTriggerStopped = false;
         }, 1000);
+      }
+    },
+  },
+  created() {
+    this.enterArea();
+    this.actionArea();
+    setTimeout(() => {
+      this.leaveArea();
+      this.firstAppear = false;
+    }, 2000);
+    if (this.muted) {
+      this.volumeTriggerStopped = this.showAllWidgets;
+    }
+  },
+  methods: {
+    handleDbClick() {
+      this.$bus.$emit('toggle-fullscreen');
+    },
+    enterArea() {
+      this.inArea = true;
+      if (this.volumeFadingId) clearTimeout(this.volumeFadingId);
+    },
+    leaveArea() {
+      if (this.volumeFadingId) clearTimeout(this.volumeFadingId);
+      this.volumeFadingId = setTimeout(() => {
+        this.inArea = false;
+      }, 200);
+    },
+    actionArea() {
+      this.mouseover = true;
+      if (this.borderFadingId) clearTimeout(this.borderFadingId);
+    },
+    leaveActionArea() {
+      if (!this.mousedown) {
+        if (this.borderFadingId) clearTimeout(this.borderFadingId);
+        this.borderFadingId = setTimeout(() => {
+          this.mouseover = false;
+        }, 200);
+      }
+    },
+    mouseDownOnIndicator(e: MouseEvent) {
+      this.canToggleMute = true;
+      const backgroundHeight = 100 + ((window.innerHeight - 180) / 3);
+      const containerTop = (window.innerHeight - (backgroundHeight + 26)) / 2;
+      const percentOfVolume = ((window.innerHeight - e.clientY) - (containerTop) - 19)
+        / this.$refs.indicatorContainer.clientHeight;
+      if (percentOfVolume >= 0) {
+        this.handleUpdateVolume(percentOfVolume * 100);
+      }
+      this.mousedown = true;
+      this.$emit('update:volume-state', true);
+      this.isMoved = false;
+      document.addEventListener('mousemove', this.globalMousemoveHandler);
+      document.addEventListener('mouseup', this.globalMouseupHandler);
+    },
+    globalMousemoveHandler(e: MouseEvent) {
+      this.isMoved = true;
+      const backgroundHeight = 100 + ((window.innerHeight - 180) / 3);
+      const containerTop = (window.innerHeight - (backgroundHeight + 26)) / 2;
+      const percentOfVolume = ((window.innerHeight - e.clientY) - (containerTop) - 19)
+        / this.$refs.indicatorContainer.clientHeight;
+      this.handleUpdateVolume(percentOfVolume * 100);
+    },
+    globalMouseupHandler() {
+      if (this.isMoved) {
+        this.$ga.event('app', 'volume', 'drag');
+      } else {
+        this.$ga.event('app', 'volume', 'mousedown');
+      }
+      document.removeEventListener('mousemove', this.globalMousemoveHandler);
+      document.removeEventListener('mouseup', this.globalMouseupHandler);
+      this.mousedown = false;
+      this.$emit('update:volume-state', false);
+      if (!this.inArea) this.mouseover = false;
+      this.canToggleMute = false;
+    },
+    mouseupOnMuteIcon() {
+      if (this.canToggleMute && !this.isMoved) {
+        if (this.volume <= 0) {
+          this.handleUpdateVolume(10);
+        } else {
+          this.handleUpdateMuted();
+        }
       }
     },
   },
@@ -331,6 +361,48 @@ export default {
       width: var(--indicator-container-width);
       height: calc(var(--background-height) + 4px);
       top: 0;
+      .container {
+        min-width: 3px;
+        min-height: 3px;;
+        border-radius: 1px;
+        box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+        position: absolute;
+        box-sizing: content-box;
+        .element {
+          border-radius: 1px;
+          position: absolute;
+          box-sizing: inherit;
+        }
+        .bottom {
+          min-width: 3px;
+          min-height: 3px;;
+          width: 100%;
+          height: 100%;
+          top: 0;
+          background-image: rgba(0, 0, 0, 0.1);
+          backdrop-filter: blur(10px);
+        }
+        .middle {
+          min-width: 3px;
+          min-height: 3px;;
+          width: 100%;
+          height: 100%;
+          top: 0;
+          background: rgba(255, 255, 255, 0.2);
+        }
+        .content {
+          min-width: var(--content-min-width);
+          min-height: var(--content-min-height);
+          width: calc(100% - 2px);
+          height: calc(100% - 2px);
+          top: 1px;
+          left: 1px;
+          background-color: transparent;
+          box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
+          display: flex;
+          overflow: hidden;
+        }
+      }
       .card {
         width: calc(var(--indicator-container-width) / 2);
         height: var(--background-height);
@@ -344,6 +416,9 @@ export default {
       }
     }
     .volume {
+      display: flex;
+      justify-content: center;
+      align-items: center;
       padding: 0 auto 0 auto;
       width: 100%;
       height: calc(var(--indicator-container-width) + 10px);
@@ -353,16 +428,24 @@ export default {
         height: var(--indicator-container-width);
       }
     }
-    @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
+    @media
+      screen and (max-aspect-ratio: 1/1) and (max-width: 288px),
+      screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
       margin-right: 23px;
     }
-    @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+    @media
+      screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
+      screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
       margin-right: 30px;
     }
-    @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+    @media
+      screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+      screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
       margin-right: 38px;
     }
-    @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+    @media
+      screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+      screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
       margin-right: 57px;
     }
   }

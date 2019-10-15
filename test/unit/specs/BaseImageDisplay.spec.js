@@ -1,6 +1,6 @@
-import BaseImageDisplay from '@/components/PlayingView/BaseImageDisplay.vue';
 import { mount } from '@vue/test-utils';
 import sinon from 'sinon';
+import BaseImageDisplay from '@/components/PlayingView/BaseImageDisplay.vue';
 
 describe('Component - BaseImageDisplay', () => {
   let sandbox;
@@ -87,14 +87,14 @@ describe('Component - BaseImageDisplay', () => {
     it('should render element with styles', () => {
       const propsData = {
         imgSrc: new Blob(new Uint8Array(1)),
-        $_style: {
+        imageStyle: {
           objectFit: 'cover',
         },
       };
 
       wrapper = mount(BaseImageDisplay, { propsData });
 
-      expect(wrapper.element.style).to.contains(propsData.$_style);
+      expect(wrapper.element.style).to.contains(propsData.imageStyle);
     });
     it('should render element with width and height', () => {
       const propsData = {

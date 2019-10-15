@@ -10,11 +10,13 @@ export default class Storage {
     this.setAsync = util.promisify(storage.set);
     this.getAsync = util.promisify(storage.get);
   }
+
   willInstall(info) {
     return new Promise((resolve) => {
       resolve(this.setAsync(updateInstalledString, info.toString()));
     });
   }
+
   // info need be the type of UpdateInfo
   updateDownLoaded(info) {
     return new Promise((resolve) => {

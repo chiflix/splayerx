@@ -1,400 +1,1239 @@
-/* eslint-disable import/first */
 // Be sure to call Sentry function as early as possible in the main process
 import '../shared/sentry';
 
-import { app, BrowserWindow, session, Tray, ipcMain, globalShortcut, nativeImage, splayerx } from 'electron' // eslint-disable-line
-import { throttle, debounce } from 'lodash';
-import path from 'path';
-import fs, { promises as fsPromises } from 'fs';
-import TaskQueue from '../renderer/helpers/proceduralQueue';
+import { app, BrowserWindow, session, Tray, ipcMain, globalShortcut, nativeImage, splayerx, systemPreferences, BrowserView, webContents } from 'electron' // eslint-disable-line
+import { throttle, debounce, uniq } from 'lodash';
+import os from 'os';
+import path, {
+  basename, dirname, extname, join, resolve,
+} from 'path';
+import fs from 'fs';
+import http from 'http';
+import rimraf from 'rimraf';
+import { audioGrabService } from './helpers/AudioGrabService';
 import './helpers/electronPrototypes';
 import writeLog from './helpers/writeLog';
-import { getOpenedFiles } from './helpers/argv';
-import { getValidVideoRegex } from '../shared/utils';
+import {
+  getValidVideoRegex, getValidSubtitleRegex,
+  getToken, saveToken,
+  getIP,
+  getRightPort,
+} from '../shared/utils';
+import { mouse } from './helpers/mouse';
+import MenuService from './menu/MenuService';
+import registerMediaTasks from './helpers/mediaTasksPlugin';
+import { BrowserViewManager } from './helpers/BrowserViewManager';
+import InjectJSManager from '../../src/shared/pip/InjectJSManager';
+import Locale from '../shared/common/localize';
+
+// requestSingleInstanceLock is not going to work for mas
+// https://github.com/electron-userland/electron-packager/issues/923
+if (!process.mas && !app.requestSingleInstanceLock()) {
+  app.quit();
+}
+
+/**
+ * Check for restore mark and delete all user data
+ */
+const userDataPath = app.getPath('userData');
+if (fs.existsSync(path.join(userDataPath, 'NEED_TO_RESTORE_MARK'))) {
+  try {
+    const tbdPath = `${userDataPath}-TBD`;
+    if (fs.existsSync(tbdPath)) rimraf.sync(tbdPath);
+    fs.renameSync(userDataPath, tbdPath);
+    rimraf(tbdPath, (err) => {
+      if (err) console.error(err);
+    });
+  } catch (ex) {
+    console.error(ex);
+    try {
+      rimraf.sync(`${userDataPath}/**/!(lockfile)`);
+      console.log('Successfully removed all user data.');
+    } catch (ex) {
+      console.error(ex);
+    }
+  }
+}
 
 /**
  * Set `__static` path to static files in production
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
  */
 if (process.env.NODE_ENV !== 'development') {
-  global.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\') // eslint-disable-line
+  global.__static = path.join(__dirname, '/static').replace(/\\/g, '\\\\') // eslint-disable-line
 }
 
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 
+let isGlobal = false;
+let sidebar = false;
+let welcomeProcessDone = false;
+let menuService = null;
+let routeName = null;
 let mainWindow = null;
+let loginWindow = null;
+let laborWindow = null;
 let aboutWindow = null;
 let preferenceWindow = null;
+let browsingWindow = null;
+let browserViewManager = null;
+let pipControlView = null;
+let titlebarView = null;
+let maskView = null;
+let maskEventTimer = 0;
+let maskDisappearTimer = 0;
+let isBrowsingWindowMax = false;
 let tray = null;
+let pipTimer = 0;
 let needToRestore = false;
+let forceQuit = false; // 大退app 关闭所有windows
+let needBlockCloseLaborWindow = true; // 标记是否阻塞nsfw窗口关闭
 let inited = false;
-const filesToOpen = [];
-const snapShotQueue = [];
-const thumbnailTask = [];
-const mediaInfoQueue = [];
-const embeeddSubtitlesQueue = new TaskQueue();
+let hideBrowsingWindow = false;
+let finalVideoToOpen = [];
+let signInEndPoint = '';
+let localHostPort = 0;
+let fileDirServerOnLine = false;
+const locale = new Locale();
+const tmpVideoToOpen = [];
+const tmpSubsToOpen = [];
+const subRegex = getValidSubtitleRegex();
+const allChannels = ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch'];
+const compareStr = [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch']];
+const titlebarUrl = process.platform === 'darwin' ? `file:${resolve(__static, 'pip/macTitlebar.html')}` : `file:${resolve(__static, 'pip/winTitlebar.html')}`;
+const maskUrl = process.platform === 'darwin' ? `file:${resolve(__static, 'pip/mask.html')}` : `file:${resolve(__static, 'pip/mask.html')}`;
 const mainURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080'
   : `file://${__dirname}/index.html`;
+const laborURL = process.env.NODE_ENV === 'development'
+  ? 'http://localhost:9080/labor.html'
+  : `file://${__dirname}/labor.html`;
 const aboutURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080/about.html'
   : `file://${__dirname}/about.html`;
 const preferenceURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080/preference.html'
   : `file://${__dirname}/preference.html`;
-
-// requestSingleInstanceLock is not going to work for mas
-// https://github.com/electron-userland/electron-packager/issues/923
-if (process.mas === undefined && !app.requestSingleInstanceLock()) {
-  app.quit();
-}
+let loginURL = process.env.NODE_ENV === 'development'
+  ? 'http://localhost:9081/login.html'
+  : `file://${__dirname}/login.html`;
+const browsingURL = process.env.NODE_ENV === 'development'
+  ? 'http://localhost:9080/browsing.html'
+  : `file://${__dirname}/browsing.html`;
 
 const tempFolderPath = path.join(app.getPath('temp'), 'splayer');
 if (!fs.existsSync(tempFolderPath)) fs.mkdirSync(tempFolderPath);
 
+function hackWindowsRightMenu(win) {
+  if (win) {
+    win.hookWindowMessage(278, () => {
+      win.setEnabled(false);
+      setTimeout(() => {
+        win.setEnabled(true);
+      }, 100);
+      return true;
+    });
+  }
+}
+
 function handleBossKey() {
-  if (!mainWindow) return;
+  if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
   if (mainWindow.isVisible()) {
     if (process.platform === 'darwin' && mainWindow.isFullScreen()) {
       mainWindow.once('leave-full-screen', handleBossKey);
       mainWindow.setFullScreen(false);
       return;
     }
-    mainWindow.webContents.send('mainDispatch', 'PAUSE_VIDEO');
+    mainWindow.webContents.send('mainCommit', 'PAUSED_UPDATE', true);
+    mainWindow.webContents.send('mainCommit', 'isHiddenByBossKey', true);
     mainWindow.hide();
     if (process.platform === 'win32') {
       tray = new Tray(nativeImage.createFromDataURL(require('../../build/icons/1024x1024.png')));
       tray.on('click', () => {
         mainWindow.show();
-        tray.destroy();
-        tray = null;
+        mainWindow.webContents.send('mainCommit', 'isHiddenByBossKey', false);
+        // Destroy tray in its callback may cause app crash
+        setTimeout(() => {
+          if (!tray) return;
+          tray.destroy();
+          tray = null;
+        }, 10);
       });
     }
   }
 }
 
-function registerMainWindowEvent() {
+function pipControlViewTitle(isGlobal) {
+  const danmu = locale.$t('browsing.danmu');
+  const title = isGlobal ? locale.$t('browsing.exitPip') : locale.$t('browsing.exitPop');
+  pipControlView.webContents.executeJavaScript(InjectJSManager.updatePipControlTitle(title, danmu));
+}
+
+function createPipControlView() {
+  if (pipControlView && !pipControlView.isDestroyed()) pipControlView.destroy();
+  pipControlView = new BrowserView({
+    webPreferences: {
+      preload: `${require('path').resolve(__static, 'pip/preload.js')}`,
+    },
+  });
+  browsingWindow.addBrowserView(pipControlView);
+  pipControlView.webContents.loadURL(`file:${require('path').resolve(__static, 'pip/pipControl.html')}`);
+  pipControlView.setBackgroundColor('#00FFFFFF');
+  pipControlView.setBounds({
+    x: Math.round(browsingWindow.getSize()[0] - 65),
+    y: Math.round(browsingWindow.getSize()[1] / 2 - 54),
+    width: 50,
+    height: 104,
+  });
+}
+
+function createTitlebarView() {
+  if (titlebarView) titlebarView.destroy();
+  titlebarView = new BrowserView({
+    webPreferences: {
+      preload: `${require('path').resolve(__static, 'pip/titlebarPreload.js')}`,
+    },
+  });
+  browsingWindow.addBrowserView(titlebarView);
+  titlebarView.webContents.loadURL(titlebarUrl);
+  titlebarView.setBackgroundColor('#00FFFFFF');
+  titlebarView.setBounds({
+    x: 0, y: 0, width: browsingWindow.getSize()[0], height: 36,
+  });
+}
+
+function createMaskView() {
+  if (maskView) maskView.destroy();
+  maskView = new BrowserView();
+  browsingWindow.addBrowserView(maskView);
+  maskView.webContents.loadURL(maskUrl);
+  maskView.setBackgroundColor('#00FFFFFF');
+  maskView.setBounds({
+    x: 0, y: 0, width: browsingWindow.getSize()[0], height: browsingWindow.getSize()[1],
+  });
+  maskView.webContents.executeJavaScript(`
+    document.body.style.backgroundColor = 'rgba(255, 255, 255, 0.18)';
+  `);
+}
+
+function markNeedToRestore() {
+  fs.closeSync(fs.openSync(path.join(app.getPath('userData'), 'NEED_TO_RESTORE_MARK'), 'w'));
+}
+
+function searchSubsInDir(dir) {
+  const subRegex = getValidSubtitleRegex();
+  const dirFiles = fs.readdirSync(dir);
+  return dirFiles
+    .filter(subtitleFilename => subRegex.test(path.extname(subtitleFilename)))
+    .map(subtitleFilename => (join(dir, subtitleFilename)));
+}
+function searchForLocalVideo(subSrc) {
+  const videoDir = dirname(subSrc);
+  const videoBasename = basename(subSrc, extname(subSrc)).toLowerCase();
+  const videoFilename = basename(subSrc).toLowerCase();
+  const dirFiles = fs.readdirSync(videoDir);
+  return dirFiles
+    .filter((subtitleFilename) => {
+      const lowerCasedName = subtitleFilename.toLowerCase();
+      return (
+        getValidVideoRegex().test(lowerCasedName)
+        && lowerCasedName.slice(0, lowerCasedName.lastIndexOf('.')) === videoBasename
+        && lowerCasedName !== videoFilename && !subRegex.test(path.extname(lowerCasedName))
+      );
+    })
+    .map(subtitleFilename => (join(videoDir, subtitleFilename)));
+}
+function getAllValidVideo(onlySubtitle, files) {
+  try {
+    const videoFiles = [];
+
+    for (let i = 0; i < files.length; i += 1) {
+      if (fs.statSync(files[i]).isDirectory()) {
+        const dirPath = files[i];
+        const dirFiles = fs.readdirSync(dirPath).map(file => path.join(dirPath, file));
+        files.push(...dirFiles);
+      }
+    }
+    if (!process.mas) {
+      files.forEach((tempFilePath) => {
+        const baseName = path.basename(tempFilePath);
+        if (baseName.startsWith('.') || fs.statSync(tempFilePath).isDirectory()) return;
+        if (subRegex.test(path.extname(tempFilePath))) {
+          const tempVideo = searchForLocalVideo(tempFilePath);
+          videoFiles.push(...tempVideo);
+        } else if (!subRegex.test(path.extname(tempFilePath))
+          && getValidVideoRegex().test(tempFilePath)) {
+          videoFiles.push(tempFilePath);
+        }
+      });
+    } else {
+      files.forEach((tempFilePath) => {
+        const baseName = path.basename(tempFilePath);
+        if (baseName.startsWith('.') || fs.statSync(tempFilePath).isDirectory()) return;
+        if (!subRegex.test(path.extname(tempFilePath))
+          && getValidVideoRegex().test(tempFilePath)) {
+          videoFiles.push(tempFilePath);
+        }
+      });
+    }
+    return uniq(videoFiles);
+  } catch (ex) {
+    return [];
+  }
+}
+
+function createPreferenceWindow(e, route) {
+  const preferenceWindowOptions = {
+    useContentSize: true,
+    frame: false,
+    titleBarStyle: 'none',
+    width: 540,
+    height: 426,
+    transparent: true,
+    resizable: false,
+    show: false,
+    webPreferences: {
+      webSecurity: false,
+      nodeIntegration: true,
+      experimentalFeatures: true,
+    },
+    acceptFirstMouse: true,
+    fullscreenable: false,
+    maximizable: false,
+    minimizable: false,
+  };
+  if (!preferenceWindow) {
+    preferenceWindow = new BrowserWindow(preferenceWindowOptions);
+    // 如果播放窗口顶置，打开首选项也顶置
+    if (mainWindow && mainWindow.isAlwaysOnTop()) {
+      preferenceWindow.setAlwaysOnTop(true);
+    }
+    if (route) preferenceWindow.loadURL(`${preferenceURL}#/${route}`);
+    else preferenceWindow.loadURL(`${preferenceURL}`);
+    preferenceWindow.on('closed', () => {
+      preferenceWindow = null;
+    });
+  } else {
+    preferenceWindow.focus();
+  }
+  preferenceWindow.once('ready-to-show', () => {
+    preferenceWindow.show();
+  });
+  preferenceWindow.on('focus', () => {
+    menuService.enableMenu(false);
+  });
+  if (process.platform === 'win32') {
+    hackWindowsRightMenu(preferenceWindow);
+  }
+}
+
+/**
+ * @description sign in window need aliyun nc valication with // protocal
+ * @author tanghaixiang
+ */
+function createFileDirServer() {
+  http.createServer((request, response) => {
+    console.log('request ', request.url);
+    let filePath = `${request.url}`;
+    if (filePath === '/') {
+      filePath = '/login.html';
+    }
+    const extname = String(path.extname(filePath)).toLowerCase();
+    const mimeTypes = {
+      '.html': 'text/html',
+      '.js': 'text/javascript',
+      '.css': 'text/css',
+      '.json': 'application/json',
+      '.png': 'image/png',
+      '.jpg': 'image/jpg',
+      '.gif': 'image/gif',
+      '.svg': 'image/svg+xml',
+      '.wav': 'audio/wav',
+      '.mp4': 'video/mp4',
+      '.woff': 'application/font-woff',
+      '.ttf': 'application/font-ttf',
+      '.eot': 'application/vnd.ms-fontobject',
+      '.otf': 'application/font-otf',
+      '.wasm': 'application/wasm',
+    };
+    const contentType = mimeTypes[extname] || 'application/octet-stream';
+    fs.readFile(`${__dirname}${filePath}`, (error, content) => {
+      if (error) {
+        return;
+      }
+      response.writeHead(200, { 'Content-Type': contentType });
+      response.end(content, 'utf-8');
+    });
+  }).listen(localHostPort);
+}
+
+function createLoginWindow(e, route) {
+  // in production use http protocal
+  // aliyun captcha use // protocal
+  if (process.env.NODE_ENV === 'production' && !fileDirServerOnLine) {
+    createFileDirServer();
+    fileDirServerOnLine = true;
+    loginURL = `http://localhost:${localHostPort}/login.html`;
+  }
+  const loginWindowOptions = {
+    useContentSize: true,
+    frame: false,
+    titleBarStyle: 'none',
+    width: 412,
+    height: 284,
+    webPreferences: {
+      experimentalFeatures: true,
+      webSecurity: false,
+      preload: `${require('path').resolve(__static, 'login/preload.js')}`,
+    },
+    transparent: true,
+    resizable: false,
+    show: false,
+    acceptFirstMouse: true,
+    fullscreenable: false,
+    maximizable: false,
+    minimizable: false,
+    backgroundColor: '#000000',
+  };
+  if (!loginWindow) {
+    loginWindow = new BrowserWindow(loginWindowOptions);
+    // 登录窗口顶置
+    loginWindow.setAlwaysOnTop(true);
+    if (route) loginWindow.loadURL(`${loginURL}#/${route}`);
+    else loginWindow.loadURL(`${loginURL}`);
+
+    loginWindow.on('closed', () => {
+      loginWindow = null;
+    });
+    loginWindow.webContents.setUserAgent(
+      `${loginWindow.webContents.getUserAgent().replace(/Electron\S+/i, '')
+      } SPlayerX@2018 ${os.platform()} ${os.release()} Version ${app.getVersion()}`,
+    );
+    if (process.env.NODE_ENV === 'development') {
+      setTimeout(() => { // wait some time to prevent `Object not found` error
+        if (loginWindow) loginWindow.openDevTools({ mode: 'detach' });
+      }, 1000);
+    }
+  } else {
+    loginWindow.focus();
+  }
+  loginWindow.once('ready-to-show', () => {
+    loginWindow.show();
+  });
+  loginWindow.on('focus', () => {
+    menuService.enableMenu(false);
+  });
+  if (process.platform === 'win32') {
+    hackWindowsRightMenu(loginWindow);
+  }
+}
+
+function createAboutWindow() {
+  const aboutWindowOptions = {
+    useContentSize: true,
+    frame: false,
+    titleBarStyle: 'none',
+    width: 190,
+    height: 280,
+    transparent: true,
+    resizable: false,
+    show: false,
+    webPreferences: {
+      webSecurity: false,
+      nodeIntegration: true,
+      experimentalFeatures: true,
+    },
+    acceptFirstMouse: true,
+    fullscreenable: false,
+    maximizable: false,
+    minimizable: false,
+  };
+  if (!aboutWindow) {
+    aboutWindow = new BrowserWindow(aboutWindowOptions);
+    // 如果播放窗口顶置，打开关于也顶置
+    if (mainWindow && mainWindow.isAlwaysOnTop()) {
+      aboutWindow.setAlwaysOnTop(true);
+    }
+    aboutWindow.loadURL(`${aboutURL}`);
+    aboutWindow.on('closed', () => {
+      aboutWindow = null;
+    });
+  }
+  aboutWindow.once('ready-to-show', () => {
+    aboutWindow.show();
+  });
+  if (process.platform === 'win32') {
+    hackWindowsRightMenu(aboutWindow);
+  }
+}
+
+function createBrowsingWindow(args) {
+  const browsingWindowOptions = {
+    useContentSize: true,
+    frame: false,
+    titleBarStyle: 'none',
+    transparent: true,
+    webPreferences: {
+      webSecurity: false,
+      nodeIntegration: true,
+      experimentalFeatures: true,
+      webviewTag: true,
+    },
+    backgroundColor: '#000000',
+    acceptFirstMouse: false,
+    show: false,
+  };
+  browsingWindow = new BrowserWindow(browsingWindowOptions);
+  browsingWindow.loadURL(`${browsingURL}`);
+  browsingWindow.on('closed', () => {
+    browsingWindow = null;
+    if (process.platform === 'win32' && isGlobal) {
+      app.quit();
+    }
+  });
+  if (browsingWindow) {
+    browsingWindow.setSize(args.size[0], args.size[1]);
+    if (args.position.length) {
+      browsingWindow.setPosition(args.position[0], args.position[1]);
+    }
+    browsingWindow.on('focus', () => {
+      menuService.updateFocusedWindow(false, mainWindow && mainWindow.isVisible());
+    });
+    browsingWindow.on('move', throttle(() => {
+      if (!mainWindow) return;
+      mainWindow.send('update-pip-pos', browsingWindow.getPosition());
+    }, 100));
+    browsingWindow.on('leave-full-screen', () => {
+      if (hideBrowsingWindow) {
+        hideBrowsingWindow = false;
+        browsingWindow.hide();
+        setTimeout(() => {
+          mainWindow.focus();
+        }, 0);
+      }
+    });
+  }
+}
+
+function createLaborWindow() {
+  const laborWindowOptions = {
+    show: false,
+    webPreferences: {
+      webSecurity: false,
+      nodeIntegration: true,
+      experimentalFeatures: true,
+    },
+  };
+  if (!laborWindow) {
+    laborWindow = new BrowserWindow(laborWindowOptions);
+    laborWindow.once('ready-to-show', () => {
+      laborWindow.readyToShow = true;
+    });
+    laborWindow.on('close', (event) => {
+      if ((mainWindow && !mainWindow.webContents.isDestroyed()) && needBlockCloseLaborWindow) {
+        event.preventDefault();
+      }
+    });
+    laborWindow.on('closed', () => {
+      laborWindow = null;
+      if (forceQuit) {
+        app.quit();
+      }
+    });
+    if (process.env.NODE_ENV === 'development') laborWindow.openDevTools({ mode: 'detach' });
+    laborWindow.loadURL(laborURL);
+  }
+  // 重置参数
+  forceQuit = false;
+  needBlockCloseLaborWindow = true;
+}
+
+function registerMainWindowEvent(mainWindow) {
   if (!mainWindow) return;
-  // TODO: should be able to use window.outerWidth/outerHeight directly
-  mainWindow.on('resize', throttle(() => {
-    mainWindow?.webContents.send('mainCommit', 'windowSize', mainWindow.getSize());
-  }, 100));
   mainWindow.on('move', throttle(() => {
-    mainWindow?.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
+    if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
+    mainWindow.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
   }, 100));
   mainWindow.on('enter-full-screen', () => {
-    mainWindow?.webContents.send('mainCommit', 'isFullScreen', true);
-    mainWindow?.webContents.send('mainCommit', 'isMaximized', mainWindow.isMaximized());
+    if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
+    mainWindow.webContents.send('mainCommit', 'isFullScreen', true);
+    mainWindow.webContents.send('mainCommit', 'isMaximized', mainWindow.isMaximized());
   });
   mainWindow.on('leave-full-screen', () => {
-    mainWindow?.webContents.send('mainCommit', 'isFullScreen', false);
-    mainWindow?.webContents.send('mainCommit', 'isMaximized', mainWindow.isMaximized());
+    if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
+    mainWindow.webContents.send('mainCommit', 'isFullScreen', false);
+    mainWindow.webContents.send('mainCommit', 'isMaximized', mainWindow.isMaximized());
   });
   mainWindow.on('maximize', () => {
-    mainWindow?.webContents.send('mainCommit', 'isMaximized', true);
+    if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
+    mainWindow.webContents.send('mainCommit', 'isMaximized', true);
+    mainWindow.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
   });
   mainWindow.on('unmaximize', () => {
-    mainWindow?.webContents.send('mainCommit', 'isMaximized', false);
+    if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
+    mainWindow.webContents.send('mainCommit', 'isMaximized', false);
+    mainWindow.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
   });
   mainWindow.on('minimize', () => {
-    mainWindow?.webContents.send('mainCommit', 'isMinimized', true);
+    menuService.enableMenu(false);
+    if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
+    mainWindow.webContents.send('mainCommit', 'isMinimized', true);
   });
   mainWindow.on('restore', () => {
-    mainWindow?.webContents.send('mainCommit', 'isMinimized', false);
+    menuService.enableMenu(true);
+    if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
+    mainWindow.webContents.send('mainCommit', 'isMinimized', false);
+  });
+  mainWindow.on('show', () => {
+    if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
+    mainWindow.webContents.send('mainCommit', 'isMinimized', false);
   });
   mainWindow.on('focus', () => {
-    mainWindow?.webContents.send('mainCommit', 'isFocused', true);
+    if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
+    mainWindow.webContents.send('mainCommit', 'isFocused', true);
+    mainWindow.webContents.send('mainCommit', 'isHiddenByBossKey', false);
   });
   mainWindow.on('blur', () => {
-    mainWindow?.webContents.send('mainCommit', 'isFocused', false);
+    if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
+    mainWindow.webContents.send('mainCommit', 'isFocused', false);
   });
-  mainWindow.on('scroll-touch-begin', () => mainWindow?.webContents.send('scroll-touch-begin'));
-  mainWindow.on('scroll-touch-end', () => mainWindow?.webContents.send('scroll-touch-end'));
+  mainWindow.on('scroll-touch-begin', () => {
+    if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
+    mainWindow.webContents.send('scroll-touch-begin');
+  });
+  mainWindow.on('scroll-touch-end', () => {
+    if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
+    mainWindow.webContents.send('scroll-touch-end');
+  });
 
+
+  registerMediaTasks();
+
+  ipcMain.on('labor-task-add', (evt, ...rest) => {
+    if (laborWindow && !laborWindow.webContents.isDestroyed()) {
+      if (laborWindow.readyToShow) laborWindow.webContents.send('labor-task-add', ...rest);
+      else laborWindow.once('ready-to-show', () => laborWindow.webContents.send('labor-task-add', ...rest));
+    }
+  });
+  ipcMain.on('labor-task-done', (evt, ...rest) => {
+    if (mainWindow && !mainWindow.webContents.isDestroyed()) {
+      mainWindow.webContents.send('labor-task-done', ...rest);
+    }
+  });
+
+  ipcMain.on('callBrowsingWindowMethod', (evt, method, args = []) => {
+    try {
+      browsingWindow[method](...args);
+    } catch (ex) {
+      console.error('callBrowsingWindowMethod', method, JSON.stringify(args), '\n', ex);
+    }
+  });
+  ipcMain.on('browser-window-mask', () => {
+    if (!browsingWindow.getBrowserViews().includes(maskView)) createMaskView();
+    clearTimeout(maskEventTimer);
+    maskEventTimer = setTimeout(() => {
+      if (maskView) {
+        maskView.webContents.executeJavaScript(`
+          document.body.style.backgroundColor = 'rgba(255, 255, 255, 0)';
+          `);
+        clearTimeout(maskDisappearTimer);
+        maskDisappearTimer = setTimeout(() => {
+          if (browsingWindow) browsingWindow.removeBrowserView(maskView);
+        }, 120);
+      }
+    }, 300);
+  });
   ipcMain.on('callMainWindowMethod', (evt, method, args = []) => {
     try {
-      mainWindow?.[method]?.(...args);
+      mainWindow[method](...args);
     } catch (ex) {
-      console.error('callMainWindowMethod', ex, method, JSON.stringify(args));
+      console.error('callMainWindowMethod', method, JSON.stringify(args), '\n', ex);
     }
   });
-  /* eslint-disable no-unused-vars */
-  ipcMain.on('windowSizeChange', (event, args) => {
-    if (!mainWindow || event.sender.isDestroyed()) return;
-    mainWindow.setSize(...args);
-    event.sender.send('windowSizeChange-asyncReply', mainWindow.getSize());
+  ipcMain.on('pip-watcher', (evt, args) => {
+    browsingWindow.getBrowserViews()[0].webContents.executeJavaScript(args);
   });
-  function thumbnail(args, cb) {
-    splayerx.generateThumbnails(
-      args.src, args.outPath, args.width, args.num.rows, args.num.cols,
-      (ret) => {
-        console[ret === '0' ? 'log' : 'error'](ret, args.src);
-        cb(ret, args.src);
-      },
-    );
-  }
-  function thumbnailTaskCallback() {
-    const cb = (ret, src) => {
-      thumbnailTask.shift();
-      if (thumbnailTask.length > 0) {
-        thumbnail(thumbnailTask[0], cb);
-      }
-      if (ret === '0') {
-        mainWindow?.webContents.send('thumbnail-saved', src);
-      }
-    };
-    thumbnail(thumbnailTask[0], cb);
-  }
-  ipcMain.on('generateThumbnails', (event, args) => {
-    if (thumbnailTask.length === 0) {
-      thumbnailTask.push(args);
-      thumbnailTaskCallback();
-    } else {
-      thumbnailTask.splice(1, 1, args);
+  ipcMain.on('update-locale', () => {
+    locale.getDisplayLanguage();
+    if (pipControlView && !pipControlView.isDestroyed()) {
+      pipControlViewTitle(isGlobal);
     }
   });
-
-  function timecodeFromSeconds(s) {
-    const dt = new Date(Math.abs(s) * 1000);
-    let hours = dt.getUTCHours();
-    let minutes = dt.getUTCMinutes();
-    let seconds = dt.getUTCSeconds();
-
-    if (minutes < 10) {
-      minutes = `0${minutes}`;
+  ipcMain.on('pip-window-fullscreen', () => {
+    if (browsingWindow && browsingWindow.isFocused()) {
+      browsingWindow.setFullScreen(!browsingWindow.isFullScreen());
+      titlebarView.webContents
+        .executeJavaScript(InjectJSManager.updateFullScreenIcon(browsingWindow.isFullScreen()));
     }
-    if (seconds < 10) {
-      seconds = `0${seconds}`;
-    }
-    if (hours > 0) {
-      if (hours < 10) {
-        hours = `${hours}`;
-      }
-      return `${hours}:${minutes}:${seconds}`;
-    }
-    return `00:${minutes}:${seconds}`;
-  }
-  function snapShot(snapShot, callback) {
-    let numberString;
-    if (snapShot.type === 'cover') {
-      let randomNumber = Math.round((Math.random() * 20) + 5);
-      if (randomNumber > snapShot.duration) randomNumber = snapShot.duration;
-      numberString = timecodeFromSeconds(randomNumber);
-    } else {
-      numberString = timecodeFromSeconds(snapShot.time);
-    }
-    splayerx.snapshotVideo(
-      snapShot.videoPath, snapShot.imgPath, numberString, `${snapShot.videoWidth}`, `${snapShot.videoHeight}`,
-      (resultCode) => {
-        console[resultCode === '0' ? 'log' : 'error'](resultCode, snapShot.videoPath);
-        callback(resultCode, snapShot.imgPath);
-      },
-    );
-  }
-
-  function extractSubtitle(videoPath, subtitlePath, index) {
-    return new Promise((resolve, reject) => {
-      splayerx.extractSubtitles(videoPath, subtitlePath, `0:${index}:0`, (err) => {
-        if (err === 0) reject(index);
-        resolve(index);
+  });
+  ipcMain.on('pip-window-close', (evt, args) => {
+    const views = browsingWindow.getBrowserViews();
+    if (views.length) {
+      views.forEach((view) => {
+        browsingWindow.removeBrowserView(view);
       });
-    });
-  }
+      browserViewManager.pipClose();
+      mainWindow.send('update-pip-state', args);
+    }
+  });
+  ipcMain.on('remove-main-window', () => {
+    browserViewManager.pauseVideo(mainWindow.getBrowserViews()[0]);
+    mainWindow.hide();
+  });
+  ipcMain.on('remove-browser', () => {
+    mainWindow.getBrowserViews()
+      .forEach(mainWindowView => mainWindow.removeBrowserView(mainWindowView));
+    if (mainWindow.isMaximized()) mainWindow.unmaximize();
+    browserViewManager.pauseVideo();
+    if (browsingWindow) {
+      const views = browsingWindow.getBrowserViews();
+      views.forEach((view) => {
+        browsingWindow.removeBrowserView(view);
+      });
+      browserViewManager.pipClose();
+      browsingWindow.close();
+    }
+    browserViewManager.clearAllBrowserViews();
+  });
+  ipcMain.on('go-to-offset', (evt, val) => {
+    if (!browserViewManager) return;
+    mainWindow.removeBrowserView(mainWindow.getBrowserViews()[0]);
+    const newBrowser = val === 1 ? browserViewManager.forward() : browserViewManager.back();
+    if (newBrowser.page) {
+      mainWindow.addBrowserView(newBrowser.page.view);
+      mainWindow.send('update-browser-state', {
+        url: newBrowser.page.url,
+        canGoBack: newBrowser.canBack,
+        canGoForward: newBrowser.canForward,
+      });
+      const bounds = mainWindow.getBounds();
+      if (process.platform === 'win32' && mainWindow.isMaximized() && (bounds.x < 0 || bounds.y < 0)) {
+        newBrowser.page.view.setBounds({
+          x: sidebar ? 76 : 0,
+          y: 40,
+          width: sidebar ? bounds.width + (bounds.x * 2) - 76
+            : bounds.width + (bounds.x * 2),
+          height: bounds.height - 40,
+        });
+      } else {
+        newBrowser.page.view.setBounds({
+          x: sidebar ? 76 : 0,
+          y: 40,
+          width: sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
+          height: mainWindow.getSize()[1] - 40,
+        });
+      }
+      newBrowser.page.view.setAutoResize({
+        width: true, height: true,
+      });
+    }
+  });
+  // eslint-disable-next-line complexity
+  ipcMain.on('change-channel', (evt, args) => {
+    if (!browserViewManager) browserViewManager = new BrowserViewManager();
+    const mainBrowser = mainWindow.getBrowserViews()[0];
+    if (mainBrowser) mainWindow.removeBrowserView(mainBrowser);
+    const newChannel = browserViewManager.changeChannel(args.channel, args);
+    const view = newChannel.view ? newChannel.view : newChannel.page.view;
+    const url = newChannel.view ? args.url : newChannel.page.url;
+    mainWindow.addBrowserView(view);
+    setTimeout(() => {
+      mainWindow.send('update-browser-state', {
+        url,
+        canGoBack: newChannel.canBack,
+        canGoForward: newChannel.canForward,
+      });
+    }, 150);
 
-  function snapShotQueueProcess(event) {
-    const maxWaitingCount = 100;
-    let waitingCount = 0;
-    const callback = (resultCode, imgPath) => {
-      if (resultCode === 'Waiting for the task completion.') {
-        waitingCount += 1;
-        if (waitingCount <= maxWaitingCount) {
-          snapShot(snapShotQueue[0], callback);
+    const bounds = mainWindow.getBounds();
+    if (process.platform === 'win32' && mainWindow.isMaximized() && (bounds.x < 0 || bounds.y < 0)) {
+      view.setBounds({
+        x: sidebar ? 76 : 0,
+        y: 40,
+        width: sidebar ? bounds.width + (bounds.x * 2) - 76
+          : bounds.width + (bounds.x * 2),
+        height: bounds.height - 40,
+      });
+    } else {
+      view.setBounds({
+        x: sidebar ? 76 : 0,
+        y: 40,
+        width: sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
+        height: mainWindow.getSize()[1] - 40,
+      });
+    }
+    view.setAutoResize({
+      width: true, height: true,
+    });
+  });
+  ipcMain.on('create-browser-view', (evt, args) => {
+    if (!browserViewManager) browserViewManager = new BrowserViewManager();
+    let currentChannel = '';
+    allChannels.forEach((channel, index) => {
+      if (compareStr[index].findIndex(str => args.url.includes(str)) !== -1) {
+        currentChannel = `${channel}.com`;
+      }
+    });
+    const currentMainBrowserView = browserViewManager.create(currentChannel, args);
+    setTimeout(() => {
+      mainWindow.send('update-browser-state', {
+        url: args.url,
+        canGoBack: currentMainBrowserView.canBack,
+        canGoForward: currentMainBrowserView.canForward,
+      });
+    }, 0);
+  });
+  ipcMain.on('update-danmu-state', (evt, val) => {
+    pipControlView.webContents.executeJavaScript(InjectJSManager.initBarrageIcon(val));
+  });
+  ipcMain.on('pip', () => {
+    mainWindow.send('handle-exit-pip');
+  });
+  ipcMain.on('danmu', () => {
+    mainWindow.send('handle-danmu-display');
+  });
+  ipcMain.on('handle-danmu-display', (evt, code) => {
+    browsingWindow.getBrowserViews()[0].webContents.executeJavaScript(code);
+  });
+  ipcMain.on('mousemove', () => {
+    if (browsingWindow && browsingWindow.isFocused()) {
+      pipControlView.webContents.executeJavaScript(InjectJSManager.updatePipControlState(true));
+      titlebarView.webContents.executeJavaScript(InjectJSManager.updatePipTitlebarToShow(true));
+      if (pipTimer) {
+        clearTimeout(pipTimer);
+      }
+      pipTimer = setTimeout(() => {
+        if (pipControlView && !pipControlView.isDestroyed()) {
+          pipControlView.webContents
+            .executeJavaScript(InjectJSManager.updatePipControlState(false));
+          titlebarView.webContents
+            .executeJavaScript(InjectJSManager.updatePipTitlebarToShow(false));
+        }
+      }, 3000);
+    }
+  });
+  ipcMain.on('pip-btn-mousemove', () => {
+    if (pipTimer) {
+      clearTimeout(pipTimer);
+    }
+  });
+  ipcMain.on('pip-btn-mouseout', () => {
+    if (pipTimer) {
+      clearTimeout(pipTimer);
+    }
+    pipTimer = setTimeout(() => {
+      if (pipControlView && !pipControlView.isDestroyed()) {
+        pipControlView.webContents.executeJavaScript(InjectJSManager.updatePipControlState(false));
+      }
+    }, 3000);
+  });
+  ipcMain.on('mouseout', () => {
+    if (browsingWindow && browsingWindow.isFocused()) {
+      if (pipTimer) {
+        clearTimeout(pipTimer);
+      }
+      pipControlView.webContents.executeJavaScript(InjectJSManager.updatePipControlState(false));
+      titlebarView.webContents.executeJavaScript(InjectJSManager.updatePipTitlebarToShow(false));
+    }
+  });
+  ipcMain.on('maximizable', (evt, val) => {
+    if (val) {
+      titlebarView.webContents.executeJavaScript(InjectJSManager.updateTitlebarState('.titlebarMax', true)
+        + InjectJSManager.updateTitlebarState('.titlebarFull', false));
+    } else {
+      titlebarView.webContents.executeJavaScript(InjectJSManager.updateTitlebarState('.titlebarMax', false)
+        + InjectJSManager.updateTitlebarState('.titlebarFull', true));
+    }
+  });
+  ipcMain.on('update-mouse-info', (evt, args) => {
+    if (browsingWindow && browsingWindow.isFocused()) {
+      browsingWindow.send('update-mouse-info', args);
+    }
+  });
+  ipcMain.on('update-full-state', (evt, isFullScreen) => {
+    titlebarView.webContents.executeJavaScript(InjectJSManager.updateFullScreenIcon(isFullScreen));
+  });
+  ipcMain.on('mouseup', (evt, type) => {
+    switch (type) {
+      case 'close':
+        browsingWindow.close();
+        break;
+      case 'min':
+        browsingWindow.minimize();
+        break;
+      case 'full':
+        browsingWindow.setFullScreen(true);
+        titlebarView.webContents.executeJavaScript(InjectJSManager.updateFullScreenIcon(true));
+        break;
+      case 'recover':
+        browsingWindow.setFullScreen(false);
+        browsingWindow.getBrowserViews()[0].webContents
+          .executeJavaScript(InjectJSManager.changeFullScreen(false));
+        titlebarView.webContents.executeJavaScript(InjectJSManager.updateFullScreenIcon(false));
+        break;
+      case 'max':
+        if (browsingWindow.isMaximized()) {
+          browsingWindow.unmaximize();
+          isBrowsingWindowMax = false;
         } else {
-          waitingCount = 0;
-          snapShotQueue.shift();
-          if (snapShotQueue.length > 0) {
-            snapShot(snapShotQueue[0], callback);
+          browsingWindow.maximize();
+          isBrowsingWindowMax = true;
+          if (process.platform === 'win32') {
+            titlebarView.webContents.executeJavaScript(InjectJSManager.updateWinMaxIcon(true));
           }
         }
-      } else if (resultCode === '0') {
-        const lastRecord = snapShotQueue.shift();
-        if (event.sender.isDestroyed()) {
-          snapShotQueue.splice(0, snapShotQueue.length);
-        } else {
-          event.sender.send(`snapShot-${lastRecord.videoPath}-reply`, imgPath);
-          if (snapShotQueue.length > 0) {
-            snapShot(snapShotQueue[0], callback);
-          }
+        break;
+      case 'unmax':
+        browsingWindow.unmaximize();
+        isBrowsingWindowMax = false;
+        if (process.platform === 'win32') {
+          titlebarView.webContents.executeJavaScript(InjectJSManager.updateWinMaxIcon(false));
+        }
+        break;
+      default:
+        break;
+    }
+  });
+  ipcMain.on('shift-pip', (evt, args) => {
+    if (!browserViewManager) return;
+    const mainWindowViews = mainWindow.getBrowserViews();
+    const mainView = mainWindowViews[0];
+    mainWindowViews
+      .forEach(mainWindowView => mainWindow.removeBrowserView(mainWindowView));
+    const browViews = browsingWindow.getBrowserViews();
+    browViews.forEach((view) => {
+      browsingWindow.removeBrowserView(view);
+    });
+    let currentChannel = '';
+    allChannels.forEach((channel, index) => {
+      if (compareStr[index].findIndex(str => mainView.webContents.getURL().includes(str)) !== -1) {
+        currentChannel = `${channel}.com`;
+      }
+    });
+    const browsers = browserViewManager.changePip(currentChannel);
+    const pipBrowser = browsers.pipBrowser;
+    const mainBrowser = browsers.mainBrowser;
+    mainWindow.addBrowserView(mainBrowser.page.view);
+    browsingWindow.addBrowserView(pipBrowser);
+    createPipControlView();
+    createTitlebarView();
+    if (args.isGlobal) {
+      isGlobal = args.isGlobal;
+      browserViewManager.pauseVideo(mainWindow.getBrowserViews()[0]);
+      mainWindow.hide();
+    }
+    mainBrowser.page.view.setBounds({
+      x: sidebar ? 76 : 0,
+      y: 40,
+      width: sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
+      height: mainWindow.getSize()[1] - 40,
+    });
+    mainBrowser.page.view.setAutoResize({
+      width: true, height: true,
+    });
+    pipBrowser.setBounds({
+      x: 0, y: 0, width: browsingWindow.getSize()[0], height: browsingWindow.getSize()[1],
+    });
+    pipBrowser.setAutoResize({
+      width: true, height: true,
+    });
+    mainWindow.send('update-browser-state', {
+      url: mainBrowser.page.url,
+      canGoBack: mainBrowser.canBack,
+      canGoForward: mainBrowser.canForward,
+    });
+    pipControlView.webContents
+      .executeJavaScript(InjectJSManager.updateBarrageState(args.barrageOpen, args.opacity));
+    menuService.updateFocusedWindow(false, mainWindow && mainWindow.isVisible());
+    browsingWindow.focus();
+  });
+  ipcMain.on('enter-pip', (evt, args) => {
+    if (!browserViewManager) return;
+    const browsers = browserViewManager.enterPip();
+    const pipBrowser = browsers.pipBrowser;
+    const mainBrowser = browsers.mainBrowser;
+    if (!browsingWindow) {
+      createBrowsingWindow({ size: args.pipInfo.pipSize, position: args.pipInfo.pipPos });
+      mainWindow.send('init-pip-position');
+      mainWindow.removeBrowserView(mainWindow.getBrowserViews()[0]);
+      mainWindow.addBrowserView(mainBrowser.page.view);
+      browsingWindow.addBrowserView(pipBrowser);
+      createPipControlView();
+      createTitlebarView();
+      browsingWindow.show();
+    } else {
+      mainWindow.removeBrowserView(mainWindow.getBrowserViews()[0]);
+      mainWindow.addBrowserView(mainBrowser.page.view);
+      browsingWindow.addBrowserView(pipBrowser);
+      browsingWindow.setSize(420, 236);
+      createPipControlView();
+      createTitlebarView();
+      browsingWindow.show();
+    }
+    if (args.isGlobal) {
+      isGlobal = args.isGlobal;
+      mainWindow.hide();
+    }
+    browsingWindow.webContents.closeDevTools();
+    browsingWindow.setAspectRatio(args.pipInfo.aspectRatio);
+    browsingWindow.setMinimumSize(args.pipInfo.minimumSize[0], args.pipInfo.minimumSize[1]);
+    browsingWindow.setSize(args.pipInfo.pipSize[0], args.pipInfo.pipSize[1]);
+    mainBrowser.page.view.setBounds({
+      x: sidebar ? 76 : 0,
+      y: 40,
+      width: sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
+      height: mainWindow.getSize()[1] - 40,
+    });
+    mainBrowser.page.view.setAutoResize({
+      width: true,
+      height: true,
+    });
+    pipBrowser.setBounds({
+      x: 0, y: 0, width: browsingWindow.getSize()[0], height: browsingWindow.getSize()[1],
+    });
+    pipBrowser.setAutoResize({
+      width: true, height: true,
+    });
+    browsingWindow.send('update-pip-listener');
+    mainWindow.send('update-browser-state', {
+      url: mainBrowser.page.url,
+      canGoBack: mainBrowser.canBack,
+      canGoForward: mainBrowser.canForward,
+    });
+    pipControlView.webContents
+      .executeJavaScript(InjectJSManager.updateBarrageState(args.barrageOpen, args.opacity));
+    pipControlViewTitle(args.isGlobal);
+    menuService.updateFocusedWindow(false, mainWindow && mainWindow.isVisible());
+    browsingWindow.focus();
+  });
+  ipcMain.on('update-pip-size', (evt, args) => {
+    mainWindow.send('update-pip-size', args);
+  });
+  ipcMain.on('update-sidebar', (evt, sidebarstate) => {
+    sidebar = sidebarstate;
+  });
+  ipcMain.on('set-bounds', (evt, args) => {
+    if (pipControlView) pipControlView.setBounds(args.control);
+    if (titlebarView) titlebarView.setBounds(args.titlebar);
+  });
+  ipcMain.on('exit-pip', (evt, args) => {
+    if (!browserViewManager) return;
+    browsingWindow.send('remove-pip-listener');
+    mainWindow.show();
+    mainWindow.getBrowserViews()
+      .forEach(mainWindowView => mainWindow.removeBrowserView(mainWindowView));
+    const browViews = browsingWindow.getBrowserViews();
+    browViews.forEach((view) => {
+      browsingWindow.removeBrowserView(view);
+    });
+    const exitBrowser = browserViewManager.exitPip();
+    exitBrowser.page.view.webContents.executeJavaScript(args.jsRecover);
+    if (args.cssRecover) exitBrowser.page.view.webContents.insertCSS(args.cssRecover);
+    mainWindow.addBrowserView(exitBrowser.page.view);
+    exitBrowser.page.view.setBounds({
+      x: sidebar ? 76 : 0,
+      y: 40,
+      width: sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
+      height: mainWindow.getSize()[1] - 40,
+    });
+    exitBrowser.page.view.setAutoResize({
+      width: true,
+      height: true,
+    });
+    mainWindow.send('update-browser-state', {
+      url: exitBrowser.page.url,
+      canGoBack: exitBrowser.canBack,
+      canGoForward: exitBrowser.canForward,
+    });
+    if (browsingWindow.isFullScreen()) {
+      hideBrowsingWindow = true;
+      browsingWindow.setFullScreen(false);
+      exitBrowser.page.view.webContents.executeJavaScript('document.webkitCancelFullScreen();');
+    } else {
+      browsingWindow.hide();
+    }
+    mainWindow.show();
+    menuService.updateFocusedWindow(true, mainWindow && mainWindow.isVisible());
+  });
+  // eslint-disable-next-line complexity
+  ipcMain.on('set-window-maximize', () => {
+    if (mainWindow && mainWindow.isFocused()) {
+      if (mainWindow.isMaximized()) {
+        mainWindow.unmaximize();
+      } else {
+        mainWindow.maximize();
+      }
+      const bounds = mainWindow.getBounds();
+      if (process.platform === 'win32' && mainWindow.isMaximized() && (bounds.x < 0 || bounds.y < 0)) {
+        mainWindow.getBrowserViews()[0].setBounds({
+          x: sidebar ? 76 : 0,
+          y: 40,
+          width: sidebar ? bounds.width + (bounds.x * 2) - 76
+            : bounds.width + (bounds.x * 2),
+          height: bounds.height - 40,
+        });
+      } else {
+        mainWindow.getBrowserViews()[0].setBounds({
+          x: sidebar ? 76 : 0,
+          y: 40,
+          width: sidebar ? mainWindow.getSize()[0] - 76
+            : mainWindow.getSize()[0],
+          height: mainWindow.getSize()[1] - 40,
+        });
+      }
+    } else if (browsingWindow && browsingWindow.isFocused()) {
+      if (!isBrowsingWindowMax) {
+        browsingWindow.maximize();
+        isBrowsingWindowMax = true;
+        if (process.platform === 'win32') {
+          titlebarView.webContents.executeJavaScript(InjectJSManager.updateWinMaxIcon(true));
         }
       } else {
-        snapShotQueue.shift();
-        if (snapShotQueue.length > 0) {
-          snapShot(snapShotQueue[0], callback);
+        browsingWindow.unmaximize();
+        isBrowsingWindowMax = false;
+        if (process.platform === 'win32') {
+          titlebarView.webContents.executeJavaScript(InjectJSManager.updateWinMaxIcon(false));
         }
       }
-    };
-    snapShot(snapShotQueue[0], callback);
-  }
-
-  ipcMain.on('snapShot', (event, video, type = 'cover', time = 0) => {
-    if (!video.videoWidth) video.videoWidth = 1920;
-    if (!video.videoHeight) video.videoHeight = 1080;
-    const imgPath = video.imgPath;
-
-    if (!fs.existsSync(imgPath)) {
-      snapShotQueue.push(Object.assign({ type, time }, video));
-      if (snapShotQueue.length === 1) {
-        snapShotQueueProcess(event);
-      }
+    }
+  });
+  ipcMain.on('update-route-name', (e, route) => {
+    routeName = route;
+  });
+  ipcMain.on('key-events', (e, keyCode) => {
+    if (keyCode === 13) {
+      browsingWindow.setFullScreen(!browsingWindow.isFullScreen());
+      titlebarView.webContents
+        .executeJavaScript(InjectJSManager.updateFullScreenIcon(browsingWindow.isFullScreen()));
     } else {
-      console.log('pass', imgPath);
-      event.sender.send(`snapShot-${video.videoPath}-reply`, imgPath);
+      browsingWindow.getBrowserViews()[0].webContents
+        .executeJavaScript(InjectJSManager.emitKeydownEvent(keyCode));
     }
   });
-
-  ipcMain.on('extract-subtitle-request', (event, videoPath, index, format, hash) => {
-    const subtitleFolderPath = path.join(tempFolderPath, hash);
-    if (!fs.existsSync(subtitleFolderPath)) fs.mkdirSync(subtitleFolderPath);
-    console.log(subtitleFolderPath);
-    const subtitlePath = path.join(subtitleFolderPath, `embedded-${index}.${format}`);
-    if (fs.existsSync(subtitlePath)) event.sender.send('extract-subtitle-response', { error: null, index, path: subtitlePath });
-    else {
-      embeeddSubtitlesQueue.add(() => extractSubtitle(videoPath, subtitlePath, index)
-        .then(index => event.sender.send('extract-subtitle-response', { error: null, index, path: subtitlePath }))
-        .catch(index => event.sender.send('extract-subtitle-response', { error: 'error', index })));
-    }
-  });
-
-  function mediaInfo(videoPath, callback) {
-    splayerx.getMediaInfo(videoPath, (info) => {
-      callback(info);
+  ipcMain.on('drop-subtitle', (event, args) => {
+    if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
+    args.forEach((file) => {
+      if (subRegex.test(path.extname(file)) || fs.statSync(file).isDirectory()) {
+        tmpSubsToOpen.push(file);
+      } else if (!subRegex.test(path.extname(file))
+        && getValidVideoRegex().test(file)) {
+        tmpVideoToOpen.push(file);
+      }
     });
-  }
-
-  function mediaInfoQueueProcess(event) {
-    const callback = (info) => {
-      event.sender.send(`mediaInfo-${mediaInfoQueue[0]}-reply`, info);
-      mediaInfoQueue.shift();
-      if (mediaInfoQueue.length > 0) {
-        mediaInfo(mediaInfoQueue[0], callback);
-      }
-    };
-    mediaInfo(mediaInfoQueue[0], callback);
-  }
-
-  ipcMain.on('mediaInfo', (event, path) => {
-    if (mediaInfoQueue.length === 0) {
-      mediaInfoQueue.push(path);
-      mediaInfoQueueProcess(event);
-    } else {
-      mediaInfoQueue.push(path);
+    finalVideoToOpen = getAllValidVideo(!tmpVideoToOpen.length,
+      tmpVideoToOpen.concat(tmpSubsToOpen));
+    if (process.mas && !tmpVideoToOpen.length && tmpSubsToOpen.length && !finalVideoToOpen) {
+      mainWindow.webContents.send('open-subtitle-in-mas', tmpSubsToOpen[0]);
+    } else if (tmpVideoToOpen.length + tmpSubsToOpen.length > 0) {
+      mainWindow.webContents.send('open-file', { onlySubtitle: !tmpVideoToOpen.length, files: finalVideoToOpen });
     }
+    finalVideoToOpen.splice(0, finalVideoToOpen.length);
+    tmpSubsToOpen.splice(0, tmpSubsToOpen.length);
+    tmpVideoToOpen.splice(0, tmpVideoToOpen.length);
   });
   ipcMain.on('windowPositionChange', (event, args) => {
     if (!mainWindow || event.sender.isDestroyed()) return;
     mainWindow.setPosition(...args);
     event.sender.send('windowPositionChange-asyncReply', mainWindow.getPosition());
   });
-  ipcMain.on('windowInit', () => {
-    mainWindow?.webContents.send('mainCommit', 'windowSize', mainWindow.getSize());
-    mainWindow?.webContents.send('mainCommit', 'windowMinimumSize', mainWindow.getMinimumSize());
-    mainWindow?.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
-    mainWindow?.webContents.send('mainCommit', 'isFullScreen', mainWindow.isFullScreen());
-    mainWindow?.webContents.send('mainCommit', 'isFocused', mainWindow.isFocused());
-  });
-  ipcMain.on('bossKey', () => {
-    handleBossKey();
+  ipcMain.on('windowInit', (event) => {
+    if (!mainWindow || event.sender.isDestroyed()) return;
+    mainWindow.webContents.send('mainCommit', 'windowMinimumSize', mainWindow.getMinimumSize());
+    mainWindow.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
+    mainWindow.webContents.send('mainCommit', 'isFullScreen', mainWindow.isFullScreen());
+    mainWindow.webContents.send('mainCommit', 'isFocused', mainWindow.isFocused());
   });
   ipcMain.on('writeLog', (event, level, log) => { // eslint-disable-line complexity
     if (!log) return;
     writeLog(level, log);
   });
-  ipcMain.on('add-windows-about', () => {
-    const aboutWindowOptions = {
-      useContentSize: true,
-      frame: false,
-      titleBarStyle: 'none',
-      width: 190,
-      height: 280,
-      transparent: true,
-      resizable: false,
-      show: false,
-      webPreferences: {
-        webSecurity: false,
-        experimentalFeatures: true,
-      },
-      acceptFirstMouse: true,
-      fullscreenable: false,
-      maximizable: false,
-      minimizable: false,
-    };
-    if (!aboutWindow) {
-      aboutWindow = new BrowserWindow(aboutWindowOptions);
-      aboutWindow.loadURL(`${aboutURL}`);
-      aboutWindow.on('closed', () => {
-        aboutWindow = null;
-      });
-    }
-    aboutWindow.once('ready-to-show', () => {
-      aboutWindow.show();
-    });
-  });
-  ipcMain.on('add-preference', () => {
-    const preferenceWindowOptions = {
-      useContentSize: true,
-      frame: false,
-      titleBarStyle: 'none',
-      width: 540,
-      height: 426,
-      transparent: true,
-      resizable: false,
-      show: false,
-      webPreferences: {
-        webSecurity: false,
-        experimentalFeatures: true,
-      },
-      acceptFirstMouse: true,
-      fullscreenable: false,
-      maximizable: false,
-      minimizable: false,
-    };
-    if (!preferenceWindow) {
-      preferenceWindow = new BrowserWindow(preferenceWindowOptions);
-      preferenceWindow.loadURL(`${preferenceURL}`);
-      preferenceWindow.on('closed', () => {
-        preferenceWindow = null;
-      });
-    } else {
-      preferenceWindow.focus();
-    }
-    preferenceWindow.once('ready-to-show', () => {
-      preferenceWindow.show();
-      preferenceWindow?.webContents.send('restore-state', needToRestore);
-    });
-  });
-  ipcMain.on('get-restore-state', () => {
-    preferenceWindow?.webContents.send('restore-state', needToRestore);
-  });
-  ipcMain.on('apply', () => {
+  ipcMain.on('need-to-restore', () => {
     needToRestore = true;
+    markNeedToRestore();
   });
   ipcMain.on('relaunch', () => {
-    app.relaunch();
+    forceQuit = true;
+    needBlockCloseLaborWindow = false;
+    const switches = process.argv.filter(a => a.startsWith('-'));
+    const argv = process.argv.filter(a => !a.startsWith('-'))
+      .slice(0, app.isPackaged ? 1 : 2).concat(switches);
+    app.relaunch({ args: argv.slice(1), execPath: argv[0] });
     app.quit();
   });
+  ipcMain.on('add-preference', createPreferenceWindow);
+
+  ipcMain.on('add-browsing', (e, args) => {
+    createBrowsingWindow(args);
+  });
   ipcMain.on('preference-to-main', (e, args) => {
-    mainWindow?.webContents.send('mainDispatch', 'setPreference', args);
+    if (mainWindow && !mainWindow.webContents.isDestroyed()) {
+      mainWindow.webContents.send('mainDispatch', 'setPreference', args);
+    }
+    if (loginWindow && !loginWindow.webContents.isDestroyed()) {
+      loginWindow.webContents.send('setPreference', args);
+    }
   });
   ipcMain.on('main-to-preference', (e, args) => {
-    preferenceWindow?.webContents.send('preferenceDispatch', 'setPreference', args);
+    if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
+      preferenceWindow.webContents.send('preferenceDispatch', 'setPreference', args);
+    }
+  });
+  /** grab audio logic in main process start */
+  function audioGrabCallBack(data) {
+    try {
+      if (mainWindow && !mainWindow.webContents.isDestroyed()) {
+        mainWindow.webContents.send('grab-audio-update', data);
+      }
+    } catch (error) {
+      // empty
+    }
+  }
+  ipcMain.on('grab-audio', (events, data) => {
+    audioGrabService.start(data);
+    audioGrabService.removeListener('data', audioGrabCallBack);
+    audioGrabService.on('data', audioGrabCallBack);
+  });
+  ipcMain.on('grab-audio-continue', () => {
+    audioGrabService.next();
+  });
+  ipcMain.on('grab-audio-stop', () => {
+    audioGrabService.stop();
+  });
+  /** grab audio logic in main process end */
+
+  ipcMain.on('add-login', createLoginWindow);
+
+  ipcMain.on('login-captcha', () => {
+    if (loginWindow && !loginWindow.webContents.isDestroyed()) {
+      loginWindow.setSize(412, 336, true);
+    }
+  });
+
+  ipcMain.on('account-enabled', () => {
+    // get storage token
+    getToken().then((account) => {
+      if (account) {
+        global['account'] = account;
+        menuService.updateAccount(account);
+        audioGrabService.setToken(account.token);
+        if (mainWindow && !mainWindow.webContents.isDestroyed()) {
+          mainWindow.webContents.send('sign-in', account);
+        }
+      } else {
+        menuService.updateAccount(undefined);
+        audioGrabService.setToken(undefined);
+      }
+    }).catch(console.error);
+  });
+
+  ipcMain.on('sign-in-end-point', (events, data) => {
+    signInEndPoint = data;
   });
 }
 
-function createWindow() {
-  /**
-   * Initial window options
-   */
-  const windowOptions = {
+function createMainWindow(openDialog, playlistId) {
+  createLaborWindow();
+  mainWindow = new BrowserWindow({
     useContentSize: true,
     frame: false,
     titleBarStyle: 'none',
@@ -406,123 +1245,246 @@ function createWindow() {
     transparent: false, // set to false to solve the backdrop-filter bug
     webPreferences: {
       webSecurity: false,
+      nodeIntegration: true,
       experimentalFeatures: true,
+      webviewTag: true,
     },
     // See https://github.com/electron/electron/blob/master/docs/api/browser-window.md#showing-window-gracefully
-    backgroundColor: '#802e2c29',
-    acceptFirstMouse: true,
+    backgroundColor: '#000000',
+    acceptFirstMouse: false,
     show: false,
     ...({
       win32: {},
     })[process.platform],
-  };
-
-  mainWindow = new BrowserWindow(windowOptions);
-
-  mainWindow.loadURL(filesToOpen.length ? `${mainURL}#/play` : mainURL);
+  });
+  if (
+    (!welcomeProcessDone && fs.existsSync(path.join(userDataPath, 'WELCOME_PROCESS_MARK')))
+    || welcomeProcessDone
+  ) {
+    welcomeProcessDone = true;
+    finalVideoToOpen.length ? mainWindow.loadURL(`${mainURL}#/play`) : mainWindow.loadURL(mainURL);
+  } else {
+    mainWindow.loadURL(`${mainURL}#/welcome`);
+  }
+  mainWindow.webContents.setUserAgent(
+    `${mainWindow.webContents.getUserAgent().replace(/Electron\S+/i, '')
+    } SPlayerX@2018 ${os.platform()} ${os.release()} Version ${app.getVersion()}`,
+  );
+  menuService.setMainWindow(mainWindow);
 
   mainWindow.on('closed', () => {
-    ipcMain.removeAllListeners();
+    ipcMain.removeAllListeners(); // FIXME: decouple mainWindow and ipcMain
     mainWindow = null;
+    menuService.setMainWindow(null);
+    if (forceQuit) {
+      needBlockCloseLaborWindow = false;
+    }
+    if (laborWindow) laborWindow.close();
   });
 
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
-
     // Open file by file association. Currently support 1 file only.
-    if (filesToOpen.length) {
-      mainWindow.webContents.send('open-file', ...filesToOpen);
-      filesToOpen.splice(0, filesToOpen.length);
+    finalVideoToOpen = getAllValidVideo(!tmpVideoToOpen.length,
+      tmpVideoToOpen.concat(tmpSubsToOpen));
+    if (process.mas && !tmpVideoToOpen.length && tmpSubsToOpen.length && !finalVideoToOpen) {
+      mainWindow.webContents.send('open-subtitle-in-mas', tmpSubsToOpen[0]);
+    } else if (tmpVideoToOpen.length + tmpSubsToOpen.length > 0) {
+      mainWindow.webContents.send('open-file', { onlySubtitle: !tmpVideoToOpen.length, files: finalVideoToOpen });
     }
+    if (openDialog) mainWindow.webContents.send('open-dialog', playlistId);
+    finalVideoToOpen.splice(0, finalVideoToOpen.length);
+    tmpSubsToOpen.splice(0, tmpSubsToOpen.length);
+    tmpVideoToOpen.splice(0, tmpVideoToOpen.length);
     inited = true;
   });
 
-  registerMainWindowEvent();
+  registerMainWindowEvent(mainWindow);
 
   if (process.env.NODE_ENV === 'development') {
     setTimeout(() => { // wait some time to prevent `Object not found` error
-      mainWindow?.openDevTools();
+      if (mainWindow) mainWindow.openDevTools({ mode: 'detach' });
     }, 1000);
   }
+  mainWindow.on('focus', () => {
+    menuService.enableMenu(true);
+  });
 }
-function removeDir(dir) {
-  const userData = app.getPath('userData');
-  return fsPromises.readdir(dir)
-    .then(files => files.reduce((result, file) => {
-      const filePath = path.join(dir, file);
-      return result.then(() => fsPromises.unlink(filePath)
-        .then(null, () => removeDir(filePath)));
-    }, Promise.resolve()).then(() => {
-      if (dir !== userData) return fsPromises.rmdir(dir);
-      return Promise.resolve();
-    }));
-}
-function removeUserData() {
-  const userData = app.getPath('userData');
-  return removeDir(path.join(userData, 'storage'))
-    .then(() => removeDir(userData));
-}
-app.on('before-quit', (e) => {
+
+['left-drag', 'left-up'].forEach((channel) => {
+  mouse.on(channel, (...args) => {
+    const focusedWindow = BrowserWindow.getFocusedWindow();
+    if (!focusedWindow || focusedWindow.webContents.isDestroyed()) return;
+    if (focusedWindow.isMaximized()) return;
+    if (process.platform === 'darwin' && focusedWindow !== browsingWindow) return;
+    focusedWindow.send(`mouse-${channel}`, ...args);
+  });
+});
+
+app.on('before-quit', () => {
+  if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
   if (needToRestore) {
-    mainWindow?.webContents.send('quit', needToRestore);
-    e.preventDefault();
-    removeUserData()
-      .catch((err) => {
-        needToRestore = false;
-        writeLog('info', { message: `error: ${err}` });
-      })
-      .finally(() => {
-        needToRestore = false;
-        app.quit();
-      });
+    mainWindow.webContents.send('quit', needToRestore);
   } else {
-    mainWindow?.webContents.send('quit');
+    mainWindow.webContents.send('quit');
+  }
+  forceQuit = true;
+});
+
+app.on('quit', () => {
+  mouse.dispose();
+});
+
+app.on('second-instance', () => {
+  if (mainWindow) {
+    if (mainWindow.isMinimized()) mainWindow.restore();
+    mainWindow.focus();
+  } else if (app.isReady()) {
+    createMainWindow();
   }
 });
-app.on('second-instance', () => {
-  if (mainWindow?.isMinimized()) mainWindow.restore();
-  mainWindow?.focus();
+
+app.on('minimize', () => {
+  if (mainWindow && mainWindow.isFocused()) {
+    mainWindow.minimize();
+  }
 });
 
-
-function darwinOpenFilesToStart() {
-  if (mainWindow) { // sencond instance
+async function darwinOpenFilesToStart() {
+  if (mainWindow && !mainWindow.webContents.isDestroyed()) { // sencond instance
     if (!inited) return;
+    finalVideoToOpen = getAllValidVideo(!tmpVideoToOpen.length,
+      tmpVideoToOpen.concat(tmpSubsToOpen));
+    if (!tmpVideoToOpen.length && tmpSubsToOpen.length) {
+      const allSubFiles = [];
+      tmpSubsToOpen.forEach((file) => {
+        if (subRegex.test(path.extname(file))) {
+          allSubFiles.push(file);
+        } else {
+          allSubFiles.push(...searchSubsInDir(file));
+        }
+      });
+      mainWindow.webContents.send('add-local-subtitles', allSubFiles);
+    } else if (tmpVideoToOpen.length + tmpSubsToOpen.length > 0) {
+      mainWindow.webContents.send('open-file', { onlySubtitle: !tmpVideoToOpen.length, files: finalVideoToOpen });
+    }
+    finalVideoToOpen.splice(0, finalVideoToOpen.length);
+    tmpSubsToOpen.splice(0, tmpSubsToOpen.length);
+    tmpVideoToOpen.splice(0, tmpVideoToOpen.length);
     if (!mainWindow.isVisible()) mainWindow.show();
     if (mainWindow.isMinimized()) mainWindow.restore();
     mainWindow.focus();
-    mainWindow.webContents.send('open-file', ...filesToOpen);
-    filesToOpen.splice(0, filesToOpen.length);
-  } else {
-    createWindow();
+  } else if (app.isReady() && !mainWindow) {
+    createMainWindow();
   }
 }
 const darwinOpenFilesToStartDebounced = debounce(darwinOpenFilesToStart, 100);
 if (process.platform === 'darwin') {
   app.on('will-finish-launching', () => {
     app.on('open-file', (event, file) => {
-      if (!getValidVideoRegex().test(file)) return;
-      filesToOpen.push(file);
+      // TODO: clean code to remove duplicated check
+      let ext;
+      let isDirectory;
+      try {
+        ext = path.extname(file);
+        isDirectory = fs.statSync(file).isDirectory();
+      } catch (ex) {
+        return;
+      }
+      if (subRegex.test(ext) || isDirectory) {
+        tmpSubsToOpen.push(file);
+      } else if (!subRegex.test(ext)
+        && getValidVideoRegex().test(file)) {
+        tmpVideoToOpen.push(file);
+      }
+      finalVideoToOpen = getAllValidVideo(!tmpVideoToOpen.length,
+        tmpVideoToOpen.concat(tmpSubsToOpen));
       darwinOpenFilesToStartDebounced();
     });
   });
 } else {
-  filesToOpen.push(...getOpenedFiles(process.argv));
-  app.on('second-instance', (event, argv) => {
-    const opendFiles = getOpenedFiles(argv); // TODO: multiple files
-    if (opendFiles.length) {
-      mainWindow?.webContents.send('open-file', ...opendFiles);
+  const tmpFile = process.argv.slice(app.isPackaged ? 1 : 2);
+  tmpFile.forEach((file) => {
+    let ext;
+    let isDirectory;
+    try {
+      ext = path.extname(file);
+      isDirectory = fs.statSync(file).isDirectory();
+    } catch (ex) {
+      return;
     }
+    if (subRegex.test(ext) || isDirectory) {
+      tmpSubsToOpen.push(file);
+    } else if (!subRegex.test(ext)
+      && getValidVideoRegex().test(file)) {
+      tmpVideoToOpen.push(file);
+    }
+  });
+  finalVideoToOpen = getAllValidVideo(!tmpVideoToOpen.length,
+    tmpVideoToOpen.concat(tmpSubsToOpen));
+  app.on('second-instance', (event, argv) => {
+    if (!mainWindow || mainWindow.webContents.isDestroyed()) {
+      if (app.isReady()) createMainWindow();
+    }
+    const opendFiles = argv.slice(app.isPackaged ? 3 : 2);
+    opendFiles.forEach((file) => {
+      let ext;
+      let isDirectory;
+      try {
+        ext = path.extname(file);
+        isDirectory = fs.statSync(file).isDirectory();
+      } catch (ex) {
+        return;
+      }
+      if (subRegex.test(ext) || isDirectory) {
+        tmpSubsToOpen.push(file);
+      } else if (!subRegex.test(ext)
+        && getValidVideoRegex().test(file)) {
+        tmpVideoToOpen.push(file);
+      }
+    });
+    finalVideoToOpen = getAllValidVideo(!tmpVideoToOpen.length,
+      tmpVideoToOpen.concat(tmpSubsToOpen));
+    if (!tmpVideoToOpen.length && tmpSubsToOpen.length) {
+      const allSubFiles = [];
+      tmpSubsToOpen.forEach((file) => {
+        if (subRegex.test(path.extname(file))) {
+          allSubFiles.push(file);
+        } else {
+          allSubFiles.push(...searchSubsInDir(file));
+        }
+      });
+      mainWindow.webContents.send('add-local-subtitles', allSubFiles);
+    } else if (tmpVideoToOpen.length + tmpSubsToOpen.length > 0) {
+      mainWindow.webContents.send('open-file', { onlySubtitle: !tmpVideoToOpen.length, files: finalVideoToOpen });
+    }
+    finalVideoToOpen.splice(0, finalVideoToOpen.length);
+    tmpSubsToOpen.splice(0, tmpSubsToOpen.length);
+    tmpVideoToOpen.splice(0, tmpVideoToOpen.length);
   });
 }
 
 app.on('ready', () => {
+  menuService = new MenuService();
+  if (process.platform === 'darwin') {
+    systemPreferences.subscribeNotification('AppleInterfaceThemeChangedNotification', () => {
+      if (routeName === 'browsing-view') {
+        menuService.updatePipIcon();
+      }
+    });
+    systemPreferences.setUserDefault('NSDisabledDictationMenuItem', 'boolean', true);
+    systemPreferences.setUserDefault('NSDisabledCharacterPaletteMenuItem', 'boolean', true);
+  }
+  createMainWindow();
   app.setName('SPlayer');
   globalShortcut.register('CmdOrCtrl+Shift+I+O+P', () => {
-    mainWindow?.openDevTools();
+    if (mainWindow) mainWindow.openDevTools({ mode: 'detach' });
   });
   globalShortcut.register('CmdOrCtrl+Shift+J+K+L', () => {
-    preferenceWindow?.openDevTools();
+    if (preferenceWindow) preferenceWindow.openDevTools({ mode: 'detach' });
+  });
+  globalShortcut.register('CmdOrCtrl+Shift+A+S+D', () => {
+    if (loginWindow) loginWindow.openDevTools({ mode: 'detach' });
   });
 
   if (process.platform === 'win32') {
@@ -530,27 +1492,110 @@ app.on('ready', () => {
       handleBossKey();
     });
   }
-
-  createWindow();
 });
 
 app.on('window-all-closed', () => {
-  if (process.env.NODE_ENV !== 'development' || process.platform !== 'darwin') {
-    if (needToRestore) {
-      removeUserData().then(() => {
-        needToRestore = false;
-        app.quit();
-      });
-    } else {
-      app.quit();
-    }
+  if (
+    (routeName === 'welcome-privacy' || routeName === 'language-setting')
+    || process.platform !== 'darwin') {
+    app.quit();
   }
+});
+
+const oauthRegex = [
+  /^https:\/\/cnpassport.youku.com\//i,
+  /^https:\/\/udb3lgn.huya.com\//i,
+  /^https:\/\/passport.iqiyi.com\/apis\/thirdparty/i,
+  /^https:\/\/api.weibo.com\/oauth2/i,
+  /^https:\/\/graph.qq.com\//i,
+  /^https:\/\/open.weixin.qq.com\//i,
+  /^https:\/\/openapi.baidu.com\//i,
+  /^https:\/\/auth.alipay.com\/login\//i,
+  /^https:\/\/account.xiaomi.com\/pass\//i,
+];
+app.on('web-contents-created', (webContentsCreatedEvent, contents) => {
+  if (contents.getType() === 'browserView') {
+    contents.on('new-window', (newWindowEvent, url) => {
+      if (!oauthRegex.some(re => re.test(url))) {
+        newWindowEvent.preventDefault();
+      }
+    });
+  }
+});
+
+app.on('bossKey', handleBossKey);
+app.on('add-preference', createPreferenceWindow);
+app.on('add-login', createLoginWindow);
+app.on('add-windows-about', createAboutWindow);
+app.on('check-for-updates', () => {
+  if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
+  mainWindow.webContents.send('check-for-updates');
+});
+
+app.on('menu-create-main-window', () => {
+  if (!mainWindow) createMainWindow();
+  else if (mainWindow.isMinimized()) {
+    mainWindow.restore();
+  } else if (!mainWindow.isVisible() && (!browsingWindow || !browsingWindow.isVisible())) {
+    mainWindow.show();
+  }
+});
+
+app.on('menu-open-dialog', (playlistId) => {
+  createMainWindow(true, playlistId);
 });
 
 app.on('activate', () => {
   if (!mainWindow) {
-    createWindow();
-  } else if (!mainWindow.isVisible()) {
+    if (app.isReady()) createMainWindow();
+  } else if (!mainWindow.isVisible() && (!browsingWindow || !browsingWindow.isVisible())) {
     mainWindow.show();
   }
+  if (browsingWindow && browsingWindow.isMinimized()) {
+    browsingWindow.restore();
+  }
+  if (mainWindow && mainWindow.isMinimized()) {
+    mainWindow.restore();
+  }
 });
+
+app.on('sign-in', (account) => {
+  global['account'] = account;
+  menuService.updateAccount(account);
+  audioGrabService.setToken(account.token);
+  saveToken(account.token);
+  if (mainWindow && !mainWindow.webContents.isDestroyed()) {
+    mainWindow.webContents.send('sign-in', account);
+  }
+});
+
+app.on('sign-out-confirm', () => {
+  if (mainWindow && !mainWindow.webContents.isDestroyed()) {
+    mainWindow.webContents.send('sign-out-confirm', undefined);
+  }
+});
+
+app.on('sign-out', () => {
+  global['account'] = undefined;
+  menuService.updateAccount(undefined);
+  audioGrabService.setToken(undefined);
+  saveToken('');
+  if (mainWindow && !mainWindow.webContents.isDestroyed()) {
+    mainWindow.webContents.send('sign-in', undefined);
+  }
+});
+
+app.getDisplayLanguage = () => {
+  locale.getDisplayLanguage();
+  return locale.displayLanguage;
+};
+
+// export getIp to static login preload.js
+app.getIP = getIP;
+
+// export getSignInEndPoint to static login preload.js
+app.getSignInEndPoint = () => signInEndPoint;
+
+getRightPort().then((port) => {
+  localHostPort = port;
+}).catch(console.error);

@@ -8,7 +8,7 @@ export default new Router({
     {
       path: '/',
       name: 'landing-view',
-      component: require('@/components/LandingView.vue').default,
+      component: require('@/containers/LandingView.vue').default,
     },
     {
       path: '/play',
@@ -16,8 +16,29 @@ export default new Router({
       component: require('@/components/PlayingView.vue').default,
     },
     {
+      path: '/browsing',
+      name: 'browsing-view',
+      component: require('@/components/BrowsingView.vue').default,
+    },
+    {
       path: '*',
-      redirect: '/',
+      redirect: '/language-setting',
+    },
+    {
+      path: '/welcome',
+      component: require('@/components/Welcome/WelcomeView.vue').default,
+      children: [
+        {
+          path: '',
+          name: 'welcome-privacy',
+          component: require('@/components/Welcome/WelcomePrivacy.vue').default,
+        },
+        {
+          path: 'language',
+          name: 'language-setting',
+          component: require('@/components/Welcome/LanguageSetting.vue').default,
+        },
+      ],
     },
   ],
 });

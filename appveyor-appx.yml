@@ -2,7 +2,14 @@
 # https://simulatedgreg.gitbooks.io/electron-vue/content/en/testing.html#on-the-subject-of-ci-testing
 version: 0.1.{build}
 
-# branches:
+branches:
+  only:
+    - master
+    - release
+    - develop
+    - testing
+
+skip_branch_with_pr: true
 
 image: Visual Studio 2017
 
@@ -17,16 +24,17 @@ init:
   - ps: ${env:APPVEYOR_REPO_COMMIT_SHORT} = (${env:APPVEYOR_REPO_COMMIT}).Substring(0, 8)
 
 install:
-  - ps: Install-Product node 11 x64
+  - ps: Install-Product node 12 x64
   - git reset --hard HEAD
-  - npm i
   - node --version
+  - yarn
+  - node scripts/check-electron-version.js
 
 before_build:
   - ps: ${env:REV} = (git rev-list --count HEAD)
 
 build_script:
-  - npm run build:appx
+  - yarn build:appx
 
 test: off
 
@@ -47,4 +55,4 @@ deploy:
   unzip: false
   set_public: true
   on:
-    branch: develop
+    appveyor_repo_tag: true # deploy on tag push only

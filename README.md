@@ -4,6 +4,7 @@
 [![Build Status](https://travis-ci.org/chiflix/splayerx.svg?branch=develop)](https://travis-ci.org/chiflix/splayerx?branch=develop)
 [![appveyor](https://ci.appveyor.com/api/projects/status/github/chiflix/splayerx?branch=develop&svg=true)](https://ci.appveyor.com/project/tomasen/splayerx/branch/develop)
 [![codecov](https://codecov.io/gh/chiflix/splayerx/branch/develop/graph/badge.svg)](https://codecov.io/gh/chiflix/splayerx/branch/develop)
+[![Crowdin](https://d322cqt584bo4o.cloudfront.net/splayerx/localized.svg)](https://crowdin.com/project/splayerx)
 
 ### 开发指南
 
@@ -17,7 +18,6 @@
  会显示当前代码的测试覆盖率。
 - 使用 [Global Event Bus](https://alligator.io/vuejs/global-event-bus/) 做消息通讯
 - 使用 [vue-router](https://router.vuejs.org/en/) 和 [vuex](https://vuex.vuejs.org/en/intro.html) 用于跨组件数据交互。
-- 使用 [vue-resource](https://github.com/pagekit/vue-resource) 进行与 Restful API 服务器之间的通讯
 - 有可能导致阻塞的操作，例如IO读写或者CPU intensive tasks，应放在基于 electron-remote 创建的 separate process 里面。参考：[Deep dive into Electron’s main and renderer processes](https://medium.com/cameron-nokes/deep-dive-into-electrons-main-and-renderer-processes-7a9599d5c9e2)
 - 可以用 CommandOrControl+Shift+I+O+P 打开开发工具，在 production 环境中也可以使用
 
@@ -66,7 +66,7 @@ in `.travis.yml`
 - CSC_LINK and CSC_KEY_PASSWORD from https://www.electron.build/code-signing/
 - GH_TOKEN= https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/
 
-#### Maintain
+#### Maintainance Cheetsheet
 
 clear up AppVeyor Cache
 ```

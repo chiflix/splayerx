@@ -1,64 +1,56 @@
 <template>
   <div class="labels">
     <transition name="cycle-label">
-    <div class="cycle-label" v-show="showCycleLabel" key="cycle">
-      <Icon type="cycle" class="cycle-icon"/>
-    </div>
+      <div
+        key="cycle"
+        v-show="showCycleLabel"
+        class="cycle-label"
+      >
+        <Icon
+          type="cycle"
+          class="cycle-icon"
+        />
+      </div>
     </transition>
     <transition name="label">
-    <div class="speed-label" v-show="showSpeedLabel" key="speed">
-      <Icon type="speed" class="speed-icon"/>
-      <div class="rate-num">{{ Number.parseFloat(rate).toFixed(1) }}</div>
-    </div>
+      <div
+        key="speed"
+        v-show="showSpeedLabel"
+        class="speed-label"
+      >
+        <Icon
+          type="speed"
+          class="speed-icon"
+        />
+        <div class="rate-num">
+          {{ Number.parseFloat(rate).toFixed(1) }}
+        </div>
+      </div>
     </transition>
   </div>
 </template>
 
-<script>
-import { mapGetters } from 'vuex';
+<script lang="ts">
 import Icon from '../BaseIconContainer.vue';
 
 export default {
-  name: 'speedLabel',
-  data() {
-    return {
-      showSpeedLabel: false,
-      showCycleLabel: false,
-      changeSrc: false,
-      changeState: false,
-    };
-  },
+  name: 'SpeedLabel',
   components: {
     Icon,
   },
-  computed: {
-    ...mapGetters(['rate', 'singleCycle']),
+  props: {
+    rate: {
+      type: Number,
+      default: 1,
+    },
+    showCycleLabel: Boolean,
+    showSpeedLabel: Boolean,
   },
-  watch: {
-    singleCycle(val) {
-      this.showCycleLabel = val;
-    },
-    rate(val) {
-      if (val === 1 && !this.changeSrc) {
-        this.changeState = true;
-        setTimeout(() => {
-          if (this.changeState) {
-            this.showSpeedLabel = false;
-          }
-        }, 3000);
-      } else if (val === 1 && this.changeSrc) {
-        this.showSpeedLabel = false;
-      } else {
-        this.changeState = false;
-        this.showSpeedLabel = true;
-      }
-      this.changeSrc = false;
-    },
+  data() {
+    return {
+    };
   },
   mounted() {
-    this.$bus.$on('show-speedlabel', () => {
-      this.changeSrc = true;
-    });
   },
 };
 </script>
@@ -67,7 +59,11 @@ export default {
 .labels {
   display: flex;
   .speed-label {
-    background-image: radial-gradient(60% 134%, rgba(255,255,255,0.09) 44%, rgba(255,255,255,0.05) 100%);
+    background-image: radial-gradient(
+      60% 134%,
+      rgba(255,255,255,0.09) 44%,
+      rgba(255,255,255,0.05) 100%
+    );
     border: 0.5px solid rgba(255,255,255,0.20);
     backdrop-filter: blur(5px);
     border-radius: 5px;
@@ -79,13 +75,18 @@ export default {
     }
   }
   .cycle-label {
-    background-image: radial-gradient(60% 134%, rgba(255,255,255,0.09) 44%, rgba(255,255,255,0.05) 100%);
+    background-image: radial-gradient(
+      60% 134%,
+      rgba(255,255,255,0.09) 44%,
+      rgba(255,255,255,0.05) 100%
+    );
     border: 0.5px solid rgba(255,255,255,0.20);
     backdrop-filter: blur(5px);
     border-radius: 5px;
   }
 }
-@media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
+@media screen and (max-aspect-ratio: 1/1) and (max-width: 288px),
+screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
   .labels {
     height: 15px;
     .speed-label {
@@ -110,7 +111,8 @@ export default {
     }
   }
 }
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
+screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
   .labels {
     height: 15px;
     .speed-label {
@@ -135,7 +137,8 @@ export default {
     }
   }
 }
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
   .labels {
     height: 18px;
     .speed-label {
@@ -160,7 +163,8 @@ export default {
     }
   }
 }
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   .labels {
     height: 28px;
     .speed-label {

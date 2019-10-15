@@ -1,129 +1,195 @@
 <template>
-  <div class="itemContainer advance-column-items">
-    <div class="textContainer advanceNormalTitle" :style="{
-      cursor: 'default',
-    }">
-      <div class="textItem">{{ item }}</div>
-    </div>
-    <div class="listContainer"
+  <div
+    :style="{
+      backgroundImage: !isChosen ? '' :
+        'linear-gradient(90deg, rgba(255,255,255,0.03) ' +
+        '0%, rgba(255,255,255,0.07) 24%, rgba(255,255,255,0.03) 100%)',
+    }"
+    @mouseenter="handleAudioMouseenter"
+    @mouseleave="handleAudioMouseleave"
+    class="itemContainer advance-column-items"
+  >
+    <div
       :style="{
-        height: heightSize,
-      }">
-      <div class="scrollScope"
+        backgroundImage: !isChosen && hoveredText ?
+          'linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.045) 20%, ' +
+          'rgba(255,255,255,0.00) 78%, rgba(255,255,255,0.00) 100%)' : '',
+        transition: 'opacity 200ms',
+      }"
+      class="detail"
+    >
+      <div
         :style="{
-          overflowY: tracks.length > 2 ? 'scroll' : '',
-          height: scopeHeight,
-        }">
-        <div class="columnContainer">
-          <div v-for="(track, index) in tracks"
-            class="columnNumDetail"
-            @mouseover="handleOver(index)"
-            @mouseout="handleOut(index)"
-            @click="handleClick(index)"
-            :style="{ cursor: track.enabled ? 'default' : 'pointer' }">
-            <div class="text advanceNormalItem"
-              :style="{
-                color: index === hoverIndex || track.enabled  ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
-                transition: 'color 300ms',
-              }">{{ track.language === 'und' || track.language === '' ? `${$t('advance.track')} ${index + 1}`
-              : tracks.length === 1 ? `${$t('advance.track')} ${index + 1} : ${track.language}` : `${$t('advance.track')} ${index + 1} : ${track.name}` }}
+          cursor: isChosen ? 'default' : 'pointer',
+          color: !isChosen && hoveredText ?
+            'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+          transition: 'color 300ms',
+        }"
+        class="textContainer"
+      >
+        <p>{{ $t('advance.changeTrack') }}</p>
+        <div
+          v-show="!isChosen"
+          class="rightTrackItem"
+        >
+          {{ currentTrackName }}
+        </div>
+      </div>
+      <div
+        v-show="isChosen"
+        :style="{
+          height: heightSize,
+        }"
+        class="listContainer"
+      >
+        <div
+          :style="{
+            overflowY: tracks.length > 2 ? 'scroll' : '',
+            height: scopeHeight,
+          }"
+          class="scrollScope"
+        >
+          <div class="columnContainer">
+            <div
+              v-for="(track, index) in tracks"
+              :key="track.id"
+              :style="{ cursor: track.enabled ? 'default' : 'pointer' }"
+              @mouseover="handleOver(index)"
+              @mouseout="handleOut(index)"
+              @click="handleClick(index)"
+              class="columnNumDetail"
+            >
+              <p
+                :style="{
+                  color: index === hoverIndex || track.enabled ?
+                    'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+                  transition: 'color 300ms',
+                }"
+              >
+                {{ track.language === 'und' || track.language === '' ?
+                  `${$t('advance.track')} ${index + 1}`
+                  : tracks.length === 1 ? `${$t('advance.track')} ${index + 1} : ${track.language}`
+                    : `${$t('advance.track')} ${index + 1} : ${track.name}` }}
+              </p>
             </div>
+            <div
+              :style="{
+                marginTop: cardPos,
+                transition: 'all 200ms cubic-bezier(0.17, 0.67, 0.17, 0.98)'
+              }"
+              class="card"
+            />
           </div>
-          <div class="card"
-            :style="{
-              marginTop: cardPos,
-              transition: 'all 200ms cubic-bezier(0.17, 0.67, 0.17, 0.98)'
-            }"></div>
         </div>
       </div>
     </div>
   </div>
 </template>
 
-<script>
-import { mapGetters } from 'vuex';
-import { Video as videoActions } from '@/store/actionTypes';
+<script lang="ts">
 
 export default {
   name: 'AdvanceColumnItems',
+  props: {
+    size: {
+      type: Number,
+      required: true,
+    },
+    isChosen: Boolean,
+    currentTrackName: {
+      type: String,
+      required: true,
+    },
+    currentTrackId: {
+      type: Number,
+      required: true,
+    },
+    tracks: {
+      type: Array,
+      required: true,
+    },
+    switchAudioTrack: {
+      type: Function,
+      required: true,
+    },
+  },
   data() {
     return {
       hoverIndex: -1,
       moveLength: 0,
+      hoveredText: false,
     };
   },
-  props: {
-    item: {
-      type: String,
+  computed: {
+    cardPos() {
+      return `${this.initialSize(this.moveLength - (this.tracks.length * 32))}px`;
     },
-    size: {
-      type: Number,
+    heightSize() {
+      return this.tracks.length <= 2
+        ? `${this.initialSize(41 + (32 * (this.tracks.length - 1)))}px`
+        : `${this.initialSize(105)}px`;
     },
-    isChosen: {
-      type: Boolean,
+    scopeHeight() {
+      return this.tracks.length <= 2
+        ? `${this.initialSize(32 * this.tracks.length)}px` : `${this.initialSize(96)}px`;
     },
   },
   watch: {
-    audioTrackList(val) {
-      val.forEach((item, index) => {
-        if (item.id === this.currentAudioTrackId) {
+    tracks(val: {id: string; kind: string; label: string;
+      language: string; name: string; enabled: boolean;}[]) {
+      val.forEach((item: { id: string; kind: string; label: string;
+        language: string; name: string; enabled: boolean; }, index: number) => {
+        if (Number(item.id) === this.currentTrackId) {
           this.moveLength = index * 32;
         }
       });
     },
   },
-  computed: {
-    ...mapGetters(['audioTrackList', 'currentAudioTrackId']),
-    cardPos() {
-      return `${this.initialSize(this.moveLength - (this.tracks.length * 32))}px`;
-    },
-    heightSize() {
-      return this.tracks.length <= 2 ? `${this.initialSize(41 + (32 * (this.tracks.length - 1)))}px` : `${this.initialSize(105)}px`;
-    },
-    scopeHeight() {
-      return this.tracks.length <= 2 ? `${this.initialSize(32 * this.tracks.length)}px` : `${this.initialSize(96)}px`;
-    },
-    tracks() {
-      return this.$store.getters.audioTrackList;
-    },
-  },
   methods: {
-    initialSize(size) {
+    handleAudioMouseenter() {
+      this.hoveredText = true;
+    },
+    handleAudioMouseleave() {
+      this.hoveredText = false;
+    },
+    initialSize(size: number) {
       if (this.size >= 289 && this.size <= 480) {
         return size;
-      } else if (this.size >= 481 && this.size < 1080) {
+      }
+      if (this.size >= 481 && this.size < 1080) {
         return size * 1.2;
       }
       return size * 1.2 * 1.4;
     },
-    handleOver(index) {
+    handleOver(index: number) {
       this.hoverIndex = index;
     },
     handleOut() {
       this.hoverIndex = -1;
     },
-    handleClick(index) {
+    handleClick(index: number) {
       this.moveLength = index * 32;
-      this.$store.dispatch(videoActions.SWITCH_AUDIO_TRACK, this.tracks[index]);
+      this.switchAudioTrack(this.tracks[index]);
     },
-  },
-  mounted() {
-    this.$bus.$on('switch-audio-track', (index) => {
-      this.handleClick(index);
-    });
   },
 };
 </script>
 
 <style lang="scss" scoped>
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
+screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
   .itemContainer {
     width: 100%;
     .textContainer {
       width: 100%;
       height: 37px;
-      .textItem {
+      p {
         margin: auto auto auto 17px;
+        font-size: 13px;
+      }
+      .rightTrackItem {
+        margin: auto 17px auto auto;
+        font-size: 11px;
       }
     }
     .listContainer {
@@ -134,8 +200,9 @@ export default {
           width: 100%;
           height: 27px;
           margin: 0 auto 5px auto;
-          .text {
+          p {
             margin: auto auto auto 27px;
+            font-size: 11px;
           }
         }
         .card {
@@ -147,14 +214,20 @@ export default {
     }
   }
 }
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
   .itemContainer {
     width: 100%;
     .textContainer {
       width: 100%;
       height: 44.4px;
-      .textItem {
+      p {
         margin: auto auto auto 20.4px;
+        font-size: 15.6px;
+      }
+      .rightTrackItem {
+        margin: auto 20.4px auto auto;
+        font-size: 13.2px;
       }
     }
     .listContainer {
@@ -165,8 +238,9 @@ export default {
           width: 100%;
           height: 32.4px;
           margin: 0 auto 6px auto;
-          .text {
+          p {
             margin: auto auto auto 32.4px;
+            font-size: 13.2px;
           }
         }
         .card {
@@ -178,14 +252,20 @@ export default {
     }
   }
 }
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   .itemContainer {
     width: 100%;
     .textContainer {
       width: 100%;
       height: 62.16px;
-      .textItem {
+      p {
         margin: auto auto auto 28.56px;
+        font-size: 21.84px;
+      }
+      .rightTrackItem {
+        margin: auto 28.48px auto auto;
+        font-size: 18.48px;
       }
     }
     .listContainer {
@@ -196,8 +276,9 @@ export default {
           width: 100%;
           height: 45.36px;
           margin: 0 auto 8.4px auto;
-          .text {
+          p {
             margin: auto auto auto 45.36px;
+            font-size: 18.48px;
           }
         }
         .card {
@@ -218,17 +299,14 @@ export default {
   background: rgba(255, 255, 255, 0.15);
 }
 .itemContainer {
-  position: absolute;
   display: flex;
   flex-direction: column;
   border-radius: 7px;
   z-index: 10;
-  background-image: linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.07) 24%, rgba(255,255,255,0.03) 100%);
-  clip-path: inset(0 round 8px);
   .textContainer {
     display: flex;
     color: rgba(255, 255, 255, 0.6);
-    .textItem {
+    p {
       letter-spacing: 0.2px;
     }
   }
@@ -240,8 +318,8 @@ export default {
       .columnNumDetail {
         position: relative;
         display: flex;
-        .text {
-          text-shadow: 0px 1px 1px rgba(0, 0, 0, .1);
+        p {
+          text-shadow: 0 1px 1px rgba(0, 0, 0, .1);
         }
       }
       .card {
@@ -249,8 +327,9 @@ export default {
         border-radius: 7px;
         opacity: 0.4;
         border: 0.5px solid rgba(255, 255, 255, 0.20);
-        box-shadow: 0px 1px 2px rgba(0, 0, 0, .2);
-        background-image: radial-gradient(60% 134%, rgba(255, 255, 255, 0.09) 44%, rgba(255, 255, 255, 0.05) 100%);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, .2);
+        background-image: radial-gradient(60% 134%,
+          rgba(255, 255, 255, 0.09) 44%, rgba(255, 255, 255, 0.05) 100%);
       }
     }
   }

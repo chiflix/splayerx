@@ -1,34 +1,72 @@
+import path from 'path';
+import { remote, ipcRenderer } from 'electron';
+import fs from 'fs';
 import asyncStorage from '@/helpers/asyncStorage';
 import syncStorage from '@/helpers/syncStorage';
 
 const state = {
-  deleteVideoHistoryOnExit: false,
+  nsfwProcessDone: false,
+  protectPrivacy: false,
+  channels: [
+    'https://www.bilibili.com/',
+    'https://www.iqiyi.com/',
+    'https://www.douyu.com/',
+    'https://www.huya.com/',
+    'https://v.qq.com/',
+    'https://www.youku.com/',
+    'https://www.twitch.tv/',
+    'https://www.youtube.com/',
+  ],
+  hideNSFW: true,
   privacyAgreement: undefined,
   displayLanguage: '',
-  primaryLanguage: '',
-  secondaryLanguage: '',
+  primaryLanguage: undefined,
+  secondaryLanguage: undefined,
   singleCycle: false,
-  lastWinSize: [],
   reverseScrolling: false,
+  subtitleOff: false,
+  showFullTimeCode: false,
 };
 const getters = {
+  nsfwProcessDone: state => state.nsfwProcessDone,
   preferenceData: state => state,
-  deleteVideoHistoryOnExit: state => state.deleteVideoHistoryOnExit,
+  protectPrivacy: state => state.protectPrivacy,
+  channels: state => state.channels,
+  hideNSFW: state => state.hideNSFW,
+  smartMode: state => state.protectPrivacy && state.hideNSFW,
+  incognitoMode: state => state.protectPrivacy && !state.hideNSFW,
   reverseScrolling: state => state.reverseScrolling,
   privacyAgreement: state => state.privacyAgreement,
-  displayLanguage: state => state.displayLanguage,
+  displayLanguage: (state) => {
+    let { displayLanguage } = state;
+    // COMPATIBILITY: 4.1.14
+    if (displayLanguage === 'zhCN') displayLanguage = 'zh-Hans';
+    if (displayLanguage === 'zhTW') displayLanguage = 'zh-Hant';
+    return displayLanguage;
+  },
   primaryLanguage: state => state.primaryLanguage,
   secondaryLanguage: state => state.secondaryLanguage,
   singleCycle: state => state.singleCycle,
-  lastWinSize: state => state.lastWinSize,
+  subtitleOff: state => state.subtitleOff,
+  showFullTimeCode: state => state.showFullTimeCode,
 };
 
 const mutations = {
+  nsfwProcessDone(state) {
+    state.nsfwProcessDone = true;
+  },
+  repositionChannels(state, { from, to }) {
+    const item = state.channels.splice(from, 1)[0];
+    state.channels.splice(to, 0, item);
+  },
   displayLanguage(state, payload) {
     state.displayLanguage = payload;
   },
-  deleteVideoHistoryOnExit(state, payload) {
-    state.deleteVideoHistoryOnExit = payload;
+  hideNSFW(state, payload) {
+    state.hideNSFW = payload;
+  },
+  protectPrivacy(state, payload) {
+    state.protectPrivacy = payload;
   },
   reverseScrolling(state, payload) {
     state.reverseScrolling = payload;
@@ -45,9 +83,6 @@ const mutations = {
   singleCycle(state, payload) {
     state.singleCycle = payload;
   },
-  lastWinSize(state, payload) {
-    state.lastWinSize = payload;
-  },
   setPreference(state, payload) {
     Object.assign(state, payload);
   },
@@ -55,8 +90,32 @@ const mutations = {
     const data = syncStorage.getSync('preferences');
     Object.assign(state, data);
   },
+  subtitleOff(state, payload) {
+    state.subtitleOff = !!payload;
+  },
+  showFullTimeCode(state, payload) {
+    state.showFullTimeCode = payload;
+  },
 };
 const actions = {
+  nsfwProcessDone({ commit, state }) {
+    commit('nsfwProcessDone');
+    return asyncStorage.set('preferences', state);
+  },
+  welcomeProcess({ commit, state }, payload) {
+    commit('privacyAgreement', payload.privacyAgreement);
+    commit('primaryLanguage', payload.primaryLanguage);
+    commit('secondaryLanguage', payload.secondaryLanguage);
+    fs.closeSync(fs.openSync(path.join(remote.app.getPath('userData'), 'WELCOME_PROCESS_MARK'), 'w'));
+    return asyncStorage.set('preferences', state);
+  },
+  repositionChannels(
+    { commit, state },
+    { from, to },
+  ) {
+    commit('repositionChannels', { from, to });
+    return asyncStorage.set('preferences', state);
+  },
   displayLanguage({ commit, state }, payload) {
     commit('displayLanguage', payload);
     return asyncStorage.set('preferences', state);
@@ -77,12 +136,17 @@ const actions = {
     commit('reverseScrolling', false);
     return asyncStorage.set('preferences', state);
   },
-  deleteVideoHistoryOnExit({ commit, state }) {
-    commit('deleteVideoHistoryOnExit', true);
+  hideNSFW({ commit, state }, payload) {
+    commit('hideNSFW', !!payload);
+    if (payload) ipcRenderer.send('labor-task-add', 'nsfw-warmup');
     return asyncStorage.set('preferences', state);
   },
-  notDeleteVideoHistoryOnExit({ commit, state }) {
-    commit('deleteVideoHistoryOnExit', false);
+  protectPrivacy({ commit, state }) {
+    commit('protectPrivacy', true);
+    return asyncStorage.set('preferences', state);
+  },
+  notprotectPrivacy({ commit, state }) {
+    commit('protectPrivacy', false);
     return asyncStorage.set('preferences', state);
   },
   primaryLanguage({ commit, state }, payload) {
@@ -101,16 +165,16 @@ const actions = {
     commit('singleCycle', false);
     commit('LOOP_UPDATE', false);
   },
-  saveWinSize({ commit }, payload) {
-    if (payload.angle === 90 || payload.angle === 270) {
-      commit('lastWinSize', [payload.size[1], payload.size[0]]);
-    } else {
-      commit('lastWinSize', payload.size);
-    }
-    return asyncStorage.set('preferences', state);
-  },
   setPreference({ commit, state }, payload) {
     commit('setPreference', payload);
+    return asyncStorage.set('preferences', state);
+  },
+  setSubtitleOff({ commit, state }, payload) {
+    commit('subtitleOff', payload);
+    return asyncStorage.set('preferences', state);
+  },
+  showFullTimeCode({ commit, state }, payload) {
+    commit('showFullTimeCode', payload);
     return asyncStorage.set('preferences', state);
   },
 };

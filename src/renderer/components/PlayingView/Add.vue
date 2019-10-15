@@ -1,14 +1,27 @@
 <template>
-  <div class="button" ref="button"
+  <div
+    ref="button"
     @mouseenter="addMouseenter"
     @mouseleave="addMouseleave"
-    @mouseup.left="addMouseup">
-    <div class="btnMask" ref="btnMask">
-      <Icon class="addUi" type="add"></Icon>
+    @mouseup.left="addMouseup"
+    :style="{
+      cursor: isInRange ? 'pointer' : `${cursorUrl}, pointer`,
+    }"
+    class="button"
+  >
+    <div
+      ref="btnMask"
+      class="btnMask"
+    >
+      <Icon
+        class="addUi"
+        type="add"
+      />
     </div>
   </div>
 </template>
-<script>
+<script lang="ts">
+import { log } from '@/libs/Log';
 import Icon from '@/components/BaseIconContainer.vue';
 
 export default {
@@ -16,26 +29,48 @@ export default {
     Icon,
   },
   props: {
-    index: {
-      type: Number,
+    cursorUrl: {
+      type: String,
+      default: '',
+    },
+    isInRange: {
+      type: Boolean,
+      default: false,
     },
     addMouseup: {
       type: Function,
+      default: () => {
+        log.debug('Add.vue', 'mouse up on add button');
+      },
     },
     itemMoving: {
       type: Boolean,
     },
+    onItemMouseout: {
+      type: Function,
+      default: () => {
+        log.debug('Add.vue', 'mouse out on add button');
+      },
+    },
+    onItemMouseover: {
+      type: Function,
+      default: () => {
+        log.debug('Add.vue', 'mouse over on add button');
+      },
+    },
   },
   methods: {
     addMouseenter() {
-      if (!this.itemMoving) {
+      if (!this.itemMoving && this.isInRange) {
         this.$refs.button.style.setProperty('background-color', 'rgba(123, 123, 123, 0.12)');
         this.$refs.btnMask.style.setProperty('border-color', 'rgba(255, 255, 255, 0.6)');
+        this.onItemMouseover(null, null, true);
       }
     },
     addMouseleave() {
       this.$refs.button.style.setProperty('background-color', 'rgba(0, 0, 0, 0.12)');
       this.$refs.btnMask.style.setProperty('border-color', 'rgba(255, 255, 255, 0.15)');
+      this.onItemMouseout();
     },
   },
 };
@@ -46,11 +81,11 @@ export default {
   border-radius: 2.5px;
   background-color: rgba(0, 0, 0, 0.12);
   transition: background-color 150ms ease-out, transform 100ms ease-out;
-  backdrop-filter: blur(9.8px);
   cursor: pointer;
 }
 
 .btnMask {
+  box-sizing: border-box;
   border-radius: 2.5px;
   width: 100%;
   height: 100%;

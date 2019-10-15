@@ -1,8 +1,11 @@
-
-<svg width="13px" height="10px" viewBox="0 0 13 10" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <g id="页面1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" opacity="0.8" stroke-linecap="round" stroke-linejoin="round">
-        <g id="General/复制-2" transform="translate(-418.000000, -167.000000)" stroke="#FFFFFF" stroke-width="1.5">
-            <polyline id="路径" points="419 171.760805 422.911873 175.521609 429.6864 168"></polyline>
+<svg width="15px" height="15px" viewBox="0 0 15 15" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <g id="画板" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" opacity="0.8">
+        <g id="success-default-icon" transform="translate(2.500000, 4.000000)" stroke="#FFFFFF" stroke-width="1.5">
+            <g id="页面1">
+                <g id="General/复制-2">
+                    <polyline id="路径" points="0 3.760805 3.911873 7.521609 10.6864 0"></polyline>
+                </g>
+            </g>
         </g>
     </g>
 </svg>

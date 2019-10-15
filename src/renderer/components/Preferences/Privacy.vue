@@ -1,369 +1,133 @@
 <template>
-<div class="preference-setting">
-  <BaseCheckBox
-    :checkboxValue="privacyAgreement"
-    @update:checkbox-value="privacyAgreement = $event">
-    {{ $t('preferences.privacy.privacyConfirm') }}
-  </BaseCheckBox>
-  <div class="languages-select">
-    <div class="select-content" :style="{opacity: privacyAgreement ? 1 : 0.3}">
-      <div class="title">{{ $t('preferences.privacy.languagePriority')}}</div>
-      <div class="description">{{ $t('preferences.privacy.languageDescription')}}</div>
-      <table>
-        <tr>
-          <td class="selection-title">{{ $t('preferences.privacy.primary')}}</td>
-          <td class="selection-box">
-            <div class="drop-down">
-            <div class="no-drag" :class="showFirstSelection ? 'drop-down-content' : 'drop-down-brief'"
-              :style="{ cursor: privacyAgreement ? 'pointer' : 'default' }"
-              @mouseup.stop="openFirstDropdown">
-              <div class="selected">{{ codeToLanguageName(primaryLanguage) }}</div>
-              <Icon type="rightArrow" :class="showFirstSelection ? 'up-arrow' : 'down-arrow'"/>
-              <div class="content" v-if="showFirstSelection"
-                @mouseup.stop="">
-                <div class="selection"
-                  v-for="(language, index) in primaryLanguages"
-                  :key="index"
-                  @mouseup.stop="handleFirstSelection(language)">
-                  {{ codeToLanguageName(language) }}
-                </div>
-              </div>
-              </div>
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td class="selection-title">{{ $t('preferences.privacy.secondary')}}</td>
-          <td class="selection-box">
-            <div class="drop-down">
-              <div class="no-drag" :class="showSecondSelection ? 'drop-down-content' : 'drop-down-brief'"
-                :style="{ cursor: privacyAgreement ? 'pointer' : 'default' }"
-                @mouseup.stop="openSecondDropdown">
-                <div class="selected">{{ codeToLanguageName(secondaryLanguage) }}</div>
-                <Icon type="rightArrow" :class="showSecondSelection ? 'up-arrow' : 'down-arrow'"/>
-                <div class="content" v-if="showSecondSelection"
-                  @mouseup.stop="">
-                  <div class="selection" ref="secondarySelection"
-                    v-for="(language, index) in secondaryLanguages"
-                    :key="index"
-                    :style="{
-                      color: (language === primaryLanguage && language !== noLanguage) ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,1)',
-                    }"
-                    @mouseover="mouseover(index)"
-                    @mouseout="mouseout(index)"
-                    @mouseup.stop="handleSecondSelection(language, index)">
-                    {{ codeToLanguageName(language) }}
-                    <span v-if="language === primaryLanguage && language !== noLanguage"
-                      style="color: rgba(255,255,255,0.5)">- {{ $t('preferences.privacy.primary') }}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </td>
-        </tr>
-      </table>
+  <div class="privacy">
+    <BaseCheckBox v-model="protectPrivacy">
+      {{ $t('preferences.privacy.enable') }}
+    </BaseCheckBox>
+    <div
+      :style="{ opacity: !protectPrivacy ? 0.3: 1.0 }"
+      class="privacy_background"
+    >
+      <div class="privacy_radio">
+        <BaseRadio
+          v-model="radioValue"
+          value="smartMode"
+          name="mode"
+        >
+          {{ $t('preferences.privacy.smartMode') }}
+          <span
+            v-if="!isMas"
+            style="opacity: 0.6"
+          >Beta</span>
+        </BaseRadio>
+        <div class="privacy_radio_description">
+          {{ $t('preferences.privacy.smartDescription') }}
+        </div>
+        <BaseRadio
+          v-model="radioValue"
+          value="incognitoMode"
+          name="mode"
+          class="privacy_radio2"
+        >
+          {{ $t('preferences.privacy.incognitoMode') }}
+        </BaseRadio>
+        <div class="privacy_radio_description">
+          {{ $t('preferences.privacy.incognitoDescription') }}
+        </div>
+      </div>
     </div>
   </div>
-</div>
 </template>
-
-<script>
+<script lang="ts">
 import electron from 'electron';
-import { codeToLanguageName } from '@/helpers/language';
-import Icon from '@/components/BaseIconContainer.vue';
 import BaseCheckBox from './BaseCheckBox.vue';
+import BaseRadio from './BaseRadio.vue';
 
 export default {
-  name: 'General',
+  name: 'Privacy',
   components: {
-    Icon,
     BaseCheckBox,
+    BaseRadio,
   },
-  props: ['mouseDown', 'isMoved'],
   data() {
     return {
-      showFirstSelection: false,
-      showSecondSelection: false,
-      languages: [
-        '',
-        'zh-CN',
-        'zh-TW',
-        'ja',
-        'ko',
-        'en',
-        'es',
-        'fr',
-        'de',
-        'it',
-        'pt',
-        'cs',
-        'ru',
-        'id',
-        'ar',
-        'hi',
-      ],
-      noLanguage: this.$t('preferences.privacy.none'),
+      radioValue: 'smartMode',
     };
   },
-  watch: {
-    privacyAgreement(val) {
-      if (!val) {
-        this.showFirstSelection = this.showSecondSelection = false;
-      }
-    },
-    mouseDown(val, oldVal) {
-      if (!val && oldVal && !this.isMoved) {
-        this.showFirstSelection = this.showSecondSelection = false;
-      } else if (!val && oldVal && this.isMoved) {
-        this.$emit('move-stoped');
-      }
-    },
-  },
   computed: {
-    primaryLanguages() {
-      return this.languages.filter(language => language && language !== this.primaryLanguage);
-    },
-    secondaryLanguages() {
-      return this.languages.filter(language => language !== this.secondaryLanguage);
+    isMas() {
+      return !!process.mas;
     },
     preferenceData() {
       return this.$store.getters.preferenceData;
     },
-    primaryLanguage: {
+    protectPrivacy: {
       get() {
-        return this.$store.getters.primaryLanguage;
+        return this.$store.getters.protectPrivacy;
       },
-      set(val) {
-        this.$store.dispatch('primaryLanguage', val).then(() => {
-          electron.ipcRenderer.send('preference-to-main', this.preferenceData);
-        });
-      },
-    },
-    secondaryLanguage: {
-      get() {
-        return this.$store.getters.secondaryLanguage;
-      },
-      set(val) {
-        this.$store.dispatch('secondaryLanguage', val).then(() => {
-          electron.ipcRenderer.send('preference-to-main', this.preferenceData);
-        });
-      },
-    },
-    privacyAgreement: {
-      get() {
-        return this.$store.getters.privacyAgreement;
-      },
-      set(val) {
+      set(val: boolean) {
         if (val) {
-          this.$store.dispatch('agreeOnPrivacyPolicy').then(() => {
+          this.$store.dispatch('protectPrivacy').then(() => {
             electron.ipcRenderer.send('preference-to-main', this.preferenceData);
           });
         } else {
-          this.$store.dispatch('disagreeOnPrivacyPolicy').then(() => {
+          this.$store.dispatch('notprotectPrivacy').then(() => {
             electron.ipcRenderer.send('preference-to-main', this.preferenceData);
           });
         }
+      },
+    },
+    hideNSFW: {
+      get() {
+        return this.$store.getters.hideNSFW;
+      },
+      set(val: boolean) {
+        this.$store.dispatch('hideNSFW', !!val).then(() => {
+          electron.ipcRenderer.send('preference-to-main', this.preferenceData);
+        });
       },
     },
   },
-  methods: {
-    codeToLanguageName(code) {
-      if (!code) return this.noLanguage;
-      return codeToLanguageName(code);
+  watch: {
+    radioValue(val: string) {
+      if (val === 'smartMode') this.hideNSFW = true;
+      else if (val === 'incognitoMode') this.hideNSFW = false;
     },
-    mouseover(index) {
-      if (this.secondaryLanguages[index] !== this.primaryLanguage) {
-        this.$refs.secondarySelection[index].classList.add('selection-hover');
-      }
-    },
-    mouseout(index) {
-      if (this.secondaryLanguages[index] !== this.primaryLanguage) {
-        this.$refs.secondarySelection[index].classList.remove('selection-hover');
-      }
-    },
-    handleFirstSelection(selection) {
-      if (selection === this.secondaryLanguage) this.secondaryLanguage = '';
-      this.primaryLanguage = selection;
-      this.showFirstSelection = false;
-    },
-    handleSecondSelection(selection, index) {
-      if (selection !== this.primaryLanguage) {
-        this.secondaryLanguage = selection;
-        this.showSecondSelection = false;
-        this.$refs.secondarySelection[index].classList.remove('selection-hover');
-      }
-    },
-    openFirstDropdown() {
-      if (this.privacyAgreement) {
-        if (this.showFirstSelection) {
-          this.showFirstSelection = false;
-        } else {
-          this.showFirstSelection = true;
-          this.showSecondSelection = false;
-        }
-      }
-    },
-    openSecondDropdown() {
-      if (this.privacyAgreement) {
-        if (this.showSecondSelection) {
-          this.showSecondSelection = false;
-        } else {
-          this.showSecondSelection = true;
-          this.showFirstSelection = false;
-        }
-      }
-    },
+  },
+  created() {
+    if (this.protectPrivacy && !this.hideNSFW) this.radioValue = 'incognitoMode';
+    else this.radioValue = 'smartMode';
   },
 };
 </script>
-<style scoped lang="scss">
-$dropdown-height: 148px;
-$interactor-backgroundColor-default: rgba(255,255,255,0.03);
-$interactor-border-default: 1px solid rgba(255,255,255,0.1);
-$interactor-backgroundColor-hover: rgba(255,255,255,0.08);
-$interactor-border-hover: 1px solid rgba(255,255,255,0.2);
-
-.preference-setting {
-  box-sizing: border-box;
-  padding-top: 37px;
-  padding-left: 24px;
-  width: 100%;
-  height: 100%;
-  .languages-select {
-    background-color: rgba(0,0,0,0.05);
-    width: 380px;
-    margin-bottom: 24px;
-    .select-content {
-      padding: 20px 28px;
-      .title {
-        font-family: $font-medium;
-        font-size: 13px;
-        margin-bottom: 5px;
-        color: rgba(255,255,255,0.9);
-        letter-spacing: 0;
-      }
-      .description {
-        font-family: $font-medium;
-        font-size: 11px;
-        color: rgba(255,255,255,0.5);
-        letter-spacing: 0;
-        margin-bottom: 9px;
-      }
-      .selection-title {
-        height: 28px;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        width: 10%;
-        padding-right: 10px;
-        line-height: 28px;
-        font-family: $font-medium;
-        font-size: 12px;
-        color: rgba(255,255,255,0.7);
-        letter-spacing: 0;
-      }
-      .down-arrow {
-        position: absolute;
-        top: 7px;
-        right: 8px;
-        transform: rotate(90deg);
-        transition: transform 200ms;
-      }
-      .up-arrow {
-        position: absolute;
-        top: 7px;
-        right: 8px;
-        transform: rotate(-90deg);
-        transition: transform 200ms;
-      }
-      table {
-        width: 100%;
-        tr {
-          height: 40px;
-        }
-      }
-      .selection-box {
-        width: 100%;
-        .drop-down {
-          width: 100%;
-          height: 28px;
-          -webkit-app-region: no-drag;
-          .drop-down-brief {
-            position: relative;
-            cursor: pointer;
-            width: 100%;
-            height: 28px;
-            background-color: $interactor-backgroundColor-default;
-            border: $interactor-border-default;
-            border-radius: 2px;
-            font-family: $font-semibold;
-            font-size: 11px;
-            line-height: 28px;
-            color: #FFFFFF;
-            letter-spacing: 0;
-            text-align: center;
-            transition: border 200ms, background-color 200ms;
-            &:hover {
-              border: $interactor-border-hover;
-              background-color: $interactor-backgroundColor-hover;
-            }
-          }
-          .drop-down-content {
-            cursor: pointer;
-            position: relative;
-            z-index: 50;
-            width: 100%;
-            height: $dropdown-height;
-            background-color: rgba(100,100,100,.95);
-            border: 1px solid rgba(255,255,255,0.3);
-            border-radius: 2px;
-            font-family: $font-semibold;
-            font-size: 11px;
-            color: #FFFFFF;
-            letter-spacing: 0;
-            text-align: center;
-            .selected {
-              height: 28px;
-              line-height: 28px;
-              background-color: rgba(255,255,255,0.1);
-            }
-            .content {
-              cursor: pointer;
-              position: absolute;
-              top: 32px;
-              left: 8px;
-              right: 4px;
-              bottom: 4px;
-              overflow-y: scroll;
-              .selection {
-                height: 28px;
-                line-height: 28px;
-              }
-              .selection:hover {
-                background-image: linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.069) 23%, rgba(255,255,255,0.00) 100%);
-              }
-            }
-          }
-        }
-      }
-      .selection-box:nth-of-type(1) {
-        z-index: 1;
-      }
+<style lang="scss" scoped>
+.privacy {
+  .checkbox:nth-of-type(1) {
+    margin-top: 0;
+  }
+  &_background {
+    width: 366px;
+    height: fit-content;
+    margin-top: 15px;
+    background-color: rgba(0,0,0,0.07);
+    border-radius: 5px;
+  }
+  &_radio {
+    margin-left: 29px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    &2 {
+      margin-top: 15px;
+    }
+    &_description {
+      width: 282px;
+      font-family: $font-medium;
+      font-size: 11px;
+      color: rgba(255,255,255,0.25);
+      letter-spacing: 0;
+      line-height: 16px;
+      margin-top: 6px;
+      margin-left: 27px;
     }
   }
-}
-::-webkit-scrollbar {
-  width: 3px;
-  user-select: none;
-}
-/* Handle */
-::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.1);
-  border-radius: 1.5px;
-}
-::-webkit-scrollbar-track {
-  cursor: pointer;
-  border-radius: 2px;
-  width: 10px;
-  user-select: none;
 }
 </style>

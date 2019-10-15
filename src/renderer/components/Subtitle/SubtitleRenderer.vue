@@ -1,433 +1,336 @@
 <template>
-  <div class="subtitle-loader">
-    <div class="subContainer"
-      :class="avaliableClass(index)"
-      v-for="(cue, index) in currentCues"
-      :key="index"
-      :id="'cue'+index"
+  <div
+    class="subtitle-loader"
+  >
+    <div
+      v-for="(item, index) in noPositionCues"
+      :key="'noPosition' + index"
+      :class="'subtitle-alignment'+(index+1)"
       :style="{
-        writingMode: isVtt ? `vertical-${cue.tags.vertical}` : '',
-        left: subLeft(index),
-        top: subTop(index),
-        bottom: subBottom(index),
-      }">
-      <cue-renderer
-        :text="cue.text"
-        :settings="cue.tags"
+        zIndex: '2',
+        bottom: calculateSubBottom(index),
+        top: calculateSubTop(index),
+        display: 'flex',
+        flexDirection: 'column'
+      }"
+    >
+      <div class="primary-sub">
+        <p
+          v-for="(cue, ind) in separateSubtitle(item)[0]"
+          :key="cue.text + ind"
+          :style="{
+            zoom: cue.category === 'first' ? `${scaleNum}` : `${secondarySubScale}`,
+            writingMode: (cue.category === 'first' ? firstType === 'vtt' : secondType === 'vtt')
+              ? `vertical-${cue.tags.vertical}` : '',
+            lineHeight: '120%',
+            paddingTop: calculatePaddingTop(ind),
+            paddingBottom: calculatePaddingBottom(ind, separateSubtitle(item)[0].length),
+            fontWeight: cue.tags.b ? 'bold' : '',
+            fontStyle: cue.tags.i ? 'italic' : '',
+            textDecoration: cue.tags.u ? 'underline' : cue.tags.s ? 'line-through' : '',
+            marginBottom: separateSubtitle(item)[1].length
+              && ind === separateSubtitle(item)[0].length - 1
+              ? `${subtitleSpace / scaleNum}px` : '',
+          }"
+          :class="[`subtitle-style${chosenStyle}`]"
+        ><!--eslint-disable-line-->{{ cue.text }}</p>
+      </div>
+      <div class="secondary-sub">
+        <p
+          v-for="(cue, ind) in separateSubtitle(item)[1]"
+          :key="cue.text + ind"
+          :style="{
+            zoom: cue.category === 'first' ? `${scaleNum}` : `${secondarySubScale}`,
+            writingMode: (cue.category === 'first' ? firstType === 'vtt' : secondType === 'vtt')
+              ? `vertical-${cue.tags.vertical}` : '',
+            lineHeight: '120%',
+            paddingTop: calculatePaddingTop(ind),
+            paddingBottom: calculatePaddingBottom(ind, separateSubtitle(item)[1].length),
+            fontWeight: cue.tags.b ? 'bold' : '',
+            fontStyle: cue.tags.i ? 'italic' : '',
+            textDecoration: cue.tags.u ? 'underline' : cue.tags.s ? 'line-through' : '',
+          }"
+          :class="[`subtitle-style${chosenStyle}`]"
+        ><!--eslint-disable-line-->{{ cue.text }}</p>
+      </div>
+    </div>
+    <div
+      v-for="(item, index) in positionCues"
+      :key="'position'+index"
+      :style="{
+        position: 'absolute',
+        left: subLeft(item[0]),
+        top: subTop(item[0]),
+        transform: `translate(${translateNum(item[0])[0]}%, ${translateNum(item[0])[1]}%)`,
+        transformOrigin: 'bottom left',
+      }"
+    >
+      <p
+        v-for="(cue, ind) in item"
+        :key="cue.text + ind"
         :style="{
-          zoom: isFirstSub ? `${scaleNum}` : `${secondarySubScale}`,
-          lineHeight: enabledSecondarySub && currentFirstSubtitleId !== '' && currentSecondSubtitleId !== '' ? '68%' : 'normal',
+          whiteSpace: 'pre',
+          zoom: cue.category === 'first' ? `${scaleNum}` : `${secondarySubScale}`,
+          fontWeight: cue.tags.b ? 'bold' : '',
+          fontStyle: cue.tags.i ? 'italic' : '',
+          textDecoration: cue.tags.u ? 'underline' : cue.tags.s ? 'line-through' : '',
+          lineHeight: '120%',
+          padding: calculatePositionSubPad
         }"
-      />
+        :class="'subtitle-style'+chosenStyle"
+      ><!--eslint-disable-line-->{{ cue.text }}</p>
     </div>
   </div>
 </template>
-<script>
-import { mapGetters, mapMutations } from 'vuex';
-import { isEqual, differenceWith, isEmpty } from 'lodash';
-import { Subtitle as subtitleMutations } from '@/store/mutationTypes';
-import { videodata } from '@/store/video';
-import CueRenderer from './CueRenderer.vue';
-import SubtitleInstance from './SubtitleLoader/index';
+<script lang="ts">
+import { isEqual } from 'lodash';
+import { Cue, ITags, NOT_SELECTED_SUBTITLE } from '@/interfaces/ISubtitle';
+import { calculateTextSize } from '@/libs/utils';
 
 export default {
-  name: 'subtitle-renderer',
+  name: 'SubtitleRenderer',
   props: {
-    subtitleInstance: SubtitleInstance,
-    isFirstSub: {
+    currentCues: {
+      type: Array,
+      required: true,
+    },
+    subPlayRes: {
+      type: Array,
+      required: true,
+    },
+    scaleNum: {
+      type: Number,
+      required: true,
+    },
+    subToTop: {
       type: Boolean,
-      default: true,
     },
-    linesNum: {
+    currentFirstSubtitleId: {
+      type: String,
+      required: true,
+    },
+    currentSecondarySubtitleId: {
+      type: String,
+      required: true,
+    },
+    winHeight: {
+      type: Number,
+      required: true,
+    },
+    chosenStyle: {
+      type: Number,
+      default: 0,
+    },
+    chosenSize: {
       type: Number,
       default: 1,
     },
-    firstLinesNum: {
-      type: Number,
-      default: 1,
-    },
-    tags: {
-      type: Object,
-    },
-    firstTags: {
-      type: Object,
+    enabledSecondarySub: {
+      type: Boolean,
+      required: true,
     },
   },
-  components: { CueRenderer },
   data() {
     return {
-      subtitle: null,
-      currentCues: [],
-      videoSegments: [],
-      currentSegment: [0, 0, false],
-      elapsedSegmentTime: 0,
-      lastIndex: [],
-      lastAlignment: [],
-      lastText: [],
-      subPlayResX: 0,
-      subPlayResY: 0,
-      lastTransPercent: 0,
-      requestId: 0,
+      normalFont: 'Avenir, Roboto-Regular, PingFang SC, Microsoft Yahei',
     };
   },
   computed: {
-    ...mapGetters(['duration', 'scaleNum', 'subtitleDelay', 'intrinsicHeight', 'intrinsicWidth', 'subToTop', 'currentFirstSubtitleId', 'currentSecondSubtitleId', 'winHeight', 'enabledSecondarySub', 'chosenSize']),
-    type() {
-      return this.subtitleInstance.metaInfo.format;
+    calculatePositionSubPad() {
+      return this.chosenStyle === 4 ? '0.9px 0' : '';
     },
-    currentTags() {
-      return this.currentCues.map(cue => cue.tags);
+    subtitleSpace() {
+      const subSpaceFactors: number[] = [15, 18, 21, 24];
+      return subSpaceFactors[this.chosenSize] / 1080 * this.winHeight;
     },
-    currentTexts() {
-      return this.currentCues.map(cue => cue.text);
+    firstType() {
+      return this.currentCues[0].cue && this.currentCues[0].cue.length > 0 ? this.currentCues[0].cue[0].format : '';
     },
-    isVtt() {
-      return this.type === 'vtt';
+    secondType() {
+      return this.currentCues[1].cue && this.currentCues[1].cue.length > 0 ? this.currentCues[1].cue[0].format : '';
     },
-    secondarySubScale() { // 第二字幕的字号最小不小于9px
-      if (this.currentFirstSubtitleId === '') {
-        return this.scaleNum;
-      }
+    secondarySubScale() {
+      if (this.currentFirstSubtitleId === NOT_SELECTED_SUBTITLE) return this.scaleNum;
       return (this.scaleNum * 5) / 6 < 1 ? 1 : (this.scaleNum * 5) / 6;
     },
-    shouldTranslate() {
-      return !this.tags.pos && !this.firstTags.pos &&
-        this.tags.alignment === this.firstTags.alignment;
+    firstSubTextHeight() {
+      const { normalFont, scaleNum } = this;
+      return calculateTextSize('9px', normalFont, '120%', scaleNum.toString(), 'test').height;
     },
-  },
-  watch: {
-    videoSegments(newVal) {
-      const duration = newVal
-        .filter(segment => segment[2])
-        .map(segment => segment[1] - segment[0])
-        .reduce((prev, curr) => prev + curr, 0);
-      this.updateDuration({ id: this.subtitleInstance.id, duration });
+    secondarySubTextHeight() {
+      const { normalFont, secondarySubScale } = this;
+      return calculateTextSize('9px', normalFont, '120%', secondarySubScale.toString(), 'test').height;
     },
-    currentTexts(val) {
-      val.forEach((de, index) => {
-        const ind = this.lastText.indexOf(de);
-        if (ind !== -1) {
-          this.currentCues[index].tags.alignment = this.lastAlignment[ind];
+    positionCues() {
+      const firstCues: Cue[] = this.currentCues[0]
+        .filter((cue: Cue) => this.calculatePosition(cue.category, cue.tags)).map((cue: Cue) => { cue.category = 'first'; return cue; });
+      const secondaryCues: Cue[] = this.currentCues[1]
+        .filter((cue: Cue) => this.calculatePosition(cue.category, cue.tags)).map((cue: Cue) => { cue.category = 'secondary'; return cue; });
+      const firstClassifiedCues: Cue[][] = [];
+      const secondaryClassifiedCues: Cue[][] = [];
+      firstCues.forEach((item: Cue) => {
+        const index: number = firstClassifiedCues
+          .findIndex((e: Cue[]) => isEqual(e[0].tags, item.tags));
+        if (index !== -1) {
+          firstClassifiedCues[index].push(item);
+        } else {
+          firstClassifiedCues.push([item]);
         }
       });
+      secondaryCues.forEach((item: Cue) => {
+        const index: number = secondaryClassifiedCues
+          .findIndex((e: Cue[]) => isEqual(e[0].tags, item.tags));
+        if (index !== -1) {
+          secondaryClassifiedCues[index].push(item);
+        } else {
+          secondaryClassifiedCues.push([item]);
+        }
+      });
+      return (firstClassifiedCues || []).concat(secondaryClassifiedCues || []);
     },
-    subToTop(val) {
-      if (!val) {
-        this.lastIndex.forEach((index) => {
-          if (this.currentTags[index]) {
-            this.currentTags[index].alignment = this.lastAlignment[index]
-              ? this.lastAlignment[index] : 2;
-          }
-        });
+    noPositionCues() {
+      const allCues = [];
+      for (let i = 1; i < 10; i += 1) {
+        const firstCues = this.currentCues[0]
+          .filter((cue: Cue) => (this.subToTop && [1, 2, 3]
+            .includes(this.calculateAlignment(cue.category, cue.tags))
+            ? this.calculateAlignment(cue.category, cue.tags) + 6
+            : this.calculateAlignment(cue.category, cue.tags)) === i
+            && !this.calculatePosition(cue.category, cue.tags));
+        const secondaryCues = this.currentCues[1]
+          .filter((cue: Cue) => (this.subToTop && [1, 2, 3]
+            .includes(this.calculateAlignment(cue.category, cue.tags))
+            ? this.calculateAlignment(cue.category, cue.tags) + 6
+            : this.calculateAlignment(cue.category, cue.tags)) === i
+            && !this.calculatePosition(cue.category, cue.tags));
+        allCues.push((firstCues.length ? firstCues.map((cue: Cue) => { cue.category = 'first'; return cue; }) : [])
+          .concat(secondaryCues.length ? secondaryCues.map((cue: Cue) => { cue.category = 'secondary'; return cue; }) : []));
       }
+      return allCues;
     },
-  },
-  created() {
-    const { subtitleInstance } = this;
-    subtitleInstance.once('data', subtitleInstance.parse);
-    subtitleInstance.on('parse', (parsed) => {
-      const parsedData = parsed.dialogues;
-      this.videoSegments = this.getVideoSegments(parsedData, this.duration);
-      this.subPlayResX = !isEmpty(parsed.info) ? Number(parsed.info.PlayResX) : this.intrinsicWidth;
-      this.subPlayResY = !isEmpty(parsed.info) ? Number(parsed.info.PlayResY) :
-        this.intrinsicHeight;
-    });
-    subtitleInstance.load();
-  },
-  mounted() {
-    this.requestId = requestAnimationFrame(this.currentTimeUpdate);
-  },
-  beforeDestroy() {
-    cancelAnimationFrame(this.requestId);
-    this.lastIndex = [];
-    this.lastAlignment = [];
-    this.lastText = [];
   },
   methods: {
-    ...mapMutations({
-      updateDuration: subtitleMutations.DURATIONS_UPDATE,
-    }),
-    avaliableClass(index) {
-      if (!this.isVtt) {
-        if (!this.currentTags[index].pos) {
-          if (this.subToTop && ![4, 5, 6, 7, 8, 9].includes(this.currentTags[index].alignment)) {
-            this.lastIndex.push(index);
-            this.lastAlignment.push(this.currentTags[index].alignment);
-            this.lastText.push(this.currentTexts[index]);
-            this.currentTags[index].alignment += 6;
-          }
-          return `subtitle-alignment${this.currentTags[index].alignment}`;
+    separateSubtitle(item: Cue[]) {
+      const index = item.findIndex((cue: Cue) => cue.category === 'secondary');
+      if (index !== -1) {
+        return [item.slice(0, index), item.slice(index, item.length)];
+      }
+      return [item, []];
+    },
+    calculateSubBottom(index: number) {
+      if ([1, 2, 3].includes(index + 1)) {
+        const {
+          secondarySubTextHeight, secondarySubScale, chosenStyle, currentFirstSubtitleId,
+          currentSecondarySubtitleId, enabledSecondarySub, subtitleSpace, winHeight, noPositionCues,
+        } = this;
+        const padding = chosenStyle === 4 ? 0.9 : 0;
+        const adaptedCues = noPositionCues[0]
+          .concat(noPositionCues[1], noPositionCues[2])
+          .filter((cue: Cue) => cue.category && cue.category === 'secondary');
+        if (adaptedCues.length === 1 && !adaptedCues[0].text.includes('\n') && currentFirstSubtitleId !== NOT_SELECTED_SUBTITLE) {
+          return `${(secondarySubTextHeight * secondarySubScale + (60 / 1080) * winHeight) * 100 / winHeight}%`;
         }
-        return '';
-      } else if (this.isVtt && this.currentTags[index].line !== '' && this.currentTags[index].position !== '') {
-        return '';
-      }
-      return 'subtitle-alignment2';
-    },
-    currentTimeUpdate() {
-      const { time: currentTime } = videodata;
-      const { subtitleDelay } = this;
-      if (!this.lastCurrentTime) {
-        this.lastCurrentTime = currentTime;
-      }
-      const { lastCurrentTime } = this;
-      this.setCurrentCues(currentTime - (subtitleDelay / 1000));
-      this.updateVideoSegments(lastCurrentTime, currentTime);
-      this.requestId = requestAnimationFrame(this.currentTimeUpdate);
-    },
-    isSameCues(cues1, cues2) {
-      return !differenceWith(
-        cues1,
-        cues2,
-        (cue1, cue2) => {
-          const { text: text1, tags: tags1 } = cue1;
-          const { text: text2, tags: tags2 } = cue2;
-          return (
-            text1 === text2 &&
-            isEqual(tags1, tags2)
-          );
-        },
-      ).length;
-    },
-    setCurrentCues(currentTime) {
-      if (!this.subtitleInstance.parsed) return;
-      const parsedData = this.subtitleInstance.parsed.dialogues;
-      if (parsedData) {
-        const cues = this.parsedFragments(parsedData
-          .filter(({
-            start, end,
-            text, fragments,
-          }) => (
-            start <= currentTime &&
-            end >= currentTime &&
-            (!!text || !!fragments)
-          )));
-        if (cues.length !== this.currentCues.length || !this.isSameCues(cues, this.currentCues)) {
-          this.currentCues = cues;
-          this.$nextTick(() => {
-            this.currentCues.forEach((item, index) => {
-              if (document.querySelector(`#cue${index}`)) {
-                document.querySelector(`#cue${index}`).style.transform = this.transPos(index);
-              }
-            });
-          });
+        if (adaptedCues.length === 0 && currentSecondarySubtitleId !== NOT_SELECTED_SUBTITLE
+          && enabledSecondarySub && currentFirstSubtitleId !== NOT_SELECTED_SUBTITLE) {
+          return `${(subtitleSpace + (secondarySubTextHeight + padding) * 2 * secondarySubScale + (60 / 1080) * winHeight) * 100 / winHeight}%`;
         }
-      }
-    },
-    parsedFragments(cues) {
-      if (this.type === 'ass') {
-        const currentCues = [];
-        cues.forEach((item) => {
-          let currentText = '';
-          let currentTags = {};
-          if (item.fragments.length) {
-            item.fragments.forEach((cue) => {
-              currentText += cue.text;
-              if (cue.tags) {
-                currentTags = cue.tags;
-              }
-            });
-            currentCues.push({
-              start: item.start, end: item.end, tags: currentTags, text: currentText,
-            });
-          }
-        });
-        return currentCues;
-      }
-      return cues;
-    },
-    updateVideoSegments(lastCurrentTime, currentTime) {
-      const { videoSegments, currentSegment, elapsedSegmentTime } = this;
-      const segment = videoSegments
-        .filter(segment => segment[0] <= currentTime && segment[1] > currentTime)[0];
-      if (segment && !segment[2]) {
-        if (isEqual(segment, currentSegment)) {
-          this.elapsedSegmentTime += currentTime - lastCurrentTime;
-        } else {
-          const segmentTime = currentSegment[1] - currentSegment[0];
-          if (elapsedSegmentTime / segmentTime >= 0.9) {
-            const index = videoSegments.findIndex(segment => segment[0] === currentSegment[0]);
-            if (index !== -1) {
-              this.$set(videoSegments, index, [...videoSegments[index].slice(0, 2), true]);
-            }
-          }
-          this.currentSegment = segment;
-        }
-      }
-    },
-    lastLineNum(index) {
-      // 全部显示的字幕中，除当前最新一条字幕外所有字幕的行数
-      const { currentTexts: texts, currentTags: tags } = this;
-      let tmp = 0;
-      while (texts[index - 1]) {
-        if (!isEqual(tags[index], tags[index - 1])) {
-          break;
-        }
-        tmp += texts[index - 1].replace('/<br>$/g', '').split('<br>').length;
-        index -= 1;
-      }
-      return tmp;
-    },
-    lineNum(index) {
-      // 最新一条字幕需要换行的translate比例
-      const { currentTags: tags, currentTexts: texts } = this;
-      if (!this.isFirstSub) {
-        this.$emit('update:linesNum', this.subToTop || [7, 8, 9].includes(tags[index].alignment) ? texts[index].split('<br>').length : this.lastLineNum(index) + texts[index].split('<br>').length); // 第二字幕的行数
-        this.$emit('update:tags', tags[index]); // 第二字幕的tags
-      } else {
-        this.$emit('update:firstLinesNum', this.subToTop || [7, 8, 9].includes(tags[index].alignment) ? this.lastLineNum(index) + texts[index].split('<br>').length : texts[index].split('<br>').length); // 第一字幕的行数
-        this.$emit('update:firstTags', tags[index]); // 第一字幕的tags
-      }
-      return this.lastLineNum(index) / texts[index].split('<br>').length;
-    },
-    assLine(index) {
-      const { currentTags: tags } = this;
-      if (tags[index].pos) {
-        return -100 * this.lineNum(index);
-      }
-      const arr = [1, 2, 3];
-      if (arr.includes(tags[index].alignment) && !this.subToTop) {
-        return -100 * this.lineNum(index);
-      }
-      return 100 * this.lineNum(index);
-    },
-    vttLine(index) {
-      const { currentTags: tags } = this;
-      let tmp = tags[index].line;
-      if (tags[index].line.includes('%')) {
-        tmp = -parseInt(tags[index].line, 10) / 100;
-      }
-      if (tmp >= -1 && tmp < -0.5) {
-        return -100 * this.lineNum(index);
-      }
-      return 100 * this.lineNum(index);
-    },
-    transDirection(transNum, alignment) { // 播放列表打开，translate方向改变
-      return this.subToTop || [7, 8, 9].includes(alignment) ? Math.abs(transNum) : transNum;
-    },
-    firstSubTransPercent(transPercent, alignment) { // 当播放列表打开，第一字幕对应的transPercent
-      return this.subToTop || [7, 8, 9].includes(alignment) ? 0 : transPercent;
-    },
-    secondarySubTransPercent(transPercent, alignment) { // 当播放列表打开，第二字幕对应的transPercent
-      return (this.subToTop || [7, 8, 9].includes(alignment)) && this.currentSecondSubtitleId !== '' && this.currentFirstSubtitleId !== '' && this.enabledSecondarySub ? transPercent : 0;
-    },
-    transPos(index) { // eslint-disable-line
-      const { currentTags: tags, currentTexts: texts, isVtt } = this;
-      const initialTranslate = [
-        [0, 0],
-        [-50, 0],
-        [0, 0],
-        [0, -50],
-        [-50, -50],
-        [0, -50],
-        [0, 0],
-        [-50, 0],
-        [0, 0],
-      ];
-      // 两个字幕的间距，由不同字幕大小下的不同表达式决定
-      const subSpaceFactorsA = [5 / 900, 9 / 900, 10 / 900, 12 / 900];
-      const subSpaceFactorsB = [4, 21 / 5, 4, 23 / 5];
-      const secondSubHeight = this.linesNum * 9 * this.secondarySubScale;
-      const firstSubHeight = this.firstLinesNum * 9 * this.scaleNum;
-      // 当播放列表打开时，计算为第二字幕相对于第一字幕需要translate的值
-      const subHeightWithDirection = this.subToTop || [7, 8, 9].includes(tags[index].alignment) ?
-        [firstSubHeight, secondSubHeight] : [secondSubHeight, firstSubHeight];
-      // 根据字体尺寸和换行数计算字幕需要translate的百分比，当第一字幕同时存在多条且之前条存在位置信息时，之前条不纳入translate计算
-      let transPercent;
-      if (texts[index - 1] && isEqual(tags[index], tags[index - 1]) && this.linesNum === texts[index - 1].split('<br>').length) {
-        transPercent = this.lastTransPercent;
-      } else if (this.tags.alignment !== this.firstTags.alignment && !texts[index - 1]) {
-        transPercent = 0;
-      } else {
-        transPercent = -((subHeightWithDirection[0] + ((subSpaceFactorsA[this.chosenSize] *
-          this.winHeight) + subSpaceFactorsB[this.chosenSize])) / subHeightWithDirection[1]) * 100;
-      }
-      this.lastTransPercent = transPercent;
-      if (!isVtt) {
-        if (this.isFirstSub) { // 第一字幕不是VTT
-          if (tags[index].pos) {
-            // 字幕不为vtt且存在pos属性时，translate字幕使字幕alignment与pos点重合
-            return `translate(${this.translateNum(tags[index].alignment)[0]}%, ${this.translateNum(tags[index].alignment)[1] + this.assLine(index)}%)`;
-          }
-          if (this.currentSecondSubtitleId !== '' && this.enabledSecondarySub && this.shouldTranslate) {
-            // 没有位置信息时且同时存在第一第二字幕时第一字幕需要translate的值
-            return `translate(${initialTranslate[tags[index].alignment - 1][0]}%, ${this.transDirection(initialTranslate[tags[index].alignment - 1][1] + this.firstSubTransPercent(transPercent, tags[index].alignment), tags[index].alignment) + this.assLine(index)}%)`;
-          }
-          // 只有第一字幕时需要translate的值
-          return `translate(${initialTranslate[tags[index].alignment - 1][0]}%, ${this.transDirection(initialTranslate[tags[index].alignment - 1][1], tags[index].alignment) + this.assLine(index)}%)`;
-        }
-        if (tags[index].pos) { // 第二字幕不是VTT
-          // 字幕不为vtt且存在pos属性时，translate字幕使字幕alignment与pos点重合
-          return `translate(${this.translateNum(tags[index].alignment)[0]}%, ${this.transDirection(this.translateNum(tags[index].alignment)[1], tags[index].alignment) + this.assLine(index)}%)`;
-        }
-        return `translate(${initialTranslate[tags[index].alignment - 1][0]}%, ${this.transDirection(initialTranslate[tags[index].alignment - 1][1] + this.secondarySubTransPercent(transPercent, tags[index].alignment), tags[index].alignment) + this.assLine(index)}%)`;
-      }
-      if (tags[index].line && tags[index].position) { // 字幕为VTT且有位置信息
-        return '';
-      }
-      if (this.isFirstSub) {
-        if (this.currentSecondSubtitleId !== '' && this.enabledSecondarySub) {
-          // vtt字幕没有位置信息时且同时存在第一第二字幕时第一字幕需要translate的值
-          if (tags[index].vertical) {
-            return `translate(${initialTranslate[1][0] + this.vttLine(index)}%, ${this.transDirection(initialTranslate[1][1] + this.firstSubTransPercent(transPercent))}%)`;
-          }
-          return `translate(${initialTranslate[1][0]}%, ${this.transDirection(initialTranslate[1][1] + this.firstSubTransPercent(transPercent)) + this.vttLine(index)}%)`;
-        }
-        // 只有第一字幕时需要translate的值
-        if (tags[index].vertical) {
-          return `translate(${initialTranslate[1][0] + this.vttLine(index)}%, ${this.transDirection([1][1], tags[index].alignment)}%)`;
-        }
-        return `translate(${initialTranslate[1][0]}%, ${this.transDirection([1][1], tags[index].alignment) + this.vttLine(index)}%)`;
-      }
-      return `translate(${initialTranslate[1][0]}%, ${this.transDirection(initialTranslate[1][1] + this.secondarySubTransPercent(transPercent, tags[index].alignment), tags[index].alignment) + this.assLine(index)}%)`;
-    },
-    subLeft(index) {
-      const { currentTags: tags, type, isVtt } = this;
-      if (!isVtt && tags[index].pos) {
-        return `${(tags[index].pos.x / this.subPlayResX) * 100}vw`;
-      } else if (type === 'vtt' && tags[index].line && tags[index].position) {
-        if (tags[index].vertical) {
-          if (!tags[index].line.includes('%')) {
-            tags[index].line = Math.abs(tags[index].line) * 100;
-            tags[index].line += '%';
-          }
-          return tags[index].line;
-        }
-        return tags[index].position;
+        return `${60 / 10.8}%`;
       }
       return '';
     },
-    subTop(index) {
-      const { currentTags: tags, isVtt } = this;
+    calculateSubTop(index: number) {
+      if ([7, 8, 9].includes(index + 1)) {
+        const {
+          firstSubTextHeight, scaleNum, chosenStyle, currentFirstSubtitleId, noPositionCues,
+          currentSecondarySubtitleId, enabledSecondarySub, subtitleSpace, winHeight,
+        } = this;
+        const padding = chosenStyle === 4 ? 0.9 : 0;
+        const adaptedCues = noPositionCues[6]
+          .concat(noPositionCues[7], noPositionCues[8])
+          .filter((cue: Cue) => cue.category && cue.category === 'first');
+        if (adaptedCues.length === 1 && !adaptedCues[0].text.includes('\n') && currentSecondarySubtitleId !== NOT_SELECTED_SUBTITLE) {
+          return `${(60 / 1080 * winHeight + firstSubTextHeight * scaleNum) * 100 / winHeight}%`;
+        }
+        if (adaptedCues.length === 0 && currentSecondarySubtitleId !== NOT_SELECTED_SUBTITLE
+          && enabledSecondarySub && currentFirstSubtitleId !== NOT_SELECTED_SUBTITLE) {
+          return `${(subtitleSpace + (firstSubTextHeight + padding) * 2 * scaleNum + 60 / 1080 * winHeight) * 100 / winHeight}%`;
+        }
+        return `${60 / 10.8}%`;
+      }
+      return '';
+    },
+    calculatePaddingTop(ind: number) {
+      if (this.chosenStyle === 4 && ind === 0) {
+        return '0.9px';
+      }
+      return '';
+    },
+    calculatePaddingBottom(ind: number, length: number) {
+      if (this.chosenStyle === 4 && ind === length - 1) {
+        return '0.9px';
+      }
+      return '';
+    },
+    calculatePosition(category: string, tags: ITags) {
+      const type = category === 'first' ? this.firstType : this.secondType;
+      if (type !== 'vtt') {
+        return !!tags.pos;
+      }
+      return tags.line && tags.position;
+    },
+    calculateAlignment(category: string, tags: ITags) {
+      const type = category === 'first' ? this.firstType : this.secondType;
+      if (type !== 'vtt') {
+        return !tags || !tags.alignment ? 2 : tags.alignment;
+      }
+      return !tags.line && !tags.position ? 2 : '';
+    },
+    subLeft(cue: Cue) {
+      const subPlayResX: number = cue.category === 'first' ? this.subPlayRes[0].x : this.subPlayRes[1].x;
+      const type = cue.category === 'first' ? this.firstType : this.secondType;
+      const { tags } = cue;
+      if (type !== 'vtt' && tags.pos) {
+        return `${(tags.pos.x / subPlayResX) * 100}vw`;
+      }
+      if (type === 'vtt' && tags.line && tags.position) {
+        if (tags.vertical) {
+          if (!tags.line.includes('%')) {
+            tags.line = `${Math.abs(Number(tags.line)) * 100}%`;
+          }
+          return tags.line;
+        }
+        return tags.position;
+      }
+      return '';
+    },
+    subTop(cue: Cue) {// eslint-disable-line
+      const subPlayResY: number = cue.category === 'first' ? this.subPlayRes[0].y : this.subPlayRes[1].y;
+      const type = cue.category === 'first' ? this.firstType : this.secondType;
+      const { tags } = cue;
+      const isVtt = type === 'vtt';
       if (!isVtt) {
-        if (tags[index].pos) {
-          return `${(tags[index].pos.y / this.subPlayResY) * 100}vh`;
-        } else if ([7, 8, 9].includes(tags[index].alignment)) {
+        if (tags.pos) {
+          return `${(tags.pos.y / subPlayResY) * 100}vh`;
+        }
+        if (tags.alignment && [7, 8, 9].includes(tags.alignment)) {
           return `${(60 / 1080) * 100}%`;
         }
         return '';
-      } else if (isVtt && tags[index].line && tags[index].position) {
-        if (tags[index].vertical) {
-          return tags[index].position;
+      }
+      if (isVtt && tags.line && tags.position) {
+        if (tags.vertical) {
+          return tags.position;
         }
-        if (!tags[index].line.includes('%')) {
-          tags[index].line = Math.abs(tags[index].line) * 100;
-          tags[index].line += '%';
+        if (!tags.line.includes('%')) {
+          tags.line = `${Math.abs(Number(tags.line)) * 100}%`;
         }
-        return tags[index].line;
+        return tags.line;
       }
       return '';
     },
-    subBottom(index) {
-      // 把subtitle.scss里固定的bottom移到这里进行计算
-      const { currentTags: tags, isVtt } = this;
-      if (((!isVtt && [1, 2, 3].includes(tags[index].alignment)) && !tags[index].pos) ||
-        (isVtt && (!tags[index].line || !tags[index].position))) {
-        return `${(60 / 1080) * 100}%`;
-      }
-      return '';
-    },
-    translateNum(index) {
+    translateNum(cue: Cue) { // eslint-disable-line
+      const index = this.calculateAlignment(cue.category, cue.tags)
+        ? this.calculateAlignment(cue.category, cue.tags) : 2;
       switch (index) {
         case 1:
           return [0, -100];
@@ -451,29 +354,6 @@ export default {
           return [0, 0];
       }
     },
-    getVideoSegments(parsedSubtitle, duration) {
-      const subtitleSegments = parsedSubtitle
-        .filter(subtitle => subtitle.text !== '')
-        .map(subtitle => [subtitle.start || 0, subtitle.end || duration])
-        .sort((a, b) => a[0] - b[0]);
-      const result = [[0, 0]];
-      let currentIndex = 0;
-      while (duration && result[result.length - 1][1] !== duration) {
-        const lastElement = result[result.length - 1];
-        if (currentIndex < subtitleSegments.length) {
-          if (lastElement[1] <= subtitleSegments[currentIndex][0]) {
-            [lastElement[1]] = [subtitleSegments[currentIndex][0]];
-            result.push(subtitleSegments[currentIndex]);
-            currentIndex += 1;
-          } else {
-            currentIndex += 1;
-          }
-        } else {
-          lastElement[1] = duration;
-        }
-      }
-      return result.map(segment => [...segment, false]);
-    },
   },
 };
 </script>
@@ -482,12 +362,34 @@ export default {
   position: absolute;
   width: 100%;
   height: 100%;
-}
-.subContainer {
-  position: absolute;
-  display: flex;
-  flex-direction: column-reverse;
-  transform-origin: bottom left;
-  z-index: 5;
+  left: 0;
+  top: 0;
+  z-index: auto;
+  pointer-events: none; /* fix click subtitle can not close control menu*/
+  .primary-sub, .secondary-sub {
+    margin: 0 auto 0 auto;
+  }
+  .subtitle-alignment2, .subtitle-alignment8 {
+    .primary-sub, .secondary-sub {
+      white-space: pre-wrap;
+      word-break: normal;
+    }
+    @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px),
+    screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
+      width: 100%;
+    }
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
+    screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+      width: calc(100% - 280px);
+    }
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+    screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+      width: calc(100% - 394px);
+    }
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+    screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+      width: calc(100% - 610px);
+    }
+  }
 }
 </style>

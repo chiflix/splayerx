@@ -32,8 +32,9 @@ export default {
     } = mouseOptions;
     const vuexOptions = { name, namespaced };
     const mousemove = generateMousemoveListener(mousemoveOptions, vuexOptions);
-    const { mousedown, mouseup } =
-      generateMousedownAndMouseupListener(mousedownOptions, vuexOptions);
+    const {
+      mousedown, mouseup,
+    } = generateMousedownAndMouseupListener(mousedownOptions, vuexOptions);
     const { keydown, keyup } = generateKeyDownAndKeyUpListener(keyboardOptions, vuexOptions);
     const wheel = generateWheelListener(wheelOptions, vuexOptions);
 
@@ -41,7 +42,7 @@ export default {
       mounted() {
         const { name, type } = this.$options;
         if (name && type === INPUT_COMPONENT_TYPE) addComponent(name, this.$el, this.$vnode.key);
-        if (this === this.$root) {
+        if (this === this.$root && this.$el) {
           // setup event listeners
           document.addEventListener('mousemove', mousemove);
           document.addEventListener('mousedown', mousedown);
@@ -54,7 +55,7 @@ export default {
       beforeDestroy() {
         const { name, type } = this.$options;
         if (name && type === INPUT_COMPONENT_TYPE) removeComponent(this.$el);
-        if (this === this.$root) {
+        if (this === this.$root && this.$el) {
           // remove event listeners
           document.removeEventListener('mousemove', mousemove);
           document.removeEventListener('mousedown', mousedown);

@@ -1,0 +1,471 @@
+{
+  "audio": {
+    "items": [
+      {
+        "id": "audio.increaseVolume",
+        "label": "msg.audio.increaseVolume",
+        "accelerator": "=",
+        "winAccelerator": "Up"
+      },
+      {
+        "id": "audio.decreaseVolume",
+        "label": "msg.audio.decreaseVolume",
+        "accelerator": "-",
+        "winAccelerator": "Down"
+      },
+      {
+        "id": "audio.mute",
+        "label": "msg.audio.mute",
+        "accelerator": "M",
+        "enabled": true,
+        "checked": false
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "audio.switchAudioTrack",
+        "label": "msg.audio.switchAudioTrack",
+        "enabled": true,
+        "submenu": {
+          "items": []
+        }
+      }
+    ]
+  },
+  "file": {
+    "items": [
+      {
+        "id": "file.open",
+        "label": "msg.file.open",
+        "accelerator": "CmdOrCtrl+O"
+      },
+      {
+        "id": "file.openRecent",
+        "label": "msg.file.openRecent",
+        "submenu": {
+          "items": []
+        }
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "file.clearHistory",
+        "label": "msg.file.clearHistory"
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "file.closeWindow",
+        "label": "msg.file.closeWindow",
+        "role": "close"
+      }
+    ]
+  },
+  "help": {
+    "items": [
+      {
+        "id": "help.feedback",
+        "label": "feedback",
+        "enabled": true
+      },
+      {
+        "id": "help.homepage",
+        "label": "homepage",
+        "enabled": true
+      },
+      {
+        "id": "help.shortCuts",
+        "label": "shortCuts",
+        "enabled": true
+      }
+    ]
+  },
+  "playback": {
+    "items": [
+      {
+        "id": "playback.playOrPause",
+        "label": "msg.playback.pause",
+        "accelerator": "Space",
+        "enabled": true
+      },
+      {
+        "id": "playback.forwardS",
+        "label": "msg.playback.forwardS",
+        "accelerator": "Right",
+        "enabled": true
+      },
+      {
+        "id": "playback.backwardS",
+        "label": "msg.playback.backwardS",
+        "accelerator": "Left",
+        "enabled": true
+      },
+      {
+        "id": "playback.forwardL",
+        "label": "msg.playback.forwardL",
+        "accelerator": "Up",
+        "winAccelerator": "Alt+Right",
+        "enabled": true
+      },
+      {
+        "id": "playback.backwardL",
+        "label": "msg.playback.backwardL",
+        "accelerator": "Down",
+        "winAccelerator": "Alt+Left",
+        "enabled": true
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id":"playback.increasePlaybackSpeed",
+        "label": "msg.playback.increasePlaybackSpeed",
+        "accelerator": "]",
+        "enabled": true
+      },
+      {
+        "id":"playback.decreasePlaybackSpeed",
+        "label": "msg.playback.decreasePlaybackSpeed",
+        "accelerator": "[",
+        "enabled": true
+      },
+      {
+        "id":"playback.resetSpeed",
+        "label": "msg.playback.resetSpeed",
+        "accelerator": "\\",
+        "enabled": true
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id":"playback.playlist",
+        "label": "msg.playback.showPlaylist",
+        "accelerator": "L"
+      },
+      {
+        "id":"playback.previousVideo",
+        "label": "msg.playback.previousVideo",
+        "accelerator": "CmdOrCtrl+Left",
+        "enabled": true
+      },
+      {
+        "id":"playback.nextVideo",
+        "label": "msg.playback.nextVideo",
+        "accelerator": "CmdOrCtrl+Right",
+        "enabled": true
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "playback.singleCycle",
+        "label": "msg.playback.singleCycle",
+        "type": "checkbox",
+        "enabled": true,
+        "checked": false
+      },
+      {
+        "id": "playback.snapShot",
+        "label": "msg.playback.snapShot",
+        "accelerator": "CmdOrCtrl+Shift+S",
+        "enabled": true
+      }
+    ]
+  },
+  "splayerx": {
+    "items": []
+  },
+  "subtitle": {
+    "items": [
+      {
+        "id": "subtitle.AITranslation",
+        "label": "msg.subtitle.AITranslation"
+      },
+      {
+        "id": "subtitle.loadSubtitleFile",
+        "label": "msg.subtitle.loadSubtitleFile"
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "subtitle.mainSubtitle",
+        "label": "msg.subtitle.mainSubtitle",
+        "enable": true,
+        "submenu": {
+          "items": []
+        }
+      },
+      {
+        "id": "subtitle.secondarySubtitle",
+        "label": "msg.subtitle.secondarySubtitle",
+        "enable": true,
+        "submenu": {
+          "items": []
+        }
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "subtitle.subtitleSetting",
+        "label": "msg.subtitle.subtitleSetting"
+      },
+      {
+        "id": "subtitle.subtitleDelay",
+        "label": "msg.subtitle.subtitleDelay",
+        "submenu": {
+          "items": [
+            {
+              "id": "subtitle.increasePrimarySubtitleDelay",
+              "label": "msg.subtitle.increasePrimarySubtitleDelay",
+              "accelerator": "CmdOrCtrl+'",
+              "enabled": false
+            },
+            {
+              "id": "subtitle.decreasePrimarySubtitleDelay",
+              "label": "msg.subtitle.decreasePrimarySubtitleDelay",
+              "accelerator": "CmdOrCtrl+;",
+              "enabled": false
+            },
+            {
+              "id": "menubar.separator"
+            },
+            {
+              "id": "subtitle.increaseSecondarySubtitleDelay",
+              "label": "msg.subtitle.increaseSecondarySubtitleDelay",
+              "enabled": false
+            },
+            {
+              "id": "subtitle.decreaseSecondarySubtitleDelay",
+              "label": "msg.subtitle.decreaseSecondarySubtitleDelay",
+              "enabled": false
+            }
+          ]
+        }
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "subtitle.uploadSelectedSubtitle",
+        "label": "msg.subtitle.uploadSelectedSubtitle"
+      }
+    ]
+  },
+  "window": {
+    "items": [
+      {
+        "id": "window.keepPlayingWindowFront",
+        "label": "msg.window.keepPlayingWindowFront",
+        "accelerator": "T",
+        "checked": false,
+        "enabled": true
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "window.fullscreen",
+        "label": "msg.window.enterFullScreen"
+      },
+      {
+        "id": "window.minimize",
+        "label": "msg.window.minimize",
+        "accelerator": "CmdOrCtrl+M",
+        "enabled": true
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "window.halfSize",
+        "label": "msg.window.halfSize",
+        "accelerator": "CmdOrCtrl+0"
+      },
+      {
+        "id": "window.originSize",
+        "label": "msg.window.originSize",
+        "accelerator": "CmdOrCtrl+1"
+      },
+      {
+        "id": "window.doubleSize",
+        "label": "msg.window.doubleSize",
+        "accelerator": "CmdOrCtrl+2"
+      },
+      {
+        "id": "window.maxmize",
+        "label": "msg.window.maxmize",
+        "accelerator": "CmdOrCtrl+3"
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "window.windowRotate",
+        "label": "msg.window.windowRotate",
+        "accelerator": "CmdOrCtrl+L"
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "window.bossKey",
+        "label": "msg.window.bossKey",
+        "accelerator": "CmdOrCtrl+`",
+        "enabled": true
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "window.backToLandingView",
+        "label": "msg.window.backToLandingView",
+        "accelerator": "CmdOrCtrl+E"
+      }
+    ]
+  },
+  "edit": {
+    "items": [
+      {
+        "id": "edit.cut",
+        "label": "msg.edit.cut",
+        "role": "cut"
+      },
+      {
+        "id": "edit.copy",
+        "label": "msg.edit.copy",
+        "role": "copy"
+      },
+      {
+        "id": "edit.paste",
+        "label": "msg.edit.paste",
+        "role": "paste"
+      },
+      {
+        "id": "edit.selectAll",
+        "label": "msg.edit.selectAll",
+        "role": "selectAll"
+      }
+    ]
+  },
+  "history": {
+    "items": [
+      {
+        "id": "history.reload",
+        "label": "msg.history.reload",
+        "accelerator": "CmdOrCtrl + R"
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "history.back",
+        "label": "msg.history.back",
+        "enabled": false,
+        "accelerator": "CmdOrCtrl + ["
+      },
+      {
+        "id": "history.forward",
+        "label": "msg.history.forward",
+        "enabled": false,
+        "accelerator": "CmdOrCtrl + ]"
+      }
+    ]
+  },
+  "favourite": {
+    "items": [
+      {
+        "id": "favourite.iqiyi",
+        "label": "msg.favourite.iqiyi"
+      },
+      {
+        "id": "favourite.bilibili",
+        "label": "msg.favourite.bilibili"
+      },
+      {
+        "id": "favourite.douyu",
+        "label": "msg.favourite.douyu"
+      },
+      {
+        "id": "favourite.huya",
+        "label": "msg.favourite.huya"
+      },
+      {
+        "id": "favourite.qq",
+        "label": "msg.favourite.qq"
+      },
+      {
+        "id": "favourite.youku",
+        "label": "msg.favourite.youku"
+      },
+      {
+        "id": "favourite.twitch",
+        "label": "msg.favourite.twitch"
+      },
+      {
+        "id": "favourite.youtube",
+        "label": "msg.favourite.youtube"
+      }
+    ]
+  },
+  "browsing.window": {
+    "items": [
+      {
+        "id": "browsing.window.keepPipFront",
+        "label": "msg.window.keepPlayingWindowFront",
+        "accelerator": "T",
+        "checked": false,
+        "enabled": false
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "browsing.window.pip",
+        "label": "msg.window.enterPip",
+        "icon": "enter-pip",
+        "accelerator": "P",
+        "enabled": false
+      },
+      {
+        "id": "browsing.window.playInNewWindow",
+        "label": "msg.window.playInNewWindow",
+        "icon": "play-in-new-window",
+        "accelerator": "O",
+        "enabled": false
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "browsing.window.fullscreen",
+        "label": "msg.window.enterFullScreen"
+      },
+      {
+        "id": "browsing.window.minimize",
+        "label": "msg.window.minimize",
+        "accelerator": "CmdOrCtrl+M",
+        "enabled": true
+      },
+      {
+        "id": "browsing.window.maxmize",
+        "label": "msg.window.maxmize",
+        "accelerator": "CmdOrCtrl+3"
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "browsing.window.backToLandingView",
+        "label": "msg.window.backToLandingView",
+        "accelerator": "CmdOrCtrl+E"
+      }
+    ]
+  }
+}
+

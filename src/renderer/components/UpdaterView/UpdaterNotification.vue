@@ -1,89 +1,103 @@
 <template>
-    <div class="updateContainer" ref="showWindow" :style="[containerProp, hideOrNot]">
-        <div class="backGround" >
+  <div
+    ref="showWindow"
+    :style="[containerProp, hideOrNot]"
+    class="updateContainer"
+  >
+    <div class="backGround" />
+    <div
+      ref="breath"
+      :style="linkProp"
+      class="breathe-div"
+    />
+    <div class="overInner">
+      {{ content }}
+      <div class="linksInUpdater">
+        <div
+          v-for="(item, index) in buttons"
+          :key="index"
+          class="clickLinks"
+        >
+          <span :class="item.classC">
+            <a
+              @click="item.callBack.call(item.THIS)"
+              href="#"
+            > {{ item.text }} </a>
+          </span>
         </div>
-        <div class="breathe-div" ref="breath" :style="linkProp"></div>
-        <div class="overInner" >
-            {{content}}
-            <div class="linksInUpdater">
-                <div class="clickLinks" v-for="(item) in buttons">
-                    <span :class=item.classC>
-                        <a href='#' v-on:click=item.callBack.call(item.THIS)> {{item.text}} </a>
-                    </span>
-                </div>
-            </div>
-        </div>
+      </div>
     </div>
+  </div>
 </template>
 
 <script>
-  import GetHelper from '../../../main/update/RendererHelper';
+import GetHelper from '../../../main/update/RendererHelper';
 
-  export default {
-    name: 'UpdaterNotification',
-    components: {
+export default {
+  name: 'UpdaterNotification',
+  components: {
+  },
+  data() {
+    return {
+      helper: null,
+      content: '',
+      buttons: [],
+      containerStyle: {
+        platform: '',
+      },
+      breathType: null,
+      visibility: 'hidden',
+    };
+  },
+  computed: {
+    linkProp() {
+      return ({ 'webkit-animation-name': this.breathType });
     },
-    data() {
-      return {
-        helper: null,
-        content: '',
-        buttons: [],
-        containerStyle: {
-          platform: '',
-        },
-        breathType: null,
-        visibility: 'hidden',
-      };
+    containerProp() {
+      return (this.containerStyle);
     },
-    beforeMount() {
-      this.helper = new GetHelper(this);
+    hideOrNot() {
+      return ({ visibility: this.visibility });
     },
-    mounted() {
+  },
+  beforeMount() {
+    this.helper = new GetHelper(this);
+  },
+  mounted() {
+  },
+  updated() {
+  },
+  methods: {
+    hide() {
+      this.visibility = 'hidden';
     },
-    updated() {
+    show() {
+      this.$refs.showWindow.className = 'updateContainer';
+      this.visibility = 'visible';
     },
-    methods: {
-      hide() {
+    registerCallBackButton(buttons) {
+      this.buttons = buttons;
+    },
+    setMessage(message) {
+      this.content = message.toString();
+    },
+    startDisappear(time = 50000) {
+      setTimeout(() => {
         this.visibility = 'hidden';
-      },
-      show() {
-        this.$refs.showWindow.className = 'updateContainer';
-        this.visibility = 'visible';
-      },
-      registerCallBackButton(buttons) {
-        this.buttons = buttons;
-      },
-      setMessage(message) {
-        this.content = message.toString();
-      },
-      startDisappear(time = 50000) {
-        setTimeout(() => {
-          this.visibility = 'hidden';
-          this.$refs.showWindow.className = 'updateContainerDisappear';
-        }, time);
-      },
-      setBreathType(breath) {
-        this.breathType = breath;
-      },
-      forWin() {
-        this.containerStyle.platform = 'win32';
-      },
-      forMac() {
-        this.containerStyle.platform = 'darwin';
-      },
+        this.$refs.showWindow.className = 'updateContainerDisappear';
+      }, time);
     },
-    computed: {
-      linkProp() {
-        return ({ 'webkit-animation-name': this.breathType });
-      },
-      containerProp() {
-        return (this.containerStyle);
-      },
-      hideOrNot() {
-        return ({ visibility: this.visibility });
-      },
+    setBreathType(breath) {
+      this.breathType = breath;
     },
-  };
+    forWin() {
+      this.containerStyle.platform = 'win32';
+    },
+    forMac() {
+      this.containerStyle.platform = 'darwin';
+    },
+  },
+};
 </script>
 
 <style lang="scss">
@@ -110,8 +124,7 @@
             line-height: 30px;
             letter-spacing: normal;
             top: 20px;
-            // border-radius: 15px;
-            clip-path: inset(0px round 15px);
+            border-radius: 15px;
             box-shadow: $bs $bs 0 0 rgba(255,255,255,0.15), $bs $bs 5px 0 rgba(0,0,0,0.3);
             @if platform = 'darwin'{
                 right: 10px;
@@ -126,8 +139,7 @@
             line-height: 33px;
             letter-spacing: normal;
             top: 20px;
-            // border-radius: 18.75px;
-            clip-path: inset(0px round 18.75px);
+            border-radius: 18.75px;
             box-shadow: $bs $bs 0 0 rgba(255,255,255,0.15), $bs $bs 7px 0 rgba(0,0,0,0.3);
             @if platform = 'darwin'{
                 right: 14px;
@@ -142,8 +154,7 @@
             line-height: 50px;
             letter-spacing: normal;
             top: 20px;
-            // border-radius: 30px;
-            clip-path: inset(0px round 30px);
+            border-radius: 30px;
             box-shadow: $bsl $bsl 0 0 rgba(255,255,255,0.15), $bsl $bsl 15px 0 rgba(0,0,0,0.3);
             @if platform = 'darwin'{
                 right: 24px;
@@ -163,8 +174,7 @@
             bottom: 0px;
             left: 0px;
             height: inherit;
-            clip-path: inherit;
-            // border-radius: inherit;
+            border-radius: inherit;
             background-color: rgba(0.3,.3,0.3,0.5);
             // -webkit-filter: blur(10px);
         }
@@ -264,24 +274,30 @@
         -webkit-animation-iteration-count: infinite;
         -webkit-animation-direction: alternate;
     }
-    @-webkit-keyframes breatheAlert {
+    @keyframes breatheAlert {
         0% {
             opacity: .4;
-            box-shadow: 1px 1px 2px rgba(183,255,111,0.5), 10px 10px 1px rgba(183,255,111,0.3) inset;;
+            box-shadow:
+              1px 1px 2px rgba(183,255,111,0.5),
+              10px 10px 1px rgba(183,255,111,0.3) inset;;
         }
         100% {
             opacity: 1;
             box-shadow: 1px 1px 15px red, 10px 10px 10px red inset;
         }
     }
-    @-webkit-keyframes breatheSuccess {
+    @keyframes breatheSuccess {
         0% {
             opacity: .4;
-            box-shadow: 0.1px 0.1px 2px rgba(183,255,111,0.5), 10px 10px 10px rgba(183,255,111,0.3) inset;;
+            box-shadow:
+              0.1px 0.1px 2px rgba(183,255,111,0.5),
+              10px 10px 10px rgba(183,255,111,0.3) inset;;
         }
         100% {
             opacity: 1;
-            box-shadow: 0.1px 0.1px 15px green, 10px 10px 1px green inset;
+            box-shadow:
+              0.1px 0.1px 15px green,
+              10px 10px 1px green inset;
         }
     }
 

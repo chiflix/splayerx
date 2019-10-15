@@ -30,6 +30,7 @@ const UpdaterFactory = ((() => {
       this.mainHelper = new GetMainHelper(this);
       this.mainHelper.registerMessageReceiver();
     }
+
     /*
      *it should be called when the app starts
      * it will not got any rejection as reject will be handled in startUpdate
@@ -56,6 +57,7 @@ const UpdaterFactory = ((() => {
         }
       });
     }
+
     startUpdate() {
       return new Promise((resolve) => {
         const handelResolve = (message) => {
@@ -161,6 +163,7 @@ const UpdaterFactory = ((() => {
       // compare(this.currentUpdateInfo, updateInfo);
       return true;
     }
+
     ulog(object) {
       this.mainHelper.sendStatusToWindow(object.toString(), 'update-message-test');
       log.info(object.toString());

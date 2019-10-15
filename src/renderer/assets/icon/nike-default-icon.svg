@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="13px" height="13px" viewBox="0 0 13 13" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <defs>
-        <radialGradient cx="81.8460892%" cy="79.2345085%" fx="81.8460892%" fy="79.2345085%" r="158.735339%" gradientTransform="translate(0.818461,0.792345),scale(1.000000,0.552460),rotate(-121.038473),translate(-0.818461,-0.792345)" id="radialGradient-1">
-            <stop stop-color="#FFFFFF" stop-opacity="0.775928442" offset="0%"></stop>
-            <stop stop-color="#FFFFFF" stop-opacity="0.508378623" offset="100%"></stop>
-        </radialGradient>
-    </defs>
-    <g id="icons/nike-default-icon" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" fill-opacity="0.7" stroke-opacity="0.168081975">
-        <path d="M8.71200854,9.56324566 C8.66676744,9.60848676 8.60426744,9.63646896 8.53523184,9.63646896 L4.46476816,9.63646896 C4.32669697,9.63646896 4.21476816,9.52454015 4.21476816,9.38646896 L4.21476816,8.18646896 C4.21476816,8.04839778 4.32669697,7.93646896 4.46476816,7.93646896 L7.08523184,7.93646896 L7.08523184,1.61353104 C7.08523184,1.47545985 7.19716066,1.36353104 7.33523184,1.36353104 L8.53523184,1.36353104 C8.67330303,1.36353104 8.78523184,1.47545985 8.78523184,1.61353104 L8.78523184,9.38646896 C8.78523184,9.45550456 8.75724964,9.51800456 8.71200854,9.56324566 Z" id="Shape" stroke="#FFFFFF" stroke-width="0.5" fill="url(#radialGradient-1)" transform="translate(6.500000, 5.500000) rotate(43.000000) translate(-6.500000, -5.500000) "></path>
+<svg width="15px" height="15px" viewBox="0 0 15 15" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 54.1 (76490) - https://sketchapp.com -->
+    <desc>Created with Sketch.</desc>
+    <g id="画板" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" opacity="0.8">
+        <g id="success-default-icon" transform="translate(2.500000, 4.000000)" stroke="#FFFFFF" stroke-width="1.5">
+            <g id="页面1">
+                <g id="General/复制-2">
+                    <polyline id="路径" points="0 3.760805 3.911873 7.521609 10.6864 0"></polyline>
+                </g>
+            </g>
+        </g>
     </g>
 </svg>

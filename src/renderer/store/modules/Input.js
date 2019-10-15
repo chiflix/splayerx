@@ -15,12 +15,12 @@ const state = {
 
 const getters = {
   progressKeydown: state => state.pressedKeyboardCodes.includes('ArrowLeft') || state.pressedKeyboardCodes.includes('ArrowRight') || state.pressedKeyboardCodes.includes('BracketLeft') || state.pressedKeyboardCodes.includes('BracketRight'),
-  volumeKeydown: state => state.pressedKeyboardCodes.includes('KeyM'),
+  volumeKeydown: state => state.pressedKeyboardCodes.includes('KeyM') || state.pressedKeyboardCodes.includes('Minus') || state.pressedKeyboardCodes.includes('Equal'),
   leftMousedown: state => state.pressedMouseButtonNames.includes('left'),
   wheelTriggered: state => state.wheelTimestamp,
   volumeWheelTriggered: ({ wheelDirection, wheelComponentName }) => (
-    wheelDirection === 'vertical' &&
-    wheelComponentName !== 'subtitle-control' && wheelComponentName !== 'advance-control'
+    wheelDirection === 'vertical'
+    && wheelComponentName !== 'SubtitleControl' && wheelComponentName !== 'AdvanceControl' && wheelComponentName !== 'AudioTranslateModal'
   ),
 };
 

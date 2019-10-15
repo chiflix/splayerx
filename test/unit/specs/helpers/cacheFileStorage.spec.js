@@ -5,8 +5,8 @@
  * @Last Modified time: 2019-03-01 13:35:13
  */
 
-import helpers from '@/helpers';
 import { writeFileSync } from 'fs';
+import { mediaQuickHash } from '@/libs/utils';
 import {
   getVideoInfoByMediaHash,
   generateThumbnailPathByMediaHash,
@@ -25,7 +25,7 @@ describe('helper.cacheFileStorage', () => {
   });
 
   it('should getVideoInfoByMediaHash with {}', async () => {
-    mediaHash = await helpers.methods.mediaQuickHash('./test/assets/test.avi');
+    mediaHash = await mediaQuickHash('./test/assets/test.avi');
     const result = await getVideoInfoByMediaHash(mediaHash);
     expect(JSON.stringify(result)).to.be.equal(JSON.stringify({}));
   });

@@ -1,263 +1,506 @@
 {
-	"advance": {
-		"audioDelay": "Retraso auditivo",
-		"audioMenu": "Configuraciones de audio",
-		"changeTrack": "Pista de audio",
-		"chosenTrack": "Defecto",
-		"fontItems": [
-			"S",
-			"M",
-			"L",
-			"XL"
-		],
-		"fontSize": "Tamaño de fuente",
-		"fontStyle": "Estilo de fuente",
-		"rateTitle": "Velocidad de juego",
-		"subDelay": "Retraso de subtítulos",
-		"subMenu": "Ajustes de subtítulos",
-		"track": "Pista"
-	},
-	"css": {
-		"titleFontSize": {
-			"fontSize": "21px"
-		},
-		"versionFontSize": {
-			"fontSize": "14px"
-		}
-	},
-	"errorFile": {
-		"addNoVideo": {
-			"content": "No se puede encontrar el archivo reproducible.",
-			"title": "Agregar archivo fallido"
-		},
-		"default": {
-			"content": "Tipo de video no soportado.",
-			"title": "Error de apertura"
-		},
-		"emptyFolder": {
-			"content": "No se puede encontrar el archivo reproducible.",
-			"title": "Error de apertura"
-		},
-		"fileNonExist": {
-			"content": "Será eliminado de la lista.",
-			"title": "Archivo no encontrado"
-		},
-		"loadFailed": {
-			"content": "Tipo de subtítulo no soportado.",
-			"title": "Subtitulo de carga fallado"
-		},
-		"offLine": {
-			"content": "Por favor, compruebe la red y vuelva a intentarlo.",
-			"title": "Sin acceso a internet"
-		},
-		"timeout": {
-			"content": "Retraso en la red o error del servidor.",
-			"title": "Pide tiempo fuera"
+  "advance": {
+    "audioDelay": "Retraso auditivo",
+    "audioMenu": "Configuraciones de audio",
+    "changeTrack": "Pista de audio",
+    "chosenTrack": "Defecto",
+    "fontItems": [
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "fontSize": "Tamaño de fuente",
+    "fontStyle": "Estilo de fuente",
+    "rateTitle": "Velocidad de juego",
+    "subDelay": "Retraso de subtítulos",
+    "subMenu": "Ajustes de subtítulos",
+    "track": "Pista"
+  },
+  "css": {
+    "titleFontSize": {
+      "fontSize": "21px"
+    },
+    "versionFontSize": {
+      "fontSize": "14px"
+    }
+  },
+  "errorFile": {
+    "ENOSPC": {
+      "content": "No hay suficiente espacio en disco disponible.",
+      "title": "Error al abrir"
+    },
+    "EACCES": {
+      "content": "No tienes suficiente permiso.",
+      "title": "Error al abrir"
+    },
+    "ENOENT": {
+      "content": "Archivo no encontrado.",
+      "title": "Error al abrir"
+    },
+    "addNoVideo": {
+      "content": "No se puede encontrar el archivo reproducible.",
+      "title": "Agregar archivo fallido"
+    },
+    "default": {
+      "content": "Este tipo video no es compatible en este momento.",
+      "title": "Error de apertura"
+    },
+    "emptyFolder": {
+      "content": "No se puede encontrar el archivo reproducible.",
+      "title": "Error de apertura"
+    },
+    "fileNonExist": {
+      "content": "Será eliminado de la lista.",
+      "title": "Archivo no encontrado"
+    },
+    "playlistNonExist": {
+      "content": "Este elemento se ha eliminado.",
+      "title": "Archivo no encontrado"
+    },
+    "fileNonExistInPlaylist": {
+      "content": "El archivo ha sido eliminado o renombrado.",
+      "title": "Algunos archivos no fueron encontrados"
+    },
+    "loadFailed": {
+      "content": "Este tipo de subtítulo no es compatible en este momento.",
+      "title": "Subtitulo de carga fallado"
+    },
+    "offLine": {
+      "content": "Por favor, compruebe la red y vuelva a intentarlo.",
+      "title": "Error al conectarse a la red"
+    },
+    "timeout": {
+      "content": "Retraso en la red o error del servidor.",
+      "title": "Pide tiempo fuera"
     },
     "localSubtitleRemoved": {
-      "title": "Fallo en el subtítulo de carga",
-      "content": "El subtítulo local se elimina o cambia de nombre."
-		}
-	},
-	"loading": {
-		"content": "Cargando Traducciones ...",
-		"title": ""
-	},
-	"msg": {
-		"audio": {
-			"decreaseAudioDelay": "Retraso auditivo",
-			"decreaseVolume": "Disminuir volumen",
-			"defaultAudioTrack": "Defecto",
-			"increaseAudioDelay": "Retraso auditivo",
-			"increaseVolume": "Aumenta el volumen",
-			"mute": "Mudo",
-			"name": "Audio",
-			"switchAudioTrack": "Cambiar la pista de audio"
-		},
-		"file": {
-			"clearHistory": "Borrar historial de reproducción",
-			"closeWindow": "Cerrar ventana",
-			"name": "Expediente",
-			"open": "Abierto…",
-			"openRecent": "Recientemente abierto",
-			"openURL": "Abrir URL ..."
-		},
-		"help": {
-			"name": "Ayuda",
-			"splayerxHelp": "Ayuda",
-			"shortCuts": "Lista de accesos directos"
-		},
-		"playback": {
-			"backwardL": "Paso atrás -60s",
-			"backwardS": "Paso hacia atrás -5s",
-      		"windowRotate": "Girar 90 °",
-			"captureScreen": "Captura de pantalla",
-			"captureVideoClip": "Captura de video clip",
-			"decreasePlaybackSpeed": "Disminuir la velocidad de reproducción",
-			"forwardL": "Step Forward 60s",
-			"forwardS": "Paso adelante 5s",
-			"fullScreen": "Pantalla Completa",
-			"increasePlaybackSpeed": "Aumentar la velocidad de reproducción",
-			"keepPlayingWindowFront": "Flotar al jugar",
-			"name": "Reproducción",
-			"pause": "pausa",
-			"play": "Jugar",
-			"resetSpeed": "Restablecer velocidad de reproducción",
-			"singleCycle": "Repetir una",
-			"snapShot": "Instantánea"
-		},
-		"splayerx": {
-			"about": "Acerca de SPlayer",
-			"feedback": "Realimentación",
-			"hide": "Esconder",
-			"hideOthers": "Esconder otros",
-			"homepage": "sitio web",
-			"preferences": "Preferencias",
-			"quit": "Salir de SPlayer"
-		},
-		"subtitle": {
-			"AITranslation": "Reload Smart Translation",
-			"decreaseSubtitleDelayL": "",
-			"decreaseSubtitleDelayS": "Subtitle Delay -0.1s",
-			"disabledSecondarySub": "Desactivar Subtitulo Secundario",
-			"enabledSecondarySub": "Habilitar subtítulos secundarios",
-			"increaseSubtitleDelayL": "",
-			"increaseSubtitleDelayS": "Subtitle Delay 0.1s",
-			"langEn": "Inglés",
-			"langZhCN": "chino",
-			"loadSubtitleFile": "Cargar archivo de subtítulos ...",
-			"mainSubtitle": "Subtitulo primario",
-			"menuLoading": "Cargando ...",
-			"name": "Subtítulos",
-			"noSubtitle": "Extraviado",
-			"notToShowSubtitle": "Ninguna",
-			"secondarySubtitle": "Subtitulo secundario",
-			"size1": "Pequeña",
-			"size2": "Estándar",
-			"size3": "Grande",
-			"size4": "Extra grande",
-			"style1": "Estilo de película",
-			"style2": "Estilo anime",
-			"style3": "Estilo retro",
-			"style4": "Estilo japones",
-			"style5": "Clásico moderno",
-			"subtitleSelect": "Traducción",
-			"subtitleSize": "Tamaño de fuente",
-			"subtitleStyle": "Estilo de fuente",
-			"uploadSelectedSubtitle": "Subir Subtítulo seleccionado"
-		},
-		"titleName": "SPlayer",
-		"update": {
-			"message": "¿Reiniciar la aplicación ahora para instalar la actualización?",
-			"no": "No",
-			"title": "diálogo de actualización",
-			"updateInstalled": "ha instalado correctamente la actualización!",
-			"yes": "Sí"
-		},
-		"window": {
-			"bossKey": "Clave de jefe",
-			"doubleSize": "200%",
-			"enterFullScreen": "Ingrese a pantalla completa",
-			"exitFullScreen": "Salir de pantalla completa",
-			"halfSize": "50%",
-			"maxmize": "Enfocar",
-			"minimize": "Minimizar",
-			"name": "Ventana",
-			"originSize": "100%"
-		}
-	},
-	"nextVideo": {
-		"nextInFolder": "Siguiente en la carpeta",
-		"nextInPlaylist": "Siguiente en Playlist"
-	},
-	"preferences": {
-		"general": {
-			"clearHistory": "Borrar siempre el historial de reproducción al salir",
-			"reverseScrolling": "Desplazamiento inverso del ratón",
-			"setDefault": "Establecer como el jugador por defecto",
-			"setDefaultDescription": "Todos los formatos de video se abren automáticamente usando SPlayer.",
-			"restoreSettings": "Borrar contenidos y ajustes",
-			"restoreSettingsDescription": "Reinicie con todos los datos y cachés borrados.",
-			"setButton": "Aplicar",
-			"relaunch": "reiniciar",
-			"displayLanguage": "Idioma de la pantalla",
-			"generalSetting": "General",
-			"others": "Otros",
-			"switchDisplayLanguages": "Mostrar idioma controla el idioma que ves en SPlayer."
-		},
-		"privacy": {
-			"languageDescription": "Cargue datos anónimos para obtener resultados de traducción en el siguiente idioma, no se incluirá información de privacidad.",
-			"languagePriority": "Preferencia de idioma",
-			"none": "Ninguna",
-			"primary": "Primario",
-			"privacyConfirm": "Habilitar la traducción inteligente",
-			"privacySetting": "Traducción",
-			"secondary": "Secundario",
-			"setAsDefault": "Establecer SPlayer como la aplicación predeterminada",
-			"settings": "Ajustes"
-		}
-	},
-	"privacyBubble": {
-		"confirmDisable": {
-			"button": "Cancelar",
-			"partOne": "Confirmar a",
-			"partTwo": "Datos anónimos y traducción inteligente.",
-			"underlinedContent": "Inhabilitar"
-		},
-		"masVersion": {
-			"agree": "Habilitar",
-			"content": "La función de traducción inteligente necesita su consentimiento para cargar información multimedia anónima en el lado del servidor, y no recibirá los resultados de la traducción si no está de acuerdo. No hay información de privacidad será recopilada.",
-			"disagree": "Inhabilitar"
-		},
-		"tryToDisable": {
-			"button": "De acuerdo",
-			"partOne": "SPlayer utiliza datos anónimos para mejorar la experiencia del usuario. La traducción inteligente se desactivará si",
-			"partTwo": ".",
-			"underlinedContent": "discrepar"
-		}
-	},
-	"recentPlaylist": {
-		"folderSource": "Carpeta",
-		"playing": "Jugando",
-		"playlistSource": "Playlist"
-	},
-	"subtitle": {
-		"embedded": "Empotrar",
-		"language": {
-			"ar": "Arábica",
-			"de": "alemán",
-			"en": "Inglés",
-			"es": "español",
-			"fr": "francés",
-			"hi": "hindi",
-			"it": "italiano",
-			"ja": "japonés",
-			"ko": "coreano",
-			"pt": "Portugués (Portugal, Brasil)",
-			"ru": "ruso",
-			"zh": "Chino simplificado)",
-			"zh-CN": "Chino simplificado)",
-			"zh-TW": "Chino tradicional)"
-		}
-	},
-	"uploading": {
-		"content": "Subtitulo subiendo ...",
-		"title": ""
-	},
-	"uploadingFailed": {
-		"content": "Por favor intente mas tarde.",
-		"title": "Subida fallida"
-	},
-	"uploadingSuccess": {
-		"content": "Subtítulo ha sido subido.",
-		"title": "Subir con éxito"
-	},
-	"snapshotSuccess": {
-		"content": "Instantánea con éxito",
-		"title": ""
-	},
-	"snapshotFailed": {
-		"content": "por favor intente más tarde.",
-		"title": "Instantánea fallada"
-	}
+      "title": "Subtítulo no se pudo cargar",
+      "content": "El subtítulo local se ha eliminado o se ha cambiado de nombre."
+    }
+  },
+  "loading": {
+    "content": "Cargando Traducciones ...",
+    "title": ""
+  },
+  "msg": {
+    "audio": {
+      "decreaseAudioDelay": "Retraso auditivo",
+      "decreaseVolume": "Disminuir volumen",
+      "defaultAudioTrack": "Defecto",
+      "increaseAudioDelay": "Retraso auditivo",
+      "increaseVolume": "Aumenta el volumen",
+      "mute": "Mudo",
+      "name": "Audio",
+      "switchAudioTrack": "Cambiar la pista de audio"
+    },
+    "file": {
+      "clearHistory": "Borrar historial de reproducción",
+      "closeWindow": "Cerrar ventana",
+      "name": "Expediente",
+      "open": "Abierto…",
+      "openRecent": "Recientemente abierto",
+      "openURL": "Abrir URL ...",
+      "copy": "Copiar",
+      "paste": "Pegar"
+    },
+    "account": {
+      "name": "Cuenta",
+      "login": "Ingressar",
+      "logout": "Cerrar Sesión"
+    },
+    "help": {
+      "name": "Ayuda",
+      "feedback": "Realimentación",
+      "homepage": "Sitio web",
+      "splayerxHelp": "Ayuda",
+      "shortCuts": "Lista de accesos directos",
+      "crashReportLocation": "Ver registro de errores",
+      "crashReportNotAvailable": "No hay registro de errores."
+    },
+    "playback": {
+      "backwardL": "Paso atrás -60s",
+      "backwardS": "Paso hacia atrás -5s",
+      "captureScreen": "Captura de pantalla",
+      "captureVideoClip": "Captura de video clip",
+      "decreasePlaybackSpeed": "Disminuir la velocidad de reproducción",
+      "forwardL": "Paso adelante 60s",
+      "forwardS": "Paso adelante 5s",
+      "fullScreen": "Pantalla Completa",
+      "increasePlaybackSpeed": "Aumentar la velocidad de reproducción",
+      "name": "Reproducción",
+      "pause": "Pausa",
+      "play": "Jugar",
+      "resetSpeed": "Restablecer velocidad de reproducción",
+      "nextVideo": "Siguiente Video",
+      "showPlaylist": "Mostrar lista de reproducción",
+      "hidePlaylist": "Ocultar lista de reproducción",
+      "previousVideo": "Video Anterior",
+      "singleCycle": "Repetir una",
+      "snapShot": "Instantánea"
+    },
+    "splayerx": {
+      "about": "Acerca de SPlayer",
+      "checkForUpdates": "Buscar actualizaciones",
+      "hide": "Esconder",
+      "hideOthers": "Esconder otros",
+      "preferences": "Preferencias",
+      "quit": "Salir de SPlayer",
+      "showAll": "Mostrar todo"
+    },
+    "subtitle": {
+      "AITranslation": "Recargar la traducción Smart",
+      "decreasePrimarySubtitleDelay": "Retraso de subtítulos -0.1s",
+      "increasePrimarySubtitleDelay": "Retraso de subtítulos +0.1s",
+      "decreaseSecondarySubtitleDelay": "Retraso de subtítulos secundarios -0.1s",
+      "increaseSecondarySubtitleDelay": "Retraso de subtítulos secundarios +0.1s",
+      "disabledSecondarySub": "Desactivar Subtitulo Secundario",
+      "enabledSecondarySub": "Habilitar subtítulos secundarios",
+      "langEn": "Inglés",
+      "langZhCN": "Chino",
+      "loadSubtitleFile": "Cargar archivo de subtítulos ...",
+      "mainSubtitle": "Subtitulo primario",
+      "menuLoading": "Cargando ...",
+      "name": "Subtítulos",
+      "noSubtitle": "Extraviado",
+      "notToShowSubtitle": "Cerrar",
+      "secondarySubtitle": "Subtitulo secundario",
+      "subtitleSetting": "Ajustes de subtítulos",
+      "subtitleDelay": "Retraso de subtítulos",
+      "size1": "Pequeño",
+      "size2": "Estándar",
+      "size3": "Grande",
+      "size4": "Extra grande",
+      "style1": "Estilo de película",
+      "style2": "Estilo anime",
+      "style3": "Estilo retro",
+      "style4": "Estilo japones",
+      "style5": "Clásico moderno",
+      "subtitleSelect": "Traducción",
+      "subtitleSize": "Tamaño de fuente",
+      "subtitleStyle": "Estilo de fuente",
+      "uploadSelectedSubtitle": "Subir Subtítulo seleccionado"
+    },
+    "titleName": "SPlayer",
+    "update": {
+      "message": "¿Reiniciar la aplicación ahora para instalar la actualización?",
+      "no": "No",
+      "title": "Actualización lista",
+      "updateInstalled": "Ha sido actualización a la última versión!",
+      "yes": "Sí"
+    },
+    "window": {
+      "windowRotate": "Girar 90 en sentido horario",
+      "keepPlayingWindowFront": "Flotar al jugar",
+      "backToLandingView": "Volver a la página de inicio",
+      "bossKey": "Clave de jefe",
+      "doubleSize": "200%",
+      "enterFullScreen": "Ingrese a pantalla completa",
+      "exitFullScreen": "Salir de pantalla completa",
+      "halfSize": "50%",
+      "maxmize": "Enfocar",
+      "minimize": "Minimizar",
+      "name": "Ventana",
+      "originSize": "100%",
+      "enterPip": "Habilitar Picture in Picture",
+      "exitPip": "Salir de Picture in Picture",
+      "playInNewWindow": "Reproducir en ventana nueva",
+      "backToBrowser": "Volver al navegador"
+    },
+    "favourite": {
+      "name": "Canal",
+      "iqiyi": "iQIYI",
+      "bilibili": "Bilibili",
+      "douyu": "Douyu",
+      "huya": "Huya",
+      "qq": "Tencent Video",
+      "twitch": "Twitch",
+      "youku": "Youku",
+      "youtube": "YouTube"
+    },
+    "edit": {
+      "name": "Editar",
+      "cut": "Cortar",
+      "copy": "Copiar",
+      "paste": "Pegar",
+      "selectAll": "Selecciona todo"
+    },
+    "history": {
+      "name": "Historia",
+      "reload": "Recargar página",
+      "back": "Espalda",
+      "forward": "Avance"
+    }
+  },
+  "nextVideo": {
+    "nextInFolder": "Siguiente en la carpeta",
+    "nextInPlaylist": "Siguiente en Playlist"
+  },
+  "welcome": {
+    "welcomeTitle": "Welcome to SPlayer",
+    "welcomeDescription": "All-new lightweight design, incredible performance with smart translation to let you enjoy your videos like never before.",
+    "agreement": "By using SPlayer, you agree to our ",
+    "policy": "Privacy Policy",
+    "languageTitle1": "Set your preferred subtitle",
+    "languageTitle2": "languages to fetch translations",
+    "primary": "Primary",
+    "secondary": "Secondary",
+    "chooseSecondary": "Select Secondary Language",
+    "languageDescription": "* You can change your settings in preferences later",
+    "none": "None"
+  },
+  "browsing": {
+    "bilibili": "Bilibili",
+    "iqiyi": "iQIYI",
+    "youtube": "YouTube",
+    "huya": "Huya",
+    "qq": "Tencent Video",
+    "douyu": "Douyu",
+    "twitch": "Twitch",
+    "youku": "Youku",
+    "openLocalFile": "Abrir archivo local...",
+    "enterPip": "Habilitar Picture in Picture",
+    "exitPip": "Volver al navegador",
+    "enterPop": "Reproducir en ventana nueva",
+    "exitPop": "Volver al navegador",
+    "danmu": "Alternar Danmaku",
+    "error": {
+      "offline": "Sin Internet",
+      "try": "Prueba:",
+      "firstLine": "Comprobando los cables de red, módem y router",
+      "secondLine": "Reconectando a Wi-Fi"
+    }
+  },
+  "preferences": {
+    "general": {
+      "hideHistory": "Ocultar historial de reproducción",
+      "clearHistory": "Borrar siempre el historial de reproducción al salir",
+      "reverseScrolling": "Desplazamiento inverso del ratón",
+      "setDefault": "Establecer como el jugador predeterminado",
+      "setDefaultDescription": "Todos los formatos de video se abren automáticamente usando SPlayer.",
+      "restoreSettings": "Borrar contenidos y ajustes",
+      "restoreSettingsDescription": "Reinicie con todos los datos y cachés borrados.",
+      "restoreSettingsAfterRelaunch": "Reiniciar para aplicar.",
+      "setButton": "Aplicar",
+      "relaunch": "Reiniciar",
+      "displayLanguage": "Idioma de la pantalla",
+      "generalSetting": "General",
+      "others": "Otros",
+      "switchDisplayLanguages": "Mostrar idioma controla el idioma que ves en SPlayer."
+    },
+    "translate": {
+      "languageDescription": "Cargue datos anónimos para obtener resultados de traducción en el siguiente idioma, no se incluirá información de privacidad.",
+      "languagePriority": "Preferencia de idioma",
+      "none": "Ninguna",
+      "primary": "Primario",
+      "translateConfirm": "Habilitar la traducción inteligente",
+      "translateSetting": "Traducción",
+      "secondary": "Secundario",
+      "setAsDefault": "Establecer SPlayer como la aplicación predeterminada",
+      "settings": "Ajustes"
+    },
+    "privacy": {
+      "privacySetting": "Intimidad",
+      "enable": "Habilitar protección de privacidad",
+      "smartMode": "Modo inteligente",
+      "smartDescription": "No se puede identificar contenidos sensibles o no adecuados para trabajar, y borrar el historial de reproducción cuando se reproduce en una lista de carpetas o cuando se sale.",
+      "incognitoMode": "Modo incógnito",
+      "incognitoDescription": "No se guardará el historial de reproducción."
+    }
+  },
+  "privacyBubble": {
+    "confirmDisable": {
+      "button": "Cancelar",
+      "partOne": "Confirmar a",
+      "partTwo": "Datos anónimos y traducción inteligente.",
+      "underlinedContent": "Prohibir"
+    },
+    "masVersion": {
+      "agree": "Habilitar",
+      "content": "La función de traducción inteligente necesita su consentimiento para cargar información multimedia anónima en el lado del servidor, y no recibirá los resultados de la traducción si no está de acuerdo. No hay información de privacidad será recopilada.",
+      "disagree": "Prohibir"
+    },
+    "tryToDisable": {
+      "button": "De acuerdo",
+      "partOne": "SPlayer utiliza datos anónimos para mejorar la experiencia del usuario. La traducción inteligente se desactivará si",
+      "partTwo": ".",
+      "underlinedContent": "Prohibir"
+    }
+  },
+  "alertBubble": {
+    "button": "OK"
+  },
+  "protectBubble": {
+    "agree": "OK",
+    "setting": "Configurando",
+    "content": "Protección de privacidad inteligente está activada. Se eliminará el historial de reproducción sensorial o no adecuado para trabajar."
+  },
+  "checkForUpdatesBubble": {
+    "needUpdate": {
+      "confirm": "Descargar",
+      "cancel": "Saltar",
+      "content": "SPlayer {version} está disponible, ¿quieres descargarlo ahora?"
+    },
+    "noNeed": {
+      "content": "SPlayer está actualizado. Versión {version}"
+    }
+  },
+  "recentPlaylist": {
+    "folderSource": "Carpeta",
+    "playing": "Jugando",
+    "paused": "En pausa",
+    "playlistSource": "Lista",
+    "add": "Agregar a la lista de reproducción"
+  },
+  "subtitle": {
+    "embedded": "Empotrar",
+    "generate": "Generar",
+    "language": {
+      "ar": "Árabe",
+      "de": "Alemán",
+      "en": "Inglés",
+      "es": "Español",
+      "fr": "Francés",
+      "hi": "Hindi",
+      "it": "Italiano",
+      "ja": "Japonés",
+      "ko": "Coreano",
+      "pt": "Portugués (Portugal, Brasil)",
+      "ru": "Ruso",
+      "zh": "Chino (Simplificado)",
+      "zh-CN": "Chino (Simplificado)",
+      "zh-TW": "Chino (Tradicional)"
+    }
+  },
+  "uploading": {
+    "content": "Subtitulo subiendo ...",
+    "title": ""
+  },
+  "uploadingFailed": {
+    "content": "Por favor intente mas tarde.",
+    "title": "Subida fallida"
+  },
+  "uploadingSuccess": {
+    "content": "Subtítulo ha sido subido.",
+    "title": "Subir con éxito"
+  },
+  "snapshotSuccess": {
+    "content": "Instantánea con éxito",
+    "title": ""
+  },
+  "snapshotFailed": {
+    "content": "Por favor intente más tarde.",
+    "title": "Instantánea fallada"
+  },
+  "loadVideoBySubtitleFailed": {
+    "content": "No hay videos relacionados en la carpeta",
+    "title": ""
+  },
+  "translateModal": {
+    "videoLanguageLabel": "Idioma de audio",
+    "subtitleLanguageLabel": "Traducir a",
+    "selectLanguageLabel": "Idioma de audio",
+    "audioLanguageLoading": "Obteniendo la lista de idiomas ...",
+    "audioLanguageLoadFail": "Conexión fallida, intente más tarde",
+    "select": {
+      "title": "Seleccionar idioma de audio",
+      "content": "Para generar un resultado de tranlación, por favor seleccione el idioma que escuche en el vídeo y haga clic en el botón generar. El proceso puede tardar algún tiempo."
+    },
+    "translate": {
+      "title": "Acerca de {time} izquierda",
+      "minute": "{number} min",
+      "second": "{number} seg",
+      "hour": "{number} hr",
+      "content": "Por favor, no omita el vídeo o cierra la aplicación. Puedes comprobar el progreso en el panel de traducción.",
+      "contentSearch": "Buscando ...",
+      "contentTranslate": "Se han encontrado subtítulos en el idioma de origen, se están traduciendo de forma inteligente ...",
+      "contentGrabbing": "Subtítulo en el idioma de origen no encontrado, extracción de audio ...",
+      "contentGrabComplated": "Audio extraído, subiendo ahora ...",
+      "contentSpeech": "Audio subido, recolocación de voz y traducción en proceso ..."
+    },
+    "success": {
+      "title": "Traducción realizada",
+      "content": "AI Translation está lista, por favor, revisa el panel de traducción."
+    },
+    "discard": {
+      "title": "La traducción de AI está en curso",
+      "content": "¿Estás seguro de que quieres salir? Si te sales, el progreso de la traducción no se restaurará."
+    },
+    "noLineFail": {
+      "title": "Algo ha ido mal",
+      "content": "Comprueba tu conexión de red y vuelve a intentarlo."
+    },
+    "timeOutFail": {
+      "title": "El tiempo para la conexión ha acabado",
+      "content": "서버에 대한 연결이 실패했습니다. 나중에 다시 시도 해주세요."
+    },
+    "serverErrorFail": {
+      "title": "Error al traducir",
+      "content": "La traducción ha fallado debido a un error del servidor. Por favor, inténtalo más tarde."
+    },
+    "ForbiddenFail": {
+      "title": "Sesión caducada",
+      "content": "Inicie una sesión de nuevo."
+    },
+    "cancel": "Cancelar",
+    "quit": "Salir",
+    "generate": "Generar",
+    "ok": "OK",
+    "continue": "Cancelar"
+  },
+  "translateBubble": {
+    "bubbleWhenGrab": "La traducción de AI se abortará si continúa, ¿quieres continuar de todos modos?",
+    "bubbleWhenTranslate": "La traducción de AI está siendo procesada en el servidor. Puedes comprobar el progreso cuando veas el vídeo la próxima vez.",
+    "bubbleFunctionForbidden": "La traducción de AI se abortará si continúa, ¿quieres continuar de todos modos?",
+    "bubbleWhenSuccess": {
+      "title": "",
+      "content": "AI Translation está lista ahora, por favor, revisa el panel de traducción."
+    },
+    "bubbleWhenSuccessOnOtherVideo": {
+      "title": "",
+      "content": "La traducción de AI está lista ahora. Será cargada automáticamente la próxima vez que veas el vídeo."
+    },
+    "bubbleTranslateNoLineFail": {
+      "title": "네트워크 오류",
+      "content": "Comprueba tu conexión de red y vuelve a intentarlo."
+    },
+    "bubbleTranslateTimeOutFail": {
+      "title": "El tiempo para la conexión ha acabado",
+      "content": "서버에 대한 연결이 실패했습니다. 나중에 다시 시도 해주세요."
+    },
+    "bubbleTranslateServerErrorFail": {
+      "title": "Error al traducir",
+      "content": "La traducción ha fallado debido a un error del servidor. Por favor, inténtalo más tarde."
+    },
+    "bubbleTranslateForbiddenFail": {
+      "title": "Sesión caducada",
+      "content": "Inicie una sesión de nuevo."
+    },
+    "ok": "OK",
+    "cancel": "Cancelar",
+    "continue": "Continuar"
+  },
+  "loginModal": {
+    "title": "Iniciar sesión con número de teléfono",
+    "sendCode": "Enviar",
+    "sendingCode": "Enviando ...",
+    "countDown": "{count} s",
+    "placeholder": {
+      "mobile": "Tu número de teléfono",
+      "code": "Introduzca el código de verificación"
+    },
+    "submit": "Ingressar",
+    "submitting": "Procesando ...",
+    "codeError": "Código de vértificación incorrecto",
+    "netWorkError": "El tiempo para la conexión ha acabado",
+    "noLineError": "No hay conexión de red",
+    "afsError": "Captcha Validation Failed",
+    "afs": {
+      "start": "Please slide to verify",
+      "yes": "Success",
+      "retry": "retry",
+      "error300": "Verification failed, please",
+      "errorNetwork": "Network Error. Please"
+    }
+  }
 }

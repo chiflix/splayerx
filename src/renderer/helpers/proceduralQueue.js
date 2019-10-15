@@ -1,7 +1,8 @@
 import PQueue from 'p-queue';
 
 export default class ProceduralQueue {
-  #queue = new PQueue();
+  queue = new PQueue();
+
   constructor(options) {
     const finalOptions = { concurrency: 1 };
     if (options && !options.autoStart) finalOptions.autoStart = false;
@@ -11,6 +12,7 @@ export default class ProceduralQueue {
   add(task) {
     return this.queue.add(task);
   }
+
   start() {
     this.queue.start();
   }

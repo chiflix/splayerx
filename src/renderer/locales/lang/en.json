@@ -1,263 +1,507 @@
 {
-	"advance": {
-		"audioDelay": "Audio Delay",
-		"audioMenu": "Audio Settings",
-		"changeTrack": "Audio Track",
-		"chosenTrack": "Default",
-		"fontItems": [
-			"S",
-			"M",
-			"L",
-			"XL"
-		],
-		"fontSize": "Font Size",
-		"fontStyle": "Font Style",
-		"rateTitle": "Play Speed",
-		"subDelay": "Subtitle Delay",
-		"subMenu": "Subtitle Settings",
-		"track": "Track"
-	},
-	"css": {
-		"titleFontSize": {
-			"fontSize": "21px"
-		},
-		"versionFontSize": {
-			"fontSize": "14px"
-		}
-	},
-	"errorFile": {
-		"addNoVideo": {
-			"content": "Cannot find playable file.",
-			"title": "Add File Failed"
-		},
-		"default": {
-			"content": "Video type unsupported.",
-			"title": "Open Failed"
-		},
-		"emptyFolder": {
-			"content": "Cannot find playable file.",
-			"title": "Open Failed"
-		},
-		"fileNonExist": {
-			"content": "It will be removed from the list.",
-			"title": "File Not Found"
-		},
-		"loadFailed": {
-			"content": "Subtitle type unsupported.",
-			"title": "Load Subtitle Failed"
-		},
-		"offLine": {
-			"content": "Please check network and try again.",
-			"title": "No Network Access"
-		},
-		"timeout": {
-			"content": "Network delay or server error.",
-			"title": "Request Timeout"
+  "advance": {
+    "audioDelay": "Audio Delay",
+    "audioMenu": "Audio Settings",
+    "changeTrack": "Audio Track",
+    "chosenTrack": "Default",
+    "fontItems": [
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "fontSize": "Font Size",
+    "fontStyle": "Font Style",
+    "rateTitle": "Play Speed",
+    "subDelay": "Subtitle Delay",
+    "subMenu": "Subtitle Settings",
+    "track": "Track"
+  },
+  "css": {
+    "titleFontSize": {
+      "fontSize": "21px"
+    },
+    "versionFontSize": {
+      "fontSize": "14px"
+    }
+  },
+  "errorFile": {
+    "ENOSPC": {
+      "content": "No enough disk space available.",
+      "title": "Open Failed"
+    },
+    "EACCES": {
+      "content": "You don't have sufficient permission.",
+      "title": "Open Failed"
+    },
+    "ENOENT": {
+      "content": "File not found.",
+      "title": "Open Failed"
+    },
+
+    "addNoVideo": {
+      "content": "Cannot find playable file.",
+      "title": "Add File Failed"
+    },
+    "default": {
+      "content": "Video type unsupported.",
+      "title": "Open Failed"
+    },
+    "emptyFolder": {
+      "content": "Cannot find playable file.",
+      "title": "Open Failed"
+    },
+    "fileNonExist": {
+      "content": "It will be removed from the list.",
+      "title": "File Not Found"
+    },
+    "playlistNonExist": {
+      "content": "File(s) has been removed or renamed.",
+      "title": "File(s) Not Found"
+    },
+    "fileNonExistInPlaylist": {
+      "content": "File(s) has been removed from the list.",
+      "title": "File(s) Not Found"
+    },
+    "loadFailed": {
+      "content": "Subtitle type unsupported.",
+      "title": "Load Subtitle Failed"
+    },
+    "offLine": {
+      "content": "Please check network and try again.",
+      "title": "No Network Access"
+    },
+    "timeout": {
+      "content": "Network delay or server error.",
+      "title": "Request Timeout"
     },
     "localSubtitleRemoved": {
       "title": "Load Subtitle Failed",
       "content": "Local subtitle removed or renamed."
-		}
-	},
-	"loading": {
-		"content": "Loading Translations ...",
-		"title": ""
-	},
-	"msg": {
-		"audio": {
-			"decreaseAudioDelay": "Audio Delay",
-			"decreaseVolume": "Decrease Volume",
-			"defaultAudioTrack": "Default",
-			"increaseAudioDelay": "Audio Delay",
-			"increaseVolume": "Increase Volume",
-			"mute": "Mute",
-			"name": "Audio",
-			"switchAudioTrack": "Switch Audio Track"
-		},
-		"file": {
-			"clearHistory": "Clear Playback History",
-			"closeWindow": "Close Window",
-			"name": "File",
-			"open": "Open…",
-			"openRecent": "Open Recent",
-			"openURL": "Open URL…"
-		},
-		"help": {
-			"name": "Help",
-			"splayerxHelp": "Help",
-			"shortCuts": "Shortcuts List"
-		},
-		"playback": {
-			"backwardL": "Step Backward -60s",
-			"backwardS": "Step Backward -5s",
-			"windowRotate": "Rotate 90° Clockwise",
-			"captureScreen": "Capture Screen",
-			"captureVideoClip": "Capture Video Clip",
-			"decreasePlaybackSpeed": "Decrease Playback Speed",
-			"forwardL": "Step Forward +60s",
-			"forwardS": "Step Forward +5s",
-			"fullScreen": "Full Screen",
-			"increasePlaybackSpeed": "Increase Playback Speed",
-			"keepPlayingWindowFront": "Float When Playing",
-			"name": "Playback",
-			"pause": "Pause",
-			"play": "Play",
-			"resetSpeed": "Reset Playback Speed",
-			"singleCycle": "Repeat One",
-			"snapShot": "Snapshot"
-		},
-		"splayerx": {
-			"about": "About SPlayer",
-			"feedback": "Feedback",
-			"hide": "Hide",
-			"hideOthers": "Hide Others",
-			"homepage": "Website",
-			"preferences": "Preferences",
-			"quit": "Quit SPlayer"
-		},
-		"subtitle": {
-			"AITranslation": "Reload Smart Translation",
-			"decreaseSubtitleDelayL": "",
-			"decreaseSubtitleDelayS": "Subtitle Delay -0.1s",
-			"disabledSecondarySub": "Disable Secondary Subtitle",
-			"enabledSecondarySub": "Enable Secondary Subtitle",
-			"increaseSubtitleDelayL": "",
-			"increaseSubtitleDelayS": "Subtitle Delay +0.1s",
-			"langEn": "English",
-			"langZhCN": "Chinese",
-			"loadSubtitleFile": "Load Subtitle File…",
-			"mainSubtitle": "Primary Subtitle",
-			"menuLoading": "Loading ...",
-			"name": "Subtitles",
-			"noSubtitle": "Not Found",
-			"notToShowSubtitle": "None",
-			"secondarySubtitle": "Secondary Subtitle",
-			"size1": "Small",
-			"size2": "Standard",
-			"size3": "Large",
-			"size4": "Extra Large",
-			"style1": "Movie Style",
-			"style2": "Anime Style",
-			"style3": "Retro Style",
-			"style4": "Japanese Style",
-			"style5": "Modern Classic",
-			"subtitleSelect": "Translation",
-			"subtitleSize": "Font Size",
-			"subtitleStyle": "Font Style",
-			"uploadSelectedSubtitle": "Upload Selected Subtitle"
-		},
-		"titleName": "SPlayer",
-		"update": {
-			"message": "Restart the app now to install update?",
-			"no": "no",
-			"title": "update dialog",
-			"updateInstalled": "has successfully installed update!",
-			"yes": "yes"
-		},
-		"window": {
-			"bossKey": "Boss Key",
-			"doubleSize": "200%",
-			"enterFullScreen": "Enter Full Screen",
-			"exitFullScreen": "Exit Full Screen",
-			"halfSize": "50%",
-			"maxmize": "Zoom",
-			"minimize": "Minimize",
-			"name": "Window",
-			"originSize": "100%"
-		}
-	},
-	"nextVideo": {
-		"nextInFolder": "Next in Folder",
-		"nextInPlaylist": "Next in Playlist"
-	},
-	"preferences": {
-		"general": {
-			"clearHistory": "Always clear playback history on exit",
-			"reverseScrolling": "Reverse mouse scrolling",
-			"setDefault": "Set as the Default Video Player",
-			"setDefaultDescription": "Open all video files with SPlayer.",
-			"restoreSettings": "Reset All Content and Settings",
-			"restoreSettingsDescription": "Restart application with all data and caches erased.",
-			"setButton": "Apply",
-			"relaunch": "Restart",
-			"displayLanguage": "Display Language",
-			"generalSetting": "General",
-			"others": "Others",
-			"switchDisplayLanguages": "Display Language controls the language you see in SPlayer."
-		},
-		"privacy": {
-			"languageDescription": "Upload anonymous data to fetch translation results in the following language,  no privacy information will be included.",
-			"languagePriority": "Language Preference",
-			"none": "None",
-			"primary": "Primary",
-			"privacyConfirm": "Enable Smart Translation",
-			"privacySetting": "Translation",
-			"secondary": "Secondary",
-			"setAsDefault": "Set SPlayer as the Default Application",
-			"settings": "Settings"
-		}
-	},
-	"privacyBubble": {
-		"confirmDisable": {
-			"button": "CANCEL",
-			"partOne": "Confirm to ",
-			"partTwo": " anonymous data and Smart Translation.",
-			"underlinedContent": "disable"
-		},
-		"masVersion": {
-			"agree": "Enable",
-			"content": "Smart Translation function needs your consent for uploading anonymous media info to the server  side, and you will not receive translation results if you disagree. There is no privacy information will be collected.",
-			"disagree": "Disable"
-		},
-		"tryToDisable": {
-			"button": "OK",
-			"partOne": "SPlayer uses anonymous data to enhance user experience. Smart Translation will be disabled if you ",
-			"partTwo": ".",
-			"underlinedContent": "disagree"
-		}
-	},
-	"recentPlaylist": {
-		"folderSource": "Folder",
-		"playing": "Playing",
-		"playlistSource": "Playlist"
-	},
-	"subtitle": {
-		"embedded": "Embed",
-		"language": {
-			"ar": "Arabic",
-			"de": "German",
-			"en": "English",
-			"es": "Spanish",
-			"fr": "French",
-			"hi": "Hindi",
-			"it": "Italian",
-			"ja": "Japanese",
-			"ko": "Korean",
-			"pt": "Portuguese (Portugal, Brazil)",
-			"ru": "Russian",
-			"zh": "Chinese (Simplified)",
-			"zh-CN": "Chinese (Simplified)",
-			"zh-TW": "Chinese (Traditional)"
-		}
-	},
-	"uploading": {
-		"content": "Subtitle Uploading ...",
-		"title": ""
-	},
-	"uploadingFailed": {
-		"content": "Please try later.",
-		"title": "Upload Failed"
-	},
-	"uploadingSuccess": {
-		"content": "Subtitle has been uploaded.",
-		"title": "Upload Successfully"
-	},
-	"snapshotSuccess": {
-		"content": "Snapshot Successfully",
-		"title": ""
-	},
-	"snapshotFailed": {
-		"content": "Please try again later.",
-		"title": "Snapshot Failed"
-	}
+    }
+  },
+  "loading": {
+    "content": "Loading Translations ...",
+    "title": ""
+  },
+  "msg": {
+    "audio": {
+      "decreaseAudioDelay": "Audio Delay",
+      "decreaseVolume": "Decrease Volume",
+      "defaultAudioTrack": "Default",
+      "increaseAudioDelay": "Audio Delay",
+      "increaseVolume": "Increase Volume",
+      "mute": "Mute",
+      "name": "Audio",
+      "switchAudioTrack": "Switch Audio Track"
+    },
+    "file": {
+      "clearHistory": "Clear Playback History",
+      "closeWindow": "Close Window",
+      "name": "File",
+      "open": "Open…",
+      "openRecent": "Open Recent",
+      "openURL": "Open URL…",
+      "copy": "Copy",
+      "paste": "Paste"
+    },
+    "account": {
+      "name": "Account",
+      "login": "Sign In",
+      "logout": "Sign Out"
+    },
+    "help": {
+      "name": "Help",
+      "feedback": "Feedback",
+      "homepage": "Website",
+      "splayerxHelp": "Help",
+      "shortCuts": "Shortcuts List",
+      "crashReportLocation": "Show Crash Reports",
+      "crashReportNotAvailable": "Found no crash report."
+    },
+    "playback": {
+      "backwardL": "Step Backward -60s",
+      "backwardS": "Step Backward -5s",
+      "captureScreen": "Capture Screen",
+      "captureVideoClip": "Capture Video Clip",
+      "decreasePlaybackSpeed": "Decrease Playback Speed",
+      "forwardL": "Step Forward +60s",
+      "forwardS": "Step Forward +5s",
+      "fullScreen": "Full Screen",
+      "increasePlaybackSpeed": "Increase Playback Speed",
+      "name": "Playback",
+      "pause": "Pause",
+      "play": "Play",
+      "resetSpeed": "Reset Playback Speed",
+      "nextVideo": "Next Video",
+      "showPlaylist": "Show Playlist",
+      "hidePlaylist": "Hide Playlist",
+      "previousVideo": "Previous Video",
+      "singleCycle": "Repeat One",
+      "snapShot": "Snapshot"
+    },
+    "splayerx": {
+      "about": "About SPlayer",
+      "checkForUpdates": "Check for Updates",
+      "hide": "Hide",
+      "hideOthers": "Hide Others",
+      "preferences": "Preferences",
+      "quit": "Quit SPlayer",
+      "showAll": "Show All"
+    },
+    "subtitle": {
+      "AITranslation": "Reload Smart Translation",
+      "decreasePrimarySubtitleDelay": "Primary Subtitle Delay -0.1s",
+      "increasePrimarySubtitleDelay": "Primary Subtitle Delay +0.1s",
+      "decreaseSecondarySubtitleDelay": "Secondary Subtitle Delay -0.1s",
+      "increaseSecondarySubtitleDelay": "Secondary Subtitle Delay +0.1s",
+      "disabledSecondarySub": "Disable Secondary Subtitle",
+      "enabledSecondarySub": "Enable Secondary Subtitle",
+      "langEn": "English",
+      "langZhCN": "Chinese",
+      "loadSubtitleFile": "Load Subtitle File…",
+      "mainSubtitle": "Primary Subtitle",
+      "menuLoading": "Loading ...",
+      "name": "Subtitles",
+      "noSubtitle": "Not Found",
+      "notToShowSubtitle": "Off",
+      "secondarySubtitle": "Secondary Subtitle",
+      "subtitleSetting": "Subtitle Settings",
+      "subtitleDelay": "Subtitle Delay",
+      "size1": "Small",
+      "size2": "Standard",
+      "size3": "Large",
+      "size4": "Extra Large",
+      "style1": "Movie Style",
+      "style2": "Anime Style",
+      "style3": "Retro Style",
+      "style4": "Japanese Style",
+      "style5": "Modern Classic",
+      "subtitleSelect": "Translation",
+      "subtitleSize": "Font Size",
+      "subtitleStyle": "Font Style",
+      "uploadSelectedSubtitle": "Upload Selected Subtitle"
+    },
+    "titleName": "SPlayer",
+    "update": {
+      "message": "Restart the app now to install update?",
+      "no": "no",
+      "title": "update dialog",
+      "updateInstalled": "has successfully installed update!",
+      "yes": "yes"
+    },
+    "window": {
+      "windowRotate": "Rotate 90° Clockwise",
+      "keepPlayingWindowFront": "Float When Playing",
+      "backToLandingView": "Back to Launching Page",
+      "bossKey": "Boss Key",
+      "doubleSize": "200%",
+      "enterFullScreen": "Enter Full Screen",
+      "exitFullScreen": "Exit Full Screen",
+      "halfSize": "50%",
+      "maxmize": "Zoom",
+      "minimize": "Minimize",
+      "name": "Window",
+      "originSize": "100%",
+      "enterPip": "Enter Picture in Picture",
+      "exitPip": "Exit Picture in Picture",
+      "playInNewWindow": "Play in New Window",
+      "backToBrowser": "Back to Browser"
+    },
+    "favourite": {
+      "name": "Channel",
+      "iqiyi": "iQIYI",
+      "bilibili": "Bilibili",
+      "douyu": "Douyu",
+      "huya": "Huya",
+      "qq": "Tencent Video",
+      "twitch": "Twitch",
+      "youku": "Youku",
+      "youtube": "YouTube"
+    },
+    "edit": {
+      "name": "Edit",
+      "cut": "Cut",
+      "copy": "Copy",
+      "paste": "Paste",
+      "selectAll": "Select All"
+    },
+    "history": {
+      "name": "History",
+      "reload": "Reload Page",
+      "back": "Back",
+      "forward": "Forward"
+    }
+  },
+  "nextVideo": {
+    "nextInFolder": "Next in Folder",
+    "nextInPlaylist": "Next in Playlist"
+  },
+  "welcome": {
+    "welcomeTitle": "Welcome to SPlayer",
+    "welcomeDescription": "All-new lightweight design, incredible performance with smart translation to let you enjoy your videos like never before.",
+    "agreement": "By using SPlayer, you agree to our ",
+    "policy": "Privacy Policy",
+    "languageTitle1": "Set your preferred subtitle",
+    "languageTitle2": "languages to fetch translations",
+    "primary": "Primary",
+    "secondary": "Secondary",
+    "chooseSecondary": "Select Secondary Language",
+    "languageDescription": "* You can change your settings in preferences later",
+    "none": "None"
+  },
+  "browsing": {
+    "bilibili": "Bilibili",
+    "iqiyi": "iQIYI",
+    "youtube": "YouTube",
+    "huya": "Huya",
+    "qq": "Tencent Video",
+    "douyu": "Douyu",
+    "twitch": "Twitch",
+    "youku": "Youku",
+    "openLocalFile": "Open Local File ...",
+    "enterPip": "Enter Picture in Picture",
+    "exitPip": "Back to Browser",
+    "enterPop": "Play in New Window",
+    "exitPop": "Back to Browser",
+    "danmu": "Toggle Danmaku",
+    "error": {
+      "offline": "No Internet",
+      "try": "Try:",
+      "firstLine": "Checking the network cables, modem, and router",
+      "secondLine": "Reconnecting to Wi-Fi"
+    }
+  },
+  "preferences": {
+    "general": {
+      "hideHistory": "Hide playback history",
+      "clearHistory": "Always clear playback history on exit",
+      "reverseScrolling": "Reverse mouse scrolling when adjusting volume",
+      "setDefault": "Set as the Default Video Player",
+      "setDefaultDescription": "Open all video files with SPlayer.",
+      "restoreSettings": "Reset All Content and Settings",
+      "restoreSettingsDescription": "Restart application with all data and caches erased.",
+      "restoreSettingsAfterRelaunch": "Restart to apply.",
+      "setButton": "Apply",
+      "relaunch": "Restart",
+      "displayLanguage": "Display Language",
+      "generalSetting": "General",
+      "others": "Others",
+      "switchDisplayLanguages": "Display Language controls the language you see in SPlayer."
+    },
+    "translate": {
+      "languageDescription": "Upload anonymous data to fetch translation results in the following language,  no privacy information will be included.",
+      "languagePriority": "Language Preference",
+      "none": "None",
+      "primary": "Primary",
+      "translateConfirm": "Enable Smart Translation",
+      "translateSetting": "Translation",
+      "secondary": "Secondary",
+      "setAsDefault": "Set SPlayer as the Default Application",
+      "settings": "Settings"
+    },
+    "privacy": {
+      "privacySetting": "Privacy",
+      "enable": "Enable Privacy Protection When Playing Local Video Files",
+      "smartMode": "Intelligent Mode",
+      "smartDescription": "Offline identify sensitive or not-suitable-for-work contents, and clear the playback history when playing in a folder playlist or when quitting.",
+      "incognitoMode": "Incognito Mode",
+      "incognitoDescription": "Your playback history will not be stored anymore."
+    }
+  },
+  "privacyBubble": {
+    "confirmDisable": {
+      "button": "CANCEL",
+      "partOne": "Confirm to ",
+      "partTwo": " anonymous data and Smart Translation.",
+      "underlinedContent": "disable"
+    },
+    "masVersion": {
+      "agree": "Enable",
+      "content": "Smart Translation function needs your consent for uploading anonymous media info to the server  side, and you will not receive translation results if you disagree. There is no privacy information will be collected.",
+      "disagree": "Disable"
+    },
+    "tryToDisable": {
+      "button": "OK",
+      "partOne": "SPlayer uses anonymous data to enhance user experience. Smart Translation will be disabled if you ",
+      "partTwo": ".",
+      "underlinedContent": "disagree"
+    }
+  },
+  "alertBubble": {
+    "button": "OK"
+  },
+  "protectBubble": {
+    "agree": "OK",
+    "setting": "Setting",
+    "content": "Smart Privacy Protection is enabled. Sensitive or not-suitable-for-work playback history will be removed."
+  },
+  "checkForUpdatesBubble": {
+    "needUpdate": {
+      "confirm": "Download",
+      "cancel": "Skip",
+      "content": "SPlayer {version} is now available, would you like to download it now?"
+    },
+    "noNeed": {
+      "content": "SPlayer is up to date. Version {version}"
+    }
+  },
+  "recentPlaylist": {
+    "folderSource": "Folder",
+    "playing": "Playing",
+    "paused": "Paused",
+    "playlistSource": "Playlist",
+    "add": "Add To Playlist"
+  },
+  "subtitle": {
+    "embedded": "Embed",
+    "generate": "Generate",
+    "language": {
+      "ar": "Arabic",
+      "de": "German",
+      "en": "English",
+      "es": "Spanish",
+      "fr": "French",
+      "hi": "Hindi",
+      "it": "Italian",
+      "ja": "Japanese",
+      "ko": "Korean",
+      "pt": "Portuguese (Portugal, Brazil)",
+      "ru": "Russian",
+      "zh": "Chinese (Simplified)",
+      "zh-CN": "Chinese (Simplified)",
+      "zh-TW": "Chinese (Traditional)"
+    }
+  },
+  "uploading": {
+    "content": "Subtitle Uploading ...",
+    "title": ""
+  },
+  "uploadingFailed": {
+    "content": "Please try later.",
+    "title": "Upload Failed"
+  },
+  "uploadingSuccess": {
+    "content": "Subtitle has been uploaded",
+    "title": "Upload Successfully"
+  },
+  "snapshotSuccess": {
+    "content": "Snapshot Successfully",
+    "title": ""
+  },
+  "snapshotFailed": {
+    "content": "Please try again later.",
+    "title": "Snapshot Failed"
+  },
+  "loadVideoBySubtitleFailed": {
+    "content": "Cannot find any related video in the folder",
+    "title": ""
+  },
+  "translateModal": {
+    "videoLanguageLabel": "Audio Language",
+    "subtitleLanguageLabel": "Translate To",
+    "selectLanguageLabel": "Select",
+    "audioLanguageLoading": "Fetching language list ...",
+    "audioLanguageLoadFail": "Connection failed, please try later",
+    "select": {
+      "title": "AI Translation",
+      "content": "Select the language you hear in the video and click the generate button."
+    },
+    "translate": {
+      "title": "About {time} Left",
+      "minute": "{number} min",
+      "second": "{number} sec",
+      "hour": "{number} hr",
+      "content": "Please do not skip the video or close the application. You can check the progress on the translation panel.",
+      "contentSearch": "Searching ...",
+      "contentTranslate": "Subtitle in source language found, translation in process ...",
+      "contentGrabbing": "Subtitle in source language not found, extracting audio ...",
+      "contentGrabComplated": "Audio extracted, uploading now ...",
+      "contentSpeech": "Audio uploaded, speech recognition and translation in process ..."
+    },
+    "success": {
+      "title": "Translation Done",
+      "content": "AI Translation is ready, please check it on the translation panel."
+    },
+    "discard": {
+      "title": "AI Translation is in Progress",
+      "content": "Are you sure you want to quit? If you quit, the translation progress will not be restored."
+    },
+    "noLineFail": {
+      "title": "Network Error",
+      "content": "Please check your network connection and try again."
+    },
+    "timeOutFail": {
+      "title": "Connection Timeout",
+      "content": "The connection to the server failed. Please try later."
+    },
+    "serverErrorFail": {
+      "title": "Translation Failed",
+      "content": "Translation failed because of a server error. Please try later."
+    },
+    "ForbiddenFail": {
+      "title": "Session Expired",
+      "content": "Please sign in again."
+    },
+    "cancel": "Cancel",
+    "quit": "Quit",
+    "generate": "Generate",
+    "ok": "Run in Background",
+    "continue": "Cancel"
+  },
+  "translateBubble": {
+    "bubbleWhenGrab": "AI Translation will be aborted If you go on, do you want to continue anyway?",
+    "bubbleWhenTranslate": "AI Translation is being processed on the server. You can check the progress when you watch the video next time.",
+    "bubbleFunctionForbidden": "AI Translation will be aborted If you go on, do you want to continue anyway?",
+    "bubbleWhenSuccess": {
+      "title": "",
+      "content": "AI Translation is ready now, \nplease check it on the translation panel."
+    },
+    "bubbleWhenSuccessOnOtherVideo": {
+      "title": "",
+      "content": "AI Translation is ready now. \nIt will be automatically loaded next time when you watch the video."
+    },
+    "bubbleTranslateNoLineFail": {
+      "title": "Network Error",
+      "content": "Please check your network connection and try again."
+    },
+    "bubbleTranslateTimeOutFail": {
+      "title": "Connection Timeout",
+      "content": "The connection to the server failed. Please try later."
+    },
+    "bubbleTranslateServerErrorFail": {
+      "title": "Translation Failed",
+      "content": "Translation failed because of a server error. Please try later."
+    },
+    "bubbleTranslateForbiddenFail": {
+      "title": "Session Expired",
+      "content": "Please sign in again."
+    },
+    "ok": "OK",
+    "cancel": "Cancel",
+    "continue": "Continue"
+  },
+  "loginModal": {
+    "title": "Sign in with phone number",
+    "sendCode": "Send",
+    "sendingCode": "Sending ...",
+    "countDown": "{count} s",
+    "placeholder": {
+      "mobile": "Your phone number",
+      "code": "Enter verification code"
+    },
+    "submit": "Sign In",
+    "submitting": "Processing ...",
+    "codeError": "Incorrect Vertification Code",
+    "netWorkError": "Connection Timeout",
+    "noLineError": "No Network Connection",
+    "afsError": "Captcha Validation Failed",
+    "afs": {
+      "start": "Please slide to verify",
+      "yes": "Success",
+      "retry": "retry",
+      "error300": "Verification failed, please",
+      "errorNetwork": "Network Error. Please"
+    }
+  }
 }

@@ -7,17 +7,11 @@ describe('helper.path', () => {
     expect(filePathToUrl('C:\\Users\\test\\测试.mp4')).to.be.equal('file:///C:/Users/test/%E6%B5%8B%E8%AF%95.mp4');
   });
   it('should convert file url to path correctly', () => {
-    const currentPlatform = process.platform;
-
     ['darwin', 'freebsd', 'linux', 'openbsd'].forEach((platform) => {
-      Object.defineProperty(process, 'platform', { value: platform });
-      expect(fileUrlToPath('file:///home/test/%E6%B5%8B%E8%AF%95.mp4?a=1&b=2#c')).to.be.equal('/home/test/测试.mp4');
+      expect(fileUrlToPath('file:///home/test/%E6%B5%8B%E8%AF%95.mp4?a=1&b=2#c', { platform })).to.be.equal('/home/test/测试.mp4');
     });
 
-    Object.defineProperty(process, 'platform', { value: 'win32' });
-    expect(fileUrlToPath('file:///C:/Users/test/%E6%B5%8B%E8%AF%95.mp4?a=1&b=2#c')).to.be.equal('C:\\Users\\test\\测试.mp4');
-
-    Object.defineProperty(process, 'platform', { value: currentPlatform });
+    expect(fileUrlToPath('file:///C:/Users/test/%E6%B5%8B%E8%AF%95.mp4?a=1&b=2#c', { platform: 'win32' })).to.be.equal('C:\\Users\\test\\测试.mp4');
   });
   it('should parse name correctly', () => {
     [
@@ -72,6 +66,8 @@ describe('helper.path', () => {
     });
     [
       'Apple Special Event. October 22, 2013..mp4',
+      'cls-kungfuhubs1080dub.mp4',
+      'ewdp-girlgifts720p.mp4',
       'Event.测试测绘试p6~p7.mkv',
       'Event.四季花园.mkv',
     ].forEach((e) => {
@@ -81,7 +77,6 @@ describe('helper.path', () => {
       }));
     });
     [
-      '越狱SE01.h456.1080P.01.mp4',
       '越狱.SE01.h456.1080P.01.mp4',
       '越狱.s01.h456.1080P.01.mp4',
       '越狱_sE01.h456.1080P.01.mp4',

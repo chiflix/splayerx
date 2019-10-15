@@ -1,8 +1,8 @@
 import Vue from 'vue';
-import messages from '@/locales';
-import UpdaterNotification from '@/components/UpdaterView/UpdaterNotification.vue';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import VueI18n from 'vue-i18n';
+import messages from '@/locales';
+import UpdaterNotification from '@/components/UpdaterView/UpdaterNotification.vue';
 import ipcs from './ipcMock';
 import { RendererHelperForWin } from '../../../../src/main/update/RendererHelper';
 import MainHelper from './mainSimulator';

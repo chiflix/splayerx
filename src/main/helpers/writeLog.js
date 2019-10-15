@@ -1,6 +1,8 @@
+/* eslint-disable no-console */
 import fs from 'fs';
 import path from 'path';
 import electron from 'electron'; // eslint-disable-line
+import mkdirp from 'mkdirp';
 import winston from 'winston';
 
 const defaultPath = path.join(electron.app.getPath('userData'), 'logs');
@@ -38,7 +40,7 @@ function getLogger(filename) {
 export default function writeLog(level, log) {
   if (!fsExistsSync(defaultPath)) {
     try {
-      fs.mkdirSync(defaultPath);
+      mkdirp.sync(defaultPath);
     } catch (err) {
       console.log(err);
     }

@@ -1,67 +1,150 @@
 <template>
-  <div :class="[container, { rtl: isRtl }]">
+  <div :class="[container, 'no-drag', { rtl: isRtl }]">
     <transition name="nextvideo">
-      <NextVideo class="next-video" ref="nextVideo"
+      <NextVideo
+        ref="nextVideo"
         v-if="showNextVideo"
         @close-next-video="closeNextVideo"
         @manualclose-next-video="manualClose"
-        @ready-to-show="readyToShow = true"/>
+        @ready-to-show="readyToShow = true"
+        class="nextVideo"
+      />
     </transition>
-    <PrivacyBubble class="privacy-bubble"
+    <PrivacyBubble
       v-if="showPrivacyBubble && !isMas"
-      @close-privacy-bubble="closePrivacyBubble"/>
-    <MASPrivacyBubble class="mas-privacy-bubble"
-      v-if="showPrivacyBubble && isMas"
-      @close-privacy-bubble="closePrivacyBubble"/>
-    <transition-group name="toast" class="transGroup">
-      <div v-for="m in messages" :key="m.id"
+      @close-privacy-bubble="closePrivacyBubble"
+      class="privacy-bubble"
+    />
+    <transition name="bubble">
+      <ConfirmBubble
+        v-if="showPrivacyBubble && isMas"
+        :content="$t('privacyBubble.masVersion.content')"
+        :confirm-button-text="$t('privacyBubble.masVersion.agree')"
+        :cancel-button-text="$t('privacyBubble.masVersion.disagree')"
+        :confirm="handleAgreePrivacy"
+        :cancel="handleDisagreePrivacy"
+        class="mas-privacy-bubble"
+      />
+    </transition>
+    <transition name="bubble">
+      <ConfirmBubble
+        v-if="showNSFWBubble"
+        :content="$t('protectBubble.content')"
+        :confirm-button-text="$t('protectBubble.agree')"
+        :cancel-button-text="$t('protectBubble.setting')"
+        :confirm="handleAgreeNSFW"
+        :cancel="handleNSFWSetting"
+        class="mas-privacy-bubble"
+      />
+    </transition>
+    <transition name="bubble">
+      <ConfirmBubble
+        v-if="showUpdateBubble"
+        :content="checkForUpdatesContent"
+        :confirm-button-text="$t('checkForUpdatesBubble.needUpdate.confirm')"
+        :cancel-button-text="$t('checkForUpdatesBubble.needUpdate.cancel')"
+        :confirm="confirmUpdate"
+        :cancel="cancelUpdate"
+        class="mas-privacy-bubble"
+      />
+    </transition>
+    <transition name="bubble">
+      <AlertBubble
+        v-if="showLastestUpdateBubble"
+        :content="lastestUpdateContent"
+        :close="closeLastestUpdateBubble"
+        class="mas-privacy-bubble"
+      />
+    </transition>
+    <transition name="bubble">
+      <TranslateBubble
+        v-if="isTranslateBubbleVisible"
+        :message="translateBubbleMessage"
+        :type="translateBubbleType"
+        @disCardTranslate="discardTranslate"
+        @backStageTranslate="backStageTranslate"
+        @hide="hideTranslateBubble"
+      />
+    </transition>
+    <transition-group
+      name="toast"
+      class="transGroup"
+    >
+      <div
+        v-for="m in messages"
+        :id="'item' + m.id"
+        :key="m.id"
         class="messageContainer"
-        :id="'item' + m.id">
-        <div :class="m.type === 'result' ? 'black-gradient-result' : 'black-gradient-state'"/>
-        <div :class="m.type === 'result' ? 'resultContainer' : `stateContainer`">
-          <div class="bubbleContent">
-            <p class="title" v-if="m.type === 'result'">{{ m.title }}</p>
-            <p class="content">{{ m.content }}</p>
-          </div>
-          <Icon v-if="m.type === 'result'" type="close" class="bubbleClose" @click.native.left="closeMessage(m.id, m.title)"></Icon>
-        </div>
+      >
+        <ErrorBubble
+          v-if="m.type === 'result'"
+          :id="m.id"
+          :title="m.title"
+          :content="m.content"
+          :close="closeMessage"
+        />
+        <StatusBubble
+          v-else
+          :content="m.content"
+        />
       </div>
     </transition-group>
   </div>
 </template>
 
-<script>
-import { mapGetters } from 'vuex';
-import NextVideo from '@/components/PlayingView/NextVideo.vue';
-import PrivacyBubble from '@/components/PlayingView/PrivacyConfirmBubble.vue';
-import MASPrivacyBubble from '@/components/PlayingView/MASPrivacyConfirmBubble.vue';
+<script lang="ts">
+import { mapGetters, mapActions } from 'vuex';
+import StatusBubble from '@/components/Bubbles/StatusBubble.vue';
+import ErrorBubble from '@/components/Bubbles/ErrorBubble.vue';
+import AlertBubble from '@/components/Bubbles/AlertBubble.vue';
+import ConfirmBubble from '@/components/Bubbles/ConfirmBubble.vue';
+import NextVideo from '@/components/Bubbles/NextVideo.vue';
+import PrivacyBubble from '@/components/Bubbles/PrivacyConfirmBubble.vue';
+import TranslateBubble from '@/components/Bubbles/TranslateBubble.vue';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
-import Icon from './BaseIconContainer.vue';
+import { AudioTranslate as atActions } from '@/store/actionTypes';
+import { skipCheckForUpdate } from '../libs/utils';
 
 export default {
-  name: 'notification-bubble',
+  name: 'NotificationBubble',
+  // @ts-ignore
   type: INPUT_COMPONENT_TYPE,
   components: {
-    Icon,
+    StatusBubble,
+    ErrorBubble,
+    AlertBubble,
+    ConfirmBubble,
     NextVideo,
     PrivacyBubble,
-    MASPrivacyBubble,
+    TranslateBubble,
   },
   data() {
     return {
-      manualClosed: false, // if next-video was manually closed then it won't appear again
+      manualClosed: false, // if nextVideo was manually closed then it won't appear again
       showNextVideo: false,
       readyToShow: false, // show after video element is loaded
       showPrivacyBubble: false,
+      showNSFWBubble: false,
+      showUpdateBubble: false, // show update bubble
+      checkForUpdatesContent: '',
+      checkForUpdatesDownloadUrl: '',
+      checkForUpdatesReleaseUrl: '',
+      checkForUpdatesVersion: '',
+      showLastestUpdateBubble: false, // show update bubble
+      lastestUpdateContent: '',
     };
   },
   computed: {
-    ...mapGetters(['nextVideo', 'nextVideoPreviewTime', 'duration', 'singleCycle', 'privacyAgreement']),
+    ...mapGetters([
+      'nextVideo', 'nextVideoPreviewTime', 'duration', 'singleCycle', 'privacyAgreement', 'nsfwProcessDone',
+      'translateBubbleMessage', 'translateBubbleType', 'isTranslateBubbleVisible', 'failBubbleId', 'preferenceData',
+    ]),
     messages() {
       const messages = this.$store.getters.messageInfo;
       if (this.showNextVideo && this.showPrivacyBubble) {
         return messages.slice(0, 1);
-      } else if (this.showNextVideo || this.showPrivacyBubble) {
+      }
+      if (this.showNextVideo || this.showPrivacyBubble) {
         return messages.slice(0, 2);
       }
       return messages;
@@ -80,23 +163,66 @@ export default {
     },
   },
   watch: {
-    singleCycle(val) {
+    singleCycle(val: boolean) {
       this.showNextVideo = !val;
     },
-    privacyAgreement(val) {
+    privacyAgreement(val: boolean) {
       if (val) {
         this.showPrivacyBubble = false;
       }
     },
   },
   mounted() {
+    this.$bus.$on('nsfw', () => {
+      if (!this.nsfwProcessDone) this.showNSFWBubble = true;
+    });
     this.$bus.$on('privacy-confirm', () => {
       this.showPrivacyBubble = true;
     });
+    this.$bus.$on('new-version', (info: { version: string, landingPage: string, url: string }) => {
+      this.checkForUpdatesContent = this.$t('checkForUpdatesBubble.needUpdate.content', { version: info.version });
+      this.checkForUpdatesDownloadUrl = info.url;
+      this.checkForUpdatesReleaseUrl = info.landingPage;
+      this.checkForUpdatesVersion = info.version;
+      this.showUpdateBubble = true;
+    });
+    // 检查当前版本是最新版本
+    this.$bus.$on('lastest-version', (info: { version: string }) => {
+      this.lastestUpdateContent = this.$t('checkForUpdatesBubble.noNeed.content', { version: info.version });
+      this.showLastestUpdateBubble = true;
+    });
   },
   methods: {
+    ...mapActions({
+      hideTranslateBubble: atActions.AUDIO_TRANSLATE_HIDE_BUBBLE,
+      discardTranslate: atActions.AUDIO_TRANSLATE_DISCARD,
+      backStageTranslate: atActions.AUDIO_TRANSLATE_BACKSATGE,
+      hideBubbleCallBack: atActions.AUDIO_TRANSLATE_HIDE_BUBBLE,
+    }),
     closePrivacyBubble() {
       this.showPrivacyBubble = false;
+    },
+    handleAgreePrivacy() {
+      this.$store.dispatch('agreeOnPrivacyPolicy').then(() => {
+        this.$electron.ipcRenderer.send('main-to-preference', this.preferenceData);
+      });
+    },
+    handleDisagreePrivacy() {
+      this.$store.dispatch('disagreeOnPrivacyPolicy').then(() => {
+        this.$electron.ipcRenderer.send('main-to-preference', this.preferenceData);
+      });
+    },
+    handleAgreeNSFW() {
+      this.showNSFWBubble = false;
+      this.$store.dispatch('nsfwProcessDone');
+    },
+    handleNSFWSetting() {
+      this.$electron.ipcRenderer.send('add-preference', 'privacy');
+      this.showNSFWBubble = false;
+      this.$store.dispatch('nsfwProcessDone');
+    },
+    closeLastestUpdateBubble() {
+      this.showLastestUpdateBubble = false;
     },
     manualClose() {
       this.manualClosed = true;
@@ -106,13 +232,14 @@ export default {
       this.manualClosed = false;
       this.showNextVideo = false;
     },
-    closeMessage(id, title) {
+    closeMessage(id: string) {
       this.$store.dispatch('removeMessages', id);
-      if (title === this.$t('errorFile.fileNonExist.title')) {
-        this.$bus.$emit('delete-file');
+      // 如果是x掉智能翻译失败的气泡，就执行智能翻译bubble cancal的回调
+      if (id === this.failBubbleId) {
+        this.hideBubbleCallBack();
       }
     },
-    checkNextVideoUI(time) {
+    checkNextVideoUI(time: number) {
       if (time > this.nextVideoPreviewTime && time < this.duration - 1 && this.duration > 240) {
         if (this.nextVideo && !this.manualClosed) {
           this.$store.dispatch('UpdatePlayingList');
@@ -126,33 +253,69 @@ export default {
         this.$refs.nextVideo.updatePlayingTime(time);
       }
     },
+    confirmUpdate() {
+      // go to web site
+      const { checkForUpdatesDownloadUrl, checkForUpdatesReleaseUrl } = this;
+      this.$electron.shell.openExternal(checkForUpdatesDownloadUrl);
+      this.$electron.shell.openExternal(checkForUpdatesReleaseUrl);
+      this.showUpdateBubble = false;
+    },
+    cancelUpdate() {
+      // this version not auto check show
+      const { checkForUpdatesVersion } = this;
+      skipCheckForUpdate(checkForUpdatesVersion);
+      this.showUpdateBubble = false;
+    },
   },
 };
 </script>
 
 <style lang="scss" scoped>
 .winContainer {
-  -webkit-app-region: no-drag;
   position: absolute;
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
     top: 28px;
     right: 19px;
   }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
     top: 34px;
     right: 28px;
   }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
     top: 34px;
     right: 34px;
   }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     top: 45px;
     right: 52px;
   }
+
+  .nextVideo {
+    transition: 200ms ease-out;
+    transition-property: opacity, transform;
+    @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px),
+    screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
+      display: none;
+    }
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
+    screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+      margin-bottom: 12px;
+    }
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+    screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+      margin-bottom: 15px;
+    }
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+    screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+      margin-bottom: 18px;
+    }
+  }
 }
 .container {
-  -webkit-app-region: no-drag;
   position: absolute;
   display: flex;
   flex-direction: column;
@@ -160,19 +323,23 @@ export default {
   width: auto;
   height: auto;
 
-  .next-video {
+  .nextVideo {
     transition: 200ms ease-out;
     transition-property: opacity, transform;
-    @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
+    @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px),
+    screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
       display: none;
     }
-    @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
+    screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
       margin-bottom: 12px;
     }
-    @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+    screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
       margin-bottom: 15px;
     }
-    @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+    screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
       margin-bottom: 18px;
     }
   }
@@ -185,32 +352,40 @@ export default {
   .privacy-bubble {
     position: relative;
     z-index: 8;
-    @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
+    @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px),
+    screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
       display: none;
     }
-    @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
+    screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
       margin-bottom: 12px;
     }
-    @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+    screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
       margin-bottom: 15px;
     }
-    @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+    screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
       margin-bottom: 18px;
     }
   }
   .mas-privacy-bubble {
     position: relative;
     z-index: 8;
-    @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
+    @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px),
+    screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
       display: none;
     }
-    @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
+    screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
       margin-bottom: 12px;
     }
-    @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+    screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
       margin-bottom: 15px;
     }
-    @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+    screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
       margin-bottom: 18px;
     }
   }
@@ -220,19 +395,23 @@ export default {
   .toast-enter, .toast-leave-active {
     transform: translateX(403px);
   }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
     top: 13px;
     right: 14px;
   }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
     top: 22px;
     right: 28px;
   }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
     top: 25px;
     right: 34px;
   }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     top: 45px;
     right: 52px;
   }
@@ -242,81 +421,6 @@ export default {
   flex-direction: column;
   align-items: flex-end;
 }
-.stateContainer {
-  display: flex;
-  justify-content: flex-start;
-  background-color: rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(8px);
-  z-index: 8;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
-    height: 32px;
-    border-radius: 6px;
-    clip-path: inset(0 round 6px);
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
-    height: 36px;
-    border-radius: 7px;
-    clip-path: inset(0 round 7px);
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
-    height: 43px;
-    border-radius: 8px;
-    clip-path: inset(0 round 8px);
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
-    height: 60px;
-    border-radius: 11px;
-    clip-path: inset(0 round 11px);
-  }
-
-  .bubbleContent {
-    @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
-      width: auto;
-      height: 11px;
-      margin: auto 14px auto 14px;
-    }
-    @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
-      width: auto;
-      height: 12px;
-      margin: auto 16px auto 16px;
-    }
-    @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
-      width: auto;
-      height: 15px;
-      margin: auto 19px auto 19px;
-    }
-    @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
-      width: auto;
-      height: 21px;
-      margin: auto 26px auto 26px;
-    }
-    .content {
-      color: rgba(255, 255, 255, 0.8);
-      text-align: center;
-      @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
-        font-size: 11px;
-        line-height: 11px;
-        letter-spacing: 0.4px;
-      }
-      @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
-        font-size: 12px;
-        line-height: 12px;
-        letter-spacing: 0.4px;
-      }
-      @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
-        font-size: 15px;
-        line-height: 15px;
-        letter-spacing: 0.4px;
-      }
-      @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
-        font-size: 21px;
-        line-height: 21px;
-        letter-spacing: 0.7px;
-      }
-    }
-  }
-}
 .messageContainer {
   z-index: 8;
   transition: 400ms cubic-bezier(0.17, 0.67, 0.17, 0.98);
@@ -324,189 +428,25 @@ export default {
   width: auto;
   white-space: nowrap;
   right: 0;
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
     margin-bottom: 8px;
   }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
     margin-bottom: 12px;
   }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
     margin-bottom: 15px;
   }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     margin-bottom: 18px;
   }
 }
-.black-gradient-result {
-  position: absolute;
-  width: 100%;
-  box-shadow: 0 0 2px 0 rgba(0,0,0,0.30);
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
-    height: 47px;
-    border-radius: 6px;
-    clip-path: inset(0 round 6px);
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
-    height: 52px;
-    border-radius: 7px;
-    clip-path: inset(0 round 7px);
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
-    height: 62px;
-    border-radius: 8px;
-    clip-path: inset(0 round 8px);
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
-    height: 87px;
-    border-radius: 11px;
-    clip-path: inset(0 round 11px);
-  }
-}
-.black-gradient-state {
-  position: absolute;
-  width: 100%;
-  box-shadow: 0 0 2px 0 rgba(0,0,0,0.30);
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
-    height: 32px;
-    border-radius: 6px;
-    clip-path: inset(0 round 6px);
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
-    height: 36px;
-    border-radius: 7px;
-    clip-path: inset(0 round 7px);
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
-    height: 43px;
-    border-radius: 8px;
-    clip-path: inset(0 round 8px);
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
-    height: 60px;
-    border-radius: 11px;
-    clip-path: inset(0 round 11px);
-  }
-}
-
-.resultContainer {
-  display: flex;
-  background-color: rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
-    height: 47px;
-    border-radius: 6px;
-    clip-path: inset(0 round 6px);
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
-    height: 52px;
-    border-radius: 7px;
-    clip-path: inset(0 round 7px);
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
-    height: 62px;
-    border-radius: 8px;
-    clip-path: inset(0 round 8px);
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
-    height: 87px;
-    border-radius: 11px;
-    clip-path: inset(0 round 11px);
-  }
-
-  .bubbleContent {
-    @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
-      width: auto;
-      height: 23px;
-      margin: 12px 10px auto 14px;
-    }
-    @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
-      width: auto;
-      height: 26px;
-      margin: 13px 15px auto 16px;
-    }
-    @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
-      width: auto;
-      height: 32px;
-      margin: 15px 20px auto 19px;
-    }
-    @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
-      width: auto;
-      height: 45px;
-      margin: 21px 25px auto 26px;
-    }
-    .title {
-      color: rgba(255, 255, 255, 1);
-      @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
-        font-size: 11px;
-        line-height: 11px;
-        letter-spacing: 0.4px;
-        margin-bottom: 3px;
-      }
-      @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
-        font-size: 12px;
-        line-height: 12px;
-        letter-spacing: 0.4px;
-        margin-bottom: 4px;
-      }
-      @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
-        font-size: 15px;
-        line-height: 15px;
-        letter-spacing: 0.4px;
-        margin-bottom: 5px;
-      }
-      @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
-        font-size: 21px;
-        line-height: 21px;
-        letter-spacing: 0.7px;
-        margin-bottom: 7px;
-      }
-    }
-    .content {
-      color: rgba(255, 255, 255, 0.7);
-      @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
-        font-size: 9px;
-        line-height: 9px;
-        letter-spacing: 0.2px;
-      }
-      @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
-        font-size: 10px;
-        line-height: 10px;
-        letter-spacing: 0.2px;
-      }
-      @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
-        font-size: 12px;
-        line-height: 12px;
-        letter-spacing: 0.24px;
-      }
-      @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
-        font-size: 17px;
-        line-height: 17px;
-        letter-spacing: 0.3px;
-      }
-    }
-  }
-
-  .bubbleClose {
-    cursor: pointer;
-    @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
-      margin: 13.5px 14px auto auto;
-    }
-    @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
-      margin: 15px 16px auto auto;
-    }
-    @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
-      margin: 18px 20px auto auto;
-    }
-    @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
-      margin: 25.5px 28px auto auto;
-    }
-  }
-}
-
-
 .toast-leave-active {
-  position: absolute;
+  // position: absolute;
   transition: transform 500ms cubic-bezier(0.17, 0.67, 0.17, 0.98);
 }
 .toast-enter-active {
@@ -524,6 +464,4 @@ export default {
 .nextvideo-leave-active {
   position: absolute;
 }
-
-
 </style>

@@ -1,24 +1,63 @@
 <template>
-  <div class="cont" v-fade-in="showAllWidgets || progressTriggerStopped">
-    <div class="timing" @mousedown="switchTimeContent">
-          <span class="timeContent" ref="timeContent" :class="{ remainTime: isRemainTime }" v-if="hasDuration"></span>
+  <div
+    v-fade-in="showAllWidgets || progressTriggerStopped"
+    class="cont"
+  >
+    <div
+      @click="onTimeCodeClick"
+      class="timing"
+    >
+      <span
+        ref="timeContent"
+        class="timeContent"
+      />
+      <transition name="fade-100">
+        <span
+          v-if="showFullTimeCode"
+          class="timeDuration"
+        >
+          / {{ formatedDuration }}
+        </span>
+      </transition>
     </div>
-    <Labels class="rate"/>
+    <Labels
+      :rate="rate"
+      :show-cycle-label="showCycleLabel"
+      :show-speed-label="showSpeedLabel"
+      class="rate"
+    />
   </div>
 </template>
-<script>
-import { mapGetters } from 'vuex';
-import { videodata } from '@/store/video';
+<script lang="ts">
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import Labels from './Labels.vue';
 
 export default {
-  name: 'the-time-codes',
+  name: 'TheTimeCodes',
+  // @ts-ignore
   type: INPUT_COMPONENT_TYPE,
   components: {
     Labels,
   },
-  props: ['showAllWidgets', 'progressTriggerStopped'],
+  props: {
+    duration: {
+      type: Number,
+      default: 0,
+    },
+    rate: {
+      type: Number,
+      default: 1,
+    },
+    showFullTimeCode: Boolean,
+    showCycleLabel: Boolean,
+    showSpeedLabel: Boolean,
+    showAllWidgets: Boolean,
+    progressTriggerStopped: Boolean,
+    onTimeCodeClick: {
+      type: Function,
+      required: true,
+    },
+  },
   data() {
     return {
       isRemainTime: false,
@@ -27,137 +66,106 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['duration', 'rate', 'singleCycle']),
     hasDuration() {
       return !Number.isNaN(this.duration);
     },
-  },
-  watch: {
-    rate() {
-      if (!this.progressKeydown) {
-        this.$emit('update:progressTriggerStopped', true);
-        this.clock.clearTimeout(this.progressTriggerId);
-        this.progressTriggerId = this.clock.setTimeout(() => {
-          this.$emit('update:progressTriggerStopped', false);
-        }, this.progressDisappearDelay);
-      }
-    },
-    singleCycle() {
-      this.$emit('update:progressTriggerStopped', true);
-      this.clock.clearTimeout(this.progressTriggerId);
-      this.progressTriggerId = this.clock.setTimeout(() => {
-        this.$emit('update:progressTriggerStopped', false);
-      }, this.progressDisappearDelay);
+    formatedDuration() {
+      return this.timecodeFromSeconds(Math.floor(this.duration));
     },
   },
   methods: {
-    switchTimeContent() {
-      this.isRemainTime = !this.isRemainTime;
+    updateTimeContent(time: number) {
       if (this.$refs.timeContent) {
-        if (this.isRemainTime) {
-          this.$refs.timeContent.textContent =
-          this.timecodeFromSeconds(Math.floor(this.duration) - Math.floor(videodata.time));
-        } else {
-          this.$refs.timeContent.textContent =
-          this.timecodeFromSeconds(Math.floor(videodata.time));
-        }
+        this.$refs.timeContent.textContent = this.timecodeFromSeconds(Math.floor(time));
       }
     },
-    updateTimeContent(time) {
-      if (this.$refs.timeContent) {
-        this.$refs.timeContent.textContent =
-        this.timecodeFromSeconds(this.isRemainTime ?
-          Math.floor(this.duration) - Math.floor(time) : Math.floor(time));
-      }
-    },
-  },
-  created() {
-    this.$bus.$on('seek', () => {
-      this.$emit('update:progressTriggerStopped', true);
-      this.clock.clearTimeout(this.progressTriggerId);
-      this.progressTriggerId = this.clock.setTimeout(() => {
-        this.$emit('update:progressTriggerStopped', false);
-      }, this.progressDisappearDelay);
-    });
   },
 };
 </script>
 
 <style lang="scss">
-@media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
+@media screen and (max-aspect-ratio: 1/1) and (max-width: 288px),
+screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
   .cont {
-    bottom: 23px;
+    bottom: 18px;
     left: 20px;
   }
   .timing {
     height: 18px;
-    font-size: 18px;
-    .secondContent {
-      font-size: 13px;
+    .timeContent {
+      font-size: 18px;
+      line-height: 18px;
     }
-    .splitSign {
+    .timeDuration {
       font-size: 13px;
+      line-height: 13px;
     }
   }
   .rate {
-    margin: 4px 1px auto 7px;
+    margin-left: 7px;
   }
 }
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
+screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
   .cont {
-    bottom: 27px;
+    bottom: 24px;
     left: 28px;
   }
   .timing {
-     height: 20px;
-     font-size: 18px;
-     .secondContent {
-       font-size: 14px;
-     }
-     .splitSign {
-       font-size: 14px;
-     }
-   }
+    height: 18px;
+    .timeContent {
+      font-size: 18px;
+      line-height: 18px;
+    }
+    .timeDuration {
+      font-size: 13px;
+      line-height: 13px;
+    }
+  }
   .rate {
-    margin: auto 2px 0 9px;
+    margin-left: 9px;
   }
 }
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
   .cont {
-    bottom: 34px;
+    bottom: 31px;
     left: 33px;
   }
   .timing {
-    height: 24px;
-    font-size: 24px;
-    .secondContent {
-      font-size: 18px;
+    height: 23px;
+    .timeContent {
+      font-size: 23px;
+      line-height: 23px;
     }
-    .splitSign {
-      font-size: 18px;
+    .timeDuration {
+      font-size: 17px;
+      line-height: 17px;
     }
   }
   .rate {
-    margin: auto 3px 0 11px;
+    margin-left: 11px;
   }
 }
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   .cont {
-    bottom: 44px;
-    left: 51px;
+    bottom: 38px;
+    left: 47px;
   }
   .timing {
-    height: 36px;
-    font-size: 36px;
-    .secondContent {
-      font-size: 26px;
+    height: 35px;
+    .timeContent {
+      font-size: 35px;
+      line-height: 35px;
     }
-    .splitSign {
-      font-size: 26px;
+    .timeDuration {
+      font-size: 25px;
+      line-height: 25px;
     }
   }
   .rate {
-    margin: 9px 4px auto 13px;
+    margin-left: 13px;
   }
 }
 .cont {
@@ -166,6 +174,7 @@ export default {
   height: auto;
   display: flex;
   flex-direction: row;
+  align-items: flex-end;
   z-index: 5;
 }
 .timing {
@@ -180,20 +189,13 @@ export default {
     letter-spacing: 0.9px;
     user-select: none;
   }
-
-  .remainTime {
-    &::before {
-      content: '-';
-      padding-right: 4px;
-      font-weight: 600;
-      display: inline-block;
-    }
+  .timeDuration {
+    display: inline-block;
+    border: 0 solid rgba(0,0,0,0.10);
+    color: rgba(255,255,255,0.50);
+    letter-spacing: 0;
+    font-weight: 600;
   }
-
-  .splitSign {
-    color: rgba(255, 255, 255, 0.5);
-  }
-
 }
 .timing:hover {
   cursor: pointer;

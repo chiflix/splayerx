@@ -1,69 +1,133 @@
 <template>
-<div class="preference-setting">
-  <div class="title">{{ $t("preferences.general.displayLanguage") }}</div>
-  <div class="description">{{ $t("preferences.general.switchDisplayLanguages")}}</div>
-  <div class="drop-down">
-    <div class="no-drag" :class="showSelection ? 'drop-down-content' : 'drop-down-brief'"
-      @mouseup.stop="showSelection = !showSelection">
-      <div class="selected">{{ mapCode(displayLanguage) }}</div>
-      <Icon type="rightArrow" :class="showSelection ? 'up-arrow' : 'down-arrow'"/>
-      <div class="content" v-if="showSelection"
-        @mouseup.stop="">
-        <div class="selection"
-          v-for="(language, index) in displayLanguages"
-          :key="index"
-          @mouseup.stop="handleSelection(language)">
-          {{ mapCode(language) }}
+  <div class="general tabcontent">
+    <div class="settingItem">
+      <div class="settingItem__title">
+        {{ $t("preferences.general.displayLanguage") }}
+      </div>
+      <div class="settingItem__description">
+        {{ $t("preferences.general.switchDisplayLanguages") }}
+      </div>
+      <div class="settingItem__input dropdown">
+        <div
+          :class="showSelection ? 'dropdown__toggle--list' : 'dropdown__toggle--display'"
+          @mouseup.stop="showSelection = !showSelection"
+          class="dropdown__toggle no-drag"
+        >
+          <div class="dropdown__displayItem">
+            {{ mapCode(displayLanguage) }}
+          </div>
+          <div
+            @mouseup.stop=""
+            class="dropdown__listItems"
+            tabindex="-1"
+          >
+            <div
+              v-for="(language, index) in displayLanguages"
+              :key="index"
+              @mouseup.stop="handleSelection(language)"
+              class="dropdownListItem"
+            >
+              {{ mapCode(language) }}
+            </div>
+          </div>
+          <Icon
+            :class="showSelection ? 'dropdown__icon--arrowUp' : 'dropdown__icon--arrowDown'"
+            type="rightArrow"
+          />
         </div>
       </div>
     </div>
-  </div>
-  <div class="description-button">
-    <div class="setting-content">
-      <div class="setting-title">{{ $t("preferences.general.setDefault") }}</div>
-      <div class="setting-description">{{ $t("preferences.general.setDefaultDescription") }}</div>
-    </div>
-    <div class="setting-button no-drag" ref="button1"
-      @mousedown="mousedownOnSetDefault">
-      <transition name="button" mode="out-in">
-        <div key="" v-if="!defaultState" class="content">{{ $t("preferences.general.setButton") }}</div>
-        <div :key="defaultState" v-else class="result">
-          <Icon :type="defaultState" :class="defaultState"/>
+    <div
+      v-if="!isMas"
+      class="settingItem--justify"
+    >
+      <div class="flex">
+        <div class="settingItem__title">
+          {{ $t("preferences.general.setDefault") }}
         </div>
-      </transition>
+        <div class="settingItem__description">
+          {{ $t("preferences.general.setDefaultDescription") }}
+        </div>
+      </div>
+      <div
+        ref="button1"
+        :class="{ 'button--mouseDown': buttonDown === 2 }"
+        @mousedown="mousedownOnSetDefault"
+        class="settingItem__input button no-drag"
+      >
+        <transition
+          name="button"
+          mode="out-in"
+        >
+          <div
+            key=""
+            v-if="!defaultState"
+            class="button__text"
+          >
+            {{ $t("preferences.general.setButton") }}
+          </div>
+          <div
+            v-else
+            :key="defaultState"
+            class="button__result"
+          >
+            <Icon
+              :type="defaultState"
+              :class="defaultState"
+            />
+          </div>
+        </transition>
+      </div>
     </div>
+    <div class="settingItem--justify">
+      <div class="flex">
+        <div class="settingItem__title">
+          {{ $t("preferences.general.restoreSettings") }}
+        </div>
+        <div class="settingItem__description">
+          {{ needToRelaunch
+            ? $t("preferences.general.restoreSettingsAfterRelaunch")
+            : $t("preferences.general.restoreSettingsDescription")
+          }}
+        </div>
+      </div>
+      <div
+        ref="button2"
+        @mousedown="mousedownOnRestore"
+        :class="{
+          'button--mouseDown': buttonDown === 2 || (needToRelaunch && isMas),
+          'disabled': needToRelaunch && isMas,
+        }"
+        class="settingItem__input button no-drag"
+      >
+        <transition
+          name="button"
+          mode="out-in"
+        >
+          <div
+            ref="restoreContent"
+            :key="needToRelaunch"
+            class="button__text"
+          >
+            {{ restoreContent }}
+          </div>
+        </transition>
+      </div>
+    </div>
+    <div class="settingItem__title">
+      {{ $t("preferences.general.others") }}
+    </div>
+    <BaseCheckBox v-model="reverseScrolling">
+      {{ $t('preferences.general.reverseScrolling') }}
+    </BaseCheckBox>
   </div>
-  <div class="description-button" v-if="isMac">
-    <div class="setting-content">
-      <div class="setting-title">{{ $t("preferences.general.restoreSettings") }}</div>
-      <div class="setting-description">{{ $t("preferences.general.restoreSettingsDescription") }}</div>
-    </div>
-    <div class="setting-button no-drag" ref="button2"
-      @mousedown="mousedownOnRestore">
-      <transition name="button" mode="out-in">
-        <div :key="needToRelaunch" class="content" ref="restoreContent">{{ restoreContent }}</div>
-      </transition>
-    </div>
-  </div>
-  <div class="title other-title">{{ $t("preferences.general.others") }}</div>
-  <BaseCheckBox
-    :checkboxValue="reverseScrolling"
-    @update:checkbox-value="reverseScrolling = $event">
-    {{ $t('preferences.general.reverseScrolling') }}
-  </BaseCheckBox>
-  <BaseCheckBox
-    :checkboxValue="deleteVideoHistoryOnExit"
-    @update:checkbox-value="deleteVideoHistoryOnExit = $event">
-    {{ $t('preferences.general.clearHistory') }}
-  </BaseCheckBox>
-</div>
 </template>
 
 <script>
 import electron from 'electron';
 import { setAsDefaultApp } from '@/../shared/system';
 import Icon from '@/components/BaseIconContainer.vue';
-import { codeToLanguageName } from '@/helpers/language';
+import { codeToLanguageName } from '@/libs/language';
 import BaseCheckBox from './BaseCheckBox.vue';
 
 export default {
@@ -72,7 +136,10 @@ export default {
     BaseCheckBox,
     Icon,
   },
-  props: ['mouseDown', 'isMoved'],
+  props: {
+    mouseDown: Boolean,
+    isMoved: Boolean,
+  },
   data() {
     return {
       showSelection: false,
@@ -82,37 +149,14 @@ export default {
       restoreState: '',
       defaultButtonTimeoutId: NaN,
       restoreButtonTimeoutId: NaN,
-      needToRelaunch: false,
-      restoreContent: '',
-      languages: ['zhCN', 'zhTW', 'ja', 'ko', 'en', 'es', 'ar'],
+      needToRelaunch: !!window.localStorage.getItem('needToRelaunch'),
+      languages: ['en', 'zh-Hans', 'zh-Hant', 'ja', 'ko', 'es', 'ar'],
+      buttonDown: 0,
     };
   },
-  created() {
-    electron.ipcRenderer.once('restore-state', (event, state) => {
-      this.restoreContent = state ? this.$t('preferences.general.relaunch')
-        : this.$t('preferences.general.setButton');
-    });
-  },
-  watch: {
-    displayLanguage(val) {
-      if (val) this.$i18n.locale = val;
-      electron.ipcRenderer.send('get-restore-state');
-      electron.ipcRenderer.once('restore-state', (event, state) => {
-        this.restoreContent = state ? this.$t('preferences.general.relaunch')
-          : this.$t('preferences.general.setButton');
-      });
-    },
-    mouseDown(val, oldVal) {
-      if (!val && oldVal && !this.isMoved) {
-        this.showSelection = false;
-      } else if (!val && oldVal && this.isMoved) {
-        this.$emit('move-stoped');
-      }
-    },
-  },
   computed: {
-    isMac() {
-      return process.platform === 'darwin';
+    isMas() {
+      return !!process.mas;
     },
     preferenceData() {
       return this.$store.getters.preferenceData;
@@ -133,22 +177,6 @@ export default {
         }
       },
     },
-    deleteVideoHistoryOnExit: {
-      get() {
-        return this.$store.getters.deleteVideoHistoryOnExit;
-      },
-      set(val) {
-        if (val) {
-          this.$store.dispatch('deleteVideoHistoryOnExit').then(() => {
-            electron.ipcRenderer.send('preference-to-main', this.preferenceData);
-          });
-        } else {
-          this.$store.dispatch('notDeleteVideoHistoryOnExit').then(() => {
-            electron.ipcRenderer.send('preference-to-main', this.preferenceData);
-          });
-        }
-      },
-    },
     displayLanguage: {
       get() {
         return this.$store.getters.displayLanguage;
@@ -162,34 +190,45 @@ export default {
     displayLanguages() {
       return this.languages.filter(language => language !== this.displayLanguage);
     },
+    restoreContent() {
+      return (this.needToRelaunch && !this.isMas)
+        ? this.$t('preferences.general.relaunch')
+        : this.$t('preferences.general.setButton');
+    },
+  },
+  watch: {
+    displayLanguage(val) {
+      if (val) this.$i18n.locale = val;
+    },
+    mouseDown(val, oldVal) {
+      if (!val && oldVal && !this.isMoved) {
+        this.showSelection = false;
+      } else if (!val && oldVal && this.isMoved) {
+        this.$emit('move-stoped');
+      }
+    },
   },
   methods: {
     mouseupOnOther() {
       if (!this.isSettingDefault) {
-        this.$refs.button1.style.setProperty('background-color', '');
-        this.$refs.button1.style.setProperty('opacity', '');
-      }
-      if (!this.isRestoring) {
-        this.$refs.button2.style.setProperty('background-color', '');
-        this.$refs.button2.style.setProperty('opacity', '');
+        this.buttonDown = 1;
+      } else if (!this.isRestoring) {
+        this.buttonDown = 2;
       }
       document.removeEventListener('mouseup', this.mouseupOnOther);
-      this.$refs.button1.removeEventListener('mouseup', this.setDefault);
-      this.$refs.button2.removeEventListener('mouseup', this.restoreSettings);
+      if (this.$refs.button1) this.$refs.button1.removeEventListener('mouseup', this.setDefault);
+      if (this.$refs.button2) this.$refs.button2.removeEventListener('mouseup', this.restoreSettings);
     },
     mousedownOnSetDefault() {
       if (!this.isSettingDefault) {
-        this.$refs.button1.style.setProperty('background-color', 'rgba(0,0,0,0.10)');
-        this.$refs.button1.style.setProperty('opacity', '0.5');
+        this.buttonDown = 1;
         this.$refs.button1.addEventListener('mouseup', this.setDefault);
         document.addEventListener('mouseup', this.mouseupOnOther);
       }
     },
     mousedownOnRestore() {
       if (!this.isSettingDefault) {
-        this.$refs.button2.style.setProperty('transition-delay', '');
-        this.$refs.button2.style.setProperty('background-color', 'rgba(0,0,0,0.10)');
-        this.$refs.button2.style.setProperty('opacity', '0.5');
+        this.buttonDown = 2;
         this.$refs.button2.addEventListener('mouseup', this.restoreSettings);
         document.addEventListener('mouseup', this.mouseupOnOther);
       }
@@ -199,48 +238,37 @@ export default {
       this.isSettingDefault = true;
       try {
         await setAsDefaultApp();
-        // TODO: feedback
-        clearTimeout(this.defaultButtonTimeoutId);
         this.defaultState = 'success';
-        this.$refs.button1.style.setProperty('transition-delay', '350ms');
-        this.$refs.button1.style.setProperty('background-color', '');
-        this.$refs.button1.style.setProperty('opacity', '');
-        this.defaultButtonTimeoutId = setTimeout(() => {
-          this.defaultState = '';
-          this.isSettingDefault = false;
-          this.$refs.button1.style.setProperty('transition-delay', '');
-        }, 1500);
       } catch (ex) {
-        // TODO: feedback
-        clearTimeout(this.defaultButtonTimeoutId);
         this.defaultState = 'failed';
-        this.$refs.button1.style.setProperty('transition-delay', '350ms');
-        this.$refs.button1.style.setProperty('background-color', '');
-        this.$refs.button1.style.setProperty('opacity', '');
+      } finally {
+        clearTimeout(this.defaultButtonTimeoutId);
         this.defaultButtonTimeoutId = setTimeout(() => {
           this.defaultState = '';
           this.isSettingDefault = false;
-          this.$refs.button1.style.setProperty('transition-delay', '');
+          if (this.$refs.button1) this.$refs.button1.style.setProperty('transition-delay', '');
         }, 1500);
-      } finally {
-        this.$refs.button1.removeEventListener('mouseup', this.setDefault);
+        this.buttonDown = 0;
+        if (this.$refs.button1) this.$refs.button1.removeEventListener('mouseup', this.setDefault);
       }
     },
     restoreSettings() {
       this.isRestoring = true;
-      if (this.restoreContent === this.$t('preferences.general.setButton')) {
-        electron.ipcRenderer.send('apply');
+      if (!this.needToRelaunch) {
+        electron.ipcRenderer.send('need-to-restore');
+        window.localStorage.setItem('needToRelaunch', '1');
         this.needToRelaunch = true;
-        this.restoreContent = this.$t('preferences.general.relaunch');
-        this.$refs.button2.style.setProperty('transition-delay', '400ms');
-        this.$refs.button2.style.setProperty('background-color', '');
-        this.$refs.button2.style.setProperty('opacity', '');
         this.isRestoring = false;
+        this.buttonDown = 0;
         return;
       }
-      electron.ipcRenderer.send('relaunch');
-      this.isRestoring = false;
-      this.$refs.button2.removeEventListener('mouseup', this.restoreSettings);
+
+      if (!this.isMas) {
+        window.localStorage.removeItem('needToRelaunch');
+        electron.ipcRenderer.send('relaunch');
+        this.isRestoring = false;
+        if (this.$refs.button2) this.$refs.button2.removeEventListener('mouseup', this.restoreSettings);
+      }
     },
     mapCode(code) {
       return codeToLanguageName(code);
@@ -253,192 +281,178 @@ export default {
 };
 </script>
 <style scoped lang="scss">
-$dropdown-height: 148px;
-$interactor-backgroundColor-default: rgba(255,255,255,0.03);
-$interactor-border-default: 1px solid rgba(255,255,255,0.1);
-$interactor-backgroundColor-hover: rgba(255,255,255,0.08);
-$interactor-border-hover: 1px solid rgba(255,255,255,0.2);
+.tabcontent {
+  .settingItem {
+    margin-bottom: 30px;
 
-.preference-setting {
-  box-sizing: border-box;
-  padding-top: 37px;
-  padding-left: 26px;
-  width: 100%;
-  height: 100%;
-  .title {
-    margin-bottom: 7px;
-    font-family: $font-medium;
-    font-size: 13px;
-    color: rgba(255,255,255,0.9);
-    letter-spacing: 0;
-    line-height: 13px;
-  }
-  .other-title {
-    margin-bottom: 12px;
-  }
-  .down-arrow {
-    position: absolute;
-    top: 7px;
-    right: 8px;
-    transform: rotate(90deg);
-    transition: transform 200ms;
-  }
-  .up-arrow {
-    position: absolute;
-    top: 7px;
-    right: 8px;
-    transform: rotate(-90deg);
-    transition: transform 200ms;
-  }
-  .description {
-    margin-bottom: 13px;
-    font-family: $font-medium;
-    font-size: 11px;
-    color: rgba(255,255,255,0.5);
-    letter-spacing: 0;
-  }
-  .drop-down {
-    width: 240px;
-    margin-bottom: 35px;
-    height: 28px;
-    -webkit-app-region: no-drag;
-    .drop-down-brief {
-      position: relative;
+    &__title {
+      font-family: $font-medium;
+      font-size: 13px;
+      color: rgba(255,255,255,0.7);
+    }
+
+    &__description {
+      font-family: $font-medium;
+      font-size: 11px;
+      color: rgba(255,255,255,0.25);
+      margin-top: 7px;
+    }
+
+    &__input {
       -webkit-app-region: no-drag;
       cursor: pointer;
-      width: 100%;
-      height: 28px;
-      background-color: $interactor-backgroundColor-default;
-      border: $interactor-border-default;
-      border-radius: 2px;
       font-family: $font-semibold;
       font-size: 11px;
-      line-height: 28px;
-      color: #FFFFFF;
-      letter-spacing: 0;
+      color: rgba(255,255,255,.7);
       text-align: center;
-      transition: border 200ms, background-color 200ms;
-      &:hover {
-        border: $interactor-border-hover;
-        background-color: $interactor-backgroundColor-hover;
+      border-radius: 2px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background-color: rgba(255,255,255,0.03);
+      transition: all 200ms;
+
+      &:not(.disabled):hover {
+        border: 1px solid rgba(255,255,255,0.2);
+        background-color: rgba(255,255,255,0.08);
+      }
+      &.disabled {
+        cursor: default;
       }
     }
-    .drop-down-content {
+
+    &--justify {
+      @extend .settingItem;
+      display: flex;
+      justify-content: space-between;
+    }
+  }
+  .dropdown {
+    position: relative;
+    width: 240px;
+    height: 28px;
+    margin-top: 13px;
+
+    &__toggle {
+      position: absolute;
+      width: 100%;
+      margin-top: -1px;
+      margin-left: -1px;
+      transition: all 200ms;
+      border-radius: 2px;
+      overflow: hidden;
+
+
+      &--display {
+        height: 28px;
+        border: 1px solid rgba(255,255,255,0);
+        background-color: rgba(255, 255, 255, 0);
+      }
+
+      &--list {
+        height: 148px;
+        border: 1px solid rgba(255,255,255,0.3);
+        background-color: #49484E;
+        .dropdown__displayItem {
+          border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+      }
+    }
+
+    &__displayItem {
+      height: 28px;
+      line-height: 28px;
+      border-bottom: 1px solid rgba(255,255,255,0);
+    }
+
+    &__listItems {
       cursor: pointer;
       position: relative;
-      z-index: 50;
-      width: 100%;
-      height: $dropdown-height;
-      background-color: rgba(100,100,100,.95);
-      border: 1px solid rgba(255,255,255,0.3);
+      height: 112px;
+      margin: 4px 4px 4px 6px;
+      overflow-y: scroll;
+      &:focus {
+        outline: none;
+      }
+    }
+
+    .dropdownListItem {
+      height: 28px;
+      line-height: 28px;
+
+      &:hover {
+        background-image: linear-gradient(
+          90deg,
+          rgba(255,255,255,0.00) 0%,
+          rgba(255,255,255,0.069) 23%,
+          rgba(255,255,255,0.00) 100%
+        );
+      }
+    }
+
+    &__icon {
+      position: absolute;
+      top: 7px;
+      right: 8px;
+      transition: transform 200ms;
+      &--arrowDown {
+        @extend .dropdown__icon;
+        transform: rotate(90deg);
+      }
+      &--arrowUp {
+        @extend .dropdown__icon;
+        z-index: 100;
+        transform: rotate(-90deg);
+      }
+    }
+
+    ::-webkit-scrollbar {
+      width: 3px;
+      user-select: none;
+    }
+    /* Handle */
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 1.5px;
+    }
+    ::-webkit-scrollbar-track {
       border-radius: 2px;
-      font-family: $font-semibold;
+      width: 10px;
+      user-select: none;
+    }
+  }
+  .button {
+    box-sizing: border-box;
+    align-self: center;
+    width: 61px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .button-enter, .button-leave-to {
+      opacity: 0;
+    }
+    .button-enter-active {
+      transition: opacity 200ms ease-in;
+    }
+    .button-leave-active {
+      transition: opacity 200ms ease-in;
+    }
+
+    &__text {
+      font-family: $font-medium;
       font-size: 11px;
-      color: #FFFFFF;
+      color: rgba(255,255,255,.7);
       letter-spacing: 0;
       text-align: center;
-      .selected {
-        height: 28px;
-        line-height: 28px;
-        background-color: rgba(255,255,255,0.1);
-      }
-      .content {
-        cursor: pointer;
-        position: absolute;
-        top: 32px;
-        left: 8px;
-        right: 4px;
-        bottom: 4px;
-        overflow-y: scroll;
-        .selection {
-          height: 28px;
-          line-height: 28px;
-        }
-        .selection:hover {
-          background-image: linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.069) 23%, rgba(255,255,255,0.00) 100%);
-        }
-      }
+      line-height: 26px;
+    }
+    &__result {
+      width: 15px;
+      height: 15px;
+    }
+    &--mouseDown {
+      opacity: 0.5;
     }
   }
-  .description-button {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 35px;
-    width: 349px;
-    height: fit-content;
-    .setting-content {
-      width: 238px;
-      .setting-title {
-        white-space: nowrap;
-        margin-bottom: 6px;
-        font-family: $font-medium;
-        font-size: 13px;
-        color: rgba(255,255,255,0.9);
-        letter-spacing: 0;
-        line-height: 13px;
-      }
-      .setting-description {
-        font-family: $font-medium;
-        font-size: 11px;
-        color: rgba(255,255,255,0.5);
-        letter-spacing: 0;
-      }
-    }
-    .setting-button {
-      cursor: pointer;
-      box-sizing: border-box;
-      align-self: center;
-      background-color: $interactor-backgroundColor-default;
-      border: $interactor-border-default;
-      border-radius: 2px;
-      transition-property: background-color, opacity, border;
-      transition-duration: 200ms;
-      transition-timing-function: ease-in;
-      width: 61px;
-      height: 28px;
-      &:hover {
-        border: $interactor-border-hover;
-        background-color: $interactor-backgroundColor-hover;
-      }
-
-      .button-enter, .button-leave-to {
-        opacity: 0;
-      }
-      .button-enter-active {
-        transition: opacity 200ms ease-in;
-      }
-      .button-leave-active {
-        transition: opacity 200ms ease-in;
-      }
-
-      .content {
-        font-family: $font-medium;
-        font-size: 11px;
-        color: #FFFFFF;
-        letter-spacing: 0;
-        text-align: center;
-        line-height: 26px;
-      }
-      .result {
-        position: relative;
-        top: 5px;
-        left: 23px;
-      }
-    }
-  }
-  ::-webkit-scrollbar {
-  width: 3px;
-  user-select: none;
-}
-/* Handle */
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 1.5px;
-}
-::-webkit-scrollbar-track {
-  border-radius: 2px;
-  width: 10px;
-  user-select: none;
-}
 }
 </style>

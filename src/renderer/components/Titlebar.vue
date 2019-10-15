@@ -1,74 +1,167 @@
 <template>
   <div
-    :class="isDarwin ? 'darwin-titlebar' : 'titlebar'"
-    @dblclick.stop="handleDbClick">
-    <div class="win-icons" v-if="!isDarwin" v-fade-in="showTitleBar">
-      <Icon class="title-button no-drag"
-        @mouseup.native="handleMinimize"
-        type="titleBarWinExitFull">
-      </Icon>
-      <Icon class="title-button no-drag"
-        @mouseup.native="handleWinFull"
-        v-show="middleButtonStatus === 'maximize'"
-        type="titleBarWinFull">
-      </Icon>
-      <Icon class="title-button no-drag"
-        @mouseup.native="handleRestore"
-        type="titleBarWinRestore"
-        v-show="middleButtonStatus === 'restore'">
-      </Icon>
-      <Icon class="title-button no-drag"
-        @mouseup.native="handleFullscreenExit"
-        v-show="middleButtonStatus === 'exit-fullscreen'"
-        type="titleBarWinResize">
-      </Icon>
-      <Icon class="title-button no-drag"
-        @mouseup.native="handleClose"
-        type="titleBarWinClose">
-      </Icon>
+    :class="['titlebar', { darwin: isDarwin }]"
+    @dblclick="handleDbClick"
+  >
+    <div
+      v-if="!isDarwin && isLandingView"
+      @dblclick.stop=""
+      :style="{
+        transform: `translateX(${showSidebar ? '76' : '0'}px)`,
+      }"
+      class="sidebar"
+    >
+      <SidebarIcon
+        @mouseover.native="mouseoverSidebar = true"
+        @mouseout.native="mouseoverSidebar = false"
+        :mouseover="mouseoverSidebar"
+        :fill="isBrowsingView ? '#BBBACC' : ''"
+        class="sidebar-icon no-drag"
+      />
+      <transition name="badge">
+        <badge v-if="showBadge">
+          {{ $t('preferences.privacy.incognitoMode') }}
+        </badge>
+      </transition>
     </div>
-    <div class="mac-icons"
-      v-if="isDarwin"
+    <div
+      v-if="!isDarwin"
       v-fade-in="showTitleBar"
-      @mouseover="handleMouseOver"
-      @mouseout="handleMouseOut">
-      <Icon id="close" class="title-button no-drag"
-            type="titleBarClose"
-            :state="state"
-            @mouseup.native="handleClose">
-      </Icon>
-      <Icon id="minimize" class="title-button no-drag"
-            type="titleBarExitFull"
-            @mouseup.native="handleMinimize"
-            :class="{ disabled: middleButtonStatus === 'exit-fullscreen' }"
-            :state="state"
-            :isFullScreen="middleButtonStatus">
-      </Icon>
-      <Icon id="maximize" class="title-button no-drag"
-            :type="itemType"
-            @mouseup.native="handleMacFull"
-            v-show="middleButtonStatus !== 'exit-fullscreen'"
-            :state="state"
-            :style="{ transform: itemType === this.itemTypeEnum.MAXSCREEN ? 'rotate(45deg)' : ''}">
-      </Icon>
-      <Icon id="restore" class="title-button no-drag"
-            @mouseup.native="handleFullscreenExit"
-            v-show="middleButtonStatus === 'exit-fullscreen'"
-            type="titleBarRecover"
-            :state="state">
-      </Icon>
+      class="win-icons"
+    >
+      <Icon
+        @click.native="handleMinimize"
+        class="title-button no-drag"
+        type="titleBarWinExitFull"
+      />
+      <Icon
+        v-show="middleButtonStatus === 'maximize' && enableFullScreenButton"
+        @click.native="handleWinFull"
+        class="title-button no-drag"
+        type="titleBarWinFull"
+      />
+      <Icon
+        v-show="middleButtonStatus === 'restore'"
+        @click.native="handleRestore"
+        class="title-button no-drag"
+        type="titleBarWinRestore"
+      />
+      <Icon
+        v-show="middleButtonStatus === 'exit-fullscreen'"
+        @click.native="handleFullscreenExit"
+        class="title-button no-drag"
+        type="titleBarWinResize"
+      />
+      <Icon
+        @mouseup.native="handleClose"
+        class="title-button no-drag"
+        type="titleBarWinClose"
+      />
     </div>
+    <div
+      v-if="isDarwin"
+      @dblclick.stop=""
+      class="mac-icons"
+    >
+      <div
+        v-fade-in="showTitleBar"
+        @mouseover="handleMouseOver"
+        @mouseout="handleMouseOut"
+        class="system-icons"
+      >
+        <Icon
+          id="close"
+          :state="state"
+          @click.native="handleClose"
+          class="title-button no-drag"
+          type="titleBarClose"
+        />
+        <Icon
+          id="minimize"
+          :class="{ disabled: middleButtonStatus === 'exit-fullscreen' }"
+          :state="state"
+          :is-full-screen="middleButtonStatus"
+          @click.native="handleMinimize"
+          class="title-button no-drag"
+          type="titleBarExitFull"
+        />
+        <Icon
+          id="maximize"
+          v-show="middleButtonStatus !== 'exit-fullscreen' && enableFullScreenButton"
+          :type="itemType"
+          :state="state"
+          :style="{ transform: isMaxScreen ? 'rotate(45deg)' : ''}"
+          @click.native="handleMacFull"
+          class="title-button no-drag"
+        />
+        <Icon
+          id="restore"
+          v-show="middleButtonStatus === 'exit-fullscreen'"
+          :state="state"
+          @click.native="handleFullscreenExit"
+          class="title-button no-drag"
+          type="titleBarRecover"
+        />
+      </div>
+      <SidebarIcon
+        v-if="isLandingView"
+        @mouseover.native="mouseoverSidebar = true"
+        @mouseout.native="mouseoverSidebar = false"
+        :style="{
+          marginLeft: showSidebar ? '19px' : '4px',
+        }"
+        :mouseover="mouseoverSidebar"
+        :fill="isBrowsingView ? '#BBBACC' : ''"
+        class="sidebar no-drag"
+      />
+    </div>
+    <transition name="badge">
+      <badge v-if="isDarwin && showBadge">
+        {{ $t('preferences.privacy.incognitoMode') }}
+      </badge>
+    </transition>
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { mapGetters } from 'vuex';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
-import Icon from './BaseIconContainer.vue';
+import Icon from '@/components/BaseIconContainer.vue';
+import SidebarIcon from '@/components/LandingView/SidebarIcon.vue';
+import Badge from '@/components/LandingView/Badge.vue';
 
 export default {
-  name: 'titlebar',
+  name: 'Titlebar',
+  // @ts-ignore
   type: INPUT_COMPONENT_TYPE,
+  components: {
+    Icon,
+    SidebarIcon,
+    Badge,
+  },
+  props: {
+    showSidebar: {
+      type: Boolean,
+      default: false,
+    },
+    isLandingView: {
+      type: Boolean,
+      default: false,
+    },
+    isBrowsingView: {
+      type: Boolean,
+      default: false,
+    },
+    showAllWidgets: {
+      type: Boolean,
+      default: true,
+    },
+    recentPlaylist: Boolean,
+    enableFullScreenButton: {
+      type: Boolean,
+      default: true,
+    },
+  },
   data() {
     return {
       state: 'default',
@@ -80,46 +173,41 @@ export default {
       keyAlt: false,
       keyOver: false,
       showTitleBar: true,
+      isShowingVideoCover: false,
+      mouseoverSidebar: false,
     };
   },
-  props: {
-    currentView: String,
-    showAllWidgets: {
-      type: Boolean,
-      default: true,
+  computed: {
+    ...mapGetters([
+      'isMaximized',
+      'isFullScreen',
+    ]),
+    isDarwin() {
+      return process.platform === 'darwin';
     },
-    recentPlaylist: Boolean,
-  },
-  components: {
-    Icon,
-  },
-  mounted() {
-    window.addEventListener('keydown', (e) => {
-      if (e.keyCode === 18) {
-        this.keyAlt = true;
-      }
-    });
-    window.addEventListener('keyup', (e) => {
-      if (e.keyCode === 18) {
-        this.keyAlt = false;
-      }
-    });
+    middleButtonStatus() {
+      return this.isFullScreen ? 'exit-fullscreen' : this.isMaximized ? 'restore' : 'maximize'; // eslint-disable-line no-nested-ternary
+    },
+    isMaxScreen() { return this.itemType === this.itemTypeEnum.MAXSCREEN; },
+    showBadge() {
+      return this.isLandingView && !this.isShowingVideoCover && this.$store.getters.incognitoMode;
+    },
   },
   watch: {
-    recentPlaylist(val) {
+    recentPlaylist(val: boolean) {
       if (!val) this.showTitleBar = this.showAllWidgets;
     },
-    showAllWidgets(val) {
+    showAllWidgets(val: boolean) {
       this.showTitleBar = this.recentPlaylist || val;
     },
-    keyAlt(val) {
+    keyAlt(val: boolean) {
       if (!val || !this.keyOver) {
         this.itemType = this.itemTypeEnum.FULLSCREEN;
       } else if (!this.isFullScreen) {
         this.itemType = this.itemTypeEnum.MAXSCREEN;
       }
     },
-    keyOver(val) {
+    keyOver(val: boolean) {
       if (!val || !this.keyAlt) {
         this.itemType = this.itemTypeEnum.FULLSCREEN;
       } else if (!this.isFullScreen) {
@@ -127,9 +215,23 @@ export default {
       }
     },
   },
+  mounted() {
+    this.$bus.$on('showing-video-cover', (showing: boolean) => { this.isShowingVideoCover = !!showing; });
+    window.addEventListener('keydown', (e: KeyboardEvent) => {
+      if (e.keyCode === 18) {
+        this.keyAlt = true;
+      }
+    });
+    window.addEventListener('keyup', (e: KeyboardEvent) => {
+      if (e.keyCode === 18) {
+        this.keyAlt = false;
+      }
+    });
+  },
   methods: {
     handleDbClick() {
-      if (!this.isMaximized) {
+      const browserWindow = this.$electron.remote.getCurrentWindow();
+      if (!browserWindow.isMaximized()) {
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'maximize');
       } else {
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'unmaximize');
@@ -172,38 +274,39 @@ export default {
       }
     },
   },
-  computed: {
-    ...mapGetters([
-      'isMaximized',
-      'isFullScreen',
-    ]),
-    isDarwin() {
-      return process.platform === 'darwin';
-    },
-    middleButtonStatus() {
-      return this.isFullScreen ? 'exit-fullscreen' : this.isMaximized ? 'restore' : 'maximize'; // eslint-disable-line no-nested-ternary
-    },
-  },
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .titlebar {
-  position: absolute;
-  top: 0;
-  border-radius: 10px;
   width: 100%;
-  height: 28px;
+  top: 0;
+  right: 0;
+  border-radius: 10px;
+  height: 36px;
   z-index: 6;
+  display: flex;
+  justify-content: space-between;
+  position: absolute;
+  .sidebar {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    transition: transform 100ms linear;
+    &-icon {
+      margin-left: 16px;
+      margin-right: 10px;
+    }
+  }
   .win-icons {
     display: flex;
     flex-wrap: nowrap;
     position: absolute;
-    right: 5px;
+    right: 0;
     .title-button {
-      margin: 0px 2px 2px 0px;
       width: 45px;
-      height: 28px;
+      height: 36px;
+      display: flex;
       background-color: rgba(255,255,255,0);
       transition: background-color 200ms;
     }
@@ -215,19 +318,26 @@ export default {
     }
   }
 }
-.darwin-titlebar {
-  position: absolute;
+.titlebar.darwin {
   z-index: 6;
-  box-sizing: content-box;
   height: 36px;
-  width: 100%;
+  display: flex;
+  position: absolute;
+  justify-content: space-between;
+  align-items: center;
   .mac-icons {
-    position: absolute;
-    top: 12px;
-    left: 12px;
     display: flex;
-    flex-wrap: nowrap;
+    align-items: center;
+    margin-left: 12px;
+    .system-icons {
+      display: flex;
+    }
+    .sidebar {
+      margin-left: 4px;
+      transition: margin-left 100ms linear;
+    }
   }
+  .badge { margin-right: 14px; }
   .title-button {
     width: 12px;
     height: 12px;
@@ -247,6 +357,19 @@ export default {
       pointer-events: none;
       opacity: 0.25;
     }
+  }
+}
+.badge {
+  &-leave-active {
+    transition: opacity .2s ease-in;
+  }
+  &-enter-active {
+    transition: opacity .3s ease-in;
+    transition-delay: .2s;
+  }
+
+  &-enter, &-leave-to{
+    opacity: 0;
   }
 }
 </style>

@@ -4,7 +4,7 @@ import helpers from '@/helpers/index';
 
 const state = {
   source: '', // 'drop' or '', used on mas version
-  id: '',
+  id: NaN,
   items: [],
   playList: [],
   isFolderList: undefined,
@@ -22,27 +22,48 @@ const getters = {
     if (!getters.singleCycle) {
       if (index !== -1 && index + 1 < state.items.length) {
         return state.items[index + 1];
-      } else if (index + 1 >= state.items.length) {
-        return state.items[0];
       }
+      return state.items[0];
     }
     return NaN;
   },
   nextVideo: (state, getters) => {
     const list = state.playList;
     const index = list.findIndex(value => value === getters.originSrc);
-    if (!getters.singleCycle) {
-      if (index !== -1 && index + 1 < list.length) {
-        return list[index + 1];
-      } else if (index + 1 >= list.length) {
-        return list[0];
-      }
+    if (!getters.singleCycle && list.length) {
+      if (index !== -1 && index + 1 < list.length) return list[index + 1];
+      if (list.length !== 1) return list[0];
     }
     return '';
+  },
+  previousVideo: (state, getters) => {
+    const list = state.playList;
+    const index = list.findIndex(value => value === getters.originSrc);
+    if (!getters.singleCycle) {
+      if (index - 1 >= 0 && index - 1 < list.length) return list[index - 1];
+      if (list.length !== 1) return list[list.length - 1];
+    }
+    return '';
+  },
+  previousVideoId: (state, getters) => {
+    const index = state.items.findIndex(value => value === getters.videoId);
+    if (!getters.singleCycle) {
+      if (index - 1 >= 0 && index - 1 < state.items.length) {
+        return state.items[index - 1];
+      }
+      return state.items[state.items.length - 1];
+    }
+    return NaN;
   },
 };
 
 const mutations = {
+  Init(state) {
+    state.id = NaN;
+    state.items = [];
+    state.playList = [];
+    state.isFolderList = undefined;
+  },
   source(state, type) {
     state.source = type;
   },
@@ -61,6 +82,9 @@ const mutations = {
   playList(state, t) {
     state.playList = t;
   },
+  AddIdsToPlayingList(state, t) {
+    state.items.push(...t);
+  },
   AddItemsToPlayingList(state, t) {
     state.playList.push(...t);
   },
@@ -71,24 +95,26 @@ const mutations = {
     }
   },
   InsertItemToPlayingList(state, item) {
-    if (item.newPosition >= 0) {
-      state.playList.splice(item.newPosition, 0, item.src);
-      state.items.splice(item.newPosition, 0, item.id);
-    }
+    if (item.newPosition < 0) item.newPosition = 0;
+    state.playList.splice(item.newPosition, 0, item.src);
+    state.items.splice(item.newPosition, 0, item.id);
   },
 };
 
 const actions = {
+  Init({ commit }) {
+    commit('Init');
+  },
   PlayingList({ commit }, payload) {
     commit('isPlayingList');
-    commit('playList', payload.paths);
-    commit('items', payload.items);
+    if (payload.paths) commit('playList', payload.paths);
+    if (payload.items) commit('items', payload.items);
     commit('id', payload.id ? payload.id : '');
   },
   FolderList({ commit }, payload) {
     commit('isFolderList');
     commit('playList', payload.paths);
-    commit('items', payload.items);
+    if (payload.items) commit('items', payload.items);
     commit('id', payload.id);
   },
   RemoveItemFromPlayingList({ state, commit }, item) {
@@ -106,15 +132,9 @@ const actions = {
     commit('RemoveItemFromPlayingListByPos', pos);
     commit('InsertItemToPlayingList', item);
   },
-  AddItemsToPlayingList({ commit, dispatch }, items) {
-    if (items.length) {
-      items.forEach((item) => {
-        dispatch('RemoveItemFromPlayingList', item);
-      });
-    } else {
-      dispatch('RemoveItemFromPlayingList', items);
-    }
-    commit('AddItemsToPlayingList', items);
+  AddItemsToPlayingList({ commit }, items) {
+    commit('AddItemsToPlayingList', items.paths);
+    commit('AddIdsToPlayingList', items.ids);
   },
   UpdatePlayingList({ dispatch, commit, state }) {
     const dirPath = path.dirname(state.playList[0]);
@@ -129,7 +149,7 @@ const actions = {
       helpers.methods.findSimilarVideoByVidPath(state.playList[0]).then((videoFiles) => {
         commit('playList', videoFiles);
       }, (err) => {
-        if (process.mas && err?.code === 'EPERM') {
+        if (process.mas && (err && err.code === 'EPERM')) {
           dispatch('FolderList', {
             id: state.id,
             paths: state.playList,
@@ -140,7 +160,7 @@ const actions = {
     } else {
       for (let i = 0; i < state.playList.length; i += 1) {
         fs.access(state.playList[i], fs.constants.F_OK, (err) => {
-          if (err?.code === 'ENOENT') dispatch('RemoveItemFromPlayingList', state.playList[i]);
+          if (err && err.code === 'ENOENT') dispatch('RemoveItemFromPlayingList', state.playList[i]);
         });
       }
     }

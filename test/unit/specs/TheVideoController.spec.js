@@ -1,11 +1,11 @@
 import Vuex from 'vuex';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
+import sinon from 'sinon';
 import Window from '@/store/modules/Window';
 import Video from '@/store/modules/Video';
 import Input from '@/store/modules/Input';
 import Playlist from '@/store/modules/Playlist';
-import TheVideoController from '@/components/PlayingView/TheVideoController.vue';
-import { shallowMount, createLocalVue } from '@vue/test-utils';
-import sinon from 'sinon';
+import TheVideoController from '@/containers/TheVideoController.vue';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
