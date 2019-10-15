@@ -35,7 +35,7 @@
         @is-dragging="isDragging = $event"
       />
       <div
-        v-if="$route.name === 'browsing-view'"
+        v-if="showFileIcon"
         :class="{ 'channel-opacity': showChannelManager }"
         @click="handleChannelManage"
         class="channel-manage no-drag"
@@ -131,15 +131,31 @@ export default {
   watch: {
     isDragging(val: boolean, oldVal: boolean) {
       if (oldVal && !val) {
-        this.$store.dispatch('repositionChannels',
-          { from: this.indexOfMovingItem, to: this.indexOfMovingTo });
+        this.channelsDetail = BrowsingChannelManager
+          .repositionChannels(this.indexOfMovingItem, this.indexOfMovingTo);
       }
+    },
+    channelsDetail: {
+      handler: (val: { url: string, channel: string,
+        icon: string, title: string, path: string }[]) => {
+        asyncStorage.get('browsing').then((data) => {
+          asyncStorage.set('browsing', Object.assign(data, { channels: val }));
+        });
+      },
+      deep: true,
     },
     winHeight() {
       const scrollTop = (document.querySelector('.icon-box') as HTMLElement).scrollTop;
       this.topMask = this.maxHeight >= this.totalHeight ? false : scrollTop !== 0;
       this.bottomMask = scrollTop + this.maxHeight < this.totalHeight;
     },
+  },
+  created() {
+    asyncStorage.get('browsing').then((data) => {
+      if (data.channels) {
+        this.channelsDetail = BrowsingChannelManager.initAvailableChannels(data.channels);
+      }
+    });
   },
   mounted() {
     this.topMask = false;
@@ -149,7 +165,6 @@ export default {
       this.topMask = scrollTop !== 0;
       this.bottomMask = scrollTop + this.maxHeight < this.totalHeight;
     });
-    this.channelsDetail = BrowsingChannelManager.getAllAvailableChannels();
     this.$bus.$on('available-channel-update', () => {
       this.channelsDetail = BrowsingChannelManager.getAllAvailableChannels();
     });

@@ -22,4 +22,6 @@ export interface IBrowsingChannelManager {
   getAllCategories(): category[]
   getAllChannels(): Map<string, channelInfo>
   getAllAvailableChannels(): channelDetails[]
+  repositionChannels(from: number, to: number): channelDetails[]
+  initAvailableChannels(channels: channelDetails[]): channelDetails[]
 }

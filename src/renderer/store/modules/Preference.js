@@ -21,7 +21,6 @@ const getters = {
   nsfwProcessDone: state => state.nsfwProcessDone,
   preferenceData: state => state,
   protectPrivacy: state => state.protectPrivacy,
-  channels: state => state.channels,
   hideNSFW: state => state.hideNSFW,
   smartMode: state => state.protectPrivacy && state.hideNSFW,
   incognitoMode: state => state.protectPrivacy && !state.hideNSFW,
@@ -44,10 +43,6 @@ const getters = {
 const mutations = {
   nsfwProcessDone(state) {
     state.nsfwProcessDone = true;
-  },
-  repositionChannels(state, { from, to }) {
-    const item = state.channels.splice(from, 1)[0];
-    state.channels.splice(to, 0, item);
   },
   displayLanguage(state, payload) {
     state.displayLanguage = payload;
@@ -97,13 +92,6 @@ const actions = {
     commit('primaryLanguage', payload.primaryLanguage);
     commit('secondaryLanguage', payload.secondaryLanguage);
     fs.closeSync(fs.openSync(path.join(remote.app.getPath('userData'), 'WELCOME_PROCESS_MARK'), 'w'));
-    return asyncStorage.set('preferences', state);
-  },
-  repositionChannels(
-    { commit, state },
-    { from, to },
-  ) {
-    commit('repositionChannels', { from, to });
     return asyncStorage.set('preferences', state);
   },
   displayLanguage({ commit, state }, payload) {

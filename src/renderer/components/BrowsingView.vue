@@ -736,7 +736,9 @@ export default {
     },
     domReady() {
       window.focus();
-      this.currentMainBrowserView().webContents.focus();
+      if (this.currentMainBrowserView()) {
+        this.currentMainBrowserView().webContents.focus();
+      }
     },
     didStopLoading() {
       if (this.currentMainBrowserView()) {
