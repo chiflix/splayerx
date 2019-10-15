@@ -371,6 +371,11 @@
       "zh": "Chinese (Simplified)",
       "zh-CN": "Chinese (Simplified)",
       "zh-TW": "Chinese (Traditional)"
+    },
+    "tips": {
+      "editor": "Edit coming soon ...",
+      "export": "Export",
+      "reload": "Regenerate"
     }
   },
   "uploading": {

@@ -1021,7 +1021,7 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
     updateSubtitleList(list, state.mediaHash);
   },
   async [a.exportSubtitle]({ getters, dispatch }, item: ISubtitleControlListItem) {
-    if (item && item.type === 'translated') {
+    if (item && (item.type === 'translated' || (item.type === 'preTranslated' && item.source.source !== ''))) {
       const { app, dialog } = remote;
       const browserWindow = remote.BrowserWindow;
       const focusWindow = browserWindow.getFocusedWindow();

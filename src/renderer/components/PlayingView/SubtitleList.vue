@@ -147,19 +147,19 @@
               class="modified-subtitle-advanced-panel"
             >
               <div class="icons-wrap">
-                <div>
+                <div :title="$t('subtitle.tips.editor')">
                   <Icon
                     @mouseup.native.stop="handleSubEdit($event, item)"
                     type="subtitleEdit"
                   />
                 </div>
-                <div>
+                <div :title="$t('subtitle.tips.export')">
                   <Icon
                     @mouseup.native="handleSubExport($event, item)"
                     type="subtitleExport"
                   />
                 </div>
-                <div>
+                <div :title="$t('subtitle.tips.reload')">
                   <Icon
                     @mouseup.native="handleReTranslate($event, item)"
                     type="reload"
@@ -202,7 +202,7 @@
 
 <script lang="ts">
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
-import { ISubtitleControlListItem } from '@/interfaces/ISubtitle';
+import { ISubtitleControlListItem, Type } from '@/interfaces/ISubtitle';
 import Icon from '../BaseIconContainer.vue';
 import Progress from './Progress.vue';
 
@@ -463,8 +463,8 @@ export default {
       const { computedAvailableItems } = this;
       const currentItem = computedAvailableItems[index];
       if (this.currentSubtitleIndex === index && currentItem
-        && (currentItem.type === 'translated'
-        || (currentItem.type === 'preTranslated' && currentItem.source.source !== ''))) {
+        && (currentItem.type === Type.Translated
+        || (currentItem.type === Type.PreTranslated && currentItem.source.source !== ''))) {
         this.clickItemArrow = true;
         this.$emit('update:panelVisiable', !this.panelVisiable);
         // 点击字幕button也可以伸缩自制字幕功能面板
@@ -476,6 +476,11 @@ export default {
           this.showSubtitleDetails(index);
         }, 0);
         this.clickItemArrow = false;
+        if (currentItem.type === Type.PreTranslated && currentItem.source.source === '') {
+          setTimeout(() => {
+            this.backCardVisiable = false;
+          }, 500);
+        }
       }
     },
     /**
@@ -637,6 +642,9 @@ export default {
       &>div:nth-child(2) {
         border-left: 1px solid rgba(255, 255, 255, 0.1);
         border-right: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      &>div:nth-child(1) {
+        cursor: default;
       }
     }
     .confirm-delete-wrap {

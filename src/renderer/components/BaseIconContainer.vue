@@ -212,6 +212,11 @@ export default {
     }
   }
 }
+
+.subtitleEdit {
+  cursor: default;
+}
+
 .volume {
   width: 100%;
   height: 100%;
