@@ -380,6 +380,7 @@ export default {
       this.showChannelManager = true;
       this.showProgress = false;
       this.webInfo.canReload = false;
+      this.currentUrl = 'edit.channel';
     }
 
     this.$bus.$on('toggle-reload', this.handleUrlReload);
