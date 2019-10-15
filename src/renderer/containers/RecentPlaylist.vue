@@ -33,43 +33,58 @@
             }"
             class="info"
           >
-            <div
-              v-if="!incognitoMode"
-              class="pin-icon"
+            <div 
+              v-if="playingList.length > 1"
+              class="pin-badge"
             >
               <div
-                @mouseup.stop="pinPlaylist"
-                @mouseenter="showPinContent = true"
-                @mouseleave="showPinContent = false"
-                :style="{
-                  backgroundColor: showPinContent && isFolderList ? 'rgba(255,255,255,0.125)' : '',
-                }"
-                class="icon"
+                v-if="!incognitoMode"
+                class="pin-icon"
               >
-                <Icon
-                  :type="pinIcon"
-                />
-              </div>
-              <transition name="fade-200">
                 <div
-                  v-show="showPinContent"
-                  class="pin-content"
+                  @mouseup.stop="pinPlaylist"
+                  @mouseenter="showPinContent = true"
+                  @mouseleave="showPinContent = false"
+                  :style="{
+                    width: sizeAdaption(23),
+                  }"
+                  class="icon"
                 >
-                  保留此播放列表至启动页
+                  <Icon
+                    :style="{
+                      backgroundColor: showPinContent && isFolderList ? 'rgba(255,255,255,0.125)' : '',
+                      width: sizeAdaption(16),
+                      height: sizeAdaption(16),
+                    }"
+                    :type="pinIcon"
+                  />
                 </div>
-              </transition>
-            </div>
-            <div
-              v-else
-              class="badge"
-            >
-              {{ $t('preferences.privacy.incognitoMode') }}
+                <transition name="fade-200">
+                  <div
+                    v-show="showPinContent"
+                    :style="{
+                      fontSize: sizeAdaption(13),
+                      lineHeight: sizeAdaption(14),
+                    }"
+                    class="pin-content"
+                  >
+                    保留此播放列表至启动页
+                  </div>
+                </transition>
+              </div>
+              <div
+                v-else
+                class="badge"
+              >
+                {{ $t('preferences.privacy.incognitoMode') }}
+              </div>
             </div>
             <div
               v-show="showTopContent"
               :style="{
-                fontSize: sizeAdaption(14),
-                lineHeight: sizeAdaption(14),
+                marginTop: sizeAdaption(9),
+                fontSize: sizeAdaption(13),
+                lineHeight: sizeAdaption(13),
               }"
               class="top"
             >
@@ -798,41 +813,41 @@ export default {
   .content {
     .info {
       width: 90%;
-      .pin-icon {
-        display: flex;
-        align-items: center;
-        margin-bottom: 7px;
-
-        .icon {
-          border-radius: 100%;
+      .pin-badge {
+        .pin-icon {
           display: flex;
+          justify-content: flex-start;
           align-items: center;
-          transition: background-color 50ms linear;
+
+          .icon {
+            display: flex;
+            align-items: center;
+            transition: background-color 50ms linear;
+            svg {
+              border-radius: 100%;
+            }
+          }
+
+          .pin-content {
+            font-family: $font-normal;
+            color: rgba(235,235,235,0.6);
+            letter-spacing: 0.56px;
+          }
         }
 
-        .pin-content {
-          margin-left: 7px;
-          font-family: $font-medium;
-          font-size: 13px;
-          color: rgba(255,255,255,0.40);
-          letter-spacing: 0.56px;
-          line-height: 13px;
+        .badge {
+          background-color: rgba(255,255,255,0.2);
+          height: 20px;
+          width: 70px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          border-radius: 4px;
+
+          font-family: $font-normal;
+          font-size: 11px;
+          color: rgba(255,255,255,0.50);
         }
-      }
-
-      .badge {
-        margin-bottom: 7px;
-        background-color: rgba(255,255,255,0.2);
-        height: 20px;
-        width: 70px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        border-radius: 4px;
-
-        font-family: $font-normal;
-        font-size: 11px;
-        color: rgba(255,255,255,0.50);
       }
 
       .top {
