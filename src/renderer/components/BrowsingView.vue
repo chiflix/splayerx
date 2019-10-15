@@ -376,7 +376,11 @@ export default {
     this.menuService = new MenuService();
     this.menuService.updateMenuItemEnabled('splayerx.checkForUpdates', false);
     this.title = this.currentChannel ? this.currentMainBrowserView().webContents.getTitle() : '添加站点';
-    if (!this.currentChannel) this.showChannelManager = true;
+    if (!this.currentChannel) {
+      this.showChannelManager = true;
+      this.showProgress = false;
+      this.webInfo.canReload = false;
+    }
 
     this.$bus.$on('toggle-reload', this.handleUrlReload);
     this.$bus.$on('toggle-back', this.handleUrlBack);
@@ -404,10 +408,12 @@ export default {
         this.$electron.remote.getCurrentWindow().removeBrowserView(this.currentMainBrowserView());
       }
       this.showChannelManager = true;
+      this.showProgress = false;
       this.title = '添加站点';
       this.webInfo.canGoBack = false;
       this.webInfo.canGoForward = false;
       this.webInfo.hasVideo = false;
+      this.webInfo.canReload = false;
       this.updateCurrentChannel('');
     });
     window.addEventListener('focus', this.focusHandler);

@@ -13,6 +13,9 @@
             @mouseover="handleMouseover(index)"
             @mouseleave="handleMouseleave"
             @click="handleMouseClick(category.type, item.channel)"
+            :style="{
+              backgroundColor: availableChannels.includes(item.channel) ? '#FBFBFD' : '',
+            }"
             class="channel-details"
           >
             <div
@@ -111,7 +114,7 @@ export default {
   position: absolute;
   .manager-container {
     margin: 36px 40px 0 20px;
-    width: calc(100% - 80px);
+    width: calc(100% - 60px);
     height: calc(100% - 36px);
     overflow: scroll;
     .category-part {
@@ -138,6 +141,7 @@ export default {
           margin-top: 20px;
           margin-left: 20px;
           position: relative;
+          cursor: pointer;
           .channel-mask {
             position: absolute;
             width: 100%;

@@ -31,7 +31,7 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
     this.allCategories.forEach((category: category) => {
       this.allChannels.set(category.type, { channels: [], availableChannels: [] });
     });
-    this.allAvailableChannels = ['bilibili.com', 'iqiyi.com', 'douyu.com', 'qq.com'];
+    this.allAvailableChannels = ['bilibili.com', 'iqiyi.com', 'douyu.com'];
 
     // 初始化默认添加的频道
     const channels = [
