@@ -18,8 +18,7 @@ type coverViedoItem = {
 
 export default class RecentPlayService implements IRecentPlay {
   public async getRecords(): Promise<ILandingViewDisplayInfo[]> {
-    const recentPlayedResults = (await playInfoStorageService.getAllRecentPlayed())
-      .filter(item => item.items.length > 1);
+    const recentPlayedResults = await playInfoStorageService.getAllRecentPlayed();
     const coverVideos = (await Promise.all(
       recentPlayedResults.map(async (value) => {
         const { items, playedIndex, id } = value;
