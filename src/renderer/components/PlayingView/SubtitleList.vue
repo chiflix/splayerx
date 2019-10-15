@@ -462,14 +462,7 @@ export default {
     toggleItemClick(event: MouseEvent, index: number) {
       const { computedAvailableItems } = this;
       const currentItem = computedAvailableItems[index];
-      if (this.currentSubtitleIndex === index && currentItem
-        && (currentItem.type === Type.Translated
-        || (currentItem.type === Type.PreTranslated && currentItem.source.source !== ''))) {
-        this.clickItemArrow = true;
-        this.$emit('update:panelVisiable', !this.panelVisiable);
-        // 点击字幕button也可以伸缩自制字幕功能面板
-        this.handleModifiedAdvancedPanelScrollTop(index);
-      } else if (currentItem) {
+      if (currentItem) {
         this.clickItem = true;
         this.changeSubtitle(currentItem);
         setTimeout(() => {
