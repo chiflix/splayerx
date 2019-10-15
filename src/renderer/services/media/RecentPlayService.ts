@@ -79,7 +79,7 @@ export default class RecentPlayService implements IRecentPlay {
   public async getMenuDisplayInfo(): Promise<IMenuDisplayInfo[]> {
     const results = (await this.getRecords())
       .map(({ id, path }: ILandingViewDisplayInfo) => ({ id, label: path }));
-    return results;
+    return results.splice(0, 9);
   }
 }
 
