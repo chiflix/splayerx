@@ -302,8 +302,8 @@
       "privacySetting": "隐私设置",
       "incognitoMode": "无痕模式",
       "incognitoDescription": "开启后将不再保留任何新的播放记录。",
-      "clearHistory": "",
-      "clearHistoryDescription": ""
+      "clearHistory": "清空播放记录",
+      "clearHistoryDescription": "清除已有的播放列表和历史记录。"
     }
   },
   "privacyBubble": {
@@ -349,7 +349,7 @@
     "paused": "已暂停",
     "playlistSource": "播放列表",
     "add": "添加到播放列表",
-    "pin": ""
+    "pin": "保留此播放列表至启动页"
   },
   "subtitle": {
     "embedded": "内嵌",
