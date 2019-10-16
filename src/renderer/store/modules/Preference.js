@@ -17,7 +17,6 @@ const state = {
     'https://www.twitch.tv/',
     'https://www.youtube.com/',
   ],
-  hideNSFW: true,
   privacyAgreement: undefined,
   displayLanguage: '',
   primaryLanguage: undefined,

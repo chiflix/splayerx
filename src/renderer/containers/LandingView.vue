@@ -143,7 +143,6 @@ import PlaylistItem from '@/components/LandingView/PlaylistItem.vue';
 import VideoItem from '@/components/LandingView/VideoItem.vue';
 import { log } from '@/libs/Log';
 import Sagi from '@/libs/sagi';
-import { findNsfwFistFilter } from '@/libs/utils';
 import { Browsing as browsingActions } from '@/store/actionTypes';
 
 Vue.component('PlaylistItem', PlaylistItem);
@@ -180,7 +179,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'winPos', 'defaultDir', 'isFullScreen', 'incognitoMode', 'hideNSFW', 'nsfwProcessDone', 'pipSize', 'pipPos']),
+    ...mapGetters(['winWidth', 'winPos', 'defaultDir', 'isFullScreen', 'incognitoMode', 'nsfwProcessDone', 'pipSize', 'pipPos']),
     lastIndex: {
       get() {
         return (this.firstIndex + this.showItemNum) - 1;

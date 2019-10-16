@@ -72,7 +72,6 @@ let menuService = null;
 let routeName = null;
 let mainWindow = null;
 let loginWindow = null;
-let laborWindow = null;
 let aboutWindow = null;
 let preferenceWindow = null;
 let browsingWindow = null;
@@ -87,7 +86,6 @@ let tray = null;
 let pipTimer = 0;
 let needToRestore = false;
 let forceQuit = false; // 大退app 关闭所有windows
-let needBlockCloseLaborWindow = true; // 标记是否阻塞nsfw窗口关闭
 let inited = false;
 let hideBrowsingWindow = false;
 let finalVideoToOpen = [];
@@ -105,9 +103,6 @@ const maskUrl = process.platform === 'darwin' ? `file:${resolve(__static, 'pip/m
 const mainURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080'
   : `file://${__dirname}/index.html`;
-const laborURL = process.env.NODE_ENV === 'development'
-  ? 'http://localhost:9080/labor.html'
-  : `file://${__dirname}/labor.html`;
 const aboutURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080/about.html'
   : `file://${__dirname}/about.html`;
@@ -515,39 +510,6 @@ function createBrowsingWindow(args) {
   }
 }
 
-function createLaborWindow() {
-  const laborWindowOptions = {
-    show: false,
-    webPreferences: {
-      webSecurity: false,
-      nodeIntegration: true,
-      experimentalFeatures: true,
-    },
-  };
-  if (!laborWindow) {
-    laborWindow = new BrowserWindow(laborWindowOptions);
-    laborWindow.once('ready-to-show', () => {
-      laborWindow.readyToShow = true;
-    });
-    laborWindow.on('close', (event) => {
-      if ((mainWindow && !mainWindow.webContents.isDestroyed()) && needBlockCloseLaborWindow) {
-        event.preventDefault();
-      }
-    });
-    laborWindow.on('closed', () => {
-      laborWindow = null;
-      if (forceQuit) {
-        app.quit();
-      }
-    });
-    if (process.env.NODE_ENV === 'development') laborWindow.openDevTools({ mode: 'detach' });
-    laborWindow.loadURL(laborURL);
-  }
-  // 重置参数
-  forceQuit = false;
-  needBlockCloseLaborWindow = true;
-}
-
 function registerMainWindowEvent(mainWindow) {
   if (!mainWindow) return;
   mainWindow.on('move', throttle(() => {
@@ -608,18 +570,6 @@ function registerMainWindowEvent(mainWindow) {
 
 
   registerMediaTasks();
-
-  ipcMain.on('labor-task-add', (evt, ...rest) => {
-    if (laborWindow && !laborWindow.webContents.isDestroyed()) {
-      if (laborWindow.readyToShow) laborWindow.webContents.send('labor-task-add', ...rest);
-      else laborWindow.once('ready-to-show', () => laborWindow.webContents.send('labor-task-add', ...rest));
-    }
-  });
-  ipcMain.on('labor-task-done', (evt, ...rest) => {
-    if (mainWindow && !mainWindow.webContents.isDestroyed()) {
-      mainWindow.webContents.send('labor-task-done', ...rest);
-    }
-  });
 
   ipcMain.on('callBrowsingWindowMethod', (evt, method, args = []) => {
     try {
@@ -1153,7 +1103,6 @@ function registerMainWindowEvent(mainWindow) {
   });
   ipcMain.on('relaunch', () => {
     forceQuit = true;
-    needBlockCloseLaborWindow = false;
     const switches = process.argv.filter(a => a.startsWith('-'));
     const argv = process.argv.filter(a => !a.startsWith('-'))
       .slice(0, app.isPackaged ? 1 : 2).concat(switches);
@@ -1237,7 +1186,6 @@ function registerMainWindowEvent(mainWindow) {
 }
 
 function createMainWindow(openDialog, playlistId) {
-  createLaborWindow();
   mainWindow = new BrowserWindow({
     useContentSize: true,
     frame: false,
@@ -1281,10 +1229,6 @@ function createMainWindow(openDialog, playlistId) {
     ipcMain.removeAllListeners(); // FIXME: decouple mainWindow and ipcMain
     mainWindow = null;
     menuService.setMainWindow(null);
-    if (forceQuit) {
-      needBlockCloseLaborWindow = false;
-    }
-    if (laborWindow) laborWindow.close();
   });
 
   mainWindow.once('ready-to-show', () => {
