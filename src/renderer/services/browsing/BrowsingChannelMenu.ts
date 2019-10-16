@@ -23,6 +23,7 @@ class BrowsingChannelMenu implements IBrowsingChannelMenu {
   public createChannelMenu(channel: string) {
     remote.getCurrentWindow().webContents.once('context-menu', (e: Event) => {
       e.preventDefault();
+      this.locale.getDisplayLanguage();
       this.channelMenu = new remote.Menu();
       this.currentChannel = channel;
       this.deleteChannel = new remote.MenuItem({
