@@ -14,7 +14,6 @@ import {
   AudioTranslate as atActions,
 } from '@/store/actionTypes';
 import { videodata } from '@/store/video';
-import { AudioTranslateBubbleOrigin } from '@/store/modules/AudioTranslate';
 import {
   EMPTY_FOLDER, OPEN_FAILED, ADD_NO_VIDEO,
   SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, FILE_NON_EXIST_IN_PLAYLIST, PLAYLIST_NON_EXIST,
@@ -545,19 +544,21 @@ export default {
       if (this.$store.getters.isTranslating) {
         // 如果正在进行智能翻译，就阻止切换视频,
         // 并且提示是否终止智能翻译
-        if (Math.ceil(videodata.time) === Math.ceil(this.$store.getters.duration)) {
-          this.$store.dispatch(atActions.AUDIO_TRANSLATE_SHOW_BUBBLE,
-            AudioTranslateBubbleOrigin.NextVideoChange);
-          this.$store.dispatch(videoActions.PAUSE_VIDEO);
-          this.$store.dispatch(atActions.AUDIO_TRANSLATE_BUBBLE_CALLBACK, () => {
-            this.$store.dispatch(videoActions.PLAY_VIDEO);
-            callback();
-          });
-        } else {
-          this.$store.dispatch(atActions.AUDIO_TRANSLATE_SHOW_BUBBLE,
-            AudioTranslateBubbleOrigin.VideoChange);
-          this.$store.dispatch(atActions.AUDIO_TRANSLATE_BUBBLE_CALLBACK, callback);
-        }
+        import('@/store/modules/AudioTranslate').then(({ AudioTranslateBubbleOrigin }) => {
+          if (Math.ceil(videodata.time) === Math.ceil(this.$store.getters.duration)) {
+            this.$store.dispatch(atActions.AUDIO_TRANSLATE_SHOW_BUBBLE,
+              AudioTranslateBubbleOrigin.NextVideoChange);
+            this.$store.dispatch(videoActions.PAUSE_VIDEO);
+            this.$store.dispatch(atActions.AUDIO_TRANSLATE_BUBBLE_CALLBACK, () => {
+              this.$store.dispatch(videoActions.PLAY_VIDEO);
+              callback();
+            });
+          } else {
+            this.$store.dispatch(atActions.AUDIO_TRANSLATE_SHOW_BUBBLE,
+              AudioTranslateBubbleOrigin.VideoChange);
+            this.$store.dispatch(atActions.AUDIO_TRANSLATE_BUBBLE_CALLBACK, callback);
+          }
+        });
         return true;
       }
       return false;

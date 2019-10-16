@@ -1,13 +1,15 @@
 import Vue from 'vue';
-import pick from 'lodash/pick';
-import partialRight from 'lodash/partialRight';
-import uniq from 'lodash/uniq';
-import difference from 'lodash/difference';
-import remove from 'lodash/remove';
+import {
+  pick,
+  partialRight,
+  uniq,
+  difference,
+  remove,
+} from 'lodash';
+import store from '@/store';
 import { Subtitle as subtitleMutations } from '@/store/mutationTypes';
 import { Subtitle as subtitleActions, SubtitleManager as realSubtitleActions } from '@/store/actionTypes';
 import { metaInfoUpdate } from './rank';
-import store from '@/store';
 
 const state = {
   loadingStates: {},
