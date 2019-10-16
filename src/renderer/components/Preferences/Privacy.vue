@@ -4,7 +4,7 @@
       {{ $t('preferences.privacy.incognitoMode') }}
     </BaseCheckBox>
     <div class="settingItem__description">
-        {{ $t("preferences.privacy.incognitoDescription") }}
+      {{ $t("preferences.privacy.incognitoDescription") }}
     </div>
     <div
       class="settingItem--justify"

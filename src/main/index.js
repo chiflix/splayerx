@@ -85,7 +85,6 @@ let isBrowsingWindowMax = false;
 let tray = null;
 let pipTimer = 0;
 let needToRestore = false;
-let forceQuit = false; // 大退app 关闭所有windows
 let inited = false;
 let hideBrowsingWindow = false;
 let finalVideoToOpen = [];
@@ -1102,7 +1101,6 @@ function registerMainWindowEvent(mainWindow) {
     markNeedToRestore();
   });
   ipcMain.on('relaunch', () => {
-    forceQuit = true;
     const switches = process.argv.filter(a => a.startsWith('-'));
     const argv = process.argv.filter(a => !a.startsWith('-'))
       .slice(0, app.isPackaged ? 1 : 2).concat(switches);
@@ -1277,7 +1275,6 @@ app.on('before-quit', () => {
   } else {
     mainWindow.webContents.send('quit');
   }
-  forceQuit = true;
 });
 
 app.on('quit', () => {

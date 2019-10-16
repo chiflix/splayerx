@@ -33,7 +33,7 @@
             }"
             class="info"
           >
-            <div 
+            <div
               v-if="playingList.length > 1"
               class="pin-badge"
             >
@@ -52,7 +52,8 @@
                 >
                   <Icon
                     :style="{
-                      backgroundColor: showPinContent && isFolderList ? 'rgba(255,255,255,0.125)' : '',
+                      backgroundColor: showPinContent && isFolderList
+                        ? 'rgba(255,255,255,0.125)' : '',
                       width: sizeAdaption(16),
                       height: sizeAdaption(16),
                     }"

@@ -1,5 +1,5 @@
 import path from 'path';
-import { remote, ipcRenderer } from 'electron';
+import { remote } from 'electron';
 import fs from 'fs';
 import asyncStorage from '@/helpers/asyncStorage';
 import syncStorage from '@/helpers/syncStorage';

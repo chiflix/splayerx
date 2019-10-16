@@ -105,7 +105,7 @@ export default {
         return;
       }
       if (oldVal && !this.isFolderList) {
-        const screenshot: ShortCut = await this.generateScreenshot();
+        await this.updatePlaylist(oldVal);
       }
     },
     async videoId(val: number, oldVal: number) {
