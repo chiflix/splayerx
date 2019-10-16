@@ -302,8 +302,8 @@
       "privacySetting": "プライバシー",
       "incognitoMode": "Incognito Mode",
       "incognitoDescription": "再生履歴は保存されません。",
-      "clearHistory": "",
-      "clearHistoryDescription": ""
+      "clearHistory": "再生履歴をクリア",
+      "clearHistoryDescription": "既存のプレイリストと再生履歴を削除する"
     }
   },
   "privacyBubble": {
@@ -349,7 +349,7 @@
     "paused": "ポーズ中",
     "playlistSource": "プレイリスト",
     "add": "プレイリストに追加する",
-    "pin": ""
+    "pin": "プレイリストを起動ページに固定する"
   },
   "subtitle": {
     "embedded": "埋め込み式",
