@@ -4,7 +4,8 @@ import {
   nameDefaultOption,
   namespacedDefaultOption,
 } from './constants';
-import { namespacedNameHelper, dispatch } from './helpers';
+import { namespacedNameHelper } from './helpers/namespacedNameHelper';
+import { dispatch } from './helpers/dispatch';
 
 const vuexDefaultOptions = {
   name: nameDefaultOption,

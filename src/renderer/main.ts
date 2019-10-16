@@ -765,6 +765,9 @@ new Vue({
         this.infoDB.clearAll();
         app.clearRecentDocuments();
         this.$bus.$emit('clean-landingViewItems');
+        if (this.currentRouteName === 'playing-view') {
+          this.openVideoFile(this.originSrc);
+        }
         this.menuService.addRecentPlayItems();
       });
       this.menuService.on('history.reload', () => {

@@ -47,16 +47,38 @@ export default {
     finalEffect() {
       return this.effect ? this.effect : 'icon';
     },
-    elementId() {
-      return `${this.type}-${this.finalState}-${this.finalEffect}`;
-    },
   },
   watch: {
-    elementId: {
+    type: {
       immediate: true,
-      handler(newId: string) {
-        // eslint-disable-next-line import/no-dynamic-require
-        if (newId && !document.getElementById(newId)) require(`@/assets/icon/${newId}.svg`);
+      handler(type: string) {
+        const defaultIcon = `${type}-${this.finalState}-${this.finalEffect}`;
+        const hoverIcon = `${type}-hover-${this.finalEffect}`;
+        const activeIcon = `${type}-active-${this.finalEffect}`;
+        if (type && !document.getElementById(defaultIcon)) {
+          try {
+            // eslint-disable-next-line import/no-dynamic-require
+            require(`@/assets/icon/${defaultIcon}.svg`);
+          } catch (error) {
+            // empty
+          }
+        }
+        if (type && !document.getElementById(hoverIcon)) {
+          try {
+            // eslint-disable-next-line import/no-dynamic-require
+            require(`@/assets/icon/${hoverIcon}.svg`);
+          } catch (error) {
+            // empty
+          }
+        }
+        if (type && !document.getElementById(activeIcon)) {
+          try {
+            // eslint-disable-next-line import/no-dynamic-require
+            require(`@/assets/icon/${activeIcon}.svg`);
+          } catch (error) {
+            // empty
+          }
+        }
       },
     },
   },
