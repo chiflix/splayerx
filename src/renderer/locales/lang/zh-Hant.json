@@ -302,8 +302,8 @@
       "privacySetting": "隱私設置",
       "incognitoMode": "無痕模式",
       "incognitoDescription": "開啟後將不再保留任何新的播放記錄。",
-      "clearHistory": "",
-      "clearHistoryDescription": ""
+      "clearHistory": "清空播放記錄",
+      "clearHistoryDescription": "清除已有的播放列表和歷史記錄"
     }
   },
   "privacyBubble": {
