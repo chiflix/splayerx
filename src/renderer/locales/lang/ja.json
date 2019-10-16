@@ -207,17 +207,6 @@
       "playInNewWindow": "新しいウィンドウで遊ぶ",
       "backToBrowser": "ブラウザに戻る"
     },
-    "favourite": {
-      "name": "チャンネル",
-      "iqiyi": "iQIYI",
-      "bilibili": "Bilibili",
-      "douyu": "Douyu",
-      "huya": "Huya",
-      "qq": "Tencent Video",
-      "twitch": "Twitch",
-      "youku": "Youku",
-      "youtube": "YouTube"
-    },
     "edit": {
       "name": "編集",
       "cut": "切り取り",
@@ -269,12 +258,12 @@
       "try": "お試しください:",
       "firstLine": "ネットワークケーブル、モデム、およびルーターの確認",
       "secondLine": "Wi-Fiへの再接続"
-    }
+    },
+    "remove": ""
   },
   "preferences": {
     "general": {
       "hideHistory": "再生履歴を隠す",
-      "clearHistory": "終了時に再生履歴を削除",
       "reverseScrolling": "マウスのスクロール方向を逆に設定",
       "setDefault": "デフォルトのプレーヤーとして設定",
       "setDefaultDescription": "SPlayer ですべてのビデオファイルを開く。",
@@ -301,10 +290,10 @@
     },
     "privacy": {
       "privacySetting": "プライバシー",
-      "enable": "Privacy Protectionを開く",
-      "smartDescription": "機密性の高いコンテンツや作業に適さないコンテンツをオフラインで識別し、フォルダプレイリストでの再生時または終了時に再生履歴を消去します。",
       "incognitoMode": "Incognito Mode",
-      "incognitoDescription": "再生履歴は保存されません。"
+      "incognitoDescription": "再生履歴は保存されません。",
+      "clearHistory": "再生履歴をクリア",
+      "clearHistoryDescription": "既存のプレイリストと再生履歴を削除する"
     }
   },
   "privacyBubble": {
@@ -349,7 +338,8 @@
     "playing": "再生中",
     "paused": "ポーズ中",
     "playlistSource": "プレイリスト",
-    "add": "プレイリストに追加する"
+    "add": "プレイリストに追加する",
+    "pin": "プレイリストを起動ページに固定する"
   },
   "subtitle": {
     "embedded": "埋め込み式",
