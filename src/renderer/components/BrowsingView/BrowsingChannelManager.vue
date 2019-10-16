@@ -12,7 +12,7 @@
             v-for="(item, index) in allChannels.get(category.type).channels"
             @mouseover="handleMouseover(index)"
             @mouseleave="handleMouseleave"
-            @click="handleMouseClick(category.type, item.channel)"
+            @click="handleMouseClick(item.channel)"
             :style="{
               backgroundColor: index === hoverIndex || availableChannels.includes(item.channel)
                 ? '#FBFBFD' : '#FFFFFF',
@@ -99,6 +99,12 @@ export default {
     this.availableChannels = BrowsingChannelManager
       .getAllAvailableChannels().map(item => item.channel);
   },
+  mounted() {
+    this.$electron.ipcRenderer.on('delete-channel', () => {
+      this.availableChannels = BrowsingChannelManager.getAllAvailableChannels()
+        .map(item => item.channel);
+    });
+  },
   methods: {
     handleMouseover(index: number) {
       this.hoverIndex = index;
@@ -106,9 +112,9 @@ export default {
     handleMouseleave() {
       this.hoverIndex = -1;
     },
-    handleMouseClick(category: string, channel: string) {
+    handleMouseClick(channel: string) {
       const isAvailable = this.availableChannels.includes(channel);
-      BrowsingChannelManager.setChannelAvailable(category, channel, !isAvailable);
+      BrowsingChannelManager.setChannelAvailable(channel, !isAvailable);
       if (isAvailable) this.$electron.ipcRenderer.send('clear-browsers-by-channel', channel);
       this.availableChannels = BrowsingChannelManager
         .getAllAvailableChannels().map(item => item.channel);
