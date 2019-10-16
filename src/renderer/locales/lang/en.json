@@ -260,7 +260,9 @@
       "firstLine": "Checking the network cables, modem, and router",
       "secondLine": "Reconnecting to Wi-Fi"
     },
-    "remove": "Remove"
+    "remove": "Remove",
+    "siteManager": "Site Manager",
+    "popularSites": "Popular Sites"
   },
   "preferences": {
     "general": {

@@ -9,7 +9,7 @@
     <browsing-header
       ref="browsingHeader"
       :show-sidebar="showSidebar"
-      :title="title"
+      :title="showChannelManager ? $t('browsing.siteManager') : title"
       :is-loading="loadingState"
       :web-info="webInfo"
       :handle-enter-pip="handleEnterPip"
@@ -375,12 +375,13 @@ export default {
   mounted() {
     this.menuService = new MenuService();
     this.menuService.updateMenuItemEnabled('splayerx.checkForUpdates', false);
-    this.title = this.currentChannel ? this.currentMainBrowserView().webContents.getTitle() : '添加站点';
     if (!this.currentChannel) {
       this.showChannelManager = true;
       this.showProgress = false;
       this.webInfo.canReload = false;
       this.currentUrl = 'edit.channel';
+    } else {
+      this.title = this.currentMainBrowserView().webContents.getTitle();
     }
 
     this.$bus.$on('toggle-reload', this.handleUrlReload);
@@ -410,7 +411,6 @@ export default {
       }
       this.showChannelManager = true;
       this.showProgress = false;
-      this.title = '添加站点';
       this.webInfo.canGoBack = false;
       this.webInfo.canGoForward = false;
       this.webInfo.hasVideo = false;
