@@ -6,7 +6,7 @@
         v-for="category in categories"
         class="category-part"
       >
-        <span>{{ category.locale }}</span>
+        <span>{{ $t(category.locale) }}</span>
         <div class="channel-container">
           <div
             v-for="(item, index) in allChannels.get(category.type).channels"

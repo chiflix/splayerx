@@ -27,7 +27,7 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
 
 
   public constructor() {
-    this.allCategories = [{ type: 'customized', locale: '自定义站点' }, { type: 'adapted', locale: '已适配站点' }];
+    this.allCategories = [{ type: 'customized', locale: 'browsing.customized' }, { type: 'adapted', locale: 'browsing.popularSites' }];
     this.allChannels = new Map();
     this.allCategories.forEach((category: category) => {
       this.allChannels.set(category.type, { channels: [], availableChannels: [] });

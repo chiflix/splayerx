@@ -157,6 +157,7 @@ export default {
       'isError',
       'channels',
       'currentChannel',
+      'displayLanguage',
     ]),
     isDarwin() {
       return process.platform === 'darwin';
@@ -200,6 +201,9 @@ export default {
     },
   },
   watch: {
+    displayLanguage() {
+      if (this.showChannelManager) this.title = this.$t('browsing.siteManager');
+    },
     currentChannel(val: string) {
       if (val) this.showChannelManager = false;
       this.webInfo.canReload = !!val;
@@ -375,12 +379,14 @@ export default {
   mounted() {
     this.menuService = new MenuService();
     this.menuService.updateMenuItemEnabled('splayerx.checkForUpdates', false);
-    this.title = this.currentChannel ? this.currentMainBrowserView().webContents.getTitle() : '添加站点';
     if (!this.currentChannel) {
       this.showChannelManager = true;
       this.showProgress = false;
       this.webInfo.canReload = false;
       this.currentUrl = 'edit.channel';
+      this.title = this.$t('browsing.siteManager');
+    } else {
+      this.title = this.currentMainBrowserView().webContents.getTitle();
     }
 
     this.$bus.$on('toggle-reload', this.handleUrlReload);
@@ -410,7 +416,7 @@ export default {
       }
       this.showChannelManager = true;
       this.showProgress = false;
-      this.title = '添加站点';
+      this.title = this.$t('browsing.siteManager');
       this.webInfo.canGoBack = false;
       this.webInfo.canGoForward = false;
       this.webInfo.hasVideo = false;
