@@ -274,7 +274,6 @@
   "preferences": {
     "general": {
       "hideHistory": "再生履歴を隠す",
-      "clearHistory": "終了時に再生履歴を削除",
       "reverseScrolling": "マウスのスクロール方向を逆に設定",
       "setDefault": "デフォルトのプレーヤーとして設定",
       "setDefaultDescription": "SPlayer ですべてのビデオファイルを開く。",
@@ -301,11 +300,10 @@
     },
     "privacy": {
       "privacySetting": "プライバシー",
-      "enable": "Privacy Protectionを開く",
-      "smartMode": "Intelligent Mode",
-      "smartDescription": "機密性の高いコンテンツや作業に適さないコンテンツをオフラインで識別し、フォルダプレイリストでの再生時または終了時に再生履歴を消去します。",
       "incognitoMode": "Incognito Mode",
-      "incognitoDescription": "再生履歴は保存されません。"
+      "incognitoDescription": "再生履歴は保存されません。",
+      "clearHistory": "",
+      "clearHistoryDescription": ""
     }
   },
   "privacyBubble": {
@@ -350,7 +348,8 @@
     "playing": "再生中",
     "paused": "ポーズ中",
     "playlistSource": "プレイリスト",
-    "add": "プレイリストに追加する"
+    "add": "プレイリストに追加する",
+    "pin": ""
   },
   "subtitle": {
     "embedded": "埋め込み式",
