@@ -9,7 +9,7 @@
     <browsing-header
       ref="browsingHeader"
       :show-sidebar="showSidebar"
-      :title="showChannelManager ? $t('browsing.siteManager') : title"
+      :title="title"
       :is-loading="loadingState"
       :web-info="webInfo"
       :handle-enter-pip="handleEnterPip"
@@ -157,6 +157,7 @@ export default {
       'isError',
       'channels',
       'currentChannel',
+      'displayLanguage',
     ]),
     isDarwin() {
       return process.platform === 'darwin';
@@ -200,6 +201,9 @@ export default {
     },
   },
   watch: {
+    displayLanguage() {
+      if (this.showChannelManager) this.title = this.$t('browsing.siteManager');
+    },
     currentChannel(val: string) {
       if (val) this.showChannelManager = false;
       this.webInfo.canReload = !!val;
@@ -380,6 +384,7 @@ export default {
       this.showProgress = false;
       this.webInfo.canReload = false;
       this.currentUrl = 'edit.channel';
+      this.title = this.$t('browsing.siteManager');
     } else {
       this.title = this.currentMainBrowserView().webContents.getTitle();
     }
@@ -411,6 +416,7 @@ export default {
       }
       this.showChannelManager = true;
       this.showProgress = false;
+      this.title = this.$t('browsing.siteManager');
       this.webInfo.canGoBack = false;
       this.webInfo.canGoForward = false;
       this.webInfo.hasVideo = false;
