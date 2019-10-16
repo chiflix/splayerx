@@ -18,15 +18,33 @@
         </div>
       </div>
       <div
+        :class="{ 'button--mousedown': mousedown }"
         @mousedown="mousedownOnClearHistory"
+        @mouseup="mouseupOnClearHistory"
         class="settingItem__input button no-drag"
       >
-        <div
-          :class="{ 'button--mousedown': mousedown }"
-          class="button__text"
+        <transition
+          name="button"
+          mode="out-in"
         >
-          {{ $t("preferences.general.setButton") }}
-        </div>
+          <div
+            key=""
+            v-if="!buttonState"
+            class="button__text"
+          >
+            {{ $t("preferences.general.setButton") }}
+          </div>
+          <div
+            v-else
+            :key="buttonState"
+            class="button__result"
+          >
+            <Icon
+              :type="buttonState"
+              :class="buttonState"
+            />
+          </div>
+        </transition>
       </div>
     </div>
   </div>
@@ -34,15 +52,19 @@
 <script lang="ts">
 import electron from 'electron';
 import BaseCheckBox from './BaseCheckBox.vue';
+import Icon from '@/components/BaseIconContainer.vue';
 
 export default {
   name: 'Privacy',
   components: {
     BaseCheckBox,
+    Icon,
   },
   data() {
     return {
       mousedown: false,
+      buttonState: '',
+      buttonTimeoutId: NaN,
     };
   },
   computed: {
@@ -66,11 +88,19 @@ export default {
   methods: {
     mousedownOnClearHistory() {
       this.mousedown = true;
-      document.addEventListener('mouseup', this.mouseupOnClearHistory, { once: true });
+      document.addEventListener('mouseup', this.mouseupOnOther, { once: true });
     },
     mouseupOnClearHistory() {
-      this.mousedown = false;
       electron.ipcRenderer.send('clear-history');
+      this.buttonState = 'success';
+      clearTimeout(this.buttonTimeoutId);
+      this.buttonTimeoutId = setTimeout(() => {
+        this.buttonState = '';
+      }, 1500);
+      this.mousedown = false;
+    },
+    mouseupOnOther() {
+      this.mousedown = false;
     },
   },
 };
@@ -135,7 +165,15 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
-
+    .button-enter, .button-leave-to {
+      opacity: 0;
+    }
+    .button-enter-active {
+      transition: opacity 200ms ease-in;
+    }
+    .button-leave-active {
+      transition: opacity 200ms ease-in;
+    }
     &__text {
       font-family: $font-medium;
       font-size: 11px;
