@@ -274,7 +274,6 @@
   "preferences": {
     "general": {
       "hideHistory": "재생 기록 숨기기",
-      "clearHistory": "종료시 항상 재생 기록 지우기",
       "reverseScrolling": "마우스 스크롤 역전",
       "setDefault": "기본 동영상 플레이어로 설정",
       "setDefaultDescription": "SPlayer 로 모든 비디오 파일 열기.",
@@ -301,11 +300,10 @@
     },
     "privacy": {
       "privacySetting": "은둔",
-      "enable": "개인 정보 보호 사용",
-      "smartMode": "Intelligent Mode",
-      "smartDescription": "오프라인은 민감하거나 부적합한 작업 내용을 식별하고 폴더 재생 목록에서 재생할 때 또는 종료 할 때 재생 기록을 삭제합니다.",
       "incognitoMode": "Incognito Mode",
-      "incognitoDescription": "재생 기록이 저장되지 않습니다."
+      "incognitoDescription": "재생 기록이 저장되지 않습니다.",
+      "clearHistory": "",
+      "clearHistoryDescription": ""
     }
   },
   "privacyBubble": {
@@ -350,7 +348,8 @@
     "playing": "연주 중",
     "paused": "일시 중지 된",
     "playlistSource": "재생 목록",
-    "add": "재생 목록에 추가"
+    "add": "재생 목록에 추가",
+    "pin": ""
   },
   "subtitle": {
     "embedded": "깊숙이 박다",
