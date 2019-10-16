@@ -8,16 +8,17 @@ export default new Router({
     {
       path: '/',
       name: 'landing-view',
-      component: require('@/containers/LandingView.vue').default,
+      component: () => import('@/containers/LandingView.vue'),
     },
     {
       path: '/play',
       name: 'playing-view',
-      component: require('@/components/PlayingView.vue').default,
+      component: () => import('@/components/PlayingView.vue'),
     },
     {
       path: '/browsing',
       name: 'browsing-view',
+      // will crash if imported asynced
       component: require('@/components/BrowsingView.vue').default,
     },
     {
@@ -26,17 +27,17 @@ export default new Router({
     },
     {
       path: '/welcome',
-      component: require('@/components/Welcome/WelcomeView.vue').default,
+      component: () => import('@/components/Welcome/WelcomeView.vue'),
       children: [
         {
           path: '',
           name: 'welcome-privacy',
-          component: require('@/components/Welcome/WelcomePrivacy.vue').default,
+          component: () => import('@/components/Welcome/WelcomePrivacy.vue'),
         },
         {
           path: 'language',
           name: 'language-setting',
-          component: require('@/components/Welcome/LanguageSetting.vue').default,
+          component: () => import('@/components/Welcome/LanguageSetting.vue'),
         },
       ],
     },
