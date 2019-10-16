@@ -40,8 +40,10 @@
     />
     <NotificationBubble />
     <browsing-content
+      v-show="!showChannelManager"
       class="browsing-content"
     />
+    <browsing-channel-manager v-show="showChannelManager" />
   </div>
 </template>
 
@@ -56,6 +58,7 @@ import { windowRectService } from '@/services/window/WindowRectService';
 import { Browsing as browsingActions } from '@/store/actionTypes';
 import BrowsingHeader from '@/components/BrowsingView/BrowsingHeader.vue';
 import BrowsingContent from '@/components/BrowsingView/BrowsingContent.vue';
+import BrowsingChannelManager from '@/components/BrowsingView/BrowsingChannelManager.vue';
 import asyncStorage from '@/helpers/asyncStorage';
 import NotificationBubble from '@/components/NotificationBubble.vue';
 import { getValidVideoRegex, getValidSubtitleRegex } from '../../shared/utils';
@@ -69,6 +72,7 @@ export default {
     'browsing-header': BrowsingHeader,
     'browsing-content': BrowsingContent,
     NotificationBubble,
+    'browsing-channel-manager': BrowsingChannelManager,
   },
   props: {
     showSidebar: {
@@ -123,12 +127,14 @@ export default {
         url: '',
         canGoForward: false,
         canGoBack: false,
+        canReload: true,
       },
       allChannels: ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch'],
       compareStr: [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch']],
       hideMainWindow: false,
       startLoadUrl: '',
       barrageOpenByPage: false,
+      showChannelManager: false,
     };
   },
   computed: {
@@ -194,7 +200,9 @@ export default {
     },
   },
   watch: {
-    currentChannel() {
+    currentChannel(val: string) {
+      if (val) this.showChannelManager = false;
+      this.webInfo.canReload = !!val;
       this.updateIsError(false);
       if (!navigator.onLine) this.offlineHandler();
     },
@@ -224,22 +232,24 @@ export default {
       this.$emit('update-current-url', val);
     },
     showSidebar(val: boolean) {
-      if (!val) {
-        setTimeout(() => {
+      if (!this.showChannelManager) {
+        if (!val) {
+          setTimeout(() => {
+            this.currentMainBrowserView().setBounds({
+              x: val ? 76 : 0,
+              y: 40,
+              width: val ? window.innerWidth - 76 : window.innerWidth,
+              height: window.innerHeight - 40,
+            });
+          }, 100);
+        } else {
           this.currentMainBrowserView().setBounds({
             x: val ? 76 : 0,
             y: 40,
             width: val ? window.innerWidth - 76 : window.innerWidth,
             height: window.innerHeight - 40,
           });
-        }, 100);
-      } else {
-        this.currentMainBrowserView().setBounds({
-          x: val ? 76 : 0,
-          y: 40,
-          width: val ? window.innerWidth - 76 : window.innerWidth,
-          height: window.innerHeight - 40,
-        });
+        }
       }
     },
     hasVideo(val: boolean) {
@@ -365,7 +375,13 @@ export default {
   mounted() {
     this.menuService = new MenuService();
     this.menuService.updateMenuItemEnabled('splayerx.checkForUpdates', false);
-    this.title = this.currentMainBrowserView().webContents.getTitle();
+    this.title = this.currentChannel ? this.currentMainBrowserView().webContents.getTitle() : '添加站点';
+    if (!this.currentChannel) {
+      this.showChannelManager = true;
+      this.showProgress = false;
+      this.webInfo.canReload = false;
+      this.currentUrl = 'edit.channel';
+    }
 
     this.$bus.$on('toggle-reload', this.handleUrlReload);
     this.$bus.$on('toggle-back', this.handleUrlBack);
@@ -386,6 +402,21 @@ export default {
       }, 0);
     });
     this.$bus.$on('sidebar-selected', this.handleBookmarkOpen);
+    this.$bus.$on('channel-manage', () => {
+      if (this.currentMainBrowserView()) {
+        this.currentMainBrowserView().webContents
+          .executeJavaScript(InjectJSManager.pauseVideo(this.currentChannel));
+        this.$electron.remote.getCurrentWindow().removeBrowserView(this.currentMainBrowserView());
+      }
+      this.showChannelManager = true;
+      this.showProgress = false;
+      this.title = '添加站点';
+      this.webInfo.canGoBack = false;
+      this.webInfo.canGoForward = false;
+      this.webInfo.hasVideo = false;
+      this.webInfo.canReload = false;
+      this.updateCurrentChannel('');
+    });
     window.addEventListener('focus', this.focusHandler);
     window.addEventListener('beforeunload', this.beforeUnloadHandler);
     this.$bus.$on('back-to-landingview', this.backToLandingViewHandler);
@@ -546,8 +577,8 @@ export default {
       this.updateCanGoBack(this.webInfo.canGoBack);
       this.updateCanGoForward(this.webInfo.canGoForward);
       this.updateReload(true);
-      const loadUrl = this.currentMainBrowserView().webContents.getURL();
       if (this.currentMainBrowserView()) {
+        const loadUrl = this.currentMainBrowserView().webContents.getURL();
         this.currentMainBrowserView().webContents
           .executeJavaScript(InjectJSManager.calcVideoNum(), (r: number) => {
             this.webInfo.hasVideo = this.currentChannel === 'youtube.com' && !getVideoId(loadUrl).id ? false : !!r;
@@ -680,8 +711,9 @@ export default {
       this.$electron.ipcRenderer.send('create-browser-view', { url });
     },
     didStartLoading() {
-      this.startLoadUrl = this.$electron.remote.getCurrentWindow()
-        .getBrowserView().webContents.getURL();
+      if (this.currentMainBrowserView()) {
+        this.startLoadUrl = this.currentMainBrowserView().webContents.getURL();
+      }
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ipcMessage(evt: Event, channel: string, args: any) {
@@ -715,11 +747,15 @@ export default {
     },
     domReady() {
       window.focus();
-      this.currentMainBrowserView().webContents.focus();
+      if (this.currentMainBrowserView()) {
+        this.currentMainBrowserView().webContents.focus();
+      }
     },
     didStopLoading() {
-      this.title = this.currentMainBrowserView().webContents.getTitle();
-      this.loadingState = false;
+      if (this.currentMainBrowserView()) {
+        this.title = this.currentMainBrowserView().webContents.getTitle();
+        this.loadingState = false;
+      }
     },
     didFailLoad() {
       // this.updateIsError(true);

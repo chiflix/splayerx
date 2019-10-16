@@ -21,6 +21,8 @@ export default {
       offset: [],
       currentUrl: '',
       canListenUrlChange: false,
+      allChannels: ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch'],
+      compareStr: [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch']],
     };
   },
   computed: {
@@ -151,22 +153,19 @@ export default {
       return process.platform === 'win32' ? window.devicePixelRatio || 1 : 1;
     },
     handleUrlChange(url: string) {
+      if (!url || url === 'about:blank') return;
       const newHostname = urlParseLax(url).hostname;
       const oldHostname = urlParseLax(this.currentUrl).hostname;
-      let newChannel = newHostname.slice(
-        newHostname.indexOf('.') + 1,
-        newHostname.length,
-      );
-      let oldChannel = oldHostname.slice(
-        oldHostname.indexOf('.') + 1,
-        oldHostname.length,
-      );
-      if (url.includes('youtube')) {
-        newChannel = 'youtube.com';
-      }
-      if (this.currentUrl.includes('youtube')) {
-        oldChannel = 'youtube.com';
-      }
+      let newChannel = '';
+      let oldChannel = '';
+      this.allChannels.forEach((channel: string, index: number) => {
+        if (this.compareStr[index].findIndex((str: string) => newHostname.includes(str)) !== -1) {
+          newChannel = `${channel}.com`;
+        }
+        if (this.compareStr[index].findIndex((str: string) => oldHostname.includes(str)) !== -1) {
+          oldChannel = `${channel}.com`;
+        }
+      });
       if (url !== this.currentUrl) {
         if (newChannel === oldChannel) {
           this.currentUrl = url;

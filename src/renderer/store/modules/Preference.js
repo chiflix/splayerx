@@ -7,16 +7,6 @@ import syncStorage from '@/helpers/syncStorage';
 const state = {
   nsfwProcessDone: false,
   incognitoMode: false,
-  channels: [
-    'https://www.bilibili.com/',
-    'https://www.iqiyi.com/',
-    'https://www.douyu.com/',
-    'https://www.huya.com/',
-    'https://v.qq.com/',
-    'https://www.youku.com/',
-    'https://www.twitch.tv/',
-    'https://www.youtube.com/',
-  ],
   privacyAgreement: undefined,
   displayLanguage: '',
   primaryLanguage: undefined,
@@ -29,7 +19,6 @@ const state = {
 const getters = {
   nsfwProcessDone: state => state.nsfwProcessDone,
   preferenceData: state => state,
-  channels: state => state.channels,
   incognitoMode: state => state.incognitoMode,
   reverseScrolling: state => state.reverseScrolling,
   privacyAgreement: state => state.privacyAgreement,
@@ -50,10 +39,6 @@ const getters = {
 const mutations = {
   nsfwProcessDone(state) {
     state.nsfwProcessDone = true;
-  },
-  repositionChannels(state, { from, to }) {
-    const item = state.channels.splice(from, 1)[0];
-    state.channels.splice(to, 0, item);
   },
   displayLanguage(state, payload) {
     state.displayLanguage = payload;
@@ -100,13 +85,6 @@ const actions = {
     commit('primaryLanguage', payload.primaryLanguage);
     commit('secondaryLanguage', payload.secondaryLanguage);
     fs.closeSync(fs.openSync(path.join(remote.app.getPath('userData'), 'WELCOME_PROCESS_MARK'), 'w'));
-    return asyncStorage.set('preferences', state);
-  },
-  repositionChannels(
-    { commit, state },
-    { from, to },
-  ) {
-    commit('repositionChannels', { from, to });
     return asyncStorage.set('preferences', state);
   },
   displayLanguage({ commit, state }, payload) {

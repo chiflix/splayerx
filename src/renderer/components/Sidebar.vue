@@ -1,5 +1,6 @@
 <template>
   <div
+    :style="{ zIndex: isDarwin ? 0 : 7 }"
     class="side-bar"
   >
     <div
@@ -25,7 +26,7 @@
         :item-dragging="isDragging"
         :index-of-moving-to="indexOfMovingTo"
         :index-of-moving-item="indexOfMovingItem"
-        :selected="info.type === currentChannel"
+        :selected="info.channel === currentChannel && !showChannelManager"
         :select-sidebar="handleSidebarIcon"
         :style="{
           margin: '0 auto 12px auto',
@@ -34,6 +35,19 @@
         @index-of-moving-to="indexOfMovingTo = $event"
         @is-dragging="isDragging = $event"
       />
+      <div
+        :class="{ 'channel-opacity': showChannelManager && currentRouteName === 'browsing-view'}"
+        @click="handleChannelManage"
+        class="channel-manage no-drag"
+      >
+        <Icon
+          type="channelManage"
+        />
+        <div
+          :class="{ selected: showChannelManager && currentRouteName === 'browsing-view' }"
+          class="mask"
+        />
+      </div>
     </div>
     <div
       v-if="!showFileIcon"
@@ -64,6 +78,7 @@ import { Browsing as browsingActions } from '@/store/actionTypes';
 import asyncStorage from '@/helpers/asyncStorage';
 import Icon from '@/components/BaseIconContainer.vue';
 import SidebarIcon from '@/components/SidebarIcon.vue';
+import BrowsingChannelManager from '@/services/browsing/BrowsingChannelManager';
 
 export default {
   name: 'Sidebar',
@@ -83,19 +98,30 @@ export default {
   },
   data() {
     return {
-      showFileIcon: false,
       mousedown: NaN,
       topMask: false,
       bottomMask: false,
       indexOfMovingItem: NaN,
       indexOfMovingTo: NaN,
       isDragging: false,
+      channelsDetail: [],
     };
   },
   computed: {
-    ...mapGetters(['pipSize', 'pipPos', 'isHistory', 'currentChannel', 'winHeight', 'channels']),
+    ...mapGetters(['pipSize', 'pipPos', 'isHistory', 'currentChannel', 'winHeight']),
+    currentRouteName() {
+      return this.$route.name;
+    },
+    showChannelManager() {
+      return !this.currentChannel;
+    },
+    showFileIcon() {
+      return !!this.currentUrl;
+    },
     totalHeight() {
-      return this.channels.length * 56;
+      const channelsNum = this.showFileIcon
+        ? this.channelsDetail.length + 1 : this.channelsDetail.length;
+      return channelsNum * 56;
     },
     maxHeight() {
       const bottomHeight = this.showFileIcon ? 66 : 0;
@@ -104,33 +130,42 @@ export default {
     isDarwin() {
       return process.platform === 'darwin';
     },
-    channelsDetail() {
-      return this.channels.map((channel: string) => {
-        const basename = channel.slice(channel.indexOf('.') + 1, channel.lastIndexOf('.'));
-        return {
-          url: channel,
-          icon: `${basename}Sidebar`,
-          title: `browsing.${basename}`,
-          type: `${basename}.com`,
-        };
-      });
-    },
   },
   watch: {
     isDragging(val: boolean, oldVal: boolean) {
       if (oldVal && !val) {
-        this.$store.dispatch('repositionChannels',
-          { from: this.indexOfMovingItem, to: this.indexOfMovingTo });
+        this.channelsDetail = BrowsingChannelManager
+          .repositionChannels(this.indexOfMovingItem, this.indexOfMovingTo);
       }
     },
-    currentUrl(val: string) {
-      this.showFileIcon = !!val;
+    channelsDetail: {
+      handler: (val: { url: string, channel: string,
+        icon: string, title: string, path: string }[]) => {
+        asyncStorage.set('channels', { channels: val });
+      },
+      deep: true,
+    },
+    currentRouteName(val: string) {
+      if (val !== 'browsing-view') {
+        this.$bus.$on('available-channel-update', () => {
+          this.channelsDetail = BrowsingChannelManager.getAllAvailableChannels();
+        });
+      }
     },
     winHeight() {
       const scrollTop = (document.querySelector('.icon-box') as HTMLElement).scrollTop;
       this.topMask = this.maxHeight >= this.totalHeight ? false : scrollTop !== 0;
       this.bottomMask = scrollTop + this.maxHeight < this.totalHeight;
     },
+  },
+  created() {
+    asyncStorage.get('channels').then((data) => {
+      if (data.channels) {
+        this.channelsDetail = BrowsingChannelManager.initAvailableChannels(data.channels);
+      } else {
+        this.channelsDetail = BrowsingChannelManager.getAllAvailableChannels();
+      }
+    });
   },
   mounted() {
     this.topMask = false;
@@ -140,18 +175,27 @@ export default {
       this.topMask = scrollTop !== 0;
       this.bottomMask = scrollTop + this.maxHeight < this.totalHeight;
     });
+    this.$bus.$on('available-channel-update', () => {
+      this.channelsDetail = BrowsingChannelManager.getAllAvailableChannels();
+    });
   },
   methods: {
     ...mapActions({
       updateIsHistoryPage: browsingActions.UPDATE_IS_HISTORY,
       updateCurrentChannel: browsingActions.UPDATE_CURRENT_CHANNEL,
     }),
+    handleChannelManage() {
+      if (this.currentRouteName !== 'browsing-view') {
+        this.$router.push({ name: 'browsing-view' });
+      }
+      this.$bus.$emit('channel-manage');
+    },
     openHistory() {
       this.updateIsHistoryPage(!this.isHistory);
     },
     handleSidebarIcon(url: string, type: string) {
       const newChannel = type;
-      if (this.$route.name === 'browsing-view') {
+      if (this.currentRouteName === 'browsing-view') {
         this.$bus.$emit('sidebar-selected', { url, currentChannel: this.currentChannel, newChannel });
       } else {
         asyncStorage.get('browsingPip').then((data) => {
@@ -160,7 +204,7 @@ export default {
           this.$electron.ipcRenderer.send('add-browsing', { size: data.pipSize || this.pipSize, position: data.pipPos || this.pipPos });
         });
         this.$electron.ipcRenderer.send('change-channel', { url, channel: newChannel });
-        if (this.$router.currentRoute.name !== 'browsing-view') this.$router.push({ name: 'browsing-view' });
+        this.$router.push({ name: 'browsing-view' });
       }
       this.updateCurrentChannel(newChannel);
     },
@@ -177,7 +221,6 @@ export default {
   flex-direction: column;
   align-items: center;
   background-color: #3B3B41;
-  z-index: 0;
   left: 0;
   width: 76px;
   height: 100%;
@@ -206,6 +249,18 @@ export default {
     flex-direction: column;
     overflow-y: scroll;
   }
+  .channel-manage {
+    margin: 0 auto 12px auto;
+    position: relative;
+    opacity: 0.7;
+    transition: opacity 100ms ease-in;
+    &:hover {
+      opacity: 1;
+    }
+  }
+  .channel-opacity {
+    opacity: 1;
+  }
   .bottom-icon {
     display:flex;
     flex-direction: column;
@@ -213,6 +268,18 @@ export default {
   }
   .icon-hover {
     margin: auto;
+  }
+  .mask {
+    width: 44px;
+    height: 44px;
+    position: absolute;
+    top: 0;
+  }
+  .selected {
+    opacity: 1;
+    border: 2px solid #E0E0EA;
+    border-radius: 100%;
+    box-sizing: border-box;
   }
   .win {
     padding-top: 16px;

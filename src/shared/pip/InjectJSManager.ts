@@ -63,18 +63,16 @@ class InjectJSManager implements IInjectJSManager {
     return enterFullScreen ? 'document.body.requestFullscreen()' : 'document.webkitCancelFullScreen()';
   }
 
-  public pauseVideo(channel: string, type?: string): string {
+  public pauseVideo(channel?: string, type?: string): string {
     switch (channel) {
-      case 'bilibili':
+      case 'bilibili.com':
         return bilibiliVideoPause(type as string);
-      case 'douyu':
+      case 'douyu.com':
         return douyuVideoPause(type as string);
-      case 'huya':
+      case 'huya.com':
         return huyaVideoPause(type as string);
-      case 'qq':
+      case 'qq.com':
         return QQVideoPause(type as string);
-      case 'normal':
-        return this.pauseNormalVideo;
       default:
         return this.pauseNormalVideo;
     }

@@ -629,11 +629,16 @@ function registerMainWindowEvent(mainWindow) {
     browserViewManager.pauseVideo(mainWindow.getBrowserViews()[0]);
     mainWindow.hide();
   });
+  ipcMain.on('clear-browsers-by-channel', (evt, channel) => {
+    if (!browserViewManager) return;
+    browserViewManager.clearBrowserViewsByChannel(channel);
+  });
   ipcMain.on('remove-browser', () => {
+    if (!browserViewManager) return;
+    if (mainWindow.getBrowserViews().length) browserViewManager.pauseVideo();
     mainWindow.getBrowserViews()
       .forEach(mainWindowView => mainWindow.removeBrowserView(mainWindowView));
     if (mainWindow.isMaximized()) mainWindow.unmaximize();
-    browserViewManager.pauseVideo();
     if (browsingWindow) {
       const views = browsingWindow.getBrowserViews();
       views.forEach((view) => {
