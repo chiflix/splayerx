@@ -19,14 +19,28 @@
             class="channel-details"
           >
             <div
-              v-show="index === hoverIndex || availableChannels.includes(item.channel)"
+              :style="{
+                border: index === hoverIndex && availableChannels.includes(item.channel)
+                  ? '1px solid rgba(224, 224, 224, 1)' : '1px solid rgba(242, 241, 244, 1)',
+                opacity: index === hoverIndex || availableChannels.includes(item.channel) ? 1 : 0,
+              }"
               class="channel-mask hover-channel"
             >
               <div
+                :style="{
+                  backgroundColor: availableChannels.includes(item.channel)
+                    && index === hoverIndex ? '#E9E9E9' : '',
+                  border: availableChannels.includes(item.channel)&& index === hoverIndex
+                    ? '1px solid rgba(224, 224, 224, 100)' : '1px solid rgba(242, 241, 244, 100)'
+                }"
                 class="available-check"
               >
                 <Icon
-                  v-show="availableChannels.includes(item.channel)"
+                  :style="{
+                    opacity: !availableChannels.includes(item.channel)
+                      ? 0 : index === hoverIndex ? 1 : 0.4,
+                    transition: 'opacity 100ms linear',
+                  }"
                   type="channelSelected"
                   class="channel-selected"
                 />
@@ -150,21 +164,21 @@ export default {
               width: 22px;
               height: 22px;
               border-radius: 4px;
-              border: 1px solid rgba(242, 241, 244, 100);
               display: flex;
               position: absolute;
               top: -1px;
               left: -1px;
+              transition: all 100ms linear;
               .channel-selected {
                 margin: auto;
               }
             }
           }
           .hover-channel {
-            border: 1px solid rgba(241, 240, 243, 1);
             border-radius: 4px;
             box-shadow: 0 2px 6px rgba(235, 234, 239, 0.28);
             box-sizing: border-box;
+            transition: all 100ms linear;
           }
           .icon-container {
             margin: 13px auto 10px auto;
