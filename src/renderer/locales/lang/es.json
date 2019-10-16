@@ -302,8 +302,8 @@
       "privacySetting": "Intimidad",
       "incognitoMode": "Modo incógnito",
       "incognitoDescription": "No se guardará el historial de reproducción.",
-      "clearHistory": "",
-      "clearHistoryDescription": ""
+      "clearHistory": "Borrar historial de reproducción",
+      "clearHistoryDescription": "Eliminar listas de reproducción existentes y historial de reproducción"
     }
   },
   "privacyBubble": {
@@ -349,7 +349,7 @@
     "paused": "En pausa",
     "playlistSource": "Lista",
     "add": "Agregar a la lista de reproducción",
-    "pin": ""
+    "pin": "Pin la lista de reproducción para iniciar la página"
   },
   "subtitle": {
     "embedded": "Empotrar",
