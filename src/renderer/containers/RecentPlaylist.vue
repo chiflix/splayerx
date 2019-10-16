@@ -34,10 +34,58 @@
             class="info"
           >
             <div
+              v-if="playingList.length > 1"
+              class="pin-badge"
+            >
+              <div
+                v-if="!incognitoMode"
+                class="pin-icon"
+              >
+                <div
+                  @mouseup.stop="pinPlaylist"
+                  @mouseenter="showPinContent = true"
+                  @mouseleave="showPinContent = false"
+                  :style="{
+                    width: sizeAdaption(23),
+                  }"
+                  class="icon"
+                >
+                  <Icon
+                    :style="{
+                      backgroundColor: showPinContent && isFolderList
+                        ? 'rgba(255,255,255,0.125)' : '',
+                      width: sizeAdaption(16),
+                      height: sizeAdaption(16),
+                    }"
+                    :type="pinIcon"
+                  />
+                </div>
+                <transition name="fade-200">
+                  <div
+                    v-show="showPinContent || !isFolderList"
+                    :style="{
+                      fontSize: sizeAdaption(13),
+                      lineHeight: sizeAdaption(14),
+                    }"
+                    class="pin-content"
+                  >
+                    {{ $t('recentPlaylist.pin') }}
+                  </div>
+                </transition>
+              </div>
+              <div
+                v-else
+                class="badge"
+              >
+                {{ $t('preferences.privacy.incognitoMode') }}
+              </div>
+            </div>
+            <div
               v-show="showTopContent"
               :style="{
-                fontSize: sizeAdaption(14),
-                lineHeight: sizeAdaption(14),
+                marginTop: sizeAdaption(9),
+                fontSize: sizeAdaption(13),
+                lineHeight: sizeAdaption(13),
               }"
               class="top"
             >
@@ -153,6 +201,7 @@ import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import RecentPlayService from '@/services/media/PlaylistService';
 import { playInfoStorageService } from '@/services/storage/PlayInfoStorageService';
 import { PlaylistItem } from '@/interfaces/IDB';
+import Icon from '@/components/BaseIconContainer.vue';
 
 export default {
   name: 'RecentPlaylist',
@@ -161,6 +210,7 @@ export default {
   components: {
     RecentPlaylistItem,
     Add,
+    Icon,
   },
   props: {
     mousemoveClientPosition: {
@@ -204,6 +254,7 @@ export default {
       showTopContent: true,
       cursorLeft: `url("${filePathToUrl(path.join(__static, 'cursor/cursorLeft.svg') as string)}")`,
       cursorRight: `url("${filePathToUrl(path.join(__static, 'cursor/cursorRight.svg') as string)}")`,
+      showPinContent: false,
     };
   },
   created() {
@@ -237,6 +288,13 @@ export default {
       clearMouseup: InputActions.MOUSEUP_UPDATE,
       updateSubToTop: subtitleActions.UPDATE_SUBTITLE_TOP,
     }),
+    pinPlaylist() {
+      if (this.isFolderList) {
+        this.setPlaylist();
+      } else {
+        this.splitPlaylist();
+      }
+    },
     keyboardHandler(e: KeyboardEvent) {
       if (this.displayState && !e.metaKey && !e.ctrlKey) {
         if (e.key === 'ArrowRight') {
@@ -362,7 +420,19 @@ export default {
         this.indexOfMovingItem = this.playingList.length;
       }
     },
-    async setPlayList() {
+    async splitPlaylist() {
+      const playlist = await this.infoDB.get('recent-played', this.playListId);
+      const currentVideoHp = playlist.hpaths[this.playingIndex];
+      const currentVideoId = playlist.items[this.playingIndex];
+
+      playlist.hpaths = [currentVideoHp];
+      playlist.items = [currentVideoId];
+      playlist.playedIndex = 0;
+
+      this.infoDB.update('recent-played', playlist, playlist.id);
+      this.$store.dispatch('FolderList', { id: playlist.id, paths: this.playingList, items: this.items });
+    },
+    async setPlaylist() {
       const playlist = await this.infoDB.get('recent-played', this.playListId);
       const currentVideoId = playlist.items[0];
       const currentVideoHp = playlist.hpaths[0];
@@ -410,8 +480,7 @@ export default {
       if (-(this.movementY) > this.thumbnailHeight * 1.5
        && this.itemMoving && this.canRemove) {
         this.$store.dispatch('RemoveItemFromPlayingList', this.playingList[index]);
-        if (this.isFolderList) this.setPlayList();
-        else this.updatePlaylist(this.playListId);
+        if (!this.isFolderList) this.updatePlaylist(this.playListId);
         this.hoverIndex = this.playingIndex;
         this.filename = this.pathBaseName(this.originSrc);
         this.canRemove = false;
@@ -422,8 +491,7 @@ export default {
           src: this.playingList[index],
           newPosition: this.indexOfMovingTo,
         });
-        if (this.isFolderList) this.setPlayList();
-        else this.updatePlaylist(this.playListId);
+        if (!this.isFolderList) this.updatePlaylist(this.playListId);
         if (this.indexOfMovingTo > this.lastIndex
           && this.lastIndex + 1 !== this.playingList.length) {
           this.lastIndex += 1;
@@ -621,11 +689,14 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['playingList', 'playListId', 'items', 'playListId', 'isFolderList', 'winWidth', 'playingIndex', 'duration', 'originSrc']),
+    ...mapGetters(['playingList', 'playListId', 'incognitoMode', 'items', 'playListId', 'isFolderList', 'winWidth', 'playingIndex', 'duration', 'originSrc']),
     ...mapState({
       currentMousedownComponent: ({ Input }) => Input.mousedownComponentName,
       currentMouseupComponent: ({ Input }) => Input.mouseupComponentName,
     }),
+    pinIcon() {
+      return this.isFolderList ? 'pin' : 'notPin';
+    },
     movingOffset() {
       const marginRight = this.winWidth > 1355 ? (this.winWidth / 1355) * 15 : 15;
       const distance = marginRight + this.thumbnailWidth;
@@ -743,6 +814,46 @@ export default {
   .content {
     .info {
       width: 90%;
+      .pin-badge {
+        .pin-icon {
+          display: flex;
+          justify-content: flex-start;
+          align-items: center;
+
+          .icon {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: background-color 50ms linear;
+            svg {
+              border-radius: 100%;
+            }
+          }
+
+          .pin-content {
+            font-family: $font-normal;
+            color: rgba(235,235,235,0.6);
+            letter-spacing: 0.56px;
+          }
+        }
+
+        .badge {
+          background-color: rgba(255,255,255,0.2);
+          height: 20px;
+          padding-left: 12px;
+          padding-right: 12px;
+          width: fit-content;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          border-radius: 4px;
+
+          font-family: $font-normal;
+          font-size: 11px;
+          color: rgba(255,255,255,0.50);
+        }
+      }
+
       .top {
         font-family: $font-heavy;
         white-space:nowrap;
