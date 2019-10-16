@@ -302,8 +302,8 @@
       "privacySetting": "الإجمالية",
       "incognitoMode": "وضع التخفي",
       "incognitoDescription": "لن يتم حفظ سجل التشغيل.",
-      "clearHistory": "",
-      "clearHistoryDescription": ""
+      "clearHistory": "مسح سجل التشغيل",
+      "clearHistoryDescription": "قم بإزالة قوائم التشغيل الحالية وسجل التشغيل"
     }
   },
   "privacyBubble": {
@@ -349,7 +349,7 @@
     "paused": "توقف",
     "playlistSource": "قائمة التشغيل",
     "add": "أضف إلى قائمة التشغيل",
-    "pin": ""
+    "pin": "ثبت قائمة التشغيل على صفحة الإطلاق"
   },
   "subtitle": {
     "embedded": "تضمين",
