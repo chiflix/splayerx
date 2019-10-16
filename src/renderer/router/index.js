@@ -18,8 +18,7 @@ export default new Router({
     {
       path: '/browsing',
       name: 'browsing-view',
-      // will crash if imported asynced
-      component: require('@/components/BrowsingView.vue').default,
+      component: () => import('@/components/BrowsingView.vue'),
     },
     {
       path: '*',

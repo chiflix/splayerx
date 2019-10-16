@@ -12,7 +12,6 @@ import uuidv4 from 'uuid/v4';
 import { AudioTranslate as m } from '@/store/mutationTypes';
 import store from '@/store';
 import { AudioTranslate as a, SubtitleManager as smActions, UserInfo as uActions } from '@/store/actionTypes';
-import { audioTranslateService } from '@/services/media/AudioTranslateService';
 import { AITaskInfo } from '@/interfaces/IMediaStorable';
 import { TranscriptInfo } from '@/services/subtitle';
 import { ISubtitleControlListItem, Type } from '@/interfaces/ISubtitle';
@@ -126,12 +125,13 @@ const getCurrentAudioInfo = async (
   return audioInfo;
 };
 
-const taskCallback = (taskInfo: AITaskInfo) => {
+const taskCallback = async (taskInfo: AITaskInfo) => {
   log.debug('AudioTranslate', taskInfo, 'audio-log');
   // @ts-ignore
   if (taskInfo.mediaHash !== store.getters.mediaHash) {
     return;
   }
+  const audioTranslateService = (await import('@/services/media/AudioTranslateService')).audioTranslateService;
   audioTranslateService.taskInfo = taskInfo;
   // const estimateTime = taskInfo.estimateTime * 1;
   // @ts-ignore
@@ -302,6 +302,7 @@ const actions = {
       return;
     }
     commit(m.AUDIO_TRANSLATE_SAVE_KEY, `${getters.mediaHash}`);
+    const audioTranslateService = (await import('@/services/media/AudioTranslateService')).audioTranslateService;
     audioTranslateService.stop();
     // audio index in audio streams
     const audioInfo = await getCurrentAudioInfo(getters.currentAudioTrackId, getters.originSrc);
@@ -611,7 +612,7 @@ const actions = {
       dispatch(a.AUDIO_TRANSLATE_START, taskInfo.audioLanguageCode);
     }
   },
-  [a.AUDIO_TRANSLATE_DISCARD]( // eslint-disable-line complexity
+  async [a.AUDIO_TRANSLATE_DISCARD]( // eslint-disable-line complexity
     {
       commit,
       getters,
@@ -676,6 +677,7 @@ const actions = {
       clearInterval(taskTimer);
     }
     // 丢弃service
+    const audioTranslateService = (await import('@/services/media/AudioTranslateService')).audioTranslateService;
     audioTranslateService.stop();
     // 丢弃任务，执行用户强制操作
     const selectId = state.selectedTargetSubtitleId;
@@ -689,7 +691,8 @@ const actions = {
     state.callbackAfterBubble();
     dispatch(a.AUDIO_TRANSLATE_HIDE_BUBBLE);
   },
-  [a.AUDIO_TRANSLATE_BACKSATGE]({ commit, dispatch }: any) {
+  async [a.AUDIO_TRANSLATE_BACKSATGE]({ commit, dispatch }: any) {
+    const audioTranslateService = (await import('@/services/media/AudioTranslateService')).audioTranslateService;
     // 保存当前进度
     if (state.status === AudioTranslateStatus.Translating) {
       audioTranslateService.saveTask();
