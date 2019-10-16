@@ -281,7 +281,10 @@ export default {
     window.addEventListener('mousemove', this.globalMoveHandler);
     // Get all data and show
     recentPlayService.getRecords().then((results) => {
-      this.landingViewItems = results.filter(result => result.playlistLength > 1);
+      this.landingViewItems = results.filter((result) => {
+        if (result.playlistLength) return result.playlistLength > 1;
+        return false;
+      });
     });
     this.$bus.$on('clean-landingViewItems', () => {
       // just for delete thumbnail display

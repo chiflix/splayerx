@@ -69,7 +69,7 @@
                     }"
                     class="pin-content"
                   >
-                    保留此播放列表至启动页
+                    {{ $t('recentPlaylist.pin') }}
                   </div>
                 </transition>
               </div>

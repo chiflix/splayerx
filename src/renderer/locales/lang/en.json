@@ -349,7 +349,8 @@
     "playing": "Playing",
     "paused": "Paused",
     "playlistSource": "Playlist",
-    "add": "Add To Playlist"
+    "add": "Add To Playlist",
+    "pin": "Pin the Playlist to Launching Page"
   },
   "subtitle": {
     "embedded": "Embed",
