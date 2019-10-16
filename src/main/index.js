@@ -12,7 +12,6 @@ import http from 'http';
 import rimraf from 'rimraf';
 import { audioGrabService } from './helpers/AudioGrabService';
 import './helpers/electronPrototypes';
-import writeLog from './helpers/writeLog';
 import {
   getValidVideoRegex, getValidSubtitleRegex,
   getToken, saveToken,
@@ -1091,10 +1090,6 @@ function registerMainWindowEvent(mainWindow) {
     mainWindow.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
     mainWindow.webContents.send('mainCommit', 'isFullScreen', mainWindow.isFullScreen());
     mainWindow.webContents.send('mainCommit', 'isFocused', mainWindow.isFocused());
-  });
-  ipcMain.on('writeLog', (event, level, log) => { // eslint-disable-line complexity
-    if (!log) return;
-    writeLog(level, log);
   });
   ipcMain.on('need-to-restore', () => {
     needToRestore = true;
