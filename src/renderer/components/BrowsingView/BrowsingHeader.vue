@@ -17,6 +17,7 @@
       :title="title"
       :is-loading="isLoading"
       :close-url-input="closeUrlInput"
+      :can-reload="webInfo.canReload"
       :play-file-with-playing-view="playFileWithPlayingView"
       @dblclick.native="handleDbClick"
     />
@@ -53,7 +54,7 @@ export default {
     },
     title: {
       type: String,
-      default: 'Splayer',
+      default: 'SPlayer',
     },
     isLoading: {
       type: Boolean,

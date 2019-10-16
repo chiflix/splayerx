@@ -80,12 +80,15 @@ export default class PlayInfoStorageService implements IPlayInfoStorable {
   public async getAllRecentPlayed(): Promise<PlaylistItem[]> {
     const results: PlaylistItem[] = (await info.getAll('recent-played'))
       .sort((a: PlaylistItem, b: PlaylistItem) => b.lastOpened - a.lastOpened);
-    results.forEach((record, index) => {
+    const playlistItems = results.filter(item => item.items.length > 1);
+    playlistItems.forEach((record, index) => {
       if (index >= 9) {
         info.delete(RECENT_OBJECT_STORE_NAME, record.id);
+        const deleteIndex = results.findIndex(item => item.id === record.id);
+        results.splice(deleteIndex, 1);
       }
     });
-    return results.splice(0, 9);
+    return results;
   }
 
   public async getPlaylistRecord(playlistId: number): Promise<PlaylistItem> {

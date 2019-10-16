@@ -8,11 +8,25 @@
         class="item"
       />
     </div>
+    <div
+      v-if="isError"
+      class="error-page"
+    >
+      <div class="title">
+        {{ $t('browsing.error.offline' ) }}
+      </div>
+      <div class="desciption">
+        {{ $t('browsing.error.try' ) }}<br>
+        {{ $t('browsing.error.firstLine') }}<br>
+        {{ $t('browsing.error.secondLine' ) }}
+      </div>
+    </div>
   </div>
 </template>
 <script lang="ts">
 import BrowsingHistoryItem from '@/components/BrowsingView/BrowsingHistoryItem.vue';
 import { browsingDB } from '@/helpers/browsingDB';
+import { mapGetters } from 'vuex';
 
 export default {
   components: {
@@ -25,6 +39,9 @@ export default {
   },
   created() {
     console.log(browsingDB);
+  },
+  computed: {
+    ...mapGetters(['isError']),
   },
 };
 </script>
@@ -56,6 +73,31 @@ export default {
     .item {
       margin-right: 20px;
       margin-bottom: 18px;
+    }
+  }
+  .error-page {
+    width: 100%;
+    height: 100%;
+    .title {
+      font-family: $font-semibold;
+      font-size: 20px;
+      color: #ABAFBA;
+      letter-spacing: 0;
+      line-height: 20px;
+
+      margin-left: 40px;
+      margin-top: 36px;
+    }
+    .desciption {
+      font-family: $font-medium;
+      font-size: 12px;
+      color: #D4D7DF;
+      letter-spacing: 0.09px;
+      line-height: 18px;
+
+
+      margin-left: 40px;
+      margin-top: 16px;
     }
   }
 }

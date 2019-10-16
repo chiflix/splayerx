@@ -208,14 +208,6 @@
       "playInNewWindow": "Play in New Window",
       "backToBrowser": "Back to Browser"
     },
-    "favourite": {
-      "name": "Channel",
-      "iqiyi": "iQIYI",
-      "bilibili": "Bilibili",
-      "douyu": "Douyu",
-      "huya": "Huya",
-      "youtube": "YouTube"
-    },
     "edit": {
       "name": "Edit",
       "cut": "Cut",
@@ -252,18 +244,27 @@
     "iqiyi": "iQIYI",
     "youtube": "YouTube",
     "huya": "Huya",
+    "qq": "Tencent Video",
     "douyu": "Douyu",
+    "twitch": "Twitch",
+    "youku": "Youku",
     "openLocalFile": "Open Local File ...",
     "enterPip": "Enter Picture in Picture",
     "exitPip": "Back to Browser",
     "enterPop": "Play in New Window",
     "exitPop": "Back to Browser",
-    "danmu": "Toggle Danmaku"
+    "danmu": "Toggle Danmaku",
+    "error": {
+      "offline": "No Internet",
+      "try": "Try:",
+      "firstLine": "Checking the network cables, modem, and router",
+      "secondLine": "Reconnecting to Wi-Fi"
+    },
+    "remove": "remove"
   },
   "preferences": {
     "general": {
       "hideHistory": "Hide playback history",
-      "clearHistory": "Always clear playback history on exit",
       "reverseScrolling": "Reverse mouse scrolling when adjusting volume",
       "setDefault": "Set as the Default Video Player",
       "setDefaultDescription": "Open all video files with SPlayer.",
@@ -290,11 +291,10 @@
     },
     "privacy": {
       "privacySetting": "Privacy",
-      "enable": "Enable Privacy Protection When Playing Local Video Files",
-      "smartMode": "Intelligent Mode",
-      "smartDescription": "Offline identify sensitive or not-suitable-for-work contents, and clear the playback history when playing in a folder playlist or when quitting.",
       "incognitoMode": "Incognito Mode",
-      "incognitoDescription": "Your playback history will not be stored anymore."
+      "incognitoDescription": "Your playback history will not be stored anymore.",
+      "clearHistory": "Clear Playback History",
+      "clearHistoryDescription": "Remove existing playlists and playback history"
     }
   },
   "privacyBubble": {
@@ -339,7 +339,8 @@
     "playing": "Playing",
     "paused": "Paused",
     "playlistSource": "Playlist",
-    "add": "Add To Playlist"
+    "add": "Add To Playlist",
+    "pin": "Pin the Playlist to Launching Page"
   },
   "subtitle": {
     "embedded": "Embed",
@@ -472,14 +473,24 @@
   "loginModal": {
     "title": "Sign in with phone number",
     "sendCode": "Send",
+    "sendingCode": "Sending ...",
     "countDown": "{count} s",
     "placeholder": {
       "mobile": "Your phone number",
       "code": "Enter verification code"
     },
     "submit": "Sign In",
+    "submitting": "Processing ...",
     "codeError": "Incorrect Vertification Code",
     "netWorkError": "Connection Timeout",
-    "noLineError": "No Network Connection"
+    "noLineError": "No Network Connection",
+    "afsError": "Captcha Validation Failed",
+    "afs": {
+      "start": "Please slide to verify",
+      "yes": "Success",
+      "retry": "retry",
+      "error300": "Verification failed, please",
+      "errorNetwork": "Network Error. Please"
+    }
   }
 }

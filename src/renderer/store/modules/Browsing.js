@@ -8,8 +8,14 @@ const state = {
   isPip: false,
   pipMode: 'Enter',
   isHistory: false,
+  isError: false,
   currentChannel: '',
   pipChannel: '',
+  categories: ['customized', 'adapted'],
+  allChannels: [
+    { type: 'customized', channels: [], availableChannels: [] },
+    { type: 'adapted', channels: ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch'], availableChannels: [] },
+  ],
 };
 const getters = {
   initialUrl: state => state.initialUrl,
@@ -18,8 +24,10 @@ const getters = {
   isPip: state => state.isPip,
   pipMode: state => state.pipMode,
   isHistory: state => state.isHistory,
+  isError: state => state.isError,
   currentChannel: state => state.currentChannel,
   pipChannel: state => state.pipChannel,
+  allChannels: state => state.allChannels,
 };
 
 const mutations = {
@@ -40,6 +48,9 @@ const mutations = {
   },
   [browsingMutations.IS_HISTORY_UPDATE](state, payload) {
     state.isHistory = payload;
+  },
+  [browsingMutations.IS_ERROR_UPDATE](state, payload) {
+    state.isError = payload;
   },
   [browsingMutations.CURRENT_CHANNEL_UPDATE](state, payload) {
     state.currentChannel = payload;
@@ -66,6 +77,9 @@ const actions = {
   },
   [browsingActions.UPDATE_IS_HISTORY]({ commit }, delta) {
     commit(browsingMutations.IS_HISTORY_UPDATE, delta);
+  },
+  [browsingActions.UPDATE_IS_ERROR]({ commit }, delta) {
+    commit(browsingMutations.IS_ERROR_UPDATE, delta);
   },
   [browsingActions.UPDATE_CURRENT_CHANNEL]({ commit }, delta) {
     commit(browsingMutations.CURRENT_CHANNEL_UPDATE, delta);

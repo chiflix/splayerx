@@ -1,5 +1,6 @@
-import { INPUT_COMPONENT_TYPE, VuexStore, nameDefaultOption } from './constants';
-import { addComponent, removeComponent } from './helpers';
+import VuexStore from '@/store';
+import { INPUT_COMPONENT_TYPE, nameDefaultOption } from './constants';
+import { addComponent, removeComponent } from './helpers/componentStore';
 import module from './vuex';
 import {
   generateMousemoveListener,

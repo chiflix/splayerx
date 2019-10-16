@@ -39,6 +39,7 @@ import { checkForUpdate } from '@/libs/utils';
 import asyncStorage from '@/helpers/asyncStorage';
 import { videodata } from '@/store/video';
 import { addBubble } from '@/helpers/notificationControl';
+import { isAccountEnabled } from '@/helpers/featureSwitch';
 import { CHECK_FOR_UPDATES_OFFLINE, REQUEST_TIMEOUT } from '@/helpers/notificationcodes';
 import { SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, LOAD_SUBVIDEO_FAILED } from './helpers/notificationcodes';
 import InputPlugin, { getterTypes as iGT } from '@/plugins/input';
@@ -47,6 +48,7 @@ import { ISubtitleControlListItem, Type, NOT_SELECTED_SUBTITLE } from './interfa
 import { getValidSubtitleRegex, getSystemLocale, getClientUUID } from '../shared/utils';
 import { isWindowsExE, isMacintoshDMG } from '../shared/common/platform';
 import MenuService from './services/menu/MenuService';
+import BrowsingChannelMenu from './services/browsing/BrowsingChannelMenu';
 
 
 // causing callbacks-registry.js 404 error. disable temporarily
@@ -159,6 +161,8 @@ new Vue({
       playingViewTop: false,
       browsingViewTop: false,
       canSendVolumeGa: true,
+      openChannelMenu: false,
+      currentChannel: '',
     };
   },
   computed: {
@@ -346,13 +350,6 @@ new Vue({
       if (!data.displayLanguage) {
         this.$store.dispatch('displayLanguage', getSystemLocale());
       }
-      if (data.protectPrivacy === undefined) {
-        this.$store.dispatch('protectPrivacy');
-        this.$store.dispatch('hideNSFW', true);
-        this.$electron.ipcRenderer.send('labor-task-add', 'nsfw-warmup');
-      } else if (data.protectPrivacy && data.hideNSFW) {
-        this.$electron.ipcRenderer.send('labor-task-add', 'nsfw-warmup');
-      }
     });
     asyncStorage.get('subtitle-style').then((data) => {
       if (data.chosenStyle) {
@@ -402,8 +399,21 @@ new Vue({
     this.$bus.$on('new-file-open', () => {
       this.menuService.addRecentPlayItems();
     });
+    this.$bus.$on('open-channel-menu', (channel: string) => {
+      this.openChannelMenu = true;
+      this.currentChannel = channel;
+    });
     getClientUUID().then((clientId: string) => {
       this.$ga && this.$ga.set('userId', clientId);
+      // get config cat is account enabled
+      isAccountEnabled().then((enabled: boolean) => {
+        log.debug('account', enabled);
+        if (enabled) {
+          this.$electron.ipcRenderer.send('account-enabled');
+        }
+      }).catch(() => {
+        // empty
+      });
     });
     this.$on('wheel-event', this.wheelEventHandler);
 
@@ -417,7 +427,12 @@ new Vue({
 
     window.addEventListener('mousedown', (e) => {
       if (e.button === 2 && process.platform === 'win32') {
-        this.menuService.popupWinMenu();
+        if (this.openChannelMenu) {
+          BrowsingChannelMenu.createChannelMenu(this.currentChannel);
+          this.openChannelMenu = false;
+        } else {
+          this.menuService.popupWinMenu();
+        }
       }
     });
     window.addEventListener('keydown', (e) => { // eslint-disable-line complexity
@@ -750,20 +765,10 @@ new Vue({
         this.infoDB.clearAll();
         app.clearRecentDocuments();
         this.$bus.$emit('clean-landingViewItems');
+        if (this.currentRouteName === 'playing-view') {
+          this.openVideoFile(this.originSrc);
+        }
         this.menuService.addRecentPlayItems();
-      });
-      const urls = ['https://www.iqiyi.com/', 'https://www.bilibili.com/', 'https://www.douyu.com/', 'https://www.youtube.com/'];
-      const channels = ['iqiyi', 'bilibili', 'douyu', 'youtube'];
-      channels.forEach((channel: string, index: number) => {
-        this.menuService.on(`favourite.${channel}`, () => {
-          const currentChannel = urls[index].slice(urls[index].indexOf('.') + 1, urls[index].length - 1);
-          this.updateCurrentChannel(currentChannel);
-          this.$electron.ipcRenderer.send('add-browsing', { size: this.pipSize, position: this.pipPos });
-          this.$electron.ipcRenderer.send('change-channel', { url: urls[index], channel: currentChannel });
-          this.$router.push({
-            name: 'browsing-view',
-          });
-        });
       });
       this.menuService.on('history.reload', () => {
         this.$bus.$emit('toggle-reload');
@@ -900,7 +905,7 @@ new Vue({
       });
       this.menuService.on('subtitle.mainSubtitle', (e: Event, id: string, item: ISubtitleControlListItem) => {
         if (id === 'off') this.changeFirstSubtitle('');
-        else if (item.type === Type.Translated && item.source.source === '') {
+        else if (item.type === Type.PreTranslated && item.source.source === '') {
           this.showAudioTranslateModal(item);
         } else {
           this.updateSubtitleType(true);
@@ -911,7 +916,7 @@ new Vue({
         if (id === 'off') this.changeSecondarySubtitle('');
         else if (id === 'secondarySub') {
           this.updateEnabledSecondarySub(!this.enabledSecondarySub)
-        } else if (item.type === Type.Translated && item.source.source === '') {
+        } else if (item.type === Type.PreTranslated && item.source.source === '') {
           this.showAudioTranslateModal(item);
         } else {
           this.updateSubtitleType(false);

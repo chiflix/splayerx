@@ -1,8 +1,8 @@
 export function douyuVideoPause(type: string) {
   if (['normal', 'others'].includes(type)) {
-    return 'document.querySelector("video").pause();var timer = setInterval(() => { const pause = document.querySelector(".pause-c594e8"); if (pause) { clearInterval(timer);pause.click(); } }, 100);';
+    return 'document.querySelector("video").pause();var timer = setInterval(() => { const pause = document.querySelector(".pause-c594e8"); if (pause && timer) { clearInterval(timer);timer = null;pause.click(); } }, 100);';
   }
-  return 'document.querySelector("video").pause();var timer = setInterval(() => { const pause = document.querySelector(".pause-81a5c3"); if (pause) { clearInterval(timer);pause.click(); } }, 100);';
+  return 'document.querySelector("video").pause();var timer = setInterval(() => { const pause = document.querySelector(".pause-81a5c3"); if (pause && timer) { clearInterval(timer);timer = null;pause.click(); } }, 100);';
 }
 
 export default class Douyu {
@@ -15,7 +15,7 @@ export default class Douyu {
   public constructor(type: string, barrageState: boolean, winSize: number[]) {
     if (type === 'normal') {
       this.adapter = `var videoPlayer = document.querySelector(".layout-Player-videoMain");
-        ${this.douyuBarrageAdapt(type, barrageState)}
+        ${this.barrageAdapt(type, barrageState)}
         videoPlayer.style.position = "fixed";
         videoPlayer.style.zIndex = "999999999";
         videoPlayer.style.width = "100%";
@@ -33,34 +33,37 @@ export default class Douyu {
         document.querySelector("video").style.width = "100%";
         document.querySelector("video").style.height = "100%";
         document.body.style.overflow = "hidden";
-        document.querySelector(".roomSmallPlayerFloatLayout").style.display = "none";
+        var roomPlayer = document.querySelector(".roomSmallPlayerFloatLayout")
+        if (roomPlayer) roomPlayer.style.display = "none";
         document.querySelector("._1Osm4fzGmcuRK9M8IVy3u6").style.width = "100%";
         document.querySelector("._1Osm4fzGmcuRK9M8IVy3u6").style.height = "100%";
         Object.defineProperty(document.querySelector("video").style, "width", {get: function(){return this._width}, set: function(val){this._width = val.width;if (val.flag) document.querySelector("video").style.setProperty("width", val.width);}});
         Object.defineProperty(document.querySelector("video").style, "height", {get: function(){return this._height}, set: function(val){this._height = val.height; if (val.flag) document.querySelector("video").style.setProperty("height", val.height);}});`;
       this.watcher = '';
-      this.recover = 'var videoPlayer = document.querySelector(".layout-Player-videoMain");'
-        + 'videoPlayer.style.position = "";'
-        + 'videoPlayer.style.zIndex = "";'
-        + 'videoPlayer.style.width = "";'
-        + 'videoPlayer.style.height = "";'
-        + 'videoPlayer.style.right = "";'
-        + 'videoPlayer.style.bottom = "";'
-        + 'videoPlayer.style.left = "";'
-        + 'videoPlayer.style.top = "";'
-        + 'document.body.style.overflow = "";'
-        + 'var room = document.querySelector(".room-Player-Box");'
-        + 'room.style.width = "";'
-        + 'room.style.height = "";'
-        + 'room.style.right = "";'
-        + 'room.style.bottom = "";'
-        + 'document.querySelector(".layout-Main").style.overflow = "";'
-        + 'document.querySelector(".roomSmallPlayerFloatLayout").style.display = "block";'
-        + 'Object.defineProperty(document.querySelector("video").style, "width", {get: function(){return this._width}, set: function(val){this._width = val;document.querySelector("video").style.setProperty("width", val);}});'
-        + 'Object.defineProperty(document.querySelector("video").style, "height", {get: function(){return this._height}, set: function(val){this._height = val;document.querySelector("video").style.setProperty("height", val);}});';
+      this.recover = ` ${this.barrageAdapt(type, barrageState)}
+        var videoPlayer = document.querySelector(".layout-Player-videoMain");
+        videoPlayer.style.position = "";
+        videoPlayer.style.zIndex = "";
+        videoPlayer.style.width = "";
+        videoPlayer.style.height = "";
+        videoPlayer.style.right = "";
+        videoPlayer.style.bottom = "";
+        videoPlayer.style.left = "";
+        videoPlayer.style.top = "";
+        document.body.style.overflow = "";
+        var room = document.querySelector(".room-Player-Box");
+        room.style.width = "";
+        room.style.height = "";
+        room.style.right = "";
+        room.style.bottom = "";
+        document.querySelector(".layout-Main").style.overflow = "";
+        var roomPlayer = document.querySelector(".roomSmallPlayerFloatLayout");
+        if (roomPlayer) roomPlayer.style.display = "block";
+        Object.defineProperty(document.querySelector("video").style, "width", {get: function(){return this._width}, set: function(val){this._width = val;document.querySelector("video").style.setProperty("width", val);}});
+        Object.defineProperty(document.querySelector("video").style, "height", {get: function(){return this._height}, set: function(val){this._height = val;document.querySelector("video").style.setProperty("height", val);}});`;
     } else if (type === 'video') {
       this.adapter = `var videoPlayer = document.querySelector(".video-holder").childNodes[0];
-        ${this.douyuBarrageAdapt(type, barrageState)}
+        ${this.barrageAdapt(type, barrageState)}
         videoPlayer.style.position = "fixed";
         videoPlayer.style.zIndex = "999999999";
         videoPlayer.style.width = "100%";
@@ -80,11 +83,12 @@ export default class Douyu {
         }
         document.querySelector("#header").style.display = "none";`;
       this.watcher = '';
-      this.recover = 'var videoPlayer = document.querySelector(".video-holder").childNodes[0];'
-      + 'videoPlayer.style.position = "relative";'
-      + 'videoPlayer.style.zIndex = "";'
-      + 'document.body.style.overflow = "";'
-      + 'document.querySelector("#header").style.display = "";';
+      this.recover = `${this.barrageAdapt(type, barrageState)}
+        var videoPlayer = document.querySelector(".video-holder").childNodes[0];
+        videoPlayer.style.position = "relative";
+        videoPlayer.style.zIndex = "";
+        document.body.style.overflow = "";
+        document.querySelector("#header").style.display = "";`;
     } else {
       this.adapter = `var video = document.querySelector("video");
         var parentElement = video.parentElement;
@@ -115,32 +119,29 @@ export default class Douyu {
     }
   }
 
-  public douyuBarrageAdapt(type: string, barrageOpen: boolean) {
-    if (['normal', 'others'].includes(type)) {
-      return `var barrage = document.querySelector(".comment-37342a");
-        if (barrage) {
-        barrage.style.visibility = ${barrageOpen} ? 'visible' : 'hidden';
-        } else {
-        var timer = setInterval(() => {
-        if (document.querySelector(".comment-37342a")) {
-          document.querySelector(".comment-37342a").style.visibility = ${barrageOpen} ? 'visible' : 'hidden';
-          clearInterval(timer);
-        }
-        }, 500);
+  public barrageAdapt(type: string, barrageOpen: boolean) {
+    if (type === 'normal') {
+      return `var danmu = !!document.getElementsByClassName("hidedanmu-5d54e2 removed-9d4c42").length;
+        if (danmu && ${!barrageOpen}) {
+          document.querySelector(".showdanmu-42b0ac").click();
+        } else if (!danmu && ${barrageOpen}) {
+          document.querySelector(".hidedanmu-5d54e2").click();
         }`;
     }
-    return `var barrage = document.querySelector(".abp-container");
-      if (barrage) {
-      barrage.style.visibility = ${barrageOpen} ? 'visible' : 'hidden';
-      } else {
-      var timer = setInterval(() => {
-      if (document.querySelector(".abp-container")) {
-        document.querySelector(".abp-container").style.visibility = ${barrageOpen} ? 'visible' : 'hidden';
-        clearInterval(timer);
-      }
-      }, 500);
-      }`;
+    if (type === 'video') {
+      return `var danmu = !!document.getElementsByClassName("s5-1d7124 input-76795c removed-fcaace").length;
+        if (danmu && ${!barrageOpen}) {
+          document.querySelector(".s4-2953ce").click();
+        } else if (!danmu && ${barrageOpen}) {
+          document.querySelector(".s5-1d7124").click();
+        }`;
+    }
+    return '';
   }
 }
 
-export const douyuFindType = 'if (document.querySelector(".layout-Player-videoMain")) { "normal"; } else if (document.querySelector(".video")) { "video" } else { "others"; }';
+export const douyuFindType = 'if (document.querySelector(".layout-Player-videoMain")) {'
+  + 'var r = { barrageState: !!document.getElementsByClassName("hidedanmu-5d54e2 removed-9d4c42").length, type: "normal" };r;'
+  + '} else if (document.querySelector(".video")) {'
+  + 'var r = { barrageState: !!document.getElementsByClassName("s5-1d7124 input-76795c removed-fcaace").length, type: "video" };r;'
+  + '} else { var r = { barrageState: false, type: "others" };r; }';

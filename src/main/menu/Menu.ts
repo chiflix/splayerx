@@ -287,7 +287,10 @@ export default class Menubar {
           checked,
           click: () => {
             if (this.mainWindow) {
-              if (subtitleItem && subtitleItem.type === Type.Translated) this.menubar.getMenuItemById('subtitle.mainSubtitle.off').checked = true;
+              // if is AI button can't choose
+              if (subtitleItem && subtitleItem.type === Type.PreTranslated && subtitleItem.source.source === '') {
+                this.menubar.getMenuItemById('subtitle.mainSubtitle.off').checked = true;
+              }
               this.mainWindow.webContents.send('subtitle.mainSubtitle', id, subtitleItem);
             }
           },
@@ -324,7 +327,10 @@ export default class Menubar {
           enabled,
           click: () => {
             if (this.mainWindow) {
-              if (subtitleItem && subtitleItem.type === Type.Translated) this.menubar.getMenuItemById('subtitle.secondarySubtitle.off').checked = true;
+              // if is AI button can't choose
+              if (subtitleItem && subtitleItem.type === Type.PreTranslated && subtitleItem.source.source === '') {
+                this.menubar.getMenuItemById('subtitle.secondarySubtitle.off').checked = true;
+              }
               this.mainWindow.webContents.send('subtitle.secondarySubtitle', id, subtitleItem);
             }
           },
@@ -351,7 +357,7 @@ export default class Menubar {
       }, undefined, false);
       accountMenu.append(idMenu);
       const logout = this.createMenuItem('msg.account.logout', () => {
-        app.emit('sign-out');
+        app.emit('sign-out-confirm');
       }, undefined, true);
       accountMenu.append(logout);
       Menu.setApplicationMenu(this.menubar);
@@ -513,6 +519,9 @@ export default class Menubar {
         } else if (item.id === 'file.openRecent') {
           const menuItem = item as IMenubarMenuItemSubmenu;
           menubar.append(this.createSubMenuItem(menuItem));
+        } else if (item.id === 'file.clearHistory') {
+          const menuItem = item as IMenubarMenuItemAction;
+          menubar.append(this.createMenuItem(menuItem));
         } else if (item.id === 'file.closeWindow') {
           const menuItem = item as IMenubarMenuItemRole;
           menubar.append(this.createRoleMenuItem(menuItem));
@@ -527,11 +536,6 @@ export default class Menubar {
 
       menubar.append(preference);
     }
-
-    // Favourite
-    const favouriteMenuItem = this.createFavouriteMenu();
-
-    menubar.append(favouriteMenuItem);
 
     // Window
     const windowMenu = new Menu();
@@ -593,6 +597,9 @@ export default class Menubar {
         } else if (item.id === 'file.openRecent') {
           const menuItem = item as IMenubarMenuItemSubmenu;
           menubar.append(this.createSubMenuItem(menuItem));
+        } else if (item.id === 'file.clearHistory') {
+          const menuItem = item as IMenubarMenuItemAction;
+          menubar.append(this.createMenuItem(menuItem));
         } else if (item.id === 'file.closeWindow') {
           const menuItem = item as IMenubarMenuItemRole;
           menubar.append(this.createRoleMenuItem(menuItem));
@@ -833,11 +840,6 @@ export default class Menubar {
     return new MenuItem({ id: 'history', label: this.$t('msg.history.name'), submenu: historyMenu });
   }
 
-  private createFavouriteMenu() {
-    const favouriteMenu = this.convertFromMenuItemTemplate('favourite');
-    return new MenuItem({ id: 'favourite', label: this.$t('msg.favourite.name'), submenu: favouriteMenu });
-  }
-
   private createBrowsingWindowMenu() {
     const window = this.convertFromMenuItemTemplate('browsing.window');
     return new MenuItem({ id: 'browsing.window', label: this.$t('msg.window.name'), submenu: window });
@@ -856,7 +858,7 @@ export default class Menubar {
       }, undefined, false);
       accountMenu.append(idMenu);
       const logout = this.createMenuItem('msg.account.logout', () => {
-        app.emit('sign-out');
+        app.emit('sign-out-confirm');
       }, undefined, true);
       accountMenu.append(logout);
     } else {
@@ -1077,6 +1079,10 @@ export default class Menubar {
     } else if (arg1.id === 'window.bossKey') {
       options.click = () => {
         app.emit('bossKey');
+      };
+    } else if (arg1.id === 'window.minimize') {
+      options.click = () => {
+        app.emit('minimize');
       };
     }
 

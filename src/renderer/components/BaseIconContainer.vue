@@ -48,12 +48,39 @@ export default {
       return this.effect ? this.effect : 'icon';
     },
   },
-  created() {
-    // @ts-ignore
-    const requireAll = requireContext => requireContext.keys().map(requireContext);
-    // @ts-ignore
-    const req = require.context('@/assets/icon', true, /\.svg$/);
-    requireAll(req);
+  watch: {
+    type: {
+      immediate: true,
+      handler(type: string) {
+        const defaultIcon = `${type}-${this.finalState}-${this.finalEffect}`;
+        const hoverIcon = `${type}-hover-${this.finalEffect}`;
+        const activeIcon = `${type}-active-${this.finalEffect}`;
+        if (type && !document.getElementById(defaultIcon)) {
+          try {
+            // eslint-disable-next-line import/no-dynamic-require
+            require(`@/assets/icon/${defaultIcon}.svg`);
+          } catch (error) {
+            // empty
+          }
+        }
+        if (type && !document.getElementById(hoverIcon)) {
+          try {
+            // eslint-disable-next-line import/no-dynamic-require
+            require(`@/assets/icon/${hoverIcon}.svg`);
+          } catch (error) {
+            // empty
+          }
+        }
+        if (type && !document.getElementById(activeIcon)) {
+          try {
+            // eslint-disable-next-line import/no-dynamic-require
+            require(`@/assets/icon/${activeIcon}.svg`);
+          } catch (error) {
+            // empty
+          }
+        }
+      },
+    },
   },
 };
 </script>
@@ -466,7 +493,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   width: 15px;
   height: 15px;
 }
-.deleteSub {
+.deleteSub, .reload  {
   cursor: pointer;
   .default {
     display: block;
@@ -501,18 +528,18 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   }
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
   screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
-    width: 10px;
-    height: 10px;
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
-  screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
     width: 12px;
     height: 12px;
   }
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+    width: 14px;
+    height: 14px;
+  }
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
   screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
-    width: 16.8px;
-    height: 16.8px;
+    width: 18.8px;
+    height: 18.8px;
   }
 }
 .picInpic {
@@ -544,6 +571,10 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   height: 16px;
   display: block;
 }
+.pin, .notPin {
+  width: 100%;
+  height: 100%;
+}
 .down {
   width: 5px;
   height: 7px;
@@ -552,7 +583,12 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   width: 30px;
   height: 30px;
 }
-.bilibiliSidebar, .iqiyiSidebar, .youtubeSidebar, .douyuSidebar, .huyaSidebar {
+.channelSelected {
+  width: 10px;
+  height: 10px;
+}
+.bilibiliSidebar, .iqiyiSidebar, .youtubeSidebar, .channelManage,
+.douyuSidebar, .huyaSidebar, .qqSidebar, .youkuSidebar, .twitchSidebar {
   width: 44px;
   height: 44px;
 }
@@ -583,11 +619,6 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
 .danmu, .noDanmu {
   width: 20px;
   height: 20px;
-  display: block;
-}
-.youtube, .bilibili, .iqiyi {
-  width: 18px;
-  height: 18px;
   display: block;
 }
 .showFavicon, .hideFavicon {

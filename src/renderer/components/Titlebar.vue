@@ -18,9 +18,11 @@
         :fill="isBrowsingView ? '#BBBACC' : ''"
         class="sidebar-icon no-drag"
       />
-      <badge v-if="showBadge">
-        {{ $t('preferences.privacy.incognitoMode') }}
-      </badge>
+      <transition name="badge">
+        <badge v-if="showBadge">
+          {{ $t('preferences.privacy.incognitoMode') }}
+        </badge>
+      </transition>
     </div>
     <div
       v-if="!isDarwin"
@@ -28,25 +30,25 @@
       class="win-icons"
     >
       <Icon
-        @mouseup.native="handleMinimize"
+        @click.native="handleMinimize"
         class="title-button no-drag"
         type="titleBarWinExitFull"
       />
       <Icon
         v-show="middleButtonStatus === 'maximize' && enableFullScreenButton"
-        @mouseup.native="handleWinFull"
+        @click.native="handleWinFull"
         class="title-button no-drag"
         type="titleBarWinFull"
       />
       <Icon
         v-show="middleButtonStatus === 'restore'"
-        @mouseup.native="handleRestore"
+        @click.native="handleRestore"
         class="title-button no-drag"
         type="titleBarWinRestore"
       />
       <Icon
         v-show="middleButtonStatus === 'exit-fullscreen'"
-        @mouseup.native="handleFullscreenExit"
+        @click.native="handleFullscreenExit"
         class="title-button no-drag"
         type="titleBarWinResize"
       />
@@ -70,7 +72,7 @@
         <Icon
           id="close"
           :state="state"
-          @mouseup.native="handleClose"
+          @click.native="handleClose"
           class="title-button no-drag"
           type="titleBarClose"
         />
@@ -79,7 +81,7 @@
           :class="{ disabled: middleButtonStatus === 'exit-fullscreen' }"
           :state="state"
           :is-full-screen="middleButtonStatus"
-          @mouseup.native="handleMinimize"
+          @click.native="handleMinimize"
           class="title-button no-drag"
           type="titleBarExitFull"
         />
@@ -89,14 +91,14 @@
           :type="itemType"
           :state="state"
           :style="{ transform: isMaxScreen ? 'rotate(45deg)' : ''}"
-          @mouseup.native="handleMacFull"
+          @click.native="handleMacFull"
           class="title-button no-drag"
         />
         <Icon
           id="restore"
           v-show="middleButtonStatus === 'exit-fullscreen'"
           :state="state"
-          @mouseup.native="handleFullscreenExit"
+          @click.native="handleFullscreenExit"
           class="title-button no-drag"
           type="titleBarRecover"
         />
@@ -113,9 +115,11 @@
         class="sidebar no-drag"
       />
     </div>
-    <badge v-if="isDarwin && showBadge">
-      {{ $t('preferences.privacy.incognitoMode') }}
-    </badge>
+    <transition name="badge">
+      <badge v-if="isDarwin && showBadge">
+        {{ $t('preferences.privacy.incognitoMode') }}
+      </badge>
+    </transition>
   </div>
 </template>
 
@@ -353,6 +357,19 @@ export default {
       pointer-events: none;
       opacity: 0.25;
     }
+  }
+}
+.badge {
+  &-leave-active {
+    transition: opacity .2s ease-in;
+  }
+  &-enter-active {
+    transition: opacity .3s ease-in;
+    transition-delay: .2s;
+  }
+
+  &-enter, &-leave-to{
+    opacity: 0;
   }
 }
 </style>

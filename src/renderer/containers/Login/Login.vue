@@ -64,7 +64,8 @@ export default Vue.extend({
   },
   computed: {
     isDarwin() {
-      return process.platform === 'darwin';
+      // @ts-ignore
+      return window.isDarwin; // eslint-disable-line
     },
   },
   methods: {

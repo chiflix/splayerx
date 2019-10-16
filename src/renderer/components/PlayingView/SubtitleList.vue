@@ -14,10 +14,11 @@
       <div class="itemContainer">
         <div
           :style="{
-            color: hoverIndex === -1 || currentSubtitleIndex === -1 ?
+            color: hoverIndex === -1 || currentSubtitleIndex === -1 || currentSubtitleIndex === -2 ?
               'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
             height: `${itemHeight}px`,
-            cursor: currentSubtitleIndex === -1 ? 'default' : 'pointer',
+            cursor: currentSubtitleIndex === -1 || currentSubtitleIndex === -2
+              ? 'default' : 'pointer',
           }"
           @mouseup="$emit('off-subtitle')"
           @mouseover="toggleItemsMouseOver(-1)"
@@ -42,8 +43,9 @@
               height: hoverIndex === index ?
                 `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
               cursor: currentSubtitleIndex === index &&
-                !(item.type === 'translated' && item.source.source === '') ? 'default' : 'pointer',
-              justifyContent: item.type === 'translated' ? 'space-between' : ''
+                !(item.type === 'preTranslated' && item.source.source === '')
+                ? 'default' : 'pointer',
+              justifyContent: item.type === 'preTranslated' ? 'space-between' : ''
             }"
             @mouseup="toggleItemClick($event, index)"
             @mouseover="toggleItemsMouseOver(index)"
@@ -52,7 +54,7 @@
           >
             <div
               :style="{
-                width: item.type === 'translated' ? 'auto' : '',
+                width: item.type === 'preTranslated' ? 'auto' : '',
               }"
               class="textContainer"
             >
@@ -68,10 +70,19 @@
             </div>
             <div
               :style="{
-                width: item.type === 'translated' ? 'auto' : '',
+                width: item.type === 'preTranslated' && item.source.source === '' ? 'auto' : '',
               }"
               class="iconContainer"
             >
+              <transition name="sub-delete">
+                <Icon
+                  v-show="item.type === 'preTranslated'
+                    && item.source.source !== '' && hoverIndex === index"
+                  @mouseup.native="handleReTranslate($event, item)"
+                  type="reload"
+                  class="deleteIcon"
+                />
+              </transition>
               <transition name="sub-delete">
                 <Icon
                   v-show="item.type === 'local' && hoverIndex === index"
@@ -81,12 +92,12 @@
                 />
               </transition>
               <transition
-                v-if="item.type === 'translated' && item.source.source === ''
+                v-if="item.type === 'preTranslated' && item.source.source === ''
                   && (item.language !== translateLanguage || translateProgress <= 0)"
                 name="sub-delete"
               >
                 <div
-                  v-show="item.type === 'translated' && hoverIndex === index"
+                  v-show="item.type === 'preTranslated' && hoverIndex === index"
                   class="txt"
                 >
                   {{ $t('subtitle.generate') }}
@@ -95,7 +106,7 @@
               <div
                 v-else-if="
                   translateProgress > 0
-                    && item.type === 'translated' && item.source.source === ''
+                    && item.type === 'preTranslated' && item.source.source === ''
                     && item.language === translateLanguage
                 "
                 class="translateProgress"
@@ -323,6 +334,13 @@ export default {
         }, 0);
       }
     },
+    handleReTranslate(e: MouseEvent, item: ISubtitleControlListItem) {
+      if ((e.target as HTMLElement).nodeName !== 'DIV') {
+        setTimeout(() => {
+          this.$emit('re-translate', item);
+        }, 0);
+      }
+    },
     toggleItemsMouseOver(index: number) {
       this.showSubtitleDetails(index);
       this.hoverIndex = index;
@@ -444,7 +462,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480p
       width: 30px;
       height: 27px;
       .deleteIcon {
-        margin: auto 10px auto auto;
+        margin: auto 8px auto auto;
       }
       .txt {
         margin-right: 10px;
@@ -501,7 +519,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080
       width: 36px;
       height: 32px;
       .deleteIcon {
-        margin: auto 12px auto auto;
+        margin: auto 10px auto auto;
       }
       .txt {
         margin-right: 12px;
@@ -558,7 +576,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
       width: 50.4px;
       height: 44px;
       .deleteIcon {
-        margin: auto 14.4px auto auto;
+        margin: auto 12.4px auto auto;
       }
       .txt {
         margin-right: 14.4px;

@@ -212,7 +212,10 @@
       "iqiyi": "iQIYI",
       "bilibili": "Bilibili",
       "douyu": "Douyu",
-      "huya": "",
+      "huya": "Huya",
+      "qq": "Tencent Video",
+      "twitch": "Twitch",
+      "youku": "Youku",
       "youtube": "YouTube"
     },
     "edit": {
@@ -250,14 +253,23 @@
     "bilibili": "Bilibili",
     "iqiyi": "iQIYI",
     "youtube": "YouTube",
-    "huya": "",
+    "huya": "Huya",
+    "qq": "Tencent Video",
     "douyu": "Douyu",
+    "twitch": "Twitch",
+    "youku": "Youku",
     "openLocalFile": "Abrir archivo local...",
     "enterPip": "Habilitar Picture in Picture",
     "exitPip": "Volver al navegador",
     "enterPop": "Reproducir en ventana nueva",
     "exitPop": "Volver al navegador",
-    "danmu": "Alternar Danmaku"
+    "danmu": "Alternar Danmaku",
+    "error": {
+      "offline": "Sin Internet",
+      "try": "Prueba:",
+      "firstLine": "Comprobando los cables de red, módem y router",
+      "secondLine": "Reconectando a Wi-Fi"
+    }
   },
   "preferences": {
     "general": {
@@ -290,7 +302,6 @@
     "privacy": {
       "privacySetting": "Intimidad",
       "enable": "Habilitar protección de privacidad",
-      "smartMode": "Modo inteligente",
       "smartDescription": "No se puede identificar contenidos sensibles o no adecuados para trabajar, y borrar el historial de reproducción cuando se reproduce en una lista de carpetas o cuando se sale.",
       "incognitoMode": "Modo incógnito",
       "incognitoDescription": "No se guardará el historial de reproducción."
@@ -471,14 +482,24 @@
   "loginModal": {
     "title": "Iniciar sesión con número de teléfono",
     "sendCode": "Enviar",
+    "sendingCode": "Enviando ...",
     "countDown": "{count} s",
     "placeholder": {
       "mobile": "Tu número de teléfono",
       "code": "Introduzca el código de verificación"
     },
     "submit": "Ingressar",
+    "submitting": "Procesando ...",
     "codeError": "Código de vértificación incorrecto",
     "netWorkError": "El tiempo para la conexión ha acabado",
-    "noLineError": "No hay conexión de red"
+    "noLineError": "No hay conexión de red",
+    "afsError": "Captcha Validation Failed",
+    "afs": {
+      "start": "Please slide to verify",
+      "yes": "Success",
+      "retry": "retry",
+      "error300": "Verification failed, please",
+      "errorNetwork": "Network Error. Please"
+    }
   }
 }
