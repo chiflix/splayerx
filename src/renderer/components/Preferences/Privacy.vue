@@ -1,38 +1,50 @@
 <template>
   <div class="privacy">
-    <BaseCheckBox v-model="protectPrivacy">
-      {{ $t('preferences.privacy.enable') }}
+    <BaseCheckBox v-model="incognitoMode">
+      {{ $t('preferences.privacy.incognitoMode') }}
     </BaseCheckBox>
+    <div class="settingItem__description">
+      {{ $t("preferences.privacy.incognitoDescription") }}
+    </div>
     <div
-      :style="{ opacity: !protectPrivacy ? 0.3: 1.0 }"
-      class="privacy_background"
+      class="settingItem--justify"
     >
-      <div class="privacy_radio">
-        <BaseRadio
-          v-model="radioValue"
-          value="smartMode"
-          name="mode"
-        >
-          {{ $t('preferences.privacy.smartMode') }}
-          <span
-            v-if="!isMas"
-            style="opacity: 0.6"
-          >Beta</span>
-        </BaseRadio>
-        <div class="privacy_radio_description">
-          {{ $t('preferences.privacy.smartDescription') }}
+      <div class="flex">
+        <div class="settingItem__title">
+          {{ $t("preferences.privacy.clearHistory") }}
         </div>
-        <BaseRadio
-          v-model="radioValue"
-          value="incognitoMode"
-          name="mode"
-          class="privacy_radio2"
-        >
-          {{ $t('preferences.privacy.incognitoMode') }}
-        </BaseRadio>
-        <div class="privacy_radio_description">
-          {{ $t('preferences.privacy.incognitoDescription') }}
+        <div class="settingItem__description">
+          {{ $t("preferences.privacy.clearHistoryDescription") }}
         </div>
+      </div>
+      <div
+        :class="{ 'button--mousedown': mousedown }"
+        @mousedown="mousedownOnClearHistory"
+        @mouseup="mouseupOnClearHistory"
+        class="settingItem__input button no-drag"
+      >
+        <transition
+          name="button"
+          mode="out-in"
+        >
+          <div
+            key=""
+            v-if="!buttonState"
+            class="button__text"
+          >
+            {{ $t("preferences.general.setButton") }}
+          </div>
+          <div
+            v-else
+            :key="buttonState"
+            class="button__result"
+          >
+            <Icon
+              :type="buttonState"
+              :class="buttonState"
+            />
+          </div>
+        </transition>
       </div>
     </div>
   </div>
@@ -40,17 +52,19 @@
 <script lang="ts">
 import electron from 'electron';
 import BaseCheckBox from './BaseCheckBox.vue';
-import BaseRadio from './BaseRadio.vue';
+import Icon from '@/components/BaseIconContainer.vue';
 
 export default {
   name: 'Privacy',
   components: {
     BaseCheckBox,
-    BaseRadio,
+    Icon,
   },
   data() {
     return {
-      radioValue: 'smartMode',
+      mousedown: false,
+      buttonState: '',
+      buttonTimeoutId: NaN,
     };
   },
   computed: {
@@ -60,73 +74,121 @@ export default {
     preferenceData() {
       return this.$store.getters.preferenceData;
     },
-    protectPrivacy: {
+    incognitoMode: {
       get() {
-        return this.$store.getters.protectPrivacy;
+        return this.$store.getters.incognitoMode;
       },
       set(val: boolean) {
-        if (val) {
-          this.$store.dispatch('protectPrivacy').then(() => {
-            electron.ipcRenderer.send('preference-to-main', this.preferenceData);
-          });
-        } else {
-          this.$store.dispatch('notprotectPrivacy').then(() => {
-            electron.ipcRenderer.send('preference-to-main', this.preferenceData);
-          });
-        }
-      },
-    },
-    hideNSFW: {
-      get() {
-        return this.$store.getters.hideNSFW;
-      },
-      set(val: boolean) {
-        this.$store.dispatch('hideNSFW', !!val).then(() => {
+        this.$store.dispatch('incognitoMode', val).then(() => {
           electron.ipcRenderer.send('preference-to-main', this.preferenceData);
         });
       },
     },
   },
-  watch: {
-    radioValue(val: string) {
-      if (val === 'smartMode') this.hideNSFW = true;
-      else if (val === 'incognitoMode') this.hideNSFW = false;
+  methods: {
+    mousedownOnClearHistory() {
+      this.mousedown = true;
+      document.addEventListener('mouseup', this.mouseupOnOther, { once: true });
     },
-  },
-  created() {
-    if (this.protectPrivacy && !this.hideNSFW) this.radioValue = 'incognitoMode';
-    else this.radioValue = 'smartMode';
+    mouseupOnClearHistory() {
+      electron.ipcRenderer.send('clear-history');
+      this.buttonState = 'success';
+      clearTimeout(this.buttonTimeoutId);
+      this.buttonTimeoutId = setTimeout(() => {
+        this.buttonState = '';
+      }, 1500);
+      this.mousedown = false;
+    },
+    mouseupOnOther() {
+      this.mousedown = false;
+    },
   },
 };
 </script>
 <style lang="scss" scoped>
 .privacy {
+  .title {
+    font-family: $font-medium;
+    font-size: 13px;
+    color: rgba(255,255,255,0.7);
+  }
   .checkbox:nth-of-type(1) {
     margin-top: 0;
   }
-  &_background {
-    width: 366px;
-    height: fit-content;
-    margin-top: 15px;
-    background-color: rgba(0,0,0,0.07);
-    border-radius: 5px;
-  }
-  &_radio {
-    margin-left: 29px;
-    padding-top: 20px;
-    padding-bottom: 20px;
-    &2 {
-      margin-top: 15px;
+  .settingItem {
+    margin-top: 30px;
+    &__title {
+      font-family: $font-medium;
+      font-size: 13px;
+      color: rgba(255,255,255,0.7);
     }
-    &_description {
-      width: 282px;
+
+    &__description {
       font-family: $font-medium;
       font-size: 11px;
       color: rgba(255,255,255,0.25);
+      margin-top: 7px;
+    }
+
+    &__input {
+      -webkit-app-region: no-drag;
+      cursor: pointer;
+      font-family: $font-semibold;
+      font-size: 11px;
+      color: rgba(255,255,255,.7);
+      text-align: center;
+      border-radius: 2px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background-color: rgba(255,255,255,0.03);
+      transition: all 200ms;
+
+      &:not(.disabled):hover {
+        border: 1px solid rgba(255,255,255,0.2);
+        background-color: rgba(255,255,255,0.08);
+      }
+      &.disabled {
+        cursor: default;
+      }
+    }
+
+    &--justify {
+      @extend .settingItem;
+      display: flex;
+      justify-content: space-between;
+    }
+  }
+  .button {
+    box-sizing: border-box;
+    align-self: center;
+    width: 61px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    .button-enter, .button-leave-to {
+      opacity: 0;
+    }
+    .button-enter-active {
+      transition: opacity 200ms ease-in;
+    }
+    .button-leave-active {
+      transition: opacity 200ms ease-in;
+    }
+    &__text {
+      font-family: $font-medium;
+      font-size: 11px;
+      color: rgba(255,255,255,.7);
       letter-spacing: 0;
-      line-height: 16px;
-      margin-top: 6px;
-      margin-left: 27px;
+      text-align: center;
+      line-height: 26px;
+    }
+    &__result {
+      width: 15px;
+      height: 15px;
+    }
+    &--mousedown {
+      transition: opacity 50ms ease-in;
+      opacity: 0.5;
     }
   }
 }

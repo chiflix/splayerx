@@ -347,13 +347,6 @@ new Vue({
       if (!data.displayLanguage) {
         this.$store.dispatch('displayLanguage', getSystemLocale());
       }
-      if (data.protectPrivacy === undefined) {
-        this.$store.dispatch('protectPrivacy');
-        this.$store.dispatch('hideNSFW', true);
-        this.$electron.ipcRenderer.send('labor-task-add', 'nsfw-warmup');
-      } else if (data.protectPrivacy && data.hideNSFW) {
-        this.$electron.ipcRenderer.send('labor-task-add', 'nsfw-warmup');
-      }
     });
     asyncStorage.get('subtitle-style').then((data) => {
       if (data.chosenStyle) {

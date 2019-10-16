@@ -38,7 +38,6 @@
     "@grpc/grpc-js": "^0.5.2",
     "@sentry/electron": "^0.17.1",
     "@sentry/integrations": "^5.1.2",
-    "@tensorflow/tfjs": "^1.2.2",
     "abort-controller": "^3.0.0",
     "ass-compiler": "github:YvonTre/ass-compiler",
     "chardet": "^0.7.0",

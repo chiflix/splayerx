@@ -143,7 +143,6 @@ import PlaylistItem from '@/components/LandingView/PlaylistItem.vue';
 import VideoItem from '@/components/LandingView/VideoItem.vue';
 import { log } from '@/libs/Log';
 import Sagi from '@/libs/sagi';
-import { findNsfwFistFilter } from '@/libs/utils';
 import { Browsing as browsingActions } from '@/store/actionTypes';
 
 Vue.component('PlaylistItem', PlaylistItem);
@@ -180,7 +179,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'winPos', 'defaultDir', 'isFullScreen', 'incognitoMode', 'hideNSFW', 'smartMode', 'nsfwProcessDone', 'pipSize', 'pipPos']),
+    ...mapGetters(['winWidth', 'winPos', 'defaultDir', 'isFullScreen', 'incognitoMode', 'nsfwProcessDone', 'pipSize', 'pipPos']),
     lastIndex: {
       get() {
         return (this.firstIndex + this.showItemNum) - 1;
@@ -282,7 +281,10 @@ export default {
     window.addEventListener('mousemove', this.globalMoveHandler);
     // Get all data and show
     recentPlayService.getRecords().then((results) => {
-      this.landingViewItems = results;
+      this.landingViewItems = results.filter((result) => {
+        if (result.playlistLength) return result.playlistLength > 1;
+        return false;
+      });
     });
     this.$bus.$on('clean-landingViewItems', () => {
       // just for delete thumbnail display
@@ -332,11 +334,6 @@ export default {
     this.$electron.ipcRenderer.on('quit', () => {
       this.quit = true;
     });
-    // 如果没有确定nsfw功能，但是有nsfw过滤记录，就出气泡
-    if (this.smartMode && !this.nsfwProcessDone && await findNsfwFistFilter()) {
-      this.$bus.$emit('nsfw');
-      this.$store.dispatch('nsfwProcessDone');
-    }
   },
   destroyed() {
     window.removeEventListener('mousemove', this.globalMoveHandler);
