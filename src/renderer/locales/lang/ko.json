@@ -302,8 +302,8 @@
       "privacySetting": "은둔",
       "incognitoMode": "Incognito Mode",
       "incognitoDescription": "재생 기록이 저장되지 않습니다.",
-      "clearHistory": "",
-      "clearHistoryDescription": ""
+      "clearHistory": "재생 기록 지우기",
+      "clearHistoryDescription": "기존 재생 목록 및 재생 기록 제거"
     }
   },
   "privacyBubble": {
@@ -349,7 +349,7 @@
     "paused": "일시 중지 된",
     "playlistSource": "재생 목록",
     "add": "재생 목록에 추가",
-    "pin": ""
+    "pin": "재생 목록을 시작 페이지에 고정"
   },
   "subtitle": {
     "embedded": "깊숙이 박다",
