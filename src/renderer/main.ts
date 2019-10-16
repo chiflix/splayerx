@@ -753,6 +753,9 @@ new Vue({
         this.infoDB.clearAll();
         app.clearRecentDocuments();
         this.$bus.$emit('clean-landingViewItems');
+        if (this.currentRouteName === 'playing-view') {
+          this.openVideoFile(this.originSrc);
+        }
         this.menuService.addRecentPlayItems();
       });
       const urls = ['https://www.iqiyi.com/', 'https://www.bilibili.com/', 'https://www.douyu.com/', 'https://www.huya.com/', 'https://v.qq.com/', 'https://www.youku.com/', 'https://www.twitch.tv/', 'https://www.youtube.com/'];

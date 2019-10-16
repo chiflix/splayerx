@@ -602,6 +602,9 @@ export default class Menubar {
         } else if (item.id === 'file.openRecent') {
           const menuItem = item as IMenubarMenuItemSubmenu;
           menubar.append(this.createSubMenuItem(menuItem));
+        } else if (item.id === 'file.clearHistory') {
+          const menuItem = item as IMenubarMenuItemAction;
+          menubar.append(this.createMenuItem(menuItem));
         } else if (item.id === 'file.closeWindow') {
           const menuItem = item as IMenubarMenuItemRole;
           menubar.append(this.createRoleMenuItem(menuItem));
