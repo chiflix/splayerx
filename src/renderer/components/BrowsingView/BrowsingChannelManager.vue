@@ -14,14 +14,15 @@
             @mouseleave="handleMouseleave"
             @click="handleMouseClick(category.type, item.channel)"
             :style="{
-              backgroundColor: availableChannels.includes(item.channel) ? '#FBFBFD' : '',
+              backgroundColor: index === hoverIndex || availableChannels.includes(item.channel)
+                ? '#FBFBFD' : '#FFFFFF',
             }"
             class="channel-details"
           >
             <div
               :style="{
                 border: index === hoverIndex && availableChannels.includes(item.channel)
-                  ? '1px solid rgba(224, 224, 224, 1)' : '1px solid rgba(242, 241, 244, 1)',
+                  ? '1px solid rgba(224, 224, 224, 1)' : '1px solid rgba(234, 234, 234, 1)',
                 opacity: index === hoverIndex || availableChannels.includes(item.channel) ? 1 : 0,
               }"
               class="channel-mask hover-channel"
@@ -31,7 +32,7 @@
                   backgroundColor: availableChannels.includes(item.channel)
                     && index === hoverIndex ? '#E9E9E9' : '',
                   border: availableChannels.includes(item.channel)&& index === hoverIndex
-                    ? '1px solid rgba(224, 224, 224, 100)' : '1px solid rgba(242, 241, 244, 100)'
+                    ? '1px solid rgba(224, 224, 224, 1)' : '1px solid rgba(234, 234, 234, 1)'
                 }"
                 class="available-check"
               >
