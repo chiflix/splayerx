@@ -274,7 +274,6 @@
   "preferences": {
     "general": {
       "hideHistory": "隐藏历史记录",
-      "clearHistory": "退出时自动清空播放记录",
       "reverseScrolling": "鼠标滚轮调节音量反向",
       "setDefault": "设为默认播放器",
       "setDefaultDescription": "所有视频文件都自动使用SPlayer打开。",
@@ -301,11 +300,10 @@
     },
     "privacy": {
       "privacySetting": "隐私设置",
-      "enable": "启用隐私保护",
-      "smartMode": "智能模式",
-      "smartDescription": "离线识别不宜在工作或公众场合浏览的敏感内容，并在自动加载同目录文件或退出时抹除相关痕迹。",
       "incognitoMode": "无痕模式",
-      "incognitoDescription": "开启后将不再保留任何新的播放记录。"
+      "incognitoDescription": "开启后将不再保留任何新的播放记录。",
+      "clearHistory": "",
+      "clearHistoryDescription": ""
     }
   },
   "privacyBubble": {
@@ -350,7 +348,8 @@
     "playing": "正在播放",
     "paused": "已暂停",
     "playlistSource": "播放列表",
-    "add": "添加到播放列表"
+    "add": "添加到播放列表",
+    "pin": ""
   },
   "subtitle": {
     "embedded": "内嵌",
