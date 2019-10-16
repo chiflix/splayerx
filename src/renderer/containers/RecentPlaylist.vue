@@ -61,7 +61,7 @@
                 </div>
                 <transition name="fade-200">
                   <div
-                    v-show="showPinContent"
+                    v-show="showPinContent || !isFolderList"
                     :style="{
                       fontSize: sizeAdaption(13),
                       lineHeight: sizeAdaption(14),
@@ -820,6 +820,7 @@ export default {
           align-items: center;
 
           .icon {
+            cursor: pointer;
             display: flex;
             align-items: center;
             transition: background-color 50ms linear;
@@ -838,7 +839,9 @@ export default {
         .badge {
           background-color: rgba(255,255,255,0.2);
           height: 20px;
-          width: 70px;
+          padding-left: 12px;
+          padding-right: 12px;
+          width: fit-content;
           display: flex;
           justify-content: center;
           align-items: center;

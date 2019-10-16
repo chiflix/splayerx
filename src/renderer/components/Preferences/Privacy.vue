@@ -1,11 +1,11 @@
 <template>
   <div class="privacy">
-    <div class="title">
-      {{ $t('preferences.privacy.incognitoMode') }}
-    </div>
     <BaseCheckBox v-model="incognitoMode">
-      {{ $t('preferences.privacy.incognitoDescription') }}
+      {{ $t('preferences.privacy.incognitoMode') }}
     </BaseCheckBox>
+    <div class="settingItem__description">
+        {{ $t("preferences.privacy.incognitoDescription") }}
+    </div>
     <div
       class="settingItem--justify"
     >
