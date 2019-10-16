@@ -96,7 +96,7 @@ export class BrowserViewManager implements IBrowserViewManager {
     }
 
     // 清空后退操作产生的history以及切换频道时暂停视频
-    if (this.currentChannel) {
+    if (this.currentChannel && currentHistory) {
       if (channel !== this.currentChannel) {
         const currentIndex = currentHistory.currentIndex;
         const view = currentHistory.list[currentIndex].view;

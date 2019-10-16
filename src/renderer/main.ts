@@ -48,6 +48,7 @@ import { ISubtitleControlListItem, Type, NOT_SELECTED_SUBTITLE } from './interfa
 import { getValidSubtitleRegex, getSystemLocale, getClientUUID } from '../shared/utils';
 import { isWindowsExE, isMacintoshDMG } from '../shared/common/platform';
 import MenuService from './services/menu/MenuService';
+import BrowsingChannelMenu from './services/browsing/BrowsingChannelMenu';
 
 
 // causing callbacks-registry.js 404 error. disable temporarily
@@ -160,6 +161,8 @@ new Vue({
       playingViewTop: false,
       browsingViewTop: false,
       canSendVolumeGa: true,
+      openChannelMenu: false,
+      currentChannel: '',
     };
   },
   computed: {
@@ -396,6 +399,10 @@ new Vue({
     this.$bus.$on('new-file-open', () => {
       this.menuService.addRecentPlayItems();
     });
+    this.$bus.$on('open-channel-menu', (channel: string) => {
+      this.openChannelMenu = true;
+      this.currentChannel = channel;
+    });
     getClientUUID().then((clientId: string) => {
       this.$ga && this.$ga.set('userId', clientId);
       // get config cat is account enabled
@@ -420,7 +427,12 @@ new Vue({
 
     window.addEventListener('mousedown', (e) => {
       if (e.button === 2 && process.platform === 'win32') {
-        this.menuService.popupWinMenu();
+        if (this.openChannelMenu) {
+          BrowsingChannelMenu.createChannelMenu(this.currentChannel);
+          this.openChannelMenu = false;
+        } else {
+          this.menuService.popupWinMenu();
+        }
       }
     });
     window.addEventListener('keydown', (e) => { // eslint-disable-line complexity
@@ -754,19 +766,6 @@ new Vue({
         app.clearRecentDocuments();
         this.$bus.$emit('clean-landingViewItems');
         this.menuService.addRecentPlayItems();
-      });
-      const urls = ['https://www.iqiyi.com/', 'https://www.bilibili.com/', 'https://www.douyu.com/', 'https://www.huya.com/', 'https://v.qq.com/', 'https://www.youku.com/', 'https://www.twitch.tv/', 'https://www.youtube.com/'];
-      const channels = ['iqiyi', 'bilibili', 'douyu', 'huya', 'qq', 'youku', 'twitch', 'youtube'];
-      channels.forEach((channel: string, index: number) => {
-        this.menuService.on(`favourite.${channel}`, () => {
-          const currentChannel = urls[index].slice(urls[index].indexOf('.') + 1, urls[index].length - 1);
-          this.updateCurrentChannel(currentChannel);
-          this.$electron.ipcRenderer.send('add-browsing', { size: this.pipSize, position: this.pipPos });
-          this.$electron.ipcRenderer.send('change-channel', { url: urls[index], channel: currentChannel });
-          this.$router.push({
-            name: 'browsing-view',
-          });
-        });
       });
       this.menuService.on('history.reload', () => {
         this.$bus.$emit('toggle-reload');

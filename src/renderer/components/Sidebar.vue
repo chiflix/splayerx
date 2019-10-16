@@ -178,6 +178,29 @@ export default {
     this.$bus.$on('available-channel-update', () => {
       this.channelsDetail = BrowsingChannelManager.getAllAvailableChannels();
     });
+    this.$electron.ipcRenderer.on('delete-channel', (e: Event, channel: string) => {
+      if (this.currentChannel === channel) {
+        if (this.channelsDetail.length <= 1) {
+          if (this.currentRouteName === 'browsing-view') {
+            this.$bus.$emit('channel-manage');
+          }
+        } else {
+          this.channelsDetail.forEach((i: {
+            url: string, channel: string,
+            icon: string, title: string, path: string
+          }, index: number) => {
+            if (i.channel === channel) {
+              const currentIndex = index === this.channelsDetail.length - 1 ? 0 : index + 1;
+              this.handleSidebarIcon(this.channelsDetail[currentIndex].url,
+                this.channelsDetail[currentIndex].channel);
+            }
+          });
+        }
+      }
+      BrowsingChannelManager.setChannelAvailable(channel, false);
+      this.$electron.ipcRenderer.send('clear-browsers-by-channel', channel);
+      this.channelsDetail = BrowsingChannelManager.getAllAvailableChannels();
+    });
   },
   methods: {
     ...mapActions({

@@ -208,17 +208,6 @@
       "playInNewWindow": "Play in New Window",
       "backToBrowser": "Back to Browser"
     },
-    "favourite": {
-      "name": "Channel",
-      "iqiyi": "iQIYI",
-      "bilibili": "Bilibili",
-      "douyu": "Douyu",
-      "huya": "Huya",
-      "qq": "Tencent Video",
-      "twitch": "Twitch",
-      "youku": "Youku",
-      "youtube": "YouTube"
-    },
     "edit": {
       "name": "Edit",
       "cut": "Cut",
@@ -270,7 +259,8 @@
       "try": "Try:",
       "firstLine": "Checking the network cables, modem, and router",
       "secondLine": "Reconnecting to Wi-Fi"
-    }
+    },
+    "remove": "remove"
   },
   "preferences": {
     "general": {

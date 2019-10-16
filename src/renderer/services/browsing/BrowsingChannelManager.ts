@@ -25,6 +25,7 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
 
   private allAvailableChannels: string[];
 
+
   public constructor() {
     this.allCategories = [{ type: 'customized', locale: '自定义站点' }, { type: 'adapted', locale: '已适配站点' }];
     this.allChannels = new Map();
@@ -71,7 +72,7 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
     return this.allChannels.get(category) as channelInfo;
   }
 
-  public setChannelAvailable(category: string, channel: string, available: boolean): void {
+  public setChannelAvailable(channel: string, available: boolean): void {
     if (available) {
       if (!this.allAvailableChannels.includes(channel)) {
         this.allAvailableChannels.push(channel);

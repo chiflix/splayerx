@@ -18,7 +18,7 @@ type category = {
 
 export interface IBrowsingChannelManager {
   getChannelInfoByCategory(category: string): channelInfo
-  setChannelAvailable(category: string, channel: string, available: boolean): void
+  setChannelAvailable(channel: string, available: boolean): void
   getAllCategories(): category[]
   getAllChannels(): Map<string, channelInfo>
   getAllAvailableChannels(): channelDetails[]
