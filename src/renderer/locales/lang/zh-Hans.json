@@ -263,7 +263,13 @@
     "exitPip": "退出画中画",
     "enterPop": "新窗口播放",
     "exitPop": "还原窗口",
-    "danmu": "弹幕开关"
+    "danmu": "弹幕开关",
+    "error": {
+      "offline": "未连接到互联网",
+      "try": "请试试以下办法：",
+      "firstLine": "检查网线、调制解调器和路由器",
+      "secondLine": "重新连接到 Wi-Fi 网络"
+    }
   },
   "preferences": {
     "general": {
@@ -296,7 +302,6 @@
     "privacy": {
       "privacySetting": "隐私设置",
       "enable": "启用隐私保护",
-      "smartMode": "智能模式",
       "smartDescription": "离线识别不宜在工作或公众场合浏览的敏感内容，并在自动加载同目录文件或退出时抹除相关痕迹。",
       "incognitoMode": "无痕模式",
       "incognitoDescription": "开启后将不再保留任何新的播放记录。"

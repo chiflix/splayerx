@@ -275,7 +275,6 @@
   "preferences": {
     "general": {
       "hideHistory": "Hide playback history",
-      "clearHistory": "Always clear playback history on exit",
       "reverseScrolling": "Reverse mouse scrolling when adjusting volume",
       "setDefault": "Set as the Default Video Player",
       "setDefaultDescription": "Open all video files with SPlayer.",
@@ -302,11 +301,10 @@
     },
     "privacy": {
       "privacySetting": "Privacy",
-      "enable": "Enable Privacy Protection When Playing Local Video Files",
-      "smartMode": "Intelligent Mode",
-      "smartDescription": "Offline identify sensitive or not-suitable-for-work contents, and clear the playback history when playing in a folder playlist or when quitting.",
       "incognitoMode": "Incognito Mode",
-      "incognitoDescription": "Your playback history will not be stored anymore."
+      "incognitoDescription": "Your playback history will not be stored anymore.",
+      "clearHistory": "Clear Playback History",
+      "clearHistoryDescription": "Remove existing playlists and playback history"
     }
   },
   "privacyBubble": {
@@ -351,7 +349,8 @@
     "playing": "Playing",
     "paused": "Paused",
     "playlistSource": "Playlist",
-    "add": "Add To Playlist"
+    "add": "Add To Playlist",
+    "pin": "Pin the Playlist to Launching Page"
   },
   "subtitle": {
     "embedded": "Embed",

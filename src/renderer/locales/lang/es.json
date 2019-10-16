@@ -263,7 +263,13 @@
     "exitPip": "Volver al navegador",
     "enterPop": "Reproducir en ventana nueva",
     "exitPop": "Volver al navegador",
-    "danmu": "Alternar Danmaku"
+    "danmu": "Alternar Danmaku",
+    "error": {
+      "offline": "Sin Internet",
+      "try": "Prueba:",
+      "firstLine": "Comprobando los cables de red, módem y router",
+      "secondLine": "Reconectando a Wi-Fi"
+    }
   },
   "preferences": {
     "general": {
@@ -296,7 +302,6 @@
     "privacy": {
       "privacySetting": "Intimidad",
       "enable": "Habilitar protección de privacidad",
-      "smartMode": "Modo inteligente",
       "smartDescription": "No se puede identificar contenidos sensibles o no adecuados para trabajar, y borrar el historial de reproducción cuando se reproduce en una lista de carpetas o cuando se sale.",
       "incognitoMode": "Modo incógnito",
       "incognitoDescription": "No se guardará el historial de reproducción."

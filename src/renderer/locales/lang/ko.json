@@ -263,7 +263,13 @@
     "exitPip": "브라우저로 돌아 가기",
     "enterPop": "새 창에서 놀다",
     "exitPop": "브라우저로 돌아 가기",
-    "danmu": "탄막"
+    "danmu": "탄막",
+    "error": {
+      "offline": "인터넷이 없습니다",
+      "try": "시험:",
+      "firstLine": "네트워크 케이블, 모뎀 및 라우터 확인",
+      "secondLine": "Wi-Fi에 다시 연결"
+    }
   },
   "preferences": {
     "general": {
@@ -296,7 +302,6 @@
     "privacy": {
       "privacySetting": "은둔",
       "enable": "개인 정보 보호 사용",
-      "smartMode": "Intelligent Mode",
       "smartDescription": "오프라인은 민감하거나 부적합한 작업 내용을 식별하고 폴더 재생 목록에서 재생할 때 또는 종료 할 때 재생 기록을 삭제합니다.",
       "incognitoMode": "Incognito Mode",
       "incognitoDescription": "재생 기록이 저장되지 않습니다."

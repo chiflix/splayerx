@@ -47,13 +47,18 @@ export default {
     finalEffect() {
       return this.effect ? this.effect : 'icon';
     },
+    elementId() {
+      return `${this.type}-${this.finalState}-${this.finalEffect}`;
+    },
   },
-  created() {
-    // @ts-ignore
-    const requireAll = requireContext => requireContext.keys().map(requireContext);
-    // @ts-ignore
-    const req = require.context('@/assets/icon', true, /\.svg$/);
-    requireAll(req);
+  watch: {
+    elementId: {
+      immediate: true,
+      handler(newId: string) {
+        // eslint-disable-next-line import/no-dynamic-require
+        if (newId && !document.getElementById(newId)) require(`@/assets/icon/${newId}.svg`);
+      },
+    },
   },
 };
 </script>
@@ -543,6 +548,10 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   width: 20px;
   height: 16px;
   display: block;
+}
+.pin, .notPin {
+  width: 100%;
+  height: 100%;
 }
 .down {
   width: 5px;

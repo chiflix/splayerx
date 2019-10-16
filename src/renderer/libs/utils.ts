@@ -17,7 +17,6 @@ import {
   VIDEO_DIRNAME, SUBTITLE_DIRNAME,
 } from '@/constants';
 import { codeToLanguageName, LanguageCode } from './language';
-import { checkPathExist, write, deleteDir } from './file';
 import { IEmbeddedOrigin } from '@/services/subtitle/utils/loaders';
 import Fetcher from '@/../shared/Fetcher';
 import { isBetaVersion } from '../../shared/common/platform';
@@ -325,25 +324,6 @@ export function crc32(str: string, crc?: number) {
   }
   return crc ^ (-1); // eslint-disable-line
 }
-
-export function saveNsfwFistFilter() {
-  const path = join(getDefaultDataPath(), 'NSFW_FILTER_MARK');
-  const buf = Buffer.alloc(0);
-  write(path, buf);
-}
-
-export async function findNsfwFistFilter() {
-  let success = false;
-  const path = join(getDefaultDataPath(), 'NSFW_FILTER_MARK');
-  try {
-    success = await checkPathExist(path);
-  } catch (error) {
-    // empty
-  }
-  deleteDir(path);
-  return success;
-}
-
 /**
  * @description get version numbers
  * @author tanghaixiang
