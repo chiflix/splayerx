@@ -405,7 +405,7 @@
     "audioLanguageLoadFail": "Connection failed, please try later",
     "select": {
       "title": "AI Translation",
-      "content": "Select the language you hear in the video and click the generate button."
+      "content": "Select the language you hear in the video and click the generate button. You can generate one AI Translation for free per day."
     },
     "translate": {
       "title": "About {time} Left",
@@ -443,11 +443,17 @@
       "title": "Session Expired",
       "content": "Please sign in again."
     },
+    "PermissionFail": {
+      "title": "Uses Remaining Today: 0",
+      "content": "Upgrade now to resume the VIP experience for getting 10 hours of AI Translation per day and more advanced features."
+    },
+    "loading": "Processing ...",
     "cancel": "Cancel",
     "quit": "Quit",
     "generate": "Generate",
     "ok": "Run in Background",
-    "continue": "Cancel"
+    "continue": "Cancel",
+    "upgrade": "Upgrade"
   },
   "translateBubble": {
     "bubbleWhenGrab": "AI Translation will be aborted If you go on, do you want to continue anyway?",
@@ -476,6 +482,10 @@
     "bubbleTranslateForbiddenFail": {
       "title": "Session Expired",
       "content": "Please sign in again."
+    },
+    "bubbleTranslatePermissionFail": {
+      "title": "Uses Remaining Today: 0",
+      "content": "Upgrade now to resume the VIP experience for getting 10 hours of AI Translation per day and more advanced features."
     },
     "ok": "OK",
     "cancel": "Cancel",

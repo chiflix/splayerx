@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-06-20 18:03:14
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-10-10 16:17:33
+ * @Last Modified time: 2019-10-16 15:18:53
  */
 
 // @ts-ignore
@@ -150,6 +150,10 @@ class AudioTranslateService extends EventEmitter {
     } else if (enabled && result && result.error && result.error.code === 16) {
       // return forbidden to render
       this.emit('error', new Error('forbidden'));
+      this.stop();
+    } else if (enabled && result && result.error && result.error.code === 7) {
+      // return no permission to render
+      this.emit('error', new Error('permission'));
       this.stop();
     } else if (result && result.error) {
       // return error to render
