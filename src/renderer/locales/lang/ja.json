@@ -260,8 +260,8 @@
       "secondLine": "Wi-Fiへの再接続"
     },
     "remove": "削除する",
-    "siteManager": "",
-    "popularSites": ""
+    "siteManager": "サイト管理",
+    "popularSites": "適合サイト"
   },
   "preferences": {
     "general": {
