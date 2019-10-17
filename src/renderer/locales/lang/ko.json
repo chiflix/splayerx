@@ -260,8 +260,8 @@
       "secondLine": "Wi-Fi에 다시 연결"
     },
     "remove": "제거",
-    "siteManager": "",
-    "popularSites": ""
+    "siteManager": "사이트 관리자",
+    "popularSites": "적응 사이트"
   },
   "preferences": {
     "general": {
