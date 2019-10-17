@@ -342,7 +342,7 @@
     "playlistSource": "Lista",
     "add": "Agregar a la lista de reproducción",
     "pin": "Pin la lista de reproducción para iniciar la página",
-    "pinned": ""
+    "pinned": "Lista de reproducción acoplada a la página de Launcing"
   },
   "subtitle": {
     "embedded": "Empotrar",
