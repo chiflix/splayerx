@@ -342,7 +342,7 @@
     "playlistSource": "播放列表",
     "add": "添加到播放列表",
     "pin": "保留此播放列表至启动页",
-    "pinned": ""
+    "pinned": "已保留此播放列表至启动页"
   },
   "subtitle": {
     "embedded": "内嵌",
