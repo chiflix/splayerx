@@ -26,9 +26,9 @@
   </div>
 </template>
 <script lang="ts">
+import { mapGetters } from 'vuex';
 import BrowsingHistoryItem from '@/components/BrowsingView/BrowsingHistoryItem.vue';
 import { browsingDB } from '@/helpers/browsingDB';
-import { mapGetters } from 'vuex';
 
 export default {
   components: {
@@ -38,9 +38,6 @@ export default {
     return {
       historys: Array(15),
     };
-  },
-  created() {
-    console.log(browsingDB);
   },
   computed: {
     ...mapGetters(['isError']),
