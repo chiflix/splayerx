@@ -291,6 +291,7 @@ export default {
     opacity: 1;
   }
   .bottom-icon {
+    padding-bottom: 16px;
     display:flex;
     flex-direction: column;
     width: 100%;

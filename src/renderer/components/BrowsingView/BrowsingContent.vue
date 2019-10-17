@@ -1,6 +1,8 @@
 <template>
   <div class="browsing-content">
-    <h1 class="title">历史播放记录</h1>
+    <h1 class="title">
+      历史播放记录
+    </h1>
     <div class="history">
       <BrowsingHistoryItem
         :key="item"
