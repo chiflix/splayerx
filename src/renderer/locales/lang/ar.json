@@ -259,7 +259,9 @@
       "firstLine": "فحص كبلات الشبكة والمودم وجهاز التوجيه",
       "secondLine": "إعادة الاتصال بشبكة Wi-Fi"
     },
-    "remove": "نزع"
+    "remove": "نزع",
+    "siteManager": "مدير المواقع",
+    "popularSites": "المواقع الأمثل"
   },
   "preferences": {
     "general": {

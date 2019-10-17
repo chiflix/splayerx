@@ -259,7 +259,9 @@
       "firstLine": "ネットワークケーブル、モデム、およびルーターの確認",
       "secondLine": "Wi-Fiへの再接続"
     },
-    "remove": "削除する"
+    "remove": "削除する",
+    "siteManager": "サイト管理",
+    "popularSites": "適合サイト"
   },
   "preferences": {
     "general": {

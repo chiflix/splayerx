@@ -259,7 +259,9 @@
       "firstLine": "檢查網線、調製解調器和路由器",
       "secondLine": "重新連接到 Wi-Fi 網絡"
     },
-    "remove": "移除"
+    "remove": "移除",
+    "siteManager": "站點管理",
+    "popularSites": "已適配站點"
   },
   "preferences": {
     "general": {

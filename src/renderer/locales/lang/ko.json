@@ -259,7 +259,9 @@
       "firstLine": "네트워크 케이블, 모뎀 및 라우터 확인",
       "secondLine": "Wi-Fi에 다시 연결"
     },
-    "remove": "제거"
+    "remove": "제거",
+    "siteManager": "사이트 관리자",
+    "popularSites": "최적화 된 사이트"
   },
   "preferences": {
     "general": {

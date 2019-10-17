@@ -259,7 +259,9 @@
       "firstLine": "Comprobando los cables de red, módem y router",
       "secondLine": "Reconectando a Wi-Fi"
     },
-    "remove": "Eliminar"
+    "remove": "Eliminar",
+    "siteManager": "Gestor de sitios",
+    "popularSites": "Sitios optimizados"
   },
   "preferences": {
     "general": {
