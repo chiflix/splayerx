@@ -260,8 +260,8 @@
       "secondLine": "Reconectando a Wi-Fi"
     },
     "remove": "Eliminar",
-    "siteManager": "",
-    "popularSites": ""
+    "siteManager": "Gestor de sitios",
+    "popularSites": "Sitios optimizados"
   },
   "preferences": {
     "general": {
