@@ -57,11 +57,13 @@
                       width: sizeAdaption(16),
                       height: sizeAdaption(16),
                     }"
+                    :class="isFolderList ? '' : 'rotate'"
                     :type="pinIcon"
                   />
                 </div>
                 <transition name="fade-200">
                   <div
+                    :key="isFolderList"
                     v-show="showPinContent || !isFolderList"
                     :style="{
                       fontSize: sizeAdaption(13),
@@ -69,7 +71,7 @@
                     }"
                     class="pin-content"
                   >
-                    {{ $t('recentPlaylist.pin') }}
+                    {{ isFolderList ? $t('recentPlaylist.pin') : $t('recentPlaylist.pinned') }}
                   </div>
                 </transition>
               </div>
@@ -820,12 +822,16 @@ export default {
           justify-content: flex-start;
           align-items: center;
 
+          .rotate {
+            transform: rotate(-30deg);
+          }
+
           .icon {
             cursor: pointer;
             display: flex;
             align-items: center;
-            transition: background-color 50ms linear;
             svg {
+              transition: background-color 50ms linear, transform 100ms linear;
               border-radius: 100%;
             }
           }

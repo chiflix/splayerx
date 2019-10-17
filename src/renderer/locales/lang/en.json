@@ -342,7 +342,8 @@
     "paused": "Paused",
     "playlistSource": "Playlist",
     "add": "Add To Playlist",
-    "pin": "Pin the Playlist to Launching Page"
+    "pin": "Pin the playlist to launching page",
+    "pinned": "Playlist pinned to launcing page"
   },
   "subtitle": {
     "embedded": "Embed",
