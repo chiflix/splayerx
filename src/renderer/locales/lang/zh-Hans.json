@@ -260,8 +260,8 @@
       "secondLine": "重新连接到 Wi-Fi 网络"
     },
     "remove": "移除",
-    "siteManager": "",
-    "popularSites": "热门站点"
+    "siteManager": "站点管理",
+    "popularSites": "已适配站点"
   },
   "preferences": {
     "general": {
