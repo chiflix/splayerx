@@ -421,6 +421,7 @@ export default {
       }
       this.$bus.$emit('new-file-open');
       this.$bus.$emit('open-playlist');
+      this.$bus.$emit('new-playlist');
     },
     async openUrlFile(url) {
       const id = await this.infoDB.addPlaylist([url]);

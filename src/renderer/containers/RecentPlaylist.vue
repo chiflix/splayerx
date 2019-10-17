@@ -52,24 +52,26 @@
                 >
                   <Icon
                     :style="{
-                      backgroundColor: showPinContent && isFolderList
+                      backgroundColor: showPinContent && !pinned
                         ? 'rgba(255,255,255,0.125)' : '',
                       width: sizeAdaption(16),
                       height: sizeAdaption(16),
                     }"
+                    :class="pinned ? 'rotate' : ''"
                     :type="pinIcon"
                   />
                 </div>
                 <transition name="fade-200">
                   <div
-                    v-show="showPinContent || !isFolderList"
+                    :key="pinned"
+                    v-show="showPinContent || pinned"
                     :style="{
                       fontSize: sizeAdaption(13),
                       lineHeight: sizeAdaption(14),
                     }"
                     class="pin-content"
                   >
-                    {{ $t('recentPlaylist.pin') }}
+                    {{ isFolderList ? $t('recentPlaylist.pin') : $t('recentPlaylist.pinned') }}
                   </div>
                 </transition>
               </div>
@@ -255,9 +257,14 @@ export default {
       cursorLeft: `url("${filePathToUrl(path.join(__static, 'cursor/cursorLeft.svg') as string)}")`,
       cursorRight: `url("${filePathToUrl(path.join(__static, 'cursor/cursorRight.svg') as string)}")`,
       showPinContent: false,
+      pinned: false,
+      openByNewPlaylist: false,
     };
   },
   created() {
+    this.$bus.$on('new-playlist', () => {
+      this.openByNewPlaylist = true;
+    });
     window.addEventListener('keyup', this.keyboardHandler);
     this.$bus.$on('delete-file', async (path: string, id: number) => {
       this.$store.dispatch('RemoveItemFromPlayingList', path);
@@ -569,6 +576,9 @@ export default {
     },
   },
   watch: {
+    playListId() {
+      this.pinned = false;
+    },
     originSrc() {
       this.updateSubToTop(this.displayState);
       if (
@@ -584,6 +594,9 @@ export default {
         }, 400);
       }
       this.filename = this.pathBaseName(this.originSrc);
+    },
+    isFolderList(val: boolean) {
+      if (this.displayState) this.pinned = !val;
     },
     duration(val: number) {
       this.hoveredDuration = val;
@@ -665,6 +678,14 @@ export default {
       }, 0);
     },
     displayState(val: boolean, oldval: boolean) {
+      if (val) {
+        this.openByNewPlaylist ? setTimeout(() => {
+          this.pinned = true;
+        }, 500)
+        : this.pinned = !this.isFolderList;
+      } else {
+        this.openByNewPlaylist = false;
+      }
       if (oldval !== undefined) {
         this.updateSubToTop(val);
       }
@@ -695,7 +716,7 @@ export default {
       currentMouseupComponent: ({ Input }) => Input.mouseupComponentName,
     }),
     pinIcon() {
-      return this.isFolderList ? 'pin' : 'notPin';
+      return !this.pinned ? 'pin' : 'notPin';
     },
     movingOffset() {
       const marginRight = this.winWidth > 1355 ? (this.winWidth / 1355) * 15 : 15;
@@ -820,12 +841,16 @@ export default {
           justify-content: flex-start;
           align-items: center;
 
+          .rotate {
+            transform: rotate(-30deg);
+          }
+
           .icon {
             cursor: pointer;
             display: flex;
             align-items: center;
-            transition: background-color 50ms linear;
             svg {
+              transition: background-color 50ms linear, transform 100ms linear;
               border-radius: 100%;
             }
           }
