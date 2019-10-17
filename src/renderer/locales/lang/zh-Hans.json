@@ -341,7 +341,8 @@
     "paused": "已暂停",
     "playlistSource": "播放列表",
     "add": "添加到播放列表",
-    "pin": "保留此播放列表至启动页"
+    "pin": "保留此播放列表至启动页",
+    "pinned": ""
   },
   "subtitle": {
     "embedded": "内嵌",
