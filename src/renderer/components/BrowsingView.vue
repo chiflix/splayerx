@@ -129,8 +129,8 @@ export default {
         canGoBack: false,
         canReload: true,
       },
-      allChannels: ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch'],
-      compareStr: [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch']],
+      allChannels: ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch', 'coursera'],
+      compareStr: [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch'], ['coursera']],
       hideMainWindow: false,
       startLoadUrl: '',
       barrageOpenByPage: false,
@@ -187,6 +187,8 @@ export default {
           return { channel: 'youku', barrageState };
         case 'twitch':
           return { channel: 'twitch', type: this.pipType, winSize: this.pipSize };
+        case 'coursera':
+          return { channel: 'coursera' };
         case 'others':
           return { channel: 'others', winSize: this.pipSize };
         default:
@@ -263,7 +265,7 @@ export default {
     adaptFinished(val: boolean) {
       if (val) {
         this.updatePipChannel(this.currentChannel);
-        const opacity = ['youtube', 'others'].includes(this.pipChannel)
+        const opacity = ['youtube', 'others', 'coursera'].includes(this.pipChannel)
           || (this.pipChannel === 'bilibili' && this.pipType === 'others')
           || (this.pipChannel === 'qq' && this.pipType !== 'normal')
           ? 0.2

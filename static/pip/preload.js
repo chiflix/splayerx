@@ -117,6 +117,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
           }
           break;
+        case url.includes('coursera'):
+          if (['VIDEO'].includes(evt.target.tagName)) {
+            offset = [evt.clientX, evt.clientY];
+            if (getRatio() !== 1) {
+              windowSize = remote.getCurrentWindow().getSize();
+            }
+          }
+          break;
         default:
           offset = [evt.clientX, evt.clientY];
           if (getRatio() !== 1) {
