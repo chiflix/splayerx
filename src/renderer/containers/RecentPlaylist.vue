@@ -578,6 +578,7 @@ export default {
   watch: {
     playListId() {
       this.pinned = false;
+      this.openByNewPlaylist = false;
     },
     originSrc() {
       this.updateSubToTop(this.displayState);
