@@ -341,7 +341,8 @@
     "paused": "En pausa",
     "playlistSource": "Lista",
     "add": "Agregar a la lista de reproducción",
-    "pin": "Pin la lista de reproducción para iniciar la página"
+    "pin": "Pin la lista de reproducción para iniciar la página",
+    "pinned": ""
   },
   "subtitle": {
     "embedded": "Empotrar",
