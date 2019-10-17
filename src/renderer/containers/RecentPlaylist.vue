@@ -578,7 +578,6 @@ export default {
   watch: {
     playListId() {
       this.pinned = false;
-      this.openByNewPlaylist = false;
     },
     originSrc() {
       this.updateSubToTop(this.displayState);
@@ -679,11 +678,13 @@ export default {
       }, 0);
     },
     displayState(val: boolean, oldval: boolean) {
-      if (val && !this.pinned) {
+      if (val) {
         this.openByNewPlaylist ? setTimeout(() => {
           this.pinned = true;
         }, 500)
         : this.pinned = !this.isFolderList;
+      } else {
+        this.openByNewPlaylist = false;
       }
       if (oldval !== undefined) {
         this.updateSubToTop(val);
