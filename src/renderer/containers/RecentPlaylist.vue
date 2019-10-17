@@ -681,7 +681,7 @@ export default {
       if (val && !this.pinned) {
         this.openByNewPlaylist ? setTimeout(() => {
           this.pinned = true;
-        }, 350)
+        }, 500)
         : this.pinned = !this.isFolderList;
       }
       if (oldval !== undefined) {
