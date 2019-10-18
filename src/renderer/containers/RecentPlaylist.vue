@@ -576,15 +576,6 @@ export default {
     },
   },
   watch: {
-    showPinContent(val: boolean) {
-      console.log('showContent', val);
-    },
-    pinned(val: boolean) {
-      console.log('pinned', val);
-    },
-    mouseoverPin(val: boolean) {
-      console.log('mouseoverPin', val);
-    },
     playListId() {
       this.pinned = false;
     },
