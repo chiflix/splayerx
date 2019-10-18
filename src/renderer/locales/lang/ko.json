@@ -261,7 +261,8 @@
     },
     "remove": "제거",
     "siteManager": "사이트 관리자",
-    "popularSites": "최적화 된 사이트"
+    "popularSites": "최적화 된 사이트",
+    "siteTip": ""
   },
   "preferences": {
     "general": {
