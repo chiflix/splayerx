@@ -153,7 +153,7 @@ export default {
       'isFocused',
       'isPip',
       'pipMode',
-      'isHistory',
+      'isHomePage',
       'isError',
       'channels',
       'currentChannel',
@@ -218,7 +218,7 @@ export default {
       this.loadingState = true;
       this.$electron.ipcRenderer.send('create-browser-view', { url: val });
     },
-    isHistory() {
+    isHomePage() {
       this.$electron.ipcRenderer.send('remove-browser-view');
     },
     isFullScreen(val: boolean) {

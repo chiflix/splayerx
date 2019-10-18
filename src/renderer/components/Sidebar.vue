@@ -70,7 +70,7 @@
         <Icon type="open" />
       </div>
       <div
-        @click="openHistory"
+        @click="openHomePage"
         class="icon-hover"
       >
         <Icon type="history" />
@@ -114,7 +114,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['pipSize', 'pipPos', 'isHistory', 'currentChannel', 'winHeight']),
+    ...mapGetters(['pipSize', 'pipPos', 'isHomePage', 'currentChannel', 'winHeight']),
     currentRouteName() {
       return this.$route.name;
     },
@@ -210,7 +210,7 @@ export default {
   },
   methods: {
     ...mapActions({
-      updateIsHistoryPage: browsingActions.UPDATE_IS_HISTORY,
+      updateIsHomePage: browsingActions.UPDATE_IS_HOME_PAGE,
       updateCurrentChannel: browsingActions.UPDATE_CURRENT_CHANNEL,
     }),
     handleChannelManage() {
@@ -219,8 +219,8 @@ export default {
       }
       this.$bus.$emit('channel-manage');
     },
-    openHistory() {
-      this.updateIsHistoryPage(!this.isHistory);
+    openHomePage() {
+      this.updateIsHomePage(!this.isHomePage);
     },
     handleSidebarIcon(url: string, type: string) {
       const newChannel = type;
