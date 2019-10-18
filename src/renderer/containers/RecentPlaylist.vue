@@ -341,7 +341,7 @@ export default {
         this.clearMousedown({ componentName: '' });
       } else if (this.backgroundDisplayState) {
         this.$emit('update:playlistcontrol-showattached', false);
-        this.updateMousemoveTarget('the-video-controller');
+        this.updateMousemoveTarget('TheVideoController');
       }
     },
     updatelastPlayedTime(time: number) {
