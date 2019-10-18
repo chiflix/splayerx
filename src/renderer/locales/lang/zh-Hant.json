@@ -259,7 +259,9 @@
       "firstLine": "檢查網線、調製解調器和路由器",
       "secondLine": "重新連接到 Wi-Fi 網絡"
     },
-    "remove": "移除"
+    "remove": "移除",
+    "siteManager": "站點管理",
+    "popularSites": "已適配站點"
   },
   "preferences": {
     "general": {
@@ -339,7 +341,8 @@
     "paused": "已暫停",
     "playlistSource": "播放列表",
     "add": "添加到播放清單",
-    "pin": "保留此播放列表至啟動頁"
+    "pin": "保留此播放列表至啟動頁",
+    "pinned": "已保留此播放列表至啟動頁"
   },
   "subtitle": {
     "embedded": "內嵌",

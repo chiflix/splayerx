@@ -420,7 +420,10 @@ export default {
         this.$router.push({ name: 'playing-view' });
       }
       this.$bus.$emit('new-file-open');
-      this.$bus.$emit('open-playlist');
+      setTimeout(() => {
+        this.$bus.$emit('open-playlist');
+        this.$bus.$emit('new-playlist');
+      }, 300);
     },
     async openUrlFile(url) {
       const id = await this.infoDB.addPlaylist([url]);

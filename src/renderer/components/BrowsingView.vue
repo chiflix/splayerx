@@ -209,6 +209,7 @@ export default {
       if (this.showChannelManager) this.title = this.$t('browsing.siteManager');
     },
     currentChannel(val: string) {
+      log.info('current channel:', val);
       if (val) this.showChannelManager = false;
       this.webInfo.canReload = !!val;
       this.updateIsError(false);
@@ -413,19 +414,22 @@ export default {
     });
     this.$bus.$on('sidebar-selected', this.handleBookmarkOpen);
     this.$bus.$on('channel-manage', () => {
-      if (this.currentMainBrowserView()) {
-        this.currentMainBrowserView().webContents
-          .executeJavaScript(InjectJSManager.pauseVideo(this.currentChannel));
-        this.$electron.remote.getCurrentWindow().removeBrowserView(this.currentMainBrowserView());
+      if (!this.showChannelManager) {
+        if (this.currentMainBrowserView()) {
+          this.removeListener();
+          this.currentMainBrowserView().webContents
+            .executeJavaScript(InjectJSManager.pauseVideo(this.currentChannel));
+          this.$electron.remote.getCurrentWindow().removeBrowserView(this.currentMainBrowserView());
+        }
+        this.showChannelManager = true;
+        this.showProgress = false;
+        this.title = this.$t('browsing.siteManager');
+        this.webInfo.canGoBack = false;
+        this.webInfo.canGoForward = false;
+        this.webInfo.hasVideo = false;
+        this.webInfo.canReload = false;
+        this.updateCurrentChannel('');
       }
-      this.showChannelManager = true;
-      this.showProgress = false;
-      this.title = this.$t('browsing.siteManager');
-      this.webInfo.canGoBack = false;
-      this.webInfo.canGoForward = false;
-      this.webInfo.hasVideo = false;
-      this.webInfo.canReload = false;
-      this.updateCurrentChannel('');
     });
     window.addEventListener('focus', this.focusHandler);
     window.addEventListener('beforeunload', this.beforeUnloadHandler);
@@ -661,6 +665,7 @@ export default {
     },
     handleBookmarkOpen(args: { url: string, currentChannel: string, newChannel: string }) {
       this.webInfo.hasVideo = false;
+      this.updateCurrentChannel(args.newChannel);
       if (args.newChannel !== args.currentChannel) {
         this.removeListener();
         this.$electron.ipcRenderer.send('change-channel', { url: args.url, channel: args.newChannel });

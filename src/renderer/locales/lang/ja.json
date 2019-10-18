@@ -259,7 +259,9 @@
       "firstLine": "ネットワークケーブル、モデム、およびルーターの確認",
       "secondLine": "Wi-Fiへの再接続"
     },
-    "remove": "削除する"
+    "remove": "削除する",
+    "siteManager": "サイト管理",
+    "popularSites": "適合サイト"
   },
   "preferences": {
     "general": {
@@ -339,7 +341,8 @@
     "paused": "ポーズ中",
     "playlistSource": "プレイリスト",
     "add": "プレイリストに追加する",
-    "pin": "プレイリストを起動ページに固定する"
+    "pin": "プレイリストを起動ページに固定する",
+    "pinned": "起動ページに固定されたプレイリスト"
   },
   "subtitle": {
     "embedded": "埋め込み式",
