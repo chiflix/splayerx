@@ -261,7 +261,8 @@
     },
     "remove": "نزع",
     "siteManager": "مدير المواقع",
-    "popularSites": "المواقع الأمثل"
+    "popularSites": "المواقع الأمثل",
+    "siteTip": ""
   },
   "preferences": {
     "general": {
