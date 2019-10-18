@@ -588,7 +588,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   height: 10px;
 }
 .bilibiliSidebar, .iqiyiSidebar, .youtubeSidebar, .channelManage, .courseraSidebar,
-.douyuSidebar, .huyaSidebar, .qqSidebar, .youkuSidebar, .twitchSidebar {
+.douyuSidebar, .huyaSidebar, .qqSidebar, .youkuSidebar, .twitchSidebar, .tedSidebar {
   width: 44px;
   height: 44px;
 }

@@ -45,6 +45,7 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
       'https://www.twitch.tv/',
       'https://www.youtube.com/',
       'https://www.coursera.org/',
+      'https://www.ted.com/',
     ];
     this.allChannels.set('adapted', {
       channels: channels.map((channel: string) => {
