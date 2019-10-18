@@ -720,10 +720,24 @@ export default {
         || url === 'about:blank'
         || urlParseLax(this.currentUrl).href === urlParseLax(url).href
       ) return;
-      log.info('will-navigate', url);
-      this.currentUrl = urlParseLax(url).href;
-      this.loadingState = true;
-      this.$electron.ipcRenderer.send('create-browser-view', { url });
+      const newHostname = urlParseLax(url).hostname;
+      const oldChannel = this.currentChannel;
+      let newChannel = '';
+      this.allChannels.forEach((channel: string, index: number) => {
+        if (this.compareStr[index].findIndex((str: string) => newHostname.includes(str)) !== -1) {
+          newChannel = `${channel}.com`;
+        }
+      });
+      if (oldChannel === newChannel) {
+        log.info('will-navigate', url);
+        this.currentUrl = urlParseLax(url).href;
+        this.loadingState = true;
+        this.$electron.ipcRenderer.send('create-browser-view', { url });
+      } else {
+        e.preventDefault();
+        log.info('open-in-chrome', `${oldChannel}, ${newChannel}`);
+        this.$electron.shell.openExternalSync(url);
+      }
     },
     didStartLoading() {
       if (this.currentMainBrowserView()) {
