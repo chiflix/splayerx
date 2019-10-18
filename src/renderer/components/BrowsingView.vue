@@ -218,7 +218,7 @@ export default {
     startLoadUrl(val: string) {
       if (
         !val
-        || val === 'about:blank'
+        || ['about:blank', 'https://www.ted.com/#/'].includes(val)
         || urlParseLax(this.currentUrl).href === urlParseLax(val).href
       ) return;
       if (val.includes('bilibili') && urlParseLax(this.currentUrl).query === urlParseLax(val).query) return;
