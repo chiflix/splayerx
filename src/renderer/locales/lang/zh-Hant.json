@@ -261,7 +261,8 @@
     },
     "remove": "移除",
     "siteManager": "站點管理",
-    "popularSites": "已適配站點"
+    "popularSites": "已適配站點",
+    "siteTip": ""
   },
   "preferences": {
     "general": {
