@@ -261,7 +261,8 @@
     },
     "remove": "Eliminar",
     "siteManager": "Gestor de sitios",
-    "popularSites": "Sitios optimizados"
+    "popularSites": "Sitios optimizados",
+    "siteTip": ""
   },
   "preferences": {
     "general": {
