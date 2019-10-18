@@ -43,8 +43,8 @@
               >
                 <div
                   @mouseup.stop="pinPlaylist"
-                  @mouseenter="showPinContent = true"
-                  @mouseleave="showPinContent = false"
+                  @mouseenter="mouseoverPin = true"
+                  @mouseleave="mouseoverPin = false"
                   :style="{
                     width: sizeAdaption(23),
                   }"
@@ -52,7 +52,7 @@
                 >
                   <Icon
                     :style="{
-                      backgroundColor: showPinContent && !pinned
+                      backgroundColor: mouseoverPin && !pinned
                         ? 'rgba(255,255,255,0.125)' : '',
                       width: sizeAdaption(16),
                       height: sizeAdaption(16),
@@ -63,8 +63,7 @@
                 </div>
                 <transition name="fade-200">
                   <div
-                    :key="pinned"
-                    v-show="showPinContent || pinned"
+                    v-show="showPinContent"
                     :style="{
                       fontSize: sizeAdaption(13),
                       lineHeight: sizeAdaption(14),
@@ -256,7 +255,7 @@ export default {
       showTopContent: true,
       cursorLeft: `url("${filePathToUrl(path.join(__static, 'cursor/cursorLeft.svg') as string)}")`,
       cursorRight: `url("${filePathToUrl(path.join(__static, 'cursor/cursorRight.svg') as string)}")`,
-      showPinContent: false,
+      mouseoverPin: false,
       pinned: false,
       openByNewPlaylist: false,
     };
@@ -716,6 +715,9 @@ export default {
       currentMousedownComponent: ({ Input }) => Input.mousedownComponentName,
       currentMouseupComponent: ({ Input }) => Input.mouseupComponentName,
     }),
+    showPinContent() {
+      return this.mouseoverPin || this.pinned;
+    },
     pinIcon() {
       return !this.pinned ? 'pin' : 'notPin';
     },
