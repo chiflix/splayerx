@@ -198,7 +198,7 @@ export default {
       const views = electron.remote.getCurrentWindow().getBrowserViews();
       if (views[0]) {
         const url = views[0].webContents.getURL();
-        if (`${this.currentUrl}/up-next` !== url) this.handleUrlChange(url);
+        if (!url.includes('/up-next')) this.handleUrlChange(url);
       }
     },
   },

@@ -125,6 +125,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
           }
           break;
+        case url.includes('ted'):
+          if ([' d:f@sm w:full h:full flx-d:r@sm a-i:s-b@sm ', ' sb pos:a pos:c w:full ', 'css-1c17hto', 'css-13wb0ss', 'css-1su2wlu'].includes(evt.target.classList.value)) {
+            offset = [evt.clientX, evt.clientY];
+            if (getRatio() !== 1) {
+              windowSize = remote.getCurrentWindow().getSize();
+            }
+          }
+          break;
         default:
           offset = [evt.clientX, evt.clientY];
           if (getRatio() !== 1) {
