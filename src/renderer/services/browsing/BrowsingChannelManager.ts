@@ -50,12 +50,14 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
     this.allChannels.set('adapted', {
       channels: channels.map((channel: string) => {
         const basename = channel.slice(channel.indexOf('.') + 1, channel.lastIndexOf('.'));
+        const tld = channel.slice(channel.lastIndexOf('.'), channel.length - 1);
+        const path = `${basename === 'qq' ? 'v.qq' : basename}${tld}`;
         return {
           channel: `${basename}.com`,
           url: channel,
           icon: `${basename}Sidebar`,
           title: `browsing.${basename}`,
-          path: `${basename}.com`,
+          path,
         };
       }),
       availableChannels: this.allAvailableChannels,

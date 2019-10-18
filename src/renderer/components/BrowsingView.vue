@@ -735,6 +735,7 @@ export default {
         this.$electron.ipcRenderer.send('create-browser-view', { url });
       } else {
         e.preventDefault();
+        this.currentMainBrowserView().webContents.stop();
         log.info('open-in-chrome', `${oldChannel}, ${newChannel}`);
         this.$electron.shell.openExternalSync(url);
       }
@@ -824,6 +825,7 @@ export default {
           });
         } else {
           log.info('open-in-chrome', `${oldChannel}, ${newChannel}`);
+          this.currentMainBrowserView().webContents.stop();
           this.$electron.shell.openExternalSync(openUrl);
         }
       }
