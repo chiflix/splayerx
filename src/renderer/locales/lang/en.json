@@ -262,7 +262,8 @@
     },
     "remove": "Remove",
     "siteManager": "Site Manager",
-    "popularSites": "Optimized Sites"
+    "popularSites": "Optimized Sites",
+    "siteTip": "Add/Edit"
   },
   "preferences": {
     "general": {
