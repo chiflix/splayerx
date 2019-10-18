@@ -129,8 +129,8 @@ export default {
         canGoBack: false,
         canReload: true,
       },
-      allChannels: ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch'],
-      compareStr: [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch']],
+      allChannels: ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch', 'coursera', 'ted'],
+      compareStr: [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch'], ['coursera'], ['ted']],
       hideMainWindow: false,
       startLoadUrl: '',
       barrageOpenByPage: false,
@@ -187,6 +187,10 @@ export default {
           return { channel: 'youku', barrageState };
         case 'twitch':
           return { channel: 'twitch', type: this.pipType, winSize: this.pipSize };
+        case 'coursera':
+          return { channel: 'coursera' };
+        case 'ted':
+          return { channel: 'ted' };
         case 'others':
           return { channel: 'others', winSize: this.pipSize };
         default:
@@ -214,7 +218,7 @@ export default {
     startLoadUrl(val: string) {
       if (
         !val
-        || val === 'about:blank'
+        || ['about:blank', 'https://www.ted.com/#/'].includes(val)
         || urlParseLax(this.currentUrl).href === urlParseLax(val).href
       ) return;
       if (val.includes('bilibili') && urlParseLax(this.currentUrl).query === urlParseLax(val).query) return;
@@ -264,7 +268,7 @@ export default {
     adaptFinished(val: boolean) {
       if (val) {
         this.updatePipChannel(this.currentChannel);
-        const opacity = ['youtube', 'others'].includes(this.pipChannel)
+        const opacity = ['youtube', 'others', 'coursera', 'ted'].includes(this.pipChannel)
           || (this.pipChannel === 'bilibili' && this.pipType === 'others')
           || (this.pipChannel === 'qq' && this.pipType !== 'normal')
           ? 0.2
@@ -716,10 +720,25 @@ export default {
         || url === 'about:blank'
         || urlParseLax(this.currentUrl).href === urlParseLax(url).href
       ) return;
-      log.info('will-navigate', url);
-      this.currentUrl = urlParseLax(url).href;
-      this.loadingState = true;
-      this.$electron.ipcRenderer.send('create-browser-view', { url });
+      const newHostname = urlParseLax(url).hostname;
+      const oldChannel = this.currentChannel;
+      let newChannel = '';
+      this.allChannels.forEach((channel: string, index: number) => {
+        if (this.compareStr[index].findIndex((str: string) => newHostname.includes(str)) !== -1) {
+          newChannel = `${channel}.com`;
+        }
+      });
+      if (oldChannel === newChannel) {
+        log.info('will-navigate', url);
+        this.currentUrl = urlParseLax(url).href;
+        this.loadingState = true;
+        this.$electron.ipcRenderer.send('create-browser-view', { url });
+      } else {
+        e.preventDefault();
+        this.currentMainBrowserView().webContents.stop();
+        log.info('open-in-chrome', `${oldChannel}, ${newChannel}`);
+        this.$electron.shell.openExternalSync(url);
+      }
     },
     didStartLoading() {
       if (this.currentMainBrowserView()) {
@@ -806,6 +825,7 @@ export default {
           });
         } else {
           log.info('open-in-chrome', `${oldChannel}, ${newChannel}`);
+          this.currentMainBrowserView().webContents.stop();
           this.$electron.shell.openExternalSync(openUrl);
         }
       }

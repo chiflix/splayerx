@@ -248,6 +248,8 @@
     "douyu": "Douyu",
     "twitch": "Twitch",
     "youku": "Youku",
+    "coursera": "Coursera",
+    "ted": "Ted",
     "openLocalFile": "Open Local File ...",
     "enterPip": "Enter Picture in Picture",
     "exitPip": "Back to Browser",
@@ -263,7 +265,7 @@
     "remove": "Remove",
     "siteManager": "Site Manager",
     "popularSites": "Optimized Sites",
-    "siteTip": "Add/Edit"
+    "siteTip": "Add / Edit"
   },
   "preferences": {
     "general": {

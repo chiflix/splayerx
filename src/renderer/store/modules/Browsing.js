@@ -11,11 +11,6 @@ const state = {
   isError: false,
   currentChannel: '',
   pipChannel: '',
-  categories: ['customized', 'adapted'],
-  allChannels: [
-    { type: 'customized', channels: [], availableChannels: [] },
-    { type: 'adapted', channels: ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch'], availableChannels: [] },
-  ],
 };
 const getters = {
   initialUrl: state => state.initialUrl,
@@ -27,7 +22,6 @@ const getters = {
   isError: state => state.isError,
   currentChannel: state => state.currentChannel,
   pipChannel: state => state.pipChannel,
-  allChannels: state => state.allChannels,
 };
 
 const mutations = {
