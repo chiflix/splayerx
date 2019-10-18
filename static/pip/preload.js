@@ -118,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
           }
           break;
         case url.includes('coursera'):
-          if (['VIDEO'].includes(evt.target.tagName)) {
+          if (['VIDEO'].includes(evt.target.tagName) || ['rc-VideoControlsContainer', 'rc-ControlBar'].includes(evt.target.classList[0])) {
             offset = [evt.clientX, evt.clientY];
             if (getRatio() !== 1) {
               windowSize = remote.getCurrentWindow().getSize();
