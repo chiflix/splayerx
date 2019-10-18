@@ -36,6 +36,7 @@
         @is-dragging="isDragging = $event"
       />
       <div
+        :title="$t('browsing.siteTip')"
         :class="{ 'channel-opacity': showChannelManager && currentRouteName === 'browsing-view'}"
         @click="handleChannelManage"
         class="channel-manage no-drag"
