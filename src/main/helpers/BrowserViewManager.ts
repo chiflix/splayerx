@@ -276,9 +276,11 @@ export class BrowserViewManager implements IBrowserViewManager {
       pipPage: null,
     };
     page.lastUpdateTime = Date.now();
-    page.view.setBounds({
-      x: 76, y: 0, width: 0, height: 0,
-    });
+    if (process.platform === 'darwin') {
+      page.view.setBounds({
+        x: 76, y: 0, width: 0, height: 0,
+      });
+    }
     this.browserViewCacheManager.recoverCacheWhenExitPip(pipChannel, page, deleteList);
     return {
       canBack: (this.historyByChannel.get(this.currentChannel) as ChannelData).currentIndex > 0,
