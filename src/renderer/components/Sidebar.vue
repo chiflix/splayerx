@@ -36,6 +36,7 @@
         @is-dragging="isDragging = $event"
       />
       <div
+        :title="$t('browsing.siteTip')"
         :class="{ 'channel-opacity': showChannelManager && currentRouteName === 'browsing-view'}"
         @click="handleChannelManage"
         class="channel-manage no-drag"
@@ -125,8 +126,7 @@ export default {
       return !!this.currentUrl;
     },
     totalHeight() {
-      const channelsNum = this.showFileIcon
-        ? this.channelsDetail.length + 1 : this.channelsDetail.length;
+      const channelsNum = this.channelsDetail.length + 1;
       return channelsNum * 56;
     },
     maxHeight() {
@@ -183,6 +183,9 @@ export default {
     });
     this.$bus.$on('available-channel-update', () => {
       this.channelsDetail = BrowsingChannelManager.getAllAvailableChannels();
+      const scrollTop = (document.querySelector('.icon-box') as HTMLElement).scrollTop;
+      this.topMask = this.maxHeight >= this.totalHeight ? false : scrollTop !== 0;
+      this.bottomMask = scrollTop + this.maxHeight < this.totalHeight;
     });
     this.$electron.ipcRenderer.on('delete-channel', (e: Event, channel: string) => {
       if (this.currentChannel === channel) {

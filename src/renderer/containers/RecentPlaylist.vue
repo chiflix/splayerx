@@ -43,8 +43,8 @@
               >
                 <div
                   @mouseup.stop="pinPlaylist"
-                  @mouseenter="showPinContent = true"
-                  @mouseleave="showPinContent = false"
+                  @mouseenter="mouseoverPin = true"
+                  @mouseleave="mouseoverPin = false"
                   :style="{
                     width: sizeAdaption(23),
                   }"
@@ -52,24 +52,25 @@
                 >
                   <Icon
                     :style="{
-                      backgroundColor: showPinContent && isFolderList
+                      backgroundColor: mouseoverPin && !pinned
                         ? 'rgba(255,255,255,0.125)' : '',
                       width: sizeAdaption(16),
                       height: sizeAdaption(16),
                     }"
+                    :class="pinned ? 'rotate' : ''"
                     :type="pinIcon"
                   />
                 </div>
                 <transition name="fade-200">
                   <div
-                    v-show="showPinContent || !isFolderList"
+                    v-show="showPinContent"
                     :style="{
                       fontSize: sizeAdaption(13),
                       lineHeight: sizeAdaption(14),
                     }"
                     class="pin-content"
                   >
-                    {{ $t('recentPlaylist.pin') }}
+                    {{ isFolderList ? $t('recentPlaylist.pin') : $t('recentPlaylist.pinned') }}
                   </div>
                 </transition>
               </div>
@@ -254,10 +255,15 @@ export default {
       showTopContent: true,
       cursorLeft: `url("${filePathToUrl(path.join(__static, 'cursor/cursorLeft.svg') as string)}")`,
       cursorRight: `url("${filePathToUrl(path.join(__static, 'cursor/cursorRight.svg') as string)}")`,
-      showPinContent: false,
+      mouseoverPin: false,
+      pinned: false,
+      openByNewPlaylist: false,
     };
   },
   created() {
+    this.$bus.$on('new-playlist', () => {
+      this.openByNewPlaylist = true;
+    });
     window.addEventListener('keyup', this.keyboardHandler);
     this.$bus.$on('delete-file', async (path: string, id: number) => {
       this.$store.dispatch('RemoveItemFromPlayingList', path);
@@ -334,7 +340,7 @@ export default {
         this.clearMousedown({ componentName: '' });
       } else if (this.backgroundDisplayState) {
         this.$emit('update:playlistcontrol-showattached', false);
-        this.updateMousemoveTarget('the-video-controller');
+        this.updateMousemoveTarget('TheVideoController');
       }
     },
     updatelastPlayedTime(time: number) {
@@ -344,6 +350,8 @@ export default {
       if (this.addIndex !== this.lastIndex + 1) {
         this.addFilesByDialog({
           defaultPath: path.dirname(this.originSrc),
+        }).then(() => {
+          this.setPlaylist();
         });
       }
       this.onItemMouseup(this.addIndex);
@@ -569,6 +577,9 @@ export default {
     },
   },
   watch: {
+    playListId() {
+      this.pinned = false;
+    },
     originSrc() {
       this.updateSubToTop(this.displayState);
       if (
@@ -584,6 +595,9 @@ export default {
         }, 400);
       }
       this.filename = this.pathBaseName(this.originSrc);
+    },
+    isFolderList(val: boolean) {
+      if (this.displayState) this.pinned = !val;
     },
     duration(val: number) {
       this.hoveredDuration = val;
@@ -665,6 +679,14 @@ export default {
       }, 0);
     },
     displayState(val: boolean, oldval: boolean) {
+      if (val) {
+        this.openByNewPlaylist ? setTimeout(() => {
+          this.pinned = true;
+        }, 500)
+        : this.pinned = !this.isFolderList;
+      } else {
+        this.openByNewPlaylist = false;
+      }
       if (oldval !== undefined) {
         this.updateSubToTop(val);
       }
@@ -694,8 +716,11 @@ export default {
       currentMousedownComponent: ({ Input }) => Input.mousedownComponentName,
       currentMouseupComponent: ({ Input }) => Input.mouseupComponentName,
     }),
+    showPinContent() {
+      return this.mouseoverPin || this.pinned;
+    },
     pinIcon() {
-      return this.isFolderList ? 'pin' : 'notPin';
+      return !this.pinned ? 'pin' : 'notPin';
     },
     movingOffset() {
       const marginRight = this.winWidth > 1355 ? (this.winWidth / 1355) * 15 : 15;
@@ -820,12 +845,16 @@ export default {
           justify-content: flex-start;
           align-items: center;
 
+          .rotate {
+            transform: rotate(-30deg);
+          }
+
           .icon {
             cursor: pointer;
             display: flex;
             align-items: center;
-            transition: background-color 50ms linear;
             svg {
+              transition: background-color 50ms linear, transform 100ms linear;
               border-radius: 100%;
             }
           }

@@ -248,6 +248,8 @@
     "douyu": "Douyu",
     "twitch": "Twitch",
     "youku": "Youku",
+    "coursera": "Coursera",
+    "ted": "TED",
     "openLocalFile": "Open Local File ...",
     "enterPip": "Enter Picture in Picture",
     "exitPip": "Back to Browser",
@@ -260,7 +262,10 @@
       "firstLine": "Checking the network cables, modem, and router",
       "secondLine": "Reconnecting to Wi-Fi"
     },
-    "remove": "remove"
+    "remove": "Remove",
+    "siteManager": "Site Manager",
+    "popularSites": "Optimized Sites",
+    "siteTip": "Add / Edit"
   },
   "preferences": {
     "general": {
@@ -340,7 +345,8 @@
     "paused": "Paused",
     "playlistSource": "Playlist",
     "add": "Add To Playlist",
-    "pin": "Pin the Playlist to Launching Page"
+    "pin": "Pin the Playlist to Launching Page",
+    "pinned": "Playlist Pinned to Launching Page"
   },
   "subtitle": {
     "embedded": "Embed",

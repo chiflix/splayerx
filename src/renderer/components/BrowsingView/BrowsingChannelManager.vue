@@ -6,7 +6,7 @@
         v-for="category in categories"
         class="category-part"
       >
-        <span>{{ category.locale }}</span>
+        <span>{{ $t(category.locale) }}</span>
         <div class="channel-container">
           <div
             v-for="(item, index) in allChannels.get(category.type).channels"
@@ -129,17 +129,18 @@ export default {
 }
 .channel-manager {
   width: 100%;
-  height: calc(100% - 38px);
-  top: 38px;
+  height: calc(100% - 40px);
+  top: 40px;
   display: flex;
-  position: absolute;
+  position: relative;
   .manager-container {
-    margin: 36px 40px 0 20px;
+    padding: 36px 40px 0 20px;
     width: calc(100% - 60px);
-    height: calc(100% - 36px);
+    height: 100%;
     overflow: scroll;
     .category-part {
       width: 100%;
+      height: auto;
       display: flex;
       flex-direction: column;
       span {
@@ -153,7 +154,7 @@ export default {
         flex-direction: row;
         flex-wrap: wrap;
         align-content: start;
-        margin-bottom: 30px;
+        padding-bottom: 66px;
         .channel-details {
           width: 110px;
           height: 110px;

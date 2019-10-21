@@ -18,6 +18,7 @@
       :style="{
         order: isDarwin ? 2 : 1,
       }"
+      :class="canReload ? 'control-button-hover' : ''"
       class="control-button page-refresh-icon no-drag"
     >
       <Icon
@@ -117,9 +118,9 @@ export default {
     justify-content: center;
     align-items: center;
     transition: background-color 100ms ease-in;
-    &:hover {
-      background-color: #ECEEF0;
-    }
+  }
+  .control-button-hover:hover {
+    background-color: #ECEEF0;
   }
   .page-refresh-icon {
     margin-right: 8px;

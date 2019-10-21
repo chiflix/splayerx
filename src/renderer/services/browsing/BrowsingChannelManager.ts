@@ -27,7 +27,7 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
 
 
   public constructor() {
-    this.allCategories = [{ type: 'customized', locale: '自定义站点' }, { type: 'adapted', locale: '已适配站点' }];
+    this.allCategories = [{ type: 'customized', locale: 'browsing.customized' }, { type: 'adapted', locale: 'browsing.popularSites' }];
     this.allChannels = new Map();
     this.allCategories.forEach((category: category) => {
       this.allChannels.set(category.type, { channels: [], availableChannels: [] });
@@ -44,16 +44,20 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
       'https://www.youku.com/',
       'https://www.twitch.tv/',
       'https://www.youtube.com/',
+      'https://www.coursera.org/',
+      'https://www.ted.com/',
     ];
     this.allChannels.set('adapted', {
       channels: channels.map((channel: string) => {
         const basename = channel.slice(channel.indexOf('.') + 1, channel.lastIndexOf('.'));
+        const tld = channel.slice(channel.lastIndexOf('.'), channel.length - 1);
+        const path = `${basename === 'qq' ? 'v.qq' : basename}${tld}`;
         return {
           channel: `${basename}.com`,
           url: channel,
           icon: `${basename}Sidebar`,
           title: `browsing.${basename}`,
-          path: `${basename}.com`,
+          path,
         };
       }),
       availableChannels: this.allAvailableChannels,

@@ -129,8 +129,8 @@ export default {
         canGoBack: false,
         canReload: true,
       },
-      allChannels: ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch'],
-      compareStr: [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch']],
+      allChannels: ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch', 'coursera', 'ted'],
+      compareStr: [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch'], ['coursera'], ['ted']],
       hideMainWindow: false,
       startLoadUrl: '',
       barrageOpenByPage: false,
@@ -157,6 +157,7 @@ export default {
       'isError',
       'channels',
       'currentChannel',
+      'displayLanguage',
     ]),
     isDarwin() {
       return process.platform === 'darwin';
@@ -186,6 +187,10 @@ export default {
           return { channel: 'youku', barrageState };
         case 'twitch':
           return { channel: 'twitch', type: this.pipType, winSize: this.pipSize };
+        case 'coursera':
+          return { channel: 'coursera' };
+        case 'ted':
+          return { channel: 'ted' };
         case 'others':
           return { channel: 'others', winSize: this.pipSize };
         default:
@@ -200,7 +205,11 @@ export default {
     },
   },
   watch: {
+    displayLanguage() {
+      if (this.showChannelManager) this.title = this.$t('browsing.siteManager');
+    },
     currentChannel(val: string) {
+      log.info('current channel:', val);
       if (val) this.showChannelManager = false;
       this.webInfo.canReload = !!val;
       this.updateIsError(false);
@@ -209,7 +218,7 @@ export default {
     startLoadUrl(val: string) {
       if (
         !val
-        || val === 'about:blank'
+        || ['about:blank', 'https://www.ted.com/#/'].includes(val)
         || urlParseLax(this.currentUrl).href === urlParseLax(val).href
       ) return;
       if (val.includes('bilibili') && urlParseLax(this.currentUrl).query === urlParseLax(val).query) return;
@@ -270,7 +279,7 @@ export default {
     adaptFinished(val: boolean) {
       if (val) {
         this.updatePipChannel(this.currentChannel);
-        const opacity = ['youtube', 'others'].includes(this.pipChannel)
+        const opacity = ['youtube', 'others', 'coursera', 'ted'].includes(this.pipChannel)
           || (this.pipChannel === 'bilibili' && this.pipType === 'others')
           || (this.pipChannel === 'qq' && this.pipType !== 'normal')
           ? 0.2
@@ -386,12 +395,14 @@ export default {
   mounted() {
     this.menuService = new MenuService();
     this.menuService.updateMenuItemEnabled('splayerx.checkForUpdates', false);
-    this.title = this.currentChannel ? this.currentMainBrowserView().webContents.getTitle() : '添加站点';
     if (!this.currentChannel) {
       this.showChannelManager = true;
       this.showProgress = false;
       this.webInfo.canReload = false;
       this.currentUrl = 'edit.channel';
+      this.title = this.$t('browsing.siteManager');
+    } else {
+      this.title = this.currentMainBrowserView().webContents.getTitle();
     }
 
     this.$bus.$on('toggle-reload', this.handleUrlReload);
@@ -414,19 +425,22 @@ export default {
     });
     this.$bus.$on('sidebar-selected', this.handleBookmarkOpen);
     this.$bus.$on('channel-manage', () => {
-      if (this.currentMainBrowserView()) {
-        this.currentMainBrowserView().webContents
-          .executeJavaScript(InjectJSManager.pauseVideo(this.currentChannel));
-        this.$electron.remote.getCurrentWindow().removeBrowserView(this.currentMainBrowserView());
+      if (!this.showChannelManager) {
+        if (this.currentMainBrowserView()) {
+          this.removeListener();
+          this.currentMainBrowserView().webContents
+            .executeJavaScript(InjectJSManager.pauseVideo(this.currentChannel));
+          this.$electron.remote.getCurrentWindow().removeBrowserView(this.currentMainBrowserView());
+        }
+        this.showChannelManager = true;
+        this.showProgress = false;
+        this.title = this.$t('browsing.siteManager');
+        this.webInfo.canGoBack = false;
+        this.webInfo.canGoForward = false;
+        this.webInfo.hasVideo = false;
+        this.webInfo.canReload = false;
+        this.updateCurrentChannel('');
       }
-      this.showChannelManager = true;
-      this.showProgress = false;
-      this.title = '添加站点';
-      this.webInfo.canGoBack = false;
-      this.webInfo.canGoForward = false;
-      this.webInfo.hasVideo = false;
-      this.webInfo.canReload = false;
-      this.updateCurrentChannel('');
     });
     window.addEventListener('focus', this.focusHandler);
     window.addEventListener('beforeunload', this.beforeUnloadHandler);
@@ -516,6 +530,7 @@ export default {
         this.$electron.ipcRenderer.send('remove-browser');
         if (this.backToLandingView) {
           setTimeout(() => {
+            if (this.isFullScreen) this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
             windowRectService.uploadWindowBy(false, 'landing-view', undefined, undefined, this.winSize, this.winPos, this.isFullScreen);
             this.$electron.ipcRenderer.send('callMainWindowMethod', 'show');
           }, 200);
@@ -662,6 +677,7 @@ export default {
     },
     handleBookmarkOpen(args: { url: string, currentChannel: string, newChannel: string }) {
       this.webInfo.hasVideo = false;
+      this.updateCurrentChannel(args.newChannel);
       if (args.newChannel !== args.currentChannel) {
         this.removeListener();
         this.$electron.ipcRenderer.send('change-channel', { url: args.url, channel: args.newChannel });
@@ -716,10 +732,25 @@ export default {
         || url === 'about:blank'
         || urlParseLax(this.currentUrl).href === urlParseLax(url).href
       ) return;
-      log.info('will-navigate', url);
-      this.currentUrl = urlParseLax(url).href;
-      this.loadingState = true;
-      this.$electron.ipcRenderer.send('create-browser-view', { url });
+      const newHostname = urlParseLax(url).hostname;
+      const oldChannel = this.currentChannel;
+      let newChannel = '';
+      this.allChannels.forEach((channel: string, index: number) => {
+        if (this.compareStr[index].findIndex((str: string) => newHostname.includes(str)) !== -1) {
+          newChannel = `${channel}.com`;
+        }
+      });
+      if (oldChannel === newChannel) {
+        log.info('will-navigate', url);
+        this.currentUrl = urlParseLax(url).href;
+        this.loadingState = true;
+        this.$electron.ipcRenderer.send('create-browser-view', { url });
+      } else {
+        e.preventDefault();
+        this.currentMainBrowserView().webContents.stop();
+        log.info('open-in-chrome', `${oldChannel}, ${newChannel}`);
+        this.$electron.shell.openExternalSync(url);
+      }
     },
     didStartLoading() {
       if (this.currentMainBrowserView()) {
@@ -806,6 +837,7 @@ export default {
           });
         } else {
           log.info('open-in-chrome', `${oldChannel}, ${newChannel}`);
+          this.currentMainBrowserView().webContents.stop();
           this.$electron.shell.openExternalSync(openUrl);
         }
       }
