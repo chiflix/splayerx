@@ -56,6 +56,21 @@ export async function getSMSCode(phone: string) {
   return res.ok;
 }
 
+export async function getGeoIP(): Promise<{ip: string, countryCode: string}> {
+  const endpoint = await getEndpoint();
+  return new Promise((resolve, reject) => {
+    fetcher.get(`${endpoint}/geoip`).then((response: Response) => {
+      if (response.ok) {
+        response.json().then((data: { ip: string, countryCode: string }) => resolve(data));
+      } else {
+        reject(new Error());
+      }
+    }).catch((error) => {
+      reject(error);
+    });
+  });
+}
+
 export async function signIn(type: string, phone: string, code: string) {
   const endpoint = await getEndpoint();
   const res = await fetcher.post(`${endpoint}/auth/login`, { phone, type, code });
