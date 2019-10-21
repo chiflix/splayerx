@@ -120,8 +120,7 @@ export default {
       return !!this.currentUrl;
     },
     totalHeight() {
-      const channelsNum = this.showFileIcon
-        ? this.channelsDetail.length + 1 : this.channelsDetail.length;
+      const channelsNum = this.channelsDetail.length + 1;
       return channelsNum * 56;
     },
     maxHeight() {
