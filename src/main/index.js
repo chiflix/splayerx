@@ -610,8 +610,8 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('pip-window-fullscreen', () => {
     if (browsingWindow && browsingWindow.isFocused()) {
       browsingWindow.setFullScreen(!browsingWindow.isFullScreen());
-      titlebarView.webContents
-        .executeJavaScript(InjectJSManager.updateFullScreenIcon(browsingWindow.isFullScreen()));
+      titlebarView.webContents.executeJavaScript(InjectJSManager
+        .updateFullScreenIcon(browsingWindow.isFullScreen(), isBrowsingWindowMax));
     }
   });
   ipcMain.on('pip-window-close', (evt, args) => {
@@ -804,7 +804,8 @@ function registerMainWindowEvent(mainWindow) {
     }
   });
   ipcMain.on('update-full-state', (evt, isFullScreen) => {
-    titlebarView.webContents.executeJavaScript(InjectJSManager.updateFullScreenIcon(isFullScreen));
+    titlebarView.webContents.executeJavaScript(InjectJSManager
+      .updateFullScreenIcon(isFullScreen, isBrowsingWindowMax));
   });
   ipcMain.on('mouseup', (evt, type) => {
     switch (type) {
@@ -816,13 +817,15 @@ function registerMainWindowEvent(mainWindow) {
         break;
       case 'full':
         browsingWindow.setFullScreen(true);
-        titlebarView.webContents.executeJavaScript(InjectJSManager.updateFullScreenIcon(true));
+        titlebarView.webContents.executeJavaScript(InjectJSManager
+          .updateFullScreenIcon(true, isBrowsingWindowMax));
         break;
       case 'recover':
         browsingWindow.setFullScreen(false);
         browsingWindow.getBrowserViews()[0].webContents
           .executeJavaScript(InjectJSManager.changeFullScreen(false));
-        titlebarView.webContents.executeJavaScript(InjectJSManager.updateFullScreenIcon(false));
+        titlebarView.webContents.executeJavaScript(InjectJSManager
+          .updateFullScreenIcon(false, isBrowsingWindowMax));
         break;
       case 'max':
         if (browsingWindow.isMaximized()) {
@@ -1056,8 +1059,8 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('key-events', (e, keyCode) => {
     if (keyCode === 13) {
       browsingWindow.setFullScreen(!browsingWindow.isFullScreen());
-      titlebarView.webContents
-        .executeJavaScript(InjectJSManager.updateFullScreenIcon(browsingWindow.isFullScreen()));
+      titlebarView.webContents.executeJavaScript(InjectJSManager
+        .updateFullScreenIcon(browsingWindow.isFullScreen(), isBrowsingWindowMax));
     } else {
       browsingWindow.getBrowserViews()[0].webContents
         .executeJavaScript(InjectJSManager.emitKeydownEvent(keyCode));
