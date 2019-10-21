@@ -487,10 +487,8 @@ new Vue({
           if (this.currentRouteName === 'playing-view') {
             if (this.isFullScreen) {
               this.$bus.$emit('off-fullscreen');
-              this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
             } else {
               this.$bus.$emit('to-fullscreen');
-              this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [true]);
             }
           }
           break;
@@ -952,10 +950,8 @@ new Vue({
       this.menuService.on('window.fullscreen', () => {
         if (this.isFullScreen) {
           this.$bus.$emit('off-fullscreen');
-          this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
         } else {
           this.$bus.$emit('to-fullscreen');
-          this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [true]);
         }
       });
       this.menuService.on('browsing.window.fullscreen', () => {
