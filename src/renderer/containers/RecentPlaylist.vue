@@ -348,9 +348,10 @@ export default {
     },
     addMouseup() {
       if (this.addIndex !== this.lastIndex + 1) {
-        this.setPlaylist();
         this.addFilesByDialog({
           defaultPath: path.dirname(this.originSrc),
+        }).then(() => {
+          this.setPlaylist();
         });
       }
       this.onItemMouseup(this.addIndex);

@@ -131,33 +131,37 @@ export default {
       });
     },
     addFilesByDialog({ defaultPath } = {}) {
-      if (this.showingPopupDialog) return;
+      if (this.showingPopupDialog) return Promise.resolve();
       this.showingPopupDialog = true;
       const opts = ['openFile', 'multiSelections'];
       if (process.platform === 'darwin') {
         opts.push('openDirectory');
       }
-      process.env.NODE_ENV === 'testing' ? '' : remote.dialog.showOpenDialog({
-        title: 'Open Dialog',
-        defaultPath,
-        filters: [{
-          name: 'Video Files',
-          extensions: getValidVideoExtensions(),
-        }, {
-          name: 'All Files',
-          extensions: ['*'],
-        }],
-        properties: opts,
-        securityScopedBookmarks: process.mas,
-      }, (files, bookmarks) => {
-        this.showingPopupDialog = false;
-        if (process.mas && get(bookmarks, 'length') > 0) {
-          // TODO: put bookmarks to database
-          bookmark.resolveBookmarks(files, bookmarks);
-        }
-        if (files) {
-          this.addFiles(...files);
-        }
+      return new Promise((resolve) => {
+        process.env.NODE_ENV === 'testing' ? '' : remote.dialog.showOpenDialog({
+          title: 'Open Dialog',
+          defaultPath,
+          filters: [{
+            name: 'Video Files',
+            extensions: getValidVideoExtensions(),
+          }, {
+            name: 'All Files',
+            extensions: ['*'],
+          }],
+          properties: opts,
+          securityScopedBookmarks: process.mas,
+        }, (files, bookmarks) => {
+          this.showingPopupDialog = false;
+          if (process.mas && get(bookmarks, 'length') > 0) {
+            // TODO: put bookmarks to database
+            bookmark.resolveBookmarks(files, bookmarks);
+          }
+          if (files) {
+            this.addFiles(...files).then(() => {
+              resolve();
+            });
+          }
+        });
       });
     },
     chooseSnapshotFolder(defaultName, data) {
