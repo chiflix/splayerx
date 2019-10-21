@@ -136,7 +136,6 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
       this.allAvailableChannels.push(...availableChannels);
       return this.getAllAvailableChannels();
     } catch (error) {
-      console.log(error);
       const availableChannels = displayLanguage === 'zh-Hans' ? ['bilibili.com', 'iqiyi.com', 'douyu.com'] : ['youtube.com', 'twitch.com'];
       (this.allChannels.get('adapted') as channelInfo).availableChannels = availableChannels;
       this.allAvailableChannels = availableChannels;
