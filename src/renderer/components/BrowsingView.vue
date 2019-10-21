@@ -519,7 +519,6 @@ export default {
         this.$electron.ipcRenderer.send('remove-browser');
         if (this.backToLandingView) {
           setTimeout(() => {
-            if (this.isFullScreen) this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
             windowRectService.uploadWindowBy(false, 'landing-view', undefined, undefined, this.winSize, this.winPos, this.isFullScreen);
             this.$electron.ipcRenderer.send('callMainWindowMethod', 'show');
           }, 200);
