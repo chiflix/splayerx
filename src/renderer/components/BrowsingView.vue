@@ -218,8 +218,19 @@ export default {
       this.loadingState = true;
       this.$electron.ipcRenderer.send('create-browser-view', { url: val });
     },
-    isHomePage() {
-      this.$electron.ipcRenderer.send('remove-browser-view');
+    isHomePage(val: boolean) {
+      if (val) {
+        this.currentMainBrowserView().setBounds({
+          x: 76, y: 0, width: 0, height: 0,
+        });
+      } else {
+        this.currentMainBrowserView().setBounds({
+          x: this.showSidebar ? 76 : 0,
+          y: 40,
+          width: this.showSidebar ? this.winSize[0] - 76 : this.winSize[0],
+          height: this.winSize[1] - 40,
+        });
+      }
     },
     isFullScreen(val: boolean) {
       this.$store.dispatch('updateBrowsingSize', this.winSize);
