@@ -158,6 +158,7 @@ export default {
       'channels',
       'currentChannel',
       'displayLanguage',
+      'isMaximized',
     ]),
     isDarwin() {
       return process.platform === 'darwin';
@@ -974,7 +975,7 @@ export default {
           [rect.x, rect.y, rect.width, rect.height],
         );
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [0]);
-      } else {
+      } else if (!this.isMaximized) {
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', this.browsingSize);
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', this.browsingPos);
       }

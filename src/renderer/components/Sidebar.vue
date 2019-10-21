@@ -229,8 +229,9 @@ export default {
           this.$store.dispatch('updatePipPos', data.pipPos || this.pipPos);
           this.$electron.ipcRenderer.send('add-browsing', { size: data.pipSize || this.pipSize, position: data.pipPos || this.pipPos });
         });
-        this.$electron.ipcRenderer.send('change-channel', { url, channel: newChannel });
-        this.$router.push({ name: 'browsing-view' });
+        this.$router.push({ name: 'browsing-view' }).then(() => {
+          this.$electron.ipcRenderer.send('change-channel', { url, channel: newChannel });
+        });
       }
       this.updateCurrentChannel(newChannel);
     },
