@@ -247,6 +247,8 @@
     "douyu": "Douyu",
     "twitch": "Twitch",
     "youku": "Youku",
+    "coursera": "Coursera",
+    "ted": "TED",
     "openLocalFile": " فتح ملف محلي ...",
     "enterPip": "أدخل صورة في صورة",
     "exitPip": "العودة إلى المتصفح",
@@ -261,7 +263,8 @@
     },
     "remove": "نزع",
     "siteManager": "مدير المواقع",
-    "popularSites": "المواقع الأمثل"
+    "popularSites": "المواقع الأمثل",
+    "siteTip": "اضافة / تغيير"
   },
   "preferences": {
     "general": {

@@ -247,6 +247,8 @@
     "douyu": "Douyu",
     "twitch": "Twitch",
     "youku": "Youku",
+    "coursera": "Coursera",
+    "ted": "TED",
     "openLocalFile": "로컬 파일 열기 ...",
     "enterPip": "Picture In Picture 사용",
     "exitPip": "브라우저로 돌아 가기",
@@ -261,7 +263,8 @@
     },
     "remove": "제거",
     "siteManager": "사이트 관리자",
-    "popularSites": "최적화 된 사이트"
+    "popularSites": "최적화 된 사이트",
+    "siteTip": "편집 / 추가"
   },
   "preferences": {
     "general": {

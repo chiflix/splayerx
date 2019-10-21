@@ -247,6 +247,8 @@
     "douyu": "Douyu",
     "twitch": "Twitch",
     "youku": "Youku",
+    "coursera": "Coursera",
+    "ted": "TED",
     "openLocalFile": "ローカルファイルを開く",
     "enterPip": "画中画を開じる",
     "exitPip": "ブラウザに戻る",
@@ -261,7 +263,8 @@
     },
     "remove": "削除する",
     "siteManager": "サイト管理",
-    "popularSites": "適合サイト"
+    "popularSites": "適合サイト",
+    "siteTip": "追加 / 編集"
   },
   "preferences": {
     "general": {

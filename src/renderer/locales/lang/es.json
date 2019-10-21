@@ -247,6 +247,8 @@
     "douyu": "Douyu",
     "twitch": "Twitch",
     "youku": "Youku",
+    "coursera": "Coursera",
+    "ted": "TED",
     "openLocalFile": "Abrir archivo local...",
     "enterPip": "Habilitar Picture in Picture",
     "exitPip": "Volver al navegador",
@@ -261,7 +263,8 @@
     },
     "remove": "Eliminar",
     "siteManager": "Gestor de sitios",
-    "popularSites": "Sitios optimizados"
+    "popularSites": "Sitios optimizados",
+    "siteTip": "Añadir / Editar"
   },
   "preferences": {
     "general": {
@@ -342,7 +345,7 @@
     "playlistSource": "Lista",
     "add": "Agregar a la lista de reproducción",
     "pin": "Pin la lista de reproducción para iniciar la página",
-    "pinned": "Lista de reproducción acoplada a la página de Launcing"
+    "pinned": "Lista de reproducción fijada para iniciar página"
   },
   "subtitle": {
     "embedded": "Empotrar",
