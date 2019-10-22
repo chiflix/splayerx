@@ -65,6 +65,7 @@ import { getValidVideoRegex, getValidSubtitleRegex } from '../../shared/utils';
 import MenuService from '@/services/menu/MenuService';
 import { log } from '@/libs/Log';
 import InjectJSManager from '../../shared/pip/InjectJSManager';
+import { browsingHistory } from '@/services/browsing/BrowsingHistory';
 
 export default {
   name: 'BrowsingView',
@@ -275,6 +276,8 @@ export default {
     hasVideo(val: boolean) {
       this.updatePipState(val);
       this.createTouchBar(val);
+      console.log('hasVideo', val);
+      console.log('currentUrl', this.currentUrl);
     },
     adaptFinished(val: boolean) {
       if (val) {
@@ -378,6 +381,7 @@ export default {
     },
   },
   created() {
+    console.log('brow', browsingHistory);
     if (!navigator.onLine) this.offlineHandler();
     window.addEventListener('online', this.onlineHandler);
     this.createTouchBar(false);

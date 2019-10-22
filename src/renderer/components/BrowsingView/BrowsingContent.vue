@@ -1,6 +1,9 @@
 <template>
   <div class="browsing-content">
-    <div class="home-page" v-if="isHomePage">
+    <div
+      v-if="isHomePage"
+      class="home-page"
+    >
       <h1 class="title">
         历史播放记录
       </h1>
