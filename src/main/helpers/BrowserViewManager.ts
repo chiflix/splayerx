@@ -45,7 +45,7 @@ export class BrowserViewManager implements IBrowserViewManager {
       pipPage: null,
     };
     this.history = [];
-    this.multiPagesChannel = ['youtube.com', 'iqiyi.com', 'bilibili.com', 'douyu.com', 'huya.com', 'twitch.com'];
+    this.multiPagesChannel = ['youtube.com', 'iqiyi.com', 'bilibili.com', 'douyu.com', 'huya.com', 'twitch.com', 'coursera.com', 'ted.com'];
     this.singlePageChannel = ['qq.com', 'youku.com'];
   }
 
@@ -96,7 +96,7 @@ export class BrowserViewManager implements IBrowserViewManager {
     }
 
     // 清空后退操作产生的history以及切换频道时暂停视频
-    if (this.currentChannel) {
+    if (this.currentChannel && currentHistory) {
       if (channel !== this.currentChannel) {
         const currentIndex = currentHistory.currentIndex;
         const view = currentHistory.list[currentIndex].view;
@@ -244,9 +244,11 @@ export class BrowserViewManager implements IBrowserViewManager {
     mainBrowser.page.lastUpdateTime = Date.now();
     mainBrowser.page.view.webContents.setAudioMuted(false);
     mainBrowser.page.view.webContents.removeAllListeners('media-started-playing');
-    mainBrowser.page.view.setBounds({
-      x: 76, y: 0, width: 0, height: 0,
-    });
+    if (process.platform === 'darwin') {
+      mainBrowser.page.view.setBounds({
+        x: 76, y: 0, width: 0, height: 0,
+      });
+    }
     this.browserViewCacheManager.removeCacheWhenEnterPip(this.currentChannel,
       mainBrowser.page, deletePages);
     this.pauseVideo(mainBrowser.page.view, this.currentChannel, true);
@@ -276,9 +278,11 @@ export class BrowserViewManager implements IBrowserViewManager {
       pipPage: null,
     };
     page.lastUpdateTime = Date.now();
-    page.view.setBounds({
-      x: 76, y: 0, width: 0, height: 0,
-    });
+    if (process.platform === 'darwin') {
+      page.view.setBounds({
+        x: 76, y: 0, width: 0, height: 0,
+      });
+    }
     this.browserViewCacheManager.recoverCacheWhenExitPip(pipChannel, page, deleteList);
     return {
       canBack: (this.historyByChannel.get(this.currentChannel) as ChannelData).currentIndex > 0,
@@ -312,11 +316,12 @@ export class BrowserViewManager implements IBrowserViewManager {
           .then((r: string) => {
             type = r;
             if (!currentView.webContents.isDestroyed()) {
-              currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo(channel, type));
+              currentView.webContents
+                .executeJavaScript(InjectJSManager.pauseVideo(pausedChannel, type));
             }
           });
       } else {
-        currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('normal'));
+        currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo());
       }
     }
     if (!enterPip) {
@@ -329,10 +334,11 @@ export class BrowserViewManager implements IBrowserViewManager {
             .executeJavaScript(InjectJSManager.pipFindType(channel))
             .then((r: string) => {
               type = r;
-              currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo(channel, type));
+              currentView.webContents
+                .executeJavaScript(InjectJSManager.pauseVideo(pausedChannel, type));
             });
         } else {
-          currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('normal'));
+          currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo());
         }
       });
     } else if (currentView.webContents.isLoading()) {
@@ -345,10 +351,11 @@ export class BrowserViewManager implements IBrowserViewManager {
             .executeJavaScript(InjectJSManager.pipFindType(channel))
             .then((r: string) => {
               type = r;
-              currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo(channel, type));
+              currentView.webContents
+                .executeJavaScript(InjectJSManager.pauseVideo(pausedChannel, type));
             });
         } else {
-          currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo('normal'));
+          currentView.webContents.executeJavaScript(InjectJSManager.pauseVideo());
         }
       });
     }
@@ -380,6 +387,11 @@ export class BrowserViewManager implements IBrowserViewManager {
     if (isDeepClear) {
       this.historyByChannel.clear();
     }
+  }
+
+  public clearBrowserViewsByChannel(channel: string): void {
+    this.browserViewCacheManager.clearCacheByChannel(channel);
+    this.historyByChannel.delete(channel);
   }
 
   private jump(left: boolean): BrowserViewData {
@@ -420,9 +432,11 @@ export class BrowserViewManager implements IBrowserViewManager {
       result.page,
       this.multiPagesChannel.includes(this.currentChannel),
     );
-    result.page.view.setBounds({
-      x: 76, y: 0, width: 0, height: 0,
-    });
+    if (process.platform === 'darwin') {
+      result.page.view.setBounds({
+        x: 76, y: 0, width: 0, height: 0,
+      });
+    }
     return result;
   }
 
@@ -459,4 +473,5 @@ export interface IBrowserViewManager {
   pipClose(): void
   pauseVideo(view?: BrowserView, currentChannel?: string, enterPip?: boolean): void
   clearAllBrowserViews(isDeepClear?: boolean): void
+  clearBrowserViewsByChannel(channel: string): void
 }

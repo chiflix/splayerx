@@ -107,7 +107,7 @@ export default {
       setTimeout(() => {
         if (this.currentMousedownComponent !== 'notification-bubble' && val !== '') {
           if (this.lastDragging || (this.currentMousedownComponent === this.$options.name
-              && val === 'the-video-controller')) {
+              && val === 'TheVideoController')) {
             if (this.showAttached) {
               this.anim.playSegments([68, 73], true);
               this.$emit('update:lastDragging', false);

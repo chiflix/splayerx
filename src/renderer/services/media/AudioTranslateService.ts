@@ -219,6 +219,4 @@ class AudioTranslateService extends EventEmitter {
 }
 export default AudioTranslateService;
 
-const audioTranslateService = new AudioTranslateService(mediaStorageService);
-
-export { audioTranslateService };
+export const audioTranslateService = new AudioTranslateService(mediaStorageService);

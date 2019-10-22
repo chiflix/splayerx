@@ -208,17 +208,6 @@
       "playInNewWindow": "Play in New Window",
       "backToBrowser": "Back to Browser"
     },
-    "favourite": {
-      "name": "Channel",
-      "iqiyi": "iQIYI",
-      "bilibili": "Bilibili",
-      "douyu": "Douyu",
-      "huya": "Huya",
-      "qq": "Tencent Video",
-      "twitch": "Twitch",
-      "youku": "Youku",
-      "youtube": "YouTube"
-    },
     "edit": {
       "name": "Edit",
       "cut": "Cut",
@@ -259,6 +248,8 @@
     "douyu": "Douyu",
     "twitch": "Twitch",
     "youku": "Youku",
+    "coursera": "Coursera",
+    "ted": "TED",
     "openLocalFile": "Open Local File ...",
     "enterPip": "Enter Picture in Picture",
     "exitPip": "Back to Browser",
@@ -270,7 +261,11 @@
       "try": "Try:",
       "firstLine": "Checking the network cables, modem, and router",
       "secondLine": "Reconnecting to Wi-Fi"
-    }
+    },
+    "remove": "Remove",
+    "siteManager": "Site Manager",
+    "popularSites": "Optimized Sites",
+    "siteTip": "Add / Edit"
   },
   "preferences": {
     "general": {
@@ -350,7 +345,8 @@
     "paused": "Paused",
     "playlistSource": "Playlist",
     "add": "Add To Playlist",
-    "pin": "Pin the Playlist to Launching Page"
+    "pin": "Pin the Playlist to Launching Page",
+    "pinned": "Playlist Pinned to Launching Page"
   },
   "subtitle": {
     "embedded": "Embed",
@@ -444,7 +440,7 @@
     },
     "PermissionFail": {
       "title": "Uses Remaining Today: 0",
-      "content": "Upgrade now to resume the VIP experience for getting 10 hours of AI Translation per day and more advanced features."
+      "content": "Sorry, you can only generate one AI Translation result per day."
     },
     "loading": "Processing ...",
     "cancel": "Cancel",
@@ -452,7 +448,7 @@
     "generate": "Generate",
     "ok": "Run in Background",
     "continue": "Cancel",
-    "upgrade": "Upgrade"
+    "upgrade": "OK"
   },
   "translateBubble": {
     "bubbleWhenGrab": "AI Translation will be aborted If you go on, do you want to continue anyway?",
@@ -484,7 +480,7 @@
     },
     "bubbleTranslatePermissionFail": {
       "title": "Uses Remaining Today: 0",
-      "content": "Upgrade now to resume the VIP experience for getting 10 hours of AI Translation per day and more advanced features."
+      "content": "Sorry, you can only generate one AI Translation result per day."
     },
     "ok": "OK",
     "cancel": "Cancel",

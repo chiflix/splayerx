@@ -47,16 +47,38 @@ export default {
     finalEffect() {
       return this.effect ? this.effect : 'icon';
     },
-    elementId() {
-      return `${this.type}-${this.finalState}-${this.finalEffect}`;
-    },
   },
   watch: {
-    elementId: {
+    type: {
       immediate: true,
-      handler(newId: string) {
-        // eslint-disable-next-line import/no-dynamic-require
-        if (newId && !document.getElementById(newId)) require(`@/assets/icon/${newId}.svg`);
+      handler(type: string) {
+        const defaultIcon = `${type}-${this.finalState}-${this.finalEffect}`;
+        const hoverIcon = `${type}-hover-${this.finalEffect}`;
+        const activeIcon = `${type}-active-${this.finalEffect}`;
+        if (type && !document.getElementById(defaultIcon)) {
+          try {
+            // eslint-disable-next-line import/no-dynamic-require
+            require(`@/assets/icon/${defaultIcon}.svg`);
+          } catch (error) {
+            // empty
+          }
+        }
+        if (type && !document.getElementById(hoverIcon)) {
+          try {
+            // eslint-disable-next-line import/no-dynamic-require
+            require(`@/assets/icon/${hoverIcon}.svg`);
+          } catch (error) {
+            // empty
+          }
+        }
+        if (type && !document.getElementById(activeIcon)) {
+          try {
+            // eslint-disable-next-line import/no-dynamic-require
+            require(`@/assets/icon/${activeIcon}.svg`);
+          } catch (error) {
+            // empty
+          }
+        }
       },
     },
   },
@@ -561,8 +583,12 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   width: 30px;
   height: 30px;
 }
-.bilibiliSidebar, .iqiyiSidebar, .youtubeSidebar,
-.douyuSidebar, .huyaSidebar, .qqSidebar, .youkuSidebar, .twitchSidebar {
+.channelSelected {
+  width: 10px;
+  height: 10px;
+}
+.bilibiliSidebar, .iqiyiSidebar, .youtubeSidebar, .channelManage, .courseraSidebar,
+.douyuSidebar, .huyaSidebar, .qqSidebar, .youkuSidebar, .twitchSidebar, .tedSidebar {
   width: 44px;
   height: 44px;
 }

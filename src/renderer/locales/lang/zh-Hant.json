@@ -207,17 +207,6 @@
       "playInNewWindow": "在新視窗播放",
       "backToBrowser": "還原窗口"
     },
-    "favourite": {
-      "name": "頻道",
-      "iqiyi": "爱奇艺",
-      "bilibili": "哔哩哔哩",
-      "douyu": "斗鱼",
-      "huya": "虎牙",
-      "qq": "腾讯視頻",
-      "twitch": "Twitch",
-      "youku": "优酷",
-      "youtube": "YouTube"
-    },
     "edit": {
       "name": "編輯",
       "cut": "剪切",
@@ -258,6 +247,8 @@
     "douyu": "斗鱼",
     "twitch": "Twitch",
     "youku": "优酷",
+    "coursera": "Coursera",
+    "ted": "TED",
     "openLocalFile": "打開本地文件 ...",
     "enterPip": "進入畫中畫",
     "exitPip": "還原窗口",
@@ -269,12 +260,15 @@
       "try": "請試試以下辦法：",
       "firstLine": "檢查網線、調製解調器和路由器",
       "secondLine": "重新連接到 Wi-Fi 網絡"
-    }
+    },
+    "remove": "移除",
+    "siteManager": "站點管理",
+    "popularSites": "已適配站點",
+    "siteTip": "新增 / 編輯"
   },
   "preferences": {
     "general": {
       "hideHistory": "隱藏曆史記錄",
-      "clearHistory": "退出時自動清空播放記錄",
       "reverseScrolling": "鼠標滾輪調節音量反向",
       "setDefault": "設為默認播放器",
       "setDefaultDescription": "所有視頻文件都自動使用 SPlayer 打開。",
@@ -301,10 +295,10 @@
     },
     "privacy": {
       "privacySetting": "隱私設置",
-      "enable": "啟用隱私保護",
-      "smartDescription": "離線識別不宜在工作或公眾場合瀏覽的敏感內容，並在自動加載同目錄文件或退出時抹除相關痕跡。",
       "incognitoMode": "無痕模式",
-      "incognitoDescription": "開啟後將不再保留任何新的播放記錄。"
+      "incognitoDescription": "開啟後將不再保留任何新的播放記錄。",
+      "clearHistory": "清空播放記錄",
+      "clearHistoryDescription": "清除已有的播放列表和歷史記錄"
     }
   },
   "privacyBubble": {
@@ -349,7 +343,9 @@
     "playing": "正在播放",
     "paused": "已暫停",
     "playlistSource": "播放列表",
-    "add": "添加到播放清單"
+    "add": "添加到播放清單",
+    "pin": "保留此播放列表至啟動頁",
+    "pinned": "已保留此播放列表至啟動頁"
   },
   "subtitle": {
     "embedded": "內嵌",

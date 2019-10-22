@@ -537,11 +537,6 @@ export default class Menubar {
       menubar.append(preference);
     }
 
-    // Favourite
-    const favouriteMenuItem = this.createFavouriteMenu();
-
-    menubar.append(favouriteMenuItem);
-
     // Window
     const windowMenu = new Menu();
 
@@ -602,6 +597,9 @@ export default class Menubar {
         } else if (item.id === 'file.openRecent') {
           const menuItem = item as IMenubarMenuItemSubmenu;
           menubar.append(this.createSubMenuItem(menuItem));
+        } else if (item.id === 'file.clearHistory') {
+          const menuItem = item as IMenubarMenuItemAction;
+          menubar.append(this.createMenuItem(menuItem));
         } else if (item.id === 'file.closeWindow') {
           const menuItem = item as IMenubarMenuItemRole;
           menubar.append(this.createRoleMenuItem(menuItem));
@@ -840,11 +838,6 @@ export default class Menubar {
   private createHistoryMenu() {
     const historyMenu = this.convertFromMenuItemTemplate('history');
     return new MenuItem({ id: 'history', label: this.$t('msg.history.name'), submenu: historyMenu });
-  }
-
-  private createFavouriteMenu() {
-    const favouriteMenu = this.convertFromMenuItemTemplate('favourite');
-    return new MenuItem({ id: 'favourite', label: this.$t('msg.favourite.name'), submenu: favouriteMenu });
   }
 
   private createBrowsingWindowMenu() {

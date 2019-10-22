@@ -12,7 +12,6 @@ import http from 'http';
 import rimraf from 'rimraf';
 import { audioGrabService } from './helpers/AudioGrabService';
 import './helpers/electronPrototypes';
-import writeLog from './helpers/writeLog';
 import {
   getValidVideoRegex, getValidSubtitleRegex,
   getToken, saveToken,
@@ -95,8 +94,8 @@ const locale = new Locale();
 const tmpVideoToOpen = [];
 const tmpSubsToOpen = [];
 const subRegex = getValidSubtitleRegex();
-const allChannels = ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch'];
-const compareStr = [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch']];
+const allChannels = ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch', 'coursera', 'ted'];
+const compareStr = [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch'], ['coursera'], ['ted']];
 const titlebarUrl = process.platform === 'darwin' ? `file:${resolve(__static, 'pip/macTitlebar.html')}` : `file:${resolve(__static, 'pip/winTitlebar.html')}`;
 const maskUrl = process.platform === 'darwin' ? `file:${resolve(__static, 'pip/mask.html')}` : `file:${resolve(__static, 'pip/mask.html')}`;
 const mainURL = process.env.NODE_ENV === 'development'
@@ -611,8 +610,8 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('pip-window-fullscreen', () => {
     if (browsingWindow && browsingWindow.isFocused()) {
       browsingWindow.setFullScreen(!browsingWindow.isFullScreen());
-      titlebarView.webContents
-        .executeJavaScript(InjectJSManager.updateFullScreenIcon(browsingWindow.isFullScreen()));
+      titlebarView.webContents.executeJavaScript(InjectJSManager
+        .updateFullScreenIcon(browsingWindow.isFullScreen(), isBrowsingWindowMax));
     }
   });
   ipcMain.on('pip-window-close', (evt, args) => {
@@ -629,11 +628,16 @@ function registerMainWindowEvent(mainWindow) {
     browserViewManager.pauseVideo(mainWindow.getBrowserViews()[0]);
     mainWindow.hide();
   });
+  ipcMain.on('clear-browsers-by-channel', (evt, channel) => {
+    if (!browserViewManager) return;
+    browserViewManager.clearBrowserViewsByChannel(channel);
+  });
   ipcMain.on('remove-browser', () => {
+    if (!browserViewManager) return;
+    if (mainWindow.getBrowserViews().length) browserViewManager.pauseVideo();
     mainWindow.getBrowserViews()
       .forEach(mainWindowView => mainWindow.removeBrowserView(mainWindowView));
     if (mainWindow.isMaximized()) mainWindow.unmaximize();
-    browserViewManager.pauseVideo();
     if (browsingWindow) {
       const views = browsingWindow.getBrowserViews();
       views.forEach((view) => {
@@ -800,7 +804,8 @@ function registerMainWindowEvent(mainWindow) {
     }
   });
   ipcMain.on('update-full-state', (evt, isFullScreen) => {
-    titlebarView.webContents.executeJavaScript(InjectJSManager.updateFullScreenIcon(isFullScreen));
+    titlebarView.webContents.executeJavaScript(InjectJSManager
+      .updateFullScreenIcon(isFullScreen, isBrowsingWindowMax));
   });
   ipcMain.on('mouseup', (evt, type) => {
     switch (type) {
@@ -812,13 +817,15 @@ function registerMainWindowEvent(mainWindow) {
         break;
       case 'full':
         browsingWindow.setFullScreen(true);
-        titlebarView.webContents.executeJavaScript(InjectJSManager.updateFullScreenIcon(true));
+        titlebarView.webContents.executeJavaScript(InjectJSManager
+          .updateFullScreenIcon(true, isBrowsingWindowMax));
         break;
       case 'recover':
         browsingWindow.setFullScreen(false);
         browsingWindow.getBrowserViews()[0].webContents
           .executeJavaScript(InjectJSManager.changeFullScreen(false));
-        titlebarView.webContents.executeJavaScript(InjectJSManager.updateFullScreenIcon(false));
+        titlebarView.webContents.executeJavaScript(InjectJSManager
+          .updateFullScreenIcon(false, isBrowsingWindowMax));
         break;
       case 'max':
         if (browsingWindow.isMaximized()) {
@@ -1052,8 +1059,8 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('key-events', (e, keyCode) => {
     if (keyCode === 13) {
       browsingWindow.setFullScreen(!browsingWindow.isFullScreen());
-      titlebarView.webContents
-        .executeJavaScript(InjectJSManager.updateFullScreenIcon(browsingWindow.isFullScreen()));
+      titlebarView.webContents.executeJavaScript(InjectJSManager
+        .updateFullScreenIcon(browsingWindow.isFullScreen(), isBrowsingWindowMax));
     } else {
       browsingWindow.getBrowserViews()[0].webContents
         .executeJavaScript(InjectJSManager.emitKeydownEvent(keyCode));
@@ -1091,10 +1098,6 @@ function registerMainWindowEvent(mainWindow) {
     mainWindow.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
     mainWindow.webContents.send('mainCommit', 'isFullScreen', mainWindow.isFullScreen());
     mainWindow.webContents.send('mainCommit', 'isFocused', mainWindow.isFocused());
-  });
-  ipcMain.on('writeLog', (event, level, log) => { // eslint-disable-line complexity
-    if (!log) return;
-    writeLog(level, log);
   });
   ipcMain.on('need-to-restore', () => {
     needToRestore = true;
