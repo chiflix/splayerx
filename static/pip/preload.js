@@ -133,6 +133,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
           }
           break;
+        case url.includes('lynda'):
+          if (['mejs-captions-text', 'player', 'mejs-overlay', 'mejs-captions-position', 'mejs-captions-layer'].includes(evt.target.classList[0])) {
+            offset = [evt.clientX, evt.clientY];
+            if (getRatio() !== 1) {
+              windowSize = remote.getCurrentWindow().getSize();
+            }
+          }
+          break;
         default:
           offset = [evt.clientX, evt.clientY];
           if (getRatio() !== 1) {

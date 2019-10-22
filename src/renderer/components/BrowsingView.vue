@@ -129,8 +129,8 @@ export default {
         canGoBack: false,
         canReload: true,
       },
-      allChannels: ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch', 'coursera', 'ted'],
-      compareStr: [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch'], ['coursera'], ['ted']],
+      allChannels: ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch', 'coursera', 'ted', 'lynda'],
+      compareStr: [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch'], ['coursera'], ['ted'], ['lynda']],
       hideMainWindow: false,
       startLoadUrl: '',
       barrageOpenByPage: false,
@@ -166,8 +166,6 @@ export default {
     pipArgs() {
       const barrageState = this.isPip ? this.barrageOpenByPage : this.barrageOpen;
       switch (this.pipChannel) {
-        case 'youtube':
-          return { channel: 'youtube' };
         case 'bilibili':
           return {
             channel: 'bilibili', type: this.pipType, barrageState, winSize: this.pipSize,
@@ -189,9 +187,10 @@ export default {
         case 'twitch':
           return { channel: 'twitch', type: this.pipType, winSize: this.pipSize };
         case 'coursera':
-          return { channel: 'coursera' };
+        case 'youtube':
         case 'ted':
-          return { channel: 'ted' };
+        case 'lynda':
+          return { channel: this.pipChannel };
         case 'others':
           return { channel: 'others', winSize: this.pipSize };
         default:
@@ -269,7 +268,7 @@ export default {
     adaptFinished(val: boolean) {
       if (val) {
         this.updatePipChannel(this.currentChannel);
-        const opacity = ['youtube', 'others', 'coursera', 'ted'].includes(this.pipChannel)
+        const opacity = ['youtube', 'others', 'coursera', 'ted', 'lynda'].includes(this.pipChannel)
           || (this.pipChannel === 'bilibili' && this.pipType === 'others')
           || (this.pipChannel === 'qq' && this.pipType !== 'normal')
           ? 0.2
