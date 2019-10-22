@@ -139,5 +139,6 @@ export const Browsing = {
 
 export const UserInfo = {
   UPDATE_USER_INFO: 'UPDATE_USER_INFO',
+  UPDATE_USER_TOKEN: 'UPDATE_USER_TOKEN',
   UPDATE_SIGN_IN_CALLBACK: 'UPDATE_SIGN_IN_CALLBACK',
 };

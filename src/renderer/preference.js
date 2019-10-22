@@ -1,14 +1,18 @@
 import Vue from 'vue';
-import Vuex from 'vuex';
+import Vuex, { mapActions } from 'vuex';
 import VueRouter from 'vue-router';
 import VueI18n from 'vue-i18n';
-import electron from 'electron';
+import electron, { ipcRenderer, remote } from 'electron';
 import osLocale from 'os-locale';
 import { hookVue } from '@/kerning';
 import messages from '@/locales';
 import store from '@/store';
 import Preference from '@/components/Preference.vue';
+import {
+  UserInfo as uActions,
+} from '@/store/actionTypes';
 import '@/css/style.scss';
+import { getUserInfo, setToken, getGeoIP } from '@/libs/apis';
 
 Vue.use(VueI18n);
 Vue.use(Vuex);
@@ -46,6 +50,16 @@ const routes = [
     name: 'Translate',
     component: require('@/components/Preferences/Translate.vue').default,
   },
+  {
+    path: '/account',
+    name: 'Account',
+    component: require('@/components/Preferences/Account.vue').default,
+  },
+  {
+    path: '/premium',
+    name: 'Premium',
+    component: require('@/components/Preferences/Premium.vue').default,
+  },
 ];
 
 const router = new VueRouter({
@@ -64,10 +78,56 @@ new Vue({
   i18n,
   router,
   components: { Preference },
-  data: {},
+  data: {
+    didGetUserInfo: false,
+  },
   store,
   mounted() {
     this.$store.commit('getLocalPreference');
+    // sign in success
+    ipcRenderer.on('sign-in', (e, account) => {
+      this.updateUserInfo(account);
+      if (account) {
+        setToken(account.token);
+        this.updateToken(account.token);
+        this.getUserInfo();
+      } else {
+        setToken('');
+        this.updateToken('');
+        this.didGetUserInfo = false;
+      }
+    });
+
+    // load global data when sign in is opend
+    const account = remote.getGlobal('account');
+    this.updateUserInfo(account);
+    if (account && account.token) {
+      this.updateToken(account.token);
+      setToken(account.token);
+      this.getUserInfo();
+    }
+
+    getGeoIP().then((res) => {
+      this.$store.dispatch('updateGeo', res);
+    }).catch(() => {
+      // empty
+    });
+  },
+  methods: {
+    ...mapActions({
+      updateUserInfo: uActions.UPDATE_USER_INFO,
+      updateToken: uActions.UPDATE_USER_TOKEN,
+    }),
+    async getUserInfo() {
+      if (this.didGetUserInfo) return;
+      try {
+        const res = await getUserInfo();
+        this.updateUserInfo(res.me);
+        this.didGetUserInfo = true;
+      } catch (error) {
+        // empty
+      }
+    },
   },
   template: '<Preference/>',
 }).$mount('#app');

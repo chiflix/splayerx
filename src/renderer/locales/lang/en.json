@@ -300,6 +300,20 @@
       "incognitoDescription": "Your playback history will not be stored anymore.",
       "clearHistory": "Clear Playback History",
       "clearHistoryDescription": "Remove existing playlists and playback history"
+    },
+    "account": {
+      "accountSetting": "Account",
+      "title": "My Profile",
+      "noToken": {
+        "title": "Not Signed In",
+        "description": "Sign in with your phone number to use AI Translation and more advanced features. ",
+        "button": "Sign In"
+      }
+    },
+    "premium": {
+      "premiumSetting": "Premium",
+      "title": "Splayer VIP Privilege",
+      "description": "In order to achieve stable and sustainable development for a long time, users are welcome to support the shooter audio and"
     }
   },
   "privacyBubble": {

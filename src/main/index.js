@@ -1,7 +1,7 @@
 // Be sure to call Sentry function as early as possible in the main process
 import '../shared/sentry';
 
-import { app, BrowserWindow, session, Tray, ipcMain, globalShortcut, nativeImage, splayerx, systemPreferences, BrowserView, webContents } from 'electron' // eslint-disable-line
+import { app, BrowserWindow, session, Tray, ipcMain, globalShortcut, nativeImage, splayerx, systemPreferences, BrowserView, webContents, inAppPurchase } from 'electron' // eslint-disable-line
 import { throttle, debounce, uniq } from 'lodash';
 import os from 'os';
 import path, {
@@ -90,6 +90,7 @@ let finalVideoToOpen = [];
 let signInEndPoint = '';
 let localHostPort = 0;
 let fileDirServerOnLine = false;
+let applePayProductID = '';
 const locale = new Locale();
 const tmpVideoToOpen = [];
 const tmpSubsToOpen = [];
@@ -1516,6 +1517,9 @@ app.on('sign-in', (account) => {
   if (mainWindow && !mainWindow.webContents.isDestroyed()) {
     mainWindow.webContents.send('sign-in', account);
   }
+  if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
+    preferenceWindow.webContents.send('sign-in', account);
+  }
 });
 
 app.on('sign-out-confirm', () => {
@@ -1531,6 +1535,9 @@ app.on('sign-out', () => {
   saveToken('');
   if (mainWindow && !mainWindow.webContents.isDestroyed()) {
     mainWindow.webContents.send('sign-in', undefined);
+  }
+  if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
+    preferenceWindow.webContents.send('sign-in', undefined);
   }
 });
 
@@ -1548,3 +1555,87 @@ app.getSignInEndPoint = () => signInEndPoint;
 getRightPort().then((port) => {
   localHostPort = port;
 }).catch(console.error);
+
+// Listen for transactions as soon as possible.
+inAppPurchase.on('transactions-updated', (event, transactions) => {
+  if (!Array.isArray(transactions)) {
+    return;
+  }
+  // Check each transaction.
+  transactions.forEach((transaction) => {
+    const payment = transaction.payment;
+    switch (transaction.transactionState) {
+      case 'purchasing':
+        console.log(`Purchasing ${payment.productIdentifier}...`);
+        break;
+      case 'purchased':
+        console.log(`${payment.productIdentifier} purchased.`);
+        // Get the receipt url.
+        // eslint-disable-next-line no-case-declarations
+        let receipt = '';
+        try {
+          receipt = fs.readFileSync(inAppPurchase.getReceiptURL()).toString();
+        } catch (error) {
+          // empty
+          console.log(error);
+        }
+        // Finish the transaction.
+        inAppPurchase.finishTransactionByDate(transaction.transactionDate);
+        if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
+          preferenceWindow.webContents.send('applePay-success', {
+            id: applePayProductID,
+            productID: payment.productIdentifier,
+            receipt,
+            transactionID: transaction.transactionIdentifier,
+          });
+        }
+        break;
+      case 'failed':
+        console.log(`Failed to purchase ${payment.productIdentifier}.`);
+        // Finish the transaction.
+        inAppPurchase.finishTransactionByDate(transaction.transactionDate);
+        if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
+          preferenceWindow.webContents.send('applePay-fail', 'not support');
+        }
+        break;
+      case 'restored':
+        console.log(`The purchase of ${payment.productIdentifier} has been restored.`);
+        break;
+      case 'deferred':
+        console.log(`The purchase of ${payment.productIdentifier} has been deferred.`);
+        break;
+      default:
+        break;
+    }
+  });
+});
+
+// apple pay
+app.applePay = (product, id, quantity, callback) => {
+  applePayProductID = id;
+  // Check if the user is allowed to make in-app purchase.
+  if (!inAppPurchase.canMakePayments()) {
+    if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
+      preferenceWindow.webContents.send('applePay-fail', 'not support');
+    }
+    return;
+  }
+  // Retrieve and display the product descriptions.
+  inAppPurchase.getProducts([product], (products) => {
+    // Check the parameters.
+    if (!Array.isArray(products) || products.length <= 0) {
+      if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
+        preferenceWindow.webContents.send('applePay-fail', 'Unable to retrieve the product informations.');
+      }
+      return;
+    }
+
+    // Display the name and price of each product.
+    products.forEach((product) => {
+      console.log(`The price of ${product.localizedTitle} is ${product.formattedPrice}.`);
+    });
+
+    // Purchase the selected product.
+    inAppPurchase.purchaseProduct(product, quantity, callback);
+  });
+};

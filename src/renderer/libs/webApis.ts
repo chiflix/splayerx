@@ -32,7 +32,8 @@ const fetcher = new Fetcher({
 });
 
 // @ts-ignore
-const endpoint = window.remote && window.remote.app.getSignInEndPoint();
+// const endpoint = window.remote && window.remote.app.getSignInEndPoint();
+const endpoint = 'http://192.168.88.135:1024';
 
 /**
  * @description get IP && geo data from server

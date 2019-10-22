@@ -132,10 +132,7 @@ export default {
       if (account) {
         setToken(account.token);
         sagi.setToken(account.token);
-        if (!this.checkedToken) {
-          this.checkedToken = true;
-          checkToken();
-        }
+        this.updateToken(account.token);
         // sign in success, callback
         if (this.signInCallback) {
           this.signInCallback();
@@ -143,6 +140,7 @@ export default {
         }
       } else {
         setToken('');
+        this.updateToken('');
         sagi.setToken('');
       }
     });
@@ -159,19 +157,22 @@ export default {
       }
     });
     // load global data when sign in is opend
-    // const account = remote.getGlobal('account');
-    // this.updateUserInfo(account);
-    // if (account && account.token) {
-    //   setToken(account.token);
-    //   sagi.setToken(account.token);
-    //   // resfrsh
-    //   checkToken();
-    // }
+    const account = remote.getGlobal('account');
+    this.updateUserInfo(account);
+    if (account && account.token) {
+      setToken(account.token);
+      this.updateToken(account.token);
+      sagi.setToken(account.token);
+      // resfrsh
+      this.checkedToken = true;
+      checkToken();
+    }
   },
   methods: {
     ...mapActions({
       resetManager: smActions.resetManager,
       updateUserInfo: uActions.UPDATE_USER_INFO,
+      updateToken: uActions.UPDATE_USER_TOKEN,
       removeCallback: uActions.UPDATE_SIGN_IN_CALLBACK,
       showTranslateBubble: atActions.AUDIO_TRANSLATE_SHOW_BUBBLE,
       addTranslateBubbleCallBack: atActions.AUDIO_TRANSLATE_BUBBLE_CALLBACK,
