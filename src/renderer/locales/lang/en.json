@@ -400,7 +400,8 @@
     "audioLanguageLoadFail": "Connection failed, please try later",
     "select": {
       "title": "AI Translation",
-      "content": "Select the language you hear in the video and click the generate button. You can generate one AI Translation for free per day."
+      "content": "Select the language you hear in the video and click the generate button.",
+      "contentLimit": "Select the language you hear in the video and click the generate button. You can generate one AI Translation for free per day."
     },
     "translate": {
       "title": "About {time} Left",

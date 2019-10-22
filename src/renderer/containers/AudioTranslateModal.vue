@@ -45,7 +45,8 @@
         {{ $t('translateModal.translate.title', { time: estimateTimeText }) }}
       </h1>
       <p v-if="!isProgress && !isConfirmCancelTranlate">
-        {{ $t('translateModal.select.content') }}
+        {{ isTranslateLimit ? $t('translateModal.select.contentLimit')
+          : $t('translateModal.select.content') }}
       </p>
       <p v-else-if="isConfirmCancelTranlate">
         {{ $t('translateModal.discard.content') }}
@@ -190,8 +191,8 @@ import Select from '@/components/PlayingView/Select.vue';
 import Icon from '@/components/BaseIconContainer.vue';
 import Progress from '@/components/PlayingView/Progress.vue';
 import { AudioTranslateStatus, AudioTranslateFailType } from '../store/modules/AudioTranslate';
-import { getJsonConfig, forceRefresh } from '@/helpers/featureSwitch';
-import { log } from '../libs/Log';
+import { getJsonConfig, forceRefresh, isTranslateLimit } from '@/helpers/featureSwitch';
+import { log } from '@/libs/Log';
 
 export default Vue.extend({
   name: 'AudioTranslateModal',
@@ -214,6 +215,7 @@ export default Vue.extend({
       isConfirmCancelTranlate: false,
       didGrab: false, // 是否提取音频，区分听写和机翻
       loadConfigCatCompleted: false,
+      isTranslateLimit: false,
     };
   },
   computed: {
@@ -329,8 +331,9 @@ export default Vue.extend({
       }
     },
   },
-  mounted() {
+  async mounted() {
     this.refreshConfig();
+    this.isTranslateLimit = await isTranslateLimit();
   },
   methods: {
     ...mapActions({
