@@ -1,7 +1,6 @@
 import { IBrowsingChannelManager } from '@/interfaces/IBrowsingChannelManager';
 import { getGeoIP } from '@/libs/apis';
 
-
 type channelInfo = {
   channels: channelDetails[],
   availableChannels: string[],
@@ -131,12 +130,12 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
   public async getDefaultChannelsByCountry(displayLanguage: string): Promise<channelDetails[]> {
     try {
       const geo = await getGeoIP();
-      const availableChannels = geo.countryCode === 'CN' ? ['bilibili.com', 'iqiyi.com', 'douyu.com'] : ['youtube.com', 'twitch.com'];
+      const availableChannels = geo.countryCode === 'CN' ? ['bilibili.com', 'douyu.com', 'iqiyi.com'] : ['youtube.com', 'twitch.com'];
       (this.allChannels.get('adapted') as channelInfo).availableChannels = availableChannels;
       this.allAvailableChannels.push(...availableChannels);
       return this.getAllAvailableChannels();
     } catch (error) {
-      const availableChannels = displayLanguage === 'zh-Hans' ? ['bilibili.com', 'iqiyi.com', 'douyu.com'] : ['youtube.com', 'twitch.com'];
+      const availableChannels = displayLanguage === 'zh-Hans' ? ['bilibili.com', 'douyu.com', 'iqiyi.com'] : ['youtube.com', 'twitch.com'];
       (this.allChannels.get('adapted') as channelInfo).availableChannels = availableChannels;
       this.allAvailableChannels = availableChannels;
       return this.getAllAvailableChannels();
