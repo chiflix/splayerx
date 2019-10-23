@@ -114,18 +114,18 @@ describe('PlayInfoStorageService logic service', () => {
   describe('PLayInfoService - getAllRecentPlayed', () => {
     it('should get sorted result from recent-played', async () => {
       const getAllResults = [
-        { lastOpened: 1 },
-        { lastOpened: 3 },
-        { lastOpened: 2 },
-        { lastOpened: 4 },
+        { lastOpened: 1, items: [1, 2] },
+        { lastOpened: 3, items: [1, 2] },
+        { lastOpened: 2, items: [1, 2] },
+        { lastOpened: 4, items: [1, 2] },
       ];
       sinon.stub(info, 'getAll').returns(getAllResults);
       const results = await playInfoStorageService.getAllRecentPlayed();
       const expectResults = [
-        { lastOpened: 4 },
-        { lastOpened: 3 },
-        { lastOpened: 2 },
-        { lastOpened: 1 },
+        { lastOpened: 4, items: [1, 2] },
+        { lastOpened: 3, items: [1, 2] },
+        { lastOpened: 2, items: [1, 2] },
+        { lastOpened: 1, items: [1, 2] },
       ];
       expect(results).to.deep.equal(expectResults);
     });

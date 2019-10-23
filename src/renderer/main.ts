@@ -7,14 +7,9 @@ import fs from 'fs';
 import electron, { ipcRenderer } from 'electron';
 import Vue from 'vue';
 import VueI18n from 'vue-i18n';
-import axios from 'axios';
 import { mapGetters, mapActions, createNamespacedHelpers } from 'vuex';
-import uuidv4 from 'uuid/v4';
 import osLocale from 'os-locale';
-import VueAxios from 'vue-axios';
 import { throttle } from 'lodash';
-// @ts-ignore
-import VueElectronJSONStorage from 'vue-electron-json-storage';
 // @ts-ignore
 import VueAnalytics from 'vue-analytics';
 // @ts-ignore
@@ -44,31 +39,20 @@ import { checkForUpdate } from '@/libs/utils';
 import asyncStorage from '@/helpers/asyncStorage';
 import { videodata } from '@/store/video';
 import { addBubble } from '@/helpers/notificationControl';
+import { isAccountEnabled } from '@/helpers/featureSwitch';
 import { CHECK_FOR_UPDATES_OFFLINE, REQUEST_TIMEOUT } from '@/helpers/notificationcodes';
 import { SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, LOAD_SUBVIDEO_FAILED } from './helpers/notificationcodes';
 import InputPlugin, { getterTypes as iGT } from '@/plugins/input';
 import { VueDevtools } from './plugins/vueDevtools.dev';
 import { ISubtitleControlListItem, Type, NOT_SELECTED_SUBTITLE } from './interfaces/ISubtitle';
-import { getValidSubtitleRegex } from '../shared/utils';
+import { getValidSubtitleRegex, getSystemLocale, getClientUUID } from '../shared/utils';
 import { isWindowsExE, isMacintoshDMG } from '../shared/common/platform';
 import MenuService from './services/menu/MenuService';
+import BrowsingChannelMenu from './services/browsing/BrowsingChannelMenu';
 
 
 // causing callbacks-registry.js 404 error. disable temporarily
 // require('source-map-support').install();
-
-function getSystemLocale() {
-  const { app } = electron.remote;
-  let locale = process.platform === 'win32' ? app.getLocale() : osLocale.sync();
-  locale = locale.replace('_', '-');
-  if (locale === 'zh-TW' || locale === 'zh-HK' || locale === 'zh-Hant') {
-    return 'zh-Hant';
-  }
-  if (locale.startsWith('zh')) {
-    return 'zh-Hans';
-  }
-  return 'en';
-}
 
 function getEnvironmentName() {
   if (process.platform === 'darwin') {
@@ -115,8 +99,6 @@ Vue.directive('fade-in', {
 
 Vue.use(VueElectron);
 Vue.use(VueI18n);
-Vue.use(VueElectronJSONStorage);
-Vue.use(VueAxios, axios);
 Vue.use(AsyncComputed);
 Vue.use(VueAnalytics, {
   id: (process.env.NODE_ENV === 'production') ? 'UA-2468227-6' : 'UA-2468227-5',
@@ -179,6 +161,8 @@ new Vue({
       playingViewTop: false,
       browsingViewTop: false,
       canSendVolumeGa: true,
+      openChannelMenu: false,
+      currentChannel: '',
     };
   },
   computed: {
@@ -366,13 +350,6 @@ new Vue({
       if (!data.displayLanguage) {
         this.$store.dispatch('displayLanguage', getSystemLocale());
       }
-      if (data.protectPrivacy === undefined) {
-        this.$store.dispatch('protectPrivacy');
-        this.$store.dispatch('hideNSFW', true);
-        this.$electron.ipcRenderer.send('labor-task-add', 'nsfw-warmup');
-      } else if (data.protectPrivacy && data.hideNSFW) {
-        this.$electron.ipcRenderer.send('labor-task-add', 'nsfw-warmup');
-      }
     });
     asyncStorage.get('subtitle-style').then((data) => {
       if (data.chosenStyle) {
@@ -422,19 +399,21 @@ new Vue({
     this.$bus.$on('new-file-open', () => {
       this.menuService.addRecentPlayItems();
     });
-    // TODO: Setup user identity
-    this.$storage.get('user-uuid', (err: Error, userUUID: string) => {
-      if (err || Object.keys(userUUID).length === 0) {
-        err && log.error('render/main', err);
-        userUUID = uuidv4();
-        this.$storage.set('user-uuid', userUUID);
-      }
-
-      Vue.axios.defaults.headers.common['X-Application-Token'] = userUUID;
-      Vue.axios.defaults.headers.common['X-Application-Display-Language'] = this.displayLanguage;
-
-      // set userUUID to google analytics uid
-      this.$ga && this.$ga.set('userId', userUUID);
+    this.$bus.$on('open-channel-menu', (channel: string) => {
+      this.openChannelMenu = true;
+      this.currentChannel = channel;
+    });
+    getClientUUID().then((clientId: string) => {
+      this.$ga && this.$ga.set('userId', clientId);
+      // get config cat is account enabled
+      isAccountEnabled().then((enabled: boolean) => {
+        log.debug('account', enabled);
+        if (enabled) {
+          this.$electron.ipcRenderer.send('account-enabled');
+        }
+      }).catch(() => {
+        // empty
+      });
     });
     this.$on('wheel-event', this.wheelEventHandler);
 
@@ -448,7 +427,12 @@ new Vue({
 
     window.addEventListener('mousedown', (e) => {
       if (e.button === 2 && process.platform === 'win32') {
-        this.menuService.popupWinMenu();
+        if (this.openChannelMenu) {
+          BrowsingChannelMenu.createChannelMenu(this.currentChannel);
+          this.openChannelMenu = false;
+        } else {
+          this.menuService.popupWinMenu();
+        }
       }
     });
     window.addEventListener('keydown', (e) => { // eslint-disable-line complexity
@@ -503,10 +487,8 @@ new Vue({
           if (this.currentRouteName === 'playing-view') {
             if (this.isFullScreen) {
               this.$bus.$emit('off-fullscreen');
-              this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
             } else {
               this.$bus.$emit('to-fullscreen');
-              this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [true]);
             }
           }
           break;
@@ -684,7 +666,7 @@ new Vue({
       checkForUpdate(true).then((
         json: { version: string, isLastest: boolean, landingPage: string, url: string }
       ) => {
-        if (!json.isLastest) {
+        if (!json.isLastest && this.currentRouteName !== 'browsing-view') {
           this.$bus.$emit('new-version', json);
         }
       }).catch((err: Error) => {
@@ -727,6 +709,7 @@ new Vue({
       updateBarrageOpen: browsingActions.UPDATE_BARRAGE_OPEN,
       showAudioTranslateModal: atActions.AUDIO_TRANSLATE_SHOW_MODAL,
       updatePipMode: browsingActions.UPDATE_PIP_MODE,
+      updateCurrentChannel: browsingActions.UPDATE_CURRENT_CHANNEL,
     }),
     async initializeMenuSettings() {
       if (this.currentRouteName !== 'welcome-privacy' && this.currentRouteName !== 'language-setting') {
@@ -780,18 +763,10 @@ new Vue({
         this.infoDB.clearAll();
         app.clearRecentDocuments();
         this.$bus.$emit('clean-landingViewItems');
+        if (this.currentRouteName === 'playing-view') {
+          this.openVideoFile(this.originSrc);
+        }
         this.menuService.addRecentPlayItems();
-      });
-      const urls = ['https://www.iqiyi.com', 'https://www.bilibili.com', 'https://www.youtube.com'];
-      const channels = ['iqiyi', 'bilibili', 'youtube'];
-      channels.forEach((channel: string, index: number) => {
-        this.menuService.on(`favourite.${channel}`, () => {
-          this.$electron.ipcRenderer.send('add-browsing', { size: this.pipSize, position: this.pipPos });
-          this.$electron.ipcRenderer.send('change-channel', { url: urls[index] });
-          this.$router.push({
-            name: 'browsing-view',
-          });
-        });
       });
       this.menuService.on('history.reload', () => {
         this.$bus.$emit('toggle-reload');
@@ -928,7 +903,7 @@ new Vue({
       });
       this.menuService.on('subtitle.mainSubtitle', (e: Event, id: string, item: ISubtitleControlListItem) => {
         if (id === 'off') this.changeFirstSubtitle('');
-        else if (item.type === Type.Translated && item.source.source === '') {
+        else if (item.type === Type.PreTranslated && item.source.source === '') {
           this.showAudioTranslateModal(item);
         } else {
           this.updateSubtitleType(true);
@@ -939,7 +914,7 @@ new Vue({
         if (id === 'off') this.changeSecondarySubtitle('');
         else if (id === 'secondarySub') {
           this.updateEnabledSecondarySub(!this.enabledSecondarySub)
-        } else if (item.type === Type.Translated && item.source.source === '') {
+        } else if (item.type === Type.PreTranslated && item.source.source === '') {
           this.showAudioTranslateModal(item);
         } else {
           this.updateSubtitleType(false);
@@ -975,10 +950,8 @@ new Vue({
       this.menuService.on('window.fullscreen', () => {
         if (this.isFullScreen) {
           this.$bus.$emit('off-fullscreen');
-          this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
         } else {
           this.$bus.$emit('to-fullscreen');
-          this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [true]);
         }
       });
       this.menuService.on('browsing.window.fullscreen', () => {

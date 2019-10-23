@@ -5,7 +5,7 @@
       :open-input-url="openInputUrl"
       :close-url-input="closeUrlInput"
     />
-    <transition name="basidebckground-container-transition">
+    <transition name="background-container-transition">
       <div
         v-if="item.backgroundUrl"
         class="background"
@@ -143,7 +143,6 @@ import PlaylistItem from '@/components/LandingView/PlaylistItem.vue';
 import VideoItem from '@/components/LandingView/VideoItem.vue';
 import { log } from '@/libs/Log';
 import Sagi from '@/libs/sagi';
-import { findNsfwFistFilter } from '@/libs/utils';
 import { Browsing as browsingActions } from '@/store/actionTypes';
 
 Vue.component('PlaylistItem', PlaylistItem);
@@ -180,7 +179,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'winPos', 'defaultDir', 'isFullScreen', 'incognitoMode', 'hideNSFW', 'smartMode', 'nsfwProcessDone', 'pipSize', 'pipPos']),
+    ...mapGetters(['winWidth', 'winPos', 'defaultDir', 'isFullScreen', 'incognitoMode', 'nsfwProcessDone', 'pipSize', 'pipPos']),
     lastIndex: {
       get() {
         return (this.firstIndex + this.showItemNum) - 1;
@@ -261,6 +260,13 @@ export default {
         this.lastIndex = this.landingViewItems.length;
       }
     },
+    item: {
+      // eslint-disable-next-line
+      handler: function (val: { id: string }) {
+        this.$bus.$emit('showing-video-cover', val && !!val.id);
+      },
+      immediate: true,
+    },
   },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   beforeRouteEnter(to: Route, { name: from }: Route, next: (vm: any) => void) {
@@ -275,7 +281,10 @@ export default {
     window.addEventListener('mousemove', this.globalMoveHandler);
     // Get all data and show
     recentPlayService.getRecords().then((results) => {
-      this.landingViewItems = results;
+      this.landingViewItems = results.filter((result) => {
+        if (result.playlistLength) return result.playlistLength > 1;
+        return false;
+      });
     });
     this.$bus.$on('clean-landingViewItems', () => {
       // just for delete thumbnail display
@@ -312,9 +321,9 @@ export default {
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [720, 405]);
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [720 / 405]);
 
-    Sagi.healthCheck().then((status) => {
+    Sagi.healthCheck().then((res) => {
       if (process.env.NODE_ENV !== 'production') {
-        this.sagiHealthStatus = status;
+        this.sagiHealthStatus = res.status;
         log.info('LandingView.vue', `launching: ${app.getName()} ${app.getVersion()}`);
       }
     });
@@ -325,11 +334,6 @@ export default {
     this.$electron.ipcRenderer.on('quit', () => {
       this.quit = true;
     });
-    // 如果没有确定nsfw功能，但是有nsfw过滤记录，就出气泡
-    if (this.smartMode && !this.nsfwProcessDone && await findNsfwFistFilter()) {
-      this.$bus.$emit('nsfw');
-      this.$store.dispatch('nsfwProcessDone');
-    }
   },
   destroyed() {
     window.removeEventListener('mousemove', this.globalMoveHandler);

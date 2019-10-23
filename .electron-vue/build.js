@@ -11,6 +11,7 @@ const Multispinner = require('multispinner');
 
 const mainConfig = require('./webpack.main.config');
 const rendererConfig = require('./webpack.renderer.config');
+const webConfig = require('./webpack.web.config');
 
 const doneLog = chalk.bgGreen.white(' DONE ') + ' ';
 const errorLog = chalk.bgRed.white(' ERROR ') + ' ';
@@ -31,7 +32,7 @@ function build() {
 
   del.sync(['dist/electron/*', '!.gitkeep']);
 
-  const tasks = ['main', 'renderer'];
+  const tasks = ['main', 'renderer', 'web'];
   const m = process.env.DISABLE_SPINNER
     ? { on() {}, success() {}, error() {} }
     : new Multispinner(tasks, {
@@ -68,6 +69,18 @@ function build() {
     .catch(err => {
       m.error('renderer');
       console.log(`\n  ${errorLog}failed to build renderer process`);
+      console.error(`\n${err}\n`);
+      process.exit(1);
+    });
+
+  pack(webConfig)
+    .then(result => {
+      results += result + '\n\n';
+      m.success('web');
+    })
+    .catch(err => {
+      m.error('web');
+      console.log(`\n  ${errorLog}failed to build web process`);
       console.error(`\n${err}\n`);
       process.exit(1);
     });

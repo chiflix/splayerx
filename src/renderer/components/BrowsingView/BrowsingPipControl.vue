@@ -7,6 +7,7 @@
   >
     <div
       @mouseup="handleEnterPip(pipMode === 'Enter')"
+      :title="$t(`browsing.${pipMode === 'Enter' ? 'enterPip' : 'enterPop'}`)"
       :class="hasVideo ? 'button-hover' : ''"
       class="pip-icon no-drag"
     >
@@ -121,7 +122,6 @@ export default {
     transition: opacity 50ms linear, padding-left 100ms ease-in;
     .icon {
       width: 12px;
-      margin-top: 1px;
     }
   }
   .icon-hover:hover {

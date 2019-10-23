@@ -104,6 +104,11 @@
       "copy": "부",
       "paste": "풀"
     },
+    "account": {
+      "name": "계정",
+      "login": "로그인",
+      "logout": "로그 아웃"
+    },
     "help": {
       "name": "도움",
       "feedback": "피드백",
@@ -202,12 +207,6 @@
       "playInNewWindow": "새 창에서 놀다",
       "backToBrowser": "브라우저로 돌아 가기"
     },
-    "favourite": {
-      "name": "채널",
-      "iqiyi": "iQIYI",
-      "bilibili": "Bilibili",
-      "youtube": "Youtube"
-    },
     "edit": {
       "name": "편집",
       "cut": "잘라내기",
@@ -239,10 +238,37 @@
     "languageDescription": "* You can change your settings in preferences later",
     "none": "None"
   },
+  "browsing": {
+    "bilibili": "Bilibili",
+    "iqiyi": "iQIYI",
+    "youtube": "YouTube",
+    "huya": "Huya",
+    "qq": "Tencent Video",
+    "douyu": "Douyu",
+    "twitch": "Twitch",
+    "youku": "Youku",
+    "coursera": "Coursera",
+    "ted": "TED",
+    "openLocalFile": "로컬 파일 열기 ...",
+    "enterPip": "Picture In Picture 사용",
+    "exitPip": "브라우저로 돌아 가기",
+    "enterPop": "새 창에서 놀다",
+    "exitPop": "브라우저로 돌아 가기",
+    "danmu": "탄막",
+    "error": {
+      "offline": "인터넷이 없습니다",
+      "try": "시험:",
+      "firstLine": "네트워크 케이블, 모뎀 및 라우터 확인",
+      "secondLine": "Wi-Fi에 다시 연결"
+    },
+    "remove": "제거",
+    "siteManager": "사이트 관리자",
+    "popularSites": "최적화 된 사이트",
+    "siteTip": "편집 / 추가"
+  },
   "preferences": {
     "general": {
       "hideHistory": "재생 기록 숨기기",
-      "clearHistory": "종료시 항상 재생 기록 지우기",
       "reverseScrolling": "마우스 스크롤 역전",
       "setDefault": "기본 동영상 플레이어로 설정",
       "setDefaultDescription": "SPlayer 로 모든 비디오 파일 열기.",
@@ -269,11 +295,10 @@
     },
     "privacy": {
       "privacySetting": "은둔",
-      "enable": "개인 정보 보호 사용",
-      "smartMode": "Intelligent Mode",
-      "smartDescription": "오프라인은 민감하거나 부적합한 작업 내용을 식별하고 폴더 재생 목록에서 재생할 때 또는 종료 할 때 재생 기록을 삭제합니다.",
       "incognitoMode": "Incognito Mode",
-      "incognitoDescription": "재생 기록이 저장되지 않습니다."
+      "incognitoDescription": "재생 기록이 저장되지 않습니다.",
+      "clearHistory": "재생 기록 지우기",
+      "clearHistoryDescription": "기존 재생 목록 및 재생 기록 제거"
     }
   },
   "privacyBubble": {
@@ -318,7 +343,9 @@
     "playing": "연주 중",
     "paused": "일시 중지 된",
     "playlistSource": "재생 목록",
-    "add": "재생 목록에 추가"
+    "add": "재생 목록에 추가",
+    "pin": "재생 목록을 시작 페이지에 고정",
+    "pinned": "시작 페이지에 고정 된 재생 목록"
   },
   "subtitle": {
     "embedded": "깊숙이 박다",
@@ -406,6 +433,10 @@
       "title": "번역 실패",
       "content": "서버 오류로 인해 변환에 실패했습니다. 나중에 다시 시도 해주세요."
     },
+    "ForbiddenFail": {
+      "title": "세션 만료됨",
+      "content": "로그인 해주시기 바랍니다"
+    },
     "cancel": "취소",
     "quit": "떠나다",
     "generate": "일으키다",
@@ -436,8 +467,35 @@
       "title": "번역 실패",
       "content": "서버 오류로 인해 변환에 실패했습니다. 나중에 다시 시도 해주세요."
     },
+    "bubbleTranslateForbiddenFail": {
+      "title": "세션 만료됨",
+      "content": "로그인 해주시기 바랍니다."
+    },
     "ok": "승인",
     "cancel": "취소",
     "continue": "잇다"
+  },
+  "loginModal": {
+    "title": "전화번호로 로그인",
+    "sendCode": "보내기",
+    "sendingCode": "송신중 ...",
+    "countDown": "{count} 초",
+    "placeholder": {
+      "mobile": "전화번호",
+      "code": "인증 코드 입력"
+    },
+    "submit": "로그인",
+    "submitting": "처리중 ...",
+    "codeError": "잘못된 검증 코드",
+    "netWorkError": "접속 시간 초과",
+    "noLineError": "연결된 네트워크가 없습니다",
+    "afsError": "Captcha Validation Failed",
+    "afs": {
+      "start": "Please slide to verify",
+      "yes": "Success",
+      "retry": "retry",
+      "error300": "Verification failed, please",
+      "errorNetwork": "Network Error. Please"
+    }
   }
 }

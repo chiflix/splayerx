@@ -5,7 +5,6 @@ import { times, padStart, sortBy } from 'lodash';
 import { sep, basename, join } from 'path';
 import { ensureDir } from 'fs-extra';
 import { remote } from 'electron';
-import axios, { AxiosResponse } from 'axios';
 // @ts-ignore
 import { promises as fsPromises } from 'fs';
 // @ts-ignore
@@ -18,8 +17,8 @@ import {
   VIDEO_DIRNAME, SUBTITLE_DIRNAME,
 } from '@/constants';
 import { codeToLanguageName, LanguageCode } from './language';
-import { checkPathExist, write, deleteDir } from './file';
 import { IEmbeddedOrigin } from '@/services/subtitle/utils/loaders';
+import Fetcher from '@/../shared/Fetcher';
 import { isBetaVersion } from '../../shared/common/platform';
 
 /**
@@ -226,7 +225,7 @@ export function calculatedName(
         && s.language === item.language)
       .findIndex((s: ISubtitleControlListItem) => s.id === item.id) + 1;
     name = `${codeToLanguageName(item.language)} ${romanize(sort)}`;
-  } else if (item.type === Type.Translated) {
+  } else if (item.type === Type.Translated || item.type === Type.PreTranslated) {
     name = `${codeToLanguageName(item.language)} AI`;
   }
   return name;
@@ -325,25 +324,6 @@ export function crc32(str: string, crc?: number) {
   }
   return crc ^ (-1); // eslint-disable-line
 }
-
-export function saveNsfwFistFilter() {
-  const path = join(getDefaultDataPath(), 'NSFW_FILTER_MARK');
-  const buf = Buffer.alloc(0);
-  write(path, buf);
-}
-
-export async function findNsfwFistFilter() {
-  let success = false;
-  const path = join(getDefaultDataPath(), 'NSFW_FILTER_MARK');
-  try {
-    success = await checkPathExist(path);
-  } catch (error) {
-    // empty
-  }
-  deleteDir(path);
-  return success;
-}
-
 /**
  * @description get version numbers
  * @author tanghaixiang
@@ -403,30 +383,30 @@ export function compareVersions(left: string, right: string): boolean {
  * @param {boolean} auto is auto check for updates
  * @returns {Promise} example { version: "4.2.2", isLastest: true }
  */
-export function checkForUpdate(
+export async function checkForUpdate(
   auto: boolean,
 ): Promise<{ version: string, isLastest: boolean, landingPage: string, url: string }> {
   const skipVersion = localStorage.getItem('skip-check-for-update');
   const url = isBetaVersion
     ? 'https://beta.splayer.org/beta/latest.json' : 'https://www.splayer.org/stable/latest.json';
-  return axios.get(url, { timeout: 10000 })
-    .then((res: AxiosResponse) => { // eslint-disable-line complexity
-      const result = {
-        version,
-        isLastest: true,
-        landingPage: '',
-        url: '',
-      };
-      // check package.json.version with res.data
-      if (res.data && res.data.name !== version && !(res.data.name === skipVersion && auto)
-        && compareVersions(version, res.data.name)) {
-        result.version = res.data.name;
-        result.isLastest = false;
-        result.landingPage = res.data.landingPage;
-        result.url = res.data.files[process.platform].url;
-      }
-      return result;
-    });
+  const fetcher = new Fetcher();
+  const res = await fetcher.fetch(url);
+  const data = await res.json();
+  const result = {
+    version,
+    isLastest: true,
+    landingPage: '',
+    url: '',
+  };
+  // check package.json.version with data
+  if (data && data.name !== version && !(data.name === skipVersion && auto)
+    && compareVersions(version, data.name)) {
+    result.version = data.name;
+    result.isLastest = false;
+    result.landingPage = data.landingPage;
+    result.url = data.files[process.platform].url;
+  }
+  return result;
 }
 
 /**
@@ -446,4 +426,9 @@ export function skipCheckForUpdate(version: string) {
 export function getMainVersion(): string {
   const vs = getNumbersFromVersion(version);
   return `${vs[0]}.${vs[1]}.${vs[2]}`;
+}
+
+/** Is this a beta release? */
+export function getIsBeta(): boolean {
+  return version.indexOf('beta') !== -1;
 }

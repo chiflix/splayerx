@@ -28,6 +28,11 @@ export default class MenuService {
     this.menu.updatePipIcon();
   }
 
+  public updateAccount(user?: { displayName: string }) {
+    this.menu.isAccountEnabled = true;
+    this.menu.updateAccount(user);
+  }
+
   private registeMenuActions() {
     ipcMain.on('popup-menu', () => {
       this.menu.popupMenu();

@@ -57,6 +57,10 @@ export default class Menubar {
 
   private _routeName: string;
 
+  private user?: { displayName: string };
+
+  public isAccountEnabled: boolean;
+
   public set routeName(val: string) {
     this._routeName = val;
     this.menuStateControl();
@@ -83,6 +87,7 @@ export default class Menubar {
 
   public constructor() {
     this.locale = new Locale();
+    this.isAccountEnabled = false;
     this.currentMenuState = cloneDeep(menuTemplate as IMenubarMenuState);
     this.menuStateControl();
   }
@@ -282,7 +287,10 @@ export default class Menubar {
           checked,
           click: () => {
             if (this.mainWindow) {
-              if (subtitleItem && subtitleItem.type === Type.Translated) this.menubar.getMenuItemById('subtitle.mainSubtitle.off').checked = true;
+              // if is AI button can't choose
+              if (subtitleItem && subtitleItem.type === Type.PreTranslated && subtitleItem.source.source === '') {
+                this.menubar.getMenuItemById('subtitle.mainSubtitle.off').checked = true;
+              }
               this.mainWindow.webContents.send('subtitle.mainSubtitle', id, subtitleItem);
             }
           },
@@ -319,7 +327,10 @@ export default class Menubar {
           enabled,
           click: () => {
             if (this.mainWindow) {
-              if (subtitleItem && subtitleItem.type === Type.Translated) this.menubar.getMenuItemById('subtitle.secondarySubtitle.off').checked = true;
+              // if is AI button can't choose
+              if (subtitleItem && subtitleItem.type === Type.PreTranslated && subtitleItem.source.source === '') {
+                this.menubar.getMenuItemById('subtitle.secondarySubtitle.off').checked = true;
+              }
               this.mainWindow.webContents.send('subtitle.secondarySubtitle', id, subtitleItem);
             }
           },
@@ -327,6 +338,36 @@ export default class Menubar {
         secondarySubMenu.append(item);
       });
 
+      Menu.setApplicationMenu(this.menubar);
+    }
+  }
+
+  public updateAccount(user?: { displayName: string }) {
+    this.user = user;
+    const menuItem = this.menubar.getMenuItemById('account');
+    if (menuItem) {
+      menuItem.visible = this.isAccountEnabled;
+    }
+    const accountMenu = menuItem && menuItem.submenu;
+    if (accountMenu && user) {
+      // @ts-ignore
+      accountMenu.clear();
+      const label = this.locale.$t('msg.account.name');
+      const idMenu = this.createMenuItem(`${label}: ${user.displayName}`, () => {
+      }, undefined, false);
+      accountMenu.append(idMenu);
+      const logout = this.createMenuItem('msg.account.logout', () => {
+        app.emit('sign-out-confirm');
+      }, undefined, true);
+      accountMenu.append(logout);
+      Menu.setApplicationMenu(this.menubar);
+    } else if (accountMenu) {
+      // @ts-ignore
+      accountMenu.clear();
+      const login = this.createMenuItem('msg.account.login', () => {
+        app.emit('add-login');
+      }, undefined, true);
+      accountMenu.append(login);
       Menu.setApplicationMenu(this.menubar);
     }
   }
@@ -361,8 +402,7 @@ export default class Menubar {
     return idArray[0];
   }
 
-  private getMenuStateById(id: string):
-  MenubarMenuItem | undefined {
+  private getMenuStateById(id: string): MenubarMenuItem | undefined {
     if (id.startsWith('browsing')) {
       return this.currentMenuState['browsing.window']
         .items.find((menuItem: MenubarMenuItem) => menuItem.id === id);
@@ -479,6 +519,9 @@ export default class Menubar {
         } else if (item.id === 'file.openRecent') {
           const menuItem = item as IMenubarMenuItemSubmenu;
           menubar.append(this.createSubMenuItem(menuItem));
+        } else if (item.id === 'file.clearHistory') {
+          const menuItem = item as IMenubarMenuItemAction;
+          menubar.append(this.createMenuItem(menuItem));
         } else if (item.id === 'file.closeWindow') {
           const menuItem = item as IMenubarMenuItemRole;
           menubar.append(this.createRoleMenuItem(menuItem));
@@ -493,11 +536,6 @@ export default class Menubar {
 
       menubar.append(preference);
     }
-
-    // Favourite
-    const favouriteMenuItem = this.createFavouriteMenu();
-
-    menubar.append(favouriteMenuItem);
 
     // Window
     const windowMenu = new Menu();
@@ -515,6 +553,10 @@ export default class Menubar {
     const windowMenuItem = new MenuItem({ id: 'window', label: this.$t('msg.window.name'), submenu: windowMenu });
 
     menubar.append(windowMenuItem);
+
+    // account
+    const account = this.createAccountMenu();
+    menubar.append(account);
 
     // Help
     const helpMenuItem = this.createHelpMenu();
@@ -555,6 +597,9 @@ export default class Menubar {
         } else if (item.id === 'file.openRecent') {
           const menuItem = item as IMenubarMenuItemSubmenu;
           menubar.append(this.createSubMenuItem(menuItem));
+        } else if (item.id === 'file.clearHistory') {
+          const menuItem = item as IMenubarMenuItemAction;
+          menubar.append(this.createMenuItem(menuItem));
         } else if (item.id === 'file.closeWindow') {
           const menuItem = item as IMenubarMenuItemRole;
           menubar.append(this.createRoleMenuItem(menuItem));
@@ -589,6 +634,10 @@ export default class Menubar {
     const windowMenuItem = this.createWindowMenu();
 
     menubar.append(windowMenuItem);
+
+    // account
+    const account = this.createAccountMenu();
+    menubar.append(account);
 
     // Help
     const helpMenuItem = this.createHelpMenu();
@@ -668,8 +717,11 @@ export default class Menubar {
     // Window
     const windowMenuItem = this.createBrowsingWindowMenu();
 
-
     menubar.append(windowMenuItem);
+
+    // account
+    const account = this.createAccountMenu();
+    menubar.append(account);
 
     // Help
     const helpMenuItem = this.createHelpMenu();
@@ -788,11 +840,6 @@ export default class Menubar {
     return new MenuItem({ id: 'history', label: this.$t('msg.history.name'), submenu: historyMenu });
   }
 
-  private createFavouriteMenu() {
-    const favouriteMenu = this.convertFromMenuItemTemplate('favourite');
-    return new MenuItem({ id: 'favourite', label: this.$t('msg.favourite.name'), submenu: favouriteMenu });
-  }
-
   private createBrowsingWindowMenu() {
     const window = this.convertFromMenuItemTemplate('browsing.window');
     return new MenuItem({ id: 'browsing.window', label: this.$t('msg.window.name'), submenu: window });
@@ -801,6 +848,29 @@ export default class Menubar {
   private createWindowMenu() {
     const windowMenu = this.convertFromMenuItemTemplate('window');
     return new MenuItem({ id: 'window', label: this.$t('msg.window.name'), submenu: windowMenu });
+  }
+
+  private createAccountMenu() {
+    const accountMenu = new Menu();
+    if (this.user) {
+      const label = this.locale.$t('msg.account.name');
+      const idMenu = this.createMenuItem(`${label}: ${this.user.displayName}`, () => {
+      }, undefined, false);
+      accountMenu.append(idMenu);
+      const logout = this.createMenuItem('msg.account.logout', () => {
+        app.emit('sign-out-confirm');
+      }, undefined, true);
+      accountMenu.append(logout);
+    } else {
+      const login = this.createMenuItem('msg.account.login', () => {
+        app.emit('add-login');
+      }, undefined, true);
+      accountMenu.append(login);
+    }
+    const accountMenuItem = new MenuItem({
+      id: 'account', label: this.$t('msg.account.name'), submenu: accountMenu, visible: this.isAccountEnabled,
+    });
+    return accountMenuItem;
   }
 
   private createHelpMenu() {
@@ -1009,6 +1079,10 @@ export default class Menubar {
     } else if (arg1.id === 'window.bossKey') {
       options.click = () => {
         app.emit('bossKey');
+      };
+    } else if (arg1.id === 'window.minimize') {
+      options.click = () => {
+        app.emit('minimize');
       };
     }
 

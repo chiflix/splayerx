@@ -81,6 +81,7 @@
                 :translate-language="selectedTargetLanugage"
                 @off-subtitle="offCurrentSubtitle"
                 @remove-subtitle="deleteCurrentSubtitle"
+                @re-translate="reTranslateSubtitle"
               />
             </div>
           </div>
@@ -237,6 +238,7 @@ export default {
               break;
             case Type.Online:
             case Type.Translated:
+            case Type.PreTranslated:
               prev[2].push(currentSub);
               break;
           }
@@ -467,10 +469,20 @@ export default {
       }
       return item.name;
     },
+    reTranslateSubtitle(item: ISubtitleControlListItem) {
+      this.showAudioTranslateModal(item);
+      // ga 字幕面板中点击 "Generate" 的次数
+      this.$ga.event('app', 'ai-translate-generate-button-click');
+      // if (this.isFirstSubtitle) {
+      //   this.changeFirstSubtitle(item.id);
+      // } else {
+      //   this.changeSecondarySubtitle(item.id);
+      // }
+    },
     changeSubtitle(item: ISubtitleControlListItem) {
-      if (!navigator.onLine && item.type === Type.Translated && item.source.source === '') {
+      if (!navigator.onLine && item.type === Type.PreTranslated && item.source.source === '') {
         addBubble(TRANSLATE_NO_LINE);
-      } else if (item.type === Type.Translated && item.source.source === '') {
+      } else if (item.type === Type.PreTranslated && item.source.source === '') {
         this.showAudioTranslateModal(item);
         // ga 字幕面板中点击 "Generate" 的次数
         this.$ga.event('app', 'ai-translate-generate-button-click');

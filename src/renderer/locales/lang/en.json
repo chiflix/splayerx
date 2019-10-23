@@ -105,6 +105,11 @@
       "copy": "Copy",
       "paste": "Paste"
     },
+    "account": {
+      "name": "Account",
+      "login": "Sign In",
+      "logout": "Sign Out"
+    },
     "help": {
       "name": "Help",
       "feedback": "Feedback",
@@ -203,12 +208,6 @@
       "playInNewWindow": "Play in New Window",
       "backToBrowser": "Back to Browser"
     },
-    "favourite": {
-      "name": "Channel",
-      "iqiyi": "iQIYI",
-      "bilibili": "Bilibili",
-      "youtube": "Youtube"
-    },
     "edit": {
       "name": "Edit",
       "cut": "Cut",
@@ -240,10 +239,37 @@
     "languageDescription": "* You can change your settings in preferences later",
     "none": "None"
   },
+  "browsing": {
+    "bilibili": "Bilibili",
+    "iqiyi": "iQIYI",
+    "youtube": "YouTube",
+    "huya": "Huya",
+    "qq": "Tencent Video",
+    "douyu": "Douyu",
+    "twitch": "Twitch",
+    "youku": "Youku",
+    "coursera": "Coursera",
+    "ted": "TED",
+    "openLocalFile": "Open Local File ...",
+    "enterPip": "Enter Picture in Picture",
+    "exitPip": "Back to Browser",
+    "enterPop": "Play in New Window",
+    "exitPop": "Back to Browser",
+    "danmu": "Toggle Danmaku",
+    "error": {
+      "offline": "No Internet",
+      "try": "Try:",
+      "firstLine": "Checking the network cables, modem, and router",
+      "secondLine": "Reconnecting to Wi-Fi"
+    },
+    "remove": "Remove",
+    "siteManager": "Site Manager",
+    "popularSites": "Optimized Sites",
+    "siteTip": "Add / Edit"
+  },
   "preferences": {
     "general": {
       "hideHistory": "Hide playback history",
-      "clearHistory": "Always clear playback history on exit",
       "reverseScrolling": "Reverse mouse scrolling when adjusting volume",
       "setDefault": "Set as the Default Video Player",
       "setDefaultDescription": "Open all video files with SPlayer.",
@@ -270,11 +296,10 @@
     },
     "privacy": {
       "privacySetting": "Privacy",
-      "enable": "Enable Privacy Protection",
-      "smartMode": "Intelligent Mode",
-      "smartDescription": "Offline identify sensitive or not-suitable-for-work contents, and clear the playback history when playing in a folder playlist or when quitting.",
       "incognitoMode": "Incognito Mode",
-      "incognitoDescription": "Your playback history will not be stored anymore."
+      "incognitoDescription": "Your playback history will not be stored anymore.",
+      "clearHistory": "Clear Playback History",
+      "clearHistoryDescription": "Remove existing playlists and playback history"
     }
   },
   "privacyBubble": {
@@ -319,7 +344,9 @@
     "playing": "Playing",
     "paused": "Paused",
     "playlistSource": "Playlist",
-    "add": "Add To Playlist"
+    "add": "Add To Playlist",
+    "pin": "Pin the Playlist to Launching Page",
+    "pinned": "Playlist Pinned to Launching Page"
   },
   "subtitle": {
     "embedded": "Embed",
@@ -407,6 +434,10 @@
       "title": "Translation Failed",
       "content": "Translation failed because of a server error. Please try later."
     },
+    "ForbiddenFail": {
+      "title": "Session Expired",
+      "content": "Please sign in again."
+    },
     "cancel": "Cancel",
     "quit": "Quit",
     "generate": "Generate",
@@ -437,8 +468,35 @@
       "title": "Translation Failed",
       "content": "Translation failed because of a server error. Please try later."
     },
+    "bubbleTranslateForbiddenFail": {
+      "title": "Session Expired",
+      "content": "Please sign in again."
+    },
     "ok": "OK",
     "cancel": "Cancel",
     "continue": "Continue"
+  },
+  "loginModal": {
+    "title": "Sign in with phone number",
+    "sendCode": "Send",
+    "sendingCode": "Sending ...",
+    "countDown": "{count} s",
+    "placeholder": {
+      "mobile": "Your phone number",
+      "code": "Enter verification code"
+    },
+    "submit": "Sign In",
+    "submitting": "Processing ...",
+    "codeError": "Incorrect Vertification Code",
+    "netWorkError": "Connection Timeout",
+    "noLineError": "No Network Connection",
+    "afsError": "Captcha Validation Failed",
+    "afs": {
+      "start": "Please slide to verify",
+      "yes": "Success",
+      "retry": "retry",
+      "error300": "Verification failed, please",
+      "errorNetwork": "Network Error. Please"
+    }
   }
 }

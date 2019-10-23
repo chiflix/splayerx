@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-22 17:18:34
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-09-11 18:41:23
+ * @Last Modified time: 2019-10-11 14:22:07
  */
 
 import { EventEmitter } from 'events';
@@ -10,7 +10,6 @@ import { EventEmitter } from 'events';
 import { splayerx } from 'electron';
 import path from 'path';
 import fs from 'fs';
-import axios from 'axios';
 import { credentials, Metadata } from 'grpc';
 
 import { TranslationClient } from 'sagi-api/translation/v1/translation_grpc_pb';
@@ -20,6 +19,7 @@ import {
   StreamingTranslationRequestConfig,
 } from 'sagi-api/translation/v1/translation_pb';
 import { IAudioStream } from '@/plugins/mediaTasks/mediaInfoQueue';
+import { getIP } from '../../shared/utils';
 
 type JobData = {
   videoSrc: string,
@@ -65,6 +65,12 @@ export default class AudioGrabService extends EventEmitter {
   public streamClient: any; // eslint-disable-line
 
   public timeoutTimer: NodeJS.Timer;
+
+  private token?: string;
+
+  public setToken(token?: string) {
+    this.token = token;
+  }
 
   public start(data: JobData) {
     if (this.queue) {
@@ -179,7 +185,7 @@ export default class AudioGrabService extends EventEmitter {
   }
 
   private openClient(): any { // eslint-disable-line
-    const { uuid, agent } = this;
+    const { uuid, agent, token } = this;
     const sslCreds = credentials.createSsl(
       // @ts-ignore
       fs.readFileSync(path.join(__static, '/certs/ca.pem')),
@@ -192,11 +198,12 @@ export default class AudioGrabService extends EventEmitter {
       const metadata = new Metadata();
       metadata.set('uuid', uuid);
       metadata.set('agent', agent);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      axios.get('https://ip.xindong.com/myip', { responseType: 'text' }).then((response: any) => {
-        metadata.set('clientip', response.data);
-        cb(null, metadata);
-      }, () => {
+      if (token) {
+        metadata.set('token', token);
+      }
+      getIP().then((ip) => {
+        metadata.set('clientip', ip);
+      }).finally(() => {
         cb(null, metadata);
       });
     };

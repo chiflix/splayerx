@@ -150,6 +150,3 @@ export const getterTypes = {
   GET_WHEEL_COMPONENT: 'wheelComponent',
   GET_WHEEL_DEVICE: 'wheelDevice',
 };
-
-// vuex module
-export { default as VuexStore } from '@/store';

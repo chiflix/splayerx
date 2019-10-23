@@ -3,7 +3,6 @@
     :style="{
       width: isDarwin || (!isDarwin && showSidebar) ? 'calc(100vw - 76px)' : '100vw',
     }"
-    @dblclick="handleDbClick"
     class="header"
   >
     <browsing-control
@@ -18,7 +17,9 @@
       :title="title"
       :is-loading="isLoading"
       :close-url-input="closeUrlInput"
+      :can-reload="webInfo.canReload"
       :play-file-with-playing-view="playFileWithPlayingView"
+      @dblclick.native="handleDbClick"
     />
     <browsing-pip-control
       :has-video="webInfo.hasVideo"
@@ -53,7 +54,7 @@ export default {
     },
     title: {
       type: String,
-      default: 'Splayer',
+      default: 'SPlayer',
     },
     isLoading: {
       type: Boolean,
@@ -90,7 +91,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['recordUrl', 'isMaximized']),
+    ...mapGetters(['recordUrl']),
     isDarwin() {
       return process.platform === 'darwin';
     },
@@ -98,10 +99,26 @@ export default {
   methods: {
     handleDbClick(e: Event) {
       if ((e.target as HTMLElement).tagName !== 'svg') {
-        if (!this.$electron.remote.getCurrentWindow().isMaximized()) {
-          this.$electron.ipcRenderer.send('callMainWindowMethod', 'maximize');
+        const currentWindow = this.$electron.remote.getCurrentWindow();
+        const isMaximized = currentWindow.isMaximized();
+        this.$electron.ipcRenderer.send('callMainWindowMethod', isMaximized ? 'unmaximize' : 'maximize');
+        const bounds = currentWindow.getBounds();
+        if (!this.isDarwin && !isMaximized && (bounds.x < 0 || bounds.y < 0)) {
+          currentWindow.getBrowserViews()[0].setBounds({
+            x: this.showSidebar ? 76 : 0,
+            y: 40,
+            width: this.showSidebar ? bounds.width + (bounds.x * 2) - 76
+              : bounds.width + (bounds.x * 2),
+            height: bounds.height - 40,
+          });
         } else {
-          this.$electron.ipcRenderer.send('callMainWindowMethod', 'unmaximize');
+          currentWindow.getBrowserViews()[0].setBounds({
+            x: this.showSidebar ? 76 : 0,
+            y: 40,
+            width: this.showSidebar ? currentWindow.getSize()[0] - 76
+              : currentWindow.getSize()[0],
+            height: currentWindow.getSize()[1] - 40,
+          });
         }
       }
     },

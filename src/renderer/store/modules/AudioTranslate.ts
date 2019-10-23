@@ -2,26 +2,27 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-05 16:03:32
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-09-20 11:29:17
+ * @Last Modified time: 2019-10-10 16:06:42
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @ts-ignore
 import { event } from 'vue-analytics';
+import { ipcRenderer, remote } from 'electron';
 import uuidv4 from 'uuid/v4';
 import { AudioTranslate as m } from '@/store/mutationTypes';
 import store from '@/store';
-import { AudioTranslate as a, SubtitleManager as smActions } from '@/store/actionTypes';
-import { audioTranslateService } from '@/services/media/AudioTranslateService';
+import { AudioTranslate as a, SubtitleManager as smActions, UserInfo as uActions } from '@/store/actionTypes';
 import { AITaskInfo } from '@/interfaces/IMediaStorable';
 import { TranscriptInfo } from '@/services/subtitle';
 import { ISubtitleControlListItem, Type } from '@/interfaces/ISubtitle';
 import { mediaStorageService } from '@/services/storage/MediaStorageService';
-import { TranslatedGenerator } from '@/services/subtitle/loaders/translated';
-import { isAudioCenterChannelEnabled } from '@/helpers/featureSwitch';
+import { PreTranslatedGenerator } from '@/services/subtitle/loaders/preTranslated';
+import { isAudioCenterChannelEnabled, isAccountEnabled } from '@/helpers/featureSwitch';
 import { addBubble } from '@/helpers/notificationControl';
 import {
   TRANSLATE_SERVER_ERROR_FAIL, TRANSLATE_SUCCESS,
   TRANSLATE_SUCCESS_WHEN_VIDEO_CHANGE, TRANSLATE_REQUEST_TIMEOUT,
+  TRANSLATE_REQUEST_FORBIDDEN,
 } from '@/helpers/notificationcodes';
 import { log } from '@/libs/Log';
 import { LanguageCode } from '@/libs/language';
@@ -49,6 +50,7 @@ export enum AudioTranslateFailType {
   NoLine = 'noLine',
   TimeOut = 'timeOut',
   ServerError = 'serverError',
+  Forbidden = 'forbidden',
 }
 
 export enum AudioTranslateBubbleOrigin {
@@ -123,12 +125,13 @@ const getCurrentAudioInfo = async (
   return audioInfo;
 };
 
-const taskCallback = (taskInfo: AITaskInfo) => {
+const taskCallback = async (taskInfo: AITaskInfo) => {
   log.debug('AudioTranslate', taskInfo, 'audio-log');
   // @ts-ignore
   if (taskInfo.mediaHash !== store.getters.mediaHash) {
     return;
   }
+  const audioTranslateService = (await import('@/services/media/AudioTranslateService')).audioTranslateService;
   audioTranslateService.taskInfo = taskInfo;
   // const estimateTime = taskInfo.estimateTime * 1;
   // @ts-ignore
@@ -299,6 +302,7 @@ const actions = {
       return;
     }
     commit(m.AUDIO_TRANSLATE_SAVE_KEY, `${getters.mediaHash}`);
+    const audioTranslateService = (await import('@/services/media/AudioTranslateService')).audioTranslateService;
     audioTranslateService.stop();
     // audio index in audio streams
     const audioInfo = await getCurrentAudioInfo(getters.currentAudioTrackId, getters.originSrc);
@@ -310,6 +314,14 @@ const actions = {
       audioLanguageCode,
       targetLanguageCode: getters.selectedTargetLanugage,
     });
+    // delete
+    dispatch(smActions.deleteSubtitlesByUuid, [state.selectedTargetSubtitleId]);
+    // add
+    const generator = new PreTranslatedGenerator(null, state.selectedTargetLanugage);
+    const subtitle = await dispatch(smActions.addSubtitle, {
+      generator, mediaHash: audioTranslateService.mediaHash,
+    });
+    commit(m.AUDIO_TRANSLATE_SELECTED_UPDATE, subtitle);
     if (grab) {
       // 旋转对应目标语言的字幕
       if (getters.isFirstSubtitle) {
@@ -381,6 +393,10 @@ const actions = {
           bubbleType = TRANSLATE_REQUEST_TIMEOUT;
           fileType = AudioTranslateFailType.TimeOut;
           failReason = 'time-out';
+        } else if (error && error.message === 'forbidden') {
+          bubbleType = TRANSLATE_REQUEST_FORBIDDEN;
+          fileType = AudioTranslateFailType.Forbidden;
+          failReason = 'forbidden';
         }
         commit(m.AUDIO_TRANSLATE_UPDATE_FAIL_TYPE, fileType);
         if (!state.isModalVisible) {
@@ -409,6 +425,11 @@ const actions = {
           event('app', 'ai-translate-server-translate-fail', failReason);
         } catch (error) {
           // empty
+        }
+        if (fileType === AudioTranslateFailType.Forbidden) {
+          // 清楚登录信息， 开登录窗口
+          remote.app.emit('sign-out');
+          ipcRenderer.send('add-login');
         }
       });
       grab.on('grabCompleted', () => {
@@ -475,7 +496,7 @@ const actions = {
           const selectId = state.selectedTargetSubtitleId;
           result = TRANSLATE_SUCCESS;
           // 加入刚刚翻译好的AI字幕
-          const generator = new TranslatedGenerator(transcriptInfo);
+          const generator = new PreTranslatedGenerator(transcriptInfo);
           const subtitle = await dispatch(smActions.addSubtitle, {
             generator, mediaHash: audioTranslateService.mediaHash,
           });
@@ -498,11 +519,13 @@ const actions = {
           const secondaryAIButtonExist = list
             .find((
               sub: ISubtitleControlListItem,
-            ) => sub.language === secondaryLanguage && !sub.source && sub.type === Type.Translated);
+            ) => sub.language === secondaryLanguage
+            && !sub.source && sub.type === Type.PreTranslated);
           const primaryAIButtonExist = list
             .find((
               sub: ISubtitleControlListItem,
-            ) => sub.language === primaryLanguage && !sub.source && sub.type === Type.Translated);
+            ) => sub.language === primaryLanguage
+            && !sub.source && sub.type === Type.PreTranslated);
           if (primaryLanguage === subtitle.language
             && !!secondaryLanguage && !!secondaryAIButtonExist) {
             dispatch(smActions.fetchSubtitleWhenTrabslateSuccess, secondaryLanguage);
@@ -564,11 +587,11 @@ const actions = {
         || taskInfo.targetLanguage === secondaryLanguage)) {
       let sub = list.find((
         sub: ISubtitleControlListItem,
-      ) => sub.type === Type.Translated && sub.language === taskInfo.targetLanguage);
+      ) => sub.type === Type.PreTranslated && sub.language === taskInfo.targetLanguage);
       if (!sub) {
         try {
           sub = await dispatch(smActions.addSubtitle, {
-            generator: new TranslatedGenerator(
+            generator: new PreTranslatedGenerator(
               null, taskInfo.targetLanguage as LanguageCode,
             ),
             mediaHash,
@@ -589,7 +612,7 @@ const actions = {
       dispatch(a.AUDIO_TRANSLATE_START, taskInfo.audioLanguageCode);
     }
   },
-  [a.AUDIO_TRANSLATE_DISCARD]( // eslint-disable-line complexity
+  async [a.AUDIO_TRANSLATE_DISCARD]( // eslint-disable-line complexity
     {
       commit,
       getters,
@@ -654,6 +677,7 @@ const actions = {
       clearInterval(taskTimer);
     }
     // 丢弃service
+    const audioTranslateService = (await import('@/services/media/AudioTranslateService')).audioTranslateService;
     audioTranslateService.stop();
     // 丢弃任务，执行用户强制操作
     const selectId = state.selectedTargetSubtitleId;
@@ -667,7 +691,8 @@ const actions = {
     state.callbackAfterBubble();
     dispatch(a.AUDIO_TRANSLATE_HIDE_BUBBLE);
   },
-  [a.AUDIO_TRANSLATE_BACKSATGE]({ commit, dispatch }: any) {
+  async [a.AUDIO_TRANSLATE_BACKSATGE]({ commit, dispatch }: any) {
+    const audioTranslateService = (await import('@/services/media/AudioTranslateService')).audioTranslateService;
     // 保存当前进度
     if (state.status === AudioTranslateStatus.Translating) {
       audioTranslateService.saveTask();
@@ -682,9 +707,22 @@ const actions = {
     dispatch(a.AUDIO_TRANSLATE_HIDE_BUBBLE);
     audioTranslateService.removeListener('task', taskCallback);
   },
-  [a.AUDIO_TRANSLATE_SHOW_MODAL]({
+  async [a.AUDIO_TRANSLATE_SHOW_MODAL]({
     commit, getters, state, dispatch,
   }: any, sub: ISubtitleControlListItem) {
+    try {
+      const enabled = await isAccountEnabled();
+      if (enabled && !getters.token) {
+        // 未登录
+        ipcRenderer.send('add-login');
+        dispatch(uActions.UPDATE_SIGN_IN_CALLBACK, () => {
+          dispatch(a.AUDIO_TRANSLATE_SHOW_MODAL, sub);
+        });
+        return;
+      }
+    } catch (error) {
+      // empty
+    }
     dispatch(a.AUDIO_TRANSLATE_HIDE_BUBBLE);
     const key = `${getters.mediaHash}`;
     const taskInfo = mediaStorageService.getAsyncTaskInfo(key);

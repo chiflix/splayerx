@@ -1,13 +1,12 @@
 import path from 'path';
-import { remote, ipcRenderer } from 'electron';
+import { remote } from 'electron';
 import fs from 'fs';
 import asyncStorage from '@/helpers/asyncStorage';
 import syncStorage from '@/helpers/syncStorage';
 
 const state = {
   nsfwProcessDone: false,
-  protectPrivacy: false,
-  hideNSFW: true,
+  incognitoMode: false,
   privacyAgreement: undefined,
   displayLanguage: '',
   primaryLanguage: undefined,
@@ -20,10 +19,7 @@ const state = {
 const getters = {
   nsfwProcessDone: state => state.nsfwProcessDone,
   preferenceData: state => state,
-  protectPrivacy: state => state.protectPrivacy,
-  hideNSFW: state => state.hideNSFW,
-  smartMode: state => state.protectPrivacy && state.hideNSFW,
-  incognitoMode: state => state.protectPrivacy && !state.hideNSFW,
+  incognitoMode: state => state.incognitoMode,
   reverseScrolling: state => state.reverseScrolling,
   privacyAgreement: state => state.privacyAgreement,
   displayLanguage: (state) => {
@@ -47,11 +43,8 @@ const mutations = {
   displayLanguage(state, payload) {
     state.displayLanguage = payload;
   },
-  hideNSFW(state, payload) {
-    state.hideNSFW = payload;
-  },
-  protectPrivacy(state, payload) {
-    state.protectPrivacy = payload;
+  incognitoMode(state, payload) {
+    state.incognitoMode = payload;
   },
   reverseScrolling(state, payload) {
     state.reverseScrolling = payload;
@@ -114,17 +107,8 @@ const actions = {
     commit('reverseScrolling', false);
     return asyncStorage.set('preferences', state);
   },
-  hideNSFW({ commit, state }, payload) {
-    commit('hideNSFW', !!payload);
-    if (payload) ipcRenderer.send('labor-task-add', 'nsfw-warmup');
-    return asyncStorage.set('preferences', state);
-  },
-  protectPrivacy({ commit, state }) {
-    commit('protectPrivacy', true);
-    return asyncStorage.set('preferences', state);
-  },
-  notprotectPrivacy({ commit, state }) {
-    commit('protectPrivacy', false);
+  incognitoMode({ commit, state }, payload) {
+    commit('incognitoMode', payload);
     return asyncStorage.set('preferences', state);
   },
   primaryLanguage({ commit, state }, payload) {

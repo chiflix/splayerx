@@ -134,6 +134,7 @@ export function sourceToFormat(subtitleSource: IOrigin) {
   switch (subtitleSource.type) {
     case Type.Online:
     case Type.Translated:
+    case Type.PreTranslated:
       return Format.Sagi;
     case Type.Embedded:
       return Format.AdvancedSubStationAplha;
@@ -190,6 +191,8 @@ export function getLoader(source: IOrigin): ILoader {
     case Type.Online:
       return new SagiLoader(source.source as string);
     case Type.Translated:
+      return new SagiLoader(source.source as string);
+    case Type.PreTranslated:
       return new SagiLoader(source.source as string);
   }
 }

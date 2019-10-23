@@ -8,18 +8,22 @@ import path, {
   basename, dirname, extname, join, resolve,
 } from 'path';
 import fs from 'fs';
+import http from 'http';
 import rimraf from 'rimraf';
-import urlParse from 'url-parse-lax';
-// import { audioHandler } from './helpers/audioHandler';
 import { audioGrabService } from './helpers/AudioGrabService';
 import './helpers/electronPrototypes';
-import writeLog from './helpers/writeLog';
-import { getValidVideoRegex, getValidSubtitleRegex } from '../shared/utils';
+import {
+  getValidVideoRegex, getValidSubtitleRegex,
+  getToken, saveToken,
+  getIP,
+  getRightPort,
+} from '../shared/utils';
 import { mouse } from './helpers/mouse';
 import MenuService from './menu/MenuService';
 import registerMediaTasks from './helpers/mediaTasksPlugin';
 import { BrowserViewManager } from './helpers/BrowserViewManager';
 import InjectJSManager from '../../src/shared/pip/InjectJSManager';
+import Locale from '../shared/common/localize';
 
 // requestSingleInstanceLock is not going to work for mas
 // https://github.com/electron-userland/electron-packager/issues/923
@@ -60,12 +64,13 @@ if (process.env.NODE_ENV !== 'development') {
 
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 
+let isGlobal = false;
 let sidebar = false;
 let welcomeProcessDone = false;
 let menuService = null;
 let routeName = null;
 let mainWindow = null;
-let laborWindow = null;
+let loginWindow = null;
 let aboutWindow = null;
 let preferenceWindow = null;
 let browsingWindow = null;
@@ -79,28 +84,32 @@ let isBrowsingWindowMax = false;
 let tray = null;
 let pipTimer = 0;
 let needToRestore = false;
-let forceQuit = false; // 大退app 关闭所有windows
-let needBlockCloseLaborWindow = true; // 标记是否阻塞nsfw窗口关闭
 let inited = false;
 let hideBrowsingWindow = false;
 let finalVideoToOpen = [];
+let signInEndPoint = '';
+let localHostPort = 0;
+let fileDirServerOnLine = false;
+const locale = new Locale();
 const tmpVideoToOpen = [];
 const tmpSubsToOpen = [];
 const subRegex = getValidSubtitleRegex();
+const allChannels = ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch', 'coursera', 'ted'];
+const compareStr = [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch'], ['coursera'], ['ted']];
 const titlebarUrl = process.platform === 'darwin' ? `file:${resolve(__static, 'pip/macTitlebar.html')}` : `file:${resolve(__static, 'pip/winTitlebar.html')}`;
 const maskUrl = process.platform === 'darwin' ? `file:${resolve(__static, 'pip/mask.html')}` : `file:${resolve(__static, 'pip/mask.html')}`;
 const mainURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080'
   : `file://${__dirname}/index.html`;
-const laborURL = process.env.NODE_ENV === 'development'
-  ? 'http://localhost:9080/labor.html'
-  : `file://${__dirname}/labor.html`;
 const aboutURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080/about.html'
   : `file://${__dirname}/about.html`;
 const preferenceURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080/preference.html'
   : `file://${__dirname}/preference.html`;
+let loginURL = process.env.NODE_ENV === 'development'
+  ? 'http://localhost:9081/login.html'
+  : `file://${__dirname}/login.html`;
 const browsingURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080/browsing.html'
   : `file://${__dirname}/browsing.html`;
@@ -108,6 +117,17 @@ const browsingURL = process.env.NODE_ENV === 'development'
 const tempFolderPath = path.join(app.getPath('temp'), 'splayer');
 if (!fs.existsSync(tempFolderPath)) fs.mkdirSync(tempFolderPath);
 
+function hackWindowsRightMenu(win) {
+  if (win) {
+    win.hookWindowMessage(278, () => {
+      win.setEnabled(false);
+      setTimeout(() => {
+        win.setEnabled(true);
+      }, 100);
+      return true;
+    });
+  }
+}
 
 function handleBossKey() {
   if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
@@ -134,6 +154,12 @@ function handleBossKey() {
       });
     }
   }
+}
+
+function pipControlViewTitle(isGlobal) {
+  const danmu = locale.$t('browsing.danmu');
+  const title = isGlobal ? locale.$t('browsing.exitPip') : locale.$t('browsing.exitPop');
+  pipControlView.webContents.executeJavaScript(InjectJSManager.updatePipControlTitle(title, danmu));
 }
 
 function createPipControlView() {
@@ -182,6 +208,7 @@ function createMaskView() {
     document.body.style.backgroundColor = 'rgba(255, 255, 255, 0.18)';
   `);
 }
+
 function markNeedToRestore() {
   fs.closeSync(fs.openSync(path.join(app.getPath('userData'), 'NEED_TO_RESTORE_MARK'), 'w'));
 }
@@ -285,6 +312,113 @@ function createPreferenceWindow(e, route) {
   preferenceWindow.once('ready-to-show', () => {
     preferenceWindow.show();
   });
+  preferenceWindow.on('focus', () => {
+    menuService.enableMenu(false);
+  });
+  if (process.platform === 'win32') {
+    hackWindowsRightMenu(preferenceWindow);
+  }
+}
+
+/**
+ * @description sign in window need aliyun nc valication with // protocal
+ * @author tanghaixiang
+ */
+function createFileDirServer() {
+  http.createServer((request, response) => {
+    console.log('request ', request.url);
+    let filePath = `${request.url}`;
+    if (filePath === '/') {
+      filePath = '/login.html';
+    }
+    const extname = String(path.extname(filePath)).toLowerCase();
+    const mimeTypes = {
+      '.html': 'text/html',
+      '.js': 'text/javascript',
+      '.css': 'text/css',
+      '.json': 'application/json',
+      '.png': 'image/png',
+      '.jpg': 'image/jpg',
+      '.gif': 'image/gif',
+      '.svg': 'image/svg+xml',
+      '.wav': 'audio/wav',
+      '.mp4': 'video/mp4',
+      '.woff': 'application/font-woff',
+      '.ttf': 'application/font-ttf',
+      '.eot': 'application/vnd.ms-fontobject',
+      '.otf': 'application/font-otf',
+      '.wasm': 'application/wasm',
+    };
+    const contentType = mimeTypes[extname] || 'application/octet-stream';
+    fs.readFile(`${__dirname}${filePath}`, (error, content) => {
+      if (error) {
+        return;
+      }
+      response.writeHead(200, { 'Content-Type': contentType });
+      response.end(content, 'utf-8');
+    });
+  }).listen(localHostPort);
+}
+
+function createLoginWindow(e, route) {
+  // in production use http protocal
+  // aliyun captcha use // protocal
+  if (process.env.NODE_ENV === 'production' && !fileDirServerOnLine) {
+    createFileDirServer();
+    fileDirServerOnLine = true;
+    loginURL = `http://localhost:${localHostPort}/login.html`;
+  }
+  const loginWindowOptions = {
+    useContentSize: true,
+    frame: false,
+    titleBarStyle: 'none',
+    width: 412,
+    height: 284,
+    webPreferences: {
+      experimentalFeatures: true,
+      webSecurity: false,
+      preload: `${require('path').resolve(__static, 'login/preload.js')}`,
+    },
+    transparent: true,
+    resizable: false,
+    show: false,
+    acceptFirstMouse: true,
+    fullscreenable: false,
+    maximizable: false,
+    minimizable: false,
+    backgroundColor: '#000000',
+  };
+  if (!loginWindow) {
+    loginWindow = new BrowserWindow(loginWindowOptions);
+    // 登录窗口顶置
+    loginWindow.setAlwaysOnTop(true);
+    if (route) loginWindow.loadURL(`${loginURL}#/${route}`);
+    else loginWindow.loadURL(`${loginURL}`);
+
+    loginWindow.on('closed', () => {
+      loginWindow = null;
+    });
+    loginWindow.webContents.setUserAgent(
+      `${loginWindow.webContents.getUserAgent().replace(/Electron\S+/i, '')
+      } SPlayerX@2018 ${os.platform()} ${os.release()} Version ${app.getVersion()}`,
+    );
+    if (process.env.NODE_ENV === 'development') {
+      setTimeout(() => { // wait some time to prevent `Object not found` error
+        if (loginWindow) loginWindow.openDevTools({ mode: 'detach' });
+      }, 1000);
+    }
+  } else {
+    loginWindow.focus();
+  }
+  loginWindow.once('ready-to-show', () => {
+    loginWindow.show();
+  });
+  loginWindow.on('focus', () => {
+    menuService.enableMenu(false);
+  });
+  if (process.platform === 'win32') {
+    hackWindowsRightMenu(loginWindow);
+  }
 }
 
 function createAboutWindow() {
@@ -321,6 +455,9 @@ function createAboutWindow() {
   aboutWindow.once('ready-to-show', () => {
     aboutWindow.show();
   });
+  if (process.platform === 'win32') {
+    hackWindowsRightMenu(aboutWindow);
+  }
 }
 
 function createBrowsingWindow(args) {
@@ -339,14 +476,15 @@ function createBrowsingWindow(args) {
     acceptFirstMouse: false,
     show: false,
   };
-  if (!browsingWindow) {
-    browsingWindow = new BrowserWindow(browsingWindowOptions);
-    browsingWindow.loadURL(`${browsingURL}`);
-    browsingWindow.on('closed', () => {
-      browsingWindow = null;
-    });
-  }
-  browsingWindow.once('ready-to-show', () => {
+  browsingWindow = new BrowserWindow(browsingWindowOptions);
+  browsingWindow.loadURL(`${browsingURL}`);
+  browsingWindow.on('closed', () => {
+    browsingWindow = null;
+    if (process.platform === 'win32' && isGlobal) {
+      app.quit();
+    }
+  });
+  if (browsingWindow) {
     browsingWindow.setSize(args.size[0], args.size[1]);
     if (args.position.length) {
       browsingWindow.setPosition(args.position[0], args.position[1]);
@@ -358,49 +496,16 @@ function createBrowsingWindow(args) {
       if (!mainWindow) return;
       mainWindow.send('update-pip-pos', browsingWindow.getPosition());
     }, 100));
-  });
-  browsingWindow.on('leave-full-screen', () => {
-    if (hideBrowsingWindow) {
-      hideBrowsingWindow = false;
-      browsingWindow.hide();
-      setTimeout(() => {
-        mainWindow.focus();
-      }, 0);
-    }
-  });
-}
-
-function createLaborWindow() {
-  const laborWindowOptions = {
-    show: false,
-    webPreferences: {
-      webSecurity: false,
-      nodeIntegration: true,
-      experimentalFeatures: true,
-    },
-  };
-  if (!laborWindow) {
-    laborWindow = new BrowserWindow(laborWindowOptions);
-    laborWindow.once('ready-to-show', () => {
-      laborWindow.readyToShow = true;
-    });
-    laborWindow.on('close', (event) => {
-      if ((mainWindow && !mainWindow.webContents.isDestroyed()) && needBlockCloseLaborWindow) {
-        event.preventDefault();
+    browsingWindow.on('leave-full-screen', () => {
+      if (hideBrowsingWindow) {
+        hideBrowsingWindow = false;
+        browsingWindow.hide();
+        setTimeout(() => {
+          mainWindow.focus();
+        }, 0);
       }
     });
-    laborWindow.on('closed', () => {
-      laborWindow = null;
-      if (forceQuit) {
-        app.quit();
-      }
-    });
-    if (process.env.NODE_ENV === 'development') laborWindow.openDevTools({ mode: 'detach' });
-    laborWindow.loadURL(laborURL);
   }
-  // 重置参数
-  forceQuit = false;
-  needBlockCloseLaborWindow = true;
 }
 
 function registerMainWindowEvent(mainWindow) {
@@ -464,18 +569,6 @@ function registerMainWindowEvent(mainWindow) {
 
   registerMediaTasks();
 
-  ipcMain.on('labor-task-add', (evt, ...rest) => {
-    if (laborWindow && !laborWindow.webContents.isDestroyed()) {
-      if (laborWindow.readyToShow) laborWindow.webContents.send('labor-task-add', ...rest);
-      else laborWindow.once('ready-to-show', () => laborWindow.webContents.send('labor-task-add', ...rest));
-    }
-  });
-  ipcMain.on('labor-task-done', (evt, ...rest) => {
-    if (mainWindow && !mainWindow.webContents.isDestroyed()) {
-      mainWindow.webContents.send('labor-task-done', ...rest);
-    }
-  });
-
   ipcMain.on('callBrowsingWindowMethod', (evt, method, args = []) => {
     try {
       browsingWindow[method](...args);
@@ -508,11 +601,17 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('pip-watcher', (evt, args) => {
     browsingWindow.getBrowserViews()[0].webContents.executeJavaScript(args);
   });
+  ipcMain.on('update-locale', () => {
+    locale.getDisplayLanguage();
+    if (pipControlView && !pipControlView.isDestroyed()) {
+      pipControlViewTitle(isGlobal);
+    }
+  });
   ipcMain.on('pip-window-fullscreen', () => {
     if (browsingWindow && browsingWindow.isFocused()) {
       browsingWindow.setFullScreen(!browsingWindow.isFullScreen());
-      titlebarView.webContents
-        .executeJavaScript(InjectJSManager.updateFullScreenIcon(browsingWindow.isFullScreen()));
+      titlebarView.webContents.executeJavaScript(InjectJSManager
+        .updateFullScreenIcon(browsingWindow.isFullScreen(), isBrowsingWindowMax));
     }
   });
   ipcMain.on('pip-window-close', (evt, args) => {
@@ -529,10 +628,16 @@ function registerMainWindowEvent(mainWindow) {
     browserViewManager.pauseVideo(mainWindow.getBrowserViews()[0]);
     mainWindow.hide();
   });
+  ipcMain.on('clear-browsers-by-channel', (evt, channel) => {
+    if (!browserViewManager) return;
+    browserViewManager.clearBrowserViewsByChannel(channel);
+  });
   ipcMain.on('remove-browser', () => {
+    if (!browserViewManager) return;
+    if (mainWindow.getBrowserViews().length) browserViewManager.pauseVideo();
     mainWindow.getBrowserViews()
       .forEach(mainWindowView => mainWindow.removeBrowserView(mainWindowView));
-    browserViewManager.pauseVideo();
+    if (mainWindow.isMaximized()) mainWindow.unmaximize();
     if (browsingWindow) {
       const views = browsingWindow.getBrowserViews();
       views.forEach((view) => {
@@ -545,67 +650,84 @@ function registerMainWindowEvent(mainWindow) {
   });
   ipcMain.on('go-to-offset', (evt, val) => {
     if (!browserViewManager) return;
+    mainWindow.removeBrowserView(mainWindow.getBrowserViews()[0]);
     const newBrowser = val === 1 ? browserViewManager.forward() : browserViewManager.back();
     if (newBrowser.page) {
-      const id = mainWindow.getBrowserViews()[0].id;
       mainWindow.addBrowserView(newBrowser.page.view);
-      setTimeout(() => {
-        mainWindow.removeBrowserView(BrowserView.fromId(id));
-        mainWindow.send('update-browser-state', {
-          url: newBrowser.page.url,
-          canGoBack: newBrowser.canBack,
-          canGoForward: newBrowser.canForward,
-        });
-      }, 150);
-      newBrowser.page.view.setBounds({
-        x: sidebar ? 76 : 0,
-        y: 40,
-        width: sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
-        height: mainWindow.getSize()[1] - 40,
+      mainWindow.send('update-browser-state', {
+        url: newBrowser.page.url,
+        canGoBack: newBrowser.canBack,
+        canGoForward: newBrowser.canForward,
       });
+      const bounds = mainWindow.getBounds();
+      if (process.platform === 'win32' && mainWindow.isMaximized() && (bounds.x < 0 || bounds.y < 0)) {
+        newBrowser.page.view.setBounds({
+          x: sidebar ? 76 : 0,
+          y: 40,
+          width: sidebar ? bounds.width + (bounds.x * 2) - 76
+            : bounds.width + (bounds.x * 2),
+          height: bounds.height - 40,
+        });
+      } else {
+        newBrowser.page.view.setBounds({
+          x: sidebar ? 76 : 0,
+          y: 40,
+          width: sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
+          height: mainWindow.getSize()[1] - 40,
+        });
+      }
       newBrowser.page.view.setAutoResize({
         width: true, height: true,
       });
     }
   });
+  // eslint-disable-next-line complexity
   ipcMain.on('change-channel', (evt, args) => {
     if (!browserViewManager) browserViewManager = new BrowserViewManager();
-    const hostname = urlParse(args.url).hostname;
-    let channel = hostname.slice(hostname.indexOf('.') + 1, hostname.length);
-    if (args.url.includes('youtube')) {
-      channel = 'youtube.com';
-    }
-    const newChannel = browserViewManager.changeChannel(channel, args);
+    const mainBrowser = mainWindow.getBrowserViews()[0];
+    if (mainBrowser) mainWindow.removeBrowserView(mainBrowser);
+    const newChannel = browserViewManager.changeChannel(args.channel, args);
     const view = newChannel.view ? newChannel.view : newChannel.page.view;
     const url = newChannel.view ? args.url : newChannel.page.url;
-    const mainBrowser = mainWindow.getBrowserViews()[0];
     mainWindow.addBrowserView(view);
     setTimeout(() => {
-      if (mainBrowser) mainWindow.removeBrowserView(BrowserView.fromId(mainBrowser.id));
       mainWindow.send('update-browser-state', {
         url,
         canGoBack: newChannel.canBack,
         canGoForward: newChannel.canForward,
       });
     }, 150);
-    view.setBounds({
-      x: sidebar ? 76 : 0,
-      y: 40,
-      width: sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
-      height: mainWindow.getSize()[1] - 40,
-    });
+
+    const bounds = mainWindow.getBounds();
+    if (process.platform === 'win32' && mainWindow.isMaximized() && (bounds.x < 0 || bounds.y < 0)) {
+      view.setBounds({
+        x: sidebar ? 76 : 0,
+        y: 40,
+        width: sidebar ? bounds.width + (bounds.x * 2) - 76
+          : bounds.width + (bounds.x * 2),
+        height: bounds.height - 40,
+      });
+    } else {
+      view.setBounds({
+        x: sidebar ? 76 : 0,
+        y: 40,
+        width: sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
+        height: mainWindow.getSize()[1] - 40,
+      });
+    }
     view.setAutoResize({
       width: true, height: true,
     });
   });
   ipcMain.on('create-browser-view', (evt, args) => {
     if (!browserViewManager) browserViewManager = new BrowserViewManager();
-    const hostname = urlParse(args.url).hostname;
-    let channel = hostname.slice(hostname.indexOf('.') + 1, hostname.length);
-    if (args.url.includes('youtube')) {
-      channel = 'youtube.com';
-    }
-    const currentMainBrowserView = browserViewManager.create(channel, args);
+    let currentChannel = '';
+    allChannels.forEach((channel, index) => {
+      if (compareStr[index].findIndex(str => args.url.includes(str)) !== -1) {
+        currentChannel = `${channel}.com`;
+      }
+    });
+    const currentMainBrowserView = browserViewManager.create(currentChannel, args);
     setTimeout(() => {
       mainWindow.send('update-browser-state', {
         url: args.url,
@@ -682,7 +804,8 @@ function registerMainWindowEvent(mainWindow) {
     }
   });
   ipcMain.on('update-full-state', (evt, isFullScreen) => {
-    titlebarView.webContents.executeJavaScript(InjectJSManager.updateFullScreenIcon(isFullScreen));
+    titlebarView.webContents.executeJavaScript(InjectJSManager
+      .updateFullScreenIcon(isFullScreen, isBrowsingWindowMax));
   });
   ipcMain.on('mouseup', (evt, type) => {
     switch (type) {
@@ -694,13 +817,15 @@ function registerMainWindowEvent(mainWindow) {
         break;
       case 'full':
         browsingWindow.setFullScreen(true);
-        titlebarView.webContents.executeJavaScript(InjectJSManager.updateFullScreenIcon(true));
+        titlebarView.webContents.executeJavaScript(InjectJSManager
+          .updateFullScreenIcon(true, isBrowsingWindowMax));
         break;
       case 'recover':
         browsingWindow.setFullScreen(false);
         browsingWindow.getBrowserViews()[0].webContents
           .executeJavaScript(InjectJSManager.changeFullScreen(false));
-        titlebarView.webContents.executeJavaScript(InjectJSManager.updateFullScreenIcon(false));
+        titlebarView.webContents.executeJavaScript(InjectJSManager
+          .updateFullScreenIcon(false, isBrowsingWindowMax));
         break;
       case 'max':
         if (browsingWindow.isMaximized()) {
@@ -735,12 +860,13 @@ function registerMainWindowEvent(mainWindow) {
     browViews.forEach((view) => {
       browsingWindow.removeBrowserView(view);
     });
-    const hostname = urlParse(mainView.webContents.getURL()).hostname;
-    let channel = hostname.slice(hostname.indexOf('.') + 1, hostname.length);
-    if (mainView.webContents.getURL().includes('youtube')) {
-      channel = 'youtube.com';
-    }
-    const browsers = browserViewManager.changePip(channel);
+    let currentChannel = '';
+    allChannels.forEach((channel, index) => {
+      if (compareStr[index].findIndex(str => mainView.webContents.getURL().includes(str)) !== -1) {
+        currentChannel = `${channel}.com`;
+      }
+    });
+    const browsers = browserViewManager.changePip(currentChannel);
     const pipBrowser = browsers.pipBrowser;
     const mainBrowser = browsers.mainBrowser;
     mainWindow.addBrowserView(mainBrowser.page.view);
@@ -748,6 +874,7 @@ function registerMainWindowEvent(mainWindow) {
     createPipControlView();
     createTitlebarView();
     if (args.isGlobal) {
+      isGlobal = args.isGlobal;
       browserViewManager.pauseVideo(mainWindow.getBrowserViews()[0]);
       mainWindow.hide();
     }
@@ -782,9 +909,7 @@ function registerMainWindowEvent(mainWindow) {
     const pipBrowser = browsers.pipBrowser;
     const mainBrowser = browsers.mainBrowser;
     if (!browsingWindow) {
-      createBrowsingWindow();
-      browsingWindow.setSize(args.pipInfo.pipSize[0], args.pipInfo.pipSize[1]);
-      browsingWindow.setPosition(args.pipInfo.pipPos[0], args.pipInfo.pipPos[1]);
+      createBrowsingWindow({ size: args.pipInfo.pipSize, position: args.pipInfo.pipPos });
       mainWindow.send('init-pip-position');
       mainWindow.removeBrowserView(mainWindow.getBrowserViews()[0]);
       mainWindow.addBrowserView(mainBrowser.page.view);
@@ -795,19 +920,20 @@ function registerMainWindowEvent(mainWindow) {
     } else {
       mainWindow.removeBrowserView(mainWindow.getBrowserViews()[0]);
       mainWindow.addBrowserView(mainBrowser.page.view);
-      browsingWindow.setSize(browsingWindow.getSize()[0] + 1, browsingWindow.getSize()[1]);
       browsingWindow.addBrowserView(pipBrowser);
+      browsingWindow.setSize(420, 236);
       createPipControlView();
       createTitlebarView();
       browsingWindow.show();
     }
     if (args.isGlobal) {
-      browserViewManager.pauseVideo(mainWindow.getBrowserViews()[0]);
+      isGlobal = args.isGlobal;
       mainWindow.hide();
     }
     browsingWindow.webContents.closeDevTools();
     browsingWindow.setAspectRatio(args.pipInfo.aspectRatio);
     browsingWindow.setMinimumSize(args.pipInfo.minimumSize[0], args.pipInfo.minimumSize[1]);
+    browsingWindow.setSize(args.pipInfo.pipSize[0], args.pipInfo.pipSize[1]);
     mainBrowser.page.view.setBounds({
       x: sidebar ? 76 : 0,
       y: 40,
@@ -832,6 +958,7 @@ function registerMainWindowEvent(mainWindow) {
     });
     pipControlView.webContents
       .executeJavaScript(InjectJSManager.updateBarrageState(args.barrageOpen, args.opacity));
+    pipControlViewTitle(args.isGlobal);
     menuService.updateFocusedWindow(false, mainWindow && mainWindow.isVisible());
     browsingWindow.focus();
   });
@@ -845,7 +972,7 @@ function registerMainWindowEvent(mainWindow) {
     if (pipControlView) pipControlView.setBounds(args.control);
     if (titlebarView) titlebarView.setBounds(args.titlebar);
   });
-  ipcMain.on('exit-pip', () => {
+  ipcMain.on('exit-pip', (evt, args) => {
     if (!browserViewManager) return;
     browsingWindow.send('remove-pip-listener');
     mainWindow.show();
@@ -856,6 +983,8 @@ function registerMainWindowEvent(mainWindow) {
       browsingWindow.removeBrowserView(view);
     });
     const exitBrowser = browserViewManager.exitPip();
+    exitBrowser.page.view.webContents.executeJavaScript(args.jsRecover);
+    if (args.cssRecover) exitBrowser.page.view.webContents.insertCSS(args.cssRecover);
     mainWindow.addBrowserView(exitBrowser.page.view);
     exitBrowser.page.view.setBounds({
       x: sidebar ? 76 : 0,
@@ -882,12 +1011,31 @@ function registerMainWindowEvent(mainWindow) {
     mainWindow.show();
     menuService.updateFocusedWindow(true, mainWindow && mainWindow.isVisible());
   });
+  // eslint-disable-next-line complexity
   ipcMain.on('set-window-maximize', () => {
     if (mainWindow && mainWindow.isFocused()) {
-      if (!mainWindow.isMaximized()) {
-        mainWindow.maximize();
-      } else {
+      if (mainWindow.isMaximized()) {
         mainWindow.unmaximize();
+      } else {
+        mainWindow.maximize();
+      }
+      const bounds = mainWindow.getBounds();
+      if (process.platform === 'win32' && mainWindow.isMaximized() && (bounds.x < 0 || bounds.y < 0)) {
+        mainWindow.getBrowserViews()[0].setBounds({
+          x: sidebar ? 76 : 0,
+          y: 40,
+          width: sidebar ? bounds.width + (bounds.x * 2) - 76
+            : bounds.width + (bounds.x * 2),
+          height: bounds.height - 40,
+        });
+      } else {
+        mainWindow.getBrowserViews()[0].setBounds({
+          x: sidebar ? 76 : 0,
+          y: 40,
+          width: sidebar ? mainWindow.getSize()[0] - 76
+            : mainWindow.getSize()[0],
+          height: mainWindow.getSize()[1] - 40,
+        });
       }
     } else if (browsingWindow && browsingWindow.isFocused()) {
       if (!isBrowsingWindowMax) {
@@ -911,8 +1059,8 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('key-events', (e, keyCode) => {
     if (keyCode === 13) {
       browsingWindow.setFullScreen(!browsingWindow.isFullScreen());
-      titlebarView.webContents
-        .executeJavaScript(InjectJSManager.updateFullScreenIcon(browsingWindow.isFullScreen()));
+      titlebarView.webContents.executeJavaScript(InjectJSManager
+        .updateFullScreenIcon(browsingWindow.isFullScreen(), isBrowsingWindowMax));
     } else {
       browsingWindow.getBrowserViews()[0].webContents
         .executeJavaScript(InjectJSManager.emitKeydownEvent(keyCode));
@@ -951,17 +1099,11 @@ function registerMainWindowEvent(mainWindow) {
     mainWindow.webContents.send('mainCommit', 'isFullScreen', mainWindow.isFullScreen());
     mainWindow.webContents.send('mainCommit', 'isFocused', mainWindow.isFocused());
   });
-  ipcMain.on('writeLog', (event, level, log) => { // eslint-disable-line complexity
-    if (!log) return;
-    writeLog(level, log);
-  });
   ipcMain.on('need-to-restore', () => {
     needToRestore = true;
     markNeedToRestore();
   });
   ipcMain.on('relaunch', () => {
-    forceQuit = true;
-    needBlockCloseLaborWindow = false;
     const switches = process.argv.filter(a => a.startsWith('-'));
     const argv = process.argv.filter(a => !a.startsWith('-'))
       .slice(0, app.isPackaged ? 1 : 2).concat(switches);
@@ -969,12 +1111,21 @@ function registerMainWindowEvent(mainWindow) {
     app.quit();
   });
   ipcMain.on('add-preference', createPreferenceWindow);
+
   ipcMain.on('add-browsing', (e, args) => {
     createBrowsingWindow(args);
+  });
+  ipcMain.on('clear-history', () => {
+    if (mainWindow && !mainWindow.webContents.isDestroyed()) {
+      mainWindow.webContents.send('file.clearHistory');
+    }
   });
   ipcMain.on('preference-to-main', (e, args) => {
     if (mainWindow && !mainWindow.webContents.isDestroyed()) {
       mainWindow.webContents.send('mainDispatch', 'setPreference', args);
+    }
+    if (loginWindow && !loginWindow.webContents.isDestroyed()) {
+      loginWindow.webContents.send('setPreference', args);
     }
   });
   ipcMain.on('main-to-preference', (e, args) => {
@@ -1004,10 +1155,38 @@ function registerMainWindowEvent(mainWindow) {
     audioGrabService.stop();
   });
   /** grab audio logic in main process end */
+
+  ipcMain.on('add-login', createLoginWindow);
+
+  ipcMain.on('login-captcha', () => {
+    if (loginWindow && !loginWindow.webContents.isDestroyed()) {
+      loginWindow.setSize(412, 336, true);
+    }
+  });
+
+  ipcMain.on('account-enabled', () => {
+    // get storage token
+    getToken().then((account) => {
+      if (account) {
+        global['account'] = account;
+        menuService.updateAccount(account);
+        audioGrabService.setToken(account.token);
+        if (mainWindow && !mainWindow.webContents.isDestroyed()) {
+          mainWindow.webContents.send('sign-in', account);
+        }
+      } else {
+        menuService.updateAccount(undefined);
+        audioGrabService.setToken(undefined);
+      }
+    }).catch(console.error);
+  });
+
+  ipcMain.on('sign-in-end-point', (events, data) => {
+    signInEndPoint = data;
+  });
 }
 
 function createMainWindow(openDialog, playlistId) {
-  createLaborWindow();
   mainWindow = new BrowserWindow({
     useContentSize: true,
     frame: false,
@@ -1051,10 +1230,6 @@ function createMainWindow(openDialog, playlistId) {
     ipcMain.removeAllListeners(); // FIXME: decouple mainWindow and ipcMain
     mainWindow = null;
     menuService.setMainWindow(null);
-    if (forceQuit) {
-      needBlockCloseLaborWindow = false;
-    }
-    if (laborWindow) laborWindow.close();
   });
 
   mainWindow.once('ready-to-show', () => {
@@ -1081,6 +1256,9 @@ function createMainWindow(openDialog, playlistId) {
       if (mainWindow) mainWindow.openDevTools({ mode: 'detach' });
     }, 1000);
   }
+  mainWindow.on('focus', () => {
+    menuService.enableMenu(true);
+  });
 }
 
 ['left-drag', 'left-up'].forEach((channel) => {
@@ -1100,7 +1278,6 @@ app.on('before-quit', () => {
   } else {
     mainWindow.webContents.send('quit');
   }
-  forceQuit = true;
 });
 
 app.on('quit', () => {
@@ -1116,6 +1293,11 @@ app.on('second-instance', () => {
   }
 });
 
+app.on('minimize', () => {
+  if (mainWindow && mainWindow.isFocused()) {
+    mainWindow.minimize();
+  }
+});
 
 async function darwinOpenFilesToStart() {
   if (mainWindow && !mainWindow.webContents.isDestroyed()) { // sencond instance
@@ -1250,6 +1432,9 @@ app.on('ready', () => {
   globalShortcut.register('CmdOrCtrl+Shift+J+K+L', () => {
     if (preferenceWindow) preferenceWindow.openDevTools({ mode: 'detach' });
   });
+  globalShortcut.register('CmdOrCtrl+Shift+A+S+D', () => {
+    if (loginWindow) loginWindow.openDevTools({ mode: 'detach' });
+  });
 
   if (process.platform === 'win32') {
     globalShortcut.register('CmdOrCtrl+`', () => {
@@ -1268,6 +1453,7 @@ app.on('window-all-closed', () => {
 
 const oauthRegex = [
   /^https:\/\/cnpassport.youku.com\//i,
+  /^https:\/\/udb3lgn.huya.com\//i,
   /^https:\/\/passport.iqiyi.com\/apis\/thirdparty/i,
   /^https:\/\/api.weibo.com\/oauth2/i,
   /^https:\/\/graph.qq.com\//i,
@@ -1288,6 +1474,7 @@ app.on('web-contents-created', (webContentsCreatedEvent, contents) => {
 
 app.on('bossKey', handleBossKey);
 app.on('add-preference', createPreferenceWindow);
+app.on('add-login', createLoginWindow);
 app.on('add-windows-about', createAboutWindow);
 app.on('check-for-updates', () => {
   if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
@@ -1316,4 +1503,48 @@ app.on('activate', () => {
   if (browsingWindow && browsingWindow.isMinimized()) {
     browsingWindow.restore();
   }
+  if (mainWindow && mainWindow.isMinimized()) {
+    mainWindow.restore();
+  }
 });
+
+app.on('sign-in', (account) => {
+  global['account'] = account;
+  menuService.updateAccount(account);
+  audioGrabService.setToken(account.token);
+  saveToken(account.token);
+  if (mainWindow && !mainWindow.webContents.isDestroyed()) {
+    mainWindow.webContents.send('sign-in', account);
+  }
+});
+
+app.on('sign-out-confirm', () => {
+  if (mainWindow && !mainWindow.webContents.isDestroyed()) {
+    mainWindow.webContents.send('sign-out-confirm', undefined);
+  }
+});
+
+app.on('sign-out', () => {
+  global['account'] = undefined;
+  menuService.updateAccount(undefined);
+  audioGrabService.setToken(undefined);
+  saveToken('');
+  if (mainWindow && !mainWindow.webContents.isDestroyed()) {
+    mainWindow.webContents.send('sign-in', undefined);
+  }
+});
+
+app.getDisplayLanguage = () => {
+  locale.getDisplayLanguage();
+  return locale.displayLanguage;
+};
+
+// export getIp to static login preload.js
+app.getIP = getIP;
+
+// export getSignInEndPoint to static login preload.js
+app.getSignInEndPoint = () => signInEndPoint;
+
+getRightPort().then((port) => {
+  localHostPort = port;
+}).catch(console.error);

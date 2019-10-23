@@ -8,17 +8,18 @@
       "repo": "splayerx"
     }
   ],
+  "afterSign": "scripts/notarize.js",
   "afterPack": "scripts/after-pack.js",
   "compression": "maximum",
   "directories": {
     "output": "build"
   },
-  "electronVersion": "5.0.7",
+  "electronVersion": "5.0.11",
   "electronDist": "node_modules/@chiflix/electron/dist",
   "electronDownload": {
     "mirror": "https://github.com/chiflix/electron/releases/download/v",
     "isVerifyChecksum": false,
-    "version": "5.0.7"
+    "version": "5.0.11"
   },
   "files": [
     "dist/electron/**/*"
@@ -57,6 +58,7 @@
     ]
   },
   "mac": {
+    "hardenedRuntime": true,
     "icon": "icons/icon.icns",
     "target": [
       "dmg"

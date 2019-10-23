@@ -7,20 +7,19 @@ import { throttle } from 'lodash';
 import electron from 'electron';
 // @ts-ignore
 import urlParseLax from 'url-parse-lax';
-import MenuService from '@/services/menu/MenuService';
 import asyncStorage from '@/helpers/asyncStorage';
 
 export default {
   name: 'BrowsingPip',
   data() {
     return {
-      supportedRecordHost: ['www.youtube.com', 'www.bilibili.com', 'www.iqiyi.com'],
-      menuService: null,
       asyncTasksDone: false,
       windowSize: [],
       offset: [],
       currentUrl: '',
       canListenUrlChange: false,
+      allChannels: ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch', 'coursera', 'ted'],
+      compareStr: [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch'], ['coursera'], ['ted']],
     };
   },
   computed: {
@@ -54,10 +53,9 @@ export default {
       }
     });
     electron.ipcRenderer.on('update-pip-listener', () => {
-      this.currentUrl = electron.remote.getCurrentWindow()
-        .getBrowserViews()[0].webContents.getURL();
-      this.canListenUrlChange = this.currentUrl.includes('iqiyi') || this.currentUrl.includes('youtube');
       const view = electron.remote.getCurrentWindow().getBrowserViews()[0];
+      this.currentUrl = view.webContents.getURL();
+      this.canListenUrlChange = this.currentUrl.includes('iqiyi') || this.currentUrl.includes('youtube');
       if (this.canListenUrlChange) {
         view.webContents.addListener('dom-ready', this.handleDomReady);
       } else {
@@ -103,7 +101,6 @@ export default {
         electron.ipcRenderer.send('callBrowsingWindowMethod', 'setPosition', [x, y]);
       }
     });
-    this.menuService = new MenuService();
     electron.remote.getCurrentWindow().addListener('enter-html-full-screen', () => {
       electron.ipcRenderer.send('update-full-state', true);
     });
@@ -151,23 +148,20 @@ export default {
       return process.platform === 'win32' ? window.devicePixelRatio || 1 : 1;
     },
     handleUrlChange(url: string) {
-      const newHostname = urlParseLax(url).hostname;
-      const oldHostname = urlParseLax(this.currentUrl).hostname;
-      let newChannel = newHostname.slice(
-        newHostname.indexOf('.') + 1,
-        newHostname.length,
-      );
-      let oldChannel = oldHostname.slice(
-        oldHostname.indexOf('.') + 1,
-        oldHostname.length,
-      );
-      if (url.includes('youtube')) {
-        newChannel = 'youtube.com';
-      }
-      if (this.currentUrl.includes('youtube')) {
-        oldChannel = 'youtube.com';
-      }
+      if (!url || url === 'about:blank') return;
       if (url !== this.currentUrl) {
+        const newHostname = urlParseLax(url).hostname;
+        const oldHostname = urlParseLax(this.currentUrl).hostname;
+        let newChannel = '';
+        let oldChannel = '';
+        this.allChannels.forEach((channel: string, index: number) => {
+          if (this.compareStr[index].findIndex((str: string) => newHostname.includes(str)) !== -1) {
+            newChannel = `${channel}.com`;
+          }
+          if (this.compareStr[index].findIndex((str: string) => oldHostname.includes(str)) !== -1) {
+            oldChannel = `${channel}.com`;
+          }
+        });
         if (newChannel === oldChannel) {
           this.currentUrl = url;
           const view = electron.remote.getCurrentWindow().getBrowserViews()[0];
@@ -204,7 +198,7 @@ export default {
       const views = electron.remote.getCurrentWindow().getBrowserViews();
       if (views[0]) {
         const url = views[0].webContents.getURL();
-        this.handleUrlChange(url);
+        if (!url.includes('/up-next')) this.handleUrlChange(url);
       }
     },
   },

@@ -104,6 +104,11 @@
       "copy": "نسخ",
       "paste": "معجون"
     },
+    "account": {
+      "name": "حساب",
+      "login": "تسجيل دخول",
+      "logout": "تسجيل الخروج"
+    },
     "help": {
       "name": "مساعدة",
       "feedback": "ردود الفعل",
@@ -202,12 +207,6 @@
       "playInNewWindow": "اللعب في نافذة جديدة",
       "backToBrowser": "العودة إلى المتصفح"
     },
-    "favourite": {
-      "name": "قناة",
-      "iqiyi": "iQIYI",
-      "bilibili": "Bilibili",
-      "youtube": "Youtube"
-    },
     "edit": {
       "name": "حرّر",
       "cut": "قص",
@@ -239,10 +238,37 @@
     "languageDescription": "* You can change your settings in preferences later",
     "none": "لا شيء"
   },
+  "browsing": {
+    "bilibili": "Bilibili",
+    "iqiyi": "iQIYI",
+    "youtube": "YouTube",
+    "huya": "Huya",
+    "qq": "Tencent Video",
+    "douyu": "Douyu",
+    "twitch": "Twitch",
+    "youku": "Youku",
+    "coursera": "Coursera",
+    "ted": "TED",
+    "openLocalFile": " فتح ملف محلي ...",
+    "enterPip": "أدخل صورة في صورة",
+    "exitPip": "العودة إلى المتصفح",
+    "enterPop": "اللعب في نافذة جديدة",
+    "exitPop": "العودة إلى المتصفح",
+    "danmu": "وابل",
+    "error": {
+      "offline": "لا يوجد إنترنت",
+      "try": "حاول:",
+      "firstLine": "فحص كبلات الشبكة والمودم وجهاز التوجيه",
+      "secondLine": "إعادة الاتصال بشبكة Wi-Fi"
+    },
+    "remove": "نزع",
+    "siteManager": "مدير المواقع",
+    "popularSites": "المواقع الأمثل",
+    "siteTip": "اضافة / تغيير"
+  },
   "preferences": {
     "general": {
       "hideHistory": "إخفاء سجل التشغيل",
-      "clearHistory": "قم دائمًا بمسح سجل التشغيل عند الخروج",
       "reverseScrolling": "التمرير عكس الماوس",
       "setDefault": "تعيين كمشغل الفيديو الافتراضي",
       "setDefaultDescription": ".افتح جميع ملفات الفيديو باستخدام SPlayer",
@@ -269,11 +295,10 @@
     },
     "privacy": {
       "privacySetting": "الإجمالية",
-      "enable": "تمكين حماية الخصوصية",
-      "smartMode": "Intelligent Mode",
-      "smartDescription": "قم بتعريف المحتويات الحساسة أو غير المناسبة للعمل دون اتصال ، وقم بمسح سجل التشغيل عند التشغيل في قائمة تشغيل مجلد أو عند الإقلاع عن التدخين.",
       "incognitoMode": "وضع التخفي",
-      "incognitoDescription": "لن يتم حفظ سجل التشغيل."
+      "incognitoDescription": "لن يتم حفظ سجل التشغيل.",
+      "clearHistory": "مسح سجل التشغيل",
+      "clearHistoryDescription": "قم بإزالة قوائم التشغيل الحالية وسجل التشغيل"
     }
   },
   "privacyBubble": {
@@ -318,7 +343,9 @@
     "playing": "تلعب",
     "paused": "توقف",
     "playlistSource": "قائمة التشغيل",
-    "add": "أضف إلى قائمة التشغيل"
+    "add": "أضف إلى قائمة التشغيل",
+    "pin": "ثبت قائمة التشغيل على صفحة الإطلاق",
+    "pinned": "قائمة التشغيل مثبتة على صفحة الإطلاق"
   },
   "subtitle": {
     "embedded": "تضمين",
@@ -406,6 +433,10 @@
       "title": "فشل الترجمة",
       "content": "فشلت الترجمة بسبب خطأ في الخادم. يرجى المحاولة لاحقا."
     },
+    "ForbiddenFail": {
+      "title": "انتهت الجلسة",
+      "content": "يرجى تسجيل الدخول أولاً."
+    },
     "cancel": "إلغاء",
     "quit": "استقال",
     "generate": "توفير",
@@ -436,8 +467,35 @@
       "title": "فشل الترجمة",
       "content": "فشلت الترجمة بسبب خطأ في الخادم. يرجى المحاولة لاحقا."
     },
+    "bubbleTranslateForbiddenFail": {
+      "title": "انتهت الجلسة",
+      "content": "يرجى تسجيل الدخول أولاً."
+    },
     "ok": "حسنا",
     "cancel": "إلغاء",
     "continue": "استمر"
+  },
+  "loginModal": {
+    "title": "سجّل الدخول برقم الهاتف",
+    "sendCode": "إرسال",
+    "sendingCode": "Sending ...",
+    "countDown": "{count} s",
+    "placeholder": {
+      "mobile": "رقم هاتفك",
+      "code": "أدخل رمز التحقق"
+    },
+    "submit": "تسجيل دخول",
+    "submitting": "Processing ...",
+    "codeError": "رمز التحقق غير صحيح",
+    "netWorkError": "مهلة الاتصال",
+    "noLineError": "لا يوجد اتصال شبكة",
+    "afsError": "Captcha Validation Failed",
+    "afs": {
+      "start": "Please slide to verify",
+      "yes": "Success",
+      "retry": "retry",
+      "error300": "Verification failed, please",
+      "errorNetwork": "Network Error. Please"
+    }
   }
 }
