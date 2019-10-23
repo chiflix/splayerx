@@ -82,13 +82,17 @@ if (process.type === 'browser') {
     crossThreadCache[key] = val;
   };
 }
-function crossThreadCache(key, fn) {
+export function crossThreadCache(key, fn) {
   const func = async () => {
     if (typeof app.getCrossThreadCache !== 'function') return fn();
     let val = app.getCrossThreadCache(key);
     if (val) return val;
     val = await fn();
-    app.setCrossThreadCache(key, val);
+    if (key instanceof Array) {
+      key.forEach(k => app.setCrossThreadCache(k, val[k]));
+    } else {
+      app.setCrossThreadCache(key, val);
+    }
     return val;
   };
   func.noCache = fn;
