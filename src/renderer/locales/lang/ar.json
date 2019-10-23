@@ -399,7 +399,8 @@
     "audioLanguageLoadFail": "فشل الاتصال ، يرجى المحاولة لاحقًا",
     "select": {
       "title": "اختر لغة الصوت",
-      "content": "لإنشاء نتيجة ترجمة ، يرجى تحديد اللغة التي تسمعها في الفيديو والنقر على زر إنشاء. قد تستغرق العملية بعض الوقت."
+      "content": "لإنشاء نتيجة ترجمة ، يرجى تحديد اللغة التي تسمعها في الفيديو والنقر على زر إنشاء. قد تستغرق العملية بعض الوقت.",
+      "contentLimit": ""
     },
     "translate": {
       "title": "حوالي {time} اليسار",
@@ -437,11 +438,17 @@
       "title": "انتهت الجلسة",
       "content": "يرجى تسجيل الدخول أولاً."
     },
+    "PermissionFail": {
+      "title": "",
+      "content": ""
+    },
+    "loading": "",
     "cancel": "إلغاء",
     "quit": "استقال",
     "generate": "توفير",
     "ok": "حسنا",
-    "continue": "إلغاء"
+    "continue": "إلغاء",
+    "upgrade": ""
   },
   "translateBubble": {
     "bubbleWhenGrab": "سيتم إحباط ترجمة AI إذا استمرت ، فهل تريد المتابعة على أي حال؟",
@@ -470,6 +477,10 @@
     "bubbleTranslateForbiddenFail": {
       "title": "انتهت الجلسة",
       "content": "يرجى تسجيل الدخول أولاً."
+    },
+    "bubbleTranslatePermissionFail": {
+      "title": "",
+      "content": ""
     },
     "ok": "حسنا",
     "cancel": "إلغاء",
