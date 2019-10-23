@@ -77,7 +77,16 @@ export function getSystemLocale() {
 
 if (process.type === 'browser') {
   const crossThreadCache = {};
-  app.getCrossThreadCache = key => crossThreadCache[key];
+  app.getCrossThreadCache = (key) => {
+    if (key instanceof Array) {
+      const re = {};
+      key.forEach((k) => {
+        re[k] = crossThreadCache[k];
+      });
+      return Object.values(re).includes(undefined) ? undefined : re;
+    }
+    return crossThreadCache[key];
+  };
   app.setCrossThreadCache = (key, val) => {
     crossThreadCache[key] = val;
   };
