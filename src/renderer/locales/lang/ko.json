@@ -400,7 +400,7 @@
     "select": {
       "title": "오디오 언어 선택",
       "content": "번역 결과를 생성하려면 동영상에서 들리는 언어를 선택하고 생성 버튼을 클릭하십시오. 과정에 약간의 시간이 걸릴 수 있습니다.",
-      "contentLimit": ""
+      "contentLimit": "비디오에서들을 언어를 선택하고 생성 버튼을 클릭하십시오. 하루에 하나의 AI 번역을 무료로 생성 할 수 있습니다."
     },
     "translate": {
       "title": "{time} 정보 남음",
@@ -439,16 +439,16 @@
       "content": "로그인 해주시기 바랍니다"
     },
     "PermissionFail": {
-      "title": "",
-      "content": ""
+      "title": "오늘 남은 사용량: 0",
+      "content": "죄송합니다. 하루에 하나의 AI 번역 결과 만 생성 할 수 있습니다."
     },
-    "loading": "",
+    "loading": "처리중 ...",
     "cancel": "취소",
     "quit": "떠나다",
     "generate": "일으키다",
     "ok": "Ejecutar en segundo plano",
     "continue": "취소",
-    "upgrade": ""
+    "upgrade": "승인"
   },
   "translateBubble": {
     "bubbleWhenGrab": "인공 지능 번역이 중단됩니다. 계속한다면 어쨌든 계속 하시겠습니까?",
@@ -479,8 +479,8 @@
       "content": "로그인 해주시기 바랍니다."
     },
     "bubbleTranslatePermissionFail": {
-      "title": "",
-      "content": ""
+      "title": "오늘 남은 사용량: 0",
+      "content": "죄송합니다. 하루에 하나의 AI 번역 결과 만 생성 할 수 있습니다."
     },
     "ok": "승인",
     "cancel": "취소",
