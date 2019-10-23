@@ -400,7 +400,7 @@
     "select": {
       "title": "AI 智能翻譯",
       "content": "選擇您在視頻中所聽到的語言並點擊生成。",
-      "contentLimit": ""
+      "contentLimit": "選擇您在視頻中聽到的語言並點擊生成。每日可免費試用一次。"
     },
     "translate": {
       "title": "大約剩餘 {time}",
@@ -439,16 +439,16 @@
       "content": "請重新登入。"
     },
     "PermissionFail": {
-      "title": "",
-      "content": ""
+      "title": "今日次數已用完",
+      "content": "今日試用次數已用完，成為射手雲養員即可獲取更多的AI翻譯時長和獨享權益。"
     },
-    "loading": "",
+    "loading": "處理中 ...",
     "cancel": "取消",
     "quit": "退出",
     "generate": "生成",
     "ok": "后台运行",
     "continue": "取消",
-    "upgrade": ""
+    "upgrade": "成為雲養員"
   },
   "translateBubble": {
     "bubbleWhenGrab": "該操作將會導致正在進行的翻譯中止，是否中止？",
@@ -479,8 +479,8 @@
       "content": "請重新登入。"
     },
     "bubbleTranslatePermissionFail": {
-      "title": "",
-      "content": ""
+      "title": "今日次數已用完",
+      "content": "今日試用次數已用完，成為射手雲養員即可獲取更多的AI翻譯時長和獨享權益。"
     },
     "ok": "好的",
     "cancel": "取消",
