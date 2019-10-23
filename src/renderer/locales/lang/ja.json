@@ -400,7 +400,7 @@
     "select": {
       "title": "ビデオソースの言語を選択",
       "content": "ビデオで聞こえる言語を選択し生成をクリックします。",
-      "contentLimit": ""
+      "contentLimit": "ビデオで聞こえる言語を選択し生成をクリックします。申し訳ありませんが、1日に1つのAI翻訳結果しか生成できません。"
     },
     "translate": {
       "title": "{time} について",
@@ -439,8 +439,8 @@
       "content": "サインインしてください。"
     },
     "PermissionFail": {
-      "title": "",
-      "content": ""
+      "title": "今日の回数は使い果たされています",
+      "content": "申し訳ありませんが、1日に1つのAI翻訳結果しか生成できません。"
     },
     "loading": "処理中...",
     "cancel": "キャンセル",
@@ -479,8 +479,8 @@
       "content": "サインインしてください。"
     },
     "bubbleTranslatePermissionFail": {
-      "title": "",
-      "content": ""
+      "title": "今日の回数は使い果たされています",
+      "content": "申し訳ありませんが、1日に1つのAI翻訳結果しか生成できません。"
     },
     "ok": "はい",
     "cancel": "キャンセル",
