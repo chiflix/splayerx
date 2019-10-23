@@ -8,7 +8,6 @@ import path, {
   basename, dirname, extname, join, resolve,
 } from 'path';
 import fs from 'fs';
-import http from 'http';
 import rimraf from 'rimraf';
 import { audioGrabService } from './helpers/AudioGrabService';
 import './helpers/electronPrototypes';
@@ -16,7 +15,6 @@ import {
   getValidVideoRegex, getValidSubtitleRegex,
   getToken, saveToken,
   getIP,
-  getRightPort,
 } from '../shared/utils';
 import { mouse } from './helpers/mouse';
 import MenuService from './menu/MenuService';
@@ -88,8 +86,6 @@ let inited = false;
 let hideBrowsingWindow = false;
 let finalVideoToOpen = [];
 let signInEndPoint = '';
-let localHostPort = 0;
-let fileDirServerOnLine = false;
 const locale = new Locale();
 const tmpVideoToOpen = [];
 const tmpSubsToOpen = [];
@@ -320,54 +316,7 @@ function createPreferenceWindow(e, route) {
   }
 }
 
-/**
- * @description sign in window need aliyun nc valication with // protocal
- * @author tanghaixiang
- */
-function createFileDirServer() {
-  http.createServer((request, response) => {
-    console.log('request ', request.url);
-    let filePath = `${request.url}`;
-    if (filePath === '/') {
-      filePath = '/login.html';
-    }
-    const extname = String(path.extname(filePath)).toLowerCase();
-    const mimeTypes = {
-      '.html': 'text/html',
-      '.js': 'text/javascript',
-      '.css': 'text/css',
-      '.json': 'application/json',
-      '.png': 'image/png',
-      '.jpg': 'image/jpg',
-      '.gif': 'image/gif',
-      '.svg': 'image/svg+xml',
-      '.wav': 'audio/wav',
-      '.mp4': 'video/mp4',
-      '.woff': 'application/font-woff',
-      '.ttf': 'application/font-ttf',
-      '.eot': 'application/vnd.ms-fontobject',
-      '.otf': 'application/font-otf',
-      '.wasm': 'application/wasm',
-    };
-    const contentType = mimeTypes[extname] || 'application/octet-stream';
-    fs.readFile(`${__dirname}${filePath}`, (error, content) => {
-      if (error) {
-        return;
-      }
-      response.writeHead(200, { 'Content-Type': contentType });
-      response.end(content, 'utf-8');
-    });
-  }).listen(localHostPort);
-}
-
 function createLoginWindow(e, route) {
-  // in production use http protocal
-  // aliyun captcha use // protocal
-  if (process.env.NODE_ENV === 'production' && !fileDirServerOnLine) {
-    createFileDirServer();
-    fileDirServerOnLine = true;
-    loginURL = `http://localhost:${localHostPort}/login.html`;
-  }
   const loginWindowOptions = {
     useContentSize: true,
     frame: false,
@@ -1183,6 +1132,9 @@ function registerMainWindowEvent(mainWindow) {
 
   ipcMain.on('sign-in-end-point', (events, data) => {
     signInEndPoint = data;
+    if (process.env.NODE_ENV === 'production') {
+      loginURL = `${signInEndPoint}/static/splayer/login.html`;
+    }
   });
 }
 
@@ -1544,7 +1496,3 @@ app.getIP = getIP;
 
 // export getSignInEndPoint to static login preload.js
 app.getSignInEndPoint = () => signInEndPoint;
-
-getRightPort().then((port) => {
-  localHostPort = port;
-}).catch(console.error);
