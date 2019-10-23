@@ -95,7 +95,7 @@ const tmpVideoToOpen = [];
 const tmpSubsToOpen = [];
 const subRegex = getValidSubtitleRegex();
 const allChannels = ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch', 'coursera', 'ted'];
-const compareStr = [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch'], ['coursera'], ['ted']];
+const compareStr = [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com', 'film.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch'], ['coursera'], ['ted']];
 const titlebarUrl = process.platform === 'darwin' ? `file:${resolve(__static, 'pip/macTitlebar.html')}` : `file:${resolve(__static, 'pip/winTitlebar.html')}`;
 const maskUrl = process.platform === 'darwin' ? `file:${resolve(__static, 'pip/mask.html')}` : `file:${resolve(__static, 'pip/mask.html')}`;
 const mainURL = process.env.NODE_ENV === 'development'
@@ -1460,7 +1460,7 @@ const oauthRegex = [
   /^https:\/\/openapi.baidu.com\//i,
   /^https:\/\/auth.alipay.com\/login\//i,
   /^https:\/\/account.xiaomi.com\/pass\//i,
-  /^https:\/\/www.facebook.com\/v3.1\/dialog\/oauth/i,
+  /^https:\/\/www.facebook.com\/v[0-9].[0-9]\/dialog\/oauth/i,
 ];
 app.on('web-contents-created', (webContentsCreatedEvent, contents) => {
   if (contents.getType() === 'browserView') {
