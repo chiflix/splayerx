@@ -465,7 +465,6 @@ function createBrowsingWindow(args) {
     useContentSize: true,
     frame: false,
     titleBarStyle: 'none',
-    transparent: true,
     webPreferences: {
       webSecurity: false,
       nodeIntegration: true,
