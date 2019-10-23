@@ -55,22 +55,24 @@
       :style="{ boxShadow: bottomMask ? '0 -3px 8px 0 rgba(0,0,0,0.60)' : '' }"
       class="bottom-mask"
     />
-    <div
-      :style="{
-        boxShadow: bottomMask ? '0 -2px 10px 0 rgba(0,0,0,0.50)' : '',
-        height: showFileIcon ? '66px' : '',
-      }"
-      v-if="showFileIcon"
-      class="bottom-icon no-drag"
-    >
+    <transition name="fade-200">
       <div
-        @click="openFilesByDialog"
-        :title="$t('browsing.openLocalFile')"
-        class="icon-hover"
+        :style="{
+          boxShadow: bottomMask ? '0 -2px 10px 0 rgba(0,0,0,0.50)' : '',
+          height: showFileIcon ? '66px' : '',
+        }"
+        v-if="showFileIcon"
+        class="bottom-icon no-drag"
       >
-        <Icon type="open" />
+        <div
+          @click="openFilesByDialog"
+          :title="$t('browsing.openLocalFile')"
+          class="icon-hover"
+        >
+          <Icon type="open" />
+        </div>
       </div>
-    </div>
+    </transition>
   </div>
 </template>
 <script lang="ts">
@@ -113,7 +115,7 @@ export default {
       return !this.currentChannel;
     },
     showFileIcon() {
-      return !!this.currentUrl;
+      return this.$route.name === 'playing-view' || this.$route.name === 'browsing-view';
     },
     totalHeight() {
       const channelsNum = this.channelsDetail.length + 1;
