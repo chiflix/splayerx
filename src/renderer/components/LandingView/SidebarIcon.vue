@@ -34,10 +34,6 @@
   </div>
 </template>
 <script lang="ts">
-import {
-  UIStates as uiActions,
-} from '@/store/actionTypes'
-
 export default {
   props: {
     fill: {

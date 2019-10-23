@@ -71,6 +71,12 @@
         >
           <Icon type="open" />
         </div>
+        <div
+          @click="openHomePage"
+          class="icon-hover"
+        >
+          <Icon type="history" />
+        </div>
       </div>
     </transition>
   </div>
@@ -208,6 +214,9 @@ export default {
       updateIsHistoryPage: browsingActions.UPDATE_IS_HISTORY,
       updateCurrentChannel: browsingActions.UPDATE_CURRENT_CHANNEL,
     }),
+    openHomePage() {
+      if (this.currentRouteName === 'playing-view') this.$bus.$emit('back-to-landingview');
+    },
     handleChannelManage() {
       if (this.currentRouteName !== 'browsing-view') {
         this.$router.push({ name: 'browsing-view' });
@@ -287,6 +296,7 @@ export default {
     opacity: 1;
   }
   .bottom-icon {
+    padding-bottom: 16px;
     display:flex;
     flex-direction: column;
     width: 100%;

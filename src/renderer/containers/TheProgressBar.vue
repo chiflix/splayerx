@@ -293,8 +293,8 @@ export default {
     },
     pageXToProportion(pageX: number, fakeButtonWidth: number, winWidth: number) {
       if (this.showSidebar) {
-        pageX = pageX - 76;
-        winWidth = winWidth - 76;
+        pageX -= 76;
+        winWidth -= 76;
       }
       if (pageX <= fakeButtonWidth) return 0;
       if (pageX >= winWidth - fakeButtonWidth) return 1;
@@ -307,8 +307,8 @@ export default {
       winWidth: number,
     ) {
       if (this.showSidebar) {
-        pageX = pageX - 76;
-        winWidth = winWidth - 76;
+        pageX -= 76;
+        winWidth -= 76;
       }
       if (pageX <= fakeButtonWidth + (thumbnailWidth / 2)) return fakeButtonWidth;
       if (pageX > winWidth - (fakeButtonWidth + (thumbnailWidth / 2))) {

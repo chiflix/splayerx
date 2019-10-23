@@ -243,7 +243,6 @@ export default {
       }
     },
     handleMousemove(event: MouseEvent) {
-      console.log('mousemove-title');
       this.$bus.$emit('titlebar-mousemove', event);
     },
     handleMouseOver() {

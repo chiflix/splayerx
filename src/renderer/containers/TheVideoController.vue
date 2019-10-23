@@ -348,7 +348,6 @@ export default {
       }
     },
     currentWidget(newVal: string, oldVal: string) {
-      console.log('new', newVal);
       this.lastWidget = oldVal;
     },
     currentMousedownWidget(newVal: string, oldVal: string) {
