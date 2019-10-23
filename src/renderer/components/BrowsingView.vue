@@ -721,11 +721,10 @@ export default {
         || url === 'about:blank'
         || urlParseLax(this.currentUrl).href === urlParseLax(url).href
       ) return;
-      const newHostname = urlParseLax(url).hostname;
       const oldChannel = this.currentChannel;
       let newChannel = '';
       this.allChannels.forEach((channel: string, index: number) => {
-        if (this.compareStr[index].findIndex((str: string) => newHostname.includes(str)) !== -1) {
+        if (this.compareStr[index].findIndex((str: string) => url.includes(str)) !== -1) {
           newChannel = `${channel}.com`;
         }
       });
