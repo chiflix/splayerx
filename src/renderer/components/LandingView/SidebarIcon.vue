@@ -34,6 +34,10 @@
   </div>
 </template>
 <script lang="ts">
+import {
+  UIStates as uiActions,
+} from '@/store/actionTypes'
+
 export default {
   props: {
     fill: {
@@ -41,6 +45,10 @@ export default {
       default: '',
     },
     mouseover: {
+      type: Boolean,
+      default: false,
+    },
+    isPlayingView: {
       type: Boolean,
       default: false,
     },
@@ -52,6 +60,7 @@ export default {
     };
   },
   created() {
+    this.highlight = this.isPlayingView;
     this.$bus.$on('highlight-sidebar', (highlight: boolean) => {
       this.highlight = highlight;
     });

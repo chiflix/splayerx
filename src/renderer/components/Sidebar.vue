@@ -88,10 +88,6 @@ export default {
     SidebarIcon,
   },
   props: {
-    showSidebar: {
-      type: Boolean,
-      default: false,
-    },
     currentUrl: {
       type: String,
       default: '',
@@ -109,7 +105,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['pipSize', 'pipPos', 'isHistory', 'currentChannel', 'winHeight']),
+    ...mapGetters(['pipSize', 'pipPos', 'isHistory', 'currentChannel', 'winHeight', 'showSidebar']),
     currentRouteName() {
       return this.$route.name;
     },

@@ -107,7 +107,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'winHeight', 'winRatio', 'duration', 'ratio', 'nextVideo']),
+    ...mapGetters(['winWidth', 'winHeight', 'winRatio', 'duration', 'ratio', 'nextVideo', 'showSidebar']),
     hoveredPercent() {
       return this.hovering ? this.pageXToProportion(this.hoveredPageX, 25, this.winWidth) * 100 : 0;
     },
@@ -292,6 +292,10 @@ export default {
       }
     },
     pageXToProportion(pageX: number, fakeButtonWidth: number, winWidth: number) {
+      if (this.showSidebar) {
+        pageX = pageX - 76;
+        winWidth = winWidth - 76;
+      }
       if (pageX <= fakeButtonWidth) return 0;
       if (pageX >= winWidth - fakeButtonWidth) return 1;
       return (pageX - fakeButtonWidth) / (winWidth - (fakeButtonWidth * 2));
@@ -302,6 +306,10 @@ export default {
       thumbnailWidth: number,
       winWidth: number,
     ) {
+      if (this.showSidebar) {
+        pageX = pageX - 76;
+        winWidth = winWidth - 76;
+      }
       if (pageX <= fakeButtonWidth + (thumbnailWidth / 2)) return fakeButtonWidth;
       if (pageX > winWidth - (fakeButtonWidth + (thumbnailWidth / 2))) {
         return winWidth - (fakeButtonWidth + thumbnailWidth);

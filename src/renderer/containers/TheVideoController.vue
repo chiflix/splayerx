@@ -13,6 +13,7 @@
   >
     <titlebar
       key="playing-view"
+      v-if="false"
       :show-all-widgets="showAllWidgets"
       :recent-playlist="displayState.RecentPlaylist"
       current-view="Playingview"
@@ -124,6 +125,7 @@ import {
   Video as videoActions,
   Subtitle as legacySubtitleActions,
   AudioTranslate as atActions,
+  UIStates as uiActions,
 } from '@/store/actionTypes';
 import { INPUT_COMPONENT_TYPE, getterTypes as iGT } from '@/plugins/input';
 import Titlebar from '@/components/Titlebar.vue';
@@ -239,14 +241,19 @@ export default {
     ...inputMapGetters({
       inputWheelDirection: iGT.GET_WHEEL_DIRECTION,
     }),
+    playlistState() {
+      return this.displayState.RecentPlaylist;
+    },
     showAllWidgets() {
       if (this.isTranslateModalVisible) return false;
       if (this.invokeAllWidgets) return true;
       return !this.tempRecentPlaylistDisplayState
-        && ((!this.mouseStopped && !this.mouseLeftWindow)
-        || (!this.mouseLeftWindow && this.onOtherWidget)
-        || this.attachedShown || this.videoChanged || this.subMenuShow
-        || (this.isMousedown && this.currentMousedownWidget === 'PlayButton'));
+        && (
+          (!this.mouseStopped && !this.mouseLeftWindow)
+          || (!this.mouseLeftWindow && this.onOtherWidget)
+          || this.attachedShown || this.videoChanged || this.subMenuShow
+          || (this.isMousedown && this.currentMousedownWidget === 'PlayButton')
+        );
     },
     onOtherWidget() {
       return (
@@ -270,6 +277,9 @@ export default {
     },
   },
   watch: {
+    playlistState(val: boolean) {
+      this.updatePlaylistState(val);
+    },
     originSrc() {
       Object.keys(this.widgetsStatus).forEach((item) => {
         if (item !== 'PlaylistControl') {
@@ -338,6 +348,7 @@ export default {
       }
     },
     currentWidget(newVal: string, oldVal: string) {
+      console.log('new', newVal);
       this.lastWidget = oldVal;
     },
     currentMousedownWidget(newVal: string, oldVal: string) {
@@ -371,6 +382,9 @@ export default {
           this.fullScreenBar.icon = this.createIcon('touchBar/resize.png');
         }
       }
+    },
+    showAllWidgets(val: boolean) {
+      this.updateShowAllWidgets(val);
     },
     paused(val: boolean) {
       if (this.playButton) {
@@ -419,6 +433,9 @@ export default {
       this.progressTriggerId = this.clock.setTimeout(() => {
         this.progressTriggerStopped = false;
       }, this.progressDisappearDelay);
+    });
+    this.$bus.$on('titlebar-mousemove', (event) => {
+      this.handleMousemove(event, 'Titlebar');
     });
     this.$bus.$on('show-subtitle-settings', () => {
       this.subMenuShow = true;
@@ -522,6 +539,8 @@ export default {
       updateSubtitleType: legacySubtitleActions.UPDATE_SUBTITLE_TYPE,
       updateHideModalCallback: atActions.AUDIO_TRANSLATE_MODAL_HIDE_CALLBACK,
       updateHideBubbleCallback: atActions.AUDIO_TRANSLATE_BUBBLE_CANCEL_CALLBACK,
+      updateShowAllWidgets: uiActions.UPDATE_SHOW_ALLWIDGETS,
+      updatePlaylistState: uiActions.UPDATE_PLAYLIST,
     }),
     onTimeCodeClick() {
       this.$store.dispatch('showFullTimeCode', !this.showFullTimeCode);
@@ -734,7 +753,7 @@ export default {
         .some(key => this.widgetsStatus[key].showAttached === true);
     },
     // Event listeners
-    handleMousemove(event: MouseEvent) {
+    handleMousemove(event: MouseEvent, component) {
       const { clientX, clientY, target } = event;
       this.mouseStopped = false;
       if (this.isMousedown) {
@@ -748,8 +767,9 @@ export default {
           this.mouseStopped = true;
         }, this.mousestopDelay);
       }
+      const componentName = component || this.getComponentName(target);
       this.updateMousemove({
-        componentName: this.getComponentName(target),
+        componentName,
         clientPosition: [clientX, clientY],
       });
     },
@@ -922,9 +942,9 @@ export default {
 </script>
 <style lang="scss">
 .the-video-controller {
-  position: relative;
+  position: absolute;
   top: 0;
-  left: 0;
+  right: 0;
   width: 100%;
   height: 100%;
   border-radius: 4px;
