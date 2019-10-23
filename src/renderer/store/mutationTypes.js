@@ -148,3 +148,8 @@ export const UserInfo = {
   UPDATE_USER_ID: 'UPDATE_USER_ID',
   UPDATE_SIGN_IN_CALLBACK: 'UPDATE_SIGN_IN_CALLBACK',
 };
+
+
+export const UIStates = {
+  UPDATE_SHOW_SIDEBAR: 'UPDATE_SHOW_SIDEBAR',
+};
