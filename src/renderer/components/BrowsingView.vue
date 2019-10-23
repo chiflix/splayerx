@@ -121,6 +121,7 @@ export default {
         /^https:\/\/openapi.baidu.com\//i,
         /^https:\/\/auth.alipay.com\/login\//i,
         /^https:\/\/account.xiaomi.com\/pass\//i,
+        /^https:\/\/www.facebook.com\/v3.1\/dialog\/oauth/i,
       ],
       webInfo: {
         hasVideo: false,
