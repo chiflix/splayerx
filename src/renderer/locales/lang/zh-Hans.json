@@ -400,7 +400,7 @@
     "select": {
       "title": "AI 智能翻译",
       "content": "选择您在视频中所听到的语言并点击生成。",
-      "contentLimit": ""
+      "contentLimit": "选择您在视频中所听到的语言并点击生成。每日可免费试用一次。"
     },
     "translate": {
       "title": "大约还需 {time}",
@@ -439,16 +439,16 @@
       "content": "请重新登录。"
     },
     "PermissionFail": {
-      "title": "",
-      "content": ""
+      "title": "今日次数已用完",
+      "content": "今日试用次数已用完，成为射手云养员即可获取更多的AI翻译时长和独享权益。"
     },
-    "loading": "",
+    "loading": "处理中 ...",
     "cancel": "取消",
     "quit": "退出",
     "generate": "生成",
     "ok": "后台运行",
     "continue": "取消",
-    "upgrade": ""
+    "upgrade": "成为云养员"
   },
   "translateBubble": {
     "bubbleWhenGrab": "该操作将会导致正在进行的翻译中止，是否继续？",
@@ -479,8 +479,8 @@
       "content": "请重新登录。"
     },
     "bubbleTranslatePermissionFail": {
-      "title": "",
-      "content": ""
+      "title": "今日次数已用完",
+      "content": "今日试用次数已用完，成为射手云养员即可获取更多的AI翻译时长和独享权益。"
     },
     "ok": "好的",
     "cancel": "取消",
