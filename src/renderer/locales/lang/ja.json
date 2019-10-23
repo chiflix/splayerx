@@ -442,13 +442,13 @@
       "title": "",
       "content": ""
     },
-    "loading": "",
+    "loading": "処理中...",
     "cancel": "キャンセル",
     "quit": "やめる",
     "generate": "生成する",
     "ok": "バックグラウンドで実行",
     "continue": "キャンセル",
-    "upgrade": ""
+    "upgrade": "はい"
   },
   "translateBubble": {
     "bubbleWhenGrab": "この操作は進行中の翻訳を中止させるでしょう。",
