@@ -201,7 +201,7 @@ let rendererConfig = {
   output: {
     filename: '[name].js',
     libraryTarget: 'umd',
-    path: path.join(__dirname, '../dist/electron'),
+    path: path.join(__dirname, '../dist/web'),
     globalObject: 'this',
   },
   resolve: {
@@ -248,13 +248,6 @@ if (process.env.NODE_ENV === 'production') {
   rendererConfig.devtool = '#source-map';
 
   rendererConfig.plugins.push(
-    new CopyWebpackPlugin([
-      {
-        from: path.join(__dirname, '../static'),
-        to: path.join(__dirname, '../dist/electron/static'),
-        ignore: ['.*'],
-      },
-    ]),
     new webpack.DefinePlugin(
       Object.assign(sharedDefinedVariables, {
         'process.env.SAGI_API': `"${process.env.SAGI_API || 'apis.sagittarius.ai:8443'}"`,
