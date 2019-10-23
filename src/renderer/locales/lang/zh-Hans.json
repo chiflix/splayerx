@@ -440,7 +440,7 @@
     },
     "PermissionFail": {
       "title": "今日次数已用完",
-      "content": "今日试用次数已用完，成为射手云养员即可获取更多的AI翻译时长和独享权益。"
+      "content": "抱歉，您今日的翻译试用次数已用完，明天再试试。"
     },
     "loading": "处理中 ...",
     "cancel": "取消",
@@ -448,7 +448,7 @@
     "generate": "生成",
     "ok": "后台运行",
     "continue": "取消",
-    "upgrade": "成为云养员"
+    "upgrade": "好的"
   },
   "translateBubble": {
     "bubbleWhenGrab": "该操作将会导致正在进行的翻译中止，是否继续？",
@@ -480,7 +480,7 @@
     },
     "bubbleTranslatePermissionFail": {
       "title": "今日次数已用完",
-      "content": "今日试用次数已用完，成为射手云养员即可获取更多的AI翻译时长和独享权益。"
+      "content": "抱歉，您今日的翻译试用次数已用完，明天再试试。"
     },
     "ok": "好的",
     "cancel": "取消",
