@@ -5,6 +5,7 @@
   >
     <div
       v-if="!isDarwin && (isLandingView || isLandingView)"
+      @mousemove.stop="handleMousemove"
       @dblclick.stop=""
       :style="{
         transform: `translateX(${showSidebar ? '76' : '0'}px)`,
