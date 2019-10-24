@@ -121,6 +121,9 @@ export default {
         /^https:\/\/openapi.baidu.com\//i,
         /^https:\/\/auth.alipay.com\/login\//i,
         /^https:\/\/account.xiaomi.com\/pass\//i,
+        /^https:\/\/www.facebook.com\/v3.1\/dialog\/oauth/i,
+        /^https:\/\/accounts.google.com\/signin\/oauth\//i,
+        /^https:\/\/accounts.google.com\/CheckCookie\?/i,
       ],
       webInfo: {
         hasVideo: false,
@@ -129,8 +132,8 @@ export default {
         canGoBack: false,
         canReload: true,
       },
-      allChannels: ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch', 'coursera', 'ted', 'lynda'],
-      compareStr: [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch'], ['coursera'], ['ted'], ['lynda']],
+      allChannels: ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch', 'coursera', 'ted', 'lynda', 'masterclass'],
+      compareStr: [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch'], ['coursera'], ['ted'], ['lynda'], ['masterclass']],
       hideMainWindow: false,
       startLoadUrl: '',
       barrageOpenByPage: false,
@@ -190,6 +193,7 @@ export default {
         case 'youtube':
         case 'ted':
         case 'lynda':
+        case 'masterclass':
           return { channel: this.pipChannel };
         case 'others':
           return { channel: 'others', winSize: this.pipSize };
@@ -225,7 +229,7 @@ export default {
       log.info('did-start-loading', val);
       this.currentUrl = urlParseLax(val).href;
       this.loadingState = true;
-      this.$electron.ipcRenderer.send('create-browser-view', { url: val });
+      this.$electron.ipcRenderer.send('create-browser-view', { url: val, channel: this.calcCurrentChannel(val) });
     },
     isHistory() {
       this.$electron.ipcRenderer.send('remove-browser-view');
@@ -280,6 +284,7 @@ export default {
             opacity,
             barrageOpen: opacity === 1 ? this.barrageOpen : false,
             pipInfo: this.pipInfo,
+            channel: this.currentChannel,
           },
         );
         this.updateIsPip(true);
@@ -673,7 +678,7 @@ export default {
       } else if (this.currentUrl === args.url) {
         this.currentMainBrowserView().webContents.loadURL(args.url);
       } else {
-        this.$electron.ipcRenderer.send('create-browser-view', { url: args.url, isNewWindow: true });
+        this.$electron.ipcRenderer.send('create-browser-view', { url: args.url, isNewWindow: true, channel: this.calcCurrentChannel(args.url) });
       }
     },
     addListenerToBrowser() {
@@ -721,19 +726,14 @@ export default {
         || url === 'about:blank'
         || urlParseLax(this.currentUrl).href === urlParseLax(url).href
       ) return;
-      const newHostname = urlParseLax(url).hostname;
+      if (this.oauthRegex.some((re: RegExp) => re.test(url))) return;
       const oldChannel = this.currentChannel;
-      let newChannel = '';
-      this.allChannels.forEach((channel: string, index: number) => {
-        if (this.compareStr[index].findIndex((str: string) => newHostname.includes(str)) !== -1) {
-          newChannel = `${channel}.com`;
-        }
-      });
+      const newChannel = this.calcCurrentChannel(url);
       if (oldChannel === newChannel) {
         log.info('will-navigate', url);
         this.currentUrl = urlParseLax(url).href;
         this.loadingState = true;
-        this.$electron.ipcRenderer.send('create-browser-view', { url });
+        this.$electron.ipcRenderer.send('create-browser-view', { url, channel: this.calcCurrentChannel(url) });
       } else {
         e.preventDefault();
         this.currentMainBrowserView().webContents.stop();
@@ -807,14 +807,8 @@ export default {
         });
       } else {
         if (this.oauthRegex.some((re: RegExp) => re.test(url))) return;
-        const newHostname = urlParseLax(openUrl).hostname;
         const oldChannel = this.currentChannel;
-        let newChannel = '';
-        this.allChannels.forEach((channel: string, index: number) => {
-          if (this.compareStr[index].findIndex((str: string) => newHostname.includes(str)) !== -1) {
-            newChannel = `${channel}.com`;
-          }
-        });
+        const newChannel = this.calcCurrentChannel(url);
         if (oldChannel === newChannel) {
           this.loadingState = true;
           log.info('new-window', openUrl);
@@ -823,6 +817,7 @@ export default {
           this.$electron.ipcRenderer.send('create-browser-view', {
             url: openUrl,
             isNewWindow: true,
+            channel: this.calcCurrentChannel(openUrl),
           });
         } else {
           log.info('open-in-chrome', `${oldChannel}, ${newChannel}`);
@@ -874,6 +869,15 @@ export default {
       // if (enablePip) touchbarItems.push(this.pipButton);
       this.touchBar = new TouchBar({ items: touchbarItems });
       this.$electron.remote.getCurrentWindow().setTouchBar(this.touchBar);
+    },
+    calcCurrentChannel(url: string) {
+      let newChannel = '';
+      this.allChannels.forEach((channel: string, index: number) => {
+        if (this.compareStr[index].findIndex((str: string) => url.includes(str)) !== -1) {
+          newChannel = `${channel}.com`;
+        }
+      });
+      return newChannel;
     },
     pipAdapter() {
       this.pipChannel = 'others';

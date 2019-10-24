@@ -10,6 +10,7 @@ import Twitch from './Twitch';
 import Coursera from './Coursera';
 import Ted from './Ted';
 import Lynda from './Lynda';
+import MasterClass from './MasterClass';
 
 type pipMode = {
   adapter: string,
@@ -61,6 +62,8 @@ export default class PipFactory {
         return new Ted();
       case 'lynda':
         return new Lynda();
+      case 'masterclass':
+        return new MasterClass();
       case 'others':
         return new Others(info.winSize as number[]);
       default:

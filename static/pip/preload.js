@@ -141,6 +141,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
           }
           break;
+        case url.includes('masterclass'):
+          if (['VIDEO'].includes(evt.target.tagName)) {
+            offset = [evt.clientX, evt.clientY];
+            if (getRatio() !== 1) {
+              windowSize = remote.getCurrentWindow().getSize();
+            }
+          }
+          break;
         default:
           offset = [evt.clientX, evt.clientY];
           if (getRatio() !== 1) {
@@ -240,6 +248,9 @@ const oauthRegex = [
   /^https:\/\/openapi.baidu.com\//i,
   /^https:\/\/auth.alipay.com\/login\//i,
   /^https:\/\/account.xiaomi.com\/pass\//i,
+  /^https:\/\/www.facebook.com\/v3.1\/dialog\/oauth/i,
+  /^https:\/\/accounts.google.com\/signin\/oauth\//i,
+  /^https:\/\/accounts.google.com\/CheckCookie\?/i,
 ];
 
 // Some websites intercept links to open a blank window, then set its location, e.g. iqiyi.com
