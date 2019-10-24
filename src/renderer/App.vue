@@ -14,7 +14,7 @@
     />
     <transition name="sidebar">
       <Sidebar
-        v-if="showSidebar"
+        v-show="showSidebar"
         :show-sidebar="showSidebar"
         :current-url="currentUrl"
       />

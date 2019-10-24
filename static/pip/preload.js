@@ -117,6 +117,22 @@ document.addEventListener('DOMContentLoaded', () => {
             }
           }
           break;
+        case url.includes('coursera'):
+          if (['VIDEO'].includes(evt.target.tagName) || ['rc-VideoControlsContainer', 'rc-ControlBar'].includes(evt.target.classList[0])) {
+            offset = [evt.clientX, evt.clientY];
+            if (getRatio() !== 1) {
+              windowSize = remote.getCurrentWindow().getSize();
+            }
+          }
+          break;
+        case url.includes('ted'):
+          if ([' d:f@sm w:full h:full flx-d:r@sm a-i:s-b@sm ', ' sb pos:a pos:c w:full ', 'css-1c17hto', 'css-13wb0ss', 'css-1su2wlu', 'z-i:0 d:f j-c:s-a a-i:c l-h:d h:full', ' pos:a pos:c w:full z-i:2 p-x:9 '].includes(evt.target.classList.value)) {
+            offset = [evt.clientX, evt.clientY];
+            if (getRatio() !== 1) {
+              windowSize = remote.getCurrentWindow().getSize();
+            }
+          }
+          break;
         default:
           offset = [evt.clientX, evt.clientY];
           if (getRatio() !== 1) {
@@ -216,6 +232,7 @@ const oauthRegex = [
   /^https:\/\/openapi.baidu.com\//i,
   /^https:\/\/auth.alipay.com\/login\//i,
   /^https:\/\/account.xiaomi.com\/pass\//i,
+  /^https:\/\/www.facebook.com\/v[0-9].[0-9]\/dialog\/oauth/i,
 ];
 
 // Some websites intercept links to open a blank window, then set its location, e.g. iqiyi.com

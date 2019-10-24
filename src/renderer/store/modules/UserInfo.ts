@@ -6,12 +6,14 @@ type UserInfoState = {
   token: string,
   id: string,
   signInCallback: Function,
+  showForbiddenModal: boolean,
 };
 
 const state = {
   token: '',
   id: '',
   signInCallback: () => { },
+  showForbiddenModal: false,
 };
 
 const getters = {
@@ -23,6 +25,9 @@ const getters = {
   },
   signInCallback(state: UserInfoState) {
     return state.signInCallback;
+  },
+  showForbiddenModal(state: UserInfoState) {
+    return state.showForbiddenModal;
   },
 };
 
@@ -36,6 +41,12 @@ const mutations = {
   },
   [m.UPDATE_SIGN_IN_CALLBACK](state: UserInfoState, callback: Function) {
     state.signInCallback = callback;
+  },
+  [m.SHOW_FORBIDDEN_MODAL](state: UserInfoState) {
+    state.showForbiddenModal = true;
+  },
+  [m.HIDE_FORBIDDEN_MODAL](state: UserInfoState) {
+    state.showForbiddenModal = false;
   },
 };
 
@@ -59,6 +70,16 @@ const actions = {
     commit,
   }: any, callback: Function) {
     commit(m.UPDATE_SIGN_IN_CALLBACK, callback);
+  },
+  [a.SHOW_FORBIDDEN_MODAL]({
+    commit,
+  }: any) {
+    commit(m.SHOW_FORBIDDEN_MODAL);
+  },
+  [a.HIDE_FORBIDDEN_MODAL]({
+    commit,
+  }: any) {
+    commit(m.HIDE_FORBIDDEN_MODAL);
   },
 };
 

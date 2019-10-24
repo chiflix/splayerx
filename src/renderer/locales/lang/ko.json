@@ -207,17 +207,6 @@
       "playInNewWindow": "새 창에서 놀다",
       "backToBrowser": "브라우저로 돌아 가기"
     },
-    "favourite": {
-      "name": "채널",
-      "iqiyi": "iQIYI",
-      "bilibili": "Bilibili",
-      "douyu": "Douyu",
-      "huya": "Huya",
-      "qq": "Tencent Video",
-      "twitch": "Twitch",
-      "youku": "Youku",
-      "youtube": "YouTube"
-    },
     "edit": {
       "name": "편집",
       "cut": "잘라내기",
@@ -258,6 +247,8 @@
     "douyu": "Douyu",
     "twitch": "Twitch",
     "youku": "Youku",
+    "coursera": "Coursera",
+    "ted": "TED",
     "openLocalFile": "로컬 파일 열기 ...",
     "enterPip": "Picture In Picture 사용",
     "exitPip": "브라우저로 돌아 가기",
@@ -269,12 +260,15 @@
       "try": "시험:",
       "firstLine": "네트워크 케이블, 모뎀 및 라우터 확인",
       "secondLine": "Wi-Fi에 다시 연결"
-    }
+    },
+    "remove": "제거",
+    "siteManager": "사이트 관리자",
+    "popularSites": "최적화 된 사이트",
+    "siteTip": "편집 / 추가"
   },
   "preferences": {
     "general": {
       "hideHistory": "재생 기록 숨기기",
-      "clearHistory": "종료시 항상 재생 기록 지우기",
       "reverseScrolling": "마우스 스크롤 역전",
       "setDefault": "기본 동영상 플레이어로 설정",
       "setDefaultDescription": "SPlayer 로 모든 비디오 파일 열기.",
@@ -301,11 +295,10 @@
     },
     "privacy": {
       "privacySetting": "은둔",
-      "enable": "개인 정보 보호 사용",
-      "smartMode": "Intelligent Mode",
-      "smartDescription": "오프라인은 민감하거나 부적합한 작업 내용을 식별하고 폴더 재생 목록에서 재생할 때 또는 종료 할 때 재생 기록을 삭제합니다.",
       "incognitoMode": "Incognito Mode",
-      "incognitoDescription": "재생 기록이 저장되지 않습니다."
+      "incognitoDescription": "재생 기록이 저장되지 않습니다.",
+      "clearHistory": "재생 기록 지우기",
+      "clearHistoryDescription": "기존 재생 목록 및 재생 기록 제거"
     }
   },
   "privacyBubble": {
@@ -350,7 +343,9 @@
     "playing": "연주 중",
     "paused": "일시 중지 된",
     "playlistSource": "재생 목록",
-    "add": "재생 목록에 추가"
+    "add": "재생 목록에 추가",
+    "pin": "재생 목록을 시작 페이지에 고정",
+    "pinned": "시작 페이지에 고정 된 재생 목록"
   },
   "subtitle": {
     "embedded": "깊숙이 박다",
@@ -404,7 +399,8 @@
     "audioLanguageLoadFail": "연결에 실패했습니다. 나중에 다시 시도하십시오",
     "select": {
       "title": "오디오 언어 선택",
-      "content": "번역 결과를 생성하려면 동영상에서 들리는 언어를 선택하고 생성 버튼을 클릭하십시오. 과정에 약간의 시간이 걸릴 수 있습니다."
+      "content": "번역 결과를 생성하려면 동영상에서 들리는 언어를 선택하고 생성 버튼을 클릭하십시오. 과정에 약간의 시간이 걸릴 수 있습니다.",
+      "contentLimit": "비디오에서들을 언어를 선택하고 생성 버튼을 클릭하십시오. 하루에 하나의 AI 번역을 무료로 생성 할 수 있습니다."
     },
     "translate": {
       "title": "{time} 정보 남음",
@@ -442,11 +438,17 @@
       "title": "세션 만료됨",
       "content": "로그인 해주시기 바랍니다"
     },
+    "PermissionFail": {
+      "title": "오늘 남은 사용량: 0",
+      "content": "죄송합니다. 하루에 하나의 AI 번역 결과 만 생성 할 수 있습니다."
+    },
+    "loading": "처리중 ...",
     "cancel": "취소",
     "quit": "떠나다",
     "generate": "일으키다",
     "ok": "Ejecutar en segundo plano",
-    "continue": "취소"
+    "continue": "취소",
+    "upgrade": "승인"
   },
   "translateBubble": {
     "bubbleWhenGrab": "인공 지능 번역이 중단됩니다. 계속한다면 어쨌든 계속 하시겠습니까?",
@@ -475,6 +477,10 @@
     "bubbleTranslateForbiddenFail": {
       "title": "세션 만료됨",
       "content": "로그인 해주시기 바랍니다."
+    },
+    "bubbleTranslatePermissionFail": {
+      "title": "오늘 남은 사용량: 0",
+      "content": "죄송합니다. 하루에 하나의 AI 번역 결과 만 생성 할 수 있습니다."
     },
     "ok": "승인",
     "cancel": "취소",

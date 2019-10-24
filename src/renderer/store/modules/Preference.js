@@ -1,23 +1,12 @@
 import path from 'path';
-import { remote, ipcRenderer } from 'electron';
+import { remote } from 'electron';
 import fs from 'fs';
 import asyncStorage from '@/helpers/asyncStorage';
 import syncStorage from '@/helpers/syncStorage';
 
 const state = {
   nsfwProcessDone: false,
-  protectPrivacy: false,
-  channels: [
-    'https://www.bilibili.com/',
-    'https://www.iqiyi.com/',
-    'https://www.douyu.com/',
-    'https://www.huya.com/',
-    'https://v.qq.com/',
-    'https://www.youku.com/',
-    'https://www.twitch.tv/',
-    'https://www.youtube.com/',
-  ],
-  hideNSFW: true,
+  incognitoMode: false,
   privacyAgreement: undefined,
   displayLanguage: '',
   primaryLanguage: undefined,
@@ -30,11 +19,7 @@ const state = {
 const getters = {
   nsfwProcessDone: state => state.nsfwProcessDone,
   preferenceData: state => state,
-  protectPrivacy: state => state.protectPrivacy,
-  channels: state => state.channels,
-  hideNSFW: state => state.hideNSFW,
-  smartMode: state => state.protectPrivacy && state.hideNSFW,
-  incognitoMode: state => state.protectPrivacy && !state.hideNSFW,
+  incognitoMode: state => state.incognitoMode,
   reverseScrolling: state => state.reverseScrolling,
   privacyAgreement: state => state.privacyAgreement,
   displayLanguage: (state) => {
@@ -55,18 +40,11 @@ const mutations = {
   nsfwProcessDone(state) {
     state.nsfwProcessDone = true;
   },
-  repositionChannels(state, { from, to }) {
-    const item = state.channels.splice(from, 1)[0];
-    state.channels.splice(to, 0, item);
-  },
   displayLanguage(state, payload) {
     state.displayLanguage = payload;
   },
-  hideNSFW(state, payload) {
-    state.hideNSFW = payload;
-  },
-  protectPrivacy(state, payload) {
-    state.protectPrivacy = payload;
+  incognitoMode(state, payload) {
+    state.incognitoMode = payload;
   },
   reverseScrolling(state, payload) {
     state.reverseScrolling = payload;
@@ -109,13 +87,6 @@ const actions = {
     fs.closeSync(fs.openSync(path.join(remote.app.getPath('userData'), 'WELCOME_PROCESS_MARK'), 'w'));
     return asyncStorage.set('preferences', state);
   },
-  repositionChannels(
-    { commit, state },
-    { from, to },
-  ) {
-    commit('repositionChannels', { from, to });
-    return asyncStorage.set('preferences', state);
-  },
   displayLanguage({ commit, state }, payload) {
     commit('displayLanguage', payload);
     return asyncStorage.set('preferences', state);
@@ -136,17 +107,8 @@ const actions = {
     commit('reverseScrolling', false);
     return asyncStorage.set('preferences', state);
   },
-  hideNSFW({ commit, state }, payload) {
-    commit('hideNSFW', !!payload);
-    if (payload) ipcRenderer.send('labor-task-add', 'nsfw-warmup');
-    return asyncStorage.set('preferences', state);
-  },
-  protectPrivacy({ commit, state }) {
-    commit('protectPrivacy', true);
-    return asyncStorage.set('preferences', state);
-  },
-  notprotectPrivacy({ commit, state }) {
-    commit('protectPrivacy', false);
+  incognitoMode({ commit, state }, payload) {
+    commit('incognitoMode', payload);
     return asyncStorage.set('preferences', state);
   },
   primaryLanguage({ commit, state }, payload) {

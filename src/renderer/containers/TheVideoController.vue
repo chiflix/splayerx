@@ -110,6 +110,7 @@
       :style="{ marginBottom: preFullScreen ? '10px' : '0' }"
     />
     <audio-translate-modal />
+    <forbidden-modal />
   </div>
 </template>
 <script lang="ts">
@@ -137,6 +138,7 @@ import TheProgressBar from '@/containers/TheProgressBar.vue';
 import RecentPlaylist from '@/containers/RecentPlaylist.vue';
 import NotificationBubble from '@/components/NotificationBubble.vue';
 import AudioTranslateModal from '@/containers/AudioTranslateModal.vue';
+import ForbiddenModal from '@/containers/ForbiddenModal.vue';
 import { videodata } from '@/store/video';
 import { AudioTranslateStatus } from '../store/modules/AudioTranslate';
 
@@ -163,6 +165,7 @@ export default {
     'notification-bubble': NotificationBubble,
     'recent-playlist': RecentPlaylist,
     'audio-translate-modal': AudioTranslateModal,
+    'forbidden-modal': ForbiddenModal,
   },
   data() {
     return {

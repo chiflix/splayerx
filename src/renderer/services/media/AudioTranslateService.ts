@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-06-20 18:03:14
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-10-15 09:58:12
+ * @Last Modified time: 2019-10-24 16:25:43
  */
 
 // @ts-ignore
@@ -151,6 +151,10 @@ class AudioTranslateService extends EventEmitter {
       // return forbidden to render
       this.emit('error', new Error('forbidden'));
       this.stop();
+    } else if (enabled && result && result.error && result.error.code === 7) {
+      // return no permission to render
+      this.emit('error', new Error('permission'));
+      this.stop();
     } else if (result && result.error) {
       // return error to render
       this.emit('error', result.error);
@@ -215,6 +219,4 @@ class AudioTranslateService extends EventEmitter {
 }
 export default AudioTranslateService;
 
-const audioTranslateService = new AudioTranslateService(mediaStorageService);
-
-export { audioTranslateService };
+export const audioTranslateService = new AudioTranslateService(mediaStorageService);

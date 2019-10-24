@@ -40,8 +40,10 @@
     />
     <NotificationBubble />
     <browsing-content
+      v-show="!showChannelManager"
       class="browsing-content"
     />
+    <browsing-channel-manager v-show="showChannelManager" />
   </div>
 </template>
 
@@ -56,6 +58,7 @@ import { windowRectService } from '@/services/window/WindowRectService';
 import { Browsing as browsingActions } from '@/store/actionTypes';
 import BrowsingHeader from '@/components/BrowsingView/BrowsingHeader.vue';
 import BrowsingContent from '@/components/BrowsingView/BrowsingContent.vue';
+import BrowsingChannelManager from '@/components/BrowsingView/BrowsingChannelManager.vue';
 import asyncStorage from '@/helpers/asyncStorage';
 import NotificationBubble from '@/components/NotificationBubble.vue';
 import { getValidVideoRegex, getValidSubtitleRegex } from '../../shared/utils';
@@ -69,6 +72,7 @@ export default {
     'browsing-header': BrowsingHeader,
     'browsing-content': BrowsingContent,
     NotificationBubble,
+    'browsing-channel-manager': BrowsingChannelManager,
   },
   props: {
     showSidebar: {
@@ -117,18 +121,21 @@ export default {
         /^https:\/\/openapi.baidu.com\//i,
         /^https:\/\/auth.alipay.com\/login\//i,
         /^https:\/\/account.xiaomi.com\/pass\//i,
+        /^https:\/\/www.facebook.com\/v[0-9].[0-9]\/dialog\/oauth/i,
       ],
       webInfo: {
         hasVideo: false,
         url: '',
         canGoForward: false,
         canGoBack: false,
+        canReload: true,
       },
-      allChannels: ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch'],
-      compareStr: [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch']],
+      allChannels: ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch', 'coursera', 'ted'],
+      compareStr: [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com', 'film.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch'], ['coursera'], ['ted']],
       hideMainWindow: false,
       startLoadUrl: '',
       barrageOpenByPage: false,
+      showChannelManager: false,
     };
   },
   computed: {
@@ -151,6 +158,8 @@ export default {
       'isError',
       'channels',
       'currentChannel',
+      'displayLanguage',
+      'isMaximized',
     ]),
     isDarwin() {
       return process.platform === 'darwin';
@@ -180,6 +189,10 @@ export default {
           return { channel: 'youku', barrageState };
         case 'twitch':
           return { channel: 'twitch', type: this.pipType, winSize: this.pipSize };
+        case 'coursera':
+          return { channel: 'coursera' };
+        case 'ted':
+          return { channel: 'ted' };
         case 'others':
           return { channel: 'others', winSize: this.pipSize };
         default:
@@ -194,14 +207,20 @@ export default {
     },
   },
   watch: {
-    currentChannel() {
+    displayLanguage() {
+      if (this.showChannelManager) this.title = this.$t('browsing.siteManager');
+    },
+    currentChannel(val: string) {
+      log.info('current channel:', val);
+      if (val) this.showChannelManager = false;
+      this.webInfo.canReload = !!val;
       this.updateIsError(false);
       if (!navigator.onLine) this.offlineHandler();
     },
     startLoadUrl(val: string) {
       if (
         !val
-        || val === 'about:blank'
+        || ['about:blank', 'https://www.ted.com/#/'].includes(val)
         || urlParseLax(this.currentUrl).href === urlParseLax(val).href
       ) return;
       if (val.includes('bilibili') && urlParseLax(this.currentUrl).query === urlParseLax(val).query) return;
@@ -224,22 +243,24 @@ export default {
       this.$emit('update-current-url', val);
     },
     showSidebar(val: boolean) {
-      if (!val) {
-        setTimeout(() => {
+      if (!this.showChannelManager) {
+        if (!val) {
+          setTimeout(() => {
+            this.currentMainBrowserView().setBounds({
+              x: val ? 76 : 0,
+              y: 40,
+              width: val ? window.innerWidth - 76 : window.innerWidth,
+              height: window.innerHeight - 40,
+            });
+          }, 100);
+        } else {
           this.currentMainBrowserView().setBounds({
             x: val ? 76 : 0,
             y: 40,
             width: val ? window.innerWidth - 76 : window.innerWidth,
             height: window.innerHeight - 40,
           });
-        }, 100);
-      } else {
-        this.currentMainBrowserView().setBounds({
-          x: val ? 76 : 0,
-          y: 40,
-          width: val ? window.innerWidth - 76 : window.innerWidth,
-          height: window.innerHeight - 40,
-        });
+        }
       }
     },
     hasVideo(val: boolean) {
@@ -249,7 +270,7 @@ export default {
     adaptFinished(val: boolean) {
       if (val) {
         this.updatePipChannel(this.currentChannel);
-        const opacity = ['youtube', 'others'].includes(this.pipChannel)
+        const opacity = ['youtube', 'others', 'coursera', 'ted'].includes(this.pipChannel)
           || (this.pipChannel === 'bilibili' && this.pipType === 'others')
           || (this.pipChannel === 'qq' && this.pipType !== 'normal')
           ? 0.2
@@ -365,7 +386,15 @@ export default {
   mounted() {
     this.menuService = new MenuService();
     this.menuService.updateMenuItemEnabled('splayerx.checkForUpdates', false);
-    this.title = this.currentMainBrowserView().webContents.getTitle();
+    if (!this.currentChannel) {
+      this.showChannelManager = true;
+      this.showProgress = false;
+      this.webInfo.canReload = false;
+      this.currentUrl = 'edit.channel';
+      this.title = this.$t('browsing.siteManager');
+    } else {
+      this.title = this.currentMainBrowserView().webContents.getTitle();
+    }
 
     this.$bus.$on('toggle-reload', this.handleUrlReload);
     this.$bus.$on('toggle-back', this.handleUrlBack);
@@ -386,6 +415,24 @@ export default {
       }, 0);
     });
     this.$bus.$on('sidebar-selected', this.handleBookmarkOpen);
+    this.$bus.$on('channel-manage', () => {
+      if (!this.showChannelManager) {
+        if (this.currentMainBrowserView()) {
+          this.removeListener();
+          this.currentMainBrowserView().webContents
+            .executeJavaScript(InjectJSManager.pauseVideo(this.currentChannel));
+          this.$electron.remote.getCurrentWindow().removeBrowserView(this.currentMainBrowserView());
+        }
+        this.showChannelManager = true;
+        this.showProgress = false;
+        this.title = this.$t('browsing.siteManager');
+        this.webInfo.canGoBack = false;
+        this.webInfo.canGoForward = false;
+        this.webInfo.hasVideo = false;
+        this.webInfo.canReload = false;
+        this.updateCurrentChannel('');
+      }
+    });
     window.addEventListener('focus', this.focusHandler);
     window.addEventListener('beforeunload', this.beforeUnloadHandler);
     this.$bus.$on('back-to-landingview', this.backToLandingViewHandler);
@@ -546,8 +593,8 @@ export default {
       this.updateCanGoBack(this.webInfo.canGoBack);
       this.updateCanGoForward(this.webInfo.canGoForward);
       this.updateReload(true);
-      const loadUrl = this.currentMainBrowserView().webContents.getURL();
       if (this.currentMainBrowserView()) {
+        const loadUrl = this.currentMainBrowserView().webContents.getURL();
         this.currentMainBrowserView().webContents
           .executeJavaScript(InjectJSManager.calcVideoNum(), (r: number) => {
             this.webInfo.hasVideo = this.currentChannel === 'youtube.com' && !getVideoId(loadUrl).id ? false : !!r;
@@ -620,6 +667,7 @@ export default {
     },
     handleBookmarkOpen(args: { url: string, currentChannel: string, newChannel: string }) {
       this.webInfo.hasVideo = false;
+      this.updateCurrentChannel(args.newChannel);
       if (args.newChannel !== args.currentChannel) {
         this.removeListener();
         this.$electron.ipcRenderer.send('change-channel', { url: args.url, channel: args.newChannel });
@@ -674,14 +722,29 @@ export default {
         || url === 'about:blank'
         || urlParseLax(this.currentUrl).href === urlParseLax(url).href
       ) return;
-      log.info('will-navigate', url);
-      this.currentUrl = urlParseLax(url).href;
-      this.loadingState = true;
-      this.$electron.ipcRenderer.send('create-browser-view', { url });
+      const oldChannel = this.currentChannel;
+      let newChannel = '';
+      this.allChannels.forEach((channel: string, index: number) => {
+        if (this.compareStr[index].findIndex((str: string) => url.includes(str)) !== -1) {
+          newChannel = `${channel}.com`;
+        }
+      });
+      if (oldChannel === newChannel) {
+        log.info('will-navigate', url);
+        this.currentUrl = urlParseLax(url).href;
+        this.loadingState = true;
+        this.$electron.ipcRenderer.send('create-browser-view', { url });
+      } else {
+        e.preventDefault();
+        this.currentMainBrowserView().webContents.stop();
+        log.info('open-in-chrome', `${oldChannel}, ${newChannel}`);
+        this.$electron.shell.openExternalSync(url);
+      }
     },
     didStartLoading() {
-      this.startLoadUrl = this.$electron.remote.getCurrentWindow()
-        .getBrowserView().webContents.getURL();
+      if (this.currentMainBrowserView()) {
+        this.startLoadUrl = this.currentMainBrowserView().webContents.getURL();
+      }
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ipcMessage(evt: Event, channel: string, args: any) {
@@ -715,11 +778,15 @@ export default {
     },
     domReady() {
       window.focus();
-      this.currentMainBrowserView().webContents.focus();
+      if (this.currentMainBrowserView()) {
+        this.currentMainBrowserView().webContents.focus();
+      }
     },
     didStopLoading() {
-      this.title = this.currentMainBrowserView().webContents.getTitle();
-      this.loadingState = false;
+      if (this.currentMainBrowserView()) {
+        this.title = this.currentMainBrowserView().webContents.getTitle();
+        this.loadingState = false;
+      }
     },
     didFailLoad() {
       // this.updateIsError(true);
@@ -759,6 +826,7 @@ export default {
           });
         } else {
           log.info('open-in-chrome', `${oldChannel}, ${newChannel}`);
+          this.currentMainBrowserView().webContents.stop();
           this.$electron.shell.openExternalSync(openUrl);
         }
       }
@@ -907,7 +975,7 @@ export default {
           [rect.x, rect.y, rect.width, rect.height],
         );
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [0]);
-      } else {
+      } else if (!this.isMaximized) {
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', this.browsingSize);
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', this.browsingPos);
       }

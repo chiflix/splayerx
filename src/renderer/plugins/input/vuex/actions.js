@@ -16,14 +16,22 @@ import {
 } from '../constants';
 import {
   getComponentName,
+} from '../helpers/componentStore';
+import {
   isInteger, isValidComponentName,
+} from '../helpers/validators';
+import {
   buttonsToButtonNames,
+} from '../helpers/buttonsToButtonNames';
+import {
   keydownCalculator as keydownCalc,
   specialKeydownCalculator as speKeydownCalc,
   keyupCalculator as keyupCalc,
   specialKeyupCalculator as speKeyupCalc,
+} from '../helpers/keyboardCalculator';
+import {
   lethargyWheel, electronWheel,
-} from '../helpers';
+} from '../helpers/wheelDetector';
 
 const wheelDetector = process.platform === 'darwin' ? electronWheel : lethargyWheel;
 

@@ -613,6 +613,10 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   height: 16px;
   display: block;
 }
+.pin, .notPin {
+  width: 100%;
+  height: 100%;
+}
 .down {
   width: 5px;
   height: 7px;
@@ -621,8 +625,12 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   width: 30px;
   height: 30px;
 }
-.bilibiliSidebar, .iqiyiSidebar, .youtubeSidebar,
-.douyuSidebar, .huyaSidebar, .qqSidebar, .youkuSidebar, .twitchSidebar {
+.channelSelected {
+  width: 10px;
+  height: 10px;
+}
+.bilibiliSidebar, .iqiyiSidebar, .youtubeSidebar, .channelManage, .courseraSidebar,
+.douyuSidebar, .huyaSidebar, .qqSidebar, .youkuSidebar, .twitchSidebar, .tedSidebar {
   width: 44px;
   height: 44px;
 }

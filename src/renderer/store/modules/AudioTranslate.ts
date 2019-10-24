@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-05 16:03:32
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-10-15 10:05:01
+ * @Last Modified time: 2019-10-24 16:25:51
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @ts-ignore
@@ -12,7 +12,6 @@ import uuidv4 from 'uuid/v4';
 import { AudioTranslate as m } from '@/store/mutationTypes';
 import store from '@/store';
 import { AudioTranslate as a, SubtitleManager as smActions, UserInfo as uActions } from '@/store/actionTypes';
-import { audioTranslateService } from '@/services/media/AudioTranslateService';
 import { AITaskInfo } from '@/interfaces/IMediaStorable';
 import { TranscriptInfo } from '@/services/subtitle';
 import { ISubtitleControlListItem, Type } from '@/interfaces/ISubtitle';
@@ -23,7 +22,7 @@ import { addBubble } from '@/helpers/notificationControl';
 import {
   TRANSLATE_SERVER_ERROR_FAIL, TRANSLATE_SUCCESS,
   TRANSLATE_SUCCESS_WHEN_VIDEO_CHANGE, TRANSLATE_REQUEST_TIMEOUT,
-  TRANSLATE_REQUEST_FORBIDDEN,
+  TRANSLATE_REQUEST_FORBIDDEN, TRANSLATE_REQUEST_PERMISSION,
 } from '@/helpers/notificationcodes';
 import { log } from '@/libs/Log';
 import { LanguageCode } from '@/libs/language';
@@ -52,6 +51,7 @@ export enum AudioTranslateFailType {
   TimeOut = 'timeOut',
   ServerError = 'serverError',
   Forbidden = 'forbidden',
+  Permission = 'permission',
 }
 
 export enum AudioTranslateBubbleOrigin {
@@ -126,12 +126,13 @@ const getCurrentAudioInfo = async (
   return audioInfo;
 };
 
-const taskCallback = (taskInfo: AITaskInfo) => {
+const taskCallback = async (taskInfo: AITaskInfo) => {
   log.debug('AudioTranslate', taskInfo, 'audio-log');
   // @ts-ignore
   if (taskInfo.mediaHash !== store.getters.mediaHash) {
     return;
   }
+  const audioTranslateService = (await import('@/services/media/AudioTranslateService')).audioTranslateService;
   audioTranslateService.taskInfo = taskInfo;
   // const estimateTime = taskInfo.estimateTime * 1;
   // @ts-ignore
@@ -193,8 +194,7 @@ const getters = {
     return state.isBubbleVisible;
   },
   isTranslating(state: AudioTranslateState) {
-    return state.status === AudioTranslateStatus.Searching
-      || state.status === AudioTranslateStatus.Grabbing
+    return state.status === AudioTranslateStatus.Grabbing
       || state.status === AudioTranslateStatus.GrabCompleted
       || state.status === AudioTranslateStatus.Translating;
   },
@@ -302,6 +302,7 @@ const actions = {
       return;
     }
     commit(m.AUDIO_TRANSLATE_SAVE_KEY, `${getters.mediaHash}`);
+    const audioTranslateService = (await import('@/services/media/AudioTranslateService')).audioTranslateService;
     audioTranslateService.stop();
     // audio index in audio streams
     const audioInfo = await getCurrentAudioInfo(getters.currentAudioTrackId, getters.originSrc);
@@ -363,7 +364,7 @@ const actions = {
         commit(m.AUDIO_TRANSLATE_UPDATE_PROGRESS, progress);
         commit(m.AUDIO_TRANSLATE_UPDATE_STATUS, AudioTranslateStatus.Grabbing);
       });
-      grab.on('error', (error: Error) => {
+      grab.on('error', (error: Error) => { // eslint-disable-line complexity
         // 记录错误日志到sentry, 排除错误原因
         try {
           log.error('AudioTranslate', error);
@@ -396,7 +397,12 @@ const actions = {
           bubbleType = TRANSLATE_REQUEST_FORBIDDEN;
           fileType = AudioTranslateFailType.Forbidden;
           failReason = 'forbidden';
+        } else if (error && error.message === 'permission') {
+          bubbleType = TRANSLATE_REQUEST_PERMISSION;
+          fileType = AudioTranslateFailType.Permission;
+          failReason = 'permission';
         }
+
         commit(m.AUDIO_TRANSLATE_UPDATE_FAIL_TYPE, fileType);
         if (!state.isModalVisible) {
           commit(m.AUDIO_TRANSLATE_UPDATE_PROGRESS, 0);
@@ -611,7 +617,7 @@ const actions = {
       dispatch(a.AUDIO_TRANSLATE_START, taskInfo.audioLanguageCode);
     }
   },
-  [a.AUDIO_TRANSLATE_DISCARD]( // eslint-disable-line complexity
+  async [a.AUDIO_TRANSLATE_DISCARD]( // eslint-disable-line complexity
     {
       commit,
       getters,
@@ -676,6 +682,7 @@ const actions = {
       clearInterval(taskTimer);
     }
     // 丢弃service
+    const audioTranslateService = (await import('@/services/media/AudioTranslateService')).audioTranslateService;
     audioTranslateService.stop();
     // 丢弃任务，执行用户强制操作
     const selectId = state.selectedTargetSubtitleId;
@@ -689,7 +696,8 @@ const actions = {
     state.callbackAfterBubble();
     dispatch(a.AUDIO_TRANSLATE_HIDE_BUBBLE);
   },
-  [a.AUDIO_TRANSLATE_BACKSATGE]({ commit, dispatch }: any) {
+  async [a.AUDIO_TRANSLATE_BACKSATGE]({ commit, dispatch }: any) {
+    const audioTranslateService = (await import('@/services/media/AudioTranslateService')).audioTranslateService;
     // 保存当前进度
     if (state.status === AudioTranslateStatus.Translating) {
       audioTranslateService.saveTask();

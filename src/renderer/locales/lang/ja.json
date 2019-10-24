@@ -207,17 +207,6 @@
       "playInNewWindow": "新しいウィンドウで遊ぶ",
       "backToBrowser": "ブラウザに戻る"
     },
-    "favourite": {
-      "name": "チャンネル",
-      "iqiyi": "iQIYI",
-      "bilibili": "Bilibili",
-      "douyu": "Douyu",
-      "huya": "Huya",
-      "qq": "Tencent Video",
-      "twitch": "Twitch",
-      "youku": "Youku",
-      "youtube": "YouTube"
-    },
     "edit": {
       "name": "編集",
       "cut": "切り取り",
@@ -258,6 +247,8 @@
     "douyu": "Douyu",
     "twitch": "Twitch",
     "youku": "Youku",
+    "coursera": "Coursera",
+    "ted": "TED",
     "openLocalFile": "ローカルファイルを開く",
     "enterPip": "画中画を開じる",
     "exitPip": "ブラウザに戻る",
@@ -269,12 +260,15 @@
       "try": "お試しください:",
       "firstLine": "ネットワークケーブル、モデム、およびルーターの確認",
       "secondLine": "Wi-Fiへの再接続"
-    }
+    },
+    "remove": "削除する",
+    "siteManager": "サイト管理",
+    "popularSites": "適合サイト",
+    "siteTip": "追加 / 編集"
   },
   "preferences": {
     "general": {
       "hideHistory": "再生履歴を隠す",
-      "clearHistory": "終了時に再生履歴を削除",
       "reverseScrolling": "マウスのスクロール方向を逆に設定",
       "setDefault": "デフォルトのプレーヤーとして設定",
       "setDefaultDescription": "SPlayer ですべてのビデオファイルを開く。",
@@ -301,11 +295,10 @@
     },
     "privacy": {
       "privacySetting": "プライバシー",
-      "enable": "Privacy Protectionを開く",
-      "smartMode": "Intelligent Mode",
-      "smartDescription": "機密性の高いコンテンツや作業に適さないコンテンツをオフラインで識別し、フォルダプレイリストでの再生時または終了時に再生履歴を消去します。",
       "incognitoMode": "Incognito Mode",
-      "incognitoDescription": "再生履歴は保存されません。"
+      "incognitoDescription": "再生履歴は保存されません。",
+      "clearHistory": "再生履歴をクリア",
+      "clearHistoryDescription": "既存のプレイリストと再生履歴を削除する"
     }
   },
   "privacyBubble": {
@@ -350,7 +343,9 @@
     "playing": "再生中",
     "paused": "ポーズ中",
     "playlistSource": "プレイリスト",
-    "add": "プレイリストに追加する"
+    "add": "プレイリストに追加する",
+    "pin": "プレイリストを起動ページに固定する",
+    "pinned": "起動ページに固定されたプレイリスト"
   },
   "subtitle": {
     "embedded": "埋め込み式",
@@ -404,7 +399,8 @@
     "audioLanguageLoadFail": "接続に失敗しました。もう一度お試しください",
     "select": {
       "title": "ビデオソースの言語を選択",
-      "content": "ビデオで聞こえる言語を選択し生成をクリックします。"
+      "content": "ビデオで聞こえる言語を選択し生成をクリックします。",
+      "contentLimit": "ビデオで聞こえる言語を選択し生成をクリックします。申し訳ありませんが、1日に1つのAI翻訳結果しか生成できません。"
     },
     "translate": {
       "title": "{time} について",
@@ -442,11 +438,17 @@
       "title": "有効期限が切れました",
       "content": "サインインしてください。"
     },
+    "PermissionFail": {
+      "title": "今日の回数は使い果たされています",
+      "content": "申し訳ありませんが、1日に1つのAI翻訳結果しか生成できません。"
+    },
+    "loading": "処理中...",
     "cancel": "キャンセル",
     "quit": "やめる",
     "generate": "生成する",
     "ok": "バックグラウンドで実行",
-    "continue": "キャンセル"
+    "continue": "キャンセル",
+    "upgrade": "はい"
   },
   "translateBubble": {
     "bubbleWhenGrab": "この操作は進行中の翻訳を中止させるでしょう。",
@@ -475,6 +477,10 @@
     "bubbleTranslateForbiddenFail": {
       "title": "有効期限が切れました",
       "content": "サインインしてください。"
+    },
+    "bubbleTranslatePermissionFail": {
+      "title": "今日の回数は使い果たされています",
+      "content": "申し訳ありませんが、1日に1つのAI翻訳結果しか生成できません。"
     },
     "ok": "はい",
     "cancel": "キャンセル",

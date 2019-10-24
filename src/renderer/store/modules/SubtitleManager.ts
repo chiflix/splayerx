@@ -17,6 +17,7 @@ import {
   newSubtitle as subActions,
   Subtitle as legacyActions,
   AudioTranslate as atActions,
+  UserInfo as usActions,
 } from '@/store/actionTypes';
 import {
   ISubtitleControlListItem, Type, IEntityGenerator, IEntity, NOT_SELECTED_SUBTITLE,
@@ -1020,8 +1021,20 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
     const list = getters.list.map(({ id }: ISubtitleControlListItem) => getters[`${id}/entity`]);
     updateSubtitleList(list, state.mediaHash);
   },
-  async [a.exportSubtitle]({ getters, dispatch }, item: ISubtitleControlListItem) {
-    if (item && (item.type === 'translated' || (item.type === 'preTranslated' && item.source.source !== ''))) {
+  async [a.exportSubtitle]({ getters, dispatch, rootState }, item: ISubtitleControlListItem) {
+    const { $bus } = Vue.prototype;
+    if (!getters.token) {
+      dispatch(usActions.SHOW_FORBIDDEN_MODAL);
+      return;
+    }
+    if (item && item.type === Type.Embedded
+      && (!rootState[item.id] || !rootState[item.id].canCache)) {
+      // Embedded not cache
+      $bus.$emit('embedded-subtitle-can-not-export');
+      return;
+    }
+
+    if (item && !(item.type === 'preTranslated' && item.source.source === '')) {
       const { app, dialog } = remote;
       const browserWindow = remote.BrowserWindow;
       const focusWindow = browserWindow.getFocusedWindow();

@@ -207,17 +207,6 @@
       "playInNewWindow": "اللعب في نافذة جديدة",
       "backToBrowser": "العودة إلى المتصفح"
     },
-    "favourite": {
-      "name": "قناة",
-      "iqiyi": "iQIYI",
-      "bilibili": "Bilibili",
-      "douyu": "Douyu",
-      "huya": "Huya",
-      "qq": "Tencent Video",
-      "twitch": "Twitch",
-      "youku": "Youku",
-      "youtube": "YouTube"
-    },
     "edit": {
       "name": "حرّر",
       "cut": "قص",
@@ -258,6 +247,8 @@
     "douyu": "Douyu",
     "twitch": "Twitch",
     "youku": "Youku",
+    "coursera": "Coursera",
+    "ted": "TED",
     "openLocalFile": " فتح ملف محلي ...",
     "enterPip": "أدخل صورة في صورة",
     "exitPip": "العودة إلى المتصفح",
@@ -269,12 +260,15 @@
       "try": "حاول:",
       "firstLine": "فحص كبلات الشبكة والمودم وجهاز التوجيه",
       "secondLine": "إعادة الاتصال بشبكة Wi-Fi"
-    }
+    },
+    "remove": "نزع",
+    "siteManager": "مدير المواقع",
+    "popularSites": "المواقع الأمثل",
+    "siteTip": "اضافة / تغيير"
   },
   "preferences": {
     "general": {
       "hideHistory": "إخفاء سجل التشغيل",
-      "clearHistory": "قم دائمًا بمسح سجل التشغيل عند الخروج",
       "reverseScrolling": "التمرير عكس الماوس",
       "setDefault": "تعيين كمشغل الفيديو الافتراضي",
       "setDefaultDescription": ".افتح جميع ملفات الفيديو باستخدام SPlayer",
@@ -301,11 +295,10 @@
     },
     "privacy": {
       "privacySetting": "الإجمالية",
-      "enable": "تمكين حماية الخصوصية",
-      "smartMode": "Intelligent Mode",
-      "smartDescription": "قم بتعريف المحتويات الحساسة أو غير المناسبة للعمل دون اتصال ، وقم بمسح سجل التشغيل عند التشغيل في قائمة تشغيل مجلد أو عند الإقلاع عن التدخين.",
       "incognitoMode": "وضع التخفي",
-      "incognitoDescription": "لن يتم حفظ سجل التشغيل."
+      "incognitoDescription": "لن يتم حفظ سجل التشغيل.",
+      "clearHistory": "مسح سجل التشغيل",
+      "clearHistoryDescription": "قم بإزالة قوائم التشغيل الحالية وسجل التشغيل"
     }
   },
   "privacyBubble": {
@@ -350,7 +343,9 @@
     "playing": "تلعب",
     "paused": "توقف",
     "playlistSource": "قائمة التشغيل",
-    "add": "أضف إلى قائمة التشغيل"
+    "add": "أضف إلى قائمة التشغيل",
+    "pin": "ثبت قائمة التشغيل على صفحة الإطلاق",
+    "pinned": "قائمة التشغيل مثبتة على صفحة الإطلاق"
   },
   "subtitle": {
     "embedded": "تضمين",
@@ -404,7 +399,8 @@
     "audioLanguageLoadFail": "فشل الاتصال ، يرجى المحاولة لاحقًا",
     "select": {
       "title": "اختر لغة الصوت",
-      "content": "لإنشاء نتيجة ترجمة ، يرجى تحديد اللغة التي تسمعها في الفيديو والنقر على زر إنشاء. قد تستغرق العملية بعض الوقت."
+      "content": "لإنشاء نتيجة ترجمة ، يرجى تحديد اللغة التي تسمعها في الفيديو والنقر على زر إنشاء. قد تستغرق العملية بعض الوقت.",
+      "contentLimit": "حدد اللغة التي تسمعها في الفيديو وانقر على زر إنشاء. يمكنك إنشاء ترجمة AI واحدة مجانًا يوميًا."
     },
     "translate": {
       "title": "حوالي {time} اليسار",
@@ -442,11 +438,17 @@
       "title": "انتهت الجلسة",
       "content": "يرجى تسجيل الدخول أولاً."
     },
+    "PermissionFail": {
+      "title": "الاستخدامات المتبقية اليوم: 0",
+      "content": "عذرًا ، يمكنك فقط إنشاء نتيجة واحدة للترجمة AI في اليوم."
+    },
+    "loading": "Processing ...",
     "cancel": "إلغاء",
     "quit": "استقال",
     "generate": "توفير",
     "ok": "حسنا",
-    "continue": "إلغاء"
+    "continue": "إلغاء",
+    "upgrade": "حسنا"
   },
   "translateBubble": {
     "bubbleWhenGrab": "سيتم إحباط ترجمة AI إذا استمرت ، فهل تريد المتابعة على أي حال؟",
@@ -475,6 +477,10 @@
     "bubbleTranslateForbiddenFail": {
       "title": "انتهت الجلسة",
       "content": "يرجى تسجيل الدخول أولاً."
+    },
+    "bubbleTranslatePermissionFail": {
+      "title": "الاستخدامات المتبقية اليوم: 0",
+      "content": "عذرًا ، يمكنك فقط إنشاء نتيجة واحدة للترجمة AI في اليوم."
     },
     "ok": "حسنا",
     "cancel": "إلغاء",

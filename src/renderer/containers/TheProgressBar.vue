@@ -263,7 +263,7 @@ export default {
       this.mousedown = true;
       if (event.target === this.$refs.leftInvisible || event.target === this.$refs.rightInvisible) {
         this.showThumbnail = false;
-        this.$bus.$emit('currentWidget', 'the-video-controller');
+        this.$bus.$emit('currentWidget', 'TheVideoController');
         this.setHoveringToFalse(false);
       }
       if (this.hoveredCurrentTime !== this.duration) {

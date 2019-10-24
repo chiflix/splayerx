@@ -45,8 +45,8 @@
               cursor: currentSubtitleIndex === index
                 && !(item.type === 'preTranslated' && item.source.source === '')
                 ? 'default' : 'pointer',
-              display: (item.type === 'translated'
-                || (item.type === 'preTranslated' && item.source.source !== '')) ? 'block' : 'flex',
+              display: !(item.type === 'preTranslated' && item.source.source === '')
+                ? 'block' : 'flex',
             }"
             @mouseup="toggleItemClick($event, index)"
             @mouseover="toggleItemsMouseOver(index)"
@@ -86,8 +86,7 @@
                 class="iconContainer"
               >
                 <transition
-                  v-if="item.type === 'translated'
-                    || (item.type === 'preTranslated' && item.source.source !== '')"
+                  v-if="!(item.type === 'preTranslated' && item.source.source === '')"
                   name="sub-delete"
                 >
                   <div class="down-arrow-icon-wrap">
@@ -101,14 +100,14 @@
                     />
                   </div>
                 </transition>
-                <transition name="sub-delete">
+                <!-- <transition name="sub-delete">
                   <Icon
                     v-show="item.type === 'local' && hoverIndex === index"
                     @mouseup.native="handleSubDelete($event, item)"
                     type="deleteSub"
                     class="deleteIcon"
                   />
-                </transition>
+                </transition> -->
                 <transition
                   v-if="item.type === 'preTranslated' && item.source.source === ''
                     && (item.language !== translateLanguage || translateProgress <= 0)"
@@ -138,15 +137,18 @@
               </div>
             </div>
             <div
-              v-if="item.type === 'translated'
-                || (item.type === 'preTranslated' && item.source.source !== '')"
+              v-if="!(item.type === 'preTranslated' && item.source.source === '')"
               :style="{
                 height: currentSubtitleIndex === index && !backCardVisiable
                   && panelVisiable ? `${itemHeight}px`: 0,
               }"
               class="modified-subtitle-advanced-panel"
             >
-              <div class="icons-wrap">
+              <div
+                v-if="item.type === 'translated'
+                  || (item.type === 'preTranslated' && item.source.source !== '')"
+                class="icons-wrap"
+              >
                 <div :title="$t('subtitle.tips.editor')">
                   <Icon
                     @mouseup.native.stop="handleSubEdit($event, item)"
@@ -163,6 +165,23 @@
                   <Icon
                     @mouseup.native="handleReTranslate($event, item)"
                     type="reload"
+                  />
+                </div>
+              </div>
+              <div
+                v-else
+                class="icons-wrap two-icons-wrap"
+              >
+                <div :title="$t('subtitle.tips.editor')">
+                  <Icon
+                    @mouseup.native.stop="handleSubEdit($event, item)"
+                    type="subtitleEdit"
+                  />
+                </div>
+                <div :title="$t('subtitle.tips.export')">
+                  <Icon
+                    @mouseup.native="handleSubExport($event, item)"
+                    type="subtitleExport"
                   />
                 </div>
               </div>
@@ -638,6 +657,11 @@ export default {
       }
       &>div:nth-child(1) {
         cursor: default;
+      }
+    }
+    .two-icons-wrap {
+      &>div:nth-child(2) {
+        border-right: none;
       }
     }
     .confirm-delete-wrap {

@@ -8,16 +8,13 @@ import path, {
   basename, dirname, extname, join, resolve,
 } from 'path';
 import fs from 'fs';
-import http from 'http';
 import rimraf from 'rimraf';
 import { audioGrabService } from './helpers/AudioGrabService';
 import './helpers/electronPrototypes';
-import writeLog from './helpers/writeLog';
 import {
   getValidVideoRegex, getValidSubtitleRegex,
   getToken, saveToken,
   getIP,
-  getRightPort,
 } from '../shared/utils';
 import { mouse } from './helpers/mouse';
 import MenuService from './menu/MenuService';
@@ -72,7 +69,6 @@ let menuService = null;
 let routeName = null;
 let mainWindow = null;
 let loginWindow = null;
-let laborWindow = null;
 let aboutWindow = null;
 let preferenceWindow = null;
 let browsingWindow = null;
@@ -86,28 +82,21 @@ let isBrowsingWindowMax = false;
 let tray = null;
 let pipTimer = 0;
 let needToRestore = false;
-let forceQuit = false; // 大退app 关闭所有windows
-let needBlockCloseLaborWindow = true; // 标记是否阻塞nsfw窗口关闭
 let inited = false;
 let hideBrowsingWindow = false;
 let finalVideoToOpen = [];
 let signInEndPoint = '';
-let localHostPort = 0;
-let fileDirServerOnLine = false;
 const locale = new Locale();
 const tmpVideoToOpen = [];
 const tmpSubsToOpen = [];
 const subRegex = getValidSubtitleRegex();
-const allChannels = ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch'];
-const compareStr = [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch']];
+const allChannels = ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch', 'coursera', 'ted'];
+const compareStr = [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com', 'film.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch'], ['coursera'], ['ted']];
 const titlebarUrl = process.platform === 'darwin' ? `file:${resolve(__static, 'pip/macTitlebar.html')}` : `file:${resolve(__static, 'pip/winTitlebar.html')}`;
 const maskUrl = process.platform === 'darwin' ? `file:${resolve(__static, 'pip/mask.html')}` : `file:${resolve(__static, 'pip/mask.html')}`;
 const mainURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080'
   : `file://${__dirname}/index.html`;
-const laborURL = process.env.NODE_ENV === 'development'
-  ? 'http://localhost:9080/labor.html'
-  : `file://${__dirname}/labor.html`;
 const aboutURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080/about.html'
   : `file://${__dirname}/about.html`;
@@ -327,54 +316,7 @@ function createPreferenceWindow(e, route) {
   }
 }
 
-/**
- * @description sign in window need aliyun nc valication with // protocal
- * @author tanghaixiang
- */
-function createFileDirServer() {
-  http.createServer((request, response) => {
-    console.log('request ', request.url);
-    let filePath = `${request.url}`;
-    if (filePath === '/') {
-      filePath = '/login.html';
-    }
-    const extname = String(path.extname(filePath)).toLowerCase();
-    const mimeTypes = {
-      '.html': 'text/html',
-      '.js': 'text/javascript',
-      '.css': 'text/css',
-      '.json': 'application/json',
-      '.png': 'image/png',
-      '.jpg': 'image/jpg',
-      '.gif': 'image/gif',
-      '.svg': 'image/svg+xml',
-      '.wav': 'audio/wav',
-      '.mp4': 'video/mp4',
-      '.woff': 'application/font-woff',
-      '.ttf': 'application/font-ttf',
-      '.eot': 'application/vnd.ms-fontobject',
-      '.otf': 'application/font-otf',
-      '.wasm': 'application/wasm',
-    };
-    const contentType = mimeTypes[extname] || 'application/octet-stream';
-    fs.readFile(`${__dirname}${filePath}`, (error, content) => {
-      if (error) {
-        return;
-      }
-      response.writeHead(200, { 'Content-Type': contentType });
-      response.end(content, 'utf-8');
-    });
-  }).listen(localHostPort);
-}
-
 function createLoginWindow(e, route) {
-  // in production use http protocal
-  // aliyun captcha use // protocal
-  if (process.env.NODE_ENV === 'production' && !fileDirServerOnLine) {
-    createFileDirServer();
-    fileDirServerOnLine = true;
-    loginURL = `http://localhost:${localHostPort}/login.html`;
-  }
   const loginWindowOptions = {
     useContentSize: true,
     frame: false,
@@ -472,7 +414,6 @@ function createBrowsingWindow(args) {
     useContentSize: true,
     frame: false,
     titleBarStyle: 'none',
-    transparent: true,
     webPreferences: {
       webSecurity: false,
       nodeIntegration: true,
@@ -513,39 +454,6 @@ function createBrowsingWindow(args) {
       }
     });
   }
-}
-
-function createLaborWindow() {
-  const laborWindowOptions = {
-    show: false,
-    webPreferences: {
-      webSecurity: false,
-      nodeIntegration: true,
-      experimentalFeatures: true,
-    },
-  };
-  if (!laborWindow) {
-    laborWindow = new BrowserWindow(laborWindowOptions);
-    laborWindow.once('ready-to-show', () => {
-      laborWindow.readyToShow = true;
-    });
-    laborWindow.on('close', (event) => {
-      if ((mainWindow && !mainWindow.webContents.isDestroyed()) && needBlockCloseLaborWindow) {
-        event.preventDefault();
-      }
-    });
-    laborWindow.on('closed', () => {
-      laborWindow = null;
-      if (forceQuit) {
-        app.quit();
-      }
-    });
-    if (process.env.NODE_ENV === 'development') laborWindow.openDevTools({ mode: 'detach' });
-    laborWindow.loadURL(laborURL);
-  }
-  // 重置参数
-  forceQuit = false;
-  needBlockCloseLaborWindow = true;
 }
 
 function registerMainWindowEvent(mainWindow) {
@@ -609,18 +517,6 @@ function registerMainWindowEvent(mainWindow) {
 
   registerMediaTasks();
 
-  ipcMain.on('labor-task-add', (evt, ...rest) => {
-    if (laborWindow && !laborWindow.webContents.isDestroyed()) {
-      if (laborWindow.readyToShow) laborWindow.webContents.send('labor-task-add', ...rest);
-      else laborWindow.once('ready-to-show', () => laborWindow.webContents.send('labor-task-add', ...rest));
-    }
-  });
-  ipcMain.on('labor-task-done', (evt, ...rest) => {
-    if (mainWindow && !mainWindow.webContents.isDestroyed()) {
-      mainWindow.webContents.send('labor-task-done', ...rest);
-    }
-  });
-
   ipcMain.on('callBrowsingWindowMethod', (evt, method, args = []) => {
     try {
       browsingWindow[method](...args);
@@ -662,8 +558,8 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('pip-window-fullscreen', () => {
     if (browsingWindow && browsingWindow.isFocused()) {
       browsingWindow.setFullScreen(!browsingWindow.isFullScreen());
-      titlebarView.webContents
-        .executeJavaScript(InjectJSManager.updateFullScreenIcon(browsingWindow.isFullScreen()));
+      titlebarView.webContents.executeJavaScript(InjectJSManager
+        .updateFullScreenIcon(browsingWindow.isFullScreen(), isBrowsingWindowMax));
     }
   });
   ipcMain.on('pip-window-close', (evt, args) => {
@@ -680,11 +576,16 @@ function registerMainWindowEvent(mainWindow) {
     browserViewManager.pauseVideo(mainWindow.getBrowserViews()[0]);
     mainWindow.hide();
   });
+  ipcMain.on('clear-browsers-by-channel', (evt, channel) => {
+    if (!browserViewManager) return;
+    browserViewManager.clearBrowserViewsByChannel(channel);
+  });
   ipcMain.on('remove-browser', () => {
+    if (!browserViewManager) return;
+    if (mainWindow.getBrowserViews().length) browserViewManager.pauseVideo();
     mainWindow.getBrowserViews()
       .forEach(mainWindowView => mainWindow.removeBrowserView(mainWindowView));
     if (mainWindow.isMaximized()) mainWindow.unmaximize();
-    browserViewManager.pauseVideo();
     if (browsingWindow) {
       const views = browsingWindow.getBrowserViews();
       views.forEach((view) => {
@@ -851,7 +752,8 @@ function registerMainWindowEvent(mainWindow) {
     }
   });
   ipcMain.on('update-full-state', (evt, isFullScreen) => {
-    titlebarView.webContents.executeJavaScript(InjectJSManager.updateFullScreenIcon(isFullScreen));
+    titlebarView.webContents.executeJavaScript(InjectJSManager
+      .updateFullScreenIcon(isFullScreen, isBrowsingWindowMax));
   });
   ipcMain.on('mouseup', (evt, type) => {
     switch (type) {
@@ -863,13 +765,15 @@ function registerMainWindowEvent(mainWindow) {
         break;
       case 'full':
         browsingWindow.setFullScreen(true);
-        titlebarView.webContents.executeJavaScript(InjectJSManager.updateFullScreenIcon(true));
+        titlebarView.webContents.executeJavaScript(InjectJSManager
+          .updateFullScreenIcon(true, isBrowsingWindowMax));
         break;
       case 'recover':
         browsingWindow.setFullScreen(false);
         browsingWindow.getBrowserViews()[0].webContents
           .executeJavaScript(InjectJSManager.changeFullScreen(false));
-        titlebarView.webContents.executeJavaScript(InjectJSManager.updateFullScreenIcon(false));
+        titlebarView.webContents.executeJavaScript(InjectJSManager
+          .updateFullScreenIcon(false, isBrowsingWindowMax));
         break;
       case 'max':
         if (browsingWindow.isMaximized()) {
@@ -1103,8 +1007,8 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('key-events', (e, keyCode) => {
     if (keyCode === 13) {
       browsingWindow.setFullScreen(!browsingWindow.isFullScreen());
-      titlebarView.webContents
-        .executeJavaScript(InjectJSManager.updateFullScreenIcon(browsingWindow.isFullScreen()));
+      titlebarView.webContents.executeJavaScript(InjectJSManager
+        .updateFullScreenIcon(browsingWindow.isFullScreen(), isBrowsingWindowMax));
     } else {
       browsingWindow.getBrowserViews()[0].webContents
         .executeJavaScript(InjectJSManager.emitKeydownEvent(keyCode));
@@ -1143,17 +1047,11 @@ function registerMainWindowEvent(mainWindow) {
     mainWindow.webContents.send('mainCommit', 'isFullScreen', mainWindow.isFullScreen());
     mainWindow.webContents.send('mainCommit', 'isFocused', mainWindow.isFocused());
   });
-  ipcMain.on('writeLog', (event, level, log) => { // eslint-disable-line complexity
-    if (!log) return;
-    writeLog(level, log);
-  });
   ipcMain.on('need-to-restore', () => {
     needToRestore = true;
     markNeedToRestore();
   });
   ipcMain.on('relaunch', () => {
-    forceQuit = true;
-    needBlockCloseLaborWindow = false;
     const switches = process.argv.filter(a => a.startsWith('-'));
     const argv = process.argv.filter(a => !a.startsWith('-'))
       .slice(0, app.isPackaged ? 1 : 2).concat(switches);
@@ -1164,6 +1062,11 @@ function registerMainWindowEvent(mainWindow) {
 
   ipcMain.on('add-browsing', (e, args) => {
     createBrowsingWindow(args);
+  });
+  ipcMain.on('clear-history', () => {
+    if (mainWindow && !mainWindow.webContents.isDestroyed()) {
+      mainWindow.webContents.send('file.clearHistory');
+    }
   });
   ipcMain.on('preference-to-main', (e, args) => {
     if (mainWindow && !mainWindow.webContents.isDestroyed()) {
@@ -1228,11 +1131,13 @@ function registerMainWindowEvent(mainWindow) {
 
   ipcMain.on('sign-in-end-point', (events, data) => {
     signInEndPoint = data;
+    if (process.env.NODE_ENV === 'production') {
+      loginURL = `${signInEndPoint}/static/splayer/login.html`;
+    }
   });
 }
 
 function createMainWindow(openDialog, playlistId) {
-  createLaborWindow();
   mainWindow = new BrowserWindow({
     useContentSize: true,
     frame: false,
@@ -1276,10 +1181,6 @@ function createMainWindow(openDialog, playlistId) {
     ipcMain.removeAllListeners(); // FIXME: decouple mainWindow and ipcMain
     mainWindow = null;
     menuService.setMainWindow(null);
-    if (forceQuit) {
-      needBlockCloseLaborWindow = false;
-    }
-    if (laborWindow) laborWindow.close();
   });
 
   mainWindow.once('ready-to-show', () => {
@@ -1328,7 +1229,6 @@ app.on('before-quit', () => {
   } else {
     mainWindow.webContents.send('quit');
   }
-  forceQuit = true;
 });
 
 app.on('quit', () => {
@@ -1512,6 +1412,7 @@ const oauthRegex = [
   /^https:\/\/openapi.baidu.com\//i,
   /^https:\/\/auth.alipay.com\/login\//i,
   /^https:\/\/account.xiaomi.com\/pass\//i,
+  /^https:\/\/www.facebook.com\/v[0-9].[0-9]\/dialog\/oauth/i,
 ];
 app.on('web-contents-created', (webContentsCreatedEvent, contents) => {
   if (contents.getType() === 'browserView') {
@@ -1595,7 +1496,3 @@ app.getIP = getIP;
 
 // export getSignInEndPoint to static login preload.js
 app.getSignInEndPoint = () => signInEndPoint;
-
-getRightPort().then((port) => {
-  localHostPort = port;
-}).catch(console.error);

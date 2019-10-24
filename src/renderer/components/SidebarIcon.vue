@@ -22,6 +22,7 @@
 </template>
 <script lang="ts">
 import Icon from '@/components/BaseIconContainer.vue';
+import BrowsingChannelMenu from '@/services/browsing/BrowsingChannelMenu';
 
 export default {
   components: {
@@ -44,7 +45,7 @@ export default {
       type: String,
       default: '',
     },
-    type: {
+    channel: {
       type: String,
       default: '',
     },
@@ -77,6 +78,11 @@ export default {
       iconTranslateY: 0,
     };
   },
+  computed: {
+    isDarwin() {
+      return process.platform === 'darwin';
+    },
+  },
   watch: {
     itemDragging() {
       this.iconTranslateY = 0;
@@ -95,11 +101,19 @@ export default {
   },
   methods: {
     handleMousedown(e: MouseEvent) {
-      this.mousedown = true;
-      this.mousedownY = e.clientY;
-      this.$emit('index-of-moving-item', this.index);
-      document.addEventListener('mousemove', this.handleMousemove);
-      document.addEventListener('mouseup', this.handleMouseup, { once: true });
+      if (e.button === 2) {
+        if (this.isDarwin) {
+          BrowsingChannelMenu.createChannelMenu(this.channel);
+        } else {
+          this.$bus.$emit('open-channel-menu', this.channel);
+        }
+      } else {
+        this.mousedown = true;
+        this.mousedownY = e.clientY;
+        this.$emit('index-of-moving-item', this.index);
+        document.addEventListener('mousemove', this.handleMousemove);
+        document.addEventListener('mouseup', this.handleMouseup, { once: true });
+      }
     },
     handleMousemove(e: MouseEvent) {
       this.isDragging = true;
@@ -120,7 +134,7 @@ export default {
         this.iconTranslateY = 0;
         this.mousedown = false;
       } else {
-        this.selectSidebar(this.url, this.type);
+        this.selectSidebar(this.url, this.channel);
       }
     },
   },

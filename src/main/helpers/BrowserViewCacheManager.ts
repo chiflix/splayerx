@@ -186,6 +186,19 @@ class BrowserViewCacheManager implements IBrowserViewCacheManager {
       this.addChannelToMulti(channel, mainPage);
     }
   }
+
+  public clearCacheByChannel(channel: string): void {
+    if (this.singlePageHistory.has(channel)) {
+      (this.singlePageHistory.get(channel) as BrowserSingleCache).page.view.destroy();
+      this.singlePageHistory.delete(channel);
+    } else if (this.multiPageHistory.has(channel)) {
+      (this.multiPageHistory.get(channel) as BrowserMultiCache).pages
+        .forEach((page: BrowserViewHistoryItem) => {
+          page.view.destroy();
+        });
+      this.multiPageHistory.delete(channel);
+    }
+  }
 }
 
 interface IBrowserViewCacheManager {
@@ -207,6 +220,7 @@ interface IBrowserViewCacheManager {
   ): void
   recoverCacheWhenExitPip(channel: string,
     mainPage: BrowserViewHistoryItem, deletePages: BrowserViewHistoryItem[]): void
+  clearCacheByChannel(channel: string): void
 }
 
 export default BrowserViewCacheManager;

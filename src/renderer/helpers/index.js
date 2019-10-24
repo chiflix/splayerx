@@ -14,7 +14,6 @@ import {
   AudioTranslate as atActions,
 } from '@/store/actionTypes';
 import { videodata } from '@/store/video';
-import { AudioTranslateBubbleOrigin } from '@/store/modules/AudioTranslate';
 import {
   EMPTY_FOLDER, OPEN_FAILED, ADD_NO_VIDEO,
   SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, FILE_NON_EXIST_IN_PLAYLIST, PLAYLIST_NON_EXIST,
@@ -132,33 +131,37 @@ export default {
       });
     },
     addFilesByDialog({ defaultPath } = {}) {
-      if (this.showingPopupDialog) return;
+      if (this.showingPopupDialog) return Promise.resolve();
       this.showingPopupDialog = true;
       const opts = ['openFile', 'multiSelections'];
       if (process.platform === 'darwin') {
         opts.push('openDirectory');
       }
-      process.env.NODE_ENV === 'testing' ? '' : remote.dialog.showOpenDialog({
-        title: 'Open Dialog',
-        defaultPath,
-        filters: [{
-          name: 'Video Files',
-          extensions: getValidVideoExtensions(),
-        }, {
-          name: 'All Files',
-          extensions: ['*'],
-        }],
-        properties: opts,
-        securityScopedBookmarks: process.mas,
-      }, (files, bookmarks) => {
-        this.showingPopupDialog = false;
-        if (process.mas && get(bookmarks, 'length') > 0) {
-          // TODO: put bookmarks to database
-          bookmark.resolveBookmarks(files, bookmarks);
-        }
-        if (files) {
-          this.addFiles(...files);
-        }
+      return new Promise((resolve) => {
+        process.env.NODE_ENV === 'testing' ? '' : remote.dialog.showOpenDialog({
+          title: 'Open Dialog',
+          defaultPath,
+          filters: [{
+            name: 'Video Files',
+            extensions: getValidVideoExtensions(),
+          }, {
+            name: 'All Files',
+            extensions: ['*'],
+          }],
+          properties: opts,
+          securityScopedBookmarks: process.mas,
+        }, (files, bookmarks) => {
+          this.showingPopupDialog = false;
+          if (process.mas && get(bookmarks, 'length') > 0) {
+            // TODO: put bookmarks to database
+            bookmark.resolveBookmarks(files, bookmarks);
+          }
+          if (files) {
+            this.addFiles(...files).then(() => {
+              resolve();
+            });
+          }
+        });
       });
     },
     chooseSnapshotFolder(defaultName, data) {
@@ -421,7 +424,10 @@ export default {
         this.$router.push({ name: 'playing-view' });
       }
       this.$bus.$emit('new-file-open');
-      this.$bus.$emit('open-playlist');
+      setTimeout(() => {
+        this.$bus.$emit('open-playlist');
+        this.$bus.$emit('new-playlist');
+      }, 300);
     },
     async openUrlFile(url) {
       const id = await this.infoDB.addPlaylist([url]);
@@ -545,19 +551,21 @@ export default {
       if (this.$store.getters.isTranslating) {
         // 如果正在进行智能翻译，就阻止切换视频,
         // 并且提示是否终止智能翻译
-        if (Math.ceil(videodata.time) === Math.ceil(this.$store.getters.duration)) {
-          this.$store.dispatch(atActions.AUDIO_TRANSLATE_SHOW_BUBBLE,
-            AudioTranslateBubbleOrigin.NextVideoChange);
-          this.$store.dispatch(videoActions.PAUSE_VIDEO);
-          this.$store.dispatch(atActions.AUDIO_TRANSLATE_BUBBLE_CALLBACK, () => {
-            this.$store.dispatch(videoActions.PLAY_VIDEO);
-            callback();
-          });
-        } else {
-          this.$store.dispatch(atActions.AUDIO_TRANSLATE_SHOW_BUBBLE,
-            AudioTranslateBubbleOrigin.VideoChange);
-          this.$store.dispatch(atActions.AUDIO_TRANSLATE_BUBBLE_CALLBACK, callback);
-        }
+        import('@/store/modules/AudioTranslate').then(({ AudioTranslateBubbleOrigin }) => {
+          if (Math.ceil(videodata.time) === Math.ceil(this.$store.getters.duration)) {
+            this.$store.dispatch(atActions.AUDIO_TRANSLATE_SHOW_BUBBLE,
+              AudioTranslateBubbleOrigin.NextVideoChange);
+            this.$store.dispatch(videoActions.PAUSE_VIDEO);
+            this.$store.dispatch(atActions.AUDIO_TRANSLATE_BUBBLE_CALLBACK, () => {
+              this.$store.dispatch(videoActions.PLAY_VIDEO);
+              callback();
+            });
+          } else {
+            this.$store.dispatch(atActions.AUDIO_TRANSLATE_SHOW_BUBBLE,
+              AudioTranslateBubbleOrigin.VideoChange);
+            this.$store.dispatch(atActions.AUDIO_TRANSLATE_BUBBLE_CALLBACK, callback);
+          }
+        });
         return true;
       }
       return false;
