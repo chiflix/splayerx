@@ -368,7 +368,7 @@ export default {
       this.updateMouseup({ componentName: '' });
     },
     currentMouseupWidget(newVal: string, oldVal: string) {
-      if ((newVal === 'TheVideoController' || newVal === 'PlayButton') && this.showSidebar) {
+      if (this.showSidebar && newVal) {
         this.updateMousedown({ componentName: '' });
         this.updateShowSidebar(false);
       }
@@ -451,7 +451,7 @@ export default {
         this.progressTriggerStopped = false;
       }, this.progressDisappearDelay);
     });
-    this.$bus.$on('titlebar-mousemove', (event) => {
+    this.$bus.$on('titlebar-mousemove', (event: MouseEvent) => {
       this.handleMouseenter();
       this.handleMousemove(event, 'Titlebar');
     });
