@@ -184,12 +184,12 @@ export default {
       if (this.switchingLock) return;
       this.switchingLock = true;
       videodata.paused = false;
-      if (this.nextVideo) {
+      if (this.nextVideo !== undefined) {
         this.$store.commit('LOOP_UPDATE', false);
         if (this.isFolderList) this.openVideoFile(this.nextVideo);
         else this.playFile(this.nextVideo, this.nextVideoId);
       } else {
-        this.$store.commit('LOOP_UPDATE', true);
+        this.$bus.$emit('back-to-landingview');
       }
     });
     this.$bus.$on('previous-video', () => {
