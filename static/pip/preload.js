@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
           }
           break;
-        case url.includes('qq'):
+        case url.includes('v.qq'):
           if (['txp_shadow', 'txp_ad_link'].includes(evt.target.classList[0])) {
             offset = [evt.clientX, evt.clientY];
             if (getRatio() !== 1) {
@@ -143,6 +143,14 @@ document.addEventListener('DOMContentLoaded', () => {
           break;
         case url.includes('masterclass'):
           if (['VIDEO'].includes(evt.target.tagName)) {
+            offset = [evt.clientX, evt.clientY];
+            if (getRatio() !== 1) {
+              windowSize = remote.getCurrentWindow().getSize();
+            }
+          }
+          break;
+        case url.includes('sports.qq'):
+          if (['txp_ad_link', 'txp_shadow'].includes(evt.target.classList[0])) {
             offset = [evt.clientX, evt.clientY];
             if (getRatio() !== 1) {
               windowSize = remote.getCurrentWindow().getSize();

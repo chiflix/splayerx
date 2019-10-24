@@ -48,12 +48,19 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
       'https://www.ted.com/',
       'https://www.lynda.com/',
       'https://www.masterclass.com/',
+      'https://sports.qq.com/',
     ];
     this.allChannels.set('adapted', {
       channels: channels.map((channel: string) => {
-        const basename = channel.slice(channel.indexOf('.') + 1, channel.lastIndexOf('.'));
+        let basename = '';
+        const host = channel.slice(8, channel.lastIndexOf('/'));
+        if (host.includes('sports.qq.com')) {
+          basename = 'sportsqq';
+        } else {
+          basename = channel.slice(channel.indexOf('.') + 1, channel.lastIndexOf('.'));
+        }
         const tld = channel.slice(channel.lastIndexOf('.'), channel.length - 1);
-        const path = `${basename === 'qq' ? 'v.qq' : basename}${tld}`;
+        const path = host.includes('www') ? `${basename}${tld}` : host;
         return {
           channel: `${basename}.com`,
           url: channel,
