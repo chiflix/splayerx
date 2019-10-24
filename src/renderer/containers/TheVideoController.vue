@@ -198,7 +198,7 @@ export default {
       isValidClick: true,
       lastMousedownPlaybutton: false,
       playButton: null, // Play Button on Touch Bar
-      sidebarButton: null, //Sidebar Button on Touch Bar
+      sidebarButton: null, // Sidebar Button on Touch Bar
       fullScreenBar: null, // Full Screen on Touch Bar
       timeLabel: null, // Time Label which indicates the current time
       scrubber: null,
@@ -282,7 +282,6 @@ export default {
     showSidebar(val: boolean) {
       if (val) this.conflictResolve('Sidebar');
       else {
-        console.log('as', this.mouseLeftWindow);
         this.handleMouseenter();
         this.mouseStoppedId = false;
         clearTimeout(this.mouseStoppedId);
@@ -635,7 +634,6 @@ export default {
     },
     conflictResolve(name: string) {
       Object.keys(this.widgetsStatus).forEach((item) => {
-        console.log(item, name);
         this.widgetsStatus[item].showAttached = item === name;
       });
       if (name !== 'Sidebar' && this.showSidebar) this.updateShowSidebar(false);
