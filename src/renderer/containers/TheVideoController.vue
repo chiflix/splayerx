@@ -368,7 +368,7 @@ export default {
       this.updateMouseup({ componentName: '' });
     },
     currentMouseupWidget(newVal: string, oldVal: string) {
-      if (newVal === 'TheVideoController' && this.showSidebar) {
+      if ((newVal === 'TheVideoController' || newVal === 'PlayButton') && this.showSidebar) {
         this.updateMousedown({ componentName: '' });
         this.updateShowSidebar(false);
       }
