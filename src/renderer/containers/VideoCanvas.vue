@@ -184,10 +184,12 @@ export default {
       if (this.switchingLock) return;
       this.switchingLock = true;
       videodata.paused = false;
-      if (this.nextVideo !== undefined) {
-        this.$store.commit('LOOP_UPDATE', false);
+      console.log(this.nextVideo);
+      if (this.nextVideo !== undefined && this.nextVideo !== '') {
         if (this.isFolderList) this.openVideoFile(this.nextVideo);
         else this.playFile(this.nextVideo, this.nextVideoId);
+      } else if (this.nextVideo === '') {
+        this.$store.commit('LOOP_UPDATE', true);
       } else {
         this.$bus.$emit('back-to-landingview');
       }
@@ -197,7 +199,6 @@ export default {
       this.switchingLock = true;
       videodata.paused = false;
       if (this.previousVideo) {
-        this.$store.commit('LOOP_UPDATE', false);
         if (this.isFolderList) this.openVideoFile(this.previousVideo);
         else this.playFile(this.previousVideo, this.previousVideoId);
       } else {
