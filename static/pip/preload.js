@@ -256,7 +256,7 @@ const oauthRegex = [
   /^https:\/\/openapi.baidu.com\//i,
   /^https:\/\/auth.alipay.com\/login\//i,
   /^https:\/\/account.xiaomi.com\/pass\//i,
-  /^https:\/\/www.facebook.com\/v3.1\/dialog\/oauth/i,
+  /^https:\/\/www.facebook.com\/v[0-9].[0-9]\/dialog\/oauth/i,
   /^https:\/\/accounts.google.com\/signin\/oauth\//i,
   /^https:\/\/accounts.google.com\/CheckCookie\?/i,
 ];

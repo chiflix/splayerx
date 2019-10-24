@@ -121,7 +121,7 @@ export default {
         /^https:\/\/openapi.baidu.com\//i,
         /^https:\/\/auth.alipay.com\/login\//i,
         /^https:\/\/account.xiaomi.com\/pass\//i,
-        /^https:\/\/www.facebook.com\/v3.1\/dialog\/oauth/i,
+        /^https:\/\/www.facebook.com\/v[0-9].[0-9]\/dialog\/oauth/i,
         /^https:\/\/accounts.google.com\/signin\/oauth\//i,
         /^https:\/\/accounts.google.com\/CheckCookie\?/i,
       ],
@@ -133,7 +133,7 @@ export default {
         canReload: true,
       },
       allChannels: ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch', 'coursera', 'ted', 'lynda', 'masterclass', 'sportsqq'],
-      compareStr: [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch'], ['coursera'], ['ted'], ['lynda'], ['masterclass'], ['sports.qq.com', 'new.qq.com', 'view.inews.qq.com']],
+      compareStr: [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com', 'film.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch'], ['coursera'], ['ted'], ['lynda'], ['masterclass'], ['sports.qq.com', 'new.qq.com', 'view.inews.qq.com']],
       hideMainWindow: false,
       startLoadUrl: '',
       barrageOpenByPage: false,
@@ -526,7 +526,6 @@ export default {
         this.$electron.ipcRenderer.send('remove-browser');
         if (this.backToLandingView) {
           setTimeout(() => {
-            if (this.isFullScreen) this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
             windowRectService.uploadWindowBy(false, 'landing-view', undefined, undefined, this.winSize, this.winPos, this.isFullScreen);
             this.$electron.ipcRenderer.send('callMainWindowMethod', 'show');
           }, 200);

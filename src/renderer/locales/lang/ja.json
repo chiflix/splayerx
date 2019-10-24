@@ -399,7 +399,8 @@
     "audioLanguageLoadFail": "接続に失敗しました。もう一度お試しください",
     "select": {
       "title": "ビデオソースの言語を選択",
-      "content": "ビデオで聞こえる言語を選択し生成をクリックします。"
+      "content": "ビデオで聞こえる言語を選択し生成をクリックします。",
+      "contentLimit": "ビデオで聞こえる言語を選択し生成をクリックします。申し訳ありませんが、1日に1つのAI翻訳結果しか生成できません。"
     },
     "translate": {
       "title": "{time} について",
@@ -437,11 +438,17 @@
       "title": "有効期限が切れました",
       "content": "サインインしてください。"
     },
+    "PermissionFail": {
+      "title": "今日の回数は使い果たされています",
+      "content": "申し訳ありませんが、1日に1つのAI翻訳結果しか生成できません。"
+    },
+    "loading": "処理中...",
     "cancel": "キャンセル",
     "quit": "やめる",
     "generate": "生成する",
     "ok": "バックグラウンドで実行",
-    "continue": "キャンセル"
+    "continue": "キャンセル",
+    "upgrade": "はい"
   },
   "translateBubble": {
     "bubbleWhenGrab": "この操作は進行中の翻訳を中止させるでしょう。",
@@ -470,6 +477,10 @@
     "bubbleTranslateForbiddenFail": {
       "title": "有効期限が切れました",
       "content": "サインインしてください。"
+    },
+    "bubbleTranslatePermissionFail": {
+      "title": "今日の回数は使い果たされています",
+      "content": "申し訳ありませんが、1日に1つのAI翻訳結果しか生成できません。"
     },
     "ok": "はい",
     "cancel": "キャンセル",
