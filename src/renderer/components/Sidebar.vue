@@ -55,7 +55,7 @@
       :style="{ boxShadow: bottomMask ? '0 -3px 8px 0 rgba(0,0,0,0.60)' : '' }"
       class="bottom-mask"
     />
-    <transition name="fade-200">
+    <transition name="fade-300">
       <div
         :style="{
           boxShadow: bottomMask ? '0 -2px 10px 0 rgba(0,0,0,0.50)' : '',
@@ -246,6 +246,17 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+.fade-300 {
+  &-enter, &-leave-to {
+    opacity: 0;
+  }
+  &-enter-active {
+    transition: opacity 200ms ease-out 200ms;
+  }
+  &-leave-active {
+    transition: opacity 200ms ease-out;
+  }
+}
 ::-webkit-scrollbar {
   width: 0;
 }
