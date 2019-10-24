@@ -198,6 +198,7 @@ export default {
       isValidClick: true,
       lastMousedownPlaybutton: false,
       playButton: null, // Play Button on Touch Bar
+      sidebarButton: null, //Sidebar Button on Touch Bar
       fullScreenBar: null, // Full Screen on Touch Bar
       timeLabel: null, // Time Label which indicates the current time
       scrubber: null,
@@ -237,6 +238,7 @@ export default {
       'leftMousedown', 'progressKeydown', 'volumeKeydown', 'wheelTriggered', 'volumeWheelTriggered',
       'enabledSecondarySub', 'isTranslateModalVisible', 'translateStatus', 'failBubbleId', 'messageInfo',
       'showFullTimeCode',
+      'showSidebar',
     ]),
     ...inputMapGetters({
       inputWheelDirection: iGT.GET_WHEEL_DIRECTION,
@@ -277,6 +279,18 @@ export default {
     },
   },
   watch: {
+    showSidebar(val: boolean) {
+      if (val) this.conflictResolve('Sidebar');
+      else {
+        console.log('as', this.mouseLeftWindow);
+        this.handleMouseenter();
+        this.mouseStoppedId = false;
+        clearTimeout(this.mouseStoppedId);
+        this.mouseStoppedId = this.clock.setTimeout(() => {
+          this.mouseStopped = true;
+        }, this.mousestopDelay);
+      }
+    },
     playlistState(val: boolean) {
       this.updatePlaylistState(val);
     },
@@ -352,8 +366,13 @@ export default {
     },
     currentMousedownWidget(newVal: string, oldVal: string) {
       this.lastMousedownWidget = oldVal;
+      this.updateMouseup({ componentName: '' });
     },
     currentMouseupWidget(newVal: string, oldVal: string) {
+      if (newVal === 'TheVideoController' && this.showSidebar) {
+        this.updateMousedown({ componentName: '' });
+        this.updateShowSidebar(false);
+      }
       this.lastMouseupWidget = oldVal;
     },
     tempRecentPlaylistDisplayState(val: boolean) {
@@ -434,6 +453,7 @@ export default {
       }, this.progressDisappearDelay);
     });
     this.$bus.$on('titlebar-mousemove', (event) => {
+      this.handleMouseenter();
       this.handleMousemove(event, 'Titlebar');
     });
     this.$bus.$on('show-subtitle-settings', () => {
@@ -540,6 +560,7 @@ export default {
       updateHideBubbleCallback: atActions.AUDIO_TRANSLATE_BUBBLE_CANCEL_CALLBACK,
       updateShowAllWidgets: uiActions.UPDATE_SHOW_ALLWIDGETS,
       updatePlaylistState: uiActions.UPDATE_PLAYLIST,
+      updateShowSidebar: uiActions.UPDATE_SHOW_SIDEBAR,
     }),
     onTimeCodeClick() {
       this.$store.dispatch('showFullTimeCode', !this.showFullTimeCode);
@@ -553,6 +574,12 @@ export default {
 
       this.timeLabel = new TouchBarLabel();
 
+      this.sidebarButton = new TouchBarButton({
+        icon: this.createIcon('touchBar/sidebar.png'),
+        click: () => {
+          this.updateShowSidebar(!this.showSidebar);
+        },
+      });
       this.previousButton = new TouchBarButton({
         icon: this.createIcon('touchBar/lastVideo.png'),
         click: () => {
@@ -586,6 +613,7 @@ export default {
       });
       this.touchBar = new TouchBar({
         items: [
+          this.sidebarButton,
           this.fullScreenBar,
           new TouchBarSpacer({ size: 'large' }),
           this.previousButton,
@@ -607,8 +635,10 @@ export default {
     },
     conflictResolve(name: string) {
       Object.keys(this.widgetsStatus).forEach((item) => {
+        console.log(item, name);
         this.widgetsStatus[item].showAttached = item === name;
       });
+      if (name !== 'Sidebar' && this.showSidebar) this.updateShowSidebar(false);
     },
     cancelPlayListTimeout() {
       clearTimeout(this.openPlayListTimeId);
@@ -705,6 +735,7 @@ export default {
       Object.keys(this.displayState).forEach((index) => {
         tempObject[index] = !this.widgetsStatus.PlaylistControl.showAttached;
       });
+      if (this.widgetsStatus.PlaylistControl.showAttached) this.updateShowSidebar(false);
       const ratio = window.innerWidth / window.innerHeight;
       if (ratio < 1 && this.winWidth < 512) {
         tempObject.PlaylistControl = false;
@@ -749,10 +780,11 @@ export default {
         }
       });
       this.attachedShown = Object.keys(this.widgetsStatus)
-        .some(key => this.widgetsStatus[key].showAttached === true);
+        .some(key => this.widgetsStatus[key].showAttached === true)
+        || this.showSidebar;
     },
     // Event listeners
-    handleMousemove(event: MouseEvent, component) {
+    handleMousemove(event: MouseEvent, component: string) {
       const { clientX, clientY, target } = event;
       this.mouseStopped = false;
       if (this.isMousedown) {

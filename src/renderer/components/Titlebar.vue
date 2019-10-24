@@ -12,7 +12,7 @@
       class="sidebar"
     >
       <SidebarIcon
-        v-fade-in="showTitleBar"
+        v-fade-in="!isPlayingView || showTitleBar"
         @mouseover.native="mouseoverSidebar = true"
         @mouseout.native="mouseoverSidebar = false"
         :mouseover="mouseoverSidebar"
@@ -61,14 +61,14 @@
     </div>
     <div
       v-if="isDarwin"
-      v-fade-in="showTitleBar"
+      v-fade-in="!isPlayingView || showTitleBar"
+      @mousemove.stop="handleMousemove"
       @dblclick.stop=""
       class="mac-icons"
     >
       <div
         @mouseover="handleMouseOver"
         @mouseout="handleMouseOut"
-        @mousemove.stop="handleMousemove"
         class="system-icons"
       >
         <Icon

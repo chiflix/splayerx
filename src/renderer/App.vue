@@ -27,7 +27,6 @@
           width: showSidebar ? 'calc(100% - 76px)' : '100%',
         }"
         :open-file-args="openFileArgs"
-        :show-sidebar="showSidebar"
         @update-current-url="currentUrl = $event"
       />
     </transition>
@@ -92,6 +91,7 @@ export default {
         }
         this.currentUrl = '';
       }
+      if (from.name === 'landing-view' && to.name === 'playing-view') this.updateShowSidebar(false);
     },
     showSidebar(val: boolean) {
       ipcRenderer.send('update-sidebar', val);

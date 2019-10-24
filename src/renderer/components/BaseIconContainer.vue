@@ -656,7 +656,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   width: 20px;
   height: 20px;
 }
-.history, .open {
+.history, .open, .home {
   width: 30px;
   height: 30px;
   .default {
