@@ -294,6 +294,7 @@ export default {
       this.updatePlaylistState(val);
     },
     originSrc() {
+      this.updateShowSidebar(false);
       Object.keys(this.widgetsStatus).forEach((item) => {
         if (item !== 'PlaylistControl') {
           this.widgetsStatus[item].showAttached = false;

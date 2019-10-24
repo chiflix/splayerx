@@ -215,7 +215,7 @@ export default {
       updateCurrentChannel: browsingActions.UPDATE_CURRENT_CHANNEL,
     }),
     openHomePage() {
-      if (this.currentRouteName === 'playing-view') this.$bus.$emit('back-to-landingview');
+      this.$bus.$emit('back-to-landingview');
     },
     handleChannelManage() {
       if (this.currentRouteName !== 'browsing-view') {
