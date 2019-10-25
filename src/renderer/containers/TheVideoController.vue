@@ -3,6 +3,8 @@
     ref="controller"
     :style="{ cursor: cursorStyle, pointerEvents: isFocused ? 'auto' : 'none' }"
     @mousemove="handleMousemove"
+    @mouseenter="handleMouseenter"	
+    @mouseleave="handleMouseleave"
     @mousedown="handleMousedown"
     @mouseup="handleMouseup"
     @mousedown.left="handleMousedownLeft"
@@ -246,6 +248,7 @@ export default {
           || (!this.mouseLeftWindow && this.onOtherWidget)
           || this.attachedShown || this.videoChanged || this.subMenuShow
           || (this.isMousedown && this.currentMousedownWidget === 'PlayButton')
+          || this.showSidebar
         );
     },
     onOtherWidget() {
@@ -273,7 +276,7 @@ export default {
     showSidebar(val: boolean) {
       if (val) this.conflictResolve('Sidebar');
       else {
-        this.handleMouseenter();
+        this.handleWindowMouseenter();
         this.mouseStoppedId = false;
         clearTimeout(this.mouseStoppedId);
         this.mouseStoppedId = this.clock.setTimeout(() => {
@@ -439,12 +442,12 @@ export default {
     },
   },
   created() {
-    window.addEventListener('mouseover', this.handleMouseenter);
-    window.addEventListener('mouseout', this.handleMouseleave);
+    window.addEventListener('mouseover', this.handleWindowMouseenter);
+    window.addEventListener('mouseout', this.handleWindowMouseleave);
   },
   beforeDestroy() {
-    window.removeEventListener('mouseover', this.handleMouseenter);
-    window.removeEventListener('mouseout', this.handleMouseleave);
+    window.removeEventListener('mouseover', this.handleWindowMouseenter);
+    window.removeEventListener('mouseout', this.handleWindowMouseleave);
   },
   mounted() {
     // 当触发seek 显示界面控件
@@ -781,8 +784,7 @@ export default {
         }
       });
       this.attachedShown = Object.keys(this.widgetsStatus)
-        .some(key => this.widgetsStatus[key].showAttached === true)
-        || this.showSidebar;
+        .some(key => this.widgetsStatus[key].showAttached === true);
     },
     // Event listeners
     handleMousemove(event: MouseEvent, component: string) {
@@ -806,11 +808,21 @@ export default {
       });
     },
     handleMouseenter() {
-      this.mouseLeftWindow = false;
       this.mouseleft = false;
+    },
+    handleMouseleave() {
+      this.mouseleft = true;
+    },
+    handleWindowMouseenter() {
+      this.mouseLeftWindow = false;
       if (this.mouseLeftId) {
         this.clock.clearTimeout(this.mouseLeftId);
       }
+    },
+    handleWindowMouseleave() {
+      this.mouseLeftId = this.clock.setTimeout(() => {
+        this.mouseLeftWindow = true;
+      }, this.mouseleftDelay);
     },
     handleMousedown(event: MouseEvent) {
       const { target, buttons } = event;
@@ -819,12 +831,6 @@ export default {
     handleMouseup(event: MouseEvent) {
       const { target, buttons } = event;
       this.updateMouseup({ componentName: this.getComponentName(target), buttons });
-    },
-    handleMouseleave() {
-      this.mouseleft = true;
-      this.mouseLeftId = this.clock.setTimeout(() => {
-        this.mouseLeftWindow = true;
-      }, this.mouseleftDelay);
     },
     handleMousedownLeft(e: MouseEvent) {
       this.isMousedown = true;

@@ -1,11 +1,11 @@
 <template>
   <div
     :class="['titlebar', { darwin: isDarwin }]"
+    @mousemove.stop="handleMousemove"
     @dblclick="handleDbClick"
   >
     <div
       v-if="!isDarwin && (isLandingView || isLandingView)"
-      @mousemove.stop="handleMousemove"
       @dblclick.stop=""
       :style="{
         transform: `translateX(${showSidebar ? '76' : '0'}px)`,
@@ -63,7 +63,6 @@
     <div
       v-if="isDarwin"
       v-fade-in="!isPlayingView || showTitleBar"
-      @mousemove.stop="handleMousemove"
       @dblclick.stop=""
       class="mac-icons"
     >
