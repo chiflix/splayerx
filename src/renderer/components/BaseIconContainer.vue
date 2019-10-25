@@ -175,7 +175,7 @@ export default {
   display: block;
 }
 
-.volume {
+.volume, .mute {
   width: 100%;
   height: 100%;
 }
