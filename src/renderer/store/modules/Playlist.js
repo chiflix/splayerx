@@ -20,6 +20,7 @@ const getters = {
   nextVideoId: (state, getters) => {
     const index = state.items.findIndex(value => value === getters.videoId);
     if (!getters.singleCycle) {
+      if (getters.playlistLoop && state.items.length === 1) return NaN;
       if (getters.playlistLoop && index + 1 === state.items.length) return state.items[0];
       if (index !== -1) {
         return state.items[index + 1];
@@ -32,6 +33,7 @@ const getters = {
     const list = state.playList;
     const index = list.findIndex(value => value === getters.originSrc);
     if (!getters.singleCycle) {
+      if (getters.playlistLoop && list.length === 1) return '';
       if (getters.playlistLoop && index + 1 === list.length) return list[0];
       if (index !== -1) return list[index + 1];
       return list[0];
