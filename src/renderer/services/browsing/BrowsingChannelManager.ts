@@ -29,7 +29,11 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
 
 
   public constructor() {
-    this.allCategories = [{ type: 'customized', locale: 'browsing.customized' }, { type: 'adapted', locale: 'browsing.popularSites' }];
+    this.allCategories = [
+      { type: 'customized', locale: 'browsing.customized' },
+      { type: 'general', locale: 'browsing.general' },
+      { type: 'education', locale: 'browsing.education' },
+    ];
     this.allChannels = new Map();
     this.allCategories.forEach((category: category) => {
       this.allChannels.set(category.type, { channels: [], availableChannels: [] });
@@ -37,7 +41,7 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
     this.allAvailableChannels = ['bilibili.com', 'iqiyi.com', 'douyu.com'];
 
     // 初始化默认添加的频道
-    const channels = [
+    const generalChannels = [
       'https://www.bilibili.com/',
       'https://www.iqiyi.com/',
       'https://www.douyu.com/',
@@ -46,15 +50,10 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
       'https://www.youku.com/',
       'https://www.twitch.tv/',
       'https://www.youtube.com/',
-      'https://www.coursera.org/',
-      'https://www.ted.com/',
-      'https://www.lynda.com/',
-      'https://www.masterclass.com/',
       'https://sports.qq.com/',
-      'https://developer.apple.com/videos/wwdc2019/',
     ];
-    this.allChannels.set('adapted', {
-      channels: channels.map((channel: string) => {
+    this.allChannels.set('general', {
+      channels: generalChannels.map((channel: string) => {
         let basename = '';
         const host = urlParseLax(channel).hostname;
         if (host.includes('sports.qq.com')) {
@@ -62,6 +61,30 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
         } else {
           basename = channel.slice(channel.indexOf('.') + 1, channel.lastIndexOf('.'));
         }
+        const tld = channel.slice(channel.lastIndexOf('.'), channel.length - 1);
+        const path = host.includes('www') ? `${basename}${tld}` : host;
+        return {
+          channel: `${basename}.com`,
+          url: channel,
+          icon: `${basename}Sidebar`,
+          title: `browsing.${basename}`,
+          path,
+        };
+      }),
+      availableChannels: this.allAvailableChannels,
+    });
+
+    const educationalChannels = [
+      'https://www.coursera.org/',
+      'https://www.ted.com/',
+      'https://www.lynda.com/',
+      'https://www.masterclass.com/',
+      'https://developer.apple.com/videos/wwdc2019/',
+    ];
+    this.allChannels.set('education', {
+      channels: educationalChannels.map((channel: string) => {
+        const host = urlParseLax(channel).hostname;
+        const basename = channel.slice(channel.indexOf('.') + 1, channel.lastIndexOf('.'));
         const tld = channel.slice(channel.lastIndexOf('.'), channel.length - 1);
         const path = host.includes('www') ? `${basename}${tld}` : host;
         return {

@@ -268,7 +268,8 @@
     },
     "remove": "Remove",
     "siteManager": "Site Manager",
-    "popularSites": "Optimized Sites",
+    "general": "General",
+    "education": "Education",
     "siteTip": "Add / Edit"
   },
   "preferences": {
