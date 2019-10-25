@@ -74,12 +74,6 @@ export default {
     NotificationBubble,
     'browsing-channel-manager': BrowsingChannelManager,
   },
-  props: {
-    showSidebar: {
-      type: Boolean,
-      default: false,
-    },
-  },
   data() {
     return {
       quit: false,
@@ -164,6 +158,7 @@ export default {
       'currentChannel',
       'displayLanguage',
       'isMaximized',
+      'showSidebar',
     ]),
     isDarwin() {
       return process.platform === 'darwin';

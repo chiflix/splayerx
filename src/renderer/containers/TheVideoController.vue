@@ -3,7 +3,7 @@
     ref="controller"
     :style="{ cursor: cursorStyle, pointerEvents: isFocused ? 'auto' : 'none' }"
     @mousemove="handleMousemove"
-    @mouseenter="handleMouseenter"
+    @mouseenter="handleMouseenter"	
     @mouseleave="handleMouseleave"
     @mousedown="handleMousedown"
     @mouseup="handleMouseup"
@@ -11,12 +11,6 @@
     @click.left="handleMouseupLeft"
     class="the-video-controller"
   >
-    <titlebar
-      key="playing-view"
-      :show-all-widgets="showAllWidgets"
-      :recent-playlist="displayState.RecentPlaylist"
-      current-view="Playingview"
-    />
     <notification-bubble
       ref="nextVideoUI"
       class="notification-bubble"
@@ -124,6 +118,7 @@ import {
   Video as videoActions,
   Subtitle as legacySubtitleActions,
   AudioTranslate as atActions,
+  UIStates as uiActions,
 } from '@/store/actionTypes';
 import { INPUT_COMPONENT_TYPE, getterTypes as iGT } from '@/plugins/input';
 import Titlebar from '@/components/Titlebar.vue';
@@ -152,7 +147,6 @@ export default {
   // @ts-ignore
   type: INPUT_COMPONENT_TYPE,
   components: {
-    titlebar: Titlebar,
     'play-button': PlayButton,
     'volume-indicator': VolumeIndicator,
     'subtitle-control': SubtitleControl,
@@ -171,7 +165,8 @@ export default {
       mouseStopped: false,
       mouseStoppedId: 0,
       mousestopDelay: 3000,
-      mouseLeftWindow: false,
+      mouseLeftWindow: false, // 离开当前控件1s后变为false
+      mouseleft: false, // 离开当前控件立刻变为false
       mouseLeftId: 0,
       mouseleftDelay: 1000,
       popupShow: false,
@@ -196,6 +191,7 @@ export default {
       isValidClick: true,
       lastMousedownPlaybutton: false,
       playButton: null, // Play Button on Touch Bar
+      sidebarButton: null, // Sidebar Button on Touch Bar
       fullScreenBar: null, // Full Screen on Touch Bar
       timeLabel: null, // Time Label which indicates the current time
       scrubber: null,
@@ -235,18 +231,24 @@ export default {
       'leftMousedown', 'progressKeydown', 'volumeKeydown', 'wheelTriggered', 'volumeWheelTriggered',
       'enabledSecondarySub', 'isTranslateModalVisible', 'translateStatus', 'failBubbleId', 'messageInfo',
       'showFullTimeCode',
+      'showSidebar',
     ]),
     ...inputMapGetters({
       inputWheelDirection: iGT.GET_WHEEL_DIRECTION,
     }),
+    playlistState() {
+      return this.displayState.RecentPlaylist;
+    },
     showAllWidgets() {
       if (this.isTranslateModalVisible) return false;
       if (this.invokeAllWidgets) return true;
       return !this.tempRecentPlaylistDisplayState
-        && ((!this.mouseStopped && !this.mouseLeftWindow)
-        || (!this.mouseLeftWindow && this.onOtherWidget)
-        || this.attachedShown || this.videoChanged || this.subMenuShow
-        || (this.isMousedown && this.currentMousedownWidget === 'PlayButton'));
+        && (
+          (!this.mouseStopped && !this.mouseLeftWindow)
+          || (!this.mouseLeftWindow && this.onOtherWidget)
+          || this.attachedShown || this.videoChanged || this.subMenuShow
+          || (this.isMousedown && this.currentMousedownWidget === 'PlayButton')
+        );
     },
     onOtherWidget() {
       return (
@@ -270,7 +272,24 @@ export default {
     },
   },
   watch: {
+    showSidebar(val: boolean) {
+      if (val) {
+        this.conflictResolve('Sidebar');
+        this.updateMousedown({ componentName: '' });
+      } else {
+        this.handleWindowMouseenter();
+        this.mouseStoppedId = false;
+        clearTimeout(this.mouseStoppedId);
+        this.mouseStoppedId = this.clock.setTimeout(() => {
+          this.mouseStopped = true;
+        }, this.mousestopDelay);
+      }
+    },
+    playlistState(val: boolean) {
+      this.updatePlaylistState(val);
+    },
     originSrc() {
+      this.updateShowSidebar(false);
       Object.keys(this.widgetsStatus).forEach((item) => {
         if (item !== 'PlaylistControl') {
           this.widgetsStatus[item].showAttached = false;
@@ -342,8 +361,18 @@ export default {
     },
     currentMousedownWidget(newVal: string, oldVal: string) {
       this.lastMousedownWidget = oldVal;
+      this.updateMouseup({ componentName: '' });
     },
     currentMouseupWidget(newVal: string, oldVal: string) {
+      if (this.showSidebar
+        && !this.isDragging
+        && ([
+          'TheVideoController', 'SubtitleControl', 'PlaylistControl', 'AdvanceControl',
+        ].includes(newVal))
+      ) {
+        this.updateMousedown({ componentName: '' });
+        this.updateShowSidebar(false);
+      }
       this.lastMouseupWidget = oldVal;
     },
     tempRecentPlaylistDisplayState(val: boolean) {
@@ -371,6 +400,9 @@ export default {
           this.fullScreenBar.icon = this.createIcon('touchBar/resize.png');
         }
       }
+    },
+    showAllWidgets(val: boolean) {
+      this.updateShowAllWidgets(val);
     },
     paused(val: boolean) {
       if (this.playButton) {
@@ -411,6 +443,14 @@ export default {
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', minimumSize);
     },
   },
+  created() {
+    window.addEventListener('mouseover', this.handleWindowMouseenter);
+    window.addEventListener('mouseout', this.handleWindowMouseleave);
+  },
+  beforeDestroy() {
+    window.removeEventListener('mouseover', this.handleWindowMouseenter);
+    window.removeEventListener('mouseout', this.handleWindowMouseleave);
+  },
   mounted() {
     // 当触发seek 显示界面控件
     this.$bus.$on('seek', () => {
@@ -419,6 +459,9 @@ export default {
       this.progressTriggerId = this.clock.setTimeout(() => {
         this.progressTriggerStopped = false;
       }, this.progressDisappearDelay);
+    });
+    this.$bus.$on('titlebar-mousemove', (event: MouseEvent) => {
+      this.handleMousemove(event, 'Titlebar');
     });
     this.$bus.$on('show-subtitle-settings', () => {
       this.subMenuShow = true;
@@ -522,6 +565,9 @@ export default {
       updateSubtitleType: legacySubtitleActions.UPDATE_SUBTITLE_TYPE,
       updateHideModalCallback: atActions.AUDIO_TRANSLATE_MODAL_HIDE_CALLBACK,
       updateHideBubbleCallback: atActions.AUDIO_TRANSLATE_BUBBLE_CANCEL_CALLBACK,
+      updateShowAllWidgets: uiActions.UPDATE_SHOW_ALLWIDGETS,
+      updatePlaylistState: uiActions.UPDATE_PLAYLIST,
+      updateShowSidebar: uiActions.UPDATE_SHOW_SIDEBAR,
     }),
     onTimeCodeClick() {
       this.$store.dispatch('showFullTimeCode', !this.showFullTimeCode);
@@ -535,6 +581,12 @@ export default {
 
       this.timeLabel = new TouchBarLabel();
 
+      this.sidebarButton = new TouchBarButton({
+        icon: this.createIcon('touchBar/sidebar.png'),
+        click: () => {
+          this.updateShowSidebar(!this.showSidebar);
+        },
+      });
       this.previousButton = new TouchBarButton({
         icon: this.createIcon('touchBar/lastVideo.png'),
         click: () => {
@@ -568,6 +620,7 @@ export default {
       });
       this.touchBar = new TouchBar({
         items: [
+          this.sidebarButton,
           this.fullScreenBar,
           new TouchBarSpacer({ size: 'large' }),
           this.previousButton,
@@ -591,6 +644,7 @@ export default {
       Object.keys(this.widgetsStatus).forEach((item) => {
         this.widgetsStatus[item].showAttached = item === name;
       });
+      if (name !== 'Sidebar' && this.showSidebar) this.updateShowSidebar(false);
     },
     cancelPlayListTimeout() {
       clearTimeout(this.openPlayListTimeId);
@@ -687,6 +741,7 @@ export default {
       Object.keys(this.displayState).forEach((index) => {
         tempObject[index] = !this.widgetsStatus.PlaylistControl.showAttached;
       });
+      if (this.widgetsStatus.PlaylistControl.showAttached) this.updateShowSidebar(false);
       const ratio = window.innerWidth / window.innerHeight;
       if (ratio < 1 && this.winWidth < 512) {
         tempObject.PlaylistControl = false;
@@ -734,7 +789,7 @@ export default {
         .some(key => this.widgetsStatus[key].showAttached === true);
     },
     // Event listeners
-    handleMousemove(event: MouseEvent) {
+    handleMousemove(event: MouseEvent, component: string) {
       const { clientX, clientY, target } = event;
       this.mouseStopped = false;
       if (this.isMousedown) {
@@ -748,16 +803,28 @@ export default {
           this.mouseStopped = true;
         }, this.mousestopDelay);
       }
+      const componentName = component || this.getComponentName(target);
       this.updateMousemove({
-        componentName: this.getComponentName(target),
+        componentName,
         clientPosition: [clientX, clientY],
       });
     },
     handleMouseenter() {
+      this.mouseleft = false;
+    },
+    handleMouseleave() {
+      this.mouseleft = true;
+    },
+    handleWindowMouseenter() {
       this.mouseLeftWindow = false;
       if (this.mouseLeftId) {
         this.clock.clearTimeout(this.mouseLeftId);
       }
+    },
+    handleWindowMouseleave() {
+      this.mouseLeftId = this.clock.setTimeout(() => {
+        this.mouseLeftWindow = true;
+      }, this.mouseleftDelay);
     },
     handleMousedown(event: MouseEvent) {
       const { target, buttons } = event;
@@ -766,11 +833,6 @@ export default {
     handleMouseup(event: MouseEvent) {
       const { target, buttons } = event;
       this.updateMouseup({ componentName: this.getComponentName(target), buttons });
-    },
-    handleMouseleave() {
-      this.mouseLeftId = this.clock.setTimeout(() => {
-        this.mouseLeftWindow = true;
-      }, this.mouseleftDelay);
     },
     handleMousedownLeft(e: MouseEvent) {
       this.isMousedown = true;
@@ -827,8 +889,9 @@ export default {
       this.updateKeyup({ releasedKeyboardCode: code });
     },
     handleWheel({ target, timeStamp }: { target: Element; timeStamp: number }) {
+      const componentName = this.mouseleft ? 'Sidebar' : this.getComponentName(target);
       this.updateWheel({
-        componentName: this.getComponentName(target),
+        componentName,
         timestamp: timeStamp,
         direction: this.inputWheelDirection,
       });
@@ -922,9 +985,9 @@ export default {
 </script>
 <style lang="scss">
 .the-video-controller {
-  position: relative;
+  position: absolute;
   top: 0;
-  left: 0;
+  right: 0;
   width: 100%;
   height: 100%;
   border-radius: 4px;

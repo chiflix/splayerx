@@ -39,14 +39,8 @@ export default {
   components: {
     Icon,
   },
-  props: {
-    showSidebar: {
-      type: Boolean,
-      required: true,
-    },
-  },
   computed: {
-    ...mapGetters(['isFullScreen', 'isMaximized']),
+    ...mapGetters(['isFullScreen', 'isMaximized', 'showSidebar']),
     isDarwin() {
       return process.platform === 'darwin';
     },

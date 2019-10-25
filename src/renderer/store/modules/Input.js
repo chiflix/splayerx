@@ -20,7 +20,9 @@ const getters = {
   wheelTriggered: state => state.wheelTimestamp,
   volumeWheelTriggered: ({ wheelDirection, wheelComponentName }) => (
     wheelDirection === 'vertical'
-    && wheelComponentName !== 'SubtitleControl' && wheelComponentName !== 'AdvanceControl' && wheelComponentName !== 'AudioTranslateModal'
+    && (
+      !['SubtitleControl', 'AdvanceControl', 'AudioTranslateModal', 'Sidebar'].includes(wheelComponentName)
+    )
   ),
 };
 
