@@ -59,7 +59,7 @@
       <div
         :style="{
           boxShadow: bottomMask ? '0 -2px 10px 0 rgba(0,0,0,0.50)' : '',
-          height: showFileIcon ? `${this.bottomIconHeight}px` : '',
+          height: showFileIcon ? '66px' : '',
         }"
         v-if="showFileIcon"
         class="bottom-icon no-drag"

@@ -274,8 +274,10 @@ export default {
   },
   watch: {
     showSidebar(val: boolean) {
-      if (val) this.conflictResolve('Sidebar');
-      else {
+      if (val) {
+        this.conflictResolve('Sidebar');
+        this.updateMousedown({ componentName: '' });
+      } else {
         this.handleWindowMouseenter();
         this.mouseStoppedId = false;
         clearTimeout(this.mouseStoppedId);
@@ -364,6 +366,7 @@ export default {
     },
     currentMouseupWidget(newVal: string, oldVal: string) {
       if (this.showSidebar
+        && !this.isDragging
         && ([
           'TheVideoController', 'SubtitleControl', 'PlaylistControl', 'AdvanceControl',
         ].includes(newVal))
