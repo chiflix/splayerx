@@ -58,3 +58,5 @@ export const isAudioCenterChannelEnabled = async () => getConfig('isAudioCenterC
 export const isAccountEnabled = async () => getConfig('isAccountEnabled', false);
 
 export const apiOfAccountService = async () => getConfig('apiForAccountService', process.env.ACCOUNT_API);
+
+export const isTranslateLimit = async () => getConfig('isTranslateLimit', false);

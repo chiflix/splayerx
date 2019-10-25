@@ -115,6 +115,7 @@ export default {
         /^https:\/\/openapi.baidu.com\//i,
         /^https:\/\/auth.alipay.com\/login\//i,
         /^https:\/\/account.xiaomi.com\/pass\//i,
+        /^https:\/\/www.facebook.com\/v[0-9].[0-9]\/dialog\/oauth/i,
       ],
       webInfo: {
         hasVideo: false,
@@ -124,7 +125,7 @@ export default {
         canReload: true,
       },
       allChannels: ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch', 'coursera', 'ted'],
-      compareStr: [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch'], ['coursera'], ['ted']],
+      compareStr: [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com', 'film.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch'], ['coursera'], ['ted']],
       hideMainWindow: false,
       startLoadUrl: '',
       barrageOpenByPage: false,
@@ -716,11 +717,10 @@ export default {
         || url === 'about:blank'
         || urlParseLax(this.currentUrl).href === urlParseLax(url).href
       ) return;
-      const newHostname = urlParseLax(url).hostname;
       const oldChannel = this.currentChannel;
       let newChannel = '';
       this.allChannels.forEach((channel: string, index: number) => {
-        if (this.compareStr[index].findIndex((str: string) => newHostname.includes(str)) !== -1) {
+        if (this.compareStr[index].findIndex((str: string) => url.includes(str)) !== -1) {
           newChannel = `${channel}.com`;
         }
       });

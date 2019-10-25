@@ -399,7 +399,8 @@
     "audioLanguageLoadFail": "連接錯誤，請稍後重試",
     "select": {
       "title": "AI 智能翻譯",
-      "content": "選擇您在視頻中所聽到的語言並點擊生成。"
+      "content": "選擇您在視頻中所聽到的語言並點擊生成。",
+      "contentLimit": "選擇您在視頻中聽到的語言並點擊生成。每日可免費試用一次。"
     },
     "translate": {
       "title": "大約剩餘 {time}",
@@ -437,11 +438,17 @@
       "title": "登入已過期",
       "content": "請重新登入。"
     },
+    "PermissionFail": {
+      "title": "今日次數已用完",
+      "content": "抱歉，您今日的翻譯試用次數已用完，明天再試試。"
+    },
+    "loading": "處理中 ...",
     "cancel": "取消",
     "quit": "退出",
     "generate": "生成",
     "ok": "后台运行",
-    "continue": "取消"
+    "continue": "取消",
+    "upgrade": "好的"
   },
   "translateBubble": {
     "bubbleWhenGrab": "該操作將會導致正在進行的翻譯中止，是否中止？",
@@ -470,6 +477,10 @@
     "bubbleTranslateForbiddenFail": {
       "title": "登入已過期",
       "content": "請重新登入。"
+    },
+    "bubbleTranslatePermissionFail": {
+      "title": "今日次數已用完",
+      "content": "抱歉，您今日的翻譯試用次數已用完，明天再試試。"
     },
     "ok": "好的",
     "cancel": "取消",

@@ -232,6 +232,7 @@ const oauthRegex = [
   /^https:\/\/openapi.baidu.com\//i,
   /^https:\/\/auth.alipay.com\/login\//i,
   /^https:\/\/account.xiaomi.com\/pass\//i,
+  /^https:\/\/www.facebook.com\/v[0-9].[0-9]\/dialog\/oauth/i,
 ];
 
 // Some websites intercept links to open a blank window, then set its location, e.g. iqiyi.com
