@@ -248,7 +248,6 @@ export default {
           || (!this.mouseLeftWindow && this.onOtherWidget)
           || this.attachedShown || this.videoChanged || this.subMenuShow
           || (this.isMousedown && this.currentMousedownWidget === 'PlayButton')
-          || this.showSidebar
         );
     },
     onOtherWidget() {

@@ -194,7 +194,7 @@ export default {
       return this.isLandingView && !this.isShowingVideoCover && this.$store.getters.incognitoMode;
     },
     showTitleBar() {
-      return this.recentPlaylist || this.showAllWidgets;
+      return this.recentPlaylist || this.showAllWidgets || this.showSidebar;
     },
   },
   watch: {
