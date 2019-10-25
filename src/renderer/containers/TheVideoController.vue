@@ -3,8 +3,6 @@
     ref="controller"
     :style="{ cursor: cursorStyle, pointerEvents: isFocused ? 'auto' : 'none' }"
     @mousemove="handleMousemove"
-    @mouseenter="handleMouseenter"
-    @mouseleave="handleMouseleave"
     @mousedown="handleMousedown"
     @mouseup="handleMouseup"
     @mousedown.left="handleMousedownLeft"
@@ -440,6 +438,14 @@ export default {
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', minimumSize);
     },
   },
+  created() {
+    window.addEventListener('mouseover', this.handleMouseenter);
+    window.addEventListener('mouseout', this.handleMouseleave);
+  },
+  beforeDestroy() {
+    window.removeEventListener('mouseover', this.handleMouseenter);
+    window.removeEventListener('mouseout', this.handleMouseleave);
+  },
   mounted() {
     // 当触发seek 显示界面控件
     this.$bus.$on('seek', () => {
@@ -450,8 +456,6 @@ export default {
       }, this.progressDisappearDelay);
     });
     this.$bus.$on('titlebar-mousemove', (event: MouseEvent) => {
-      console.log('mouseove');
-      this.handleMouseenter();
       this.handleMousemove(event, 'Titlebar');
     });
     this.$bus.$on('show-subtitle-settings', () => {

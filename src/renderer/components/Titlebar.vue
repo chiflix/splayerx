@@ -13,7 +13,7 @@
       class="sidebar"
     >
       <SidebarIcon
-        v-show="!isPlayingView || showTitleBar"
+        v-fade-in="!isPlayingView || showTitleBar"
         @mouseover.native="mouseoverSidebar = true"
         @mouseout.native="mouseoverSidebar = false"
         :mouseover="mouseoverSidebar"
@@ -28,7 +28,7 @@
     </div>
     <div
       v-if="!isDarwin"
-      v-show="showTitleBar"
+      v-fade-in="showTitleBar"
       class="win-icons"
     >
       <Icon
@@ -62,7 +62,7 @@
     </div>
     <div
       v-if="isDarwin"
-      v-show="!isPlayingView || showTitleBar"
+      v-fade-in="!isPlayingView || showTitleBar"
       @mousemove.stop="handleMousemove"
       @dblclick.stop=""
       class="mac-icons"
@@ -169,9 +169,6 @@ export default {
       mouseoverSidebar: false,
     };
   },
-  created() {
-    window.addEventListener('mouseenter', this.handleWindowMouseenter);
-  },
   computed: {
     ...mapGetters([
       'isMaximized',
@@ -234,9 +231,6 @@ export default {
     ...mapActions({
       updateMousemove: inputActions.MOUSEMOVE_UPDATE,
     }),
-    handleWindowMouseenter() {
-      console.log('mouseenter-window');
-    },
     handleDbClick() {
       const browserWindow = this.$electron.remote.getCurrentWindow();
       if (!browserWindow.isMaximized()) {
