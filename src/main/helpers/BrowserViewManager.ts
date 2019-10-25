@@ -45,7 +45,7 @@ export class BrowserViewManager implements IBrowserViewManager {
       pipPage: null,
     };
     this.history = [];
-    this.multiPagesChannel = ['youtube.com', 'iqiyi.com', 'bilibili.com', 'douyu.com', 'huya.com', 'twitch.com', 'coursera.com', 'ted.com', 'lynda.com', 'masterclass.com', 'sportsqq.com'];
+    this.multiPagesChannel = ['youtube.com', 'iqiyi.com', 'bilibili.com', 'douyu.com', 'huya.com', 'twitch.com', 'coursera.com', 'ted.com', 'lynda.com', 'masterclass.com', 'sportsqq.com', 'apple.com'];
     this.singlePageChannel = ['qq.com', 'youku.com'];
   }
 

@@ -12,6 +12,7 @@ import Ted from './Ted';
 import Lynda from './Lynda';
 import MasterClass from './MasterClass';
 import Sportsqq from './Sportsqq';
+import WWDC from './WWDC';
 
 type pipMode = {
   adapter: string,
@@ -35,6 +36,7 @@ export default class PipFactory {
 
   public static getPipByChannel(info: { channel: string, winSize: number[] }): pipMode
 
+  // eslint-disable-next-line complexity
   public static getPipByChannel(info: { channel: string, type?: string,
     barrageState?: boolean, winSize?: number[] }): pipMode {
     switch (info.channel) {
@@ -67,6 +69,8 @@ export default class PipFactory {
         return new MasterClass();
       case 'sportsqq':
         return new Sportsqq();
+      case 'apple':
+        return new WWDC();
       case 'others':
         return new Others(info.winSize as number[]);
       default:

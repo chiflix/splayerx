@@ -1,3 +1,5 @@
+// @ts-ignore
+import urlParseLax from 'url-parse-lax';
 import { IBrowsingChannelManager } from '@/interfaces/IBrowsingChannelManager';
 
 type channelInfo = {
@@ -49,11 +51,12 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
       'https://www.lynda.com/',
       'https://www.masterclass.com/',
       'https://sports.qq.com/',
+      'https://developer.apple.com/videos/wwdc2019/',
     ];
     this.allChannels.set('adapted', {
       channels: channels.map((channel: string) => {
         let basename = '';
-        const host = channel.slice(8, channel.lastIndexOf('/'));
+        const host = urlParseLax(channel).hostname;
         if (host.includes('sports.qq.com')) {
           basename = 'sportsqq';
         } else {
