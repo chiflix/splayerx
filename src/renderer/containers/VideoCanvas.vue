@@ -182,16 +182,17 @@ export default {
     }, 50, { leading: true }));
     this.$bus.$on('next-video', () => {
       if (this.switchingLock) return;
+      if (this.nextVideo === undefined) {
+        this.$bus.$emit('back-to-landingview');
+        return;
+      }
       this.switchingLock = true;
       videodata.paused = false;
-      console.log(this.nextVideo);
       if (this.nextVideo !== undefined && this.nextVideo !== '') {
         if (this.isFolderList) this.openVideoFile(this.nextVideo);
         else this.playFile(this.nextVideo, this.nextVideoId);
       } else if (this.nextVideo === '') {
         this.$store.commit('LOOP_UPDATE', true);
-      } else {
-        this.$bus.$emit('back-to-landingview');
       }
     });
     this.$bus.$on('previous-video', () => {
