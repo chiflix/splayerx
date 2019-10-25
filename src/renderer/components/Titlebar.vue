@@ -5,7 +5,7 @@
     @dblclick="handleDbClick"
   >
     <div
-      v-if="!isDarwin && (isLandingView || isLandingView)"
+      v-if="!isDarwin"
       @dblclick.stop=""
       :style="{
         transform: `translateX(${showSidebar ? '76' : '0'}px)`,

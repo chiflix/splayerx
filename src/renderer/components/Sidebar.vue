@@ -59,7 +59,7 @@
       <div
         :style="{
           boxShadow: bottomMask ? '0 -2px 10px 0 rgba(0,0,0,0.50)' : '',
-          height: showFileIcon ? '66px' : '',
+          height: showFileIcon ? '60px' : '',
         }"
         v-if="showFileIcon"
         class="bottom-icon no-drag"
@@ -100,6 +100,10 @@ export default {
       type: String,
       default: '',
     },
+    showSidebar: {
+      type: Boolean,
+      default: false
+    },
   },
   data() {
     return {
@@ -128,11 +132,11 @@ export default {
       return channelsNum * 56;
     },
     bottomIconHeight() {
-      return 98;
+      return 92;
     },
     maxHeight() {
       const bottomHeight = this.showFileIcon ? this.bottomIconHeight : 0;
-      return this.winHeight - (this.isDarwin ? 42 : 0) - bottomHeight;
+      return this.winHeight - (this.isDarwin ? 42 : 16) - bottomHeight;
     },
     isDarwin() {
       return process.platform === 'darwin';

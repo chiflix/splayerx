@@ -12,12 +12,14 @@
       :enable-full-screen-button="['landing-view', 'playing-view', 'browsing-view']
         .includes($route.name)"
     />
-    <transition name="sidebar">
-      <Sidebar
-        v-show="showSidebar"
-        :current-url="currentUrl"
-      />
-    </transition>
+    <Sidebar
+      v-show="showSidebar"
+      :style="{
+        width: showSidebar ? '76px' : '0',
+      }"
+      show-sidebar="showSidebar"
+      :current-url="currentUrl"
+    />
     <transition
       :name="transitionMode"
       mode="out-in"
