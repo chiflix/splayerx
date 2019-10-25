@@ -11,13 +11,6 @@
     @click.left="handleMouseupLeft"
     class="the-video-controller"
   >
-    <titlebar
-      key="playing-view"
-      v-if="false"
-      :show-all-widgets="showAllWidgets"
-      :recent-playlist="displayState.RecentPlaylist"
-      current-view="Playingview"
-    />
     <notification-bubble
       ref="nextVideoUI"
       class="notification-bubble"
@@ -154,7 +147,6 @@ export default {
   // @ts-ignore
   type: INPUT_COMPONENT_TYPE,
   components: {
-    titlebar: Titlebar,
     'play-button': PlayButton,
     'volume-indicator': VolumeIndicator,
     'subtitle-control': SubtitleControl,
@@ -173,7 +165,8 @@ export default {
       mouseStopped: false,
       mouseStoppedId: 0,
       mousestopDelay: 3000,
-      mouseLeftWindow: false,
+      mouseLeftWindow: false, // 离开当前控件1s后变为false
+      mouseleft: false, // 离开当前控件立刻变为false
       mouseLeftId: 0,
       mouseleftDelay: 1000,
       popupShow: false,
@@ -369,7 +362,11 @@ export default {
       this.updateMouseup({ componentName: '' });
     },
     currentMouseupWidget(newVal: string, oldVal: string) {
-      if (this.showSidebar && newVal) {
+      if (this.showSidebar
+        && ([
+          'TheVideoController', 'SubtitleControl', 'PlaylistControl', 'AdvanceControl',
+        ].includes(newVal))
+      ) {
         this.updateMousedown({ componentName: '' });
         this.updateShowSidebar(false);
       }
@@ -453,6 +450,7 @@ export default {
       }, this.progressDisappearDelay);
     });
     this.$bus.$on('titlebar-mousemove', (event: MouseEvent) => {
+      console.log('mouseove');
       this.handleMouseenter();
       this.handleMousemove(event, 'Titlebar');
     });
@@ -805,6 +803,7 @@ export default {
     },
     handleMouseenter() {
       this.mouseLeftWindow = false;
+      this.mouseleft = false;
       if (this.mouseLeftId) {
         this.clock.clearTimeout(this.mouseLeftId);
       }
@@ -818,6 +817,7 @@ export default {
       this.updateMouseup({ componentName: this.getComponentName(target), buttons });
     },
     handleMouseleave() {
+      this.mouseleft = true;
       this.mouseLeftId = this.clock.setTimeout(() => {
         this.mouseLeftWindow = true;
       }, this.mouseleftDelay);
@@ -877,8 +877,9 @@ export default {
       this.updateKeyup({ releasedKeyboardCode: code });
     },
     handleWheel({ target, timeStamp }: { target: Element; timeStamp: number }) {
+      const componentName = this.mouseleft ? 'Sidebar' : this.getComponentName(target);
       this.updateWheel({
-        componentName: this.getComponentName(target),
+        componentName,
         timestamp: timeStamp,
         direction: this.inputWheelDirection,
       });

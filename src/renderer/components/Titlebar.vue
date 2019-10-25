@@ -13,7 +13,7 @@
       class="sidebar"
     >
       <SidebarIcon
-        v-fade-in="!isPlayingView || showTitleBar"
+        v-show="!isPlayingView || showTitleBar"
         @mouseover.native="mouseoverSidebar = true"
         @mouseout.native="mouseoverSidebar = false"
         :mouseover="mouseoverSidebar"
@@ -28,7 +28,7 @@
     </div>
     <div
       v-if="!isDarwin"
-      v-fade-in="showTitleBar"
+      v-show="showTitleBar"
       class="win-icons"
     >
       <Icon
@@ -62,7 +62,7 @@
     </div>
     <div
       v-if="isDarwin"
-      v-fade-in="!isPlayingView || showTitleBar"
+      v-show="!isPlayingView || showTitleBar"
       @mousemove.stop="handleMousemove"
       @dblclick.stop=""
       class="mac-icons"
@@ -165,10 +165,12 @@ export default {
       itemType: 'titleBarFull',
       keyAlt: false,
       keyOver: false,
-      showTitleBar: true,
       isShowingVideoCover: false,
       mouseoverSidebar: false,
     };
+  },
+  created() {
+    window.addEventListener('mouseenter', this.handleWindowMouseenter);
   },
   computed: {
     ...mapGetters([
@@ -195,14 +197,11 @@ export default {
     showBadge() {
       return this.isLandingView && !this.isShowingVideoCover && this.$store.getters.incognitoMode;
     },
+    showTitleBar() {
+      return this.recentPlaylist || this.showAllWidgets;
+    },
   },
   watch: {
-    recentPlaylist(val: boolean) {
-      if (!val) this.showTitleBar = this.showAllWidgets;
-    },
-    showAllWidgets(val: boolean) {
-      this.showTitleBar = this.recentPlaylist || val;
-    },
     keyAlt(val: boolean) {
       if (!val || !this.keyOver) {
         this.itemType = this.itemTypeEnum.FULLSCREEN;
@@ -235,6 +234,9 @@ export default {
     ...mapActions({
       updateMousemove: inputActions.MOUSEMOVE_UPDATE,
     }),
+    handleWindowMouseenter() {
+      console.log('mouseenter-window');
+    },
     handleDbClick() {
       const browserWindow = this.$electron.remote.getCurrentWindow();
       if (!browserWindow.isMaximized()) {

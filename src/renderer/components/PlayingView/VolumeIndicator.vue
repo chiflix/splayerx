@@ -42,8 +42,8 @@
         <transition name="fade">
           <base-icon
             v-show="showIcon"
-            class="volume-icon"
             :type="muted || volume <= 0 ? 'mute' : 'volume'"
+            class="volume-icon"
           />
         </transition>
       </div>
