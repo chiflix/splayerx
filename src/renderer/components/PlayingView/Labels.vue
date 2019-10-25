@@ -2,12 +2,12 @@
   <div class="labels">
     <transition name="cycle-label">
       <div
-        key="cycle"
-        v-show="showCycleLabel"
+        :key="showCycleLabel"
+        v-show="showCycleLabel || showPlaylistLoopLabel"
         class="cycle-label"
       >
         <Icon
-          type="cycle"
+          :type="showCycleLabel ? 'cycleOne': 'cycle'"
           class="cycle-icon"
         />
       </div>
@@ -45,12 +45,7 @@ export default {
     },
     showCycleLabel: Boolean,
     showSpeedLabel: Boolean,
-  },
-  data() {
-    return {
-    };
-  },
-  mounted() {
+    showPlaylistLoopLabel: Boolean,
   },
 };
 </script>

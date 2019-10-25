@@ -24,6 +24,7 @@
       :rate="rate"
       :show-cycle-label="showCycleLabel"
       :show-speed-label="showSpeedLabel"
+      :show-playlist-loop-label="showPlaylistLoopLabel"
       class="rate"
     />
   </div>
@@ -51,6 +52,7 @@ export default {
     showFullTimeCode: Boolean,
     showCycleLabel: Boolean,
     showSpeedLabel: Boolean,
+    showPlaylistLoopLabel: Boolean,
     showAllWidgets: Boolean,
     progressTriggerStopped: Boolean,
     onTimeCodeClick: {

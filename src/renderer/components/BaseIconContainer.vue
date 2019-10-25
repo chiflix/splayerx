@@ -440,7 +440,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     height: 11px;
   }
 }
-.cycle {
+.cycle, .cycleOne {
   display: block;
   @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px),
   screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
