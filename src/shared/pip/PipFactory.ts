@@ -16,6 +16,7 @@ import WWDC from './WWDC';
 import NetEaseOpen from './NetEaseOpen';
 import NetEaseStudy from './NetEaseStudy';
 import Imooc from './Imooc';
+import Icourse163 from './Icourse163';
 
 type pipMode = {
   adapter: string,
@@ -80,6 +81,8 @@ export default class PipFactory {
         return new NetEaseStudy();
       case 'imooc':
         return new Imooc();
+      case 'icourse163':
+        return new Icourse163();
       case 'others':
         return new Others(info.winSize as number[]);
       default:

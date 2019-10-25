@@ -83,6 +83,7 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
       'https://vip.open.163.com/',
       'https://study.163.com',
       'https://www.imooc.com/',
+      'https://www.icourse163.org/',
     ];
     this.allChannels.set('education', {
       channels: educationalChannels.map((channel: string) => {
