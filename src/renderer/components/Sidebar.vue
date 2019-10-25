@@ -59,7 +59,7 @@
       <div
         :style="{
           boxShadow: bottomMask ? '0 -2px 10px 0 rgba(0,0,0,0.50)' : '',
-          height: showFileIcon ? '66px' : '',
+          height: showFileIcon ? `${this.bottomIconHeight}px` : '',
         }"
         v-if="showFileIcon"
         class="bottom-icon no-drag"
@@ -127,8 +127,11 @@ export default {
       const channelsNum = this.channelsDetail.length + 1;
       return channelsNum * 56;
     },
+    bottomIconHeight() {
+      return 98;
+    },
     maxHeight() {
-      const bottomHeight = this.showFileIcon ? 66 : 0;
+      const bottomHeight = this.showFileIcon ? this.bottomIconHeight : 0;
       return this.winHeight - (this.isDarwin ? 42 : 0) - bottomHeight;
     },
     isDarwin() {
@@ -262,9 +265,6 @@ export default {
 }
 .side-bar {
   position: absolute;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   background-color: #3B3B41;
   left: 0;
   width: 76px;
@@ -307,6 +307,8 @@ export default {
     opacity: 1;
   }
   .bottom-icon {
+    position: absolute;
+    bottom: 0;
     padding-top: 16px;
     padding-bottom: 16px;
     display:flex;
