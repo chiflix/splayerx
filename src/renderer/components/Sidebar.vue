@@ -75,7 +75,7 @@
           @click="openHomePage"
           class="icon-hover"
         >
-          <Icon type="home" />
+          <Icon type="exit" />
         </div>
       </div>
     </transition>
