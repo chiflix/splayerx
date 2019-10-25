@@ -1,4 +1,4 @@
-export default class NetEase {
+export default class NetEaseOpen {
   public adapter: string;
 
   public watcher: string;

@@ -81,11 +81,13 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
       'https://www.masterclass.com/',
       'https://developer.apple.com/videos/wwdc2019/',
       'https://vip.open.163.com/',
+      'https://study.163.com',
     ];
     this.allChannels.set('education', {
       channels: educationalChannels.map((channel: string) => {
         const host = urlParseLax(channel).hostname;
-        const basename = channel.slice(channel.indexOf('.') + 1, channel.lastIndexOf('.')).replace('.', '');
+        const basename = host.includes('www') ? channel.slice(channel.indexOf('.') + 1, channel.lastIndexOf('.')).replace(/\./g, '')
+          : host.slice(0, host.lastIndexOf('.')).replace(/\./g, '');
         const tld = channel.slice(channel.lastIndexOf('.'), channel.length - 1);
         const path = host.includes('www') ? `${basename}${tld}` : host;
         return {

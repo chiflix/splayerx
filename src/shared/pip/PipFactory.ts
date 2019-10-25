@@ -13,7 +13,8 @@ import Lynda from './Lynda';
 import MasterClass from './MasterClass';
 import Sportsqq from './Sportsqq';
 import WWDC from './WWDC';
-import NetEase from './NetEase';
+import NetEaseOpen from './NetEaseOpen';
+import NetEaseStudy from './NetEaseStudy';
 
 type pipMode = {
   adapter: string,
@@ -70,10 +71,12 @@ export default class PipFactory {
         return new MasterClass();
       case 'sportsqq':
         return new Sportsqq();
-      case 'apple':
+      case 'developerapple':
         return new WWDC();
-      case 'open163':
-        return new NetEase();
+      case 'vipopen163':
+        return new NetEaseOpen();
+      case 'study163':
+        return new NetEaseStudy();
       case 'others':
         return new Others(info.winSize as number[]);
       default:
