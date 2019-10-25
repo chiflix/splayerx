@@ -428,6 +428,7 @@ export default {
         this.shifting = true;
         this.firstIndex = 0;
       } else if (!this.filePathNeedToDelete) {
+        this.$store.dispatch('UPDATE_SHOW_SIDEBAR', false);
         this.openPlayList(this.landingViewItems[index].id);
       }
     },

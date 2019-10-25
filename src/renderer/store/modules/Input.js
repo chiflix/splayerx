@@ -18,9 +18,10 @@ const getters = {
   volumeKeydown: state => state.pressedKeyboardCodes.includes('KeyM') || state.pressedKeyboardCodes.includes('Minus') || state.pressedKeyboardCodes.includes('Equal'),
   leftMousedown: state => state.pressedMouseButtonNames.includes('left'),
   wheelTriggered: state => state.wheelTimestamp,
-  volumeWheelTriggered: ({ wheelDirection, wheelComponentName }) => (
+  volumeWheelTriggered: ({ wheelDirection, wheelComponentName }, { showSidebar }) => (
     wheelDirection === 'vertical'
     && wheelComponentName !== 'SubtitleControl' && wheelComponentName !== 'AdvanceControl' && wheelComponentName !== 'AudioTranslateModal'
+    && !showSidebar
   ),
 };
 
