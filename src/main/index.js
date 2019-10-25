@@ -1400,6 +1400,8 @@ const oauthRegex = [
   /^https:\/\/www.facebook.com\/v[0-9].[0-9]\/dialog\/oauth/i,
   /^https:\/\/accounts.google.com\/signin\/oauth\//i,
   /^https:\/\/accounts.google.com\/CheckCookie\?/i,
+  /^\/passport\/user\/tplogin\?/i,
+  /^https:\/\/www.imooc.com\/passport\//i,
 ];
 app.on('web-contents-created', (webContentsCreatedEvent, contents) => {
   if (contents.getType() === 'browserView') {

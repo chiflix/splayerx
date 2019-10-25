@@ -143,6 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
           break;
         case url.includes('masterclass'):
         case url.includes('open.163'):
+        case url.includes('imooc'):
           if (['VIDEO'].includes(evt.target.tagName)) {
             offset = [evt.clientX, evt.clientY];
             if (getRatio() !== 1) {
@@ -268,6 +269,8 @@ const oauthRegex = [
   /^https:\/\/www.facebook.com\/v[0-9].[0-9]\/dialog\/oauth/i,
   /^https:\/\/accounts.google.com\/signin\/oauth\//i,
   /^https:\/\/accounts.google.com\/CheckCookie\?/i,
+  /^\/passport\/user\/tplogin\?/i,
+  /^https:\/\/www.imooc.com\/passport\//i,
 ];
 
 // Some websites intercept links to open a blank window, then set its location, e.g. iqiyi.com

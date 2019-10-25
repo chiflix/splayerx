@@ -124,6 +124,8 @@ export default {
         /^https:\/\/www.facebook.com\/v[0-9].[0-9]\/dialog\/oauth/i,
         /^https:\/\/accounts.google.com\/signin\/oauth\//i,
         /^https:\/\/accounts.google.com\/CheckCookie\?/i,
+        /^\/passport\/user\/tplogin\?/i,
+        /^https:\/\/www.imooc.com\/passport\//i,
       ],
       webInfo: {
         hasVideo: false,
@@ -132,8 +134,8 @@ export default {
         canGoBack: false,
         canReload: true,
       },
-      allChannels: ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch', 'coursera', 'ted', 'lynda', 'masterclass', 'sportsqq', 'developerapple', 'vipopen163', 'study163'],
-      compareStr: [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com', 'film.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch'], ['coursera'], ['ted'], ['lynda'], ['masterclass'], ['sports.qq.com', 'new.qq.com', 'view.inews.qq.com'], ['apple', 'wwdc'], ['open.163'], ['study.163']],
+      allChannels: ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch', 'coursera', 'ted', 'lynda', 'masterclass', 'sportsqq', 'developerapple', 'vipopen163', 'study163', 'imooc'],
+      compareStr: [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com', 'film.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch'], ['coursera'], ['ted'], ['lynda'], ['masterclass'], ['sports.qq.com', 'new.qq.com', 'view.inews.qq.com'], ['apple', 'wwdc'], ['open.163'], ['study.163'], ['imooc']],
       hideMainWindow: false,
       startLoadUrl: '',
       barrageOpenByPage: false,
@@ -199,6 +201,7 @@ export default {
         case 'appledeveloper':
         case 'vipopen163':
         case 'study163':
+        case 'imooc':
           return { channel: this.pipChannel };
         case 'others':
           return { channel: 'others', winSize: this.pipSize };

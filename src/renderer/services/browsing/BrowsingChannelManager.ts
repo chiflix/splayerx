@@ -82,6 +82,7 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
       'https://developer.apple.com/videos/wwdc2019/',
       'https://vip.open.163.com/',
       'https://study.163.com',
+      'https://www.imooc.com/',
     ];
     this.allChannels.set('education', {
       channels: educationalChannels.map((channel: string) => {
