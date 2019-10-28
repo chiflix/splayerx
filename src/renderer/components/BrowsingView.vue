@@ -41,6 +41,7 @@
     <NotificationBubble />
     <browsing-content
       v-show="!showChannelManager"
+      :all-channels="allChannels"
       class="browsing-content"
     />
     <browsing-channel-manager v-show="showChannelManager" />
@@ -278,8 +279,7 @@ export default {
     hasVideo(val: boolean) {
       this.updatePipState(val);
       this.createTouchBar(val);
-      console.log('hasVideo', val);
-      console.log('currentUrl', this.currentUrl);
+      if (val) browsingHistory.saveHistoryItem(this.currentUrl, this.title);
     },
     adaptFinished(val: boolean) {
       if (val) {

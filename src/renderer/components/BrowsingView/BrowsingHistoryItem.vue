@@ -1,68 +1,99 @@
 <template>
   <div class="history-item">
-    <div class="image" />
     <div class="content">
+      <div class="image">
+        <Icon
+          :type="icon"
+        />
+      </div>
       <div class="title">
         {{ title }}
       </div>
-      <div class="info">
-        <span class="channel">{{ channel }}</span>
-        <span class="author">{{ author }}</span>
+      <div class="channel">
+        {{ channel }}
       </div>
+    </div>
+    <div class="time">
+      {{ date }}
     </div>
   </div>
 </template>
 <script lang="ts">
+import Icon from '@/components/BaseIconContainer.vue';
+
 export default {
+  components: {
+    Icon
+  },
   props: {
     title: {
       type: String,
       default: 'Title..',
     },
+    url: {
+      type: String,
+      default: 'Channel',
+    },
+    icon: {
+      type: String,
+      default: 'bilibiliSidebar',
+    },
+    openTime: {
+      type: String,
+      default: new Date(),
+    },
     channel: {
       type: String,
       default: 'Channel',
     },
-    author: {
-      type: String,
-      default: 'Author',
+  },
+  computed: {
+    date() {
+      return this.openTime;
     },
   },
 };
 </script>
 <style lang="scss" scoped>
 .history-item {
-  width: 172px;
-  height: 156px;
-  border-radius: 4px;
-
-  .image {
-    background-color: gray;
-    width: 172px;
-    height: 96px;
+  width: calc(100% - 12px);
+  height: 56px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: box-shadow 1s;
+  border-radius: 7px;
+  &:hover {
+    box-shadow: 0 1px 9px 0 rgba(0,0,0,0.10);
   }
+
   .content {
-    width: 172px;
-    height: 60px;
-    display: flex;
-    flex-direction: column;
-    padding-top: 8px;
+    display:flex;
+    justify-content: flex-start;
+    align-items: center;
+    .image {
+      margin-left: 20px;
+      width: 28px;
+      height: 28px;
+    }   
     .title {
-      font-family: $font-medium;
-      font-size: 12px;
+      font-family: $font-normal;
+      font-size: 15px;
       color: #3B3B41;
-      letter-spacing: -0.3px;
-      line-height: 16px;
-      margin-bottom: 4px;
     }
-    .info {
-      opacity: 0.58;
-      font-family: $font-medium;
-      font-size: 12px;
-      color: #7E808F;
-      letter-spacing: 0;
-      line-height: 16px;
+    .channel {
+      font-family: $font-normal;
+      font-size: 15px;
+      color: #B5B6BF;
+      letter-spacing: 0; 
     }
+  }
+  .time {
+    font-family: $font-normal;
+    font-size: 15px;
+    color: #B5B6BF;
+    letter-spacing: 0;
+    text-align: right;
   }
 }
 </style>
