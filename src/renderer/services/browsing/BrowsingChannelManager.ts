@@ -1,3 +1,5 @@
+// @ts-ignore
+import urlParseLax from 'url-parse-lax';
 import { IBrowsingChannelManager } from '@/interfaces/IBrowsingChannelManager';
 import { getGeoIP } from '@/libs/apis';
 
@@ -28,7 +30,11 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
 
 
   public constructor() {
-    this.allCategories = [{ type: 'customized', locale: 'browsing.customized' }, { type: 'adapted', locale: 'browsing.popularSites' }];
+    this.allCategories = [
+      { type: 'customized', locale: 'browsing.customized' },
+      { type: 'general', locale: 'browsing.general' },
+      { type: 'education', locale: 'browsing.education' },
+    ];
     this.allChannels = new Map();
     this.allCategories.forEach((category: category) => {
       this.allChannels.set(category.type, { channels: [], availableChannels: [] });
@@ -36,7 +42,7 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
     this.allAvailableChannels = [];
 
     // 初始化默认添加的频道
-    const channels = [
+    const generalChannels = [
       'https://www.bilibili.com/',
       'https://www.iqiyi.com/',
       'https://www.douyu.com/',
@@ -45,14 +51,48 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
       'https://www.youku.com/',
       'https://www.twitch.tv/',
       'https://www.youtube.com/',
+      'https://sports.qq.com/',
+    ];
+    this.allChannels.set('general', {
+      channels: generalChannels.map((channel: string) => {
+        let basename = '';
+        const host = urlParseLax(channel).hostname;
+        if (host.includes('sports.qq.com')) {
+          basename = 'sportsqq';
+        } else {
+          basename = channel.slice(channel.indexOf('.') + 1, channel.lastIndexOf('.'));
+        }
+        const tld = channel.slice(channel.lastIndexOf('.'), channel.length - 1);
+        const path = host.includes('www') ? `${basename}${tld}` : host;
+        return {
+          channel: `${basename}.com`,
+          url: channel,
+          icon: `${basename}Sidebar`,
+          title: `browsing.${basename}`,
+          path,
+        };
+      }),
+      availableChannels: this.allAvailableChannels,
+    });
+
+    const educationalChannels = [
       'https://www.coursera.org/',
       'https://www.ted.com/',
+      'https://www.lynda.com/',
+      'https://www.masterclass.com/',
+      'https://developer.apple.com/videos/wwdc2019/',
+      'https://vip.open.163.com/',
+      'https://study.163.com',
+      'https://www.imooc.com/',
+      'https://www.icourse163.org/',
     ];
-    this.allChannels.set('adapted', {
-      channels: channels.map((channel: string) => {
-        const basename = channel.slice(channel.indexOf('.') + 1, channel.lastIndexOf('.'));
+    this.allChannels.set('education', {
+      channels: educationalChannels.map((channel: string) => {
+        const host = urlParseLax(channel).hostname;
+        const basename = host.includes('www') ? channel.slice(channel.indexOf('.') + 1, channel.lastIndexOf('.')).replace(/\./g, '')
+          : host.slice(0, host.lastIndexOf('.')).replace(/\./g, '');
         const tld = channel.slice(channel.lastIndexOf('.'), channel.length - 1);
-        const path = `${basename === 'qq' ? 'v.qq' : basename}${tld}`;
+        const path = host.includes('www') ? `${basename}${tld}` : host;
         return {
           channel: `${basename}.com`,
           url: channel,
@@ -131,12 +171,12 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
     try {
       const geo = await getGeoIP();
       const availableChannels = geo.countryCode === 'CN' ? ['bilibili.com', 'douyu.com', 'iqiyi.com'] : ['youtube.com', 'twitch.com'];
-      (this.allChannels.get('adapted') as channelInfo).availableChannels = availableChannels;
+      (this.allChannels.get('general') as channelInfo).availableChannels = availableChannels;
       this.allAvailableChannels.push(...availableChannels);
       return this.getAllAvailableChannels();
     } catch (error) {
       const availableChannels = displayLanguage === 'zh-Hans' ? ['bilibili.com', 'douyu.com', 'iqiyi.com'] : ['youtube.com', 'twitch.com'];
-      (this.allChannels.get('adapted') as channelInfo).availableChannels = availableChannels;
+      (this.allChannels.get('general') as channelInfo).availableChannels = availableChannels;
       this.allAvailableChannels = availableChannels;
       return this.getAllAvailableChannels();
     }
