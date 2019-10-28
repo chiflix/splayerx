@@ -10,7 +10,7 @@ import { loadLocalFile, formatToExtension } from '.';
 import { SUBTITLE_FULL_DIRNAME } from '@/constants';
 import { mediaQuickHash, getSubtitleDir } from '@/libs/utils';
 import Sagi from '@/libs/sagi';
-import { SagiSubtitlePayload } from '../parsers';
+import { SagiTextSubtitlePayload } from '../parsers';
 import { sagiSubtitleToWebVTT } from './transcoders';
 import {
   getSubtitleMetadata, cacheSubtitle, getSubtitleFragment, finishSubtitleExtraction,
@@ -218,7 +218,10 @@ export class EmbeddedTextStreamLoader extends EventEmitter implements ILoader {
   public async destroy() {
     this.removeAllListeners();
     this._payloadString = '';
-    await finishSubtitleExtraction(this.source.source.videoPath, this.source.source.streamIndex);
+    await finishSubtitleExtraction(
+      this.source.source.videoPath,
+      this.source.source.streamIndex,
+    );
   }
 }
 export interface ISagiOrigin extends IOrigin {
@@ -247,9 +250,9 @@ export class SagiLoader extends EventEmitter implements ILoader {
     this.source = { type: Type.Online, source: hash };
   }
 
-  private _payloads: SagiSubtitlePayload = [];
+  private _payloads: SagiTextSubtitlePayload = [];
 
-  public async getPayload(): Promise<SagiSubtitlePayload> {
+  public async getPayload(): Promise<SagiTextSubtitlePayload> {
     if (this._loadingStatus === Status.NOT_STARTED) {
       this._loadingStatus = Status.WORKING;
       this._payloads = await Sagi.getTranscript({

@@ -1,8 +1,8 @@
 // @ts-ignore
 import { toVttTime, stringifyVtt } from 'subtitle';
-import { SagiSubtitlePayload } from '../parsers';
+import { SagiTextSubtitlePayload } from '../parsers';
 
-export function sagiSubtitleToWebVTT(subtitlePayload: SagiSubtitlePayload): string {
+export function sagiSubtitleToWebVTT(subtitlePayload: SagiTextSubtitlePayload): string {
   const vttSubtitles = subtitlePayload
     .map(cue => ({
       start: toVttTime(cue.startTime * 1000),

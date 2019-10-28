@@ -1,7 +1,7 @@
 import { pick, get } from 'lodash';
 import { compile, CompiledASS, AssStream } from 'ass-compiler';
 import {
-  Format, IParser, ILoader, IMetadata, Cue, IVideoSegments,
+  Format, IParser, ILoader, IMetadata, TextCue, IVideoSegments,
 } from '@/interfaces/ISubtitle';
 import { getDialogues } from '../utils';
 import { StreamTimeSegments } from '@/libs/TimeSegments';
@@ -75,7 +75,7 @@ export class AssParser implements IParser {
 
   private metadata: IMetadata;
 
-  private dialogues: Cue[] = [];
+  private dialogues: TextCue[] = [];
 
   private normalize(compiledSubtitle: CompiledASS) {
     if (!compiledSubtitle.dialogues.length) return;

@@ -1,14 +1,14 @@
 import { TranscriptResponse } from 'sagi-api/translation/v1/translation_pb';
 import {
-  Format, Cue, IParser, IVideoSegments,
+  Format, TextCue, IParser, IVideoSegments,
 } from '@/interfaces/ISubtitle';
 import { tagsGetter, getDialogues } from '../utils';
 import { SagiLoader } from '../utils/loaders';
 
-export type SagiSubtitlePayload = TranscriptResponse.Cue.AsObject[];
+export type SagiTextSubtitlePayload = TranscriptResponse.Cue.AsObject[];
 
-export class SagiParser implements IParser {
-  public get format() { return Format.Sagi; }
+export class SagiTextParser implements IParser {
+  public get format() { return Format.SagiText; }
 
   public readonly loader: SagiLoader;
 
@@ -21,12 +21,12 @@ export class SagiParser implements IParser {
 
   public async getMetadata() { return { PlayResX: '', PlayResY: '' }; }
 
-  private dialogues: Cue[] = [];
+  private dialogues: TextCue[] = [];
 
   private baseTags = { alignment: 2, pos: undefined };
 
-  private normalizer(parsedSubtitle: SagiSubtitlePayload) {
-    const finalDialogues: Cue[] = [];
+  private normalizer(parsedSubtitle: SagiTextSubtitlePayload) {
+    const finalDialogues: TextCue[] = [];
     parsedSubtitle = Array.isArray(parsedSubtitle) ? parsedSubtitle : [];
     parsedSubtitle.forEach(({ startTime, endTime, text }) => {
       finalDialogues.push({
@@ -45,7 +45,7 @@ export class SagiParser implements IParser {
 
   public async getDialogues(time?: number) {
     if (!this.loader.fullyRead) {
-      const payload = await this.loader.getPayload() as SagiSubtitlePayload;
+      const payload = await this.loader.getPayload() as SagiTextSubtitlePayload;
       if (this.loader.fullyRead) this.normalizer(payload);
     }
     return getDialogues(this.dialogues, time);

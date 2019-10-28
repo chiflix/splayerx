@@ -94,8 +94,8 @@ const getters: GetterTree<ISubtitleState, {}> = {
       totalTime: rootGetters.duration,
       delay: state.delay * 1000,
       hints: generateHints(rootGetters.originSrc),
-      transcriptIdentity: state.format === Format.Sagi ? state.hash : '',
-      payload: state.format !== Format.Sagi ? payload || '' : '',
+      transcriptIdentity: state.format === Format.SagiText ? state.hash : '',
+      payload: state.format !== Format.SagiText ? payload || '' : '',
     });
   },
 };
@@ -194,7 +194,7 @@ const actions: ActionTree<ISubtitleState, {}> = {
   async [a.upload]({ state, getters, commit }) {
     const subtitle = subtitleLoaderParserMap.get(state.hash);
     if (getters.canAutoUpload && subtitle && subtitle.loader) {
-      if (state.format !== Format.Sagi) {
+      if (state.format !== Format.SagiText) {
         const payload = Buffer.from(await subtitle.loader.getPayload() as string);
         return upload.add(getters.getUploadParam(payload))
           .then(() => commit(m.setAutoUploaded, true));
@@ -220,7 +220,7 @@ const actions: ActionTree<ISubtitleState, {}> = {
   async [a.manualUpload]({ state, getters }) {
     const subtitle = subtitleLoaderParserMap.get(state.hash);
     if (getters.canUpload && subtitle && subtitle.loader) {
-      if (state.format !== Format.Sagi) {
+      if (state.format !== Format.SagiText) {
         const payload = Buffer.from(await subtitle.loader.getPayload() as string);
         return upload.addManually(getters.getUploadParam(payload));
       }

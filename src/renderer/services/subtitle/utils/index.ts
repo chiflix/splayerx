@@ -5,12 +5,12 @@ import {
 } from 'fs-extra';
 import { extname } from 'path';
 import {
-  ITags, IOrigin, Type, Format, IParser, ILoader, Cue, IVideoSegments,
+  ITags, IOrigin, Type, Format, IParser, ILoader, TextCue, IVideoSegments,
 } from '@/interfaces/ISubtitle';
 import { LanguageCode } from '@/libs/language';
 
 import {
-  AssParser, SrtParser, SagiParser, VttParser,
+  AssParser, SrtParser, SagiTextParser, VttParser,
 } from '@/services/subtitle';
 
 import { assFragmentLanguageLoader, srtFragmentLanguageLoader, vttFragmentLanguageLoader } from './languageLoader';
@@ -20,7 +20,7 @@ import {
 } from './loaders';
 
 /**
- * Cue tags getter for SubRip, SubStation Alpha and Online Transcript subtitles.
+ * TextCue tags getter for SubRip, SubStation Alpha and Online Transcript subtitles.
  *
  * @export
  * @param {string} text - cue text to evaluate.
@@ -135,7 +135,7 @@ export function sourceToFormat(subtitleSource: IOrigin) {
     case Type.Online:
     case Type.Translated:
     case Type.PreTranslated:
-      return Format.Sagi;
+      return Format.SagiText;
     case Type.Embedded:
       return Format.AdvancedSubStationAplha;
     default:
@@ -145,7 +145,7 @@ export function sourceToFormat(subtitleSource: IOrigin) {
 
 export function formatToExtension(format: Format): string {
   switch (format) {
-    case Format.Sagi:
+    case Format.SagiText:
     case Format.WebVTT:
       return 'vtt';
     case Format.SubRip:
@@ -171,7 +171,7 @@ export async function inferLanguageFromPath(path: string): Promise<LanguageCode>
   }
 }
 
-export function getDialogues(dialogues: Cue[], time?: number) {
+export function getDialogues(dialogues: TextCue[], time?: number) {
   return typeof time === 'undefined' ? dialogues
     : dialogues.filter(({ start, end, text }) => (
       (start <= time && end >= time) && !!text
@@ -208,8 +208,8 @@ export function getParser(
     case Format.AdvancedSubStationAplha:
     case Format.SubStationAlpha:
       return new AssParser(loader, videoSegments);
-    case Format.Sagi:
-      return new SagiParser(loader as SagiLoader, videoSegments);
+    case Format.SagiText:
+      return new SagiTextParser(loader as SagiLoader, videoSegments);
     case Format.SubRip:
       return new SrtParser(loader as LocalTextLoader, videoSegments);
     case Format.WebVTT:

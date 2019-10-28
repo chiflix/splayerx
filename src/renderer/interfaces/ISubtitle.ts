@@ -11,7 +11,7 @@ export enum Type {
 }
 export enum Format {
   AdvancedSubStationAplha = 'ass',
-  Sagi = 'sagi',
+  SagiText = 'sagi',
   SubRip = 'subrip',
   SubStationAlpha = 'ssa',
   WebVTT = 'webvtt',
@@ -141,7 +141,7 @@ export interface ITags {
 }
 export type TagsPartial = Partial<ITags>;
 
-export type Cue = {
+export type TextCue = {
   category?: string,
   start: number,
   end: number,
@@ -149,5 +149,7 @@ export type Cue = {
   format: string,
   tags: ITags,
 }
+
+export type Cue = TextCue;
 
 export const NOT_SELECTED_SUBTITLE = 'NOT_SELECTED_SUBTITLE';

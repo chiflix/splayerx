@@ -74,7 +74,6 @@ class SubtitleFragmentTask implements IMediaTask<string> {
 
   private readonly videoTime: number;
 
-
   public constructor(videoPath: string, streamIndex: number, videoTime: number) {
     this.videoPath = videoPath;
     this.streamIndex = streamIndex;

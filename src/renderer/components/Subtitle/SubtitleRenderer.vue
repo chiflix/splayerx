@@ -84,7 +84,7 @@
 </template>
 <script lang="ts">
 import { isEqual } from 'lodash';
-import { Cue, ITags, NOT_SELECTED_SUBTITLE } from '@/interfaces/ISubtitle';
+import { TextCue, ITags, NOT_SELECTED_SUBTITLE } from '@/interfaces/ISubtitle';
 import { calculateTextSize } from '@/libs/utils';
 
 export default {
@@ -162,24 +162,24 @@ export default {
       return calculateTextSize('9px', normalFont, '120%', secondarySubScale.toString(), 'test').height;
     },
     positionCues() {
-      const firstCues: Cue[] = this.currentCues[0]
-        .filter((cue: Cue) => this.calculatePosition(cue.category, cue.tags)).map((cue: Cue) => { cue.category = 'first'; return cue; });
-      const secondaryCues: Cue[] = this.currentCues[1]
-        .filter((cue: Cue) => this.calculatePosition(cue.category, cue.tags)).map((cue: Cue) => { cue.category = 'secondary'; return cue; });
-      const firstClassifiedCues: Cue[][] = [];
-      const secondaryClassifiedCues: Cue[][] = [];
-      firstCues.forEach((item: Cue) => {
+      const firstCues: TextCue[] = this.currentCues[0]
+        .filter((cue: TextCue) => this.calculatePosition(cue.category, cue.tags)).map((cue: TextCue) => { cue.category = 'first'; return cue; });
+      const secondaryCues: TextCue[] = this.currentCues[1]
+        .filter((cue: TextCue) => this.calculatePosition(cue.category, cue.tags)).map((cue: TextCue) => { cue.category = 'secondary'; return cue; });
+      const firstClassifiedCues: TextCue[][] = [];
+      const secondaryClassifiedCues: TextCue[][] = [];
+      firstCues.forEach((item: TextCue) => {
         const index: number = firstClassifiedCues
-          .findIndex((e: Cue[]) => isEqual(e[0].tags, item.tags));
+          .findIndex((e: TextCue[]) => isEqual(e[0].tags, item.tags));
         if (index !== -1) {
           firstClassifiedCues[index].push(item);
         } else {
           firstClassifiedCues.push([item]);
         }
       });
-      secondaryCues.forEach((item: Cue) => {
+      secondaryCues.forEach((item: TextCue) => {
         const index: number = secondaryClassifiedCues
-          .findIndex((e: Cue[]) => isEqual(e[0].tags, item.tags));
+          .findIndex((e: TextCue[]) => isEqual(e[0].tags, item.tags));
         if (index !== -1) {
           secondaryClassifiedCues[index].push(item);
         } else {
@@ -192,26 +192,26 @@ export default {
       const allCues = [];
       for (let i = 1; i < 10; i += 1) {
         const firstCues = this.currentCues[0]
-          .filter((cue: Cue) => (this.subToTop && [1, 2, 3]
+          .filter((cue: TextCue) => (this.subToTop && [1, 2, 3]
             .includes(this.calculateAlignment(cue.category, cue.tags))
             ? this.calculateAlignment(cue.category, cue.tags) + 6
             : this.calculateAlignment(cue.category, cue.tags)) === i
             && !this.calculatePosition(cue.category, cue.tags));
         const secondaryCues = this.currentCues[1]
-          .filter((cue: Cue) => (this.subToTop && [1, 2, 3]
+          .filter((cue: TextCue) => (this.subToTop && [1, 2, 3]
             .includes(this.calculateAlignment(cue.category, cue.tags))
             ? this.calculateAlignment(cue.category, cue.tags) + 6
             : this.calculateAlignment(cue.category, cue.tags)) === i
             && !this.calculatePosition(cue.category, cue.tags));
-        allCues.push((firstCues.length ? firstCues.map((cue: Cue) => { cue.category = 'first'; return cue; }) : [])
-          .concat(secondaryCues.length ? secondaryCues.map((cue: Cue) => { cue.category = 'secondary'; return cue; }) : []));
+        allCues.push((firstCues.length ? firstCues.map((cue: TextCue) => { cue.category = 'first'; return cue; }) : [])
+          .concat(secondaryCues.length ? secondaryCues.map((cue: TextCue) => { cue.category = 'secondary'; return cue; }) : []));
       }
       return allCues;
     },
   },
   methods: {
-    separateSubtitle(item: Cue[]) {
-      const index = item.findIndex((cue: Cue) => cue.category === 'secondary');
+    separateSubtitle(item: TextCue[]) {
+      const index = item.findIndex((cue: TextCue) => cue.category === 'secondary');
       if (index !== -1) {
         return [item.slice(0, index), item.slice(index, item.length)];
       }
@@ -226,7 +226,7 @@ export default {
         const padding = chosenStyle === 4 ? 0.9 : 0;
         const adaptedCues = noPositionCues[0]
           .concat(noPositionCues[1], noPositionCues[2])
-          .filter((cue: Cue) => cue.category && cue.category === 'secondary');
+          .filter((cue: TextCue) => cue.category && cue.category === 'secondary');
         if (adaptedCues.length === 1 && !adaptedCues[0].text.includes('\n') && currentFirstSubtitleId !== NOT_SELECTED_SUBTITLE) {
           return `${(secondarySubTextHeight * secondarySubScale + (60 / 1080) * winHeight) * 100 / winHeight}%`;
         }
@@ -247,7 +247,7 @@ export default {
         const padding = chosenStyle === 4 ? 0.9 : 0;
         const adaptedCues = noPositionCues[6]
           .concat(noPositionCues[7], noPositionCues[8])
-          .filter((cue: Cue) => cue.category && cue.category === 'first');
+          .filter((cue: TextCue) => cue.category && cue.category === 'first');
         if (adaptedCues.length === 1 && !adaptedCues[0].text.includes('\n') && currentSecondarySubtitleId !== NOT_SELECTED_SUBTITLE) {
           return `${(60 / 1080 * winHeight + firstSubTextHeight * scaleNum) * 100 / winHeight}%`;
         }
@@ -285,7 +285,7 @@ export default {
       }
       return !tags.line && !tags.position ? 2 : '';
     },
-    subLeft(cue: Cue) {
+    subLeft(cue: TextCue) {
       const subPlayResX: number = cue.category === 'first' ? this.subPlayRes[0].x : this.subPlayRes[1].x;
       const type = cue.category === 'first' ? this.firstType : this.secondType;
       const { tags } = cue;
@@ -303,7 +303,7 @@ export default {
       }
       return '';
     },
-    subTop(cue: Cue) {// eslint-disable-line
+    subTop(cue: TextCue) {// eslint-disable-line
       const subPlayResY: number = cue.category === 'first' ? this.subPlayRes[0].y : this.subPlayRes[1].y;
       const type = cue.category === 'first' ? this.firstType : this.secondType;
       const { tags } = cue;
@@ -328,7 +328,7 @@ export default {
       }
       return '';
     },
-    translateNum(cue: Cue) { // eslint-disable-line
+    translateNum(cue: TextCue) { // eslint-disable-line
       const index = this.calculateAlignment(cue.category, cue.tags)
         ? this.calculateAlignment(cue.category, cue.tags) : 2;
       switch (index) {
