@@ -81,6 +81,39 @@ export default {
         }
       },
     },
+    effect: {
+      immediate: true,
+      handler(effect: string) {
+        const type = this.type;
+        const defaultIcon = `${type}-${this.finalState}-${effect}`;
+        const hoverIcon = `${type}-hover-${effect}`;
+        const activeIcon = `${type}-active-${effect}`;
+        if (effect && !document.getElementById(defaultIcon)) {
+          try {
+            // eslint-disable-next-line import/no-dynamic-require
+            require(`@/assets/icon/${defaultIcon}.svg`);
+          } catch (error) {
+            // empty
+          }
+        }
+        if (effect && !document.getElementById(hoverIcon)) {
+          try {
+            // eslint-disable-next-line import/no-dynamic-require
+            require(`@/assets/icon/${hoverIcon}.svg`);
+          } catch (error) {
+            // empty
+          }
+        }
+        if (effect && !document.getElementById(activeIcon)) {
+          try {
+            // eslint-disable-next-line import/no-dynamic-require
+            require(`@/assets/icon/${activeIcon}.svg`);
+          } catch (error) {
+            // empty
+          }
+        }
+      },
+    },
   },
 };
 </script>
