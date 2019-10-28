@@ -262,3 +262,16 @@ export default {
   }
 }
 </style>
+<style lang="scss">
+
+.fade-in {
+  visibility: visible;
+  opacity: 1;
+  transition: opacity 100ms ease-in;
+}
+.fade-out {
+  visibility: hidden;
+  opacity: 0;
+  transition: visibility 0s 300ms, opacity 300ms ease-out;
+}
+</style>

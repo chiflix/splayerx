@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-05 16:03:32
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-10-10 16:06:42
+ * @Last Modified time: 2019-10-16 15:20:50
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @ts-ignore
@@ -22,7 +22,7 @@ import { addBubble } from '@/helpers/notificationControl';
 import {
   TRANSLATE_SERVER_ERROR_FAIL, TRANSLATE_SUCCESS,
   TRANSLATE_SUCCESS_WHEN_VIDEO_CHANGE, TRANSLATE_REQUEST_TIMEOUT,
-  TRANSLATE_REQUEST_FORBIDDEN,
+  TRANSLATE_REQUEST_FORBIDDEN, TRANSLATE_REQUEST_PERMISSION,
 } from '@/helpers/notificationcodes';
 import { log } from '@/libs/Log';
 import { LanguageCode } from '@/libs/language';
@@ -51,6 +51,7 @@ export enum AudioTranslateFailType {
   TimeOut = 'timeOut',
   ServerError = 'serverError',
   Forbidden = 'forbidden',
+  Permission = 'permission',
 }
 
 export enum AudioTranslateBubbleOrigin {
@@ -193,8 +194,7 @@ const getters = {
     return state.isBubbleVisible;
   },
   isTranslating(state: AudioTranslateState) {
-    return state.status === AudioTranslateStatus.Searching
-      || state.status === AudioTranslateStatus.Grabbing
+    return state.status === AudioTranslateStatus.Grabbing
       || state.status === AudioTranslateStatus.GrabCompleted
       || state.status === AudioTranslateStatus.Translating;
   },
@@ -364,7 +364,7 @@ const actions = {
         commit(m.AUDIO_TRANSLATE_UPDATE_PROGRESS, progress);
         commit(m.AUDIO_TRANSLATE_UPDATE_STATUS, AudioTranslateStatus.Grabbing);
       });
-      grab.on('error', (error: Error) => {
+      grab.on('error', (error: Error) => { // eslint-disable-line complexity
         // 记录错误日志到sentry, 排除错误原因
         try {
           log.error('AudioTranslate', error);
@@ -397,7 +397,12 @@ const actions = {
           bubbleType = TRANSLATE_REQUEST_FORBIDDEN;
           fileType = AudioTranslateFailType.Forbidden;
           failReason = 'forbidden';
+        } else if (error && error.message === 'permission') {
+          bubbleType = TRANSLATE_REQUEST_PERMISSION;
+          fileType = AudioTranslateFailType.Permission;
+          failReason = 'permission';
         }
+
         commit(m.AUDIO_TRANSLATE_UPDATE_FAIL_TYPE, fileType);
         if (!state.isModalVisible) {
           commit(m.AUDIO_TRANSLATE_UPDATE_PROGRESS, 0);

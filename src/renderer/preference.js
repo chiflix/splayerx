@@ -17,6 +17,31 @@ import { getUserInfo, setToken, getGeoIP } from '@/libs/apis';
 Vue.use(VueI18n);
 Vue.use(Vuex);
 Vue.use(VueRouter);
+Vue.directive('fade-in', {
+  bind(el, binding) {
+    if (!el) return;
+    const { value } = binding;
+    if (value) {
+      el.classList.add('fade-in');
+      el.classList.remove('fade-out');
+    } else {
+      el.classList.add('fade-out');
+      el.classList.remove('fade-in');
+    }
+  },
+  update(el, binding) {
+    const { oldValue, value } = binding;
+    if (oldValue !== value) {
+      if (value) {
+        el.classList.add('fade-in');
+        el.classList.remove('fade-out');
+      } else {
+        el.classList.add('fade-out');
+        el.classList.remove('fade-in');
+      }
+    }
+  },
+});
 
 function getSystemLocale() {
   const { app } = electron.remote;
@@ -120,12 +145,13 @@ new Vue({
     }),
     async getUserInfo() {
       if (this.didGetUserInfo) return;
+      this.didGetUserInfo = true;
       try {
         const res = await getUserInfo();
         this.updateUserInfo(res.me);
-        this.didGetUserInfo = true;
       } catch (error) {
         // empty
+        this.didGetUserInfo = false;
       }
     },
   },

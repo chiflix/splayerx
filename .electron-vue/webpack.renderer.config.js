@@ -60,6 +60,7 @@ let rendererConfig = {
   entry: {
     preference: path.join(__dirname, '../src/renderer/preference.js'),
     about: path.join(__dirname, '../src/renderer/about.js'),
+    payment: path.join(__dirname, '../src/renderer/payment.ts'),
     index: path.join(__dirname, '../src/renderer/main.ts'),
     browsing: path.join(__dirname, '../src/renderer/browsing.ts'),
   },
@@ -198,6 +199,7 @@ let rendererConfig = {
     new ExtractTextPlugin('styles.css'),
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('index')),
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('about')),
+    new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('payment')),
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('preference')),
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('browsing')),
     new webpack.HotModuleReplacementPlugin(),

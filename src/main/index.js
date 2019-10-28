@@ -8,7 +8,6 @@ import path, {
   basename, dirname, extname, join, resolve,
 } from 'path';
 import fs from 'fs';
-import http from 'http';
 import rimraf from 'rimraf';
 import { audioGrabService } from './helpers/AudioGrabService';
 import './helpers/electronPrototypes';
@@ -16,7 +15,6 @@ import {
   getValidVideoRegex, getValidSubtitleRegex,
   getToken, saveToken,
   getIP,
-  getRightPort,
 } from '../shared/utils';
 import { mouse } from './helpers/mouse';
 import MenuService from './menu/MenuService';
@@ -74,6 +72,7 @@ let loginWindow = null;
 let aboutWindow = null;
 let preferenceWindow = null;
 let browsingWindow = null;
+let paymentWindow = null;
 let browserViewManager = null;
 let pipControlView = null;
 let titlebarView = null;
@@ -88,15 +87,14 @@ let inited = false;
 let hideBrowsingWindow = false;
 let finalVideoToOpen = [];
 let signInEndPoint = '';
-let localHostPort = 0;
-let fileDirServerOnLine = false;
 let applePayProductID = '';
+let paymentWindowCloseTag = false;
 const locale = new Locale();
 const tmpVideoToOpen = [];
 const tmpSubsToOpen = [];
 const subRegex = getValidSubtitleRegex();
 const allChannels = ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch', 'coursera', 'ted'];
-const compareStr = [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch'], ['coursera'], ['ted']];
+const compareStr = [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com', 'film.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch'], ['coursera'], ['ted']];
 const titlebarUrl = process.platform === 'darwin' ? `file:${resolve(__static, 'pip/macTitlebar.html')}` : `file:${resolve(__static, 'pip/winTitlebar.html')}`;
 const maskUrl = process.platform === 'darwin' ? `file:${resolve(__static, 'pip/mask.html')}` : `file:${resolve(__static, 'pip/mask.html')}`;
 const mainURL = process.env.NODE_ENV === 'development'
@@ -105,6 +103,9 @@ const mainURL = process.env.NODE_ENV === 'development'
 const aboutURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080/about.html'
   : `file://${__dirname}/about.html`;
+const paymentURL = process.env.NODE_ENV === 'development'
+  ? 'http://localhost:9080/payment.html'
+  : `file://${__dirname}/payment.html`;
 const preferenceURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080/preference.html'
   : `file://${__dirname}/preference.html`;
@@ -321,54 +322,7 @@ function createPreferenceWindow(e, route) {
   }
 }
 
-/**
- * @description sign in window need aliyun nc valication with // protocal
- * @author tanghaixiang
- */
-function createFileDirServer() {
-  http.createServer((request, response) => {
-    console.log('request ', request.url);
-    let filePath = `${request.url}`;
-    if (filePath === '/') {
-      filePath = '/login.html';
-    }
-    const extname = String(path.extname(filePath)).toLowerCase();
-    const mimeTypes = {
-      '.html': 'text/html',
-      '.js': 'text/javascript',
-      '.css': 'text/css',
-      '.json': 'application/json',
-      '.png': 'image/png',
-      '.jpg': 'image/jpg',
-      '.gif': 'image/gif',
-      '.svg': 'image/svg+xml',
-      '.wav': 'audio/wav',
-      '.mp4': 'video/mp4',
-      '.woff': 'application/font-woff',
-      '.ttf': 'application/font-ttf',
-      '.eot': 'application/vnd.ms-fontobject',
-      '.otf': 'application/font-otf',
-      '.wasm': 'application/wasm',
-    };
-    const contentType = mimeTypes[extname] || 'application/octet-stream';
-    fs.readFile(`${__dirname}${filePath}`, (error, content) => {
-      if (error) {
-        return;
-      }
-      response.writeHead(200, { 'Content-Type': contentType });
-      response.end(content, 'utf-8');
-    });
-  }).listen(localHostPort);
-}
-
 function createLoginWindow(e, route) {
-  // in production use http protocal
-  // aliyun captcha use // protocal
-  if (process.env.NODE_ENV === 'production' && !fileDirServerOnLine) {
-    createFileDirServer();
-    fileDirServerOnLine = true;
-    loginURL = `http://localhost:${localHostPort}/login.html`;
-  }
   const loginWindowOptions = {
     useContentSize: true,
     frame: false,
@@ -466,7 +420,6 @@ function createBrowsingWindow(args) {
     useContentSize: true,
     frame: false,
     titleBarStyle: 'none',
-    transparent: true,
     webPreferences: {
       webSecurity: false,
       nodeIntegration: true,
@@ -506,6 +459,55 @@ function createBrowsingWindow(args) {
         }, 0);
       }
     });
+  }
+}
+
+function createPaymentWindow(url, orderID, channel) {
+  const width = channel === 'wxpay' ? 258 : 1200;
+  const height = channel === 'wxpay' ? 294 : 890;
+  const paymentWindowOptions = {
+    useContentSize: true,
+    frame: false,
+    titleBarStyle: 'none',
+    width,
+    height,
+    transparent: true,
+    resizable: false,
+    show: false,
+    webPreferences: {
+      webSecurity: false,
+      nodeIntegration: true,
+      experimentalFeatures: true,
+      webviewTag: true,
+    },
+    acceptFirstMouse: true,
+    fullscreenable: false,
+    maximizable: false,
+    minimizable: false,
+  };
+  if (!paymentWindow) {
+    paymentWindow = new BrowserWindow(paymentWindowOptions);
+    // 如果播放窗口顶置，打开关于也顶置
+    if (mainWindow && mainWindow.isAlwaysOnTop()) {
+      paymentWindow.setAlwaysOnTop(true);
+    }
+    paymentWindow.loadURL(`${paymentURL}?url=${url}&orderID=${orderID}`);
+    paymentWindow.on('closed', () => {
+      if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()
+        && !paymentWindowCloseTag) {
+        preferenceWindow.webContents.send('close-payment');
+      }
+      paymentWindow = null;
+      paymentWindowCloseTag = false;
+    });
+  } else {
+    paymentWindow.focus();
+  }
+  paymentWindow.once('ready-to-show', () => {
+    paymentWindow.show();
+  });
+  if (process.platform === 'win32') {
+    hackWindowsRightMenu(paymentWindow);
   }
 }
 
@@ -1184,6 +1186,42 @@ function registerMainWindowEvent(mainWindow) {
 
   ipcMain.on('sign-in-end-point', (events, data) => {
     signInEndPoint = data;
+    if (process.env.NODE_ENV === 'production') {
+      loginURL = `${signInEndPoint}/static/splayer/login.html`;
+    }
+  });
+
+  ipcMain.on('add-payment', (events, data) => {
+    createPaymentWindow(data.url, data.orderID, data.channel);
+  });
+
+  ipcMain.on('close-payment', () => {
+    if (paymentWindow) {
+      paymentWindow.close();
+      paymentWindow = null;
+    }
+  });
+
+  ipcMain.on('payment-fail', () => {
+    if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
+      preferenceWindow.webContents.send('payment-fail');
+    }
+    if (paymentWindow && !paymentWindow.webContents.isDestroyed()) {
+      paymentWindowCloseTag = true;
+      paymentWindow.close();
+      paymentWindow = null;
+    }
+  });
+
+  ipcMain.on('payment-success', () => {
+    if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
+      preferenceWindow.webContents.send('payment-success');
+    }
+    if (paymentWindow && !paymentWindow.webContents.isDestroyed()) {
+      paymentWindowCloseTag = true;
+      paymentWindow.close();
+      paymentWindow = null;
+    }
   });
 }
 
@@ -1462,6 +1500,7 @@ const oauthRegex = [
   /^https:\/\/openapi.baidu.com\//i,
   /^https:\/\/auth.alipay.com\/login\//i,
   /^https:\/\/account.xiaomi.com\/pass\//i,
+  /^https:\/\/www.facebook.com\/v[0-9].[0-9]\/dialog\/oauth/i,
 ];
 app.on('web-contents-created', (webContentsCreatedEvent, contents) => {
   if (contents.getType() === 'browserView') {
@@ -1520,6 +1559,9 @@ app.on('sign-in', (account) => {
   if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
     preferenceWindow.webContents.send('sign-in', account);
   }
+  if (paymentWindow && !paymentWindow.webContents.isDestroyed()) {
+    paymentWindow.webContents.send('sign-in', account);
+  }
 });
 
 app.on('sign-out-confirm', () => {
@@ -1539,6 +1581,9 @@ app.on('sign-out', () => {
   if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
     preferenceWindow.webContents.send('sign-in', undefined);
   }
+  if (paymentWindow && !paymentWindow.webContents.isDestroyed()) {
+    paymentWindow.webContents.send('sign-in', undefined);
+  }
 });
 
 app.getDisplayLanguage = () => {
@@ -1551,10 +1596,6 @@ app.getIP = getIP;
 
 // export getSignInEndPoint to static login preload.js
 app.getSignInEndPoint = () => signInEndPoint;
-
-getRightPort().then((port) => {
-  localHostPort = port;
-}).catch(console.error);
 
 // Listen for transactions as soon as possible.
 inAppPurchase.on('transactions-updated', (event, transactions) => {
@@ -1574,7 +1615,7 @@ inAppPurchase.on('transactions-updated', (event, transactions) => {
         // eslint-disable-next-line no-case-declarations
         let receipt = '';
         try {
-          receipt = fs.readFileSync(inAppPurchase.getReceiptURL()).toString();
+          receipt = fs.readFileSync(inAppPurchase.getReceiptURL());
         } catch (error) {
           // empty
           console.log(error);

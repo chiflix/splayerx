@@ -22,26 +22,30 @@
         <div class="settingItem__box">
           <div class="settingItem__box__left">
             <div class="settingItem__title">
-              {{ isVip ? 'Premium Account' : 'Account' }} {{ '****2468' }} <span>注销</span>
+              {{ userInfo.isVip ? $t('preferences.account.vipUser.title')
+                : $t('preferences.account.normalUser.title') }} {{ userInfo.displayName }}
+              <span>{{ $t('preferences.account.signOut') }}</span>
             </div>
             <div class="settingItem__description">
-              Upgrade your account now and get started with exclusive features and more.
+              {{ userInfo.isVip
+                ? `${$t('preferences.account.vipUser.description')}${userInfo.vipExpiredAt}`
+                : $t('preferences.account.normalUser.description') }}
             </div>
           </div>
           <div class="settingItem__box__right">
-            <button v-if="isVip">
-              Renew
+            <button v-if="userInfo.isVip">
+              {{ $t('preferences.account.vipUser.button') }}
             </button>
             <button v-else>
-              成为VIP
+              {{ $t('preferences.account.normalUser.button') }}
             </button>
           </div>
         </div>
         <div class="settingItem__title">
-          Registration Date
+          {{ $t('preferences.account.createdAt') }}
         </div>
         <div class="settingItem__description">
-          2018-05-23
+          {{ userInfo.createdAt }}
         </div>
       </div>
     </div>
@@ -50,7 +54,11 @@
 <script lang="ts">
 import Vue from 'vue';
 import { remote, ipcRenderer } from 'electron';
-import { mapGetters } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
+import {
+  UserInfo as uActions,
+} from '@/store/actionTypes';
+import { getUserInfo } from '@/libs/apis';
 
 export default Vue.extend({
   name: 'Account',
@@ -58,7 +66,6 @@ export default Vue.extend({
   },
   data() {
     return {
-      isVip: false,
     };
   },
   computed: {
@@ -66,10 +73,24 @@ export default Vue.extend({
       'userInfo', 'token',
     ]),
   },
+  mounted() {
+    this.getUserInfo();
+  },
   methods: {
+    ...mapActions({
+      updateUserInfo: uActions.UPDATE_USER_INFO,
+    }),
     signIn() {
       remote.app.emit('sign-out');
       ipcRenderer.send('add-login');
+    },
+    async getUserInfo() {
+      try {
+        const res = await getUserInfo();
+        this.updateUserInfo(res.me);
+      } catch (error) {
+        // empty
+      }
     },
   },
 });

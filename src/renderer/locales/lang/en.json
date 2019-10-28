@@ -306,9 +306,21 @@
       "title": "My Profile",
       "noToken": {
         "title": "Not Signed In",
-        "description": "Sign in with your phone number to use AI Translation and more advanced features. ",
+        "description": "Sign in with your phone number to use AI Translation and more advanced features.",
         "button": "Sign In"
-      }
+      },
+      "normalUser": {
+        "title": "Account",
+        "description": "Upgrade your account now and get started with exclusive features and more.",
+        "button": "Upgrade"
+      },
+      "vipUser": {
+        "title": "Premium Account ",
+        "description": "Expiration Date: ",
+        "button": "Renew"
+      },
+      "signOut": "Sign out",
+      "createdAt": "Registration Date"
     },
     "premium": {
       "premiumSetting": "Premium",
@@ -414,7 +426,8 @@
     "audioLanguageLoadFail": "Connection failed, please try later",
     "select": {
       "title": "AI Translation",
-      "content": "Select the language you hear in the video and click the generate button."
+      "content": "Select the language you hear in the video and click the generate button.",
+      "contentLimit": "Select the language you hear in the video and click the generate button. You can generate one AI Translation for free per day."
     },
     "translate": {
       "title": "About {time} Left",
@@ -452,11 +465,17 @@
       "title": "Session Expired",
       "content": "Please sign in again."
     },
+    "PermissionFail": {
+      "title": "Uses Remaining Today: 0",
+      "content": "Sorry, you can only generate one AI Translation result per day."
+    },
+    "loading": "Processing ...",
     "cancel": "Cancel",
     "quit": "Quit",
     "generate": "Generate",
     "ok": "Run in Background",
-    "continue": "Cancel"
+    "continue": "Cancel",
+    "upgrade": "OK"
   },
   "translateBubble": {
     "bubbleWhenGrab": "AI Translation will be aborted If you go on, do you want to continue anyway?",
@@ -485,6 +504,10 @@
     "bubbleTranslateForbiddenFail": {
       "title": "Session Expired",
       "content": "Please sign in again."
+    },
+    "bubbleTranslatePermissionFail": {
+      "title": "Uses Remaining Today: 0",
+      "content": "Sorry, you can only generate one AI Translation result per day."
     },
     "ok": "OK",
     "cancel": "Cancel",
