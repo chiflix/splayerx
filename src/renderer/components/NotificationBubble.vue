@@ -242,7 +242,6 @@ export default {
     checkNextVideoUI(time: number) {
       if (time > this.nextVideoPreviewTime && time < this.duration - 1 && this.duration > 240) {
         if (this.nextVideo && !this.manualClosed) {
-          this.$store.dispatch('UpdatePlayingList');
           this.showNextVideo = true;
         }
       } else {

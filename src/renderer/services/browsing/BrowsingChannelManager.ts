@@ -1,6 +1,7 @@
 // @ts-ignore
 import urlParseLax from 'url-parse-lax';
 import { IBrowsingChannelManager } from '@/interfaces/IBrowsingChannelManager';
+import { getGeoIP } from '@/libs/apis';
 
 type channelInfo = {
   channels: channelDetails[],
@@ -38,7 +39,7 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
     this.allCategories.forEach((category: category) => {
       this.allChannels.set(category.type, { channels: [], availableChannels: [] });
     });
-    this.allAvailableChannels = ['bilibili.com', 'iqiyi.com', 'douyu.com'];
+    this.allAvailableChannels = [];
 
     // 初始化默认添加的频道
     const generalChannels = [
@@ -164,6 +165,21 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
       i.availableChannels = available;
     });
     return this.getAllAvailableChannels();
+  }
+
+  public async getDefaultChannelsByCountry(displayLanguage: string): Promise<channelDetails[]> {
+    try {
+      const geo = await getGeoIP();
+      const availableChannels = geo.countryCode === 'CN' ? ['bilibili.com', 'douyu.com', 'iqiyi.com'] : ['youtube.com', 'twitch.com'];
+      (this.allChannels.get('adapted') as channelInfo).availableChannels = availableChannels;
+      this.allAvailableChannels.push(...availableChannels);
+      return this.getAllAvailableChannels();
+    } catch (error) {
+      const availableChannels = displayLanguage === 'zh-Hans' ? ['bilibili.com', 'douyu.com', 'iqiyi.com'] : ['youtube.com', 'twitch.com'];
+      (this.allChannels.get('adapted') as channelInfo).availableChannels = availableChannels;
+      this.allAvailableChannels = availableChannels;
+      return this.getAllAvailableChannels();
+    }
   }
 }
 

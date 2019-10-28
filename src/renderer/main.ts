@@ -234,6 +234,9 @@ new Vue({
     singleCycle(val: boolean) {
       this.menuService.updateMenuItemChecked('playback.singleCycle', val);
     },
+    playlistLoop(val: boolean) {
+      this.menuService.updateMenuItemChecked('playback.playlistLoop', val);
+    },
     enabledSecondarySub() {
       this.menuService.addSecondarySub(this.recentSecondarySubMenu());
     },
@@ -813,11 +816,16 @@ new Vue({
         this.$bus.$emit('seek', Math.ceil(this.duration));
       });
       this.menuService.on('playback.singleCycle', () => {
+        if (this.playlistLoop) this.$store.dispatch('playlistLoop', false);
         if (this.singleCycle) {
           this.$store.dispatch('notSingleCycle');
         } else {
           this.$store.dispatch('singleCycle');
         }
+      });
+      this.menuService.on('playback.playlistLoop', () => {
+        if (this.singleCycle) this.$store.dispatch('notSingleCycle');
+        this.$store.dispatch('playlistLoop', !this.playlistLoop);
       });
       this.menuService.on('playback.snapShot', () => {
         if (!this.paused) {
