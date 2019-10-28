@@ -137,7 +137,8 @@
       "showPlaylist": "Show Playlist",
       "hidePlaylist": "Hide Playlist",
       "previousVideo": "Previous Video",
-      "singleCycle": "Repeat One",
+      "singleCycle": "Loop One",
+      "playlistLoop": "Loop Playlist",
       "snapShot": "Snapshot"
     },
     "splayerx": {

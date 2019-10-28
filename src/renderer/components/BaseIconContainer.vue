@@ -463,6 +463,29 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     height: 11.5px;
   }
 }
+.cycleOne {
+ display: block;
+  @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px),
+  screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
+    width: 15px;
+    height: 7px;
+  }
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+    width: 15px;
+    height: 7px;
+  }
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+    width: 17px;
+    height: 8px;
+  }
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+    width: 24px;
+    height: 11.5px;
+  } 
+}
 .refresh {
   .default {
     display: block;
