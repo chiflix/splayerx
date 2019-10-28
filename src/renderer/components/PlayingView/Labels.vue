@@ -2,12 +2,12 @@
   <div class="labels">
     <transition name="cycle-label">
       <div
-        key="cycle"
-        v-show="showCycleLabel"
+        :key="showCycleLabel"
+        v-show="showCycleLabel || showPlaylistLoopLabel"
         class="cycle-label"
       >
         <Icon
-          type="cycle"
+          :type="showCycleLabel ? 'cycleOne': 'cycle'"
           class="cycle-icon"
         />
       </div>
@@ -45,12 +45,7 @@ export default {
     },
     showCycleLabel: Boolean,
     showSpeedLabel: Boolean,
-  },
-  data() {
-    return {
-    };
-  },
-  mounted() {
+    showPlaylistLoopLabel: Boolean,
   },
 };
 </script>
@@ -75,6 +70,9 @@ export default {
     }
   }
   .cycle-label {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     background-image: radial-gradient(
       60% 134%,
       rgba(255,255,255,0.09) 44%,
@@ -102,12 +100,6 @@ screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
     .cycle-label {
       width: 23px;
       margin-right: 5px;
-      .cycle-icon {
-        margin-top: 3px;
-        margin-left: 5px;
-        margin-right: 6px;
-        margin-bottom: 4px;
-      }
     }
   }
 }
@@ -128,12 +120,6 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480p
     .cycle-label {
       width: 23px;
       margin-right: 5px;
-      .cycle-icon {
-        margin-top: 3px;
-        margin-left: 5px;
-        margin-right: 6px;
-        margin-bottom: 4px;
-      }
     }
   }
 }
@@ -154,12 +140,6 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080
     .cycle-label {
       width: 28px;
       margin-right: 6px;
-      .cycle-icon {
-        margin-top: 4px;
-        margin-left: 7px;
-        margin-right: 7.5px;
-        margin-bottom: 5px;
-      }
     }
   }
 }
@@ -180,12 +160,6 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     .cycle-label {
       width: 38px;
       margin-right: 9px;
-      .cycle-icon {
-        margin-top: 7px;
-        margin-left: 9px;
-        margin-right: 10px;
-        margin-bottom: 6.75px;
-      }
     }
   }
 }

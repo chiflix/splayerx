@@ -76,23 +76,37 @@ export function getSystemLocale() {
 
 if (process.type === 'browser') {
   const crossThreadCache = {};
-  app.getCrossThreadCache = key => crossThreadCache[key];
+  app.getCrossThreadCache = (key) => {
+    if (key instanceof Array) {
+      const re = {};
+      key.forEach((k) => {
+        re[k] = crossThreadCache[k];
+      });
+      return Object.values(re).includes(undefined) ? undefined : re;
+    }
+    return crossThreadCache[key];
+  };
   app.setCrossThreadCache = (key, val) => {
     crossThreadCache[key] = val;
   };
 }
-function crossThreadCache(key, fn) {
+export function crossThreadCache(key, fn) {
   const func = async () => {
     if (typeof app.getCrossThreadCache !== 'function') return fn();
     let val = app.getCrossThreadCache(key);
     if (val) return val;
     val = await fn();
-    app.setCrossThreadCache(key, val);
+    if (key instanceof Array) {
+      key.forEach(k => app.setCrossThreadCache(k, val[k]));
+    } else {
+      app.setCrossThreadCache(key, val);
+    }
     return val;
   };
   func.noCache = fn;
   return func;
 }
+app.crossThreadCache = crossThreadCache;
 
 export const getIP = crossThreadCache('ip', async () => {
   const res = await fetcher.get('https://ip.xindong.com/myip');

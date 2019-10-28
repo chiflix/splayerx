@@ -117,7 +117,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['pipSize', 'pipPos', 'isHistory', 'currentChannel', 'winHeight', 'showSidebar']),
+    ...mapGetters(['pipSize', 'pipPos', 'isHistory', 'currentChannel', 'winHeight', 'showSidebar', 'displayLanguage']),
     currentRouteName() {
       return this.$route.name;
     },
@@ -170,11 +170,12 @@ export default {
     },
   },
   created() {
-    asyncStorage.get('channels').then((data) => {
+    asyncStorage.get('channels').then(async (data) => {
       if (data.channels) {
         this.channelsDetail = BrowsingChannelManager.initAvailableChannels(data.channels);
       } else {
-        this.channelsDetail = BrowsingChannelManager.getAllAvailableChannels();
+        this.channelsDetail = await BrowsingChannelManager
+          .getDefaultChannelsByCountry(this.displayLanguage);
       }
     });
   },

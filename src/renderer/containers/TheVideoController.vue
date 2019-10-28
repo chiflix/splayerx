@@ -94,6 +94,7 @@
       :show-full-time-code="showFullTimeCode"
       :rate="rate"
       :show-cycle-label="!!singleCycle"
+      :show-playlist-loop-label="!!playlistLoop"
       :show-speed-label="showSpeedLabel"
       :on-time-code-click="onTimeCodeClick"
       :style="{ marginBottom: preFullScreen ? '10px' : '0' }"
@@ -224,7 +225,7 @@ export default {
       wheelTime: ({ Input }) => Input.wheelTimestamp,
     }),
     ...mapGetters([
-      'originSrc', 'paused', 'ratio', 'duration', 'intrinsicWidth', 'intrinsicHeight', 'singleCycle', 'rate', 'muted', 'volume',
+      'originSrc', 'paused', 'ratio', 'duration', 'intrinsicWidth', 'intrinsicHeight', 'singleCycle', 'rate', 'muted', 'volume', 'playlistLoop',
       'winWidth',
       'playingList', 'isFolderList',
       'isFullScreen', 'isFocused', 'isMinimized',
