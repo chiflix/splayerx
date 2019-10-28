@@ -122,6 +122,7 @@ export default {
         /^https:\/\/openapi.baidu.com\//i,
         /^https:\/\/auth.alipay.com\/login\//i,
         /^https:\/\/account.xiaomi.com\/pass\//i,
+        /^https:\/\/www.facebook.com\/v[0-9].[0-9]\/dialog\/oauth/i,
       ],
       webInfo: {
         hasVideo: false,
@@ -131,7 +132,7 @@ export default {
         canReload: true,
       },
       allChannels: ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch', 'coursera', 'ted'],
-      compareStr: [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch'], ['coursera'], ['ted']],
+      compareStr: [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com', 'film.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch'], ['coursera'], ['ted']],
       hideMainWindow: false,
       startLoadUrl: '',
       barrageOpenByPage: false,
@@ -159,6 +160,7 @@ export default {
       'channels',
       'currentChannel',
       'displayLanguage',
+      'isMaximized',
     ]),
     isDarwin() {
       return process.platform === 'darwin';
@@ -534,7 +536,6 @@ export default {
         this.$electron.ipcRenderer.send('remove-browser');
         if (this.backToLandingView) {
           setTimeout(() => {
-            if (this.isFullScreen) this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
             windowRectService.uploadWindowBy(false, 'landing-view', undefined, undefined, this.winSize, this.winPos, this.isFullScreen);
             this.$electron.ipcRenderer.send('callMainWindowMethod', 'show');
           }, 200);
@@ -736,11 +737,10 @@ export default {
         || url === 'about:blank'
         || urlParseLax(this.currentUrl).href === urlParseLax(url).href
       ) return;
-      const newHostname = urlParseLax(url).hostname;
       const oldChannel = this.currentChannel;
       let newChannel = '';
       this.allChannels.forEach((channel: string, index: number) => {
-        if (this.compareStr[index].findIndex((str: string) => newHostname.includes(str)) !== -1) {
+        if (this.compareStr[index].findIndex((str: string) => url.includes(str)) !== -1) {
           newChannel = `${channel}.com`;
         }
       });
@@ -990,7 +990,7 @@ export default {
           [rect.x, rect.y, rect.width, rect.height],
         );
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [0]);
-      } else {
+      } else if (!this.isMaximized) {
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', this.browsingSize);
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', this.browsingPos);
       }

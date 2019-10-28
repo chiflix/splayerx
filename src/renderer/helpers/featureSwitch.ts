@@ -1,7 +1,7 @@
 import * as configcat from 'configcat-js';
 import store from '@/store';
 import { log } from '@/libs/Log';
-import { getMainVersion } from '@/libs/utils';
+import { getMainVersion, getIsBeta } from '@/libs/utils';
 import { getSystemLocale, getClientUUID } from '@/../shared/utils';
 
 const configCatApiKey = process.env.NODE_ENV === 'development'
@@ -17,6 +17,7 @@ async function getUserObject() {
     identifier: await getClientUUID(),
     custom: {
       version: getMainVersion(),
+      isBeta: getIsBeta().toString(),
       displayLanguage: store.getters.displayLanguage || getSystemLocale(),
     },
   };
@@ -57,3 +58,5 @@ export const isAudioCenterChannelEnabled = async () => getConfig('isAudioCenterC
 export const isAccountEnabled = async () => getConfig('isAccountEnabled', false);
 
 export const apiOfAccountService = async () => getConfig('apiForAccountService', process.env.ACCOUNT_API);
+
+export const isTranslateLimit = async () => getConfig('isTranslateLimit', false);

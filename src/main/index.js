@@ -8,7 +8,6 @@ import path, {
   basename, dirname, extname, join, resolve,
 } from 'path';
 import fs from 'fs';
-import http from 'http';
 import rimraf from 'rimraf';
 import { audioGrabService } from './helpers/AudioGrabService';
 import './helpers/electronPrototypes';
@@ -16,7 +15,6 @@ import {
   getValidVideoRegex, getValidSubtitleRegex,
   getToken, saveToken,
   getIP,
-  getRightPort,
 } from '../shared/utils';
 import { mouse } from './helpers/mouse';
 import MenuService from './menu/MenuService';
@@ -88,14 +86,12 @@ let inited = false;
 let hideBrowsingWindow = false;
 let finalVideoToOpen = [];
 let signInEndPoint = '';
-let localHostPort = 0;
-let fileDirServerOnLine = false;
 const locale = new Locale();
 const tmpVideoToOpen = [];
 const tmpSubsToOpen = [];
 const subRegex = getValidSubtitleRegex();
 const allChannels = ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch', 'coursera', 'ted'];
-const compareStr = [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch'], ['coursera'], ['ted']];
+const compareStr = [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com', 'film.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch'], ['coursera'], ['ted']];
 const titlebarUrl = process.platform === 'darwin' ? `file:${resolve(__static, 'pip/macTitlebar.html')}` : `file:${resolve(__static, 'pip/winTitlebar.html')}`;
 const maskUrl = process.platform === 'darwin' ? `file:${resolve(__static, 'pip/mask.html')}` : `file:${resolve(__static, 'pip/mask.html')}`;
 const mainURL = process.env.NODE_ENV === 'development'
@@ -320,54 +316,7 @@ function createPreferenceWindow(e, route) {
   }
 }
 
-/**
- * @description sign in window need aliyun nc valication with // protocal
- * @author tanghaixiang
- */
-function createFileDirServer() {
-  http.createServer((request, response) => {
-    console.log('request ', request.url);
-    let filePath = `${request.url}`;
-    if (filePath === '/') {
-      filePath = '/login.html';
-    }
-    const extname = String(path.extname(filePath)).toLowerCase();
-    const mimeTypes = {
-      '.html': 'text/html',
-      '.js': 'text/javascript',
-      '.css': 'text/css',
-      '.json': 'application/json',
-      '.png': 'image/png',
-      '.jpg': 'image/jpg',
-      '.gif': 'image/gif',
-      '.svg': 'image/svg+xml',
-      '.wav': 'audio/wav',
-      '.mp4': 'video/mp4',
-      '.woff': 'application/font-woff',
-      '.ttf': 'application/font-ttf',
-      '.eot': 'application/vnd.ms-fontobject',
-      '.otf': 'application/font-otf',
-      '.wasm': 'application/wasm',
-    };
-    const contentType = mimeTypes[extname] || 'application/octet-stream';
-    fs.readFile(`${__dirname}${filePath}`, (error, content) => {
-      if (error) {
-        return;
-      }
-      response.writeHead(200, { 'Content-Type': contentType });
-      response.end(content, 'utf-8');
-    });
-  }).listen(localHostPort);
-}
-
 function createLoginWindow(e, route) {
-  // in production use http protocal
-  // aliyun captcha use // protocal
-  if (process.env.NODE_ENV === 'production' && !fileDirServerOnLine) {
-    createFileDirServer();
-    fileDirServerOnLine = true;
-    loginURL = `http://localhost:${localHostPort}/login.html`;
-  }
   const loginWindowOptions = {
     useContentSize: true,
     frame: false,
@@ -465,7 +414,6 @@ function createBrowsingWindow(args) {
     useContentSize: true,
     frame: false,
     titleBarStyle: 'none',
-    transparent: true,
     webPreferences: {
       webSecurity: false,
       nodeIntegration: true,
@@ -610,8 +558,8 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('pip-window-fullscreen', () => {
     if (browsingWindow && browsingWindow.isFocused()) {
       browsingWindow.setFullScreen(!browsingWindow.isFullScreen());
-      titlebarView.webContents
-        .executeJavaScript(InjectJSManager.updateFullScreenIcon(browsingWindow.isFullScreen()));
+      titlebarView.webContents.executeJavaScript(InjectJSManager
+        .updateFullScreenIcon(browsingWindow.isFullScreen(), isBrowsingWindowMax));
     }
   });
   ipcMain.on('pip-window-close', (evt, args) => {
@@ -804,7 +752,8 @@ function registerMainWindowEvent(mainWindow) {
     }
   });
   ipcMain.on('update-full-state', (evt, isFullScreen) => {
-    titlebarView.webContents.executeJavaScript(InjectJSManager.updateFullScreenIcon(isFullScreen));
+    titlebarView.webContents.executeJavaScript(InjectJSManager
+      .updateFullScreenIcon(isFullScreen, isBrowsingWindowMax));
   });
   ipcMain.on('mouseup', (evt, type) => {
     switch (type) {
@@ -816,13 +765,15 @@ function registerMainWindowEvent(mainWindow) {
         break;
       case 'full':
         browsingWindow.setFullScreen(true);
-        titlebarView.webContents.executeJavaScript(InjectJSManager.updateFullScreenIcon(true));
+        titlebarView.webContents.executeJavaScript(InjectJSManager
+          .updateFullScreenIcon(true, isBrowsingWindowMax));
         break;
       case 'recover':
         browsingWindow.setFullScreen(false);
         browsingWindow.getBrowserViews()[0].webContents
           .executeJavaScript(InjectJSManager.changeFullScreen(false));
-        titlebarView.webContents.executeJavaScript(InjectJSManager.updateFullScreenIcon(false));
+        titlebarView.webContents.executeJavaScript(InjectJSManager
+          .updateFullScreenIcon(false, isBrowsingWindowMax));
         break;
       case 'max':
         if (browsingWindow.isMaximized()) {
@@ -1056,8 +1007,8 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('key-events', (e, keyCode) => {
     if (keyCode === 13) {
       browsingWindow.setFullScreen(!browsingWindow.isFullScreen());
-      titlebarView.webContents
-        .executeJavaScript(InjectJSManager.updateFullScreenIcon(browsingWindow.isFullScreen()));
+      titlebarView.webContents.executeJavaScript(InjectJSManager
+        .updateFullScreenIcon(browsingWindow.isFullScreen(), isBrowsingWindowMax));
     } else {
       browsingWindow.getBrowserViews()[0].webContents
         .executeJavaScript(InjectJSManager.emitKeydownEvent(keyCode));
@@ -1180,6 +1131,9 @@ function registerMainWindowEvent(mainWindow) {
 
   ipcMain.on('sign-in-end-point', (events, data) => {
     signInEndPoint = data;
+    if (process.env.NODE_ENV === 'production') {
+      loginURL = `${signInEndPoint}/static/splayer/login.html`;
+    }
   });
 }
 
@@ -1458,6 +1412,7 @@ const oauthRegex = [
   /^https:\/\/openapi.baidu.com\//i,
   /^https:\/\/auth.alipay.com\/login\//i,
   /^https:\/\/account.xiaomi.com\/pass\//i,
+  /^https:\/\/www.facebook.com\/v[0-9].[0-9]\/dialog\/oauth/i,
 ];
 app.on('web-contents-created', (webContentsCreatedEvent, contents) => {
   if (contents.getType() === 'browserView') {
@@ -1541,7 +1496,3 @@ app.getIP = getIP;
 
 // export getSignInEndPoint to static login preload.js
 app.getSignInEndPoint = () => signInEndPoint;
-
-getRightPort().then((port) => {
-  localHostPort = port;
-}).catch(console.error);

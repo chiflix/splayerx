@@ -427,3 +427,8 @@ export function getMainVersion(): string {
   const vs = getNumbersFromVersion(version);
   return `${vs[0]}.${vs[1]}.${vs[2]}`;
 }
+
+/** Is this a beta release? */
+export function getIsBeta(): boolean {
+  return version.indexOf('beta') !== -1;
+}

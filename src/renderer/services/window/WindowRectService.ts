@@ -124,6 +124,7 @@ export default class WindowRectService implements IWindowRectRequest {
     isFullScreen?: boolean,
   ): number[] {
     let newRect: number[] = [];
+    ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [fullScreen]);
     if (!fullScreen && whichView === 'landing-view') {
       if (lastWindowSize && windowPosition && isFullScreen === false) {
         const oldRect = windowPosition.concat(lastWindowSize);
