@@ -399,7 +399,8 @@
     "audioLanguageLoadFail": "Conexión fallida, intente más tarde",
     "select": {
       "title": "Seleccionar idioma de audio",
-      "content": "Para generar un resultado de tranlación, por favor seleccione el idioma que escuche en el vídeo y haga clic en el botón generar. El proceso puede tardar algún tiempo."
+      "content": "Para generar un resultado de tranlación, por favor seleccione el idioma que escuche en el vídeo y haga clic en el botón generar. El proceso puede tardar algún tiempo.",
+      "contentLimit": "Seleccione el idioma que escuche en el vídeo y haga clic en el botón generar. Puede generar una traducción de AI gratis por día."
     },
     "translate": {
       "title": "Acerca de {time} izquierda",
@@ -437,11 +438,17 @@
       "title": "Sesión caducada",
       "content": "Inicie una sesión de nuevo."
     },
+    "PermissionFail": {
+      "title": "Usos restantes hoy: 0",
+      "content": "Lo sentimos, sólo puedes generar un resultado de traducción de AI por día."
+    },
+    "loading": "Procesando ...",
     "cancel": "Cancelar",
     "quit": "Salir",
     "generate": "Generar",
     "ok": "OK",
-    "continue": "Cancelar"
+    "continue": "Cancelar",
+    "upgrade": "OK"
   },
   "translateBubble": {
     "bubbleWhenGrab": "La traducción de AI se abortará si continúa, ¿quieres continuar de todos modos?",
@@ -470,6 +477,10 @@
     "bubbleTranslateForbiddenFail": {
       "title": "Sesión caducada",
       "content": "Inicie una sesión de nuevo."
+    },
+    "bubbleTranslatePermissionFail": {
+      "title": "Usos restantes hoy: 0",
+      "content": "Lo sentimos, sólo puedes generar un resultado de traducción de AI por día."
     },
     "ok": "OK",
     "cancel": "Cancelar",
