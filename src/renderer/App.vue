@@ -17,8 +17,8 @@
       :style="{
         width: showSidebar ? '76px' : '0',
       }"
-      show-sidebar="showSidebar"
       :current-url="currentUrl"
+      show-sidebar="showSidebar"
     />
     <transition
       :name="transitionMode"

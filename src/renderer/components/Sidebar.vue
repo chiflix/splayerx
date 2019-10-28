@@ -102,7 +102,7 @@ export default {
     },
     showSidebar: {
       type: Boolean,
-      default: false
+      default: false,
     },
   },
   data() {
