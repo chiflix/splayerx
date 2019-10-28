@@ -24,4 +24,5 @@ export interface IBrowsingChannelManager {
   getAllAvailableChannels(): channelDetails[]
   repositionChannels(from: number, to: number): channelDetails[]
   initAvailableChannels(channels: channelDetails[]): channelDetails[]
+  getDefaultChannelsByCountry(displayLanguage: string): Promise<channelDetails[]>
 }
