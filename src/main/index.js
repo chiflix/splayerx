@@ -1586,6 +1586,14 @@ app.on('sign-out', () => {
   }
 });
 
+app.on('route-account', (e) => {
+  if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
+    preferenceWindow.webContents.send('route-account');
+  } else {
+    createPreferenceWindow(e, 'account');
+  }
+});
+
 app.getDisplayLanguage = () => {
   locale.getDisplayLanguage();
   return locale.displayLanguage;

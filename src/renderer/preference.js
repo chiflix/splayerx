@@ -12,7 +12,9 @@ import {
   UserInfo as uActions,
 } from '@/store/actionTypes';
 import '@/css/style.scss';
-import { getUserInfo, setToken, getGeoIP } from '@/libs/apis';
+import {
+  getUserInfo, getProductList, setToken, getGeoIP,
+} from '@/libs/apis';
 
 Vue.use(VueI18n);
 Vue.use(Vuex);
@@ -123,6 +125,10 @@ new Vue({
       }
     });
 
+    ipcRenderer.on('route-account', () => {
+      this.$router.push({ name: 'Account' });
+    });
+
     // load global data when sign in is opend
     const account = remote.getGlobal('account');
     this.updateUserInfo(account);
@@ -142,6 +148,7 @@ new Vue({
     ...mapActions({
       updateUserInfo: uActions.UPDATE_USER_INFO,
       updateToken: uActions.UPDATE_USER_TOKEN,
+      updatePremiumList: uActions.UPDATE_PREMIUM,
     }),
     async getUserInfo() {
       if (this.didGetUserInfo) return;
@@ -149,6 +156,8 @@ new Vue({
       try {
         const res = await getUserInfo();
         this.updateUserInfo(res.me);
+        const productList = await getProductList();
+        this.updatePremiumList(productList);
       } catch (error) {
         // empty
         this.didGetUserInfo = false;

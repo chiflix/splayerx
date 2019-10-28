@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { UserInfo as m } from '@/store/mutationTypes';
 import { UserInfo as a } from '@/store/actionTypes';
+import { toDateString } from '@/libs/utils';
 
 type UserInfoState = {
   token: string,
@@ -11,6 +12,7 @@ type UserInfoState = {
   vipExpiredAt: string,
   isVip: boolean,
   signInCallback: Function,
+  premiumList: [],
 };
 
 const state = {
@@ -21,6 +23,7 @@ const state = {
   createdAt: '',
   vipExpiredAt: '',
   isVip: false,
+  premiumList: [],
   signInCallback: () => { },
 };
 
@@ -44,6 +47,9 @@ const getters = {
   signInCallback(state: UserInfoState) {
     return state.signInCallback;
   },
+  premiumList(state: UserInfoState) {
+    return state.premiumList;
+  },
 };
 
 const mutations = {
@@ -62,9 +68,11 @@ const mutations = {
       state.id = userInfo.id ? userInfo.id : state.id;
       state.phone = userInfo.phone ? userInfo.phone : state.phone;
       state.displayName = userInfo.displayName ? userInfo.displayName : state.displayName;
-      state.createdAt = userInfo.createdAt ? userInfo.createdAt : state.createdAt;
+      state.createdAt = userInfo.createdAt
+        ? toDateString(userInfo.createdAt) : state.createdAt;
       state.isVip = userInfo.isVip ? userInfo.isVip : state.isVip;
-      state.vipExpiredAt = userInfo.vipExpiredAt ? userInfo.vipExpiredAt : state.vipExpiredAt;
+      state.vipExpiredAt = userInfo.vipExpiredAt
+        ? toDateString(userInfo.vipExpiredAt) : state.vipExpiredAt;
     } else {
       state.id = '';
       state.phone = '';
@@ -77,6 +85,9 @@ const mutations = {
   [m.UPDATE_SIGN_IN_CALLBACK](state: UserInfoState, callback: Function) {
     state.signInCallback = callback;
   },
+  [m.UPDATE_PREMIUM](state: UserInfoState, list: []) {
+    state.premiumList = list;
+  },
 };
 
 const actions = {
@@ -87,6 +98,7 @@ const actions = {
     phone: string,
     displayName: string,
     createdAt: string,
+    vipExpiredAt: string,
   }) {
     commit(m.UPDATE_USER_INFO, userInfo);
   },
@@ -99,6 +111,11 @@ const actions = {
     commit,
   }: any, callback: Function) {
     commit(m.UPDATE_SIGN_IN_CALLBACK, callback);
+  },
+  [a.UPDATE_PREMIUM]({
+    commit,
+  }: any, list: []) {
+    commit(m.UPDATE_PREMIUM, list);
   },
 };
 

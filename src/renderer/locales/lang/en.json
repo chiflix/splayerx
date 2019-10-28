@@ -325,7 +325,19 @@
     "premium": {
       "premiumSetting": "Premium",
       "title": "Splayer VIP Privilege",
-      "description": "In order to achieve stable and sustainable development for a long time, users are welcome to support the shooter audio and"
+      "description": "In order to achieve stable and sustainable development for a long time, users are welcome to support the shooter audio and",
+      "content": {
+        "description1": "Extend AI Translation time for your daily use",
+        "description2": "Support more languages in AI Translation",
+        "description3": "Export unlimited speech recognition results",
+        "description4": "New features are coming soon",
+        "description5": "",
+        "description6": ""
+      },
+      "payType": {
+        "alipay": "Alipay",
+        "wxpay": "Wechat Pay"
+      }
     }
   },
   "privacyBubble": {
@@ -534,6 +546,28 @@
       "retry": "retry",
       "error300": "Verification failed, please",
       "errorNetwork": "Network Error. Please"
+    }
+  },
+  "premiumModal": {
+    "loading": {
+      "content": "Processing，please wait a second …",
+      "button": "Close"
+    },
+    "success": {
+      "h2": "Thanks for your support !",
+      "h1": "Payment Successful!",
+      "h4": "NOW",
+      "content1": "Extend AI Translation Time",
+      "content2": "More Languages Support in AI Translation",
+      "content3": "Export Translation Results Unlimitedly",
+      "button": "Done"
+    },
+    "fail": {
+      "h1": "Sorry",
+      "content": "Your transaction could not be processed，Please contact us",
+      "copy": "Copy",
+      "copied": "Copied",
+      "button": "Back"
     }
   }
 }

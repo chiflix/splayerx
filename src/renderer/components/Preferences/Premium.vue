@@ -7,16 +7,18 @@
       {{ $t('preferences.premium.description') }}
     </div>
     <div
-      v-if="isCN"
+      v-if="isCNLanguage"
       class="settingItem__functionList"
     >
       <ul>
-        <li>AI翻译功能每天可使用10小时</li>
-        <li>更多智能翻译语言选择</li>
+        <li>{{ $t('preferences.premium.content.description1') }}</li>
+        <li>{{ $t('preferences.premium.content.description2') }}</li>
+        <li>{{ $t('preferences.premium.content.description3') }}</li>
       </ul>
       <ul>
-        <li>AI翻译功能每天可使用10小时</li>
-        <li>更多智能翻译语言选择</li>
+        <li>{{ $t('preferences.premium.content.description4') }}</li>
+        <li>{{ $t('preferences.premium.content.description5') }}</li>
+        <li>{{ $t('preferences.premium.content.description6') }}</li>
       </ul>
     </div>
     <div
@@ -24,28 +26,30 @@
       class="settingItem__functionList"
     >
       <ul>
-        <li>AI翻译功能每天可使用10小时</li>
-        <li>更多智能翻译语言选择</li>
+        <li>{{ $t('preferences.premium.content.description1') }}</li>
+        <li>{{ $t('preferences.premium.content.description2') }}</li>
+        <li>{{ $t('preferences.premium.content.description3') }}</li>
+        <li>{{ $t('preferences.premium.content.description4') }}</li>
       </ul>
     </div>
     <div class="settingItem__payList">
-      <BaseRadio
+      <!-- <BaseRadio
         v-model="payType"
         value="applepay"
       >
         ApplePay
-      </BaseRadio>
+      </BaseRadio>-->
       <BaseRadio
         v-model="payType"
         value="alipay"
       >
-        Alipay
+        {{ $t('preferences.premium.payType.alipay') }}
       </BaseRadio>
       <BaseRadio
         v-model="payType"
         value="wxpay"
       >
-        Paypal
+        {{ $t('preferences.premium.payType.wxpay') }}
       </BaseRadio>
     </div>
     <ul class="settingItem__productionList">
@@ -111,39 +115,41 @@
       >
         <transition name="success-up">
           <h2 v-if="isPaySuccess">
-            感谢您对SPlayer的支持
+            {{ $t('premiumModal.success.h2') }}
           </h2>
         </transition>
         <transition name="success-up">
           <h1 v-if="isPaySuccess">
-            投食成功!
+            {{ $t('premiumModal.success.h1') }}
           </h1>
         </transition>
         <transition name="success-up">
           <h4 v-if="isPaySuccess">
-            NOW
+            {{ $t('premiumModal.success.h4') }}
           </h4>
         </transition>
         <transition name="success-up2">
           <p v-if="isPaySuccess">
-            所有投食记录永久保留
+            {{ $t('premiumModal.success.content1') }}
           </p>
         </transition>
         <transition name="success-up2">
           <p v-if="isPaySuccess">
-            更多智能翻译语言选择
+            {{ $t('premiumModal.success.content2') }}
           </p>
         </transition>
         <transition name="success-up2">
           <p v-if="isPaySuccess">
-            无限制导出字幕文件
+            {{ $t('premiumModal.success.content3') }}
           </p>
         </transition>
         <transition name="success-fade">
-          <span
+          <button
             v-if="isPaySuccess"
             @click="closePay"
-          >立即返回</span>
+          >
+            {{ $t('premiumModal.success.button') }}
+          </button>
         </transition>
       </div>
       <div
@@ -152,38 +158,50 @@
       >
         <div>
           <div class="loader">
-            <Icon
-              type="loading"
-            />
+            <Icon type="loading" />
           </div>
         </div>
-        <p>投食中，请稍后 ...</p>
-        <span @click="closePay">关闭页面</span>
+        <p>{{ $t('premiumModal.loading.content') }}</p>
+        <button @click="closePay">
+          {{ $t('premiumModal.loading.button') }}
+        </button>
       </div>
       <div
         v-fade-in="isPayFail"
         class="fail-box"
       >
-        <h1>很遗憾</h1>
-        <p>投食过程中遇到了一些问题，请通过邮箱联系我们</p>
+        <h1>{{ $t('premiumModal.fail.h1') }}</h1>
+        <p>{{ $t('premiumModal.fail.content') }}</p>
         <h5>
-          support@splayer.org <span
+          support@splayer.org
+          <span
             @click="copy"
             :class="isCopyed ? '' : 'canHover'"
-          >{{ isCopyed ? '已复制' : '复制' }}</span>
+          >{{ isCopyed ? $t('premiumModal.fail.copied') : $t('premiumModal.fail.copy') }}</span>
         </h5>
-        <span @click="closePay">返回上一页</span>
+        <button @click="closePay">
+          {{ $t('premiumModal.fail.button') }}
+        </button>
       </div>
+    </div>
+    <div class="load-icons">
+      <img src="../../assets/payment-success-icon1.svg">
+      <img src="../../assets/payment-success-icon2.svg">
+      <img src="../../assets/payment-success-icon3.svg">
+      <img src="../../assets/payment-success-icon4.svg">
+      <img src="../../assets/payment-success-background1.svg">
+      <img src="../../assets/payment-success-background2.svg">
     </div>
   </div>
 </template>
 <script lang="ts">
 import Vue from 'vue';
-import { mapGetters } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
 import { remote, ipcRenderer, clipboard } from 'electron';
 import {
   applePay, getProductList, createOrder, ApiError,
 } from '@/libs/apis';
+import { UserInfo as uActions } from '@/store/actionTypes';
 import Icon from '@/components/BaseIconContainer.vue';
 import BaseRadio from './BaseRadio.vue';
 import { log } from '../../libs/Log';
@@ -196,23 +214,21 @@ export default Vue.extend({
   },
   data() {
     return {
-      isCN: true,
       payType: 'alipay',
       isPaying: false,
       isApplePaing: false,
       isPaySuccess: false,
       isPayFail: false,
       isCopyed: false,
-      productList: [
-      ],
     };
   },
   computed: {
-    ...mapGetters([
-      'countryCode',
-    ]),
+    ...mapGetters(['countryCode', 'displayLanguage', 'premiumList']),
     isMas() {
       return !!process.mas;
+    },
+    isCNLanguage() {
+      return this.displayLanguage.indexOf('zh') > -1;
     },
     country() {
       if (this.countryCode === 'CN' || !this.countryCode) {
@@ -221,60 +237,89 @@ export default Vue.extend({
       return 'USD';
     },
     list() {
-      return this.productList.map((e: {
-        appleProductID: string,
-        currentPrice: {
-          CNY: number,
-          USD: number,
+      return this.premiumList.map(
+        (e: {
+          appleProductID: string;
+          currentPrice: {
+            CNY: number;
+            USD: number;
+          };
+          originalPrice: {
+            CNY: number;
+            USD: number;
+          };
+          duration: {
+            value: number;
+          };
+          id: string;
+        }) => {
+          let currentPrice = (e.currentPrice[this.country] / 100).toFixed(2);
+          let originalPrice = (e.originalPrice[this.country] / 100).toFixed(2);
+          if (
+            e.currentPrice[this.country]
+            === parseInt(currentPrice, 10) * 100
+          ) {
+            currentPrice = (e.currentPrice[this.country] / 100).toFixed(0);
+          }
+          if (
+            e.originalPrice[this.country]
+            === parseInt(originalPrice, 10) * 100
+          ) {
+            originalPrice = (e.originalPrice[this.country] / 100).toFixed(0);
+          }
+          return {
+            id: e.id,
+            appleProductID: e.appleProductID,
+            currentPrice,
+            originalPrice,
+          };
         },
-        originalPrice: {
-          CNY: number,
-          USD: number,
-        },
-        duration: {
-          value: number,
-        },
-        id: string,
-      }) => {
-        const currentPrice = e.currentPrice[this.country] / 100;
-        const originalPrice = e.originalPrice[this.country] / 100;
-        return {
-          id: e.id,
-          appleProductID: e.appleProductID,
-          currentPrice: currentPrice.toFixed(2),
-          originalPrice: originalPrice.toFixed(2),
-        };
-      });
+      );
+    },
+  },
+  watch: {
+    displayLanguage(val: string) {
+      if (val) this.$i18n.locale = val;
     },
   },
   async mounted() {
     try {
-      this.productList = await getProductList();
+      const productList = await getProductList();
+      this.updatePremiumList(productList);
     } catch (error) {
       // empty
     }
-    ipcRenderer.on('applePay-success', async (e: Event, payment: {
-      id: string, productID: string, transactionID: string, receipt: Buffer
-    }) => {
-      if (this.isApplePaing) return;
-      this.isApplePaing = true;
-      try {
-        await applePay({
-          currency: this.country,
-          productID: payment.id,
-          transactionID: payment.transactionID,
-          receipt: payment.receipt.toString('base64'),
-        });
-        this.isPaying = false;
-        this.isPaySuccess = true;
-        this.isPayFail = false;
-      } catch (error) {
-        this.isPaying = false;
-        this.isPaySuccess = false;
-        this.isPayFail = true;
-      }
-      this.isApplePaing = false;
-    });
+    ipcRenderer.on(
+      'applePay-success',
+      async (
+        e: Event,
+        payment: {
+          id: string;
+          productID: string;
+          transactionID: string;
+          receipt: Buffer;
+        },
+      ) => {
+        if (this.isApplePaing) return;
+        this.isApplePaing = true;
+        try {
+          await applePay({
+            currency: this.country,
+            productID: payment.id,
+            transactionID: payment.transactionID,
+            receipt: payment.receipt.toString('base64'),
+          });
+          this.isPaying = false;
+          this.isPaySuccess = true;
+          this.isPayFail = false;
+        } catch (error) {
+          this.isPaying = false;
+          this.isPaySuccess = false;
+          this.isPayFail = true;
+        }
+        this.isApplePaing = false;
+      },
+    );
     ipcRenderer.on('applePay-fail', async (e: Event, fail: string) => {
       log.debug('applePay', fail);
       this.isPaying = false;
@@ -296,48 +341,56 @@ export default Vue.extend({
     });
   },
   methods: {
+    ...mapActions({
+      updatePremiumList: uActions.UPDATE_PREMIUM,
+    }),
     buy(item: {
-      id: string,
-      appleProductID: string,
-      currentPrice: string,
-      originalPrice: string
+      id: string;
+      appleProductID: string;
+      currentPrice: string;
+      originalPrice: string;
     }) {
       if (this.isPaying) return;
       this.isPaying = true;
       if (this.isMas || this.payType === 'applepay') {
         // @ts-ignore
-        remote.app.applePay(item.appleProductID, item.id, 1, (isProductValid: boolean) => {
-          if (!isProductValid) {
-            this.isPaying = false;
-            this.isPaySuccess = false;
-            this.isPayFail = true;
-          }
-        });
+        remote.app.applePay(
+          item.appleProductID,
+          item.id,
+          1,
+          (isProductValid: boolean) => {
+            if (!isProductValid) {
+              this.isPaying = false;
+              this.isPaySuccess = false;
+              this.isPayFail = true;
+            }
+          },
+        );
       } else {
         const channel = this.payType;
         createOrder({
           channel,
           currency: 'CNY',
           productID: item.id,
-        }).then((res: {
-          url: string,
-          orderID: string,
-        }) => {
-          log.debug('createOrder', res.url);
-          ipcRenderer.send('add-payment', {
-            channel,
-            url: window.btoa(res.url),
-            orderID: res.orderID,
+        })
+          .then((res: { url: string; orderID: string }) => {
+            log.debug('createOrder', res.url);
+            ipcRenderer.send('add-payment', {
+              channel,
+              url: window.btoa(res.url),
+              orderID: res.orderID,
+            });
+          })
+          .catch((error: ApiError) => {
+            this.isPaying = false;
+            this.isPayFail = true;
+            log.debug('createOrder', error);
+            if (error && (error.status === 400 || error.status === 403)) {
+              this.closePay();
+              remote.app.emit('sign-out');
+              ipcRenderer.send('add-login');
+            }
           });
-        }).catch((error: ApiError) => {
-          this.isPaying = false;
-          this.isPayFail = true;
-          log.debug('createOrder', error);
-          if (error && (error.status === 400 || error.status === 403)) {
-            remote.app.emit('sign-out');
-            ipcRenderer.send('add-login');
-          }
-        });
       }
     },
     closePay() {
@@ -354,9 +407,14 @@ export default Vue.extend({
 });
 </script>
 <style lang="scss" scoped>
+.load-icons {
+  width: 0px;
+  height: 0px;
+  overflow: hidden;
+}
 .settingItem {
   &__attached {
-    background-color: rgba(0,0,0,0.07);
+    background-color: rgba(0, 0, 0, 0.07);
     margin-top: 15px;
     padding: 20px 28px;
     border-radius: 5px;
@@ -365,13 +423,13 @@ export default Vue.extend({
   &__title {
     font-family: $font-medium;
     font-size: 13px;
-    color: rgba(255,255,255,0.7);
+    color: rgba(255, 255, 255, 0.7);
   }
 
   &__description {
     font-family: $font-medium;
     font-size: 11px;
-    color: rgba(255,255,255,0.25);
+    color: rgba(255, 255, 255, 0.25);
     margin-top: 7px;
     margin-bottom: 20px;
   }
@@ -385,7 +443,7 @@ export default Vue.extend({
     li {
       font-family: $font-medium;
       font-size: 11px;
-      color: rgba(255,255,255,0.70);
+      color: rgba(255, 255, 255, 0.7);
       letter-spacing: 0;
       list-style-position: inside;
       margin-bottom: 5px;
@@ -394,39 +452,44 @@ export default Vue.extend({
   &__payList {
     display: flex;
     margin-bottom: 20px;
-    &>div {
-      padding-right: 20px;
-    }
-    &>div:last-child {
-      padding-right: 0;
+    & > div {
+      width: 110px;
     }
   }
   &__productionList {
-    font-family: $font-medium;
     display: flex;
     justify-content: space-between;
     li {
       width: 110px;
       list-style: none;
       text-align: center;
-      background: rgba(0,0,0,0.05);
+      background: rgba(0, 0, 0, 0.05);
       padding-top: 18px;
       padding-bottom: 20px;
       cursor: pointer;
+      transition: all 200ms ease-in;
+      border: 1px solid transparent;
+      border-radius: 2px;
+      &:hover {
+        background: rgba(120, 120, 120, 1);
+        border-color: rgba(255, 255, 255, 0.3);
+      }
     }
     div {
       font-size: 35px;
-      color: #FFFFFF;
-      font-weight: lighter;
+      color: #ffffff;
+      font-weight: 300;
     }
     p {
+      font-family: $font-medium;
       font-size: 10px;
-      color: rgba(255,255,255,0.30);
+      color: rgba(255, 255, 255, 0.3);
       letter-spacing: 0;
     }
     span {
+      font-family: $font-medium;
       font-size: 11px;
-      color: rgba(255,255,255,0.70);
+      color: rgba(255, 255, 255, 0.7);
       letter-spacing: 0;
     }
   }
@@ -445,7 +508,29 @@ export default Vue.extend({
     left: 0;
     top: 0;
     z-index: 2;
-    background-color: rgba(0,0,0,0.9);
+    background-color: rgba(0, 0, 0, 0.9);
+  }
+  button {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.3);
+    letter-spacing: 0;
+    font-family: $font-medium;
+    font-size: 11px;
+    color: #ffffff;
+    letter-spacing: 0;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    text-align: center;
+    line-height: 28px;
+    outline: none;
+    cursor: pointer;
+    transition: all 200ms ease-in;
+    padding: 0 12px;
+    &:hover {
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background-color: rgba(255, 255, 255, 0.08);
+    }
   }
 }
 .loading-box {
@@ -456,7 +541,7 @@ export default Vue.extend({
   z-index: 3;
   text-align: center;
   font-family: $font-medium;
-  &>div {
+  & > div {
     width: 115px;
     height: 115px;
     margin: 0 auto 11px;
@@ -469,7 +554,7 @@ export default Vue.extend({
     -webkit-transform: translateZ(0);
     -ms-transform: translateZ(0);
     transform: translateZ(0);
-    color: rgba(255,255,255,0.70);
+    color: rgba(255, 255, 255, 0.7);
     svg {
       width: 100%;
       height: 100%;
@@ -477,18 +562,10 @@ export default Vue.extend({
   }
   p {
     font-size: 13px;
-    color: rgba(255,255,255,0.70);
+    color: rgba(255, 255, 255, 0.7);
     letter-spacing: -0.3px;
     line-height: 13px;
     margin-bottom: 30px;
-  }
-  span {
-    font-size: 11px;
-    color: rgba(255,255,255,0.30);
-    letter-spacing: 0;
-    line-height: 11px;
-    text-decoration: underline;
-    cursor: pointer;
   }
 }
 .fail-box {
@@ -501,7 +578,7 @@ export default Vue.extend({
   font-family: $font-medium;
   h1 {
     font-size: 35px;
-    color: rgba(255,255,255,0.70);
+    color: rgba(255, 255, 255, 0.7);
     letter-spacing: 0;
     text-align: center;
     line-height: 35px;
@@ -510,38 +587,30 @@ export default Vue.extend({
   p {
     width: 300px;
     font-size: 13px;
-    color: rgba(255,255,255,0.70);
+    color: rgba(255, 255, 255, 0.7);
     letter-spacing: 0;
     line-height: 13px;
     margin-bottom: 15px;
   }
   h5 {
     font-size: 15px;
-    color: rgba(255,255,255,0.70);
+    color: rgba(255, 255, 255, 0.7);
     letter-spacing: 0;
     text-align: center;
     line-height: 15px;
     margin-bottom: 30px;
     span {
       font-size: 11px;
-      color: rgba(255,255,255,0.30);
+      color: rgba(255, 255, 255, 0.3);
       letter-spacing: 0;
       text-align: center;
       line-height: 11px;
       &.canHover {
         &:hover {
-          color: rgba(255,255,255,0.90);
+          color: rgba(255, 255, 255, 0.9);
         }
       }
     }
-  }
-  span {
-    font-size: 11px;
-    color: rgba(255,255,255,0.30);
-    letter-spacing: 0;
-    line-height: 11px;
-    text-decoration: underline;
-    cursor: pointer;
   }
 }
 .success-box {
@@ -554,7 +623,7 @@ export default Vue.extend({
   font-family: $font-medium;
   h2 {
     font-size: 13px;
-    color: rgba(255,255,255,0.70);
+    color: rgba(255, 255, 255, 0.7);
     letter-spacing: 0;
     text-align: center;
     line-height: 13px;
@@ -562,7 +631,7 @@ export default Vue.extend({
   }
   h1 {
     font-size: 35px;
-    color: rgba(255,255,255,0.70);
+    color: rgba(255, 255, 255, 0.7);
     letter-spacing: 0;
     text-align: center;
     line-height: 35px;
@@ -570,7 +639,7 @@ export default Vue.extend({
   }
   h4 {
     font-size: 13px;
-    color: rgba(255,255,255,0.20);
+    color: rgba(255, 255, 255, 0.2);
     letter-spacing: 0;
     text-align: center;
     line-height: 13px;
@@ -578,19 +647,10 @@ export default Vue.extend({
   }
   p {
     font-size: 11px;
-    color: rgba(255,255,255,0.70);
+    color: rgba(255, 255, 255, 0.7);
     letter-spacing: 0;
     line-height: 11px;
     margin-bottom: 15px;
-  }
-  span {
-    font-size: 11px;
-    color: rgba(255,255,255,0.30);
-    letter-spacing: 0;
-    text-align: center;
-    line-height: 11px;
-    text-decoration: underline;
-    cursor: pointer;
   }
 }
 .success-background1 {
@@ -634,7 +694,6 @@ export default Vue.extend({
   left: 398px;
   top: 247px;
   z-index: 3;
-
 }
 .success-icon4 {
   width: 48px;
@@ -643,7 +702,7 @@ export default Vue.extend({
   left: 350px;
   top: 362px;
   z-index: 3;
-  background: rgba(255,255,255,0.78);
+  background: rgba(255, 255, 255, 0.78);
   opacity: 0.5;
 }
 @-webkit-keyframes load3 {
@@ -667,19 +726,19 @@ export default Vue.extend({
   }
 }
 .background-enter-active {
-  animation: bounce-in .3s;
+  animation: bounce-in 0.3s;
 }
 .left-icon1-enter-active {
-  animation: left-icon1 .4s;
+  animation: left-icon1 0.4s;
 }
 .left-icon2-enter-active {
-  animation: left-icon2 .4s;
+  animation: left-icon2 0.4s;
 }
 .right-icon1-enter-active {
-  animation: right-icon1 .4s;
+  animation: right-icon1 0.4s;
 }
 .right-icon2-enter-active {
-  animation: right-icon2 .4s;
+  animation: right-icon2 0.4s;
 }
 @keyframes left-icon1 {
   0% {
@@ -701,10 +760,10 @@ export default Vue.extend({
 }
 @keyframes right-icon1 {
   0% {
-    transform: rotate(0)
+    transform: rotate(0);
   }
   100% {
-    transform: rotate(360deg)
+    transform: rotate(360deg);
   }
 }
 @keyframes right-icon2 {
@@ -727,15 +786,15 @@ export default Vue.extend({
 }
 
 .success-up-enter-active {
-  animation: successUp .4s;
+  animation: successUp 0.4s;
 }
 
 .success-up2-enter-active {
-  animation: successUp2 .4s;
+  animation: successUp2 0.4s;
 }
 
 .success-fade-enter-active {
-  animation: successFade .4s;
+  animation: successFade 0.4s;
 }
 
 @keyframes successUp {

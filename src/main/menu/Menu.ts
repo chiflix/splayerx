@@ -354,7 +354,8 @@ export default class Menubar {
       accountMenu.clear();
       const label = this.locale.$t('msg.account.name');
       const idMenu = this.createMenuItem(`${label}: ${user.displayName}`, () => {
-      }, undefined, false);
+        app.emit('route-account');
+      }, undefined, true);
       accountMenu.append(idMenu);
       const logout = this.createMenuItem('msg.account.logout', () => {
         app.emit('sign-out-confirm');
@@ -855,7 +856,8 @@ export default class Menubar {
     if (this.user) {
       const label = this.locale.$t('msg.account.name');
       const idMenu = this.createMenuItem(`${label}: ${this.user.displayName}`, () => {
-      }, undefined, false);
+        app.emit('route-account');
+      }, undefined, true);
       accountMenu.append(idMenu);
       const logout = this.createMenuItem('msg.account.logout', () => {
         app.emit('sign-out-confirm');
