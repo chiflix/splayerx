@@ -171,12 +171,12 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
     try {
       const geo = await getGeoIP();
       const availableChannels = geo.countryCode === 'CN' ? ['bilibili.com', 'douyu.com', 'iqiyi.com'] : ['youtube.com', 'twitch.com'];
-      (this.allChannels.get('adapted') as channelInfo).availableChannels = availableChannels;
+      (this.allChannels.get('general') as channelInfo).availableChannels = availableChannels;
       this.allAvailableChannels.push(...availableChannels);
       return this.getAllAvailableChannels();
     } catch (error) {
       const availableChannels = displayLanguage === 'zh-Hans' ? ['bilibili.com', 'douyu.com', 'iqiyi.com'] : ['youtube.com', 'twitch.com'];
-      (this.allChannels.get('adapted') as channelInfo).availableChannels = availableChannels;
+      (this.allChannels.get('general') as channelInfo).availableChannels = availableChannels;
       this.allAvailableChannels = availableChannels;
       return this.getAllAvailableChannels();
     }

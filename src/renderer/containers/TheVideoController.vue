@@ -3,7 +3,7 @@
     ref="controller"
     :style="{ cursor: cursorStyle, pointerEvents: isFocused ? 'auto' : 'none' }"
     @mousemove="handleMousemove"
-    @mouseenter="handleMouseenter"	
+    @mouseenter="handleMouseenter"
     @mouseleave="handleMouseleave"
     @mousedown="handleMousedown"
     @mouseup="handleMouseup"
@@ -122,7 +122,6 @@ import {
   UIStates as uiActions,
 } from '@/store/actionTypes';
 import { INPUT_COMPONENT_TYPE, getterTypes as iGT } from '@/plugins/input';
-import Titlebar from '@/components/Titlebar.vue';
 import PlayButton from '@/components/PlayingView/PlayButton.vue';
 import VolumeIndicator from '@/components/PlayingView/VolumeIndicator.vue';
 import AdvanceControl from '@/components/PlayingView/AdvanceControl.vue';
