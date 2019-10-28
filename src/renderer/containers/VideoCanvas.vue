@@ -439,6 +439,7 @@ export default {
       }
     },
     backToLandingView() {
+      this.$store.dispatch('UPDATE_SHOW_SIDEBAR', false);
       this.handleLeaveVideo(this.videoId)
         .finally(() => {
           this.removeAllAudioTrack();

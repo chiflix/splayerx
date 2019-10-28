@@ -44,6 +44,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    isPlayingView: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -52,6 +56,7 @@ export default {
     };
   },
   created() {
+    this.highlight = this.isPlayingView;
     this.$bus.$on('highlight-sidebar', (highlight: boolean) => {
       this.highlight = highlight;
     });

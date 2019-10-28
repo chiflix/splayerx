@@ -144,7 +144,14 @@ export default {
 
 <style lang="scss">
 .player {
-  width: 100%;
+  will-change: width;
+  transition-property: width;
+  transition-duration: 100ms;
+  transition-timing-function: ease-out;
+
+  position: absolute;
+  right: 0;
+
   height: 100%;
   background-color: black;
 }

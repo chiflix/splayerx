@@ -175,7 +175,7 @@ export default {
   display: block;
 }
 
-.volume {
+.volume, .mute {
   width: 100%;
   height: 100%;
 }
@@ -484,7 +484,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     width: 24px;
     height: 11.5px;
-  } 
+  }
 }
 .refresh {
   .default {
@@ -679,7 +679,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   width: 20px;
   height: 20px;
 }
-.history, .open {
+.history, .open, .home, .exit {
   width: 30px;
   height: 30px;
   .default {
