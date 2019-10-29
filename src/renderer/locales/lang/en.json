@@ -26,7 +26,7 @@
     }
   },
   "tips": {
-    "openSidebar": "Open Sidebar (C)",
+    "openSidebar": "Show Sidebar (C)",
     "closeSidebar": "Hide Sidebar (C)",
     "exit": "Back To Launching Page"
   },
@@ -268,8 +268,8 @@
     "icourse163": "中国大学MOOC",
     "openLocalFile": "Open Local File ...",
     "enterPip": "Enter Picture in Picture (P)",
-    "exitPip": "Exit Picture in Picture (O)",
-    "enterPop": "Play in New Window",
+    "exitPip": "Exit Picture in Picture",
+    "enterPop": "Play in New Window (O)",
     "exitPop": "Back to Browser",
     "danmu": "Toggle Danmaku",
     "error": {

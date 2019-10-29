@@ -1009,7 +1009,7 @@ new Vue({
         this.$bus.$emit('back-to-landingview');
       });
       this.menuService.on('window.sidebar', () => {
-        this.updateShowSidebar(!this.showSidebar);
+        this.$event.emit('side-bar-mouseup');
       });
       this.menuService.on('browsing.window.keepPipFront', () => {
         this.browsingViewTop = !this.browsingViewTop;

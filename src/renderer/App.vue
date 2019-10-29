@@ -18,7 +18,7 @@
         width: showSidebar ? '76px' : '0',
       }"
       :current-url="currentUrl"
-      show-sidebar="showSidebar"
+      :show-sidebar="showSidebar"
     />
     <transition
       :name="transitionMode"
@@ -101,7 +101,14 @@ export default {
   },
   mounted() {
     this.$event.on('side-bar-mouseup', () => {
-      this.updateShowSidebar(!this.showSidebar);
+      if (this.playlistState && !this.showSidebar) {
+        this.$bus.$emit('close-playlist');
+        setTimeout(() => {
+          this.updateShowSidebar(true);
+        }, 200);
+      } else {
+        this.updateShowSidebar(!this.showSidebar);
+      }
     });
     ipcRenderer.on('open-file', (event: Event, args: { onlySubtitle: boolean, files: string[] }) => {
       this.openFileArgs = args;

@@ -330,14 +330,14 @@
         "id": "menubar.separator"
       },
       {
-        "id": "window.backToLandingView",
-        "label": "msg.window.backToLandingView",
-        "accelerator": "CmdOrCtrl+E"
-      },
-      {
         "id": "window.sidebar",
         "label": "msg.window.openSidebar",
         "accelerator": "C"
+      },
+      {
+        "id": "window.backToLandingView",
+        "label": "msg.window.backToLandingView",
+        "accelerator": "CmdOrCtrl+E"
       }
     ]
   },
