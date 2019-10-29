@@ -7,7 +7,7 @@ export default class MasterClass {
 
   public constructor() {
     this.adapter = 'var navHeader = document.querySelector(".header-nav");'
-      + 'navHeader.style.display = "none";'
+      + 'if (navHeader) navHeader.style.display = "none";'
       + 'var pip = document.querySelector(".txp_top_btns");'
       + 'if (pip) pip.style.display = "none";'
       + 'var nav = document.querySelector(".nav_simplify");'
@@ -28,7 +28,7 @@ export default class MasterClass {
       + 'if (document.querySelector("#mercury")) {document.querySelector("#mercury").style.display = "none";}';
     this.watcher = '';
     this.recover = 'var navHeader = document.querySelector(".header-nav");'
-      + 'navHeader.style.display = "";'
+      + 'if (navHeader) navHeader.style.display = "";'
       + 'var pip = document.querySelector(".txp_top_btns");'
       + 'if (pip) pip.style.display = "";'
       + 'var nav = document.querySelector(".nav_simplify");'
