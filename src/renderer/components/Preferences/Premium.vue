@@ -32,7 +32,10 @@
         <li>{{ $t('preferences.premium.content.description4') }}</li>
       </ul>
     </div>
-    <div class="settingItem__payList">
+    <div
+      v-if="!isMas"
+      class="settingItem__payList"
+    >
       <div v-if="country === 'CNY'">
         <BaseRadio
           v-model="payType"
@@ -61,13 +64,13 @@
     </div>
     <ul class="settingItem__productionList">
       <li
-        @click="buy(item)"
+        @click.left="buy(item)"
         v-for="(item) in list"
         :key="item.id"
       >
-        <div>{{ item.currentPrice }}</div>
+        <div>{{ item.currentPrice.int }}.<span>{{ item.currentPrice.float }}</span> </div>
         <p>{{ item.origin }}</p>
-        <span>{{ item.duration }}</span>
+        <span>{{ item.discount }}<i v-if="item.discount">/</i>{{ item.duration }}</span>
       </li>
     </ul>
     <div
@@ -153,7 +156,7 @@
         <transition name="success-fade">
           <button
             v-if="isPaySuccess"
-            @click="closePay"
+            @click.left="closePay"
           >
             {{ $t('premiumModal.success.button') }}
           </button>
@@ -169,7 +172,7 @@
           </div>
         </div>
         <p>{{ $t('premiumModal.loading.content') }}</p>
-        <button @click="closePay">
+        <button @click.left="closePay">
           {{ $t('premiumModal.loading.button') }}
         </button>
       </div>
@@ -182,11 +185,11 @@
         <h5>
           support@splayer.org
           <span
-            @click="copy"
+            @click.left="copy"
             :class="isCopyed ? '' : 'canHover'"
           >{{ isCopyed ? $t('premiumModal.fail.copied') : $t('premiumModal.fail.copy') }}</span>
         </h5>
-        <button @click="closePay">
+        <button @click.left="closePay">
           {{ $t('premiumModal.fail.button') }}
         </button>
       </div>
@@ -262,14 +265,8 @@ export default Vue.extend({
           discount: number,
           id: string;
         }) => {
-          let currentPrice = (e.currentPrice[this.country] / 100).toFixed(2);
+          const currentPrice = (e.currentPrice[this.country] / 100).toFixed(2).split('.');
           let originalPrice = (e.originalPrice[this.country] / 100).toFixed(2);
-          if (
-            e.currentPrice[this.country]
-            === parseInt(currentPrice, 10) * 100
-          ) {
-            currentPrice = (e.currentPrice[this.country] / 100).toFixed(0);
-          }
           if (
             e.originalPrice[this.country]
             === parseInt(originalPrice, 10) * 100
@@ -278,16 +275,22 @@ export default Vue.extend({
           }
           const off = this.isCNLanguage ? e.discount : 100 - e.discount;
           const originString = e.discount === 100 ? '' : `${this.$t('preferences.premium.origin')}${originalPrice}`;
-          const origin = `${originString} ${this.country === 'CNY' ? 'RMB' : this.country}`;
-          const durationString = e.discount === 100 ? '' : `${off}${this.$t('preferences.premium.off')} /`;
-          const duration = `${durationString} ${e.duration.value} ${this.$t(`preferences.premium.${e.duration.unit}`)}`;
+          const origin = `${originString} ${this.country}`;
+          const discount = e.discount === 100 ? '' : `${off}${this.$t('preferences.premium.off')}`;
+          const duration = e.duration.value > 1
+            ? `${e.duration.value} ${this.$t(`preferences.premium.${e.duration.unit}s`)}`
+            : `${e.duration.value} ${this.$t(`preferences.premium.${e.duration.unit}`)}`;
           return {
             id: e.id,
             appleProductID: e.appleProductID,
-            currentPrice,
+            currentPrice: {
+              int: currentPrice[0],
+              float: currentPrice[1],
+            },
             originalPrice,
             origin,
             off,
+            discount,
             duration,
           };
         },
@@ -415,7 +418,7 @@ export default Vue.extend({
             if (error && (error.status === 400 || error.status === 403)) {
               this.closePay();
               remote.app.emit('sign-out');
-              ipcRenderer.send('add-login');
+              ipcRenderer.send('add-login', 'preference');
             }
           });
       }
@@ -491,6 +494,7 @@ export default Vue.extend({
     display: flex;
     justify-content: space-between;
     li {
+      -webkit-app-region: no-drag;
       width: 110px;
       list-style: none;
       text-align: center;
@@ -508,8 +512,12 @@ export default Vue.extend({
     }
     div {
       font-size: 35px;
-      color: #ffffff;
+      color: rgba(255, 255, 255, 0.7);
       font-weight: 300;
+      span {
+        font-family: $font-normal;
+        font-size: 15px;
+      }
     }
     p {
       font-family: $font-medium;
@@ -522,6 +530,10 @@ export default Vue.extend({
       font-size: 11px;
       color: rgba(255, 255, 255, 0.7);
       letter-spacing: 0;
+    }
+    i {
+      font-style: normal;
+      margin: 0 2px;
     }
   }
 }
@@ -558,6 +570,7 @@ export default Vue.extend({
     cursor: pointer;
     transition: all 200ms ease-in;
     padding: 0 12px;
+    -webkit-app-region: no-drag;
     &:hover {
       border: 1px solid rgba(255, 255, 255, 0.2);
       background-color: rgba(255, 255, 255, 0.08);

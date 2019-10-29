@@ -329,16 +329,20 @@
         "description": "Expiration Date: ",
         "button": "Renew"
       },
+      "month": "Month",
+      "year": "Year",
+      "months": "Months",
+      "years": "Years",
       "signOut": "Sign out",
       "createdAt": "Registration Date",
       "payAt": "Recent Purchased",
-      "payContent": "{date} {product}",
-      "payProduct": "purchased {product} Premium"
+      "payContent": "{date}{product}",
+      "payProduct": ": {product} Premium"
 
     },
     "premium": {
       "premiumSetting": "Premium",
-      "title": "Splayer VIP Privilege",
+      "title": "SPlayer VIP Privilege",
       "description": "In order to achieve stable and sustainable development for a long time, users are welcome to support the shooter audio and",
       "content": {
         "description1": "Extend AI Translation time for your daily use",
@@ -348,10 +352,12 @@
         "description5": "",
         "description6": ""
       },
-      "origin": "ORIG.",
+      "origin": "ORIG. ",
       "off": "% Off",
-      "month": "Mon",
+      "month": "Month",
       "year": "Year",
+      "months": "Mo.",
+      "years": "Yr.",
       "payType": {
         "alipay": "Alipay",
         "wxpay": "Wechat Pay",

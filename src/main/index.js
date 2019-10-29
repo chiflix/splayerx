@@ -1,7 +1,7 @@
 // Be sure to call Sentry function as early as possible in the main process
 import '../shared/sentry';
 
-import { app, BrowserWindow, session, Tray, ipcMain, globalShortcut, nativeImage, splayerx, systemPreferences, BrowserView, webContents, inAppPurchase } from 'electron' // eslint-disable-line
+import { app, BrowserWindow, session, Tray, ipcMain, globalShortcut, nativeImage, splayerx, systemPreferences, BrowserView, webContents, inAppPurchase, screen } from 'electron' // eslint-disable-line
 import { throttle, debounce, uniq } from 'lodash';
 import os from 'os';
 import path, {
@@ -275,6 +275,26 @@ function getAllValidVideo(onlySubtitle, files) {
   }
 }
 
+function setBoundsCenterByOriginWindow(origin, win, width, height) {
+  const displays = screen.getAllDisplays();
+  const list = displays.map(e => ({
+    x: e.workArea.x,
+    left: Number((e.workArea.x + (e.workArea.width - width) / 2).toFixed(0)),
+    top: Number((e.workArea.y + (e.workArea.height - height) / 2).toFixed(0)),
+  })).sort((l, r) => l.x - r.x);
+  if (origin && win && list.length > 1) {
+    const pos = origin.getPosition();
+    const bounds = pos[0] > list[1].x ? {
+      x: list[1].left,
+      y: list[1].top,
+    } : {
+      x: list[0].left,
+      y: list[0].top,
+    };
+    win.setBounds(bounds);
+  }
+}
+
 function createPreferenceWindow(e, route) {
   const preferenceWindowOptions = {
     useContentSize: true,
@@ -318,9 +338,10 @@ function createPreferenceWindow(e, route) {
   if (process.platform === 'win32') {
     hackWindowsRightMenu(preferenceWindow);
   }
+  setBoundsCenterByOriginWindow(mainWindow, preferenceWindow, 540, 426);
 }
 
-function createLoginWindow(e, route) {
+function createLoginWindow(e, fromWindow, route) {
   const loginWindowOptions = {
     useContentSize: true,
     frame: false,
@@ -372,6 +393,9 @@ function createLoginWindow(e, route) {
   if (process.platform === 'win32') {
     hackWindowsRightMenu(loginWindow);
   }
+  // login window setbounds on mainwidnow
+  const win = fromWindow === 'preference' ? preferenceWindow : mainWindow;
+  setBoundsCenterByOriginWindow(win, loginWindow, 412, 284);
 }
 
 function createAboutWindow() {
@@ -507,6 +531,7 @@ function createPaymentWindow(url, orderID, channel) {
   if (process.platform === 'win32') {
     hackWindowsRightMenu(paymentWindow);
   }
+  setBoundsCenterByOriginWindow(preferenceWindow, paymentWindow, width, height);
 }
 
 function registerMainWindowEvent(mainWindow) {
@@ -1608,18 +1633,14 @@ if (process.platform === 'darwin') {
       const payment = transaction.payment;
       switch (transaction.transactionState) {
         case 'purchasing':
-          console.log(`Purchasing ${payment.productIdentifier}...`);
           break;
         case 'purchased':
-          console.log(`${payment.productIdentifier} purchased.`);
-          // Get the receipt url.
           // eslint-disable-next-line no-case-declarations
           let receipt = '';
           try {
             receipt = fs.readFileSync(inAppPurchase.getReceiptURL());
           } catch (error) {
             // empty
-            console.log(error);
           }
           // Finish the transaction.
           inAppPurchase.finishTransactionByDate(transaction.transactionDate);
@@ -1633,7 +1654,6 @@ if (process.platform === 'darwin') {
           }
           break;
         case 'failed':
-          console.log(`Failed to purchase ${payment.productIdentifier}.`);
           // Finish the transaction.
           inAppPurchase.finishTransactionByDate(transaction.transactionDate);
           if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
@@ -1641,10 +1661,8 @@ if (process.platform === 'darwin') {
           }
           break;
         case 'restored':
-          console.log(`The purchase of ${payment.productIdentifier} has been restored.`);
           break;
         case 'deferred':
-          console.log(`The purchase of ${payment.productIdentifier} has been deferred.`);
           break;
         default:
           break;
@@ -1671,12 +1689,6 @@ if (process.platform === 'darwin') {
         }
         return;
       }
-
-      // Display the name and price of each product.
-      products.forEach((product) => {
-        console.log(`The price of ${product.localizedTitle} is ${product.formattedPrice}.`);
-      });
-
       // Purchase the selected product.
       inAppPurchase.purchaseProduct(product, quantity, callback);
     });

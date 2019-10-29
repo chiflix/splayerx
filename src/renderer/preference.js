@@ -109,7 +109,7 @@ new Vue({
     didGetUserInfo: false,
   },
   store,
-  mounted() {
+  async mounted() {
     this.$store.commit('getLocalPreference');
     // sign in success
     ipcRenderer.on('sign-in', (e, account) => {
@@ -143,6 +143,13 @@ new Vue({
     }).catch(() => {
       // empty
     });
+    // get products
+    try {
+      const productList = await getProductList();
+      this.updatePremiumList(productList);
+    } catch (error) {
+      // empty
+    }
   },
   methods: {
     ...mapActions({
@@ -156,8 +163,6 @@ new Vue({
       try {
         const res = await getUserInfo();
         this.updateUserInfo(res.me);
-        const productList = await getProductList();
-        this.updatePremiumList(productList);
       } catch (error) {
         // empty
         this.didGetUserInfo = false;

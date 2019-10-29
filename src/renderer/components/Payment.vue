@@ -119,7 +119,7 @@ export default {
     border-radius: 4px;
     display: flex;
     flex-direction: column;
-    padding-top: 24px;
+    padding-top: 28px;
     box-sizing: border-box;
     &.mac {
       padding-top: 36px;

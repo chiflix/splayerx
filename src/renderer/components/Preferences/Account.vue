@@ -1,7 +1,11 @@
 <template>
   <div class="settingItem">
     <div class="settingItem__title">
-      {{ $t('preferences.account.title') }}
+      {{ $t('preferences.account.title') }}<span
+        @click.left="signOut"
+        v-if="!!token"
+        class="sign-out"
+      >{{ $t('preferences.account.signOut') }}</span>
     </div>
     <div class="settingItem__attached">
       <div v-if="!token">
@@ -12,7 +16,7 @@
           {{ $t('preferences.account.noToken.description') }}
         </div>
         <button
-          @click="signIn"
+          @click.left="signIn"
           class="settingItem__button"
         >
           {{ $t('preferences.account.noToken.button') }}
@@ -24,7 +28,6 @@
             <div class="settingItem__title">
               {{ userInfo.isVip ? $t('preferences.account.vipUser.title')
                 : $t('preferences.account.normalUser.title') }}{{ userInfo.displayName }}
-              <span @click="signOut">{{ $t('preferences.account.signOut') }}</span>
             </div>
             <div class="settingItem__description">
               {{ userInfo.isVip
@@ -35,13 +38,13 @@
           <div class="settingItem__box__right">
             <button
               v-if="userInfo.isVip"
-              @click="goPremium"
+              @click.left="goPremium"
             >
               {{ $t('preferences.account.vipUser.button') }}
             </button>
             <button
               v-else
-              @click="goPremium"
+              @click.left="goPremium"
             >
               {{ $t('preferences.account.normalUser.button') }}
             </button>
@@ -105,7 +108,9 @@ export default Vue.extend({
         }
       }) => {
         const date = new Date(e.createdAt).toISOString().split('T')[0];
-        const product = `${e.product.duration.value} ${this.$t(`preferences.premium.${e.product.duration.unit}`)}`;
+        const product = e.product.duration.value > 1
+          ? `${e.product.duration.value} ${this.$t(`preferences.account.${e.product.duration.unit}s`)}`
+          : `${e.product.duration.value} ${this.$t(`preferences.account.${e.product.duration.unit}`)}`;
         const payProduct = this.$t('preferences.account.payProduct', { product });
         const name = this.$t('preferences.account.payContent', { date, product: payProduct });
         return {
@@ -127,7 +132,7 @@ export default Vue.extend({
     },
     signIn() {
       remote.app.emit('sign-out');
-      ipcRenderer.send('add-login');
+      ipcRenderer.send('add-login', 'preference');
     },
     goPremium() {
       this.$router.push({ name: 'Premium' });
@@ -156,6 +161,18 @@ export default Vue.extend({
     font-family: $font-medium;
     font-size: 13px;
     color: rgba(255,255,255,0.7);
+    .sign-out {
+      color: rgba(255,255,255,0.25);
+      letter-spacing: 0;
+      font-size: 11px;
+      line-height: 16px;
+      cursor: pointer;
+      margin-left: 8px;
+      -webkit-app-region: no-drag;
+      &:hover {
+        color: rgba(255,255,255,0.7);
+      }
+    }
   }
 
   &__description {
@@ -170,7 +187,7 @@ export default Vue.extend({
     width: 100%;
     font-family: $font-medium;
     font-size: 11px;
-    color: #FFFFFF;
+    color: rgba(255,255,255,0.7);
     letter-spacing: 0;
     text-align: center;
     line-height: 28px;
@@ -180,6 +197,7 @@ export default Vue.extend({
     outline: none;
     cursor: pointer;
     transition: all 200ms ease-in;
+    -webkit-app-region: no-drag;
     &:hover {
       border: 1px solid rgba(255,255,255,0.2);
       background-color: rgba(255,255,255,0.08);
