@@ -25,6 +25,11 @@
       "fontSize": "14px"
     }
   },
+  "tips": {
+    "openSidebar": "",
+    "closeSidebar": "",
+    "exit": ""
+  },
   "errorFile": {
     "ENOSPC": {
       "content": "لا توجد مساحة كافية على القرص.",
@@ -206,7 +211,9 @@
       "enterPip": "أدخل صورة في صورة",
       "exitPip": "الخروج من الصورة في صورة",
       "playInNewWindow": "اللعب في نافذة جديدة",
-      "backToBrowser": "العودة إلى المتصفح"
+      "backToBrowser": "العودة إلى المتصفح",
+      "openSidebar": "",
+      "closeSidebar": ""
     },
     "edit": {
       "name": "حرّر",
