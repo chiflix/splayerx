@@ -26,9 +26,9 @@
     }
   },
   "tips": {
-    "openSidebar": "",
-    "closeSidebar": "",
-    "exit": ""
+    "openSidebar": "Mostrar barra lateral (C)",
+    "closeSidebar": "Ocultar barra lateral (C)",
+    "exit": "Volver a la página de inicio"
   },
   "errorFile": {
     "ENOSPC": {
@@ -212,8 +212,8 @@
       "exitPip": "Salir de Picture in Picture",
       "playInNewWindow": "Reproducir en ventana nueva",
       "backToBrowser": "Volver al navegador",
-      "openSidebar": "",
-      "closeSidebar": ""
+      "openSidebar": "Mostrar barra lateral",
+      "closeSidebar": "Ocultar barra lateral"
     },
     "edit": {
       "name": "Editar",
