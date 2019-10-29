@@ -26,8 +26,8 @@
     }
   },
   "tips": {
-    "openSidebar": "사이드 바 표시v (C)",
-    "closeSidebar": "가장자리 창 숨김 (C)",
+    "openSidebar": "사이드 바 표시 (C)",
+    "closeSidebar": "사이드 바 숨김 (C)",
     "exit": "시작 페이지로 돌아 가기"
   },
   "errorFile": {
@@ -212,7 +212,7 @@
       "exitPip": "Picture In Picture 퇴출",
       "playInNewWindow": "새 창에서 놀다",
       "backToBrowser": "브라우저로 돌아 가기",
-      "openSidebar": "사이드바 열기",
+      "openSidebar": "사이드 바 표시",
       "closeSidebar": "사이드 바 숨김"
     },
     "edit": {
