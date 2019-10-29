@@ -14,7 +14,7 @@ import './helpers/electronPrototypes';
 import {
   getValidVideoRegex, getValidSubtitleRegex,
   getToken, saveToken,
-  getIP,
+  getIP, crossThreadCache,
 } from '../shared/utils';
 import { mouse } from './helpers/mouse';
 import MenuService from './menu/MenuService';
@@ -90,8 +90,6 @@ const locale = new Locale();
 const tmpVideoToOpen = [];
 const tmpSubsToOpen = [];
 const subRegex = getValidSubtitleRegex();
-const allChannels = ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch', 'coursera', 'ted'];
-const compareStr = [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com', 'film.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch'], ['coursera'], ['ted']];
 const titlebarUrl = process.platform === 'darwin' ? `file:${resolve(__static, 'pip/macTitlebar.html')}` : `file:${resolve(__static, 'pip/winTitlebar.html')}`;
 const maskUrl = process.platform === 'darwin' ? `file:${resolve(__static, 'pip/mask.html')}` : `file:${resolve(__static, 'pip/mask.html')}`;
 const mainURL = process.env.NODE_ENV === 'development'
@@ -669,13 +667,7 @@ function registerMainWindowEvent(mainWindow) {
   });
   ipcMain.on('create-browser-view', (evt, args) => {
     if (!browserViewManager) browserViewManager = new BrowserViewManager();
-    let currentChannel = '';
-    allChannels.forEach((channel, index) => {
-      if (compareStr[index].findIndex(str => args.url.includes(str)) !== -1) {
-        currentChannel = `${channel}.com`;
-      }
-    });
-    const currentMainBrowserView = browserViewManager.create(currentChannel, args);
+    const currentMainBrowserView = browserViewManager.create(args.channel, args);
     setTimeout(() => {
       mainWindow.send('update-browser-state', {
         url: args.url,
@@ -801,20 +793,13 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('shift-pip', (evt, args) => {
     if (!browserViewManager) return;
     const mainWindowViews = mainWindow.getBrowserViews();
-    const mainView = mainWindowViews[0];
     mainWindowViews
       .forEach(mainWindowView => mainWindow.removeBrowserView(mainWindowView));
     const browViews = browsingWindow.getBrowserViews();
     browViews.forEach((view) => {
       browsingWindow.removeBrowserView(view);
     });
-    let currentChannel = '';
-    allChannels.forEach((channel, index) => {
-      if (compareStr[index].findIndex(str => mainView.webContents.getURL().includes(str)) !== -1) {
-        currentChannel = `${channel}.com`;
-      }
-    });
-    const browsers = browserViewManager.changePip(currentChannel);
+    const browsers = browserViewManager.changePip(args.channel);
     const pipBrowser = browsers.pipBrowser;
     const mainBrowser = browsers.mainBrowser;
     mainWindow.addBrowserView(mainBrowser.page.view);
@@ -1413,6 +1398,10 @@ const oauthRegex = [
   /^https:\/\/auth.alipay.com\/login\//i,
   /^https:\/\/account.xiaomi.com\/pass\//i,
   /^https:\/\/www.facebook.com\/v[0-9].[0-9]\/dialog\/oauth/i,
+  /^https:\/\/accounts.google.com\/signin\/oauth\//i,
+  /^https:\/\/accounts.google.com\/CheckCookie\?/i,
+  /^\/passport\/user\/tplogin\?/i,
+  /^https:\/\/www.imooc.com\/passport\//i,
 ];
 app.on('web-contents-created', (webContentsCreatedEvent, contents) => {
   if (contents.getType() === 'browserView') {
@@ -1493,6 +1482,8 @@ app.getDisplayLanguage = () => {
 
 // export getIp to static login preload.js
 app.getIP = getIP;
+
+app.crossThreadCache = crossThreadCache;
 
 // export getSignInEndPoint to static login preload.js
 app.getSignInEndPoint = () => signInEndPoint;

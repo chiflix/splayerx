@@ -155,12 +155,6 @@ export default {
     NotificationBubble,
     'open-url': OpenUrl,
   },
-  props: {
-    showSidebar: {
-      type: Boolean,
-      default: false,
-    },
-  },
   data() {
     return {
       landingViewItems: [],
@@ -179,7 +173,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'winPos', 'defaultDir', 'isFullScreen', 'incognitoMode', 'nsfwProcessDone', 'pipSize', 'pipPos']),
+    ...mapGetters(['winWidth', 'winPos', 'defaultDir', 'isFullScreen', 'incognitoMode', 'nsfwProcessDone', 'pipSize', 'pipPos', 'showSidebar']),
     lastIndex: {
       get() {
         return (this.firstIndex + this.showItemNum) - 1;
@@ -434,6 +428,7 @@ export default {
         this.shifting = true;
         this.firstIndex = 0;
       } else if (!this.filePathNeedToDelete) {
+        this.$store.dispatch('UPDATE_SHOW_SIDEBAR', false);
         this.openPlayList(this.landingViewItems[index].id);
       }
     },

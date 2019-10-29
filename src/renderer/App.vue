@@ -5,20 +5,21 @@
     class="application"
   >
     <Titlebar
-      v-if="!($route.name === 'playing-view' || ($route.name === 'browsing-view' && !isDarwin))"
-      :is-landing-view="$route.name === 'landing-view'"
-      :is-browsing-view="$route.name === 'browsing-view'"
+      v-if="!($route.name === 'browsing-view' && !isDarwin)"
+      :show-all-widgets="showAllWidgets"
+      :recent-playlist="playlistState"
       :show-sidebar="showSidebar"
       :enable-full-screen-button="['landing-view', 'playing-view', 'browsing-view']
         .includes($route.name)"
     />
-    <transition name="sidebar">
-      <Sidebar
-        v-show="showSidebar"
-        :show-sidebar="showSidebar"
-        :current-url="currentUrl"
-      />
-    </transition>
+    <Sidebar
+      v-show="showSidebar"
+      :style="{
+        width: showSidebar ? '76px' : '0',
+      }"
+      :current-url="currentUrl"
+      show-sidebar="showSidebar"
+    />
     <transition
       :name="transitionMode"
       mode="out-in"
@@ -28,7 +29,6 @@
           width: showSidebar ? 'calc(100% - 76px)' : '100%',
         }"
         :open-file-args="openFileArgs"
-        :show-sidebar="showSidebar"
         @update-current-url="currentUrl = $event"
       />
     </transition>
@@ -43,6 +43,7 @@ import {
   SubtitleManager as smActions,
   UserInfo as uActions,
   AudioTranslate as atActions,
+  UIStates as uiActions,
 } from '@/store/actionTypes';
 import Titlebar from '@/components/Titlebar.vue';
 import Sidebar from '@/components/Sidebar.vue';
@@ -63,13 +64,16 @@ export default {
     return {
       transitionMode: '',
       openFileArgs: null,
-      showSidebar: false,
       currentUrl: '',
       checkedToken: false,
     };
   },
   computed: {
-    ...mapGetters(['signInCallback', 'isTranslating', 'translateStatus']),
+    ...mapGetters([
+      'signInCallback', 'isTranslating', 'translateStatus',
+      // UIStates
+      'showSidebar', 'showAllWidgets', 'playlistState',
+    ]),
     isDarwin() {
       return process.platform === 'darwin';
     },
@@ -89,6 +93,7 @@ export default {
         }
         this.currentUrl = '';
       }
+      if (from.name === 'landing-view' && to.name === 'playing-view') this.updateShowSidebar(false);
     },
     showSidebar(val: boolean) {
       ipcRenderer.send('update-sidebar', val);
@@ -96,7 +101,7 @@ export default {
   },
   mounted() {
     this.$event.on('side-bar-mouseup', () => {
-      this.showSidebar = !this.showSidebar;
+      this.updateShowSidebar(!this.showSidebar);
     });
     ipcRenderer.on('open-file', (event: Event, args: { onlySubtitle: boolean, files: string[] }) => {
       this.openFileArgs = args;
@@ -175,6 +180,7 @@ export default {
       removeCallback: uActions.UPDATE_SIGN_IN_CALLBACK,
       showTranslateBubble: atActions.AUDIO_TRANSLATE_SHOW_BUBBLE,
       addTranslateBubbleCallBack: atActions.AUDIO_TRANSLATE_BUBBLE_CALLBACK,
+      updateShowSidebar: uiActions.UPDATE_SHOW_SIDEBAR,
     }),
     mainCommitProxy(commitType: string, commitPayload: any) {
       this.$store.commit(commitType, commitPayload);

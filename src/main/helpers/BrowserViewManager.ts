@@ -45,7 +45,7 @@ export class BrowserViewManager implements IBrowserViewManager {
       pipPage: null,
     };
     this.history = [];
-    this.multiPagesChannel = ['youtube.com', 'iqiyi.com', 'bilibili.com', 'douyu.com', 'huya.com', 'twitch.com', 'coursera.com', 'ted.com'];
+    this.multiPagesChannel = ['youtube.com', 'iqiyi.com', 'bilibili.com', 'douyu.com', 'huya.com', 'twitch.com', 'coursera.com', 'ted.com', 'lynda.com', 'masterclass.com', 'sportsqq.com', 'developerapple.com', 'vipopen163.com', 'study163.com', 'imooc'];
     this.singlePageChannel = ['qq.com', 'youku.com'];
   }
 
@@ -78,11 +78,13 @@ export class BrowserViewManager implements IBrowserViewManager {
     };
     if (newHistory.list.length) {
       newHistory.list[index].url = args.url;
-      newHistory.list[index].view.webContents.setAudioMuted(false);
       newHistory.list[index].lastUpdateTime = Date.now();
-      newHistory.list[index].view.webContents.removeAllListeners('media-started-playing');
-      if (args.isNewWindow) {
-        newHistory.list[index].view.webContents.loadURL(args.url);
+      if (!newHistory.list[index].view.isDestroyed()) {
+        newHistory.list[index].view.webContents.setAudioMuted(false);
+        newHistory.list[index].view.webContents.removeAllListeners('media-started-playing');
+        if (args.isNewWindow) {
+          newHistory.list[index].view.webContents.loadURL(args.url);
+        }
       }
     }
 

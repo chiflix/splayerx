@@ -9,6 +9,14 @@ import Youku from './Youku';
 import Twitch from './Twitch';
 import Coursera from './Coursera';
 import Ted from './Ted';
+import Lynda from './Lynda';
+import MasterClass from './MasterClass';
+import Sportsqq from './Sportsqq';
+import WWDC from './WWDC';
+import NetEaseOpen from './NetEaseOpen';
+import NetEaseStudy from './NetEaseStudy';
+import Imooc from './Imooc';
+import Icourse163 from './Icourse163';
 
 type pipMode = {
   adapter: string,
@@ -32,6 +40,7 @@ export default class PipFactory {
 
   public static getPipByChannel(info: { channel: string, winSize: number[] }): pipMode
 
+  // eslint-disable-next-line complexity
   public static getPipByChannel(info: { channel: string, type?: string,
     barrageState?: boolean, winSize?: number[] }): pipMode {
     switch (info.channel) {
@@ -58,6 +67,22 @@ export default class PipFactory {
         return new Coursera();
       case 'ted':
         return new Ted();
+      case 'lynda':
+        return new Lynda();
+      case 'masterclass':
+        return new MasterClass();
+      case 'sportsqq':
+        return new Sportsqq();
+      case 'developerapple':
+        return new WWDC();
+      case 'vipopen163':
+        return new NetEaseOpen();
+      case 'study163':
+        return new NetEaseStudy();
+      case 'imooc':
+        return new Imooc();
+      case 'icourse163':
+        return new Icourse163();
       case 'others':
         return new Others(info.winSize as number[]);
       default:
