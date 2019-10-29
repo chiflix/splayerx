@@ -3,7 +3,7 @@ import { HISTORY_OBJECT_STORE_NAME } from '@/constants';
 import { browsingDB, BrowsingHistoryItem } from '@/helpers/browsingDB';
 
 export default class BrowsingHistory implements IBrowsingHistory {
-  public async clearAllHistorys(): Prmoise<void> {
+  public async clearAllHistorys(): Promise<void> {
     return browsingDB.clear(HISTORY_OBJECT_STORE_NAME);
   }
 

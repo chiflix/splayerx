@@ -43,6 +43,7 @@
       >
         <Icon
           type="channelManage"
+          class="sidebar-icon"
         />
         <div
           :class="{ selected: showChannelManager && currentRouteName === 'browsing-view' }"
@@ -67,13 +68,13 @@
         <div
           @click="openFilesByDialog"
           :title="$t('browsing.openLocalFile')"
-          class="icon-hover"
+          class="icon"
         >
           <Icon type="open" />
         </div>
         <div
           @click="openHomePage"
-          class="icon-hover"
+          class="icon"
         >
           <Icon type="exit" />
         </div>
@@ -222,9 +223,6 @@ export default {
       updateIsHomePage: browsingActions.UPDATE_IS_HOME_PAGE,
       updateCurrentChannel: browsingActions.UPDATE_CURRENT_CHANNEL,
     }),
-    openHomePage() {
-      this.$bus.$emit('back-to-landingview');
-    },
     handleChannelManage() {
       if (this.currentRouteName !== 'browsing-view') {
         this.$router.push({ name: 'browsing-view' });
@@ -267,6 +265,10 @@ export default {
 }
 ::-webkit-scrollbar {
   width: 0;
+}
+.sidebar-icon {
+  width: 44px;
+  height: 44px;
 }
 .side-bar {
   position: absolute;
@@ -319,9 +321,11 @@ export default {
     display:flex;
     flex-direction: column;
     width: 100%;
-  }
-  .icon-hover {
-    margin: auto;
+    .icon {
+      width: 30px;
+      height: 30px;
+      margin: auto;
+    }
   }
   .mask {
     width: 44px;

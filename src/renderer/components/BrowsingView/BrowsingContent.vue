@@ -44,7 +44,7 @@ export default {
   flex-direction: column;
 
   .home-page {
-    width: 100%;
+    width: calc(100% - 104px);
     height: 100%;
   }
 

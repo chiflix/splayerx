@@ -647,8 +647,8 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
 .douyuSidebar, .huyaSidebar, .qqSidebar, .youkuSidebar, .twitchSidebar, .tedSidebar,
 .sportsqqSidebar, .masterclassSidebar, .developerappleSidebar, .vipopen163Sidebar,
 .study163Sidebar, .imoocSidebar, .icourse163Sidebar {
-  width: 44px;
-  height: 44px;
+  width: 100%;
+  height: 100%;
 }
 .showMarks, .hideMarks, .closeSearch {
   width: 18px;

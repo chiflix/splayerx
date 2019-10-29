@@ -1,7 +1,7 @@
 <template>
   <div class="history-item">
     <div class="content">
-      <div class="image">
+      <div class="icon">
         <Icon
           :type="icon"
         />
@@ -23,7 +23,7 @@ import Icon from '@/components/BaseIconContainer.vue';
 
 export default {
   components: {
-    Icon
+    Icon,
   },
   props: {
     title: {
@@ -49,7 +49,11 @@ export default {
   },
   computed: {
     date() {
-      return this.openTime;
+      const a = new Date(this.openTime);
+      const date = a.getDate();
+      const year = a.getFullYear();
+      console.log(a);
+      return `${year}年 ${date}日`;
     },
   },
 };
@@ -71,24 +75,30 @@ export default {
     display:flex;
     justify-content: flex-start;
     align-items: center;
-    .image {
+    .icon {
       margin-left: 20px;
       width: 28px;
       height: 28px;
-    }   
+    }
     .title {
+      margin-left: 13px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
       font-family: $font-normal;
       font-size: 15px;
       color: #3B3B41;
     }
     .channel {
+      margin-left: 13px;
       font-family: $font-normal;
       font-size: 15px;
       color: #B5B6BF;
-      letter-spacing: 0; 
+      letter-spacing: 0;
     }
   }
   .time {
+    margin-right: 30px;
     font-family: $font-normal;
     font-size: 15px;
     color: #B5B6BF;
