@@ -26,9 +26,9 @@
     }
   },
   "tips": {
-    "openSidebar": "",
-    "closeSidebar": "",
-    "exit": ""
+    "openSidebar": "عرض المحتوى الجانبي (C)",
+    "closeSidebar": "أخفِ الشّريط الجانبيّ (C)",
+    "exit": "العودة إلى صفحة الإطلاق"
   },
   "errorFile": {
     "ENOSPC": {
@@ -212,8 +212,8 @@
       "exitPip": "الخروج من الصورة في صورة",
       "playInNewWindow": "اللعب في نافذة جديدة",
       "backToBrowser": "العودة إلى المتصفح",
-      "openSidebar": "",
-      "closeSidebar": ""
+      "openSidebar": "عرض المحتوى الجانبي",
+      "closeSidebar": "أخفِ الشّريط الجانبيّ"
     },
     "edit": {
       "name": "حرّر",
