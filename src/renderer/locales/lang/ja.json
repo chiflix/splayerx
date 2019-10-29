@@ -25,6 +25,11 @@
       "fontSize": "14px"
     }
   },
+  "tips": {
+    "openSidebar": "",
+    "closeSidebar": "",
+    "exit": ""
+  },
   "errorFile": {
     "ENOSPC": {
       "content": "ディスク容量が不足しています。",
@@ -206,7 +211,9 @@
       "enterPip": "画中画を開じる",
       "exitPip": "画中画を閉じる (P)",
       "playInNewWindow": "新しいウィンドウで遊ぶ",
-      "backToBrowser": "ブラウザに戻る"
+      "backToBrowser": "ブラウザに戻る",
+      "openSidebar": "",
+      "closeSidebar": ""
     },
     "edit": {
       "name": "編集",
