@@ -26,9 +26,9 @@
     }
   },
   "tips": {
-    "openSidebar": "",
-    "closeSidebar": "",
-    "exit": ""
+    "openSidebar": "サイドバーの表示 (C)",
+    "closeSidebar": "サイドバーを隠す (C)",
+    "exit": "起動ページに戻る"
   },
   "errorFile": {
     "ENOSPC": {
@@ -212,8 +212,8 @@
       "exitPip": "画中画を閉じる (P)",
       "playInNewWindow": "新しいウィンドウで遊ぶ",
       "backToBrowser": "ブラウザに戻る",
-      "openSidebar": "",
-      "closeSidebar": ""
+      "openSidebar": "サイドバーを開く",
+      "closeSidebar": "サイドバーを隠す"
     },
     "edit": {
       "name": "編集",
