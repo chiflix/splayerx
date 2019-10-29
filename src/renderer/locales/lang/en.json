@@ -28,7 +28,7 @@
   "tips": {
     "openSidebar": "Show Sidebar (C)",
     "closeSidebar": "Hide Sidebar (C)",
-    "exit": "Back To Launching Page"
+    "exit": "Back to Launching Page"
   },
   "errorFile": {
     "ENOSPC": {
@@ -213,7 +213,7 @@
       "exitPip": "Exit Picture in Picture",
       "playInNewWindow": "Play in New Window",
       "backToBrowser": "Back to Browser",
-      "openSidebar": "Open Sidebar",
+      "openSidebar": "Show Sidebar",
       "closeSidebar": "Hide Sidebar"
     },
     "edit": {
