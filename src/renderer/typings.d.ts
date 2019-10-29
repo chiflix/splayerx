@@ -1,17 +1,18 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/interface-name-prefix */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import Vue, { VNode } from 'vue'; // eslint-disable-line no-unused-vars
+// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+import Vue, { VNode } from 'vue';
 
 declare global {
-  declare const __static: string; //eslint-disable-line
+  // eslint-disable-next-line no-underscore-dangle
+  declare const __static: string;
   interface Screen {
     availLeft: number;
     availTop: number;
   }
   namespace JSX {
-    interface Element extends VNode {} //eslint-disable-line
-    interface ElementClass extends Vue {} //eslint-disable-line
+    // eslint-disable-next-line @typescript-eslint/no-empty-interface
+    interface Element extends VNode {}
+    // eslint-disable-next-line @typescript-eslint/no-empty-interface
+    interface ElementClass extends Vue {}
     interface IntrinsicElements {
       [elem: string]: unknown;
     }
@@ -21,7 +22,8 @@ declare global {
   interface JsonMap {
     [member: string]: string | number | boolean | null | JsonArray | JsonMap;
   }
-  interface JsonArray extends Array<string | number | boolean | null | JsonArray | JsonMap> {} // eslint-disable-line
+  // eslint-disable-next-line @typescript-eslint/no-empty-interface
+  interface JsonArray extends Array<string | number | boolean | null | JsonArray | JsonMap> {}
   type Json = JsonMap | JsonArray | string | number | boolean | null;
 
   interface AbortablePromise<T> extends Promise<T> {
@@ -35,8 +37,10 @@ declare module '*.vue' {
 
 declare module 'vue/types/vue' {
   interface Vue {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     $store: any;
     $bus: Vue;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     $ga: any;
     $electron: Electron.RendererInterface;
   }
@@ -307,6 +311,7 @@ declare module 'electron' {
   }
 
   interface Event {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     reply(channel: string, ...args: any[]): void;
     reply(channel: 'media-info-reply', error?: Error, info: string): void;
     reply(channel: 'snapshot-reply', error?: Error, path: string): this;
