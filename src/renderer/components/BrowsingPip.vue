@@ -6,7 +6,6 @@
 import { throttle } from 'lodash';
 import electron from 'electron';
 // @ts-ignore
-import urlParseLax from 'url-parse-lax';
 import asyncStorage from '@/helpers/asyncStorage';
 
 export default {
@@ -18,8 +17,8 @@ export default {
       offset: [],
       currentUrl: '',
       canListenUrlChange: false,
-      allChannels: ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch', 'coursera', 'ted'],
-      compareStr: [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com', 'film.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch'], ['coursera'], ['ted']],
+      allChannels: ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch', 'coursera', 'ted', 'lynda', 'masterclass', 'sportsqq', 'developerapple', 'vipopen163', 'study163', 'imooc', 'icourse163'],
+      compareStr: [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com', 'film.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch'], ['coursera'], ['ted'], ['lynda'], ['masterclass'], ['sports.qq.com', 'new.qq.com', 'view.inews.qq.com'], ['apple', 'wwdc'], ['open.163'], ['study.163'], ['imooc'], ['icourse163']],
     };
   },
   computed: {
@@ -144,24 +143,23 @@ export default {
     });
   },
   methods: {
+    calcChannel(url: string) {
+      let calcChannel = '';
+      this.allChannels.forEach((channel: string, index: number) => {
+        if (this.compareStr[index].findIndex((str: string) => url.includes(str)) !== -1) {
+          calcChannel = `${channel}.com`;
+        }
+      });
+      return calcChannel;
+    },
     getRatio() {
       return process.platform === 'win32' ? window.devicePixelRatio || 1 : 1;
     },
     handleUrlChange(url: string) {
       if (!url || url === 'about:blank') return;
       if (url !== this.currentUrl) {
-        const newHostname = urlParseLax(url).hostname;
-        const oldHostname = urlParseLax(this.currentUrl).hostname;
-        let newChannel = '';
-        let oldChannel = '';
-        this.allChannels.forEach((channel: string, index: number) => {
-          if (this.compareStr[index].findIndex((str: string) => newHostname.includes(str)) !== -1) {
-            newChannel = `${channel}.com`;
-          }
-          if (this.compareStr[index].findIndex((str: string) => oldHostname.includes(str)) !== -1) {
-            oldChannel = `${channel}.com`;
-          }
-        });
+        const oldChannel = this.calcChannel(this.currentUrl);
+        const newChannel = this.calcChannel(url);
         if (newChannel === oldChannel) {
           this.currentUrl = url;
           const view = electron.remote.getCurrentWindow().getBrowserViews()[0];

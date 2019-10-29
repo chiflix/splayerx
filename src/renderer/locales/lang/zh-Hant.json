@@ -137,6 +137,7 @@
       "hidePlaylist": "收起播放列表",
       "previousVideo": "上一集",
       "singleCycle": "循環單個文件",
+      "playlistLoop": "循環播放清單",
       "snapShot": "截圖"
     },
     "splayerx": {
@@ -203,8 +204,8 @@
       "name": "窗口",
       "originSize": "100%",
       "enterPip": "進入畫中畫模式",
-      "exitPip": "退出畫中畫模式",
-      "playInNewWindow": "在新視窗播放",
+      "exitPip": "退出畫中畫 (P)",
+      "playInNewWindow": "在新視窗播放 (O)",
       "backToBrowser": "還原窗口"
     },
     "edit": {
@@ -249,11 +250,19 @@
     "youku": "优酷",
     "coursera": "Coursera",
     "ted": "TED",
+    "lynda": "Lynda",
+    "masterclass": "MasterClass",
+    "sportsqq": "腾讯体育",
+    "developerapple": "WWDC",
+    "vipopen163": "网易公开课",
+    "study163": "网易云课堂",
+    "imooc": "慕课网",
+    "icourse163": "中国大学MOOC",
     "openLocalFile": "打開本地文件 ...",
-    "enterPip": "進入畫中畫",
-    "exitPip": "還原窗口",
-    "enterPop": "在新視窗播放",
-    "exitPop": "還原窗口",
+    "enterPip": "進入畫中畫 (P)",
+    "exitPip": "退出畫中畫模式 (P)",
+    "enterPop": "在新視窗播放 (O)",
+    "exitPop": "還原窗口 (O)",
     "danmu": "彈幕開關",
     "error": {
       "offline": "未連接到互聯網",
@@ -263,7 +272,8 @@
     },
     "remove": "移除",
     "siteManager": "站點管理",
-    "popularSites": "已適配站點",
+    "general": "綜合",
+    "education": "教育",
     "siteTip": "新增 / 編輯"
   },
   "preferences": {

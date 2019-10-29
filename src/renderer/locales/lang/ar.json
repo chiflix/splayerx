@@ -137,6 +137,7 @@
       "hidePlaylist": "إخفاء قائمة التشغيل",
       "previousVideo": "الفيديو السابق",
       "singleCycle": "كرر مرة واحدة",
+      "playlistLoop": "حلقة قائمة التشغيل",
       "snapShot": "لمحة"
     },
     "splayerx": {
@@ -249,6 +250,14 @@
     "youku": "Youku",
     "coursera": "Coursera",
     "ted": "TED",
+    "lynda": "Lynda",
+    "masterclass": "MasterClass",
+    "sportsqq": "Tencent Sports",
+    "developerapple": "WWDC",
+    "vipopen163": "网易公开课",
+    "study163": "网易云课堂",
+    "imooc": "慕课网",
+    "icourse163": "中国大学MOOC",
     "openLocalFile": " فتح ملف محلي ...",
     "enterPip": "أدخل صورة في صورة",
     "exitPip": "العودة إلى المتصفح",
@@ -263,7 +272,8 @@
     },
     "remove": "نزع",
     "siteManager": "مدير المواقع",
-    "popularSites": "المواقع الأمثل",
+    "general": "مجمع",
+    "education": "التعليم",
     "siteTip": "اضافة / تغيير"
   },
   "preferences": {

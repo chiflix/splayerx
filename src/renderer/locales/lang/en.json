@@ -137,7 +137,8 @@
       "showPlaylist": "Show Playlist",
       "hidePlaylist": "Hide Playlist",
       "previousVideo": "Previous Video",
-      "singleCycle": "Repeat One",
+      "singleCycle": "Loop One",
+      "playlistLoop": "Loop Playlist",
       "snapShot": "Snapshot"
     },
     "splayerx": {
@@ -250,9 +251,17 @@
     "youku": "Youku",
     "coursera": "Coursera",
     "ted": "TED",
+    "lynda": "Lynda",
+    "masterclass": "MasterClass",
+    "sportsqq": "Tencent Sports",
+    "developerapple": "WWDC",
+    "vipopen163": "网易公开课",
+    "study163": "网易云课堂",
+    "imooc": "慕课网",
+    "icourse163": "中国大学MOOC",
     "openLocalFile": "Open Local File ...",
     "enterPip": "Enter Picture in Picture",
-    "exitPip": "Back to Browser",
+    "exitPip": "Exit Picture in Picture",
     "enterPop": "Play in New Window",
     "exitPop": "Back to Browser",
     "danmu": "Toggle Danmaku",
@@ -264,7 +273,8 @@
     },
     "remove": "Remove",
     "siteManager": "Site Manager",
-    "popularSites": "Optimized Sites",
+    "general": "General",
+    "education": "Education",
     "siteTip": "Add / Edit"
   },
   "preferences": {
@@ -300,6 +310,59 @@
       "incognitoDescription": "Your playback history will not be stored anymore.",
       "clearHistory": "Clear Playback History",
       "clearHistoryDescription": "Remove existing playlists and playback history"
+    },
+    "account": {
+      "accountSetting": "Account",
+      "title": "My Profile",
+      "noToken": {
+        "title": "Not Signed In",
+        "description": "Sign in with your phone number to use AI Translation and more advanced features.",
+        "button": "Sign In"
+      },
+      "normalUser": {
+        "title": "Account",
+        "description": "Upgrade your account now and get started with exclusive features and more.",
+        "button": "Upgrade"
+      },
+      "vipUser": {
+        "title": "Premium Account ",
+        "description": "Expiration Date: ",
+        "button": "Renew"
+      },
+      "month": "Month",
+      "year": "Year",
+      "months": "Months",
+      "years": "Years",
+      "signOut": "Sign out",
+      "createdAt": "Registration Date",
+      "payAt": "Recent Purchased",
+      "payContent": "{date}{product}",
+      "payProduct": ": {product} Premium"
+
+    },
+    "premium": {
+      "premiumSetting": "Premium",
+      "title": "SPlayer VIP Privilege",
+      "description": "In order to achieve stable and sustainable development for a long time, users are welcome to support the shooter audio and",
+      "content": {
+        "description1": "Extend AI Translation time for your daily use",
+        "description2": "Support more languages in AI Translation",
+        "description3": "Export unlimited speech recognition results",
+        "description4": "New features are coming soon",
+        "description5": "",
+        "description6": ""
+      },
+      "origin": "ORIG. ",
+      "off": "% Off",
+      "month": "Month",
+      "year": "Year",
+      "months": "Mo.",
+      "years": "Yr.",
+      "payType": {
+        "alipay": "Alipay",
+        "wxpay": "Wechat Pay",
+        "paypal": "PayPal"
+      }
     }
   },
   "privacyBubble": {
@@ -524,5 +587,27 @@
     "content": "Upgrade to export translations unlimitedly，and get access to more exclusive features。",
     "span": "Already Premium? Sign In Now.",
     "button": "Go Premium Now"
+  },
+  "premiumModal": {
+    "loading": {
+      "content": "Processing，please wait a second …",
+      "button": "Close"
+    },
+    "success": {
+      "h2": "Thanks for your support !",
+      "h1": "Payment Successful!",
+      "h4": "NOW",
+      "content1": "Extend AI Translation Time",
+      "content2": "More Languages Support in AI Translation",
+      "content3": "Export Translation Results Unlimitedly",
+      "button": "Done"
+    },
+    "fail": {
+      "h1": "Sorry",
+      "content": "Your transaction could not be processed，Please contact us",
+      "copy": "Copy",
+      "copied": "Copied",
+      "button": "Back"
+    }
   }
 }

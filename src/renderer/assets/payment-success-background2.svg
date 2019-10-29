@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="327px" height="360px" viewBox="0 0 327 360" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 59 (86127) - https://sketch.com -->
+    <title>g2</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <filter x="-26.5%" y="-23.1%" width="151.0%" height="146.2%" filterUnits="objectBoundingBox" id="filter-1">
+            <feOffset dx="0" dy="0" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="3" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.122622283 0" type="matrix" in="shadowBlurOuter1" result="shadowMatrixOuter1"></feColorMatrix>
+            <feMerge>
+                <feMergeNode in="shadowMatrixOuter1"></feMergeNode>
+                <feMergeNode in="SourceGraphic"></feMergeNode>
+            </feMerge>
+        </filter>
+        <radialGradient cx="50%" cy="64.5280792%" fx="50%" fy="64.5280792%" r="48.6820853%" gradientTransform="translate(0.500000,0.645281),scale(0.941176,1.000000),rotate(90.000000),translate(-0.500000,-0.645281)" id="radialGradient-2">
+            <stop stop-color="#FFFFFF" stop-opacity="0.109884511" offset="2.09763367%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.227553216" offset="53.8768967%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.540194746" offset="100%"></stop>
+        </radialGradient>
+        <radialGradient cx="50%" cy="63.3385735%" fx="50%" fy="63.3385735%" r="50.4122753%" gradientTransform="translate(0.500000,0.633386),scale(0.941176,1.000000),rotate(90.000000),translate(-0.500000,-0.633386)" id="radialGradient-3">
+            <stop stop-color="#FFFFFF" stop-opacity="0.329398777" offset="0%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.573822464" offset="53.8768967%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.764124774" offset="100%"></stop>
+        </radialGradient>
+        <radialGradient cx="50.0000208%" cy="64.5281%" fx="50.0000208%" fy="64.5281%" r="161.936709%" gradientTransform="translate(0.500000,0.645281),scale(1.000000,0.300625),rotate(90.000000),translate(-0.500000,-0.645281)" id="radialGradient-4">
+            <stop stop-color="#FFFFFF" stop-opacity="0.109884511" offset="2.09763367%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.227553216" offset="53.8768967%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.540194746" offset="100%"></stop>
+        </radialGradient>
+        <radialGradient cx="50.0000265%" cy="63.3386%" fx="50.0000265%" fy="63.3386%" r="167.692036%" gradientTransform="translate(0.500000,0.633386),scale(1.000000,0.300625),rotate(90.000000),translate(-0.500000,-0.633386)" id="radialGradient-5">
+            <stop stop-color="#FFFFFF" stop-opacity="0.329398777" offset="0%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.573822464" offset="53.8768967%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.764124774" offset="100%"></stop>
+        </radialGradient>
+        <radialGradient cx="50.0000208%" cy="64.5281%" fx="50.0000208%" fy="64.5281%" r="161.886007%" gradientTransform="translate(0.500000,0.645281),scale(1.000000,0.300719),rotate(90.000000),translate(-0.500000,-0.645281)" id="radialGradient-6">
+            <stop stop-color="#FFFFFF" stop-opacity="0.109884511" offset="2.09763367%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.227553216" offset="53.8768967%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.540194746" offset="100%"></stop>
+        </radialGradient>
+        <radialGradient cx="50.0000265%" cy="63.3386%" fx="50.0000265%" fy="63.3386%" r="167.639531%" gradientTransform="translate(0.500000,0.633386),scale(1.000000,0.300719),rotate(90.000000),translate(-0.500000,-0.633386)" id="radialGradient-7">
+            <stop stop-color="#FFFFFF" stop-opacity="0.329398777" offset="0%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.573822464" offset="53.8768967%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.764124774" offset="100%"></stop>
+        </radialGradient>
+        <radialGradient cx="84.2036702%" cy="81.3988863%" fx="84.2036702%" fy="81.3988863%" r="114.30679%" id="radialGradient-8">
+            <stop stop-color="#FFFFFF" stop-opacity="0.775928442" offset="0%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.508378623" offset="100%"></stop>
+        </radialGradient>
+    </defs>
+    <g id="页面-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" opacity="0.6">
+        <g id="Userinfo/Payment-Instruction/Style5/Success" transform="translate(-112.000000, -30.000000)">
+            <g id="background" transform="translate(-25.000000, 29.000000)">
+                <g id="g2" transform="translate(140.000000, 0.000000)">
+                    <g id="Icon---Play" filter="url(#filter-1)" opacity="0.5" transform="translate(34.500000, 323.000000) rotate(-31.000000) translate(-34.500000, -323.000000) translate(10.000000, 297.000000)">
+                        <path d="M24.1159603,50.4961805 L3.72929447,50.4961805 C2.12753198,50.4961805 0.6442084,49.6524362 -0.174421013,48.2756686 C-0.995903927,46.894102 -1.04862101,45.1870296 -0.313952046,43.7574066 L10.1695099,23.3572004 L10.1695099,23.3572004 L19.407675,5.38026934 C20.3141925,3.61623914 22.1295816,2.50578443 24.1129028,2.50213023 C26.095021,2.49847824 27.9121631,3.60540966 28.8181306,5.36836982 L38.0624108,23.3572004 L38.0624108,23.3572004 L48.2291206,43.1410255 C49.0261002,44.6919013 48.9929761,46.5389443 48.1409015,48.0602466 C47.2983507,49.564545 45.7087326,50.4961805 43.9845501,50.4961805 L24.1159603,50.4961805 L24.1159603,50.4961805 Z" id="Basis" fill="url(#radialGradient-2)" opacity="0.3" transform="translate(24.005257, 26.496180) rotate(90.000000) translate(-24.005257, -26.496180) "></path>
+                        <path d="M24.1159603,50.4961805 L3.72929447,50.4961805 C2.12753198,50.4961805 0.6442084,49.6524362 -0.174421013,48.2756686 C-0.995903927,46.894102 -1.04862101,45.1870296 -0.313952046,43.7574066 L10.1695099,23.3572004 L10.1695099,23.3572004 L19.407675,5.38026934 C20.3141925,3.61623914 22.1295816,2.50578443 24.1129028,2.50213023 C26.095021,2.49847824 27.9121631,3.60540966 28.8181306,5.36836982 L38.0624108,23.3572004 L38.0624108,23.3572004 L48.2291206,43.1410255 C49.0261002,44.6919013 48.9929761,46.5389443 48.1409015,48.0602466 C47.2983507,49.564545 45.7087326,50.4961805 43.9845501,50.4961805 L24.1159603,50.4961805 L24.1159603,50.4961805 Z" id="Border" stroke-opacity="0.437273551" stroke="#FFFFFF" stroke-width="0.75" fill="url(#radialGradient-3)" opacity="0.2" transform="translate(24.005257, 26.496180) rotate(90.000000) translate(-24.005257, -26.496180) "></path>
+                    </g>
+                    <g id="新版播放暂停图标-Icon---Pause" opacity="0.4" transform="translate(301.500000, 25.000000) rotate(-160.000000) translate(-301.500000, -25.000000) translate(284.000000, 5.000000)" fill-rule="nonzero">
+                        <g id="Group" transform="translate(0.396893, 0.123729)">
+                            <rect id="Rectangle" fill="url(#radialGradient-4)" x="0" y="0" width="11.52" height="38.3202254" rx="1.3824"></rect>
+                            <rect id="Rectangle" stroke-opacity="0.437273551" stroke="#FFFFFF" stroke-width="0.6" fill="url(#radialGradient-5)" x="0" y="0" width="11.52" height="38.3202254" rx="1.3824"></rect>
+                        </g>
+                        <g id="Group" transform="translate(22.285604, 0.672037)">
+                            <rect id="Rectangle" fill="url(#radialGradient-6)" x="0" y="0" width="11.52" height="38.3082353" rx="1.3824"></rect>
+                            <rect id="Rectangle" stroke-opacity="0.437273551" stroke="#FFFFFF" stroke-width="0.6" fill="url(#radialGradient-7)" x="0" y="0" width="11.52" height="38.3082353" rx="1.3824"></rect>
+                        </g>
+                    </g>
+                    <path d="M52.1630435,57 C52.4391859,57 52.6630435,57.2238576 52.6630435,57.5 L52.6630435,57.5 L52.663,64.336 L59.5,64.3369565 C59.7454599,64.3369565 59.9496084,64.5138317 59.9919443,64.7470809 L60,64.8369565 L60,67.1630435 C60,67.4391859 59.7761424,67.6630435 59.5,67.6630435 L59.5,67.6630435 L52.663,67.663 L52.6630435,74.5 C52.6630435,74.7454599 52.4861683,74.9496084 52.2529191,74.9919443 L52.1630435,75 L49.8369565,75 C49.5608141,75 49.3369565,74.7761424 49.3369565,74.5 L49.3369565,74.5 L49.336,67.663 L42.5,67.6630435 C42.2545401,67.6630435 42.0503916,67.4861683 42.0080557,67.2529191 L42,67.1630435 L42,64.8369565 C42,64.5608141 42.2238576,64.3369565 42.5,64.3369565 L42.5,64.3369565 L49.336,64.336 L49.3369565,57.5 C49.3369565,57.2545401 49.5138317,57.0503916 49.7470809,57.0080557 L49.8369565,57 Z" id="Icon---Add" stroke-opacity="0.168081975" stroke="#FFFFFF" fill="url(#radialGradient-8)" opacity="0.7"></path>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

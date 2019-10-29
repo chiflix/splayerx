@@ -1,10 +1,11 @@
 <template>
   <div
     :class="['titlebar', { darwin: isDarwin }]"
+    @mousemove.stop="handleMousemove"
     @dblclick="handleDbClick"
   >
     <div
-      v-if="!isDarwin && isLandingView"
+      v-if="!isDarwin"
       @dblclick.stop=""
       :style="{
         transform: `translateX(${showSidebar ? '76' : '0'}px)`,
@@ -12,6 +13,7 @@
       class="sidebar"
     >
       <SidebarIcon
+        v-fade-in="!isPlayingView || showTitleBar"
         @mouseover.native="mouseoverSidebar = true"
         @mouseout.native="mouseoverSidebar = false"
         :mouseover="mouseoverSidebar"
@@ -26,7 +28,7 @@
     </div>
     <div
       v-if="!isDarwin"
-      v-fade-in="showTitleBar"
+      v-fade-in="!isPlayingView || showTitleBar"
       class="win-icons"
     >
       <Icon
@@ -60,11 +62,11 @@
     </div>
     <div
       v-if="isDarwin"
+      v-fade-in="!isPlayingView || showTitleBar"
       @dblclick.stop=""
       class="mac-icons"
     >
       <div
-        v-fade-in="showTitleBar"
         @mouseover="handleMouseOver"
         @mouseout="handleMouseOut"
         class="system-icons"
@@ -104,7 +106,7 @@
         />
       </div>
       <SidebarIcon
-        v-if="isLandingView"
+        v-if="isLandingView || isPlayingView"
         @mouseover.native="mouseoverSidebar = true"
         @mouseout.native="mouseoverSidebar = false"
         :style="{
@@ -112,6 +114,7 @@
         }"
         :mouseover="mouseoverSidebar"
         :fill="isBrowsingView ? '#BBBACC' : ''"
+        :is-playing-view="isPlayingView"
         class="sidebar no-drag"
       />
     </div>
@@ -124,11 +127,12 @@
 </template>
 
 <script lang="ts">
-import { mapGetters } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import Icon from '@/components/BaseIconContainer.vue';
 import SidebarIcon from '@/components/LandingView/SidebarIcon.vue';
 import Badge from '@/components/LandingView/Badge.vue';
+import { Input as inputActions } from '@/store/actionTypes';
 
 export default {
   name: 'Titlebar',
@@ -140,18 +144,6 @@ export default {
     Badge,
   },
   props: {
-    showSidebar: {
-      type: Boolean,
-      default: false,
-    },
-    isLandingView: {
-      type: Boolean,
-      default: false,
-    },
-    isBrowsingView: {
-      type: Boolean,
-      default: false,
-    },
     showAllWidgets: {
       type: Boolean,
       default: true,
@@ -172,7 +164,6 @@ export default {
       itemType: 'titleBarFull',
       keyAlt: false,
       keyOver: false,
-      showTitleBar: true,
       isShowingVideoCover: false,
       mouseoverSidebar: false,
     };
@@ -181,7 +172,17 @@ export default {
     ...mapGetters([
       'isMaximized',
       'isFullScreen',
+      'showSidebar',
     ]),
+    isLandingView() {
+      return this.$route.name === 'landing-view';
+    },
+    isPlayingView() {
+      return this.$route.name === 'playing-view';
+    },
+    isBrowsingView() {
+      return this.$route.name === 'browsing-view';
+    },
     isDarwin() {
       return process.platform === 'darwin';
     },
@@ -192,14 +193,11 @@ export default {
     showBadge() {
       return this.isLandingView && !this.isShowingVideoCover && this.$store.getters.incognitoMode;
     },
+    showTitleBar() {
+      return this.recentPlaylist || this.showAllWidgets || this.showSidebar;
+    },
   },
   watch: {
-    recentPlaylist(val: boolean) {
-      if (!val) this.showTitleBar = this.showAllWidgets;
-    },
-    showAllWidgets(val: boolean) {
-      this.showTitleBar = this.recentPlaylist || val;
-    },
     keyAlt(val: boolean) {
       if (!val || !this.keyOver) {
         this.itemType = this.itemTypeEnum.FULLSCREEN;
@@ -229,6 +227,9 @@ export default {
     });
   },
   methods: {
+    ...mapActions({
+      updateMousemove: inputActions.MOUSEMOVE_UPDATE,
+    }),
     handleDbClick() {
       const browserWindow = this.$electron.remote.getCurrentWindow();
       if (!browserWindow.isMaximized()) {
@@ -236,6 +237,9 @@ export default {
       } else {
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'unmaximize');
       }
+    },
+    handleMousemove(event: MouseEvent) {
+      this.$bus.$emit('titlebar-mousemove', event);
     },
     handleMouseOver() {
       this.keyOver = true;

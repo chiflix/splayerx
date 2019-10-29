@@ -432,3 +432,8 @@ export function getMainVersion(): string {
 export function getIsBeta(): boolean {
   return version.indexOf('beta') !== -1;
 }
+
+export function toDateString(d: string): string {
+  const date = new Date(d).toISOString();
+  return date.split('T')[0];
+}
