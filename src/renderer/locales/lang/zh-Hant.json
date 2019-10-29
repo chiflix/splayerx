@@ -26,9 +26,9 @@
     }
   },
   "tips": {
-    "openSidebar": "",
-    "closeSidebar": "",
-    "exit": ""
+    "openSidebar": "打開側邊欄 (C)",
+    "closeSidebar": "隱藏側邊欄 (C)",
+    "exit": "回到啟動頁"
   },
   "errorFile": {
     "ENOSPC": {
@@ -212,8 +212,8 @@
       "exitPip": "退出畫中畫 (P)",
       "playInNewWindow": "在新視窗播放 (O)",
       "backToBrowser": "還原窗口",
-      "openSidebar": "",
-      "closeSidebar": ""
+      "openSidebar": "打開側邊欄",
+      "closeSidebar": "隱藏側邊欄"
     },
     "edit": {
       "name": "編輯",
