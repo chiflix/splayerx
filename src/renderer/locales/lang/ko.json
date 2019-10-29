@@ -25,6 +25,11 @@
       "fontSize": "14px"
     }
   },
+  "tips": {
+    "openSidebar": "",
+    "closeSidebar": "",
+    "exit": ""
+  },
   "errorFile": {
     "ENOSPC": {
       "content": "사용할 수있는 디스크 공간이 부족합니다.",
@@ -206,7 +211,9 @@
       "enterPip": "Picture In Picture 사용",
       "exitPip": "Picture In Picture 퇴출",
       "playInNewWindow": "새 창에서 놀다",
-      "backToBrowser": "브라우저로 돌아 가기"
+      "backToBrowser": "브라우저로 돌아 가기",
+      "openSidebar": "",
+      "closeSidebar": ""
     },
     "edit": {
       "name": "편집",
