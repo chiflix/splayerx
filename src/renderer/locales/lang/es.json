@@ -25,6 +25,11 @@
       "fontSize": "14px"
     }
   },
+  "tips": {
+    "openSidebar": "",
+    "closeSidebar": "",
+    "exit": ""
+  },
   "errorFile": {
     "ENOSPC": {
       "content": "No hay suficiente espacio en disco disponible.",
@@ -206,7 +211,9 @@
       "enterPip": "Habilitar Picture in Picture",
       "exitPip": "Salir de Picture in Picture",
       "playInNewWindow": "Reproducir en ventana nueva",
-      "backToBrowser": "Volver al navegador"
+      "backToBrowser": "Volver al navegador",
+      "openSidebar": "",
+      "closeSidebar": ""
     },
     "edit": {
       "name": "Editar",
