@@ -26,9 +26,9 @@
     }
   },
   "tips": {
-    "openSidebar": "",
-    "closeSidebar": "",
-    "exit": ""
+    "openSidebar": "사이드 바 표시v (C)",
+    "closeSidebar": "가장자리 창 숨김 (C)",
+    "exit": "시작 페이지로 돌아 가기"
   },
   "errorFile": {
     "ENOSPC": {
@@ -212,8 +212,8 @@
       "exitPip": "Picture In Picture 퇴출",
       "playInNewWindow": "새 창에서 놀다",
       "backToBrowser": "브라우저로 돌아 가기",
-      "openSidebar": "",
-      "closeSidebar": ""
+      "openSidebar": "사이드바 열기",
+      "closeSidebar": "사이드 바 숨김"
     },
     "edit": {
       "name": "편집",
