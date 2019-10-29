@@ -106,7 +106,6 @@ export function crossThreadCache(key, fn) {
   func.noCache = fn;
   return func;
 }
-app.crossThreadCache = crossThreadCache;
 
 export const getIP = crossThreadCache('ip', async () => {
   const res = await fetcher.get('https://ip.xindong.com/myip');

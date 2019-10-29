@@ -34,14 +34,14 @@ const fetcher = new Fetcher({
 // @ts-ignore
 const endpoint = window.remote && window.remote.app.getSignInEndPoint();
 // @ts-ignore
-const crossThreadCache = window.remote && window.remote.app.crossThreadCache;
+const crossThread = (window.remote && window.remote.app.crossThreadCache) || ((key, func) => func);
 
 /**
  * @description get IP && geo data from server
  * @author tanghaixiang
  * @returns Promise
  */
-export const getGeoIP = crossThreadCache(['ip', 'countryCode'], () => new Promise((resolve, reject) => {
+export const getGeoIP = crossThread(['ip', 'countryCode'], () => new Promise((resolve, reject) => {
   fetcher.get(`${endpoint}/api/geoip`).then((response: Response) => {
     if (response.ok) {
       response.json().then((data: { ip: string, countryCode: string }) => resolve(data));
