@@ -17,6 +17,7 @@
         @mouseover.native="mouseoverSidebar = true"
         @mouseout.native="mouseoverSidebar = false"
         :mouseover="mouseoverSidebar"
+        :title="showSidebar ? $t('tips.openSidebar') : $t('tips.closeSidebar')"
         :fill="isBrowsingView ? '#BBBACC' : ''"
         class="sidebar-icon no-drag"
       />

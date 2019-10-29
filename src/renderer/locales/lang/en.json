@@ -25,6 +25,11 @@
       "fontSize": "14px"
     }
   },
+  "tips": {
+    "openSidebar": "Open Sidebar (C)",
+    "closeSidebar": "Hide Sidebar (C)",
+    "exit": "Back To Launching Page"
+  },
   "errorFile": {
     "ENOSPC": {
       "content": "No enough disk space available.",
@@ -207,7 +212,9 @@
       "enterPip": "Enter Picture in Picture",
       "exitPip": "Exit Picture in Picture",
       "playInNewWindow": "Play in New Window",
-      "backToBrowser": "Back to Browser"
+      "backToBrowser": "Back to Browser",
+      "openSidebar": "Open Sidebar",
+      "closeSidebar": "Hide Sidebar"
     },
     "edit": {
       "name": "Edit",
@@ -260,8 +267,8 @@
     "imooc": "慕课网",
     "icourse163": "中国大学MOOC",
     "openLocalFile": "Open Local File ...",
-    "enterPip": "Enter Picture in Picture",
-    "exitPip": "Exit Picture in Picture",
+    "enterPip": "Enter Picture in Picture (P)",
+    "exitPip": "Exit Picture in Picture (O)",
     "enterPop": "Play in New Window",
     "exitPop": "Back to Browser",
     "danmu": "Toggle Danmaku",
