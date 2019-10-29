@@ -101,10 +101,6 @@ export default {
       type: String,
       default: '',
     },
-    showSidebar: {
-      type: Boolean,
-      default: false,
-    },
   },
   data() {
     return {
