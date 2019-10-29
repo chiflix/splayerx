@@ -730,6 +730,7 @@ export default {
         || urlParseLax(this.currentUrl).href === urlParseLax(url).href
       ) return;
       if (this.oauthRegex.some((re: RegExp) => re.test(url))) return;
+      log.info('open-url-by-nav', this.currentChannel);
       const oldChannel = this.currentChannel;
       const newChannel = this.calcCurrentChannel(url);
       if (oldChannel === newChannel) {
@@ -810,6 +811,7 @@ export default {
         });
       } else {
         if (this.oauthRegex.some((re: RegExp) => re.test(url))) return;
+        log.info('open-url-by-new-window', this.currentChannel);
         const oldChannel = this.currentChannel;
         const newChannel = this.calcCurrentChannel(url);
         if (oldChannel === newChannel) {
