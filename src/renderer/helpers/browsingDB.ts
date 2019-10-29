@@ -10,6 +10,7 @@ import { log } from '@/libs/Log';
 export type BrowsingHistoryItem = {
   url: string,
   title: string,
+  channel: string,
   openTime: number,
 };
 

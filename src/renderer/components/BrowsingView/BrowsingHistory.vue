@@ -1,10 +1,11 @@
 <template>
   <div class="browsing-history">
     <div class="title">
-      历史记录
-    </div>
-    <div class="clear">
-      |  清除
+      <span>历史记录</span> 
+      <span
+        @click="handleClear"
+        class="clear"
+      >清除</span>
     </div>
     <div class="history">
       <BrowsingHistoryItem
@@ -18,7 +19,7 @@
 </template>
 <script lang="ts">
 import BrowsingHistoryItem from '@/components/BrowsingView/BrowsingHistoryItem.vue';
-import { browsingHistory } from '@/services/browsing/BrowsingHistory';
+import { browsingHistory } from '@/services/browsing/BrowsingHistoryService';
 
 export default {
   components: {
@@ -34,16 +35,29 @@ export default {
       historys: [],
     };
   },
+  methods: {
+    async handleClear() {
+      await browsingHistory.clearAllHistorys();
+      this.historys = [];
+    },
+  },
 };
 </script>
 <style lang="scss" scoped>
 .browsing-history {
-  width: 100%;
+  width: calc(100% - 104px);
   height: 100%;
   .title {
     font-family: $font-semibold;
     font-size: 25px;
     color: #3B3B41;
+    .clear {
+      border-left: 1px solid #B5B6BF; 
+      font-family: $font-light;
+      font-size: 19px;
+      color: #B5B6BF;
+      letter-spacing: 0.14px;
+    }
   }
   .history {
     margin-left: 6px;

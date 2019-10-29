@@ -61,7 +61,7 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  transition: box-shadow 1s;
+  transition: box-shadow 500ms;
   border-radius: 7px;
   &:hover {
     box-shadow: 0 1px 9px 0 rgba(0,0,0,0.10);

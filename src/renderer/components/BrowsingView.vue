@@ -66,7 +66,7 @@ import { getValidVideoRegex, getValidSubtitleRegex } from '../../shared/utils';
 import MenuService from '@/services/menu/MenuService';
 import { log } from '@/libs/Log';
 import InjectJSManager from '../../shared/pip/InjectJSManager';
-import { browsingHistory } from '@/services/browsing/BrowsingHistory';
+import { browsingHistory } from '@/services/browsing/BrowsingHistoryService';
 
 export default {
   name: 'BrowsingView',
@@ -279,7 +279,10 @@ export default {
     hasVideo(val: boolean) {
       this.updatePipState(val);
       this.createTouchBar(val);
-      if (val) browsingHistory.saveHistoryItem(this.currentUrl, this.title);
+      if (val) {
+        console.log('channel', this.currentChannel);
+        browsingHistory.saveHistoryItem(this.currentUrl, this.title, this.currentChannel);
+      }
     },
     adaptFinished(val: boolean) {
       if (val) {
