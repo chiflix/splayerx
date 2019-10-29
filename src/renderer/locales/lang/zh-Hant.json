@@ -25,6 +25,11 @@
       "fontSize": "14px"
     }
   },
+  "tips": {
+    "openSidebar": "",
+    "closeSidebar": "",
+    "exit": ""
+  },
   "errorFile": {
     "ENOSPC": {
       "content": "沒有足夠的磁盤空間。",
@@ -206,7 +211,9 @@
       "enterPip": "進入畫中畫模式",
       "exitPip": "退出畫中畫 (P)",
       "playInNewWindow": "在新視窗播放 (O)",
-      "backToBrowser": "還原窗口"
+      "backToBrowser": "還原窗口",
+      "openSidebar": "",
+      "closeSidebar": ""
     },
     "edit": {
       "name": "編輯",
