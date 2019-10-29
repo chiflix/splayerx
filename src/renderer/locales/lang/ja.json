@@ -137,6 +137,7 @@
       "hidePlaylist": "プレイリストを隠す",
       "previousVideo": "前のビデオ",
       "singleCycle": "リピート",
+      "playlistLoop": "プレイリストをループ再生",
       "snapShot": "スナップショット"
     },
     "splayerx": {
@@ -203,7 +204,7 @@
       "name": "ウィンドウ",
       "originSize": "100%",
       "enterPip": "画中画を開じる",
-      "exitPip": "画中画を閉じる",
+      "exitPip": "画中画を閉じる (P)",
       "playInNewWindow": "新しいウィンドウで遊ぶ",
       "backToBrowser": "ブラウザに戻る"
     },
@@ -249,11 +250,19 @@
     "youku": "Youku",
     "coursera": "Coursera",
     "ted": "TED",
+    "lynda": "Lynda",
+    "masterclass": "MasterClass",
+    "sportsqq": "Tencent Sports",
+    "developerapple": "WWDC",
+    "vipopen163": "网易公开课",
+    "study163": "网易云课堂",
+    "imooc": "慕课网",
+    "icourse163": "中国大学MOOC",
     "openLocalFile": "ローカルファイルを開く",
-    "enterPip": "画中画を開じる",
-    "exitPip": "ブラウザに戻る",
+    "enterPip": "画中画を開じる (P)",
+    "exitPip": "ブラウザに戻る (P)",
     "enterPop": "新しいウィンドウで遊ぶ",
-    "exitPop": "ブラウザに戻る",
+    "exitPop": "ブラウザに戻る (O)",
     "danmu": "だんまくスイッチ",
     "error": {
       "offline": "インターネットがない",
@@ -263,7 +272,8 @@
     },
     "remove": "削除する",
     "siteManager": "サイト管理",
-    "popularSites": "適合サイト",
+    "general": "綜合",
+    "education": "教育",
     "siteTip": "追加 / 編集"
   },
   "preferences": {

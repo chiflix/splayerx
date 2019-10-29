@@ -81,6 +81,39 @@ export default {
         }
       },
     },
+    effect: {
+      immediate: true,
+      handler(effect: string) {
+        const type = this.type;
+        const defaultIcon = `${type}-${this.finalState}-${effect}`;
+        const hoverIcon = `${type}-hover-${effect}`;
+        const activeIcon = `${type}-active-${effect}`;
+        if (effect && !document.getElementById(defaultIcon)) {
+          try {
+            // eslint-disable-next-line import/no-dynamic-require
+            require(`@/assets/icon/${defaultIcon}.svg`);
+          } catch (error) {
+            // empty
+          }
+        }
+        if (effect && !document.getElementById(hoverIcon)) {
+          try {
+            // eslint-disable-next-line import/no-dynamic-require
+            require(`@/assets/icon/${hoverIcon}.svg`);
+          } catch (error) {
+            // empty
+          }
+        }
+        if (effect && !document.getElementById(activeIcon)) {
+          try {
+            // eslint-disable-next-line import/no-dynamic-require
+            require(`@/assets/icon/${activeIcon}.svg`);
+          } catch (error) {
+            // empty
+          }
+        }
+      },
+    },
   },
 };
 </script>
@@ -175,7 +208,7 @@ export default {
   display: block;
 }
 
-.volume {
+.volume, .mute {
   width: 100%;
   height: 100%;
 }
@@ -463,6 +496,29 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     height: 11.5px;
   }
 }
+.cycleOne {
+ display: block;
+  @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px),
+  screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
+    width: 15px;
+    height: 7px;
+  }
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+    width: 15px;
+    height: 7px;
+  }
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+    width: 17px;
+    height: 8px;
+  }
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+    width: 24px;
+    height: 11.5px;
+  }
+}
 .refresh {
   .default {
     display: block;
@@ -587,8 +643,10 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   width: 10px;
   height: 10px;
 }
-.bilibiliSidebar, .iqiyiSidebar, .youtubeSidebar, .channelManage, .courseraSidebar,
-.douyuSidebar, .huyaSidebar, .qqSidebar, .youkuSidebar, .twitchSidebar, .tedSidebar {
+.bilibiliSidebar, .iqiyiSidebar, .youtubeSidebar, .channelManage, .courseraSidebar, .lyndaSidebar,
+.douyuSidebar, .huyaSidebar, .qqSidebar, .youkuSidebar, .twitchSidebar, .tedSidebar,
+.sportsqqSidebar, .masterclassSidebar, .developerappleSidebar, .vipopen163Sidebar,
+.study163Sidebar, .imoocSidebar, .icourse163Sidebar {
   width: 44px;
   height: 44px;
 }
@@ -656,7 +714,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   width: 20px;
   height: 20px;
 }
-.history, .open {
+.history, .open, .home, .exit {
   width: 30px;
   height: 30px;
   .default {

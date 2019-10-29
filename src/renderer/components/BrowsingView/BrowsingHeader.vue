@@ -27,7 +27,6 @@
     />
     <browsing-title-bar
       v-if="!isDarwin"
-      :show-sidebar="showSidebar"
     />
   </div>
 </template>
@@ -48,10 +47,6 @@ export default {
     'browsing-title-bar': BrowsingTitleBar,
   },
   props: {
-    showSidebar: {
-      type: Boolean,
-      default: false,
-    },
     title: {
       type: String,
       default: 'SPlayer',
@@ -91,7 +86,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['recordUrl']),
+    ...mapGetters(['recordUrl', 'showSidebar']),
     isDarwin() {
       return process.platform === 'darwin';
     },

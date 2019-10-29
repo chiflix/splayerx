@@ -33,26 +33,25 @@ const fetcher = new Fetcher({
 
 // @ts-ignore
 const endpoint = window.remote && window.remote.app.getSignInEndPoint();
-// const endpoint = 'http://192.168.88.135:1024';
+// @ts-ignore
+const crossThread = (window.remote && window.remote.app.crossThreadCache) || ((key, func) => func);
 
 /**
  * @description get IP && geo data from server
  * @author tanghaixiang
  * @returns Promise
  */
-export function getGeoIP(): Promise<{ip: string, countryCode: string}> {
-  return new Promise((resolve, reject) => {
-    fetcher.get(`${endpoint}/api/geoip`).then((response: Response) => {
-      if (response.ok) {
-        response.json().then((data: { ip: string, countryCode: string }) => resolve(data));
-      } else {
-        reject(new Error());
-      }
-    }).catch((error) => {
-      reject(error);
-    });
+export const getGeoIP = crossThread(['ip', 'countryCode'], () => new Promise((resolve, reject) => {
+  fetcher.get(`${endpoint}/api/geoip`).then((response: Response) => {
+    if (response.ok) {
+      response.json().then((data: { ip: string, countryCode: string }) => resolve(data));
+    } else {
+      reject(new Error());
+    }
+  }).catch((error) => {
+    reject(error);
   });
-}
+}));
 
 /**
  * @description get sms code with no-captcha validation

@@ -169,6 +169,13 @@
         "checked": false
       },
       {
+        "id": "playback.playlistLoop",
+        "label": "msg.playback.playlistLoop",
+        "type": "checkbox",
+        "enabled": true,
+        "checked": false
+      },
+      {
         "id": "playback.snapShot",
         "label": "msg.playback.snapShot",
         "accelerator": "CmdOrCtrl+Shift+S",

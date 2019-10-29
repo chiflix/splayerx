@@ -2,6 +2,7 @@ import { remote } from 'electron';
 import { log } from '@/libs/Log';
 import { apiOfAccountService } from '@/helpers/featureSwitch';
 import Fetcher from '@/../shared/Fetcher';
+import { crossThreadCache } from '../../shared/utils';
 
 export class ApiError extends Error {
   /** HTTP status */
@@ -61,6 +62,21 @@ export async function getSMSCode(phone: string) {
   return res.ok;
 }
 
+export const getGeoIP = crossThreadCache(['ip', 'countryCode'], async () => {
+  const endpoint = await getEndpoint();
+  return new Promise((resolve, reject) => {
+    fetcher.get(`${endpoint}/geoip`).then((response: Response) => {
+      if (response.ok) {
+        response.json().then((data: { ip: string, countryCode: string }) => resolve(data));
+      } else {
+        reject(new Error());
+      }
+    }).catch((error) => {
+      reject(error);
+    });
+  });
+});
+
 export async function signIn(type: string, phone: string, code: string) {
   const endpoint = await getEndpoint();
   const res = await fetcher.post(`${endpoint}/auth/login`, { phone, type, code });
@@ -85,23 +101,6 @@ export function signOut() {
   remote.app.emit('sign-out');
 }
 
-/**
- * @description get IP && geo data from server
- * @author tanghaixiang
- * @returns Promise
- */
-export async function getGeoIP() {
-  const endpoint = await getEndpoint();
-  const res = await fetcher.get(`${endpoint}/geoip`);
-  if (res.ok) {
-    const data = await res.json();
-    return data;
-  }
-  const error = new ApiError();
-  error.status = res.status;
-  throw error;
-}
-
 export async function getUserInfo() {
   const api = await apiOfAccountService();
   // const api = 'http://192.168.88.135:1024';
@@ -113,6 +112,17 @@ export async function getUserInfo() {
         displayName,
         createdAt,
         isVip,
+        orders(status: Valid, limit: 3) {
+          id,
+          createdAt,
+          product {
+            id,
+            duration {
+              unit,
+              value
+            }
+          }
+        },
         vipExpiredAt,
       }
     }`,
@@ -147,6 +157,7 @@ export async function getProductList() {
           unit
           value
         },
+        discount,
         productIntro,
       }
     }`,

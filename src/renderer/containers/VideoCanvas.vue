@@ -182,13 +182,16 @@ export default {
     }, 50, { leading: true }));
     this.$bus.$on('next-video', () => {
       if (this.switchingLock) return;
+      if (this.nextVideo === undefined) {
+        this.$bus.$emit('back-to-landingview');
+        return;
+      }
       this.switchingLock = true;
       videodata.paused = false;
-      if (this.nextVideo) {
-        this.$store.commit('LOOP_UPDATE', false);
+      if (this.nextVideo !== undefined && this.nextVideo !== '') {
         if (this.isFolderList) this.openVideoFile(this.nextVideo);
         else this.playFile(this.nextVideo, this.nextVideoId);
-      } else {
+      } else if (this.nextVideo === '') {
         this.$store.commit('LOOP_UPDATE', true);
       }
     });
@@ -197,7 +200,6 @@ export default {
       this.switchingLock = true;
       videodata.paused = false;
       if (this.previousVideo) {
-        this.$store.commit('LOOP_UPDATE', false);
         if (this.isFolderList) this.openVideoFile(this.previousVideo);
         else this.playFile(this.previousVideo, this.previousVideoId);
       } else {
@@ -437,6 +439,7 @@ export default {
       }
     },
     backToLandingView() {
+      this.$store.dispatch('UPDATE_SHOW_SIDEBAR', false);
       this.handleLeaveVideo(this.videoId)
         .finally(() => {
           this.removeAllAudioTrack();

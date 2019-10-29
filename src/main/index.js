@@ -14,7 +14,7 @@ import './helpers/electronPrototypes';
 import {
   getValidVideoRegex, getValidSubtitleRegex,
   getToken, saveToken,
-  getIP,
+  getIP, crossThreadCache,
 } from '../shared/utils';
 import { mouse } from './helpers/mouse';
 import MenuService from './menu/MenuService';
@@ -93,8 +93,6 @@ const locale = new Locale();
 const tmpVideoToOpen = [];
 const tmpSubsToOpen = [];
 const subRegex = getValidSubtitleRegex();
-const allChannels = ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch', 'coursera', 'ted'];
-const compareStr = [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com', 'film.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch'], ['coursera'], ['ted']];
 const titlebarUrl = process.platform === 'darwin' ? `file:${resolve(__static, 'pip/macTitlebar.html')}` : `file:${resolve(__static, 'pip/winTitlebar.html')}`;
 const maskUrl = process.platform === 'darwin' ? `file:${resolve(__static, 'pip/mask.html')}` : `file:${resolve(__static, 'pip/mask.html')}`;
 const mainURL = process.env.NODE_ENV === 'development'
@@ -724,13 +722,7 @@ function registerMainWindowEvent(mainWindow) {
   });
   ipcMain.on('create-browser-view', (evt, args) => {
     if (!browserViewManager) browserViewManager = new BrowserViewManager();
-    let currentChannel = '';
-    allChannels.forEach((channel, index) => {
-      if (compareStr[index].findIndex(str => args.url.includes(str)) !== -1) {
-        currentChannel = `${channel}.com`;
-      }
-    });
-    const currentMainBrowserView = browserViewManager.create(currentChannel, args);
+    const currentMainBrowserView = browserViewManager.create(args.channel, args);
     setTimeout(() => {
       mainWindow.send('update-browser-state', {
         url: args.url,
@@ -856,20 +848,13 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('shift-pip', (evt, args) => {
     if (!browserViewManager) return;
     const mainWindowViews = mainWindow.getBrowserViews();
-    const mainView = mainWindowViews[0];
     mainWindowViews
       .forEach(mainWindowView => mainWindow.removeBrowserView(mainWindowView));
     const browViews = browsingWindow.getBrowserViews();
     browViews.forEach((view) => {
       browsingWindow.removeBrowserView(view);
     });
-    let currentChannel = '';
-    allChannels.forEach((channel, index) => {
-      if (compareStr[index].findIndex(str => mainView.webContents.getURL().includes(str)) !== -1) {
-        currentChannel = `${channel}.com`;
-      }
-    });
-    const browsers = browserViewManager.changePip(currentChannel);
+    const browsers = browserViewManager.changePip(args.channel);
     const pipBrowser = browsers.pipBrowser;
     const mainBrowser = browsers.mainBrowser;
     mainWindow.addBrowserView(mainBrowser.page.view);
@@ -1501,6 +1486,10 @@ const oauthRegex = [
   /^https:\/\/auth.alipay.com\/login\//i,
   /^https:\/\/account.xiaomi.com\/pass\//i,
   /^https:\/\/www.facebook.com\/v[0-9].[0-9]\/dialog\/oauth/i,
+  /^https:\/\/accounts.google.com\/signin\/oauth\//i,
+  /^https:\/\/accounts.google.com\/CheckCookie\?/i,
+  /^\/passport\/user\/tplogin\?/i,
+  /^https:\/\/www.imooc.com\/passport\//i,
 ];
 app.on('web-contents-created', (webContentsCreatedEvent, contents) => {
   if (contents.getType() === 'browserView') {
@@ -1602,89 +1591,94 @@ app.getDisplayLanguage = () => {
 // export getIp to static login preload.js
 app.getIP = getIP;
 
+app.crossThreadCache = crossThreadCache;
+
 // export getSignInEndPoint to static login preload.js
 app.getSignInEndPoint = () => signInEndPoint;
 
-// Listen for transactions as soon as possible.
-inAppPurchase.on('transactions-updated', (event, transactions) => {
-  if (!Array.isArray(transactions)) {
-    return;
-  }
-  // Check each transaction.
-  transactions.forEach((transaction) => {
-    const payment = transaction.payment;
-    switch (transaction.transactionState) {
-      case 'purchasing':
-        console.log(`Purchasing ${payment.productIdentifier}...`);
-        break;
-      case 'purchased':
-        console.log(`${payment.productIdentifier} purchased.`);
-        // Get the receipt url.
-        // eslint-disable-next-line no-case-declarations
-        let receipt = '';
-        try {
-          receipt = fs.readFileSync(inAppPurchase.getReceiptURL());
-        } catch (error) {
-          // empty
-          console.log(error);
-        }
-        // Finish the transaction.
-        inAppPurchase.finishTransactionByDate(transaction.transactionDate);
-        if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
-          preferenceWindow.webContents.send('applePay-success', {
-            id: applePayProductID,
-            productID: payment.productIdentifier,
-            receipt,
-            transactionID: transaction.transactionIdentifier,
-          });
-        }
-        break;
-      case 'failed':
-        console.log(`Failed to purchase ${payment.productIdentifier}.`);
-        // Finish the transaction.
-        inAppPurchase.finishTransactionByDate(transaction.transactionDate);
-        if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
-          preferenceWindow.webContents.send('applePay-fail', 'not support');
-        }
-        break;
-      case 'restored':
-        console.log(`The purchase of ${payment.productIdentifier} has been restored.`);
-        break;
-      case 'deferred':
-        console.log(`The purchase of ${payment.productIdentifier} has been deferred.`);
-        break;
-      default:
-        break;
-    }
-  });
-});
-
 // apple pay
-app.applePay = (product, id, quantity, callback) => {
-  applePayProductID = id;
-  // Check if the user is allowed to make in-app purchase.
-  if (!inAppPurchase.canMakePayments()) {
-    if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
-      preferenceWindow.webContents.send('applePay-fail', 'not support');
+if (process.platform === 'darwin') {
+  // Listen for transactions as soon as possible.
+  inAppPurchase.on('transactions-updated', (event, transactions) => {
+    if (!Array.isArray(transactions)) {
+      return;
     }
-    return;
-  }
-  // Retrieve and display the product descriptions.
-  inAppPurchase.getProducts([product], (products) => {
-    // Check the parameters.
-    if (!Array.isArray(products) || products.length <= 0) {
+    // Check each transaction.
+    transactions.forEach((transaction) => {
+      const payment = transaction.payment;
+      switch (transaction.transactionState) {
+        case 'purchasing':
+          console.log(`Purchasing ${payment.productIdentifier}...`);
+          break;
+        case 'purchased':
+          console.log(`${payment.productIdentifier} purchased.`);
+          // Get the receipt url.
+          // eslint-disable-next-line no-case-declarations
+          let receipt = '';
+          try {
+            receipt = fs.readFileSync(inAppPurchase.getReceiptURL());
+          } catch (error) {
+            // empty
+            console.log(error);
+          }
+          // Finish the transaction.
+          inAppPurchase.finishTransactionByDate(transaction.transactionDate);
+          if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
+            preferenceWindow.webContents.send('applePay-success', {
+              id: applePayProductID,
+              productID: payment.productIdentifier,
+              receipt,
+              transactionID: transaction.transactionIdentifier,
+            });
+          }
+          break;
+        case 'failed':
+          console.log(`Failed to purchase ${payment.productIdentifier}.`);
+          // Finish the transaction.
+          inAppPurchase.finishTransactionByDate(transaction.transactionDate);
+          if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
+            preferenceWindow.webContents.send('applePay-fail', 'not support');
+          }
+          break;
+        case 'restored':
+          console.log(`The purchase of ${payment.productIdentifier} has been restored.`);
+          break;
+        case 'deferred':
+          console.log(`The purchase of ${payment.productIdentifier} has been deferred.`);
+          break;
+        default:
+          break;
+      }
+    });
+  });
+
+  // apple pay
+  app.applePay = (product, id, quantity, callback) => {
+    applePayProductID = id;
+    // Check if the user is allowed to make in-app purchase.
+    if (!inAppPurchase.canMakePayments()) {
       if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
-        preferenceWindow.webContents.send('applePay-fail', 'Unable to retrieve the product informations.');
+        preferenceWindow.webContents.send('applePay-fail', 'not support');
       }
       return;
     }
+    // Retrieve and display the product descriptions.
+    inAppPurchase.getProducts([product], (products) => {
+      // Check the parameters.
+      if (!Array.isArray(products) || products.length <= 0) {
+        if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
+          preferenceWindow.webContents.send('applePay-fail', 'Unable to retrieve the product informations.');
+        }
+        return;
+      }
 
-    // Display the name and price of each product.
-    products.forEach((product) => {
-      console.log(`The price of ${product.localizedTitle} is ${product.formattedPrice}.`);
+      // Display the name and price of each product.
+      products.forEach((product) => {
+        console.log(`The price of ${product.localizedTitle} is ${product.formattedPrice}.`);
+      });
+
+      // Purchase the selected product.
+      inAppPurchase.purchaseProduct(product, quantity, callback);
     });
-
-    // Purchase the selected product.
-    inAppPurchase.purchaseProduct(product, quantity, callback);
-  });
-};
+  };
+}

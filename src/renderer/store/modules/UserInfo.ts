@@ -13,6 +13,7 @@ type UserInfoState = {
   isVip: boolean,
   signInCallback: Function,
   premiumList: [],
+  orders: [],
 };
 
 const state = {
@@ -24,6 +25,7 @@ const state = {
   vipExpiredAt: '',
   isVip: false,
   premiumList: [],
+  orders: [],
   signInCallback: () => { },
 };
 
@@ -50,6 +52,9 @@ const getters = {
   premiumList(state: UserInfoState) {
     return state.premiumList;
   },
+  orders(state: UserInfoState) {
+    return state.orders;
+  },
 };
 
 const mutations = {
@@ -63,6 +68,7 @@ const mutations = {
     createdAt?: string,
     isVip?: boolean,
     vipExpiredAt?: string,
+    orders?: [],
   }) {
     if (userInfo) {
       state.id = userInfo.id ? userInfo.id : state.id;
@@ -73,6 +79,7 @@ const mutations = {
       state.isVip = userInfo.isVip ? userInfo.isVip : state.isVip;
       state.vipExpiredAt = userInfo.vipExpiredAt
         ? toDateString(userInfo.vipExpiredAt) : state.vipExpiredAt;
+      state.orders = userInfo.orders ? userInfo.orders : state.orders;
     } else {
       state.id = '';
       state.phone = '';
@@ -80,6 +87,7 @@ const mutations = {
       state.displayName = '';
       state.vipExpiredAt = '';
       state.isVip = false;
+      state.orders = [];
     }
   },
   [m.UPDATE_SIGN_IN_CALLBACK](state: UserInfoState, callback: Function) {
@@ -91,7 +99,7 @@ const mutations = {
 };
 
 const actions = {
-  [a.UPDATE_USER_INFO]({
+  async [a.UPDATE_USER_INFO]({
     commit,
   }: any, userInfo?: {
     id: string,
@@ -99,6 +107,7 @@ const actions = {
     displayName: string,
     createdAt: string,
     vipExpiredAt: string,
+    orders: [],
   }) {
     commit(m.UPDATE_USER_INFO, userInfo);
   },

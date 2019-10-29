@@ -33,24 +33,31 @@
       </ul>
     </div>
     <div class="settingItem__payList">
-      <!-- <BaseRadio
-        v-model="payType"
-        value="applepay"
-      >
-        ApplePay
-      </BaseRadio>-->
-      <BaseRadio
-        v-model="payType"
-        value="alipay"
-      >
-        {{ $t('preferences.premium.payType.alipay') }}
-      </BaseRadio>
-      <BaseRadio
-        v-model="payType"
-        value="wxpay"
-      >
-        {{ $t('preferences.premium.payType.wxpay') }}
-      </BaseRadio>
+      <div v-if="country === 'CNY'">
+        <BaseRadio
+          v-model="payType"
+          value="alipay"
+        >
+          {{ $t('preferences.premium.payType.alipay') }}
+        </BaseRadio>
+      </div>
+      <div v-if="country === 'CNY'">
+        <BaseRadio
+          v-model="payType"
+          value="wxpay"
+        >
+          {{ $t('preferences.premium.payType.wxpay') }}
+        </BaseRadio>
+      </div>
+      <div v-if="country === 'USD'">
+        <BaseRadio
+          v-model="payType"
+          value="paypal"
+        >
+          {{ $t('preferences.premium.payType.paypal') }}
+        </BaseRadio>
+      </div>
+      <div />
     </div>
     <ul class="settingItem__productionList">
       <li
@@ -59,8 +66,8 @@
         :key="item.id"
       >
         <div>{{ item.currentPrice }}</div>
-        <p>{{ country }}</p>
-        <span>1 Mon</span>
+        <p>{{ item.origin }}</p>
+        <span>{{ item.duration }}</span>
       </li>
     </ul>
     <div
@@ -250,7 +257,9 @@ export default Vue.extend({
           };
           duration: {
             value: number;
+            unit: string;
           };
+          discount: number,
           id: string;
         }) => {
           let currentPrice = (e.currentPrice[this.country] / 100).toFixed(2);
@@ -267,11 +276,19 @@ export default Vue.extend({
           ) {
             originalPrice = (e.originalPrice[this.country] / 100).toFixed(0);
           }
+          const off = this.isCNLanguage ? e.discount : 100 - e.discount;
+          const originString = e.discount === 100 ? '' : `${this.$t('preferences.premium.origin')}${originalPrice}`;
+          const origin = `${originString} ${this.country === 'CNY' ? 'RMB' : this.country}`;
+          const durationString = e.discount === 100 ? '' : `${off}${this.$t('preferences.premium.off')} /`;
+          const duration = `${durationString} ${e.duration.value} ${this.$t(`preferences.premium.${e.duration.unit}`)}`;
           return {
             id: e.id,
             appleProductID: e.appleProductID,
             currentPrice,
             originalPrice,
+            origin,
+            off,
+            duration,
           };
         },
       );
@@ -281,8 +298,16 @@ export default Vue.extend({
     displayLanguage(val: string) {
       if (val) this.$i18n.locale = val;
     },
+    country(val: string) {
+      if (val === 'CNY') {
+        this.payType = 'alipay';
+      } else if (val === 'USD') {
+        this.payType = 'paypal';
+      }
+    },
   },
   async mounted() {
+    this.payType = this.country === 'USD' ? 'paypal' : 'alipay';
     try {
       const productList = await getProductList();
       this.updatePremiumList(productList);
@@ -330,9 +355,11 @@ export default Vue.extend({
       this.closePay();
     });
     ipcRenderer.on('payment-success', () => {
-      this.isPaying = false;
-      this.isPaySuccess = true;
-      this.isPayFail = false;
+      setTimeout(() => {
+        this.isPaying = false;
+        this.isPaySuccess = true;
+        this.isPayFail = false;
+      }, 800);
     });
     ipcRenderer.on('payment-fail', () => {
       this.isPaying = false;
@@ -352,7 +379,7 @@ export default Vue.extend({
     }) {
       if (this.isPaying) return;
       this.isPaying = true;
-      if (this.isMas || this.payType === 'applepay') {
+      if (this.isMas) {
         // @ts-ignore
         remote.app.applePay(
           item.appleProductID,
@@ -370,7 +397,7 @@ export default Vue.extend({
         const channel = this.payType;
         createOrder({
           channel,
-          currency: 'CNY',
+          currency: this.country,
           productID: item.id,
         })
           .then((res: { url: string; orderID: string }) => {
@@ -452,8 +479,12 @@ export default Vue.extend({
   &__payList {
     display: flex;
     margin-bottom: 20px;
+    justify-content: space-between;
     & > div {
       width: 110px;
+    }
+    .radio {
+      display: inline-block;
     }
   }
   &__productionList {

@@ -16,7 +16,8 @@ import { TranslationClient } from 'sagi-api/translation/v1/translation_grpc_pb';
 import { TrainingData } from 'sagi-api/training/v1/training_pb';
 import { TrainngClient } from 'sagi-api/training/v1/training_grpc_pb';
 import { SagiSubtitlePayload } from '@/services/subtitle';
-import { getClientUUID, getIP } from '@/../shared/utils';
+import { getClientUUID } from '@/../shared/utils';
+import { getGeoIP } from '@/libs/apis';
 import { log } from './Log';
 
 export class Sagi {
@@ -39,7 +40,7 @@ export class Sagi {
       fs.readFileSync(path.join(__static, '/certs/cert.pem')),
     );
     const metadataUpdater = (_: unknown, cb: Function) => {
-      Promise.all([getClientUUID(), getIP()]).then(([uuid, ip]) => {
+      Promise.all([getClientUUID(), getGeoIP()]).then(([uuid, { ip }]) => {
         const metadata = new Metadata();
         metadata.set('uuid', uuid);
         metadata.set('agent', navigator.userAgent);

@@ -76,8 +76,9 @@ export default {
   },
   methods: {
     handleClose() {
-      if (remote.BrowserWindow.getFocusedWindow()) {
-        remote.BrowserWindow.getFocusedWindow().close();
+      const currentWindow = remote.BrowserWindow.getFocusedWindow();
+      if (currentWindow) {
+        currentWindow.close();
       }
     },
     async startPolling(orderID: string) {

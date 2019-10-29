@@ -23,7 +23,7 @@
           <div class="settingItem__box__left">
             <div class="settingItem__title">
               {{ userInfo.isVip ? $t('preferences.account.vipUser.title')
-                : $t('preferences.account.normalUser.title') }} {{ userInfo.displayName }}
+                : $t('preferences.account.normalUser.title') }}{{ userInfo.displayName }}
               <span @click="signOut">{{ $t('preferences.account.signOut') }}</span>
             </div>
             <div class="settingItem__description">
@@ -47,11 +47,26 @@
             </button>
           </div>
         </div>
+        <div class="settingItem__box">
+          <div>
+            <div class="settingItem__title">
+              {{ $t('preferences.account.createdAt') }}
+            </div>
+            <div class="settingItem__description">
+              {{ userInfo.createdAt }}
+            </div>
+          </div>
+        </div>
         <div class="settingItem__title">
-          {{ $t('preferences.account.createdAt') }}
+          {{ $t('preferences.account.payAt') }}
         </div>
         <div class="settingItem__description">
-          {{ userInfo.createdAt }}
+          <p
+            v-for="(item) in list"
+            :key="item.id"
+          >
+            {{ item.name }}
+          </p>
         </div>
       </div>
     </div>
@@ -76,8 +91,29 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters([
-      'userInfo', 'token',
+      'userInfo', 'token', 'orders',
     ]),
+    list() {
+      return this.orders.map((e: {
+        id: string,
+        createdAt: string,
+        product: {
+          duration: {
+            unit: string,
+            value: number
+          }
+        }
+      }) => {
+        const date = new Date(e.createdAt).toISOString().split('T')[0];
+        const product = `${e.product.duration.value} ${this.$t(`preferences.premium.${e.product.duration.unit}`)}`;
+        const payProduct = this.$t('preferences.account.payProduct', { product });
+        const name = this.$t('preferences.account.payContent', { date, product: payProduct });
+        return {
+          id: e.id,
+          name,
+        };
+      });
+    },
   },
   mounted() {
     this.getUserInfo();
@@ -162,11 +198,12 @@ export default Vue.extend({
       flex: 1;
       padding-right: 10px;
       span {
-        cursor: pointer;
-        font-size: 11px;
-        color: rgba(255,255,255,0.50);
+        color: rgba(255,255,255,0.25);
         letter-spacing: 0;
+        font-size: 11px;
         line-height: 16px;
+        cursor: pointer;
+        margin-left: 6px;
         &:hover {
           color: rgba(255,255,255,0.9);
         }
