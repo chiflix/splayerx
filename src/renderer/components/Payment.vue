@@ -127,6 +127,10 @@ export default {
   },
   destroyed() {
     this.remove();
+    const webview = document.getElementById('webview');
+    if (webview) {
+      webview.removeEventListener('will-navigate', this.locationChange);
+    }
   },
   methods: {
     handleClose() {
@@ -141,9 +145,9 @@ export default {
         if (res === 0) {
           setTimeout(() => {
             this.startPolling(orderID);
-          }, 10 * 1000);
+          }, 3 * 1000);
         } else if (res === 1) {
-          // ipcRenderer.send('payment-success');
+          ipcRenderer.send('payment-success');
         } else {
           ipcRenderer.send('payment-fail');
         }
@@ -153,11 +157,10 @@ export default {
         }
         setTimeout(() => {
           this.startPolling(orderID);
-        }, 10 * 1000);
+        }, 3 * 1000);
       }
     },
     locationChange(event: EventSource) {
-      console.log(event);
       if (event && event.url && event.url.indexOf('splayer.org') > -1) {
         setTimeout(() => {
           ipcRenderer.send('payment-fail');

@@ -556,11 +556,10 @@ export default Vue.extend({
   }
   button {
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.3);
+    color: rgba(255, 255, 255, 0.7);
     letter-spacing: 0;
     font-family: $font-medium;
     font-size: 11px;
-    color: #ffffff;
     letter-spacing: 0;
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.1);
