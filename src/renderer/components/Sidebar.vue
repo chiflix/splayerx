@@ -67,13 +67,14 @@
         <div
           @click="openFilesByDialog"
           :title="$t('browsing.openLocalFile')"
-          class="icon-hover"
+          class="icon"
         >
           <Icon type="open" />
         </div>
         <div
           @click="openHomePage"
-          class="icon-hover"
+          :title="$t('tips.exit')"
+          class="icon"
         >
           <Icon type="exit" />
         </div>
@@ -99,10 +100,6 @@ export default {
     currentUrl: {
       type: String,
       default: '',
-    },
-    showSidebar: {
-      type: Boolean,
-      default: false,
     },
   },
   data() {
@@ -319,9 +316,11 @@ export default {
     display:flex;
     flex-direction: column;
     width: 100%;
-  }
-  .icon-hover {
-    margin: auto;
+    .icon {
+      width: 30px;
+      height: 30px;
+      margin: auto;
+    }
   }
   .mask {
     width: 44px;

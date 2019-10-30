@@ -17,6 +17,7 @@
         @mouseover.native="mouseoverSidebar = true"
         @mouseout.native="mouseoverSidebar = false"
         :mouseover="mouseoverSidebar"
+        :title="!showSidebar ? $t('tips.openSidebar') : $t('tips.closeSidebar')"
         :fill="isBrowsingView ? '#BBBACC' : ''"
         class="sidebar-icon no-drag"
       />
@@ -113,6 +114,7 @@
           marginLeft: showSidebar ? '19px' : '4px',
         }"
         :mouseover="mouseoverSidebar"
+        :title="!showSidebar ? $t('tips.openSidebar') : $t('tips.closeSidebar')"
         :fill="isBrowsingView ? '#BBBACC' : ''"
         :is-playing-view="isPlayingView"
         class="sidebar no-drag"

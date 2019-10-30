@@ -551,6 +551,10 @@ export default class Menubar {
 
     windowMenu.append(this.createRoleMenuItem(minimizeMenuItem));
 
+    const sidebarMenuItem = items.find((item: MenubarMenuItem) => item.id === 'window.sidebar') as IMenubarMenuItemAction;
+
+    windowMenu.append(this.createMenuItem(sidebarMenuItem));
+
     const windowMenuItem = new MenuItem({ id: 'window', label: this.$t('msg.window.name'), submenu: windowMenu });
 
     menubar.append(windowMenuItem);
