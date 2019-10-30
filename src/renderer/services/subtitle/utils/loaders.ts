@@ -1,6 +1,6 @@
 import { dirname, join, extname } from 'path';
 import {
-  ensureDirSync, existsSync, copyFile, outputFile, writeFile,
+  ensureDirSync, existsSync, copyFile, outputFile, readFile,
 } from 'fs-extra';
 import { EventEmitter } from 'events';
 import {
@@ -8,7 +8,7 @@ import {
 } from '@/interfaces/ISubtitle';
 import { loadLocalFile, formatToExtension } from '.';
 import { SUBTITLE_FULL_DIRNAME } from '@/constants';
-import { mediaQuickHash, getSubtitleDir } from '@/libs/utils';
+import { mediaQuickHash } from '@/libs/utils';
 import Sagi from '@/libs/sagi';
 import { SagiTextSubtitlePayload } from '../parsers';
 import { sagiSubtitleToWebVTT } from './transcoders';
@@ -47,6 +47,8 @@ export class LocalTextLoader extends EventEmitter implements ILoader {
     this.source = { type: Type.Local, source: path };
     if (dirname(path) === SUBTITLE_FULL_DIRNAME) this._cacheStatus = Status.FINISHED;
   }
+
+  public async getMetadata() { return ''; }
 
   private _payloadString: string = '';
 
@@ -93,7 +95,7 @@ export interface IEmbeddedOrigin extends IOrigin {
     streamIndex: number;
   };
 }
-export class EmbeddedTextStreamLoader extends EventEmitter implements ILoader {
+export class EmbeddedStreamLoader extends EventEmitter implements ILoader {
   public readonly canPreload = false;
 
   private _loadingStatus = Status.NOT_STARTED;
@@ -110,17 +112,25 @@ export class EmbeddedTextStreamLoader extends EventEmitter implements ILoader {
 
   public readonly source: IEmbeddedOrigin;
 
-  public constructor(videoPath: string, streamIndex: number) {
+  private readonly format: Format;
+
+  public constructor(videoPath: string, streamIndex: number, format: Format) {
     super();
     this.source = { type: Type.Embedded, source: { videoPath, streamIndex } };
+    this.format = format;
   }
 
-  public async getPayload(time?: number): Promise<string> {
-    if (this.fullyRead) return this._payloadString;
-    this.paused = false;
+  private _cachedPayload: Buffer = Buffer.alloc(0);
+
+  public async getPayload(time?: number): Promise<Buffer | undefined> {
+    if ((typeof time === 'undefined')
+      || (this.fullyRead && this._cacheStatus === Status.FINISHED)) {
+      return this._cachedPayload;
+    }
+    this._paused = false;
     if (!this.listenerCount('extraction-finished')) {
       this.on('extraction-finished', () => {
-        if (!this.paused && this.currentTime === -1) this.extractSequentially();
+        if (!this._paused && this._currentTime === -1) this.extractSequentially();
       });
       this.once('all-finished', () => {
         this._loadingStatus = Status.FINISHED;
@@ -130,94 +140,79 @@ export class EmbeddedTextStreamLoader extends EventEmitter implements ILoader {
         this.removeAllListeners();
       });
     }
-    let result = '';
-    if (time) {
-      this.currentTime = time;
-      await this.extractRandomly();
-      result = this._payloadString;
-      this._payloadString = '';
-    } else this.extractSequentially();
-    return result;
+    this._currentTime = time;
+    return this.extractRandomly();
   }
 
   public async cache() {
-    if (this.canCache) {
-      this._cacheStatus = Status.WORKING;
-      const { videoPath, streamIndex } = this.source.source;
-      const hash = await mediaQuickHash(videoPath);
-      const subtitlePath = join(await getSubtitleDir(), `${hash}-${streamIndex}.${Format.AdvancedSubStationAplha}`);
-      await writeFile(subtitlePath, this._payloadString);
-      this._cacheStatus = Status.FINISHED;
+    if (this.fullyRead) {
       return {
         type: Type.Local,
-        source: subtitlePath,
+        source: this._cachedPath,
       };
     }
     throw new Error('Cannot cache now.');
   }
 
-  private _payloadString: string = '';
-
   private _metadataString: string = '';
 
-  private async getMetadata() {
+  public async getMetadata() {
     if (!this._metadataString) {
       this._loadingStatus = Status.WORKING;
       const { videoPath, streamIndex } = this.source.source;
-      const result = await getSubtitleMetadata(videoPath, streamIndex);
+      const result = await getSubtitleMetadata(videoPath, streamIndex, this.format);
       if (result) this._metadataString = result;
     }
+    return this._metadataString;
   }
 
-  private cacheCount = 0;
+  private _cacheCounter = 0;
+
+  private _cachedPath: string = '';
 
   private async extractSequentially() {
     if (!this._metadataString) await this.getMetadata();
     const { videoPath, streamIndex } = this.source.source;
-    if (!this.cacheCount) console.time(`${this.source.source.streamIndex}-cache-took: `);
-    this.cacheCount += 1;
-    console.time(`${this.source.source.streamIndex}-cache-${this.cacheCount}`);
+    if (!this._cacheCounter) console.time(`${this.source.source.streamIndex}-cache-took: `);
+    this._cacheCounter += 1;
+    console.time(`${this.source.source.streamIndex}-cache-${this._cacheCounter}`);
     const result = await cacheSubtitle(videoPath, streamIndex);
     if (result) {
-      this._payloadString = result;
+      this._cacheStatus = Status.FINISHED;
+      this._cachedPath = result;
+      this._cachedPayload = await readFile(result);
       this.emit('all-finished');
       console.timeEnd(`${this.source.source.streamIndex}-cache-took: `);
     } else this.emit('extraction-finished');
-    console.timeEnd(`${this.source.source.streamIndex}-cache-${this.cacheCount}`);
+    console.timeEnd(`${this.source.source.streamIndex}-cache-${this._cacheCounter}`);
   }
 
-  private currentTime: number = -1;
+  private _currentTime: number = -1;
 
-  private initialRandom: boolean = true;
+  private _streamCounter = 0;
 
-  private streamCount = 0;
-
-  private async extractRandomly() {
+  private async extractRandomly(): Promise<Buffer | undefined> {
     if (!this._metadataString) await this.getMetadata();
-    if (this.currentTime !== -1) {
-      this.streamCount += 1;
-      console.time(`${this.source.source.streamIndex}-stream-${this.streamCount}`);
+    if (this._currentTime !== -1) {
+      this._streamCounter += 1;
+      console.time(`${this.source.source.streamIndex}-stream-${this._streamCounter}`);
       const { videoPath, streamIndex } = this.source.source;
-      const result = await getSubtitleFragment(videoPath, streamIndex, this.currentTime);
-      console.timeEnd(`${this.source.source.streamIndex}-stream-${this.streamCount}`);
-      this.currentTime = -1;
-      if (result) {
-        if (this.initialRandom) {
-          this.initialRandom = false;
-          this._payloadString += `${this._metadataString}\n${result}`;
-        } else this._payloadString = result;
-      }
+      const result = await getSubtitleFragment(videoPath, streamIndex, this._currentTime);
+      console.timeEnd(`${this.source.source.streamIndex}-stream-${this._streamCounter}`);
+      this._currentTime = -1;
+      this.emit('extraction-finished');
+      if (result) return result;
     }
     this.emit('extraction-finished');
+    return undefined;
   }
 
-  private paused = false;
+  private _paused = false;
 
-  public pause() { this.paused = true; }
+  public pause() { this._paused = true; }
 
   public async destroy() {
     this.removeAllListeners();
-    this._payloadString = '';
     await finishSubtitleExtraction(
       this.source.source.videoPath,
       this.source.source.streamIndex,
@@ -251,6 +246,8 @@ export class SagiLoader extends EventEmitter implements ILoader {
   }
 
   private _payloads: SagiTextSubtitlePayload = [];
+
+  public async getMetadata() { return ''; }
 
   public async getPayload(): Promise<SagiTextSubtitlePayload> {
     if (this._loadingStatus === Status.NOT_STARTED) {

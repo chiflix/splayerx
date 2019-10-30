@@ -141,11 +141,11 @@ declare module 'electron' {
     ): this;
     on(
       channel: 'subtitle-cache-reply',
-      listener: (event: Event, error?: Error, finished: boolean, payload?: string) => void,
+      listener: (event: Event, error?: Error, path?: string) => void,
     ): this;
     on(
       channel: 'subtitle-stream-reply',
-      listener: (event: Event, error?: Error, dialogue: string) => void,
+      listener: (event: Event, error?: Error, data: Buffer) => void,
     ): this;
     on(channel: 'subtitle-destroy-reply', listener: (event: Event, error?: Error) => void): this;
     on(
@@ -167,11 +167,11 @@ declare module 'electron' {
     ): this;
     once(
       channel: 'subtitle-cache-reply',
-      listener: (event: Event, error?: Error, finished: boolean, payload?: string) => void,
+      listener: (event: Event, error?: Error, path?: string) => void,
     ): this;
     once(
       channel: 'subtitle-stream-reply',
-      listener: (event: Event, error?: Error, dialogue: string) => void,
+      listener: (event: Event, error?: Error, data: Buffer) => void,
     ): this;
     once(channel: 'subtitle-destroy-reply', listener: (event: Event, error?: Error) => void): this;
     once(
@@ -191,8 +191,8 @@ declare module 'electron' {
       finished: boolean,
       matadata: string,
     ): this;
-    reply(channel: 'subtitle-cache-reply', error?: Error, finished: boolean): this;
-    reply(channel: 'subtitle-stream-reply', error?: Error, dialogue: string): this;
+    reply(channel: 'subtitle-cache-reply', error?: Error, path?: string): this;
+    reply(channel: 'subtitle-stream-reply', error?: Error, data: Buffer): this;
     reply(channel: 'subtitle-destroy-reply', error?: Error): this;
     reply(channel: 'thumbnail-reply', error?: Error, path: string): void;
   }

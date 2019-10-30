@@ -16,7 +16,7 @@ import {
 import { assFragmentLanguageLoader, srtFragmentLanguageLoader, vttFragmentLanguageLoader } from './languageLoader';
 import {
   IEmbeddedOrigin,
-  EmbeddedTextStreamLoader, LocalTextLoader, SagiLoader,
+  EmbeddedStreamLoader, LocalTextLoader, SagiLoader,
 } from './loaders';
 
 /**
@@ -178,13 +178,13 @@ export function getDialogues(dialogues: TextCue[], time?: number) {
     ));
 }
 
-export function getLoader(source: IOrigin): ILoader {
+export function getLoader(source: IOrigin, format: Format): ILoader {
   switch (source.type) {
     default:
       throw new Error('Unknown source type.');
     case Type.Embedded: {
       const { videoPath, streamIndex } = (source as IEmbeddedOrigin).source;
-      return new EmbeddedTextStreamLoader(videoPath, streamIndex);
+      return new EmbeddedStreamLoader(videoPath, streamIndex, format);
     }
     case Type.Local:
       return new LocalTextLoader(source.source as string);

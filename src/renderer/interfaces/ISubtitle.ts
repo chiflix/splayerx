@@ -11,9 +11,13 @@ export enum Type {
 }
 export enum Format {
   AdvancedSubStationAplha = 'ass',
+  // DvbSub = 'dvb_subtitle',
+  // HdmvPgs = 'hdmv_pgs_subtitle',
+  // SagiImage = 'sagi_image_subtitle',
   SagiText = 'sagi',
   SubRip = 'subrip',
   SubStationAlpha = 'ssa',
+  // VobSub = 'dvd_subtitle',
   WebVTT = 'webvtt',
   Unknown = 'unknown',
 }
@@ -71,6 +75,8 @@ export interface ILoader {
   readonly canUpload: boolean;
   /** whether this subtitle has been fully read */
   readonly fullyRead: boolean;
+  /** get subtitle metadata string */
+  getMetadata(): Promise<string>;
   /** get subtitle payload (param time may be unsupported) */
   getPayload(time?: number): Promise<unknown>;
   /** pause the subtitle loading process (may be unsupported) */

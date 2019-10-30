@@ -21,7 +21,19 @@ export class AssParser implements IParser {
         this.loader.getPayload()
           .then((payload) => {
             this.dialogues = [];
-            this.normalize(compile(payload as string));
+            const deduplicatedStringPayload = (payload instanceof Buffer ? payload.toString('utf8') : (payload as string))
+              .split(/\r?\n/)
+              .reduce((deduplicatedLines, line, index, oldLines) => {
+                const existedIndex = oldLines
+                  .slice(index + 1)
+                  .findIndex(oldLine => oldLine === line)
+                  + index + 1;
+                if (existedIndex !== index) oldLines.splice(existedIndex, 1);
+                deduplicatedLines.push(line);
+                return deduplicatedLines;
+              }, [] as string[])
+              .join('\n');
+            this.normalize(compile(deduplicatedStringPayload));
             // some clean up
             if (this.timer) clearTimeout(this.timer);
             this.assStream = undefined;
@@ -140,6 +152,8 @@ export class AssParser implements IParser {
     );
   }
 
+  private _metadataString: string = '';
+
   private lastLines: string[] = [];
 
   public async getDialogues(time?: number) {
@@ -151,18 +165,19 @@ export class AssParser implements IParser {
         }
       }
     } else if (!this.loader.fullyRead) {
+      if (!this._metadataString) this._metadataString = await this.loader.getMetadata();
       this.currentTime = time || 0;
       if (this.canRequestPayload) {
         if (this.timer) clearTimeout(this.timer);
         this.timeout = false;
         this.timer = setTimeout(() => { this.timeout = true; }, 10000);
         this.isRequesting = true;
-        const payload = await this.loader.getPayload(time) as string || '';
+        const payload = (await this.loader.getPayload(time) as Buffer || Buffer.alloc(0)).toString('utf8');
         const newLines = payload.split(/\r?\n/);
         const deDuplicatedPayload = newLines.filter(line => !this.lastLines.includes(line)).join('\n');
         this.lastLines = newLines;
         if (!this.assStream) this.assStream = new AssStream();
-        const result = this.assStream.compile(deDuplicatedPayload);
+        const result = this.assStream.compile(this._metadataString.concat(deDuplicatedPayload));
         if (!this.timeSegments) this.timeSegments = new StreamTimeSegments();
         this.timeSegments.bulkInsert(result.map(({ Start, End }) => [Start, End]), time || 0);
         this.normalize(this.assStream.compiled);

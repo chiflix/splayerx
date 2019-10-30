@@ -21,9 +21,22 @@ class SubtitleMetadataTask implements IMediaTask<string> {
     this.subtitlePath = subtitlePath;
   }
 
-  public static async from(videoPath: string, streamIndex: number) {
+  private static formatToExtension(format: Format) {
+    switch (format) {
+      case Format.AdvancedSubStationAplha:
+      case Format.SagiText:
+      case Format.SubRip:
+      case Format.SubStationAlpha:
+      case Format.WebVTT:
+        return '.ass';
+      default:
+        throw new Error(`Unknown format: ${format}.`);
+    }
+  }
+
+  public static async from(videoPath: string, streamIndex: number, format: Format) {
     const hash = await mediaQuickHash(videoPath);
-    const subtitlePath = join(await getSubtitleDir(), `${hash}-${streamIndex}.${Format.AdvancedSubStationAplha}`);
+    const subtitlePath = join(await getSubtitleDir(), `${hash}-${streamIndex}${SubtitleMetadataTask.formatToExtension(format)}`);
     return new SubtitleMetadataTask(videoPath, streamIndex, subtitlePath);
   }
 
@@ -58,16 +71,15 @@ class SubtitleCacheTask implements IMediaTask<string | undefined> {
   public execute(): Promise<string | undefined> {
     return new Promise((resolve, reject) => {
       ipcRenderer.send('subtitle-cache-request', this.videoPath, this.streamIndex);
-      ipcRenderer.once('subtitle-cache-reply', (event, error, finished, payload) => {
+      ipcRenderer.once('subtitle-cache-reply', (event, error, path) => {
         if (error) reject(error);
-        else if (!finished) resolve();
-        else resolve(payload);
+        else resolve(path);
       });
     });
   }
 }
 
-class SubtitleFragmentTask implements IMediaTask<string> {
+class SubtitleFragmentTask implements IMediaTask<Buffer> {
   private readonly videoPath: string;
 
   private readonly streamIndex: number;
@@ -88,7 +100,7 @@ class SubtitleFragmentTask implements IMediaTask<string> {
     ].join('-')}`;
   }
 
-  public execute(): Promise<string> {
+  public execute(): Promise<Buffer> {
     return new Promise((resolve, reject) => {
       ipcRenderer.send('subtitle-stream-request', this.videoPath, this.streamIndex, this.videoTime);
       ipcRenderer.once('subtitle-stream-reply', (event, error, data) => {
@@ -125,8 +137,8 @@ class SubtitleDestroyTask implements IMediaTask<void> {
 }
 
 export default class SubtitleQueue extends BaseMediaTaskQueue {
-  public getSubtitleMetadata(videoPath: string, streamIndex: number) {
-    return SubtitleMetadataTask.from(videoPath, streamIndex)
+  public getSubtitleMetadata(videoPath: string, streamIndex: number, format: Format) {
+    return SubtitleMetadataTask.from(videoPath, streamIndex, format)
       .then(task => super.addTask(task, { piority: 3 }));
   }
 

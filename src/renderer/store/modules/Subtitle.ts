@@ -163,7 +163,7 @@ const actions: ActionTree<ISubtitleState, {}> = {
     const subtitle = subtitleLoaderParserMap.get(state.hash);
     if (state.realSource && subtitle) {
       if (!subtitle.loader) {
-        subtitle.loader = getLoader(state.realSource);
+        subtitle.loader = getLoader(state.realSource, state.format);
         subtitle.loader.on('cache', async (result) => {
           commit(m.setCanCache, result);
           if (result) {
