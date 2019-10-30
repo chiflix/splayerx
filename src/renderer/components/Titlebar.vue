@@ -29,7 +29,7 @@
     </div>
     <div
       v-if="!isDarwin"
-      v-fade-in="showTitleBar"
+      v-fade-in="!isPlayingView || showTitleBar"
       class="win-icons"
     >
       <Icon
