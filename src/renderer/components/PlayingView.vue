@@ -25,7 +25,6 @@ import { Subtitle as subtitleActions, SubtitleManager as smActions, AudioTransla
 import SubtitleRenderer from '@/components/Subtitle/SubtitleRenderer.vue';
 import VideoCanvas from '@/containers/VideoCanvas.vue';
 import TheVideoController from '@/containers/TheVideoController.vue';
-import { windowRectService } from '@/services/window/WindowRectService';
 import { AudioTranslateBubbleType } from '@/store/modules/AudioTranslate';
 import { videodata } from '../store/video';
 import { getStreams } from '../plugins/mediaTasks';

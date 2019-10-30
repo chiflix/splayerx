@@ -536,7 +536,8 @@ export default {
         }
       });
   },
-  beforeRouteEnter(to: Route, { name: from }: Route, next: (vm: any) => void) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  beforeRouteEnter(to: Route, from: Route, next: (vm: any) => void) {
     next((vm: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
       vm.updateShowSidebar(true);
     });

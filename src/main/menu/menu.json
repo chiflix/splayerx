@@ -437,6 +437,11 @@
         "id": "menubar.separator"
       },
       {
+        "id": "browsing.window.sidebar",
+        "label": "msg.window.closeSidebar",
+        "accelerator": "C"
+      },
+      {
         "id": "browsing.window.backToLandingView",
         "label": "msg.window.backToLandingView",
         "accelerator": "CmdOrCtrl+E"
