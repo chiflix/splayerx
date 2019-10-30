@@ -176,6 +176,9 @@
         "checked": false
       },
       {
+        "id": "menubar.separator"
+      },
+      {
         "id": "playback.snapShot",
         "label": "msg.playback.snapShot",
         "accelerator": "CmdOrCtrl+Shift+S",
