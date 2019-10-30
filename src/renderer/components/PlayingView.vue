@@ -105,7 +105,6 @@ export default {
     this.$bus.$once('videocanvas-saved', () => {
       this.$store.dispatch('Init');
       this.$bus.$off();
-      windowRectService.uploadWindowBy(false, 'landing-view', undefined, undefined, this.winSize, this.winPos, this.isFullScreen);
       next();
     });
     this.$bus.$emit('back-to-landingview');
