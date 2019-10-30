@@ -19,11 +19,13 @@
 </template>
 
 <script lang="ts">
+import { Route } from 'vue-router';
 import { mapActions, mapGetters } from 'vuex';
 import { Subtitle as subtitleActions, SubtitleManager as smActions, AudioTranslate as atActions } from '@/store/actionTypes';
 import SubtitleRenderer from '@/components/Subtitle/SubtitleRenderer.vue';
 import VideoCanvas from '@/containers/VideoCanvas.vue';
 import TheVideoController from '@/containers/TheVideoController.vue';
+import { windowRectService } from '@/services/window/WindowRectService';
 import { AudioTranslateBubbleType } from '@/store/modules/AudioTranslate';
 import { videodata } from '../store/video';
 import { getStreams } from '../plugins/mediaTasks';
@@ -98,6 +100,15 @@ export default {
       const paths = subs.map((sub: { src: string, type: string }) => (sub.src));
       this.addLocalSubtitlesWithSelect(paths);
     });
+  },
+  beforeRouteLeave(to: Route, from: Route, next: (to: void) => void) {
+    this.$bus.$once('videocanvas-saved', () => {
+      this.$store.dispatch('Init');
+      this.$bus.$off();
+      windowRectService.uploadWindowBy(false, 'landing-view', undefined, undefined, this.winSize, this.winPos, this.isFullScreen);
+      next();
+    });
+    this.$bus.$emit('back-to-landingview');
   },
   beforeDestroy() {
     this.updateSubToTop(false);

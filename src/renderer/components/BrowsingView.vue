@@ -49,6 +49,7 @@
 
 <script lang="ts">
 import { mapGetters, mapActions } from 'vuex';
+import { Route } from 'vue-router';
 import fs from 'fs';
 // @ts-ignore
 import urlParseLax from 'url-parse-lax';
@@ -442,7 +443,6 @@ export default {
     });
     window.addEventListener('focus', this.focusHandler);
     window.addEventListener('beforeunload', this.beforeUnloadHandler);
-    this.$bus.$on('back-to-landingview', this.backToLandingViewHandler);
     this.$electron.ipcRenderer.on('handle-exit-pip', () => {
       this.handleExitPip();
     });
@@ -509,7 +509,6 @@ export default {
   },
   beforeDestroy() {
     this.removeListener();
-    this.$bus.$off('back-to-landingview', this.backToLandingViewHandler);
     this.$store.dispatch('updateBrowsingSize', this.winSize);
     this.boundBackPosition();
     this.updateIsPip(false);
@@ -534,6 +533,12 @@ export default {
         }
       });
   },
+  beforeRouteLeave(to: Route, from: Route, next: (to: void) => void) {
+    this.removeListener();
+    this.backToLandingView = true;
+    this.$bus.$off();
+    next();
+  },
   methods: {
     ...mapActions({
       updateRecordUrl: browsingActions.UPDATE_RECORD_URL,
@@ -543,14 +548,6 @@ export default {
       updatePipChannel: browsingActions.UPDATE_PIP_CHANNEL,
       updateIsError: browsingActions.UPDATE_IS_ERROR,
     }),
-    backToLandingViewHandler() {
-      this.removeListener();
-      this.backToLandingView = true;
-      this.$bus.$off();
-      this.$router.push({
-        name: 'landing-view',
-      });
-    },
     onlineHandler() {
       this.currentMainBrowserView().setBounds({
         x: this.showSidebar ? 76 : 0,

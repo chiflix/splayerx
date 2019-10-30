@@ -1006,7 +1006,7 @@ new Vue({
         this.windowRotate();
       }, 150));
       this.menuService.on('window.backToLandingView', () => {
-        this.$bus.$emit('back-to-landingview');
+        this.$router.push({ name: 'landing-view' });
       });
       this.menuService.on('window.sidebar', () => {
         this.$event.emit('side-bar-mouseup');
@@ -1025,7 +1025,7 @@ new Vue({
         this.$electron.ipcRenderer.send('set-window-maximize');
       });
       this.menuService.on('browsing.window.backToLandingView', () => {
-        this.$bus.$emit('back-to-landingview');
+        this.$router.push({ name: 'landing-view' });
       });
       this.menuService.on('help.crashReportLocation', () => {
         const { remote } = this.$electron;
