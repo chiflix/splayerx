@@ -107,6 +107,7 @@ export default {
       this.$bus.$off();
       next();
     });
+    if (to.name !== 'browsing-view') this.$store.dispatch('UPDATE_SHOW_SIDEBAR', false);
     this.$bus.$emit('back-to-landingview');
   },
   beforeDestroy() {

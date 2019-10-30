@@ -56,7 +56,10 @@ import urlParseLax from 'url-parse-lax';
 // @ts-ignore
 import getVideoId from 'get-video-id';
 import { windowRectService } from '@/services/window/WindowRectService';
-import { Browsing as browsingActions } from '@/store/actionTypes';
+import {
+  Browsing as browsingActions,
+  UIStates as uiActions,
+} from '@/store/actionTypes';
 import BrowsingHeader from '@/components/BrowsingView/BrowsingHeader.vue';
 import BrowsingContent from '@/components/BrowsingView/BrowsingContent.vue';
 import BrowsingChannelManager from '@/components/BrowsingView/BrowsingChannelManager.vue';
@@ -533,6 +536,11 @@ export default {
         }
       });
   },
+  beforeRouteEnter(to: Route, { name: from }: Route, next: (vm: any) => void) {
+    next((vm: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+      vm.updateShowSidebar(true);
+    });
+  },
   beforeRouteLeave(to: Route, from: Route, next: (to: void) => void) {
     this.removeListener();
     this.backToLandingView = true;
@@ -547,6 +555,7 @@ export default {
       updateCurrentChannel: browsingActions.UPDATE_CURRENT_CHANNEL,
       updatePipChannel: browsingActions.UPDATE_PIP_CHANNEL,
       updateIsError: browsingActions.UPDATE_IS_ERROR,
+      updateShowSidebar: uiActions.UPDATE_SHOW_SIDEBAR,
     }),
     onlineHandler() {
       this.currentMainBrowserView().setBounds({
