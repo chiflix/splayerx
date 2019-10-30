@@ -544,6 +544,7 @@ export default {
   beforeRouteLeave(to: Route, from: Route, next: (to: void) => void) {
     this.removeListener();
     this.backToLandingView = true;
+    this.updateShowSidebar(false);
     this.$bus.$off();
     next();
   },
