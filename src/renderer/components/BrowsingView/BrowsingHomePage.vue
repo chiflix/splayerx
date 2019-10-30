@@ -1,12 +1,6 @@
 <template>
   <div class="home-page-container">
-    <div
-      :style="{
-        width: '100%',
-        height: 'auto',
-      }"
-      class="home-page-content"
-    >
+    <div class="home-page-content">
       <div
         :style="{
           width: `calc(100% - ${calcMargin[currentPhase] * 2}px)`,
@@ -262,6 +256,8 @@ export default {
   position: relative;
   overflow: scroll;
   .home-page-content {
+    width: 100%;
+    height: auto;
     overflow: scroll;
     display: flex;
     flex-direction: column;
