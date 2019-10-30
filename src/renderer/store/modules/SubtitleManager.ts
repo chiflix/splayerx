@@ -1023,8 +1023,12 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
   },
   async [a.exportSubtitle]({ getters, dispatch, rootState }, item: ISubtitleControlListItem) {
     const { $bus } = Vue.prototype;
-    if (!getters.token) {
+    if (!getters.token || !getters.isVip) {
       dispatch(usActions.SHOW_FORBIDDEN_MODAL);
+      dispatch(usActions.UPDATE_SIGN_IN_CALLBACK, () => {
+        dispatch(usActions.HIDE_FORBIDDEN_MODAL);
+        dispatch(a.exportSubtitle, item);
+      });
       return;
     }
     if (item && item.type === Type.Embedded

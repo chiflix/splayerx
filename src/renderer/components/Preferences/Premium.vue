@@ -36,31 +36,17 @@
       v-if="!isMas"
       class="settingItem__payList"
     >
-      <div v-if="country === 'CNY'">
+      <div
+        v-for="(item) in payList"
+        :key="item"
+      >
         <BaseRadio
           v-model="payType"
-          value="alipay"
+          :value="item"
         >
-          {{ $t('preferences.premium.payType.alipay') }}
+          {{ $t(`preferences.premium.payType.${item}`) }}
         </BaseRadio>
       </div>
-      <div v-if="country === 'CNY'">
-        <BaseRadio
-          v-model="payType"
-          value="wxpay"
-        >
-          {{ $t('preferences.premium.payType.wxpay') }}
-        </BaseRadio>
-      </div>
-      <div v-if="country === 'USD'">
-        <BaseRadio
-          v-model="payType"
-          value="paypal"
-        >
-          {{ $t('preferences.premium.payType.paypal') }}
-        </BaseRadio>
-      </div>
-      <div />
     </div>
     <ul class="settingItem__productionList">
       <li
@@ -68,7 +54,11 @@
         v-for="(item) in list"
         :key="item.id"
       >
-        <div>{{ item.currentPrice.int }}<span v-if="country === 'USD'">.{{ item.currentPrice.float }}</span> </div>
+        <div>
+          {{ item.currentPrice.int }}<span
+            v-if="payType === 'paypal'"
+          >.{{ item.currentPrice.float }}</span>
+        </div>
         <p>{{ item.origin }}</p>
         <span>{{ item.discount }}<i v-if="item.discount">/</i>{{ item.duration }}</span>
       </li>
@@ -78,14 +68,14 @@
       class="modal"
     >
       <div class="mask" />
-      <transition name="background">
+      <transition name="background1">
         <img
           v-if="isPaySuccess"
           class="success-background1"
           src="../../assets/payment-success-background1.svg"
         >
       </transition>
-      <transition name="background">
+      <transition name="background2">
         <img
           v-if="isPaySuccess"
           class="success-background2"
@@ -123,22 +113,20 @@
         v-fade-in="isPaySuccess"
         class="success-box"
       >
-        <transition name="success-up">
-          <h2 v-if="isPaySuccess">
-            {{ $t('premiumModal.success.h2') }}
-          </h2>
+        <transition name="success-scale">
+          <div v-if="isPaySuccess">
+            <h2>
+              {{ $t('premiumModal.success.h2') }}
+            </h2>
+            <h1>
+              {{ $t('premiumModal.success.h1') }}
+            </h1>
+            <h4>
+              {{ $t('premiumModal.success.h4') }}
+            </h4>
+          </div>
         </transition>
-        <transition name="success-up">
-          <h1 v-if="isPaySuccess">
-            {{ $t('premiumModal.success.h1') }}
-          </h1>
-        </transition>
-        <transition name="success-up">
-          <h4 v-if="isPaySuccess">
-            {{ $t('premiumModal.success.h4') }}
-          </h4>
-        </transition>
-        <transition name="success-up2">
+        <transition name="success-up1">
           <p v-if="isPaySuccess">
             {{ $t('premiumModal.success.content1') }}
           </p>
@@ -148,7 +136,7 @@
             {{ $t('premiumModal.success.content2') }}
           </p>
         </transition>
-        <transition name="success-up2">
+        <transition name="success-up3">
           <p v-if="isPaySuccess">
             {{ $t('premiumModal.success.content3') }}
           </p>
@@ -156,7 +144,7 @@
         <transition name="success-fade">
           <button
             v-if="isPaySuccess"
-            @click.left="closePay"
+            @click.left="goAccount"
           >
             {{ $t('premiumModal.success.button') }}
           </button>
@@ -198,7 +186,6 @@
       <img src="../../assets/payment-success-icon1.svg">
       <img src="../../assets/payment-success-icon2.svg">
       <img src="../../assets/payment-success-icon3.svg">
-      <img src="../../assets/payment-success-icon4.svg">
       <img src="../../assets/payment-success-background1.svg">
       <img src="../../assets/payment-success-background2.svg">
     </div>
@@ -224,12 +211,13 @@ export default Vue.extend({
   },
   data() {
     return {
-      payType: 'alipay',
       isPaying: false,
       isApplePaing: false,
       isPaySuccess: false,
       isPayFail: false,
       isCopyed: false,
+      payType: '',
+      payList: [],
     };
   },
   computed: {
@@ -247,6 +235,7 @@ export default Vue.extend({
       return 'USD';
     },
     list() {
+      const country = this.payType === 'paypal' ? 'USD' : 'CNY';
       return this.premiumList.map(
         (e: {
           appleProductID: string;
@@ -265,17 +254,17 @@ export default Vue.extend({
           discount: number,
           id: string;
         }) => {
-          const currentPrice = (e.currentPrice[this.country] / 100).toFixed(2).split('.');
-          let originalPrice = (e.originalPrice[this.country] / 100).toFixed(2);
+          const currentPrice = (e.currentPrice[country] / 100).toFixed(2).split('.');
+          let originalPrice = (e.originalPrice[country] / 100).toFixed(2);
           if (
-            e.originalPrice[this.country]
+            e.originalPrice[country]
             === parseInt(originalPrice, 10) * 100
           ) {
-            originalPrice = (e.originalPrice[this.country] / 100).toFixed(0);
+            originalPrice = (e.originalPrice[country] / 100).toFixed(0);
           }
           const off = this.isCNLanguage ? e.discount : 100 - e.discount;
           const originString = e.discount === 100 ? '' : `${this.$t('preferences.premium.origin')}${originalPrice}`;
-          const origin = `${originString} ${this.country}`;
+          const origin = `${originString} ${country}`;
           const discount = e.discount === 100 ? '' : `${off}${this.$t('preferences.premium.off')}`;
           const duration = e.duration.value > 1
             ? `${e.duration.value} ${this.$t(`preferences.premium.${e.duration.unit}s`)}`
@@ -304,13 +293,16 @@ export default Vue.extend({
     country(val: string) {
       if (val === 'CNY') {
         this.payType = 'alipay';
+        this.payList = ['alipay', 'wxpay', 'paypal'];
       } else if (val === 'USD') {
         this.payType = 'paypal';
+        this.payList = ['paypal', 'alipay', 'wxpay'];
       }
     },
   },
   async mounted() {
     this.payType = this.country === 'USD' ? 'paypal' : 'alipay';
+    this.payList = this.country === 'USD' ? ['paypal', 'alipay', 'wxpay'] : ['alipay', 'wxpay', 'paypal'];
     try {
       const productList = await getProductList();
       this.updatePremiumList(productList);
@@ -373,6 +365,7 @@ export default Vue.extend({
   methods: {
     ...mapActions({
       updatePremiumList: uActions.UPDATE_PREMIUM,
+      updateCallback: uActions.UPDATE_SIGN_IN_CALLBACK,
     }),
     buy(item: {
       id: string;
@@ -398,13 +391,13 @@ export default Vue.extend({
         );
       } else {
         const channel = this.payType;
+        const currency = this.payType === 'paypal' ? 'USD' : 'CNY';
         createOrder({
           channel,
-          currency: this.country,
+          currency,
           productID: item.id,
         })
           .then((res: { url: string; orderID: string }) => {
-            log.debug('createOrder', res.url);
             ipcRenderer.send('add-payment', {
               channel,
               url: window.btoa(res.url),
@@ -413,12 +406,16 @@ export default Vue.extend({
           })
           .catch((error: ApiError) => {
             this.isPaying = false;
-            this.isPayFail = true;
             log.debug('createOrder', error);
-            if (error && (error.status === 400 || error.status === 403)) {
-              this.closePay();
+            if (error && (error.status === 400 || error.status === 401 || error.status === 403)) {
+              // sign in callback
+              this.updateCallback(() => {
+                this.buy(item);
+              });
               remote.app.emit('sign-out');
               ipcRenderer.send('add-login', 'preference');
+            } else {
+              this.isPayFail = true;
             }
           });
       }
@@ -428,6 +425,10 @@ export default Vue.extend({
       this.isPaying = false;
       this.isPaySuccess = false;
       ipcRenderer.send('close-payment');
+    },
+    goAccount() {
+      this.closePay();
+      this.$router.push({ name: 'Account' });
     },
     copy() {
       this.isCopyed = true;
@@ -658,6 +659,7 @@ export default Vue.extend({
   }
 }
 .success-box {
+  width: 100%;
   position: absolute;
   left: 50%;
   top: 50%;
@@ -746,7 +748,7 @@ export default Vue.extend({
   left: 350px;
   top: 362px;
   z-index: 3;
-  background: rgba(255, 255, 255, 0.78);
+  background: rgba(255, 255, 255, 0.20);
   opacity: 0.5;
 }
 @-webkit-keyframes load3 {
@@ -769,20 +771,35 @@ export default Vue.extend({
     transform: rotate(360deg);
   }
 }
-.background-enter-active {
+.background1-enter-active {
   animation: bounce-in 0.3s;
+  animation-delay: 0.3s;
+  opacity: 0;
+}
+.background2-enter-active {
+  animation: bounce-in2 0.3s;
+  animation-delay: 0.3s;
+  opacity: 0;
 }
 .left-icon1-enter-active {
-  animation: left-icon1 0.4s;
+  animation: left-icon1 0.3s;
+  animation-delay: 0.3s;
+  opacity: 0;
 }
 .left-icon2-enter-active {
-  animation: left-icon2 0.4s;
+  animation: left-icon2 0.5s;
+  animation-delay: 0.3s;
+  opacity: 0;
 }
 .right-icon1-enter-active {
-  animation: right-icon1 0.4s;
+  animation: right-icon1 0.3s;
+  animation-delay: 0.3s;
+  opacity: 0;
 }
 .right-icon2-enter-active {
-  animation: right-icon2 0.4s;
+  animation: right-icon2 0.3s;
+  animation-delay: 0.3s;
+  opacity: 0;
 }
 @keyframes left-icon1 {
   0% {
@@ -804,10 +821,10 @@ export default Vue.extend({
 }
 @keyframes right-icon1 {
   0% {
-    transform: rotate(0);
+    opacity: 0;
   }
   100% {
-    transform: rotate(360deg);
+    opacity: 1;
   }
 }
 @keyframes right-icon2 {
@@ -820,41 +837,70 @@ export default Vue.extend({
 }
 @keyframes bounce-in {
   0% {
-    width: 0;
-    height: 0;
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes bounce-in2 {
+  0% {
+    width: 40%;
+    height: 40%;
+    opacity: 0;
   }
   100% {
     width: 100%;
     height: 100%;
+    opacity: 1;
   }
 }
 
-.success-up-enter-active {
-  animation: successUp 0.4s;
+.success-scale-enter-active {
+  animation: successScale 0.3s;
+  animation-delay: 0.3s;
+  opacity: 0;
+}
+
+.success-up1-enter-active {
+  animation: successUp 0.3s;
+  animation-delay: 0.6s;
+  opacity: 0;
 }
 
 .success-up2-enter-active {
-  animation: successUp2 0.4s;
+  animation: successUp 0.3s;
+  animation-delay: 0.9s;
+  opacity: 0;
+}
+
+.success-up3-enter-active {
+  animation: successUp 0.3s;
+  animation-delay: 1.2s;
+  opacity: 0;
 }
 
 .success-fade-enter-active {
-  animation: successFade 0.4s;
+  animation: successFade 0.3s;
+  animation-delay: 1.5s;
+  opacity: 0;
 }
 
-@keyframes successUp {
+@keyframes successScale {
   0% {
     opacity: 0;
-    transform: translateY(150%);
+    transform: scale(0.1);
   }
   100% {
     opacity: 1;
-    transform: translateY(0);
+    transform: scale(1);
   }
 }
-@keyframes successUp2 {
+@keyframes successUp {
   0% {
     opacity: 0;
-    transform: translateY(350%);
+    transform: translateY(200%);
   }
   100% {
     opacity: 1;

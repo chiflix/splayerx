@@ -133,7 +133,9 @@ export default {
     apiOfAccountService().then((api: string) => {
       ipcRenderer.send('sign-in-end-point', api);
     }).catch(() => {});
-
+    ipcRenderer.on('clear-signIn-callback', () => {
+      this.removeCallback(() => { });
+    });
     // sign in success
     ipcRenderer.on('sign-in', (e: Event, account?: {
       token: string, id: string,

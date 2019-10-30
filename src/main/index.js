@@ -283,15 +283,19 @@ function setBoundsCenterByOriginWindow(origin, win, width, height) {
     top: Number((e.workArea.y + (e.workArea.height - height) / 2).toFixed(0)),
   })).sort((l, r) => l.x - r.x);
   if (origin && win && list.length > 1) {
-    const pos = origin.getPosition();
-    const bounds = pos[0] > list[1].x ? {
-      x: list[1].left,
-      y: list[1].top,
-    } : {
-      x: list[0].left,
-      y: list[0].top,
-    };
-    win.setBounds(bounds);
+    try {
+      const pos = origin.getPosition();
+      const bounds = pos[0] > list[1].x ? {
+        x: list[1].left,
+        y: list[1].top,
+      } : {
+        x: list[0].left,
+        y: list[0].top,
+      };
+      win.setBounds(bounds);
+    } catch (error) {
+      console.log(error);
+    }
   }
 }
 
@@ -396,6 +400,12 @@ function createLoginWindow(e, fromWindow, route) {
   // login window setbounds on mainwidnow
   const win = fromWindow === 'preference' ? preferenceWindow : mainWindow;
   setBoundsCenterByOriginWindow(win, loginWindow, 412, 284);
+  if (fromWindow !== 'main' && mainWindow && !mainWindow.webContents.isDestroyed()) {
+    mainWindow.webContents.send('clear-signIn-callback');
+  }
+  if (fromWindow !== 'preference' && preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
+    preferenceWindow.webContents.send('clear-signIn-callback');
+  }
 }
 
 function createAboutWindow() {
@@ -485,8 +495,8 @@ function createBrowsingWindow(args) {
 }
 
 function createPaymentWindow(url, orderID, channel) {
-  const width = channel === 'wxpay' ? 258 : 1200;
-  const height = channel === 'wxpay' ? 294 : 890;
+  const width = channel === 'wxpay' ? 270 : 1200;
+  const height = channel === 'wxpay' ? 462 : 890;
   const paymentWindowOptions = {
     useContentSize: true,
     frame: false,
@@ -513,7 +523,7 @@ function createPaymentWindow(url, orderID, channel) {
     if (mainWindow && mainWindow.isAlwaysOnTop()) {
       paymentWindow.setAlwaysOnTop(true);
     }
-    paymentWindow.loadURL(`${paymentURL}?url=${url}&orderID=${orderID}`);
+    paymentWindow.loadURL(`${paymentURL}?url=${url}&orderID=${orderID}&type=${channel}`);
     paymentWindow.on('closed', () => {
       if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()
         && !paymentWindowCloseTag) {
@@ -524,6 +534,11 @@ function createPaymentWindow(url, orderID, channel) {
     });
   } else {
     paymentWindow.focus();
+    paymentWindow.setBounds({
+      width,
+      height,
+    });
+    paymentWindow.loadURL(`${paymentURL}?url=${url}&orderID=${orderID}&type=${channel}`);
   }
   paymentWindow.once('ready-to-show', () => {
     paymentWindow.show();

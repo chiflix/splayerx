@@ -23,9 +23,13 @@
       </h1>
       <p>
         {{ $t("exportForbiddenModal.content") }}
-        <br><span @click="signIn">{{ $t("exportForbiddenModal.span") }}</span>
+        <br><span
+          @click.left="signIn"
+          v-if="!token"
+        >{{ $t("exportForbiddenModal.span") }}</span>
       </p>
       <div
+        @click.left="goPremium"
         class="button"
       >
         {{ $t("exportForbiddenModal.button") }}
@@ -64,7 +68,10 @@ export default Vue.extend({
     signIn() {
       // 清楚登录信息， 开登录窗口
       remote.app.emit('sign-out');
-      ipcRenderer.send('add-login');
+      ipcRenderer.send('add-login', 'main');
+    },
+    goPremium() {
+      ipcRenderer.send('add-preference', 'premium');
     },
   },
 });

@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-05 16:03:32
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-10-24 16:25:51
+ * @Last Modified time: 2019-10-30 11:07:34
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @ts-ignore
@@ -434,7 +434,8 @@ const actions = {
         if (fileType === AudioTranslateFailType.Forbidden) {
           // 清楚登录信息， 开登录窗口
           remote.app.emit('sign-out');
-          ipcRenderer.send('add-login');
+          ipcRenderer.send('add-login', 'main');
+          dispatch(uActions.UPDATE_SIGN_IN_CALLBACK, () => { });
         }
       });
       grab.on('grabCompleted', () => {
@@ -719,7 +720,7 @@ const actions = {
       const enabled = await isAccountEnabled();
       if (enabled && !getters.token) {
         // 未登录
-        ipcRenderer.send('add-login');
+        ipcRenderer.send('add-login', 'main');
         dispatch(uActions.UPDATE_SIGN_IN_CALLBACK, () => {
           dispatch(a.AUDIO_TRANSLATE_SHOW_MODAL, sub);
         });

@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import Vuex, { mapActions } from 'vuex';
+import Vuex, { mapActions, mapGetters } from 'vuex';
 import VueRouter from 'vue-router';
 import VueI18n from 'vue-i18n';
 import electron, { ipcRenderer, remote } from 'electron';
@@ -109,8 +109,16 @@ new Vue({
     didGetUserInfo: false,
   },
   store,
+  computed: {
+    ...mapGetters([
+      'signInCallback',
+    ]),
+  },
   async mounted() {
     this.$store.commit('getLocalPreference');
+    ipcRenderer.on('clear-signIn-callback', () => {
+      this.removeCallback(() => { });
+    });
     // sign in success
     ipcRenderer.on('sign-in', (e, account) => {
       this.updateUserInfo(account);
@@ -118,6 +126,11 @@ new Vue({
         setToken(account.token);
         this.updateToken(account.token);
         this.getUserInfo();
+        // sign in success, callback
+        if (this.signInCallback) {
+          this.signInCallback();
+          this.removeCallback(() => { });
+        }
       } else {
         setToken('');
         this.updateToken('');
@@ -156,6 +169,7 @@ new Vue({
       updateUserInfo: uActions.UPDATE_USER_INFO,
       updateToken: uActions.UPDATE_USER_TOKEN,
       updatePremiumList: uActions.UPDATE_PREMIUM,
+      removeCallback: uActions.UPDATE_SIGN_IN_CALLBACK,
     }),
     async getUserInfo() {
       if (this.didGetUserInfo) return;

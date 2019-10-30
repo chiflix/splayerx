@@ -175,7 +175,7 @@ export async function applePay(payment: {
   currency: string, productID: string, transactionID: string, receipt: string
 }) {
   const endpoint = await getEndpoint();
-  const res = await longFetcher.post(`${endpoint}/auth/applepay`, payment);
+  const res = await longFetcher.post(`${endpoint}/applepay/verify`, payment);
   if (res.ok) {
     const data = await res.json();
     return data.data;
@@ -203,7 +203,7 @@ export async function createOrder(payment: {
 
 export async function polling(orderID: string) {
   const endpoint = await getEndpoint();
-  const res = await longFetcher.post(`${endpoint}/payment/polling`, {
+  const res = await longFetcher.post(`${endpoint}/order/polling`, {
     orderID,
   });
   if (res.ok) {

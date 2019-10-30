@@ -180,6 +180,7 @@
 </template>
 <script lang="ts">
 import Vue from 'vue';
+import { ipcRenderer } from 'electron';
 import { mapActions, mapGetters } from 'vuex';
 import {
   Input as inputActions,
@@ -410,6 +411,10 @@ export default Vue.extend({
     getLanguageLabel(code: string) {
       const l = this.lanugages.find((l: { value: string, label: string }) => l.value === code);
       return l ? l.label : codeToLanguageName(code);
+    },
+    goPremium() {
+      ipcRenderer.send('add-preference', 'premium');
+      this.hideTranslateModal();
     },
   },
 });

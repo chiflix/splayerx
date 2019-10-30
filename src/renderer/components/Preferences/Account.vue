@@ -50,7 +50,7 @@
             </button>
           </div>
         </div>
-        <div class="settingItem__box">
+        <div :class="`settingItem__box ${userInfo.isVip ? '' : 'no-margin'}`">
           <div>
             <div class="settingItem__title">
               {{ $t('preferences.account.createdAt') }}
@@ -60,10 +60,16 @@
             </div>
           </div>
         </div>
-        <div class="settingItem__title">
+        <div
+          v-if="userInfo.isVip"
+          class="settingItem__title"
+        >
           {{ $t('preferences.account.payAt') }}
         </div>
-        <div class="settingItem__description">
+        <div
+          v-if="userInfo.isVip"
+          class="settingItem__description"
+        >
           <p
             v-for="(item) in list"
             :key="item.id"
@@ -126,6 +132,7 @@ export default Vue.extend({
   methods: {
     ...mapActions({
       updateUserInfo: uActions.UPDATE_USER_INFO,
+      updateCallback: uActions.UPDATE_SIGN_IN_CALLBACK,
     }),
     signOut() {
       remote.app.emit('sign-out');
@@ -133,6 +140,7 @@ export default Vue.extend({
     signIn() {
       remote.app.emit('sign-out');
       ipcRenderer.send('add-login', 'preference');
+      this.updateCallback(() => { });
     },
     goPremium() {
       this.$router.push({ name: 'Premium' });
@@ -209,6 +217,9 @@ export default Vue.extend({
   &__box {
     display: flex;
     margin-bottom: 10px;
+    &.no-margin {
+      margin-bottom: 0;
+    }
     span {
       font-size: 11px;
     }

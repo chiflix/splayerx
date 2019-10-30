@@ -48,15 +48,15 @@
             <stop stop-color="#FFFFFF" stop-opacity="0.508378623" offset="100%"></stop>
         </radialGradient>
     </defs>
-    <g id="页面-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" opacity="0.6">
+    <g id="页面-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" opacity="0.7">
         <g id="Userinfo/Payment-Instruction/Style5/Success" transform="translate(-112.000000, -30.000000)">
             <g id="background" transform="translate(-25.000000, 29.000000)">
-                <g id="g2" transform="translate(140.000000, 0.000000)">
-                    <g id="Icon---Play" filter="url(#filter-1)" opacity="0.5" transform="translate(34.500000, 323.000000) rotate(-31.000000) translate(-34.500000, -323.000000) translate(10.000000, 297.000000)">
+                <g id="g2" opacity="0.5" transform="translate(140.000000, 0.000000)">
+                    <g id="Icon---Play" filter="url(#filter-1)" transform="translate(34.500000, 323.000000) rotate(-31.000000) translate(-34.500000, -323.000000) translate(10.000000, 297.000000)">
                         <path d="M24.1159603,50.4961805 L3.72929447,50.4961805 C2.12753198,50.4961805 0.6442084,49.6524362 -0.174421013,48.2756686 C-0.995903927,46.894102 -1.04862101,45.1870296 -0.313952046,43.7574066 L10.1695099,23.3572004 L10.1695099,23.3572004 L19.407675,5.38026934 C20.3141925,3.61623914 22.1295816,2.50578443 24.1129028,2.50213023 C26.095021,2.49847824 27.9121631,3.60540966 28.8181306,5.36836982 L38.0624108,23.3572004 L38.0624108,23.3572004 L48.2291206,43.1410255 C49.0261002,44.6919013 48.9929761,46.5389443 48.1409015,48.0602466 C47.2983507,49.564545 45.7087326,50.4961805 43.9845501,50.4961805 L24.1159603,50.4961805 L24.1159603,50.4961805 Z" id="Basis" fill="url(#radialGradient-2)" opacity="0.3" transform="translate(24.005257, 26.496180) rotate(90.000000) translate(-24.005257, -26.496180) "></path>
                         <path d="M24.1159603,50.4961805 L3.72929447,50.4961805 C2.12753198,50.4961805 0.6442084,49.6524362 -0.174421013,48.2756686 C-0.995903927,46.894102 -1.04862101,45.1870296 -0.313952046,43.7574066 L10.1695099,23.3572004 L10.1695099,23.3572004 L19.407675,5.38026934 C20.3141925,3.61623914 22.1295816,2.50578443 24.1129028,2.50213023 C26.095021,2.49847824 27.9121631,3.60540966 28.8181306,5.36836982 L38.0624108,23.3572004 L38.0624108,23.3572004 L48.2291206,43.1410255 C49.0261002,44.6919013 48.9929761,46.5389443 48.1409015,48.0602466 C47.2983507,49.564545 45.7087326,50.4961805 43.9845501,50.4961805 L24.1159603,50.4961805 L24.1159603,50.4961805 Z" id="Border" stroke-opacity="0.437273551" stroke="#FFFFFF" stroke-width="0.75" fill="url(#radialGradient-3)" opacity="0.2" transform="translate(24.005257, 26.496180) rotate(90.000000) translate(-24.005257, -26.496180) "></path>
                     </g>
-                    <g id="新版播放暂停图标-Icon---Pause" opacity="0.4" transform="translate(301.500000, 25.000000) rotate(-160.000000) translate(-301.500000, -25.000000) translate(284.000000, 5.000000)" fill-rule="nonzero">
+                    <g id="新版播放暂停图标-Icon---Pause" opacity="0.2" transform="translate(301.500000, 25.000000) rotate(-160.000000) translate(-301.500000, -25.000000) translate(284.000000, 5.000000)" fill-rule="nonzero">
                         <g id="Group" transform="translate(0.396893, 0.123729)">
                             <rect id="Rectangle" fill="url(#radialGradient-4)" x="0" y="0" width="11.52" height="38.3202254" rx="1.3824"></rect>
                             <rect id="Rectangle" stroke-opacity="0.437273551" stroke="#FFFFFF" stroke-width="0.6" fill="url(#radialGradient-5)" x="0" y="0" width="11.52" height="38.3202254" rx="1.3824"></rect>

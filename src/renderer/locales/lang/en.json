@@ -349,8 +349,8 @@
     },
     "premium": {
       "premiumSetting": "Premium",
-      "title": "SPlayer VIP Privilege",
-      "description": "In order to achieve stable and sustainable development for a long time, users are welcome to support the shooter audio and",
+      "title": "SPlayer Premium",
+      "description": "Go Premium now to help SPlayer change the way people watch videos, and get access to more advanced features. ",
       "content": {
         "description1": "Extend AI Translation time for your daily use",
         "description2": "Support more languages in AI Translation",
@@ -367,10 +367,17 @@
       "years": "Yr.",
       "payType": {
         "alipay": "Alipay",
-        "wxpay": "Wechat Pay",
+        "wxpay": "Wechat",
         "paypal": "PayPal"
       }
     }
+  },
+  "payment": {
+    "wxpay": {
+      "title": "SCAN & PAY",
+      "description": "WeChat Pay"
+    },
+    "fail": "Error"
   },
   "privacyBubble": {
     "confirmDisable": {
@@ -591,8 +598,8 @@
   },
   "exportForbiddenModal": {
     "title": "Upgrade to SPlayer Premium",
-    "content": "Upgrade to export translations unlimitedly，and get access to more exclusive features。",
-    "span": "Already Premium? Sign In Now.",
+    "content": "Upgrade to export translation results unlimitedly, and get access to more exclusive features.",
+    "span": "Already Premium? Sign In",
     "button": "Go Premium Now"
   },
   "premiumModal": {
@@ -601,8 +608,8 @@
       "button": "Close"
     },
     "success": {
-      "h2": "Thanks for your support !",
-      "h1": "Payment Successful!",
+      "h2": "Thanks for your support",
+      "h1": "Payment Successful !",
       "h4": "NOW",
       "content1": "Extend AI Translation Time",
       "content2": "More Languages Support in AI Translation",
