@@ -33,6 +33,7 @@ import {
   SubtitleManager,
   Browsing as browsingActions,
   AudioTranslate as atActions,
+  UIStates as uiActions,
 } from '@/store/actionTypes';
 import { log } from '@/libs/Log';
 import { checkForUpdate } from '@/libs/utils';
@@ -186,6 +187,13 @@ new Vue({
     },
   },
   watch: {
+    showSidebar(val: boolean) {
+      if (this.currentRouteName === 'landing-view') return;
+      this.menuService.updateMenuItemLabel(
+        'window.sidebar',
+        val ? 'msg.window.closeSidebar' : 'msg.window.openSidebar',
+      );
+    },
     isFullScreen(val) {
       this.menuService.updateMenuItemLabel(
         this.currentRouteName === 'browsing-view' ? 'browsing.window.fullscreen' : 'window.fullscreen',
@@ -714,6 +722,7 @@ new Vue({
       showAudioTranslateModal: atActions.AUDIO_TRANSLATE_SHOW_MODAL,
       updatePipMode: browsingActions.UPDATE_PIP_MODE,
       updateCurrentChannel: browsingActions.UPDATE_CURRENT_CHANNEL,
+      updateShowSidebar: uiActions.UPDATE_SHOW_SIDEBAR,
     }),
     async initializeMenuSettings() {
       if (this.currentRouteName !== 'welcome-privacy' && this.currentRouteName !== 'language-setting') {
@@ -998,6 +1007,9 @@ new Vue({
       }, 150));
       this.menuService.on('window.backToLandingView', () => {
         this.$bus.$emit('back-to-landingview');
+      });
+      this.menuService.on('window.sidebar', () => {
+        this.$event.emit('side-bar-mouseup');
       });
       this.menuService.on('browsing.window.keepPipFront', () => {
         this.browsingViewTop = !this.browsingViewTop;

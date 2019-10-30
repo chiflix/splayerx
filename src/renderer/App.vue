@@ -8,7 +8,6 @@
       v-if="!($route.name === 'browsing-view' && !isDarwin)"
       :show-all-widgets="showAllWidgets"
       :recent-playlist="playlistState"
-      :show-sidebar="showSidebar"
       :enable-full-screen-button="['landing-view', 'playing-view', 'browsing-view']
         .includes($route.name)"
     />
@@ -18,7 +17,6 @@
         width: showSidebar ? '76px' : '0',
       }"
       :current-url="currentUrl"
-      show-sidebar="showSidebar"
     />
     <transition
       :name="transitionMode"
@@ -83,7 +81,7 @@ export default {
       if (to.name === 'landing-view' && from.name === 'language-setting') this.transitionMode = 'fade';
       if (from.name === 'playing-view' && to.name !== 'playing-view') this.resetManager();
       else this.transitionMode = '';
-      if (to.name !== 'browsing-view' && !(to.name === 'landing-view' && from.name === 'browsing-view')) this.showSidebar = false;
+      if (to.name !== 'browsing-view' && !(to.name === 'landing-view' && from.name === 'browsing-view')) this.updateShowSidebar(false);
       if (from.name === 'browsing-view' && to.name === 'landing-view') this.currentUrl = '';
       if (from.name === 'browsing-view' && to.name === 'playing-view') {
         if (!this.$electron.remote.getCurrentWindow().isVisible()) {
@@ -101,7 +99,14 @@ export default {
   },
   mounted() {
     this.$event.on('side-bar-mouseup', () => {
-      this.updateShowSidebar(!this.showSidebar);
+      if (this.playlistState && !this.showSidebar) {
+        this.$bus.$emit('close-playlist');
+        setTimeout(() => {
+          this.updateShowSidebar(true);
+        }, 200);
+      } else {
+        this.updateShowSidebar(!this.showSidebar);
+      }
     });
     ipcRenderer.on('open-file', (event: Event, args: { onlySubtitle: boolean, files: string[] }) => {
       this.openFileArgs = args;

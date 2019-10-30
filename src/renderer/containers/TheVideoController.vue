@@ -510,6 +510,9 @@ export default {
     this.$bus.$on('switch-playlist', () => {
       this.widgetsStatus.PlaylistControl.showAttached = !this.tempRecentPlaylistDisplayState;
     });
+    this.$bus.$on('close-playlist', () => {
+      this.widgetsStatus.PlaylistControl.showAttached = false;
+    });
     this.$bus.$on('drag-over', () => {
       this.clock.clearTimeout(this.openPlayListTimeId);
       this.dragOver = true;

@@ -25,6 +25,11 @@
       "fontSize": "14px"
     }
   },
+  "tips": {
+    "openSidebar": "打开侧边栏 (C)",
+    "closeSidebar": "隐藏侧边栏 (C)",
+    "exit": "回到启动页"
+  },
   "errorFile": {
     "ENOSPC": {
       "content": "没有足够的磁盘空间。",
@@ -206,7 +211,9 @@
       "enterPip": "进入画中画 (P)",
       "exitPip": "退出画中画 (P)",
       "playInNewWindow": "新窗口播放",
-      "backToBrowser": "还原窗口"
+      "backToBrowser": "还原窗口",
+      "openSidebar": "打开侧边栏",
+      "closeSidebar": "隐藏侧边栏"
     },
     "edit": {
       "name": "编辑",

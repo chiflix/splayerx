@@ -74,6 +74,7 @@
         </div>
         <div
           @click="openHomePage"
+          :title="$t('tips.exit')"
           class="icon"
         >
           <Icon type="exit" />
@@ -100,10 +101,6 @@ export default {
     currentUrl: {
       type: String,
       default: '',
-    },
-    showSidebar: {
-      type: Boolean,
-      default: false,
     },
   },
   data() {
