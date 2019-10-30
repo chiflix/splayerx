@@ -40,10 +40,11 @@
     />
     <NotificationBubble />
     <browsing-content
-      v-show="!showChannelManager"
+      v-show="currentChannel"
       class="browsing-content"
     />
     <browsing-channel-manager v-show="showChannelManager" />
+    <browsing-home-page v-show="showHomePage" />
   </div>
 </template>
 
@@ -59,6 +60,7 @@ import { Browsing as browsingActions } from '@/store/actionTypes';
 import BrowsingHeader from '@/components/BrowsingView/BrowsingHeader.vue';
 import BrowsingContent from '@/components/BrowsingView/BrowsingContent.vue';
 import BrowsingChannelManager from '@/components/BrowsingView/BrowsingChannelManager.vue';
+import BrowsingHomePage from '@/components/BrowsingView/BrowsingHomePage.vue';
 import asyncStorage from '@/helpers/asyncStorage';
 import NotificationBubble from '@/components/NotificationBubble.vue';
 import { getValidVideoRegex, getValidSubtitleRegex } from '../../shared/utils';
@@ -73,6 +75,7 @@ export default {
     'browsing-content': BrowsingContent,
     NotificationBubble,
     'browsing-channel-manager': BrowsingChannelManager,
+    'browsing-home-page': BrowsingHomePage,
   },
   data() {
     return {
@@ -134,6 +137,7 @@ export default {
       startLoadUrl: '',
       barrageOpenByPage: false,
       showChannelManager: false,
+      showHomePage: false,
     };
   },
   computed: {
@@ -218,7 +222,10 @@ export default {
     },
     currentChannel(val: string) {
       log.info('current channel:', val);
-      if (val) this.showChannelManager = false;
+      if (val) {
+        this.showChannelManager = false;
+        this.showHomePage = false;
+      }
       this.webInfo.canReload = !!val;
       this.updateIsError(false);
       if (!navigator.onLine) this.offlineHandler();
@@ -249,7 +256,7 @@ export default {
       this.$emit('update-current-url', val);
     },
     showSidebar(val: boolean) {
-      if (!this.showChannelManager) {
+      if (this.currentChannel) {
         if (!val) {
           setTimeout(() => {
             this.currentMainBrowserView().setBounds({
@@ -431,8 +438,28 @@ export default {
           this.$electron.remote.getCurrentWindow().removeBrowserView(this.currentMainBrowserView());
         }
         this.showChannelManager = true;
+        this.showHomePage = false;
         this.showProgress = false;
         this.title = this.$t('browsing.siteManager');
+        this.webInfo.canGoBack = false;
+        this.webInfo.canGoForward = false;
+        this.webInfo.hasVideo = false;
+        this.webInfo.canReload = false;
+        this.updateCurrentChannel('');
+      }
+    });
+    this.$bus.$on('show-homepage', () => {
+      if (!this.showHomePage) {
+        if (this.currentMainBrowserView()) {
+          this.removeListener();
+          this.currentMainBrowserView().webContents
+            .executeJavaScript(InjectJSManager.pauseVideo(this.currentChannel));
+          this.$electron.remote.getCurrentWindow().removeBrowserView(this.currentMainBrowserView());
+        }
+        this.showHomePage = true;
+        this.showChannelManager = false;
+        this.showProgress = false;
+        this.title = this.$t('msg.titleName');
         this.webInfo.canGoBack = false;
         this.webInfo.canGoForward = false;
         this.webInfo.hasVideo = false;
@@ -552,14 +579,16 @@ export default {
       });
     },
     onlineHandler() {
-      this.currentMainBrowserView().setBounds({
-        x: this.showSidebar ? 76 : 0,
-        y: 40,
-        width: this.showSidebar ? this.winSize[0] - 76 : this.winSize[0],
-        height: this.winSize[1] - 40,
-      });
-      this.handleUrlReload();
-      this.updateIsError(false);
+      if (this.currentMainBrowserView()) {
+        this.currentMainBrowserView().setBounds({
+          x: this.showSidebar ? 76 : 0,
+          y: 40,
+          width: this.showSidebar ? this.winSize[0] - 76 : this.winSize[0],
+          height: this.winSize[1] - 40,
+        });
+        this.handleUrlReload();
+        this.updateIsError(false);
+      }
     },
     offlineHandler() {
       this.currentMainBrowserView().setBounds({

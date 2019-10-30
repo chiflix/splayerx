@@ -485,6 +485,19 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     }
   }
 }
+.browsingDelete {
+  width: 100%;
+  height: 100%;
+}
+.browsingNext, .browsingPre {
+  max-height: 68px;
+  max-width: 28px;
+  min-height: 50px;
+  min-width: 20px;
+  width: calc(2000vw / 888);
+  height: calc(5000vh / 888);
+  margin: auto;
+}
 .success {
   width: 15px;
   height: 15px;
@@ -658,7 +671,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   width: 20px;
   height: 20px;
 }
-.history, .open, .home, .exit {
+.history, .open, .home, .exit, .homePage {
   width: 30px;
   height: 30px;
   .default {
@@ -675,6 +688,11 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
       display: block;
     }
   }
+}
+.homePageLogo {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 .pip, .pop, .pipDisabled, .popDisabled {
   width: 30px;

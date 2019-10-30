@@ -26,7 +26,7 @@
         :item-dragging="isDragging"
         :index-of-moving-to="indexOfMovingTo"
         :index-of-moving-item="indexOfMovingItem"
-        :selected="info.channel === currentChannel && !showChannelManager"
+        :selected="info.channel === currentChannel"
         :select-sidebar="handleSidebarIcon"
         :style="{
           margin: '0 auto 12px auto',
@@ -37,7 +37,7 @@
       />
       <div
         :title="$t('browsing.siteTip')"
-        :class="{ 'channel-opacity': showChannelManager && currentRouteName === 'browsing-view'}"
+        :class="{ 'channel-opacity': channelManagerSelected && currentRouteName === 'browsing-view'}"
         @click="handleChannelManage"
         class="channel-manage no-drag"
       >
@@ -45,7 +45,7 @@
           type="channelManage"
         />
         <div
-          :class="{ selected: showChannelManager && currentRouteName === 'browsing-view' }"
+          :class="{ selected: channelManagerSelected && currentRouteName === 'browsing-view' }"
           class="mask"
         />
       </div>
@@ -59,7 +59,7 @@
       <div
         :style="{
           boxShadow: bottomMask ? '0 -2px 10px 0 rgba(0,0,0,0.50)' : '',
-          height: showFileIcon ? '66px' : '',
+          height: showFileIcon ? '90px' : '',
         }"
         v-if="showFileIcon"
         class="bottom-icon no-drag"
@@ -67,13 +67,19 @@
         <div
           @click="openFilesByDialog"
           :title="$t('browsing.openLocalFile')"
-          class="icon-hover"
+          class="icon-hover icon-size"
         >
           <Icon type="open" />
         </div>
         <div
           @click="openHomePage"
-          class="icon-hover"
+          class="icon-hover icon-size"
+        >
+          <Icon type="homePage" />
+        </div>
+        <div
+          @click="backToLanding"
+          class="icon-hover icon-size"
         >
           <Icon type="exit" />
         </div>
@@ -110,6 +116,7 @@ export default {
       indexOfMovingTo: NaN,
       isDragging: false,
       channelsDetail: [],
+      channelManagerSelected: false,
     };
   },
   computed: {
@@ -117,18 +124,15 @@ export default {
     currentRouteName() {
       return this.$route.name;
     },
-    showChannelManager() {
-      return !this.currentChannel;
-    },
     showFileIcon() {
-      return this.$route.name === 'playing-view' || this.$route.name === 'browsing-view';
+      return this.$route.name === 'playing-view' || !!this.currentUrl;
     },
     totalHeight() {
       const channelsNum = this.channelsDetail.length + 1;
       return channelsNum * 56;
     },
     bottomIconHeight() {
-      return 98;
+      return 126;
     },
     maxHeight() {
       const bottomHeight = this.showFileIcon ? this.bottomIconHeight : 0;
@@ -163,6 +167,12 @@ export default {
       const scrollTop = (document.querySelector('.icon-box') as HTMLElement).scrollTop;
       this.topMask = this.maxHeight >= this.totalHeight ? false : scrollTop !== 0;
       this.bottomMask = scrollTop + this.maxHeight < this.totalHeight;
+    },
+    currentChannel(val: string) {
+      if (val) {
+        this.showHomePage = false;
+        this.channelManagerSelected = false;
+      }
     },
   },
   created() {
@@ -218,9 +228,15 @@ export default {
       updateCurrentChannel: browsingActions.UPDATE_CURRENT_CHANNEL,
     }),
     openHomePage() {
+      this.channelManagerSelected = false;
+      this.$bus.$emit('show-homepage');
+    },
+    backToLanding() {
+      this.channelManagerSelected = false;
       this.$bus.$emit('back-to-landingview');
     },
     handleChannelManage() {
+      this.channelManagerSelected = true;
       if (this.currentRouteName !== 'browsing-view') {
         this.$router.push({ name: 'browsing-view' });
       }
@@ -231,6 +247,7 @@ export default {
     },
     handleSidebarIcon(url: string, type: string) {
       const newChannel = type;
+      this.channelManagerSelected = false;
       if (this.currentRouteName === 'browsing-view') {
         this.$bus.$emit('sidebar-selected', { url, currentChannel: this.currentChannel, newChannel });
       } else {
@@ -309,14 +326,18 @@ export default {
   .bottom-icon {
     position: absolute;
     bottom: 0;
-    padding-top: 16px;
-    padding-bottom: 16px;
+    padding-top: 18px;
+    padding-bottom: 18px;
     display:flex;
     flex-direction: column;
     width: 100%;
   }
   .icon-hover {
     margin: auto;
+  }
+  .icon-size {
+    width: 30px;
+    height: 30px;
   }
   .mask {
     width: 44px;
