@@ -60,7 +60,23 @@ export default {
 
       const today = new Date(Date.now());
       if (today.toDateString() === openDate.toDateString()) {
-        return `${this.$t('browsing.today')}${time}`;
+        return `${this.$t('browsing.today')} ${time}`;
+      }
+
+      const yesterday = new Date(Date.now());
+      const yesDate = yesterday.getDate();
+
+      yesterday.setDate(yesDate - 1);
+      if (yesDate === 1) {
+        const yesMonth = yesterday.getMonth();
+        yesterday.setMonth(yesMonth - 1);
+        if (yesMonth === 1) {
+          yesterday.setFullYear(yesterday.getFullYear() - 1);
+        }
+      }
+
+      if (yesterday.toDateString() === openDate.toDateString()) {
+        return `${this.$t('browsing.yesterday')} ${time}}`;
       }
 
       return `${year}-${month}-${date} ${time}`;

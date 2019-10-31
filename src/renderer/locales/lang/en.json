@@ -287,7 +287,8 @@
     "clear": "clear",
     "am": "AM",
     "pm": "PM",
-    "today": "Today"
+    "today": "Today",
+    "yesterday": "YesterDay"
   },
   "preferences": {
     "general": {
