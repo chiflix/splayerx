@@ -29,6 +29,8 @@ class SubtitleMetadataTask implements IMediaTask<string> {
       case Format.SubStationAlpha:
       case Format.WebVTT:
         return '.ass';
+      case Format.SagiImage:
+        return '.sis';
       default:
         throw new Error(`Unknown format: ${format}.`);
     }

@@ -143,11 +143,16 @@ export default {
       const subSpaceFactors: number[] = [15, 18, 21, 24];
       return subSpaceFactors[this.chosenSize] / 1080 * this.winHeight;
     },
+    textCues() {
+      return Array.isArray(this.currentCues)
+        ? this.currentCues.map((cues: TextCue[]) => cues.filter(({ text }: TextCue) => !!text))
+        : [[], []];
+    },
     firstType() {
-      return this.currentCues[0].cue && this.currentCues[0].cue.length > 0 ? this.currentCues[0].cue[0].format : '';
+      return this.textCues[0].cue && this.textCues[0].cue.length > 0 ? this.textCues[0].cue[0].format : '';
     },
     secondType() {
-      return this.currentCues[1].cue && this.currentCues[1].cue.length > 0 ? this.currentCues[1].cue[0].format : '';
+      return this.textCues[1].cue && this.textCues[1].cue.length > 0 ? this.textCues[1].cue[0].format : '';
     },
     secondarySubScale() {
       if (this.currentFirstSubtitleId === NOT_SELECTED_SUBTITLE) return this.scaleNum;
@@ -162,9 +167,9 @@ export default {
       return calculateTextSize('9px', normalFont, '120%', secondarySubScale.toString(), 'test').height;
     },
     positionCues() {
-      const firstCues: TextCue[] = this.currentCues[0]
+      const firstCues: TextCue[] = this.textCues[0]
         .filter((cue: TextCue) => this.calculatePosition(cue.category, cue.tags)).map((cue: TextCue) => { cue.category = 'first'; return cue; });
-      const secondaryCues: TextCue[] = this.currentCues[1]
+      const secondaryCues: TextCue[] = this.textCues[1]
         .filter((cue: TextCue) => this.calculatePosition(cue.category, cue.tags)).map((cue: TextCue) => { cue.category = 'secondary'; return cue; });
       const firstClassifiedCues: TextCue[][] = [];
       const secondaryClassifiedCues: TextCue[][] = [];
@@ -191,13 +196,13 @@ export default {
     noPositionCues() {
       const allCues = [];
       for (let i = 1; i < 10; i += 1) {
-        const firstCues = this.currentCues[0]
+        const firstCues = this.textCues[0]
           .filter((cue: TextCue) => (this.subToTop && [1, 2, 3]
             .includes(this.calculateAlignment(cue.category, cue.tags))
             ? this.calculateAlignment(cue.category, cue.tags) + 6
             : this.calculateAlignment(cue.category, cue.tags)) === i
             && !this.calculatePosition(cue.category, cue.tags));
-        const secondaryCues = this.currentCues[1]
+        const secondaryCues = this.textCues[1]
           .filter((cue: TextCue) => (this.subToTop && [1, 2, 3]
             .includes(this.calculateAlignment(cue.category, cue.tags))
             ? this.calculateAlignment(cue.category, cue.tags) + 6

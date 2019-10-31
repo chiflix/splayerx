@@ -18,6 +18,7 @@ import {
   IEmbeddedOrigin,
   EmbeddedStreamLoader, LocalTextLoader, SagiLoader,
 } from './loaders';
+import { SagiImageParser } from '../parsers/sagiImage';
 
 /**
  * TextCue tags getter for SubRip, SubStation Alpha and Online Transcript subtitles.
@@ -214,5 +215,14 @@ export function getParser(
       return new SrtParser(loader as LocalTextLoader, videoSegments);
     case Format.WebVTT:
       return new VttParser(loader as LocalTextLoader, videoSegments);
+    case Format.DvbSub:
+    case Format.HdmvPgs:
+    case Format.VobSub:
+      throw new Error('Local bitmap-based subtitle loading hasn\'t been implemented yet!');
+    case Format.SagiImage:
+      if (loader instanceof EmbeddedStreamLoader) {
+        return new SagiImageParser(loader as EmbeddedStreamLoader, videoSegments);
+      }
+      throw new Error('Local sagi image subtitle loading hasn\'t been implemented yet!');
   }
 }

@@ -11,13 +11,13 @@ export enum Type {
 }
 export enum Format {
   AdvancedSubStationAplha = 'ass',
-  // DvbSub = 'dvb_subtitle',
-  // HdmvPgs = 'hdmv_pgs_subtitle',
-  // SagiImage = 'sagi_image_subtitle',
+  DvbSub = 'dvb_subtitle',
+  HdmvPgs = 'hdmv_pgs_subtitle',
+  SagiImage = 'sagi_image_subtitle',
   SagiText = 'sagi',
   SubRip = 'subrip',
   SubStationAlpha = 'ssa',
-  // VobSub = 'dvd_subtitle',
+  VobSub = 'dvd_subtitle',
   WebVTT = 'webvtt',
   Unknown = 'unknown',
 }
@@ -156,6 +156,19 @@ export type TextCue = {
   tags: ITags,
 }
 
-export type Cue = TextCue;
+export type ImageCue = {
+  start: number,
+  end: number,
+  payload: Buffer,
+  format: Format,
+  position: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  },
+};
+
+export type Cue = TextCue | ImageCue;
 
 export const NOT_SELECTED_SUBTITLE = 'NOT_SELECTED_SUBTITLE';
