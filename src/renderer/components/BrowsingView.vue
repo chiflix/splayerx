@@ -40,26 +40,31 @@
     />
     <NotificationBubble />
     <browsing-content
-      v-show="!showChannelManager"
-      :all-channels="allChannels"
+      v-show="currentChannel"
       class="browsing-content"
     />
     <browsing-channel-manager v-show="showChannelManager" />
+    <browsing-home-page v-show="showHomePage" />
   </div>
 </template>
 
 <script lang="ts">
 import { mapGetters, mapActions } from 'vuex';
+import { Route } from 'vue-router';
 import fs from 'fs';
 // @ts-ignore
 import urlParseLax from 'url-parse-lax';
 // @ts-ignore
 import getVideoId from 'get-video-id';
 import { windowRectService } from '@/services/window/WindowRectService';
-import { Browsing as browsingActions } from '@/store/actionTypes';
+import {
+  Browsing as browsingActions,
+  UIStates as uiActions,
+} from '@/store/actionTypes';
 import BrowsingHeader from '@/components/BrowsingView/BrowsingHeader.vue';
 import BrowsingContent from '@/components/BrowsingView/BrowsingContent.vue';
 import BrowsingChannelManager from '@/components/BrowsingView/BrowsingChannelManager.vue';
+import BrowsingHomePage from '@/components/BrowsingView/BrowsingHomePage.vue';
 import asyncStorage from '@/helpers/asyncStorage';
 import NotificationBubble from '@/components/NotificationBubble.vue';
 import { getValidVideoRegex, getValidSubtitleRegex } from '../../shared/utils';
@@ -75,6 +80,7 @@ export default {
     'browsing-content': BrowsingContent,
     NotificationBubble,
     'browsing-channel-manager': BrowsingChannelManager,
+    'browsing-home-page': BrowsingHomePage,
   },
   data() {
     return {
@@ -136,6 +142,7 @@ export default {
       startLoadUrl: '',
       barrageOpenByPage: false,
       showChannelManager: false,
+      showHomePage: false,
     };
   },
   computed: {
@@ -220,7 +227,10 @@ export default {
     },
     currentChannel(val: string) {
       log.info('current channel:', val);
-      if (val) this.showChannelManager = false;
+      if (val) {
+        this.showChannelManager = false;
+        this.showHomePage = false;
+      }
       this.webInfo.canReload = !!val;
       this.updateIsError(false);
       if (!navigator.onLine) this.offlineHandler();
@@ -262,7 +272,7 @@ export default {
       this.$emit('update-current-url', val);
     },
     showSidebar(val: boolean) {
-      if (!this.showChannelManager) {
+      if (this.currentChannel) {
         if (!val) {
           setTimeout(() => {
             this.currentMainBrowserView().setBounds({
@@ -449,6 +459,7 @@ export default {
           this.$electron.remote.getCurrentWindow().removeBrowserView(this.currentMainBrowserView());
         }
         this.showChannelManager = true;
+        this.showHomePage = false;
         this.showProgress = false;
         this.title = this.$t('browsing.siteManager');
         this.webInfo.canGoBack = false;
@@ -458,9 +469,27 @@ export default {
         this.updateCurrentChannel('');
       }
     });
+    this.$bus.$on('show-homepage', () => {
+      if (!this.showHomePage) {
+        if (this.currentMainBrowserView()) {
+          this.removeListener();
+          this.currentMainBrowserView().webContents
+            .executeJavaScript(InjectJSManager.pauseVideo(this.currentChannel));
+          this.$electron.remote.getCurrentWindow().removeBrowserView(this.currentMainBrowserView());
+        }
+        this.showHomePage = true;
+        this.showChannelManager = false;
+        this.showProgress = false;
+        this.title = this.$t('msg.titleName');
+        this.webInfo.canGoBack = false;
+        this.webInfo.canGoForward = false;
+        this.webInfo.hasVideo = false;
+        this.webInfo.canReload = false;
+        this.updateCurrentChannel('');
+      }
+    });
     window.addEventListener('focus', this.focusHandler);
     window.addEventListener('beforeunload', this.beforeUnloadHandler);
-    this.$bus.$on('back-to-landingview', this.backToLandingViewHandler);
     this.$electron.ipcRenderer.on('handle-exit-pip', () => {
       this.handleExitPip();
     });
@@ -527,7 +556,6 @@ export default {
   },
   beforeDestroy() {
     this.removeListener();
-    this.$bus.$off('back-to-landingview', this.backToLandingViewHandler);
     this.$store.dispatch('updateBrowsingSize', this.winSize);
     this.boundBackPosition();
     this.updateIsPip(false);
@@ -552,6 +580,19 @@ export default {
         }
       });
   },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  beforeRouteEnter(to: Route, from: Route, next: (vm: any) => void) {
+    next((vm: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+      vm.updateShowSidebar(true);
+    });
+  },
+  beforeRouteLeave(to: Route, from: Route, next: (to: void) => void) {
+    this.removeListener();
+    this.backToLandingView = true;
+    this.updateShowSidebar(false);
+    this.$bus.$off();
+    next();
+  },
   methods: {
     ...mapActions({
       updateRecordUrl: browsingActions.UPDATE_RECORD_URL,
@@ -560,24 +601,19 @@ export default {
       updateCurrentChannel: browsingActions.UPDATE_CURRENT_CHANNEL,
       updatePipChannel: browsingActions.UPDATE_PIP_CHANNEL,
       updateIsError: browsingActions.UPDATE_IS_ERROR,
+      updateShowSidebar: uiActions.UPDATE_SHOW_SIDEBAR,
     }),
-    backToLandingViewHandler() {
-      this.removeListener();
-      this.backToLandingView = true;
-      this.$bus.$off();
-      this.$router.push({
-        name: 'landing-view',
-      });
-    },
     onlineHandler() {
-      this.currentMainBrowserView().setBounds({
-        x: this.showSidebar ? 76 : 0,
-        y: 40,
-        width: this.showSidebar ? this.winSize[0] - 76 : this.winSize[0],
-        height: this.winSize[1] - 40,
-      });
-      this.handleUrlReload();
-      this.updateIsError(false);
+      if (this.currentMainBrowserView()) {
+        this.currentMainBrowserView().setBounds({
+          x: this.showSidebar ? 76 : 0,
+          y: 40,
+          width: this.showSidebar ? this.winSize[0] - 76 : this.winSize[0],
+          height: this.winSize[1] - 40,
+        });
+        this.handleUrlReload();
+        this.updateIsError(false);
+      }
     },
     offlineHandler() {
       this.currentMainBrowserView().setBounds({

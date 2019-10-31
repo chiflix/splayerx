@@ -188,11 +188,17 @@ new Vue({
   },
   watch: {
     showSidebar(val: boolean) {
-      if (this.currentRouteName === 'landing-view') return;
-      this.menuService.updateMenuItemLabel(
-        'window.sidebar',
-        val ? 'msg.window.closeSidebar' : 'msg.window.openSidebar',
-      );
+      if (this.currentRouteName === 'playing-view') {
+        this.menuService.updateMenuItemLabel(
+          'window.sidebar',
+          val ? 'msg.window.closeSidebar' : 'msg.window.openSidebar',
+        );
+      } else if (this.currentRouteName === 'browsing-view') {
+        this.menuService.updateMenuItemLabel(
+          'browsing.window.sidebar',
+          val ? 'msg.window.closeSidebar' : 'msg.window.openSidebar',
+        );
+      }
     },
     isFullScreen(val) {
       this.menuService.updateMenuItemLabel(
@@ -1006,7 +1012,7 @@ new Vue({
         this.windowRotate();
       }, 150));
       this.menuService.on('window.backToLandingView', () => {
-        this.$bus.$emit('back-to-landingview');
+        this.$router.push({ name: 'landing-view' });
       });
       this.menuService.on('window.sidebar', () => {
         this.$event.emit('side-bar-mouseup');
@@ -1024,8 +1030,11 @@ new Vue({
       this.menuService.on('browsing.window.maxmize', () => {
         this.$electron.ipcRenderer.send('set-window-maximize');
       });
+      this.menuService.on('browsing.window.sidebar', () => {
+        this.$event.emit('side-bar-mouseup');
+      });
       this.menuService.on('browsing.window.backToLandingView', () => {
-        this.$bus.$emit('back-to-landingview');
+        this.$router.push({ name: 'landing-view' });
       });
       this.menuService.on('help.crashReportLocation', () => {
         const { remote } = this.$electron;

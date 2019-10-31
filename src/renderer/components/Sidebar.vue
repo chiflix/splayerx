@@ -37,7 +37,8 @@
       />
       <div
         :title="$t('browsing.siteTip')"
-        :class="{ 'channel-opacity': showChannelManager && currentRouteName === 'browsing-view'}"
+        :class="{ 'channel-opacity': channelManagerSelected
+          && currentRouteName === 'browsing-view'}"
         @click="handleChannelManage"
         class="channel-manage no-drag"
       >
@@ -46,7 +47,8 @@
           class="sidebar-icon"
         />
         <div
-          :class="{ selected: showChannelManager && currentRouteName === 'browsing-view' }"
+          :class="{ selected: channelManagerSelected
+            && currentRouteName === 'browsing-view' }"
           class="mask"
         />
       </div>
@@ -60,7 +62,7 @@
       <div
         :style="{
           boxShadow: bottomMask ? '0 -2px 10px 0 rgba(0,0,0,0.50)' : '',
-          height: showFileIcon ? '60px' : '',
+          height: showFileIcon ? '90px' : '',
         }"
         v-if="showFileIcon"
         class="bottom-icon no-drag"
@@ -74,6 +76,12 @@
         </div>
         <div
           @click="openHomePage"
+          class="icon"
+        >
+          <Icon type="homePage" />
+        </div>
+        <div
+          @click="backToLanding"
           :title="$t('tips.exit')"
           class="icon"
         >
@@ -112,6 +120,7 @@ export default {
       indexOfMovingTo: NaN,
       isDragging: false,
       channelsDetail: [],
+      channelManagerSelected: false,
     };
   },
   computed: {
@@ -123,14 +132,14 @@ export default {
       return !this.currentChannel;
     },
     showFileIcon() {
-      return this.$route.name === 'playing-view' || this.$route.name === 'browsing-view';
+      return this.$route.name === 'playing-view' || !!this.currentUrl;
     },
     totalHeight() {
       const channelsNum = this.channelsDetail.length + 1;
       return channelsNum * 56;
     },
     bottomIconHeight() {
-      return 92;
+      return 122;
     },
     maxHeight() {
       const bottomHeight = this.showFileIcon ? this.bottomIconHeight : 0;
@@ -141,6 +150,11 @@ export default {
     },
   },
   watch: {
+    currentChannel(val: string) {
+      if (val) {
+        this.channelManagerSelected = false;
+      }
+    },
     isDragging(val: boolean, oldVal: boolean) {
       if (oldVal && !val) {
         this.channelsDetail = BrowsingChannelManager
@@ -220,14 +234,20 @@ export default {
       updateIsHomePage: browsingActions.UPDATE_IS_HOME_PAGE,
       updateCurrentChannel: browsingActions.UPDATE_CURRENT_CHANNEL,
     }),
+    backToLanding() {
+      this.channelManagerSelected = false;
+      this.$router.push({ name: 'landing-view' });
+    },
+    openHomePage() {
+      this.channelManagerSelected = false;
+      this.$bus.$emit('show-homepage');
+    },
     handleChannelManage() {
+      this.channelManagerSelected = true;
       if (this.currentRouteName !== 'browsing-view') {
         this.$router.push({ name: 'browsing-view' });
       }
       this.$bus.$emit('channel-manage');
-    },
-    openHomePage() {
-      this.updateIsHomePage(!this.isHomePage);
     },
     handleSidebarIcon(url: string, type: string) {
       const newChannel = type;

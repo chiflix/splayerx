@@ -183,7 +183,7 @@ export default {
     this.$bus.$on('next-video', () => {
       if (this.switchingLock) return;
       if (this.nextVideo === undefined) {
-        this.$bus.$emit('back-to-landingview');
+        this.$router.push({ name: 'landing-view' });
         return;
       }
       this.switchingLock = true;
@@ -439,18 +439,10 @@ export default {
       }
     },
     backToLandingView() {
-      this.$store.dispatch('UPDATE_SHOW_SIDEBAR', false);
       this.handleLeaveVideo(this.videoId)
         .finally(() => {
           this.removeAllAudioTrack();
-          this.$store.dispatch('Init');
-          this.$bus.$off();
-          this.$router.push({
-            name: 'landing-view',
-          });
-          setTimeout(() => {
-            windowRectService.uploadWindowBy(false, 'landing-view', undefined, undefined, this.winSize, this.winPos, this.isFullScreen);
-          }, 200);
+          this.$bus.$emit('videocanvas-saved');
         });
     },
   },

@@ -19,6 +19,7 @@
 </template>
 
 <script lang="ts">
+import { Route } from 'vue-router';
 import { mapActions, mapGetters } from 'vuex';
 import { Subtitle as subtitleActions, SubtitleManager as smActions, AudioTranslate as atActions } from '@/store/actionTypes';
 import SubtitleRenderer from '@/components/Subtitle/SubtitleRenderer.vue';
@@ -98,6 +99,15 @@ export default {
       const paths = subs.map((sub: { src: string, type: string }) => (sub.src));
       this.addLocalSubtitlesWithSelect(paths);
     });
+  },
+  beforeRouteLeave(to: Route, from: Route, next: (to: void) => void) {
+    this.$bus.$once('videocanvas-saved', () => {
+      this.$store.dispatch('Init');
+      this.$bus.$off();
+      next();
+    });
+    if (to.name !== 'browsing-view') this.$store.dispatch('UPDATE_SHOW_SIDEBAR', false);
+    this.$bus.$emit('back-to-landingview');
   },
   beforeDestroy() {
     this.updateSubToTop(false);
