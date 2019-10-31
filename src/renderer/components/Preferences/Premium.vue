@@ -372,6 +372,7 @@ export default Vue.extend({
         this.isPaySuccess = true;
         this.isPayFail = false;
         this.isApplePaing = false;
+        ipcRenderer.send('payment-success-apple-verify');
       } catch (error) {
         this.isApplePaing = false;
         if (error && (error.status === 400 || error.status === 401 || error.status === 403)) {

@@ -484,7 +484,7 @@
     "videoLanguageLabel": "Audio Language",
     "subtitleLanguageLabel": "Translate To",
     "selectLanguageLabel": "Select",
-    "selectLanguageMoreLabel": "更多语言...",
+    "selectLanguageMoreLabel": "More ...",
     "audioLanguageLoading": "Fetching language list ...",
     "audioLanguageLoadFail": "Connection failed, please try later",
     "select": {
@@ -607,7 +607,7 @@
     "audioLanguage": "日本語, 한국어, Español, Français, Deutsch, Italiano, Português, čeština, Русский, Indonesian, العربية, Türkçe, română",
     "translate": {
       "title": "Upgrade to SPlayer Premium",
-      "content": "Go Premium to get access to Speech Recognition and AI Translation that supports more languages.",
+      "content": "Go Premium to get access to more languages and other exclusive features.",
       "span": "Already Premium? Sign In",
       "button": "Go Premium Now"
     },

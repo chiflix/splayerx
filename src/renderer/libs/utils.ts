@@ -437,3 +437,18 @@ export function toDateString(d: string): string {
   const date = new Date(d).toISOString();
   return date.split('T')[0];
 }
+
+/**
+ * @description app env
+ * @author tanghaixiang
+ * @returns String
+ */
+export function getEnvironmentName() {
+  if (process.platform === 'darwin') {
+    return process.mas ? 'MAS' : 'DMG';
+  }
+  if (process.platform === 'win32') {
+    return process.windowsStore ? 'APPX' : 'EXE';
+  }
+  return 'Unknown';
+}

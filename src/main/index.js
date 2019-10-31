@@ -1251,6 +1251,12 @@ function registerMainWindowEvent(mainWindow) {
       paymentWindow = null;
     }
   });
+
+  ipcMain.on('payment-success-apple-verify', () => {
+    if (mainWindow && !mainWindow.webContents.isDestroyed()) {
+      mainWindow.webContents.send('payment-success');
+    }
+  });
 }
 
 function createMainWindow(openDialog, playlistId) {

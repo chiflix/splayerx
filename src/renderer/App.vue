@@ -47,7 +47,7 @@ import Titlebar from '@/components/Titlebar.vue';
 import Sidebar from '@/components/Sidebar.vue';
 import '@/css/style.scss';
 import drag from '@/helpers/drag';
-import { setToken, getUserInfo } from '@/libs/apis';
+import { setToken, getUserInfo, checkToken } from '@/libs/apis';
 import sagi from '@/libs/sagi';
 import { apiOfAccountService, forceRefresh } from './helpers/featureSwitch';
 import { AudioTranslateBubbleOrigin, AudioTranslateStatus } from '@/store/modules/AudioTranslate';
@@ -98,7 +98,7 @@ export default {
       ipcRenderer.send('update-sidebar', val);
     },
   },
-  mounted() {
+  async mounted() {
     this.$event.on('side-bar-mouseup', () => {
       if (this.playlistState && !this.showSidebar) {
         this.$bus.$emit('close-playlist');
@@ -167,6 +167,7 @@ export default {
     ipcRenderer.on('payment-success', async () => {
       forceRefresh();
       try {
+        await checkToken();
         const res = await getUserInfo();
         this.updateUserInfo(res.me);
       } catch (error) {
@@ -190,6 +191,7 @@ export default {
     this.updateUserInfo(account);
     if (account && account.token) {
       setToken(account.token);
+      await checkToken();
       this.updateToken(account.token);
       sagi.setToken(account.token);
       // resfrsh

@@ -3,6 +3,7 @@ import { log } from '@/libs/Log';
 import { apiOfAccountService } from '@/helpers/featureSwitch';
 import Fetcher from '@/../shared/Fetcher';
 import { crossThreadCache } from '../../shared/utils';
+import { getEnvironmentName } from './utils';
 
 export class ApiError extends Error {
   /** HTTP status */
@@ -16,6 +17,10 @@ const fetcher = new Fetcher();
 const longFetcher = new Fetcher({
   timeout: 20 * 1000,
 });
+
+const environmentName = getEnvironmentName();
+fetcher.setHeader('Environment-Name', environmentName);
+longFetcher.setHeader('Environment-Name', environmentName);
 
 async function getEndpoint() {
   const api = await apiOfAccountService();
