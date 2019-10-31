@@ -146,6 +146,7 @@ export default {
       barrageOpenByPage: false,
       showChannelManager: false,
       showHomePage: false,
+      historyTitle: '',
     };
   },
   computed: {
@@ -295,16 +296,11 @@ export default {
         }
       }
     },
-    title(val: string) {
-      if (val && this.hasVideo) {
-        browsingHistory.saveHistoryItem(this.currentUrl, val, this.currentChannel);
-      }
-    },
     hasVideo(val: boolean) {
       this.updatePipState(val);
       this.createTouchBar(val);
       if (val) {
-        browsingHistory.saveHistoryItem(this.currentUrl, this.title, this.currentChannel);
+        browsingHistory.saveHistoryItem(this.currentUrl, this.historyTitle, this.currentChannel);
       }
     },
     adaptFinished(val: boolean) {
@@ -381,10 +377,11 @@ export default {
             const loadUrl = this.currentMainBrowserView().webContents.getURL();
             this.currentMainBrowserView().webContents.executeJavaScript(
               InjectJSManager.calcVideoNum(),
-              (r: number) => {
+              (r: { num: number, title: string }) => {
                 this.webInfo.hasVideo = this.currentChannel === 'youtube.com' && !getVideoId(loadUrl).id
                   ? false
-                  : !!r;
+                  : !!r.num;
+                this.historyTitle = r.title;
               },
             );
           }
@@ -549,10 +546,11 @@ export default {
           if (!this.currentMainBrowserView().webContents.isLoading()) {
             this.currentMainBrowserView().webContents.executeJavaScript(
               InjectJSManager.calcVideoNum(),
-              (r: number) => {
+              (r: { num: number, title: string }) => {
                 this.webInfo.hasVideo = this.currentChannel === 'youtube.com' && !getVideoId(loadUrl).id
                   ? false
-                  : !!r;
+                  : !!r.num;
+                this.historyTitle = r.title;
               },
             );
           }
@@ -664,9 +662,11 @@ export default {
       if (this.currentMainBrowserView()) {
         const loadUrl = this.currentMainBrowserView().webContents.getURL();
         this.currentMainBrowserView().webContents
-          .executeJavaScript(InjectJSManager.calcVideoNum(), (r: number) => {
-            this.webInfo.hasVideo = this.currentChannel === 'youtube.com' && !getVideoId(loadUrl).id ? false : !!r;
-          });
+          .executeJavaScript(InjectJSManager.calcVideoNum(),
+            (r: { num: number, title: string }) => {
+              this.webInfo.hasVideo = this.currentChannel === 'youtube.com' && !getVideoId(loadUrl).id ? false : !!r.num;
+              this.historyTitle = r.title;
+            });
       }
     },
     beforeUnloadHandler(e: BeforeUnloadEvent) {
