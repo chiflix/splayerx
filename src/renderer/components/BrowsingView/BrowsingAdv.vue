@@ -18,7 +18,7 @@
     <div
       :style="{
         position: 'relative',
-        width: `calc(100% - ${padding * 2}px)`,
+        width: `${winWidth - (showSidebar ? 76 : 0) - padding * 2}px`,
       }"
     >
       <ul
@@ -44,7 +44,6 @@
       </ul>
     </div>
     <div
-      v-show="winWidth >= 888 - (showSidebar ? 0 : 76)"
       :style="{ width: `${padding}px` }"
       @click="handleNextItem"
       class="next-item"
@@ -167,9 +166,16 @@ export default {
   max-height: 144px;
   width: 100%;
   display: flex;
+  position: relative;
   .pre-item, .next-item {
     height: 100%;
     display: flex;
+  }
+  .next-item {
+    position: absolute;
+    right: 0;
+    transform: translateY(-50%);
+    top: 50%;
   }
   .scroll-elements {
     width: 100%;

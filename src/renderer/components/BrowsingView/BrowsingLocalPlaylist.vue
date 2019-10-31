@@ -12,6 +12,18 @@
     >
       本地播放列表</span>
     <div
+      :style="{
+        marginBottom: `${blankTitleBottom[currentPhase]}px`,
+        marginLeft: `${padding}px`,
+        color: '#B5B6BF',
+        fontSize: `${blankTitleFontSize[currentPhase]}px`,
+      }"
+      v-show="!hasPlaylist"
+    >
+      <!--eslint-disable-next-line-->
+      <span>{{ '点击侧边栏底部“ ' }}<Icon :style="{ width: '15px', height: '14px' }" type="browsingOpen" />{{ ' ”按钮，选择多个文件播放，即可生成播放列表' }}</span>
+    </div>
+    <div
       @mouseover="handleMouseover"
       @mouseleave="handleMouseleave"
       class="playlist-content"
@@ -29,14 +41,14 @@
       <div
         :style="{
           position: 'relative',
-          width: `calc(100% - ${padding * 2}px)`,
+          width: `${winWidth - (showSidebar ? 76 : 0) - padding * 2}px`,
           display: 'flex',
           flexDirection: 'column',
         }"
       >
         <ul
           :style="{
-            borderBottom: '1px solid #eeeeee',
+            borderBottom: hasPlaylist ? '1px solid #eeeeee' : '',
             paddingBottom: `${listBottom[currentPhase]}px`,
           }"
         >
@@ -47,6 +59,10 @@
               marginRight: `${listRight[currentPhase]}px`,
               transform: `translateX(${calcTranslateX})`,
               transition: 'transform 300ms linear',
+              background: hasPlaylist ? '' : `url(${item.blankPlaylist})`,
+              backgroundSize: '100% 100%',
+              backgroundRepeat: 'no-repeat',
+              cursor: hasPlaylist ? 'pointer' : 'default',
             }"
             @click="handleItemClick(item.id)"
             @mouseover="handleFirstMouseover(index)"
@@ -62,6 +78,7 @@
               class="item-thumbnail"
             />
             <div
+              v-show="hasPlaylist"
               :style="{
                 fontSize: `${listItemFontSize[currentPhase]}px`,
               }"
@@ -93,7 +110,7 @@
               </div>
             </div>
             <div
-              v-show="index === firstHoveredIndex"
+              v-show="index === firstHoveredIndex && hasPlaylist"
               :style="{
                 width: `${deleteIconSize[currentPhase]}px`,
                 height: `${deleteIconSize[currentPhase]}px`,
@@ -119,6 +136,7 @@
               marginRight: `${listRight[currentPhase]}px`,
               transform: `translateX(${calcTranslateX})`,
               transition: 'transform 300ms linear',
+              cursor: 'pointer',
             }"
             @click="handleItemClick(item.id)"
             @mouseover="handleSecondMouseover(index)"
@@ -181,7 +199,6 @@
         </ul>
       </div>
       <div
-        v-show="winWidth >= 888 - (showSidebar ? 0 : 76)"
         :style="{ width: `${padding}px` }"
         @click="handleNextItem"
         class="next-item"
@@ -199,6 +216,7 @@
 import { mapGetters } from 'vuex';
 import { recentPlayService } from '@/services/media/RecentPlayService';
 import { playInfoStorageService } from '@/services/storage/PlayInfoStorageService';
+import blankPlaylist from '../../assets/blankPlaylist.png';
 import Icon from '../BaseIconContainer.vue';
 
 export default {
@@ -239,6 +257,7 @@ export default {
       translateSpace: 0,
       firstHoveredIndex: -1,
       secondHoveredIndex: -1,
+      hasPlaylist: false,
     };
   },
   computed: {
@@ -283,22 +302,35 @@ export default {
     deleteIconSize() {
       return [30 * 888 / 1176, 30 * this.winWidth / 1176, 30];
     },
+    blankTitleBottom() {
+      return [25 * 888 / 1176, 25 * this.winWidth / 1176, 25];
+    },
+    blankTitleFontSize() {
+      return [19 * 888 / 1176, 19 * this.winWidth / 1176, 19];
+    },
   },
   watch: {
     playlist: {
       handler(val: number[]) {
         this.firstLineList = [];
         this.secondLineList = [];
-        const tmp = val.slice(0, val.length);
-        const times = Math.ceil(val.length / this.showListNum);
-        let isFirst = true;
-        for (let i = 0; i < times; i += 1) {
-          if (isFirst) {
-            this.firstLineList.push(...tmp.splice(0, this.showListNum));
-            isFirst = false;
-          } else {
-            this.secondLineList.push(...tmp.splice(0, this.showListNum));
-            isFirst = true;
+        if (val.length) {
+          const tmp = val.slice(0, val.length);
+          const times = Math.ceil(val.length / this.showListNum);
+          let isFirst = true;
+          for (let i = 0; i < times; i += 1) {
+            if (isFirst) {
+              this.firstLineList.push(...tmp.splice(0, this.showListNum));
+              isFirst = false;
+            } else {
+              this.secondLineList.push(...tmp.splice(0, this.showListNum));
+              isFirst = true;
+            }
+          }
+        } else {
+          this.hasPlaylist = false;
+          for (let i = 0; i < this.showListNum; i += 1) {
+            this.firstLineList.push({ blankPlaylist });
           }
         }
       },
@@ -308,18 +340,25 @@ export default {
       handler(val: number) {
         this.firstLineList = [];
         this.secondLineList = [];
-        this.translateX = 0;
-        this.translateSpace = 0;
-        const tmp = this.playlist.slice(0, this.playlist.length);
-        const times = Math.ceil(this.playlist.length / val);
-        let isFirst = true;
-        for (let i = 0; i < times; i += 1) {
-          if (isFirst) {
-            this.firstLineList.push(...tmp.splice(0, val));
-            isFirst = false;
-          } else {
-            this.secondLineList.push(...tmp.splice(0, val));
-            isFirst = true;
+        if (this.hasPlaylist) {
+          this.translateX = 0;
+          this.translateSpace = 0;
+          this.currentListIndex = 0;
+          const tmp = this.playlist.slice(0, this.playlist.length);
+          const times = Math.ceil(this.playlist.length / val);
+          let isFirst = true;
+          for (let i = 0; i < times; i += 1) {
+            if (isFirst) {
+              this.firstLineList.push(...tmp.splice(0, val));
+              isFirst = false;
+            } else {
+              this.secondLineList.push(...tmp.splice(0, val));
+              isFirst = true;
+            }
+          }
+        } else {
+          for (let i = 0; i < this.showListNum; i += 1) {
+            this.firstLineList.push({ blankPlaylist });
           }
         }
       },
@@ -329,16 +368,26 @@ export default {
   created() {
     // Get all data and show
     recentPlayService.getRecords().then((results) => {
-      this.playlist = results.filter((result) => {
-        if (result.playlistLength) return result.playlistLength > 1;
-        return false;
-      });
+      if (results.length) {
+        this.hasPlaylist = true;
+        this.playlist = results.filter((result) => {
+          if (result.playlistLength) return result.playlistLength > 1;
+          return false;
+        });
+      } else {
+        this.hasPlaylist = false;
+        for (let i = 0; i < this.showListNum; i += 1) {
+          this.playlist.push({ blankPlaylist });
+        }
+      }
       console.log(results);
     });
   },
   methods: {
     handleItemClick(id: number) {
-      this.openPlayList(id);
+      if (this.hasPlaylist && id) {
+        this.openPlayList(id);
+      }
     },
     calcSize(min: number, max: number) {
       const a = (max - min) / (1176 - 888);
@@ -396,9 +445,16 @@ export default {
     height: auto;
     display: flex;
   }
+  .next-item {
+    position: absolute;
+    right: 0;
+    transform: translateY(-50%);
+    top: 50%;
+  }
   .playlist-content {
     height: auto;
     display: flex;
+    position: relative;
   }
   ul {
     display: block;
@@ -409,7 +465,6 @@ export default {
     li {
       display: inline-block;
       min-width: 360px;
-      cursor: pointer;
     }
   }
   .delete-icon {

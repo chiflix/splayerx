@@ -1,15 +1,9 @@
 <template>
   <div class="home-page-container">
-    <div
-      :style="{
-        width: '100%',
-        height: 'auto',
-      }"
-      class="home-page-content"
-    >
+    <div class="home-page-content">
       <div
         :style="{
-          width: `calc(100% - ${calcMargin[currentPhase] * 2}px)`,
+          width: `${winWidth - (showSidebar ? 76 : 0) - calcMargin[currentPhase] * 2}px`,
           height: currentPhase <= 1 ? `${calcHeight}px` : '314px',
           margin: `0 ${calcMargin[currentPhase]}px`,
         }"
@@ -139,7 +133,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['winWidth']),
+    ...mapGetters(['winWidth', 'showSidebar']),
     calcWidth() {
       return this.calcSize(732, 992);
     },
@@ -262,12 +256,12 @@ export default {
   position: relative;
   overflow: scroll;
   .home-page-content {
+    width: auto;
+    height: auto;
     overflow: scroll;
     display: flex;
     flex-direction: column;
     position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
     max-width: 1772px;
     .account-content {
       position: relative;
@@ -279,6 +273,7 @@ export default {
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      max-width: 1664px;
       background-image: linear-gradient(180deg, rgba(255,255,255,0.50) 10%, #E6E6E6 100%);
       .back-logo {
         position: absolute;
