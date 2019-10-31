@@ -4,9 +4,7 @@
       v-if="isHomePage"
       class="home-page"
     >
-      <BrowsingHistory
-        :all-channels="allChannels"
-      />
+      <BrowsingHistory />
     </div>
     <div
       v-if="isError"

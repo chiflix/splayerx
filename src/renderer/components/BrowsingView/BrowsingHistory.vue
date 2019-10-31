@@ -10,10 +10,9 @@
     <div class="dash" />
     <div class="history">
       <BrowsingHistoryItem
-        :key="item"
+        :key="item.url"
         v-for="item in historys"
         v-bind="item"
-        class="item"
       />
     </div>
   </div>

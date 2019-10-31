@@ -39,8 +39,8 @@ export default {
       default: 'bilibiliSidebar',
     },
     openTime: {
-      type: String,
-      default: new Date(),
+      type: Number,
+      default: Date.now(),
     },
     channel: {
       type: String,
@@ -49,17 +49,28 @@ export default {
   },
   computed: {
     date() {
-      const a = new Date(this.openTime);
-      const date = a.getDate();
-      const year = a.getFullYear();
-      console.log(a);
-      return `${year}年 ${date}日`;
+      const openDate = new Date(this.openTime);
+      const year = openDate.getFullYear();
+      const month = openDate.getMonth();
+      const date = openDate.getDate();
+      const hour = openDate.getHours();
+      let minute = openDate.getMinutes();
+
+      const time = `${hour >= 12 ? '下午' : '上午'} ${hour >= 12 ? hour - 12 : hour}:${minute < 10 ? '0' : ''}${minute}`;
+
+      const today = new Date(Date.now());
+      if (today.toDateString() === openDate.toDateString()) {
+        return `今天${time}`;
+      }
+
+      return `${year}-${month}-${date} ${time}`;
     },
   },
 };
 </script>
 <style lang="scss" scoped>
 .history-item {
+  min-width: 724px;
   width: calc(100% - 12px);
   height: 56px;
   display: flex;
@@ -72,6 +83,7 @@ export default {
   }
 
   .content {
+    min-width: 0;
     display:flex;
     justify-content: flex-start;
     align-items: center;
@@ -81,6 +93,7 @@ export default {
       height: 28px;
     }
     .title {
+      flex-shrink: 10;
       margin-left: 13px;
       overflow: hidden;
       white-space: nowrap;
@@ -98,6 +111,8 @@ export default {
     }
   }
   .time {
+    min-width: fit-content;
+    margin-left: 10px;
     margin-right: 30px;
     font-family: $font-normal;
     font-size: 15px;
