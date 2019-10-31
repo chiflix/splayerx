@@ -83,7 +83,7 @@
             right: `${versionPos.right[currentPhase]}px`,
             bottom: `${versionPos.bottom[currentPhase]}px`,
           }"
-        >{{ `Version ${$electron.remote.app.getVersion()}` }}</span>
+        >{{ `Version ${currentVersion}` }}</span>
         <div
           :style="{
             width: `${logoSize[currentPhase]}px`,
@@ -120,6 +120,7 @@
 
 <script lang="ts">
 import { mapGetters } from 'vuex';
+import { version } from '@/../../package.json';
 import BrowsingAdv from './BrowsingAdv.vue';
 import BrowsingLocalPlaylist from './BrowsingLocalPlaylist.vue';
 import Icon from '../BaseIconContainer.vue';
@@ -140,6 +141,9 @@ export default {
   },
   computed: {
     ...mapGetters(['winWidth', 'showSidebar']),
+    currentVersion() {
+      return version;
+    },
     calcWidth() {
       return this.calcSize(732, 992);
     },

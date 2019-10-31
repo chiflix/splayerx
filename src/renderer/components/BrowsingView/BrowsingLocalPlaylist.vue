@@ -382,7 +382,6 @@ export default {
           this.playlist.push({ blankPlaylist });
         }
       }
-      console.log(results);
     });
   },
   methods: {

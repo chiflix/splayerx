@@ -126,12 +126,15 @@ export default {
       if (val > oldVal) {
         if (this.hasNextItem) {
           this.translateX -= 100;
+          this.translateSpace -= this.rightSpace[this.currentPhase];
         } else if (this.hasPreItem) {
           this.translateX += 100;
+          this.translateSpace += this.rightSpace[this.currentPhase];
           this.currentAdvIndex -= 1;
         }
       } else if (this.hasPreItem) {
         this.translateX -= 100;
+        this.translateSpace -= this.rightSpace[this.currentPhase];
       }
     },
   },
