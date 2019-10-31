@@ -40,7 +40,8 @@
     />
     <NotificationBubble />
     <browsing-content
-      v-show="currentChannel"
+      v-show="!showChannelManager"
+      :all-channels="allChannels"
       class="browsing-content"
     />
     <browsing-channel-manager v-show="showChannelManager" />

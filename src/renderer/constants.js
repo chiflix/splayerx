@@ -68,12 +68,11 @@ export const INFO_SCHEMAS = [
   },
 ];
 
+export const DATADB_NAME = 'data';
+export const SUBTITLE_OBJECTSTORE_NAME = 'subtitles';
 export const BROWSINGDB_NAME = 'browsingDB';
 export const HISTORY_OBJECT_STORE_NAME = 'history';
 export const BROWSINGDB_VERSION = 1;
-
-export const DATADB_NAME = 'data';
-export const SUBTITLE_OBJECTSTORE_NAME = 'subtitles';
 
 /** electron 缓存用户数据路径
  * @constant

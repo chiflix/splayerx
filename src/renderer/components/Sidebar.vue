@@ -231,7 +231,6 @@ export default {
   },
   methods: {
     ...mapActions({
-      updateIsHomePage: browsingActions.UPDATE_IS_HOME_PAGE,
       updateCurrentChannel: browsingActions.UPDATE_CURRENT_CHANNEL,
     }),
     backToLanding() {

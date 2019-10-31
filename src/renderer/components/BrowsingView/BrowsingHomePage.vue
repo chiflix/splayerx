@@ -107,6 +107,11 @@
           margin: `${advPos.marginTop[currentPhase]}px 0 ${advPos.marginBottom[currentPhase]}px 0`,
         }"
       />
+      <browsing-history
+        :playlist-font-size="playlistFontSize"
+        :padding="calcMargin[currentPhase]"
+        :current-phase="currentPhase"
+      />
       <browsing-local-playlist
         :width="calcWidth"
         :height="playlistHeight[currentPhase]"
@@ -121,6 +126,7 @@
 <script lang="ts">
 import { mapGetters } from 'vuex';
 import { version } from '@/../../package.json';
+import BrowsingHistory from '@/components/BrowsingView/BrowsingHistory.vue';
 import BrowsingAdv from './BrowsingAdv.vue';
 import BrowsingLocalPlaylist from './BrowsingLocalPlaylist.vue';
 import Icon from '../BaseIconContainer.vue';
@@ -131,6 +137,7 @@ export default {
     Icon,
     'browsing-adv': BrowsingAdv,
     'browsing-local-playlist': BrowsingLocalPlaylist,
+    'browsing-history': BrowsingHistory,
   },
   data() {
     return {

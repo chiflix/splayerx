@@ -758,7 +758,8 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   height: 100%;
   display: block;
 }
-.pip, .pop, .pipDisabled, .popDisabled {
+.pip, .pop, .pipDisabled, .popDisabled,
+.back, .backDisabled, .forward, .forwardDisabled, .pageRefresh, .reloadStop {
   width: 30px;
   height: 30px;
 }

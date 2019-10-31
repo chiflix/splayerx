@@ -1,12 +1,6 @@
 <template>
   <div class="browsing-content">
     <div
-      v-if="isHomePage"
-      class="home-page"
-    >
-      <BrowsingHistory />
-    </div>
-    <div
       v-if="isError"
       class="error-page"
     >
@@ -23,14 +17,10 @@
 </template>
 <script lang="ts">
 import { mapGetters } from 'vuex';
-import BrowsingHistory from '@/components/BrowsingView/BrowsingHistory.vue';
 
 export default {
-  components: {
-    BrowsingHistory,
-  },
   computed: {
-    ...mapGetters(['isHomePage', 'isError']),
+    ...mapGetters(['isError']),
   },
 };
 </script>
@@ -40,11 +30,6 @@ export default {
   display: flex;
   align-items: center;
   flex-direction: column;
-
-  .home-page {
-    width: calc(100% - 104px);
-    height: 100%;
-  }
 
   .error-page {
     width: 100%;
