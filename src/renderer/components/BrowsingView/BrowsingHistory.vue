@@ -34,7 +34,7 @@
           borderBottom: '1px solid #EEEEEE',
           margin: `${playlistBottom[currentPhase]}px 0 ${historyBottom[currentPhase]}px 0`,
         }"
-        class="history"
+        class="content"
       >
         <div
           v-if="histories.length < 1"
@@ -145,7 +145,7 @@ export default {
       color: #B5B6BF;
     }
   }
-  .history {
+  .content {
     min-width: 732px;
     display: flex;
     justify-content: flex-start;
