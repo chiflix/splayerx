@@ -41,11 +41,13 @@
     <NotificationBubble />
     <browsing-content
       v-show="!showChannelManager"
-      :all-channels="allChannels"
       class="browsing-content"
     />
     <browsing-channel-manager v-show="showChannelManager" />
-    <browsing-home-page v-show="showHomePage" />
+    <browsing-home-page
+      v-show="showHomePage"
+      :show-home-page="showHomePage"
+    />
   </div>
 </template>
 
@@ -293,11 +295,15 @@ export default {
         }
       }
     },
+    title(val: string) {
+      if (val && this.hasVideo) {
+        browsingHistory.saveHistoryItem(this.currentUrl, val, this.currentChannel);
+      }
+    },
     hasVideo(val: boolean) {
       this.updatePipState(val);
       this.createTouchBar(val);
       if (val) {
-        console.log('channel', this.currentChannel);
         browsingHistory.saveHistoryItem(this.currentUrl, this.title, this.currentChannel);
       }
     },

@@ -108,6 +108,7 @@
         }"
       />
       <browsing-history
+        :show-home-page="showHomePage"
         :playlist-font-size="playlistFontSize"
         :padding="calcMargin[currentPhase]"
         :current-phase="currentPhase"
@@ -138,6 +139,12 @@ export default {
     'browsing-adv': BrowsingAdv,
     'browsing-local-playlist': BrowsingLocalPlaylist,
     'browsing-history': BrowsingHistory,
+  },
+  props: {
+    showHomePage: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {

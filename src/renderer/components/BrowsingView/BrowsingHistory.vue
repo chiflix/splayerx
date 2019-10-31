@@ -78,6 +78,10 @@ export default {
       type: Array,
       required: true,
     },
+    showHomePage: {
+      type: Boolean,
+      required: true,
+    },
   },
   data() {
     return {
@@ -99,10 +103,14 @@ export default {
       return [50 * 888 / 1176, 50 * this.winWidth / 1176, 50];
     },
   },
-  created() {
-    browsingHistory.getHistorys().then((result: any) => {
-      this.histories = result;
-    });
+  watch: {
+    showHomePage(val: boolean) {
+      if (val) {
+        browsingHistory.getHistorys().then((result: any) => {
+          this.histories = result;
+        });
+      }
+    },
   },
   methods: {
     async handleClear() {
