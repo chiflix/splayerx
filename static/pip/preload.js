@@ -200,7 +200,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   if (floatTop) {
     floatTop.addEventListener('mouseup', () => {
-      console.log('mouseup');
       sendToHost('pin', 'pin');
     });
   }
