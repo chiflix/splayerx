@@ -1024,7 +1024,7 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
   async [a.exportSubtitle]({ getters, dispatch, rootState }, item: ISubtitleControlListItem) {
     const { $bus } = Vue.prototype;
     if (!getters.token || !(getters.userInfo && getters.userInfo.isVip)) {
-      dispatch(usActions.SHOW_FORBIDDEN_MODAL);
+      dispatch(usActions.SHOW_FORBIDDEN_MODAL, 'export');
       dispatch(usActions.UPDATE_SIGN_IN_CALLBACK, () => {
         dispatch(usActions.HIDE_FORBIDDEN_MODAL);
         dispatch(a.exportSubtitle, item);
@@ -1045,7 +1045,7 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
       const originSrc = getters.originSrc;
       const videoName = `${basename(originSrc, extname(originSrc))}`;
       const left = originSrc.split(videoName)[0];
-      const lang = `-${codeToLanguageName(item.language)}`;
+      const lang = item.language ? `-${codeToLanguageName(item.language)}` : '';
       const name = `${videoName}${lang}`;
       const fileName = `${basename(name, '.srt')}.srt`;
       const defaultPath = join(left, fileName);

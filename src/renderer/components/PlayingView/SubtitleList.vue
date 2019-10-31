@@ -95,7 +95,7 @@
                         + `${currentSubtitleIndex === index && panelVisiable
                           ? ' up' : ''}`"
                       @mouseup.native.stop="handleSubToggle($event, index)"
-                      v-show="hoverIndex === index || currentSubtitleIndex === index"
+                      v-show="currentSubtitleIndex === index"
                       type="downArrow"
                     />
                   </div>
@@ -165,6 +165,23 @@
                   <Icon
                     @mouseup.native="handleReTranslate($event, item)"
                     type="reload"
+                  />
+                </div>
+              </div>
+              <div
+                v-else-if="item.type === 'local'"
+                class="icons-wrap two-icons-wrap"
+              >
+                <div :title="$t('subtitle.tips.editor')">
+                  <Icon
+                    @mouseup.native.stop="handleSubEdit($event, item)"
+                    type="subtitleEdit"
+                  />
+                </div>
+                <div :title="$t('subtitle.tips.delete')">
+                  <Icon
+                    @mouseup.native.stop="handleSubDelete($event, item)"
+                    type="deleteSub"
                   />
                 </div>
               </div>

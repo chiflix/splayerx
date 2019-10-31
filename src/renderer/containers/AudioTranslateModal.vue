@@ -343,7 +343,7 @@ export default Vue.extend({
       if (n.value === 'premium') {
         this.audioLanguage = o;
         this.hideTranslateModal();
-        this.showForbidden();
+        this.showForbidden('translate');
       }
     },
   },
@@ -385,12 +385,12 @@ export default Vue.extend({
     async refreshConfig() {
       try {
         const isVip = this.userInfo && this.userInfo.isVip;
-        const supportedAudioLanguage = isVip ? await getJsonConfig('vipAudioLanguage', null)
+        const supportedAudioLanguage = !isVip ? await getJsonConfig('vipAudioLanguage', null)
           : await getJsonConfig('audioLanguage', null);
         if (supportedAudioLanguage && supportedAudioLanguage['list']) {
           this.lanugages = supportedAudioLanguage['list'];
           // this.getAudioLanguage();
-          if (!isVip) {
+          if (isVip) {
             const goPremiumLabel = this.$t('translateModal.selectLanguageMoreLabel');
             this.lanugages.push({
               value: 'premium',

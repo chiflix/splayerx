@@ -5,6 +5,7 @@ import osLocale from 'os-locale';
 import messages from '@/locales';
 import { hookVue } from '@/kerning';
 import { setToken } from '@/libs/apis';
+// @ts-ignore
 import Payment from '@/components/Payment.vue';
 import '@/css/style.scss';
 

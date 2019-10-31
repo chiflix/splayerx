@@ -28,7 +28,8 @@
   "tips": {
     "openSidebar": "Show Sidebar (C)",
     "closeSidebar": "Hide Sidebar (C)",
-    "exit": "Back to Launching Page"
+    "exit": "Back to Launching Page",
+    "delete": "Back to Launching Page"
   },
   "errorFile": {
     "ENOSPC": {
@@ -316,7 +317,7 @@
       "incognitoMode": "Incognito Mode",
       "incognitoDescription": "Your playback history will not be stored anymore.",
       "clearHistory": "Clear Playback History",
-      "clearHistoryDescription": "Remove existing playlists and playback history"
+      "clearHistoryDescription": "Remove existing playlists and playback history."
     },
     "account": {
       "accountSetting": "Account",
@@ -451,7 +452,8 @@
     "tips": {
       "editor": "Edit coming soon ...",
       "export": "Export",
-      "reload": "Regenerate"
+      "reload": "Regenerate",
+      "delete": "Remove"
     }
   },
   "uploading": {
@@ -597,11 +599,24 @@
       "errorNetwork": "Network Error. Please"
     }
   },
-  "exportForbiddenModal": {
+  "forbiddenModal": {
     "title": "Upgrade to SPlayer Premium",
     "content": "Upgrade to export translation results unlimitedly, and get access to more exclusive features.",
     "span": "Already Premium? Sign In",
-    "button": "Go Premium Now"
+    "button": "Go Premium Now",
+    "audioLanguage": "日本語, 한국어, Español, Français, Deutsch, Italiano, Português, čeština, Русский, Indonesian, العربية, Türkçe, română",
+    "translate": {
+      "title": "Upgrade to SPlayer Premium",
+      "content": "Go Premium to get access to Speech Recognition and AI Translation that supports more languages.",
+      "span": "Already Premium? Sign In",
+      "button": "Go Premium Now"
+    },
+    "export": {
+      "title": "Upgrade to SPlayer Premium",
+      "content": "Upgrade to export translation results unlimitedly, and get access to more exclusive features.",
+      "span": "Already Premium? Sign In",
+      "button": "Go Premium Now"
+    }
   },
   "premiumModal": {
     "loading": {
@@ -619,7 +634,7 @@
     },
     "fail": {
       "h1": "Sorry",
-      "content": "Your transaction could not be processed，Please contact us",
+      "content": "Your transaction could not be processed，please contact us",
       "copy": "Copy",
       "copied": "Copied",
       "button": "Back"

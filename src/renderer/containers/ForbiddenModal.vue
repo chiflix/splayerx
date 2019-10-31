@@ -19,31 +19,34 @@
         />
       </div>
       <h1>
-        {{ $t("exportForbiddenModal.title") }}
+        {{ title }}
       </h1>
       <p>
-        {{ $t("exportForbiddenModal.content") }}
+        <span v-html="content" />
         <br><span
           @click.left="signIn"
           v-if="!token"
-        >{{ $t("exportForbiddenModal.span") }}</span>
+          class="link"
+        >{{ signText }}</span>
       </p>
       <div
         @click.left="goPremium"
         class="button"
       >
-        {{ $t("exportForbiddenModal.button") }}
+        {{ buttonText }}
       </div>
     </div>
   </div>
 </template>
 <script lang="ts">
 import Vue from 'vue';
+import { remove, findIndex } from 'lodash';
 import { ipcRenderer, remote } from 'electron';
 import { mapGetters, mapActions } from 'vuex';
 import {
   UserInfo as usActions,
 } from '@/store/actionTypes';
+import { getJsonConfig } from '@/helpers/featureSwitch';
 import Icon from '@/components/BaseIconContainer.vue';
 
 export default Vue.extend({
@@ -53,13 +56,56 @@ export default Vue.extend({
   },
   data() {
     return {
-
+      audioLanguageString: '',
     };
   },
   computed: {
     ...mapGetters([
-      'showForbiddenModal', 'token',
+      'showForbiddenModal', 'token', 'which',
     ]),
+    title() {
+      if (this.which === 'translate') {
+        return this.$t('forbiddenModal.translate.title');
+      } if (this.which === 'export') {
+        return this.$t('forbiddenModal.export.title');
+      }
+      return this.$t('forbiddenModal.title');
+    },
+    content() {
+      if (this.which === 'translate') {
+        return `${this.$t('forbiddenModal.translate.content')}<br/><br/>${this.audioLanguageString}`;
+      } if (this.which === 'export') {
+        return this.$t('forbiddenModal.export.content');
+      }
+      return this.$t('forbiddenModal.content');
+    },
+    signText() {
+      if (this.which === 'translate') {
+        return this.$t('forbiddenModal.translate.span');
+      } if (this.which === 'export') {
+        return this.$t('forbiddenModal.export.span');
+      }
+      return this.$t('forbiddenModal.span');
+    },
+    buttonText() {
+      if (this.which === 'translate') {
+        return this.$t('forbiddenModal.translate.button');
+      } if (this.which === 'export') {
+        return this.$t('forbiddenModal.export.button');
+      }
+      return this.$t('forbiddenModal.button');
+    },
+  },
+  async mounted() {
+    this.audioLanguageString = this.$t('forbiddenModal.audioLanguage');
+    try {
+      const configString = await this.getMoreLanguages();
+      if (configString) {
+        this.audioLanguageString = configString;
+      }
+    } catch (error) {
+      // empty
+    }
   },
   methods: {
     ...mapActions({
@@ -74,6 +120,32 @@ export default Vue.extend({
     goPremium() {
       ipcRenderer.send('add-preference', 'premium');
       this.hideModal();
+    },
+    async getMoreLanguages() {
+      const vipAudioLanguage = await getJsonConfig('vipAudioLanguage', null);
+      const normalAudioLanguage = await getJsonConfig('audioLanguage', null);
+      if (vipAudioLanguage && vipAudioLanguage['list']) {
+        const list = vipAudioLanguage['list'];
+        const normal = normalAudioLanguage && normalAudioLanguage['list'] ? normalAudioLanguage['list'] : [];
+        remove(list, (e: {
+          value: string,
+          label: string,
+        }) => {
+          if (!normal || !normal.length) {
+            return false;
+          }
+          const index = findIndex(normal, (item: {
+            value: string,
+            label: string,
+          }) => item.value === e.value);
+          return index > -1;
+        });
+        return list.map((e: {
+          value: string,
+          label: string,
+        }) => e.label).join(', ');
+      }
+      return '';
     },
   },
 });
@@ -153,7 +225,8 @@ export default Vue.extend({
     color: rgba(255,255,255,0.50);
     line-height: 16px;
     margin-bottom: 10px;
-    span {
+    word-break: break-word;
+    .link {
       text-decoration: underline;
       cursor: pointer;
     }

@@ -15,6 +15,7 @@ type UserInfoState = {
   showForbiddenModal: boolean,
   premiumList: [],
   orders: [],
+  which: string,
 };
 
 const state = {
@@ -29,6 +30,7 @@ const state = {
   orders: [],
   signInCallback: () => { },
   showForbiddenModal: false,
+  which: '',
 };
 
 const getters = {
@@ -59,6 +61,9 @@ const getters = {
   },
   orders(state: UserInfoState) {
     return state.orders;
+  },
+  which(state: UserInfoState) {
+    return state.which;
   },
 };
 
@@ -98,8 +103,9 @@ const mutations = {
   [m.UPDATE_SIGN_IN_CALLBACK](state: UserInfoState, callback: Function) {
     state.signInCallback = callback;
   },
-  [m.SHOW_FORBIDDEN_MODAL](state: UserInfoState) {
+  [m.SHOW_FORBIDDEN_MODAL](state: UserInfoState, which: string) {
     state.showForbiddenModal = true;
+    state.which = which;
   },
   [m.HIDE_FORBIDDEN_MODAL](state: UserInfoState) {
     state.showForbiddenModal = false;
@@ -134,8 +140,8 @@ const actions = {
   },
   [a.SHOW_FORBIDDEN_MODAL]({
     commit,
-  }: any) {
-    commit(m.SHOW_FORBIDDEN_MODAL);
+  }: any, which: string) {
+    commit(m.SHOW_FORBIDDEN_MODAL, which);
   },
   [a.HIDE_FORBIDDEN_MODAL]({
     commit,

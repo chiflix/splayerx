@@ -221,7 +221,7 @@ export default Vue.extend({
     };
   },
   computed: {
-    ...mapGetters(['countryCode', 'displayLanguage', 'premiumList']),
+    ...mapGetters(['countryCode', 'displayLanguage', 'premiumList', 'token']),
     isMas() {
       return !!process.mas;
     },
@@ -320,24 +320,7 @@ export default Vue.extend({
           receipt: Buffer;
         },
       ) => {
-        if (this.isApplePaing) return;
-        this.isApplePaing = true;
-        try {
-          await applePay({
-            currency: this.country,
-            productID: payment.id,
-            transactionID: payment.transactionID,
-            receipt: payment.receipt.toString('base64'),
-          });
-          this.isPaying = false;
-          this.isPaySuccess = true;
-          this.isPayFail = false;
-        } catch (error) {
-          this.isPaying = false;
-          this.isPaySuccess = false;
-          this.isPayFail = true;
-        }
-        this.isApplePaing = false;
+        this.appleBuy(payment);
       },
     );
     ipcRenderer.on('applePay-fail', (e: Event, fail: string) => {
@@ -370,12 +353,52 @@ export default Vue.extend({
       updateCallback: uActions.UPDATE_SIGN_IN_CALLBACK,
       updateUserInfo: uActions.UPDATE_USER_INFO,
     }),
+    async appleBuy(payment: {
+      id: string;
+      productID: string;
+      transactionID: string;
+      receipt: Buffer;
+    }) {
+      if (this.isApplePaing) return;
+      this.isApplePaing = true;
+      try {
+        await applePay({
+          currency: this.country,
+          productID: payment.id,
+          transactionID: payment.transactionID,
+          receipt: payment.receipt.toString('base64'),
+        });
+        this.isPaying = false;
+        this.isPaySuccess = true;
+        this.isPayFail = false;
+        this.isApplePaing = false;
+      } catch (error) {
+        this.isApplePaing = false;
+        if (error && (error.status === 400 || error.status === 401 || error.status === 403)) {
+          // sign in callback
+          this.updateCallback(() => {
+            this.appleBuy(payment);
+          });
+          remote.app.emit('sign-out');
+          ipcRenderer.send('add-login', 'preference');
+        } else {
+          this.isPaying = false;
+          this.isPaySuccess = false;
+          this.isPayFail = true;
+        }
+      }
+    },
     buy(item: {
       id: string;
       appleProductID: string;
       currentPrice: string;
       originalPrice: string;
     }) {
+      if (!this.token) {
+        remote.app.emit('sign-out');
+        ipcRenderer.send('add-login', 'preference');
+        return;
+      }
       if (this.isPaying) return;
       this.isPaying = true;
       if (this.isMas) {
