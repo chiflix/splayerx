@@ -485,7 +485,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     }
   }
 }
-.browsingDelete, .browsingOpen {
+.browsingDelete {
   width: 100%;
   height: 100%;
 }

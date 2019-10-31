@@ -12,18 +12,6 @@
     >
       本地播放列表</span>
     <div
-      :style="{
-        marginBottom: `${blankTitleBottom[currentPhase]}px`,
-        marginLeft: `${padding}px`,
-        color: '#B5B6BF',
-        fontSize: `${blankTitleFontSize[currentPhase]}px`,
-      }"
-      v-show="!hasPlaylist"
-    >
-      <!--eslint-disable-next-line-->
-      <span>{{ '点击侧边栏底部“ ' }}<Icon :style="{ width: '15px', height: '14px' }" type="browsingOpen" />{{ ' ”按钮，选择多个文件播放，即可生成播放列表' }}</span>
-    </div>
-    <div
       @mouseover="handleMouseover"
       @mouseleave="handleMouseleave"
       class="playlist-content"
@@ -48,13 +36,12 @@
       >
         <ul
           :style="{
-            borderBottom: hasPlaylist ? '1px solid #eeeeee' : '',
+            borderBottom: '1px solid #eeeeee',
             paddingBottom: `${listBottom[currentPhase]}px`,
           }"
         >
           <li
             :style="{
-              cursor: hasPlaylist ? 'pointer' : 'default',
               height: `${height}px`,
               width: winWidth > 1772 + (showSidebar ? 76 : 0) ? '544px' : `${itemWidth}px`,
               marginRight: `${listRight[currentPhase]}px`,
@@ -68,7 +55,7 @@
           >
             <div
               :style="{
-                backgroundImage: hasPlaylist ? `${item.backgroundUrl}` : '',
+                background: `${item.backgroundUrl}`,
                 backgroundSize: '100% 100%',
                 backgroundRepeat: 'no-repeat',
               }"
@@ -80,65 +67,25 @@
               }"
               class="item-info"
             >
-              <div
-                :style="{ justifyContent: hasPlaylist ? '' : 'space-between' }"
-                class="title"
-              >
-                <div
-                  v-show="!hasPlaylist"
-                  :style="{
-                    marginLeft: `${playlistBottom[currentPhase]}px`,
-                    marginTop: blankIndex === 0 ? `${progressPos[currentPhase]}px` : '',
-                    width: blankIndex === 2 ? `${84 * 0.68}%` : '84%',
-                    flex: 1,
-                    marginBottom: blankIndex < 2 ? `${progressPos[currentPhase]}px` : '',
-                    background: '#CECFDB',
-                    borderRadius: '2px',
-                  }"
-                  v-for="(blank, blankIndex) in [1, 2, 3]"
-                />
+              <div class="title">
                 <!--eslint-disable-next-line-->
-                <span v-show="hasPlaylist" :style="{ margin: `${progressPos[currentPhase]}px auto auto auto` }"><b>{{ `0${playlist.findIndex(i => i === item) + 1} / 0${playlist.length} · ` }}</b>{{ `${item.basename}` }}</span>
+                <span :style="{ margin: `${progressPos[currentPhase]}px auto auto auto` }"><b>{{ `0${playlist.findIndex(i => i === item) + 1} / 0${playlist.length} · ` }}</b>{{ `${item.basename}` }}</span>
               </div>
               <div
                 :style="{ margin: `auto auto ${progressPos[currentPhase]}px 8%` }"
                 class="progress"
               >
-                <div
-                  v-show="hasPlaylist"
-                  class="progress-time"
-                >
+                <div class="progress-time">
                   <!--eslint-disable-line--><span>{{ `${timecodeFromSeconds(item.lastPlayedTime)} / ${timecodeFromSeconds(item.duration)}` }}</span>
                 </div>
                 <div
                   :style="{
                     width: `${progressBarWidth[currentPhase]}px`,
-                    height: hasPlaylist ? `${progressHeight[currentPhase]}px`
-                      : `${blankProgressHeight[currentPhase]}px`,
-                    maxHeight: hasPlaylist ? '4px': '11px',
-                    background: hasPlaylist ? '#B5B6BF' : '',
+                    height: `${progressHeight[currentPhase]}px`
                   }"
                   class="progress-bar"
                 >
                   <div
-                    v-show="!hasPlaylist"
-                    :style="{
-                      flex: '0.4',
-                      background: '#CECFDB',
-                      marginRight: '5px',
-                      borderRadius: '2px',
-                    }"
-                  />
-                  <div
-                    v-show="!hasPlaylist"
-                    :style="{
-                      flex: '0.6',
-                      background: '#CECFDB',
-                      borderRadius: '2px',
-                    }"
-                  />
-                  <div
-                    v-show="hasPlaylist"
                     :style="{ width: `${item.lastPlayedTime / item.duration * 100}%` }"
                     class="slider"
                   />
@@ -146,7 +93,7 @@
               </div>
             </div>
             <div
-              v-show="index === firstHoveredIndex && hasPlaylist"
+              v-show="index === firstHoveredIndex"
               :style="{
                 width: `${deleteIconSize[currentPhase]}px`,
                 height: `${deleteIconSize[currentPhase]}px`,
@@ -167,7 +114,6 @@
         >
           <li
             :style="{
-              cursor: hasPlaylist ? 'pointer' : 'default',
               height: `${height}px`,
               width: winWidth > 1772 + (showSidebar ? 76 : 0) ? '544px' : `${itemWidth}px`,
               marginRight: `${listRight[currentPhase]}px`,
@@ -207,8 +153,7 @@
                 <div
                   :style="{
                     width: `${progressBarWidth[currentPhase]}px`,
-                    height: `${progressHeight[currentPhase]}px`,
-                    background: hasPlaylist ? '#B5B6BF' : '',
+                    height: `${progressHeight[currentPhase]}px`
                   }"
                   class="progress-bar"
                 >
@@ -294,7 +239,6 @@ export default {
       translateSpace: 0,
       firstHoveredIndex: -1,
       secondHoveredIndex: -1,
-      hasPlaylist: false,
     };
   },
   computed: {
@@ -304,9 +248,6 @@ export default {
     },
     playlistBottom() {
       return [20 * 888 / 1176, 20 * this.winWidth / 1176, 20];
-    },
-    blankTitleBottom() {
-      return [25 * 888 / 1176, 25 * this.winWidth / 1176, 25];
     },
     listBottom() {
       return [18, this.calcSize(18, 25), 25];
@@ -342,59 +283,44 @@ export default {
     deleteIconSize() {
       return [30 * 888 / 1176, 30 * this.winWidth / 1176, 30];
     },
-    blankProgressHeight() {
-      return [11 * 888 / 1176, 11 * this.winWidth / 1176, 11];
-    },
-    blankTitleFontSize() {
-      return [19 * 888 / 1176, 19 * this.winWidth / 1176, 19];
-    },
   },
   watch: {
     playlist: {
       handler(val: number[]) {
-        if (val.length) {
-          this.firstLineList = [];
-          this.secondLineList = [];
-          const tmp = val.slice(0, val.length);
-          const times = Math.ceil(val.length / this.showListNum);
-          let isFirst = true;
-          for (let i = 0; i < times; i += 1) {
-            if (isFirst) {
-              this.firstLineList.push(...tmp.splice(0, this.showListNum));
-              isFirst = false;
-            } else {
-              this.secondLineList.push(...tmp.splice(0, this.showListNum));
-              isFirst = true;
-            }
+        this.firstLineList = [];
+        this.secondLineList = [];
+        const tmp = val.slice(0, val.length);
+        const times = Math.ceil(val.length / this.showListNum);
+        let isFirst = true;
+        for (let i = 0; i < times; i += 1) {
+          if (isFirst) {
+            this.firstLineList.push(...tmp.splice(0, this.showListNum));
+            isFirst = false;
+          } else {
+            this.secondLineList.push(...tmp.splice(0, this.showListNum));
+            isFirst = true;
           }
-        } else {
-          this.playlist = this.showListNum === 3 ? [{}, {}, {}] : [{}, {}];
-          this.hasPlaylist = false;
         }
       },
       immediate: true,
     },
     showListNum: {
       handler(val: number) {
-        if (this.hasPlaylist) {
-          this.firstLineList = [];
-          this.secondLineList = [];
-          this.translateX = 0;
-          this.translateSpace = 0;
-          const tmp = this.playlist.slice(0, this.playlist.length);
-          const times = Math.ceil(this.playlist.length / val);
-          let isFirst = true;
-          for (let i = 0; i < times; i += 1) {
-            if (isFirst) {
-              this.firstLineList.push(...tmp.splice(0, val));
-              isFirst = false;
-            } else {
-              this.secondLineList.push(...tmp.splice(0, val));
-              isFirst = true;
-            }
+        this.firstLineList = [];
+        this.secondLineList = [];
+        this.translateX = 0;
+        this.translateSpace = 0;
+        const tmp = this.playlist.slice(0, this.playlist.length);
+        const times = Math.ceil(this.playlist.length / val);
+        let isFirst = true;
+        for (let i = 0; i < times; i += 1) {
+          if (isFirst) {
+            this.firstLineList.push(...tmp.splice(0, val));
+            isFirst = false;
+          } else {
+            this.secondLineList.push(...tmp.splice(0, val));
+            isFirst = true;
           }
-        } else {
-          this.playlist = val === 3 ? [{}, {}, {}] : [{}, {}];
         }
       },
       immediate: true,
@@ -403,16 +329,10 @@ export default {
   created() {
     // Get all data and show
     recentPlayService.getRecords().then((results) => {
-      if (results.length) {
-        this.hasPlaylist = true;
-        this.playlist = results.filter((result) => {
-          if (result.playlistLength) return result.playlistLength > 1;
-          return false;
-        });
-      } else {
-        this.playlist = [{}, {}];
-        this.hasPlaylist = false;
-      }
+      this.playlist = results.filter((result) => {
+        if (result.playlistLength) return result.playlistLength > 1;
+        return false;
+      });
       console.log(results);
     });
   },
@@ -489,6 +409,7 @@ export default {
     li {
       display: inline-block;
       min-width: 360px;
+      cursor: pointer;
     }
   }
   .delete-icon {
@@ -505,7 +426,6 @@ export default {
     height: 100%;
     float: left;
     border-radius: 5px;
-    background: #E6E7ED;
   }
   .item-info {
     width: 52%;
@@ -517,7 +437,6 @@ export default {
       width: 100%;
       height: 59%;
       display: flex;
-      flex-direction: column;
       span {
         width: 84%;
         height: auto;
@@ -542,8 +461,9 @@ export default {
         color: #B5B6BF;
       }
       .progress-bar {
+        max-height: 4px;
+        background: #B5B6BF;
         border-radius: 3px;
-        display: flex;
         .slider {
           background: #3B3B41;
           height: 100%;
