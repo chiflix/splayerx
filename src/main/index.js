@@ -1242,6 +1242,9 @@ function registerMainWindowEvent(mainWindow) {
     if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
       preferenceWindow.webContents.send('payment-success');
     }
+    if (mainWindow && !mainWindow.webContents.isDestroyed()) {
+      mainWindow.webContents.send('payment-success');
+    }
     if (paymentWindow && !paymentWindow.webContents.isDestroyed()) {
       paymentWindowCloseTag = true;
       paymentWindow.close();

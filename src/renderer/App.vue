@@ -47,9 +47,9 @@ import Titlebar from '@/components/Titlebar.vue';
 import Sidebar from '@/components/Sidebar.vue';
 import '@/css/style.scss';
 import drag from '@/helpers/drag';
-import { setToken, checkToken } from '@/libs/apis';
+import { setToken, getUserInfo } from '@/libs/apis';
 import sagi from '@/libs/sagi';
-import { apiOfAccountService } from './helpers/featureSwitch';
+import { apiOfAccountService, forceRefresh } from './helpers/featureSwitch';
 import { AudioTranslateBubbleOrigin, AudioTranslateStatus } from '@/store/modules/AudioTranslate';
 
 export default {
@@ -64,6 +64,7 @@ export default {
       openFileArgs: null,
       currentUrl: '',
       checkedToken: false,
+      didGetUserInfo: false,
     };
   },
   computed: {
@@ -137,7 +138,7 @@ export default {
       this.removeCallback(() => { });
     });
     // sign in success
-    ipcRenderer.on('sign-in', (e: Event, account?: {
+    ipcRenderer.on('sign-in', async (e: Event, account?: {
       token: string, id: string,
     }) => {
       this.updateUserInfo(account);
@@ -145,6 +146,11 @@ export default {
         setToken(account.token);
         sagi.setToken(account.token);
         this.updateToken(account.token);
+        try {
+          await this.getUserInfo();
+        } catch (error) {
+          // empty
+        }
         // sign in success, callback
         if (this.signInCallback) {
           this.signInCallback();
@@ -154,6 +160,17 @@ export default {
         setToken('');
         this.updateToken('');
         sagi.setToken('');
+        this.didGetUserInfo = false;
+      }
+    });
+
+    ipcRenderer.on('payment-success', async () => {
+      forceRefresh();
+      try {
+        const res = await getUserInfo();
+        this.updateUserInfo(res.me);
+      } catch (error) {
+        // empty
       }
     });
 
@@ -177,7 +194,7 @@ export default {
       sagi.setToken(account.token);
       // resfrsh
       this.checkedToken = true;
-      checkToken();
+      this.getUserInfo();
     }
   },
   methods: {
@@ -195,6 +212,17 @@ export default {
     },
     mainDispatchProxy(actionType: string, actionPayload: any) {
       this.$store.dispatch(actionType, actionPayload);
+    },
+    async getUserInfo() {
+      if (this.didGetUserInfo) return;
+      this.didGetUserInfo = true;
+      try {
+        const res = await getUserInfo();
+        this.updateUserInfo(res.me);
+      } catch (error) {
+        // empty
+        this.didGetUserInfo = false;
+      }
     },
   },
 };

@@ -42,7 +42,7 @@ import {
   SUBTITLE_UPLOAD, UPLOAD_SUCCESS, UPLOAD_FAILED,
   LOCAL_SUBTITLE_REMOVED,
 } from '../../helpers/notificationcodes';
-import { LanguageCode } from '@/libs/language';
+import { LanguageCode, codeToLanguageName } from '@/libs/language';
 import { AudioTranslateBubbleOrigin } from './AudioTranslate';
 import { ISubtitleStream } from '@/plugins/mediaTasks';
 import { isAIEnabled } from '@/helpers/featureSwitch';
@@ -1023,7 +1023,7 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
   },
   async [a.exportSubtitle]({ getters, dispatch, rootState }, item: ISubtitleControlListItem) {
     const { $bus } = Vue.prototype;
-    if (!getters.token || !getters.isVip) {
+    if (!getters.token || !(getters.userInfo && getters.userInfo.isVip)) {
       dispatch(usActions.SHOW_FORBIDDEN_MODAL);
       dispatch(usActions.UPDATE_SIGN_IN_CALLBACK, () => {
         dispatch(usActions.HIDE_FORBIDDEN_MODAL);
@@ -1032,25 +1032,23 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
       return;
     }
     if (item && item.type === Type.Embedded
-      && (!rootState[item.id] || !rootState[item.id].canCache)) {
+      && (!rootState[item.id] || !rootState[item.id].fullyRead)) {
       // Embedded not cache
       $bus.$emit('embedded-subtitle-can-not-export');
       return;
     }
 
     if (item && !(item.type === 'preTranslated' && item.source.source === '')) {
-      const { app, dialog } = remote;
+      const { dialog } = remote;
       const browserWindow = remote.BrowserWindow;
       const focusWindow = browserWindow.getFocusedWindow();
-      let defaultPath = getters.defaultDir;
-      if (!defaultPath) {
-        defaultPath = process.platform === 'darwin' ? app.getPath('home') : app.getPath('desktop');
-      }
       const originSrc = getters.originSrc;
       const videoName = `${basename(originSrc, extname(originSrc))}`;
-      const name = `a-${videoName}-SPlayer`;
+      const left = originSrc.split(videoName)[0];
+      const lang = `-${codeToLanguageName(item.language)}`;
+      const name = `${videoName}${lang}`;
       const fileName = `${basename(name, '.srt')}.srt`;
-      defaultPath = join(defaultPath, fileName);
+      const defaultPath = join(left, fileName);
       if (focusWindow) {
         dialog.showSaveDialog(focusWindow, {
           defaultPath,

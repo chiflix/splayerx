@@ -196,7 +196,7 @@ import Vue from 'vue';
 import { mapGetters, mapActions } from 'vuex';
 import { remote, ipcRenderer, clipboard } from 'electron';
 import {
-  applePay, getProductList, createOrder, ApiError,
+  applePay, getProductList, createOrder, ApiError, getUserInfo,
 } from '@/libs/apis';
 import { UserInfo as uActions } from '@/store/actionTypes';
 import Icon from '@/components/BaseIconContainer.vue';
@@ -340,7 +340,7 @@ export default Vue.extend({
         this.isApplePaing = false;
       },
     );
-    ipcRenderer.on('applePay-fail', async (e: Event, fail: string) => {
+    ipcRenderer.on('applePay-fail', (e: Event, fail: string) => {
       log.debug('applePay', fail);
       this.isPaying = false;
       this.isPaySuccess = false;
@@ -354,7 +354,9 @@ export default Vue.extend({
         this.isPaying = false;
         this.isPaySuccess = true;
         this.isPayFail = false;
+        this.getUserInfo();
       }, 800);
+      // update userInfo
     });
     ipcRenderer.on('payment-fail', () => {
       this.isPaying = false;
@@ -366,6 +368,7 @@ export default Vue.extend({
     ...mapActions({
       updatePremiumList: uActions.UPDATE_PREMIUM,
       updateCallback: uActions.UPDATE_SIGN_IN_CALLBACK,
+      updateUserInfo: uActions.UPDATE_USER_INFO,
     }),
     buy(item: {
       id: string;
@@ -433,6 +436,14 @@ export default Vue.extend({
     copy() {
       this.isCopyed = true;
       clipboard.writeText('support@splayer.org');
+    },
+    async getUserInfo() {
+      try {
+        const res = await getUserInfo();
+        this.updateUserInfo(res.me);
+      } catch (error) {
+        // empty
+      }
     },
   },
 });

@@ -482,6 +482,7 @@
     "videoLanguageLabel": "Audio Language",
     "subtitleLanguageLabel": "Translate To",
     "selectLanguageLabel": "Select",
+    "selectLanguageMoreLabel": "更多语言...",
     "audioLanguageLoading": "Fetching language list ...",
     "audioLanguageLoadFail": "Connection failed, please try later",
     "select": {
@@ -527,7 +528,7 @@
     },
     "PermissionFail": {
       "title": "Uses Remaining Today: 0",
-      "content": "Sorry, you can only generate one AI Translation result per day."
+      "content": "Sorry, you can only generate one AI Translation result per day. Upgrade to SPlayer Premium to continue your exclusive experience."
     },
     "loading": "Processing ...",
     "cancel": "Cancel",
@@ -535,7 +536,7 @@
     "generate": "Generate",
     "ok": "Run in Background",
     "continue": "Cancel",
-    "upgrade": "OK"
+    "upgrade": "Go Premium Now"
   },
   "translateBubble": {
     "bubbleWhenGrab": "AI Translation will be aborted If you go on, do you want to continue anyway?",
@@ -567,7 +568,7 @@
     },
     "bubbleTranslatePermissionFail": {
       "title": "Uses Remaining Today: 0",
-      "content": "Sorry, you can only generate one AI Translation result per day."
+      "content": "Sorry, you can only generate one AI Translation result per day. Upgrade to SPlayer Premium to continue your exclusive experience."
     },
     "ok": "OK",
     "cancel": "Cancel",

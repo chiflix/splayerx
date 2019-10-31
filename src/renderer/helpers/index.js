@@ -523,6 +523,9 @@ export default {
       if (process.mas && this.$store.getters.source !== 'drop') {
         if (!this.bookmarkAccessing(vidPath)) return;
       }
+      if (this.$store.getters.showSidebar) {
+        this.$store.dispatch('UPDATE_SHOW_SIDEBAR', false);
+      }
       // 如果有翻译任务就阻止
       if (this.translateFilter(() => {
         this.playFile(vidPath, id);

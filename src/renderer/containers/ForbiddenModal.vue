@@ -69,9 +69,11 @@ export default Vue.extend({
       // 清楚登录信息， 开登录窗口
       remote.app.emit('sign-out');
       ipcRenderer.send('add-login', 'main');
+      this.hideModal();
     },
     goPremium() {
       ipcRenderer.send('add-preference', 'premium');
+      this.hideModal();
     },
   },
 });
