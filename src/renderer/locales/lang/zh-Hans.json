@@ -110,7 +110,7 @@
       "paste": "粘贴"
     },
     "account": {
-      "name": "账户",
+      "name": "账号",
       "login": "登录",
       "logout": "注销"
     },
@@ -268,7 +268,7 @@
     "openLocalFile": "打开本地文件 ...",
     "enterPip": "进入画中画 (P)",
     "exitPip": "退出画中画 (P)",
-    "enterPop": "新窗口播放",
+    "enterPop": "新窗口播放 (O)",
     "exitPop": "还原窗口 (O)",
     "danmu": "弹幕开关",
     "error": {
