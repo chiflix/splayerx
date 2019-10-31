@@ -7,7 +7,7 @@ const state = {
   barrageOpen: false,
   isPip: false,
   pipMode: 'Enter',
-  isHistory: false,
+  isHomePage: false,
   isError: false,
   currentChannel: '',
   pipChannel: '',
@@ -18,7 +18,7 @@ const getters = {
   barrageOpen: state => state.barrageOpen,
   isPip: state => state.isPip,
   pipMode: state => state.pipMode,
-  isHistory: state => state.isHistory,
+  isHomePage: state => state.isHomePage,
   isError: state => state.isError,
   currentChannel: state => state.currentChannel,
   pipChannel: state => state.pipChannel,
@@ -40,8 +40,8 @@ const mutations = {
   [browsingMutations.PIP_MODE_UPDATE](state, payload) {
     state.pipMode = payload;
   },
-  [browsingMutations.IS_HISTORY_UPDATE](state, payload) {
-    state.isHistory = payload;
+  [browsingMutations.IS_HOME_PAGE_UPDATE](state, payload) {
+    state.isHomePage = payload;
   },
   [browsingMutations.IS_ERROR_UPDATE](state, payload) {
     state.isError = payload;
@@ -69,8 +69,8 @@ const actions = {
   [browsingActions.UPDATE_PIP_MODE]({ commit }, delta) {
     commit(browsingMutations.PIP_MODE_UPDATE, delta);
   },
-  [browsingActions.UPDATE_IS_HISTORY]({ commit }, delta) {
-    commit(browsingMutations.IS_HISTORY_UPDATE, delta);
+  [browsingActions.UPDATE_IS_HOME_PAGE]({ commit }, delta) {
+    commit(browsingMutations.IS_HOME_PAGE_UPDATE, delta);
   },
   [browsingActions.UPDATE_IS_ERROR]({ commit }, delta) {
     commit(browsingMutations.IS_ERROR_UPDATE, delta);

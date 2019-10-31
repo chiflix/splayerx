@@ -282,7 +282,13 @@
     "siteManager": "Site Manager",
     "general": "General",
     "education": "Education",
-    "siteTip": "Add / Edit"
+    "siteTip": "Add / Edit",
+    "history": "History",
+    "clear": "clear",
+    "am": "AM",
+    "pm": "PM",
+    "today": "Today",
+    "yesterday": "YesterDay"
   },
   "preferences": {
     "general": {

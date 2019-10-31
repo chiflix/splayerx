@@ -660,8 +660,16 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
 .douyuSidebar, .huyaSidebar, .qqSidebar, .youkuSidebar, .twitchSidebar, .tedSidebar,
 .sportsqqSidebar, .masterclassSidebar, .developerappleSidebar, .vipopen163Sidebar,
 .study163Sidebar, .imoocSidebar, .icourse163Sidebar {
-  width: 44px;
-  height: 44px;
+  width: 100%;
+  height: 100%;
+  .default {
+    display: block;
+  }
+  &:hover {
+    .default {
+      display: block;
+    }
+  }
 }
 .showMarks, .hideMarks, .closeSearch {
   width: 18px;
@@ -750,7 +758,8 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   height: 100%;
   display: block;
 }
-.pip, .pop, .pipDisabled, .popDisabled {
+.pip, .pop, .pipDisabled, .popDisabled,
+.back, .backDisabled, .forward, .forwardDisabled, .pageRefresh, .reloadStop {
   width: 30px;
   height: 30px;
 }

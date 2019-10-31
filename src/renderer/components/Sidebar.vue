@@ -44,6 +44,7 @@
       >
         <Icon
           type="channelManage"
+          class="sidebar-icon"
         />
         <div
           :class="{ selected: channelManagerSelected
@@ -123,7 +124,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['pipSize', 'pipPos', 'isHistory', 'currentChannel', 'winHeight', 'showSidebar', 'displayLanguage']),
+    ...mapGetters(['pipSize', 'pipPos', 'isHomePage', 'currentChannel', 'winHeight', 'showSidebar', 'displayLanguage']),
     currentRouteName() {
       return this.$route.name;
     },
@@ -230,7 +231,6 @@ export default {
   },
   methods: {
     ...mapActions({
-      updateIsHistoryPage: browsingActions.UPDATE_IS_HISTORY,
       updateCurrentChannel: browsingActions.UPDATE_CURRENT_CHANNEL,
     }),
     backToLanding() {
@@ -247,9 +247,6 @@ export default {
         this.$router.push({ name: 'browsing-view' });
       }
       this.$bus.$emit('channel-manage');
-    },
-    openHistory() {
-      this.updateIsHistoryPage(!this.isHistory);
     },
     handleSidebarIcon(url: string, type: string) {
       const newChannel = type;
@@ -284,6 +281,10 @@ export default {
 }
 ::-webkit-scrollbar {
   width: 0;
+}
+.sidebar-icon {
+  width: 44px;
+  height: 44px;
 }
 .side-bar {
   position: absolute;

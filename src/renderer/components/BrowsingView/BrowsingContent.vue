@@ -30,6 +30,7 @@ export default {
   display: flex;
   align-items: center;
   flex-direction: column;
+
   .error-page {
     width: 100%;
     height: 100%;

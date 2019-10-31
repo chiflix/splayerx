@@ -40,7 +40,8 @@
     />
     <NotificationBubble />
     <browsing-content
-      v-show="currentChannel"
+      v-show="!showChannelManager"
+      :all-channels="allChannels"
       class="browsing-content"
     />
     <browsing-channel-manager v-show="showChannelManager" />
@@ -71,6 +72,7 @@ import { getValidVideoRegex, getValidSubtitleRegex } from '../../shared/utils';
 import MenuService from '@/services/menu/MenuService';
 import { log } from '@/libs/Log';
 import InjectJSManager from '../../shared/pip/InjectJSManager';
+import { browsingHistory } from '@/services/browsing/BrowsingHistoryService';
 
 export default {
   name: 'BrowsingView',
@@ -160,7 +162,7 @@ export default {
       'isFocused',
       'isPip',
       'pipMode',
-      'isHistory',
+      'isHomePage',
       'isError',
       'channels',
       'currentChannel',
@@ -246,8 +248,19 @@ export default {
       this.loadingState = true;
       this.$electron.ipcRenderer.send('create-browser-view', { url: val, channel: this.calcCurrentChannel(val) });
     },
-    isHistory() {
-      this.$electron.ipcRenderer.send('remove-browser-view');
+    isHomePage(val: boolean) {
+      if (val) {
+        this.currentMainBrowserView().setBounds({
+          x: 76, y: 0, width: 0, height: 0,
+        });
+      } else {
+        this.currentMainBrowserView().setBounds({
+          x: this.showSidebar ? 76 : 0,
+          y: 40,
+          width: this.showSidebar ? this.winSize[0] - 76 : this.winSize[0],
+          height: this.winSize[1] - 40,
+        });
+      }
     },
     isFullScreen(val: boolean) {
       this.$store.dispatch('updateBrowsingSize', this.winSize);
@@ -283,6 +296,10 @@ export default {
     hasVideo(val: boolean) {
       this.updatePipState(val);
       this.createTouchBar(val);
+      if (val) {
+        console.log('channel', this.currentChannel);
+        browsingHistory.saveHistoryItem(this.currentUrl, this.title, this.currentChannel);
+      }
     },
     adaptFinished(val: boolean) {
       if (val) {
@@ -387,6 +404,7 @@ export default {
     },
   },
   created() {
+    console.log('brow', browsingHistory);
     if (!navigator.onLine) this.offlineHandler();
     window.addEventListener('online', this.onlineHandler);
     this.createTouchBar(false);
