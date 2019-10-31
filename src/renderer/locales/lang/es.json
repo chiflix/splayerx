@@ -25,6 +25,11 @@
       "fontSize": "14px"
     }
   },
+  "tips": {
+    "openSidebar": "Mostrar barra lateral (C)",
+    "closeSidebar": "Ocultar barra lateral (C)",
+    "exit": "Volver a la página de inicio"
+  },
   "errorFile": {
     "ENOSPC": {
       "content": "No hay suficiente espacio en disco disponible.",
@@ -137,6 +142,7 @@
       "hidePlaylist": "Ocultar lista de reproducción",
       "previousVideo": "Video Anterior",
       "singleCycle": "Repetir una",
+      "playlistLoop": "Lista de bucles",
       "snapShot": "Instantánea"
     },
     "splayerx": {
@@ -205,7 +211,9 @@
       "enterPip": "Habilitar Picture in Picture",
       "exitPip": "Salir de Picture in Picture",
       "playInNewWindow": "Reproducir en ventana nueva",
-      "backToBrowser": "Volver al navegador"
+      "backToBrowser": "Volver al navegador",
+      "openSidebar": "Mostrar barra lateral",
+      "closeSidebar": "Ocultar barra lateral"
     },
     "edit": {
       "name": "Editar",
@@ -249,6 +257,14 @@
     "youku": "Youku",
     "coursera": "Coursera",
     "ted": "TED",
+    "lynda": "Lynda",
+    "masterclass": "MasterClass",
+    "sportsqq": "Tencent Sports",
+    "developerapple": "WWDC",
+    "vipopen163": "网易公开课",
+    "study163": "网易云课堂",
+    "imooc": "慕课网",
+    "icourse163": "中国大学MOOC",
     "openLocalFile": "Abrir archivo local...",
     "enterPip": "Habilitar Picture in Picture",
     "exitPip": "Volver al navegador",
@@ -263,7 +279,8 @@
     },
     "remove": "Eliminar",
     "siteManager": "Gestor de sitios",
-    "popularSites": "Sitios optimizados",
+    "general": "General",
+    "education": "Educación",
     "siteTip": "Añadir / Editar"
   },
   "preferences": {

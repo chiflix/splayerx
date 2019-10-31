@@ -25,6 +25,11 @@
       "fontSize": "14px"
     }
   },
+  "tips": {
+    "openSidebar": "사이드 바 표시 (C)",
+    "closeSidebar": "사이드 바 숨김 (C)",
+    "exit": "시작 페이지로 돌아 가기"
+  },
   "errorFile": {
     "ENOSPC": {
       "content": "사용할 수있는 디스크 공간이 부족합니다.",
@@ -137,6 +142,7 @@
       "hidePlaylist": "재생 목록 숨기기",
       "previousVideo": "이전 비디오",
       "singleCycle": "하나 반복",
+      "playlistLoop": "반복 재생",
       "snapShot": "스냅 샷"
     },
     "splayerx": {
@@ -205,7 +211,9 @@
       "enterPip": "Picture In Picture 사용",
       "exitPip": "Picture In Picture 퇴출",
       "playInNewWindow": "새 창에서 놀다",
-      "backToBrowser": "브라우저로 돌아 가기"
+      "backToBrowser": "브라우저로 돌아 가기",
+      "openSidebar": "사이드 바 표시",
+      "closeSidebar": "사이드 바 숨김"
     },
     "edit": {
       "name": "편집",
@@ -249,6 +257,14 @@
     "youku": "Youku",
     "coursera": "Coursera",
     "ted": "TED",
+    "lynda": "Lynda",
+    "masterclass": "MasterClass",
+    "sportsqq": "Tencent Sports",
+    "developerapple": "WWDC",
+    "vipopen163": "网易公开课",
+    "study163": "网易云课堂",
+    "imooc": "慕课网",
+    "icourse163": "中国大学MOOC",
     "openLocalFile": "로컬 파일 열기 ...",
     "enterPip": "Picture In Picture 사용",
     "exitPip": "브라우저로 돌아 가기",
@@ -263,7 +279,8 @@
     },
     "remove": "제거",
     "siteManager": "사이트 관리자",
-    "popularSites": "최적화 된 사이트",
+    "general": "종합적인",
+    "education": "교육",
     "siteTip": "편집 / 추가"
   },
   "preferences": {

@@ -33,6 +33,7 @@ import {
   SubtitleManager,
   Browsing as browsingActions,
   AudioTranslate as atActions,
+  UIStates as uiActions,
 } from '@/store/actionTypes';
 import { log } from '@/libs/Log';
 import { checkForUpdate } from '@/libs/utils';
@@ -167,7 +168,7 @@ new Vue({
   },
   computed: {
     ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winAngle', 'winWidth', 'winHeight', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'list', 'enabledSecondarySub', 'isRefreshing', 'browsingSize', 'pipSize', 'pipPos', 'barrageOpen', 'isPip', 'pipAlwaysOnTop', 'isMaximized', 'pipMode',
-      'primarySubtitleId', 'secondarySubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isHiddenByBossKey', 'isMinimized', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle', 'displayLanguage', 'calculatedNoSub', 'sizePercent', 'snapshotSavedPath', 'duration', 'reverseScrolling', 'pipSize', 'pipPos',
+      'primarySubtitleId', 'secondarySubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'playlistLoop', 'isHiddenByBossKey', 'isMinimized', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle', 'displayLanguage', 'calculatedNoSub', 'sizePercent', 'snapshotSavedPath', 'duration', 'reverseScrolling', 'pipSize', 'pipPos',
       'showSidebar', 'volumeWheelTriggered',
     ]),
     ...inputMapGetters({
@@ -186,6 +187,19 @@ new Vue({
     },
   },
   watch: {
+    showSidebar(val: boolean) {
+      if (this.currentRouteName === 'playing-view') {
+        this.menuService.updateMenuItemLabel(
+          'window.sidebar',
+          val ? 'msg.window.closeSidebar' : 'msg.window.openSidebar',
+        );
+      } else if (this.currentRouteName === 'browsing-view') {
+        this.menuService.updateMenuItemLabel(
+          'browsing.window.sidebar',
+          val ? 'msg.window.closeSidebar' : 'msg.window.openSidebar',
+        );
+      }
+    },
     isFullScreen(val) {
       this.menuService.updateMenuItemLabel(
         this.currentRouteName === 'browsing-view' ? 'browsing.window.fullscreen' : 'window.fullscreen',
@@ -233,6 +247,9 @@ new Vue({
     },
     singleCycle(val: boolean) {
       this.menuService.updateMenuItemChecked('playback.singleCycle', val);
+    },
+    playlistLoop(val: boolean) {
+      this.menuService.updateMenuItemChecked('playback.playlistLoop', val);
     },
     enabledSecondarySub() {
       this.menuService.addSecondarySub(this.recentSecondarySubMenu());
@@ -711,6 +728,7 @@ new Vue({
       showAudioTranslateModal: atActions.AUDIO_TRANSLATE_SHOW_MODAL,
       updatePipMode: browsingActions.UPDATE_PIP_MODE,
       updateCurrentChannel: browsingActions.UPDATE_CURRENT_CHANNEL,
+      updateShowSidebar: uiActions.UPDATE_SHOW_SIDEBAR,
     }),
     async initializeMenuSettings() {
       if (this.currentRouteName !== 'welcome-privacy' && this.currentRouteName !== 'language-setting') {
@@ -813,11 +831,16 @@ new Vue({
         this.$bus.$emit('seek', Math.ceil(this.duration));
       });
       this.menuService.on('playback.singleCycle', () => {
+        if (this.playlistLoop) this.$store.dispatch('playlistLoop', false);
         if (this.singleCycle) {
           this.$store.dispatch('notSingleCycle');
         } else {
           this.$store.dispatch('singleCycle');
         }
+      });
+      this.menuService.on('playback.playlistLoop', () => {
+        if (this.singleCycle) this.$store.dispatch('notSingleCycle');
+        this.$store.dispatch('playlistLoop', !this.playlistLoop);
       });
       this.menuService.on('playback.snapShot', () => {
         if (!this.paused) {
@@ -989,7 +1012,10 @@ new Vue({
         this.windowRotate();
       }, 150));
       this.menuService.on('window.backToLandingView', () => {
-        this.$bus.$emit('back-to-landingview');
+        this.$router.push({ name: 'landing-view' });
+      });
+      this.menuService.on('window.sidebar', () => {
+        this.$event.emit('side-bar-mouseup');
       });
       this.menuService.on('browsing.window.keepPipFront', () => {
         this.browsingViewTop = !this.browsingViewTop;
@@ -1004,8 +1030,11 @@ new Vue({
       this.menuService.on('browsing.window.maxmize', () => {
         this.$electron.ipcRenderer.send('set-window-maximize');
       });
+      this.menuService.on('browsing.window.sidebar', () => {
+        this.$event.emit('side-bar-mouseup');
+      });
       this.menuService.on('browsing.window.backToLandingView', () => {
-        this.$bus.$emit('back-to-landingview');
+        this.$router.push({ name: 'landing-view' });
       });
       this.menuService.on('help.crashReportLocation', () => {
         const { remote } = this.$electron;

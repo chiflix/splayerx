@@ -12,6 +12,7 @@ const state = {
   primaryLanguage: undefined,
   secondaryLanguage: undefined,
   singleCycle: false,
+  playlistLoop: false,
   reverseScrolling: false,
   subtitleOff: false,
   showFullTimeCode: false,
@@ -32,6 +33,7 @@ const getters = {
   primaryLanguage: state => state.primaryLanguage,
   secondaryLanguage: state => state.secondaryLanguage,
   singleCycle: state => state.singleCycle,
+  playlistLoop: state => state.playlistLoop,
   subtitleOff: state => state.subtitleOff,
   showFullTimeCode: state => state.showFullTimeCode,
 };
@@ -60,6 +62,9 @@ const mutations = {
   },
   singleCycle(state, payload) {
     state.singleCycle = payload;
+  },
+  playlistLoop(state, payload) {
+    state.playlistLoop = payload;
   },
   setPreference(state, payload) {
     Object.assign(state, payload);
@@ -118,6 +123,9 @@ const actions = {
   secondaryLanguage({ commit, state }, payload) {
     commit('secondaryLanguage', payload);
     return asyncStorage.set('preferences', state);
+  },
+  playlistLoop({ commit }, payload) {
+    commit('playlistLoop', payload);
   },
   singleCycle({ commit }) {
     commit('singleCycle', true);

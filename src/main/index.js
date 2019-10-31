@@ -14,7 +14,7 @@ import './helpers/electronPrototypes';
 import {
   getValidVideoRegex, getValidSubtitleRegex,
   getToken, saveToken,
-  getIP,
+  getIP, crossThreadCache,
 } from '../shared/utils';
 import { mouse } from './helpers/mouse';
 import MenuService from './menu/MenuService';
@@ -1482,6 +1482,8 @@ app.getDisplayLanguage = () => {
 
 // export getIp to static login preload.js
 app.getIP = getIP;
+
+app.crossThreadCache = crossThreadCache;
 
 // export getSignInEndPoint to static login preload.js
 app.getSignInEndPoint = () => signInEndPoint;

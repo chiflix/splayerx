@@ -26,7 +26,7 @@
         :item-dragging="isDragging"
         :index-of-moving-to="indexOfMovingTo"
         :index-of-moving-item="indexOfMovingItem"
-        :selected="info.channel === currentChannel"
+        :selected="info.channel === currentChannel && !showChannelManager"
         :select-sidebar="handleSidebarIcon"
         :style="{
           margin: '0 auto 12px auto',
@@ -37,7 +37,8 @@
       />
       <div
         :title="$t('browsing.siteTip')"
-        :class="{ 'channel-opacity': channelManagerSelected && currentRouteName === 'browsing-view'}"
+        :class="{ 'channel-opacity': channelManagerSelected
+          && currentRouteName === 'browsing-view'}"
         @click="handleChannelManage"
         class="channel-manage no-drag"
       >
@@ -45,7 +46,8 @@
           type="channelManage"
         />
         <div
-          :class="{ selected: channelManagerSelected && currentRouteName === 'browsing-view' }"
+          :class="{ selected: channelManagerSelected
+            && currentRouteName === 'browsing-view' }"
           class="mask"
         />
       </div>
@@ -67,19 +69,20 @@
         <div
           @click="openFilesByDialog"
           :title="$t('browsing.openLocalFile')"
-          class="icon-hover icon-size"
+          class="icon"
         >
           <Icon type="open" />
         </div>
         <div
           @click="openHomePage"
-          class="icon-hover icon-size"
+          class="icon"
         >
           <Icon type="homePage" />
         </div>
         <div
           @click="backToLanding"
-          class="icon-hover icon-size"
+          :title="$t('tips.exit')"
+          class="icon"
         >
           <Icon type="exit" />
         </div>
@@ -120,9 +123,12 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['pipSize', 'pipPos', 'isHistory', 'currentChannel', 'winHeight', 'showSidebar']),
+    ...mapGetters(['pipSize', 'pipPos', 'isHistory', 'currentChannel', 'winHeight', 'showSidebar', 'displayLanguage']),
     currentRouteName() {
       return this.$route.name;
+    },
+    showChannelManager() {
+      return !this.currentChannel;
     },
     showFileIcon() {
       return this.$route.name === 'playing-view' || !!this.currentUrl;
@@ -132,17 +138,22 @@ export default {
       return channelsNum * 56;
     },
     bottomIconHeight() {
-      return 126;
+      return 122;
     },
     maxHeight() {
       const bottomHeight = this.showFileIcon ? this.bottomIconHeight : 0;
-      return this.winHeight - (this.isDarwin ? 42 : 0) - bottomHeight;
+      return this.winHeight - (this.isDarwin ? 42 : 16) - bottomHeight;
     },
     isDarwin() {
       return process.platform === 'darwin';
     },
   },
   watch: {
+    currentChannel(val: string) {
+      if (val) {
+        this.channelManagerSelected = false;
+      }
+    },
     isDragging(val: boolean, oldVal: boolean) {
       if (oldVal && !val) {
         this.channelsDetail = BrowsingChannelManager
@@ -168,19 +179,14 @@ export default {
       this.topMask = this.maxHeight >= this.totalHeight ? false : scrollTop !== 0;
       this.bottomMask = scrollTop + this.maxHeight < this.totalHeight;
     },
-    currentChannel(val: string) {
-      if (val) {
-        this.showHomePage = false;
-        this.channelManagerSelected = false;
-      }
-    },
   },
   created() {
-    asyncStorage.get('channels').then((data) => {
+    asyncStorage.get('channels').then(async (data) => {
       if (data.channels) {
         this.channelsDetail = BrowsingChannelManager.initAvailableChannels(data.channels);
       } else {
-        this.channelsDetail = BrowsingChannelManager.getAllAvailableChannels();
+        this.channelsDetail = await BrowsingChannelManager
+          .getDefaultChannelsByCountry(this.displayLanguage);
       }
     });
   },
@@ -227,13 +233,13 @@ export default {
       updateIsHistoryPage: browsingActions.UPDATE_IS_HISTORY,
       updateCurrentChannel: browsingActions.UPDATE_CURRENT_CHANNEL,
     }),
+    backToLanding() {
+      this.channelManagerSelected = false;
+      this.$router.push({ name: 'landing-view' });
+    },
     openHomePage() {
       this.channelManagerSelected = false;
       this.$bus.$emit('show-homepage');
-    },
-    backToLanding() {
-      this.channelManagerSelected = false;
-      this.$bus.$emit('back-to-landingview');
     },
     handleChannelManage() {
       this.channelManagerSelected = true;
@@ -247,7 +253,6 @@ export default {
     },
     handleSidebarIcon(url: string, type: string) {
       const newChannel = type;
-      this.channelManagerSelected = false;
       if (this.currentRouteName === 'browsing-view') {
         this.$bus.$emit('sidebar-selected', { url, currentChannel: this.currentChannel, newChannel });
       } else {
@@ -326,18 +331,16 @@ export default {
   .bottom-icon {
     position: absolute;
     bottom: 0;
-    padding-top: 18px;
-    padding-bottom: 18px;
+    padding-top: 16px;
+    padding-bottom: 16px;
     display:flex;
     flex-direction: column;
     width: 100%;
-  }
-  .icon-hover {
-    margin: auto;
-  }
-  .icon-size {
-    width: 30px;
-    height: 30px;
+    .icon {
+      width: 30px;
+      height: 30px;
+      margin: auto;
+    }
   }
   .mask {
     width: 44px;
