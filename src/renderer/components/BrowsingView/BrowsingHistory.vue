@@ -53,15 +53,19 @@
           :key="item.url"
           v-for="item in histories"
           v-bind="item"
+          @click.native="handleOpenHistoryItem(item)"
         />
       </div>
     </div>
   </div>
 </template>
 <script lang="ts">
-import { mapGetters } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
 import BrowsingHistoryItem from '@/components/BrowsingView/BrowsingHistoryItem.vue';
 import { browsingHistory } from '@/services/browsing/BrowsingHistoryService';
+import {
+  Browsing as browsingActions,
+} from '@/store/actionTypes';
 
 export default {
   components: {
@@ -115,9 +119,22 @@ export default {
     },
   },
   methods: {
+    ...mapActions({
+      updateCurrentChannel: browsingActions.UPDATE_CURRENT_CHANNEL,
+    }),
     async handleClear() {
       await browsingHistory.clearAllHistorys();
       this.histories = [];
+    },
+    handleOpenHistoryItem(item: {
+      channel: string,
+      icon: string,
+      openTime: number,
+      title: string,
+      url: string
+    }) {
+      this.$electron.ipcRenderer.send('open-history-item', { url: item.url, channel: item.channel });
+      this.updateCurrentChannel(item.channel);
     },
   },
 };

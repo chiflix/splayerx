@@ -296,12 +296,14 @@ export default {
         }
       }
     },
+    historyTitle(val: string) {
+      if (this.hasVideo && this.currentChannel) {
+        browsingHistory.saveHistoryItem(this.currentUrl, val, this.currentChannel);
+      }
+    },
     hasVideo(val: boolean) {
       this.updatePipState(val);
       this.createTouchBar(val);
-      if (val) {
-        browsingHistory.saveHistoryItem(this.currentUrl, this.historyTitle, this.currentChannel);
-      }
     },
     adaptFinished(val: boolean) {
       if (val) {
