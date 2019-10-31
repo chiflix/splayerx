@@ -76,6 +76,7 @@
                 backgroundImage: `${item.backgroundUrl}`,
                 backgroundSize: '100% 100%',
                 backgroundRepeat: 'no-repeat',
+                boxShadow: index === firstHoveredIndex ? '0 6px 14px rgba(0, 0, 0, 0.3)' : '',
               }"
               class="item-thumbnail"
             />
@@ -150,6 +151,7 @@
                 background: `${item.backgroundUrl}`,
                 backgroundSize: '100% 100%',
                 backgroundRepeat: 'no-repeat',
+                boxShadow: index === secondHoveredIndex ? '0 6px 14px rgba(0, 0, 0, 0.3)' : '',
               }"
               class="item-thumbnail"
             />
