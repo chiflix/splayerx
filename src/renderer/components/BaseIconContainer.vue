@@ -662,14 +662,6 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
 .study163Sidebar, .imoocSidebar, .icourse163Sidebar {
   width: 100%;
   height: 100%;
-  .default {
-    display: block;
-  }
-  &:hover {
-    .default {
-      display: block;
-    }
-  }
 }
 .showMarks, .hideMarks, .closeSearch {
   width: 18px;

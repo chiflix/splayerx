@@ -33,6 +33,8 @@
           borderTop: '1px solid #EEEEEE',
           borderBottom: '1px solid #EEEEEE',
           margin: `${playlistBottom[currentPhase]}px 0 ${historyBottom[currentPhase]}px 0`,
+          padding: histories.length < 1 ? '' :
+            `${playlistBottom[currentPhase]}px 0 ${playlistBottom[currentPhase]}px 0`,
         }"
         class="history"
       >
