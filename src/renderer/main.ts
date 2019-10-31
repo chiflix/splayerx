@@ -417,6 +417,9 @@ new Vue({
     this.$bus.$on('new-file-open', () => {
       this.menuService.addRecentPlayItems();
     });
+    this.$electron.ipcRenderer.on('pip-float-on-top', () => {
+      this.browsingViewTop = !this.browsingViewTop;
+    });
     this.$bus.$on('open-channel-menu', (channel: string) => {
       this.openChannelMenu = true;
       this.currentChannel = channel;

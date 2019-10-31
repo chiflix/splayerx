@@ -153,7 +153,9 @@ function handleBossKey() {
 function pipControlViewTitle(isGlobal) {
   const danmu = locale.$t('browsing.danmu');
   const title = isGlobal ? locale.$t('browsing.exitPip') : locale.$t('browsing.exitPop');
-  pipControlView.webContents.executeJavaScript(InjectJSManager.updatePipControlTitle(title, danmu));
+  const pin = locale.$t('browsing.pin');
+  pipControlView.webContents
+    .executeJavaScript(InjectJSManager.updatePipControlTitle(title, danmu, pin));
 }
 
 function createPipControlView() {
@@ -168,9 +170,9 @@ function createPipControlView() {
   pipControlView.setBackgroundColor('#00FFFFFF');
   pipControlView.setBounds({
     x: Math.round(browsingWindow.getSize()[0] - 65),
-    y: Math.round(browsingWindow.getSize()[1] / 2 - 54),
+    y: Math.round(browsingWindow.getSize()[1] / 2 - 72),
     width: 50,
-    height: 104,
+    height: 144,
   });
 }
 
@@ -442,6 +444,11 @@ function createBrowsingWindow(args) {
       if (!mainWindow) return;
       mainWindow.send('update-pip-pos', browsingWindow.getPosition());
     }, 100));
+    browsingWindow.on('always-on-top-changed', (e, top) => {
+      if (pipControlView) {
+        pipControlView.webContents.executeJavaScript(InjectJSManager.updatePinState(top));
+      }
+    });
     browsingWindow.on('leave-full-screen', () => {
       if (hideBrowsingWindow) {
         hideBrowsingWindow = false;
@@ -679,6 +686,9 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('update-danmu-state', (evt, val) => {
     pipControlView.webContents.executeJavaScript(InjectJSManager.initBarrageIcon(val));
   });
+  ipcMain.on('pin', () => {
+    mainWindow.send('pip-float-on-top');
+  });
   ipcMain.on('pip', () => {
     mainWindow.send('handle-exit-pip');
   });
@@ -864,6 +874,7 @@ function registerMainWindowEvent(mainWindow) {
       mainWindow.hide();
     }
     browsingWindow.webContents.closeDevTools();
+    pipControlView.webContents.openDevTools({ mode: 'detach' });
     browsingWindow.setAspectRatio(args.pipInfo.aspectRatio);
     browsingWindow.setMinimumSize(args.pipInfo.minimumSize[0], args.pipInfo.minimumSize[1]);
     browsingWindow.setSize(args.pipInfo.pipSize[0], args.pipInfo.pipSize[1]);

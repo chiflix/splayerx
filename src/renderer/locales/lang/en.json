@@ -272,6 +272,7 @@
     "enterPop": "Play in New Window (O)",
     "exitPop": "Back to Browser",
     "danmu": "Toggle Danmaku",
+    "pin": "Pin / Unpin (T)",
     "error": {
       "offline": "No Internet",
       "try": "Try:",

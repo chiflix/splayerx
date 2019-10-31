@@ -22,21 +22,22 @@
       background: rgba(0, 0, 0, 0.4);
       z-index: 100;
     }
-    .danmu, .pip {
+    .danmu, .pip, .pin {
       width: 20px;
       height: 20px;
       cursor: pointer;
     }
-    .danmu {
+    .danmu, .pin {
       margin-bottom: 20px;
     }
-    .pip:active, .danmu:active {
+    .pip:active, .danmu:active, .pin:active {
       opacity: 0.333;
     }
   </style>
 </head>
 <body draggable="false">
   <div class="pip-buttons">
+    <img class="pin" src="assets/pin-default-icon.svg">
     <img class="danmu" src="assets/noDanmu-default-icon.svg">
     <img class="pip" src="assets/pipBack-default-icon.svg">
   </div>
