@@ -122,19 +122,16 @@ export default {
     },
   },
   watch: {
+    winWidth() {
+      this.translateSpace = -this.currentAdvIndex * this.rightSpace[this.currentPhase];
+    },
+    currentAdvIndex(val: number) {
+      this.translateX = -val * 100;
+      this.translateSpace = -val * this.rightSpace[this.currentPhase];
+    },
     showAdvNum(val: number, oldVal: number) {
-      if (val > oldVal) {
-        if (this.hasNextItem) {
-          this.translateX -= 100;
-          this.translateSpace -= this.rightSpace[this.currentPhase];
-        } else if (this.hasPreItem) {
-          this.translateX += 100;
-          this.translateSpace += this.rightSpace[this.currentPhase];
-          this.currentAdvIndex -= 1;
-        }
-      } else if (this.hasPreItem) {
-        this.translateX -= 100;
-        this.translateSpace -= this.rightSpace[this.currentPhase];
+      if (val > oldVal && this.hasPreItem) {
+        this.currentAdvIndex -= 1;
       }
     },
   },
@@ -142,15 +139,11 @@ export default {
     handleNextItem() {
       if (this.hasNextItem) {
         this.currentAdvIndex += 1;
-        this.translateX -= 100;
-        this.translateSpace -= this.rightSpace[this.currentPhase];
       }
     },
     handlePreItem() {
       if (this.hasPreItem) {
         this.currentAdvIndex -= 1;
-        this.translateX += 100;
-        this.translateSpace += this.rightSpace[this.currentPhase];
       }
     },
     handleMouseover() {

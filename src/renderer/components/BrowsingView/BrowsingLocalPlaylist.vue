@@ -343,8 +343,6 @@ export default {
         this.firstLineList = [];
         this.secondLineList = [];
         if (this.hasPlaylist) {
-          this.translateX = 0;
-          this.translateSpace = 0;
           this.currentListIndex = 0;
           const tmp = this.playlist.slice(0, this.playlist.length);
           const times = Math.ceil(this.playlist.length / val);
@@ -365,6 +363,13 @@ export default {
         }
       },
       immediate: true,
+    },
+    currentListIndex(val: number) {
+      this.translateX = -val * 100;
+      this.translateSpace = -val * this.listRight[this.currentPhase];
+    },
+    winWidth() {
+      this.translateSpace = -this.currentListIndex * this.listRight[this.currentPhase];
     },
   },
   created() {
@@ -398,14 +403,10 @@ export default {
     handlePreItem() {
       if (this.hasPreItem) {
         this.currentListIndex -= this.showListNum;
-        this.translateX += this.showListNum * 100;
-        this.translateSpace += this.showListNum * this.listRight[this.currentPhase];
       }
     },
     handleNextItem() {
       if (this.hasNextItem) {
-        this.translateX -= this.showListNum * 100;
-        this.translateSpace -= this.showListNum * this.listRight[this.currentPhase];
         this.currentListIndex += this.showListNum;
       }
     },
