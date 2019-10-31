@@ -54,13 +54,13 @@ export default {
       const month = openDate.getMonth();
       const date = openDate.getDate();
       const hour = openDate.getHours();
-      let minute = openDate.getMinutes();
+      const minute = openDate.getMinutes();
 
-      const time = `${hour >= 12 ? '下午' : '上午'} ${hour >= 12 ? hour - 12 : hour}:${minute < 10 ? '0' : ''}${minute}`;
+      const time = `${hour >= 12 ? this.$t('browsing.pm') : this.$t('browsing.am')} ${hour >= 12 ? hour - 12 : hour}:${minute < 10 ? '0' : ''}${minute}`;
 
       const today = new Date(Date.now());
       if (today.toDateString() === openDate.toDateString()) {
-        return `今天${time}`;
+        return `${this.$t('browsing.today')}${time}`;
       }
 
       return `${year}-${month}-${date} ${time}`;

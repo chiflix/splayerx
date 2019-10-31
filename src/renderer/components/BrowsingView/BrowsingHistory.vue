@@ -1,11 +1,12 @@
 <template>
   <div class="browsing-history">
     <div class="title">
-      <span>历史记录</span>
+      <span>{{ $t('browsing.history') }}</span>
+      <span class="slash">|&nbsp;&nbsp;</span>
       <span
         @click="handleClear"
         class="clear"
-      >|  清除</span>
+      >{{ $t('browsing.clear') }}</span>
     </div>
     <div class="dash" />
     <div class="history">
@@ -51,9 +52,14 @@ export default {
     font-family: $font-semibold;
     font-size: 25px;
     color: #3B3B41;
+    .slash {
+      color: #B5B6BF;
+      font-size: 19px;
+      font-family: $font-light;
+    }
     .clear {
+      cursor: pointer;
       height: 26px;
-      margin-left: 9px;
       font-family: $font-light;
       font-size: 19px;
       color: #B5B6BF;
