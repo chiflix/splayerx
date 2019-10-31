@@ -1,6 +1,12 @@
 <template>
   <div class="home-page-container">
-    <div class="home-page-content">
+    <div
+      :style="{
+        left: winWidth - (showSidebar ? 0 : 76) > 1772 ? '50%' : '',
+        transform: winWidth - (showSidebar ? 0 : 76) > 1772 ? 'translateX(-50%)' : '',
+      }"
+      class="home-page-content"
+    >
       <div
         :style="{
           width: `${winWidth - (showSidebar ? 76 : 0) - calcMargin[currentPhase] * 2}px`,

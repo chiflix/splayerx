@@ -44,6 +44,7 @@
           width: `${winWidth - (showSidebar ? 76 : 0) - padding * 2}px`,
           display: 'flex',
           flexDirection: 'column',
+          maxWidth: '1664px',
         }"
       >
         <ul
@@ -60,8 +61,8 @@
               transform: `translateX(${calcTranslateX})`,
               transition: 'transform 300ms linear',
               background: hasPlaylist ? '' : `url(${item.blankPlaylist})`,
-              backgroundSize: '100% 100%',
-              backgroundRepeat: 'no-repeat',
+              backgroundSize: hasPlaylist ? '' : '100% 100%',
+              backgroundRepeat: hasPlaylist ? '' : 'no-repeat',
               cursor: hasPlaylist ? 'pointer' : 'default',
             }"
             @click="handleItemClick(item.id)"
@@ -70,8 +71,9 @@
             v-for="(item, index) in firstLineList"
           >
             <div
+              v-show="hasPlaylist"
               :style="{
-                background: `${item.backgroundUrl}`,
+                backgroundImage: `${item.backgroundUrl}`,
                 backgroundSize: '100% 100%',
                 backgroundRepeat: 'no-repeat',
               }"

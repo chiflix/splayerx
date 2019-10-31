@@ -19,6 +19,7 @@
       :style="{
         position: 'relative',
         width: `${winWidth - (showSidebar ? 76 : 0) - padding * 2}px`,
+        maxWidth: '1664px',
       }"
     >
       <ul
