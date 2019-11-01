@@ -352,32 +352,32 @@
       "title": "",
       "description": "",
       "content": {
-        "description1": "",
-        "description2": "",
-        "description3": "",
-        "description4": "",
+        "description1": "AI翻譯功能 (應該) 足夠用",
+        "description2": "更多智能翻譯語言選擇",
+        "description3": "無限制導出語言識別字幕",
+        "description4": "更多福利準備中，敬請期待",
         "description5": "",
         "description6": ""
       },
-      "origin": "",
-      "off": "",
-      "month": "",
-      "year": "",
-      "months": "",
-      "years": "",
+      "origin": "原價 ",
+      "off": "折",
+      "month": "個月",
+      "year": "年",
+      "months": "個月",
+      "years": "年",
       "payType": {
-        "alipay": "",
-        "wxpay": "",
-        "paypal": ""
+        "alipay": "支付寶",
+        "wxpay": "微信支付",
+        "paypal": "Paypal"
       }
     }
   },
   "payment": {
     "wxpay": {
-      "title": "",
-      "description": ""
+      "title": "掃碼支付",
+      "description": "微信支付"
     },
-    "fail": ""
+    "fail": "加載失敗"
   },
   "privacyBubble": {
     "confirmDisable": {
@@ -403,7 +403,7 @@
   },
   "notExportEmbeddedSubtitle": {
     "title": "",
-    "content": ""
+    "content": "內嵌字幕正在加載中，請稍後再嘗試導出。"
   },
   "protectBubble": {
     "agree": "好的",
@@ -449,10 +449,10 @@
       "zh-TW": "中文 (繁體)"
     },
     "tips": {
-      "editor": "",
-      "export": "",
-      "reload": "",
-      "delete": ""
+      "editor": "編輯功能即將上線",
+      "export": "導出",
+      "reload": "重新生成",
+      "delete": "移除"
     }
   },
   "uploading": {
@@ -599,21 +599,21 @@
     }
   },
   "forbiddenModal": {
-    "title": "",
-    "content": "",
-    "span": "",
-    "button": "",
+    "title": "加入射手雲養計劃",
+    "content": "投食成為射手雲養員，即可導出翻譯至本地，還可以獲得更多專享功能。",
+    "span": "成為射手雲養員",
+    "button": "成為射手雲養員",
     "audioLanguage": "日本語, 한국어, Español, Français, Deutsch, Italiano, Português, čeština, Русский, Indonesian, العربية, Türkçe, română",
     "translate": {
-      "title": "",
-      "content": "",
-      "span": "",
-      "button": ""
+      "title": "加入射手雲養計劃",
+      "content": "投食成為射手雲養員，支持更多語言的語音識別和AI翻譯，並獲得更多專享功能。",
+      "span": "已是雲養員請登錄",
+      "button": "成為射手雲養員"
     },
     "export": {
-      "title": "",
-      "content": "",
-      "span": "",
+      "title": "加入射手雲養計劃",
+      "content": "投食成為射手雲養員，即可導出翻譯至本地，還可以獲得更多專享功能。",
+      "span": "已是雲養員請登錄",
       "button": "成為射手雲養員"
     }
   },
