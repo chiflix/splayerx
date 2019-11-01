@@ -105,17 +105,18 @@ export default {
   },
   watch: {
     showHomePage(val: boolean) {
-      if (val) {
-        browsingHistory.getHistorys().then((result: any) => {
-          this.histories = result;
-        });
-      }
+      if (val) this.updateHistory();
     },
   },
   methods: {
+    async updateHistory() {
+      browsingHistory.getHistorys().then((result: any) => {
+        this.histories = result;
+      });
+    },
     async handleClear() {
       await browsingHistory.clearAllHistorys();
-      this.histories = [];
+      this.updateHistory();
     },
   },
 };

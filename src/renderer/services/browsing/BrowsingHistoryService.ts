@@ -11,7 +11,7 @@ export default class BrowsingHistory implements IBrowsingHistory {
   }
 
   public async getHistorys(): Promise<HistoryDisplayItem[]> {
-    if (this.icons.length >= 1) {
+    if (!this.icons || this.icons.length < 1) {
       this.icons = Array.from(BrowsingChannelManager.getAllChannels().values())
         .map(val => val.channels).flat().map(val => val.icon);
     }
@@ -34,7 +34,7 @@ export default class BrowsingHistory implements IBrowsingHistory {
   }
 
   public async getMenuDisplayInfo() {
-    if (this.icons.length >= 1) {
+    if (!this.icons || this.icons.length < 1) {
       this.icons = Array.from(BrowsingChannelManager.getAllChannels().values())
         .map(val => val.channels).flat().map(val => val.icon);
     }
@@ -51,6 +51,10 @@ export default class BrowsingHistory implements IBrowsingHistory {
     const allChannels = Array.from(BrowsingChannelManager.getAllChannels().values())
       .map(val => val.channels).flat().map(val => val.channel);
     if (!allChannels.includes(channel)) throw new Error('Channel not existed');
+    const results = await browsingDB.getAllValueByIndex('history', 'channel', channel);
+    results.forEach((result) => {
+      browsingDB.delete('history', result.url);
+    });
   }
 }
 
