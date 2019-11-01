@@ -329,19 +329,19 @@
         "button": "Sign In"
       },
       "normalUser": {
-        "title": "Account",
+        "title": "Account: ",
         "description": "Upgrade your account now and get started with exclusive features and more.",
         "button": "Upgrade"
       },
       "vipUser": {
-        "title": "Premium Account ",
+        "title": "Premium Account: ",
         "description": "Expiration Date: ",
         "button": "Renew"
       },
-      "month": "Month",
-      "year": "Year",
-      "months": "Months",
-      "years": "Years",
+      "month": " Month",
+      "year": " Year",
+      "months": " Months",
+      "years": " Years",
       "signOut": "Sign out",
       "createdAt": "Registration Date",
       "payAt": "Recent Purchased",
@@ -352,24 +352,24 @@
     "premium": {
       "premiumSetting": "Premium",
       "title": "SPlayer Premium",
-      "description": "Go Premium now to help SPlayer change the way people watch videos, and get access to more advanced features. ",
+      "description": "Go Premium now to help SPlayer change the way people watch videos, and get access to more advanced features.",
       "content": {
-        "description1": "Extend AI Translation time for your daily use",
+        "description1": "Additional hours of AI Translation service",
         "description2": "Support more languages in AI Translation",
-        "description3": "Export unlimited speech recognition results",
+        "description3": "Export speech recognition results unlimitedly",
         "description4": "New features are coming soon",
         "description5": "",
         "description6": ""
       },
       "origin": "ORIG. ",
       "off": "% Off",
-      "month": "Month",
-      "year": "Year",
-      "months": "Mo.",
-      "years": "Yr.",
+      "month": " Month",
+      "year": " Year",
+      "months": " Mo.",
+      "years": " Yr.",
       "payType": {
         "alipay": "Alipay",
-        "wxpay": "Wechat",
+        "wxpay": "WeChat",
         "paypal": "PayPal"
       }
     }
@@ -451,7 +451,7 @@
       "zh-TW": "Chinese (Traditional)"
     },
     "tips": {
-      "editor": "Edit coming soon ...",
+      "editor": "Edit is coming soon ...",
       "export": "Export",
       "reload": "Regenerate",
       "delete": "Remove"
@@ -628,8 +628,8 @@
       "h2": "Thanks for your support",
       "h1": "Payment Successful !",
       "h4": "NOW",
-      "content1": "Extend AI Translation Time",
-      "content2": "More Languages Support in AI Translation",
+      "content1": "Additional Hours of AI Translation Service",
+      "content2": "Support More Languages in AI Translation",
       "content3": "Export Translation Results Unlimitedly",
       "button": "Done"
     },
