@@ -111,7 +111,7 @@
       "paste": "貼上"
     },
     "account": {
-      "name": "帳號",
+      "name": "账号",
       "login": "登入",
       "logout": "登出"
     },
@@ -320,8 +320,8 @@
       "clearHistoryDescription": "清除已有的播放列表和歷史記錄"
     },
     "account": {
-      "accountSetting": "用戶設置",
-      "title": "用戶信息",
+      "accountSetting": "我的賬號",
+      "title": "賬號信息",
       "noToken": {
         "title": "未登錄",
         "description": "登錄後可使用AI翻譯等更多功能",
@@ -345,7 +345,7 @@
       "createdAt": "註冊時間",
       "payAt": "投食記錄",
       "payContent": "{date}{product}",
-      "payProduct": ": 投食 {product}"
+      "payProduct": ": 投食{product}"
     },
     "premium": {
       "premiumSetting": "雲養計劃",
