@@ -28,7 +28,8 @@
   "tips": {
     "openSidebar": "사이드 바 표시 (C)",
     "closeSidebar": "사이드 바 숨김 (C)",
-    "exit": "시작 페이지로 돌아 가기"
+    "exit": "시작 페이지로 돌아 가기",
+    "delete": ""
   },
   "errorFile": {
     "ENOSPC": {
@@ -317,7 +318,66 @@
       "incognitoDescription": "재생 기록이 저장되지 않습니다.",
       "clearHistory": "재생 기록 지우기",
       "clearHistoryDescription": "기존 재생 목록 및 재생 기록 제거"
+    },
+    "account": {
+      "accountSetting": "",
+      "title": "",
+      "noToken": {
+        "title": "",
+        "description": "",
+        "button": ""
+      },
+      "normalUser": {
+        "title": "",
+        "description": "",
+        "button": ""
+      },
+      "vipUser": {
+        "title": "",
+        "description": "",
+        "button": ""
+      },
+      "month": "",
+      "year": "",
+      "months": "",
+      "years": "",
+      "signOut": "",
+      "createdAt": "",
+      "payAt": "",
+      "payContent": "",
+      "payProduct": ""
+    },
+    "premium": {
+      "premiumSetting": "",
+      "title": "",
+      "description": "",
+      "content": {
+        "description1": "",
+        "description2": "",
+        "description3": "",
+        "description4": "",
+        "description5": "",
+        "description6": ""
+      },
+      "origin": "",
+      "off": "",
+      "month": "",
+      "year": "",
+      "months": "",
+      "years": "",
+      "payType": {
+        "alipay": "",
+        "wxpay": "",
+        "paypal": ""
+      }
     }
+  },
+  "payment": {
+    "wxpay": {
+      "title": "",
+      "description": ""
+    },
+    "fail": ""
   },
   "privacyBubble": {
     "confirmDisable": {
@@ -340,6 +400,10 @@
   },
   "alertBubble": {
     "button": "승인"
+  },
+  "notExportEmbeddedSubtitle": {
+    "title": "",
+    "content": ""
   },
   "protectBubble": {
     "agree": "승인",
@@ -383,6 +447,12 @@
       "zh": "중국어 (간체)",
       "zh-CN": "중국어 (간체)",
       "zh-TW": "중국어 (번체)"
+    },
+    "tips": {
+      "editor": "",
+      "export": "",
+      "reload": "",
+      "delete": ""
     }
   },
   "uploading": {
@@ -413,6 +483,7 @@
     "videoLanguageLabel": "오디오 언어",
     "subtitleLanguageLabel": "번역할 언어",
     "selectLanguageLabel": "오디오 언어",
+    "selectLanguageMoreLabel": "",
     "audioLanguageLoading": "언어 목록을 가져 오는 중 ...",
     "audioLanguageLoadFail": "연결에 실패했습니다. 나중에 다시 시도하십시오",
     "select": {
@@ -525,6 +596,47 @@
       "retry": "retry",
       "error300": "Verification failed, please",
       "errorNetwork": "Network Error. Please"
+    }
+  },
+  "forbiddenModal": {
+    "title": "",
+    "content": "",
+    "span": "",
+    "button": "",
+    "audioLanguage": "",
+    "translate": {
+      "title": "",
+      "content": "",
+      "span": "",
+      "button": ""
+    },
+    "export": {
+      "title": "",
+      "content": "",
+      "span": "",
+      "button": ""
+    }
+  },
+  "premiumModal": {
+    "loading": {
+      "content": "",
+      "button": ""
+    },
+    "success": {
+      "h2": "",
+      "h1": "",
+      "h4": "",
+      "content1": "",
+      "content2": "",
+      "content3": "",
+      "button": ""
+    },
+    "fail": {
+      "h1": "",
+      "content": "",
+      "copy": "",
+      "copied": "",
+      "button": ""
     }
   }
 }
