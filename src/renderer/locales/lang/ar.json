@@ -328,56 +328,56 @@
         "button": ""
       },
       "normalUser": {
-        "title": "",
+        "title": "Account: ",
         "description": "",
         "button": ""
       },
       "vipUser": {
-        "title": "",
+        "title": "Premium Account: ",
         "description": "",
         "button": ""
       },
-      "month": "",
-      "year": "",
-      "months": "",
-      "years": "",
+      "month": " Month",
+      "year": " Year",
+      "months": " Months",
+      "years": " Years",
       "signOut": "",
       "createdAt": "",
       "payAt": "",
       "payContent": "",
-      "payProduct": ""
+      "payProduct": ": {product} Premium"
     },
     "premium": {
-      "premiumSetting": "",
-      "title": "",
-      "description": "",
+      "premiumSetting": "Premium",
+      "title": "SPlayer Premium",
+      "description": "Go Premium now to help SPlayer change the way people watch videos, and get access to more advanced features.",
       "content": {
-        "description1": "",
-        "description2": "",
-        "description3": "",
-        "description4": "",
+        "description1": "Additional hours of AI Translation service",
+        "description2": "Support more languages in AI Translation",
+        "description3": "Export speech recognition results unlimitedly",
+        "description4": "New features are coming soon",
         "description5": "",
         "description6": ""
       },
-      "origin": "",
-      "off": "",
-      "month": "",
-      "year": "",
-      "months": "",
-      "years": "",
+      "origin": "ORIG. ",
+      "off": "% Off",
+      "month": " Month",
+      "year": " Year",
+      "months": " Mo.",
+      "years": " Yr.",
       "payType": {
-        "alipay": "",
-        "wxpay": "",
-        "paypal": ""
+        "alipay": "Alipay",
+        "wxpay": "WeChat",
+        "paypal": "PayPal"
       }
     }
   },
   "payment": {
     "wxpay": {
-      "title": "",
-      "description": ""
+      "title": "SCAN & PAY",
+      "description": "WeChat Pay"
     },
-    "fail": ""
+    "fail": "Error"
   },
   "privacyBubble": {
     "confirmDisable": {
@@ -403,7 +403,7 @@
   },
   "notExportEmbeddedSubtitle": {
     "title": "",
-    "content": ""
+    "content": "Embedded subtitle is loading, please try to export later."
   },
   "protectBubble": {
     "agree": "حسنا",
@@ -449,10 +449,10 @@
       "zh-TW": "الصينية التقليدية"
     },
     "tips": {
-      "editor": "",
-      "export": "",
-      "reload": "",
-      "delete": ""
+      "editor": "Edit is coming soon ...",
+      "export": "Export",
+      "reload": "Regenerate",
+      "delete": "Remove"
     }
   },
   "uploading": {
@@ -483,7 +483,7 @@
     "videoLanguageLabel": "لغة الصوت",
     "subtitleLanguageLabel": "ترجم إلى",
     "selectLanguageLabel": "لغة الصوت",
-    "selectLanguageMoreLabel": "",
+    "selectLanguageMoreLabel": "المزيد ...",
     "audioLanguageLoading": "جارٍ إحضار قائمة اللغات ...",
     "audioLanguageLoadFail": "فشل الاتصال ، يرجى المحاولة لاحقًا",
     "select": {
@@ -599,44 +599,44 @@
     }
   },
   "forbiddenModal": {
-    "title": "",
-    "content": "",
-    "span": "",
-    "button": "",
-    "audioLanguage": "",
+    "title": "Upgrade to SPlayer Premium",
+    "content": "Upgrade to export translation results unlimitedly, and get access to more exclusive features.",
+    "span": "Already Premium? Sign In",
+    "button": "Go Premium Now",
+    "audioLanguage": "日本語, 한국어, Español, Français, Deutsch, Italiano, Português, čeština, Русский, Indonesian, العربية, Türkçe, română",
     "translate": {
-      "title": "",
-      "content": "",
-      "span": "",
-      "button": ""
+      "title": "Upgrade to SPlayer Premium",
+      "content": "Go Premium to get access to more languages and other exclusive features.",
+      "span": "Already Premium? Sign In",
+      "button": "Go Premium Now"
     },
     "export": {
-      "title": "",
-      "content": "",
-      "span": "",
-      "button": ""
+      "title": "Upgrade to SPlayer Premium",
+      "content": "Upgrade to export translation results unlimitedly, and get access to more exclusive features.",
+      "span": "Already Premium? Sign In",
+      "button": "Go Premium Now"
     }
   },
   "premiumModal": {
     "loading": {
-      "content": "",
-      "button": ""
+      "content": "Processing，please wait a second …",
+      "button": "Close"
     },
     "success": {
-      "h2": "",
-      "h1": "",
-      "h4": "",
-      "content1": "",
-      "content2": "",
-      "content3": "",
-      "button": ""
+      "h2": "Thanks for your support",
+      "h1": "Payment Successful !",
+      "h4": "NOW",
+      "content1": "Additional Hours of AI Translation Service",
+      "content2": "Support More Languages in AI Translation",
+      "content3": "Export Translation Results Unlimitedly",
+      "button": "Done"
     },
     "fail": {
-      "h1": "",
-      "content": "",
-      "copy": "",
-      "copied": "",
-      "button": ""
+      "h1": "Sorry",
+      "content": "Your transaction could not be processed，please contact us",
+      "copy": "نسخ",
+      "copied": "تم النسخ",
+      "button": "ظهر"
     }
   }
 }
