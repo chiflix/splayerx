@@ -452,7 +452,7 @@
       "editor": "编辑功能即将到来",
       "export": "导出",
       "reload": "",
-      "delete": ""
+      "delete": "移除"
     }
   },
   "uploading": {
@@ -620,7 +620,7 @@
   "premiumModal": {
     "loading": {
       "content": "",
-      "button": ""
+      "button": "关闭页面"
     },
     "success": {
       "h2": "感谢您对 SPlayer 的支持",
@@ -629,10 +629,10 @@
       "content1": "",
       "content2": "",
       "content3": "",
-      "button": ""
+      "button": "完成"
     },
     "fail": {
-      "h1": "",
+      "h1": "很遗憾",
       "content": "投食过程中遇到了一些问题，请通过邮箱联系我们",
       "copy": "复制",
       "copied": "已复制",
