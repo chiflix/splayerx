@@ -271,6 +271,7 @@
     "enterPop": "Reproducir en ventana nueva",
     "exitPop": "Volver al navegador",
     "danmu": "Alternar Danmaku",
+    "pin": "",
     "error": {
       "offline": "Sin Internet",
       "try": "Prueba:",
