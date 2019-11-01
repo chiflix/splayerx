@@ -29,7 +29,7 @@
     "openSidebar": "عرض المحتوى الجانبي (C)",
     "closeSidebar": "أخفِ الشّريط الجانبيّ (C)",
     "exit": "العودة إلى صفحة الإطلاق",
-    "delete": ""
+    "delete": "Back to Launching Page"
   },
   "errorFile": {
     "ENOSPC": {
@@ -272,7 +272,7 @@
     "enterPop": "اللعب في نافذة جديدة",
     "exitPop": "العودة إلى المتصفح",
     "danmu": "وابل",
-    "pin": "",
+    "pin": "Pin / Unpin (T)",
     "error": {
       "offline": "لا يوجد إنترنت",
       "try": "حاول:",
@@ -320,16 +320,16 @@
       "clearHistoryDescription": "قم بإزالة قوائم التشغيل الحالية وسجل التشغيل"
     },
     "account": {
-      "accountSetting": "",
-      "title": "",
+      "accountSetting": "Account",
+      "title": "My Profile",
       "noToken": {
-        "title": "",
-        "description": "",
-        "button": ""
+        "title": "Not Signed In",
+        "description": "Sign in with your phone number to use AI Translation and more advanced features.",
+        "button": "Sign In"
       },
       "normalUser": {
         "title": "Account: ",
-        "description": "",
+        "description": "Upgrade your account now and get started with exclusive features and more.",
         "button": "Upgrade"
       },
       "vipUser": {
@@ -344,7 +344,7 @@
       "signOut": "Sign out",
       "createdAt": "Registration Date",
       "payAt": "Recent Purchased",
-      "payContent": "",
+      "payContent": "{date}{product}",
       "payProduct": ": {product} Premium"
     },
     "premium": {
