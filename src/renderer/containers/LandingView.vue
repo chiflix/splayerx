@@ -144,6 +144,7 @@ import VideoItem from '@/components/LandingView/VideoItem.vue';
 import { log } from '@/libs/Log';
 import Sagi from '@/libs/sagi';
 import { Browsing as browsingActions } from '@/store/actionTypes';
+import { windowRectService } from '../services/window/WindowRectService';
 
 Vue.component('PlaylistItem', PlaylistItem);
 Vue.component('VideoItem', VideoItem);
@@ -154,12 +155,6 @@ export default {
     Icon,
     NotificationBubble,
     'open-url': OpenUrl,
-  },
-  props: {
-    showSidebar: {
-      type: Boolean,
-      default: false,
-    },
   },
   data() {
     return {
@@ -179,7 +174,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'winPos', 'defaultDir', 'isFullScreen', 'incognitoMode', 'nsfwProcessDone', 'pipSize', 'pipPos']),
+    ...mapGetters(['winWidth', 'winSize', 'winPos', 'defaultDir', 'isFullScreen', 'incognitoMode', 'nsfwProcessDone', 'pipSize', 'pipPos', 'showSidebar']),
     lastIndex: {
       get() {
         return (this.firstIndex + this.showItemNum) - 1;
@@ -273,6 +268,7 @@ export default {
     next((vm: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
       vm.logoTransition = from === 'language-setting' ? 'scale' : '';
       vm.pageMounted = true;
+      windowRectService.uploadWindowBy(false, 'landing-view', undefined, undefined, vm.winSize, vm.winPos, vm.isFullScreen);
     });
   },
   /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -434,6 +430,7 @@ export default {
         this.shifting = true;
         this.firstIndex = 0;
       } else if (!this.filePathNeedToDelete) {
+        this.$store.dispatch('UPDATE_SHOW_SIDEBAR', false);
         this.openPlayList(this.landingViewItems[index].id);
       }
     },

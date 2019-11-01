@@ -9,7 +9,7 @@ docs
 doc
 website
 images
-assets
+#assets
 
 # examples
 example
@@ -47,3 +47,4 @@ wercker.yml
 # custom
 .git
 *.map
+

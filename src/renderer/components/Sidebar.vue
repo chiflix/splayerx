@@ -55,22 +55,31 @@
       :style="{ boxShadow: bottomMask ? '0 -3px 8px 0 rgba(0,0,0,0.60)' : '' }"
       class="bottom-mask"
     />
-    <div
-      :style="{
-        boxShadow: bottomMask ? '0 -2px 10px 0 rgba(0,0,0,0.50)' : '',
-        height: showFileIcon ? '66px' : '',
-      }"
-      v-if="showFileIcon"
-      class="bottom-icon no-drag"
-    >
+    <transition name="fade-300">
       <div
-        @click="openFilesByDialog"
-        :title="$t('browsing.openLocalFile')"
-        class="icon-hover"
+        :style="{
+          boxShadow: bottomMask ? '0 -2px 10px 0 rgba(0,0,0,0.50)' : '',
+          height: showFileIcon ? '60px' : '',
+        }"
+        v-if="showFileIcon"
+        class="bottom-icon no-drag"
       >
-        <Icon type="open" />
+        <div
+          @click="openFilesByDialog"
+          :title="$t('browsing.openLocalFile')"
+          class="icon"
+        >
+          <Icon type="open" />
+        </div>
+        <div
+          @click="openHomePage"
+          :title="$t('tips.exit')"
+          class="icon"
+        >
+          <Icon type="exit" />
+        </div>
       </div>
-    </div>
+    </transition>
   </div>
 </template>
 <script lang="ts">
@@ -88,10 +97,6 @@ export default {
     SidebarIcon,
   },
   props: {
-    showSidebar: {
-      type: Boolean,
-      default: false,
-    },
     currentUrl: {
       type: String,
       default: '',
@@ -109,7 +114,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['pipSize', 'pipPos', 'isHistory', 'currentChannel', 'winHeight']),
+    ...mapGetters(['pipSize', 'pipPos', 'isHistory', 'currentChannel', 'winHeight', 'showSidebar', 'displayLanguage']),
     currentRouteName() {
       return this.$route.name;
     },
@@ -117,15 +122,18 @@ export default {
       return !this.currentChannel;
     },
     showFileIcon() {
-      return !!this.currentUrl;
+      return this.$route.name === 'playing-view' || this.$route.name === 'browsing-view';
     },
     totalHeight() {
       const channelsNum = this.channelsDetail.length + 1;
       return channelsNum * 56;
     },
+    bottomIconHeight() {
+      return 92;
+    },
     maxHeight() {
-      const bottomHeight = this.showFileIcon ? 66 : 0;
-      return this.winHeight - (this.isDarwin ? 42 : 0) - bottomHeight;
+      const bottomHeight = this.showFileIcon ? this.bottomIconHeight : 0;
+      return this.winHeight - (this.isDarwin ? 42 : 16) - bottomHeight;
     },
     isDarwin() {
       return process.platform === 'darwin';
@@ -159,11 +167,12 @@ export default {
     },
   },
   created() {
-    asyncStorage.get('channels').then((data) => {
+    asyncStorage.get('channels').then(async (data) => {
       if (data.channels) {
         this.channelsDetail = BrowsingChannelManager.initAvailableChannels(data.channels);
       } else {
-        this.channelsDetail = BrowsingChannelManager.getAllAvailableChannels();
+        this.channelsDetail = await BrowsingChannelManager
+          .getDefaultChannelsByCountry(this.displayLanguage);
       }
     });
   },
@@ -210,6 +219,9 @@ export default {
       updateIsHistoryPage: browsingActions.UPDATE_IS_HISTORY,
       updateCurrentChannel: browsingActions.UPDATE_CURRENT_CHANNEL,
     }),
+    openHomePage() {
+      this.$router.push({ name: 'landing-view' });
+    },
     handleChannelManage() {
       if (this.currentRouteName !== 'browsing-view') {
         this.$router.push({ name: 'browsing-view' });
@@ -239,14 +251,22 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+.fade-300 {
+  &-enter, &-leave-to {
+    opacity: 0;
+  }
+  &-enter-active {
+    transition: opacity 200ms ease-out 200ms;
+  }
+  &-leave-active {
+    transition: opacity 200ms ease-out;
+  }
+}
 ::-webkit-scrollbar {
   width: 0;
 }
 .side-bar {
   position: absolute;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   background-color: #3B3B41;
   left: 0;
   width: 76px;
@@ -289,12 +309,18 @@ export default {
     opacity: 1;
   }
   .bottom-icon {
+    position: absolute;
+    bottom: 0;
+    padding-top: 16px;
+    padding-bottom: 16px;
     display:flex;
     flex-direction: column;
     width: 100%;
-  }
-  .icon-hover {
-    margin: auto;
+    .icon {
+      width: 30px;
+      height: 30px;
+      margin: auto;
+    }
   }
   .mask {
     width: 44px;

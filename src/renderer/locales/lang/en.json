@@ -25,6 +25,11 @@
       "fontSize": "14px"
     }
   },
+  "tips": {
+    "openSidebar": "Show Sidebar (C)",
+    "closeSidebar": "Hide Sidebar (C)",
+    "exit": "Back to Launching Page"
+  },
   "errorFile": {
     "ENOSPC": {
       "content": "No enough disk space available.",
@@ -137,7 +142,8 @@
       "showPlaylist": "Show Playlist",
       "hidePlaylist": "Hide Playlist",
       "previousVideo": "Previous Video",
-      "singleCycle": "Repeat One",
+      "singleCycle": "Loop One",
+      "playlistLoop": "Loop Playlist",
       "snapShot": "Snapshot"
     },
     "splayerx": {
@@ -206,7 +212,9 @@
       "enterPip": "Enter Picture in Picture",
       "exitPip": "Exit Picture in Picture",
       "playInNewWindow": "Play in New Window",
-      "backToBrowser": "Back to Browser"
+      "backToBrowser": "Back to Browser",
+      "openSidebar": "Show Sidebar",
+      "closeSidebar": "Hide Sidebar"
     },
     "edit": {
       "name": "Edit",
@@ -250,12 +258,21 @@
     "youku": "Youku",
     "coursera": "Coursera",
     "ted": "TED",
+    "lynda": "Lynda",
+    "masterclass": "MasterClass",
+    "sportsqq": "Tencent Sports",
+    "developerapple": "WWDC",
+    "vipopen163": "网易公开课",
+    "study163": "网易云课堂",
+    "imooc": "慕课网",
+    "icourse163": "中国大学MOOC",
     "openLocalFile": "Open Local File ...",
-    "enterPip": "Enter Picture in Picture",
-    "exitPip": "Back to Browser",
-    "enterPop": "Play in New Window",
-    "exitPop": "Back to Browser",
+    "enterPip": "Enter Picture in Picture (P)",
+    "exitPip": "Exit Picture in Picture (P)",
+    "enterPop": "Play in New Window (O)",
+    "exitPop": "Back to Browser (O)",
     "danmu": "Toggle Danmaku",
+    "pin": "Pin / Unpin (T)",
     "error": {
       "offline": "No Internet",
       "try": "Try:",
@@ -264,7 +281,8 @@
     },
     "remove": "Remove",
     "siteManager": "Site Manager",
-    "popularSites": "Optimized Sites",
+    "general": "General",
+    "education": "Education",
     "siteTip": "Add / Edit"
   },
   "preferences": {

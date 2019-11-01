@@ -2,6 +2,7 @@ import { remote } from 'electron';
 import { log } from '@/libs/Log';
 import { apiOfAccountService } from '@/helpers/featureSwitch';
 import Fetcher from '@/../shared/Fetcher';
+import { crossThreadCache } from '../../shared/utils';
 
 export class ApiError extends Error {
   /** HTTP status */
@@ -55,6 +56,21 @@ export async function getSMSCode(phone: string) {
   log.debug('api/account/sms', res);
   return res.ok;
 }
+
+export const getGeoIP = crossThreadCache(['ip', 'countryCode'], async () => {
+  const endpoint = await getEndpoint();
+  return new Promise((resolve, reject) => {
+    fetcher.get(`${endpoint}/geoip`).then((response: Response) => {
+      if (response.ok) {
+        response.json().then((data: { ip: string, countryCode: string }) => resolve(data));
+      } else {
+        reject(new Error());
+      }
+    }).catch((error) => {
+      reject(error);
+    });
+  });
+});
 
 export async function signIn(type: string, phone: string, code: string) {
   const endpoint = await getEndpoint();
