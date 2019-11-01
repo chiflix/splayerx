@@ -1,5 +1,6 @@
 // @ts-ignore
 import urlParseLax from 'url-parse-lax';
+import { browsingHistory } from '@/services/browsing/BrowsingHistoryService';
 import { IBrowsingChannelManager } from '@/interfaces/IBrowsingChannelManager';
 import { getGeoIP } from '@/libs/apis';
 
@@ -117,7 +118,7 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
     return this.allChannels.get(category) as channelInfo;
   }
 
-  public setChannelAvailable(channel: string, available: boolean): void {
+  public async setChannelAvailable(channel: string, available: boolean): void {
     if (available) {
       if (!this.allAvailableChannels.includes(channel)) {
         this.allAvailableChannels.push(channel);
@@ -125,6 +126,7 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
     } else {
       this.allAvailableChannels = this.allAvailableChannels
         .filter((aChannel: string) => aChannel !== channel);
+      await browsingHistory.cleanChannelRecords(channel);
     }
     this.allChannels.forEach((i: channelInfo) => {
       const allItems = i.channels.map((item: channelDetails) => item.channel);

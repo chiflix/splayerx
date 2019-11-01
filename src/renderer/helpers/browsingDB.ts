@@ -18,7 +18,10 @@ interface IBrowsingDB extends DBSchema {
   history: {
     key: string,
     value: BrowsingHistoryItem,
-    indexes: { 'openTime': number };
+    indexes: {
+      'openTime': number,
+      'channel': string,
+    };
   },
 }
 
@@ -31,6 +34,7 @@ export default class BrowsingDB {
             HISTORY_OBJECT_STORE_NAME, { keyPath: 'url' },
           );
           historyStore.createIndex('openTime', 'openTime');
+          historyStore.createIndex('channel', 'channel');
         },
       },
     );
@@ -87,7 +91,7 @@ export default class BrowsingDB {
   }
 
   public async getValueByIndex(
-    objectStore: 'history', index: 'openTime', value: number,
+    objectStore: 'history', index: 'openTime' | 'channel', value: number,
   ): Promise<BrowsingHistoryItem | undefined> {
     if (!index) throw new Error(`BrowsingDB | Invalid get method: ${index} to ${objectStore}`);
     const db = await this.getDB();
@@ -96,7 +100,7 @@ export default class BrowsingDB {
   }
 
   public async getAllValueByIndex(
-    objectStore: 'history', index: 'openTime', value: string | number,
+    objectStore: 'history', index: 'openTime' | 'channel', value: string | number,
   ): Promise<BrowsingHistoryItem[]> {
     const db = await this.getDB();
     const res = [];

@@ -39,7 +39,7 @@
           padding: histories.length < 1 ? '' :
             `${playlistBottom[currentPhase]}px 0 ${playlistBottom[currentPhase]}px 0`,
         }"
-        class="history"
+        class="content"
       >
         <div
           v-if="histories.length < 1"
@@ -116,19 +116,27 @@ export default {
     },
   },
   watch: {
-    async showHomePage(val: boolean) {
-      if (val) {
-        this.histories = await browsingHistory.getHistorys();
-      }
+    showHomePage(val: boolean) {
+      if (val) this.updateHistory();
     },
+  },
+  mounted() {
+    this.$bus.$on('update-browsing-playlist', () => {
+      setTimeout(() => {
+        this.updateHistory();
+      }, 1000);
+    });
   },
   methods: {
     ...mapActions({
       updateCurrentChannel: browsingActions.UPDATE_CURRENT_CHANNEL,
     }),
+    async updateHistory() {
+      this.histories = await browsingHistory.getHistorys();
+    },
     async handleClear() {
       await browsingHistory.clearAllHistorys();
-      this.histories = [];
+      this.updateHistory();
     },
     handleOpenHistoryItem(item: {
       channel: string,
@@ -165,7 +173,7 @@ export default {
       color: #B5B6BF;
     }
   }
-  .history {
+  .content {
     min-width: 732px;
     display: flex;
     justify-content: flex-start;
