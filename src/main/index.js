@@ -1,7 +1,7 @@
 // Be sure to call Sentry function as early as possible in the main process
 import '../shared/sentry';
 
-import { app, BrowserWindow, session, Tray, ipcMain, globalShortcut, nativeImage, splayerx, systemPreferences, BrowserView, webContents } from 'electron' // eslint-disable-line
+import { app, BrowserWindow, session, Tray, ipcMain, globalShortcut, nativeImage, splayerx, systemPreferences, BrowserView, webContents, inAppPurchase, screen } from 'electron' // eslint-disable-line
 import { throttle, debounce, uniq } from 'lodash';
 import os from 'os';
 import path, {
@@ -72,6 +72,7 @@ let loginWindow = null;
 let aboutWindow = null;
 let preferenceWindow = null;
 let browsingWindow = null;
+let paymentWindow = null;
 let browserViewManager = null;
 let pipControlView = null;
 let titlebarView = null;
@@ -86,6 +87,8 @@ let inited = false;
 let hideBrowsingWindow = false;
 let finalVideoToOpen = [];
 let signInEndPoint = '';
+let applePayProductID = '';
+let paymentWindowCloseTag = false;
 const locale = new Locale();
 const tmpVideoToOpen = [];
 const tmpSubsToOpen = [];
@@ -98,6 +101,9 @@ const mainURL = process.env.NODE_ENV === 'development'
 const aboutURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080/about.html'
   : `file://${__dirname}/about.html`;
+const paymentURL = process.env.NODE_ENV === 'development'
+  ? 'http://localhost:9080/payment.html'
+  : `file://${__dirname}/payment.html`;
 const preferenceURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080/preference.html'
   : `file://${__dirname}/preference.html`;
@@ -153,7 +159,9 @@ function handleBossKey() {
 function pipControlViewTitle(isGlobal) {
   const danmu = locale.$t('browsing.danmu');
   const title = isGlobal ? locale.$t('browsing.exitPip') : locale.$t('browsing.exitPop');
-  pipControlView.webContents.executeJavaScript(InjectJSManager.updatePipControlTitle(title, danmu));
+  const pin = locale.$t('browsing.pin');
+  pipControlView.webContents
+    .executeJavaScript(InjectJSManager.updatePipControlTitle(title, danmu, pin));
 }
 
 function createPipControlView() {
@@ -168,9 +176,9 @@ function createPipControlView() {
   pipControlView.setBackgroundColor('#00FFFFFF');
   pipControlView.setBounds({
     x: Math.round(browsingWindow.getSize()[0] - 65),
-    y: Math.round(browsingWindow.getSize()[1] / 2 - 54),
+    y: Math.round(browsingWindow.getSize()[1] / 2 - 72),
     width: 50,
-    height: 104,
+    height: 144,
   });
 }
 
@@ -269,6 +277,30 @@ function getAllValidVideo(onlySubtitle, files) {
   }
 }
 
+function setBoundsCenterByOriginWindow(origin, win, width, height) {
+  const displays = screen.getAllDisplays();
+  const list = displays.map(e => ({
+    x: e.workArea.x,
+    left: Number((e.workArea.x + (e.workArea.width - width) / 2).toFixed(0)),
+    top: Number((e.workArea.y + (e.workArea.height - height) / 2).toFixed(0)),
+  })).sort((l, r) => l.x - r.x);
+  if (origin && win && list.length > 1) {
+    try {
+      const pos = origin.getPosition();
+      const bounds = pos[0] > list[1].x ? {
+        x: list[1].left,
+        y: list[1].top,
+      } : {
+        x: list[0].left,
+        y: list[0].top,
+      };
+      win.setBounds(bounds);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+}
+
 function createPreferenceWindow(e, route) {
   const preferenceWindowOptions = {
     useContentSize: true,
@@ -312,9 +344,10 @@ function createPreferenceWindow(e, route) {
   if (process.platform === 'win32') {
     hackWindowsRightMenu(preferenceWindow);
   }
+  setBoundsCenterByOriginWindow(mainWindow, preferenceWindow, 540, 426);
 }
 
-function createLoginWindow(e, route) {
+function createLoginWindow(e, fromWindow, route) {
   const loginWindowOptions = {
     useContentSize: true,
     frame: false,
@@ -365,6 +398,15 @@ function createLoginWindow(e, route) {
   });
   if (process.platform === 'win32') {
     hackWindowsRightMenu(loginWindow);
+  }
+  // login window setbounds on mainwidnow
+  const win = fromWindow === 'preference' ? preferenceWindow : mainWindow;
+  setBoundsCenterByOriginWindow(win, loginWindow, 412, 284);
+  if (fromWindow !== 'main' && mainWindow && !mainWindow.webContents.isDestroyed()) {
+    mainWindow.webContents.send('clear-signIn-callback');
+  }
+  if (fromWindow !== 'preference' && preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
+    preferenceWindow.webContents.send('clear-signIn-callback');
   }
 }
 
@@ -442,6 +484,11 @@ function createBrowsingWindow(args) {
       if (!mainWindow) return;
       mainWindow.send('update-pip-pos', browsingWindow.getPosition());
     }, 100));
+    browsingWindow.on('always-on-top-changed', (e, top) => {
+      if (pipControlView) {
+        pipControlView.webContents.executeJavaScript(InjectJSManager.updatePinState(top));
+      }
+    });
     browsingWindow.on('leave-full-screen', () => {
       if (hideBrowsingWindow) {
         hideBrowsingWindow = false;
@@ -452,6 +499,61 @@ function createBrowsingWindow(args) {
       }
     });
   }
+}
+
+function createPaymentWindow(url, orderID, channel) {
+  const width = channel === 'wxpay' ? 270 : 1200;
+  const height = channel === 'wxpay' ? 462 : 890;
+  const paymentWindowOptions = {
+    useContentSize: true,
+    frame: false,
+    titleBarStyle: 'none',
+    width,
+    height,
+    transparent: true,
+    resizable: false,
+    show: false,
+    webPreferences: {
+      webSecurity: false,
+      nodeIntegration: true,
+      experimentalFeatures: true,
+      webviewTag: true,
+    },
+    acceptFirstMouse: true,
+    fullscreenable: false,
+    maximizable: false,
+    minimizable: false,
+  };
+  if (!paymentWindow) {
+    paymentWindow = new BrowserWindow(paymentWindowOptions);
+    // 如果播放窗口顶置，打开关于也顶置
+    if (mainWindow && mainWindow.isAlwaysOnTop()) {
+      paymentWindow.setAlwaysOnTop(true);
+    }
+    paymentWindow.loadURL(`${paymentURL}?url=${url}&orderID=${orderID}&type=${channel}`);
+    paymentWindow.on('closed', () => {
+      if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()
+        && !paymentWindowCloseTag) {
+        preferenceWindow.webContents.send('close-payment');
+      }
+      paymentWindow = null;
+      paymentWindowCloseTag = false;
+    });
+  } else {
+    paymentWindow.focus();
+    paymentWindow.setBounds({
+      width,
+      height,
+    });
+    paymentWindow.loadURL(`${paymentURL}?url=${url}&orderID=${orderID}&type=${channel}`);
+  }
+  paymentWindow.once('ready-to-show', () => {
+    paymentWindow.show();
+  });
+  if (process.platform === 'win32') {
+    hackWindowsRightMenu(paymentWindow);
+  }
+  setBoundsCenterByOriginWindow(preferenceWindow, paymentWindow, width, height);
 }
 
 function registerMainWindowEvent(mainWindow) {
@@ -711,6 +813,9 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('update-danmu-state', (evt, val) => {
     pipControlView.webContents.executeJavaScript(InjectJSManager.initBarrageIcon(val));
   });
+  ipcMain.on('pin', () => {
+    mainWindow.send('pip-float-on-top');
+  });
   ipcMain.on('pip', () => {
     mainWindow.send('handle-exit-pip');
   });
@@ -896,6 +1001,9 @@ function registerMainWindowEvent(mainWindow) {
       mainWindow.hide();
     }
     browsingWindow.webContents.closeDevTools();
+    if (process.env.NODE_ENV === 'development') {
+      pipControlView.webContents.openDevTools({ mode: 'detach' });
+    }
     browsingWindow.setAspectRatio(args.pipInfo.aspectRatio);
     browsingWindow.setMinimumSize(args.pipInfo.minimumSize[0], args.pipInfo.minimumSize[1]);
     browsingWindow.setSize(args.pipInfo.pipSize[0], args.pipInfo.pipSize[1]);
@@ -1150,6 +1258,48 @@ function registerMainWindowEvent(mainWindow) {
     signInEndPoint = data;
     if (process.env.NODE_ENV === 'production') {
       loginURL = `${signInEndPoint}/static/splayer/login.html`;
+    }
+  });
+
+  ipcMain.on('add-payment', (events, data) => {
+    createPaymentWindow(data.url, data.orderID, data.channel);
+  });
+
+  ipcMain.on('close-payment', () => {
+    if (paymentWindow) {
+      paymentWindow.close();
+      paymentWindow = null;
+    }
+  });
+
+  ipcMain.on('payment-fail', () => {
+    if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
+      preferenceWindow.webContents.send('payment-fail');
+    }
+    if (paymentWindow && !paymentWindow.webContents.isDestroyed()) {
+      paymentWindowCloseTag = true;
+      paymentWindow.close();
+      paymentWindow = null;
+    }
+  });
+
+  ipcMain.on('payment-success', () => {
+    if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
+      preferenceWindow.webContents.send('payment-success');
+    }
+    if (mainWindow && !mainWindow.webContents.isDestroyed()) {
+      mainWindow.webContents.send('payment-success');
+    }
+    if (paymentWindow && !paymentWindow.webContents.isDestroyed()) {
+      paymentWindowCloseTag = true;
+      paymentWindow.close();
+      paymentWindow = null;
+    }
+  });
+
+  ipcMain.on('payment-success-apple-verify', () => {
+    if (mainWindow && !mainWindow.webContents.isDestroyed()) {
+      mainWindow.webContents.send('payment-success');
     }
   });
 }
@@ -1489,6 +1639,12 @@ app.on('sign-in', (account) => {
   if (mainWindow && !mainWindow.webContents.isDestroyed()) {
     mainWindow.webContents.send('sign-in', account);
   }
+  if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
+    preferenceWindow.webContents.send('sign-in', account);
+  }
+  if (paymentWindow && !paymentWindow.webContents.isDestroyed()) {
+    paymentWindow.webContents.send('sign-in', account);
+  }
 });
 
 app.on('sign-out-confirm', () => {
@@ -1505,6 +1661,20 @@ app.on('sign-out', () => {
   if (mainWindow && !mainWindow.webContents.isDestroyed()) {
     mainWindow.webContents.send('sign-in', undefined);
   }
+  if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
+    preferenceWindow.webContents.send('sign-in', undefined);
+  }
+  if (paymentWindow && !paymentWindow.webContents.isDestroyed()) {
+    paymentWindow.webContents.send('sign-in', undefined);
+  }
+});
+
+app.on('route-account', (e) => {
+  if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
+    preferenceWindow.webContents.send('route-account');
+  } else {
+    createPreferenceWindow(e, 'account');
+  }
 });
 
 app.getDisplayLanguage = () => {
@@ -1519,3 +1689,77 @@ app.crossThreadCache = crossThreadCache;
 
 // export getSignInEndPoint to static login preload.js
 app.getSignInEndPoint = () => signInEndPoint;
+
+// apple pay
+if (process.platform === 'darwin') {
+  // Listen for transactions as soon as possible.
+  inAppPurchase.on('transactions-updated', (event, transactions) => {
+    if (!Array.isArray(transactions)) {
+      return;
+    }
+    // Check each transaction.
+    transactions.forEach((transaction) => {
+      const payment = transaction.payment;
+      switch (transaction.transactionState) {
+        case 'purchasing':
+          break;
+        case 'purchased':
+          // eslint-disable-next-line no-case-declarations
+          let receipt = '';
+          try {
+            receipt = fs.readFileSync(inAppPurchase.getReceiptURL());
+          } catch (error) {
+            // empty
+          }
+          // Finish the transaction.
+          inAppPurchase.finishTransactionByDate(transaction.transactionDate);
+          if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
+            preferenceWindow.webContents.send('applePay-success', {
+              id: applePayProductID,
+              productID: payment.productIdentifier,
+              receipt,
+              transactionID: transaction.transactionIdentifier,
+            });
+          }
+          break;
+        case 'failed':
+          // Finish the transaction.
+          inAppPurchase.finishTransactionByDate(transaction.transactionDate);
+          if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
+            preferenceWindow.webContents.send('applePay-fail', 'not support');
+          }
+          break;
+        case 'restored':
+          break;
+        case 'deferred':
+          break;
+        default:
+          break;
+      }
+    });
+  });
+
+  // apple pay
+  app.applePay = (product, id, quantity, callback) => {
+    applePayProductID = id;
+    // Check if the user is allowed to make in-app purchase.
+    if (!inAppPurchase.canMakePayments()) {
+      if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
+        preferenceWindow.webContents.send('applePay-fail', 'not support');
+      }
+      return;
+    }
+    // Retrieve and display the product descriptions.
+    inAppPurchase.getProducts([product], (products) => {
+      // Check the parameters.
+      if (!Array.isArray(products) || products.length <= 0) {
+        if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
+          preferenceWindow.webContents.send('applePay-fail', 'Unable to retrieve the product informations.');
+        }
+        return;
+      }
+      // Purchase the selected product.
+      inAppPurchase.purchaseProduct(product, quantity, callback);
+    });
+  };
+}

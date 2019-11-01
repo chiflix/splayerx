@@ -36,7 +36,7 @@ import {
   UIStates as uiActions,
 } from '@/store/actionTypes';
 import { log } from '@/libs/Log';
-import { checkForUpdate } from '@/libs/utils';
+import { checkForUpdate, getEnvironmentName } from '@/libs/utils';
 import asyncStorage from '@/helpers/asyncStorage';
 import { videodata } from '@/store/video';
 import { addBubble } from '@/helpers/notificationControl';
@@ -54,16 +54,6 @@ import BrowsingChannelMenu from './services/browsing/BrowsingChannelMenu';
 
 // causing callbacks-registry.js 404 error. disable temporarily
 // require('source-map-support').install();
-
-function getEnvironmentName() {
-  if (process.platform === 'darwin') {
-    return process.mas ? 'MAS' : 'DMG';
-  }
-  if (process.platform === 'win32') {
-    return process.windowsStore ? 'APPX' : 'EXE';
-  }
-  return 'Unknown';
-}
 
 Vue.config.productionTip = false;
 Vue.config.warnHandler = (warn) => {
@@ -416,6 +406,9 @@ new Vue({
     this.initializeMenuSettings();
     this.$bus.$on('new-file-open', () => {
       this.menuService.addRecentPlayItems();
+    });
+    this.$electron.ipcRenderer.on('pip-float-on-top', () => {
+      this.browsingViewTop = !this.browsingViewTop;
     });
     this.$bus.$on('open-channel-menu', (channel: string) => {
       this.openChannelMenu = true;

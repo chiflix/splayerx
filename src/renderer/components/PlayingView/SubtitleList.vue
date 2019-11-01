@@ -5,7 +5,8 @@
       :class="refAnimation"
       :style="{
         transition: '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
-        height: `${scopeHeight + hoverHeight}px`,
+        height: panelVisiable ? `${scopeHeight + hoverHeight + itemHeight + 5}px`
+          : `${scopeHeight + hoverHeight}px`,
         overflowY: isOverFlow,
       }"
       @animationend="finishAnimation"
@@ -23,7 +24,8 @@
           @mouseup="$emit('off-subtitle')"
           @mouseover="toggleItemsMouseOver(-1)"
           @mouseleave="toggleItemsMouseLeave(-1)"
-          class="menu-item-text-wrapper"
+          :class="`menu-item-text-wrapper ${!backCardVisiable
+            && (currentSubtitleIndex === -1 || currentSubtitleIndex === -2 )? ' focused' : ''}`"
         >
           <div class="text">
             {{ noSubtitle }}
@@ -40,81 +42,165 @@
               transition: isOverFlow ? '' : '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
               color: hoverIndex === index || currentSubtitleIndex === index ?
                 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
-              height: hoverIndex === index ?
-                `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
-              cursor: currentSubtitleIndex === index &&
-                !(item.type === 'preTranslated' && item.source.source === '')
+              cursor: currentSubtitleIndex === index
+                && !(item.type === 'preTranslated' && item.source.source === '')
                 ? 'default' : 'pointer',
-              justifyContent: item.type === 'preTranslated' ? 'space-between' : ''
+              display: !(item.type === 'preTranslated' && item.source.source === '')
+                ? 'block' : 'flex',
             }"
             @mouseup="toggleItemClick($event, index)"
             @mouseover="toggleItemsMouseOver(index)"
             @mouseleave="toggleItemsMouseLeave(index)"
-            class="menu-item-text-wrapper"
+            :class="`menu-item-text-wrapper ${!backCardVisiable && currentSubtitleIndex === index
+              ? ' focused' : ''}`"
           >
             <div
               :style="{
-                width: item.type === 'preTranslated' ? 'auto' : '',
+                display: 'flex',
+                justifyContent: item.type === 'preTranslated' && item.source.source === ''
+                  ? 'space-between' : '',
+                width: 'calc(100% - 2px)',
+                height: hoverIndex === index ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
               }"
-              class="textContainer"
             >
               <div
                 :style="{
-                  wordBreak: hoverIndex === index && showAllName ? 'break-all' : '',
-                  whiteSpace: hoverIndex === index && showAllName ? '' : 'nowrap'
+                  width: item.type === 'preTranslated' && item.source.source === '' ? 'auto' : '',
                 }"
-                class="text"
+                class="textContainer"
               >
-                {{ item.name }}
+                <div
+                  :style="{
+                    wordBreak: hoverIndex === index && showAllName ? 'break-all' : '',
+                    whiteSpace: hoverIndex === index && showAllName ? '' : 'nowrap'
+                  }"
+                  class="text"
+                >
+                  {{ item.name }}
+                </div>
+              </div>
+              <div
+                :style="{
+                  width: item.type === 'preTranslated' && item.source.source === '' ? 'auto' : '',
+                }"
+                class="iconContainer"
+              >
+                <transition
+                  v-if="!(item.type === 'preTranslated' && item.source.source === '')"
+                  name="sub-delete"
+                >
+                  <div class="down-arrow-icon-wrap">
+                    <Icon
+                      :class="'down-arrow-icon'
+                        + `${currentSubtitleIndex === index && panelVisiable
+                          ? ' up' : ''}`"
+                      @mouseup.native.stop="handleSubToggle($event, index)"
+                      v-show="currentSubtitleIndex === index"
+                      type="downArrow"
+                    />
+                  </div>
+                </transition>
+                <!-- <transition name="sub-delete">
+                  <Icon
+                    v-show="item.type === 'local' && hoverIndex === index"
+                    @mouseup.native="handleSubDelete($event, item)"
+                    type="deleteSub"
+                    class="deleteIcon"
+                  />
+                </transition> -->
+                <transition
+                  v-if="item.type === 'preTranslated' && item.source.source === ''
+                    && (item.language !== translateLanguage || translateProgress <= 0)"
+                  name="sub-delete"
+                >
+                  <div
+                    v-show="item.type === 'preTranslated'
+                      && item.source.source === '' && hoverIndex === index"
+                    class="txt"
+                  >
+                    {{ $t('subtitle.generate') }}
+                  </div>
+                </transition>
+                <div
+                  v-else-if="
+                    translateProgress > 0
+                      && item.type === 'preTranslated'
+                      && item.source.source === '' && item.language === translateLanguage
+                  "
+                  class="translateProgress"
+                >
+                  <Progress
+                    :progress="translateProgress"
+                    :type="'circle'"
+                  />
+                </div>
               </div>
             </div>
             <div
+              v-if="!(item.type === 'preTranslated' && item.source.source === '')"
               :style="{
-                width: item.type === 'preTranslated' && item.source.source === '' ? 'auto' : '',
+                height: currentSubtitleIndex === index && !backCardVisiable
+                  && panelVisiable ? `${itemHeight}px`: 0,
               }"
-              class="iconContainer"
+              class="modified-subtitle-advanced-panel"
             >
-              <transition name="sub-delete">
-                <Icon
-                  v-show="item.type === 'preTranslated'
-                    && item.source.source !== '' && hoverIndex === index"
-                  @mouseup.native="handleReTranslate($event, item)"
-                  type="reload"
-                  class="deleteIcon"
-                />
-              </transition>
-              <transition name="sub-delete">
-                <Icon
-                  v-show="item.type === 'local' && hoverIndex === index"
-                  @mouseup.native="handleSubDelete($event, item)"
-                  type="deleteSub"
-                  class="deleteIcon"
-                />
-              </transition>
-              <transition
-                v-if="item.type === 'preTranslated' && item.source.source === ''
-                  && (item.language !== translateLanguage || translateProgress <= 0)"
-                name="sub-delete"
-              >
-                <div
-                  v-show="item.type === 'preTranslated' && hoverIndex === index"
-                  class="txt"
-                >
-                  {{ $t('subtitle.generate') }}
-                </div>
-              </transition>
               <div
-                v-else-if="
-                  translateProgress > 0
-                    && item.type === 'preTranslated' && item.source.source === ''
-                    && item.language === translateLanguage
-                "
-                class="translateProgress"
+                v-if="item.type === 'translated'
+                  || (item.type === 'preTranslated' && item.source.source !== '')"
+                class="icons-wrap"
               >
-                <Progress
-                  :progress="translateProgress"
-                  :type="'circle'"
-                />
+                <div :title="$t('subtitle.tips.editor')">
+                  <Icon
+                    @mouseup.native.stop="handleSubEdit($event, item)"
+                    type="subtitleEdit"
+                  />
+                </div>
+                <div :title="$t('subtitle.tips.export')">
+                  <Icon
+                    @mouseup.native="handleSubExport($event, item)"
+                    type="subtitleExport"
+                  />
+                </div>
+                <div :title="$t('subtitle.tips.reload')">
+                  <Icon
+                    @mouseup.native="handleReTranslate($event, item)"
+                    type="reload"
+                  />
+                </div>
+              </div>
+              <div
+                v-else-if="item.type === 'local'"
+                class="icons-wrap two-icons-wrap"
+              >
+                <div :title="$t('subtitle.tips.editor')">
+                  <Icon
+                    @mouseup.native.stop="handleSubEdit($event, item)"
+                    type="subtitleEdit"
+                  />
+                </div>
+                <div :title="$t('subtitle.tips.delete')">
+                  <Icon
+                    @mouseup.native.stop="handleSubDelete($event, item)"
+                    type="deleteSub"
+                  />
+                </div>
+              </div>
+              <div
+                v-else
+                class="icons-wrap two-icons-wrap"
+              >
+                <div :title="$t('subtitle.tips.editor')">
+                  <Icon
+                    @mouseup.native.stop="handleSubEdit($event, item)"
+                    type="subtitleEdit"
+                  />
+                </div>
+                <div :title="$t('subtitle.tips.export')">
+                  <Icon
+                    @mouseup.native="handleSubExport($event, item)"
+                    type="subtitleExport"
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -132,6 +218,7 @@
           </div>
         </div>
         <div
+          ref="backCard"
           v-if="0 <= computedAvailableItems.length"
           :style="{
             height: currentSubtitleIndex === hoverIndex ?
@@ -140,6 +227,7 @@
               `${-cardPos - hoverHeight}px` : `${-cardPos}px`,
             transition: transFlag ?
               'all 100ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' : '',
+            opacity: backCardVisiable ? '1': '0'
           }"
           class="card"
         />
@@ -150,7 +238,7 @@
 
 <script lang="ts">
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
-import { ISubtitleControlListItem } from '@/interfaces/ISubtitle';
+import { ISubtitleControlListItem, Type } from '@/interfaces/ISubtitle';
 import Icon from '../BaseIconContainer.vue';
 import Progress from './Progress.vue';
 
@@ -186,6 +274,10 @@ export default {
     loadingTypes: {
       type: Array,
       default: () => [],
+    },
+    itemHeight: {
+      type: Number,
+      required: true,
     },
     hoverHeight: {
       type: Number,
@@ -223,12 +315,23 @@ export default {
       type: String,
       required: true,
     },
+    panelVisiable: {
+      type: Boolean,
+      default: false,
+    },
+    exportSubtitle: {
+      type: Function,
+      required: true,
+    },
   },
   data() {
     return {
       detailTimer: null,
       hoverIndex: -5,
       showAllName: false,
+      backCardVisiable: false, // 背景card动画结束就隐藏
+      clickItem: false, //
+      clickItemArrow: false, //
     };
   },
   computed: {
@@ -240,15 +343,6 @@ export default {
         return 14;
       }
       return 18;
-    },
-    itemHeight() {
-      if (this.computedSize >= 289 && this.computedSize <= 480) {
-        return 27;
-      }
-      if (this.computedSize >= 481 && this.computedSize < 1080) {
-        return 32;
-      }
-      return 44;
     },
     currentScrollTop() {
       const marginFactors = [4, 5, 7];
@@ -274,6 +368,9 @@ export default {
         : this.scopeHeight + 7;
     },
     isOverFlow() {
+      if (this.panelVisiable) {
+        return 'auto';
+      }
       if (this.computedSize >= 289 && this.computedSize <= 480) {
         return this.scopeHeight + this.hoverHeight > 89 ? 'scroll' : '';
       }
@@ -297,9 +394,21 @@ export default {
       if (val === 0) {
         this.$refs.scroll.scrollTop = 0;
       }
+      this.backCardVisiable = this.transFlag && this.clickItem;
+      if (val < 0) {
+        this.$emit('update:panelVisiable', false);
+      } else {
+        this.$emit('update:panelVisiable', this.clickItemArrow);
+      }
     },
-    showAttached() {
-      this.$refs.scroll.scrollTop = this.currentScrollTop;
+    showAttached(val: boolean) {
+      setImmediate(() => {
+        this.$refs.scroll.scrollTop = this.currentScrollTop;
+      });
+      if (!val) {
+        this.$emit('update:panelVisiable', false);
+        this.clickItemArrow = false;
+      }
     },
     isFirstSubtitle() {
       this.$refs.scroll.scrollTop = this.currentScrollTop;
@@ -307,6 +416,15 @@ export default {
     enabledSecondarySub(val: boolean) {
       this.$refs.scroll.scrollTop = val ? 0 : this.currentScrollTop;
     },
+  },
+  mounted() {
+    // card transition end
+    this.$refs.backCard.addEventListener('transitionend', (e: TransitionEvent) => {
+      if (e.propertyName !== 'opacity') {
+        this.clickItem = false;
+        this.backCardVisiable = false;
+      }
+    });
   },
   methods: {
     finishAnimation() {
@@ -334,6 +452,14 @@ export default {
         }, 0);
       }
     },
+    /**
+     * 自制字幕导出按钮
+     */
+    handleSubExport(e: MouseEvent, item: ISubtitleControlListItem) {
+      this.exportSubtitle(item);
+      // 字幕面板点击导出字幕按钮
+      this.$ga.event('app', 'export-subtitle');
+    },
     handleReTranslate(e: MouseEvent, item: ISubtitleControlListItem) {
       if ((e.target as HTMLElement).nodeName !== 'DIV') {
         setTimeout(() => {
@@ -351,14 +477,81 @@ export default {
       this.showAllName = false;
       this.hoverIndex = -5;
     },
-    toggleItemClick(event: MouseEvent, index: number) {
-      if ((event.target as HTMLElement).nodeName === 'DIV') {
+    /**
+     * 点击自制字幕的箭头
+     */
+    handleSubToggle(e: MouseEvent, index: number) {
+      if (this.currentSubtitleIndex === index) {
+        this.$emit('update:panelVisiable', !this.panelVisiable);
+      } else {
         const { computedAvailableItems } = this;
+        this.clickItem = true;
         this.changeSubtitle(computedAvailableItems[index]);
         setTimeout(() => {
           this.showSubtitleDetails(index);
         }, 0);
       }
+      this.clickItemArrow = true;
+      // 处理显示
+      this.handleModifiedAdvancedPanelScrollTop(index);
+    },
+    toggleItemClick(event: MouseEvent, index: number) {
+      const { computedAvailableItems } = this;
+      const currentItem = computedAvailableItems[index];
+      if (currentItem) {
+        this.clickItem = true;
+        this.changeSubtitle(currentItem);
+        setTimeout(() => {
+          this.showSubtitleDetails(index);
+        }, 0);
+        this.clickItemArrow = false;
+        if (currentItem.type === Type.PreTranslated && currentItem.source.source === '') {
+          setTimeout(() => {
+            this.backCardVisiable = false;
+          }, 500);
+        }
+      }
+    },
+    /**
+     * 处理当自制字幕功能面板不在可是范围内，滚动父级的视窗
+     */
+    handleModifiedAdvancedPanelScrollTop(index: number) {
+      setImmediate(() => {
+        const currentScrollTop = this.$refs.scroll.scrollTop;
+        const parentHeight = this.$refs.scroll.parentNode.offsetHeight;
+        const subDom = document.getElementById(`item${index}`);
+        const offsetTop = subDom ? subDom.offsetTop : 0;
+        const targetScrollTop = (offsetTop + (2 * this.itemHeight)) - parentHeight;
+        if (this.panelVisiable && offsetTop < currentScrollTop) {
+          this.animateScrollTop(currentScrollTop, offsetTop);
+        } else if (this.panelVisiable && targetScrollTop > currentScrollTop) {
+          this.animateScrollTop(currentScrollTop, targetScrollTop);
+        }
+      });
+    },
+    /**
+     * 处理scrollTop动画
+     */
+    animateScrollTop(origin: number, target: number) {
+      const cosParameter = (origin - target) / 2;
+      let scrollCount = 0;
+      let oldTimestamp = window.performance.now();
+      const step = (newTimestamp: number) => {
+        let tsDiff = newTimestamp - oldTimestamp;
+        if (tsDiff > 100) {
+          tsDiff = 30;
+        }
+        scrollCount += Math.PI / (300 / tsDiff);
+        if (scrollCount >= Math.PI) {
+          return;
+        }
+        const moveStep = Math.round((target + cosParameter)
+          + (cosParameter * Math.cos(scrollCount)));
+        this.$refs.scroll.scrollTop = moveStep;
+        oldTimestamp = newTimestamp;
+        window.requestAnimationFrame(step);
+      };
+      window.requestAnimationFrame(step);
     },
   },
 };
@@ -387,6 +580,38 @@ export default {
   100% { opacity: 1 }
 }
 .menu-item-text-wrapper {
+  position: relative;
+  &::before {
+    width: calc(100% - 2px);
+    height: calc(100% - 1px);
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 50%;
+    z-index: -5;
+    transform: translateX(calc(-50% - 1px));
+    box-sizing: inherit;
+    border-radius: 7px;
+    opacity: 0;
+    background: transparent;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .2);
+    border: 0.5px solid rgba(255, 255, 255, 0.40);
+    background-image: radial-gradient(
+      60% 134%,
+    rgba(255, 255, 255, 0.25) 44%,
+      rgba(255, 255, 255, 0.21) 100%
+    );
+  }
+  &.focused {
+    border-radius: 7px;
+    overflow: hidden;
+    &::before {
+      opacity: 1;
+    }
+  }
+  .deleteIcon, .detach-icon {
+    transition-delay: 75ms;
+  }
   .iconContainer {
     display: flex;
     align-items: center;
@@ -401,11 +626,74 @@ export default {
   .deleteIcon {
     transition-delay: 75ms;
   }
+  .down-arrow-icon-wrap {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    z-index: 2;
+    .down-arrow-icon {
+      width: 100%;
+      height: 48%;
+      display: flex;
+      transition: transform 0.1s ease-in-out;
+      &.up {
+        transform: rotate(180deg);
+      }
+    }
+  }
   .text {
     transition: color 90ms linear;
     transition-delay: 75ms;
     overflow: hidden; //超出的文本隐藏
     text-overflow: ellipsis;
+  }
+  .modified-subtitle-advanced-panel {
+    width: calc(100% - 2px);
+    background: rgba(0,0,0,0.05);
+    overflow: hidden;
+    transition: height 0.1s ease-in-out;
+    .icons-wrap, .confirm-delete-wrap {
+      height: 100%;
+    }
+    .icons-wrap {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      &>div {
+        // width: 16.95px;
+        height: 53.5%;
+        cursor: pointer;
+      }
+      &>div:nth-child(2) {
+        border-left: 1px solid rgba(255, 255, 255, 0.1);
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      &>div:nth-child(1) {
+        cursor: default;
+      }
+    }
+    .two-icons-wrap {
+      &>div:nth-child(2) {
+        border-right: none;
+      }
+    }
+    .confirm-delete-wrap {
+      text-align: right;
+      .submit, .cancel {
+        color: #FFFFFF;
+        margin-right: 15px;
+      }
+      .submit {
+        opacity: 0.4;
+      }
+      .cancel {
+        opacity: 0.2;
+      }
+    }
   }
 }
 .placeholder-item-text-wrapper {
