@@ -359,8 +359,8 @@
         "description5": "",
         "description6": ""
       },
-      "origin": "",
-      "off": "",
+      "origin": "原价 ",
+      "off": "折",
       "month": "个月",
       "year": "年",
       "months": "个月",
@@ -449,8 +449,8 @@
       "zh-TW": "中文（繁体）"
     },
     "tips": {
-      "editor": "",
-      "export": "",
+      "editor": "编辑功能即将到来",
+      "export": "导出",
       "reload": "",
       "delete": ""
     }
