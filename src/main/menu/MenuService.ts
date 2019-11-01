@@ -40,6 +40,9 @@ export default class MenuService {
     ipcMain.on('update-locale', () => {
       this.menu.updateLocale();
     });
+    ipcMain.on('update-browisng-history', (e: Event, items: IMenuDisplayInfo[]) => {
+      this.menu.updateBrowsingHistory(items);
+    });
     ipcMain.on('update-recent-play', (e: Event, items: IMenuDisplayInfo[]) => {
       this.menu.updateRecentPlay(items);
     });

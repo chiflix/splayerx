@@ -8,5 +8,7 @@ export type HistoryDisplayItem = {
 
 export interface IBrowsingHistory {
   getHistorys(): Promise<HistoryDisplayItem[]>,
+  getMenuDisplayInfo(): Promise<IMenuDisplayInfo[]>,
   saveHistoryItem(url: string, title: string, channel: string): Promise<IDBValidKey>,
+  cleanChannelRecords(channel: string): Promise<void>,
 }
