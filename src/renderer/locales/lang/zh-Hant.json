@@ -29,7 +29,7 @@
     "openSidebar": "打開側邊欄 (C)",
     "closeSidebar": "隱藏側邊欄 (C)",
     "exit": "回到啟動頁",
-    "delete": ""
+    "delete": "回到啟動頁"
   },
   "errorFile": {
     "ENOSPC": {
@@ -320,36 +320,36 @@
       "clearHistoryDescription": "清除已有的播放列表和歷史記錄"
     },
     "account": {
-      "accountSetting": "",
-      "title": "",
+      "accountSetting": "用戶設置",
+      "title": "用戶信息",
       "noToken": {
-        "title": "",
-        "description": "",
-        "button": ""
+        "title": "未登錄",
+        "description": "登錄後可使用AI翻譯等更多功能",
+        "button": "免註冊登錄"
       },
       "normalUser": {
         "title": "普通用戶: ",
-        "description": "",
-        "button": ""
+        "description": "投食成為射手雲養員，獲取專享功能和特殊權益。",
+        "button": "投食"
       },
       "vipUser": {
         "title": "云养员: ",
-        "description": "",
-        "button": ""
+        "description": "雲養至：",
+        "button": "繼續投食"
       },
       "month": "個月",
       "year": "年",
       "months": "个月",
       "years": "年",
-      "signOut": "",
-      "createdAt": "",
-      "payAt": "",
-      "payContent": "",
-      "payProduct": ""
+      "signOut": "註銷",
+      "createdAt": "註冊時間",
+      "payAt": "投食記錄",
+      "payContent": "{date}{product}",
+      "payProduct": ": 投食 {product}"
     },
     "premium": {
-      "premiumSetting": "",
-      "title": "",
+      "premiumSetting": "雲養計劃",
+      "title": "射手雲養計劃",
       "description": "牆裂歡迎廣大用戶投食支持射手影音長期穩定可持續開發，同時獲得射手雲養員專享功能。",
       "content": {
         "description1": "AI翻譯功能 (應該) 足夠用",
