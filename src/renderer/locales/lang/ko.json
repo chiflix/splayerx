@@ -271,6 +271,7 @@
     "enterPop": "새 창에서 놀다",
     "exitPop": "브라우저로 돌아 가기",
     "danmu": "탄막",
+    "pin": "",
     "error": {
       "offline": "인터넷이 없습니다",
       "try": "시험:",
