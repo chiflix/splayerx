@@ -328,12 +328,12 @@
         "button": "免注册登录"
       },
       "normalUser": {
-        "title": "普通用户",
+        "title": "普通用户: ",
         "description": "投食成为射手云养员，获取专享功能和特殊权益。",
         "button": "投食"
       },
       "vipUser": {
-        "title": "云养员 ",
+        "title": "云养员: ",
         "description": "云养至：",
         "button": "继续投食"
       },
