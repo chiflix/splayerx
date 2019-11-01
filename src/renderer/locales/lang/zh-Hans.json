@@ -337,22 +337,22 @@
         "description": "",
         "button": ""
       },
-      "month": "",
-      "year": "",
-      "months": "",
-      "years": "",
-      "signOut": "",
-      "createdAt": "",
-      "payAt": "",
-      "payContent": "",
-      "payProduct": ""
+      "month": "个月",
+      "year": "年",
+      "months": "个月",
+      "years": "年",
+      "signOut": "注销",
+      "createdAt": "注册时间",
+      "payAt": "投食记录",
+      "payContent": "{date}{product}",
+      "payProduct": ": 投食 {product}"
     },
     "premium": {
-      "premiumSetting": "",
+      "premiumSetting": "云养计划",
       "title": "",
       "description": "",
       "content": {
-        "description1": "",
+        "description1": "AI翻译功能 (应该) 足够用",
         "description2": "",
         "description3": "",
         "description4": "",
