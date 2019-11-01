@@ -355,7 +355,7 @@
         "description1": "AI翻译功能 (应该) 足够用",
         "description2": "更多智能翻译语言选择",
         "description3": "无限制导出语音识别字幕",
-        "description4": "更多福利准备中，尽情期待",
+        "description4": "更多福利准备中，敬请期待",
         "description5": "",
         "description6": ""
       },
@@ -368,7 +368,7 @@
       "payType": {
         "alipay": "支付宝",
         "wxpay": "微信支付",
-        "paypal": "PayPal 支付"
+        "paypal": "PayPal"
       }
     }
   },
@@ -624,7 +624,7 @@
     },
     "success": {
       "h2": "感谢您对 SPlayer 的支持",
-      "h1": "投食成功!",
+      "h1": "投食成功！",
       "h4": "NOW",
       "content1": "增加智能翻译使用时间",
       "content2": "更多智能翻译语言选择",
