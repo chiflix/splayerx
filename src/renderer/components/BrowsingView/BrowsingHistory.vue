@@ -44,13 +44,46 @@
         <div
           v-if="histories.length < 1"
           :style="{
-            backgroundImage: `url(${require('@/assets/history.png')})`,
-            backgroundSize: '100% 100%',
-            backgroundRepeat: 'no-repeat',
             height: `${placeholderHeight[currentPhase]}px`
           }"
           class="placeholder"
-        />
+        >
+          <div
+            :style="{
+              width: `${placeholderPreWidth[currentPhase]}px`,
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+            }"
+          >
+            <div
+              :style="{
+                width: '100%',
+                height: `${placeholderPreWidth[currentPhase]}px`,
+                background: '#CECFDB',
+                borderRadius: '100%',
+              }"
+            />
+            <div
+              :style="{
+                width: '100%',
+                height: `${placeholderPreWidth[currentPhase]}px`,
+                background: '#CECFDB',
+                borderRadius: '100%',
+             }"
+            />
+          </div>
+          <div
+            :style="{
+              flex: '1',
+              height: '100%',
+              backgroundImage: `url(${require('@/assets/history.png')})`,
+              backgroundSize: '100% 100%',
+              backgroundRepeat: 'no-repeat',
+            }"
+          />
+        </div>
         <BrowsingHistoryItem
           v-else
           :key="item.url"
@@ -113,6 +146,9 @@ export default {
     },
     blankTitleFontSize() {
       return [19 * 888 / 1176, 19 * this.winWidth / 1176, 19];
+    },
+    placeholderPreWidth() {
+      return [26 * 888 / 1176, 26 * this.winWidth / 1176, 26];
     },
   },
   watch: {
@@ -181,6 +217,7 @@ export default {
     .placeholder {
       width: 100%;
       margin: auto 0 auto 0;
+      display: flex;
     }
   }
 }

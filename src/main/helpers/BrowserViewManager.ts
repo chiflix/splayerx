@@ -148,9 +148,32 @@ export class BrowserViewManager implements IBrowserViewManager {
 
   public openHistoryPage(channel: string, url: string): BrowserViewData {
     const newHistory = (this.historyByChannel.get(channel) as ChannelData);
-    const index = newHistory.list.findIndex(i => i.url === url);
-    if (!this.historyByChannel.has(channel) || index === -1) {
+    if (!this.historyByChannel.has(channel)) {
       return this.create(channel, { url });
+    }
+    const index = newHistory.list.findIndex(i => i.url === url);
+    if (index === -1) {
+      const page = {
+        url,
+        view: new BrowserView({
+          webPreferences: {
+            preload: `${require('path').resolve(__static, 'pip/preload.js')}`,
+            nativeWindowOpen: true,
+            // disableHtmlFullscreenWindowResize: true, // Electron 6 required
+          },
+        }),
+        lastUpdateTime: Date.now(),
+      };
+      page.view.webContents.loadURL(url);
+      newHistory.list.push(page);
+      newHistory.currentIndex = newHistory.list.length - 1;
+      newHistory.lastUpdateTime = Date.now();
+      this.addCacheByChannel(channel, newHistory.list[newHistory.currentIndex]);
+      return {
+        canBack: newHistory.list.length > 1,
+        canForward: false,
+        page,
+      };
     }
     const page = newHistory.list[index];
     if (page.view && page.view.isDestroyed()) {
