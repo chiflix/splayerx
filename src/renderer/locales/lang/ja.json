@@ -29,7 +29,7 @@
     "openSidebar": "サイドバーの表示 (C)",
     "closeSidebar": "サイドバーを隠す (C)",
     "exit": "起動ページに戻る",
-    "delete": ""
+    "delete": "Back to Launching Page"
   },
   "errorFile": {
     "ENOSPC": {
@@ -272,7 +272,7 @@
     "enterPop": "新しいウィンドウで遊ぶ",
     "exitPop": "ブラウザに戻る (O)",
     "danmu": "だんまくスイッチ",
-    "pin": "",
+    "pin": "Pin / Unpin (T)",
     "error": {
       "offline": "インターネットがない",
       "try": "お試しください:",
@@ -321,16 +321,16 @@
     },
     "account": {
       "accountSetting": "账户",
-      "title": "",
+      "title": "プロフィール",
       "noToken": {
-        "title": "",
-        "description": "",
-        "button": ""
+        "title": "サインインしていません",
+        "description": "AI翻訳とより高度な機能を使用するには、電話番号でサインインしてください。",
+        "button": "登入"
       },
       "normalUser": {
         "title": "Account: ",
-        "description": "",
-        "button": ""
+        "description": "Upgrade your account now and get started with exclusive features and more.",
+        "button": "Upgrade"
       },
       "vipUser": {
         "title": "Premium Account: ",
@@ -343,7 +343,7 @@
       "years": " Years",
       "signOut": "登出",
       "createdAt": "登録日",
-      "payAt": "Recent Purchased",
+      "payAt": "最近の購入履歴",
       "payContent": "{date}{product}",
       "payProduct": ": {product} Premium"
     },
