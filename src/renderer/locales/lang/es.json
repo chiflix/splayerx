@@ -344,40 +344,40 @@
       "signOut": "",
       "createdAt": "",
       "payAt": "",
-      "payContent": "",
-      "payProduct": ""
+      "payContent": "{date}{product}",
+      "payProduct": ": {product} Premium"
     },
     "premium": {
-      "premiumSetting": "",
-      "title": "",
+      "premiumSetting": "Premium",
+      "title": "SPlayer Premium",
       "description": "",
       "content": {
         "description1": "",
-        "description2": "",
+        "description2": "Soporta más idiomas en Traducción de IA",
         "description3": "",
-        "description4": "",
+        "description4": "Nuevas funciones próximamente",
         "description5": "",
         "description6": ""
       },
-      "origin": "",
-      "off": "",
+      "origin": "ORIG. ",
+      "off": "% Off",
       "month": "",
       "year": "",
       "months": "",
       "years": "",
       "payType": {
-        "alipay": "",
+        "alipay": "Alipay",
         "wxpay": "",
-        "paypal": ""
+        "paypal": "PayPal"
       }
     }
   },
   "payment": {
     "wxpay": {
-      "title": "",
-      "description": ""
+      "title": "SCAN & PAY",
+      "description": "WeChat Pay"
     },
-    "fail": ""
+    "fail": "Error"
   },
   "privacyBubble": {
     "confirmDisable": {
