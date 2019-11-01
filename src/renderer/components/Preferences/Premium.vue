@@ -18,7 +18,6 @@
       <ul>
         <li>{{ $t('preferences.premium.content.description4') }}</li>
         <li>{{ $t('preferences.premium.content.description5') }}</li>
-        <li>{{ $t('preferences.premium.content.description6') }}</li>
       </ul>
     </div>
     <div
