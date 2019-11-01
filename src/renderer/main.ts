@@ -1055,7 +1055,7 @@ new Vue({
         this.$electron.ipcRenderer.send('set-window-maximize');
       });
       this.menuService.on('browsing.window.sidebar', () => {
-        this.$event.emit('side-bar-mouseup');
+        this.$bus.$emit('toggle-side-bar');
       });
       this.menuService.on('browsing.window.backToLandingView', () => {
         this.$router.push({ name: 'landing-view' });
