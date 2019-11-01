@@ -483,7 +483,7 @@
     "videoLanguageLabel": "視頻語言",
     "subtitleLanguageLabel": "翻譯至",
     "selectLanguageLabel": "請選擇",
-    "selectLanguageMoreLabel": "",
+    "selectLanguageMoreLabel": "更多語言 ...",
     "audioLanguageLoading": "獲取語言列表中 ...",
     "audioLanguageLoadFail": "連接錯誤，請稍後重試",
     "select": {
@@ -603,7 +603,7 @@
     "content": "",
     "span": "",
     "button": "",
-    "audioLanguage": "",
+    "audioLanguage": "日本語, 한국어, Español, Français, Deutsch, Italiano, Português, čeština, Русский, Indonesian, العربية, Türkçe, română",
     "translate": {
       "title": "",
       "content": "",
@@ -625,7 +625,7 @@
     "success": {
       "h2": "",
       "h1": "",
-      "h4": "",
+      "h4": "NOW",
       "content1": "",
       "content2": "",
       "content3": "",
