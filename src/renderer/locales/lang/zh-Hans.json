@@ -377,7 +377,7 @@
       "title": "扫码支付",
       "description": "微信支付"
     },
-    "fail": ""
+    "fail": "加载失败"
   },
   "privacyBubble": {
     "confirmDisable": {
@@ -628,7 +628,7 @@
       "h4": "NOW",
       "content1": "增加智能翻译使用时间",
       "content2": "更多智能翻译语言选择",
-      "content3": "",
+      "content3": "无限制导出字幕文件",
       "button": "完成"
     },
     "fail": {
