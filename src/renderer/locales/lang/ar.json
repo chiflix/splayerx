@@ -330,20 +330,20 @@
       "normalUser": {
         "title": "Account: ",
         "description": "",
-        "button": ""
+        "button": "Upgrade"
       },
       "vipUser": {
         "title": "Premium Account: ",
-        "description": "",
-        "button": ""
+        "description": "Expiration Date: ",
+        "button": "Renew"
       },
       "month": " Month",
       "year": " Year",
       "months": " Months",
       "years": " Years",
-      "signOut": "",
-      "createdAt": "",
-      "payAt": "",
+      "signOut": "Sign out",
+      "createdAt": "Registration Date",
+      "payAt": "Recent Purchased",
       "payContent": "",
       "payProduct": ": {product} Premium"
     },
