@@ -599,22 +599,22 @@
     }
   },
   "forbiddenModal": {
-    "title": "",
-    "content": "",
-    "span": "",
-    "button": "",
+    "title": "加入射手云养计划",
+    "content": "投食成为射手云养员，即可导出翻译至本地，还可以获得更多专享功能。",
+    "span": "已是云养员请登录",
+    "button": "成为射手云养员",
     "audioLanguage": "日本語, 한국어, Español, Français, Deutsch, Italiano, Português, čeština, Русский, Indonesian, العربية, Türkçe, română",
     "translate": {
-      "title": "",
-      "content": "",
-      "span": "",
-      "button": ""
+      "title": "加入射手云养计划",
+      "content": "投食成为射手云养员，支持更多语言的语音识别和AI翻译，并获得更多专享功能。",
+      "span": "已是云养员请登录",
+      "button": "成为射手云养员"
     },
     "export": {
-      "title": "",
-      "content": "",
-      "span": "",
-      "button": ""
+      "title": "加入射手云养计划",
+      "content": "投食成为射手云养员，即可导出翻译至本地，还可以获得更多专享功能。",
+      "span": "已是云养员请登录",
+      "button": "成为射手云养员"
     }
   },
   "premiumModal": {
