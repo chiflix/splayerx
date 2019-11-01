@@ -444,6 +444,7 @@ export default {
     },
   },
   created() {
+    this.updateShowAllWidgets(this.showAllWidgets);
     window.addEventListener('mouseover', this.handleWindowMouseenter);
     window.addEventListener('mouseout', this.handleWindowMouseleave);
   },
