@@ -333,6 +333,9 @@ function createPreferenceWindow(e, route) {
       preferenceWindow = null;
     });
   } else {
+    if (!preferenceWindow.webContents.isDestroyed()) {
+      preferenceWindow.webContents.send('route-change', 'Premium');
+    }
     preferenceWindow.focus();
   }
   preferenceWindow.once('ready-to-show', () => {
@@ -1636,7 +1639,7 @@ app.on('sign-out', () => {
 
 app.on('route-account', (e) => {
   if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
-    preferenceWindow.webContents.send('route-account');
+    preferenceWindow.webContents.send('route-change');
   } else {
     createPreferenceWindow(e, 'account');
   }
