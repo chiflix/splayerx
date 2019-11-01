@@ -46,6 +46,7 @@ window.onload = () => {
 document.addEventListener('DOMContentLoaded', () => {
   const danmu = document.querySelector('.danmu');
   const pip = document.querySelector('.pip');
+  const floatTop = document.querySelector('.pin');
   const pipBtns = document.querySelector('.pip-buttons');
   // eslint-disable-next-line complexity
   function handleMousedown(evt) {
@@ -195,6 +196,11 @@ document.addEventListener('DOMContentLoaded', () => {
   if (danmu) {
     danmu.addEventListener('mouseup', () => {
       sendToHost('danmu', 'danmu');
+    });
+  }
+  if (floatTop) {
+    floatTop.addEventListener('mouseup', () => {
+      sendToHost('pin', 'pin');
     });
   }
   if (pip) {
