@@ -29,7 +29,7 @@
     "openSidebar": "사이드 바 표시 (C)",
     "closeSidebar": "사이드 바 숨김 (C)",
     "exit": "시작 페이지로 돌아 가기",
-    "delete": ""
+    "delete": "Back to Launching Page"
   },
   "errorFile": {
     "ENOSPC": {
@@ -272,7 +272,7 @@
     "enterPop": "새 창에서 놀다",
     "exitPop": "브라우저로 돌아 가기",
     "danmu": "탄막",
-    "pin": "",
+    "pin": "Pin / Unpin (T)",
     "error": {
       "offline": "인터넷이 없습니다",
       "try": "시험:",
@@ -320,64 +320,64 @@
       "clearHistoryDescription": "기존 재생 목록 및 재생 기록 제거"
     },
     "account": {
-      "accountSetting": "",
-      "title": "",
+      "accountSetting": "계정",
+      "title": "My Profile",
       "noToken": {
-        "title": "",
-        "description": "",
-        "button": ""
+        "title": "Not Signed In",
+        "description": "Sign in with your phone number to use AI Translation and more advanced features.",
+        "button": "Sign In"
       },
       "normalUser": {
-        "title": "",
-        "description": "",
-        "button": ""
+        "title": "Account: ",
+        "description": "Upgrade your account now and get started with exclusive features and more.",
+        "button": "Upgrade"
       },
       "vipUser": {
-        "title": "",
-        "description": "",
-        "button": ""
+        "title": "Premium Account: ",
+        "description": "Expiration Date: ",
+        "button": "Renew"
       },
-      "month": "",
-      "year": "",
-      "months": "",
-      "years": "",
-      "signOut": "",
-      "createdAt": "",
-      "payAt": "",
-      "payContent": "",
-      "payProduct": ""
+      "month": " Month",
+      "year": " Year",
+      "months": " Years",
+      "years": " Years",
+      "signOut": "Sign out",
+      "createdAt": "Registration Date",
+      "payAt": "Recent Purchased",
+      "payContent": "{date}{product}",
+      "payProduct": ": {product} Premium"
     },
     "premium": {
-      "premiumSetting": "",
-      "title": "",
-      "description": "",
+      "premiumSetting": "Premium",
+      "title": "SPlayer Premium",
+      "description": "Additional hours of AI Translation service",
       "content": {
-        "description1": "",
-        "description2": "",
-        "description3": "",
-        "description4": "",
+        "description1": "Additional hours of AI Translation service",
+        "description2": "Support more languages in AI Translation",
+        "description3": "Export speech recognition results unlimitedly",
+        "description4": "New features are coming soon",
         "description5": "",
         "description6": ""
       },
-      "origin": "",
-      "off": "",
-      "month": "",
-      "year": "",
-      "months": "",
-      "years": "",
+      "origin": "ORIG. ",
+      "off": "% Off",
+      "month": " Month",
+      "year": " Year",
+      "months": " Yr.",
+      "years": " Yr.",
       "payType": {
-        "alipay": "",
-        "wxpay": "",
-        "paypal": ""
+        "alipay": "Alipay",
+        "wxpay": "WeChat",
+        "paypal": "PayPal"
       }
     }
   },
   "payment": {
     "wxpay": {
-      "title": "",
-      "description": ""
+      "title": "SCAN & PAY",
+      "description": "WeChat Pay"
     },
-    "fail": ""
+    "fail": "Error"
   },
   "privacyBubble": {
     "confirmDisable": {
@@ -403,7 +403,7 @@
   },
   "notExportEmbeddedSubtitle": {
     "title": "",
-    "content": ""
+    "content": "Embedded subtitle is loading, please try to export later."
   },
   "protectBubble": {
     "agree": "승인",
@@ -449,10 +449,10 @@
       "zh-TW": "중국어 (번체)"
     },
     "tips": {
-      "editor": "",
-      "export": "",
-      "reload": "",
-      "delete": ""
+      "editor": "Edit is coming soon ...",
+      "export": "내보내기",
+      "reload": "재생",
+      "delete": "제거"
     }
   },
   "uploading": {
@@ -483,7 +483,7 @@
     "videoLanguageLabel": "오디오 언어",
     "subtitleLanguageLabel": "번역할 언어",
     "selectLanguageLabel": "오디오 언어",
-    "selectLanguageMoreLabel": "",
+    "selectLanguageMoreLabel": "더보기 ...",
     "audioLanguageLoading": "언어 목록을 가져 오는 중 ...",
     "audioLanguageLoadFail": "연결에 실패했습니다. 나중에 다시 시도하십시오",
     "select": {
@@ -599,44 +599,44 @@
     }
   },
   "forbiddenModal": {
-    "title": "",
-    "content": "",
-    "span": "",
-    "button": "",
-    "audioLanguage": "",
+    "title": "Upgrade to SPlayer Premium",
+    "content": "Upgrade to export translation results unlimitedly, and get access to more exclusive features.",
+    "span": "Already Premium? Sign In",
+    "button": "Go Premium Now",
+    "audioLanguage": "日本語, 한국어, Español, Français, Deutsch, Italiano, Português, čeština, Русский, Indonesian, العربية, Türkçe, română",
     "translate": {
-      "title": "",
-      "content": "",
-      "span": "",
-      "button": ""
+      "title": "Upgrade to SPlayer Premium",
+      "content": "Go Premium to get access to more languages and other exclusive features.",
+      "span": "Already Premium? Sign In",
+      "button": "Go Premium Now"
     },
     "export": {
-      "title": "",
-      "content": "",
-      "span": "",
-      "button": ""
+      "title": "Upgrade to SPlayer Premium",
+      "content": "Upgrade to export translation results unlimitedly, and get access to more exclusive features.",
+      "span": "Already Premium? Sign In",
+      "button": "Go Premium Now"
     }
   },
   "premiumModal": {
     "loading": {
-      "content": "",
-      "button": ""
+      "content": "Processing，please wait a second …",
+      "button": "Close"
     },
     "success": {
-      "h2": "",
-      "h1": "",
-      "h4": "",
-      "content1": "",
-      "content2": "",
-      "content3": "",
-      "button": ""
+      "h2": "Thanks for your support",
+      "h1": "Payment Successful !",
+      "h4": "NOW",
+      "content1": "Additional Hours of AI Translation Service",
+      "content2": "Support More Languages in AI Translation",
+      "content3": "Export Translation Results Unlimitedly",
+      "button": "Done"
     },
     "fail": {
-      "h1": "",
-      "content": "",
-      "copy": "",
-      "copied": "",
-      "button": ""
+      "h1": "Sorry",
+      "content": "Your transaction could not be processed，please contact us",
+      "copy": "Copy",
+      "copied": "Copied",
+      "button": "Back"
     }
   }
 }
