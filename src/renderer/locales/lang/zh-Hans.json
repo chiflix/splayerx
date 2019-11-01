@@ -361,14 +361,14 @@
       },
       "origin": "",
       "off": "",
-      "month": "",
-      "year": "",
-      "months": "",
-      "years": "",
+      "month": "个月",
+      "year": "年",
+      "months": "个月",
+      "years": "年",
       "payType": {
-        "alipay": "",
+        "alipay": "支付宝",
         "wxpay": "微信支付",
-        "paypal": ""
+        "paypal": "PayPal 支付"
       }
     }
   },
