@@ -614,20 +614,20 @@
       "title": "",
       "content": "",
       "span": "",
-      "button": ""
+      "button": "成為射手雲養員"
     }
   },
   "premiumModal": {
     "loading": {
-      "content": "",
-      "button": ""
+      "content": "投食中，請稍後 ...",
+      "button": "關閉頁面"
     },
     "success": {
-      "h2": "",
-      "h1": "",
+      "h2": "感謝您對 SPlayer 的支持",
+      "h1": "投食成功！",
       "h4": "NOW",
-      "content1": "",
-      "content2": "",
+      "content1": "增加智能翻譯使用時間",
+      "content2": "更多智能翻譯語言選擇",
       "content3": "無限制導出字幕文件",
       "button": "完成"
     },
