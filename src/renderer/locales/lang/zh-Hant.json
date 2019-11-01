@@ -328,19 +328,19 @@
         "button": ""
       },
       "normalUser": {
-        "title": "",
+        "title": "普通用戶: ",
         "description": "",
         "button": ""
       },
       "vipUser": {
-        "title": "",
+        "title": "云养员: ",
         "description": "",
         "button": ""
       },
-      "month": "",
-      "year": "",
-      "months": "",
-      "years": "",
+      "month": "個月",
+      "year": "年",
+      "months": "个月",
+      "years": "年",
       "signOut": "",
       "createdAt": "",
       "payAt": "",
@@ -350,7 +350,7 @@
     "premium": {
       "premiumSetting": "",
       "title": "",
-      "description": "",
+      "description": "牆裂歡迎廣大用戶投食支持射手影音長期穩定可持續開發，同時獲得射手雲養員專享功能。",
       "content": {
         "description1": "AI翻譯功能 (應該) 足夠用",
         "description2": "更多智能翻譯語言選擇",
