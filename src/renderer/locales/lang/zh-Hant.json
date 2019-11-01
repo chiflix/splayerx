@@ -628,15 +628,15 @@
       "h4": "NOW",
       "content1": "",
       "content2": "",
-      "content3": "",
-      "button": ""
+      "content3": "無限制導出字幕文件",
+      "button": "完成"
     },
     "fail": {
-      "h1": "",
-      "content": "",
-      "copy": "",
-      "copied": "",
-      "button": ""
+      "h1": "很遺憾",
+      "content": "投食過程中遇到了一些問題，請通過郵箱聯繫我們",
+      "copy": "拷貝",
+      "copied": "已拷貝",
+      "button": "返回"
     }
   }
 }
