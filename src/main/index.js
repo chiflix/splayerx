@@ -969,9 +969,6 @@ function registerMainWindowEvent(mainWindow) {
       mainWindow.hide();
     }
     browsingWindow.webContents.closeDevTools();
-    if (process.env.NODE_ENV === 'development') {
-      pipControlView.webContents.openDevTools({ mode: 'detach' });
-    }
     browsingWindow.setAspectRatio(args.pipInfo.aspectRatio);
     browsingWindow.setMinimumSize(args.pipInfo.minimumSize[0], args.pipInfo.minimumSize[1]);
     browsingWindow.setSize(args.pipInfo.pipSize[0], args.pipInfo.pipSize[1]);
