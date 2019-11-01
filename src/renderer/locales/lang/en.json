@@ -28,7 +28,8 @@
   "tips": {
     "openSidebar": "Show Sidebar (C)",
     "closeSidebar": "Hide Sidebar (C)",
-    "exit": "Back to Launching Page"
+    "exit": "Back to Launching Page",
+    "delete": "Back to Launching Page"
   },
   "errorFile": {
     "ENOSPC": {
@@ -317,8 +318,68 @@
       "incognitoMode": "Incognito Mode",
       "incognitoDescription": "Your playback history will not be stored anymore.",
       "clearHistory": "Clear Playback History",
-      "clearHistoryDescription": "Remove existing playlists and playback history"
+      "clearHistoryDescription": "Remove existing playlists and playback history."
+    },
+    "account": {
+      "accountSetting": "Account",
+      "title": "My Profile",
+      "noToken": {
+        "title": "Not Signed In",
+        "description": "Sign in with your phone number to use AI Translation and more advanced features.",
+        "button": "Sign In"
+      },
+      "normalUser": {
+        "title": "Account",
+        "description": "Upgrade your account now and get started with exclusive features and more.",
+        "button": "Upgrade"
+      },
+      "vipUser": {
+        "title": "Premium Account ",
+        "description": "Expiration Date: ",
+        "button": "Renew"
+      },
+      "month": "Month",
+      "year": "Year",
+      "months": "Months",
+      "years": "Years",
+      "signOut": "Sign out",
+      "createdAt": "Registration Date",
+      "payAt": "Recent Purchased",
+      "payContent": "{date}{product}",
+      "payProduct": ": {product} Premium"
+
+    },
+    "premium": {
+      "premiumSetting": "Premium",
+      "title": "SPlayer Premium",
+      "description": "Go Premium now to help SPlayer change the way people watch videos, and get access to more advanced features. ",
+      "content": {
+        "description1": "Extend AI Translation time for your daily use",
+        "description2": "Support more languages in AI Translation",
+        "description3": "Export unlimited speech recognition results",
+        "description4": "New features are coming soon",
+        "description5": "",
+        "description6": ""
+      },
+      "origin": "ORIG. ",
+      "off": "% Off",
+      "month": "Month",
+      "year": "Year",
+      "months": "Mo.",
+      "years": "Yr.",
+      "payType": {
+        "alipay": "Alipay",
+        "wxpay": "Wechat",
+        "paypal": "PayPal"
+      }
     }
+  },
+  "payment": {
+    "wxpay": {
+      "title": "SCAN & PAY",
+      "description": "WeChat Pay"
+    },
+    "fail": "Error"
   },
   "privacyBubble": {
     "confirmDisable": {
@@ -341,6 +402,10 @@
   },
   "alertBubble": {
     "button": "OK"
+  },
+  "notExportEmbeddedSubtitle": {
+    "title": "",
+    "content": "Embedded subtitle is loading, please try to export later."
   },
   "protectBubble": {
     "agree": "OK",
@@ -384,6 +449,12 @@
       "zh": "Chinese (Simplified)",
       "zh-CN": "Chinese (Simplified)",
       "zh-TW": "Chinese (Traditional)"
+    },
+    "tips": {
+      "editor": "Edit coming soon ...",
+      "export": "Export",
+      "reload": "Regenerate",
+      "delete": "Remove"
     }
   },
   "uploading": {
@@ -414,6 +485,7 @@
     "videoLanguageLabel": "Audio Language",
     "subtitleLanguageLabel": "Translate To",
     "selectLanguageLabel": "Select",
+    "selectLanguageMoreLabel": "More ...",
     "audioLanguageLoading": "Fetching language list ...",
     "audioLanguageLoadFail": "Connection failed, please try later",
     "select": {
@@ -459,7 +531,7 @@
     },
     "PermissionFail": {
       "title": "Uses Remaining Today: 0",
-      "content": "Sorry, you can only generate one AI Translation result per day."
+      "content": "Sorry, you can only generate one AI Translation result per day. Upgrade to SPlayer Premium to continue your exclusive experience."
     },
     "loading": "Processing ...",
     "cancel": "Cancel",
@@ -467,7 +539,7 @@
     "generate": "Generate",
     "ok": "Run in Background",
     "continue": "Cancel",
-    "upgrade": "OK"
+    "upgrade": "Go Premium Now"
   },
   "translateBubble": {
     "bubbleWhenGrab": "AI Translation will be aborted If you go on, do you want to continue anyway?",
@@ -499,7 +571,7 @@
     },
     "bubbleTranslatePermissionFail": {
       "title": "Uses Remaining Today: 0",
-      "content": "Sorry, you can only generate one AI Translation result per day."
+      "content": "Sorry, you can only generate one AI Translation result per day. Upgrade to SPlayer Premium to continue your exclusive experience."
     },
     "ok": "OK",
     "cancel": "Cancel",
@@ -526,6 +598,47 @@
       "retry": "retry",
       "error300": "Verification failed, please",
       "errorNetwork": "Network Error. Please"
+    }
+  },
+  "forbiddenModal": {
+    "title": "Upgrade to SPlayer Premium",
+    "content": "Upgrade to export translation results unlimitedly, and get access to more exclusive features.",
+    "span": "Already Premium? Sign In",
+    "button": "Go Premium Now",
+    "audioLanguage": "日本語, 한국어, Español, Français, Deutsch, Italiano, Português, čeština, Русский, Indonesian, العربية, Türkçe, română",
+    "translate": {
+      "title": "Upgrade to SPlayer Premium",
+      "content": "Go Premium to get access to more languages and other exclusive features.",
+      "span": "Already Premium? Sign In",
+      "button": "Go Premium Now"
+    },
+    "export": {
+      "title": "Upgrade to SPlayer Premium",
+      "content": "Upgrade to export translation results unlimitedly, and get access to more exclusive features.",
+      "span": "Already Premium? Sign In",
+      "button": "Go Premium Now"
+    }
+  },
+  "premiumModal": {
+    "loading": {
+      "content": "Processing，please wait a second …",
+      "button": "Close"
+    },
+    "success": {
+      "h2": "Thanks for your support",
+      "h1": "Payment Successful !",
+      "h4": "NOW",
+      "content1": "Extend AI Translation Time",
+      "content2": "More Languages Support in AI Translation",
+      "content3": "Export Translation Results Unlimitedly",
+      "button": "Done"
+    },
+    "fail": {
+      "h1": "Sorry",
+      "content": "Your transaction could not be processed，please contact us",
+      "copy": "Copy",
+      "copied": "Copied",
+      "button": "Back"
     }
   }
 }

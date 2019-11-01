@@ -36,7 +36,7 @@ import {
   UIStates as uiActions,
 } from '@/store/actionTypes';
 import { log } from '@/libs/Log';
-import { checkForUpdate } from '@/libs/utils';
+import { checkForUpdate, getEnvironmentName } from '@/libs/utils';
 import asyncStorage from '@/helpers/asyncStorage';
 import { videodata } from '@/store/video';
 import { addBubble } from '@/helpers/notificationControl';
@@ -54,16 +54,6 @@ import BrowsingChannelMenu from './services/browsing/BrowsingChannelMenu';
 
 // causing callbacks-registry.js 404 error. disable temporarily
 // require('source-map-support').install();
-
-function getEnvironmentName() {
-  if (process.platform === 'darwin') {
-    return process.mas ? 'MAS' : 'DMG';
-  }
-  if (process.platform === 'win32') {
-    return process.windowsStore ? 'APPX' : 'EXE';
-  }
-  return 'Unknown';
-}
 
 Vue.config.productionTip = false;
 Vue.config.warnHandler = (warn) => {
@@ -464,27 +454,6 @@ new Vue({
             this.$bus.$emit('off-fullscreen');
             this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
           }
-          break;
-        case 37:
-          e.preventDefault();
-          if (!this.playlistDisplayState) this.$bus.$emit('seek', videodata.time - 5);
-          break;
-        case 39:
-          e.preventDefault();
-          if (!this.playlistDisplayState) this.$bus.$emit('seek', videodata.time + 5);
-          break;
-        case 84:
-          e.preventDefault();
-          this.playingViewTop = !this.playingViewTop;
-          this.$bus.$emit('invoke-all-widgets');
-          break;
-        case 76:
-          e.preventDefault();
-          this.$bus.$emit('switch-playlist');
-          break;
-        case 67:
-          e.preventDefault();
-          this.$event.emit('side-bar-mouseup');
           break;
         case 219:
           e.preventDefault();

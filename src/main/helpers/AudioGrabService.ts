@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-22 17:18:34
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-10-16 15:54:19
+ * @Last Modified time: 2019-10-31 12:23:22
  */
 
 import { EventEmitter } from 'events';

@@ -23,7 +23,7 @@
 import Icon from '@/components/BaseIconContainer.vue';
 
 export default {
-  name: 'BaseCheckBox',
+  name: 'BaseRadio',
   components: {
     Icon,
   },

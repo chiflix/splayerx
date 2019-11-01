@@ -344,31 +344,18 @@ export default class Menubar {
 
   public updateAccount(user?: { displayName: string }) {
     this.user = user;
-    const menuItem = this.menubar.getMenuItemById('account');
-    if (menuItem) {
-      menuItem.visible = this.isAccountEnabled;
-    }
-    const accountMenu = menuItem && menuItem.submenu;
-    if (accountMenu && user) {
-      // @ts-ignore
-      accountMenu.clear();
-      const label = this.locale.$t('msg.account.name');
-      const idMenu = this.createMenuItem(`${label}: ${user.displayName}`, () => {
-      }, undefined, false);
-      accountMenu.append(idMenu);
-      const logout = this.createMenuItem('msg.account.logout', () => {
-        app.emit('sign-out-confirm');
-      }, undefined, true);
-      accountMenu.append(logout);
-      Menu.setApplicationMenu(this.menubar);
-    } else if (accountMenu) {
-      // @ts-ignore
-      accountMenu.clear();
-      const login = this.createMenuItem('msg.account.login', () => {
-        app.emit('add-login');
-      }, undefined, true);
-      accountMenu.append(login);
-      Menu.setApplicationMenu(this.menubar);
+    if (isMacintosh) {
+      const menuItem = this.menubar.getMenuItemById('application');
+      const accountMenu = menuItem && menuItem.submenu;
+      if (accountMenu) {
+        // @ts-ignore
+        accountMenu.clear();
+        const actions = this.createMacApplicationMenuItem();
+        actions.forEach(i => accountMenu.append(i));
+        Menu.setApplicationMenu(this.menubar);
+      }
+    } else {
+      this.menuStateControl();
     }
   }
 
@@ -535,6 +522,19 @@ export default class Menubar {
       }, 'Ctrl+,', true);
 
       menubar.append(preference);
+
+      let account: MenuItem;
+      if (this.user) {
+        const label = this.locale.$t('msg.account.name');
+        account = this.createMenuItem(`${label}: ${this.user.displayName}`, () => {
+          app.emit('route-account');
+        }, undefined, true, undefined, 'account');
+      } else {
+        account = this.createMenuItem('msg.account.login', () => {
+          app.emit('add-login', 'menu');
+        }, undefined, true, undefined, 'account');
+      }
+      menubar.append(account);
     }
 
     // Window
@@ -557,10 +557,6 @@ export default class Menubar {
     const windowMenuItem = new MenuItem({ id: 'window', label: this.$t('msg.window.name'), submenu: windowMenu });
 
     menubar.append(windowMenuItem);
-
-    // account
-    const account = this.createAccountMenu();
-    menubar.append(account);
 
     // Help
     const helpMenuItem = this.createHelpMenu();
@@ -617,6 +613,19 @@ export default class Menubar {
       }, 'Ctrl+,', true);
 
       menubar.append(preference);
+
+      let account: MenuItem;
+      if (this.user) {
+        const label = this.locale.$t('msg.account.name');
+        account = this.createMenuItem(`${label}: ${this.user.displayName}`, () => {
+          app.emit('route-account');
+        }, undefined, true, undefined, 'account');
+      } else {
+        account = this.createMenuItem('msg.account.login', () => {
+          app.emit('add-login', 'menu');
+        }, undefined, true, undefined, 'account');
+      }
+      menubar.append(account);
     }
 
     // PlayBack
@@ -638,10 +647,6 @@ export default class Menubar {
     const windowMenuItem = this.createWindowMenu();
 
     menubar.append(windowMenuItem);
-
-    // account
-    const account = this.createAccountMenu();
-    menubar.append(account);
 
     // Help
     const helpMenuItem = this.createHelpMenu();
@@ -707,6 +712,19 @@ export default class Menubar {
       }, 'Ctrl+,', true);
 
       menubar.append(preference);
+
+      let account: MenuItem;
+      if (this.user) {
+        const label = this.locale.$t('msg.account.name');
+        account = this.createMenuItem(`${label}: ${this.user.displayName}`, () => {
+          app.emit('route-account');
+        }, undefined, true, undefined, 'account');
+      } else {
+        account = this.createMenuItem('msg.account.login', () => {
+          app.emit('add-login', 'menu');
+        }, undefined, true, undefined, 'account');
+      }
+      menubar.append(account);
     }
 
     // Edit
@@ -722,10 +740,6 @@ export default class Menubar {
     const windowMenuItem = this.createBrowsingWindowMenu();
 
     menubar.append(windowMenuItem);
-
-    // account
-    const account = this.createAccountMenu();
-    menubar.append(account);
 
     // Help
     const helpMenuItem = this.createHelpMenu();
@@ -766,8 +780,7 @@ export default class Menubar {
     return menubar;
   }
 
-  private createMacApplicationMenu(hideCheckBtn: boolean = false): Electron.MenuItem {
-    const applicationMenu = new Menu();
+  private createMacApplicationMenuItem(hideCheckBtn: boolean = false): MenuItem[] {
     const about = this.createMenuItem('msg.splayerx.about', () => {
       app.emit('add-windows-about');
     }, undefined, true);
@@ -777,6 +790,17 @@ export default class Menubar {
     const preference = this.createMenuItem('msg.splayerx.preferences', () => {
       app.emit('add-preference');
     }, 'CmdOrCtrl+,');
+    let account: MenuItem;
+    if (this.user) {
+      const label = this.locale.$t('msg.account.name');
+      account = this.createMenuItem(`${label}: ${this.user.displayName}`, () => {
+        app.emit('route-account');
+      }, undefined, true, undefined, 'account');
+    } else {
+      account = this.createMenuItem('msg.account.login', () => {
+        app.emit('add-login', 'menu');
+      }, undefined, true, undefined, 'account');
+    }
 
     const hide = this.createRoleMenuItem('msg.splayerx.hide', 'hide');
     const hideOthers = this.createRoleMenuItem('msg.splayerx.hideOthers', 'hideothers');
@@ -793,12 +817,14 @@ export default class Menubar {
         checkForUpdates,
         separator(),
         preference,
+        account,
         separator(),
       ];
       actions.push(...items);
     } else if (this._routeName !== 'welcome-privacy' && this._routeName !== 'language-setting') {
       actions.push(...[
         preference,
+        account,
         separator(),
       ]);
     }
@@ -809,9 +835,14 @@ export default class Menubar {
       separator(),
       quit,
     ]);
-    actions.forEach(i => applicationMenu.append(i));
+    return actions;
+  }
 
-    return new MenuItem({ label: this.$t('msg.splayerx.name'), submenu: applicationMenu });
+  private createMacApplicationMenu(hideCheckBtn: boolean = false): Electron.MenuItem {
+    const applicationMenu = new Menu();
+    const actions = this.createMacApplicationMenuItem(hideCheckBtn);
+    actions.forEach(i => applicationMenu.append(i));
+    return new MenuItem({ label: this.$t('msg.splayerx.name'), submenu: applicationMenu, id: 'application' });
   }
 
   private createFileMenu(): Electron.MenuItem {
@@ -852,29 +883,6 @@ export default class Menubar {
   private createWindowMenu() {
     const windowMenu = this.convertFromMenuItemTemplate('window');
     return new MenuItem({ id: 'window', label: this.$t('msg.window.name'), submenu: windowMenu });
-  }
-
-  private createAccountMenu() {
-    const accountMenu = new Menu();
-    if (this.user) {
-      const label = this.locale.$t('msg.account.name');
-      const idMenu = this.createMenuItem(`${label}: ${this.user.displayName}`, () => {
-      }, undefined, false);
-      accountMenu.append(idMenu);
-      const logout = this.createMenuItem('msg.account.logout', () => {
-        app.emit('sign-out-confirm');
-      }, undefined, true);
-      accountMenu.append(logout);
-    } else {
-      const login = this.createMenuItem('msg.account.login', () => {
-        app.emit('add-login');
-      }, undefined, true);
-      accountMenu.append(login);
-    }
-    const accountMenuItem = new MenuItem({
-      id: 'account', label: this.$t('msg.account.name'), submenu: accountMenu, visible: this.isAccountEnabled,
-    });
-    return accountMenuItem;
   }
 
   private createHelpMenu() {

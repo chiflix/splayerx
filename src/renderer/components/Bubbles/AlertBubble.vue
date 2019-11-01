@@ -11,7 +11,7 @@
         }"
         @mouseover.stop="hovered = true"
         @mouseout.stop="hovered = false"
-        @mouseup="close"
+        @mouseup.stop="close"
         class="button"
       >
         <div class="button-info">

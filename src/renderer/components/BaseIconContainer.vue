@@ -208,7 +208,50 @@ export default {
   display: block;
 }
 
-.volume, .mute {
+.downArrow, .subtitleDetach, .subtitleEdit,
+.subtitleExport, .reload, .subtitleEditorExit, .deleteSub {
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: pointer;
+  .default {
+    display: block;
+  }
+  .hover {
+    display: none;
+  }
+  .active {
+    display: none;
+  }
+  &:hover {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: block;
+    }
+    .active {
+      display: none;
+    }
+  }
+  &:active {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: none;
+    }
+    .active {
+      display: block;
+    }
+  }
+}
+
+.subtitleEdit {
+  cursor: default;
+}
+
+.volume {
   width: 100%;
   height: 100%;
 }
@@ -548,55 +591,6 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
 .failed {
   width: 15px;
   height: 15px;
-}
-.deleteSub, .reload  {
-  cursor: pointer;
-  .default {
-    display: block;
-  }
-  .hover {
-    display: none;
-  }
-  .active {
-    display: none;
-  }
-  &:hover {
-    .default {
-      display: none;
-    }
-    .hover {
-      display: block;
-    }
-    .active {
-      display: none;
-    }
-  }
-  &:active {
-    .default {
-      display: none;
-    }
-    .hover {
-      display: none;
-    }
-    .active {
-      display: block;
-    }
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
-  screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
-    width: 12px;
-    height: 12px;
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
-  screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
-    width: 14px;
-    height: 14px;
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
-  screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
-    width: 18.8px;
-    height: 18.8px;
-  }
 }
 .picInpic {
   width: 20px;

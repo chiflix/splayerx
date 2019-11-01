@@ -98,6 +98,7 @@ export const SubtitleManager = {
   alterSecondaryDelay: 'ALTER_SECONDARY_DELAY',
   resetSecondaryDelay: 'RESET_SECONDARY_DELAY',
   storeSubtitleDelays: 'STORE_SUBTITLE_DELAYS',
+  exportSubtitle: 'EXPORT_SUBTITLE',
 };
 
 export const Input = {
@@ -139,7 +140,11 @@ export const Browsing = {
 
 export const UserInfo = {
   UPDATE_USER_INFO: 'UPDATE_USER_INFO',
+  UPDATE_USER_TOKEN: 'UPDATE_USER_TOKEN',
   UPDATE_SIGN_IN_CALLBACK: 'UPDATE_SIGN_IN_CALLBACK',
+  SHOW_FORBIDDEN_MODAL: 'SHOW_FORBIDDEN_MODAL',
+  HIDE_FORBIDDEN_MODAL: 'HIDE_FORBIDDEN_MODAL',
+  UPDATE_PREMIUM: 'UPDATE_PREMIUM',
 };
 
 export const UIStates = {
