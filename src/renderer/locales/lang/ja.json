@@ -28,7 +28,8 @@
   "tips": {
     "openSidebar": "サイドバーの表示 (C)",
     "closeSidebar": "サイドバーを隠す (C)",
-    "exit": "起動ページに戻る"
+    "exit": "起動ページに戻る",
+    "delete": ""
   },
   "errorFile": {
     "ENOSPC": {
@@ -317,7 +318,66 @@
       "incognitoDescription": "再生履歴は保存されません。",
       "clearHistory": "再生履歴をクリア",
       "clearHistoryDescription": "既存のプレイリストと再生履歴を削除する"
+    },
+    "account": {
+      "accountSetting": "",
+      "title": "",
+      "noToken": {
+        "title": "",
+        "description": "",
+        "button": ""
+      },
+      "normalUser": {
+        "title": "",
+        "description": "",
+        "button": ""
+      },
+      "vipUser": {
+        "title": "",
+        "description": "",
+        "button": ""
+      },
+      "month": "",
+      "year": "",
+      "months": "",
+      "years": "",
+      "signOut": "",
+      "createdAt": "",
+      "payAt": "",
+      "payContent": "",
+      "payProduct": ""
+    },
+    "premium": {
+      "premiumSetting": "",
+      "title": "",
+      "description": "",
+      "content": {
+        "description1": "",
+        "description2": "",
+        "description3": "",
+        "description4": "",
+        "description5": "",
+        "description6": ""
+      },
+      "origin": "",
+      "off": "",
+      "month": "",
+      "year": "",
+      "months": "",
+      "years": "",
+      "payType": {
+        "alipay": "",
+        "wxpay": "",
+        "paypal": ""
+      }
     }
+  },
+  "payment": {
+    "wxpay": {
+      "title": "",
+      "description": ""
+    },
+    "fail": ""
   },
   "privacyBubble": {
     "confirmDisable": {
@@ -340,6 +400,10 @@
   },
   "alertBubble": {
     "button": "はい"
+  },
+  "notExportEmbeddedSubtitle": {
+    "title": "",
+    "content": ""
   },
   "protectBubble": {
     "agree": "確定",
@@ -383,6 +447,12 @@
       "zh": "中国語（簡体字）",
       "zh-CN": "中国語（簡体字）",
       "zh-TW": "中国語（繁体字）"
+    },
+    "tips": {
+      "editor": "",
+      "export": "",
+      "reload": "",
+      "delete": ""
     }
   },
   "uploading": {
@@ -413,6 +483,7 @@
     "videoLanguageLabel": "音声の言語",
     "subtitleLanguageLabel": "以下に翻訳",
     "selectLanguageLabel": "音声の言語",
+    "selectLanguageMoreLabel": "",
     "audioLanguageLoading": "言語リストの取得 ...",
     "audioLanguageLoadFail": "接続に失敗しました。もう一度お試しください",
     "select": {
@@ -525,6 +596,47 @@
       "retry": "retry",
       "error300": "Verification failed, please",
       "errorNetwork": "Network Error. Please"
+    }
+  },
+  "forbiddenModal": {
+    "title": "",
+    "content": "",
+    "span": "",
+    "button": "",
+    "audioLanguage": "",
+    "translate": {
+      "title": "",
+      "content": "",
+      "span": "",
+      "button": ""
+    },
+    "export": {
+      "title": "",
+      "content": "",
+      "span": "",
+      "button": ""
+    }
+  },
+  "premiumModal": {
+    "loading": {
+      "content": "",
+      "button": ""
+    },
+    "success": {
+      "h2": "",
+      "h1": "",
+      "h4": "",
+      "content1": "",
+      "content2": "",
+      "content3": "",
+      "button": ""
+    },
+    "fail": {
+      "h1": "",
+      "content": "",
+      "copy": "",
+      "copied": "",
+      "button": ""
     }
   }
 }
