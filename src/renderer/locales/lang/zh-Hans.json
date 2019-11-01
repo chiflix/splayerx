@@ -28,7 +28,8 @@
   "tips": {
     "openSidebar": "打开侧边栏 (C)",
     "closeSidebar": "隐藏侧边栏 (C)",
-    "exit": "回到启动页"
+    "exit": "回到启动页",
+    "delete": ""
   },
   "errorFile": {
     "ENOSPC": {
@@ -271,6 +272,7 @@
     "enterPop": "新窗口播放 (O)",
     "exitPop": "还原窗口 (O)",
     "danmu": "弹幕开关",
+    "pin": "",
     "error": {
       "offline": "未连接到互联网",
       "try": "请试试以下办法：",
@@ -316,7 +318,66 @@
       "incognitoDescription": "开启后将不再保留任何新的播放记录。",
       "clearHistory": "清空播放记录",
       "clearHistoryDescription": "清除已有的播放列表和历史记录。"
+    },
+    "account": {
+      "accountSetting": "",
+      "title": "",
+      "noToken": {
+        "title": "",
+        "description": "",
+        "button": ""
+      },
+      "normalUser": {
+        "title": "",
+        "description": "",
+        "button": ""
+      },
+      "vipUser": {
+        "title": "",
+        "description": "",
+        "button": ""
+      },
+      "month": "个月",
+      "year": "年",
+      "months": "个月",
+      "years": "年",
+      "signOut": "注销",
+      "createdAt": "注册时间",
+      "payAt": "投食记录",
+      "payContent": "{date}{product}",
+      "payProduct": ": 投食 {product}"
+    },
+    "premium": {
+      "premiumSetting": "云养计划",
+      "title": "",
+      "description": "",
+      "content": {
+        "description1": "AI翻译功能 (应该) 足够用",
+        "description2": "",
+        "description3": "",
+        "description4": "",
+        "description5": "",
+        "description6": ""
+      },
+      "origin": "原价 ",
+      "off": "折",
+      "month": "个月",
+      "year": "年",
+      "months": "个月",
+      "years": "年",
+      "payType": {
+        "alipay": "支付宝",
+        "wxpay": "微信支付",
+        "paypal": "PayPal 支付"
+      }
     }
+  },
+  "payment": {
+    "wxpay": {
+      "title": "扫码支付",
+      "description": "微信支付"
+    },
+    "fail": "加载失败"
   },
   "privacyBubble": {
     "confirmDisable": {
@@ -339,6 +400,10 @@
   },
   "alertBubble": {
     "button": "确定"
+  },
+  "notExportEmbeddedSubtitle": {
+    "title": "",
+    "content": "内嵌字幕正在加载中，请稍后再尝试导出。"
   },
   "protectBubble": {
     "agree": "好的",
@@ -382,6 +447,12 @@
       "zh": "中文（简体）",
       "zh-CN": "中文（简体）",
       "zh-TW": "中文（繁体）"
+    },
+    "tips": {
+      "editor": "编辑功能即将到来",
+      "export": "导出",
+      "reload": "重新生成",
+      "delete": "移除"
     }
   },
   "uploading": {
@@ -412,6 +483,7 @@
     "videoLanguageLabel": "视频语言",
     "subtitleLanguageLabel": "翻译至",
     "selectLanguageLabel": "请选择",
+    "selectLanguageMoreLabel": "更多语言 ...",
     "audioLanguageLoading": "获取语言列表中 ...",
     "audioLanguageLoadFail": "连接错误，请稍后重试",
     "select": {
@@ -524,6 +596,47 @@
       "retry": "重试",
       "error300": "验证失败，请",
       "errorNetwork": "网络错误，请"
+    }
+  },
+  "forbiddenModal": {
+    "title": "加入射手云养计划",
+    "content": "投食成为射手云养员，即可导出翻译至本地，还可以获得更多专享功能。",
+    "span": "已是云养员请登录",
+    "button": "成为射手云养员",
+    "audioLanguage": "日本語, 한국어, Español, Français, Deutsch, Italiano, Português, čeština, Русский, Indonesian, العربية, Türkçe, română",
+    "translate": {
+      "title": "加入射手云养计划",
+      "content": "投食成为射手云养员，支持更多语言的语音识别和AI翻译，并获得更多专享功能。",
+      "span": "已是云养员请登录",
+      "button": "成为射手云养员"
+    },
+    "export": {
+      "title": "加入射手云养计划",
+      "content": "投食成为射手云养员，即可导出翻译至本地，还可以获得更多专享功能。",
+      "span": "已是云养员请登录",
+      "button": "成为射手云养员"
+    }
+  },
+  "premiumModal": {
+    "loading": {
+      "content": "投食中，请稍后 …",
+      "button": "关闭页面"
+    },
+    "success": {
+      "h2": "感谢您对 SPlayer 的支持",
+      "h1": "投食成功!",
+      "h4": "NOW",
+      "content1": "增加智能翻译使用时间",
+      "content2": "更多智能翻译语言选择",
+      "content3": "无限制导出字幕文件",
+      "button": "完成"
+    },
+    "fail": {
+      "h1": "很遗憾",
+      "content": "投食过程中遇到了一些问题，请通过邮箱联系我们",
+      "copy": "复制",
+      "copied": "已复制",
+      "button": "返回"
     }
   }
 }

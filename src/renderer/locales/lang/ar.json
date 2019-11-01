@@ -28,7 +28,8 @@
   "tips": {
     "openSidebar": "عرض المحتوى الجانبي (C)",
     "closeSidebar": "أخفِ الشّريط الجانبيّ (C)",
-    "exit": "العودة إلى صفحة الإطلاق"
+    "exit": "العودة إلى صفحة الإطلاق",
+    "delete": ""
   },
   "errorFile": {
     "ENOSPC": {
@@ -271,6 +272,7 @@
     "enterPop": "اللعب في نافذة جديدة",
     "exitPop": "العودة إلى المتصفح",
     "danmu": "وابل",
+    "pin": "",
     "error": {
       "offline": "لا يوجد إنترنت",
       "try": "حاول:",
@@ -316,7 +318,66 @@
       "incognitoDescription": "لن يتم حفظ سجل التشغيل.",
       "clearHistory": "مسح سجل التشغيل",
       "clearHistoryDescription": "قم بإزالة قوائم التشغيل الحالية وسجل التشغيل"
+    },
+    "account": {
+      "accountSetting": "",
+      "title": "",
+      "noToken": {
+        "title": "",
+        "description": "",
+        "button": ""
+      },
+      "normalUser": {
+        "title": "",
+        "description": "",
+        "button": ""
+      },
+      "vipUser": {
+        "title": "",
+        "description": "",
+        "button": ""
+      },
+      "month": "",
+      "year": "",
+      "months": "",
+      "years": "",
+      "signOut": "",
+      "createdAt": "",
+      "payAt": "",
+      "payContent": "",
+      "payProduct": ""
+    },
+    "premium": {
+      "premiumSetting": "",
+      "title": "",
+      "description": "",
+      "content": {
+        "description1": "",
+        "description2": "",
+        "description3": "",
+        "description4": "",
+        "description5": "",
+        "description6": ""
+      },
+      "origin": "",
+      "off": "",
+      "month": "",
+      "year": "",
+      "months": "",
+      "years": "",
+      "payType": {
+        "alipay": "",
+        "wxpay": "",
+        "paypal": ""
+      }
     }
+  },
+  "payment": {
+    "wxpay": {
+      "title": "",
+      "description": ""
+    },
+    "fail": ""
   },
   "privacyBubble": {
     "confirmDisable": {
@@ -339,6 +400,10 @@
   },
   "alertBubble": {
     "button": ""
+  },
+  "notExportEmbeddedSubtitle": {
+    "title": "",
+    "content": ""
   },
   "protectBubble": {
     "agree": "حسنا",
@@ -382,6 +447,12 @@
       "zh": "الصينية المبسطة",
       "zh-CN": "الصينية المبسطة",
       "zh-TW": "الصينية التقليدية"
+    },
+    "tips": {
+      "editor": "",
+      "export": "",
+      "reload": "",
+      "delete": ""
     }
   },
   "uploading": {
@@ -412,6 +483,7 @@
     "videoLanguageLabel": "لغة الصوت",
     "subtitleLanguageLabel": "ترجم إلى",
     "selectLanguageLabel": "لغة الصوت",
+    "selectLanguageMoreLabel": "",
     "audioLanguageLoading": "جارٍ إحضار قائمة اللغات ...",
     "audioLanguageLoadFail": "فشل الاتصال ، يرجى المحاولة لاحقًا",
     "select": {
@@ -524,6 +596,47 @@
       "retry": "retry",
       "error300": "Verification failed, please",
       "errorNetwork": "Network Error. Please"
+    }
+  },
+  "forbiddenModal": {
+    "title": "",
+    "content": "",
+    "span": "",
+    "button": "",
+    "audioLanguage": "",
+    "translate": {
+      "title": "",
+      "content": "",
+      "span": "",
+      "button": ""
+    },
+    "export": {
+      "title": "",
+      "content": "",
+      "span": "",
+      "button": ""
+    }
+  },
+  "premiumModal": {
+    "loading": {
+      "content": "",
+      "button": ""
+    },
+    "success": {
+      "h2": "",
+      "h1": "",
+      "h4": "",
+      "content1": "",
+      "content2": "",
+      "content3": "",
+      "button": ""
+    },
+    "fail": {
+      "h1": "",
+      "content": "",
+      "copy": "",
+      "copied": "",
+      "button": ""
     }
   }
 }
