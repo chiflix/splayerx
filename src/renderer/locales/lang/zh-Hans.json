@@ -28,7 +28,8 @@
   "tips": {
     "openSidebar": "打开侧边栏 (C)",
     "closeSidebar": "隐藏侧边栏 (C)",
-    "exit": "回到启动页"
+    "exit": "回到启动页",
+    "delete": ""
   },
   "errorFile": {
     "ENOSPC": {
@@ -317,7 +318,66 @@
       "incognitoDescription": "开启后将不再保留任何新的播放记录。",
       "clearHistory": "清空播放记录",
       "clearHistoryDescription": "清除已有的播放列表和历史记录。"
+    },
+    "account": {
+      "accountSetting": "",
+      "title": "",
+      "noToken": {
+        "title": "",
+        "description": "",
+        "button": ""
+      },
+      "normalUser": {
+        "title": "",
+        "description": "",
+        "button": ""
+      },
+      "vipUser": {
+        "title": "",
+        "description": "",
+        "button": ""
+      },
+      "month": "",
+      "year": "",
+      "months": "",
+      "years": "",
+      "signOut": "",
+      "createdAt": "",
+      "payAt": "",
+      "payContent": "",
+      "payProduct": ""
+    },
+    "premium": {
+      "premiumSetting": "",
+      "title": "",
+      "description": "",
+      "content": {
+        "description1": "",
+        "description2": "",
+        "description3": "",
+        "description4": "",
+        "description5": "",
+        "description6": ""
+      },
+      "origin": "",
+      "off": "",
+      "month": "",
+      "year": "",
+      "months": "",
+      "years": "",
+      "payType": {
+        "alipay": "",
+        "wxpay": "",
+        "paypal": ""
+      }
     }
+  },
+  "payment": {
+    "wxpay": {
+      "title": "",
+      "description": ""
+    },
+    "fail": ""
   },
   "privacyBubble": {
     "confirmDisable": {
@@ -340,6 +400,10 @@
   },
   "alertBubble": {
     "button": "确定"
+  },
+  "notExportEmbeddedSubtitle": {
+    "title": "",
+    "content": ""
   },
   "protectBubble": {
     "agree": "好的",
@@ -383,6 +447,12 @@
       "zh": "中文（简体）",
       "zh-CN": "中文（简体）",
       "zh-TW": "中文（繁体）"
+    },
+    "tips": {
+      "editor": "",
+      "export": "",
+      "reload": "",
+      "delete": ""
     }
   },
   "uploading": {
@@ -413,6 +483,7 @@
     "videoLanguageLabel": "视频语言",
     "subtitleLanguageLabel": "翻译至",
     "selectLanguageLabel": "请选择",
+    "selectLanguageMoreLabel": "",
     "audioLanguageLoading": "获取语言列表中 ...",
     "audioLanguageLoadFail": "连接错误，请稍后重试",
     "select": {
@@ -525,6 +596,47 @@
       "retry": "重试",
       "error300": "验证失败，请",
       "errorNetwork": "网络错误，请"
+    }
+  },
+  "forbiddenModal": {
+    "title": "",
+    "content": "",
+    "span": "",
+    "button": "",
+    "audioLanguage": "",
+    "translate": {
+      "title": "",
+      "content": "",
+      "span": "",
+      "button": ""
+    },
+    "export": {
+      "title": "",
+      "content": "",
+      "span": "",
+      "button": ""
+    }
+  },
+  "premiumModal": {
+    "loading": {
+      "content": "",
+      "button": ""
+    },
+    "success": {
+      "h2": "",
+      "h1": "",
+      "h4": "",
+      "content1": "",
+      "content2": "",
+      "content3": "",
+      "button": ""
+    },
+    "fail": {
+      "h1": "",
+      "content": "",
+      "copy": "",
+      "copied": "",
+      "button": ""
     }
   }
 }
