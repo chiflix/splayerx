@@ -29,7 +29,7 @@
     "openSidebar": "打開側邊欄 (C)",
     "closeSidebar": "隱藏側邊欄 (C)",
     "exit": "回到啟動頁",
-    "delete": ""
+    "delete": "回到啟動頁"
   },
   "errorFile": {
     "ENOSPC": {
@@ -272,7 +272,7 @@
     "enterPop": "在新視窗播放 (O)",
     "exitPop": "還原窗口 (O)",
     "danmu": "彈幕開關",
-    "pin": "",
+    "pin": "置頂 / 取消置頂 (T)",
     "error": {
       "offline": "未連接到互聯網",
       "try": "請試試以下辦法：",
@@ -320,64 +320,64 @@
       "clearHistoryDescription": "清除已有的播放列表和歷史記錄"
     },
     "account": {
-      "accountSetting": "",
-      "title": "",
+      "accountSetting": "用戶設置",
+      "title": "用戶信息",
       "noToken": {
-        "title": "",
-        "description": "",
-        "button": ""
+        "title": "未登錄",
+        "description": "登錄後可使用AI翻譯等更多功能",
+        "button": "免註冊登錄"
       },
       "normalUser": {
-        "title": "",
-        "description": "",
-        "button": ""
+        "title": "普通用戶: ",
+        "description": "投食成為射手雲養員，獲取專享功能和特殊權益。",
+        "button": "投食"
       },
       "vipUser": {
-        "title": "",
-        "description": "",
-        "button": ""
+        "title": "云养员: ",
+        "description": "雲養至：",
+        "button": "繼續投食"
       },
-      "month": "",
-      "year": "",
-      "months": "",
-      "years": "",
-      "signOut": "",
-      "createdAt": "",
-      "payAt": "",
-      "payContent": "",
-      "payProduct": ""
+      "month": "個月",
+      "year": "年",
+      "months": "个月",
+      "years": "年",
+      "signOut": "註銷",
+      "createdAt": "註冊時間",
+      "payAt": "投食記錄",
+      "payContent": "{date}{product}",
+      "payProduct": ": 投食 {product}"
     },
     "premium": {
-      "premiumSetting": "",
-      "title": "",
-      "description": "",
+      "premiumSetting": "雲養計劃",
+      "title": "射手雲養計劃",
+      "description": "牆裂歡迎廣大用戶投食支持射手影音長期穩定可持續開發，同時獲得射手雲養員專享功能。",
       "content": {
-        "description1": "",
-        "description2": "",
-        "description3": "",
-        "description4": "",
+        "description1": "AI翻譯功能 (應該) 足夠用",
+        "description2": "更多智能翻譯語言選擇",
+        "description3": "無限制導出語言識別字幕",
+        "description4": "更多福利準備中，敬請期待",
         "description5": "",
         "description6": ""
       },
-      "origin": "",
-      "off": "",
-      "month": "",
-      "year": "",
-      "months": "",
-      "years": "",
+      "origin": "原價 ",
+      "off": "折",
+      "month": "個月",
+      "year": "年",
+      "months": "個月",
+      "years": "年",
       "payType": {
-        "alipay": "",
-        "wxpay": "",
-        "paypal": ""
+        "alipay": "支付寶",
+        "wxpay": "微信支付",
+        "paypal": "Paypal"
       }
     }
   },
   "payment": {
     "wxpay": {
-      "title": "",
-      "description": ""
+      "title": "掃碼支付",
+      "description": "微信支付"
     },
-    "fail": ""
+    "fail": "加載失敗"
   },
   "privacyBubble": {
     "confirmDisable": {
@@ -403,7 +403,7 @@
   },
   "notExportEmbeddedSubtitle": {
     "title": "",
-    "content": ""
+    "content": "內嵌字幕正在加載中，請稍後再嘗試導出。"
   },
   "protectBubble": {
     "agree": "好的",
@@ -449,10 +449,10 @@
       "zh-TW": "中文 (繁體)"
     },
     "tips": {
-      "editor": "",
-      "export": "",
-      "reload": "",
-      "delete": ""
+      "editor": "編輯功能即將上線",
+      "export": "導出",
+      "reload": "重新生成",
+      "delete": "移除"
     }
   },
   "uploading": {
@@ -599,44 +599,44 @@
     }
   },
   "forbiddenModal": {
-    "title": "",
-    "content": "",
-    "span": "",
-    "button": "",
+    "title": "加入射手雲養計劃",
+    "content": "投食成為射手雲養員，即可導出翻譯至本地，還可以獲得更多專享功能。",
+    "span": "成為射手雲養員",
+    "button": "成為射手雲養員",
     "audioLanguage": "日本語, 한국어, Español, Français, Deutsch, Italiano, Português, čeština, Русский, Indonesian, العربية, Türkçe, română",
     "translate": {
-      "title": "",
-      "content": "",
-      "span": "",
-      "button": ""
+      "title": "加入射手雲養計劃",
+      "content": "投食成為射手雲養員，支持更多語言的語音識別和AI翻譯，並獲得更多專享功能。",
+      "span": "已是雲養員請登錄",
+      "button": "成為射手雲養員"
     },
     "export": {
-      "title": "",
-      "content": "",
-      "span": "",
-      "button": ""
+      "title": "加入射手雲養計劃",
+      "content": "投食成為射手雲養員，即可導出翻譯至本地，還可以獲得更多專享功能。",
+      "span": "已是雲養員請登錄",
+      "button": "成為射手雲養員"
     }
   },
   "premiumModal": {
     "loading": {
-      "content": "",
-      "button": ""
+      "content": "投食中，請稍後 ...",
+      "button": "關閉頁面"
     },
     "success": {
-      "h2": "",
-      "h1": "",
+      "h2": "感謝您對 SPlayer 的支持",
+      "h1": "投食成功！",
       "h4": "NOW",
-      "content1": "",
-      "content2": "",
-      "content3": "",
-      "button": ""
+      "content1": "增加智能翻譯使用時間",
+      "content2": "更多智能翻譯語言選擇",
+      "content3": "無限制導出字幕文件",
+      "button": "完成"
     },
     "fail": {
-      "h1": "",
-      "content": "",
-      "copy": "",
-      "copied": "",
-      "button": ""
+      "h1": "很遺憾",
+      "content": "投食過程中遇到了一些問題，請通過郵箱聯繫我們",
+      "copy": "拷貝",
+      "copied": "已拷貝",
+      "button": "返回"
     }
   }
 }

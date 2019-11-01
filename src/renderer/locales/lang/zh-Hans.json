@@ -29,7 +29,7 @@
     "openSidebar": "打开侧边栏 (C)",
     "closeSidebar": "隐藏侧边栏 (C)",
     "exit": "回到启动页",
-    "delete": ""
+    "delete": "回到启动页"
   },
   "errorFile": {
     "ENOSPC": {
@@ -272,7 +272,7 @@
     "enterPop": "新窗口播放 (O)",
     "exitPop": "还原窗口 (O)",
     "danmu": "弹幕开关",
-    "pin": "",
+    "pin": "置顶 / 取消置顶 (T)",
     "error": {
       "offline": "未连接到互联网",
       "try": "请试试以下办法：",
@@ -320,22 +320,22 @@
       "clearHistoryDescription": "清除已有的播放列表和历史记录。"
     },
     "account": {
-      "accountSetting": "",
-      "title": "",
+      "accountSetting": "用户设置",
+      "title": "用户信息",
       "noToken": {
-        "title": "",
-        "description": "",
-        "button": ""
+        "title": "未登录",
+        "description": "登录后可使用AI翻译等更多功能",
+        "button": "免注册登录"
       },
       "normalUser": {
-        "title": "",
-        "description": "",
-        "button": ""
+        "title": "普通用户: ",
+        "description": "投食成为射手云养员，获取专享功能和特殊权益。",
+        "button": "投食"
       },
       "vipUser": {
-        "title": "",
-        "description": "",
-        "button": ""
+        "title": "云养员: ",
+        "description": "云养至：",
+        "button": "继续投食"
       },
       "month": "个月",
       "year": "年",
@@ -349,13 +349,13 @@
     },
     "premium": {
       "premiumSetting": "云养计划",
-      "title": "",
-      "description": "",
+      "title": "射手云养计划",
+      "description": "墙裂欢迎广大用户投食支持射手影音长期稳定可持续开发，同时获得射手云养员专享功能。",
       "content": {
         "description1": "AI翻译功能 (应该) 足够用",
-        "description2": "",
-        "description3": "",
-        "description4": "",
+        "description2": "更多智能翻译语言选择",
+        "description3": "无限制导出语音识别字幕",
+        "description4": "更多福利准备中，敬请期待",
         "description5": "",
         "description6": ""
       },
@@ -368,7 +368,7 @@
       "payType": {
         "alipay": "支付宝",
         "wxpay": "微信支付",
-        "paypal": "PayPal 支付"
+        "paypal": "PayPal"
       }
     }
   },
@@ -449,7 +449,7 @@
       "zh-TW": "中文（繁体）"
     },
     "tips": {
-      "editor": "编辑功能即将到来",
+      "editor": "编辑功能即将上线",
       "export": "导出",
       "reload": "重新生成",
       "delete": "移除"
@@ -624,7 +624,7 @@
     },
     "success": {
       "h2": "感谢您对 SPlayer 的支持",
-      "h1": "投食成功!",
+      "h1": "投食成功！",
       "h4": "NOW",
       "content1": "增加智能翻译使用时间",
       "content2": "更多智能翻译语言选择",
