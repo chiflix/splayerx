@@ -762,7 +762,6 @@ function registerMainWindowEvent(mainWindow) {
       width: true, height: true,
     });
   });
-  // eslint-disable-next-line complexity
   ipcMain.on('change-channel', (evt, args) => {
     if (!browserViewManager) browserViewManager = new BrowserViewManager();
     const mainBrowser = mainWindow.getBrowserViews()[0];

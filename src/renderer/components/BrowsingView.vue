@@ -371,14 +371,13 @@ export default {
           this.progress = 0;
           if (this.currentMainBrowserView()) {
             const loadUrl = this.currentMainBrowserView().webContents.getURL();
-            this.currentMainBrowserView().webContents.executeJavaScript(
-              InjectJSManager.calcVideoNum(),
-              (r: number) => {
+            this.currentMainBrowserView().webContents
+              .executeJavaScript(InjectJSManager.calcVideoNum())
+              .then((r: number) => {
                 this.webInfo.hasVideo = this.currentChannel === 'youtube.com' && !getVideoId(loadUrl).id
                   ? false
                   : !!r;
-              },
-            );
+              });
           }
         }, 1000);
       }
@@ -538,14 +537,13 @@ export default {
           this.updateCanGoForward(this.webInfo.canGoForward);
           const loadUrl = this.currentMainBrowserView().webContents.getURL();
           if (!this.currentMainBrowserView().webContents.isLoading()) {
-            this.currentMainBrowserView().webContents.executeJavaScript(
-              InjectJSManager.calcVideoNum(),
-              (r: number) => {
+            this.currentMainBrowserView().webContents
+              .executeJavaScript(InjectJSManager.calcVideoNum())
+              .then((r: number) => {
                 this.webInfo.hasVideo = this.currentChannel === 'youtube.com' && !getVideoId(loadUrl).id
                   ? false
                   : !!r;
-              },
-            );
+              });
           }
           this.createTouchBar(this.webInfo.hasVideo);
         }
@@ -655,10 +653,10 @@ export default {
       if (this.currentMainBrowserView()) {
         const loadUrl = this.currentMainBrowserView().webContents.getURL();
         this.currentMainBrowserView().webContents
-          .executeJavaScript(InjectJSManager.calcVideoNum(),
-            (r: number) => {
-              this.webInfo.hasVideo = this.currentChannel === 'youtube.com' && !getVideoId(loadUrl).id ? false : !!r;
-            });
+          .executeJavaScript(InjectJSManager.calcVideoNum())
+          .then((r: number) => {
+            this.webInfo.hasVideo = this.currentChannel === 'youtube.com' && !getVideoId(loadUrl).id ? false : !!r;
+          });
       }
     },
     beforeUnloadHandler(e: BeforeUnloadEvent) {

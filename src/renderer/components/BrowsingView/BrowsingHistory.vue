@@ -71,7 +71,7 @@
                 height: `${placeholderPreWidth[currentPhase]}px`,
                 background: '#CECFDB',
                 borderRadius: '100%',
-             }"
+              }"
             />
           </div>
           <div
