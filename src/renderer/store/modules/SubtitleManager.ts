@@ -714,16 +714,18 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
     }
   },
   async [a.deleteSubtitlesByUuid]({ state, dispatch }, ids: string[]) {
+    const p = removeSubtitleItemsFromList(ids.map(id => state.allSubtitles[id]), state.mediaHash);
     ids.forEach(id => dispatch(a.removeSubtitle, id));
-    return removeSubtitleItemsFromList(ids.map(id => state.allSubtitles[id]), state.mediaHash);
+    return p;
   },
   async [a.deleteSubtitlesByHash]({ state, dispatch }, hashes: string[]) {
     const { allSubtitles } = state;
     const ids = hashes
       .map(hash => Object.keys(allSubtitles).find(id => allSubtitles[id].hash === hash) || '')
       .filter(id => id);
+    const p = removeSubtitleItemsFromList(ids.map(id => state.allSubtitles[id]), state.mediaHash);
     ids.forEach(id => dispatch(a.removeSubtitle, id));
-    return removeSubtitleItemsFromList(ids.map(id => state.allSubtitles[id]), state.mediaHash);
+    return p;
   },
   async [a.autoChangePrimarySubtitle]({
     dispatch, commit, getters, state,

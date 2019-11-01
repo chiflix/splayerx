@@ -262,13 +262,13 @@ export default Vue.extend({
           ) {
             originalPrice = (e.originalPrice[country] / 100).toFixed(0);
           }
-          const off = this.isCNLanguage ? e.discount : 100 - e.discount;
+          const off = this.isCNLanguage ? this.cnOff(e.discount) : 100 - e.discount;
           const originString = e.discount === 100 ? '' : `${this.$t('preferences.premium.origin')}${originalPrice}`;
           const origin = `${originString} ${country}`;
           const discount = e.discount === 100 ? '' : `${off}${this.$t('preferences.premium.off')}`;
           const duration = e.duration.value > 1
-            ? `${e.duration.value} ${this.$t(`preferences.premium.${e.duration.unit}s`)}`
-            : `${e.duration.value} ${this.$t(`preferences.premium.${e.duration.unit}`)}`;
+            ? `${e.duration.value}${this.$t(`preferences.premium.${e.duration.unit}s`)}`
+            : `${e.duration.value}${this.$t(`preferences.premium.${e.duration.unit}`)}`;
           return {
             id: e.id,
             appleProductID: e.appleProductID,
@@ -353,6 +353,9 @@ export default Vue.extend({
       updateCallback: uActions.UPDATE_SIGN_IN_CALLBACK,
       updateUserInfo: uActions.UPDATE_USER_INFO,
     }),
+    cnOff(num: number) {
+      return (num % 10 === 0) ? (num / 10) : num;
+    },
     async appleBuy(payment: {
       id: string;
       productID: string;

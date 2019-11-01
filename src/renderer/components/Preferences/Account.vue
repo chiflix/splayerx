@@ -115,8 +115,8 @@ export default Vue.extend({
       }) => {
         const date = new Date(e.createdAt).toISOString().split('T')[0];
         const product = e.product.duration.value > 1
-          ? `${e.product.duration.value} ${this.$t(`preferences.account.${e.product.duration.unit}s`)}`
-          : `${e.product.duration.value} ${this.$t(`preferences.account.${e.product.duration.unit}`)}`;
+          ? `${e.product.duration.value}${this.$t(`preferences.account.${e.product.duration.unit}s`)}`
+          : `${e.product.duration.value}${this.$t(`preferences.account.${e.product.duration.unit}`)}`;
         const payProduct = this.$t('preferences.account.payProduct', { product });
         const name = this.$t('preferences.account.payContent', { date, product: payProduct });
         return {
