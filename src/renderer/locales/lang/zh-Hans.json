@@ -367,15 +367,15 @@
       "years": "",
       "payType": {
         "alipay": "",
-        "wxpay": "",
+        "wxpay": "微信支付",
         "paypal": ""
       }
     }
   },
   "payment": {
     "wxpay": {
-      "title": "",
-      "description": ""
+      "title": "扫码支付",
+      "description": "微信支付"
     },
     "fail": ""
   },
