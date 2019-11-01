@@ -465,27 +465,6 @@ new Vue({
             this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
           }
           break;
-        case 37:
-          e.preventDefault();
-          if (!this.playlistDisplayState) this.$bus.$emit('seek', videodata.time - 5);
-          break;
-        case 39:
-          e.preventDefault();
-          if (!this.playlistDisplayState) this.$bus.$emit('seek', videodata.time + 5);
-          break;
-        case 84:
-          e.preventDefault();
-          this.playingViewTop = !this.playingViewTop;
-          this.$bus.$emit('invoke-all-widgets');
-          break;
-        case 76:
-          e.preventDefault();
-          this.$bus.$emit('switch-playlist');
-          break;
-        case 67:
-          e.preventDefault();
-          this.$event.emit('side-bar-mouseup');
-          break;
         case 219:
           e.preventDefault();
           if (this.currentRouteName === 'browsing-view' && e.metaKey) {
@@ -1055,7 +1034,7 @@ new Vue({
         this.$electron.ipcRenderer.send('set-window-maximize');
       });
       this.menuService.on('browsing.window.sidebar', () => {
-        this.$event.emit('side-bar-mouseup');
+        this.$bus.$emit('toggle-side-bar');
       });
       this.menuService.on('browsing.window.backToLandingView', () => {
         this.$router.push({ name: 'landing-view' });
