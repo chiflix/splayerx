@@ -20,6 +20,9 @@
         </span>
         <div
           v-else
+          :style="{
+            fontSize: `${blankTitleFontSize[currentPhase]}px`,
+          }"
           class="description"
         >
           在线上播放的视频历史记录将在这里显示，包括页面名称、站点地址和浏览时间
@@ -108,13 +111,14 @@ export default {
     historyBottom() {
       return [50 * 888 / 1176, 50 * this.winWidth / 1176, 50];
     },
+    blankTitleFontSize() {
+      return [19 * 888 / 1176, 19 * this.winWidth / 1176, 19];
+    },
   },
   watch: {
-    showHomePage(val: boolean) {
+    async showHomePage(val: boolean) {
       if (val) {
-        browsingHistory.getHistorys().then((result: any) => {
-          this.histories = result;
-        });
+        this.histories = await browsingHistory.getHistorys();
       }
     },
   },
@@ -147,19 +151,16 @@ export default {
     .slash {
       color: #B5B6BF;
       font-size: 19px;
-      font-family: $font-light;
     }
     .clear {
       cursor: pointer;
       height: 26px;
-      font-family: $font-light;
       font-size: 19px;
       color: #B5B6BF;
       letter-spacing: 0.14px;
     }
     .description {
       margin-top: 20px;
-      font-family: $font-semibold;
       font-size: 19px;
       color: #B5B6BF;
     }
