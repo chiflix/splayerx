@@ -627,6 +627,38 @@ function registerMainWindowEvent(mainWindow) {
       });
     }
   });
+  ipcMain.on('open-history-item', (evt, args) => {
+    if (!browserViewManager) browserViewManager = new BrowserViewManager();
+    const newChannel = browserViewManager.openHistoryPage(args.channel, args.url);
+    mainWindow.addBrowserView(newChannel.page.view);
+    setTimeout(() => {
+      mainWindow.send('update-browser-state', {
+        url: args.url,
+        canGoBack: newChannel.canBack,
+        canGoForward: newChannel.canForward,
+      });
+    }, 150);
+    const bounds = mainWindow.getBounds();
+    if (process.platform === 'win32' && mainWindow.isMaximized() && (bounds.x < 0 || bounds.y < 0)) {
+      newChannel.page.view.setBounds({
+        x: sidebar ? 76 : 0,
+        y: 40,
+        width: sidebar ? bounds.width + (bounds.x * 2) - 76
+          : bounds.width + (bounds.x * 2),
+        height: bounds.height - 40,
+      });
+    } else {
+      newChannel.page.view.setBounds({
+        x: sidebar ? 76 : 0,
+        y: 40,
+        width: sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
+        height: mainWindow.getSize()[1] - 40,
+      });
+    }
+    newChannel.page.view.setAutoResize({
+      width: true, height: true,
+    });
+  });
   // eslint-disable-next-line complexity
   ipcMain.on('change-channel', (evt, args) => {
     if (!browserViewManager) browserViewManager = new BrowserViewManager();

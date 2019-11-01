@@ -33,6 +33,8 @@
           borderTop: '1px solid #EEEEEE',
           borderBottom: '1px solid #EEEEEE',
           margin: `${playlistBottom[currentPhase]}px 0 ${historyBottom[currentPhase]}px 0`,
+          padding: histories.length < 1 ? '' :
+            `${playlistBottom[currentPhase]}px 0 ${playlistBottom[currentPhase]}px 0`,
         }"
         class="content"
       >
@@ -51,15 +53,19 @@
           :key="item.url"
           v-for="item in histories"
           v-bind="item"
+          @click.native="handleOpenHistoryItem(item)"
         />
       </div>
     </div>
   </div>
 </template>
 <script lang="ts">
-import { mapGetters } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
 import BrowsingHistoryItem from '@/components/BrowsingView/BrowsingHistoryItem.vue';
 import { browsingHistory } from '@/services/browsing/BrowsingHistoryService';
+import {
+  Browsing as browsingActions,
+} from '@/store/actionTypes';
 
 export default {
   components: {
@@ -109,6 +115,9 @@ export default {
     },
   },
   methods: {
+    ...mapActions({
+      updateCurrentChannel: browsingActions.UPDATE_CURRENT_CHANNEL,
+    }),
     async updateHistory() {
       browsingHistory.getHistorys().then((result: any) => {
         this.histories = result;
@@ -117,6 +126,16 @@ export default {
     async handleClear() {
       await browsingHistory.clearAllHistorys();
       this.updateHistory();
+    },
+    handleOpenHistoryItem(item: {
+      channel: string,
+      icon: string,
+      openTime: number,
+      title: string,
+      url: string
+    }) {
+      this.$electron.ipcRenderer.send('open-history-item', { url: item.url, channel: item.channel });
+      this.updateCurrentChannel(item.channel);
     },
   },
 };
