@@ -6,15 +6,15 @@ export type HistoryDisplayItem = {
   icon: string | undefined,
 }
 
-export type IMenuDisplayInfo = {
-  id: string,
-  label: string,
-  icon?: string,
+export type IBrowsingHistoryMenuInfo = {
+  url: string,
+  title: string,
+  iconPath: string,
 }
 
 export interface IBrowsingHistory {
   getHistorys(): Promise<HistoryDisplayItem[]>,
-  getMenuDisplayInfo(): Promise<IMenuDisplayInfo[]>,
+  getMenuDisplayInfo(): Promise<IBrowsingHistoryMenuInfo[]>,
   saveHistoryItem(url: string, title: string, channel: string): Promise<IDBValidKey>,
   cleanChannelRecords(channel: string): Promise<void>,
 }

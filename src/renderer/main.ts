@@ -256,6 +256,7 @@ new Vue({
     },
     currentRouteName(val) {
       this.menuService.updateRouteName(val);
+      if (val === 'browsing-view') this.menuService.addBrowsingHistoryItems();
       if (val === 'landing-view' || val === 'playing-view') this.menuService.addRecentPlayItems();
       if (val === 'landing-view') this.topOnWindow = false;
       if (val === 'playing-view' && this.playingViewTop) {

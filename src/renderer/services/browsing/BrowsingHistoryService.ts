@@ -1,3 +1,4 @@
+import path from 'path';
 import { IBrowsingHistory, HistoryDisplayItem } from '@/interfaces/IBrowsingHistory';
 import { HISTORY_OBJECT_STORE_NAME } from '@/constants';
 import { browsingDB, BrowsingHistoryItem } from '@/helpers/browsingDB';
@@ -34,16 +35,18 @@ export default class BrowsingHistory implements IBrowsingHistory {
   }
 
   public async getMenuDisplayInfo() {
-    if (!this.icons || this.icons.length < 1) {
-      this.icons = Array.from(BrowsingChannelManager.getAllChannels().values())
-        .map(val => val.channels).flat().map(val => val.icon);
-    }
+    const channels = Array.from(BrowsingChannelManager.getAllChannels().values())
+      .map(val => val.channels).flat().map(val => val.channel.split('.')[0]);
     const results = (await browsingDB.getAll(HISTORY_OBJECT_STORE_NAME))
       .sort((a: BrowsingHistoryItem, b: BrowsingHistoryItem) => a.openTime - b.openTime);
-    return results.map(result => ({
-      id: `history.${result.url}`,
-      label: result.title,
-      icon: this.icons.find(icon => `${result.channel.split('.')[0]}Sidebar` === icon),
+    return results.map(({ url, title, channel }) => ({
+      url,
+      title,
+      iconPath: path.join(
+        __static,
+        'browsing',
+        `${channels.find(val => channel.split('.')[0] === val)}.png`,
+      ),
     }));
   }
 

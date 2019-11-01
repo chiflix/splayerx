@@ -2,6 +2,7 @@ import { ipcMain } from 'electron';
 import Menu from './Menu';
 import { IMenuDisplayInfo } from '../../renderer/interfaces/IRecentPlay';
 import { ISubtitleControlListItem } from '../../renderer/interfaces/ISubtitle';
+import { IBrowsingHistoryMenuInfo } from '@/interfaces/IBrowsingHistory';
 
 export default class MenuService {
   private menu: Menu;
@@ -40,7 +41,7 @@ export default class MenuService {
     ipcMain.on('update-locale', () => {
       this.menu.updateLocale();
     });
-    ipcMain.on('update-browisng-history', (e: Event, items: IMenuDisplayInfo[]) => {
+    ipcMain.on('update-browisng-history', (e: Event, items: IBrowsingHistoryMenuInfo[]) => {
       this.menu.updateBrowsingHistory(items);
     });
     ipcMain.on('update-recent-play', (e: Event, items: IMenuDisplayInfo[]) => {
