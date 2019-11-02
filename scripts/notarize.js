@@ -3,6 +3,7 @@ const { notarize } = require('electron-notarize');
 
 exports.default = async function notarizing(context) {
   if (!process.env.APPLEIDPASS) return;
+  if (process.env.TRAVIS && !process.env.TRAVIS_TAG) return;
 
   const { electronPlatformName, appOutDir } = context;
   if (electronPlatformName !== 'darwin') { // dmg only
