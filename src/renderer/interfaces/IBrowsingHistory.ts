@@ -9,6 +9,7 @@ export type HistoryDisplayItem = {
 export type IBrowsingHistoryMenuInfo = {
   url: string,
   title: string,
+  channel: string,
   iconPath: string,
 }
 

@@ -42,6 +42,7 @@ export default class BrowsingHistory implements IBrowsingHistory {
     return results.map(({ url, title, channel }) => ({
       url,
       title,
+      channel,
       iconPath: path.join(
         __static,
         'browsing',

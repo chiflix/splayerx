@@ -185,7 +185,6 @@ export default class Menubar {
         this.updateSecondarySub();
       } else if (this._routeName === 'browsing-view') {
         this.refreshMenu('edit');
-        this.refreshMenu('history');
         this.refreshMenu('browsing.window');
       }
     } else {
@@ -198,7 +197,6 @@ export default class Menubar {
 
       if (this._routeName === 'browsing-view') {
         this.disableSubmenuItem('edit');
-        this.disableSubmenuItem('history');
         this.disableSubmenuItem('browsing.window');
       }
     }
@@ -268,15 +266,15 @@ export default class Menubar {
       }
     });
 
-    this.browsingHistory.forEach(({ url, title, iconPath }) => {
+    this.browsingHistory.forEach(({
+      url, title, channel, iconPath,
+    }) => {
       const item = new MenuItem({
         id: url,
         label: title,
         icon: nativeImage.createFromPath(iconPath).resize({ height: 20 }),
         click: () => {
-          if (this.mainWindow) {
-            this.mainWindow.webContents.send('history.openHistory', url);
-          }
+          app.emit('open-history-item', null, { url, channel });
         },
       });
       historyMenu.append(item);
