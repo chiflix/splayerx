@@ -118,9 +118,9 @@ export default {
         },
         control: {
           x: Math.round(size[0] - 65),
-          y: Math.round(size[1] / 2 - 54),
+          y: Math.round(size[1] / 2 - 72),
           width: 50,
-          height: 104,
+          height: 144,
         },
       });
     }, 100));

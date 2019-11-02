@@ -57,6 +57,14 @@
       />
     </transition>
     <transition name="bubble">
+      <AlertBubble
+        v-if="showNotExportEmbeddedSubtitleBubble"
+        :content="$t('notExportEmbeddedSubtitle.content')"
+        :close="closeNotExportEmbeddedSubtitleBubble"
+        class="mas-privacy-bubble"
+      />
+    </transition>
+    <transition name="bubble">
       <TranslateBubble
         v-if="isTranslateBubbleVisible"
         :message="translateBubbleMessage"
@@ -132,6 +140,7 @@ export default {
       checkForUpdatesVersion: '',
       showLastestUpdateBubble: false, // show update bubble
       lastestUpdateContent: '',
+      showNotExportEmbeddedSubtitleBubble: false,
     };
   },
   computed: {
@@ -191,6 +200,9 @@ export default {
       this.lastestUpdateContent = this.$t('checkForUpdatesBubble.noNeed.content', { version: info.version });
       this.showLastestUpdateBubble = true;
     });
+    this.$bus.$on('embedded-subtitle-can-not-export', () => {
+      this.showNotExportEmbeddedSubtitleBubble = true;
+    });
   },
   methods: {
     ...mapActions({
@@ -223,6 +235,9 @@ export default {
     },
     closeLastestUpdateBubble() {
       this.showLastestUpdateBubble = false;
+    },
+    closeNotExportEmbeddedSubtitleBubble() {
+      this.showNotExportEmbeddedSubtitleBubble = false;
     },
     manualClose() {
       this.manualClosed = true;

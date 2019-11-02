@@ -7,7 +7,8 @@ import {
   isEqual, sortBy, differenceWith, flatten, remove, debounce, difference,
 } from 'lodash';
 import Vue from 'vue';
-import { extname } from 'path';
+import { remote } from 'electron';
+import { extname, basename, join } from 'path';
 import { existsSync } from 'fs';
 import store from '@/store';
 import { SubtitleManager as m } from '@/store/mutationTypes';
@@ -16,6 +17,7 @@ import {
   newSubtitle as subActions,
   Subtitle as legacyActions,
   AudioTranslate as atActions,
+  UserInfo as usActions,
 } from '@/store/actionTypes';
 import {
   ISubtitleControlListItem, Type, IEntityGenerator, IEntity, NOT_SELECTED_SUBTITLE,
@@ -40,11 +42,13 @@ import {
   SUBTITLE_UPLOAD, UPLOAD_SUCCESS, UPLOAD_FAILED,
   LOCAL_SUBTITLE_REMOVED,
 } from '../../helpers/notificationcodes';
-import { LanguageCode } from '@/libs/language';
+import { LanguageCode, codeToLanguageName } from '@/libs/language';
 import { AudioTranslateBubbleOrigin } from './AudioTranslate';
 import { ISubtitleStream } from '@/plugins/mediaTasks';
 import { isAIEnabled } from '@/helpers/featureSwitch';
 import { IEmbeddedOrigin } from '@/services/subtitle/utils/loaders';
+import { sagiSubtitleToSRT } from '@/services/subtitle/utils/transcoders';
+import { write } from '@/libs/file';
 
 const sortOfTypes = {
   local: 0,
@@ -1016,6 +1020,53 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
   async [a.storeSubtitleDelays]({ getters, state }) {
     const list = getters.list.map(({ id }: ISubtitleControlListItem) => getters[`${id}/entity`]);
     updateSubtitleList(list, state.mediaHash);
+  },
+  async [a.exportSubtitle]({ getters, dispatch, rootState }, item: ISubtitleControlListItem) {
+    const { $bus } = Vue.prototype;
+    if (!getters.token || !(getters.userInfo && getters.userInfo.isVip)) {
+      dispatch(usActions.SHOW_FORBIDDEN_MODAL, 'export');
+      dispatch(usActions.UPDATE_SIGN_IN_CALLBACK, () => {
+        dispatch(usActions.HIDE_FORBIDDEN_MODAL);
+        dispatch(a.exportSubtitle, item);
+      });
+      return;
+    }
+    if (item && item.type === Type.Embedded
+      && (!rootState[item.id] || !rootState[item.id].fullyRead)) {
+      // Embedded not cache
+      $bus.$emit('embedded-subtitle-can-not-export');
+      return;
+    }
+
+    if (item && !(item.type === 'preTranslated' && item.source.source === '')) {
+      const { dialog } = remote;
+      const browserWindow = remote.BrowserWindow;
+      const focusWindow = browserWindow.getFocusedWindow();
+      const originSrc = getters.originSrc;
+      const videoName = `${basename(originSrc, extname(originSrc))}`;
+      const left = originSrc.split(videoName)[0];
+      const lang = item.language ? `-${codeToLanguageName(item.language)}` : '';
+      const name = `${videoName}${lang}`;
+      const fileName = `${basename(name, '.srt')}.srt`;
+      const defaultPath = join(left, fileName);
+      if (focusWindow) {
+        dialog.showSaveDialog(focusWindow, {
+          defaultPath,
+        }, async (filePath) => {
+          if (filePath) {
+            const { dialogues = [] } = await dispatch(`${getters.primarySubtitleId}/${subActions.getDialogues}`, undefined);
+            log.debug('export', dialogues);
+            const str = sagiSubtitleToSRT(dialogues);
+            try {
+              write(filePath, Buffer.from(`\ufeff${str}`, 'utf8'));
+            } catch (err) {
+              log.error('exportSubtitle', err);
+            }
+            dispatch('UPDATE_DEFAULT_DIR', filePath);
+          }
+        });
+      }
+    }
   },
 };
 

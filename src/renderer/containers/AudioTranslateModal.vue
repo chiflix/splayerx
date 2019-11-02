@@ -163,7 +163,7 @@
       </div>
       <div
         v-else-if="isTranslateFail && isPermissionFail"
-        @click="hideTranslateModal"
+        @click="goPremium"
         class="button"
       >
         {{ $t('translateModal.upgrade') }}
@@ -180,10 +180,12 @@
 </template>
 <script lang="ts">
 import Vue from 'vue';
+import { ipcRenderer } from 'electron';
 import { mapActions, mapGetters } from 'vuex';
 import {
   Input as inputActions,
   AudioTranslate as atActions,
+  UserInfo as usActions,
 } from '@/store/actionTypes';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import { codeToLanguageName, normalizeCode } from '@/libs/language';
@@ -223,6 +225,7 @@ export default Vue.extend({
       'currentAudioTrackId', 'mediaHash', 'audioTrackList', 'currentAudioTrackId', 'displayLanguage',
       'isTranslateModalVisible', 'translateProgress', 'isTranslating', 'selectedTargetLanugage',
       'translateEstimateTime', 'translateStatus', 'lastAudioLanguage', 'failType',
+      'userInfo',
     ]),
     translateLanguageLabel() {
       return codeToLanguageName(this.selectedTargetLanugage);
@@ -330,6 +333,19 @@ export default Vue.extend({
         await this.refreshConfig();
       }
     },
+    audioLanguage(n: {
+      label: string,
+      value: string
+    }, o: {
+      label: string,
+      value: string
+    }) {
+      if (n.value === 'premium') {
+        this.audioLanguage = o;
+        this.hideTranslateModal();
+        this.showForbidden('translate');
+      }
+    },
   },
   async mounted() {
     this.refreshConfig();
@@ -341,6 +357,7 @@ export default Vue.extend({
       startTranslate: atActions.AUDIO_TRANSLATE_START,
       discardTranslate: atActions.AUDIO_TRANSLATE_DISCARD,
       updateWheel: inputActions.WHEEL_UPDATE,
+      showForbidden: usActions.SHOW_FORBIDDEN_MODAL,
     }),
     getAudioLanguage() {
       const { lanugages } = this;
@@ -367,10 +384,19 @@ export default Vue.extend({
     },
     async refreshConfig() {
       try {
-        const supportedAudioLanguage = await getJsonConfig('audioLanguage', null);
+        const isVip = this.userInfo && this.userInfo.isVip;
+        const supportedAudioLanguage = isVip ? await getJsonConfig('vipAudioLanguage', null)
+          : await getJsonConfig('audioLanguage', null);
         if (supportedAudioLanguage && supportedAudioLanguage['list']) {
           this.lanugages = supportedAudioLanguage['list'];
           // this.getAudioLanguage();
+          if (!isVip) {
+            const goPremiumLabel = this.$t('translateModal.selectLanguageMoreLabel');
+            this.lanugages.push({
+              value: 'premium',
+              label: goPremiumLabel,
+            });
+          }
         } else {
           throw new Error();
         }
@@ -381,7 +407,7 @@ export default Vue.extend({
           label: failLabel,
         }];
       } finally {
-        this.loadConfigCatCompleted = true;
+        // this.loadConfigCatCompleted = true;
       }
     },
     translate() {
@@ -410,6 +436,10 @@ export default Vue.extend({
     getLanguageLabel(code: string) {
       const l = this.lanugages.find((l: { value: string, label: string }) => l.value === code);
       return l ? l.label : codeToLanguageName(code);
+    },
+    goPremium() {
+      ipcRenderer.send('add-preference', 'premium');
+      this.hideTranslateModal();
     },
   },
 });

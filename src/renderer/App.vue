@@ -47,9 +47,9 @@ import Titlebar from '@/components/Titlebar.vue';
 import Sidebar from '@/components/Sidebar.vue';
 import '@/css/style.scss';
 import drag from '@/helpers/drag';
-import { setToken, checkToken } from '@/libs/apis';
+import { setToken, getUserInfo, checkToken } from '@/libs/apis';
 import sagi from '@/libs/sagi';
-import { apiOfAccountService } from './helpers/featureSwitch';
+import { apiOfAccountService, forceRefresh } from './helpers/featureSwitch';
 import { AudioTranslateBubbleOrigin, AudioTranslateStatus } from '@/store/modules/AudioTranslate';
 
 export default {
@@ -64,6 +64,7 @@ export default {
       openFileArgs: null,
       currentUrl: '',
       checkedToken: false,
+      didGetUserInfo: false,
     };
   },
   computed: {
@@ -97,7 +98,7 @@ export default {
       ipcRenderer.send('update-sidebar', val);
     },
   },
-  mounted() {
+  async mounted() {
     this.$event.on('side-bar-mouseup', () => {
       if (this.playlistState && !this.showSidebar) {
         this.$bus.$emit('close-playlist');
@@ -133,18 +134,22 @@ export default {
     apiOfAccountService().then((api: string) => {
       ipcRenderer.send('sign-in-end-point', api);
     }).catch(() => {});
-
+    ipcRenderer.on('clear-signIn-callback', () => {
+      this.removeCallback(() => { });
+    });
     // sign in success
-    ipcRenderer.on('sign-in', (e: Event, account?: {
+    ipcRenderer.on('sign-in', async (e: Event, account?: {
       token: string, id: string,
     }) => {
       this.updateUserInfo(account);
       if (account) {
         setToken(account.token);
         sagi.setToken(account.token);
-        if (!this.checkedToken) {
-          this.checkedToken = true;
-          checkToken();
+        this.updateToken(account.token);
+        try {
+          await this.getUserInfo();
+        } catch (error) {
+          // empty
         }
         // sign in success, callback
         if (this.signInCallback) {
@@ -153,7 +158,20 @@ export default {
         }
       } else {
         setToken('');
+        this.updateToken('');
         sagi.setToken('');
+        this.didGetUserInfo = false;
+      }
+    });
+
+    ipcRenderer.on('payment-success', async () => {
+      forceRefresh();
+      try {
+        await checkToken();
+        const res = await getUserInfo();
+        this.updateUserInfo(res.me);
+      } catch (error) {
+        // empty
       }
     });
 
@@ -169,19 +187,23 @@ export default {
       }
     });
     // load global data when sign in is opend
-    // const account = remote.getGlobal('account');
-    // this.updateUserInfo(account);
-    // if (account && account.token) {
-    //   setToken(account.token);
-    //   sagi.setToken(account.token);
-    //   // resfrsh
-    //   checkToken();
-    // }
+    const account = remote.getGlobal('account');
+    this.updateUserInfo(account);
+    if (account && account.token) {
+      setToken(account.token);
+      await checkToken();
+      this.updateToken(account.token);
+      sagi.setToken(account.token);
+      // resfrsh
+      this.checkedToken = true;
+      this.getUserInfo();
+    }
   },
   methods: {
     ...mapActions({
       resetManager: smActions.resetManager,
       updateUserInfo: uActions.UPDATE_USER_INFO,
+      updateToken: uActions.UPDATE_USER_TOKEN,
       removeCallback: uActions.UPDATE_SIGN_IN_CALLBACK,
       showTranslateBubble: atActions.AUDIO_TRANSLATE_SHOW_BUBBLE,
       addTranslateBubbleCallBack: atActions.AUDIO_TRANSLATE_BUBBLE_CALLBACK,
@@ -192,6 +214,17 @@ export default {
     },
     mainDispatchProxy(actionType: string, actionPayload: any) {
       this.$store.dispatch(actionType, actionPayload);
+    },
+    async getUserInfo() {
+      if (this.didGetUserInfo) return;
+      this.didGetUserInfo = true;
+      try {
+        const res = await getUserInfo();
+        this.updateUserInfo(res.me);
+      } catch (error) {
+        // empty
+        this.didGetUserInfo = false;
+      }
     },
   },
 };

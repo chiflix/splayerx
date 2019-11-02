@@ -20,6 +20,9 @@
         </span>
         <div
           v-else
+          :style="{
+            fontSize: `${blankTitleFontSize[currentPhase]}px`,
+          }"
           class="description"
         >
           在线上播放的视频历史记录将在这里显示，包括页面名称、站点地址和浏览时间
@@ -41,13 +44,46 @@
         <div
           v-if="histories.length < 1"
           :style="{
-            backgroundImage: `url(${require('@/assets/history.png')})`,
-            backgroundSize: '100% 100%',
-            backgroundRepeat: 'no-repeat',
             height: `${placeholderHeight[currentPhase]}px`
           }"
           class="placeholder"
-        />
+        >
+          <div
+            :style="{
+              width: `${placeholderPreWidth[currentPhase]}px`,
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+            }"
+          >
+            <div
+              :style="{
+                width: '100%',
+                height: `${placeholderPreWidth[currentPhase]}px`,
+                background: '#CECFDB',
+                borderRadius: '100%',
+              }"
+            />
+            <div
+              :style="{
+                width: '100%',
+                height: `${placeholderPreWidth[currentPhase]}px`,
+                background: '#CECFDB',
+                borderRadius: '100%',
+              }"
+            />
+          </div>
+          <div
+            :style="{
+              flex: '1',
+              height: '100%',
+              backgroundImage: `url(${require('@/assets/history.png')})`,
+              backgroundSize: '100% 100%',
+              backgroundRepeat: 'no-repeat',
+            }"
+          />
+        </div>
         <BrowsingHistoryItem
           v-else
           :key="item.url"
@@ -108,20 +144,31 @@ export default {
     historyBottom() {
       return [50 * 888 / 1176, 50 * this.winWidth / 1176, 50];
     },
+    blankTitleFontSize() {
+      return [19 * 888 / 1176, 19 * this.winWidth / 1176, 19];
+    },
+    placeholderPreWidth() {
+      return [26 * 888 / 1176, 26 * this.winWidth / 1176, 26];
+    },
   },
   watch: {
     showHomePage(val: boolean) {
       if (val) this.updateHistory();
     },
   },
+  mounted() {
+    this.$bus.$on('update-browsing-playlist', () => {
+      setTimeout(() => {
+        this.updateHistory();
+      }, 1000);
+    });
+  },
   methods: {
     ...mapActions({
       updateCurrentChannel: browsingActions.UPDATE_CURRENT_CHANNEL,
     }),
     async updateHistory() {
-      browsingHistory.getHistorys().then((result: any) => {
-        this.histories = result;
-      });
+      this.histories = await browsingHistory.getHistorys();
     },
     async handleClear() {
       await browsingHistory.clearAllHistorys();
@@ -148,19 +195,16 @@ export default {
     .slash {
       color: #B5B6BF;
       font-size: 19px;
-      font-family: $font-light;
     }
     .clear {
       cursor: pointer;
       height: 26px;
-      font-family: $font-light;
       font-size: 19px;
       color: #B5B6BF;
       letter-spacing: 0.14px;
     }
     .description {
       margin-top: 20px;
-      font-family: $font-semibold;
       font-size: 19px;
       color: #B5B6BF;
     }
@@ -173,6 +217,7 @@ export default {
     .placeholder {
       width: 100%;
       margin: auto 0 auto 0;
+      display: flex;
     }
   }
 }

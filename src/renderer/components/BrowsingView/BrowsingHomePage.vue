@@ -260,8 +260,7 @@ export default {
       if (!this.isLogin) {
         this.$electron.remote.app.emit('add-login');
       } else {
-        // eslint-disable-next-line no-console
-        console.log('投食');
+        this.$electron.ipcRenderer.send('add-preference', 'premium');
       }
     },
     handleLogout() {

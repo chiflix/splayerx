@@ -161,12 +161,10 @@ export default {
           .repositionChannels(this.indexOfMovingItem, this.indexOfMovingTo);
       }
     },
-    channelsDetail: {
-      handler: (val: { url: string, channel: string,
-        icon: string, title: string, path: string }[]) => {
-        asyncStorage.set('channels', { channels: val });
-      },
-      deep: true,
+    channelsDetail(val: { url: string, channel: string,
+      icon: string, title: string, path: string }[]) {
+      asyncStorage.set('channels', { channels: val });
+      this.$bus.$emit('update-browsing-playlist');
     },
     currentRouteName(val: string) {
       if (val !== 'browsing-view') {
@@ -205,7 +203,7 @@ export default {
       this.topMask = this.maxHeight >= this.totalHeight ? false : scrollTop !== 0;
       this.bottomMask = scrollTop + this.maxHeight < this.totalHeight;
     });
-    this.$electron.ipcRenderer.on('delete-channel', (e: Event, channel: string) => {
+    this.$electron.ipcRenderer.on('delete-channel', async (e: Event, channel: string) => {
       if (this.currentChannel === channel) {
         if (this.channelsDetail.length <= 1) {
           if (this.currentRouteName === 'browsing-view') {
@@ -224,7 +222,7 @@ export default {
           });
         }
       }
-      BrowsingChannelManager.setChannelAvailable(channel, false);
+      await BrowsingChannelManager.setChannelAvailable(channel, false);
       this.$electron.ipcRenderer.send('clear-browsers-by-channel', channel);
       this.channelsDetail = BrowsingChannelManager.getAllAvailableChannels();
     });

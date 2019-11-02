@@ -146,7 +146,6 @@ export default {
       barrageOpenByPage: false,
       showChannelManager: false,
       showHomePage: false,
-      historyTitle: '',
     };
   },
   computed: {
@@ -296,11 +295,6 @@ export default {
         }
       }
     },
-    historyTitle(val: string) {
-      if (this.hasVideo && this.currentChannel) {
-        browsingHistory.saveHistoryItem(this.currentUrl, val, this.currentChannel);
-      }
-    },
     hasVideo(val: boolean) {
       this.updatePipState(val);
       this.createTouchBar(val);
@@ -377,15 +371,13 @@ export default {
           this.progress = 0;
           if (this.currentMainBrowserView()) {
             const loadUrl = this.currentMainBrowserView().webContents.getURL();
-            this.currentMainBrowserView().webContents.executeJavaScript(
-              InjectJSManager.calcVideoNum(),
-              (r: { num: number, title: string }) => {
+            this.currentMainBrowserView().webContents
+              .executeJavaScript(InjectJSManager.calcVideoNum())
+              .then((r: number) => {
                 this.webInfo.hasVideo = this.currentChannel === 'youtube.com' && !getVideoId(loadUrl).id
                   ? false
-                  : !!r.num;
-                this.historyTitle = r.title;
-              },
-            );
+                  : !!r;
+              });
           }
         }, 1000);
       }
@@ -409,7 +401,6 @@ export default {
     },
   },
   created() {
-    console.log('brow', browsingHistory);
     if (!navigator.onLine) this.offlineHandler();
     window.addEventListener('online', this.onlineHandler);
     this.createTouchBar(false);
@@ -546,15 +537,13 @@ export default {
           this.updateCanGoForward(this.webInfo.canGoForward);
           const loadUrl = this.currentMainBrowserView().webContents.getURL();
           if (!this.currentMainBrowserView().webContents.isLoading()) {
-            this.currentMainBrowserView().webContents.executeJavaScript(
-              InjectJSManager.calcVideoNum(),
-              (r: { num: number, title: string }) => {
+            this.currentMainBrowserView().webContents
+              .executeJavaScript(InjectJSManager.calcVideoNum())
+              .then((r: number) => {
                 this.webInfo.hasVideo = this.currentChannel === 'youtube.com' && !getVideoId(loadUrl).id
                   ? false
-                  : !!r.num;
-                this.historyTitle = r.title;
-              },
-            );
+                  : !!r;
+              });
           }
           this.createTouchBar(this.webInfo.hasVideo);
         }
@@ -664,11 +653,10 @@ export default {
       if (this.currentMainBrowserView()) {
         const loadUrl = this.currentMainBrowserView().webContents.getURL();
         this.currentMainBrowserView().webContents
-          .executeJavaScript(InjectJSManager.calcVideoNum(),
-            (r: { num: number, title: string }) => {
-              this.webInfo.hasVideo = this.currentChannel === 'youtube.com' && !getVideoId(loadUrl).id ? false : !!r.num;
-              this.historyTitle = r.title;
-            });
+          .executeJavaScript(InjectJSManager.calcVideoNum())
+          .then((r: number) => {
+            this.webInfo.hasVideo = this.currentChannel === 'youtube.com' && !getVideoId(loadUrl).id ? false : !!r;
+          });
       }
     },
     beforeUnloadHandler(e: BeforeUnloadEvent) {
@@ -751,6 +739,7 @@ export default {
       this.removeListener();
       const view = this.currentMainBrowserView();
       if (view) {
+        view.webContents.addListener('media-started-playing', this.mediaStartedPlaying);
         view.webContents.addListener('ipc-message', this.ipcMessage);
         view.webContents.addListener('page-title-updated', this.handlePageTitle);
         view.webContents.addListener('dom-ready', this.domReady);
@@ -770,6 +759,7 @@ export default {
             this.didStopLoading,
           );
         }
+        view.webContents.removeListener('media-started-playing', this.mediaStartedPlaying);
         view.webContents.removeListener('page-title-updated', this.handlePageTitle);
         view.webContents.removeListener('dom-ready', this.domReady);
         view.webContents.removeListener('ipc-message', this.ipcMessage);
@@ -780,6 +770,9 @@ export default {
         view.webContents.removeListener('new-window', this.newWindow);
         view.webContents.removeListener('will-navigate', this.willNavigate);
       }
+    },
+    mediaStartedPlaying() {
+      browsingHistory.saveHistoryItem(this.currentUrl, this.title, this.currentChannel);
     },
     newWindow(e: Event, url: string, disposition: string) {
       if (disposition !== 'new-window') {
