@@ -448,15 +448,10 @@ new Vue({
     });
     window.addEventListener('keydown', (e) => { // eslint-disable-line complexity
       if (e.code === 'BracketLeft') {
-        e.preventDefault();
         this.$store.dispatch(videoActions.DECREASE_RATE);
       } else if (e.code === 'BracketRight') {
-        e.preventDefault();
         this.$store.dispatch(videoActions.INCREASE_RATE);
-      } else if (e.code === 'Backslash') {
-        e.preventDefault();
-        this.$store.dispatch(videoActions.CHANGE_RATE, 1);
-      }
+      };
       switch (e.keyCode) {
         case 27:
           if (this.isFullScreen && !this.playlistDisplayState) {
@@ -470,6 +465,10 @@ new Vue({
           if (this.currentRouteName === 'browsing-view' && e.metaKey) {
             this.$bus.$emit('toggle-back');
           }
+          break;
+        case 220:
+          e.preventDefault();
+          this.$store.dispatch(videoActions.CHANGE_RATE, 1);
           break;
         case 221:
           e.preventDefault();
