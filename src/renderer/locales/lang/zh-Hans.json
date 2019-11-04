@@ -205,7 +205,7 @@
       "enterFullScreen": "进入全屏",
       "exitFullScreen": "退出全屏",
       "halfSize": "50%",
-      "maxmize": "缩放",
+      "maxmize": "最大化",
       "minimize": "最小化",
       "name": "窗口",
       "originSize": "100%",
@@ -354,7 +354,7 @@
       "content": {
         "description1": "AI翻译功能 (应该) 足够用",
         "description2": "更多智能翻译语言选择",
-        "description3": "无限制导出语音识别字幕",
+        "description3": "无限制导出翻译和字幕",
         "description4": "投食记录将被永久保存",
         "description5": "",
         "description6": "更多福利准备中，敬请期待"
@@ -628,7 +628,7 @@
       "h4": "NOW",
       "content1": "增加智能翻译使用时间",
       "content2": "更多智能翻译语言选择",
-      "content3": "无限制导出字幕文件",
+      "content3": "无限制导出翻译和字幕",
       "button": "完成"
     },
     "fail": {
