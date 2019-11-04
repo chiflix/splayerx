@@ -50,6 +50,7 @@ import { getValidSubtitleRegex, getSystemLocale, getClientUUID } from '../shared
 import { isWindowsExE, isMacintoshDMG } from '../shared/common/platform';
 import MenuService from './services/menu/MenuService';
 import BrowsingChannelMenu from './services/browsing/BrowsingChannelMenu';
+import { browsingHistory } from '@/services/browsing/BrowsingHistoryService';
 
 
 // causing callbacks-registry.js 404 error. disable temporarily
@@ -789,6 +790,9 @@ new Vue({
       });
       this.menuService.on('history.forward', () => {
         this.$bus.$emit('toggle-forward');
+      });
+      this.menuService.on('history.clearHistory', () => {
+        browsingHistory.clearAllHistorys(); 
       });
       this.menuService.on('playback.playOrPause', () => {
         this.$bus.$emit('toggle-playback');

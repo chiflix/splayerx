@@ -9,7 +9,8 @@ export default class BrowsingHistory implements IBrowsingHistory {
   private icons: string[];
 
   public async clearAllHistorys(): Promise<void> {
-    return browsingDB.clear(HISTORY_OBJECT_STORE_NAME);
+    await browsingDB.clear(HISTORY_OBJECT_STORE_NAME);
+    return menuService.addBrowsingHistoryItems();
   }
 
   public async getHistorys(): Promise<HistoryDisplayItem[]> {
@@ -33,7 +34,7 @@ export default class BrowsingHistory implements IBrowsingHistory {
       channel,
       openTime: Date.now(),
     });
-    menuService.addBrowsingHistoryItems(); 
+    menuService.addBrowsingHistoryItems();
     return result;
   }
 
