@@ -232,8 +232,12 @@ if (process.env.ENVIRONMENT_NAME === 'APPX') {
  * Adjust rendererConfig for development settings
  */
 if (process.env.NODE_ENV !== 'production') {
+  if (!process.env.TEST && process.platform === 'darwin') {
+    rendererConfig.plugins.push(
+      new ForkTsCheckerWebpackPlugin({ eslint: true, vue: true }),
+    );
+  }
   rendererConfig.plugins.push(
-    new ForkTsCheckerWebpackPlugin({ eslint: true, vue: true }),
     new webpack.DefinePlugin(
       Object.assign(sharedDefinedVariables, {
         'process.env.SAGI_API': `"${process.env.SAGI_API || 'apis.stage.sagittarius.ai:8443'}"`,
