@@ -1622,7 +1622,10 @@ app.on('check-for-updates', () => {
   if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
   mainWindow.webContents.send('check-for-updates');
 });
-app.on('open-history-item', openHistoryItem);
+app.on('open-history-item', (evt, args) => {
+  openHistoryItem(evt, args);
+  mainWindow.send('update-current-channel', args.channel);
+});
 
 app.on('menu-create-main-window', () => {
   if (!mainWindow) createMainWindow();

@@ -164,6 +164,9 @@ export default {
     },
   },
   mounted() {
+    this.$electron.ipcRenderer.on('update-current-channel', (evt: Event, channel: string) => {
+      this.updateCurrentChannel(channel);
+    });
     this.$bus.$on('update-browsing-playlist', () => {
       setTimeout(() => {
         this.updateHistory();
