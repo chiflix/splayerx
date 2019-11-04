@@ -191,10 +191,12 @@ new Vue({
       }
     },
     isFullScreen(val) {
-      this.menuService.updateMenuItemLabel(
-        this.currentRouteName === 'browsing-view' ? 'browsing.window.fullscreen' : 'window.fullscreen',
-        val ? 'msg.window.exitFullScreen' : 'msg.window.enterFullScreen',
-      );
+      if (this.currentRouteName === 'browsing-view' || this.currentRouteName === 'playing-view') {
+        this.menuService.updateMenuItemLabel(
+          this.currentRouteName === 'browsing-view' ? 'browsing.window.fullscreen' : 'window.fullscreen',
+          val ? 'msg.window.exitFullScreen' : 'msg.window.enterFullScreen',
+        );
+      }
     },
     topOnWindow(val: boolean) {
       this.$electron.ipcRenderer.send(this.currentRouteName === 'browsing-view' ? 'callBrowsingWindowMethod' : 'callMainWindowMethod', 'setAlwaysOnTop', [val]);
@@ -447,6 +449,16 @@ new Vue({
       }
     });
     window.addEventListener('keydown', (e) => { // eslint-disable-line complexity
+      if (e.code === 'BracketLeft') {
+        e.preventDefault();
+        this.$store.dispatch(videoActions.DECREASE_RATE);
+      } else if (e.code === 'BracketRight') {
+        e.preventDefault();
+        this.$store.dispatch(videoActions.INCREASE_RATE);
+      } else if (e.code === 'Backslash') {
+        e.preventDefault();
+        this.$store.dispatch(videoActions.CHANGE_RATE, 1);
+      }
       switch (e.keyCode) {
         case 27:
           if (this.isFullScreen && !this.playlistDisplayState) {
@@ -459,20 +471,12 @@ new Vue({
           e.preventDefault();
           if (this.currentRouteName === 'browsing-view' && e.metaKey) {
             this.$bus.$emit('toggle-back');
-          } else {
-            this.$store.dispatch(videoActions.DECREASE_RATE);
           }
-          break;
-        case 220:
-          e.preventDefault();
-          this.$store.dispatch(videoActions.CHANGE_RATE, 1);
           break;
         case 221:
           e.preventDefault();
           if (this.currentRouteName === 'browsing-view' && e.metaKey) {
             this.$bus.$emit('toggle-forward');
-          } else {
-            this.$store.dispatch(videoActions.INCREASE_RATE);
           }
           break;
         case 187:
@@ -817,11 +821,10 @@ new Vue({
         this.$bus.$emit('switch-playlist');
       });
       this.menuService.on('playback.previousVideo', () => {
-        if (!this.singleCycle) this.$bus.$emit('previous-video');
-        else this.$bus.$emit('seek', 0);
+        this.$bus.$emit('previous-video');
       });
       this.menuService.on('playback.nextVideo', () => {
-        this.$bus.$emit('seek', Math.ceil(this.duration));
+        this.$bus.$emit('next-video');
       });
       this.menuService.on('playback.singleCycle', () => {
         if (this.playlistLoop) this.$store.dispatch('playlistLoop', false);
