@@ -3,6 +3,7 @@ import { IBrowsingHistory, HistoryDisplayItem } from '@/interfaces/IBrowsingHist
 import { HISTORY_OBJECT_STORE_NAME } from '@/constants';
 import { browsingDB, BrowsingHistoryItem } from '@/helpers/browsingDB';
 import BrowsingChannelManager from '@/services/browsing/BrowsingChannelManager';
+import { menuService } from '@/services/menu/MenuService';
 
 export default class BrowsingHistory implements IBrowsingHistory {
   private icons: string[];
@@ -26,12 +27,14 @@ export default class BrowsingHistory implements IBrowsingHistory {
   }
 
   public async saveHistoryItem(url: string, title: string, channel: string) {
-    return browsingDB.put(HISTORY_OBJECT_STORE_NAME, {
+    const result = await browsingDB.put(HISTORY_OBJECT_STORE_NAME, {
       url,
       title,
       channel,
       openTime: Date.now(),
     });
+    menuService.addBrowsingHistoryItems(); 
+    return result;
   }
 
   public async getMenuDisplayInfo() {
