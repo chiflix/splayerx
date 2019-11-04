@@ -827,11 +827,10 @@ new Vue({
         this.$bus.$emit('switch-playlist');
       });
       this.menuService.on('playback.previousVideo', () => {
-        if (!this.singleCycle) this.$bus.$emit('previous-video');
-        else this.$bus.$emit('seek', 0);
+        this.$bus.$emit('previous-video');
       });
       this.menuService.on('playback.nextVideo', () => {
-        this.$bus.$emit('seek', Math.ceil(this.duration));
+        this.$bus.$emit('next-video');
       });
       this.menuService.on('playback.singleCycle', () => {
         if (this.playlistLoop) this.$store.dispatch('playlistLoop', false);
