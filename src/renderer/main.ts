@@ -447,6 +447,11 @@ new Vue({
       }
     });
     window.addEventListener('keydown', (e) => { // eslint-disable-line complexity
+      if (e.code === 'BracketLeft') {
+        this.$store.dispatch(videoActions.DECREASE_RATE);
+      } else if (e.code === 'BracketRight') {
+        this.$store.dispatch(videoActions.INCREASE_RATE);
+      };
       switch (e.keyCode) {
         case 27:
           if (this.isFullScreen && !this.playlistDisplayState) {
@@ -459,8 +464,6 @@ new Vue({
           e.preventDefault();
           if (this.currentRouteName === 'browsing-view' && e.metaKey) {
             this.$bus.$emit('toggle-back');
-          } else {
-            this.$store.dispatch(videoActions.DECREASE_RATE);
           }
           break;
         case 220:
@@ -471,8 +474,6 @@ new Vue({
           e.preventDefault();
           if (this.currentRouteName === 'browsing-view' && e.metaKey) {
             this.$bus.$emit('toggle-forward');
-          } else {
-            this.$store.dispatch(videoActions.INCREASE_RATE);
           }
           break;
         case 187:
