@@ -2,7 +2,6 @@
   <div class="browsing-history">
     <div
       :style="{
-        fontSize: `${playlistFontSize[currentPhase]}px`,
         marginLeft: `${padding}px`,
         color: '#3B3B41',
         marginBottom: `${playlistBottom[currentPhase]}px`,
@@ -10,13 +9,17 @@
       class="history-container"
     >
       <div class="title">
-        <span>{{ $t('browsing.history') }}</span>
-        <span v-if="histories.length >= 1">
+        <span :style="{ fontSize: `${playlistFontSize[currentPhase]}px` }">
+          {{ $t('browsing.homepage.history') }}</span>
+        <span
+          :style="{ fontSize: `${blankTitleFontSize[currentPhase]}px` }"
+          v-if="histories.length >= 1"
+        >
           <span class="slash">|&nbsp;&nbsp;</span>
           <span
             @click="handleClear"
             class="clear"
-          >{{ $t('browsing.clear') }}</span>
+          >{{ $t('browsing.homepage.clear') }}</span>
         </span>
         <div
           v-else
@@ -25,7 +28,7 @@
           }"
           class="description"
         >
-          在线上播放的视频历史记录将在这里显示，包括页面名称、站点地址和浏览时间
+          {{ $t('browsing.homepage.historyInfo') }}
         </div>
       </div>
       <div
@@ -87,6 +90,7 @@
         <BrowsingHistoryItem
           v-else
           :key="item.url"
+          :font-size="itemDetailFontSize[currentPhase]"
           v-for="item in histories"
           v-bind="item"
           @click.native="handleOpenHistoryItem(item)"
@@ -133,22 +137,25 @@ export default {
   computed: {
     ...mapGetters(['winWidth', 'showSidebar']),
     playlistBottom() {
-      return [20 * 888 / 1176, 20 * this.winWidth / 1176, 20];
+      return [20 * 857 / 1148, 20 * this.winWidth / 1148, 20];
     },
     placeholderHeight() {
-      return [66 * 888 / 1176, 66 * this.winWidth / 1176, 66];
+      return [66 * 857 / 1148, 66 * this.winWidth / 1148, 66];
     },
     contentHeight() {
-      return [160 * 888 / 1176, 160 * this.winWidth / 1176, 160];
+      return [160 * 857 / 1148, 160 * this.winWidth / 1148, 160];
     },
     historyBottom() {
-      return [50 * 888 / 1176, 50 * this.winWidth / 1176, 50];
+      return [50 * 857 / 1148, 50 * this.winWidth / 1148, 50];
     },
     blankTitleFontSize() {
-      return [19 * 888 / 1176, 19 * this.winWidth / 1176, 19];
+      return [19 * 857 / 1148, 19 * this.winWidth / 1148, 19];
     },
     placeholderPreWidth() {
-      return [26 * 888 / 1176, 26 * this.winWidth / 1176, 26];
+      return [26 * 857 / 1148, 26 * this.winWidth / 1148, 26];
+    },
+    itemDetailFontSize() {
+      return [11, 15 * this.winWidth / 1148, 15];
     },
   },
   watch: {

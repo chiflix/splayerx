@@ -1,5 +1,6 @@
 <template>
   <div
+    :style="{ paddingBottom: `${playlistBottom[currentPhase]}px` }"
     class="playlist-container"
   >
     <span
@@ -10,7 +11,7 @@
         marginBottom: `${playlistBottom[currentPhase]}px`,
       }"
     >
-      本地播放列表</span>
+      {{ $t('browsing.homepage.playlist') }}</span>
     <div
       :style="{
         marginBottom: `${blankTitleBottom[currentPhase]}px`,
@@ -21,7 +22,7 @@
       v-show="!hasPlaylist"
     >
       <!--eslint-disable-next-line-->
-      <span>{{ '点击侧边栏底部“ ' }}<Icon :style="{ width: '15px', height: '14px' }" type="browsingOpen" />{{ ' ”按钮，选择多个文件播放，即可生成播放列表' }}</span>
+      <span>{{ $t('browsing.homepage.playlistInfoPre') }}<Icon :style="{ width: '15px', height: '14px' }" type="browsingOpen" />{{ $t('browsing.homepage.playlistInfoNext') }}</span>
     </div>
     <div
       @mouseover="handleMouseover"
@@ -55,8 +56,8 @@
         >
           <li
             :style="{
-              height: `${height}px`,
-              width: winWidth > 1772 + (showSidebar ? 76 : 0) ? '544px' : `${itemWidth}px`,
+              height: `${thumbnailWidth * 0.56}px`,
+              width: winWidth > 1744 + (showSidebar ? 76 : 0) ? '544px' : `${itemWidth}px`,
               marginRight: `${listRight[currentPhase]}px`,
               transform: `translateX(${calcTranslateX})`,
               transition: 'transform 300ms linear',
@@ -73,6 +74,7 @@
             <div
               v-show="hasPlaylist"
               :style="{
+                width: `${thumbnailWidth}px`,
                 backgroundImage: `${item.backgroundUrl}`,
                 backgroundSize: '100% 100%',
                 backgroundRepeat: 'no-repeat',
@@ -134,8 +136,8 @@
         >
           <li
             :style="{
-              height: `${height}px`,
-              width: winWidth > 1772 + (showSidebar ? 76 : 0) ? '544px' : `${itemWidth}px`,
+              height: `${thumbnailWidth * 0.56}px`,
+              width: winWidth > 1744 + (showSidebar ? 76 : 0) ? '544px' : `${itemWidth}px`,
               marginRight: `${listRight[currentPhase]}px`,
               transform: `translateX(${calcTranslateX})`,
               transition: 'transform 300ms linear',
@@ -148,6 +150,7 @@
           >
             <div
               :style="{
+                width: `${thumbnailWidth}px`,
                 background: `${item.backgroundUrl}`,
                 backgroundSize: '100% 100%',
                 backgroundRepeat: 'no-repeat',
@@ -233,10 +236,6 @@ export default {
       type: Number,
       required: true,
     },
-    height: {
-      type: Number,
-      required: true,
-    },
     padding: {
       type: Number,
       required: true,
@@ -266,11 +265,26 @@ export default {
   },
   computed: {
     ...mapGetters(['winWidth', 'showSidebar']),
+    thumbnailWidth() {
+      const thumbnailsTotalWidth = this.winWidth - (this.showSidebar ? 76 : 0) - this.padding * 2;
+      const calcVideoNum = Math.floor((thumbnailsTotalWidth + this.listRight[this.currentPhase])
+        / (224 + this.listRight[this.currentPhase]));
+      let updateVideoNum = 4;
+      if (calcVideoNum < 4) {
+        updateVideoNum = 4;
+      } else if (calcVideoNum >= 4 && calcVideoNum <= 6) {
+        updateVideoNum = calcVideoNum;
+      } else if (calcVideoNum > 6) {
+        updateVideoNum = 6;
+      }
+      return (thumbnailsTotalWidth - (updateVideoNum - 1) * this.listRight[this.currentPhase])
+        / updateVideoNum;
+    },
     calcTranslateX() {
       return this.translateX === 0 ? 0 : `calc(${this.translateX}% + ${this.translateSpace}px)`;
     },
     playlistBottom() {
-      return [20 * 888 / 1176, 20 * this.winWidth / 1176, 20];
+      return [20 * 857 / 1148, 20 * this.winWidth / 1148, 20];
     },
     listBottom() {
       return [18, this.calcSize(18, 25), 25];
@@ -282,13 +296,13 @@ export default {
       return [11, this.calcSize(11, 15), 15];
     },
     progressHeight() {
-      return [4 * 888 / 1176, 4 * this.winWidth / 1176, 4];
+      return [4 * 857 / 1148, 4 * this.winWidth / 1148, 4];
     },
     progressPos() {
-      return [7 * 888 / 1176, 7 * this.winWidth / 1176, 7];
+      return [7 * 857 / 1148, 7 * this.winWidth / 1148, 7];
     },
     showListNum() {
-      return this.winWidth >= 1608 - (this.showSidebar ? 0 : 76) ? 3 : 2;
+      return this.winWidth >= 1580 - (this.showSidebar ? 0 : 76) ? 3 : 2;
     },
     itemWidth() {
       return (this.winWidth - this.padding * 2 - (this.showSidebar ? 76 : 0)
@@ -301,16 +315,16 @@ export default {
       return this.currentListIndex > 0;
     },
     progressBarWidth() {
-      return [110 * 888 / 1176, 110 * this.winWidth / 1176, 110];
+      return [110 * 857 / 1148, 110 * this.winWidth / 1148, 110];
     },
     deleteIconSize() {
-      return [30 * 888 / 1176, 30 * this.winWidth / 1176, 30];
+      return [30 * 857 / 1148, 30 * this.winWidth / 1148, 30];
     },
     blankTitleBottom() {
-      return [25 * 888 / 1176, 25 * this.winWidth / 1176, 25];
+      return [25 * 857 / 1148, 25 * this.winWidth / 1148, 25];
     },
     blankTitleFontSize() {
-      return [19 * 888 / 1176, 19 * this.winWidth / 1176, 19];
+      return [19 * 857 / 1148, 19 * this.winWidth / 1148, 19];
     },
   },
   watch: {
@@ -398,8 +412,8 @@ export default {
       }
     },
     calcSize(min: number, max: number) {
-      const a = (max - min) / (1176 - 888);
-      const b = min - 888 * a;
+      const a = (max - min) / (1148 - 857);
+      const b = min - 857 * a;
       return a * this.winWidth + b;
     },
     handlePreItem() {
@@ -469,6 +483,7 @@ export default {
     li {
       display: inline-block;
       min-width: 360px;
+      min-height: 99px;
     }
   }
   .delete-icon {
@@ -481,15 +496,13 @@ export default {
     }
   }
   .item-thumbnail {
-    width: 48%;
+    min-width: 175px;
     height: 100%;
     float: left;
     border-radius: 5px;
   }
   .item-info {
-    width: 52%;
     height: 100%;
-    float: left;
     display: flex;
     flex-direction: column;
     .title {

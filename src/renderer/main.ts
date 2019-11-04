@@ -1020,6 +1020,9 @@ new Vue({
       this.menuService.on('browsing.window.playInNewWindow', () => {
         this.$bus.$emit('toggle-pip', false);
       });
+      this.menuService.on('browsing.window.minimize', () => {
+        this.$electron.ipcRenderer.send('set-window-minimize');
+      });
       this.menuService.on('browsing.window.maxmize', () => {
         this.$electron.ipcRenderer.send('set-window-maximize');
       });

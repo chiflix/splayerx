@@ -62,23 +62,24 @@
       <div
         :style="{
           boxShadow: bottomMask ? '0 -2px 10px 0 rgba(0,0,0,0.50)' : '',
-          height: showFileIcon ? '90px' : '',
+          height: 'auto',
         }"
         v-if="showFileIcon"
         class="bottom-icon no-drag"
       >
+        <div
+          v-show="$route.name !== 'playing-view'"
+          @click="openHomePage"
+          class="icon"
+        >
+          <Icon type="homePage" />
+        </div>
         <div
           @click="openFilesByDialog"
           :title="$t('browsing.openLocalFile')"
           class="icon"
         >
           <Icon type="open" />
-        </div>
-        <div
-          @click="openHomePage"
-          class="icon"
-        >
-          <Icon type="homePage" />
         </div>
         <div
           @click="backToLanding"
@@ -139,7 +140,7 @@ export default {
       return channelsNum * 56;
     },
     bottomIconHeight() {
-      return 122;
+      return this.$route.name === 'playing-view' ? 92 : 122;
     },
     maxHeight() {
       const bottomHeight = this.showFileIcon ? this.bottomIconHeight : 0;
@@ -163,6 +164,9 @@ export default {
     },
     channelsDetail(val: { url: string, channel: string,
       icon: string, title: string, path: string }[]) {
+      const scrollTop = (document.querySelector('.icon-box') as HTMLElement).scrollTop;
+      this.topMask = this.maxHeight >= this.totalHeight ? false : scrollTop !== 0;
+      this.bottomMask = scrollTop + this.maxHeight < this.totalHeight;
       asyncStorage.set('channels', { channels: val });
       this.$bus.$emit('update-browsing-playlist');
     },

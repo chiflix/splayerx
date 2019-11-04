@@ -2,8 +2,8 @@
   <div class="home-page-container">
     <div
       :style="{
-        left: winWidth - (showSidebar ? 0 : 76) > 1772 ? '50%' : '',
-        transform: winWidth - (showSidebar ? 0 : 76) > 1772 ? 'translateX(-50%)' : '',
+        left: winWidth - (showSidebar ? 0 : 76) > 1744 ? '50%' : '',
+        transform: winWidth - (showSidebar ? 0 : 76) > 1744 ? 'translateX(-50%)' : '',
       }"
       class="home-page-content"
     >
@@ -36,7 +36,9 @@
               display: 'block',
             }"
           >
-            {{ isLogin ? `普通用户 ${displayName}  |  ` : '未登录' }}
+            {{ isLogin ? (userInfo.isVip ? $t('browsing.homepage.premiumAccount')
+              : $t('browsing.homepage.account')) +
+              `${displayName}  |  ` : $t('browsing.homepage.unSigned') }}
             <div
               :style="{
                 fontWeight: 'lighter',
@@ -46,7 +48,7 @@
               @click="handleLogout"
               v-show="isLogin"
             >
-              注销
+              {{ $t('browsing.homepage.signOut') }}
             </div>
           </div>
           <span
@@ -55,7 +57,9 @@
               color: '#8F8F96',
             }"
           >
-            {{ isLogin ? '投食成为射手云养员，获取专享功能和特殊权益。' : '登录后可使用AI翻译等更多功能' }}
+            {{ isLogin ? userInfo.isVip ? $t('browsing.homepage.premiumInfo')
+              + `${userInfo.vipExpiredAt}`: $t('browsing.homepage.accountInfo')
+              : $t('browsing.homepage.signInfo') }}
           </span>
           <button
             :style="{
@@ -72,7 +76,8 @@
             }"
             @click="handleLogin"
           >
-            {{ isLogin ? '投食成为云养员' : '免注册登录' }}
+            {{ isLogin ? userInfo.isVip ? $t('browsing.homepage.renewBtn') :
+              $t('browsing.homepage.premiumBtn') : $t('browsing.homepage.signBtn') }}
           </button>
         </div>
         <span
@@ -115,7 +120,6 @@
       />
       <browsing-local-playlist
         :width="calcWidth"
-        :height="playlistHeight[currentPhase]"
         :playlist-font-size="playlistFontSize"
         :padding="calcMargin[currentPhase]"
         :current-phase="currentPhase"
@@ -154,7 +158,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'showSidebar']),
+    ...mapGetters(['winWidth', 'showSidebar', 'userInfo']),
     currentVersion() {
       return version;
     },
@@ -165,19 +169,19 @@ export default {
       return this.calcSize(232, 314);
     },
     calcMargin() {
-      return [40, this.calcSize(40, 54), 54];
+      return [29.5, this.calcSize(29.5, 30), 40];
     },
     titlePos() {
       return {
-        marginLeft: [40 * 888 / 1176, 40 * this.winWidth / 1176, 40],
-        marginTop: [56 * 888 / 1176, 56 * this.winWidth / 1176, 56],
+        marginLeft: [40 * 857 / 1148, 40 * this.winWidth / 1148, 40],
+        marginTop: [56 * 857 / 1148, 56 * this.winWidth / 1148, 56],
       };
     },
     titleSize() {
-      return [44 * 888 / 1176, 44 * this.winWidth / 1176, 44];
+      return [44 * 857 / 1148, 44 * this.winWidth / 1148, 44];
     },
     userPos() {
-      return [40 * 888 / 1176, 40 * this.winWidth / 1176, 40];
+      return [40 * 857 / 1148, 40 * this.winWidth / 1148, 40];
     },
     userStateSize() {
       return [14, this.calcSize(14, 19), 19];
@@ -195,12 +199,12 @@ export default {
       return [15, this.calcSize(15, 21), 21];
     },
     logoSize() {
-      return [360 * 888 / 1176, 360 * this.winWidth / 1176, 360];
+      return [360 * 857 / 1148, 360 * this.winWidth / 1148, 360];
     },
     logoPos() {
       return {
-        top: [36.8 * 888 / 1176, 36.8 * this.winWidth / 1176, 36.8],
-        right: [-50 * 888 / 1176, -50 * this.winWidth / 1176, -50],
+        top: [36.8 * 857 / 1148, 36.8 * this.winWidth / 1148, 36.8],
+        right: [-50 * 857 / 1148, -50 * this.winWidth / 1148, -50],
       };
     },
     versionSize() {
@@ -208,33 +212,30 @@ export default {
     },
     versionPos() {
       return {
-        bottom: [48 * 888 / 1176, 48 * this.winWidth / 1176, 48],
-        right: [50 * 888 / 1176, 50 * this.winWidth / 1176, 50],
+        bottom: [48 * 857 / 1148, 48 * this.winWidth / 1148, 48],
+        right: [50 * 857 / 1148, 50 * this.winWidth / 1148, 50],
       };
     },
     advHeight() {
       return [107, this.calcSize(107, 144), 144];
     },
-    playlistHeight() {
-      return [99, this.calcSize(99, 133), 133];
-    },
     playlistFontSize() {
-      return [25 * 888 / 1176, 25 * this.winWidth / 1176, 25];
+      return [25 * 857 / 1148, 25 * this.winWidth / 1148, 25];
     },
     advPos() {
       return {
-        marginTop: [20 * 888 / 1176, 20 * this.winWidth / 1176, 20],
-        marginBottom: [50 * 888 / 1176, 50 * this.winWidth / 1176, 50],
+        marginTop: [20 * 857 / 1148, 20 * this.winWidth / 1148, 20],
+        marginBottom: [50 * 857 / 1148, 50 * this.winWidth / 1148, 50],
       };
     },
   },
   watch: {
     winWidth(val: number) {
-      if (val > 0 && val < 888) {
+      if (val > 0 && val < 857) {
         this.currentPhase = 0;
-      } else if (val >= 888 && val < 1176) {
+      } else if (val >= 857 && val < 1148) {
         this.currentPhase = 1;
-      } else if (val >= 1176) {
+      } else if (val >= 1148) {
         this.currentPhase = 2;
       }
     },
@@ -252,8 +253,8 @@ export default {
   },
   methods: {
     calcSize(min: number, max: number) {
-      const a = (max - min) / (1176 - 888);
-      const b = min - 888 * a;
+      const a = (max - min) / (1148 - 857);
+      const b = min - 857 * a;
       return a * this.winWidth + b;
     },
     handleLogin() {
@@ -285,7 +286,7 @@ export default {
     display: flex;
     flex-direction: column;
     position: absolute;
-    max-width: 1772px;
+    max-width: 1744px;
     .account-content {
       position: relative;
       width: 100%;
@@ -316,6 +317,7 @@ export default {
         height: auto;
         display: flex;
         flex-direction: column;
+        z-index: 1;
       }
     }
   }

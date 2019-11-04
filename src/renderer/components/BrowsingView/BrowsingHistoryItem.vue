@@ -1,5 +1,8 @@
 <template>
-  <div class="history-item">
+  <div
+    :style="{ fontSize: `${fontSize}px` }"
+    class="history-item"
+  >
     <div class="content">
       <div class="icon">
         <Icon
@@ -45,6 +48,10 @@ export default {
     channel: {
       type: String,
       default: 'Channel',
+    },
+    fontSize: {
+      type: Number,
+      required: true,
     },
   },
   computed: {
@@ -115,13 +122,11 @@ export default {
       white-space: nowrap;
       text-overflow: ellipsis;
       font-family: $font-normal;
-      font-size: 15px;
       color: #3B3B41;
     }
     .channel {
       margin-left: 13px;
       font-family: $font-normal;
-      font-size: 15px;
       color: #B5B6BF;
       letter-spacing: 0;
     }
@@ -131,7 +136,6 @@ export default {
     margin-left: 10px;
     margin-right: 30px;
     font-family: $font-normal;
-    font-size: 15px;
     color: #B5B6BF;
     letter-spacing: 0;
     text-align: right;

@@ -32,10 +32,10 @@
         <li
           :style="{
             marginRight: index !== advItems.length - 1 ? `${rightSpace[currentPhase]}px` : '',
-            width: winWidth > 1772 + (showSidebar ? 76 : 0) ? '544px' : `${advWidth}px`,
+            width: winWidth > 1744 + (showSidebar ? 76 : 0) ? '544px' : `${advWidth}px`,
             background: `url(${item.src})`,
-            backgroundRepeat: 'no-repeat',
-            backgroundSize: '100% 100%',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
             transform: `translateX(${calcTranslateX})`,
             transition: 'transform 300ms linear',
           }"
@@ -62,6 +62,7 @@ import { mapGetters } from 'vuex';
 import Icon from '../BaseIconContainer.vue';
 import adv1 from '../../assets/adv-1.png';
 import adv2 from '../../assets/adv-2.png';
+import adv3 from '../../assets/adv-3.png';
 
 export default {
   name: 'BrowsingAdv',
@@ -92,7 +93,7 @@ export default {
   },
   data() {
     return {
-      advItems: [{ src: adv1 }, { src: adv2 }, { src: adv1 }],
+      advItems: [{ src: adv1 }, { src: adv2 }, { src: adv3 }],
       currentAdvIndex: 0,
       hoveredItem: false,
       translateX: 0,
@@ -108,7 +109,7 @@ export default {
       return [11, this.adaptSpace, 16];
     },
     showAdvNum() {
-      return this.winWidth >= 1368 - (this.showSidebar ? 0 : 76) ? 3 : 2;
+      return this.winWidth >= 1340 - (this.showSidebar ? 0 : 76) ? 3 : 2;
     },
     advWidth() {
       return (this.winWidth - this.padding * 2 - (this.showSidebar ? 76 : 0)

@@ -285,12 +285,28 @@
     "general": "General",
     "education": "Education",
     "siteTip": "Add / Edit",
-    "history": "History",
-    "clear": "clear",
     "am": "AM",
     "pm": "PM",
     "today": "Today",
-    "yesterday": "YesterDay"
+    "yesterday": "YesterDay",
+    "homepage": {
+      "unSigned": "Not Signed In",
+      "signInfo": "Sign in to use AI Translation and get access to more features.",
+      "signBtn": "Sign In",
+      "account": "Account: ",
+      "signOut": "Sign out",
+      "accountInfo": "Upgrade your account now and get started with exclusive features and more.",
+      "premiumBtn": "Upgrade",
+      "premiumAccount": "Premium Account: ",
+      "premiumInfo": "Expiration Date: ",
+      "renewBtn": "Renew",
+      "history": "History",
+      "clear": "clear",
+      "historyInfo": "Keep track of your playback history, including the page title, the site address and the date you watched.",
+      "playlist": "Local Playlist",
+      "playlistInfoPre": "Click the ",
+      "playlistInfoNext": " button on the the left sidebar, choose and open more than one file to generate a playlist."
+    }
   },
   "preferences": {
     "general": {

@@ -1084,6 +1084,21 @@ function registerMainWindowEvent(mainWindow) {
     mainWindow.show();
     menuService.updateFocusedWindow(true, mainWindow && mainWindow.isVisible());
   });
+  ipcMain.on('set-window-minimize', () => {
+    if (mainWindow && mainWindow.isFocused()) {
+      if (mainWindow.isMinimized()) {
+        mainWindow.restore();
+      } else {
+        mainWindow.minimize();
+      }
+    } else if (browsingWindow && browsingWindow.isFocused()) {
+      if (browsingWindow.isMinimized()) {
+        browsingWindow.restore();
+      } else {
+        browsingWindow.minimize();
+      }
+    }
+  });
   // eslint-disable-next-line complexity
   ipcMain.on('set-window-maximize', () => {
     if (mainWindow && mainWindow.isFocused()) {
@@ -1092,23 +1107,25 @@ function registerMainWindowEvent(mainWindow) {
       } else {
         mainWindow.maximize();
       }
-      const bounds = mainWindow.getBounds();
-      if (process.platform === 'win32' && mainWindow.isMaximized() && (bounds.x < 0 || bounds.y < 0)) {
-        mainWindow.getBrowserViews()[0].setBounds({
-          x: sidebar ? 76 : 0,
-          y: 40,
-          width: sidebar ? bounds.width + (bounds.x * 2) - 76
-            : bounds.width + (bounds.x * 2),
-          height: bounds.height - 40,
-        });
-      } else {
-        mainWindow.getBrowserViews()[0].setBounds({
-          x: sidebar ? 76 : 0,
-          y: 40,
-          width: sidebar ? mainWindow.getSize()[0] - 76
-            : mainWindow.getSize()[0],
-          height: mainWindow.getSize()[1] - 40,
-        });
+      if (mainWindow.getBrowserViews().length) {
+        const bounds = mainWindow.getBounds();
+        if (process.platform === 'win32' && mainWindow.isMaximized() && (bounds.x < 0 || bounds.y < 0)) {
+          mainWindow.getBrowserViews()[0].setBounds({
+            x: sidebar ? 76 : 0,
+            y: 40,
+            width: sidebar ? bounds.width + (bounds.x * 2) - 76
+              : bounds.width + (bounds.x * 2),
+            height: bounds.height - 40,
+          });
+        } else {
+          mainWindow.getBrowserViews()[0].setBounds({
+            x: sidebar ? 76 : 0,
+            y: 40,
+            width: sidebar ? mainWindow.getSize()[0] - 76
+              : mainWindow.getSize()[0],
+            height: mainWindow.getSize()[1] - 40,
+          });
+        }
       }
     } else if (browsingWindow && browsingWindow.isFocused()) {
       if (!isBrowsingWindowMax) {
