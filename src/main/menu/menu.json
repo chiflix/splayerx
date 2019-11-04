@@ -389,6 +389,11 @@
         "label": "msg.history.forward",
         "enabled": false,
         "accelerator": "CmdOrCtrl + ]"
+      },
+      {
+        "id": "history.clearHistory",
+        "label": "msg.history.clearHistory",
+        "enabled": true
       }
     ]
   },

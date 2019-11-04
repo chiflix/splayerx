@@ -73,3 +73,5 @@ export default class MenuService {
     return this.menu.getMenuItemById(id);
   }
 }
+
+export const menuService = new MenuService();
