@@ -321,7 +321,7 @@
     },
     "account": {
       "accountSetting": "계정",
-      "title": "My Profile",
+      "title": "계정 정보",
       "noToken": {
         "title": "Not Signed In",
         "description": "Sign in with your phone number to use AI Translation and more advanced features.",
@@ -335,15 +335,15 @@
       "vipUser": {
         "title": "Premium Account: ",
         "description": "Expiration Date: ",
-        "button": "Renew"
+        "button": "갱신 수수료"
       },
       "month": " Month",
       "year": " Year",
       "months": " Years",
       "years": " Years",
-      "signOut": "Sign out",
-      "createdAt": "Registration Date",
-      "payAt": "Recent Purchased",
+      "signOut": "로그 아웃",
+      "createdAt": "등록 날짜",
+      "payAt": "최근 구매",
       "payContent": "{date}{product}",
       "payProduct": ": {product} Premium"
     },
@@ -355,9 +355,9 @@
         "description1": "Additional hours of AI Translation service",
         "description2": "Support more languages in AI Translation",
         "description3": "Export speech recognition results unlimitedly",
-        "description4": "New features are coming soon",
+        "description4": "Your purchase history will be conserved permanently",
         "description5": "",
-        "description6": ""
+        "description6": "New features are coming soon"
       },
       "origin": "ORIG. ",
       "off": "% Off",
