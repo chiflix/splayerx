@@ -44,18 +44,20 @@ const getters = {
     const list = state.playList;
     const index = list.findIndex(value => value === getters.originSrc);
     if (!getters.singleCycle) {
-      if (index - 1 >= 0 && index - 1 < list.length) return list[index - 1];
-      if (list.length !== 1) return list[list.length - 1];
+      if (getters.playlistLoop && list.length === 1) return '';
+      if (getters.playlistLoop && index - 1 < 0) return list[list.length - 1];
+      if (index !== -1) return list[index - 1];
+      return list[0];
     }
     return '';
   },
   previousVideoId: (state, getters) => {
     const index = state.items.findIndex(value => value === getters.videoId);
     if (!getters.singleCycle) {
-      if (index - 1 >= 0 && index - 1 < state.items.length) {
-        return state.items[index - 1];
-      }
-      return state.items[state.items.length - 1];
+      if (getters.playlistLoop && state.items.length === 1) return NaN;
+      if (getters.playlistLoop && index - 1 < 0) return state.items[state.items.length - 1];
+      if (index !== -1) return state.items[index - 1];
+      return state.items[0];
     }
     return NaN;
   },
