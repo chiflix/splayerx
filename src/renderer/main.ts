@@ -201,10 +201,12 @@ new Vue({
       }
     },
     isFullScreen(val) {
-      this.menuService.updateMenuItemLabel(
-        this.currentRouteName === 'browsing-view' ? 'browsing.window.fullscreen' : 'window.fullscreen',
-        val ? 'msg.window.exitFullScreen' : 'msg.window.enterFullScreen',
-      );
+      if (this.currentRouteName === 'browsing-view' || this.currentRouteName === 'playing-view') {
+        this.menuService.updateMenuItemLabel(
+          this.currentRouteName === 'browsing-view' ? 'browsing.window.fullscreen' : 'window.fullscreen',
+          val ? 'msg.window.exitFullScreen' : 'msg.window.enterFullScreen',
+        );
+      }
     },
     topOnWindow(val: boolean) {
       this.$electron.ipcRenderer.send(this.currentRouteName === 'browsing-view' ? 'callBrowsingWindowMethod' : 'callMainWindowMethod', 'setAlwaysOnTop', [val]);
