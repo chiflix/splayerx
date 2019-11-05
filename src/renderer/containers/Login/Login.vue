@@ -148,7 +148,7 @@ export default Vue.extend({
 <style lang="scss">
   body {
     -webkit-app-region: drag;
-    background-color: #3B3B41;
+    background-color: #44444b;
   }
   input {
     -webkit-app-region: no-drag;
