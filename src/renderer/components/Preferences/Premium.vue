@@ -490,13 +490,13 @@ export default Vue.extend({
 
   &__title {
     font-family: $font-medium;
-    font-size: 13px;
+    font-size: 14px;
     color: rgba(255, 255, 255, 0.7);
   }
 
   &__description {
     font-family: $font-medium;
-    font-size: 11px;
+    font-size: 12px;
     color: rgba(255, 255, 255, 0.25);
     margin-top: 7px;
     margin-bottom: 20px;
@@ -510,7 +510,7 @@ export default Vue.extend({
     }
     li {
       font-family: $font-medium;
-      font-size: 11px;
+      font-size: 12px;
       color: rgba(255, 255, 255, 0.7);
       letter-spacing: 0;
       list-style-position: inside;
@@ -559,13 +559,13 @@ export default Vue.extend({
     }
     p {
       font-family: $font-medium;
-      font-size: 10px;
+      font-size: 11px;
       color: rgba(255, 255, 255, 0.3);
       letter-spacing: 0;
     }
     span {
       font-family: $font-medium;
-      font-size: 11px;
+      font-size: 12px;
       color: rgba(255, 255, 255, 0.7);
       letter-spacing: 0;
     }
