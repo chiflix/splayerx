@@ -167,12 +167,12 @@ export default Vue.extend({
 
   &__title {
     font-family: $font-medium;
-    font-size: 13px;
+    font-size: 14px;
     color: rgba(255,255,255,0.7);
     .sign-out {
       color: rgba(255,255,255,0.25);
       letter-spacing: 0;
-      font-size: 11px;
+      font-size: 12px;
       line-height: 16px;
       cursor: pointer;
       margin-left: 8px;
@@ -185,7 +185,7 @@ export default Vue.extend({
 
   &__description {
     font-family: $font-medium;
-    font-size: 11px;
+    font-size: 12px;
     color: rgba(255,255,255,0.25);
     margin-top: 7px;
     margin-bottom: 7px;
@@ -240,7 +240,7 @@ export default Vue.extend({
     }
     &__right {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       button {
         padding-left: 8px;
         padding-right: 8px;
