@@ -171,6 +171,7 @@ export default {
       this.status = 'loading';
     },
     loadFail(e: DidFailLoadEvent) {
+      // electron send aborted error(code: -3) but webview load success
       if (e.errorCode !== -3) {
         this.status = 'fail';
       } else {
