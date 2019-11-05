@@ -47,7 +47,7 @@ export default {
     cursor: pointer;
     padding-left: 29px;
     font-family: $font-medium;
-    font-size: 13px;
+    font-size: 14px;
     color: rgba(255,255,255,0.7);
     letter-spacing: 0.3px;
     line-height: 19px;
