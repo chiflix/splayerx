@@ -60,6 +60,9 @@ export default {
         LanguageCode.ru,
         LanguageCode.id,
         LanguageCode.ar,
+        LanguageCode.tr,
+        LanguageCode.ro,
+        LanguageCode.nl,
       ],
     };
   },
