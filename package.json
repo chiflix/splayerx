@@ -2,7 +2,7 @@
   "name": "splayer",
   "productName": "splayer",
   "homepage": "https://splayer.org",
-  "version": "4.6.1-beta.1",
+  "version": "4.6.1",
   "author": "tomasen <tomasen@gmail.com>",
   "description": "a media player",
   "license": "GPL-3.0-or-later",
