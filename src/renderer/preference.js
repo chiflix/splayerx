@@ -138,8 +138,12 @@ new Vue({
       }
     });
 
-    ipcRenderer.on('route-account', () => {
-      this.$router.push({ name: 'Account' });
+    ipcRenderer.on('route-change', (e, route) => {
+      if (route) {
+        this.$router.push({ name: route });
+      } else {
+        this.$router.push({ name: 'Account' });
+      }
     });
 
     // load global data when sign in is opend

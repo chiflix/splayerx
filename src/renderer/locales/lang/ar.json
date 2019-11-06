@@ -28,7 +28,8 @@
   "tips": {
     "openSidebar": "عرض المحتوى الجانبي (C)",
     "closeSidebar": "أخفِ الشّريط الجانبيّ (C)",
-    "exit": "العودة إلى صفحة الإطلاق"
+    "exit": "العودة إلى صفحة الإطلاق",
+    "delete": "Back to Launching Page"
   },
   "errorFile": {
     "ENOSPC": {
@@ -271,6 +272,7 @@
     "enterPop": "اللعب في نافذة جديدة",
     "exitPop": "العودة إلى المتصفح",
     "danmu": "وابل",
+    "pin": "Pin / Unpin (T)",
     "error": {
       "offline": "لا يوجد إنترنت",
       "try": "حاول:",
@@ -316,7 +318,66 @@
       "incognitoDescription": "لن يتم حفظ سجل التشغيل.",
       "clearHistory": "مسح سجل التشغيل",
       "clearHistoryDescription": "قم بإزالة قوائم التشغيل الحالية وسجل التشغيل"
+    },
+    "account": {
+      "accountSetting": "Account",
+      "title": "My Profile",
+      "noToken": {
+        "title": "Not Signed In",
+        "description": "Sign in with your phone number to use AI Translation and more advanced features.",
+        "button": "Sign In"
+      },
+      "normalUser": {
+        "title": "Account: ",
+        "description": "Upgrade your account now and get started with exclusive features and more.",
+        "button": "Upgrade"
+      },
+      "vipUser": {
+        "title": "Premium Account: ",
+        "description": "Expiration Date: ",
+        "button": "Renew"
+      },
+      "month": " Month",
+      "year": " Year",
+      "months": " Months",
+      "years": " Years",
+      "signOut": "Sign out",
+      "createdAt": "Registration Date",
+      "payAt": "Recent Purchased",
+      "payContent": "{date}{product}",
+      "payProduct": ": {product} Premium"
+    },
+    "premium": {
+      "premiumSetting": "Premium",
+      "title": "SPlayer Premium",
+      "description": "Go Premium now to help SPlayer change the way people watch videos, and get access to more advanced features.",
+      "content": {
+        "description1": "Additional hours of AI Translation service",
+        "description2": "Support more languages in AI Translation",
+        "description3": "Export speech recognition results unlimitedly",
+        "description4": "Your purchase history will be conserved permanently",
+        "description5": "",
+        "description6": "New features are coming soon"
+      },
+      "origin": "ORIG. ",
+      "off": "% Off",
+      "month": " Month",
+      "year": " Year",
+      "months": " Mo.",
+      "years": " Yr.",
+      "payType": {
+        "alipay": "Alipay",
+        "wxpay": "WeChat",
+        "paypal": "PayPal"
+      }
     }
+  },
+  "payment": {
+    "wxpay": {
+      "title": "SCAN & PAY",
+      "description": "WeChat Pay"
+    },
+    "fail": "Error"
   },
   "privacyBubble": {
     "confirmDisable": {
@@ -339,6 +400,10 @@
   },
   "alertBubble": {
     "button": ""
+  },
+  "notExportEmbeddedSubtitle": {
+    "title": "",
+    "content": "Embedded subtitle is loading, please try to export later."
   },
   "protectBubble": {
     "agree": "حسنا",
@@ -382,6 +447,12 @@
       "zh": "الصينية المبسطة",
       "zh-CN": "الصينية المبسطة",
       "zh-TW": "الصينية التقليدية"
+    },
+    "tips": {
+      "editor": "Edit is coming soon ...",
+      "export": "Export",
+      "reload": "Regenerate",
+      "delete": "Remove"
     }
   },
   "uploading": {
@@ -412,6 +483,7 @@
     "videoLanguageLabel": "لغة الصوت",
     "subtitleLanguageLabel": "ترجم إلى",
     "selectLanguageLabel": "لغة الصوت",
+    "selectLanguageMoreLabel": "المزيد ...",
     "audioLanguageLoading": "جارٍ إحضار قائمة اللغات ...",
     "audioLanguageLoadFail": "فشل الاتصال ، يرجى المحاولة لاحقًا",
     "select": {
@@ -524,6 +596,47 @@
       "retry": "retry",
       "error300": "Verification failed, please",
       "errorNetwork": "Network Error. Please"
+    }
+  },
+  "forbiddenModal": {
+    "title": "Upgrade to SPlayer Premium",
+    "content": "Upgrade to export translation results unlimitedly, and get access to more exclusive features.",
+    "span": "Already Premium? Sign In",
+    "button": "Go Premium Now",
+    "audioLanguage": "日本語, 한국어, Español, Français, Deutsch, Italiano, Português, čeština, Русский, Indonesian, العربية, Türkçe, română",
+    "translate": {
+      "title": "Upgrade to SPlayer Premium",
+      "content": "Go Premium to get access to more languages and other exclusive features.",
+      "span": "Already Premium? Sign In",
+      "button": "Go Premium Now"
+    },
+    "export": {
+      "title": "Upgrade to SPlayer Premium",
+      "content": "Upgrade to export translation results unlimitedly, and get access to more exclusive features.",
+      "span": "Already Premium? Sign In",
+      "button": "Go Premium Now"
+    }
+  },
+  "premiumModal": {
+    "loading": {
+      "content": "Processing，please wait a second …",
+      "button": "Close"
+    },
+    "success": {
+      "h2": "Thanks for your support",
+      "h1": "Payment Successful !",
+      "h4": "NOW",
+      "content1": "Additional Hours of AI Translation Service",
+      "content2": "Support More Languages in AI Translation",
+      "content3": "Export Translation Results Unlimitedly",
+      "button": "Done"
+    },
+    "fail": {
+      "h1": "Sorry",
+      "content": "Your transaction could not be processed，please contact us",
+      "copy": "نسخ",
+      "copied": "تم النسخ",
+      "button": "ظهر"
     }
   }
 }

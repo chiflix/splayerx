@@ -31,6 +31,7 @@
       </p>
       <div
         @click.left="goPremium"
+        @mouseup.stop=""
         class="button"
       >
         {{ buttonText }}
@@ -229,6 +230,9 @@ export default Vue.extend({
     .link {
       text-decoration: underline;
       cursor: pointer;
+      &:hover {
+        color: rgba(255,255,255,0.7);
+      }
     }
   }
   .button {
@@ -241,7 +245,6 @@ export default Vue.extend({
     border: 1px solid rgba(255,255,255,0.1);
     background-color: rgba(255,255,255,0.03);
     transition: all 200ms;
-
     &:not(.disabled):hover {
       border: 1px solid rgba(255,255,255,0.2);
       background-color: rgba(255,255,255,0.08);

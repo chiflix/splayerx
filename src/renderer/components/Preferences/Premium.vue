@@ -17,7 +17,6 @@
       </ul>
       <ul>
         <li>{{ $t('preferences.premium.content.description4') }}</li>
-        <li>{{ $t('preferences.premium.content.description5') }}</li>
         <li>{{ $t('preferences.premium.content.description6') }}</li>
       </ul>
     </div>
@@ -29,7 +28,7 @@
         <li>{{ $t('preferences.premium.content.description1') }}</li>
         <li>{{ $t('preferences.premium.content.description2') }}</li>
         <li>{{ $t('preferences.premium.content.description3') }}</li>
-        <li>{{ $t('preferences.premium.content.description4') }}</li>
+        <li>{{ $t('preferences.premium.content.description6') }}</li>
       </ul>
     </div>
     <div
@@ -262,13 +261,13 @@ export default Vue.extend({
           ) {
             originalPrice = (e.originalPrice[country] / 100).toFixed(0);
           }
-          const off = this.isCNLanguage ? e.discount : 100 - e.discount;
+          const off = this.isCNLanguage ? this.cnOff(e.discount) : 100 - e.discount;
           const originString = e.discount === 100 ? '' : `${this.$t('preferences.premium.origin')}${originalPrice}`;
           const origin = `${originString} ${country}`;
           const discount = e.discount === 100 ? '' : `${off}${this.$t('preferences.premium.off')}`;
           const duration = e.duration.value > 1
-            ? `${e.duration.value} ${this.$t(`preferences.premium.${e.duration.unit}s`)}`
-            : `${e.duration.value} ${this.$t(`preferences.premium.${e.duration.unit}`)}`;
+            ? `${e.duration.value}${this.$t(`preferences.premium.${e.duration.unit}s`)}`
+            : `${e.duration.value}${this.$t(`preferences.premium.${e.duration.unit}`)}`;
           return {
             id: e.id,
             appleProductID: e.appleProductID,
@@ -353,6 +352,9 @@ export default Vue.extend({
       updateCallback: uActions.UPDATE_SIGN_IN_CALLBACK,
       updateUserInfo: uActions.UPDATE_USER_INFO,
     }),
+    cnOff(num: number) {
+      return (num % 10 === 0) ? (num / 10) : num;
+    },
     async appleBuy(payment: {
       id: string;
       productID: string;
@@ -488,13 +490,13 @@ export default Vue.extend({
 
   &__title {
     font-family: $font-medium;
-    font-size: 13px;
+    font-size: 14px;
     color: rgba(255, 255, 255, 0.7);
   }
 
   &__description {
     font-family: $font-medium;
-    font-size: 11px;
+    font-size: 12px;
     color: rgba(255, 255, 255, 0.25);
     margin-top: 7px;
     margin-bottom: 20px;
@@ -508,7 +510,7 @@ export default Vue.extend({
     }
     li {
       font-family: $font-medium;
-      font-size: 11px;
+      font-size: 12px;
       color: rgba(255, 255, 255, 0.7);
       letter-spacing: 0;
       list-style-position: inside;
@@ -557,13 +559,13 @@ export default Vue.extend({
     }
     p {
       font-family: $font-medium;
-      font-size: 10px;
+      font-size: 11px;
       color: rgba(255, 255, 255, 0.3);
       letter-spacing: 0;
     }
     span {
       font-family: $font-medium;
-      font-size: 11px;
+      font-size: 12px;
       color: rgba(255, 255, 255, 0.7);
       letter-spacing: 0;
     }

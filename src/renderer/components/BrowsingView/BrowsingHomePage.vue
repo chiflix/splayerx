@@ -1,5 +1,10 @@
 <template>
-  <div class="home-page-container">
+  <div
+    :style="{
+      overflowX: winWidth + (showSidebar ? 0 : 76) < 888 ? 'scroll' : 'hidden',
+    }"
+    class="home-page-container no-drag"
+  >
     <div
       :style="{
         left: winWidth - (showSidebar ? 0 : 76) > 1441 ? '50%' : '',
@@ -106,12 +111,10 @@
       <browsing-adv
         :width="calcWidth"
         :height="advHeight[currentPhase]"
+        :contentPos="advPos"
         :padding="calcMargin[currentPhase]"
         :current-phase="currentPhase"
         :adapt-space="calcSize(11, 16)"
-        :style="{
-          margin: `${advPos.marginTop[currentPhase]}px 0 ${advPos.marginBottom[currentPhase]}px 0`,
-        }"
       />
       <browsing-history
         :show-home-page="showHomePage"
@@ -279,11 +282,10 @@ export default {
   top: 40px;
   display: flex;
   position: relative;
-  overflow: scroll;
+  overflow-y: scroll;
   .home-page-content {
     width: auto;
     height: auto;
-    overflow: scroll;
     display: flex;
     flex-direction: column;
     position: absolute;

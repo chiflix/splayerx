@@ -60,6 +60,7 @@ export default {
       } else {
         view.webContents.addListener('did-start-loading', this.handleStartLoading);
       }
+      view.webContents.addListener('will-navigate', this.handleWillNavigate);
       view.webContents.addListener('new-window', this.handleNewWindow);
       view.webContents.addListener('ipc-message', this.handleIpcMessage);
     });
@@ -168,6 +169,7 @@ export default {
           } else {
             view.webContents.removeListener('did-start-loading', this.handleStartLoading);
           }
+          view.webContents.removeListener('will-navigate', this.handleWillNavigate);
           view.webContents.removeListener('new-window', this.handleNewWindow);
           view.webContents.removeListener('ipc-message', this.handleIpcMessage);
           electron.ipcRenderer.send('pip');
@@ -198,6 +200,9 @@ export default {
         const url = views[0].webContents.getURL();
         if (!url.includes('/up-next')) this.handleUrlChange(url);
       }
+    },
+    handleWillNavigate(e: Event, url: string) {
+      this.handleUrlChange(url);
     },
   },
 };

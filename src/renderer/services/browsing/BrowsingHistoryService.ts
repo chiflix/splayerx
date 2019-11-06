@@ -19,7 +19,7 @@ export default class BrowsingHistory implements IBrowsingHistory {
         .map(val => val.channels).flat().map(val => val.icon);
     }
     const results = (await browsingDB.getAll(HISTORY_OBJECT_STORE_NAME))
-      .sort((a: BrowsingHistoryItem, b: BrowsingHistoryItem) => a.openTime - b.openTime);
+      .sort((a: BrowsingHistoryItem, b: BrowsingHistoryItem) => b.openTime - a.openTime);
 
     return results.map(result => ({
       ...result,
@@ -51,7 +51,7 @@ export default class BrowsingHistory implements IBrowsingHistory {
     const channels = Array.from(BrowsingChannelManager.getAllChannels().values())
       .map(val => val.channels).flat().map(val => val.channel.split('.')[0]);
     const results = (await browsingDB.getAll(HISTORY_OBJECT_STORE_NAME))
-      .sort((a: BrowsingHistoryItem, b: BrowsingHistoryItem) => a.openTime - b.openTime);
+      .sort((a: BrowsingHistoryItem, b: BrowsingHistoryItem) => b.openTime - a.openTime);
     return results.map(({ url, title, channel }) => ({
       url,
       title,

@@ -367,7 +367,7 @@ enum LanguageName {
   'hr' = 'Hrvatski',
   'cs' = 'Čeština',
   'da' = 'Dansk',
-  'nl' = 'Nederlands',
+  'nl' = 'Dutch',
   'en' = 'English',
   'fi' = 'Suomi',
   'fr' = 'Français',

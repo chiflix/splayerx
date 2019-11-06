@@ -27,7 +27,7 @@ install:
   - ps: Install-Product node 12 x64
   - git reset --hard HEAD
   - node --version
-  - npm i -g nodejs/node-gyp#rvagg/v6.0.1-proposal
+  - npm i -g node-gyp@6.0.1
   - ps: npm prefix -g | % {npm config set node_gyp "$_\node_modules\node-gyp\bin\node-gyp.js"}
   - yarn
   - node scripts/check-electron-version.js

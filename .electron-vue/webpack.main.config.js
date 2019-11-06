@@ -133,7 +133,7 @@ if (process.env.NODE_ENV === 'production') {
     ],
   };
 
-  if (process.platform === 'darwin') {
+  if (!process.env.TEST && process.platform === 'darwin') {
     // only check on mac, to speed up Windows build
     mainConfig.plugins.push(new ForkTsCheckerWebpackPlugin({ eslint: true }));
   }

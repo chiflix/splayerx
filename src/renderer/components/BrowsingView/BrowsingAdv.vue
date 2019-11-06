@@ -1,12 +1,17 @@
 <template>
   <div
-    :style="{ height: `${height}px` }"
+    :style="{ height: `${height + contentPos.marginTop[currentPhase]
+      + contentPos.marginBottom[currentPhase]}px` }"
     @mouseover="handleMouseover"
     @mouseleave="handleMouseleave"
     class="adv-container"
   >
     <div
-      :style="{ width: `${padding}px` }"
+      :style="{
+        width: `${padding}px`,
+        margin: `${contentPos.marginTop[currentPhase]}px 0
+          ${contentPos.marginBottom[currentPhase]}px 0`
+      }"
       @click="handlePreItem"
       class="pre-item"
     >
@@ -24,24 +29,29 @@
     >
       <ul
         :style="{
-          height: `${height}px`,
+          height: '100%',
           listStyle: 'none',
         }"
         class="scroll-elements"
       >
         <li
           :style="{
+            height: `${height}px`,
+            marginTop: `${contentPos.marginTop[currentPhase]}px`,
+            marginBottom: `${contentPos.marginBottom[currentPhase]}px`,
             marginRight: index !== advItems.length - 1 ? `${rightSpace[currentPhase]}px` : '',
             width: `${finalAdvWidth}`,
             background: `url(${item.src})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             transform: `translateX(${calcTranslateX})`,
-            transition: 'transform 300ms linear',
+            transition: 'transform 300ms linear, box-shadow 100ms linear',
           }"
           v-for="(item, index) in advItems"
+          @click="handleAdvClick(item.url)"
           class="adv-content"
         >
+          <div class="mask" />
           <div
             :style="{
               width: `${textWidth[currentPhase]}px`,
@@ -63,7 +73,12 @@
       </ul>
     </div>
     <div
-      :style="{ width: `${padding}px` }"
+      :style="{
+        width: `${padding}px`,
+        height: `${height}px`,
+        margin: `${contentPos.marginTop[currentPhase]}px 0
+          ${contentPos.marginBottom[currentPhase]}px 0`
+      }"
       @click="handleNextItem"
       class="next-item"
     >
@@ -108,10 +123,14 @@ export default {
       type: Number,
       required: true,
     },
+    contentPos: {
+      type: Object,
+      required: true,
+    },
   },
   data() {
     return {
-      advItems: [{ src: adv1, text: '有需求，想吐槽<br>立刻告诉我们' }, { src: adv2, text: '成为射手影音<br>多语言熟悉翻译官' }, { src: adv3, text: '版本更新一览' }],
+      advItems: [{ src: adv1, text: this.$t('browsing.homepage.banner1'), url: 'https://feedback.splayer.org/' }, { src: adv2, text: this.$t('browsing.homepage.banner2'), url: 'https://www.sagittarius.ai/blog/2019/10/31/splayer-i18n-project' }, { src: adv3, text: this.$t('browsing.homepage.banner3'), url: 'https://splayer.org/changelog.html' }],
       currentAdvIndex: 0,
       hoveredItem: false,
       translateX: 0,
@@ -196,6 +215,9 @@ export default {
     handleMouseleave() {
       this.hoveredItem = false;
     },
+    handleAdvClick(url: string) {
+      this.$electron.shell.openExternal(url);
+    },
   },
 };
 </script>
@@ -204,19 +226,16 @@ export default {
 .adv-container {
   min-width: 710.6px;
   min-height: 107px;
-  max-height: 144px;
   width: 100%;
   display: flex;
   position: relative;
   .pre-item, .next-item {
-    height: 100%;
+    height: auto;
     display: flex;
   }
   .next-item {
     position: absolute;
     right: 0;
-    transform: translateY(-50%);
-    top: 50%;
   }
   .text-content {
     span {
@@ -239,6 +258,13 @@ export default {
     white-space: nowrap;
     display: block;
     min-width: 710.6px;
+    .mask {
+      position: absolute;
+      background: rgba(0, 0, 0, 0.2);
+      width: 100%;
+      height: 100%;
+      border-radius: 7px;
+    }
   }
   .adv-content {
     cursor: pointer;
@@ -246,6 +272,9 @@ export default {
     height: 100%;
     min-width: 302.3px;
     border-radius: 7px;
+    &:hover {
+      box-shadow: 1px 2px 6px rgba(0, 0, 0, 0.3);
+    }
   }
 }
 </style>

@@ -20,7 +20,7 @@
           :style="{ fontSize: `${blankTitleFontSize[currentPhase]}px` }"
           v-if="histories.length >= 1"
         >
-          <span class="slash">&nbsp;|&nbsp;</span>
+          <span class="slash">&nbsp;&nbsp;</span>
           <span
             :style="{ fontSize: `${itemDetailFontSize[currentPhase]}px` }"
             @click="handleClear"
@@ -43,7 +43,6 @@
           width: `${winWidth - (showSidebar ? 76 : 0) - padding * 2}px`,
           maxWidth: '1321px',
           height: histories.length < 1 ? `${contentHeight[currentPhase]}px` : 'auto',
-          borderBottom: '1px solid #EEEEEE',
           margin: `0 0 ${historyBottom[currentPhase]}px 0`,
           padding: histories.length < 1 ? '' :
             `${titleBottom[currentPhase]}px 0 ${titleBottom[currentPhase]}px 0`,
