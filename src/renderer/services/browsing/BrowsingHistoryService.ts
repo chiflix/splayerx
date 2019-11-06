@@ -28,12 +28,21 @@ export default class BrowsingHistory implements IBrowsingHistory {
   }
 
   public async saveHistoryItem(url: string, title: string, channel: string) {
-    const result = await browsingDB.put(HISTORY_OBJECT_STORE_NAME, {
-      url,
-      title,
-      channel,
-      openTime: Date.now(),
-    });
+    let result;
+    const record = await browsingDB.getValueByKey(HISTORY_OBJECT_STORE_NAME, url);
+    if (!record) {
+      result = await browsingDB.add(HISTORY_OBJECT_STORE_NAME, {
+        url,
+        title,
+        channel,
+        openTime: Date.now(),
+      });
+    } else {
+      result = await browsingDB.put(HISTORY_OBJECT_STORE_NAME, {
+        ...record,
+        openTime: Date.now(),
+      });
+    }
     menuService.addBrowsingHistoryItems();
     return result;
   }
