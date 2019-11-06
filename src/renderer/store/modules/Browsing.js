@@ -11,6 +11,7 @@ const state = {
   isError: false,
   currentChannel: '',
   pipChannel: '',
+  currentPage: '',
 };
 const getters = {
   initialUrl: state => state.initialUrl,
@@ -22,6 +23,7 @@ const getters = {
   isError: state => state.isError,
   currentChannel: state => state.currentChannel,
   pipChannel: state => state.pipChannel,
+  currentPage: state => state.currentPage,
 };
 
 const mutations = {
@@ -52,6 +54,9 @@ const mutations = {
   [browsingMutations.PIP_CHANNEL_UPDATE](state, payload) {
     state.pipChannel = payload;
   },
+  [browsingMutations.CURRENT_PAGE_UPDATE](state, payload) {
+    state.currentPage = payload;
+  },
 };
 const actions = {
   [browsingActions.UPDATE_INITIAL_URL]({ commit }, delta) {
@@ -80,6 +85,9 @@ const actions = {
   },
   [browsingActions.UPDATE_PIP_CHANNEL]({ commit }, delta) {
     commit(browsingMutations.PIP_CHANNEL_UPDATE, delta);
+  },
+  [browsingActions.UPDATE_CURRENT_PAGE]({ commit }, delta) {
+    commit(browsingMutations.CURRENT_PAGE_UPDATE, delta);
   },
 };
 export default {

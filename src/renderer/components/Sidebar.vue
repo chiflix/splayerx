@@ -37,7 +37,7 @@
       />
       <div
         :title="$t('browsing.siteTip')"
-        :class="{ 'channel-opacity': channelManagerSelected
+        :class="{ 'channel-opacity': currentPage === 'channelManager'
           && currentRouteName === 'browsing-view'}"
         @click="handleChannelManage"
         class="channel-manage no-drag"
@@ -47,7 +47,7 @@
           class="sidebar-icon"
         />
         <div
-          :class="{ selected: channelManagerSelected
+          :class="{ selected: currentPage === 'channelManager'
             && currentRouteName === 'browsing-view' }"
           class="mask"
         />
@@ -64,17 +64,17 @@
           boxShadow: bottomMask ? '0 -2px 10px 0 rgba(0,0,0,0.50)' : '',
           height: 'auto',
         }"
-        v-if="showFileIcon"
         class="bottom-icon no-drag"
       >
         <div
-          v-show="$route.name !== 'playing-view'"
+          v-if="showFileIcon && $route.name !== 'playing-view' || $route.name === 'landing-view'"
           @click="openHomePage"
           class="icon"
         >
           <Icon type="homePage" />
         </div>
         <div
+          v-if="showFileIcon"
           @click="openFilesByDialog"
           :title="$t('browsing.openLocalFile')"
           class="icon"
@@ -82,6 +82,7 @@
           <Icon type="open" />
         </div>
         <div
+          v-if="showFileIcon"
           @click="backToLanding"
           :title="$t('tips.exit')"
           class="icon"
@@ -121,11 +122,10 @@ export default {
       indexOfMovingTo: NaN,
       isDragging: false,
       channelsDetail: [],
-      channelManagerSelected: false,
     };
   },
   computed: {
-    ...mapGetters(['pipSize', 'pipPos', 'isHomePage', 'currentChannel', 'winHeight', 'showSidebar', 'displayLanguage']),
+    ...mapGetters(['pipSize', 'pipPos', 'isHomePage', 'currentChannel', 'winHeight', 'showSidebar', 'displayLanguage', 'currentPage']),
     currentRouteName() {
       return this.$route.name;
     },
@@ -153,7 +153,7 @@ export default {
   watch: {
     currentChannel(val: string) {
       if (val) {
-        this.channelManagerSelected = false;
+        this.updateCurrentPage('webPage');
       }
     },
     isDragging(val: boolean, oldVal: boolean) {
@@ -234,17 +234,22 @@ export default {
   methods: {
     ...mapActions({
       updateCurrentChannel: browsingActions.UPDATE_CURRENT_CHANNEL,
+      updateCurrentPage: browsingActions.UPDATE_CURRENT_PAGE,
     }),
     backToLanding() {
-      this.channelManagerSelected = false;
+      this.updateCurrentPage('');
       this.$router.push({ name: 'landing-view' });
     },
     openHomePage() {
-      this.channelManagerSelected = false;
-      this.$bus.$emit('show-homepage');
+      this.updateCurrentPage('homePage');
+      if (this.currentRouteName !== 'browsing-view') {
+        this.$router.push({ name: 'browsing-view' });
+      } else {
+        this.$bus.$emit('show-homepage');
+      }
     },
     handleChannelManage() {
-      this.channelManagerSelected = true;
+      this.updateCurrentPage('channelManager');
       if (this.currentRouteName !== 'browsing-view') {
         this.$router.push({ name: 'browsing-view' });
       }

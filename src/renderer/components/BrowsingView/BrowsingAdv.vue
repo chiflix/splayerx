@@ -19,7 +19,7 @@
       :style="{
         position: 'relative',
         width: `${winWidth - (showSidebar ? 76 : 0) - padding * 2}px`,
-        maxWidth: '1664px',
+        maxWidth: '1321px',
       }"
     >
       <ul
@@ -32,7 +32,7 @@
         <li
           :style="{
             marginRight: index !== advItems.length - 1 ? `${rightSpace[currentPhase]}px` : '',
-            width: winWidth > 1744 + (showSidebar ? 76 : 0) ? '544px' : `${advWidth}px`,
+            width: `${finalAdvWidth}`,
             background: `url(${item.src})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
@@ -41,7 +41,25 @@
           }"
           v-for="(item, index) in advItems"
           class="adv-content"
-        />
+        >
+          <div
+            :style="{
+              width: `${textWidth[currentPhase]}px`,
+              height: `${textHeight[currentPhase]}px`,
+              margin: `${textPos.top[currentPhase]}px auto auto ${textPos.left[currentPhase]}px`,
+              position: 'absolute',
+            }"
+            class="text-content"
+          >
+            <span
+              :style="{
+                fontSize: `${textFontSize[currentPhase]}px`,
+                color: '#FFFFFF',
+              }"
+              v-html="item.text"
+            />
+          </div>
+        </li>
       </ul>
     </div>
     <div
@@ -93,7 +111,7 @@ export default {
   },
   data() {
     return {
-      advItems: [{ src: adv1 }, { src: adv2 }, { src: adv3 }],
+      advItems: [{ src: adv1, text: '有需求，想吐槽<br>立刻告诉我们' }, { src: adv2, text: '成为射手影音<br>多语言熟悉翻译官' }, { src: adv3, text: '版本更新一览' }],
       currentAdvIndex: 0,
       hoveredItem: false,
       translateX: 0,
@@ -109,17 +127,42 @@ export default {
       return [11, this.adaptSpace, 16];
     },
     showAdvNum() {
-      return this.winWidth >= 1340 - (this.showSidebar ? 0 : 76) ? 3 : 2;
+      return this.winWidth >= 1135 - (this.showSidebar ? 0 : 76) ? 3 : 2;
     },
-    advWidth() {
+    adaptAdvWidth() {
       return (this.winWidth - this.padding * 2 - (this.showSidebar ? 76 : 0)
         - this.rightSpace[this.currentPhase] * (this.showAdvNum - 1)) / this.showAdvNum;
+    },
+    finalAdvWidth() {
+      switch (true) {
+        case this.winWidth > 1441 + (this.showSidebar ? 76 : 0):
+          return '429.6px';
+        case this.winWidth < 812 + (this.showSidebar ? 76 : 0):
+          return '349.8px';
+        default:
+          return `${this.adaptAdvWidth}px`;
+      }
     },
     hasNextItem() {
       return this.currentAdvIndex + this.showAdvNum < this.advItems.length;
     },
     hasPreItem() {
       return this.currentAdvIndex > 0;
+    },
+    textWidth() {
+      return [222.3 * 888 / 1030, 222.3 * this.winWidth / 1030, 222.3];
+    },
+    textHeight() {
+      return [90 * 888 / 1030, 90 * this.winWidth / 1030, 90];
+    },
+    textPos() {
+      return {
+        top: [30 * 888 / 1030, 30 * this.winWidth / 1030, 30],
+        left: [40 * 888 / 1030, 40 * this.winWidth / 1030, 40],
+      };
+    },
+    textFontSize() {
+      return [20 * 888 / 1030, 20 * this.winWidth / 1030, 20];
     },
   },
   watch: {
@@ -159,7 +202,7 @@ export default {
 
 <style scoped lang="scss">
 .adv-container {
-  min-width: 732px;
+  min-width: 710.6px;
   min-height: 107px;
   max-height: 144px;
   width: 100%;
@@ -175,18 +218,33 @@ export default {
     transform: translateY(-50%);
     top: 50%;
   }
+  .text-content {
+    span {
+      width: 100%;
+      height: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 3;
+      text-overflow: ellipsis;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.69);
+    }
+  }
   .scroll-elements {
     width: 100%;
     position: absolute;
     overflow: hidden;
     white-space: nowrap;
     display: block;
-    min-width: 732px;
+    min-width: 710.6px;
   }
   .adv-content {
+    cursor: pointer;
     display: inline-block;
     height: 100%;
-    min-width: 360px;
+    min-width: 302.3px;
     border-radius: 7px;
   }
 }

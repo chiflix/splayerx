@@ -1,13 +1,22 @@
 <template>
   <div
-    :style="{ fontSize: `${fontSize}px` }"
+    :style="{
+      cursor: 'pointer',
+      fontSize: `${fontSize}px`,
+      height: `${selectedHeight}px`,
+    }"
     class="history-item"
   >
     <div class="content">
-      <div class="icon">
-        <Icon
-          :type="icon"
-        />
+      <div
+        :style="{
+          marginLeft: `${iconPos}px`,
+          width: `${iconSize}px`,
+          height: `${iconSize}px`,
+        }"
+        class="icon"
+      >
+        <Icon :type="icon" />
       </div>
       <div class="title">
         {{ title }}
@@ -39,7 +48,7 @@ export default {
     },
     icon: {
       type: String,
-      default: 'bilibiliSidebar',
+      required: true,
     },
     openTime: {
       type: Number,
@@ -50,6 +59,18 @@ export default {
       default: 'Channel',
     },
     fontSize: {
+      type: Number,
+      required: true,
+    },
+    iconSize: {
+      type: Number,
+      required: true,
+    },
+    selectedHeight: {
+      type: Number,
+      required: true,
+    },
+    iconPos: {
       type: Number,
       required: true,
     },
@@ -95,11 +116,10 @@ export default {
 .history-item {
   min-width: 724px;
   width: calc(100% - 12px);
-  height: 56px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  transition: box-shadow 500ms;
+  transition: box-shadow 100ms linear;
   border-radius: 7px;
   &:hover {
     box-shadow: 0 1px 9px 0 rgba(0,0,0,0.10);
@@ -110,11 +130,6 @@ export default {
     display:flex;
     justify-content: flex-start;
     align-items: center;
-    .icon {
-      margin-left: 20px;
-      width: 28px;
-      height: 28px;
-    }
     .title {
       flex-shrink: 10;
       margin-left: 13px;

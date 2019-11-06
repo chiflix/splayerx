@@ -9,14 +9,20 @@
       class="history-container"
     >
       <div class="title">
-        <span :style="{ fontSize: `${playlistFontSize[currentPhase]}px` }">
+        <span
+          :style="{
+            fontSize: `${playlistFontSize[currentPhase]}px`,
+            fontWeight: 'bold',
+          }"
+        >
           {{ $t('browsing.homepage.history') }}</span>
         <span
           :style="{ fontSize: `${blankTitleFontSize[currentPhase]}px` }"
           v-if="histories.length >= 1"
         >
-          <span class="slash">|&nbsp;&nbsp;</span>
+          <span class="slash">&nbsp;|&nbsp;</span>
           <span
+            :style="{ fontSize: `${itemDetailFontSize[currentPhase]}px` }"
             @click="handleClear"
             class="clear"
           >{{ $t('browsing.homepage.clear') }}</span>
@@ -24,7 +30,8 @@
         <div
           v-else
           :style="{
-            fontSize: `${blankTitleFontSize[currentPhase]}px`,
+            fontSize: `${descriptionSize[currentPhase]}px`,
+            marginTop: `${titleBottom[currentPhase]}px`,
           }"
           class="description"
         >
@@ -34,19 +41,20 @@
       <div
         :style="{
           width: `${winWidth - (showSidebar ? 76 : 0) - padding * 2}px`,
-          maxWidth: '1664px',
+          maxWidth: '1321px',
           height: histories.length < 1 ? `${contentHeight[currentPhase]}px` : 'auto',
-          borderTop: '1px solid #EEEEEE',
           borderBottom: '1px solid #EEEEEE',
-          margin: `${playlistBottom[currentPhase]}px 0 ${historyBottom[currentPhase]}px 0`,
+          margin: `0 0 ${historyBottom[currentPhase]}px 0`,
           padding: histories.length < 1 ? '' :
-            `${playlistBottom[currentPhase]}px 0 ${playlistBottom[currentPhase]}px 0`,
+            `${titleBottom[currentPhase]}px 0 ${titleBottom[currentPhase]}px 0`,
         }"
         class="content"
       >
         <div
           v-if="histories.length < 1"
           :style="{
+            marginLeft: `${placeholderPos[currentPhase]}px`,
+            width: `calc(100% - ${placeholderPos[currentPhase]}px)`,
             height: `${placeholderHeight[currentPhase]}px`
           }"
           class="placeholder"
@@ -64,7 +72,7 @@
               :style="{
                 width: '100%',
                 height: `${placeholderPreWidth[currentPhase]}px`,
-                background: '#CECFDB',
+                background: '#E6E7ED',
                 borderRadius: '100%',
               }"
             />
@@ -72,7 +80,7 @@
               :style="{
                 width: '100%',
                 height: `${placeholderPreWidth[currentPhase]}px`,
-                background: '#CECFDB',
+                background: '#E6E7ED',
                 borderRadius: '100%',
               }"
             />
@@ -91,6 +99,9 @@
           v-else
           :key="item.url"
           :font-size="itemDetailFontSize[currentPhase]"
+          :icon-size="iconSize[currentPhase]"
+          :selected-height="selectedHeight[currentPhase]"
+          :icon-pos="iconPos[currentPhase]"
           v-for="item in histories"
           v-bind="item"
           @click.native="handleOpenHistoryItem(item)"
@@ -136,26 +147,45 @@ export default {
   },
   computed: {
     ...mapGetters(['winWidth', 'showSidebar']),
+    selectedHeight() {
+      return [48 * 888 / 1030, 48 * this.winWidth / 1030, 48];
+    },
+    iconSize() {
+      return [24 * 888 / 1030, 24 * this.winWidth / 1030, 24];
+    },
     playlistBottom() {
-      return [20 * 857 / 1148, 20 * this.winWidth / 1148, 20];
+      return [20 * 888 / 1030, 20 * this.winWidth / 1030, 20];
     },
     placeholderHeight() {
-      return [66 * 857 / 1148, 66 * this.winWidth / 1148, 66];
+      return [66 * 888 / 1030, 66 * this.winWidth / 1030, 66];
     },
     contentHeight() {
-      return [160 * 857 / 1148, 160 * this.winWidth / 1148, 160];
+      const defaultHeight = this.histories.length ? 160 : 110;
+      return [defaultHeight * 888 / 1030, defaultHeight * this.winWidth / 1030, defaultHeight];
     },
     historyBottom() {
-      return [50 * 857 / 1148, 50 * this.winWidth / 1148, 50];
+      return [30 * 888 / 1030, 30 * this.winWidth / 1030, 30];
     },
     blankTitleFontSize() {
-      return [19 * 857 / 1148, 19 * this.winWidth / 1148, 19];
+      return [19 * 888 / 1030, 19 * this.winWidth / 1030, 19];
     },
     placeholderPreWidth() {
-      return [26 * 857 / 1148, 26 * this.winWidth / 1148, 26];
+      return [26 * 888 / 1030, 26 * this.winWidth / 1030, 26];
     },
     itemDetailFontSize() {
-      return [11, 15 * this.winWidth / 1148, 15];
+      return [15 * 888 / 1030, 15 * this.winWidth / 1030, 15];
+    },
+    titleBottom() {
+      return [10 * 888 / 1030, 10 * this.winWidth / 1030, 10];
+    },
+    iconPos() {
+      return [16 * 888 / 1030, 16 * this.winWidth / 1030, 16];
+    },
+    descriptionSize() {
+      return [17 * 888 / 1030, 17 * this.winWidth / 1030, 17];
+    },
+    placeholderPos() {
+      return [13 * 888 / 1030, 13 * this.winWidth / 1030, 13];
     },
   },
   watch: {
@@ -212,15 +242,17 @@ export default {
       font-size: 19px;
       color: #B5B6BF;
       letter-spacing: 0.14px;
+      &:hover {
+        color: rgb(59, 59, 65);
+      }
     }
     .description {
-      margin-top: 20px;
       font-size: 19px;
       color: #B5B6BF;
     }
   }
   .content {
-    min-width: 732px;
+    min-width: 710.6px;
     display: flex;
     justify-content: flex-start;
     flex-direction: column;

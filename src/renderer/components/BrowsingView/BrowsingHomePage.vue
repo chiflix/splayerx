@@ -2,8 +2,8 @@
   <div class="home-page-container">
     <div
       :style="{
-        left: winWidth - (showSidebar ? 0 : 76) > 1744 ? '50%' : '',
-        transform: winWidth - (showSidebar ? 0 : 76) > 1744 ? 'translateX(-50%)' : '',
+        left: winWidth - (showSidebar ? 0 : 76) > 1441 ? '50%' : '',
+        transform: winWidth - (showSidebar ? 0 : 76) > 1441 ? 'translateX(-50%)' : '',
       }"
       class="home-page-content"
     >
@@ -25,7 +25,7 @@
         >{{ $t('welcome.welcomeTitle') }}</span>
         <div
           :style="{
-            margin: `${userPos[currentPhase]}px 0 0 ${userPos[currentPhase]}px`,
+            margin: `auto 0 ${userPos[currentPhase]}px ${userPos[currentPhase]}px`,
           }"
           class="user-content"
         >
@@ -73,6 +73,7 @@
               fontSize: `${moreInfoSize[currentPhase]}px`,
               cursor: 'pointer',
               zIndex: 1,
+              border: 'none',
             }"
             @click="handleLogin"
           >
@@ -163,25 +164,25 @@ export default {
       return version;
     },
     calcWidth() {
-      return this.calcSize(732, 992);
+      return this.calcSize(710.6, 834);
     },
     calcHeight() {
       return this.calcSize(232, 314);
     },
     calcMargin() {
-      return [29.5, this.calcSize(29.5, 30), 40];
+      return [50.7, this.calcSize(50.7, 60), 60];
     },
     titlePos() {
       return {
-        marginLeft: [40 * 857 / 1148, 40 * this.winWidth / 1148, 40],
-        marginTop: [56 * 857 / 1148, 56 * this.winWidth / 1148, 56],
+        marginLeft: [30 * 888 / 1030, 30 * this.winWidth / 1030, 30],
+        marginTop: [45 * 888 / 1030, 45 * this.winWidth / 1030, 45],
       };
     },
     titleSize() {
-      return [44 * 857 / 1148, 44 * this.winWidth / 1148, 44];
+      return [44 * 888 / 1030, 44 * this.winWidth / 1030, 44];
     },
     userPos() {
-      return [40 * 857 / 1148, 40 * this.winWidth / 1148, 40];
+      return [30 * 888 / 1030, 30 * this.winWidth / 1030, 30];
     },
     userStateSize() {
       return [14, this.calcSize(14, 19), 19];
@@ -199,43 +200,43 @@ export default {
       return [15, this.calcSize(15, 21), 21];
     },
     logoSize() {
-      return [360 * 857 / 1148, 360 * this.winWidth / 1148, 360];
+      return [360 * 888 / 1030, 360 * this.winWidth / 1030, 360];
     },
     logoPos() {
       return {
-        top: [36.8 * 857 / 1148, 36.8 * this.winWidth / 1148, 36.8],
-        right: [-50 * 857 / 1148, -50 * this.winWidth / 1148, -50],
+        top: [36.8 * 888 / 1030, 36.8 * this.winWidth / 1030, 36.8],
+        right: [-50 * 888 / 1030, -50 * this.winWidth / 1030, -50],
       };
     },
     versionSize() {
-      return [14, this.calcSize(14, 19), 19];
+      return [11, this.calcSize(11, 15), 15];
     },
     versionPos() {
       return {
-        bottom: [48 * 857 / 1148, 48 * this.winWidth / 1148, 48],
-        right: [50 * 857 / 1148, 50 * this.winWidth / 1148, 50],
+        bottom: [30 * 888 / 1030, 30 * this.winWidth / 1030, 30],
+        right: [50 * 888 / 1030, 50 * this.winWidth / 1030, 50],
       };
     },
     advHeight() {
       return [107, this.calcSize(107, 144), 144];
     },
     playlistFontSize() {
-      return [25 * 857 / 1148, 25 * this.winWidth / 1148, 25];
+      return [25 * 888 / 1030, 25 * this.winWidth / 1030, 25];
     },
     advPos() {
       return {
-        marginTop: [20 * 857 / 1148, 20 * this.winWidth / 1148, 20],
-        marginBottom: [50 * 857 / 1148, 50 * this.winWidth / 1148, 50],
+        marginTop: [20 * 888 / 1030, 20 * this.winWidth / 1030, 20],
+        marginBottom: [30 * 888 / 1030, 30 * this.winWidth / 1030, 30],
       };
     },
   },
   watch: {
     winWidth(val: number) {
-      if (val > 0 && val < 857) {
+      if (val > 0 && val < 888) {
         this.currentPhase = 0;
-      } else if (val >= 857 && val < 1148) {
+      } else if (val >= 888 && val < 1030) {
         this.currentPhase = 1;
-      } else if (val >= 1148) {
+      } else if (val >= 1030) {
         this.currentPhase = 2;
       }
     },
@@ -253,8 +254,8 @@ export default {
   },
   methods: {
     calcSize(min: number, max: number) {
-      const a = (max - min) / (1148 - 857);
-      const b = min - 857 * a;
+      const a = (max - min) / (1030 - 888);
+      const b = min - 888 * a;
       return a * this.winWidth + b;
     },
     handleLogin() {
@@ -286,18 +287,18 @@ export default {
     display: flex;
     flex-direction: column;
     position: absolute;
-    max-width: 1744px;
+    max-width: 1441px;
     .account-content {
       position: relative;
       width: 100%;
       height: auto;
-      min-width: 732px;
+      min-width: 710.6px;
       min-height: 232px;
-      border-radius: 7px;
+      border-radius: 0 0 7px 7px;
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      max-width: 1664px;
+      max-width: 1321px;
       background-image: linear-gradient(180deg, rgba(255,255,255,0.50) 10%, #E6E6E6 100%);
       .back-logo {
         position: absolute;

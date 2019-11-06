@@ -171,6 +171,7 @@ export default {
       'displayLanguage',
       'isMaximized',
       'showSidebar',
+      'currentPage',
     ]),
     isDarwin() {
       return process.platform === 'darwin';
@@ -418,13 +419,19 @@ export default {
   mounted() {
     this.menuService = new MenuService();
     this.menuService.updateMenuItemEnabled('splayerx.checkForUpdates', false);
-    if (!this.currentChannel) {
+    if (this.currentPage === 'channelManager') {
       this.showChannelManager = true;
       this.showProgress = false;
       this.webInfo.canReload = false;
       this.currentUrl = 'edit.channel';
       this.title = this.$t('browsing.siteManager');
-    } else {
+    } else if (this.currentPage === 'homePage') {
+      this.showHomePage = true;
+      this.showProgress = false;
+      this.webInfo.canReload = false;
+      this.currentUrl = 'home.page';
+      this.title = this.$t('msg.titleName');
+    } else if (this.currentPage === 'webPage') {
       this.title = this.currentMainBrowserView().webContents.getTitle();
     }
 
