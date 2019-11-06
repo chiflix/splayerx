@@ -788,7 +788,8 @@ export default {
       }
     },
     mediaStartedPlaying() {
-      browsingHistory.saveHistoryItem(this.currentUrl, this.title, this.currentChannel);
+      browsingHistory.saveHistoryItem(this.currentUrl,
+        this.title, this.calcCurrentChannel(this.currentUrl));
     },
     newWindow(e: Event, url: string, disposition: string) {
       if (disposition !== 'new-window') {
