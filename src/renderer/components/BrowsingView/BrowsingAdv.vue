@@ -5,7 +5,7 @@
     @mouseover="handleMouseover"
     @mouseleave="handleMouseleave"
     class="adv-container"
->
+  >
     <div
       :style="{
         width: `${padding}px`,
@@ -51,6 +51,7 @@
           @click="handleAdvClick(item.url)"
           class="adv-content"
         >
+          <div class="mask" />
           <div
             :style="{
               width: `${textWidth[currentPhase]}px`,
@@ -129,7 +130,7 @@ export default {
   },
   data() {
     return {
-      advItems: [{ src: adv1, text: '有需求，想吐槽<br>立刻告诉我们', url: 'https://feedback.splayer.org/' }, { src: adv2, text: '成为射手影音<br>多语言熟悉翻译官', url: 'https://www.sagittarius.ai/blog/2019/10/31/splayer-i18n-project' }, { src: adv3, text: '版本更新一览', url: 'https://splayer.org/changelog.html' }],
+      advItems: [{ src: adv1, text: this.$t('browsing.homepage.banner1'), url: 'https://feedback.splayer.org/' }, { src: adv2, text: this.$t('browsing.homepage.banner2'), url: 'https://www.sagittarius.ai/blog/2019/10/31/splayer-i18n-project' }, { src: adv3, text: this.$t('browsing.homepage.banner3'), url: 'https://splayer.org/changelog.html' }],
       currentAdvIndex: 0,
       hoveredItem: false,
       translateX: 0,
@@ -257,6 +258,13 @@ export default {
     white-space: nowrap;
     display: block;
     min-width: 710.6px;
+    .mask {
+      position: absolute;
+      background: rgba(0, 0, 0, 0.2);
+      width: 100%;
+      height: 100%;
+      border-radius: 7px;
+    }
   }
   .adv-content {
     cursor: pointer;

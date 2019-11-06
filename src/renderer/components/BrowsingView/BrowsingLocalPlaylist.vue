@@ -76,7 +76,7 @@
                 class="title"
               >
                 <!--eslint-disable-next-line-->
-                <span :style="{ margin: `${progressPos[currentPhase]}px 0 auto 7%` }"><b>{{ `0${index + 1} / 0${playlist.length}  ·  ` }}</b>{{ `${item.basename}` }}</span>
+                <span :style="{ margin: `${progressPos[currentPhase]}px 0 auto 7%` }"><b>{{ `${orderFormat(item.playedIndex + 1)} / ${orderFormat(item.playlistLength)}  ·  ` }}</b>{{ `${item.basename}` }}</span>
               </div>
               <div
                 :style="{ margin: `auto auto ${progressPos[currentPhase]}px 7%` }"
@@ -291,6 +291,9 @@ export default {
     });
   },
   methods: {
+    orderFormat(val: number) {
+      return val < 10 ? `0${val}` : val;
+    },
     handleItemClick(id: number) {
       if (this.hasPlaylist && id) {
         this.openPlayList(id);

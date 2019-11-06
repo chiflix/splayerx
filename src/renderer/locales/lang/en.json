@@ -306,7 +306,10 @@
       "historyInfo": "Keep track of your playback history, including the page title, the site address and the date you watched.",
       "playlist": "Local Playlist",
       "playlistInfoPre": "Click the ",
-      "playlistInfoNext": " button on the the left sidebar, choose and open more than one file to generate a playlist."
+      "playlistInfoNext": " button on the the left sidebar, choose and open more than one file to generate a playlist.",
+      "banner1": "SPlayer welcomes<br>your product feedback",
+      "banner2": "Contribute to our<br>localization project",
+      "banner3": "Release Notes"
     }
   },
   "preferences": {
