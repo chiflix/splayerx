@@ -288,7 +288,6 @@ export default {
   .home-page-content {
     width: auto;
     height: auto;
-    overflow: scroll;
     display: flex;
     flex-direction: column;
     position: absolute;
