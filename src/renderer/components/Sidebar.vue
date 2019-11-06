@@ -305,6 +305,7 @@ export default {
   height: 100%;
   transition: width 100ms ease-out;
   will-change: width;
+  overflow: hidden;
 
   .top-mask {
     width: 100%;

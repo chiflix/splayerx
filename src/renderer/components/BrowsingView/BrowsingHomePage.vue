@@ -111,12 +111,10 @@
       <browsing-adv
         :width="calcWidth"
         :height="advHeight[currentPhase]"
+        :contentPos="advPos"
         :padding="calcMargin[currentPhase]"
         :current-phase="currentPhase"
         :adapt-space="calcSize(11, 16)"
-        :style="{
-          margin: `${advPos.marginTop[currentPhase]}px 0 ${advPos.marginBottom[currentPhase]}px 0`,
-        }"
       />
       <browsing-history
         :show-home-page="showHomePage"

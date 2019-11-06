@@ -122,7 +122,7 @@ export default {
   transition: box-shadow 100ms linear;
   border-radius: 7px;
   &:hover {
-    box-shadow: 0 1px 9px 0 rgba(0,0,0,0.10);
+    box-shadow: 0 0 6px rgba(0,0,0,0.10);
   }
 
   .content {
