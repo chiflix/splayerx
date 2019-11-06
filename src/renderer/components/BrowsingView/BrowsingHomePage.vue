@@ -1,5 +1,10 @@
 <template>
-  <div class="home-page-container">
+  <div
+    :style="{
+      overflowX: winWidth + (showSidebar ? 0 : 76) < 888 ? 'scroll' : '',
+    }"
+    class="home-page-container"
+  >
     <div
       :style="{
         left: winWidth - (showSidebar ? 0 : 76) > 1441 ? '50%' : '',
@@ -279,7 +284,7 @@ export default {
   top: 40px;
   display: flex;
   position: relative;
-  overflow: scroll;
+  overflow-y: scroll;
   .home-page-content {
     width: auto;
     height: auto;

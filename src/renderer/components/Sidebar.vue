@@ -53,11 +53,6 @@
         />
       </div>
     </div>
-    <div
-      v-if="!showFileIcon"
-      :style="{ boxShadow: bottomMask ? '0 -3px 8px 0 rgba(0,0,0,0.60)' : '' }"
-      class="bottom-mask"
-    />
     <transition name="fade-300">
       <div
         :style="{
@@ -140,10 +135,19 @@ export default {
       return channelsNum * 56;
     },
     bottomIconHeight() {
-      return this.$route.name === 'playing-view' ? 92 : 122;
+      switch (this.$route.name) {
+        case 'playing-view':
+          return 92;
+        case 'landing-view':
+          return 62;
+        case 'browsing-view':
+          return 122;
+        default:
+          return 0;
+      }
     },
     maxHeight() {
-      const bottomHeight = this.showFileIcon ? this.bottomIconHeight : 0;
+      const bottomHeight = this.bottomIconHeight;
       return this.winHeight - (this.isDarwin ? 42 : 16) - bottomHeight;
     },
     isDarwin() {
@@ -311,12 +315,6 @@ export default {
     height: 42px;
     position: absolute;
     top: -42px;
-  }
-  .bottom-mask {
-    position: absolute;
-    width: 100%;
-    height: 42px;
-    bottom: -42px;
   }
   .icon-box {
     width: 100%;
