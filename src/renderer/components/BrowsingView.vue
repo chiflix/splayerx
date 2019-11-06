@@ -885,7 +885,7 @@ export default {
         if (this.oauthRegex.some((re: RegExp) => re.test(url))) return;
         log.info('open-url-by-new-window', this.currentChannel);
         const oldChannel = this.currentChannel;
-        const newChannel = this.calcCurrentChannel(url);
+        const newChannel = this.calcCurrentChannel(openUrl);
         if (oldChannel === newChannel) {
           this.loadingState = true;
           log.info('new-window', openUrl);
