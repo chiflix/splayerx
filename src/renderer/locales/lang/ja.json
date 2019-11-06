@@ -28,7 +28,8 @@
   "tips": {
     "openSidebar": "サイドバーの表示 (C)",
     "closeSidebar": "サイドバーを隠す (C)",
-    "exit": "起動ページに戻る"
+    "exit": "起動ページに戻る",
+    "delete": "Back to Launching Page"
   },
   "errorFile": {
     "ENOSPC": {
@@ -271,6 +272,7 @@
     "enterPop": "新しいウィンドウで遊ぶ",
     "exitPop": "ブラウザに戻る (O)",
     "danmu": "だんまくスイッチ",
+    "pin": "Pin / Unpin (T)",
     "error": {
       "offline": "インターネットがない",
       "try": "お試しください:",
@@ -316,7 +318,66 @@
       "incognitoDescription": "再生履歴は保存されません。",
       "clearHistory": "再生履歴をクリア",
       "clearHistoryDescription": "既存のプレイリストと再生履歴を削除する"
+    },
+    "account": {
+      "accountSetting": "账户設定",
+      "title": "プロフィール",
+      "noToken": {
+        "title": "サインインしていません",
+        "description": "AI翻訳とより高度な機能を使用するには、電話番号でサインインしてください。",
+        "button": "登入"
+      },
+      "normalUser": {
+        "title": "Account: ",
+        "description": "Upgrade your account now and get started with exclusive features and more.",
+        "button": "Upgrade"
+      },
+      "vipUser": {
+        "title": "プレミアムアカウント: ",
+        "description": "有効期限: ",
+        "button": "更新"
+      },
+      "month": " Year",
+      "year": " Year",
+      "months": " Months",
+      "years": " Years",
+      "signOut": "登出",
+      "createdAt": "登録日",
+      "payAt": "最近の購入履歴",
+      "payContent": "{date}{product}",
+      "payProduct": ": {product} Premium"
+    },
+    "premium": {
+      "premiumSetting": "プレミアム",
+      "title": "SPlayer Premium",
+      "description": "Go Premium now to help SPlayer change the way people watch videos, and get access to more advanced features.",
+      "content": {
+        "description1": "Additional hours of AI Translation service",
+        "description2": "Support more languages in AI Translation",
+        "description3": "Export speech recognition results unlimitedly",
+        "description4": "Your purchase history will be conserved permanently",
+        "description5": "",
+        "description6": "New features are coming soon"
+      },
+      "origin": "ORIG. ",
+      "off": "% Off",
+      "month": " Month",
+      "year": " Mo.",
+      "months": " Mo.",
+      "years": " Yr.",
+      "payType": {
+        "alipay": "Alipay",
+        "wxpay": "WeChat",
+        "paypal": "PayPal"
+      }
     }
+  },
+  "payment": {
+    "wxpay": {
+      "title": "SCAN & PAY",
+      "description": "WeChat Pay"
+    },
+    "fail": "Error"
   },
   "privacyBubble": {
     "confirmDisable": {
@@ -339,6 +400,10 @@
   },
   "alertBubble": {
     "button": "はい"
+  },
+  "notExportEmbeddedSubtitle": {
+    "title": "",
+    "content": "Embedded subtitle is loading, please try to export later."
   },
   "protectBubble": {
     "agree": "確定",
@@ -382,6 +447,12 @@
       "zh": "中国語（簡体字）",
       "zh-CN": "中国語（簡体字）",
       "zh-TW": "中国語（繁体字）"
+    },
+    "tips": {
+      "editor": "Edit is coming soon ...",
+      "export": "Export",
+      "reload": "Regenerate",
+      "delete": "Remove"
     }
   },
   "uploading": {
@@ -412,6 +483,7 @@
     "videoLanguageLabel": "音声の言語",
     "subtitleLanguageLabel": "以下に翻訳",
     "selectLanguageLabel": "音声の言語",
+    "selectLanguageMoreLabel": "More ...",
     "audioLanguageLoading": "言語リストの取得 ...",
     "audioLanguageLoadFail": "接続に失敗しました。もう一度お試しください",
     "select": {
@@ -524,6 +596,47 @@
       "retry": "retry",
       "error300": "Verification failed, please",
       "errorNetwork": "Network Error. Please"
+    }
+  },
+  "forbiddenModal": {
+    "title": "Upgrade to SPlayer Premium",
+    "content": "Upgrade to export translation results unlimitedly, and get access to more exclusive features.",
+    "span": "Already Premium? Sign In",
+    "button": "Go Premium Now",
+    "audioLanguage": "日本語, 한국어, Español, Français, Deutsch, Italiano, Português, čeština, Русский, Indonesian, العربية, Türkçe, română",
+    "translate": {
+      "title": "Upgrade to SPlayer Premium",
+      "content": "Go Premium to get access to more languages and other exclusive features.",
+      "span": "Already Premium? Sign In",
+      "button": "Go Premium Now"
+    },
+    "export": {
+      "title": "Upgrade to SPlayer Premium",
+      "content": "Upgrade to export translation results unlimitedly, and get access to more exclusive features.",
+      "span": "Already Premium? Sign In",
+      "button": "Go Premium Now"
+    }
+  },
+  "premiumModal": {
+    "loading": {
+      "content": "Processing，please wait a second …",
+      "button": "Close"
+    },
+    "success": {
+      "h2": "Thanks for your support",
+      "h1": "Payment Successful !",
+      "h4": "NOW",
+      "content1": "Additional Hours of AI Translation Service",
+      "content2": "Support More Languages in AI Translation",
+      "content3": "Export Translation Results Unlimitedly",
+      "button": "Done"
+    },
+    "fail": {
+      "h1": "Sorry",
+      "content": "Your transaction could not be processed，please contact us",
+      "copy": "Copy",
+      "copied": "Copied",
+      "button": "Back"
     }
   }
 }

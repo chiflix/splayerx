@@ -438,6 +438,15 @@ export default {
     this.$bus.$on('toggle-reload', this.handleUrlReload);
     this.$bus.$on('toggle-back', this.handleUrlBack);
     this.$bus.$on('toggle-forward', this.handleUrlForward);
+    this.$bus.$on('toggle-side-bar', () => {
+      setTimeout(() => {
+        if (this.acceleratorAvailable) {
+          this.$event.emit('side-bar-mouseup');
+        } else {
+          this.acceleratorAvailable = true;
+        }
+      }, 10);
+    });
     this.$bus.$on('toggle-pip', (isGlobal: boolean) => {
       const focusedOnMainWindow = this.$electron.remote.getCurrentWindow().isVisible()
         && this.$electron.remote.getCurrentWindow().isFocused();
@@ -451,7 +460,7 @@ export default {
         } else {
           this.acceleratorAvailable = true;
         }
-      }, 0);
+      }, 10);
     });
     this.$bus.$on('sidebar-selected', this.handleBookmarkOpen);
     this.$bus.$on('channel-manage', () => {

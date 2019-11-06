@@ -75,7 +75,7 @@
 </template>
 
 <script lang="ts">
-import { remote, ipcRenderer } from 'electron';
+import { remote, ipcRenderer, DidFailLoadEvent } from 'electron';
 import Icon from '@/components/BaseIconContainer.vue';
 import { polling } from '@/libs/apis';
 
@@ -170,8 +170,13 @@ export default {
     loadStart() {
       this.status = 'loading';
     },
-    loadFail() {
-      this.status = 'fail';
+    loadFail(e: DidFailLoadEvent) {
+      // electron send aborted error(code: -3) but webview load success
+      if (e.errorCode !== -3) {
+        this.status = 'fail';
+      } else {
+        this.status = 'success';
+      }
       this.remove();
     },
     loadSuccess() {

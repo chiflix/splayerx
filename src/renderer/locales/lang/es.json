@@ -28,7 +28,8 @@
   "tips": {
     "openSidebar": "Mostrar barra lateral (C)",
     "closeSidebar": "Ocultar barra lateral (C)",
-    "exit": "Volver a la página de inicio"
+    "exit": "Volver a la página de inicio",
+    "delete": "Back to Launching Page"
   },
   "errorFile": {
     "ENOSPC": {
@@ -271,6 +272,7 @@
     "enterPop": "Reproducir en ventana nueva",
     "exitPop": "Volver al navegador",
     "danmu": "Alternar Danmaku",
+    "pin": "Pin / Unpin (T)",
     "error": {
       "offline": "Sin Internet",
       "try": "Prueba:",
@@ -316,7 +318,66 @@
       "incognitoDescription": "No se guardará el historial de reproducción.",
       "clearHistory": "Borrar historial de reproducción",
       "clearHistoryDescription": "Eliminar listas de reproducción existentes y historial de reproducción"
+    },
+    "account": {
+      "accountSetting": "Cuenta",
+      "title": "Mi Perfil",
+      "noToken": {
+        "title": "No iniciado sesión",
+        "description": "Inicia sesión con tu número de teléfono para usar Traducción AI y funciones más avanzadas.",
+        "button": "Iniciar sesión"
+      },
+      "normalUser": {
+        "title": "Account: ",
+        "description": "Actualiza tu cuenta ahora y empieza con características exclusivas y más.",
+        "button": "Upgrade"
+      },
+      "vipUser": {
+        "title": "Premium Account: ",
+        "description": "Fecha de caducidad: ",
+        "button": "Renovar"
+      },
+      "month": " Month",
+      "year": " Year",
+      "months": " Months",
+      "years": " Years",
+      "signOut": "Cerrar sesión",
+      "createdAt": "Fecha de registro",
+      "payAt": "Compras Recientes",
+      "payContent": "{date}{product}",
+      "payProduct": ": {product} Premium"
+    },
+    "premium": {
+      "premiumSetting": "Premium",
+      "title": "SPlayer Premium",
+      "description": "Acceda ahora a Premium para ayudar a SPlayer a cambiar la forma en que la gente ve los vídeos y obtener acceso a funciones más avanzadas.",
+      "content": {
+        "description1": "Horas adicionales de servicio de traducción de IA",
+        "description2": "Soporta más idiomas en Traducción de IA",
+        "description3": "Exportar resultados de reconocimiento de voz ilimitadamente",
+        "description4": "Your purchase history will be conserved permanently",
+        "description5": "",
+        "description6": "New features are coming soon"
+      },
+      "origin": "ORIG. ",
+      "off": "% Off",
+      "month": " Month",
+      "year": " Year",
+      "months": " Mo.",
+      "years": " Yr.",
+      "payType": {
+        "alipay": "Alipay",
+        "wxpay": "WeChat",
+        "paypal": "PayPal"
+      }
     }
+  },
+  "payment": {
+    "wxpay": {
+      "title": "SCAN & PAY",
+      "description": "WeChat Pay"
+    },
+    "fail": "Error"
   },
   "privacyBubble": {
     "confirmDisable": {
@@ -339,6 +400,10 @@
   },
   "alertBubble": {
     "button": "OK"
+  },
+  "notExportEmbeddedSubtitle": {
+    "title": "",
+    "content": "Se está cargando el subtítulo, por favor intente exportar más tarde."
   },
   "protectBubble": {
     "agree": "OK",
@@ -382,6 +447,12 @@
       "zh": "Chino (Simplificado)",
       "zh-CN": "Chino (Simplificado)",
       "zh-TW": "Chino (Tradicional)"
+    },
+    "tips": {
+      "editor": "Edit is coming soon ...",
+      "export": "Exportar",
+      "reload": "Regenerar",
+      "delete": "Eliminar"
     }
   },
   "uploading": {
@@ -412,6 +483,7 @@
     "videoLanguageLabel": "Idioma de audio",
     "subtitleLanguageLabel": "Traducir a",
     "selectLanguageLabel": "Idioma de audio",
+    "selectLanguageMoreLabel": "Más ...",
     "audioLanguageLoading": "Obteniendo la lista de idiomas ...",
     "audioLanguageLoadFail": "Conexión fallida, intente más tarde",
     "select": {
@@ -524,6 +596,47 @@
       "retry": "retry",
       "error300": "Verification failed, please",
       "errorNetwork": "Network Error. Please"
+    }
+  },
+  "forbiddenModal": {
+    "title": "Upgrade to SPlayer Premium",
+    "content": "Actualice para exportar los resultados de la traducción de forma ilimitada y obtenga acceso a características más exclusivas.",
+    "span": "Already Premium? Sign In",
+    "button": "Go Premium Now",
+    "audioLanguage": "日本語, 한국어, Español, Français, Deutsch, Italiano, Português, čeština, Русский, Indonesian, العربية, Türkçe, română",
+    "translate": {
+      "title": "Upgrade to SPlayer Premium",
+      "content": "Acceda a Premium para tener acceso a más idiomas y otras características exclusivas.",
+      "span": "Already Premium? Sign In",
+      "button": "Go Premium Now"
+    },
+    "export": {
+      "title": "Upgrade to SPlayer Premium",
+      "content": "Actualice para exportar los resultados de la traducción de forma ilimitada y obtenga acceso a características más exclusivas.",
+      "span": "Already Premium? Sign In",
+      "button": "Go Premium Now"
+    }
+  },
+  "premiumModal": {
+    "loading": {
+      "content": "Processing，please wait a second …",
+      "button": "Cerrar"
+    },
+    "success": {
+      "h2": "Thanks for your support",
+      "h1": "Payment Successful !",
+      "h4": "NOW",
+      "content1": "Horas adicionales del Servicio de Traducción de IA",
+      "content2": "Soporta más idiomas en traducción de IA",
+      "content3": "Exportar los resultados de la traducción ilimitadamente",
+      "button": "Hecho"
+    },
+    "fail": {
+      "h1": "Sorry",
+      "content": "Your transaction could not be processed，please contact us",
+      "copy": "Copiar",
+      "copied": "Copiado",
+      "button": "Atrás"
     }
   }
 }

@@ -333,6 +333,9 @@ function createPreferenceWindow(e, route) {
       preferenceWindow = null;
     });
   } else {
+    if (!preferenceWindow.webContents.isDestroyed()) {
+      preferenceWindow.webContents.send('route-change', 'Premium');
+    }
     preferenceWindow.focus();
   }
   preferenceWindow.once('ready-to-show', () => {
@@ -1003,9 +1006,6 @@ function registerMainWindowEvent(mainWindow) {
       mainWindow.hide();
     }
     browsingWindow.webContents.closeDevTools();
-    if (process.env.NODE_ENV === 'development') {
-      pipControlView.webContents.openDevTools({ mode: 'detach' });
-    }
     browsingWindow.setAspectRatio(args.pipInfo.aspectRatio);
     browsingWindow.setMinimumSize(args.pipInfo.minimumSize[0], args.pipInfo.minimumSize[1]);
     browsingWindow.setSize(args.pipInfo.pipSize[0], args.pipInfo.pipSize[1]);
@@ -1694,7 +1694,7 @@ app.on('sign-out', () => {
 
 app.on('route-account', (e) => {
   if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
-    preferenceWindow.webContents.send('route-account');
+    preferenceWindow.webContents.send('route-change');
   } else {
     createPreferenceWindow(e, 'account');
   }

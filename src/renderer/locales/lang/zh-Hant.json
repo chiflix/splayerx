@@ -28,7 +28,8 @@
   "tips": {
     "openSidebar": "打開側邊欄 (C)",
     "closeSidebar": "隱藏側邊欄 (C)",
-    "exit": "回到啟動頁"
+    "exit": "回到啟動頁",
+    "delete": "回到啟動頁"
   },
   "errorFile": {
     "ENOSPC": {
@@ -110,7 +111,7 @@
       "paste": "貼上"
     },
     "account": {
-      "name": "帳號",
+      "name": "账号",
       "login": "登入",
       "logout": "登出"
     },
@@ -271,6 +272,7 @@
     "enterPop": "在新視窗播放 (O)",
     "exitPop": "還原窗口 (O)",
     "danmu": "彈幕開關",
+    "pin": "置頂 / 取消置頂 (T)",
     "error": {
       "offline": "未連接到互聯網",
       "try": "請試試以下辦法：",
@@ -316,7 +318,66 @@
       "incognitoDescription": "開啟後將不再保留任何新的播放記錄。",
       "clearHistory": "清空播放記錄",
       "clearHistoryDescription": "清除已有的播放列表和歷史記錄"
+    },
+    "account": {
+      "accountSetting": "我的賬號",
+      "title": "賬號信息",
+      "noToken": {
+        "title": "未登錄",
+        "description": "登錄後可使用AI翻譯等更多功能",
+        "button": "免註冊登錄"
+      },
+      "normalUser": {
+        "title": "普通用戶: ",
+        "description": "投食成為射手雲養員，獲取專享功能和特殊權益。",
+        "button": "投食"
+      },
+      "vipUser": {
+        "title": "云养员: ",
+        "description": "雲養至：",
+        "button": "繼續投食"
+      },
+      "month": "個月",
+      "year": "年",
+      "months": "个月",
+      "years": "年",
+      "signOut": "註銷",
+      "createdAt": "註冊時間",
+      "payAt": "投食記錄",
+      "payContent": "{date}{product}",
+      "payProduct": ": 投食{product}"
+    },
+    "premium": {
+      "premiumSetting": "雲養計劃",
+      "title": "射手雲養計劃",
+      "description": "牆裂歡迎廣大用戶投食支持射手影音長期穩定可持續開發，同時獲得射手雲養員專享功能。",
+      "content": {
+        "description1": "AI翻譯功能 (應該) 足夠用",
+        "description2": "更多智能翻譯語言選擇",
+        "description3": "無限制導出語言識別字幕",
+        "description4": "更多福利準備中，敬請期待",
+        "description5": "",
+        "description6": "更多福利準備中，敬請期待"
+      },
+      "origin": "原價 ",
+      "off": "折",
+      "month": "個月",
+      "year": "年",
+      "months": "個月",
+      "years": "年",
+      "payType": {
+        "alipay": "支付寶",
+        "wxpay": "微信支付",
+        "paypal": "Paypal"
+      }
     }
+  },
+  "payment": {
+    "wxpay": {
+      "title": "掃碼支付",
+      "description": "微信支付"
+    },
+    "fail": "加載失敗"
   },
   "privacyBubble": {
     "confirmDisable": {
@@ -339,6 +400,10 @@
   },
   "alertBubble": {
     "button": "確定"
+  },
+  "notExportEmbeddedSubtitle": {
+    "title": "",
+    "content": "內嵌字幕正在加載中，請稍後再嘗試導出。"
   },
   "protectBubble": {
     "agree": "好的",
@@ -382,6 +447,12 @@
       "zh": "中文 (簡體)",
       "zh-CN": "中文 (簡體)",
       "zh-TW": "中文 (繁體)"
+    },
+    "tips": {
+      "editor": "編輯功能即將上線",
+      "export": "導出",
+      "reload": "重新生成",
+      "delete": "移除"
     }
   },
   "uploading": {
@@ -412,6 +483,7 @@
     "videoLanguageLabel": "視頻語言",
     "subtitleLanguageLabel": "翻譯至",
     "selectLanguageLabel": "請選擇",
+    "selectLanguageMoreLabel": "更多語言 ...",
     "audioLanguageLoading": "獲取語言列表中 ...",
     "audioLanguageLoadFail": "連接錯誤，請稍後重試",
     "select": {
@@ -524,6 +596,47 @@
       "retry": "重試",
       "error300": "驗證失敗，請",
       "errorNetwork": "驗證失敗，請"
+    }
+  },
+  "forbiddenModal": {
+    "title": "加入射手雲養計劃",
+    "content": "投食成為射手雲養員，即可導出翻譯至本地，還可以獲得更多專享功能。",
+    "span": "成為射手雲養員",
+    "button": "成為射手雲養員",
+    "audioLanguage": "日本語, 한국어, Español, Français, Deutsch, Italiano, Português, čeština, Русский, Indonesian, العربية, Türkçe, română",
+    "translate": {
+      "title": "加入射手雲養計劃",
+      "content": "投食成為射手雲養員，支持更多語言的語音識別和AI翻譯，並獲得更多專享功能。",
+      "span": "已是雲養員請登錄",
+      "button": "成為射手雲養員"
+    },
+    "export": {
+      "title": "加入射手雲養計劃",
+      "content": "投食成為射手雲養員，即可導出翻譯至本地，還可以獲得更多專享功能。",
+      "span": "已是雲養員請登錄",
+      "button": "成為射手雲養員"
+    }
+  },
+  "premiumModal": {
+    "loading": {
+      "content": "投食中，請稍後 ...",
+      "button": "關閉頁面"
+    },
+    "success": {
+      "h2": "感謝您對 SPlayer 的支持",
+      "h1": "投食成功！",
+      "h4": "NOW",
+      "content1": "增加智能翻譯使用時間",
+      "content2": "更多智能翻譯語言選擇",
+      "content3": "無限制導出字幕文件",
+      "button": "完成"
+    },
+    "fail": {
+      "h1": "很遺憾",
+      "content": "投食過程中遇到了一些問題，請通過郵箱聯繫我們",
+      "copy": "拷貝",
+      "copied": "已拷貝",
+      "button": "返回"
     }
   }
 }

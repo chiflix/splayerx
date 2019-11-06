@@ -10,7 +10,7 @@
       class="select-language-modal"
     >
       <div
-        v-if="(!isProgress && !isConfirmCancelTranlate) || isPermissionFail"
+        v-if="(!isProgress && !isConfirmCancelTranlate) || isPermissionFail || isGoPremium"
         @click="hideTranslateModal"
         class="close-box"
       >
@@ -20,7 +20,7 @@
         />
       </div>
       <div
-        v-if="!isProgress && !isConfirmCancelTranlate"
+        v-if="!isProgress && !isConfirmCancelTranlate && !isGoPremium"
         class="select-title"
       >
         <h1>
@@ -44,7 +44,10 @@
       <h1 v-else-if="isProgress">
         {{ $t('translateModal.translate.title', { time: estimateTimeText }) }}
       </h1>
-      <p v-if="!isProgress && !isConfirmCancelTranlate">
+      <h1 v-else-if="isGoPremium">
+        {{ $t('forbiddenModal.translate.title') }}
+      </h1>
+      <p v-if="!isProgress && !isConfirmCancelTranlate && !isGoPremium">
         {{ isTranslateLimit ? $t('translateModal.select.contentLimit')
           : $t('translateModal.select.content') }}
       </p>
@@ -63,8 +66,12 @@
       >
         {{ progressContent }}
       </p>
+      <p
+        v-else-if="isGoPremium"
+        v-html="premiumContent"
+      />
       <div
-        v-if="!isProgress && !isConfirmCancelTranlate"
+        v-if="!isProgress && !isConfirmCancelTranlate && !isGoPremium"
         class="select"
       >
         <div class="left">
@@ -86,7 +93,7 @@
         </div>
       </div>
       <div
-        v-else-if="showProgress && !isConfirmCancelTranlate"
+        v-else-if="showProgress && !isConfirmCancelTranlate && !isGoPremium"
         class="progress-wraper"
       >
         <Progress
@@ -125,7 +132,7 @@
         </div>
       </div>
       <div
-        v-if="!isProgress && !isLoading && !isConfirmCancelTranlate"
+        v-if="!isProgress && !isLoading && !isConfirmCancelTranlate && !isGoPremium"
         @click="translate"
         :class="`${audioLanguage.value ? '' : 'disabled'} button`"
       >
@@ -169,6 +176,13 @@
         {{ $t('translateModal.upgrade') }}
       </div>
       <div
+        @click.stop="goPremium"
+        v-else-if="isGoPremium"
+        class="button"
+      >
+        {{ $t('forbiddenModal.translate.button') }}
+      </div>
+      <div
         v-else
         @click="hideTranslateModal"
         class="button"
@@ -182,6 +196,7 @@
 import Vue from 'vue';
 import { ipcRenderer } from 'electron';
 import { mapActions, mapGetters } from 'vuex';
+import { remove, findIndex } from 'lodash';
 import {
   Input as inputActions,
   AudioTranslate as atActions,
@@ -218,6 +233,7 @@ export default Vue.extend({
       didGrab: false, // 是否提取音频，区分听写和机翻
       loadConfigCatCompleted: false,
       isTranslateLimit: false,
+      audioLanguageString: '',
     };
   },
   computed: {
@@ -236,6 +252,9 @@ export default Vue.extend({
     isProgress() {
       return this.isTranslating || this.translateStatus === AudioTranslateStatus.Fail
         || this.translateStatus === AudioTranslateStatus.Success;
+    },
+    isGoPremium() {
+      return this.translateStatus === AudioTranslateStatus.GoPremium;
     },
     isTranslateFail() {
       return this.translateStatus === AudioTranslateStatus.Fail;
@@ -300,6 +319,9 @@ export default Vue.extend({
       }
       return message;
     },
+    premiumContent() {
+      return `${this.$t('forbiddenModal.translate.content')}<br/><br/>${this.audioLanguageString}`;
+    },
   },
   watch: {
     displayLanguage() {
@@ -342,20 +364,29 @@ export default Vue.extend({
     }) {
       if (n.value === 'premium') {
         this.audioLanguage = o;
-        this.hideTranslateModal();
-        this.showForbidden('translate');
+        this.updateStatus(AudioTranslateStatus.GoPremium);
       }
     },
   },
   async mounted() {
     this.refreshConfig();
     this.isTranslateLimit = await isTranslateLimit();
+    this.audioLanguageString = this.$t('forbiddenModal.audioLanguage');
+    try {
+      const configString = await this.getMoreLanguages();
+      if (configString) {
+        this.audioLanguageString = configString;
+      }
+    } catch (error) {
+      // empty
+    }
   },
   methods: {
     ...mapActions({
       hideTranslateModal: atActions.AUDIO_TRANSLATE_HIDE_MODAL,
       startTranslate: atActions.AUDIO_TRANSLATE_START,
       discardTranslate: atActions.AUDIO_TRANSLATE_DISCARD,
+      updateStatus: atActions.AUDIO_TRANSLATE_UPDATE_STATUS,
       updateWheel: inputActions.WHEEL_UPDATE,
       showForbidden: usActions.SHOW_FORBIDDEN_MODAL,
     }),
@@ -409,6 +440,32 @@ export default Vue.extend({
       } finally {
         // this.loadConfigCatCompleted = true;
       }
+    },
+    async getMoreLanguages() {
+      const vipAudioLanguage = await getJsonConfig('vipAudioLanguage', null);
+      const normalAudioLanguage = await getJsonConfig('audioLanguage', null);
+      if (vipAudioLanguage && vipAudioLanguage['list']) {
+        const list = vipAudioLanguage['list'];
+        const normal = normalAudioLanguage && normalAudioLanguage['list'] ? normalAudioLanguage['list'] : [];
+        remove(list, (e: {
+          value: string,
+          label: string,
+        }) => {
+          if (!normal || !normal.length) {
+            return false;
+          }
+          const index = findIndex(normal, (item: {
+            value: string,
+            label: string,
+          }) => item.value === e.value);
+          return index > -1;
+        });
+        return list.map((e: {
+          value: string,
+          label: string,
+        }) => e.label).join(', ');
+      }
+      return '';
     },
     translate() {
       const { audioLanguage } = this;

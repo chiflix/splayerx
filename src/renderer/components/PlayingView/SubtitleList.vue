@@ -416,6 +416,11 @@ export default {
     enabledSecondarySub(val: boolean) {
       this.$refs.scroll.scrollTop = val ? 0 : this.currentScrollTop;
     },
+    panelVisiable(v: boolean) {
+      setTimeout(() => {
+        this.backCardVisiable = !v;
+      });
+    },
   },
   mounted() {
     // card transition end
