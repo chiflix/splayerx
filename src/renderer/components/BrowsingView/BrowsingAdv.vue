@@ -45,7 +45,7 @@
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             transform: `translateX(${calcTranslateX})`,
-            transition: 'transform 300ms linear',
+            transition: 'transform 300ms linear, box-shadow 100ms linear',
           }"
           v-for="(item, index) in advItems"
           @click="handleAdvClick(item.url)"
@@ -264,7 +264,6 @@ export default {
     height: 100%;
     min-width: 302.3px;
     border-radius: 7px;
-    transition: box-shadow 100ms linear;
     &:hover {
       box-shadow: 1px 2px 6px rgba(0, 0, 0, 0.3);
     }
