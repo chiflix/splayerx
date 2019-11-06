@@ -1,9 +1,9 @@
 <template>
   <div
     :style="{
-      overflowX: winWidth + (showSidebar ? 0 : 76) < 888 ? 'scroll' : '',
+      overflowX: winWidth + (showSidebar ? 0 : 76) < 888 ? 'scroll' : 'hidden',
     }"
-    class="home-page-container"
+    class="home-page-container no-drag"
   >
     <div
       :style="{
