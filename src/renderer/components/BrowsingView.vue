@@ -805,7 +805,7 @@ export default {
       ) return;
       if (this.oauthRegex.some((re: RegExp) => re.test(url))) return;
       log.info('open-url-by-nav', this.currentChannel);
-      const oldChannel = this.currentChannel;
+      const oldChannel = this.calcCurrentChannel(this.currentUrl);
       const newChannel = this.calcCurrentChannel(url);
       if (oldChannel === newChannel) {
         log.info('will-navigate', url);
