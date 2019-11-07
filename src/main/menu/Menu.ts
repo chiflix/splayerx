@@ -279,7 +279,6 @@ export default class Menubar {
           });
           historyMenu.append(item);
         });
-        historyMenu.append(separator());
       }
     });
 
