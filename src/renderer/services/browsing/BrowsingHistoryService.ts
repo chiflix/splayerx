@@ -31,7 +31,9 @@ export default class BrowsingHistory implements IBrowsingHistory {
     let result;
     const allRecords = await browsingDB.getAll(HISTORY_OBJECT_STORE_NAME);
     if (allRecords.length >= 10) {
-      browsingDB.delete(HISTORY_OBJECT_STORE_NAME, allRecords[0].url);
+      const removeItem = allRecords
+        .find(record => record.openTime === Math.min(...(allRecords.map(i => i.openTime))));
+      browsingDB.delete(HISTORY_OBJECT_STORE_NAME, (removeItem as BrowsingHistoryItem).url);
     }
     const record = await browsingDB.getValueByKey(HISTORY_OBJECT_STORE_NAME, url);
     if (!record) {

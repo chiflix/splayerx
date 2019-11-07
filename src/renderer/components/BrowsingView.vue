@@ -75,6 +75,7 @@ import MenuService from '@/services/menu/MenuService';
 import { log } from '@/libs/Log';
 import InjectJSManager from '../../shared/pip/InjectJSManager';
 import { browsingHistory } from '@/services/browsing/BrowsingHistoryService';
+import browsingChannelManager from '@/services/browsing/BrowsingChannelManager';
 
 export default {
   name: 'BrowsingView',
@@ -252,17 +253,19 @@ export default {
       this.$electron.ipcRenderer.send('create-browser-view', { url: val, channel: this.calcCurrentChannel(val) });
     },
     isHomePage(val: boolean) {
-      if (val) {
-        this.currentMainBrowserView().setBounds({
-          x: 76, y: 0, width: 0, height: 0,
-        });
-      } else {
-        this.currentMainBrowserView().setBounds({
-          x: this.showSidebar ? 76 : 0,
-          y: 40,
-          width: this.showSidebar ? this.winSize[0] - 76 : this.winSize[0],
-          height: this.winSize[1] - 40,
-        });
+      if (this.currentMainBrowserView()) {
+        if (val) {
+          this.currentMainBrowserView().setBounds({
+            x: 76, y: 0, width: 0, height: 0,
+          });
+        } else {
+          this.currentMainBrowserView().setBounds({
+            x: this.showSidebar ? 76 : 0,
+            y: 40,
+            width: this.showSidebar ? this.winSize[0] - 76 : this.winSize[0],
+            height: this.winSize[1] - 40,
+          });
+        }
       }
     },
     isFullScreen(val: boolean) {
@@ -276,7 +279,7 @@ export default {
       this.$emit('update-current-url', val);
     },
     showSidebar(val: boolean) {
-      if (this.currentChannel) {
+      if (this.currentChannel && this.currentMainBrowserView()) {
         if (!val) {
           setTimeout(() => {
             this.currentMainBrowserView().setBounds({
@@ -384,20 +387,22 @@ export default {
       }
     },
     headerToShow(val: boolean) {
-      if (!val) {
-        this.currentMainBrowserView().setBounds({
-          x: 0,
-          y: 0,
-          width: window.screen.width,
-          height: window.screen.height,
-        });
-      } else {
-        this.currentMainBrowserView().setBounds({
-          x: this.showSidebar ? 76 : 0,
-          y: 40,
-          width: this.showSidebar ? this.winSize[0] - 76 : this.winSize[0],
-          height: this.winSize[1] - 40,
-        });
+      if (this.currentMainBrowserView()) {
+        if (!val) {
+          this.currentMainBrowserView().setBounds({
+            x: 0,
+            y: 0,
+            width: window.screen.width,
+            height: window.screen.height,
+          });
+        } else {
+          this.currentMainBrowserView().setBounds({
+            x: this.showSidebar ? 76 : 0,
+            y: 40,
+            width: this.showSidebar ? this.winSize[0] - 76 : this.winSize[0],
+            height: this.winSize[1] - 40,
+          });
+        }
       }
     },
   },
@@ -468,8 +473,10 @@ export default {
         if (this.currentMainBrowserView()) {
           this.removeListener();
           this.currentMainBrowserView().webContents
-            .executeJavaScript(InjectJSManager.pauseVideo(this.currentChannel));
-          this.$electron.remote.getCurrentWindow().removeBrowserView(this.currentMainBrowserView());
+            .executeJavaScript(InjectJSManager.pauseVideo(this.currentChannel)).then(() => {
+              this.$electron.remote.getCurrentWindow()
+                .removeBrowserView(this.currentMainBrowserView());
+            });
         }
         this.showChannelManager = true;
         this.showHomePage = false;
@@ -487,8 +494,10 @@ export default {
         if (this.currentMainBrowserView()) {
           this.removeListener();
           this.currentMainBrowserView().webContents
-            .executeJavaScript(InjectJSManager.pauseVideo(this.currentChannel));
-          this.$electron.remote.getCurrentWindow().removeBrowserView(this.currentMainBrowserView());
+            .executeJavaScript(InjectJSManager.pauseVideo(this.currentChannel)).then(() => {
+              this.$electron.remote.getCurrentWindow()
+                .removeBrowserView(this.currentMainBrowserView());
+            });
         }
         this.showHomePage = true;
         this.showChannelManager = false;
@@ -629,9 +638,11 @@ export default {
       }
     },
     offlineHandler() {
-      this.currentMainBrowserView().setBounds({
-        x: 76, y: 0, width: 0, height: 0,
-      });
+      if (this.currentMainBrowserView()) {
+        this.currentMainBrowserView().setBounds({
+          x: 76, y: 0, width: 0, height: 0,
+        });
+      }
       this.updateIsError(true);
     },
     handlePageTitle(e: Event, title: string) {
@@ -875,7 +886,10 @@ export default {
       if (protocol) {
         openUrl = url;
       } else {
-        openUrl = this.currentUrl.includes('douyu') ? `https://www.douyu.com${url}` : `https:${url}`;
+        const hostname = (browsingChannelManager.getAllAvailableChannels()
+          .find(i => i.channel === this.currentChannel) as
+            { url: string, channel: string, icon: string, path: string, title: string }).url;
+        openUrl = `${hostname}${url}`;
       }
       if (!url || url === 'about:blank') return;
       if (urlParseLax(openUrl).href === urlParseLax(this.currentUrl).href) {

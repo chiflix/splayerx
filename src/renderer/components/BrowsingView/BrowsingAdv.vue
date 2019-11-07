@@ -91,6 +91,7 @@
 
 <script lang="ts">
 import { mapGetters } from 'vuex';
+import { getIsBeta } from '@/libs/utils';
 import Icon from '../BaseIconContainer.vue';
 import adv1 from '../../assets/adv-1.png';
 import adv2 from '../../assets/adv-2.png';
@@ -129,7 +130,7 @@ export default {
   },
   data() {
     return {
-      advItems: [{ src: adv1, text: this.$t('browsing.homepage.banner1'), url: 'https://feedback.splayer.org/' }, { src: adv2, text: this.$t('browsing.homepage.banner2'), url: 'https://www.sagittarius.ai/blog/2019/10/31/splayer-i18n-project' }, { src: adv3, text: this.$t('browsing.homepage.banner3'), url: 'https://splayer.org/changelog.html' }],
+      advItems: [{ src: adv1, text: this.$t('browsing.homepage.banner1'), url: 'https://feedback.splayer.org/' }, { src: adv2, text: this.$t('browsing.homepage.banner2'), url: 'https://www.sagittarius.ai/blog/2019/10/31/splayer-i18n-project' }, { src: adv3, text: this.$t('browsing.homepage.banner3'), url: getIsBeta() ? 'https://splayer.org/changelog.html?beta' : 'https://splayer.org/changelog.html' }],
       currentAdvIndex: 0,
       hoveredItem: false,
       translateX: 0,

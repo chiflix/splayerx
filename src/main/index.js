@@ -783,26 +783,28 @@ function registerMainWindowEvent(mainWindow) {
       });
     }, 150);
 
-    const bounds = mainWindow.getBounds();
-    if (process.platform === 'win32' && mainWindow.isMaximized() && (bounds.x < 0 || bounds.y < 0)) {
-      view.setBounds({
-        x: sidebar ? 76 : 0,
-        y: 40,
-        width: sidebar ? bounds.width + (bounds.x * 2) - 76
-          : bounds.width + (bounds.x * 2),
-        height: bounds.height - 40,
-      });
-    } else {
-      view.setBounds({
-        x: sidebar ? 76 : 0,
-        y: 40,
-        width: sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
-        height: mainWindow.getSize()[1] - 40,
+    if (!view.isDestroyed()) {
+      const bounds = mainWindow.getBounds();
+      if (process.platform === 'win32' && mainWindow.isMaximized() && (bounds.x < 0 || bounds.y < 0)) {
+        view.setBounds({
+          x: sidebar ? 76 : 0,
+          y: 40,
+          width: sidebar ? bounds.width + (bounds.x * 2) - 76
+            : bounds.width + (bounds.x * 2),
+          height: bounds.height - 40,
+        });
+      } else {
+        view.setBounds({
+          x: sidebar ? 76 : 0,
+          y: 40,
+          width: sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
+          height: mainWindow.getSize()[1] - 40,
+        });
+      }
+      view.setAutoResize({
+        width: true, height: true,
       });
     }
-    view.setAutoResize({
-      width: true, height: true,
-    });
   });
   ipcMain.on('create-browser-view', (evt, args) => {
     if (!browserViewManager) browserViewManager = new BrowserViewManager();
@@ -1109,7 +1111,7 @@ function registerMainWindowEvent(mainWindow) {
       } else {
         mainWindow.maximize();
       }
-      if (mainWindow.getBrowserViews().length) {
+      if (mainWindow.getBrowserViews().length && !mainWindow.getBrowserViews()[0].isDestroyed()) {
         const bounds = mainWindow.getBounds();
         if (process.platform === 'win32' && mainWindow.isMaximized() && (bounds.x < 0 || bounds.y < 0)) {
           mainWindow.getBrowserViews()[0].setBounds({

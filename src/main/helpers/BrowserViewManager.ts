@@ -369,8 +369,8 @@ export class BrowserViewManager implements IBrowserViewManager {
         const channel = pausedChannel.slice(0, pausedChannel.indexOf('.'));
         currentView.webContents
           .executeJavaScript(InjectJSManager.pipFindType(channel))
-          .then((r: string) => {
-            type = r;
+          .then((r: { barrageState: boolean, type: string }) => {
+            type = r.type;
             if (!currentView.webContents.isDestroyed()) {
               currentView.webContents
                 .executeJavaScript(InjectJSManager.pauseVideo(pausedChannel, type));
@@ -388,8 +388,8 @@ export class BrowserViewManager implements IBrowserViewManager {
           const channel = pausedChannel.slice(0, pausedChannel.indexOf('.'));
           currentView.webContents
             .executeJavaScript(InjectJSManager.pipFindType(channel))
-            .then((r: string) => {
-              type = r;
+            .then((r: { barrageState: boolean, type: string }) => {
+              type = r.type;
               currentView.webContents
                 .executeJavaScript(InjectJSManager.pauseVideo(pausedChannel, type));
             });
@@ -405,8 +405,8 @@ export class BrowserViewManager implements IBrowserViewManager {
           const channel = pausedChannel.slice(0, pausedChannel.indexOf('.'));
           currentView.webContents
             .executeJavaScript(InjectJSManager.pipFindType(channel))
-            .then((r: string) => {
-              type = r;
+            .then((r: { barrageState: boolean, type: string }) => {
+              type = r.type;
               currentView.webContents
                 .executeJavaScript(InjectJSManager.pauseVideo(pausedChannel, type));
             });
