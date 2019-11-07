@@ -264,20 +264,23 @@ export default class Menubar {
         const item = this.createMenuItem(menuItem);
         historyMenu.append(item);
       }
-    });
-
-    this.browsingHistory.forEach(({
-      url, title, channel, iconPath,
-    }) => {
-      const item = new MenuItem({
-        id: url,
-        label: title,
-        icon: nativeImage.createFromPath(iconPath).resize({ height: 20 }),
-        click: () => {
-          app.emit('open-history-item', null, { url, channel });
-        },
-      });
-      historyMenu.append(item);
+      if (menuItem.id === 'history.forward') {
+        historyMenu.append(separator());
+        this.browsingHistory.forEach(({
+          url, title, channel, iconPath,
+        }) => {
+          const item = new MenuItem({
+            id: url,
+            label: title,
+            icon: nativeImage.createFromPath(iconPath).resize({ height: 20 }),
+            click: () => {
+              app.emit('open-history-item', null, { url, channel });
+            },
+          });
+          historyMenu.append(item);
+        });
+        historyMenu.append(separator());
+      }
     });
 
     Menu.setApplicationMenu(this.menubar);
