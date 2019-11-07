@@ -84,7 +84,7 @@ export default {
       const hour = openDate.getHours();
       const minute = openDate.getMinutes();
 
-      const time = `${hour >= 12 ? this.$t('browsing.pm') : this.$t('browsing.am')} ${hour >= 12 ? hour - 12 : hour}:${minute < 10 ? '0' : ''}${minute}`;
+      const time = `${hour < 10 ? '0' : ''}${hour}:${minute < 10 ? '0' : ''}${minute}`;
 
       const today = new Date(Date.now());
       if (today.toDateString() === openDate.toDateString()) {
@@ -104,7 +104,7 @@ export default {
       }
 
       if (yesterday.toDateString() === openDate.toDateString()) {
-        return `${this.$t('browsing.yesterday')} ${time}}`;
+        return `${this.$t('browsing.yesterday')} ${time}`;
       }
 
       return `${year}-${month}-${date} ${time}`;
@@ -122,7 +122,7 @@ export default {
   transition: box-shadow 100ms linear;
   border-radius: 7px;
   &:hover {
-    box-shadow: 0 0 6px rgba(0,0,0,0.10);
+    box-shadow: 0 0 6px rgba(0,0,0,0.20);
   }
 
   .content {

@@ -29,6 +29,10 @@ export default class BrowsingHistory implements IBrowsingHistory {
 
   public async saveHistoryItem(url: string, title: string, channel: string) {
     let result;
+    const allRecords = await browsingDB.getAll(HISTORY_OBJECT_STORE_NAME);
+    if (allRecords.length >= 10) {
+      browsingDB.delete(HISTORY_OBJECT_STORE_NAME, allRecords[0].url);
+    }
     const record = await browsingDB.getValueByKey(HISTORY_OBJECT_STORE_NAME, url);
     if (!record) {
       result = await browsingDB.add(HISTORY_OBJECT_STORE_NAME, {

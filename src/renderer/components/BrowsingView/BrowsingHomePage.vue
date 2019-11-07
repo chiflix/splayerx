@@ -26,6 +26,7 @@
             margin: `${titlePos.marginTop[currentPhase]}px 0
               0 ${titlePos.marginLeft[currentPhase]}px`,
             color: '#3B3B41',
+            fontWeight: 'bold',
           }"
         >{{ $t('welcome.welcomeTitle') }}</span>
         <div
@@ -39,19 +40,21 @@
               fontSize: `${userStateSize[currentPhase]}px`,
               color: '#818188',
               display: 'block',
+              fontWeight: 'bold',
+              marginBottom: `${userStatePos[currentPhase]}px`,
             }"
           >
             {{ isLogin ? (userInfo.isVip ? $t('browsing.homepage.premiumAccount')
               : $t('browsing.homepage.account')) +
-              `${displayName}  |  ` : $t('browsing.homepage.unSigned') }}
+              `${displayName}` : '' }}
             <div
               :style="{
-                fontWeight: 'lighter',
-                cursor: 'pointer',
-                display: 'inline-block',
+                marginLeft: `${userStatePos[currentPhase]}px`,
+                fontSize: `${moreInfoSize[currentPhase]}px`,
               }"
               @click="handleLogout"
               v-show="isLogin"
+              class="sign-out"
             >
               {{ $t('browsing.homepage.signOut') }}
             </div>
@@ -75,7 +78,7 @@
               marginTop: `${buttonPos[currentPhase]}px`,
               borderRadius: '3px',
               color: '#ffffff',
-              fontSize: `${moreInfoSize[currentPhase]}px`,
+              fontSize: `${buttonFontSize[currentPhase]}px`,
               cursor: 'pointer',
               zIndex: 1,
               border: 'none',
@@ -88,7 +91,7 @@
         </div>
         <span
           :style="{
-            color: '#8A8A91',
+            color: 'rgba(138, 138, 145, 0.6)',
             fontSize: `${versionSize[currentPhase]}px`,
             position: 'absolute',
             right: `${versionPos.right[currentPhase]}px`,
@@ -188,9 +191,15 @@ export default {
       return [30 * 888 / 1030, 30 * this.winWidth / 1030, 30];
     },
     userStateSize() {
-      return [14, this.calcSize(14, 19), 19];
+      return [20 * 888 / 1030, 20 * this.winWidth / 1030, 20];
+    },
+    userStatePos() {
+      return [6 * 888 / 1030, 6 * this.winWidth / 1030, 6];
     },
     moreInfoSize() {
+      return [14 * 888 / 1030, 14 * this.winWidth / 1030, 14];
+    },
+    buttonFontSize() {
       return [11, this.calcSize(11, 15), 15];
     },
     buttonSize() {
@@ -212,7 +221,7 @@ export default {
       };
     },
     versionSize() {
-      return [11, this.calcSize(11, 15), 15];
+      return [12 * 888 / 1030, 12 * this.winWidth / 1030, 12];
     },
     versionPos() {
       return {
@@ -301,7 +310,7 @@ export default {
       flex-direction: column;
       overflow: hidden;
       max-width: 1321px;
-      background-image: linear-gradient(180deg, rgba(255,255,255,0.50) 10%, #E6E6E6 100%);
+      background-image: linear-gradient(180deg, rgba(255,255,255,0.40) 10%, #E6E6E6 100%);
       .back-logo {
         position: absolute;
         width: 226px;
@@ -313,7 +322,7 @@ export default {
         position: absolute;
         width: 100%;
         height: 100%;
-        background: url('../../assets/homePageNoise.jpg');
+        background: url('../../assets/homePageNoise.png');
       }
       .user-content {
         width: auto;
@@ -321,6 +330,16 @@ export default {
         display: flex;
         flex-direction: column;
         z-index: 1;
+      }
+      .sign-out {
+        font-weight: lighter;
+        cursor: pointer;
+        display: inline-block;
+        color: #8F8F96;
+        transition: color 100ms linear;
+        &:hover {
+          color: #818188;
+        }
       }
     }
   }

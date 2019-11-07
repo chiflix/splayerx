@@ -51,7 +51,6 @@
           @click="handleAdvClick(item.url)"
           class="adv-content"
         >
-          <div class="mask" />
           <div
             :style="{
               width: `${textWidth[currentPhase]}px`,
@@ -258,13 +257,6 @@ export default {
     white-space: nowrap;
     display: block;
     min-width: 710.6px;
-    .mask {
-      position: absolute;
-      background: rgba(0, 0, 0, 0.2);
-      width: 100%;
-      height: 100%;
-      border-radius: 7px;
-    }
   }
   .adv-content {
     cursor: pointer;
