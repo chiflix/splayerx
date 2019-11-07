@@ -30,7 +30,7 @@ export default class BrowsingHistory implements IBrowsingHistory {
   public async saveHistoryItem(url: string, title: string, channel: string) {
     let result;
     const allRecords = await browsingDB.getAll(HISTORY_OBJECT_STORE_NAME);
-    if (allRecords.length >= 10) {
+    if (allRecords.length >= 10 && allRecords.findIndex(i => i.url === url) === -1) {
       const removeItem = allRecords
         .find(record => record.openTime === Math.min(...(allRecords.map(i => i.openTime))));
       browsingDB.delete(HISTORY_OBJECT_STORE_NAME, (removeItem as BrowsingHistoryItem).url);

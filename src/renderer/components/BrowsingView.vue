@@ -486,6 +486,9 @@ export default {
         this.webInfo.canGoForward = false;
         this.webInfo.hasVideo = false;
         this.webInfo.canReload = false;
+        this.menuService.updateMenuItemEnabled('history.back', false);
+        this.menuService.updateMenuItemEnabled('history.forward', false);
+        this.menuService.updateMenuItemEnabled('history.reload', false);
         this.updateCurrentChannel('');
       }
     });
@@ -507,6 +510,9 @@ export default {
         this.webInfo.canGoForward = false;
         this.webInfo.hasVideo = false;
         this.webInfo.canReload = false;
+        this.menuService.updateMenuItemEnabled('history.back', false);
+        this.menuService.updateMenuItemEnabled('history.forward', false);
+        this.menuService.updateMenuItemEnabled('history.reload', false);
         this.updateCurrentChannel('');
       }
     });
