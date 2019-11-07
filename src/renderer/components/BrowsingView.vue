@@ -567,6 +567,7 @@ export default {
     );
   },
   beforeDestroy() {
+    this.$electron.ipcRenderer.removeAllListeners('update-browser-state');
     this.removeListener();
     this.$store.dispatch('updateBrowsingSize', this.winSize);
     this.boundBackPosition();
@@ -885,7 +886,7 @@ export default {
       } else {
         if (this.oauthRegex.some((re: RegExp) => re.test(url))) return;
         log.info('open-url-by-new-window', this.currentChannel);
-        const oldChannel = this.currentChannel;
+        const oldChannel = this.calcCurrentChannel(this.currentUrl);
         const newChannel = this.calcCurrentChannel(openUrl);
         if (oldChannel === newChannel) {
           this.loadingState = true;
