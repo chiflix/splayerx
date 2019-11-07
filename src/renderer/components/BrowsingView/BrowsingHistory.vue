@@ -20,7 +20,7 @@
           :style="{ fontSize: `${blankTitleFontSize[currentPhase]}px` }"
           v-if="histories.length >= 1"
         >
-          <span class="slash">&nbsp;&nbsp;</span>
+          <span class="slash">&nbsp;</span>
           <span
             :style="{ fontSize: `${itemDetailFontSize[currentPhase]}px` }"
             @click="handleClear"
