@@ -88,13 +88,6 @@
           src="../../assets/payment-success-icon2.svg"
         >
       </transition>
-      <transition name="left-icon2">
-        <img
-          v-if="isPaySuccess"
-          class="success-icon2"
-          src="../../assets/payment-success-icon1.svg"
-        >
-      </transition>
       <transition name="right-icon1">
         <img
           v-if="isPaySuccess"
@@ -613,8 +606,8 @@ export default Vue.extend({
       border: 1px solid transparent;
       border-radius: 2px;
       &:hover {
-        background: rgba(120, 120, 120, 1);
-        border-color: rgba(255, 255, 255, 0.3);
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.2);
       }
     }
     div {
