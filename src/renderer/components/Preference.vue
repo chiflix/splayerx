@@ -90,7 +90,7 @@
 </template>
 
 <script lang="ts">
-import electron from 'electron';
+import electron, { ipcRenderer } from 'electron';
 import Icon from '@/components/BaseIconContainer.vue';
 
 export default {
@@ -103,6 +103,7 @@ export default {
       state: 'default',
       mouseDown: false,
       isMoved: false,
+      disableRoute: false,
     };
   },
   computed: {
@@ -138,6 +139,12 @@ export default {
   mounted() {
     document.title = 'Preference SPlayer';
     document.body.classList.add('drag');
+    ipcRenderer.on('add-payment', () => {
+      this.disableRoute = true;
+    });
+    ipcRenderer.on('close-payment', () => {
+      this.disableRoute = false;
+    });
   },
   beforeDestroy() {
     window.onmousedown = null;
@@ -153,7 +160,9 @@ export default {
       this.$store.dispatch(actionType, actionPayload);
     },
     handleMouseup(panel: string) {
-      this.$router.push({ name: panel });
+      if (!this.disableRoute) {
+        this.$router.push({ name: panel });
+      }
     },
   },
 };

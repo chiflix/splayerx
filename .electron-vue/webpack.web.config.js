@@ -60,6 +60,7 @@ let rendererConfig = {
   entry: {
     index: path.join(__dirname, '../src/renderer/login.ts'),
     login: path.join(__dirname, '../src/renderer/login.ts'),
+    premium: path.join(__dirname, '../src/renderer/premium.ts'),
   },
   externals: [
     ...Object.keys(Object.assign({}, dependencies, optionalDependencies)).filter(
@@ -196,6 +197,7 @@ let rendererConfig = {
     new ExtractTextPlugin('styles.css'),
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('index')),
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('login')),
+    new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('premium')),
     new webpack.HotModuleReplacementPlugin(),
   ],
   output: {

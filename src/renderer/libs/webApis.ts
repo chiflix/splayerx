@@ -1,5 +1,14 @@
 import Fetcher from '@/../shared/Fetcher';
 
+
+export class ApiError extends Error {
+  /** HTTP status */
+  public status: number;
+
+  /** Message from server */
+  public message: string;
+}
+
 /**
  * @description http intercept method
  * @author tanghaixiang
@@ -18,7 +27,7 @@ function intercept(response: Response) {
       // tmpty
     }
     // @ts-ignore
-    window.remote.app.emit('sign-in', {
+    window.remote && window.remote.app.emit('sign-in', {
       token,
       displayName,
     });
@@ -30,6 +39,16 @@ const fetcher = new Fetcher({
   timeout: 1000 * 10,
   responseInterceptors: [intercept],
 });
+
+const longFetcher = new Fetcher({
+  timeout: 20 * 1000,
+  responseInterceptors: [intercept],
+});
+
+export function setToken(t: string) {
+  fetcher.setHeader('Authorization', `Bearer ${t}`);
+  longFetcher.setHeader('Authorization', `Bearer ${t}`);
+}
 
 // @ts-ignore
 const endpoint = window.remote && window.remote.app.getSignInEndPoint();
@@ -127,4 +146,65 @@ export function signIn(type: string, phone: string, code: string) {
         reject(error);
       });
   });
+}
+
+export async function getProductList() {
+  const res = await fetcher.post(`${endpoint}/graphql`, {
+    query: `query {
+      products {
+        appleProductID,
+        currentPrice {
+          CNY
+          USD
+        },
+        originalPrice {
+          CNY
+          USD
+        },
+        name,
+        id,
+        duration {
+          unit
+          value
+        },
+        discount,
+        productIntro,
+      }
+    }`,
+  });
+  if (res.ok) {
+    const data = (await res.json()).data;
+    return data.products;
+  }
+  const error = new ApiError();
+  error.status = res.status;
+  throw error;
+}
+
+export async function applePay(payment: {
+  currency: string, productID: string, transactionID: string, receipt: string
+}) {
+  const res = await longFetcher.post(`${endpoint}/api/applepay/verify`, payment);
+  if (res.ok) {
+    const data = await res.json();
+    return data.data;
+  }
+  const error = new ApiError();
+  error.status = res.status;
+  throw error;
+}
+
+export async function createOrder(payment: {
+  channel: string,
+  currency: string,
+  productID: string
+}) {
+  const res = await longFetcher.post(`${endpoint}/api/order`, payment);
+  if (res.ok) {
+    const data = await res.json();
+    return data.data;
+  }
+  const error = new ApiError();
+  error.status = res.status;
+  throw error;
 }
