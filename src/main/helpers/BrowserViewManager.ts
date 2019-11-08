@@ -146,6 +146,60 @@ export class BrowserViewManager implements IBrowserViewManager {
     return this.jump(false);
   }
 
+  public openHistoryPage(channel: string, url: string): BrowserViewData {
+    const newHistory = (this.historyByChannel.get(channel) as ChannelData);
+    if (!this.historyByChannel.has(channel)) {
+      return this.create(channel, { url });
+    }
+    const index = newHistory.list.findIndex(i => i.url === url);
+    if (index === -1) {
+      const page = {
+        url,
+        view: new BrowserView({
+          webPreferences: {
+            preload: `${require('path').resolve(__static, 'pip/preload.js')}`,
+            nativeWindowOpen: true,
+            // disableHtmlFullscreenWindowResize: true, // Electron 6 required
+          },
+        }),
+        lastUpdateTime: Date.now(),
+      };
+      page.view.webContents.loadURL(url);
+      newHistory.list.push(page);
+      newHistory.currentIndex = newHistory.list.length - 1;
+      newHistory.lastUpdateTime = Date.now();
+      this.addCacheByChannel(channel, newHistory.list[newHistory.currentIndex]);
+      return {
+        canBack: newHistory.list.length > 1,
+        canForward: false,
+        page,
+      };
+    }
+    const page = newHistory.list[index];
+    if (page.view && page.view.isDestroyed()) {
+      page.view = new BrowserView({
+        webPreferences: {
+          preload: `${require('path').resolve(__static, 'pip/preload.js')}`,
+          nativeWindowOpen: true,
+          // disableHtmlFullscreenWindowResize: true, // Electron 6 required
+        },
+      });
+      page.view.webContents.loadURL(page.url);
+    } else {
+      page.view.webContents.reload();
+    }
+    page.view.webContents.setAudioMuted(false);
+    page.view.webContents.removeAllListeners('media-started-playing');
+    newHistory.currentIndex = index;
+    newHistory.lastUpdateTime = Date.now();
+    return {
+      canBack: newHistory.currentIndex > 0,
+      canForward: newHistory.currentIndex
+        < newHistory.list.length - 1,
+      page,
+    };
+  }
+
   // 浏览器切换频道
   public changeChannel(channel: string,
     args: { url: string, isNewWindow?: boolean }): BrowserViewData {
@@ -315,8 +369,8 @@ export class BrowserViewManager implements IBrowserViewManager {
         const channel = pausedChannel.slice(0, pausedChannel.indexOf('.'));
         currentView.webContents
           .executeJavaScript(InjectJSManager.pipFindType(channel))
-          .then((r: string) => {
-            type = r;
+          .then((r: { barrageState: boolean, type: string }) => {
+            type = r.type;
             if (!currentView.webContents.isDestroyed()) {
               currentView.webContents
                 .executeJavaScript(InjectJSManager.pauseVideo(pausedChannel, type));
@@ -334,8 +388,8 @@ export class BrowserViewManager implements IBrowserViewManager {
           const channel = pausedChannel.slice(0, pausedChannel.indexOf('.'));
           currentView.webContents
             .executeJavaScript(InjectJSManager.pipFindType(channel))
-            .then((r: string) => {
-              type = r;
+            .then((r: { barrageState: boolean, type: string }) => {
+              type = r.type;
               currentView.webContents
                 .executeJavaScript(InjectJSManager.pauseVideo(pausedChannel, type));
             });
@@ -351,8 +405,8 @@ export class BrowserViewManager implements IBrowserViewManager {
           const channel = pausedChannel.slice(0, pausedChannel.indexOf('.'));
           currentView.webContents
             .executeJavaScript(InjectJSManager.pipFindType(channel))
-            .then((r: string) => {
-              type = r;
+            .then((r: { barrageState: boolean, type: string }) => {
+              type = r.type;
               currentView.webContents
                 .executeJavaScript(InjectJSManager.pauseVideo(pausedChannel, type));
             });
@@ -476,4 +530,5 @@ export interface IBrowserViewManager {
   pauseVideo(view?: BrowserView, currentChannel?: string, enterPip?: boolean): void
   clearAllBrowserViews(isDeepClear?: boolean): void
   clearBrowserViewsByChannel(channel: string): void
+  openHistoryPage(channel: string, url: string): BrowserViewData
 }

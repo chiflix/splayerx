@@ -17,6 +17,7 @@ import Locale from '../../shared/common/localize';
 import menuTemplate from './menu.json';
 import { IMenuDisplayInfo } from '../../renderer/interfaces/IRecentPlay';
 import { ISubtitleControlListItem, Type } from '../../renderer/interfaces/ISubtitle';
+import { IBrowsingHistoryMenuInfo } from '@/interfaces/IBrowsingHistory';
 
 function separator(): Electron.MenuItem {
   return new MenuItem({ type: 'separator' });
@@ -39,6 +40,8 @@ export default class Menubar {
   private menubar: Electron.Menu;
 
   private currentMenuState: IMenubarMenuState;
+
+  private browsingHistory: IBrowsingHistoryMenuInfo[];
 
   private recentPlay: IMenuDisplayInfo[];
 
@@ -182,7 +185,6 @@ export default class Menubar {
         this.updateSecondarySub();
       } else if (this._routeName === 'browsing-view') {
         this.refreshMenu('edit');
-        this.refreshMenu('history');
         this.refreshMenu('browsing.window');
       }
     } else {
@@ -195,7 +197,6 @@ export default class Menubar {
 
       if (this._routeName === 'browsing-view') {
         this.disableSubmenuItem('edit');
-        this.disableSubmenuItem('history');
         this.disableSubmenuItem('browsing.window');
       }
     }
@@ -240,6 +241,48 @@ export default class Menubar {
     if (this.menubar.getMenuItemById(id)) {
       this.menubar.getMenuItemById(id).enabled = enabled;
     }
+  }
+
+  public updateBrowsingHistory(items?: IBrowsingHistoryMenuInfo[]) {
+    if (items) this.browsingHistory = items;
+    const historyMenu = this.getSubmenuById('history');
+    if (!historyMenu || !this.browsingHistory) return;
+    // @ts-ignore
+    historyMenu.clear();
+
+    this.getMenuItemTemplate('history').items.forEach((menuItem: MenubarMenuItem) => {
+      if (isSeparator(menuItem)) {
+        const item = separator();
+        historyMenu.append(item);
+      } else if (isSubmenu(menuItem)) {
+        const item = this.createSubMenuItem(menuItem);
+        historyMenu.append(item);
+      } else if (isRole(menuItem)) {
+        const item = this.createRoleMenuItem(menuItem);
+        historyMenu.append(item);
+      } else {
+        const item = this.createMenuItem(menuItem);
+        historyMenu.append(item);
+      }
+      if (menuItem.id === 'history.forward') {
+        historyMenu.append(separator());
+        this.browsingHistory.forEach(({
+          url, title, channel, iconPath,
+        }) => {
+          const item = new MenuItem({
+            id: url,
+            label: title,
+            icon: nativeImage.createFromPath(iconPath).resize({ height: 20 }),
+            click: () => {
+              app.emit('open-history-item', null, { url, channel });
+            },
+          });
+          historyMenu.append(item);
+        });
+      }
+    });
+
+    Menu.setApplicationMenu(this.menubar);
   }
 
   public updateRecentPlay(items?: IMenuDisplayInfo[]) {

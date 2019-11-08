@@ -118,9 +118,9 @@ export default {
       this.hoverIndex = -1;
       this.hoverCategory = '';
     },
-    handleMouseClick(channel: string) {
+    async handleMouseClick(channel: string) {
       const isAvailable = this.availableChannels.includes(channel);
-      BrowsingChannelManager.setChannelAvailable(channel, !isAvailable);
+      await BrowsingChannelManager.setChannelAvailable(channel, !isAvailable);
       if (isAvailable) this.$electron.ipcRenderer.send('clear-browsers-by-channel', channel);
       this.availableChannels = BrowsingChannelManager
         .getAllAvailableChannels().map(item => item.channel);

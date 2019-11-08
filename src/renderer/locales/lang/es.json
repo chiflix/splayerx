@@ -227,7 +227,8 @@
       "name": "Historia",
       "reload": "Recargar página",
       "back": "Espalda",
-      "forward": "Avance"
+      "forward": "Avance",
+      "clearHistory": "Borrar Historial"
     }
   },
   "nextVideo": {
@@ -283,7 +284,30 @@
     "siteManager": "Gestor de sitios",
     "general": "General",
     "education": "Educación",
-    "siteTip": "Añadir / Editar"
+    "siteTip": "Añadir / Editar",
+    "today": "Hoy",
+    "yesterday": "Ayer",
+    "homepage": {
+      "unSigned": "No iniciado sesión",
+      "signInfo": "Inicia sesión para usar la traducción de IA y tener acceso a más funciones.",
+      "signBtn": "Ingressar",
+      "account": "Account: ",
+      "signOut": "Cerrar sesión",
+      "accountInfo": "Actualiza tu cuenta ahora y empieza con características exclusivas y más.",
+      "premiumBtn": "Upgrade",
+      "premiumAccount": "Premium Account: ",
+      "premiumInfo": "Fecha de caducidad: ",
+      "renewBtn": "Renovar",
+      "history": "Historial en línea",
+      "clear": "Clear",
+      "historyInfo": "Keep track of your playback history, including the page title, the site address and the date you watched.",
+      "playlist": "Lista local",
+      "playlistInfoPre": "Click the ",
+      "playlistInfoNext": " button on the the left sidebar, choose and open more than one file to generate a playlist.",
+      "banner1": "Submit your<br>Feedback",
+      "banner2": "Contribute to our<br>Localization Project",
+      "banner3": "Release Notes"
+    }
   },
   "preferences": {
     "general": {

@@ -14,11 +14,11 @@ export interface IMenuDisplayInfo {
   id: number,
   label: string,
 }
-
 export interface IRecentPlay {
   /**
    * @returns Promise
    * 获取LandingView所需数据
    */
   getRecords(): Promise<ILandingViewDisplayInfo[]>
+  getMenuDisplayInfo(): Promise<IMenuDisplayInfo[]>
 }

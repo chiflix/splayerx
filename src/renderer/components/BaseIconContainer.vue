@@ -584,6 +584,19 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     }
   }
 }
+.browsingDelete, .browsingOpen {
+  width: 100%;
+  height: 100%;
+}
+.browsingNext, .browsingPre {
+  max-height: 68px;
+  max-width: 28px;
+  min-height: 50px;
+  min-width: 20px;
+  width: calc(2000vw / 888);
+  height: calc(5000vh / 888);
+  margin: auto;
+}
 .success {
   width: 15px;
   height: 15px;
@@ -641,8 +654,8 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
 .douyuSidebar, .huyaSidebar, .qqSidebar, .youkuSidebar, .twitchSidebar, .tedSidebar,
 .sportsqqSidebar, .masterclassSidebar, .developerappleSidebar, .vipopen163Sidebar,
 .study163Sidebar, .imoocSidebar, .icourse163Sidebar {
-  width: 44px;
-  height: 44px;
+  width: 100%;
+  height: 100%;
 }
 .showMarks, .hideMarks, .closeSearch {
   width: 18px;
@@ -708,7 +721,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   width: 20px;
   height: 20px;
 }
-.history, .open, .home, .exit {
+.history, .open, .home, .exit, .homePage {
   width: 30px;
   height: 30px;
   .default {
@@ -726,7 +739,13 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     }
   }
 }
-.pip, .pop, .pipDisabled, .popDisabled {
+.homePageLogo {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.pip, .pop, .pipDisabled, .popDisabled,
+.back, .backDisabled, .forward, .forwardDisabled, .pageRefresh, .reloadStop {
   width: 30px;
   height: 30px;
 }

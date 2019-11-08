@@ -603,6 +603,40 @@ function createPaymentWindow(url, orderID, channel) {
   }
 }
 
+function openHistoryItem(evt, args) {
+  if (!browserViewManager) browserViewManager = new BrowserViewManager();
+  const newChannel = browserViewManager.openHistoryPage(args.channel, args.url);
+  const view = newChannel.view ? newChannel.view : newChannel.page.view;
+  mainWindow.addBrowserView(view);
+  setTimeout(() => {
+    mainWindow.send('update-browser-state', {
+      url: args.url,
+      canGoBack: newChannel.canBack,
+      canGoForward: newChannel.canForward,
+    });
+  }, 150);
+  const bounds = mainWindow.getBounds();
+  if (process.platform === 'win32' && mainWindow.isMaximized() && (bounds.x < 0 || bounds.y < 0)) {
+    view.setBounds({
+      x: sidebar ? 76 : 0,
+      y: 40,
+      width: sidebar ? bounds.width + (bounds.x * 2) - 76
+        : bounds.width + (bounds.x * 2),
+      height: bounds.height - 40,
+    });
+  } else {
+    view.setBounds({
+      x: sidebar ? 76 : 0,
+      y: 40,
+      width: sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
+      height: mainWindow.getSize()[1] - 40,
+    });
+  }
+  view.setAutoResize({
+    width: true, height: true,
+  });
+}
+
 function registerMainWindowEvent(mainWindow) {
   if (!mainWindow) return;
   mainWindow.on('move', throttle(() => {
@@ -776,7 +810,7 @@ function registerMainWindowEvent(mainWindow) {
       });
     }
   });
-  // eslint-disable-next-line complexity
+  ipcMain.on('open-history-item', openHistoryItem);
   ipcMain.on('change-channel', (evt, args) => {
     if (!browserViewManager) browserViewManager = new BrowserViewManager();
     const mainBrowser = mainWindow.getBrowserViews()[0];
@@ -793,26 +827,28 @@ function registerMainWindowEvent(mainWindow) {
       });
     }, 150);
 
-    const bounds = mainWindow.getBounds();
-    if (process.platform === 'win32' && mainWindow.isMaximized() && (bounds.x < 0 || bounds.y < 0)) {
-      view.setBounds({
-        x: sidebar ? 76 : 0,
-        y: 40,
-        width: sidebar ? bounds.width + (bounds.x * 2) - 76
-          : bounds.width + (bounds.x * 2),
-        height: bounds.height - 40,
-      });
-    } else {
-      view.setBounds({
-        x: sidebar ? 76 : 0,
-        y: 40,
-        width: sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
-        height: mainWindow.getSize()[1] - 40,
+    if (!view.isDestroyed()) {
+      const bounds = mainWindow.getBounds();
+      if (process.platform === 'win32' && mainWindow.isMaximized() && (bounds.x < 0 || bounds.y < 0)) {
+        view.setBounds({
+          x: sidebar ? 76 : 0,
+          y: 40,
+          width: sidebar ? bounds.width + (bounds.x * 2) - 76
+            : bounds.width + (bounds.x * 2),
+          height: bounds.height - 40,
+        });
+      } else {
+        view.setBounds({
+          x: sidebar ? 76 : 0,
+          y: 40,
+          width: sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
+          height: mainWindow.getSize()[1] - 40,
+        });
+      }
+      view.setAutoResize({
+        width: true, height: true,
       });
     }
-    view.setAutoResize({
-      width: true, height: true,
-    });
   });
   ipcMain.on('create-browser-view', (evt, args) => {
     if (!browserViewManager) browserViewManager = new BrowserViewManager();
@@ -1096,6 +1132,21 @@ function registerMainWindowEvent(mainWindow) {
     mainWindow.show();
     menuService.updateFocusedWindow(true, mainWindow && mainWindow.isVisible());
   });
+  ipcMain.on('set-window-minimize', () => {
+    if (mainWindow && mainWindow.isFocused()) {
+      if (mainWindow.isMinimized()) {
+        mainWindow.restore();
+      } else {
+        mainWindow.minimize();
+      }
+    } else if (browsingWindow && browsingWindow.isFocused()) {
+      if (browsingWindow.isMinimized()) {
+        browsingWindow.restore();
+      } else {
+        browsingWindow.minimize();
+      }
+    }
+  });
   // eslint-disable-next-line complexity
   ipcMain.on('set-window-maximize', () => {
     if (mainWindow && mainWindow.isFocused()) {
@@ -1104,23 +1155,25 @@ function registerMainWindowEvent(mainWindow) {
       } else {
         mainWindow.maximize();
       }
-      const bounds = mainWindow.getBounds();
-      if (process.platform === 'win32' && mainWindow.isMaximized() && (bounds.x < 0 || bounds.y < 0)) {
-        mainWindow.getBrowserViews()[0].setBounds({
-          x: sidebar ? 76 : 0,
-          y: 40,
-          width: sidebar ? bounds.width + (bounds.x * 2) - 76
-            : bounds.width + (bounds.x * 2),
-          height: bounds.height - 40,
-        });
-      } else {
-        mainWindow.getBrowserViews()[0].setBounds({
-          x: sidebar ? 76 : 0,
-          y: 40,
-          width: sidebar ? mainWindow.getSize()[0] - 76
-            : mainWindow.getSize()[0],
-          height: mainWindow.getSize()[1] - 40,
-        });
+      if (mainWindow.getBrowserViews().length && !mainWindow.getBrowserViews()[0].isDestroyed()) {
+        const bounds = mainWindow.getBounds();
+        if (process.platform === 'win32' && mainWindow.isMaximized() && (bounds.x < 0 || bounds.y < 0)) {
+          mainWindow.getBrowserViews()[0].setBounds({
+            x: sidebar ? 76 : 0,
+            y: 40,
+            width: sidebar ? bounds.width + (bounds.x * 2) - 76
+              : bounds.width + (bounds.x * 2),
+            height: bounds.height - 40,
+          });
+        } else {
+          mainWindow.getBrowserViews()[0].setBounds({
+            x: sidebar ? 76 : 0,
+            y: 40,
+            width: sidebar ? mainWindow.getSize()[0] - 76
+              : mainWindow.getSize()[0],
+            height: mainWindow.getSize()[1] - 40,
+          });
+        }
       }
     } else if (browsingWindow && browsingWindow.isFocused()) {
       if (!isBrowsingWindowMax) {
@@ -1653,6 +1706,10 @@ app.on('add-windows-about', createAboutWindow);
 app.on('check-for-updates', () => {
   if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
   mainWindow.webContents.send('check-for-updates');
+});
+app.on('open-history-item', (evt, args) => {
+  openHistoryItem(evt, args);
+  mainWindow.send('update-current-channel', args.channel);
 });
 
 app.on('menu-create-main-window', () => {

@@ -37,49 +37,59 @@
       />
       <div
         :title="$t('browsing.siteTip')"
-        :class="{ 'channel-opacity': showChannelManager && currentRouteName === 'browsing-view'}"
+        :class="{ 'channel-opacity': currentPage === 'channelManager'
+          && currentRouteName === 'browsing-view'}"
         @click="handleChannelManage"
         class="channel-manage no-drag"
       >
         <Icon
           type="channelManage"
+          class="sidebar-icon"
         />
         <div
-          :class="{ selected: showChannelManager && currentRouteName === 'browsing-view' }"
+          :class="{ selected: currentPage === 'channelManager'
+            && currentRouteName === 'browsing-view' }"
           class="mask"
         />
       </div>
     </div>
     <div
-      v-if="!showFileIcon"
-      :style="{ boxShadow: bottomMask ? '0 -3px 8px 0 rgba(0,0,0,0.60)' : '' }"
-      class="bottom-mask"
-    />
-    <transition name="fade-300">
-      <div
-        :style="{
-          boxShadow: bottomMask ? '0 -2px 10px 0 rgba(0,0,0,0.50)' : '',
-          height: showFileIcon ? '60px' : '',
-        }"
-        v-if="showFileIcon"
-        class="bottom-icon no-drag"
-      >
+      :style="{
+        boxShadow: bottomMask ? '0 -2px 10px 0 rgba(0,0,0,0.50)' : '',
+        height: 'auto',
+      }"
+      class="bottom-icon no-drag"
+    >
+      <transition name="fade-300">
         <div
+          v-if="showFileIcon || $route.name === 'landing-view'"
+          @click="openHomePage"
+          class="icon"
+        >
+          <Icon type="homePage" />
+        </div>
+      </transition>
+      <transition name="fade-300">
+        <div
+          v-if="showFileIcon"
           @click="openFilesByDialog"
           :title="$t('browsing.openLocalFile')"
           class="icon"
         >
           <Icon type="open" />
         </div>
+      </transition>
+      <transition name="fade-300">
         <div
-          @click="openHomePage"
+          v-if="showFileIcon"
+          @click="backToLanding"
           :title="$t('tips.exit')"
           class="icon"
         >
           <Icon type="exit" />
         </div>
-      </div>
-    </transition>
+      </transition>
+    </div>
   </div>
 </template>
 <script lang="ts">
@@ -114,7 +124,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['pipSize', 'pipPos', 'isHistory', 'currentChannel', 'winHeight', 'showSidebar', 'displayLanguage']),
+    ...mapGetters(['pipSize', 'pipPos', 'isHomePage', 'currentChannel', 'winHeight', 'showSidebar', 'displayLanguage', 'currentPage']),
     currentRouteName() {
       return this.$route.name;
     },
@@ -122,17 +132,25 @@ export default {
       return !this.currentChannel;
     },
     showFileIcon() {
-      return this.$route.name === 'playing-view' || this.$route.name === 'browsing-view';
+      return this.$route.name === 'playing-view' || !!this.currentUrl;
     },
     totalHeight() {
       const channelsNum = this.channelsDetail.length + 1;
       return channelsNum * 56;
     },
     bottomIconHeight() {
-      return 92;
+      switch (this.$route.name) {
+        case 'playing-view':
+        case 'browsing-view':
+          return 122;
+        case 'landing-view':
+          return 62;
+        default:
+          return 0;
+      }
     },
     maxHeight() {
-      const bottomHeight = this.showFileIcon ? this.bottomIconHeight : 0;
+      const bottomHeight = this.bottomIconHeight;
       return this.winHeight - (this.isDarwin ? 42 : 16) - bottomHeight;
     },
     isDarwin() {
@@ -140,18 +158,24 @@ export default {
     },
   },
   watch: {
+    currentChannel(val: string) {
+      if (val) {
+        this.updateCurrentPage('webPage');
+      }
+    },
     isDragging(val: boolean, oldVal: boolean) {
       if (oldVal && !val) {
         this.channelsDetail = BrowsingChannelManager
           .repositionChannels(this.indexOfMovingItem, this.indexOfMovingTo);
       }
     },
-    channelsDetail: {
-      handler: (val: { url: string, channel: string,
-        icon: string, title: string, path: string }[]) => {
-        asyncStorage.set('channels', { channels: val });
-      },
-      deep: true,
+    channelsDetail(val: { url: string, channel: string,
+      icon: string, title: string, path: string }[]) {
+      const scrollTop = (document.querySelector('.icon-box') as HTMLElement).scrollTop;
+      this.topMask = this.maxHeight >= this.totalHeight ? false : scrollTop !== 0;
+      this.bottomMask = scrollTop + this.maxHeight < this.totalHeight;
+      asyncStorage.set('channels', { channels: val });
+      this.$bus.$emit('update-browsing-playlist');
     },
     currentRouteName(val: string) {
       if (val !== 'browsing-view') {
@@ -190,7 +214,7 @@ export default {
       this.topMask = this.maxHeight >= this.totalHeight ? false : scrollTop !== 0;
       this.bottomMask = scrollTop + this.maxHeight < this.totalHeight;
     });
-    this.$electron.ipcRenderer.on('delete-channel', (e: Event, channel: string) => {
+    this.$electron.ipcRenderer.on('delete-channel', async (e: Event, channel: string) => {
       if (this.currentChannel === channel) {
         if (this.channelsDetail.length <= 1) {
           if (this.currentRouteName === 'browsing-view') {
@@ -209,27 +233,34 @@ export default {
           });
         }
       }
-      BrowsingChannelManager.setChannelAvailable(channel, false);
+      await BrowsingChannelManager.setChannelAvailable(channel, false);
       this.$electron.ipcRenderer.send('clear-browsers-by-channel', channel);
       this.channelsDetail = BrowsingChannelManager.getAllAvailableChannels();
     });
   },
   methods: {
     ...mapActions({
-      updateIsHistoryPage: browsingActions.UPDATE_IS_HISTORY,
       updateCurrentChannel: browsingActions.UPDATE_CURRENT_CHANNEL,
+      updateCurrentPage: browsingActions.UPDATE_CURRENT_PAGE,
     }),
-    openHomePage() {
+    backToLanding() {
+      this.updateCurrentPage('');
       this.$router.push({ name: 'landing-view' });
     },
+    openHomePage() {
+      this.updateCurrentPage('homePage');
+      if (this.currentRouteName !== 'browsing-view') {
+        this.$router.push({ name: 'browsing-view' });
+      } else {
+        this.$bus.$emit('show-homepage');
+      }
+    },
     handleChannelManage() {
+      this.updateCurrentPage('channelManager');
       if (this.currentRouteName !== 'browsing-view') {
         this.$router.push({ name: 'browsing-view' });
       }
       this.$bus.$emit('channel-manage');
-    },
-    openHistory() {
-      this.updateIsHistoryPage(!this.isHistory);
     },
     handleSidebarIcon(url: string, type: string) {
       const newChannel = type;
@@ -265,6 +296,10 @@ export default {
 ::-webkit-scrollbar {
   width: 0;
 }
+.sidebar-icon {
+  width: 44px;
+  height: 44px;
+}
 .side-bar {
   position: absolute;
   background-color: #3B3B41;
@@ -273,6 +308,7 @@ export default {
   height: 100%;
   transition: width 100ms ease-out;
   will-change: width;
+  overflow: hidden;
 
   .top-mask {
     width: 100%;
@@ -283,12 +319,6 @@ export default {
     height: 42px;
     position: absolute;
     top: -42px;
-  }
-  .bottom-mask {
-    position: absolute;
-    width: 100%;
-    height: 42px;
-    bottom: -42px;
   }
   .icon-box {
     width: 100%;

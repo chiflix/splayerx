@@ -12,6 +12,10 @@ export default class NetEaseStudy {
       + 'player.style.height = "100%";'
       + 'player.style.left = "0";'
       + 'player.style.top = "0";'
+      + 'var course = document.querySelector("#course-learn-box");'
+      + 'if (course) course.style.zIndex = "999999";'
+      + 'var lesson = document.querySelector("#lesson-learn-box");'
+      + 'if (lesson) lesson.style.zIndex = "999999";'
       + 'player.style.zIndex = "999999";'
       + 'document.body.style.overflow = "hidden";';
     this.watcher = '';
@@ -21,6 +25,10 @@ export default class NetEaseStudy {
       + 'player.style.height = "";'
       + 'player.style.left = "";'
       + 'player.style.top = "";'
+      + 'var course = document.querySelector("#course-learn-box");'
+      + 'if (course) course.style.zIndex = "";'
+      + 'var lesson = document.querySelector("#lesson-learn-box");'
+      + 'if (lesson) lesson.style.zIndex = "";'
       + 'player.style.zIndex = "";'
       + 'document.body.style.overflow = "";';
   }

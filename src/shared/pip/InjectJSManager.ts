@@ -17,9 +17,9 @@ class InjectJSManager implements IInjectJSManager {
   public constructor() {
     this.calcVideoNumCode = 'var iframe = document.querySelector("iframe");'
       + 'if (iframe && iframe.contentDocument) {'
-      + 'document.getElementsByTagName("video").length + iframe.contentDocument.getElementsByTagName("video").length'
+      + 'document.getElementsByTagName("video").length + iframe.contentDocument.getElementsByTagName("video").length;'
       + '} else {'
-      + 'document.getElementsByTagName("video").length'
+      + 'document.getElementsByTagName("video").length;'
       + '}';
     this.getVideoStyleCode = 'getComputedStyle(document.querySelector("video") || document.querySelector("iframe").contentDocument.querySelector("video"))';
     this.pauseNormalVideo = 'document.querySelector("video").pause();';
