@@ -228,7 +228,7 @@
       "reload": "重新加载页面",
       "back": "后退",
       "forward": "前进",
-      "clearHistory": "清除播放历史"
+      "clearHistory": "清空播放历史"
     }
   },
   "nextVideo": {
@@ -296,11 +296,11 @@
       "accountInfo": "投食成为射手云养员，获取专享功能和特殊权益。",
       "premiumBtn": "投食",
       "premiumAccount": "云养员: ",
-      "premiumInfo": "云养至： ",
+      "premiumInfo": "云养至: ",
       "renewBtn": "继续投食",
       "history": "在线播放记录",
       "clear": "清空",
-      "historyInfo": "线上视频的播放历史记录将在这里显示，包括页面名称、站点地址和浏览时间。",
+      "historyInfo": "线上视频的播放历史将在这里显示，包括页面名称、站点地址和浏览时间。",
       "playlist": "本地播放列表",
       "playlistInfoPre": "点击侧边栏底部“ ",
       "playlistInfoNext": " ”按钮，选择多个文件播放，即可生成播放列表。",
@@ -361,10 +361,10 @@
         "description": "云养至：",
         "button": "继续投食"
       },
-      "month": "个月",
-      "year": "年",
-      "months": "个月",
-      "years": "年",
+      "month": " 个月",
+      "year": " 年",
+      "months": " 个月",
+      "years": " 年",
       "signOut": "注销",
       "createdAt": "注册时间",
       "payAt": "投食记录",
@@ -385,10 +385,10 @@
       },
       "origin": "原价 ",
       "off": "折",
-      "month": "个月",
-      "year": "年",
-      "months": "个月",
-      "years": "年",
+      "month": " 个月",
+      "year": " 年",
+      "months": " 个月",
+      "years": " 年",
       "payType": {
         "alipay": "支付宝",
         "wxpay": "微信支付",
