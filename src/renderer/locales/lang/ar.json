@@ -228,7 +228,7 @@
       "reload": "إعادة تحميل الصفحة",
       "back": "ظهر",
       "forward": "تقدم",
-      "clearHistory": ""
+      "clearHistory": "حذف التاريخ"
     }
   },
   "nextVideo": {
@@ -285,28 +285,28 @@
     "general": "مجمع",
     "education": "التعليم",
     "siteTip": "اضافة / تغيير",
-    "today": "",
-    "yesterday": "",
+    "today": "اليوم",
+    "yesterday": "أمس",
     "homepage": {
-      "unSigned": "",
-      "signInfo": "",
-      "signBtn": "",
-      "account": "",
-      "signOut": "",
-      "accountInfo": "",
-      "premiumBtn": "",
-      "premiumAccount": "",
-      "premiumInfo": "",
-      "renewBtn": "",
-      "history": "",
-      "clear": "",
-      "historyInfo": "",
-      "playlist": "",
-      "playlistInfoPre": "",
-      "playlistInfoNext": "",
-      "banner1": "",
-      "banner2": "",
-      "banner3": ""
+      "unSigned": "Not Signed In",
+      "signInfo": "Sign in to use AI Translation and get access to more features.",
+      "signBtn": "Sign In",
+      "account": "Account: ",
+      "signOut": "Sign out",
+      "accountInfo": "Upgrade your account now and get started with exclusive features and more.",
+      "premiumBtn": "Upgrade",
+      "premiumAccount": "Premium Account: ",
+      "premiumInfo": "Expiration Date: ",
+      "renewBtn": "Renew",
+      "history": "Online History",
+      "clear": "Clear",
+      "historyInfo": "Keep track of your playback history, including the page title, the site address and the date you watched.",
+      "playlist": "Local Playlist",
+      "playlistInfoPre": "Click the ",
+      "playlistInfoNext": " button on the left sidebar, choose and open more than one file to generate a playlist.",
+      "banner1": "Submit your<br>Feedback",
+      "banner2": "Contribute to our<br>Localization Project",
+      "banner3": "Release Notes"
     }
   },
   "preferences": {
