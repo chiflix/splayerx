@@ -62,7 +62,7 @@
         class="bottom-icon no-drag"
       >
         <div
-          v-if="showFileIcon && $route.name !== 'playing-view' || $route.name === 'landing-view'"
+          v-if="showFileIcon || $route.name === 'landing-view'"
           @click="openHomePage"
           class="icon"
         >
@@ -137,11 +137,10 @@ export default {
     bottomIconHeight() {
       switch (this.$route.name) {
         case 'playing-view':
-          return 92;
-        case 'landing-view':
-          return 62;
         case 'browsing-view':
           return 122;
+        case 'landing-view':
+          return 62;
         default:
           return 0;
       }
