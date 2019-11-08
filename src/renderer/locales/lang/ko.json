@@ -227,7 +227,8 @@
       "name": "역사",
       "reload": "페이지 새로 고침",
       "back": "뒤로",
-      "forward": "사전"
+      "forward": "사전",
+      "clearHistory": ""
     }
   },
   "nextVideo": {
@@ -283,7 +284,30 @@
     "siteManager": "사이트 관리자",
     "general": "종합적인",
     "education": "교육",
-    "siteTip": "편집 / 추가"
+    "siteTip": "편집 / 추가",
+    "today": "",
+    "yesterday": "",
+    "homepage": {
+      "unSigned": "",
+      "signInfo": "",
+      "signBtn": "",
+      "account": "",
+      "signOut": "",
+      "accountInfo": "",
+      "premiumBtn": "",
+      "premiumAccount": "",
+      "premiumInfo": "",
+      "renewBtn": "",
+      "history": "",
+      "clear": "",
+      "historyInfo": "",
+      "playlist": "",
+      "playlistInfoPre": "",
+      "playlistInfoNext": "",
+      "banner1": "",
+      "banner2": "",
+      "banner3": ""
+    }
   },
   "preferences": {
     "general": {
