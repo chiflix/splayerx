@@ -319,7 +319,7 @@ export default {
   }
 }
 .home-page-container {
-  width: calc(100%- 1px);
+  width: calc(100% - 1px);
   height: calc(100% - 40px);
   top: 40px;
   display: flex;
