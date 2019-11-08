@@ -227,7 +227,8 @@
       "name": "历史",
       "reload": "重新加载页面",
       "back": "后退",
-      "forward": "前进"
+      "forward": "前进",
+      "clearHistory": ""
     }
   },
   "nextVideo": {
@@ -283,7 +284,30 @@
     "siteManager": "站点管理",
     "general": "综合",
     "education": "教育",
-    "siteTip": "添加 / 编辑"
+    "siteTip": "添加 / 编辑",
+    "today": "",
+    "yesterday": "",
+    "homepage": {
+      "unSigned": "",
+      "signInfo": "",
+      "signBtn": "",
+      "account": "",
+      "signOut": "",
+      "accountInfo": "",
+      "premiumBtn": "",
+      "premiumAccount": "",
+      "premiumInfo": "",
+      "renewBtn": "",
+      "history": "",
+      "clear": "",
+      "historyInfo": "",
+      "playlist": "",
+      "playlistInfoPre": "",
+      "playlistInfoNext": "",
+      "banner1": "",
+      "banner2": "",
+      "banner3": ""
+    }
   },
   "preferences": {
     "general": {
