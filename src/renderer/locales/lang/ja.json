@@ -228,7 +228,7 @@
       "reload": "ページを再読み込み",
       "back": "戻る",
       "forward": "進む",
-      "clearHistory": ""
+      "clearHistory": "履歴をクリア"
     }
   },
   "nextVideo": {
@@ -285,28 +285,28 @@
     "general": "綜合",
     "education": "教育",
     "siteTip": "追加 / 編集",
-    "today": "",
-    "yesterday": "",
+    "today": "今日",
+    "yesterday": "昨日",
     "homepage": {
-      "unSigned": "",
-      "signInfo": "",
-      "signBtn": "",
-      "account": "",
-      "signOut": "",
-      "accountInfo": "",
-      "premiumBtn": "",
-      "premiumAccount": "",
-      "premiumInfo": "",
-      "renewBtn": "",
-      "history": "",
-      "clear": "",
-      "historyInfo": "",
-      "playlist": "",
-      "playlistInfoPre": "",
-      "playlistInfoNext": "",
-      "banner1": "",
-      "banner2": "",
-      "banner3": ""
+      "unSigned": "サインインしていません",
+      "signInfo": "サインインしてAI翻訳を使用し、より多くの機能にアクセスします。",
+      "signBtn": "登入",
+      "account": "アカウント: ",
+      "signOut": "登出",
+      "accountInfo": "今すぐアカウントをアップグレードして、専用機能などを始めましょう。",
+      "premiumBtn": "アップグレード",
+      "premiumAccount": "プレミアムアカウント: ",
+      "premiumInfo": "有効期限: ",
+      "renewBtn": "更新",
+      "history": "オンライン履歴",
+      "clear": "クリアー",
+      "historyInfo": "ページタイトル、サイトアドレス、視聴した日付など、再生履歴を追跡します。",
+      "playlist": "ローカルプレイリスト",
+      "playlistInfoPre": "左側のサイドバーの ",
+      "playlistInfoNext": " ボタンをクリックして、複数のファイルを選択して開き、プレイリストを生成します。",
+      "banner1": "フィードバック<br>を送る",
+      "banner2": "翻訳プロジェクト<br>に参加する",
+      "banner3": "リリースノート"
     }
   },
   "preferences": {
