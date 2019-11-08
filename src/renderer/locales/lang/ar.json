@@ -227,7 +227,8 @@
       "name": "التاريخ",
       "reload": "إعادة تحميل الصفحة",
       "back": "ظهر",
-      "forward": "تقدم"
+      "forward": "تقدم",
+      "clearHistory": ""
     }
   },
   "nextVideo": {
@@ -283,7 +284,30 @@
     "siteManager": "مدير المواقع",
     "general": "مجمع",
     "education": "التعليم",
-    "siteTip": "اضافة / تغيير"
+    "siteTip": "اضافة / تغيير",
+    "today": "",
+    "yesterday": "",
+    "homepage": {
+      "unSigned": "",
+      "signInfo": "",
+      "signBtn": "",
+      "account": "",
+      "signOut": "",
+      "accountInfo": "",
+      "premiumBtn": "",
+      "premiumAccount": "",
+      "premiumInfo": "",
+      "renewBtn": "",
+      "history": "",
+      "clear": "",
+      "historyInfo": "",
+      "playlist": "",
+      "playlistInfoPre": "",
+      "playlistInfoNext": "",
+      "banner1": "",
+      "banner2": "",
+      "banner3": ""
+    }
   },
   "preferences": {
     "general": {
