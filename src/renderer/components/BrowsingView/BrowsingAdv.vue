@@ -1,7 +1,7 @@
 <template>
   <div
-    :style="{ height: `${height + contentPos.marginTop[currentPhase]
-      + contentPos.marginBottom[currentPhase]}px` }"
+    :style="{ height: `${height + contentPos.marginTop
+      + contentPos.marginBottom}px` }"
     @mouseover="handleMouseover"
     @mouseleave="handleMouseleave"
     class="adv-container"
@@ -9,8 +9,8 @@
     <div
       :style="{
         width: `${padding}px`,
-        margin: `${contentPos.marginTop[currentPhase]}px 0
-          ${contentPos.marginBottom[currentPhase]}px 0`
+        margin: `${contentPos.marginTop}px 0
+          ${contentPos.marginBottom}px 0`
       }"
       @click="handlePreItem"
       class="pre-item"
@@ -37,9 +37,9 @@
         <li
           :style="{
             height: `${height}px`,
-            marginTop: `${contentPos.marginTop[currentPhase]}px`,
-            marginBottom: `${contentPos.marginBottom[currentPhase]}px`,
-            marginRight: index !== advItems.length - 1 ? `${rightSpace[currentPhase]}px` : '',
+            marginTop: `${contentPos.marginTop}px`,
+            marginBottom: `${contentPos.marginBottom}px`,
+            marginRight: index !== advItems.length - 1 ? `${rightSpace}px` : '',
             width: `${finalAdvWidth}`,
             background: `url(${item.src})`,
             backgroundSize: 'cover',
@@ -53,16 +53,16 @@
         >
           <div
             :style="{
-              width: `${textWidth[currentPhase]}px`,
-              height: `${textHeight[currentPhase]}px`,
-              margin: `${textPos.top[currentPhase]}px auto auto ${textPos.left[currentPhase]}px`,
+              width: `${textWidth}px`,
+              height: `${textHeight}px`,
+              margin: `${textPos.top}px auto auto ${textPos.left}px`,
               position: 'absolute',
             }"
             class="text-content"
           >
             <span
               :style="{
-                fontSize: `${textFontSize[currentPhase]}px`,
+                fontSize: `${textFontSize}px`,
                 color: '#FFFFFF',
               }"
               v-html="item.text"
@@ -75,8 +75,8 @@
       :style="{
         width: `${padding}px`,
         height: `${height}px`,
-        margin: `${contentPos.marginTop[currentPhase]}px 0
-          ${contentPos.marginBottom[currentPhase]}px 0`
+        margin: `${contentPos.marginTop}px 0
+          ${contentPos.marginBottom}px 0`
       }"
       @click="handleNextItem"
       class="next-item"
@@ -115,16 +115,16 @@ export default {
       type: Number,
       required: true,
     },
-    currentPhase: {
-      type: Number,
-      required: true,
-    },
-    adaptSpace: {
-      type: Number,
-      required: true,
-    },
     contentPos: {
       type: Object,
+      required: true,
+    },
+    calcSizeByPhase: {
+      type: Function,
+      required: true,
+    },
+    rightSpace: {
+      type: Number,
       required: true,
     },
   },
@@ -142,15 +142,12 @@ export default {
     calcTranslateX() {
       return this.translateX === 0 ? 0 : `calc(${this.translateX}% + ${this.translateSpace}px)`;
     },
-    rightSpace() {
-      return [11, this.adaptSpace, 16];
-    },
     showAdvNum() {
       return this.winWidth >= 1135 - (this.showSidebar ? 0 : 76) ? 3 : 2;
     },
     adaptAdvWidth() {
       return (this.winWidth - this.padding * 2 - (this.showSidebar ? 76 : 0)
-        - this.rightSpace[this.currentPhase] * (this.showAdvNum - 1)) / this.showAdvNum;
+        - this.rightSpace * (this.showAdvNum - 1)) / this.showAdvNum;
     },
     finalAdvWidth() {
       switch (true) {
@@ -169,28 +166,28 @@ export default {
       return this.currentAdvIndex > 0;
     },
     textWidth() {
-      return [222.3 * 888 / 1030, 222.3 * this.winWidth / 1030, 222.3];
+      return this.calcSizeByPhase(222.3);
     },
     textHeight() {
-      return [90 * 888 / 1030, 90 * this.winWidth / 1030, 90];
+      return this.calcSizeByPhase(90);
     },
     textPos() {
       return {
-        top: [30 * 888 / 1030, 30 * this.winWidth / 1030, 30],
-        left: [40 * 888 / 1030, 40 * this.winWidth / 1030, 40],
+        top: this.calcSizeByPhase(30),
+        left: this.calcSizeByPhase(40),
       };
     },
     textFontSize() {
-      return [20 * 888 / 1030, 20 * this.winWidth / 1030, 20];
+      return this.calcSizeByPhase(20);
     },
   },
   watch: {
     winWidth() {
-      this.translateSpace = -this.currentAdvIndex * this.rightSpace[this.currentPhase];
+      this.translateSpace = -this.currentAdvIndex * this.rightSpace;
     },
     currentAdvIndex(val: number) {
       this.translateX = -val * 100;
-      this.translateSpace = -val * this.rightSpace[this.currentPhase];
+      this.translateSpace = -val * this.rightSpace;
     },
     showAdvNum(val: number, oldVal: number) {
       if (val > oldVal && this.hasPreItem) {

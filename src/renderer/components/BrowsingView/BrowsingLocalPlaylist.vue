@@ -2,20 +2,20 @@
   <div class="playlist-container">
     <span
       :style="{
-        fontSize: `${playlistFontSize[currentPhase]}px`,
+        fontSize: `${playlistFontSize}px`,
         marginLeft: `${padding}px`,
         color: '#3B3B41',
-        marginBottom: `${titleBottom[currentPhase]}px`,
+        marginBottom: `${titleBottom}px`,
         fontWeight: 'bold',
       }"
     >
       {{ $t('browsing.homepage.playlist') }}</span>
     <div
       :style="{
-        marginBottom: `${blankTitleBottom[currentPhase]}px`,
+        marginBottom: `${blankTitleBottom}px`,
         marginLeft: `${padding}px`,
         color: '#B5B6BF',
-        fontSize: `${descriptionSize[currentPhase]}px`,
+        fontSize: `${descriptionSize}px`,
       }"
       v-show="!hasPlaylist"
     >
@@ -31,7 +31,7 @@
           flexDirection: 'column',
           maxWidth: '1321px',
           marginLeft: `${padding}px`,
-          marginBottom: `${playlistBottom[currentPhase]}px`,
+          marginBottom: `${playlistBottom}px`,
         }"
       >
         <ul>
@@ -40,8 +40,8 @@
               height: winWidth - (showSidebar ? 0 : 76) > 888 ?
                 `${thumbnailWidth * 133 / 236}px` : '${175 * 133 / 236}px',
               width: `${finalItemWidth}px`,
-              marginBottom: `${deleteIconSize[currentPhase]}px`,
-              marginLeft: `${listRight[currentPhase]}px`,
+              marginBottom: `${deleteIconSize}px`,
+              marginLeft: `${listRight}px`,
               background: hasPlaylist ? '' : `url(${item.blankPlaylist})`,
               backgroundSize: hasPlaylist ? '' : '100% 100%',
               backgroundRepeat: hasPlaylist ? '' : 'no-repeat',
@@ -67,19 +67,19 @@
               v-show="hasPlaylist"
               :style="{
                 width: `${thumbnailWidth}px`,
-                fontSize: `${listItemFontSize[currentPhase]}px`,
+                fontSize: `${listItemFontSize}px`,
               }"
               class="item-info"
             >
               <div
-                :style="{ lineHeight: `${infoLineHeight[currentPhase]}px` }"
+                :style="{ lineHeight: `${infoLineHeight}px` }"
                 class="title"
               >
                 <!--eslint-disable-next-line-->
-                <span :style="{ margin: `${progressPos[currentPhase]}px 0 auto 7%` }"><b>{{ `${orderFormat(item.playedIndex + 1)} / ${orderFormat(item.playlistLength)}  ·  ` }}</b>{{ `${item.basename}` }}</span>
+                <span :style="{ margin: `${progressPos}px 0 auto 7%` }"><b>{{ `${orderFormat(item.playedIndex + 1)} / ${orderFormat(item.playlistLength)}  ·  ` }}</b>{{ `${item.basename}` }}</span>
               </div>
               <div
-                :style="{ margin: `auto auto ${progressPos[currentPhase]}px 7%` }"
+                :style="{ margin: `auto auto ${progressPos}px 7%` }"
                 class="progress"
               >
                 <div class="progress-time">
@@ -87,8 +87,8 @@
                 </div>
                 <div
                   :style="{
-                    width: `${progressBarWidth[currentPhase]}px`,
-                    height: `${progressHeight[currentPhase]}px`
+                    width: `${progressBarWidth}px`,
+                    height: `${progressHeight}px`
                   }"
                   class="progress-bar"
                 >
@@ -102,10 +102,10 @@
                 <div
                   v-show="index === hoveredIndex && hasPlaylist"
                   :style="{
-                    width: `${deleteIconSize[currentPhase]}px`,
-                    height: `${deleteIconSize[currentPhase]}px`,
-                    right: `${listBottom[currentPhase]}px`,
-                    bottom: `${progressPos[currentPhase]}px`,
+                    width: `${deleteIconSize}px`,
+                    height: `${deleteIconSize}px`,
+                    right: `${listBottom}px`,
+                    bottom: `${progressPos}px`,
                   }"
                   @click.stop="handleItemDelete(item.id)"
                   class="delete-icon"
@@ -142,12 +142,20 @@ export default {
       type: Number,
       required: true,
     },
-    currentPhase: {
+    playlistFontSize: {
       type: Number,
       required: true,
     },
-    playlistFontSize: {
-      type: Array,
+    calcSizeByPhase: {
+      type: Function,
+      required: true,
+    },
+    listRight: {
+      type: Number,
+      required: true,
+    },
+    listItemFontSize: {
+      type: Number,
       required: true,
     },
   },
@@ -168,8 +176,8 @@ export default {
       const winWidth = this.winWidth > 1441 + (this.showSidebar ? 76 : 0)
         ? 1441 + (this.showSidebar ? 76 : 0) : this.winWidth;
       const thumbnailsTotalWidth = winWidth - (this.showSidebar ? 76 : 0) - this.padding * 2;
-      const calcVideoNum = Math.floor((thumbnailsTotalWidth + this.listRight[this.currentPhase])
-        / (175 + this.listRight[this.currentPhase]));
+      const calcVideoNum = Math.floor((thumbnailsTotalWidth + this.listRight)
+        / (175 + this.listRight));
       let updateVideoNum = 4;
       if (calcVideoNum < 4) {
         updateVideoNum = 4;
@@ -178,42 +186,36 @@ export default {
       } else if (calcVideoNum > 6) {
         updateVideoNum = 6;
       }
-      return (thumbnailsTotalWidth - (updateVideoNum - 1) * this.listRight[this.currentPhase])
+      return (thumbnailsTotalWidth - (updateVideoNum - 1) * this.listRight)
         / updateVideoNum;
     },
     calcTranslateX() {
       return this.translateX === 0 ? 0 : `calc(${this.translateX}% + ${this.translateSpace}px)`;
     },
     playlistBottom() {
-      return [20 * 888 / 1030, 20 * this.winWidth / 1030, 20];
+      return this.calcSizeByPhase(20);
     },
     titleBottom() {
-      return [15 * 888 / 1030, 15 * this.winWidth / 1030, 15];
+      return this.calcSizeByPhase(15);
     },
     descriptionSize() {
-      return [17 * 888 / 1030, 17 * this.winWidth / 1030, 17];
+      return this.calcSizeByPhase(17);
     },
     listBottom() {
-      return [15 * 888 / 1030, 15 * this.winWidth / 1030, 15];
-    },
-    listRight() {
-      return [11, this.calcSize(11, 16), 16];
-    },
-    listItemFontSize() {
-      return [11, this.calcSize(11, 14), 14];
+      return this.calcSizeByPhase(15);
     },
     progressHeight() {
-      return [4 * 888 / 1030, 4 * this.winWidth / 1030, 4];
+      return this.calcSizeByPhase(4);
     },
     progressPos() {
-      return [7 * 888 / 1030, 7 * this.winWidth / 1030, 7];
+      return this.calcSizeByPhase(7);
     },
     showListNum() {
       return this.winWidth >= 1326 - (this.showSidebar ? 0 : 76) ? 3 : 2;
     },
     itemWidth() {
       return (this.winWidth - this.padding * 2 - (this.showSidebar ? 76 : 0)
-        - this.listRight[this.currentPhase] * this.showListNum) / this.showListNum;
+        - this.listRight * this.showListNum) / this.showListNum;
     },
     finalItemWidth() {
       switch (true) {
@@ -226,51 +228,45 @@ export default {
       }
     },
     progressBarWidth() {
-      return [110 * 888 / 1030, 110 * this.winWidth / 1030, 110];
+      return this.calcSizeByPhase(110);
     },
     deleteIconSize() {
-      return [30 * 888 / 1030, 30 * this.winWidth / 1030, 30];
+      return this.calcSizeByPhase(30);
     },
     blankTitleBottom() {
-      return [25 * 888 / 1030, 25 * this.winWidth / 1030, 25];
+      return this.calcSizeByPhase(25);
     },
     blankTitleFontSize() {
-      return [19 * 888 / 1030, 19 * this.winWidth / 1030, 19];
+      return this.calcSizeByPhase(19);
     },
     infoLineHeight() {
-      return [18 * 888 / 1030, 18 * this.winWidth / 1030, 18];
+      return this.calcSizeByPhase(18);
     },
   },
   watch: {
-    playlist: {
-      handler(val: number[]) {
-        if (!val.length) {
-          this.hasPlaylist = false;
-          for (let i = 0; i < this.showListNum; i += 1) {
-            this.playlist.push({ blankPlaylist });
-          }
+    playlist(val: number[]) {
+      if (!val.length) {
+        this.hasPlaylist = false;
+        for (let i = 0; i < this.showListNum; i += 1) {
+          this.playlist.push({ blankPlaylist });
         }
-      },
-      immediate: true,
+      }
     },
-    showListNum: {
-      handler(val: number) {
-        if (!this.hasPlaylist) {
-          this.playlist = [];
-          for (let i = 0; i < val; i += 1) {
-            this.playlist.push({ blankPlaylist });
-          }
+    showListNum(val: number) {
+      if (!this.hasPlaylist) {
+        this.playlist = [];
+        for (let i = 0; i < val; i += 1) {
+          this.playlist.push({ blankPlaylist });
         }
-      },
-      immediate: true,
+      }
     },
 
     currentListIndex(val: number) {
       this.translateX = -val * 100;
-      this.translateSpace = -val * this.listRight[this.currentPhase];
+      this.translateSpace = -val * this.listRight;
     },
     winWidth() {
-      this.translateSpace = -this.currentListIndex * this.listRight[this.currentPhase];
+      this.translateSpace = -this.currentListIndex * this.listRight;
     },
   },
   created() {
@@ -298,11 +294,6 @@ export default {
       if (this.hasPlaylist && id) {
         this.openPlayList(id);
       }
-    },
-    calcSize(min: number, max: number) {
-      const a = (max - min) / (1030 - 888);
-      const b = min - 888 * a;
-      return a * this.winWidth + b;
     },
     handleMouseover(index: number) {
       this.hoveredIndex = index;

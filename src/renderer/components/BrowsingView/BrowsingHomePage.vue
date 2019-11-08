@@ -1,7 +1,7 @@
 <template>
   <div
     :style="{
-      overflowX: winWidth + (showSidebar ? 0 : 76) < 888 ? 'scroll' : 'hidden',
+      overflowX: winWidth + (showSidebar ? 0 : 76) < minRatioWidth ? 'scroll' : 'hidden',
     }"
     class="home-page-container no-drag"
   >
@@ -14,34 +14,34 @@
     >
       <div
         :style="{
-          width: `${winWidth - (showSidebar ? 76 : 0) - calcMargin[currentPhase] * 2}px`,
+          width: `${winWidth - (showSidebar ? 76 : 0) - calcMargin * 2}px`,
           height: currentPhase <= 1 ? `${calcHeight}px` : '314px',
-          margin: `0 ${calcMargin[currentPhase]}px`,
+          margin: `0 ${calcMargin}px`,
         }"
         class="account-content"
       >
         <span
           :style="{
-            fontSize: `${titleSize[currentPhase]}px`,
-            margin: `${titlePos.marginTop[currentPhase]}px 0
-              0 ${titlePos.marginLeft[currentPhase]}px`,
+            fontSize: `${titleSize}px`,
+            margin: `${titlePos.marginTop}px 0
+              0 ${titlePos.marginLeft}px`,
             color: '#3B3B41',
             fontWeight: 'bold',
           }"
         >{{ $t('welcome.welcomeTitle') }}</span>
         <div
           :style="{
-            margin: `auto 0 ${userPos[currentPhase]}px ${userPos[currentPhase]}px`,
+            margin: `auto 0 ${userPos}px ${userPos}px`,
           }"
           class="user-content"
         >
           <div
             :style="{
-              fontSize: `${userStateSize[currentPhase]}px`,
+              fontSize: `${userStateSize}px`,
               color: '#818188',
               display: 'block',
               fontWeight: 'bold',
-              marginBottom: `${userStatePos[currentPhase]}px`,
+              marginBottom: `${userStatePos}px`,
             }"
           >
             {{ isLogin ? (userInfo.isVip ? $t('browsing.homepage.premiumAccount')
@@ -49,8 +49,8 @@
               `${displayName}` : '' }}
             <div
               :style="{
-                marginLeft: `${userStatePos[currentPhase]}px`,
-                fontSize: `${moreInfoSize[currentPhase]}px`,
+                marginLeft: `${userStatePos}px`,
+                fontSize: `${moreInfoSize}px`,
               }"
               @click="handleLogout"
               v-show="isLogin"
@@ -61,7 +61,7 @@
           </div>
           <span
             :style="{
-              fontSize: `${moreInfoSize[currentPhase]}px`,
+              fontSize: `${moreInfoSize}px`,
               color: '#8F8F96',
             }"
           >
@@ -72,13 +72,13 @@
           <button
             :style="{
               outline: 'none',
-              width: `${buttonSize.width[currentPhase]}px`,
-              height: `${buttonSize.height[currentPhase]}px`,
+              width: `${buttonSize.width}px`,
+              height: `${buttonSize.height}px`,
               background: '#FF8400',
-              marginTop: `${buttonPos[currentPhase]}px`,
+              marginTop: `${buttonPos}px`,
               borderRadius: '3px',
               color: '#ffffff',
-              fontSize: `${buttonFontSize[currentPhase]}px`,
+              fontSize: `${buttonFontSize}px`,
               cursor: 'pointer',
               zIndex: 1,
               border: 'none',
@@ -92,18 +92,18 @@
         <span
           :style="{
             color: 'rgba(138, 138, 145, 0.6)',
-            fontSize: `${versionSize[currentPhase]}px`,
+            fontSize: `${versionSize}px`,
             position: 'absolute',
-            right: `${versionPos.right[currentPhase]}px`,
-            bottom: `${versionPos.bottom[currentPhase]}px`,
+            right: `${versionPos.right}px`,
+            bottom: `${versionPos.bottom}px`,
           }"
         >{{ `Version ${currentVersion}` }}</span>
         <div
           :style="{
-            width: `${logoSize[currentPhase]}px`,
-            height: `${logoSize[currentPhase]}px`,
-            top: `${logoPos.top[currentPhase]}px`,
-            right: `${logoPos.right[currentPhase]}px`,
+            width: `${logoSize}px`,
+            height: `${logoSize}px`,
+            top: `${logoPos.top}px`,
+            right: `${logoPos.right}px`,
           }"
           class="back-logo"
         >
@@ -113,23 +113,25 @@
       </div>
       <browsing-adv
         :width="calcWidth"
-        :height="advHeight[currentPhase]"
-        :contentPos="advPos"
-        :padding="calcMargin[currentPhase]"
-        :current-phase="currentPhase"
-        :adapt-space="calcSize(11, 16)"
+        :height="advHeight"
+        :content-pos="advPos"
+        :padding="calcMargin"
+        :right-space="rightSpace"
+        :calc-size-by-phase="calcSizeByPhase"
       />
       <browsing-history
         :show-home-page="showHomePage"
         :playlist-font-size="playlistFontSize"
-        :padding="calcMargin[currentPhase]"
-        :current-phase="currentPhase"
+        :padding="calcMargin"
+        :calc-size-by-phase="calcSizeByPhase"
       />
       <browsing-local-playlist
         :width="calcWidth"
         :playlist-font-size="playlistFontSize"
-        :padding="calcMargin[currentPhase]"
-        :current-phase="currentPhase"
+        :padding="calcMargin"
+        :list-right="listRight"
+        :list-item-font-size="listItemFontSize"
+        :calc-size-by-phase="calcSizeByPhase"
       />
     </div>
   </div>
@@ -162,6 +164,8 @@ export default {
       currentPhase: 2,
       isLogin: false,
       displayName: '',
+      minRatioWidth: 888,
+      maxRatioWidth: 1030,
     };
   },
   computed: {
@@ -176,79 +180,88 @@ export default {
       return this.calcSize(232, 314);
     },
     calcMargin() {
-      return [50.7, this.calcSize(50.7, 60), 60];
+      return [50.7, this.calcSize(50.7, 60), 60][this.currentPhase];
     },
     titlePos() {
       return {
-        marginLeft: [30 * 888 / 1030, 30 * this.winWidth / 1030, 30],
-        marginTop: [45 * 888 / 1030, 45 * this.winWidth / 1030, 45],
+        marginLeft: this.calcSizeByPhase(30),
+        marginTop: this.calcSizeByPhase(45),
       };
     },
     titleSize() {
-      return [44 * 888 / 1030, 44 * this.winWidth / 1030, 44];
+      return this.calcSizeByPhase(44);
     },
     userPos() {
-      return [30 * 888 / 1030, 30 * this.winWidth / 1030, 30];
+      return this.calcSizeByPhase(30);
     },
     userStateSize() {
-      return [20 * 888 / 1030, 20 * this.winWidth / 1030, 20];
+      return this.calcSizeByPhase(20);
     },
     userStatePos() {
-      return [6 * 888 / 1030, 6 * this.winWidth / 1030, 6];
+      return this.calcSizeByPhase(6);
     },
     moreInfoSize() {
-      return [14 * 888 / 1030, 14 * this.winWidth / 1030, 14];
+      return this.calcSizeByPhase(14);
     },
     buttonFontSize() {
-      return [11, this.calcSize(11, 15), 15];
+      return [11, this.calcSize(11, 15), 15][this.currentPhase];
     },
     buttonSize() {
       return {
-        width: [101, this.calcSize(101, 136), 136],
-        height: [31, this.calcSize(31, 41), 41],
+        width: [101, this.calcSize(101, 136), 136][this.currentPhase],
+        height: [31, this.calcSize(31, 41), 41][this.currentPhase],
       };
     },
     buttonPos() {
-      return [15, this.calcSize(15, 21), 21];
+      return [15, this.calcSize(15, 21), 21][this.currentPhase];
+    },
+    rightSpace() {
+      return [11, this.calcSize(11, 16), 16][this.currentPhase];
+    },
+    listRight() {
+      return [11, this.calcSize(11, 16), 16][this.currentPhase];
+    },
+    listItemFontSize() {
+      return [11, this.calcSize(11, 14), 14][this.currentPhase];
     },
     logoSize() {
-      return [360 * 888 / 1030, 360 * this.winWidth / 1030, 360];
+      return this.calcSizeByPhase(360);
     },
     logoPos() {
       return {
-        top: [36.8 * 888 / 1030, 36.8 * this.winWidth / 1030, 36.8],
-        right: [-50 * 888 / 1030, -50 * this.winWidth / 1030, -50],
+        top: this.calcSizeByPhase(36.8),
+        right: this.calcSizeByPhase(-50),
       };
     },
     versionSize() {
-      return [12 * 888 / 1030, 12 * this.winWidth / 1030, 12];
+      return this.calcSizeByPhase(12);
     },
     versionPos() {
       return {
-        bottom: [30 * 888 / 1030, 30 * this.winWidth / 1030, 30],
-        right: [50 * 888 / 1030, 50 * this.winWidth / 1030, 50],
+        bottom: this.calcSizeByPhase(30),
+        right: this.calcSizeByPhase(50),
       };
     },
     advHeight() {
-      return [107, this.calcSize(107, 144), 144];
+      return [107, this.calcSize(107, 144), 144][this.currentPhase];
     },
     playlistFontSize() {
-      return [25 * 888 / 1030, 25 * this.winWidth / 1030, 25];
+      return this.calcSizeByPhase(25);
     },
     advPos() {
       return {
-        marginTop: [20 * 888 / 1030, 20 * this.winWidth / 1030, 20],
-        marginBottom: [30 * 888 / 1030, 30 * this.winWidth / 1030, 30],
+        marginTop: this.calcSizeByPhase(20),
+        marginBottom: this.calcSizeByPhase(30),
       };
     },
   },
   watch: {
     winWidth(val: number) {
-      if (val > 0 && val < 888) {
+      if (val > 0 && val < this.minRatioWidth) {
         this.currentPhase = 0;
-      } else if (val >= 888 && val < 1030) {
+      } else if (val >= this.minRatioWidth && val < this.maxRatioWidth) {
         this.currentPhase = 1;
-      } else if (val >= 1030) {
+      } else if (val >= this.maxRatioWidth) {
         this.currentPhase = 2;
       }
     },
@@ -266,9 +279,13 @@ export default {
   },
   methods: {
     calcSize(min: number, max: number) {
-      const a = (max - min) / (1030 - 888);
-      const b = min - 888 * a;
+      const a = (max - min) / (this.maxRatioWidth - this.minRatioWidth);
+      const b = min - this.minRatioWidth * a;
       return a * this.winWidth + b;
+    },
+    calcSizeByPhase(val: number) {
+      return [val * this.minRatioWidth / this.maxRatioWidth,
+        val * this.winWidth / this.maxRatioWidth, val][this.currentPhase];
     },
     handleLogin() {
       if (!this.isLogin) {

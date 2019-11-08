@@ -4,25 +4,25 @@
       :style="{
         marginLeft: `${padding}px`,
         color: '#3B3B41',
-        marginBottom: `${playlistBottom[currentPhase]}px`,
+        marginBottom: `${playlistBottom}px`,
       }"
       class="history-container"
     >
       <div class="title">
         <span
           :style="{
-            fontSize: `${playlistFontSize[currentPhase]}px`,
+            fontSize: `${playlistFontSize}px`,
             fontWeight: 'bold',
           }"
         >
           {{ $t('browsing.homepage.history') }}</span>
         <span
-          :style="{ fontSize: `${blankTitleFontSize[currentPhase]}px` }"
+          :style="{ fontSize: `${blankTitleFontSize}px` }"
           v-if="histories.length >= 1"
         >
           <span class="slash">&nbsp;</span>
           <span
-            :style="{ fontSize: `${itemDetailFontSize[currentPhase]}px` }"
+            :style="{ fontSize: `${itemDetailFontSize}px` }"
             @click="handleClear"
             class="clear"
           >{{ $t('browsing.homepage.clear') }}</span>
@@ -30,8 +30,8 @@
         <div
           v-else
           :style="{
-            fontSize: `${descriptionSize[currentPhase]}px`,
-            marginTop: `${titleBottom[currentPhase]}px`,
+            fontSize: `${descriptionSize}px`,
+            marginTop: `${titleBottom}px`,
           }"
           class="description"
         >
@@ -42,25 +42,25 @@
         :style="{
           width: `${winWidth - (showSidebar ? 76 : 0) - padding * 2}px`,
           maxWidth: '1321px',
-          height: histories.length < 1 ? `${contentHeight[currentPhase]}px` : 'auto',
-          margin: `0 0 ${historyBottom[currentPhase]}px 0`,
+          height: histories.length < 1 ? `${contentHeight}px` : 'auto',
+          margin: `0 0 ${historyBottom}px 0`,
           padding: histories.length < 1 ? '' :
-            `${titleBottom[currentPhase]}px 0 ${titleBottom[currentPhase]}px 0`,
+            `${titleBottom}px 0 ${titleBottom}px 0`,
         }"
         class="content"
       >
         <div
           v-if="histories.length < 1"
           :style="{
-            marginLeft: `${placeholderPos[currentPhase]}px`,
-            width: `calc(100% - ${placeholderPos[currentPhase]}px)`,
-            height: `${placeholderHeight[currentPhase]}px`
+            marginLeft: `${placeholderPos}px`,
+            width: `calc(100% - ${placeholderPos}px)`,
+            height: `${placeholderHeight}px`
           }"
           class="placeholder"
         >
           <div
             :style="{
-              width: `${placeholderPreWidth[currentPhase]}px`,
+              width: `${placeholderPreWidth}px`,
               height: '100%',
               display: 'flex',
               flexDirection: 'column',
@@ -70,7 +70,7 @@
             <div
               :style="{
                 width: '100%',
-                height: `${placeholderPreWidth[currentPhase]}px`,
+                height: `${placeholderPreWidth}px`,
                 background: '#E6E7ED',
                 borderRadius: '100%',
               }"
@@ -78,7 +78,7 @@
             <div
               :style="{
                 width: '100%',
-                height: `${placeholderPreWidth[currentPhase]}px`,
+                height: `${placeholderPreWidth}px`,
                 background: '#E6E7ED',
                 borderRadius: '100%',
               }"
@@ -97,10 +97,10 @@
         <BrowsingHistoryItem
           v-else
           :key="item.url"
-          :font-size="itemDetailFontSize[currentPhase]"
-          :icon-size="iconSize[currentPhase]"
-          :selected-height="selectedHeight[currentPhase]"
-          :icon-pos="iconPos[currentPhase]"
+          :font-size="itemDetailFontSize"
+          :icon-size="iconSize"
+          :selected-height="selectedHeight"
+          :icon-pos="iconPos"
           v-for="item in histories"
           v-bind="item"
           @click.native="handleOpenHistoryItem(item)"
@@ -126,16 +126,16 @@ export default {
       type: Number,
       required: true,
     },
-    currentPhase: {
-      type: Number,
-      required: true,
-    },
     playlistFontSize: {
-      type: Array,
+      type: Number,
       required: true,
     },
     showHomePage: {
       type: Boolean,
+      required: true,
+    },
+    calcSizeByPhase: {
+      type: Function,
       required: true,
     },
   },
@@ -147,44 +147,44 @@ export default {
   computed: {
     ...mapGetters(['winWidth', 'showSidebar']),
     selectedHeight() {
-      return [48 * 888 / 1030, 48 * this.winWidth / 1030, 48];
+      return this.calcSizeByPhase(48);
     },
     iconSize() {
-      return [24 * 888 / 1030, 24 * this.winWidth / 1030, 24];
+      return this.calcSizeByPhase(24);
     },
     playlistBottom() {
-      return [20 * 888 / 1030, 20 * this.winWidth / 1030, 20];
+      return this.calcSizeByPhase(20);
     },
     placeholderHeight() {
-      return [66 * 888 / 1030, 66 * this.winWidth / 1030, 66];
+      return this.calcSizeByPhase(66);
     },
     contentHeight() {
       const defaultHeight = this.histories.length ? 160 : 110;
-      return [defaultHeight * 888 / 1030, defaultHeight * this.winWidth / 1030, defaultHeight];
+      return this.calcSizeByPhase(defaultHeight);
     },
     historyBottom() {
-      return [30 * 888 / 1030, 30 * this.winWidth / 1030, 30];
+      return this.calcSizeByPhase(30);
     },
     blankTitleFontSize() {
-      return [19 * 888 / 1030, 19 * this.winWidth / 1030, 19];
+      return this.calcSizeByPhase(19);
     },
     placeholderPreWidth() {
-      return [26 * 888 / 1030, 26 * this.winWidth / 1030, 26];
+      return this.calcSizeByPhase(26);
     },
     itemDetailFontSize() {
-      return [15 * 888 / 1030, 15 * this.winWidth / 1030, 15];
+      return this.calcSizeByPhase(15);
     },
     titleBottom() {
-      return [10 * 888 / 1030, 10 * this.winWidth / 1030, 10];
+      return this.calcSizeByPhase(10);
     },
     iconPos() {
-      return [16 * 888 / 1030, 16 * this.winWidth / 1030, 16];
+      return this.calcSizeByPhase(16);
     },
     descriptionSize() {
-      return [17 * 888 / 1030, 17 * this.winWidth / 1030, 17];
+      return this.calcSizeByPhase(17);
     },
     placeholderPos() {
-      return [13 * 888 / 1030, 13 * this.winWidth / 1030, 13];
+      return this.calcSizeByPhase(13);
     },
   },
   watch: {
