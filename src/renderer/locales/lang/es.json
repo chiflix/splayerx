@@ -227,7 +227,8 @@
       "name": "Historia",
       "reload": "Recargar página",
       "back": "Espalda",
-      "forward": "Avance"
+      "forward": "Avance",
+      "clearHistory": ""
     }
   },
   "nextVideo": {
@@ -283,7 +284,30 @@
     "siteManager": "Gestor de sitios",
     "general": "General",
     "education": "Educación",
-    "siteTip": "Añadir / Editar"
+    "siteTip": "Añadir / Editar",
+    "today": "",
+    "yesterday": "",
+    "homepage": {
+      "unSigned": "",
+      "signInfo": "",
+      "signBtn": "",
+      "account": "",
+      "signOut": "",
+      "accountInfo": "",
+      "premiumBtn": "",
+      "premiumAccount": "",
+      "premiumInfo": "",
+      "renewBtn": "",
+      "history": "",
+      "clear": "",
+      "historyInfo": "",
+      "playlist": "",
+      "playlistInfoPre": "",
+      "playlistInfoNext": "",
+      "banner1": "",
+      "banner2": "",
+      "banner3": ""
+    }
   },
   "preferences": {
     "general": {
