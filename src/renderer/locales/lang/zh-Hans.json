@@ -228,7 +228,7 @@
       "reload": "重新加载页面",
       "back": "后退",
       "forward": "前进",
-      "clearHistory": ""
+      "clearHistory": "清除播放历史"
     }
   },
   "nextVideo": {
@@ -285,28 +285,28 @@
     "general": "综合",
     "education": "教育",
     "siteTip": "添加 / 编辑",
-    "today": "",
-    "yesterday": "",
+    "today": "今天",
+    "yesterday": "昨天",
     "homepage": {
-      "unSigned": "",
-      "signInfo": "",
-      "signBtn": "",
-      "account": "",
-      "signOut": "",
-      "accountInfo": "",
-      "premiumBtn": "",
-      "premiumAccount": "",
-      "premiumInfo": "",
-      "renewBtn": "",
-      "history": "",
-      "clear": "",
-      "historyInfo": "",
-      "playlist": "",
-      "playlistInfoPre": "",
-      "playlistInfoNext": "",
-      "banner1": "",
-      "banner2": "",
-      "banner3": ""
+      "unSigned": "未登录",
+      "signInfo": "登录开始使用 AI 翻译以及其他更多功能。",
+      "signBtn": "登录",
+      "account": "账号: ",
+      "signOut": "注销",
+      "accountInfo": "投食成为射手云养员，获取专享功能和特殊权益。",
+      "premiumBtn": "投食",
+      "premiumAccount": "云养员: ",
+      "premiumInfo": "云养至： ",
+      "renewBtn": "继续投食",
+      "history": "在线播放记录",
+      "clear": "清空",
+      "historyInfo": "线上视频的播放历史记录将在这里显示，包括页面名称、站点地址和浏览时间。",
+      "playlist": "本地播放列表",
+      "playlistInfoPre": "点击侧边栏底部“ ",
+      "playlistInfoNext": " ”按钮，选择多个文件播放，即可生成播放列表。",
+      "banner1": "有需求、想吐槽<br>立刻告诉我们",
+      "banner2": "成为射手影音<br>首席多语言翻译官",
+      "banner3": "版本更新一览"
     }
   },
   "preferences": {
