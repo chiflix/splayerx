@@ -376,9 +376,6 @@
         "accelerator": "CmdOrCtrl + R"
       },
       {
-        "id": "menubar.separator"
-      },
-      {
         "id": "history.back",
         "label": "msg.history.back",
         "enabled": false,
@@ -389,6 +386,14 @@
         "label": "msg.history.forward",
         "enabled": false,
         "accelerator": "CmdOrCtrl + ]"
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "history.clearHistory",
+        "label": "msg.history.clearHistory",
+        "enabled": true
       }
     ]
   },

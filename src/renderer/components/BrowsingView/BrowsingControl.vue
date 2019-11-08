@@ -93,7 +93,7 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
-    transition: background-color 100ms ease-in;
+    transition: background-color 100ms linear;
   }
   .button-hover:hover {
     background-color: #ECEEF0;
