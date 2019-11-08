@@ -183,6 +183,24 @@
         "label": "msg.playback.snapShot",
         "accelerator": "CmdOrCtrl+Shift+S",
         "enabled": true
+      },
+      {
+        "id": "playback.generateThumbnails",
+        "label": "msg.playback.generateThumbnails",
+        "submenu": {
+          "items": [
+            {
+              "id": "playback.generate3*3",
+              "label": "msg.playback.generate3*3",
+              "enabled": true
+            },
+            {
+              "id": "playback.generate4*4",
+              "label": "msg.playback.generate4*4",
+              "enabled": true
+            }
+          ]
+        }
       }
     ]
   },
