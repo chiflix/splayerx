@@ -227,7 +227,8 @@
       "name": "歷史",
       "reload": "重新載入頁面",
       "back": "後退",
-      "forward": "前進"
+      "forward": "前進",
+      "clearHistory": ""
     }
   },
   "nextVideo": {
@@ -283,7 +284,30 @@
     "siteManager": "站點管理",
     "general": "綜合",
     "education": "教育",
-    "siteTip": "新增 / 編輯"
+    "siteTip": "新增 / 編輯",
+    "today": "",
+    "yesterday": "",
+    "homepage": {
+      "unSigned": "",
+      "signInfo": "",
+      "signBtn": "",
+      "account": "",
+      "signOut": "",
+      "accountInfo": "",
+      "premiumBtn": "",
+      "premiumAccount": "",
+      "premiumInfo": "",
+      "renewBtn": "",
+      "history": "",
+      "clear": "",
+      "historyInfo": "",
+      "playlist": "",
+      "playlistInfoPre": "",
+      "playlistInfoNext": "",
+      "banner1": "",
+      "banner2": "",
+      "banner3": ""
+    }
   },
   "preferences": {
     "general": {
