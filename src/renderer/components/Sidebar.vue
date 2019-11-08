@@ -53,14 +53,14 @@
         />
       </div>
     </div>
-    <transition name="fade-300">
-      <div
-        :style="{
-          boxShadow: bottomMask ? '0 -2px 10px 0 rgba(0,0,0,0.50)' : '',
-          height: 'auto',
-        }"
-        class="bottom-icon no-drag"
-      >
+    <div
+      :style="{
+        boxShadow: bottomMask ? '0 -2px 10px 0 rgba(0,0,0,0.50)' : '',
+        height: 'auto',
+      }"
+      class="bottom-icon no-drag"
+    >
+      <transition name="fade-300">
         <div
           v-if="showFileIcon || $route.name === 'landing-view'"
           @click="openHomePage"
@@ -68,6 +68,8 @@
         >
           <Icon type="homePage" />
         </div>
+      </transition>
+      <transition name="fade-300">
         <div
           v-if="showFileIcon"
           @click="openFilesByDialog"
@@ -76,6 +78,8 @@
         >
           <Icon type="open" />
         </div>
+      </transition>
+      <transition name="fade-300">
         <div
           v-if="showFileIcon"
           @click="backToLanding"
@@ -84,8 +88,8 @@
         >
           <Icon type="exit" />
         </div>
-      </div>
-    </transition>
+      </transition>
+    </div>
   </div>
 </template>
 <script lang="ts">
