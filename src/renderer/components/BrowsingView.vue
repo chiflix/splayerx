@@ -436,8 +436,27 @@ export default {
       this.webInfo.canReload = false;
       this.currentUrl = 'home.page';
       this.title = this.$t('msg.titleName');
-    } else if (this.currentPage === 'webPage') {
+    } else if (this.currentPage === 'webPage' && this.currentMainBrowserView()) {
       this.title = this.currentMainBrowserView().webContents.getTitle();
+      const url = this.currentMainBrowserView().webContents.getURL()
+        ? this.currentMainBrowserView().webContents.getURL()
+        : (browsingChannelManager.getAllAvailableChannels()
+          .find(i => i.channel === this.currentChannel) as
+          { url: string, channel: string, icon: string, path: string, title: string }).url;
+      this.currentUrl = urlParseLax(url).href;
+      this.startLoadUrl = this.currentUrl;
+      this.removeListener();
+      this.addListenerToBrowser();
+      if (!this.currentMainBrowserView().webContents.isLoading()) {
+        this.currentMainBrowserView().webContents
+          .executeJavaScript(InjectJSManager.calcVideoNum())
+          .then((r: number) => {
+            this.webInfo.hasVideo = this.currentChannel === 'youtube.com' && !getVideoId(url).id
+              ? false
+              : !!r;
+          });
+      }
+      this.createTouchBar(this.webInfo.hasVideo);
     }
 
     this.$bus.$on('toggle-reload', this.handleUrlReload);
