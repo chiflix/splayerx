@@ -301,7 +301,7 @@ export default {
     },
     hasVideo(val: boolean) {
       this.updatePipState(val);
-      this.createTouchBar(val);
+      this.createTouchBar();
     },
     adaptFinished(val: boolean) {
       if (val) {
@@ -359,7 +359,7 @@ export default {
     loadingState(val: boolean) {
       if (val) {
         this.webInfo.hasVideo = false;
-        this.createTouchBar(false);
+        this.createTouchBar();
         if (this.refreshButton) {
           this.refreshButton.icon = this.createIcon('touchBar/stopRefresh.png');
         }
@@ -409,7 +409,7 @@ export default {
   created() {
     if (!navigator.onLine) this.offlineHandler();
     window.addEventListener('online', this.onlineHandler);
-    this.createTouchBar(false);
+    this.createTouchBar();
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [
       570,
       375,
@@ -456,7 +456,7 @@ export default {
               : !!r;
           });
       }
-      this.createTouchBar(this.webInfo.hasVideo);
+      this.createTouchBar();
     }
 
     this.$bus.$on('toggle-reload', this.handleUrlReload);
@@ -595,7 +595,7 @@ export default {
                   : !!r;
               });
           }
-          this.createTouchBar(this.webInfo.hasVideo);
+          this.createTouchBar();
         }
       },
     );
