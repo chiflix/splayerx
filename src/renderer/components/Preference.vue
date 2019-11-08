@@ -200,7 +200,7 @@ export default {
       top: 0;
       right: 0;
       position: fixed;
-
+      z-index: 2;
       .titlebar__button {
         width: 45px;
         height: 36px;
@@ -268,6 +268,7 @@ export default {
 
   &__tabcontent {
     padding: 32px 32px;
+    position: relative;
   }
 }
 </style>

@@ -166,6 +166,8 @@ export async function getProductList() {
         duration {
           unit
           value
+          giftUnit
+          giftValue
         },
         discount,
         productIntro,

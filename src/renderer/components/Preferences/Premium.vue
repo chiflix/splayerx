@@ -1,5 +1,6 @@
 <template>
-  <div class="box">
+  <div class="content">
+    <div class="box" />
     <div class="no-drag" />
   </div>
 </template>
@@ -18,18 +19,18 @@ export default Vue.extend({
 });
 </script>
 <style lang="scss" scoped>
-.box {
-  width: 100%;
-  height: 362px;
-  position: relative;
-  overflow: hidden;
+.content {
+  -webkit-app-region: no-drag;
   .no-drag {
-    position: absolute;
-    right: 0;
-    top: 160px;
     width: 100%;
-    height: 202px;
+    height: calc(100% - 36px);
+    position: absolute;
+    left: 0;
+    top: 36px;
     -webkit-app-region: no-drag;
+  }
+  .box {
+    height: 372px;
   }
 }
 </style>

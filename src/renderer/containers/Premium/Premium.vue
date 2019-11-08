@@ -1,67 +1,112 @@
 <template>
-  <div class="settingItem">
-    <div class="settingItem__title">
-      {{ $t('preferences.premium.title') }}
-    </div>
-    <div class="settingItem__description">
-      {{ $t('preferences.premium.description') }}
-    </div>
+  <div :class="`box ${isDarwin ? 'mac' : 'win' }`">
     <div
-      v-if="isCNLanguage"
-      class="settingItem__functionList"
+      v-if="!isDarwin"
+      @mouseover="state = 'hover'"
+      @mouseout="state = 'default'"
+      class="titlebar titlebar--win no-drag"
     >
-      <ul>
-        <li>{{ $t('preferences.premium.content.description1') }}</li>
-        <li>{{ $t('preferences.premium.content.description2') }}</li>
-        <li>{{ $t('preferences.premium.content.description3') }}</li>
-      </ul>
-      <ul>
-        <li>{{ $t('preferences.premium.content.description4') }}</li>
-        <li>{{ $t('preferences.premium.content.description6') }}</li>
-      </ul>
+      <Icon
+        class="titlebar__button--disable"
+        type="titleBarWinExitFull"
+      />
+      <Icon
+        class="titlebar__button--disable"
+        type="titleBarWinFull"
+      />
+      <Icon
+        @click.native="handleClose"
+        class="titlebar__button"
+        type="titleBarWinClose"
+      />
     </div>
-    <div
-      v-else
-      class="settingItem__functionList"
-    >
-      <ul>
-        <li>{{ $t('preferences.premium.content.description1') }}</li>
-        <li>{{ $t('preferences.premium.content.description2') }}</li>
-        <li>{{ $t('preferences.premium.content.description3') }}</li>
-        <li>{{ $t('preferences.premium.content.description6') }}</li>
-      </ul>
-    </div>
-    <div
-      v-if="!isMas"
-      class="settingItem__payList"
-    >
+    <div :class="`settingItem ${isDarwin ? 'mac' : 'win' }`">
+      <div class="bottom-mark" />
+      <div class="settingItem__title">
+        {{ $t('preferences.premium.title') }}
+      </div>
+      <div class="settingItem__description">
+        {{ $t('preferences.premium.description') }}
+      </div>
       <div
-        v-for="(item) in payList"
-        :key="item"
+        v-if="isCNLanguage"
+        class="settingItem__functionList"
       >
-        <BaseRadio
-          v-model="payType"
-          :value="item"
+        <ul>
+          <li>{{ $t('preferences.premium.content.description1') }}</li>
+          <li>{{ $t('preferences.premium.content.description2') }}</li>
+          <li>{{ $t('preferences.premium.content.description3') }}</li>
+        </ul>
+        <ul>
+          <li>{{ $t('preferences.premium.content.description4') }}</li>
+          <li>{{ $t('preferences.premium.content.description6') }}</li>
+        </ul>
+      </div>
+      <div
+        v-else
+        class="settingItem__functionList"
+      >
+        <ul>
+          <li>{{ $t('preferences.premium.content.description1') }}</li>
+          <li>{{ $t('preferences.premium.content.description2') }}</li>
+          <li>{{ $t('preferences.premium.content.description3') }}</li>
+          <li>{{ $t('preferences.premium.content.description6') }}</li>
+        </ul>
+      </div>
+      <div
+        v-if="!isMas"
+        class="settingItem__payList"
+      >
+        <div
+          v-for="(item) in payList"
+          :key="item"
         >
-          {{ $t(`preferences.premium.payType.${item}`) }}
-        </BaseRadio>
+          <BaseRadio
+            v-model="payType"
+            :value="item"
+          >
+            {{ $t(`preferences.premium.payType.${item}`) }}
+          </BaseRadio>
+        </div>
+      </div>
+      <ul class="settingItem__productionList">
+        <li
+          @click.left="buy(item)"
+          v-for="(item) in list"
+          :key="item.id"
+        >
+          <div>
+            {{ item.duration }}
+          </div>
+          <p>{{ item.current }}</p>
+          <span>{{ item.gift }}</span>
+        </li>
+      </ul>
+      <div class="settingItem__title">
+        {{ $t('preferences.premium.explanation.title') }}
+      </div>
+      <div class="settingItem__description no-margin">
+        <p>
+          {{ $t('preferences.premium.explanation.description1') }}
+        </p>
+        <br>
+        <p>
+          {{ $t('preferences.premium.explanation.description2') }}
+        </p>
+        <br>
+        <p>
+          {{ $t('preferences.premium.explanation.description3') }}
+        </p>
+        <br>
+        <p>
+          {{ $t('preferences.premium.explanation.description4') }}
+        </p>
+        <br>
+        <p>
+          {{ $t('preferences.premium.explanation.description5') }}
+        </p>
       </div>
     </div>
-    <ul class="settingItem__productionList">
-      <li
-        @click.left="buy(item)"
-        v-for="(item) in list"
-        :key="item.id"
-      >
-        <div>
-          {{ item.currentPrice.int }}<span
-            v-if="payType === 'paypal'"
-          >.{{ item.currentPrice.float }}</span>
-        </div>
-        <p>{{ item.origin }}</p>
-        <span>{{ item.discount }}<i v-if="item.discount">/</i>{{ item.duration }}</span>
-      </li>
-    </ul>
     <div
       v-fade-in="isPaying || isPaySuccess || isPayFail"
       class="modal"
@@ -199,6 +244,7 @@ export default Vue.extend({
   },
   data() {
     return {
+      state: 'default',
       isPaying: false,
       isApplePaing: false,
       isPaySuccess: false,
@@ -215,6 +261,10 @@ export default Vue.extend({
     };
   },
   computed: {
+    isDarwin() {
+      // @ts-ignore
+      return window.isDarwin;
+    },
     isMas() {
       // @ts-ignore
       return window.isMAS;
@@ -249,36 +299,31 @@ export default Vue.extend({
           duration: {
             value: number;
             unit: string;
+            giftValue: number;
+            giftUnit: string;
           };
           discount: number,
           id: string;
         }) => {
-          const currentPrice = (e.currentPrice[country] / 100).toFixed(2).split('.');
-          let originalPrice = (e.originalPrice[country] / 100).toFixed(2);
-          if (
-            e.originalPrice[country]
-            === parseInt(originalPrice, 10) * 100
-          ) {
-            originalPrice = (e.originalPrice[country] / 100).toFixed(0);
-          }
-          const off = this.isCNLanguage ? this.cnOff(e.discount) : 100 - e.discount;
-          const originString = e.discount === 100 ? '' : `${this.$t('preferences.premium.origin')}${originalPrice}`;
-          const origin = `${originString} ${country}`;
-          const discount = e.discount === 100 ? '' : `${off}${this.$t('preferences.premium.off')}`;
+          const currentPrice = e.currentPrice[country] / 100;
+          const currentPriceString = country === 'USD' ? currentPrice.toFixed(2) : currentPrice.toFixed(0);
+          const current = `${currentPriceString} ${country}`;
           const duration = e.duration.value > 1
-            ? `${e.duration.value}${this.$t(`preferences.premium.${e.duration.unit}s`)}`
-            : `${e.duration.value}${this.$t(`preferences.premium.${e.duration.unit}`)}`;
+            ? this.$t(`preferences.premium.${e.duration.unit}s`, { num: e.duration.value })
+            : this.$t(`preferences.premium.${e.duration.unit}`, { num: e.duration.value });
+          let gift = '';
+          if (e.duration.giftValue === 0) {
+            gift = this.$t('preferences.premium.normal');
+          } else if (e.duration.giftValue === 1) {
+            gift = this.$t(`preferences.premium.gift${e.duration.giftUnit}`, { num: e.duration.giftValue });
+          } else {
+            gift = this.$t(`preferences.premium.gift${e.duration.giftUnit}s`, { num: e.duration.giftValue });
+          }
           return {
             id: e.id,
             appleProductID: e.appleProductID,
-            currentPrice: {
-              int: currentPrice[0],
-              float: currentPrice[1],
-            },
-            originalPrice,
-            origin,
-            off,
-            discount,
+            current,
+            gift,
             duration,
           };
         },
@@ -531,6 +576,10 @@ export default Vue.extend({
       // @ts-ignore
       window.clipboard && window.clipboard.writeText('support@splayer.org');
     },
+    handleClose() {
+      // @ts-ignore
+      window.ipcRenderer && window.ipcRenderer.send('close-preference');
+    },
   },
 });
 </script>
@@ -540,9 +589,88 @@ export default Vue.extend({
   height: 0px;
   overflow: hidden;
 }
+.titlebar {
+  display: flex;
+  flex-wrap: nowrap;
+
+  &--mac {
+    margin-top: 12px;
+    margin-left: 12px;
+    margin-bottom: 18px;
+    width: fit-content;
+
+    .titlebar__button {
+      margin-right: 8px;
+      width: 12px;
+      height: 12px;
+      background-repeat: no-repeat;
+      -webkit-app-region: no-drag;
+      border-radius: 100%;
+
+      &--disable {
+        pointer-events: none;
+        opacity: 0.25;
+      }
+    }
+  }
+
+  &--win {
+    top: 0;
+    right: 0;
+    position: fixed;
+    z-index: 2;
+    .titlebar__button {
+      width: 45px;
+      height: 36px;
+      background-color: rgba(255,255,255,0);
+      transition: background-color 200ms;
+      &--disable {
+        pointer-events: none;
+        opacity: 0.25;
+      }
+      &:hover {
+        background-color: rgba(221, 221, 221, 0.2);
+      }
+      &:active {
+        background-color: rgba(221, 221, 221, 0.5);
+      }
+    }
+  }
+}
+.box {
+  width: 100%;
+  height: 100%;
+  overflow-y: scroll;
+  &::-webkit-scrollbar {
+    width: 8px;
+    background-color: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background-color: rgba(255,255,255,0.2);
+  }
+  &::-webkit-scrollbar-track {
+    border-radius: 4px;
+    background-color: transparent;
+  }
+  &.win {
+    height: calc(100% - 36px);
+  }
+}
 .settingItem {
   padding: 32px;
   -webkit-app-region: no-drag;
+  &.win {
+    padding-top: 0;
+  }
+  .bottom-mark {
+    width: calc(100% - 8px);
+    height: 20px;
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    background: linear-gradient(transparent, #3B3B41)
+  }
   &__attached {
     background-color: rgba(0, 0, 0, 0.07);
     margin-top: 15px;
@@ -562,6 +690,9 @@ export default Vue.extend({
     color: rgba(255, 255, 255, 0.25);
     margin-top: 7px;
     margin-bottom: 20px;
+    &.no-margin {
+      margin-bottom: 0;
+    }
   }
 
   &__functionList {
@@ -593,25 +724,29 @@ export default Vue.extend({
   &__productionList {
     display: flex;
     justify-content: space-between;
+    margin-bottom: 20px;
     li {
       -webkit-app-region: no-drag;
       width: 110px;
       list-style: none;
       text-align: center;
       background: rgba(0, 0, 0, 0.05);
-      padding-top: 18px;
-      padding-bottom: 20px;
+      padding-top: 29px;
+      padding-bottom: 16px;
       cursor: pointer;
       transition: all 200ms ease-in;
       border: 1px solid transparent;
       border-radius: 2px;
+      line-height: 0;
       &:hover {
         background: rgba(255, 255, 255, 0.08);
         border-color: rgba(255, 255, 255, 0.2);
       }
     }
     div {
-      font-size: 35px;
+      font-size: 24px;
+      line-height: 33px;
+      margin-bottom: 7px;
       color: rgba(255, 255, 255, 0.7);
       font-weight: 300;
       span {
@@ -622,12 +757,15 @@ export default Vue.extend({
     p {
       font-family: $font-medium;
       font-size: 11px;
+      line-height: 16px;
+      margin-bottom: 2px;
       color: rgba(255, 255, 255, 0.3);
       letter-spacing: 0;
     }
     span {
       font-family: $font-medium;
       font-size: 12px;
+      line-height: 17px;
       color: rgba(255, 255, 255, 0.7);
       letter-spacing: 0;
     }

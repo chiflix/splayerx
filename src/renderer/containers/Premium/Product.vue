@@ -12,6 +12,10 @@ export default Vue.extend({
   body {
     -webkit-app-region: drag;
     background-color: #3B3B41;
+    &.platform-win32 {
+      padding-top: 36px;
+      overflow: hidden;
+    }
   }
   .fade-in {
     visibility: visible;

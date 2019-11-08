@@ -330,7 +330,6 @@ function createPremiumView() {
       premiumView.webContents.openDevTools();
     }, 1000);
   }
-  premiumView.webContents.openDevTools();
 }
 
 function createPreferenceWindow(e, route) {
@@ -339,7 +338,7 @@ function createPreferenceWindow(e, route) {
     frame: false,
     titleBarStyle: 'none',
     width: 540,
-    height: 426,
+    height: 436,
     transparent: true,
     resizable: false,
     show: false,
@@ -1404,6 +1403,13 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('create-order-done', () => {
     if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
       preferenceWindow.webContents.send('close-payment');
+    }
+  });
+
+  ipcMain.on('close-preference', () => {
+    if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
+      preferenceWindow.close();
+      preferenceWindow = null;
     }
   });
 }

@@ -4,7 +4,7 @@ const { ipcRenderer, remote, clipboard } = require('electron');
 
 window.isDarwin = process.platform === 'darwin';
 
-window.isMAS = !process.mas;
+window.isMAS = process.mas;
 
 window.ipcRenderer = ipcRenderer;
 
