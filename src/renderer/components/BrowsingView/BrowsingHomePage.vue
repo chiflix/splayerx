@@ -3,6 +3,7 @@
     :style="{
       overflowX: winWidth + (showSidebar ? 0 : 76) < minRatioWidth ? 'scroll' : 'hidden',
     }"
+    :class="isDarwin ? '' : 'win-scroll'"
     class="home-page-container no-drag"
   >
     <div
@@ -170,6 +171,9 @@ export default {
   },
   computed: {
     ...mapGetters(['winWidth', 'showSidebar', 'userInfo']),
+    isDarwin() {
+      return process.platform === 'darwin';
+    },
     currentVersion() {
       return version;
     },
@@ -302,8 +306,20 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.win-scroll {
+  &::-webkit-scrollbar {
+    width: 9px;
+    height: 9px;
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    border-radius: 8px;
+    border: 0.5px solid rgba(255, 255, 255, 0.2);
+    background-color: rgba(0, 0, 0, 0.4);
+  }
+}
 .home-page-container {
-  width: 100%;
+  width: calc(100%- 1px);
   height: calc(100% - 40px);
   top: 40px;
   display: flex;
