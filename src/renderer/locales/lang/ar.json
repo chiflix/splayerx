@@ -227,7 +227,8 @@
       "name": "التاريخ",
       "reload": "إعادة تحميل الصفحة",
       "back": "ظهر",
-      "forward": "تقدم"
+      "forward": "تقدم",
+      "clearHistory": "حذف التاريخ"
     }
   },
   "nextVideo": {
@@ -283,7 +284,30 @@
     "siteManager": "مدير المواقع",
     "general": "مجمع",
     "education": "التعليم",
-    "siteTip": "اضافة / تغيير"
+    "siteTip": "اضافة / تغيير",
+    "today": "اليوم",
+    "yesterday": "أمس",
+    "homepage": {
+      "unSigned": "Not Signed In",
+      "signInfo": "Sign in to use AI Translation and get access to more features.",
+      "signBtn": "Sign In",
+      "account": "Account: ",
+      "signOut": "Sign out",
+      "accountInfo": "Upgrade your account now and get started with exclusive features and more.",
+      "premiumBtn": "Upgrade",
+      "premiumAccount": "Premium Account: ",
+      "premiumInfo": "Expiration Date: ",
+      "renewBtn": "Renew",
+      "history": "Online History",
+      "clear": "Clear",
+      "historyInfo": "Keep track of your playback history, including the page title, the site address and the date you watched.",
+      "playlist": "Local Playlist",
+      "playlistInfoPre": "Click the ",
+      "playlistInfoNext": " button on the left sidebar, choose and open more than one file to generate a playlist.",
+      "banner1": "Submit your<br>Feedback",
+      "banner2": "Contribute to our<br>Localization Project",
+      "banner3": "Release Notes"
+    }
   },
   "preferences": {
     "general": {
