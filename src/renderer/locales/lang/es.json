@@ -375,6 +375,14 @@
       "premiumSetting": "Premium",
       "title": "SPlayer Premium",
       "description": "Acceda ahora a Premium para ayudar a SPlayer a cambiar la forma en que la gente ve los vídeos y obtener acceso a funciones más avanzadas.",
+      "explanation": {
+        "title": "",
+        "description1": "",
+        "description2": "",
+        "description3": "",
+        "description4": "",
+        "description5": ""
+      },
       "content": {
         "description1": "Horas adicionales de servicio de traducción de IA",
         "description2": "Soporta más idiomas en Traducción de IA",
@@ -389,6 +397,11 @@
       "year": " Year",
       "months": " Mo.",
       "years": " Yr.",
+      "normal": "",
+      "giftmonth": "",
+      "giftyear": "",
+      "giftmonths": "",
+      "giftyears": "",
       "payType": {
         "alipay": "Alipay",
         "wxpay": "WeChat",
