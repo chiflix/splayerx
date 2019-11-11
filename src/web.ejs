@@ -1,15 +1,91 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <title>SPlayer</title>
-  </head>
-  <body class="platform-<%= process.platform %>">
-    <div id="app"></div>
-    <script>
-      window.process = window.process || {};
-      window.process.platform = (/Mac OS/i.test(window.navigator.userAgent) ? 'darwin' : 'win32');
-    </script>
-    <!-- webpack builds are automatically injected -->
-  </body>
+<head>
+  <meta charset="utf-8">
+  <title>SPlayer</title>
+  <style>
+    .pre-loading {
+      width: 110px;
+      height: 110px;
+      position: fixed;
+      left: calc(50% - 55px);
+      top: calc(50% - 55px);
+      -webkit-animation: pre-loading 1.4s infinite linear;
+      animation: pre-loading 1.4s infinite linear;
+    }
+    .pre-loading svg {
+      width: 100%;
+      height: 100%;
+    }
+    @keyframes pre-loading {
+      0% {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+      }
+      100% {
+        -webkit-transform: rotate(360deg);
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+<body style="background-color: #3B3B41;">
+  <div id="app">
+    <div class="pre-loading">
+      <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 115 115">
+        <defs>
+          <style>
+            .cls-1,
+            .cls-3 {
+              fill: none;
+            }
+
+            .cls-2 {
+              clip-path: url(#clip-path);
+            }
+
+            .cls-3 {
+              stroke: #fff;
+              stroke-miterlimit: 10;
+              stroke-width: 20px;
+              opacity: 0.1;
+            }
+
+            .cls-4 {
+              fill: url(#未命名的渐变_17);
+            }
+          </style>
+          <clipPath id="clip-path">
+            <circle class="cls-1" cx="57.5" cy="57.5" r="47.5" />
+          </clipPath>
+          <linearGradient id="未命名的渐变_17" x1="39.49" y1="85.49" x2="87.95" y2="32.34" gradientUnits="userSpaceOnUse">
+            <stop offset="0.1" stop-color="#fff" stop-opacity="0.3" />
+            <stop offset="0.16" stop-color="#fff" stop-opacity="0.25" />
+            <stop offset="0.31" stop-color="#fff" stop-opacity="0.14" />
+            <stop offset="0.44" stop-color="#fff" stop-opacity="0.07" />
+            <stop offset="0.53" stop-color="#fff" stop-opacity="0.05" />
+            <stop offset="0.55" stop-color="#fff" stop-opacity="0.04" />
+            <stop offset="0.7" stop-color="#fff" stop-opacity="0.01" />
+            <stop offset="0.97" stop-color="#fff" stop-opacity="0" />
+          </linearGradient>
+        </defs>
+        <g id="图层_2" data-name="图层 2">
+          <g id="图层_1-2" data-name="图层 1">
+            <g class="cls-2">
+              <circle class="cls-3" cx="57.5" cy="57.5" r="47.5" />
+            </g>
+            <path class="cls-4"
+              d="M10,57.5A47.5,47.5,0,1,0,57.5,10a5,5,0,0,0,0,10A37.5,37.5,0,1,1,20,57.5a5,5,0,0,0-10,0Z" />
+          </g>
+        </g>
+      </svg>
+    </div>
+  </div>
+  <script>
+    window.process = window.process || {};
+    window.process.platform = (/Mac OS/i.test(window.navigator.userAgent) ? 'darwin' : 'win32');
+    document.body.setAttribute('class', `platform-${window.process.platform}`);
+  </script>
+  <!-- webpack builds are automatically injected -->
+</body>
 </html>

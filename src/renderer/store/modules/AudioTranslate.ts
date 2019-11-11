@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-05 16:03:32
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-11-01 11:53:12
+ * @Last Modified time: 2019-11-11 16:20:18
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @ts-ignore
@@ -16,7 +16,7 @@ import { AITaskInfo } from '@/interfaces/IMediaStorable';
 import { TranscriptInfo } from '@/services/subtitle';
 import { ISubtitleControlListItem, Type } from '@/interfaces/ISubtitle';
 import { mediaStorageService } from '@/services/storage/MediaStorageService';
-import { PreTranslatedGenerator } from '@/services/subtitle/loaders/PreTranslated';
+import { PreTranslatedGenerator } from '@/services/subtitle/loaders/preTranslated';
 import { isAudioCenterChannelEnabled, isAccountEnabled } from '@/helpers/featureSwitch';
 import { addBubble } from '@/helpers/notificationControl';
 import {
