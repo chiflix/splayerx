@@ -101,7 +101,6 @@
         <p>
           {{ $t('preferences.premium.explanation.description4') }}
         </p>
-        <br>
         <p>
           {{ $t('preferences.premium.explanation.description5') }}
         </p>
