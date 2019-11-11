@@ -6,6 +6,10 @@
   </head>
   <body class="platform-<%= process.platform %>">
     <div id="app"></div>
+    <script>
+      window.process = window.process || {};
+      window.process.platform = (/Mac OS/i.test(window.navigator.userAgent) ? 'darwin' : 'win32');
+    </script>
     <!-- webpack builds are automatically injected -->
   </body>
 </html>
