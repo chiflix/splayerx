@@ -54,13 +54,18 @@ function generateHtmlWebpackPluginConfig(name) {
  */
 let whiteListedModules = ['vue', 'vuex', 'vue-router', 'vue-i18n', 'vue-axios', 'axios'];
 
+const entry = {
+  login: path.join(__dirname, '../src/renderer/login.ts'),
+  premium: path.join(__dirname, '../src/renderer/premium.ts'),
+};
+if (process.env.NODE_ENV !== 'production') {
+  entry['index'] = entry['login'];
+}
+
 let rendererConfig = {
   mode: 'development',
   devtool: '#module-eval-source-map',
-  entry: {
-    login: path.join(__dirname, '../src/renderer/login.ts'),
-    premium: path.join(__dirname, '../src/renderer/premium.ts'),
-  },
+  entry,
   externals: [
     ...Object.keys(Object.assign({}, dependencies, optionalDependencies)).filter(
       d => !whiteListedModules.includes(d),
