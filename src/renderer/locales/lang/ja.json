@@ -375,6 +375,14 @@
       "premiumSetting": "プレミアム",
       "title": "SPlayer Premium",
       "description": "Go Premium now to help SPlayer change the way people watch videos, and get access to more advanced features.",
+      "explanation": {
+        "title": "",
+        "description1": "",
+        "description2": "",
+        "description3": "",
+        "description4": "",
+        "description5": ""
+      },
       "content": {
         "description1": "Additional hours of AI Translation service",
         "description2": "Support more languages in AI Translation",
@@ -389,6 +397,11 @@
       "year": " Mo.",
       "months": " Mo.",
       "years": " Yr.",
+      "normal": "",
+      "giftmonth": "",
+      "giftyear": "",
+      "giftmonths": "",
+      "giftyears": "",
       "payType": {
         "alipay": "Alipay",
         "wxpay": "WeChat",
