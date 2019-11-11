@@ -64,6 +64,7 @@
         <div
           v-if="showFileIcon || $route.name === 'landing-view'"
           @click="openHomePage"
+          :title="$t('browsing.homepage.tips')"
           class="icon"
         >
           <Icon type="homePage" />
