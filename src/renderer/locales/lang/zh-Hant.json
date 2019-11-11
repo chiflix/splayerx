@@ -375,6 +375,14 @@
       "premiumSetting": "雲養計劃",
       "title": "射手雲養計劃",
       "description": "牆裂歡迎廣大用戶投食支持射手影音長期穩定可持續開發，同時獲得射手雲養員專享功能。",
+      "explanation": {
+        "title": "",
+        "description1": "",
+        "description2": "",
+        "description3": "",
+        "description4": "",
+        "description5": ""
+      },
       "content": {
         "description1": "AI翻譯功能 (應該) 足夠用",
         "description2": "更多智能翻譯語言選擇",
@@ -389,6 +397,11 @@
       "year": " 年",
       "months": " 個月",
       "years": " 年",
+      "normal": "",
+      "giftmonth": "",
+      "giftyear": "",
+      "giftmonths": "",
+      "giftyears": "",
       "payType": {
         "alipay": "支付寶",
         "wxpay": "微信支付",
