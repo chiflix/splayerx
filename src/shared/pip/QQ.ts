@@ -1,8 +1,8 @@
 export function QQVideoPause(type: string) {
   if (['normal', 'hotVideo'].includes(type)) {
-    return 'document.querySelector(".mod_player").getElementsByTagName("video")[0].pause();';
+    return 'var video = document.querySelector(".mod_player").getElementsByTagName("video")[0]; if (video) video.pause();';
   }
-  return 'document.querySelector(".poplayer_quickplay").getElementsByTagName("video")[0].pause();';
+  return 'var video = document.querySelector(".poplayer_quickplay").getElementsByTagName("video")[0]; if (video) video.pause();';
 }
 
 export default class QQ {

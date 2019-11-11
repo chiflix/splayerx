@@ -2,6 +2,7 @@
   <div
     :style="{
       overflowX: winWidth + (showSidebar ? 0 : 76) < minRatioWidth ? 'scroll' : 'hidden',
+      width: isDarwin ? '100%' : 'calc(100% - 1px)'
     }"
     :class="isDarwin ? '' : 'win-scroll'"
     class="home-page-container no-drag"
@@ -319,7 +320,6 @@ export default {
   }
 }
 .home-page-container {
-  width: calc(100% - 1px);
   height: calc(100% - 40px);
   top: 40px;
   display: flex;

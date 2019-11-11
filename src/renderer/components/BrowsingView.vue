@@ -516,10 +516,9 @@ export default {
         if (this.currentMainBrowserView()) {
           this.removeListener();
           this.currentMainBrowserView().webContents
-            .executeJavaScript(InjectJSManager.pauseVideo(this.currentChannel)).then(() => {
-              this.$electron.remote.getCurrentWindow()
-                .removeBrowserView(this.currentMainBrowserView());
-            });
+            .executeJavaScript(InjectJSManager.pauseVideo(this.currentChannel));
+          this.$electron.remote.getCurrentWindow()
+            .removeBrowserView(this.currentMainBrowserView());
         }
         this.showHomePage = true;
         this.showChannelManager = false;

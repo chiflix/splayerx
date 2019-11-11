@@ -1,8 +1,8 @@
 export function huyaVideoPause(type: string) {
   if (['normal', 'others'].includes(type)) {
-    return 'var timer = setInterval(() => { var video = document.querySelector("video");if (video && !video.paused) { video.pause();}const pause = document.querySelector(".player-pause-btn");if (pause && timer) { clearInterval(timer);timer = null;pause.click(); } }, 100);';
+    return 'var timer = setInterval(() => { var video = document.querySelector("video");if (video && !video.paused) { video.pause();}var pause = document.querySelector(".player-pause-btn");if (pause && timer) { clearInterval(timer);timer = null;pause.click(); } }, 100);';
   }
-  return 'var timer = setInterval(() => { var video = document.querySelector("video");if (video && !video.paused) { video.pause();}const pause = document.querySelector(".pause-81a5c3"); if (pause) { clearInterval(timer);pause.click(); } }, 100);';
+  return 'var timer = setInterval(() => { var video = document.querySelector("video");if (video && !video.paused) { video.pause();}var pause = document.querySelector(".pause-81a5c3"); if (pause) { clearInterval(timer);pause.click(); } }, 100);';
 }
 
 export default class Huya {

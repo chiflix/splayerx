@@ -22,7 +22,7 @@ class InjectJSManager implements IInjectJSManager {
       + 'document.getElementsByTagName("video").length;'
       + '}';
     this.getVideoStyleCode = 'getComputedStyle(document.querySelector("video") || document.querySelector("iframe").contentDocument.querySelector("video"))';
-    this.pauseNormalVideo = 'document.querySelector("video").pause();';
+    this.pauseNormalVideo = 'var video = document.querySelector("video"); if (video) video.pause();';
   }
 
   public getPipByChannel(info: { channel: string, type?: string,
