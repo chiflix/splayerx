@@ -217,7 +217,7 @@ export class BrowserViewManager implements IBrowserViewManager {
         },
       });
       page.view.webContents.loadURL(page.url);
-    } else {
+    } else if (this.currentChannel){
       this.pauseVideo();
     }
     newHistory.lastUpdateTime = Date.now();
@@ -425,6 +425,10 @@ export class BrowserViewManager implements IBrowserViewManager {
     this.currentPip.pipPage = null;
   }
 
+  public setCurrentChannel(newChannel: string): void {
+    this.currentChannel = newChannel;
+  }
+
   public clearAllBrowserViews(isDeepClear?: boolean): void {
     this.currentChannel = '';
     this.currentPip = {
@@ -531,4 +535,5 @@ export interface IBrowserViewManager {
   clearAllBrowserViews(isDeepClear?: boolean): void
   clearBrowserViewsByChannel(channel: string): void
   openHistoryPage(channel: string, url: string): BrowserViewData
+  setCurrentChannel(newChannel: string): void
 }

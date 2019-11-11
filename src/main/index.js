@@ -770,7 +770,11 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('change-channel', (evt, args) => {
     if (!browserViewManager) browserViewManager = new BrowserViewManager();
     const mainBrowser = mainWindow.getBrowserViews()[0];
-    if (mainBrowser) mainWindow.removeBrowserView(mainBrowser);
+    if (mainBrowser) {
+      mainWindow.removeBrowserView(mainBrowser);
+    } else {
+      browserViewManager.setCurrentChannel('');
+    }
     const newChannel = browserViewManager.changeChannel(args.channel, args);
     const view = newChannel.view ? newChannel.view : newChannel.page.view;
     const url = newChannel.view ? args.url : newChannel.page.url;
