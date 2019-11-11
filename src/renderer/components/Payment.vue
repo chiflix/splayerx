@@ -152,7 +152,7 @@ export default {
           ipcRenderer.send('payment-fail');
         }
       } catch (error) {
-        if (error && (error.status === 400 || error.status === 401 || error.status === 403)) {
+        if (error && (error.status === 401 || error.status === 403)) {
           ipcRenderer.send('payment-fail');
         }
         setTimeout(() => {
