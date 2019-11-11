@@ -320,10 +320,10 @@ function createPremiumView() {
     } SPlayerX@2018 ${os.platform()} ${os.release()} Version ${app.getVersion()}`,
   );
   premiumView.setBounds({
-    x: 0,
+    x: 110,
     y: 0,
-    width: 0,
-    height: 0,
+    width: preferenceWindow.getSize()[0] - 110,
+    height: preferenceWindow.getSize()[1],
   });
   if (process.env.NODE_ENV === 'development') {
     setTimeout(() => { // wait some time to prevent `Object not found` error
@@ -384,6 +384,7 @@ function createPreferenceWindow(e, route) {
   setBoundsCenterByOriginWindow(mainWindow, preferenceWindow, 540, 426);
   // 预先加载好PremiumView
   createPremiumView();
+  preferenceWindow.removeBrowserView(premiumView);
 }
 
 function createLoginWindow(e, fromWindow, route) {
@@ -1375,22 +1376,14 @@ function registerMainWindowEvent(mainWindow) {
     if (!premiumView) {
       createPremiumView();
     }
-    premiumView.setBounds({
-      x: 110,
-      y: 0,
-      width: preferenceWindow.getSize()[0] - 110,
-      height: preferenceWindow.getSize()[1],
-    });
+    if (preferenceWindow) {
+      preferenceWindow.addBrowserView(premiumView);
+    }
   });
 
   ipcMain.on('hide-premium-view', () => {
-    if (premiumView) {
-      premiumView.setBounds({
-        x: 0,
-        y: 0,
-        width: 0,
-        height: 0,
-      });
+    if (premiumView && preferenceWindow) {
+      preferenceWindow.removeBrowserView(premiumView);
     }
   });
 
