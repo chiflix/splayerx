@@ -369,18 +369,18 @@
       "createdAt": "注册时间",
       "payAt": "投食记录",
       "payContent": "{date}{product}",
-      "payProduct": ": 投食{product}"
+      "payProduct": ": 投食 {product}"
     },
     "premium": {
       "premiumSetting": "云养计划",
       "title": "射手云养计划",
       "description": "墙裂欢迎广大用户投食，支持射手影音长期稳定可持续开发，同时获得射手云养员专享功能。",
       "explanation": {
-        "title": "",
+        "title": "为何如此定价?",
         "description1": "",
         "description2": "",
-        "description3": "",
-        "description4": "",
+        "description3": "祝好",
+        "description4": "射手影音 开发团队",
         "description5": ""
       },
       "content": {
@@ -393,11 +393,11 @@
       },
       "origin": "原价 ",
       "off": "折",
-      "month": " 个月",
-      "year": " 年",
-      "months": " 个月",
-      "years": " 年",
-      "normal": "",
+      "month": "{num}个月",
+      "year": "{num}年",
+      "months": "{num}个月",
+      "years": "{num}年",
+      "normal": "标准",
       "giftmonth": "",
       "giftyear": "",
       "giftmonths": "",
