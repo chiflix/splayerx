@@ -375,6 +375,14 @@
       "premiumSetting": "云养计划",
       "title": "射手云养计划",
       "description": "墙裂欢迎广大用户投食，支持射手影音长期稳定可持续开发，同时获得射手云养员专享功能。",
+      "explanation": {
+        "title": "",
+        "description1": "",
+        "description2": "",
+        "description3": "",
+        "description4": "",
+        "description5": ""
+      },
       "content": {
         "description1": "AI翻译功能 (应该) 足够用",
         "description2": "更多智能翻译语言选择",
@@ -389,6 +397,11 @@
       "year": " 年",
       "months": " 个月",
       "years": " 年",
+      "normal": "",
+      "giftmonth": "",
+      "giftyear": "",
+      "giftmonths": "",
+      "giftyears": "",
       "payType": {
         "alipay": "支付宝",
         "wxpay": "微信支付",
