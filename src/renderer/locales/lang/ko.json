@@ -375,6 +375,14 @@
       "premiumSetting": "Premium",
       "title": "SPlayer Premium",
       "description": "Additional hours of AI Translation service",
+      "explanation": {
+        "title": "",
+        "description1": "",
+        "description2": "",
+        "description3": "",
+        "description4": "",
+        "description5": ""
+      },
       "content": {
         "description1": "Additional hours of AI Translation service",
         "description2": "Support more languages in AI Translation",
@@ -389,6 +397,11 @@
       "year": " Year",
       "months": " Yr.",
       "years": " Yr.",
+      "normal": "",
+      "giftmonth": "",
+      "giftyear": "",
+      "giftmonths": "",
+      "giftyears": "",
       "payType": {
         "alipay": "Alipay",
         "wxpay": "WeChat",
