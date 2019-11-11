@@ -364,10 +364,10 @@ new Vue({
       }
     });
     asyncStorage.get('subtitle-style').then((data) => {
-      if (data.chosenStyle) {
+      if (data.chosenStyle !== undefined) {
         this.updateChosenStyle(data.chosenStyle);
       }
-      if (data.chosenSize) {
+      if (data.chosenSize !== undefined) {
         this.updateChosenSize(data.chosenSize);
       }
       this.updateEnabledSecondarySub(!!data.enabledSecondarySub);
