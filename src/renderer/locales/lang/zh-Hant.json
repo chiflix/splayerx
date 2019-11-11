@@ -376,12 +376,12 @@
       "title": "射手雲養計劃",
       "description": "牆裂歡迎廣大用戶投食支持射手影音長期穩定可持續開發，同時獲得射手雲養員專享功能。",
       "explanation": {
-        "title": "",
-        "description1": "",
-        "description2": "",
-        "description3": "",
-        "description4": "",
-        "description5": ""
+        "title": "為何如此定價？",
+        "description1": "長視頻語音識別和智能翻譯功能，會消耗大量計​​算資源。目前為止，我們該功能每小時的計算成本仍在2-5元之間。",
+        "description2": "在此特別感謝用戶們對射手的支持，我們會繼續開發更多有趣的功能，打破語言藩籬，理解世界。",
+        "description3": "祝好",
+        "description4": "射手影音 開發團隊",
+        "description5": "2019年"
       },
       "content": {
         "description1": "AI翻譯功能 (應該) 足夠用",
@@ -398,10 +398,10 @@
       "months": "{num}個月",
       "years": "{num}年",
       "normal": "標準",
-      "giftmonth": "",
-      "giftyear": "",
-      "giftmonths": "",
-      "giftyears": "",
+      "giftmonth": "贈{num}个月",
+      "giftyear": "贈{num}年",
+      "giftmonths": "贈{num}个月",
+      "giftyears": "贈{num}年",
       "payType": {
         "alipay": "支付寶",
         "wxpay": "微信支付",
