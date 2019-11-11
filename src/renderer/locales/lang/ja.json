@@ -288,6 +288,7 @@
     "today": "今日",
     "yesterday": "昨日",
     "homepage": {
+      "tips": "ホーム",
       "unSigned": "サインインしていません",
       "signInfo": "サインインしてAI翻訳を使用し、より多くの機能にアクセスします。",
       "signBtn": "登入",
