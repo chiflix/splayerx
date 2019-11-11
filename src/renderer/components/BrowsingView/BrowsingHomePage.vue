@@ -170,15 +170,6 @@ export default {
       maxRatioWidth: 1030,
     };
   },
-  created() {
-    if (this.userInfo.id) {
-      this.isLogin = true;
-      this.displayName = this.userInfo.displayName;
-    } else {
-      this.isLogin = false;
-      this.displayName = '';
-    }
-  },
   computed: {
     ...mapGetters(['winWidth', 'showSidebar', 'userInfo']),
     isDarwin() {
@@ -279,6 +270,15 @@ export default {
         this.currentPhase = 2;
       }
     },
+  },
+  created() {
+    if (this.userInfo.id) {
+      this.isLogin = true;
+      this.displayName = this.userInfo.displayName;
+    } else {
+      this.isLogin = false;
+      this.displayName = '';
+    }
   },
   mounted() {
     this.$electron.ipcRenderer.on('sign-in', (evt: Event, account?: { displayName: string, token: string}) => {
