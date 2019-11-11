@@ -369,14 +369,22 @@
       "createdAt": "注册时间",
       "payAt": "投食记录",
       "payContent": "{date}{product}",
-      "payProduct": ": 投食{product}"
+      "payProduct": ": 投食 {product}"
     },
     "premium": {
       "premiumSetting": "云养计划",
       "title": "射手云养计划",
       "description": "墙裂欢迎广大用户投食，支持射手影音长期稳定可持续开发，同时获得射手云养员专享功能。",
+      "explanation": {
+        "title": "为何如此定价？",
+        "description1": "长视频语音识别和智能翻译功能，会消耗大量计算资源。目前为止，我们该功能每小时的计算成本仍在2-5元之间。",
+        "description2": "在此特别感谢用户们对射手的支持，我们会继续开发更多有趣的功能，打破语言藩篱，理解世界。",
+        "description3": "祝好",
+        "description4": "射手影音 开发团队",
+        "description5": "2019年"
+      },
       "content": {
-        "description1": "AI翻译功能 (应该) 足够用",
+        "description1": "AI 翻译功能 (应该) 足够用",
         "description2": "更多智能翻译语言选择",
         "description3": "无限制导出翻译和字幕",
         "description4": "投食记录将被永久保存",
@@ -385,10 +393,15 @@
       },
       "origin": "原价 ",
       "off": "折",
-      "month": " 个月",
-      "year": " 年",
-      "months": " 个月",
-      "years": " 年",
+      "month": "{num}个月",
+      "year": "{num}年",
+      "months": "{num}个月",
+      "years": "{num}年",
+      "normal": "标准",
+      "giftmonth": "赠 {num} 个月",
+      "giftyear": "赠 {num} 年",
+      "giftmonths": "赠 {num} 个月",
+      "giftyears": "赠 {num} 年",
       "payType": {
         "alipay": "支付宝",
         "wxpay": "微信支付",
