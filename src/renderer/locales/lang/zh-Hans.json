@@ -384,7 +384,7 @@
         "description5": "2019年"
       },
       "content": {
-        "description1": "AI翻译功能 (应该) 足够用",
+        "description1": "AI 翻译功能 (应该) 足够用",
         "description2": "更多智能翻译语言选择",
         "description3": "无限制导出翻译和字幕",
         "description4": "投食记录将被永久保存",
@@ -398,10 +398,10 @@
       "months": "{num}个月",
       "years": "{num}年",
       "normal": "标准",
-      "giftmonth": "赠{num}个月",
-      "giftyear": "赠{num}年",
-      "giftmonths": "赠{num}个月",
-      "giftyears": "赠{num}年",
+      "giftmonth": "赠 {num} 个月",
+      "giftyear": "赠 {num} 年",
+      "giftmonths": "赠 {num} 个月",
+      "giftyears": "赠 {num} 年",
       "payType": {
         "alipay": "支付宝",
         "wxpay": "微信支付",
