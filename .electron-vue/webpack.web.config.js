@@ -34,7 +34,7 @@ function generateHtmlWebpackPluginConfig(name) {
   return {
     chunks: [name],
     filename: `${name}.html`,
-    template: path.resolve(__dirname, `../src/login.ejs`),
+    template: path.resolve(__dirname, `../src/web.ejs`),
     minify: {
       collapseWhitespace: true,
       removeAttributeQuotes: true,
@@ -54,14 +54,18 @@ function generateHtmlWebpackPluginConfig(name) {
  */
 let whiteListedModules = ['vue', 'vuex', 'vue-router', 'vue-i18n', 'vue-axios', 'axios'];
 
+const entry = {
+  login: path.join(__dirname, '../src/renderer/login.ts'),
+  premium: path.join(__dirname, '../src/renderer/premium.ts'),
+};
+if (process.env.NODE_ENV !== 'production') {
+  entry['index'] = entry['login'];
+}
+
 let rendererConfig = {
   mode: 'development',
   devtool: '#module-eval-source-map',
-  entry: {
-    index: path.join(__dirname, '../src/renderer/login.ts'),
-    login: path.join(__dirname, '../src/renderer/login.ts'),
-    premium: path.join(__dirname, '../src/renderer/premium.ts'),
-  },
+  entry,
   externals: [
     ...Object.keys(Object.assign({}, dependencies, optionalDependencies)).filter(
       d => !whiteListedModules.includes(d),
@@ -195,13 +199,12 @@ let rendererConfig = {
   plugins: [
     new VueLoaderPlugin(),
     new ExtractTextPlugin('styles.css'),
-    new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('index')),
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('login')),
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('premium')),
     new webpack.HotModuleReplacementPlugin(),
   ],
   output: {
-    filename: '[name].js',
+    filename: '[name]-[hash].js',
     libraryTarget: 'umd',
     path: path.join(__dirname, '../dist/web'),
     globalObject: 'this',
@@ -213,19 +216,14 @@ let rendererConfig = {
       electron: '@chiflix/electron',
       grpc: '@grpc/grpc-js',
     },
-    extensions: ['.ts', '.tsx', '.js', '.json', '.node'],
+    extensions: ['.ts', '.tsx', '.js', '.json'],
   },
   target: 'web',
 };
 
 const sharedDefinedVariables = {
-  'process.platform': `"${process.platform}"`,
 };
 
-if (process.env.ENVIRONMENT_NAME === 'APPX') {
-  // quick fix for process.windowsStore undefined on Windows Store build
-  sharedDefinedVariables['process.windowsStore'] = 'true';
-}
 /**
  * Adjust rendererConfig for development settings
  */
@@ -271,6 +269,15 @@ if (process.env.NODE_ENV === 'production') {
         },
       }),
     ],
+    splitChunks: {
+      cacheGroups: {
+        commons: {
+          name: "commons",
+          chunks: "initial",
+          minChunks: 2,
+        },
+      },
+    },
   };
 
   if (process.platform === 'darwin') {
