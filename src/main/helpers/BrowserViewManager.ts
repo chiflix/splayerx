@@ -217,7 +217,7 @@ export class BrowserViewManager implements IBrowserViewManager {
         },
       });
       page.view.webContents.loadURL(page.url);
-    } else if (this.currentChannel){
+    } else if (this.currentChannel) {
       this.pauseVideo();
     }
     newHistory.lastUpdateTime = Date.now();

@@ -516,7 +516,7 @@ export default {
         if (this.currentMainBrowserView()) {
           this.removeListener();
           this.currentMainBrowserView().webContents
-            .executeJavaScript(InjectJSManager.pauseVideo(this.currentChannel))
+            .executeJavaScript(InjectJSManager.pauseVideo(this.currentChannel));
           this.$electron.remote.getCurrentWindow()
             .removeBrowserView(this.currentMainBrowserView());
         }
