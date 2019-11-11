@@ -8,76 +8,80 @@
       >{{ $t('preferences.account.signOut') }}</span>
     </div>
     <div class="settingItem__attached">
-      <div v-if="!token">
-        <div class="settingItem__title">
-          {{ $t('preferences.account.noToken.title') }}
-        </div>
-        <div class="settingItem__description">
-          {{ $t('preferences.account.noToken.description') }}
-        </div>
-        <button
-          @click.left="signIn"
-          class="settingItem__button"
-        >
-          {{ $t('preferences.account.noToken.button') }}
-        </button>
-      </div>
-      <div v-else>
-        <div class="settingItem__box">
-          <div class="settingItem__box__left">
-            <div class="settingItem__title">
-              {{ userInfo.isVip ? $t('preferences.account.vipUser.title')
-                : $t('preferences.account.normalUser.title') }}{{ userInfo.displayName }}
-            </div>
-            <div class="settingItem__description">
-              {{ userInfo.isVip
-                ? `${$t('preferences.account.vipUser.description')}${userInfo.vipExpiredAt}`
-                : $t('preferences.account.normalUser.description') }}
-            </div>
+      <transition name="fade">
+        <div v-if="!token">
+          <div class="settingItem__title">
+            {{ $t('preferences.account.noToken.title') }}
           </div>
-          <div class="settingItem__box__right">
-            <button
-              v-if="userInfo.isVip"
-              @click.left="goPremium"
-            >
-              {{ $t('preferences.account.vipUser.button') }}
-            </button>
-            <button
-              v-else
-              @click.left="goPremium"
-            >
-              {{ $t('preferences.account.normalUser.button') }}
-            </button>
+          <div class="settingItem__description">
+            {{ $t('preferences.account.noToken.description') }}
           </div>
-        </div>
-        <div :class="`settingItem__box ${userInfo.isVip ? '' : 'no-margin'}`">
-          <div>
-            <div class="settingItem__title">
-              {{ $t('preferences.account.createdAt') }}
-            </div>
-            <div class="settingItem__description">
-              {{ userInfo.createdAt }}
-            </div>
-          </div>
-        </div>
-        <div
-          v-if="userInfo.isVip"
-          class="settingItem__title"
-        >
-          {{ $t('preferences.account.payAt') }}
-        </div>
-        <div
-          v-if="userInfo.isVip"
-          class="settingItem__description"
-        >
-          <p
-            v-for="(item) in list"
-            :key="item.id"
+          <button
+            @click.left="signIn"
+            class="settingItem__button"
           >
-            {{ item.name }}
-          </p>
+            {{ $t('preferences.account.noToken.button') }}
+          </button>
         </div>
-      </div>
+      </transition>
+      <transition name="fade">
+        <div v-if="token">
+          <div class="settingItem__box">
+            <div class="settingItem__box__left">
+              <div class="settingItem__title">
+                {{ userInfo.isVip ? $t('preferences.account.vipUser.title')
+                  : $t('preferences.account.normalUser.title') }}{{ userInfo.displayName }}
+              </div>
+              <div class="settingItem__description">
+                {{ userInfo.isVip
+                  ? `${$t('preferences.account.vipUser.description')}${userInfo.vipExpiredAt}`
+                  : $t('preferences.account.normalUser.description') }}
+              </div>
+            </div>
+            <div class="settingItem__box__right">
+              <button
+                v-if="userInfo.isVip"
+                @click.left="goPremium"
+              >
+                {{ $t('preferences.account.vipUser.button') }}
+              </button>
+              <button
+                v-else
+                @click.left="goPremium"
+              >
+                {{ $t('preferences.account.normalUser.button') }}
+              </button>
+            </div>
+          </div>
+          <div :class="`settingItem__box ${userInfo.isVip ? '' : 'no-margin'}`">
+            <div>
+              <div class="settingItem__title">
+                {{ $t('preferences.account.createdAt') }}
+              </div>
+              <div class="settingItem__description">
+                {{ userInfo.createdAt }}
+              </div>
+            </div>
+          </div>
+          <div
+            v-if="userInfo.isVip"
+            class="settingItem__title"
+          >
+            {{ $t('preferences.account.payAt') }}
+          </div>
+          <div
+            v-if="userInfo.isVip"
+            class="settingItem__description"
+          >
+            <p
+              v-for="(item) in list"
+              :key="item.id"
+            >
+              {{ item.name }}
+            </p>
+          </div>
+        </div>
+      </transition>
     </div>
   </div>
 </template>
@@ -159,10 +163,16 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .settingItem {
   &__attached {
-    background-color: rgba(0,0,0,0.07);
-    margin-top: 15px;
-    padding: 20px 28px;
-    border-radius: 5px;
+    position: relative;
+    &>div {
+      width: 100%;
+      background-color: rgba(0,0,0,0.07);
+      margin-top: 15px;
+      padding: 20px 28px;
+      border-radius: 5px;
+      position: absolute;
+      box-sizing: border-box;
+    }
   }
 
   &__title {
@@ -247,5 +257,23 @@ export default Vue.extend({
       }
     }
   }
+}
+</style>
+<style lang="scss">
+.fade-in {
+  visibility: visible;
+  opacity: 1;
+  transition: opacity 300ms ease-in;
+}
+.fade-out {
+  visibility: hidden;
+  opacity: 0;
+  transition: visibility 0s 100ms, opacity 100ms ease-out;
+}
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 200ms ease-in;
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+  opacity: 0;
 }
 </style>

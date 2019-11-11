@@ -375,6 +375,14 @@
       "premiumSetting": "Premium",
       "title": "SPlayer Premium",
       "description": "Additional hours of AI Translation service",
+      "explanation": {
+        "title": "About the Pricing",
+        "description1": "Applying a complex Translation System, which supports the translation of multiple languages and the speech recognition of long duration videos, has been incurring massive ongoing maintenance costs so far. The cost is based on the duration of the video successfully processed by the system, which is approximately one dollar per hour.",
+        "description2": "We are thrilled to your strong support, of which the impact and power will help us make the SPlayer better, and your adoption of the new technology will finally contribute to briding the language gaps and connecting the world.",
+        "description3": "Best Regards,",
+        "description4": "SPlayer Team",
+        "description5": "2019"
+      },
       "content": {
         "description1": "Additional hours of AI Translation service",
         "description2": "Support more languages in AI Translation",
@@ -389,6 +397,11 @@
       "year": " Year",
       "months": " Yr.",
       "years": " Yr.",
+      "normal": "Standard",
+      "giftmonth": "{num} Bonus Month",
+      "giftyear": "{num} Bonus Year",
+      "giftmonths": "{num} Bonus Months",
+      "giftyears": "{num} Bonus Years",
       "payType": {
         "alipay": "Alipay",
         "wxpay": "WeChat",
