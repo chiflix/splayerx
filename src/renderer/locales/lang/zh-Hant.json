@@ -384,7 +384,7 @@
         "description5": "2019年"
       },
       "content": {
-        "description1": "AI翻譯功能 (應該) 足夠用",
+        "description1": "AI 翻譯功能 (應該) 足夠用",
         "description2": "更多智能翻譯語言選擇",
         "description3": "無限制導出語言識別字幕",
         "description4": "更多福利準備中，敬請期待",
@@ -398,10 +398,10 @@
       "months": "{num}個月",
       "years": "{num}年",
       "normal": "標準",
-      "giftmonth": "贈{num}个月",
-      "giftyear": "贈{num}年",
-      "giftmonths": "贈{num}个月",
-      "giftyears": "贈{num}年",
+      "giftmonth": "贈 {num} 个月",
+      "giftyear": "贈 {num} 年",
+      "giftmonths": "贈 {num} 个月",
+      "giftyears": "贈 {num} 年",
       "payType": {
         "alipay": "支付寶",
         "wxpay": "微信支付",
