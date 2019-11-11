@@ -1663,6 +1663,9 @@ app.on('ready', () => {
   globalShortcut.register('CmdOrCtrl+Shift+Q+W+E', () => {
     if (premiumView) premiumView.webContents.openDevTools();
   });
+  globalShortcut.register('CmdOrCtrl+Shift+Z+X+C', () => {
+    if (paymentWindow) paymentWindow.openDevTools({ mode: 'detach' });
+  });
 
   if (process.platform === 'win32') {
     globalShortcut.register('CmdOrCtrl+`', () => {
