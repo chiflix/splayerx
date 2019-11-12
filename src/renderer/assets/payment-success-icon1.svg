@@ -1,19 +1,11 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="14px" height="21px" viewBox="0 0 14 21" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <!-- Generator: Sketch 59 (86127) - https://sketch.com -->
-    <title>Icon - Right Arrow</title>
-    <desc>Created with Sketch.</desc>
+<svg width="14" height="21" xmlns="http://www.w3.org/2000/svg">
     <defs>
-        <radialGradient cx="84.2036702%" cy="81.3988863%" fx="84.2036702%" fy="81.3988863%" r="144.900676%" gradientTransform="translate(0.842037,0.813989),scale(1.000000,0.655537),rotate(-125.528865),translate(-0.842037,-0.813989)" id="radialGradient-1">
-            <stop stop-color="#FFFFFF" stop-opacity="0.775928442" offset="0%"></stop>
-            <stop stop-color="#FFFFFF" stop-opacity="0.508378623" offset="100%"></stop>
+        <radialGradient cx="84.204%" cy="81.399%" fx="84.204%" fy="81.399%" r="144.901%" gradientTransform="scale(-1 -.65554) rotate(54.471 1.997 -1.85)" id="a">
+            <stop stop-color="#FFF" stop-opacity=".776" offset="0%"/>
+            <stop stop-color="#FFF" stop-opacity=".508" offset="100%"/>
         </radialGradient>
     </defs>
-    <g id="页面-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" opacity="0.7" stroke-opacity="0.168081975">
-        <g id="Userinfo/Payment-Instruction/Style5/Success" transform="translate(-84.000000, -70.000000)" fill="url(#radialGradient-1)" stroke="#FFFFFF" stroke-width="0.5">
-            <g id="background" transform="translate(-25.000000, 29.000000)">
-                <path d="M113.129022,42.1054416 L122.448916,51.4253362 C122.571932,51.5483514 122.587308,51.7382443 122.495047,51.877979 L122.448916,51.9344531 L113.337551,61.0458186 C113.196962,61.1864074 112.969023,61.1864074 112.828434,61.0458186 L110.248433,58.4658176 C110.107844,58.3252289 110.107844,58.0972895 110.248433,57.9567007 L115.721,52.483 L115.72127,52.231506 C115.909747,52.0310575 116.025218,51.7611728 116.025218,51.4643184 C116.025218,51.2551067 115.967865,51.0592907 115.868023,50.8917354 L110.105442,45.1290218 C109.964853,44.988433 109.964853,44.7604936 110.105442,44.6199049 L112.619905,42.1054416 C112.760494,41.9648528 112.988433,41.9648528 113.129022,42.1054416 Z" id="Icon---Right-Arrow" opacity="0.5"></path>
-            </g>
-        </g>
+    <g opacity=".7">
+        <path d="M113.129 42.105l9.32 9.32a.36.36 0 01.046.453l-.046.056-9.111 9.112a.36.36 0 01-.51 0l-2.58-2.58a.36.36 0 010-.51l5.473-5.473v-.251a1.116 1.116 0 00.147-1.34l-5.763-5.763a.36.36 0 010-.51l2.515-2.514a.36.36 0 01.509 0z" opacity=".5" transform="translate(-109 -41)" fill="url(#a)" stroke="#FFF" stroke-width=".5" fill-rule="evenodd" stroke-opacity=".168"/>
     </g>
 </svg>
