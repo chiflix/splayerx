@@ -1,13 +1,6 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="11px" height="10px" viewBox="0 0 11 10" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <!-- Generator: Sketch 53.1 (72631) - https://sketchapp.com -->
-    <desc>Created with Sketch.</desc>
-    <g id="页面-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" opacity="0.796735491">
-        <g id="画板" transform="translate(-407.000000, -156.000000)" fill="#FFFFFF">
-            <g id="编组" transform="translate(407.000000, 156.000000)">
-                <rect id="矩形" transform="translate(5.430299, 5.128289) rotate(-45.000000) translate(-5.430299, -5.128289) " x="-0.929700526" y="4.4468608" width="12.72" height="1.36285714" rx="0.681428571"></rect>
-                <rect id="矩形" transform="translate(5.430299, 5.128289) rotate(-315.000000) translate(-5.430299, -5.128289) " x="-0.929700526" y="4.4468608" width="12.72" height="1.36285714" rx="0.681428571"></rect>
-            </g>
-        </g>
+<svg width="11" height="10" xmlns="http://www.w3.org/2000/svg">
+    <g fill="#FFF" fill-rule="evenodd" opacity=".797">
+        <rect transform="rotate(-45 5.43 5.128)" x="-.93" y="4.447" width="12.72" height="1.363" rx=".681"/>
+        <rect transform="rotate(45 5.43 5.128)" x="-.93" y="4.447" width="12.72" height="1.363" rx=".681"/>
     </g>
 </svg>

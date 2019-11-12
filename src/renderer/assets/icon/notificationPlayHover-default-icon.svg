@@ -1,21 +1,18 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="30px" height="30px" viewBox="0 0 30 30" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <!-- Generator: Sketch 54.1 (76490) - https://sketchapp.com -->
-    <desc>Created with Sketch.</desc>
+<svg width="30" height="30" xmlns="http://www.w3.org/2000/svg">
     <defs>
-        <radialGradient cx="50%" cy="65.549251%" fx="50%" fy="65.549251%" r="47.6609134%" gradientTransform="translate(0.500000,0.655493),scale(0.938879,1.000000),rotate(90.000000),translate(-0.500000,-0.655493)" id="radialGradient-1">
-            <stop stop-color="#FFFFFF" stop-opacity="0.35" offset="0%"></stop>
-            <stop stop-color="#FFFFFF" stop-opacity="0.36" offset="43.5256546%"></stop>
-            <stop stop-color="#FFFFFF" stop-opacity="0.5" offset="100%"></stop>
+        <radialGradient cx="50%" cy="65.549%" fx="50%" fy="65.549%" r="47.661%" gradientTransform="matrix(0 1 -.93888 0 1.115 .155)" id="a">
+            <stop stop-color="#FFF" stop-opacity=".35" offset="0%"/>
+            <stop stop-color="#FFF" stop-opacity=".36" offset="43.526%"/>
+            <stop stop-color="#FFF" stop-opacity=".5" offset="100%"/>
         </radialGradient>
-        <radialGradient cx="50%" cy="63.3385735%" fx="50%" fy="63.3385735%" r="50.4122753%" gradientTransform="translate(0.500000,0.633386),scale(0.938879,1.000000),rotate(90.000000),translate(-0.500000,-0.633386)" id="radialGradient-2">
-            <stop stop-color="#FFFFFF" stop-opacity="0.45" offset="0%"></stop>
-            <stop stop-color="#FFFFFF" stop-opacity="0.55" offset="61.2146326%"></stop>
-            <stop stop-color="#FFFFFF" stop-opacity="0.7" offset="100%"></stop>
+        <radialGradient cx="50%" cy="63.339%" fx="50%" fy="63.339%" r="50.412%" gradientTransform="matrix(0 1 -.93888 0 1.095 .133)" id="b">
+            <stop stop-color="#FFF" stop-opacity=".45" offset="0%"/>
+            <stop stop-color="#FFF" stop-opacity=".55" offset="61.215%"/>
+            <stop stop-color="#FFF" stop-opacity=".7" offset="100%"/>
         </radialGradient>
     </defs>
-    <g id="Icons/notificationPlayHover-default-icon" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" fill-opacity="0.5" opacity="0.5">
-        <path d="M15.5037672,26.9107812 L5.01203407,26.9107812 C4.20605645,26.9107812 3.45803783,26.4917719 3.03705373,25.8044785 L3.03705373,25.8044785 C2.61703732,25.1187648 2.5901757,24.2622699 2.96639785,23.5515845 L8.34593799,13.389607 L13.0694105,4.46694458 C13.5465995,3.56553212 14.4822713,3.00102467 15.502198,2.99920047 L15.502198,2.99920047 C16.5215333,2.99737733 17.4580731,3.56012621 17.9349855,4.46101601 L22.6615965,13.389607 L27.8789334,23.2451818 C28.2868635,24.0157639 28.2699842,24.9419445 27.8342471,25.697151 L27.8342471,25.697151 C27.4009575,26.4481155 26.5998556,26.9107812 25.7328565,26.9107812 L15.5037672,26.9107812 Z" id="Basis" fill="url(#radialGradient-1)" transform="translate(15.437702, 14.953509) rotate(90.000000) translate(-15.437702, -14.953509) "></path>
-        <path d="M15.5037672,26.9107812 L5.01203407,26.9107812 C4.20605645,26.9107812 3.45803783,26.4917719 3.03705373,25.8044785 L3.03705373,25.8044785 C2.61703732,25.1187648 2.5901757,24.2622699 2.96639785,23.5515845 L8.34593799,13.389607 L13.0694105,4.46694458 C13.5465995,3.56553212 14.4822713,3.00102467 15.502198,2.99920047 L15.502198,2.99920047 C16.5215333,2.99737733 17.4580731,3.56012621 17.9349855,4.46101601 L22.6615965,13.389607 L27.8789334,23.2451818 C28.2868635,24.0157639 28.2699842,24.9419445 27.8342471,25.697151 L27.8342471,25.697151 C27.4009575,26.4481155 26.5998556,26.9107812 25.7328565,26.9107812 L15.5037672,26.9107812 Z" id="Border" stroke-opacity="0.437273551" stroke="#FFFFFF" stroke-width="0.5" fill="url(#radialGradient-2)" transform="translate(15.437702, 14.953509) rotate(90.000000) translate(-15.437702, -14.953509) "></path>
+    <g fill="none" fill-rule="evenodd" fill-opacity=".5" opacity=".5">
+        <path d="M15.504 26.91H5.012a2.316 2.316 0 01-1.975-1.106 2.275 2.275 0 01-.07-2.252L8.345 13.39l4.723-8.923a2.758 2.758 0 012.433-1.468 2.747 2.747 0 012.433 1.462l4.727 8.929 5.217 9.855c.408.77.391 1.697-.045 2.452a2.426 2.426 0 01-2.101 1.214h-10.23z" fill="url(#a)" transform="rotate(90 15.438 14.954)"/>
+        <path d="M15.504 26.91H5.012a2.316 2.316 0 01-1.975-1.106h0a2.275 2.275 0 01-.07-2.252L8.345 13.39l4.723-8.923a2.758 2.758 0 012.433-1.468h0a2.747 2.747 0 012.433 1.462l4.727 8.929 5.217 9.855c.408.77.391 1.697-.045 2.452h0a2.426 2.426 0 01-2.101 1.214h-10.23z" stroke-opacity=".437" stroke="#FFF" stroke-width=".5" fill="url(#b)" transform="rotate(90 15.438 14.954)"/>
     </g>
 </svg>
