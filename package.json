@@ -49,6 +49,7 @@
     "fs-extra": "^7.0.1",
     "get-video-id": "^3.1.4",
     "google-protobuf": "^3.6.0",
+    "html-to-image": "^0.1.1",
     "iconv-lite": "^0.4.24",
     "idb": "^4.0.3",
     "lethargy": "^1.0.4",

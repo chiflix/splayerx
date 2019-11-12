@@ -15,6 +15,7 @@
       :enabledSecondarySub="enabledSecondarySub"
     />
     <the-video-controller ref="videoctrl" />
+    <thumbnailPost />
   </div>
 </template>
 
@@ -23,11 +24,13 @@ import { Route } from 'vue-router';
 import { mapActions, mapGetters } from 'vuex';
 import { Subtitle as subtitleActions, SubtitleManager as smActions, AudioTranslate as atActions } from '@/store/actionTypes';
 import SubtitleRenderer from '@/components/Subtitle/SubtitleRenderer.vue';
+import thumbnailPost from '@/components/PlayingView/ThumbnailPost/ThumbnailPost.vue';
 import VideoCanvas from '@/containers/VideoCanvas.vue';
 import TheVideoController from '@/containers/TheVideoController.vue';
 import { AudioTranslateBubbleType } from '@/store/modules/AudioTranslate';
 import { videodata } from '../store/video';
 import { getStreams } from '../plugins/mediaTasks';
+import { thumbnailPostService } from '@/services/media/ThumbnailPostService';
 
 export default {
   name: 'PlayingView',
@@ -35,6 +38,7 @@ export default {
     'the-video-controller': TheVideoController,
     'the-video-canvas': VideoCanvas,
     'subtitle-renderer': SubtitleRenderer,
+    thumbnailPost,
   },
   data() {
     return {
@@ -71,6 +75,9 @@ export default {
     },
   },
   watch: {
+    duration(val: number, oldVal: number) {
+      if (val) thumbnailPostService.getPostPng(this.originSrc, val);
+    },
     originSrc: {
       immediate: true,
       // eslint-disable-next-line
