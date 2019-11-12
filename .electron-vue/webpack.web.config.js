@@ -62,7 +62,7 @@ if (process.env.NODE_ENV !== 'production') {
   entry['index'] = entry['login'];
 }
 
-let rendererConfig = {
+let webConfig = {
   mode: 'development',
   devtool: '#module-eval-source-map',
   entry,
@@ -152,23 +152,27 @@ let rendererConfig = {
       {
         test: /\.svg$/,
         include: [path.resolve(__dirname, '../src/renderer/assets/icon')],
-        use: {
-          loader: 'svg-sprite-loader',
-          options: {
-            symbolId: '[name]',
+        use: [
+          {
+            loader: 'svg-sprite-loader',
+            options: {
+              symbolId: '[name]',
+            },
           },
-        },
+        ],
       },
       {
         test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
         exclude: [path.resolve(__dirname, '../src/renderer/assets/icon')],
-        use: {
-          loader: 'url-loader',
-          query: {
-            limit: 10000,
-            name: 'imgs/[name]--[folder].[ext]',
+        use: [
+          {
+            loader: 'url-loader',
+            query: {
+              limit: 10000,
+              name: 'imgs/[name].[contenthash].[ext]',
+            },
           },
-        },
+        ],
       },
       {
         test: /\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/,
@@ -176,7 +180,7 @@ let rendererConfig = {
           loader: 'url-loader',
           options: {
             limit: 10000,
-            name: 'media/[name]--[folder].[ext]',
+            name: 'media/[name].[contenthash].[ext]',
           },
         },
       },
@@ -186,7 +190,7 @@ let rendererConfig = {
           loader: 'url-loader',
           query: {
             limit: 10000,
-            name: 'fonts/[name]--[folder].[ext]',
+            name: 'fonts/[name].[contenthash].[ext]',
           },
         },
       },
@@ -204,7 +208,9 @@ let rendererConfig = {
     new webpack.HotModuleReplacementPlugin(),
   ],
   output: {
-    filename: '[name]-[hash].js',
+    publicPath: process.env.NODE_ENV !== 'production' ? undefined : process.env.WEB_CDN,
+    filename: '[name].[hash].js',
+    chunkFilename: 'chunks/[contenthash].js',
     libraryTarget: 'umd',
     path: path.join(__dirname, '../dist/web'),
     globalObject: 'this',
@@ -221,33 +227,39 @@ let rendererConfig = {
   target: 'web',
 };
 
-const sharedDefinedVariables = {
-};
+const sharedDefinedVariables = {};
 
 /**
- * Adjust rendererConfig for development settings
+ * Adjust webConfig for development settings
  */
 if (process.env.NODE_ENV !== 'production') {
-  rendererConfig.plugins.push(
+  webConfig.plugins.push(
     new ForkTsCheckerWebpackPlugin({ eslint: true, vue: true }),
     new webpack.DefinePlugin(
       Object.assign(sharedDefinedVariables, {
         'process.env.SAGI_API': `"${process.env.SAGI_API || 'apis.stage.sagittarius.ai:8443'}"`,
-        'process.env.ACCOUNT_API': `"${process.env.ACCOUNT_API || 'https://account.stage.splayer.org'}"`,
+        'process.env.ACCOUNT_API': `"${process.env.ACCOUNT_API ||
+          'https://account.stage.splayer.org'}"`,
         __static: `"${path.join(__dirname, '../static').replace(/\\/g, '\\\\')}"`,
       }),
     ),
   );
+} else {
+  webConfig.plugins.push(
+    new webpack.optimize.MinChunkSizePlugin({
+      minChunkSize: 100000,
+    }),
+  );
 }
 
 /**
- * Adjust rendererConfig for production settings
+ * Adjust webConfig for production settings
  */
 if (process.env.NODE_ENV === 'production') {
-  rendererConfig.mode = 'production';
-  rendererConfig.devtool = '#source-map';
+  webConfig.mode = 'production';
+  webConfig.devtool = '#source-map';
 
-  rendererConfig.plugins.push(
+  webConfig.plugins.push(
     new webpack.DefinePlugin(
       Object.assign(sharedDefinedVariables, {
         'process.env.SAGI_API': `"${process.env.SAGI_API || 'apis.sagittarius.ai:8443'}"`,
@@ -261,7 +273,7 @@ if (process.env.NODE_ENV === 'production') {
     }),
   );
 
-  rendererConfig.optimization = {
+  webConfig.optimization = {
     minimizer: [
       new TerserPlugin({
         terserOptions: {
@@ -272,8 +284,8 @@ if (process.env.NODE_ENV === 'production') {
     splitChunks: {
       cacheGroups: {
         commons: {
-          name: "commons",
-          chunks: "initial",
+          name: 'commons',
+          chunks: 'initial',
           minChunks: 2,
         },
       },
@@ -282,11 +294,11 @@ if (process.env.NODE_ENV === 'production') {
 
   if (process.platform === 'darwin') {
     // only check on mac, to speed up Windows build
-    rendererConfig.plugins.push(new ForkTsCheckerWebpackPlugin({ eslint: true, vue: true }));
+    webConfig.plugins.push(new ForkTsCheckerWebpackPlugin({ eslint: true, vue: true }));
   }
 
   if (release && process.env.SENTRY_AUTH_TOKEN) {
-    rendererConfig.plugins.push(
+    webConfig.plugins.push(
       new SentryWebpackPlugin({
         release,
         include: './dist',
@@ -305,4 +317,4 @@ if (process.env.NODE_ENV === 'production') {
   }
 }
 
-module.exports = rendererConfig;
+module.exports = webConfig;
