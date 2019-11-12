@@ -5,47 +5,56 @@ import { getThumbnailPath } from '@/plugins/mediaTasks';
 import { getMediaInfo } from '@/plugins/mediaTasks/index';
 import { timecodeFromSeconds } from '@/libs/utils';
 import { IVideoStream } from '@/plugins/mediaTasks/mediaInfoQueue';
+import filesize from 'filesize';
+
+interface IPostInfo {
+  name: string;
+  details: string;
+  duration: string;
+}
 
 export default class ThumbnailPostService {
-  public async getPostPng(src: string, duration: number): Promise<string> {
+  public async getPostPng(src: string, duration: number): Promise<string[]> {
     const interval = Math.ceil(duration / 10);
     const width = 380;
     const col = 3;
     const thumbnail = await getThumbnailPath(src, interval, width, col)
+    const results: string[] = [];
     const img = new Image();
     img.src = `file://${thumbnail.imgPath}`;
     return new Promise((resolve) => {
       img.addEventListener('load', () => {
         const height = img.height / 4;
         const resultCanvas = document.createElement('canvas');
-        resultCanvas.setAttribute('width', `${(width * 3) + 120}px`);
-        resultCanvas.setAttribute('height', `${(height * 3) + 120}px`);
+        resultCanvas.setAttribute('width', `${width}}px`);
+        resultCanvas.setAttribute('height', `${height}px`);
         const ctx = resultCanvas.getContext('2d');
-        ctx.fillStyle = '#FFF';
-        ctx.fillRect(0, 0, resultCanvas.width, resultCanvas.height);
         for (let i = 0; i <= 2; i += 1) {
           for (let j = 0; j <= 2; j += 1) {
             ctx.drawImage(
               img, j * width, i * height, width, height,
-              60 + j * (width + 10), 60 + i * (height + 10), width, height,
+              0, 0, width, height,
             );
+            results.push(resultCanvas.toDataURL());
           }
         }
-        const imgDataUrl = resultCanvas.toDataURL();
-        // const imgPath = imgDataUrl.replace(/^data:image\/\w+;base64/, '');
-        // writeFileSync(path.join(__static, 'cbd.png'), imgPath, 'base64');
-        resolve(imgDataUrl);
+        resolve(results);
       }, { once: true });
     });
   }
 
-  public async getPostMediaInfo(src: string) {
+  public async getPostMediaInfo(src: string): Promise<IPostInfo> {
     const mediaInfo = await getMediaInfo(src);
     const videoStream = mediaInfo.streams.find(val => val.codecType === 'video') as IVideoStream;
-    console.log('mediaInffo', videoStream);
-    console.log('width', videoStream.width);
-    console.log('height', videoStream.height);
-    console.log('duration', timecodeFromSeconds(videoStream.duration));
+    const size = filesize(mediaInfo.format.size);
+    const width = videoStream.width;
+    const height = videoStream.height;
+    const duration = timecodeFromSeconds(videoStream.duration);
+    return {
+      name: `${path.basename(src)}`,
+      details: `${size}   ${width} * ${height}   ${duration}`,
+      duration,
+    };
   }
 }
 
