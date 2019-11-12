@@ -271,6 +271,15 @@ export default {
       }
     },
   },
+  created() {
+    if (this.userInfo.id) {
+      this.isLogin = true;
+      this.displayName = this.userInfo.displayName;
+    } else {
+      this.isLogin = false;
+      this.displayName = '';
+    }
+  },
   mounted() {
     this.$electron.ipcRenderer.on('sign-in', (evt: Event, account?: { displayName: string, token: string}) => {
       if (account) {
