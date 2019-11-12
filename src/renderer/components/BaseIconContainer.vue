@@ -26,10 +26,10 @@ function importIcon(type: string, state: string, effect: string) {
     import(`@/assets/icon/${defaultIcon}.svg`).catch(err => console.error(err));
   }
   if (!document.getElementById(hoverIcon)) {
-    import(`@/assets/icon/${hoverIcon}.svg`).catch(err => console.error(err));
+    import(`@/assets/icon/${hoverIcon}.svg`).catch(() => {});
   }
   if (!document.getElementById(activeIcon)) {
-    import(`@/assets/icon/${activeIcon}.svg`).catch(err => console.error(err));
+    import(`@/assets/icon/${activeIcon}.svg`).catch(() => {});
   }
 }
 
