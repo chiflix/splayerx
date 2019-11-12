@@ -1,19 +1,16 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="22px" height="22px" viewBox="0 0 22 22" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <!-- Generator: Sketch 53.1 (72631) - https://sketchapp.com -->
-    <desc>Created with Sketch.</desc>
+<svg width="22" height="22" xmlns="http://www.w3.org/2000/svg">
     <defs>
-        <radialGradient cx="60.435757%" cy="40.5111711%" fx="60.435757%" fy="40.5111711%" r="95.1521857%" id="radialGradient-1">
-            <stop stop-color="#000000" stop-opacity="0.16479846" offset="0%"></stop>
-            <stop stop-color="#000000" stop-opacity="0.42408288" offset="100%"></stop>
+        <radialGradient cx="60.436%" cy="40.511%" fx="60.436%" fy="40.511%" r="95.152%" id="a">
+            <stop stop-opacity=".165" offset="0%"/>
+            <stop stop-opacity=".424" offset="100%"/>
         </radialGradient>
-        <radialGradient cx="81.8460892%" cy="79.2345085%" fx="81.8460892%" fy="79.2345085%" r="146.343123%" gradientTransform="translate(0.818461,0.792345),scale(1.000000,0.619365),rotate(-124.005692),translate(-0.818461,-0.792345)" id="radialGradient-2">
-            <stop stop-color="#FFFFFF" stop-opacity="0.775928442" offset="0%"></stop>
-            <stop stop-color="#FFFFFF" stop-opacity="0.508378623" offset="100%"></stop>
+        <radialGradient cx="81.846%" cy="79.235%" fx="81.846%" fy="79.235%" r="146.343%" gradientTransform="matrix(-.55928 -.51344 .82898 -.3464 .62 1.487)" id="b">
+            <stop stop-color="#FFF" stop-opacity=".776" offset="0%"/>
+            <stop stop-color="#FFF" stop-opacity=".508" offset="100%"/>
         </radialGradient>
     </defs>
-    <g id="Icons/complete-active-icon" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" fill-opacity="0.7">
-        <circle id="Background" fill="url(#radialGradient-1)" cx="11" cy="11" r="11"></circle>
-        <path d="M12.9865846,14.810369 C12.9542736,14.8169278 12.9208312,14.8203708 12.8865846,14.8203708 L8.98672623,14.8203708 C8.71058386,14.8203708 8.48672623,14.5965132 8.48672623,14.3203708 L8.48672623,13.6831615 C8.48672623,13.4070191 8.71058386,13.1831615 8.98672623,13.1831615 L12.5865846,13.1831615 L12.5865846,6.11763128 C12.5865846,5.84148891 12.8104422,5.61763128 13.0865846,5.61763128 L13.6865846,5.61763128 C13.962727,5.61763128 14.1865846,5.84148891 14.1865846,6.11763128 L14.1865846,14.3203708 C14.1865846,14.5965132 13.962727,14.8203708 13.6865846,14.8203708 L13.0865846,14.8203708 C13.052338,14.8203708 13.0188956,14.8169278 12.9865846,14.810369 Z" id="Shape" stroke-opacity="0.168081975" stroke="#FFFFFF" stroke-width="0.5" fill="url(#radialGradient-2)" transform="translate(11.336655, 10.219001) rotate(45.000000) translate(-11.336655, -10.219001) "></path>
+    <g fill="none" fill-rule="evenodd" fill-opacity=".7">
+        <circle fill="url(#a)" cx="11" cy="11" r="11"/>
+        <path d="M12.987 14.81a.502.502 0 01-.1.01h-3.9a.5.5 0 01-.5-.5v-.637a.5.5 0 01.5-.5h3.6V6.118a.5.5 0 01.5-.5h.6a.5.5 0 01.5.5v8.202a.5.5 0 01-.5.5h-.6a.502.502 0 01-.1-.01z" stroke-opacity=".168" stroke="#FFF" stroke-width=".5" fill="url(#b)" transform="rotate(45 11.337 10.219)"/>
     </g>
 </svg>

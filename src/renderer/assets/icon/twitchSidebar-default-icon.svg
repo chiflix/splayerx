@@ -1,21 +1,15 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="44px" height="44px" viewBox="0 0 44 44" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <!-- Generator: Sketch 58 (84663) - https://sketch.com -->
-    <desc>Created with Sketch.</desc>
+<svg width="44" height="44" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <defs>
-        <circle id="path-1" cx="22" cy="22" r="22"></circle>
+        <circle id="a" cx="22" cy="22" r="22"/>
     </defs>
-    <g id="sideBarItem/__logoWithColorBg/--twitch" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <mask id="mask-2" fill="white">
-            <use xlink:href="#path-1"></use>
+    <g fill="none" fill-rule="evenodd">
+        <mask id="b" fill="#fff">
+            <use xlink:href="#a"/>
         </mask>
-        <use id="colorBg" fill="#673AB7" xlink:href="#path-1"></use>
-        <g id="twitch-(1)" mask="url(#mask-2)" fill="#FFFFFF" fill-rule="nonzero">
-            <g transform="translate(11.000000, 11.000000)">
-                <path d="M0.037398374,4.16368564 L0.037398374,20.8124444 L5.77081843,20.8124444 L5.77081843,23.9349593 L8.90131165,23.9349593 L12.0268184,20.8114472 L16.7190678,20.8114472 L22.976065,14.5704065 L22.976065,0 L1.60015176,0 L0.037398374,4.16368564 Z M3.68548509,2.07934959 L20.8907317,2.07934959 L20.8907317,13.5272412 L17.2406504,17.1693442 L11.5052358,17.1693442 L8.379729,20.2878699 L8.379729,17.1693442 L3.68548509,17.1693442 L3.68548509,2.07934959 Z" id="形状"></path>
-                <polygon id="路径" points="9.42189702 6.24502981 11.5062331 6.24502981 11.5062331 12.488065 9.42189702 12.488065"></polygon>
-                <polygon id="路径" points="15.1543198 6.24502981 17.2396531 6.24502981 17.2396531 12.488065 15.1543198 12.488065"></polygon>
-            </g>
+        <use fill="#673AB7" xlink:href="#a"/>
+        <g mask="url(#b)" fill="#FFF" fill-rule="nonzero">
+            <path d="M11.037 15.164v16.648h5.734v3.123h3.13l3.126-3.124h4.692l6.257-6.24V11H12.6l-1.563 4.164zm3.648-2.085h17.206v11.448l-3.65 3.642h-5.736l-3.125 3.119v-3.119h-4.695V13.08z"/>
+            <path d="M20.422 17.245h2.084v6.243h-2.084zm5.732 0h2.086v6.243h-2.086z"/>
         </g>
     </g>
 </svg>

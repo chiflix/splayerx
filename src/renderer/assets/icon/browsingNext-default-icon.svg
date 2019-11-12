@@ -1,16 +1,11 @@
-<svg width="17px" height="56px" viewBox="0 0 17 56" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg width="17" height="56" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <defs>
-        <rect id="path-1" x="0" y="0" width="27.0935961" height="67.7339901"></rect>
+        <path id="a" d="M0 0h27.094v67.734H0z"/>
     </defs>
-    <g id="页面-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g id="1176" transform="translate(-1142.000000, -731.000000)">
-            <g id="编组-5" transform="translate(1135.000000, 725.000000)">
-                <mask id="mask-2" fill="white">
-                    <use xlink:href="#path-1"></use>
-                </mask>
-                <g id="矩形"></g>
-                <polyline id="路径-2" stroke="#7F7E7E" stroke-width="1.62561576" stroke-linecap="round" stroke-linejoin="round" mask="url(#mask-2)" points="8.12807882 6.77339901 22.7586207 34.0024631 8.12807882 61.2315271"></polyline>
-            </g>
-        </g>
+    <g transform="translate(-7 -6)" fill="none" fill-rule="evenodd">
+        <mask id="b" fill="#fff">
+            <use xlink:href="#a"/>
+        </mask>
+        <path stroke="#7F7E7E" stroke-width="1.626" stroke-linecap="round" stroke-linejoin="round" mask="url(#b)" d="M8.128 6.773l14.63 27.23-14.63 27.229"/>
     </g>
 </svg>

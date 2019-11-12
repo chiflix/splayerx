@@ -1,15 +1,12 @@
-
-<svg width="44px" height="44px" viewBox="0 0 44 44" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg width="44" height="44" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <defs>
-        <circle id="path-1" cx="22" cy="22" r="22"></circle>
+        <circle id="a" cx="22" cy="22" r="22"/>
     </defs>
-    <g id="组件" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g id="sideBarItem/__logoWithColorBg/--youtube" transform="translate(0.000000, 0.000000)">
-            <mask id="mask-2" fill="white">
-                <use xlink:href="#path-1"></use>
-            </mask>
-            <use id="colorBg" fill="#FF0000" xlink:href="#path-1"></use>
-            <polygon id="路径" fill="#FFFFFF" fill-rule="nonzero" mask="url(#mask-2)" points="17.1970909 29.544 30.2610909 22 17.1970909 14.456"></polygon>
-        </g>
+    <g fill="none" fill-rule="evenodd">
+        <mask id="b" fill="#fff">
+            <use xlink:href="#a"/>
+        </mask>
+        <use fill="red" xlink:href="#a"/>
+        <path fill="#FFF" fill-rule="nonzero" mask="url(#b)" d="M17.197 29.544L30.261 22l-13.064-7.544z"/>
     </g>
 </svg>

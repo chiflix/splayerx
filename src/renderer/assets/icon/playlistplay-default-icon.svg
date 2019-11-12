@@ -1,15 +1,10 @@
-
-<svg width="10px" height="10px" viewBox="0 0 10 10" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg width="10" height="10" xmlns="http://www.w3.org/2000/svg">
     <defs>
-        <radialGradient cx="50%" cy="64.5280792%" fx="50%" fy="64.5280792%" r="48.6820853%" gradientTransform="translate(0.500000,0.645281),scale(0.938879,1.000000),rotate(90.000000),translate(-0.500000,-0.645281)" id="radialGradient-1">
-            <stop stop-color="#FFFFFF" stop-opacity="0.109884511" offset="2.09763367%"></stop>
-            <stop stop-color="#FFFFFF" stop-opacity="0.227553216" offset="53.8768967%"></stop>
-            <stop stop-color="#FFFFFF" stop-opacity="0.540194746" offset="100%"></stop>
+        <radialGradient cx="50%" cy="64.528%" fx="50%" fy="64.528%" r="48.682%" gradientTransform="matrix(0 1 -.93888 0 1.106 .145)" id="a">
+            <stop stop-color="#FFF" stop-opacity=".11" offset="2.098%"/>
+            <stop stop-color="#FFF" stop-opacity=".228" offset="53.877%"/>
+            <stop stop-color="#FFF" stop-opacity=".54" offset="100%"/>
         </radialGradient>
     </defs>
-    <g id="Buttons" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" opacity="0.9" stroke-opacity="0.5">
-        <g id="Play-Button-/-Playlist-Icon" fill="url(#radialGradient-1)" stroke="#FFFFFF" stroke-width="0.72">
-            <path d="M5.02269525,9.01664904 L1.49747291,9.01664904 C1.22666443,9.01664904 0.975330172,8.87586194 0.833879515,8.64493133 L0.833879515,8.64493133 C0.692754002,8.41453155 0.683728495,8.12674926 0.810139139,7.88795894 L2.61766463,4.47353452 L4.20475138,1.47551994 C4.3650869,1.17264536 4.67947261,0.982970852 5.02216799,0.982357922 L5.02216799,0.982357922 C5.36466466,0.981745348 5.67934203,1.17082897 5.83958459,1.47352794 L7.42772587,4.47353452 L9.18075108,7.78500766 C9.31781561,8.04392322 9.31214416,8.35511992 9.16573648,8.6088693 L9.16573648,8.6088693 C9.02015117,8.86119337 8.75098095,9.01664904 8.45966924,9.01664904 L5.02269525,9.01664904 Z" id="Icon" transform="translate(5.000497, 4.999005) rotate(90.000000) translate(-5.000497, -4.999005) "></path>
-        </g>
-    </g>
+    <path d="M5.023 9.017H1.497a.778.778 0 01-.663-.372h0a.764.764 0 01-.024-.757l1.808-3.414 1.587-2.998a.927.927 0 01.817-.494h0c.343 0 .657.189.818.492l1.588 3L9.18 7.785a.851.851 0 01-.015.824h0a.815.815 0 01-.706.408H5.023z" transform="rotate(90 5 4.999)" fill="url(#a)" stroke="#FFF" stroke-width=".72" fill-rule="evenodd" opacity=".9" stroke-opacity=".5"/>
 </svg>

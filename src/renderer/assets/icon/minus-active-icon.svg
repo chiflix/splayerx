@@ -1,12 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg viewBox="0 0 12 12" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg">
     <defs>
-        <radialGradient cx="84.2036702%" cy="81.3988863%" fx="84.2036702%" fy="81.3988863%" r="462.200791%" gradientTransform="translate(0.842037,0.813989),scale(0.184783,1.000000),rotate(-170.372019),translate(-0.842037,-0.813989)" id="radialGradient-1">
-            <stop stop-color="#FFFFFF" stop-opacity="0.85" offset="0%"></stop>
-            <stop stop-color="#FFFFFF" stop-opacity="0.7" offset="100%"></stop>
+        <radialGradient cx="84.204%" cy="81.399%" fx="84.204%" fy="81.399%" r="462.201%" gradientTransform="scale(-.18478 -1) rotate(9.628 7.808 -32.053)" id="a">
+            <stop stop-color="#FFF" stop-opacity=".85" offset="0%"/>
+            <stop stop-color="#FFF" stop-opacity=".7" offset="100%"/>
         </radialGradient>
     </defs>
-    <g id="Playing-View-Icon-/-Minus" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" opacity="0.2">
-        <path d="M1.37937446,5.41360928 L1.37937446,6.61360928 C1.37937446,6.75168047 1.49130327,6.86360928 1.62937446,6.86360928 L10.3293745,6.86360928 C10.4674456,6.86360928 10.5793745,6.75168047 10.5793745,6.61360928 L10.5793745,5.41360928 C10.5793745,5.27553809 10.4674456,5.16360928 10.3293745,5.16360928 L1.62937446,5.16360928 C1.49130327,5.16360928 1.37937446,5.27553809 1.37937446,5.41360928 Z" id="Icon---Add" fill="url(#radialGradient-1)"></path>
-    </g>
+    <path d="M1.38 5.414v1.2c0 .138.111.25.25.25h8.7a.25.25 0 00.25-.25v-1.2a.25.25 0 00-.25-.25h-8.7a.25.25 0 00-.25.25z" fill="url(#a)" fill-rule="evenodd" opacity=".2"/>
 </svg>
