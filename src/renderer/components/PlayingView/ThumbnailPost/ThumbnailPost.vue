@@ -121,7 +121,7 @@ export default {
           setTimeout(() => {
             addBubble(THUMBNAIL_FAILED);
           }, 500);
-        })
+        });
     });
   },
   methods: {
