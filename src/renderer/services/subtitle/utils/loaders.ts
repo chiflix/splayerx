@@ -21,26 +21,30 @@ enum Status {
   WORKING,
   FINISHED,
 }
-export interface ILocalTextOrigin extends IOrigin {
+export interface ILocalOrigin extends IOrigin {
   type: Type.Local;
   source: string;
 }
-export class LocalTextLoader extends EventEmitter implements ILoader {
+
+class CanFullyReadLoader extends EventEmitter {
   public readonly canPreload = true;
 
-  private _loadingStatus = Status.NOT_STARTED;
+  protected _loadingStatus = Status.NOT_STARTED;
 
   public get fullyRead() { return this._loadingStatus === Status.FINISHED; }
 
   public get canUpload() { return this._loadingStatus === Status.FINISHED; }
 
-  private _cacheStatus = Status.NOT_STARTED;
+  protected _cacheStatus = Status.NOT_STARTED;
 
   public get canCache() {
-    return this._loadingStatus === Status.FINISHED && this._cacheStatus === Status.NOT_STARTED;
+    return this._loadingStatus === Status.FINISHED
+      && (this._cacheStatus === Status.NOT_STARTED || this._cacheStatus === Status.FINISHED);
   }
+}
 
-  public readonly source: ILocalTextOrigin;
+export class LocalTextLoader extends CanFullyReadLoader implements ILoader {
+  public readonly source: ILocalOrigin;
 
   public constructor(path: string) {
     super();
@@ -88,6 +92,62 @@ export class LocalTextLoader extends EventEmitter implements ILoader {
 
   public async destroy() { this._payloadString = ''; }
 }
+
+export class LocalBinaryLoader extends CanFullyReadLoader {
+  public readonly source: ILocalOrigin;
+
+  public constructor(path: string) {
+    super();
+    this.source = { type: Type.Local, source: path };
+    if (dirname(path) === SUBTITLE_FULL_DIRNAME) this._cacheStatus = Status.FINISHED;
+  }
+
+  public async getMetadata() { return ''; }
+
+  private _payloadBuffer: Buffer;
+
+  public async getPayload(): Promise<Buffer> {
+    if (this._loadingStatus === Status.NOT_STARTED) {
+      this._loadingStatus = Status.WORKING;
+      this._payloadBuffer = await readFile(this.source.source);
+      this._loadingStatus = Status.FINISHED;
+      this.emit('cache', this.canCache);
+      this.emit('upload', this.canUpload);
+      this.emit('read', this.fullyRead);
+    }
+    return this._payloadBuffer;
+  }
+
+  public pause() {}
+
+  public async cache() {
+    if (this.canCache) {
+      const { source } = this.source;
+      if (dirname(source) === SUBTITLE_FULL_DIRNAME) {
+        return {
+          type: Type.Local,
+          source,
+        };
+      }
+      const hash = await mediaQuickHash.try(source);
+      if (hash) {
+        this._cacheStatus = Status.WORKING;
+        const storedPath = join(SUBTITLE_FULL_DIRNAME, `${hash}${extname(source)}`);
+        ensureDirSync(SUBTITLE_FULL_DIRNAME);
+        if (!existsSync(storedPath)) await copyFile(source, storedPath);
+        this._cacheStatus = Status.FINISHED;
+        return {
+          type: Type.Local,
+          source: storedPath,
+        };
+      }
+      throw new Error('Invalid hash.');
+    }
+    throw new Error('Cannot cache now.');
+  }
+
+  public async destroy() { this._payloadBuffer = Buffer.alloc(0); }
+}
 export interface IEmbeddedOrigin extends IOrigin {
   type: Type.Embedded;
   source: {
@@ -107,7 +167,8 @@ export class EmbeddedStreamLoader extends EventEmitter implements ILoader {
   private _cacheStatus = Status.NOT_STARTED;
 
   public get canCache() {
-    return this._loadingStatus === Status.FINISHED && this._cacheStatus === Status.NOT_STARTED;
+    return this._loadingStatus === Status.FINISHED
+      && (this._cacheStatus === Status.NOT_STARTED || this._cacheStatus === Status.FINISHED);
   }
 
   public readonly source: IEmbeddedOrigin;
@@ -145,7 +206,7 @@ export class EmbeddedStreamLoader extends EventEmitter implements ILoader {
   }
 
   public async cache() {
-    if (this.fullyRead) {
+    if (this.canCache && existsSync(this._cachedPath)) {
       return {
         type: Type.Local,
         source: this._cachedPath,

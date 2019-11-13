@@ -16,7 +16,7 @@ import {
 import { assFragmentLanguageLoader, srtFragmentLanguageLoader, vttFragmentLanguageLoader } from './languageLoader';
 import {
   IEmbeddedOrigin,
-  EmbeddedStreamLoader, LocalTextLoader, SagiLoader,
+  EmbeddedStreamLoader, LocalTextLoader, SagiLoader, LocalBinaryLoader,
 } from './loaders';
 import { SagiImageParser } from '../parsers/sagiImage';
 
@@ -126,6 +126,8 @@ export function pathToFormat(path: string): Format {
       return Format.SubStationAlpha;
     case 'vtt':
       return Format.WebVTT;
+    case 'sis':
+      return Format.SagiImage;
     default:
       return Format.Unknown;
   }
@@ -187,8 +189,19 @@ export function getLoader(source: IOrigin, format: Format): ILoader {
       const { videoPath, streamIndex } = (source as IEmbeddedOrigin).source;
       return new EmbeddedStreamLoader(videoPath, streamIndex, format);
     }
-    case Type.Local:
-      return new LocalTextLoader(source.source as string);
+    case Type.Local: {
+      switch (format) {
+        case Format.AdvancedSubStationAplha:
+        case Format.SubStationAlpha:
+        case Format.SubRip:
+        case Format.WebVTT:
+          return new LocalTextLoader(source.source as string);
+        case Format.SagiImage:
+          return new LocalBinaryLoader(source.source as string);
+        default:
+          throw new Error(`Unknown local subtitle's format ${format}.`);
+      }
+    }
     case Type.Online:
       return new SagiLoader(source.source as string);
     case Type.Translated:
@@ -220,9 +233,6 @@ export function getParser(
     case Format.VobSub:
       throw new Error('Local bitmap-based subtitle loading hasn\'t been implemented yet!');
     case Format.SagiImage:
-      if (loader instanceof EmbeddedStreamLoader) {
-        return new SagiImageParser(loader as EmbeddedStreamLoader, videoSegments);
-      }
-      throw new Error('Local sagi image subtitle loading hasn\'t been implemented yet!');
+      return new SagiImageParser(loader, videoSegments);
   }
 }
