@@ -13,7 +13,7 @@
           marginLeft: generateType === 3 ? '10px' : '8px',
           marginBottom: generateType === 3 ? '10px' : '8px',
         }"
-        v-for="thumbnail in thumbnails"
+        v-for="(thumbnail, index) in thumbnails"
         :key="thumbnail.src"
         class="image"
       >
@@ -28,7 +28,7 @@
           }"
           class="duration"
         >
-          {{ info.durationFmt }}
+          {{ thumbnailTime(index) }}
         </div>
       </div>
     </div>
@@ -54,6 +54,7 @@ import { mapGetters } from 'vuex';
 import splayer from '@/assets/splayer.png';
 import { log } from '@/libs/Log';
 import { thumbnailPostService } from '@/services/media/ThumbnailPostService';
+import { timecodeFromSeconds } from '../../../libs/utils';
 
 export default {
   props: {
@@ -101,6 +102,13 @@ export default {
           this.thumbnails = thumbnails.map((val: string) => ({ src: val, loaded: false }));
         });
     });
+  },
+  methods: {
+    thumbnailTime(index: number) {
+      return timecodeFromSeconds(
+        (index + 1) * (this.info.duration / ((this.generateType * this.generateType) + 1)),
+      );
+    },
   },
 };
 </script>
