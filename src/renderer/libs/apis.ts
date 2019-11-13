@@ -42,7 +42,7 @@ fetcher.useResponseInterceptor((res) => {
     try {
       displayName = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString()).displayName; // eslint-disable-line
       log.debug('apis/account/token', token);
-      remote.app.emit('sign-in', {
+      remote.app.emit('refresh-token', {
         token,
         displayName,
       });
