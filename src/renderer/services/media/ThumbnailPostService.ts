@@ -9,7 +9,8 @@ import filesize from 'filesize';
 
 interface IPostInfo {
   name: string;
-  details: string;
+  size: string;
+  resolution: string;
   duration: number;
   durationFmt: string;
 }

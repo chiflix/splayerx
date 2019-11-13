@@ -169,8 +169,9 @@ export default {
         });
       }
       if (this.generatePost || !this.thumbnailPostPath) return;
-      this.thumbnailPostPath
-        = join(dirname(this.thumbnailPostPath), this.generateThumbnailFilename(type));
+      this.thumbnailPostPath = join(
+        dirname(this.thumbnailPostPath), this.generateThumbnailFilename(type),
+      );
       this.generatePost = true;
       this.generateType = type;
     },
