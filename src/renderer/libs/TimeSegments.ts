@@ -7,7 +7,11 @@ export class StreamTimeSegments implements ITimeSegments {
   private endTimestamps: number[] = [];
 
   private isValidTimestamp(num: number) {
-    return typeof num === 'number' && Number.isFinite(num) && !Number.isNaN(num) && num >= 0;
+    /**
+     * 4294967.29 is a special number
+     * provided by ffmpeg's from extractSubtitle's pgs end timestamp result
+     */
+    return typeof num === 'number' && Number.isFinite(num) && !Number.isNaN(num) && num >= 0 && num < 4294967.29;
   }
 
   /** also return the index for insertion use */

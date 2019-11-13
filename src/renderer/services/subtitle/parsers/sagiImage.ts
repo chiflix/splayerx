@@ -1,3 +1,4 @@
+import { isEqual } from 'lodash';
 import {
   IParser, Format, IVideoSegments, ImageCue, ILoader,
 } from '@/interfaces/ISubtitle';
@@ -33,11 +34,13 @@ export class SagiImageParser implements IParser {
           .then((payload) => {
             if (payload) {
               this.payload = payload as Buffer;
+              this.offset = 0;
               this.metadataString = this.parseMetadata(this.payload);
               this.dialogues = this.parseDialogues(this.payload);
               // some clean up
               if (this.timer) clearTimeout(this.timer);
               this.timeSegments = undefined;
+              this.offset = 0;
             }
           });
       }
@@ -59,6 +62,7 @@ export class SagiImageParser implements IParser {
     const actualSize = data.length > metadataSize + 4 ? metadataSize : data.length - 4;
     actualOffset += 4;
     this.metadataString = data.subarray(actualOffset, actualOffset + actualSize).toString('utf8');
+    actualOffset += actualSize;
 
     const useInternalOffset = typeof offset === 'undefined';
     if (useInternalOffset) this.offset = actualOffset;
@@ -71,19 +75,19 @@ export class SagiImageParser implements IParser {
     const result: (ImageCue | IInternalImageCue)[] = [];
 
     while (actualOffset < length) {
-      const start = data.readUInt32LE(actualOffset);
+      const start = data.readUInt32LE(actualOffset) / 100;
       actualOffset += 4;
-      const end = data.readUInt32LE(actualOffset);
+      const end = data.readUInt32LE(actualOffset) / 100;
       actualOffset += 4;
-      const width = data.readUInt32LE(actualOffset);
+      const width = data.readInt32LE(actualOffset);
       actualOffset += 4;
-      const height = data.readUInt32LE(actualOffset);
+      const height = data.readInt32LE(actualOffset);
       actualOffset += 4;
-      const x = data.readUInt32LE(actualOffset);
+      const x = data.readInt32LE(actualOffset);
       actualOffset += 4;
-      const y = data.readUInt32LE(actualOffset);
+      const y = data.readInt32LE(actualOffset);
       actualOffset += 4;
-      const pngSize = data.readUInt32LE(actualOffset);
+      const pngSize = data.readInt32LE(actualOffset);
       actualOffset += 4;
       const actualPngSize = length > actualOffset + pngSize ? pngSize : length - actualOffset;
       const partialImageCue = {
@@ -94,6 +98,17 @@ export class SagiImageParser implements IParser {
           x, y, width, height,
         },
       };
+
+      if (!result.length && this.dialogues.length) {
+        const { start: oldStart, end: oldEnd } = this.dialogues[this.dialogues.length - 1];
+        if (oldStart <= start && oldEnd >= start) {
+          this.dialogues[this.dialogues.length - 1].end = start;
+        }
+      } else if (result.length) {
+        const { start: oldStart, end: oldEnd } = result[result.length - 1];
+        if (oldStart <= start && oldEnd >= start) result[result.length - 1].end = start;
+      }
+
       const usePayloadPosition = data === this.payload;
       if (usePayloadPosition) {
         result.push({
@@ -115,6 +130,21 @@ export class SagiImageParser implements IParser {
     return result;
   }
 
+  private addDialogues(dialogues: (IInternalImageCue | ImageCue)[]) {
+    const notExistedDialogues = dialogues
+      .filter(({ start, end, position }) => !this.dialogues.some(dialogue => (
+        dialogue.start === start && (dialogue.end === end || isEqual(position, dialogue.position))
+      )));
+    // remove last segment's abnormal end timestamp (mainly for pgs subtitles)
+    if (this.dialogues.length && notExistedDialogues.length) {
+      const lastSegment = this.dialogues[this.dialogues.length - 1];
+      const { start: lastStart, end: lastEnd } = lastSegment;
+      const { start: firstStart } = notExistedDialogues[0];
+      if (lastStart <= firstStart && lastEnd > firstStart) lastSegment.end = firstStart;
+    }
+    this.dialogues.push(...notExistedDialogues);
+  }
+
   private timer?: NodeJS.Timeout;
 
   private timeSegments?: StreamTimeSegments;
@@ -131,14 +161,21 @@ export class SagiImageParser implements IParser {
     );
   }
 
+  private lastDialoguesResult: ImageCue[] = [];
+
+  private areEqualDialogues(
+    newDialogues: (IInternalImageCue | ImageCue)[],
+    oldDialogues: ImageCue[],
+  ) {
+    return newDialogues.length === oldDialogues.length && newDialogues
+      .every(dialogue => oldDialogues
+        .some(({ start, end }) => dialogue.start === start && dialogue.end === end));
+  }
+
   public async getDialogues(time?: number): Promise<ImageCue[]> {
     if (this.loader.canPreload) {
       if (!this.loader.fullyRead) {
         this.payload = await this.loader.getPayload() as Buffer;
-        if (this.loader.fullyRead) {
-          this.metadataString = this.parseMetadata(this.payload);
-          this.dialogues = this.parseDialogues(this.payload);
-        }
       }
     } else if (!this.loader.fullyRead) {
       if (!this.metadataString) this.metadataString = await this.loader.getMetadata();
@@ -152,18 +189,21 @@ export class SagiImageParser implements IParser {
         const newCues = this.parseDialogues(payload, 0);
         if (!this.timeSegments) this.timeSegments = new StreamTimeSegments();
         this.timeSegments.bulkInsert(newCues.map(({ start, end }) => [start, end]), time || 0);
-        this.dialogues.push(...newCues);
+        this.addDialogues(newCues);
         this.isRequesting = false;
       }
     }
-    return this.dialogues
-      .filter(({ start, end }) => start <= (time || 0) && end >= (time || 0))
-      .map((cue) => {
+    const matchedDialogues = this.dialogues
+      .filter(({ start, end }) => start <= (time || 0) && end >= (time || 0));
+    if (!this.areEqualDialogues(matchedDialogues, this.lastDialoguesResult)) {
+      this.lastDialoguesResult = matchedDialogues.map((cue) => {
         const payloadPosition = (cue as IInternalImageCue).payloadPosition;
         if (payloadPosition) {
           return { ...cue, payload: this.payload.subarray(...payloadPosition) };
         }
         return (cue as ImageCue);
       });
+    }
+    return this.lastDialoguesResult;
   }
 }
