@@ -158,7 +158,7 @@ export default {
         this.showingPopupDialog = true;
         process.env.NODE_ENV === 'testing' ? '' : this.$electron.remote.dialog.showSaveDialog({
           title: 'Thumbnail Post Save',
-          defaultPath: this.generateThumbnailFilename(type)
+          defaultPath: this.generateThumbnailFilename(type),
         }, (filename: string) => {
           this.thumbnailPostPath = filename;
           this.showingPopupDialog = false;
@@ -169,7 +169,8 @@ export default {
         });
       }
       if (this.generatePost || !this.thumbnailPostPath) return;
-      this.thumbnailPostPath = join(dirname(this.thumbnailPostPath), this.generateThumbnailFilename(type));
+      this.thumbnailPostPath
+        = join(dirname(this.thumbnailPostPath), this.generateThumbnailFilename(type));
       this.generatePost = true;
       this.generateType = type;
     },

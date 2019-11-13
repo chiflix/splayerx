@@ -54,7 +54,7 @@
 </template>
 <script lang="ts">
 import { mapGetters } from 'vuex';
-import splayer from '@/assets/splayer.png';
+import splayer from '../../../assets/splayer.png';
 import { log } from '@/libs/Log';
 import { thumbnailPostService } from '@/services/media/ThumbnailPostService';
 import { timecodeFromSeconds } from '../../../libs/utils';
@@ -109,7 +109,7 @@ export default {
       thumbnailPostService.getPostPng(this.originSrc, val.duration, this.generateType)
         .then((thumbnails: string[]) => {
           log.debug('post-generated', this.originSrc, val.duration);
-          addBubble(THUMBNAIL_SUCCESS)
+          addBubble(THUMBNAIL_SUCCESS);
           this.thumbnails = thumbnails.map((val: string) => ({ src: val, loaded: false }));
         });
     });
@@ -117,7 +117,7 @@ export default {
   methods: {
     thumbnailTime(index: number) {
       return timecodeFromSeconds(
-        (index + 1) * (this.info.duration / ((this.generateType * this.generateType) + 1)), true
+        (index + 1) * (this.info.duration / ((this.generateType * this.generateType) + 1)), true,
       );
     },
   },
