@@ -59,7 +59,7 @@ import { log } from '@/libs/Log';
 import { thumbnailPostService } from '@/services/media/ThumbnailPostService';
 import { timecodeFromSeconds } from '../../../libs/utils';
 import { addBubble } from '../../../helpers/notificationControl';
-import { THUMBNAIL_GENERATING, THUMBNAIL_SUCCESS } from '../../../helpers/notificationcodes';
+import { THUMBNAIL_GENERATING, THUMBNAIL_SUCCESS, THUMBNAIL_FAILED } from '../../../helpers/notificationcodes';
 
 export default {
   props: {
@@ -105,13 +105,23 @@ export default {
     thumbnailPostService.getPostMediaInfo(this.originSrc).then((val) => {
       this.info = val;
       log.debug('generate-post', this.originSrc, val.duration, this.generateType);
-      addBubble(THUMBNAIL_GENERATING);
+      addBubble(THUMBNAIL_GENERATING, { id: 'thumbnail-generating' });
       thumbnailPostService.getPostPng(this.originSrc, val.duration, this.generateType)
         .then((thumbnails: string[]) => {
           log.debug('post-generated', this.originSrc, val.duration);
-          addBubble(THUMBNAIL_SUCCESS);
+          this.$store.dispatch('removeMessages', 'thumbnail-generating');
+          setTimeout(() => {
+            addBubble(THUMBNAIL_SUCCESS);
+          }, 500);
           this.thumbnails = thumbnails.map((val: string) => ({ src: val, loaded: false }));
-        });
+        })
+        .catch((err) => {
+          log.error('Thumbnail Post Generate', err);
+          this.$store.dispatch('removeMessages', 'thumbnail-generating');
+          setTimeout(() => {
+            addBubble(THUMBNAIL_FAILED);
+          }, 500);
+        })
     });
   },
   methods: {

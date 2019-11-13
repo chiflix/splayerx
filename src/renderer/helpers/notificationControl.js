@@ -31,6 +31,7 @@ import {
   CHECK_FOR_UPDATES_OFFLINE,
   THUMBNAIL_SUCCESS,
   THUMBNAIL_GENERATING,
+  THUMBNAIL_FAILED,
 } from './notificationcodes';
 
 export function addBubble(code, options = {}) { // eslint-disable-line complexity
@@ -181,7 +182,6 @@ export function addBubble(code, options = {}) { // eslint-disable-line complexit
         type: 'state',
         title: i18n.t('thumbnailGenerating.title', i18n.locale, i18n.messages),
         content: i18n.t('thumbnailGenerating.content', i18n.locale, i18n.messages),
-        dismissAfter: 2000,
       });
       break;
     case THUMBNAIL_SUCCESS:
@@ -190,6 +190,15 @@ export function addBubble(code, options = {}) { // eslint-disable-line complexit
         type: 'state',
         title: i18n.t('thumbnailSuccess.title', i18n.locale, i18n.messages),
         content: i18n.t('thumbnailSuccess.content', i18n.locale, i18n.messages),
+        dismissAfter: 2000,
+      });
+      break;
+    case THUMBNAIL_FAILED:
+      store.dispatch('addMessages', {
+        id,
+        type: 'state',
+        title: i18n.t('thumbnailFailed.title', i18n.locale, i18n.messages),
+        content: i18n.t('thumbnailFailed.content', i18n.locale, i18n.messages),
         dismissAfter: 2000,
       });
       break;
