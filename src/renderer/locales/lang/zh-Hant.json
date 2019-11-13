@@ -25,6 +25,12 @@
       "fontSize": "14px"
     }
   },
+  "tips": {
+    "openSidebar": "打開側邊欄 (C)",
+    "closeSidebar": "隱藏側邊欄 (C)",
+    "exit": "回到啟動頁",
+    "delete": "回到啟動頁"
+  },
   "errorFile": {
     "ENOSPC": {
       "content": "沒有足夠的磁盤空間。",
@@ -105,7 +111,7 @@
       "paste": "貼上"
     },
     "account": {
-      "name": "帳號",
+      "name": "账号",
       "login": "登入",
       "logout": "登出"
     },
@@ -137,6 +143,7 @@
       "hidePlaylist": "收起播放列表",
       "previousVideo": "上一集",
       "singleCycle": "循環單個文件",
+      "playlistLoop": "循環播放清單",
       "snapShot": "截圖"
     },
     "splayerx": {
@@ -202,10 +209,12 @@
       "minimize": "最小化",
       "name": "窗口",
       "originSize": "100%",
-      "enterPip": "進入畫中畫模式",
-      "exitPip": "退出畫中畫模式",
-      "playInNewWindow": "在新視窗播放",
-      "backToBrowser": "還原窗口"
+      "enterPip": "進入畫中畫",
+      "exitPip": "退出畫中畫",
+      "playInNewWindow": "在新視窗播放 (O)",
+      "backToBrowser": "還原窗口",
+      "openSidebar": "打開側邊欄",
+      "closeSidebar": "隱藏側邊欄"
     },
     "edit": {
       "name": "編輯",
@@ -218,7 +227,8 @@
       "name": "歷史",
       "reload": "重新載入頁面",
       "back": "後退",
-      "forward": "前進"
+      "forward": "前進",
+      "clearHistory": "清空播放歷史"
     }
   },
   "nextVideo": {
@@ -249,12 +259,21 @@
     "youku": "优酷",
     "coursera": "Coursera",
     "ted": "TED",
+    "lynda": "Lynda",
+    "masterclass": "MasterClass",
+    "sportsqq": "腾讯体育",
+    "developerapple": "WWDC",
+    "vipopen163": "网易公开课",
+    "study163": "网易云课堂",
+    "imooc": "慕课网",
+    "icourse163": "中国大学MOOC",
     "openLocalFile": "打開本地文件 ...",
-    "enterPip": "進入畫中畫",
-    "exitPip": "還原窗口",
-    "enterPop": "在新視窗播放",
-    "exitPop": "還原窗口",
+    "enterPip": "進入畫中畫 (P)",
+    "exitPip": "退出畫中畫 (P)",
+    "enterPop": "在新視窗播放 (O)",
+    "exitPop": "還原窗口 (O)",
     "danmu": "彈幕開關",
+    "pin": "置頂 / 取消置頂 (T)",
     "error": {
       "offline": "未連接到互聯網",
       "try": "請試試以下辦法：",
@@ -263,8 +282,33 @@
     },
     "remove": "移除",
     "siteManager": "站點管理",
-    "popularSites": "已適配站點",
-    "siteTip": "新增 / 編輯"
+    "general": "綜合",
+    "education": "教育",
+    "siteTip": "新增 / 編輯",
+    "today": "今天",
+    "yesterday": "昨天",
+    "homepage": {
+      "tips": "首頁",
+      "unSigned": "未登錄",
+      "signInfo": "登錄開始使用 AI 翻譯以及其他更多功能。",
+      "signBtn": "登錄",
+      "account": "賬號: ",
+      "signOut": "註銷",
+      "accountInfo": "投食成為射手雲養員，獲取專享功能和特殊權益。",
+      "premiumBtn": "投食",
+      "premiumAccount": "雲養員: ",
+      "premiumInfo": "雲養至: ",
+      "renewBtn": "繼續投食",
+      "history": "在線播放歷史",
+      "clear": "清空",
+      "historyInfo": "線上視頻的播放歷史將在這裡顯示，包括頁面名稱、站點地址和瀏覽時間。",
+      "playlist": "本地播放列表",
+      "playlistInfoPre": "点击側邊欄底部“ ",
+      "playlistInfoNext": " ”按鈕，選擇多個文件播放，即可生成播放列表。",
+      "banner1": "有需求、想吐槽<br>立刻告訴我們",
+      "banner2": "成為射手影音<br>首席多語言翻譯員",
+      "banner3": "版本更新一覽"
+    }
   },
   "preferences": {
     "general": {
@@ -299,7 +343,79 @@
       "incognitoDescription": "開啟後將不再保留任何新的播放記錄。",
       "clearHistory": "清空播放記錄",
       "clearHistoryDescription": "清除已有的播放列表和歷史記錄"
+    },
+    "account": {
+      "accountSetting": "我的賬號",
+      "title": "賬號信息",
+      "noToken": {
+        "title": "未登錄",
+        "description": "登錄後可使用AI翻譯等更多功能",
+        "button": "免註冊登錄"
+      },
+      "normalUser": {
+        "title": "普通用戶: ",
+        "description": "投食成為射手雲養員，獲取專享功能和特殊權益。",
+        "button": "投食"
+      },
+      "vipUser": {
+        "title": "云养员: ",
+        "description": "雲養至：",
+        "button": "繼續投食"
+      },
+      "month": " 個月",
+      "year": " 年",
+      "months": " 個月",
+      "years": " 年",
+      "signOut": "註銷",
+      "createdAt": "註冊時間",
+      "payAt": "投食記錄",
+      "payContent": "{date}{product}",
+      "payProduct": ": 投食 {product}"
+    },
+    "premium": {
+      "premiumSetting": "雲養計劃",
+      "title": "射手雲養計劃",
+      "description": "牆裂歡迎廣大用戶投食支持射手影音長期穩定可持續開發，同時獲得射手雲養員專享功能。",
+      "explanation": {
+        "title": "為何如此定價？",
+        "description1": "長視頻語音識別和智能翻譯功能，會消耗大量計​​算資源。目前為止，我們該功能每小時的計算成本仍在2-5元之間。",
+        "description2": "在此特別感謝用戶們對射手的支持，我們會繼續開發更多有趣的功能，打破語言藩籬，理解世界。",
+        "description3": "祝好",
+        "description4": "射手影音 開發團隊",
+        "description5": "2019年"
+      },
+      "content": {
+        "description1": "AI 翻譯功能 (應該) 足夠用",
+        "description2": "更多智能翻譯語言選擇",
+        "description3": "無限制導出語言識別字幕",
+        "description4": "更多福利準備中，敬請期待",
+        "description5": "",
+        "description6": "更多福利準備中，敬請期待"
+      },
+      "origin": "原價 ",
+      "off": "折",
+      "month": "{num}個月",
+      "year": "{num}年",
+      "months": "{num}個月",
+      "years": "{num}年",
+      "normal": "標準",
+      "giftmonth": "贈 {num} 个月",
+      "giftyear": "贈 {num} 年",
+      "giftmonths": "贈 {num} 个月",
+      "giftyears": "贈 {num} 年",
+      "payType": {
+        "alipay": "支付寶",
+        "wxpay": "微信支付",
+        "paypal": "Paypal"
+      }
     }
+  },
+  "payment": {
+    "wxpay": {
+      "title": "掃碼支付",
+      "description": "微信支付"
+    },
+    "fail": "加載失敗"
   },
   "privacyBubble": {
     "confirmDisable": {
@@ -322,6 +438,10 @@
   },
   "alertBubble": {
     "button": "確定"
+  },
+  "notExportEmbeddedSubtitle": {
+    "title": "",
+    "content": "內嵌字幕正在加載中，請稍後再嘗試導出。"
   },
   "protectBubble": {
     "agree": "好的",
@@ -365,6 +485,12 @@
       "zh": "中文 (簡體)",
       "zh-CN": "中文 (簡體)",
       "zh-TW": "中文 (繁體)"
+    },
+    "tips": {
+      "editor": "編輯功能即將上線",
+      "export": "導出",
+      "reload": "重新生成",
+      "delete": "移除"
     }
   },
   "uploading": {
@@ -395,11 +521,13 @@
     "videoLanguageLabel": "視頻語言",
     "subtitleLanguageLabel": "翻譯至",
     "selectLanguageLabel": "請選擇",
+    "selectLanguageMoreLabel": "更多語言 ...",
     "audioLanguageLoading": "獲取語言列表中 ...",
     "audioLanguageLoadFail": "連接錯誤，請稍後重試",
     "select": {
       "title": "AI 智能翻譯",
-      "content": "選擇您在視頻中所聽到的語言並點擊生成。"
+      "content": "選擇您在視頻中所聽到的語言並點擊生成。",
+      "contentLimit": "選擇您在視頻中聽到的語言並點擊生成。每日可免費試用一次。"
     },
     "translate": {
       "title": "大約剩餘 {time}",
@@ -437,11 +565,17 @@
       "title": "登入已過期",
       "content": "請重新登入。"
     },
+    "PermissionFail": {
+      "title": "今日次數已用完",
+      "content": "抱歉，您今日的翻譯試用次數已用完，明天再試試。"
+    },
+    "loading": "處理中 ...",
     "cancel": "取消",
     "quit": "退出",
     "generate": "生成",
     "ok": "后台运行",
-    "continue": "取消"
+    "continue": "取消",
+    "upgrade": "好的"
   },
   "translateBubble": {
     "bubbleWhenGrab": "該操作將會導致正在進行的翻譯中止，是否中止？",
@@ -471,6 +605,10 @@
       "title": "登入已過期",
       "content": "請重新登入。"
     },
+    "bubbleTranslatePermissionFail": {
+      "title": "今日次數已用完",
+      "content": "抱歉，您今日的翻譯試用次數已用完，明天再試試。"
+    },
     "ok": "好的",
     "cancel": "取消",
     "continue": "中止"
@@ -496,6 +634,47 @@
       "retry": "重試",
       "error300": "驗證失敗，請",
       "errorNetwork": "驗證失敗，請"
+    }
+  },
+  "forbiddenModal": {
+    "title": "加入射手雲養計劃",
+    "content": "投食成為射手雲養員，即可導出翻譯至本地，還可以獲得更多專享功能。",
+    "span": "成為射手雲養員",
+    "button": "成為射手雲養員",
+    "audioLanguage": "日本語, 한국어, Español, Français, Deutsch, Italiano, Português, čeština, Русский, Indonesian, العربية, Türkçe, română",
+    "translate": {
+      "title": "加入射手雲養計劃",
+      "content": "投食成為射手雲養員，支持更多語言的語音識別和AI翻譯，並獲得更多專享功能。",
+      "span": "已是雲養員請登錄",
+      "button": "成為射手雲養員"
+    },
+    "export": {
+      "title": "加入射手雲養計劃",
+      "content": "投食成為射手雲養員，即可導出翻譯至本地，還可以獲得更多專享功能。",
+      "span": "已是雲養員請登錄",
+      "button": "成為射手雲養員"
+    }
+  },
+  "premiumModal": {
+    "loading": {
+      "content": "投食中，請稍後 ...",
+      "button": "關閉頁面"
+    },
+    "success": {
+      "h2": "感謝您對 SPlayer 的支持",
+      "h1": "投食成功！",
+      "h4": "NOW",
+      "content1": "增加智能翻譯使用時間",
+      "content2": "更多智能翻譯語言選擇",
+      "content3": "無限制導出字幕文件",
+      "button": "完成"
+    },
+    "fail": {
+      "h1": "很遺憾",
+      "content": "投食過程中遇到了一些問題，請通過郵箱聯繫我們",
+      "copy": "拷貝",
+      "copied": "已拷貝",
+      "button": "返回"
     }
   }
 }

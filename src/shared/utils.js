@@ -3,7 +3,6 @@ import { join } from 'path';
 import osLocale from 'os-locale';
 import uuidv4 from 'uuid/v4';
 import storage from 'electron-json-storage';
-import net from 'net';
 import { checkPathExist, read, write } from '../renderer/libs/file';
 import { ELECTRON_CACHE_DIRNAME, TOKEN_FILE_NAME } from '../renderer/constants';
 import electronBuilderConfig from '../../electron-builder.json';
@@ -77,18 +76,31 @@ export function getSystemLocale() {
 
 if (process.type === 'browser') {
   const crossThreadCache = {};
-  app.getCrossThreadCache = key => crossThreadCache[key];
+  app.getCrossThreadCache = (key) => {
+    if (key instanceof Array) {
+      const re = {};
+      key.forEach((k) => {
+        re[k] = crossThreadCache[k];
+      });
+      return Object.values(re).includes(undefined) ? undefined : re;
+    }
+    return crossThreadCache[key];
+  };
   app.setCrossThreadCache = (key, val) => {
     crossThreadCache[key] = val;
   };
 }
-function crossThreadCache(key, fn) {
+export function crossThreadCache(key, fn) {
   const func = async () => {
     if (typeof app.getCrossThreadCache !== 'function') return fn();
     let val = app.getCrossThreadCache(key);
     if (val) return val;
     val = await fn();
-    app.setCrossThreadCache(key, val);
+    if (key instanceof Array) {
+      key.forEach(k => app.setCrossThreadCache(k, val[k]));
+    } else {
+      app.setCrossThreadCache(key, val);
+    }
     return val;
   };
   func.noCache = fn;
@@ -163,43 +175,4 @@ export async function saveToken(nToken) {
     // empty
   }
   return token;
-}
-
-/**
- * @description check port can use
- * @author tanghaixiang
- * @param {Number} port number
- * @returns Promise<boolean>
- */
-function checkPort(port) {
-  return new Promise((resolve) => {
-    const server = net.createServer().listen(port);
-    server.on('listening', () => {
-      server.close();
-      resolve(true);
-    });
-
-    server.on('error', (err) => {
-      if (err.code === 'EADDRINUSE') {
-        resolve(false);
-      }
-    });
-  });
-}
-
-/**
- * @description get port can use
- * @author tanghaixiang
- * @returns Promise<number>
- */
-export async function getRightPort() {
-  let port = 20000;
-  let done = false;
-
-  do {
-    port += 1;
-    done = await checkPort(port);
-  } while (!done);
-
-  return port;
 }

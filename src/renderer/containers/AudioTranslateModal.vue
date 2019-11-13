@@ -10,7 +10,7 @@
       class="select-language-modal"
     >
       <div
-        v-if="!isProgress && !isConfirmCancelTranlate"
+        v-if="(!isProgress && !isConfirmCancelTranlate) || isPermissionFail || isGoPremium"
         @click="hideTranslateModal"
         class="close-box"
       >
@@ -20,7 +20,7 @@
         />
       </div>
       <div
-        v-if="!isProgress && !isConfirmCancelTranlate"
+        v-if="!isProgress && !isConfirmCancelTranlate && !isGoPremium"
         class="select-title"
       >
         <h1>
@@ -44,8 +44,12 @@
       <h1 v-else-if="isProgress">
         {{ $t('translateModal.translate.title', { time: estimateTimeText }) }}
       </h1>
-      <p v-if="!isProgress && !isConfirmCancelTranlate">
-        {{ $t('translateModal.select.content') }}
+      <h1 v-else-if="isGoPremium">
+        {{ $t('forbiddenModal.translate.title') }}
+      </h1>
+      <p v-if="!isProgress && !isConfirmCancelTranlate && !isGoPremium">
+        {{ isTranslateLimit ? $t('translateModal.select.contentLimit')
+          : $t('translateModal.select.content') }}
       </p>
       <p v-else-if="isConfirmCancelTranlate">
         {{ $t('translateModal.discard.content') }}
@@ -62,8 +66,12 @@
       >
         {{ progressContent }}
       </p>
+      <p
+        v-else-if="isGoPremium"
+        v-html="premiumContent"
+      />
       <div
-        v-if="!isProgress && !isConfirmCancelTranlate"
+        v-if="!isProgress && !isConfirmCancelTranlate && !isGoPremium"
         class="select"
       >
         <div class="left">
@@ -85,7 +93,7 @@
         </div>
       </div>
       <div
-        v-else-if="isProgress && !isConfirmCancelTranlate"
+        v-else-if="showProgress && !isConfirmCancelTranlate && !isGoPremium"
         class="progress-wraper"
       >
         <Progress
@@ -124,11 +132,17 @@
         </div>
       </div>
       <div
-        v-if="!isProgress && !isConfirmCancelTranlate"
+        v-if="!isProgress && !isLoading && !isConfirmCancelTranlate && !isGoPremium"
         @click="translate"
         :class="`${audioLanguage.value ? '' : 'disabled'} button`"
       >
         {{ $t('translateModal.generate') }}
+      </div>
+      <div
+        v-else-if="isLoading"
+        class="disabled button"
+      >
+        {{ $t('translateModal.loading') }}
       </div>
       <div
         v-else-if="isConfirmCancelTranlate"
@@ -148,11 +162,25 @@
         </div>
       </div>
       <div
-        v-else-if="isTranslateFail"
+        v-else-if="isTranslateFail && !isPermissionFail"
         @click="hideTranslateModal"
         class="button"
       >
         {{ $t('translateModal.cancel') }}
+      </div>
+      <div
+        v-else-if="isTranslateFail && isPermissionFail"
+        @click="goPremium"
+        class="button"
+      >
+        {{ $t('translateModal.upgrade') }}
+      </div>
+      <div
+        @click.stop="goPremium"
+        v-else-if="isGoPremium"
+        class="button"
+      >
+        {{ $t('forbiddenModal.translate.button') }}
       </div>
       <div
         v-else
@@ -166,10 +194,13 @@
 </template>
 <script lang="ts">
 import Vue from 'vue';
+import { ipcRenderer } from 'electron';
 import { mapActions, mapGetters } from 'vuex';
+import { remove, findIndex } from 'lodash';
 import {
   Input as inputActions,
   AudioTranslate as atActions,
+  UserInfo as usActions,
 } from '@/store/actionTypes';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import { codeToLanguageName, normalizeCode } from '@/libs/language';
@@ -177,8 +208,8 @@ import Select from '@/components/PlayingView/Select.vue';
 import Icon from '@/components/BaseIconContainer.vue';
 import Progress from '@/components/PlayingView/Progress.vue';
 import { AudioTranslateStatus, AudioTranslateFailType } from '../store/modules/AudioTranslate';
-import { getJsonConfig, forceRefresh } from '@/helpers/featureSwitch';
-import { log } from '../libs/Log';
+import { getJsonConfig, forceRefresh, isTranslateLimit } from '@/helpers/featureSwitch';
+import { log } from '@/libs/Log';
 
 export default Vue.extend({
   name: 'AudioTranslateModal',
@@ -201,6 +232,8 @@ export default Vue.extend({
       isConfirmCancelTranlate: false,
       didGrab: false, // 是否提取音频，区分听写和机翻
       loadConfigCatCompleted: false,
+      isTranslateLimit: false,
+      audioLanguageString: '',
     };
   },
   computed: {
@@ -208,16 +241,29 @@ export default Vue.extend({
       'currentAudioTrackId', 'mediaHash', 'audioTrackList', 'currentAudioTrackId', 'displayLanguage',
       'isTranslateModalVisible', 'translateProgress', 'isTranslating', 'selectedTargetLanugage',
       'translateEstimateTime', 'translateStatus', 'lastAudioLanguage', 'failType',
+      'userInfo',
     ]),
     translateLanguageLabel() {
       return codeToLanguageName(this.selectedTargetLanugage);
+    },
+    isLoading() {
+      return this.translateStatus === AudioTranslateStatus.Searching;
     },
     isProgress() {
       return this.isTranslating || this.translateStatus === AudioTranslateStatus.Fail
         || this.translateStatus === AudioTranslateStatus.Success;
     },
+    isGoPremium() {
+      return this.translateStatus === AudioTranslateStatus.GoPremium;
+    },
     isTranslateFail() {
       return this.translateStatus === AudioTranslateStatus.Fail;
+    },
+    showProgress() {
+      return this.isProgress && this.failType !== AudioTranslateFailType.Permission;
+    },
+    isPermissionFail() {
+      return this.failType === AudioTranslateFailType.Permission;
     },
     isTranslateSuccess() {
       return this.translateStatus === AudioTranslateStatus.Success;
@@ -239,6 +285,8 @@ export default Vue.extend({
         title = this.$t('translateModal.timeOutFail.title');
       } else if (this.failType === AudioTranslateFailType.Forbidden) {
         title = this.$t('translateModal.ForbiddenFail.title');
+      } else if (this.failType === AudioTranslateFailType.Permission) {
+        title = this.$t('translateModal.PermissionFail.title');
       }
       return title;
     },
@@ -250,6 +298,8 @@ export default Vue.extend({
         message = this.$t('translateModal.timeOutFail.content');
       } else if (this.failType === AudioTranslateFailType.Forbidden) {
         message = this.$t('translateModal.ForbiddenFail.content');
+      } else if (this.failType === AudioTranslateFailType.Permission) {
+        message = this.$t('translateModal.PermissionFail.content');
       }
       return message;
     },
@@ -268,6 +318,9 @@ export default Vue.extend({
         message = this.$t('translateModal.translate.contentTranslate');
       }
       return message;
+    },
+    premiumContent() {
+      return `${this.$t('forbiddenModal.translate.content')}<br/><br/>${this.audioLanguageString}`;
     },
   },
   watch: {
@@ -302,16 +355,40 @@ export default Vue.extend({
         await this.refreshConfig();
       }
     },
+    audioLanguage(n: {
+      label: string,
+      value: string
+    }, o: {
+      label: string,
+      value: string
+    }) {
+      if (n.value === 'premium') {
+        this.audioLanguage = o;
+        this.updateStatus(AudioTranslateStatus.GoPremium);
+      }
+    },
   },
-  mounted() {
+  async mounted() {
     this.refreshConfig();
+    this.isTranslateLimit = await isTranslateLimit();
+    this.audioLanguageString = this.$t('forbiddenModal.audioLanguage');
+    try {
+      const configString = await this.getMoreLanguages();
+      if (configString) {
+        this.audioLanguageString = configString;
+      }
+    } catch (error) {
+      // empty
+    }
   },
   methods: {
     ...mapActions({
       hideTranslateModal: atActions.AUDIO_TRANSLATE_HIDE_MODAL,
       startTranslate: atActions.AUDIO_TRANSLATE_START,
       discardTranslate: atActions.AUDIO_TRANSLATE_DISCARD,
+      updateStatus: atActions.AUDIO_TRANSLATE_UPDATE_STATUS,
       updateWheel: inputActions.WHEEL_UPDATE,
+      showForbidden: usActions.SHOW_FORBIDDEN_MODAL,
     }),
     getAudioLanguage() {
       const { lanugages } = this;
@@ -338,10 +415,19 @@ export default Vue.extend({
     },
     async refreshConfig() {
       try {
-        const supportedAudioLanguage = await getJsonConfig('audioLanguage', null);
+        const isVip = this.userInfo && this.userInfo.isVip;
+        const supportedAudioLanguage = isVip ? await getJsonConfig('vipAudioLanguage', null)
+          : await getJsonConfig('audioLanguage', null);
         if (supportedAudioLanguage && supportedAudioLanguage['list']) {
           this.lanugages = supportedAudioLanguage['list'];
           // this.getAudioLanguage();
+          if (!isVip) {
+            const goPremiumLabel = this.$t('translateModal.selectLanguageMoreLabel');
+            this.lanugages.push({
+              value: 'premium',
+              label: goPremiumLabel,
+            });
+          }
         } else {
           throw new Error();
         }
@@ -352,8 +438,34 @@ export default Vue.extend({
           label: failLabel,
         }];
       } finally {
-        this.loadConfigCatCompleted = true;
+        // this.loadConfigCatCompleted = true;
       }
+    },
+    async getMoreLanguages() {
+      const vipAudioLanguage = await getJsonConfig('vipAudioLanguage', null);
+      const normalAudioLanguage = await getJsonConfig('audioLanguage', null);
+      if (vipAudioLanguage && vipAudioLanguage['list']) {
+        const list = vipAudioLanguage['list'];
+        const normal = normalAudioLanguage && normalAudioLanguage['list'] ? normalAudioLanguage['list'] : [];
+        remove(list, (e: {
+          value: string,
+          label: string,
+        }) => {
+          if (!normal || !normal.length) {
+            return false;
+          }
+          const index = findIndex(normal, (item: {
+            value: string,
+            label: string,
+          }) => item.value === e.value);
+          return index > -1;
+        });
+        return list.map((e: {
+          value: string,
+          label: string,
+        }) => e.label).join(', ');
+      }
+      return '';
     },
     translate() {
       const { audioLanguage } = this;
@@ -381,6 +493,10 @@ export default Vue.extend({
     getLanguageLabel(code: string) {
       const l = this.lanugages.find((l: { value: string, label: string }) => l.value === code);
       return l ? l.label : codeToLanguageName(code);
+    },
+    goPremium() {
+      ipcRenderer.send('add-preference', 'premium');
+      this.hideTranslateModal();
     },
   },
 });
@@ -436,6 +552,7 @@ export default Vue.extend({
       background: rgba(103, 103, 103, 0.8);
       border-radius: 7px;
       margin-left: 3px;
+      margin-right: 3px;
       font-size: 7px;
       line-height: 12px;
       color: rgba(255, 255, 255, 0.6);
@@ -465,6 +582,13 @@ export default Vue.extend({
   h1 {
     font-size: 13px;
     color: rgba(255,255,255,0.90);
+    letter-spacing: 1px;
+    line-height: 13px;
+    margin-bottom: 10px;
+  }
+  span {
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
     letter-spacing: 1px;
     line-height: 13px;
     margin-bottom: 10px;

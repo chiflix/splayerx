@@ -1,12 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg viewBox="0 0 12 12" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg">
     <defs>
-        <radialGradient cx="84.2036702%" cy="81.3988863%" fx="84.2036702%" fy="81.3988863%" r="146.431887%" gradientTransform="translate(0.842037,0.813989),scale(1.000000,0.645269),rotate(-125.102184),translate(-0.842037,-0.813989)" id="radialGradient-1">
-            <stop stop-color="#FFFFFF" stop-opacity="0.85" offset="0%"></stop>
-            <stop stop-color="#FFFFFF" stop-opacity="0.7" offset="100%"></stop>
+        <radialGradient cx="84.204%" cy="81.399%" fx="84.204%" fy="81.399%" r="146.432%" gradientTransform="matrix(-.57504 -.52791 .81813 -.37105 .66 1.56)" id="a">
+            <stop stop-color="#FFF" stop-opacity=".85" offset="0%"/>
+            <stop stop-color="#FFF" stop-opacity=".7" offset="100%"/>
         </radialGradient>
     </defs>
-    <g id="Playing-View-Icon-/-Left-Arrow" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" opacity="0.2">
-        <path d="M5.27993743,6.34734179 L5.27993743,6.34556975 C5.3649386,6.25533366 5.41702967,6.13375009 5.41702967,6 C5.41702967,5.86624991 5.3649386,5.74466634 5.27993743,5.65443025 L5.27993743,5.65265821 L2.82713637,3.19985715 C2.68654762,3.0592684 2.68654762,2.83132901 2.82713637,2.69074026 L3.71809091,1.79978572 C3.85867966,1.65919697 4.08661905,1.65919697 4.22720779,1.79978572 L8.17286363,5.74544156 C8.24315801,5.81573593 8.27830519,5.90786797 8.27830519,6 C8.27830519,6.09213203 8.24315801,6.18426407 8.17286363,6.25455844 L4.22720779,10.2002143 C4.08661905,10.340803 3.85867966,10.340803 3.71809091,10.2002143 L2.82713637,9.30925974 C2.68654762,9.16867099 2.68654762,8.9407316 2.82713637,8.80014285 L5.27993743,6.34734179 Z" id="Icon---Right-Arrow" fill="url(#radialGradient-1)" transform="translate(5.500000, 6.000000) scale(-1, 1) translate(-5.500000, -6.000000) "></path>
-    </g>
+    <path d="M5.28 6.347v-.001a.502.502 0 000-.692v-.001L2.827 3.2a.36.36 0 010-.51l.891-.89a.36.36 0 01.51 0l3.945 3.945a.359.359 0 010 .51L4.227 10.2a.36.36 0 01-.509 0l-.89-.89a.36.36 0 010-.51L5.28 6.347z" fill="url(#a)" transform="matrix(-1 0 0 1 11 0)" fill-rule="evenodd" opacity=".2"/>
 </svg>

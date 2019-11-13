@@ -25,6 +25,12 @@
       "fontSize": "14px"
     }
   },
+  "tips": {
+    "openSidebar": "サイドバーの表示 (C)",
+    "closeSidebar": "サイドバーを隠す (C)",
+    "exit": "起動ページに戻る",
+    "delete": "Back to Launching Page"
+  },
   "errorFile": {
     "ENOSPC": {
       "content": "ディスク容量が不足しています。",
@@ -137,6 +143,7 @@
       "hidePlaylist": "プレイリストを隠す",
       "previousVideo": "前のビデオ",
       "singleCycle": "リピート",
+      "playlistLoop": "プレイリストをループ再生",
       "snapShot": "スナップショット"
     },
     "splayerx": {
@@ -203,9 +210,11 @@
       "name": "ウィンドウ",
       "originSize": "100%",
       "enterPip": "画中画を開じる",
-      "exitPip": "画中画を閉じる",
+      "exitPip": "画中画を閉じる (P)",
       "playInNewWindow": "新しいウィンドウで遊ぶ",
-      "backToBrowser": "ブラウザに戻る"
+      "backToBrowser": "ブラウザに戻る",
+      "openSidebar": "サイドバーを開く",
+      "closeSidebar": "サイドバーを隠す"
     },
     "edit": {
       "name": "編集",
@@ -218,7 +227,8 @@
       "name": "履歴",
       "reload": "ページを再読み込み",
       "back": "戻る",
-      "forward": "進む"
+      "forward": "進む",
+      "clearHistory": "履歴をクリア"
     }
   },
   "nextVideo": {
@@ -249,12 +259,21 @@
     "youku": "Youku",
     "coursera": "Coursera",
     "ted": "TED",
+    "lynda": "Lynda",
+    "masterclass": "MasterClass",
+    "sportsqq": "Tencent Sports",
+    "developerapple": "WWDC",
+    "vipopen163": "网易公开课",
+    "study163": "网易云课堂",
+    "imooc": "慕课网",
+    "icourse163": "中国大学MOOC",
     "openLocalFile": "ローカルファイルを開く",
-    "enterPip": "画中画を開じる",
-    "exitPip": "ブラウザに戻る",
+    "enterPip": "画中画を開じる (P)",
+    "exitPip": "ブラウザに戻る (P)",
     "enterPop": "新しいウィンドウで遊ぶ",
-    "exitPop": "ブラウザに戻る",
+    "exitPop": "ブラウザに戻る (O)",
     "danmu": "だんまくスイッチ",
+    "pin": "Pin / Unpin (T)",
     "error": {
       "offline": "インターネットがない",
       "try": "お試しください:",
@@ -263,8 +282,33 @@
     },
     "remove": "削除する",
     "siteManager": "サイト管理",
-    "popularSites": "適合サイト",
-    "siteTip": "追加 / 編集"
+    "general": "綜合",
+    "education": "教育",
+    "siteTip": "追加 / 編集",
+    "today": "今日",
+    "yesterday": "昨日",
+    "homepage": {
+      "tips": "ホーム",
+      "unSigned": "サインインしていません",
+      "signInfo": "サインインしてAI翻訳を使用し、より多くの機能にアクセスします。",
+      "signBtn": "登入",
+      "account": "アカウント: ",
+      "signOut": "登出",
+      "accountInfo": "今すぐアカウントをアップグレードして、専用機能などを始めましょう。",
+      "premiumBtn": "アップグレード",
+      "premiumAccount": "プレミアムアカウント: ",
+      "premiumInfo": "有効期限: ",
+      "renewBtn": "更新",
+      "history": "オンライン履歴",
+      "clear": "クリアー",
+      "historyInfo": "ページタイトル、サイトアドレス、視聴した日付など、再生履歴を追跡します。",
+      "playlist": "ローカルプレイリスト",
+      "playlistInfoPre": "左側のサイドバーの ",
+      "playlistInfoNext": " ボタンをクリックして、複数のファイルを選択して開き、プレイリストを生成します。",
+      "banner1": "フィードバック<br>を送る",
+      "banner2": "翻訳プロジェクト<br>に参加する",
+      "banner3": "リリースノート"
+    }
   },
   "preferences": {
     "general": {
@@ -299,7 +343,79 @@
       "incognitoDescription": "再生履歴は保存されません。",
       "clearHistory": "再生履歴をクリア",
       "clearHistoryDescription": "既存のプレイリストと再生履歴を削除する"
+    },
+    "account": {
+      "accountSetting": "账户設定",
+      "title": "プロフィール",
+      "noToken": {
+        "title": "サインインしていません",
+        "description": "AI翻訳とより高度な機能を使用するには、電話番号でサインインしてください。",
+        "button": "登入"
+      },
+      "normalUser": {
+        "title": "Account: ",
+        "description": "Upgrade your account now and get started with exclusive features and more.",
+        "button": "Upgrade"
+      },
+      "vipUser": {
+        "title": "プレミアムアカウント: ",
+        "description": "有効期限: ",
+        "button": "更新"
+      },
+      "month": " Year",
+      "year": " Year",
+      "months": " Months",
+      "years": " Years",
+      "signOut": "登出",
+      "createdAt": "登録日",
+      "payAt": "最近の購入履歴",
+      "payContent": "{date}{product}",
+      "payProduct": ": {product} Premium"
+    },
+    "premium": {
+      "premiumSetting": "プレミアム",
+      "title": "SPlayer Premium",
+      "description": "Go Premium now to help SPlayer change the way people watch videos, and get access to more advanced features.",
+      "explanation": {
+        "title": "About the Pricing",
+        "description1": "Applying a complex Translation System, which supports the translation of multiple languages and the speech recognition of long duration videos, has been incurring massive ongoing maintenance costs so far. The cost is based on the duration of the video successfully processed by the system, which is approximately one dollar per hour.",
+        "description2": "We are thrilled to your strong support, of which the impact and power will help us make the SPlayer better, and your adoption of the new technology will finally contribute to briding the language gaps and connecting the world.",
+        "description3": "Best Regards,",
+        "description4": "SPlayer Team",
+        "description5": "2019"
+      },
+      "content": {
+        "description1": "Additional hours of AI Translation service",
+        "description2": "Support more languages in AI Translation",
+        "description3": "Export speech recognition results unlimitedly",
+        "description4": "Your purchase history will be conserved permanently",
+        "description5": "",
+        "description6": "New features are coming soon"
+      },
+      "origin": "ORIG. ",
+      "off": "% Off",
+      "month": " Month",
+      "year": " Mo.",
+      "months": " Mo.",
+      "years": " Yr.",
+      "normal": "Standard",
+      "giftmonth": "{num} Bonus Month",
+      "giftyear": "{num} Bonus Year",
+      "giftmonths": "{num} Bonus Months",
+      "giftyears": "{num} Bonus Years",
+      "payType": {
+        "alipay": "Alipay",
+        "wxpay": "WeChat",
+        "paypal": "PayPal"
+      }
     }
+  },
+  "payment": {
+    "wxpay": {
+      "title": "SCAN & PAY",
+      "description": "WeChat Pay"
+    },
+    "fail": "Error"
   },
   "privacyBubble": {
     "confirmDisable": {
@@ -322,6 +438,10 @@
   },
   "alertBubble": {
     "button": "はい"
+  },
+  "notExportEmbeddedSubtitle": {
+    "title": "",
+    "content": "Embedded subtitle is loading, please try to export later."
   },
   "protectBubble": {
     "agree": "確定",
@@ -365,6 +485,12 @@
       "zh": "中国語（簡体字）",
       "zh-CN": "中国語（簡体字）",
       "zh-TW": "中国語（繁体字）"
+    },
+    "tips": {
+      "editor": "Edit is coming soon ...",
+      "export": "Export",
+      "reload": "Regenerate",
+      "delete": "Remove"
     }
   },
   "uploading": {
@@ -395,11 +521,13 @@
     "videoLanguageLabel": "音声の言語",
     "subtitleLanguageLabel": "以下に翻訳",
     "selectLanguageLabel": "音声の言語",
+    "selectLanguageMoreLabel": "More ...",
     "audioLanguageLoading": "言語リストの取得 ...",
     "audioLanguageLoadFail": "接続に失敗しました。もう一度お試しください",
     "select": {
       "title": "ビデオソースの言語を選択",
-      "content": "ビデオで聞こえる言語を選択し生成をクリックします。"
+      "content": "ビデオで聞こえる言語を選択し生成をクリックします。",
+      "contentLimit": "ビデオで聞こえる言語を選択し生成をクリックします。申し訳ありませんが、1日に1つのAI翻訳結果しか生成できません。"
     },
     "translate": {
       "title": "{time} について",
@@ -437,11 +565,17 @@
       "title": "有効期限が切れました",
       "content": "サインインしてください。"
     },
+    "PermissionFail": {
+      "title": "今日の回数は使い果たされています",
+      "content": "申し訳ありませんが、1日に1つのAI翻訳結果しか生成できません。"
+    },
+    "loading": "処理中...",
     "cancel": "キャンセル",
     "quit": "やめる",
     "generate": "生成する",
     "ok": "バックグラウンドで実行",
-    "continue": "キャンセル"
+    "continue": "キャンセル",
+    "upgrade": "はい"
   },
   "translateBubble": {
     "bubbleWhenGrab": "この操作は進行中の翻訳を中止させるでしょう。",
@@ -471,6 +605,10 @@
       "title": "有効期限が切れました",
       "content": "サインインしてください。"
     },
+    "bubbleTranslatePermissionFail": {
+      "title": "今日の回数は使い果たされています",
+      "content": "申し訳ありませんが、1日に1つのAI翻訳結果しか生成できません。"
+    },
     "ok": "はい",
     "cancel": "キャンセル",
     "continue": "続ける"
@@ -496,6 +634,47 @@
       "retry": "retry",
       "error300": "Verification failed, please",
       "errorNetwork": "Network Error. Please"
+    }
+  },
+  "forbiddenModal": {
+    "title": "Upgrade to SPlayer Premium",
+    "content": "Upgrade to export translation results unlimitedly, and get access to more exclusive features.",
+    "span": "Already Premium? Sign In",
+    "button": "Go Premium Now",
+    "audioLanguage": "日本語, 한국어, Español, Français, Deutsch, Italiano, Português, čeština, Русский, Indonesian, العربية, Türkçe, română",
+    "translate": {
+      "title": "Upgrade to SPlayer Premium",
+      "content": "Go Premium to get access to more languages and other exclusive features.",
+      "span": "Already Premium? Sign In",
+      "button": "Go Premium Now"
+    },
+    "export": {
+      "title": "Upgrade to SPlayer Premium",
+      "content": "Upgrade to export translation results unlimitedly, and get access to more exclusive features.",
+      "span": "Already Premium? Sign In",
+      "button": "Go Premium Now"
+    }
+  },
+  "premiumModal": {
+    "loading": {
+      "content": "Processing，please wait a second …",
+      "button": "Close"
+    },
+    "success": {
+      "h2": "Thanks for your support",
+      "h1": "Payment Successful !",
+      "h4": "NOW",
+      "content1": "Additional Hours of AI Translation Service",
+      "content2": "Support More Languages in AI Translation",
+      "content3": "Export Translation Results Unlimitedly",
+      "button": "Done"
+    },
+    "fail": {
+      "h1": "Sorry",
+      "content": "Your transaction could not be processed，please contact us",
+      "copy": "Copy",
+      "copied": "Copied",
+      "button": "Back"
     }
   }
 }

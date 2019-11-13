@@ -25,6 +25,12 @@
       "fontSize": "14px"
     }
   },
+  "tips": {
+    "openSidebar": "عرض المحتوى الجانبي (C)",
+    "closeSidebar": "أخفِ الشّريط الجانبيّ (C)",
+    "exit": "العودة إلى صفحة الإطلاق",
+    "delete": "Back to Launching Page"
+  },
   "errorFile": {
     "ENOSPC": {
       "content": "لا توجد مساحة كافية على القرص.",
@@ -137,6 +143,7 @@
       "hidePlaylist": "إخفاء قائمة التشغيل",
       "previousVideo": "الفيديو السابق",
       "singleCycle": "كرر مرة واحدة",
+      "playlistLoop": "حلقة قائمة التشغيل",
       "snapShot": "لمحة"
     },
     "splayerx": {
@@ -205,7 +212,9 @@
       "enterPip": "أدخل صورة في صورة",
       "exitPip": "الخروج من الصورة في صورة",
       "playInNewWindow": "اللعب في نافذة جديدة",
-      "backToBrowser": "العودة إلى المتصفح"
+      "backToBrowser": "العودة إلى المتصفح",
+      "openSidebar": "عرض المحتوى الجانبي",
+      "closeSidebar": "أخفِ الشّريط الجانبيّ"
     },
     "edit": {
       "name": "حرّر",
@@ -218,7 +227,8 @@
       "name": "التاريخ",
       "reload": "إعادة تحميل الصفحة",
       "back": "ظهر",
-      "forward": "تقدم"
+      "forward": "تقدم",
+      "clearHistory": "حذف التاريخ"
     }
   },
   "nextVideo": {
@@ -249,12 +259,21 @@
     "youku": "Youku",
     "coursera": "Coursera",
     "ted": "TED",
+    "lynda": "Lynda",
+    "masterclass": "MasterClass",
+    "sportsqq": "Tencent Sports",
+    "developerapple": "WWDC",
+    "vipopen163": "网易公开课",
+    "study163": "网易云课堂",
+    "imooc": "慕课网",
+    "icourse163": "中国大学MOOC",
     "openLocalFile": " فتح ملف محلي ...",
     "enterPip": "أدخل صورة في صورة",
     "exitPip": "العودة إلى المتصفح",
     "enterPop": "اللعب في نافذة جديدة",
     "exitPop": "العودة إلى المتصفح",
     "danmu": "وابل",
+    "pin": "Pin / Unpin (T)",
     "error": {
       "offline": "لا يوجد إنترنت",
       "try": "حاول:",
@@ -263,8 +282,33 @@
     },
     "remove": "نزع",
     "siteManager": "مدير المواقع",
-    "popularSites": "المواقع الأمثل",
-    "siteTip": "اضافة / تغيير"
+    "general": "مجمع",
+    "education": "التعليم",
+    "siteTip": "اضافة / تغيير",
+    "today": "اليوم",
+    "yesterday": "أمس",
+    "homepage": {
+      "tips": "منزل",
+      "unSigned": "Not Signed In",
+      "signInfo": "Sign in to use AI Translation and get access to more features.",
+      "signBtn": "Sign In",
+      "account": "Account: ",
+      "signOut": "Sign out",
+      "accountInfo": "Upgrade your account now and get started with exclusive features and more.",
+      "premiumBtn": "Upgrade",
+      "premiumAccount": "Premium Account: ",
+      "premiumInfo": "Expiration Date: ",
+      "renewBtn": "Renew",
+      "history": "Online History",
+      "clear": "Clear",
+      "historyInfo": "Keep track of your playback history, including the page title, the site address and the date you watched.",
+      "playlist": "Local Playlist",
+      "playlistInfoPre": "Click the ",
+      "playlistInfoNext": " button on the left sidebar, choose and open more than one file to generate a playlist.",
+      "banner1": "Submit your<br>Feedback",
+      "banner2": "Contribute to our<br>Localization Project",
+      "banner3": "Release Notes"
+    }
   },
   "preferences": {
     "general": {
@@ -299,7 +343,79 @@
       "incognitoDescription": "لن يتم حفظ سجل التشغيل.",
       "clearHistory": "مسح سجل التشغيل",
       "clearHistoryDescription": "قم بإزالة قوائم التشغيل الحالية وسجل التشغيل"
+    },
+    "account": {
+      "accountSetting": "Account",
+      "title": "My Profile",
+      "noToken": {
+        "title": "Not Signed In",
+        "description": "Sign in with your phone number to use AI Translation and more advanced features.",
+        "button": "Sign In"
+      },
+      "normalUser": {
+        "title": "Account: ",
+        "description": "Upgrade your account now and get started with exclusive features and more.",
+        "button": "Upgrade"
+      },
+      "vipUser": {
+        "title": "Premium Account: ",
+        "description": "Expiration Date: ",
+        "button": "Renew"
+      },
+      "month": " Month",
+      "year": " Year",
+      "months": " Months",
+      "years": " Years",
+      "signOut": "Sign out",
+      "createdAt": "Registration Date",
+      "payAt": "Recent Purchased",
+      "payContent": "{date}{product}",
+      "payProduct": ": {product} Premium"
+    },
+    "premium": {
+      "premiumSetting": "Premium",
+      "title": "SPlayer Premium",
+      "description": "Go Premium now to help SPlayer change the way people watch videos, and get access to more advanced features.",
+      "explanation": {
+        "title": "About the Pricing",
+        "description1": "Applying a complex Translation System, which supports the translation of multiple languages and the speech recognition of long duration videos, has been incurring massive ongoing maintenance costs so far. The cost is based on the duration of the video successfully processed by the system, which is approximately one dollar per hour.",
+        "description2": "We are thrilled to your strong support, of which the impact and power will help us make the SPlayer better, and your adoption of the new technology will finally contribute to briding the language gaps and connecting the world.",
+        "description3": "Best Regards,",
+        "description4": "SPlayer Team",
+        "description5": "2019"
+      },
+      "content": {
+        "description1": "Additional hours of AI Translation service",
+        "description2": "Support more languages in AI Translation",
+        "description3": "Export speech recognition results unlimitedly",
+        "description4": "Your purchase history will be conserved permanently",
+        "description5": "",
+        "description6": "New features are coming soon"
+      },
+      "origin": "ORIG. ",
+      "off": "% Off",
+      "month": " Month",
+      "year": " Year",
+      "months": " Mo.",
+      "years": " Yr.",
+      "normal": "Standard",
+      "giftmonth": "{num} Bonus Month",
+      "giftyear": "{num} Bonus Year",
+      "giftmonths": "{num} Bonus Months",
+      "giftyears": "{num} Bonus Years",
+      "payType": {
+        "alipay": "Alipay",
+        "wxpay": "WeChat",
+        "paypal": "PayPal"
+      }
     }
+  },
+  "payment": {
+    "wxpay": {
+      "title": "SCAN & PAY",
+      "description": "WeChat Pay"
+    },
+    "fail": "Error"
   },
   "privacyBubble": {
     "confirmDisable": {
@@ -322,6 +438,10 @@
   },
   "alertBubble": {
     "button": ""
+  },
+  "notExportEmbeddedSubtitle": {
+    "title": "",
+    "content": "Embedded subtitle is loading, please try to export later."
   },
   "protectBubble": {
     "agree": "حسنا",
@@ -365,6 +485,12 @@
       "zh": "الصينية المبسطة",
       "zh-CN": "الصينية المبسطة",
       "zh-TW": "الصينية التقليدية"
+    },
+    "tips": {
+      "editor": "Edit is coming soon ...",
+      "export": "Export",
+      "reload": "Regenerate",
+      "delete": "Remove"
     }
   },
   "uploading": {
@@ -395,11 +521,13 @@
     "videoLanguageLabel": "لغة الصوت",
     "subtitleLanguageLabel": "ترجم إلى",
     "selectLanguageLabel": "لغة الصوت",
+    "selectLanguageMoreLabel": "المزيد ...",
     "audioLanguageLoading": "جارٍ إحضار قائمة اللغات ...",
     "audioLanguageLoadFail": "فشل الاتصال ، يرجى المحاولة لاحقًا",
     "select": {
       "title": "اختر لغة الصوت",
-      "content": "لإنشاء نتيجة ترجمة ، يرجى تحديد اللغة التي تسمعها في الفيديو والنقر على زر إنشاء. قد تستغرق العملية بعض الوقت."
+      "content": "لإنشاء نتيجة ترجمة ، يرجى تحديد اللغة التي تسمعها في الفيديو والنقر على زر إنشاء. قد تستغرق العملية بعض الوقت.",
+      "contentLimit": "حدد اللغة التي تسمعها في الفيديو وانقر على زر إنشاء. يمكنك إنشاء ترجمة AI واحدة مجانًا يوميًا."
     },
     "translate": {
       "title": "حوالي {time} اليسار",
@@ -437,11 +565,17 @@
       "title": "انتهت الجلسة",
       "content": "يرجى تسجيل الدخول أولاً."
     },
+    "PermissionFail": {
+      "title": "الاستخدامات المتبقية اليوم: 0",
+      "content": "عذرًا ، يمكنك فقط إنشاء نتيجة واحدة للترجمة AI في اليوم."
+    },
+    "loading": "Processing ...",
     "cancel": "إلغاء",
     "quit": "استقال",
     "generate": "توفير",
     "ok": "حسنا",
-    "continue": "إلغاء"
+    "continue": "إلغاء",
+    "upgrade": "حسنا"
   },
   "translateBubble": {
     "bubbleWhenGrab": "سيتم إحباط ترجمة AI إذا استمرت ، فهل تريد المتابعة على أي حال؟",
@@ -471,6 +605,10 @@
       "title": "انتهت الجلسة",
       "content": "يرجى تسجيل الدخول أولاً."
     },
+    "bubbleTranslatePermissionFail": {
+      "title": "الاستخدامات المتبقية اليوم: 0",
+      "content": "عذرًا ، يمكنك فقط إنشاء نتيجة واحدة للترجمة AI في اليوم."
+    },
     "ok": "حسنا",
     "cancel": "إلغاء",
     "continue": "استمر"
@@ -496,6 +634,47 @@
       "retry": "retry",
       "error300": "Verification failed, please",
       "errorNetwork": "Network Error. Please"
+    }
+  },
+  "forbiddenModal": {
+    "title": "Upgrade to SPlayer Premium",
+    "content": "Upgrade to export translation results unlimitedly, and get access to more exclusive features.",
+    "span": "Already Premium? Sign In",
+    "button": "Go Premium Now",
+    "audioLanguage": "日本語, 한국어, Español, Français, Deutsch, Italiano, Português, čeština, Русский, Indonesian, العربية, Türkçe, română",
+    "translate": {
+      "title": "Upgrade to SPlayer Premium",
+      "content": "Go Premium to get access to more languages and other exclusive features.",
+      "span": "Already Premium? Sign In",
+      "button": "Go Premium Now"
+    },
+    "export": {
+      "title": "Upgrade to SPlayer Premium",
+      "content": "Upgrade to export translation results unlimitedly, and get access to more exclusive features.",
+      "span": "Already Premium? Sign In",
+      "button": "Go Premium Now"
+    }
+  },
+  "premiumModal": {
+    "loading": {
+      "content": "Processing，please wait a second …",
+      "button": "Close"
+    },
+    "success": {
+      "h2": "Thanks for your support",
+      "h1": "Payment Successful !",
+      "h4": "NOW",
+      "content1": "Additional Hours of AI Translation Service",
+      "content2": "Support More Languages in AI Translation",
+      "content3": "Export Translation Results Unlimitedly",
+      "button": "Done"
+    },
+    "fail": {
+      "h1": "Sorry",
+      "content": "Your transaction could not be processed，please contact us",
+      "copy": "نسخ",
+      "copied": "تم النسخ",
+      "button": "ظهر"
     }
   }
 }

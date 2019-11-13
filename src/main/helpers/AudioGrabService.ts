@@ -2,13 +2,13 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-22 17:18:34
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-10-11 14:22:07
+ * @Last Modified time: 2019-10-31 12:23:22
  */
 
 import { EventEmitter } from 'events';
 // @ts-ignore
 import { splayerx } from 'electron';
-import path from 'path';
+import path, { sep } from 'path';
 import fs from 'fs';
 import { credentials, Metadata } from 'grpc';
 
@@ -114,6 +114,8 @@ export default class AudioGrabService extends EventEmitter {
     requestConfig.setTargetLanguageCode(this.targetLanguageCode);
     requestConfig.setMediaIdentity(this.mediaHash);
     requestConfig.setAudioTrack(String(this.audioId));
+    const hints = this.generateHints();
+    requestConfig.setHints(hints);
     request.setStreamingConfig(requestConfig);
     this.streamClient.write(request);
     this.streamClient.once('data', this.grpcCallBack.bind(this));
@@ -138,6 +140,24 @@ export default class AudioGrabService extends EventEmitter {
       200, // 一次性待提取的帧数
       handleCallBack.bind(this),
     );
+  }
+
+  private generateHints(): string {
+    const { videoSrc } = this;
+    let result = '';
+    videoSrc.split(sep).reverse().some((dirOrFileName, index) => {
+      if (index === 0) {
+        result = dirOrFileName;
+        return false;
+      }
+      if (index <= 2) {
+        result = `${dirOrFileName}${sep}${result}`;
+        return false;
+      }
+      result = `${sep}${result}`;
+      return true;
+    });
+    return result;
   }
 
   private handleCallBack(err: string, framebuf: Buffer, framedata: string) {

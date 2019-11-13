@@ -17,12 +17,12 @@ class InjectJSManager implements IInjectJSManager {
   public constructor() {
     this.calcVideoNumCode = 'var iframe = document.querySelector("iframe");'
       + 'if (iframe && iframe.contentDocument) {'
-      + 'document.getElementsByTagName("video").length + iframe.contentDocument.getElementsByTagName("video").length'
+      + 'document.getElementsByTagName("video").length + iframe.contentDocument.getElementsByTagName("video").length;'
       + '} else {'
-      + 'document.getElementsByTagName("video").length'
+      + 'document.getElementsByTagName("video").length;'
       + '}';
     this.getVideoStyleCode = 'getComputedStyle(document.querySelector("video") || document.querySelector("iframe").contentDocument.querySelector("video"))';
-    this.pauseNormalVideo = 'document.querySelector("video").pause();';
+    this.pauseNormalVideo = 'var video = document.querySelector("video"); if (video) video.pause();';
   }
 
   public getPipByChannel(info: { channel: string, type?: string,
@@ -82,10 +82,11 @@ class InjectJSManager implements IInjectJSManager {
     return `document.querySelector(".pip-buttons").style.display = ${shouldShow} ? "flex" : "none";`;
   }
 
-  public updatePipControlTitle(title: string, danmu: string): string {
+  public updatePipControlTitle(title: string, danmu: string, pin: string): string {
     return `
       document.querySelector(".pip").title = "${title}";
       document.querySelector(".danmu").title = "${danmu}";
+      document.querySelector(".pin").title = "${pin}";
     `;
   }
 
@@ -120,10 +121,15 @@ class InjectJSManager implements IInjectJSManager {
   }
 
   public updateBarrageState(barrageState: boolean, opacity: number): string {
-    return `const danmu = document.querySelector(".danmu");
+    return `var danmu = document.querySelector(".danmu");
       danmu.src = ${barrageState} ? "assets/danmu-default-icon.svg" : "assets/noDanmu-default-icon.svg";
       danmu.style.opacity = ${opacity};
       danmu.style.cursor = ${opacity} === 1 ? "cursor" : "default"`;
+  }
+
+  public updatePinState(isPin: boolean): string {
+    return `var pin = document.querySelector(".pin");
+      pin.src = ${isPin} ? "assets/pined-default-icon.svg" : "assets/pin-default-icon.svg";`;
   }
 
   public emitKeydownEvent(keyCode: number) {
@@ -171,6 +177,7 @@ export interface IInjectJSManager {
   updateBarrageState(barrageState: boolean, opacity: number): string
   emitKeydownEvent(keyCode: number): string
   changeFullScreen(enterFullScreen: boolean): string
+  updatePinState(isPin: boolean): string
 }
 
 export default new InjectJSManager();

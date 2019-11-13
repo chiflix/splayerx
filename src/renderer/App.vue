@@ -5,20 +5,19 @@
     class="application"
   >
     <Titlebar
-      v-if="!($route.name === 'playing-view' || ($route.name === 'browsing-view' && !isDarwin))"
-      :is-landing-view="$route.name === 'landing-view'"
-      :is-browsing-view="$route.name === 'browsing-view'"
-      :show-sidebar="showSidebar"
+      v-if="!($route.name === 'browsing-view' && !isDarwin)"
+      :show-all-widgets="showAllWidgets"
+      :recent-playlist="playlistState"
       :enable-full-screen-button="['landing-view', 'playing-view', 'browsing-view']
         .includes($route.name)"
     />
-    <transition name="sidebar">
-      <Sidebar
-        v-show="showSidebar"
-        :show-sidebar="showSidebar"
-        :current-url="currentUrl"
-      />
-    </transition>
+    <Sidebar
+      v-show="showSidebar"
+      :style="{
+        width: showSidebar ? '76px' : '0',
+      }"
+      :current-url="currentUrl"
+    />
     <transition
       :name="transitionMode"
       mode="out-in"
@@ -28,7 +27,6 @@
           width: showSidebar ? 'calc(100% - 76px)' : '100%',
         }"
         :open-file-args="openFileArgs"
-        :show-sidebar="showSidebar"
         @update-current-url="currentUrl = $event"
       />
     </transition>
@@ -43,14 +41,15 @@ import {
   SubtitleManager as smActions,
   UserInfo as uActions,
   AudioTranslate as atActions,
+  UIStates as uiActions,
 } from '@/store/actionTypes';
 import Titlebar from '@/components/Titlebar.vue';
 import Sidebar from '@/components/Sidebar.vue';
 import '@/css/style.scss';
 import drag from '@/helpers/drag';
-import { setToken, checkToken } from '@/libs/apis';
+import { setToken, getUserInfo, checkToken } from '@/libs/apis';
 import sagi from '@/libs/sagi';
-import { apiOfAccountService } from './helpers/featureSwitch';
+import { apiOfAccountService, forceRefresh } from './helpers/featureSwitch';
 import { AudioTranslateBubbleOrigin, AudioTranslateStatus } from '@/store/modules/AudioTranslate';
 
 export default {
@@ -63,13 +62,17 @@ export default {
     return {
       transitionMode: '',
       openFileArgs: null,
-      showSidebar: false,
       currentUrl: '',
       checkedToken: false,
+      didGetUserInfo: false,
     };
   },
   computed: {
-    ...mapGetters(['signInCallback', 'isTranslating', 'translateStatus']),
+    ...mapGetters([
+      'signInCallback', 'isTranslating', 'translateStatus',
+      // UIStates
+      'showSidebar', 'showAllWidgets', 'playlistState',
+    ]),
     isDarwin() {
       return process.platform === 'darwin';
     },
@@ -79,7 +82,7 @@ export default {
       if (to.name === 'landing-view' && from.name === 'language-setting') this.transitionMode = 'fade';
       if (from.name === 'playing-view' && to.name !== 'playing-view') this.resetManager();
       else this.transitionMode = '';
-      if (to.name !== 'browsing-view' && !(to.name === 'landing-view' && from.name === 'browsing-view')) this.showSidebar = false;
+      if (to.name !== 'browsing-view' && !(to.name === 'landing-view' && from.name === 'browsing-view')) this.updateShowSidebar(false);
       if (from.name === 'browsing-view' && to.name === 'landing-view') this.currentUrl = '';
       if (from.name === 'browsing-view' && to.name === 'playing-view') {
         if (!this.$electron.remote.getCurrentWindow().isVisible()) {
@@ -89,14 +92,22 @@ export default {
         }
         this.currentUrl = '';
       }
+      if (from.name === 'landing-view' && to.name === 'playing-view') this.updateShowSidebar(false);
     },
     showSidebar(val: boolean) {
       ipcRenderer.send('update-sidebar', val);
     },
   },
-  mounted() {
+  async mounted() {
     this.$event.on('side-bar-mouseup', () => {
-      this.showSidebar = !this.showSidebar;
+      if (this.playlistState && !this.showSidebar) {
+        this.$bus.$emit('close-playlist');
+        setTimeout(() => {
+          this.updateShowSidebar(true);
+        }, 200);
+      } else {
+        this.updateShowSidebar(!this.showSidebar);
+      }
     });
     ipcRenderer.on('open-file', (event: Event, args: { onlySubtitle: boolean, files: string[] }) => {
       this.openFileArgs = args;
@@ -123,18 +134,22 @@ export default {
     apiOfAccountService().then((api: string) => {
       ipcRenderer.send('sign-in-end-point', api);
     }).catch(() => {});
-
+    ipcRenderer.on('clear-signIn-callback', () => {
+      this.removeCallback(() => { });
+    });
     // sign in success
-    ipcRenderer.on('sign-in', (e: Event, account?: {
+    ipcRenderer.on('sign-in', async (e: Event, account?: {
       token: string, id: string,
     }) => {
       this.updateUserInfo(account);
       if (account) {
         setToken(account.token);
         sagi.setToken(account.token);
-        if (!this.checkedToken) {
-          this.checkedToken = true;
-          checkToken();
+        this.updateToken(account.token);
+        try {
+          await this.getUserInfo();
+        } catch (error) {
+          // empty
         }
         // sign in success, callback
         if (this.signInCallback) {
@@ -143,7 +158,20 @@ export default {
         }
       } else {
         setToken('');
+        this.updateToken('');
         sagi.setToken('');
+        this.didGetUserInfo = false;
+      }
+    });
+
+    ipcRenderer.on('payment-success', async () => {
+      forceRefresh();
+      try {
+        await checkToken();
+        const res = await getUserInfo();
+        this.updateUserInfo(res.me);
+      } catch (error) {
+        // empty
       }
     });
 
@@ -159,28 +187,44 @@ export default {
       }
     });
     // load global data when sign in is opend
-    // const account = remote.getGlobal('account');
-    // this.updateUserInfo(account);
-    // if (account && account.token) {
-    //   setToken(account.token);
-    //   sagi.setToken(account.token);
-    //   // resfrsh
-    //   checkToken();
-    // }
+    const account = remote.getGlobal('account');
+    this.updateUserInfo(account);
+    if (account && account.token) {
+      setToken(account.token);
+      await checkToken();
+      this.updateToken(account.token);
+      sagi.setToken(account.token);
+      // resfrsh
+      this.checkedToken = true;
+      this.getUserInfo();
+    }
   },
   methods: {
     ...mapActions({
       resetManager: smActions.resetManager,
       updateUserInfo: uActions.UPDATE_USER_INFO,
+      updateToken: uActions.UPDATE_USER_TOKEN,
       removeCallback: uActions.UPDATE_SIGN_IN_CALLBACK,
       showTranslateBubble: atActions.AUDIO_TRANSLATE_SHOW_BUBBLE,
       addTranslateBubbleCallBack: atActions.AUDIO_TRANSLATE_BUBBLE_CALLBACK,
+      updateShowSidebar: uiActions.UPDATE_SHOW_SIDEBAR,
     }),
     mainCommitProxy(commitType: string, commitPayload: any) {
       this.$store.commit(commitType, commitPayload);
     },
     mainDispatchProxy(actionType: string, actionPayload: any) {
       this.$store.dispatch(actionType, actionPayload);
+    },
+    async getUserInfo() {
+      if (this.didGetUserInfo) return;
+      this.didGetUserInfo = true;
+      try {
+        const res = await getUserInfo();
+        this.updateUserInfo(res.me);
+      } catch (error) {
+        // empty
+        this.didGetUserInfo = false;
+      }
     },
   },
 };

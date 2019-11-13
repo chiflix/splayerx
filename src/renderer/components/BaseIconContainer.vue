@@ -16,6 +16,23 @@
 </template>
 
 <script lang="ts">
+function importIcon(type: string, state: string, effect: string) {
+  if (!type) return;
+  const defaultIcon = `${type}-${state}-${effect}`;
+  const hoverIcon = `${type}-hover-${effect}`;
+  const activeIcon = `${type}-active-${effect}`;
+  // svg-sprite-loader
+  if (!document.getElementById(defaultIcon)) {
+    import(`@/assets/icon/${defaultIcon}.svg`).catch(err => console.error(err));
+  }
+  if (!document.getElementById(hoverIcon)) {
+    import(`@/assets/icon/${hoverIcon}.svg`).catch(() => {});
+  }
+  if (!document.getElementById(activeIcon)) {
+    import(`@/assets/icon/${activeIcon}.svg`).catch(() => {});
+  }
+}
+
 export default {
   name: 'Icon',
   props: {
@@ -52,33 +69,14 @@ export default {
     type: {
       immediate: true,
       handler(type: string) {
-        const defaultIcon = `${type}-${this.finalState}-${this.finalEffect}`;
-        const hoverIcon = `${type}-hover-${this.finalEffect}`;
-        const activeIcon = `${type}-active-${this.finalEffect}`;
-        if (type && !document.getElementById(defaultIcon)) {
-          try {
-            // eslint-disable-next-line import/no-dynamic-require
-            require(`@/assets/icon/${defaultIcon}.svg`);
-          } catch (error) {
-            // empty
-          }
-        }
-        if (type && !document.getElementById(hoverIcon)) {
-          try {
-            // eslint-disable-next-line import/no-dynamic-require
-            require(`@/assets/icon/${hoverIcon}.svg`);
-          } catch (error) {
-            // empty
-          }
-        }
-        if (type && !document.getElementById(activeIcon)) {
-          try {
-            // eslint-disable-next-line import/no-dynamic-require
-            require(`@/assets/icon/${activeIcon}.svg`);
-          } catch (error) {
-            // empty
-          }
-        }
+        importIcon(type, this.finalState, this.finalEffect);
+      },
+    },
+    effect: {
+      immediate: true,
+      handler(effect: string) {
+        const type = this.type;
+        importIcon(type, this.finalState, effect);
       },
     },
   },
@@ -173,6 +171,49 @@ export default {
   width: 24px;
   height: 27px;
   display: block;
+}
+
+.downArrow, .subtitleDetach, .subtitleEdit,
+.subtitleExport, .reload, .subtitleEditorExit, .deleteSub {
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: pointer;
+  .default {
+    display: block;
+  }
+  .hover {
+    display: none;
+  }
+  .active {
+    display: none;
+  }
+  &:hover {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: block;
+    }
+    .active {
+      display: none;
+    }
+  }
+  &:active {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: none;
+    }
+    .active {
+      display: block;
+    }
+  }
+}
+
+.subtitleEdit {
+  cursor: default;
 }
 
 .volume {
@@ -463,6 +504,29 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     height: 11.5px;
   }
 }
+.cycleOne {
+ display: block;
+  @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px),
+  screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
+    width: 15px;
+    height: 7px;
+  }
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+    width: 15px;
+    height: 7px;
+  }
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+    width: 17px;
+    height: 8px;
+  }
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+    width: 24px;
+    height: 11.5px;
+  }
+}
 .refresh {
   .default {
     display: block;
@@ -485,6 +549,19 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     }
   }
 }
+.browsingDelete, .browsingOpen {
+  width: 100%;
+  height: 100%;
+}
+.browsingNext, .browsingPre {
+  max-height: 68px;
+  max-width: 28px;
+  min-height: 50px;
+  min-width: 20px;
+  width: calc(2000vw / 888);
+  height: calc(5000vh / 888);
+  margin: auto;
+}
 .success {
   width: 15px;
   height: 15px;
@@ -492,55 +569,6 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
 .failed {
   width: 15px;
   height: 15px;
-}
-.deleteSub, .reload  {
-  cursor: pointer;
-  .default {
-    display: block;
-  }
-  .hover {
-    display: none;
-  }
-  .active {
-    display: none;
-  }
-  &:hover {
-    .default {
-      display: none;
-    }
-    .hover {
-      display: block;
-    }
-    .active {
-      display: none;
-    }
-  }
-  &:active {
-    .default {
-      display: none;
-    }
-    .hover {
-      display: none;
-    }
-    .active {
-      display: block;
-    }
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
-  screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
-    width: 12px;
-    height: 12px;
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
-  screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
-    width: 14px;
-    height: 14px;
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
-  screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
-    width: 18.8px;
-    height: 18.8px;
-  }
 }
 .picInpic {
   width: 20px;
@@ -587,10 +615,12 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   width: 10px;
   height: 10px;
 }
-.bilibiliSidebar, .iqiyiSidebar, .youtubeSidebar, .channelManage, .courseraSidebar,
-.douyuSidebar, .huyaSidebar, .qqSidebar, .youkuSidebar, .twitchSidebar, .tedSidebar {
-  width: 44px;
-  height: 44px;
+.bilibiliSidebar, .iqiyiSidebar, .youtubeSidebar, .channelManage, .courseraSidebar, .lyndaSidebar,
+.douyuSidebar, .huyaSidebar, .qqSidebar, .youkuSidebar, .twitchSidebar, .tedSidebar,
+.sportsqqSidebar, .masterclassSidebar, .developerappleSidebar, .vipopen163Sidebar,
+.study163Sidebar, .imoocSidebar, .icourse163Sidebar {
+  width: 100%;
+  height: 100%;
 }
 .showMarks, .hideMarks, .closeSearch {
   width: 18px;
@@ -656,7 +686,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   width: 20px;
   height: 20px;
 }
-.history, .open {
+.history, .open, .home, .exit, .homePage {
   width: 30px;
   height: 30px;
   .default {
@@ -674,7 +704,13 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     }
   }
 }
-.pip, .pop, .pipDisabled, .popDisabled {
+.homePageLogo {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.pip, .pop, .pipDisabled, .popDisabled,
+.back, .backDisabled, .forward, .forwardDisabled, .pageRefresh, .reloadStop {
   width: 30px;
   height: 30px;
 }

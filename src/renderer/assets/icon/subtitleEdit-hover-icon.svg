@@ -1,0 +1,9 @@
+<svg width="13" height="13" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <radialGradient cx="84.204%" cy="81.399%" fx="84.204%" fy="81.399%" r="120.395%" gradientTransform="scale(-.91229 -1) rotate(39.947 2.2 -2.428)" id="a">
+            <stop stop-color="#FFF" stop-opacity=".776" offset="0%"/>
+            <stop stop-color="#FFF" stop-opacity=".508" offset="100%"/>
+        </radialGradient>
+    </defs>
+    <path d="M1.507 6.06a.22.22 0 01.22-.22h3.786a.22.22 0 01.22.22v.36a.22.22 0 01-.22.22H1.726a.22.22 0 01-.22-.22v-.36zm0-2.294a.22.22 0 01.22-.22H6.28a.22.22 0 01.219.22v.361a.22.22 0 01-.22.22H1.727a.22.22 0 01-.22-.22v-.361zM7.3 6.089a.22.22 0 010-.31l3.967-3.967a.22.22 0 01.31 0l.256.255a.22.22 0 010 .31L7.865 6.345a.22.22 0 01-.31 0L7.3 6.089zM1.507 8.352a.22.22 0 01.22-.219h6.815a.22.22 0 01.22.22v.36a.22.22 0 01-.22.22H1.726a.22.22 0 01-.22-.22v-.36zm0 2.294a.22.22 0 01.22-.22h8.923a.22.22 0 01.219.22v.36a.22.22 0 01-.22.22H1.727a.22.22 0 01-.22-.22v-.36z" stroke="#FFF" stroke-width=".5" fill="url(#a)" fill-rule="evenodd" fill-opacity=".2" stroke-opacity=".04"/>
+</svg>

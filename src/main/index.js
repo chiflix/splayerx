@@ -1,22 +1,20 @@
 // Be sure to call Sentry function as early as possible in the main process
 import '../shared/sentry';
 
-import { app, BrowserWindow, session, Tray, ipcMain, globalShortcut, nativeImage, splayerx, systemPreferences, BrowserView, webContents } from 'electron' // eslint-disable-line
+import { app, BrowserWindow, session, Tray, ipcMain, globalShortcut, nativeImage, splayerx, systemPreferences, BrowserView, webContents, inAppPurchase, screen } from 'electron' // eslint-disable-line
 import { throttle, debounce, uniq } from 'lodash';
 import os from 'os';
 import path, {
   basename, dirname, extname, join, resolve,
 } from 'path';
 import fs from 'fs';
-import http from 'http';
 import rimraf from 'rimraf';
 import { audioGrabService } from './helpers/AudioGrabService';
 import './helpers/electronPrototypes';
 import {
   getValidVideoRegex, getValidSubtitleRegex,
   getToken, saveToken,
-  getIP,
-  getRightPort,
+  getIP, crossThreadCache,
 } from '../shared/utils';
 import { mouse } from './helpers/mouse';
 import MenuService from './menu/MenuService';
@@ -74,9 +72,11 @@ let loginWindow = null;
 let aboutWindow = null;
 let preferenceWindow = null;
 let browsingWindow = null;
+let paymentWindow = null;
 let browserViewManager = null;
 let pipControlView = null;
 let titlebarView = null;
+let premiumView = null;
 let maskView = null;
 let maskEventTimer = 0;
 let maskDisappearTimer = 0;
@@ -88,14 +88,12 @@ let inited = false;
 let hideBrowsingWindow = false;
 let finalVideoToOpen = [];
 let signInEndPoint = '';
-let localHostPort = 0;
-let fileDirServerOnLine = false;
+let applePayProductID = '';
+let paymentWindowCloseTag = false;
 const locale = new Locale();
 const tmpVideoToOpen = [];
 const tmpSubsToOpen = [];
 const subRegex = getValidSubtitleRegex();
-const allChannels = ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch', 'coursera', 'ted'];
-const compareStr = [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com', 'film.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch'], ['coursera'], ['ted']];
 const titlebarUrl = process.platform === 'darwin' ? `file:${resolve(__static, 'pip/macTitlebar.html')}` : `file:${resolve(__static, 'pip/winTitlebar.html')}`;
 const maskUrl = process.platform === 'darwin' ? `file:${resolve(__static, 'pip/mask.html')}` : `file:${resolve(__static, 'pip/mask.html')}`;
 const mainURL = process.env.NODE_ENV === 'development'
@@ -104,6 +102,9 @@ const mainURL = process.env.NODE_ENV === 'development'
 const aboutURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080/about.html'
   : `file://${__dirname}/about.html`;
+const paymentURL = process.env.NODE_ENV === 'development'
+  ? 'http://localhost:9080/payment.html'
+  : `file://${__dirname}/payment.html`;
 const preferenceURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080/preference.html'
   : `file://${__dirname}/preference.html`;
@@ -113,6 +114,9 @@ let loginURL = process.env.NODE_ENV === 'development'
 const browsingURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080/browsing.html'
   : `file://${__dirname}/browsing.html`;
+let premiumURL = process.env.NODE_ENV === 'development'
+  ? 'http://localhost:9081/premium.html'
+  : `file://${__dirname}/premium.html`;
 
 const tempFolderPath = path.join(app.getPath('temp'), 'splayer');
 if (!fs.existsSync(tempFolderPath)) fs.mkdirSync(tempFolderPath);
@@ -159,7 +163,9 @@ function handleBossKey() {
 function pipControlViewTitle(isGlobal) {
   const danmu = locale.$t('browsing.danmu');
   const title = isGlobal ? locale.$t('browsing.exitPip') : locale.$t('browsing.exitPop');
-  pipControlView.webContents.executeJavaScript(InjectJSManager.updatePipControlTitle(title, danmu));
+  const pin = locale.$t('browsing.pin');
+  pipControlView.webContents
+    .executeJavaScript(InjectJSManager.updatePipControlTitle(title, danmu, pin));
 }
 
 function createPipControlView() {
@@ -174,9 +180,9 @@ function createPipControlView() {
   pipControlView.setBackgroundColor('#00FFFFFF');
   pipControlView.setBounds({
     x: Math.round(browsingWindow.getSize()[0] - 65),
-    y: Math.round(browsingWindow.getSize()[1] / 2 - 54),
+    y: Math.round(browsingWindow.getSize()[1] / 2 - 72),
     width: 50,
-    height: 104,
+    height: 144,
   });
 }
 
@@ -275,13 +281,64 @@ function getAllValidVideo(onlySubtitle, files) {
   }
 }
 
+function setBoundsCenterByOriginWindow(origin, win, width, height) {
+  const displays = screen.getAllDisplays();
+  const list = displays.map(e => ({
+    x: e.workArea.x,
+    left: Number((e.workArea.x + (e.workArea.width - width) / 2).toFixed(0)),
+    top: Number((e.workArea.y + (e.workArea.height - height) / 2).toFixed(0)),
+  })).sort((l, r) => l.x - r.x);
+  if (origin && win && list.length > 1) {
+    try {
+      const pos = origin.getPosition();
+      const bounds = pos[0] > list[1].x ? {
+        x: list[1].left,
+        y: list[1].top,
+      } : {
+        x: list[0].left,
+        y: list[0].top,
+      };
+      win.setBounds(bounds);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+}
+
+function createPremiumView() {
+  premiumView = new BrowserView({
+    webPreferences: {
+      preload: `${require('path').resolve(__static, 'premium/preload.js')}`,
+      webSecurity: false,
+      nativeWindowOpen: true,
+    },
+  });
+  preferenceWindow.setBrowserView(premiumView);
+  premiumView.webContents.loadURL(premiumURL);
+  premiumView.webContents.setUserAgent(
+    `${premiumView.webContents.getUserAgent().replace(/Electron\S+/i, '')
+    } SPlayerX@2018 ${os.platform()} ${os.release()} Version ${app.getVersion()}`,
+  );
+  premiumView.setBounds({
+    x: 110,
+    y: 0,
+    width: preferenceWindow.getSize()[0] - 110,
+    height: preferenceWindow.getSize()[1],
+  });
+  if (process.env.NODE_ENV === 'development') {
+    setTimeout(() => { // wait some time to prevent `Object not found` error
+      premiumView.webContents.openDevTools();
+    }, 1000);
+  }
+}
+
 function createPreferenceWindow(e, route) {
   const preferenceWindowOptions = {
     useContentSize: true,
     frame: false,
     titleBarStyle: 'none',
     width: 540,
-    height: 426,
+    height: 436,
     transparent: true,
     resizable: false,
     show: false,
@@ -305,8 +362,14 @@ function createPreferenceWindow(e, route) {
     else preferenceWindow.loadURL(`${preferenceURL}`);
     preferenceWindow.on('closed', () => {
       preferenceWindow = null;
+      if (paymentWindow) {
+        paymentWindow.close();
+      }
     });
   } else {
+    if (!preferenceWindow.webContents.isDestroyed()) {
+      preferenceWindow.webContents.send('route-change', route);
+    }
     preferenceWindow.focus();
   }
   preferenceWindow.once('ready-to-show', () => {
@@ -318,56 +381,13 @@ function createPreferenceWindow(e, route) {
   if (process.platform === 'win32') {
     hackWindowsRightMenu(preferenceWindow);
   }
+  setBoundsCenterByOriginWindow(mainWindow, preferenceWindow, 540, 426);
+  // 预先加载好PremiumView
+  createPremiumView();
+  preferenceWindow.removeBrowserView(premiumView);
 }
 
-/**
- * @description sign in window need aliyun nc valication with // protocal
- * @author tanghaixiang
- */
-function createFileDirServer() {
-  http.createServer((request, response) => {
-    console.log('request ', request.url);
-    let filePath = `${request.url}`;
-    if (filePath === '/') {
-      filePath = '/login.html';
-    }
-    const extname = String(path.extname(filePath)).toLowerCase();
-    const mimeTypes = {
-      '.html': 'text/html',
-      '.js': 'text/javascript',
-      '.css': 'text/css',
-      '.json': 'application/json',
-      '.png': 'image/png',
-      '.jpg': 'image/jpg',
-      '.gif': 'image/gif',
-      '.svg': 'image/svg+xml',
-      '.wav': 'audio/wav',
-      '.mp4': 'video/mp4',
-      '.woff': 'application/font-woff',
-      '.ttf': 'application/font-ttf',
-      '.eot': 'application/vnd.ms-fontobject',
-      '.otf': 'application/font-otf',
-      '.wasm': 'application/wasm',
-    };
-    const contentType = mimeTypes[extname] || 'application/octet-stream';
-    fs.readFile(`${__dirname}${filePath}`, (error, content) => {
-      if (error) {
-        return;
-      }
-      response.writeHead(200, { 'Content-Type': contentType });
-      response.end(content, 'utf-8');
-    });
-  }).listen(localHostPort);
-}
-
-function createLoginWindow(e, route) {
-  // in production use http protocal
-  // aliyun captcha use // protocal
-  if (process.env.NODE_ENV === 'production' && !fileDirServerOnLine) {
-    createFileDirServer();
-    fileDirServerOnLine = true;
-    loginURL = `http://localhost:${localHostPort}/login.html`;
-  }
+function createLoginWindow(e, fromWindow, route) {
   const loginWindowOptions = {
     useContentSize: true,
     frame: false,
@@ -418,6 +438,15 @@ function createLoginWindow(e, route) {
   });
   if (process.platform === 'win32') {
     hackWindowsRightMenu(loginWindow);
+  }
+  // login window setbounds on mainwidnow
+  const win = fromWindow === 'preference' ? preferenceWindow : mainWindow;
+  setBoundsCenterByOriginWindow(win, loginWindow, 412, 284);
+  if (fromWindow !== 'main' && mainWindow && !mainWindow.webContents.isDestroyed()) {
+    mainWindow.webContents.send('clear-signIn-callback');
+  }
+  if (fromWindow !== 'preference' && preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
+    preferenceWindow.webContents.send('clear-signIn-callback');
   }
 }
 
@@ -495,6 +524,11 @@ function createBrowsingWindow(args) {
       if (!mainWindow) return;
       mainWindow.send('update-pip-pos', browsingWindow.getPosition());
     }, 100));
+    browsingWindow.on('always-on-top-changed', (e, top) => {
+      if (pipControlView) {
+        pipControlView.webContents.executeJavaScript(InjectJSManager.updatePinState(top));
+      }
+    });
     browsingWindow.on('leave-full-screen', () => {
       if (hideBrowsingWindow) {
         hideBrowsingWindow = false;
@@ -505,6 +539,102 @@ function createBrowsingWindow(args) {
       }
     });
   }
+}
+
+function createPaymentWindow(url, orderID, channel) {
+  if (!preferenceWindow) return;
+  const width = channel === 'wxpay' ? 270 : 1200;
+  const height = channel === 'wxpay' ? 462 : 890;
+  const paymentWindowOptions = {
+    useContentSize: true,
+    frame: false,
+    titleBarStyle: 'none',
+    width,
+    height,
+    transparent: true,
+    resizable: false,
+    show: false,
+    webPreferences: {
+      webSecurity: false,
+      nodeIntegration: true,
+      experimentalFeatures: true,
+      webviewTag: true,
+    },
+    acceptFirstMouse: true,
+    fullscreenable: false,
+    maximizable: false,
+    minimizable: false,
+  };
+  if (!paymentWindow) {
+    paymentWindow = new BrowserWindow(paymentWindowOptions);
+    // 如果播放窗口顶置，打开关于也顶置
+    if (mainWindow && mainWindow.isAlwaysOnTop()) {
+      paymentWindow.setAlwaysOnTop(true);
+    }
+    paymentWindow.loadURL(`${paymentURL}?url=${url}&orderID=${orderID}&type=${channel}`);
+    paymentWindow.on('closed', () => {
+      if (premiumView && !premiumView.webContents.isDestroyed()
+        && !paymentWindowCloseTag) {
+        premiumView.webContents.send('close-payment');
+      }
+      if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
+        preferenceWindow.webContents.send('close-payment');
+      }
+      paymentWindow = null;
+      paymentWindowCloseTag = false;
+    });
+  } else {
+    paymentWindow.focus();
+    paymentWindow.setBounds({
+      width,
+      height,
+    });
+    paymentWindow.loadURL(`${paymentURL}?url=${url}&orderID=${orderID}&type=${channel}`);
+  }
+  paymentWindow.once('ready-to-show', () => {
+    paymentWindow.show();
+  });
+  if (process.platform === 'win32') {
+    hackWindowsRightMenu(paymentWindow);
+  }
+  setBoundsCenterByOriginWindow(preferenceWindow, paymentWindow, width, height);
+  if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
+    preferenceWindow.webContents.send('add-payment');
+  }
+}
+
+function openHistoryItem(evt, args) {
+  if (!browserViewManager) browserViewManager = new BrowserViewManager();
+  const newChannel = browserViewManager.openHistoryPage(args.channel, args.url);
+  const view = newChannel.view ? newChannel.view : newChannel.page.view;
+  mainWindow.addBrowserView(view);
+  setTimeout(() => {
+    mainWindow.send('update-browser-state', {
+      url: args.url,
+      canGoBack: newChannel.canBack,
+      canGoForward: newChannel.canForward,
+    });
+  }, 150);
+  const bounds = mainWindow.getBounds();
+  if (process.platform === 'win32' && mainWindow.isMaximized() && (bounds.x < 0 || bounds.y < 0)) {
+    view.setBounds({
+      x: sidebar ? 76 : 0,
+      y: 40,
+      width: sidebar ? bounds.width + (bounds.x * 2) - 76
+        : bounds.width + (bounds.x * 2),
+      height: bounds.height - 40,
+    });
+  } else {
+    view.setBounds({
+      x: sidebar ? 76 : 0,
+      y: 40,
+      width: sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
+      height: mainWindow.getSize()[1] - 40,
+    });
+  }
+  view.setAutoResize({
+    width: true, height: true,
+  });
 }
 
 function registerMainWindowEvent(mainWindow) {
@@ -680,11 +810,23 @@ function registerMainWindowEvent(mainWindow) {
       });
     }
   });
-  // eslint-disable-next-line complexity
+  ipcMain.on('open-history-item', openHistoryItem);
+  ipcMain.on('remove-web-page', () => {
+    if (!browserViewManager) browserViewManager = new BrowserViewManager();
+    const mainBrowser = mainWindow.getBrowserViews()[0];
+    if (mainBrowser) {
+      browserViewManager.pauseVideo();
+      mainWindow.removeBrowserView(mainBrowser);
+    }
+  });
   ipcMain.on('change-channel', (evt, args) => {
     if (!browserViewManager) browserViewManager = new BrowserViewManager();
     const mainBrowser = mainWindow.getBrowserViews()[0];
-    if (mainBrowser) mainWindow.removeBrowserView(mainBrowser);
+    if (mainBrowser) {
+      mainWindow.removeBrowserView(mainBrowser);
+    } else {
+      browserViewManager.setCurrentChannel('');
+    }
     const newChannel = browserViewManager.changeChannel(args.channel, args);
     const view = newChannel.view ? newChannel.view : newChannel.page.view;
     const url = newChannel.view ? args.url : newChannel.page.url;
@@ -697,36 +839,32 @@ function registerMainWindowEvent(mainWindow) {
       });
     }, 150);
 
-    const bounds = mainWindow.getBounds();
-    if (process.platform === 'win32' && mainWindow.isMaximized() && (bounds.x < 0 || bounds.y < 0)) {
-      view.setBounds({
-        x: sidebar ? 76 : 0,
-        y: 40,
-        width: sidebar ? bounds.width + (bounds.x * 2) - 76
-          : bounds.width + (bounds.x * 2),
-        height: bounds.height - 40,
-      });
-    } else {
-      view.setBounds({
-        x: sidebar ? 76 : 0,
-        y: 40,
-        width: sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
-        height: mainWindow.getSize()[1] - 40,
+    if (!view.isDestroyed()) {
+      const bounds = mainWindow.getBounds();
+      if (process.platform === 'win32' && mainWindow.isMaximized() && (bounds.x < 0 || bounds.y < 0)) {
+        view.setBounds({
+          x: sidebar ? 76 : 0,
+          y: 40,
+          width: sidebar ? bounds.width + (bounds.x * 2) - 76
+            : bounds.width + (bounds.x * 2),
+          height: bounds.height - 40,
+        });
+      } else {
+        view.setBounds({
+          x: sidebar ? 76 : 0,
+          y: 40,
+          width: sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
+          height: mainWindow.getSize()[1] - 40,
+        });
+      }
+      view.setAutoResize({
+        width: true, height: true,
       });
     }
-    view.setAutoResize({
-      width: true, height: true,
-    });
   });
   ipcMain.on('create-browser-view', (evt, args) => {
     if (!browserViewManager) browserViewManager = new BrowserViewManager();
-    let currentChannel = '';
-    allChannels.forEach((channel, index) => {
-      if (compareStr[index].findIndex(str => args.url.includes(str)) !== -1) {
-        currentChannel = `${channel}.com`;
-      }
-    });
-    const currentMainBrowserView = browserViewManager.create(currentChannel, args);
+    const currentMainBrowserView = browserViewManager.create(args.channel, args);
     setTimeout(() => {
       mainWindow.send('update-browser-state', {
         url: args.url,
@@ -737,6 +875,9 @@ function registerMainWindowEvent(mainWindow) {
   });
   ipcMain.on('update-danmu-state', (evt, val) => {
     pipControlView.webContents.executeJavaScript(InjectJSManager.initBarrageIcon(val));
+  });
+  ipcMain.on('pin', () => {
+    mainWindow.send('pip-float-on-top');
   });
   ipcMain.on('pip', () => {
     mainWindow.send('handle-exit-pip');
@@ -852,20 +993,13 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('shift-pip', (evt, args) => {
     if (!browserViewManager) return;
     const mainWindowViews = mainWindow.getBrowserViews();
-    const mainView = mainWindowViews[0];
     mainWindowViews
       .forEach(mainWindowView => mainWindow.removeBrowserView(mainWindowView));
     const browViews = browsingWindow.getBrowserViews();
     browViews.forEach((view) => {
       browsingWindow.removeBrowserView(view);
     });
-    let currentChannel = '';
-    allChannels.forEach((channel, index) => {
-      if (compareStr[index].findIndex(str => mainView.webContents.getURL().includes(str)) !== -1) {
-        currentChannel = `${channel}.com`;
-      }
-    });
-    const browsers = browserViewManager.changePip(currentChannel);
+    const browsers = browserViewManager.changePip(args.channel);
     const pipBrowser = browsers.pipBrowser;
     const mainBrowser = browsers.mainBrowser;
     mainWindow.addBrowserView(mainBrowser.page.view);
@@ -1010,6 +1144,21 @@ function registerMainWindowEvent(mainWindow) {
     mainWindow.show();
     menuService.updateFocusedWindow(true, mainWindow && mainWindow.isVisible());
   });
+  ipcMain.on('set-window-minimize', () => {
+    if (mainWindow && mainWindow.isFocused()) {
+      if (mainWindow.isMinimized()) {
+        mainWindow.restore();
+      } else {
+        mainWindow.minimize();
+      }
+    } else if (browsingWindow && browsingWindow.isFocused()) {
+      if (browsingWindow.isMinimized()) {
+        browsingWindow.restore();
+      } else {
+        browsingWindow.minimize();
+      }
+    }
+  });
   // eslint-disable-next-line complexity
   ipcMain.on('set-window-maximize', () => {
     if (mainWindow && mainWindow.isFocused()) {
@@ -1018,23 +1167,25 @@ function registerMainWindowEvent(mainWindow) {
       } else {
         mainWindow.maximize();
       }
-      const bounds = mainWindow.getBounds();
-      if (process.platform === 'win32' && mainWindow.isMaximized() && (bounds.x < 0 || bounds.y < 0)) {
-        mainWindow.getBrowserViews()[0].setBounds({
-          x: sidebar ? 76 : 0,
-          y: 40,
-          width: sidebar ? bounds.width + (bounds.x * 2) - 76
-            : bounds.width + (bounds.x * 2),
-          height: bounds.height - 40,
-        });
-      } else {
-        mainWindow.getBrowserViews()[0].setBounds({
-          x: sidebar ? 76 : 0,
-          y: 40,
-          width: sidebar ? mainWindow.getSize()[0] - 76
-            : mainWindow.getSize()[0],
-          height: mainWindow.getSize()[1] - 40,
-        });
+      if (mainWindow.getBrowserViews().length && !mainWindow.getBrowserViews()[0].isDestroyed()) {
+        const bounds = mainWindow.getBounds();
+        if (process.platform === 'win32' && mainWindow.isMaximized() && (bounds.x < 0 || bounds.y < 0)) {
+          mainWindow.getBrowserViews()[0].setBounds({
+            x: sidebar ? 76 : 0,
+            y: 40,
+            width: sidebar ? bounds.width + (bounds.x * 2) - 76
+              : bounds.width + (bounds.x * 2),
+            height: bounds.height - 40,
+          });
+        } else {
+          mainWindow.getBrowserViews()[0].setBounds({
+            x: sidebar ? 76 : 0,
+            y: 40,
+            width: sidebar ? mainWindow.getSize()[0] - 76
+              : mainWindow.getSize()[0],
+            height: mainWindow.getSize()[1] - 40,
+          });
+        }
       }
     } else if (browsingWindow && browsingWindow.isFocused()) {
       if (!isBrowsingWindowMax) {
@@ -1126,6 +1277,9 @@ function registerMainWindowEvent(mainWindow) {
     if (loginWindow && !loginWindow.webContents.isDestroyed()) {
       loginWindow.webContents.send('setPreference', args);
     }
+    if (premiumView && !premiumView.webContents.isDestroyed()) {
+      premiumView.webContents.send('setPreference', args);
+    }
   });
   ipcMain.on('main-to-preference', (e, args) => {
     if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
@@ -1182,6 +1336,86 @@ function registerMainWindowEvent(mainWindow) {
 
   ipcMain.on('sign-in-end-point', (events, data) => {
     signInEndPoint = data;
+    if (process.env.NODE_ENV === 'production') {
+      loginURL = `${signInEndPoint}/static/splayer/login.html`;
+      premiumURL = `${signInEndPoint}/static/splayer/premium.html`;
+    }
+  });
+
+  ipcMain.on('add-payment', (events, data) => {
+    createPaymentWindow(data.url, data.orderID, data.channel);
+  });
+
+  ipcMain.on('close-payment', () => {
+    if (paymentWindow) {
+      paymentWindow.close();
+      paymentWindow = null;
+    }
+  });
+
+  ipcMain.on('payment-fail', () => {
+    if (premiumView && !premiumView.webContents.isDestroyed()) {
+      premiumView.webContents.send('payment-fail');
+    }
+    if (paymentWindow && !paymentWindow.webContents.isDestroyed()) {
+      paymentWindowCloseTag = true;
+      paymentWindow.close();
+      paymentWindow = null;
+    }
+  });
+
+  ipcMain.on('payment-success', () => {
+    if (premiumView && !premiumView.webContents.isDestroyed()) {
+      premiumView.webContents.send('payment-success');
+    }
+    if (mainWindow && !mainWindow.webContents.isDestroyed()) {
+      mainWindow.webContents.send('payment-success');
+    }
+    if (paymentWindow && !paymentWindow.webContents.isDestroyed()) {
+      paymentWindowCloseTag = true;
+      paymentWindow.close();
+      paymentWindow = null;
+    }
+  });
+
+  ipcMain.on('payment-success-apple-verify', () => {
+    if (mainWindow && !mainWindow.webContents.isDestroyed()) {
+      mainWindow.webContents.send('payment-success');
+    }
+  });
+
+  ipcMain.on('show-premium-view', () => {
+    if (!premiumView) {
+      createPremiumView();
+    }
+    if (preferenceWindow) {
+      preferenceWindow.addBrowserView(premiumView);
+    }
+  });
+
+  ipcMain.on('hide-premium-view', () => {
+    if (premiumView && preferenceWindow) {
+      preferenceWindow.removeBrowserView(premiumView);
+    }
+  });
+
+  ipcMain.on('create-order-loading', () => {
+    if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
+      preferenceWindow.webContents.send('add-payment');
+    }
+  });
+
+  ipcMain.on('create-order-done', () => {
+    if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
+      preferenceWindow.webContents.send('close-payment');
+    }
+  });
+
+  ipcMain.on('close-preference', () => {
+    if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
+      preferenceWindow.close();
+      preferenceWindow = null;
+    }
   });
 }
 
@@ -1434,6 +1668,12 @@ app.on('ready', () => {
   globalShortcut.register('CmdOrCtrl+Shift+A+S+D', () => {
     if (loginWindow) loginWindow.openDevTools({ mode: 'detach' });
   });
+  globalShortcut.register('CmdOrCtrl+Shift+Q+W+E', () => {
+    if (premiumView) premiumView.webContents.openDevTools();
+  });
+  globalShortcut.register('CmdOrCtrl+Shift+Z+X+C', () => {
+    if (paymentWindow) paymentWindow.openDevTools({ mode: 'detach' });
+  });
 
   if (process.platform === 'win32') {
     globalShortcut.register('CmdOrCtrl+`', () => {
@@ -1461,6 +1701,10 @@ const oauthRegex = [
   /^https:\/\/auth.alipay.com\/login\//i,
   /^https:\/\/account.xiaomi.com\/pass\//i,
   /^https:\/\/www.facebook.com\/v[0-9].[0-9]\/dialog\/oauth/i,
+  /^https:\/\/accounts.google.com\/signin\/oauth\//i,
+  /^https:\/\/accounts.google.com\/CheckCookie\?/i,
+  /^\/passport\/user\/tplogin\?/i,
+  /^https:\/\/www.imooc.com\/passport\//i,
 ];
 app.on('web-contents-created', (webContentsCreatedEvent, contents) => {
   if (contents.getType() === 'browserView') {
@@ -1479,6 +1723,10 @@ app.on('add-windows-about', createAboutWindow);
 app.on('check-for-updates', () => {
   if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
   mainWindow.webContents.send('check-for-updates');
+});
+app.on('open-history-item', (evt, args) => {
+  openHistoryItem(evt, args);
+  mainWindow.send('update-current-channel', args.channel);
 });
 
 app.on('menu-create-main-window', () => {
@@ -1516,6 +1764,15 @@ app.on('sign-in', (account) => {
   if (mainWindow && !mainWindow.webContents.isDestroyed()) {
     mainWindow.webContents.send('sign-in', account);
   }
+  if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
+    preferenceWindow.webContents.send('sign-in', account);
+  }
+  if (premiumView && !premiumView.webContents.isDestroyed()) {
+    premiumView.webContents.send('sign-in', account);
+  }
+  if (paymentWindow && !paymentWindow.webContents.isDestroyed()) {
+    paymentWindow.webContents.send('sign-in', account);
+  }
 });
 
 app.on('sign-out-confirm', () => {
@@ -1532,6 +1789,23 @@ app.on('sign-out', () => {
   if (mainWindow && !mainWindow.webContents.isDestroyed()) {
     mainWindow.webContents.send('sign-in', undefined);
   }
+  if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
+    preferenceWindow.webContents.send('sign-in', undefined);
+  }
+  if (premiumView && !premiumView.webContents.isDestroyed()) {
+    premiumView.webContents.send('sign-in', undefined);
+  }
+  if (paymentWindow && !paymentWindow.webContents.isDestroyed()) {
+    paymentWindow.webContents.send('sign-in', undefined);
+  }
+});
+
+app.on('route-account', (e) => {
+  if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
+    preferenceWindow.webContents.send('route-change');
+  } else {
+    createPreferenceWindow(e, 'account');
+  }
 });
 
 app.getDisplayLanguage = () => {
@@ -1542,9 +1816,81 @@ app.getDisplayLanguage = () => {
 // export getIp to static login preload.js
 app.getIP = getIP;
 
+app.crossThreadCache = crossThreadCache;
+
 // export getSignInEndPoint to static login preload.js
 app.getSignInEndPoint = () => signInEndPoint;
 
-getRightPort().then((port) => {
-  localHostPort = port;
-}).catch(console.error);
+// apple pay
+if (process.platform === 'darwin') {
+  // Listen for transactions as soon as possible.
+  inAppPurchase.on('transactions-updated', (event, transactions) => {
+    if (!Array.isArray(transactions)) {
+      return;
+    }
+    // Check each transaction.
+    transactions.forEach((transaction) => {
+      const payment = transaction.payment;
+      switch (transaction.transactionState) {
+        case 'purchasing':
+          break;
+        case 'purchased':
+          // eslint-disable-next-line no-case-declarations
+          let receipt = '';
+          try {
+            receipt = fs.readFileSync(inAppPurchase.getReceiptURL());
+          } catch (error) {
+            // empty
+          }
+          // Finish the transaction.
+          inAppPurchase.finishTransactionByDate(transaction.transactionDate);
+          if (premiumView && !premiumView.webContents.isDestroyed()) {
+            premiumView.webContents.send('applePay-success', {
+              id: applePayProductID,
+              productID: payment.productIdentifier,
+              receipt,
+              transactionID: transaction.transactionIdentifier,
+            });
+          }
+          break;
+        case 'failed':
+          // Finish the transaction.
+          inAppPurchase.finishTransactionByDate(transaction.transactionDate);
+          if (premiumView && !premiumView.webContents.isDestroyed()) {
+            premiumView.webContents.send('applePay-fail', 'not support');
+          }
+          break;
+        case 'restored':
+          break;
+        case 'deferred':
+          break;
+        default:
+          break;
+      }
+    });
+  });
+
+  // apple pay
+  app.applePay = (product, id, quantity, callback) => {
+    applePayProductID = id;
+    // Check if the user is allowed to make in-app purchase.
+    if (!inAppPurchase.canMakePayments()) {
+      if (premiumView && !premiumView.webContents.isDestroyed()) {
+        premiumView.webContents.send('applePay-fail', 'not support');
+      }
+      return;
+    }
+    // Retrieve and display the product descriptions.
+    inAppPurchase.getProducts([product], (products) => {
+      // Check the parameters.
+      if (!Array.isArray(products) || products.length <= 0) {
+        if (premiumView && !premiumView.webContents.isDestroyed()) {
+          premiumView.webContents.send('applePay-fail', 'Unable to retrieve the product informations.');
+        }
+        return;
+      }
+      // Purchase the selected product.
+      inAppPurchase.purchaseProduct(product, quantity, callback);
+    });
+  };
+}

@@ -1,5 +1,6 @@
 import { ipcRenderer, remote, MenuItem } from 'electron';
 import { recentPlayService } from '../media/RecentPlayService';
+import { browsingHistory } from '../browsing/BrowsingHistoryService';
 
 export default class MenuService {
   private menu?: Electron.Menu;
@@ -45,6 +46,11 @@ export default class MenuService {
     ipcRenderer.send('update-recent-play', items);
   }
 
+  public async addBrowsingHistoryItems() {
+    const items = await browsingHistory.getMenuDisplayInfo();
+    ipcRenderer.send('update-browisng-history', items);
+  }
+
   public addPrimarySub(menuItem: Electron.MenuItem) {
     ipcRenderer.send('update-primary-sub', menuItem);
   }
@@ -67,3 +73,5 @@ export default class MenuService {
     return this.menu.getMenuItemById(id);
   }
 }
+
+export const menuService = new MenuService();

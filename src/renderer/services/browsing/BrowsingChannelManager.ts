@@ -1,4 +1,8 @@
+// @ts-ignore
+import urlParseLax from 'url-parse-lax';
+import { browsingHistory } from '@/services/browsing/BrowsingHistoryService';
 import { IBrowsingChannelManager } from '@/interfaces/IBrowsingChannelManager';
+import { getGeoIP } from '@/libs/apis';
 
 type channelInfo = {
   channels: channelDetails[],
@@ -27,15 +31,19 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
 
 
   public constructor() {
-    this.allCategories = [{ type: 'customized', locale: 'browsing.customized' }, { type: 'adapted', locale: 'browsing.popularSites' }];
+    this.allCategories = [
+      { type: 'customized', locale: 'browsing.customized' },
+      { type: 'general', locale: 'browsing.general' },
+      { type: 'education', locale: 'browsing.education' },
+    ];
     this.allChannels = new Map();
     this.allCategories.forEach((category: category) => {
       this.allChannels.set(category.type, { channels: [], availableChannels: [] });
     });
-    this.allAvailableChannels = ['bilibili.com', 'iqiyi.com', 'douyu.com'];
+    this.allAvailableChannels = [];
 
     // 初始化默认添加的频道
-    const channels = [
+    const generalChannels = [
       'https://www.bilibili.com/',
       'https://www.iqiyi.com/',
       'https://www.douyu.com/',
@@ -44,14 +52,48 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
       'https://www.youku.com/',
       'https://www.twitch.tv/',
       'https://www.youtube.com/',
+      'https://sports.qq.com/',
+    ];
+    this.allChannels.set('general', {
+      channels: generalChannels.map((channel: string) => {
+        let basename = '';
+        const host = urlParseLax(channel).hostname;
+        if (host.includes('sports.qq.com')) {
+          basename = 'sportsqq';
+        } else {
+          basename = channel.slice(channel.indexOf('.') + 1, channel.lastIndexOf('.'));
+        }
+        const tld = channel.slice(channel.lastIndexOf('.'), channel.length - 1);
+        const path = host.includes('www') ? `${basename}${tld}` : host;
+        return {
+          channel: `${basename}.com`,
+          url: channel,
+          icon: `${basename}Sidebar`,
+          title: `browsing.${basename}`,
+          path,
+        };
+      }),
+      availableChannels: this.allAvailableChannels,
+    });
+
+    const educationalChannels = [
       'https://www.coursera.org/',
       'https://www.ted.com/',
+      'https://www.lynda.com/',
+      'https://www.masterclass.com/',
+      'https://developer.apple.com/videos/wwdc2019/',
+      'https://vip.open.163.com/',
+      'https://study.163.com',
+      'https://www.imooc.com/',
+      'https://www.icourse163.org/',
     ];
-    this.allChannels.set('adapted', {
-      channels: channels.map((channel: string) => {
-        const basename = channel.slice(channel.indexOf('.') + 1, channel.lastIndexOf('.'));
+    this.allChannels.set('education', {
+      channels: educationalChannels.map((channel: string) => {
+        const host = urlParseLax(channel).hostname;
+        const basename = host.includes('www') ? channel.slice(channel.indexOf('.') + 1, channel.lastIndexOf('.')).replace(/\./g, '')
+          : host.slice(0, host.lastIndexOf('.')).replace(/\./g, '');
         const tld = channel.slice(channel.lastIndexOf('.'), channel.length - 1);
-        const path = `${basename === 'qq' ? 'v.qq' : basename}${tld}`;
+        const path = host.includes('www') ? `${basename}${tld}` : host;
         return {
           channel: `${basename}.com`,
           url: channel,
@@ -76,7 +118,7 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
     return this.allChannels.get(category) as channelInfo;
   }
 
-  public setChannelAvailable(channel: string, available: boolean): void {
+  public async setChannelAvailable(channel: string, available: boolean): Promise<void> {
     if (available) {
       if (!this.allAvailableChannels.includes(channel)) {
         this.allAvailableChannels.push(channel);
@@ -84,6 +126,7 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
     } else {
       this.allAvailableChannels = this.allAvailableChannels
         .filter((aChannel: string) => aChannel !== channel);
+      await browsingHistory.cleanChannelRecords(channel);
     }
     this.allChannels.forEach((i: channelInfo) => {
       const allItems = i.channels.map((item: channelDetails) => item.channel);
@@ -124,6 +167,21 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
       i.availableChannels = available;
     });
     return this.getAllAvailableChannels();
+  }
+
+  public async getDefaultChannelsByCountry(displayLanguage: string): Promise<channelDetails[]> {
+    try {
+      const geo = await getGeoIP();
+      const availableChannels = geo.countryCode === 'CN' ? ['bilibili.com', 'douyu.com', 'iqiyi.com'] : ['youtube.com', 'twitch.com'];
+      (this.allChannels.get('general') as channelInfo).availableChannels = availableChannels;
+      this.allAvailableChannels.push(...availableChannels);
+      return this.getAllAvailableChannels();
+    } catch (error) {
+      const availableChannels = displayLanguage === 'zh-Hans' ? ['bilibili.com', 'douyu.com', 'iqiyi.com'] : ['youtube.com', 'twitch.com'];
+      (this.allChannels.get('general') as channelInfo).availableChannels = availableChannels;
+      this.allAvailableChannels = availableChannels;
+      return this.getAllAvailableChannels();
+    }
   }
 }
 

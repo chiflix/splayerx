@@ -25,6 +25,12 @@
       "fontSize": "14px"
     }
   },
+  "tips": {
+    "openSidebar": "Show Sidebar (C)",
+    "closeSidebar": "Hide Sidebar (C)",
+    "exit": "Back to Launching Page",
+    "delete": "Back to Launching Page"
+  },
   "errorFile": {
     "ENOSPC": {
       "content": "No enough disk space available.",
@@ -137,7 +143,8 @@
       "showPlaylist": "Show Playlist",
       "hidePlaylist": "Hide Playlist",
       "previousVideo": "Previous Video",
-      "singleCycle": "Repeat One",
+      "singleCycle": "Loop One",
+      "playlistLoop": "Loop Playlist",
       "snapShot": "Snapshot"
     },
     "splayerx": {
@@ -206,7 +213,9 @@
       "enterPip": "Enter Picture in Picture",
       "exitPip": "Exit Picture in Picture",
       "playInNewWindow": "Play in New Window",
-      "backToBrowser": "Back to Browser"
+      "backToBrowser": "Back to Browser",
+      "openSidebar": "Show Sidebar",
+      "closeSidebar": "Hide Sidebar"
     },
     "edit": {
       "name": "Edit",
@@ -219,7 +228,8 @@
       "name": "History",
       "reload": "Reload Page",
       "back": "Back",
-      "forward": "Forward"
+      "forward": "Forward",
+      "clearHistory": "Clear History"
     }
   },
   "nextVideo": {
@@ -250,12 +260,21 @@
     "youku": "Youku",
     "coursera": "Coursera",
     "ted": "TED",
+    "lynda": "Lynda",
+    "masterclass": "MasterClass",
+    "sportsqq": "Tencent Sports",
+    "developerapple": "WWDC",
+    "vipopen163": "网易公开课",
+    "study163": "网易云课堂",
+    "imooc": "慕课网",
+    "icourse163": "中国大学MOOC",
     "openLocalFile": "Open Local File ...",
-    "enterPip": "Enter Picture in Picture",
-    "exitPip": "Back to Browser",
-    "enterPop": "Play in New Window",
-    "exitPop": "Back to Browser",
+    "enterPip": "Enter Picture in Picture (P)",
+    "exitPip": "Exit Picture in Picture (P)",
+    "enterPop": "Play in New Window (O)",
+    "exitPop": "Back to Browser (O)",
     "danmu": "Toggle Danmaku",
+    "pin": "Pin / Unpin (T)",
     "error": {
       "offline": "No Internet",
       "try": "Try:",
@@ -264,8 +283,33 @@
     },
     "remove": "Remove",
     "siteManager": "Site Manager",
-    "popularSites": "Optimized Sites",
-    "siteTip": "Add / Edit"
+    "general": "General",
+    "education": "Education",
+    "siteTip": "Add / Edit",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "homepage": {
+      "tips": "Home Page",
+      "unSigned": "Not Signed In",
+      "signInfo": "Sign in to use AI Translation and get access to more features.",
+      "signBtn": "Sign In",
+      "account": "Account: ",
+      "signOut": "Sign out",
+      "accountInfo": "Upgrade your account now and get started with exclusive features and more.",
+      "premiumBtn": "Upgrade",
+      "premiumAccount": "Premium Account: ",
+      "premiumInfo": "Expiration Date: ",
+      "renewBtn": "Renew",
+      "history": "Online History",
+      "clear": "Clear",
+      "historyInfo": "Keep track of your playback history, including the page title, the site address and the date you watched.",
+      "playlist": "Local Playlist",
+      "playlistInfoPre": "Click the ",
+      "playlistInfoNext": " button on the left sidebar, choose and open more than one file to generate a playlist.",
+      "banner1": "Submit your<br>Feedback",
+      "banner2": "Contribute to our<br>Localization Project",
+      "banner3": "Release Notes"
+    }
   },
   "preferences": {
     "general": {
@@ -299,8 +343,81 @@
       "incognitoMode": "Incognito Mode",
       "incognitoDescription": "Your playback history will not be stored anymore.",
       "clearHistory": "Clear Playback History",
-      "clearHistoryDescription": "Remove existing playlists and playback history"
+      "clearHistoryDescription": "Remove existing playlists and playback history."
+    },
+    "account": {
+      "accountSetting": "Account",
+      "title": "My Profile",
+      "noToken": {
+        "title": "Not Signed In",
+        "description": "Sign in with your phone number to use AI Translation and more advanced features.",
+        "button": "Sign In"
+      },
+      "normalUser": {
+        "title": "Account: ",
+        "description": "Upgrade your account now and get started with exclusive features and more.",
+        "button": "Upgrade"
+      },
+      "vipUser": {
+        "title": "Premium Account: ",
+        "description": "Expiration Date: ",
+        "button": "Renew"
+      },
+      "month": " Month",
+      "year": " Year",
+      "months": " Months",
+      "years": " Years",
+      "signOut": "Sign out",
+      "createdAt": "Registration Date",
+      "payAt": "Recent Purchased",
+      "payContent": "{date}{product}",
+      "payProduct": ": {product} Premium"
+
+    },
+    "premium": {
+      "premiumSetting": "Premium",
+      "title": "SPlayer Premium",
+      "description": "Go Premium now to help SPlayer change the way people watch videos, and get access to more advanced features.",
+      "explanation": {
+        "title": "About the Pricing",
+        "description1": "Applying a complex Translation System, which supports the translation of multiple languages and the speech recognition of long duration videos, has been incurring massive ongoing maintenance costs so far. The cost is based on the duration of the video successfully processed by the system, which is approximately one dollar per hour.",
+        "description2": "We are thrilled to your strong support, of which the impact and power will help us make the SPlayer better, and your adoption of the new technology will finally contribute to briding the language gaps and connecting the world.",
+        "description3": "Best Regards,",
+        "description4": "SPlayer Team",
+        "description5": "2019"
+      },
+      "content": {
+        "description1": "Additional hours of AI Translation service",
+        "description2": "Support more languages in AI Translation",
+        "description3": "Export subtitles and translation results unlimitedly",
+        "description4": "Your purchase history will be conserved permanently",
+        "description5": ".",
+        "description6": "New features are coming soon"
+      },
+      "origin": "ORIG. ",
+      "off": "% Off",
+      "month": "{num} Mo.",
+      "year": "{num} Yr.",
+      "months": "{num} Mos.",
+      "years": "{num} Yrs.",
+      "normal": "Standard",
+      "giftmonth": "{num} Bonus Month",
+      "giftyear": "{num} Bonus Year",
+      "giftmonths": "{num} Bonus Months",
+      "giftyears": "{num} Bonus Years",
+      "payType": {
+        "alipay": "Alipay",
+        "wxpay": "WeChat",
+        "paypal": "PayPal"
+      }
     }
+  },
+  "payment": {
+    "wxpay": {
+      "title": "SCAN & PAY",
+      "description": "WeChat Pay"
+    },
+    "fail": "Error"
   },
   "privacyBubble": {
     "confirmDisable": {
@@ -323,6 +440,10 @@
   },
   "alertBubble": {
     "button": "OK"
+  },
+  "notExportEmbeddedSubtitle": {
+    "title": "",
+    "content": "Embedded subtitle is loading, please try to export later."
   },
   "protectBubble": {
     "agree": "OK",
@@ -366,6 +487,12 @@
       "zh": "Chinese (Simplified)",
       "zh-CN": "Chinese (Simplified)",
       "zh-TW": "Chinese (Traditional)"
+    },
+    "tips": {
+      "editor": "Edit is coming soon ...",
+      "export": "Export",
+      "reload": "Regenerate",
+      "delete": "Remove"
     }
   },
   "uploading": {
@@ -396,11 +523,13 @@
     "videoLanguageLabel": "Audio Language",
     "subtitleLanguageLabel": "Translate To",
     "selectLanguageLabel": "Select",
+    "selectLanguageMoreLabel": "More ...",
     "audioLanguageLoading": "Fetching language list ...",
     "audioLanguageLoadFail": "Connection failed, please try later",
     "select": {
       "title": "AI Translation",
-      "content": "Select the language you hear in the video and click the generate button."
+      "content": "Select the language you hear in the video and click the generate button.",
+      "contentLimit": "Select the language you hear in the video and click the generate button. You can generate one AI Translation for free per day."
     },
     "translate": {
       "title": "About {time} Left",
@@ -438,11 +567,17 @@
       "title": "Session Expired",
       "content": "Please sign in again."
     },
+    "PermissionFail": {
+      "title": "Uses Remaining Today: 0",
+      "content": "Sorry, you can only generate one AI Translation result per day. Upgrade to SPlayer Premium to continue your exclusive experience."
+    },
+    "loading": "Processing ...",
     "cancel": "Cancel",
     "quit": "Quit",
     "generate": "Generate",
     "ok": "Run in Background",
-    "continue": "Cancel"
+    "continue": "Cancel",
+    "upgrade": "Go Premium Now"
   },
   "translateBubble": {
     "bubbleWhenGrab": "AI Translation will be aborted If you go on, do you want to continue anyway?",
@@ -472,6 +607,10 @@
       "title": "Session Expired",
       "content": "Please sign in again."
     },
+    "bubbleTranslatePermissionFail": {
+      "title": "Uses Remaining Today: 0",
+      "content": "Sorry, you can only generate one AI Translation result per day. Upgrade to SPlayer Premium to continue your exclusive experience."
+    },
     "ok": "OK",
     "cancel": "Cancel",
     "continue": "Continue"
@@ -497,6 +636,47 @@
       "retry": "retry",
       "error300": "Verification failed, please",
       "errorNetwork": "Network Error. Please"
+    }
+  },
+  "forbiddenModal": {
+    "title": "Upgrade to SPlayer Premium",
+    "content": "Upgrade to export translation results unlimitedly, and get access to more exclusive features.",
+    "span": "Already Premium? Sign In",
+    "button": "Go Premium Now",
+    "audioLanguage": "日本語, 한국어, Español, Français, Deutsch, Italiano, Português, čeština, Русский, Indonesian, العربية, Türkçe, română",
+    "translate": {
+      "title": "Upgrade to SPlayer Premium",
+      "content": "Go Premium to get access to more languages and other exclusive features.",
+      "span": "Already Premium? Sign In",
+      "button": "Go Premium Now"
+    },
+    "export": {
+      "title": "Upgrade to SPlayer Premium",
+      "content": "Upgrade to export translation results unlimitedly, and get access to more exclusive features.",
+      "span": "Already Premium? Sign In",
+      "button": "Go Premium Now"
+    }
+  },
+  "premiumModal": {
+    "loading": {
+      "content": "Processing，please wait a second …",
+      "button": "Close"
+    },
+    "success": {
+      "h2": "Thanks for your support",
+      "h1": "Payment Successful !",
+      "h4": "NOW",
+      "content1": "Additional Hours of AI Translation Service",
+      "content2": "Support More Languages in AI Translation",
+      "content3": "Export Subtitles and Translation Results Unlimitedly",
+      "button": "Done"
+    },
+    "fail": {
+      "h1": "Sorry",
+      "content": "Your transaction could not be processed，please contact us",
+      "copy": "Copy",
+      "copied": "Copied",
+      "button": "Back"
     }
   }
 }

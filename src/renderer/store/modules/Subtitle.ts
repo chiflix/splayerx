@@ -159,7 +159,7 @@ const actions: ActionTree<ISubtitleState, {}> = {
   },
   async [a.getDialogues]({
     state, rootGetters, commit, dispatch, getters,
-  }, time: number) {
+  }, time?: number) {
     const subtitle = subtitleLoaderParserMap.get(state.hash);
     if (state.realSource && subtitle) {
       if (!subtitle.loader) {
@@ -181,10 +181,11 @@ const actions: ActionTree<ISubtitleState, {}> = {
         const videoSegments = new VideoTimeSegments(rootGetters.duration);
         subtitle.parser = getParser(state.format, subtitle.loader, videoSegments);
       }
+      const realTime = time !== undefined ? time - state.delay : undefined;
       if (subtitle.parser) {
         return {
           metadata: await subtitle.parser.getMetadata(),
-          dialogues: await subtitle.parser.getDialogues(time - state.delay),
+          dialogues: await subtitle.parser.getDialogues(realTime),
         };
       }
     }

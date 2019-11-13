@@ -10,28 +10,31 @@
         <div class="channel-container">
           <div
             v-for="(item, index) in allChannels.get(category.type).channels"
-            @mouseover="handleMouseover(index)"
+            @mouseover="handleMouseover(index, category.type)"
             @mouseleave="handleMouseleave"
             @click="handleMouseClick(item.channel)"
             :style="{
-              backgroundColor: index === hoverIndex || availableChannels.includes(item.channel)
-                ? '#FBFBFD' : '#FFFFFF',
+              backgroundColor: (index === hoverIndex && category.type === hoverCategory)
+                || availableChannels.includes(item.channel) ? '#FBFBFD' : '#FFFFFF',
             }"
             class="channel-details"
           >
             <div
               :style="{
-                border: index === hoverIndex && availableChannels.includes(item.channel)
-                  ? '1px solid rgba(224, 224, 224, 1)' : '1px solid rgba(234, 234, 234, 1)',
-                opacity: index === hoverIndex || availableChannels.includes(item.channel) ? 1 : 0,
+                border: (index === hoverIndex && category.type === hoverCategory)
+                  && availableChannels.includes(item.channel) ? '1px solid rgba(224, 224, 224, 1)'
+                  : '1px solid rgba(234, 234, 234, 1)',
+                opacity: (index === hoverIndex && category.type === hoverCategory)
+                  || availableChannels.includes(item.channel) ? 1 : 0,
               }"
               class="channel-mask hover-channel"
             >
               <div
                 :style="{
                   backgroundColor: availableChannels.includes(item.channel)
-                    && index === hoverIndex ? '#E9E9E9' : '',
-                  border: availableChannels.includes(item.channel)&& index === hoverIndex
+                    && (index === hoverIndex && category.type === hoverCategory) ? '#E9E9E9' : '',
+                  border: availableChannels.includes(item.channel)
+                    && (index === hoverIndex && category.type === hoverCategory)
                     ? '1px solid rgba(224, 224, 224, 1)' : '1px solid rgba(234, 234, 234, 1)'
                 }"
                 class="available-check"
@@ -39,7 +42,7 @@
                 <Icon
                   :style="{
                     opacity: !availableChannels.includes(item.channel)
-                      ? 0 : index === hoverIndex ? 1 : 0.4,
+                      ? 0 : (index === hoverIndex && category.type === hoverCategory) ? 1 : 0.4,
                     transition: 'opacity 100ms linear',
                   }"
                   type="channelSelected"
@@ -80,6 +83,7 @@ export default {
     return {
       hoverIndex: -1,
       availableChannels: [],
+      hoverCategory: '',
     };
   },
   computed: {
@@ -106,15 +110,17 @@ export default {
     });
   },
   methods: {
-    handleMouseover(index: number) {
+    handleMouseover(index: number, category: string) {
       this.hoverIndex = index;
+      this.hoverCategory = category;
     },
     handleMouseleave() {
       this.hoverIndex = -1;
+      this.hoverCategory = '';
     },
-    handleMouseClick(channel: string) {
+    async handleMouseClick(channel: string) {
       const isAvailable = this.availableChannels.includes(channel);
-      BrowsingChannelManager.setChannelAvailable(channel, !isAvailable);
+      await BrowsingChannelManager.setChannelAvailable(channel, !isAvailable);
       if (isAvailable) this.$electron.ipcRenderer.send('clear-browsers-by-channel', channel);
       this.availableChannels = BrowsingChannelManager
         .getAllAvailableChannels().map(item => item.channel);

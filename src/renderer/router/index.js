@@ -13,7 +13,7 @@ export default new Router({
     {
       path: '/play',
       name: 'playing-view',
-      component: () => import('@/components/PlayingView.vue'),
+      component: require('@/components/PlayingView.vue').default,
     },
     {
       path: '/browsing',

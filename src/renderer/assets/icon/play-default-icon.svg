@@ -1,41 +1,34 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="84px" height="84px" viewBox="0 0 84 84" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <!-- Generator: Sketch 55 (78076) - https://sketchapp.com -->
-    <desc>Created with Sketch.</desc>
+<svg width="84" height="84" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <defs>
-        <radialGradient cx="50%" cy="50.7192251%" fx="50%" fy="50.7192251%" r="49.2807749%" id="radialGradient-1">
-            <stop stop-color="#000000" stop-opacity="0.0518192745" offset="0%"></stop>
-            <stop stop-color="#000000" stop-opacity="0.05" offset="36.9488376%"></stop>
-            <stop stop-color="#000000" stop-opacity="0" offset="100%"></stop>
+        <radialGradient cx="50%" cy="50.719%" fx="50%" fy="50.719%" r="49.281%" id="a">
+            <stop stop-opacity=".052" offset="0%"/>
+            <stop stop-opacity=".05" offset="36.949%"/>
+            <stop stop-opacity="0" offset="100%"/>
         </radialGradient>
-        <radialGradient cx="50%" cy="64.5280792%" fx="50%" fy="64.5280792%" r="48.6820853%" gradientTransform="translate(0.500000,0.645281),scale(0.938879,1.000000),rotate(90.000000),translate(-0.500000,-0.645281)" id="radialGradient-2">
-            <stop stop-color="#FFFFFF" stop-opacity="0.109884511" offset="2.09763367%"></stop>
-            <stop stop-color="#FFFFFF" stop-opacity="0.227553216" offset="53.8768967%"></stop>
-            <stop stop-color="#FFFFFF" stop-opacity="0.540194746" offset="100%"></stop>
+        <radialGradient cx="50%" cy="64.528%" fx="50%" fy="64.528%" r="48.682%" gradientTransform="matrix(0 1 -.93888 0 1.106 .145)" id="d">
+            <stop stop-color="#FFF" stop-opacity=".11" offset="2.098%"/>
+            <stop stop-color="#FFF" stop-opacity=".228" offset="53.877%"/>
+            <stop stop-color="#FFF" stop-opacity=".54" offset="100%"/>
         </radialGradient>
-        <path d="M34.3105482,69.4501873 L4.93369539,69.4501873 C2.67695805,69.4501873 0.582505924,68.2769614 -0.596249554,66.3525397 L-0.596249554,66.3525397 C-1.77229549,64.4325416 -1.84750805,62.0343558 -0.794086017,60.0444365 L14.2686264,31.5908997 L27.4943493,6.60744484 C28.8304787,4.08348993 31.4503595,2.50286907 34.3061544,2.49776131 L34.3061544,2.49776131 C37.1602933,2.49265653 39.7826048,4.06835338 41.1179594,6.59084482 L54.3524701,31.5908997 L68.9610135,59.1865091 C70.1032179,61.3441388 70.0559558,63.9374446 68.8358918,66.0520228 L68.8358918,66.0520228 C67.6226809,68.1547234 65.3795958,69.4501873 62.9519981,69.4501873 L34.3105482,69.4501873 Z" id="path-3"></path>
-        <filter x="-12.6%" y="-13.4%" width="125.2%" height="126.9%" filterUnits="objectBoundingBox" id="filter-4">
-            <feOffset dx="0" dy="0" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
-            <feGaussianBlur stdDeviation="3" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
-            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.08 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        <radialGradient cx="52.149%" cy="50%" fx="52.149%" fy="50%" r="50.412%" gradientTransform="matrix(0 1 -.93888 0 .99 -.021)" id="e">
+            <stop stop-color="#FFF" stop-opacity=".716" offset="0%"/>
+            <stop stop-color="#FFF" stop-opacity=".788" offset="53.363%"/>
+            <stop stop-color="#FFF" stop-opacity=".764" offset="100%"/>
+        </radialGradient>
+        <filter x="-12.6%" y="-13.4%" width="125.2%" height="126.9%" filterUnits="objectBoundingBox" id="b">
+            <feOffset in="SourceAlpha" result="shadowOffsetOuter1"/>
+            <feGaussianBlur stdDeviation="3" in="shadowOffsetOuter1" result="shadowBlurOuter1"/>
+            <feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.08 0" in="shadowBlurOuter1"/>
         </filter>
-        <radialGradient cx="52.1494921%" cy="50%" fx="52.1494921%" fy="50%" r="50.4122753%" gradientTransform="translate(0.521495,0.500000),scale(0.938879,1.000000),rotate(90.000000),translate(-0.521495,-0.500000)" id="radialGradient-5">
-            <stop stop-color="#FFFFFF" stop-opacity="0.71637347" offset="0%"></stop>
-            <stop stop-color="#FFFFFF" stop-opacity="0.788434222" offset="53.3625422%"></stop>
-            <stop stop-color="#FFFFFF" stop-opacity="0.764124774" offset="100%"></stop>
-        </radialGradient>
+        <path d="M34.31 69.45H4.935a6.485 6.485 0 01-5.53-3.097 6.37 6.37 0 01-.198-6.309L14.27 31.591 27.494 6.607a7.723 7.723 0 016.812-4.11 7.692 7.692 0 016.812 4.094l13.234 25 14.609 27.596a7.095 7.095 0 01-.125 6.865 6.793 6.793 0 01-5.884 3.398H34.311z" id="c"/>
     </defs>
-    <g id="Play-Button-/-Playing-View-Huge-Button-/-Play备份" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <circle id="椭圆形" fill="url(#radialGradient-1)" cx="42" cy="42" r="40"></circle>
-        <g id="Playing-View-Huge-Button-/-Play" transform="translate(8.500000, 5.500000)">
-            <g id="Icon---Play" transform="translate(0.600000, 0.400000)">
-                <g id="Basis" transform="translate(34.125565, 35.969824) rotate(90.000000) translate(-34.125565, -35.969824) ">
-                    <use fill="black" fill-opacity="1" filter="url(#filter-4)" xlink:href="#path-3"></use>
-                    <use fill="url(#radialGradient-2)" fill-rule="evenodd" xlink:href="#path-3"></use>
-                </g>
-                <path d="M34.3105482,69.4501873 L4.93369539,69.4501873 C2.67695805,69.4501873 0.582505924,68.2769614 -0.596249554,66.3525397 L-0.596249554,66.3525397 C-1.77229549,64.4325416 -1.84750805,62.0343558 -0.794086017,60.0444365 L14.2686264,31.5908997 L27.4943493,6.60744484 C28.8304787,4.08348993 31.4503595,2.50286907 34.3061544,2.49776131 L34.3061544,2.49776131 C37.1602933,2.49265653 39.7826048,4.06835338 41.1179594,6.59084482 L54.3524701,31.5908997 L68.9610135,59.1865091 C70.1032179,61.3441388 70.0559558,63.9374446 68.8358918,66.0520228 L68.8358918,66.0520228 C67.6226809,68.1547234 65.3795958,69.4501873 62.9519981,69.4501873 L34.3105482,69.4501873 Z" id="Basis" fill="url(#radialGradient-2)" transform="translate(34.125565, 35.969824) rotate(90.000000) translate(-34.125565, -35.969824) "></path>
-                <path d="M34.3105482,69.4501873 L4.93369539,69.4501873 C2.67695805,69.4501873 0.582505924,68.2769614 -0.596249554,66.3525397 L-0.596249554,66.3525397 C-1.77229549,64.4325416 -1.84750805,62.0343558 -0.794086017,60.0444365 L14.2686264,31.5908997 L27.4943493,6.60744484 C28.8304787,4.08348993 31.4503595,2.50286907 34.3061544,2.49776131 L34.3061544,2.49776131 C37.1602933,2.49265653 39.7826048,4.06835338 41.1179594,6.59084482 L54.3524701,31.5908997 L68.9610135,59.1865091 C70.1032179,61.3441388 70.0559558,63.9374446 68.8358918,66.0520228 L68.8358918,66.0520228 C67.6226809,68.1547234 65.3795958,69.4501873 62.9519981,69.4501873 L34.3105482,69.4501873 Z" id="Border" stroke-opacity="0.437273551" stroke="#FFFFFF" stroke-width="1.2" fill="url(#radialGradient-5)" transform="translate(34.125565, 35.969824) rotate(90.000000) translate(-34.125565, -35.969824) "></path>
-            </g>
+    <g fill="none" fill-rule="evenodd">
+        <circle fill="url(#a)" cx="42" cy="42" r="40"/>
+        <g transform="rotate(90 35.726 43.47)">
+            <use fill="#000" filter="url(#b)" xlink:href="#c"/>
+            <use fill="url(#d)" xlink:href="#c"/>
         </g>
+        <path d="M34.31 69.45H4.935a6.485 6.485 0 01-5.53-3.097 6.37 6.37 0 01-.198-6.309L14.27 31.591 27.494 6.607a7.723 7.723 0 016.812-4.11 7.692 7.692 0 016.812 4.094l13.234 25 14.609 27.596a7.095 7.095 0 01-.125 6.865 6.793 6.793 0 01-5.884 3.398H34.311z" fill="url(#d)" transform="rotate(90 35.726 43.47)"/>
+        <path d="M34.31 69.45H4.935a6.485 6.485 0 01-5.53-3.097h0a6.37 6.37 0 01-.198-6.309L14.27 31.591 27.494 6.607a7.723 7.723 0 016.812-4.11h0a7.692 7.692 0 016.812 4.094l13.234 25 14.609 27.596a7.095 7.095 0 01-.125 6.865h0a6.793 6.793 0 01-5.884 3.398H34.311z" stroke-opacity=".437" stroke="#FFF" stroke-width="1.2" fill="url(#e)" transform="rotate(90 35.726 43.47)"/>
     </g>
 </svg>

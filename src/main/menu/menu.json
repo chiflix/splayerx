@@ -169,6 +169,16 @@
         "checked": false
       },
       {
+        "id": "playback.playlistLoop",
+        "label": "msg.playback.playlistLoop",
+        "type": "checkbox",
+        "enabled": true,
+        "checked": false
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
         "id": "playback.snapShot",
         "label": "msg.playback.snapShot",
         "accelerator": "CmdOrCtrl+Shift+S",
@@ -323,6 +333,11 @@
         "id": "menubar.separator"
       },
       {
+        "id": "window.sidebar",
+        "label": "msg.window.openSidebar",
+        "accelerator": "C"
+      },
+      {
         "id": "window.backToLandingView",
         "label": "msg.window.backToLandingView",
         "accelerator": "CmdOrCtrl+E"
@@ -361,9 +376,6 @@
         "accelerator": "CmdOrCtrl + R"
       },
       {
-        "id": "menubar.separator"
-      },
-      {
         "id": "history.back",
         "label": "msg.history.back",
         "enabled": false,
@@ -374,6 +386,14 @@
         "label": "msg.history.forward",
         "enabled": false,
         "accelerator": "CmdOrCtrl + ]"
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "history.clearHistory",
+        "label": "msg.history.clearHistory",
+        "enabled": true
       }
     ]
   },
@@ -423,6 +443,11 @@
       },
       {
         "id": "menubar.separator"
+      },
+      {
+        "id": "browsing.window.sidebar",
+        "label": "msg.window.closeSidebar",
+        "accelerator": "C"
       },
       {
         "id": "browsing.window.backToLandingView",

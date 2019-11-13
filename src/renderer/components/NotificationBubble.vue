@@ -57,6 +57,14 @@
       />
     </transition>
     <transition name="bubble">
+      <AlertBubble
+        v-if="showNotExportEmbeddedSubtitleBubble"
+        :content="$t('notExportEmbeddedSubtitle.content')"
+        :close="closeNotExportEmbeddedSubtitleBubble"
+        class="mas-privacy-bubble"
+      />
+    </transition>
+    <transition name="bubble">
       <TranslateBubble
         v-if="isTranslateBubbleVisible"
         :message="translateBubbleMessage"
@@ -132,6 +140,7 @@ export default {
       checkForUpdatesVersion: '',
       showLastestUpdateBubble: false, // show update bubble
       lastestUpdateContent: '',
+      showNotExportEmbeddedSubtitleBubble: false,
     };
   },
   computed: {
@@ -191,6 +200,9 @@ export default {
       this.lastestUpdateContent = this.$t('checkForUpdatesBubble.noNeed.content', { version: info.version });
       this.showLastestUpdateBubble = true;
     });
+    this.$bus.$on('embedded-subtitle-can-not-export', () => {
+      this.showNotExportEmbeddedSubtitleBubble = true;
+    });
   },
   methods: {
     ...mapActions({
@@ -224,6 +236,9 @@ export default {
     closeLastestUpdateBubble() {
       this.showLastestUpdateBubble = false;
     },
+    closeNotExportEmbeddedSubtitleBubble() {
+      this.showNotExportEmbeddedSubtitleBubble = false;
+    },
     manualClose() {
       this.manualClosed = true;
       this.showNextVideo = false;
@@ -242,7 +257,6 @@ export default {
     checkNextVideoUI(time: number) {
       if (time > this.nextVideoPreviewTime && time < this.duration - 1 && this.duration > 240) {
         if (this.nextVideo && !this.manualClosed) {
-          this.$store.dispatch('UpdatePlayingList');
           this.showNextVideo = true;
         }
       } else {

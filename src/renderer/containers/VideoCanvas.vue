@@ -182,26 +182,34 @@ export default {
     }, 50, { leading: true }));
     this.$bus.$on('next-video', () => {
       if (this.switchingLock) return;
+      if (this.nextVideo === undefined) { // 非列表循环或单曲循环时，当前播放列表已经播完
+        this.$router.push({ name: 'landing-view' });
+        return;
+      }
       this.switchingLock = true;
       videodata.paused = false;
-      if (this.nextVideo) {
-        this.$store.commit('LOOP_UPDATE', false);
+      if (this.nextVideo !== '') {
         if (this.isFolderList) this.openVideoFile(this.nextVideo);
         else this.playFile(this.nextVideo, this.nextVideoId);
-      } else {
+      } else if (this.nextVideo === '') { // 单曲循环时，nextVideo返回空字符串
         this.$store.commit('LOOP_UPDATE', true);
+        this.$bus.$emit('seek', Math.ceil(this.duration));
       }
     });
     this.$bus.$on('previous-video', () => {
       if (this.switchingLock) return;
+      if (this.previousVideo === undefined) { // 同上，当前为播放列表第一个视频
+        this.$bus.$emit('seek', 0);
+        return;
+      }
       this.switchingLock = true;
       videodata.paused = false;
-      if (this.previousVideo) {
-        this.$store.commit('LOOP_UPDATE', false);
+      if (this.previousVideo !== '') {
         if (this.isFolderList) this.openVideoFile(this.previousVideo);
         else this.playFile(this.previousVideo, this.previousVideoId);
-      } else {
+      } else if (this.previousVideo === '') {
         this.$store.commit('LOOP_UPDATE', true);
+        this.$bus.$emit('seek', 0);
       }
     });
     this.$bus.$on('seek', (e: number) => { this.seekTime = [e]; });
@@ -440,14 +448,7 @@ export default {
       this.handleLeaveVideo(this.videoId)
         .finally(() => {
           this.removeAllAudioTrack();
-          this.$store.dispatch('Init');
-          this.$bus.$off();
-          this.$router.push({
-            name: 'landing-view',
-          });
-          setTimeout(() => {
-            windowRectService.uploadWindowBy(false, 'landing-view', undefined, undefined, this.winSize, this.winPos, this.isFullScreen);
-          }, 200);
+          this.$bus.$emit('videocanvas-saved');
         });
     },
   },
