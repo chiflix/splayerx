@@ -1,7 +1,18 @@
 <template>
   <div class="post">
-    <div class="images">
+    <div
+      :style="{
+        marginLeft: generateType === 3 ? '60px' : '52px',
+        width: generateType === 3 ? '1170px': '1184px',
+      }"
+      class="images"
+    >
       <div
+        :style="{
+          width: generateType === 3 ? '380px' : '288px',
+          marginLeft: generateType === 3 ? '10px' : '8px',
+          marginBottom: generateType === 3 ? '10px' : '8px',
+        }"
         v-for="thumbnail in thumbnails"
         :key="thumbnail.src"
         class="image"
@@ -10,7 +21,13 @@
           :src="thumbnail.src"
           @load="thumbnail.loaded = true"
         >
-        <div class="duration">
+        <div
+          :style="{
+            bottom: generateType === 3 ? '10px' : '8px',
+            right: generateType === 3 ? '12px' : '10px',
+          }"
+          class="duration"
+        >
           {{ info.durationFmt }}
         </div>
       </div>
@@ -39,6 +56,12 @@ import { log } from '@/libs/Log';
 import { thumbnailPostService } from '@/services/media/ThumbnailPostService';
 
 export default {
+  props: {
+    generateType: {
+      type: Number,
+      required: true,
+    },
+  },
   data() {
     return {
       thumbnails: [],
@@ -61,14 +84,18 @@ export default {
   },
   watch: {
     canExportPng(val: boolean) {
-      if (val) thumbnailPostService.exportPng(this.$el);
+      if (val) {
+        thumbnailPostService.exportPng(this.$el, this.generateType).then(() => {
+          this.$emit('generated');
+        });
+      }
     },
   },
   created() {
     thumbnailPostService.getPostMediaInfo(this.originSrc).then((val) => {
       this.info = val;
-      log.debug('generate-post', this.originSrc, val.duration);
-      thumbnailPostService.getPostPng(this.originSrc, val.duration)
+      log.debug('generate-post', this.originSrc, val.duration, this.generateType);
+      thumbnailPostService.getPostPng(this.originSrc, val.duration, this.generateType)
         .then((thumbnails: string[]) => {
           log.debug('post-generated', this.originSrc, val.duration);
           this.thumbnails = thumbnails.map((val: string) => ({ src: val, loaded: false }));
@@ -93,24 +120,17 @@ export default {
 }
 .images {
   padding-top: 60px;
-  margin-left: 60px;
   display: flex;
   justify-content: space-between;
   flex-wrap: wrap;
-  width: 1170px;
   .image {
     position: relative;
-    margin-right: 10px;
-    margin-bottom: 10px;
-    width: 380px;
     img {
       display: block;
     }
   }
   .duration {
     position: absolute;
-    bottom: 10px;
-    right: 12px;
     border: 0 solid #FFFFFF;
     font-family: PingFangSC-Medium;
     font-size: 20px;

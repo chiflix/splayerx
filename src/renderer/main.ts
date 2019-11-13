@@ -886,10 +886,10 @@ new Vue({
         });
       });
       this.menuService.on('playback.generate3*3', () => {
-        console.log('3*3');
+        this.$bus.$emit('generate-post', 3);
       });
       this.menuService.on('playback.generate4*4', () => {
-        console.log('4*4');
+        this.$bus.$emit('generate-post', 4);
       });
       this.menuService.on('audio.increaseVolume', () => {
         this.$ga.event('app', 'volume', 'keyboard');

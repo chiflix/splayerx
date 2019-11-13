@@ -15,7 +15,11 @@
       :enabledSecondarySub="enabledSecondarySub"
     />
     <the-video-controller ref="videoctrl" />
-    <thumbnailPost />
+    <thumbnailPost
+      v-if="generatePost"
+      :generate-type="generateType"
+      @generated="generatePost = false"
+    />
   </div>
 </template>
 
@@ -53,6 +57,8 @@ export default {
           subPlayResY: 405,
         },
       ],
+      generatePost: false,
+      generateType: NaN,
     };
   },
   computed: {
@@ -102,6 +108,7 @@ export default {
       const paths = subs.map((sub: { src: string, type: string }) => (sub.src));
       this.addLocalSubtitlesWithSelect(paths);
     });
+    this.$bus.$on('generate-post', this.generatePostHandler);
   },
   beforeRouteLeave(to: Route, from: Route, next: (to: void) => void) {
     this.$bus.$once('videocanvas-saved', () => {
@@ -140,6 +147,11 @@ export default {
         this.hideTranslateBubble();
       }
       this.$refs.videoctrl.onTickUpdate();
+    },
+    generatePostHandler(type: number) {
+      if (this.generatePost) return;
+      this.generatePost = true;
+      this.generateType = type;
     },
     async loopCues() {
       if (!this.time) this.time = videodata.time;

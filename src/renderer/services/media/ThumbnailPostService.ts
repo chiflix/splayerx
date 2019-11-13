@@ -15,24 +15,23 @@ interface IPostInfo {
 }
 
 export default class ThumbnailPostService {
-  public async getPostPng(src: string, duration: number): Promise<string[]> {
-    const interval = Math.ceil(duration / 10);
-    const width = 380;
-    const col = 3;
-    const thumbnail = await getThumbnailPath(src, interval, width, col);
+  public async getPostPng(src: string, duration: number, type: 3 | 4): Promise<string[]> {
+    const interval = Math.ceil(duration / ((type * type) + 1));
+    const width = type === 3 ? 380 : 288;
+    const thumbnail = await getThumbnailPath(src, interval, width, type);
     if (!thumbnail) throw new Error('No Thumbnail');
     const results: string[] = [];
     const img = new Image();
     img.src = `file://${thumbnail.imgPath}`;
     return new Promise((resolve) => {
       img.addEventListener('load', () => {
-        const height = img.height / 4;
+        const height = img.height / (type + 1);
         const resultCanvas = document.createElement('canvas');
         resultCanvas.setAttribute('width', `${width}}px`);
         resultCanvas.setAttribute('height', `${height}px`);
         const ctx = resultCanvas.getContext('2d') as CanvasRenderingContext2D;
-        for (let i = 0; i <= 2; i += 1) {
-          for (let j = 0; j <= 2; j += 1) {
+        for (let i = 0; i <= type - 1; i += 1) {
+          for (let j = 0; j <= type - 1; j += 1) {
             ctx.drawImage(
               img, j * width, i * height, width, height,
               0, 0, width, height,
@@ -56,19 +55,19 @@ export default class ThumbnailPostService {
     const width = videoStream.width;
     const height = videoStream.height;
     const duration = mediaInfo.format.duration as number;
+    const durationFmt = timecodeFromSeconds(duration);
     return {
       name: `${path.basename(src)}`,
-      details: `${size}   ${width} * ${height}   ${duration}`,
-      durationFmt: timecodeFromSeconds(duration),
+      details: `${size}   ${width} * ${height}   ${durationFmt}`,
+      durationFmt,
       duration,
     };
   }
 
-  public async exportPng(el: HTMLElement) {
-    toPng(el).then((val) => {
-      const imgPath = val.replace(/^data:image\/\w+;base64,/, '');
-      writeFileSync(path.join(__static, 'abc.png'), imgPath, 'base64');
-    });
+  public async exportPng(el: HTMLElement, type: 3 | 4) {
+    const val = await toPng(el);
+    const imgPath = val.replace(/^data:image\/\w+;base64,/, '');
+    writeFileSync(path.join(__static, `abc${type}.png`), imgPath, 'base64');
   }
 }
 
