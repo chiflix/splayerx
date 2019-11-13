@@ -230,7 +230,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import {
-  getGeoIP, applePay, getProductList, createOrder, ApiError, setToken,
+  getGeoIP, getProductList, createOrder, ApiError, setToken,
 } from '@/libs/webApis';
 import Icon from '@/components/BaseIconContainer.vue';
 import BaseRadio from '@/components/Preferences/BaseRadio.vue';
@@ -245,7 +245,6 @@ export default Vue.extend({
     return {
       state: 'default',
       isPaying: false,
-      isApplePaing: false,
       isPaySuccess: false,
       isPayFail: false,
       isCopyed: false,
@@ -399,20 +398,12 @@ export default Vue.extend({
           setToken('');
         }
       });
-      ipcRenderer.on(
-        'applePay-success',
-        async (
-          e: Event,
-          payment: {
-            id: string;
-            productID: string;
-            transactionID: string;
-            receipt: Buffer;
-          },
-        ) => {
-          this.appleBuy(payment);
-        },
-      );
+      ipcRenderer.on('applePay-success', () => {
+        this.isPaying = false;
+        this.isPaySuccess = true;
+        this.isPayFail = false;
+        ipcRenderer && ipcRenderer.send('create-order-done');
+      });
       ipcRenderer.on('applePay-fail', () => {
         this.isPaying = false;
         this.isPaySuccess = false;
@@ -441,47 +432,6 @@ export default Vue.extend({
     cnOff(num: number) {
       return (num % 10 === 0) ? (num / 10) : num;
     },
-    async appleBuy(payment: {
-      id: string;
-      productID: string;
-      transactionID: string;
-      receipt: Buffer;
-    }) {
-      // @ts-ignore
-      const ipcRenderer = window.ipcRenderer;
-      // @ts-ignore
-      const remote = window.remote;
-      if (this.isApplePaing) return;
-      this.isApplePaing = true;
-      try {
-        await applePay({
-          currency: this.country,
-          productID: payment.id,
-          transactionID: payment.transactionID,
-          receipt: payment.receipt.toString('base64'),
-        });
-        this.isPaying = false;
-        this.isPaySuccess = true;
-        this.isPayFail = false;
-        this.isApplePaing = false;
-        ipcRenderer && ipcRenderer.send('payment-success-apple-verify');
-      } catch (error) {
-        this.isApplePaing = false;
-        if (error && (error.status === 400 || error.status === 401 || error.status === 403)) {
-          // sign in callback
-          this.signInCallback = () => {
-            this.appleBuy(payment);
-          };
-          remote && remote.app.emit('sign-out');
-          ipcRenderer && ipcRenderer.send('add-login', 'preference');
-        } else {
-          this.isPaying = false;
-          this.isPaySuccess = false;
-          this.isPayFail = true;
-        }
-      }
-      ipcRenderer && ipcRenderer.send('create-order-done');
-    },
     buy(item: {
       id: string;
       appleProductID: string;
@@ -508,6 +458,7 @@ export default Vue.extend({
         remote && remote.app.applePay(
           item.appleProductID,
           item.id,
+          this.country,
           1,
           (isProductValid: boolean) => {
             if (!isProductValid) {
